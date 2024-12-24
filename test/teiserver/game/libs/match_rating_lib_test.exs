@@ -56,6 +56,13 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     # Check num_matches has increased
     assert ratings[user1.id].num_matches == 2
     assert ratings[user1.id].num_matches == 2
+
+    # Rerate the same match
+    MatchRatingLib.re_rate_specific_matches([match.id])
+
+    # Check num_matches unchanged
+    assert ratings[user1.id].num_matches == 2
+    assert ratings[user1.id].num_matches == 2
   end
 
   defp get_ratings(userids, rating_type_id) do

@@ -7,7 +7,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   alias Teiserver.{Account, Coordinator, Config, Game, Battle}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Repo
-  alias Teiserver.Battle.{BalanceLib, MatchLib}
+  alias Teiserver.Battle.BalanceLib
   require Logger
 
   @rated_match_types [
@@ -44,14 +44,14 @@ defmodule Teiserver.Game.MatchRatingLib do
 
   @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t(), boolean()) ::
           :ok | {:error, atom}
-  def rate_match(match_id, override) when is_integer(match_id) do
+  def rate_match(match_id, rerate?) when is_integer(match_id) do
     Battle.get_match(match_id, preload: [:members])
-    |> rate_match(override)
+    |> rate_match(rerate?)
   end
 
   def rate_match(nil, _), do: {:error, :no_match}
 
-  def rate_match(match, override) do
+  def rate_match(match, rerate?) do
     logs = Game.list_rating_logs(search: [match_id: match.id], limit: 1, select: [:id])
 
     sizes =
@@ -85,9 +85,9 @@ defmodule Teiserver.Game.MatchRatingLib do
       Map.get(match.tags, "game/modoptions/ranked_game", "1") == "0" ->
         {:error, :unranked_tag}
 
-      # If override is set to true we skip the next few checks
-      override ->
-        do_rate_match(match, override?: true)
+      # If rerate? is set to true we skip the next few checks
+      rerate? ->
+        do_rate_match(match, rerate?: true)
 
       not Enum.empty?(logs) ->
         {:error, :already_rated}
@@ -437,7 +437,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
   @spec do_update_rating(T.userid(), map(), map(), {number(), number()}, any()) :: any
   defp do_update_rating(user_id, match, user_rating, rating_update, opts) do
-    override? = Keyword.get(opts, :override?, false)
+    rerate? = Keyword.get(opts, :rerate?, false)
     # It's possible they don't yet have a rating
     user_rating =
       if Map.get(user_rating, :user_id) do
@@ -460,7 +460,7 @@ defmodule Teiserver.Game.MatchRatingLib do
         # This is the player's first match
         user_rating.num_matches == nil -> 1
         # We are re-rating a previously rated match, so num_matches unchanged
-        override? -> user_rating.num_matches
+        rerate? -> user_rating.num_matches
         # Otherwise increment by one
         true -> user_rating.num_matches + 1
       end
@@ -732,11 +732,11 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
 
   # Saves ratings logs to database
-  # If override? then delete existing logs of that match before we insert
+  # If rerate? then delete existing logs of that match before we insert
   defp save_rating_logs(match_id, win_ratings, loss_ratings, opts) do
-    override? = Keyword.get(opts, :override?, false)
+    rerate? = Keyword.get(opts, :rerate?, false)
 
-    if(override?) do
+    if(rerate?) do
       Ecto.Multi.new()
       |> Ecto.Multi.run(:delete_existing, fn repo, _ ->
         query = """
