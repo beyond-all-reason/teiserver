@@ -93,7 +93,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         Game.list_rating_logs(
           search: [
             match_id: match.id
-          ]
+          ],
+          limit: :infinity
         )
         |> Map.new(fn log -> {log.user_id, get_prematch_log(log)} end)
 
@@ -246,13 +247,14 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:events_by_team_and_type, %{})
       |> assign(:replay, nil)
       |> assign(:rating_status, nil)
+      |> assign(:prediction_text, [])
     end
   end
 
   defp get_prediction_text(rating_logs, members) do
     if(rating_logs == %{}) do
       # Unrated match will not have rating logs
-      nil
+      []
     else
       simple_rating_logs =
         Enum.map(members, fn m ->
@@ -309,7 +311,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           }
         ]
       else
-        nil
+        []
       end
     end
   end
