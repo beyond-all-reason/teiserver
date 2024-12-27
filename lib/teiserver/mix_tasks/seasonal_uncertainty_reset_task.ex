@@ -40,10 +40,11 @@ defmodule Mix.Tasks.Teiserver.SeasonalUncertaintyResetTask do
           rating_value,
           uncertainty,
           calculate_season_uncertainty(uncertainty, last_updated, $1) as new_uncertainty,
-          skill
+          skill,
+          num_matches
         FROM
           teiserver_account_ratings tar
-        );
+        ) as a;
         """
 
         Ecto.Adapters.SQL.query(repo, query, [uncertainty_target])
@@ -62,7 +63,8 @@ defmodule Mix.Tasks.Teiserver.SeasonalUncertaintyResetTask do
           'rating_value', new_rating,
           'skill_change', 0.0,
           'uncertainty_change', uncertainty_change,
-          'rating_value_change', rating_value_change
+          'rating_value_change', rating_value_change,
+          'num_matches', num_matches
         )
         FROM temp_table;
         """
