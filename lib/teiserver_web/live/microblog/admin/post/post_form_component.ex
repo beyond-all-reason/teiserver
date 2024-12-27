@@ -30,6 +30,23 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
             <label for="post_title" class="control-label">Title:</label>
             <.input field={@form[:title]} type="text" autofocus="autofocus" phx-debounce="100" />
             <br />
+            <label for="poster_alias" class="control-label">Author Alias:</label>
+            <span class="font-italic">
+              <small>
+                <small>
+                  Edit this if your contributor name is different from your in-game name. Your user id will still be linked to this blog post in the database.
+                </small>
+              </small>
+            </span>
+            <.input
+              id="poster_alias"
+              field={@form[:poster_alias]}
+              type="text"
+              phx-debounce="100"
+              placeholder={@current_user.name}
+            />
+
+            <br />
 
             <label for="post_contents" class="control-label">Summary:</label>
             <em class="float-end">Plain text, 1-3 lines</em>
@@ -99,7 +116,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
                 <span class="monospace">$discord</span>
                 in a public room and the server will send you a one time code to send the bridge.
 
-                You can still post microblog messages to discord but it will not include your name/profile in them.
+                You can still post microblog messages to discord but it will not include your name/profile in them. It will use your author alias instead.
               </div>
             <% end %>
           </div>
@@ -330,14 +347,19 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   defp create_discord_text(post) do
     user = Account.get_user_by_id(post.poster_id)
 
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    create_discord_text(user, post, host)
+  end
+
+  def create_discord_text(user, post, host) do
     discord_tag =
       if user.discord_id do
         " - Posted by <@#{user.discord_id}>"
       else
-        " - Posted by #{user.name}"
+        username = post.poster_alias || user.name
+        " - Posted by #{username}"
       end
 
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     url = "https://#{host}/microblog/show/#{post.id}"
 
     [
