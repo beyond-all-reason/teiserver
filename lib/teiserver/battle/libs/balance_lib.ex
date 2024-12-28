@@ -52,7 +52,8 @@ defmodule Teiserver.Battle.BalanceLib do
       "brute_force" => Teiserver.Battle.Balance.BruteForce,
       "split_noobs" => Teiserver.Battle.Balance.SplitNoobs,
       "auto" => Teiserver.Battle.Balance.AutoBalance,
-      "respect_avoids" => Teiserver.Battle.Balance.RespectAvoids
+      "respect_avoids" => Teiserver.Battle.Balance.RespectAvoids,
+      "win_predict" => Teiserver.Battle.Balance.WinPredict
     }
   end
 
@@ -111,6 +112,7 @@ defmodule Teiserver.Battle.BalanceLib do
       team_sizes: %{},
       means: %{},
       stdevs: %{},
+      win_predictions: %{},
       has_parties?: false
     }
   end
@@ -544,13 +546,18 @@ defmodule Teiserver.Battle.BalanceLib do
         {team, stdev}
       end)
 
+    team_ids = Map.keys(data.team_groups)
+    win_probabilities = Openskill.predict_win(data.team_groups)
+    win_predictions = Enum.zip(team_ids, win_probabilities) |> Map.new()
+
     Map.merge(data, %{
       stdevs: stdevs,
       means: means,
       team_sizes: team_sizes,
       ratings: ratings,
       captains: captains,
-      deviation: get_deviation(ratings)
+      deviation: get_deviation(ratings),
+      win_predictions: win_predictions
     })
   end
 

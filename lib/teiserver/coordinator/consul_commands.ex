@@ -471,7 +471,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           sum = (balance.ratings[team_id] || 0) |> round(1)
           mean = (balance.means[team_id] || 0) |> round(1)
           stdev = (balance.stdevs[team_id] || 0) |> round(2)
-          "Team #{team_id} - sum: #{sum}, mean: #{mean}, stdev: #{stdev}"
+          win_predictions =  (balance.win_predictions[team_id] || 0)
+
+          "Team #{team_id} - sum: #{sum}, mean: #{mean}, stdev: #{stdev} - win prediction: #{win_predictions}"
         end)
 
       Coordinator.send_to_user(
