@@ -54,7 +54,7 @@
               <%= post.title %> &nbsp;&nbsp;&nbsp;&nbsp;
               <span style={"color: #{post.poster.colour};"}>
                 <Fontawesome.icon icon={post.poster.icon} style="solid" />
-                <%= post.poster.name %>
+                <%= post.poster_alias || post.poster.name %>
               </span>
             </h5>
             Posted at <%= date_to_str(post.inserted_at, format: :ymd_hms) %>

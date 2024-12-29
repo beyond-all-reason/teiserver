@@ -9,6 +9,7 @@ defmodule Teiserver.Microblog.Post do
     field :summary, :string
     field :contents, :string
     field :view_count, :integer, default: 0
+    field :poster_alias, :string
 
     belongs_to :discord_channel, Teiserver.Communication.DiscordChannel
     field :discord_post_id, :integer
@@ -39,7 +40,7 @@ defmodule Teiserver.Microblog.Post do
     struct
     |> cast(
       params,
-      ~w(poster_id title summary contents view_count discord_channel_id discord_post_id)a
+      ~w(poster_id title summary contents view_count discord_channel_id discord_post_id poster_alias)a
     )
     |> cast_assoc(:post_tags, tag_ids)
     |> validate_required(~w(poster_id title contents)a)
