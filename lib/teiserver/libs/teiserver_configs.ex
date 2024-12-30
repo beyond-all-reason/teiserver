@@ -13,6 +13,7 @@ defmodule Teiserver.TeiserverConfigs do
     lobby_configs()
     debugging_configs()
     profile_configs()
+    hidden_configs()
   end
 
   @spec site_configs :: any
@@ -579,6 +580,15 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "profile.Num matches for rating to equal skill",
+      section: "Profiles",
+      type: "integer",
+      default: 30,
+      permissions: ["Admin"],
+      description: "The minimum number of matches required for match rating to equal skill"
+    })
+
+    add_site_config_type(%{
       key: "user.Enable one time links",
       section: "User permissions",
       type: "boolean",
@@ -631,6 +641,20 @@ defmodule Teiserver.TeiserverConfigs do
       opts: [],
       default: false,
       value_label: "Light mode as default"
+    })
+  end
+
+  # These configs can be saved to the database but will not be editable on the Admin page
+  @spec hidden_configs() :: :ok
+  defp hidden_configs() do
+    add_site_config_type(%{
+      key: "hidden.Rating method",
+      section: "Hidden",
+      type: "select",
+      default: "skill minus uncertainty",
+      permissions: ["Admin"],
+      description: "The rating system. Use Mix.Tasks.Teiserver.ProvisionalRatingSetup to change.",
+      opts: [choices: ["skill minus uncertainty", "start at zero; converge to skill"]]
     })
   end
 end

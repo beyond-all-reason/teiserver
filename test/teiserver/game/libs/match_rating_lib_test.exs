@@ -7,6 +7,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
   alias Teiserver.Account
   alias Teiserver.Battle
   alias Teiserver.Game
+  alias Teiserver.Config
 
   test "num_matches is updated after rating a match" do
     # Create two user
@@ -63,6 +64,105 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     # Check num_matches unchanged
     assert ratings[user1.id].num_matches == 2
     assert ratings[user1.id].num_matches == 2
+  end
+
+  describe "Test rating system where new players start at zero" do
+    test "rating after one match" do
+      # Set config to use provisional ratings
+      Config.update_site_config("hidden.Rating method", "start at zero; converge to skill")
+
+      # Create two user
+      user1 = AccountTestLib.user_fixture()
+      user2 = AccountTestLib.user_fixture()
+
+      match = create_fake_match(user1.id, user2.id)
+
+      MatchRatingLib.rate_match(match.id)
+      rating_type_id = Game.get_or_add_rating_type(match.game_type)
+
+      # Check ratings of users after match
+      ratings = get_ratings([user1.id, user2.id], rating_type_id)
+
+      assert ratings[user1.id].skill == 27.637760127073694
+      assert ratings[user2.id].skill == 22.362239872926306
+
+      # New players start at zero then converge to skill over time
+      assert ratings[user1.id].rating_value == 0.9212586709024565
+      assert ratings[user2.id].rating_value == 0.7454079957642102
+    end
+
+    test "rating after many matches" do
+      # Set config to use provisional ratings
+      Config.update_site_config("hidden.Rating method", "start at zero; converge to skill")
+
+      # Create two user
+      user1 = AccountTestLib.user_fixture()
+      user2 = AccountTestLib.user_fixture()
+
+      matches_target =
+        Config.get_site_config_cache("profile.Num matches for rating to equal skill")
+
+      match_ids = 1..matches_target
+
+      matches =
+        Enum.map(match_ids, fn x ->
+          match = create_fake_match(user1.id, user2.id)
+
+          MatchRatingLib.rate_match(match.id)
+
+          match
+        end)
+
+      rating_type_id = Game.get_or_add_rating_type(Enum.at(matches, 0).game_type)
+
+      # Check ratings of users after match
+      ratings = get_ratings([user1.id, user2.id], rating_type_id)
+
+      assert ratings[user1.id].skill == 41.851075350620384
+      assert ratings[user2.id].skill == 8.148924649379609
+
+      # Rating should equal skill
+      assert ratings[user1.id].rating_value == ratings[user1.id].skill
+      assert ratings[user2.id].rating_value == ratings[user2.id].skill
+
+      # Rate one more match and rating should still equal skill since we've hit the matches_target
+      match = create_fake_match(user1.id, user2.id)
+      MatchRatingLib.rate_match(match.id)
+      # Check ratings of users after match
+      ratings = get_ratings([user1.id, user2.id], rating_type_id)
+
+      # Rating should equal skill
+      assert ratings[user1.id].rating_value == ratings[user1.id].skill
+      assert ratings[user2.id].rating_value == ratings[user2.id].skill
+    end
+  end
+
+  describe "Test rating system where rating = skill minus uncertainty" do
+    test "rating after one match" do
+      # Set config to use provisional ratings
+      Config.update_site_config("hidden.Rating method", "skill minus uncertainty")
+
+      # Create two user
+      user1 = AccountTestLib.user_fixture()
+      user2 = AccountTestLib.user_fixture()
+
+      match = create_fake_match(user1.id, user2.id)
+
+      MatchRatingLib.rate_match(match.id)
+      rating_type_id = Game.get_or_add_rating_type(match.game_type)
+
+      # Check ratings of users after match
+      ratings = get_ratings([user1.id, user2.id], rating_type_id)
+
+      assert ratings[user1.id].skill == 27.637760127073694
+      assert ratings[user2.id].skill == 22.362239872926306
+
+      assert ratings[user1.id].rating_value ==
+               ratings[user1.id].skill - ratings[user1.id].uncertainty
+
+      assert ratings[user2.id].rating_value ==
+               ratings[user2.id].skill - ratings[user2.id].uncertainty
+    end
   end
 
   defp get_ratings(userids, rating_type_id) do

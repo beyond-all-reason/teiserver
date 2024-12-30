@@ -19,7 +19,14 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
 
   @spec index(Plug.Conn.t(), any) :: Plug.Conn.t()
   def index(conn, _params) do
-    site_configs = Config.get_grouped_site_configs()
+    site_configs =
+      Config.get_grouped_site_configs()
+      |> Enum.filter(fn x ->
+        case x do
+          {"Hidden", _} -> false
+          _ -> true
+        end
+      end)
 
     conn
     |> assign(:site_configs, site_configs)

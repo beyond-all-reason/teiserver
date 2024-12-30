@@ -583,8 +583,8 @@ defmodule Teiserver.Battle.BalanceLib do
     captain.member_id
   end
 
-  @spec default_rating :: List.t()
-  @spec default_rating(non_neg_integer()) :: List.t()
+  @spec default_rating :: any()
+  @spec default_rating(non_neg_integer()) :: any()
   def default_rating(rating_type_id \\ nil) do
     {skill, uncertainty} = Openskill.rating()
     rating_value = calculate_rating_value(skill, uncertainty)
@@ -595,7 +595,8 @@ defmodule Teiserver.Battle.BalanceLib do
       skill: skill,
       uncertainty: uncertainty,
       rating_value: rating_value,
-      leaderboard_rating: leaderboard_rating
+      leaderboard_rating: leaderboard_rating,
+      num_matches: 0
     }
   end
 
@@ -704,7 +705,24 @@ defmodule Teiserver.Battle.BalanceLib do
 
   @spec calculate_rating_value(float(), float()) :: float()
   def calculate_rating_value(skill, uncertainty) do
-    max(skill - uncertainty, 0)
+    calculate_rating_value(skill, uncertainty, 0)
+  end
+
+  @spec calculate_rating_value(float(), float(), integer()) :: float()
+  def calculate_rating_value(skill, uncertainty, num_matches) do
+    config = Config.get_site_config_cache("hidden.Rating method")
+
+    if config == "start at zero; converge to skill" do
+      num_matches_target = get_num_matches_for_rating_to_equal_skill()
+
+      min(1, num_matches / num_matches_target) * skill
+    else
+      max(skill - uncertainty, 0)
+    end
+  end
+
+  def get_num_matches_for_rating_to_equal_skill() do
+    Config.get_site_config_cache("profile.Num matches for rating to equal skill")
   end
 
   @doc """

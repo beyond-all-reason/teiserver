@@ -514,7 +514,13 @@ defmodule TeiserverWeb.Admin.UserController do
             user_rating = existing_rating || BalanceLib.default_rating()
             new_skill = changes["skill"] |> float_parse
             new_uncertainty = changes["uncertainty"] |> float_parse
-            new_rating_value = BalanceLib.calculate_rating_value(new_skill, new_uncertainty)
+
+            new_rating_value =
+              BalanceLib.calculate_rating_value(
+                new_skill,
+                new_uncertainty,
+                user_rating.num_matches
+              )
 
             new_leaderboard_rating =
               BalanceLib.calculate_leaderboard_rating(new_skill, new_uncertainty)
