@@ -16,9 +16,6 @@ defmodule Teiserver.Game.MatchRatingLibTest do
 
     match = create_fake_match(user1.id, user2.id)
 
-    # Check ratings of users before we rate the match
-    rating_type_id = Game.get_or_add_rating_type(match.game_type)
-
     ratings =
       Account.list_ratings(
         search: [
@@ -36,7 +33,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     MatchRatingLib.rate_match(match.id)
 
     # Check ratings of users after match
-    ratings = get_ratings([user1.id, user2.id], rating_type_id)
+    ratings = get_ratings([user1.id, user2.id], match.game_type)
 
     assert ratings[user1.id].skill == 27.637760127073694
     assert ratings[user2.id].skill == 22.362239872926306
@@ -49,7 +46,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     MatchRatingLib.rate_match(match.id)
 
     # Check ratings of users after match
-    ratings = get_ratings([user1.id, user2.id], rating_type_id)
+    ratings = get_ratings([user1.id, user2.id], match.game_type)
 
     assert ratings[user1.id].skill == 29.662576313923775
     assert ratings[user2.id].skill == 20.337423686076225
@@ -78,10 +75,9 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       match = create_fake_match(user1.id, user2.id)
 
       MatchRatingLib.rate_match(match.id)
-      rating_type_id = Game.get_or_add_rating_type(match.game_type)
 
       # Check ratings of users after match
-      ratings = get_ratings([user1.id, user2.id], rating_type_id)
+      ratings = get_ratings([user1.id, user2.id], match.game_type)
 
       assert ratings[user1.id].skill == 27.637760127073694
       assert ratings[user2.id].skill == 22.362239872926306
@@ -113,10 +109,8 @@ defmodule Teiserver.Game.MatchRatingLibTest do
           match
         end)
 
-      rating_type_id = Game.get_or_add_rating_type(Enum.at(matches, 0).game_type)
-
       # Check ratings of users after match
-      ratings = get_ratings([user1.id, user2.id], rating_type_id)
+      ratings = get_ratings([user1.id, user2.id], Enum.at(matches, 0).game_type)
 
       assert ratings[user1.id].skill == 41.851075350620384
       assert ratings[user2.id].skill == 8.148924649379609
@@ -149,10 +143,9 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       match = create_fake_match(user1.id, user2.id)
 
       MatchRatingLib.rate_match(match.id)
-      rating_type_id = Game.get_or_add_rating_type(match.game_type)
 
       # Check ratings of users after match
-      ratings = get_ratings([user1.id, user2.id], rating_type_id)
+      ratings = get_ratings([user1.id, user2.id], match.game_type)
 
       assert ratings[user1.id].skill == 27.637760127073694
       assert ratings[user2.id].skill == 22.362239872926306
@@ -165,7 +158,9 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     end
   end
 
-  defp get_ratings(userids, rating_type_id) do
+  defp get_ratings(userids, game_type) do
+    rating_type_id = Game.get_or_add_rating_type(game_type)
+
     Account.list_ratings(
       search: [
         rating_type_id: rating_type_id,
