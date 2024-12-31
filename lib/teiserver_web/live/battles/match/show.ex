@@ -262,8 +262,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
           %{
             team_id: m.team_id,
-            old_skill: logs["skill"] - logs["skill_change"],
-            old_uncertainty: logs["uncertainty"] - logs["uncertainty_change"]
+            old_skill: logs["old_skill"],
+            old_uncertainty: logs["old_uncertainty"]
           }
         end)
         |> Enum.group_by(fn x -> x.team_id end)
@@ -323,14 +323,21 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       "rating_value" => rating_value,
       "uncertainty" => uncertainty,
       "rating_value_change" => rating_value_change,
-      "uncertainty_change" => uncertainty_change
+      "uncertainty_change" => uncertainty_change,
+      "skill" => skill,
+      "skill_change" => skill_change
     } = log.value
 
     old_rating = rating_value - rating_value_change
     old_uncertainty = uncertainty - uncertainty_change
+    old_skill = skill - skill_change
 
-    Map.put(log, :rating_value, old_rating)
-    |> Map.put(:uncertainty, old_uncertainty)
+    new_log_value =
+      Map.put(log.value, "old_rating_value", old_rating)
+      |> Map.put("old_uncertainty", old_uncertainty)
+      |> Map.put("old_skill", old_skill)
+
+    Map.put(log, :value, new_log_value)
   end
 
   def get_team_id(player_id, team_players) do
