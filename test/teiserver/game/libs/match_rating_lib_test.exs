@@ -16,16 +16,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
 
     match = create_fake_match(user1.id, user2.id)
 
-    ratings =
-      Account.list_ratings(
-        search: [
-          rating_type_id: rating_type_id,
-          user_id_in: [user1.id, user2.id]
-        ]
-      )
-      |> Map.new(fn rating ->
-        {rating.user_id, rating}
-      end)
+    ratings = get_ratings([user1.id, user2.id], match.game_type)
 
     assert ratings[user1.id] == nil
     assert ratings[user2.id] == nil
@@ -101,7 +92,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       match_ids = 1..matches_target
 
       matches =
-        Enum.map(match_ids, fn x ->
+        Enum.map(match_ids, fn _ ->
           match = create_fake_match(user1.id, user2.id)
 
           MatchRatingLib.rate_match(match.id)
@@ -123,7 +114,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       match = create_fake_match(user1.id, user2.id)
       MatchRatingLib.rate_match(match.id)
       # Check ratings of users after match
-      ratings = get_ratings([user1.id, user2.id], rating_type_id)
+      ratings = get_ratings([user1.id, user2.id], match.game_type)
 
       # Rating should equal skill
       assert ratings[user1.id].rating_value == ratings[user1.id].skill
