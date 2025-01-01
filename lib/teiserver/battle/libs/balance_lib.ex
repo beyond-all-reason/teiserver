@@ -710,15 +710,18 @@ defmodule Teiserver.Battle.BalanceLib do
 
   @spec calculate_rating_value(float(), float(), integer()) :: float()
   def calculate_rating_value(skill, uncertainty, num_matches) do
-    config = Config.get_site_config_cache("hidden.Rating method")
-
-    if config == "start at zero; converge to skill" do
+    if new_players_start_at_zero?() do
       num_matches_target = get_num_matches_for_rating_to_equal_skill()
 
       min(1, num_matches / num_matches_target) * skill
     else
       max(skill - uncertainty, 0)
     end
+  end
+
+  def new_players_start_at_zero?() do
+    config = Config.get_site_config_cache("hidden.Rating method")
+    config == "start at zero; converge to skill"
   end
 
   def get_num_matches_for_rating_to_equal_skill() do
