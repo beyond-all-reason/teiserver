@@ -123,17 +123,23 @@
         <thead>
           <tr>
             <th colspan="6">&nbsp;</th>
+            <th colspan="3">&nbsp;</th>
+
             <th colspan="2" style="text-align: center; bbackground-color: #FEE;">Damage</th>
             <th colspan="2" style="text-align: center; bbackground-color: #EEF;">Metal</th>
             <th colspan="2" style="text-align: center; bbackground-color: #FFE;">Energy</th>
 
-            <th colspan="3">&nbsp;</th>
+            <th colspan="1">&nbsp;</th>
           </tr>
 
           <tr>
             <th colspan="4">Name & Party</th>
             <th>Team</th>
             <th>Play</th>
+
+            <th >Rating</th>
+            <th >Uncertainty</th>
+            <th >Num Matches</th>
 
             <th>Done</th>
             <th>Taken</th>
@@ -144,8 +150,6 @@
             <th>Prod</th>
             <th>Used</th>
 
-            <th colspan="1">Rating</th>
-            <th colspan="1">Uncertainty</th>
             <th colspan="1">&nbsp;</th>
           </tr>
         </thead>
@@ -194,15 +198,6 @@
                 <% end %>
               </td>
 
-              <td><%= normalize(m.stats["damageDealt"]) %></td>
-              <td><%= normalize(m.stats["damageReceived"]) %></td>
-
-              <td><%= normalize(m.stats["metalProduced"]) %></td>
-              <td><%= normalize(m.stats["metalUsed"]) %></td>
-
-              <td><%= normalize(m.stats["energyProduced"]) %></td>
-              <td><%= normalize(m.stats["energyUsed"]) %></td>
-
               <td>
                 <%= if rating != nil do %>
                   <%= rating.value["old_rating_value"]
@@ -216,6 +211,21 @@
                   |> round(2) %>
                 <% end %>
               </td>
+
+              <td>
+                <%= if rating != nil do %>
+                  <%= normalize(rating.value["old_num_matches"]) %>
+                <% end %>
+              </td>
+
+              <td><%= normalize(m.stats["damageDealt"]) %></td>
+              <td><%= normalize(m.stats["damageReceived"]) %></td>
+
+              <td><%= normalize(m.stats["metalProduced"]) %></td>
+              <td><%= normalize(m.stats["metalUsed"]) %></td>
+
+              <td><%= normalize(m.stats["energyProduced"]) %></td>
+              <td><%= normalize(m.stats["energyUsed"]) %></td>
 
               <td>
                 <a
