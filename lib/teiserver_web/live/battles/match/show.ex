@@ -444,4 +444,12 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
      |> assign(:algorithm, value)
      |> get_match()}
   end
+
+  def format_num_matches(num_matches) do
+    cond do
+      num_matches == nil -> ""
+      num_matches <= 1000 -> num_matches
+      num_matches > 1000 -> ">1000"
+    end
+  end
 end
