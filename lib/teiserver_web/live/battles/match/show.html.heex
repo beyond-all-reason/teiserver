@@ -201,7 +201,7 @@
 
               <td>
                 <%= if rating != nil do %>
-                  <%= format_num_matches(rating.value["old_num_matches"]) %>
+                  <%= normalize(rating.value["old_num_matches"]) %>
                 <% end %>
               </td>
 

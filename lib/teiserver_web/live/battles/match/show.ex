@@ -335,11 +335,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     old_skill = skill - skill_change
 
     old_num_matches =
-      if(num_matches == nil) do
-        nil
-      else
-        num_matches - 1
-      end
+      if num_matches, do: num_matches - 1, else: nil
 
     new_log_value =
       Map.put(log.value, "old_rating_value", old_rating)
@@ -443,13 +439,5 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
      socket
      |> assign(:algorithm, value)
      |> get_match()}
-  end
-
-  def format_num_matches(num_matches) do
-    cond do
-      num_matches == nil -> ""
-      num_matches <= 1000 -> num_matches
-      num_matches > 1000 -> ">1000"
-    end
   end
 end
