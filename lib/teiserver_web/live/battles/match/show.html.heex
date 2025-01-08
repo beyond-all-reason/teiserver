@@ -135,11 +135,11 @@
           <tr>
             <th colspan="4">Name & Party</th>
             <th>Team</th>
-            <th>Play</th>
 
-            <th >Rating</th>
-            <th >Uncertainty</th>
-            <th >Num Matches</th>
+            <th>Rating</th>
+            <th>Uncertainty</th>
+            <th>Num Matches</th>
+            <th>Play</th>
 
             <th>Done</th>
             <th>Taken</th>
@@ -184,19 +184,6 @@
               <% end %>
 
               <td><%= m.team_id + 1 %></td>
-              <td>
-                <%= case m.exit_status do %>
-                  <% :stayed -> %>
-                  <% :early -> %>
-                    <i class="fa-fw fa-solid fa-clock text-warning"></i>
-                    &nbsp; <%= play_percentage %>%
-                  <% :abandoned -> %>
-                    <i class="fa-fw fa-solid fa-person-running text-danger"></i>
-                    &nbsp; <%= play_percentage %>%
-                  <% :noshow -> %>
-                    <i class="fa-fw fa-solid fa-user-ninja text-info2"></i>
-                <% end %>
-              </td>
 
               <td>
                 <%= if rating != nil do %>
@@ -215,6 +202,20 @@
               <td>
                 <%= if rating != nil do %>
                   <%= format_num_matches(rating.value["old_num_matches"]) %>
+                <% end %>
+              </td>
+
+              <td>
+                <%= case m.exit_status do %>
+                  <% :stayed -> %>
+                  <% :early -> %>
+                    <i class="fa-fw fa-solid fa-clock text-warning"></i>
+                    &nbsp; <%= play_percentage %>%
+                  <% :abandoned -> %>
+                    <i class="fa-fw fa-solid fa-person-running text-danger"></i>
+                    &nbsp; <%= play_percentage %>%
+                  <% :noshow -> %>
+                    <i class="fa-fw fa-solid fa-user-ninja text-info2"></i>
                 <% end %>
               </td>
 
