@@ -219,6 +219,13 @@
         </div>
       <% end %>
     <% end %>
+
+    <div :if={@has_recent_accolade?} class="alert alert-success" role="alert">
+      You have received an accolade recently! &nbsp;&nbsp;
+      <a href={~p"/profile/#{@user.id}/accolades"} class="btn btn-success btn-sm float-right">
+        <i class="fa-solid fa-award"></i> &nbsp; Accolades
+      </a>
+    </div>
     <br /><br /> Once we have some privacy controls we will be adding:
     <ul>
       <li>Recent matches</li>

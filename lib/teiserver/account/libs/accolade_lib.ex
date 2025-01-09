@@ -417,4 +417,18 @@ defmodule Teiserver.Account.AccoladeLib do
     [[count]] = results.rows
     count
   end
+
+  def get_number_of_received_accolades(user_id, window_days) do
+    query = """
+    select count(*) from teiserver_account_accolades taa
+    where taa.inserted_at >= now() - interval '#{window_days} day'
+    and taa.recipient_id = $1
+    """
+
+    results =
+      Ecto.Adapters.SQL.query!(Repo, query, [user_id])
+
+    [[count]] = results.rows
+    count
+  end
 end

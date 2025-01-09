@@ -6,6 +6,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Lobby
+  alias Teiserver.Account.AccoladeLib
 
   @impl true
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -34,6 +35,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
           |> assign(:role_data, Account.RoleLib.role_data())
           |> assign(:client, Account.get_client_by_id(userid))
           |> get_relationships_and_permissions
+          |> check_recent_accolades
       end
 
     {:ok, socket}
@@ -357,5 +359,14 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     |> assign(:friendship, nil)
     |> assign(:friendship_request, nil)
     |> assign(:profile_permissions, [])
+  end
+
+  def check_recent_accolades(socket) do
+    user_id = socket.assigns.user.id
+    days = 1
+    count = AccoladeLib.get_number_of_received_accolades(user_id, days)
+    has_recent? = count > 0
+
+    socket |> assign(:has_recent_accolade?, has_recent?)
   end
 end
