@@ -6,6 +6,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
   alias Teiserver.Coordinator
   alias Teiserver.Account.ClientLib
   alias Teiserver.Client
+  alias Teiserver.Config
 
   import Teiserver.TeiserverTestLib,
     only: [
@@ -29,6 +30,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
   describe "ratings" do
     test "non-user", %{conn: conn} do
+      Config.update_site_config("hidden.Rating method", nil)
       conn = get(conn, Routes.ts_spads_path(conn, :get_rating, -1, "Team"))
       response = response(conn, 200)
       data = Jason.decode!(response)
