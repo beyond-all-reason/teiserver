@@ -78,16 +78,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
       match_name = MatchLib.make_match_name(match)
 
-      members =
-        match.members
-        |> Enum.map(fn member ->
-          Map.merge(member, %{
-            exit_status: MatchLib.calculate_exit_status(member.left_after, match.game_duration)
-          })
-        end)
-        |> Enum.sort_by(fn m -> m.user.name end, &<=/2)
-        |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
-
       # For unprocessed or unrated matches this will return %{}
       rating_logs =
         Game.list_rating_logs(
@@ -97,6 +87,16 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           limit: :infinity
         )
         |> Map.new(fn log -> {log.user_id, get_prematch_log(log)} end)
+
+      members =
+        match.members
+        |> Enum.map(fn member ->
+          Map.merge(member, %{
+            exit_status: MatchLib.calculate_exit_status(member.left_after, match.game_duration)
+          })
+        end)
+        |> Enum.sort_by(fn m -> rating_logs[m.user.id].value["old_rating_value"] end, &>=/2)
+        |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
 
       prediction_text = get_prediction_text(rating_logs, members)
 
@@ -201,7 +201,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
               team_id = get_team_id(x.user_id, past_balance.team_players)
               Map.put(x, :team_id, team_id)
             end)
-            |> Enum.sort_by(fn m -> rating_logs[m.user.id].value["rating_value"] end, &>=/2)
+            |> Enum.sort_by(fn m -> rating_logs[m.user.id].value["old_rating_value"] end, &>=/2)
             |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
         end
 
@@ -262,8 +262,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
           %{
             team_id: m.team_id,
-            old_skill: logs["skill"] - logs["skill_change"],
-            old_uncertainty: logs["uncertainty"] - logs["uncertainty_change"]
+            old_skill: logs["old_skill"],
+            old_uncertainty: logs["old_uncertainty"]
           }
         end)
         |> Enum.group_by(fn x -> x.team_id end)
@@ -323,14 +323,27 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       "rating_value" => rating_value,
       "uncertainty" => uncertainty,
       "rating_value_change" => rating_value_change,
-      "uncertainty_change" => uncertainty_change
+      "uncertainty_change" => uncertainty_change,
+      "skill" => skill,
+      "skill_change" => skill_change
     } = log.value
+
+    num_matches = Map.get(log.value, "num_matches", nil)
 
     old_rating = rating_value - rating_value_change
     old_uncertainty = uncertainty - uncertainty_change
+    old_skill = skill - skill_change
 
-    Map.put(log, :rating_value, old_rating)
-    |> Map.put(:uncertainty, old_uncertainty)
+    old_num_matches =
+      if num_matches, do: num_matches - 1, else: nil
+
+    new_log_value =
+      Map.put(log.value, "old_rating_value", old_rating)
+      |> Map.put("old_uncertainty", old_uncertainty)
+      |> Map.put("old_skill", old_skill)
+      |> Map.put("old_num_matches", old_num_matches)
+
+    Map.put(log, :value, new_log_value)
   end
 
   def get_team_id(player_id, team_players) do
