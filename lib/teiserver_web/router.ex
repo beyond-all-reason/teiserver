@@ -310,6 +310,7 @@ defmodule TeiserverWeb.Router do
       live "/:id/ratings", MatchLive.Show, :ratings
       live "/:id/balance", MatchLive.Show, :balance
       live "/:id/events", MatchLive.Show, :events
+      live "/:id/user/:user_id/give_accolade", GiveAccoladeLive.Index
     end
   end
 

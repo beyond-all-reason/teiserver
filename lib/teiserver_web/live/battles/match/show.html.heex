@@ -122,17 +122,17 @@
       <table class="table table-sm">
         <thead>
           <tr>
-            <th colspan="6">&nbsp;</th>
+            <th colspan="5">&nbsp;</th>
             <th colspan="2" style="text-align: center; bbackground-color: #FEE;">Damage</th>
             <th colspan="2" style="text-align: center; bbackground-color: #EFE;">Units</th>
             <th colspan="2" style="text-align: center; bbackground-color: #EEF;">Metal</th>
             <th colspan="2" style="text-align: center; bbackground-color: #FFE;">Energy</th>
 
-            <th colspan="2">&nbsp;</th>
+            <th colspan="3">&nbsp;</th>
           </tr>
 
           <tr>
-            <th colspan="4">Name & Party</th>
+            <th colspan="3">Name & Party</th>
             <th>Team</th>
             <th>Play</th>
 
@@ -149,7 +149,7 @@
             <th>Used</th>
 
             <th colspan="1">Rating</th>
-            <th colspan="1">&nbsp;</th>
+            <th colspan="2">&nbsp;</th>
           </tr>
         </thead>
         <tbody>
@@ -167,9 +167,7 @@
                   <i class="fa-fw fa-solid fa-trophy"></i>
                 <% end %>
               </td>
-              <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
-                <Fontawesome.icon icon={m.user.icon} style="" />
-              </td>
+
               <td style={"background-color: #{rgba_css m.user.colour};"}>
                 <%= m.user.name %>
               </td>
@@ -224,6 +222,17 @@
                 >
                   <i class={"fa-fw #{Teiserver.Moderation.ReportLib.icon()}"}></i> &nbsp;
                   Report
+                </a>
+              </td>
+
+              <td>
+                <a
+                  :if={m.user_id != @current_user.id}
+                  href={~p"/battle/#{@match.id}/user/#{m.user_id}/give_accolade"}
+                  class="btn btn-sm btn-success"
+                >
+                  <i class="fa-solid fa-award"></i> &nbsp;
+                  Accolade
                 </a>
               </td>
             </tr>

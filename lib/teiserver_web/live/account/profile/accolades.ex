@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Account
+  import Central.Helpers.ComponentHelper
 
   @impl true
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -16,11 +17,25 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
           |> redirect(to: ~p"/")
 
         true ->
+          accolades =
+            Account.list_accolades(
+              search: [
+                filter: {"recipient", userid}
+              ],
+              preload: [
+                :giver,
+                :recipient,
+                :badge_type
+              ],
+              order_by: "Newest first"
+            )
+
           socket
           |> assign(:tab, nil)
           |> assign(:site_menu_active, "teiserver_account")
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
+          |> assign(:accolades, accolades)
           |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
       end
 

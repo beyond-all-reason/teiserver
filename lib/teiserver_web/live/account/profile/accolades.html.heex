@@ -6,8 +6,40 @@
   profile_permissions={@profile_permissions}
 />
 
-<div class="row mt-2 mb-3">
-  <div class="col">
-    Stuff about how great a person they are goes here
+<%= if Enum.count(@accolades) == 0 do %>
+  You have no accolades.
+<% end %>
+<%= if Enum.count(@accolades) > 0 do %>
+  <div class="mt-2 mb-3  col-lg-6 ml-2">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th></th>
+
+          <th colspan="1">Accolade Type</th>
+          <th>Giver</th>
+          <th colspan="3">&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for accolade <- @accolades do %>
+          <tr>
+            <td style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"} width="22">
+              <%= central_component("icon", icon: accolade.badge_type.icon) %>
+            </td>
+            <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
+              <%= accolade.badge_type.name %>
+            </td>
+            <td><%= accolade.giver.name %></td>
+            <td><%= date_to_str(accolade.inserted_at, format: :hms_or_dmy, tz: @tz) %></td>
+            <td>
+              <a href={~p"/battle/#{accolade.match_id}/players"} class="btn btn-secondary btn-sm">
+                view match
+              </a>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
   </div>
-</div>
+<% end %>
