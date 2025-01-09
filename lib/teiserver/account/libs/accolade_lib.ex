@@ -446,4 +446,19 @@ defmodule Teiserver.Account.AccoladeLib do
     [[count]] = results.rows
     count > 0
   end
+
+  # Fetch the number of unique givers who have given at least one accolade to this recipient
+  def get_unique_giver_count(recipient_id) do
+    query = """
+    select count(distinct taa.giver_id), count(*) from teiserver_account_accolades taa
+    where taa.recipient_id  = $1
+    """
+
+    result =
+      Ecto.Adapters.SQL.query!(Repo, query, [recipient_id])
+
+    [[unique_giver_count, total_accolades]] = result.rows
+
+    {unique_giver_count, total_accolades}
+  end
 end

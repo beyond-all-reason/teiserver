@@ -6,9 +6,9 @@
   profile_permissions={@profile_permissions}
 />
 
-<%= if @error_message do %>
-  <%= @error_message %>
-<% else %>
+<%= @summary %>
+
+<%= if Enum.count(@accolades) > 0 do %>
   <div class="mt-2 mb-3  col-lg-6 ml-2">
     <table class="table table-sm">
       <thead>
