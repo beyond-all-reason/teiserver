@@ -6,10 +6,9 @@
   profile_permissions={@profile_permissions}
 />
 
-<%= if Enum.count(@accolades) == 0 do %>
-  You have no accolades.
-<% end %>
-<%= if Enum.count(@accolades) > 0 do %>
+<%= if @error_message do %>
+  <%= @error_message %>
+<% else %>
   <div class="mt-2 mb-3  col-lg-6 ml-2">
     <table class="table table-sm">
       <thead>

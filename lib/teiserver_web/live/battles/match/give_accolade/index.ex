@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Battle.GiveAccoladeLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     badge_types =
-      Account.list_badge_types(order_by: "Name (A-Z)")
+      Account.list_accolade_types()
 
     gift_limit = Config.get_site_config_cache("teiserver.Accolade gift limit")
     gift_window = Config.get_site_config_cache("teiserver.Accolade gift window")
@@ -71,17 +71,39 @@ defmodule TeiserverWeb.Battle.GiveAccoladeLive.Index do
     user_id = socket.assigns.current_user.id
     gift_count = AccoladeLib.get_number_of_gifted_accolades(user_id, gift_window)
     gift_limit = socket.assigns.gift_limit
+    recipient_id = socket.assigns.user.id
+    match_id = socket.assigns.match_id
 
-    if gift_count >= gift_limit do
-      socket
-      |> assign(
-        :failure_reason,
-        "You can only gift #{gift_limit} accolades every #{gift_window} days."
-      )
-      |> assign(:stage, :not_allowed)
-    else
+    with :ok <- check_gift_count(user_id, gift_limit, gift_window),
+         :ok <- check_already_gifted(user_id, recipient_id, match_id) do
       socket
       |> assign(:gift_count, gift_count)
+    else
+      {:error, reason} ->
+        socket
+        |> assign(
+          :failure_reason,
+          reason
+        )
+        |> assign(:stage, :not_allowed)
+    end
+  end
+
+  defp check_gift_count(user_id, gift_limit, gift_window) do
+    gift_count = AccoladeLib.get_number_of_gifted_accolades(user_id, gift_window)
+
+    if gift_count >= gift_limit do
+      {:error, "You can only give #{gift_limit} accolades every #{gift_window} days."}
+    else
+      :ok
+    end
+  end
+
+  defp check_already_gifted(user_id, recipient_id, match_id) do
+    if AccoladeLib.does_accolade_exist?(user_id, recipient_id, match_id) do
+      {:error, "You have already given an accolade to this user for this match."}
+    else
+      :ok
     end
   end
 

@@ -30,11 +30,23 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
               order_by: "Newest first"
             )
 
+          error_message =
+            cond do
+              Enum.count(accolades) == 0 ->
+                if user.id == socket.assigns.current_user.id,
+                  do: "You have no accolades.",
+                  else: "#{user.name} has no accolades."
+
+              true ->
+                nil
+            end
+
           socket
           |> assign(:tab, nil)
           |> assign(:site_menu_active, "teiserver_account")
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
+          |> assign(:error_message, error_message)
           |> assign(:accolades, accolades)
           |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
       end

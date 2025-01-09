@@ -81,7 +81,7 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["Server"],
       description: "The number of accolades you can gift within the allocated window.",
-      default: 10
+      default: 20
     })
 
     add_site_config_type(%{

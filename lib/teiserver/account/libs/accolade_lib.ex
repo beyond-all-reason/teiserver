@@ -431,4 +431,19 @@ defmodule Teiserver.Account.AccoladeLib do
     [[count]] = results.rows
     count
   end
+
+  def does_accolade_exist?(giver_id, recipient_id, match_id) do
+    query = """
+    select count(*) from teiserver_account_accolades taa
+    where taa.giver_id = $1
+    and taa.recipient_id = $2
+    and taa.match_id = $3
+    """
+
+    results =
+      Ecto.Adapters.SQL.query!(Repo, query, [giver_id, recipient_id, match_id])
+
+    [[count]] = results.rows
+    count > 0
+  end
 end

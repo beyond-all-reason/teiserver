@@ -38,8 +38,8 @@
       </div>
 
       <div :if={@stage == :form} class="card-footer">
-        You can give this player an accolade if you feel they deserve to be acknowledged for their positive behaviour in a match. You can only give <%= @gift_limit %> accolades every <%= @gift_window %> days.
-        (You have gifted <%= @gift_count %> accolades over the past <%= @gift_window %> days.)
+        You can give this player an accolade if you feel they deserve to be acknowledged for their positive behaviour in this match. You can give <%= @gift_limit %> accolades in a rolling <%= @gift_window %>-day window.
+        (You have given <%= @gift_count %> accolades over the past <%= @gift_window %> days.)
         <br /><br />
 
         <table class="table table-sm">
@@ -56,7 +56,9 @@
                 <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
                   <%= central_component("icon", icon: badge_type.icon) %>
                 </td>
-                <td><%= badge_type.name %></td>
+                <td style={"background-color: #{rgba_css badge_type.colour};"}>
+                  <%= badge_type.name %>
+                </td>
 
                 <td>
                   <a
