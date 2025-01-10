@@ -364,9 +364,14 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   def check_recent_accolades(socket) do
     user_id = socket.assigns.user.id
     days = 1
-    count = AccoladeLib.get_number_of_received_accolades(user_id, days)
-    has_recent? = count > 0
 
-    socket |> assign(:has_recent_accolade?, has_recent?)
+    message =
+      with %{map: map, giver_name: giver_name} <- AccoladeLib.recent_accolade(user_id, days) do
+        "You have recently received an accolade from #{giver_name} for your match in #{map}!"
+      else
+        nil -> nil
+      end
+
+    socket |> assign(:accolade_notification, message)
   end
 end
