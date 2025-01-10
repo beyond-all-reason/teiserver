@@ -148,7 +148,7 @@
             <th>Prod</th>
             <th>Used</th>
 
-            <th colspan="2">&nbsp;</th>
+            <th colspan="1">&nbsp;</th>
           </tr>
         </thead>
         <tbody>
@@ -161,9 +161,12 @@
                 (m.left_after / @match.game_duration * 100) |> round
               end %>
             <tr>
-              <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
+              <td
+                style={"vertical-align: middle; background-color: #{m.user.colour}; color: #FFF;"}
+                width="22"
+              >
                 <%= if m.team_id == @match.winning_team do %>
-                  <i class="fa-fw fa-solid fa-trophy"></i>
+                  <i class="fa-fw fa-solid fa-trophy "></i>
                 <% end %>
               </td>
 
@@ -225,25 +228,25 @@
               <td><%= normalize(m.stats["energyUsed"]) %></td>
 
               <td>
-                <a
-                  :if={m.user_id != @current_user.id}
-                  href={~p"/moderation/report_user/#{m.user_id}"}
-                  class="btn btn-sm btn-warning"
-                >
-                  <i class={"fa-fw #{Teiserver.Moderation.ReportLib.icon()}"}></i> &nbsp;
-                  Report
-                </a>
-              </td>
-
-              <td>
-                <a
-                  :if={m.user_id != @current_user.id}
-                  href={~p"/battle/#{@match.id}/user/#{m.user_id}/give_accolade"}
-                  class="btn btn-sm btn-success"
-                >
-                  <i class="fa-solid fa-award"></i> &nbsp;
-                  Accolade
-                </a>
+                <div :if={m.user_id != @current_user.id} style="display: flex;">
+                  <a
+                    href={~p"/moderation/report_user/#{m.user_id}"}
+                    class="btn btn-sm btn-warning "
+                    style="flex: 1"
+                  >
+                    <i class={"fa-fw #{Teiserver.Moderation.ReportLib.icon()}"}></i>&nbsp;
+                    Report
+                  </a>
+                  <div style="width: 10px;" />
+                  <a
+                    href={~p"/battle/#{@match.id}/user/#{m.user_id}/give_accolade"}
+                    class="btn btn-sm btn-success"
+                    style="flex: 1"
+                  >
+                    <i class="fa-solid fa-award"></i>&nbsp;
+                    Accolade
+                  </a>
+                </div>
               </td>
             </tr>
           <% end %>
