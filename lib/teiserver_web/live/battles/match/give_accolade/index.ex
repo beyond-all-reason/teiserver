@@ -69,12 +69,11 @@ defmodule TeiserverWeb.Battle.GiveAccoladeLive.Index do
   defp assign_gift_history(socket) do
     gift_window = socket.assigns.gift_window
     user_id = socket.assigns.current_user.id
-    gift_count = AccoladeLib.get_number_of_gifted_accolades(user_id, gift_window)
     gift_limit = socket.assigns.gift_limit
     recipient_id = socket.assigns.user.id
     match_id = socket.assigns.match_id
 
-    with :ok <- check_gift_count(user_id, gift_limit, gift_window),
+    with {:ok, gift_count} <- check_gift_count(user_id, gift_limit, gift_window),
          :ok <- check_already_gifted(user_id, recipient_id, match_id) do
       socket
       |> assign(:gift_count, gift_count)
@@ -95,7 +94,7 @@ defmodule TeiserverWeb.Battle.GiveAccoladeLive.Index do
     if gift_count >= gift_limit do
       {:error, "You can only give #{gift_limit} accolades every #{gift_window} days."}
     else
-      :ok
+      {:ok, gift_count}
     end
   end
 
