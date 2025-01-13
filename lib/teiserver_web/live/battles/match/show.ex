@@ -95,7 +95,18 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
             exit_status: MatchLib.calculate_exit_status(member.left_after, match.game_duration)
           })
         end)
-        |> Enum.sort_by(fn m -> rating_logs[m.user.id].value["old_rating_value"] end, &>=/2)
+        |> Enum.sort_by(
+          fn m ->
+            if rating_logs[m.user_id] do
+              # Sort be rating descending (that's why there's a negative in front)
+              -rating_logs[m.user.id].value["old_rating_value"]
+            else
+              # Or name ascending if unrated match
+              m.user.name
+            end
+          end,
+          &>=/2
+        )
         |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
 
       prediction_text = get_prediction_text(rating_logs, members)

@@ -32,7 +32,7 @@
             <td><%= accolade.giver.name %></td>
             <td><%= date_to_str(accolade.inserted_at, format: :hms_or_dmy, tz: @tz) %></td>
             <td>
-              <a href={~p"/battle/#{accolade.match_id}/players"} class="btn btn-secondary btn-sm">
+              <a :if={accolade.match_id} href={~p"/battle/#{accolade.match_id}/players"} class="btn btn-secondary btn-sm">
                 view match
               </a>
             </td>
