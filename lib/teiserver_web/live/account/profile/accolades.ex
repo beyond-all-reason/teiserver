@@ -20,9 +20,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
         true ->
           accolades =
             Account.list_accolades(
-              search: [
-                filter: {"recipient", userid}
-              ],
+              search: [recipient_id: userid, has_badge: true],
               preload: [
                 :giver,
                 :recipient,

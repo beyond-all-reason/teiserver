@@ -438,6 +438,7 @@ defmodule Teiserver.Account.AccoladeLib do
     query = """
     select count(distinct taa.giver_id), count(*) from teiserver_account_accolades taa
     where taa.recipient_id  = $1
+    and taa.badge_type_id is not null
     """
 
     result =
