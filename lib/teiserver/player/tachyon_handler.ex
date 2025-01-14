@@ -38,14 +38,26 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   @impl Handler
-  @spec init(%{user: T.user()}) :: WebSock.handle_result()
+  @spec init(%{user: T.user()}) :: Handler.result()
   def init(initial_state) do
     # this is inside the process that maintain the connection
     {:ok, session_pid} = setup_session(initial_state.user)
     sess_monitor = Process.monitor(session_pid)
 
-    {:ok,
-     initial_state |> Map.put(:sess_monitor, sess_monitor) |> Map.put(:pending_responses, %{})}
+    state =
+      initial_state |> Map.put(:sess_monitor, sess_monitor) |> Map.put(:pending_responses, %{})
+
+    user = initial_state.user
+
+    event = %{
+      users: [
+        %{
+          userId: to_string(user.id)
+        }
+      ]
+    }
+
+    {:event, "user/updated", event, state}
   end
 
   @impl Handler

@@ -39,7 +39,6 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
     client: client,
     token: token
   } do
-    ensure_connected(client)
     opts = Tachyon.connect_options(token)
     {:ok, client2} = WSC.connect(Tachyon.tachyon_url(), opts)
     ensure_connected(client2)
@@ -52,7 +51,6 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
   end
 
   test "session dies after too long", %{client: client, user: user} do
-    ensure_connected(client)
     Tachyon.abrupt_disconnect!(client)
     assert {:error, :disconnected} = WSC.send_message(client, {:text, "test_ping"})
     sess_pid = Player.SessionRegistry.lookup(user.id)
@@ -65,6 +63,7 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
 
   defp ensure_connected(client) do
     WSC.send_message(client, {:text, "test_ping"})
+    Tachyon.recv_message!(client)
     assert {:ok, {:text, "test_pong"}} == WSC.recv(client)
   end
 end
