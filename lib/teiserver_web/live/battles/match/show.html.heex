@@ -243,25 +243,28 @@
 
                 <td>
                   <div :if={m.user_id != @current_user.id} style="display: flex;">
-                    <a
-                      href={~p"/moderation/report_user/#{m.user_id}"}
-                      class="btn btn-sm btn-warning "
-                      style="flex: 1"
-                    >
-                      <i class={"fa-fw #{Teiserver.Moderation.ReportLib.icon()}"}></i>&nbsp;
-                      Report
-                    </a>
-                    <div style="width: 10px;" />
-                    <a
-                      phx-click="give-accolade"
-                      phx-value-recipient_name={m.user.name}
-                      phx-value-recipient_id={m.user.id}
-                      class="btn btn-sm btn-success"
-                      style="flex: 1"
-                    >
-                      <i class="fa-solid fa-award"></i>&nbsp;
-                      Accolade
-                    </a>
+                    <div style="flex: 1">
+                      <a
+                        href={~p"/moderation/report_user/#{m.user_id}"}
+                        class="btn btn-sm btn-warning "
+                      >
+                        <i class={"fa-fw #{Teiserver.Moderation.ReportLib.icon()}"}></i>&nbsp;
+                        Report
+                      </a>
+                    </div>
+
+                     <div style="flex: 1">
+                      <a
+                        :if={m.team_id == @current_user_team_id}
+                        phx-click="give-accolade"
+                        phx-value-recipient_name={m.user.name}
+                        phx-value-recipient_id={m.user.id}
+                        class="btn btn-sm btn-success"
+                       >
+                        <i class="fa-solid fa-award"></i>&nbsp;
+                        Accolade
+                      </a>
+                    </div>
                   </div>
                 </td>
               </tr>

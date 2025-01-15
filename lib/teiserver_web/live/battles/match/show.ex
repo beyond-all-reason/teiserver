@@ -72,9 +72,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   #   {:noreply, assign(socket, :tab, tab)}
   # end
 
-  defp get_match(
-         %{assigns: %{id: id, algorithm: algorithm, current_user: _current_user}} = socket
-       ) do
+  defp get_match(%{assigns: %{id: id, algorithm: algorithm, current_user: current_user}} = socket) do
     if connected?(socket) do
       match =
         Battle.get_match!(id,
@@ -113,6 +111,13 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           &>=/2
         )
         |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
+
+      find_current_user =
+        Enum.find(members, fn x ->
+          x.user_id == current_user.id
+        end)
+
+      current_user_team_id = if find_current_user, do: find_current_user.team_id, else: nil
 
       prediction_text = get_prediction_text(rating_logs, members)
 
@@ -250,6 +255,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:replay, replay)
       |> assign(:rating_status, match_rating_status)
       |> assign(:prediction_text, prediction_text)
+      |> assign(:current_user_team_id, current_user_team_id)
     else
       socket
       |> assign(:match, nil)
