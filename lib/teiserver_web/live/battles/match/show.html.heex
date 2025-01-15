@@ -19,262 +19,148 @@
       &nbsp;
     </div>
 
-    <h3>
-      <%= @match_name %> &nbsp;&nbsp;&nbsp;&nbsp;
-      <%= if @match.winning_team != nil do %>
-        Team <%= @match.winning_team + 1 %> won
-      <% end %>
-    </h3>
-    <br />
+    <%= if @give_accolade do %>
+      <.give_accolade_form
+        recipient={@give_accolade.recipient}
+        stage={@give_accolade.stage}
+        badge_types={@give_accolade[:badge_types]}
+        gift_window={@give_accolade[:gift_window]}
+        gift_count={@give_accolade[:gift_count]}
+        gift_limit={@give_accolade[:gift_limit]}
+        current_user={@current_user}
+        failure_reason={@give_accolade[:failure_reason]}
+      />
+    <% else %>
+      <h3>
+        <%= @match_name %> &nbsp;&nbsp;&nbsp;&nbsp;
+        <%= if @match.winning_team != nil do %>
+          Team <%= @match.winning_team + 1 %> won
+        <% end %>
+      </h3>
+      <br />
 
-    <%= if @rating_status != nil and allow?(@current_user, "Tester") do %>
-      <% {alert_type, status} = @rating_status %>
-      <div class={"alert alert-#{alert_type} alert-dismissible fade show"} role="alert">
-        <%= status %>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-        </button>
+      <%= if @rating_status != nil and allow?(@current_user, "Tester") do %>
+        <% {alert_type, status} = @rating_status %>
+        <div class={"alert alert-#{alert_type} alert-dismissible fade show"} role="alert">
+          <%= status %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+          </button>
+        </div>
+      <% end %>
+
+      <div :if={@match.processed and @match.game_id == nil} class="alert alert-danger">
+        Match data missing!
       </div>
-    <% end %>
 
-    <div :if={@match.processed and @match.game_id == nil} class="alert alert-danger">
-      Match data missing!
-    </div>
-
-    <.tab_header>
-      <.tab_nav url={~p"/battle/#{@match.id}/overview"} selected={@tab == :overview}>
-        <Fontawesome.icon icon="file-alt" style="solid" /> Overview
-      </.tab_nav>
-
-      <.tab_nav url={~p"/battle/#{@match.id}/players"} selected={@tab == :players}>
-        <Fontawesome.icon icon="users" style="solid" /> Players
-      </.tab_nav>
-
-      <%= if @rating_logs != %{} and allow?(@current_user, "Overwatch") do %>
-        <.tab_nav url={~p"/battle/#{@match.id}/ratings"} selected={@tab == :ratings}>
-          <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="solid" /> Ratings
+      <.tab_header>
+        <.tab_nav url={~p"/battle/#{@match.id}/overview"} selected={@tab == :overview}>
+          <Fontawesome.icon icon="file-alt" style="solid" /> Overview
         </.tab_nav>
-      <% end %>
 
-      <%= if @rating_logs != %{} and allow_any?(@current_user, ["Overwatch", "Tester"]) do %>
-        <.tab_nav url={~p"/battle/#{@match.id}/balance"} selected={@tab == :balance}>
-          <Fontawesome.icon icon="fa-solid fa-scale-balanced" style="solid" /> Balance
+        <.tab_nav url={~p"/battle/#{@match.id}/players"} selected={@tab == :players}>
+          <Fontawesome.icon icon="users" style="solid" /> Players
         </.tab_nav>
-      <% end %>
 
-      <%= if @events_by_type != %{} and allow?(@current_user, "Overwatch") do %>
-        <.tab_nav url={~p"/battle/#{@match.id}/events"} selected={@tab == :events}>
-          <Fontawesome.icon icon={Teiserver.Telemetry.SimpleMatchEventLib.icon()} style="solid" />
-          Events
-        </.tab_nav>
-      <% end %>
-    </.tab_header>
+        <%= if @rating_logs != %{} and allow?(@current_user, "Overwatch") do %>
+          <.tab_nav url={~p"/battle/#{@match.id}/ratings"} selected={@tab == :ratings}>
+            <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="solid" /> Ratings
+          </.tab_nav>
+        <% end %>
 
-    <div :if={@tab == :overview} class="p-4">
-      <div class="row">
-        <div class="col">
-          <strong>Team count:</strong> <%= @match.team_count %>
-        </div>
+        <%= if @rating_logs != %{} and allow_any?(@current_user, ["Overwatch", "Tester"]) do %>
+          <.tab_nav url={~p"/battle/#{@match.id}/balance"} selected={@tab == :balance}>
+            <Fontawesome.icon icon="fa-solid fa-scale-balanced" style="solid" /> Balance
+          </.tab_nav>
+        <% end %>
 
-        <div class="col">
-          <strong>Team size:</strong> <%= @match.team_size %>
-        </div>
+        <%= if @events_by_type != %{} and allow?(@current_user, "Overwatch") do %>
+          <.tab_nav url={~p"/battle/#{@match.id}/events"} selected={@tab == :events}>
+            <Fontawesome.icon icon={Teiserver.Telemetry.SimpleMatchEventLib.icon()} style="solid" />
+            Events
+          </.tab_nav>
+        <% end %>
+      </.tab_header>
 
-        <div class="col">
-          <strong>Started:</strong> <%= date_to_str(@match.started, format: :ymd_hms, tz: @tz) %>
-        </div>
-
-        <div class="col">
-          <strong>Finished:</strong> <%= date_to_str(@match.finished, format: :ymd_hms, tz: @tz) %>
-        </div>
-
-        <%= if allow?(@current_user, "admin.dev") do %>
+      <div :if={@tab == :overview} class="p-4">
+        <div class="row">
           <div class="col">
-            <strong>Tag count:</strong> <%= Map.keys(@match.tags) |> Enum.count() %>
+            <strong>Team count:</strong> <%= @match.team_count %>
           </div>
+
+          <div class="col">
+            <strong>Team size:</strong> <%= @match.team_size %>
+          </div>
+
+          <div class="col">
+            <strong>Started:</strong> <%= date_to_str(@match.started, format: :ymd_hms, tz: @tz) %>
+          </div>
+
+          <div class="col">
+            <strong>Finished:</strong> <%= date_to_str(@match.finished, format: :ymd_hms, tz: @tz) %>
+          </div>
+
+          <%= if allow?(@current_user, "admin.dev") do %>
+            <div class="col">
+              <strong>Tag count:</strong> <%= Map.keys(@match.tags) |> Enum.count() %>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="row mt-2">
+          <div class="col">
+            <strong>Host:</strong> <%= @match.founder.name %>
+          </div>
+
+          <div class="col">
+            <strong>Duration:</strong> <%= duration_to_str_short(@match.game_duration) %>
+          </div>
+
+          <div class="col">
+            <strong>Bot count:</strong> <%= Enum.count(@match.bots) %>
+          </div>
+        </div>
+        <hr />
+
+        <%= if allow?(@current_user, "Moderator") do %>
+          Match data <textarea class="form-control" style="font-family: monospace" rows="20"><%= Jason.encode!(@match.data, pretty: true) %></textarea> Match bots <textarea
+            class="form-control"
+            style="font-family: monospace"
+            rows="20"
+          ><%= Jason.encode!(@match.bots, pretty: true) %></textarea>
         <% end %>
       </div>
 
-      <div class="row mt-2">
-        <div class="col">
-          <strong>Host:</strong> <%= @match.founder.name %>
-        </div>
-
-        <div class="col">
-          <strong>Duration:</strong> <%= duration_to_str_short(@match.game_duration) %>
-        </div>
-
-        <div class="col">
-          <strong>Bot count:</strong> <%= Enum.count(@match.bots) %>
-        </div>
-      </div>
-      <hr />
-
-      <%= if allow?(@current_user, "Moderator") do %>
-        Match data <textarea class="form-control" style="font-family: monospace" rows="20"><%= Jason.encode!(@match.data, pretty: true) %></textarea> Match bots <textarea
-          class="form-control"
-          style="font-family: monospace"
-          rows="20"
-        ><%= Jason.encode!(@match.bots, pretty: true) %></textarea>
-      <% end %>
-    </div>
-
-    <div :if={@tab == :players} class="p-4">
-      <table class="table table-sm">
-        <thead>
-          <tr>
-            <th colspan="8">&nbsp;</th>
-            <th colspan="2" style="text-align: center; bbackground-color: #FEE;">Damage</th>
-            <th colspan="2" style="text-align: center; bbackground-color: #EEF;">Metal</th>
-            <th colspan="2" style="text-align: center; bbackground-color: #FFE;">Energy</th>
-
-            <th colspan="5">&nbsp;</th>
-          </tr>
-
-          <tr>
-            <th colspan="3">Name & Party</th>
-            <th>Team</th>
-
-            <th>Rating</th>
-            <th>Uncertainty</th>
-            <th>Num Matches</th>
-            <th>Play</th>
-
-            <th>Done</th>
-            <th>Taken</th>
-
-            <th>Prod</th>
-            <th>Used</th>
-
-            <th>Prod</th>
-            <th>Used</th>
-
-            <th colspan="1">&nbsp;</th>
-          </tr>
-        </thead>
-        <tbody>
-          <%= for m <- @members do %>
-            <% rating = @rating_logs[m.user_id]
-            {party_colour, party_idx} = Map.get(@parties, m.party_id, {nil, nil})
-
-            play_percentage =
-              if m.exit_status != :stayed do
-                (m.left_after / @match.game_duration * 100) |> round
-              end %>
-            <tr>
-              <td
-                style={"vertical-align: middle; background-color: #{m.user.colour}; color: #FFF;"}
-                width="22"
-              >
-                <%= if m.team_id == @match.winning_team do %>
-                  <i class="fa-fw fa-solid fa-trophy "></i>
-                <% end %>
-              </td>
-
-              <td style={"background-color: #{rgba_css m.user.colour};"}>
-                <%= m.user.name %>
-              </td>
-
-              <%= if party_colour do %>
-                <td style={"background-color: #{rgba_css(party_colour, 0.3)};"} width="50">
-                  <Fontawesome.icon icon={party_idx} style="solid" size="lg" />
-                </td>
-              <% else %>
-                <td style={"background-color: #{rgba_css m.user.colour};"} width="50">&nbsp;</td>
-              <% end %>
-
-              <td><%= m.team_id + 1 %></td>
-
-              <td>
-                <%= if rating != nil do %>
-                  <%= rating.value["old_rating_value"]
-                  |> round(2) %>
-                <% end %>
-              </td>
-
-              <td>
-                <%= if rating != nil do %>
-                  <%= rating.value["old_uncertainty"]
-                  |> round(2) %>
-                <% end %>
-              </td>
-
-              <td>
-                <%= if rating != nil do %>
-                  <%= normalize(rating.value["old_num_matches"]) %>
-                <% end %>
-              </td>
-
-              <td>
-                <%= case m.exit_status do %>
-                  <% :stayed -> %>
-                  <% :early -> %>
-                    <i class="fa-fw fa-solid fa-clock text-warning"></i>
-                    &nbsp; <%= play_percentage %>%
-                  <% :abandoned -> %>
-                    <i class="fa-fw fa-solid fa-person-running text-danger"></i>
-                    &nbsp; <%= play_percentage %>%
-                  <% :noshow -> %>
-                    <i class="fa-fw fa-solid fa-user-ninja text-info2"></i>
-                <% end %>
-              </td>
-
-              <td><%= normalize(m.stats["damageDealt"]) %></td>
-              <td><%= normalize(m.stats["damageReceived"]) %></td>
-
-              <td><%= normalize(m.stats["metalProduced"]) %></td>
-              <td><%= normalize(m.stats["metalUsed"]) %></td>
-
-              <td><%= normalize(m.stats["energyProduced"]) %></td>
-              <td><%= normalize(m.stats["energyUsed"]) %></td>
-
-              <td>
-                <div :if={m.user_id != @current_user.id} style="display: flex;">
-                  <a
-                    href={~p"/moderation/report_user/#{m.user_id}"}
-                    class="btn btn-sm btn-warning "
-                    style="flex: 1"
-                  >
-                    <i class={"fa-fw #{Teiserver.Moderation.ReportLib.icon()}"}></i>&nbsp;
-                    Report
-                  </a>
-                  <div style="width: 10px;" />
-                  <a
-                    href={~p"/battle/#{@match.id}/user/#{m.user_id}/give_accolade"}
-                    class="btn btn-sm btn-success"
-                    style="flex: 1"
-                  >
-                    <i class="fa-solid fa-award"></i>&nbsp;
-                    Accolade
-                  </a>
-                </div>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <%= for m <-  @prediction_text do %>
-            <tr>
-              <td style="padding-right:10px;"><%= m.label %></td>
-              <td><%= m.value %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-
-    <%= if allow?(@current_user, "Overwatch") do %>
-      <div :if={@tab == :ratings and @rating_logs != %{}} class="p-4">
+      <div :if={@tab == :players} class="p-4">
         <table class="table table-sm">
           <thead>
             <tr>
-              <th colspan="4">Name & Party</th>
+              <th colspan="8">&nbsp;</th>
+              <th colspan="2" style="text-align: center; bbackground-color: #FEE;">Damage</th>
+              <th colspan="2" style="text-align: center; bbackground-color: #EEF;">Metal</th>
+              <th colspan="2" style="text-align: center; bbackground-color: #FFE;">Energy</th>
+
+              <th colspan="5">&nbsp;</th>
+            </tr>
+
+            <tr>
+              <th colspan="3">Name & Party</th>
               <th>Team</th>
 
-              <th>Pre-game rating</th>
-              <th>Post-game rating</th>
-              <th>Change</th>
+              <th>Rating</th>
+              <th>Uncertainty</th>
+              <th>Num Matches</th>
+              <th>Play</th>
+
+              <th>Done</th>
+              <th>Taken</th>
+
+              <th>Prod</th>
+              <th>Used</th>
+
+              <th>Prod</th>
+              <th>Used</th>
+
+              <th colspan="1">&nbsp;</th>
             </tr>
           </thead>
           <tbody>
@@ -282,21 +168,20 @@
               <% rating = @rating_logs[m.user_id]
               {party_colour, party_idx} = Map.get(@parties, m.party_id, {nil, nil})
 
-              {text_class, icon} =
-                cond do
-                  rating.value["rating_value_change"] > 0 -> {"text-success", "up"}
-                  rating.value["rating_value_change"] < 0 -> {"text-danger", "down"}
-                  true -> {"text-warning", "pause"}
+              play_percentage =
+                if m.exit_status != :stayed do
+                  (m.left_after / @match.game_duration * 100) |> round
                 end %>
               <tr>
-                <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
+                <td
+                  style={"vertical-align: middle; background-color: #{m.user.colour}; color: #FFF;"}
+                  width="22"
+                >
                   <%= if m.team_id == @match.winning_team do %>
-                    <i class="fa-fw fa-solid fa-trophy"></i>
+                    <i class="fa-fw fa-solid fa-trophy "></i>
                   <% end %>
                 </td>
-                <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
-                  <Fontawesome.icon icon={m.user.icon} style="" />
-                </td>
+
                 <td style={"background-color: #{rgba_css m.user.colour};"}>
                   <%= m.user.name %>
                 </td>
@@ -314,164 +199,296 @@
                 <td><%= m.team_id + 1 %></td>
 
                 <td>
-                  <%= (rating.value["rating_value"] - rating.value["rating_value_change"])
-                  |> round(2) %>
+                  <%= if rating != nil do %>
+                    <%= rating.value["old_rating_value"]
+                    |> round(2) %>
+                  <% end %>
                 </td>
-                <td><%= rating.value["rating_value"] |> round(2) %></td>
-                <td class={text_class}>
-                  <Fontawesome.icon icon={icon} style="solid" />
-                  <%= rating.value["rating_value_change"] |> round(2) %>
+
+                <td>
+                  <%= if rating != nil do %>
+                    <%= rating.value["old_uncertainty"]
+                    |> round(2) %>
+                  <% end %>
+                </td>
+
+                <td>
+                  <%= if rating != nil do %>
+                    <%= normalize(rating.value["old_num_matches"]) %>
+                  <% end %>
+                </td>
+
+                <td>
+                  <%= case m.exit_status do %>
+                    <% :stayed -> %>
+                    <% :early -> %>
+                      <i class="fa-fw fa-solid fa-clock text-warning"></i>
+                      &nbsp; <%= play_percentage %>%
+                    <% :abandoned -> %>
+                      <i class="fa-fw fa-solid fa-person-running text-danger"></i>
+                      &nbsp; <%= play_percentage %>%
+                    <% :noshow -> %>
+                      <i class="fa-fw fa-solid fa-user-ninja text-info2"></i>
+                  <% end %>
+                </td>
+
+                <td><%= normalize(m.stats["damageDealt"]) %></td>
+                <td><%= normalize(m.stats["damageReceived"]) %></td>
+
+                <td><%= normalize(m.stats["metalProduced"]) %></td>
+                <td><%= normalize(m.stats["metalUsed"]) %></td>
+
+                <td><%= normalize(m.stats["energyProduced"]) %></td>
+                <td><%= normalize(m.stats["energyUsed"]) %></td>
+
+                <td>
+                  <div :if={m.user_id != @current_user.id} style="display: flex;">
+                    <a
+                      href={~p"/moderation/report_user/#{m.user_id}"}
+                      class="btn btn-sm btn-warning "
+                      style="flex: 1"
+                    >
+                      <i class={"fa-fw #{Teiserver.Moderation.ReportLib.icon()}"}></i>&nbsp;
+                      Report
+                    </a>
+                    <div style="width: 10px;" />
+                    <a
+                      phx-click="give-accolade"
+                      phx-value-recipient_name={m.user.name}
+                      phx-value-recipient_id={m.user.id}
+                      class="btn btn-sm btn-success"
+                      style="flex: 1"
+                    >
+                      <i class="fa-solid fa-award"></i>&nbsp;
+                      Accolade
+                    </a>
+                  </div>
                 </td>
               </tr>
             <% end %>
           </tbody>
         </table>
-      </div>
-    <% end %>
-
-    <%= if allow_any?(@current_user, ["Overwatch", "Tester"]) do %>
-      <div :if={@tab == :balance} class="p-4">
-        <form method="post" class="">
-          <.input
-            type="select"
-            label="Balance Algorithm"
-            options={@algorithm_options}
-            name="algorithm"
-            value={@algorithm}
-            phx-change="update-algorithm"
-          />
-        </form>
-        <br />
-
-        <h4>Based on data at the time</h4>
-
-        <table class="table">
+        <table>
           <tbody>
-            <tr>
-              <td>Team 1</td>
-              <td>
-                Rating: <%= @past_balance.ratings[1] |> round(2) %>
-              </td>
-              <td>
-                St Dev: <%= @past_balance.stdevs[1] |> round(2) %>
-              </td>
-            </tr>
-            <tr>
-              <td>Team 2</td>
-              <td>
-                Rating: <%= @past_balance.ratings[2] |> round(2) %>
-              </td>
-              <td>
-                St Dev: <%= @past_balance.stdevs[2] |> round(2) %>
-              </td>
-            </tr>
-
-            <tr>
-              <td>Deviation</td>
-              <td colspan="2"><%= @past_balance.deviation %></td>
-            </tr>
-            <tr>
-              <td>Time Taken (ms)</td>
-              <td colspan="2"><%= @past_balance.time_taken / 1000 %></td>
-            </tr>
+            <%= for m <-  @prediction_text do %>
+              <tr>
+                <td style="padding-right:10px;"><%= m.label %></td>
+                <td><%= m.value %></td>
+              </tr>
+            <% end %>
           </tbody>
         </table>
+      </div>
 
-        <textarea name="" id="" rows={Enum.count(@past_balance.logs)} class="form-control"><%= @past_balance.logs |> Enum.join("\n") %></textarea>
-        <hr />
-
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th colspan="2">Name & Party</th>
-              <th>Team</th>
-              <th colspan="1">Rating</th>
-              <th colspan="1">Uncertainty</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for m <- @balanced_members do %>
-              <% rating = @rating_logs[m.user_id]
-              {party_colour, party_idx} = Map.get(@parties, m.party_id, {nil, nil}) %>
+      <%= if allow?(@current_user, "Overwatch") do %>
+        <div :if={@tab == :ratings and @rating_logs != %{}} class="p-4">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td>
-                  <%= m.user.name %>
-                </td>
-                <%= if party_colour do %>
-                  <td style={"background-color: #{rgba_css(party_colour, 0.3)};"} width="50">
-                    <Fontawesome.icon icon={party_idx} style="solid" size="lg" />
+                <th colspan="4">Name & Party</th>
+                <th>Team</th>
+
+                <th>Pre-game rating</th>
+                <th>Post-game rating</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for m <- @members do %>
+                <% rating = @rating_logs[m.user_id]
+                {party_colour, party_idx} = Map.get(@parties, m.party_id, {nil, nil})
+
+                {text_class, icon} =
+                  cond do
+                    rating.value["rating_value_change"] > 0 -> {"text-success", "up"}
+                    rating.value["rating_value_change"] < 0 -> {"text-danger", "down"}
+                    true -> {"text-warning", "pause"}
+                  end %>
+                <tr>
+                  <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
+                    <%= if m.team_id == @match.winning_team do %>
+                      <i class="fa-fw fa-solid fa-trophy"></i>
+                    <% end %>
                   </td>
-                <% else %>
-                  <td width="50">
-                    &nbsp;
+                  <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
+                    <Fontawesome.icon icon={m.user.icon} style="" />
                   </td>
-                <% end %>
-                <td><%= m.team_id + 1 %></td>
-                <td>
-                  <%= if rating != nil do %>
+                  <td style={"background-color: #{rgba_css m.user.colour};"}>
+                    <%= m.user.name %>
+                  </td>
+
+                  <%= if party_colour do %>
+                    <td style={"background-color: #{rgba_css(party_colour, 0.3)};"} width="50">
+                      <Fontawesome.icon icon={party_idx} style="solid" size="lg" />
+                    </td>
+                  <% else %>
+                    <td style={"background-color: #{rgba_css m.user.colour};"} width="50">
+                      &nbsp;
+                    </td>
+                  <% end %>
+
+                  <td><%= m.team_id + 1 %></td>
+
+                  <td>
                     <%= (rating.value["rating_value"] - rating.value["rating_value_change"])
                     |> round(2) %>
-                  <% end %>
+                  </td>
+                  <td><%= rating.value["rating_value"] |> round(2) %></td>
+                  <td class={text_class}>
+                    <Fontawesome.icon icon={icon} style="solid" />
+                    <%= rating.value["rating_value_change"] |> round(2) %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+
+      <%= if allow_any?(@current_user, ["Overwatch", "Tester"]) do %>
+        <div :if={@tab == :balance} class="p-4">
+          <form method="post" class="">
+            <.input
+              type="select"
+              label="Balance Algorithm"
+              options={@algorithm_options}
+              name="algorithm"
+              value={@algorithm}
+              phx-change="update-algorithm"
+            />
+          </form>
+          <br />
+
+          <h4>Based on data at the time</h4>
+
+          <table class="table">
+            <tbody>
+              <tr>
+                <td>Team 1</td>
+                <td>
+                  Rating: <%= @past_balance.ratings[1] |> round(2) %>
                 </td>
                 <td>
-                  <%= if rating != nil do %>
-                    <%= (rating.value["uncertainty"] - rating.value["uncertainty_change"])
-                    |> round(2) %>
-                  <% end %>
+                  St Dev: <%= @past_balance.stdevs[1] |> round(2) %>
                 </td>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
-        <br />
+              <tr>
+                <td>Team 2</td>
+                <td>
+                  Rating: <%= @past_balance.ratings[2] |> round(2) %>
+                </td>
+                <td>
+                  St Dev: <%= @past_balance.stdevs[2] |> round(2) %>
+                </td>
+              </tr>
 
-        <h4>If balance we made using current ratings</h4>
-        <table class="table">
-          <tbody>
-            <tr>
-              <td>Team 1</td>
-              <td><%= @new_balance.ratings[1] |> round(2) %></td>
-            </tr>
-            <tr>
-              <td>Team 2</td>
-              <td><%= @new_balance.ratings[2] |> round(2) %></td>
-            </tr>
-            <tr>
-              <td>Deviation</td>
-              <td><%= @new_balance.deviation %></td>
-            </tr>
-            <tr>
-              <td>Time Taken (ms)</td>
-              <td><%= @new_balance.time_taken / 1000 %></td>
-            </tr>
-          </tbody>
-        </table>
+              <tr>
+                <td>Deviation</td>
+                <td colspan="2"><%= @past_balance.deviation %></td>
+              </tr>
+              <tr>
+                <td>Time Taken (ms)</td>
+                <td colspan="2"><%= @past_balance.time_taken / 1000 %></td>
+              </tr>
+            </tbody>
+          </table>
 
-        <textarea name="" id="" rows={Enum.count(@new_balance.logs)} class="form-control"><%= @new_balance.logs |> Enum.join("\n") %></textarea>
-      </div>
-    <% end %>
+          <textarea name="" id="" rows={Enum.count(@past_balance.logs)} class="form-control"><%= @past_balance.logs |> Enum.join("\n") %></textarea>
+          <hr />
 
-    <%= if allow?(@current_user, "Overwatch") do %>
-      <div :if={@tab == :events} class="p-4">
-        <div class="row">
-          <div class="col">
-            <h4>By type</h4>
-            <.table id="by_type" rows={@events_by_type} table_class="table-sm">
-              <:col :let={{name, _}} label="Event"><%= name %></:col>
-              <:col :let={{_, count}} label="Count"><%= count %></:col>
-            </.table>
-          </div>
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th colspan="2">Name & Party</th>
+                <th>Team</th>
+                <th colspan="1">Rating</th>
+                <th colspan="1">Uncertainty</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for m <- @balanced_members do %>
+                <% rating = @rating_logs[m.user_id]
+                {party_colour, party_idx} = Map.get(@parties, m.party_id, {nil, nil}) %>
+                <tr>
+                  <td>
+                    <%= m.user.name %>
+                  </td>
+                  <%= if party_colour do %>
+                    <td style={"background-color: #{rgba_css(party_colour, 0.3)};"} width="50">
+                      <Fontawesome.icon icon={party_idx} style="solid" size="lg" />
+                    </td>
+                  <% else %>
+                    <td width="50">
+                      &nbsp;
+                    </td>
+                  <% end %>
+                  <td><%= m.team_id + 1 %></td>
+                  <td>
+                    <%= if rating != nil do %>
+                      <%= (rating.value["rating_value"] - rating.value["rating_value_change"])
+                      |> round(2) %>
+                    <% end %>
+                  </td>
+                  <td>
+                    <%= if rating != nil do %>
+                      <%= (rating.value["uncertainty"] - rating.value["uncertainty_change"])
+                      |> round(2) %>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+          <br />
 
-          <div class="col">
-            <h4>By team and type</h4>
-            <.table id="by_type" rows={@events_by_team_and_type} table_class="table-sm">
-              <:col :let={{{team, _}, _}} label="Team"><%= team + 1 %></:col>
-              <:col :let={{{_, name}, _}} label="Event"><%= name %></:col>
-              <:col :let={{_, count}} label="Count"><%= count %></:col>
-            </.table>
+          <h4>If balance we made using current ratings</h4>
+          <table class="table">
+            <tbody>
+              <tr>
+                <td>Team 1</td>
+                <td><%= @new_balance.ratings[1] |> round(2) %></td>
+              </tr>
+              <tr>
+                <td>Team 2</td>
+                <td><%= @new_balance.ratings[2] |> round(2) %></td>
+              </tr>
+              <tr>
+                <td>Deviation</td>
+                <td><%= @new_balance.deviation %></td>
+              </tr>
+              <tr>
+                <td>Time Taken (ms)</td>
+                <td><%= @new_balance.time_taken / 1000 %></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <textarea name="" id="" rows={Enum.count(@new_balance.logs)} class="form-control"><%= @new_balance.logs |> Enum.join("\n") %></textarea>
+        </div>
+      <% end %>
+
+      <%= if allow?(@current_user, "Overwatch") do %>
+        <div :if={@tab == :events} class="p-4">
+          <div class="row">
+            <div class="col">
+              <h4>By type</h4>
+              <.table id="by_type" rows={@events_by_type} table_class="table-sm">
+                <:col :let={{name, _}} label="Event"><%= name %></:col>
+                <:col :let={{_, count}} label="Count"><%= count %></:col>
+              </.table>
+            </div>
+
+            <div class="col">
+              <h4>By team and type</h4>
+              <.table id="by_type" rows={@events_by_team_and_type} table_class="table-sm">
+                <:col :let={{{team, _}, _}} label="Team"><%= team + 1 %></:col>
+                <:col :let={{{_, name}, _}} label="Event"><%= name %></:col>
+                <:col :let={{_, count}} label="Count"><%= count %></:col>
+              </.table>
+            </div>
           </div>
         </div>
-      </div>
+      <% end %>
     <% end %>
   </div>
 </div>
