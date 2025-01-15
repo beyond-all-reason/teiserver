@@ -304,7 +304,7 @@ defmodule TeiserverWeb.Router do
       live "/chat/:id/*userids", MatchLive.Chat, :index
 
       live "/", MatchLive.Index, :index
-      live "/:id", MatchLive.Show, :overview
+      live "/:id", MatchLive.Show, :players
       live "/:id/overview", MatchLive.Show, :overview
       live "/:id/players", MatchLive.Show, :players
       live "/:id/ratings", MatchLive.Show, :ratings

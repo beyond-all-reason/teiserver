@@ -403,4 +403,80 @@ defmodule Teiserver.Account.AccoladeLib do
         end
     end
   end
+
+  def get_number_of_gifted_accolades(user_id, window_days) do
+    query = """
+    select count(*) from teiserver_account_accolades taa
+    where taa.inserted_at >= now() - interval '#{window_days} day'
+    and taa.giver_id = $1
+    """
+
+    results =
+      Ecto.Adapters.SQL.query!(Repo, query, [user_id])
+
+    [[count]] = results.rows
+    count
+  end
+
+  def does_accolade_exist?(giver_id, recipient_id, match_id) do
+    query = """
+    select count(*) from teiserver_account_accolades taa
+    where taa.giver_id = $1
+    and taa.recipient_id = $2
+    and taa.match_id = $3
+    """
+
+    results =
+      Ecto.Adapters.SQL.query!(Repo, query, [giver_id, recipient_id, match_id])
+
+    [[count]] = results.rows
+    count > 0
+  end
+
+  # Fetch the number of unique givers who have given at least one accolade to this recipient
+  def get_unique_giver_count(recipient_id) do
+    query = """
+    select count(distinct taa.giver_id), count(*) from teiserver_account_accolades taa
+    where taa.recipient_id  = $1
+    and taa.badge_type_id is not null
+    """
+
+    result =
+      Ecto.Adapters.SQL.query!(Repo, query, [recipient_id])
+
+    [[unique_giver_count, total_accolades]] = result.rows
+
+    {unique_giver_count, total_accolades}
+  end
+
+  # Returns information about the most recent accolade that was received during the window.
+  def recent_accolade(recipient_id, window_days) do
+    query = """
+    select map, au.name from teiserver_account_accolades taa
+    inner join teiserver_battle_matches tbm
+    on tbm.id = taa.match_id
+    inner join account_users au
+    on au.id = taa.giver_id
+    where taa.inserted_at >= now() - interval '#{window_days} day'
+    and recipient_id = $1
+    order by taa.inserted_at  desc
+    limit 1
+    """
+
+    result =
+      Ecto.Adapters.SQL.query!(Repo, query, [recipient_id])
+
+    case result.num_rows do
+      1 ->
+        [[map, giver_name]] = result.rows
+
+        %{
+          map: map,
+          giver_name: giver_name
+        }
+
+      _ ->
+        nil
+    end
+  end
 end

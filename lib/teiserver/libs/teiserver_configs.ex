@@ -76,6 +76,24 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Accolade gift limit",
+      section: "Accolades",
+      type: "integer",
+      permissions: ["Server"],
+      description: "The number of accolades you can gift within the allocated window.",
+      default: 20
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Accolade gift window",
+      section: "Accolades",
+      type: "integer",
+      permissions: ["Server"],
+      description: "The window in days when checking the accolade gift limit.",
+      default: 30
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Require email verification",
       section: "Registrations",
       type: "boolean",

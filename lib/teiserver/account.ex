@@ -246,6 +246,14 @@ defmodule Teiserver.Account do
     |> Repo.all()
   end
 
+  @spec list_accolade_types() :: List.t()
+  def list_accolade_types() do
+    args = [search: [purpose: "Accolade"], order_by: "Name (A-Z)"]
+
+    badge_type_query(args)
+    |> Repo.all()
+  end
+
   @doc """
   Gets a single badge_type.
 

@@ -1,9 +1,13 @@
 defmodule TeiserverWeb.Battle.MatchLive.Show do
   @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.{Battle, Game, Telemetry}
+  alias Teiserver.{Account, Battle, Game, Telemetry}
   alias Teiserver.Battle.{MatchLib, BalanceLib}
   alias Teiserver.Helper.NumberHelper
+  alias Teiserver.Config
+  alias Teiserver.Account.AccoladeLib
+  import Central.Helpers.ComponentHelper
+  import Teiserver.Helper.ColourHelper
 
   @impl true
   def mount(_params, _session, socket) do
@@ -17,6 +21,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         BalanceLib.get_allowed_algorithms(true)
       )
       |> assign(:algorithm, BalanceLib.get_default_algorithm())
+      |> assign(:give_accolade, nil)
 
     {:ok, socket}
   end
@@ -67,9 +72,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   #   {:noreply, assign(socket, :tab, tab)}
   # end
 
-  defp get_match(
-         %{assigns: %{id: id, algorithm: algorithm, current_user: _current_user}} = socket
-       ) do
+  defp get_match(%{assigns: %{id: id, algorithm: algorithm, current_user: current_user}} = socket) do
     if connected?(socket) do
       match =
         Battle.get_match!(id,
@@ -95,8 +98,26 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
             exit_status: MatchLib.calculate_exit_status(member.left_after, match.game_duration)
           })
         end)
-        |> Enum.sort_by(fn m -> rating_logs[m.user.id].value["old_rating_value"] end, &>=/2)
+        |> Enum.sort_by(
+          fn m ->
+            if rating_logs[m.user_id] do
+              # Sort be rating descending (that's why there's a negative in front)
+              -rating_logs[m.user.id].value["old_rating_value"]
+            else
+              # Or name ascending if unrated match
+              m.user.name
+            end
+          end,
+          &>=/2
+        )
         |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
+
+      find_current_user =
+        Enum.find(members, fn x ->
+          x.user_id == current_user.id
+        end)
+
+      current_user_team_id = if find_current_user, do: find_current_user.team_id, else: nil
 
       prediction_text = get_prediction_text(rating_logs, members)
 
@@ -234,6 +255,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:replay, replay)
       |> assign(:rating_status, match_rating_status)
       |> assign(:prediction_text, prediction_text)
+      |> assign(:current_user_team_id, current_user_team_id)
     else
       socket
       |> assign(:match, nil)
@@ -439,5 +461,186 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
      socket
      |> assign(:algorithm, value)
      |> get_match()}
+  end
+
+  def handle_event(
+        "give-accolade",
+        %{"recipient_id" => recipient_id, "recipient_name" => recipient_name},
+        socket
+      ) do
+    badge_types =
+      Account.list_accolade_types()
+
+    gift_limit = Config.get_site_config_cache("teiserver.Accolade gift limit")
+    gift_window = Config.get_site_config_cache("teiserver.Accolade gift window")
+    user_id = socket.assigns.current_user.id
+    match_id = socket.assigns.id
+    {recipient_id, _} = Integer.parse(recipient_id)
+
+    with {:ok, gift_count} <-
+           check_gift_count(socket.assigns.current_user.id, gift_limit, gift_window),
+         :ok <- check_already_gifted(user_id, recipient_id, match_id) do
+      {:noreply,
+       socket
+       |> assign(:give_accolade, %{
+         recipient: %{
+           id: recipient_id,
+           name: recipient_name
+         },
+         stage: :form,
+         badge_types: badge_types,
+         gift_window: gift_window,
+         gift_count: gift_count,
+         gift_limit: gift_limit
+       })}
+    else
+      {:error, reason} ->
+        {:noreply,
+         socket
+         |> assign(:give_accolade, %{
+           recipient: %{
+             id: recipient_id,
+             name: recipient_name
+           },
+           stage: :not_allowed,
+           failure_reason: reason
+         })}
+    end
+  end
+
+  def handle_event(
+        "give-accolade-submit",
+        %{"badgeid" => badge_id},
+        socket
+      ) do
+    recipient_id = socket.assigns.give_accolade.recipient.id
+    current_user = socket.assigns.current_user
+    match_id = socket.assigns.id
+
+    Account.create_accolade(%{
+      recipient_id: recipient_id,
+      giver_id: current_user.id,
+      match_id: match_id,
+      inserted_at: Timex.now(),
+      badge_type_id: badge_id
+    })
+
+    {:noreply,
+     socket
+     |> assign(:give_accolade, Map.put(socket.assigns.give_accolade, :stage, :complete))}
+  end
+
+  def handle_event(
+        "return-to-match",
+        _,
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(:give_accolade, nil)}
+  end
+
+  defp check_gift_count(user_id, gift_limit, gift_window) do
+    gift_count = AccoladeLib.get_number_of_gifted_accolades(user_id, gift_window)
+
+    if gift_count >= gift_limit do
+      {:error, "You can only give #{gift_limit} accolades every #{gift_window} days."}
+    else
+      {:ok, gift_count}
+    end
+  end
+
+  defp check_already_gifted(user_id, recipient_id, match_id) do
+    if AccoladeLib.does_accolade_exist?(user_id, recipient_id, match_id) do
+      {:error, "You have already given an accolade to this user for this match."}
+    else
+      :ok
+    end
+  end
+
+  def give_accolade_form(assigns) do
+    ~H"""
+    <div class="row" style="padding-top: 5vh;">
+      <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
+        <div class="card mb-3">
+          <div class="card-header">
+            <h3>
+              <img
+                src="/images/logo/logo_favicon.png"
+                height="42"
+                style="margin-right: 5px;"
+                class="d-inline align-top"
+              />
+              <span>
+                Give accolade to user: <%= @recipient.name %>
+              </span>
+            </h3>
+          </div>
+
+          <div :if={@stage == :not_allowed} class="card-body">
+            <div class="alert alert-warning">
+              <%= @failure_reason %>
+            </div>
+            <a phx-click="return-to-match" class="btn btn-sm btn-secondary">
+              Return to match details
+            </a>
+          </div>
+
+          <div :if={@stage == :complete} class="card-body">
+            You have succesfully gifted an accolade to <%= @recipient.name %>! <br /><br />
+            <a phx-click="return-to-match" class="btn btn-sm btn-success">
+              Return to match details
+            </a>
+            <a href={~p"/profile/#{@current_user.id}/accolades"} class="btn btn-sm btn-secondary">
+              <i class="fa-solid fa-award"></i> &nbsp;
+              View your accolades
+            </a>
+            <a href={~p"/profile/#{@recipient.id}/accolades"} class="btn btn-sm  btn-secondary">
+              <i class="fa-solid fa-award"></i> &nbsp;
+              View <%= @recipient.name %>'s accolades
+            </a>
+          </div>
+
+          <div :if={@stage == :form} class="card-footer">
+            You can give this player an accolade if you feel they deserve to be acknowledged for their positive behaviour in this match. You can give <%= @gift_limit %> accolades in a rolling <%= @gift_window %>-day window.
+            (You have given <%= @gift_count %> accolades over the past <%= @gift_window %> days.)
+            <br /><br />
+
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th colspan="1"></th>
+                  <th colspan="1">Accolade Type</th>
+                  <th colspan="2">&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= for badge_type <- @badge_types do %>
+                  <tr>
+                    <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
+                      <%= central_component("icon", icon: badge_type.icon) %>
+                    </td>
+                    <td style={"background-color: #{rgba_css badge_type.colour};"}>
+                      <%= badge_type.name %>
+                    </td>
+
+                    <td>
+                      <a
+                        phx-click="give-accolade-submit"
+                        phx-value-badgeid={badge_type.id}
+                        class="btn btn-secondary btn-sm"
+                      >
+                        Give
+                      </a>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
   end
 end

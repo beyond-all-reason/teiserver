@@ -80,13 +80,13 @@
             <%= date_to_str(match.finished, format: :hms_or_ymd, tz: @tz) %>
           </:col>
 
-          <:action :let={match}>
+          <:col :let={match} label="">
             <div class="visually-hidden">
               <.link navigate={~p"/battle/#{match.id}"}>
                 Show
               </.link>
             </div>
-          </:action>
+          </:col>
         </.table>
       </div>
     </div>
