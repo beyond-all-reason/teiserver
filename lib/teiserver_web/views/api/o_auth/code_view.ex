@@ -22,7 +22,7 @@ defmodule TeiserverWeb.OAuth.CodeView do
   end
 
   def metadata(_) do
-    base = TeiserverWeb.Endpoint.static_url()
+    base = Application.get_env(:teiserver, Teiserver.OAuth)[:issuer] || TeiserverWeb.Endpoint.url()
 
     %{
       issuer: base,
