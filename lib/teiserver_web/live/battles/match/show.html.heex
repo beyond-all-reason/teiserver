@@ -253,14 +253,17 @@
                       </a>
                     </div>
 
-                     <div style="flex: 1">
+                    <div style="flex: 1">
                       <a
-                        :if={m.team_id == @current_user_team_id}
                         phx-click="give-accolade"
                         phx-value-recipient_name={m.user.name}
                         phx-value-recipient_id={m.user.id}
-                        class="btn btn-sm btn-success"
-                       >
+                        class={[
+                          "btn btn-sm btn-success",
+                          @current_user_team_id && m.team_id != @current_user_team_id &&
+                            "invisible"
+                        ]}
+                      >
                         <i class="fa-solid fa-award"></i>&nbsp;
                         Accolade
                       </a>
