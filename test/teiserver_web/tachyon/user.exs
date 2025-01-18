@@ -8,19 +8,18 @@ defmodule Teiserver.Tachyon.UserTest do
 
       %{client: client} = Tachyon.connect(user, swallow_first_event: false)
 
-      expected_user_id = to_string(user.id)
-
       {:ok,
        %{
          "commandId" => "user/updated",
          "data" => %{
-           "users" => [
-             %{"userId" => recv_user_id}
-           ]
+           "users" => [userdata]
          }
        }} = Tachyon.recv_message(client)
 
-      assert recv_user_id == expected_user_id
+      assert userdata["userId"] == to_string(user.id)
+      assert userdata["username"] == user.name
+      assert userdata["clanId"] == user.clan_id
+      assert userdata["status"] == "menu"
     end
   end
 end

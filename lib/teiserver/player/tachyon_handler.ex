@@ -52,7 +52,11 @@ defmodule Teiserver.Player.TachyonHandler do
     event = %{
       users: [
         %{
-          userId: to_string(user.id)
+          userId: to_string(user.id),
+          username: user.name,
+          countryCode: user.country,
+          status: :menu,
+          clanId: user.clan_id
         }
       ]
     }
