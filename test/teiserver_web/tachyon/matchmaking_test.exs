@@ -1,4 +1,4 @@
-defmodule Teiserver.Matchmaking.MatchmakingTest do
+defmodule Teiserver.Tachyon.MatchmakingTest do
   use TeiserverWeb.ConnCase
   alias Teiserver.Support.Tachyon
   alias Teiserver.OAuthFixtures
