@@ -102,6 +102,8 @@ if config_env() == :prod do
     issuer: Teiserver.ConfigHelpers.get_env("TEI_GUARDIAN_ISSUER", "teiserver"),
     secret_key: Teiserver.ConfigHelpers.get_env("TEI_GUARDIAN_SECRET_KEY")
 
+  config :teiserver, Teiserver.OAuth, issuer: "https://#{domain_name}"
+
   if Teiserver.ConfigHelpers.get_env("TEI_ENABLE_EMAIL_INTEGRATION", true, :bool) do
     config :teiserver, Teiserver.Mailer,
       adapter: Bamboo.SMTPAdapter,
