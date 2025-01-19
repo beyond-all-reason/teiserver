@@ -60,3 +60,8 @@ the full launch.json should look like that:
 ```
 
 Then you can press the mix (Default task) button or F5 to start debugging. **It may take a while to start**
+
+## Review test coverage of recently changed files
+To get a quick list of recently changed files and their test coverage, run `scripts/show_test_coverage_for_files_changed_in_last_month.sh`
+
+To update minimum test coverage requirements, edit `coveralls.json`
