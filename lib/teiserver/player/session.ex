@@ -146,13 +146,11 @@ defmodule Teiserver.Player.Session do
   end
 
   @impl true
-  def handle_call({:replace, _}, _from, state) when is_nil(state.conn_pid),
-    do: {:reply, :ok, state}
-
   def handle_call({:replace, new_conn_pid}, _from, state) do
     Process.demonitor(state.mon_ref, [:flush])
 
     mon_ref = Process.monitor(new_conn_pid)
+    Logger.info("session reused for player #{state.user.id}")
 
     {:reply, :ok, %{state | conn_pid: new_conn_pid, mon_ref: mon_ref}}
   end
