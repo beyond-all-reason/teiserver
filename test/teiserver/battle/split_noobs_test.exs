@@ -231,8 +231,8 @@ defmodule Teiserver.Battle.SplitNoobsTest do
                "------------------------------------------------------",
                "Parties: None",
                "Solo noobs:",
-               "kyutoryu (chev: 2, σ: 7.1)",
-               "HungDaddy (chev: 1, σ: 2)",
+               "kyutoryu (9.0, chev: 1, σ: 7.1)",
+               "HungDaddy (0, chev: 0, σ: 2)",
                "------------------------------------------------------",
                "Teams constructed by simple draft",
                "------------------------------------------------------",
@@ -242,11 +242,36 @@ defmodule Teiserver.Battle.SplitNoobsTest do
              ],
              team_groups: %{
                1 => [
-                 %{count: 1, group_rating: 0, members: ["HungDaddy"], ratings: [0]},
-                 %{count: 1, group_rating: 8.26, members: ["MaTThiuS_82"], ratings: [8.26]},
-                 %{count: 1, group_rating: 17.64, members: ["Noody"], ratings: [17.64]},
-                 %{count: 1, group_rating: 20.06, members: ["[DTG]BamBin0"], ratings: [20.06]},
-                 %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]}
+                 %{
+                   count: 1,
+                   group_rating: 0,
+                   members: ["HungDaddy"],
+                   ratings: [0]
+                 },
+                 %{
+                   count: 1,
+                   group_rating: 8.26,
+                   members: ["MaTThiuS_82"],
+                   ratings: [8.26]
+                 },
+                 %{
+                   count: 1,
+                   group_rating: 17.64,
+                   members: ["Noody"],
+                   ratings: [17.64]
+                 },
+                 %{
+                   count: 1,
+                   group_rating: 20.06,
+                   members: ["[DTG]BamBin0"],
+                   ratings: [20.06]
+                 },
+                 %{
+                   count: 1,
+                   group_rating: 20.42,
+                   members: ["Aposis"],
+                   ratings: [20.42]
+                 }
                ],
                2 => [
                  %{
@@ -255,15 +280,47 @@ defmodule Teiserver.Battle.SplitNoobsTest do
                    members: ["kyutoryu"],
                    ratings: [8.975247524752481]
                  },
-                 %{count: 1, group_rating: 8.89, members: ["SLOPPYGAGGER"], ratings: [8.89]},
-                 %{count: 1, group_rating: 18.28, members: ["Dixinormus"], ratings: [18.28]},
-                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
-                 %{count: 1, group_rating: 20.49, members: ["jauggy"], ratings: [20.49]}
+                 %{
+                   count: 1,
+                   group_rating: 8.89,
+                   members: ["SLOPPYGAGGER"],
+                   ratings: [8.89]
+                 },
+                 %{
+                   count: 1,
+                   group_rating: 18.28,
+                   members: ["Dixinormus"],
+                   ratings: [18.28]
+                 },
+                 %{
+                   count: 1,
+                   group_rating: 18.4,
+                   members: ["reddragon2010"],
+                   ratings: [18.4]
+                 },
+                 %{
+                   count: 1,
+                   group_rating: 20.49,
+                   members: ["jauggy"],
+                   ratings: [20.49]
+                 }
                ]
              },
              team_players: %{
-               1 => ["HungDaddy", "MaTThiuS_82", "Noody", "[DTG]BamBin0", "Aposis"],
-               2 => ["kyutoryu", "SLOPPYGAGGER", "Dixinormus", "reddragon2010", "jauggy"]
+               1 => [
+                 "HungDaddy",
+                 "MaTThiuS_82",
+                 "Noody",
+                 "[DTG]BamBin0",
+                 "Aposis"
+               ],
+               2 => [
+                 "kyutoryu",
+                 "SLOPPYGAGGER",
+                 "Dixinormus",
+                 "reddragon2010",
+                 "jauggy"
+               ]
              }
            }
   end
@@ -405,11 +462,11 @@ defmodule Teiserver.Battle.SplitNoobsTest do
              "------------------------------------------------------",
              "Parties: (LuBaee, TimeContainer)",
              "Solo noobs:",
-             "StinkBee (chev: 3, σ: 6.7)",
-             "HoldButyLeg (chev: 1, σ: 7.5)",
+             "StinkBee (14.6, chev: 2, σ: 6.7)",
+             "HoldButyLeg (5.9, chev: 0, σ: 7.5)",
              "------------------------------------------------------",
              "Perform brute force with the following players to get the best score.",
-             "Players: TimeContainer, LuBaee, DUFFY, Orii, colossus, PotatoesHead, Theo45, onse, 976, Regithros, Darth, Akio, nubl, CowOfWar",
+             "Players: TimeContainer (21), LuBaee (14), DUFFY (34), Orii (23), colossus (22), PotatoesHead (22), Theo45 (21), onse (20), 976 (14), Regithros (12), Darth (11), Akio (10), nubl (6), CowOfWar (3)",
              "------------------------------------------------------",
              "Brute force result:",
              "Team rating diff penalty: 1",
@@ -418,7 +475,7 @@ defmodule Teiserver.Battle.SplitNoobsTest do
              "Score: 1.2 (lower is better)",
              "------------------------------------------------------",
              "Draft remaining players (ordered from best to worst).",
-             "Remaining: StinkBee, HoldButyLeg",
+             "Remaining: StinkBee (14.6), HoldButyLeg (5.9)",
              "------------------------------------------------------",
              "Final result:",
              "Team 1: Akio, Darth, Regithros, 976, DUFFY, LuBaee, TimeContainer, HoldButyLeg",
@@ -572,10 +629,10 @@ defmodule Teiserver.Battle.SplitNoobsTest do
              "------------------------------------------------------",
              "Parties: None",
              "Solo noobs:",
-             "BIL (chev: 1, σ: 8.3)",
+             "BIL (0.3, chev: 0, σ: 8.3)",
              "------------------------------------------------------",
              "Perform brute force with the following players to get the best score.",
-             "Players: Raigeki, Engolianth, Demodred, FRODODOR, shoeofobama, Larch, Artifical_Banana, Cobaltstore, quest, SHAAARKBATE, illusiveman2024, UnreasonableIkko, ColorlesScum, Renkei",
+             "Players: Raigeki (59.9), Engolianth (27.0), Demodred (26.0), FRODODOR (25.7), shoeofobama (23.9), Larch (22.0), Artifical_Banana (20.1), Cobaltstore (13.6), quest (13.1), SHAAARKBATE (9.9), illusiveman2024 (7.0), UnreasonableIkko (6.0), ColorlesScum (2.3), Renkei (1.2)",
              "------------------------------------------------------",
              "Brute force result:",
              "Team rating diff penalty: 1.5",
@@ -584,7 +641,7 @@ defmodule Teiserver.Battle.SplitNoobsTest do
              "Score: 28.9 (lower is better)",
              "------------------------------------------------------",
              "Draft remaining players (ordered from best to worst).",
-             "Remaining: MrKicks, BIL",
+             "Remaining: MrKicks (0.9), BIL (0.3)",
              "------------------------------------------------------",
              "Final result:",
              "Team 1: UnreasonableIkko, illusiveman2024, SHAAARKBATE, quest, Cobaltstore, Artifical_Banana, Raigeki, BIL",
