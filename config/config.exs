@@ -94,11 +94,7 @@ config :teiserver, Teiserver,
 # config :grpc,
 #   start_server: true
 
-config :logger, :default_formatter,
-  type: :standard_io,
-  metadata: [:request_id, :user_id],
-  format: "$date $time [$level] $metadata $message\n"
-
+config :logger, :default_handler, false
 
 config :logger, LoggerBackends.Console,
   format: "$date $time [$level] $metadata $message\n",
