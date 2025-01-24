@@ -63,5 +63,7 @@ config :teiserver, TeiserverWeb.Endpoint,
   server: true,
   version: Mix.Project.config()[:version]
 
-
 config :logger, :default_handler, level: :info
+
+# disable stdout logging in production, rely on log files
+config :logger, LoggerBackends.Console, false
