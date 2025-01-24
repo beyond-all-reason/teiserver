@@ -48,6 +48,7 @@ defmodule Teiserver.Player.TachyonHandler do
       initial_state |> Map.put(:sess_monitor, sess_monitor) |> Map.put(:pending_responses, %{})
 
     user = initial_state.user
+    Logger.metadata(user_id: user.id)
 
     event = %{
       users: [
@@ -67,7 +68,7 @@ defmodule Teiserver.Player.TachyonHandler do
   @impl Handler
   def handle_info({:DOWN, _, :process, _, reason}, state) do
     Logger.warning(
-      "Session for player #{state.user.id} went down because #{inspect(reason)}, terminating connection"
+      "Session for player went down because #{inspect(reason)}, terminating connection"
     )
 
     {:stop, :normal,
@@ -117,7 +118,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_info({:timeout, message_id}, state)
       when is_map_key(state.pending_responses, message_id) do
-    Logger.debug("User(#{state.user.id}) did not reply in time to request with id #{message_id}")
+    Logger.debug("User did not reply in time to request with id #{message_id}")
     {:stop, :normal, state}
   end
 
