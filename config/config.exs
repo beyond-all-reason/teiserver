@@ -94,9 +94,31 @@ config :teiserver, Teiserver,
 # config :grpc,
 #   start_server: true
 
-config :logger, :console,
-  format: "$date $time $metadata[$level] $message\n",
-  metadata: [:request_id, :user_id]
+config :logger, :default_formatter,
+  type: :standard_io,
+  metadata: [:request_id, :user_id],
+  format: "$date $time [$level] $metadata $message\n"
+
+
+config :logger, LoggerBackends.Console,
+  format: "$date $time [$level] $metadata $message\n",
+  metadata: [:request_id, :user_id],
+  level: :debug
+
+config :logger, :error_log,
+  format: "$time [$level] $metadata $message\n",
+  metadata: [:request_id, :user_id],
+  level: :error
+
+config :logger, :notice_log,
+  format: "$time [$level] $metadata $message\n",
+  metadata: [:request_id, :user_id],
+  level: :notice
+
+config :logger, :info_log,
+  format: "$time [$level] $metadata $message\n",
+  metadata: [:request_id, :user_id],
+  level: :info
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason

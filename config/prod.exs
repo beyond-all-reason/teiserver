@@ -62,3 +62,6 @@ config :teiserver, TeiserverWeb.Endpoint,
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true,
   version: Mix.Project.config()[:version]
+
+
+config :logger, :default_handler, level: :info

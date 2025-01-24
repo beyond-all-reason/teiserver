@@ -84,28 +84,6 @@ config :teiserver, Oban,
   queues: false,
   crontab: false
 
-# Do not include metadata nor timestamps in development logs
-config :logger, :console, format: "[$level] $message\n"
-
-config :logger,
-  backends: [
-    {LoggerFileBackend, :error_log},
-    {LoggerFileBackend, :info_log},
-    :console
-  ]
-
-config :logger, :error_log,
-  path: "/tmp/teiserver_error.log",
-  format: "$time [$level] $metadata $message\n",
-  metadata: [:request_id, :user_id],
-  level: :error
-
-config :logger, :info_log,
-  path: "/tmp/teiserver_info.log",
-  format: "$time [$level] $metadata $message\n",
-  metadata: [:request_id, :user_id],
-  level: :info
-
 try do
   import_config "dev.secret.exs"
 rescue

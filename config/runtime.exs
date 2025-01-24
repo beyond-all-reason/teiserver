@@ -134,37 +134,6 @@ if config_env() == :prod do
       auth: :always
   end
 
-  log_root_path = Teiserver.ConfigHelpers.get_env("TEI_LOG_ROOT_PATH", "/var/log/teiserver/")
-
-  config :logger,
-    backends: [
-      {LoggerFileBackend, :error_log},
-      {LoggerFileBackend, :notice_log},
-      {LoggerFileBackend, :info_log},
-      :console
-    ]
-
-  # Do not print debug messages in production
-  config :logger, :default_handler, false
-
-  config :logger, :error_log,
-    path: "#{log_root_path}error.log",
-    format: "$date $time [$level] $metadata $message\n",
-    metadata: [:request_id, :user_id],
-    level: :error
-
-  config :logger, :notice_log,
-    path: "#{log_root_path}notice.log",
-    format: "$date $time [$level] $metadata $message\n",
-    metadata: [:request_id, :user_id],
-    level: :notice
-
-  config :logger, :info_log,
-    path: "#{log_root_path}info.log",
-    format: "$date $time [$level] $metadata $message\n",
-    metadata: [:request_id, :user_id],
-    level: :info
-
   if enable_discord_bridge do
     config :nostrum,
       gateway_intents: [
@@ -185,3 +154,11 @@ if config_env() == :prod do
       bot_name: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_NAME")
   end
 end
+
+log_root_path = Teiserver.ConfigHelpers.get_env("TEI_LOG_ROOT_PATH", "/tmp/teiserver")
+
+config :logger, :error_log, path: "#{log_root_path}/error.log"
+
+config :logger, :notice_log, path: "#{log_root_path}/notice.log"
+
+config :logger, :info_log, path: "#{log_root_path}/info.log"
