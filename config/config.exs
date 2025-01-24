@@ -104,17 +104,17 @@ config :logger, LoggerBackends.Console,
   level: :debug
 
 config :logger, :error_log,
-  format: "$time [$level] $metadata $message\n",
+  format: "$date $time [$level] $metadata $message\n",
   metadata: metadata,
   level: :error
 
 config :logger, :notice_log,
-  format: "$time [$level] $metadata $message\n",
+  format: "$date $time [$level] $metadata $message\n",
   metadata: metadata,
   level: :notice
 
 config :logger, :info_log,
-  format: "$time [$level] $metadata $message\n",
+  format: "$date $time [$level] $metadata $message\n",
   metadata: metadata,
   level: :info
 
