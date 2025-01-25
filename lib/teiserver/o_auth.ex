@@ -129,7 +129,7 @@ defmodule Teiserver.OAuth do
     now = Keyword.get(opts, :now, Timex.now())
     app_id = attrs.id
 
-    if application_allows_code?(app_id) do
+    if ApplicationQueries.application_allows_code?(app_id) do
       # don't do any validation on the challenge yet, this is done when exchanging
       # the code for a token
       attrs = %{
@@ -149,15 +149,6 @@ defmodule Teiserver.OAuth do
     else
       {:error, :invalid_flow}
     end
-  end
-
-  defp application_allows_code?(%Application{} = app) do
-    not Enum.empty?(app.redirect_uris)
-  end
-
-  defp application_allows_code?(id) do
-    ApplicationQueries.get_application_by_id(id)
-    |> application_allows_code?()
   end
 
   @doc """
