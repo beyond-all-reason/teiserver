@@ -16,7 +16,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   @doc """
   Returns the application for the given id
   """
-  @spec get_application_by_id(String.t()) :: Application.t() | nil
+  @spec get_application_by_id(Application.id()) :: Application.t() | nil
   def get_application_by_id(nil), do: nil
 
   def get_application_by_id(id) do

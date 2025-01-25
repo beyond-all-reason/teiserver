@@ -114,7 +114,7 @@ defmodule Teiserver.OAuth do
           },
           options()
         ) ::
-          {:ok, Code.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Code.t()} | {:error, Ecto.Changeset.t() | :invalid_flow}
   def create_code(user, attrs, opts \\ [])
 
   def create_code(%User{} = user, attrs, opts) do
@@ -127,23 +127,37 @@ defmodule Teiserver.OAuth do
 
   def create_code(user_id, attrs, opts) do
     now = Keyword.get(opts, :now, Timex.now())
+    app_id = attrs.id
 
-    # don't do any validation on the challenge yet, this is done when exchanging
-    # the code for a token
-    attrs = %{
-      value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
-      owner_id: user_id,
-      application_id: attrs.id,
-      scopes: attrs.scopes,
-      expires_at: Timex.add(now, Timex.Duration.from_minutes(5)),
-      redirect_uri: Map.get(attrs, :redirect_uri),
-      challenge: Map.get(attrs, :challenge),
-      challenge_method: Map.get(attrs, :challenge_method)
-    }
+    if application_allows_code?(app_id) do
+      # don't do any validation on the challenge yet, this is done when exchanging
+      # the code for a token
+      attrs = %{
+        value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
+        owner_id: user_id,
+        application_id: app_id,
+        scopes: attrs.scopes,
+        expires_at: Timex.add(now, Timex.Duration.from_minutes(5)),
+        redirect_uri: Map.get(attrs, :redirect_uri),
+        challenge: Map.get(attrs, :challenge),
+        challenge_method: Map.get(attrs, :challenge_method)
+      }
 
-    %Code{}
-    |> Code.changeset(attrs)
-    |> Repo.insert()
+      %Code{}
+      |> Code.changeset(attrs)
+      |> Repo.insert()
+    else
+      {:error, :invalid_flow}
+    end
+  end
+
+  defp application_allows_code?(%Application{} = app) do
+    not Enum.empty?(app.redirect_uris)
+  end
+
+  defp application_allows_code?(id) do
+    ApplicationQueries.get_application_by_id(id)
+    |> application_allows_code?()
   end
 
   @doc """
