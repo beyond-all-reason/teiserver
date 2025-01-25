@@ -100,6 +100,15 @@ defmodule Teiserver.OAuth do
   defp localhost?(_), do: false
 
   @doc """
+  Some applications are not meant to allow authorization code grants
+  typically the ones meant for bots
+  """
+  @spec can_create_code?(Application.t()) :: boolean()
+  def can_create_code?(%Application{} = app) do
+    ApplicationQueries.application_allows_code?(app)
+  end
+
+  @doc """
   Create an authorization token for the given user and application.
   The token scopes are the same as the application
   """

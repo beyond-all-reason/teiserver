@@ -37,10 +37,6 @@ defmodule Teiserver.OAuth.ApplicationQueries do
     base_query() |> preload(:owner) |> Repo.all()
   end
 
-  @doc """
-  Some applications are not meant to allow authorization code grants
-  typically the ones meant for bots
-  """
   def application_allows_code?(%Application{} = app) do
     not Enum.empty?(app.redirect_uris)
   end
@@ -49,7 +45,6 @@ defmodule Teiserver.OAuth.ApplicationQueries do
     get_application_by_id(id)
     |> application_allows_code?()
   end
-
 
   @doc """
   returns the number of authorisation codes, authentication token and
