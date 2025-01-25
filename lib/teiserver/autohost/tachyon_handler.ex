@@ -7,12 +7,13 @@ defmodule Teiserver.Autohost.TachyonHandler do
   """
   alias Teiserver.Tachyon.{Handler, Schema}
   alias Teiserver.Autohost.{Autohost, Registry}
+  alias Teiserver.Bot.Bot
   require Logger
   @behaviour Handler
 
   @type connected_state :: %{max_battles: non_neg_integer(), current_battles: non_neg_integer()}
   @type state :: %{
-          autohost: Autohost.t(),
+          autohost: Bot.t(),
           state: :handshaking | {:connected, connected_state()},
           pending_responses: Handler.pending_responses()
         }
@@ -24,7 +25,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
   @impl Handler
   def connect(conn) do
-    autohost = conn.assigns[:token].autohost
+    autohost = conn.assigns[:token].bot
     {:ok, %{autohost: autohost, state: :handshaking, pending_responses: %{}}}
   end
 
@@ -133,7 +134,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   end
 
   # TODO: there should be some kind of retry here
-  @spec start_matchmaking(Autohost.id(), Teiserver.Autohost.start_script()) ::
+  @spec start_matchmaking(Bot.id(), Teiserver.Autohost.start_script()) ::
           {:ok, start_response()} | {:error, term()}
   def start_matchmaking(autohost_id, start_script) do
     case Registry.lookup(autohost_id) do

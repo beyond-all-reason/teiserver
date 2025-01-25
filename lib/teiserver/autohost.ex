@@ -49,8 +49,8 @@ defmodule Teiserver.Autohost do
   Returns the pid of the autohost registered with a given id
   """
   @spec lookup_autohost(Bot.id()) :: {pid(), reg_value()} | nil
-  def lookup_autohost(autohost_id) do
-    Teiserver.Autohost.Registry.lookup(autohost_id)
+  def lookup_autohost(bot_id) do
+    Teiserver.Autohost.Registry.lookup(bot_id)
   end
 
   @spec list() :: [reg_value()]
@@ -58,6 +58,6 @@ defmodule Teiserver.Autohost do
 
   @spec start_matchmaking(Bot.id(), start_script()) ::
           {:ok, start_response()} | {:error, term()}
-  defdelegate start_matchmaking(autohost_id, start_script),
+  defdelegate start_matchmaking(bot_id, start_script),
     to: Teiserver.Autohost.TachyonHandler
 end

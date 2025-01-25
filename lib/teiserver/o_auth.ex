@@ -396,7 +396,7 @@ defmodule Teiserver.OAuth do
   def create_credentials(app_id, bot_id, client_id, secret) do
     attrs = %{
       application_id: app_id,
-      autohost_id: bot_id,
+      bot_id: bot_id,
       client_id: client_id,
       hashed_secret: Argon2.hash_pwd_salt(secret)
     }
@@ -444,9 +444,7 @@ defmodule Teiserver.OAuth do
 
   @spec get_token_from_credentials(Credential.t()) :: {:ok, Token.t()} | {:error, term()}
   def get_token_from_credentials(credential) do
-    do_create_token(%{autohost_id: credential.autohost_id}, credential.application,
-      create_refresh: false
-    )
+    do_create_token(%{bot_id: credential.bot_id}, credential.application, create_refresh: false)
   end
 
   @doc """

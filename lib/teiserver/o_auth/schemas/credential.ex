@@ -7,14 +7,14 @@ defmodule Teiserver.OAuth.Credential do
   @type id :: non_neg_integer()
   @type t :: %__MODULE__{
           application: OAuth.Application.t(),
-          autohost: Teiserver.Bot.Bot.t(),
-          autohost_id: Teiserver.Bot.id(),
+          bot: Teiserver.Bot.Bot.t(),
+          bot_id: Teiserver.Bot.id(),
           hashed_secret: binary()
         }
 
   schema "oauth_credentials" do
     belongs_to :application, OAuth.Application
-    belongs_to :autohost, Teiserver.Bot.Bot, primary_key: true
+    belongs_to :bot, Teiserver.Bot.Bot, primary_key: true
     field :client_id, :string
     field :hashed_secret, :binary
 
@@ -23,7 +23,7 @@ defmodule Teiserver.OAuth.Credential do
 
   def changeset(credential, attrs) do
     credential
-    |> cast(attrs, [:application_id, :autohost_id, :client_id, :hashed_secret])
+    |> cast(attrs, [:application_id, :bot_id, :client_id, :hashed_secret])
     |> validate_required([:client_id, :hashed_secret])
   end
 end

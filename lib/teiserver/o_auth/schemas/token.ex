@@ -14,7 +14,7 @@ defmodule Teiserver.OAuth.Token do
           expires_at: DateTime.t(),
           type: :access | :refresh,
           refresh_token: t() | nil,
-          autohost: Teiserver.Bot.Bot.t()
+          bot: Teiserver.Bot.Bot.t()
         }
 
   schema "oauth_tokens" do
@@ -26,7 +26,7 @@ defmodule Teiserver.OAuth.Token do
     field :expires_at, :utc_datetime
     field :type, Ecto.Enum, values: [:access, :refresh]
     belongs_to :refresh_token, __MODULE__
-    belongs_to :autohost, Teiserver.Bot.Bot
+    belongs_to :bot, Teiserver.Bot.Bot
 
     timestamps()
   end
@@ -46,7 +46,7 @@ defmodule Teiserver.OAuth.Token do
       :original_scopes,
       :expires_at,
       :type,
-      :autohost_id
+      :bot_id
     ])
     |> cast_assoc(:refresh_token)
     |> validate_required([:value, :application_id, :scopes, :expires_at, :type])

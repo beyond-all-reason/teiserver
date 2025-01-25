@@ -39,8 +39,8 @@ defmodule Teiserver.OAuth.CredentialQueries do
       |> where_bot_ids(bot_ids)
 
     from([credential: credential] in query,
-      group_by: credential.autohost_id,
-      select: {credential.autohost_id, count(credential.id)}
+      group_by: credential.bot_id,
+      select: {credential.bot_id, count(credential.id)}
     )
     |> Repo.all()
     |> Enum.into(%{})
@@ -82,11 +82,11 @@ defmodule Teiserver.OAuth.CredentialQueries do
 
   def where_bot_id(query, bot_id) do
     from [credential: credential] in query,
-      where: credential.autohost_id == ^bot_id
+      where: credential.bot_id == ^bot_id
   end
 
   def where_bot_ids(query, bot_ids) do
     from [credential: credential] in query,
-      where: credential.autohost_id in ^bot_ids
+      where: credential.bot_id in ^bot_ids
   end
 end

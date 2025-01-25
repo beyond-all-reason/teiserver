@@ -415,7 +415,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     token =
       OAuthFixtures.token_attrs(nil, context.app)
       |> Map.drop([:owner_id])
-      |> Map.put(:autohost_id, autohost.id)
+      |> Map.put(:bot_id, autohost.id)
       |> OAuthFixtures.create_token()
 
     client = Tachyon.connect_autohost!(token, 10, 0)

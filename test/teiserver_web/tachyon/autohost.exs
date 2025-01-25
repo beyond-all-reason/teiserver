@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     token =
       OAuthFixtures.token_attrs(nil, context.app)
       |> Map.drop([:owner_id])
-      |> Map.put(:autohost_id, context.autohost.id)
+      |> Map.put(:bot_id, context.bot.id)
       |> OAuthFixtures.create_token()
 
     {:ok, creds: creds, token: token}
@@ -57,7 +57,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     Tachyon.connect_autohost!(token, 10, 0)
 
     {pid, %{max_battles: 10, current_battles: 0}} =
-      poll_until_some(fn -> Teiserver.Bot.lookup_bot(token.autohost_id) end)
+      poll_until_some(fn -> Teiserver.Bot.lookup_bot(token.bot_id) end)
 
     assert is_pid(pid)
   end
@@ -66,13 +66,13 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     client = Tachyon.connect_autohost!(token, 10, 0)
 
     {_, %{max_battles: 10, current_battles: 0}} =
-      poll_until_some(fn -> Teiserver.Bot.lookup_bot(token.autohost_id) end)
+      poll_until_some(fn -> Teiserver.Bot.lookup_bot(token.bot_id) end)
 
     :ok = Tachyon.send_event(client, "autohost/status", %{maxBattles: 15, currentBattles: 3})
 
     {_, %{max_battles: 15, current_battles: 3}} =
       poll_until(
-        fn -> Teiserver.Bot.lookup_bot(token.autohost_id) end,
+        fn -> Teiserver.Bot.lookup_bot(token.bot_id) end,
         fn {_, details} ->
           details != nil && details.max_battles == 15 && details.current_battles == 3
         end,

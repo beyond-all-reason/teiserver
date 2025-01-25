@@ -41,6 +41,6 @@ defmodule Teiserver.OAuth.CredentialTest do
     assert {:ok, token} = OAuth.get_token_from_credentials(created_cred)
     assert token.application_id == app.id
     assert token.owner_id == nil
-    assert token.autohost_id == bot.id
+    assert token.bot_id == bot.id
   end
 end

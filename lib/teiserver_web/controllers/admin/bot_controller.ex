@@ -175,7 +175,7 @@ defmodule TeiserverWeb.Admin.BotController do
     with bot when not is_nil(bot) <- Bot.get_by_id(Map.get(assigns, "id")),
          cred when not is_nil(cred) <-
            CredentialQueries.get_credential_by_id(Map.get(assigns, "cred_id")) do
-      if cred.autohost_id != bot.id do
+      if cred.bot_id != bot.id do
         conn
         |> put_status(:bad_request)
         |> put_flash(:danger, "credential doesn't match bot")

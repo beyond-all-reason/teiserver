@@ -63,7 +63,7 @@ defmodule Teiserver.OAuthFixtures do
   def credential_attrs(bot, app_id) do
     %{
       application_id: app_id,
-      autohost_id: bot.id,
+      bot_id: bot.id,
       client_id: UUID.uuid4(),
       hashed_secret: UUID.uuid4()
     }
