@@ -29,7 +29,7 @@ defmodule Teiserver.OAuth.Application do
   end
 
   def allowed_scopes do
-    ~w(tachyon.lobby)
+    ["tachyon.lobby", "admin.map", "admin.engine"]
   end
 
   def changeset(application, attrs) do
@@ -49,7 +49,7 @@ defmodule Teiserver.OAuth.Application do
     end)
     |> Ecto.Changeset.unique_constraint(:uid)
     |> Ecto.Changeset.validate_subset(:scopes, allowed_scopes(),
-      message: "Must be #{allowed_scopes()}"
+      message: "Must be one of #{allowed_scopes()}"
     )
     |> Ecto.Changeset.validate_length(:scopes, min: 1)
   end

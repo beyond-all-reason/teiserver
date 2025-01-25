@@ -180,7 +180,11 @@ defmodule Teiserver.OAuth do
 
   @spec create_token(
           User.t() | T.userid(),
-          %{id: integer(), scopes: Application.scopes()},
+          %{
+            :id => integer(),
+            :scopes => Application.scopes(),
+            optional(:original_scopes) => Application.scopes()
+          },
           create_refresh: boolean() | options()
         ) ::
           {:ok, Token.t()} | {:error, Ecto.Changeset.t()}
@@ -206,6 +210,7 @@ defmodule Teiserver.OAuth do
         value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
         application_id: application.id,
         scopes: application.scopes,
+        original_scopes: Map.get(application, :original_scopes, application.scopes),
         expires_at: Timex.add(now, Timex.Duration.from_minutes(30)),
         type: :access
       }
@@ -217,6 +222,7 @@ defmodule Teiserver.OAuth do
           value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
           application_id: application.id,
           scopes: application.scopes,
+          original_scopes: application.scopes,
           # there's no real recourse when the refresh token expires and it's
           # quite annoying, so make it "never" expire.
           expires_at: Timex.add(now, Timex.Duration.from_days(365 * 100)),
@@ -327,7 +333,8 @@ defmodule Teiserver.OAuth do
     end
   end
 
-  @spec refresh_token(Token.t(), options()) :: {:ok, Token.t()} | {:error, term()}
+  @spec refresh_token(Token.t(), [option() | {:scopes, Application.scopes()}]) ::
+          {:ok, Token.t()} | {:error, term()}
   def refresh_token(token, opts \\ [])
 
   def refresh_token(token, _opts) when token.type != :refresh do
@@ -349,11 +356,24 @@ defmodule Teiserver.OAuth do
             TokenQueries.get_token(token.value)
           end
 
-        Repo.transaction(fn ->
-          {:ok, new_token} = create_token(token.owner_id, token.application, opts)
-          TokenQueries.delete_refresh_token(token)
-          new_token
-        end)
+        refresh_attr = %{
+          id: token.application.id,
+          scopes: Keyword.get(opts, :scopes, token.scopes),
+          original_scopes: token.original_scopes
+        }
+
+        tx_result =
+          Repo.transaction(fn ->
+            with {:ok, new_token} <- create_token(token.owner_id, refresh_attr, opts) do
+              TokenQueries.delete_refresh_token(token)
+              new_token
+            end
+          end)
+
+        case tx_result do
+          {:ok, {:error, err}} -> {:error, err}
+          other -> other
+        end
     end
   end
 

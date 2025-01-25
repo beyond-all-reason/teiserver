@@ -11,7 +11,7 @@ defmodule Teiserver.OAuth.TokenTest do
         name: "Testing app",
         uid: "test_app_uid",
         owner_id: user.id,
-        scopes: ["tachyon.lobby"]
+        scopes: ["tachyon.lobby", "admin.map"]
       })
 
     {:ok, user: user, app: app}
@@ -76,6 +76,24 @@ defmodule Teiserver.OAuth.TokenTest do
     # the newly created token is valid
     assert {:ok, new_token_fresh} = OAuth.get_valid_token(new_token.value)
     assert new_token_fresh.id == new_token.id
+  end
+
+  test "can change scopes at refresh", %{user: user, app: app} do
+    assert {:ok, token} = OAuth.create_token(user, app)
+    assert {:ok, _} = OAuth.get_valid_token(token.refresh_token.value)
+    assert {:ok, new_token} = OAuth.refresh_token(token.refresh_token, scopes: ["tachyon.lobby"])
+    assert MapSet.new(new_token.scopes) == MapSet.new(["tachyon.lobby"])
+    assert MapSet.new(token.scopes) == MapSet.new(new_token.original_scopes)
+  end
+
+  test "cannot get more scopes than originally", %{user: user, app: app} do
+    assert {:ok, token} = OAuth.create_token(user, app)
+    assert {:ok, _} = OAuth.get_valid_token(token.refresh_token.value)
+
+    {:error, changeset} =
+      OAuth.refresh_token(token.refresh_token, scopes: ["tachyon.lobby", "lolscope"])
+
+    assert Keyword.get(changeset.errors, :scopes) != nil
   end
 
   test "can delete expired token", %{user: user, app: app} do
