@@ -1,9 +1,10 @@
 defmodule Teiserver.Autohost do
-  alias Teiserver.Autohost.{Autohost, Registry}
-  alias Teiserver.AutohostQueries
+  alias Teiserver.Autohost.Registry
+  alias Teiserver.Bot.Bot
+  alias Teiserver.BotQueries
   alias Teiserver.Repo
 
-  @type id :: Teiserver.Autohost.Autohost.id()
+  @type id :: Teiserver.Bot.Bot.id()
   @type reg_value :: Registry.reg_value()
 
   @type start_script :: %{
@@ -31,34 +32,23 @@ defmodule Teiserver.Autohost do
 
   @type start_response :: Teiserver.Autohost.TachyonHandler.start_response()
 
-  def create_autohost(attrs \\ %{}) do
-    %Autohost{}
-    |> Autohost.changeset(attrs)
-    |> Repo.insert()
-  end
+  defdelegate create_autohost(attrs \\ %{}), to: Teiserver.Bot, as: :create_bot
 
-  def change_autohost(%Autohost{} = autohost, attrs \\ %{}) do
-    Autohost.changeset(autohost, attrs)
-  end
+  defdelegate change_autohost(autohost, attrs \\ %{}),
+    to: Teiserver.Bot,
+    as: :change_bot
 
-  def update_autohost(%Autohost{} = autohost, attrs) do
-    autohost |> change_autohost(attrs) |> Repo.update()
-  end
+  defdelegate update_autohost(autohost, attrs), to: Teiserver.Bot, as: :update_bot
 
-  @spec delete(Autohost.t()) :: :ok | {:error, term()}
-  def delete(%Autohost{} = autohost) do
-    case Repo.delete(autohost) do
-      {:ok, _} -> :ok
-      {:error, err} -> {:error, err}
-    end
-  end
+  @spec delete(Bot.t()) :: :ok | {:error, term()}
+  defdelegate delete(autohost), to: Teiserver.Bot, as: :delete
 
-  defdelegate get_by_id(id), to: AutohostQueries
+  defdelegate get_by_id(id), to: BotQueries
 
   @doc """
   Returns the pid of the autohost registered with a given id
   """
-  @spec lookup_autohost(Autohost.id()) :: {pid(), reg_value()} | nil
+  @spec lookup_autohost(Bot.id()) :: {pid(), reg_value()} | nil
   def lookup_autohost(autohost_id) do
     Teiserver.Autohost.Registry.lookup(autohost_id)
   end
@@ -66,7 +56,7 @@ defmodule Teiserver.Autohost do
   @spec list() :: [reg_value()]
   defdelegate list(), to: Registry
 
-  @spec start_matchmaking(Autohost.id(), start_script()) ::
+  @spec start_matchmaking(Bot.id(), start_script()) ::
           {:ok, start_response()} | {:error, term()}
   defdelegate start_matchmaking(autohost_id, start_script),
     to: Teiserver.Autohost.TachyonHandler

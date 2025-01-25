@@ -60,10 +60,10 @@ defmodule Teiserver.OAuthFixtures do
     %Token{} |> Token.changeset(attrs) |> Repo.insert!()
   end
 
-  def credential_attrs(autohost, app_id) do
+  def credential_attrs(bot, app_id) do
     %{
       application_id: app_id,
-      autohost_id: autohost.id,
+      autohost_id: bot.id,
       client_id: UUID.uuid4(),
       hashed_secret: UUID.uuid4()
     }

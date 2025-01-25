@@ -1,10 +1,10 @@
 defmodule Teiserver.OAuth.CredentialTest do
   use Teiserver.DataCase, async: true
-  alias Teiserver.{OAuth, Autohost}
+  alias Teiserver.{OAuth, Bot}
 
-  defp setup_autohost(_context) do
-    {:ok, autohost} = Autohost.create_autohost(%{name: "testing_autohost"})
-    %{autohost: autohost}
+  defp setup_bot(_context) do
+    {:ok, bot} = Bot.create_bot(%{name: "testing_bot"})
+    %{bot: bot}
   end
 
   defp setup_app(_context) do
@@ -21,11 +21,11 @@ defmodule Teiserver.OAuth.CredentialTest do
     %{user: user, app: app}
   end
 
-  setup [:setup_autohost, :setup_app]
+  setup [:setup_bot, :setup_app]
 
-  test "can create and retrieve credentials", %{app: app, autohost: autohost} do
+  test "can create and retrieve credentials", %{app: app, bot: bot} do
     assert {:ok, created_cred} =
-             OAuth.create_credentials(app, autohost, "some-client-id", "very-secret")
+             OAuth.create_credentials(app, bot, "some-client-id", "very-secret")
 
     assert {:ok, cred} = OAuth.get_valid_credentials("some-client-id", "very-secret")
     assert created_cred.id == cred.id
@@ -34,13 +34,13 @@ defmodule Teiserver.OAuth.CredentialTest do
     refute cred.hashed_secret =~ "very-secret"
   end
 
-  test "can get a token from credentials", %{app: app, autohost: autohost} do
+  test "can get a token from credentials", %{app: app, bot: bot} do
     assert {:ok, created_cred} =
-             OAuth.create_credentials(app, autohost, "some-client-id", "very-secret")
+             OAuth.create_credentials(app, bot, "some-client-id", "very-secret")
 
     assert {:ok, token} = OAuth.get_token_from_credentials(created_cred)
     assert token.application_id == app.id
     assert token.owner_id == nil
-    assert token.autohost_id == autohost.id
+    assert token.autohost_id == bot.id
   end
 end

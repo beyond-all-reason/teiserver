@@ -281,6 +281,7 @@ CLIENTS test_room #{user.name}\n"
     assert reply == :timeout
   end
 
+  @tag :needs_attention
   test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: user1} do
     hash = "-1540855590"
 

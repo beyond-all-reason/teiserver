@@ -1,7 +1,7 @@
 defmodule Teiserver.OAuth do
   alias Teiserver.Repo
 
-  alias Teiserver.Autohost.Autohost
+  alias Teiserver.Bot.Bot
 
   alias Teiserver.OAuth.{
     Application,
@@ -378,25 +378,25 @@ defmodule Teiserver.OAuth do
   end
 
   @doc """
-  Given a client_id, an application/app_id an autohost/id and a cleartext secret, hash and persist it
+  Given a client_id, an application/app_id a bot/id and a cleartext secret, hash and persist it
   """
   @spec create_credentials(
           Application.t() | Application.app_id(),
-          Autohost.t() | Autohost.id(),
+          Bot.t() | Bot.id(),
           String.t(),
           String.t()
         ) ::
           {:ok, Credential.t()} | {:error, term()}
-  def create_credentials(%Application{} = app, autohost, client_id, secret),
-    do: create_credentials(app.id, autohost, client_id, secret)
+  def create_credentials(%Application{} = app, bot, client_id, secret),
+    do: create_credentials(app.id, bot, client_id, secret)
 
-  def create_credentials(app_id, %Autohost{} = autohost, client_id, secret),
-    do: create_credentials(app_id, autohost.id, client_id, secret)
+  def create_credentials(app_id, %Bot{} = bot, client_id, secret),
+    do: create_credentials(app_id, bot.id, client_id, secret)
 
-  def create_credentials(app_id, autohost_id, client_id, secret) do
+  def create_credentials(app_id, bot_id, client_id, secret) do
     attrs = %{
       application_id: app_id,
-      autohost_id: autohost_id,
+      autohost_id: bot_id,
       client_id: client_id,
       hashed_secret: Argon2.hash_pwd_salt(secret)
     }

@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.Admin.AutohostController do
+defmodule TeiserverWeb.Admin.BotController do
   @moduledoc """
-  management of autohosts and their credentials
+  management of bots and their credentials
   """
 
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Autohost, AutohostQueries, OAuth}
+  alias Teiserver.{Bot, BotQueries, OAuth}
   alias Teiserver.OAuth.{ApplicationQueries, CredentialQueries}
 
   plug Bodyguard.Plug.Authorize,
@@ -17,20 +17,20 @@ defmodule TeiserverWeb.Admin.AutohostController do
     user: {Teiserver.Account.AuthLib, :current_user}
 
   plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
-  plug :add_breadcrumb, name: "Autohosts", url: "/teiserver/admin/autohost"
+  plug :add_breadcrumb, name: "Bots", url: "/teiserver/admin/bot"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
-    autohosts = AutohostQueries.list_autohosts()
-    cred_counts = CredentialQueries.count_per_autohosts(Enum.map(autohosts, fn a -> a.id end))
+    bots = BotQueries.list_bots()
+    cred_counts = CredentialQueries.count_per_bots(Enum.map(bots, fn a -> a.id end))
 
     conn
-    |> render("index.html", autohosts: autohosts, cred_counts: cred_counts)
+    |> render("index.html", bots: bots, cred_counts: cred_counts)
   end
 
   @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
-    changeset = Autohost.change_autohost(%Autohost.Autohost{})
+    changeset = Bot.change_bot(%Bot.Bot{})
 
     conn
     |> assign(:page_title, "")
@@ -38,16 +38,16 @@ defmodule TeiserverWeb.Admin.AutohostController do
   end
 
   @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def create(conn, %{"autohost" => attrs}) do
-    case Autohost.create_autohost(attrs) do
-      {:ok, %Autohost.Autohost{} = autohost} ->
+  def create(conn, %{"bot" => attrs}) do
+    case Bot.create_bot(attrs) do
+      {:ok, %Bot.Bot{} = bot} ->
         conn
-        |> put_flash(:info, "Autohost created")
-        |> redirect(to: ~p"/teiserver/admin/autohost/#{autohost.id}")
+        |> put_flash(:info, "Bot created")
+        |> redirect(to: ~p"/teiserver/admin/bot/#{bot.id}")
 
       {:error, changeset} ->
         conn
-        |> assign(:page_title, "BAR - new autohost")
+        |> assign(:page_title, "BAR - new bot")
         |> put_status(400)
         |> render("new.html", changeset: changeset)
     end
@@ -57,14 +57,14 @@ defmodule TeiserverWeb.Admin.AutohostController do
     do:
       conn
       |> put_status(400)
-      |> assign(:page_title, "BAR - new autohost")
-      |> render("new.html", changeset: Autohost.Autohost.changeset(%Autohost.Autohost{}, %{}))
+      |> assign(:page_title, "BAR - new bot")
+      |> render("new.html", changeset: Bot.Bot.changeset(%Bot.Bot{}, %{}))
 
   @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, assigns) do
-    case Autohost.get_by_id(Map.get(assigns, "id")) do
-      %Autohost.Autohost{} = autohost ->
-        render_show(conn, autohost)
+    case Bot.get_by_id(Map.get(assigns, "id")) do
+      %Bot.Bot{} = bot ->
+        render_show(conn, bot)
 
       nil ->
         conn
@@ -75,13 +75,13 @@ defmodule TeiserverWeb.Admin.AutohostController do
 
   @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, assigns) do
-    case Autohost.get_by_id(Map.get(assigns, "id")) do
-      %Autohost.Autohost{} = autohost ->
-        changeset = Autohost.change_autohost(autohost)
+    case Bot.get_by_id(Map.get(assigns, "id")) do
+      %Bot.Bot{} = bot ->
+        changeset = Bot.change_bot(bot)
 
         conn
-        |> assign(:page_title, "BAR - edit autohost #{autohost.name}")
-        |> render("edit.html", autohost: autohost, changeset: changeset)
+        |> assign(:page_title, "BAR - edit bot #{bot.name}")
+        |> render("edit.html", bot: bot, changeset: changeset)
 
       nil ->
         conn
@@ -91,19 +91,19 @@ defmodule TeiserverWeb.Admin.AutohostController do
   end
 
   @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def update(conn, %{"autohost" => params} = assigns) do
-    case Autohost.get_by_id(Map.get(assigns, "id")) do
-      %Autohost.Autohost{} = autohost ->
-        case Autohost.update_autohost(autohost, params) do
-          {:ok, autohost} ->
+  def update(conn, %{"bot" => params} = assigns) do
+    case Bot.get_by_id(Map.get(assigns, "id")) do
+      %Bot.Bot{} = bot ->
+        case Bot.update_bot(bot, params) do
+          {:ok, bot} ->
             conn
-            |> put_flash(:info, "Autohost updated")
-            |> render_show(autohost)
+            |> put_flash(:info, "Bot updated")
+            |> render_show(bot)
 
           {:error, changeset} ->
             conn
             |> put_status(400)
-            |> render(:edit, autohost: autohost, changeset: changeset)
+            |> render(:edit, bot: bot, changeset: changeset)
         end
 
       nil ->
@@ -121,18 +121,18 @@ defmodule TeiserverWeb.Admin.AutohostController do
 
   @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, assigns) do
-    case Autohost.get_by_id(Map.get(assigns, "id")) do
-      %Autohost.Autohost{} = autohost ->
-        case Autohost.delete(autohost) do
+    case Bot.get_by_id(Map.get(assigns, "id")) do
+      %Bot.Bot{} = bot ->
+        case Bot.delete(bot) do
           :ok ->
             conn
             |> put_flash(:info, "Deleted!")
-            |> redirect(to: ~p"/teiserver/admin/autohost")
+            |> redirect(to: ~p"/teiserver/admin/bot")
 
           {:error, err} ->
             conn
             |> put_flash(:danger, inspect(err))
-            |> redirect(to: ~p"/teiserver/admin/autohost/#{autohost.id}")
+            |> redirect(to: ~p"/teiserver/admin/bot/#{bot.id}")
         end
 
       nil ->
@@ -144,23 +144,23 @@ defmodule TeiserverWeb.Admin.AutohostController do
 
   @spec create_credential(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create_credential(conn, assigns) do
-    with autohost when not is_nil(autohost) <- Autohost.get_by_id(Map.get(assigns, "id")),
+    with bot when not is_nil(bot) <- Bot.get_by_id(Map.get(assigns, "id")),
          app when not is_nil(app) <-
            ApplicationQueries.get_application_by_id(Map.get(assigns, "application")) do
       client_id = UUID.uuid4()
       secret = Base.hex_encode32(:crypto.strong_rand_bytes(32))
 
-      case OAuth.create_credentials(app, autohost, client_id, secret) do
+      case OAuth.create_credentials(app, bot, client_id, secret) do
         {:ok, _cred} ->
           conn
           |> put_flash(:info, "credential created")
           |> Plug.Conn.put_resp_cookie("client_secret", secret, sign: true, max_age: 60)
-          |> redirect(to: ~p"/teiserver/admin/autohost/#{autohost.id}")
+          |> redirect(to: ~p"/teiserver/admin/bot/#{bot.id}")
 
         {:error, err} ->
           conn
           |> put_flash(:danger, inspect(err))
-          |> render_show(autohost)
+          |> render_show(bot)
       end
     else
       nil ->
@@ -172,25 +172,25 @@ defmodule TeiserverWeb.Admin.AutohostController do
 
   @spec delete_credential(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete_credential(conn, assigns) do
-    with autohost when not is_nil(autohost) <- Autohost.get_by_id(Map.get(assigns, "id")),
+    with bot when not is_nil(bot) <- Bot.get_by_id(Map.get(assigns, "id")),
          cred when not is_nil(cred) <-
            CredentialQueries.get_credential_by_id(Map.get(assigns, "cred_id")) do
-      if cred.autohost_id != autohost.id do
+      if cred.autohost_id != bot.id do
         conn
         |> put_status(:bad_request)
-        |> put_flash(:danger, "credential doesn't match autohost")
-        |> render_show(autohost)
+        |> put_flash(:danger, "credential doesn't match bot")
+        |> render_show(bot)
       else
         case OAuth.delete_credential(cred) do
           :ok ->
             conn
             |> put_flash(:info, "credential deleted")
-            |> redirect(to: ~p"/teiserver/admin/autohost/#{autohost.id}")
+            |> redirect(to: ~p"/teiserver/admin/bot/#{bot.id}")
 
           {:error, err} ->
             conn
             |> put_flash(:danger, inspect(err))
-            |> render_show(autohost)
+            |> render_show(bot)
         end
       end
     else
@@ -201,17 +201,17 @@ defmodule TeiserverWeb.Admin.AutohostController do
     end
   end
 
-  defp render_show(conn, autohost) do
+  defp render_show(conn, bot) do
     applications = ApplicationQueries.list_applications()
-    credentials = CredentialQueries.for_autohost(autohost)
+    credentials = CredentialQueries.for_bot(bot)
     cookies = Plug.Conn.fetch_cookies(conn, signed: ["client_secret"]).cookies
     client_secret = Map.get(cookies, "client_secret")
 
     conn
-    |> assign(:page_title, "BAR - autohost #{autohost.name}")
+    |> assign(:page_title, "BAR - bot #{bot.name}")
     |> Plug.Conn.delete_resp_cookie("client_secret", sign: true)
     |> render("show.html",
-      autohost: autohost,
+      bot: bot,
       applications: applications,
       credentials: credentials,
       client_secret: client_secret

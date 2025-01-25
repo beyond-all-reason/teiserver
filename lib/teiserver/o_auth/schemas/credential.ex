@@ -7,13 +7,14 @@ defmodule Teiserver.OAuth.Credential do
   @type id :: non_neg_integer()
   @type t :: %__MODULE__{
           application: OAuth.Application.t(),
-          autohost: Teiserver.Autohost.Autohost.t(),
+          autohost: Teiserver.Bot.Bot.t(),
+          autohost_id: Teiserver.Bot.id(),
           hashed_secret: binary()
         }
 
   schema "oauth_credentials" do
     belongs_to :application, OAuth.Application
-    belongs_to :autohost, Teiserver.Autohost.Autohost, primary_key: true
+    belongs_to :autohost, Teiserver.Bot.Bot, primary_key: true
     field :client_id, :string
     field :hashed_secret, :binary
 

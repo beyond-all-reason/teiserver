@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.Components.AutohostComponent do
+defmodule TeiserverWeb.Components.BotComponent do
   use Phoenix.Component
   alias TeiserverWeb.CoreComponents, as: CC
 
   attr :changeset, Ecto.Changeset, required: true
   attr :action, :string, required: true
 
-  def autohost_form(assigns) do
+  def bot_form(assigns) do
     ~H"""
     <CC.simple_form :let={f} for={@changeset} action={@action}>
       <CC.error :if={@changeset.action}>
