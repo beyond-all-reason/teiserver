@@ -2,7 +2,6 @@ defmodule Teiserver.Autohost do
   alias Teiserver.Autohost.Registry
   alias Teiserver.Bot.Bot
   alias Teiserver.BotQueries
-  alias Teiserver.Repo
 
   @type id :: Teiserver.Bot.Bot.id()
   @type reg_value :: Registry.reg_value()

@@ -1,8 +1,8 @@
 defmodule Teiserver.Protocols.Spring.UserIn do
   @moduledoc false
-  alias Teiserver.{Account, Room, CacheUser}
+  alias Teiserver.Account
   alias Teiserver.Protocols.SpringIn
-  import Teiserver.Protocols.SpringOut, only: [reply: 5, do_join_room: 2, do_login_accepted: 3]
+  import Teiserver.Protocols.SpringOut, only: [reply: 5]
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
