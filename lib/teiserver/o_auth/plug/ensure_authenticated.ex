@@ -1,4 +1,4 @@
-defmodule Teiserver.OAuth.TokenPlug do
+defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
   @behaviour Plug
 
   import Plug.Conn

@@ -9,7 +9,7 @@ defmodule TeiserverWeb.TachyonController do
   """
   use TeiserverWeb, :controller
 
-  plug Teiserver.OAuth.TokenPlug
+  plug Teiserver.OAuth.Plug.EnsureAuthenticated
 
   @subprotocol_hdr_name "sec-websocket-protocol"
 
