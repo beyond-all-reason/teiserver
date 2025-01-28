@@ -19,6 +19,10 @@ defmodule TeiserverWeb.Components.OAuthApplicationComponent do
         type="text"
         label="comma separated scopes"
       />
+      <p>
+        Note that changing the scopes does NOT change any existing credentials. You need to issue new ones to take the new scopes into account
+      </p>
+
       <%!-- This form is meant to be used by an admin user, so it's fine to allow supplying --%>
       <%!-- an email manually. If given to general users, it's probably best to lock that down --%>
       <%!-- to the email of the logged-in user only. --%>
