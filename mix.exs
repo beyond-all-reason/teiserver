@@ -73,7 +73,8 @@ defmodule Teiserver.MixProject do
 
       # Extra deps
       {:ecto_psql_extras, "~> 0.7"},
-      {:logger_file_backend, "~> 0.0.10"},
+      {:logger_file_backend, "~> 0.0.14"},
+      {:logger_backends, "~> 1.0"},
       {:timex, "~> 3.7.5"},
       {:breadcrumble, "~> 1.0.0"},
       {:guardian, "~> 2.1"},
