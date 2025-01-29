@@ -164,14 +164,7 @@ defmodule Teiserver.Game.BalancerServer do
 
   @spec do_make_balance(non_neg_integer(), [T.client()], List.t()) :: map()
   defp do_make_balance(team_count, players, opts) do
-    teams =
-      players
-      |> Enum.group_by(fn c -> c.team_number end)
-
-    team_size =
-      teams
-      |> Enum.map(fn {_, t} -> Enum.count(t) end)
-      |> Enum.max(fn -> 0 end)
+    team_size = calculate_team_size(team_count, players)
 
     # Use Large Team ratings when balancing Team FFA
     game_type =
@@ -200,6 +193,14 @@ defmodule Teiserver.Game.BalancerServer do
     else
       make_solo_balance(team_count, players, game_type, [], opts)
     end
+  end
+
+  # This calculates the team size after balancing, which is important for determining whether a game is small or large team
+  # After balancing the team size will equal the number of players divided by team count rounded up.
+  # After balancing, the team size will be as even as possible.
+  @spec calculate_team_size(non_neg_integer(), [T.client()]) :: non_neg_integer()
+  def calculate_team_size(team_count, players) do
+    (Enum.count(players) / team_count) |> ceil()
   end
 
   @spec make_grouped_balance(non_neg_integer(), [T.client()], String.t(), list()) :: map()
