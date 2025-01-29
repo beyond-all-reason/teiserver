@@ -195,8 +195,8 @@ defmodule Teiserver.Game.BalancerServer do
     end
   end
 
-  # This calculates the team size after balancing, which is important for determining whether a game is small or large team
-  # After balancing the team size will equal the number of players divided by team count rounded up.
+  # This function is run before balancing but calculates the expected team size after balancing, which is important for determining whether a game is small or large team.
+  # After balancing the team size will equal the number of players divided by team count rounded up. So if team 1 has 6 players and team 2 has 4 players, after balancing this will become a 5v5 not 6v4.
   # After balancing, the team size will be as even as possible.
   @spec calculate_team_size(non_neg_integer(), [T.client()]) :: non_neg_integer()
   def calculate_team_size(team_count, players) do
