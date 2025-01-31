@@ -1,17 +1,17 @@
 <div class="container">
-  <h1>Autohost: <%= @autohost.name %></h1>
+  <h1>Bot: <%= @bot.name %></h1>
 
   <div :if={@client_secret} class="note note-danger">
     Secret only shown once! <pre><%= @client_secret %></pre>
   </div>
 
   <p>
-    <Phx.link href={~p"/teiserver/admin/autohost/#{@autohost.id}/edit"}>
-      <button type="button" class="btn btn-primary">Edit autohost</button>
+    <Phx.link href={~p"/teiserver/admin/bot/#{@bot.id}/edit"}>
+      <button type="button" class="btn btn-primary">Edit bot</button>
     </Phx.link>
 
-    <%!-- TODO: add a modal confirmation for deleting an autohost --%>
-    <CC.simple_form for={} action={~p"/teiserver/admin/autohost/#{@autohost.id}"} method="delete">
+    <%!-- TODO: add a modal confirmation for deleting an bot --%>
+    <CC.simple_form for={} action={~p"/teiserver/admin/bot/#{@bot.id}"} method="delete">
       <:actions>
         <CC.button type="submit" class="btn-danger">Delete</CC.button>
       </:actions>
@@ -35,7 +35,7 @@
             <td><pre> <%= credential.client_id %> </pre></td>
             <td>
               <Phx.link
-                href={~p"/teiserver/admin/autohost/#{@autohost.id}/credential/#{credential.id}"}
+                href={~p"/teiserver/admin/bot/#{@bot.id}/credential/#{credential.id}"}
                 method="delete"
               >
                 <CC.button type="submit" class="btn btn-danger">DELETE</CC.button>
@@ -51,7 +51,7 @@
 
   <p>
     <h2>Create credential</h2>
-    <form method="POST" action={~p"/teiserver/admin/autohost/#{@autohost.id}/credential"}>
+    <form method="POST" action={~p"/teiserver/admin/bot/#{@bot.id}/credential"}>
       <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
       <CC.label for="application_select">application</CC.label>
       <select id="application_select" name="application" class="form_control">

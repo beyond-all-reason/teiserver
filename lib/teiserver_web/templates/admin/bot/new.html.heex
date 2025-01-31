@@ -1,13 +1,13 @@
 <div class="card page-card">
   <div class="card-body">
-    <h1>Create a new autohost</h1>
+    <h1>Create a new bot</h1>
 
     <div class="row d-flex justify-content-center">
       <div class="col-md-6">
-        <.autohost_form
-          button_label="Create autohost"
+        <.bot_form
+          button_label="Create bot"
           changeset={@changeset}
-          action={~p"/teiserver/admin/autohost"}
+          action={~p"/teiserver/admin/bot"}
         />
       </div>
     </div>

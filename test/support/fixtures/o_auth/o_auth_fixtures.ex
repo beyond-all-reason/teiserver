@@ -17,6 +17,10 @@ defmodule Teiserver.OAuthFixtures do
     %Application{} |> Application.changeset(attrs) |> Repo.insert!()
   end
 
+  def update_app(app, changes) do
+    Ecto.Changeset.change(app, changes) |> Repo.update!()
+  end
+
   def code_attrs(user_id, app) do
     now = DateTime.utc_now()
     {verifier, challenge, method} = generate_challenge()
@@ -27,7 +31,7 @@ defmodule Teiserver.OAuthFixtures do
       application_id: app.id,
       scopes: app.scopes,
       expires_at: Timex.add(now, Timex.Duration.from_minutes(5)),
-      redirect_uri: hd(app.redirect_uris),
+      redirect_uri: List.first(app.redirect_uris),
       challenge: challenge,
       challenge_method: method,
       _verifier: verifier
@@ -56,10 +60,10 @@ defmodule Teiserver.OAuthFixtures do
     %Token{} |> Token.changeset(attrs) |> Repo.insert!()
   end
 
-  def credential_attrs(autohost, app_id) do
+  def credential_attrs(bot, app_id) do
     %{
       application_id: app_id,
-      autohost_id: autohost.id,
+      bot_id: bot.id,
       client_id: UUID.uuid4(),
       hashed_secret: UUID.uuid4()
     }

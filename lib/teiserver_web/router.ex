@@ -691,12 +691,12 @@ defmodule TeiserverWeb.Router do
     get("/lobbies/:id/lobby_chat/:page", LobbyController, :lobby_chat)
 
     resources("/oauth_application", OAuthApplicationController)
-    resources("/autohost", AutohostController)
+    resources("/bot", BotController)
 
     # Ideally credentials would get the full CRUD routes, but I can't be arsed
     # right now for an "mvp". Only autohost need credentials so far, so bind
     # the two
-    post("/autohost/:id/credential", AutohostController, :create_credential)
-    delete("/autohost/:id/credential/:cred_id", AutohostController, :delete_credential)
+    post("/bot/:id/credential", BotController, :create_credential)
+    delete("/bot/:id/credential/:cred_id", BotController, :delete_credential)
   end
 end

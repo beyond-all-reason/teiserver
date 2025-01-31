@@ -51,7 +51,7 @@ defmodule TeiserverWeb.TachyonController do
           not is_nil(token.owner_id) ->
             {:ok, supported_version, Teiserver.Player.TachyonHandler}
 
-          not is_nil(token.autohost_id) ->
+          not is_nil(token.bot_id) ->
             {:ok, supported_version, Teiserver.Autohost.TachyonHandler}
 
           true ->

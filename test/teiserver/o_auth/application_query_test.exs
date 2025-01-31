@@ -13,19 +13,19 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
     %{user: user, app: app}
   end
 
-  defp setup_autohost(_context) do
-    alias Teiserver.Autohost.Autohost
+  defp setup_bot(_context) do
+    alias Teiserver.Bot.Bot
 
-    autohost =
-      %Autohost{}
-      |> Autohost.changeset(%{name: "fixture autohost"})
+    bot =
+      %Bot{}
+      |> Bot.changeset(%{name: "fixture bot"})
       |> Repo.insert!()
 
-    %{autohost: autohost}
+    %{bot: bot}
   end
 
   describe "app stats" do
-    setup [:setup_app, :setup_autohost]
+    setup [:setup_app, :setup_bot]
 
     test "nothing associated", %{app: app} do
       assert [
@@ -37,7 +37,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
              ] == ApplicationQueries.get_stats(app.id)
     end
 
-    test "bit of everything", %{app: app, autohost: autohost} do
+    test "bit of everything", %{app: app, bot: bot} do
       OAuthFixtures.code_attrs(app.owner_id, app)
       |> OAuthFixtures.create_code()
 
@@ -47,7 +47,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
       end)
 
       Enum.each(1..3, fn _ ->
-        OAuthFixtures.credential_attrs(autohost, app.id)
+        OAuthFixtures.credential_attrs(bot, app.id)
         |> OAuthFixtures.create_credential()
       end)
 

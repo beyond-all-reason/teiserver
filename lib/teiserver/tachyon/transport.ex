@@ -1,7 +1,7 @@
 defmodule Teiserver.Tachyon.Transport do
   @moduledoc """
   Handle a tachyon connection
-  This is the common behaviour for player, autohost and whatever could pop up.
+  This is the common behaviour for player, bot and whatever could pop up.
   It handle parsing and validating commands before delegating it to a handler
   """
 

@@ -1,7 +1,7 @@
 defmodule Teiserver.OAuth.CredentialQueries do
   use TeiserverWeb, :queries
   alias Teiserver.OAuth.{Credential, Application}
-  alias Teiserver.Autohost.Autohost
+  alias Teiserver.Bot.Bot
 
   def get_credential(nil), do: nil
 
@@ -21,26 +21,26 @@ defmodule Teiserver.OAuth.CredentialQueries do
     |> Repo.one()
   end
 
-  @spec for_autohost(Autohost.t() | Autohost.id()) :: [
+  @spec for_bot(Bot.t() | Bot.id()) :: [
           Credential.t()
         ]
-  def for_autohost(%Autohost{} = autohost) do
-    for_autohost(autohost.id)
+  def for_bot(%Bot{} = bot) do
+    for_bot(bot.id)
   end
 
-  def for_autohost(autohost_id) do
-    base_query() |> preload(:application) |> where_autohost_id(autohost_id) |> Repo.all()
+  def for_bot(bot_id) do
+    base_query() |> preload(:application) |> where_bot_id(bot_id) |> Repo.all()
   end
 
-  @spec count_per_autohosts([Autohost.id()]) :: %{Autohost.id() => non_neg_integer()}
-  def count_per_autohosts(autohost_ids) do
+  @spec count_per_bots([Bot.id()]) :: %{Bot.id() => non_neg_integer()}
+  def count_per_bots(bot_ids) do
     query =
       base_query()
-      |> where_autohost_ids(autohost_ids)
+      |> where_bot_ids(bot_ids)
 
     from([credential: credential] in query,
-      group_by: credential.autohost_id,
-      select: {credential.autohost_id, count(credential.id)}
+      group_by: credential.bot_id,
+      select: {credential.bot_id, count(credential.id)}
     )
     |> Repo.all()
     |> Enum.into(%{})
@@ -80,13 +80,13 @@ defmodule Teiserver.OAuth.CredentialQueries do
       where: credential.application_id in ^app_ids
   end
 
-  def where_autohost_id(query, autohost_id) do
+  def where_bot_id(query, bot_id) do
     from [credential: credential] in query,
-      where: credential.autohost_id == ^autohost_id
+      where: credential.bot_id == ^bot_id
   end
 
-  def where_autohost_ids(query, autohost_ids) do
+  def where_bot_ids(query, bot_ids) do
     from [credential: credential] in query,
-      where: credential.autohost_id in ^autohost_ids
+      where: credential.bot_id in ^bot_ids
   end
 end

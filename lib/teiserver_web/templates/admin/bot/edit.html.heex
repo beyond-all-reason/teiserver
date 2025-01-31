@@ -1,13 +1,13 @@
 <div class="card page-card">
   <div class="card-body">
-    <h1>Edit autohost <%= @autohost.name %></h1>
+    <h1>Edit bot <%= @bot.name %></h1>
 
     <div class="row d-flex justify-content-center">
       <div class="col-md-6">
-        <.autohost_form
+        <.bot_form
           button_label="Update"
           changeset={@changeset}
-          action={~p"/teiserver/admin/autohost/#{@autohost.id}"}
+          action={~p"/teiserver/admin/bot/#{@bot.id}"}
           method="PUT"
         />
       </div>

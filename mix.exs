@@ -51,8 +51,8 @@ defmodule Teiserver.MixProject do
     [
       # Default phoenix deps
       {:phoenix, "~> 1.7"},
-      {:phoenix_ecto, "~> 4.4"},
-      {:ecto_sql, "~> 3.10"},
+      {:phoenix_ecto, "~> 4.6"},
+      {:ecto_sql, "~> 3.12"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.3"},
       {:phoenix_live_reload, "~> 1.4", only: :dev},
@@ -72,9 +72,9 @@ defmodule Teiserver.MixProject do
       {:phoenix_view, "~> 2.0"},
 
       # Extra deps
-      {:ecto_psql_extras, "~> 0.7"},
       {:logger_file_backend, "~> 0.0.14"},
       {:logger_backends, "~> 1.0"},
+      {:ecto_psql_extras, "~> 0.8"},
       {:timex, "~> 3.7.5"},
       {:breadcrumble, "~> 1.0.0"},
       {:guardian, "~> 2.1"},
