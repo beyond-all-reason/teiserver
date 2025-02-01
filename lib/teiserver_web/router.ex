@@ -61,6 +61,14 @@ defmodule TeiserverWeb.Router do
     plug(Guardian.Plug.EnsureAuthenticated)
   end
 
+  # a pipeline to use for any api endpoint consuming json and expecting
+  # authenticated access with an OAuth bearer token
+  pipeline :oauth_api do
+    plug(:accepts, ["json"])
+    plug(Teiserver.Logging.LoggingPlug)
+    plug(Teiserver.OAuth.Plug.EnsureAuthenticated)
+  end
+
   scope "/", TeiserverWeb.General do
     pipe_through([:live_browser, :nomenu_layout, :protected])
 
@@ -444,6 +452,12 @@ defmodule TeiserverWeb.Router do
     pipe_through([:token_api])
 
     post "/battle/create", BattleController, :create
+  end
+
+  scope "/teiserver/api/admin", TeiserverWeb.API.Admin do
+    pipe_through([:oauth_api])
+
+    post "/assets", AssetController, :ping
   end
 
   # ADMIN
