@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Auth.Server,
+    policy: Teiserver.Auth.Telemetry,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
