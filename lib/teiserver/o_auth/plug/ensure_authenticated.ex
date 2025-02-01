@@ -5,14 +5,20 @@ defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
 
   def init(opts), do: opts
 
-  # Pretty sure there's a better way to return the response than hardcode
-  # a json response and manually encode, but for now it'll be enough
+  def call(conn, opts) when is_map_key(conn.assigns, :token) do
+    token = conn.assigns[:token]
+
+    case has_all_scopes?(token, opts[:scopes]) do
+      :ok -> conn
+      err -> unauthorized(conn, err)
+    end
+  end
+
   def call(conn, opts) do
-    with ["Bearer " <> raw_token] <- get_req_header(conn, "authorization"),
-         {:ok, token} <- Teiserver.OAuth.get_valid_token(raw_token),
-         :ok <- has_all_scopes?(token, opts[:scopes]) do
+    with {:ok, raw_token} <- get_token(conn),
+         {:ok, token} <- Teiserver.OAuth.get_valid_token(raw_token) do
       if token.type == :access do
-        assign(conn, :token, token)
+        assign(conn, :token, token) |> call(opts)
       else
         conn
         |> put_resp_header("content-type", "application/json")
@@ -26,15 +32,27 @@ defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
         |> halt()
       end
     else
-      err ->
-        conn
-        |> put_resp_header("www-authenticate", "Unauthorized")
-        |> put_resp_header("content-type", "application/json")
-        |> resp(
-          401,
-          Jason.encode!(%{error: "unauthorized_client", error_description: inspect(err)})
-        )
-        |> halt()
+      err -> unauthorized(conn, err)
+    end
+  end
+
+  # Pretty sure there's a better way to return the response than hardcode
+  # a json response and manually encode, but for now it'll be enough
+  defp unauthorized(conn, err) do
+    conn
+    |> put_resp_header("www-authenticate", "Unauthorized")
+    |> put_resp_header("content-type", "application/json")
+    |> resp(
+      401,
+      Jason.encode!(%{error: "unauthorized_client", error_description: inspect(err)})
+    )
+    |> halt()
+  end
+
+  defp get_token(conn) do
+    case get_req_header(conn, "authorization") do
+      ["Bearer " <> raw_token] -> {:ok, raw_token}
+      _ -> {:error, "invalid bearer token"}
     end
   end
 

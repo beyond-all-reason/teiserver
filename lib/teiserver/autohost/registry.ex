@@ -6,7 +6,6 @@ defmodule Teiserver.Autohost.Registry do
   and matchmaking
   """
 
-  alias Teiserver.Autohost.Autohost
   alias Teiserver.Bot.Bot
 
   @type reg_value :: %{
