@@ -7,10 +7,10 @@ defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
 
   # Pretty sure there's a better way to return the response than hardcode
   # a json response and manually encode, but for now it'll be enough
-  def call(conn, _opts) do
+  def call(conn, opts) do
     with ["Bearer " <> raw_token] <- get_req_header(conn, "authorization"),
-         {:ok, token} <- Teiserver.OAuth.get_valid_token(raw_token) do
-      # TODO: validate scope once we have more than one (v0.tachyon only for now)
+         {:ok, token} <- Teiserver.OAuth.get_valid_token(raw_token),
+         :ok <- has_all_scopes?(token, opts[:scopes]) do
       if token.type == :access do
         assign(conn, :token, token)
       else
@@ -35,6 +35,24 @@ defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
           Jason.encode!(%{error: "unauthorized_client", error_description: inspect(err)})
         )
         |> halt()
+    end
+  end
+
+  defp has_all_scopes?(_token, nil), do: :ok
+
+  defp has_all_scopes?(token, requested_scopes) do
+    diff = MapSet.difference(MapSet.new(requested_scopes), MapSet.new(token.scopes))
+
+    if Enum.empty?(diff) do
+      :ok
+    else
+      missing = Enum.join(diff, ", ")
+
+      if Enum.count(diff) == 1 do
+        "Access denied, missing the following scope: #{missing}"
+      else
+        "Access denied, missing the following scopes: #{missing}"
+      end
     end
   end
 end

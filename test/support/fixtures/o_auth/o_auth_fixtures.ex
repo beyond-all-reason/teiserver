@@ -77,11 +77,16 @@ defmodule Teiserver.OAuthFixtures do
   given a user id, will create a OAuth application and a valid token for that
   user, returning both
   """
-  def setup_token(%{user: user}), do: setup_token(user.id)
-  def setup_token(%{id: id}), do: setup_token(id)
+  def setup_token(user_or_id, opts \\ [])
+  def setup_token(%{user: user}, opts), do: setup_token(user.id, opts)
+  def setup_token(%{id: id}, opts), do: setup_token(id, opts)
 
-  def setup_token(user_id) do
-    app = app_attrs(user_id) |> create_app()
+  def setup_token(user_id, opts) do
+    app =
+      app_attrs(user_id)
+      |> Map.update!(:scopes, fn s -> Keyword.get(opts, :scopes, s) end)
+      |> create_app()
+
     token = token_attrs(user_id, app) |> create_token()
     %{app: app, token: token}
   end

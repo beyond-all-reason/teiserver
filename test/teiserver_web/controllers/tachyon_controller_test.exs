@@ -129,6 +129,17 @@ defmodule TeiserverWeb.TachyonControllerTest do
       assert msg =~ "temporarily suspended"
     end
 
+    test "must have tachyon.lobby scope", %{user: user, conn: conn} do
+      %{token: token} = OAuthFixtures.setup_token(user, scopes: ["admin.map"])
+
+      conn =
+        valid_tachyon_conn(conn, token)
+        |> get(~p"/tachyon")
+
+      assert %{"error_description" => msg} = json_response(conn, 401)
+      assert msg =~ "missing the following scope"
+    end
+
     test "can upgrade to websocket", %{user: user} do
       %{token: token} = OAuthFixtures.setup_token(user)
 
@@ -170,7 +181,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
         ]
       ]
 
-      {:ok, client} = WSC.connect(tachyon_url(), opts)
+      {:ok, _client} = WSC.connect(tachyon_url(), opts)
 
       conn_pid =
         Tachyon.poll_until_some(fn ->
@@ -182,9 +193,12 @@ defmodule TeiserverWeb.TachyonControllerTest do
   end
 
   # convenience function to create a valid conn object to test login
-  defp valid_tachyon_conn(conn, user) do
+  defp valid_tachyon_conn(conn, %Teiserver.Account.User{} = user) do
     %{token: token} = OAuthFixtures.setup_token(user)
+    valid_tachyon_conn(conn, token)
+  end
 
+  defp valid_tachyon_conn(conn, %Teiserver.OAuth.Token{} = token) do
     conn
     |> put_req_header("authorization", "Bearer #{token.value}")
     |> put_req_header("sec-websocket-protocol", "v0.tachyon")
