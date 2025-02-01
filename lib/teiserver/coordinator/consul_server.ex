@@ -28,7 +28,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password? tournament)
   @boss_commands ~w(balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec lock unlock makebalance set-config-teaser)
-  @admin_commands ~w(playerlimit broadcast shuffle)
+  @admin_commands ~w(shuffle)
 
   # @handled_by_lobby ~w(explain)
   @splitter "########################################"

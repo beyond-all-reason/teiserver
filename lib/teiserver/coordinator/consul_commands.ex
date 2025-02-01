@@ -2040,8 +2040,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> ConsulServer.broadcast_update("reset")
   end
 
-  #################### Admin only
-  # ----------------- General commands
   def handle_command(
         %{command: "playerlimit", remaining: value_str, senderid: senderid} = cmd,
         state
