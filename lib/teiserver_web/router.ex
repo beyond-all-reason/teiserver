@@ -61,18 +61,6 @@ defmodule TeiserverWeb.Router do
     plug(Guardian.Plug.EnsureAuthenticated)
   end
 
-  pipeline :protected_api do
-    plug(:accepts, ["json"])
-    plug(:fetch_session)
-    plug(:protect_from_forgery)
-    plug(:put_secure_browser_headers)
-    plug(Teiserver.Logging.LoggingPlug)
-    plug(Teiserver.Account.AuthPipeline)
-    plug(Teiserver.Account.AuthPlug)
-    plug(Teiserver.Plugs.CachePlug)
-    plug(Guardian.Plug.EnsureAuthenticated)
-  end
-
   scope "/", TeiserverWeb.General do
     pipe_through([:live_browser, :nomenu_layout, :protected])
 
