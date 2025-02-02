@@ -16,27 +16,22 @@ defmodule TeiserverWeb.API.Admin.AssetControllerTest do
     {:ok, authed_conn: auth_conn(conn, token), token: token}
   end
 
-  defp assets_path(), do: ~p"/teiserver/api/admin/assets"
+  defp update_map_path(), do: ~p"/teiserver/api/admin/assets/update_maps"
 
   describe "auth" do
     setup [:setup_user, :setup_token]
 
     test "requires a bearer token", %{conn: conn} do
-      post(conn, assets_path()) |> json_response(401)
+      post(conn, update_map_path()) |> json_response(401)
     end
 
     test "can access with token", %{conn: conn, token: token} do
-      conn |> auth_conn(token) |> post(assets_path()) |> json_response(401)
+      conn |> auth_conn(token) |> post(update_map_path()) |> json_response(401)
     end
   end
 
   describe "maps with valid auth" do
-    defp update_map_path(), do: ~p"/teiserver/api/admin/assets/update_maps"
     setup [:setup_user, :setup_authed_conn]
-
-    test "placeholder", %{authed_conn: conn} do
-      conn |> post(assets_path()) |> json_response(501)
-    end
 
     test "update ok", %{authed_conn: conn} do
       data = %{

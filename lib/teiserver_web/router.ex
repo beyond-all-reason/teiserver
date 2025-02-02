@@ -457,7 +457,6 @@ defmodule TeiserverWeb.Router do
   scope "/teiserver/api/admin", TeiserverWeb.API.Admin do
     pipe_through([:oauth_api])
 
-    post "/assets", AssetController, :ping
     post "/assets/update_maps", AssetController, :update_maps
   end
 

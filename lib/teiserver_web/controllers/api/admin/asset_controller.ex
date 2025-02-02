@@ -4,10 +4,6 @@ defmodule TeiserverWeb.API.Admin.AssetController do
 
   plug Teiserver.OAuth.Plug.EnsureAuthenticated, scopes: ["admin.map"]
 
-  def ping(conn, _opts) do
-    conn |> put_status(:not_implemented) |> render(:error)
-  end
-
   def update_maps(conn, params) do
     result =
       Asset.update_maps(params["maps"])
