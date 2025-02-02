@@ -39,7 +39,10 @@ defmodule TeiserverWeb.API.Admin.AssetControllerTest do
           %{
             springName: "Quicksilver Remake 1.24",
             displayName: "Quicksilver",
-            thumbnail: "http://blah.com/qs.jpg"
+            thumbnail: "http://blah.com/qs.jpg",
+            matchmakingQueues: [],
+            modoptions: %{},
+            startboxesSet: []
           }
         ]
       }

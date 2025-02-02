@@ -19,8 +19,6 @@ defmodule Teiserver.Asset do
           {:ok, %{deleted_count: non_neg_integer(), created_count: non_neg_integer()}}
           | {:error, :bad_request}
           | {:error, {String.t(), Ecto.Changeset.t()}}
-  def update_maps(map_attrs) when not is_list(map_attrs), do: {:error, :bad_request}
-
   def update_maps(map_attrs) do
     Teiserver.Repo.transaction(fn ->
       n = delete_all_maps()
