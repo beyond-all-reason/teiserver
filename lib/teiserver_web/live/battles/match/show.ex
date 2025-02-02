@@ -108,7 +108,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
               m.user.name
             end
           end,
-          &>=/2
+          &<=/2
         )
         |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
 
