@@ -19,4 +19,12 @@ defmodule Teiserver.TachyonBattle.Registry do
   def via_tuple(battle_id) do
     {:via, Horde.Registry, {__MODULE__, battle_id}}
   end
+
+  @spec lookup(T.id()) :: pid() | nil
+  def lookup(battle_id) do
+    case Horde.Registry.lookup(__MODULE__, battle_id) do
+      [{pid, _}] -> pid
+      _ -> nil
+    end
+  end
 end
