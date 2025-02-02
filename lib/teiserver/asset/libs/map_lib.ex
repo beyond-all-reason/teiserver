@@ -6,7 +6,12 @@ defmodule Teiserver.Asset.MapLib do
   @spec create_maps([map()]) ::
           {:ok, [Asset.Map.t()]} | {:error, String.t(), Ecto.Changeset.t(), map()}
   def create_maps(map_attrs) do
-    names = 1..Enum.count(map_attrs) |> Enum.map(fn idx -> "insert-#{idx}" end)
+    names =
+      Enum.with_index(map_attrs)
+      |> Enum.map(fn {attr, idx} ->
+        name = Map.get(attr, "springName", idx)
+        "insert-#{name}"
+      end)
 
     tx =
       Enum.reduce(Enum.zip(map_attrs, names), Multi.new(), fn {attr, name}, multi ->

@@ -12,6 +12,9 @@ defmodule TeiserverWeb.API.Admin.AssetController do
       {:ok, res} ->
         conn |> assign(:result, res) |> put_status(:created) |> render(:map_updated)
 
+      {:error, :bad_request} ->
+        conn |> assign(:reason, "bad request: invalid input") |> render(:error)
+
       {:error, {op_name, err_changeset}} ->
         conn
         |> assign(:op_name, op_name)

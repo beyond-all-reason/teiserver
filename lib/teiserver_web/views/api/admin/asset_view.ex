@@ -1,8 +1,11 @@
 defmodule TeiserverWeb.API.Admin.AssetView do
   use TeiserverWeb, :view
 
-  def render("error.json", _conn) do
-    %{}
+  def render("error.json", conn) do
+    %{
+      status: :failed,
+      reason: conn.reason
+    }
   end
 
   def render("map_updated_error.json", conn) do
@@ -11,7 +14,7 @@ defmodule TeiserverWeb.API.Admin.AssetView do
         "#{name}: #{err_msg}"
       end
 
-    reason = "Operation #{conn.op_name} failed: #{errors}"
+    reason = "Operation #{conn.op_name} failed: #{Enum.join(errors, ", ")}"
 
     %{
       status: :failed,
