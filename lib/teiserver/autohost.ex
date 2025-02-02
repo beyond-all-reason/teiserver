@@ -7,7 +7,7 @@ defmodule Teiserver.Autohost do
   @type reg_value :: Registry.reg_value()
 
   @type start_script :: %{
-          battleId: String.t(),
+          battleId: Teiserver.TachyonBattle.id(),
           engineVersion: String.t(),
           gameName: String.t(),
           mapName: String.t(),
