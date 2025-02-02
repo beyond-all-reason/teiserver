@@ -5,6 +5,7 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.{Battle, TeiserverTestLib, Client}
   alias Teiserver.Lobby
+  alias TeiserverWeb.Account.ProfileLive.Overview
 
   setup do
     {:ok, data} =
@@ -89,6 +90,11 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
       Lobby.close_lobby(lobby_id)
       assert Lobby.get_lobby(lobby_id) == nil
     end
+  end
+
+  test "get_accolade_notification_message should be able to handle when user not logged in" do
+    result = Overview.get_accolade_notification_message(nil, nil)
+    assert result == nil
   end
 
   defp login_user(user) do

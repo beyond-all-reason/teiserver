@@ -362,18 +362,24 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   end
 
   def assign_accolade_notification(socket) do
-    user_id = socket.assigns.user.id
-    current_user_id = socket.assigns.current_user.id
-    days = 1
-
-    message =
-      with true <- user_id == current_user_id,
-           %{map: map, giver_name: giver_name} <- AccoladeLib.recent_accolade(user_id, days) do
-        "You have recently received an accolade from #{giver_name} for your match in #{map}!"
-      else
-        _ -> nil
-      end
+    message = get_accolade_notification_message(socket.assigns.user, socket.assigns.current_user)
 
     socket |> assign(:accolade_notification, message)
+  end
+
+  def get_accolade_notification_message(viewed_user, current_user) do
+    days = 1
+
+    with true <- viewed_user != nil,
+         true <- current_user != nil,
+         true <- viewed_user.id == current_user.id && current_user.id != nil,
+         %{map: map, giver_name: giver_name} <-
+           AccoladeLib.recent_accolade(current_user.id, days) do
+      "You have recently received an accolade from #{giver_name} for your match in #{map}!"
+    else
+      # Goes here if the viewed user is not the same as the logged in user
+      # Or if there are no recent accolades
+      _ -> nil
+    end
   end
 end
