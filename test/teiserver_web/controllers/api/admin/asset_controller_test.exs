@@ -31,10 +31,39 @@ defmodule TeiserverWeb.API.Admin.AssetControllerTest do
   end
 
   describe "maps with valid auth" do
+    defp update_map_path(), do: ~p"/teiserver/api/admin/assets/update_maps"
     setup [:setup_user, :setup_authed_conn]
 
     test "placeholder", %{authed_conn: conn} do
       conn |> post(assets_path()) |> json_response(501)
+    end
+
+    test "update ok", %{authed_conn: conn} do
+      data = %{
+        maps: [
+          %{
+            spring_name: "Quicksilver Remake 1.24",
+            display_name: "Quicksilver",
+            thumbnail_url: "http://blah.com/qs.jpg"
+          }
+        ]
+      }
+
+      resp = conn |> post(update_map_path(), data) |> json_response(201)
+      assert resp == %{"status" => "success", "created_count" => 1, "deleted_count" => 0}
+    end
+
+    test "invalid payload, missing spring name", %{authed_conn: conn} do
+      data = %{
+        maps: [
+          %{
+            display_name: "Quicksilver",
+            thumbnail_url: "http://blah.com/qs.jpg"
+          }
+        ]
+      }
+
+      conn |> post(update_map_path(), data) |> json_response(400)
     end
   end
 

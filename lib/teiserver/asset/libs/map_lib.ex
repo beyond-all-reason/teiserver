@@ -3,7 +3,8 @@ defmodule Teiserver.Asset.MapLib do
   alias Ecto.Multi
   alias Teiserver.Repo
 
-  @spec create_maps([map()]) :: {:ok, [Asset.Map.t()]} | {:error, Ecto.Changeset.t()}
+  @spec create_maps([map()]) ::
+          {:ok, [Asset.Map.t()]} | {:error, String.t(), Ecto.Changeset.t(), map()}
   def create_maps(map_attrs) do
     names = 1..Enum.count(map_attrs) |> Enum.map(fn idx -> "insert-#{idx}" end)
 
