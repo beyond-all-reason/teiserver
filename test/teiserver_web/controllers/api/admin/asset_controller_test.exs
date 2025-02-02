@@ -37,9 +37,9 @@ defmodule TeiserverWeb.API.Admin.AssetControllerTest do
       data = %{
         maps: [
           %{
-            spring_name: "Quicksilver Remake 1.24",
-            display_name: "Quicksilver",
-            thumbnail_url: "http://blah.com/qs.jpg"
+            springName: "Quicksilver Remake 1.24",
+            displayName: "Quicksilver",
+            thumbnail: "http://blah.com/qs.jpg"
           }
         ]
       }
@@ -52,8 +52,8 @@ defmodule TeiserverWeb.API.Admin.AssetControllerTest do
       data = %{
         maps: [
           %{
-            display_name: "Quicksilver",
-            thumbnail_url: "http://blah.com/qs.jpg"
+            displayName: "Quicksilver",
+            thumbnail: "http://blah.com/qs.jpg"
           }
         ]
       }
