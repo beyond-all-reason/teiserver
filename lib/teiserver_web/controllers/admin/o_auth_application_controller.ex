@@ -38,12 +38,12 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
 
     conn
     |> assign(:page_title, "BAR - new OAuth app")
-    |> render("new.html", changeset: changeset)
+    |> render("new.html", changeset: changeset, scopes: scopes_with_descriptions())
   end
 
   @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def create(conn, %{"application" => app}) do
-    app = form_to_app(app)
+  def create(conn, %{"application" => app, "scopes" => scopes}) do
+    app = form_to_app(app, scopes)
 
     case OAuth.create_application(app) do
       {:ok, %Application{} = app} ->
@@ -59,7 +59,10 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
         conn
         |> put_status(400)
         |> assign(:page_title, "BAR - new OAuth app")
-        |> render("new.html", changeset: changeset)
+        |> render("new.html",
+          changeset: changeset,
+          scopes: scopes_with_descriptions(changeset.changes.scopes)
+        )
     end
   end
 
@@ -68,7 +71,20 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
       conn
       |> put_status(400)
       |> assign(:page_title, "BAR - new OAuth app")
-      |> render("new.html", changeset: Application.changeset(%Application{}, %{}))
+      |> render("new.html",
+        changeset: Application.changeset(%Application{}, %{}),
+        scopes: scopes_with_descriptions()
+      )
+
+  defp scopes_with_descriptions(enabled_scopes \\ []) do
+    Application.allowed_scopes()
+    |> Enum.map(fn s -> {s, Enum.member?(enabled_scopes, s), scope_description(s)} end)
+  end
+
+  defp scope_description("tachyon.lobby"), do: "for autohost"
+  defp scope_description("admin.map"), do: "for CI, to setup maps data in teiserver"
+  defp scope_description("admin.engine"), do: "for CI, to setup engine data in teiserver"
+  defp scope_description(_), do: nil
 
   @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, assigns) do
@@ -91,7 +107,11 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
 
         conn
         |> assign(:page_title, "BAR - edit oauth app #{app.name}")
-        |> render("edit.html", app: app, changeset: changeset)
+        |> render("edit.html",
+          app: app,
+          changeset: changeset,
+          scopes: scopes_with_descriptions(app.scopes)
+        )
 
       nil ->
         conn
@@ -101,10 +121,10 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   end
 
   @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def update(conn, %{"application" => app_params} = assigns) do
+  def update(conn, assigns) do
     case ApplicationQueries.get_application_by_id(Map.get(assigns, "id")) do
       %Application{} = app ->
-        attrs = form_to_app(app_params)
+        attrs = form_to_app(Map.get(assigns, "application", %{}), Map.get(assigns, "scopes", %{}))
 
         case OAuth.update_application(app, attrs) do
           {:ok, app} ->
@@ -117,7 +137,11 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
 
             conn
             |> put_status(400)
-            |> render("edit.html", app: app, changeset: changeset)
+            |> render("edit.html",
+              app: app,
+              changeset: changeset,
+              scopes: scopes_with_descriptions()
+            )
         end
 
       nil ->
@@ -159,11 +183,16 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   end
 
   # split the comma separated fields and map emails to users
-  defp form_to_app(params) do
-    user_id = Map.get(Account.get_user_by_email(params["owner_email"]) || %{}, :id)
+  defp form_to_app(app, raw_scopes) do
+    user_id = Map.get(Account.get_user_by_email(app["owner_email"]) || %{}, :id)
 
-    params
-    |> split_string_key("scopes")
+    scopes =
+      Enum.filter(Application.allowed_scopes(), fn scope ->
+        Map.get(raw_scopes, scope, "false") == "true"
+      end)
+
+    app
+    |> then(fn m -> if Enum.empty?(scopes), do: m, else: Map.put(m, "scopes", scopes) end)
     |> split_string_key("redirect_uris")
     |> then(fn m -> if user_id, do: Map.put(m, "owner_id", user_id), else: m end)
   end
