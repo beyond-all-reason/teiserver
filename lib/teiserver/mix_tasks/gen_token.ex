@@ -29,7 +29,7 @@ defmodule Mix.Tasks.Teiserver.GenToken do
         exit({:shutdown, 1})
 
       user ->
-        case Teiserver.OAuth.Task.GenToken.create_token(user, parsed[:app]) do
+        case Teiserver.OAuth.Tasks.GenToken.create_token(user, parsed[:app]) do
           {:ok, token} ->
             shell.info("Generated token (id=#{token.id}) - #{token.value}")
             :ok
