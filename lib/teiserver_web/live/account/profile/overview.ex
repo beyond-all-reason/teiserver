@@ -370,11 +370,11 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   def get_accolade_notification_message(viewed_user, current_user) do
     days = 1
 
-    with true <- viewed_user != nil,
-         true <- current_user != nil,
-         true <- viewed_user.id == current_user.id && current_user.id != nil,
+    with %{id: viewed_user_id} <- viewed_user,
+         %{id: current_user_id} <- current_user,
+         true <- viewed_user_id == current_user_id,
          %{map: map, giver_name: giver_name} <-
-           AccoladeLib.recent_accolade(current_user.id, days) do
+           AccoladeLib.recent_accolade(current_user_id, days) do
       "You have recently received an accolade from #{giver_name} for your match in #{map}!"
     else
       # Goes here if the viewed user is not the same as the logged in user
