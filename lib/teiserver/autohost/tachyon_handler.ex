@@ -6,7 +6,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   very different roles, have very different behaviour and states.
   """
   alias Teiserver.Tachyon.{Handler, Schema}
-  alias Teiserver.Autohost.{Autohost, Registry}
+  alias Teiserver.Autohost.Registry
   alias Teiserver.Bot.Bot
   require Logger
   @behaviour Handler

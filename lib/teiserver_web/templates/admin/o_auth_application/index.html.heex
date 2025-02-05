@@ -15,6 +15,7 @@
           <th>client id (uid)</th>
           <th>name</th>
           <th>owner</th>
+          <th>scopes</th>
           <th>code/token/creds</th>
           <th>actions</th>
         </tr>
@@ -25,7 +26,12 @@
             <td><%= app.id %></td>
             <td><%= app.uid %></td>
             <td><%= app.name %></td>
-            <td><%= app.owner.name %> (<%= app.owner.email %>)</td>
+            <%= if is_nil(app.owner) do %>
+              <td>No owner</td>
+            <% else %>
+              <td><%= app.owner.name %> (<%= app.owner.email %>)</td>
+            <% end %>
+            <td><%= Enum.join(app.scopes, ", ") %></td>
             <td>
               <%= stats.code_count %> / <%= stats.token_count %> / <%= stats.credential_count %>
             </td>

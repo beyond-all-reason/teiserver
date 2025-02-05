@@ -104,7 +104,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   def update(conn, %{"application" => app_params} = assigns) do
     case ApplicationQueries.get_application_by_id(Map.get(assigns, "id")) do
       %Application{} = app ->
-        attrs = form_to_app(app_params) |> Map.drop(["scopes"])
+        attrs = form_to_app(app_params)
 
         case OAuth.update_application(app, attrs) do
           {:ok, app} ->

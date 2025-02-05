@@ -49,7 +49,7 @@ defmodule Teiserver.OAuth.Application do
     end)
     |> Ecto.Changeset.unique_constraint(:uid)
     |> Ecto.Changeset.validate_subset(:scopes, allowed_scopes(),
-      message: "Must be one of #{allowed_scopes()}"
+      message: "Must a subset of #{Enum.join(allowed_scopes(), ", ")}"
     )
     |> Ecto.Changeset.validate_length(:scopes, min: 1)
   end
