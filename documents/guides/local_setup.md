@@ -134,6 +134,15 @@ mix teiserver.fakedata
 
 Will generate a large amount of fake data and setup a root account for you. The account will have full access to everything and the database will be populated with false data as if generated over a period of time to make development and testing easier.
 
+For developping tachyon, you should also run
+```bash
+mix teiserver.tachyon_setup
+```
+This setup the oauth applications required for tachyon.
+
+There is also `mix teiserver.gen_token --user CheerfulBeigeKarganeth --app generic_lobby` to generate access token valid for 24h. These help a lot when attempting to manually test the API.
+
+
 ### Resetting your user password
 When running locally it's likely you won't want to connect the server to an email account, as such password resets need to be done a little differently.
 
