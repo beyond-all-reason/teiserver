@@ -258,10 +258,11 @@
                         phx-click="give-accolade"
                         phx-value-recipient_name={m.user.name}
                         phx-value-recipient_id={m.user.id}
+                        phx-value-current_user_team_id={@current_user_team_id}
+                        phx-value-recipient_team_id={m.team_id}
                         class={[
                           "btn btn-sm btn-success",
-                          @current_user_team_id && m.team_id != @current_user_team_id &&
-                            "invisible"
+                          
                         ]}
                       >
                         <i class="fa-solid fa-award"></i>&nbsp;
