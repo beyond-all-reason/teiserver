@@ -105,8 +105,8 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   # It's go time! Find an autohost, send it the start script and let all the players
   # know about the autohost waiting for them.
   def handle_continue(:start_match, state) do
-    case Teiserver.Autohost.list() do
-      [] ->
+    case Teiserver.Autohost.find_autohost() do
+      nil ->
         Logger.warning(
           "No autohost available to start a paired matchmaking for queue #{inspect(state.queue)}"
         )
@@ -119,7 +119,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
         {:stop, :normal, state}
 
-      [%{id: id} | _] ->
+      id ->
         start_script = hardcoded_start_script(state)
 
         case Teiserver.Autohost.start_matchmaking(id, start_script) do
