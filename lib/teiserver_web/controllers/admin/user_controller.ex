@@ -43,7 +43,9 @@ defmodule TeiserverWeb.Admin.UserController do
         []
       end
 
-    users = (exact_match ++ users) |> Enum.uniq_by(fn user -> user.id end) |> Enum.reject(&(&1 == nil))
+    users =
+      (exact_match ++ users) |> Enum.uniq_by(fn user -> user.id end) |> Enum.reject(&(&1 == nil))
+
     user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
 
     if Enum.count(users) == 1 do
