@@ -9,6 +9,7 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Player
   alias Teiserver.Matchmaking
+  alias Teiserver.Messaging
 
   @behaviour Handler
 
@@ -114,6 +115,17 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_info({:battle_start, data}, state) do
     {:request, "battle/start", data, [], state}
+  end
+
+  def handle_info({:messaging, {:dm_received, message}}, state) do
+    data = %{
+      message: message.content,
+      source: message_source_to_tachyon(message.source),
+      timestamp: message.timestamp,
+      marker: to_string(message.marker)
+    }
+
+    {:event, "messaging/received", data, state}
   end
 
   def handle_info({:timeout, message_id}, state)
@@ -226,8 +238,26 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, Jason.encode!(response)}, state}
   end
 
-  def handle_command("messaging/send" = cmd_id, "request", _message_id, _msg, state) do
-    {:response, cmd_id, nil, state}
+  def handle_command("messaging/send" = cmd_id, "request", message_id, msg, state) do
+    with {:ok, target} <- message_target_from_tachyon(msg["data"]["target"]),
+         msg <-
+           Messaging.new(
+             msg["data"]["message"],
+             {:player, state.user.id},
+             :erlang.monotonic_time(:micro_seconds)
+           ),
+         :ok <- Messaging.send(msg, target) do
+      {:response, cmd_id, nil, state}
+    else
+      {:error, :invalid_recipient} ->
+        resp = Schema.error_response(cmd_id, message_id, :invalid_target)
+        {:push, {:text, Jason.encode!(resp)}, state}
+    end
+  end
+
+  def handle_command("messaging/subscribeReceived" = cmd_id, "request", _message_id, _msg, state) do
+    # TODO!
+    {:response, cmd_id, %{hasMissedMessages: false}, state}
   end
 
   def handle_command(command_id, _message_type, message_id, _message, state) do
@@ -265,6 +295,25 @@ defmodule Teiserver.Player.TachyonHandler do
             {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
             {:ok, pid}
         end
+    end
+  end
+
+  defp message_source_to_tachyon(source) do
+    case source do
+      {:player, player_id} -> %{type: "player", userId: to_string(player_id)}
+    end
+  end
+
+  defp message_target_from_tachyon(target) do
+    case target["type"] do
+      "player" ->
+        case Integer.parse(target["userId"]) do
+          {user_id, ""} -> {:ok, {:player, user_id}}
+          _ -> {:error, :invalid_recipient}
+        end
+
+      _ ->
+        {:error, :invalid_recipient}
     end
   end
 end

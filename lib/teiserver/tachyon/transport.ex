@@ -87,6 +87,9 @@ defmodule Teiserver.Tachyon.Transport do
       {:error, :closed} ->
         Logger.debug("Peer closed connection #{inspect(state)}")
 
+      {:crash, :error, err} ->
+        Logger.error("ws connection crashed: #{inspect(err)}")
+
       _ ->
         Logger.info(
           "Terminating ws connection #{inspect(self())} with reason #{inspect(reason)} and state #{inspect(state)}"

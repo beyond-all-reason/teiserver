@@ -14,7 +14,7 @@ defmodule Teiserver.Player.Session do
   require Logger
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Player, Matchmaking}
+  alias Teiserver.{Player, Matchmaking, Messaging}
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 
@@ -106,6 +106,15 @@ defmodule Teiserver.Player.Session do
   @spec battle_start(T.userid(), Teiserver.Autohost.start_response()) :: :ok
   def battle_start(user_id, battle_start_data) do
     GenServer.cast(via_tuple(user_id), {:battle_start, battle_start_data})
+  end
+
+  @doc """
+  Attempt to send a dm to the target player. If there is no session for this
+  player the message is lost
+  """
+  @spec send_dm(T.userid(), Messaging.message()) :: :ok
+  def send_dm(user_id, message) do
+    GenServer.cast(via_tuple(user_id), {:messaging, {:dm, message}})
   end
 
   def start_link({_conn_pid, user} = arg) do
@@ -355,6 +364,11 @@ defmodule Teiserver.Player.Session do
 
         {:noreply, state}
     end
+  end
+
+  def handle_cast({:messaging, {:dm, message}}, state) do
+    state = send_to_player({:messaging, {:dm_received, message}}, state)
+    {:noreply, state}
   end
 
   @impl true
