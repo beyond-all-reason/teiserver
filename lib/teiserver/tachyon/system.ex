@@ -13,6 +13,7 @@ defmodule Teiserver.Tachyon.System do
       Teiserver.Tachyon.Schema.cache_spec(),
       Teiserver.TachyonBattle.System,
       Teiserver.Autohost.System,
+      Teiserver.Matchmaking.System,
       Teiserver.Player.System
     ]
 
