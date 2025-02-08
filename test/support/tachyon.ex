@@ -255,7 +255,7 @@ defmodule Teiserver.Support.Tachyon do
     if pred.(res) do
       res
     else
-      limit = Keyword.get(opts, :limit, 10)
+      limit = Keyword.get(opts, :limit, 50)
 
       if limit <= 0 do
         raise "poll timeout"
