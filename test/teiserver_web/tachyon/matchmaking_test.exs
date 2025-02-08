@@ -409,21 +409,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
   end
 
-  def setup_autohost(context) do
-    autohost = Teiserver.BotFixtures.create_bot()
-
-    token =
-      OAuthFixtures.token_attrs(nil, context.app)
-      |> Map.drop([:owner_id])
-      |> Map.put(:bot_id, autohost.id)
-      |> OAuthFixtures.create_token()
-
-    client = Tachyon.connect_autohost!(token, 10, 0)
-    {:ok, autohost: autohost, autohost_client: client}
-  end
-
   describe "join with autohost" do
-    setup [{Tachyon, :setup_client}, :setup_app, :setup_queue, :setup_autohost]
+    setup [{Tachyon, :setup_client}, :setup_app, :setup_queue, {Tachyon, :setup_autohost}]
 
     test "happy full path", %{
       app: app,

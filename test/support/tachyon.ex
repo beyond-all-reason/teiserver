@@ -12,6 +12,19 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, user: user, client: client, token: token}
   end
 
+  def setup_autohost(context) do
+    autohost = Teiserver.BotFixtures.create_bot()
+
+    token =
+      OAuthFixtures.token_attrs(nil, context.app)
+      |> Map.drop([:owner_id])
+      |> Map.put(:bot_id, autohost.id)
+      |> OAuthFixtures.create_token()
+
+    client = connect_autohost!(token, 10, 0)
+    {:ok, autohost: autohost, autohost_client: client}
+  end
+
   @doc """
   connects the given user and returns the ws client
   """
