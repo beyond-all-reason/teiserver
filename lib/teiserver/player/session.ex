@@ -34,11 +34,16 @@ defmodule Teiserver.Player.Session do
                battle_password: String.t()
              }}
 
+  @type messaging_state :: %{
+          subscribed?: boolean()
+        }
+
   @type state :: %{
           user: T.user(),
           mon_ref: reference(),
           conn_pid: pid() | nil,
-          matchmaking: matchmaking_state()
+          matchmaking: matchmaking_state(),
+          messaging_state: %{subscribed?: boolean()}
         }
 
   @impl true
@@ -51,9 +56,11 @@ defmodule Teiserver.Player.Session do
       mon_ref: ref,
       conn_pid: conn_pid,
       matchmaking: initial_matchmaking_state(),
+      messaging_state: %{subscribed?: false}
     }
 
     Logger.debug("init session #{inspect(self())}")
+    Logger.info("session started")
 
     {:ok, state}
   end
@@ -127,6 +134,17 @@ defmodule Teiserver.Player.Session do
   @spec battle_start(T.userid(), Teiserver.Autohost.start_response()) :: :ok
   def battle_start(user_id, battle_start_data) do
     GenServer.cast(via_tuple(user_id), {:battle_start, battle_start_data})
+  end
+
+  @doc """
+  this user should now receive all messaging events
+  """
+  @spec subscribe_received(
+          user_id :: T.userid(),
+          since :: :latest | :from_start | {:marker, term()}
+        ) :: {:ok, has_missed_messages :: boolean()}
+  def subscribe_received(user_id, since) do
+    GenServer.call(via_tuple(user_id), {:messaging, {:subscribe, since}})
   end
 
   @doc """
@@ -251,6 +269,12 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_call({:messaging, {:subscribe, _since}}, _from, state) do
+    state = put_in(state.messaging_state.subscribed?, true)
+    has_missed_messages = false
+    {:reply, {:ok, has_missed_messages}, state}
+  end
+
   @impl true
   def handle_cast(
         {:matchmaking, {:notify_found, queue_id, room_pid, timeout_ms}},
@@ -367,8 +391,12 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_cast({:messaging, {:dm, message}}, state) do
-    state = send_to_player({:messaging, {:dm_received, message}}, state)
-    {:noreply, state}
+    if state.messaging_state.subscribed? do
+      state = send_to_player({:messaging, {:dm_received, message}}, state)
+      {:noreply, state}
+    else
+      {:noreply, state}
+    end
   end
 
   @impl true

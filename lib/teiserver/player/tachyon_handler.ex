@@ -255,9 +255,20 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command("messaging/subscribeReceived" = cmd_id, "request", _message_id, _msg, state) do
-    # TODO!
-    {:response, cmd_id, %{hasMissedMessages: false}, state}
+  def handle_command("messaging/subscribeReceived" = cmd_id, "request", _message_id, msg, state) do
+    since =
+      case msg["since"] do
+        nil ->
+          :latest
+
+        %{"type" => "latest"} ->
+          :latest
+          # %{"type" => "from_start"} -> :from_start  # TODO
+          # %{"type" => "marker", "value" => marker} -> {:marker, marker} # TODO
+      end
+
+    {:ok, has_missed_messages} = Player.Session.subscribe_received(state.user.id, since)
+    {:response, cmd_id, %{hasMissedMessages: has_missed_messages}, state}
   end
 
   def handle_command(command_id, _message_type, message_id, _message, state) do
