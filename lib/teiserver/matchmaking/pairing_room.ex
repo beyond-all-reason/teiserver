@@ -119,7 +119,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
       id ->
         start_script = hardcoded_start_script(state)
 
-        case Teiserver.Autohost.start_matchmaking(id, start_script) do
+        case Teiserver.TachyonBattle.start_battle(id, start_script) do
           {:error, reason} ->
             QueueServer.disband_pairing(state.queue_id, self())
 
@@ -211,10 +211,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     {:stop, :normal, state}
   end
 
-  @spec hardcoded_start_script(state()) :: Teiserver.Autohost.start_script()
+  @spec hardcoded_start_script(state()) :: Teiserver.TachyonBattle.start_script()
   defp hardcoded_start_script(state) do
     %{
-      battleId: UUID.uuid4(),
       engineVersion: "105.1.1-2590-gb9462a0 bar",
       gameName: "Beyond All Reason test-26929-d709d32",
       mapName: "Red Comet Remake 1.8",

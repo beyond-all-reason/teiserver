@@ -14,12 +14,12 @@ defmodule Teiserver.TachyonBattle.Battle do
           autohost_id: Teiserver.Autohost.id()
         }
 
-  def start_link({battle_id, _autohost_id} = arg) do
+  def start_link(%{battle_id: battle_id} = arg) do
     GenServer.start_link(__MODULE__, arg, name: via_tuple(battle_id))
   end
 
   @impl true
-  def init({battle_id, autohost_id}) do
+  def init(%{battle_id: battle_id, autohost_id: autohost_id}) do
     Logger.metadata(battle_id: battle_id)
 
     state = %{

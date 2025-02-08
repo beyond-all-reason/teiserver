@@ -16,6 +16,9 @@ defmodule Teiserver.TachyonBattle.Supervisor do
 
   @spec start_battle(T.id(), Teiserver.Autohost.id()) :: DynamicSupervisor.on_start_child()
   def start_battle(battle_id, autohost_id) do
-    DynamicSupervisor.start_child(__MODULE__, {Battle, {battle_id, autohost_id}})
+    DynamicSupervisor.start_child(
+      __MODULE__,
+      {Battle, %{battle_id: battle_id, autohost_id: autohost_id}}
+    )
   end
 end

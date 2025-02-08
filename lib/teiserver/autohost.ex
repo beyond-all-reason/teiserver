@@ -68,8 +68,8 @@ defmodule Teiserver.Autohost do
     if autohost_val == nil, do: nil, else: autohost_val[:id]
   end
 
-  @spec start_matchmaking(Bot.id(), start_script()) ::
+  @spec start_battle(Bot.id(), start_script()) ::
           {:ok, start_response()} | {:error, term()}
-  defdelegate start_matchmaking(bot_id, start_script),
+  defdelegate start_battle(bot_id, start_script),
     to: Teiserver.Autohost.TachyonHandler
 end

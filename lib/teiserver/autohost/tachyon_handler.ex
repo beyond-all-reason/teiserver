@@ -36,7 +36,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   end
 
   @impl Handler
-  def handle_info({:start_matchmaking, start_script, sender}, state) do
+  def handle_info({:start_battle, start_script, sender}, state) do
     {:request, "autohost/start", start_script, [cb_state: sender], state}
   end
 
@@ -134,19 +134,19 @@ defmodule Teiserver.Autohost.TachyonHandler do
   end
 
   # TODO: there should be some kind of retry here
-  @spec start_matchmaking(Bot.id(), Teiserver.Autohost.start_script()) ::
+  @spec start_battle(Bot.id(), Teiserver.Autohost.start_script()) ::
           {:ok, start_response()} | {:error, term()}
-  def start_matchmaking(autohost_id, start_script) do
+  def start_battle(autohost_id, start_script) do
     case Registry.lookup(autohost_id) do
       {pid, _} ->
-        send(pid, {:start_matchmaking, start_script, self()})
+        send(pid, {:start_battle, start_script, self()})
 
         # This receive is a bit iffy and may cause problem with controlled shutdown
         # Ideally, the same way player work, there would be a GenServer decoupled
         # from the actual websocket connection, but for now, this poor's man
         # GenServer.call will have to do
         receive do
-          {:start_matchmaking_response, resp} -> resp
+          {:start_battle_response, resp} -> resp
         after
           10_000 -> {:error, :timeout}
         end
@@ -163,13 +163,13 @@ defmodule Teiserver.Autohost.TachyonHandler do
         details -> "#{reason} - #{details}"
       end
 
-    send(reply_to, {:start_matchmaking_response, {:error, msg}})
+    send(reply_to, {:start_battle_response, {:error, msg}})
   end
 
   defp notify_autohost_started(reply_to, %{"status" => "success", "data" => data}) do
     send(
       reply_to,
-      {:start_matchmaking_response,
+      {:start_battle_response,
        {:ok,
         %{
           ips: data["ips"],
