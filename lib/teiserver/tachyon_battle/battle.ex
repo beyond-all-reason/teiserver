@@ -36,6 +36,10 @@ defmodule Teiserver.TachyonBattle.Battle do
       autohost_timeout: Map.get(args, :autohost_timeout, 100)
     }
 
+    # we need an overall timeout to avoid any potential zombie process
+    # 8h is more than enough time for any online game
+    :timer.send_after(8 * 60 * 60_000, :battle_timeout)
+
     case Teiserver.Autohost.lookup_autohost(autohost_id) do
       {pid, _} ->
         Logger.info("init battle for autohost #{autohost_id}")
@@ -59,6 +63,9 @@ defmodule Teiserver.TachyonBattle.Battle do
     {:stop, :normal, state}
   end
 
+  def handle_info(:battle_timeout, state) do
+    Logger.info("Battle shutting down to save resources")
+    {:stop, :normal, state}
   end
 
   defp via_tuple(battle_id) do
