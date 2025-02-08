@@ -226,6 +226,10 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, Jason.encode!(response)}, state}
   end
 
+  def handle_command("messaging/send" = cmd_id, "request", _message_id, _msg, state) do
+    {:response, cmd_id, nil, state}
+  end
+
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)
