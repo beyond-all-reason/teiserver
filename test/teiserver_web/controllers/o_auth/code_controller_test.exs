@@ -88,7 +88,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
       client_id = data.client_id
       data = Map.drop(data, [:client_id])
-      auth_header = Plug.BasicAuth.encode_basic_auth(client_id, "")
+      auth_header = OAuth.encode_basic_auth(client_id, "")
 
       resp =
         conn
@@ -103,7 +103,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       data = get_valid_data(setup_data)
 
       client_id = data.client_id
-      auth_header = Plug.BasicAuth.encode_basic_auth(client_id, "")
+      auth_header = OAuth.encode_basic_auth(client_id, "")
 
       resp =
         conn
@@ -196,7 +196,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
     test "can also use basic auth",
          %{conn: conn, credential: credential, credential_secret: secret} do
       data = %{grant_type: "client_credentials"}
-      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, secret)
+      auth_header = OAuth.encode_basic_auth(credential.client_id, secret)
 
       conn =
         conn
@@ -212,7 +212,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
     test "basic auth check", %{conn: conn, credential: credential} do
       data = %{grant_type: "client_credentials"}
-      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, "lolnope")
+      auth_header = OAuth.encode_basic_auth(credential.client_id, "lolnope")
 
       conn =
         conn
@@ -228,7 +228,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       credential_secret: secret
     } do
       data = %{grant_type: "client_credentials", client_id: credential.client_id}
-      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, secret)
+      auth_header = OAuth.encode_basic_auth(credential.client_id, secret)
 
       conn =
         conn
@@ -244,7 +244,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       credential_secret: secret
     } do
       data = %{grant_type: "client_credentials", client_secret: secret}
-      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, secret)
+      auth_header = OAuth.encode_basic_auth(credential.client_id, secret)
 
       conn =
         conn
