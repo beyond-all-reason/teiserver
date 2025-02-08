@@ -63,7 +63,7 @@ defmodule Teiserver.Player.Session do
 
   @spec join_queues(T.userid(), [Matchmaking.queue_id()]) :: Matchmaking.join_result()
   def join_queues(user_id, queue_ids) do
-    GenServer.call(via_tuple(user_id), {:join_queues, queue_ids})
+    GenServer.call(via_tuple(user_id), {:matchmaking, {:join_queues, queue_ids}})
   end
 
   @doc """
@@ -71,7 +71,7 @@ defmodule Teiserver.Player.Session do
   """
   @spec leave_queues(T.userid()) :: Matchmaking.leave_result()
   def leave_queues(user_id) do
-    GenServer.call(via_tuple(user_id), :leave_queues)
+    GenServer.call(via_tuple(user_id), {:matchmaking, :leave_queues})
   end
 
   @doc """
@@ -81,7 +81,7 @@ defmodule Teiserver.Player.Session do
   def matchmaking_notify_found(user_id, queue_id, room_pid, timeout_ms) do
     GenServer.cast(
       via_tuple(user_id),
-      {:matchmaking_notify_found, queue_id, room_pid, timeout_ms}
+      {:matchmaking, {:notify_found, queue_id, room_pid, timeout_ms}}
     )
   end
 
@@ -90,17 +90,17 @@ defmodule Teiserver.Player.Session do
   """
   @spec matchmaking_ready(T.userid()) :: :ok | {:error, :no_match}
   def matchmaking_ready(user_id) do
-    GenServer.call(via_tuple(user_id), :matchmaking_ready)
+    GenServer.call(via_tuple(user_id), {:matchmaking, :ready})
   end
 
   @spec matchmaking_lost(T.userid(), Matchmaking.lost_reason()) :: :ok
   def matchmaking_lost(user_id, reason) do
-    GenServer.cast(via_tuple(user_id), {:matchmaking_lost, reason})
+    GenServer.cast(via_tuple(user_id), {:matchmaking, {:lost, reason}})
   end
 
   @spec matchmaking_found_update(T.userid(), non_neg_integer(), pid()) :: :ok
   def matchmaking_found_update(user_id, ready_count, room_pid) do
-    GenServer.cast(via_tuple(user_id), {:matchmaking_found_update, ready_count, room_pid})
+    GenServer.cast(via_tuple(user_id), {:matchmaking, {:found_update, ready_count, room_pid}})
   end
 
   @spec battle_start(T.userid(), Teiserver.Autohost.start_response()) :: :ok
@@ -178,10 +178,10 @@ defmodule Teiserver.Player.Session do
   end
 
   # this should never happen because the json schema already checks for minimum length
-  def handle_call({:join_queues, []}, _from, state),
+  def handle_call({:matchmaking, {:join_queues, []}}, _from, state),
     do: {:reply, {:error, :invalid_request}, state}
 
-  def handle_call({:join_queues, queue_ids}, _from, state) do
+  def handle_call({:matchmaking, {:join_queues, queue_ids}}, _from, state) do
     case state.matchmaking do
       :no_matchmaking ->
         case join_all_queues(state.user.id, queue_ids, []) do
@@ -201,7 +201,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call(:leave_queues, _from, state) do
+  def handle_call({:matchmaking, :leave_queues}, _from, state) do
     case state.matchmaking do
       :no_matchmaking ->
         {:reply, {:error, :not_queued}, state}
@@ -218,7 +218,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call(:matchmaking_ready, _from, state) do
+  def handle_call({:matchmaking, :ready}, _from, state) do
     case state.matchmaking do
       {:pairing, %{room: {room_pid, _}} = pairing_state} ->
         password = :crypto.strong_rand_bytes(16) |> Base.encode16()
@@ -244,13 +244,13 @@ defmodule Teiserver.Player.Session do
 
   @impl true
   def handle_cast(
-        {:matchmaking_notify_found, queue_id, room_pid, timeout_ms},
+        {:matchmaking, {:notify_found, queue_id, room_pid, timeout_ms}},
         %{matchmaking: {:searching, %{joined_queues: queue_ids}}} = state
       ) do
     if not Enum.member?(queue_ids, queue_id) do
       {:noreply, state}
     else
-      state = send_to_player({:matchmaking_notify_found, queue_id, timeout_ms}, state)
+      state = send_to_player({:matchmaking, {:notify_found, queue_id, timeout_ms}}, state)
 
       other_queues =
         for qid <- queue_ids, qid != queue_id do
@@ -274,7 +274,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:matchmaking_notify_found, _queue_id, room_pid, _}, state) do
+  def handle_cast({:matchmaking, {:notify_found, _queue_id, room_pid, _}}, state) do
     # we're not searching anything. This can happen as a race when two queues
     # match the same player at the same time.
     # Do log it since it should not happen too often unless something is wrong
@@ -284,30 +284,30 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
-  def handle_cast({:matchmaking_lost, reason}, state) do
+  def handle_cast({:matchmaking, {:lost, reason}}, state) do
     case state.matchmaking do
       :no_matchmaking ->
         {:noreply, state}
 
       {:searching, _} ->
-        state = send_to_player(:matchmaking_notify_lost, state)
+        state = send_to_player({:matchmaking, :notify_lost}, state)
         {:noreply, state}
 
       {:pairing,
        %{paired_queue: q_id, room: {_, ref}, frozen_queues: frozen_queues, readied: readied}} ->
         Process.demonitor(ref, [:flush])
         q_ids = [q_id | frozen_queues]
-        state = send_to_player(:matchmaking_notify_lost, state)
+        state = send_to_player({:matchmaking, :notify_lost}, state)
 
         case reason do
           :timeout when not readied ->
             state = leave_all_queues(q_ids, state)
-            state = send_to_player({:matchmaking_cancelled, reason}, state)
+            state = send_to_player({:matchmaking, {:cancelled, reason}}, state)
             {:noreply, state}
 
           {:server_error, _details} ->
             state = leave_all_queues(q_ids, state)
-            state = send_to_player({:matchmaking_cancelled, reason}, state)
+            state = send_to_player({:matchmaking, {:cancelled, reason}}, state)
             {:noreply, state}
 
           _ ->
@@ -317,17 +317,17 @@ defmodule Teiserver.Player.Session do
                 {:noreply, put_in(state.matchmaking, new_mm_state)}
 
               {:error, _err} ->
-                state = send_to_player({:matchmaking_cancelled, :server_error}, state)
+                state = send_to_player({:matchmaking, {:cancelled, :server_error}}, state)
                 {:noreply, %{state | matchmaking: initial_matchmaking_state()}}
             end
         end
     end
   end
 
-  def handle_cast({:matchmaking_found_update, current, room_pid}, state) do
+  def handle_cast({:matchmaking, {:found_update, current, room_pid}}, state) do
     case state.matchmaking do
       {:pairing, %{room: {^room_pid, _}}} ->
-        {:noreply, send_to_player({:matchmaking_found_update, current}, state)}
+        {:noreply, send_to_player({:matchmaking, {:found_update, current}}, state)}
 
       _ ->
         {:noreply, state}

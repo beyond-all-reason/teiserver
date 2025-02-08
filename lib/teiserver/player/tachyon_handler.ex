@@ -75,7 +75,7 @@ defmodule Teiserver.Player.TachyonHandler do
      {1008, "Server error: session process exited with reason #{inspect(reason)}"}, state}
   end
 
-  def handle_info({:matchmaking_notify_found, queue_id, timeout_ms}, state) do
+  def handle_info({:matchmaking, {:notify_found, queue_id, timeout_ms}}, state) do
     resp =
       Schema.event("matchmaking/found", %{
         queueId: queue_id,
@@ -85,7 +85,7 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, resp |> Jason.encode!()}, state}
   end
 
-  def handle_info({:matchmaking_found_update, ready_count}, state) do
+  def handle_info({:matchmaking, {:found_update, ready_count}}, state) do
     resp =
       Schema.event("matchmaking/foundUpdate", %{
         readyCount: ready_count
@@ -94,12 +94,12 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, resp |> Jason.encode!()}, state}
   end
 
-  def handle_info(:matchmaking_notify_lost, state) do
+  def handle_info({:matchmaking, :notify_lost}, state) do
     resp = Schema.event("matchmaking/lost")
     {:push, {:text, resp |> Jason.encode!()}, state}
   end
 
-  def handle_info({:matchmaking_cancelled, reason}, state) do
+  def handle_info({:matchmaking, {:cancelled, reason}}, state) do
     data =
       case reason do
         :cancel -> %{reason: :intentional}
