@@ -41,6 +41,27 @@ defmodule Teiserver.Player.Session do
           matchmaking: matchmaking_state()
         }
 
+  @impl true
+  def init({conn_pid, user}) do
+    ref = Process.monitor(conn_pid)
+    Logger.metadata(user_id: user.id)
+
+    state = %{
+      user: user,
+      mon_ref: ref,
+      conn_pid: conn_pid,
+      matchmaking: initial_matchmaking_state(),
+    }
+
+    Logger.debug("init session #{inspect(self())}")
+
+    {:ok, state}
+  end
+
+  defp initial_matchmaking_state() do
+    :no_matchmaking
+  end
+
   @spec conn_state(T.userid()) :: conn_state()
   def conn_state(user_id) do
     GenServer.call(via_tuple(user_id), :conn_state)
@@ -132,27 +153,6 @@ defmodule Teiserver.Player.Session do
   catch
     :exit, _ ->
       :died
-  end
-
-  @impl true
-  def init({conn_pid, user}) do
-    ref = Process.monitor(conn_pid)
-    Logger.metadata(user_id: user.id)
-
-    state = %{
-      user: user,
-      mon_ref: ref,
-      conn_pid: conn_pid,
-      matchmaking: initial_matchmaking_state()
-    }
-
-    Logger.debug("init session #{inspect(self())}")
-
-    {:ok, state}
-  end
-
-  defp initial_matchmaking_state() do
-    :no_matchmaking
   end
 
   @impl true
