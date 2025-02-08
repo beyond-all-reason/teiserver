@@ -5,7 +5,10 @@ defmodule Teiserver.TachyonBattle.BattleTest do
 
   describe "start battle" do
     test "happy path" do
-      {:ok, battle_id} = Battle.start_battle("irrelevant_autohost_id")
+      autohost_id = 123
+      Teiserver.Autohost.Registry.register(%{id: autohost_id})
+      on_exit(fn -> Teiserver.Autohost.Registry.unregister(autohost_id) end)
+      {:ok, battle_id} = Battle.start_battle(autohost_id)
       poll_until_some(fn -> Battle.lookup(battle_id) end)
     end
   end

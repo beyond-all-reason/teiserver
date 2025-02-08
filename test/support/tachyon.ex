@@ -273,4 +273,11 @@ defmodule Teiserver.Support.Tachyon do
   def poll_until_some(f, opts \\ []) do
     poll_until(f, fn x -> not is_nil(x) end, opts)
   end
+
+  @doc """
+  the dual of poll_until_some
+  """
+  def poll_until_nil(f, opts \\ []) do
+    poll_until(f, &is_nil/1, opts)
+  end
 end
