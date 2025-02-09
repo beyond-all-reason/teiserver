@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.Battle.MatchLive.Show do
   @moduledoc false
-  alias Teiserver.Account.Accolade
   use TeiserverWeb, :live_view
   alias Teiserver.{Account, Battle, Game, Telemetry}
   alias Teiserver.Battle.{MatchLib, BalanceLib}

@@ -360,9 +360,9 @@ defmodule Teiserver.Account.AccoladeLib do
   def get_viewable_accolade_types(is_ally?) do
     restriction =
       if is_ally? do
-        "ally"
+        "Ally"
       else
-        "enemy"
+        "Enemy"
       end
 
     query =

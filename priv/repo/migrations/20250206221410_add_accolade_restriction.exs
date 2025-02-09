@@ -9,7 +9,7 @@ defmodule Teiserver.Repo.Migrations.AddAccoladeRestriction do
     # Restrict new column to certain values
     constraint_query = """
      ALTER TABLE teiserver_account_badge_types
-     ADD CONSTRAINT restriction_constraint check(restriction in ('ally', 'enemy') OR restriction is null);
+     ADD CONSTRAINT restriction_constraint check(restriction in ('Ally', 'Enemy') OR restriction is null);
 
 
     """
@@ -20,10 +20,10 @@ defmodule Teiserver.Repo.Migrations.AddAccoladeRestriction do
 
     execute(constraint_query, rollback_query)
 
-    # Restrict new column to certain values
+    # UPDATE Good Teammate accolade to be ally only
     update_restrictions = """
      UPDATE teiserver_account_badge_types
-      set restriction = 'ally'
+      set restriction = 'Ally'
       where lower(name) = 'good teammate';
     """
 
