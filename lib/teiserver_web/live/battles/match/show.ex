@@ -644,6 +644,9 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
                 <% end %>
               </tbody>
             </table>
+            <a phx-click="return-to-match" class="btn btn-sm btn-secondary">
+              Cancel
+            </a>
           </div>
         </div>
       </div>
