@@ -601,7 +601,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "profile.Num matches for rating to equal skill",
       section: "Profiles",
       type: "integer",
-      default: 30,
+      default: 20,
       permissions: ["Admin"],
       description: "The minimum number of matches required for match rating to equal skill"
     })
