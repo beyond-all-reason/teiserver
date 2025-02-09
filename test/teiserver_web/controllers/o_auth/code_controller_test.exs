@@ -40,14 +40,14 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
     %{code: code, code_attrs: attrs}
   end
 
-  defp setup_autohost(_context) do
-    {:ok, autohost} = Teiserver.Autohost.create_autohost(%{name: "testing_autohost"})
-    %{autohost: autohost}
+  defp setup_bot(_context) do
+    {:ok, bot} = Teiserver.Bot.create_bot(%{name: "testing_bot"})
+    %{bot: bot}
   end
 
-  defp setup_credential(%{autohost: autohost, app: app}) do
+  defp setup_credential(%{bot: bot, app: app}) do
     secret = "very-much-secret"
-    {:ok, cred} = OAuth.create_credentials(app, autohost, "cred-client-id", secret)
+    {:ok, cred} = OAuth.create_credentials(app, bot, "cred-client-id", secret)
     %{credential: cred, credential_secret: secret}
   end
 
@@ -161,7 +161,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   end
 
   describe "get token from client credentials" do
-    setup [:setup_conn, :setup_app, :setup_autohost, :setup_credential]
+    setup [:setup_conn, :setup_app, :setup_bot, :setup_credential]
 
     test "it works with the right params", %{
       conn: conn,

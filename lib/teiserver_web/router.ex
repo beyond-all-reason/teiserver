@@ -61,16 +61,12 @@ defmodule TeiserverWeb.Router do
     plug(Guardian.Plug.EnsureAuthenticated)
   end
 
-  pipeline :protected_api do
+  # a pipeline to use for any api endpoint consuming json and expecting
+  # authenticated access with an OAuth bearer token
+  pipeline :oauth_api do
     plug(:accepts, ["json"])
-    plug(:fetch_session)
-    plug(:protect_from_forgery)
-    plug(:put_secure_browser_headers)
     plug(Teiserver.Logging.LoggingPlug)
-    plug(Teiserver.Account.AuthPipeline)
-    plug(Teiserver.Account.AuthPlug)
-    plug(Teiserver.Plugs.CachePlug)
-    plug(Guardian.Plug.EnsureAuthenticated)
+    plug(Teiserver.OAuth.Plug.EnsureAuthenticated)
   end
 
   scope "/", TeiserverWeb.General do
@@ -304,7 +300,7 @@ defmodule TeiserverWeb.Router do
       live "/chat/:id/*userids", MatchLive.Chat, :index
 
       live "/", MatchLive.Index, :index
-      live "/:id", MatchLive.Show, :overview
+      live "/:id", MatchLive.Show, :players
       live "/:id/overview", MatchLive.Show, :overview
       live "/:id/players", MatchLive.Show, :players
       live "/:id/ratings", MatchLive.Show, :ratings
@@ -456,6 +452,12 @@ defmodule TeiserverWeb.Router do
     pipe_through([:token_api])
 
     post "/battle/create", BattleController, :create
+  end
+
+  scope "/teiserver/api/admin", TeiserverWeb.API.Admin do
+    pipe_through([:oauth_api])
+
+    post "/assets/update_maps", AssetController, :update_maps
   end
 
   # ADMIN
@@ -691,12 +693,12 @@ defmodule TeiserverWeb.Router do
     get("/lobbies/:id/lobby_chat/:page", LobbyController, :lobby_chat)
 
     resources("/oauth_application", OAuthApplicationController)
-    resources("/autohost", AutohostController)
+    resources("/bot", BotController)
 
     # Ideally credentials would get the full CRUD routes, but I can't be arsed
     # right now for an "mvp". Only autohost need credentials so far, so bind
     # the two
-    post("/autohost/:id/credential", AutohostController, :create_credential)
-    delete("/autohost/:id/credential/:cred_id", AutohostController, :delete_credential)
+    post("/bot/:id/credential", BotController, :create_credential)
+    delete("/bot/:id/credential/:cred_id", BotController, :delete_credential)
   end
 end

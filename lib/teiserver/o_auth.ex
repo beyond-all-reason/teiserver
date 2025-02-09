@@ -1,7 +1,7 @@
 defmodule Teiserver.OAuth do
   alias Teiserver.Repo
 
-  alias Teiserver.Autohost.Autohost
+  alias Teiserver.Bot.Bot
 
   alias Teiserver.OAuth.{
     Application,
@@ -100,6 +100,15 @@ defmodule Teiserver.OAuth do
   defp localhost?(_), do: false
 
   @doc """
+  Some applications are not meant to allow authorization code grants
+  typically the ones meant for bots
+  """
+  @spec can_create_code?(Application.t()) :: boolean()
+  def can_create_code?(%Application{} = app) do
+    ApplicationQueries.application_allows_code?(app)
+  end
+
+  @doc """
   Create an authorization token for the given user and application.
   The token scopes are the same as the application
   """
@@ -114,7 +123,7 @@ defmodule Teiserver.OAuth do
           },
           options()
         ) ::
-          {:ok, Code.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Code.t()} | {:error, Ecto.Changeset.t() | :invalid_flow}
   def create_code(user, attrs, opts \\ [])
 
   def create_code(%User{} = user, attrs, opts) do
@@ -127,23 +136,28 @@ defmodule Teiserver.OAuth do
 
   def create_code(user_id, attrs, opts) do
     now = Keyword.get(opts, :now, Timex.now())
+    app_id = attrs.id
 
-    # don't do any validation on the challenge yet, this is done when exchanging
-    # the code for a token
-    attrs = %{
-      value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
-      owner_id: user_id,
-      application_id: attrs.id,
-      scopes: attrs.scopes,
-      expires_at: Timex.add(now, Timex.Duration.from_minutes(5)),
-      redirect_uri: Map.get(attrs, :redirect_uri),
-      challenge: Map.get(attrs, :challenge),
-      challenge_method: Map.get(attrs, :challenge_method)
-    }
+    if ApplicationQueries.application_allows_code?(app_id) do
+      # don't do any validation on the challenge yet, this is done when exchanging
+      # the code for a token
+      attrs = %{
+        value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
+        owner_id: user_id,
+        application_id: app_id,
+        scopes: attrs.scopes,
+        expires_at: Timex.add(now, Timex.Duration.from_minutes(5)),
+        redirect_uri: Map.get(attrs, :redirect_uri),
+        challenge: Map.get(attrs, :challenge),
+        challenge_method: Map.get(attrs, :challenge_method)
+      }
 
-    %Code{}
-    |> Code.changeset(attrs)
-    |> Repo.insert()
+      %Code{}
+      |> Code.changeset(attrs)
+      |> Repo.insert()
+    else
+      {:error, :invalid_flow}
+    end
   end
 
   @doc """
@@ -166,7 +180,11 @@ defmodule Teiserver.OAuth do
 
   @spec create_token(
           User.t() | T.userid(),
-          %{id: integer(), scopes: Application.scopes()},
+          %{
+            :id => integer(),
+            :scopes => Application.scopes(),
+            optional(:original_scopes) => Application.scopes()
+          },
           create_refresh: boolean() | options()
         ) ::
           {:ok, Token.t()} | {:error, Ecto.Changeset.t()}
@@ -192,6 +210,7 @@ defmodule Teiserver.OAuth do
         value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
         application_id: application.id,
         scopes: application.scopes,
+        original_scopes: Map.get(application, :original_scopes, application.scopes),
         expires_at: Timex.add(now, Timex.Duration.from_minutes(30)),
         type: :access
       }
@@ -203,6 +222,7 @@ defmodule Teiserver.OAuth do
           value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
           application_id: application.id,
           scopes: application.scopes,
+          original_scopes: application.scopes,
           # there's no real recourse when the refresh token expires and it's
           # quite annoying, so make it "never" expire.
           expires_at: Timex.add(now, Timex.Duration.from_days(365 * 100)),
@@ -313,7 +333,8 @@ defmodule Teiserver.OAuth do
     end
   end
 
-  @spec refresh_token(Token.t(), options()) :: {:ok, Token.t()} | {:error, term()}
+  @spec refresh_token(Token.t(), [option() | {:scopes, Application.scopes()}]) ::
+          {:ok, Token.t()} | {:error, term()}
   def refresh_token(token, opts \\ [])
 
   def refresh_token(token, _opts) when token.type != :refresh do
@@ -335,34 +356,47 @@ defmodule Teiserver.OAuth do
             TokenQueries.get_token(token.value)
           end
 
-        Repo.transaction(fn ->
-          {:ok, new_token} = create_token(token.owner_id, token.application, opts)
-          TokenQueries.delete_refresh_token(token)
-          new_token
-        end)
+        refresh_attr = %{
+          id: token.application.id,
+          scopes: Keyword.get(opts, :scopes, token.scopes),
+          original_scopes: token.original_scopes
+        }
+
+        tx_result =
+          Repo.transaction(fn ->
+            with {:ok, new_token} <- create_token(token.owner_id, refresh_attr, opts) do
+              TokenQueries.delete_refresh_token(token)
+              new_token
+            end
+          end)
+
+        case tx_result do
+          {:ok, {:error, err}} -> {:error, err}
+          other -> other
+        end
     end
   end
 
   @doc """
-  Given a client_id, an application/app_id an autohost/id and a cleartext secret, hash and persist it
+  Given a client_id, an application/app_id a bot/id and a cleartext secret, hash and persist it
   """
   @spec create_credentials(
           Application.t() | Application.app_id(),
-          Autohost.t() | Autohost.id(),
+          Bot.t() | Bot.id(),
           String.t(),
           String.t()
         ) ::
           {:ok, Credential.t()} | {:error, term()}
-  def create_credentials(%Application{} = app, autohost, client_id, secret),
-    do: create_credentials(app.id, autohost, client_id, secret)
+  def create_credentials(%Application{} = app, bot, client_id, secret),
+    do: create_credentials(app.id, bot, client_id, secret)
 
-  def create_credentials(app_id, %Autohost{} = autohost, client_id, secret),
-    do: create_credentials(app_id, autohost.id, client_id, secret)
+  def create_credentials(app_id, %Bot{} = bot, client_id, secret),
+    do: create_credentials(app_id, bot.id, client_id, secret)
 
-  def create_credentials(app_id, autohost_id, client_id, secret) do
+  def create_credentials(app_id, bot_id, client_id, secret) do
     attrs = %{
       application_id: app_id,
-      autohost_id: autohost_id,
+      bot_id: bot_id,
       client_id: client_id,
       hashed_secret: Argon2.hash_pwd_salt(secret)
     }
@@ -410,9 +444,7 @@ defmodule Teiserver.OAuth do
 
   @spec get_token_from_credentials(Credential.t()) :: {:ok, Token.t()} | {:error, term()}
   def get_token_from_credentials(credential) do
-    do_create_token(%{autohost_id: credential.autohost_id}, credential.application,
-      create_refresh: false
-    )
+    do_create_token(%{bot_id: credential.bot_id}, credential.application, create_refresh: false)
   end
 
   @doc """

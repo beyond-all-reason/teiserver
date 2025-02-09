@@ -38,20 +38,37 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   @impl Handler
-  @spec init(%{user: T.user()}) :: WebSock.handle_result()
+  @spec init(%{user: T.user()}) :: Handler.result()
   def init(initial_state) do
     # this is inside the process that maintain the connection
     {:ok, session_pid} = setup_session(initial_state.user)
     sess_monitor = Process.monitor(session_pid)
 
-    {:ok,
-     initial_state |> Map.put(:sess_monitor, sess_monitor) |> Map.put(:pending_responses, %{})}
+    state =
+      initial_state |> Map.put(:sess_monitor, sess_monitor) |> Map.put(:pending_responses, %{})
+
+    user = initial_state.user
+    Logger.metadata(user_id: user.id)
+
+    event = %{
+      users: [
+        %{
+          userId: to_string(user.id),
+          username: user.name,
+          countryCode: user.country,
+          status: :menu,
+          clanId: user.clan_id
+        }
+      ]
+    }
+
+    {:event, "user/updated", event, state}
   end
 
   @impl Handler
   def handle_info({:DOWN, _, :process, _, reason}, state) do
     Logger.warning(
-      "Session for player #{state.user.id} went down because #{inspect(reason)}, terminating connection"
+      "Session for player went down because #{inspect(reason)}, terminating connection"
     )
 
     {:stop, :normal,
@@ -101,7 +118,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_info({:timeout, message_id}, state)
       when is_map_key(state.pending_responses, message_id) do
-    Logger.debug("User(#{state.user.id}) did not reply in time to request with id #{message_id}")
+    Logger.debug("User did not reply in time to request with id #{message_id}")
     {:stop, :normal, state}
   end
 

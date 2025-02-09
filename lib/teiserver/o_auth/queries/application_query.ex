@@ -16,7 +16,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   @doc """
   Returns the application for the given id
   """
-  @spec get_application_by_id(String.t()) :: Application.t() | nil
+  @spec get_application_by_id(Application.id()) :: Application.t() | nil
   def get_application_by_id(nil), do: nil
 
   def get_application_by_id(id) do
@@ -35,6 +35,15 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   @spec list_applications() :: [Application.t()]
   def list_applications() do
     base_query() |> preload(:owner) |> Repo.all()
+  end
+
+  def application_allows_code?(%Application{} = app) do
+    not Enum.empty?(app.redirect_uris)
+  end
+
+  def application_allows_code?(id) do
+    get_application_by_id(id)
+    |> application_allows_code?()
   end
 
   @doc """

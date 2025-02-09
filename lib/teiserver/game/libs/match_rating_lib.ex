@@ -493,7 +493,8 @@ defmodule Teiserver.Game.MatchRatingLib do
         uncertainty: new_uncertainty,
         rating_value_change: new_rating_value - user_rating.rating_value,
         skill_change: new_skill - user_rating.skill,
-        uncertainty_change: new_uncertainty - user_rating.uncertainty
+        uncertainty_change: new_uncertainty - user_rating.uncertainty,
+        num_matches: new_num_matches
       }
     }
   end

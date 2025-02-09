@@ -30,6 +30,23 @@ defmodule Teiserver.OAuth.CodeTest do
     assert {:error, :expired} = OAuth.get_valid_code(code.value)
   end
 
+  test "cannot get code for apps with no redirect uris", %{user: user, app: app} do
+    updated_app =
+      OAuthFixtures.update_app(app, %{redirect_uris: []})
+
+    attrs = create_code_attrs(user, updated_app)
+
+    code_attrs = %{
+      id: app.id,
+      scopes: app.scopes,
+      redirect_uri: nil,
+      challenge: attrs.challenge,
+      challenge_method: attrs.challenge_method
+    }
+
+    assert {:error, :invalid_flow} = OAuth.create_code(user, code_attrs)
+  end
+
   test "can exchange valid code for token", %{user: user, app: app} do
     assert {:ok, code, attrs} = create_code(user, app)
     assert {:ok, token} = OAuth.exchange_code(code, attrs._verifier, attrs.redirect_uri)
@@ -95,13 +112,16 @@ defmodule Teiserver.OAuth.CodeTest do
     assert {:error, :no_code} = OAuth.get_valid_code(code.value)
   end
 
-  defp create_code(user, app, opts \\ []) do
+  defp create_code_attrs(user, app, opts \\ []) do
     expires_at =
       Keyword.get(opts, :expires_at, Timex.add(DateTime.utc_now(), Timex.Duration.from_days(1)))
 
-    attrs =
-      OAuthFixtures.code_attrs(user.id, app)
-      |> Map.put(:expires_at, expires_at)
+    OAuthFixtures.code_attrs(user.id, app)
+    |> Map.put(:expires_at, expires_at)
+  end
+
+  defp create_code(user, app, opts \\ []) do
+    attrs = create_code_attrs(user, app, opts)
 
     code = OAuthFixtures.create_code(attrs)
     {:ok, code, attrs}

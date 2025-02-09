@@ -6,6 +6,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Lobby
+  alias Teiserver.Account.AccoladeLib
 
   @impl true
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -34,6 +35,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
           |> assign(:role_data, Account.RoleLib.role_data())
           |> assign(:client, Account.get_client_by_id(userid))
           |> get_relationships_and_permissions
+          |> assign_accolade_notification
       end
 
     {:ok, socket}
@@ -357,5 +359,21 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     |> assign(:friendship, nil)
     |> assign(:friendship_request, nil)
     |> assign(:profile_permissions, [])
+  end
+
+  def assign_accolade_notification(socket) do
+    user_id = socket.assigns.user.id
+    current_user_id = socket.assigns.current_user.id
+    days = 1
+
+    message =
+      with true <- user_id == current_user_id,
+           %{map: map, giver_name: giver_name} <- AccoladeLib.recent_accolade(user_id, days) do
+        "You have recently received an accolade from #{giver_name} for your match in #{map}!"
+      else
+        _ -> nil
+      end
+
+    socket |> assign(:accolade_notification, message)
   end
 end

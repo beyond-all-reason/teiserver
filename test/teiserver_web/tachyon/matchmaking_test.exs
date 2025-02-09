@@ -1,4 +1,4 @@
-defmodule Teiserver.Matchmaking.MatchmakingTest do
+defmodule Teiserver.Tachyon.MatchmakingTest do
   use TeiserverWeb.ConnCase
   alias Teiserver.Support.Tachyon
   alias Teiserver.OAuthFixtures
@@ -410,12 +410,12 @@ defmodule Teiserver.Matchmaking.MatchmakingTest do
   end
 
   def setup_autohost(context) do
-    autohost = Teiserver.AutohostFixtures.create_autohost()
+    autohost = Teiserver.BotFixtures.create_bot()
 
     token =
       OAuthFixtures.token_attrs(nil, context.app)
       |> Map.drop([:owner_id])
-      |> Map.put(:autohost_id, autohost.id)
+      |> Map.put(:bot_id, autohost.id)
       |> OAuthFixtures.create_token()
 
     client = Tachyon.connect_autohost!(token, 10, 0)

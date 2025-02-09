@@ -1,4 +1,4 @@
-defmodule Teiserver.Matchmaking.QueueSynest do
+defmodule Teiserver.Matchmaking.QueueTest do
   use Teiserver.DataCase, async: true
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueServer

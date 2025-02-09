@@ -29,8 +29,21 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     assert ratings[user1.id].skill == 27.637760127073694
     assert ratings[user2.id].skill == 22.362239872926306
 
+    # Check num_matches in teiserver_account_ratings table
     assert ratings[user1.id].num_matches == 1
     assert ratings[user1.id].num_matches == 1
+
+    # Check num_matches in teiserver_game_rating_logs table
+    rating_logs =
+      Game.list_rating_logs(
+        search: [
+          match_id: match.id
+        ],
+        limit: :infinity
+      )
+
+    assert Enum.at(rating_logs, 0).value["num_matches"] == 1
+    assert Enum.at(rating_logs, 1).value["num_matches"] == 1
 
     # Create another match
     match = create_fake_match(user1.id, user2.id)

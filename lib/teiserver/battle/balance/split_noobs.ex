@@ -98,8 +98,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
         length(state.noobs) > 0 ->
           noobs_string =
             Enum.map(state.noobs, fn x ->
-              chev = Map.get(x, :rank, 0) + 1
-              "#{x.name} (chev: #{chev}, σ: #{format(x.uncertainty)})"
+              log_noob(x)
             end)
 
           [
@@ -242,7 +241,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
 
     logs = [
       "Perform brute force with the following players to get the best score.",
-      "Players: #{Enum.join(Enum.map(state.top_experienced, fn x -> x.name end), ", ")}",
+      "Players: #{Enum.join(Enum.map(state.top_experienced, fn x -> log_player(x) end), ", ")}",
       @splitter,
       "Brute force result:",
       "Team rating diff penalty: #{format(combo_result.rating_diff_penalty)}",
@@ -251,7 +250,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
       "Score: #{format(combo_result.score)} (lower is better)",
       @splitter,
       "Draft remaining players (ordered from best to worst).",
-      "Remaining: #{Enum.join(Enum.map(remaining, fn x -> x.name end), ", ")}"
+      "Remaining: #{Enum.join(Enum.map(remaining, fn x -> log_player(x) end), ", ")}"
     ]
 
     default_acc = combo_result
@@ -263,6 +262,16 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
       Map.put(acc, picking_team, [noob | acc[picking_team]])
     end)
     |> Map.put(:logs, logs)
+  end
+
+  def log_player(%{name: name, rating: rating}) do
+    "#{name} (#{format(rating)})"
+  end
+
+  def log_noob(%{name: name, rating: rating, uncertainty: uncertainty, rank: rank}) do
+    chev = rank || 0 + 1
+
+    "#{name} (#{format(rating)}, chev: #{chev}, σ: #{format(uncertainty)})"
   end
 
   def get_picking_team(first_team, second_team) do

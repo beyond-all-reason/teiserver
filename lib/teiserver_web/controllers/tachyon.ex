@@ -9,7 +9,7 @@ defmodule TeiserverWeb.TachyonController do
   """
   use TeiserverWeb, :controller
 
-  plug Teiserver.OAuth.TokenPlug
+  plug Teiserver.OAuth.Plug.EnsureAuthenticated, scopes: ["tachyon.lobby"]
 
   @subprotocol_hdr_name "sec-websocket-protocol"
 
@@ -51,7 +51,7 @@ defmodule TeiserverWeb.TachyonController do
           not is_nil(token.owner_id) ->
             {:ok, supported_version, Teiserver.Player.TachyonHandler}
 
-          not is_nil(token.autohost_id) ->
+          not is_nil(token.bot_id) ->
             {:ok, supported_version, Teiserver.Autohost.TachyonHandler}
 
           true ->

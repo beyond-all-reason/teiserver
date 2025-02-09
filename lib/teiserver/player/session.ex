@@ -128,6 +128,7 @@ defmodule Teiserver.Player.Session do
   @impl true
   def init({conn_pid, user}) do
     ref = Process.monitor(conn_pid)
+    Logger.metadata(user_id: user.id)
 
     state = %{
       user: user,
@@ -136,7 +137,7 @@ defmodule Teiserver.Player.Session do
       matchmaking: initial_matchmaking_state()
     }
 
-    Logger.debug("init session #{inspect(self())} for player #{user.id}")
+    Logger.debug("init session #{inspect(self())}")
 
     {:ok, state}
   end
@@ -146,13 +147,11 @@ defmodule Teiserver.Player.Session do
   end
 
   @impl true
-  def handle_call({:replace, _}, _from, state) when is_nil(state.conn_pid),
-    do: {:reply, :ok, state}
-
   def handle_call({:replace, new_conn_pid}, _from, state) do
     Process.demonitor(state.mon_ref, [:flush])
 
     mon_ref = Process.monitor(new_conn_pid)
+    Logger.info("session reused")
 
     {:reply, :ok, %{state | conn_pid: new_conn_pid, mon_ref: mon_ref}}
   end
@@ -279,9 +278,7 @@ defmodule Teiserver.Player.Session do
     # we're not searching anything. This can happen as a race when two queues
     # match the same player at the same time.
     # Do log it since it should not happen too often unless something is wrong
-    Logger.info(
-      "Got a matchmaking found but in state #{inspect(state.matchmaking)} for user #{inspect(state.user.id)}"
-    )
+    Logger.info("Got a matchmaking found but in state #{inspect(state.matchmaking)}")
 
     Matchmaking.cancel(room_pid, state.user.id)
     {:noreply, state}
@@ -353,7 +350,7 @@ defmodule Teiserver.Player.Session do
 
       _ ->
         Logger.warning(
-          "User #{state.user.id} received a request to start a battle but is not in a state to do so #{inspect(state)}"
+          "User received a request to start a battle but is not in a state to do so #{inspect(state)}"
         )
 
         {:noreply, state}
@@ -364,8 +361,8 @@ defmodule Teiserver.Player.Session do
   def handle_info({:DOWN, ref, :process, _, _reason}, state) when ref == state.mon_ref do
     # we don't care about cancelling the timer if the player reconnects since reconnection
     # should be fairly low (and rate limited) so too many messages isn't an issue
-    {:ok, _} = :timer.send_after(30_000, :player_timeout)
-    Logger.debug("Player #{state.user.id} disconnected abruptly")
+    {:ok, _} = :timer.send_after(2_000, :player_timeout)
+    Logger.info("Player disconnected abruptly")
     {:noreply, %{state | conn_pid: nil}}
   end
 
@@ -391,7 +388,7 @@ defmodule Teiserver.Player.Session do
 
   def handle_info(:player_timeout, state) do
     if is_nil(state.conn_pid) do
-      Logger.debug("Player #{state.user.id} timed out, stopping session")
+      Logger.debug("Player timed out, stopping session")
       {:stop, :normal, state}
     else
       {:noreply, state}

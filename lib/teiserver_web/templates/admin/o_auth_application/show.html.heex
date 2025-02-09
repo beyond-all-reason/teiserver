@@ -14,7 +14,11 @@
           </tr>
           <tr>
             <td>owner</td>
-            <td><%= @app.owner.name %> (<%= @app.owner.email %>)</td>
+            <%= if is_nil(@app.owner) do %>
+              <td>No owner</td>
+            <% else %>
+              <td><%= @app.owner.name %> (<%= @app.owner.email %>)</td>
+            <% end %>
           </tr>
           <tr>
             <td>description</td>

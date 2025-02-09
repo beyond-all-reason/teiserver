@@ -45,7 +45,7 @@ defmodule Teiserver.Tachyon.Handler do
   @doc """
   Same as `WebSock.init/1`
   """
-  @callback init(term()) :: WebSock.handle_result()
+  @callback init(term()) :: result()
 
   @doc """
   Same as `WebSock.handle_info/2`

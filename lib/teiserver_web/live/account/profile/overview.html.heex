@@ -219,6 +219,20 @@
         </div>
       <% end %>
     <% end %>
+
+    <div
+      :if={@accolade_notification}
+      class="alert alert-success"
+      role="alert"
+      style="display: flex;"
+    >
+      <span style="flex: 1">
+        <%= @accolade_notification %>&nbsp;
+      </span>
+      <a href={~p"/profile/#{@user.id}/accolades"} class="btn btn-success btn-sm">
+        <i class="fa-solid fa-award"></i> &nbsp; View Accolades
+      </a>
+    </div>
     <br /><br /> Once we have some privacy controls we will be adding:
     <ul>
       <li>Recent matches</li>

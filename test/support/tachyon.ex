@@ -15,18 +15,28 @@ defmodule Teiserver.Support.Tachyon do
   @doc """
   connects the given user and returns the ws client
   """
-  def connect(%Teiserver.OAuth.Token{} = token) do
-    opts = connect_options(token)
+  def connect(x, opts \\ [swallow_first_event: true])
 
-    {:ok, client} = WSC.connect(tachyon_url(), opts)
+  def connect(%Teiserver.OAuth.Token{} = token, opts) do
+    connect_opts = connect_options(token)
+
+    {:ok, client} = WSC.connect(tachyon_url(), connect_opts)
+
+    # by default, swallow the user/updated event sent at login
+    swallow = Keyword.get(opts, :swallow_first_event, true)
+
+    if swallow and not is_nil(token.owner_id) do
+      {:ok, _user_updated} = recv_message(client)
+    end
+
     ExUnit.Callbacks.on_exit(fn -> WSC.disconnect(client) end)
     client
   end
 
-  def connect(user) do
+  def connect(user, opts) do
     %{token: token} = OAuthFixtures.setup_token(user)
 
-    client = connect(token)
+    client = connect(token, opts)
     %{client: client, token: token}
   end
 

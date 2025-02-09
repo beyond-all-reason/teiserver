@@ -136,9 +136,7 @@ Multiple locks can be engaged at the same time
       {"specafk", [],
        "Everybody is sent a message asking them to confirm they are not afk. If they don't respond within 40 seconds they are moved to spectators. Requires boss privileges.",
        :moderator},
-
-      # --- :admin only ---
-      {"playerlimit", ["limit"], "Sets a new player limit for this specific host.", :admin}
+      {"playerlimit", ["limit"], "Sets a new player limit for this specific host.", :moderator}
     ]
 
     # $command - Coordinator command
@@ -249,7 +247,6 @@ Multiple locks can be engaged at the same time
       :everybody -> true
       :host -> CacheUser.is_moderator?(user) or host
       :moderator -> CacheUser.is_moderator?(user)
-      :admin -> CacheUser.is_admin?(user)
       _ -> false
     end
   end

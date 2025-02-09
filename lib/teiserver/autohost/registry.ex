@@ -6,10 +6,10 @@ defmodule Teiserver.Autohost.Registry do
   and matchmaking
   """
 
-  alias Teiserver.Autohost.Autohost
+  alias Teiserver.Bot.Bot
 
   @type reg_value :: %{
-          id: Autohost.id(),
+          id: Bot.id(),
           max_battles: non_neg_integer(),
           current_battles: non_neg_integer()
         }
@@ -21,7 +21,7 @@ defmodule Teiserver.Autohost.Registry do
   @doc """
   how to reach a given autohost
   """
-  @spec via_tuple(Autohost.id()) :: GenServer.name()
+  @spec via_tuple(Bot.id()) :: GenServer.name()
   def via_tuple(autohost_id) do
     {:via, Horde.Registry, {__MODULE__, autohost_id}}
   end
@@ -33,7 +33,7 @@ defmodule Teiserver.Autohost.Registry do
     Horde.Registry.register(__MODULE__, via_tuple(autohost_id), val)
   end
 
-  @spec lookup(Autohost.id()) :: {pid(), reg_value()} | nil
+  @spec lookup(Bot.id()) :: {pid(), reg_value()} | nil
   def lookup(autohost_id) do
     case Horde.Registry.lookup(__MODULE__, via_tuple(autohost_id)) do
       [x] -> x
