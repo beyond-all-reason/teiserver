@@ -467,6 +467,37 @@ defmodule Teiserver.OAuth do
     count
   end
 
+  # Because OAuth does some special basic auth handling, see:
+  # https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1
+  # and especially the Appendix B:
+  # https://datatracker.ietf.org/doc/html/rfc6749#appendix-B
+  @doc """
+  Similar to Plug.BasicAuth.encode_basic_auth but compliant with OAuth special handling
+  Takes client id, client secret and returns the basic auth header
+  """
+  @spec encode_basic_auth(String.t(), String.t()) :: String.t()
+  def encode_basic_auth(client_id, client_secret) do
+    encoded =
+      Base.encode64("#{URI.encode_www_form(client_id)}:#{URI.encode_www_form(client_secret)}")
+
+    "Basic #{encoded}"
+  end
+
+  @doc """
+  Similar to Plug.BasicAuth.parse_basic_auth but compliant with OAuth special handling
+  """
+  @spec parse_basic_auth(Plug.Conn.t()) ::
+          {client_id :: String.t(), client_secret :: String.t()} | :error
+  def parse_basic_auth(%Plug.Conn{} = conn) do
+    with ["Basic " <> encoded_parts] <- Plug.Conn.get_req_header(conn, "authorization"),
+         {:ok, decoded} <- Base.decode64(encoded_parts),
+         [client_id, client_secret] <- :binary.split(decoded, ":") do
+      {URI.decode_www_form(client_id), URI.decode_www_form(client_secret)}
+    else
+      _ -> :error
+    end
+  end
+
   defp check_expiry(obj, now) do
     if Timex.after?(now, Map.fetch!(obj, :expires_at)) do
       {:error, :expired}

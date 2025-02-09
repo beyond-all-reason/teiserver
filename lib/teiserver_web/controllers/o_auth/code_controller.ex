@@ -91,7 +91,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
 
   defp get_client_id(conn, params) do
     query = Map.get(params, "client_id")
-    basic = Plug.BasicAuth.parse_basic_auth(conn)
+    basic = OAuth.parse_basic_auth(conn)
 
     case {basic, query} do
       {:error, nil} ->
@@ -109,7 +109,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
   end
 
   defp get_credentials(conn, params) do
-    basic = Plug.BasicAuth.parse_basic_auth(conn)
+    basic = OAuth.parse_basic_auth(conn)
     post_params = {Map.get(params, "client_id"), Map.get(params, "client_secret")}
 
     case {basic, post_params} do
