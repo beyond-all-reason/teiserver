@@ -118,14 +118,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_info({:messaging, {:dm_received, message}}, state) do
-    data = %{
-      message: message.content,
-      source: message_source_to_tachyon(message.source),
-      timestamp: message.timestamp,
-      marker: to_string(message.marker)
-    }
-
-    {:event, "messaging/received", data, state}
+    {:event, "messaging/received", message_to_tachyon(message), state}
   end
 
   def handle_info({:timeout, message_id}, state)
@@ -255,20 +248,33 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command("messaging/subscribeReceived" = cmd_id, "request", _message_id, msg, state) do
+  def handle_command("messaging/subscribeReceived" = cmd_id, "request", message_id, msg, state) do
     since =
-      case msg["since"] do
+      case msg["data"]["since"] do
         nil ->
           :latest
 
         %{"type" => "latest"} ->
           :latest
-          # %{"type" => "from_start"} -> :from_start  # TODO
+
+        # TODO
+        %{"type" => "from_start"} ->
+          :from_start
           # %{"type" => "marker", "value" => marker} -> {:marker, marker} # TODO
       end
 
-    {:ok, has_missed_messages} = Player.Session.subscribe_received(state.user.id, since)
-    {:response, cmd_id, %{hasMissedMessages: has_missed_messages}, state}
+    {:ok, has_missed_messages, msg_to_send} =
+      Player.Session.subscribe_received(state.user.id, since)
+
+    response = Schema.response(cmd_id, message_id, %{hasMissedMessages: has_missed_messages})
+
+    msg_to_send =
+      Enum.map(msg_to_send, fn msg ->
+        Schema.event("messaging/received", message_to_tachyon(msg))
+      end)
+
+    messages = [response | msg_to_send] |> Enum.map(fn data -> {:text, Jason.encode!(data)} end)
+    {:push, messages, state}
   end
 
   def handle_command(command_id, _message_type, message_id, _message, state) do
@@ -326,5 +332,14 @@ defmodule Teiserver.Player.TachyonHandler do
       _ ->
         {:error, :invalid_recipient}
     end
+  end
+
+  defp message_to_tachyon(message) do
+    %{
+      message: message.content,
+      source: message_source_to_tachyon(message.source),
+      timestamp: message.timestamp,
+      marker: to_string(message.marker)
+    }
   end
 end

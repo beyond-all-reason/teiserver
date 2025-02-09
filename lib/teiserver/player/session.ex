@@ -15,6 +15,7 @@ defmodule Teiserver.Player.Session do
 
   alias Teiserver.Data.Types, as: T
   alias Teiserver.{Player, Matchmaking, Messaging}
+  alias Teiserver.Helpers.BoundedQueue, as: BQ
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 
@@ -35,7 +36,14 @@ defmodule Teiserver.Player.Session do
              }}
 
   @type messaging_state :: %{
-          subscribed?: boolean()
+          store_messages?: boolean(),
+          subscribed?: boolean(),
+          # for simplicity, only hold one buffer for everything. This may lead to
+          # problems if a few sources are really noisy, they will force out
+          # the other messages. We can deal with that later with a smaller
+          # buffer per source, and the added complexity of having to limit
+          # that total size
+          buffer: BQ.t(Messaging.message())
         }
 
   @type state :: %{
@@ -43,8 +51,12 @@ defmodule Teiserver.Player.Session do
           mon_ref: reference(),
           conn_pid: pid() | nil,
           matchmaking: matchmaking_state(),
-          messaging_state: %{subscribed?: boolean()}
+          messaging_state: messaging_state()
         }
+
+  # TODO: would be better to have that as a db setting, perhaps passed as an
+  # argument to init()
+  @messaging_buffer_size 200
 
   @impl true
   def init({conn_pid, user}) do
@@ -56,7 +68,11 @@ defmodule Teiserver.Player.Session do
       mon_ref: ref,
       conn_pid: conn_pid,
       matchmaking: initial_matchmaking_state(),
-      messaging_state: %{subscribed?: false}
+      messaging_state: %{
+        store_messages?: true,
+        subscribed?: false,
+        buffer: BQ.new(@messaging_buffer_size)
+      }
     }
 
     Logger.debug("init session #{inspect(self())}")
@@ -142,7 +158,7 @@ defmodule Teiserver.Player.Session do
   @spec subscribe_received(
           user_id :: T.userid(),
           since :: :latest | :from_start | {:marker, term()}
-        ) :: {:ok, has_missed_messages :: boolean()}
+        ) :: {:ok, has_missed_messages :: boolean(), msg_to_send :: [Messaging.message()]}
   def subscribe_received(user_id, since) do
     GenServer.call(via_tuple(user_id), {:messaging, {:subscribe, since}})
   end
@@ -269,10 +285,27 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:messaging, {:subscribe, _since}}, _from, state) do
-    state = put_in(state.messaging_state.subscribed?, true)
-    has_missed_messages = false
-    {:reply, {:ok, has_missed_messages}, state}
+  def handle_call({:messaging, {:subscribe, since}}, _from, state) do
+    state =
+      state
+      |> put_in([:messaging_state, :subscribed?], true)
+      |> put_in([:messaging_state, :store_messages?], true)
+
+    buffer = state.messaging_state.buffer
+    has_missed_messages = BQ.dropped?(buffer)
+
+    # Keep the history, even if it is sent to the player. This may be a
+    # problem in the long run because the buffer are never emptied, but for
+    # now it’ll do
+    msg_to_send =
+      case since do
+        :latest -> []
+        :from_start -> BQ.to_list(buffer)
+        # TODO
+        {:maker, _marker} -> []
+      end
+
+    {:reply, {:ok, has_missed_messages, msg_to_send}, state}
   end
 
   @impl true
@@ -391,11 +424,20 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_cast({:messaging, {:dm, message}}, state) do
-    if state.messaging_state.subscribed? do
-      state = send_to_player({:messaging, {:dm_received, message}}, state)
-      {:noreply, state}
-    else
-      {:noreply, state}
+    state =
+      if state.messaging_state.store_messages? do
+        update_in(state.messaging_state.buffer, fn buf -> BQ.put(buf, message) end)
+      else
+        state
+      end
+
+    case {state.messaging_state.subscribed?, state.conn_pid} do
+      {true, pid} when not is_nil(pid) ->
+        send(pid, {:messaging, {:dm_received, message}})
+        {:noreply, state}
+
+      _ ->
+        {:noreply, state}
     end
   end
 
@@ -405,7 +447,13 @@ defmodule Teiserver.Player.Session do
     # should be fairly low (and rate limited) so too many messages isn't an issue
     {:ok, _} = :timer.send_after(2_000, :player_timeout)
     Logger.info("Player disconnected abruptly")
-    {:noreply, %{state | conn_pid: nil}}
+
+    state =
+      state
+      |> Map.put(:conn_pid, nil)
+      |> put_in([:messaging_state, :subscribed?], false)
+
+    {:noreply, state}
   end
 
   def handle_info({:DOWN, ref, :process, _obj, reason}, state) do
