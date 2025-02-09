@@ -356,8 +356,8 @@ defmodule Teiserver.Account.AccoladeLib do
     end)
   end
 
-  @spec get_viewable_accolade_types(boolean()) :: [map()]
-  def get_viewable_accolade_types(is_ally?) do
+  @spec get_giveable_accolade_types(boolean()) :: [map()]
+  def get_giveable_accolade_types(is_ally?) do
     restriction =
       if is_ally? do
         "Ally"

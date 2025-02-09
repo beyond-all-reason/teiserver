@@ -476,7 +476,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     is_ally? = current_user_team_id == recipient_team_id
 
     badge_types =
-      AccoladeLib.get_viewable_accolade_types(is_ally?)
+      AccoladeLib.get_giveable_accolade_types(is_ally?)
 
     gift_limit = Config.get_site_config_cache("teiserver.Accolade gift limit")
     gift_window = Config.get_site_config_cache("teiserver.Accolade gift window")
