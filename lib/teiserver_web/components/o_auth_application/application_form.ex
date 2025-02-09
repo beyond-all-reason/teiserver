@@ -14,13 +14,31 @@ defmodule TeiserverWeb.Components.OAuthApplicationComponent do
 
       <CC.input field={f[:name]} type="text" label="Name (user facing)" />
       <CC.input field={f[:uid]} type="text" label="client id" />
-      <CC.input
-        field={Map.update(f[:scopes], :value, "", &Enum.join(&1, ", "))}
-        type="text"
-        label="comma separated scopes"
-      />
+
+      <br />
+      <p><strong>List of scopes</strong></p>
+      <CC.error :if={@changeset.errors[:scopes]}>
+        <% {msg, _} = @changeset.errors[:scopes] %>
+        <%= msg %>
+      </CC.error>
+
+      <%= for {scope, checked, desc} <- @scopes do %>
+        <p>
+          <CC.input
+            type="checkbox"
+            value="true"
+            name={"scopes[#{scope}]"}
+            id={"application_scope_#{scope}"}
+            checked={checked}
+            label={scope}
+            description={desc}
+          />
+        </p>
+      <% end %>
+
       <p>
-        Note that changing the scopes does NOT change any existing credentials. You need to issue new ones to take the new scopes into account
+        Note that changing scopes there will <strong>NOT</strong>
+        change any authorization code, access token or client credentials
       </p>
 
       <%!-- This form is meant to be used by an admin user, so it's fine to allow supplying --%>

@@ -1,4 +1,4 @@
-defmodule Teiserver.OAuth.Task.GenToken do
+defmodule Teiserver.OAuth.Tasks.GenToken do
   @moduledoc """
   Generates a token for the given user. This is for a convenience task to ease
   the development of anything requiring OAuth tokens like tachyon protocol.

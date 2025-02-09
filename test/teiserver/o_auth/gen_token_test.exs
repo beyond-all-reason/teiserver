@@ -1,7 +1,7 @@
 defmodule Teiserver.OAuth.GenTokenTest do
   use Teiserver.DataCase, async: true
   alias Teiserver.OAuthFixtures
-  alias Teiserver.OAuth.Task.GenToken
+  alias Teiserver.OAuth.Tasks.GenToken
   alias Teiserver.OAuth.{Token, TokenQueries}
 
   test "no user fails" do
