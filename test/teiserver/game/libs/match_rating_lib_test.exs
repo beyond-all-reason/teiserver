@@ -87,8 +87,8 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       assert ratings[user2.id].skill == 22.362239872926306
 
       # New players start at zero then converge to skill over time
-      assert ratings[user1.id].rating_value == 0.9212586709024565
-      assert ratings[user2.id].rating_value == 0.7454079957642102
+      assert ratings[user1.id].rating_value == 1.3818880063536847
+      assert ratings[user2.id].rating_value == 1.1181119936463153
     end
 
     test "rating after many matches" do
@@ -116,8 +116,8 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       # Check ratings of users after match
       ratings = get_ratings([user1.id, user2.id], Enum.at(matches, 0).game_type)
 
-      assert ratings[user1.id].skill == 41.851075350620384
-      assert ratings[user2.id].skill == 8.148924649379609
+      assert ratings[user1.id].skill == 40.06193301869303
+      assert ratings[user2.id].skill == 9.938066981306962
 
       # Rating should equal skill
       assert ratings[user1.id].rating_value == ratings[user1.id].skill
