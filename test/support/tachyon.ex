@@ -1,6 +1,7 @@
 defmodule Teiserver.Support.Tachyon do
   alias WebsocketSyncClient, as: WSC
   alias Teiserver.OAuthFixtures
+  alias Teiserver.Player
 
   def setup_client(_context), do: setup_client()
 
@@ -29,7 +30,20 @@ defmodule Teiserver.Support.Tachyon do
       {:ok, _user_updated} = recv_message(client)
     end
 
-    ExUnit.Callbacks.on_exit(fn -> WSC.disconnect(client) end)
+    ExUnit.Callbacks.on_exit(fn ->
+      WSC.disconnect(client)
+
+      case Player.lookup_session(token.owner_id) do
+        nil -> :ok
+        pid -> Process.exit(pid, :test_cleanup)
+      end
+
+      poll_until(
+        fn -> Player.lookup_session(token.owner_id) end,
+        fn x -> is_nil(x) end
+      )
+    end)
+
     client
   end
 
@@ -221,6 +235,13 @@ defmodule Teiserver.Support.Tachyon do
 
   def matchmaking_ready!(client) do
     req = request("matchmaking/ready")
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def server_stats!(client) do
+    req = request("system/serverStats")
     :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
     {:ok, resp} = recv_message(client)
     resp

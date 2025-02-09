@@ -13,24 +13,26 @@ defmodule Teiserver.Player do
   alias Teiserver.{Player, Matchmaking}
 
   @doc """
+  Returns the pid of the session registered with a given user id
+  """
+  @spec lookup_session(T.userid()) :: pid() | nil
+  defdelegate lookup_session(user_id), to: Player.SessionRegistry, as: :lookup
+
+  @doc """
   Returns the pid of the connection registered with a given user id
   """
   @spec lookup_connection(T.userid()) :: pid() | nil
-  def lookup_connection(user_id) do
-    Player.Registry.lookup(user_id)
-  end
+  defdelegate lookup_connection(user_id), to: Player.Registry, as: :lookup
 
   @spec connection_via_tuple(T.userid()) :: GenServer.name()
-  def connection_via_tuple(user_id) do
-    Player.Registry.via_tuple(user_id)
-  end
+  defdelegate connection_via_tuple(user_id), to: Player.Registry, as: :via_tuple
 
   @doc """
   To be used when a process is interested in the presence of a given player.
   """
   @spec monitor_session(T.userid()) :: reference() | nil
   def monitor_session(user_id) do
-    pid = Player.SessionRegistry.lookup(user_id)
+    pid = lookup_connection(user_id)
 
     if is_nil(pid) do
       nil
