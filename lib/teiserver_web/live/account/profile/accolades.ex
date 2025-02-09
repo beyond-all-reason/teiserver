@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
   end
 
   defp assign_summary(socket) do
-    current_user_id = socket.assigns.current_user.id
+    current_user_id = socket.assigns.current_user && socket.assigns.current_user.id
     viewed_user_id = socket.assigns.user.id
     viewed_user_name = socket.assigns.user.name
 
@@ -81,6 +81,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
 
   defp fix_pronouns(message, current_user_id, viewed_user_id, viewed_user_name) do
     if(current_user_id != viewed_user_id) do
+      # When viewing someone else's accolades, replace "you" with person's name
       String.replace(message, "You have", "#{viewed_user_name} has")
     else
       message
