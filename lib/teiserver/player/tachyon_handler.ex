@@ -140,6 +140,12 @@ defmodule Teiserver.Player.TachyonHandler do
     {:stop, :normal, state}
   end
 
+  def handle_command("system/serverStats" = cmd_id, "request", _message_id, _message, state) do
+    user_count = Teiserver.Player.SessionRegistry.count()
+
+    {:response, cmd_id, %{userCount: user_count}, state}
+  end
+
   def handle_command("matchmaking/list" = cmd_id, "request", message_id, _message, state) do
     queues =
       Matchmaking.list_queues()
