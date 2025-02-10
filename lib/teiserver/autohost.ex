@@ -7,7 +7,7 @@ defmodule Teiserver.Autohost do
   @type reg_value :: Registry.reg_value()
 
   @type start_script :: %{
-          battleId: String.t(),
+          battleId: Teiserver.TachyonBattle.id(),
           engineVersion: String.t(),
           gameName: String.t(),
           mapName: String.t(),
@@ -55,8 +55,21 @@ defmodule Teiserver.Autohost do
   @spec list() :: [reg_value()]
   defdelegate list(), to: Registry
 
-  @spec start_matchmaking(Bot.id(), start_script()) ::
+  @doc """
+  Given some search params (none for now), find a autohost that is connected,
+  has capacity, and matches the search params.
+  """
+  @spec find_autohost(term()) :: id() | nil
+  def find_autohost(_params \\ %{}) do
+    autohost_val =
+      Registry.list()
+      |> Enum.find(fn %{max_battles: m, current_battles: c} -> m > c end)
+
+    if autohost_val == nil, do: nil, else: autohost_val[:id]
+  end
+
+  @spec start_battle(Bot.id(), start_script()) ::
           {:ok, start_response()} | {:error, term()}
-  defdelegate start_matchmaking(bot_id, start_script),
+  defdelegate start_battle(bot_id, start_script),
     to: Teiserver.Autohost.TachyonHandler
 end

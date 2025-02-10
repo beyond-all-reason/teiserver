@@ -62,6 +62,8 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
   @impl true
   def init({queue_id, queue, teams, timeout}) do
+    Logger.metadata(queue_id: queue_id)
+
     initial_state =
       %{
         queue_id: queue_id,
@@ -81,10 +83,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           end
       }
 
-    Logger.debug(
-      "Pairing room for queue #{initial_state.queue_id} starting for players " <>
-        Enum.join(initial_state.awaiting, ",")
-    )
+    Logger.debug("Pairing room for players " <> Enum.join(initial_state.awaiting, ","))
 
     {:ok, initial_state, {:continue, {:notify_players, timeout}}}
   end
@@ -105,11 +104,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   # It's go time! Find an autohost, send it the start script and let all the players
   # know about the autohost waiting for them.
   def handle_continue(:start_match, state) do
-    case Teiserver.Autohost.list() do
-      [] ->
-        Logger.warning(
-          "No autohost available to start a paired matchmaking for queue #{inspect(state.queue)}"
-        )
+    case Teiserver.Autohost.find_autohost() do
+      nil ->
+        Logger.warning("No autohost available to start a paired matchmaking")
 
         QueueServer.disband_pairing(state.queue_id, self())
 
@@ -119,10 +116,10 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
         {:stop, :normal, state}
 
-      [%{id: id} | _] ->
+      id ->
         start_script = hardcoded_start_script(state)
 
-        case Teiserver.Autohost.start_matchmaking(id, start_script) do
+        case Teiserver.TachyonBattle.start_battle(id, start_script) do
           {:error, reason} ->
             QueueServer.disband_pairing(state.queue_id, self())
 
@@ -140,10 +137,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
                 p_id
               end
 
-            Logger.debug(
-              "Pairing completed for queue #{state.queue_id} is starting for players " <>
-                Enum.join(ids, ",")
-            )
+            Logger.debug("Pairing completed for players " <> Enum.join(ids, ","))
 
             for team <- state.teams, member <- team, p_id <- member.player_ids do
               Teiserver.Player.battle_start(p_id, battle_start_data)
@@ -217,10 +211,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     {:stop, :normal, state}
   end
 
-  @spec hardcoded_start_script(state()) :: Teiserver.Autohost.start_script()
+  @spec hardcoded_start_script(state()) :: Teiserver.TachyonBattle.start_script()
   defp hardcoded_start_script(state) do
     %{
-      battleId: UUID.uuid4(),
       engineVersion: "105.1.1-2590-gb9462a0 bar",
       gameName: "Beyond All Reason test-26929-d709d32",
       mapName: "Red Comet Remake 1.8",

@@ -12,6 +12,19 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, user: user, client: client, token: token}
   end
 
+  def setup_autohost(context) do
+    autohost = Teiserver.BotFixtures.create_bot()
+
+    token =
+      OAuthFixtures.token_attrs(nil, context.app)
+      |> Map.drop([:owner_id])
+      |> Map.put(:bot_id, autohost.id)
+      |> OAuthFixtures.create_token()
+
+    client = connect_autohost!(token, 10, 0)
+    {:ok, autohost: autohost, autohost_client: client}
+  end
+
   @doc """
   connects the given user and returns the ws client
   """
@@ -242,7 +255,7 @@ defmodule Teiserver.Support.Tachyon do
     if pred.(res) do
       res
     else
-      limit = Keyword.get(opts, :limit, 10)
+      limit = Keyword.get(opts, :limit, 50)
 
       if limit <= 0 do
         raise "poll timeout"
@@ -259,5 +272,12 @@ defmodule Teiserver.Support.Tachyon do
   """
   def poll_until_some(f, opts \\ []) do
     poll_until(f, fn x -> not is_nil(x) end, opts)
+  end
+
+  @doc """
+  the dual of poll_until_some
+  """
+  def poll_until_nil(f, opts \\ []) do
+    poll_until(f, &is_nil/1, opts)
   end
 end
