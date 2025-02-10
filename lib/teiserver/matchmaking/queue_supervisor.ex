@@ -6,6 +6,30 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   use Horde.DynamicSupervisor
   alias Teiserver.Matchmaking.QueueServer
 
+  @spec default_queues() :: [
+          %{
+            id: any(),
+            members: any(),
+            monitors: [],
+            pairings: [],
+            queue: %{
+              engines: any(),
+              games: any(),
+              maps: any(),
+              name: any(),
+              ranked: true,
+              team_count: any(),
+              team_size: any()
+            },
+            settings: %{
+              :max_distance => any(),
+              :pairing_timeout => any(),
+              :tick_interval_ms => any(),
+              optional(any()) => any()
+            }
+          },
+          ...
+        ]
   def default_queues() do
     [
       QueueServer.init_state(%{

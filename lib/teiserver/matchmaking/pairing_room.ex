@@ -117,40 +117,54 @@ defmodule Teiserver.Matchmaking.PairingRoom do
         {:stop, :normal, state}
 
       id ->
-        start_script = hardcoded_start_script(state)
+        engine = select_engine(state.queue.engines)
+        %{spring_game: game} = select_game(state.queue.games)
+        %{spring_name: map} = select_map(state.queue.maps)
 
-        case Teiserver.TachyonBattle.start_battle(id, start_script) do
-          {:error, reason} ->
-            QueueServer.disband_pairing(state.queue_id, self())
+        start_battle(state, id, engine, game, map)
+    end
+  end
 
-            for team <- state.teams, member <- team, p_id <- member.player_ids do
-              Teiserver.Player.matchmaking_notify_lost(p_id, {:server_error, reason})
-            end
+  defp start_battle(state, host_id, engine, game, map) do
+    start_script = start_script(state, engine, game, map)
 
-            {:stop, :normal, state}
+    case Teiserver.TachyonBattle.start_battle(host_id, start_script) do
+      {:error, reason} ->
+        QueueServer.disband_pairing(state.queue_id, self())
 
-          {:ok, host_data} ->
-            QueueServer.disband_pairing(state.queue_id, self())
+        state.teams
+        |> List.flatten()
+        |> Enum.flat_map(& &1.player_ids)
+        |> Enum.each(fn p_id ->
+          Teiserver.Player.matchmaking_notify_lost(p_id, {:server_error, reason})
+        end)
 
-            ids =
-              for team <- state.teams, member <- team, p_id <- member.player_ids do
-                p_id
-              end
+        {:stop, :normal, state}
 
-            Logger.debug("Pairing completed for players " <> Enum.join(ids, ","))
+      {:ok, host_data} ->
+        QueueServer.disband_pairing(state.queue_id, self())
 
-            battle_start_data =
-              host_data
-              |> Map.put(:engine, %{version: start_script.engineVersion})
-              |> Map.put(:game, %{springName: start_script.gameName})
-              |> Map.put(:map, %{springName: start_script.mapName})
+        ids =
+          for team <- state.teams, member <- team, p_id <- member.player_ids do
+            p_id
+          end
 
-            for team <- state.teams, member <- team, p_id <- member.player_ids do
-              Teiserver.Player.battle_start(p_id, battle_start_data)
-            end
+        Logger.debug("Pairing completed for players " <> Enum.join(ids, ","))
 
-            {:stop, :normal, state}
-        end
+        battle_start_data =
+          host_data
+          |> Map.put(:engine, engine)
+          |> Map.put(:game, %{springName: game})
+          |> Map.put(:map, %{springName: map})
+
+        state.teams
+        |> List.flatten()
+        |> Enum.flat_map(& &1.player_ids)
+        |> Enum.each(fn p_id ->
+          Teiserver.Player.battle_start(p_id, battle_start_data)
+        end)
+
+        {:stop, :normal, state}
     end
   end
 
@@ -217,12 +231,13 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     {:stop, :normal, state}
   end
 
-  @spec hardcoded_start_script(state()) :: Teiserver.TachyonBattle.start_script()
-  defp hardcoded_start_script(state) do
+  @spec start_script(state(), %{version: String.t()}, String.t(), String.t()) ::
+          Teiserver.TachyonBattle.start_script()
+  defp start_script(state, engine, game, map) do
     %{
-      engineVersion: "105.1.1-2590-gb9462a0 bar",
-      gameName: "Beyond All Reason test-26929-d709d32",
-      mapName: "Red Comet Remake 1.8",
+      engineVersion: engine.version,
+      gameName: game,
+      mapName: map,
       startPosType: :ingame,
       allyTeams: get_ally_teams(state)
     }
@@ -239,5 +254,21 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
       %{teams: teams}
     end
+  end
+
+  # TODO implement some smarter engine/game selection logic here in the future, get first for now
+  @spec select_engine([%{version: String.t()}]) :: %{version: String.t()}
+  def select_engine(engines) do
+    Enum.at(engines, 0)
+  end
+
+  @spec select_game([%{spring_game: String.t()}]) :: %{spring_game: String.t()}
+  def select_game(games) do
+    Enum.at(games, 0)
+  end
+
+  @spec select_map([Teiserver.Asset.Map.t()]) :: Teiserver.Asset.Map.t()
+  def select_map(maps) do
+    Enum.random(maps)
   end
 end

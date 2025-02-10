@@ -12,6 +12,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   require Logger
   alias Teiserver.Matchmaking.{QueueRegistry, PairingRoom}
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Asset
 
   @typedoc """
   member of a queue. Holds of the information required to match members together.
@@ -81,6 +82,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
           required(:name) => String.t(),
           required(:team_size) => pos_integer(),
           required(:team_count) => pos_integer(),
+          optional(:engines) => [%{version: String.t()}],
+          optional(:games) => [%{spring_game: String.t()}],
+          optional(:maps) => [Teiserver.Asset.Map.t()],
           optional(:settings) => settings(),
           optional(:members) => [member()]
         }) :: state()
@@ -91,7 +95,10 @@ defmodule Teiserver.Matchmaking.QueueServer do
         name: attrs.name,
         team_size: attrs.team_size,
         team_count: attrs.team_count,
-        ranked: true
+        ranked: true,
+        engines: Map.get(attrs, :engines, []),
+        games: Map.get(attrs, :games, []),
+        maps: Map.get(attrs, :maps, [])
       },
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
       members: Map.get(attrs, :members, []),
@@ -108,7 +115,15 @@ defmodule Teiserver.Matchmaking.QueueServer do
     QueueRegistry.via_tuple(queue_id, queue)
   end
 
-  @type join_result :: :ok | {:error, :invalid_queue | :already_queued | :too_many_players}
+  @type join_result ::
+          :ok
+          | {:error,
+             :invalid_queue
+             | :already_queued
+             | :too_many_players
+             | :missing_engines
+             | :missing_games
+             | :missing_maps}
 
   @doc """
   Join the specified queue
@@ -162,7 +177,31 @@ defmodule Teiserver.Matchmaking.QueueServer do
       :timer.send_interval(state.settings.tick_interval_ms, :tick)
     end
 
-    {:ok, state}
+    {:ok, state, {:continue, :init_engines}}
+  end
+
+  @impl true
+  def handle_continue(:init_engines, state) do
+    # TODO Get engines from somewhere else
+    engines = state.queue.engines
+
+    {:noreply, %{state | queue: Map.put(state.queue, :engines, engines)},
+     {:continue, :init_games}}
+  end
+
+  @impl true
+  def handle_continue(:init_games, state) do
+    # TODO Get games from somewhere else
+    games = state.queue.games
+
+    {:noreply, %{state | queue: Map.put(state.queue, :games, games)}, {:continue, :init_maps}}
+  end
+
+  @impl true
+  def handle_continue(:init_maps, state) do
+    # Only get maps if the map list is empty
+    maps = Asset.get_maps_for_queue(state.id)
+    {:noreply, %{state | queue: Map.put(state.queue, :maps, maps)}}
   end
 
   @impl true
@@ -184,6 +223,15 @@ defmodule Teiserver.Matchmaking.QueueServer do
     cond do
       Enum.count(new_member.player_ids) > state.queue.team_size ->
         {:reply, {:error, :too_many_players}, state}
+
+      Enum.empty?(state.queue.engines) ->
+        {:reply, {:error, :missing_engines}, state}
+
+      Enum.empty?(state.queue.games) ->
+        {:reply, {:error, :missing_games}, state}
+
+      Enum.empty?(state.queue.maps) ->
+        {:reply, {:error, :missing_maps}, state}
 
       !is_queuing && !is_pairing ->
         monitors =
