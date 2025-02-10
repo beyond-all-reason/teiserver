@@ -376,7 +376,7 @@ defmodule Teiserver.Player.Session do
         {:stop, :normal, state}
 
       st ->
-        if reason != :normal do
+        if reason not in [:normal, :test_cleanup] do
           Logger.warning(
             "unhandled DOWN: #{inspect(ref)} went down because #{reason}. state: #{inspect(st)}"
           )
