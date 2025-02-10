@@ -117,4 +117,37 @@ defmodule Teiserver.Helpers.BoundedQueue do
        :queue.to_list(spilled_q)}
     end
   end
+
+  @doc """
+  Split the bounded queue in two. The first contains all the elements until
+  the predicate returns true (inclusive). The second contains all the remaining
+  elements, or nil if the predicate didn't match anything in the queue
+  This function isn't too efficient.
+  """
+  @spec split_when(t(), pred :: (term() -> as_boolean(term()))) :: {t(), t() | nil}
+  def split_when(bq, pred) do
+    l = :queue.to_list(bq.q)
+
+    {a, b} = split_when_lists(pred, [], l)
+
+    before = from_list(Enum.reverse(a), bq.max_len)
+    rest = if b == nil, do: nil, else: from_list(b, bq.max_len)
+
+    {before, rest}
+  end
+
+  defp split_when_lists(pred, checked_so_far, l) do
+    case l do
+      # got to the end of the list without finding anything
+      [] ->
+        {checked_so_far, nil}
+
+      [el | rest] ->
+        if pred.(el) do
+          {[el | checked_so_far], rest}
+        else
+          split_when_lists(pred, [el | checked_so_far], rest)
+        end
+    end
+  end
 end

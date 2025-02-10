@@ -80,4 +80,28 @@ defmodule Teiserver.Helpers.BoundedQueueTest do
     assert BQ.dropped?(q2)
     assert [4] == BQ.to_list(q2)
   end
+
+  describe "split_when" do
+    test "match first element" do
+      q = BQ.from_list([1, 2, 3], 5)
+      {a, b} = BQ.split_when(q, &(&1 == 1))
+      assert BQ.to_list(a) == [1]
+      assert BQ.to_list(b) == [2, 3]
+    end
+
+    test "match last element" do
+      q = BQ.from_list([1, 2, 3], 5)
+      {a, b} = BQ.split_when(q, &(&1 == 3))
+      assert {{:value, 1}, _} = BQ.out(a)
+      assert BQ.to_list(a) == [1, 2, 3]
+      assert BQ.to_list(b) == []
+    end
+
+    test "no match" do
+      q = BQ.from_list([1, 2, 3], 5)
+      {a, b} = BQ.split_when(q, &(&1 == 10))
+      assert BQ.to_list(a) == [1, 2, 3]
+      assert b == nil
+    end
+  end
 end
