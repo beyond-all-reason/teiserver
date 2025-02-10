@@ -47,7 +47,6 @@ defmodule Teiserver.Game.BalancerServer do
 
   def handle_call(:report_state, _from, state) do
     result = %{
-      hashes: Enum.count(state.hashes),
       algorithm: state.algorithm,
       max_deviation: state.max_deviation,
       rating_lower_boundary: state.rating_lower_boundary,
@@ -134,17 +133,31 @@ defmodule Teiserver.Game.BalancerServer do
     players = Battle.list_lobby_players(state.lobby_id)
     hash = make_player_hash(team_count, players, opts)
 
-    if Map.has_key?(state.hashes, hash) do
-      result = state.hashes[hash]
+    if hash == state.last_balance_hash do
+      last_balance_hash_cache_hit = state.last_balance_hash_cache_hit + 1
+      result = state.last_balance_result
 
-      {result, %{state | last_balance_hash: hash}}
+      {result,
+       %{
+         state
+         | last_balance_hash_cache_hit: last_balance_hash_cache_hit,
+           last_balance_hash: hash,
+           last_balance_result: result
+       }}
     else
+      last_balance_hash_cache_miss = state.last_balance_hash_cache_miss + 1
+
       result =
         do_make_balance(team_count, players, opts)
         |> Map.put(:hash, hash)
 
-      new_hashes = Map.put(state.hashes, hash, result)
-      {result, %{state | last_balance_hash: hash, hashes: new_hashes}}
+      {result,
+       %{
+         state
+         | last_balance_hash_cache_miss: last_balance_hash_cache_miss,
+           last_balance_hash: hash,
+           last_balance_result: result
+       }}
     end
   end
 
@@ -278,9 +291,11 @@ defmodule Teiserver.Game.BalancerServer do
       coordinator_id: Coordinator.get_coordinator_userid(),
       lobby_id: lobby_id,
       host_id: founder_id,
-      hashes: %{},
       algorithm: BalanceLib.get_default_algorithm(),
-      last_balance_hash: nil
+      last_balance_hash: nil,
+      last_balance_result: nil,
+      last_balance_hash_cache_hit: 0,
+      last_balance_hash_cache_miss: 0
     })
   end
 
