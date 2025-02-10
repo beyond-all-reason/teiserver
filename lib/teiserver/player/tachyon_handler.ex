@@ -257,10 +257,12 @@ defmodule Teiserver.Player.TachyonHandler do
         %{"type" => "latest"} ->
           :latest
 
-        # TODO
         %{"type" => "from_start"} ->
           :from_start
-          # %{"type" => "marker", "value" => marker} -> {:marker, marker} # TODO
+
+        %{"type" => "marker", "value" => marker} ->
+          {:marker, String.to_integer(marker)}
+          # the json schema validation ensure there is no additional possible case
       end
 
     {:ok, has_missed_messages, msg_to_send} =

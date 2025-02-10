@@ -83,5 +83,64 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
       assert %{"status" => "success", "data" => %{"message" => "immediate delivery"}} =
                Tachyon.recv_message!(receiver_client)
     end
+
+    test "can subscribe from marker", ctx do
+      assert %{"status" => "success"} = Tachyon.subscribe_messaging!(ctx.receiver_client)
+
+      assert %{"status" => "success"} =
+               Tachyon.send_dm!(ctx.sender_client, "first message", ctx.receiver.id)
+
+      assert %{"status" => "success"} =
+               Tachyon.send_dm!(ctx.sender_client, "second message", ctx.receiver.id)
+
+      assert %{"status" => "success"} = Tachyon.recv_message!(ctx.receiver_client)
+
+      assert %{"status" => "success", "data" => data2} =
+               Tachyon.recv_message!(ctx.receiver_client)
+
+      Tachyon.abrupt_disconnect!(ctx.receiver_client)
+
+      # the subscription is gone at that point
+      assert %{"status" => "success"} =
+               Tachyon.send_dm!(ctx.sender_client, "will be stored", ctx.receiver.id)
+
+      receiver_client = Tachyon.connect(ctx.receiver_token)
+
+      # can get message from the marker (excluding the marker)
+      assert %{"status" => "success", "data" => %{"hasMissedMessages" => false}} =
+               Tachyon.subscribe_messaging!(receiver_client,
+                 since: %{type: "marker", value: data2["marker"]}
+               )
+
+      assert %{"status" => "success", "data" => missed1} =
+               Tachyon.recv_message!(receiver_client)
+
+      assert missed1["message"] == "will be stored"
+    end
+
+    test "marker doesn't match anything", ctx do
+      assert %{"status" => "success"} = Tachyon.subscribe_messaging!(ctx.receiver_client)
+
+      assert %{"status" => "success"} =
+               Tachyon.send_dm!(ctx.sender_client, "first message", ctx.receiver.id)
+
+      assert %{"status" => "success"} =
+               Tachyon.send_dm!(ctx.sender_client, "second message", ctx.receiver.id)
+
+      assert %{"status" => "success"} = Tachyon.recv_message!(ctx.receiver_client)
+      assert %{"status" => "success"} = Tachyon.recv_message!(ctx.receiver_client)
+
+      assert %{"status" => "success", "data" => %{"hasMissedMessages" => true}} =
+               Tachyon.subscribe_messaging!(ctx.receiver_client,
+                 since: %{type: "marker", value: "87391237821037801381921"}
+               )
+
+      # the whole buffer is sent again
+      assert %{"status" => "success", "data" => %{"message" => "first message"}} =
+               Tachyon.recv_message!(ctx.receiver_client)
+
+      assert %{"status" => "success", "data" => %{"message" => "second message"}} =
+               Tachyon.recv_message!(ctx.receiver_client)
+    end
   end
 end

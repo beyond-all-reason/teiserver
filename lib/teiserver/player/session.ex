@@ -292,17 +292,26 @@ defmodule Teiserver.Player.Session do
       |> put_in([:messaging_state, :store_messages?], true)
 
     buffer = state.messaging_state.buffer
-    has_missed_messages = BQ.dropped?(buffer)
 
     # Keep the history, even if it is sent to the player. This may be a
     # problem in the long run because the buffer are never emptied, but for
     # now it’ll do
-    msg_to_send =
+    {msg_to_send, has_missed_messages} =
       case since do
-        :latest -> []
-        :from_start -> BQ.to_list(buffer)
-        # TODO
-        {:maker, _marker} -> []
+        :latest ->
+          {[], false}
+
+        :from_start ->
+          {BQ.to_list(buffer), BQ.dropped?(buffer)}
+
+        {:marker, marker} ->
+          {seen, not_seen} = BQ.split_when(buffer, fn msg -> msg.marker == marker end)
+
+          if is_nil(not_seen) do
+            {BQ.to_list(seen), true}
+          else
+            {BQ.to_list(not_seen), false}
+          end
       end
 
     {:reply, {:ok, has_missed_messages, msg_to_send}, state}
