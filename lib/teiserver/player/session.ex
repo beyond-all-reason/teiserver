@@ -304,6 +304,9 @@ defmodule Teiserver.Player.Session do
         :from_start ->
           {BQ.to_list(buffer), BQ.dropped?(buffer)}
 
+        {:marker, :invalid} ->
+          {BQ.to_list(buffer), true}
+
         {:marker, marker} ->
           {seen, not_seen} = BQ.split_when(buffer, fn msg -> msg.marker == marker end)
 

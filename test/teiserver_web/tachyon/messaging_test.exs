@@ -132,7 +132,7 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
 
       assert %{"status" => "success", "data" => %{"hasMissedMessages" => true}} =
                Tachyon.subscribe_messaging!(ctx.receiver_client,
-                 since: %{type: "marker", value: "87391237821037801381921"}
+                 since: %{type: "marker", value: "lolnope-that's-not-a-marker"}
                )
 
       # the whole buffer is sent again

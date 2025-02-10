@@ -249,21 +249,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("messaging/subscribeReceived" = cmd_id, "request", message_id, msg, state) do
-    since =
-      case msg["data"]["since"] do
-        nil ->
-          :latest
-
-        %{"type" => "latest"} ->
-          :latest
-
-        %{"type" => "from_start"} ->
-          :from_start
-
-        %{"type" => "marker", "value" => marker} ->
-          {:marker, String.to_integer(marker)}
-          # the json schema validation ensure there is no additional possible case
-      end
+    since = parse_since(msg["data"]["since"])
 
     {:ok, has_missed_messages, msg_to_send} =
       Player.Session.subscribe_received(state.user.id, since)
@@ -343,5 +329,17 @@ defmodule Teiserver.Player.TachyonHandler do
       timestamp: message.timestamp,
       marker: to_string(message.marker)
     }
+  end
+
+  defp parse_since(nil), do: :latest
+  defp parse_since(%{"type" => "latest"}), do: :latest
+  defp parse_since(%{"type" => "from_start"}), do: :from_start
+
+  defp parse_since(%{"type" => "marker", "value" => marker}) do
+    case Integer.parse(marker) do
+      {m, ""} -> {:marker, m}
+      # invalid markers won't be found in the queue
+      _ -> {:marker, :invalid}
+    end
   end
 end
