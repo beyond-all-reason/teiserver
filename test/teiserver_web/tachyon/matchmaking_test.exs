@@ -436,7 +436,6 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         for ally_team <- data["allyTeams"],
             team <- ally_team["teams"],
             player <- team["players"] do
-          # TODO: actually run json schema validation on the payloadd instead of that
           assert Map.has_key?(player, "name")
           assert Map.has_key?(player, "password")
           player["userId"]
@@ -450,8 +449,16 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       end
 
       for client <- clients do
-        # TODO: same, json schema validation here
-        assert %{"commandId" => "battle/start", "data" => %{"ip" => _ip, "port" => _port}} =
+        assert %{
+                 "commandId" => "battle/start",
+                 "data" => %{
+                   "ip" => _ip,
+                   "port" => _port,
+                   "engine" => %{"version" => "105.1.1-2590-gb9462a0 bar"},
+                   "game" => %{"springName" => "Beyond All Reason test-26929-d709d32"},
+                   "map" => %{"springName" => "Red Comet Remake 1.8"}
+                 }
+               } =
                  Tachyon.recv_message!(client)
       end
     end

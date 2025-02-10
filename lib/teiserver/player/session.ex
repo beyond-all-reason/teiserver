@@ -341,7 +341,10 @@ defmodule Teiserver.Player.Session do
           username: state.user.name,
           password: pass,
           ip: hd(battle_start_data.ips),
-          port: battle_start_data.port
+          port: battle_start_data.port,
+          engine: battle_start_data.engine,
+          game: battle_start_data.game,
+          map: battle_start_data.map
         }
 
         state = send_to_player({:battle_start, data}, state)

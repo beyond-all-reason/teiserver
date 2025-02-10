@@ -129,7 +129,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
             {:stop, :normal, state}
 
-          {:ok, battle_start_data} ->
+          {:ok, host_data} ->
             QueueServer.disband_pairing(state.queue_id, self())
 
             ids =
@@ -138,6 +138,12 @@ defmodule Teiserver.Matchmaking.PairingRoom do
               end
 
             Logger.debug("Pairing completed for players " <> Enum.join(ids, ","))
+
+            battle_start_data =
+              host_data
+              |> Map.put(:engine, %{version: start_script.engineVersion})
+              |> Map.put(:game, %{springName: start_script.gameName})
+              |> Map.put(:map, %{springName: start_script.mapName})
 
             for team <- state.teams, member <- team, p_id <- member.player_ids do
               Teiserver.Player.battle_start(p_id, battle_start_data)
