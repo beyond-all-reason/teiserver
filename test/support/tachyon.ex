@@ -9,7 +9,7 @@ defmodule Teiserver.Support.Tachyon do
     user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
     %{client: client, token: token} = connect(user)
 
-    ExUnit.Callbacks.on_exit(fn -> WSC.disconnect(client) end)
+    ExUnit.Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
     {:ok, user: user, client: client, token: token}
   end
 
@@ -43,20 +43,7 @@ defmodule Teiserver.Support.Tachyon do
       {:ok, _user_updated} = recv_message(client)
     end
 
-    ExUnit.Callbacks.on_exit(fn ->
-      WSC.disconnect(client)
-
-      case Player.lookup_session(token.owner_id) do
-        nil -> :ok
-        pid -> Process.exit(pid, :test_cleanup)
-      end
-
-      poll_until(
-        fn -> Player.lookup_session(token.owner_id) end,
-        fn x -> is_nil(x) end
-      )
-    end)
-
+    ExUnit.Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
     client
   end
 
@@ -65,6 +52,26 @@ defmodule Teiserver.Support.Tachyon do
 
     client = connect(token, opts)
     %{client: client, token: token}
+  end
+
+  # used for on_exit callback and make sure nothing is lingering after the test
+  def cleanup_connection(client, token) do
+    WSC.disconnect(client)
+
+    if not is_nil(token.owner_id) do
+      poll_until_nil(fn -> Player.lookup_connection(token.owner_id) end)
+
+      case Player.lookup_session(token.owner_id) do
+        nil -> :ok
+        pid -> Process.exit(pid, :test_cleanup)
+      end
+
+      poll_until_nil(fn -> Player.lookup_session(token.owner_id) end)
+    end
+
+    if not is_nil(token.bot_id) do
+      poll_until_nil(fn -> Teiserver.Autohost.Registry.lookup(token.bot_id) end)
+    end
   end
 
   @doc """
