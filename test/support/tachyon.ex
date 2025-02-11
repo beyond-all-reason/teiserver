@@ -68,6 +68,10 @@ defmodule Teiserver.Support.Tachyon do
 
       poll_until_nil(fn -> Player.lookup_session(token.owner_id) end)
     end
+
+    if not is_nil(token.bot_id) do
+      poll_until_nil(fn -> Teiserver.Autohost.Registry.lookup(token.bot_id) end)
+    end
   end
 
   @doc """
