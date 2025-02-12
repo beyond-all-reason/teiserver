@@ -153,6 +153,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
       ]
 
       {:ok, client} = WSC.connect(tachyon_url(), opts)
+      ExUnit.Callbacks.on_exit(fn -> Tachyon.cleanup_connection(client, token) end)
 
       conn_pid =
         Teiserver.Support.Tachyon.poll_until_some(fn ->
@@ -181,7 +182,8 @@ defmodule TeiserverWeb.TachyonControllerTest do
         ]
       ]
 
-      {:ok, _client} = WSC.connect(tachyon_url(), opts)
+      {:ok, client} = WSC.connect(tachyon_url(), opts)
+      ExUnit.Callbacks.on_exit(fn -> Tachyon.cleanup_connection(client, token) end)
 
       conn_pid =
         Tachyon.poll_until_some(fn ->
