@@ -23,6 +23,7 @@ defmodule Teiserver.Support.Tachyon do
       |> OAuthFixtures.create_token()
 
     client = connect_autohost!(token, 10, 0)
+    ExUnit.Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
     {:ok, autohost: autohost, autohost_client: client}
   end
 
