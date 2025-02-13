@@ -1,6 +1,5 @@
 defmodule Teiserver.Game.BalancerServerTest do
   @moduledoc false
-  use ExUnit.Case, async: true
   use Teiserver.DataCase, async: true
 
   @moduletag :balance_test
@@ -38,34 +37,24 @@ defmodule Teiserver.Game.BalancerServerTest do
     assert result == 4
   end
 
-  # test "run one balance pass" do
-  #   team_count = 2
-  #   players = create_fake_players(4)
-  #   team_size = BalancerServer.calculate_team_size(team_count, players)
-
-  #   state1 = BalancerServer.init()
-  #   dbg(state1)
-  #   dbg(BalancerServer.handle_call(:report_state, nil, state1))
-
-  # end
-
   test "report empty state" do
     team_count = 2
     players = create_fake_players(4)
-    team_size = BalancerServer.calculate_team_size(team_count, players)
+    _team_size = BalancerServer.calculate_team_size(team_count, players)
 
-    state1 = BalancerServer.init(%{lobby_id: 1})
-    dbg(state1)
-    dbg(BalancerServer.handle_call(:report_state, nil, state1))
+    {:ok, tharp} = BalancerServer.init(%{lobby_id: 1})
+    dbg(tharp)
+
+    {:ok, narp} = BalancerServer.start_link(data: tharp)
+    dbg(narp)
+
+    assert is_pid(narp)
+    dbg(:sys.get_state(narp))
+
+    report_state_result = GenServer.call(narp, :report_state)
+
+    dbg(report_state_result)
   end
-
-  # defp init() do
-  #   BalancerServer.init(%{lobby_id: 1})
-  # end
-
-  # defp make_balance(team_count, state, opts) do
-  #   BalancerServer.make_balance(team_count, state, opts)
-  # end
 
   defp create_fake_players(count) do
     1..count |> Enum.map(fn _ -> %{} end)
