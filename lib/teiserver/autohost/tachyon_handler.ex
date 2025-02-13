@@ -20,7 +20,10 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
   @type start_response :: %{
           ips: [String.t()],
-          port: integer()
+          port: integer(),
+          engine: %{version: String.t()},
+          game: %{springName: String.t()},
+          map: %{springName: String.t()}
         }
 
   @impl Handler
