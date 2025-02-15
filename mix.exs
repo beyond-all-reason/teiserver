@@ -59,7 +59,7 @@ defmodule Teiserver.MixProject do
       {:phoenix_live_view, "~> 0.19"},
       {:floki, ">= 0.34.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8"},
-      {:esbuild, "~> 0.5", runtime: Mix.env() == :dev},
+      {:esbuild, "~> 0.9", runtime: Mix.env() == :dev},
       {:bamboo, "~> 2.1"},
       {:bamboo_smtp, "~> 4.0"},
       {:telemetry_metrics, "~> 0.6"},
