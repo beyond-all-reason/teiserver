@@ -254,6 +254,6 @@ defmodule Teiserver.Bridge.MessageCommands do
   defp reply(channel, message) when is_list(message), do: reply(channel, Enum.join(message, "\n"))
 
   defp reply(channel, message) do
-    Api.create_message(channel, message)
+    Api.Message.create(channel, message)
   end
 end
