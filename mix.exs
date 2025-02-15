@@ -104,7 +104,7 @@ defmodule Teiserver.MixProject do
       {:csv, "~> 2.4"},
       {:earmark, "~> 1.4"},
       {:ranch, "~> 1.8"},
-      {:horde, "~> 0.8"},
+      {:horde, "~> 0.9"},
       {:etop, "~> 0.7.0"},
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},
