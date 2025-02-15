@@ -1,8 +1,8 @@
 defmodule Central.Helpers.InputHelper do
   @moduledoc false
 
-  use Phoenix.HTML
-  alias Phoenix.HTML.Form
+  import Phoenix.HTML.Form
+  use PhoenixHTMLHelpers
 
   # http://blog.plataformatec.com.br/2016/09/dynamic-forms-with-phoenix/
   def input_with_type(form, field, type) do
@@ -31,7 +31,7 @@ defmodule Central.Helpers.InputHelper do
   end
 
   def input(form, field, opts \\ []) do
-    type = opts[:using] || Form.input_type(form, field)
+    type = opts[:using]
 
     wrapper_opts = [class: "form-group #{state_class(form, field)}"]
     label_opts = [class: "control-label"]
@@ -70,9 +70,9 @@ defmodule Central.Helpers.InputHelper do
     content_tag :div, wrapper_opts do
       input =
         if type == :select do
-          apply(Phoenix.HTML.Form, type, [form, field, choices, input_opts])
+          apply(PhoenixHTMLHelpers.Form, type, [form, field, choices, input_opts])
         else
-          apply(Phoenix.HTML.Form, type, [form, field, input_opts])
+          apply(PhoenixHTMLHelpers.Form, type, [form, field, input_opts])
         end
 
       label = label(form, field, humanize(field), label_opts)

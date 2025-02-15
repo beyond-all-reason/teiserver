@@ -258,6 +258,10 @@ value_types = [
             <textarea rows="20" class="form-control" style="font-family: monospace;">
 ids = [<%= id_list_str %>]
 
+<%#
+# When upgrading to live view 1.0 this snippet would throw an error and I can't
+# really be arsed to debug it. The goal is to have a copy/paste ready for a shell
+# but it's completely unused, and we may very well never use it
 (
   # Find existing players
   Teiserver.Account.list_users(
@@ -281,6 +285,7 @@ ids = [<%= id_list_str %>]
     Teiserver.Account.update_cache_user(userid, %{roles: new_roles})
   end)
 )
+%>
             </textarea>
           </div>
         </div>

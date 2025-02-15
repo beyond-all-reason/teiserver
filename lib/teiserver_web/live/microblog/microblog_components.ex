@@ -66,7 +66,7 @@ defmodule TeiserverWeb.MicroblogComponents do
 
   def post_preview_small(assigns) do
     ~H"""
-    <div id="post-preview" class="mt-4">
+    <div id="post-preview-small" class="mt-4">
       <hr />
       <h5 style="text-align: center;">--- Small preview ---</h5>
 
@@ -93,7 +93,7 @@ defmodule TeiserverWeb.MicroblogComponents do
 
   def post_preview_full(assigns) do
     ~H"""
-    <div id="post-preview" class="mt-4">
+    <div id="post-preview-full" class="mt-4">
       <hr />
       <h5 style="text-align: center;">--- Full preview ---</h5>
 
