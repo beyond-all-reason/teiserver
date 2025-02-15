@@ -90,7 +90,6 @@ defmodule Teiserver.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:dart_sass, "~> 0.6", only: [:dev]},
-      {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1.2"},
       {:ex_ulid, "~> 0.1.0"},
       {:combination, "~> 0.0.3"},
