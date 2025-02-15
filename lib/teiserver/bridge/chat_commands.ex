@@ -36,7 +36,7 @@ defmodule Teiserver.Bridge.ChatCommands do
 
   def handle_command({_user, _discord_id, message_id}, "gdt", _remaining, channel_id) do
     gdt_discussion_channel_id =
-      Config.get_site_config_cache("teiserver.Discord channel #gdt-discussion")
+      Config.get_site_config_cache("teiserver.Discord forum #gdt-discussion")
 
     if gdt_discussion_channel_id do
       # Post message to channel
