@@ -78,7 +78,7 @@ defmodule Teiserver.MixProject do
       {:timex, "~> 3.7.5"},
       {:breadcrumble, "~> 1.0.0"},
       {:guardian, "~> 2.1"},
-      {:argon2_elixir, "~> 3.0"},
+      {:argon2_elixir, "~> 4.1"},
       {:bodyguard, "~> 2.4"},
       {:human_time, "~> 0.3.0"},
       {:oban, "~> 2.15"},
