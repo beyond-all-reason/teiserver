@@ -465,11 +465,18 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
   def handle_event(
         "give-accolade",
-        %{"recipient_id" => recipient_id, "recipient_name" => recipient_name},
+        params,
         socket
       ) do
+    recipient_id = params["recipient_id"]
+    recipient_name = params["recipient_name"]
+    current_user_team_id = params["current_user_team_id"]
+    recipient_team_id = params["recipient_team_id"]
+
+    is_ally? = current_user_team_id == recipient_team_id
+
     badge_types =
-      Account.list_accolade_types()
+      AccoladeLib.get_giveable_accolade_types(is_ally?)
 
     gift_limit = Config.get_site_config_cache("teiserver.Accolade gift limit")
     gift_window = Config.get_site_config_cache("teiserver.Accolade gift window")
@@ -637,6 +644,9 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
                 <% end %>
               </tbody>
             </table>
+            <a phx-click="return-to-match" class="btn btn-sm btn-secondary">
+              Cancel
+            </a>
           </div>
         </div>
       </div>

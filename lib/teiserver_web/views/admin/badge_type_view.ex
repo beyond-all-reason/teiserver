@@ -9,4 +9,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeView do
 
   @spec purpose_list() :: [String.t()]
   defdelegate purpose_list(), to: Teiserver.Account.BadgeTypeLib
+
+  @spec restriction_list() :: [String.t()]
+  defdelegate restriction_list(), to: Teiserver.Account.BadgeTypeLib
 end
