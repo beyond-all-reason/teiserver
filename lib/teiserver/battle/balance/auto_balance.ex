@@ -28,7 +28,7 @@ defmodule Teiserver.Battle.Balance.AutoBalance do
 
         cond do
           has_noobs? -> SplitNoobs
-          get_parties_count(expanded_group) >= 3 -> SplitNoobs
+          get_parties_count(expanded_group) >= 1 -> SplitNoobs
           true -> LoserPicks
         end
     end
