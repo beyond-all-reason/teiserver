@@ -188,7 +188,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.create_message(channel_id, message)
+        channel_id -> Nostrum.Api.Message.create(channel_id, message)
       end
     else
       {:error, :discord_disabled}
@@ -215,7 +215,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.delete_message(channel_id, message_id)
+        channel_id -> Nostrum.Api.Message.delete(channel_id, message_id)
       end
     else
       {:error, :discord_disabled}

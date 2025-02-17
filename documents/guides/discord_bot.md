@@ -17,33 +17,32 @@ Go to that URL and follow the steps to add your bot to the server of your choosi
 Congratulations, your bot is set up!
 
 ### Configuring it to bridge
-Add to your `config/prod.secret.exs` the following block.
+
+You need to set the following environment variables:
 
 ```
-config :teiserver, DiscordBridgeBot,
-  token: "TOKEN",
-  bot_name: "BOT NAME",
-  bridges: [
-    {"Channel", "Room"}
-  ]
+TEI_ENABLE_DISCORD_BRIDGE=true
+TEI_DISCORD_BOT_TOKEN={{ TOKEN }}
+TEI_DISCORD_GUILD_ID=xxx
+TEI_DISCORD_BOT_NAME=test-teiserver-self-server
+TEI_DISCORD_BOT_EMAIL=test-teiserver-self-server@teiserver
 ```
 
-- token: The bot token found the Discord application for the bot in the bot tab
+- TOKEN: The bot token found the Discord application for the bot in the bot tab
+- GUILD_ID: this is the server ID, see [this discord article](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID) to see how to get it.
 - bot_name: The display name of the bot, if you don't have this correct the bot can respond to it's own messages creating an infinite loop
-- bridges: A list of tuple pairs of the channels/rooms you are linking
 
 To get a channel ID in your discord settings enable developer mode in advanced settings. Then right click the channel you wish to bridge to and select `Copy ID`. Paste that ID into the first element of the tuple and replace the second element with the room you wish to bridge to.
 
-Finally you need to enable the bot in either `config/prod.secret.exs` or `config/prod.exs`.
-
-```
-config :teiserver, Teiserver,
-  enable_discord_bridge: true
-```
+### Server startup
+The easiest way to test the bridge is working is to look for the startup message in discord. Get the [channel id](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID#h_01HRSTXPS5FMK2A5SMVSX4JW4E) and set it as a db settings through the web ui:
+* go under [the web ui](http://localhost:4000/teiserver/admin/site#Discord)
+* fill the channel id under `#server-updates`
+* when starting the server with `mix phx.server`, you should get a message from the bot in that channel.
 
 ### Moderator actions
 If one of the bridge channels is called "moderation-reports" then it will not bridge the normal way and instead be used for bridging user reports.
 If one of the bridge channels is called "moderation-actions" then it will not bridge the normal way and instead be used for bridging moderator actions (including warnings).
 
 ### Developing the bot
-If you are working on the bot in development then you'll need to create a 2nd bot account as above and link it to the relevant place for testing. Place the same config structure in `config/dev.secret.exs`, enable it and you should be good to go!
+If you are working on the bot in development then you'll need to create a 2nd bot account as above and link it to the relevant place for testing.

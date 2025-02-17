@@ -51,7 +51,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
       true ->
         channel_id = user.discord_dm_channel_id || user.discord_dm_channel
-        Api.create_message(channel_id, message)
+        Api.Message.create(channel_id, message)
     end
   end
 
@@ -222,14 +222,14 @@ defmodule Teiserver.Bridge.BridgeServer do
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #main")
 
       if channel_id do
-        Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
+        Api.Message.create(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
       end
 
       # Server
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
 
       if channel_id do
-        Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
+        Api.Message.create(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
       end
     end
 
@@ -241,7 +241,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
 
       if channel_id do
-        Api.create_message(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
+        Api.Message.create(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
       end
     end
 
@@ -253,7 +253,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   # pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
   # send(pid, :gdt_check)
   def handle_info(:gdt_check, state) do
-    Api.list_guild_threads(Application.get_env(:teiserver, DiscordBridgeBot)[:guild_id])
+    Api.Thread.list(Application.get_env(:teiserver, DiscordBridgeBot)[:guild_id])
 
     # Api.list_joined_private_archived_threads(channel_id)
     # When a thread in 👇｜game-design-team has gone 48 hours without any new messages:
@@ -389,7 +389,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       message
       |> convert_emoticons
 
-    Api.create_message(channel, "**#{author}**: #{new_message}")
+    Api.Message.create(channel, "**#{author}**: #{new_message}")
   end
 
   defp convert_emoticons(message) do
@@ -445,7 +445,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   def change_channel_name(0, _), do: false
 
   def change_channel_name(channel_id, new_name) do
-    Api.modify_channel(channel_id, %{
+    Api.Channel.modify(channel_id, %{
       name: new_name
     })
 
