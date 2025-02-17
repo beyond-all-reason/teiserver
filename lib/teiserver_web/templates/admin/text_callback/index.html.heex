@@ -53,9 +53,9 @@
 
                 <td>
                   <%= if text_callback.enabled do %>
-                    <i class="fa-fw fa-regular fa-check text-success"></i>
+                    <i class="fa-fw fa-solid fa-check text-success"></i>
                   <% else %>
-                    <i class="fa-fw fa-regular fa-times text-danger"></i>
+                    <i class="fa-fw fa-solid fa-times text-danger"></i>
                   <% end %>
                 </td>
 
@@ -77,7 +77,7 @@
                       href={~p"/admin/text_callbacks/#{text_callback.id}/edit"}
                       class={"btn btn-outline-#{bsname} btn-sm"}
                     >
-                      <i class="fa-fw fa-regular fa-wrench"></i> Edit
+                      <i class="fa-solid fa-wrench"></i> Edit
                     </a>
                   <% end %>
                 </td>
