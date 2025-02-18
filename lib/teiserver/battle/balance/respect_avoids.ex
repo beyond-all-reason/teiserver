@@ -14,6 +14,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   alias Teiserver.Account.RelationshipLib
   alias Teiserver.Config
+  alias Teiserver.Battle.BalanceLib
   # If player uncertainty is greater than equal to this, that player is considered a noob
   # The lowest uncertainty rank 0 player at the time of writing this is 6.65
   @high_uncertainty 6.65
@@ -523,9 +524,15 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   end
 
   def is_newish_player?(rank, uncertainty) do
-    # It is possible that someone has high uncertainty due to
-    # playing unranked, playing PvE, or playing a different game mode e.g. 1v1
-    # If they have many hours i.e. chev 4 = 100 hours, we will not consider them newish
-    uncertainty >= @high_uncertainty && rank <= 2
+    if BalanceLib.new_players_start_at_zero?() do
+      # Since new players start at zero, we shouldn't need to treat them special
+      # We can trust their rating since it won't be inflated
+      false
+    else
+      # It is possible that someone has high uncertainty due to
+      # playing unranked, playing PvE, or playing a different game mode e.g. 1v1
+      # If they have many hours i.e. chev 4 = 100 hours, we will not consider them newish
+      uncertainty >= @high_uncertainty && rank <= 2
+    end
   end
 end
