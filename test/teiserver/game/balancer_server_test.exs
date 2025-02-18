@@ -1,6 +1,6 @@
 defmodule Teiserver.Game.BalancerServerTest do
   @moduledoc false
-  use Teiserver.DataCase, async: true
+  use Teiserver.DataCase, async: false
 
   @moduletag :balance_test
   alias Teiserver.Game.BalancerServer
@@ -37,23 +37,52 @@ defmodule Teiserver.Game.BalancerServerTest do
     assert result == 4
   end
 
-  test "report empty state" do
+  test "load some players in and run a balance pass or two" do
     team_count = 2
     players = create_fake_players(4)
     _team_size = BalancerServer.calculate_team_size(team_count, players)
 
-    {:ok, tharp} = BalancerServer.init(%{lobby_id: 1})
-    dbg(tharp)
+    # spin up a lobby
+    lobby_starter_info = %{
+      "ip" => nil,
+      "port" => nil,
+      "engine_version" => nil,
+      "map_hash" => nil,
+      "map_name" => nil,
+      "game_name" => nil,
+      "hash_code" => nil,
+      "founder_id" => 4,
+      "founder_name" => "root",
+      "name" => "asdf",
+      "locked" => false,
+      "type" => "normal",
+      "nattype" => "none"
+    }
 
-    {:ok, narp} = BalancerServer.start_link(data: tharp)
-    dbg(narp)
+    {:ok, lobby} =
+      Teiserver.Lobby.create_new_lobby(lobby_starter_info)
 
-    assert is_pid(narp)
-    dbg(:sys.get_state(narp))
+    # put some users in the lobby
+    users = Teiserver.Account.list_users(limit: 4)
+    _ = Enum.map(users, fn user -> Teiserver.Lobby.force_add_user_to_lobby(user.id, lobby.id) end)
 
-    report_state_result = GenServer.call(narp, :report_state)
+    # ask for the initial balance state of the lobby
+    {:ok, balance_server_init_results} = BalancerServer.init(%{lobby_id: lobby.id})
 
-    dbg(report_state_result)
+    {:ok, start_link_results} = BalancerServer.start_link(data: balance_server_init_results)
+
+    assert is_pid(start_link_results)
+    state = :sys.get_state(start_link_results)
+
+    state = GenServer.call(start_link_results, :report_state)
+    dbg(state)
+    # list the players in the lobby
+    players = Teiserver.Battle.list_lobby_players(lobby.id)
+    dbg(players)
+    assert Enum.any?(players)
+
+    # there should be some players in the lobby, and from there we could run a balance pass and get a hash,
+    # but we don't have any players in the lobby for some reason...
   end
 
   defp create_fake_players(count) do
