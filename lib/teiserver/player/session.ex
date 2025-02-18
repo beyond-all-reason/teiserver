@@ -14,7 +14,8 @@ defmodule Teiserver.Player.Session do
   require Logger
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Player, Matchmaking}
+  alias Teiserver.{Player, Matchmaking, Messaging}
+  alias Teiserver.Helpers.BoundedQueue, as: BQ
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 
@@ -34,12 +35,55 @@ defmodule Teiserver.Player.Session do
                battle_password: String.t()
              }}
 
+  @type messaging_state :: %{
+          store_messages?: boolean(),
+          subscribed?: boolean(),
+          # for simplicity, only hold one buffer for everything. This may lead to
+          # problems if a few sources are really noisy, they will force out
+          # the other messages. We can deal with that later with a smaller
+          # buffer per source, and the added complexity of having to limit
+          # that total size
+          buffer: BQ.t(Messaging.message())
+        }
+
   @type state :: %{
           user: T.user(),
           mon_ref: reference(),
           conn_pid: pid() | nil,
-          matchmaking: matchmaking_state()
+          matchmaking: matchmaking_state(),
+          messaging_state: messaging_state()
         }
+
+  # TODO: would be better to have that as a db setting, perhaps passed as an
+  # argument to init()
+  @messaging_buffer_size 200
+
+  @impl true
+  def init({conn_pid, user}) do
+    ref = Process.monitor(conn_pid)
+    Logger.metadata(user_id: user.id)
+
+    state = %{
+      user: user,
+      mon_ref: ref,
+      conn_pid: conn_pid,
+      matchmaking: initial_matchmaking_state(),
+      messaging_state: %{
+        store_messages?: true,
+        subscribed?: false,
+        buffer: BQ.new(@messaging_buffer_size)
+      }
+    }
+
+    Logger.debug("init session #{inspect(self())}")
+    Logger.info("session started")
+
+    {:ok, state}
+  end
+
+  defp initial_matchmaking_state() do
+    :no_matchmaking
+  end
 
   @spec conn_state(T.userid()) :: conn_state()
   def conn_state(user_id) do
@@ -63,7 +107,7 @@ defmodule Teiserver.Player.Session do
 
   @spec join_queues(T.userid(), [Matchmaking.queue_id()]) :: Matchmaking.join_result()
   def join_queues(user_id, queue_ids) do
-    GenServer.call(via_tuple(user_id), {:join_queues, queue_ids})
+    GenServer.call(via_tuple(user_id), {:matchmaking, {:join_queues, queue_ids}})
   end
 
   @doc """
@@ -71,7 +115,7 @@ defmodule Teiserver.Player.Session do
   """
   @spec leave_queues(T.userid()) :: Matchmaking.leave_result()
   def leave_queues(user_id) do
-    GenServer.call(via_tuple(user_id), :leave_queues)
+    GenServer.call(via_tuple(user_id), {:matchmaking, :leave_queues})
   end
 
   @doc """
@@ -81,7 +125,7 @@ defmodule Teiserver.Player.Session do
   def matchmaking_notify_found(user_id, queue_id, room_pid, timeout_ms) do
     GenServer.cast(
       via_tuple(user_id),
-      {:matchmaking_notify_found, queue_id, room_pid, timeout_ms}
+      {:matchmaking, {:notify_found, queue_id, room_pid, timeout_ms}}
     )
   end
 
@@ -90,22 +134,42 @@ defmodule Teiserver.Player.Session do
   """
   @spec matchmaking_ready(T.userid()) :: :ok | {:error, :no_match}
   def matchmaking_ready(user_id) do
-    GenServer.call(via_tuple(user_id), :matchmaking_ready)
+    GenServer.call(via_tuple(user_id), {:matchmaking, :ready})
   end
 
   @spec matchmaking_lost(T.userid(), Matchmaking.lost_reason()) :: :ok
   def matchmaking_lost(user_id, reason) do
-    GenServer.cast(via_tuple(user_id), {:matchmaking_lost, reason})
+    GenServer.cast(via_tuple(user_id), {:matchmaking, {:lost, reason}})
   end
 
   @spec matchmaking_found_update(T.userid(), non_neg_integer(), pid()) :: :ok
   def matchmaking_found_update(user_id, ready_count, room_pid) do
-    GenServer.cast(via_tuple(user_id), {:matchmaking_found_update, ready_count, room_pid})
+    GenServer.cast(via_tuple(user_id), {:matchmaking, {:found_update, ready_count, room_pid}})
   end
 
   @spec battle_start(T.userid(), Teiserver.Autohost.start_response()) :: :ok
   def battle_start(user_id, battle_start_data) do
     GenServer.cast(via_tuple(user_id), {:battle_start, battle_start_data})
+  end
+
+  @doc """
+  this user should now receive all messaging events
+  """
+  @spec subscribe_received(
+          user_id :: T.userid(),
+          since :: :latest | :from_start | {:marker, term()}
+        ) :: {:ok, has_missed_messages :: boolean(), msg_to_send :: [Messaging.message()]}
+  def subscribe_received(user_id, since) do
+    GenServer.call(via_tuple(user_id), {:messaging, {:subscribe, since}})
+  end
+
+  @doc """
+  Attempt to send a dm to the target player. If there is no session for this
+  player the message is lost
+  """
+  @spec send_dm(T.userid(), Messaging.message()) :: :ok
+  def send_dm(user_id, message) do
+    GenServer.cast(via_tuple(user_id), {:messaging, {:dm, message}})
   end
 
   def start_link({_conn_pid, user} = arg) do
@@ -123,27 +187,6 @@ defmodule Teiserver.Player.Session do
   catch
     :exit, _ ->
       :died
-  end
-
-  @impl true
-  def init({conn_pid, user}) do
-    ref = Process.monitor(conn_pid)
-    Logger.metadata(user_id: user.id)
-
-    state = %{
-      user: user,
-      mon_ref: ref,
-      conn_pid: conn_pid,
-      matchmaking: initial_matchmaking_state()
-    }
-
-    Logger.debug("init session #{inspect(self())}")
-
-    {:ok, state}
-  end
-
-  defp initial_matchmaking_state() do
-    :no_matchmaking
   end
 
   @impl true
@@ -178,10 +221,10 @@ defmodule Teiserver.Player.Session do
   end
 
   # this should never happen because the json schema already checks for minimum length
-  def handle_call({:join_queues, []}, _from, state),
+  def handle_call({:matchmaking, {:join_queues, []}}, _from, state),
     do: {:reply, {:error, :invalid_request}, state}
 
-  def handle_call({:join_queues, queue_ids}, _from, state) do
+  def handle_call({:matchmaking, {:join_queues, queue_ids}}, _from, state) do
     case state.matchmaking do
       :no_matchmaking ->
         case join_all_queues(state.user.id, queue_ids, []) do
@@ -201,7 +244,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call(:leave_queues, _from, state) do
+  def handle_call({:matchmaking, :leave_queues}, _from, state) do
     case state.matchmaking do
       :no_matchmaking ->
         {:reply, {:error, :not_queued}, state}
@@ -218,7 +261,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call(:matchmaking_ready, _from, state) do
+  def handle_call({:matchmaking, :ready}, _from, state) do
     case state.matchmaking do
       {:pairing, %{room: {room_pid, _}} = pairing_state} ->
         password = :crypto.strong_rand_bytes(16) |> Base.encode16()
@@ -242,15 +285,50 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_call({:messaging, {:subscribe, since}}, _from, state) do
+    state =
+      state
+      |> put_in([:messaging_state, :subscribed?], true)
+      |> put_in([:messaging_state, :store_messages?], true)
+
+    buffer = state.messaging_state.buffer
+
+    # Keep the history, even if it is sent to the player. This may be a
+    # problem in the long run because the buffer are never emptied, but for
+    # now it’ll do
+    {msg_to_send, has_missed_messages} =
+      case since do
+        :latest ->
+          {[], false}
+
+        :from_start ->
+          {BQ.to_list(buffer), BQ.dropped?(buffer)}
+
+        {:marker, :invalid} ->
+          {BQ.to_list(buffer), true}
+
+        {:marker, marker} ->
+          {seen, not_seen} = BQ.split_when(buffer, fn msg -> msg.marker == marker end)
+
+          if is_nil(not_seen) do
+            {BQ.to_list(seen), true}
+          else
+            {BQ.to_list(not_seen), false}
+          end
+      end
+
+    {:reply, {:ok, has_missed_messages, msg_to_send}, state}
+  end
+
   @impl true
   def handle_cast(
-        {:matchmaking_notify_found, queue_id, room_pid, timeout_ms},
+        {:matchmaking, {:notify_found, queue_id, room_pid, timeout_ms}},
         %{matchmaking: {:searching, %{joined_queues: queue_ids}}} = state
       ) do
     if not Enum.member?(queue_ids, queue_id) do
       {:noreply, state}
     else
-      state = send_to_player({:matchmaking_notify_found, queue_id, timeout_ms}, state)
+      state = send_to_player({:matchmaking, {:notify_found, queue_id, timeout_ms}}, state)
 
       other_queues =
         for qid <- queue_ids, qid != queue_id do
@@ -274,7 +352,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:matchmaking_notify_found, _queue_id, room_pid, _}, state) do
+  def handle_cast({:matchmaking, {:notify_found, _queue_id, room_pid, _}}, state) do
     # we're not searching anything. This can happen as a race when two queues
     # match the same player at the same time.
     # Do log it since it should not happen too often unless something is wrong
@@ -284,30 +362,30 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
-  def handle_cast({:matchmaking_lost, reason}, state) do
+  def handle_cast({:matchmaking, {:lost, reason}}, state) do
     case state.matchmaking do
       :no_matchmaking ->
         {:noreply, state}
 
       {:searching, _} ->
-        state = send_to_player(:matchmaking_notify_lost, state)
+        state = send_to_player({:matchmaking, :notify_lost}, state)
         {:noreply, state}
 
       {:pairing,
        %{paired_queue: q_id, room: {_, ref}, frozen_queues: frozen_queues, readied: readied}} ->
         Process.demonitor(ref, [:flush])
         q_ids = [q_id | frozen_queues]
-        state = send_to_player(:matchmaking_notify_lost, state)
+        state = send_to_player({:matchmaking, :notify_lost}, state)
 
         case reason do
           :timeout when not readied ->
             state = leave_all_queues(q_ids, state)
-            state = send_to_player({:matchmaking_cancelled, reason}, state)
+            state = send_to_player({:matchmaking, {:cancelled, reason}}, state)
             {:noreply, state}
 
           {:server_error, _details} ->
             state = leave_all_queues(q_ids, state)
-            state = send_to_player({:matchmaking_cancelled, reason}, state)
+            state = send_to_player({:matchmaking, {:cancelled, reason}}, state)
             {:noreply, state}
 
           _ ->
@@ -317,17 +395,17 @@ defmodule Teiserver.Player.Session do
                 {:noreply, put_in(state.matchmaking, new_mm_state)}
 
               {:error, _err} ->
-                state = send_to_player({:matchmaking_cancelled, :server_error}, state)
+                state = send_to_player({:matchmaking, {:cancelled, :server_error}}, state)
                 {:noreply, %{state | matchmaking: initial_matchmaking_state()}}
             end
         end
     end
   end
 
-  def handle_cast({:matchmaking_found_update, current, room_pid}, state) do
+  def handle_cast({:matchmaking, {:found_update, current, room_pid}}, state) do
     case state.matchmaking do
       {:pairing, %{room: {^room_pid, _}}} ->
-        {:noreply, send_to_player({:matchmaking_found_update, current}, state)}
+        {:noreply, send_to_player({:matchmaking, {:found_update, current}}, state)}
 
       _ ->
         {:noreply, state}
@@ -360,13 +438,37 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_cast({:messaging, {:dm, message}}, state) do
+    state =
+      if state.messaging_state.store_messages? do
+        update_in(state.messaging_state.buffer, fn buf -> BQ.put(buf, message) end)
+      else
+        state
+      end
+
+    case {state.messaging_state.subscribed?, state.conn_pid} do
+      {true, pid} when not is_nil(pid) ->
+        send(pid, {:messaging, {:dm_received, message}})
+        {:noreply, state}
+
+      _ ->
+        {:noreply, state}
+    end
+  end
+
   @impl true
   def handle_info({:DOWN, ref, :process, _, _reason}, state) when ref == state.mon_ref do
     # we don't care about cancelling the timer if the player reconnects since reconnection
     # should be fairly low (and rate limited) so too many messages isn't an issue
     {:ok, _} = :timer.send_after(2_000, :player_timeout)
     Logger.info("Player disconnected abruptly")
-    {:noreply, %{state | conn_pid: nil}}
+
+    state =
+      state
+      |> Map.put(:conn_pid, nil)
+      |> put_in([:messaging_state, :subscribed?], false)
+
+    {:noreply, state}
   end
 
   def handle_info({:DOWN, ref, :process, _obj, reason}, state) do

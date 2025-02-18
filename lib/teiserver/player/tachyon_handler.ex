@@ -9,6 +9,7 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Player
   alias Teiserver.Matchmaking
+  alias Teiserver.Messaging
 
   @behaviour Handler
 
@@ -75,7 +76,7 @@ defmodule Teiserver.Player.TachyonHandler do
      {1008, "Server error: session process exited with reason #{inspect(reason)}"}, state}
   end
 
-  def handle_info({:matchmaking_notify_found, queue_id, timeout_ms}, state) do
+  def handle_info({:matchmaking, {:notify_found, queue_id, timeout_ms}}, state) do
     resp =
       Schema.event("matchmaking/found", %{
         queueId: queue_id,
@@ -85,7 +86,7 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, resp |> Jason.encode!()}, state}
   end
 
-  def handle_info({:matchmaking_found_update, ready_count}, state) do
+  def handle_info({:matchmaking, {:found_update, ready_count}}, state) do
     resp =
       Schema.event("matchmaking/foundUpdate", %{
         readyCount: ready_count
@@ -94,12 +95,12 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, resp |> Jason.encode!()}, state}
   end
 
-  def handle_info(:matchmaking_notify_lost, state) do
+  def handle_info({:matchmaking, :notify_lost}, state) do
     resp = Schema.event("matchmaking/lost")
     {:push, {:text, resp |> Jason.encode!()}, state}
   end
 
-  def handle_info({:matchmaking_cancelled, reason}, state) do
+  def handle_info({:matchmaking, {:cancelled, reason}}, state) do
     data =
       case reason do
         :cancel -> %{reason: :intentional}
@@ -114,6 +115,10 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_info({:battle_start, data}, state) do
     {:request, "battle/start", data, [], state}
+  end
+
+  def handle_info({:messaging, {:dm_received, message}}, state) do
+    {:event, "messaging/received", message_to_tachyon(message), state}
   end
 
   def handle_info({:timeout, message_id}, state)
@@ -226,6 +231,40 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, {:text, Jason.encode!(response)}, state}
   end
 
+  def handle_command("messaging/send" = cmd_id, "request", message_id, msg, state) do
+    with {:ok, target} <- message_target_from_tachyon(msg["data"]["target"]),
+         msg <-
+           Messaging.new(
+             msg["data"]["message"],
+             {:player, state.user.id},
+             :erlang.monotonic_time(:micro_seconds)
+           ),
+         :ok <- Messaging.send(msg, target) do
+      {:response, cmd_id, nil, state}
+    else
+      {:error, :invalid_recipient} ->
+        resp = Schema.error_response(cmd_id, message_id, :invalid_target)
+        {:push, {:text, Jason.encode!(resp)}, state}
+    end
+  end
+
+  def handle_command("messaging/subscribeReceived" = cmd_id, "request", message_id, msg, state) do
+    since = parse_since(msg["data"]["since"])
+
+    {:ok, has_missed_messages, msg_to_send} =
+      Player.Session.subscribe_received(state.user.id, since)
+
+    response = Schema.response(cmd_id, message_id, %{hasMissedMessages: has_missed_messages})
+
+    msg_to_send =
+      Enum.map(msg_to_send, fn msg ->
+        Schema.event("messaging/received", message_to_tachyon(msg))
+      end)
+
+    messages = [response | msg_to_send] |> Enum.map(fn data -> {:text, Jason.encode!(data)} end)
+    {:push, messages, state}
+  end
+
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)
@@ -261,6 +300,46 @@ defmodule Teiserver.Player.TachyonHandler do
             {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
             {:ok, pid}
         end
+    end
+  end
+
+  defp message_source_to_tachyon(source) do
+    case source do
+      {:player, player_id} -> %{type: "player", userId: to_string(player_id)}
+    end
+  end
+
+  defp message_target_from_tachyon(target) do
+    case target["type"] do
+      "player" ->
+        case Integer.parse(target["userId"]) do
+          {user_id, ""} -> {:ok, {:player, user_id}}
+          _ -> {:error, :invalid_recipient}
+        end
+
+      _ ->
+        {:error, :invalid_recipient}
+    end
+  end
+
+  defp message_to_tachyon(message) do
+    %{
+      message: message.content,
+      source: message_source_to_tachyon(message.source),
+      timestamp: message.timestamp,
+      marker: to_string(message.marker)
+    }
+  end
+
+  defp parse_since(nil), do: :latest
+  defp parse_since(%{"type" => "latest"}), do: :latest
+  defp parse_since(%{"type" => "from_start"}), do: :from_start
+
+  defp parse_since(%{"type" => "marker", "value" => marker}) do
+    case Integer.parse(marker) do
+      {m, ""} -> {:marker, m}
+      # invalid markers won't be found in the queue
+      _ -> {:marker, :invalid}
     end
   end
 end

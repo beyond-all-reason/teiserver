@@ -1,0 +1,38 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/messaging/received/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MessagingReceivedEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "messaging/received" },
+        "data": {
+            "title": "MessagingReceivedEventData",
+            "type": "object",
+            "properties": {
+                "message": { "type": "string" },
+                "source": {
+                    "type": "object",
+                    "properties": {
+                        "type": { "const": "player" },
+                        "userId": { "$ref": "../../definitions/userId.json" }
+                    },
+                    "required": ["type", "userId"]
+                },
+                "timestamp": {
+                    "$ref": "../../definitions/unixTime.json",
+                    "description": "time at which the message was received by the server"
+                },
+                "marker": { "$ref": "../../definitions/historyMarker.json" }
+            },
+            "required": ["message", "source", "timestamp", "marker"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

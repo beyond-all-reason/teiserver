@@ -268,6 +268,27 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
+  def send_message!(client, message, target) do
+    :ok =
+      send_request(client, "messaging/send", %{
+        message: message,
+        target: target
+      })
+
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def send_dm!(client, message, player_id) do
+    send_message!(client, message, %{type: "player", userId: to_string(player_id)})
+  end
+
+  def subscribe_messaging!(client, opts \\ []) do
+    since = Keyword.get(opts, :since, %{type: "latest"})
+    :ok = send_request(client, "messaging/subscribeReceived", %{since: since})
+    recv_message!(client)
+  end
+
   @doc """
   Run the given function `f` until `pred` returns true on its result.
   Waits `wait` ms between each tries. Raise an error if `pred` returns false
