@@ -52,7 +52,10 @@ defmodule Teiserver.Matchmaking.QueueServer do
           name: String.t(),
           team_size: pos_integer(),
           team_count: pos_integer(),
-          ranked: boolean()
+          ranked: boolean(),
+          engines: [%{version: String.t()}],
+          games: [%{spring_game: String.t()}],
+          maps: [Teiserver.Asset.Map.t()]
         }
 
   @type state :: %{
