@@ -3,6 +3,7 @@ defmodule Teiserver.Battle.Balance.AutoBalanceTypes do
 
   @type player :: %{
           rank: number(),
-          uncertainty: number()
+          uncertainty: number(),
+          rating: number()
         }
 end
