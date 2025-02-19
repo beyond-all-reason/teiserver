@@ -5,6 +5,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   alias Teiserver.Player
   alias Teiserver.AssetFixtures
   alias Teiserver.Asset
+  alias Teiserver.Matchmaking.{QueueSupervisor, QueueServer}
 
   def altair_attr() do
     altair_attr("8v8")
@@ -15,7 +16,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       spring_name: "Altair Crossing Remake 1.2.3",
       display_name: "Altair Crossing",
       thumbnail_url: "https://www.beyondallreason.info/map/altair-crossing",
-      matchmaking_queues: ["1v1", "2v2", "3v3", id]
+      matchmaking_queues: [id]
     }
 
   def rosetta_attr(id),
@@ -23,7 +24,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       spring_name: "Rosetta",
       display_name: "Rosetta",
       thumbnail_url: "https://www.beyondallreason.info/map/rosetta",
-      matchmaking_queues: ["5v5", "6v6", "7v7", "8v8", id]
+      matchmaking_queues: [id]
     }
 
   def map_attrs(id),
@@ -69,32 +70,14 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     |> mk_queue()
   end
 
-  def setup_queue(id, team_size, timeout) do
-    setup_maps(id)
-
-    queue_attrs(id, team_size)
-    |> put_in([:settings, :pairing_timeout], timeout)
-    |> mk_queue()
-  end
-
-  def setup_mapless_queue(id, team_size) do
-    queue_attrs(id, team_size)
-    |> Map.put(:maps, [])
-    |> mk_queue()
-  end
-
   defp setup_maps(id) do
-    Asset.delete_all_maps()
-
     map_attrs(id)
-    |> Enum.each(&AssetFixtures.create_map/1)
+    |> Enum.each(&AssetFixtures.create_or_update_map/1)
   end
 
   defp queue_attrs(id, team_size) do
     maps =
-      Teiserver.Support.Tachyon.poll_until_some(fn ->
-        Asset.get_maps_for_queue(id)
-      end)
+      Asset.get_maps_for_queue(id)
 
     %{
       id: id,
@@ -109,8 +92,6 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   end
 
   defp mk_queue(attrs) do
-    alias Teiserver.Matchmaking.QueueServer
-
     {:ok, pid} =
       QueueServer.init_state(attrs)
       |> QueueServer.start_link()
@@ -156,15 +137,25 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
 
     test "empty map list", %{client: client} do
-      {:ok, queue_id: queue_id, queue_pid: _} = setup_mapless_queue("mapless", 1)
+      :ok =
+        Teiserver.Matchmaking.QueueServer.init_state(%{
+          id: "mapless",
+          name: "mapless",
+          team_size: 1,
+          team_count: 2,
+          engines: engine_versions(),
+          games: game_versions(),
+          maps: []
+        })
+        |> QueueSupervisor.start_queue!()
 
       resp = Tachyon.list_queues!(client)
 
       expected_playlists =
         MapSet.new([
           %{
-            "id" => queue_id,
-            "name" => queue_id,
+            "id" => "mapless",
+            "name" => "mapless",
             "numOfTeams" => 2,
             "teamSize" => 1,
             "ranked" => true,
@@ -220,17 +211,16 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     test "too many player", %{client: client} do
       id = "emptyqueue"
 
-      {:ok, _} =
-        Teiserver.Matchmaking.QueueServer.init_state(%{
-          id: id,
-          name: id,
-          team_size: 0,
-          team_count: 2,
-          engines: engine_versions(),
-          games: game_versions(),
-          maps: map_names(id)
-        })
-        |> Teiserver.Matchmaking.QueueServer.start_link()
+      Teiserver.Matchmaking.QueueServer.init_state(%{
+        id: id,
+        name: id,
+        team_size: 0,
+        team_count: 2,
+        engines: engine_versions(),
+        games: game_versions(),
+        maps: map_attrs(id)
+      })
+      |> QueueSupervisor.start_queue!()
 
       assert %{"status" => "failed", "reason" => "invalid_request"} =
                Tachyon.join_queues!(client, [id])
@@ -239,7 +229,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     test "empty engines", %{client: client} do
       id = "emptyengines"
 
-      {:ok, _} =
+      :ok =
         Teiserver.Matchmaking.QueueServer.init_state(%{
           id: id,
           name: id,
@@ -247,9 +237,9 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
           team_count: 2,
           engines: [],
           games: game_versions(),
-          maps: map_names(id)
+          maps: map_attrs(id)
         })
-        |> Teiserver.Matchmaking.QueueServer.start_link()
+        |> QueueSupervisor.start_queue!()
 
       assert %{"status" => "failed", "reason" => "internal_error"} =
                Tachyon.join_queues!(client, [id])
@@ -258,7 +248,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     test "empty games", %{client: client} do
       id = "emptygames"
 
-      {:ok, _} =
+      :ok =
         Teiserver.Matchmaking.QueueServer.init_state(%{
           id: id,
           name: id,
@@ -266,9 +256,9 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
           team_count: 2,
           engines: engine_versions(),
           games: [],
-          maps: map_names(id)
+          maps: map_attrs(id)
         })
-        |> Teiserver.Matchmaking.QueueServer.start_link()
+        |> QueueSupervisor.start_queue!()
 
       assert %{"status" => "failed", "reason" => "internal_error"} =
                Tachyon.join_queues!(client, [id])
@@ -277,7 +267,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     test "empty maps", %{client: client} do
       id = "emptymaps"
 
-      {:ok, _} =
+      :ok =
         Teiserver.Matchmaking.QueueServer.init_state(%{
           id: id,
           name: id,
@@ -287,7 +277,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
           games: game_versions(),
           maps: []
         })
-        |> Teiserver.Matchmaking.QueueServer.start_link()
+        |> QueueSupervisor.start_queue!()
 
       assert %{"status" => "failed", "reason" => "internal_error"} =
                Tachyon.join_queues!(client, [id])
@@ -518,8 +508,12 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       timeout_ms = 5
       uuid = UUID.uuid4()
 
+      setup_maps(uuid)
+
       {:ok, queue_id: q_id, queue_pid: q_pid} =
-        setup_queue(uuid, 1, timeout_ms)
+        queue_attrs(uuid, 1)
+        |> put_in([:settings, :pairing_timeout], timeout_ms)
+        |> mk_queue()
 
       clients =
         Enum.map(1..2, fn _ ->
