@@ -180,31 +180,19 @@ defmodule Teiserver.Matchmaking.QueueServer do
       :timer.send_interval(state.settings.tick_interval_ms, :tick)
     end
 
-    {:ok, state, {:continue, :init_engines}}
+    {:ok, state, {:continue, :init_engines_games_maps}}
   end
 
   @impl true
-  def handle_continue(:init_engines, state) do
-    # TODO Get engines from somewhere else
+  def handle_continue(:init_engines_games_maps, state) do
+    # TODO Get engines and games from somewhere else
     engines = state.queue.engines
-
-    {:noreply, %{state | queue: Map.put(state.queue, :engines, engines)},
-     {:continue, :init_games}}
-  end
-
-  @impl true
-  def handle_continue(:init_games, state) do
-    # TODO Get games from somewhere else
     games = state.queue.games
-
-    {:noreply, %{state | queue: Map.put(state.queue, :games, games)}, {:continue, :init_maps}}
-  end
-
-  @impl true
-  def handle_continue(:init_maps, state) do
-    # Only get maps if the map list is empty
     maps = Asset.get_maps_for_queue(state.id)
-    {:noreply, %{state | queue: Map.put(state.queue, :maps, maps)}}
+
+    queue = %{state.queue | engines: engines, games: games, maps: maps}
+
+    {:noreply, %{state | queue: queue}}
   end
 
   @impl true
