@@ -132,12 +132,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
       {:error, reason} ->
         QueueServer.disband_pairing(state.queue_id, self())
 
-        state.teams
-        |> List.flatten()
-        |> Enum.flat_map(& &1.player_ids)
-        |> Enum.each(fn p_id ->
+        for team <- state.teams, member <- team, p_id <- member.player_ids do
           Teiserver.Player.matchmaking_notify_lost(p_id, {:server_error, reason})
-        end)
+        end
 
         {:stop, :normal, state}
 
@@ -157,12 +154,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           |> Map.put(:game, %{springName: game})
           |> Map.put(:map, %{springName: map})
 
-        state.teams
-        |> List.flatten()
-        |> Enum.flat_map(& &1.player_ids)
-        |> Enum.each(fn p_id ->
+        for team <- state.teams, member <- team, p_id <- member.player_ids do
           Teiserver.Player.battle_start(p_id, battle_start_data)
-        end)
+        end
 
         {:stop, :normal, state}
     end
