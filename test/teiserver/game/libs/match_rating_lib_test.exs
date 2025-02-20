@@ -8,7 +8,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
   alias Teiserver.Battle
   alias Teiserver.Game
 
-  test "num_matches is updated after rating a match" do
+  test "num_matches and num_wins is updated after rating a match" do
     # Create two user
     user1 = AccountTestLib.user_fixture()
     user2 = AccountTestLib.user_fixture()
@@ -40,11 +40,13 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     assert ratings[user1.id].skill == 27.637760127073694
     assert ratings[user2.id].skill == 22.362239872926306
 
-    # Check num_matches in teiserver_account_ratings table
+    # Check num_matches and num_wins in teiserver_account_ratings table
     assert ratings[user1.id].num_matches == 1
-    assert ratings[user1.id].num_matches == 1
+    assert ratings[user2.id].num_matches == 1
+    assert ratings[user1.id].num_wins == 1
+    assert ratings[user2.id].num_wins == 0
 
-    # Check num_matches in teiserver_game_rating_logs table
+    # Check num_matches and num_wins in teiserver_game_rating_logs table
     rating_logs =
       Game.list_rating_logs(
         search: [
@@ -54,7 +56,9 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       )
 
     assert Enum.at(rating_logs, 0).value["num_matches"] == 1
+    assert Enum.at(rating_logs, 0).value["num_wins"] == 1
     assert Enum.at(rating_logs, 1).value["num_matches"] == 1
+    assert Enum.at(rating_logs, 1).value["num_wins"] == 0
 
     # Create another match
     match = create_fake_match(user1.id, user2.id)
@@ -66,16 +70,20 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     assert ratings[user1.id].skill == 29.662576313923775
     assert ratings[user2.id].skill == 20.337423686076225
 
-    # Check num_matches has increased
+    # Check num_matches and num_wins has increased
     assert ratings[user1.id].num_matches == 2
-    assert ratings[user1.id].num_matches == 2
+    assert ratings[user2.id].num_matches == 2
+    assert ratings[user1.id].num_wins == 2
+    assert ratings[user2.id].num_wins == 0
 
     # Rerate the same match
     MatchRatingLib.re_rate_specific_matches([match.id])
 
-    # Check num_matches unchanged
+    # Check num_matches and num_wins unchanged
     assert ratings[user1.id].num_matches == 2
-    assert ratings[user1.id].num_matches == 2
+    assert ratings[user2.id].num_matches == 2
+    assert ratings[user1.id].num_wins == 2
+    assert ratings[user2.id].num_wins == 0
   end
 
   defp get_ratings(userids, rating_type_id) do

@@ -205,8 +205,8 @@ defmodule Teiserver.Game.MatchRatingLib do
       |> Enum.map(fn %{user_id: user_id} ->
         rating_update = rate_result[user_id]
         user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
-
-        do_update_rating(user_id, match, user_rating, rating_update, opts)
+        win? = true
+        do_update_rating(user_id, match, user_rating, rating_update, win?, opts)
       end)
 
     loss_ratings =
@@ -214,7 +214,8 @@ defmodule Teiserver.Game.MatchRatingLib do
       |> Enum.map(fn %{user_id: user_id} ->
         rating_update = rate_result[user_id]
         user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
-        do_update_rating(user_id, match, user_rating, rating_update, opts)
+        win? = false
+        do_update_rating(user_id, match, user_rating, rating_update, win?, opts)
       end)
 
     save_rating_logs(match.id, win_ratings, loss_ratings, opts)
@@ -348,8 +349,8 @@ defmodule Teiserver.Game.MatchRatingLib do
       |> Enum.map(fn %{user_id: user_id} ->
         rating_update = win_result[user_id]
         user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
-
-        do_update_rating(user_id, match, user_rating, rating_update, opts)
+        win? = true
+        do_update_rating(user_id, match, user_rating, rating_update, win?, opts)
       end)
 
     # If you lose you just count as losing against the winner
@@ -361,10 +362,10 @@ defmodule Teiserver.Game.MatchRatingLib do
         team_ratings
         |> Enum.map(fn {user_id, _old_rating} ->
           rating_update = lose_results[user_id]
-
+          win? = false
           user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
           ratiod_rating_update = apply_change_ratio(user_rating, rating_update, opponent_ratio)
-          do_update_rating(user_id, match, user_rating, ratiod_rating_update, opts)
+          do_update_rating(user_id, match, user_rating, ratiod_rating_update, win?, opts)
         end)
       end)
       |> List.flatten()
@@ -435,8 +436,8 @@ defmodule Teiserver.Game.MatchRatingLib do
     {new_skill, u}
   end
 
-  @spec do_update_rating(T.userid(), map(), map(), {number(), number()}, any()) :: any
-  defp do_update_rating(user_id, match, user_rating, rating_update, opts) do
+  @spec do_update_rating(T.userid(), map(), map(), {number(), number()}, boolean(), any()) :: any
+  defp do_update_rating(user_id, match, user_rating, rating_update, win?, opts) do
     rerate? = Keyword.get(opts, :rerate?, false)
     # It's possible they don't yet have a rating
     user_rating =
@@ -465,6 +466,10 @@ defmodule Teiserver.Game.MatchRatingLib do
         true -> user_rating.num_matches + 1
       end
 
+    old_num_wins = user_rating.num_wins || 0
+    # If re-rerating or the person lost, do not increment num_wins
+    new_num_wins = if rerate? || !win?, do: old_num_wins, else: old_num_wins + 1
+
     rating_type_id = user_rating.rating_type_id
     {new_skill, new_uncertainty} = rating_update
     new_rating_value = BalanceLib.calculate_rating_value(new_skill, new_uncertainty)
@@ -476,7 +481,8 @@ defmodule Teiserver.Game.MatchRatingLib do
       uncertainty: new_uncertainty,
       leaderboard_rating: new_leaderboard_rating,
       last_updated: match.finished,
-      num_matches: new_num_matches
+      num_matches: new_num_matches,
+      num_wins: new_num_wins
     })
 
     %{
@@ -491,7 +497,8 @@ defmodule Teiserver.Game.MatchRatingLib do
         rating_value_change: new_rating_value - user_rating.rating_value,
         skill_change: new_skill - user_rating.skill,
         uncertainty_change: new_uncertainty - user_rating.uncertainty,
-        num_matches: new_num_matches
+        num_matches: new_num_matches,
+        num_wins: new_num_wins
       }
     }
   end
