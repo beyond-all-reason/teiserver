@@ -139,16 +139,6 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     end
   end
 
-  @spec get_captain_rating([BF.player()]) :: any()
-  def get_captain_rating(team) do
-    if(length(team) > 0) do
-      captain = Enum.max_by(team, fn player -> player.rating end, &>=/2)
-      captain.rating
-    else
-      0
-    end
-  end
-
   @spec score_combo([BF.player()], [BF.player()], [String.t()]) :: BF.combo_result()
   def score_combo(first_team, all_players, parties) do
     second_team = get_second_team(first_team, all_players)
