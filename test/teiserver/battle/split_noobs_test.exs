@@ -649,7 +649,7 @@ defmodule Teiserver.Battle.SplitNoobsTest do
            ]
   end
 
-  test "can handle party with high sd." do
+  test "can handle non op party with high sd." do
     expanded_group = [
       %{
         count: 2,
