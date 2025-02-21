@@ -69,9 +69,7 @@ defmodule Teiserver.Protocols.SpringIn do
   def handle(data, state) do
     tuple =
       if String.valid?(data) do
-        ~r/^(#[0-9]+ )?([a-z_A-Z0-9\.]+)(.*)?$/u
-        |> Regex.run(data)
-        |> _clean()
+        parse_in_message(data)
       else
         Logger.error("Invalid characters in data: '#{data}'")
 
@@ -1398,6 +1396,13 @@ defmodule Teiserver.Protocols.SpringIn do
       true ->
         {false, %{state | status_timestamps: status_timestamps}}
     end
+  end
+
+  @spec parse_in_message(String.t()) :: nil | {String.t(), String.t(), String.t()}
+  def parse_in_message(raw) do
+    ~r/^(#[0-9]+ )?([a-z_A-Z0-9\.]+)(.*)?$/u
+    |> Regex.run(raw)
+    |> _clean()
   end
 
   # @spec engage_flood_protection(map()) :: {:stop, String.t(), map()}
