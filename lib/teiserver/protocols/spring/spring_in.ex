@@ -19,7 +19,8 @@ defmodule Teiserver.Protocols.SpringIn do
     BattleIn,
     LobbyPolicyIn,
     UserIn,
-    SystemIn
+    SystemIn,
+    PartyIn
   }
 
   @optimisation_level %{
@@ -134,6 +135,10 @@ defmodule Teiserver.Protocols.SpringIn do
     SystemIn.do_handle(cmd, data, msg_id, state)
   end
 
+  defp do_handle("c.party." <> cmd, data, msg_id, state) do
+    PartyIn.do_handle(cmd, data, msg_id, state)
+  end
+
   defp do_handle("STARTTLS", _, msg_id, state) do
     do_handle("STLS", nil, msg_id, state)
   end
@@ -234,7 +239,9 @@ defmodule Teiserver.Protocols.SpringIn do
       {:ok, user} ->
         optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
 
-        new_state = SpringOut.do_login_accepted(state, user, optimisation_level)
+        new_state =
+          SpringOut.do_login_accepted(state, user, optimisation_level)
+          |> Map.put(:party_id, nil)
 
         # Do we have a clan?
         if user.clan_id do
