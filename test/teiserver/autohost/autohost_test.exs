@@ -1,6 +1,6 @@
 defmodule Teiserver.Autohost.AutohostTest do
   use ExUnit.Case, async: false
-  import Teiserver.Support.Tachyon, only: [poll_until: 2, poll_until_nil: 1]
+  import Teiserver.Support.Polling, only: [poll_until: 2, poll_until_nil: 1]
 
   alias Teiserver.Autohost
 
@@ -29,14 +29,10 @@ defmodule Teiserver.Autohost.AutohostTest do
   defp register_autohost(id, max, current) do
     Autohost.Registry.register(%{id: id, max_battles: max, current_battles: current})
 
-    # Teiserver.Support.Tachyon.poll_until_some(fn ->
-    #   Autohost.Registry.lookup(id)
-    # end)
-
     on_exit(fn ->
       Autohost.Registry.unregister(id)
 
-      Teiserver.Support.Tachyon.poll_until_nil(fn ->
+      poll_until_nil(fn ->
         Autohost.Registry.lookup(id)
       end)
     end)

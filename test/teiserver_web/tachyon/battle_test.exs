@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Tachyon.BattleTest do
   use TeiserverWeb.ConnCase
-  alias Teiserver.Support.Tachyon
+  alias Teiserver.Support.{Polling, Tachyon}
   alias Teiserver.OAuthFixtures
   alias Teiserver.TachyonBattle
 
@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
   # but tests some internals of the Battle process
   # Not sure about a better way though
   test "battle timeout", %{autohost: autohost, autohost_client: autohost_client} do
-    Tachyon.poll_until_some(&Teiserver.Autohost.find_autohost/0)
+    Polling.poll_until_some(&Teiserver.Autohost.find_autohost/0)
 
     assert {:ok, pid} =
              TachyonBattle.Battle.start(%{
@@ -31,7 +31,7 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
              })
 
     Tachyon.disconnect!(autohost_client)
-    Tachyon.poll_until(&Teiserver.Autohost.find_autohost/0, &is_nil/1)
-    Tachyon.poll_until(fn -> Process.alive?(pid) end, &(&1 == false))
+    Polling.poll_until(&Teiserver.Autohost.find_autohost/0, &is_nil/1)
+    Polling.poll_until(fn -> Process.alive?(pid) end, &(&1 == false))
   end
 end
