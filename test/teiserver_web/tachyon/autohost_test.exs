@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
 
   def create_autohost(name), do: Teiserver.BotFixtures.create_bot(name)
 
-  def setup_autohost(_context), do: {:ok, autohost: create_bot()}
+  def setup_autohost(_context), do: {:ok, autohost: Teiserver.BotFixtures.create_bot()}
 
   def setup_app(_context) do
     user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     token =
       OAuthFixtures.token_attrs(nil, context.app)
       |> Map.drop([:owner_id])
-      |> Map.put(:bot_id, context.bot.id)
+      |> Map.put(:bot_id, context.autohost.id)
       |> OAuthFixtures.create_token()
 
     {:ok, creds: creds, token: token}
@@ -57,7 +57,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     Tachyon.connect_autohost!(token, 10, 0)
 
     {pid, %{max_battles: 10, current_battles: 0}} =
-      poll_until_some(fn -> Teiserver.Bot.lookup_bot(token.bot_id) end)
+      poll_until_some(fn -> Teiserver.Autohost.lookup_autohost(token.bot_id) end)
 
     assert is_pid(pid)
   end
@@ -66,13 +66,13 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     client = Tachyon.connect_autohost!(token, 10, 0)
 
     {_, %{max_battles: 10, current_battles: 0}} =
-      poll_until_some(fn -> Teiserver.Bot.lookup_bot(token.bot_id) end)
+      poll_until_some(fn -> Teiserver.Autohost.lookup_autohost(token.bot_id) end)
 
     :ok = Tachyon.send_event(client, "autohost/status", %{maxBattles: 15, currentBattles: 3})
 
     {_, %{max_battles: 15, current_battles: 3}} =
       poll_until(
-        fn -> Teiserver.Bot.lookup_bot(token.bot_id) end,
+        fn -> Teiserver.Autohost.lookup_autohost(token.bot_id) end,
         fn {_, details} ->
           details != nil && details.max_battles == 15 && details.current_battles == 3
         end,
@@ -85,13 +85,13 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     {:ok, creds: _, token: other_token} = setup_token(%{app: app, autohost: other_autohost})
 
     # make sure the other tests aren't interfering
-    poll_until(&Teiserver.Bot.list/0, fn l -> Enum.empty?(l) end)
+    poll_until(&Teiserver.Autohost.list/0, fn l -> Enum.empty?(l) end)
 
     Tachyon.connect_autohost!(token, 10, 0)
     Tachyon.connect_autohost!(other_token, 15, 1)
 
     list =
-      poll_until(&Teiserver.Bot.list/0, fn l -> Enum.count(l) == 2 end)
+      poll_until(&Teiserver.Autohost.list/0, fn l -> Enum.count(l) == 2 end)
       |> MapSet.new()
 
     expected =
