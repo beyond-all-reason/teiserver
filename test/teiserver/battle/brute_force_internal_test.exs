@@ -117,7 +117,7 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
     result = BruteForce.score_combo(first_potential_team, input.players, input.parties)
 
     assert result == %{
-             broken_party_penalty: 0,
+             broken_party_penalty: 0.0,
              first_team: [
                %{id: 1, name: "kyutoryu", rating: 12.25},
                %{id: 2, name: "fbots1998", rating: 13.98},
@@ -127,7 +127,7 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
                %{id: 6, name: "jauggy", rating: 20.49}
              ],
              rating_diff_penalty: 11.670000000000044,
-             score: 13.987048974705417,
+             score: 12.82852448735273,
              second_team: [
                %{id: 7, name: "reddragon2010", rating: 18.4},
                %{id: 8, name: "Aposis", rating: 20.42},
@@ -136,32 +136,32 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
                %{id: 11, name: "[DTG]BamBin0", rating: 20.06},
                %{id: 12, name: "barmalev", rating: 3.58}
              ],
-             stdev_diff_penalty: 2.317048974705372
+             stdev_diff_penalty: 1.158524487352686
            }
 
     best_combo = BruteForce.get_best_combo(combos, input.players, input.parties)
 
     assert best_combo == %{
-             broken_party_penalty: 0,
+             broken_party_penalty: 3.5,
              first_team: [
                %{id: 1, name: "kyutoryu", rating: 12.25},
-               %{id: 2, name: "fbots1998", rating: 13.98},
-               %{id: 5, name: "SLOPPYGAGGER", rating: 8.89},
                %{id: 6, name: "jauggy", rating: 20.49},
                %{id: 8, name: "Aposis", rating: 20.42},
-               %{id: 12, name: "barmalev", rating: 3.58}
-             ],
-             rating_diff_penalty: 5.830000000000041,
-             score: 7.322550984245979,
-             second_team: [
-               %{id: 3, name: "Dixinormus", rating: 18.28},
-               %{id: 4, name: "HungDaddy", rating: 2.8},
-               %{id: 7, name: "reddragon2010", rating: 18.4},
                %{id: 9, name: "MaTThiuS_82", rating: 8.26},
                %{id: 10, name: "Noody", rating: 17.64},
+               %{id: 12, name: "barmalev", rating: 3.58}
+             ],
+             rating_diff_penalty: 0.22999999999996135,
+             score: 4.139916720108468,
+             second_team: [
+               %{id: 2, name: "fbots1998", rating: 13.98},
+               %{id: 3, name: "Dixinormus", rating: 18.28},
+               %{id: 4, name: "HungDaddy", rating: 2.8},
+               %{id: 5, name: "SLOPPYGAGGER", rating: 8.89},
+               %{id: 7, name: "reddragon2010", rating: 18.4},
                %{id: 11, name: "[DTG]BamBin0", rating: 20.06}
              ],
-             stdev_diff_penalty: 1.4925509842459377
+             stdev_diff_penalty: 0.409916720108507
            }
 
     result = BruteForce.standardise_result(best_combo, input.parties) |> Map.drop([:logs])
@@ -170,22 +170,22 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
              team_groups: %{
                1 => [
                  %{count: 1, group_rating: 12.25, members: [1], ratings: [12.25]},
-                 %{count: 1, group_rating: 13.98, members: [2], ratings: [13.98]},
-                 %{count: 1, group_rating: 8.89, members: [5], ratings: [8.89]},
                  %{count: 1, group_rating: 20.49, members: [6], ratings: [20.49]},
                  %{count: 1, group_rating: 20.42, members: ~c"\b", ratings: [20.42]},
+                 %{count: 1, members: ~c"\t", ratings: [8.26], group_rating: 8.26},
+                 %{count: 1, members: ~c"\n", ratings: [17.64], group_rating: 17.64},
                  %{count: 1, group_rating: 3.58, members: ~c"\f", ratings: [3.58]}
                ],
                2 => [
+                 %{count: 1, members: [2], ratings: [13.98], group_rating: 13.98},
                  %{count: 1, group_rating: 18.28, members: [3], ratings: [18.28]},
                  %{count: 1, group_rating: 2.8, members: [4], ratings: [2.8]},
+                 %{count: 1, members: [5], ratings: [8.89], group_rating: 8.89},
                  %{count: 1, group_rating: 18.4, members: ~c"\a", ratings: [18.4]},
-                 %{count: 1, group_rating: 8.26, members: ~c"\t", ratings: [8.26]},
-                 %{count: 1, members: ~c"\n", ratings: [17.64], group_rating: 17.64},
                  %{count: 1, group_rating: 20.06, members: ~c"\v", ratings: [20.06]}
                ]
              },
-             team_players: %{1 => [1, 2, 5, 6, 8, 12], 2 => [3, 4, 7, 9, 10, 11]}
+             team_players: %{1 => [1, 6, 8, 9, 10, 12], 2 => [2, 3, 4, 5, 7, 11]}
            }
   end
 

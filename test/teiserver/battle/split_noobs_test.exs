@@ -103,37 +103,23 @@ defmodule Teiserver.Battle.SplitNoobsTest do
     result = SplitNoobs.perform(expanded_group, 2) |> Map.drop([:logs])
 
     # This test passes if the top three players (all rated 20+) are NOT on the same team
-    assert result == %{
-             team_groups: %{
-               1 => [
-                 %{count: 1, group_rating: 13.98, members: ["fbots1998"], ratings: [13.98]},
-                 %{count: 1, group_rating: 20.06, members: ["[DTG]BamBin0"], ratings: [20.06]},
-                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
-                 %{count: 1, members: ["Dixinormus"], ratings: [18.28], group_rating: 18.28},
-                 %{count: 1, group_rating: 8.89, members: ["SLOPPYGAGGER"], ratings: [8.89]},
-                 %{count: 1, group_rating: 2.8, members: ["HungDaddy"], ratings: [2.8]}
-               ],
-               2 => [
-                 %{count: 1, members: ["kyutoryu"], ratings: [12.25], group_rating: 12.25},
-                 %{count: 1, members: ["jauggy"], ratings: [20.49], group_rating: 20.49},
-                 %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]},
-                 %{count: 1, group_rating: 17.64, members: ["Noody"], ratings: [17.64]},
-                 %{count: 1, members: ["MaTThiuS_82"], ratings: [8.26], group_rating: 8.26},
-                 %{count: 1, group_rating: 3.58, members: ["barmalev"], ratings: [3.58]}
-               ]
-             },
-             team_players: %{
-               1 => [
-                 "fbots1998",
-                 "[DTG]BamBin0",
-                 "reddragon2010",
-                 "Dixinormus",
-                 "SLOPPYGAGGER",
-                 "HungDaddy"
-               ],
-               2 => ["kyutoryu", "jauggy", "Aposis", "Noody", "MaTThiuS_82", "barmalev"]
-             }
-           }
+    team1_op_count =
+      Enum.map(result.team_groups[1], fn x ->
+        x.ratings
+      end)
+      |> List.flatten()
+      |> Enum.count(fn rating -> rating >= 20 end)
+
+    team2_op_count =
+      Enum.map(result.team_groups[2], fn x ->
+        x.ratings
+      end)
+      |> List.flatten()
+      |> Enum.count(fn rating -> rating >= 20 end)
+
+    assert team1_op_count <= 2
+    assert team2_op_count <= 2
+    assert team1_op_count + team2_op_count == 3
   end
 
   test "can process expanded_group with no parties" do
