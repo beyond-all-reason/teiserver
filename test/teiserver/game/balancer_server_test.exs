@@ -1,6 +1,7 @@
 defmodule Teiserver.Game.BalancerServerTest do
   @moduledoc false
-  use ExUnit.Case
+  use Teiserver.DataCase, async: false
+
   @moduletag :balance_test
   alias Teiserver.Game.BalancerServer
 
@@ -36,7 +37,49 @@ defmodule Teiserver.Game.BalancerServerTest do
     assert result == 4
   end
 
+  test "load some players in and run a balance pass or two" do
+    team_count = 2
+    players = create_fake_players(4)
+
+    {:ok, start_link_results} = BalancerServer.start_link(data: %{lobby_id: 1})
+
+    starting_state = GenServer.call(start_link_results, :report_state, 5000)
+    dbg(starting_state)
+
+    dbg(players)
+
+    first_balance_pass =
+      GenServer.call(
+        start_link_results,
+        {:make_balance, team_count, [], players},
+        5000
+      )
+
+    dbg(first_balance_pass)
+
+    second_balance_pass_hash_reuse =
+      GenServer.call(
+        start_link_results,
+        {:make_balance, team_count, [], create_fake_players(4)},
+        5000
+      )
+
+    dbg(second_balance_pass_hash_reuse)
+
+    assert second_balance_pass_hash_reuse.hash == first_balance_pass.hash
+
+    third_balance_pass_with_more_players =
+      GenServer.call(
+        start_link_results,
+        {:make_balance, team_count, [], create_fake_players(160)},
+        5000
+      )
+
+    dbg(third_balance_pass_with_more_players)
+    assert second_balance_pass_hash_reuse.hash != third_balance_pass_with_more_players.hash
+  end
+
   defp create_fake_players(count) do
-    1..count |> Enum.map(fn _ -> %{} end)
+    1..count |> Enum.map(fn iter -> %{userid: iter, party_id: iter} end)
   end
 end
