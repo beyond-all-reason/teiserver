@@ -3,6 +3,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
 
   alias Teiserver.Protocols.SpringOut
   alias Teiserver.Account
+  alias Phoenix.PubSub
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("create_new_party", _, msg_id, state) when not is_nil(state.party_id) do
@@ -54,6 +55,26 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     end
   end
 
+  def do_handle("accept_invite_to_party", data, msg_id, state) do
+    cmd_id = "c.party.accept_invite_to_party"
+
+    with [party_id] <- String.split(data) |> Enum.map(&String.trim/1),
+         {true, _party} <- Account.accept_party_invite(party_id, state.user.id) do
+      SpringOut.reply(:okay, cmd_id, msg_id, state)
+    else
+      {false, reason} ->
+        SpringOut.reply(:no, {cmd_id, "msg=#{reason}"}, msg_id, state)
+
+      _ ->
+        SpringOut.reply(
+          :no,
+          {cmd_id, "msg=expected party_id in argument but could not parse"},
+          msg_id,
+          state
+        )
+    end
+  end
+
   def do_handle(msg, _, _msg_id, state) do
     Logger.debug("Unhandled party message: #{msg}")
     state
@@ -61,6 +82,22 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
 
   def handle_event(%{event: :party_invite, party_id: party_id}, state) do
     SpringOut.reply(:party, :invited_to_party, party_id, message_id(), state)
+  end
+
+  def handle_event(%{event: :added_to_party, party_id: party_id}, state) do
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
+
+    state
+  end
+
+  def handle_event(
+        %{event: :updated_values, party_id: party_id, operation: {:member_added, userid}},
+        state
+      ) do
+    case Teiserver.Account.get_user_by_id(userid) do
+      nil -> state
+      user -> SpringOut.reply(:party, :member_added, {party_id, user.name}, message_id(), state)
+    end
   end
 
   def handle_event(event, state) do

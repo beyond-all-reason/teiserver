@@ -362,6 +362,14 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, state}
   end
 
+  def handle_info(%{channel: "teiserver_party:" <> _party_id} = event, state) do
+    # I am taking a shortcut here. There may already be something in place to
+    # react to random events and delegating that to a handler.
+    # This is bypassing SpringIn entirely
+    Teiserver.Protocols.Spring.PartyIn.handle_event(event, state)
+    {:noreply, state}
+  end
+
   def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str}, state) do
     {:noreply, state}
   end
