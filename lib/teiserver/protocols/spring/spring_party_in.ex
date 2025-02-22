@@ -60,7 +60,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
 
     with [party_id] <- String.split(data) |> Enum.map(&String.trim/1),
          {true, _party} <- Account.accept_party_invite(party_id, state.user.id) do
-      SpringOut.reply(:okay, cmd_id, msg_id, state)
+      SpringOut.reply(:okay, cmd_id, msg_id, Map.put(state, :party_id, party_id))
     else
       {false, reason} ->
         SpringOut.reply(:no, {cmd_id, "msg=#{reason}"}, msg_id, state)
@@ -90,6 +90,21 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
           state
         )
     end
+  end
+
+  def do_handle("leave_current_party", _data, msg_id, state) when is_nil(state.party_id),
+    do:
+      SpringOut.reply(
+        :no,
+        {"c.party.leave_current_party", "msg=not currently in a party"},
+        msg_id,
+        state
+      )
+
+  def do_handle("leave_current_party", _data, msg_id, state) do
+    Account.leave_party(state.party_id, state.user.id)
+    :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{state.party_id}")
+    SpringOut.reply(:okay, "c.party.leave_current_party", msg_id, Map.put(state, :party_id, nil))
   end
 
   def do_handle(msg, _, _msg_id, state) do
@@ -127,6 +142,19 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
 
       user ->
         SpringOut.reply(:party, :invite_cancelled, {party_id, user.name}, message_id(), state)
+    end
+  end
+
+  def handle_event(
+        %{event: :updated_values, party_id: party_id, operation: {:member_removed, userid}},
+        state
+      ) do
+    case Teiserver.Account.get_user_by_id(userid) do
+      nil ->
+        state
+
+      user ->
+        SpringOut.reply(:party, :member_removed, {party_id, user.name}, message_id(), state)
     end
   end
 
