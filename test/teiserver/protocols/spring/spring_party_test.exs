@@ -62,6 +62,33 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     end
   end
 
+  describe "handle invite" do
+    setup do
+      {:ok, socket: socket1, user: user1} = setup_user(nil)
+      {:ok, socket: socket2, user: user2} = setup_user(nil)
+
+      # absorb the broadcasted message that another player is online
+      "ADDUSER " <> _ = _recv_until(socket1)
+
+      party_id = create_party!(socket1)
+      invite_to_party!(socket1, user2.name)
+
+      assert {"s.party.invited_to_party", [^party_id, _], _} =
+               _recv_until(socket2) |> parse_in_message()
+
+      {:ok, socket1: socket1, user1: user1, socket2: socket2, user2: user2, party_id: party_id}
+    end
+
+    test "accept invite", %{socket1: sock1, user2: user2, socket2: sock2, party_id: party_id} do
+      accept_invite!(sock2, party_id)
+
+      assert {"s.party.joined_party", [^party_id, username2], _} =
+               _recv_until(sock1) |> parse_in_message()
+
+      assert username2 == user2.name
+    end
+  end
+
   defp create_party(socket) do
     msg_id = :rand.uniform(1_000_000) |> to_string()
     _send_raw(socket, "##{msg_id} c.party.create_new_party\n")
@@ -85,6 +112,16 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
 
   defp invite_to_party!(socket, username) do
     invite_to_party(socket, username)
+    assert {"OK", _, _} = _recv_until(socket) |> parse_in_message()
+  end
+
+  defp accept_invite(socket, party_id) do
+    msg_id = :rand.uniform(1_000_000) |> to_string()
+    _send_raw(socket, "##{msg_id} c.party.accept_invite_to_party #{party_id}\n")
+  end
+
+  defp accept_invite!(socket, party_id) do
+    accept_invite(socket, party_id)
     assert {"OK", _, _} = _recv_until(socket) |> parse_in_message()
   end
 
