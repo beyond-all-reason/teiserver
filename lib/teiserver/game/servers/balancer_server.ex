@@ -9,7 +9,6 @@ defmodule Teiserver.Game.BalancerServer do
   @tick_interval 2_000
   # Balance algos that allow fuzz; randomness will be added to match rating before processing
   @algos_allowing_fuzz ~w(loser_picks force_party)
-
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -28,7 +27,9 @@ defmodule Teiserver.Game.BalancerServer do
           mean_diff_max: state.mean_diff_max,
           stddev_diff_max: state.stddev_diff_max,
           fuzz_multiplier: state.fuzz_multiplier,
-          shuffle_first_pick: state.shuffle_first_pick
+          shuffle_first_pick: state.shuffle_first_pick,
+          last_balance_hash_cache_hit: state.last_balance_hash_cache_hit,
+          last_balance_hash_cache_miss: state.last_balance_hash_cache_miss
         ]
 
     {balance, new_state} = make_balance(team_count, state, opts)
@@ -48,7 +49,9 @@ defmodule Teiserver.Game.BalancerServer do
           mean_diff_max: state.mean_diff_max,
           stddev_diff_max: state.stddev_diff_max,
           fuzz_multiplier: state.fuzz_multiplier,
-          shuffle_first_pick: state.shuffle_first_pick
+          shuffle_first_pick: state.shuffle_first_pick,
+          last_balance_hash_cache_hit: state.last_balance_hash_cache_hit,
+          last_balance_hash_cache_miss: state.last_balance_hash_cache_miss
         ]
 
     {balance, new_state} = make_balance(team_count, state, opts, players)
@@ -74,7 +77,9 @@ defmodule Teiserver.Game.BalancerServer do
       mean_diff_max: state.mean_diff_max,
       fuzz_multiplier: state.fuzz_multiplier,
       stddev_diff_max: state.stddev_diff_max,
-      shuffle_first_pick: state.shuffle_first_pick
+      shuffle_first_pick: state.shuffle_first_pick,
+      last_balance_hash_cache_hit: state.last_balance_hash_cache_hit,
+      last_balance_hash_cache_miss: state.last_balance_hash_cache_miss
     }
 
     {:reply, result, state}
