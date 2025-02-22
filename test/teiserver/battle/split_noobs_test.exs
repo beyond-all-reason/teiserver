@@ -103,23 +103,32 @@ defmodule Teiserver.Battle.SplitNoobsTest do
     result = SplitNoobs.perform(expanded_group, 2) |> Map.drop([:logs])
 
     # This test passes if the top three players (all rated 20+) are NOT on the same team
-    team1_op_count =
+    team1_ratings =
       Enum.map(result.team_groups[1], fn x ->
         x.ratings
       end)
       |> List.flatten()
-      |> Enum.count(fn rating -> rating >= 20 end)
 
-    team2_op_count =
+    team2_ratings =
       Enum.map(result.team_groups[2], fn x ->
         x.ratings
       end)
       |> List.flatten()
+
+    team1_op_count =
+      team1_ratings
+      |> Enum.count(fn rating -> rating >= 20 end)
+
+    team2_op_count =
+      team2_ratings
       |> Enum.count(fn rating -> rating >= 20 end)
 
     assert team1_op_count <= 2
     assert team2_op_count <= 2
     assert team1_op_count + team2_op_count == 3
+
+    # Ensure ratings are close
+    assert abs(Enum.sum(team1_ratings) - Enum.sum(team2_ratings)) < 10
   end
 
   test "can process expanded_group with no parties" do
