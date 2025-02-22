@@ -13,6 +13,10 @@ defmodule Teiserver.Protocols.Spring.PartyOut do
     "s.party.invite_cancelled #{party_id} #{username}\n"
   end
 
+  def do_reply(:member_removed, {party_id, username}, _state) do
+    "s.party.left_party #{party_id} #{username}\n"
+  end
+
   def do_reply(event, data, _state) do
     Logger.error("No handler for event `#{event}` with data #{inspect(data)}")
     "\n"
