@@ -119,7 +119,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
   def handle_event(%{event: :added_to_party, party_id: party_id}, state) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 
-    state
+    SpringOut.reply(:party, :member_added, {party_id, state.user.name}, message_id(), state)
   end
 
   def handle_event(
