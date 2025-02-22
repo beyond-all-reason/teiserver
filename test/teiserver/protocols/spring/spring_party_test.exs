@@ -27,6 +27,41 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     end
   end
 
+  describe "invite" do
+    setup do
+      {:ok, socket: socket1, user: user1} = setup_user(nil)
+      {:ok, socket: socket2, user: user2} = setup_user(nil)
+      # absorb the broadcasted message that another player is online
+      "ADDUSER " <> _ = _recv_until(socket1)
+      {:ok, socket1: socket1, user1: user1, socket2: socket2, user2: user2}
+    end
+
+    test "online player", %{socket1: sock1, socket2: sock2, user2: user2} do
+      party_id = create_party!(sock1)
+      invite_to_party!(sock1, user2.name)
+
+      assert {"s.party.invited_to_party", [^party_id, _], _} =
+               _recv_until(sock2) |> parse_in_message()
+    end
+
+    test "invalid player", %{socket1: sock1} do
+      party_id = create_party!(sock1)
+      invite_to_party(sock1, "lolnope-this-is-not-a-username-for-party")
+
+      assert {"NO", _, _} = _recv_until(sock1) |> parse_in_message()
+    end
+
+    test "offline player", %{socket1: sock1, user2: user2} do
+      Teiserver.Client.disconnect(user2.id)
+      assert "REMOVEUSER " <> _ = _recv_until(sock1)
+      party_id = create_party!(sock1)
+      invite_to_party(sock1, user2.name)
+
+      assert {"NO", %{"msg" => "user not connected"}, _} =
+               _recv_until(sock1) |> parse_in_message()
+    end
+  end
+
   defp create_party(socket) do
     msg_id = :rand.uniform(1_000_000) |> to_string()
     _send_raw(socket, "##{msg_id} c.party.create_new_party\n")
@@ -43,20 +78,37 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     party_id
   end
 
+  defp invite_to_party(socket, username) do
+    msg_id = :rand.uniform(1_000_000) |> to_string()
+    _send_raw(socket, "##{msg_id} c.party.invite_to_party #{username}\n")
+  end
+
+  defp invite_to_party!(socket, username) do
+    invite_to_party(socket, username)
+    assert {"OK", _, _} = _recv_until(socket) |> parse_in_message()
+  end
+
   defp parse_in_message(raw) do
     case SpringIn.parse_in_message(raw) do
-      nil ->
-        nil
-
-      {x, raw_args, y} ->
-        args =
-          String.split(raw_args, "\t")
-          |> Enum.reduce(%{}, fn frag, m ->
-            [k, v] = String.split(frag, "=")
-            Map.put(m, String.trim(k), String.trim(v))
-          end)
-
-        {x, args, y}
+      nil -> nil
+      {cmd, args, ""} -> parse_args(nil, cmd, args)
+      {cmd, args, msg_id} -> parse_args(msg_id, cmd, args)
     end
+  end
+
+  defp parse_args(msg_id, cmd, raw_args) when cmd in ["NO", "OK"] do
+    args =
+      String.split(raw_args, "\t")
+      |> Enum.reduce(%{}, fn frag, m ->
+        [k, v] = String.split(frag, "=")
+        Map.put(m, String.trim(k), String.trim(v))
+      end)
+
+    {cmd, args, msg_id}
+  end
+
+  defp parse_args(msg_id, cmd, raw_args) do
+    args = String.split(raw_args) |> Enum.map(&String.trim/1)
+    {cmd, args, msg_id}
   end
 end

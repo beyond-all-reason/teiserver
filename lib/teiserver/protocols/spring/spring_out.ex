@@ -10,7 +10,7 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.{Account, CacheUser, Client, Room, Battle, Coordinator, Config}
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
-  alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut, UserOut, SystemOut}
+  alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut, UserOut, SystemOut, PartyOut}
   alias Teiserver.Data.Types, as: T
 
   @motd """
@@ -36,6 +36,7 @@ defmodule Teiserver.Protocols.SpringOut do
         :user -> UserOut.do_reply(reply_cmd, data, state)
         :system -> SystemOut.do_reply(reply_cmd, data, state)
         :spring -> do_reply(reply_cmd, data)
+        :party -> PartyOut.do_reply(reply_cmd, data, state)
       end
 
     if Config.get_site_config_cache("debug.Print outgoing messages") or
