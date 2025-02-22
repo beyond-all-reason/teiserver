@@ -557,6 +557,7 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
     result = SplitNoobs.get_result(initial_state)
 
     assert result.broken_party_penalty == 0
+    assert result.rating_diff_penalty < 10
 
     standard_result = SplitNoobs.standardise_result(result, initial_state)
 

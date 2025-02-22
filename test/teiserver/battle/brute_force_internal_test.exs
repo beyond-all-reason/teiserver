@@ -130,7 +130,7 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
     best_combo = BruteForce.get_best_combo(combos, input.players, input.parties)
 
     assert best_combo.broken_party_penalty == 0
-
+    assert best_combo.rating_diff_penalty < 10
     result = BruteForce.standardise_result(best_combo, input.parties) |> Map.drop([:logs])
 
     assert [
