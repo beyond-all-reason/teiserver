@@ -16,9 +16,9 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   require Integer
 
-  @captain_diff_importance 2
+  @captain_diff_importance 1
   @rating_diff_importance 1
-  @stdev_diff_importance 2
+  @stdev_diff_importance 1
   @party_importance 6
   @splitter "------------------------------------------------------"
 

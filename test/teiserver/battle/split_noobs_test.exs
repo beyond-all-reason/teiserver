@@ -449,36 +449,15 @@ defmodule Teiserver.Battle.SplitNoobsTest do
 
     result = SplitNoobs.perform(expanded_group, 2)
 
-    assert result.logs == [
-             "------------------------------------------------------",
-             "Algorithm: split_noobs",
-             "------------------------------------------------------",
-             "This algorithm will evenly distribute noobs and devalue them. Noobs are non-partied players that have either high uncertainty or 0 rating. Noobs will always be drafted last. For non-noobs, teams will prefer higher rating. For noobs, teams will prefer higher chevrons and lower uncertainty.",
-             "------------------------------------------------------",
-             "Parties: (LuBaee, TimeContainer)",
-             "Solo noobs:",
-             "StinkBee (14.6, chev: 2, σ: 6.7)",
-             "HoldButyLeg (5.9, chev: 0, σ: 7.5)",
-             "------------------------------------------------------",
-             "Perform brute force with the following players to get the best score.",
-             "Players: TimeContainer (21), LuBaee (14), DUFFY (34), Orii (23), colossus (22), PotatoesHead (22), Theo45 (21), onse (20), 976 (14), Regithros (12), Darth (11), Akio (10), nubl (6), CowOfWar (3)",
-             "------------------------------------------------------",
-             "Brute force result:",
-             "Team rating diff penalty: 1",
-             "Broken party penalty: 0",
-             "Stdev diff penalty: 0.1",
-             "Captain diff penalty: 22",
-             "Score: 23.1 (lower is better)",
-             "------------------------------------------------------",
-             "Draft remaining players (ordered from best to worst).",
-             "Remaining: StinkBee (14.6), HoldButyLeg (5.9)",
-             "------------------------------------------------------",
-             "Final result:",
-             "Team 1: Akio, Darth, Regithros, 976, DUFFY, LuBaee, TimeContainer, HoldButyLeg",
-             "Team 2: CowOfWar, nubl, onse, Theo45, PotatoesHead, colossus, Orii, StinkBee"
-           ]
+    strongest_and_weakest_count =
+      result.team_players[1]
+      |> Enum.count(fn x ->
+        x == "DUFFY" || x == "HoldButyLeg"
+      end)
 
-    # Note DUFFY (Strongest captain) is on same team with noobiest noob HoldButyLeg
+    # Test passes if DUFFY (Strongest captain) is on same team with noobiest noob HoldButyLeg
+    # Either they are both team 1 or both team 2
+    assert strongest_and_weakest_count == 2 || strongest_and_weakest_count == 0
   end
 
   test "Imbalanced captains will use brute force" do
