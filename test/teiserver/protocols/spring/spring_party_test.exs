@@ -152,7 +152,11 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
 
   defp create_party!(socket) do
     create_party(socket)
-    assert {"OK", %{"party_id" => party_id}, _} = _recv_until(socket) |> parse_in_message()
+
+    [ok, joined] = _recv_until(socket) |> parse_in_messages()
+
+    assert {"OK", %{"party_id" => party_id}, _} = ok
+    assert {"s.party.joined_party", [^party_id, _], _} = joined
 
     Polling.poll_until_some(fn ->
       PartyLib.get_party(party_id)
@@ -178,7 +182,9 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
 
   defp accept_invite!(socket, party_id) do
     accept_invite(socket, party_id)
-    assert {"OK", _, _} = _recv_until(socket) |> parse_in_message()
+    [ok, joined] = _recv_until(socket) |> parse_in_messages()
+    assert {"OK", _, _} = ok
+    assert {"s.party.joined_party", [^party_id, _], _} = joined
   end
 
   defp decline_invite(socket, party_id) do
@@ -199,6 +205,10 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
   defp leave_party!(socket) do
     leave_party(socket)
     assert {"OK", _, _} = _recv_until(socket) |> parse_in_message()
+  end
+
+  defp parse_in_messages(raw) do
+    String.split(raw, "\n") |> Enum.reject(&(&1 == "")) |> Enum.map(&parse_in_message/1)
   end
 
   defp parse_in_message(raw) do
