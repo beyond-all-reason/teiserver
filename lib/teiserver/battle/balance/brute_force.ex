@@ -16,9 +16,10 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   require Integer
 
+  @captain_diff_importance 2
   @rating_diff_importance 1
   @stdev_diff_importance 2
-  @party_importance 3.5
+  @party_importance 6
   @splitter "------------------------------------------------------"
 
   @doc """
@@ -139,6 +140,16 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     end
   end
 
+  @spec get_captain_rating([BF.player()]) :: any()
+  def get_captain_rating(team) do
+    if(length(team) > 0) do
+      captain = Enum.max_by(team, fn player -> player.rating end, &>=/2)
+      captain.rating
+    else
+      0
+    end
+  end
+
   @spec score_combo([BF.player()], [BF.player()], [String.t()]) :: BF.combo_result()
   def score_combo(first_team, all_players, parties) do
     second_team = get_second_team(first_team, all_players)
@@ -148,17 +159,22 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     rating_diff_penalty = abs(both_team_rating - first_team_rating * 2) * @rating_diff_importance
     broken_party_penalty = count_broken_parties(first_team, parties) * @party_importance
 
+    captain_diff_penalty =
+      abs(get_captain_rating(first_team) - get_captain_rating(second_team)) *
+        @captain_diff_importance
+
     stdev_diff_penalty =
       abs(get_st_dev(first_team) - get_st_dev(second_team)) *
         @stdev_diff_importance
 
-    score = rating_diff_penalty + broken_party_penalty + stdev_diff_penalty
+    score = rating_diff_penalty + broken_party_penalty + stdev_diff_penalty + captain_diff_penalty
 
     %{
       score: score,
       rating_diff_penalty: rating_diff_penalty,
       broken_party_penalty: broken_party_penalty,
       stdev_diff_penalty: stdev_diff_penalty,
+      captain_diff_penalty: captain_diff_penalty,
       first_team: first_team,
       second_team: second_team
     }

@@ -102,37 +102,23 @@ defmodule Teiserver.Battle.BruteForceTest do
 
     result = BruteForce.perform(expanded_group, 2) |> Map.drop([:logs])
 
-    # If we us a stdev penalty of less than 4, then all the 20+ players end up on the same team
-    assert result == %{
-             team_groups: %{
-               1 => [
-                 %{count: 1, group_rating: 12.25, members: ["kyutoryu"], ratings: [12.25]},
-                 %{count: 1, group_rating: 20.49, members: ["jauggy"], ratings: [20.49]},
-                 %{count: 1, group_rating: 20.42, members: ["Aposis"], ratings: [20.42]},
-                 %{count: 1, members: ["MaTThiuS_82"], ratings: [8.26], group_rating: 8.26},
-                 %{count: 1, members: ["Noody"], ratings: [17.64], group_rating: 17.64},
-                 %{count: 1, group_rating: 3.58, members: ["barmalev"], ratings: [3.58]}
-               ],
-               2 => [
-                 %{count: 1, members: ["fbots1998"], ratings: [13.98], group_rating: 13.98},
-                 %{count: 1, group_rating: 18.28, members: ["Dixinormus"], ratings: [18.28]},
-                 %{count: 1, group_rating: 2.8, members: ["HungDaddy"], ratings: [2.8]},
-                 %{count: 1, members: ["SLOPPYGAGGER"], ratings: [8.89], group_rating: 8.89},
-                 %{count: 1, group_rating: 18.4, members: ["reddragon2010"], ratings: [18.4]},
-                 %{count: 1, group_rating: 20.06, members: ["[DTG]BamBin0"], ratings: [20.06]}
-               ]
-             },
-             team_players: %{
-               1 => ["kyutoryu", "jauggy", "Aposis", "MaTThiuS_82", "Noody", "barmalev"],
-               2 => [
-                 "fbots1998",
-                 "Dixinormus",
-                 "HungDaddy",
-                 "SLOPPYGAGGER",
-                 "reddragon2010",
-                 "[DTG]BamBin0"
-               ]
-             }
-           }
+    # This test passes if the top three players (all rated 20+) are NOT on the same team
+    team1_op_count =
+      Enum.map(result.team_groups[1], fn x ->
+        x.ratings
+      end)
+      |> List.flatten()
+      |> Enum.count(fn rating -> rating >= 20 end)
+
+    team2_op_count =
+      Enum.map(result.team_groups[2], fn x ->
+        x.ratings
+      end)
+      |> List.flatten()
+      |> Enum.count(fn rating -> rating >= 20 end)
+
+    assert team1_op_count <= 2
+    assert team2_op_count <= 2
+    assert team1_op_count + team2_op_count == 3
   end
 end
