@@ -75,6 +75,23 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     end
   end
 
+  def do_handle("decline_invite_to_party", data, msg_id, state) do
+    cmd_id = "c.party.decline_invite_to_party"
+
+    with [party_id] <- String.split(data) |> Enum.map(&String.trim/1) do
+      Account.cancel_party_invite(party_id, state.user.id)
+      SpringOut.reply(:okay, cmd_id, msg_id, state)
+    else
+      _ ->
+        SpringOut.reply(
+          :no,
+          {cmd_id, "msg=expected party_id in argument but could not parse"},
+          msg_id,
+          state
+        )
+    end
+  end
+
   def do_handle(msg, _, _msg_id, state) do
     Logger.debug("Unhandled party message: #{msg}")
     state
@@ -97,6 +114,19 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     case Teiserver.Account.get_user_by_id(userid) do
       nil -> state
       user -> SpringOut.reply(:party, :member_added, {party_id, user.name}, message_id(), state)
+    end
+  end
+
+  def handle_event(
+        %{event: :updated_values, party_id: party_id, operation: {:invite_cancelled, userid}},
+        state
+      ) do
+    case Teiserver.Account.get_user_by_id(userid) do
+      nil ->
+        state
+
+      user ->
+        SpringOut.reply(:party, :invite_cancelled, {party_id, user.name}, message_id(), state)
     end
   end
 

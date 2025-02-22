@@ -89,7 +89,8 @@ defmodule Teiserver.Account.PartyServer do
               channel: "teiserver_party:#{party.id}",
               event: :updated_values,
               party_id: party.id,
-              new_values: %{pending_invites: new_invites}
+              new_values: %{pending_invites: new_invites},
+              operation: {:invite_cancelled, userid}
             }
           )
 
