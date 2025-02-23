@@ -19,7 +19,8 @@ defmodule Teiserver.Protocols.SpringIn do
     BattleIn,
     LobbyPolicyIn,
     UserIn,
-    SystemIn
+    SystemIn,
+    PartyIn
   }
 
   @optimisation_level %{
@@ -69,9 +70,7 @@ defmodule Teiserver.Protocols.SpringIn do
   def handle(data, state) do
     tuple =
       if String.valid?(data) do
-        ~r/^(#[0-9]+ )?([a-z_A-Z0-9\.]+)(.*)?$/u
-        |> Regex.run(data)
-        |> _clean()
+        parse_in_message(data)
       else
         Logger.error("Invalid characters in data: '#{data}'")
 
@@ -134,6 +133,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("c.system." <> cmd, data, msg_id, state) do
     SystemIn.do_handle(cmd, data, msg_id, state)
+  end
+
+  defp do_handle("c.party." <> cmd, data, msg_id, state) do
+    PartyIn.do_handle(cmd, data, msg_id, state)
   end
 
   defp do_handle("STARTTLS", _, msg_id, state) do
@@ -236,7 +239,9 @@ defmodule Teiserver.Protocols.SpringIn do
       {:ok, user} ->
         optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
 
-        new_state = SpringOut.do_login_accepted(state, user, optimisation_level)
+        new_state =
+          SpringOut.do_login_accepted(state, user, optimisation_level)
+          |> Map.put(:party_id, nil)
 
         # Do we have a clan?
         if user.clan_id do
@@ -1398,6 +1403,13 @@ defmodule Teiserver.Protocols.SpringIn do
       true ->
         {false, %{state | status_timestamps: status_timestamps}}
     end
+  end
+
+  @spec parse_in_message(String.t()) :: nil | {String.t(), String.t(), String.t()}
+  def parse_in_message(raw) do
+    ~r/^(#[0-9]+ )?([a-z_A-Z0-9\.]+)(.*)?$/u
+    |> Regex.run(raw)
+    |> _clean()
   end
 
   # @spec engage_flood_protection(map()) :: {:stop, String.t(), map()}

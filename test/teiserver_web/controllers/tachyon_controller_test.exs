@@ -2,7 +2,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
   use TeiserverWeb.ConnCase
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
-  alias Teiserver.Support.Tachyon
+  alias Teiserver.Support.{Tachyon, Polling}
 
   alias WebsocketSyncClient, as: WSC
 
@@ -156,7 +156,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
       ExUnit.Callbacks.on_exit(fn -> Tachyon.cleanup_connection(client, token) end)
 
       conn_pid =
-        Teiserver.Support.Tachyon.poll_until_some(fn ->
+        Teiserver.Support.Polling.poll_until_some(fn ->
           Teiserver.Player.lookup_connection(user.id)
         end)
 
@@ -186,7 +186,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
       ExUnit.Callbacks.on_exit(fn -> Tachyon.cleanup_connection(client, token) end)
 
       conn_pid =
-        Tachyon.poll_until_some(fn ->
+        Polling.poll_until_some(fn ->
           Teiserver.Player.lookup_connection(user.id)
         end)
 

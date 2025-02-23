@@ -18,7 +18,7 @@ defmodule Teiserver.SpringAuthTest do
       new_user: 2
     ]
 
-  import Teiserver.Support.Tachyon, only: [poll_until: 2]
+  import Teiserver.Support.Polling, only: [poll_until: 3]
 
   setup do
     %{socket: socket, user: user} = auth_setup()
@@ -481,7 +481,7 @@ CLIENTS test_room #{user.name}\n"
     wreply = _recv_raw(watcher)
     assert wreply == "REMOVEUSER #{user.name}\n"
 
-    Teiserver.Support.Tachyon.poll_until(
+    poll_until(
       fn -> Client.get_client_by_id(userid) end,
       &(&1 == nil),
       limit: 32,
@@ -504,7 +504,7 @@ CLIENTS test_room #{user.name}\n"
     # Now we get flood protection after the rename
     expected_server_response = "DENIED Flood protection - Please wait 20 seconds and try again"
 
-    Teiserver.Support.Tachyon.poll_until(
+    poll_until(
       fn ->
         _send_raw(
           socket,

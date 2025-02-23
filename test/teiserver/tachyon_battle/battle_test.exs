@@ -1,6 +1,6 @@
 defmodule Teiserver.TachyonBattle.BattleTest do
   use Teiserver.DataCase, async: true
-  import Teiserver.Support.Tachyon, only: [poll_until_some: 1]
+  import Teiserver.Support.Polling, only: [poll_until_some: 1]
   alias Teiserver.TachyonBattle, as: Battle
 
   describe "start battle" do
