@@ -34,7 +34,10 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
 
     with [username] <- String.split(data) |> Enum.map(&String.trim/1),
          user when not is_nil(user) <- Teiserver.Account.get_user_by_name(username),
-         true <- Account.client_exists?(user.id) do
+         # this check isn't great, it should be done in the party server
+         # which is the source of truth for parties, but I'm taking a shortcut
+         :ok <- if(state.party_id != nil, do: :ok, else: :not_in_party),
+         :ok <- if(Account.client_exists?(user.id), do: :ok, else: :no_client) do
       Account.create_party_invite(state.party_id, user.id)
 
       SpringOut.reply(:okay, cmd_id, msg_id, state)
@@ -42,7 +45,10 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
       nil ->
         SpringOut.reply(:no, {cmd_id, "msg=no user found"}, msg_id, state)
 
-      false ->
+      :not_in_party ->
+        SpringOut.reply(:no, {cmd_id, "msg=cannot invite when not in party"}, msg_id, state)
+
+      :no_client ->
         SpringOut.reply(:no, {cmd_id, "msg=user not connected"}, msg_id, state)
 
       _ ->

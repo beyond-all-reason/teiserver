@@ -88,6 +88,11 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
       assert username2 == user2.name
     end
 
+    test "must be in party", ctx do
+      invite_to_party(ctx.socket2, ctx.user1.name)
+      assert {"NO", _, _} = _recv_until(ctx.socket2) |> parse_in_message()
+    end
+
     test "decline invite", %{socket1: sock1, user2: user2, socket2: sock2, party_id: party_id} do
       decline_invite!(sock2, party_id)
 
