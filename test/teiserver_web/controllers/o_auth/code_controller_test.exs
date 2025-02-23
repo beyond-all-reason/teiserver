@@ -190,7 +190,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       }
 
       resp = post(conn, ~p"/oauth/token", data)
-      json_response(resp, 400)
+      assert %{"error" => "invalid_client"} = json_response(resp, 401)
     end
 
     test "can also use basic auth",
@@ -219,7 +219,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
         |> put_req_header("authorization", auth_header)
 
       resp = post(conn, ~p"/oauth/token", data)
-      json_response(resp, 400)
+      json_response(resp, 401)
     end
 
     test "cannot provide client_id twice", %{

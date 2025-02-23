@@ -141,7 +141,14 @@ defmodule TeiserverWeb.OAuth.CodeController do
          {:ok, token} <- OAuth.get_token_from_credentials(cred) do
       conn |> put_status(200) |> render(:token, token: token)
     else
-      _ -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
+      # https://www.rfc-editor.org/rfc/rfc6749#section-5.2 server may return 401
+      {:error, :invalid_password} ->
+        conn
+        |> put_status(401)
+        |> render(:error, error: "invalid_client", error_description: "invalid credentials")
+
+      _ ->
+        conn |> put_status(400) |> render(:error, error_description: "invalid request")
     end
   end
 

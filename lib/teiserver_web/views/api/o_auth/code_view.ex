@@ -18,7 +18,8 @@ defmodule TeiserverWeb.OAuth.CodeView do
   end
 
   def error(conn) do
-    Map.take(conn, [:error_description]) |> Map.put("error", "invalid_request")
+    error_code = Map.get(conn, :error, "invalid_request")
+    Map.take(conn, [:error_description]) |> Map.put("error", error_code)
   end
 
   def metadata(_) do
