@@ -36,12 +36,14 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
       {:ok, socket1: socket1, user1: user1, socket2: socket2, user2: user2}
     end
 
-    test "online player", %{socket1: sock1, socket2: sock2, user2: user2} do
+    test "online player", %{socket1: sock1, socket2: sock2, user2: user2} = ctx do
       party_id = create_party!(sock1)
       invite_to_party!(sock1, user2.name)
 
-      assert {"s.party.invited_to_party", [^party_id, _], _} =
-               _recv_until(sock2) |> parse_in_message()
+      [ok, joined] = _recv_until(sock2) |> parse_in_messages()
+      assert {"s.party.invited_to_party", [^party_id, _], _} = ok
+      assert {"s.party.joined_party", [^party_id, username1], _} = joined
+      assert username1 == ctx.user1.name
     end
 
     test "invalid player", %{socket1: sock1} do
@@ -73,8 +75,9 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
       party_id = create_party!(socket1)
       invite_to_party!(socket1, user2.name)
 
-      assert {"s.party.invited_to_party", [^party_id, _], _} =
-               _recv_until(socket2) |> parse_in_message()
+      # absorb the message and the "added_to_party" message. Assume this
+      # works as it is tested in another test
+      _recv_until(socket2)
 
       {:ok, socket1: socket1, user1: user1, socket2: socket2, user2: user2, party_id: party_id}
     end
@@ -117,9 +120,9 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
 
       party_id = create_party!(socket1)
       invite_to_party!(socket1, user2.name)
-
-      assert {"s.party.invited_to_party", [^party_id, _], _} =
-               _recv_until(socket2) |> parse_in_message()
+      # absorb the message and the "added_to_party" message. Assume this
+      # works as it is tested in another test
+      _recv_until(socket2)
 
       accept_invite!(socket2, party_id)
 

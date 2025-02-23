@@ -118,8 +118,14 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     state
   end
 
-  def handle_event(%{event: :party_invite, party_id: party_id}, state) do
+  def handle_event(%{event: :party_invite, party_id: party_id, members: members}, state) do
     SpringOut.reply(:party, :invited_to_party, party_id, message_id(), state)
+
+    # the web interface uses a list of parties to get the content. But with
+    # chobby and spring, we need to let the client know about the members
+    for uid <- members, username <- [Account.get_username_by_id(uid)], not is_nil(username) do
+      SpringOut.reply(:party, :member_added, {party_id, username}, message_id(), state)
+    end
   end
 
   def handle_event(%{event: :added_to_party, party_id: party_id}, state) do
