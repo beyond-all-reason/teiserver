@@ -108,6 +108,25 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
       accept_invite(sock2, party_id)
       assert {"NO", _, _} = _recv_until(sock2) |> parse_in_message()
     end
+
+    test "cancel invite, bad user", ctx do
+      cancel_invite(ctx.socket1, "definitely-not-a-valid-username")
+      assert {"NO", _, _} = _recv_until(ctx.socket1) |> parse_in_message()
+    end
+
+    test "must be in party to cancel invite", ctx do
+      cancel_invite(ctx.socket2, ctx.user2.name)
+      assert {"NO", _, _} = _recv_until(ctx.socket2) |> parse_in_message()
+    end
+
+    test "cancel invite", ctx do
+      username2 = ctx.user2.name
+      cancel_invite!(ctx.socket1, username2)
+      party_id = ctx.party_id
+
+      assert {"s.party.invite_cancelled", [^party_id, ^username2], _} =
+               _recv_until(ctx.socket2) |> parse_in_message()
+    end
   end
 
   describe "leaving parties" do
@@ -145,6 +164,7 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
       Teiserver.Account.leave_party(ctx.party_id, ctx.user2.id)
       party_id = ctx.party_id
       user2 = ctx.user2.name
+
       assert {"s.party.left_party", [^party_id, ^user2], _} =
                _recv_until(ctx.socket1) |> parse_in_message()
 
@@ -203,6 +223,19 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
   defp decline_invite!(socket, party_id) do
     decline_invite(socket, party_id)
     assert {"OK", _, _} = _recv_until(socket) |> parse_in_message()
+  end
+
+  defp cancel_invite(socket, username) do
+    msg_id = :rand.uniform(1_000_000) |> to_string()
+    _send_raw(socket, "##{msg_id} c.party.cancel_invite_to_party #{username}\n")
+  end
+
+  defp cancel_invite!(socket, username) do
+    cancel_invite(socket, username)
+
+    [ok, cancelled] = _recv_until(socket) |> parse_in_messages()
+    assert {"OK", _, _} = ok
+    assert {"s.party.invite_cancelled", _, _} = cancelled
   end
 
   defp leave_party(socket) do

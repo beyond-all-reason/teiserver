@@ -113,6 +113,52 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     SpringOut.reply(:okay, "c.party.leave_current_party", msg_id, Map.put(state, :party_id, nil))
   end
 
+  def do_handle("cancel_invite_to_party", data, msg_id, state) do
+    cmd_id = "c.party.cancel_invite_to_party"
+
+    with [username] <- String.split(data) |> Enum.map(&String.trim/1),
+         user when not is_nil(user) <- Teiserver.Account.get_user_by_name(username),
+         :ok <- if(state.party_id != nil, do: :ok, else: :not_in_party),
+         :ok <- if(Account.client_exists?(user.id), do: :ok, else: :no_client) do
+      party_id = state.party_id
+      Account.cancel_party_invite(party_id, user.id)
+
+      PubSub.broadcast!(
+        Teiserver.PubSub,
+        "teiserver_client_messages:#{user.id}",
+        %{
+          channel: "teiserver_party:#{party_id}",
+          event: {:invite_cancelled, user.id},
+          party_id: party_id
+        }
+      )
+
+      SpringOut.reply(:okay, cmd_id, msg_id, state)
+    else
+      nil ->
+        SpringOut.reply(:no, {cmd_id, "msg=no user found"}, msg_id, state)
+
+      :not_in_party ->
+        SpringOut.reply(
+          :no,
+          {cmd_id, "msg=cannot cancel invite when not in party"},
+          msg_id,
+          state
+        )
+
+      :no_client ->
+        SpringOut.reply(:no, {cmd_id, "msg=user not connected"}, msg_id, state)
+
+      _ ->
+        SpringOut.reply(
+          :no,
+          {cmd_id, "msg=expected username in argument but could not parse"},
+          msg_id,
+          state
+        )
+    end
+  end
+
   def do_handle(msg, _, _msg_id, state) do
     Logger.debug("Unhandled party message: #{msg}")
     state
@@ -167,6 +213,19 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
 
       user ->
         SpringOut.reply(:party, :member_removed, {party_id, user.name}, message_id(), state)
+    end
+  end
+
+  def handle_event(
+        %{event: {:invite_cancelled, user_id}, party_id: party_id},
+        state
+      ) do
+    case Teiserver.Account.get_user_by_id(user_id) do
+      nil ->
+        state
+
+      user ->
+        SpringOut.reply(:party, :invite_cancelled, {party_id, user.name}, message_id(), state)
     end
   end
 
