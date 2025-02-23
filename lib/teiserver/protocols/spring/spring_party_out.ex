@@ -1,6 +1,7 @@
 defmodule Teiserver.Protocols.Spring.PartyOut do
   require Logger
 
+  @spec do_reply(atom(), nil | String.t() | tuple() | list(), map()) :: String.t()
   def do_reply(:invited_to_party, party_id, state) do
     "s.party.invited_to_party #{party_id} #{state.user.name}\n"
   end

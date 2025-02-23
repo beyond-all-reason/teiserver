@@ -173,6 +173,56 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     end
   end
 
+  @tag :wip
+  test "with 3 players" do
+    # only test happy paths, but with more players to check broadcast mechanics
+    {:ok, socket: socket1, user: user1} = setup_user(nil)
+    {:ok, socket: socket2, user: user2} = setup_user(nil)
+    {:ok, socket: socket3, user: user3} = setup_user(nil)
+
+    username1 = user1.name
+    username2 = user2.name
+    username3 = user3.name
+
+    # absorb the broadcasted message that another player is online
+    _recv_until(socket1)
+    _recv_until(socket2)
+
+    party_id = create_party!(socket1)
+
+    invite_to_party!(socket1, user2.name)
+
+    assert [{"s.party.invited_to_party", _, _}, {"s.party.joined_party", _, _}] =
+             _recv_until(socket2) |> parse_in_messages()
+
+    invite_to_party!(socket1, user3.name)
+
+    assert [{"s.party.invited_to_party", _, _}, {"s.party.joined_party", _, _}] =
+             _recv_until(socket3) |> parse_in_messages()
+
+    accept_invite!(socket3, party_id)
+
+    assert [{"s.party.joined_party", [_, ^username3], _}] =
+             _recv_until(socket1) |> parse_in_messages()
+
+    accept_invite!(socket2, party_id)
+
+    assert [{"s.party.joined_party", [_, ^username2], _}] =
+             _recv_until(socket1) |> parse_in_messages()
+
+    assert [{"s.party.joined_party", [_, ^username2], _}] =
+             _recv_until(socket3) |> parse_in_messages()
+
+    # check disconnection triggers "left party" to all members
+    Teiserver.Client.disconnect(user1.id)
+
+    assert [{"s.party.left_party", [_, ^username1], _}, _] =
+             _recv_until(socket2) |> parse_in_messages()
+
+    assert [{"s.party.left_party", [_, ^username1], _}, _] =
+             _recv_until(socket3) |> parse_in_messages()
+  end
+
   defp create_party(socket) do
     msg_id = :rand.uniform(1_000_000) |> to_string()
     _send_raw(socket, "##{msg_id} c.party.create_new_party\n")

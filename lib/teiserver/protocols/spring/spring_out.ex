@@ -840,7 +840,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # This sends a message to the self to send out a message
-  @spec _send(String.t() | list() | nil, String.t(), map) :: any()
+  @spec _send(String.t() | [term()] | nil, String.t(), map()) :: term()
   # defp _send(msg, msg_id, state) do
   #   _send(msg, state.socket, state.transport, msg_id)
   # end
