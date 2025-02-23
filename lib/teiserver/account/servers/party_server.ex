@@ -64,7 +64,8 @@ defmodule Teiserver.Account.PartyServer do
             %{
               channel: "teiserver_client_messages:#{userid}",
               event: :party_invite,
-              party_id: party.id
+              party_id: party.id,
+              members: party.members
             }
           )
 
