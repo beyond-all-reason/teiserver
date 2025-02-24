@@ -113,10 +113,10 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       json_response(resp, 400)
     end
 
-    test "must provide grant_type", %{conn: conn} = setup_data do
-      data = get_valid_data(setup_data) |> Map.drop([:grant_type])
+    test "must provide correct grant type", %{conn: conn} = setup_data do
+      data = get_valid_data(setup_data) |> Map.put(:grant_type, "invalid-grant-type")
       resp = post(conn, ~p"/oauth/token", data)
-      assert %{"error" => "invalid_request"} = json_response(resp, 400)
+      assert %{"error" => "unsupported_grant_type"} = json_response(resp, 400)
     end
 
     test "must provide code", %{conn: conn} = setup_data do

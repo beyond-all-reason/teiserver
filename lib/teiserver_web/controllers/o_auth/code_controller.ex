@@ -42,7 +42,9 @@ defmodule TeiserverWeb.OAuth.CodeController do
   end
 
   def token(conn, _params) do
-    conn |> put_status(400) |> render(:error, error_description: "invalid grant_type")
+    conn
+    |> put_status(400)
+    |> render(:error, error: "unsupported_grant_type")
   end
 
   defp check_required_keys(params, keys) do
