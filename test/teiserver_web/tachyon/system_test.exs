@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Tachyon.SystemTest do
   use TeiserverWeb.ConnCase
-  alias Teiserver.Support.Tachyon
+  alias Teiserver.Support.{Tachyon, Polling}
   alias Teiserver.OAuthFixtures
 
   describe "server stats" do
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Tachyon.SystemTest do
 
       Tachyon.disconnect!(client2)
 
-      Tachyon.poll_until(fn -> Tachyon.server_stats!(client1) end, fn data ->
+      Polling.poll_until(fn -> Tachyon.server_stats!(client1) end, fn data ->
         data["data"]["userCount"] == 1
       end)
     end
