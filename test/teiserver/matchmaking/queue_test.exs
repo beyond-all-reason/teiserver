@@ -1,5 +1,5 @@
 defmodule Teiserver.Matchmaking.QueueTest do
-  use Teiserver.DataCase, async: true
+  use Teiserver.DataCase
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueServer
 
