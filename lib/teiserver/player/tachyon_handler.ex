@@ -155,12 +155,18 @@ defmodule Teiserver.Player.TachyonHandler do
     queues =
       Matchmaking.list_queues()
       |> Enum.map(fn {qid, queue} ->
+        game_names = Enum.map(queue.games, fn game -> %{springName: game.spring_game} end)
+        map_names = Enum.map(queue.maps, fn map -> %{springName: map.spring_name} end)
+
         %{
           id: qid,
           name: queue.name,
           numOfTeams: queue.team_count,
           teamSize: queue.team_size,
-          ranked: queue.ranked
+          ranked: queue.ranked,
+          engines: queue.engines,
+          games: game_names,
+          maps: map_names
         }
       end)
 
@@ -185,6 +191,15 @@ defmodule Teiserver.Player.TachyonHandler do
 
               :too_many_players ->
                 %{reason: :invalid_request, details: "too many player for a playlist"}
+
+              :missing_engines ->
+                %{reason: :internal_error, details: "missing engine list"}
+
+              :missing_games ->
+                %{reason: :internal_error, details: "missing game list"}
+
+              :missing_maps ->
+                %{reason: :internal_error, details: "missing map list"}
 
               x ->
                 %{reason: x}

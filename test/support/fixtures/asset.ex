@@ -1,4 +1,5 @@
 defmodule Teiserver.AssetFixtures do
+  require Logger
   alias Teiserver.Asset
   alias Teiserver.Repo
 
