@@ -52,7 +52,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   end
 
   defp setup_token(context) do
-    {:ok, token} = OAuth.create_token(context[:user], context[:app])
+    {:ok, token} = OAuth.create_token(context[:user], context[:app], scopes: context[:app].scopes)
     %{token: token}
   end
 
@@ -252,6 +252,18 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
       resp = post(conn, ~p"/oauth/token", data)
       json_response(resp, 400)
+    end
+
+    test "must provide correct scopes", %{conn: conn} = setup_data do
+      data = %{
+        grant_type: "client_credentials",
+        client_id: setup_data.credential.client_id,
+        client_secret: setup_data.credential_secret,
+        scope: "lolnotascope tachyon.lobby"
+      }
+
+      resp = post(conn, ~p"/oauth/token", data)
+      assert %{"error" => "invalid_scope"} = json_response(resp, 400)
     end
   end
 

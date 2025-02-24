@@ -1,6 +1,7 @@
 defmodule Teiserver.OAuth.CredentialTest do
   use Teiserver.DataCase, async: true
   alias Teiserver.{OAuth, Bot}
+  alias Teiserver.OAuthFixtures
 
   defp setup_bot(_context) do
     {:ok, bot} = Bot.create_bot(%{name: "testing_bot"})
@@ -38,9 +39,29 @@ defmodule Teiserver.OAuth.CredentialTest do
     assert {:ok, created_cred} =
              OAuth.create_credentials(app, bot, "some-client-id", "very-secret")
 
-    assert {:ok, token} = OAuth.get_token_from_credentials(created_cred)
+    assert {:ok, token} = OAuth.get_token_from_credentials(created_cred, app.scopes)
     assert token.application_id == app.id
     assert token.owner_id == nil
     assert token.bot_id == bot.id
+  end
+
+  test "must provide scopes", %{app: app, bot: bot} do
+    OAuthFixtures.update_app(app, %{scopes: ["tachyon.lobby", "admin.engine"]})
+
+    assert {:ok, created_cred} =
+             OAuth.create_credentials(app, bot, "some-client-id", "very-secret")
+
+    assert {:error, :invalid_scope} =
+             OAuth.get_token_from_credentials(created_cred, [])
+  end
+
+  test "must provide valid scopes", %{app: app, bot: bot} do
+    OAuthFixtures.update_app(app, %{scopes: ["tachyon.lobby", "admin.engine"]})
+
+    assert {:ok, created_cred} =
+             OAuth.create_credentials(app, bot, "some-client-id", "very-secret")
+
+    assert {:error, :invalid_scope} =
+             OAuth.get_token_from_credentials(created_cred, ["admin.map"])
   end
 end
