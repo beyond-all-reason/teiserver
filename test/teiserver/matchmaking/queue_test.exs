@@ -2,13 +2,31 @@ defmodule Teiserver.Matchmaking.QueueTest do
   use Teiserver.DataCase
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueServer
+  alias Teiserver.AssetFixtures
+
+  defp stg_attr(id),
+    do: %{
+      spring_name: "Supreme that glitters",
+      display_name: "Supreme That Glitters",
+      thumbnail_url: "https://www.beyondallreason.info/map/?!",
+      matchmaking_queues: [id]
+    }
 
   setup _context do
     user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
     id = UUID.uuid4()
 
+    AssetFixtures.create_map(stg_attr(id))
+
     {:ok, pid} =
-      QueueServer.init_state(%{id: id, name: id, team_size: 1, team_count: 2})
+      QueueServer.init_state(%{
+        id: id,
+        name: id,
+        team_size: 1,
+        team_count: 2,
+        engines: ["spring", "recoil"],
+        games: ["BAR test version", "BAR release version"]
+      })
       |> QueueServer.start_link()
 
     {:ok, user: user, queue_id: id, queue_pid: pid}

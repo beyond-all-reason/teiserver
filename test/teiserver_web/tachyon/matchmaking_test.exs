@@ -7,11 +7,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   alias Teiserver.Asset
   alias Teiserver.Matchmaking.{QueueSupervisor, QueueServer}
 
-  def altair_attr() do
-    altair_attr("8v8")
-  end
-
-  def altair_attr(id),
+  defp altair_attr(id),
     do: %{
       spring_name: "Altair Crossing Remake " <> id,
       display_name: "Altair Crossing",
@@ -19,7 +15,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       matchmaking_queues: [id]
     }
 
-  def rosetta_attr(id),
+  defp rosetta_attr(id),
     do: %{
       spring_name: "Rosetta " <> id,
       display_name: "Rosetta",
@@ -27,29 +23,29 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       matchmaking_queues: [id]
     }
 
-  def map_attrs(id),
+  defp map_attrs(id),
     do: [altair_attr(id), rosetta_attr(id)]
 
-  def map_names(id) do
+  defp map_names(id) do
     map_attrs(id)
     |> Enum.map(fn map -> %{"springName" => map.spring_name} end)
   end
 
-  def engine_versions(),
+  defp engine_versions(),
     do: [%{version: "105.1.1-2590-gb9462a0 bar"}, %{version: "100.2.1-2143-test bar"}]
 
-  def game_versions(),
+  defp game_versions(),
     do: [
       %{spring_game: "Beyond All Reason test-26929-d709d32"},
       %{spring_game: "BAR test version"}
     ]
 
-  def engine_names() do
+  defp engine_names() do
     engine_versions()
     |> Enum.map(fn engine -> %{"version" => engine.version} end)
   end
 
-  def game_names() do
+  defp game_names() do
     game_versions()
     |> Enum.map(fn game -> %{"springName" => game.spring_game} end)
   end
@@ -65,7 +61,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     setup_queue(id, team_size)
   end
 
-  def setup_queue(id, team_size) do
+  defp setup_queue(id, team_size) do
     queue_attrs(id, team_size)
     |> mk_queue()
   end
