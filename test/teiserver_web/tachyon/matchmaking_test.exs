@@ -13,7 +13,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
   def altair_attr(id),
     do: %{
-      spring_name: "Altair Crossing Remake 1.2.3",
+      spring_name: "Altair Crossing Remake " <> id,
       display_name: "Altair Crossing",
       thumbnail_url: "https://www.beyondallreason.info/map/altair-crossing",
       matchmaking_queues: [id]
@@ -21,7 +21,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
   def rosetta_attr(id),
     do: %{
-      spring_name: "Rosetta",
+      spring_name: "Rosetta " <> id,
       display_name: "Rosetta",
       thumbnail_url: "https://www.beyondallreason.info/map/rosetta",
       matchmaking_queues: [id]
@@ -72,7 +72,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
   defp setup_maps(id) do
     map_attrs(id)
-    |> Enum.each(&AssetFixtures.create_or_update_map/1)
+    |> Enum.each(&AssetFixtures.create_map/1)
   end
 
   defp queue_attrs(id, team_size) do
@@ -631,7 +631,11 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
                }
              } = first_message
 
-      assert spring_name in ["Altair Crossing Remake 1.2.3", "Rosetta"]
+      maps =
+        map_attrs(queue_id)
+        |> Enum.map(fn map -> map.spring_name end)
+
+      assert spring_name in maps
 
       # and then if that the rest of clients have the same map
       for client <- rest_clients do
