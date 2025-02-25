@@ -719,6 +719,9 @@ defmodule Teiserver.Game.MatchRatingLib do
         end)
       end)
 
+    default_opts = [tau: get_tau()]
+    options = Keyword.merge(default_opts, options)
+
     result =
       Openskill.rate(rating_groups_without_ids, options)
       |> Enum.zip(rating_groups)
@@ -761,5 +764,9 @@ defmodule Teiserver.Game.MatchRatingLib do
       |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
       |> Teiserver.Repo.transaction()
     end
+  end
+
+  defp get_tau() do
+    Config.get_site_config_cache("lobby.Tau")
   end
 end

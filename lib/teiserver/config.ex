@@ -458,6 +458,7 @@ defmodule Teiserver.Config do
 
     case type.type do
       "integer" -> Teiserver.Helper.NumberHelper.int_parse(value)
+      "float" -> Teiserver.Helper.NumberHelper.float_parse(value)
       "boolean" -> if value == "true" or value == true, do: true, else: false
       "select" -> value
       "string" -> value
