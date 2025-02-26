@@ -6,6 +6,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
   alias Teiserver.Coordinator
   alias Teiserver.Account.ClientLib
   alias Teiserver.Client
+  alias TeiserverWeb.API.SpadsController
 
   import Teiserver.TeiserverTestLib,
     only: [
@@ -103,6 +104,26 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       data = Jason.decode!(response)
 
       assert data == %{}
+    end
+
+    test "can detect empty balance result" do
+      # This is the default balance result when no players
+      # Defined inside balance_lib.ex
+      balance_result = %{
+        logs: [],
+        time_taken: 0,
+        captains: %{},
+        deviation: 0,
+        ratings: %{},
+        team_groups: %{},
+        team_players: %{},
+        team_sizes: %{},
+        means: %{},
+        stdevs: %{},
+        has_parties?: false
+      }
+
+      assert SpadsController.is_non_empty_balance_result?(balance_result) == false
     end
   end
 end

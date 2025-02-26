@@ -152,7 +152,7 @@ defmodule TeiserverWeb.API.SpadsController do
             opts
           })
 
-        if balance_result do
+        if is_non_empty_balance_result?(balance_result) do
           # Get some counts for later
           team_count =
             balance_result.team_sizes
@@ -212,6 +212,14 @@ defmodule TeiserverWeb.API.SpadsController do
         conn
         |> put_status(200)
         |> render("empty.json")
+    end
+  end
+
+  def is_non_empty_balance_result?(balance_result) do
+    cond do
+      balance_result == nil -> false
+      balance_result.team_sizes == %{} -> false
+      true -> true
     end
   end
 
