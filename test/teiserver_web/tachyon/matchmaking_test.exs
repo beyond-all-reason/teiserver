@@ -143,7 +143,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
           games: game_versions(),
           maps: []
         })
-        |> QueueSupervisor.start_queue!()
+        |> start_queue()
 
       resp = Tachyon.list_queues!(client)
 
@@ -216,7 +216,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         games: game_versions(),
         maps: map_attrs(id)
       })
-      |> QueueSupervisor.start_queue!()
+      |> start_queue()
 
       assert %{"status" => "failed", "reason" => "invalid_request"} =
                Tachyon.join_queues!(client, [id])
@@ -235,7 +235,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
           games: game_versions(),
           maps: map_attrs(id)
         })
-        |> QueueSupervisor.start_queue!()
+        |> start_queue()
 
       assert %{"status" => "failed", "reason" => "internal_error"} =
                Tachyon.join_queues!(client, [id])
@@ -254,7 +254,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
           games: [],
           maps: map_attrs(id)
         })
-        |> QueueSupervisor.start_queue!()
+        |> start_queue()
 
       assert %{"status" => "failed", "reason" => "internal_error"} =
                Tachyon.join_queues!(client, [id])
@@ -273,7 +273,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
           games: game_versions(),
           maps: []
         })
-        |> QueueSupervisor.start_queue!()
+        |> start_queue()
 
       assert %{"status" => "failed", "reason" => "internal_error"} =
                Tachyon.join_queues!(client, [id])
@@ -720,5 +720,17 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
                 "readyCount" => ^current
               }
             }} = Tachyon.recv_message(client, timeout: 10)
+  end
+
+  defp start_queue(state) do
+    QueueSupervisor.start_queue!(state)
+
+    ExUnit.Callbacks.on_exit(fn ->
+      Teiserver.Matchmaking.QueueSupervisor.terminate_queue(state.id)
+
+      Teiserver.Support.Polling.poll_until_nil(fn ->
+        Teiserver.Matchmaking.lookup_queue(state.id)
+      end)
+    end)
   end
 end
