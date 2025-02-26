@@ -44,6 +44,10 @@ defmodule Teiserver.Player do
   @spec conn_state(T.userid()) :: Player.Session.conn_state()
   defdelegate conn_state(user_id), to: Player.Session
 
+
+  @spec status(T.userid()) :: Player.Session.status()
+  defdelegate status(user_id), to: Player.Session
+
   @doc """
   When a queued player is matched with other, need to let them know
   """

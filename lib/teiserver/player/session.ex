@@ -19,6 +19,7 @@ defmodule Teiserver.Player.Session do
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 
+  @type status :: :offline | :menu | :playing | :lobby
   @type matchmaking_state ::
           :no_matchmaking
           | {:searching,
@@ -51,7 +52,8 @@ defmodule Teiserver.Player.Session do
           mon_ref: reference(),
           conn_pid: pid() | nil,
           matchmaking: matchmaking_state(),
-          messaging_state: messaging_state()
+          messaging_state: messaging_state(),
+          status: status()
         }
 
   # TODO: would be better to have that as a db setting, perhaps passed as an
@@ -91,6 +93,14 @@ defmodule Teiserver.Player.Session do
   catch
     :exit, {:noproc, _} ->
       :disconnected
+  end
+
+  @spec status(T.userid()) :: status()
+  def status(user_id) do
+    GenServer.call(via_tuple(user_id), :status)
+  catch
+    :exit, {:noproc, _} ->
+      :offline
   end
 
   @doc """
@@ -201,6 +211,25 @@ defmodule Teiserver.Player.Session do
 
   def handle_call(:conn_state, _from, state) do
     result = if is_nil(state.conn_pid), do: :reconnecting, else: :connected
+    {:reply, result, state}
+  end
+
+  def handle_call(:status, _from, state) do
+    result = cond do
+      state.status == :playing ->
+        :playing
+
+      state.status == :lobby ->
+        :lobby
+
+      true ->
+        case conn_state(state.user_id) do
+          :connected -> :menu
+          :reconnecting -> :offline
+          :disconnected -> :offline
+        end
+    end
+
     {:reply, result, state}
   end
 
@@ -427,7 +456,7 @@ defmodule Teiserver.Player.Session do
 
         state = send_to_player({:battle_start, data}, state)
         Process.demonitor(mon_ref, [:flush])
-        {:noreply, %{state | matchmaking: :no_matchmaking}}
+        {:noreply, %{state | %{matchmaking: :no_matchmaking, status: :playing}}}
 
       _ ->
         Logger.warning(
