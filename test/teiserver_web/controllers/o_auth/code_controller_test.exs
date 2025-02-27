@@ -265,6 +265,18 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       resp = post(conn, ~p"/oauth/token", data)
       assert %{"error" => "invalid_scope"} = json_response(resp, 400)
     end
+
+    test "can provide a specific scope", %{conn: conn} = setup_data do
+      data = %{
+        grant_type: "client_credentials",
+        client_id: setup_data.credential.client_id,
+        client_secret: setup_data.credential_secret,
+        scope: "tachyon.lobby"
+      }
+
+      resp = post(conn, ~p"/oauth/token", data)
+      assert %{"token_type" => "Bearer"} = json_response(resp, 200)
+    end
   end
 
   describe "refresh token" do

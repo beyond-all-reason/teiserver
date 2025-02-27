@@ -162,7 +162,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
     scopes =
       Map.get(params, "scope", "")
       |> String.split()
-      |> Enum.map(&String.split/1)
+      |> Enum.map(&String.trim/1)
       |> Enum.into(MapSet.new())
 
     app_scopes = MapSet.new(app.scopes)
@@ -175,10 +175,12 @@ defmodule TeiserverWeb.OAuth.CodeController do
         {:ok, MapSet.to_list(scopes)}
 
       true ->
-        invalid_scopes = MapSet.difference(scopes, app_scopes)
+        invalid_scopes =
+          MapSet.difference(scopes, app_scopes)
+          |> MapSet.to_list()
+          |> Enum.join(", ")
 
-        {:error, :invalid_scope,
-         "the following scopes aren't allowed: #{inspect(MapSet.to_list(invalid_scopes))}"}
+        {:error, :invalid_scope, "the following scopes aren't allowed: #{invalid_scopes}"}
     end
   end
 
