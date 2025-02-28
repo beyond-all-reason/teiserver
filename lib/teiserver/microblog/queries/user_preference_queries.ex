@@ -15,8 +15,6 @@ defmodule Teiserver.Microblog.UserPreferenceQueries do
   end
 
   @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()
-  defp do_where(query, nil), do: query
-
   defp do_where(query, params) do
     params
     |> Enum.reduce(query, fn {key, value}, query_acc ->
@@ -24,7 +22,7 @@ defmodule Teiserver.Microblog.UserPreferenceQueries do
     end)
   end
 
-  @spec _where(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
+  @spec _where(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
   defp _where(query, _, ""), do: query
   defp _where(query, _, nil), do: query
 

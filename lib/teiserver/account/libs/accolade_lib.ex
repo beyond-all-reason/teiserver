@@ -24,7 +24,7 @@ defmodule Teiserver.Account.AccoladeLib do
       type_icon: icon(),
       item_id: accolade.id,
       item_type: "teiserver_account_accolade",
-      item_colour: colours() |> elem(0),
+      item_colour: StylingHelper.colours(colours()) |> elem(0),
       item_icon: Teiserver.Account.AccoladeLib.icon(),
       item_label: "#{accolade.name}",
       url: "/account/accolades/#{accolade.id}"

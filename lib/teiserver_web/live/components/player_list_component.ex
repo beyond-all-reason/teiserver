@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Components.PlayerListComponent do
   import Teiserver.Account.AuthLib, only: [allow?: 2]
 
   @impl true
-  def preload(list_of_assigns) do
+  def update_many(list_of_assigns) do
     assigns = hd(list_of_assigns)
 
     [

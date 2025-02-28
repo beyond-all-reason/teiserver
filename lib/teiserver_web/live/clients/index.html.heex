@@ -65,10 +65,10 @@
                     <td><%= client.party_id %></td>
                     <td>
                       <%= if client.lobby_id do %>
-                        <%= live_redirect("Show #{client.lobby_id}",
-                          to: Routes.ts_battle_lobby_show_path(@socket, :show, client.lobby_id),
-                          class: "btn btn-sm btn-#{Teiserver.Lobby.colours()}"
-                        ) %>
+                        <.link navigate={Routes.ts_battle_lobby_show_path(@socket, :show, client.lobby_id)}
+                          class={"btn btn-sm btn-#{Teiserver.Lobby.colours()}"}>
+                        Show {client.lobby_id}
+                        </.link>
                       <% end %>
                     </td>
                     <td>
@@ -104,10 +104,10 @@
 
                     <td>
                       <span>
-                        <%= live_redirect("Show",
-                          to: Routes.ts_admin_client_show_path(@socket, :show, client.userid),
-                          class: "btn btn-sm btn-#{bsname}"
-                        ) %>
+                        <.link navigate={Routes.ts_admin_client_show_path(@socket, :show, client.userid)}
+                          class={"btn btn-sm btn-#{bsname}"}>
+                        Show
+                        </.link>
                       </span>
                     </td>
                   </tr>

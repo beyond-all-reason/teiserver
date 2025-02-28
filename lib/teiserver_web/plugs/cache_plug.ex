@@ -6,7 +6,7 @@ defmodule Teiserver.Plugs.CachePlug do
   def init(_) do
   end
 
-  def call(%{user_id: nil} = conn, _) do
+  def call(%{assigns: %{user_id: nil}} = conn, _) do
     conn
     |> assign(:tz, Application.get_env(:teiserver, Teiserver.Config)[:defaults].tz)
   end
