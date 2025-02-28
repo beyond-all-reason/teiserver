@@ -75,7 +75,7 @@ defmodule Teiserver.MixProject do
       {:logger_file_backend, "~> 0.0.14"},
       {:logger_backends, "~> 1.0"},
       {:ecto_psql_extras, "~> 0.8"},
-      {:timex, "~> 3.7.5"},
+      {:timex, "~> 3.7.11"},
       {:breadcrumble, "~> 1.0.0"},
       {:guardian, "~> 2.1"},
       {:argon2_elixir, "~> 4.1"},
