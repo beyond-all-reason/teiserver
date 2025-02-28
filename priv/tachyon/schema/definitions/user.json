@@ -1,0 +1,14 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/user.json",
+    "title": "User",
+    "type": "object",
+    "properties": {
+        "userId": { "$ref": "../definitions/userId.json" },
+        "username": { "type": "string" },
+        "displayName": { "type": "string" },
+        "clanId": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "countryCode": { "type": "string" },
+        "status": { "enum": ["offline", "menu", "playing", "lobby"] }
+    },
+    "required": ["userId", "username", "displayName", "clanId", "status"]
+}

@@ -1,0 +1,23 @@
+{
+    "title": "UserInfoRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "user/info" },
+        "data": {
+            "title": "UserInfoRequestData",
+            "type": "object",
+            "properties": {
+                "userId": { "$ref": "../../definitions/userId.json" }
+            },
+            "required": ["userId"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}
