@@ -1,11 +1,11 @@
 <% bsname = @view_colour
 moderator = allow?(@current_user, "Moderator") %>
 
-<%= render(
+{render(
   TeiserverWeb.Battle.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "battle_lobbies", conn: @socket})
-) %>
+)}
 
 <style type="text/css">
   .chat-row {
@@ -40,10 +40,12 @@ moderator = allow?(@current_user, "Moderator") %>
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
         <div class="float-end">
-          <%= live_redirect("Show",
-            to: Routes.ts_battle_lobby_show_path(@socket, :show, @lobby.id),
-            class: "btn btn-#{bsname}"
-          ) %>
+          <.link
+            navigate={Routes.ts_battle_lobby_show_path(@socket, :show, @lobby.id)}
+            class={"btn btn-#{bsname}"}
+          >
+            Show
+          </.link>
 
           <%= if moderator and @lobby.match_id != nil do %>
             <a href={~p"/battle/chat/#{@lobby.match_id}"} class={"btn btn-#{bsname}"}>
@@ -56,12 +58,12 @@ moderator = allow?(@current_user, "Moderator") %>
 
         <%= if @lobby.in_progress do %>
           <h4>
-            Match in progress - <%= Teiserver.Helper.TimexHelper.duration_to_str_short(
+            Match in progress - {Teiserver.Helper.TimexHelper.duration_to_str_short(
               System.system_time(:second) - (@lobby.started_at || 1_652_282_031)
-            ) %> - <%= extra %>
+            )} - {extra}
           </h4>
         <% else %>
-          <h4>Pre-game lobby - <%= extra %></h4>
+          <h4>Pre-game lobby - {extra}</h4>
         <% end %>
 
         <div id="chat" class="mt-4">
@@ -80,7 +82,7 @@ moderator = allow?(@current_user, "Moderator") %>
             <% end %>
             <div class="chat-row">
               <%= if different_user do %>
-                <div class="chat-author"><%= @user_map[userid].name %>:</div>
+                <div class="chat-author">{@user_map[userid].name}:</div>
               <% else %>
                 <div class="chat-author">&nbsp;</div>
               <% end %>
@@ -124,7 +126,7 @@ moderator = allow?(@current_user, "Moderator") %>
                     ""
                 end %>
 
-              <div class={"chat-message #{class}"}><%= message %></div>
+              <div class={"chat-message #{class}"}>{message}</div>
             </div>
           <% end %>
         </div>
@@ -133,15 +135,15 @@ moderator = allow?(@current_user, "Moderator") %>
           <.form :let={f} for={@message_changeset} phx-submit="send-message" class="mt-2">
             <div class="row">
               <div class="col-md-10">
-                <%= text_input(f, :content,
+                {text_input(f, :content,
                   class: "form-control",
                   autofocus: "autofocus",
                   autocomplete: "off"
-                ) %>
+                )}
               </div>
 
               <div class="col-md-2">
-                <%= submit("Send", class: "btn btn-primary btn-block") %>
+                {submit("Send", class: "btn btn-primary btn-block")}
               </div>
             </div>
           </.form>

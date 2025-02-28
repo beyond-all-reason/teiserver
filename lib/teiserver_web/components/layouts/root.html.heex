@@ -10,10 +10,9 @@
       <link rel="alternate" type="application/rss+xml" title="Blog title" href={@rss_feed} />
     <% end %>
 
-    <%= live_title_tag(
-      assigns[:page_title] || Application.get_env(:teiserver, Teiserver)[:site_title],
-      suffix: Application.get_env(:teiserver, Teiserver)[:site_suffix]
-    ) %>
+    <.live_title suffix={Application.get_env(:teiserver, Teiserver)[:site_suffix]}>
+      {assigns[:page_title] || Application.get_env(:teiserver, Teiserver)[:site_title]}
+    </.live_title>
 
     <% light_mode =
       case Teiserver.Config.get_user_config_cache(@current_user, "general.Colour scheme") do
@@ -43,6 +42,6 @@
   </head>
   <body class="container-fluid px-0 d-flex flex-column">
     <.flash_group flash={@flash} />
-    <%= @inner_content %>
+    {@inner_content}
   </body>
 </html>

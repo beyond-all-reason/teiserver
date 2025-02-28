@@ -80,10 +80,10 @@ moderator = allow?(@current_user, "Moderator") %>
 
                     <td>
                       <span>
-                        <%= live_redirect("Show",
-                          to: ~p"/tournament/lobbies/show/#{lobby.id}",
-                          class: "btn btn-sm btn-outline-#{bsname}"
-                        ) %>
+                        <.link navigate={~p"/tournament/lobbies/show/#{lobby.id}"}
+                        class="btn btn-sm btn-outline-#{bsname}">
+                        Show
+                        </.link>
                       </span>
                     </td>
                   <% else %>

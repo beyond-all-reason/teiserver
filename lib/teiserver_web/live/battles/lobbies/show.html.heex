@@ -24,10 +24,10 @@ spectators =
   |> Enum.map(fn p -> @clients[p] end)
   |> Enum.sort_by(& &1[:name]) %>
 
-<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+{render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "battle_lobbies",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
-}) %>
+})}
 
 <div class="row mt-3" id="main-content">
   <div class="col-md-12">
@@ -69,10 +69,12 @@ spectators =
             </span>
           <% end %>
 
-          <%= live_redirect("Live chat",
-            to: Routes.ts_battle_lobby_chat_path(@socket, :chat, @lobby.id),
-            class: "btn btn-#{bsname}"
-          ) %>
+          <.link
+            navigate={Routes.ts_battle_lobby_chat_path(@socket, :chat, @lobby.id)}
+            class={"btn btn-#{bsname}"}
+          >
+            Live chat
+          </.link>
 
           <%= if @moderator and @lobby.match_id do %>
             <a href={~p"/battle/chat/#{@lobby.match_id}"} class={"btn btn-#{bsname}"}>
@@ -84,38 +86,38 @@ spectators =
         <% extra = "#{@lobby.name} - #{@lobby.map_name}" %>
         <%= if @lobby.in_progress do %>
           <h4>
-            Match in progress - <%= Teiserver.Helper.TimexHelper.duration_to_str_short(
+            Match in progress - {Teiserver.Helper.TimexHelper.duration_to_str_short(
               System.system_time(:second) - (@lobby.started_at || 1_652_282_031)
-            ) %> - <%= extra %>
+            )} - {extra}
           </h4>
         <% else %>
-          <h4>Pre-game lobby - <%= extra %></h4>
+          <h4>Pre-game lobby - {extra}</h4>
         <% end %>
 
         <div class="row">
           <div class="col">
             <ul>
-              <li>Max players: <%= @lobby.max_players %></li>
-              <li>Locked: <%= @lobby.locked %></li>
+              <li>Max players: {@lobby.max_players}</li>
+              <li>Locked: {@lobby.locked}</li>
               <li>
-                Rated Game: <%= if @modoptions["game/modoptions/ranked_game"] == "1",
+                Rated Game: {if @modoptions["game/modoptions/ranked_game"] == "1",
                   do: "Yes",
-                  else: "No" %>
+                  else: "No"}
               </li>
               <%= if @lobby.password != nil do %>
-                <li>Password: <%= @lobby.password %></li>
+                <li>Password: {@lobby.password}</li>
               <% end %>
               <li>
-                Queue size: <%= Enum.count(@consul.join_queue ++ @consul.low_priority_join_queue) %>
+                Queue size: {Enum.count(@consul.join_queue ++ @consul.low_priority_join_queue)}
               </li>
-              <li>Balance algorithm: <%= @consul.balance_algorithm %></li>
+              <li>Balance algorithm: {@consul.balance_algorithm}</li>
               <%= if @tester_perms do %>
-                <li>Match ID: <%= Map.get(@modoptions, "game/server_match_id") %></li>
+                <li>Match ID: {Map.get(@modoptions, "game/server_match_id")}</li>
               <% end %>
 
               <%= if @server_perms do %>
-                <li>Match UUID: <%= Map.get(@modoptions, "server/match/uuid") %></li>
-                <li>Server UUID: <%= Map.get(@modoptions, "server/host/uuid") %></li>
+                <li>Match UUID: {Map.get(@modoptions, "server/match/uuid")}</li>
+                <li>Server UUID: {Map.get(@modoptions, "server/host/uuid")}</li>
               <% end %>
             </ul>
           </div>
@@ -127,19 +129,19 @@ spectators =
                 <%= if Enum.empty?(@consul.host_bosses) do %>
                   No boss
                 <% else %>
-                  <%= @consul.host_bosses
+                  {@consul.host_bosses
                   |> Enum.map_join(", ", fn userid ->
                     Map.get(@users, userid, %{name: "NoUserFound"}).name
-                  end) %>
+                  end)}
                 <% end %>
               </li>
-              <li>Host team-count: <%= @consul.host_teamcount %></li>
-              <li>Host team-size: <%= @consul.host_teamsize %></li>
+              <li>Host team-count: {@consul.host_teamcount}</li>
+              <li>Host team-size: {@consul.host_teamsize}</li>
               <li>
-                Rating bounds: <%= @consul.minimum_rating_to_play %>, <%= @consul.maximum_rating_to_play %>
+                Rating bounds: {@consul.minimum_rating_to_play}, {@consul.maximum_rating_to_play}
               </li>
               <li>
-                Rank bounds: <%= @consul.minimum_rank_to_play %>, <%= @consul.maximum_rank_to_play %>
+                Rank bounds: {@consul.minimum_rank_to_play}, {@consul.maximum_rank_to_play}
               </li>
             </ul>
           </div>
@@ -191,9 +193,9 @@ spectators =
                       <i class={"text-danger fa-fw #{Teiserver.icon(:ignore)}"}></i>
                     <% end %>
                   </td>
-                  <td><%= user.name %></td>
-                  <td><%= if client.ready, do: "Ready" %></td>
-                  <td><%= client.team_number %></td>
+                  <td>{user.name}</td>
+                  <td>{if client.ready, do: "Ready"}</td>
+                  <td>{client.team_number}</td>
 
                   <%= if party_colour do %>
                     <td style={"background-color: #{party_colour};"} width="50">&nbsp;</td>
@@ -201,24 +203,26 @@ spectators =
                     <td width="50">&nbsp;</td>
                   <% end %>
 
-                  <td><%= Teiserver.Helper.NumberHelper.round(rating_value, 2) %></td>
+                  <td>{Teiserver.Helper.NumberHelper.round(rating_value, 2)}</td>
                   <%= if @tester_perms do %>
-                    <td><%= Teiserver.Helper.NumberHelper.round(uncertainty, 2) %></td>
+                    <td>{Teiserver.Helper.NumberHelper.round(uncertainty, 2)}</td>
 
-                    <td><%= @stats[user.id]["win_rate.team"] %></td>
-                    <td><%= @stats[user.id]["recent_count.team"] %></td>
+                    <td>{@stats[user.id]["win_rate.team"]}</td>
+                    <td>{@stats[user.id]["recent_count.team"]}</td>
                   <% end %>
 
-                  <td><%= client.handicap %></td>
-                  <td><%= factions[client.side] %></td>
+                  <td>{client.handicap}</td>
+                  <td>{factions[client.side]}</td>
 
                   <%= if @moderator do %>
-                    <td><%= client.player_number %></td>
+                    <td>{client.player_number}</td>
                     <td>
-                      <%= live_redirect("Show",
-                        to: Routes.ts_admin_client_show_path(@socket, :show, client.userid),
-                        class: "btn btn-sm btn-#{bsname}"
-                      ) %>
+                      <.link
+                        navigate={Routes.ts_admin_client_show_path(@socket, :show, client.userid)}
+                        class={"btn btn-sm btn-#{bsname}"}
+                      >
+                        Show
+                      </.link>
 
                       <span
                         class={"btn btn-sm btn-outline-#{bsname}"}
@@ -275,19 +279,21 @@ spectators =
                       <i class={"text-danger fa-fw #{Teiserver.icon(:ignore)}"}></i>
                     <% end %>
                   </td>
-                  <td><%= user.name %></td>
+                  <td>{user.name}</td>
 
-                  <td><%= Teiserver.Helper.NumberHelper.round(rating_value, 2) %></td>
+                  <td>{Teiserver.Helper.NumberHelper.round(rating_value, 2)}</td>
                   <%= if @tester_perms do %>
-                    <td><%= Teiserver.Helper.NumberHelper.round(uncertainty, 2) %></td>
+                    <td>{Teiserver.Helper.NumberHelper.round(uncertainty, 2)}</td>
                   <% end %>
 
                   <%= if @moderator do %>
                     <td>
-                      <%= live_redirect("Show",
-                        to: Routes.ts_admin_client_show_path(@socket, :show, client.userid),
-                        class: "btn btn-sm btn-#{bsname}"
-                      ) %>
+                      <.link
+                        navigate={Routes.ts_admin_client_show_path(@socket, :show, client.userid)}
+                        class={"btn btn-sm btn-#{bsname}"}
+                      >
+                        Show
+                      </.link>
 
                       <span
                         class={"btn btn-sm btn-outline-#{bsname}"}
@@ -305,7 +311,9 @@ spectators =
         <br />
 
         <span>
-          <%= live_redirect("Back", to: ~p"/battle/lobbies", class: "btn btn-#{bsname}") %>
+          <.link navigate={~p"/battle/lobbies"} class="btn btn-#{bsname}">
+            Back
+          </.link>
         </span>
 
         <%= if @server_perms do %>

@@ -82,18 +82,18 @@
 
               <td>
                 <span>
-                  <%= live_redirect("Show",
-                    to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id),
-                    class: "btn btn-sm btn-outline-#{bsname}"
-                  ) %>
+                  <.link navigate={Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id)}
+                    class={"btn btn-sm btn-outline-#{bsname}"}>
+                  Show
+                  </.link>
                 </span>
               </td>
               <td>
                 <span>
-                  <%= live_redirect("Chat",
-                    to: Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id),
-                    class: "btn btn-sm btn-outline-#{bsname}"
-                  ) %>
+                  <.link navigate={Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id)}
+                    class={"btn btn-sm btn-outline-#{bsname}"}>
+                  Chat
+                  </.link>
                 </span>
               </td>
 
