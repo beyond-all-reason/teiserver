@@ -10,7 +10,7 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.{Account, CacheUser, Client, Room, Battle, Coordinator, Config}
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
-  alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut, UserOut, SystemOut}
+  alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut, UserOut, SystemOut, PartyOut}
   alias Teiserver.Data.Types, as: T
 
   @motd """
@@ -36,6 +36,7 @@ defmodule Teiserver.Protocols.SpringOut do
         :user -> UserOut.do_reply(reply_cmd, data, state)
         :system -> SystemOut.do_reply(reply_cmd, data, state)
         :spring -> do_reply(reply_cmd, data)
+        :party -> PartyOut.do_reply(reply_cmd, data, state)
       end
 
     if Config.get_site_config_cache("debug.Print outgoing messages") or
@@ -839,7 +840,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # This sends a message to the self to send out a message
-  @spec _send(String.t() | list() | nil, String.t(), map) :: any()
+  @spec _send(String.t() | [term()] | nil, String.t(), map()) :: term()
   # defp _send(msg, msg_id, state) do
   #   _send(msg, state.socket, state.transport, msg_id)
   # end
