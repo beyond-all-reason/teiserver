@@ -290,4 +290,10 @@ defmodule Teiserver.Support.Tachyon do
     :ok = send_request(client, "messaging/subscribeReceived", %{since: since})
     recv_message!(client)
   end
+
+  def user_info!(client, user_id) do
+    :ok = send_request(client, "user/info", %{userId: to_string(user_id)})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
 end

@@ -284,7 +284,6 @@ defmodule Teiserver.Player.TachyonHandler do
     user = Account.get_user_by_id(user_id)
 
     if user != nil do
-      status = Player.status(user_id)
       resp =
         Schema.response(cmd_id, message_id, %{
           userId: to_string(user.id),
@@ -292,7 +291,7 @@ defmodule Teiserver.Player.TachyonHandler do
           displayName: user.name,
           clanId: user.clan_id,
           countryCode: user.country,
-          status: status
+          status: :menu
         })
 
       {:reply, :ok, {:text, Jason.encode!(resp)}, state}
