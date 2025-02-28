@@ -1,18 +1,20 @@
 <div class="my-2">
-  <%= live_redirect("Main dashboard", to: ~p"/admin/dashboard", class: "btn btn-outline-primary") %>
+  <.link navigate={~p"/admin/dashboard"} class="btn btn-outline-primary">
+    Main dashboard
+  </.link>
 </div>
 
 <div class="row">
   <div class="col">
-    <h5>Remaining capacity: <%= @remaining_capacity %></h5>
+    <h5>Remaining capacity: {@remaining_capacity}</h5>
   </div>
 </div>
 
 <div class="row">
   <div class="col">
-    <h3>Heartbeats (<%= Enum.count(@heartbeats) %>)</h3>
+    <h3>Heartbeats ({Enum.count(@heartbeats)})</h3>
     <%= for {userid, {pid, timestamp}} <- @heartbeats do %>
-      <%= userid %>: <%= inspect(pid) %>, <%= timestamp %><br />
+      {userid}: {inspect(pid)}, {timestamp}<br />
     <% end %>
   </div>
 
@@ -20,22 +22,22 @@
     <h3>Queues</h3>
     <%= if @queues do %>
       <%= for {name, contents} <- @queues do %>
-        <%= name %> (<%= Enum.count(contents) %>): <%= inspect(contents) %><br />
+        {name} ({Enum.count(contents)}): {inspect(contents)}<br />
       <% end %>
     <% end %>
   </div>
 
   <div class="col">
-    <h3>Recent logins (<%= Enum.count(@recent_logins) %>)</h3>
+    <h3>Recent logins ({Enum.count(@recent_logins)})</h3>
     <%= for userid <- @recent_logins do %>
-      <%= userid %><br />
+      {userid}<br />
     <% end %>
   </div>
 
   <div class="col">
-    <h3>Arrival times (<%= Enum.count(@arrival_times) %>)</h3>
+    <h3>Arrival times ({Enum.count(@arrival_times)})</h3>
     <%= for {userid, v} <- @arrival_times do %>
-      <%= userid %>: <%= v %><br />
+      {userid}: {v}<br />
     <% end %>
   </div>
 </div>

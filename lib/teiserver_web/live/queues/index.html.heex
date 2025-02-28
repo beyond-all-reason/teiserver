@@ -2,10 +2,10 @@
 accepted_app = @client == nil or @client.app_status == :accepted
 # accepted_app = true %>
 
-<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+{render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "matchmaking",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
-}) %>
+})}
 
 <div class="row mt-3">
   <div class="col-md-12">
@@ -38,7 +38,7 @@ accepted_app = @client == nil or @client.app_status == :accepted
 
         <h4>
           <%= if Enum.count(@db_queues) > 0 do %>
-            Queues - <%= Enum.count(@db_queues) %>
+            Queues - {Enum.count(@db_queues)}
           <% else %>
             No queues
           <% end %>
@@ -81,17 +81,19 @@ accepted_app = @client == nil or @client.app_status == :accepted
             <%= for {queue_id, queue} <- @db_queues do %>
               <% info = @queue_info[queue_id] %>
               <tr>
-                <td><%= queue.name %></td>
+                <td>{queue.name}</td>
 
                 <%= if info do %>
-                  <td><%= info.group_count %></td>
-                  <td><%= round(info.mean_wait_time) %></td>
+                  <td>{info.group_count}</td>
+                  <td>{round(info.mean_wait_time)}</td>
                   <td>
                     <%= if @is_admin or Enum.member?(@queue_membership, queue_id) do %>
-                      <%= live_redirect("Show",
-                        to: Routes.ts_game_queue_show_path(@socket, :show, queue_id),
-                        class: "btn btn-sm btn-outline-#{bsname}"
-                      ) %>
+                      <.link
+                        navigate={Routes.ts_game_queue_show_path(@socket, :show, queue_id)}
+                        class={"btn btn-sm btn-outline-#{bsname}"}
+                      >
+                        Show
+                      </.link>
                     <% end %>
                   </td>
                   <td>

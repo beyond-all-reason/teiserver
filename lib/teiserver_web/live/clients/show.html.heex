@@ -1,9 +1,9 @@
 <% bsname = @view_colour %>
 
-<%= render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{
+{render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{
   active: "users",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
-}) %>
+})}
 
 <div class="row">
   <div class="col-md-12">
@@ -20,19 +20,18 @@
         </div>
 
         <h3>
-          <%= @user.name %>
+          {@user.name}
         </h3>
 
         <ul>
-          <li>Bot: <%= Teiserver.CacheUser.is_bot?(@user) %></li>
-          <li>Moderator: <%= Teiserver.CacheUser.is_moderator?(@user) %></li>
+          <li>Bot: {Teiserver.CacheUser.is_bot?(@user)}</li>
+          <li>Moderator: {Teiserver.CacheUser.is_moderator?(@user)}</li>
           <li>
             Battle:
             <%= if @client != nil and @client.lobby_id != nil do %>
-              <%= live_redirect("Battle ##{@client.lobby_id}",
-                to: Routes.ts_battle_lobby_show_path(@socket, :show, @client.lobby_id),
-                class: ""
-              ) %> &nbsp;&nbsp;&nbsp;
+              <.link navigate={Routes.ts_battle_lobby_show_path(@socket, :show, @client.lobby_id)}>
+                Battle #{@client.lobby_id}
+              </.link>
               <%= if @current_client do %>
                 <span phx-click="join-lobby" class={"btn btn-#{bsname} btn-sm"}>
                   Join
@@ -105,7 +104,9 @@
         </div>
 
         <span>
-          <%= live_redirect("Back", to: ~p"/teiserver/admin/client", class: "btn btn-secondary") %>
+          <.link navigate={~p"/teiserver/admin/client"} class="btn btn-secondary">
+            Back
+          </.link>
         </span>
       </div>
     </div>
