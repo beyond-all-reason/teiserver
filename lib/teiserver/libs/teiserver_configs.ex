@@ -13,6 +13,7 @@ defmodule Teiserver.TeiserverConfigs do
     lobby_configs()
     debugging_configs()
     profile_configs()
+    rating_configs()
   end
 
   @spec site_configs :: any
@@ -419,15 +420,6 @@ defmodule Teiserver.TeiserverConfigs do
       description: "Maximum team size to be considered as a small team game",
       default: 5
     })
-
-    add_site_config_type(%{
-      key: "lobby.Tau",
-      section: "Lobbies",
-      type: "float",
-      permissions: ["Admin"],
-      description: "Tau used by openskill lib",
-      default: 1 / 3
-    })
   end
 
   defp discord_configs() do
@@ -658,6 +650,17 @@ defmodule Teiserver.TeiserverConfigs do
       opts: [],
       default: false,
       value_label: "Light mode as default"
+    })
+  end
+
+  defp rating_configs do
+    add_site_config_type(%{
+      key: "rating.Tau",
+      section: "Rating",
+      type: "float",
+      permissions: ["Admin"],
+      description: "Tau used by openskill lib",
+      default: 1 / 3
     })
   end
 end

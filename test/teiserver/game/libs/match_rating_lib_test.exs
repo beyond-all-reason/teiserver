@@ -106,7 +106,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     assert ratings[user1.id].uncertainty == ratings[user2.id].uncertainty
 
     # Change tau in config to a lower number
-    Config.update_site_config("lobby.Tau", 0)
+    Config.update_site_config("rating.Tau", 0)
 
     # Create two user
     user1 = AccountTestLib.user_fixture()
@@ -128,7 +128,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
   end
 
   defp reset_to_default_tau() do
-    Config.delete_site_config("lobby.Tau")
+    Config.delete_site_config("rating.Tau")
   end
 
   defp get_ratings(userids, rating_type_id) do

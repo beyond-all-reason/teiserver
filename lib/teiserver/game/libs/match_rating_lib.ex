@@ -719,7 +719,7 @@ defmodule Teiserver.Game.MatchRatingLib do
         end)
       end)
 
-    default_opts = [tau: get_tau()]
+    default_opts = [tau: get_tau(), prevent_sigma_increase: true]
     options = Keyword.merge(default_opts, options)
 
     result =
@@ -767,6 +767,6 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
 
   defp get_tau() do
-    Config.get_site_config_cache("lobby.Tau")
+    Config.get_site_config_cache("rating.Tau")
   end
 end
