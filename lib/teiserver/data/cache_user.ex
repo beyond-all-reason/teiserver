@@ -310,7 +310,7 @@ defmodule Teiserver.CacheUser do
               :no_verify ->
                 verify_user(get_user_by_id(user.id))
 
-              {:ok, _, _} ->
+              :ok ->
                 :ok
             end
         end

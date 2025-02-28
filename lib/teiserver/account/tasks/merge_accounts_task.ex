@@ -49,15 +49,7 @@ defmodule Teiserver.Account.MergeAccountsTask do
 
     # Reports
 
-    result = Teiserver.Admin.DeleteUserTask.delete_users([deleting_id])
-
-    case result do
-      {:ok, _} ->
-        :ok
-
-      {:error, error} ->
-        Logger.error("Error merging #{deleting_id} into #{keeping_id}\n#{Kernel.inspect(error)}")
-    end
+    Teiserver.Admin.DeleteUserTask.delete_users([deleting_id])
 
     Account.decache_user(deleting_id)
   end

@@ -29,7 +29,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
       |> Map.drop([:cycle])
 
     if Teiserver.Communication.use_discord?() do
-      if rem(Timex.now().minute(), 10) == 0 do
+      if rem(Timex.now().minute, 10) == 0 do
         if Config.get_site_config_cache("teiserver.Bridge player numbers") do
           [
             {:update_stats, :client_count, Enum.count(data.client.total)},
