@@ -70,7 +70,7 @@ defmodule Teiserver.Account.RetentionReport do
             end
           end)
 
-        if last_login != nil and last_played != nil do
+        if last_played != nil do
           %{
             last_login: Timex.diff(user.inserted_at, last_login, :days) |> abs,
             last_played: Timex.diff(user.inserted_at, last_played, :days) |> abs

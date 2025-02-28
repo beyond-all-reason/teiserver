@@ -110,6 +110,9 @@ defmodule Teiserver.MixProject do
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},
       {:nostrum, "~> 0.10"},
+      # nostrum and hackney both depends on certifi, but they resolve to diffenrent
+      # versions, which screws over elixir-ls.
+      {:certifi, "~> 2.13.0", override: true},
       {:websocket_sync_client,
        git: "https://github.com/geekingfrog/websocket_sync_client.git",
        ref: "66e48fb256e279cd343276999a59ed48b9d8ae36",

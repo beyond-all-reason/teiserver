@@ -67,13 +67,9 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     if connected?(socket) do
       changes = run_match_query(filters, rating_type, current_user)
 
-      if changes != nil do
-        socket
-        |> assign(:logs, changes.logs)
-        |> assign(:stats, changes.stats)
-      else
-        socket
-      end
+      socket
+      |> assign(:logs, changes.logs)
+      |> assign(:stats, changes.stats)
     else
       socket
       |> assign(:logs, [])
