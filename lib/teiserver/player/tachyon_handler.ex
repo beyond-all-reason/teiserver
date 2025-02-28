@@ -296,8 +296,8 @@ defmodule Teiserver.Player.TachyonHandler do
 
       {:reply, :ok, {:text, Jason.encode!(resp)}, state}
     else
-        resp = Schema.error_response(cmd_id, message_id, :unknown_user)
-        {:reply, :error, {:text, Jason.encode!(resp)}, state}
+      resp = Schema.error_response(cmd_id, message_id, :unknown_user)
+      {:reply, :error, {:text, Jason.encode!(resp)}, state}
     end
   end
 

@@ -11,17 +11,20 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       %{id: user_id, name: name, clan_id: clan_id} = user
       %{country: country} = Teiserver.Account.get_user_by_id(user_id)
 
-      assert %{"data" => %{
-        "userId" => user_id,
-        "username" => name,
-        "displayName" => name,
-        "clanId" => clan_id,
-        "countryCode" => country
-        }} = Tachyon.user_info!(client, user_id)
+      assert %{
+               "data" => %{
+                 "userId" => user_id,
+                 "username" => name,
+                 "displayName" => name,
+                 "clanId" => clan_id,
+                 "countryCode" => country
+               }
+             } = Tachyon.user_info!(client, user_id)
     end
 
     test "user doesn't exist", %{user: user, client: client} do
-      assert %{"status" => "failed", "reason" => "unknown_user"} = Tachyon.user_info!(client, "999999999")
+      assert %{"status" => "failed", "reason" => "unknown_user"} =
+               Tachyon.user_info!(client, "999999999")
     end
   end
 
