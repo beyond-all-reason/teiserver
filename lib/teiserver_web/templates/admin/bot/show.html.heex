@@ -23,6 +23,7 @@
     <table class="table">
       <thead>
         <tr>
+          <th>created at</th>
           <th>application</th>
           <th>client id</th>
           <th>scopes</th>
@@ -32,6 +33,7 @@
       <tbody>
         <%= for credential <- @credentials do %>
           <tr>
+            <td><%= credential.inserted_at %></td>
             <td><%= credential.application.name %></td>
             <td><pre> <%= credential.client_id %> </pre></td>
             <td><%= Enum.join(credential.application.scopes, ", ") %></td>

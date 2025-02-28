@@ -29,7 +29,14 @@ defmodule Teiserver.OAuth.CredentialQueries do
   end
 
   def for_bot(bot_id) do
-    base_query() |> preload(:application) |> where_bot_id(bot_id) |> Repo.all()
+    base_query()
+    |> preload(:application)
+    |> where_bot_id(bot_id)
+    |> then(fn query ->
+      from [credential: credential] in query,
+        order_by: [desc: credential.inserted_at]
+    end)
+    |> Repo.all()
   end
 
   @spec count_per_bots([Bot.id()]) :: %{Bot.id() => non_neg_integer()}

@@ -18,7 +18,7 @@ defmodule Teiserver.OAuthFixtures do
   end
 
   def update_app(app, changes) do
-    Ecto.Changeset.change(app, changes) |> Repo.update!()
+    app |> Application.changeset(changes) |> Repo.update!()
   end
 
   def code_attrs(user_id, app) do

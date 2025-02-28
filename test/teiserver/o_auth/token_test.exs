@@ -33,20 +33,20 @@ defmodule Teiserver.OAuth.TokenTest do
   end
 
   test "can create a token directly", %{user: user, app: app} do
-    assert {:ok, token} = OAuth.create_token(user, app)
+    assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
     assert token.type == :access
     assert token.refresh_token.type == :refresh
     assert token.scopes == app.scopes
   end
 
   test "can create a token without refresh token", %{user: user, app: app} do
-    assert {:ok, token} = OAuth.create_token(user, app, create_refresh: false)
+    assert {:ok, token} = OAuth.create_token(user, app, create_refresh: false, scopes: app.scopes)
     assert token.type == :access
     assert token.refresh_token == nil
   end
 
   test "can get valid token", %{user: user, app: app} do
-    assert {:ok, new_token} = OAuth.create_token(user, app)
+    assert {:ok, new_token} = OAuth.create_token(user, app, scopes: app.scopes)
     assert {:ok, token} = OAuth.get_valid_token(new_token.value)
     assert {:error, :no_token} = OAuth.get_valid_token(nil)
     assert token.id == new_token.id
@@ -55,17 +55,17 @@ defmodule Teiserver.OAuth.TokenTest do
 
   test "cannot get expired token", %{user: user, app: app} do
     yesterday = Timex.shift(Timex.now(), days: -1)
-    assert {:ok, token} = OAuth.create_token(user, app, now: yesterday)
+    assert {:ok, token} = OAuth.create_token(user, app, now: yesterday, scopes: app.scopes)
     assert {:error, :expired} = OAuth.get_valid_token(token.value)
   end
 
   test "cannot use bearer token as refresh token", %{user: user, app: app} do
-    assert {:ok, token} = OAuth.create_token(user, app)
+    assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
     assert {:error, :invalid_token} = OAuth.refresh_token(token)
   end
 
   test "can refresh a token", %{user: user, app: app} do
-    assert {:ok, token} = OAuth.create_token(user, app)
+    assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
     assert {:ok, _} = OAuth.get_valid_token(token.refresh_token.value)
     assert {:ok, new_token} = OAuth.refresh_token(token.refresh_token)
 
@@ -79,7 +79,7 @@ defmodule Teiserver.OAuth.TokenTest do
   end
 
   test "can change scopes at refresh", %{user: user, app: app} do
-    assert {:ok, token} = OAuth.create_token(user, app)
+    assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
     assert {:ok, _} = OAuth.get_valid_token(token.refresh_token.value)
     assert {:ok, new_token} = OAuth.refresh_token(token.refresh_token, scopes: ["tachyon.lobby"])
     assert MapSet.new(new_token.scopes) == MapSet.new(["tachyon.lobby"])
@@ -87,7 +87,7 @@ defmodule Teiserver.OAuth.TokenTest do
   end
 
   test "cannot get more scopes than originally", %{user: user, app: app} do
-    assert {:ok, token} = OAuth.create_token(user, app)
+    assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
     assert {:ok, _} = OAuth.get_valid_token(token.refresh_token.value)
 
     {:error, changeset} =
@@ -117,6 +117,7 @@ defmodule Teiserver.OAuth.TokenTest do
       Enum.into(opts, %{})
       |> Map.merge(OAuthFixtures.token_attrs(user.id, app))
       |> Map.put(:expires_at, expires_at)
+      |> Map.put(:scopes, Keyword.get(opts, :scopes, app.scopes))
 
     code = OAuthFixtures.create_token(attrs)
     {:ok, code, attrs}
