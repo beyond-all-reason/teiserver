@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -18,7 +18,7 @@
             show_search: false,
             active: "rename"
           })
-        ) %>
+        )}
 
         <hr />
 
@@ -77,7 +77,7 @@
               <input type="hidden" name="new_name" value={random_rename} />
 
               <button type="submit" class={"btn btn-#{bsname}2 btn-block"}>
-                Rename to <%= random_rename %>
+                Rename to {random_rename}
               </button>
             </form>
           </div>

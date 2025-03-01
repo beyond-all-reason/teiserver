@@ -13,17 +13,17 @@
   }
 </script>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "matches"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.MatchView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -35,10 +35,10 @@
                 true -> "list"
               end
           })
-        ) %>
+        )}
 
         <%= if @conn.params["search"] != nil do %>
-          <%= render(TeiserverWeb.Admin.MatchView, "search.html", assigns) %>
+          {render(TeiserverWeb.Admin.MatchView, "search.html", assigns)}
         <% else %>
           <br /><br />
         <% end %>
@@ -62,16 +62,16 @@
           <tbody>
             <%= for match <- @matches do %>
               <tr>
-                <td><%= match.game_type %></td>
-                <td><%= match.map %></td>
+                <td>{match.game_type}</td>
+                <td>{match.map}</td>
 
-                <td><%= if match.queue != nil, do: match.queue.name %></td>
+                <td>{if match.queue != nil, do: match.queue.name}</td>
 
-                <td><%= match.team_count %></td>
-                <td><%= match.team_size %></td>
+                <td>{match.team_count}</td>
+                <td>{match.team_size}</td>
 
-                <td><%= if match.finished, do: duration_to_str_short(match.game_duration) %></td>
-                <td><%= date_to_str(match.finished, format: :ymd_hms) %></td>
+                <td>{if match.finished, do: duration_to_str_short(match.game_duration)}</td>
+                <td>{date_to_str(match.finished, format: :ymd_hms)}</td>
 
                 <td>
                   <a href={~p"/battle/#{match.id}"} class="btn btn-secondary btn-sm">

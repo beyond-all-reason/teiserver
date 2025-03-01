@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
-) %>
+)}
 
 <style type="text/css">
   .message {
@@ -17,7 +17,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -25,7 +25,7 @@
             show_search: false,
             active: "show"
           })
-        ) %>
+        )}
         <hr />
 
         <a class={"btn btn-outline-#{bsname} float-end"} href={~p"/teiserver/admin/user/#{@user}"}>
@@ -53,7 +53,7 @@
 
         <%= case @mode do %>
           <% "room" -> %>
-            <h4>Room chat - Page <%= @page + 1 %> - <%= @user.name %></h4>
+            <h4>Room chat - Page {@page + 1} - {@user.name}</h4>
             <table class="table table-sm">
               <thead>
                 <tr>
@@ -65,17 +65,17 @@
               <tbody>
                 <%= for msg <- @messages do %>
                   <tr>
-                    <td><%= msg.chat_room %></td>
-                    <td class="message"><%= msg.content %></td>
+                    <td>{msg.chat_room}</td>
+                    <td class="message">{msg.content}</td>
                     <td class="d-none d-lg-block">
-                      <%= date_to_str(msg.inserted_at, :ymd_hms) %>
+                      {date_to_str(msg.inserted_at, :ymd_hms)}
                     </td>
                   </tr>
                 <% end %>
               </tbody>
             </table>
           <% "lobby" -> %>
-            <h4>Lobby chat - Page <%= @page + 1 %> - <%= @user.name %></h4>
+            <h4>Lobby chat - Page {@page + 1} - {@user.name}</h4>
             <table class="table table-sm">
               <thead>
                 <tr>
@@ -89,12 +89,12 @@
                   <tr>
                     <td>
                       <a href={~p"/battle/chat/#{msg.match_id}"}>
-                        <%= msg.match_id %>
+                        {msg.match_id}
                       </a>
                     </td>
-                    <td class="message"><%= msg.content %></td>
+                    <td class="message">{msg.content}</td>
                     <td class="d-none d-lg-block">
-                      <%= date_to_str(msg.inserted_at, :hms_or_dmy) %>
+                      {date_to_str(msg.inserted_at, :hms_or_dmy)}
                     </td>
                   </tr>
                 <% end %>

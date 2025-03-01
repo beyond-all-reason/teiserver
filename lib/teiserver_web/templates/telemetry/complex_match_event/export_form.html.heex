@@ -22,7 +22,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Telemetry.ComplexMatchEventView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -30,7 +30,7 @@
             show_search: false,
             active: "export"
           })
-        ) %>
+        )}
         <br /><br />
 
         <form action={~p"/telemetry/complex_match_events/export/post"} method="post" class="">
@@ -45,7 +45,7 @@
                 id="event_type"
               >
                 <%= for event_type <- @event_types do %>
-                  <option value={event_type.id}><%= event_type.name %></option>
+                  <option value={event_type.id}>{event_type.name}</option>
                 <% end %>
               </select>
             </div>
@@ -61,12 +61,12 @@
 
             <div class="col-xl-4 col-lg-6 col-md-12 my-2">
               <label for="timeframe" class="control-label">Timeframe</label>
-              <%= central_component("icon_dropdown",
+              {central_component("icon_dropdown",
                 name: "timeframe",
                 id: "timeframe",
                 enumerable:
                   for(p <- Teiserver.Helper.DatePresets.short_ranges(), do: %{id: p, name: p})
-              ) %>
+              )}
             </div>
           </div>
 

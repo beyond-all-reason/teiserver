@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "exports"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -17,7 +17,7 @@
           <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
-        <%= render(
+        {render(
           TeiserverWeb.Report.ExportsView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -25,7 +25,7 @@
             show_search: false,
             active: "match_datatable"
           })
-        ) %>
+        )}
         <br /><br />
 
         <form
@@ -38,7 +38,7 @@
           <div class="row">
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_rating_type" class="control-label">Game type:</label>
-              <%= select(
+              {select(
                 :report,
                 :rating_type,
                 [
@@ -51,17 +51,17 @@
                 ],
                 class: "form-control",
                 selected: @params["rating_type"]
-              ) %>
+              )}
             </div>
           </div>
 
           <div class="row mt-4">
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_date_preset" class="control-label">Date range:</label>
-              <%= select(:report, :date_preset, @presets,
+              {select(:report, :date_preset, @presets,
                 class: "form-control",
                 selected: @params["date_preset"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">

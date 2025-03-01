@@ -20,9 +20,9 @@
       <tbody>
         <%= for bot <- @bots do %>
           <tr>
-            <td><%= bot.id %></td>
-            <td><%= bot.name %></td>
-            <td><%= Map.get(@cred_counts, bot.id, 0) %></td>
+            <td>{bot.id}</td>
+            <td>{bot.name}</td>
+            <td>{Map.get(@cred_counts, bot.id, 0)}</td>
             <td>
               <Phx.link href={~p"/teiserver/admin/bot/#{bot.id}"}>
                 <button type="button" class="btn btn-primary btn-sm">show</button>

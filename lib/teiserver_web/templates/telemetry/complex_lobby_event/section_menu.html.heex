@@ -1,41 +1,41 @@
 <% bsname = view_colour() %>
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "summary",
   label: "Summary",
   active: @active,
   icon: Teiserver.Helper.StylingHelper.icon(:summary),
   bsname: bsname,
   url: ~p"/telemetry/complex_lobby_events/summary"
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "export",
   label: "Export",
   active: @active,
   icon: Teiserver.Helper.StylingHelper.icon(:export),
   bsname: bsname,
   url: ~p"/telemetry/complex_lobby_events/export/form"
-) %>
+)}
 
 <%= if @active == "property_detail" do %>
-  <%= central_component("section_menu_button",
+  {central_component("section_menu_button",
     name: "property_detail",
     label: "Property detail",
     active: @active,
     icon: Teiserver.Helper.StylingHelper.icon(:detail),
     bsname: bsname,
     url: "#"
-  ) %>
+  )}
 <% end %>
 
 <%= if @active == "event_detail" do %>
-  <%= central_component("section_menu_button",
+  {central_component("section_menu_button",
     name: "event_detail",
     label: "Event detail",
     active: @active,
     icon: Teiserver.Helper.StylingHelper.icon(:detail),
     bsname: bsname,
     url: "#"
-  ) %>
+  )}
 <% end %>

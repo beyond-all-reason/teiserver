@@ -8,13 +8,13 @@
   });
 </script>
 
-<%= central_component("picker_script",
+{central_component("picker_script",
   module: Teiserver.Account.UserLib,
   name: "account_user",
   title: "User search"
-) %>
+)}
 
-<%= central_component("icon_dropdown_js", []) %>
+{central_component("icon_dropdown_js", [])}
 
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
 <script src={Routes.static_path(@conn, "/js/select2.js")}>
@@ -39,7 +39,7 @@
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_timeframe" class="control-label">Timeframe: </label>
-      <%= central_component("icon_dropdown", %{
+      {central_component("icon_dropdown", %{
         name: "search[timeframe]",
         id: "search_timeframe",
         selected: @params["timeframe"] || "24 hours",
@@ -49,20 +49,20 @@
           %{id: "7 days", icon: "fa-solid fa-square", colour: fg},
           %{id: "All time", icon: "fa-solid fa-square", colour: fg}
         ]
-      }) %>
+      })}
     </div>
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_account_user" class="control-label">User: </label>
-      <%= render(TeiserverWeb.Account.UserView, "picker.html",
+      {render(TeiserverWeb.Account.UserView, "picker.html",
         input_name: "search[account_user]",
         value: @params["account_user"]
-      ) %>
+      )}
     </div>
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_order" class="control-label">Order by: </label>
-      <%= central_component("icon_dropdown", %{
+      {central_component("icon_dropdown", %{
         name: "search[order]",
         id: "search_order",
         selected: @params["order"] || "Newest first",
@@ -70,21 +70,21 @@
           %{id: "Newest first", icon: "fa-solid fa-sort-numeric-down", colour: fg},
           %{id: "Oldest first", icon: "fa-solid fa-sort-numeric-up", colour: fg}
         ]
-      }) %>
+      })}
     </div>
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-      <%= central_component("checkbox", %{
+      {central_component("checkbox", %{
         name: "search[include_bots]",
         id: "search_include_bots",
         checked: @params["include_bots"] == "true",
         label: "Include bot accounts"
-      }) %>
+      })}
     </div>
 
     <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_mode" class="control-label">Mode: </label>
-      <%= central_component("icon_dropdown", %{
+      {central_component("icon_dropdown", %{
         name: "search[mode]",
         id: "search_mode",
         selected: @params["mode"],
@@ -93,7 +93,7 @@
           %{id: "Party", icon: Teiserver.Account.PartyLib.icon(), colour: fg},
           %{id: "Room", icon: Teiserver.Chat.LobbyMessageLib.icon(), colour: fg}
         ]
-      }) %>
+      })}
     </div>
   </div>
 

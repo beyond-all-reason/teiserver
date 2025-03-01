@@ -1,30 +1,30 @@
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "tools"})
-) %>
+)}
 
 <div class="row page-row">
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon_class: "fa-solid",
     icon: "fa-regular fa-map-marker-question",
     text: "Test page",
     link: ~p"/teiserver/admin/tools/test_page"
-  ) %>
+  )}
 
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon_class: "fa-solid",
     icon: "fa-brands fa-font-awesome",
     text: "FA List",
     link: ~p"/teiserver/admin/tools/falist"
-  ) %>
+  )}
 </div>
 
 <div class="row page-row">
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon_class: "fa-solid",
     icon: StylingHelper.icon(:back),
     text: "Back",
     link: ~p"/teiserver/admin"
-  ) %>
+  )}
 </div>

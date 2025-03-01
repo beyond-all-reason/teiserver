@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "badge_types"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.TextCallbackView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -18,14 +18,14 @@
             show_search: false,
             active: "new"
           })
-        ) %>
+        )}
 
         <hr />
 
-        <%= render(
+        {render(
           "form.html",
           Map.put(assigns, :action, ~p"/admin/text_callbacks")
-        ) %>
+        )}
       </div>
     </div>
   </div>

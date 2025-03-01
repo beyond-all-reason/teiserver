@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
-) %>
+)}
 
 <script src={Routes.static_path(@conn, "/js/d3.js")}>
 </script>
@@ -25,7 +25,7 @@
           Show/Hide help
         </div>
 
-        <%= render(
+        {render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -33,7 +33,7 @@
             show_search: false,
             active: "population"
           })
-        ) %>
+        )}
         <br /><br />
 
         <form
@@ -46,7 +46,7 @@
           <div class="row">
             <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
               <label for="report_metric" class="control-label">Metric:</label>
-              <%= select(
+              {select(
                 :report,
                 :metric,
                 [
@@ -60,35 +60,35 @@
                 ],
                 class: "form-control",
                 selected: @params["metric"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_last_login" class="control-label">Last login:</label>
-              <%= select(:report, :last_login, @presets,
+              {select(:report, :last_login, @presets,
                 class: "form-control",
                 selected: @params["last_login"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_registered" class="control-label">Registered:</label>
-              <%= select(:report, :registered, @presets,
+              {select(:report, :registered, @presets,
                 class: "form-control",
                 selected: @params["registered"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_exclude_bots" class="control-label">Exclude bots:</label>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "report[exclude_bots]",
                 id: "report_exclude_bots",
                 value: "true",
                 label: "Exclude bot accounts",
                 checked: @params["exclude_bots"] == "true",
                 description: ""
-              ) %>
+              )}
             </div>
           </div>
 
@@ -119,7 +119,7 @@
               <thead>
                 <tr>
                   <th>#</th>
-                  <th><%= @params["metric"] %></th>
+                  <th>{@params["metric"]}</th>
                   <th>Count</th>
                   <th>Percentage</th>
                 </tr>
@@ -127,10 +127,10 @@
               <tbody>
                 <%= for {[key, count], index} <- Enum.with_index(@data) do %>
                   <tr>
-                    <td><%= index + 1 %></td>
-                    <td><%= key %></td>
-                    <td><%= count |> format_number %></td>
-                    <td><%= (count / @stats[:total]) |> percent(1) %>%</td>
+                    <td>{index + 1}</td>
+                    <td>{key}</td>
+                    <td>{count |> format_number}</td>
+                    <td>{(count / @stats[:total]) |> percent(1)}%</td>
                   </tr>
                 <% end %>
               </tbody>
@@ -143,8 +143,8 @@
               <tbody>
                 <%= for {key, value} <- @stats do %>
                   <tr>
-                    <td><%= key %></td>
-                    <td><%= value |> format_number %></td>
+                    <td>{key}</td>
+                    <td>{value |> format_number}</td>
                   </tr>
                 <% end %>
               </tbody>

@@ -13,7 +13,7 @@
         <th>&nbsp;</th>
 
         <%= for i <- 0..23 do %>
-          <th><%= i %></th>
+          <th>{i}</th>
         <% end %>
       </tr>
     </thead>
@@ -26,7 +26,7 @@
             class="hourly-view-td"
             style={"background-color: ##{heatmap(Enum.fetch!(@data["average_user_counts"]["total"], i), maximum, "black-red")};"}
           >
-            <%= Enum.fetch!(@data["average_user_counts"]["total"], i) |> round() %>
+            {Enum.fetch!(@data["average_user_counts"]["total"], i) |> round()}
           </td>
         <% end %>
       </tr>
@@ -38,7 +38,7 @@
             class="hourly-view-td"
             style={"background-color: ##{heatmap(Enum.fetch!(@data["average_user_counts"]["player"], i), maximum, "black-red")};"}
           >
-            <%= Enum.fetch!(@data["average_user_counts"]["player"], i) |> round() %>
+            {Enum.fetch!(@data["average_user_counts"]["player"], i) |> round()}
           </td>
         <% end %>
       </tr>
@@ -50,7 +50,7 @@
             class="hourly-view-td"
             style={"background-color: ##{heatmap(Enum.fetch!(@data["average_user_counts"]["spectator"], i), maximum, "black-red")};"}
           >
-            <%= Enum.fetch!(@data["average_user_counts"]["spectator"], i) |> round() %>
+            {Enum.fetch!(@data["average_user_counts"]["spectator"], i) |> round()}
           </td>
         <% end %>
       </tr>
@@ -62,7 +62,7 @@
             class="hourly-view-td"
             style={"background-color: ##{heatmap(Enum.fetch!(@data["average_user_counts"]["lobby"], i), maximum, "black-red")};"}
           >
-            <%= Enum.fetch!(@data["average_user_counts"]["lobby"], i) |> round() %>
+            {Enum.fetch!(@data["average_user_counts"]["lobby"], i) |> round()}
           </td>
         <% end %>
       </tr>
@@ -74,7 +74,7 @@
             class="hourly-view-td"
             style={"background-color: ##{heatmap(Enum.fetch!(@data["average_user_counts"]["menu"], i), maximum, "black-red")};"}
           >
-            <%= Enum.fetch!(@data["average_user_counts"]["menu"], i) |> round() %>
+            {Enum.fetch!(@data["average_user_counts"]["menu"], i) |> round()}
           </td>
         <% end %>
       </tr>
@@ -91,7 +91,7 @@
             class="hourly-view-td"
             style={"background-color: ##{heatmap(Enum.fetch!(@data["peak_user_counts"]["total"], i), maximum, "black-red")};"}
           >
-            <%= Enum.fetch!(@data["peak_user_counts"]["total"], i) %>
+            {Enum.fetch!(@data["peak_user_counts"]["total"], i)}
           </td>
         <% end %>
       </tr>
@@ -103,7 +103,7 @@
             class="hourly-view-td"
             style={"background-color: ##{heatmap(Enum.fetch!(@data["peak_user_counts"]["player"], i), maximum, "black-red")};"}
           >
-            <%= Enum.fetch!(@data["peak_user_counts"]["player"], i) %>
+            {Enum.fetch!(@data["peak_user_counts"]["player"], i)}
           </td>
         <% end %>
       </tr>
@@ -115,7 +115,7 @@
             class="hourly-view-td"
             style={"background-color: ##{heatmap(Enum.fetch!(@data["peak_user_counts"]["spectator"], i), maximum, "black-red")};"}
           >
-            <%= Enum.fetch!(@data["peak_user_counts"]["spectator"], i) %>
+            {Enum.fetch!(@data["peak_user_counts"]["spectator"], i)}
           </td>
         <% end %>
       </tr>
@@ -127,7 +127,7 @@
             class="hourly-view-td"
             style={"background-color: ##{heatmap(Enum.fetch!(@data["peak_user_counts"]["lobby"], i), maximum, "black-red")};"}
           >
-            <%= Enum.fetch!(@data["peak_user_counts"]["lobby"], i) %>
+            {Enum.fetch!(@data["peak_user_counts"]["lobby"], i)}
           </td>
         <% end %>
       </tr>
@@ -139,7 +139,7 @@
             class="hourly-view-td"
             style={"background-color: ##{heatmap(Enum.fetch!(@data["peak_user_counts"]["menu"], i), maximum, "black-red")};"}
           >
-            <%= Enum.fetch!(@data["peak_user_counts"]["menu"], i) %>
+            {Enum.fetch!(@data["peak_user_counts"]["menu"], i)}
           </td>
         <% end %>
       </tr>
@@ -157,7 +157,7 @@
             class="hourly-view-td"
             style={"background-color: ##{heatmap(Enum.fetch!(@data["battles"]["in_progress"], i), maximum, "black-red")};"}
           >
-            <%= Enum.fetch!(@data["battles"]["in_progress"], i) |> round() %>
+            {Enum.fetch!(@data["battles"]["in_progress"], i) |> round()}
           </td>
         <% end %>
       </tr>

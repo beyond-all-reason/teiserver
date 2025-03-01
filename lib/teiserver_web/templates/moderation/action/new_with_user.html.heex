@@ -26,7 +26,7 @@ bsname = view_colour() %>
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Moderation.ActionView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -34,7 +34,7 @@ bsname = view_colour() %>
             show_search: false,
             active: "new"
           })
-        ) %>
+        )}
 
         <hr />
         <div class="float-end">
@@ -43,7 +43,7 @@ bsname = view_colour() %>
           </a>
         </div>
 
-        <h3>Adding action against <%= @user.name %></h3>
+        <h3>Adding action against {@user.name}</h3>
 
         <div class="row">
           <div class="col-md-12 mb-4">
@@ -59,41 +59,41 @@ bsname = view_colour() %>
               <div class="row">
                 <div class="col-lg-6">
                   <div class="form-group my-2">
-                    <%= label(f, :reason, class: "control-label") %>
-                    <%= textarea(f, :reason,
+                    {label(f, :reason, class: "control-label")}
+                    {textarea(f, :reason,
                       class: "form-control",
                       autofocus: :autofocus,
                       rows: 3,
                       required: "required"
-                    ) %>
-                    <%= error_tag(f, :reason) %>
+                    )}
+                    {error_tag(f, :reason)}
                   </div>
                 </div>
 
                 <div class="col-lg-6">
                   <div class="form-group my-2">
-                    <%= label(f, :notes, class: "control-label") %>
-                    <%= textarea(f, :notes,
+                    {label(f, :notes, class: "control-label")}
+                    {textarea(f, :notes,
                       class: "form-control",
                       rows: 3
-                    ) %>
-                    <%= error_tag(f, :notes) %>
+                    )}
+                    {error_tag(f, :notes)}
                   </div>
                 </div>
 
                 <div class="col-lg-6">
                   <div class="form-group my-2">
-                    <%= label(f, :expires, class: "control-label") %>
-                    <%= text_input(f, :expires, class: "form-control", required: "required") %>
-                    <%= error_tag(f, :expires) %>
+                    {label(f, :expires, class: "control-label")}
+                    {text_input(f, :expires, class: "form-control", required: "required")}
+                    {error_tag(f, :expires)}
                   </div>
                 </div>
 
                 <div class="col-lg-6">
                   <div class="form-group my-2">
-                    <%= label(f, :score_modifier, class: "control-label") %>
-                    <%= text_input(f, :score_modifier, class: "form-control") %>
-                    <%= error_tag(f, :score_modifier) %>
+                    {label(f, :score_modifier, class: "control-label")}
+                    {text_input(f, :score_modifier, class: "form-control")}
+                    {error_tag(f, :score_modifier)}
                   </div>
                 </div>
               </div>
@@ -104,10 +104,10 @@ bsname = view_colour() %>
                 </div>
                 <%= for {section, r_list} <- @restrictions_lists do %>
                   <div class="col restrictions-col">
-                    <strong><%= section %></strong>
+                    <strong>{section}</strong>
                     <%= for r <- r_list do %>
                       <% r_clean = String.replace(r, " ", "_") %>
-                      <%= central_component("checkbox",
+                      {central_component("checkbox",
                         id: "action_restriction_#{r_clean}",
                         name: "action[restrictions][#{r_clean}]",
                         label: r,
@@ -115,11 +115,11 @@ bsname = view_colour() %>
                         checked:
                           (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
                           |> Enum.member?(r)
-                      ) %>
+                      )}
                     <% end %>
                   </div>
                 <% end %>
-                <%= error_tag(f, :restrictions) %>
+                {error_tag(f, :restrictions)}
               </div>
 
               <div class="row">
@@ -476,17 +476,17 @@ bsname = view_colour() %>
                     <tbody>
                       <%= for r <- @reports do %>
                         <tr>
-                          <td><%= r.reporter.name %></td>
-                          <td><%= r.type %>/<%= r.sub_type %></td>
-                          <td><%= r.extra_text %></td>
+                          <td>{r.reporter.name}</td>
+                          <td>{r.type}/{r.sub_type}</td>
+                          <td>{r.extra_text}</td>
                           <td>
-                            <%= central_component("checkbox",
+                            {central_component("checkbox",
                               id: "action_report_#{r.id}",
                               name: "action[reports][#{r.id}]",
                               label: "",
                               value: r.id,
                               checked: Enum.member?(@selected_report_ids, r.id)
-                            ) %>
+                            )}
                           </td>
                         </tr>
                       <% end %>
@@ -528,20 +528,20 @@ bsname = view_colour() %>
                 <tbody>
                   <%= for action <- @past_actions do %>
                     <tr>
-                      <td><%= action.target.name %></td>
-                      <td><%= action.reason |> String.slice(0..100) %></td>
-                      <td><%= action.notes && action.notes |> String.slice(0..100) %></td>
-                      <td><%= action.restrictions |> Enum.join(", ") %></td>
+                      <td>{action.target.name}</td>
+                      <td>{action.reason |> String.slice(0..100)}</td>
+                      <td>{action.notes && action.notes |> String.slice(0..100)}</td>
+                      <td>{action.restrictions |> Enum.join(", ")}</td>
 
-                      <td><%= action.inserted_at |> date_to_str(format: :hms_or_ymd) %></td>
+                      <td>{action.inserted_at |> date_to_str(format: :hms_or_ymd)}</td>
                       <%= if action.expires do %>
                         <%= if Timex.compare(Timex.now(), action.expires) == 1 do %>
                           <td>Expired</td>
                         <% else %>
-                          <td><%= action.expires |> date_to_str(format: :hms_or_ymd) %></td>
+                          <td>{action.expires |> date_to_str(format: :hms_or_ymd)}</td>
                         <% end %>
 
-                        <td><%= duration_to_str(action.inserted_at, action.expires) %></td>
+                        <td>{duration_to_str(action.inserted_at, action.expires)}</td>
                       <% else %>
                         <td colspan="2" class="text-warning">
                           Permanent

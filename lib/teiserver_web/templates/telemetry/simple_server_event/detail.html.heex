@@ -10,7 +10,7 @@
 
 <div class="row section-menu">
   <div class="col-md-12 mb-4">
-    <%= render(
+    {render(
       TeiserverWeb.Telemetry.SimpleServerEventView,
       "section_menu.html",
       Map.merge(assigns, %{
@@ -18,18 +18,18 @@
         show_search: false,
         active: "event_detail"
       })
-    ) %>
+    )}
     <br /><br />
 
     <%= for tf <- timeframes do %>
-      <%= central_component("section_menu_button",
+      {central_component("section_menu_button",
         name: "tf-#{tf}",
         label: tf,
         active: "tf-#{@timeframe}",
         bsname: bsname,
         icon: "",
         url: "?tf=#{tf}"
-      ) %>
+      )}
     <% end %>
   </div>
 
@@ -46,8 +46,8 @@
       <tbody>
         <%= for {userid, username, count} <- @server_events do %>
           <tr>
-            <td><%= username %></td>
-            <td><%= format_number(count) %></td>
+            <td>{username}</td>
+            <td>{format_number(count)}</td>
             <td>
               <.link
                 navigate={~p"/teiserver/admin/user/#{userid}"}

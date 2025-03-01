@@ -9,7 +9,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Moderation.ActionView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -17,34 +17,34 @@
             show_search: false,
             active: "edit"
           })
-        ) %>
+        )}
 
         <hr />
 
-        <%= render(
+        {render(
           "form.html",
           Map.put(assigns, :action, Routes.moderation_action_path(@conn, :update, @action))
-        ) %>
+        )}
 
         <hr />
-        <%= link(raw("<i class='fa-brands fa-fw fa-discord'></i>&nbsp; Re post to discord"),
+        {link(raw("<i class='fa-brands fa-fw fa-discord'></i>&nbsp; Re post to discord"),
           to: ~p"/moderation/action/re-post/#{@action.id}",
           method: :put,
           data: [confirm: "Are you sure (this is only needed if you deleted the post)?"],
           class: "btn btn-warning"
-        ) %> &nbsp;&nbsp;&nbsp; <%= link(
+        )} &nbsp;&nbsp;&nbsp; {link(
           raw("<i class='fa-solid fa-fw fa-octagon'></i>&nbsp; Halt action"),
           to: ~p"/moderation/action/halt/#{@action.id}",
           method: :put,
           data: [confirm: "Are you sure?"],
           class: "btn btn-danger"
-        ) %> &nbsp;&nbsp;&nbsp; <%= link(
+        )} &nbsp;&nbsp;&nbsp; {link(
           raw("<i class='fa-solid fa-fw fa-trash'></i>&nbsp; Delete action"),
           to: ~p"/moderation/action/#{@action.id}",
           method: :delete,
           data: [confirm: "Are you sure?"],
           class: "btn btn-danger2"
-        ) %>
+        )}
       </div>
     </div>
   </div>

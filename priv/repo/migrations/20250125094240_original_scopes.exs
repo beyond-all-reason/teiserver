@@ -6,7 +6,9 @@ defmodule Teiserver.Repo.Migrations.OriginalScopes do
       add_if_not_exists :original_scopes, {:array, :string}, null: true
     end
 
-    execute(fn -> repo().update_all("oauth_tokens", set: [original_scopes: ["tachyon.lobby"]]) end)
+    execute(fn ->
+      repo().update_all("oauth_tokens", set: [original_scopes: ["tachyon.lobby"]])
+    end)
 
     # This is not technically safe if there were multiple connections/applications/nodes
     # because they could insert a record between the backfill operation and

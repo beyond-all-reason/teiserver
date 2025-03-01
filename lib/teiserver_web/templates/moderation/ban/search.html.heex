@@ -12,7 +12,7 @@
   });
 </script>
 
-<%= central_component("icon_dropdown_js", []) %>
+{central_component("icon_dropdown_js", [])}
 
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
 <script src={Routes.static_path(@conn, "/js/select2.js")}>
@@ -55,7 +55,7 @@
 
       <div class="col-md-4 col-xl-2 search-form-input">
         <label for="search_order" class="control-label">Order by: </label>
-        <%= central_component("icon_dropdown", %{
+        {central_component("icon_dropdown", %{
           name: "search[order]",
           id: "search_order",
           selected: @conn.params["order"] || "Newest first",
@@ -65,7 +65,7 @@
             %{id: "Newest first", icon: "fas fa-sort-numeric-down", colour: fg},
             %{id: "Oldest first", icon: "fas fa-sort-numeric-up", colour: fg}
           ]
-        }) %>
+        })}
       </div>
     </div>
 

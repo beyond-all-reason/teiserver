@@ -12,37 +12,37 @@
       <tbody>
         <tr>
           <td>Unique users</td>
-          <td><%= format_number(@data["aggregates"]["stats"]["unique_users"]) %></td>
-          <td><%= format_number(@last_month["aggregates"]["stats"]["unique_users"]) %></td>
+          <td>{format_number(@data["aggregates"]["stats"]["unique_users"])}</td>
+          <td>{format_number(@last_month["aggregates"]["stats"]["unique_users"])}</td>
           <td>
-            <%= percent(
+            {percent(
               @data["aggregates"]["stats"]["unique_users"] /
                 @last_month["aggregates"]["stats"]["unique_users"]
-            ) %>
+            )}
           </td>
         </tr>
 
         <tr>
           <td>Peak total users</td>
-          <td><%= format_number(@data["aggregates"]["stats"]["peak_users"]) %></td>
-          <td><%= format_number(@last_month["aggregates"]["stats"]["peak_users"]) %></td>
+          <td>{format_number(@data["aggregates"]["stats"]["peak_users"])}</td>
+          <td>{format_number(@last_month["aggregates"]["stats"]["peak_users"])}</td>
           <td>
-            <%= percent(
+            {percent(
               @data["aggregates"]["stats"]["peak_users"] /
                 @last_month["aggregates"]["stats"]["peak_users"]
-            ) %>
+            )}
           </td>
         </tr>
 
         <tr>
           <td>User registrations</td>
-          <td><%= format_number(@data["aggregates"]["stats"]["accounts_created"]) %></td>
-          <td><%= format_number(@last_month["aggregates"]["stats"]["accounts_created"]) %></td>
+          <td>{format_number(@data["aggregates"]["stats"]["accounts_created"])}</td>
+          <td>{format_number(@last_month["aggregates"]["stats"]["accounts_created"])}</td>
           <td>
-            <%= percent(
+            {percent(
               @data["aggregates"]["stats"]["accounts_created"] /
                 @last_month["aggregates"]["stats"]["accounts_created"]
-            ) %>
+            )}
           </td>
         </tr>
       </tbody>
@@ -61,25 +61,25 @@
       <tbody>
         <tr>
           <td>Unique players</td>
-          <td><%= format_number(@data["aggregates"]["stats"]["unique_players"]) %></td>
-          <td><%= format_number(@last_month["aggregates"]["stats"]["unique_players"]) %></td>
+          <td>{format_number(@data["aggregates"]["stats"]["unique_players"])}</td>
+          <td>{format_number(@last_month["aggregates"]["stats"]["unique_players"])}</td>
           <td>
-            <%= percent(
+            {percent(
               @data["aggregates"]["stats"]["unique_players"] /
                 @last_month["aggregates"]["stats"]["unique_players"]
-            ) %>
+            )}
           </td>
         </tr>
 
         <tr>
           <td>Peak players</td>
-          <td><%= format_number(@data["aggregates"]["stats"]["peak_players"]) %></td>
-          <td><%= format_number(@last_month["aggregates"]["stats"]["peak_players"]) %></td>
+          <td>{format_number(@data["aggregates"]["stats"]["peak_players"])}</td>
+          <td>{format_number(@last_month["aggregates"]["stats"]["peak_players"])}</td>
           <td>
-            <%= percent(
+            {percent(
               @data["aggregates"]["stats"]["peak_players"] /
                 @last_month["aggregates"]["stats"]["peak_players"]
-            ) %>
+            )}
           </td>
         </tr>
       </tbody>
@@ -103,57 +103,57 @@
       <tbody>
         <tr>
           <td>Player</td>
-          <td><%= represent_minutes(@data["aggregates"]["minutes"]["player"]) %></td>
-          <td><%= represent_minutes(@last_month["aggregates"]["minutes"]["player"]) %></td>
+          <td>{represent_minutes(@data["aggregates"]["minutes"]["player"])}</td>
+          <td>{represent_minutes(@last_month["aggregates"]["minutes"]["player"])}</td>
           <td>
-            <%= percent(
+            {percent(
               @data["aggregates"]["minutes"]["player"] /
                 @last_month["aggregates"]["minutes"]["player"]
-            ) %>
+            )}
           </td>
         </tr>
         <tr>
           <td>Spectator</td>
-          <td><%= represent_minutes(@data["aggregates"]["minutes"]["spectator"]) %></td>
-          <td><%= represent_minutes(@last_month["aggregates"]["minutes"]["spectator"]) %></td>
+          <td>{represent_minutes(@data["aggregates"]["minutes"]["spectator"])}</td>
+          <td>{represent_minutes(@last_month["aggregates"]["minutes"]["spectator"])}</td>
           <td>
-            <%= percent(
+            {percent(
               @data["aggregates"]["minutes"]["spectator"] /
                 @last_month["aggregates"]["minutes"]["spectator"]
-            ) %>
+            )}
           </td>
         </tr>
         <tr>
           <td>Lobby</td>
-          <td><%= represent_minutes(@data["aggregates"]["minutes"]["lobby"]) %></td>
-          <td><%= represent_minutes(@last_month["aggregates"]["minutes"]["lobby"]) %></td>
+          <td>{represent_minutes(@data["aggregates"]["minutes"]["lobby"])}</td>
+          <td>{represent_minutes(@last_month["aggregates"]["minutes"]["lobby"])}</td>
           <td>
-            <%= percent(
+            {percent(
               @data["aggregates"]["minutes"]["lobby"] /
                 @last_month["aggregates"]["minutes"]["lobby"]
-            ) %>
+            )}
           </td>
         </tr>
         <tr>
           <td>Menu</td>
-          <td><%= represent_minutes(@data["aggregates"]["minutes"]["menu"]) %></td>
-          <td><%= represent_minutes(@last_month["aggregates"]["minutes"]["menu"]) %></td>
+          <td>{represent_minutes(@data["aggregates"]["minutes"]["menu"])}</td>
+          <td>{represent_minutes(@last_month["aggregates"]["minutes"]["menu"])}</td>
           <td>
-            <%= percent(
+            {percent(
               @data["aggregates"]["minutes"]["menu"] /
                 @last_month["aggregates"]["minutes"]["menu"]
-            ) %>
+            )}
           </td>
         </tr>
         <tr>
           <td>Total</td>
-          <td><%= represent_minutes(@data["aggregates"]["minutes"]["total"]) %></td>
-          <td><%= represent_minutes(@last_month["aggregates"]["minutes"]["total"]) %></td>
+          <td>{represent_minutes(@data["aggregates"]["minutes"]["total"])}</td>
+          <td>{represent_minutes(@last_month["aggregates"]["minutes"]["total"])}</td>
           <td>
-            <%= percent(
+            {percent(
               @data["aggregates"]["minutes"]["total"] /
                 @last_month["aggregates"]["minutes"]["total"]
-            ) %>
+            )}
           </td>
         </tr>
       </tbody>
@@ -175,10 +175,10 @@
       <tbody>
         <%= for key <- event_keys do %>
           <tr>
-            <td><%= key %></td>
-            <td><%= format_number(@data["aggregates"]["events"]["client"][key] || 0) %></td>
-            <td><%= format_number(@data["aggregates"]["events"]["unauth"][key] || 0) %></td>
-            <td><%= format_number(@data["aggregates"]["events"]["combined"][key] || 0) %></td>
+            <td>{key}</td>
+            <td>{format_number(@data["aggregates"]["events"]["client"][key] || 0)}</td>
+            <td>{format_number(@data["aggregates"]["events"]["unauth"][key] || 0)}</td>
+            <td>{format_number(@data["aggregates"]["events"]["combined"][key] || 0)}</td>
           </tr>
         <% end %>
       </tbody>
@@ -198,8 +198,8 @@
       <tbody>
         <%= for key <- event_keys do %>
           <tr>
-            <td><%= key %></td>
-            <td><%= format_number(@data["aggregates"]["events"]["server"][key] || 0) %></td>
+            <td>{key}</td>
+            <td>{format_number(@data["aggregates"]["events"]["server"][key] || 0)}</td>
           </tr>
         <% end %>
       </tbody>

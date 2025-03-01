@@ -12,7 +12,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Telemetry.ComplexMatchEventView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -20,24 +20,24 @@
             show_search: false,
             active: "event_detail"
           })
-        ) %>
+        )}
         <br /><br />
 
         <%= for key <- @schema_keys do %>
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "key-#{key}",
             label: key,
             active: "key-#{@key}",
             bsname: bsname,
             icon: "",
             url: "?key=#{key}&tf=#{@timeframe}"
-          ) %>
+          )}
         <% end %>
         &nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;
         <%= for tf <- timeframes do %>
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "tf-#{tf}",
             label: tf,
             active: "tf-#{@timeframe}",
@@ -45,13 +45,13 @@
             bsname: bsname,
             icon: "",
             url: "?key=#{@key}&tf=#{tf}"
-          ) %>
+          )}
         <% end %>
 
         <br /><br />
 
         <%= if @match_data.aggregates && @match_data.aggregates != [] do %>
-          <h4>Value counts for <%= @event_name %></h4>
+          <h4>Value counts for {@event_name}</h4>
           <table class="table table-sm">
             <thead>
               <tr>
@@ -62,8 +62,8 @@
             <tbody>
               <%= for %{value: key, count: count} <- @match_data.aggregates do %>
                 <tr>
-                  <td><%= key %></td>
-                  <td><%= count %></td>
+                  <td>{key}</td>
+                  <td>{count}</td>
                 </tr>
               <% end %>
             </tbody>
@@ -71,12 +71,12 @@
         <% end %>
 
         <%= if @match_data.events && @match_data.events != [] do %>
-          <h4>Event list for <%= @event_name %></h4>
+          <h4>Event list for {@event_name}</h4>
           <table class="table table-sm">
             <thead>
               <tr>
                 <%= for {key, _} <- Map.to_list(List.first(@match_data.events)) do %>
-                  <th><b><%= String.upcase(key) %></b></th>
+                  <th><b>{String.upcase(key)}</b></th>
                 <% end %>
               </tr>
             </thead>
@@ -90,7 +90,7 @@
                           <Fontawesome.icon icon={:show} style="solid" /> Show
                         </.link>
                       <% else %>
-                        <%= value %>
+                        {value}
                       <% end %>
                     </td>
                   <% end %>

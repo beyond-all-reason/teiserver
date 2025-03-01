@@ -22,32 +22,32 @@
   <div class="row">
     <div class="form-group">
       <div class="col-lg-6">
-        <%= label(f, :name, class: "control-label") %>
-        <%= text_input(f, :name, class: "form-control", autofocus: :autofocus) %>
-        <%= error_tag(f, :name) %>
+        {label(f, :name, class: "control-label")}
+        {text_input(f, :name, class: "form-control", autofocus: :autofocus)}
+        {error_tag(f, :name)}
       </div>
     </div>
 
     <div class="form-group">
-      <%= input_with_type(f, :colour, "color") %>
+      {input_with_type(f, :colour, "color")}
     </div>
 
     <div class="form-group">
-      <%= central_component("fa5_icon_picker", %{form: f, field: :icon}) %>
+      {central_component("fa5_icon_picker", %{form: f, field: :icon})}
     </div>
 
     <div class="form-group">
-      <%= input_with_type(f, :description, "text") %>
+      {input_with_type(f, :description, "text")}
     </div>
 
     <div class="form-group">
       <label class="control-label" for="badge_type_purposes">Purposes</label>
-      <%= select(f, :purpose, purpose_list(), class: "form-control") %>
+      {select(f, :purpose, purpose_list(), class: "form-control")}
     </div>
 
     <div class="form-group">
       <label class="control-label" for="badge_type_restrictions">Restriction</label>
-      <%= select(f, :restriction, restriction_list(), class: "form-control") %>
+      {select(f, :restriction, restriction_list(), class: "form-control")}
     </div>
   </div>
 

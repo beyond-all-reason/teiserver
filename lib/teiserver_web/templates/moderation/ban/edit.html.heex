@@ -6,7 +6,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Moderation.BanView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -14,14 +14,14 @@
             show_search: false,
             active: "edit"
           })
-        ) %>
+        )}
 
         <hr />
 
-        <%= render(
+        {render(
           "form.html",
           Map.put(assigns, :action, ~p"/moderation/ban/#{@ban.id}")
-        ) %>
+        )}
       </div>
     </div>
   </div>

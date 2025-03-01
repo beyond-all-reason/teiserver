@@ -52,14 +52,14 @@
     </div>
 
     <h3>
-      <%= @match_name %> &nbsp;&nbsp;&nbsp;&nbsp;
+      {@match_name} &nbsp;&nbsp;&nbsp;&nbsp;
       <%= if @match.winning_team != nil do %>
-        Team <%= @match.winning_team + 1 %> won
+        Team {@match.winning_team + 1} won
         &nbsp;&nbsp;&nbsp;&nbsp;
       <% end %>
-      Duration: <%= duration_to_str_short(@match.game_duration) %> &nbsp;&nbsp;&nbsp;&nbsp;
-      Started: <%= date_to_str(@match.started, format: :hms) %> &nbsp;&nbsp;&nbsp;&nbsp;
-      Messages: <%= Teiserver.Helper.StringHelper.format_number(Enum.count(@messages)) %>
+      Duration: {duration_to_str_short(@match.game_duration)} &nbsp;&nbsp;&nbsp;&nbsp;
+      Started: {date_to_str(@match.started, format: :hms)} &nbsp;&nbsp;&nbsp;&nbsp;
+      Messages: {Teiserver.Helper.StringHelper.format_number(Enum.count(@messages))}
     </h3>
 
     <form method="post" class="">
@@ -151,9 +151,9 @@
           <%= for msg <- @messages do %>
             <% highlighted = "uh-#{Map.get(@highlight_map, msg.user_id, "x")}" %>
             <tr class={"#{highlighted}"}>
-              <td><%= msg.user.name %></td>
-              <td class="message"><%= msg.content %></td>
-              <td><%= date_to_str(msg.inserted_at, :hms) %></td>
+              <td>{msg.user.name}</td>
+              <td class="message">{msg.content}</td>
+              <td>{date_to_str(msg.inserted_at, :hms)}</td>
             </tr>
           <% end %>
         </tbody>

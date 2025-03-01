@@ -20,53 +20,53 @@
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
         <div class="row">
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "battle_lobbies",
             label: "Lobbies",
             active: @active,
             url: ~p"/battle/lobbies",
             icon: Teiserver.Lobby.icon()
-          ) %>
+          )}
 
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "matchmaking",
             label: "Matchmaking",
             active: @active,
             url: ~p"/teiserver/matchmaking/queues",
             icon: Teiserver.Game.QueueLib.icon()
-          ) %>
+          )}
 
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "parties",
             label: "Parties",
             active: @active,
             url: ~p"/teiserver/account/parties",
             icon: Teiserver.Account.PartyLib.icon()
-          ) %>
+          )}
 
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "matches",
             label: "Matches",
             active: @active,
             url: ~p"/battle",
             icon: Teiserver.Battle.MatchLib.icon()
-          ) %>
+          )}
 
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "ratings",
             label: "Leaderboard",
             active: @active,
             url: ~p"/battle/ratings/leaderboard",
             icon: Teiserver.Account.RatingLib.icon()
-          ) %>
+          )}
 
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "tournaments",
             label: "Tournament",
             active: @active,
             url: ~p"/tournament/lobbies",
             icon: "fa-solid fa-trophy"
-          ) %>
+          )}
         </div>
       </div>
     </div>

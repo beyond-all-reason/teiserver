@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
-) %>
+)}
 
 <style type="text/css">
   .innactive {
@@ -18,20 +18,20 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
             active: "smurf_merge_form"
           })
-        ) %>
+        )}
 
         <hr />
 
         <h4>
-          <%= @from_user.name %> (Original)
+          {@from_user.name} (Original)
           &nbsp; <i class="fa-fw fa-solid fa-arrow-right"></i>
-          &nbsp; <%= @to_user.name %> (New user, the smurf)
+          &nbsp; {@to_user.name} (New user, the smurf)
         </h4>
         Anything in a gray box won't have an effect at this stage.
 
@@ -53,45 +53,45 @@
           <div class="row">
             <div class="col-md-12 m-3 innactive">
               <h5 class="text-primary">
-                <%= central_component("icon", icon: "fa-solid fa-link") %> &nbsp;
+                {central_component("icon", icon: "fa-solid fa-link")} &nbsp;
                 <label for="" class="control-label">Link accounts</label>
               </h5>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "merge[link]",
                 id: "merge_link_create",
                 value: "true",
                 label: "Create link",
                 checked: true,
                 description: "A smurf link between the two accounts will be created"
-              ) %>
+              )}
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-12 m-3">
               <h5 class={"text-#{Teiserver.Account.RatingLib.colours}"}>
-                <%= central_component("icon", icon: Teiserver.Account.RatingLib.icon()) %> &nbsp;
+                {central_component("icon", icon: Teiserver.Account.RatingLib.icon())} &nbsp;
                 <label for="" class="control-label">Ratings</label>
               </h5>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "merge[ratings]",
                 id: "merge_ratings_pick_highest",
                 value: "true",
                 label: "Pick highest value",
                 checked: true,
                 description: "The highest score from each user will be used for each rating"
-              ) %>
+              )}
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-12 m-3">
               <h5 class="text-warning">
-                <%= central_component("icon",
+                {central_component("icon",
                   icon: Teiserver.Helper.StylingHelper.icon(:moderation)
-                ) %> &nbsp; <label for="" class="control-label">Moderation reports/actions</label>
+                )} &nbsp; <label for="" class="control-label">Moderation reports/actions</label>
               </h5>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "merge[reports]",
                 id: "merge_reports_copy",
                 value: "true",
@@ -99,17 +99,17 @@
                 checked: true,
                 description:
                   "Reports for #{@from_user.name} will be duplicated to #{@to_user.name}"
-              ) %>
+              )}
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-12 m-3">
               <h5 class="text-danger">
-                <%= central_component("icon", icon: Teiserver.Account.RelationshipReport.icon()) %> &nbsp;
+                {central_component("icon", icon: Teiserver.Account.RelationshipReport.icon())} &nbsp;
                 <label for="" class="control-label">Mutes/Ignores</label>
               </h5>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "merge[mutes]",
                 id: "merge_mutes_duplicate",
                 value: "true",
@@ -117,17 +117,17 @@
                 checked: true,
                 description:
                   "Users who have muted #{@from_user.name} will add #{@to_user.name} as a mute"
-              ) %>
+              )}
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-12 m-3">
               <h5 class="text-info2">
-                <%= central_component("icon", icon: "fa-solid fa-input-text") %> &nbsp;
+                {central_component("icon", icon: "fa-solid fa-input-text")} &nbsp;
                 <label for="" class="control-label">Names</label>
               </h5>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "merge[names]",
                 id: "merge_names_duplicate",
                 value: "true",
@@ -135,24 +135,24 @@
                 checked: true,
                 description:
                   "Past names used by #{@from_user.name} will be copied over to #{@to_user.name}"
-              ) %>
+              )}
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-12 m-3 innactive">
               <h5 class="text-warning2">
-                <%= central_component("icon", icon: Teiserver.Account.UserLib.icon()) %> &nbsp;
-                <label for="" class="control-label">Old account (<%= @from_user.name %>)</label>
+                {central_component("icon", icon: Teiserver.Account.UserLib.icon())} &nbsp;
+                <label for="" class="control-label">Old account ({@from_user.name})</label>
               </h5>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "merge[old_account]",
                 id: "merge_old_account_deactivate",
                 value: "true",
                 label: "Deactivate",
                 checked: false,
                 description: "The account #{@from_user.name} will be deactivated"
-              ) %>
+              )}
             </div>
           </div>
 

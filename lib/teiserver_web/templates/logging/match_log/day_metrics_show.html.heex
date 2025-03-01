@@ -18,17 +18,17 @@
   }
 </style>
 
-<%= render(
+{render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "match"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Logging.MatchLogView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -36,7 +36,7 @@
             show_search: false,
             active: "today"
           })
-        ) %>
+        )}
 
         <hr />
 
@@ -46,7 +46,7 @@
               <h3>Day to day metric: Today so far</h3>
             <% else %>
               <h3>
-                Day to day metric: <%= Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}") %>
+                Day to day metric: {Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}")}
               </h3>
             <% end %>
             <br /><br />
@@ -54,7 +54,7 @@
             <ul class="nav nav-tabs" role="tablist" id="the_tabs">
               <li class="nav-item">
                 <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <%= central_component("icon", icon: icon()) %> Details
+                  {central_component("icon", icon: icon())} Details
                 </a>
               </li>
 
@@ -103,35 +103,35 @@
 
             <div class="tab-content">
               <div class="tab-pane" id="details_tab" style="padding:5px;">
-                <%= render("tab_details.html", %{data: @data}) %>
+                {render("tab_details.html", %{data: @data})}
               </div>
 
               <div class="tab-pane" id="duel_tab" style="padding:5px;">
-                <%= render("tab_duel.html", %{data: @data["duel"]}) %>
+                {render("tab_duel.html", %{data: @data["duel"]})}
               </div>
 
               <div class="tab-pane" id="team_tab" style="padding:5px;">
-                <%= render("tab_team.html", %{data: @data["team"]}) %>
+                {render("tab_team.html", %{data: @data["team"]})}
               </div>
 
               <div class="tab-pane" id="ffa_tab" style="padding:5px;">
-                <%= render("tab_ffa.html", %{data: @data["ffa"]}) %>
+                {render("tab_ffa.html", %{data: @data["ffa"]})}
               </div>
 
               <div class="tab-pane" id="bots_tab" style="padding:5px;">
-                <%= render("tab_bots.html", %{data: @data["bots"]}) %>
+                {render("tab_bots.html", %{data: @data["bots"]})}
               </div>
 
               <div class="tab-pane" id="scavengers_tab" style="padding:5px;">
-                <%= render("tab_scavengers.html", %{data: @data["scavengers"]}) %>
+                {render("tab_scavengers.html", %{data: @data["scavengers"]})}
               </div>
 
               <div class="tab-pane" id="raptors_tab" style="padding:5px;">
-                <%= render("tab_raptors.html", %{data: @data["raptors"]}) %>
+                {render("tab_raptors.html", %{data: @data["raptors"]})}
               </div>
 
               <div class="tab-pane" id="raw_tab" style="padding:5px;">
-                <%= render("tab_raw.html", assigns) %>
+                {render("tab_raw.html", assigns)}
               </div>
             </div>
           </div>

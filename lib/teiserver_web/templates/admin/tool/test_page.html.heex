@@ -70,32 +70,32 @@
   <div class="col-xl-6 col-lg-12">
     <div class="card">
       <div class="card-body">
-        <%= central_component("section_menu_button",
+        {central_component("section_menu_button",
           name: "list",
           label: "List",
           active: "list",
           icon: StylingHelper.icon(:list, "thin"),
           bsname: :primary,
           url: "#"
-        ) %>
+        )}
 
-        <%= central_component("section_menu_button",
+        {central_component("section_menu_button",
           name: "show",
           label: "Show",
           active: "",
           icon: StylingHelper.icon(:show, "thin"),
           bsname: :primary,
           url: "#"
-        ) %>
+        )}
 
-        <%= central_component("section_menu_button",
+        {central_component("section_menu_button",
           name: "edit",
           label: "Edit",
           active: "",
           icon: StylingHelper.icon(:edit, "thin"),
           bsname: :primary,
           url: "#"
-        ) %>
+        )}
         <br /><br />
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
@@ -157,7 +157,7 @@
                 <h4>text-xxx</h4>
                 <%= for c <- colours do %>
                   <div class={"text-#{c}"}>
-                    <%= c |> String.capitalize() %> lorem ipsum text goes here
+                    {c |> String.capitalize()} lorem ipsum text goes here
                   </div>
                   &nbsp;&nbsp;
                 <% end %>
@@ -172,7 +172,7 @@
                 <div class="col-md-3 p-2">
                   <div class={"card card-#{c}"}>
                     <div class="card-header">
-                      <i class="fa fa-search fa-fw"></i> Title - <%= c %>
+                      <i class="fa fa-search fa-fw"></i> Title - {c}
                     </div>
 
                     <div class="card-body">
@@ -181,7 +181,7 @@
                     </div>
 
                     <div class="card-footer">
-                      <i class="fa fa-home fa-fw"></i> Footer - <%= c %>
+                      <i class="fa fa-home fa-fw"></i> Footer - {c}
                     </div>
                   </div>
                 </div>
@@ -249,7 +249,7 @@
 
                       <h5>Standard</h5>
                       <%= for c <- colours do %>
-                        <div class={"btn btn-#{c}"}><%= c |> String.capitalize() %></div>
+                        <div class={"btn btn-#{c}"}>{c |> String.capitalize()}</div>
                         &nbsp;&nbsp;
                       <% end %>
                     </div>
@@ -259,7 +259,7 @@
                     <div class="col-md-12 my-2">
                       <h5>Outline</h5>
                       <%= for c <- colours do %>
-                        <div class={"btn btn-outline-#{c}"}><%= c |> String.capitalize() %></div>
+                        <div class={"btn btn-outline-#{c}"}>{c |> String.capitalize()}</div>
                         &nbsp;&nbsp;
                       <% end %>
                     </div>
@@ -269,7 +269,7 @@
                     <div class="col-md-12 my-2">
                       <h5>Active</h5>
                       <%= for c <- colours do %>
-                        <div class={"btn active btn-#{c}"}><%= c |> String.capitalize() %></div>
+                        <div class={"btn active btn-#{c}"}>{c |> String.capitalize()}</div>
                         &nbsp;&nbsp;
                       <% end %>
                     </div>
@@ -279,7 +279,7 @@
                     <div class="col-md-12 my-2">
                       <h5>Disabled</h5>
                       <%= for c <- colours do %>
-                        <div class={"btn disabled btn-#{c}"}><%= c |> String.capitalize() %></div>
+                        <div class={"btn disabled btn-#{c}"}>{c |> String.capitalize()}</div>
                         &nbsp;&nbsp;
                       <% end %>
                     </div>
@@ -376,45 +376,45 @@
 
               <div class="col-md-6">
                 <div class="p-2">
-                  <%= central_component("checkbox",
+                  {central_component("checkbox",
                     name: "cb1",
                     id: "cb1",
                     value: "true",
                     label: "Checkbox 1",
                     checked: true,
                     description: ""
-                  ) %>
+                  )}
 
-                  <%= central_component("checkbox",
+                  {central_component("checkbox",
                     name: "cb2",
                     id: "cb2",
                     value: "true",
                     label: "Checkbox 2",
                     checked: false,
                     description: ""
-                  ) %>
+                  )}
                 </div>
               </div>
 
               <div class="col-md-6">
                 <div class="p-2">
-                  <%= central_component("radio",
+                  {central_component("radio",
                     name: "rb",
                     id: "rb1",
                     value: "true",
                     label: "Radio button 1",
                     checked: true,
                     description: ""
-                  ) %>
+                  )}
 
-                  <%= central_component("radio",
+                  {central_component("radio",
                     name: "rb",
                     id: "rb2",
                     value: "false",
                     label: "Radio button 2",
                     checked: false,
                     description: ""
-                  ) %>
+                  )}
                 </div>
               </div>
             </div>
@@ -474,7 +474,7 @@
           </div>
 
           <div class="tab-pane fade" id="calculations_tab">
-            <% now = Timex.now() %> Server time is <%= now |> Kernel.inspect() %><br /><br />
+            <% now = Timex.now() %> Server time is {now |> Kernel.inspect()}<br /><br />
 
             <pre>
 UTC conversion is <%= date_to_str(now, format: :ymd_hms, tz: "UTC") %>

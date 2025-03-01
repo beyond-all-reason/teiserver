@@ -19,7 +19,7 @@
       <div class="card-body">
         <div class="float-end">
           <a class={"btn btn-outline-#{bsname}"} href={~p"/moderation/report_user/#{@user.id}"}>
-            <%= central_component("icon", icon: icon(), class: "fa-solid") %> &nbsp;
+            {central_component("icon", icon: icon(), class: "fa-solid")} &nbsp;
             Report form
           </a>
 
@@ -28,10 +28,10 @@
               class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
               href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@user.id}_"}
             >
-              <%= central_component("icon",
+              {central_component("icon",
                 icon: Teiserver.Moderation.ActionLib.icon(),
                 class: "fa-solid"
-              ) %> &nbsp;
+              )} &nbsp;
               Action user
             </a>
           <% end %>
@@ -41,10 +41,10 @@
               class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
               href={~p"/teiserver/admin/user/#{@user}"}
             >
-              <%= central_component("icon",
+              {central_component("icon",
                 icon: Teiserver.Account.UserLib.icon(),
                 class: "fa-solid"
-              ) %> &nbsp;
+              )} &nbsp;
               View user
             </a>
 
@@ -52,45 +52,45 @@
               class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
               href={~p"/teiserver/admin/users/smurf_search/#{@user}"}
             >
-              <%= central_component("icon",
+              {central_component("icon",
                 icon: "fa-solid fa-face-angry-horns",
                 class: "fa-solid"
-              ) %> &nbsp;
+              )} &nbsp;
               Smurf search
             </a>
           <% end %>
         </div>
 
         <h3 style={"color: #{@user.colour}"}>
-          <%= @user.name %> &nbsp; <%= central_component("icon",
+          {@user.name} &nbsp; {central_component("icon",
             icon: @user.icon,
             icon_class: "fa-solid"
-          ) %>
+          )}
         </h3>
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item" role="presentation">
             <a href="#overview_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: "fa-solid fa-bullseye-pointer") %> Reports against (<%= Enum.count(
+              {central_component("icon", icon: "fa-solid fa-bullseye-pointer")} Reports against ({Enum.count(
                 @reports_against
-              ) %>)
+              )})
             </a>
           </li>
 
           <li class="nav-item" role="presentation">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: "fa-solid fa-share-from-square") %> Reports made (<%= Enum.count(
+              {central_component("icon", icon: "fa-solid fa-share-from-square")} Reports made ({Enum.count(
                 @reports_made
-              ) %>)
+              )})
             </a>
           </li>
 
           <li class="nav-item" role="presentation">
             <a href="#actions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon",
+              {central_component("icon",
                 icon: Teiserver.Moderation.ActionLib.icon(),
                 class: "fa-solid"
-              ) %> Actions (<%= Enum.count(@actions) %>)
+              )} Actions ({Enum.count(@actions)})
             </a>
           </li>
 
@@ -104,19 +104,19 @@
 
         <div class="tab-content">
           <div class="tab-pane" id="overview_tab" style="padding:5px;">
-            <%= render("tab_against.html", assigns) %>
+            {render("tab_against.html", assigns)}
           </div>
 
           <div class="tab-pane" id="details_tab" style="padding:5px;">
-            <%= render("tab_from.html", assigns) %>
+            {render("tab_from.html", assigns)}
           </div>
 
           <div class="tab-pane" id="actions_tab" style="padding:5px;">
-            <%= render("tab_actions.html", assigns) %>
+            {render("tab_actions.html", assigns)}
           </div>
 
           <div class="tab-pane" id="user_details_tab" style="padding:5px;">
-            <%= render("tab_user_details.html", assigns) %>
+            {render("tab_user_details.html", assigns)}
           </div>
         </div>
       </div>

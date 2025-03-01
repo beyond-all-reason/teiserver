@@ -120,11 +120,11 @@
         </span>
       </:col>
 
-      <:col :let={report_group} label="Reports"><%= report_group.report_count %></:col>
-      <:col :let={report_group} label="Votes"><%= report_group.vote_count %></:col>
-      <:col :let={report_group} label="Actions"><%= report_group.action_count %></:col>
+      <:col :let={report_group} label="Reports">{report_group.report_count}</:col>
+      <:col :let={report_group} label="Votes">{report_group.vote_count}</:col>
+      <:col :let={report_group} label="Actions">{report_group.action_count}</:col>
       <:col :let={report_group} label="Created">
-        <%= report_group.inserted_at |> date_to_str(format: :hms_or_ymd) %>
+        {report_group.inserted_at |> date_to_str(format: :hms_or_ymd)}
       </:col>
 
       <:col :let={report_group} label="">
@@ -158,21 +158,21 @@
       row_click={fn action -> JS.navigate(~p"/moderation/action/#{action.id}") end}
     >
       <:col :let={action} label="Created">
-        <%= action.inserted_at |> date_to_str(format: :hms_or_ymd) %>
+        {action.inserted_at |> date_to_str(format: :hms_or_ymd)}
       </:col>
 
-      <:col :let={action} label="Reason"><%= action.reason |> String.slice(0, 100) %></:col>
-      <:col :let={action} label="Reason"><%= action.restrictions |> Enum.join(", ") %></:col>
+      <:col :let={action} label="Reason">{action.reason |> String.slice(0, 100)}</:col>
+      <:col :let={action} label="Reason">{action.restrictions |> Enum.join(", ")}</:col>
 
       <:col :let={action} label="Duration">
-        <%= duration_to_str(action.inserted_at, action.expires) %>
+        {duration_to_str(action.inserted_at, action.expires)}
       </:col>
 
       <:col :let={action} label="Expires">
         <%= if Timex.compare(Timex.now(), action.expires) == 1 do %>
           Expired
         <% else %>
-          <%= action.expires |> date_to_str(format: :hms_or_ymd) %>
+          {action.expires |> date_to_str(format: :hms_or_ymd)}
         <% end %>
       </:col>
     </.table>

@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "lobby_policies"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.LobbyPolicyView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -22,7 +22,7 @@
                 true -> "index"
               end
           })
-        ) %>
+        )}
         <br /><br />
 
         <h4>Listing Lobby policies</h4>
@@ -58,10 +58,10 @@
                 end %>
               <tr>
                 <td style={"background-color: #{lobby_policy.colour}; color: #FFF;"} width="22">
-                  <%= central_component("icon", icon: lobby_policy.icon) %>
+                  {central_component("icon", icon: lobby_policy.icon)}
                 </td>
                 <td style={"background-color: #{rgba_css lobby_policy.colour};"}>
-                  <%= lobby_policy.lobby_name_format %>
+                  {lobby_policy.lobby_name_format}
                 </td>
 
                 <td>
@@ -72,20 +72,20 @@
                   <% end %>
                 </td>
 
-                <td><%= lobby_policy.agent_name_format %></td>
+                <td>{lobby_policy.agent_name_format}</td>
 
-                <td><%= lobby_policy.preset %></td>
+                <td>{lobby_policy.preset}</td>
 
-                <td><%= "#{lobby_policy.min_teamsize} - #{lobby_policy.max_teamsize}" %></td>
-                <td><%= "#{lobby_policy.min_rank} - #{lobby_policy.max_rank}" %></td>
-                <td><%= "#{lobby_policy.min_rating} - #{lobby_policy.max_rating}" %></td>
+                <td>{"#{lobby_policy.min_teamsize} - #{lobby_policy.max_teamsize}"}</td>
+                <td>{"#{lobby_policy.min_rank} - #{lobby_policy.max_rank}"}</td>
+                <td>{"#{lobby_policy.min_rating} - #{lobby_policy.max_rating}"}</td>
                 <td>
-                  <%= "#{lobby_policy.min_uncertainty} - #{lobby_policy.max_uncertainty}" %>
+                  {"#{lobby_policy.min_uncertainty} - #{lobby_policy.max_uncertainty}"}
                 </td>
 
-                <td><%= Enum.count(lobby_policy.map_list) %></td>
+                <td>{Enum.count(lobby_policy.map_list)}</td>
                 <td>
-                  <%= Enum.count(lobby_policy.agent_name_list) %> (<%= first_name %>)
+                  {Enum.count(lobby_policy.agent_name_list)} ({first_name})
                 </td>
 
                 <td>

@@ -84,7 +84,7 @@
       </div>
 
       <h3>
-        Report group for <%= @report_group.target.name %>
+        Report group for {@report_group.target.name}
 
         <%= if @report_group.action_count > 0 do %>
           &nbsp;
@@ -104,7 +104,7 @@
       <div class="row">
         <div class="col-md-6">
           <h4>
-            Reports (<%= Enum.count(@report_group.reports) %>)
+            Reports ({Enum.count(@report_group.reports)})
             <Fontawesome.icon
               icon={Teiserver.Moderation.ReportLib.icon()}
               style="solid"
@@ -117,16 +117,16 @@
             table_class="table-sm table-hover"
             row_click={fn report -> JS.navigate(~p"/moderation/report/#{report.id}") end}
           >
-            <:col :let={report} label="Type"><%= report.type %>/<%= report.sub_type %></:col>
-            <:col :let={report} label="Description"><%= report.extra_text %></:col>
+            <:col :let={report} label="Type">{report.type}/{report.sub_type}</:col>
+            <:col :let={report} label="Description">{report.extra_text}</:col>
             <:col :let={report} label="Type">
-              <%= date_to_str(report.inserted_at, format: :hms_or_ymd) %>
+              {date_to_str(report.inserted_at, format: :hms_or_ymd)}
             </:col>
           </.table>
         </div>
         <div class="col-md-6">
           <h4>
-            Actions (<%= Enum.count(@report_group.actions) %>)
+            Actions ({Enum.count(@report_group.actions)})
             <Fontawesome.icon
               icon={Teiserver.Moderation.ActionLib.icon()}
               style="solid"
@@ -139,9 +139,9 @@
             table_class="table-sm table-hover"
             row_click={fn action -> JS.navigate(~p"/moderation/action/#{action.id}") end}
           >
-            <:col :let={action} label="Reason"><%= action.reason %></:col>
+            <:col :let={action} label="Reason">{action.reason}</:col>
             <:col :let={action} label="Restrictions">
-              <%= action.restrictions |> Enum.join(", ") %>
+              {action.restrictions |> Enum.join(", ")}
             </:col>
           </.table>
         </div>

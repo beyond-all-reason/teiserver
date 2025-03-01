@@ -21,55 +21,55 @@
 
   <div class="row">
     <div class="col-lg-6 my-2">
-      <%= label(f, :name, class: "control-label") %>
-      <%= text_input(f, :name, class: "form-control", autofocus: :autofocus) %>
-      <%= error_tag(f, :name) %>
+      {label(f, :name, class: "control-label")}
+      {text_input(f, :name, class: "form-control", autofocus: :autofocus)}
+      {error_tag(f, :name)}
     </div>
 
     <div class="col-lg-6 my-2">
       <br />
-      <%= central_component("checkbox",
+      {central_component("checkbox",
         name: "text_callback[enabled]",
         id: "text_callback_enabled",
         value: "true",
         label: "Enabled",
         field: :enabled,
         changeset: @changeset
-      ) %>
+      )}
     </div>
 
     <div class="col-lg-6 my-2">
-      <%= input_with_type(f, :colour, "color") %>
+      {input_with_type(f, :colour, "color")}
     </div>
 
     <div class="col-lg-6 my-2">
-      <%= central_component("fa5_icon_picker", %{form: f, field: :icon}) %>
+      {central_component("fa5_icon_picker", %{form: f, field: :icon})}
     </div>
   </div>
 
   <div class="row">
     <div class="col-lg-6 my-2">
-      <%= central_component("checkbox",
+      {central_component("checkbox",
         name: "text_callback[rules][delete_trigger]",
         id: "text_callback_rules_delete_trigger",
         value: "true",
         label: "Delete triggering message",
         checked: Map.get(@changeset.data.rules, "delete_trigger", false) == "true"
-      ) %>
+      )}
     </div>
   </div>
 
   <div class="row">
     <div class="col-md-8 my-2">
-      <%= label(f, :response, class: "control-label") %>
-      <%= textarea(f, :response, class: "form-control monospace", rows: 16) %>
-      <%= error_tag(f, :response) %>
+      {label(f, :response, class: "control-label")}
+      {textarea(f, :response, class: "form-control monospace", rows: 16)}
+      {error_tag(f, :response)}
     </div>
 
     <div class="col-md-4 my-2">
-      <%= label(f, :triggers, class: "control-label") %>
-      <%= textarea_array(f, :triggers, class: "form-control", rows: 8) %>
-      <%= error_tag(f, :triggers) %>
+      {label(f, :triggers, class: "control-label")}
+      {textarea_array(f, :triggers, class: "form-control", rows: 8)}
+      {error_tag(f, :triggers)}
     </div>
   </div>
 

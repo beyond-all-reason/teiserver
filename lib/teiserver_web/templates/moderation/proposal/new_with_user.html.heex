@@ -8,17 +8,17 @@
   });
 </script>
 
-<%= render(
+{render(
   TeiserverWeb.Moderation.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "proposals"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Moderation.ProposalView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -26,7 +26,7 @@
             show_search: false,
             active: "new"
           })
-        ) %>
+        )}
 
         <hr />
         <div class="float-end">
@@ -35,46 +35,46 @@
           </a>
         </div>
 
-        <h3>Adding proposal for action against <%= @user.name %></h3>
+        <h3>Adding proposal for action against {@user.name}</h3>
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li>
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: "fas fa-file-alt") %> Details
+              {central_component("icon", icon: "fas fa-file-alt")} Details
             </a>
           </li>
 
           <li>
             <a href="#reports_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: Teiserver.Moderation.ReportLib.icon()) %> Existing reports (<%= Enum.count(
+              {central_component("icon", icon: Teiserver.Moderation.ReportLib.icon())} Existing reports ({Enum.count(
                 @reports
-              ) %>)
+              )})
             </a>
           </li>
 
           <li>
             <a href="#actions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: Teiserver.Moderation.ActionLib.icon()) %> Existing actions (<%= Enum.count(
+              {central_component("icon", icon: Teiserver.Moderation.ActionLib.icon())} Existing actions ({Enum.count(
                 @actions
-              ) %>)
+              )})
             </a>
           </li>
         </ul>
 
         <div class="tab-content">
           <div class="tab-pane" id="details_tab" style="padding:5px;">
-            <%= render(
+            {render(
               "tab_details.html",
               Map.put(assigns, :action, Routes.moderation_proposal_path(@conn, :create))
-            ) %>
+            )}
           </div>
 
           <div class="tab-pane" id="reports_tab" style="padding:5px;">
-            <%= render("tab_reports.html", assigns) %>
+            {render("tab_reports.html", assigns)}
           </div>
 
           <div class="tab-pane" id="actions_tab" style="padding:5px;">
-            <%= render("tab_actions.html", assigns) %>
+            {render("tab_actions.html", assigns)}
           </div>
         </div>
 

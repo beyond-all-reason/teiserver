@@ -1,22 +1,22 @@
 <% bsname = view_colour() %>
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "index",
   label: "List",
   active: @active,
   icon: :list,
   bsname: bsname,
   url: Routes.admin_code_path(@conn, :index)
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "new",
   label: "New",
   active: @active,
   icon: :new,
   bsname: bsname,
   url: Routes.admin_code_path(@conn, :new)
-) %>
+)}
 
 <form
   action={Routes.admin_code_path(@conn, :index)}

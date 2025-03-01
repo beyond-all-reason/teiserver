@@ -1,11 +1,11 @@
 <% {_fg, _bg, bsname} = view_colour() |> colours()
 user_moderator = allow?(@current_user, "Moderator") %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -18,7 +18,7 @@ user_moderator = allow?(@current_user, "Moderator") %>
           <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
-        <%= render(
+        {render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -26,7 +26,7 @@ user_moderator = allow?(@current_user, "Moderator") %>
             show_search: false,
             active: "leaderboard"
           })
-        ) %>
+        )}
         <br /><br />
 
         <form
@@ -61,22 +61,22 @@ user_moderator = allow?(@current_user, "Moderator") %>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_limit" class="control-label">Game type: </label>
-              <%= select(:report, :game_type, @game_types,
+              {select(:report, :game_type, @game_types,
                 class: "form-control",
                 selected: @params["game_type"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_limit" class="control-label">Extended dataset</label>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "report[extended]",
                 id: "report_extended",
                 value: "true",
                 label: "",
                 checked: @params["extended"] == "true",
                 description: "win/loss, match count"
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
@@ -134,34 +134,34 @@ user_moderator = allow?(@current_user, "Moderator") %>
 
               <tr style={"background-color: #{rgba_css rating.user.colour};"}>
                 <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                  #<%= pos + 1 %>
+                  #{pos + 1}
                 </td>
                 <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                  <%= central_component("icon", icon: rating.user.icon) %>
+                  {central_component("icon", icon: rating.user.icon)}
                 </td>
                 <td><TeiserverWeb.UserComponents.status_icon user={rating.user} /></td>
-                <td><%= rating.user.name %></td>
+                <td>{rating.user.name}</td>
 
-                <td><%= rating.leaderboard_rating |> round(2) %></td>
-                <td><%= rating.rating_value |> round(2) %></td>
-                <td><%= rating.skill |> round(2) %></td>
-                <td><%= rating.uncertainty |> round(2) %></td>
+                <td>{rating.leaderboard_rating |> round(2)}</td>
+                <td>{rating.rating_value |> round(2)}</td>
+                <td>{rating.skill |> round(2)}</td>
+                <td>{rating.uncertainty |> round(2)}</td>
 
-                <td><%= age %></td>
+                <td>{age}</td>
 
                 <%= if @extra_data do %>
                   <%= if @extra_data[rating.user_id] do %>
-                    <td><%= @extra_data[rating.user_id].count %></td>
+                    <td>{@extra_data[rating.user_id].count}</td>
                     <td>
-                      <%= percent(
+                      {percent(
                         @extra_data[rating.user_id].wins / @extra_data[rating.user_id].count
-                      ) %>%
+                      )}%
                     </td>
 
-                    <td><%= @extra_data[rating.user_id].stayed %></td>
-                    <td><%= @extra_data[rating.user_id].early %></td>
-                    <td><%= @extra_data[rating.user_id].abandoned %></td>
-                    <td><%= @extra_data[rating.user_id].noshow %></td>
+                    <td>{@extra_data[rating.user_id].stayed}</td>
+                    <td>{@extra_data[rating.user_id].early}</td>
+                    <td>{@extra_data[rating.user_id].abandoned}</td>
+                    <td>{@extra_data[rating.user_id].noshow}</td>
                   <% else %>
                     <td colspan="2">&nbsp;</td>
                   <% end %>

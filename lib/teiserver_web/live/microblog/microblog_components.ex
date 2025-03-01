@@ -77,13 +77,13 @@ defmodule TeiserverWeb.MicroblogComponents do
       </div>
 
       <h4>
-        <%= Map.get(@post, :title, "") %> - <%= TimexHelper.date_to_str(Timex.now(), :hms_or_ymd) %>
+        {Map.get(@post, :title, "")} - {TimexHelper.date_to_str(Timex.now(), :hms_or_ymd)}
       </h4>
-      <%= Map.get(@post, :contents, "")
+      {Map.get(@post, :contents, "")
       |> String.split("\n\n")
       |> hd
       |> Earmark.as_html!()
-      |> Phoenix.HTML.raw() %>
+      |> Phoenix.HTML.raw()}
       <br />
     </div>
     """
@@ -104,9 +104,9 @@ defmodule TeiserverWeb.MicroblogComponents do
       </div>
 
       <h4>
-        <%= Map.get(@post, :title, "") %> - <%= TimexHelper.date_to_str(Timex.now(), :hms_or_ymd) %>
+        {Map.get(@post, :title, "")} - {TimexHelper.date_to_str(Timex.now(), :hms_or_ymd)}
       </h4>
-      <%= Map.get(@post, :contents, "") |> Earmark.as_html!() |> Phoenix.HTML.raw() %>
+      {Map.get(@post, :contents, "") |> Earmark.as_html!() |> Phoenix.HTML.raw()}
       <br />
     </div>
     """
@@ -139,7 +139,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       {@rest}
     >
       <Fontawesome.icon icon={@tag.icon} style="solid" />
-      <%= @tag.name %>
+      {@tag.name}
     </span>
     """
   end

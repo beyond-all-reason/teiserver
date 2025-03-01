@@ -7,7 +7,7 @@ active_class = if is_active, do: "active" %>
 
 <div class="col sub-menu-icon">
   <a href={@url} class={"block-link #{active_class}"} id={"sub-menu-#{@name}"} style={disabled}>
-    <%= central_component("icon", icon: icon, class: "fa-2x") %><br />
-    <%= @label %>
+    {central_component("icon", icon: icon, class: "fa-2x")}<br />
+    {@label}
   </a>
 </div>

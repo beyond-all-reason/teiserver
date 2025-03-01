@@ -1,10 +1,10 @@
 <% bsname = @view_colour
 moderator = allow?(@current_user, "Moderator") %>
 
-<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+{render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "tournaments",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
-}) %>
+})}
 
 <div class="row mt-3">
   <div class="col-md-12">
@@ -14,10 +14,10 @@ moderator = allow?(@current_user, "Moderator") %>
           <%= if @stats.lobby_count == 0 do %>
             No tournament lobbies
           <% else %>
-            Lobbies: <%= @stats.lobby_count %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            Total members: <%= @stats.total_members %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            Players: <%= @stats.total_players %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            Spectators: <%= @stats.total_spectators %>
+            Lobbies: {@stats.lobby_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Total members: {@stats.total_members} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Players: {@stats.total_players} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Spectators: {@stats.total_spectators}
           <% end %>
         </h4>
 
@@ -42,8 +42,8 @@ moderator = allow?(@current_user, "Moderator") %>
             <%= for lobby <- @lobbies do %>
               <%= if lobby != nil do %>
                 <tr id={"lobby-#{lobby.id}"}>
-                  <td><%= lobby.name %></td>
-                  <td><%= lobby.map_name %></td>
+                  <td>{lobby.name}</td>
+                  <td>{lobby.map_name}</td>
                   <td>
                     <%= if lobby.in_progress do %>
                       <i class="fa-fw fa-solid fa-play"></i>
@@ -59,9 +59,9 @@ moderator = allow?(@current_user, "Moderator") %>
                       <i class="fa-fw fa-solid fa-key"></i>
                     <% end %>
                   </td>
-                  <td><%= lobby.member_count %></td>
-                  <td><%= lobby.player_count %></td>
-                  <td><%= lobby.member_count - lobby.player_count %></td>
+                  <td>{lobby.member_count}</td>
+                  <td>{lobby.player_count}</td>
+                  <td>{lobby.member_count - lobby.player_count}</td>
 
                   <%= if @can_join do %>
                     <%= if @client != nil do %>
@@ -80,9 +80,11 @@ moderator = allow?(@current_user, "Moderator") %>
 
                     <td>
                       <span>
-                        <.link navigate={~p"/tournament/lobbies/show/#{lobby.id}"}
-                        class="btn btn-sm btn-outline-#{bsname}">
-                        Show
+                        <.link
+                          navigate={~p"/tournament/lobbies/show/#{lobby.id}"}
+                          class="btn btn-sm btn-outline-#{bsname}"
+                        >
+                          Show
                         </.link>
                       </span>
                     </td>

@@ -6,7 +6,7 @@
   profile_permissions={@profile_permissions}
 />
 
-<%= @summary %>
+{@summary}
 
 <%= if Enum.count(@accolades) > 0 do %>
   <div class="mt-2 mb-3  col-lg-6 ml-2">
@@ -24,13 +24,13 @@
         <%= for accolade <- @accolades do %>
           <tr>
             <td style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"} width="22">
-              <%= central_component("icon", icon: accolade.badge_type.icon) %>
+              {central_component("icon", icon: accolade.badge_type.icon)}
             </td>
             <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
-              <%= accolade.badge_type.name %>
+              {accolade.badge_type.name}
             </td>
-            <td><%= accolade.giver.name %></td>
-            <td><%= date_to_str(accolade.inserted_at, format: :hms_or_dmy, tz: @tz) %></td>
+            <td>{accolade.giver.name}</td>
+            <td>{date_to_str(accolade.inserted_at, format: :hms_or_dmy, tz: @tz)}</td>
             <td>
               <a
                 :if={accolade.match_id}

@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -18,7 +18,7 @@
             show_search: false,
             active: "accolades"
           })
-        ) %>
+        )}
         <br /><br />
 
         <form
@@ -31,10 +31,10 @@
           <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_date_preset" class="control-label">Date range:</label>
-              <%= select(:report, :date_preset, @presets,
+              {select(:report, :date_preset, @presets,
                 class: "form-control",
                 selected: @params["date_preset"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
@@ -87,13 +87,13 @@
                 <%= for {bt_id, badge_type} <- @badge_types do %>
                   <tr>
                     <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
-                      <%= central_component("icon", icon: badge_type.icon) %>
+                      {central_component("icon", icon: badge_type.icon)}
                     </td>
                     <td style={"background-color: #{rgba_css badge_type.colour};"}>
-                      <%= badge_type.name %>
+                      {badge_type.name}
                     </td>
 
-                    <td><%= @counts[bt_id] %></td>
+                    <td>{@counts[bt_id]}</td>
                   </tr>
                 <% end %>
               </tbody>
@@ -116,15 +116,15 @@
                   <% badge_type = @badge_types[bt_id] %>
                   <tr>
                     <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
-                      <%= central_component("icon", icon: badge_type.icon) %>
+                      {central_component("icon", icon: badge_type.icon)}
                     </td>
                     <td style={"background-color: #{rgba_css badge_type.colour};"}>
-                      <%= badge_type.name %>
+                      {badge_type.name}
                     </td>
 
                     <%= for {userid, count} <- board do %>
                       <% user = @users[userid] %>
-                      <td><%= user.name %> x<%= count %></td>
+                      <td>{user.name} x{count}</td>
                     <% end %>
                   </tr>
                 <% end %>
@@ -148,15 +148,15 @@
                   <% badge_type = @badge_types[bt_id] %>
                   <tr>
                     <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
-                      <%= central_component("icon", icon: badge_type.icon) %>
+                      {central_component("icon", icon: badge_type.icon)}
                     </td>
                     <td style={"background-color: #{rgba_css badge_type.colour};"}>
-                      <%= badge_type.name %>
+                      {badge_type.name}
                     </td>
 
                     <%= for {userid, count} <- board do %>
                       <% user = @users[userid] %>
-                      <td><%= user.name %> x<%= count %></td>
+                      <td>{user.name} x{count}</td>
                     <% end %>
                   </tr>
                 <% end %>
@@ -179,11 +179,11 @@
                 <%= for {userid, gave, received, ratio} <- @top_givers do %>
                   <% user = @users[userid] %>
                   <tr>
-                    <td><%= user.name %></td>
+                    <td>{user.name}</td>
 
-                    <td><%= gave %></td>
-                    <td><%= received %></td>
-                    <td><%= ratio %></td>
+                    <td>{gave}</td>
+                    <td>{received}</td>
+                    <td>{ratio}</td>
                   </tr>
                 <% end %>
               </tbody>
@@ -205,11 +205,11 @@
                 <%= for {userid, gave, received, ratio} <- @top_takers do %>
                   <% user = @users[userid] %>
                   <tr>
-                    <td><%= user.name %></td>
+                    <td>{user.name}</td>
 
-                    <td><%= gave %></td>
-                    <td><%= received %></td>
-                    <td><%= ratio %></td>
+                    <td>{gave}</td>
+                    <td>{received}</td>
+                    <td>{ratio}</td>
                   </tr>
                 <% end %>
               </tbody>

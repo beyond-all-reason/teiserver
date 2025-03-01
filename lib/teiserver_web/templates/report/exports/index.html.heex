@@ -1,8 +1,8 @@
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "exports"})
-) %>
+)}
 
 <div class="row mt-2">
   <div class="col-md-12">
@@ -10,43 +10,43 @@
   </div>
 
   <%= if allow?(@current_user, Teiserver.Game.MatchRatingsExport.permissions()) do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :small,
       icon: Teiserver.Game.MatchRatingsExport.icon(),
       name: "match_ratings",
       text: "Match ratings",
       link: Routes.ts_reports_exports_path(@conn, :show, "match_ratings")
-    ) %>
+    )}
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Game.PlayerRatingsExport.permissions()) do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :small,
       icon: Teiserver.Game.PlayerRatingsExport.icon(),
       name: "player_ratings",
       text: "Current ratings",
       link: Routes.ts_reports_exports_path(@conn, :show, "player_ratings")
-    ) %>
+    )}
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Game.RatingLogsExport.permissions()) do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :small,
       icon: Teiserver.Game.RatingLogsExport.icon(),
       name: "player_ratings",
       text: "Rating logs",
       link: Routes.ts_reports_exports_path(@conn, :show, "rating_logs")
-    ) %>
+    )}
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Game.MatchDataTableExport.permissions()) do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :small,
       icon: Teiserver.Game.MatchDataTableExport.icon(),
       name: "match_datatable",
       text: "Match datatable",
       link: Routes.ts_reports_exports_path(@conn, :show, "match_datatable")
-    ) %>
+    )}
   <% end %>
 </div>
 
@@ -55,22 +55,22 @@
     <h4>Population</h4>
   </div>
   <%= if allow?(@current_user, Teiserver.Account.PlayerCountExport.permissions()) do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.PlayerCountExport.icon(),
       name: "player_count",
       text: "Player counts",
       link: Routes.ts_reports_exports_path(@conn, :show, "player_count")
-    ) %>
+    )}
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.RetentionRateExport.permissions()) do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :small,
       icon: Teiserver.Account.RetentionRateExport.icon(),
       name: "retention_rate",
       text: "Retention",
       link: Routes.ts_reports_exports_path(@conn, :show, "retention_rate")
-    ) %>
+    )}
   <% end %>
 </div>

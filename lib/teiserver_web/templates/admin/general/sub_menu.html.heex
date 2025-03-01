@@ -21,51 +21,51 @@
       <div class="card-body" style="padding: 0 15px;">
         <div class="row">
           <%= if allow?(assigns[:current_user], "Moderator") do %>
-            <%= central_component("sub_menu_icon",
+            {central_component("sub_menu_icon",
               name: "users",
               label: "Users",
               active: @active,
               url: ~p"/teiserver/admin/user",
               icon: "fa-solid fa-users"
-            ) %>
+            )}
           <% end %>
 
           <%= if allow?(assigns[:current_user], "Reviewer") do %>
-            <%= central_component("sub_menu_icon",
+            {central_component("sub_menu_icon",
               name: "matches",
               label: "Matches",
               active: @active,
               url: Routes.ts_admin_match_path(@conn, :index),
               icon: Teiserver.Battle.MatchLib.icon()
-            ) %>
+            )}
 
-            <%= central_component("sub_menu_icon",
+            {central_component("sub_menu_icon",
               name: "chat",
               label: "Chat",
               active: @active,
               url: ~p"/admin/chat",
               icon: Teiserver.Chat.LobbyMessageLib.icon()
-            ) %>
+            )}
           <% end %>
 
           <%= if allow?(assigns[:current_user], "Moderator") do %>
-            <%= central_component("sub_menu_icon",
+            {central_component("sub_menu_icon",
               name: "achievements",
               label: "Achievements",
               active: @active,
               url: Routes.ts_admin_achievement_path(@conn, :index),
               icon: Teiserver.Game.AchievementTypeLib.icon()
-            ) %>
+            )}
           <% end %>
 
           <%= if allow?(assigns[:current_user], "Reviewer") do %>
-            <%= central_component("sub_menu_icon",
+            {central_component("sub_menu_icon",
               name: "moderation",
               label: "Moderation",
               active: @active,
               url: Routes.moderation_general_path(@conn, :index),
               icon: Teiserver.Moderation.ReportLib.icon()
-            ) %>
+            )}
           <% end %>
         </div>
       </div>

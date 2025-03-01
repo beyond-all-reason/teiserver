@@ -5,7 +5,7 @@
         class="input-group-text row-left"
         style={if assigns[:width], do: "width: #{assigns[:width]}px"}
       >
-        <%= @label %>
+        {@label}
       </span>
     </span>
   <% end %>
@@ -16,7 +16,7 @@
         class="input-group-text"
         style={"background-color: #{@icon.colour}; color: #FFF; height: 100%;"}
       >
-        <%= central_component("icon", icon: @icon.icon) %>
+        {central_component("icon", icon: @icon.icon)}
       </span>
     </span>
   <% end %>
@@ -56,9 +56,9 @@
         style="height: 100%;"
       >
         <%= if @link.icon do %>
-          <%= central_component("icon", icon: @link.icon) %> &nbsp;
+          {central_component("icon", icon: @link.icon)} &nbsp;
         <% end %>
-        <%= central_component("icon", icon: "fa-solid fa-link") %>
+        {central_component("icon", icon: "fa-solid fa-link")}
       </a>
     </span>
   <% end %>

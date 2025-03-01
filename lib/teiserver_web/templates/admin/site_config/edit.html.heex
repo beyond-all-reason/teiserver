@@ -1,17 +1,17 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "config"})
-) %>
+)}
 
 <div class="row mt-3">
   <div class="col-md-12 col-xl-6 offset-xl-3">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <h4>Edit site config - <%= config_name(@config_info.key) %></h4>
-        <%= @config_info.description %>
+        <h4>Edit site config - {config_name(@config_info.key)}</h4>
+        {@config_info.description}
         <br /><br />
 
         <form action={Routes.admin_site_config_path(@conn, :update, @key)} method="post" class="">
@@ -22,11 +22,11 @@
           <div class="form-group my-4">
             <%= case @config_info.type do %>
               <% "select" -> %>
-                <%= central_component("icon_dropdown_js", []) %>
+                {central_component("icon_dropdown_js", [])}
                 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
                 <script src={Routes.static_path(@conn, "/js/select2.js")}>
                 </script>
-                <%= central_component("icon_dropdown", %{
+                {central_component("icon_dropdown", %{
                   name: "site_config[value]",
                   id: "site_config_value",
                   selected: @value,
@@ -35,14 +35,14 @@
                       v <- @config_info.opts[:choices],
                       do: %{id: v, name: v, colour: "#555555", icon: "fa-solid fa-square"}
                     )
-                }) %>
+                })}
               <% "boolean" -> %>
-                <%= central_component("checkbox", %{
+                {central_component("checkbox", %{
                   name: "site_config[value]",
                   id: "site_config_value",
                   checked: @value,
                   label: @config_info[:value_label] || "Value"
-                }) %>
+                })}
               <% _ -> %>
                 <label for="control_id" class="col-sm-2 control-label">Value</label>
                 <input

@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -18,7 +18,7 @@
           Show/Hide help
         </div>
 
-        <%= render(
+        {render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -26,7 +26,7 @@
             show_search: false,
             active: "new_user_funnel"
           })
-        ) %>
+        )}
         <br /><br />
 
         <div class="old-help-box-large">
@@ -54,28 +54,28 @@
               <tbody>
                 <tr>
                   <td>Created account</td>
-                  <td><%= @data.total_count %></td>
+                  <td>{@data.total_count}</td>
                   <td>100%</td>
                   <td>&nbsp;</td>
                 </tr>
                 <tr>
                   <td>Verified</td>
-                  <td><%= @data.verified %></td>
-                  <td><%= percent(@data.verified / @data.total_count) %>%</td>
-                  <td><%= percent(@data.verified / @data.total_count) %>%</td>
+                  <td>{@data.verified}</td>
+                  <td>{percent(@data.verified / @data.total_count)}%</td>
+                  <td>{percent(@data.verified / @data.total_count)}%</td>
                 </tr>
                 <tr>
                   <td>Played singleplayer (telemetry)</td>
-                  <td><%= @data.single_player_telemetry %></td>
-                  <td><%= percent(@data.single_player_telemetry / @data.total_count) %>%</td>
-                  <td><%= percent(@data.single_player_telemetry / @data.verified) %>%</td>
+                  <td>{@data.single_player_telemetry}</td>
+                  <td>{percent(@data.single_player_telemetry / @data.total_count)}%</td>
+                  <td>{percent(@data.single_player_telemetry / @data.verified)}%</td>
                 </tr>
                 <tr>
                   <td>Played online (telemetry)</td>
-                  <td><%= @data.online_player_telemetry %></td>
-                  <td><%= percent(@data.online_player_telemetry / @data.total_count) %>%</td>
+                  <td>{@data.online_player_telemetry}</td>
+                  <td>{percent(@data.online_player_telemetry / @data.total_count)}%</td>
                   <td>
-                    <%= percent(@data.online_player_telemetry / @data.single_player_telemetry) %>%
+                    {percent(@data.online_player_telemetry / @data.single_player_telemetry)}%
                   </td>
                 </tr>
 
@@ -85,8 +85,8 @@
 
                 <tr>
                   <td>Played online (match membership)</td>
-                  <td><%= @data.online_player_db %></td>
-                  <td><%= percent(@data.online_player_db / @data.total_count) %>%</td>
+                  <td>{@data.online_player_db}</td>
+                  <td>{percent(@data.online_player_db / @data.total_count)}%</td>
                 </tr>
               </tbody>
             </table>

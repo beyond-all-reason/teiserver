@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "accolades"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.AccoladeView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -22,7 +22,7 @@
                 true -> "index"
               end
           })
-        ) %>
+        )}
         <br /><br />
 
         <h4>Listing Accolades</h4>
@@ -43,14 +43,14 @@
                   style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"}
                   width="22"
                 >
-                  <%= central_component("icon", icon: accolade.badge_type.icon) %>
+                  {central_component("icon", icon: accolade.badge_type.icon)}
                 </td>
                 <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
-                  <%= accolade.badge_type.name %>
+                  {accolade.badge_type.name}
                 </td>
 
-                <td><%= accolade.recipient.name %></td>
-                <td><%= accolade.giver.name %></td>
+                <td>{accolade.recipient.name}</td>
+                <td>{accolade.giver.name}</td>
 
                 <td>
                   <a

@@ -13,24 +13,24 @@
   });
 </script>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
             active: "show"
           })
-        ) %>
+        )}
         <hr />
 
         <div class="float-end">
@@ -43,7 +43,7 @@
             >
               Actions
             </div>
-            <%= render("actions.html", assigns) %>
+            {render("actions.html", assigns)}
           </div>
 
           <%= if @user.smurf_of_id do %>
@@ -69,7 +69,7 @@
               class={class}
               id="section-menu-new"
             >
-              <%= central_component("icon", icon: Teiserver.Account.ClientLib.icon()) %> &nbsp;
+              {central_component("icon", icon: Teiserver.Account.ClientLib.icon())} &nbsp;
               Client view
             </a>
           <% end %>
@@ -82,10 +82,10 @@
         </div>
 
         <h3 style={"color: #{@user.colour}"}>
-          <%= @user.name %> &nbsp; <%= central_component("icon",
+          {@user.name} &nbsp; {central_component("icon",
             icon: @user.icon,
             icon_class: "fa-solid"
-          ) %>
+          )}
         </h3>
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
@@ -113,11 +113,11 @@
 
         <div class="tab-content">
           <div class="tab-pane" id="overview_tab" style="padding:5px;">
-            <%= render("tab_overview.html", assigns) %>
+            {render("tab_overview.html", assigns)}
           </div>
 
           <div class="tab-pane" id="details_tab" style="padding:5px;">
-            <%= render("tab_details.html", assigns) %>
+            {render("tab_details.html", assigns)}
           </div>
 
           <div
@@ -126,7 +126,7 @@
             id="raw_tab"
             style="padding:5px;"
           >
-            <%= render("tab_raw.html", assigns) %>
+            {render("tab_raw.html", assigns)}
           </div>
         </div>
       </div>

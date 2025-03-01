@@ -1,10 +1,10 @@
 <% bsname = @view_colour
 moderator = allow?(@current_user, "Moderator") %>
 
-<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+{render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "parties",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
-}) %>
+})}
 
 <div class="row mt-3" id="main-content">
   <div class="col-md-12">
@@ -72,13 +72,13 @@ moderator = allow?(@current_user, "Moderator") %>
               <tr>
                 <td style={"background-color: #{@user_lookup[party.leader].colour}"}>
                   <div class="badge rounded-pill bg-primary">
-                    <%= @user_lookup[party.leader].name %>
+                    {@user_lookup[party.leader].name}
                   </div>
                 </td>
                 <td>
                   <%= for member_id <- non_leader_members do %>
                     <div class="badge rounded-pill bg-secondary">
-                      <%= @user_lookup[member_id].name %>
+                      {@user_lookup[member_id].name}
                     </div>
                   <% end %>
                 </td>

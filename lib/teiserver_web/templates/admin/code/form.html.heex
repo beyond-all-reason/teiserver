@@ -9,21 +9,21 @@
 
   <div class="row">
     <div class="col-lg-6 mt-3">
-      <%= label(f, :value, class: "control-label") %>
-      <%= text_input(f, :value, class: "form-control", autofocus: :autofocus) %>
-      <%= error_tag(f, :value) %>
+      {label(f, :value, class: "control-label")}
+      {text_input(f, :value, class: "form-control", autofocus: :autofocus)}
+      {error_tag(f, :value)}
     </div>
 
     <div class="col-lg-6 mt-3">
-      <%= label(f, :purpose, class: "control-label") %>
-      <%= select(f, :purpose, @code_types, class: "form-control") %>
-      <%= error_tag(f, :purpose) %>
+      {label(f, :purpose, class: "control-label")}
+      {select(f, :purpose, @code_types, class: "form-control")}
+      {error_tag(f, :purpose)}
     </div>
 
     <div class="col-lg-6 mt-3">
-      <%= label(f, :expires, class: "control-label") %>
-      <%= text_input(f, :expires, class: "form-control") %>
-      <%= error_tag(f, :expires) %>
+      {label(f, :expires, class: "control-label")}
+      {text_input(f, :expires, class: "form-control")}
+      {error_tag(f, :expires)}
     </div>
   </div>
 

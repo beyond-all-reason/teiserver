@@ -41,9 +41,9 @@
           <% end %>
         </td>
         <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
-          <%= central_component("icon", icon: m.user.icon) %>
+          {central_component("icon", icon: m.user.icon)}
         </td>
-        <td style={"background-color: #{rgba_css m.user.colour};"}><%= m.user.name %></td>
+        <td style={"background-color: #{rgba_css m.user.colour};"}>{m.user.name}</td>
 
         <%= if party_colour do %>
           <td style={"background-color: #{party_colour};"} width="50">&nbsp;</td>
@@ -51,21 +51,21 @@
           <td style={"background-color: #{rgba_css m.user.colour};"} width="50">&nbsp;</td>
         <% end %>
 
-        <td><%= m.team_id + 1 %></td>
+        <td>{m.team_id + 1}</td>
 
-        <td><%= normalize(m.stats["damageDealt"]) %></td>
-        <td><%= normalize(m.stats["damageReceived"]) %></td>
+        <td>{normalize(m.stats["damageDealt"])}</td>
+        <td>{normalize(m.stats["damageReceived"])}</td>
 
-        <td><%= normalize(m.stats["unitsKilled"]) %></td>
-        <td><%= normalize(m.stats["unitsProduced"]) %></td>
+        <td>{normalize(m.stats["unitsKilled"])}</td>
+        <td>{normalize(m.stats["unitsProduced"])}</td>
 
-        <td><%= normalize(m.stats["metalProduced"]) %></td>
-        <td><%= normalize(m.stats["metalUsed"]) %></td>
+        <td>{normalize(m.stats["metalProduced"])}</td>
+        <td>{normalize(m.stats["metalUsed"])}</td>
 
-        <td><%= normalize(m.stats["energyProduced"]) %></td>
-        <td><%= normalize(m.stats["energyUsed"]) %></td>
+        <td>{normalize(m.stats["energyProduced"])}</td>
+        <td>{normalize(m.stats["energyUsed"])}</td>
 
-        <td><%= if rating, do: rating.value["rating_value"] |> round(2) %></td>
+        <td>{if rating, do: rating.value["rating_value"] |> round(2)}</td>
 
         <td>
           <%= if m.user_id != @conn.assigns.current_user.id do %>

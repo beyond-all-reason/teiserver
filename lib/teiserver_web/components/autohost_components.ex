@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Components.BotComponent do
       <CC.input field={f[:name]} type="text" label="Name" />
 
       <:actions>
-        <CC.button type="submit" class="btn-primary"><%= @button_label %></CC.button>
+        <CC.button type="submit" class="btn-primary">{@button_label}</CC.button>
       </:actions>
     </CC.simple_form>
     """

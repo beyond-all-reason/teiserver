@@ -21,21 +21,20 @@
       <% @friendship -> %>
         You are friends <br /><br />
       <% @friendship_request && @friendship_request.from_user_id == @current_user.id -> %>
-        You have sent <%= @user.name %> a friend request and are waiting for a response
-        <br /><br />
+        You have sent {@user.name} a friend request and are waiting for a response <br /><br />
       <% @friendship_request && @friendship_request.from_user_id != @current_user.id -> %>
         They have sent you a friend request and are waiting for a response <br /><br />
       <% @relationship && @relationship.state == "follow" -> %>
-        You are following <%= @user.name %>
+        You are following {@user.name}
         <br /><br />
       <% @relationship && @relationship.ignore -> %>
-        You are ignoring <%= @user.name %>
+        You are ignoring {@user.name}
         <br /><br />
       <% @relationship && @relationship.state == "avoid" -> %>
-        You are avoiding <%= @user.name %>
+        You are avoiding {@user.name}
         <br /><br />
       <% @relationship && @relationship.state == "block" -> %>
-        You are blocking <%= @user.name %>
+        You are blocking {@user.name}
         <br /><br />
       <% true -> %>
     <% end %>
@@ -91,7 +90,7 @@
 
       <span :if={@friendship != nil} phx-click="unfriend" class="btn btn-outline-danger mx-1">
         <Fontawesome.icon icon="times" style="regular" /> &nbsp;
-        Unfriend <%= @user.name %>
+        Unfriend {@user.name}
       </span>
 
       <span
@@ -215,7 +214,7 @@
         <div class="role-badge">
           <i class={"fa-fw fa-2x #{data.icon}"} style={"color: #{data.colour}"} title={role}></i>
           <br />
-          <%= role %>
+          {role}
         </div>
       <% end %>
     <% end %>
@@ -227,7 +226,7 @@
       style="display: flex;"
     >
       <span style="flex: 1">
-        <%= @accolade_notification %>&nbsp;
+        {@accolade_notification}&nbsp;
       </span>
       <a href={~p"/profile/#{@user.id}/accolades"} class="btn btn-success btn-sm">
         <i class="fa-solid fa-award"></i> &nbsp; View Accolades

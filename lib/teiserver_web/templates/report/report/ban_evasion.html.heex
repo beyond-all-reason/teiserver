@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -18,7 +18,7 @@
             show_search: false,
             active: "ban_evasion"
           })
-        ) %>
+        )}
 
         <form
           action={Routes.ts_reports_report_path(@conn, :show, "ban_evasion")}
@@ -87,38 +87,38 @@
               <% stats = @user_stats[user.id] %>
 
               <tr>
-                <td><%= user.name %></td>
+                <td>{user.name}</td>
                 <td>
                   <TeiserverWeb.UserComponents.status_icon user={user} />
                 </td>
 
                 <td>
-                  <%= date_to_str(((user.data["last_login_mins"] || 0) * 60) |> Timex.from_unix(),
+                  {date_to_str(((user.data["last_login_mins"] || 0) * 60) |> Timex.from_unix(),
                     format: :hms_or_ymd,
                     tz: @tz
-                  ) %>
+                  )}
                 </td>
                 <td>
-                  <%= date_to_str(user.last_played,
+                  {date_to_str(user.last_played,
                     format: :hms_or_ymd,
                     tz: @tz
-                  ) %>
+                  )}
                 </td>
-                <td><%= date_to_str(user.inserted_at, format: :hms_or_ymd) %></td>
+                <td>{date_to_str(user.inserted_at, format: :hms_or_ymd)}</td>
 
                 <td>
                   <%= if stats["recent_count.duel"] do %>
-                    <%= stats["win_rate.duel"] %>% of <%= stats["recent_count.duel"] %>
+                    {stats["win_rate.duel"]}% of {stats["recent_count.duel"]}
                   <% end %>
                 </td>
                 <td>
                   <%= if stats["recent_count.ffa"] do %>
-                    <%= stats["win_rate.ffa"] %>% of <%= stats["recent_count.ffa"] %>
+                    {stats["win_rate.ffa"]}% of {stats["recent_count.ffa"]}
                   <% end %>
                 </td>
                 <td>
                   <%= if stats["recent_count.team"] do %>
-                    <%= stats["win_rate.team"] %>% of <%= stats["recent_count.team"] %>
+                    {stats["win_rate.team"]}% of {stats["recent_count.team"]}
                   <% end %>
                 </td>
 

@@ -14,17 +14,17 @@ is_moderator = allow?(@conn, "Moderator") %>
   }
 </script>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -37,19 +37,19 @@ is_moderator = allow?(@conn, "Moderator") %>
                 true -> "list"
               end
           })
-        ) %>
+        )}
 
         <%= if @conn.params["search"] != nil do %>
-          <%= render(TeiserverWeb.Admin.UserView, "search.html", assigns) %>
+          {render(TeiserverWeb.Admin.UserView, "search.html", assigns)}
         <% else %>
           <%= if assigns[:data_search] != nil do %>
-            <%= render(TeiserverWeb.Admin.UserView, "data_search.html", assigns) %>
+            {render(TeiserverWeb.Admin.UserView, "data_search.html", assigns)}
           <% else %>
             <br /><br />
           <% end %>
         <% end %>
 
-        <h4>Listing Users (<%= Enum.count(@users) %>)</h4>
+        <h4>Listing Users ({Enum.count(@users)})</h4>
 
         <table class="table table-sm">
           <thead>
@@ -77,13 +77,13 @@ is_moderator = allow?(@conn, "Moderator") %>
             <%= for {user, user_stats} <- @users do %>
               <tr>
                 <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-                  <%= central_component("icon", icon: user.icon) %>
+                  {central_component("icon", icon: user.icon)}
                 </td>
-                <td><%= user.name %></td>
+                <td>{user.name}</td>
                 <%= if is_moderator do %>
-                  <td><%= user.email %></td>
+                  <td>{user.email}</td>
                 <% end %>
-                <td><%= user_stats["lobby_client"] %></td>
+                <td>{user_stats["lobby_client"]}</td>
 
                 <td>
                   <TeiserverWeb.UserComponents.status_icon user={user} />
@@ -92,9 +92,9 @@ is_moderator = allow?(@conn, "Moderator") %>
                 <%= if is_moderator do %>
                   <td>
                     <%= if user_stats["hardware:cpuinfo"] != "" and user_stats["hardware:cpuinfo"] != nil do %>
-                      <%= user_stats["hardware:cpuinfo"] %>
+                      {user_stats["hardware:cpuinfo"]}
                       <br />
-                      <%= user_stats["hardware:gpuinfo"] %>
+                      {user_stats["hardware:gpuinfo"]}
                     <% else %>
                       &nbsp;
                     <% end %>
@@ -102,13 +102,13 @@ is_moderator = allow?(@conn, "Moderator") %>
                 <% end %>
 
                 <td>
-                  <%= if Enum.member?(user.roles || [], "Trusted"), do: "Trusted " %>
-                  <%= if Enum.member?(user.roles || [], "Contributor"), do: "Contributor " %>
-                  <%= if Enum.member?(user.roles || [], "Moderator"), do: "Moderator" %>
+                  {if Enum.member?(user.roles || [], "Trusted"), do: "Trusted "}
+                  {if Enum.member?(user.roles || [], "Contributor"), do: "Contributor "}
+                  {if Enum.member?(user.roles || [], "Moderator"), do: "Moderator"}
                 </td>
 
                 <td>
-                  <%= date_to_str(user.inserted_at, format: :dmy) %>
+                  {date_to_str(user.inserted_at, format: :dmy)}
                 </td>
 
                 <td>

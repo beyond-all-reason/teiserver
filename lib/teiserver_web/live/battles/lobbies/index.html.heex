@@ -1,9 +1,9 @@
 <% bsname = @view_colour %>
 
-<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+{render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "battle_lobbies",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
-}) %>
+})}
 
 <div class="row mt-3">
   <div class="col-md-12">
@@ -14,10 +14,10 @@
       <%= if Enum.empty?(@lobbies) do %>
         No lobbies found
       <% else %>
-        Lobbies: <%= Enum.count(@lobbies) %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        Total members: <%= member_count %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        Players: <%= player_count %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        Spectators: <%= spectator_count %>
+        Lobbies: {Enum.count(@lobbies)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Total members: {member_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Players: {player_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Spectators: {spectator_count}
       <% end %>
     </h4>
 
@@ -42,14 +42,14 @@
         <%= for lobby <- @lobbies do %>
           <%= if lobby != nil do %>
             <tr id={"lobby-#{lobby.id}"}>
-              <td><%= lobby.name %></td>
-              <td><%= lobby.map_name %></td>
+              <td>{lobby.name}</td>
+              <td>{lobby.map_name}</td>
               <td>
                 <%= if lobby.in_progress do %>
                   <i class="fa-fw fa-solid fa-play"></i>
-                  &nbsp; <%= Teiserver.Helper.TimexHelper.duration_to_str_short(
+                  &nbsp; {Teiserver.Helper.TimexHelper.duration_to_str_short(
                     System.system_time(:second) - (lobby.started_at || 1_652_282_031)
-                  ) %>
+                  )}
                 <% end %>
               </td>
               <td>
@@ -62,9 +62,9 @@
                   <i class="fa-fw fa-solid fa-key"></i>
                 <% end %>
               </td>
-              <td><%= lobby.member_count %></td>
-              <td><%= lobby.player_count %></td>
-              <td><%= lobby.member_count - lobby.player_count %></td>
+              <td>{lobby.member_count}</td>
+              <td>{lobby.player_count}</td>
+              <td>{lobby.member_count - lobby.player_count}</td>
 
               <%= if @client do %>
                 <td>
@@ -82,17 +82,21 @@
 
               <td>
                 <span>
-                  <.link navigate={Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id)}
-                    class={"btn btn-sm btn-outline-#{bsname}"}>
-                  Show
+                  <.link
+                    navigate={Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id)}
+                    class={"btn btn-sm btn-outline-#{bsname}"}
+                  >
+                    Show
                   </.link>
                 </span>
               </td>
               <td>
                 <span>
-                  <.link navigate={Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id)}
-                    class={"btn btn-sm btn-outline-#{bsname}"}>
-                  Chat
+                  <.link
+                    navigate={Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id)}
+                    class={"btn btn-sm btn-outline-#{bsname}"}
+                  >
+                    Chat
                   </.link>
                 </span>
               </td>

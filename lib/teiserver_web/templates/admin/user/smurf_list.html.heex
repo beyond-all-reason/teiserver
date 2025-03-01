@@ -28,27 +28,27 @@ is_moderator = allow?(@conn, "Moderator") %>
   }
 </style>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
             active: "smurf"
           })
-        ) %>
+        )}
 
         <div class="old-help-box-large">
-          Lists all users <%= @user.name %> shares a matched key with. In the list of matches it will show the most recent match date as used by the user being matched with. This allows you to see how recently the matched player had that value vs when it was last used by <%= @user.name %>.
+          Lists all users {@user.name} shares a matched key with. In the list of matches it will show the most recent match date as used by the user being matched with. This allows you to see how recently the matched player had that value vs when it was last used by {@user.name}.
         </div>
 
         <div class="float-end py-3">
@@ -69,11 +69,11 @@ is_moderator = allow?(@conn, "Moderator") %>
             Show user
           </a>
         </div>
-        <h3 class="mt-4">Previous names for <%= @user.name %></h3>
-        <%= (@stats["previous_names"] || [])
-        |> Enum.join(", ") %>
+        <h3 class="mt-4">Previous names for {@user.name}</h3>
+        {(@stats["previous_names"] || [])
+        |> Enum.join(", ")}
 
-        <h3 class="mt-4">Listing matches for <%= @user.name %></h3>
+        <h3 class="mt-4">Listing matches for {@user.name}</h3>
 
         <% type_colours = %{
           "hw1" => "danger",
@@ -120,7 +120,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                   <th>games vs</th>
 
                   <%= for type <- @key_types do %>
-                    <th><%= short_name[type] || type %></th>
+                    <th>{short_name[type] || type}</th>
                   <% end %>
 
                   <th>Last login</th>
@@ -136,21 +136,21 @@ is_moderator = allow?(@conn, "Moderator") %>
               <tbody>
                 <tr class="selected-user-row">
                   <td style={"background-color: #{@user.colour}; color: #FFF;"} width="22">
-                    <%= central_component("icon", icon: @user.icon) %>
+                    {central_component("icon", icon: @user.icon)}
                   </td>
-                  <td><%= @user.name %></td>
-                  <td><%= @user.email %></td>
-                  <td><%= @user.data["lobby_client"] %></td>
+                  <td>{@user.name}</td>
+                  <td>{@user.email}</td>
+                  <td>{@user.data["lobby_client"]}</td>
 
                   <td>
                     <TeiserverWeb.UserComponents.status_icon user={@user} />
                   </td>
 
-                  <td><%= @stats["win_rate.team"] %></td>
-                  <td><%= @stats["recent_count.team"] %></td>
+                  <td>{@stats["win_rate.team"]}</td>
+                  <td>{@stats["recent_count.team"]}</td>
                   <% hours = ((@stats["player_minutes"] || 0) / 60) |> round %>
                   <td>
-                    <%= "#{hours}h" %>
+                    {"#{hours}h"}
                   </td>
 
                   <%= for _type <- @key_types do %>
@@ -160,14 +160,14 @@ is_moderator = allow?(@conn, "Moderator") %>
                   <% end %>
 
                   <td>
-                    <%= date_to_str(((@user.data["last_login"] || 0) * 60) |> Timex.from_unix(),
+                    {date_to_str(((@user.data["last_login"] || 0) * 60) |> Timex.from_unix(),
                       format: :hms_or_ymd,
                       tz: @tz
-                    ) %>
+                    )}
                   </td>
 
                   <td>
-                    <%= date_to_str(@user.inserted_at, format: :hms_or_ymd) %>
+                    {date_to_str(@user.inserted_at, format: :hms_or_ymd)}
                   </td>
 
                   <td>
@@ -189,21 +189,21 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                   <tr>
                     <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-                      <%= central_component("icon", icon: user.icon) %>
+                      {central_component("icon", icon: user.icon)}
                     </td>
-                    <td><%= user.name %></td>
-                    <td><%= user.email %></td>
-                    <td><%= user.data["lobby_client"] %></td>
+                    <td>{user.name}</td>
+                    <td>{user.email}</td>
+                    <td>{user.data["lobby_client"]}</td>
 
                     <td>
                       <TeiserverWeb.UserComponents.status_icon user={user} />
                     </td>
 
-                    <td><%= user_stats["win_rate.team"] %></td>
-                    <td><%= user_stats["recent_count.team"] %></td>
+                    <td>{user_stats["win_rate.team"]}</td>
+                    <td>{user_stats["recent_count.team"]}</td>
                     <% hours = ((user_stats["player_minutes"] || 0) / 60) |> round %>
                     <td>
-                      <%= "#{hours}h" %>
+                      {"#{hours}h"}
                     </td>
 
                     <%= for type <- @key_types do %>
@@ -218,24 +218,24 @@ is_moderator = allow?(@conn, "Moderator") %>
                           >
                           </i>
                           <span class="key-date">
-                            <%= date_to_str(match.last_updated, format: :ymd) %>/<%= date_to_str(
+                            {date_to_str(match.last_updated, format: :ymd)}/{date_to_str(
                               user_key.last_updated,
                               format: :ymd
-                            ) %>
+                            )}
                           </span>
                         <% end %>
                       </td>
                     <% end %>
 
                     <td>
-                      <%= date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix(),
+                      {date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix(),
                         format: :hms_or_ymd,
                         tz: @tz
-                      ) %>
+                      )}
                     </td>
 
                     <td>
-                      <%= date_to_str(user.inserted_at, format: :hms_or_ymd) %>
+                      {date_to_str(user.inserted_at, format: :hms_or_ymd)}
                     </td>
 
                     <td>
@@ -260,12 +260,12 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                     <%= if is_moderator and user.smurf_of_id == nil and @user.smurf_of_id == nil do %>
                       <td>
-                        <%= link(raw("<i class='far fa-fw fa-link'></i> Smurf link"),
+                        {link(raw("<i class='far fa-fw fa-link'></i> Smurf link"),
                           to: ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}",
                           method: :put,
                           # data: [confirm: "Are you sure?"],
                           class: "btn btn-sm btn-warning"
-                        ) %>
+                        )}
                       </td>
                     <% else  # TODO if @user.smurf_of_id == nil, link to parent? %>
                       <td></td>
@@ -295,10 +295,10 @@ is_moderator = allow?(@conn, "Moderator") %>
                     <td>
                       <i class={"fa-fw fa-regular #{type_icons[type_name]} text-#{type_colours[type_name]}"}>
                       </i>
-                      &nbsp; <%= type_name %>
+                      &nbsp; {type_name}
                     </td>
                     <td>
-                      <%= count %>
+                      {count}
                     </td>
                   </tr>
                 <% end %>
@@ -323,25 +323,25 @@ is_moderator = allow?(@conn, "Moderator") %>
                     <td>
                       <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
                       </i>
-                      &nbsp; <%= key.type.name %>
+                      &nbsp; {key.type.name}
                     </td>
                     <td>
                       <%= if String.length(key.value) > 50 do %>
-                        <%= key.value |> String.slice(0, 50) %>...
+                        {key.value |> String.slice(0, 50)}...
                       <% else %>
-                        <%= key.value %>
+                        {key.value}
                       <% end %>
                     </td>
                     <td>
-                      <%= date_to_str(key.last_updated, format: :hms_or_ymd) %>
+                      {date_to_str(key.last_updated, format: :hms_or_ymd)}
                     </td>
                     <td :if={allow?(@conn, "Server")}>
-                      <%= link("Delete",
+                      {link("Delete",
                         to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id),
                         class: "btn btn-danger btn-sm",
                         method: "delete",
                         data: [confirm: "Are you sure?"]
-                      ) %>
+                      )}
                     </td>
                   </tr>
                 <% end %>

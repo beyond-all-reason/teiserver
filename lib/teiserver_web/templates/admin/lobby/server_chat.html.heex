@@ -1,4 +1,4 @@
-<%= render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"})) %>
+{render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"}))}
 
 <style type="text/css">
   .message {
@@ -47,7 +47,7 @@
           </a>
         </div>
 
-        <h4>Lobby chat - Page <%= @page + 1 %></h4>
+        <h4>Lobby chat - Page {@page + 1}</h4>
         Oldest chat at the top (read top to bottom)
         <table class="table table-sm">
           <thead>
@@ -63,16 +63,16 @@
               <tr>
                 <td>
                   <a href={~p"/teiserver/admin/lobbies/#{msg.match_id}/lobby_chat"}>
-                    <%= msg.match_id %>
+                    {msg.match_id}
                   </a>
                 </td>
                 <td>
                   <a href={~p"/teiserver/admin/user/#{msg.user_id}"}>
-                    <%= msg.user.name %>
+                    {msg.user.name}
                   </a>
                 </td>
-                <td class="message"><%= msg.content %></td>
-                <td class="d-none d-lg-block"><%= date_to_str(msg.inserted_at, :ymd_hms) %></td>
+                <td class="message">{msg.content}</td>
+                <td class="d-none d-lg-block">{date_to_str(msg.inserted_at, :ymd_hms)}</td>
               </tr>
             <% end %>
           </tbody>

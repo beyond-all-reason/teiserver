@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "discord_channels"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.DiscordChannelView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -22,7 +22,7 @@
                 true -> "index"
               end
           })
-        ) %>
+        )}
         <br /><br />
 
         <h4>Listing Discord channels</h4>
@@ -47,13 +47,13 @@
                   <Fontawesome.icon icon={discord_channel.icon} style="regular" />
                 </td>
                 <td style={"background-color: #{rgba_css discord_channel.colour};"}>
-                  <%= discord_channel.name %>
+                  {discord_channel.name}
                 </td>
 
-                <td><%= discord_channel.channel_id %></td>
+                <td>{discord_channel.channel_id}</td>
 
-                <td><%= discord_channel.view_permission %></td>
-                <td><%= discord_channel.post_permission %></td>
+                <td>{discord_channel.view_permission}</td>
+                <td>{discord_channel.post_permission}</td>
 
                 <td>
                   <a

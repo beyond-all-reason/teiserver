@@ -12,7 +12,7 @@
   });
 </script>
 
-<%= central_component("icon_dropdown_js", []) %>
+{central_component("icon_dropdown_js", [])}
 
 <% search_col_class = "col-md-4 col-lg-3 col-xl-2 col-xxl-1 my-2" %>
 
@@ -73,7 +73,7 @@
 
       <div class={search_col_class}>
         <label for="search_order" class="control-label">Order by: </label>
-        <%= central_component("icon_dropdown", %{
+        {central_component("icon_dropdown", %{
           name: "search[order]",
           id: "search_order",
           selected: @params["order"] || "Name (A-Z)",
@@ -84,12 +84,12 @@
             %{id: "Newest first", icon: "fa-solid fa-sort-numeric-down", colour: fg},
             %{id: "Oldest first", icon: "fa-solid fa-sort-numeric-up", colour: fg}
           ]
-        }) %>
+        })}
       </div>
 
       <div class={search_col_class}>
         <label for="search_mod_action" class="control-label">Mod action: </label>
-        <%= central_component("icon_dropdown", %{
+        {central_component("icon_dropdown", %{
           name: "search[mod_action]",
           id: "search_mod_action",
           selected: @params["mod_action"],
@@ -104,7 +104,7 @@
               colour: fg
             }
           ]
-        }) %>
+        })}
       </div>
 
       <div class={search_col_class}>

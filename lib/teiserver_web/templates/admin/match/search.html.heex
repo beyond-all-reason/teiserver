@@ -12,17 +12,17 @@
   });
 </script>
 
-<%= central_component("icon_dropdown_js", []) %>
+{central_component("icon_dropdown_js", [])}
 
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
 <script src={Routes.static_path(@conn, "/js/select2.js")}>
 </script>
 
-<%= central_component("picker_script",
+{central_component("picker_script",
   module: Teiserver.Account.UserLib,
   name: "account_user",
   title: "User search"
-) %>
+)}
 
 <div class="row">
   <div class="col-md-12">
@@ -44,15 +44,15 @@
           <div class="row">
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="teiserver-user-search" class="control-label">User: </label>
-              <%= render(TeiserverWeb.Account.UserView, "picker.html",
+              {render(TeiserverWeb.Account.UserView, "picker.html",
                 input_name: "search[account_user]",
                 value: @params["account_user"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="search_action" class="control-label">Queue: </label>
-              <%= central_component("icon_dropdown", %{
+              {central_component("icon_dropdown", %{
                 name: "search[queue]",
                 id: "search_queue",
                 insert_blank: %{
@@ -66,12 +66,12 @@
                   %{id: "no_queue", name: "No queue", icon: "fa-solid fa-stop", colour: "#AA0000"}
                   | @queues
                 ]
-              }) %>
+              })}
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="search_action" class="control-label">Game type: </label>
-              <%= central_component("icon_dropdown", %{
+              {central_component("icon_dropdown", %{
                 name: "search[game_type]",
                 id: "search_game_type",
                 selected: @params["game_type"] || "Any",
@@ -111,7 +111,7 @@
                   },
                   %{id: "Bots", name: "Bots", icon: "fa-solid fa-square", colour: "#AA0000"}
                 ]
-              }) %>
+              })}
             </div>
 
             <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">

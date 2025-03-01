@@ -101,19 +101,19 @@
             <tr>
               <td :if={@filters["mode"] == "Lobby"}>
                 <a href={~p"/battle/chat/#{msg.match_id}/#{msg.user_id}"}>
-                  <%= msg.match_id %>
+                  {msg.match_id}
                 </a>
               </td>
               <td :if={@filters["mode"] == "Room"}>
-                <%= msg.chat_room %>
+                {msg.chat_room}
               </td>
               <td>
                 <a href={~p"/teiserver/admin/user/#{msg.user_id}"}>
-                  <%= @usernames[msg.user_id] %>
+                  {@usernames[msg.user_id]}
                 </a>
               </td>
-              <td class="message"><%= msg.content %></td>
-              <td><%= date_to_str(msg.inserted_at, :hms_or_hmsymd) %></td>
+              <td class="message">{msg.content}</td>
+              <td>{date_to_str(msg.inserted_at, :hms_or_hmsymd)}</td>
             </tr>
           <% end %>
         </tbody>

@@ -138,7 +138,9 @@ defmodule Teiserver.Account.AccoladeReport do
   defp get_recipient_leaderboard(accolades, positions) do
     accolades
     |> Enum.group_by(fn a -> a.badge_type_id end)
-    |> Map.new(fn {b_id, accs} -> {b_id, get_recipient_leaderboard_for_badge(accs, positions)} end)
+    |> Map.new(fn {b_id, accs} ->
+      {b_id, get_recipient_leaderboard_for_badge(accs, positions)}
+    end)
   end
 
   defp get_recipient_leaderboard_for_badge(accolades, positions) do

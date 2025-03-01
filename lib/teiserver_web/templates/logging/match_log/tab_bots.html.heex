@@ -2,21 +2,21 @@
   <div class="col-md-6">
     <h4>Map</h4>
     <%= for {map, count} <- @data["maps"] do %>
-      <%= central_component("detail_line",
+      {central_component("detail_line",
         label: map,
         value: format_number(count),
         width: 350
-      ) %>
+      )}
     <% end %>
   </div>
 
   <div class="col-md-3">
     <h4>Duration (minutes)</h4>
     <%= for {duration, count} <- @data["duration"] do %>
-      <%= central_component("detail_line",
+      {central_component("detail_line",
         label: duration,
         value: format_number(count)
-      ) %>
+      )}
     <% end %>
   </div>
 </div>

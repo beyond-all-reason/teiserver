@@ -1,20 +1,20 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "audit"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(TeiserverWeb.Logging.AuditLogView, "section_menu.html",
+        {render(TeiserverWeb.Logging.AuditLogView, "section_menu.html",
           conn: @conn,
           show_search: false,
           active: ""
-        ) %>
+        )}
       </div>
     </div>
   </div>
@@ -24,25 +24,25 @@
   <div class="col-lg-12 col-xl-6">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <h2>Audit log #<%= @log.id %></h2>
+        <h2>Audit log #{@log.id}</h2>
 
-        <%= central_component("detail_line",
+        {central_component("detail_line",
           label: "Action",
           value: @log.action
-        ) %>
+        )}
 
-        <%= central_component("detail_line",
+        {central_component("detail_line",
           label: "IP",
           value: @log.ip
-        ) %>
+        )}
 
-        <%= central_component("detail_line",
+        {central_component("detail_line",
           label: "Timestamp",
           value: date_to_str(@log.inserted_at, format: :hms_or_dmy, tz: @tz)
-        ) %>
+        )}
 
         <%= if @log.user_id do %>
-          <%= central_component("detail_line",
+          {central_component("detail_line",
             label: "User",
             icon: %{
               colour: @log.user.colour,
@@ -54,12 +54,12 @@
               bsname: elem(Teiserver.Account.UserLib.colours() |> colours(), 2),
               icon: Teiserver.Account.UserLib.icon()
             }
-          ) %>
+          )}
         <% else %>
-          <%= central_component("detail_line",
+          {central_component("detail_line",
             label: "User",
             value: "none"
-          ) %>
+          )}
         <% end %>
 
         <br /><br />

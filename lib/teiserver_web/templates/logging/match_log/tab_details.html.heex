@@ -3,103 +3,103 @@
     <h4>
       <i class="fa-fw fa-regular fa-user"></i> Counts
     </h4>
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Total completed",
       value: format_number(@data["totals"]["aggregate"]["total_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Duel",
       value: format_number(@data["duel"]["aggregate"]["total_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "FFA",
       value: format_number(@data["ffa"]["aggregate"]["total_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Small Team",
       value: format_number(@data["small_team"]["aggregate"]["total_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Large Team",
       value: format_number(@data["large_team"]["aggregate"]["total_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Scavengers",
       value: format_number(@data["scavengers"]["aggregate"]["total_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Bots",
       value: format_number(@data["bots"]["aggregate"]["total_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Raptors",
       value: format_number(@data["raptors"]["aggregate"]["total_count"])
-    ) %>
+    )}
   </div>
 
   <div class="col-md-3">
     <h4>
       <i class="fa-fw fa-regular fa-users"></i> Weighted counts
     </h4>
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Total completed",
       value: format_number(@data["totals"]["aggregate"]["weighted_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Duel",
       value: format_number(@data["duel"]["aggregate"]["weighted_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "FFA",
       value: format_number(@data["ffa"]["aggregate"]["weighted_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Small Team",
       value: format_number(@data["small_team"]["aggregate"]["weighted_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Large Team",
       value: format_number(@data["large_team"]["aggregate"]["weighted_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Scavengers",
       value: format_number(@data["scavengers"]["aggregate"]["weighted_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Bots",
       value: format_number(@data["bots"]["aggregate"]["weighted_count"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Raptors",
       value: format_number(@data["raptors"]["aggregate"]["weighted_count"])
-    ) %>
+    )}
   </div>
 
   <div class="col-md-6">
     <h4>Durations</h4>
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Mean duration",
       value: represent_seconds(@data["totals"]["aggregate"]["mean_duration_seconds"])
-    ) %>
+    )}
     <%= for t <- ~w(5 10 15 20 25 30 35 40 45 50 55 60) do %>
-      <%= central_component("detail_line",
+      {central_component("detail_line",
         label: "#{t} minutes",
         value: format_number(@data["totals"]["duration"][t])
-      ) %>
+      )}
     <% end %>
   </div>
 </div>
@@ -112,20 +112,20 @@
       @data["totals"]["maps"]
       |> Enum.sort(fn {_, v1}, {_, v2} -> v1 >= v2 end) %>
     <%= for {name, count} <- maps do %>
-      <%= central_component("detail_line",
+      {central_component("detail_line",
         label: name,
         value: format_number(count),
         width: 350
-      ) %>
+      )}
     <% end %>
   </div>
   <div class="col-md-6">
     <h4>Team size</h4>
     <%= for t <- 1..8 do %>
-      <%= central_component("detail_line",
+      {central_component("detail_line",
         label: t,
         value: format_number(@data["totals"]["team_sizes"]["#{t}"] || 0)
-      ) %>
+      )}
     <% end %>
   </div>
 </div>

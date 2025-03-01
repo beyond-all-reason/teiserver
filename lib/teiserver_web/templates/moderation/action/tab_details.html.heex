@@ -4,7 +4,7 @@
       <tbody>
         <tr>
           <td>Reason</td>
-          <td><%= breakup_long_words(@action.reason) %></td>
+          <td>{breakup_long_words(@action.reason)}</td>
         </tr>
 
         <tr>
@@ -14,7 +14,7 @@
 
         <tr>
           <td>Started:</td>
-          <td><%= date_to_str(@action.inserted_at, format: :hms_or_ymd) %></td>
+          <td>{date_to_str(@action.inserted_at, format: :hms_or_ymd)}</td>
         </tr>
 
         <%= if @action.expires do %>
@@ -24,13 +24,13 @@
             <%= if Timex.compare(Timex.now(), @action.expires) == 1 do %>
               <td>Expired</td>
             <% else %>
-              <td><%= @action.expires |> date_to_str(format: :hms_or_ymd) %></td>
+              <td>{@action.expires |> date_to_str(format: :hms_or_ymd)}</td>
             <% end %>
           </tr>
 
           <tr>
             <td>Duration:</td>
-            <td><%= duration_to_str(@action.inserted_at, @action.expires) %></td>
+            <td>{duration_to_str(@action.inserted_at, @action.expires)}</td>
           </tr>
         <% else %>
           <tr>
@@ -41,7 +41,7 @@
 
         <tr>
           <td>Score modifier:</td>
-          <td><%= @action.score_modifier %></td>
+          <td>{@action.score_modifier}</td>
         </tr>
       </tbody>
     </table>

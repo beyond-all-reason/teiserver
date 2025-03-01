@@ -1,40 +1,40 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "matches"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.MatchView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
             active: "user"
           })
-        ) %>
+        )}
 
         <div class="float-end">
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "ratings",
             label: "Rated matches",
             icon: Teiserver.Account.RatingLib.icon(),
             bsname: bsname,
             url: Routes.ts_admin_user_path(@conn, :ratings, @user.id)
-          ) %>
+          )}
 
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "view_user",
             label: "View user",
             icon: Teiserver.Account.UserLib.icon(),
             bsname: bsname,
             url: ~p"/teiserver/admin/user/#{@user.id}"
-          ) %>
+          )}
         </div>
         <br /><br />
 
@@ -66,8 +66,8 @@
                 end %>
 
               <tr>
-                <td><%= match.game_type %></td>
-                <td><%= match.map %></td>
+                <td>{match.game_type}</td>
+                <td>{match.map}</td>
 
                 <td>
                   <%= cond do %>
@@ -80,8 +80,8 @@
                   <% end %>
                 </td>
 
-                <td><%= match.team_count %></td>
-                <td><%= match.team_size %></td>
+                <td>{match.team_count}</td>
+                <td>{match.team_size}</td>
 
                 <td>
                   <%= case {match.finished, match.started} do %>
@@ -90,10 +90,10 @@
                     <% {_, nil} -> %>
                       Never started
                     <% _ -> %>
-                      <%= Timex.diff(match.finished, match.started, :minute) %>
+                      {Timex.diff(match.finished, match.started, :minute)}
                   <% end %>
                 </td>
-                <td><%= date_to_str(match.finished, format: :ymd_hms) %></td>
+                <td>{date_to_str(match.finished, format: :ymd_hms)}</td>
 
                 <td>
                   <a href={~p"/battle/#{match.id}"} class="btn btn-secondary btn-sm">

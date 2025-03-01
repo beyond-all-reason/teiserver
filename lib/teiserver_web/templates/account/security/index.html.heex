@@ -18,10 +18,10 @@
           <div class="row">
             <%= for token <- @user_tokens do %>
               <div class="col-md-6 mt-1 mb-4">
-                <strong>User agent:</strong> <%= token.user_agent %><br />
-                <strong>IP:</strong> <%= token.ip %><br />
-                <strong>Last used:</strong> <%= date_to_str(token.last_used, format: :ymd_hms) %><br />
-                <strong>Expires:</strong> <%= date_to_str(token.expires, format: :ymd_hms) %><br />
+                <strong>User agent:</strong> {token.user_agent}<br />
+                <strong>IP:</strong> {token.ip}<br />
+                <strong>Last used:</strong> {date_to_str(token.last_used, format: :ymd_hms)}<br />
+                <strong>Expires:</strong> {date_to_str(token.expires, format: :ymd_hms)}<br />
                 <%= if allow?(@conn, "admin.dev") do %>
                   <strong>Value:</strong>
                   <input type="text" value={token.value} class="form-control" />
@@ -36,12 +36,12 @@
                 <% end %>
                 <br />
 
-                <%= link(raw("Delete token"),
+                {link(raw("Delete token"),
                   to: Routes.ts_account_security_path(@conn, :delete_token, token),
                   method: :delete,
                   data: [confirm: "Are you sure?"],
                   class: "btn btn-danger2"
-                ) %>
+                )}
               </div>
             <% end %>
           </div>

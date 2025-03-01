@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
     <div>
       <hr />
       <h3>
-        <%= @title %>
+        {@title}
       </h3>
 
       <.form for={@form} phx-target={@myself} phx-change="validate" phx-submit="save" id="tag-form">
@@ -41,11 +41,11 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
               </a>
             </div>
             <div class="col">
-              <%= submit("Update tag", class: "btn btn-primary btn-block #{disabled}") %>
+              {submit("Update tag", class: "btn btn-primary btn-block #{disabled}")}
             </div>
           </div>
         <% else %>
-          <%= submit("Create tag", class: "btn btn-primary btn-block #{disabled}") %>
+          {submit("Create tag", class: "btn btn-primary btn-block #{disabled}")}
         <% end %>
       </.form>
     </div>

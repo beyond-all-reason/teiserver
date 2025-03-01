@@ -17,7 +17,7 @@ active_class = if is_active, do: "active" %>
 
 <a href={@url} class={"btn btn-outline-#{@bsname} #{active_class}"} id={"section-menu-#{@name}"}>
   <%= if not is_nil(@icon) && @icon != "" do %>
-    <%= central_component("icon", icon: icon) %> &nbsp;
+    {central_component("icon", icon: icon)} &nbsp;
   <% end %>
-  <%= @label %>
+  {@label}
 </a>

@@ -1,11 +1,11 @@
 <br />
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "Timestamp",
   value: date_to_str(@page_view_log.inserted_at, format: :hms_dmy, tz: @tz)
-) %>
+)}
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "User",
   icon: %{
     colour: @page_view_log.user.colour,
@@ -17,19 +17,19 @@
     bsname: elem(Teiserver.Account.UserLib.colours() |> colours(), 2),
     icon: Teiserver.Account.UserLib.icon()
   }
-) %>
+)}
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "Section",
   value: @page_view_log.section
-) %>
+)}
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "Path",
   value: @page_view_log.path
-) %>
+)}
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "Full route",
   value: "#{@page_view_log.section}/#{@page_view_log.path}",
   link: %{
@@ -37,26 +37,26 @@
     bsname: "primary",
     icon: Teiserver.Logging.PageViewLogLib.icon()
   }
-) %>
+)}
 
 <hr />
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "Method",
   value: @page_view_log.method
-) %>
+)}
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "Status",
   value: @page_view_log.status
-) %>
+)}
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "IP",
   value: @page_view_log.ip
-) %>
+)}
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "Load time",
   value: "#{round(@page_view_log.load_time / 100) / 10}ms"
-) %>
+)}

@@ -14,14 +14,14 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Moderation.BanView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
             active: "show"
           })
-        ) %>
+        )}
         <hr />
 
         <div class="float-end">
@@ -46,13 +46,13 @@
               >
                 Actions
               </div>
-              <%= render("actions.html", assigns) %>
+              {render("actions.html", assigns)}
             </div>
           <% end %>
         </div>
 
         <h3>
-          <%= @ban.source.name %>
+          {@ban.source.name}
           <%= if not @ban.enabled do %>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             Disabled
@@ -63,16 +63,16 @@
           <%= if allow?(@conn, "Moderator") do %>
             <li class="nav-item">
               <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                <%= central_component("icon", icon: Teiserver.Helper.StylingHelper.icon(:detail)) %> Details
+                {central_component("icon", icon: Teiserver.Helper.StylingHelper.icon(:detail))} Details
               </a>
             </li>
           <% end %>
 
           <li class="nav-item">
             <a href="#logs_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: Teiserver.Helper.StylingHelper.icon(:list)) %> Logs (<%= Enum.count(
+              {central_component("icon", icon: Teiserver.Helper.StylingHelper.icon(:list))} Logs ({Enum.count(
                 @logs
-              ) %>)
+              )})
             </a>
           </li>
         </ul>
@@ -80,12 +80,12 @@
         <div class="tab-content">
           <%= if allow?(@conn, "Moderator") do %>
             <div class="tab-pane" id="details_tab" style="padding:5px;">
-              <%= render("tab_details.html", assigns) %>
+              {render("tab_details.html", assigns)}
             </div>
           <% end %>
 
           <div class="tab-pane" id="logs_tab" style="padding:5px;">
-            <%= render("tab_logs.html", assigns) %>
+            {render("tab_logs.html", assigns)}
           </div>
         </div>
       </div>

@@ -7,11 +7,11 @@ value_types = [
   "Skill value"
 ] %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
-) %>
+)}
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -32,7 +32,7 @@ value_types = [
           <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
-        <%= render(
+        {render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -40,7 +40,7 @@ value_types = [
             show_search: false,
             active: "tournament"
           })
-        ) %>
+        )}
         <br /><br />
 
         <form
@@ -68,30 +68,30 @@ value_types = [
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_limit" class="control-label">Game type: </label>
-              <%= select(:report, :game_type, @game_types,
+              {select(:report, :game_type, @game_types,
                 class: "form-control",
                 selected: @params["game_type"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_value_type" class="control-label">Value: </label>
-              <%= select(:report, :value_type, value_types,
+              {select(:report, :value_type, value_types,
                 class: "form-control",
                 selected: @params["value_type"]
-              ) %>
+              )}
             </div>
 
             <%= if false and not Enum.empty?(@ratings) do %>
               <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-                <%= central_component("checkbox",
+                {central_component("checkbox",
                   name: "report[make_players]",
                   id: "report_make_players",
                   value: "true",
                   label: "Make players",
                   field: :see_group,
                   checked: false
-                ) %>
+                )}
               </div>
             <% end %>
 
@@ -163,7 +163,7 @@ value_types = [
         <div class="tab-content">
           <div class="tab-pane" id="user_tab" style="padding:5px;">
             <h5>
-              Found <%= Enum.count(@ratings) %> of <%= Enum.count(@name_to_id_map) %> players
+              Found {Enum.count(@ratings)} of {Enum.count(@name_to_id_map)} players
             </h5>
             <table class="table table-sm">
               <thead>
@@ -171,7 +171,7 @@ value_types = [
                   <th>&nbsp;</th>
                   <th colspan="2">Player</th>
 
-                  <th><%= @params["value_type"] %></th>
+                  <th>{@params["value_type"]}</th>
 
                   <th>Moderation status</th>
                   <th>Player role</th>
@@ -185,19 +185,19 @@ value_types = [
                 <%= for {rating, pos} <- Enum.with_index(@ratings) do %>
                   <tr style={"background-color: #{rgba_css rating.user.colour};"}>
                     <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                      #<%= pos + 1 %>
+                      #{pos + 1}
                     </td>
                     <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                      <%= central_component("icon", icon: rating.user.icon) %>
+                      {central_component("icon", icon: rating.user.icon)}
                     </td>
-                    <td><%= rating.user.name %></td>
+                    <td>{rating.user.name}</td>
 
                     <td>
-                      <%= case @params["value_type"] do
+                      {case @params["value_type"] do
                         "Leaderboard rating" -> rating.leaderboard_rating |> round(2)
                         "Game rating" -> rating.rating_value |> round(2)
                         "Skill value" -> rating.skill |> round(2)
-                      end %>
+                      end}
                     </td>
 
                     <td>
@@ -228,18 +228,18 @@ value_types = [
 
           <div class="tab-pane" id="team_tab" style="padding:5px;">
             <.table id="users" rows={@team_data} table_class="table-sm table-hover">
-              <:col :let={{team, _}} label="Team"><%= team + 1 %></:col>
+              <:col :let={{team, _}} label="Team">{team + 1}</:col>
               <:col :let={{_, ratings}} label="Captain">
-                <%= ratings.captain_name %> (<%= ratings.captain_rating %>)
+                {ratings.captain_name} ({ratings.captain_rating})
               </:col>
 
-              <:col :let={{_, ratings}} label="Size"><%= ratings.count %></:col>
-              <:col :let={{_, ratings}} label="Min"><%= ratings.min %></:col>
-              <:col :let={{_, ratings}} label="Max"><%= ratings.max %></:col>
+              <:col :let={{_, ratings}} label="Size">{ratings.count}</:col>
+              <:col :let={{_, ratings}} label="Min">{ratings.min}</:col>
+              <:col :let={{_, ratings}} label="Max">{ratings.max}</:col>
 
-              <:col :let={{_, ratings}} label="Mean"><%= ratings.mean %></:col>
-              <:col :let={{_, ratings}} label="Median"><%= ratings.median %></:col>
-              <:col :let={{_, ratings}} label="Standard Deviation"><%= ratings.stdev %></:col>
+              <:col :let={{_, ratings}} label="Mean">{ratings.mean}</:col>
+              <:col :let={{_, ratings}} label="Median">{ratings.median}</:col>
+              <:col :let={{_, ratings}} label="Standard Deviation">{ratings.stdev}</:col>
             </.table>
           </div>
 

@@ -1,8 +1,8 @@
-<%= render(
+{render(
   TeiserverWeb.Battle.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "matches"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -61,8 +61,8 @@
           table_class="table-sm table-hover"
           row_click={fn match -> JS.navigate(~p"/battle/#{match.id}") end}
         >
-          <:col :let={match} label="Type"><%= match.game_type %></:col>
-          <:col :let={match} label="Map"><%= match.map %></:col>
+          <:col :let={match} label="Type">{match.game_type}</:col>
+          <:col :let={match} label="Map">{match.map}</:col>
           <:col :let={match} label="Outcome">
             <%= if hd(match.members).win do %>
               <Fontawesome.icon icon="trophy" style="solid" class="text-success" /> &nbsp;
@@ -71,13 +71,13 @@
               Loss
             <% end %>
           </:col>
-          <:col :let={match} label="Team count"><%= match.team_count %></:col>
-          <:col :let={match} label="Team size"><%= match.team_size %></:col>
+          <:col :let={match} label="Team count">{match.team_count}</:col>
+          <:col :let={match} label="Team size">{match.team_size}</:col>
           <:col :let={match} label="Duration">
-            <%= if match.finished, do: duration_to_str_short(match.game_duration) %>
+            {if match.finished, do: duration_to_str_short(match.game_duration)}
           </:col>
           <:col :let={match} label="Ended">
-            <%= date_to_str(match.finished, format: :hms_or_ymd, tz: @tz) %>
+            {date_to_str(match.finished, format: :hms_or_ymd, tz: @tz)}
           </:col>
 
           <:col :let={match} label="">

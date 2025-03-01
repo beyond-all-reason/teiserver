@@ -14,17 +14,17 @@
   }
 </style>
 
-<%= render(
+{render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "server"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Logging.ServerLogView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -32,7 +32,7 @@
             show_search: false,
             active: if(@today, do: "this_#{@unit}", else: "#{@unit}_list")
           })
-        ) %>
+        )}
 
         <hr />
 
@@ -49,7 +49,7 @@
                 }
                 class={"btn btn-outline-#{TeiserverWeb.Logging.MatchLogView.view_colour}"}
               >
-                <%= central_component("icon", icon: TeiserverWeb.Logging.MatchLogView.icon()) %> &nbsp;
+                {central_component("icon", icon: TeiserverWeb.Logging.MatchLogView.icon())} &nbsp;
                 Match detail
               </a>
 
@@ -66,7 +66,7 @@
               <h3>Day to day metric: Today so far</h3>
             <% else %>
               <h3>
-                Day to day metric: <%= Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}") %>
+                Day to day metric: {Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}")}
               </h3>
             <% end %>
             <br /><br />
@@ -74,7 +74,7 @@
             <ul class="nav nav-tabs" role="tablist" id="the_tabs">
               <li class="nav-item">
                 <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <%= central_component("icon", icon: icon()) %> Details
+                  {central_component("icon", icon: icon())} Details
                 </a>
               </li>
 
@@ -88,9 +88,9 @@
 
               <li class="nav-item">
                 <a href="#event_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <%= central_component("icon",
+                  {central_component("icon",
                     icon: Teiserver.Telemetry.ComplexClientEventLib.icon()
-                  ) %> Events
+                  )} Events
                 </a>
               </li>
 
@@ -103,21 +103,21 @@
 
             <div class="tab-content">
               <div class="tab-pane" id="details_tab" style="padding:5px;">
-                <%= render("tab_details.html", assigns) %>
+                {render("tab_details.html", assigns)}
               </div>
 
               <%= if Map.has_key?(@data, "average_user_counts") do %>
                 <div class="tab-pane" id="hourly_tab" style="padding:5px;">
-                  <%= render("tab_hourly.html", assigns) %>
+                  {render("tab_hourly.html", assigns)}
                 </div>
               <% end %>
 
               <div class="tab-pane" id="event_tab" style="padding:5px;">
-                <%= render("tab_event.html", assigns) %>
+                {render("tab_event.html", assigns)}
               </div>
 
               <div class="tab-pane" id="raw_tab" style="padding:5px;">
-                <%= render("tab_raw.html", assigns) %>
+                {render("tab_raw.html", assigns)}
               </div>
             </div>
           </div>

@@ -11,10 +11,10 @@
         data-bgcolour={Map.get(row, :colour, "#000000")}
         data-icons={icons}
       >
-        <%= Map.get(row, :name, row.id) %>
+        {Map.get(row, :name, row.id)}
       </option>
     <% else %>
-      <option value=""><%= assigns[:insert_blank] %></option>
+      <option value="">{assigns[:insert_blank]}</option>
     <% end %>
   <% end %>
 
@@ -32,7 +32,7 @@
       data-bgcolour={bgcolour}
       {selected}
     >
-      <%= Map.get(row, :name, row.id) %>
+      {Map.get(row, :name, row.id)}
     </option>
   <% end %>
 </select>

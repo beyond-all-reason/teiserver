@@ -20,22 +20,22 @@
     </div>
 
     <div :if={@allowed_to_send != true} id="chat-input-failure-div" class="alert">
-      You cannot post messages to this room because <%= @allowed_to_send %>
+      You cannot post messages to this room because {@allowed_to_send}
     </div>
 
     <div :if={@allowed_to_send == true} id="chat-input-div">
       <.form :let={f} for={@message_changeset} phx-submit="send-message" class="mt-2">
         <div class="row">
           <div class="col-md-10">
-            <%= text_input(f, :content,
+            {text_input(f, :content,
               class: "form-control",
               autofocus: true,
               autocomplete: "off"
-            ) %>
+            )}
           </div>
 
           <div class="col-md-2">
-            <%= submit("Send", class: "btn btn-primary btn-block") %>
+            {submit("Send", class: "btn btn-primary btn-block")}
           </div>
         </div>
       </.form>

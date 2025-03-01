@@ -45,21 +45,21 @@
   }
 </style>
 
-<%= render(
+{render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "audit"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(TeiserverWeb.Logging.AuditLogView, "section_menu.html",
+        {render(TeiserverWeb.Logging.AuditLogView, "section_menu.html",
           conn: @conn,
           show_search: @show_search,
           active: if(@show_search, do: "search", else: "index")
-        ) %>
+        )}
 
         <div class="float-end">
           <span class={"btn btn-#{bsname} btn-outline"} onclick="hide_all();">
@@ -72,18 +72,18 @@
         </div>
 
         <%= if @show_search do %>
-          <%= render(TeiserverWeb.Logging.AuditLogView, "search.html",
+          {render(TeiserverWeb.Logging.AuditLogView, "search.html",
             conn: @conn,
             params: @params,
             actions: @actions,
             permissions: @current_user.permissions
-          ) %>
+          )}
         <% else %>
           <br /><br />
         <% end %>
 
         <h4>
-          Audit logs - Row count: <%= Enum.count(@logs) %>
+          Audit logs - Row count: {Enum.count(@logs)}
         </h4>
         <table class="table table-sm">
           <thead>
@@ -99,7 +99,7 @@
           <tbody>
             <%= for log <- @logs do %>
               <tr>
-                <td><%= log.action %></td>
+                <td>{log.action}</td>
                 <td>
                   <div
                     class={"btn btn-outline-#{bsname} btn-sm show-button"}
@@ -118,22 +118,22 @@
                   </div>
 
                   <div class="json_details" id={"details-#{log.id}"}>
-                    <%= Jason.encode!(log.details) %>
+                    {Jason.encode!(log.details)}
                   </div>
                 </td>
-                <td><%= date_to_str(log.inserted_at, format: :hms_or_dmy, tz: @tz) %></td>
+                <td>{date_to_str(log.inserted_at, format: :hms_or_dmy, tz: @tz)}</td>
 
                 <%= if Ecto.assoc_loaded?(log.user) and log.user != nil do %>
-                  <td><%= log.user.name %>, <%= log.ip %></td>
+                  <td>{log.user.name}, {log.ip}</td>
                 <% else %>
                   <td>&nbsp;</td>
                 <% end %>
 
                 <td class="text-right">
-                  <%= link("Show",
+                  {link("Show",
                     to: Routes.logging_audit_log_path(@conn, :show, log),
                     class: "btn btn-secondary btn-sm"
-                  ) %>
+                  )}
                 </td>
               </tr>
             <% end %>

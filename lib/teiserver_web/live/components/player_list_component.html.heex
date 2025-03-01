@@ -2,16 +2,16 @@
   <div class="card page-card">
     <div class="card-body">
       <%= for {team, players} <- @teams do %>
-        <strong class="px-2">Team <%= team + 1 %></strong>
+        <strong class="px-2">Team {team + 1}</strong>
         <ul class="list-unstyled">
           <%= for p <- players do %>
             <li>
               <%= if @admin do %>
                 <a href={Routes.ts_admin_client_show_path(@socket, :show, p.userid)}>
-                  <%= p.name %>
+                  {p.name}
                 </a>
               <% else %>
-                <%= p.name %>
+                {p.name}
               <% end %>
             </li>
           <% end %>
@@ -25,10 +25,10 @@
           <li>
             <%= if @admin do %>
               <a href={Routes.ts_admin_client_show_path(@socket, :show, p.userid)}>
-                <%= p.name %>
+                {p.name}
               </a>
             <% else %>
-              <%= p.name %>
+              {p.name}
             <% end %>
           </li>
         <% end %>

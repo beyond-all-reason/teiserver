@@ -21,118 +21,118 @@
 
   <div class="row">
     <div class="col-lg-6 my-2">
-      <%= label(f, :name, class: "control-label") %>
-      <%= text_input(f, :name, class: "form-control", autofocus: :autofocus) %>
-      <%= error_tag(f, :name) %>
+      {label(f, :name, class: "control-label")}
+      {text_input(f, :name, class: "form-control", autofocus: :autofocus)}
+      {error_tag(f, :name)}
     </div>
 
     <div class="col-lg-6 my-2">
-      <%= central_component("checkbox",
+      {central_component("checkbox",
         name: "lobby_policy[enabled]",
         id: "lobby_policy_enabled",
         value: "true",
         label: "Enabled",
         field: :enabled,
         changeset: @changeset
-      ) %>
+      )}
     </div>
 
     <div class="col-lg-6 my-2">
-      <%= label(f, :agent_name_format, class: "control-label") %>
-      <%= text_input(f, :agent_name_format, class: "form-control") %>
-      <%= error_tag(f, :agent_name_format) %>
+      {label(f, :agent_name_format, class: "control-label")}
+      {text_input(f, :agent_name_format, class: "form-control")}
+      {error_tag(f, :agent_name_format)}
     </div>
 
     <div class="col-lg-6 my-2">
-      <%= label(f, :lobby_name_format, class: "control-label") %>
-      <%= text_input(f, :lobby_name_format, class: "form-control") %>
-      <%= error_tag(f, :lobby_name_format) %>
+      {label(f, :lobby_name_format, class: "control-label")}
+      {text_input(f, :lobby_name_format, class: "form-control")}
+      {error_tag(f, :lobby_name_format)}
     </div>
 
     <div class="col-lg-6 my-2">
-      <%= input_with_type(f, :colour, "color") %>
+      {input_with_type(f, :colour, "color")}
     </div>
 
     <div class="col-lg-6 my-2">
-      <%= central_component("fa5_icon_picker", %{form: f, field: :icon}) %>
+      {central_component("fa5_icon_picker", %{form: f, field: :icon})}
     </div>
   </div>
 
   <div class="row">
     <div class="col-lg-3 col-md-6 my-2">
-      <%= label(f, :preset, class: "control-label") %>
-      <%= text_input(f, :preset, class: "form-control") %>
-      <%= error_tag(f, :preset) %>
+      {label(f, :preset, class: "control-label")}
+      {text_input(f, :preset, class: "form-control")}
+      {error_tag(f, :preset)}
     </div>
 
     <div class="col-lg-3 col-md-6 my-2">
-      <%= label(f, :max_teamcount, class: "control-label") %>
-      <%= text_input(f, :max_teamcount, class: "form-control") %>
-      <%= error_tag(f, :max_teamcount) %>
+      {label(f, :max_teamcount, class: "control-label")}
+      {text_input(f, :max_teamcount, class: "form-control")}
+      {error_tag(f, :max_teamcount)}
     </div>
 
     <div class="col-lg-3 col-md-6 my-2">
-      <%= label(f, :min_teamsize, class: "control-label") %>
-      <%= text_input(f, :min_teamsize, class: "form-control") %>
-      <%= error_tag(f, :min_teamsize) %>
+      {label(f, :min_teamsize, class: "control-label")}
+      {text_input(f, :min_teamsize, class: "form-control")}
+      {error_tag(f, :min_teamsize)}
     </div>
 
     <div class="col-lg-3 col-md-6 my-2">
-      <%= label(f, :max_teamsize, class: "control-label") %>
-      <%= text_input(f, :max_teamsize, class: "form-control") %>
-      <%= error_tag(f, :max_teamsize) %>
+      {label(f, :max_teamsize, class: "control-label")}
+      {text_input(f, :max_teamsize, class: "form-control")}
+      {error_tag(f, :max_teamsize)}
     </div>
   </div>
 
   <div class="row">
     <div class="col-lg-3 col-md-6 my-2">
-      <%= label(f, :min_rank, class: "control-label") %>
-      <%= text_input(f, :min_rank, class: "form-control") %>
-      <%= error_tag(f, :min_rank) %>
+      {label(f, :min_rank, class: "control-label")}
+      {text_input(f, :min_rank, class: "form-control")}
+      {error_tag(f, :min_rank)}
     </div>
 
     <div class="col-lg-3 col-md-6 my-2">
-      <%= label(f, :max_rank, class: "control-label") %>
-      <%= text_input(f, :max_rank, class: "form-control") %>
-      <%= error_tag(f, :max_rank) %>
+      {label(f, :max_rank, class: "control-label")}
+      {text_input(f, :max_rank, class: "form-control")}
+      {error_tag(f, :max_rank)}
     </div>
 
     <div class="col-lg-3 col-md-6 my-2">
-      <%= label(f, :min_rating, class: "control-label") %>
-      <%= text_input(f, :min_rating, class: "form-control") %>
-      <%= error_tag(f, :min_rating) %>
+      {label(f, :min_rating, class: "control-label")}
+      {text_input(f, :min_rating, class: "form-control")}
+      {error_tag(f, :min_rating)}
     </div>
 
     <div class="col-lg-3 col-md-6 my-2">
-      <%= label(f, :max_rating, class: "control-label") %>
-      <%= text_input(f, :max_rating, class: "form-control") %>
-      <%= error_tag(f, :max_rating) %>
+      {label(f, :max_rating, class: "control-label")}
+      {text_input(f, :max_rating, class: "form-control")}
+      {error_tag(f, :max_rating)}
     </div>
 
     <div class="col-lg-3 col-md-6 my-2">
-      <%= label(f, :min_uncertainty, class: "control-label") %>
-      <%= text_input(f, :min_uncertainty, class: "form-control") %>
-      <%= error_tag(f, :min_uncertainty) %>
+      {label(f, :min_uncertainty, class: "control-label")}
+      {text_input(f, :min_uncertainty, class: "form-control")}
+      {error_tag(f, :min_uncertainty)}
     </div>
 
     <div class="col-lg-3 col-md-6 my-2">
-      <%= label(f, :max_uncertainty, class: "control-label") %>
-      <%= text_input(f, :max_uncertainty, class: "form-control") %>
-      <%= error_tag(f, :max_uncertainty) %>
+      {label(f, :max_uncertainty, class: "control-label")}
+      {text_input(f, :max_uncertainty, class: "form-control")}
+      {error_tag(f, :max_uncertainty)}
     </div>
   </div>
 
   <div class="row">
     <div class="col-md-6 my-2">
-      <%= label(f, :map_list, class: "control-label") %>
-      <%= textarea_array(f, :map_list, class: "form-control", rows: 8) %>
-      <%= error_tag(f, :map_list) %>
+      {label(f, :map_list, class: "control-label")}
+      {textarea_array(f, :map_list, class: "form-control", rows: 8)}
+      {error_tag(f, :map_list)}
     </div>
 
     <div class="col-md-6 my-2">
-      <%= label(f, :agent_name_list, class: "control-label") %>
-      <%= textarea_array(f, :agent_name_list, class: "form-control", rows: 8) %>
-      <%= error_tag(f, :agent_name_list) %>
+      {label(f, :agent_name_list, class: "control-label")}
+      {textarea_array(f, :agent_name_list, class: "form-control", rows: 8)}
+      {error_tag(f, :agent_name_list)}
     </div>
   </div>
 

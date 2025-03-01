@@ -1,107 +1,107 @@
 <% bsname = view_colour() %>
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "day_list",
   label: "Daily",
   active: @active,
   icon: nil,
   bsname: bsname,
   url: ~p"/logging/server/day"
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "week_list",
   label: "Weekly",
   active: @active,
   icon: nil,
   bsname: bsname,
   url: ~p"/logging/server/week"
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "month_list",
   label: "Monthly",
   active: @active,
   icon: nil,
   bsname: bsname,
   url: ~p"/logging/server/month"
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "quarter_list",
   label: "Quarterly",
   active: @active,
   icon: nil,
   bsname: bsname,
   url: ~p"/logging/server/quarter"
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "year_list",
   label: "Yearly",
   active: @active,
   icon: nil,
   bsname: bsname,
   url: ~p"/logging/server/year"
-) %> &nbsp;&nbsp;&nbsp;&nbsp;
-<%= central_component("section_menu_button",
+)} &nbsp;&nbsp;&nbsp;&nbsp;
+{central_component("section_menu_button",
   name: "this_day",
   label: "Today",
   active: @active,
   icon: nil,
   bsname: bsname,
   url: ~p"/logging/server/show/day/today"
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "this_week",
   label: "This week",
   active: @active,
   icon: nil,
   bsname: bsname,
   url: ~p"/logging/server/show/week/today"
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "this_month",
   label: "This month",
   active: @active,
   icon: nil,
   bsname: bsname,
   url: ~p"/logging/server/show/month/today"
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "this_quarter",
   label: "This quarter",
   active: @active,
   icon: nil,
   bsname: bsname,
   url: ~p"/logging/server/show/quarter/today"
-) %> &nbsp;&nbsp;&nbsp;&nbsp;
-<%= central_component("section_menu_button",
+)} &nbsp;&nbsp;&nbsp;&nbsp;
+{central_component("section_menu_button",
   name: "now",
   label: "Now",
   active: @active,
   icon: "fa-regular fa-clock",
   bsname: bsname,
   url: ~p"/logging/server/now"
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "load",
   label: "Load",
   active: @active,
   icon: "fa-solid fa-server",
   bsname: bsname,
   url: ~p"/logging/server/load"
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "user_cost",
   label: "User cost",
   active: @active,
   icon: "fa-solid fa-euro",
   bsname: bsname,
   url: ~p"/logging/server/user_cost"
-) %>
+)}

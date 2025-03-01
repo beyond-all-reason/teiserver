@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Moderation.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "proposals"})
-) %>
+)}
 
 <div class="row">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Moderation.ProposalView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -18,15 +18,15 @@
             show_search: false,
             active: "edit"
           })
-        ) %>
+        )}
 
         <hr />
 
-        <h3>Editing proposal for action against <%= @proposal.target.name %></h3>
-        <%= render(
+        <h3>Editing proposal for action against {@proposal.target.name}</h3>
+        {render(
           "form.html",
           Map.put(assigns, :action, Routes.moderation_proposal_path(@conn, :update, @proposal))
-        ) %>
+        )}
       </div>
     </div>
   </div>

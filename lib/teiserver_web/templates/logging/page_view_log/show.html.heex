@@ -8,35 +8,35 @@
   });
 </script>
 
-<%= render(
+{render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "page_view"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(TeiserverWeb.Logging.PageViewLogView, "section_menu.html",
+        {render(TeiserverWeb.Logging.PageViewLogView, "section_menu.html",
           conn: @conn,
           permissions: @current_user.permissions,
           active: ""
-        ) %>
+        )}
 
         <hr />
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: icon()) %> Details
+              {central_component("icon", icon: icon())} Details
             </a>
           </li>
         </ul>
 
         <div class="tab-content">
           <div class="tab-pane" id="details_tab">
-            <%= render("tab_details.html", assigns) %>
+            {render("tab_details.html", assigns)}
           </div>
         </div>
       </div>

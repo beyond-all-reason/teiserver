@@ -1,22 +1,22 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "server"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Logging.ServerLogView,
           "section_menu.html",
           Map.merge(assigns, %{
             active: "#{@unit}_list"
           })
-        ) %>
+        )}
         <br /><br />
 
         <.section_menu_button
@@ -29,59 +29,59 @@
         </.section_menu_button>
 
         <%= if @unit == "day" do %>
-          &nbsp;&nbsp; <%= central_component("section_menu_button",
+          &nbsp;&nbsp; {central_component("section_menu_button",
             name: "filter-hourly-users",
             label: "Users",
             active: "filter-#{@filter}",
             icon: "fa-regular fa-grid-4",
             bsname: bsname,
             url: "?filter=hourly-users"
-          ) %>
+          )}
 
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "filter-hourly-players",
             label: "Players",
             active: "filter-#{@filter}",
             icon: "fa-regular fa-grid-4",
             bsname: bsname,
             url: "?filter=hourly-players"
-          ) %>
+          )}
 
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "filter-hourly-battles",
             label: "Battles",
             active: "filter-#{@filter}",
             icon: "fa-regular fa-grid-4",
             bsname: bsname,
             url: "?filter=hourly-battles"
-          ) %>
+          )}
         <% end %>
-        &nbsp;&nbsp; <%= central_component("section_menu_button",
+        &nbsp;&nbsp; {central_component("section_menu_button",
           name: "filter-graph-unique-users",
           label: "Uniques",
           active: "filter-#{@filter}",
           icon: StylingHelper.icon(:chart),
           bsname: bsname,
           url: "?filter=graph-unique-users"
-        ) %>
+        )}
 
-        <%= central_component("section_menu_button",
+        {central_component("section_menu_button",
           name: "filter-graph-peak-users",
           label: "Peaks",
           active: "filter-#{@filter}",
           icon: StylingHelper.icon(:chart),
           bsname: bsname,
           url: "?filter=graph-peak-users"
-        ) %>
+        )}
 
-        <%= central_component("section_menu_button",
+        {central_component("section_menu_button",
           name: "filter-graph-time",
           label: "Time",
           active: "filter-#{@filter}",
           icon: StylingHelper.icon(:chart),
           bsname: bsname,
           url: "?filter=graph-time"
-        ) %> &nbsp;&nbsp;
+        )} &nbsp;&nbsp;
         <.section_menu_button
           bsname={bsname}
           icon={StylingHelper.icon(:chart)}
@@ -142,28 +142,28 @@
           href={Routes.logging_match_log_path(@conn, :day_metrics_list)}
           class={"btn float-end btn-outline-#{TeiserverWeb.Logging.MatchLogView.view_colour}"}
         >
-          <%= central_component("icon", icon: TeiserverWeb.Logging.MatchLogView.icon()) %> &nbsp;
+          {central_component("icon", icon: TeiserverWeb.Logging.MatchLogView.icon())} &nbsp;
           Match data
         </a>
         <br /><br />
 
         <%= case @filter do %>
           <% "hourly-users" -> %>
-            <%= render(
+            {render(
               "heatmap_list.html",
               Map.put(assigns, :path, ~w(average_user_counts total))
-            ) %>
+            )}
           <% "hourly-players" -> %>
-            <%= render(
+            {render(
               "heatmap_list.html",
               Map.put(assigns, :path, ~w(average_user_counts player))
-            ) %>
+            )}
           <% "hourly-battles" -> %>
-            <%= render("heatmap_list.html", Map.put(assigns, :path, ~w(battles in_progress))) %>
+            {render("heatmap_list.html", Map.put(assigns, :path, ~w(battles in_progress)))}
           <% "graph-" <> _ -> %>
-            <%= render("metric_graph.html", assigns) %>
+            {render("metric_graph.html", assigns)}
           <% _ -> %>
-            <%= render("metric_list_data.html", assigns) %>
+            {render("metric_list_data.html", assigns)}
         <% end %>
       </div>
     </div>

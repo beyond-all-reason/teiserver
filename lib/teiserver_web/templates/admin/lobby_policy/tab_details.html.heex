@@ -1,34 +1,34 @@
 <div class="row">
   <div class="col-md-6">
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Name format",
       value: @lobby_policy.agent_name_format
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Teamsize",
       value: "#{@lobby_policy.min_teamsize} - #{@lobby_policy.max_teamsize}"
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Team count",
       value: @lobby_policy.max_teamcount
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Rating",
       value: "#{@lobby_policy.min_rating} - #{@lobby_policy.max_rating}"
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Uncertainty",
       value: "#{@lobby_policy.min_uncertainty} - #{@lobby_policy.max_uncertainty}"
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Rank",
       value: "#{@lobby_policy.min_rank} - #{@lobby_policy.max_rank}"
-    ) %>
+    )}
   </div>
   <div class="col-md-6">
     Map list: <textarea rows="8" class="form-control"><%= @lobby_policy.map_list |> Enum.join("\n") %></textarea>

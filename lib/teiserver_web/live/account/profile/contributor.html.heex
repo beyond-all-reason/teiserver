@@ -35,14 +35,14 @@
 
       <%= if @error_message do %>
         <div class="text-danger">
-          <%= @error_message %>
+          {@error_message}
         </div>
       <% end %>
 
       <div :if={@temp_country_code && @country_code != @temp_country_code} class="pt-2">
         <span class="btn btn-secondary" phx-click="revert-country_code">
           <Fontawesome.icon icon="cancel" style="solid" size="2x" /><br />
-          Revert to <%= @country_code %>
+          Revert to {@country_code}
         </span>
         &nbsp;&nbsp;&nbsp;
         <span class="btn btn-secondary" phx-click="clear-country_code">

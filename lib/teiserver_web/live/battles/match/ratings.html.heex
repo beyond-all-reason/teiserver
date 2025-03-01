@@ -1,8 +1,8 @@
-<%= render(
+{render(
   TeiserverWeb.Battle.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "matches"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -22,7 +22,7 @@
               active={@rating_type == rt}
               url={~p"/battle/ratings/#{rt}"}
             >
-              <%= rt %> &nbsp;&nbsp;&nbsp; <%= @user_ratings[rt].rating_value |> round(2) %>
+              {rt} &nbsp;&nbsp;&nbsp; {@user_ratings[rt].rating_value |> round(2)}
             </.section_menu_button_patch>
           <% end %>
         <% end %>
@@ -32,24 +32,24 @@
     <%= if @stats.first_log != nil and @user_ratings[@rating_type] != nil do %>
       <div class="row m-2 mt-3">
         <div class="col-md-3">
-          Games: <%= @stats.games %>
+          Games: {@stats.games}
         </div>
 
         <div class="col-md-3">
-          Winrate: <%= (@stats.winrate * 100) |> round %>%
+          Winrate: {(@stats.winrate * 100) |> round}%
         </div>
 
         <div class="col-md-3">
-          Peak balance rating: <%= Enum.max_by(@logs, fn l -> l.value["rating_value"] end).value[
+          Peak balance rating: {Enum.max_by(@logs, fn l -> l.value["rating_value"] end).value[
             "rating_value"
           ]
-          |> round(2) %>
+          |> round(2)}
         </div>
 
         <div class="col-md-3">
-          Balance rating change: <%= (@user_ratings[@rating_type].rating_value -
-                                        @stats.first_log.value["rating_value"])
-          |> round(2) %>
+          Balance rating change: {(@user_ratings[@rating_type].rating_value -
+                                     @stats.first_log.value["rating_value"])
+          |> round(2)}
         </div>
       </div>
     <% end %>
@@ -90,40 +90,40 @@
           <tr class="position-relative">
             <%= if log.match do %>
               <td>
-                <%= log.match.map %>
+                {log.match.map}
               </td>
-              <td><%= log.match.team_size * log.match.team_count %></td>
+              <td>{log.match.team_size * log.match.team_count}</td>
             <% else %>
-              <td colspan="2"><%= log.value["reason"] || "No match" %></td>
+              <td colspan="2">{log.value["reason"] || "No match"}</td>
             <% end %>
-            <td><%= @rating_type_id_lookup[log.rating_type_id] %></td>
-            <td><%= round(log.value["skill"], 2) %></td>
+            <td>{@rating_type_id_lookup[log.rating_type_id]}</td>
+            <td>{round(log.value["skill"], 2)}</td>
             <td class={skill_text_class}>
               <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
 
-              <%= round(log.value["skill_change"], 2) %>
+              {round(log.value["skill_change"], 2)}
             </td>
-            <td><%= round(log.value["uncertainty"], 2) %></td>
+            <td>{round(log.value["uncertainty"], 2)}</td>
             <td class={uncertainty_text_class}>
               <i class={"fa-fw fa-solid fa-#{uncertainty_icon}"}></i>
 
-              <%= round(log.value["uncertainty_change"], 2) %>
+              {round(log.value["uncertainty_change"], 2)}
             </td>
-            <td><%= round(log.value["rating_value"], 2) %></td>
+            <td>{round(log.value["rating_value"], 2)}</td>
             <td class={skill_text_class}>
               <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
 
-              <%= round(log.value["rating_value_change"], 2) %>
+              {round(log.value["rating_value_change"], 2)}
             </td>
 
-            <td><%= round(log.value["skill"] - 3 * log.value["uncertainty"], 2) %></td>
+            <td>{round(log.value["skill"] - 3 * log.value["uncertainty"], 2)}</td>
             <td class={skill_text_class}>
               <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
 
-              <%= round(log.value["skill_change"] - 3 * log.value["uncertainty_change"], 2) %>
+              {round(log.value["skill_change"] - 3 * log.value["uncertainty_change"], 2)}
             </td>
 
-            <td><%= date_to_str(log.inserted_at, format: :hms_or_dmy, tz: @tz) %></td>
+            <td>{date_to_str(log.inserted_at, format: :hms_or_dmy, tz: @tz)}</td>
 
             <%= if log.match do %>
               <td>

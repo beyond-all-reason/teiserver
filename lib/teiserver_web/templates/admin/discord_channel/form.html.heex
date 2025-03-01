@@ -21,50 +21,50 @@
 
   <div class="row">
     <div class="col my-2">
-      <%= label(f, :name, class: "control-label") %>
-      <%= text_input(f, :name, class: "form-control", autofocus: :autofocus) %>
-      <%= error_tag(f, :name) %>
+      {label(f, :name, class: "control-label")}
+      {text_input(f, :name, class: "form-control", autofocus: :autofocus)}
+      {error_tag(f, :name)}
     </div>
 
     <div class="col my-2">
-      <%= label(f, :special_name, class: "control-label") %> (if used, this overwrites the name) <%= select(
+      {label(f, :special_name, class: "control-label")} (if used, this overwrites the name) {select(
         f,
         :special_name,
         @special_names,
         class: "form-control"
-      ) %>
-      <%= error_tag(f, :special_name) %>
+      )}
+      {error_tag(f, :special_name)}
     </div>
 
     <div :if={@special_names} class="col my-2">
-      <%= label(f, :channel_id, class: "control-label") %> id <%= text_input(f, :channel_id,
+      {label(f, :channel_id, class: "control-label")} id {text_input(f, :channel_id,
         class: "form-control"
-      ) %>
-      <%= error_tag(f, :channel_id) %>
+      )}
+      {error_tag(f, :channel_id)}
     </div>
   </div>
 
   <div class="row">
     <div class="col my-2">
-      <%= label(f, :read_permission, class: "control-label") %>
-      <%= text_input(f, :read_permission, class: "form-control") %>
-      <%= error_tag(f, :read_permission) %>
+      {label(f, :read_permission, class: "control-label")}
+      {text_input(f, :read_permission, class: "form-control")}
+      {error_tag(f, :read_permission)}
     </div>
 
     <div class="col my-2">
-      <%= label(f, :post_permission, class: "control-label") %>
-      <%= text_input(f, :post_permission, class: "form-control") %>
-      <%= error_tag(f, :post_permission) %>
+      {label(f, :post_permission, class: "control-label")}
+      {text_input(f, :post_permission, class: "form-control")}
+      {error_tag(f, :post_permission)}
     </div>
   </div>
 
   <div class="row">
     <div class="col-lg-6 my-2">
-      <%= input_with_type(f, :colour, "color") %>
+      {input_with_type(f, :colour, "color")}
     </div>
 
     <div class="col-lg-6 my-2">
-      <%= central_component("fa5_icon_picker", %{form: f, field: :icon}) %>
+      {central_component("fa5_icon_picker", %{form: f, field: :icon})}
     </div>
   </div>
 

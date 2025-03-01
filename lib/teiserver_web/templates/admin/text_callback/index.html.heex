@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "text_callbacks"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.TextCallbackView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -22,7 +22,7 @@
                 true -> "index"
               end
           })
-        ) %>
+        )}
         <br /><br />
 
         <h4>Listing Text callbacks</h4>
@@ -45,10 +45,10 @@
             <%= for text_callback <- @text_callbacks do %>
               <tr>
                 <td style={"background-color: #{text_callback.colour}; color: #FFF;"} width="22">
-                  <%= central_component("icon", icon: text_callback.icon) %>
+                  {central_component("icon", icon: text_callback.icon)}
                 </td>
                 <td style={"background-color: #{rgba_css text_callback.colour};"}>
-                  <%= text_callback.name %>
+                  {text_callback.name}
                 </td>
 
                 <td>
@@ -59,9 +59,9 @@
                   <% end %>
                 </td>
 
-                <td><%= Enum.join(text_callback.triggers, ", ") %></td>
+                <td>{Enum.join(text_callback.triggers, ", ")}</td>
 
-                <td><%= String.slice(text_callback.response, 0..100) %></td>
+                <td>{String.slice(text_callback.response, 0..100)}</td>
 
                 <td>
                   <a

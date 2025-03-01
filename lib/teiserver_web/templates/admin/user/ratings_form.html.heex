@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
-) %>
+)}
 
 <script type="text/javascript">
   function new_rating_value(index) {
@@ -21,13 +21,13 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
             active: "ratings_form"
           })
-        ) %>
+        )}
 
         <hr />
 
@@ -71,7 +71,7 @@
             <% rating = @ratings[r] || @default_rating %>
             <div class="row my-3">
               <div class="col-md-12">
-                <h4><%= r %></h4>
+                <h4>{r}</h4>
               </div>
               <div class="col-md-2">
                 <input type="text" value={rating.skill} class="form-control" disabled="disabled" />

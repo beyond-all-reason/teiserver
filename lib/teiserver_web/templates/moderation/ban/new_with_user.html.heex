@@ -38,7 +38,7 @@ type_icons = %{
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Moderation.BanView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -46,7 +46,7 @@ type_icons = %{
             show_search: false,
             active: "new"
           })
-        ) %>
+        )}
 
         <hr />
         <div class="float-end">
@@ -59,7 +59,7 @@ type_icons = %{
           Warning, if you use this tool incorrectly you might end up banning innocent users. If you are not sure how to use it then do not use it.
         </div>
 
-        <h3>Adding ban based on <%= @user.name %></h3>
+        <h3>Adding ban based on {@user.name}</h3>
 
         <div class="row">
           <div class="col-md-12 mb-4">
@@ -70,12 +70,12 @@ type_icons = %{
                 </div>
               <% _ -> %>
                 <div class="alert alert-primary">
-                  Potentially matches the following unbanned user(s): <%= for(
+                  Potentially matches the following unbanned user(s): {for(
                     u <- @matching_users,
                     do: u.name
                   )
                   |> Enum.sort()
-                  |> Enum.join(", ") %>. They exist prior to this ban and will not be affected.
+                  |> Enum.join(", ")}. They exist prior to this ban and will not be affected.
                 </div>
             <% end %>
 
@@ -92,9 +92,9 @@ type_icons = %{
 
               <div class="row" id="keys-row">
                 <div class="form-group col-md-12 col-lg-6 my-3">
-                  <%= label(f, :reason, class: "control-label") %>
-                  <%= text_input(f, :reason, class: "form-control", autofocus: :autofocus) %>
-                  <%= error_tag(f, :reason) %>
+                  {label(f, :reason, class: "control-label")}
+                  {text_input(f, :reason, class: "form-control", autofocus: :autofocus)}
+                  {error_tag(f, :reason)}
                 </div>
 
                 <div class="form-group col-md-12 my-3">
@@ -124,25 +124,25 @@ type_icons = %{
                             <label for={"ban_type_#{key.value}"}>
                               <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
                               </i>
-                              &nbsp; <%= key.type.name %>
+                              &nbsp; {key.type.name}
                             </label>
                           </td>
                           <td>
-                            <label for={"ban_type_#{key.value}"}><%= key.value %></label>
+                            <label for={"ban_type_#{key.value}"}>{key.value}</label>
                           </td>
                           <td>
                             <label for={"ban_type_#{key.value}"}>
-                              <%= date_to_str(key.last_updated, format: :hms_or_ymd) %>
+                              {date_to_str(key.last_updated, format: :hms_or_ymd)}
                             </label>
                           </td>
                           <td>
-                            <%= central_component("checkbox",
+                            {central_component("checkbox",
                               name: "ban[key_values][]",
                               id: "ban_type_#{key.value}",
                               value: key.value,
                               label: "",
                               checked: false
-                            ) %>
+                            )}
                           </td>
                         </tr>
                       <% end %>

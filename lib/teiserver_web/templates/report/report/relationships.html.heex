@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -17,7 +17,7 @@
           <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
-        <%= render(
+        {render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -25,7 +25,7 @@
             show_search: false,
             active: "relationships"
           })
-        ) %>
+        )}
         <br /><br />
 
         <form
@@ -49,22 +49,22 @@
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_state" class="control-label">State:</label>
-              <%= select(:report, :state, ["Follow", "Ignore", "Avoid", "Block"],
+              {select(:report, :state, ["Follow", "Ignore", "Avoid", "Block"],
                 class: "form-control",
                 selected: @params["state"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_limit" class="control-label">Exclude banned users</label>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "report[exclude_banned]",
                 id: "report_exclude_banned",
                 value: "true",
                 label: "",
                 checked: @params["exclude_banned"] == "true",
                 description: "exclude banned users from all queries"
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
@@ -88,17 +88,17 @@
             <tr>
               <th>&nbsp;</th>
               <th>Ignore count</th>
-              <th><%= String.capitalize(@state_past_tense) %> by</th>
+              <th>{String.capitalize(@state_past_tense)} by</th>
               <th>&nbsp;</th>
             </tr>
           </thead>
           <tbody>
             <%= for [userid, username, state_count, from_names] <- @results do %>
               <tr>
-                <td><%= username %></td>
-                <td><%= state_count %></td>
+                <td>{username}</td>
+                <td>{state_count}</td>
                 <td>
-                  <%= from_names |> Enum.join(", ") %>
+                  {from_names |> Enum.join(", ")}
                 </td>
                 <td>
                   <%= if allow?(@conn, "Moderator") do %>

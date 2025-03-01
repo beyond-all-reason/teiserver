@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Game.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "queues"})
-) %>
+)}
 
 <div class="row section-menu" id="main-content">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Game.QueueView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -22,7 +22,7 @@
                 true -> "index"
               end
           })
-        ) %>
+        )}
         <br /><br />
 
         <h4>Listing Queues</h4>
@@ -40,9 +40,9 @@
             <%= for queue <- @queues do %>
               <tr>
                 <td style={"background-color: #{queue.colour}; color: #FFF;"} width="22">
-                  <%= central_component("icon", icon: queue.icon) %>
+                  {central_component("icon", icon: queue.icon)}
                 </td>
-                <td><%= queue.name %></td>
+                <td>{queue.name}</td>
 
                 <td>
                   <%= if queue.settings["enabled"] do %>
@@ -52,7 +52,7 @@
                   <% end %>
                 </td>
 
-                <td><%= queue.settings["rating_type"] %></td>
+                <td>{queue.settings["rating_type"]}</td>
 
                 <td>
                   <a

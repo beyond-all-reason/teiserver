@@ -13,17 +13,17 @@
         style={"background-color: #{@post.poster.colour}; font-size: 1em;"}
       >
         <Fontawesome.icon icon={@post.poster.icon} style="solid" />
-        <%= @post.poster.name %>
+        {@post.poster.name}
       </span>
     </div>
     <h3>
-      <%= @post.title %> - <%= Teiserver.Helper.TimexHelper.date_to_str(
+      {@post.title} - {Teiserver.Helper.TimexHelper.date_to_str(
         @post.inserted_at,
         :ymd_hms
-      ) %>
+      )}
     </h3>
 
-    <%= @post.contents |> Earmark.as_html!() |> raw %>
+    {@post.contents |> Earmark.as_html!() |> raw}
     <br /><br />
 
     <div class="float-end">
