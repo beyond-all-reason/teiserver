@@ -142,6 +142,22 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "friend/removed", %{from: to_string(from_id)}, state}
   end
 
+  def handle_info({:user, {:user_updated, user_state}}, state) do
+    event = %{
+      users: [
+        %{
+          userId: to_string(user_state.user_id),
+          username: user_state.username,
+          clanId: user_state.clan_id,
+          country: user_state.country,
+          status: user_state.status
+        }
+      ]
+    }
+
+    {:event, "user/updated", event, state}
+  end
+
   def handle_info({:timeout, message_id}, state)
       when is_map_key(state.pending_responses, message_id) do
     Logger.debug("User did not reply in time to request with id #{message_id}")
@@ -397,6 +413,31 @@ defmodule Teiserver.Player.TachyonHandler do
       err ->
         Logger.error("can't remove friend #{inspect(err)}")
         {:error_response, :internal_error, inspect(err), state}
+    end
+  end
+
+  def handle_command("user/subscribeUpdates", "request", _message_id, msg, state) do
+    # that kind of parsing can probably be extracted, will likely be generally useful
+    {ok_ids, invalid_ids} =
+      Enum.reduce(msg["data"]["userIds"], {[], []}, fn raw_id, {ok, invalid} ->
+        case Integer.parse(raw_id) do
+          {id, ""} -> {[id | ok], invalid}
+          _ -> {ok, [raw_id | invalid]}
+        end
+      end)
+
+    if not Enum.empty?(invalid_ids) do
+      details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
+      {:error_response, :invalid_request, details, state}
+    else
+      case Player.Session.subscribe_updates(state.user.id, ok_ids) do
+        :ok ->
+          {:response, state}
+
+        {:error, {:invalid_ids, invalid_ids}} ->
+          details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
+          {:error_response, :invalid_request, details, state}
+      end
     end
   end
 

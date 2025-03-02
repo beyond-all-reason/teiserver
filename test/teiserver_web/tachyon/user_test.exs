@@ -46,4 +46,64 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       assert userdata["status"] == "menu"
     end
   end
+
+  describe "subscribeUpdates" do
+    setup [{Tachyon, :setup_client}]
+
+    test "must pass valid user ids", %{client: client} do
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.subscribe_updates!(client, ["invalid-user-id"])
+    end
+
+    test "must pass id for existing users", %{client: client} do
+      # negative integer are valid int, but guaranteed to be invalid postgres
+      # primary key, so guaranteed no user behind that
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.subscribe_updates!(client, ["-87931"])
+    end
+
+    test "for offline user", %{client: client} do
+      other_user =
+        Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+
+      assert %{"status" => "success"} =
+               Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
+
+      # subscribing should also be followed by an updated event to get the full state
+      assert {:ok,
+              %{
+                "status" => "success",
+                "commandId" => "user/updated",
+                "data" => %{"users" => [user_data]}
+              }} =
+               Tachyon.recv_message(client)
+
+      assert user_data["userId"] == to_string(other_user.id)
+      assert user_data["username"] == other_user.name
+      assert user_data["clanId"] == other_user.clan_id
+      assert user_data["status"] == "offline"
+    end
+
+    test "for online user", %{client: client} do
+      {:ok, ctx} = Tachyon.setup_client()
+      other_user = ctx[:user]
+
+      assert %{"status" => "success"} =
+               Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
+
+      # subscribing should also be followed by an updated event to get the full state
+      assert {:ok,
+              %{
+                "status" => "success",
+                "commandId" => "user/updated",
+                "data" => %{"users" => [user_data]}
+              }} =
+               Tachyon.recv_message(client)
+
+      assert user_data["userId"] == to_string(other_user.id)
+      assert user_data["username"] == other_user.name
+      assert user_data["clanId"] == other_user.clan_id
+      assert user_data["status"] == "menu"
+    end
+  end
 end

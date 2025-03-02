@@ -92,6 +92,12 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.one()
   end
 
+  @spec query_users(list) :: [User.t()]
+  def query_users(query_args \\ []) do
+    UserQueries.query_users(query_args)
+    |> Repo.all()
+  end
+
   @spec query_user(list) :: User.t() | nil
   def query_user(query_args \\ []) do
     UserQueries.query_users(query_args)
