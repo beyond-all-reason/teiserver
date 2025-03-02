@@ -1,0 +1,33 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/privateUser.json",
+    "title": "PrivateUser",
+    "allOf": [
+        { "$ref": "../definitions/user.json" },
+        {
+            "type": "object",
+            "properties": {
+                "partyId": {
+                    "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "friendIds": { "type": "array", "items": { "type": "string" } },
+                "outgoingFriendRequestIds": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "incomingFriendRequestIds": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "ignoreIds": { "type": "array", "items": { "type": "string" } },
+                "currentBattle": { "$ref": "../definitions/privateBattle.json" }
+            },
+            "required": [
+                "partyId",
+                "friendIds",
+                "outgoingFriendRequestIds",
+                "incomingFriendRequestIds",
+                "ignoreIds"
+            ]
+        }
+    ]
+}

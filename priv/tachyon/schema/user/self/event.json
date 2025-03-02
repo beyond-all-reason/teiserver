@@ -1,0 +1,25 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/user/self/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "UserSelfEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "user/self" },
+        "data": {
+            "title": "UserSelfEventData",
+            "type": "object",
+            "properties": {
+                "user": { "$ref": "../../definitions/privateUser.json" }
+            },
+            "required": ["user"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

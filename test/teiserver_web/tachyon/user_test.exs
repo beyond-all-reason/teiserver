@@ -2,14 +2,13 @@ defmodule TeiserverWeb.Tachyon.UserTest do
   use TeiserverWeb.ConnCase, async: false
   alias Teiserver.Support.Tachyon
 
-  setup _context do
-    Tachyon.setup_client()
-  end
-
   describe "info" do
+    setup [{Tachyon, :setup_client}]
+
     test "works", %{user: user, client: client} do
       %{id: user_id, name: name, clan_id: clan_id} = user
       %{country: country} = Teiserver.Account.get_user_by_id(user_id)
+      user_id = to_string(user_id)
 
       user_id = to_string(user_id)
 
@@ -30,16 +29,15 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     end
   end
 
-  describe "updated" do
-    test "sent after login", %{user: user} do
+  describe "self event" do
+    test "sent after login" do
+      user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
       %{client: client} = Tachyon.connect(user, swallow_first_event: false)
 
       {:ok,
        %{
-         "commandId" => "user/updated",
-         "data" => %{
-           "users" => [userdata]
-         }
+         "commandId" => "user/self",
+         "data" => %{"user" => userdata}
        }} = Tachyon.recv_message(client)
 
       assert userdata["userId"] == to_string(user.id)

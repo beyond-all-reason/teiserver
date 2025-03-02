@@ -51,18 +51,22 @@ defmodule Teiserver.Player.TachyonHandler do
     Logger.metadata(user_id: user.id)
 
     event = %{
-      users: [
-        %{
-          userId: to_string(user.id),
-          username: user.name,
-          countryCode: user.country,
-          status: :menu,
-          clanId: user.clan_id
-        }
-      ]
+      user: %{
+        userId: to_string(user.id),
+        username: user.name,
+        displayName: user.name,
+        clanId: user.clan_id,
+        countryCode: user.country,
+        status: :menu,
+        partyId: nil,
+        friendIds: [],
+        outgoingFriendRequestIds: [],
+        incomingFriendRequestIds: [],
+        ignoreIds: []
+      }
     }
 
-    {:event, "user/updated", event, state}
+    {:event, "user/self", event, state}
   end
 
   @impl Handler
