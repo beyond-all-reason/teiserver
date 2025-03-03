@@ -18,10 +18,37 @@ defmodule Teiserver.Game.BalancerServerTest do
       "data" => params["data"] || %{}
     }
 
-    dbg(requested_user)
-
     {:ok, u} =
       Teiserver.Account.create_user(requested_user)
+  end
+
+  @spec make_users_with_ranks([non_neg_integer()]) ::
+          list()
+  def make_users_with_ranks(list_of_ranks_to_assign_to_users) do
+    users =
+      Enum.with_index(list_of_ranks_to_assign_to_users)
+      |> Enum.map(fn {user, index} ->
+        %{
+          "name" => "user" <> to_string(index + 1) <> "_" <> to_string(ExULID.ULID.generate()),
+          "email" => to_string(ExULID.ULID.generate()) <> "@example.com",
+          "permissions" => []
+        }
+      end)
+      |> Enum.map(fn x -> make_user(x) end)
+      # unwrap user creation response
+      |> Enum.map(fn {:ok, reply} -> reply end)
+      |> Enum.map(fn x -> Map.put(x, :userid, x.id) end)
+      # each user in their own party
+      |> Enum.map(fn x -> Map.put(x, :party_id, x.id + 1) end)
+
+    # set the user rank
+    Enum.map(Enum.with_index(users), fn {user, index} ->
+      Teiserver.Account.update_user_stat(user.id, %{
+        :rank => Enum.at(list_of_ranks_to_assign_to_users, index)
+      })
+    end)
+
+    users
   end
 
   test "get fuzz multiplier" do
@@ -61,35 +88,20 @@ defmodule Teiserver.Game.BalancerServerTest do
 
     arbitrary_rank_for_all_test_users = 10
 
-    users =
-      create_fake_players(6)
-      # take the above sequence generator and use it to create some fake user data
-      |> Enum.map(fn x ->
-        %{
-          "name" => "user" <> to_string(x.iter) <> "_" <> to_string(ExULID.ULID.generate()),
-          "email" => to_string(ExULID.ULID.generate()) <> "@example.com",
-          "permissions" => []
-        }
-      end)
-      |> Enum.map(fn x -> make_user(x) end)
-      # unwrap user creation response
-      |> Enum.map(fn {:ok, reply} -> reply end)
-      # set the user rank
-      |> Enum.map(fn user ->
-        Teiserver.Account.update_user_stat(user.id, %{:rank => arbitrary_rank_for_all_test_users})
-      end)
-      |> Enum.map(fn {:ok, reply} -> reply end)
-      |> Enum.map(fn user -> Map.put(user, :userid, user.user_id) end)
-      # all users are in different parties
-      |> Enum.map(fn user -> Map.put(user, :party_id, user.user_id + 1) end)
+    players =
+      make_users_with_ranks([10, 20, 30, 40])
 
-    dbg(users)
-    players = users
+    dbg(players)
+
+    players2 =
+      players
+      |> Enum.map(fn x -> Map.put(x, :userid, x.id) end)
+
+    dbg(players2)
 
     {:ok, start_link_results} = BalancerServer.start_link(data: %{lobby_id: 1})
 
     starting_state = GenServer.call(start_link_results, :report_state, 5000)
-
     dbg(starting_state)
 
     first_balance_pass =
@@ -99,7 +111,8 @@ defmodule Teiserver.Game.BalancerServerTest do
         5000
       )
 
-    dbg(first_balance_pass)
+    state2 = GenServer.call(start_link_results, :report_state, 5000)
+    dbg(state2)
 
     second_balance_pass_hash_reuse =
       GenServer.call(
@@ -107,6 +120,9 @@ defmodule Teiserver.Game.BalancerServerTest do
         {:make_balance, team_count, [], players},
         5000
       )
+
+    state3 = GenServer.call(start_link_results, :report_state, 5000)
+    dbg(state3)
 
     assert second_balance_pass_hash_reuse.hash == first_balance_pass.hash
 
@@ -138,8 +154,6 @@ defmodule Teiserver.Game.BalancerServerTest do
     #   })
     # ]
 
-    # dbg(users)
-
     #### TODO
 
     # third_balance_pass_with_more_players =
@@ -151,6 +165,62 @@ defmodule Teiserver.Game.BalancerServerTest do
 
     # dbg(third_balance_pass_with_more_players)
     # assert second_balance_pass_hash_reuse.hash != third_balance_pass_with_more_players.hash
+  end
+
+  test "get_balance_mode works with a hash" do
+    team_count = 2
+
+    arbitrary_rank_for_all_test_users = 10
+
+    players = make_users_with_ranks([10, 20, 30, 40])
+
+    {:ok, start_link_results} = BalancerServer.start_link(data: %{lobby_id: 1})
+
+    starting_state = GenServer.call(start_link_results, :report_state, 5000)
+
+    first_balance_pass =
+      GenServer.call(
+        start_link_results,
+        {:make_balance, team_count, [], players},
+        5000
+      )
+
+    get_balance_mode_returns_value =
+      GenServer.call(
+        start_link_results,
+        :get_balance_mode,
+        5000
+      )
+
+    refute get_balance_mode_returns_value == nil
+  end
+
+  test "get_current_balance works with a hash" do
+    team_count = 2
+
+    arbitrary_rank_for_all_test_users = 10
+
+    players = make_users_with_ranks([10, 20, 30, 40])
+
+    {:ok, start_link_results} = BalancerServer.start_link(data: %{lobby_id: 1})
+
+    starting_state = GenServer.call(start_link_results, :report_state, 5000)
+
+    first_balance_pass =
+      GenServer.call(
+        start_link_results,
+        {:make_balance, team_count, [], players},
+        5000
+      )
+
+    get_balance_mode_returns_value =
+      GenServer.call(
+        start_link_results,
+        :get_current_balance,
+        5000
+      )
+
+    refute get_balance_mode_returns_value == nil
   end
 
   defp create_fake_players(count) do

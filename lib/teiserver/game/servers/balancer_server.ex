@@ -29,7 +29,9 @@ defmodule Teiserver.Game.BalancerServer do
           fuzz_multiplier: state.fuzz_multiplier,
           shuffle_first_pick: state.shuffle_first_pick,
           last_balance_hash_cache_hit: state.last_balance_hash_cache_hit,
-          last_balance_hash_cache_miss: state.last_balance_hash_cache_miss
+          last_balance_hash_cache_miss: state.last_balance_hash_cache_miss,
+          last_balance_hash: state.last_balance_hash,
+          last_balance_result: state.last_balance_result
         ]
 
     {balance, new_state} = make_balance(team_count, state, opts)
@@ -51,7 +53,9 @@ defmodule Teiserver.Game.BalancerServer do
           fuzz_multiplier: state.fuzz_multiplier,
           shuffle_first_pick: state.shuffle_first_pick,
           last_balance_hash_cache_hit: state.last_balance_hash_cache_hit,
-          last_balance_hash_cache_miss: state.last_balance_hash_cache_miss
+          last_balance_hash_cache_miss: state.last_balance_hash_cache_miss,
+          last_balance_hash: state.last_balance_hash,
+          last_balance_result: state.last_balance_result
         ]
 
     {balance, new_state} = make_balance(team_count, state, opts, players)
@@ -59,12 +63,22 @@ defmodule Teiserver.Game.BalancerServer do
   end
 
   def handle_call(:get_balance_mode, _from, %{last_balance_hash: hash} = state) do
-    result = state.hashes[hash]
+    result =
+      cond do
+        state.last_balance_hash == hash -> state.last_balance_result
+        true -> nil
+      end
+
     {:reply, result.balance_mode, state}
   end
 
   def handle_call(:get_current_balance, _from, %{last_balance_hash: hash} = state) do
-    result = state.hashes[hash]
+    result =
+      cond do
+        state.last_balance_hash == hash -> state.last_balance_result
+        true -> nil
+      end
+
     {:reply, result, state}
   end
 
@@ -79,7 +93,9 @@ defmodule Teiserver.Game.BalancerServer do
       stddev_diff_max: state.stddev_diff_max,
       shuffle_first_pick: state.shuffle_first_pick,
       last_balance_hash_cache_hit: state.last_balance_hash_cache_hit,
-      last_balance_hash_cache_miss: state.last_balance_hash_cache_miss
+      last_balance_hash_cache_miss: state.last_balance_hash_cache_miss,
+      last_balance_hash: state.last_balance_hash,
+      last_balance_result: state.last_balance_result
     }
 
     {:reply, result, state}
@@ -121,7 +137,6 @@ defmodule Teiserver.Game.BalancerServer do
 
   def handle_cast(:reinit, state) do
     new_state = Map.merge(empty_state(state.lobby_id), state)
-
     {:noreply, new_state}
   end
 
@@ -191,8 +206,10 @@ defmodule Teiserver.Game.BalancerServer do
     |> Base.encode64()
   end
 
+  # This function is public only for testing; it should not be called otherwise
+  # long term, there in interest in confirming this is a stateless pure function, which would make this easier to test
   @spec do_make_balance(non_neg_integer(), [T.client()], List.t()) :: map()
-  defp do_make_balance(team_count, players, opts) do
+  def do_make_balance(team_count, players, opts) do
     team_size = calculate_team_size(team_count, players)
 
     # Use Large Team ratings when balancing Team FFA
