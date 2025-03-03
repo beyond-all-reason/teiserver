@@ -671,6 +671,12 @@ defmodule Teiserver.CacheUser do
         |> String.trim()
         |> String.downcase()
         |> case do
+          "!cv joinas" ->
+            "!cv joinas spec"
+
+          "!callvote joinas spec" ->
+            "!callvote joinas spec"
+
           "!joinas" ->
             "!joinas spec"
 
