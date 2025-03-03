@@ -105,5 +105,52 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       assert user_data["clanId"] == other_user.clan_id
       assert user_data["status"] == "menu"
     end
+
+    test "when target connects", %{client: client} do
+      other_user =
+        Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+
+      assert %{"status" => "success"} =
+               Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
+
+      assert {:ok, %{"status" => "success"}} = Tachyon.recv_message(client)
+      Tachyon.connect(other_user)
+
+      assert {:ok,
+              %{
+                "status" => "success",
+                "commandId" => "user/updated",
+                "data" => %{"users" => [user_data]}
+              }} =
+               Tachyon.recv_message(client)
+
+      assert user_data["userId"] == to_string(other_user.id)
+      assert user_data["status"] == "menu"
+    end
+
+    test "when target disconnects", %{client: client} do
+      {:ok, ctx} = Tachyon.setup_client()
+      other_user = ctx[:user]
+
+      assert %{"status" => "success"} =
+               Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
+
+      # get the full state
+      assert {:ok, %{"status" => "success", "data" => ev_data}} = Tachyon.recv_message(client)
+      assert hd(ev_data["users"])["status"] == "menu"
+
+      Tachyon.disconnect!(ctx[:client])
+
+      assert {:ok,
+              %{
+                "status" => "success",
+                "commandId" => "user/updated",
+                "data" => %{"users" => [user_data]}
+              }} =
+               Tachyon.recv_message(client)
+
+      assert user_data["userId"] == to_string(ctx[:user].id)
+      assert user_data["status"] == "offline"
+    end
   end
 end

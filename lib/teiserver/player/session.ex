@@ -80,6 +80,8 @@ defmodule Teiserver.Player.Session do
       }
     }
 
+    broadcast_user_update!(user, :menu)
+
     Logger.debug("init session #{inspect(self())}")
     Logger.info("session started")
 
@@ -290,6 +292,8 @@ defmodule Teiserver.Player.Session do
       _ ->
         nil
     end
+
+    broadcast_user_update!(state.user, :offline)
 
     {:stop, :normal, :ok, %{state | matchmaking: initial_matchmaking_state()}}
   end
