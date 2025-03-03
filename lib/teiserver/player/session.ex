@@ -52,7 +52,8 @@ defmodule Teiserver.Player.Session do
           mon_ref: reference(),
           conn_pid: pid() | nil,
           matchmaking: matchmaking_state(),
-          messaging_state: messaging_state()
+          messaging_state: messaging_state(),
+          user_subscriptions: MapSet.t(T.userid())
         }
 
   # TODO: would be better to have that as a db setting, perhaps passed as an
@@ -77,7 +78,8 @@ defmodule Teiserver.Player.Session do
         store_messages?: true,
         subscribed?: false,
         buffer: BQ.new(@messaging_buffer_size)
-      }
+      },
+      user_subscriptions: MapSet.new()
     }
 
     broadcast_user_update!(user, :menu)
@@ -259,6 +261,12 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(originator_id), {:user, {:subscribe_updates, user_ids}})
   end
 
+  @spec unsubscribe_updates(T.userid(), [T.userid()]) ::
+          :ok | {:error, {:invalid_ids, [integer()]}}
+  def unsubscribe_updates(originator_id, user_ids) do
+    GenServer.call(via_tuple(originator_id), {:user, {:unsubscribe_updates, user_ids}})
+  end
+
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
@@ -409,8 +417,21 @@ defmodule Teiserver.Player.Session do
       {:reply, {:error, {:invalid_ids, diff}}, state}
     else
       Enum.each(users, &do_subscribe_updates/1)
-      {:reply, :ok, state}
+      new_state = Map.update!(state, :user_subscriptions, &MapSet.union(&1, MapSet.new(user_ids)))
+      {:reply, :ok, new_state}
     end
+  end
+
+  def handle_call({:user, {:unsubscribe_updates, user_ids}}, _from, state) do
+    user_ids = MapSet.new(user_ids)
+    to_remove = MapSet.intersection(user_ids, state.user_subscriptions)
+
+    for user_id <- to_remove do
+      PubSub.unsubscribe(Teiserver.PubSub, user_topic(user_id))
+    end
+
+    new_subs = MapSet.difference(state.user_subscriptions, user_ids)
+    {:reply, :ok, %{state | user_subscriptions: new_subs}}
   end
 
   @impl true
@@ -611,11 +632,21 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_info(
-        %{channel: "tachyon:user:" <> _user_id, event: :user_updated, state: user_state},
+        %{
+          channel: "tachyon:user:" <> _user_id,
+          user_id: user_id,
+          event: :user_updated,
+          state: user_state
+        },
         state
       ) do
-    # TODO: before sending to a player, make sure we’re still subscribed
-    state = send_to_player({:user, {:user_updated, user_state}}, state)
+    state =
+      if user_id in state.user_subscriptions do
+        send_to_player({:user, {:user_updated, user_state}}, state)
+      else
+        state
+      end
+
     {:noreply, state}
   end
 
@@ -705,6 +736,7 @@ defmodule Teiserver.Player.Session do
       %{
         channel: topic,
         event: :user_updated,
+        user_id: user.id,
         state: state
       }
     )
