@@ -338,4 +338,10 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, resp} = recv_message(client)
     resp
   end
+
+  def unsubscribe_updates!(client, user_ids) do
+    :ok = send_request(client, "user/unsubscribeUpdates", %{userIds: user_ids})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
 end

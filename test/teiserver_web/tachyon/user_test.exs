@@ -47,7 +47,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     end
   end
 
-  describe "subscribeUpdates" do
+  describe "updates" do
     setup [{Tachyon, :setup_client}]
 
     test "must pass valid user ids", %{client: client} do
@@ -151,6 +151,28 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
       assert user_data["userId"] == to_string(ctx[:user].id)
       assert user_data["status"] == "offline"
+    end
+
+    test "unsubscribe invalid id", %{client: client} do
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.unsubscribe_updates!(client, ["invalid-user-id"])
+    end
+
+    test "unsubscribe", %{client: client} do
+      {:ok, ctx} = Tachyon.setup_client()
+      other_user = ctx[:user]
+
+      assert %{"status" => "success"} =
+               Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
+
+      # swallow the first update message
+      Tachyon.recv_message!(client)
+
+      assert %{"status" => "success"} =
+               Tachyon.unsubscribe_updates!(client, [to_string(other_user.id)])
+
+      Tachyon.disconnect!(ctx[:client])
+      assert {:error, :timeout} = Tachyon.recv_message(client)
     end
   end
 end

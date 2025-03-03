@@ -417,20 +417,31 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("user/subscribeUpdates", "request", _message_id, msg, state) do
-    # that kind of parsing can probably be extracted, will likely be generally useful
-    {ok_ids, invalid_ids} =
-      Enum.reduce(msg["data"]["userIds"], {[], []}, fn raw_id, {ok, invalid} ->
-        case Integer.parse(raw_id) do
-          {id, ""} -> {[id | ok], invalid}
-          _ -> {ok, [raw_id | invalid]}
-        end
-      end)
+    {ok_ids, invalid_ids} = parse_user_ids(msg["data"]["userIds"])
 
     if not Enum.empty?(invalid_ids) do
       details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
       {:error_response, :invalid_request, details, state}
     else
       case Player.Session.subscribe_updates(state.user.id, ok_ids) do
+        :ok ->
+          {:response, state}
+
+        {:error, {:invalid_ids, invalid_ids}} ->
+          details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
+          {:error_response, :invalid_request, details, state}
+      end
+    end
+  end
+
+  def handle_command("user/unsubscribeUpdates", "request", _message_id, msg, state) do
+    {ok_ids, invalid_ids} = parse_user_ids(msg["data"]["userIds"])
+
+    if not Enum.empty?(invalid_ids) do
+      details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
+      {:error_response, :invalid_request, details, state}
+    else
+      case Player.Session.unsubscribe_updates(state.user.id, ok_ids) do
         :ok ->
           {:response, state}
 
