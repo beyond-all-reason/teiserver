@@ -8,38 +8,35 @@ defmodule Teiserver.Lobby.ChatLib do
   def say(nil, _, _), do: {:error, "No userid"}
   def say(_, _, nil), do: {:error, "No lobby"}
 
-  def say(userid, "!joinas spec", lobby_id), do: say(userid, "!!joinas spec", lobby_id)
-  def say(userid, "!joinas" <> s, lobby_id), do: say(userid, "!cv joinas" <> s, lobby_id)
-  def say(userid, "!joinq", lobby_id), do: say(userid, "$joinq", lobby_id)
   def say(_userid, "!specafk" <> _, _lobby_id), do: :ok
 
-  def say(userid, "!clan" <> _, _lobby_id) do
-    client = Account.get_client_by_id(userid)
-
-    {:ok, code} =
-      Account.create_code(%{
-        value: ExULID.ULID.generate(),
-        purpose: "one_time_login",
-        expires: Timex.now() |> Timex.shift(minutes: 5),
-        user_id: userid,
-        metadata: %{
-          ip: client.ip,
-          redirect: "/teiserver/account/parties"
-        }
-      })
-
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-    url = "https://#{host}/one_time_login/#{code.value}"
-
-    Coordinator.send_to_user(userid, [
-      "To access parties please use this link - #{url}",
-      "You can use the $explain command to see how balance is being calculated and why you are/are not being teamed with your party",
-      "We are working on handling it within the new client and protocol, the website is only a temporary measure."
-    ])
-  end
-
   def say(userid, msg, lobby_id) do
-    msg = String.replace(msg, "!!joinas spec", "!joinas spec")
+    # Replace SPADS command (starting with !) with lowercase version to prevent bypassing with capitalised command names
+    # Ignore !# bot commands like !#JSONRPC
+    msg =
+      if String.starts_with?(msg, "!") and !String.starts_with?(msg, "!#") do
+        [cmd | rest] = String.split(msg, " ", parts: 2)
+
+        cmd
+        |> String.trim()
+        |> String.downcase()
+        |> case do
+          "!joinas" ->
+            "!joinas spec"
+
+          "!clan" ->
+            clan_command(userid)
+            "!clan"
+
+          "!joinq" ->
+            "$joinq"
+
+          processed_cmd ->
+            [processed_cmd | rest] |> Enum.join(" ")
+        end
+      else
+        msg
+      end
 
     case Teiserver.Coordinator.Parser.handle_in(userid, msg, lobby_id) do
       :say -> do_say(userid, msg, lobby_id)
@@ -69,7 +66,7 @@ defmodule Teiserver.Lobby.ChatLib do
         CacheUser.is_restricted?(user, ["All chat", "Lobby chat"]) ->
           msg_allowed_when_muted?(msg)
 
-        String.slice(msg, 0..0) == "!" and CacheUser.is_restricted?(user, ["Host commands"]) ->
+        String.starts_with?(msg, "!") and CacheUser.is_restricted?(user, ["Host commands"]) ->
           false
 
         blacklisted ->
@@ -315,5 +312,30 @@ defmodule Teiserver.Lobby.ChatLib do
     Enum.any?(@valid_mute_chat_regex, fn regex ->
       String.match?(msg, regex)
     end)
+  end
+
+  defp clan_command(user_id) do
+    client = Account.get_client_by_id(user_id)
+
+    {:ok, code} =
+      Account.create_code(%{
+        value: ExULID.ULID.generate(),
+        purpose: "one_time_login",
+        expires: Timex.now() |> Timex.shift(minutes: 5),
+        user_id: user_id,
+        metadata: %{
+          ip: client.ip,
+          redirect: "/teiserver/account/parties"
+        }
+      })
+
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    url = "https://#{host}/one_time_login/#{code.value}"
+
+    Coordinator.send_to_user(user_id, [
+      "To access parties please use this link - #{url}",
+      "You can use the $explain command to see how balance is being calculated and why you are/are not being teamed with your party",
+      "We are working on handling it within the new client and protocol, the website is only a temporary measure."
+    ])
   end
 end

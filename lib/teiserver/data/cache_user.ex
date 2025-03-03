@@ -661,35 +661,59 @@ defmodule Teiserver.CacheUser do
   def send_direct_message(_, _, nil), do: :ok
 
   def send_direct_message(from_id, to_id, message) do
-    if String.starts_with?(message, "!clan") do
-      host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-      website_url = "https://#{host}"
+    # Replace SPADS command (starting with !) with lowercase version to prevent bypassing with capitalised command names
+    # Ignore !# bot commands like !#JSONRPC
+    message =
+      if String.starts_with?(message, "!") and !String.starts_with?(message, "!#") do
+        [cmd | rest] = String.split(message, " ", parts: 2)
 
-      Coordinator.send_to_user(
-        from_id,
-        "SPADS clans have been replaced by parties. You can access them via #{website_url}/teiserver/parties."
-      )
+        cmd
+        |> String.trim()
+        |> String.downcase()
+        |> case do
+          "!joinas" ->
+            "!joinas spec"
 
-      uuid = ExULID.ULID.generate()
-      client = Account.get_client_by_id(from_id)
+          "!clan" ->
+            clan_command(from_id)
+            "!clan"
 
-      {:ok, _code} =
-        Account.create_code(%{
-          value: uuid <> "$#{client.ip}",
-          purpose: "one_time_login",
-          expires: Timex.now() |> Timex.shift(minutes: 5),
-          user_id: from_id
-        })
-
-      url = "https://#{host}/one_time_login/#{uuid}"
-
-      Coordinator.send_to_user(
-        from_id,
-        "If you have not already logged in, here is a one-time link to do so automatically - #{url}"
-      )
-    end
+          processed_cmd ->
+            [processed_cmd | rest] |> Enum.join(" ")
+        end
+      else
+        message
+      end
 
     send_direct_message(from_id, to_id, [message])
+  end
+
+  defp clan_command(from_id) do
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    website_url = "https://#{host}"
+
+    Coordinator.send_to_user(
+      from_id,
+      "SPADS clans have been replaced by parties. You can access them via #{website_url}/teiserver/parties."
+    )
+
+    uuid = ExULID.ULID.generate()
+    client = Account.get_client_by_id(from_id)
+
+    {:ok, _code} =
+      Account.create_code(%{
+        value: uuid <> "$#{client.ip}",
+        purpose: "one_time_login",
+        expires: Timex.now() |> Timex.shift(minutes: 5),
+        user_id: from_id
+      })
+
+    url = "https://#{host}/one_time_login/#{uuid}"
+
+    Coordinator.send_to_user(
+      from_id,
+      "If you have not already logged in, here is a one-time link to do so automatically - #{url}"
+    )
   end
 
   @spec ring(T.userid(), T.userid()) :: :ok
