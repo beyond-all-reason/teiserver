@@ -20,37 +20,37 @@
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
         <div class="row">
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "reports",
             label: "Reports",
             active: @active,
             url: Routes.moderation_report_path(@conn, :index),
             icon: Teiserver.Moderation.ReportLib.icon()
-          ) %>
+          )}
 
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "actions",
             label: "Actions",
             active: @active,
             url: Routes.moderation_action_path(@conn, :index),
             icon: Teiserver.Moderation.ActionLib.icon()
-          ) %>
+          )}
 
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "proposals",
             label: "Proposals",
             active: @active,
             url: Routes.moderation_proposal_path(@conn, :index),
             icon: Teiserver.Moderation.ProposalLib.icon()
-          ) %>
+          )}
 
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "bans",
             label: "Bans",
             active: @active,
             url: Routes.moderation_ban_path(@conn, :index),
             icon: Teiserver.Moderation.BanLib.icon()
-          ) %>
+          )}
         </div>
       </div>
     </div>

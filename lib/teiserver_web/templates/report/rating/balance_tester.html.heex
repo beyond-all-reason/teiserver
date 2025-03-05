@@ -1,19 +1,19 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "ratings"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(TeiserverWeb.Report.RatingView, "section_menu.html",
+        {render(TeiserverWeb.Report.RatingView, "section_menu.html",
           conn: @conn,
           active: "balance_tester"
-        ) %>
+        )}
         <br /><br />
 
         <form
@@ -60,12 +60,12 @@
         <%= if @balance_result do %>
           <%= for team_id <- [1, 2] do %>
             <h4>
-              Team <%= team_id %> - Rating: <%= round(@balance_result.ratings[team_id], 2) %>
+              Team {team_id} - Rating: {round(@balance_result.ratings[team_id], 2)}
             </h4>
             <strong>Members:</strong>
             <br />
             <%= for userid <- @balance_result.team_players[team_id] do %>
-              <%= @user_lookup[userid] %> (<%= round(@rating_lookup[userid], 2) %>)<br />
+              {@user_lookup[userid]} ({round(@rating_lookup[userid], 2)})<br />
             <% end %>
             <br /><br />
           <% end %>

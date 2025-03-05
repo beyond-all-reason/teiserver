@@ -1,5 +1,5 @@
 <div class="container">
-  <h1>Bot: <%= @bot.name %></h1>
+  <h1>Bot: {@bot.name}</h1>
 
   <div :if={@client_secret} class="note note-danger">
     Secret only shown once! <pre><%= @client_secret %></pre>
@@ -33,10 +33,10 @@
       <tbody>
         <%= for credential <- @credentials do %>
           <tr>
-            <td><%= credential.inserted_at %></td>
-            <td><%= credential.application.name %></td>
+            <td>{credential.inserted_at}</td>
+            <td>{credential.application.name}</td>
             <td><pre> <%= credential.client_id %> </pre></td>
-            <td><%= Enum.join(credential.application.scopes, ", ") %></td>
+            <td>{Enum.join(credential.application.scopes, ", ")}</td>
             <td>
               <Phx.link
                 href={~p"/teiserver/admin/bot/#{@bot.id}/credential/#{credential.id}"}
@@ -60,7 +60,7 @@
       <CC.label for="application_select">application</CC.label>
       <select id="application_select" name="application" class="form_control">
         <%= for app <- @applications do %>
-          <option value={app.id}><%= app.name %></option>
+          <option value={app.id}>{app.name}</option>
         <% end %>
       </select>
       <CC.button type="submit" class="btn-primary">Create credentials</CC.button>

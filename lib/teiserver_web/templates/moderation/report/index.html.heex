@@ -32,11 +32,11 @@
 
     <%= if @target && @target.smurf_of_id do %>
       <div class="alert alert-primary">
-        <%= @target.name %> has been flagged as a smurf, these reports are not worth acting on.
+        {@target.name} has been flagged as a smurf, these reports are not worth acting on.
       </div>
     <% end %>
 
-    <%= render(TeiserverWeb.Moderation.ReportView, "search.html", assigns) %>
+    {render(TeiserverWeb.Moderation.ReportView, "search.html", assigns)}
 
     <h4>Listing Reports</h4>
 
@@ -85,21 +85,21 @@
                   style="regular"
                 />
               </a>
-              &nbsp; <%= report.target.name %>
+              &nbsp; {report.target.name}
             </td>
 
-            <td><%= report.type %>/<%= report.sub_type %></td>
-            <td><%= String.slice(report.extra_text || "", 0..40) %></td>
+            <td>{report.type}/{report.sub_type}</td>
+            <td>{String.slice(report.extra_text || "", 0..40)}</td>
 
             <td>
               <a href={Routes.moderation_report_path(@conn, :user, report.reporter_id)}>
-                <%= report.reporter.name %>
+                {report.reporter.name}
               </a>
             </td>
 
-            <td><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></td>
+            <td>{date_to_str(report.inserted_at, format: :hms_or_ymd)}</td>
 
-            <td><%= Enum.count(report.responses) %></td>
+            <td>{Enum.count(report.responses)}</td>
 
             <td>
               <a

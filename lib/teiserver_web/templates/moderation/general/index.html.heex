@@ -3,37 +3,37 @@
     Overwatch
   </.menu_card>
 
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon: Teiserver.Moderation.ReportLib.icon(),
     name: "reports",
     text: "Reports",
     icon_class: "fa-solid",
     link: Routes.moderation_report_path(@conn, :index)
-  ) %>
+  )}
 
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon: Teiserver.Moderation.ActionLib.icon(),
     name: "actions",
     text: "Actions",
     icon_class: "fa-solid",
     link: Routes.moderation_action_path(@conn, :index)
-  ) %>
+  )}
 
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon: Teiserver.Moderation.BanLib.icon(),
     name: "bans",
     text: "Bans",
     icon_class: "fa-solid",
     link: Routes.moderation_ban_path(@conn, :index)
-  ) %>
+  )}
 </div>
 
 <div class="row page-row">
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon_class: "fa-solid",
     name: "",
     icon: StylingHelper.icon(:back),
     text: "Back",
     link: ~p"/teiserver/admin"
-  ) %>
+  )}
 </div>

@@ -1,30 +1,30 @@
 <div class="row">
   <div class="col-md-6">
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Unique users",
       value: format_number(@data["aggregates"]["stats"]["unique_users"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Peak total users",
       value: format_number(@data["aggregates"]["stats"]["peak_users"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "User registrations",
       value: format_number(@data["aggregates"]["stats"]["accounts_created"])
-    ) %>
+    )}
   </div>
   <div class="col-md-6">
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Unique players",
       value: format_number(@data["aggregates"]["stats"]["unique_players"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Peak players",
       value: format_number(@data["aggregates"]["stats"]["peak_players"])
-    ) %>
+    )}
   </div>
 </div>
 
@@ -32,29 +32,29 @@
 <div class="row">
   <div class="col-md-6">
     <h4>Time spent by state</h4>
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Player",
       value: represent_minutes(@data["aggregates"]["minutes"]["player"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Spectator",
       value: represent_minutes(@data["aggregates"]["minutes"]["spectator"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Lobby",
       value: represent_minutes(@data["aggregates"]["minutes"]["lobby"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Menu",
       value: represent_minutes(@data["aggregates"]["minutes"]["menu"])
-    ) %>
+    )}
 
-    <%= central_component("detail_line",
+    {central_component("detail_line",
       label: "Total",
       value: represent_minutes(@data["aggregates"]["minutes"]["total"])
-    ) %>
+    )}
   </div>
 </div>

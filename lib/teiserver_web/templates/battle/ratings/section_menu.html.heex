@@ -2,12 +2,12 @@
 types = Teiserver.Game.MatchRatingLib.rating_type_list() %>
 
 <%= for t <- types do %>
-  <%= central_component("section_menu_button",
+  {central_component("section_menu_button",
     name: t,
     label: t,
     active: @active,
     icon: "",
     bsname: bsname,
     url: Routes.ts_battle_ratings_path(@conn, :leaderboard, t)
-  ) %>
+  )}
 <% end %>

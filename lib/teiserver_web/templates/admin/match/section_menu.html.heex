@@ -1,56 +1,56 @@
 <% bsname = view_colour() %>
 
 <%= if allow?(@conn, "Reviewer") do %>
-  <%= central_component("section_menu_button",
+  {central_component("section_menu_button",
     name: "list",
     label: "List",
     active: @active,
     icon: "fa-solid fa-bars",
     bsname: bsname,
     url: Routes.ts_admin_match_path(@conn, :index)
-  ) %>
+  )}
 
-  <%= central_component("section_menu_button",
+  {central_component("section_menu_button",
     name: "advanced_search",
     label: "Advanced search",
     active: @active,
     icon: Teiserver.Helper.StylingHelper.icon(:search),
     bsname: bsname,
     url: Routes.ts_admin_match_path(@conn, :index) <> "?search=true"
-  ) %>
+  )}
 <% end %>
 
 <%= if @active == "user" do %>
-  <%= central_component("section_menu_button",
+  {central_component("section_menu_button",
     name: "user",
     label: "User",
     active: @active,
     icon: "fa-regular fa-user",
     bsname: bsname,
     url: @conn.request_path
-  ) %>
+  )}
 <% end %>
 
 <div class="float-end">
   <%= if assigns[:match] != nil do %>
-    <%= central_component("section_menu_button",
+    {central_component("section_menu_button",
       name: "user_view",
       label: "Standard view",
       active: @active,
       icon: Teiserver.Account.UserLib.icon(),
       bsname: bsname,
       url: ~p"/battle/#{@match.id}"
-    ) %>
+    )}
 
     <%= if allow?(@conn, "Overwatch") do %>
-      <%= central_component("section_menu_button",
+      {central_component("section_menu_button",
         name: "chat",
         label: "Chat",
         active: @active,
         icon: Teiserver.Chat.LobbyMessageLib.icon(),
         bsname: bsname,
         url: Routes.ts_admin_lobby_path(@conn, :lobby_chat, @match.id)
-      ) %>
+      )}
     <% end %>
   <% end %>
 </div>

@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Moderation.OverwatchComponents do
       Report group detail
     </.section_menu_button>
 
-    <%= render_slot(@inner_block) %>
+    {render_slot(@inner_block)}
     """
   end
 end

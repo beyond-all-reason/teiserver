@@ -7,7 +7,7 @@
     <meta name="description" content="" />
     <meta name="author" content="" />
 
-    <title><%= Application.get_env(:teiserver, TeiserverWeb)[:page_title] %></title>
+    <title>{Application.get_env(:teiserver, TeiserverWeb)[:page_title]}</title>
 
     <% light_mode =
       case get_user_config_cache(assigns[:current_user], "general.Colour scheme") do
@@ -64,7 +64,7 @@
                 Sadly something has gone wrong. However, we think we can fix it but we need your help.
                 <br /><br />
 
-                <%= @msg %>
+                {@msg}
                 <br /><br />
 
                 <%= if @info != "" do %>

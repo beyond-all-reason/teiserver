@@ -33,9 +33,9 @@ complex_lobby_data =
       <tbody>
         <%= for key <- simple_client_keys do %>
           <tr>
-            <td><%= key %></td>
-            <td><%= @data["events"]["simple_client"][key] |> format_number %></td>
-            <td><%= @data["events"]["simple_anon"][key] |> format_number %></td>
+            <td>{key}</td>
+            <td>{@data["events"]["simple_client"][key] |> format_number}</td>
+            <td>{@data["events"]["simple_anon"][key] |> format_number}</td>
           </tr>
         <% end %>
       </tbody>
@@ -55,9 +55,9 @@ complex_lobby_data =
       <tbody>
         <%= for key <- complex_client_keys do %>
           <tr>
-            <td><%= key %></td>
-            <td><%= @data["events"]["complex_client"][key] |> format_number %></td>
-            <td><%= @data["events"]["complex_anon"][key] |> format_number %></td>
+            <td>{key}</td>
+            <td>{@data["events"]["complex_client"][key] |> format_number}</td>
+            <td>{@data["events"]["complex_anon"][key] |> format_number}</td>
           </tr>
         <% end %>
       </tbody>
@@ -76,8 +76,8 @@ complex_lobby_data =
       <tbody>
         <%= for {key, value} <- simple_server_data do %>
           <tr>
-            <td><%= key %></td>
-            <td><%= value |> format_number %></td>
+            <td>{key}</td>
+            <td>{value |> format_number}</td>
           </tr>
         <% end %>
       </tbody>
@@ -96,8 +96,8 @@ complex_lobby_data =
       <tbody>
         <%= for {key, value} <- complex_server_data do %>
           <tr>
-            <td><%= key %></td>
-            <td><%= value |> format_number %></td>
+            <td>{key}</td>
+            <td>{value |> format_number}</td>
           </tr>
         <% end %>
       </tbody>
@@ -118,8 +118,8 @@ complex_lobby_data =
       <tbody>
         <%= for {key, value} <- simple_lobby_data do %>
           <tr>
-            <td><%= key %></td>
-            <td><%= value |> format_number %></td>
+            <td>{key}</td>
+            <td>{value |> format_number}</td>
           </tr>
         <% end %>
       </tbody>
@@ -138,8 +138,8 @@ complex_lobby_data =
       <tbody>
         <%= for {key, value} <- complex_lobby_data do %>
           <tr>
-            <td><%= key %></td>
-            <td><%= value |> format_number %></td>
+            <td>{key}</td>
+            <td>{value |> format_number}</td>
           </tr>
         <% end %>
       </tbody>
@@ -158,8 +158,8 @@ complex_lobby_data =
       <tbody>
         <%= for {key, value} <- simple_match_data do %>
           <tr>
-            <td><%= key %></td>
-            <td><%= value |> format_number %></td>
+            <td>{key}</td>
+            <td>{value |> format_number}</td>
           </tr>
         <% end %>
       </tbody>
@@ -178,8 +178,8 @@ complex_lobby_data =
       <tbody>
         <%= for {key, value} <- complex_match_data do %>
           <tr>
-            <td><%= key %></td>
-            <td><%= value |> format_number %></td>
+            <td>{key}</td>
+            <td>{value |> format_number}</td>
           </tr>
         <% end %>
       </tbody>

@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Account.LiveComponents.UserPicker do
 
   def render(assigns) do
     ~H"""
-    <div class="hero"><%= @content %></div>
+    <div class="hero">{@content}</div>
     """
   end
 end

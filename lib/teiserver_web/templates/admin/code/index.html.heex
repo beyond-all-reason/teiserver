@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "codes"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.CodeView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -22,7 +22,7 @@
                 true -> "index"
               end
           })
-        ) %>
+        )}
         <br /><br />
 
         <h4>Listing Codes</h4>
@@ -51,31 +51,31 @@
                     ""
                 end %>
               <tr>
-                <td><%= code.user.name %></td>
-                <td><%= code.purpose %></td>
+                <td>{code.user.name}</td>
+                <td>{code.purpose}</td>
                 <td>
-                  <%= if Timex.compare(code.expires, Timex.now()) != 1 do
+                  {if Timex.compare(code.expires, Timex.now()) != 1 do
                     "Expired"
                   else
                     date_to_str(code.expires, format: :hms_or_dmy, tz: @tz)
-                  end %>
+                  end}
                 </td>
-                <td style="font-family:monospace;"><%= code.value %></td>
+                <td style="font-family:monospace;">{code.value}</td>
 
                 <td>
-                  <%= link("+ 6h",
+                  {link("+ 6h",
                     to: Routes.admin_code_path(@conn, :extend, code, "6"),
                     class: "btn btn-outline-secondary btn-sm",
                     method: "put"
-                  ) %> &nbsp; <%= link("+ 24h",
+                  )} &nbsp; {link("+ 24h",
                     to: Routes.admin_code_path(@conn, :extend, code, "24"),
                     class: "btn btn-outline-secondary btn-sm",
                     method: "put"
-                  ) %> &nbsp; <%= link("+ 7d",
+                  )} &nbsp; {link("+ 7d",
                     to: Routes.admin_code_path(@conn, :extend, code, "168"),
                     class: "btn btn-outline-secondary btn-sm",
                     method: "put"
-                  ) %>
+                  )}
                 </td>
 
                 <td>
@@ -94,12 +94,12 @@
                 </td>
 
                 <td>
-                  <%= link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
+                  {link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
                     to: Routes.admin_code_path(@conn, :delete, code),
                     method: :delete,
                     data: [confirm: "Are you sure?"],
                     class: "btn btn-danger btn-sm"
-                  ) %>
+                  )}
                 </td>
               </tr>
             <% end %>

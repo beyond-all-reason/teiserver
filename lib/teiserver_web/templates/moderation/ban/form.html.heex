@@ -33,9 +33,9 @@ type_icons = %{
 
   <div class="row" id="keys-row">
     <div class="form-group col-md-12 col-lg-6 my-3">
-      <%= label(f, :reason, class: "control-label") %>
-      <%= text_input(f, :reason, class: "form-control", autofocus: :autofocus) %>
-      <%= error_tag(f, :reason) %>
+      {label(f, :reason, class: "control-label")}
+      {text_input(f, :reason, class: "form-control", autofocus: :autofocus)}
+      {error_tag(f, :reason)}
 
       <div class="mt-4">
         <span class="btn btn-outline-secondary" onclick="select_all_keys()">
@@ -48,7 +48,7 @@ type_icons = %{
     </div>
 
     <div class="form-group col-md-12 col-lg-6 my-3">
-      <%= label(f, :extra_values, class: "control-label") %>
+      {label(f, :extra_values, class: "control-label")}
       <textarea
         name="ban[extra_values]"
         id="ban_extra_values"
@@ -76,25 +76,25 @@ type_icons = %{
                 <label for={"ban_type_#{key.value}"}>
                   <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
                   </i>
-                  &nbsp; <%= key.type.name %>
+                  &nbsp; {key.type.name}
                 </label>
               </td>
               <td>
-                <label for={"ban_type_#{key.value}"}><%= key.value %></label>
+                <label for={"ban_type_#{key.value}"}>{key.value}</label>
               </td>
               <td>
                 <label for={"ban_type_#{key.value}"}>
-                  <%= date_to_str(key.last_updated, format: :hms_or_ymd) %>
+                  {date_to_str(key.last_updated, format: :hms_or_ymd)}
                 </label>
               </td>
               <td>
-                <%= central_component("checkbox",
+                {central_component("checkbox",
                   name: "ban[key_values][]",
                   id: "ban_type_#{key.value}",
                   value: key.value,
                   label: "",
                   checked: Enum.member?(@ban.key_values, key.value)
-                ) %>
+                )}
               </td>
             </tr>
           <% end %>

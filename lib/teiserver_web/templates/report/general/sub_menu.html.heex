@@ -20,22 +20,22 @@
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
         <div class="row">
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "exports",
             label: "Data exports",
             active: @active,
             url: ~p"/teiserver/reports/exports",
             icon: "fa-solid fa-download"
-          ) %>
+          )}
 
           <%= if allow_any?(@conn, ~w(Contributor Overwatch)) do %>
-            <%= central_component("sub_menu_icon",
+            {central_component("sub_menu_icon",
               name: "reports",
               label: "Reports",
               active: @active,
               url: ~p"/teiserver/reports",
               icon: Teiserver.Helper.StylingHelper.icon(:report)
-            ) %>
+            )}
           <% end %>
         </div>
       </div>

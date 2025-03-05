@@ -10,7 +10,7 @@
             class="d-inline align-top"
           />
           <span :if={@user}>
-            Reporting user: <%= @user.name %>
+            Reporting user: {@user.name}
           </span>
         </h3>
       </div>
@@ -36,7 +36,7 @@
             >
               <span>
                 <Fontawesome.icon icon={icon} style="regular" size="3x" /><br />
-                <%= label %>
+                {label}
               </span>
             </div>
           </div>
@@ -44,7 +44,7 @@
       </div>
 
       <div :if={@stage == :sub_type} class="card-body">
-        <h5>Type of <%= @type %></h5>
+        <h5>Type of {@type}</h5>
         <div class="row">
           <div :for={{label, name, icon} <- @sub_types[@type]} class="col">
             <div
@@ -56,7 +56,7 @@
               <span>
                 <i class={"fa-fw fa-regular #{icon} fa-3x"} id={"icon-sub_type-#{name}"}></i>
                 <br />
-                <%= label %>
+                {label}
               </span>
             </div>
           </div>
@@ -72,11 +72,11 @@
           table_class="table-sm table-hover"
           row_click={fn match -> "select-match-#{match.id}" end}
         >
-          <:col :let={match} label="Match"><%= match.label %></:col>
-          <:col :let={match} label="Map"><%= match.map %></:col>
-          <:col :let={match} label="When?"><%= match.time_ago %></:col>
+          <:col :let={match} label="Match">{match.label}</:col>
+          <:col :let={match} label="Map">{match.map}</:col>
+          <:col :let={match} label="When?">{match.time_ago}</:col>
           <:col :let={match} label="Match length">
-            <%= duration_to_str_short(match.game_duration) %>
+            {duration_to_str_short(match.game_duration)}
           </:col>
         </.table>
         If you cannot find the match here then you can submit the report without a match selected but it may mean we cannot find evidence and are thus unable to handle the report.
@@ -122,7 +122,7 @@
         <div :if={@result == :success}>
           Your report has been submitted, thank you for taking the time to help improve the community.
           <br /><br />
-          Please note if you want to then you can ignore, avoid or even block <%= @user.name %> via <a href={
+          Please note if you want to then you can ignore, avoid or even block {@user.name} via <a href={
             ~p"/profile/#{@user.id}"
           }>their profile</a>.
         </div>
@@ -130,7 +130,7 @@
 
       <div :if={@stage == :not_allowed} class="card-body">
         <div class="alert alert-warning">
-          <%= @failure_reason %>
+          {@failure_reason}
         </div>
       </div>
 

@@ -20,13 +20,13 @@
     <div class="card card-default">
       <div class="card-body" style="padding: 0 15px;">
         <div class="row">
-          <%= central_component("sub_menu_icon",
+          {central_component("sub_menu_icon",
             name: "queues",
             label: "Matchmaking",
             active: @active,
             url: ~p"/teiserver/matchmaking/queues",
             icon: Teiserver.Game.QueueLib.icon()
-          ) %>
+          )}
         </div>
       </div>
     </div>

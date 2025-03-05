@@ -1,10 +1,10 @@
 <% bsname = @view_colour
 # is_moderator = allow?(@current_user, "Moderator") %>
 
-<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+{render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "matchmaking",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
-}) %>
+})}
 
 <div class="row">
   <div class="col-md-12">
@@ -13,13 +13,12 @@
         <div class="row">
           <div class="col-md-12 mb-2">
             <span class="float-end">
-              <%= live_redirect("Back",
-                to: ~p"/teiserver/matchmaking/queues",
-                class: "btn btn-#{bsname}"
-              ) %>
+              <.link navigate={~p"/teiserver/matchmaking/queues"} class={"btn btn-#{bsname}"}>
+                Back
+              </.link>
             </span>
 
-            <h3><%= @queue.name %></h3>
+            <h3>{@queue.name}</h3>
             This is a beta page. Please feel free to ping the devs on the discord and ask questions.
           </div>
 
@@ -37,33 +36,33 @@
                 <tbody>
                   <tr>
                     <td>Bucket</td>
-                    <td><%= @queue_info.group.bucket %></td>
+                    <td>{@queue_info.group.bucket}</td>
                   </tr>
                   <tr>
                     <td>Max distance</td>
-                    <td><%= @queue_info.group.max_distance %></td>
+                    <td>{@queue_info.group.max_distance}</td>
                   </tr>
                   <tr>
                     <td>Current distance</td>
                     <td>
-                      <%= @queue_info.group.search_distance %> ( <%= @queue_info.group.bucket -
-                        @queue_info.group.search_distance %>, <%= @queue_info.group.bucket +
-                        @queue_info.group.search_distance %> )
+                      {@queue_info.group.search_distance} ( {@queue_info.group.bucket -
+                        @queue_info.group.search_distance}, {@queue_info.group.bucket +
+                        @queue_info.group.search_distance} )
                     </td>
                   </tr>
                   <tr>
                     <td>Group size</td>
-                    <td><%= @queue_info.group.count %></td>
+                    <td>{@queue_info.group.count}</td>
                   </tr>
                   <tr>
                     <td>Member ids</td>
-                    <td><%= @queue_info.group.members |> Enum.join(", ") %></td>
+                    <td>{@queue_info.group.members |> Enum.join(", ")}</td>
                   </tr>
                   <tr>
                     <td>Join time</td>
                     <td>
-                      <%= @queue_info.group.join_time %> (<%= @system_time -
-                        @queue_info.group.join_time %>s ago)
+                      {@queue_info.group.join_time} ({@system_time -
+                        @queue_info.group.join_time}s ago)
                     </td>
                   </tr>
                 </tbody>
@@ -84,8 +83,8 @@
                 <%= for {key, groups} <- @queue_info.buckets do %>
                   <% member = Enum.member?(groups, @group_id) %>
                   <tr class={if member, do: "bg-primary_transparent", else: ""}>
-                    <td><%= key %></td>
-                    <td><%= Enum.count(groups) %></td>
+                    <td>{key}</td>
+                    <td>{Enum.count(groups)}</td>
                   </tr>
                 <% end %>
               </tbody>
@@ -100,7 +99,7 @@
             <h4>Map list</h4>
             <ul>
               <%= for m <- @queue.map_list do %>
-                <li><%= m %></li>
+                <li>{m}</li>
               <% end %>
             </ul>
           </div>
@@ -109,7 +108,7 @@
             <h4>Queue settings</h4>
             <ul>
               <%= for {k, v} <- Map.take(@queue, ~w(team_count team_size)a) |> Map.merge(@queue.settings) do %>
-                <li><%= k %>: <%= inspect(v) %></li>
+                <li>{k}: {inspect(v)}</li>
               <% end %>
             </ul>
           </div>
@@ -134,10 +133,9 @@
         <br />
 
         <span>
-          <%= live_redirect("Back",
-            to: ~p"/teiserver/matchmaking/queues",
-            class: "btn btn-#{bsname}"
-          ) %>
+          <.link navigate={~p"/teiserver/matchmaking/queues"} class={"btn btn-#{bsname}"}>
+            Back
+          </.link>
         </span>
       </div>
     </div>

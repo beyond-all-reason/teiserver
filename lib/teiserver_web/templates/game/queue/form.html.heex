@@ -9,55 +9,55 @@
 
   <div class="form-group row">
     <div class="col-lg-6 col-xl-4 mt-4">
-      <%= label(f, :name, class: "control-label") %>
-      <%= text_input(f, :name, class: "form-control", autofocus: :autofocus) %>
-      <%= error_tag(f, :name) %>
+      {label(f, :name, class: "control-label")}
+      {text_input(f, :name, class: "form-control", autofocus: :autofocus)}
+      {error_tag(f, :name)}
     </div>
 
     <div class="col-lg-6 col-xl-4 mt-4">
-      <%= label(f, :team_size, class: "control-label") %>
-      <%= text_input(f, :team_size, class: "form-control") %>
-      <%= error_tag(f, :team_size) %>
+      {label(f, :team_size, class: "control-label")}
+      {text_input(f, :team_size, class: "form-control")}
+      {error_tag(f, :team_size)}
     </div>
 
     <div class="col-lg-6 col-xl-4 mt-4">
-      <%= label(f, :team_count, class: "control-label") %>
-      <%= text_input(f, :team_count, class: "form-control") %>
-      <%= error_tag(f, :team_count) %>
+      {label(f, :team_count, class: "control-label")}
+      {text_input(f, :team_count, class: "form-control")}
+      {error_tag(f, :team_count)}
     </div>
 
     <div class="col-lg-6 col-xl-4 mt-4">
-      <%= input_with_type(f, :colour, "color") %>
+      {input_with_type(f, :colour, "color")}
     </div>
 
     <div class="col-lg-6 col-xl-8 mt-4">
-      <%= central_component("fa5_icon_picker", %{form: f, field: :icon}) %>
+      {central_component("fa5_icon_picker", %{form: f, field: :icon})}
     </div>
 
     <div class="col-lg-6 mt-4">
       <% map_list = f.data.map_list || Map.get(@changeset.changes, :map_list, []) %>
-      <%= label(f, :map_list, class: "control-label") %>
+      {label(f, :map_list, class: "control-label")}
       <textarea id="queue_map_list" name="queue[map_list]" rows="8" class="form-control monospace"><%= Enum.join(map_list, "\n") %></textarea>
-      <%= error_tag(f, :map_list) %>
+      {error_tag(f, :map_list)}
     </div>
 
     <div class="col-lg-12 mt-4">
       <% settings = f.data.settings || Map.get(@changeset.changes, :settings, %{}) %>
-      <%= label(f, :settings, class: "control-label") %>
+      {label(f, :settings, class: "control-label")}
       <textarea id="queue_settings" name="queue[settings]" rows="8" class="form-control monospace"><%= Jason.encode! settings, pretty: true %></textarea>
-      <%= error_tag(f, :settings) %>
+      {error_tag(f, :settings)}
     </div>
 
     <div class="col-lg-12 mt-4">
       <% conditions = f.data.conditions || Map.get(@changeset.changes, :conditions, %{}) %>
-      <%= label(f, :conditions, class: "control-label") %>
+      {label(f, :conditions, class: "control-label")}
       <textarea
         id="queue_conditions"
         name="queue[conditions]"
         rows="8"
         class="form-control monospace"
       ><%= Jason.encode! conditions, pretty: true %></textarea>
-      <%= error_tag(f, :conditions) %>
+      {error_tag(f, :conditions)}
     </div>
   </div>
 

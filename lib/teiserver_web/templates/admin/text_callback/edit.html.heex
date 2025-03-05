@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "text_callbacks"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.TextCallbackView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -18,22 +18,22 @@
             show_search: false,
             active: "new"
           })
-        ) %>
+        )}
 
         <hr />
 
-        <%= render(
+        {render(
           "form.html",
           Map.put(assigns, :action, ~p"/admin/text_callbacks/#{@text_callback}")
-        ) %>
+        )}
 
         <hr />
-        <%= link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
+        {link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
           to: ~p"/admin/text_callbacks/#{@text_callback}",
           method: :delete,
           data: [confirm: "Are you sure?"],
           class: "btn btn-danger btn-outline"
-        ) %>
+        )}
       </div>
     </div>
   </div>

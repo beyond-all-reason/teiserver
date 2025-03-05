@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Components.OAuthApplicationComponent do
       <p><strong>List of scopes</strong></p>
       <CC.error :if={@changeset.errors[:scopes]}>
         <% {msg, _} = @changeset.errors[:scopes] %>
-        <%= msg %>
+        {msg}
       </CC.error>
 
       <%= for {scope, checked, desc} <- @scopes do %>
@@ -52,7 +52,7 @@ defmodule TeiserverWeb.Components.OAuthApplicationComponent do
       />
       <CC.input field={f[:description]} type="text" label="short description" />
       <:actions>
-        <CC.button type="submit" class="btn-primary"><%= @button_label %></CC.button>
+        <CC.button type="submit" class="btn-primary">{@button_label}</CC.button>
       </:actions>
     </CC.simple_form>
     """

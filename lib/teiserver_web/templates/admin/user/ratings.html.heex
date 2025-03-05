@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -18,18 +18,18 @@
             show_search: false,
             active: "ratings"
           })
-        ) %>
+        )}
         <hr />
 
         <div class="float-end">
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "all_games",
             label: "500 games",
             active: @filter,
             url: "?filter=#{@filter}&limit=500",
             icon: "",
             bsname: bsname
-          ) %>
+          )}
 
           <a
             class={"btn btn-outline-#{bsname}"}
@@ -46,26 +46,26 @@
         <div class="row">
           <div class="col-md-12">
             <%= if @filter != nil do %>
-              <%= central_component("section_menu_button",
+              {central_component("section_menu_button",
                 name: "rating-all",
                 label: "All matches",
                 active: @filter,
                 url: Routes.ts_admin_user_path(@conn, :ratings, @user),
                 icon: "",
                 bsname: bsname
-              ) %>
+              )}
             <% end %>
 
             <%= for rt <- @rating_type_list do %>
               <%= if @ratings[rt] != nil do %>
-                <%= central_component("section_menu_button",
+                {central_component("section_menu_button",
                   name: rt,
                   label: raw("#{rt} &nbsp;&nbsp;&nbsp; #{@ratings[rt].rating_value |> round(2)}"),
                   active: @filter,
                   url: "?filter=#{rt}",
                   icon: "",
                   bsname: bsname
-                ) %>
+                )}
               <% end %>
             <% end %>
           </div>
@@ -74,23 +74,23 @@
         <%= if @stats.first_log != nil and @ratings[@filter] != nil do %>
           <div class="row m-2 mt-3">
             <div class="col-md-3">
-              Games: <%= @stats.games %>
+              Games: {@stats.games}
             </div>
 
             <div class="col-md-3">
-              Winrate: <%= (@stats.winrate * 100) |> round %>%
+              Winrate: {(@stats.winrate * 100) |> round}%
             </div>
 
             <div class="col-md-3">
-              Rating change: <%= (@ratings[@filter].rating_value -
-                                    @stats.first_log.value["rating_value"])
-              |> round(2) %>
+              Rating change: {(@ratings[@filter].rating_value -
+                                 @stats.first_log.value["rating_value"])
+              |> round(2)}
             </div>
 
             <div class="col-md-3">
-              Uncertainty change: <%= (@ratings[@filter].uncertainty -
-                                         @stats.first_log.value["uncertainty"])
-              |> round(2) %>
+              Uncertainty change: {(@ratings[@filter].uncertainty -
+                                      @stats.first_log.value["uncertainty"])
+              |> round(2)}
             </div>
           </div>
         <% end %>
@@ -140,7 +140,7 @@
                 end %>
               <tr>
                 <%= if log.match do %>
-                  <td><%= log.match.map %></td>
+                  <td>{log.match.map}</td>
 
                   <%= if @filter in ["Small Team", "Large Team"] do %>
                     <td>
@@ -148,40 +148,40 @@
                         <% :stayed -> %>
                         <% :early -> %>
                           <i class="fa-fw fa-solid fa-clock text-warning"></i>
-                          &nbsp; <%= play_percentage %>%
+                          &nbsp; {play_percentage}%
                         <% :abandoned -> %>
                           <i class="fa-fw fa-solid fa-person-running text-danger"></i>
-                          &nbsp; <%= play_percentage %>%
+                          &nbsp; {play_percentage}%
                         <% :noshow -> %>
                           <i class="fa-fw fa-solid fa-user-ninja text-info2"></i>
                       <% end %>
                     </td>
                   <% end %>
-                  <td><%= log.match.team_size * log.match.team_count %></td>
+                  <td>{log.match.team_size * log.match.team_count}</td>
                 <% else %>
-                  <td colspan="3"><%= log.value["reason"] || "No match" %></td>
+                  <td colspan="3">{log.value["reason"] || "No match"}</td>
                 <% end %>
-                <td><%= @rating_type_id_lookup[log.rating_type_id] %></td>
+                <td>{@rating_type_id_lookup[log.rating_type_id]}</td>
 
-                <td><%= round(log.value["rating_value"], 2) %></td>
+                <td>{round(log.value["rating_value"], 2)}</td>
                 <td class={text_class}>
-                  <%= round(log.value["rating_value_change"], 2) %>
+                  {round(log.value["rating_value_change"], 2)}
                 </td>
 
-                <td><%= round(log.value["skill"], 2) %></td>
+                <td>{round(log.value["skill"], 2)}</td>
                 <td class={text_class}>
-                  <%= round(log.value["skill_change"] || 0, 2) %>
+                  {round(log.value["skill_change"] || 0, 2)}
                 </td>
 
-                <td><%= round(log.value["uncertainty"], 2) %></td>
+                <td>{round(log.value["uncertainty"], 2)}</td>
                 <td>
-                  <%= round(log.value["uncertainty_change"] || 0, 2) %>
+                  {round(log.value["uncertainty_change"] || 0, 2)}
                 </td>
 
                 <td class={text_class}>
                   <i class={"fa-fw fa-solid fa-#{icon}"}></i>
                 </td>
-                <td><%= date_to_str(log.inserted_at, format: :hms_or_dmy) %></td>
+                <td>{date_to_str(log.inserted_at, format: :hms_or_dmy)}</td>
                 <%= if log.match do %>
                   <td>
                     <a href={~p"/battle/#{log.match.id}"} class="btn btn-secondary btn-sm">

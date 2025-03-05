@@ -17,14 +17,14 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Moderation.ActionView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
             active: "show"
           })
-        ) %>
+        )}
         <hr />
 
         <div class="float-end">
@@ -40,7 +40,7 @@
             href={"#{Routes.moderation_action_path(@conn, :index)}?target_id=#{@action.target_id}"}
             class={"btn btn-outline-#{bsname}"}
           >
-            <i class="far fa-fw fa-list"></i> Actions for <%= @action.target.name %>
+            <i class="far fa-fw fa-list"></i> Actions for {@action.target.name}
           </a>
 
           <%= if allow?(@conn, "Moderator") do %>
@@ -55,38 +55,38 @@
               href={~p"/teiserver/admin/user/#{@action.target_id}"}
               class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
             >
-              <%= central_component("icon", icon: Teiserver.Account.UserLib.icon()) %> Administrate user
+              {central_component("icon", icon: Teiserver.Account.UserLib.icon())} Administrate user
             </a>
           <% end %>
         </div>
 
         <h3>
-          <%= @action.target.name %> - <%= Enum.join(@action.restrictions, ", ") %>
+          {@action.target.name} - {Enum.join(@action.restrictions, ", ")}
         </h3>
         <br />
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li>
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: "fas fa-file-alt") %> Details
+              {central_component("icon", icon: "fas fa-file-alt")} Details
             </a>
           </li>
 
           <li class="nav-item">
             <a href="#logs_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: Teiserver.Helper.StylingHelper.icon(:list)) %> Logs (<%= Enum.count(
+              {central_component("icon", icon: Teiserver.Helper.StylingHelper.icon(:list))} Logs ({Enum.count(
                 @logs
-              ) %>)
+              )})
             </a>
           </li>
         </ul>
 
         <div class="tab-content">
           <div class="tab-pane" id="details_tab" style="padding:5px;">
-            <%= render("tab_details.html", assigns) %>
+            {render("tab_details.html", assigns)}
           </div>
 
           <div class="tab-pane" id="logs_tab" style="padding:5px;">
-            <%= render("tab_logs.html", assigns) %>
+            {render("tab_logs.html", assigns)}
           </div>
         </div>
       </div>

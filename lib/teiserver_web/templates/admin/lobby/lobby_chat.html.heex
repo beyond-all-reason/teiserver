@@ -1,4 +1,4 @@
-<%= render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"})) %>
+{render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"}))}
 
 <style type="text/css">
   .message {
@@ -55,7 +55,7 @@
               href={~p"/battle/#{@match.id}"}
               class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
             >
-              <%= central_component("icon", icon: Teiserver.Battle.MatchLib.icon()) %> Match details
+              {central_component("icon", icon: Teiserver.Battle.MatchLib.icon())} Match details
             </a>
           <% end %>
 
@@ -75,7 +75,7 @@
           </a>
         </div>
 
-        <h4>Lobby chat - Page <%= @page + 1 %> - <%= @match_name %></h4>
+        <h4>Lobby chat - Page {@page + 1} - {@match_name}</h4>
         Oldest chat at the top (read top to bottom)
         <table class="table table-sm">
           <thead>
@@ -91,16 +91,16 @@
                 <td>
                   <%= if allow?(@conn, "Moderator") do %>
                     <a href={~p"/teiserver/admin/user/#{msg.user_id}"}>
-                      <%= msg.user.name %>
+                      {msg.user.name}
                     </a>
                   <% else %>
-                    <%= msg.user.name %>
+                    {msg.user.name}
                   <% end %>
                 </td>
                 <td class="message">
-                  <%= msg.content %>
+                  {msg.content}
                 </td>
-                <td class="d-none d-lg-block"><%= date_to_str(msg.inserted_at, :ymd_hms) %></td>
+                <td class="d-none d-lg-block">{date_to_str(msg.inserted_at, :ymd_hms)}</td>
               </tr>
             <% end %>
           </tbody>

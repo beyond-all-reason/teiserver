@@ -6,7 +6,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Moderation.BanView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -18,11 +18,11 @@
                 true -> "list"
               end
           })
-        ) %>
+        )}
         <br /><br />
 
         <%= if @conn.params["search"] != nil do %>
-          <%= render(TeiserverWeb.Moderation.BanView, "search.html", assigns) %>
+          {render(TeiserverWeb.Moderation.BanView, "search.html", assigns)}
         <% end %>
 
         <h4>Listing Bans</h4>
@@ -41,17 +41,17 @@
           <tbody>
             <%= for ban <- @bans do %>
               <tr>
-                <td><%= ban.source.name %></td>
+                <td>{ban.source.name}</td>
                 <td>
                   <%= if ban.enabled do %>
                     <i class="fa-fw fa-solid fa-check"></i>
                   <% end %>
                 </td>
 
-                <td><%= ban.reason %></td>
-                <td><%= Enum.count(ban.key_values) %></td>
+                <td>{ban.reason}</td>
+                <td>{Enum.count(ban.key_values)}</td>
 
-                <td><%= ban.added_by.name %></td>
+                <td>{ban.added_by.name}</td>
 
                 <td>
                   <%= if allow?(@conn, "Reviewer") do %>

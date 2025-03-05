@@ -12,7 +12,7 @@
   <div class="col-md-12">
     <div class="card">
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Telemetry.ComplexClientEventView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -20,40 +20,40 @@
             show_search: false,
             active: "event_detail"
           })
-        ) %>
+        )}
         <br /><br />
 
         <%= for key <- @schema_keys do %>
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "key-#{key}",
             label: key,
             active: "key-#{@key}",
             bsname: bsname,
             icon: "",
             url: "?key=#{key}&tf=#{@timeframe}"
-          ) %>
+          )}
         <% end %>
         &nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;
         <%= for tf <- timeframes do %>
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "tf-#{tf}",
             label: tf,
             active: "tf-#{@timeframe}",
             bsname: bsname,
             icon: "",
             url: "?key=#{@key}&tf=#{tf}"
-          ) %>
+          )}
         <% end %>
 
         <br /><br />
 
-        <h4>Value counts for <%= @event_name %></h4>
+        <h4>Value counts for {@event_name}</h4>
         <table class="table table-sm">
           <thead>
             <tr>
-              <th><%= @key %></th>
+              <th>{@key}</th>
               <th>Auth count</th>
               <th>Unauth count</th>
               <th>Total</th>
@@ -62,11 +62,11 @@
           <tbody>
             <%= for value <- @combined_values do %>
               <tr>
-                <td><%= value %></td>
-                <td><%= @client_data[value] %></td>
-                <td><%= @anon_data[value] %></td>
+                <td>{value}</td>
+                <td>{@client_data[value]}</td>
+                <td>{@anon_data[value]}</td>
                 <td>
-                  <%= Map.get(@client_data, value, 0) + Map.get(@anon_data, value, 0) %>
+                  {Map.get(@client_data, value, 0) + Map.get(@anon_data, value, 0)}
                 </td>
               </tr>
             <% end %>

@@ -7,7 +7,7 @@
     <meta name="description" content="" />
     <meta name="author" content="" />
 
-    <title><%= Application.get_env(:teiserver, TeiserverWeb)[:page_title] %></title>
+    <title>{Application.get_env(:teiserver, TeiserverWeb)[:page_title]}</title>
 
     <% light_mode =
       case get_user_config_cache(assigns[:current_user], "general.Colour scheme") do
@@ -61,7 +61,7 @@
                 </a>
 
                 <h4 style="padding-bottom: 10px;">Sorry, I can't do that</h4>
-                <%= @msg %>
+                {@msg}
                 <br /><br />
               </div>
             </div>

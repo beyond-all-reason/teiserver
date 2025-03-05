@@ -2,54 +2,54 @@
 
 <div class="row">
   <div class="col-md-9">
-    <%= central_component("section_menu_button",
+    {central_component("section_menu_button",
       name: "list",
       label: "List",
       active: @active,
       icon: StylingHelper.icon(:list),
       bsname: bsname,
       url: Routes.moderation_action_path(@conn, :index)
-    ) %>
+    )}
 
-    <%= central_component("section_menu_button",
+    {central_component("section_menu_button",
       name: "search",
       label: "Search",
       active: @active,
       icon: StylingHelper.icon(:search),
       bsname: bsname,
       url: Routes.moderation_action_path(@conn, :index) <> "?search=true"
-    ) %>
+    )}
 
     <%= if allow?(@conn, "Moderator") do %>
-      <%= central_component("section_menu_button",
+      {central_component("section_menu_button",
         name: "new",
         label: "New",
         active: @active,
         icon: StylingHelper.icon(:new),
         bsname: bsname,
         url: Routes.moderation_action_path(@conn, :new)
-      ) %>
+      )}
     <% end %>
 
     <%= case @active do %>
       <% "show" -> %>
-        <%= central_component("section_menu_button",
+        {central_component("section_menu_button",
           name: "show",
           label: "Show",
           active: @active,
           icon: StylingHelper.icon(:show),
           bsname: bsname,
           url: "#"
-        ) %>
+        )}
       <% "edit" -> %>
-        <%= central_component("section_menu_button",
+        {central_component("section_menu_button",
           name: "edit",
           label: "Edit",
           active: @active,
           icon: StylingHelper.icon(:edit),
           bsname: bsname,
           url: "#"
-        ) %>
+        )}
       <% _ -> %>
     <% end %>
   </div>

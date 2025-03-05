@@ -2,10 +2,10 @@
 moderator = allow?(@current_user, "Moderator")
 leader = moderator or @party.leader == @current_user.id %>
 
-<%= render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+{render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "parties",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
-}) %>
+})}
 
 <div class="row mt-3" id="main-content">
   <div class="col-md-12">
@@ -20,14 +20,14 @@ leader = moderator or @party.leader == @current_user.id %>
           <% end %>
         </div>
 
-        <h4>Leader: <%= (@user_lookup[@party.leader] || %{name: ""}).name %></h4>
+        <h4>Leader: {(@user_lookup[@party.leader] || %{name: ""}).name}</h4>
         <h5>Members:</h5>
         <table class="table">
           <tbody>
             <%= for m <- @party.members do %>
               <tr>
                 <td>
-                  <%= @user_lookup[m].name %>
+                  {@user_lookup[m].name}
                 </td>
                 <td>
                   <%= if leader and m != @current_user.id do %>
@@ -47,7 +47,7 @@ leader = moderator or @party.leader == @current_user.id %>
             <%= for m <- @party.pending_invites do %>
               <tr>
                 <td>
-                  <%= (@user_lookup[m] || %{name: "Err, no user"}).name %>
+                  {(@user_lookup[m] || %{name: "Err, no user"}).name}
                 </td>
                 <td>
                   <%= if leader do %>
@@ -78,7 +78,7 @@ leader = moderator or @party.leader == @current_user.id %>
                       phx-click="create_invite"
                       phx-value-userid={f}
                     >
-                      Invite <%= @user_lookup[f].name %>
+                      Invite {@user_lookup[f].name}
                     </span>
                   <% end %>
                 </div>
@@ -99,7 +99,7 @@ leader = moderator or @party.leader == @current_user.id %>
                         phx-click="create_invite"
                         phx-value-userid={f}
                       >
-                        Invite <%= @user_lookup[f].name %>
+                        Invite {@user_lookup[f].name}
                       </span>
                     <% end %>
                   </div>

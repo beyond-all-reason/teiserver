@@ -8,24 +8,24 @@
   });
 </script>
 
-<%= render(
+{render(
   TeiserverWeb.Battle.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "matches"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Battle.MatchView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
             active: "show"
           })
-        ) %>
+        )}
         <hr />
 
         <div class="float-end">
@@ -33,33 +33,33 @@
         </div>
 
         <h3>
-          <%= @match_name %> &nbsp;&nbsp;&nbsp;&nbsp;
+          {@match_name} &nbsp;&nbsp;&nbsp;&nbsp;
           <%= if @match.winning_team != nil do %>
-            Team <%= @match.winning_team + 1 %> won
+            Team {@match.winning_team + 1} won
           <% end %>
         </h3>
         <br />
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: "fa-solid fa-file-alt") %> Details
+              {central_component("icon", icon: "fa-solid fa-file-alt")} Details
             </a>
           </li>
 
           <li class="nav-item">
             <a href="#players_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: "fa-solid fa-users") %> Players
+              {central_component("icon", icon: "fa-solid fa-users")} Players
             </a>
           </li>
         </ul>
 
         <div class="tab-content">
           <div class="tab-pane" id="details_tab" style="padding:5px;">
-            <%= render("tab_details.html", assigns) %>
+            {render("tab_details.html", assigns)}
           </div>
 
           <div class="tab-pane" id="players_tab" style="padding:5px;">
-            <%= render("tab_players.html", assigns) %>
+            {render("tab_players.html", assigns)}
           </div>
         </div>
       </div>

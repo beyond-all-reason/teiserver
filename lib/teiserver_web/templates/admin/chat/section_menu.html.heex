@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "search",
   label: "Search",
   active: @active,
   icon: Teiserver.Chat.LobbyMessageLib.icon(),
   bsname: bsname,
   url: ~p"/admin/chat"
-) %>
+)}

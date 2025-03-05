@@ -1,12 +1,12 @@
 <% {fg, _bg, bsname} = view_colour() |> colours() %>
 
-<%= render(
+{render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "match"})
-) %>
+)}
 
-<%= central_component("icon_dropdown_js", []) %>
+{central_component("icon_dropdown_js", [])}
 
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
 <script src={Routes.static_path(@conn, "/js/select2.js")}>
@@ -16,7 +16,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Logging.MatchLogView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -24,7 +24,7 @@
             show_search: false,
             active: "download"
           })
-        ) %>
+        )}
         <br /><br />
 
         <form action={Routes.logging_match_log_path(@conn, :export_post)} method="post" class="">
@@ -33,7 +33,7 @@
           <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_export_type" class="control-label">Export type: </label>
-              <%= central_component("icon_dropdown", %{
+              {central_component("icon_dropdown", %{
                 name: "report[export_type]",
                 id: "report_export_type",
                 selected: @params[:active],
@@ -41,17 +41,17 @@
                   %{id: "Raw data", icon: "fa-solid fa-th", colour: fg}
                   # %{id: "Aggregrate data", icon: "fa-regular fa-check", colour: fg}
                 ]
-              }) %>
+              })}
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_date_preset" class="control-label">Date range:</label>
-              <%= select(:report, :date_preset, @presets,
+              {select(:report, :date_preset, @presets,
                 class: "form-control",
                 selected: @params["date_preset"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">

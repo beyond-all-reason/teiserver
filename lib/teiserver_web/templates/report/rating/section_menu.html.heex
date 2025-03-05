@@ -1,28 +1,28 @@
 <% bsname = view_colour() %>
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "distribution_table",
   label: "Distribution table",
   active: @active,
   icon: "fa-regular fa-table",
   bsname: bsname,
   url: Routes.ts_reports_rating_path(@conn, :distribution_table)
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "distribution_graph",
   label: "Distribution graph",
   active: @active,
   icon: "fa-solid fa-chart-area",
   bsname: bsname,
   url: Routes.ts_reports_rating_path(@conn, :distribution_graph)
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "balance_tester",
   label: "Balance tester",
   active: @active,
   icon: "fa-regular fa-scale-balanced",
   bsname: bsname,
   url: Routes.ts_reports_rating_path(@conn, :balance_tester)
-) %>
+)}

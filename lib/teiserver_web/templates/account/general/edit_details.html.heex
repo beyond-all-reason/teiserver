@@ -24,32 +24,32 @@
 
           <%= if Teiserver.Config.get_site_config_cache("user.Enable renames") do %>
             <div class="form-group mt-3">
-              <%= label(f, :name) %>
-              <%= text_input(f, :name,
+              {label(f, :name)}
+              {text_input(f, :name,
                 class: "form-control",
                 required: "",
                 autofocus: "autofocus"
-              ) %>
-              <%= error_tag(f, :name) %>
+              )}
+              {error_tag(f, :name)}
             </div>
           <% else %>
             <div class="form-group mt-3">
-              <%= label(f, :name) %>
-              <%= text_input(f, :name, class: "form-control", required: "", disabled: "disabled") %>
-              <%= error_tag(f, :name) %>
+              {label(f, :name)}
+              {text_input(f, :name, class: "form-control", required: "", disabled: "disabled")}
+              {error_tag(f, :name)}
             </div>
           <% end %>
 
           <div class="form-group mt-3" style="display: nnone;">
-            <%= label(f, :email) %>
-            <%= text_input(f, :email, class: "form-control") %>
-            <%= error_tag(f, :email) %>
+            {label(f, :email)}
+            {text_input(f, :email, class: "form-control")}
+            {error_tag(f, :email)}
           </div>
 
           <div class="form-group mt-3">
-            <%= label(f, :password_confirmation) %>
-            <%= password_input(f, :password_confirmation, class: "form-control", required: true) %>
-            <%= error_tag(f, :password_confirmation) %>
+            {label(f, :password_confirmation)}
+            {password_input(f, :password_confirmation, class: "form-control", required: true)}
+            {error_tag(f, :password_confirmation)}
           </div>
 
           <div class="form-group mt-3">
@@ -57,7 +57,7 @@
               Cancel
             </a>
 
-            <%= submit("Update details", class: "btn btn-primary float-end") %>
+            {submit("Update details", class: "btn btn-primary float-end")}
           </div>
         <% end %>
       </div>

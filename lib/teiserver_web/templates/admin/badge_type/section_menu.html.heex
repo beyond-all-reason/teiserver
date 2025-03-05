@@ -1,22 +1,22 @@
 <% bsname = view_colour() %>
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "index",
   label: "List",
   active: @active,
   icon: "fa-solid fa-bars",
   bsname: bsname,
   url: Routes.ts_admin_badge_type_path(@conn, :index)
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "new",
   label: "New",
   active: @active,
   icon: "fa-regular fa-plus",
   bsname: bsname,
   url: Routes.ts_admin_badge_type_path(@conn, :new)
-) %>
+)}
 
 <form
   action={Routes.ts_admin_badge_type_path(@conn, :index)}

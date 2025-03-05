@@ -20,35 +20,35 @@
   }
 </style>
 
-<%= render(
+{render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "aggregate"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(TeiserverWeb.Logging.AggregateViewLogView, "section_menu.html",
+        {render(TeiserverWeb.Logging.AggregateViewLogView, "section_menu.html",
           conn: @conn,
           permissions: @current_user.permissions,
           active: "index"
-        ) %>
+        )}
 
         <hr />
 
         <div class="row mt-3">
           <div class="col-md-12">
             <h3>
-              Aggregate log view: <%= Timex.format!(@log.date, "{0D}/{0M}/{YYYY}, {WDfull}") %>
+              Aggregate log view: {Timex.format!(@log.date, "{0D}/{0M}/{YYYY}, {WDfull}")}
             </h3>
             <br /><br />
 
             <ul class="nav nav-tabs" role="tablist" id="the_tabs">
               <li class="nav-item">
                 <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <%= central_component("icon", icon: icon()) %> Details
+                  {central_component("icon", icon: icon())} Details
                 </a>
               </li>
 
@@ -67,15 +67,15 @@
 
             <div class="tab-content">
               <div class="tab-pane" id="details_tab" style="padding:5px;">
-                <%= render("tab_details.html", assigns) %>
+                {render("tab_details.html", assigns)}
               </div>
 
               <div class="tab-pane" id="hourly_tab" style="padding:5px;">
-                <%= render("tab_hourly.html", assigns) %>
+                {render("tab_hourly.html", assigns)}
               </div>
 
               <div class="tab-pane" id="section_tab" style="padding:5px;">
-                <%= render("tab_section.html", assigns) %>
+                {render("tab_section.html", assigns)}
               </div>
             </div>
           </div>

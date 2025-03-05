@@ -12,11 +12,11 @@
   <tbody>
     <%= for report <- @action.reports do %>
       <tr>
-        <td><%= report.reporter.name %></td>
-        <td><%= report.type %>/<%= report.sub_type %></td>
-        <td><%= report.extra_text %></td>
+        <td>{report.reporter.name}</td>
+        <td>{report.type}/{report.sub_type}</td>
+        <td>{report.extra_text}</td>
 
-        <td><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></td>
+        <td>{date_to_str(report.inserted_at, format: :hms_or_ymd)}</td>
 
         <td>
           <a

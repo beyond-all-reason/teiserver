@@ -1,8 +1,8 @@
-<%= render(
+{render(
   TeiserverWeb.Battle.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "matches"})
-) %>
+)}
 
 <div :if={@match} class="row section-menu">
   <div class="col-md-12">
@@ -32,9 +32,9 @@
       />
     <% else %>
       <h3>
-        <%= @match_name %> &nbsp;&nbsp;&nbsp;&nbsp;
+        {@match_name} &nbsp;&nbsp;&nbsp;&nbsp;
         <%= if @match.winning_team != nil do %>
-          Team <%= @match.winning_team + 1 %> won
+          Team {@match.winning_team + 1} won
         <% end %>
       </h3>
       <br />
@@ -42,7 +42,7 @@
       <%= if @rating_status != nil and allow?(@current_user, "Tester") do %>
         <% {alert_type, status} = @rating_status %>
         <div class={"alert alert-#{alert_type} alert-dismissible fade show"} role="alert">
-          <%= status %>
+          {status}
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
           </button>
         </div>
@@ -84,39 +84,39 @@
       <div :if={@tab == :overview} class="p-4">
         <div class="row">
           <div class="col">
-            <strong>Team count:</strong> <%= @match.team_count %>
+            <strong>Team count:</strong> {@match.team_count}
           </div>
 
           <div class="col">
-            <strong>Team size:</strong> <%= @match.team_size %>
+            <strong>Team size:</strong> {@match.team_size}
           </div>
 
           <div class="col">
-            <strong>Started:</strong> <%= date_to_str(@match.started, format: :ymd_hms, tz: @tz) %>
+            <strong>Started:</strong> {date_to_str(@match.started, format: :ymd_hms, tz: @tz)}
           </div>
 
           <div class="col">
-            <strong>Finished:</strong> <%= date_to_str(@match.finished, format: :ymd_hms, tz: @tz) %>
+            <strong>Finished:</strong> {date_to_str(@match.finished, format: :ymd_hms, tz: @tz)}
           </div>
 
           <%= if allow?(@current_user, "admin.dev") do %>
             <div class="col">
-              <strong>Tag count:</strong> <%= Map.keys(@match.tags) |> Enum.count() %>
+              <strong>Tag count:</strong> {Map.keys(@match.tags) |> Enum.count()}
             </div>
           <% end %>
         </div>
 
         <div class="row mt-2">
           <div class="col">
-            <strong>Host:</strong> <%= @match.founder.name %>
+            <strong>Host:</strong> {@match.founder.name}
           </div>
 
           <div class="col">
-            <strong>Duration:</strong> <%= duration_to_str_short(@match.game_duration) %>
+            <strong>Duration:</strong> {duration_to_str_short(@match.game_duration)}
           </div>
 
           <div class="col">
-            <strong>Bot count:</strong> <%= Enum.count(@match.bots) %>
+            <strong>Bot count:</strong> {Enum.count(@match.bots)}
           </div>
         </div>
         <hr />
@@ -183,7 +183,7 @@
                 </td>
 
                 <td style={"background-color: #{rgba_css m.user.colour};"}>
-                  <%= m.user.name %>
+                  {m.user.name}
                 </td>
 
                 <%= if party_colour do %>
@@ -196,25 +196,25 @@
                   </td>
                 <% end %>
 
-                <td><%= m.team_id + 1 %></td>
+                <td>{m.team_id + 1}</td>
 
                 <td>
                   <%= if rating != nil do %>
-                    <%= rating.value["old_rating_value"]
-                    |> round(2) %>
+                    {rating.value["old_rating_value"]
+                    |> round(2)}
                   <% end %>
                 </td>
 
                 <td>
                   <%= if rating != nil do %>
-                    <%= rating.value["old_uncertainty"]
-                    |> round(2) %>
+                    {rating.value["old_uncertainty"]
+                    |> round(2)}
                   <% end %>
                 </td>
 
                 <td>
                   <%= if rating != nil do %>
-                    <%= normalize(rating.value["old_num_matches"]) %>
+                    {normalize(rating.value["old_num_matches"])}
                   <% end %>
                 </td>
 
@@ -223,23 +223,23 @@
                     <% :stayed -> %>
                     <% :early -> %>
                       <i class="fa-fw fa-solid fa-clock text-warning"></i>
-                      &nbsp; <%= play_percentage %>%
+                      &nbsp; {play_percentage}%
                     <% :abandoned -> %>
                       <i class="fa-fw fa-solid fa-person-running text-danger"></i>
-                      &nbsp; <%= play_percentage %>%
+                      &nbsp; {play_percentage}%
                     <% :noshow -> %>
                       <i class="fa-fw fa-solid fa-user-ninja text-info2"></i>
                   <% end %>
                 </td>
 
-                <td><%= normalize(m.stats["damageDealt"]) %></td>
-                <td><%= normalize(m.stats["damageReceived"]) %></td>
+                <td>{normalize(m.stats["damageDealt"])}</td>
+                <td>{normalize(m.stats["damageReceived"])}</td>
 
-                <td><%= normalize(m.stats["metalProduced"]) %></td>
-                <td><%= normalize(m.stats["metalUsed"]) %></td>
+                <td>{normalize(m.stats["metalProduced"])}</td>
+                <td>{normalize(m.stats["metalUsed"])}</td>
 
-                <td><%= normalize(m.stats["energyProduced"]) %></td>
-                <td><%= normalize(m.stats["energyUsed"]) %></td>
+                <td>{normalize(m.stats["energyProduced"])}</td>
+                <td>{normalize(m.stats["energyUsed"])}</td>
 
                 <td>
                   <div :if={m.user_id != @current_user.id} style="display: flex;">
@@ -278,8 +278,8 @@
           <tbody>
             <%= for m <-  @prediction_text do %>
               <tr>
-                <td style="padding-right:10px;"><%= m.label %></td>
-                <td><%= m.value %></td>
+                <td style="padding-right:10px;">{m.label}</td>
+                <td>{m.value}</td>
               </tr>
             <% end %>
           </tbody>
@@ -320,7 +320,7 @@
                     <Fontawesome.icon icon={m.user.icon} style="" />
                   </td>
                   <td style={"background-color: #{rgba_css m.user.colour};"}>
-                    <%= m.user.name %>
+                    {m.user.name}
                   </td>
 
                   <%= if party_colour do %>
@@ -333,16 +333,16 @@
                     </td>
                   <% end %>
 
-                  <td><%= m.team_id + 1 %></td>
+                  <td>{m.team_id + 1}</td>
 
                   <td>
-                    <%= (rating.value["rating_value"] - rating.value["rating_value_change"])
-                    |> round(2) %>
+                    {(rating.value["rating_value"] - rating.value["rating_value_change"])
+                    |> round(2)}
                   </td>
-                  <td><%= rating.value["rating_value"] |> round(2) %></td>
+                  <td>{rating.value["rating_value"] |> round(2)}</td>
                   <td class={text_class}>
                     <Fontawesome.icon icon={icon} style="solid" />
-                    <%= rating.value["rating_value_change"] |> round(2) %>
+                    {rating.value["rating_value_change"] |> round(2)}
                   </td>
                 </tr>
               <% end %>
@@ -372,29 +372,29 @@
               <tr>
                 <td>Team 1</td>
                 <td>
-                  Rating: <%= @past_balance.ratings[1] |> round(2) %>
+                  Rating: {@past_balance.ratings[1] |> round(2)}
                 </td>
                 <td>
-                  St Dev: <%= @past_balance.stdevs[1] |> round(2) %>
+                  St Dev: {@past_balance.stdevs[1] |> round(2)}
                 </td>
               </tr>
               <tr>
                 <td>Team 2</td>
                 <td>
-                  Rating: <%= @past_balance.ratings[2] |> round(2) %>
+                  Rating: {@past_balance.ratings[2] |> round(2)}
                 </td>
                 <td>
-                  St Dev: <%= @past_balance.stdevs[2] |> round(2) %>
+                  St Dev: {@past_balance.stdevs[2] |> round(2)}
                 </td>
               </tr>
 
               <tr>
                 <td>Deviation</td>
-                <td colspan="2"><%= @past_balance.deviation %></td>
+                <td colspan="2">{@past_balance.deviation}</td>
               </tr>
               <tr>
                 <td>Time Taken (ms)</td>
-                <td colspan="2"><%= @past_balance.time_taken / 1000 %></td>
+                <td colspan="2">{@past_balance.time_taken / 1000}</td>
               </tr>
             </tbody>
           </table>
@@ -417,7 +417,7 @@
                 {party_colour, party_idx} = Map.get(@parties, m.party_id, {nil, nil}) %>
                 <tr>
                   <td>
-                    <%= m.user.name %>
+                    {m.user.name}
                   </td>
                   <%= if party_colour do %>
                     <td style={"background-color: #{rgba_css(party_colour, 0.3)};"} width="50">
@@ -428,17 +428,17 @@
                       &nbsp;
                     </td>
                   <% end %>
-                  <td><%= m.team_id + 1 %></td>
+                  <td>{m.team_id + 1}</td>
                   <td>
                     <%= if rating != nil do %>
-                      <%= (rating.value["rating_value"] - rating.value["rating_value_change"])
-                      |> round(2) %>
+                      {(rating.value["rating_value"] - rating.value["rating_value_change"])
+                      |> round(2)}
                     <% end %>
                   </td>
                   <td>
                     <%= if rating != nil do %>
-                      <%= (rating.value["uncertainty"] - rating.value["uncertainty_change"])
-                      |> round(2) %>
+                      {(rating.value["uncertainty"] - rating.value["uncertainty_change"])
+                      |> round(2)}
                     <% end %>
                   </td>
                 </tr>
@@ -452,19 +452,19 @@
             <tbody>
               <tr>
                 <td>Team 1</td>
-                <td><%= @new_balance.ratings[1] |> round(2) %></td>
+                <td>{@new_balance.ratings[1] |> round(2)}</td>
               </tr>
               <tr>
                 <td>Team 2</td>
-                <td><%= @new_balance.ratings[2] |> round(2) %></td>
+                <td>{@new_balance.ratings[2] |> round(2)}</td>
               </tr>
               <tr>
                 <td>Deviation</td>
-                <td><%= @new_balance.deviation %></td>
+                <td>{@new_balance.deviation}</td>
               </tr>
               <tr>
                 <td>Time Taken (ms)</td>
-                <td><%= @new_balance.time_taken / 1000 %></td>
+                <td>{@new_balance.time_taken / 1000}</td>
               </tr>
             </tbody>
           </table>
@@ -479,17 +479,17 @@
             <div class="col">
               <h4>By type</h4>
               <.table id="by_type" rows={@events_by_type} table_class="table-sm">
-                <:col :let={{name, _}} label="Event"><%= name %></:col>
-                <:col :let={{_, count}} label="Count"><%= count %></:col>
+                <:col :let={{name, _}} label="Event">{name}</:col>
+                <:col :let={{_, count}} label="Count">{count}</:col>
               </.table>
             </div>
 
             <div class="col">
               <h4>By team and type</h4>
               <.table id="by_type" rows={@events_by_team_and_type} table_class="table-sm">
-                <:col :let={{{team, _}, _}} label="Team"><%= team + 1 %></:col>
-                <:col :let={{{_, name}, _}} label="Event"><%= name %></:col>
-                <:col :let={{_, count}} label="Count"><%= count %></:col>
+                <:col :let={{{team, _}, _}} label="Team">{team + 1}</:col>
+                <:col :let={{{_, name}, _}} label="Event">{name}</:col>
+                <:col :let={{_, count}} label="Count">{count}</:col>
               </.table>
             </div>
           </div>

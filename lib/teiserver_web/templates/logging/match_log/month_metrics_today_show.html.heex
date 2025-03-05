@@ -18,17 +18,17 @@
   }
 </style>
 
-<%= render(
+{render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "match"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Logging.MatchLogView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -36,27 +36,27 @@
             show_search: false,
             active: "this_month"
           })
-        ) %>
+        )}
 
         <hr />
 
         <div class="row page-row">
           <div class="col-md-12">
             <h4>
-              Headline stats - <%= @month %>/<%= @year %> month to date (<%= @progress %>% through this month)
+              Headline stats - {@month}/{@year} month to date ({@progress}% through this month)
             </h4>
 
             <ul class="nav nav-tabs" role="tablist" id="the_tabs">
               <li class="nav-item">
                 <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <%= central_component("icon", icon: icon()) %> Details
+                  {central_component("icon", icon: icon())} Details
                 </a>
               </li>
             </ul>
 
             <div class="tab-content">
               <div class="tab-pane" id="details_tab" style="padding:5px;">
-                <%= render("tab_month_today_details.html", %{data: @data, last_month: @last_month}) %>
+                {render("tab_month_today_details.html", %{data: @data, last_month: @last_month})}
               </div>
             </div>
           </div>

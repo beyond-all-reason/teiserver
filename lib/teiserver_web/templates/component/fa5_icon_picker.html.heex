@@ -52,11 +52,11 @@ value =
           <a href="https://fontawesome.com/icons" target="_blank">fontawesome.com/icons</a>
         </label>
       <% else %>
-        <%= label(form, @field, class: "control-label") %>
+        {label(form, @field, class: "control-label")}
         <em>
           For a list of icons see:
           <a
-            href={"https://fontawesome.com/icons#{if free_only, do: '?d=gallery&m=free'}"}
+            href={"https://fontawesome.com/icons#{if free_only, do: "?d=gallery&m=free"}"}
             target="_blank"
           >
             fontawesome.com/icons

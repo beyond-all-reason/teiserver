@@ -11,26 +11,26 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <div class="float-end">
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "day",
             label: "Day",
             active: @timeframe,
             bsname: bsname,
             icon: "",
             url: "?timeframe=day"
-          ) %>
+          )}
 
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "week",
             label: "Week",
             active: @timeframe,
             bsname: bsname,
             icon: "",
             url: "?timeframe=week"
-          ) %>
+          )}
         </div>
 
-        <%= render(
+        {render(
           TeiserverWeb.Telemetry.SimpleClientEventView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -38,12 +38,12 @@
             show_search: false,
             active: "summary"
           })
-        ) %>
+        )}
         <br /><br />
 
         <div class="row">
           <div class="col-md-6">
-            <h4>Event counts - Timeframe 1 <%= @timeframe %></h4>
+            <h4>Event counts - Timeframe 1 {@timeframe}</h4>
             <table class="table table-sm">
               <thead>
                 <tr>
@@ -55,8 +55,8 @@
               <tbody>
                 <%= for event_type <- @event_types do %>
                   <tr>
-                    <td><%= event_type %></td>
-                    <td><%= format_number(@client_events[event_type]) %></td>
+                    <td>{event_type}</td>
+                    <td>{format_number(@client_events[event_type])}</td>
                     <td>
                       <a
                         href={~p"/telemetry/simple_client_events/#{event_type}/detail"}

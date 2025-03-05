@@ -9,26 +9,26 @@
 
   <div class="form-group row">
     <div class="col-xl-4 col-lg-4">
-      <%= label(f, :name, class: "control-label") %>
-      <%= text_input(f, :name, class: "form-control", disabled: "disabled") %>
-      <%= error_tag(f, :name) %>
+      {label(f, :name, class: "control-label")}
+      {text_input(f, :name, class: "form-control", disabled: "disabled")}
+      {error_tag(f, :name)}
     </div>
 
     <%= if allow?(@conn, "Admin") do %>
       <div class="col-xl-4 col-lg-4">
-        <%= label(f, :email, class: "control-label") %>
-        <%= text_input(f, :email, class: "form-control") %>
-        <%= error_tag(f, :email) %>
+        {label(f, :email, class: "control-label")}
+        {text_input(f, :email, class: "form-control")}
+        {error_tag(f, :email)}
       </div>
     <% end %>
 
     <div class="col-xl-4 col-lg-4">
       <%= if assigns[:user].smurf_of_id do %>
-        <%= link(raw("<i class='far fa-fw fa-link-slash'></i> Clear smurf link"),
+        {link(raw("<i class='far fa-fw fa-link-slash'></i> Clear smurf link"),
           to: ~p"/teiserver/admin/users/cancel_smurf_mark/#{@user.id}",
           method: :delete,
           class: "btn btn-outline-warning"
-        ) %>
+        )}
       <% end %>
     </div>
   </div>
@@ -47,12 +47,12 @@
           else
             r
           end %>
-        <%= central_component("checkbox",
+        {central_component("checkbox",
           id: "user_#{r}",
           name: "user[#{r}]",
           label: label,
           checked: r in (@changeset.data.roles || [])
-        ) %>
+        )}
       <% end %>
     </div>
 
@@ -69,12 +69,12 @@
           else
             r
           end %>
-        <%= central_component("checkbox",
+        {central_component("checkbox",
           id: "user_#{r}",
           name: "user[#{r}]",
           label: label,
           checked: r in (@changeset.data.roles || [])
-        ) %>
+        )}
       <% end %>
     </div>
 
@@ -91,12 +91,12 @@
           else
             r
           end %>
-        <%= central_component("checkbox",
+        {central_component("checkbox",
           id: "user_#{r}",
           name: "user[#{r}]",
           label: label,
           checked: r in (@changeset.data.roles || [])
-        ) %>
+        )}
       <% end %>
     </div>
 
@@ -113,12 +113,12 @@
           else
             r
           end %>
-        <%= central_component("checkbox",
+        {central_component("checkbox",
           id: "user_#{r}",
           name: "user[#{r}]",
           label: label,
           checked: r in (@changeset.data.roles || [])
-        ) %>
+        )}
       <% end %>
     </div>
 
@@ -135,12 +135,12 @@
           else
             r
           end %>
-        <%= central_component("checkbox",
+        {central_component("checkbox",
           id: "user_#{r}",
           name: "user[#{r}]",
           label: label,
           checked: r in (@changeset.data.roles || [])
-        ) %>
+        )}
       <% end %>
     </div>
 
@@ -157,23 +157,23 @@
           else
             r
           end %>
-        <%= central_component("checkbox",
+        {central_component("checkbox",
           id: "user_#{r}",
           name: "user[#{r}]",
           label: label,
           checked: r in (@changeset.data.roles || [])
-        ) %>
+        )}
       <% end %>
     </div>
   </div>
 
   <div :if={allow?(@conn, "Admin")} class="row mt-2">
     <div class="col">
-      <%= input_with_type(f, :colour, "color") %>
+      {input_with_type(f, :colour, "color")}
     </div>
 
     <div class="col">
-      <%= central_component("fa5_icon_picker", %{form: f, field: :icon}) %>
+      {central_component("fa5_icon_picker", %{form: f, field: :icon})}
     </div>
   </div>
 

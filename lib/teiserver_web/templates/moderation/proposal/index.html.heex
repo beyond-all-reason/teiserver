@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Moderation.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "proposals"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Moderation.ProposalView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -22,11 +22,11 @@
                 true -> "list"
               end
           })
-        ) %>
+        )}
         <br /><br />
 
         <%= if @conn.params["search"] != nil do %>
-          <%= render(TeiserverWeb.Moderation.ProposalView, "search.html", assigns) %>
+          {render(TeiserverWeb.Moderation.ProposalView, "search.html", assigns)}
         <% end %>
 
         <h4>Listing Proposals</h4>
@@ -49,18 +49,18 @@
           <tbody>
             <%= for proposal <- @proposals do %>
               <tr>
-                <td><%= proposal.target.name %></td>
+                <td>{proposal.target.name}</td>
 
                 <td>
-                  <%= proposal.reason
+                  {proposal.reason
                   |> String.split("\n")
-                  |> hd %>
+                  |> hd}
                 </td>
 
                 <td>
-                  <%= Enum.join(proposal.restrictions, ", ") %>
+                  {Enum.join(proposal.restrictions, ", ")}
                 </td>
-                <td><%= proposal.duration %></td>
+                <td>{proposal.duration}</td>
 
                 <td>
                   <% score = proposal.votes_for - proposal.votes_against
@@ -71,12 +71,12 @@
                       score > 0 -> "text-success"
                       score == 0 -> "text-info"
                     end %>
-                  <span class={class}><%= score %></span>
-                  &nbsp;&nbsp; <span class="text-success"><%= proposal.votes_for %></span>
-                  / <span class="text-danger"><%= proposal.votes_against %></span>
+                  <span class={class}>{score}</span>
+                  &nbsp;&nbsp; <span class="text-success">{proposal.votes_for}</span>
+                  / <span class="text-danger">{proposal.votes_against}</span>
                 </td>
 
-                <td><%= proposal.proposer.name %></td>
+                <td>{proposal.proposer.name}</td>
 
                 <%= if proposal.concluder_id do %>
                   <td>Concluded</td>

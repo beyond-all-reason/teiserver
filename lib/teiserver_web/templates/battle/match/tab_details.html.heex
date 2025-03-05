@@ -1,24 +1,24 @@
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "Team count",
   value: @match.team_count
-) %>
+)}
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "Team size",
   value: @match.team_size
-) %>
+)}
 
 <hr />
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "Started",
   value: date_to_str(@match.started, format: :ymd_hms, tz: @tz)
-) %>
+)}
 
-<%= central_component("detail_line",
+{central_component("detail_line",
   label: "Finished",
   value: date_to_str(@match.finished, format: :ymd_hms, tz: @tz)
-) %>
+)}
 
 <%= if allow?(@conn, "Moderator") do %>
   <hr />

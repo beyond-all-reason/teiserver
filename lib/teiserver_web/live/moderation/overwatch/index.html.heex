@@ -122,12 +122,12 @@
     <% end %>
   </:col>
 
-  <:col :let={report_group} label="Target"><%= report_group.target.name %></:col>
-  <:col :let={report_group} label="Reports"><%= report_group.report_count %></:col>
-  <:col :let={report_group} label="Votes"><%= report_group.vote_count %></:col>
-  <:col :let={report_group} label="Actions"><%= report_group.action_count %></:col>
+  <:col :let={report_group} label="Target">{report_group.target.name}</:col>
+  <:col :let={report_group} label="Reports">{report_group.report_count}</:col>
+  <:col :let={report_group} label="Votes">{report_group.vote_count}</:col>
+  <:col :let={report_group} label="Actions">{report_group.action_count}</:col>
   <:col :let={report_group} label="Created">
-    <%= report_group.inserted_at |> date_to_str(format: :hms_or_ymd) %>
+    {report_group.inserted_at |> date_to_str(format: :hms_or_ymd)}
   </:col>
 
   <:col :let={report_group} label="">

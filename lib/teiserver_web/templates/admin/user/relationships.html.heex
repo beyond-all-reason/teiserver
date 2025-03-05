@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "users"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.UserView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -18,7 +18,7 @@
             show_search: false,
             active: "show"
           })
-        ) %>
+        )}
         <hr />
 
         <a class={"btn btn-outline-#{bsname} float-end"} href={~p"/teiserver/admin/user/#{@user}"}>
@@ -37,7 +37,7 @@
                 {:blocking, "Blocked by"}
               ] do %>
             <div class="col-md-4">
-              <h4><%= title %> (<%= Enum.count(@relationships[relationship_type]) %>)</h4>
+              <h4>{title} ({Enum.count(@relationships[relationship_type])})</h4>
               <table class="table table-sm">
                 <thead>
                   <tr>
@@ -51,10 +51,10 @@
                     <%= if user do %>
                       <tr>
                         <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-                          <%= central_component("icon", icon: user.icon) %>
+                          {central_component("icon", icon: user.icon)}
                         </td>
                         <td style={"background-color: #{rgba_css user.colour};"}>
-                          <%= user.name %>
+                          {user.name}
                         </td>
                         <td>&nbsp;</td>
                         <td>

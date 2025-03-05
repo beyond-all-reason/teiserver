@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= central_component("picker_script",
+{central_component("picker_script",
   module: Teiserver.Account.UserLib,
   name: "account_user",
   title: "User search"
-) %>
+)}
 
 <div class="row">
   <div class="col-md-12">
@@ -26,23 +26,23 @@
           <div class="row">
             <div class="col-md-4 col-xl-2">
               <label for="search_action" class="control-label">Action type: </label>
-              <%= select(:search, :action, ["Any"] ++ @actions,
+              {select(:search, :action, ["Any"] ++ @actions,
                 class: "form-control",
                 selected: @params["action"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-xl-2">
               <label for="teiserver-user-search" class="control-label">User: </label>
-              <%= render(TeiserverWeb.Account.UserView, "picker.html",
+              {render(TeiserverWeb.Account.UserView, "picker.html",
                 input_name: "search[account_user]",
                 value: @params["account_user"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-xl-2">
               <label for="limit" class="control-label">Limit: </label>
-              <%= select(
+              {select(
                 :search,
                 :limit,
                 [
@@ -52,7 +52,7 @@
                 ],
                 class: "form-control",
                 selected: @params["limit"]
-              ) %>
+              )}
             </div>
           </div>
 

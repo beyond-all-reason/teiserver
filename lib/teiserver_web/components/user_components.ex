@@ -106,7 +106,7 @@ defmodule TeiserverWeb.UserComponents do
           <% else %>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <% end %>
-          &nbsp; <%= r.item_label %>
+          &nbsp; {r.item_label}
         </a>
       </div>
     </div>
@@ -155,7 +155,7 @@ defmodule TeiserverWeb.UserComponents do
             id="signout-link"
           >
             <i class="fa-regular fa-sign-out fa-fw"></i> &nbsp;
-            Sign out <%= @current_user.name %>
+            Sign out {@current_user.name}
           </a>
         </form>
       </div>

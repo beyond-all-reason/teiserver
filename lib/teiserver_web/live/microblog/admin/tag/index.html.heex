@@ -12,7 +12,7 @@
       rows={@tags}
       row_click={fn tag -> JS.navigate(~p"/microblog/admin/tags/#{tag.id}") end}
     >
-      <:col :let={tag} label="Name"><%= tag.name %></:col>
+      <:col :let={tag} label="Name">{tag.name}</:col>
       <:col :let={tag} label="Style">
         <span
           class="badge rounded-pill px-4"

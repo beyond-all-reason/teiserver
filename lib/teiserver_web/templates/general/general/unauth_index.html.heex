@@ -9,7 +9,7 @@
           width="30"
           class="mr-2"
         />
-        <%= Application.get_env(:teiserver, Teiserver)[:site_title] %>
+        {Application.get_env(:teiserver, Teiserver)[:site_title]}
       </a>
       <button
         class="navbar-toggler"
@@ -47,10 +47,10 @@
     <div class="row">
       <div class="col-md-12">
         <h1 class="welcome-heading display-4">
-          <%= Application.get_env(:teiserver, Teiserver)[:site_title] %>
+          {Application.get_env(:teiserver, Teiserver)[:site_title]}
         </h1>
         <p class="">
-          <%= Application.get_env(:teiserver, Teiserver)[:site_description] %>
+          {Application.get_env(:teiserver, Teiserver)[:site_description]}
         </p>
         <a href={~p"/login"} class="btn btn-lg btn-outline-primary btn-pill align-self-center">
           Login

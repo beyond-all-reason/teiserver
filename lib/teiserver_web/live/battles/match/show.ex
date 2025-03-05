@@ -579,14 +579,14 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
                 class="d-inline align-top"
               />
               <span>
-                Give accolade to user: <%= @recipient.name %>
+                Give accolade to user: {@recipient.name}
               </span>
             </h3>
           </div>
 
           <div :if={@stage == :not_allowed} class="card-body">
             <div class="alert alert-warning">
-              <%= @failure_reason %>
+              {@failure_reason}
             </div>
             <a phx-click="return-to-match" class="btn btn-sm btn-secondary">
               Return to match details
@@ -594,7 +594,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           </div>
 
           <div :if={@stage == :complete} class="card-body">
-            You have succesfully gifted an accolade to <%= @recipient.name %>! <br /><br />
+            You have succesfully gifted an accolade to {@recipient.name}! <br /><br />
             <a phx-click="return-to-match" class="btn btn-sm btn-success">
               Return to match details
             </a>
@@ -604,14 +604,13 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
             </a>
             <a href={~p"/profile/#{@recipient.id}/accolades"} class="btn btn-sm  btn-secondary">
               <i class="fa-solid fa-award"></i> &nbsp;
-              View <%= @recipient.name %>'s accolades
+              View {@recipient.name}'s accolades
             </a>
           </div>
 
           <div :if={@stage == :form} class="card-footer">
-            You can give this player an accolade if you feel they deserve to be acknowledged for their positive behaviour in this match. You can give <%= @gift_limit %> accolades in a rolling <%= @gift_window %>-day window.
-            (You have given <%= @gift_count %> accolades over the past <%= @gift_window %> days.)
-            <br /><br />
+            You can give this player an accolade if you feel they deserve to be acknowledged for their positive behaviour in this match. You can give {@gift_limit} accolades in a rolling {@gift_window}-day window.
+            (You have given {@gift_count} accolades over the past {@gift_window} days.) <br /><br />
 
             <table class="table table-sm">
               <thead>
@@ -625,10 +624,10 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
                 <%= for badge_type <- @badge_types do %>
                   <tr>
                     <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
-                      <%= central_component("icon", icon: badge_type.icon) %>
+                      {central_component("icon", icon: badge_type.icon)}
                     </td>
                     <td style={"background-color: #{rgba_css badge_type.colour};"}>
-                      <%= badge_type.name %>
+                      {badge_type.name}
                     </td>
 
                     <td>

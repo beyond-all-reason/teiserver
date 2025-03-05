@@ -1,6 +1,6 @@
 <% bsname = view_colour() %>
 
-<%= render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"})) %>
+{render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"}))}
 
 <style type="text/css">
   .message {
@@ -13,17 +13,17 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.ChatView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: true,
             active: "search"
           })
-        ) %>
+        )}
         <hr />
 
-        <%= render(TeiserverWeb.Admin.ChatView, "search.html", assigns) %>
+        {render(TeiserverWeb.Admin.ChatView, "search.html", assigns)}
 
         <hr />
 
@@ -42,14 +42,14 @@
               <tbody>
                 <%= for msg <- @messages do %>
                   <tr>
-                    <td><%= msg.chat_room %></td>
+                    <td>{msg.chat_room}</td>
                     <td>
                       <a href={"#{Routes.ts_admin_user_path(@conn, :full_chat, msg.user.id)}?mode=room"}>
-                        <%= msg.user.name %>
+                        {msg.user.name}
                       </a>
                     </td>
-                    <td class="message"><%= msg.content %></td>
-                    <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
+                    <td class="message">{msg.content}</td>
+                    <td>{date_to_str(msg.inserted_at, :hms_or_dmy)}</td>
                   </tr>
                 <% end %>
               </tbody>
@@ -68,14 +68,14 @@
               <tbody>
                 <%= for msg <- @messages do %>
                   <tr>
-                    <td><%= msg.chat_room %></td>
+                    <td>{msg.chat_room}</td>
                     <td>
                       <a href={"#{Routes.ts_admin_user_path(@conn, :full_chat, msg.user.id)}?mode=room"}>
-                        <%= msg.user.name %>
+                        {msg.user.name}
                       </a>
                     </td>
-                    <td class="message"><%= msg.content %></td>
-                    <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
+                    <td class="message">{msg.content}</td>
+                    <td>{date_to_str(msg.inserted_at, :hms_or_dmy)}</td>
                   </tr>
                 <% end %>
               </tbody>
@@ -96,16 +96,16 @@
                   <tr>
                     <td>
                       <a href={~p"/battle/chat/#{msg.match_id}/#{msg.user.id}"}>
-                        <%= msg.match_id %>
+                        {msg.match_id}
                       </a>
                     </td>
                     <td>
                       <a href={"#{Routes.ts_admin_user_path(@conn, :full_chat, msg.user.id)}?mode=lobby"}>
-                        <%= msg.user.name %>
+                        {msg.user.name}
                       </a>
                     </td>
-                    <td class="message"><%= msg.content %></td>
-                    <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
+                    <td class="message">{msg.content}</td>
+                    <td>{date_to_str(msg.inserted_at, :hms_or_dmy)}</td>
                   </tr>
                 <% end %>
               </tbody>

@@ -8,11 +8,11 @@
   });
 </script>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "config"})
-) %>
+)}
 
 <div class="row">
   <div class="col-md-12">
@@ -31,7 +31,7 @@
                 class="nav-link"
                 data-bs-toggle="tab"
               >
-                <%= String.capitalize(group_name) %>
+                {String.capitalize(group_name)}
               </a>
             </li>
           <% end %>
@@ -47,22 +47,22 @@
                     <tr>
                       <td>
                         <label>
-                          <%= config_name(the_config.key) %>
+                          {config_name(the_config.key)}
                         </label>
                       </td>
                       <td>
-                        <%= value %>
+                        {value}
                       </td>
 
                       <td style="min-width:50px;">
-                        <%= link("Edit",
+                        {link("Edit",
                           to: Routes.admin_site_config_path(@conn, :edit, the_config.key),
                           class: "btn btn-secondary btn-sm"
-                        ) %>
+                        )}
                       </td>
 
                       <td>
-                        <%= raw(the_config.description) %>
+                        {raw(the_config.description)}
                       </td>
                     </tr>
                   <% end %>

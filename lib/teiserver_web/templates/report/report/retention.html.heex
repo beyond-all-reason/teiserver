@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
-) %>
+)}
 
 <%= if @graph_data do %>
   <script src={Routes.static_path(@conn, "/js/d3.js")}>
@@ -38,7 +38,7 @@
           Show/Hide help
         </div>
 
-        <%= render(
+        {render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -46,7 +46,7 @@
             show_search: false,
             active: "retention"
           })
-        ) %>
+        )}
         <br /><br />
 
         <form
@@ -59,10 +59,10 @@
           <div class="row">
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_date_preset" class="control-label">Date range:</label>
-              <%= select(:report, :date_preset, @presets,
+              {select(:report, :date_preset, @presets,
                 class: "form-control",
                 selected: @params["date_preset"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-3 col-xl-2 search-form-input">
@@ -89,14 +89,14 @@
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_skip0" class="control-label">Skip day 0:</label>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "report[skip0]",
                 id: "report_skip0",
                 value: "true",
                 label: "Skip day 0",
                 checked: @params["skip0"] == "true",
                 description: ""
-              ) %>
+              )}
             </div>
           </div>
 
@@ -138,7 +138,7 @@
             <tr>
               <th>&nbsp;</th>
               <%= for d <- Range.new(1, @max_key) do %>
-                <th><%= d %></th>
+                <th>{d}</th>
               <% end %>
             </tr>
           </thead>
@@ -146,7 +146,7 @@
             <tr>
               <td>Count</td>
               <%= for d <- Range.new(0, @max_key) do %>
-                <td><%= Map.get(@play_retention_grouping, d, 0) %></td>
+                <td>{Map.get(@play_retention_grouping, d, 0)}</td>
               <% end %>
             </tr>
 
@@ -154,8 +154,8 @@
               <td>As %</td>
               <%= for d <- Range.new(0, @max_key) do %>
                 <td>
-                  <%= raw = Map.get(@play_retention_grouping, d, 0) / max(@user_count, 1)
-                  round(raw * 1000) / 10 %>
+                  {raw = Map.get(@play_retention_grouping, d, 0) / max(@user_count, 1)
+                  round(raw * 1000) / 10}
                 </td>
               <% end %>
             </tr>

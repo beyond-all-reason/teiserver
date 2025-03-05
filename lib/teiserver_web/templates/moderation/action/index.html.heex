@@ -9,7 +9,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Moderation.ActionView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -21,11 +21,11 @@
                 true -> "list"
               end
           })
-        ) %>
+        )}
         <br /><br />
 
         <%= if @conn.params["search"] != nil do %>
-          <%= render(TeiserverWeb.Moderation.ActionView, "search.html", assigns) %>
+          {render(TeiserverWeb.Moderation.ActionView, "search.html", assigns)}
         <% end %>
 
         <h4>Listing Actions</h4>
@@ -48,19 +48,19 @@
           <tbody>
             <%= for action <- @actions do %>
               <tr>
-                <td><%= action.target.name %></td>
-                <td><%= action.reason |> String.slice(0..100) %></td>
-                <td><%= action.restrictions |> Enum.join(", ") %></td>
+                <td>{action.target.name}</td>
+                <td>{action.reason |> String.slice(0..100)}</td>
+                <td>{action.restrictions |> Enum.join(", ")}</td>
 
-                <td><%= action.inserted_at |> date_to_str(format: :hms_or_ymd) %></td>
+                <td>{action.inserted_at |> date_to_str(format: :hms_or_ymd)}</td>
                 <%= if action.expires do %>
                   <%= if Timex.compare(Timex.now(), action.expires) == 1 do %>
                     <td>Expired</td>
                   <% else %>
-                    <td><%= action.expires |> date_to_str(format: :hms_or_ymd) %></td>
+                    <td>{action.expires |> date_to_str(format: :hms_or_ymd)}</td>
                   <% end %>
 
-                  <td><%= duration_to_str(action.inserted_at, action.expires) %></td>
+                  <td>{duration_to_str(action.inserted_at, action.expires)}</td>
                 <% else %>
                   <td colspan="2" class="text-warning">
                     Permanent

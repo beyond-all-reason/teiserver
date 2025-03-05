@@ -10,25 +10,25 @@
   <div class="row">
     <div class="col-lg-6">
       <div class="form-group my-2">
-        <%= label(f, :reason, class: "control-label") %>
-        <%= textarea(f, :reason, class: "form-control", autofocus: :autofocus) %>
-        <%= error_tag(f, :reason) %>
+        {label(f, :reason, class: "control-label")}
+        {textarea(f, :reason, class: "form-control", autofocus: :autofocus)}
+        {error_tag(f, :reason)}
       </div>
     </div>
 
     <div class="col-lg-6">
       <div class="form-group my-2">
-        <%= label(f, :notes, class: "control-label") %>
-        <%= textarea(f, :notes, class: "form-control") %>
-        <%= error_tag(f, :notes) %>
+        {label(f, :notes, class: "control-label")}
+        {textarea(f, :notes, class: "form-control")}
+        {error_tag(f, :notes)}
       </div>
     </div>
 
     <div class="col-lg-6">
       <div class="form-group my-2">
-        <%= label(f, :expires, class: "control-label") %>
-        <%= text_input(f, :expires, class: "form-control") %>
-        <%= error_tag(f, :expires) %>
+        {label(f, :expires, class: "control-label")}
+        {text_input(f, :expires, class: "form-control")}
+        {error_tag(f, :expires)}
       </div>
     </div>
   </div>
@@ -37,10 +37,10 @@
     <h5>Restrictions</h5>
     <%= for {section, r_list} <- @restrictions_lists do %>
       <div class="col-md-3 col-lg-2">
-        <strong><%= section %></strong>
+        <strong>{section}</strong>
         <%= for r <- r_list do %>
           <% r_clean = String.replace(r, " ", "_") %>
-          <%= central_component("checkbox",
+          {central_component("checkbox",
             id: "action_restriction_#{r_clean}",
             name: "action[restrictions][#{r_clean}]",
             label: r,
@@ -48,11 +48,11 @@
             checked:
               (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
               |> Enum.member?(r)
-          ) %>
+          )}
         <% end %>
       </div>
     <% end %>
-    <%= error_tag(f, :restrictions) %>
+    {error_tag(f, :restrictions)}
   </div>
 
   <div class="form-group my-4">

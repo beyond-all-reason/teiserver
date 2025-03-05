@@ -30,7 +30,7 @@
         <th>&nbsp;</th>
 
         <%= for i <- 0..23 do %>
-          <th><%= i %></th>
+          <th>{i}</th>
         <% end %>
       </tr>
     </thead>
@@ -44,7 +44,7 @@
             style={"background-color: ##{heatmap(Enum.fetch!(@log.hourly_views, i), maximum, "black-red")};"}
           >
             <span class="hourly-view-span">
-              <%= Enum.fetch!(@log.hourly_views, i) |> round() |> format_number %>
+              {Enum.fetch!(@log.hourly_views, i) |> round() |> format_number}
             </span>
           </td>
         <% end %>
@@ -58,7 +58,7 @@
             style={"background-color: ##{heatmap(Enum.fetch!(@log.hourly_uniques, i), maximum, "black-red")};"}
           >
             <span class="hourly-view-span">
-              <%= Enum.fetch!(@log.hourly_uniques, i) |> round() |> format_number %>
+              {Enum.fetch!(@log.hourly_uniques, i) |> round() |> format_number}
             </span>
           </td>
         <% end %>
@@ -73,7 +73,7 @@
             style={"background-color: ##{heatmap(Enum.fetch!(@log.hourly_average_load_times, i), maximum, "black-red")};"}
           >
             <span class="hourly-view-span">
-              <%= convert_load_time(Enum.fetch!(@log.hourly_average_load_times, i)) %>
+              {convert_load_time(Enum.fetch!(@log.hourly_average_load_times, i))}
             </span>
           </td>
         <% end %>

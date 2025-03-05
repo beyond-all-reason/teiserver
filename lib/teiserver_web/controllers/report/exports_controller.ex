@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Report.ExportsController do
   def show(conn, %{"id" => id}) do
     module = get_module(id)
 
-    if allow?(conn.assigns.current_user, module.permissions) do
+    if allow?(conn.assigns.current_user, apply(module, :permissions, [])) do
       assigns = module.show_form(conn)
 
       assigns
@@ -49,28 +49,16 @@ defmodule TeiserverWeb.Report.ExportsController do
   def download(conn, %{"id" => id, "report" => report_params}) do
     module = get_module(id)
 
-    if allow?(conn.assigns.current_user, module.permissions) do
-      case module.show_form(conn, report_params) do
-        {:file, file_path, file_name, content_type} ->
-          conn
-          |> put_resp_content_type(content_type)
-          |> put_resp_header(
-            "content-disposition",
-            "attachment; filename=\"#{file_name}\""
-          )
-          |> send_file(200, file_path)
+    if allow?(conn.assigns.current_user, apply(module, :permissions, [])) do
+      {:file, file_path, file_name, content_type} = module.show_form(conn, report_params)
 
-        # {:data, file_contents, file_name, format} ->
-        #   conn
-        #     |> put_resp_content_type(format)
-        #     |> put_resp_header("content-disposition", "attachment; filename=\"#{file_name}\"")
-        #     |> send_resp(200, file_contents)
-
-        {:raw, raw_contents} ->
-          conn
-          |> put_resp_content_type("text/plain")
-          |> send_resp(200, raw_contents)
-      end
+      conn
+      |> put_resp_content_type(content_type)
+      |> put_resp_header(
+        "content-disposition",
+        "attachment; filename=\"#{file_name}\""
+      )
+      |> send_file(200, file_path)
     else
       conn
       |> redirect(to: Routes.ts_reports_exports_path(conn, :index))

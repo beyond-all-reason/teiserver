@@ -15,12 +15,12 @@
   <tbody>
     <%= for report <- @reports_made do %>
       <tr>
-        <td><%= report.target.name %></td>
-        <td><%= report.type %> / <%= report.sub_type %></td>
-        <td><%= report.extra_text %></td>
+        <td>{report.target.name}</td>
+        <td>{report.type} / {report.sub_type}</td>
+        <td>{report.extra_text}</td>
 
         <%= if report.match_id do %>
-          <td><%= report.relationship %></td>
+          <td>{report.relationship}</td>
           <td>
             <a href={~p"/battle/#{report.match_id}"} class="btn btn-secondary btn-sm">
               Match
@@ -35,7 +35,7 @@
           <td colspan="3"></td>
         <% end %>
 
-        <td><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></td>
+        <td>{date_to_str(report.inserted_at, format: :hms_or_ymd)}</td>
 
         <td>
           <%= if report.result_id do %>
@@ -43,10 +43,10 @@
               href={Routes.moderation_action_path(@conn, :show, report.result_id)}
               class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()} btn-block"}
             >
-              <%= central_component("icon",
+              {central_component("icon",
                 icon: Teiserver.Moderation.ActionLib.icon(),
                 class: "fa-solid"
-              ) %>
+              )}
             </a>
           <% end %>
 

@@ -1,22 +1,22 @@
 <% bsname = view_colour() %>
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "index",
   label: "List",
   active: @active,
   icon: Teiserver.Helper.StylingHelper.icon(:list),
   bsname: bsname,
   url: ~p"/telemetry/infolog"
-) %>
+)}
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "search",
   label: "Search",
   active: @active,
   icon: Teiserver.Helper.StylingHelper.icon(:search),
   bsname: bsname,
   url: ~p"/telemetry/infolog?search=true"
-) %>
+)}
 
 <%= case @active do %>
   <% "index" -> %>

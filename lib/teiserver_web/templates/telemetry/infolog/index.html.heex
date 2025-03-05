@@ -23,7 +23,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Telemetry.InfologView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -35,10 +35,10 @@
                 true -> "index"
               end
           })
-        ) %>
+        )}
 
         <%= if @conn.params["search"] != nil do %>
-          <%= render(TeiserverWeb.Telemetry.InfologView, "search.html", assigns) %>
+          {render(TeiserverWeb.Telemetry.InfologView, "search.html", assigns)}
         <% else %>
           <br /><br />
         <% end %>
@@ -66,18 +66,18 @@
               <tr>
                 <%= if log.user do %>
                   <td style={"background-color: #{log.user.colour}; color: #FFF;"} width="22">
-                    <%= central_component("icon", icon: log.user.icon) %>
+                    {central_component("icon", icon: log.user.icon)}
                   </td>
-                  <td><%= log.user.name %></td>
+                  <td>{log.user.name}</td>
                 <% else %>
                   <td colspan="2">Anonymous</td>
                 <% end %>
 
-                <td><%= log.log_type %></td>
-                <td><%= log.metadata["engineversion"] %></td>
-                <td><%= log.metadata["gameversion"] %></td>
-                <td><%= log.size |> normalize %></td>
-                <td><%= date_to_str(log.timestamp, format: :ymd_hms) %></td>
+                <td>{log.log_type}</td>
+                <td>{log.metadata["engineversion"]}</td>
+                <td>{log.metadata["gameversion"]}</td>
+                <td>{log.size |> normalize}</td>
+                <td>{date_to_str(log.timestamp, format: :ymd_hms)}</td>
 
                 <td>
                   <a href={~p"/telemetry/infolog/#{log.id}"} class="btn btn-secondary btn-sm">
@@ -94,12 +94,12 @@
                 </td>
                 <%= if allow?(@conn, "admin.dev") do %>
                   <td>
-                    <%= link("Delete",
+                    {link("Delete",
                       to: ~p"/telemetry/infolog/#{log.id}",
                       class: "btn btn-danger btn-sm",
                       method: "delete",
                       data: [confirm: "Are you sure?"]
-                    ) %>
+                    )}
                   </td>
                 <% end %>
               </tr>

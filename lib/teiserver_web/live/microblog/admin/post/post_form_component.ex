@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
       </style>
 
       <h3>
-        <%= @title %>
+        {@title}
       </h3>
 
       <.form for={@form} phx-target={@myself} phx-change="validate" phx-submit="save" id="post-form">
@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
             ><%= @form[:contents].value %></textarea>
           </div>
           <div class="col">
-            <h4>Tags (<%= Enum.count(@selected_tags) %>)</h4>
+            <h4>Tags ({Enum.count(@selected_tags)})</h4>
             <%= for tag <- @tags do %>
               <%= if Enum.member?(@selected_tags, tag.id) do %>
                 <span
@@ -90,7 +90,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
                   id={"tag-#{tag.id}"}
                 >
                   <Fontawesome.icon icon={tag.icon} style="solid" />
-                  <%= tag.name %>
+                  {tag.name}
                 </span>
               <% else %>
                 <span
@@ -102,7 +102,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
                   id={"tag-#{tag.id}"}
                 >
                   <Fontawesome.icon icon={tag.icon} style="regular" />
-                  <%= tag.name %>
+                  {tag.name}
                 </span>
               <% end %>
             <% end %>
@@ -131,11 +131,11 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
               </a>
             </div>
             <div class="col">
-              <%= submit("Update post", class: "btn btn-primary btn-block #{disabled}") %>
+              {submit("Update post", class: "btn btn-primary btn-block #{disabled}")}
             </div>
           </div>
         <% else %>
-          <%= submit("Post", class: "btn btn-primary btn-block #{disabled}") %>
+          {submit("Post", class: "btn btn-primary btn-block #{disabled}")}
         <% end %>
       </.form>
     </div>

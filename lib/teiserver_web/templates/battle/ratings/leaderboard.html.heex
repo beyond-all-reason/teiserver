@@ -1,23 +1,23 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Battle.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "ratings"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12 col-lg-6">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Battle.RatingsView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
             active: @type_name
           })
-        ) %>
+        )}
         <br /><br />
         The leaderboard weighs uncertainty a lot more than lobby balance. As a result the number you see here will not be the same as the value you see ingame.
         <table class="table table-sm">
@@ -40,13 +40,13 @@
                   &nbsp;
                 </td>
                 <td style={"background-color: #{@current_user.colour}; color: #FFF;"} width="22">
-                  <%= central_component("icon", icon: @current_user.icon) %>
+                  {central_component("icon", icon: @current_user.icon)}
                 </td>
-                <td><%= @current_user.name %></td>
+                <td>{@current_user.name}</td>
 
-                <td><%= @my_rating.leaderboard_rating |> round(2) %></td>
+                <td>{@my_rating.leaderboard_rating |> round(2)}</td>
 
-                <td><%= age %></td>
+                <td>{age}</td>
               </tr>
               <tr>
                 <td colspan="5">&nbsp;</td>
@@ -58,16 +58,16 @@
 
               <tr style={"background-color: #{rgba_css rating.user.colour};"}>
                 <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                  #<%= pos + 1 %>
+                  #{pos + 1}
                 </td>
                 <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                  <%= central_component("icon", icon: rating.user.icon) %>
+                  {central_component("icon", icon: rating.user.icon)}
                 </td>
-                <td><%= rating.user.name %></td>
+                <td>{rating.user.name}</td>
 
-                <td><%= rating.leaderboard_rating |> round(2) %></td>
+                <td>{rating.leaderboard_rating |> round(2)}</td>
 
-                <td><%= age %></td>
+                <td>{age}</td>
               </tr>
             <% end %>
           </tbody>

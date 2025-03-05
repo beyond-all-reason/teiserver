@@ -51,16 +51,16 @@
               <.tag_badge :for={tag <- post.tags} tag={tag} />
             </div>
             <h5>
-              <%= post.title %> &nbsp;&nbsp;&nbsp;&nbsp;
+              {post.title} &nbsp;&nbsp;&nbsp;&nbsp;
               <span style={"color: #{post.poster.colour};"}>
                 <Fontawesome.icon icon={post.poster.icon} style="solid" />
-                <%= post.poster_alias || post.poster.name %>
+                {post.poster_alias || post.poster.name}
               </span>
             </h5>
-            Posted at <%= date_to_str(post.inserted_at, format: :ymd_hms) %>
+            Posted at {date_to_str(post.inserted_at, format: :ymd_hms)}
             <br /><br />
 
-            <%= post.summary %>
+            {post.summary}
             <br /><br />
             <em>Click for more details</em>
 

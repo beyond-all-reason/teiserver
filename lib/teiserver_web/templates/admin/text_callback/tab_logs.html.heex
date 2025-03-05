@@ -2,18 +2,18 @@
   <div class="col-md-12">
     <.table id="logs" rows={@logs} table_class="table-sm table-hover">
       <:col :let={log} label="UserID">
-        <%= log.details["discord_user_id"] %>
-        <%= if log.username, do: "(#{log.username})" %>
+        {log.details["discord_user_id"]}
+        {if log.username, do: "(#{log.username})"}
       </:col>
 
       <:col :let={log} label="Channel">
-        <%= log.details["discord_channel_id"] %>
-        <%= if log.channel_name, do: "(#{log.channel_name})" %>
+        {log.details["discord_channel_id"]}
+        {if log.channel_name, do: "(#{log.channel_name})"}
       </:col>
 
-      <:col :let={log} label="Trigger"><%= log.details["trigger"] %></:col>
+      <:col :let={log} label="Trigger">{log.details["trigger"]}</:col>
       <:col :let={log} label="Timestamp">
-        <%= date_to_str(log.inserted_at, format: :hms_or_ymd) %>
+        {date_to_str(log.inserted_at, format: :hms_or_ymd)}
       </:col>
     </.table>
   </div>

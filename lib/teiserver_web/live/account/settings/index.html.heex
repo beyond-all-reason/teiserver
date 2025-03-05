@@ -3,24 +3,24 @@
 <div class="row mt-4 mb-3">
   <div class="col">
     <div :for={{group_name, group_configs} <- @config_types}>
-      <h4><%= group_name %></h4>
+      <h4>{group_name}</h4>
       <table class="table table-hover" style="cursor: pointer;">
         <tbody>
           <tr :for={the_config <- group_configs} id={"config-row-#{the_config.key}"}>
             <td phx-click="open-form" phx-value-key={the_config.key}>
               <strong>
-                <%= the_config.label %>
+                {the_config.label}
               </strong>
 
               <%= if the_config.key == @selected_key do %>
                 <br />
                 <em>
-                  <%= raw(the_config.description) %>
+                  {raw(the_config.description)}
                 </em>
               <% else %>
                 &nbsp;&nbsp;&nbsp;
                 <em>
-                  <%= the_config.description |> String.slice(0..90) |> raw %>
+                  {the_config.description |> String.slice(0..90) |> raw}
                 </em>
               <% end %>
             </td>
@@ -31,8 +31,8 @@
               phx-click="open-form"
               phx-value-key={the_config.key}
             >
-              <%= @config_values[the_config.key] ||
-                raw("#{the_config.default} <em>(default)</em>") %>
+              {@config_values[the_config.key] ||
+                raw("#{the_config.default} <em>(default)</em>")}
             </td>
 
             <td :if={the_config.key == @selected_key} style="width:700px; text-align: right;">
@@ -75,7 +75,7 @@
                   </span>
                 <% _ -> %>
                   <div class="alert alert-danger monospace" style="text-align: center;">
-                    No handler for user_config.type of '<%= the_config.type %>' for config key '<%= the_config.key %>'
+                    No handler for user_config.type of '{the_config.type}' for config key '{the_config.key}'
                   </div>
               <% end %>
             </td>

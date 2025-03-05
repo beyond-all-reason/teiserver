@@ -1,39 +1,39 @@
 <div class="container">
-  <h1><%= @app.name %></h1>
+  <h1>{@app.name}</h1>
   <div class="row">
     <div class="col-6">
       <table class="table">
         <tbody>
           <tr>
             <td>id</td>
-            <td><%= @app.id %></td>
+            <td>{@app.id}</td>
           </tr>
           <tr>
             <td>client id (uid)</td>
-            <td><%= @app.uid %></td>
+            <td>{@app.uid}</td>
           </tr>
           <tr>
             <td>owner</td>
             <%= if is_nil(@app.owner) do %>
               <td>No owner</td>
             <% else %>
-              <td><%= @app.owner.name %> (<%= @app.owner.email %>)</td>
+              <td>{@app.owner.name} ({@app.owner.email})</td>
             <% end %>
           </tr>
           <tr>
             <td>description</td>
-            <td><%= @app.description %></td>
+            <td>{@app.description}</td>
           </tr>
           <tr>
             <td>scopes</td>
             <td>
-              <span :for={scope <- @app.scopes} class="badge badge-success"><%= scope %></span>
+              <span :for={scope <- @app.scopes} class="badge badge-success">{scope}</span>
             </td>
           </tr>
           <tr :if={length(@app.redirect_uris) > 0}>
             <td>redirect uris</td>
             <td>
-              <span :for={uri <- @app.redirect_uris} class="badge badge-success"><%= uri %></span>
+              <span :for={uri <- @app.redirect_uris} class="badge badge-success">{uri}</span>
             </td>
           </tr>
         </tbody>
@@ -48,15 +48,15 @@
         <tbody>
           <tr>
             <td>Authorization code</td>
-            <td><%= @stats.code_count %></td>
+            <td>{@stats.code_count}</td>
           </tr>
           <tr>
             <td>Authentication token</td>
-            <td><%= @stats.token_count %></td>
+            <td>{@stats.token_count}</td>
           </tr>
           <tr>
             <td>Client credentials</td>
-            <td><%= @stats.credential_count %></td>
+            <td>{@stats.credential_count}</td>
           </tr>
         </tbody>
       </table>

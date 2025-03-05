@@ -1,16 +1,16 @@
 <% {_fg, _bg, bsname} = view_colour() |> colours() %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
-) %>
+)}
 
-<%= central_component("picker_script",
+{central_component("picker_script",
   module: Teiserver.Account.UserLib,
   name: "account_user",
   title: "User search"
-) %>
+)}
 
 <%= if assigns[:lines] do %>
   <script src={Routes.static_path(@conn, "/js/d3.js")}>
@@ -58,7 +58,7 @@
           <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
-        <%= render(
+        {render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -66,11 +66,11 @@
             show_search: false,
             active: "time_compare"
           })
-        ) %>
+        )}
         <br /><br />
 
         <%= if @end_date do %>
-          <h4><%= date_to_str(@start_date, format: :ymd_hms) %></h4>
+          <h4>{date_to_str(@start_date, format: :ymd_hms)}</h4>
         <% else %>
           <h4>No date found</h4>
         <% end %>
@@ -149,13 +149,13 @@
             <%= for i <- 1..@user_count_max do %>
               <div class="col-md-4 col-lg-3 col-xl-2 my-2">
                 <label for={"search_account_user#{i}"} class="control-label">
-                  User <%= i %>:
+                  User {i}:
                 </label>
-                <%= render(TeiserverWeb.Account.UserView, "picker.html",
+                {render(TeiserverWeb.Account.UserView, "picker.html",
                   input_name: "report[account_user#{i}]",
                   input_id: "report_account_user#{i}",
                   value: @params["account_user#{i}"]
-                ) %>
+                )}
               </div>
             <% end %>
 
@@ -172,26 +172,26 @@
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_overlap" class="control-label">Overlaps:</label>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "report[overlap]",
                 id: "report_overlap",
                 value: "true",
                 label: "Only show overlapping data",
                 checked: @params["overlap"] == "true",
                 description: ""
-              ) %>
+              )}
             </div>
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_skip_nil" class="control-label">Ignore empty:</label>
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "report[skip_nil]",
                 id: "report_skip_nil",
                 value: "true",
                 label: "Ignore logs with no activity",
                 checked: @params["skip_nil"] == "true",
                 description: ""
-              ) %>
+              )}
             </div>
           </div>
 
@@ -230,7 +230,7 @@
               <tr>
                 <th>&nbsp;</th>
                 <%= for {u1, u2} <- @stats |> Map.keys do %>
-                  <th><%= @usernames[u1] %> / <%= @usernames[u2] %></th>
+                  <th>{@usernames[u1]} / {@usernames[u2]}</th>
                 <% end %>
               </tr>
             </thead>
@@ -238,16 +238,16 @@
               <tr>
                 <td>Total mins</td>
                 <%= for col_stats <- @stats |> Map.values do %>
-                  <td><%= format_number(col_stats.count) %></td>
+                  <td>{format_number(col_stats.count)}</td>
                 <% end %>
               </tr>
               <tr>
                 <td>Online</td>
                 <%= for col_stats <- @stats |> Map.values do %>
                   <td>
-                    <%= percent(col_stats.online_at_same_time / col_stats.count) %>% (<%= format_number(
+                    {percent(col_stats.online_at_same_time / col_stats.count)}% ({format_number(
                       col_stats.online_at_same_time
-                    ) %>)
+                    )})
                   </td>
                 <% end %>
               </tr>
@@ -255,9 +255,9 @@
                 <td>Lobby & Spec</td>
                 <%= for col_stats <- @stats |> Map.values do %>
                   <td>
-                    <%= percent(col_stats.lobby_spec_at_same_time / col_stats.count) %>% (<%= format_number(
+                    {percent(col_stats.lobby_spec_at_same_time / col_stats.count)}% ({format_number(
                       col_stats.lobby_spec_at_same_time
-                    ) %>)
+                    )})
                   </td>
                 <% end %>
               </tr>

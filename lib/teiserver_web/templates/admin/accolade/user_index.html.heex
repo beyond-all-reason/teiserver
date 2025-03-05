@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "accolades"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -17,19 +17,19 @@
           View user
         </a>
 
-        <%= render(
+        {render(
           TeiserverWeb.Admin.AccoladeView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
             active: "user"
           })
-        ) %>
+        )}
         <br /><br />
 
         <div class="row">
           <div class="col-md-6">
-            <h4>Accolades given by <%= @user.name %></h4>
+            <h4>Accolades given by {@user.name}</h4>
             <table class="table table-sm">
               <thead>
                 <tr>
@@ -46,14 +46,14 @@
                         style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"}
                         width="22"
                       >
-                        <%= central_component("icon", icon: accolade.badge_type.icon) %>
+                        {central_component("icon", icon: accolade.badge_type.icon)}
                       </td>
                       <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
-                        <%= accolade.badge_type.name %>
+                        {accolade.badge_type.name}
                       </td>
-                      <td><%= accolade.recipient.name %></td>
+                      <td>{accolade.recipient.name}</td>
 
-                      <td><%= date_to_str(accolade.inserted_at, format: :hms_or_dmy) %></td>
+                      <td>{date_to_str(accolade.inserted_at, format: :hms_or_dmy)}</td>
                       <td>
                         <a
                           href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)}
@@ -86,14 +86,14 @@
                         style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"}
                         width="22"
                       >
-                        <%= central_component("icon", icon: accolade.badge_type.icon) %>
+                        {central_component("icon", icon: accolade.badge_type.icon)}
                       </td>
                       <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
-                        <%= accolade.badge_type.name %>
+                        {accolade.badge_type.name}
                       </td>
-                      <td><%= accolade.giver.name %></td>
+                      <td>{accolade.giver.name}</td>
 
-                      <td><%= date_to_str(accolade.inserted_at, format: :hms_or_dmy) %></td>
+                      <td>{date_to_str(accolade.inserted_at, format: :hms_or_dmy)}</td>
                       <td>
                         <a
                           href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)}

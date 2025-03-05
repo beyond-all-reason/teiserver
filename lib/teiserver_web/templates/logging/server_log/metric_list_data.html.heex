@@ -1,7 +1,7 @@
 <% {_fg, bg, _bsname} = view_colour() |> colours() %>
 
 <h4>
-  Server metrics by <%= @unit %>
+  Server metrics by {@unit}
 </h4>
 
 <table class="table table-sm">
@@ -42,26 +42,26 @@
             log.date.year
         end %>
       <tr>
-        <td><%= date_string %></td>
+        <td>{date_string}</td>
 
-        <td><%= format_number(log.data["aggregates"]["stats"]["unique_users"]) %></td>
-        <td><%= format_number(log.data["aggregates"]["stats"]["unique_players"]) %></td>
+        <td>{format_number(log.data["aggregates"]["stats"]["unique_users"])}</td>
+        <td>{format_number(log.data["aggregates"]["stats"]["unique_players"])}</td>
         <td>
-          <%= format_number(log.data["aggregates"]["stats"]["peak_user_counts"]["total"]) %>
+          {format_number(log.data["aggregates"]["stats"]["peak_user_counts"]["total"])}
         </td>
         <td>
-          <%= format_number(log.data["aggregates"]["stats"]["peak_user_counts"]["player"]) %>
+          {format_number(log.data["aggregates"]["stats"]["peak_user_counts"]["player"])}
         </td>
 
-        <td><%= represent_minutes(log.data["aggregates"]["minutes"]["player"]) %></td>
+        <td>{represent_minutes(log.data["aggregates"]["minutes"]["player"])}</td>
 
-        <td><%= format_number(log.data["aggregates"]["stats"]["accounts_created"]) %></td>
+        <td>{format_number(log.data["aggregates"]["stats"]["accounts_created"])}</td>
 
         <td>
-          <%= link("Show",
+          {link("Show",
             to: ~p"/logging/server/show/#{@unit}/#{log.date |> date_to_str(format: :ymd)}",
             class: "btn btn-secondary btn-sm"
-          ) %>
+          )}
         </td>
       </tr>
 

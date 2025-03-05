@@ -7,11 +7,11 @@
 
 <link href="/css/c3.min.css" rel="stylesheet" />
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
-) %>
+)}
 <script>
   $(function() {
     var chart = c3.generate({
@@ -34,7 +34,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -42,7 +42,7 @@
             show_search: false,
             active: "open_skill"
           })
-        ) %>
+        )}
         <br /><br />
 
         <form
@@ -54,7 +54,7 @@
           <div class="row">
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_rating_type" class="control-label">Game type:</label>
-              <%= select(
+              {select(
                 :report,
                 :rating_type,
                 [
@@ -67,11 +67,11 @@
                 ],
                 class: "form-control",
                 selected: @params["rating_type"]
-              ) %>
+              )}
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_metric" class="control-label">Metric:</label>
-              <%= select(
+              {select(
                 :report,
                 :metric,
                 [
@@ -82,11 +82,11 @@
                 ],
                 class: "form-control",
                 selected: @params["metric"]
-              ) %>
+              )}
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_last_active" class="control-label">Max last-active:</label>
-              <%= select(
+              {select(
                 :report,
                 :last_active,
                 [
@@ -97,7 +97,7 @@
                 ],
                 class: "form-control",
                 selected: @params["last_active"]
-              ) %>
+              )}
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_uncertainty" class="control-label">Maximum uncertainty:</label>

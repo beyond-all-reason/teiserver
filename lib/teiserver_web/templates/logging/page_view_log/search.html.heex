@@ -1,9 +1,9 @@
 <% {fg, _bg, bsname} = view_colour() |> colours %>
-<%= central_component("picker_script",
+{central_component("picker_script",
   module: Teiserver.Account.UserLib,
   name: "account_user",
   title: "User search"
-) %>
+)}
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -17,7 +17,7 @@
   });
 </script>
 
-<%= central_component("icon_dropdown_js", []) %>
+{central_component("icon_dropdown_js", [])}
 
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
 <script src={Routes.static_path(@conn, "/js/select2.js")}>
@@ -43,10 +43,10 @@
           <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="teiserver-user-search" class="control-label">User: </label>
-              <%= render(TeiserverWeb.Account.UserView, "picker.html",
+              {render(TeiserverWeb.Account.UserView, "picker.html",
                 input_name: "search[account_user]",
                 value: @params["account_user"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
@@ -62,7 +62,7 @@
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="search_section" class="control-label">Section: </label>
-              <%= central_component("icon_dropdown", %{
+              {central_component("icon_dropdown", %{
                 name: "search[section]",
                 id: "search_section",
                 selected: @params["section"],
@@ -70,12 +70,12 @@
                   %{id: "any", name: "Any section", icon: "fa-solid fa-th", colour: fg},
                   %{id: "admin", icon: "fa-regular fa-user-circle", colour: fg}
                 ]
-              }) %>
+              })}
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="search_limit" class="control-label">Limit: </label>
-              <%= select(
+              {select(
                 :search,
                 :limit,
                 [
@@ -85,7 +85,7 @@
                 ],
                 class: "form-control",
                 selected: @params["limit"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
@@ -112,7 +112,7 @@
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="search_order_by" class="control-label">Order by: </label>
-              <%= central_component("icon_dropdown", %{
+              {central_component("icon_dropdown", %{
                 name: "search[order]",
                 id: "search_search_group",
                 selected: @params["order"],
@@ -121,7 +121,7 @@
                   %{id: "Oldest first", icon: "fa-regular fa-sort-numeric-up", colour: fg},
                   %{id: "Slowest", icon: "fa-regular fa-hourglass-end", colour: fg}
                 ]
-              }) %>
+              })}
             </div>
           </div>
 

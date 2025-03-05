@@ -32,12 +32,12 @@
           phx-click="create-flash"
           phx-value-name={name}
         >
-          Flash <%= name %>
+          Flash {name}
         </div>
         <br /><br />
 
         <div :for={name <- @limited_bsnames} class={"alert alert-#{name}"}>
-          <%= name %> alert
+          {name} alert
         </div>
       </div>
 

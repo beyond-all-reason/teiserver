@@ -10,39 +10,39 @@
   <div class="row mt-2">
     <%= for {action, icon} <- Teiserver.Moderation.ResponseLib.list_actions() do %>
       <div class="col">
-        <%= central_component("radio",
+        {central_component("radio",
           name: "response[action]",
           id: "response_#{action}",
           value: action,
           label: raw("<i class='fa-fw #{icon}'></i> #{action}"),
           field: :action,
           changeset: @response_changeset
-        ) %>
+        )}
       </div>
     <% end %>
   </div>
 
   <div class="row mt-2">
     <div class="col">
-      <%= central_component("radio",
+      {central_component("radio",
         name: "response[accurate]",
         id: "response_is_accurate",
         value: "true",
         label: raw("<i class='fa-fw fa-solid fa-check'></i> Accurate report"),
         field: :accurate,
         changeset: @response_changeset
-      ) %>
+      )}
     </div>
 
     <div class="col">
-      <%= central_component("radio",
+      {central_component("radio",
         name: "response[accurate]",
         id: "response_not_accurate",
         value: "false",
         label: raw("<i class='fa-fw fa-regular fa-times'></i> Inaccurate report"),
         field: :accurate,
         changeset: @response_changeset
-      ) %>
+      )}
     </div>
   </div>
 

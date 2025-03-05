@@ -1,9 +1,9 @@
 <% bsname = @view_colour %>
 
-<%= render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{
+{render(TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{
   active: "users",
   conn: Map.put(@socket, :permissions, @current_user.permissions)
-}) %>
+})}
 
 <div class="row">
   <div class="col-md-12">
@@ -35,7 +35,7 @@
 
         <h4>
           <%= if Enum.count(@client_ids) > 0 do %>
-            Clients - <%= Enum.count(@client_ids) %>
+            Clients - {Enum.count(@client_ids)}
           <% else %>
             No clients found
           <% end %>
@@ -61,14 +61,18 @@
                 client = @clients[userid] %>
                 <%= if client != nil do %>
                   <tr>
-                    <td><%= client.name %></td>
-                    <td><%= client.party_id %></td>
+                    <td>{client.name}</td>
+                    <td>{client.party_id}</td>
                     <td>
                       <%= if client.lobby_id do %>
-                        <%= live_redirect("Show #{client.lobby_id}",
-                          to: Routes.ts_battle_lobby_show_path(@socket, :show, client.lobby_id),
-                          class: "btn btn-sm btn-#{Teiserver.Lobby.colours()}"
-                        ) %>
+                        <.link
+                          navigate={
+                            Routes.ts_battle_lobby_show_path(@socket, :show, client.lobby_id)
+                          }
+                          class={"btn btn-sm btn-#{Teiserver.Lobby.colours()}"}
+                        >
+                          Show {client.lobby_id}
+                        </.link>
                       <% end %>
                     </td>
                     <td>
@@ -100,14 +104,18 @@
                       <% end %>
                     </td>
 
-                    <td><%= if user.bot, do: "Bot" %></td>
+                    <td>{if user.bot, do: "Bot"}</td>
 
                     <td>
                       <span>
-                        <%= live_redirect("Show",
-                          to: Routes.ts_admin_client_show_path(@socket, :show, client.userid),
-                          class: "btn btn-sm btn-#{bsname}"
-                        ) %>
+                        <.link
+                          navigate={
+                            Routes.ts_admin_client_show_path(@socket, :show, client.userid)
+                          }
+                          class={"btn btn-sm btn-#{bsname}"}
+                        >
+                          Show
+                        </.link>
                       </span>
                     </td>
                   </tr>

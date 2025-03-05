@@ -1,21 +1,21 @@
 <% bsname = view_colour() %>
 
-<%= central_component("section_menu_button",
+{central_component("section_menu_button",
   name: "index",
   label: "List",
   active: @active,
   icon: "fa-solid fa-bars",
   bsname: bsname,
   url: ~p"/admin/discord_channels"
-) %>
+)}
 
 <%= if allow?(@conn, "Admin") do %>
-  <%= central_component("section_menu_button",
+  {central_component("section_menu_button",
     name: "new",
     label: "New",
     active: @active,
     icon: "fa-regular fa-plus",
     bsname: bsname,
     url: ~p"/admin/discord_channels/new"
-  ) %>
+  )}
 <% end %>

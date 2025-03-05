@@ -11,10 +11,10 @@
     <h4>Mutual friends</h4>
 
     <%= if Enum.empty?(@mutual_friends) do %>
-      You and <%= @user.name %> have no mutual friends.
+      You and {@user.name} have no mutual friends.
     <% else %>
       <.table id="mutual_friends" rows={@mutual_friends} table_class="table-sm">
-        <:col :let={user} label="Name"><%= user.name %></:col>
+        <:col :let={user} label="Name">{user.name}</:col>
       </.table>
     <% end %>
   </div>

@@ -58,13 +58,13 @@
     <.breadcrumb_trail :if={assigns[:breadcrumb_trails]} trails={assigns[:breadcrumb_trails]} />
 
     <div class="px-3 my-0">
-      <%= @inner_content %>
+      {@inner_content}
     </div>
   </main>
 
   <footer class="footer mt-auto pt-2 pb-1 px-2">
     <div style="text-align: right;">
-      <%= Teiserver.Config.get_site_config_cache("site.Footer credit text") %>
+      {Teiserver.Config.get_site_config_cache("site.Footer credit text")}
     </div>
   </footer>
 </div>

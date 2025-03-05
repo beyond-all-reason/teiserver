@@ -1,10 +1,10 @@
 <% bsname = view_colour() %>
 
-<%= central_component("picker_script",
+{central_component("picker_script",
   module: Teiserver.Account.UserLib,
   name: "account_user",
   title: "User search"
-) %>
+)}
 
 <div class="row">
   <div class="col-md-12">
@@ -21,7 +21,7 @@
           <div class="form-group">
             <div class="col-md-4 col-xl-2">
               <label for="f_split" class="control-label">Split: </label>
-              <%= select(
+              {select(
                 :f,
                 :split,
                 [
@@ -30,23 +30,23 @@
                 ],
                 class: "form-control",
                 selected: @params["split"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-xl-2">
               <label for="teiserver-user-search" class="control-label">Specific user: </label>
-              <%= render(TeiserverWeb.Account.UserView, "picker.html") %>
+              {render(TeiserverWeb.Account.UserView, "picker.html")}
             </div>
 
             <div class="col-md-4 col-xl-2">
-              <%= central_component("checkbox",
+              {central_component("checkbox",
                 name: "f[no_root]",
                 id: "f_no_root",
                 value: "true",
                 label: "Do not include developers",
                 field: :not_root,
                 changeset: @changeset
-              ) %>
+              )}
             </div>
           </div>
 

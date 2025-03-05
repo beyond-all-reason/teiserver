@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "badge_types"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.BadgeTypeView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -22,7 +22,7 @@
                 true -> "index"
               end
           })
-        ) %>
+        )}
         <br /><br />
 
         <h4>Listing Badge Types</h4>
@@ -41,11 +41,11 @@
             <%= for badge_type <- @badge_types do %>
               <tr>
                 <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
-                  <%= central_component("icon", icon: badge_type.icon) %>
+                  {central_component("icon", icon: badge_type.icon)}
                 </td>
-                <td><%= badge_type.name %></td>
-                <td><%= badge_type.purpose %></td>
-                <td><%= badge_type.restriction %></td>
+                <td>{badge_type.name}</td>
+                <td>{badge_type.purpose}</td>
+                <td>{badge_type.restriction}</td>
 
                 <td>
                   <a

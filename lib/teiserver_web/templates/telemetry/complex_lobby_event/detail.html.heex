@@ -12,7 +12,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Telemetry.ComplexLobbyEventView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -20,36 +20,36 @@
             show_search: false,
             active: "event_detail"
           })
-        ) %>
+        )}
         <br /><br />
 
         <%= for key <- @schema_keys do %>
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "key-#{key}",
             label: key,
             active: "key-#{@key}",
             bsname: bsname,
             icon: "",
             url: "?key=#{key}&tf=#{@timeframe}"
-          ) %>
+          )}
         <% end %>
         &nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;
         <%= for tf <- timeframes do %>
-          <%= central_component("section_menu_button",
+          {central_component("section_menu_button",
             name: "tf-#{tf}",
             label: tf,
             active: "tf-#{@timeframe}",
             bsname: bsname,
             icon: "",
             url: "?key=#{@key}&tf=#{tf}"
-          ) %>
+          )}
         <% end %>
 
         <br /><br />
 
-        <h4>Value counts for <%= @event_name %></h4>
+        <h4>Value counts for {@event_name}</h4>
         <table class="table table-sm">
           <thead>
             <tr>
@@ -62,11 +62,11 @@
               <tr>
                 <td :if={Map.has_key?(@usernames, k)}>
                   <a href={~p"/teiserver/admin/user/#{k}"}>
-                    <%= k %> (<%= @usernames[k] %>)
+                    {k} ({@usernames[k]})
                   </a>
                 </td>
-                <td :if={not Map.has_key?(@usernames, k)}><%= k %></td>
-                <td><%= v %></td>
+                <td :if={not Map.has_key?(@usernames, k)}>{k}</td>
+                <td>{v}</td>
               </tr>
             <% end %>
           </tbody>

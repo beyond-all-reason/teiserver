@@ -1,16 +1,16 @@
 <% bsname = view_colour() %>
 
-<%= render(
+{render(
   TeiserverWeb.Report.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "reports"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Report.ReportView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -18,7 +18,7 @@
             show_search: false,
             active: "records"
           })
-        ) %>
+        )}
         <br /><br />
 
         <form action={~p"/teiserver/reports/show/records"} method="post">
@@ -27,10 +27,10 @@
           <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_date_preset" class="control-label">Date range:</label>
-              <%= select(:report, :date_preset, @presets,
+              {select(:report, :date_preset, @presets,
                 class: "form-control",
                 selected: @params["date_preset"]
-              ) %>
+              )}
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
@@ -68,7 +68,7 @@
               <th>Today</th>
 
               <%= for i <- 1..@top_count do %>
-                <th>Pos: <%= i %></th>
+                <th>Pos: {i}</th>
                 <th>Date</th>
               <% end %>
             </tr>
@@ -76,12 +76,12 @@
           <tbody>
             <%= for {key, rows} <- @records do %>
               <tr>
-                <td><%= key %></td>
-                <td><%= format_number(@today[key]) %></td>
+                <td>{key}</td>
+                <td>{format_number(@today[key])}</td>
 
                 <%= for [date, value] <- rows do %>
-                  <td><%= format_number(value) %></td>
-                  <td><%= date_to_str(date, format: :ymd) %></td>
+                  <td>{format_number(value)}</td>
+                  <td>{date_to_str(date, format: :ymd)}</td>
                 <% end %>
               </tr>
             <% end %>

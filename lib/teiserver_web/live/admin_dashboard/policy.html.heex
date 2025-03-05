@@ -1,5 +1,7 @@
 <div class="my-2">
-  <%= live_redirect("Main dashboard", to: ~p"/admin/dashboard", class: "btn btn-outline-primary") %>
+  <.link navigate={~p"/admin/dashboard"} class="btn btn-outline-primary">
+    Main dashboard
+  </.link>
 
   <div class="float-end">
     <a href={~p"/admin/lobby_policies/#{@id}"} class="btn btn-outline-primary">
@@ -25,16 +27,18 @@
     <tbody>
       <%= for {name, bot} <- @bots || [] do %>
         <tr>
-          <td><%= name %></td>
+          <td>{name}</td>
           <%= if bot.status.lobby_id do %>
             <td>
-              <%= live_redirect("Show lobby #{bot.status.lobby_id}",
-                to: ~p"/battle/lobbies/show/#{bot.status.lobby_id}",
-                class: "btn btn-sm btn-outline-primary"
-              ) %>
+              <.link
+                navigate={~p"/battle/lobbies/show/#{bot.status.lobby_id}"}
+                class="btn btn-sm btn-outline-primary"
+              >
+                Show lobby #{bot.status.lobby_id}
+              </.link>
             </td>
             <td>
-              <%= bot.status.member_count %>
+              {bot.status.member_count}
             </td>
             <td>
               <%= if bot.status.in_progress do %>
@@ -45,10 +49,12 @@
             <td colspan="3">&nbsp;</td>
           <% end %>
           <td>
-            <%= live_redirect("Show client",
-              to: ~p"/teiserver/admin/client/#{bot.status.userid}",
-              class: "btn btn-sm btn-outline-success"
-            ) %>
+            <.link
+              navigate={~p"/teiserver/admin/client/#{bot.status.userid}"}
+              class="btn btn-sm btn-outline-success"
+            >
+              Show client
+            </.link>
           </td>
         </tr>
       <% end %>

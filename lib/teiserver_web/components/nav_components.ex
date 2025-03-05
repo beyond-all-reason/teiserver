@@ -27,7 +27,7 @@ defmodule TeiserverWeb.NavComponents do
         <%= if assigns[:icon] do %>
           <i class={"fa-fw #{@icon}"}></i>
         <% end %>
-        <%= @text %>
+        {@text}
       </a>
     </li>
     """
@@ -54,7 +54,7 @@ defmodule TeiserverWeb.NavComponents do
             >
             </i>
             <span id="page-title">
-              <%= Application.get_env(:teiserver, Teiserver)[:site_title] %>
+              {Application.get_env(:teiserver, Teiserver)[:site_title]}
             </span>
           </a>
           <!-- Left links -->
@@ -169,7 +169,7 @@ defmodule TeiserverWeb.NavComponents do
   def tab_header(assigns) do
     ~H"""
     <ul class="nav nav-tabs" role="tablist">
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </ul>
     """
   end
@@ -186,7 +186,7 @@ defmodule TeiserverWeb.NavComponents do
     ~H"""
     <li class="nav-item">
       <.link patch={@url} class={"nav-link #{@active_class}"}>
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </.link>
     </li>
     """
@@ -246,7 +246,7 @@ defmodule TeiserverWeb.NavComponents do
     <div class={"#{@col_classes} menu-card #{@extra_classes}"}>
       <a href={@url} class="block-link" style={@style}>
         <Fontawesome.icon icon={@icon} style={@icon_class} size={@icon_size} /><br />
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </a>
     </div>
     """
@@ -272,7 +272,7 @@ defmodule TeiserverWeb.NavComponents do
     <div class="col sub-menu-icon">
       <a href={@url} class={"block-link #{@active_class}"}>
         <Fontawesome.icon :if={@icon} icon={@icon} style="solid" size="2x" /><br />
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </a>
     </div>
     """
@@ -297,7 +297,7 @@ defmodule TeiserverWeb.NavComponents do
     ~H"""
     <.link navigate={@url} class={"btn btn-outline-#{@bsname} #{@active_class}"}>
       <Fontawesome.icon :if={@icon} icon={@icon} style={if @active, do: "solid", else: "regular"} />
-      &nbsp; <%= render_slot(@inner_block) %>
+      &nbsp; {render_slot(@inner_block)}
     </.link>
     """
   end
@@ -330,7 +330,7 @@ defmodule TeiserverWeb.NavComponents do
     ~H"""
     <.link patch={@url} class={"btn btn-outline-#{@bsname} #{@active_class}"}>
       <Fontawesome.icon :if={@icon} icon={@icon} style={if @active, do: "solid", else: "regular"} />
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </.link>
     """
   end
@@ -348,11 +348,11 @@ defmodule TeiserverWeb.NavComponents do
               <%= for breadcrumb <- breadcrumb_trail do %>
                 <%= if breadcrumb[:url] == "#" do %>
                   <li class="breadcrumb-item active" aria-current="page">
-                    <a href={breadcrumb[:url]}><%= breadcrumb[:name] %></a>
+                    <a href={breadcrumb[:url]}>{breadcrumb[:name]}</a>
                   </li>
                 <% else %>
                   <li class="breadcrumb-item">
-                    <a href={breadcrumb[:url]}><%= breadcrumb[:name] %></a>
+                    <a href={breadcrumb[:url]}>{breadcrumb[:name]}</a>
                   </li>
                 <% end %>
               <% end %>
@@ -362,7 +362,7 @@ defmodule TeiserverWeb.NavComponents do
 
         <%= if assigns[:breadcrumb_extra] do %>
           <div id="breadcrumb-right">
-            <%= assigns[:breadcrumb_extra] %>
+            {assigns[:breadcrumb_extra]}
           </div>
         <% end %>
       </div>

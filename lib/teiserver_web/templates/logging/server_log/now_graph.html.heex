@@ -55,17 +55,17 @@
   });
 </script>
 
-<%= render(
+{render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "server"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Logging.ServerLogView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -73,7 +73,7 @@
             show_search: false,
             active: "now"
           })
-        ) %>
+        )}
         <br /><br />
 
         <div class="row">
@@ -85,7 +85,7 @@
                     <div class="row">
                       <div class="col-lg-5 col-md-12 my-3">
                         <label for="minutes" class="control-label">Minutes</label>
-                        <%= central_component("icon_dropdown",
+                        {central_component("icon_dropdown",
                           name: "minutes",
                           id: "minutes",
                           enumerable: [
@@ -97,14 +97,14 @@
                             %{id: "1440", name: "1440 (24 hours)"}
                           ],
                           selected: Map.get(@params, "minutes", "30")
-                        ) %>
+                        )}
                       </div>
 
                       <div class="col-lg-5 col-md-12 my-3">
                         <label for="resolution" class="control-label">
                           Resolution (minutes per point)
                         </label>
-                        <%= central_component("icon_dropdown",
+                        {central_component("icon_dropdown",
                           name: "resolution",
                           id: "resolution",
                           enumerable: [
@@ -114,7 +114,7 @@
                             %{id: "60", name: "60"}
                           ],
                           selected: Map.get(@params, "resolution", "1")
-                        ) %>
+                        )}
                       </div>
 
                       <div class="col-lg-2 col-md-12 my-3">

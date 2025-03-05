@@ -7,7 +7,7 @@
     <meta name="description" content="" />
     <meta name="author" content="" />
 
-    <title><%= Application.get_env(:teiserver, TeiserverWeb)[:page_title] %></title>
+    <title>{Application.get_env(:teiserver, TeiserverWeb)[:page_title]}</title>
 
     <% light_mode =
       case get_user_config_cache(assigns[:current_user], "general.Colour scheme") do
@@ -80,15 +80,15 @@
 
                   <%= form_for changeset, Routes.account_session_path(@conn, :login), fn f -> %>
                     <div class="form-group">
-                      <%= label(f, :username, class: "control-label") %>
-                      <%= text_input(f, :username, class: "form-control", autofocus: "autofocus") %>
-                      <%= error_tag(f, :username) %>
+                      {label(f, :username, class: "control-label")}
+                      {text_input(f, :username, class: "form-control", autofocus: "autofocus")}
+                      {error_tag(f, :username)}
                     </div>
 
                     <div class="form-group">
-                      <%= label(f, :password, class: "control-label") %>
-                      <%= password_input(f, :password, class: "form-control") %>
-                      <%= error_tag(f, :password) %>
+                      {label(f, :password, class: "control-label")}
+                      {password_input(f, :password, class: "form-control")}
+                      {error_tag(f, :password)}
                     </div>
 
                     <div class="form-group">
@@ -97,7 +97,7 @@
                           &nbsp;
                         </div>
                         <div class="col-md-12">
-                          <%= submit("Sign In", class: "btn btn-primary btn-block") %>
+                          {submit("Sign In", class: "btn btn-primary btn-block")}
                         </div>
                       </div>
                     </div>

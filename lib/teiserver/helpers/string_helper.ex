@@ -64,7 +64,7 @@ defmodule Teiserver.Helper.StringHelper do
     cond do
       last_2digits == "ey" -> "#{s}s"
       last_1digit == "s" -> s
-      last_1digit == "y" -> "#{String.slice(s, 0..-2)}ies"
+      last_1digit == "y" -> "#{String.slice(s, 0..-2//-1)}ies"
       true -> "#{s}s"
     end
   end

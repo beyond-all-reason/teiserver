@@ -23,17 +23,17 @@
       <tbody>
         <%= for {app, stats} <- @app_and_stats do %>
           <tr>
-            <td><%= app.id %></td>
-            <td><%= app.uid %></td>
-            <td><%= app.name %></td>
+            <td>{app.id}</td>
+            <td>{app.uid}</td>
+            <td>{app.name}</td>
             <%= if is_nil(app.owner) do %>
               <td>No owner</td>
             <% else %>
-              <td><%= app.owner.name %> (<%= app.owner.email %>)</td>
+              <td>{app.owner.name} ({app.owner.email})</td>
             <% end %>
-            <td><%= Enum.join(app.scopes, ", ") %></td>
+            <td>{Enum.join(app.scopes, ", ")}</td>
             <td>
-              <%= stats.code_count %> / <%= stats.token_count %> / <%= stats.credential_count %>
+              {stats.code_count} / {stats.token_count} / {stats.credential_count}
             </td>
             <td>
               <Phx.link href={~p"/teiserver/admin/oauth_application/#{app.id}"}>

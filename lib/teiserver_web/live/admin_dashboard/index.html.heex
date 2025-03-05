@@ -7,20 +7,20 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
     <h4>Links</h4>
   </div>
   <div class="col-md-4">
-    <%= live_redirect("Login throttle",
-      to: ~p"/admin/dashboard/login_throttle",
-      class: "btn btn-sm mx-1 btn-outline-primary"
-    ) %>
+    <.link
+      navigate={~p"/admin/dashboard/login_throttle"}
+      class="btn btn-sm mx-1 btn-outline-primary"
+    >
+      Login throttle
+    </.link>
 
-    <%= live_redirect("Server graphs",
-      to: ~p"/logging/server/now",
-      class: "btn btn-sm mx-1 btn-outline-warning"
-    ) %>
+    <.link navigate={~p"/logging/server/now"} class="btn btn-sm mx-1 btn-outline-warning">
+      Server graphs
+    </.link>
 
-    <%= live_redirect("Load graphs",
-      to: ~p"/logging/server/load",
-      class: "btn btn-sm mx-1 btn-outline-warning"
-    ) %>
+    <.link navigate={~p"/logging/server/load"} class="btn btn-sm mx-1 btn-outline-warning">
+      Load graphs
+    </.link>
   </div>
 </div>
 
@@ -54,34 +54,34 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
           <tbody>
             <tr>
               <td>Clients</td>
-              <td><%= @total_connected_clients %></td>
+              <td>{@total_connected_clients}</td>
             </tr>
             <tr>
               <td>Non-bot users</td>
-              <td><%= @telemetry_client.total %></td>
+              <td>{@telemetry_client.total}</td>
             </tr>
             <tr>
               <td>Players</td>
-              <td><%= @telemetry_client.player %></td>
+              <td>{@telemetry_client.player}</td>
             </tr>
             <tr>
               <td>Spectators</td>
-              <td><%= @telemetry_client.spectator %></td>
+              <td>{@telemetry_client.spectator}</td>
             </tr>
             <tr>
               <td>Lobbies</td>
-              <td><%= @telemetry_battle.total %></td>
+              <td>{@telemetry_battle.total}</td>
             </tr>
             <tr>
               <td>Matches</td>
-              <td><%= @telemetry_battle.in_progress %></td>
+              <td>{@telemetry_battle.in_progress}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
-        <h4>Queues (<%= Enum.count(@queues) %>)</h4>
+        <h4>Queues ({Enum.count(@queues)})</h4>
         <table class="table table-sm">
           <thead>
             <tr>
@@ -94,8 +94,8 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
           <tbody>
             <%= for {queue, wait} <- @queues do %>
               <tr>
-                <td><%= queue.id %></td>
-                <td><%= queue.name %></td>
+                <td>{queue.id}</td>
+                <td>{queue.name}</td>
                 <td>
                   <%= if wait == nil do %>
                     <i class="fa-fw fa-regular fa-times text-danger"></i>
@@ -104,10 +104,12 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
                   <% end %>
                 </td>
                 <td>
-                  <%= live_redirect("Show",
-                    to: Routes.ts_game_queue_show_path(@socket, :show, queue.id),
-                    class: "btn btn-sm btn-outline-#{queue_bsname}"
-                  ) %>
+                  <.link
+                    navigate={Routes.ts_game_queue_show_path(@socket, :show, queue.id)}
+                    class={"btn btn-sm btn-outline-#{queue_bsname}"}
+                  >
+                    Show
+                  </.link>
                 </td>
               </tr>
             <% end %>
@@ -116,7 +118,7 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
       </div>
 
       <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
-        <h4>Policies (<%= Enum.count(@policies) %>)</h4>
+        <h4>Policies ({Enum.count(@policies)})</h4>
         <table class="table table-sm">
           <thead>
             <tr>
@@ -129,8 +131,8 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
           <tbody>
             <%= for {policy, organiser} <- @policies do %>
               <tr>
-                <td><%= policy.id %></td>
-                <td><%= policy.name %></td>
+                <td>{policy.id}</td>
+                <td>{policy.name}</td>
                 <td>
                   <%= if organiser == nil do %>
                     <i class="fa-fw fa-regular fa-times text-danger"></i>
@@ -139,10 +141,12 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
                   <% end %>
                 </td>
                 <td>
-                  <%= live_redirect("Show",
-                    to: ~p"/admin/dashboard/policy/#{policy.id}",
-                    class: "btn btn-sm btn-outline-#{queue_bsname}"
-                  ) %>
+                  <.link
+                    navigate={~p"/admin/dashboard/policy/#{policy.id}"}
+                    class={"btn btn-sm btn-outline-#{queue_bsname}"}
+                  >
+                    Show
+                  </.link>
                 </td>
               </tr>
             <% end %>
@@ -151,7 +155,7 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
       </div>
 
       <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
-        <h4>Servers (<%= Enum.count(@server_pids) %>)</h4>
+        <h4>Servers ({Enum.count(@server_pids)})</h4>
         <table class="table table-sm">
           <thead>
             <tr>
@@ -162,7 +166,7 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
           <tbody>
             <%= for {server_name, server_pid} <- @server_pids do %>
               <tr>
-                <td><%= server_name %></td>
+                <td>{server_name}</td>
                 <td>
                   <%= if server_pid == nil do %>
                     <i class="fa-fw fa-regular fa-times text-danger"></i>
@@ -179,7 +183,7 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
   </div>
 
   <div class="col-md-6 mb-4 col-xl-4 col-xxl-3">
-    <h4>Lobbies (<%= Enum.count(@lobbies) %>)</h4>
+    <h4>Lobbies ({Enum.count(@lobbies)})</h4>
     <table class="table table-sm">
       <thead>
         <tr>
@@ -194,8 +198,8 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
       <tbody>
         <%= for {lobby, consul, balancer, throttle} <- @lobbies do %>
           <tr>
-            <td><%= lobby.id %></td>
-            <td><%= lobby.name %></td>
+            <td>{lobby.id}</td>
+            <td>{lobby.name}</td>
             <td>
               <%= if consul == nil do %>
                 <i class="fa-fw fa-regular fa-times text-danger"></i>
@@ -218,10 +222,12 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
               <% end %>
             </td>
             <td>
-              <%= live_redirect("Show",
-                to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id),
-                class: "btn btn-sm btn-outline-#{lobby_bsname}"
-              ) %>
+              <.link
+                navigate={Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id)}
+                class={"btn btn-sm btn-outline-#{lobby_bsname}"}
+              >
+                Show
+              </.link>
             </td>
           </tr>
         <% end %>

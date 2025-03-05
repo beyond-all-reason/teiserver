@@ -2,13 +2,13 @@
   <div class="col-md-12">
     <div class="card">
       <div class="card-body">
-        <h3><%= dgettext("coherence", "Edit Account") %></h3>
+        <h3>{dgettext("coherence", "Edit Account")}</h3>
 
-        <%= render("form.html",
+        {render("form.html",
           changeset: @changeset,
           label: dgettext("coherence", "Update"),
           action: Routes.account_session_path(@conn, :update)
-        ) %>
+        )}
       </div>
     </div>
   </div>

@@ -5,23 +5,23 @@
         <tr>
           <td>Report by</td>
           <td>
-            <%= @report.reporter.name %>, <%= date_to_str(@report.inserted_at,
+            {@report.reporter.name}, {date_to_str(@report.inserted_at,
               format: :hms_or_dmy
-            ) %>
+            )}
           </td>
         </tr>
 
         <tr>
           <td>Type:</td>
-          <td><%= @report.type %>/<%= @report.sub_type %></td>
+          <td>{@report.type}/{@report.sub_type}</td>
         </tr>
         <tr>
           <td>Extra text:</td>
-          <td><%= @report.extra_text %></td>
+          <td>{@report.extra_text}</td>
         </tr>
         <tr>
           <td>Report date:</td>
-          <td><%= date_to_str(@report.inserted_at, format: :ymd_hms, tz: @tz) %></td>
+          <td>{date_to_str(@report.inserted_at, format: :ymd_hms, tz: @tz)}</td>
         </tr>
 
         <%= if @report.match_id do %>
@@ -44,7 +44,7 @@
           </tr>
           <tr>
             <td>Relationship:</td>
-            <td><%= @report.relationship %></td>
+            <td>{@report.relationship}</td>
           </tr>
         <% end %>
         <tr>
@@ -101,13 +101,13 @@
   <%= if not @report.closed do %>
     <div class="col-md-12 col-lg-6">
       <h4>Your response</h4>
-      <%= render(
+      {render(
         "response_form.html",
         Map.put(assigns, :action, ~p"/moderation/report/#{@report.id}/respond")
-      ) %>
+      )}
 
       <h4>Responses</h4>
-      <h6>Accuracy: <%= @accuracy %>%</h6>
+      <h6>Accuracy: {@accuracy}%</h6>
 
       <table class="table table-sm">
         <thead>
@@ -121,10 +121,10 @@
             <tr>
               <td>
                 <i class={"fa-fw #{icon}"}></i>
-                <%= action %>
+                {action}
               </td>
               <td>
-                <%= @response_action_counts[action] || 0 %>
+                {@response_action_counts[action] || 0}
               </td>
             </tr>
           <% end %>

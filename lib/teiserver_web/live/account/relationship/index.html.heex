@@ -45,9 +45,9 @@
       rows={@friends}
       row_click={fn friend -> JS.navigate(~p"/profile/#{friend.other_user.id}") end}
     >
-      <:col :let={friend} label="Name"><%= friend.other_user.name %></:col>
+      <:col :let={friend} label="Name">{friend.other_user.name}</:col>
       <:col :let={friend} label="Last played">
-        <%= friend.other_user.last_played |> date_to_str(:hms_or_ymd) %>
+        {friend.other_user.last_played |> date_to_str(:hms_or_ymd)}
       </:col>
 
       <:col :let={friend} label="">
@@ -67,7 +67,7 @@
       These people are not your friends (yet) but they want to be!
     </div>
     <.table id="incoming-request-table" table_class="table-sm" rows={@incoming_friend_requests}>
-      <:col :let={request} label="Name"><%= request.from_user.name %></:col>
+      <:col :let={request} label="Name">{request.from_user.name}</:col>
 
       <:col :let={request} label="">
         <.link class="btn btn-secondary btn-sm" navigate={~p"/profile/#{request.from_user.id}"}>
@@ -106,7 +106,7 @@
       These are people you've asked to be friends, you're just waiting on their reply.
     </div>
     <.table id="incoming-request-table" table_class="table-sm" rows={@outgoing_friend_requests}>
-      <:col :let={request} label="Name"><%= request.to_user.name %></:col>
+      <:col :let={request} label="Name">{request.to_user.name}</:col>
       <:col :let={request} label="">
         <div
           class="btn btn-danger btn-sm"
@@ -136,9 +136,9 @@
       rows={@follows}
       row_click={fn follow -> JS.navigate(~p"/profile/#{follow.to_user.id}") end}
     >
-      <:col :let={follow} label="Name"><%= follow.to_user.name %></:col>
+      <:col :let={follow} label="Name">{follow.to_user.name}</:col>
       <:col :let={follow} label="Last played">
-        <%= follow.to_user.last_played |> date_to_str(:hms_or_ymd) %>
+        {follow.to_user.last_played |> date_to_str(:hms_or_ymd)}
       </:col>z
       <:col :let={follow} label="">
         <.link class="btn btn-secondary btn-sm" navigate={~p"/profile/#{follow.to_user.id}"}>
@@ -170,7 +170,7 @@
       If someone is ignored they cannot direct message you and you will not see their chat messages in the lobby. Muting ingame is currently a separate action and not linked to this.
     </div>
     <.table id="ignores-table" table_class="table-sm" rows={@ignores}>
-      <:col :let={ignore} label="Name"><%= ignore.to_user.name %></:col>
+      <:col :let={ignore} label="Name">{ignore.to_user.name}</:col>
       <:col :let={avoid} label="">
         <span
           phx-click="unignore-user"
@@ -202,7 +202,7 @@
       If you avoid someone, there's less chance the balance algorithm will place you on the same team. However, avoids will be broken if the algorithm cannot balance teams fairly. This feature is still under development.
     </div>
     <.table id="avoids-table" table_class="table-sm" rows={@avoids}>
-      <:col :let={avoid} label="Name"><%= avoid.to_user.name %></:col>
+      <:col :let={avoid} label="Name">{avoid.to_user.name}</:col>
       <:col :let={avoid} label="">
         <span
           phx-click="unavoid-user"
@@ -233,7 +233,7 @@
       In addition to the effects of avoiding; if enough members of a lobby are blocking someone they will not be able to join the lobby at all.
     </div>
     <.table id="blocks-table" table_class="table-sm" rows={@blocks}>
-      <:col :let={block} label="Name"><%= block.to_user.name %></:col>
+      <:col :let={block} label="Name">{block.to_user.name}</:col>
       <:col :let={block} label="">
         <span
           phx-click="avoid-user"
@@ -285,9 +285,9 @@
           <Fontawesome.icon icon={@found_user.icon} style="regular" size="sm" />
         </div>
 
-        <%= @found_user.name %> &nbsp;&nbsp;&nbsp;&nbsp;
+        {@found_user.name} &nbsp;&nbsp;&nbsp;&nbsp;
         <span style="font-size: 0.7em;">
-          Chevron level: <%= (@found_user.data["rank"] || 0) + 1 %>
+          Chevron level: {(@found_user.data["rank"] || 0) + 1}
         </span>
       </h3>
 
@@ -406,7 +406,7 @@
                 <i class={"fa-fw fa-2x #{data.icon}"} style={"color: #{data.colour}"} title={role}>
                 </i>
                 <br />
-                <%= role %>
+                {role}
               </div>
             <% end %>
           <% end %>
@@ -441,7 +441,7 @@
         Purge inactive ignores / avoids / blocks
       </div>
       <%= if(assigns[:purge_avoids_message]) do %>
-        <p class="mt-2"><%= @purge_avoids_message %></p>
+        <p class="mt-2">{@purge_avoids_message}</p>
       <% end %>
     </form>
     <br />
@@ -469,7 +469,7 @@
         Purge inactive Friends
       </div>
       <%= if(assigns[:purge_friends_message]) do %>
-        <p class="mt-2"><%= @purge_friends_message %></p>
+        <p class="mt-2">{@purge_friends_message}</p>
       <% end %>
     </form>
   </div>

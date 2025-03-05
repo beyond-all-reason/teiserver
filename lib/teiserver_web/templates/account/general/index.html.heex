@@ -1,49 +1,49 @@
 <div class="row page-row">
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon_class: "fa-solid",
     name: "profile",
     icon: "fa-solid fa-user-circle",
     text: "My profile",
     link: ~p"/profile"
-  ) %>
+  )}
 
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon_class: "fa-solid",
     name: "",
     icon: Teiserver.icon(:relationship),
     text: "Friends/Mutes/Invites",
     link: ~p"/account/relationship"
-  ) %>
+  )}
 
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon_class: "fa-solid",
     name: "",
     icon: Teiserver.Config.UserConfigLib.icon(),
     text: "Preferences",
     link: ~p"/account/settings"
-  ) %>
+  )}
 
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon: Teiserver.Account.icon(),
     text: "Account details",
     icon_class: "fa-solid",
     link: Routes.ts_account_general_path(@conn, :edit_details)
-  ) %>
+  )}
 
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon: "fa-lock",
     text: "Security",
     icon_class: "fa-solid",
     link: Routes.ts_account_security_path(@conn, :index)
-  ) %>
+  )}
 </div>
 
 <div class="row page-row">
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon_class: "fa-solid",
     name: "",
     icon: StylingHelper.icon(:back),
     text: "Back",
     link: ~p"/"
-  ) %>
+  )}
 </div>

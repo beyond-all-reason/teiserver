@@ -2,119 +2,119 @@
 
 <div class="row">
   <div class="col-md-9">
-    <%= central_component("section_menu_button",
+    {central_component("section_menu_button",
       name: "client_admin",
       label: "Client admin",
       active: @active,
       icon: Teiserver.Account.ClientLib.icon(),
       bsname: bsname,
       url: ~p"/teiserver/admin/client"
-    ) %>
+    )}
 
-    <%= central_component("section_menu_button",
+    {central_component("section_menu_button",
       name: "list",
       label: "List",
       active: @active,
       icon: Teiserver.Helper.StylingHelper.icon(:list),
       bsname: bsname,
       url: ~p"/teiserver/admin/user"
-    ) %>
+    )}
 
-    <%= central_component("section_menu_button",
+    {central_component("section_menu_button",
       name: "advanced_search",
       label: "Advanced search",
       active: @active,
       icon: Teiserver.Helper.StylingHelper.icon(:search),
       bsname: bsname,
       url: ~p"/teiserver/admin/user" <> "?search=true"
-    ) %>
+    )}
 
     <%= if allow?(@current_user, "admin") do %>
-      <%= central_component("section_menu_button",
+      {central_component("section_menu_button",
         name: "data_search",
         label: "Data search",
         active: @active,
         icon: "fa-regular fa-print-magnifying-glass",
         bsname: bsname,
         url: ~p"/teiserver/admin/users/data_search"
-      ) %>
+      )}
     <% end %>
 
     <%= if @active == "show" do %>
-      <%= central_component("section_menu_button",
+      {central_component("section_menu_button",
         name: "show",
         label: "Show",
         active: @active,
         icon: Teiserver.Helper.StylingHelper.icon(:detail),
         bsname: bsname,
         url: "#"
-      ) %>
+      )}
     <% end %>
 
     <%= if @active == "edit" do %>
-      <%= central_component("section_menu_button",
+      {central_component("section_menu_button",
         name: "edit",
         label: "Edit",
         active: @active,
         icon: Teiserver.Helper.StylingHelper.icon(:edit),
         bsname: bsname,
         url: "#"
-      ) %>
+      )}
     <% end %>
 
     <%= if @active == "smurf" do %>
-      <%= central_component("section_menu_button",
+      {central_component("section_menu_button",
         name: "smurf",
         label: "Smurf search",
         active: @active,
         icon: "fa-solid fa-face-angry-horns",
         bsname: bsname,
         url: "#"
-      ) %>
+      )}
     <% end %>
 
     <%= if @active == "smurf_merge_form" do %>
-      <%= central_component("section_menu_button",
+      {central_component("section_menu_button",
         name: "smurf_merge_form",
         label: "Smurf merge",
         active: @active,
         icon: "fa-solid fa-merge",
         bsname: bsname,
         url: "#"
-      ) %>
+      )}
     <% end %>
 
     <%= if @active == "ratings" do %>
-      <%= central_component("section_menu_button",
+      {central_component("section_menu_button",
         name: "ratings",
         label: "Ratings",
         active: @active,
         icon: "fa-solid #{Teiserver.Account.RatingLib.icon()}",
         bsname: bsname,
         url: "#"
-      ) %>
+      )}
     <% end %>
 
     <%= if @active == "ratings_form" do %>
-      <%= central_component("section_menu_button",
+      {central_component("section_menu_button",
         name: "ratings_form",
         label: "Ratings form",
         active: @active,
         icon: "fa-solid #{Teiserver.Account.RatingLib.icon()}",
         bsname: bsname,
         url: "#"
-      ) %>
+      )}
     <% end %>
 
     <%= if @active == "moderation" do %>
-      <%= central_component("section_menu_button",
+      {central_component("section_menu_button",
         name: "moderation",
         label: "Moderation",
         active: @active,
         icon: "fa-solid #{Teiserver.Moderation.icon()}",
         bsname: bsname,
         url: "#"
-      ) %>
+      )}
     <% end %>
   </div>
 

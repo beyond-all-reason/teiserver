@@ -19,25 +19,25 @@
 </.section_menu_button>
 
 <%= if @active == "show" do %>
-  <%= central_component("section_menu_button",
+  {central_component("section_menu_button",
     name: "show",
     label: "Show",
     active: @active,
     icon: Teiserver.Helper.StylingHelper.icon(:detail),
     bsname: bsname,
     url: "#"
-  ) %>
+  )}
 <% end %>
 
 <div class="float-end">
   <%= if assigns[:match] != nil and allow?(@current_user, "Moderator") do %>
-    <%= central_component("section_menu_button",
+    {central_component("section_menu_button",
       name: "admin",
       label: "Admin view",
       active: @active,
       icon: Teiserver.Admin.AdminLib.icon(),
       bsname: bsname,
       url: ~p"/battle/#{@match.id}"
-    ) %>
+    )}
   <% end %>
 </div>

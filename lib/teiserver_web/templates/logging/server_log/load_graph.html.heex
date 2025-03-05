@@ -262,17 +262,17 @@ all_col_class = col_class <> " all-chart" %>
   </script>
 <% end %>
 
-<%= render(
+{render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "server"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Logging.ServerLogView,
           "section_menu.html",
           Map.merge(assigns, %{
@@ -280,7 +280,7 @@ all_col_class = col_class <> " all-chart" %>
             show_search: false,
             active: "load"
           })
-        ) %>
+        )}
         <br /><br />
 
         <div class="row">
@@ -292,7 +292,7 @@ all_col_class = col_class <> " all-chart" %>
                     <div class="row">
                       <div class="col-xl-3 col-lg-4 col-md-6 my-2">
                         <label for="hours" class="control-label">Hours</label>
-                        <%= central_component("icon_dropdown",
+                        {central_component("icon_dropdown",
                           name: "hours",
                           id: "hours",
                           enumerable: [
@@ -305,14 +305,14 @@ all_col_class = col_class <> " all-chart" %>
                             %{id: "504", name: "504 (21 days)"}
                           ],
                           selected: Map.get(@params, "hours", "3")
-                        ) %>
+                        )}
                       </div>
 
                       <div class="col-xl-3 col-lg-4 col-md-6 my-2">
                         <label for="resolution" class="control-label">
                           Resolution (minutes per point)
                         </label>
-                        <%= central_component("icon_dropdown",
+                        {central_component("icon_dropdown",
                           name: "resolution",
                           id: "resolution",
                           enumerable: [
@@ -323,7 +323,7 @@ all_col_class = col_class <> " all-chart" %>
                             %{id: "360", name: "360 (6 hours)"}
                           ],
                           selected: Map.get(@params, "resolution", "1")
-                        ) %>
+                        )}
                       </div>
 
                       <div class="col-xl-3 col-lg-4 col-md-6 my-2">
@@ -350,13 +350,13 @@ all_col_class = col_class <> " all-chart" %>
 
                       <div class="col-xl-3 col-lg-4 col-md-6 my-2">
                         <br />
-                        <%= central_component("checkbox",
+                        {central_component("checkbox",
                           id: "all_charts",
                           name: "all_charts",
                           label: "Show all charts",
                           skip_hidden: true,
                           checked: @params["all_charts"] == "true"
-                        ) %>
+                        )}
                       </div>
 
                       <div class="col-md-12 my-2">

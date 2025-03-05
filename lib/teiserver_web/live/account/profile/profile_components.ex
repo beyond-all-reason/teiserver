@@ -95,9 +95,9 @@ defmodule TeiserverWeb.Account.ProfileComponents do
             <Fontawesome.icon icon={@user.icon} style="regular" size="sm" />
           </div>
 
-          <%= @user.name %> &nbsp;&nbsp;&nbsp;&nbsp;
+          {@user.name} &nbsp;&nbsp;&nbsp;&nbsp;
           <span style="font-size: 0.7em;">
-            Chevron level: <%= (@user.rank || 0) + 1 %>
+            Chevron level: {(@user.rank || 0) + 1}
           </span>
         </h3>
       </div>

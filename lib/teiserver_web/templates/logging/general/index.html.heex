@@ -1,70 +1,70 @@
 <div class="row mt-3">
   <%= if allow?(@current_user, "Admin") do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :medium,
       icon: Teiserver.Logging.ServerDayLogLib.icon(),
       name: "server",
       text: "Server",
       link: ~p"/logging/server"
-    ) %>
+    )}
   <% end %>
 
   <%= if allow?(@current_user, "Admin") do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :medium,
       icon: Teiserver.Battle.MatchLib.icon(),
       name: "match",
       text: "Match",
       link: ~p"/logging/match/day_metrics"
-    ) %>
+    )}
   <% end %>
 
   <%= if allow?(@conn, "Server") do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :medium,
       icon_class: "fa-solid",
       icon: Teiserver.Logging.PageViewLogLib.icon(),
       text: "Web views",
       link: ~p"/logging/page_views"
-    ) %>
+    )}
   <% end %>
 
   <%= if allow?(@conn, "Server") do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :medium,
       icon_class: "fa-solid",
       icon: Teiserver.Logging.AggregateViewLogLib.icon(),
       text: "Web aggregate",
       link: ~p"/logging/aggregate_views"
-    ) %>
+    )}
   <% end %>
 
   <%= if allow?(@conn, "Server") do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :medium,
       icon_class: "fa-solid",
       icon: Teiserver.Logging.AuditLogLib.icon(),
       text: "Audit",
       link: ~p"/logging/audit"
-    ) %>
+    )}
   <% end %>
 
   <%= if allow?(@conn, "Server") do %>
-    <%= central_component("menu_card",
+    {central_component("menu_card",
       size: :medium,
       icon_class: "fa-solid",
       icon: "fa-regular fa-tachometer-alt",
       text: "Live dashboard",
       link: ~p"/logging/live/dashboard"
-    ) %>
+    )}
   <% end %>
 </div>
 
 <div class="row mt-3">
-  <%= central_component("menu_card",
+  {central_component("menu_card",
     icon_class: "fa-solid",
     icon: StylingHelper.icon(:back),
     text: "Back",
     link: ~p"/"
-  ) %>
+  )}
 </div>

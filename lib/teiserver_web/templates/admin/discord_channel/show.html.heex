@@ -8,24 +8,24 @@
   });
 </script>
 
-<%= render(
+{render(
   TeiserverWeb.Admin.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "discord_channels"})
-) %>
+)}
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render(
+        {render(
           TeiserverWeb.Admin.DiscordChannelView,
           "section_menu.html",
           Map.merge(assigns, %{
             show_search: false,
             active: ""
           })
-        ) %>
+        )}
         <hr />
 
         <div class="float-end">
@@ -40,21 +40,21 @@
         </div>
 
         <h3 style={"color: #{@discord_channel.colour}"}>
-          <%= @discord_channel.name %> &nbsp;
+          {@discord_channel.name} &nbsp;
           <i class={"fa-regular fa-fw #{@discord_channel.icon}"}></i>
         </h3>
         <br />
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component("icon", icon: "fa-solid fa-file-alt") %> Details
+              {central_component("icon", icon: "fa-solid fa-file-alt")} Details
             </a>
           </li>
         </ul>
 
         <div class="tab-content">
           <div class="tab-pane" id="details_tab" style="padding:5px;">
-            <%= render("tab_details.html", assigns) %>
+            {render("tab_details.html", assigns)}
           </div>
         </div>
       </div>
