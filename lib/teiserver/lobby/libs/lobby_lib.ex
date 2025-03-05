@@ -135,7 +135,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     cast_lobby(lobby_id, {:update_values, new_values})
   end
 
-  @spec rename_lobby(T.lobby_id(), String.t(), T.userid()) :: :ok | nil
+  @spec rename_lobby(T.lobby_id(), String.t(), T.userid() | nil) :: :ok | nil
   def rename_lobby(lobby_id, new_base_name, renamer_id) do
     cast_lobby(lobby_id, {:rename_lobby, new_base_name, renamer_id})
   end

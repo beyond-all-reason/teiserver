@@ -52,7 +52,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   end
 
   defp setup_token(context) do
-    {:ok, token} = OAuth.create_token(context[:user], context[:app])
+    {:ok, token} = OAuth.create_token(context[:user], context[:app], scopes: context[:app].scopes)
     %{token: token}
   end
 
@@ -88,7 +88,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
       client_id = data.client_id
       data = Map.drop(data, [:client_id])
-      auth_header = Plug.BasicAuth.encode_basic_auth(client_id, "")
+      auth_header = OAuth.encode_basic_auth(client_id, "")
 
       resp =
         conn
@@ -103,7 +103,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       data = get_valid_data(setup_data)
 
       client_id = data.client_id
-      auth_header = Plug.BasicAuth.encode_basic_auth(client_id, "")
+      auth_header = OAuth.encode_basic_auth(client_id, "")
 
       resp =
         conn
@@ -113,10 +113,10 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       json_response(resp, 400)
     end
 
-    test "must provide grant_type", %{conn: conn} = setup_data do
-      data = get_valid_data(setup_data) |> Map.drop([:grant_type])
+    test "must provide correct grant type", %{conn: conn} = setup_data do
+      data = get_valid_data(setup_data) |> Map.put(:grant_type, "invalid-grant-type")
       resp = post(conn, ~p"/oauth/token", data)
-      assert %{"error" => "invalid_request"} = json_response(resp, 400)
+      assert %{"error" => "unsupported_grant_type"} = json_response(resp, 400)
     end
 
     test "must provide code", %{conn: conn} = setup_data do
@@ -190,13 +190,13 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       }
 
       resp = post(conn, ~p"/oauth/token", data)
-      json_response(resp, 400)
+      assert %{"error" => "invalid_client"} = json_response(resp, 401)
     end
 
     test "can also use basic auth",
          %{conn: conn, credential: credential, credential_secret: secret} do
       data = %{grant_type: "client_credentials"}
-      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, secret)
+      auth_header = OAuth.encode_basic_auth(credential.client_id, secret)
 
       conn =
         conn
@@ -212,14 +212,14 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
     test "basic auth check", %{conn: conn, credential: credential} do
       data = %{grant_type: "client_credentials"}
-      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, "lolnope")
+      auth_header = OAuth.encode_basic_auth(credential.client_id, "lolnope")
 
       conn =
         conn
         |> put_req_header("authorization", auth_header)
 
       resp = post(conn, ~p"/oauth/token", data)
-      json_response(resp, 400)
+      json_response(resp, 401)
     end
 
     test "cannot provide client_id twice", %{
@@ -228,7 +228,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       credential_secret: secret
     } do
       data = %{grant_type: "client_credentials", client_id: credential.client_id}
-      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, secret)
+      auth_header = OAuth.encode_basic_auth(credential.client_id, secret)
 
       conn =
         conn
@@ -244,7 +244,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       credential_secret: secret
     } do
       data = %{grant_type: "client_credentials", client_secret: secret}
-      auth_header = Plug.BasicAuth.encode_basic_auth(credential.client_id, secret)
+      auth_header = OAuth.encode_basic_auth(credential.client_id, secret)
 
       conn =
         conn
@@ -252,6 +252,30 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
       resp = post(conn, ~p"/oauth/token", data)
       json_response(resp, 400)
+    end
+
+    test "must provide correct scopes", %{conn: conn} = setup_data do
+      data = %{
+        grant_type: "client_credentials",
+        client_id: setup_data.credential.client_id,
+        client_secret: setup_data.credential_secret,
+        scope: "lolnotascope tachyon.lobby"
+      }
+
+      resp = post(conn, ~p"/oauth/token", data)
+      assert %{"error" => "invalid_scope"} = json_response(resp, 400)
+    end
+
+    test "can provide a specific scope", %{conn: conn} = setup_data do
+      data = %{
+        grant_type: "client_credentials",
+        client_id: setup_data.credential.client_id,
+        client_secret: setup_data.credential_secret,
+        scope: "tachyon.lobby"
+      }
+
+      resp = post(conn, ~p"/oauth/token", data)
+      assert %{"token_type" => "Bearer"} = json_response(resp, 200)
     end
   end
 

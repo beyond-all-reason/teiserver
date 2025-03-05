@@ -55,15 +55,15 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
 
     test "with valid data", %{conn: conn, user: user} do
       data = valid_app_attr(user)
-      conn = post(conn, ~p"/teiserver/admin/oauth_application", application: data)
+      conn = post(conn, ~p"/teiserver/admin/oauth_application", data)
       assert %{id: id} = redirected_params(conn)
       conn = get(conn, ~p"/teiserver/admin/oauth_application/#{id}")
       assert html_response(conn, 200) =~ "generic name"
     end
 
     test "must provide email of valid user", %{conn: conn, user: user} do
-      data = valid_app_attr(user) |> Map.put("owner_email", "lol@nope.com")
-      resp = post(conn, ~p"/teiserver/admin/oauth_application", application: data)
+      data = valid_app_attr(user) |> put_in(["application", "owner_email"], "lol@nope.com")
+      resp = post(conn, ~p"/teiserver/admin/oauth_application", data)
       assert resp.status == 400
     end
   end
@@ -91,7 +91,11 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
         "redirect_uris" => "http://localhost/foo, http://localhost/bar"
       }
 
-      conn = patch(conn, ~p"/teiserver/admin/oauth_application/#{app.id}", application: data)
+      conn =
+        patch(conn, ~p"/teiserver/admin/oauth_application/#{app.id}",
+          application: data,
+          scopes: %{}
+        )
 
       assert conn.status == 200
 
@@ -101,20 +105,42 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
              } = OAuth.get_application_by_uid(app.uid)
     end
 
+    test "can update scopes", %{conn: conn, app: app} do
+      scopes = %{"admin.engine" => "true"}
+
+      conn = patch(conn, ~p"/teiserver/admin/oauth_application/#{app.id}", scopes: scopes)
+
+      assert conn.status == 200
+
+      assert %Application{scopes: ["admin.engine"]} = OAuth.get_application_by_uid(app.uid)
+    end
+
     test "reject invalid redirect uris", %{conn: conn, app: app} do
       data = %{"redirect_uris" => "http://localhost/foo, lolnope"}
       conn = patch(conn, ~p"/teiserver/admin/oauth_application/#{app.id}", application: data)
       assert conn.status == 400
     end
+
+    test "ignores invalid scopes", %{conn: conn, app: app} do
+      scopes = %{"not.a.valid.scope" => "true"}
+
+      conn = patch(conn, ~p"/teiserver/admin/oauth_application/#{app.id}", scopes: scopes)
+
+      assert conn.status == 200
+      assert %Application{} = updated_app = OAuth.get_application_by_uid(app.uid)
+      assert updated_app.scopes == app.scopes
+    end
   end
 
   defp valid_app_attr(user) do
     %{
-      "name" => "generic name",
-      "uid" => "generic_name",
-      "scopes" => "tachyon.lobby",
-      "description" => "test app",
-      "owner_email" => user.email
+      "application" => %{
+        "name" => "generic name",
+        "uid" => "generic_name",
+        "description" => "test app",
+        "owner_email" => user.email
+      },
+      "scopes" => %{"tachyon.lobby" => "true"}
     }
   end
 end

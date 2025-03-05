@@ -18,7 +18,7 @@ defmodule Teiserver.OAuthFixtures do
   end
 
   def update_app(app, changes) do
-    Ecto.Changeset.change(app, changes) |> Repo.update!()
+    app |> Application.changeset(changes) |> Repo.update!()
   end
 
   def code_attrs(user_id, app) do
@@ -82,8 +82,11 @@ defmodule Teiserver.OAuthFixtures do
   def setup_token(%{id: id}, opts), do: setup_token(id, opts)
 
   def setup_token(user_id, opts) do
+    uid = for _ <- 1..10, into: "", do: <<Enum.random(~c"abcdefghijklmnopqrstuvwxyz")>>
+
     app =
       app_attrs(user_id)
+      |> Map.put(:uid, uid)
       |> Map.update!(:scopes, fn s -> Keyword.get(opts, :scopes, s) end)
       |> create_app()
 

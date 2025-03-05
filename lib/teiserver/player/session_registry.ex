@@ -10,7 +10,7 @@ defmodule Teiserver.Player.SessionRegistry do
   end
 
   @doc """
-  how to reach a given session
+  How to reach a given session
   """
   @spec via_tuple(T.userid()) :: GenServer.name()
   def via_tuple(user_id) do
@@ -34,5 +34,9 @@ defmodule Teiserver.Player.SessionRegistry do
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}
     )
+  end
+
+  def count() do
+    Horde.Registry.count(__MODULE__)
   end
 end

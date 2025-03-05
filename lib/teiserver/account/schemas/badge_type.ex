@@ -6,8 +6,8 @@ defmodule Teiserver.Account.BadgeType do
     field :icon, :string
     field :colour, :string
     field :description, :string
-
     field :purpose, :string
+    field :restriction, :string
 
     timestamps()
   end
@@ -22,7 +22,7 @@ defmodule Teiserver.Account.BadgeType do
       |> trim_strings(~w(name description)a)
 
     struct
-    |> cast(params, ~w(name icon colour purpose description)a)
+    |> cast(params, ~w(name icon colour purpose description restriction)a)
     |> validate_required(~w(name icon colour purpose)a)
   end
 

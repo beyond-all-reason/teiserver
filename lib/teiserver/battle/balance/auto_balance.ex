@@ -4,6 +4,7 @@ defmodule Teiserver.Battle.Balance.AutoBalance do
   """
   alias Teiserver.Battle.Balance.SplitNoobs
   alias Teiserver.Battle.Balance.LoserPicks
+  alias Teiserver.Battle.Balance.RespectAvoids
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Battle.Balance.AutoBalanceTypes, as: DB
 
@@ -24,11 +25,15 @@ defmodule Teiserver.Battle.Balance.AutoBalance do
 
       true ->
         players = flatten_members(expanded_group)
-        has_noobs? = has_noobs?(players)
+        num_players = Enum.count(players)
 
         cond do
-          has_noobs? -> SplitNoobs
-          get_parties_count(expanded_group) >= 3 -> SplitNoobs
+          # respect_avoids keeps parties if it can find a combination where team ratings are similar. It could potentially allow op parties. If there is NOT an op party, respect_avoids is less risky and can be used.
+          # respect_avoids also treats noobs as worst in lobby.
+          num_players <= 16 && !has_op_party?(players) -> RespectAvoids
+          # split_noobs will keep parties together if it can find a combination where team rating is similar and team standard deviation is similar. It can split up op parties if it would result in team standard deviation diff that is too large.
+          has_noobs?(players) -> SplitNoobs
+          get_parties_count(expanded_group) >= 1 -> SplitNoobs
           true -> LoserPicks
         end
     end
@@ -39,19 +44,28 @@ defmodule Teiserver.Battle.Balance.AutoBalance do
   """
   @spec flatten_members([BT.expanded_group()]) :: [DB.player()]
   def flatten_members(expanded_group) do
+    players_with_party_id =
+      Enum.with_index(expanded_group, fn element, index ->
+        Map.put(element, :party_id, index)
+      end)
+
     # We only care about ranks and uncertainties for now
     # However, in the future we may use other data to decide what balance algorithm to use,
     # e.g. whether there are parties or not, whether it's a high rating lobby, etc.
     for %{
           ranks: ranks,
-          uncertainties: uncertainties
-        } <- expanded_group,
+          uncertainties: uncertainties,
+          ratings: ratings,
+          party_id: party_id
+        } <- players_with_party_id,
         # Zipping will create binary tuples from 2 lists
-        {rank, uncertainty} <-
-          Enum.zip([ranks, uncertainties]),
+        {rank, uncertainty, rating} <-
+          Enum.zip([ranks, uncertainties, ratings]),
         do: %{
           uncertainty: uncertainty,
-          rank: rank
+          rank: rank,
+          rating: rating,
+          party_id: party_id
         }
   end
 
@@ -68,5 +82,27 @@ defmodule Teiserver.Battle.Balance.AutoBalance do
     Enum.any?(players, fn x ->
       SplitNoobs.is_newish_player?(x.rank, x.uncertainty)
     end)
+  end
+
+  # If the top two players are in the same party, this will return true
+  @spec has_op_party?([DB.player()]) :: boolean()
+  def has_op_party?(players) do
+    if(Enum.count(players) >= 2) do
+      sorted_players =
+        Enum.sort_by(
+          players,
+          fn x ->
+            x.rating
+          end,
+          :desc
+        )
+
+      best_player = Enum.at(sorted_players, 0)
+      second_best_player = Enum.at(sorted_players, 1)
+
+      best_player.party_id == second_best_player.party_id
+    else
+      false
+    end
   end
 end

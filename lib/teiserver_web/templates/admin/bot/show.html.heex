@@ -23,16 +23,20 @@
     <table class="table">
       <thead>
         <tr>
+          <th>created at</th>
           <th>application</th>
           <th>client id</th>
+          <th>scopes</th>
           <th>actions</th>
         </tr>
       </thead>
       <tbody>
         <%= for credential <- @credentials do %>
           <tr>
+            <td><%= credential.inserted_at %></td>
             <td><%= credential.application.name %></td>
             <td><pre> <%= credential.client_id %> </pre></td>
+            <td><%= Enum.join(credential.application.scopes, ", ") %></td>
             <td>
               <Phx.link
                 href={~p"/teiserver/admin/bot/#{@bot.id}/credential/#{credential.id}"}

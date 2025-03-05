@@ -62,6 +62,8 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
   @impl true
   def init({queue_id, queue, teams, timeout}) do
+    Logger.metadata(queue_id: queue_id)
+
     initial_state =
       %{
         queue_id: queue_id,
@@ -81,10 +83,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           end
       }
 
-    Logger.debug(
-      "Pairing room for queue #{initial_state.queue_id} starting for players " <>
-        Enum.join(initial_state.awaiting, ",")
-    )
+    Logger.debug("Pairing room for players " <> Enum.join(initial_state.awaiting, ","))
 
     {:ok, initial_state, {:continue, {:notify_players, timeout}}}
   end
@@ -105,11 +104,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   # It's go time! Find an autohost, send it the start script and let all the players
   # know about the autohost waiting for them.
   def handle_continue(:start_match, state) do
-    case Teiserver.Autohost.list() do
-      [] ->
-        Logger.warning(
-          "No autohost available to start a paired matchmaking for queue #{inspect(state.queue)}"
-        )
+    case Teiserver.Autohost.find_autohost() do
+      nil ->
+        Logger.warning("No autohost available to start a paired matchmaking")
 
         QueueServer.disband_pairing(state.queue_id, self())
 
@@ -119,38 +116,49 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
         {:stop, :normal, state}
 
-      [%{id: id} | _] ->
-        start_script = hardcoded_start_script(state)
+      id ->
+        engine = select_engine(state.queue.engines)
+        %{spring_game: game} = select_game(state.queue.games)
+        %{spring_name: map} = select_map(state.queue.maps)
 
-        case Teiserver.Autohost.start_matchmaking(id, start_script) do
-          {:error, reason} ->
-            QueueServer.disband_pairing(state.queue_id, self())
+        start_battle(state, id, engine, game, map)
+    end
+  end
 
-            for team <- state.teams, member <- team, p_id <- member.player_ids do
-              Teiserver.Player.matchmaking_notify_lost(p_id, {:server_error, reason})
-            end
+  defp start_battle(state, host_id, engine, game, map) do
+    start_script = start_script(state, engine, game, map)
 
-            {:stop, :normal, state}
+    case Teiserver.TachyonBattle.start_battle(host_id, start_script) do
+      {:error, reason} ->
+        QueueServer.disband_pairing(state.queue_id, self())
 
-          {:ok, battle_start_data} ->
-            QueueServer.disband_pairing(state.queue_id, self())
-
-            ids =
-              for team <- state.teams, member <- team, p_id <- member.player_ids do
-                p_id
-              end
-
-            Logger.debug(
-              "Pairing completed for queue #{state.queue_id} is starting for players " <>
-                Enum.join(ids, ",")
-            )
-
-            for team <- state.teams, member <- team, p_id <- member.player_ids do
-              Teiserver.Player.battle_start(p_id, battle_start_data)
-            end
-
-            {:stop, :normal, state}
+        for team <- state.teams, member <- team, p_id <- member.player_ids do
+          Teiserver.Player.matchmaking_notify_lost(p_id, {:server_error, reason})
         end
+
+        {:stop, :normal, state}
+
+      {:ok, host_data} ->
+        QueueServer.disband_pairing(state.queue_id, self())
+
+        ids =
+          for team <- state.teams, member <- team, p_id <- member.player_ids do
+            p_id
+          end
+
+        Logger.debug("Pairing completed for players " <> Enum.join(ids, ","))
+
+        battle_start_data =
+          host_data
+          |> Map.put(:engine, engine)
+          |> Map.put(:game, %{springName: game})
+          |> Map.put(:map, %{springName: map})
+
+        for team <- state.teams, member <- team, p_id <- member.player_ids do
+          Teiserver.Player.battle_start(p_id, battle_start_data)
+        end
+
+        {:stop, :normal, state}
     end
   end
 
@@ -217,13 +225,13 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     {:stop, :normal, state}
   end
 
-  @spec hardcoded_start_script(state()) :: Teiserver.Autohost.start_script()
-  defp hardcoded_start_script(state) do
+  @spec start_script(state(), %{version: String.t()}, String.t(), String.t()) ::
+          Teiserver.TachyonBattle.start_script()
+  defp start_script(state, engine, game, map) do
     %{
-      battleId: UUID.uuid4(),
-      engineVersion: "105.1.1-2590-gb9462a0 bar",
-      gameName: "Beyond All Reason test-26929-d709d32",
-      mapName: "Red Comet Remake 1.8",
+      engineVersion: engine.version,
+      gameName: game,
+      mapName: map,
       startPosType: :ingame,
       allyTeams: get_ally_teams(state)
     }
@@ -240,5 +248,21 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
       %{teams: teams}
     end
+  end
+
+  # TODO implement some smarter engine/game selection logic here in the future, get first for now
+  @spec select_engine([%{version: String.t()}]) :: %{version: String.t()}
+  def select_engine(engines) do
+    Enum.at(engines, 0)
+  end
+
+  @spec select_game([%{spring_game: String.t()}]) :: %{spring_game: String.t()}
+  def select_game(games) do
+    Enum.at(games, 0)
+  end
+
+  @spec select_map([Teiserver.Asset.Map.t()]) :: Teiserver.Asset.Map.t()
+  def select_map(maps) do
+    Enum.random(maps)
   end
 end

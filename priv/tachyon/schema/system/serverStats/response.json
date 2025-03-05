@@ -1,0 +1,47 @@
+{
+    "title": "SystemServerStatsResponse",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "anyOf": [
+        {
+            "title": "SystemServerStatsOkResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "system/serverStats" },
+                "status": { "const": "success" },
+                "data": {
+                    "title": "SystemServerStatsOkResponseData",
+                    "type": "object",
+                    "properties": { "userCount": { "type": "integer" } },
+                    "required": ["userCount"]
+                }
+            },
+            "required": ["type", "messageId", "commandId", "status", "data"]
+        },
+        {
+            "title": "SystemServerStatsFailResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "system/serverStats" },
+                "status": { "const": "failed" },
+                "reason": {
+                    "enum": [
+                        "internal_error",
+                        "unauthorized",
+                        "invalid_request",
+                        "command_unimplemented"
+                    ]
+                },
+                "details": { "type": "string" }
+            },
+            "required": ["type", "messageId", "commandId", "status", "reason"]
+        }
+    ]
+}

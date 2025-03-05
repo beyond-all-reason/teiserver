@@ -28,6 +28,14 @@ defmodule Teiserver.Account.BadgeTypeLib do
       "Role"
     ]
 
+  @spec restriction_list() :: [String.t()]
+  def restriction_list(),
+    do: [
+      nil,
+      "Ally",
+      "Enemy"
+    ]
+
   @spec make_favourite(map()) :: map()
   def make_favourite(badge_type) do
     %{

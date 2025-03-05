@@ -44,6 +44,11 @@
       <label class="control-label" for="badge_type_purposes">Purposes</label>
       <%= select(f, :purpose, purpose_list(), class: "form-control") %>
     </div>
+
+    <div class="form-group">
+      <label class="control-label" for="badge_type_restrictions">Restriction</label>
+      <%= select(f, :restriction, restriction_list(), class: "form-control") %>
+    </div>
   </div>
 
   <div class="row mt-4">

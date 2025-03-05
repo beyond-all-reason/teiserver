@@ -187,7 +187,7 @@ defmodule Teiserver.OAuth do
           },
           create_refresh: boolean() | options()
         ) ::
-          {:ok, Token.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Token.t()} | {:error, :invalid_scope | Ecto.Changeset.t()}
   def create_token(user_id, application, opts \\ [])
 
   def create_token(%User{} = user, application, opts) do
@@ -204,41 +204,47 @@ defmodule Teiserver.OAuth do
 
   defp do_create_token(owner_attr, application, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
+    scopes = opts[:scopes]
 
-    token_attrs =
-      %{
-        value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
-        application_id: application.id,
-        scopes: application.scopes,
-        original_scopes: Map.get(application, :original_scopes, application.scopes),
-        expires_at: Timex.add(now, Timex.Duration.from_minutes(30)),
-        type: :access
-      }
-      |> Map.merge(owner_attr)
-
-    refresh_attrs =
-      if Keyword.get(opts, :create_refresh, true) do
+    if Enum.empty?(scopes) ||
+         not MapSet.subset?(MapSet.new(scopes), MapSet.new(application.scopes)) do
+      {:error, :invalid_scope}
+    else
+      token_attrs =
         %{
           value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
           application_id: application.id,
-          scopes: application.scopes,
-          original_scopes: application.scopes,
-          # there's no real recourse when the refresh token expires and it's
-          # quite annoying, so make it "never" expire.
-          expires_at: Timex.add(now, Timex.Duration.from_days(365 * 100)),
-          type: :refresh,
-          refresh_token: nil
+          scopes: scopes,
+          original_scopes: Map.get(application, :original_scopes, application.scopes),
+          expires_at: Timex.add(now, Timex.Duration.from_minutes(30)),
+          type: :access
         }
         |> Map.merge(owner_attr)
-      else
-        nil
-      end
 
-    token_attrs = Map.put(token_attrs, :refresh_token, refresh_attrs)
+      refresh_attrs =
+        if Keyword.get(opts, :create_refresh, true) do
+          %{
+            value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
+            application_id: application.id,
+            scopes: scopes,
+            original_scopes: application.scopes,
+            # there's no real recourse when the refresh token expires and it's
+            # quite annoying, so make it "never" expire.
+            expires_at: Timex.add(now, Timex.Duration.from_days(365 * 100)),
+            type: :refresh,
+            refresh_token: nil
+          }
+          |> Map.merge(owner_attr)
+        else
+          nil
+        end
 
-    %Token{}
-    |> Token.changeset(token_attrs)
-    |> Repo.insert()
+      token_attrs = Map.put(token_attrs, :refresh_token, refresh_attrs)
+
+      %Token{}
+      |> Token.changeset(token_attrs)
+      |> Repo.insert()
+    end
   end
 
   @doc """
@@ -276,7 +282,11 @@ defmodule Teiserver.OAuth do
         Repo.delete!(code)
 
         {:ok, token} =
-          create_token(code.owner_id, %{id: code.application_id, scopes: code.scopes}, opts)
+          create_token(
+            code.owner_id,
+            %{id: code.application_id, scopes: code.scopes},
+            Keyword.put(opts, :scopes, code.scopes)
+          )
 
         token
       end)
@@ -356,15 +366,18 @@ defmodule Teiserver.OAuth do
             TokenQueries.get_token(token.value)
           end
 
+        scopes = Keyword.get(opts, :scopes, token.scopes)
+
         refresh_attr = %{
           id: token.application.id,
-          scopes: Keyword.get(opts, :scopes, token.scopes),
+          scopes: scopes,
           original_scopes: token.original_scopes
         }
 
         tx_result =
           Repo.transaction(fn ->
-            with {:ok, new_token} <- create_token(token.owner_id, refresh_attr, opts) do
+            with {:ok, new_token} <-
+                   create_token(token.owner_id, refresh_attr, Keyword.put(opts, :scopes, scopes)) do
               TokenQueries.delete_refresh_token(token)
               new_token
             end
@@ -442,9 +455,13 @@ defmodule Teiserver.OAuth do
     end
   end
 
-  @spec get_token_from_credentials(Credential.t()) :: {:ok, Token.t()} | {:error, term()}
-  def get_token_from_credentials(credential) do
-    do_create_token(%{bot_id: credential.bot_id}, credential.application, create_refresh: false)
+  @spec get_token_from_credentials(Credential.t(), Application.scopes()) ::
+          {:ok, Token.t()} | {:error, term()}
+  def get_token_from_credentials(credential, scopes) do
+    do_create_token(%{bot_id: credential.bot_id}, credential.application,
+      create_refresh: false,
+      scopes: scopes
+    )
   end
 
   @doc """
@@ -465,6 +482,37 @@ defmodule Teiserver.OAuth do
     now = now || DateTime.utc_now()
     {count, _} = TokenQueries.base_query() |> TokenQueries.expired(now) |> Repo.delete_all()
     count
+  end
+
+  # Because OAuth does some special basic auth handling, see:
+  # https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1
+  # and especially the Appendix B:
+  # https://datatracker.ietf.org/doc/html/rfc6749#appendix-B
+  @doc """
+  Similar to Plug.BasicAuth.encode_basic_auth but compliant with OAuth special handling
+  Takes client id, client secret and returns the basic auth header
+  """
+  @spec encode_basic_auth(String.t(), String.t()) :: String.t()
+  def encode_basic_auth(client_id, client_secret) do
+    encoded =
+      Base.encode64("#{URI.encode_www_form(client_id)}:#{URI.encode_www_form(client_secret)}")
+
+    "Basic #{encoded}"
+  end
+
+  @doc """
+  Similar to Plug.BasicAuth.parse_basic_auth but compliant with OAuth special handling
+  """
+  @spec parse_basic_auth(Plug.Conn.t()) ::
+          {client_id :: String.t(), client_secret :: String.t()} | :error
+  def parse_basic_auth(%Plug.Conn{} = conn) do
+    with ["Basic " <> encoded_parts] <- Plug.Conn.get_req_header(conn, "authorization"),
+         {:ok, decoded} <- Base.decode64(encoded_parts),
+         [client_id, client_secret] <- :binary.split(decoded, ":") do
+      {URI.decode_www_form(client_id), URI.decode_www_form(client_secret)}
+    else
+      _ -> :error
+    end
   end
 
   defp check_expiry(obj, now) do

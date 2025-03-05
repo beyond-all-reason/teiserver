@@ -356,6 +356,33 @@ defmodule Teiserver.Account.AccoladeLib do
     end)
   end
 
+  @spec get_giveable_accolade_types(boolean()) :: [map()]
+  def get_giveable_accolade_types(is_ally?) do
+    restriction =
+      if is_ally? do
+        "Ally"
+      else
+        "Enemy"
+      end
+
+    query =
+      "select id, name, icon, colour from teiserver_account_badge_types tabt
+      where (restriction in ($1) or restriction is null) and purpose = 'Accolade'
+order by name;"
+
+    results = Ecto.Adapters.SQL.query!(Repo, query, [restriction])
+
+    results.rows
+    |> Enum.map(fn [id, name, icon, colour] ->
+      %{
+        id: id,
+        name: name,
+        icon: icon,
+        colour: colour
+      }
+    end)
+  end
+
   @spec get_player_accolades(T.userid()) :: map()
   def get_player_accolades(userid) do
     Account.list_accolades(search: [recipient_id: userid, has_badge: true])

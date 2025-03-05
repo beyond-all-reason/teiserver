@@ -1,0 +1,17 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/system/serverStats/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "SystemServerStatsRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "system/serverStats" }
+    },
+    "required": ["type", "messageId", "commandId"]
+}

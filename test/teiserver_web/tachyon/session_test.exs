@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
   use TeiserverWeb.ConnCase
   alias WebsocketSyncClient, as: WSC
   alias Teiserver.Support.Tachyon
-  import Teiserver.Support.Tachyon, only: [poll_until_some: 1, poll_until: 2]
+  import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until: 2]
   alias Teiserver.Player
 
   setup _context do
@@ -41,6 +41,7 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
   } do
     opts = Tachyon.connect_options(token)
     {:ok, client2} = WSC.connect(Tachyon.tachyon_url(), opts)
+    on_exit(fn -> Tachyon.cleanup_connection(client2, token) end)
     ensure_connected(client2)
     WSC.send_message(client, {:text, "test_ping"})
     assert {:error, :disconnected} == WSC.recv(client)
@@ -56,7 +57,7 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
     sess_pid = Player.SessionRegistry.lookup(user.id)
     assert sess_pid != nil
     ref = Process.monitor(sess_pid)
-    Tachyon.poll_until(fn -> Player.lookup_connection(user.id) end, &is_nil/1)
+    poll_until(fn -> Player.lookup_connection(user.id) end, &is_nil/1)
     send(sess_pid, :player_timeout)
     assert_receive({:DOWN, ^ref, :process, _, _}, 1000, "Session should have died")
   end

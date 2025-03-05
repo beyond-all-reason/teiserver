@@ -33,6 +33,11 @@ defmodule Teiserver.Autohost.Registry do
     Horde.Registry.register(__MODULE__, via_tuple(autohost_id), val)
   end
 
+  @spec unregister(Bot.id()) :: :ok
+  def unregister(autohost_id) do
+    Horde.Registry.unregister(__MODULE__, via_tuple(autohost_id))
+  end
+
   @spec lookup(Bot.id()) :: {pid(), reg_value()} | nil
   def lookup(autohost_id) do
     case Horde.Registry.lookup(__MODULE__, via_tuple(autohost_id)) do

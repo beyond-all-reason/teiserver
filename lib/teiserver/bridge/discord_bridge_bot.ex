@@ -194,7 +194,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       nsfw: false
     }
 
-    Nostrum.Api.create_global_application_command(command)
+    Api.ApplicationCommand.create_global_command(command)
   end
 
   # Meant to be used manually
@@ -207,8 +207,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       description: "About to be deleted"
     }
 
-    {:ok, %{id: cmd_id}} = Nostrum.Api.create_guild_application_command(guild_id, command)
-    Nostrum.Api.delete_guild_application_command(guild_id, cmd_id)
+    {:ok, %{id: cmd_id}} = Api.ApplicationCommand.create_guild_command(guild_id, command)
+    Api.ApplicationCommand.delete_guild_command(guild_id, cmd_id)
   end
 
   @spec get_text_to_emoticon_map() :: map()
@@ -253,7 +253,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         ]
         |> Enum.join("\n")
 
-      Api.create_message(channel_id, message)
+      Api.Message.create(channel_id, message)
     end
   end
 
@@ -307,7 +307,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         ]
         |> Enum.join("\n")
 
-      Api.create_message(channel, msg)
+      Api.Message.create(channel, msg)
     end
   end
 
@@ -316,7 +316,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     name = ""
     content = ""
 
-    Nostrum.Api.start_thread(channel_id, %{
+    Nostrum.Api.Thread.create(channel_id, %{
       name: name,
       message: %{
         content: content

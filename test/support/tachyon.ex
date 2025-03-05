@@ -1,6 +1,9 @@
 defmodule Teiserver.Support.Tachyon do
   alias WebsocketSyncClient, as: WSC
   alias Teiserver.OAuthFixtures
+  alias Teiserver.Player
+
+  alias Teiserver.Support.Polling
 
   def setup_client(_context), do: setup_client()
 
@@ -8,8 +11,22 @@ defmodule Teiserver.Support.Tachyon do
     user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
     %{client: client, token: token} = connect(user)
 
-    ExUnit.Callbacks.on_exit(fn -> WSC.disconnect(client) end)
+    ExUnit.Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
     {:ok, user: user, client: client, token: token}
+  end
+
+  def setup_autohost(context) do
+    autohost = Teiserver.BotFixtures.create_bot()
+
+    token =
+      OAuthFixtures.token_attrs(nil, context.app)
+      |> Map.drop([:owner_id])
+      |> Map.put(:bot_id, autohost.id)
+      |> OAuthFixtures.create_token()
+
+    client = connect_autohost!(token, 10, 0)
+    ExUnit.Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
+    {:ok, autohost: autohost, autohost_client: client}
   end
 
   @doc """
@@ -29,7 +46,7 @@ defmodule Teiserver.Support.Tachyon do
       {:ok, _user_updated} = recv_message(client)
     end
 
-    ExUnit.Callbacks.on_exit(fn -> WSC.disconnect(client) end)
+    ExUnit.Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
     client
   end
 
@@ -38,6 +55,26 @@ defmodule Teiserver.Support.Tachyon do
 
     client = connect(token, opts)
     %{client: client, token: token}
+  end
+
+  # used for on_exit callback and make sure nothing is lingering after the test
+  def cleanup_connection(client, token) do
+    WSC.disconnect(client)
+
+    if not is_nil(token.owner_id) do
+      Polling.poll_until_nil(fn -> Player.lookup_connection(token.owner_id) end)
+
+      case Player.lookup_session(token.owner_id) do
+        nil -> :ok
+        pid -> Process.exit(pid, :test_cleanup)
+      end
+
+      Polling.poll_until_nil(fn -> Player.lookup_session(token.owner_id) end)
+    end
+
+    if not is_nil(token.bot_id) do
+      Polling.poll_until_nil(fn -> Teiserver.Autohost.Registry.lookup(token.bot_id) end)
+    end
   end
 
   @doc """
@@ -226,38 +263,31 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
-  @doc """
-  Run the given function `f` until `pred` returns true on its result.
-  Waits `wait` ms between each tries. Raise an error if `pred` returns false
-  after `limit` attempts.
-
-  This is often required due to the nature of eventually consistent state and
-  lack of control over the beam scheduler.
-  """
-  @spec poll_until(function(), function(), limit: non_neg_integer(), wait: non_neg_integer()) ::
-          term()
-  def poll_until(f, pred, opts \\ []) do
-    res = f.()
-
-    if pred.(res) do
-      res
-    else
-      limit = Keyword.get(opts, :limit, 10)
-
-      if limit <= 0 do
-        raise "poll timeout"
-      end
-
-      wait = Keyword.get(opts, :wait, 1)
-      :timer.sleep(wait)
-      poll_until(f, pred, limit: limit - 1, wait: wait)
-    end
+  def server_stats!(client) do
+    req = request("system/serverStats")
+    :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
+    {:ok, resp} = recv_message(client)
+    resp
   end
 
-  @doc """
-  convenience function to poll until f returns a not_nil value
-  """
-  def poll_until_some(f, opts \\ []) do
-    poll_until(f, fn x -> not is_nil(x) end, opts)
+  def send_message!(client, message, target) do
+    :ok =
+      send_request(client, "messaging/send", %{
+        message: message,
+        target: target
+      })
+
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def send_dm!(client, message, player_id) do
+    send_message!(client, message, %{type: "player", userId: to_string(player_id)})
+  end
+
+  def subscribe_messaging!(client, opts \\ []) do
+    since = Keyword.get(opts, :since, %{type: "latest"})
+    :ok = send_request(client, "messaging/subscribeReceived", %{since: since})
+    recv_message!(client)
   end
 end

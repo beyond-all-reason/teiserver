@@ -3,55 +3,91 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   alias Teiserver.Support.Tachyon
   alias Teiserver.OAuthFixtures
   alias Teiserver.Player
+  alias Teiserver.AssetFixtures
+  alias Teiserver.Asset
+  alias Teiserver.Matchmaking.{QueueSupervisor, QueueServer}
 
-  describe "list" do
-    setup {Tachyon, :setup_client}
+  defp altair_attr(id),
+    do: %{
+      spring_name: "Altair Crossing Remake " <> id,
+      display_name: "Altair Crossing",
+      thumbnail_url: "https://www.beyondallreason.info/map/altair-crossing",
+      matchmaking_queues: [id]
+    }
 
-    test "works", %{client: client} do
-      resp = Tachyon.list_queues!(client)
+  defp rosetta_attr(id),
+    do: %{
+      spring_name: "Rosetta " <> id,
+      display_name: "Rosetta",
+      thumbnail_url: "https://www.beyondallreason.info/map/rosetta",
+      matchmaking_queues: [id]
+    }
 
-      # convert into a set since the order must not impact test result
-      expected_playlists =
-        MapSet.new([
-          %{
-            "id" => "1v1",
-            "name" => "Duel",
-            "numOfTeams" => 2,
-            "teamSize" => 1,
-            "ranked" => true
-          },
-          %{
-            "id" => "2v2",
-            "name" => "2v2",
-            "numOfTeams" => 2,
-            "teamSize" => 2,
-            "ranked" => true
-          }
-        ])
+  defp map_attrs(id),
+    do: [altair_attr(id), rosetta_attr(id)]
 
-      assert MapSet.new(resp["data"]["playlists"]) == expected_playlists
-    end
+  defp map_names(id) do
+    map_attrs(id)
+    |> Enum.map(fn map -> %{"springName" => map.spring_name} end)
   end
 
-  defp mk_queue_attrs(team_size) do
+  defp engine_versions(),
+    do: [%{version: "105.1.1-2590-gb9462a0 bar"}, %{version: "100.2.1-2143-test bar"}]
+
+  defp game_versions(),
+    do: [
+      %{spring_game: "Beyond All Reason test-26929-d709d32"},
+      %{spring_game: "BAR test version"}
+    ]
+
+  defp engine_names() do
+    engine_versions()
+    |> Enum.map(fn engine -> %{"version" => engine.version} end)
+  end
+
+  defp game_names() do
+    game_versions()
+    |> Enum.map(fn game -> %{"springName" => game.spring_game} end)
+  end
+
+  defp setup_queue(context) when is_map(context) do
+    setup_queue(1)
+  end
+
+  defp setup_queue(team_size) when is_integer(team_size) do
     id = UUID.uuid4()
+
+    setup_maps(id)
+    setup_queue(id, team_size)
+  end
+
+  defp setup_queue(id, team_size) do
+    queue_attrs(id, team_size)
+    |> mk_queue()
+  end
+
+  defp setup_maps(id) do
+    map_attrs(id)
+    |> Enum.each(&AssetFixtures.create_map/1)
+  end
+
+  defp queue_attrs(id, team_size) do
+    maps =
+      Asset.get_maps_for_queue(id)
 
     %{
       id: id,
       name: id,
       team_size: team_size,
       team_count: 2,
-      settings: %{tick_interval_ms: :manual, max_distance: 15}
+      settings: %{tick_interval_ms: :manual, max_distance: 15},
+      engines: engine_versions(),
+      games: game_versions(),
+      maps: maps
     }
   end
 
-  defp mk_queue(team_size) when is_integer(team_size) do
-    mk_queue(mk_queue_attrs(team_size))
-  end
-
   defp mk_queue(attrs) do
-    alias Teiserver.Matchmaking.QueueServer
-
     {:ok, pid} =
       QueueServer.init_state(attrs)
       |> QueueServer.start_link()
@@ -59,8 +95,74 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     {:ok, queue_id: attrs.id, queue_pid: pid}
   end
 
-  defp setup_queue(_context) do
-    mk_queue(1)
+  describe "list" do
+    setup [{Tachyon, :setup_client}, :setup_queue]
+
+    test "works", %{client: client, queue_id: q1v1_id} do
+      {:ok, queue_id: q2v2_id, queue_pid: _} = setup_queue(2)
+
+      resp = Tachyon.list_queues!(client)
+
+      # Convert into a set since the order must not impact test result
+      expected_playlists =
+        MapSet.new([
+          %{
+            "id" => q1v1_id,
+            "name" => q1v1_id,
+            "numOfTeams" => 2,
+            "teamSize" => 1,
+            "ranked" => true,
+            "engines" => engine_names(),
+            "games" => game_names(),
+            "maps" => map_names(q1v1_id)
+          },
+          %{
+            "id" => q2v2_id,
+            "name" => q2v2_id,
+            "numOfTeams" => 2,
+            "teamSize" => 2,
+            "ranked" => true,
+            "engines" => engine_names(),
+            "games" => game_names(),
+            "maps" => map_names(q2v2_id)
+          }
+        ])
+
+      # Checking for subset because the response also contains default queues
+      assert MapSet.subset?(expected_playlists, MapSet.new(resp["data"]["playlists"]))
+    end
+
+    test "empty map list", %{client: client} do
+      :ok =
+        Teiserver.Matchmaking.QueueServer.init_state(%{
+          id: "mapless",
+          name: "mapless",
+          team_size: 1,
+          team_count: 2,
+          engines: engine_versions(),
+          games: game_versions(),
+          maps: []
+        })
+        |> start_queue()
+
+      resp = Tachyon.list_queues!(client)
+
+      expected_playlists =
+        MapSet.new([
+          %{
+            "id" => "mapless",
+            "name" => "mapless",
+            "numOfTeams" => 2,
+            "teamSize" => 1,
+            "ranked" => true,
+            "engines" => engine_names(),
+            "games" => game_names(),
+            "maps" => []
+          }
+        ])
+
+      assert MapSet.subset?(expected_playlists, MapSet.new(resp["data"]["playlists"]))
+    end
   end
 
   describe "joining queues" do
@@ -74,7 +176,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
 
     test "multiple", %{client: client, queue_id: queue_id} do
-      {:ok, queue_id: other_queue_id, queue_pid: _} = setup_queue(nil)
+      {:ok, queue_id: other_queue_id, queue_pid: _} = setup_queue(2)
       resp = Tachyon.join_queues!(client, [queue_id, other_queue_id])
       assert %{"status" => "success"} = resp
     end
@@ -105,16 +207,75 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     test "too many player", %{client: client} do
       id = "emptyqueue"
 
-      {:ok, _} =
+      Teiserver.Matchmaking.QueueServer.init_state(%{
+        id: id,
+        name: id,
+        team_size: 0,
+        team_count: 2,
+        engines: engine_versions(),
+        games: game_versions(),
+        maps: map_attrs(id)
+      })
+      |> start_queue()
+
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.join_queues!(client, [id])
+    end
+
+    test "empty engines", %{client: client} do
+      id = "emptyengines"
+
+      :ok =
         Teiserver.Matchmaking.QueueServer.init_state(%{
           id: id,
           name: id,
-          team_size: 0,
-          team_count: 2
+          team_size: 1,
+          team_count: 2,
+          engines: [],
+          games: game_versions(),
+          maps: map_attrs(id)
         })
-        |> Teiserver.Matchmaking.QueueServer.start_link()
+        |> start_queue()
 
-      assert %{"status" => "failed", "reason" => "invalid_request"} =
+      assert %{"status" => "failed", "reason" => "internal_error"} =
+               Tachyon.join_queues!(client, [id])
+    end
+
+    test "empty games", %{client: client} do
+      id = "emptygames"
+
+      :ok =
+        Teiserver.Matchmaking.QueueServer.init_state(%{
+          id: id,
+          name: id,
+          team_size: 1,
+          team_count: 2,
+          engines: engine_versions(),
+          games: [],
+          maps: map_attrs(id)
+        })
+        |> start_queue()
+
+      assert %{"status" => "failed", "reason" => "internal_error"} =
+               Tachyon.join_queues!(client, [id])
+    end
+
+    test "empty maps", %{client: client} do
+      id = "emptymaps"
+
+      :ok =
+        Teiserver.Matchmaking.QueueServer.init_state(%{
+          id: id,
+          name: id,
+          team_size: 1,
+          team_count: 2,
+          engines: engine_versions(),
+          games: game_versions(),
+          maps: []
+        })
+        |> start_queue()
+
+      assert %{"status" => "failed", "reason" => "internal_error"} =
                Tachyon.join_queues!(client, [id])
     end
   end
@@ -268,8 +429,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
 
     test "two pairings on different queues", %{app: app} do
-      {:ok, queue_id: q1v1_id, queue_pid: q1v1_pid} = mk_queue(1)
-      {:ok, queue_id: q2v2_id, queue_pid: q2v2_pid} = mk_queue(2)
+      {:ok, queue_id: q1v1_id, queue_pid: q1v1_pid} = setup_queue(1)
+      {:ok, queue_id: q2v2_id, queue_pid: q2v2_pid} = setup_queue(2)
 
       clients =
         Enum.map(1..5, fn _ ->
@@ -312,7 +473,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
 
     test "foundUpdate event", %{app: app} do
-      {:ok, queue_id: q_id, queue_pid: q_pid} = mk_queue(2)
+      {:ok, queue_id: q_id, queue_pid: q_pid} = setup_queue(2)
 
       clients =
         Enum.map(1..4, fn _ ->
@@ -341,9 +502,12 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
     test "timeout puts ready players back in queue", %{app: app} do
       timeout_ms = 5
+      uuid = UUID.uuid4()
+
+      setup_maps(uuid)
 
       {:ok, queue_id: q_id, queue_pid: q_pid} =
-        mk_queue_attrs(1)
+        queue_attrs(uuid, 1)
         |> put_in([:settings, :pairing_timeout], timeout_ms)
         |> mk_queue()
 
@@ -409,21 +573,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
   end
 
-  def setup_autohost(context) do
-    autohost = Teiserver.BotFixtures.create_bot()
-
-    token =
-      OAuthFixtures.token_attrs(nil, context.app)
-      |> Map.drop([:owner_id])
-      |> Map.put(:bot_id, autohost.id)
-      |> OAuthFixtures.create_token()
-
-    client = Tachyon.connect_autohost!(token, 10, 0)
-    {:ok, autohost: autohost, autohost_client: client}
-  end
-
   describe "join with autohost" do
-    setup [{Tachyon, :setup_client}, :setup_app, :setup_queue, :setup_autohost]
+    setup [{Tachyon, :setup_client}, :setup_app, :setup_queue, {Tachyon, :setup_autohost}]
 
     test "happy full path", %{
       app: app,
@@ -449,7 +600,6 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         for ally_team <- data["allyTeams"],
             team <- ally_team["teams"],
             player <- team["players"] do
-          # TODO: actually run json schema validation on the payloadd instead of that
           assert Map.has_key?(player, "name")
           assert Map.has_key?(player, "password")
           player["userId"]
@@ -462,10 +612,39 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         assert is_pid(Player.SessionRegistry.lookup(user_id))
       end
 
-      for client <- clients do
-        # TODO: same, json schema validation here
-        assert %{"commandId" => "battle/start", "data" => %{"ip" => _ip, "port" => _port}} =
-                 Tachyon.recv_message!(client)
+      # Map will be randomly selected so we first check if the first client's map is in the map pool
+      [first_client | rest_clients] = clients
+      first_message = Tachyon.recv_message!(first_client)
+
+      assert %{
+               "commandId" => "battle/start",
+               "data" => %{
+                 "ip" => _ip,
+                 "port" => _port,
+                 "engine" => %{"version" => "105.1.1-2590-gb9462a0 bar"},
+                 "game" => %{"springName" => "Beyond All Reason test-26929-d709d32"},
+                 "map" => %{"springName" => spring_name}
+               }
+             } = first_message
+
+      maps =
+        map_attrs(queue_id)
+        |> Enum.map(fn map -> map.spring_name end)
+
+      assert spring_name in maps
+
+      # and then if that the rest of clients have the same map
+      for client <- rest_clients do
+        assert %{
+                 "commandId" => "battle/start",
+                 "data" => %{
+                   "ip" => _ip,
+                   "port" => _port,
+                   "engine" => %{"version" => "105.1.1-2590-gb9462a0 bar"},
+                   "game" => %{"springName" => "Beyond All Reason test-26929-d709d32"},
+                   "map" => %{"springName" => ^spring_name}
+                 }
+               } = Tachyon.recv_message!(client)
       end
     end
 
@@ -541,5 +720,17 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
                 "readyCount" => ^current
               }
             }} = Tachyon.recv_message(client, timeout: 10)
+  end
+
+  defp start_queue(state) do
+    QueueSupervisor.start_queue!(state)
+
+    ExUnit.Callbacks.on_exit(fn ->
+      Teiserver.Matchmaking.QueueSupervisor.terminate_queue(state.id)
+
+      Teiserver.Support.Polling.poll_until_nil(fn ->
+        Teiserver.Matchmaking.lookup_queue(state.id)
+      end)
+    end)
   end
 end

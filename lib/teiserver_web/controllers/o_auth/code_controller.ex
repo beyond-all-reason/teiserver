@@ -34,7 +34,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
   def token(conn, %{"grant_type" => "client_credentials"} = params) do
     case get_credentials(conn, params) do
       {:ok, client_id, client_secret} ->
-        get_token_from_credentials(conn, client_id, client_secret)
+        get_token_from_credentials(conn, client_id, client_secret, params)
 
       {:error, msg} ->
         conn |> put_status(400) |> render(:error, error_description: msg)
@@ -42,7 +42,9 @@ defmodule TeiserverWeb.OAuth.CodeController do
   end
 
   def token(conn, _params) do
-    conn |> put_status(400) |> render(:error, error_description: "invalid grant_type")
+    conn
+    |> put_status(400)
+    |> render(:error, error: "unsupported_grant_type")
   end
 
   defp check_required_keys(params, keys) do
@@ -73,16 +75,14 @@ defmodule TeiserverWeb.OAuth.CodeController do
 
   defp refresh_token(conn, params) do
     with {:ok, app} <- get_app_by_uid(params["client_id"]),
-         # Once we support more than one single scope, modify this function to allow
-         # changing the scope of the new token
-         {:ok, _scopes} <- check_scopes(app, params),
+         {:ok, scopes} <- check_scopes(app, params),
          {:ok, token} <- OAuth.get_valid_token(params["refresh_token"]),
          :ok <-
            if(token.application_id == app.id,
              do: :ok,
              else: {:error, "token doesn't match application. Invalid token for this client_id"}
            ),
-         {:ok, new_token} <- OAuth.refresh_token(token) do
+         {:ok, new_token} <- OAuth.refresh_token(token, scopes: scopes) do
       conn |> put_status(200) |> render(:token, token: new_token)
     else
       _ -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
@@ -91,7 +91,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
 
   defp get_client_id(conn, params) do
     query = Map.get(params, "client_id")
-    basic = Plug.BasicAuth.parse_basic_auth(conn)
+    basic = OAuth.parse_basic_auth(conn)
 
     case {basic, query} do
       {:error, nil} ->
@@ -109,7 +109,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
   end
 
   defp get_credentials(conn, params) do
-    basic = Plug.BasicAuth.parse_basic_auth(conn)
+    basic = OAuth.parse_basic_auth(conn)
     post_params = {Map.get(params, "client_id"), Map.get(params, "client_secret")}
 
     case {basic, post_params} do
@@ -136,17 +136,35 @@ defmodule TeiserverWeb.OAuth.CodeController do
     end
   end
 
-  defp get_token_from_credentials(conn, client_id, client_secret) do
+  defp get_token_from_credentials(conn, client_id, client_secret, scopes) do
     with {:ok, cred} <- OAuth.get_valid_credentials(client_id, client_secret),
-         {:ok, token} <- OAuth.get_token_from_credentials(cred) do
+         {:ok, scopes} <- check_scopes(cred.application, scopes),
+         {:ok, token} <- OAuth.get_token_from_credentials(cred, scopes) do
       conn |> put_status(200) |> render(:token, token: token)
     else
-      _ -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
+      # https://www.rfc-editor.org/rfc/rfc6749#section-5.2 server may return 401
+      {:error, :invalid_password} ->
+        conn
+        |> put_status(401)
+        |> render(:error, error: "invalid_client", error_description: "invalid credentials")
+
+      {:error, :invalid_scope, desc} ->
+        conn
+        |> put_status(400)
+        |> render(:error, error: "invalid_scope", error_description: desc)
+
+      _ ->
+        conn |> put_status(400) |> render(:error, error_description: "invalid request")
     end
   end
 
   defp check_scopes(app, params) do
-    scopes = Map.get(params, "scope", "") |> String.split() |> Enum.into(MapSet.new())
+    scopes =
+      Map.get(params, "scope", "")
+      |> String.split()
+      |> Enum.map(&String.trim/1)
+      |> Enum.into(MapSet.new())
+
     app_scopes = MapSet.new(app.scopes)
 
     cond do
@@ -157,10 +175,12 @@ defmodule TeiserverWeb.OAuth.CodeController do
         {:ok, MapSet.to_list(scopes)}
 
       true ->
-        invalid_scopes = MapSet.difference(scopes, app_scopes)
+        invalid_scopes =
+          MapSet.difference(scopes, app_scopes)
+          |> MapSet.to_list()
+          |> Enum.join(", ")
 
-        {:error,
-         "the following scopes aren't allowed: #{inspect(MapSet.to_list(invalid_scopes))}"}
+        {:error, :invalid_scope, "the following scopes aren't allowed: #{invalid_scopes}"}
     end
   end
 

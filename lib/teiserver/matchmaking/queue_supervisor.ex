@@ -30,6 +30,16 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
     end
   end
 
+  def terminate_queue(id) do
+    case Teiserver.Matchmaking.QueueRegistry.lookup(id) do
+      nil ->
+        :ok
+
+      pid ->
+        Horde.DynamicSupervisor.terminate_child(__MODULE__, pid)
+    end
+  end
+
   def start_link(init_arg) do
     {:ok, sup} = Horde.DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
 

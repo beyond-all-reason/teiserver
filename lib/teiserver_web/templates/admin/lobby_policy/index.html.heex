@@ -66,9 +66,9 @@
 
                 <td>
                   <%= if lobby_policy.enabled do %>
-                    <i class="fa-fw fa-regular fa-check text-success"></i>
+                    <i class="fa-fw fa-solid fa-check text-success"></i>
                   <% else %>
-                    <i class="fa-fw fa-regular fa-times text-danger"></i>
+                    <i class="fa-fw fa-solid fa-times text-danger"></i>
                   <% end %>
                 </td>
 
@@ -102,7 +102,7 @@
                       href={Routes.admin_lobby_policy_path(@conn, :edit, lobby_policy.id)}
                       class={"btn btn-outline-#{bsname} btn-sm"}
                     >
-                      <i class="fa-fw fa-regular fa-wrench"></i> Edit
+                      <i class="fa-solid fa-wrench"></i> Edit
                     </a>
                   <% end %>
                 </td>

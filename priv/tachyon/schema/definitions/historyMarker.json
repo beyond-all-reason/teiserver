@@ -1,0 +1,7 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/historyMarker.json",
+    "title": "HistoryMarker",
+    "description": "an opaque value to allow history retrieval",
+    "type": "string",
+    "examples": ["-576460745805023"]
+}

@@ -9,6 +9,9 @@ defmodule Teiserver.Asset do
   @spec get_map(String.t()) :: Asset.Map.t() | nil
   defdelegate get_map(spring_name), to: MapQueries
 
+  @spec get_maps_for_queue(Teiserver.Matchmaking.queue_id()) :: [Asset.Map.t()] | nil
+  defdelegate get_maps_for_queue(spring_name), to: MapQueries
+
   @spec get_all_maps() :: [Asset.Map.t()]
   defdelegate get_all_maps(), to: MapQueries
 

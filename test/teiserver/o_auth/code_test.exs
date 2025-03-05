@@ -112,6 +112,27 @@ defmodule Teiserver.OAuth.CodeTest do
     assert {:error, :no_code} = OAuth.get_valid_code(code.value)
   end
 
+  test "correct encoding of basic auth" do
+    actual = OAuth.encode_basic_auth("user1", "pass1==")
+    assert "Basic dXNlcjE6cGFzczElM0QlM0Q=" == actual
+  end
+
+  test "correct parsing of basic auth" do
+    conn =
+      Plug.Test.conn(:post, "/irrelevant")
+      |> Plug.Conn.put_req_header("authorization", "Basic dXNlcjE6cGFzczElM0QlM0Q=")
+
+    assert {"user1", "pass1=="} == OAuth.parse_basic_auth(conn)
+  end
+
+  test "correct error for garbage basic auth header" do
+    conn =
+      Plug.Test.conn(:post, "/irrelevant")
+      |> Plug.Conn.put_req_header("authorization", "Basic dXNlcjE6cGFzczElM0QlM0")
+
+    assert :error = OAuth.parse_basic_auth(conn)
+  end
+
   defp create_code_attrs(user, app, opts \\ []) do
     expires_at =
       Keyword.get(opts, :expires_at, Timex.add(DateTime.utc_now(), Timex.Duration.from_days(1)))

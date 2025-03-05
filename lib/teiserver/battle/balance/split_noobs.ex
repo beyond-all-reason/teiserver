@@ -247,6 +247,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
       "Team rating diff penalty: #{format(combo_result.rating_diff_penalty)}",
       "Broken party penalty: #{combo_result.broken_party_penalty}",
       "Stdev diff penalty: #{format(combo_result.stdev_diff_penalty)}",
+      "Captain diff penalty: #{format(combo_result.captain_diff_penalty)}",
       "Score: #{format(combo_result.score)} (lower is better)",
       @splitter,
       "Draft remaining players (ordered from best to worst).",

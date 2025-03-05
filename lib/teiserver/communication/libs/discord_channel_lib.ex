@@ -188,7 +188,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.create_message(channel_id, message)
+        channel_id -> Nostrum.Api.Message.create(channel_id, message)
       end
     else
       {:error, :discord_disabled}
@@ -202,7 +202,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.edit_message(channel_id, message_id, content: new_message)
+        channel_id -> Nostrum.Api.Message.edit(channel_id, message_id, content: new_message)
       end
     else
       {:error, :discord_disabled}
@@ -215,7 +215,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.delete_message(channel_id, message_id)
+        channel_id -> Nostrum.Api.Message.delete(channel_id, message_id)
       end
     else
       {:error, :discord_disabled}
@@ -235,7 +235,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
           new_discord_message(user.discord_dm_channel_id, message)
 
         user.discord_id != nil ->
-          case Nostrum.Api.create_dm(user.discord_id) do
+          case Nostrum.Api.User.create_dm(user.discord_id) do
             {:ok, %{id: channel_id}} ->
               Account.update_cache_user(user.id, %{discord_dm_channel_id: channel_id})
               new_discord_message(channel_id, message)

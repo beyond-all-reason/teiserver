@@ -1,0 +1,54 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/messaging/subscribeReceived/response.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MessagingSubscribeReceivedResponse",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "anyOf": [
+        {
+            "title": "MessagingSubscribeReceivedOkResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "messaging/subscribeReceived" },
+                "status": { "const": "success" },
+                "data": {
+                    "title": "MessagingSubscribeReceivedOkResponseData",
+                    "type": "object",
+                    "properties": {
+                        "hasMissedMessages": {
+                            "description": "set to true when the marker sent doesn't match any message stored by the server.",
+                            "type": "boolean"
+                        }
+                    },
+                    "required": ["hasMissedMessages"]
+                }
+            },
+            "required": ["type", "messageId", "commandId", "status", "data"]
+        },
+        {
+            "title": "MessagingSubscribeReceivedFailResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "messaging/subscribeReceived" },
+                "status": { "const": "failed" },
+                "reason": {
+                    "enum": [
+                        "internal_error",
+                        "unauthorized",
+                        "invalid_request",
+                        "command_unimplemented"
+                    ]
+                },
+                "details": { "type": "string" }
+            },
+            "required": ["type", "messageId", "commandId", "status", "reason"]
+        }
+    ]
+}

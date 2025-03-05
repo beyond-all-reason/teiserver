@@ -1,0 +1,48 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/messaging/subscribeReceived/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MessagingSubscribeReceivedRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "messaging/subscribeReceived" },
+        "data": {
+            "title": "MessagingSubscribeReceivedRequestData",
+            "type": "object",
+            "properties": {
+                "since": {
+                    "anyOf": [
+                        {
+                            "type": "object",
+                            "properties": { "type": { "const": "from_start" } },
+                            "required": ["type"]
+                        },
+                        {
+                            "type": "object",
+                            "properties": { "type": { "const": "latest" } },
+                            "required": ["type"]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": { "const": "marker" },
+                                "value": {
+                                    "$ref": "../../definitions/historyMarker.json"
+                                }
+                            },
+                            "required": ["type", "value"]
+                        }
+                    ],
+                    "default": { "type": "latest" }
+                }
+            }
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

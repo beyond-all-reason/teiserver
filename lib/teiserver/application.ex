@@ -142,7 +142,6 @@ defmodule Teiserver.Application do
         # Matchmaking
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
         Teiserver.Data.MatchmakingCache,
-        Teiserver.Matchmaking.System,
 
         # Coordinator mode
         {DynamicSupervisor,

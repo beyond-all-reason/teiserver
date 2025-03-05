@@ -96,7 +96,7 @@ config :teiserver, Teiserver,
 
 config :logger, :default_handler, false
 
-metadata = [:request_id, :user_id, :queue_id]
+metadata = [:request_id, :user_id, :queue_id, :pid]
 
 config :logger, LoggerBackends.Console,
   format: "$date $time [$level] $metadata $message\n",
