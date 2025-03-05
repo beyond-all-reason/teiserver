@@ -599,15 +599,6 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "profile.Num matches for rating to equal skill",
-      section: "Profiles",
-      type: "integer",
-      default: 20,
-      permissions: ["Admin"],
-      description: "The minimum number of matches required for match rating to equal skill"
-    })
-
-    add_site_config_type(%{
       key: "user.Enable one time links",
       section: "User permissions",
       type: "boolean",
@@ -685,6 +676,15 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["Admin"],
       description: "Tau used by openskill lib",
       default: 1 / 3
+    })
+
+    add_site_config_type(%{
+      key: "rating.Num matches for rating to equal skill",
+      section: "Rating",
+      type: "integer",
+      default: 20,
+      permissions: ["Admin"],
+      description: "The minimum number of matches required for match rating to equal skill"
     })
   end
 end

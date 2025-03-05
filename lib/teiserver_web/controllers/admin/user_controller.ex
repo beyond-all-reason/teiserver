@@ -521,7 +521,8 @@ defmodule TeiserverWeb.Admin.UserController do
               BalanceLib.calculate_rating_value(
                 new_skill,
                 new_uncertainty,
-                user_rating.num_matches
+                user_rating.num_matches,
+                user_rating.num_wins
               )
 
             new_leaderboard_rating =

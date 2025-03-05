@@ -139,7 +139,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       assert ratings[user2.id].skill == 22.362239872926306
 
       # New players start at zero then converge to skill over time
-      assert ratings[user1.id].rating_value == 1.3818880063536847
+      assert ratings[user1.id].rating_value == 2.7637760127073694
       assert ratings[user2.id].rating_value == 1.1181119936463153
     end
 
@@ -152,7 +152,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       user2 = AccountTestLib.user_fixture()
 
       matches_target =
-        Config.get_site_config_cache("profile.Num matches for rating to equal skill")
+        Config.get_site_config_cache("rating.Num matches for rating to equal skill")
 
       match_ids = 1..matches_target
 
@@ -214,9 +214,13 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     end
   end
 
-  defp get_ratings(userids, game_type) do
+  defp get_ratings(userids, game_type) when is_binary(game_type) do
     rating_type_id = Game.get_or_add_rating_type(game_type)
 
+    get_ratings(userids, rating_type_id)
+  end
+
+  defp get_ratings(userids, rating_type_id) when is_integer(rating_type_id) do
     Account.list_ratings(
       search: [
         rating_type_id: rating_type_id,

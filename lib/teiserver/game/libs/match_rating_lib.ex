@@ -474,7 +474,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     {new_skill, new_uncertainty} = rating_update
 
     new_rating_value =
-      BalanceLib.calculate_rating_value(new_skill, new_uncertainty, new_num_matches)
+      BalanceLib.calculate_rating_value(new_skill, new_uncertainty, new_num_matches, new_num_wins)
 
     new_leaderboard_rating = BalanceLib.calculate_leaderboard_rating(new_skill, new_uncertainty)
 

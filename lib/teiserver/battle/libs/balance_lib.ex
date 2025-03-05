@@ -705,15 +705,17 @@ defmodule Teiserver.Battle.BalanceLib do
 
   @spec calculate_rating_value(float(), float()) :: float()
   def calculate_rating_value(skill, uncertainty) do
-    calculate_rating_value(skill, uncertainty, 0)
+    calculate_rating_value(skill, uncertainty, 0, 0)
   end
 
-  @spec calculate_rating_value(float(), float(), integer()) :: float()
-  def calculate_rating_value(skill, uncertainty, num_matches) do
+  @spec calculate_rating_value(float(), float(), integer(), integer()) :: float()
+  def calculate_rating_value(skill, uncertainty, num_matches, num_wins) do
     if new_players_start_at_zero?() do
+      # Provisional rating if num wins less than target or num matches less than target
+      # Otherwise rating just equal skill
       num_matches_target = get_num_matches_for_rating_to_equal_skill()
-
-      min(1, num_matches / num_matches_target) * skill
+      num_wins_target = num_matches_target / 2
+      min(1, max(num_wins / num_wins_target, num_matches / num_matches_target)) * skill
     else
       max(skill - uncertainty, 0)
     end
@@ -725,7 +727,7 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   def get_num_matches_for_rating_to_equal_skill() do
-    Config.get_site_config_cache("profile.Num matches for rating to equal skill")
+    Config.get_site_config_cache("rating.Num matches for rating to equal skill")
   end
 
   @doc """
