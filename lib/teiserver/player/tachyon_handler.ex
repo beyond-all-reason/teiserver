@@ -301,6 +301,37 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("friend/list" = cmd_id, "request", _message_id, _msg, state) do
+    epoch = ~N[1970-01-01 00:00:00]
+
+    friends =
+      Account.list_friends_for_user(state.user.id)
+      |> Enum.map(fn friend ->
+        id = if friend.user1_id == state.user.id, do: friend.user2_id, else: friend.user1_id
+        %{userId: to_string(id), addedAt: NaiveDateTime.diff(friend.inserted_at, epoch)}
+      end)
+
+    {outgoing, incoming} = Account.list_requests_for_user(state.user.id)
+
+    incoming =
+      Enum.map(incoming, fn req ->
+        %{from: to_string(req.from_user_id), sentAt: NaiveDateTime.diff(req.inserted_at, epoch)}
+      end)
+
+    outgoing =
+      Enum.map(outgoing, fn req ->
+        %{to: to_string(req.to_user_id), sentAt: NaiveDateTime.diff(req.inserted_at, epoch)}
+      end)
+
+    resp = %{
+      friends: friends,
+      incomingPendingRequests: incoming,
+      outgoingPendingRequests: outgoing
+    }
+
+    {:response, cmd_id, resp, state}
+  end
+
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)
