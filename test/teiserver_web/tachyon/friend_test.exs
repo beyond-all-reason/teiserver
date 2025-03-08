@@ -41,4 +41,37 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
              } = data
     end
   end
+
+  defp setup_friend_requests(_) do
+    {:ok, ctx1} = Tachyon.setup_client()
+    {:ok, ctx2} = Tachyon.setup_client()
+    {:ok, user: ctx1[:user], client: ctx1[:client], user2: ctx2[:user], client2: ctx2[:client]}
+  end
+
+  describe "friend request lifecycle" do
+    setup :setup_friend_requests
+
+    test "request non-existent user", ctx do
+      assert %{"status" => "failed", "reason" => "invalid_user"} =
+               Tachyon.send_friend_request!(ctx[:client], "not-a-valid-id")
+
+      assert %{"status" => "failed", "reason" => "invalid_user"} =
+               Tachyon.send_friend_request!(ctx[:client], "-37189312")
+    end
+
+    test "request to self", ctx do
+      assert %{"status" => "failed", "reason" => "invalid_user"} =
+               Tachyon.send_friend_request!(ctx[:client], ctx[:user].id)
+    end
+
+    test "request success", ctx do
+      assert %{"status" => "success"} =
+               Tachyon.send_friend_request!(ctx[:client], ctx[:user2].id)
+
+      user_id = ctx[:user].id
+
+      assert %Account.FriendRequest{from_user_id: ^user_id} =
+               Account.get_friend_request(user_id, ctx[:user2].id)
+    end
+  end
 end

@@ -332,6 +332,38 @@ defmodule Teiserver.Player.TachyonHandler do
     {:response, cmd_id, resp, state}
   end
 
+  def handle_command("friend/sendRequest" = cmd_id, "request", message_id, msg, state) do
+    with {:ok, target} <- get_user(msg["data"]["to"]),
+         {:ok, %Account.FriendRequest{}} <- Account.create_friend_request(state.user.id, target.id) do
+      {:response, cmd_id, nil, state}
+    else
+      {:error, :invalid_user} ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :invalid_user)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      # this is a bit scuffed and could be refactored so that `create_friend_request`
+      # returns an atom instead of a raw string
+      {:error, err} when is_binary(err) ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :invalid_user, err)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      err ->
+        Logger.error("cannot create friend request #{inspect(err)}")
+
+        resp =
+          Schema.error_response(cmd_id, message_id, :internal_error)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+    end
+  end
+
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)
@@ -407,6 +439,27 @@ defmodule Teiserver.Player.TachyonHandler do
       {m, ""} -> {:marker, m}
       # invalid markers won't be found in the queue
       _ -> {:marker, :invalid}
+    end
+  end
+
+  # that kind of parsing can probably be extracted, will likely be generally useful
+  @spec parse_user_ids([String.t()]) :: {[T.userid()], [String.t()]}
+  defp parse_user_ids(raw_ids) do
+    Enum.reduce(raw_ids, {[], []}, fn raw_id, {ok, invalid} ->
+      case Integer.parse(raw_id) do
+        {id, ""} -> {[id | ok], invalid}
+        _ -> {ok, [raw_id | invalid]}
+      end
+    end)
+  end
+
+  @spec get_user(String.t()) :: {:ok, T.user()} | {:error, :invalid_user}
+  defp get_user(raw_id) do
+    with {[user_id], []} <- parse_user_ids([raw_id]),
+         user when not is_nil(user) <- Account.get_user(user_id) do
+      {:ok, user}
+    else
+      _ -> {:error, :invalid_user}
     end
   end
 end

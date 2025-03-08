@@ -305,4 +305,14 @@ defmodule Teiserver.Support.Tachyon do
     :ok = send_request(client, "friend/list")
     recv_message!(client)
   end
+
+  def send_friend_request!(client, user_id) do
+    :ok = send_request(client, "friend/sendRequest", %{to: to_string(user_id)})
+    recv_message!(client)
+  end
+
+  def cancel_friend_request!(client, user_id) do
+    :ok = send_request(client, "friend/cancelRequest", %{to: to_string(user_id)})
+    recv_message!(client)
+  end
 end
