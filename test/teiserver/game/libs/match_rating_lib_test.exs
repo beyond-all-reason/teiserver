@@ -16,19 +16,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
 
     match = create_fake_match(user1.id, user2.id)
 
-    # Check ratings of users before we rate the match
-    rating_type_id = Game.get_or_add_rating_type(match.game_type)
-
-    ratings =
-      Account.list_ratings(
-        search: [
-          rating_type_id: rating_type_id,
-          user_id_in: [user1.id, user2.id]
-        ]
-      )
-      |> Map.new(fn rating ->
-        {rating.user_id, rating}
-      end)
+    ratings = get_ratings([user1.id, user2.id], match.game_type)
 
     assert ratings[user1.id] == nil
     assert ratings[user2.id] == nil
@@ -36,7 +24,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     MatchRatingLib.rate_match(match.id)
 
     # Check ratings of users after match
-    ratings = get_ratings([user1.id, user2.id], rating_type_id)
+    ratings = get_ratings([user1.id, user2.id], match.game_type)
 
     assert ratings[user1.id].skill == 27.637760127073694
     assert ratings[user2.id].skill == 22.362239872926306
@@ -66,7 +54,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     MatchRatingLib.rate_match(match.id)
 
     # Check ratings of users after match
-    ratings = get_ratings([user1.id, user2.id], rating_type_id)
+    ratings = get_ratings([user1.id, user2.id], match.game_type)
 
     assert ratings[user1.id].skill == 29.662576313923775
     assert ratings[user2.id].skill == 20.337423686076225
@@ -131,7 +119,108 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     Config.delete_site_config("rating.Tau")
   end
 
-  defp get_ratings(userids, rating_type_id) do
+  describe "Test rating system where new players start at zero" do
+    test "rating after one match" do
+      # Set config to use provisional ratings
+      Config.update_site_config("hidden.Rating method", "start at zero; converge to skill")
+
+      # Create two user
+      user1 = AccountTestLib.user_fixture()
+      user2 = AccountTestLib.user_fixture()
+
+      match = create_fake_match(user1.id, user2.id)
+
+      MatchRatingLib.rate_match(match.id)
+
+      # Check ratings of users after match
+      ratings = get_ratings([user1.id, user2.id], match.game_type)
+
+      assert ratings[user1.id].skill == 27.637760127073694
+      assert ratings[user2.id].skill == 22.362239872926306
+
+      # New players start at zero then converge to skill over time
+      assert ratings[user1.id].rating_value == 2.7637760127073694
+      assert ratings[user2.id].rating_value == 1.1181119936463153
+    end
+
+    test "rating after many matches" do
+      # Set config to use provisional ratings
+      Config.update_site_config("hidden.Rating method", "start at zero; converge to skill")
+
+      # Create two user
+      user1 = AccountTestLib.user_fixture()
+      user2 = AccountTestLib.user_fixture()
+
+      matches_target =
+        Config.get_site_config_cache("rating.Num matches for rating to equal skill")
+
+      match_ids = 1..matches_target
+
+      matches =
+        Enum.map(match_ids, fn _ ->
+          match = create_fake_match(user1.id, user2.id)
+
+          MatchRatingLib.rate_match(match.id)
+
+          match
+        end)
+
+      # Check ratings of users after match
+      ratings = get_ratings([user1.id, user2.id], Enum.at(matches, 0).game_type)
+
+      assert ratings[user1.id].skill == 40.06193301869303
+      assert ratings[user2.id].skill == 9.938066981306962
+
+      # Rating should equal skill
+      assert ratings[user1.id].rating_value == ratings[user1.id].skill
+      assert ratings[user2.id].rating_value == ratings[user2.id].skill
+
+      # Rate one more match and rating should still equal skill since we've hit the matches_target
+      match = create_fake_match(user1.id, user2.id)
+      MatchRatingLib.rate_match(match.id)
+      # Check ratings of users after match
+      ratings = get_ratings([user1.id, user2.id], match.game_type)
+
+      # Rating should equal skill
+      assert ratings[user1.id].rating_value == ratings[user1.id].skill
+      assert ratings[user2.id].rating_value == ratings[user2.id].skill
+    end
+  end
+
+  describe "Test rating system where rating = skill minus uncertainty" do
+    test "rating after one match" do
+      # Set config to use provisional ratings
+      Config.update_site_config("hidden.Rating method", "skill minus uncertainty")
+
+      # Create two user
+      user1 = AccountTestLib.user_fixture()
+      user2 = AccountTestLib.user_fixture()
+
+      match = create_fake_match(user1.id, user2.id)
+
+      MatchRatingLib.rate_match(match.id)
+
+      # Check ratings of users after match
+      ratings = get_ratings([user1.id, user2.id], match.game_type)
+
+      assert ratings[user1.id].skill == 27.637760127073694
+      assert ratings[user2.id].skill == 22.362239872926306
+
+      assert ratings[user1.id].rating_value ==
+               ratings[user1.id].skill - ratings[user1.id].uncertainty
+
+      assert ratings[user2.id].rating_value ==
+               ratings[user2.id].skill - ratings[user2.id].uncertainty
+    end
+  end
+
+  defp get_ratings(userids, game_type) when is_binary(game_type) do
+    rating_type_id = Game.get_or_add_rating_type(game_type)
+
+    get_ratings(userids, rating_type_id)
+  end
+
+  defp get_ratings(userids, rating_type_id) when is_integer(rating_type_id) do
     Account.list_ratings(
       search: [
         rating_type_id: rating_type_id,
