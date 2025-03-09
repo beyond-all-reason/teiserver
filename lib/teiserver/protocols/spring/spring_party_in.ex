@@ -18,15 +18,19 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
   end
 
   def do_handle("create_new_party", _, msg_id, state) do
-    party =
-      Account.create_party(state.user.id)
+    party = Account.create_party(state.user.id)
 
-    SpringOut.reply(
-      :okay,
-      {"c.party.create_new_party", "party_id=#{party.id}"},
-      msg_id,
-      state |> Map.put(:party_id, party.id)
-    )
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party.id}")
+
+    state =
+      SpringOut.reply(
+        :okay,
+        {"c.party.create_new_party", "party_id=#{party.id}"},
+        msg_id,
+        state |> Map.put(:party_id, party.id)
+      )
+
+    SpringOut.reply(:party, :member_added, {party.id, state.user.name}, message_id(), state)
   end
 
   def do_handle("invite_to_party", data, msg_id, state) do
@@ -83,6 +87,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
 
   def do_handle("decline_invite_to_party", data, msg_id, state) do
     cmd_id = "c.party.decline_invite_to_party"
+    :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{state.party_id}")
 
     with [party_id] <- String.split(data) |> Enum.map(&String.trim/1) do
       Account.cancel_party_invite(party_id, state.user.id)
@@ -123,16 +128,6 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
       party_id = state.party_id
       Account.cancel_party_invite(party_id, user.id)
 
-      PubSub.broadcast!(
-        Teiserver.PubSub,
-        "teiserver_client_messages:#{user.id}",
-        %{
-          channel: "teiserver_party:#{party_id}",
-          event: {:invite_cancelled, user.id},
-          party_id: party_id
-        }
-      )
-
       SpringOut.reply(:okay, cmd_id, msg_id, state)
     else
       nil ->
@@ -165,6 +160,8 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
   end
 
   def handle_event(%{event: :party_invite, party_id: party_id, members: members}, state) do
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
+
     SpringOut.reply(:party, :invited_to_party, party_id, message_id(), state)
 
     # the web interface uses a list of parties to get the content. But with
@@ -174,10 +171,9 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     end
   end
 
-  def handle_event(%{event: :added_to_party, party_id: party_id}, state) do
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
-
-    SpringOut.reply(:party, :member_added, {party_id, state.user.name}, message_id(), state)
+  def handle_event(%{event: :added_to_party, party_id: _party_id}, state) do
+    # this event is redundant with others in term of communication with players, so just no-op it
+    state
   end
 
   def handle_event(
@@ -213,19 +209,6 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
 
       user ->
         SpringOut.reply(:party, :member_removed, {party_id, user.name}, message_id(), state)
-    end
-  end
-
-  def handle_event(
-        %{event: {:invite_cancelled, user_id}, party_id: party_id},
-        state
-      ) do
-    case Teiserver.Account.get_user_by_id(user_id) do
-      nil ->
-        state
-
-      user ->
-        SpringOut.reply(:party, :invite_cancelled, {party_id, user.name}, message_id(), state)
     end
   end
 
