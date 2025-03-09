@@ -163,6 +163,7 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     test "leave party via web", ctx do
       Teiserver.Account.leave_party(ctx.party_id, ctx.user2.id)
       party_id = ctx.party_id
+      user1 = ctx.user1.name
       user2 = ctx.user2.name
 
       assert {"s.party.left_party", [^party_id, ^user2], _} =
@@ -170,6 +171,11 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
 
       assert {"s.party.left_party", [^party_id, ^user2], _} =
                _recv_until(ctx.socket2) |> parse_in_message()
+
+      Teiserver.Account.leave_party(ctx.party_id, ctx.user1.id)
+
+      assert {"s.party.left_party", [^party_id, ^user1], _} =
+               _recv_until(ctx.socket1) |> parse_in_message()
     end
   end
 
