@@ -6,8 +6,9 @@ You will need to install:
 - [Elixir/Erlang installed](https://elixir-lang.org/install.html).
 - [Postresql](https://www.postgresql.org/download).
 
-Make sure that Elixir is in correct version (currently using 1.16). You can find required version [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
-You can use [asdf](https://github.com/asdf-vm/asdf) to install correct version, picked up from the file `.tool-version`.
+Make sure that you have the correct version of elixir (currently using 1.18) and otp (currently 26.2.5.2). You can find the dependency requirement [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
+You can use [asdf](https://github.com/asdf-vm/asdf) or [mise](https://mise.jdx.dev/dev-tools/) to install the correct version, picked up from the file `.tool-version`.
+
 
 ### Clone repo
 ```bash
