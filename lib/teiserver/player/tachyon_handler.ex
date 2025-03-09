@@ -120,6 +120,10 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "messaging/received", message_to_tachyon(message), state}
   end
 
+  def handle_info({:friend, {:request_received, from_id}}, state) do
+    {:event, "friend/requestReceived", %{from: to_string(from_id)}, state}
+  end
+
   def handle_info({:timeout, message_id}, state)
       when is_map_key(state.pending_responses, message_id) do
     Logger.debug("User did not reply in time to request with id #{message_id}")
@@ -334,7 +338,9 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("friend/sendRequest" = cmd_id, "request", message_id, msg, state) do
     with {:ok, target} <- get_user(msg["data"]["to"]),
-         {:ok, %Account.FriendRequest{}} <- Account.create_friend_request(state.user.id, target.id) do
+         {:ok, %Account.FriendRequest{}} <-
+           Account.create_friend_request(state.user.id, target.id) do
+           Player.Session.friend_request_received(target.id, state.user.id)
       {:response, cmd_id, nil, state}
     else
       {:error, :invalid_user} ->

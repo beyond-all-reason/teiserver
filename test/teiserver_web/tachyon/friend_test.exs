@@ -72,6 +72,11 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
 
       assert %Account.FriendRequest{from_user_id: ^user_id} =
                Account.get_friend_request(user_id, ctx[:user2].id)
+
+      expected = %{"from" => to_string(ctx[:user].id)}
+
+      assert %{"commandId" => "friend/requestReceived", "data" => ^expected} =
+               Tachyon.recv_message!(ctx[:client2])
     end
   end
 end

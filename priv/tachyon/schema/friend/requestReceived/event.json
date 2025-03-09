@@ -1,0 +1,25 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/friend/requestReceived/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "FriendRequestReceivedEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "friend/requestReceived" },
+        "data": {
+            "title": "FriendRequestReceivedEventData",
+            "type": "object",
+            "properties": {
+                "from": { "$ref": "../../definitions/userId.json" }
+            },
+            "required": ["from"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}
