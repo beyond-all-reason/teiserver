@@ -104,9 +104,10 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
   end
 
   def handle_info(
-        data = %{channel: "teiserver_client_messages:" <> _, event: :party_invite},
+        data = %{channel: "teiserver_client_messages:" <> _, event: ev},
         socket
-      ) do
+      )
+      when ev in [:added_to_party, :party_invite] do
     party = Account.get_party(data.party_id)
 
     new_parties =
