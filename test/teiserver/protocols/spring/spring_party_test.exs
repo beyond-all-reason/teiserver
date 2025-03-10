@@ -25,6 +25,16 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
       create_party(socket)
       assert {"NO", _, _} = _recv_until(socket) |> parse_in_message()
     end
+
+    test "create from web", %{socket: socket, user: user} do
+      party = Teiserver.Account.create_party(user.id)
+
+      assert {"s.party.joined_party", [party_id, username], _} =
+               _recv_until(socket) |> parse_in_message()
+
+      assert party_id == party.id
+      assert username == user.name
+    end
   end
 
   describe "invite" do
