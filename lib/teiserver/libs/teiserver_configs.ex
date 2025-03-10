@@ -13,6 +13,7 @@ defmodule Teiserver.TeiserverConfigs do
     lobby_configs()
     debugging_configs()
     profile_configs()
+    hidden_configs()
     rating_configs()
   end
 
@@ -653,6 +654,20 @@ defmodule Teiserver.TeiserverConfigs do
     })
   end
 
+  # These configs can be saved to the database but will not be editable on the Admin page
+  @spec hidden_configs() :: :ok
+  defp hidden_configs() do
+    add_site_config_type(%{
+      key: "hidden.Rating method",
+      section: "Hidden",
+      type: "select",
+      default: "skill minus uncertainty",
+      permissions: ["Admin"],
+      description: "The rating system. Use Mix.Tasks.Teiserver.ProvisionalRatingSetup to change.",
+      opts: [choices: ["skill minus uncertainty", "start at zero; converge to skill"]]
+    })
+  end
+
   defp rating_configs do
     add_site_config_type(%{
       key: "rating.Tau",
@@ -661,6 +676,15 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["Admin"],
       description: "Tau used by openskill lib",
       default: 1 / 3
+    })
+
+    add_site_config_type(%{
+      key: "rating.Num matches for rating to equal skill",
+      section: "Rating",
+      type: "integer",
+      default: 20,
+      permissions: ["Admin"],
+      description: "The minimum number of matches required for match rating to equal skill"
     })
   end
 end

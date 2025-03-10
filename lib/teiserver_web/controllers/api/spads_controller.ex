@@ -56,7 +56,8 @@ defmodule TeiserverWeb.API.SpadsController do
       if uncertainty > max_uncertainty do
         0
       else
-        rating_value
+        # Negative ratings will be displayed as zero
+        max(0, rating_value)
       end
 
     conn

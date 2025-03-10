@@ -18,6 +18,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Battle.Balance.SplitNoobsTypes, as: SN
   alias Teiserver.Battle.Balance.BruteForce
+  alias Teiserver.Battle.BalanceLib
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   # If player uncertainty is greater than equal to this, that player is considered a noob
   # The lowest uncertainty rank 0 player in integration server at the time of writing this is 6.65
@@ -368,7 +369,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   # This will not be displayed in chobby ui or player list; it's only used for balance
   # It will be used when calculating team deviation
   defp adjusted_rating(rating, uncertainty, rank) do
-    if(is_newish_player?(rank, uncertainty)) do
+    if(is_newish_player?(rank, uncertainty) && !BalanceLib.new_players_start_at_zero?()) do
       # For newish players we assume they are the worst in the lobby e.g. 0 match rating and
       # then they converge to their true rating over time
       # Once their uncertainty is low enough, we fully trust their rating

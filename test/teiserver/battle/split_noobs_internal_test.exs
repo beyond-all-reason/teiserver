@@ -3,7 +3,7 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
   Can run all balance tests via
   mix test --only balance_test
   """
-  use ExUnit.Case
+  use Teiserver.DataCase, async: false
   @moduletag :balance_test
   alias Teiserver.Battle.Balance.SplitNoobs
 
