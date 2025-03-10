@@ -171,9 +171,17 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     end
   end
 
-  def handle_event(%{event: :added_to_party, party_id: _party_id}, state) do
-    # this event is redundant with others in term of communication with players, so just no-op it
-    state
+  def handle_event(%{event: :added_to_party, party_id: party_id}, state) do
+    if state.party_id == nil do
+      # this means the client joined a party through the website, but not the
+      # spring protocol, so let the client know
+      new_state = Map.put(state, :party_id, party_id)
+      PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
+
+      SpringOut.reply(:party, :member_added, {party_id, state.user.name}, message_id(), new_state)
+    else
+      state
+    end
   end
 
   def handle_event(
