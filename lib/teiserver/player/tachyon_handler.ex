@@ -124,6 +124,10 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "friend/requestReceived", %{from: to_string(from_id)}, state}
   end
 
+  def handle_info({:friend, {:request_cancelled, from_id}}, state) do
+    {:event, "friend/requestCancelled", %{from: to_string(from_id)}, state}
+  end
+
   def handle_info({:timeout, message_id}, state)
       when is_map_key(state.pending_responses, message_id) do
     Logger.debug("User did not reply in time to request with id #{message_id}")
@@ -340,7 +344,7 @@ defmodule Teiserver.Player.TachyonHandler do
     with {:ok, target} <- get_user(msg["data"]["to"]),
          {:ok, %Account.FriendRequest{}} <-
            Account.create_friend_request(state.user.id, target.id) do
-           Player.Session.friend_request_received(target.id, state.user.id)
+      Player.Session.friend_request_received(target.id, state.user.id)
       {:response, cmd_id, nil, state}
     else
       {:error, :invalid_user} ->
@@ -364,6 +368,24 @@ defmodule Teiserver.Player.TachyonHandler do
 
         resp =
           Schema.error_response(cmd_id, message_id, :internal_error)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+    end
+  end
+
+  def handle_command("friend/cancelRequest" = cmd_id, "request", message_id, msg, state) do
+    with {:ok, target_id} <- parse_user_id(msg["data"]["to"]),
+         :ok <- Account.rescind_friend_request(state.user.id, target_id) do
+      Player.Session.friend_request_cancelled(target_id, state.user.id)
+      {:response, cmd_id, nil, state}
+    else
+      {:error, "no request"} ->
+        {:response, cmd_id, nil, state}
+
+      _ ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :invalid_user)
           |> Jason.encode!()
 
         {:reply, :ok, {:text, resp}, state}
@@ -459,9 +481,16 @@ defmodule Teiserver.Player.TachyonHandler do
     end)
   end
 
+  defp parse_user_id(raw) do
+    case Integer.parse(raw) do
+      {id, ""} -> {:ok, id}
+      _ -> {:error, :invalid_id}
+    end
+  end
+
   @spec get_user(String.t()) :: {:ok, T.user()} | {:error, :invalid_user}
   defp get_user(raw_id) do
-    with {[user_id], []} <- parse_user_ids([raw_id]),
+    with {:ok, user_id} <- parse_user_id(raw_id),
          user when not is_nil(user) <- Account.get_user(user_id) do
       {:ok, user}
     else
