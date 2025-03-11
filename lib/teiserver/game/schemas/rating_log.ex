@@ -13,6 +13,8 @@ defmodule Teiserver.Game.RatingLog do
 
     has_one :match_membership,
       through: [:match, :members]
+
+    field :season, :integer
   end
 
   @doc """
@@ -21,8 +23,8 @@ defmodule Teiserver.Game.RatingLog do
   @spec changeset(map(), map()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, ~w(user_id rating_type_id match_id value inserted_at party_id)a)
-    |> validate_required(~w(user_id rating_type_id value inserted_at)a)
+    |> cast(params, ~w(user_id rating_type_id match_id value inserted_at party_id season)a)
+    |> validate_required(~w(user_id rating_type_id value inserted_at season)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()

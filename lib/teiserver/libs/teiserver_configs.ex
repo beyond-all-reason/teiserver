@@ -662,5 +662,14 @@ defmodule Teiserver.TeiserverConfigs do
       description: "Tau used by openskill lib",
       default: 1 / 3
     })
+
+    add_site_config_type(%{
+      key: "rating.Season",
+      section: "Rating",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "Active season",
+      default: 1
+    })
   end
 end

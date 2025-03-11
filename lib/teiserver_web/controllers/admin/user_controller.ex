@@ -531,7 +531,8 @@ defmodule TeiserverWeb.Admin.UserController do
                     skill: new_skill,
                     uncertainty: new_uncertainty,
                     leaderboard_rating: new_leaderboard_rating,
-                    last_updated: Timex.now()
+                    last_updated: Timex.now(),
+                    season: active_season()
                   })
 
                 existing ->
@@ -540,7 +541,8 @@ defmodule TeiserverWeb.Admin.UserController do
                     skill: new_skill,
                     uncertainty: new_uncertainty,
                     leaderboard_rating: new_leaderboard_rating,
-                    last_updated: Timex.now()
+                    last_updated: Timex.now(),
+                    season: active_season()
                   })
               end
 
@@ -549,6 +551,7 @@ defmodule TeiserverWeb.Admin.UserController do
               rating_type_id: rating_type_id,
               match_id: nil,
               inserted_at: Timex.now(),
+              season: active_season(),
               value: %{
                 reason: "Manual adjustment",
                 rating_value: new_rating_value,
@@ -1121,5 +1124,9 @@ defmodule TeiserverWeb.Admin.UserController do
         |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: ~p"/teiserver/admin/user")
     end
+  end
+
+  defp active_season() do
+    Teiserver.Config.get_site_config_cache("rating.Season")
   end
 end

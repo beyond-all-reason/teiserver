@@ -24,7 +24,8 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
         skill: rating_value,
         uncertainty: 0,
         leaderboard_rating: rating_value,
-        last_updated: Timex.now()
+        last_updated: Timex.now(),
+        season: 1
       })
   end
 
@@ -50,7 +51,8 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
           skill: 25,
           uncertainty: 5,
           leaderboard_rating: 5,
-          last_updated: Timex.now()
+          last_updated: Timex.now(),
+          season: 1
         })
 
       Client.login(user, :spring, "127.0.0.1")

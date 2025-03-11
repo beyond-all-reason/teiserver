@@ -449,7 +449,8 @@ defmodule Teiserver.Game.MatchRatingLib do
             Map.merge(user_rating, %{
               user_id: user_id,
               last_updated: match.finished,
-              num_matches: 0
+              num_matches: 0,
+              season: active_season()
             })
           )
 
@@ -482,7 +483,8 @@ defmodule Teiserver.Game.MatchRatingLib do
       leaderboard_rating: new_leaderboard_rating,
       last_updated: match.finished,
       num_matches: new_num_matches,
-      num_wins: new_num_wins
+      num_wins: new_num_wins,
+      season: active_season()
     })
 
     %{
@@ -490,6 +492,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       rating_type_id: rating_type_id,
       match_id: match.id,
       inserted_at: match.finished,
+      season: active_season(),
       value: %{
         rating_value: new_rating_value,
         skill: new_skill,
@@ -768,5 +771,9 @@ defmodule Teiserver.Game.MatchRatingLib do
 
   defp get_tau() do
     Config.get_site_config_cache("rating.Tau")
+  end
+
+  defp active_season() do
+    Config.get_site_config_cache("rating.Season")
   end
 end
