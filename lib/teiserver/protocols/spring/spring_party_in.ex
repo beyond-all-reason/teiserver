@@ -169,6 +169,8 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     for uid <- members, username <- [Account.get_username_by_id(uid)], not is_nil(username) do
       SpringOut.reply(:party, :member_added, {party_id, username}, message_id(), state)
     end
+
+    state
   end
 
   def handle_event(%{event: :added_to_party, party_id: party_id}, state) do
