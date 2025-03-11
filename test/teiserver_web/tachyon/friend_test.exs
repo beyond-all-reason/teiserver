@@ -79,6 +79,25 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
                Tachyon.recv_message!(ctx[:client2])
     end
 
+    test "accept from invalid user", ctx do
+      assert %{"status" => "failed", "reason" => "invalid_user"} =
+               Tachyon.accept_friend_request!(ctx[:client], "wtfid")
+    end
+
+    test "accept non existant request", ctx do
+      assert %{"status" => "failed", "reason" => "no_pending_request"} =
+               Tachyon.accept_friend_request!(ctx[:client], ctx[:user2].id)
+    end
+
+    test "can accept friend request", ctx do
+      {:ok, _} = Account.create_friend_request(ctx[:user].id, ctx[:user2].id)
+
+      assert %{"status" => "success"} =
+               Tachyon.accept_friend_request!(ctx[:client2], ctx[:user].id)
+
+      assert %Account.Friend{} = Account.get_friend(ctx[:user].id, ctx[:user2].id)
+    end
+
     test "cancel for invalid user", ctx do
       assert %{"status" => "failed", "reason" => "invalid_user"} =
                Tachyon.cancel_friend_request!(ctx[:client], "invalid-id")
