@@ -7,9 +7,7 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Tachyon.Schema
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Player
-  alias Teiserver.Matchmaking
-  alias Teiserver.Messaging
+  alias Teiserver.{Account, Player, Matchmaking, Messaging}
 
   @behaviour Handler
 
@@ -21,12 +19,13 @@ defmodule Teiserver.Player.TachyonHandler do
 
   @impl Handler
   def connect(conn) do
-    # TODO: get the IP from request (somehow)
-    ip = "127.0.0.1"
+    {a, b, c, d} = conn.remote_ip
+    ipv4_address = "#{a}.#{b}.#{c}.#{d}"
+
     lobby_client = conn.assigns[:token].application.uid
     user = conn.assigns[:token].owner
 
-    case Teiserver.CacheUser.tachyon_login(user, ip, lobby_client) do
+    case Teiserver.CacheUser.tachyon_login(user, ipv4_address, lobby_client) do
       {:ok, user} ->
         {:ok, %{user: user}}
 
@@ -278,6 +277,28 @@ defmodule Teiserver.Player.TachyonHandler do
 
     messages = [response | msg_to_send] |> Enum.map(fn data -> {:text, Jason.encode!(data)} end)
     {:push, messages, state}
+  end
+
+  def handle_command("user/info" = cmd_id, "request", message_id, msg, state) do
+    user_id = msg["data"]["userId"]
+    user = Account.get_user_by_id(user_id)
+
+    if user != nil do
+      resp =
+        Schema.response(cmd_id, message_id, %{
+          userId: to_string(user.id),
+          username: user.name,
+          displayName: user.name,
+          clanId: user.clan_id,
+          countryCode: user.country,
+          status: :menu
+        })
+
+      {:reply, :ok, {:text, Jason.encode!(resp)}, state}
+    else
+      resp = Schema.error_response(cmd_id, message_id, :unknown_user)
+      {:reply, :error, {:text, Jason.encode!(resp)}, state}
+    end
   end
 
   def handle_command(command_id, _message_type, message_id, _message, state) do
