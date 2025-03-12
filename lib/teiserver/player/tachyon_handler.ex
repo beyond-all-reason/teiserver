@@ -400,6 +400,36 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("friend/rejectRequest" = cmd_id, "request", message_id, msg, state) do
+    with {:ok, originator_id} <- parse_user_id(msg["data"]["from"]),
+         :ok <- Account.decline_friend_request(originator_id, state.user.id) do
+      {:response, cmd_id, nil, state}
+    else
+      {:error, :invalid_id} ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :invalid_user)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      {:error, "no request"} ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :no_pending_request)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      err ->
+        Logger.error("Unhandled error in rejectRequest: #{inspect(err)}")
+
+        resp =
+          Schema.error_response(cmd_id, message_id, :internal_error, inspect(err))
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+    end
+  end
+
   def handle_command("friend/cancelRequest" = cmd_id, "request", message_id, msg, state) do
     with {:ok, target_id} <- parse_user_id(msg["data"]["to"]),
          :ok <- Account.rescind_friend_request(state.user.id, target_id) do

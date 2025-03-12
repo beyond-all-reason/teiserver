@@ -124,5 +124,20 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
       assert %{"commandId" => "friend/requestCancelled", "data" => ^expected} =
                Tachyon.recv_message!(ctx[:client2])
     end
+
+    test "can't reject non existant request", ctx do
+      assert %{"status" => "failed", "reason" => "no_pending_request"} =
+               Tachyon.reject_friend_request!(ctx[:client2], ctx[:user].id)
+    end
+
+    test "reject request", ctx do
+      {:ok, _} = Account.create_friend_request(ctx[:user].id, ctx[:user2].id)
+
+      assert %{"status" => "success"} =
+               Tachyon.reject_friend_request!(ctx[:client2], ctx[:user].id)
+
+      assert nil == Account.get_friend(ctx[:user].id, ctx[:user2].id)
+      assert nil == Account.get_friend_request(ctx[:user].id, ctx[:user2].id)
+    end
   end
 end
