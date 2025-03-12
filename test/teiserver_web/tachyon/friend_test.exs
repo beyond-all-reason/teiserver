@@ -96,6 +96,10 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
                Tachyon.accept_friend_request!(ctx[:client2], ctx[:user].id)
 
       assert %Account.Friend{} = Account.get_friend(ctx[:user].id, ctx[:user2].id)
+      expected = %{"from" => to_string(ctx[:user2].id)}
+
+      assert %{"commandId" => "friend/requestAccepted", "data" => ^expected} =
+               Tachyon.recv_message!(ctx[:client])
     end
 
     test "cancel for invalid user", ctx do
