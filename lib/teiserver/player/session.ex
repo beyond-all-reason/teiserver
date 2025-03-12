@@ -200,6 +200,15 @@ defmodule Teiserver.Player.Session do
     GenServer.cast(via_tuple(originator_id), {:friend, {:request_accepted, target_id}})
   end
 
+  @doc """
+  notify the connected originator player that their friend request
+  has been rejected by the target.
+  """
+  @spec friend_request_rejected(originator_id :: T.userid(), target_id :: T.userid()) :: :ok
+  def friend_request_rejected(originator_id, target_id) do
+    GenServer.cast(via_tuple(originator_id), {:friend, {:request_rejected, target_id}})
+  end
+
   def start_link({_conn_pid, user} = arg) do
     GenServer.start_link(__MODULE__, arg, name: via_tuple(user.id))
   end
@@ -485,7 +494,7 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_cast({:friend, {event, from_id}}, state)
-      when event in [:request_received, :request_cancelled, :request_accepted] do
+      when event in [:request_received, :request_cancelled, :request_accepted, :request_rejected] do
     state = send_to_player({:friend, {event, from_id}}, state)
     {:noreply, state}
   end
