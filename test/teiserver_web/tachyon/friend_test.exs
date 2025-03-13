@@ -177,6 +177,10 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
     test "can remove friend", ctx do
       assert %{"status" => "success"} = Tachyon.remove_friend!(ctx[:client], ctx[:user2].id)
       assert nil == Account.get_friend(ctx[:user].id, ctx[:user2].id)
+      expected = %{"from" => to_string(ctx[:user].id)}
+
+      assert %{"commandId" => "friend/removed", "data" => ^expected} =
+               Tachyon.recv_message!(ctx[:client2])
     end
   end
 end
