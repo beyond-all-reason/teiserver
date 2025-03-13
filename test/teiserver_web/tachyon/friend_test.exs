@@ -145,4 +145,38 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
                Tachyon.recv_message!(ctx[:client])
     end
   end
+
+  defp setup_friends(_) do
+    {:ok, ctx1} = Tachyon.setup_client()
+    {:ok, ctx2} = Tachyon.setup_client()
+    {:ok, friend} = Account.create_friend(ctx1[:user].id, ctx2[:user].id)
+
+    {:ok,
+     user: ctx1[:user],
+     client: ctx1[:client],
+     user2: ctx2[:user],
+     client2: ctx2[:client],
+     friend: friend}
+  end
+
+  describe "removing" do
+    setup [:setup_friends]
+
+    test "cannot remove non existant user", ctx do
+      assert %{"status" => "failed", "reason" => "invalid_user"} =
+               Tachyon.remove_friend!(ctx[:client], "lolnope")
+    end
+
+    test "is no-op if not friend", ctx do
+      random_user = Tachyon.create_user()
+
+      assert %{"status" => "success"} =
+               Tachyon.remove_friend!(ctx[:client], random_user.id)
+    end
+
+    test "can remove friend", ctx do
+      assert %{"status" => "success"} = Tachyon.remove_friend!(ctx[:client], ctx[:user2].id)
+      assert nil == Account.get_friend(ctx[:user].id, ctx[:user2].id)
+    end
+  end
 end

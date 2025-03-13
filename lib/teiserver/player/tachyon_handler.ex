@@ -453,6 +453,31 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("friend/remove" = cmd_id, "request", message_id, msg, state) do
+    with {:ok, target_id} <- parse_user_id(msg["data"]["userId"]),
+         %Account.Friend{} = friend <- Account.get_friend(state.user.id, target_id),
+         {:ok, _changeset} <- Account.delete_friend(friend) do
+      {:response, cmd_id, nil, state}
+    else
+      nil ->
+        {:response, cmd_id, nil, state}
+
+      {:error, :invalid_id} ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :invalid_user)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      _ ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :internal_error)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+    end
+  end
+
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)
