@@ -86,10 +86,8 @@ defmodule Teiserver.Game.BalancerServerTest do
   test "load some players in and run a balance pass or two" do
     team_count = 2
 
-    arbitrary_rank_for_all_test_users = 10
-
     players =
-      make_users_with_ranks([10, 20, 30, 40])
+      make_users_with_ranks([10, 20, 30, 40, 50, 60])
 
     dbg(players)
 
@@ -99,97 +97,62 @@ defmodule Teiserver.Game.BalancerServerTest do
 
     dbg(players2)
 
-    {:ok, start_link_results} = BalancerServer.start_link(data: %{lobby_id: 1})
+    {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
 
-    starting_state = GenServer.call(start_link_results, :report_state, 5000)
+    starting_state = GenServer.call(pid, :report_state)
     dbg(starting_state)
 
     first_balance_pass =
       GenServer.call(
-        start_link_results,
-        {:make_balance, team_count, [], players},
-        5000
+        pid,
+        {:make_balance, team_count, [], players}
       )
 
-    state2 = GenServer.call(start_link_results, :report_state, 5000)
+    state2 = GenServer.call(pid, :report_state)
     dbg(state2)
 
     second_balance_pass_hash_reuse =
       GenServer.call(
-        start_link_results,
-        {:make_balance, team_count, [], players},
-        5000
+        pid,
+        {:make_balance, team_count, [], players}
       )
 
-    state3 = GenServer.call(start_link_results, :report_state, 5000)
+    state3 = GenServer.call(pid, :report_state)
     dbg(state3)
 
     assert second_balance_pass_hash_reuse.hash == first_balance_pass.hash
 
-    # users = [
-    #   make_user(%{
-    #     "name" => "user"+ExULID.ULID.generate(),
-    #     "email" => ExULID.ULID.generate()+"@example.com",
-    #     "permissions" => []
-    #   }),
-    #   make_user(%{
-    #     "name" => "user2",
-    #     "email" => "user2-test542684@example.com",
-    #     "permissions" => []
-    #   }),
-    #   make_user(%{
-    #     "name" => "user3",
-    #     "email" => "user3-test542684@example.com",
-    #     "permissions" => []
-    #   }),
-    #   make_user(%{
-    #     "name" => "user4",
-    #     "email" => "user4-test542684@example.com",
-    #     "permissions" => []
-    #   }),
-    #   make_user(%{
-    #     "name" => "user5",
-    #     "email" => "user5-test542684@example.com",
-    #     "permissions" => []
-    #   })
-    # ]
+    [_first_player | player_list_with_one_less_player] = players
 
-    #### TODO
+    third_balance_pass_with_fewer_players =
+      GenServer.call(
+        pid,
+        {:make_balance, team_count, [], player_list_with_one_less_player}
+      )
 
-    # third_balance_pass_with_more_players =
-    #   GenServer.call(
-    #     start_link_results,
-    #     {:make_balance, team_count, [], create_fake_players(160)},
-    #     5000
-    #   )
-
-    # dbg(third_balance_pass_with_more_players)
-    # assert second_balance_pass_hash_reuse.hash != third_balance_pass_with_more_players.hash
+    assert second_balance_pass_hash_reuse.hash != third_balance_pass_with_fewer_players.hash
+    dbg(GenServer.call(pid, :report_state))
   end
 
   test "get_balance_mode works with a hash" do
     team_count = 2
 
-    arbitrary_rank_for_all_test_users = 10
-
     players = make_users_with_ranks([10, 20, 30, 40])
 
-    {:ok, start_link_results} = BalancerServer.start_link(data: %{lobby_id: 1})
+    {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
 
-    starting_state = GenServer.call(start_link_results, :report_state, 5000)
+    starting_state = GenServer.call(pid, :report_state)
 
     first_balance_pass =
       GenServer.call(
-        start_link_results,
-        {:make_balance, team_count, [], players},
-        5000
+        pid,
+        {:make_balance, team_count, [], players}
       )
 
     get_balance_mode_returns_value =
       GenServer.call(
-        start_link_results,
-        :get_balance_mode,
-        5000
+        pid,
+        :get_balance_mode
       )
 
     refute get_balance_mode_returns_value == nil
@@ -198,32 +161,25 @@ defmodule Teiserver.Game.BalancerServerTest do
   test "get_current_balance works with a hash" do
     team_count = 2
 
-    arbitrary_rank_for_all_test_users = 10
-
     players = make_users_with_ranks([10, 20, 30, 40])
 
-    {:ok, start_link_results} = BalancerServer.start_link(data: %{lobby_id: 1})
+    {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
 
-    starting_state = GenServer.call(start_link_results, :report_state, 5000)
+    starting_state = GenServer.call(pid, :report_state)
 
     first_balance_pass =
       GenServer.call(
-        start_link_results,
-        {:make_balance, team_count, [], players},
-        5000
+        pid,
+        {:make_balance, team_count, [], players}
       )
 
     get_balance_mode_returns_value =
-      GenServer.call(
-        start_link_results,
-        :get_current_balance,
-        5000
-      )
+      GenServer.call(pid, :get_current_balance)
 
     refute get_balance_mode_returns_value == nil
   end
 
   defp create_fake_players(count) do
-    1..count |> Enum.map(fn iter -> %{iter: iter} end)
+    1..count |> Enum.map(fn _ -> %{} end)
   end
 end
