@@ -60,6 +60,11 @@ defmodule Teiserver.Account.RatingLib do
       where: ratings.last_updated > ^datetime
   end
 
+  def _search(query, :season, season) do
+    from ratings in query,
+      where: ratings.season == ^season
+  end
+
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 

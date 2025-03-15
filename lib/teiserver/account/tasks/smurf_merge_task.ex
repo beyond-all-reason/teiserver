@@ -56,6 +56,8 @@ defmodule Teiserver.Account.SmurfMergeTask do
       from_value = BalanceLib.convert_rating(from_rating)
       to_value = BalanceLib.convert_rating(to_rating)
 
+      season = Teiserver.Config.get_site_config_cache("rating.Season")
+
       if from_value > to_value do
         {:ok, _rating} =
           Account.create_or_update_rating(%{
@@ -74,6 +76,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
             rating_type_id: rating_type_id,
             match_id: nil,
             inserted_at: Timex.now(),
+            season: season,
             value: %{
               reason: "Smurf adjustment",
               rating_value: from_rating.rating_value,
