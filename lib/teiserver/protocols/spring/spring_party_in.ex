@@ -224,7 +224,14 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
 
   def handle_event(%{event: :closed, party_id: party_id}, state) do
     # chobby would like to receive a member_left message when the last member leaves
-    SpringOut.reply(:party, :member_removed, {party_id, state.user.name}, message_id(), state)
+    SpringOut.reply(
+      :party,
+      :member_removed,
+      {party_id, state.user.name},
+      message_id(),
+      # by construction, this is the last member leaving
+      Map.put(state, :party_id, nil)
+    )
   end
 
   def handle_event(event, state) do
