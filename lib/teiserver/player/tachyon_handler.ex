@@ -120,6 +120,26 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "messaging/received", message_to_tachyon(message), state}
   end
 
+  def handle_info({:friend, {:request_received, from_id}}, state) do
+    {:event, "friend/requestReceived", %{from: to_string(from_id)}, state}
+  end
+
+  def handle_info({:friend, {:request_cancelled, from_id}}, state) do
+    {:event, "friend/requestCancelled", %{from: to_string(from_id)}, state}
+  end
+
+  def handle_info({:friend, {:request_accepted, from_id}}, state) do
+    {:event, "friend/requestAccepted", %{from: to_string(from_id)}, state}
+  end
+
+  def handle_info({:friend, {:request_rejected, from_id}}, state) do
+    {:event, "friend/requestRejected", %{from: to_string(from_id)}, state}
+  end
+
+  def handle_info({:friend, {:removed, from_id}}, state) do
+    {:event, "friend/removed", %{from: to_string(from_id)}, state}
+  end
+
   def handle_info({:timeout, message_id}, state)
       when is_map_key(state.pending_responses, message_id) do
     Logger.debug("User did not reply in time to request with id #{message_id}")
@@ -301,6 +321,168 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("friend/list" = cmd_id, "request", _message_id, _msg, state) do
+    epoch = ~N[1970-01-01 00:00:00]
+
+    friends =
+      Account.list_friends_for_user(state.user.id)
+      |> Enum.map(fn friend ->
+        id = if friend.user1_id == state.user.id, do: friend.user2_id, else: friend.user1_id
+        %{userId: to_string(id), addedAt: NaiveDateTime.diff(friend.inserted_at, epoch)}
+      end)
+
+    {outgoing, incoming} = Account.list_requests_for_user(state.user.id)
+
+    incoming =
+      Enum.map(incoming, fn req ->
+        %{from: to_string(req.from_user_id), sentAt: NaiveDateTime.diff(req.inserted_at, epoch)}
+      end)
+
+    outgoing =
+      Enum.map(outgoing, fn req ->
+        %{to: to_string(req.to_user_id), sentAt: NaiveDateTime.diff(req.inserted_at, epoch)}
+      end)
+
+    resp = %{
+      friends: friends,
+      incomingPendingRequests: incoming,
+      outgoingPendingRequests: outgoing
+    }
+
+    {:response, cmd_id, resp, state}
+  end
+
+  def handle_command("friend/sendRequest" = cmd_id, "request", message_id, msg, state) do
+    with {:ok, target} <- get_user(msg["data"]["to"]),
+         {:ok, %Account.FriendRequest{}} <-
+           Account.create_friend_request(state.user.id, target.id) do
+      Player.Session.friend_request_received(target.id, state.user.id)
+      {:response, cmd_id, nil, state}
+    else
+      {:error, :invalid_user} ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :invalid_user)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      # this is a bit scuffed and could be refactored so that `create_friend_request`
+      # returns an atom instead of a raw string
+      {:error, err} when is_binary(err) ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :invalid_user, err)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      err ->
+        Logger.error("cannot create friend request #{inspect(err)}")
+
+        resp =
+          Schema.error_response(cmd_id, message_id, :internal_error)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+    end
+  end
+
+  def handle_command("friend/acceptRequest" = cmd_id, "request", message_id, msg, state) do
+    with {:ok, originator_id} <- parse_user_id(msg["data"]["from"]),
+         :ok <- Account.accept_friend_request(originator_id, state.user.id) do
+      Player.Session.friend_request_accepted(originator_id, state.user.id)
+      {:response, cmd_id, nil, state}
+    else
+      {:error, :invalid_id} ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :invalid_user)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      {:error, "no request"} ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :no_pending_request)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+    end
+  end
+
+  def handle_command("friend/rejectRequest" = cmd_id, "request", message_id, msg, state) do
+    with {:ok, originator_id} <- parse_user_id(msg["data"]["from"]),
+         :ok <- Account.decline_friend_request(originator_id, state.user.id) do
+      Player.Session.friend_request_rejected(originator_id, state.user.id)
+      {:response, cmd_id, nil, state}
+    else
+      {:error, :invalid_id} ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :invalid_user)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      {:error, "no request"} ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :no_pending_request)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      err ->
+        Logger.error("Unhandled error in rejectRequest: #{inspect(err)}")
+
+        resp =
+          Schema.error_response(cmd_id, message_id, :internal_error, inspect(err))
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+    end
+  end
+
+  def handle_command("friend/cancelRequest" = cmd_id, "request", message_id, msg, state) do
+    with {:ok, target_id} <- parse_user_id(msg["data"]["to"]),
+         :ok <- Account.rescind_friend_request(state.user.id, target_id) do
+      Player.Session.friend_request_cancelled(target_id, state.user.id)
+      {:response, cmd_id, nil, state}
+    else
+      {:error, "no request"} ->
+        {:response, cmd_id, nil, state}
+
+      _ ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :invalid_user)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+    end
+  end
+
+  def handle_command("friend/remove" = cmd_id, "request", message_id, msg, state) do
+    with {:ok, target_id} <- parse_user_id(msg["data"]["userId"]),
+         %Account.Friend{} = friend <- Account.get_friend(state.user.id, target_id),
+         {:ok, _changeset} <- Account.delete_friend(friend) do
+      Player.Session.friend_removed(target_id, state.user.id)
+      {:response, cmd_id, nil, state}
+    else
+      nil ->
+        {:response, cmd_id, nil, state}
+
+      {:error, :invalid_id} ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :invalid_user)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
+      _ ->
+        resp =
+          Schema.error_response(cmd_id, message_id, :internal_error)
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+    end
+  end
+
   def handle_command(command_id, _message_type, message_id, _message, state) do
     resp =
       Schema.error_response(command_id, message_id, :command_unimplemented)
@@ -376,6 +558,34 @@ defmodule Teiserver.Player.TachyonHandler do
       {m, ""} -> {:marker, m}
       # invalid markers won't be found in the queue
       _ -> {:marker, :invalid}
+    end
+  end
+
+  # that kind of parsing can probably be extracted, will likely be generally useful
+  @spec parse_user_ids([String.t()]) :: {[T.userid()], [String.t()]}
+  defp parse_user_ids(raw_ids) do
+    Enum.reduce(raw_ids, {[], []}, fn raw_id, {ok, invalid} ->
+      case Integer.parse(raw_id) do
+        {id, ""} -> {[id | ok], invalid}
+        _ -> {ok, [raw_id | invalid]}
+      end
+    end)
+  end
+
+  defp parse_user_id(raw) do
+    case Integer.parse(raw) do
+      {id, ""} -> {:ok, id}
+      _ -> {:error, :invalid_id}
+    end
+  end
+
+  @spec get_user(String.t()) :: {:ok, T.user()} | {:error, :invalid_user}
+  defp get_user(raw_id) do
+    with {:ok, user_id} <- parse_user_id(raw_id),
+         user when not is_nil(user) <- Account.get_user(user_id) do
+      {:ok, user}
+    else
+      _ -> {:error, :invalid_user}
     end
   end
 end

@@ -31,4 +31,15 @@ defmodule Teiserver.AccountFixtures do
 
     tag
   end
+
+  @doc """
+  Make the two given users friends
+  """
+  def create_friend(%{id: id1}, user2), do: create_friend(id1, user2)
+  def create_friend(user1, %{id: id}), do: create_friend(user1, id)
+
+  def create_friend(user_id1, user_id2) do
+    {:ok, friend} = Account.create_friend(user_id1, user_id2)
+    friend
+  end
 end

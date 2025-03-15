@@ -1607,6 +1607,17 @@ defmodule Teiserver.Account do
   end
 
   @doc """
+  Returns the list of friends for the given user
+  """
+  @spec list_friends_for_user(map() | T.userid()) :: [map()]
+  def list_friends_for_user(%{id: id}), do: list_friends_for_user(id)
+
+  def list_friends_for_user(user_id) do
+    FriendQueries.query_friends(where: [either_user_is: user_id])
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a single friend.
 
   Raises `Ecto.NoResultsError` if the Friend does not exist.
@@ -1952,6 +1963,9 @@ defmodule Teiserver.Account do
 
   @spec list_outgoing_friend_requests_of_userid(T.userid()) :: [T.userid()]
   defdelegate list_outgoing_friend_requests_of_userid(userid), to: FriendRequestLib
+
+  @spec list_requests_for_user(T.userid()) :: {outgoing :: [map()], incoming :: [map()]}
+  defdelegate list_requests_for_user(userid), to: FriendRequestLib
 
   @spec list_incoming_friend_requests_of_userid(T.userid()) :: [T.userid()]
   defdelegate list_incoming_friend_requests_of_userid(userid), to: FriendRequestLib
