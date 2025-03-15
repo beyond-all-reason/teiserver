@@ -358,7 +358,7 @@ defmodule Teiserver.SpringTcpServer do
     # I am taking a shortcut here. There may already be something in place to
     # react to random events and delegating that to a handler.
     # This is bypassing SpringIn entirely
-    Teiserver.Protocols.Spring.PartyIn.handle_event(event, state)
+    state = Teiserver.Protocols.Spring.PartyIn.handle_event(event, state)
     {:noreply, state}
   end
 
@@ -366,7 +366,7 @@ defmodule Teiserver.SpringTcpServer do
     # I am taking a shortcut here. There may already be something in place to
     # react to random events and delegating that to a handler.
     # This is bypassing SpringIn entirely
-    Teiserver.Protocols.Spring.PartyIn.handle_event(event, state)
+    state = Teiserver.Protocols.Spring.PartyIn.handle_event(event, state)
     {:noreply, state}
   end
 
