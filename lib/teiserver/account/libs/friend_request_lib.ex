@@ -144,33 +144,30 @@ defmodule Teiserver.Account.FriendRequestLib do
     :ok
   end
 
+  @doc """
+  Returns all friend requests for the given user
+  """
+  @spec list_requests_for_user(T.userid()) :: {outgoing :: [map()], incoming :: [map()]}
+  def list_requests_for_user(userid) do
+    Account.list_friend_requests(where: [to_or_from_is: userid])
+    |> Enum.reduce({[], []}, fn req, {outgoing, incoming} ->
+      if req.from_user_id == userid do
+        {[req | outgoing], incoming}
+      else
+        {outgoing, [req | incoming]}
+      end
+    end)
+  end
+
   @spec list_incoming_friend_requests_of_userid(T.userid()) :: [T.userid()]
   def list_incoming_friend_requests_of_userid(userid) do
-    Teiserver.cache_get_or_store(:account_incoming_friend_request_cache, userid, fn ->
-      Account.list_friend_requests(
-        where: [
-          to_user_id: userid
-        ],
-        select: [:from_user_id]
-      )
-      |> Enum.map(fn %{from_user_id: from_user_id} ->
-        from_user_id
-      end)
-    end)
+    {_, incoming} = list_requests_for_user(userid)
+    Enum.map(incoming, fn incoming -> incoming.from_user_id end)
   end
 
   @spec list_outgoing_friend_requests_of_userid(T.userid()) :: [T.userid()]
   def list_outgoing_friend_requests_of_userid(userid) do
-    Teiserver.cache_get_or_store(:account_outgoing_friend_request_cache, userid, fn ->
-      Account.list_friend_requests(
-        where: [
-          from_user_id: userid
-        ],
-        select: [:to_user_id]
-      )
-      |> Enum.map(fn %{to_user_id: to_user_id} ->
-        to_user_id
-      end)
-    end)
+    {outgoing, _} = list_requests_for_user(userid)
+    Enum.map(outgoing, fn outgoing -> outgoing.to_user_id end)
   end
 end
