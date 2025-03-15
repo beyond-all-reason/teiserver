@@ -66,9 +66,13 @@ defmodule Teiserver.Game.BalancerServerTest do
       Teiserver.Account.create_user(requested_user)
   end
 
-  @spec make_users_with_ranks([non_neg_integer()]) ::
+  @spec make_users_with_ranks_and_parties(
+          [non_neg_integer()],
+          [non_neg_integer()]
+        ) ::
           list()
-  def make_users_with_ranks(list_of_ranks) do
+
+  def make_users_with_ranks_and_parties(list_of_ranks, list_of_parties) do
     users =
       Enum.with_index(list_of_ranks)
       |> Enum.map(fn {user, index} ->
@@ -82,8 +86,6 @@ defmodule Teiserver.Game.BalancerServerTest do
       # unwrap user creation response
       |> Enum.map(fn {:ok, reply} -> reply end)
       |> Enum.map(fn x -> Map.put(x, :userid, x.id) end)
-      # each user in their own party
-      |> Enum.map(fn x -> Map.put(x, :party_id, x.id) end)
 
     # set the user rank
     for {user, rank} <- Enum.zip(users, list_of_ranks) do
@@ -92,6 +94,12 @@ defmodule Teiserver.Game.BalancerServerTest do
       })
     end
 
+    # set the user party_id
+    users =
+      for {user, party_id} <- Enum.zip(users, list_of_parties) do
+        Map.put(user, :party_id, party_id)
+      end
+
     users
   end
 
@@ -99,7 +107,7 @@ defmodule Teiserver.Game.BalancerServerTest do
     team_count = 2
 
     players =
-      make_users_with_ranks([10, 20, 30, 40, 50, 60])
+      make_users_with_ranks_and_parties([10, 20, 30, 40, 50, 60], [1, 2, 3, 4, 5, 6])
 
     dbg(players)
 
@@ -149,7 +157,7 @@ defmodule Teiserver.Game.BalancerServerTest do
   test "get_balance_mode works with a hash" do
     team_count = 2
 
-    players = make_users_with_ranks([10, 20, 30, 40])
+    players = make_users_with_ranks_and_parties([10, 20, 30, 40], [1, 2, 3, 4])
 
     {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
 
@@ -173,7 +181,7 @@ defmodule Teiserver.Game.BalancerServerTest do
   test "get_current_balance works with a hash" do
     team_count = 2
 
-    players = make_users_with_ranks([10, 20, 30, 40])
+    players = make_users_with_ranks_and_parties([10, 20, 30, 40], [1, 2, 3, 4])
 
     {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
 
