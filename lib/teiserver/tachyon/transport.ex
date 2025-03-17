@@ -179,12 +179,28 @@ defmodule Teiserver.Tachyon.Transport do
           WebSock.handle_result()
   defp handle_result(result, message_id, conn_state) do
     case result do
+      {:event, cmd_id, state} ->
+        message = Schema.event(cmd_id) |> Jason.encode!()
+        {:push, [{:text, message}], %{conn_state | handler_state: state}}
+
       {:event, cmd_id, payload, state} ->
         message = Schema.event(cmd_id, payload) |> Jason.encode!()
         {:push, [{:text, message}], %{conn_state | handler_state: state}}
 
+      {:response, cmd_id, state} ->
+        message = Schema.response(cmd_id, message_id)
+        {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
+
       {:response, cmd_id, payload, state} ->
         message = Schema.response(cmd_id, message_id, payload)
+        {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
+
+      {:error_response, cmd_id, reason, state} ->
+        message = Schema.error_response(cmd_id, message_id, reason)
+        {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
+
+      {:error_response, cmd_id, reason, details, state} ->
+        message = Schema.error_response(cmd_id, message_id, reason, details)
         {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
 
       {:request, cmd_id, payload, opts, state} ->

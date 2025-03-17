@@ -76,27 +76,24 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_info({:matchmaking, {:notify_found, queue_id, timeout_ms}}, state) do
-    resp =
-      Schema.event("matchmaking/found", %{
-        queueId: queue_id,
-        timeoutMs: timeout_ms
-      })
+    resp = %{
+      queueId: queue_id,
+      timeoutMs: timeout_ms
+    }
 
-    {:push, {:text, resp |> Jason.encode!()}, state}
+    {:event, "matchmaking/found", resp, state}
   end
 
   def handle_info({:matchmaking, {:found_update, ready_count}}, state) do
-    resp =
-      Schema.event("matchmaking/foundUpdate", %{
-        readyCount: ready_count
-      })
+    resp = %{
+      readyCount: ready_count
+    }
 
-    {:push, {:text, resp |> Jason.encode!()}, state}
+    {:event, "matchmaking/foundUpdate", resp, state}
   end
 
   def handle_info({:matchmaking, :notify_lost}, state) do
-    resp = Schema.event("matchmaking/lost")
-    {:push, {:text, resp |> Jason.encode!()}, state}
+    {:event, "matchmaking/lost", state}
   end
 
   def handle_info({:matchmaking, {:cancelled, reason}}, state) do
@@ -108,8 +105,7 @@ defmodule Teiserver.Player.TachyonHandler do
         err -> %{reason: err}
       end
 
-    resp = Schema.event("matchmaking/cancelled", data)
-    {:push, {:text, resp |> Jason.encode!()}, state}
+    {:event, "matchmaking/cancelled", data, state}
   end
 
   def handle_info({:battle_start, data}, state) do
@@ -170,7 +166,7 @@ defmodule Teiserver.Player.TachyonHandler do
     {:response, cmd_id, %{userCount: user_count}, state}
   end
 
-  def handle_command("matchmaking/list" = cmd_id, "request", message_id, _message, state) do
+  def handle_command("matchmaking/list" = cmd_id, "request", _message_id, _message, state) do
     queues =
       Matchmaking.list_queues()
       |> Enum.map(fn {qid, queue} ->
@@ -189,50 +185,37 @@ defmodule Teiserver.Player.TachyonHandler do
         }
       end)
 
-    resp = Schema.response(cmd_id, message_id, %{playlists: queues}) |> Jason.encode!()
-
-    {:reply, :ok, {:text, resp}, state}
+    {:response, cmd_id, %{playlists: queues}, state}
   end
 
-  def handle_command("matchmaking/queue" = cmd_id, "request", message_id, message, state) do
+  def handle_command("matchmaking/queue" = cmd_id, "request", _message_id, message, state) do
     queue_ids = message["data"]["queues"]
 
-    response =
-      case Player.Session.join_queues(state.user.id, queue_ids) do
-        :ok ->
-          Schema.response(cmd_id, message_id)
+    case Player.Session.join_queues(state.user.id, queue_ids) do
+      :ok ->
+        {:response, cmd_id, state}
 
-        {:error, reason} ->
-          reason =
-            case reason do
-              :invalid_queue ->
-                %{reason: :invalid_queue_specified}
+      {:error, reason} ->
+        case reason do
+          :invalid_queue ->
+            {:error_response, cmd_id, :invalid_queue_specified, state}
 
-              :too_many_players ->
-                %{reason: :invalid_request, details: "too many player for a playlist"}
+          :too_many_players ->
+            {:error_response, cmd_id, :invalid_request, "too many player for a playlist", state}
 
-              :missing_engines ->
-                %{reason: :internal_error, details: "missing engine list"}
+          :missing_engines ->
+            {:error_response, cmd_id, :internal_error, "missing engine list", state}
 
-              :missing_games ->
-                %{reason: :internal_error, details: "missing game list"}
+          :missing_games ->
+            {:error_response, cmd_id, :internal_error, "missing game list", state}
 
-              :missing_maps ->
-                %{reason: :internal_error, details: "missing map list"}
+          :missing_maps ->
+            {:error_response, cmd_id, :internal_error, "missing map list", state}
 
-              x ->
-                %{reason: x}
-            end
-
-          Map.merge(reason, %{
-            type: :response,
-            status: :failed,
-            commandId: cmd_id,
-            messageId: message_id
-          })
-      end
-
-    {:push, {:text, Jason.encode!(response)}, state}
+          x ->
+            {:error_response, cmd_id, x, state}
+        end
+    end
   end
 
   def handle_command("matchmaking/cancel" = cmd_id, "request", message_id, _message, state) do
@@ -247,25 +230,18 @@ defmodule Teiserver.Player.TachyonHandler do
         {:push, messages, state}
 
       {:error, reason} ->
-        response = Schema.error_response(cmd_id, message_id, reason)
-        {:push, {:text, Jason.encode!(response)}, state}
+        {:error_response, cmd_id, reason, state}
     end
   end
 
-  def handle_command("matchmaking/ready" = cmd_id, "request", message_id, _message, state) do
-    response =
-      case Player.Session.matchmaking_ready(state.user.id) do
-        :ok ->
-          Schema.response(cmd_id, message_id)
-
-        {:error, :no_match} ->
-          Schema.error_response(cmd_id, message_id, :no_match)
-      end
-
-    {:push, {:text, Jason.encode!(response)}, state}
+  def handle_command("matchmaking/ready" = cmd_id, "request", _message_id, _message, state) do
+    case Player.Session.matchmaking_ready(state.user.id) do
+      :ok -> {:response, cmd_id, nil, state}
+      {:error, :no_match} -> {:error_response, cmd_id, :no_match, state}
+    end
   end
 
-  def handle_command("messaging/send" = cmd_id, "request", message_id, msg, state) do
+  def handle_command("messaging/send" = cmd_id, "request", _message_id, msg, state) do
     with {:ok, target} <- message_target_from_tachyon(msg["data"]["target"]),
          msg <-
            Messaging.new(
@@ -277,8 +253,7 @@ defmodule Teiserver.Player.TachyonHandler do
       {:response, cmd_id, nil, state}
     else
       {:error, :invalid_recipient} ->
-        resp = Schema.error_response(cmd_id, message_id, :invalid_target)
-        {:push, {:text, Jason.encode!(resp)}, state}
+        {:error_response, cmd_id, :invalid_target, state}
     end
   end
 
@@ -299,25 +274,24 @@ defmodule Teiserver.Player.TachyonHandler do
     {:push, messages, state}
   end
 
-  def handle_command("user/info" = cmd_id, "request", message_id, msg, state) do
+  def handle_command("user/info" = cmd_id, "request", _message_id, msg, state) do
     user_id = msg["data"]["userId"]
     user = Account.get_user_by_id(user_id)
 
     if user != nil do
       resp =
-        Schema.response(cmd_id, message_id, %{
+        %{
           userId: to_string(user.id),
           username: user.name,
           displayName: user.name,
           clanId: user.clan_id,
           countryCode: user.country,
           status: :menu
-        })
+        }
 
-      {:reply, :ok, {:text, Jason.encode!(resp)}, state}
+      {:response, cmd_id, resp, state}
     else
-      resp = Schema.error_response(cmd_id, message_id, :unknown_user)
-      {:reply, :error, {:text, Jason.encode!(resp)}, state}
+      {:error_response, cmd_id, :unknown_user, state}
     end
   end
 
@@ -352,7 +326,7 @@ defmodule Teiserver.Player.TachyonHandler do
     {:response, cmd_id, resp, state}
   end
 
-  def handle_command("friend/sendRequest" = cmd_id, "request", message_id, msg, state) do
+  def handle_command("friend/sendRequest" = cmd_id, "request", _message_id, msg, state) do
     with {:ok, target} <- get_user(msg["data"]["to"]),
          {:ok, %Account.FriendRequest{}} <-
            Account.create_friend_request(state.user.id, target.id) do
@@ -360,86 +334,53 @@ defmodule Teiserver.Player.TachyonHandler do
       {:response, cmd_id, nil, state}
     else
       {:error, :invalid_user} ->
-        resp =
-          Schema.error_response(cmd_id, message_id, :invalid_user)
-          |> Jason.encode!()
-
-        {:reply, :ok, {:text, resp}, state}
+        {:error_response, cmd_id, :invalid_user, state}
 
       # this is a bit scuffed and could be refactored so that `create_friend_request`
       # returns an atom instead of a raw string
       {:error, err} when is_binary(err) ->
-        resp =
-          Schema.error_response(cmd_id, message_id, :invalid_user, err)
-          |> Jason.encode!()
-
-        {:reply, :ok, {:text, resp}, state}
+        {:error_response, cmd_id, :invalid_user, state}
 
       err ->
         Logger.error("cannot create friend request #{inspect(err)}")
-
-        resp =
-          Schema.error_response(cmd_id, message_id, :internal_error)
-          |> Jason.encode!()
-
-        {:reply, :ok, {:text, resp}, state}
+        {:error_response, cmd_id, :internal_error, state}
     end
   end
 
-  def handle_command("friend/acceptRequest" = cmd_id, "request", message_id, msg, state) do
+  def handle_command("friend/acceptRequest" = cmd_id, "request", _message_id, msg, state) do
     with {:ok, originator_id} <- parse_user_id(msg["data"]["from"]),
          :ok <- Account.accept_friend_request(originator_id, state.user.id) do
       Player.Session.friend_request_accepted(originator_id, state.user.id)
       {:response, cmd_id, nil, state}
     else
       {:error, :invalid_id} ->
-        resp =
-          Schema.error_response(cmd_id, message_id, :invalid_user)
-          |> Jason.encode!()
-
-        {:reply, :ok, {:text, resp}, state}
+        {:error_response, cmd_id, :invalid_user, state}
 
       {:error, "no request"} ->
-        resp =
-          Schema.error_response(cmd_id, message_id, :no_pending_request)
-          |> Jason.encode!()
-
-        {:reply, :ok, {:text, resp}, state}
+        {:error_response, cmd_id, :no_pending_request, state}
     end
   end
 
-  def handle_command("friend/rejectRequest" = cmd_id, "request", message_id, msg, state) do
+  def handle_command("friend/rejectRequest" = cmd_id, "request", _message_id, msg, state) do
     with {:ok, originator_id} <- parse_user_id(msg["data"]["from"]),
          :ok <- Account.decline_friend_request(originator_id, state.user.id) do
       Player.Session.friend_request_rejected(originator_id, state.user.id)
       {:response, cmd_id, nil, state}
     else
       {:error, :invalid_id} ->
-        resp =
-          Schema.error_response(cmd_id, message_id, :invalid_user)
-          |> Jason.encode!()
-
-        {:reply, :ok, {:text, resp}, state}
+        {:error_response, cmd_id, :invalid_user, state}
 
       {:error, "no request"} ->
-        resp =
-          Schema.error_response(cmd_id, message_id, :no_pending_request)
-          |> Jason.encode!()
-
-        {:reply, :ok, {:text, resp}, state}
+        {:error_response, cmd_id, :no_pending_request, state}
 
       err ->
         Logger.error("Unhandled error in rejectRequest: #{inspect(err)}")
 
-        resp =
-          Schema.error_response(cmd_id, message_id, :internal_error, inspect(err))
-          |> Jason.encode!()
-
-        {:reply, :ok, {:text, resp}, state}
+        {:error_response, cmd_id, :internal_error, inspect(err), state}
     end
   end
 
-  def handle_command("friend/cancelRequest" = cmd_id, "request", message_id, msg, state) do
+  def handle_command("friend/cancelRequest" = cmd_id, "request", _message_id, msg, state) do
     with {:ok, target_id} <- parse_user_id(msg["data"]["to"]),
          :ok <- Account.rescind_friend_request(state.user.id, target_id) do
       Player.Session.friend_request_cancelled(target_id, state.user.id)
@@ -449,15 +390,11 @@ defmodule Teiserver.Player.TachyonHandler do
         {:response, cmd_id, nil, state}
 
       _ ->
-        resp =
-          Schema.error_response(cmd_id, message_id, :invalid_user)
-          |> Jason.encode!()
-
-        {:reply, :ok, {:text, resp}, state}
+        {:error_response, cmd_id, :invalid_user, state}
     end
   end
 
-  def handle_command("friend/remove" = cmd_id, "request", message_id, msg, state) do
+  def handle_command("friend/remove" = cmd_id, "request", _message_id, msg, state) do
     with {:ok, target_id} <- parse_user_id(msg["data"]["userId"]),
          %Account.Friend{} = friend <- Account.get_friend(state.user.id, target_id),
          {:ok, _changeset} <- Account.delete_friend(friend) do
@@ -468,27 +405,16 @@ defmodule Teiserver.Player.TachyonHandler do
         {:response, cmd_id, nil, state}
 
       {:error, :invalid_id} ->
-        resp =
-          Schema.error_response(cmd_id, message_id, :invalid_user)
-          |> Jason.encode!()
+        {:error_response, cmd_id, :invalid_user, state}
 
-        {:reply, :ok, {:text, resp}, state}
-
-      _ ->
-        resp =
-          Schema.error_response(cmd_id, message_id, :internal_error)
-          |> Jason.encode!()
-
-        {:reply, :ok, {:text, resp}, state}
+      err ->
+        Logger.error("can't remove friend #{inspect(err)}")
+        {:error_response, cmd_id, :internal_error, inspect(err), state}
     end
   end
 
-  def handle_command(command_id, _message_type, message_id, _message, state) do
-    resp =
-      Schema.error_response(command_id, message_id, :command_unimplemented)
-      |> Jason.encode!()
-
-    {:reply, :ok, {:text, resp}, state}
+  def handle_command(command_id, _message_type, _message_id, _message, state) do
+    {:error_response, command_id, :command_unimplemented, state}
   end
 
   # Ensure a session is started for the given user id. Register both the session

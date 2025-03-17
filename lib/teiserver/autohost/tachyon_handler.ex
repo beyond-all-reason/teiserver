@@ -122,12 +122,8 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:stop, :normal, 1000, [{:text, resp}], state}
   end
 
-  def handle_command(command_id, _message_type, message_id, _message, state) do
-    resp =
-      Schema.error_response(command_id, message_id, :command_unimplemented)
-      |> Jason.encode!()
-
-    {:reply, :ok, {:text, resp}, state}
+  def handle_command(command_id, _message_type, _message_id, _message, state) do
+    {:error_response, command_id, :command_unimplemented, state}
   end
 
   @impl true
