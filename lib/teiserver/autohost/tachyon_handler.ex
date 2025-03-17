@@ -122,8 +122,8 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:stop, :normal, 1000, [{:text, resp}], state}
   end
 
-  def handle_command(command_id, _message_type, _message_id, _message, state) do
-    {:error_response, command_id, :command_unimplemented, state}
+  def handle_command(_command_id, _message_type, _message_id, _message, state) do
+    {:error_response, :command_unimplemented, state}
   end
 
   @impl true
