@@ -665,27 +665,25 @@ defmodule Teiserver.CacheUser do
     # Ignore !# bot commands like !#JSONRPC
     message =
       if String.starts_with?(message, "!") and !String.starts_with?(message, "!#") do
-        [cmd | rest] = String.split(message, " ", parts: 2)
-
-        cmd
+        message
         |> String.trim()
         |> String.downcase()
         |> case do
-          "!cv joinas" ->
+          ["!cv", "joinas" | _] ->
             "!cv joinas spec"
 
-          "!callvote joinas spec" ->
+          ["!callvote", "joinas" | _] ->
             "!callvote joinas spec"
 
-          "!joinas" ->
+          ["!joinas" | _] ->
             "!joinas spec"
 
-          "!clan" ->
+          ["!clan"] ->
             clan_command(from_id)
             "!clan"
 
-          processed_cmd ->
-            [processed_cmd | rest] |> Enum.join(" ")
+          _ ->
+            message
         end
       else
         message
