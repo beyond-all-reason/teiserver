@@ -16,14 +16,14 @@ defmodule Teiserver.Tachyon.Handler do
 
   @typedoc """
   Value to return to send an event to the peer.
-  {:event, cmd_id, payload, state}
-  {:response, cmd_id, payload, state}
-  {:request, cmd_id, paylcad, opts, state}
   """
   @type tachyon_result ::
-          {:event, Schema.command_id(), term(), term()}
-          | {:response, Schema.command_id(), term(), term()}
-          | {:request, Schema.command_id(), term(), request_opts(), term()}
+          {:event, Schema.command_id(), payload :: term(), state :: term()}
+          | {:response, payload :: term(), state :: term()}
+          | {:error_response, reason :: String.t() | atom(), state :: term()}
+          | {:error_response, reason :: String.t() | atom(), details :: String.t(),
+             state :: term()}
+          | {:request, Schema.command_id(), payload :: term(), request_opts(), state :: term()}
 
   @type result :: tachyon_result() | WebSock.handle_result()
 

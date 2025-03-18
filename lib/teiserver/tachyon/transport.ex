@@ -142,7 +142,7 @@ defmodule Teiserver.Tachyon.Transport do
           result =
             state.handler.handle_response(command_id, cb_state, message, state.handler_state)
 
-          handle_result(result, message_id, state)
+          handle_result(result, command_id, message_id, state)
         else
           {:ok, state}
         end
@@ -160,7 +160,7 @@ defmodule Teiserver.Tachyon.Transport do
       )
 
     try do
-      handle_result(result, message_id, state)
+      handle_result(result, command_id, message_id, state)
     rescue
       e ->
         str_err = inspect({e, __STACKTRACE__})
@@ -171,20 +171,43 @@ defmodule Teiserver.Tachyon.Transport do
     end
   end
 
-  @spec handle_result(Handler.result(), connection_state()) :: WebSock.handle_result()
-  defp handle_result(result, conn_state), do: handle_result(result, nil, conn_state)
+  @spec handle_result(Handler.result(), connection_state()) ::
+          WebSock.handle_result()
+  defp handle_result(result, conn_state),
+    do: handle_result(result, nil, nil, conn_state)
 
   # helper function to use the result from the invoked handler function
-  @spec handle_result(Handler.result(), Schema.message_id() | nil, connection_state()) ::
+  @spec handle_result(
+          Handler.result(),
+          Schema.command_id() | nil,
+          Schema.message_id() | nil,
+          connection_state()
+        ) ::
           WebSock.handle_result()
-  defp handle_result(result, message_id, conn_state) do
+  defp handle_result(result, command_id, message_id, conn_state) do
     case result do
+      {:event, cmd_id, state} ->
+        message = Schema.event(cmd_id) |> Jason.encode!()
+        {:push, [{:text, message}], %{conn_state | handler_state: state}}
+
       {:event, cmd_id, payload, state} ->
         message = Schema.event(cmd_id, payload) |> Jason.encode!()
         {:push, [{:text, message}], %{conn_state | handler_state: state}}
 
-      {:response, cmd_id, payload, state} ->
-        message = Schema.response(cmd_id, message_id, payload)
+      {:response, state} ->
+        message = Schema.response(command_id, message_id)
+        {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
+
+      {:response, payload, state} ->
+        message = Schema.response(command_id, message_id, payload)
+        {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
+
+      {:error_response, reason, state} ->
+        message = Schema.error_response(command_id, message_id, reason)
+        {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
+
+      {:error_response, reason, details, state} ->
+        message = Schema.error_response(command_id, message_id, reason, details)
         {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
 
       {:request, cmd_id, payload, opts, state} ->
