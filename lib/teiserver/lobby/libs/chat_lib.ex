@@ -15,30 +15,29 @@ defmodule Teiserver.Lobby.ChatLib do
     # Ignore !# bot commands like !#JSONRPC
     msg =
       if String.starts_with?(msg, "!") and !String.starts_with?(msg, "!#") do
-        [cmd | rest] = String.split(msg, " ", parts: 2)
-
-        cmd
+        msg
         |> String.trim()
         |> String.downcase()
+        |> String.split()
         |> case do
-          "!cv joinas" ->
+          ["!cv", "joinas" | _] ->
             "!cv joinas spec"
 
-          "!callvote joinas spec" ->
+          ["!callvote", "joinas" | _] ->
             "!callvote joinas spec"
 
-          "!joinas" ->
+          ["!joinas" | _] ->
             "!joinas spec"
 
-          "!clan" ->
+          ["!clan"] ->
             clan_command(userid)
             "!clan"
 
-          "!joinq" ->
+          ["!joinq"] ->
             "$joinq"
 
-          processed_cmd ->
-            [processed_cmd | rest] |> Enum.join(" ")
+          _ ->
+            msg
         end
       else
         msg
