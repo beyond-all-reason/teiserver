@@ -45,6 +45,7 @@ end
 defmodule Teiserver.Game.BalancerServerTest do
   @moduledoc false
   use Teiserver.DataCase, async: false
+  import Teiserver.Support.Polling, only: [poll_until_nil: 1]
 
   @moduletag :balance_test
   alias Teiserver.Game.BalancerServer
@@ -62,7 +63,7 @@ defmodule Teiserver.Game.BalancerServerTest do
       "data" => params["data"] || %{}
     }
 
-    {:ok, u} =
+    {:ok, _u} =
       Teiserver.Account.create_user(requested_user)
   end
 
@@ -75,7 +76,7 @@ defmodule Teiserver.Game.BalancerServerTest do
   def make_users_with_ranks_and_parties(list_of_ranks, list_of_parties) do
     users =
       Enum.with_index(list_of_ranks)
-      |> Enum.map(fn {user, index} ->
+      |> Enum.map(fn {_user, index} ->
         %{
           "name" => "user" <> to_string(index + 1) <> "_" <> to_string(ExULID.ULID.generate()),
           "email" => to_string(ExULID.ULID.generate()) <> "@example.com",
@@ -108,19 +109,9 @@ defmodule Teiserver.Game.BalancerServerTest do
 
     players =
       make_users_with_ranks_and_parties([10, 20, 30, 40, 50, 60], [1, 2, 3, 4, 5, 6])
-
-    dbg(players)
-
-    players2 =
-      players
       |> Enum.map(fn x -> Map.put(x, :userid, x.id) end)
 
-    dbg(players2)
-
     {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
-
-    starting_state = GenServer.call(pid, :report_state)
-    dbg(starting_state)
 
     first_balance_pass =
       GenServer.call(
@@ -128,21 +119,15 @@ defmodule Teiserver.Game.BalancerServerTest do
         {:make_balance, team_count, [], players}
       )
 
-    state2 = GenServer.call(pid, :report_state)
-    dbg(state2)
-
     second_balance_pass_hash_reuse =
       GenServer.call(
         pid,
         {:make_balance, team_count, [], players}
       )
 
-    state3 = GenServer.call(pid, :report_state)
-    dbg(state3)
-
     assert second_balance_pass_hash_reuse.hash == first_balance_pass.hash
 
-    [_first_player | player_list_with_one_less_player] = players
+    player_list_with_one_less_player = tl(players)
 
     third_balance_pass_with_fewer_players =
       GenServer.call(
@@ -151,51 +136,80 @@ defmodule Teiserver.Game.BalancerServerTest do
       )
 
     assert second_balance_pass_hash_reuse.hash != third_balance_pass_with_fewer_players.hash
-    dbg(GenServer.call(pid, :report_state))
   end
 
-  test "get_balance_mode works with a hash" do
+  test "get_current_balance returns a result" do
     team_count = 2
 
     players = make_users_with_ranks_and_parties([10, 20, 30, 40], [1, 2, 3, 4])
 
     {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
 
-    starting_state = GenServer.call(pid, :report_state)
+    GenServer.call(
+      pid,
+      {:make_balance, team_count, [], players}
+    )
 
-    first_balance_pass =
-      GenServer.call(
-        pid,
-        {:make_balance, team_count, [], players}
-      )
-
-    get_balance_mode_returns_value =
-      GenServer.call(
-        pid,
-        :get_balance_mode
-      )
-
-    refute get_balance_mode_returns_value == nil
+    refute GenServer.call(pid, :get_current_balance) == nil
   end
 
-  test "get_current_balance works with a hash" do
+  test "reset_hashes clears hash and result" do
     team_count = 2
 
     players = make_users_with_ranks_and_parties([10, 20, 30, 40], [1, 2, 3, 4])
 
     {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
 
-    starting_state = GenServer.call(pid, :report_state)
+    GenServer.call(
+      pid,
+      {:make_balance, team_count, [], players}
+    )
 
-    first_balance_pass =
-      GenServer.call(
-        pid,
-        {:make_balance, team_count, [], players}
-      )
+    refute GenServer.call(pid, :get_current_balance) == nil
 
-    get_balance_mode_returns_value =
-      GenServer.call(pid, :get_current_balance)
+    with {:ok, value} <- Map.fetch(GenServer.call(pid, :report_state), :last_balance_result) do
+      refute value == nil
+    end
 
-    refute get_balance_mode_returns_value == nil
+    GenServer.cast(
+      pid,
+      :reset_hashes
+    )
+
+    poll_until_nil(fn -> GenServer.call(pid, :get_current_balance) end)
+
+    with {:ok, hash} <- Map.fetch(GenServer.call(pid, :report_state), :last_balance_hash) do
+      assert hash == nil
+    end
+  end
+
+  test "setting the balance mode resets the hash" do
+    team_count = 2
+
+    players = make_users_with_ranks_and_parties([10, 20, 30, 40], [1, 2, 3, 4])
+
+    {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
+
+    GenServer.call(
+      pid,
+      {:make_balance, team_count, [], players}
+    )
+
+    refute GenServer.call(pid, :get_current_balance) == nil
+
+    with {:ok, value} <- Map.fetch(GenServer.call(pid, :report_state), :last_balance_result) do
+      refute value == nil
+    end
+
+    GenServer.cast(
+      pid,
+      {:set, :rating_upper_boundary, 100}
+    )
+
+    poll_until_nil(fn -> GenServer.call(pid, :get_current_balance) end)
+
+    with {:ok, hash} <- Map.fetch(GenServer.call(pid, :report_state), :last_balance_hash) do
+      assert hash == nil
+    end
   end
 end

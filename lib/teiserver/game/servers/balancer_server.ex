@@ -95,7 +95,7 @@ defmodule Teiserver.Game.BalancerServer do
 
   @impl true
   def handle_cast(:reset_hashes, state) do
-    {:noreply, %{state | hashes: %{}}}
+    {:noreply, %{state | last_balance_hash: nil, last_balance_result: nil}}
   end
 
   def handle_cast({:set_algorithm, algorithm}, state) do
@@ -118,7 +118,8 @@ defmodule Teiserver.Game.BalancerServer do
         true ->
           state
           |> Map.put(key, value)
-          |> Map.put(:hashes, %{})
+          |> Map.put(:last_balance_hash, nil)
+          |> Map.put(:last_balance_result, nil)
 
         false ->
           state
