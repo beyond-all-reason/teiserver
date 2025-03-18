@@ -199,10 +199,9 @@ defmodule Teiserver.Game.BalancerServer do
     |> Base.encode64()
   end
 
-  # This function is public only for testing; it should not be called otherwise
-  # long term, there in interest in confirming this is a stateless pure function, which would make this easier to test
+  # long term, there in interest in confirming do_make_balance is a stateless pure function, which would make it easier to test
   @spec do_make_balance(non_neg_integer(), [T.client()], List.t()) :: map()
-  def do_make_balance(team_count, players, opts) do
+  defp do_make_balance(team_count, players, opts) do
     team_size = calculate_team_size(team_count, players)
 
     # Use Large Team ratings when balancing Team FFA

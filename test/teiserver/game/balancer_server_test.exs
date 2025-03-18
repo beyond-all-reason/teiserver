@@ -183,7 +183,7 @@ defmodule Teiserver.Game.BalancerServerTest do
     end
   end
 
-  test "setting the balance mode resets the hash" do
+  test "setting the balance mode clears the hash and result" do
     team_count = 2
 
     players = make_users_with_ranks_and_parties([10, 20, 30, 40], [1, 2, 3, 4])
