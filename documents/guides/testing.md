@@ -9,9 +9,6 @@ The balance test cases have `@moduletag :balance_test` and you can test them whi
 mix test --only balance_test
 ```
 
-## Integration tests
-We have a separate project to perform integration tests on Teiserver called [Hailstorm](https://github.com/beyond-all-reason/hailstorm). All Hailstorm documentation is located on the Hailstorm repo.
-
 ## Debugging with VSCode using ElixirLS
 You can run the server in the visual studio code debugger using the ElixirLS extension
 
