@@ -19,7 +19,8 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   alias Mix.Tasks.Teiserver.PartyBalanceStatsTypes, as: PB
   alias Teiserver.Config
 
-  @provisional_num_matches_cutoff 20
+  @noob_matches_cutoff 20
+  @num_matches_to_process 2000
 
   def run(args) do
     Logger.info("Args: #{args}")
@@ -31,8 +32,20 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
     match_ids = get_match_ids()
 
     initial_errors = %{
-      noob_matches: %{openskill_error: 0, bar_error: 0, provisional_error: 0, num_matches: 0},
-      pro_matches: %{openskill_error: 0, bar_error: 0, provisional_error: 0, num_matches: 0}
+      noob_matches: %{
+        openskill_error: 0,
+        bar_error: 0,
+        provisional_10_error: 0,
+        provisional_20_error: 0,
+        num_matches: 0
+      },
+      pro_matches: %{
+        openskill_error: 0,
+        bar_error: 0,
+        provisional_10_error: 0,
+        provisional_20_error: 0,
+        num_matches: 0
+      }
     }
 
     # The error result will be the sum of forecast error squared for all matches
@@ -49,7 +62,10 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
           updated_errors = %{
             openskill_error: match_error.openskill_error + acc[key][:openskill_error],
             bar_error: match_error.bar_error + acc[key][:bar_error],
-            provisional_error: match_error.provisional_error + acc[key][:provisional_error],
+            provisional_10_error:
+              match_error.provisional_10_error + acc[key][:provisional_10_error],
+            provisional_20_error:
+              match_error.provisional_20_error + acc[key][:provisional_20_error],
             num_matches: acc[key][:num_matches] + 1
           }
 
@@ -71,7 +87,8 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
          %{
            openskill_error: openskill_error,
            bar_error: bar_error,
-           provisional_error: provisional_error,
+           provisional_10_error: provisional_10_error,
+           provisional_20_error: provisional_20_error,
            num_matches: num_matches
          } = error_result
        ) do
@@ -81,14 +98,16 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
       %{
         openskill_brier: 0,
         bar_brier: 0,
-        provisional_brier: 0,
+        provisional_10_brier: 0,
+        provisional_20_brier: 0,
         num_matches: 0
       }
     else
       %{
         openskill_brier: openskill_error / num_matches,
         bar_brier: bar_error / num_matches,
-        provisional_brier: provisional_error / num_matches,
+        provisional_10_brier: provisional_10_error / num_matches,
+        provisional_20_brier: provisional_20_error / num_matches,
         num_matches: num_matches
       }
     end
@@ -104,14 +123,15 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
     and tbm.team_count = $2
     and tgrl.value is not null
     order by tbm.inserted_at DESC
-    limit 1000;
+    limit $3;
 
     """
 
     min_team_size = 2
     team_count = 2
 
-    sql_results = Ecto.Adapters.SQL.query!(Repo, query, [min_team_size, team_count])
+    sql_results =
+      Ecto.Adapters.SQL.query!(Repo, query, [min_team_size, team_count, @num_matches_to_process])
 
     sql_results.rows
     |> Enum.map(fn [id, _inserted] ->
@@ -165,12 +185,13 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
       }
     else
       has_noobs? =
-        players |> Enum.any?(fn x -> x.num_matches < @provisional_num_matches_cutoff end)
+        players |> Enum.any?(fn x -> x.num_matches < @noob_matches_cutoff end)
 
       %{
         openskill_error: process_sql_result(teams, :openskill),
         bar_error: process_sql_result(teams, :bar),
-        provisional_error: process_sql_result(teams, :provisional),
+        provisional_10_error: process_sql_result(teams, :provisional_10),
+        provisional_20_error: process_sql_result(teams, :provisional_20),
         has_noobs?: has_noobs?,
         invalid_match?: false
       }
@@ -204,10 +225,20 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   end
 
   defp get_rating(player, rating_system) do
+    num_matches = player.num_matches || 0
+
     case rating_system do
-      :openskill -> player.skill
-      :bar -> max(player.skill - player.uncertainty, 0)
-      :provisional -> min(player.num_matches / @provisional_num_matches_cutoff, 1) * player.skill
+      :openskill ->
+        player.skill
+
+      :bar ->
+        max(player.skill - player.uncertainty, 0)
+
+      :provisional_20 ->
+        min(num_matches / 20, 1) * (player.skill - player.uncertainty)
+
+      :provisional_10 ->
+        min(num_matches / 10, 1) * (player.skill - player.uncertainty)
     end
   end
 end
