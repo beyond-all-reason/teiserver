@@ -15,6 +15,8 @@ defmodule Teiserver.Account.Rating do
     field :last_updated, :utc_datetime
     field :num_matches, :integer
     field :num_wins, :integer
+
+    field :season, :integer
   end
 
   @doc false
@@ -22,11 +24,11 @@ defmodule Teiserver.Account.Rating do
     stats
     |> cast(
       attrs,
-      ~w(user_id rating_type_id rating_value skill uncertainty last_updated leaderboard_rating num_matches num_wins)a
+      ~w(user_id rating_type_id rating_value skill uncertainty last_updated leaderboard_rating num_matches num_wins season)a
     )
     # fields below are required; num_matches is not required
     |> validate_required(
-      ~w(user_id rating_type_id rating_value skill uncertainty last_updated leaderboard_rating)a
+      ~w(user_id rating_type_id rating_value skill uncertainty last_updated leaderboard_rating season)a
     )
   end
 end

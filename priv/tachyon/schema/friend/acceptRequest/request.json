@@ -1,0 +1,25 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/friend/acceptRequest/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "FriendAcceptRequestRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "friend/acceptRequest" },
+        "data": {
+            "title": "FriendAcceptRequestRequestData",
+            "type": "object",
+            "properties": {
+                "from": { "$ref": "../../definitions/userId.json" }
+            },
+            "required": ["from"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

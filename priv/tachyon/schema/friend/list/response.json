@@ -1,0 +1,99 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/friend/list/response.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "FriendListResponse",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "anyOf": [
+        {
+            "title": "FriendListOkResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "friend/list" },
+                "status": { "const": "success" },
+                "data": {
+                    "title": "FriendListOkResponseData",
+                    "type": "object",
+                    "properties": {
+                        "friends": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "userId": {
+                                        "$ref": "../../definitions/userId.json"
+                                    },
+                                    "addedAt": {
+                                        "$ref": "../../definitions/unixTime.json"
+                                    }
+                                },
+                                "required": ["userId", "addedAt"]
+                            }
+                        },
+                        "outgoingPendingRequests": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "to": {
+                                        "$ref": "../../definitions/userId.json"
+                                    },
+                                    "sentAt": {
+                                        "$ref": "../../definitions/unixTime.json"
+                                    }
+                                },
+                                "required": ["to", "sentAt"]
+                            }
+                        },
+                        "incomingPendingRequests": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "from": {
+                                        "$ref": "../../definitions/userId.json"
+                                    },
+                                    "sentAt": {
+                                        "$ref": "../../definitions/unixTime.json"
+                                    }
+                                },
+                                "required": ["from", "sentAt"]
+                            }
+                        }
+                    },
+                    "required": [
+                        "friends",
+                        "outgoingPendingRequests",
+                        "incomingPendingRequests"
+                    ]
+                }
+            },
+            "required": ["type", "messageId", "commandId", "status", "data"]
+        },
+        {
+            "title": "FriendListFailResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "friend/list" },
+                "status": { "const": "failed" },
+                "reason": {
+                    "enum": [
+                        "internal_error",
+                        "unauthorized",
+                        "invalid_request",
+                        "command_unimplemented"
+                    ]
+                },
+                "details": { "type": "string" }
+            },
+            "required": ["type", "messageId", "commandId", "status", "reason"]
+        }
+    ]
+}

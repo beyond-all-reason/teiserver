@@ -5,10 +5,14 @@ defmodule Teiserver.Support.Tachyon do
 
   alias Teiserver.Support.Polling
 
+  def create_user() do
+    Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+  end
+
   def setup_client(_context), do: setup_client()
 
   def setup_client() do
-    user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    user = create_user()
     %{client: client, token: token} = connect(user)
 
     ExUnit.Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
@@ -295,5 +299,35 @@ defmodule Teiserver.Support.Tachyon do
     :ok = send_request(client, "user/info", %{userId: to_string(user_id)})
     {:ok, resp} = recv_message(client)
     resp
+  end
+
+  def friend_list!(client) do
+    :ok = send_request(client, "friend/list")
+    recv_message!(client)
+  end
+
+  def send_friend_request!(client, user_id) do
+    :ok = send_request(client, "friend/sendRequest", %{to: to_string(user_id)})
+    recv_message!(client)
+  end
+
+  def accept_friend_request!(client, from_id) do
+    :ok = send_request(client, "friend/acceptRequest", %{from: to_string(from_id)})
+    recv_message!(client)
+  end
+
+  def reject_friend_request!(client, from_id) do
+    :ok = send_request(client, "friend/rejectRequest", %{from: to_string(from_id)})
+    recv_message!(client)
+  end
+
+  def cancel_friend_request!(client, user_id) do
+    :ok = send_request(client, "friend/cancelRequest", %{to: to_string(user_id)})
+    recv_message!(client)
+  end
+
+  def remove_friend!(client, friend_id) do
+    :ok = send_request(client, "friend/remove", %{userId: to_string(friend_id)})
+    recv_message!(client)
   end
 end

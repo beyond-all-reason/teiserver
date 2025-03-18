@@ -1,0 +1,45 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/friend/remove/response.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "FriendRemoveResponse",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "anyOf": [
+        {
+            "title": "FriendRemoveOkResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "friend/remove" },
+                "status": { "const": "success" }
+            },
+            "required": ["type", "messageId", "commandId", "status"]
+        },
+        {
+            "title": "FriendRemoveFailResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "friend/remove" },
+                "status": { "const": "failed" },
+                "reason": {
+                    "enum": [
+                        "invalid_user",
+                        "not_in_friendlist",
+                        "internal_error",
+                        "unauthorized",
+                        "invalid_request",
+                        "command_unimplemented"
+                    ]
+                },
+                "details": { "type": "string" }
+            },
+            "required": ["type", "messageId", "commandId", "status", "reason"]
+        }
+    ]
+}

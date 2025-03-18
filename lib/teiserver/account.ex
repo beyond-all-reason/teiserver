@@ -6,7 +6,7 @@ defmodule Teiserver.Account do
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub
   alias Teiserver.Helper.QueryHelpers
-
+  alias Teiserver.Config
   alias Teiserver.Account.UserLib
 
   @type t :: UserLib.t()
@@ -941,12 +941,33 @@ defmodule Teiserver.Account do
     end)
   end
 
+  def get_rating(user_id, rating_type_id, season)
+      when is_integer(user_id) and is_integer(rating_type_id) and is_integer(season) do
+    Teiserver.cache_get_or_store(:teiserver_user_ratings, {user_id, rating_type_id, season}, fn ->
+      rating_query(
+        search: [
+          user_id: user_id,
+          rating_type_id: rating_type_id,
+          season: season
+        ],
+        limit: 1
+      )
+      |> Repo.one()
+    end)
+  end
+
   @spec get_player_highest_leaderboard_rating(T.userid()) :: number()
   def get_player_highest_leaderboard_rating(user_id) do
+    get_player_highest_leaderboard_rating(user_id, Config.get_site_config_cache("rating.Season"))
+  end
+
+  @spec get_player_highest_leaderboard_rating(T.userid(), integer()) :: number()
+  def get_player_highest_leaderboard_rating(user_id, season) do
     result =
       rating_query(
         search: [
-          user_id: user_id
+          user_id: user_id,
+          season: season
         ],
         select: [:leaderboard_rating],
         order_by: "Leaderboard rating high to low",
@@ -1607,6 +1628,17 @@ defmodule Teiserver.Account do
   end
 
   @doc """
+  Returns the list of friends for the given user
+  """
+  @spec list_friends_for_user(map() | T.userid()) :: [map()]
+  def list_friends_for_user(%{id: id}), do: list_friends_for_user(id)
+
+  def list_friends_for_user(user_id) do
+    FriendQueries.query_friends(where: [either_user_is: user_id])
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a single friend.
 
   Raises `Ecto.NoResultsError` if the Friend does not exist.
@@ -1952,6 +1984,9 @@ defmodule Teiserver.Account do
 
   @spec list_outgoing_friend_requests_of_userid(T.userid()) :: [T.userid()]
   defdelegate list_outgoing_friend_requests_of_userid(userid), to: FriendRequestLib
+
+  @spec list_requests_for_user(T.userid()) :: {outgoing :: [map()], incoming :: [map()]}
+  defdelegate list_requests_for_user(userid), to: FriendRequestLib
 
   @spec list_incoming_friend_requests_of_userid(T.userid()) :: [T.userid()]
   defdelegate list_incoming_friend_requests_of_userid(userid), to: FriendRequestLib
