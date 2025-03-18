@@ -136,6 +136,7 @@ defmodule Teiserver.SpringTcpServer do
       # Connection microstate
       msg_id: nil,
       lobby_id: nil,
+      party_id: nil,
       room_member_cache: %{},
       known_users: %{},
       known_battles: [],
