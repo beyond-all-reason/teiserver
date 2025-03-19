@@ -22,6 +22,8 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   @noob_matches_cutoff 20
   @num_matches_to_process 2000
 
+  @rating_systems [:openskill, :bar, :provisional_10, :provisional_20]
+
   def run(args) do
     Logger.info("Args: #{args}")
     write_log_filepath = Enum.at(args, 0, nil)
@@ -33,17 +35,11 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
 
     initial_errors = %{
       noob_matches: %{
-        openskill_error: 0,
-        bar_error: 0,
-        provisional_10_error: 0,
-        provisional_20_error: 0,
+        errors: [],
         num_matches: 0
       },
       pro_matches: %{
-        openskill_error: 0,
-        bar_error: 0,
-        provisional_10_error: 0,
-        provisional_20_error: 0,
+        errors: [],
         num_matches: 0
       }
     }
@@ -60,13 +56,8 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
 
           # We simply add the errors for each match
           updated_errors = %{
-            openskill_error: match_error.openskill_error + acc[key][:openskill_error],
-            bar_error: match_error.bar_error + acc[key][:bar_error],
-            provisional_10_error:
-              match_error.provisional_10_error + acc[key][:provisional_10_error],
-            provisional_20_error:
-              match_error.provisional_20_error + acc[key][:provisional_20_error],
-            num_matches: acc[key][:num_matches] + 1
+            errors: match_error.errors ++ acc[key].errors,
+            num_matches: acc[key].num_matches + 1
           }
 
           Map.put(acc, key, updated_errors)
@@ -79,38 +70,27 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
       pro_matches: convert_error_result_to_brier_score(error_result.pro_matches)
     }
 
-    IO.inspect(brier_score, label: "brier_score", charlists: :as_lists)
     Logger.info("Finished processing matches")
   end
 
-  defp convert_error_result_to_brier_score(
-         %{
-           openskill_error: openskill_error,
-           bar_error: bar_error,
-           provisional_10_error: provisional_10_error,
-           provisional_20_error: provisional_20_error,
-           num_matches: num_matches
-         } = error_result
-       ) do
-    # Don't divide by zero
+  defp convert_error_result_to_brier_score(error_result) do
+    Enum.map(@rating_systems, fn rating_system ->
+      errors =
+        error_result.errors
+        |> Enum.filter(fn x -> x.rating_system == rating_system end)
 
-    if(num_matches == 0) do
+      mean_squared_error_sum =
+        errors
+        |> Enum.reduce(0, fn x, acc -> x.mean_squared_error + acc end)
+
+      num_matches = Enum.count(errors)
+      brier_score = mean_squared_error_sum / num_matches
+
       %{
-        openskill_brier: 0,
-        bar_brier: 0,
-        provisional_10_brier: 0,
-        provisional_20_brier: 0,
-        num_matches: 0
+        rating_system: rating_system,
+        brier_score: brier_score
       }
-    else
-      %{
-        openskill_brier: openskill_error / num_matches,
-        bar_brier: bar_error / num_matches,
-        provisional_10_brier: provisional_10_error / num_matches,
-        provisional_20_brier: provisional_20_error / num_matches,
-        num_matches: num_matches
-      }
-    end
+    end)
   end
 
   defp get_match_ids() do
@@ -187,11 +167,16 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
       has_noobs? =
         players |> Enum.any?(fn x -> x.num_matches < @noob_matches_cutoff end)
 
+      errors =
+        Enum.map(@rating_systems, fn rating_system ->
+          %{
+            rating_system: rating_system,
+            mean_squared_error: process_sql_result(teams, rating_system)
+          }
+        end)
+
       %{
-        openskill_error: process_sql_result(teams, :openskill),
-        bar_error: process_sql_result(teams, :bar),
-        provisional_10_error: process_sql_result(teams, :provisional_10),
-        provisional_20_error: process_sql_result(teams, :provisional_20),
+        errors: errors,
         has_noobs?: has_noobs?,
         invalid_match?: false
       }
