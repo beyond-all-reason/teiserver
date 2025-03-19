@@ -70,6 +70,7 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
       pro_matches: convert_error_result_to_brier_score(error_result.pro_matches)
     }
 
+    IO.inspect(brier_score, label: "brier_score", charlists: :as_lists)
     Logger.info("Finished processing matches")
   end
 
