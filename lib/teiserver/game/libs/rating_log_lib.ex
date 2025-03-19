@@ -93,6 +93,11 @@ defmodule Teiserver.Game.RatingLogLib do
       where: rating_logs.inserted_at < ^datetime
   end
 
+  def _search(query, :season, season) do
+    from rating_logs in query,
+      where: rating_logs.season == ^season
+  end
+
   def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 

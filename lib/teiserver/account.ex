@@ -929,16 +929,7 @@ defmodule Teiserver.Account do
 
   def get_rating(user_id, rating_type_id)
       when is_integer(user_id) and is_integer(rating_type_id) do
-    Teiserver.cache_get_or_store(:teiserver_user_ratings, {user_id, rating_type_id}, fn ->
-      rating_query(
-        search: [
-          user_id: user_id,
-          rating_type_id: rating_type_id
-        ],
-        limit: 1
-      )
-      |> Repo.one()
-    end)
+    get_rating(user_id, rating_type_id, Config.get_site_config_cache("rating.Season"))
   end
 
   def get_rating(user_id, rating_type_id, season)
