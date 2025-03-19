@@ -434,7 +434,8 @@ defmodule TeiserverWeb.Router do
 
   scope "/teiserver/api/public", TeiserverWeb.API, as: :ts do
     pipe_through([:api])
-    get "/leaderboard/:type", PublicController, :leaderboard
+    get "/leaderboard", PublicController, :leaderboard
+    get "/leaderboard/:season", PublicController, :leaderboard
   end
 
   scope "/teiserver/api", TeiserverWeb.API do
