@@ -1,14 +1,11 @@
-defmodule Mix.Tasks.Teiserver.PredictionStats do
+defmodule Mix.Tasks.Teiserver.BrierStats do
   @moduledoc """
   The purpose of this task is to get statistics on how well we predict the winner of a match. We use the BrierScore to measure prediction accuracy
 
   To run:
 
-  mix teiserver.prediction_stats
+  mix teiserver.brier_stats
 
-
-  On integration server it is recommended you output to a specific path as follows:
-  mix teiserver.prediction_stats /var/log/teiserver/prediction_results.txt
   """
 
   use Mix.Task
