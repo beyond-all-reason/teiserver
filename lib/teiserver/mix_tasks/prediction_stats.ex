@@ -89,7 +89,8 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
 
       %{
         rating_system: rating_system,
-        brier_score: brier_score
+        brier_score: brier_score,
+        num_matches: num_matches
       }
     end)
   end
