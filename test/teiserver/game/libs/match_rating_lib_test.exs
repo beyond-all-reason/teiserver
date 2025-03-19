@@ -18,12 +18,14 @@ defmodule Teiserver.Game.MatchRatingLibTest do
 
     # Check ratings of users before we rate the match
     rating_type_id = Game.get_or_add_rating_type(match.game_type)
+    season = MatchRatingLib.active_season()
 
     ratings =
       Account.list_ratings(
         search: [
           rating_type_id: rating_type_id,
-          user_id_in: [user1.id, user2.id]
+          user_id_in: [user1.id, user2.id],
+          season: season
         ]
       )
       |> Map.new(fn rating ->
@@ -51,7 +53,8 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     rating_logs =
       Game.list_rating_logs(
         search: [
-          match_id: match.id
+          match_id: match.id,
+          season: season
         ],
         limit: :infinity
       )
@@ -135,7 +138,8 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     Account.list_ratings(
       search: [
         rating_type_id: rating_type_id,
-        user_id_in: userids
+        user_id_in: userids,
+        season: MatchRatingLib.active_season()
       ]
     )
     |> Map.new(fn rating ->

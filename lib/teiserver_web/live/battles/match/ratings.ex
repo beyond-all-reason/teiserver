@@ -10,7 +10,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     user_ratings =
       Account.list_ratings(
         search: [
-          user_id: socket.assigns.current_user.id
+          user_id: socket.assigns.current_user.id,
+          season: MatchRatingLib.active_season()
         ],
         preload: [:rating_type]
       )
@@ -92,7 +93,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
       Game.list_rating_logs(
         search: [
           user_id: user.id,
-          rating_type_id: filter_type_id
+          rating_type_id: filter_type_id,
+          season: MatchRatingLib.active_season()
         ],
         order_by: "Newest first",
         limit: 50,

@@ -41,7 +41,8 @@ defmodule TeiserverWeb.Battle.RatingsController do
       Account.list_ratings(
         search: [
           rating_type_id: type_id,
-          updated_after: activity_time
+          updated_after: activity_time,
+          season: MatchRatingLib.active_season()
         ],
         order_by: "Leaderboard rating high to low",
         preload: [:user],

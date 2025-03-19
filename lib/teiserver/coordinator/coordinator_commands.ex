@@ -188,7 +188,8 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     ratings =
       Account.list_ratings(
         search: [
-          user_id: sender.id
+          user_id: sender.id,
+          season: Teiserver.Game.MatchRatingLib.active_season()
         ],
         preload: [:rating_type]
       )
@@ -273,7 +274,8 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         ratings =
           Account.list_ratings(
             search: [
-              user_id: user.id
+              user_id: user.id,
+              season: Teiserver.Game.MatchRatingLib.active_season()
             ],
             preload: [:rating_type]
           )

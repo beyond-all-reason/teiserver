@@ -36,11 +36,13 @@ defmodule Teiserver.Game.PlayerRatingsExport do
     start_time = System.system_time(:second)
 
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[params["rating_type"]]
+    season = MatchRatingLib.active_season()
 
     ratings =
       Account.list_ratings(
         search: [
-          rating_type_id: rating_type_id
+          rating_type_id: rating_type_id,
+          season: season
         ],
         select:
           ~w(user_id rating_type_id rating_value skill uncertainty leaderboard_rating last_updated)a,

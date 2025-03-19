@@ -90,11 +90,13 @@ defmodule TeiserverWeb.Battle.MatchController do
 
     filter = params["filter"] || "Large Team"
     filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter] || 1
+    season = MatchRatingLib.active_season()
 
     ratings =
       Account.list_ratings(
         search: [
-          user_id: user.id
+          user_id: user.id,
+          season: season
         ],
         preload: [:rating_type]
       )
@@ -106,7 +108,8 @@ defmodule TeiserverWeb.Battle.MatchController do
       Game.list_rating_logs(
         search: [
           user_id: user.id,
-          rating_type_id: filter_type_id
+          rating_type_id: filter_type_id,
+          season: season
         ],
         order_by: "Newest first",
         limit: 50,
@@ -146,11 +149,13 @@ defmodule TeiserverWeb.Battle.MatchController do
 
     filter = params["filter"] || "Large Team"
     filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter] || 1
+    season = MatchRatingLib.active_season()
 
     ratings =
       Account.list_ratings(
         search: [
-          user_id: user.id
+          user_id: user.id,
+          season: season
         ],
         preload: [:rating_type]
       )
@@ -162,7 +167,8 @@ defmodule TeiserverWeb.Battle.MatchController do
       Game.list_rating_logs(
         search: [
           user_id: user.id,
-          rating_type_id: filter_type_id
+          rating_type_id: filter_type_id,
+          season: season
         ],
         order_by: "Newest first",
         limit: 50,
