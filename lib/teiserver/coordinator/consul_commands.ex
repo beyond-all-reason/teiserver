@@ -1488,19 +1488,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     %{state | locks: new_locks}
   end
 
-  # Used for some hailstorm tests for now
-  def handle_command(%{command: "makebalance"} = cmd, state) do
-    Coordinator.call_balancer(state.lobby_id, {
-      :make_balance,
-      2,
-      []
-    })
-
-    ConsulServer.say_command(cmd, state)
-
-    state
-  end
-
   def handle_command(%{command: "specunready"} = cmd, state) do
     battle = Lobby.get_lobby(state.lobby_id)
 

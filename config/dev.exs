@@ -59,7 +59,6 @@ config :teiserver, Teiserver,
   heartbeat_interval: nil,
   heartbeat_timeout: nil,
   enable_discord_bridge: false,
-  enable_hailstorm: true,
   accept_all_emails: true
 
 # Watch static and templates for browser reloading.

@@ -423,17 +423,6 @@ defmodule TeiserverWeb.Router do
     get "/request_token", SessionController, :request_token_get
   end
 
-  scope "/teiserver/api/hailstorm", TeiserverWeb.API, as: :ts do
-    pipe_through([:api])
-    post("/start", HailstormController, :start)
-    post("/update_site_config", HailstormController, :update_site_config)
-    post("/create_user", HailstormController, :create_user)
-    post("/db_update_user", HailstormController, :db_update_user)
-    post("/ts_update_user", HailstormController, :ts_update_user)
-    post("/update_user_rating", HailstormController, :update_user_rating)
-    post("/get_server_state", HailstormController, :get_server_state)
-  end
-
   scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do
     pipe_through([:api])
     get "/get_rating/:target_id/:type", SpadsController, :get_rating

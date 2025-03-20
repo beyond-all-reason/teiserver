@@ -294,12 +294,6 @@ defmodule Teiserver.CacheUser do
           String.ends_with?(user.email, "@agents") ->
             :ok
 
-          String.ends_with?(user.email, "@hailstorm") ->
-            :ok
-
-          String.ends_with?(user.email, "@hailstorm_spring") ->
-            :ok
-
           true ->
             case EmailHelper.new_user(user) do
               {:error, error} ->

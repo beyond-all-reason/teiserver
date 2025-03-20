@@ -14,19 +14,17 @@ defmodule Mix.Tasks.Teiserver.FakePlaytime do
   def run(_args) do
     Application.ensure_all_started(:teiserver)
 
-    if Application.get_env(:teiserver, Teiserver)[:enable_hailstorm] do
-      Account.list_users(
-        search: [
-          not_has_role: "Bot"
-        ],
-        select: [:id, :name]
-      )
-      |> Enum.map(fn user ->
-        update_stats(user.id, random_playtime())
-      end)
+    Account.list_users(
+      search: [
+        not_has_role: "Bot"
+      ],
+      select: [:id, :name]
+    )
+    |> Enum.map(fn user ->
+      update_stats(user.id, random_playtime())
+    end)
 
-      Logger.info("Finished applying fake playtime data")
-    end
+    Logger.info("Finished applying fake playtime data")
   end
 
   def update_stats(user_id, player_minutes) do

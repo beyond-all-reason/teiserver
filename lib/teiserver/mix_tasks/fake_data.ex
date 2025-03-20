@@ -22,31 +22,27 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   @spec run(list()) :: :ok
   def run(_args) do
-    if Application.get_env(:teiserver, Teiserver)[:enable_hailstorm] do
-      # Start by rebuilding the database
-      Mix.Task.run("ecto.reset")
+    # Start by rebuilding the database
+    Mix.Task.run("ecto.reset")
 
-      # Accounts
-      make_accounts()
+    # Accounts
+    make_accounts()
 
-      make_matches()
-      make_telemetry()
-      make_moderation()
-      make_one_time_code()
+    make_matches()
+    make_telemetry()
+    make_moderation()
+    make_one_time_code()
 
-      make_lobby_app()
+    make_lobby_app()
 
-      # Add fake playtime data to all our non-bot users
-      Mix.Task.run("teiserver.fake_playtime")
+    # Add fake playtime data to all our non-bot users
+    Mix.Task.run("teiserver.fake_playtime")
 
-      :timer.sleep(50)
+    :timer.sleep(50)
 
-      IO.puts(
-        "\nFake data insertion complete. You can now login with the email 'root@localhost' and password 'password'\nA one-time link has been created: http://localhost:4000/one_time_login/fakedata_code\n"
-      )
-    else
-      Logger.error("Hailstorm mode is not enabled, you cannot run the fakedata task")
-    end
+    IO.puts(
+      "\nFake data insertion complete. You can now login with the email 'root@localhost' and password 'password'\nA one-time link has been created: http://localhost:4000/one_time_login/fakedata_code\n"
+    )
   end
 
   defp add_root_user() do
