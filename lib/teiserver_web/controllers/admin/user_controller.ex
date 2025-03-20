@@ -408,12 +408,14 @@ defmodule TeiserverWeb.Admin.UserController do
       {true, _} ->
         filter = params["filter"]
         filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter]
+        season = MatchRatingLib.active_season()
         limit = (params["limit"] || "50") |> int_parse
 
         ratings =
           Account.list_ratings(
             search: [
-              user_id: user.id
+              user_id: user.id,
+              season: season
             ],
             preload: [:rating_type]
           )
@@ -425,7 +427,8 @@ defmodule TeiserverWeb.Admin.UserController do
           Game.list_rating_logs(
             search: [
               user_id: user.id,
-              rating_type_id: filter_type_id
+              rating_type_id: filter_type_id,
+              season: season
             ],
             order_by: "Newest first",
             limit: limit,
@@ -473,7 +476,8 @@ defmodule TeiserverWeb.Admin.UserController do
         ratings =
           Account.list_ratings(
             search: [
-              user_id: user.id
+              user_id: user.id,
+              season: MatchRatingLib.active_season()
             ],
             preload: [:rating_type]
           )

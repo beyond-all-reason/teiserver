@@ -6,6 +6,8 @@ defmodule Teiserver.Account.Rating do
     belongs_to :user, Teiserver.Account.User, primary_key: true
     belongs_to :rating_type, Teiserver.Game.RatingType, primary_key: true
 
+    field :season, :integer, primary_key: true
+
     field :rating_value, :float
     field :skill, :float
     field :uncertainty, :float
@@ -15,8 +17,6 @@ defmodule Teiserver.Account.Rating do
     field :last_updated, :utc_datetime
     field :num_matches, :integer
     field :num_wins, :integer
-
-    field :season, :integer
   end
 
   @doc false

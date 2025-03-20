@@ -105,7 +105,8 @@ defmodule Teiserver.Account.TournamentReport do
       Account.list_ratings(
         search: [
           rating_type_id: type_id,
-          user_id_in: Map.values(name_to_id_map)
+          user_id_in: Map.values(name_to_id_map),
+          season: MatchRatingLib.active_season()
         ],
         order_by: order_by,
         preload: [:user],

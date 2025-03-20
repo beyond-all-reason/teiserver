@@ -43,20 +43,20 @@ defmodule Teiserver.Account.SmurfMergeTask do
   defp merge_ratings(_from_id, _to_id, "false"), do: :ok
 
   defp merge_ratings(from_id, to_id, "true") do
+    season = Teiserver.Game.MatchRatingLib.active_season()
+
     to_ratings =
-      Account.list_ratings(search: [user_id: to_id])
+      Account.list_ratings(search: [user_id: to_id, season: season])
       |> Map.new(fn r -> {r.rating_type_id, r} end)
 
     # Now we go through the ratings of the from player and act
-    Account.list_ratings(search: [user_id: from_id])
+    Account.list_ratings(search: [user_id: from_id, season: season])
     |> Enum.each(fn from_rating ->
       rating_type_id = from_rating.rating_type_id
       to_rating = to_ratings[rating_type_id] || BalanceLib.default_rating()
 
       from_value = BalanceLib.convert_rating(from_rating)
       to_value = BalanceLib.convert_rating(to_rating)
-
-      season = Teiserver.Config.get_site_config_cache("rating.Season")
 
       if from_value > to_value do
         {:ok, _rating} =
@@ -67,7 +67,8 @@ defmodule Teiserver.Account.SmurfMergeTask do
             skill: from_rating.skill,
             uncertainty: from_rating.uncertainty,
             leaderboard_rating: from_rating.leaderboard_rating,
-            last_updated: Timex.now()
+            last_updated: Timex.now(),
+            season: season
           })
 
         {:ok, _log} =

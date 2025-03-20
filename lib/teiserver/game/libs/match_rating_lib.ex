@@ -146,7 +146,8 @@ defmodule Teiserver.Game.MatchRatingLib do
       Account.list_ratings(
         search: [
           rating_type_id: rating_type_id,
-          user_id_in: solo_user_ids
+          user_id_in: solo_user_ids,
+          season: active_season()
         ]
       )
       |> Map.new(fn rating ->
@@ -164,7 +165,8 @@ defmodule Teiserver.Game.MatchRatingLib do
       Account.list_ratings(
         search: [
           rating_type_id: partied_rating_type_id,
-          user_id_in: partied_user_ids
+          user_id_in: partied_user_ids,
+          season: active_season()
         ]
       )
       |> Map.new(fn rating ->
@@ -284,7 +286,8 @@ defmodule Teiserver.Game.MatchRatingLib do
       Account.list_ratings(
         search: [
           rating_type_id: rating_type_id,
-          user_id_in: solo_user_ids
+          user_id_in: solo_user_ids,
+          season: active_season()
         ]
       )
       |> Map.new(fn rating ->
@@ -302,7 +305,8 @@ defmodule Teiserver.Game.MatchRatingLib do
       Account.list_ratings(
         search: [
           rating_type_id: partied_rating_type_id,
-          user_id_in: partied_user_ids
+          user_id_in: partied_user_ids,
+          season: active_season()
         ]
       )
       |> Map.new(fn rating ->
@@ -773,7 +777,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     Config.get_site_config_cache("rating.Tau")
   end
 
-  defp active_season() do
+  def active_season() do
     Config.get_site_config_cache("rating.Season")
   end
 end
