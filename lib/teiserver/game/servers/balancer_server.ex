@@ -19,16 +19,7 @@ defmodule Teiserver.Game.BalancerServer do
   def handle_call({:make_balance, team_count, call_opts}, _from, state) do
     opts =
       call_opts ++
-        [
-          algorithm: state.algorithm,
-          max_deviation: state.max_deviation,
-          rating_lower_boundary: state.rating_lower_boundary,
-          rating_upper_boundary: state.rating_upper_boundary,
-          mean_diff_max: state.mean_diff_max,
-          stddev_diff_max: state.stddev_diff_max,
-          fuzz_multiplier: state.fuzz_multiplier,
-          shuffle_first_pick: state.shuffle_first_pick
-        ]
+        handle_call_make_balance_additional_opts(state)
 
     {balance, new_state} = make_balance(team_count, state, opts)
     {:reply, balance, new_state}
@@ -39,19 +30,23 @@ defmodule Teiserver.Game.BalancerServer do
   def handle_call({:make_balance, team_count, call_opts, players}, _from, state) do
     opts =
       call_opts ++
-        [
-          algorithm: state.algorithm,
-          max_deviation: state.max_deviation,
-          rating_lower_boundary: state.rating_lower_boundary,
-          rating_upper_boundary: state.rating_upper_boundary,
-          mean_diff_max: state.mean_diff_max,
-          stddev_diff_max: state.stddev_diff_max,
-          fuzz_multiplier: state.fuzz_multiplier,
-          shuffle_first_pick: state.shuffle_first_pick
-        ]
+        handle_call_make_balance_additional_opts(state)
 
     {balance, new_state} = make_balance(team_count, state, opts, players)
     {:reply, balance, new_state}
+  end
+
+  defp handle_call_make_balance_additional_opts(state) do
+    [
+      algorithm: state.algorithm,
+      max_deviation: state.max_deviation,
+      rating_lower_boundary: state.rating_lower_boundary,
+      rating_upper_boundary: state.rating_upper_boundary,
+      mean_diff_max: state.mean_diff_max,
+      stddev_diff_max: state.stddev_diff_max,
+      fuzz_multiplier: state.fuzz_multiplier,
+      shuffle_first_pick: state.shuffle_first_pick
+    ]
   end
 
   def handle_call(:get_balance_mode, _from, %{last_balance_hash: hash} = state) do
