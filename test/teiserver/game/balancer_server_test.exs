@@ -104,7 +104,7 @@ defmodule Teiserver.Game.BalancerServerTest do
     users
   end
 
-  test "load some players in and run a balance pass or two" do
+  test "load some players in and run a balance pass or three, checking if the cache was hit" do
     team_count = 2
 
     players =
@@ -125,7 +125,10 @@ defmodule Teiserver.Game.BalancerServerTest do
         {:make_balance, team_count, [], players}
       )
 
-    assert second_balance_pass_hash_reuse.hash == first_balance_pass.hash
+    assert second_balance_pass_hash_reuse === first_balance_pass
+
+    assert 1 ==
+             Map.get(GenServer.call(pid, :report_state), :last_balance_hash_cache_hit, :not_found)
 
     player_list_with_one_less_player = tl(players)
 
@@ -135,7 +138,24 @@ defmodule Teiserver.Game.BalancerServerTest do
         {:make_balance, team_count, [], player_list_with_one_less_player}
       )
 
-    assert second_balance_pass_hash_reuse.hash != third_balance_pass_with_fewer_players.hash
+    assert 2 ==
+             Map.get(
+               GenServer.call(pid, :report_state),
+               :last_balance_hash_cache_miss,
+               :not_found
+             )
+
+    refute second_balance_pass_hash_reuse.hash == third_balance_pass_with_fewer_players.hash
+
+    refute second_balance_pass_hash_reuse.team_sizes ==
+             third_balance_pass_with_fewer_players.team_sizes
+
+    refute second_balance_pass_hash_reuse.team_groups ==
+             third_balance_pass_with_fewer_players.team_groups
+
+    refute second_balance_pass_hash_reuse.logs == third_balance_pass_with_fewer_players.logs
+
+    dbg(third_balance_pass_with_fewer_players)
   end
 
   test "get_current_balance returns a result" do
@@ -166,10 +186,7 @@ defmodule Teiserver.Game.BalancerServerTest do
     )
 
     refute GenServer.call(pid, :get_current_balance) == nil
-
-    with {:ok, value} <- Map.fetch(GenServer.call(pid, :report_state), :last_balance_result) do
-      refute value == nil
-    end
+    refute Map.get(GenServer.call(pid, :report_state), :last_balance_result, :not_found) == nil
 
     GenServer.cast(
       pid,
@@ -177,10 +194,7 @@ defmodule Teiserver.Game.BalancerServerTest do
     )
 
     poll_until_nil(fn -> GenServer.call(pid, :get_current_balance) end)
-
-    with {:ok, hash} <- Map.fetch(GenServer.call(pid, :report_state), :last_balance_hash) do
-      assert hash == nil
-    end
+    assert Map.get(GenServer.call(pid, :report_state), :last_balance_hash, :not_found) == nil
   end
 
   test "setting the balance mode clears the hash and result" do
@@ -196,10 +210,7 @@ defmodule Teiserver.Game.BalancerServerTest do
     )
 
     refute GenServer.call(pid, :get_current_balance) == nil
-
-    with {:ok, value} <- Map.fetch(GenServer.call(pid, :report_state), :last_balance_result) do
-      refute value == nil
-    end
+    refute Map.get(GenServer.call(pid, :report_state), :last_balance_result, :not_found) == nil
 
     GenServer.cast(
       pid,
@@ -207,9 +218,6 @@ defmodule Teiserver.Game.BalancerServerTest do
     )
 
     poll_until_nil(fn -> GenServer.call(pid, :get_current_balance) end)
-
-    with {:ok, hash} <- Map.fetch(GenServer.call(pid, :report_state), :last_balance_hash) do
-      assert hash == nil
-    end
+    assert Map.get(GenServer.call(pid, :report_state), :last_balance_hash, :not_found) == nil
   end
 end
