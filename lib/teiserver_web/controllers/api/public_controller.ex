@@ -13,7 +13,7 @@ defmodule TeiserverWeb.API.PublicController do
   def leaderboard(conn, %{"season" => season_param}) do
     activity_time =
       Timex.today()
-      |> Timex.shift(days: -350)
+      |> Timex.shift(days: -35)
       |> Timex.to_datetime()
 
     case Integer.parse(season_param) do
