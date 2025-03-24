@@ -1,6 +1,8 @@
 defmodule Teiserver.Asset do
   alias Teiserver.Asset
   alias Teiserver.Asset.{MapLib, MapQueries}
+  alias Teiserver.Asset.EngineQueries
+  alias Teiserver.Asset.GameQueries
 
   @spec create_maps([map()]) ::
           {:ok, [Asset.Map.t()]} | {:error, String.t(), Ecto.Changeset.t(), map()}
@@ -38,4 +40,10 @@ defmodule Teiserver.Asset do
       end
     end)
   end
+
+  @spec get_engines() :: [Asset.Engine.t()]
+  defdelegate get_engines(), to: EngineQueries
+
+  @spec get_games() :: [Asset.Game.t()]
+  defdelegate get_games(), to: GameQueries
 end
