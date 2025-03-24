@@ -10,13 +10,27 @@
                     "anyOf": [{ "type": "string" }, { "type": "null" }]
                 },
                 "friendIds": { "type": "array", "items": { "type": "string" } },
-                "outgoingFriendRequestIds": {
+                "outgoingFriendRequest": {
                     "type": "array",
-                    "items": { "type": "string" }
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "to": { "$ref": "../definitions/userId.json" },
+                            "sentAt": { "$ref": "../definitions/unixTime.json" }
+                        },
+                        "required": ["to", "sentAt"]
+                    }
                 },
-                "incomingFriendRequestIds": {
+                "incomingFriendRequest": {
                     "type": "array",
-                    "items": { "type": "string" }
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "from": { "$ref": "../definitions/userId.json" },
+                            "sentAt": { "$ref": "../definitions/unixTime.json" }
+                        },
+                        "required": ["from", "sentAt"]
+                    }
                 },
                 "ignoreIds": { "type": "array", "items": { "type": "string" } },
                 "currentBattle": { "$ref": "../definitions/privateBattle.json" }
@@ -24,8 +38,8 @@
             "required": [
                 "partyId",
                 "friendIds",
-                "outgoingFriendRequestIds",
-                "incomingFriendRequestIds",
+                "outgoingFriendRequest",
+                "incomingFriendRequest",
                 "ignoreIds"
             ]
         }

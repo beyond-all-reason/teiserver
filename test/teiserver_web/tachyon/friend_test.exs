@@ -42,6 +42,24 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
     end
   end
 
+  test "self event contains friend info" do
+    [user1, user2, user3, user4] = Enum.map(1..4, fn _ -> Tachyon.create_user() end)
+    {:ok, _} = Account.create_friend(user1.id, user2.id)
+    # outgoing
+    {:ok, _} = Account.create_friend_request(user1.id, user3.id)
+    # incoming
+    {:ok, _} = Account.create_friend_request(user4.id, user1.id)
+
+    %{client: client} = Tachyon.connect(user1, swallow_first_event: false)
+    %{"commandId" => "user/self", "data" => %{"user" => data}} = Tachyon.recv_message!(client)
+    assert data["friendIds"] == [to_string(user2.id)]
+
+    id3 = to_string(user3.id)
+    id4 = to_string(user4.id)
+    assert [%{"from" => ^id4}] = data["incomingFriendRequest"]
+    assert [%{"to" => ^id3}] = data["outgoingFriendRequest"]
+  end
+
   defp setup_friend_requests(_) do
     {:ok, ctx1} = Tachyon.setup_client()
     {:ok, ctx2} = Tachyon.setup_client()
