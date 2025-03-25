@@ -692,5 +692,8 @@ defmodule TeiserverWeb.Router do
     delete("/bot/:id/credential/:cred_id", BotController, :delete_credential)
 
     get("/asset", AssetController, :index)
+    get("/asset/engine/new", AssetController, :new_engine)
+    post("/asset/engine", AssetController, :create_engine)
+    delete("/asset/engine/:id", AssetController, :delete_engine)
   end
 end

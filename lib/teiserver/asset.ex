@@ -3,6 +3,7 @@ defmodule Teiserver.Asset do
   alias Teiserver.Asset.{MapLib, MapQueries}
   alias Teiserver.Asset.EngineQueries
   alias Teiserver.Asset.GameQueries
+  alias Teiserver.Repo
 
   @spec create_maps([map()]) ::
           {:ok, [Asset.Map.t()]} | {:error, String.t(), Ecto.Changeset.t(), map()}
@@ -43,6 +44,30 @@ defmodule Teiserver.Asset do
 
   @spec get_engines() :: [Asset.Engine.t()]
   defdelegate get_engines(), to: EngineQueries
+
+  def change_engine(%Asset.Engine{} = engine \\ %Asset.Engine{}, attrs \\ %{}) do
+    Asset.Engine.changeset(engine, attrs)
+  end
+
+  def create_engine(attrs \\ %{}) do
+    %Asset.Engine{}
+    |> Asset.Engine.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec delete_engine(id :: integer()) :: :ok | :error
+  def delete_engine(id) do
+    import Ecto.Query
+
+    result =
+      from(e in Asset.Engine, where: e.id == ^id)
+      |> Repo.delete_all()
+
+    case result do
+      {1, _} -> :ok
+      {0, _} -> :error
+    end
+  end
 
   @spec get_games() :: [Asset.Game.t()]
   defdelegate get_games(), to: GameQueries

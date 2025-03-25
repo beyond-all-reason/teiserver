@@ -21,5 +21,6 @@ defmodule Teiserver.Asset.Engine do
   def changeset(engine, attrs) do
     cast(engine, attrs, [:name])
     |> validate_required([:name])
+    |> unique_constraint(:name)
   end
 end

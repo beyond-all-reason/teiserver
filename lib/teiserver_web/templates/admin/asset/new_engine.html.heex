@@ -1,0 +1,15 @@
+<div class="card page-card">
+  <div class="card-body">
+    <h1>Add a new engine version</h1>
+
+    <div class="row d-flex justify-content-center">
+      <div class="col-md-6">
+        <.engine_form
+          button_label="Add"
+          changeset={@changeset}
+          action={~p"/teiserver/admin/asset/engine"}
+        />
+      </div>
+    </div>
+  </div>
+</div>
