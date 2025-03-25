@@ -250,6 +250,9 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
 
     invite_to_party!(socket1, user3.name)
 
+    assert [{"s.party.invited_to_party", _, _}] =
+             _recv_until(socket2) |> parse_in_messages()
+
     assert [{"s.party.invited_to_party", _, _}, {"s.party.joined_party", _, _}] =
              _recv_until(socket3) |> parse_in_messages()
 
@@ -307,7 +310,9 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
 
   defp invite_to_party!(socket, username) do
     invite_to_party(socket, username)
-    assert {"OK", _, _} = _recv_until(socket) |> parse_in_message()
+    [ok, invited] = _recv_until(socket) |> parse_in_messages()
+    assert {"OK", _, _} = ok
+    assert {"s.party.invited_to_party", [_, ^username], _} = invited
   end
 
   defp accept_invite(socket, party_id) do

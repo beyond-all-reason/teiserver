@@ -226,6 +226,19 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     end
   end
 
+  def handle_event(
+        %{event: :updated_values, party_id: party_id, operation: {:invite_created, userid}},
+        state
+      ) do
+    case Teiserver.Account.get_user_by_id(userid) do
+      nil ->
+        state
+
+      user ->
+        SpringOut.reply(:party, :invited_to_party, {party_id, user.name}, message_id(), state)
+    end
+  end
+
   def handle_event(%{event: :closed, party_id: party_id, last_member: userid}, state) do
     # invited players also receive this message, but this shouldn't force them to
     # leave the party they are in
