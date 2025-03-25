@@ -19,16 +19,16 @@ defmodule Mix.Tasks.Teiserver.BrierStats do
   @noob_matches_cutoff 20
   @num_matches_to_process 2000
 
-  @rating_systems [:openskill, :bar, :provisional_10, :provisional_20]
+  @rating_systems [:openskill, :bar, :provisional_5, :provisional_10, :provisional_20]
 
   def run(args) do
     Logger.info("Args: #{args}")
-    write_log_filepath = Enum.at(args, 0, nil)
+    {min_team_size, _} = Integer.parse(Enum.at(args, 0, "8"))
 
     Application.ensure_all_started(:teiserver)
     opts = []
 
-    match_ids = get_match_ids()
+    match_ids = get_match_ids(min_team_size)
 
     initial_errors = %{
       noob_matches: %{
@@ -81,7 +81,7 @@ defmodule Mix.Tasks.Teiserver.BrierStats do
         errors
         |> Enum.reduce(0, fn x, acc -> x.mean_squared_error + acc end)
 
-      num_matches = Enum.count(errors)
+      num_matches = max(Enum.count(errors), 1)
       brier_score = mean_squared_error_sum / num_matches
 
       %{
@@ -92,13 +92,14 @@ defmodule Mix.Tasks.Teiserver.BrierStats do
     end)
   end
 
-  defp get_match_ids() do
+  defp get_match_ids(min_team_size) do
     query = """
     select distinct  tbm.id, tbm.inserted_at  from
     teiserver_battle_matches tbm
     inner join teiserver_game_rating_logs tgrl
     on tgrl.match_id = tbm.id
     and tbm.team_size >= $1
+    and tbm.team_size <= 8
     and tbm.team_count = $2
     and tgrl.value is not null
     order by tbm.inserted_at DESC
@@ -106,7 +107,6 @@ defmodule Mix.Tasks.Teiserver.BrierStats do
 
     """
 
-    min_team_size = 2
     team_count = 2
 
     sql_results =
@@ -156,7 +156,8 @@ defmodule Mix.Tasks.Teiserver.BrierStats do
       players
       |> Enum.group_by(fn x -> x.team_id end)
 
-    invalid_match? = players |> Enum.any?(fn x -> x.num_matches == nil end)
+    invalid_match? =
+      players |> Enum.any?(fn x -> x.num_matches == nil || x.skill > 100 end)
 
     if(invalid_match?) do
       %{
@@ -223,6 +224,9 @@ defmodule Mix.Tasks.Teiserver.BrierStats do
 
       :provisional_10 ->
         min(num_matches / 10, 1) * (player.skill - player.uncertainty)
+
+      :provisional_5 ->
+        min(num_matches / 5, 1) * (player.skill - player.uncertainty)
     end
   end
 end
