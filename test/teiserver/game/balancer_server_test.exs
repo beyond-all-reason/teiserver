@@ -50,31 +50,21 @@ defmodule Teiserver.Game.BalancerServerTest do
   @moduletag :balance_test
   alias Teiserver.Game.BalancerServer
 
-  @spec make_users_with_ranks_and_parties(
-          [non_neg_integer()],
-          [non_neg_integer()]
-        ) ::
+  @spec make_users_with_ranks([non_neg_integer()]) ::
           list()
 
-  def make_users_with_ranks_and_parties(list_of_ranks, list_of_parties) do
-    assert length(list_of_ranks) == length(list_of_parties),
-           "Error: Lists are not of equal length. Got #{length(list_of_ranks)} and #{length(list_of_parties)}."
-
+  def make_users_with_ranks(list_of_ranks) do
     users =
-      Enum.map(list_of_ranks, fn _ -> Central.Helpers.GeneralTestLib.make_user(%{}) end)
-      |> Enum.map(fn x -> Map.put(x, :userid, x.id) end)
+      for {rank, i} <- Enum.with_index(list_of_ranks) do
+        user = Central.Helpers.GeneralTestLib.make_user(%{})
+        user = Map.put(user, :party_id, i)
+        user = Map.put(user, :userid, user.id)
 
-    # set the user rank
-    for {user, rank} <- Enum.zip(users, list_of_ranks) do
-      Teiserver.Account.update_user_stat(user.id, %{
-        :rank => rank
-      })
-    end
+        Teiserver.Account.update_user_stat(user.id, %{
+          :rank => rank
+        })
 
-    # set the user party_id
-    users =
-      for {user, party_id} <- Enum.zip(users, list_of_parties) do
-        Map.put(user, :party_id, party_id)
+        user
       end
 
     users
@@ -84,8 +74,7 @@ defmodule Teiserver.Game.BalancerServerTest do
     team_count = 2
 
     players =
-      make_users_with_ranks_and_parties([10, 20, 30, 40, 50, 60], [1, 2, 3, 4, 5, 6])
-      |> Enum.map(fn x -> Map.put(x, :userid, x.id) end)
+      make_users_with_ranks([10, 20, 30, 40, 50, 60])
 
     {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
 
@@ -125,7 +114,7 @@ defmodule Teiserver.Game.BalancerServerTest do
   test "get_current_balance returns a result" do
     team_count = 2
 
-    players = make_users_with_ranks_and_parties([10, 20, 30, 40], [1, 2, 3, 4])
+    players = make_users_with_ranks([10, 20, 30, 40])
 
     {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
 
@@ -140,7 +129,7 @@ defmodule Teiserver.Game.BalancerServerTest do
   test "reset_hashes clears hash and result" do
     team_count = 2
 
-    players = make_users_with_ranks_and_parties([10, 20, 30, 40], [1, 2, 3, 4])
+    players = make_users_with_ranks([10, 20, 30, 40])
 
     {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
 
@@ -164,7 +153,7 @@ defmodule Teiserver.Game.BalancerServerTest do
   test "setting the balance mode clears the hash and result" do
     team_count = 2
 
-    players = make_users_with_ranks_and_parties([10, 20, 30, 40], [1, 2, 3, 4])
+    players = make_users_with_ranks([10, 20, 30, 40])
 
     {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
 
