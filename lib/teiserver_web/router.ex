@@ -690,5 +690,7 @@ defmodule TeiserverWeb.Router do
     # the two
     post("/bot/:id/credential", BotController, :create_credential)
     delete("/bot/:id/credential/:cred_id", BotController, :delete_credential)
+
+    get("/asset", AssetController, :index)
   end
 end

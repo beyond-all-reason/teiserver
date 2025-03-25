@@ -1,0 +1,45 @@
+<div class="container">
+  <h1>Engine versions</h1>
+  <%= if length(@engines) > 0 do %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Created at</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for engine <- @engines do %>
+          <tr>
+            <td>{engine.name}</td>
+            <td>{engine.inserted_at}</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    No engine !
+  <% end %>
+
+  <h2>Game versions</h2>
+  <%= if length(@games) > 0 do %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Created at</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for game <- @games do %>
+          <tr>
+            <td>{game.name}</td>
+            <td>{game.inserted_at}</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    No game version !
+  <% end %>
+</div>
