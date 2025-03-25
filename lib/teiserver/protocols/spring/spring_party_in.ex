@@ -197,16 +197,20 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
   end
 
   def handle_event(
-        %{event: :updated_values, party_id: party_id, operation: {:invite_cancelled, userid}},
+        %{event: :updated_values, party_id: party_id, operation: {:invite_cancelled, user_ids}},
         state
       ) do
-    case Teiserver.Account.get_user_by_id(userid) do
-      nil ->
-        state
+    for user_id <- user_ids do
+      case Teiserver.Account.get_user_by_id(user_id) do
+        nil ->
+          state
 
-      user ->
-        SpringOut.reply(:party, :invite_cancelled, {party_id, user.name}, message_id(), state)
+        user ->
+          SpringOut.reply(:party, :invite_cancelled, {party_id, user.name}, message_id(), state)
+      end
     end
+
+    state
   end
 
   def handle_event(
@@ -222,16 +226,19 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     end
   end
 
-  def handle_event(%{event: :closed, party_id: party_id}, state) do
+  def handle_event(%{event: :closed, party_id: party_id, last_member: userid}, state) do
+    # invited players also receive this message, but this shouldn't force them to
+    # leave the party they are in
+    state = if state.user.id == userid, do: Map.put(state, :party_id, nil), else: state
+
     # chobby would like to receive a member_left message when the last member leaves
-    SpringOut.reply(
-      :party,
-      :member_removed,
-      {party_id, state.user.name},
-      message_id(),
-      # by construction, this is the last member leaving
-      Map.put(state, :party_id, nil)
-    )
+    case Teiserver.Account.get_user_by_id(userid) do
+      nil ->
+        state
+
+      user ->
+        SpringOut.reply(:party, :member_removed, {party_id, user.name}, message_id(), state)
+    end
   end
 
   def handle_event(event, state) do

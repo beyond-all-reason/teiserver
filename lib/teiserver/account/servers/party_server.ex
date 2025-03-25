@@ -91,7 +91,7 @@ defmodule Teiserver.Account.PartyServer do
               event: :updated_values,
               party_id: party.id,
               new_values: %{pending_invites: new_invites},
-              operation: {:invite_cancelled, userid}
+              operation: {:invite_cancelled, [userid]}
             }
           )
 
@@ -123,7 +123,20 @@ defmodule Teiserver.Account.PartyServer do
               channel: "teiserver_party:#{party.id}",
               event: :closed,
               party_id: party.id,
-              reason: "No members"
+              reason: "No members",
+              last_member: userid
+            }
+          )
+
+          PubSub.broadcast(
+            Teiserver.PubSub,
+            "teiserver_party:#{party.id}",
+            %{
+              channel: "teiserver_party:#{party.id}",
+              event: :updated_values,
+              party_id: party.id,
+              new_values: %{pending_invites: []},
+              operation: {:invite_cancelled, party.pending_invites}
             }
           )
 

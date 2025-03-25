@@ -205,6 +205,27 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     end
   end
 
+  test "both in parties" do
+    {:ok, socket: socket1, user: user1} = setup_user(nil)
+    {:ok, socket: socket2, user: user2} = setup_user(nil)
+    # absorb the broadcasted message that another player is online
+    "ADDUSER " <> _ = _recv_until(socket1)
+
+    username1 = user1.name
+    username2 = user2.name
+
+    party1 = create_party!(socket1)
+    create_party!(socket2)
+    invite_to_party!(socket1, user2.name)
+    [invited, joined] = _recv_until(socket2) |> parse_in_messages()
+    assert {"s.party.invited_to_party", [^party1, ^username2], _} = invited
+    assert {"s.party.joined_party", [^party1, ^username1], _} = joined
+    leave_party!(socket1)
+    [left, cancelled] = _recv_until(socket2) |> parse_in_messages()
+    assert {"s.party.left_party", [^party1, ^username1], _} = left
+    assert {"s.party.invite_cancelled", [^party1, ^username2], _} = cancelled
+  end
+
   test "with 3 players" do
     # only test happy paths, but with more players to check broadcast mechanics
     {:ok, socket: socket1, user: user1} = setup_user(nil)
