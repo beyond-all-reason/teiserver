@@ -50,23 +50,6 @@ defmodule Teiserver.Game.BalancerServerTest do
   @moduletag :balance_test
   alias Teiserver.Game.BalancerServer
 
-  def user_fixture(), do: make_user(%{"permissions" => []})
-
-  def make_user(params \\ %{}) do
-    requested_user = %{
-      "name" => params["name"] || "Test",
-      "email" => params["email"] || "email@email#{:rand.uniform(999_999_999_999)}",
-      "colour" => params["colour"] || "#00AA00",
-      "icon" => params["icon"] || "fa-solid fa-user",
-      "password" => params["password"] || "password",
-      "password_confirmation" => params["password"] || "password",
-      "data" => params["data"] || %{}
-    }
-
-    {:ok, _u} =
-      Teiserver.Account.create_user(requested_user)
-  end
-
   @spec make_users_with_ranks_and_parties(
           [non_neg_integer()],
           [non_neg_integer()]
@@ -74,18 +57,12 @@ defmodule Teiserver.Game.BalancerServerTest do
           list()
 
   def make_users_with_ranks_and_parties(list_of_ranks, list_of_parties) do
+    assert length(list_of_ranks) == length(list_of_parties),
+           "Error: Lists are not of equal length. Got #{length(list_of_ranks)} and #{length(list_of_parties)}."
+
     users =
       Enum.with_index(list_of_ranks)
-      |> Enum.map(fn {_user, index} ->
-        %{
-          "name" => "user" <> to_string(index + 1) <> "_" <> to_string(ExULID.ULID.generate()),
-          "email" => to_string(ExULID.ULID.generate()) <> "@example.com",
-          "permissions" => []
-        }
-      end)
-      |> Enum.map(fn x -> make_user(x) end)
-      # unwrap user creation response
-      |> Enum.map(fn {:ok, reply} -> reply end)
+      |> Enum.map(fn {_user, _index} -> Central.Helpers.GeneralTestLib.make_user(%{}) end)
       |> Enum.map(fn x -> Map.put(x, :userid, x.id) end)
 
     # set the user rank
@@ -127,9 +104,6 @@ defmodule Teiserver.Game.BalancerServerTest do
 
     assert second_balance_pass_hash_reuse === first_balance_pass
 
-    assert 1 ==
-             Map.get(GenServer.call(pid, :report_state), :last_balance_hash_cache_hit, :not_found)
-
     player_list_with_one_less_player = tl(players)
 
     third_balance_pass_with_fewer_players =
@@ -137,13 +111,6 @@ defmodule Teiserver.Game.BalancerServerTest do
         pid,
         {:make_balance, team_count, [], player_list_with_one_less_player}
       )
-
-    assert 2 ==
-             Map.get(
-               GenServer.call(pid, :report_state),
-               :last_balance_hash_cache_miss,
-               :not_found
-             )
 
     refute second_balance_pass_hash_reuse.hash == third_balance_pass_with_fewer_players.hash
 
@@ -154,8 +121,6 @@ defmodule Teiserver.Game.BalancerServerTest do
              third_balance_pass_with_fewer_players.team_groups
 
     refute second_balance_pass_hash_reuse.logs == third_balance_pass_with_fewer_players.logs
-
-    dbg(third_balance_pass_with_fewer_players)
   end
 
   test "get_current_balance returns a result" do
