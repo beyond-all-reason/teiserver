@@ -103,7 +103,6 @@ defmodule Mix.Tasks.Teiserver.LoglossStats do
     and tbm.team_size <= 8
     and tbm.team_count = $2
     and tgrl.value is not null
-    and season = 1
     order by tbm.inserted_at DESC
     limit $3;
 
