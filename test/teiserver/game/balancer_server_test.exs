@@ -61,8 +61,7 @@ defmodule Teiserver.Game.BalancerServerTest do
            "Error: Lists are not of equal length. Got #{length(list_of_ranks)} and #{length(list_of_parties)}."
 
     users =
-      Enum.with_index(list_of_ranks)
-      |> Enum.map(fn {_user, _index} -> Central.Helpers.GeneralTestLib.make_user(%{}) end)
+      Enum.map(list_of_ranks, fn _ -> Central.Helpers.GeneralTestLib.make_user(%{}) end)
       |> Enum.map(fn x -> Map.put(x, :userid, x.id) end)
 
     # set the user rank
