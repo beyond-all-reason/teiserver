@@ -58,6 +58,10 @@ defmodule Teiserver.Player.Session do
   # argument to init()
   @messaging_buffer_size 200
 
+  def start_link({_conn_pid, user} = arg) do
+    GenServer.start_link(__MODULE__, arg, name: via_tuple(user.id))
+  end
+
   @impl true
   def init({conn_pid, user}) do
     ref = Process.monitor(conn_pid)
@@ -85,6 +89,15 @@ defmodule Teiserver.Player.Session do
     :no_matchmaking
   end
 
+  ################################################################################
+  #                                                                              #
+  #                                    API                                       #
+  #                                                                              #
+  ################################################################################
+
+  @doc """
+  Retrieve the connection state for the given user
+  """
   @spec conn_state(T.userid()) :: conn_state()
   def conn_state(user_id) do
     GenServer.call(via_tuple(user_id), :conn_state)
@@ -147,6 +160,9 @@ defmodule Teiserver.Player.Session do
     GenServer.cast(via_tuple(user_id), {:matchmaking, {:found_update, ready_count, room_pid}})
   end
 
+  @doc """
+  Let the player know that they are now in a battle
+  """
   @spec battle_start(T.userid(), Teiserver.Autohost.start_response()) :: :ok
   def battle_start(user_id, battle_start_data) do
     GenServer.cast(via_tuple(user_id), {:battle_start, battle_start_data})
@@ -218,10 +234,6 @@ defmodule Teiserver.Player.Session do
     GenServer.cast(via_tuple(user_id), {:friend, {:removed, from_id}})
   end
 
-  def start_link({_conn_pid, user} = arg) do
-    GenServer.start_link(__MODULE__, arg, name: via_tuple(user.id))
-  end
-
   @doc """
   To forcefully disconnect a connected player and replace this connection
   with another one. This is to avoid having the same player with several
@@ -234,6 +246,12 @@ defmodule Teiserver.Player.Session do
     :exit, _ ->
       :died
   end
+
+  ################################################################################
+  #                                                                              #
+  #                       INTERNAL MESSAGE HANDLERS                              #
+  #                                                                              #
+  ################################################################################
 
   @impl true
   def handle_call({:replace, new_conn_pid}, _from, state) do

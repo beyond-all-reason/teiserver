@@ -50,19 +50,25 @@ defmodule Teiserver.Player.TachyonHandler do
     user = initial_state.user
     Logger.metadata(user_id: user.id)
 
+    {friends, incoming, outgoing} = get_user_friends(state.user.id)
+
     event = %{
-      users: [
-        %{
-          userId: to_string(user.id),
-          username: user.name,
-          countryCode: user.country,
-          status: :menu,
-          clanId: user.clan_id
-        }
-      ]
+      user: %{
+        userId: to_string(user.id),
+        username: user.name,
+        displayName: user.name,
+        clanId: user.clan_id,
+        countryCode: user.country,
+        status: :menu,
+        partyId: nil,
+        friendIds: Enum.map(friends, fn %{userId: uid} -> uid end),
+        outgoingFriendRequest: outgoing,
+        incomingFriendRequest: incoming,
+        ignoreIds: []
+      }
     }
 
-    {:event, "user/updated", event, state}
+    {:event, "user/self", event, state}
   end
 
   @impl Handler
@@ -296,26 +302,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("friend/list", "request", _message_id, _msg, state) do
-    epoch = ~N[1970-01-01 00:00:00]
-
-    friends =
-      Account.list_friends_for_user(state.user.id)
-      |> Enum.map(fn friend ->
-        id = if friend.user1_id == state.user.id, do: friend.user2_id, else: friend.user1_id
-        %{userId: to_string(id), addedAt: NaiveDateTime.diff(friend.inserted_at, epoch)}
-      end)
-
-    {outgoing, incoming} = Account.list_requests_for_user(state.user.id)
-
-    incoming =
-      Enum.map(incoming, fn req ->
-        %{from: to_string(req.from_user_id), sentAt: NaiveDateTime.diff(req.inserted_at, epoch)}
-      end)
-
-    outgoing =
-      Enum.map(outgoing, fn req ->
-        %{to: to_string(req.to_user_id), sentAt: NaiveDateTime.diff(req.inserted_at, epoch)}
-      end)
+    {friends, incoming, outgoing} = get_user_friends(state.user.id)
 
     resp = %{
       friends: friends,
@@ -413,7 +400,7 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command(command_id, _message_type, _message_id, _message, state) do
+  def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
 
@@ -513,5 +500,32 @@ defmodule Teiserver.Player.TachyonHandler do
     else
       _ -> {:error, :invalid_user}
     end
+  end
+
+  @spec get_user_friends(T.userid()) ::
+          {friends :: [term()], incoming :: [term()], outgoing :: [term()]}
+  def get_user_friends(user_id) do
+    epoch = ~N[1970-01-01 00:00:00]
+
+    friends =
+      Account.list_friends_for_user(user_id)
+      |> Enum.map(fn friend ->
+        id = if friend.user1_id == user_id, do: friend.user2_id, else: friend.user1_id
+        %{userId: to_string(id), addedAt: NaiveDateTime.diff(friend.inserted_at, epoch)}
+      end)
+
+    {outgoing, incoming} = Account.list_requests_for_user(user_id)
+
+    incoming =
+      Enum.map(incoming, fn req ->
+        %{from: to_string(req.from_user_id), sentAt: NaiveDateTime.diff(req.inserted_at, epoch)}
+      end)
+
+    outgoing =
+      Enum.map(outgoing, fn req ->
+        %{to: to_string(req.to_user_id), sentAt: NaiveDateTime.diff(req.inserted_at, epoch)}
+      end)
+
+    {friends, incoming, outgoing}
   end
 end

@@ -1,0 +1,47 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/privateUser.json",
+    "title": "PrivateUser",
+    "allOf": [
+        { "$ref": "../definitions/user.json" },
+        {
+            "type": "object",
+            "properties": {
+                "partyId": {
+                    "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "friendIds": { "type": "array", "items": { "type": "string" } },
+                "outgoingFriendRequest": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "to": { "$ref": "../definitions/userId.json" },
+                            "sentAt": { "$ref": "../definitions/unixTime.json" }
+                        },
+                        "required": ["to", "sentAt"]
+                    }
+                },
+                "incomingFriendRequest": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "from": { "$ref": "../definitions/userId.json" },
+                            "sentAt": { "$ref": "../definitions/unixTime.json" }
+                        },
+                        "required": ["from", "sentAt"]
+                    }
+                },
+                "ignoreIds": { "type": "array", "items": { "type": "string" } },
+                "currentBattle": { "$ref": "../definitions/privateBattle.json" }
+            },
+            "required": [
+                "partyId",
+                "friendIds",
+                "outgoingFriendRequest",
+                "incomingFriendRequest",
+                "ignoreIds"
+            ]
+        }
+    ]
+}
