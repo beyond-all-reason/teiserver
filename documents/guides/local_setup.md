@@ -135,6 +135,14 @@ mix teiserver.fakedata
 
 Will generate a large amount of fake data and setup a root account for you. The account will have full access to everything and the database will be populated with false data as if generated over a period of time to make development and testing easier.
 
+
+### Working on tachyon
+
+Tachyon is the [new protocol](https://beyond-all-reason.github.io/infrastructure/new_client/) under development.
+* The new client [is over there](https://github.com/beyond-all-reason/bar-lobby), it'll replace the existing client (chobby).
+* The new autohost starting games [is over there](https://github.com/beyond-all-reason/recoil-autohost) and will more or less replace SPADS, although a lot of what spads is currently doing will be done in teiserver.
+* Teiserver is still the same, although the tachyon related code is isolated from the spring one.
+
 For developping tachyon, you should also run
 ```bash
 mix teiserver.tachyon_setup

@@ -33,8 +33,6 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     make_moderation()
     make_one_time_code()
 
-    make_lobby_app()
-
     # Add fake playtime data to all our non-bot users
     Mix.Task.run("teiserver.fake_playtime")
 
@@ -422,21 +420,6 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(hours: 24),
         user_id: root_user.id
-      })
-  end
-
-  # Create the oauth application for the new lobby
-  defp make_lobby_app() do
-    root_user = Account.get_user_by_email("root@localhost")
-
-    {:ok, _app} =
-      Teiserver.OAuth.create_application(%{
-        name: "generic lobby client",
-        owner_id: root_user.id,
-        uid: "generic_lobby",
-        scopes: ["tachyon.lobby"],
-        redirect_uris: ["http://localhost/oauth2callback"],
-        description: "new and shiny client!"
       })
   end
 
