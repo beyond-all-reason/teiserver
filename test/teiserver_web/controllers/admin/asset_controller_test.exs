@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Admin.AssetControllerTest do
   use TeiserverWeb.ConnCase
   alias Teiserver.AssetFixtures
   alias Teiserver.Asset.EngineQueries
+  alias Teiserver.Asset.GameQueries
 
   defp setup_user(_context) do
     Central.Helpers.GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
@@ -69,6 +70,36 @@ defmodule TeiserverWeb.Admin.AssetControllerTest do
       resp = delete(conn, ~p"/teiserver/admin/asset/engine/128931")
       assert redirected_to(resp) == ~p"/teiserver/admin/asset/"
       assert %{"danger" => "engine not found"} = resp.assigns.flash
+    end
+  end
+
+  describe "game version crud" do
+    setup [:setup_user]
+
+    test "valid create", %{conn: conn} do
+      resp = post(conn, ~p"/teiserver/admin/asset/game", %{game: %{name: "game-name"}})
+      assert redirected_to(resp) == ~p"/teiserver/admin/asset/"
+      assert [game] = GameQueries.get_games()
+      assert game.name == "game-name"
+    end
+
+    test "name already taken", %{conn: conn} do
+      AssetFixtures.create_game(%{name: "game-name"})
+      resp = post(conn, ~p"/teiserver/admin/asset/game", %{game: %{name: "game-name"}})
+      assert html_response(resp, 400)
+    end
+
+    test "delete game", %{conn: conn} do
+      game = AssetFixtures.create_game(%{name: "game-name"})
+      resp = delete(conn, ~p"/teiserver/admin/asset/game/#{game.id}")
+      assert redirected_to(resp) == ~p"/teiserver/admin/asset/"
+      assert [] == GameQueries.get_games()
+    end
+
+    test "delete invalid game", %{conn: conn} do
+      resp = delete(conn, ~p"/teiserver/admin/asset/game/128931")
+      assert redirected_to(resp) == ~p"/teiserver/admin/asset/"
+      assert %{"danger" => "game not found"} = resp.assigns.flash
     end
   end
 end

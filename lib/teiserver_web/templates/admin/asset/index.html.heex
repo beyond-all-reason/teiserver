@@ -41,19 +41,38 @@
   <% end %>
 
   <h2>Game versions</h2>
+
+  <p>
+    <div class="btn btn-sm btn-outline-success">
+      <Phx.link href={~p"/teiserver/admin/asset/game/new"}>Add game version</Phx.link>
+    </div>
+  </p>
+
   <%= if length(@games) > 0 do %>
     <table class="table">
       <thead>
         <tr>
           <th>Name</th>
           <th>Created at</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         <%= for game <- @games do %>
-          <tr>
+          <tr style="vertical-align: middle;">
             <td>{game.name}</td>
             <td>{game.inserted_at}</td>
+            <td>
+              <CC.simple_form
+                for={}
+                action={~p"/teiserver/admin/asset/game/#{game.id}"}
+                method="delete"
+              >
+                <:actions>
+                  <CC.button type="submit" class="btn-danger">Delete</CC.button>
+                </:actions>
+              </CC.simple_form>
+            </td>
           </tr>
         <% end %>
       </tbody>

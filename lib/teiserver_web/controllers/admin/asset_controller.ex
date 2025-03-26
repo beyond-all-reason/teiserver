@@ -71,4 +71,50 @@ defmodule TeiserverWeb.Admin.AssetController do
         |> redirect(to: ~p"/teiserver/admin/asset/")
     end
   end
+
+  def new_game(conn, _) do
+    changeset = Asset.change_game()
+
+    conn
+    |> assign(:page_title, "BAR - new game version")
+    |> render("new_game.html", changeset: changeset)
+  end
+
+  @spec create_game(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def create_game(conn, %{"game" => attrs}) do
+    case Asset.create_game(attrs) do
+      {:ok, %Asset.Game{} = _game} ->
+        conn
+        |> put_flash(:info, "game added")
+        |> redirect(to: ~p"/teiserver/admin/asset/")
+
+      {:error, changeset} ->
+        conn
+        |> put_status(:bad_request)
+        |> assign(:page_title, "BAR - new game version")
+        |> render("new_game.html", changeset: changeset)
+    end
+  end
+
+  def create_game(conn, _) do
+    conn
+    |> put_status(:bad_request)
+    |> assign(:page_title, "BAR - new game version")
+    |> render("new_game.html", changeset: Asset.change_game())
+  end
+
+  def delete_game(conn, assigns) do
+    case Asset.delete_game(assigns["id"]) do
+      :ok ->
+        conn
+        |> put_flash(:info, "Engine deleted")
+
+        redirect(conn, to: ~p"/teiserver/admin/asset/")
+
+      :error ->
+        conn
+        |> put_flash(:danger, "game not found")
+        |> redirect(to: ~p"/teiserver/admin/asset/")
+    end
+  end
 end

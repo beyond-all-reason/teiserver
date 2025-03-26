@@ -71,4 +71,28 @@ defmodule Teiserver.Asset do
 
   @spec get_games() :: [Asset.Game.t()]
   defdelegate get_games(), to: GameQueries
+
+  def change_game(%Asset.Game{} = game \\ %Asset.Game{}, attrs \\ %{}) do
+    Asset.Game.changeset(game, attrs)
+  end
+
+  def create_game(attrs \\ %{}) do
+    %Asset.Game{}
+    |> Asset.Game.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec delete_game(id :: integer()) :: :ok | :error
+  def delete_game(id) do
+    import Ecto.Query
+
+    result =
+      from(e in Asset.Game, where: e.id == ^id)
+      |> Repo.delete_all()
+
+    case result do
+      {1, _} -> :ok
+      {0, _} -> :error
+    end
+  end
 end

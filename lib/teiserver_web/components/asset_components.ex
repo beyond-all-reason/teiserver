@@ -5,7 +5,9 @@ defmodule TeiserverWeb.Components.AssetComponents do
   attr :changeset, Ecto.Changeset, required: true
   attr :action, :string, required: true
 
-  def engine_form(assigns) do
+  # engine and game version are actually identical so use the same form.
+  # when they start to diverge, this should be split
+  def asset_form(assigns) do
     ~H"""
     <CC.simple_form :let={f} for={@changeset} action={@action}>
       <CC.error :if={@changeset.action}>

@@ -21,5 +21,6 @@ defmodule Teiserver.Asset.Game do
   def changeset(game, attrs) do
     cast(game, attrs, [:name])
     |> validate_required([:name])
+    |> unique_constraint(:name)
   end
 end
