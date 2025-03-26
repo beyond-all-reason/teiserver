@@ -35,7 +35,7 @@ defmodule Mix.Tasks.Teiserver.BrierStats do
         errors: [],
         num_matches: 0
       },
-      pro_matches: %{
+      experienced_matches: %{
         errors: [],
         num_matches: 0
       }
@@ -49,7 +49,7 @@ defmodule Mix.Tasks.Teiserver.BrierStats do
           # Do not process
           acc
         else
-          key = if match_error.has_noobs?, do: :noob_matches, else: :pro_matches
+          key = if match_error.has_noobs?, do: :noob_matches, else: :experienced_matches
 
           # We simply add the errors for each match
           updated_errors = %{
@@ -64,7 +64,7 @@ defmodule Mix.Tasks.Teiserver.BrierStats do
     # The brier score is just the sum of error squared divided by num matches
     brier_score = %{
       noob_matches: convert_error_result_to_brier_score(error_result.noob_matches),
-      pro_matches: convert_error_result_to_brier_score(error_result.pro_matches)
+      experienced_matches: convert_error_result_to_brier_score(error_result.experienced_matches)
     }
 
     IO.inspect(brier_score, label: "brier_score", charlists: :as_lists)
