@@ -31,7 +31,7 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
            ]
   end
 
-  test "Handle groups with incomplete data in create_balance loser_pics" do
+  test "Handle groups with incomplete data in create_balance loser_picks" do
     [user1, user2, user3, user4, user5] = create_test_users()
 
     groups = [
