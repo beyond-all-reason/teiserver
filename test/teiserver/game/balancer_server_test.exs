@@ -56,9 +56,10 @@ defmodule Teiserver.Game.BalancerServerTest do
   def make_users_with_ranks(list_of_ranks) do
     users =
       for {rank, i} <- Enum.with_index(list_of_ranks) do
-        user = Central.Helpers.GeneralTestLib.make_user(%{})
-        user = Map.put(user, :party_id, i)
-        user = Map.put(user, :userid, user.id)
+        user =
+          Central.Helpers.GeneralTestLib.make_user(%{})
+          |> Map.put(:party_id, i)
+          |> then(fn user -> Map.put(user, :userid, user.id) end)
 
         Teiserver.Account.update_user_stat(user.id, %{
           :rank => rank
