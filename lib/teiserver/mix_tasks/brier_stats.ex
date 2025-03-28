@@ -188,7 +188,9 @@ defmodule Mix.Tasks.Teiserver.BrierStats do
   # Returns the forecast error squared
   defp process_sql_result(teams, rating_system) do
     openskill_teams =
-      teams |> Enum.map(fn {x, v} -> convert_player_list_to_tuple_list(v, rating_system) end)
+      teams
+      |> Enum.map(fn {x, v} -> convert_player_list_to_tuple_list(v, rating_system) end)
+      |> double_captain()
 
     # When predicting, we should feed into the openskill library the {skill, uncertainty} of players
     # However, since we balance on player rating, instead we feed in {rating, uncertainty} of all players
@@ -196,6 +198,14 @@ defmodule Mix.Tasks.Teiserver.BrierStats do
     [team1_win_predict, _team2_win_predict] = Openskill.predict_win(openskill_teams)
     # team 1 is the winning team
     get_forecast_error_squared(team1_win_predict)
+  end
+
+  # Treat each team as if they have a clone of the captain
+  defp double_captain(openskill_teams) do
+    Enum.map(openskill_teams, fn team ->
+      captain = Enum.max_by(team, fn {skill, uncertainty} -> skill end)
+      [captain | team]
+    end)
   end
 
   # Fully accurate forecast will be 0.
