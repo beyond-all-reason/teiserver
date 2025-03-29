@@ -4,7 +4,7 @@ defmodule Teiserver.Asset.Engine do
   """
   use TeiserverWeb, :schema
 
-  @timestamps_opts [type: :utc_datetime_usec, autogenerate: {DateTime, :now!, ["Etc/UTC"]}]
+  @timestamps_opts [type: :utc_datetime_usec]
 
   @type t :: %__MODULE__{
           id: integer(),
