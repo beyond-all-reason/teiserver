@@ -201,6 +201,10 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
         state
       ) do
     for user_id <- user_ids do
+      if user_id == state.user.id do
+        :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{state.party_id}")
+      end
+
       case Teiserver.Account.get_user_by_id(user_id) do
         nil ->
           state
