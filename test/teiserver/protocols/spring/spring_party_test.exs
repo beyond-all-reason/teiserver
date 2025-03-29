@@ -258,7 +258,12 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     assert [{"s.party.invited_to_party", _, _}] =
              _recv_until(socket2) |> parse_in_messages()
 
-    assert [{"s.party.invited_to_party", _, _}, {"s.party.joined_party", _, _}] =
+    assert [
+             {"s.party.invited_to_party", _, _},
+             {"s.party.joined_party", _, _},
+             # also get the message about user2 being invited
+             {"s.party.invited_to_party", [_, ^username2], _}
+           ] =
              _recv_until(socket3) |> parse_in_messages()
 
     # player 3 accepts the invite

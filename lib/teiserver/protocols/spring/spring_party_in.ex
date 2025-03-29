@@ -160,7 +160,15 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     state
   end
 
-  def handle_event(%{event: :party_invite, party_id: party_id, members: members}, state) do
+  def handle_event(
+        %{
+          event: :party_invite,
+          party_id: party_id,
+          members: members,
+          pending_invites: pending_invites
+        },
+        state
+      ) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 
     SpringOut.reply(:party, :invited_to_party, party_id, message_id(), state)
@@ -169,6 +177,13 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     # chobby and spring, we need to let the client know about the members
     for uid <- members, username <- [Account.get_username_by_id(uid)], not is_nil(username) do
       SpringOut.reply(:party, :member_added, {party_id, username}, message_id(), state)
+    end
+
+    for uid <- pending_invites,
+        username <- [Account.get_username_by_id(uid)],
+        not is_nil(username),
+        uid != state.user.id do
+      SpringOut.reply(:party, :invited_to_party, {party_id, username}, message_id(), state)
     end
 
     state
