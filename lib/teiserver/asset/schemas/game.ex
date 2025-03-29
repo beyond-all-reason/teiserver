@@ -9,17 +9,19 @@ defmodule Teiserver.Asset.Game do
   @type t :: %__MODULE__{
           id: integer(),
           name: String.t(),
+          in_matchmaking: boolean() | nil,
           inserted_at: DateTime.t(),
           updated_at: DateTime.t()
         }
 
   schema "asset_games" do
     field :name, :string
+    field :in_matchmaking, :boolean
     timestamps()
   end
 
   def changeset(game, attrs) do
-    cast(game, attrs, [:name])
+    cast(game, attrs, [:name, :in_matchmaking])
     |> validate_required([:name])
     |> unique_constraint(:name)
   end

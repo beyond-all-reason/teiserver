@@ -9,17 +9,19 @@ defmodule Teiserver.Asset.Engine do
   @type t :: %__MODULE__{
           id: integer(),
           name: String.t(),
+          in_matchmaking: boolean() | nil,
           inserted_at: DateTime.t(),
           updated_at: DateTime.t()
         }
 
   schema "asset_engines" do
     field :name, :string
+    field :in_matchmaking, :boolean
     timestamps()
   end
 
   def changeset(engine, attrs) do
-    cast(engine, attrs, [:name])
+    cast(engine, attrs, [:name, :in_matchmaking])
     |> validate_required([:name])
     |> unique_constraint(:name)
   end
