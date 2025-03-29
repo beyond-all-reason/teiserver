@@ -263,6 +263,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     # invited players also receive this message, but this shouldn't force them to
     # leave the party they are in
     state = if state.user.id == userid, do: Map.put(state, :party_id, nil), else: state
+    :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 
     # chobby would like to receive a member_left message when the last member leaves
     case Teiserver.Account.get_user_by_id(userid) do
