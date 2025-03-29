@@ -87,9 +87,10 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
 
   def do_handle("decline_invite_to_party", data, msg_id, state) do
     cmd_id = "c.party.decline_invite_to_party"
-    :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{state.party_id}")
 
     with [party_id] <- String.split(data) |> Enum.map(&String.trim/1) do
+      # no need to unsubscribe here because it'll be done when handling the
+      # :invite_cancelled event
       Account.cancel_party_invite(party_id, state.user.id)
       SpringOut.reply(:okay, cmd_id, msg_id, state)
     else
@@ -201,6 +202,10 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
         state
       ) do
     for user_id <- user_ids do
+      if user_id == state.user.id do
+        :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
+      end
+
       case Teiserver.Account.get_user_by_id(user_id) do
         nil ->
           state
