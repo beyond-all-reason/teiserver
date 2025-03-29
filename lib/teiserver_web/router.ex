@@ -699,5 +699,6 @@ defmodule TeiserverWeb.Router do
     get("/asset/game/new", AssetController, :new_game)
     post("/asset/game", AssetController, :create_game)
     delete("/asset/game/:id", AssetController, :delete_game)
+    post("/asset/game/:id/set_matchmaking", AssetController, :set_game_matchmaking)
   end
 end

@@ -131,4 +131,18 @@ defmodule TeiserverWeb.Admin.AssetController do
         |> redirect(to: ~p"/teiserver/admin/asset/")
     end
   end
+
+  def set_game_matchmaking(conn, assigns) do
+    case Asset.set_game_matchmaking(assigns["id"]) do
+      {:error, :not_found} ->
+        conn
+        |> put_flash(:danger, "game not found")
+        |> redirect(to: ~p"/teiserver/admin/asset/")
+
+      {:ok, game} ->
+        conn
+        |> put_flash(:info, "#{game.name} setup for matchmaking")
+        |> redirect(to: ~p"/teiserver/admin/asset/")
+    end
+  end
 end

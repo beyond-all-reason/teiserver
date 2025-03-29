@@ -8,9 +8,21 @@ defmodule Teiserver.Asset.GameQueries do
     base_query() |> order_by() |> Repo.all()
   end
 
-  @spec get_game([id: integer() | String.t()] | [name: String.t()]) :: Asset.Game.t() | nil
-  def get_game(id: id), do: base_query() |> where_id(id) |> Repo.one()
-  def get_game(name: name), do: base_query() |> where_name(name) |> Repo.one()
+  @type where_opt ::
+          {:id, integer() | String.t()} | {:name, String.t()} | {:in_matchmaking, boolean()}
+  @type where_opts :: [where_opt()]
+
+  @spec get_game(where_opts()) :: Asset.Game.t() | nil
+  def get_game(clauses) do
+    Enum.reduce(clauses, base_query(), fn clause, q ->
+      case clause do
+        {:id, id} -> where_id(q, id)
+        {:name, name} -> where_name(q, name)
+        {:in_matchmaking, mm} -> where_in_matchmaking(q, mm)
+      end
+    end)
+    |> Repo.one()
+  end
 
   defp base_query() do
     from game in Asset.Game, as: :game
@@ -20,11 +32,14 @@ defmodule Teiserver.Asset.GameQueries do
     from game in query, order_by: [desc: game.id]
   end
 
-  def where_id(query, id) do
-    from game in query, where: game.id == ^id
-  end
+  def where_id(query, nil), do: from(game in query, where: is_nil(game.id))
+  def where_id(query, id), do: from(game in query, where: game.id == ^id)
 
   def where_name(query, name) do
     from game in query, where: game.name == ^name
+  end
+
+  def where_in_matchmaking(query, mm) do
+    from game in query, where: game.in_matchmaking == ^mm
   end
 end

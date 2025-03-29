@@ -95,7 +95,7 @@ defmodule Teiserver.Asset do
   @spec get_games() :: [Asset.Game.t()]
   defdelegate get_games(), to: GameQueries
 
-  @spec get_game([id: integer() | String.t()] | [name: String.t()]) :: Asset.Game.t() | nil
+  @spec get_game(GameQueries.where_opts()) :: Asset.Game.t() | nil
   defdelegate get_game(attr), to: GameQueries
 
   def change_game(%Asset.Game{} = game \\ %Asset.Game{}, attrs \\ %{}) do
@@ -120,5 +120,25 @@ defmodule Teiserver.Asset do
       {1, _} -> :ok
       {0, _} -> :error
     end
+  end
+
+  @spec set_game_matchmaking(id :: integer() | String.t()) ::
+          {:ok, Asset.Game.t()} | {:error, :not_found}
+  def set_game_matchmaking(id) do
+    Repo.transaction(fn ->
+      case GameQueries.get_game(id: id) do
+        nil ->
+          Repo.rollback(:not_found)
+
+        game ->
+          mm_game = GameQueries.get_game(in_matchmaking: true)
+
+          if mm_game != nil do
+            change_game(mm_game, %{in_matchmaking: false}) |> Repo.update!()
+          end
+
+          change_game(game, %{in_matchmaking: true}) |> Repo.update!()
+      end
+    end)
   end
 end
