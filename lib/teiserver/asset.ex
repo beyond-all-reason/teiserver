@@ -45,7 +45,7 @@ defmodule Teiserver.Asset do
   @spec get_engines() :: [Asset.Engine.t()]
   defdelegate get_engines(), to: EngineQueries
 
-  @spec get_engine([id: integer() | String.t()] | [name: String.t()]) :: Asset.Engine.t() | nil
+  @spec get_engine(EngineQueries.where_opts()) :: Asset.Engine.t() | nil
   defdelegate get_engine(attr), to: EngineQueries
 
   def change_engine(%Asset.Engine{} = engine \\ %Asset.Engine{}, attrs \\ %{}) do
@@ -70,6 +70,26 @@ defmodule Teiserver.Asset do
       {1, _} -> :ok
       {0, _} -> :error
     end
+  end
+
+  @spec set_engine_matchmaking(id :: integer() | String.t()) ::
+          {:ok, Asset.Engine.t()} | {:error, :not_found}
+  def set_engine_matchmaking(id) do
+    Repo.transaction(fn ->
+      case EngineQueries.get_engine(id: id) do
+        nil ->
+          Repo.rollback(:not_found)
+
+        engine ->
+          mm_engine = EngineQueries.get_engine(in_matchmaking: true)
+
+          if mm_engine != nil do
+            change_engine(mm_engine, %{in_matchmaking: false}) |> Repo.update!()
+          end
+
+          change_engine(engine, %{in_matchmaking: true}) |> Repo.update!()
+      end
+    end)
   end
 
   @spec get_games() :: [Asset.Game.t()]

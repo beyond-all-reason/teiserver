@@ -13,6 +13,7 @@
         <tr>
           <th>Name</th>
           <th>Created at</th>
+          <th>Matchmaking?</th>
           <th></th>
         </tr>
       </thead>
@@ -20,16 +21,37 @@
         <%= for engine <- @engines do %>
           <tr style="vertical-align: middle;">
             <td>{engine.name}</td>
-            <td>{engine.inserted_at}</td>
+            <td>
+              {Timex.format!(engine.inserted_at, "{YYYY}-{0M}-{0D} {0h24}:{0m}:{0s} {Zabbr}")}
+            </td>
+            <td>
+              <Fontawesome.icon :if={engine.in_matchmaking} icon="check" style="solid" />
+            </td>
             <td>
               <CC.simple_form
                 for={}
                 action={~p"/teiserver/admin/asset/engine/#{engine.id}"}
                 method="delete"
+                style="display: inline-block;"
               >
                 <:actions>
-                  <CC.button type="submit" class="btn-danger">Delete</CC.button>
+                  <CC.button type="submit" class="btn-sm btn-danger">Delete</CC.button>
                 </:actions>
+              </CC.simple_form>
+
+              <CC.simple_form
+                for={}
+                action={~p"/teiserver/admin/asset/engine/#{engine.id}/set_matchmaking"}
+                method="post"
+                style="display: inline-block;"
+              >
+                <CC.button
+                  type="submit"
+                  class="btn-sm btn-success"
+                  disabled={engine.in_matchmaking}
+                >
+                  Set matchmaking
+                </CC.button>
               </CC.simple_form>
             </td>
           </tr>

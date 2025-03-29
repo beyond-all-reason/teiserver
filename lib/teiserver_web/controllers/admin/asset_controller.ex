@@ -72,6 +72,20 @@ defmodule TeiserverWeb.Admin.AssetController do
     end
   end
 
+  def set_engine_matchmaking(conn, assigns) do
+    case Asset.set_engine_matchmaking(assigns["id"]) do
+      {:error, :not_found} ->
+        conn
+        |> put_flash(:danger, "engine not found")
+        |> redirect(to: ~p"/teiserver/admin/asset/")
+
+      {:ok, engine} ->
+        conn
+        |> put_flash(:info, "#{engine.name} setup for matchmaking")
+        |> redirect(to: ~p"/teiserver/admin/asset/")
+    end
+  end
+
   def new_game(conn, _) do
     changeset = Asset.change_game()
 
