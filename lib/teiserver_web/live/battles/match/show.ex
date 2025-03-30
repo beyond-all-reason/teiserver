@@ -684,7 +684,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
                 "damage_taken" => acc["damage_taken"] + (member.stats["damage_taken"] || 0),
                 "metal_produced" => acc["metal_produced"] + (member.stats["metal_produced"] || 0),
                 "metal_used" => acc["metal_used"] + (member.stats["metal_used"] || 0),
-                "energy_produced" => acc["energy_produced"] + (member.stats["energy_produced"] || 0),
+                "energy_produced" =>
+                  acc["energy_produced"] + (member.stats["energy_produced"] || 0),
                 "energy_used" => acc["energy_used"] + (member.stats["energy_used"] || 0)
               }
             end
