@@ -53,17 +53,17 @@
 
         <td>{m.team_id + 1}</td>
 
-        <td>{normalize(m.stats["damage_done"])}</td>
-        <td>{normalize(m.stats["damage_taken"])}</td>
+        <td>{normalize(m.stats["damageDealt"])}</td>
+        <td>{normalize(m.stats["damageReceived"])}</td>
 
-        <td>{normalize(m.stats["units_killed"])}</td>
-        <td>{normalize(m.stats["units_produced"])}</td>
+        <td>{normalize(m.stats["unitsKilled"])}</td>
+        <td>{normalize(m.stats["unitsProduced"])}</td>
 
-        <td>{normalize(m.stats["metal_produced"])}</td>
-        <td>{normalize(m.stats["metal_used"])}</td>
+        <td>{normalize(m.stats["metalProduced"])}</td>
+        <td>{normalize(m.stats["metalUsed"])}</td>
 
-        <td>{normalize(m.stats["energy_produced"])}</td>
-        <td>{normalize(m.stats["energy_used"])}</td>
+        <td>{normalize(m.stats["energyProduced"])}</td>
+        <td>{normalize(m.stats["energyUsed"])}</td>
 
         <td>{if rating, do: rating.value["rating_value"] |> round(2)}</td>
 
