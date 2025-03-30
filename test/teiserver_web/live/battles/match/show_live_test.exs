@@ -4,36 +4,36 @@ defmodule TeiserverWeb.Battle.MatchLive.ShowTest do
 
   @player_stats %{
     team1_player1: %{
-      "damage_done" => 100,
-      "damage_taken" => 50,
-      "metal_produced" => 200,
-      "metal_used" => 150,
-      "energy_produced" => 300,
-      "energy_used" => 250
+      "damageDealt" => 100,
+      "damageReceived" => 50,
+      "metalProduced" => 200,
+      "metalUsed" => 150,
+      "energyProduced" => 300,
+      "energyUsed" => 250
     },
     team1_player2: %{
-      "damage_done" => 200,
-      "damage_taken" => 100,
-      "metal_produced" => 300,
-      "metal_used" => 250,
-      "energy_produced" => 400,
-      "energy_used" => 350
+      "damageDealt" => 200,
+      "damageReceived" => 100,
+      "metalProduced" => 300,
+      "metalUsed" => 250,
+      "energyProduced" => 400,
+      "energyUsed" => 350
     },
     team2_player1: %{
-      "damage_done" => 150,
-      "damage_taken" => 75,
-      "metal_produced" => 250,
-      "metal_used" => 200,
-      "energy_produced" => 350,
-      "energy_used" => 300
+      "damageDealt" => 150,
+      "damageReceived" => 75,
+      "metalProduced" => 250,
+      "metalUsed" => 200,
+      "energyProduced" => 350,
+      "energyUsed" => 300
     },
     team2_player2: %{
-      "damage_done" => 250,
-      "damage_taken" => 125,
-      "metal_produced" => 350,
-      "metal_used" => 300,
-      "energy_produced" => 450,
-      "energy_used" => 400
+      "damageDealt" => 250,
+      "damageReceived" => 125,
+      "metalProduced" => 350,
+      "metalUsed" => 300,
+      "energyProduced" => 450,
+      "energyUsed" => 400
     }
   }
 
@@ -76,12 +76,12 @@ defmodule TeiserverWeb.Battle.MatchLive.ShowTest do
 
   defp assert_team_totals(totals, team_id, expected) do
     assert totals[team_id].players == expected.players
-    assert totals[team_id].stats["damage_done"] == expected.damage_done
-    assert totals[team_id].stats["damage_taken"] == expected.damage_taken
-    assert totals[team_id].stats["metal_produced"] == expected.metal_produced
-    assert totals[team_id].stats["metal_used"] == expected.metal_used
-    assert totals[team_id].stats["energy_produced"] == expected.energy_produced
-    assert totals[team_id].stats["energy_used"] == expected.energy_used
+    assert totals[team_id].stats["damageDealt"] == expected.damage_done
+    assert totals[team_id].stats["damageReceived"] == expected.damage_taken
+    assert totals[team_id].stats["metalProduced"] == expected.metal_produced
+    assert totals[team_id].stats["metalUsed"] == expected.metal_used
+    assert totals[team_id].stats["energyProduced"] == expected.energy_produced
+    assert totals[team_id].stats["energyUsed"] == expected.energy_used
   end
 
   test "get team id" do

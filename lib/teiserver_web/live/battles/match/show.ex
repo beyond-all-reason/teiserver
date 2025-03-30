@@ -671,22 +671,21 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           Enum.reduce(
             team_members,
             %{
-              "damage_done" => 0,
-              "damage_taken" => 0,
-              "metal_produced" => 0,
-              "metal_used" => 0,
-              "energy_produced" => 0,
-              "energy_used" => 0
+              "damageDealt" => 0,
+              "damageReceived" => 0,
+              "metalProduced" => 0,
+              "metalUsed" => 0,
+              "energyProduced" => 0,
+              "energyUsed" => 0
             },
             fn member, acc ->
               %{
-                "damage_done" => acc["damage_done"] + (member.stats["damage_done"] || 0),
-                "damage_taken" => acc["damage_taken"] + (member.stats["damage_taken"] || 0),
-                "metal_produced" => acc["metal_produced"] + (member.stats["metal_produced"] || 0),
-                "metal_used" => acc["metal_used"] + (member.stats["metal_used"] || 0),
-                "energy_produced" =>
-                  acc["energy_produced"] + (member.stats["energy_produced"] || 0),
-                "energy_used" => acc["energy_used"] + (member.stats["energy_used"] || 0)
+                "damageDealt" => acc["damageDealt"] + (member.stats["damageDealt"] || 0),
+                "damageReceived" => acc["damageReceived"] + (member.stats["damageReceived"] || 0),
+                "metalProduced" => acc["metalProduced"] + (member.stats["metalProduced"] || 0),
+                "metalUsed" => acc["metalUsed"] + (member.stats["metalUsed"] || 0),
+                "energyProduced" => acc["energyProduced"] + (member.stats["energyProduced"] || 0),
+                "energyUsed" => acc["energyUsed"] + (member.stats["energyUsed"] || 0)
               }
             end
           )
