@@ -112,6 +112,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         )
         |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
 
+      team_totals = calculate_team_totals(members)
+
       find_current_user =
         Enum.find(members, fn x ->
           x.user_id == current_user.id
@@ -245,6 +247,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> assign(:match, match)
       |> assign(:match_name, match_name)
       |> assign(:members, members)
+      |> assign(:team_totals, team_totals)
       |> assign(:balanced_members, balanced_members)
       |> assign(:rating_logs, rating_logs)
       |> assign(:parties, parties)
@@ -651,5 +654,64 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       </div>
     </div>
     """
+  end
+
+  @doc """
+  Calculates team totals for each team based on member stats.
+  Only calculates totals for teams with more than one player.
+  """
+  def calculate_team_totals(members) do
+    members
+    |> Enum.group_by(& &1.team_id)
+    |> Map.new(fn {team_id, team_members} ->
+      if length(team_members) <= 1 do
+        {team_id, nil}
+      else
+        stats =
+          Enum.reduce(
+            team_members,
+            %{
+              "damageDealt" => 0,
+              "damageReceived" => 0,
+              "metalProduced" => 0,
+              "metalUsed" => 0,
+              "energyProduced" => 0,
+              "energyUsed" => 0
+            },
+            fn member, acc ->
+              %{
+                "damageDealt" => acc["damageDealt"] + (member.stats["damageDealt"] || 0),
+                "damageReceived" => acc["damageReceived"] + (member.stats["damageReceived"] || 0),
+                "metalProduced" => acc["metalProduced"] + (member.stats["metalProduced"] || 0),
+                "metalUsed" => acc["metalUsed"] + (member.stats["metalUsed"] || 0),
+                "energyProduced" => acc["energyProduced"] + (member.stats["energyProduced"] || 0),
+                "energyUsed" => acc["energyUsed"] + (member.stats["energyUsed"] || 0)
+              }
+            end
+          )
+
+        {team_id,
+         %{
+           players: Enum.count(team_members),
+           stats: stats
+         }}
+      end
+    end)
+    |> Map.reject(fn {_team_id, value} -> is_nil(value) end)
+  end
+
+  @doc """
+  Determines if team totals should be shown.
+  Totals are only shown under the last player in teams with multiple players.
+  """
+  def should_show_team_total?(members, member) do
+    team_members = Enum.filter(members, &(&1.team_id == member.team_id))
+
+    if length(team_members) <= 1 do
+      false
+    else
+      last_member = List.last(team_members)
+      member.user_id == last_member.user_id
+    end
   end
 end
