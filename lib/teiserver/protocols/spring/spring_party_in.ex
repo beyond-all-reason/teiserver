@@ -87,9 +87,10 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
 
   def do_handle("decline_invite_to_party", data, msg_id, state) do
     cmd_id = "c.party.decline_invite_to_party"
-    :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{state.party_id}")
 
     with [party_id] <- String.split(data) |> Enum.map(&String.trim/1) do
+      # no need to unsubscribe here because it'll be done when handling the
+      # :invite_cancelled event
       Account.cancel_party_invite(party_id, state.user.id)
       SpringOut.reply(:okay, cmd_id, msg_id, state)
     else
@@ -159,7 +160,15 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     state
   end
 
-  def handle_event(%{event: :party_invite, party_id: party_id, members: members}, state) do
+  def handle_event(
+        %{
+          event: :party_invite,
+          party_id: party_id,
+          members: members,
+          pending_invites: pending_invites
+        },
+        state
+      ) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 
     SpringOut.reply(:party, :invited_to_party, party_id, message_id(), state)
@@ -168,6 +177,13 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     # chobby and spring, we need to let the client know about the members
     for uid <- members, username <- [Account.get_username_by_id(uid)], not is_nil(username) do
       SpringOut.reply(:party, :member_added, {party_id, username}, message_id(), state)
+    end
+
+    for uid <- pending_invites,
+        username <- [Account.get_username_by_id(uid)],
+        not is_nil(username),
+        uid != state.user.id do
+      SpringOut.reply(:party, :invited_to_party, {party_id, username}, message_id(), state)
     end
 
     state
@@ -197,16 +213,24 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
   end
 
   def handle_event(
-        %{event: :updated_values, party_id: party_id, operation: {:invite_cancelled, userid}},
+        %{event: :updated_values, party_id: party_id, operation: {:invite_cancelled, user_ids}},
         state
       ) do
-    case Teiserver.Account.get_user_by_id(userid) do
-      nil ->
-        state
+    for user_id <- user_ids do
+      if user_id == state.user.id do
+        :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
+      end
 
-      user ->
-        SpringOut.reply(:party, :invite_cancelled, {party_id, user.name}, message_id(), state)
+      case Teiserver.Account.get_user_by_id(user_id) do
+        nil ->
+          state
+
+        user ->
+          SpringOut.reply(:party, :invite_cancelled, {party_id, user.name}, message_id(), state)
+      end
     end
+
+    state
   end
 
   def handle_event(
@@ -222,16 +246,33 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     end
   end
 
-  def handle_event(%{event: :closed, party_id: party_id}, state) do
+  def handle_event(
+        %{event: :updated_values, party_id: party_id, operation: {:invite_created, userid}},
+        state
+      ) do
+    case Teiserver.Account.get_user_by_id(userid) do
+      nil ->
+        state
+
+      user ->
+        SpringOut.reply(:party, :invited_to_party, {party_id, user.name}, message_id(), state)
+    end
+  end
+
+  def handle_event(%{event: :closed, party_id: party_id, last_member: userid}, state) do
+    # invited players also receive this message, but this shouldn't force them to
+    # leave the party they are in
+    state = if state.user.id == userid, do: Map.put(state, :party_id, nil), else: state
+    :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
+
     # chobby would like to receive a member_left message when the last member leaves
-    SpringOut.reply(
-      :party,
-      :member_removed,
-      {party_id, state.user.name},
-      message_id(),
-      # by construction, this is the last member leaving
-      Map.put(state, :party_id, nil)
-    )
+    case Teiserver.Account.get_user_by_id(userid) do
+      nil ->
+        state
+
+      user ->
+        SpringOut.reply(:party, :member_removed, {party_id, user.name}, message_id(), state)
+    end
   end
 
   def handle_event(event, state) do

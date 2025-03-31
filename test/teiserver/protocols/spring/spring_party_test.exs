@@ -137,6 +137,11 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
 
       cancelled = _recv_until(ctx.socket2) |> parse_in_message()
       assert {"s.party.invite_cancelled", [^party_id, ^username2], _} = cancelled
+
+      invite_to_party!(ctx.socket1, username2)
+      [invited, joined] = _recv_until(ctx.socket2) |> parse_in_messages()
+      assert {"s.party.invited_to_party", _, _} = invited
+      assert {"s.party.joined_party", _, _} = joined
     end
 
     test "cancel invite via web", ctx do
@@ -205,6 +210,27 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     end
   end
 
+  test "both in parties" do
+    {:ok, socket: socket1, user: user1} = setup_user(nil)
+    {:ok, socket: socket2, user: user2} = setup_user(nil)
+    # absorb the broadcasted message that another player is online
+    "ADDUSER " <> _ = _recv_until(socket1)
+
+    username1 = user1.name
+    username2 = user2.name
+
+    party1 = create_party!(socket1)
+    create_party!(socket2)
+    invite_to_party!(socket1, user2.name)
+    [invited, joined] = _recv_until(socket2) |> parse_in_messages()
+    assert {"s.party.invited_to_party", [^party1, ^username2], _} = invited
+    assert {"s.party.joined_party", [^party1, ^username1], _} = joined
+    leave_party!(socket1)
+    [left, cancelled] = _recv_until(socket2) |> parse_in_messages()
+    assert {"s.party.left_party", [^party1, ^username1], _} = left
+    assert {"s.party.invite_cancelled", [^party1, ^username2], _} = cancelled
+  end
+
   test "with 3 players" do
     # only test happy paths, but with more players to check broadcast mechanics
     {:ok, socket: socket1, user: user1} = setup_user(nil)
@@ -229,7 +255,15 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
 
     invite_to_party!(socket1, user3.name)
 
-    assert [{"s.party.invited_to_party", _, _}, {"s.party.joined_party", _, _}] =
+    assert [{"s.party.invited_to_party", _, _}] =
+             _recv_until(socket2) |> parse_in_messages()
+
+    assert [
+             {"s.party.invited_to_party", _, _},
+             {"s.party.joined_party", _, _},
+             # also get the message about user2 being invited
+             {"s.party.invited_to_party", [_, ^username2], _}
+           ] =
              _recv_until(socket3) |> parse_in_messages()
 
     # player 3 accepts the invite
@@ -286,7 +320,9 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
 
   defp invite_to_party!(socket, username) do
     invite_to_party(socket, username)
-    assert {"OK", _, _} = _recv_until(socket) |> parse_in_message()
+    [ok, invited] = _recv_until(socket) |> parse_in_messages()
+    assert {"OK", _, _} = ok
+    assert {"s.party.invited_to_party", [_, ^username], _} = invited
   end
 
   defp accept_invite(socket, party_id) do
