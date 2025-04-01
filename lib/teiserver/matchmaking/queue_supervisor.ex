@@ -5,30 +5,37 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
 
   use Horde.DynamicSupervisor
   alias Teiserver.Matchmaking.QueueServer
+  alias Teiserver.Asset
 
   def default_queues() do
+    engines =
+      case Asset.get_engine(in_matchmaking: true) do
+        nil -> []
+        e -> [%{version: e.name}]
+      end
+
+    games =
+      case Asset.get_game(in_matchmaking: true) do
+        nil -> []
+        g -> [%{spring_game: g.name}]
+      end
+
     [
       QueueServer.init_state(%{
         id: "1v1",
         name: "Duel",
         team_size: 1,
         team_count: 2,
-        engines: [%{version: "105.1.1-2590-gb9462a0 bar"}, %{version: "100.2.1-2143-test bar"}],
-        games: [
-          %{spring_game: "Beyond All Reason latest"},
-          %{spring_game: "BAR test"}
-        ]
+        engines: engines,
+        games: games
       }),
       QueueServer.init_state(%{
         id: "2v2",
         name: "2v2",
         team_size: 2,
         team_count: 2,
-        engines: [%{version: "105.1.1-2590-gb9462a0 bar"}, %{version: "100.2.1-2143-test bar"}],
-        games: [
-          %{spring_game: "Beyond All Reason latest"},
-          %{spring_game: "BAR test"}
-        ]
+        engines: engines,
+        games: games
       })
     ]
   end
