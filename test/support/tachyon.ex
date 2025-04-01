@@ -187,10 +187,12 @@ defmodule Teiserver.Support.Tachyon do
           {:ok, decoded}
         else
           {:error, %JsonXema.ValidationError{} = err} ->
-            IO.inspect(Jason.decode!(resp))
+            IO.inspect(Jason.decode!(resp), label: "schema validation failed on")
             {:error, err}
 
           err ->
+            IO.inspect(Jason.decode!(resp), label: "schema validation failed on")
+            IO.inspect(err, label: "unknown error")
             err
         end
 
@@ -329,5 +331,17 @@ defmodule Teiserver.Support.Tachyon do
   def remove_friend!(client, friend_id) do
     :ok = send_request(client, "friend/remove", %{userId: to_string(friend_id)})
     recv_message!(client)
+  end
+
+  def subscribe_updates!(client, user_ids) do
+    :ok = send_request(client, "user/subscribeUpdates", %{userIds: user_ids})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def unsubscribe_updates!(client, user_ids) do
+    :ok = send_request(client, "user/unsubscribeUpdates", %{userIds: user_ids})
+    {:ok, resp} = recv_message(client)
+    resp
   end
 end

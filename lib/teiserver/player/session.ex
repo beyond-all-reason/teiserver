@@ -14,8 +14,9 @@ defmodule Teiserver.Player.Session do
   require Logger
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Player, Matchmaking, Messaging}
+  alias Teiserver.{Player, Matchmaking, Messaging, Account}
   alias Teiserver.Helpers.BoundedQueue, as: BQ
+  alias Phoenix.PubSub
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 
@@ -51,7 +52,8 @@ defmodule Teiserver.Player.Session do
           mon_ref: reference(),
           conn_pid: pid() | nil,
           matchmaking: matchmaking_state(),
-          messaging_state: messaging_state()
+          messaging_state: messaging_state(),
+          user_subscriptions: MapSet.t(T.userid())
         }
 
   # TODO: would be better to have that as a db setting, perhaps passed as an
@@ -76,8 +78,11 @@ defmodule Teiserver.Player.Session do
         store_messages?: true,
         subscribed?: false,
         buffer: BQ.new(@messaging_buffer_size)
-      }
+      },
+      user_subscriptions: MapSet.new()
     }
+
+    broadcast_user_update!(user, :menu)
 
     Logger.debug("init session #{inspect(self())}")
     Logger.info("session started")
@@ -247,6 +252,21 @@ defmodule Teiserver.Player.Session do
       :died
   end
 
+  @doc """
+  Subscribe the session process to user updates. This will also ensure the first
+  message processed from these channel is the full user state
+  """
+  @spec subscribe_updates(T.userid(), [T.userid()]) :: :ok | {:error, {:invalid_ids, [integer()]}}
+  def subscribe_updates(originator_id, user_ids) do
+    GenServer.call(via_tuple(originator_id), {:user, {:subscribe_updates, user_ids}})
+  end
+
+  @spec unsubscribe_updates(T.userid(), [T.userid()]) ::
+          :ok | {:error, {:invalid_ids, [integer()]}}
+  def unsubscribe_updates(originator_id, user_ids) do
+    GenServer.call(via_tuple(originator_id), {:user, {:unsubscribe_updates, user_ids}})
+  end
+
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
@@ -280,6 +300,8 @@ defmodule Teiserver.Player.Session do
       _ ->
         nil
     end
+
+    broadcast_user_update!(state.user, :offline)
 
     {:stop, :normal, :ok, %{state | matchmaking: initial_matchmaking_state()}}
   end
@@ -382,6 +404,34 @@ defmodule Teiserver.Player.Session do
       end
 
     {:reply, {:ok, has_missed_messages, msg_to_send}, state}
+  end
+
+  def handle_call({:user, {:subscribe_updates, user_ids}}, _from, state) do
+    users = Account.query_users(where: [id_in: user_ids])
+
+    if Enum.count(users) != Enum.count(user_ids) do
+      diff =
+        MapSet.difference(MapSet.new(user_ids), MapSet.new(Enum.map(users, & &1.id)))
+        |> MapSet.to_list()
+
+      {:reply, {:error, {:invalid_ids, diff}}, state}
+    else
+      Enum.each(users, &do_subscribe_updates/1)
+      new_state = Map.update!(state, :user_subscriptions, &MapSet.union(&1, MapSet.new(user_ids)))
+      {:reply, :ok, new_state}
+    end
+  end
+
+  def handle_call({:user, {:unsubscribe_updates, user_ids}}, _from, state) do
+    user_ids = MapSet.new(user_ids)
+    to_remove = MapSet.intersection(user_ids, state.user_subscriptions)
+
+    for user_id <- to_remove do
+      PubSub.unsubscribe(Teiserver.PubSub, user_topic(user_id))
+    end
+
+    new_subs = MapSet.difference(state.user_subscriptions, user_ids)
+    {:reply, :ok, %{state | user_subscriptions: new_subs}}
   end
 
   @impl true
@@ -532,6 +582,11 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
+  def handle_cast({:user, :get_subscribe_state}, state) do
+    broadcast_user_update!(state.user, :menu)
+    {:noreply, state}
+  end
+
   @impl true
   def handle_info({:DOWN, ref, :process, _, _reason}, state) when ref == state.mon_ref do
     # we don't care about cancelling the timer if the player reconnects since reconnection
@@ -576,6 +631,25 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_info(
+        %{
+          channel: "tachyon:user:" <> _user_id,
+          user_id: user_id,
+          event: :user_updated,
+          state: user_state
+        },
+        state
+      ) do
+    state =
+      if user_id in state.user_subscriptions do
+        send_to_player({:user, {:user_updated, user_state}}, state)
+      else
+        state
+      end
+
+    {:noreply, state}
+  end
+
   defp via_tuple(user_id) do
     Player.SessionRegistry.via_tuple(user_id)
   end
@@ -617,5 +691,54 @@ defmodule Teiserver.Player.Session do
     end
 
     state
+  end
+
+  defp do_subscribe_updates(user) do
+    topic = user_topic(user.id)
+    :ok = PubSub.subscribe(Teiserver.PubSub, topic)
+
+    case Player.SessionRegistry.lookup(user.id) do
+      # player is offline, simulate the broadcast ourselves
+      nil ->
+        broadcast_user_update!(user, :offline)
+
+      # TODO: needs to store a monitor in the state to handle the case where the
+      # session dies before it can process this message.
+      pid ->
+        GenServer.cast(pid, {:user, :get_subscribe_state})
+    end
+  end
+
+  defp user_topic(%{id: id}), do: user_topic(id)
+  defp user_topic(user_id), do: "tachyon:user:#{user_id}"
+
+  defp broadcast_user_update!(user, status) do
+    topic = user_topic(user)
+
+    state = %{
+      user_id: user.id,
+      username: user.name,
+      clan_id: user.clan_id,
+      # the user struct is a giant mess, where a bunch of stuff is added from
+      # "user stats data" and whatnot. We should refactor user access so that
+      # we get the same struct every time, possibly with nil values for some keys
+      # but in the meantime, just defensively get the country
+      country: Map.get(user, :country, "??"),
+      status: status
+    }
+
+    PubSub.broadcast!(
+      Teiserver.PubSub,
+      topic,
+      # for now(?) we don't surface the `reconnecting` status. I think we'll revisit
+      # that because it's not a transparent state in term of capabilities:
+      # the player is "online" but cannot vote, reply, or anything really
+      %{
+        channel: topic,
+        event: :user_updated,
+        user_id: user.id,
+        state: state
+      }
+    )
   end
 end

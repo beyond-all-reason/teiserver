@@ -1,0 +1,34 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/user/unsubscribeUpdates/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "UserUnsubscribeUpdatesRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "user/unsubscribeUpdates" },
+        "data": {
+            "title": "UserUnsubscribeUpdatesRequestData",
+            "type": "object",
+            "properties": {
+                "userIds": {
+                    "type": "array",
+                    "items": {
+                        "$id": "userId",
+                        "type": "string",
+                        "examples": ["351"]
+                    },
+                    "minItems": 1,
+                    "maxItems": 100
+                }
+            },
+            "required": ["userIds"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

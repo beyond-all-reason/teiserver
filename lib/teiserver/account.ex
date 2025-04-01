@@ -32,6 +32,9 @@ defmodule Teiserver.Account do
   @spec get_user(non_neg_integer(), list) :: User.t() | nil
   defdelegate get_user(user_id, args), to: UserLib
 
+  @spec query_users(list) :: [User.t()]
+  defdelegate query_users(query_args), to: UserLib
+
   @spec query_user(list) :: User.t() | nil
   defdelegate query_user(query_args), to: UserLib
 
