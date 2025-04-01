@@ -105,7 +105,8 @@ config :logger, LoggerBackends.Console,
 config :logger, :error_log,
   format: "$date $time [$level] $metadata $message\n",
   metadata: metadata,
-  level: :error
+  level: :error,
+  truncate: 16384
 
 config :logger, :notice_log,
   format: "$date $time [$level] $metadata $message\n",
