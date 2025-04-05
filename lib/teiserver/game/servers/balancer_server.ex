@@ -36,19 +36,6 @@ defmodule Teiserver.Game.BalancerServer do
     {:reply, balance, new_state}
   end
 
-  defp handle_call_make_balance_additional_opts(state) do
-    [
-      algorithm: state.algorithm,
-      max_deviation: state.max_deviation,
-      rating_lower_boundary: state.rating_lower_boundary,
-      rating_upper_boundary: state.rating_upper_boundary,
-      mean_diff_max: state.mean_diff_max,
-      stddev_diff_max: state.stddev_diff_max,
-      fuzz_multiplier: state.fuzz_multiplier,
-      shuffle_first_pick: state.shuffle_first_pick
-    ]
-  end
-
   def handle_call(:get_balance_mode, _from, %{last_balance_hash: hash} = state) do
     result =
       cond do
@@ -135,6 +122,19 @@ defmodule Teiserver.Game.BalancerServer do
 
   def handle_info(:startup, state) do
     {:noreply, state}
+  end
+
+  defp handle_call_make_balance_additional_opts(state) do
+    [
+      algorithm: state.algorithm,
+      max_deviation: state.max_deviation,
+      rating_lower_boundary: state.rating_lower_boundary,
+      rating_upper_boundary: state.rating_upper_boundary,
+      mean_diff_max: state.mean_diff_max,
+      stddev_diff_max: state.stddev_diff_max,
+      fuzz_multiplier: state.fuzz_multiplier,
+      shuffle_first_pick: state.shuffle_first_pick
+    ]
   end
 
   @spec make_balance(non_neg_integer(), T.balance_server_state(), list()) ::
