@@ -123,10 +123,10 @@ defmodule Teiserver.Account.PartyServer do
             "teiserver_party:#{party.id}",
             %{
               channel: "teiserver_party:#{party.id}",
-              event: :closed,
+              event: :updated_values,
               party_id: party.id,
-              reason: "No members",
-              last_member: userid
+              new_values: %{pending_invites: []},
+              operation: {:invite_cancelled, party.pending_invites}
             }
           )
 
@@ -135,10 +135,10 @@ defmodule Teiserver.Account.PartyServer do
             "teiserver_party:#{party.id}",
             %{
               channel: "teiserver_party:#{party.id}",
-              event: :updated_values,
+              event: :closed,
               party_id: party.id,
-              new_values: %{pending_invites: []},
-              operation: {:invite_cancelled, party.pending_invites}
+              reason: "No members",
+              last_member: userid
             }
           )
 

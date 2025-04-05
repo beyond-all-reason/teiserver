@@ -226,7 +226,11 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     assert {"s.party.invited_to_party", [^party1, ^username2], _} = invited
     assert {"s.party.joined_party", [^party1, ^username1], _} = joined
     leave_party!(socket1)
-    [left, cancelled] = _recv_until(socket2) |> parse_in_messages()
+
+    [cancelled, left] =
+      _recv_until(socket2) |> IO.inspect(label: "sock2 go stuff") |> parse_in_messages()
+
+    assert {"s.party.invite_cancelled", [^party1, ^username2], _} = cancelled
     assert {"s.party.left_party", [^party1, ^username1], _} = left
     assert {"s.party.invite_cancelled", [^party1, ^username2], _} = cancelled
   end
