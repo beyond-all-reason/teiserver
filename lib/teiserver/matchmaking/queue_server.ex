@@ -118,15 +118,15 @@ defmodule Teiserver.Matchmaking.QueueServer do
     QueueRegistry.via_tuple(queue_id, queue)
   end
 
-  @type join_result ::
-          :ok
-          | {:error,
-             :invalid_queue
-             | :already_queued
-             | :too_many_players
-             | :missing_engines
-             | :missing_games
-             | :missing_maps}
+  @type join_error ::
+          {:error,
+           :invalid_queue
+           | :already_queued
+           | :too_many_players
+           | :missing_engines
+           | :missing_games
+           | :missing_maps}
+  @type join_result :: {:ok, queue_pid :: pid()} | join_error()
 
   @doc """
   Join the specified queue
@@ -231,7 +231,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           end)
           |> Enum.filter(fn {x, _} -> x != nil end)
 
-        {:reply, :ok,
+        {:reply, {:ok, self()},
          %{state | members: [new_member | state.members], monitors: monitors ++ state.monitors}}
 
       true ->

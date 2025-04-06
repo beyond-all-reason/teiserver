@@ -278,6 +278,21 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       assert %{"status" => "failed", "reason" => "internal_error"} =
                Tachyon.join_queues!(client, [id])
     end
+
+    test "cancelled event when queue dies", %{
+      client: client,
+      queue_id: queue_id,
+      queue_pid: queue_pid
+    } do
+      assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
+      Process.unlink(queue_pid)
+      Process.exit(queue_pid, :kill)
+      assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(client)
+
+      # can join again
+      {:ok, queue_id: q2_id, queue_pid: _q2_pid} = setup_queue(1)
+      assert %{"status" => "success"} = Tachyon.join_queues!(client, [q2_id])
+    end
   end
 
   describe "leaving queues" do
@@ -386,6 +401,15 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       [client, _] = join_and_pair(app, queue_id, queue_pid, 2)
       resp = Tachyon.join_queues!(client, [queue_id])
       assert %{"status" => "failed", "reason" => "already_queued"} = resp
+    end
+
+    test "cancelled event if queue dies during pairing", ctx do
+      [client1, client2] = join_and_pair(ctx.app, ctx.queue_id, ctx.queue_pid, 2)
+      Process.unlink(ctx.queue_pid)
+      Process.exit(ctx.queue_pid, :kill)
+
+      assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(client1)
+      assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(client2)
     end
 
     test "ready then leave triggers lost events", %{
