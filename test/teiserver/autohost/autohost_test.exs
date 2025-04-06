@@ -4,10 +4,7 @@ defmodule Teiserver.Autohost.AutohostTest do
 
   alias Teiserver.Autohost
 
-  setup do
-    ExUnit.Callbacks.start_supervised!(Teiserver.Tachyon.System)
-    :ok
-  end
+  @moduletag :tachyon
 
   describe "find autohost" do
     test "no autohost available" do
