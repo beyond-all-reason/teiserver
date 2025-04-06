@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.Battle.MatchLive.ChatLiveTest do
   use TeiserverWeb.ConnCase
-  import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
 

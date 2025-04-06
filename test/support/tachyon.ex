@@ -2,6 +2,12 @@ defmodule Teiserver.Support.Tachyon do
   alias WebsocketSyncClient, as: WSC
   alias Teiserver.OAuthFixtures
 
+  def tachyon_case_setup(tags) do
+    if String.contains?(to_string(tags[:module]), "Tachyon") || tags[:tachyon] do
+      ExUnit.Callbacks.start_supervised!(Teiserver.Tachyon.System)
+    end
+  end
+
   def create_user() do
     Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
   end

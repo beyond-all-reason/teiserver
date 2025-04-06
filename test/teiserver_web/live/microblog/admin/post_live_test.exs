@@ -55,7 +55,7 @@ defmodule TeiserverWeb.PostLiveTest do
   describe "Basic auth test" do
     setup [:unauth_setup, :create_post]
 
-    test "cannot visit admin posts", %{post: post, conn: conn} do
+    test "cannot visit admin posts", %{conn: conn} do
       {:error, {:redirect, resp}} = live(conn, ~p"/microblog/admin/posts")
       assert resp.to == ~p"/"
     end

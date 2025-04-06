@@ -2,10 +2,7 @@ defmodule Teiserver.Player.SessionTest do
   use Teiserver.DataCase, async: false
   alias Teiserver.Player
 
-  setup do
-    ExUnit.Callbacks.start_supervised!(Teiserver.Tachyon.System)
-    :ok
-  end
+  @moduletag :tachyon
 
   def setup_session(_) do
     user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})

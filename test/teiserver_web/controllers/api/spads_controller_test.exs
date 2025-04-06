@@ -1,33 +1,15 @@
 defmodule TeiserverWeb.API.SpadsControllerTest do
   use TeiserverWeb.ConnCase, async: false
   alias Teiserver.Account
-  alias Teiserver.Lobby
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Coordinator
-  alias Teiserver.Account.ClientLib
   alias Teiserver.Client
   alias TeiserverWeb.API.SpadsController
 
   import Teiserver.TeiserverTestLib,
     only: [
       new_user: 0,
-      new_user: 1,
       make_lobby: 1
     ]
-
-  defp make_rating(userid, rating_type_id, rating_value) do
-    {:ok, _} =
-      Account.create_rating(%{
-        user_id: userid,
-        rating_type_id: rating_type_id,
-        rating_value: rating_value,
-        skill: rating_value,
-        uncertainty: 0,
-        leaderboard_rating: rating_value,
-        last_updated: Timex.now(),
-        season: 1
-      })
-  end
 
   describe "ratings" do
     test "non-user", %{conn: conn} do

@@ -3,10 +3,7 @@ defmodule Teiserver.TachyonBattle.BattleTest do
   import Teiserver.Support.Polling, only: [poll_until_some: 1]
   alias Teiserver.TachyonBattle, as: Battle
 
-  setup do
-    ExUnit.Callbacks.start_supervised!(Teiserver.Tachyon.System)
-    :ok
-  end
+  @moduletag :tachyon
 
   describe "start battle" do
     test "happy path" do
