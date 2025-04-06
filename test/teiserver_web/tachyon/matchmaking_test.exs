@@ -90,7 +90,9 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   defp mk_queue(attrs) do
     {:ok, pid} =
       QueueServer.init_state(attrs)
-      |> QueueServer.start_link()
+      |> QueueSupervisor.start_queue!()
+
+    on_exit(fn -> QueueSupervisor.terminate_queue(attrs.id) end)
 
     {:ok, queue_id: attrs.id, queue_pid: pid}
   end
