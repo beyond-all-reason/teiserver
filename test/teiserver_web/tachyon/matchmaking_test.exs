@@ -92,8 +92,6 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       QueueServer.init_state(attrs)
       |> QueueSupervisor.start_queue!()
 
-    on_exit(fn -> QueueSupervisor.terminate_queue(attrs.id) end)
-
     {:ok, queue_id: attrs.id, queue_pid: pid}
   end
 
@@ -725,14 +723,15 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   end
 
   defp start_queue(state) do
-    QueueSupervisor.start_queue!(state)
+    {:ok, _pid} = QueueSupervisor.start_queue!(state)
+    :ok
 
-    ExUnit.Callbacks.on_exit(fn ->
-      Teiserver.Matchmaking.QueueSupervisor.terminate_queue(state.id)
-
-      Teiserver.Support.Polling.poll_until_nil(fn ->
-        Teiserver.Matchmaking.lookup_queue(state.id)
-      end)
-    end)
+    # ExUnit.Callbacks.on_exit(fn ->
+    #   Teiserver.Matchmaking.QueueSupervisor.terminate_queue(state.id)
+    #
+    #   Teiserver.Support.Polling.poll_until_nil(fn ->
+    #     Teiserver.Matchmaking.lookup_queue(state.id)
+    #   end)
+    # end)
   end
 end

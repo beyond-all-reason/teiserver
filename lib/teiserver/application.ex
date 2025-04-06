@@ -164,7 +164,7 @@ defmodule Teiserver.Application do
 
         # this must be before Endpoint. Endpoint takes care of ws connection upgrade
         # and makes use of the tachyon systems spawned under this module.
-        Teiserver.Tachyon.System,
+        tachyon_system(),
 
         # Start the endpoint after the rest of the systems are up
         TeiserverWeb.Endpoint,
@@ -179,6 +179,8 @@ defmodule Teiserver.Application do
           start: {Teiserver.SpringTcpServer, :start_link, [[]]}
         }
       ] ++ discord_start()
+
+    children = Enum.filter(children, fn x -> not is_nil(x) end)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -249,5 +251,9 @@ defmodule Teiserver.Application do
     )
 
     state
+  end
+
+  defp tachyon_system() do
+    if Mix.env() != :test, do: Teiserver.Tachyon.System, else: nil
   end
 end

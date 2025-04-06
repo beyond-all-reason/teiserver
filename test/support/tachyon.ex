@@ -1,9 +1,6 @@
 defmodule Teiserver.Support.Tachyon do
   alias WebsocketSyncClient, as: WSC
   alias Teiserver.OAuthFixtures
-  alias Teiserver.Player
-
-  alias Teiserver.Support.Polling
 
   def create_user() do
     Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
@@ -62,23 +59,8 @@ defmodule Teiserver.Support.Tachyon do
   end
 
   # used for on_exit callback and make sure nothing is lingering after the test
-  def cleanup_connection(client, token) do
+  def cleanup_connection(client, _token) do
     WSC.disconnect(client)
-
-    if not is_nil(token.owner_id) do
-      Polling.poll_until_nil(fn -> Player.lookup_connection(token.owner_id) end)
-
-      case Player.lookup_session(token.owner_id) do
-        nil -> :ok
-        pid -> Process.exit(pid, :test_cleanup)
-      end
-
-      Polling.poll_until_nil(fn -> Player.lookup_session(token.owner_id) end)
-    end
-
-    if not is_nil(token.bot_id) do
-      Polling.poll_until_nil(fn -> Teiserver.Autohost.Registry.lookup(token.bot_id) end)
-    end
   end
 
   @doc """

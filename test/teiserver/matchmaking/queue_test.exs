@@ -4,6 +4,11 @@ defmodule Teiserver.Matchmaking.QueueTest do
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.AssetFixtures
 
+  setup do
+    ExUnit.Callbacks.start_supervised!(Teiserver.Tachyon.System)
+    :ok
+  end
+
   defp stg_attr(id),
     do: %{
       spring_name: "Supreme that glitters",
