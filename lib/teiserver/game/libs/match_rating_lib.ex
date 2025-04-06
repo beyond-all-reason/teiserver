@@ -461,19 +461,20 @@ defmodule Teiserver.Game.MatchRatingLib do
         rating
       end
 
-    new_num_matches =
-      cond do
-        # This is the player's first match
-        user_rating.num_matches == nil -> 1
-        # We are re-rating a previously rated match, so num_matches unchanged
-        rerate? -> user_rating.num_matches
-        # Otherwise increment by one
-        true -> user_rating.num_matches + 1
-      end
+    # num_matches are number of matches for the season
+    # total_matches are total matches for all seasons
+    old_num_matches = user_rating.num_matches || 0
+    new_num_matches = if rerate?, do: old_num_matches, else: old_num_matches + 1
+
+    old_total_matches = user_rating.total_matches || 0
+    new_total_matches = if rerate?, do: old_total_matches, else: old_total_matches + 1
 
     old_num_wins = user_rating.num_wins || 0
     # If re-rerating or the person lost, do not increment num_wins
     new_num_wins = if rerate? || !win?, do: old_num_wins, else: old_num_wins + 1
+
+    old_total_wins = user_rating.total_wins || 0
+    new_total_wins = if rerate? || !win?, do: old_total_wins, else: old_total_wins + 1
 
     rating_type_id = user_rating.rating_type_id
     {new_skill, new_uncertainty} = rating_update
@@ -488,6 +489,8 @@ defmodule Teiserver.Game.MatchRatingLib do
       last_updated: match.finished,
       num_matches: new_num_matches,
       num_wins: new_num_wins,
+      total_matches: new_total_matches,
+      total_wins: new_total_wins,
       season: active_season()
     })
 
@@ -505,7 +508,9 @@ defmodule Teiserver.Game.MatchRatingLib do
         skill_change: new_skill - user_rating.skill,
         uncertainty_change: new_uncertainty - user_rating.uncertainty,
         num_matches: new_num_matches,
-        num_wins: new_num_wins
+        num_wins: new_num_wins,
+        total_matches: new_total_matches,
+        total_wins: new_total_wins
       }
     }
   end

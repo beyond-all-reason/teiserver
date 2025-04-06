@@ -88,6 +88,13 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     assert ratings[user2.id].num_matches == 2
     assert ratings[user1.id].num_wins == 2
     assert ratings[user2.id].num_wins == 0
+
+    # Check total_matches and total_wins are correct
+    # num_matches and total_matches should be the same because they have only played in one season
+    assert ratings[user1.id].total_matches == 2
+    assert ratings[user2.id].total_matches == 2
+    assert ratings[user1.id].total_wins == 2
+    assert ratings[user2.id].total_wins == 0
   end
 
   test "tau in config is used when rating matches" do
