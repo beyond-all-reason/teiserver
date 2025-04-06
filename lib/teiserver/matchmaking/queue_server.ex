@@ -185,7 +185,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
   @impl true
   def handle_continue(:init_engines_games_maps, state) do
-    # TODO Get engines and games from somewhere else
     engines = state.queue.engines
     games = state.queue.games
     maps = Asset.get_maps_for_queue(state.id)
