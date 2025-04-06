@@ -5,6 +5,7 @@ defmodule Teiserver.Matchmaking do
   @type queue :: Matchmaking.QueueServer.queue()
   @type queue_id :: Matchmaking.QueueServer.id()
   @type member :: Matchmaking.QueueServer.member()
+  @type join_error :: Matchmaking.QueueServer.join_error()
   @type join_result :: Matchmaking.QueueServer.join_result()
   @type leave_result :: Matchmaking.QueueServer.leave_result()
   @type lost_reason :: Matchmaking.PairingRoom.lost_reason()
