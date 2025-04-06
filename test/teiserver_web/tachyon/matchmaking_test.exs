@@ -90,7 +90,9 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   defp mk_queue(attrs) do
     {:ok, pid} =
       QueueServer.init_state(attrs)
-      |> QueueServer.start_link()
+      |> QueueSupervisor.start_queue!()
+
+    on_exit(fn -> QueueSupervisor.terminate_queue(attrs.id) end)
 
     {:ok, queue_id: attrs.id, queue_pid: pid}
   end
@@ -281,12 +283,10 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
     test "cancelled event when queue dies", %{
       client: client,
-      queue_id: queue_id,
-      queue_pid: queue_pid
+      queue_id: queue_id
     } do
       assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
-      Process.unlink(queue_pid)
-      Process.exit(queue_pid, :kill)
+      QueueSupervisor.terminate_queue(queue_id)
       assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(client)
 
       # can join again
@@ -405,8 +405,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
     test "cancelled event if queue dies during pairing", ctx do
       [client1, client2] = join_and_pair(ctx.app, ctx.queue_id, ctx.queue_pid, 2)
-      Process.unlink(ctx.queue_pid)
-      Process.exit(ctx.queue_pid, :kill)
+      QueueSupervisor.terminate_queue(ctx.queue_id)
 
       assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(client1)
       assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(client2)
