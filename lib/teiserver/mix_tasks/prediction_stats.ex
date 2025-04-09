@@ -13,7 +13,7 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   require Logger
   alias Teiserver.Repo
 
-  @noob_matches_cutoff 30
+  @noob_matches_cutoff 50
   @num_matches_to_process 2000
 
   @rating_systems [
@@ -22,7 +22,8 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
     :provisional_5,
     :provisional_10,
     :provisional_20,
-    :provisional_30
+    :provisional_30,
+    :provisional_50
   ]
 
   def run(args) do
@@ -274,6 +275,9 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
 
       :bar ->
         max(player.skill - player.uncertainty, 0)
+
+      :provisional_50 ->
+        min(num_matches / 50, 1) * (player.skill - player.uncertainty)
 
       :provisional_30 ->
         min(num_matches / 30, 1) * (player.skill - player.uncertainty)
