@@ -21,7 +21,7 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   def run(args) do
     {opts, _, _} =
       OptionParser.parse(args,
-        string: [debug: :boolean, brier: :boolean, logloss: :boolean, doublecaptain: :boolean]
+        strict: [debug: :boolean, brier: :boolean, logloss: :boolean, doublecaptain: :boolean]
       )
 
     IO.inspect(opts, label: "opts", charlists: :as_lists)
