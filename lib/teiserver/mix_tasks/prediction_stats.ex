@@ -13,10 +13,17 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   require Logger
   alias Teiserver.Repo
 
-  @noob_matches_cutoff 20
+  @noob_matches_cutoff 30
   @num_matches_to_process 2000
 
-  @rating_systems [:openskill, :bar, :provisional_5, :provisional_10, :provisional_20]
+  @rating_systems [
+    :openskill,
+    :bar,
+    :provisional_5,
+    :provisional_10,
+    :provisional_20,
+    :provisional_30
+  ]
 
   def run(args) do
     {opts, _, _} =
@@ -39,11 +46,13 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
     initial_errors = %{
       noob_matches: %{
         errors: [],
-        num_matches: 0
+        num_matches: 0,
+        matches_with_win_data: 0
       },
       experienced_matches: %{
         errors: [],
-        num_matches: 0
+        num_matches: 0,
+        matches_with_win_data: 0
       }
     }
 
@@ -56,11 +65,13 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
           acc
         else
           key = if match_error.has_noobs?, do: :noob_matches, else: :experienced_matches
+          win_data_increment = if match_error.has_win_data?, do: 1, else: 0
 
           # We simply add the errors for each match
           updated_errors = %{
             errors: match_error.errors ++ acc[key].errors,
-            num_matches: acc[key].num_matches + 1
+            num_matches: acc[key].num_matches + 1,
+            matches_with_win_data: acc[key].matches_with_win_data + win_data_increment
           }
 
           Map.put(acc, key, updated_errors)
@@ -87,13 +98,15 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
         errors
         |> Enum.reduce(0, fn x, acc -> x.forecast_error + acc end)
 
-      num_matches = max(1, Enum.count(errors))
-      score = error_sum / num_matches
+      num_matches = error_result.num_matches
+      score = error_sum / max(1, num_matches)
+      matches_with_win_data = error_result.matches_with_win_data
 
       %{
         rating_system: rating_system,
         score: score,
-        num_matches: num_matches
+        num_matches: num_matches,
+        matches_with_win_data: matches_with_win_data
       }
     end)
   end
@@ -133,7 +146,12 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
     (value->'skill')::float - (value->'skill_change')::float   as skill,
     (value->'uncertainty')::float - (value->'uncertainty_change')::float   as uncertainty,
 
-    (value->'num_matches')::int - 1  as num_matches
+    (value->'num_matches')::int - 1  as num_matches,
+    CASE
+      WHEN win THEN (value->'num_wins')::int - 1
+    ELSE
+      (value->'num_wins')::int
+    END as "num_wins"
     from teiserver_game_rating_logs tgrl
     inner join teiserver_battle_match_memberships tbmm
     on tbmm.match_id = tgrl.match_id
@@ -146,13 +164,14 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
 
     players =
       sql_results.rows
-      |> Enum.map(fn [team_id, win, skill, uncertainty, num_matches] ->
+      |> Enum.map(fn [team_id, win, skill, uncertainty, num_matches, num_wins] ->
         %{
           team_id: team_id,
           win: win,
           skill: skill,
           uncertainty: uncertainty,
-          num_matches: num_matches
+          num_matches: num_matches,
+          num_wins: num_wins
         }
       end)
 
@@ -162,7 +181,7 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
 
     invalid_match? = players |> Enum.any?(fn x -> x.num_matches == nil || x.skill > 100 end)
     debug? = Keyword.get(opts, :debug, false)
-    IO.inspect(opts, label: "opts", charlists: :as_lists)
+    has_win_data? = players |> Enum.any?(fn x -> x.num_wins != nil end)
 
     if(invalid_match? && !debug?) do
       %{
@@ -183,7 +202,8 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
       %{
         errors: errors,
         has_noobs?: has_noobs?,
-        invalid_match?: false
+        invalid_match?: false,
+        has_win_data?: has_win_data?
       }
     end
   end
@@ -254,6 +274,9 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
 
       :bar ->
         max(player.skill - player.uncertainty, 0)
+
+      :provisional_30 ->
+        min(num_matches / 30, 1) * (player.skill - player.uncertainty)
 
       :provisional_20 ->
         min(num_matches / 20, 1) * (player.skill - player.uncertainty)
