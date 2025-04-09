@@ -1,11 +1,11 @@
-defmodule Mix.Tasks.Teiserver.LoglossStats do
+defmodule Mix.Tasks.Teiserver.PredictionStats do
   @moduledoc """
   The purpose of this task is to get statistics on how well we predict the winner of a match. We use the Logloss score to measure prediction accuracy
   Logloss formula: https://www.dratings.com/log-loss-vs-brier-score/
 
   To run:
 
-  mix teiserver.logloss_stats
+  mix teiserver.prediction_stats
   """
 
   use Mix.Task
@@ -22,11 +22,20 @@ defmodule Mix.Tasks.Teiserver.LoglossStats do
   @rating_systems [:openskill, :bar, :provisional_5, :provisional_10, :provisional_20]
 
   def run(args) do
-    Logger.info("Args: #{args}")
-    {min_team_size, _} = Integer.parse(Enum.at(args, 0, "8"))
+    {opts, _, _} =
+      OptionParser.parse(args,
+        string: [debug: :boolean, brier: :boolean, logloss: :boolean, doublecaptain: :boolean]
+      )
+
+    IO.inspect(opts, label: "opts", charlists: :as_lists)
+
+    min_team_size =
+      case Keyword.get(opts, :debug, false) do
+        true -> 2
+        false -> 8
+      end
 
     Application.ensure_all_started(:teiserver)
-    opts = []
 
     match_ids = get_match_ids(min_team_size)
 
@@ -43,7 +52,7 @@ defmodule Mix.Tasks.Teiserver.LoglossStats do
 
     # The error result will be the sum of forecast errors for all matches
     error_result =
-      Enum.map(match_ids, fn match_id -> get_match_log_loss(match_id) end)
+      Enum.map(match_ids, fn match_id -> get_match_error(match_id, opts) end)
       |> Enum.reduce(initial_errors, fn match_error, acc ->
         if(match_error.invalid_match?) do
           # Do not process
@@ -61,18 +70,17 @@ defmodule Mix.Tasks.Teiserver.LoglossStats do
         end
       end)
 
-    # The log_loss_score formula is explained here: https://www.dratings.com/log-loss-vs-brier-score/
-    log_loss_score = %{
-      noob_matches: convert_error_result_to_log_loss_score(error_result.noob_matches),
-      experienced_matches:
-        convert_error_result_to_log_loss_score(error_result.experienced_matches)
+    # The score formula is explained here: https://www.dratings.com/log-loss-vs-brier-score/
+    score = %{
+      noob_matches: convert_error_result_to_score(error_result.noob_matches),
+      experienced_matches: convert_error_result_to_score(error_result.experienced_matches)
     }
 
-    IO.inspect(log_loss_score, label: "log_loss_score", charlists: :as_lists)
+    IO.inspect(score, label: "score", charlists: :as_lists)
     Logger.info("Finished processing matches")
   end
 
-  defp convert_error_result_to_log_loss_score(error_result) do
+  defp convert_error_result_to_score(error_result) do
     Enum.map(@rating_systems, fn rating_system ->
       errors =
         error_result.errors
@@ -83,11 +91,11 @@ defmodule Mix.Tasks.Teiserver.LoglossStats do
         |> Enum.reduce(0, fn x, acc -> x.forecast_error + acc end)
 
       num_matches = max(1, Enum.count(errors))
-      log_loss_score = -error_sum / num_matches
+      score = error_sum / num_matches
 
       %{
         rating_system: rating_system,
-        log_loss_score: log_loss_score,
+        score: score,
         num_matches: num_matches
       }
     end)
@@ -119,8 +127,7 @@ defmodule Mix.Tasks.Teiserver.LoglossStats do
     end)
   end
 
-  # This will return [y*log(p) + (1-y)*log(1-p)]
-  defp get_match_log_loss(match_id) do
+  defp get_match_error(match_id, opts) do
     # This query will return players of this match
     # Sorted by win desc so that team 1 will always be the winning team
     # All log data is the postmatch value so we need to make adjustments to get prematch values
@@ -157,8 +164,10 @@ defmodule Mix.Tasks.Teiserver.LoglossStats do
       |> Enum.group_by(fn x -> x.team_id end)
 
     invalid_match? = players |> Enum.any?(fn x -> x.num_matches == nil || x.skill > 100 end)
+    debug? = Keyword.get(opts, :debug, false)
+    IO.inspect(opts, label: "opts", charlists: :as_lists)
 
-    if(invalid_match?) do
+    if(invalid_match? && !debug?) do
       %{
         invalid_match?: true
       }
@@ -170,7 +179,7 @@ defmodule Mix.Tasks.Teiserver.LoglossStats do
         Enum.map(@rating_systems, fn rating_system ->
           %{
             rating_system: rating_system,
-            forecast_error: process_sql_result(teams, rating_system)
+            forecast_error: process_sql_result(teams, rating_system, opts)
           }
         end)
 
@@ -185,18 +194,34 @@ defmodule Mix.Tasks.Teiserver.LoglossStats do
   # Teams are a list of players
   # First team is always the winning team
   # Returns the forecast error squared
-  defp process_sql_result(teams, rating_system) do
+  defp process_sql_result(teams, rating_system, opts) do
     openskill_teams =
       teams
-      |> Enum.map(fn {x, v} -> convert_player_list_to_tuple_list(v, rating_system) end)
-      |> double_captain()
+      |> Enum.map(fn {_key, v} -> convert_player_list_to_tuple_list(v, rating_system) end)
+
+    openskill_teams =
+      if Keyword.get(opts, :doublecaptain, false) do
+        openskill_teams |> double_captain
+      else
+        openskill_teams
+      end
+
+    # This will be [true,false] if first team is winner. Otherwise will be [false,true]
+    win_list = teams |> Enum.map(fn {_key, value} -> Enum.at(value, 0).win end)
 
     # When predicting, we should feed into the openskill library the {skill, uncertainty} of players
     # However, since we balance on player rating, instead we feed in {rating, uncertainty} of all players
+    [team1_win_predict, team2_win_predict] = Openskill.predict_win(openskill_teams)
 
-    [team1_win_predict, _team2_win_predict] = Openskill.predict_win(openskill_teams)
-    # team 1 is the winning team
-    get_forecast_error(team1_win_predict)
+    win_predict =
+      case Enum.at(win_list, 0) do
+        # team 1 is the winning team
+        true -> team1_win_predict
+        # team 2 is the winning team
+        false -> team2_win_predict
+      end
+
+    get_forecast_error(win_predict, opts)
   end
 
   # Treat each team as if they have a clone of the captain
@@ -209,8 +234,13 @@ defmodule Mix.Tasks.Teiserver.LoglossStats do
 
   # Fully accurate forecast will be 0.
   # Lower is better
-  defp get_forecast_error(winning_team_predict) do
-    :math.log(winning_team_predict)
+  defp get_forecast_error(winning_team_predict, opts) do
+    cond do
+      # Get error using logloss
+      Keyword.get(opts, :logloss, false) -> -:math.log(winning_team_predict)
+      # Get error using Brier
+      true -> (1 - winning_team_predict) ** 2
+    end
   end
 
   # Converts a list of player maps into tuples to be fed into OpenSkill library win_predict function
