@@ -332,4 +332,10 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, resp} = recv_message(client)
     resp
   end
+
+  def create_party!(client) do
+    :ok = send_request(client, "party/create")
+    {:ok, resp} = recv_message(client)
+    resp
+  end
 end

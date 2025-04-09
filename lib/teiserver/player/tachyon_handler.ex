@@ -452,6 +452,20 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("party/create", "request", _message_id, _msg, state) do
+    case Player.Session.create_party(state.user.id) do
+      {:ok, party_id} ->
+        data = %{partyId: party_id}
+        {:response, data, state}
+
+      {:error, :already_in_party} ->
+        {:error_response, :invalid_request, "Already in a party", state}
+
+      {:error, reason} ->
+        {:error_response, :internal_error, to_string(reason), state}
+    end
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end

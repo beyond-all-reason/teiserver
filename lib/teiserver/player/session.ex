@@ -14,7 +14,7 @@ defmodule Teiserver.Player.Session do
   require Logger
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Player, Matchmaking, Messaging, Account}
+  alias Teiserver.{Account, Matchmaking, Messaging, Party, Player}
   alias Teiserver.Helpers.BoundedQueue, as: BQ
   alias Phoenix.PubSub
 
@@ -45,6 +45,10 @@ defmodule Teiserver.Player.Session do
           # buffer per source, and the added complexity of having to limit
           # that total size
           buffer: BQ.t(Messaging.message())
+        }
+
+  @type party_state :: %{
+          current_party: Party.id()
         }
 
   @type state :: %{
@@ -79,7 +83,8 @@ defmodule Teiserver.Player.Session do
         subscribed?: false,
         buffer: BQ.new(@messaging_buffer_size)
       },
-      user_subscriptions: MapSet.new()
+      user_subscriptions: MapSet.new(),
+      party: %{current_party: nil}
     }
 
     broadcast_user_update!(user, :menu)
@@ -267,6 +272,12 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(originator_id), {:user, {:unsubscribe_updates, user_ids}})
   end
 
+  @spec create_party(T.userid()) ::
+          {:ok, Party.id()} | {:error, :already_in_party} | {:error, reason :: term()}
+  def create_party(user_id) do
+    GenServer.call(via_tuple(user_id), {:party, :create})
+  end
+
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
@@ -432,6 +443,21 @@ defmodule Teiserver.Player.Session do
 
     new_subs = MapSet.difference(state.user_subscriptions, user_ids)
     {:reply, :ok, %{state | user_subscriptions: new_subs}}
+  end
+
+  def handle_call({:party, :create}, _from, state) do
+    if state.party.current_party != nil do
+      {:reply, {:error, :already_in_party}, state}
+    else
+      case Party.create_party() do
+        {:ok, party_id} ->
+          state = put_in(state.party.current_party, party_id)
+          {:reply, {:ok, party_id}, state}
+
+        {:error, reason} ->
+          {:reply, {:error, reason}, state}
+      end
+    end
   end
 
   @impl true

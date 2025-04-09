@@ -12,11 +12,16 @@ defmodule Teiserver.Party do
 
   @type id :: Party.Server.id()
 
-  @spec create_party() :: {id(), DynamicSupervisor.on_start_child()}
+  @spec create_party() :: {:ok, id()} | {:error, reason :: term()}
   def create_party() do
     party_id = Party.Server.gen_party_id()
-    res = Party.Supervisor.start_party(party_id)
-    {party_id, res}
+
+    case Party.Supervisor.start_party(party_id) do
+      {:ok, _pid} -> {:ok, party_id}
+      {:ok, _pid, _info} -> {:ok, party_id}
+      :ignore -> {:error, :ignore}
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   @spec lookup(id()) :: pid() | nil

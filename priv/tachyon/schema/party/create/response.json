@@ -1,0 +1,51 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/party/create/response.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "PartyCreateResponse",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "anyOf": [
+        {
+            "title": "PartyCreateOkResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "party/create" },
+                "status": { "const": "success" },
+                "data": {
+                    "title": "PartyCreateOkResponseData",
+                    "type": "object",
+                    "properties": {
+                        "partyId": { "$ref": "../../definitions/partyId.json" }
+                    },
+                    "required": ["partyId"]
+                }
+            },
+            "required": ["type", "messageId", "commandId", "status", "data"]
+        },
+        {
+            "title": "PartyCreateFailResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "party/create" },
+                "status": { "const": "failed" },
+                "reason": {
+                    "enum": [
+                        "internal_error",
+                        "unauthorized",
+                        "invalid_request",
+                        "command_unimplemented"
+                    ]
+                },
+                "details": { "type": "string" }
+            },
+            "required": ["type", "messageId", "commandId", "status", "reason"]
+        }
+    ]
+}
