@@ -6,15 +6,12 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   To run:
 
   mix teiserver.prediction_stats
+  mix teiserver.prediction_stats --doublecaptain
   """
 
   use Mix.Task
   require Logger
   alias Teiserver.Repo
-  alias Teiserver.{Battle, Game}
-  alias Teiserver.Battle.{BalanceLib}
-  alias Mix.Tasks.Teiserver.PartyBalanceStatsTypes, as: PB
-  alias Teiserver.Config
 
   @noob_matches_cutoff 20
   @num_matches_to_process 2000
@@ -227,7 +224,7 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   # Treat each team as if they have a clone of the captain
   defp double_captain(openskill_teams) do
     Enum.map(openskill_teams, fn team ->
-      captain = Enum.max_by(team, fn {skill, uncertainty} -> skill end)
+      captain = Enum.max_by(team, fn {skill, _uncertainty} -> skill end)
       [captain | team]
     end)
   end
