@@ -41,7 +41,8 @@ defmodule Teiserver.Player.TachyonHandler do
   @spec init(%{user: T.user()}) :: Handler.result()
   def init(initial_state) do
     # this is inside the process that maintain the connection
-    {:ok, session_pid} = setup_session(initial_state.user)
+    {:ok, session_pid, sess_state} = setup_session(initial_state.user)
+
     sess_monitor = Process.monitor(session_pid)
 
     state =
@@ -60,7 +61,25 @@ defmodule Teiserver.Player.TachyonHandler do
         clanId: user.clan_id,
         countryCode: user.country,
         status: :menu,
-        partyId: nil,
+        party:
+          case sess_state.party do
+            nil ->
+              nil
+
+            p ->
+              %{
+                id: p.id,
+                members:
+                  Enum.map(p.members, fn m ->
+                    %{
+                      userId: to_string(m.id),
+                      joinedAt: DateTime.to_unix(m.joined_at, :microsecond)
+                    }
+                  end),
+                invited: []
+              }
+          end,
+        invitedToParties: [],
         friendIds: Enum.map(friends, fn %{userId: uid} -> uid end),
         outgoingFriendRequest: outgoing,
         incomingFriendRequest: incoming,
@@ -482,7 +501,7 @@ defmodule Teiserver.Player.TachyonHandler do
     case Player.SessionSupervisor.start_session(user) do
       {:ok, session_pid} ->
         {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
-        {:ok, session_pid}
+        {:ok, session_pid, %{party: nil}}
 
       {:error, {:already_started, pid}} ->
         case Player.Session.replace_connection(pid, self()) do
@@ -493,9 +512,9 @@ defmodule Teiserver.Player.TachyonHandler do
           :died ->
             setup_session(user)
 
-          :ok ->
+          {:ok, sess_state} ->
             {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
-            {:ok, pid}
+            {:ok, pid, sess_state}
         end
     end
   end

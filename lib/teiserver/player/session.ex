@@ -48,6 +48,10 @@ defmodule Teiserver.Player.Session do
         }
 
   @type party_state :: %{
+          # the last party state version gotten from the party through GenServer.call
+          # this is used to avoid races where the reply of the call would be processed
+          # before a message already in the mailbox
+          version: integer(),
           current_party: Party.id()
         }
 
@@ -84,7 +88,7 @@ defmodule Teiserver.Player.Session do
         buffer: BQ.new(@messaging_buffer_size)
       },
       user_subscriptions: MapSet.new(),
-      party: %{current_party: nil}
+      party: %{version: 0, current_party: nil}
     }
 
     broadcast_user_update!(user, :menu)
@@ -249,7 +253,8 @@ defmodule Teiserver.Player.Session do
   with another one. This is to avoid having the same player with several
   connections.
   """
-  @spec replace_connection(pid(), pid()) :: :ok | :died
+  @spec replace_connection(pid(), pid()) ::
+          {:ok, session_state :: %{party: party_state()}} | :died
   def replace_connection(sess_pid, new_conn_pid) do
     GenServer.call(sess_pid, {:replace, new_conn_pid})
   catch
@@ -291,7 +296,18 @@ defmodule Teiserver.Player.Session do
     mon_ref = Process.monitor(new_conn_pid)
     Logger.info("session reused")
 
-    {:reply, :ok, %{state | conn_pid: new_conn_pid, mon_ref: mon_ref}}
+    new_state = %{state | conn_pid: new_conn_pid, mon_ref: mon_ref}
+
+    case state.party.current_party do
+      nil ->
+        {:reply, {:ok, %{party: nil}}, new_state}
+
+      party_id ->
+        party_state = Party.get_state(party_id)
+        party = %{version: party_state.version, current_party: party_state.id}
+        new_state = %{state | party: party}
+        {:reply, {:ok, %{party: party_state}}, new_state}
+    end
   end
 
   def handle_call(:conn_state, _from, state) do
@@ -449,9 +465,13 @@ defmodule Teiserver.Player.Session do
     if state.party.current_party != nil do
       {:reply, {:error, :already_in_party}, state}
     else
-      case Party.create_party() do
+      case Party.create_party(state.user.id) do
         {:ok, party_id} ->
-          state = put_in(state.party.current_party, party_id)
+          state = %{
+            state
+            | party: %{current_party: party_id}
+          }
+
           {:reply, {:ok, party_id}, state}
 
         {:error, reason} ->

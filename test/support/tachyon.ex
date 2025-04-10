@@ -17,8 +17,6 @@ defmodule Teiserver.Support.Tachyon do
   def setup_client() do
     user = create_user()
     %{client: client, token: token} = connect(user)
-
-    ExUnit.Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
     {:ok, user: user, client: client, token: token}
   end
 

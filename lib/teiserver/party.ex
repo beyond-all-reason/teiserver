@@ -9,14 +9,15 @@ defmodule Teiserver.Party do
   """
 
   alias Teiserver.Party
+  alias Teiserver.Data.Types, as: T
 
   @type id :: Party.Server.id()
 
-  @spec create_party() :: {:ok, id()} | {:error, reason :: term()}
-  def create_party() do
+  @spec create_party(T.userid()) :: {:ok, id()} | {:error, reason :: term()}
+  def create_party(user_id) do
     party_id = Party.Server.gen_party_id()
 
-    case Party.Supervisor.start_party(party_id) do
+    case Party.Supervisor.start_party(party_id, user_id) do
       {:ok, _pid} -> {:ok, party_id}
       {:ok, _pid, _info} -> {:ok, party_id}
       :ignore -> {:error, :ignore}
@@ -26,4 +27,7 @@ defmodule Teiserver.Party do
 
   @spec lookup(id()) :: pid() | nil
   defdelegate lookup(party_id), to: Party.Registry
+
+  @spec get_state(id()) :: state() | nil
+  defdelegate get_state(party_id), to: Party.Server
 end
