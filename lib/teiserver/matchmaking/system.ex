@@ -16,6 +16,6 @@ defmodule Teiserver.Matchmaking.System do
       Teiserver.Matchmaking.QueueSupervisor
     ]
 
-    Supervisor.init(children, strategy: :one_for_one)
+    Supervisor.init(children, strategy: :rest_for_one)
   end
 end

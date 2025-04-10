@@ -3,6 +3,7 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   cluster wide supervisor for all matchmaking queues
   """
 
+  require Logger
   use Horde.DynamicSupervisor
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Asset
@@ -40,10 +41,20 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
     ]
   end
 
+  def restart_queues() do
+    Logger.info("Restarting all matchmaking queues")
+
+    Horde.DynamicSupervisor.stop(__MODULE__, :shutdown)
+    :ok
+  catch
+    :exit, {:noproc, _} ->
+      :ok
+  end
+
   def start_queue!(state) do
     case Horde.DynamicSupervisor.start_child(__MODULE__, {QueueServer, state}) do
       {:error, err} -> raise "Cannot start queue: #{inspect(err)}"
-      _ -> :ok
+      {:ok, pid} -> {:ok, pid}
     end
   end
 

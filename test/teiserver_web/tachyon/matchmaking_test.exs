@@ -1,6 +1,7 @@
 defmodule Teiserver.Tachyon.MatchmakingTest do
   use TeiserverWeb.ConnCase
   alias Teiserver.Support.Tachyon
+  alias Teiserver.Support.Polling
   alias Teiserver.OAuthFixtures
   alias Teiserver.Player
   alias Teiserver.AssetFixtures
@@ -88,9 +89,13 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   end
 
   defp mk_queue(attrs) do
+    Polling.poll_until_some(fn -> Process.whereis(QueueSupervisor) end)
+
     {:ok, pid} =
       QueueServer.init_state(attrs)
-      |> QueueServer.start_link()
+      |> QueueSupervisor.start_queue!()
+
+    # on_exit(fn -> QueueSupervisor.terminate_queue(attrs.id) end)
 
     {:ok, queue_id: attrs.id, queue_pid: pid}
   end
@@ -278,6 +283,47 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       assert %{"status" => "failed", "reason" => "internal_error"} =
                Tachyon.join_queues!(client, [id])
     end
+
+    test "cancelled event when queue dies", %{
+      client: client,
+      queue_id: queue_id
+    } do
+      assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
+      QueueSupervisor.terminate_queue(queue_id)
+      assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(client)
+
+      # can join again
+      {:ok, queue_id: q2_id, queue_pid: _q2_pid} = setup_queue(1)
+      assert %{"status" => "success"} = Tachyon.join_queues!(client, [q2_id])
+    end
+  end
+
+  describe "interactions with assets" do
+    setup [{Tachyon, :setup_client}, :setup_queue]
+
+    test "cancelled event when engine version change", ctx do
+      Process.unlink(ctx.queue_pid)
+      assert %{"status" => "success"} = Tachyon.join_queues!(ctx.client, [ctx.queue_id])
+      g2 = AssetFixtures.create_engine(%{name: "game1"})
+      Teiserver.Asset.set_engine_matchmaking(g2.id)
+      # when running many tests, or with --repeat-until-failure sometimes the
+      # supervisors get restarted too many times without the sleep
+      # I have no idea why a small sleep fixes it though :(
+      :timer.sleep(5)
+      assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(ctx.client)
+    end
+
+    test "cancelled event when game version change", ctx do
+      Process.unlink(ctx.queue_pid)
+      assert %{"status" => "success"} = Tachyon.join_queues!(ctx.client, [ctx.queue_id])
+      g2 = AssetFixtures.create_game(%{name: "game1"})
+      Teiserver.Asset.set_game_matchmaking(g2.id)
+      # when running many tests, or with --repeat-until-failure sometimes the
+      # supervisors get restarted too many times without the sleep
+      # I have no idea why a small sleep fixes it though :(
+      :timer.sleep(5)
+      assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(ctx.client)
+    end
   end
 
   describe "leaving queues" do
@@ -386,6 +432,14 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       [client, _] = join_and_pair(app, queue_id, queue_pid, 2)
       resp = Tachyon.join_queues!(client, [queue_id])
       assert %{"status" => "failed", "reason" => "already_queued"} = resp
+    end
+
+    test "cancelled event if queue dies during pairing", ctx do
+      [client1, client2] = join_and_pair(ctx.app, ctx.queue_id, ctx.queue_pid, 2)
+      QueueSupervisor.terminate_queue(ctx.queue_id)
+
+      assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(client1)
+      assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(client2)
     end
 
     test "ready then leave triggers lost events", %{
@@ -723,14 +777,15 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   end
 
   defp start_queue(state) do
-    QueueSupervisor.start_queue!(state)
+    {:ok, _pid} = QueueSupervisor.start_queue!(state)
+    :ok
 
-    ExUnit.Callbacks.on_exit(fn ->
-      Teiserver.Matchmaking.QueueSupervisor.terminate_queue(state.id)
-
-      Teiserver.Support.Polling.poll_until_nil(fn ->
-        Teiserver.Matchmaking.lookup_queue(state.id)
-      end)
-    end)
+    # ExUnit.Callbacks.on_exit(fn ->
+    #   Teiserver.Matchmaking.QueueSupervisor.terminate_queue(state.id)
+    #
+    #   Teiserver.Support.Polling.poll_until_nil(fn ->
+    #     Teiserver.Matchmaking.lookup_queue(state.id)
+    #   end)
+    # end)
   end
 end

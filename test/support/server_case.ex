@@ -34,6 +34,11 @@ defmodule Teiserver.ServerCase do
     Teiserver.TeiserverTestLib.clear_all_con_caches()
     Teiserver.DataCase.setup_sandbox(tags)
     Teiserver.Config.update_site_config("system.Use geoip", false)
+
+    unless tags[:async] do
+      ExUnit.Callbacks.start_supervised!(Teiserver.Tachyon.System)
+    end
+
     on_exit(&Teiserver.TeiserverTestLib.clear_all_con_caches/0)
     :ok
   end
