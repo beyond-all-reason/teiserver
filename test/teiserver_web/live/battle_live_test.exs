@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Live.BattleTest do
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{Battle, TeiserverTestLib, Lobby}
+  alias Teiserver.{TeiserverTestLib, Lobby}
   import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1]
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 

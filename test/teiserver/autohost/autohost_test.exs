@@ -1,8 +1,10 @@
 defmodule Teiserver.Autohost.AutohostTest do
-  use ExUnit.Case, async: false
+  use Teiserver.DataCase, async: false
   import Teiserver.Support.Polling, only: [poll_until: 2, poll_until_nil: 1]
 
   alias Teiserver.Autohost
+
+  @moduletag :tachyon
 
   describe "find autohost" do
     test "no autohost available" do
@@ -28,13 +30,5 @@ defmodule Teiserver.Autohost.AutohostTest do
 
   defp register_autohost(id, max, current) do
     Autohost.Registry.register(%{id: id, max_battles: max, current_battles: current})
-
-    on_exit(fn ->
-      Autohost.Registry.unregister(id)
-
-      poll_until_nil(fn ->
-        Autohost.Registry.lookup(id)
-      end)
-    end)
   end
 end

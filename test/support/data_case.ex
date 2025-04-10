@@ -37,6 +37,7 @@ defmodule Teiserver.DataCase do
 
   setup tags do
     setup_sandbox(tags)
+    Teiserver.Support.Tachyon.tachyon_case_setup(tags)
     :ok
   end
 

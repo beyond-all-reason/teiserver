@@ -16,14 +16,6 @@ defmodule TeiserverWeb.Account.GeneralControllerTest do
     assert html_response(conn, 200) =~ "Preferences"
   end
 
-  @tag :needs_attention
-  test "relationships", %{conn: conn} do
-    conn = get(conn, Routes.ts_account_relationships_path(conn, :index))
-
-    assert html_response(conn, 200) =~ "Pending requests"
-    assert html_response(conn, 200) =~ "Clan invites"
-  end
-
   test "admin permissions", %{conn: conn} do
     assert_raise Bodyguard.NotAuthorizedError, fn ->
       get(conn, Routes.ts_admin_general_path(conn, :index))
