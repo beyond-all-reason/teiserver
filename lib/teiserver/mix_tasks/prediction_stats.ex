@@ -29,10 +29,14 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   def run(args) do
     {opts, _, _} =
       OptionParser.parse(args,
-        strict: [debug: :boolean, brier: :boolean, logloss: :boolean, doublecaptain: :boolean]
+        strict: [
+          debug: :boolean,
+          brier: :boolean,
+          logloss: :boolean,
+          doublecaptain: :boolean,
+          offset: :integer
+        ]
       )
-
-    IO.inspect(opts, label: "opts", charlists: :as_lists)
 
     min_team_size =
       case Keyword.get(opts, :debug, false) do
@@ -84,6 +88,8 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
       noob_matches: convert_error_result_to_score(error_result.noob_matches),
       experienced_matches: convert_error_result_to_score(error_result.experienced_matches)
     }
+
+    IO.inspect(opts, label: "opts", charlists: :as_lists)
 
     IO.inspect(score, label: "score", charlists: :as_lists)
     Logger.info("Finished processing matches")
@@ -215,7 +221,7 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   defp process_sql_result(teams, rating_system, opts) do
     openskill_teams =
       teams
-      |> Enum.map(fn {_key, v} -> convert_player_list_to_tuple_list(v, rating_system) end)
+      |> Enum.map(fn {_key, v} -> convert_player_list_to_tuple_list(v, rating_system, opts) end)
 
     openskill_teams =
       if Keyword.get(opts, :doublecaptain, false) do
@@ -262,12 +268,13 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   end
 
   # Converts a list of player maps into tuples to be fed into OpenSkill library win_predict function
-  defp convert_player_list_to_tuple_list(player_list, rating_system) do
-    player_list |> Enum.map(fn x -> {get_rating(x, rating_system), x.uncertainty} end)
+  defp convert_player_list_to_tuple_list(player_list, rating_system, opts) do
+    player_list |> Enum.map(fn x -> {get_rating(x, rating_system, opts), x.uncertainty} end)
   end
 
-  defp get_rating(player, rating_system) do
+  defp get_rating(player, rating_system, opts) do
     num_matches = player.num_matches || 0
+    offset = Keyword.get(opts, :offset, 0)
 
     case rating_system do
       :openskill ->
@@ -277,19 +284,19 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
         max(player.skill - player.uncertainty, 0)
 
       :provisional_50 ->
-        min(num_matches / 50, 1) * (player.skill - player.uncertainty)
+        min(num_matches / 50, 1) * (player.skill - player.uncertainty + offset)
 
       :provisional_30 ->
-        min(num_matches / 30, 1) * (player.skill - player.uncertainty)
+        min(num_matches / 30, 1) * (player.skill - player.uncertainty + offset)
 
       :provisional_20 ->
-        min(num_matches / 20, 1) * (player.skill - player.uncertainty)
+        min(num_matches / 20, 1) * (player.skill - player.uncertainty + offset)
 
       :provisional_10 ->
-        min(num_matches / 10, 1) * (player.skill - player.uncertainty)
+        min(num_matches / 10, 1) * (player.skill - player.uncertainty + offset)
 
       :provisional_5 ->
-        min(num_matches / 5, 1) * (player.skill - player.uncertainty)
+        min(num_matches / 5, 1) * (player.skill - player.uncertainty + offset)
     end
   end
 end
