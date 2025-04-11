@@ -88,7 +88,7 @@ defmodule Teiserver.Player.Session do
         buffer: BQ.new(@messaging_buffer_size)
       },
       user_subscriptions: MapSet.new(),
-      party: %{version: 0, current_party: nil}
+      party: initial_party_state()
     }
 
     broadcast_user_update!(user, :menu)
@@ -281,6 +281,11 @@ defmodule Teiserver.Player.Session do
           {:ok, Party.id()} | {:error, :already_in_party} | {:error, reason :: term()}
   def create_party(user_id) do
     GenServer.call(via_tuple(user_id), {:party, :create})
+  end
+
+  @spec leave_party(T.userid()) :: :ok | {:error, :not_a_member} | {:error, reason :: term()}
+  def leave_party(user_id) do
+    GenServer.call(via_tuple(user_id), {:party, :leave})
   end
 
   ################################################################################
@@ -477,6 +482,21 @@ defmodule Teiserver.Player.Session do
         {:error, reason} ->
           {:reply, {:error, reason}, state}
       end
+    end
+  end
+
+  def handle_call({:party, :leave}, _from, state)
+      when is_nil(state.party.current_party) do
+    {:reply, {:error, :not_in_party}, state}
+  end
+
+  def handle_call({:party, :leave}, _from, state) do
+    party_id = state.party.current_party
+
+    case Teiserver.Party.leave_party(state.party.current_party, state.user.id) do
+      :ok -> {:reply, :ok, %{state | party: initial_party_state()}}
+      {:error, :not_a_member} -> {:reply, :ok, %{state | party: initial_party_state()}}
+      {:error, reason} -> {:reply, {:error, {party_id, reason}}, state}
     end
   end
 
@@ -835,4 +855,6 @@ defmodule Teiserver.Player.Session do
       }
     )
   end
+
+  defp initial_party_state(), do: %{version: 0, current_party: nil}
 end

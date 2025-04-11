@@ -30,4 +30,7 @@ defmodule Teiserver.Party do
 
   @spec get_state(id()) :: state() | nil
   defdelegate get_state(party_id), to: Party.Server
+
+  @spec leave_party(id(), T.userid()) :: :ok | {:error, :invalid_party | :not_a_member}
+  defdelegate leave_party(party_id, user_id), to: Party.Server
 end

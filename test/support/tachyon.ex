@@ -336,4 +336,10 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, resp} = recv_message(client)
     resp
   end
+
+  def leave_party!(client) do
+    :ok = send_request(client, "party/leave")
+    {:ok, resp} = recv_message(client)
+    resp
+  end
 end

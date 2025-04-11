@@ -6,7 +6,8 @@ defmodule Teiserver.Party.Server do
   alias Teiserver.Party
   alias Teiserver.Data.Types, as: T
 
-  use GenServer
+  use GenServer, restart: :transient
+  alias Teiserver.Data.Types, as: T
 
   @type id :: String.t()
   @type state :: %{
@@ -18,6 +19,13 @@ defmodule Teiserver.Party.Server do
 
   @spec gen_party_id() :: id()
   def gen_party_id(), do: UUID.uuid4()
+
+  @spec leave_party(id(), T.userid()) :: :ok | {:error, :invalid_party | :not_a_member}
+  def leave_party(party_id, user_id) do
+    GenServer.call(via_tuple(party_id), {:leave, user_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_party}
+  end
 
   def start_link({party_id, _user_id} = args) do
     GenServer.start_link(__MODULE__, args, name: via_tuple(party_id))
@@ -44,7 +52,18 @@ defmodule Teiserver.Party.Server do
     {:reply, state, state}
   end
 
-  def via_tuple(party_id) do
+  @spec handle_call(term(), GenServer.from(), state()) :: term()
+  def handle_call({:leave, user_id}, _from, state) do
+    case Enum.split_with(state.members, fn %{id: mid} -> mid == user_id end) do
+      {[], _} -> {:reply, {:error, :not_a_member}, state}
+      {[_], []} -> {:stop, :normal, :ok, %{state | members: []} |> bump()}
+      {[_], new_members} -> {:reply, :ok, %{state | members: new_members} |> bump()}
+    end
+  end
+
+  defp via_tuple(party_id) do
     Party.Registry.via_tuple(party_id)
   end
+
+  defp bump(state), do: Map.update!(state, :version, &(&1 + 1))
 end

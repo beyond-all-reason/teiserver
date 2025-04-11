@@ -485,6 +485,14 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("party/leave", "request", _message_id, _msg, state) do
+    case Player.Session.leave_party(state.user.id) do
+      :ok -> {:response, state}
+      {:error, :not_in_party} -> {:error_response, :invalid_request, "Not in a party", state}
+      {:error, reason} -> {:error_response, :internal_error, to_string(reason), state}
+    end
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
