@@ -128,6 +128,7 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
     and tbm.team_size <= 8
     and tbm.team_count = $2
     and tgrl.value is not null
+    and tgrl.season = 1
     order by tbm.inserted_at DESC
     limit $3;
 
