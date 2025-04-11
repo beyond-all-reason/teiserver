@@ -4,6 +4,7 @@ defmodule Teiserver.Party.Server do
   """
 
   alias Teiserver.Party
+  alias Teiserver.Player
   alias Teiserver.Data.Types, as: T
 
   use GenServer, restart: :transient
@@ -14,7 +15,8 @@ defmodule Teiserver.Party.Server do
           # versionning of the state to avoid races between call and cast
           version: integer(),
           id: id(),
-          members: [%{id: T.userid(), joined_at: DateTime.t()}]
+          members: [%{id: T.userid(), joined_at: DateTime.t()}],
+          invited: [%{id: T.userid(), invited_at: DateTime.t()}]
         }
 
   @spec gen_party_id() :: id()
@@ -27,8 +29,15 @@ defmodule Teiserver.Party.Server do
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
 
-  def start_link({party_id, _user_id} = args) do
-    GenServer.start_link(__MODULE__, args, name: via_tuple(party_id))
+  @doc """
+  Create an invite for the given player, ensuring they're not alreay part of the party
+  """
+  @spec create_invite(id(), T.userid()) ::
+          {:ok, state()} | {:error, :invalid_party | :already_invited}
+  def create_invite(party_id, user_id) do
+    GenServer.call(via_tuple(party_id), {:create_invite, user_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_party}
   end
 
   @doc """
@@ -41,9 +50,19 @@ defmodule Teiserver.Party.Server do
     :exit, {:noproc, _} -> nil
   end
 
+  def start_link({party_id, _user_id} = args) do
+    GenServer.start_link(__MODULE__, args, name: via_tuple(party_id))
+  end
+
   @impl true
   def init({party_id, user_id}) do
-    state = %{version: 0, id: party_id, members: [%{id: user_id, joined_at: DateTime.utc_now()}]}
+    state = %{
+      version: 0,
+      id: party_id,
+      members: [%{id: user_id, joined_at: DateTime.utc_now()}],
+      invited: []
+    }
+
     {:ok, state}
   end
 
@@ -58,6 +77,31 @@ defmodule Teiserver.Party.Server do
       {[], _} -> {:reply, {:error, :not_a_member}, state}
       {[_], []} -> {:stop, :normal, :ok, %{state | members: []} |> bump()}
       {[_], new_members} -> {:reply, :ok, %{state | members: new_members} |> bump()}
+    end
+  end
+
+  def handle_call({:create_invite, user_id}, _from, state) do
+    invited = Enum.find(state.invited, fn %{id: id} -> id == user_id end)
+    member = Enum.find(state.members, fn %{id: id} -> id == user_id end)
+
+    if invited != nil || member != nil do
+      {:reply, {:error, :already_invited}, state}
+    else
+      invite = %{id: user_id, invited_at: DateTime.utc_now()}
+
+      new_state =
+        state
+        |> Map.put(:invited, [invite | state.invited])
+        |> bump()
+
+      # don't send the updated event to the newly invited player
+      for %{id: id} <- state.invited ++ state.members do
+        Player.party_notify_updated(id, new_state)
+      end
+
+      # TODO: add a timeout and cancel the invite after it
+
+      {:reply, {:ok, new_state}, new_state}
     end
   end
 

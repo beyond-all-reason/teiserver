@@ -61,24 +61,7 @@ defmodule Teiserver.Player.TachyonHandler do
         clanId: user.clan_id,
         countryCode: user.country,
         status: :menu,
-        party:
-          case sess_state.party do
-            nil ->
-              nil
-
-            p ->
-              %{
-                id: p.id,
-                members:
-                  Enum.map(p.members, fn m ->
-                    %{
-                      userId: to_string(m.id),
-                      joinedAt: DateTime.to_unix(m.joined_at, :microsecond)
-                    }
-                  end),
-                invited: []
-              }
-          end,
+        party: party_state_to_tachyon(sess_state.party),
         invitedToParties: [],
         friendIds: Enum.map(friends, fn %{userId: uid} -> uid end),
         outgoingFriendRequest: outgoing,
@@ -175,6 +158,16 @@ defmodule Teiserver.Player.TachyonHandler do
     }
 
     {:event, "user/updated", event, state}
+  end
+
+  def handle_info({:party, {:invited, party_state}}, state) do
+    event = %{party: party_state_to_tachyon(party_state)}
+    {:event, "party/invited", event, state}
+  end
+
+  def handle_info({:party, {:updated, party_state}}, state) do
+    event = party_state_to_tachyon(party_state)
+    {:event, "party/updated", event, state}
   end
 
   def handle_info({:timeout, message_id}, state)
@@ -493,6 +486,22 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("party/invite", "request", _message_id, msg, state) do
+    raw_user_id = msg["data"]["userId"]
+
+    with {:ok, id} <- parse_user_id(raw_user_id),
+         :ok <- Player.Session.invite_to_party(state.user.id, id) do
+      {:response, state}
+    else
+      {:error, reason} when reason in [:invalid_player, :invalid_user] ->
+        {:error_response, :invalid_request,
+         "User with id #{raw_user_id} isn't valid or connected"}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
@@ -620,5 +629,27 @@ defmodule Teiserver.Player.TachyonHandler do
       end)
 
     {friends, incoming, outgoing}
+  end
+
+  defp party_state_to_tachyon(nil), do: nil
+
+  defp party_state_to_tachyon(party_state) do
+    %{
+      id: party_state.id,
+      members:
+        Enum.map(party_state.members, fn m ->
+          %{
+            userId: to_string(m.id),
+            joinedAt: DateTime.to_unix(m.joined_at, :microsecond)
+          }
+        end),
+      invited:
+        Enum.map(party_state.invited, fn m ->
+          %{
+            userId: to_string(m.id),
+            invitedAt: DateTime.to_unix(m.invited_at)
+          }
+        end)
+    }
   end
 end

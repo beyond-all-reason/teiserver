@@ -77,4 +77,16 @@ defmodule Teiserver.Player do
   """
   @spec battle_start(T.userid(), Teiserver.Autohost.start_response()) :: :ok
   defdelegate battle_start(user_id, battle_start_data), to: Player.Session
+
+  @doc """
+  Let the player know they've been invited to a party
+  """
+  defdelegate party_notify_invited(user_id, party_state), to: Player.Session
+
+  @doc """
+  Let the player know about the new state of a party they're a member of, or
+  have been invited to.
+  """
+  defdelegate party_notify_updated(user_id, party_state), to: Player.Session
+
 end

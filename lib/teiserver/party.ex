@@ -12,6 +12,7 @@ defmodule Teiserver.Party do
   alias Teiserver.Data.Types, as: T
 
   @type id :: Party.Server.id()
+  @type state :: Party.Server.state()
 
   @spec create_party(T.userid()) :: {:ok, id()} | {:error, reason :: term()}
   def create_party(user_id) do
@@ -33,4 +34,8 @@ defmodule Teiserver.Party do
 
   @spec leave_party(id(), T.userid()) :: :ok | {:error, :invalid_party | :not_a_member}
   defdelegate leave_party(party_id, user_id), to: Party.Server
+
+  @spec create_invite(id(), T.userid()) ::
+          {:ok, state()} | {:error, :invalid_party | :already_invited}
+  defdelegate create_invite(party_id, user_id), to: Party.Server
 end

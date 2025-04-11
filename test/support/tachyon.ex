@@ -342,4 +342,10 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, resp} = recv_message(client)
     resp
   end
+
+  def invite_to_party!(client, user_id) do
+    :ok = send_request(client, "party/invite", %{userId: to_string(user_id)})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
 end
