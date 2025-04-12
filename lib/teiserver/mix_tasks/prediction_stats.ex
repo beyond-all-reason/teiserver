@@ -165,7 +165,7 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
     ELSE
       (value->'num_wins')::int
     END as "num_wins",
-    tbmm.party_id as party_id
+    team_id || '_' || tbmm.party_id  as party_id
     from teiserver_game_rating_logs tgrl
     inner join teiserver_battle_match_memberships tbmm
     on tbmm.match_id = tgrl.match_id
@@ -190,6 +190,14 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
         }
       end)
 
+    # Party id of nil or party with only one member is invalid
+    valid_party_ids =
+      players
+      |> Enum.map(fn x -> x.party_id end)
+      |> Enum.frequencies_by(fn x -> x end)
+      |> Enum.filter(fn {party_id, party_size} -> party_size > 1 && party_id != nil end)
+      |> Enum.map(fn {key, value} -> key end)
+
     teams =
       players
       |> Enum.group_by(fn x -> x.team_id end)
@@ -199,11 +207,8 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
       |> Enum.map(fn {_key, v} ->
         v
         |> Enum.map(fn x -> x.party_id end)
-        |> Enum.filter(fn party_id -> party_id != nil end)
-        |> Enum.frequencies_by(fn x -> x end)
-        |> Enum.map(fn {_key, party_count} -> party_count end)
-        |> Enum.filter(fn party_count -> party_count > 1 end)
-        |> Enum.sum()
+        |> Enum.filter(fn party_id -> Enum.any?(valid_party_ids, fn x -> x == party_id end) end)
+        |> length()
       end)
 
     debug? = Keyword.get(opts, :debug, false)
