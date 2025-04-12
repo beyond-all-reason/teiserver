@@ -37,7 +37,9 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
           brier: :boolean,
           logloss: :boolean,
           doublecaptain: :boolean,
-          offset: :integer
+          offset: :integer,
+          equalparties: :boolean,
+          noparties: :boolean
         ]
       )
 
@@ -162,7 +164,8 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
       WHEN win THEN (value->'num_wins')::int - 1
     ELSE
       (value->'num_wins')::int
-    END as "num_wins"
+    END as "num_wins",
+    tbmm.party_id as party_id
     from teiserver_game_rating_logs tgrl
     inner join teiserver_battle_match_memberships tbmm
     on tbmm.match_id = tgrl.match_id
@@ -175,14 +178,15 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
 
     players =
       sql_results.rows
-      |> Enum.map(fn [team_id, win, skill, uncertainty, num_matches, num_wins] ->
+      |> Enum.map(fn [team_id, win, skill, uncertainty, num_matches, num_wins, party_id] ->
         %{
           team_id: team_id,
           win: win,
           skill: skill,
           uncertainty: uncertainty,
           num_matches: num_matches,
-          num_wins: num_wins
+          num_wins: num_wins,
+          party_id: party_id
         }
       end)
 
@@ -190,11 +194,36 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
       players
       |> Enum.group_by(fn x -> x.team_id end)
 
-    invalid_match? = players |> Enum.any?(fn x -> x.num_matches == nil || x.skill > 100 end)
+    [team1_party_count, team2_party_count] =
+      teams
+      |> Enum.map(fn {_key, v} ->
+        v
+        |> Enum.map(fn x -> x.party_id end)
+        |> Enum.filter(fn party_id -> party_id != nil end)
+        |> Enum.frequencies_by(fn x -> x end)
+        |> Enum.map(fn {_key, party_count} -> party_count end)
+        |> Enum.filter(fn party_count -> party_count > 1 end)
+        |> Enum.sum()
+      end)
+
     debug? = Keyword.get(opts, :debug, false)
+
+    invalid_match? =
+      players |> Enum.any?(fn x -> x.num_matches == nil || x.skill > 100 end) && !debug?
+
     has_win_data? = players |> Enum.any?(fn x -> x.num_wins != nil end)
 
-    if(invalid_match? && !debug?) do
+    equal_parties? = team1_party_count == team2_party_count
+    no_parties? = team1_party_count == 0 && team2_party_count == 0
+
+    # If we only want matches with no parties, then filter out matches that have parties
+    invalid_match? = invalid_match? || (Keyword.get(opts, :noparties, false) && !no_parties?)
+
+    # If we only want matches with equal parties, then filter out matches where party count is not equal
+    invalid_match? =
+      invalid_match? || (Keyword.get(opts, :equalparties, false) && !equal_parties?)
+
+    if(invalid_match?) do
       %{
         invalid_match?: true
       }
@@ -288,13 +317,13 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
         max(player.skill - player.uncertainty, 0)
 
       :bar_negative ->
-        player.skill - player.uncertainity
+        player.skill - player.uncertainty
 
       :leaderboard_2 ->
-        player.skill - player.uncertainity * 2
+        player.skill - player.uncertainty * 2
 
       :leaderboard_3 ->
-        player.skill - player.uncertainity * 3
+        player.skill - player.uncertainty * 3
 
       :provisional_50 ->
         min(num_matches / 50, 1) * (player.skill - player.uncertainty + offset)
