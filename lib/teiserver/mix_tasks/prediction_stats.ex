@@ -19,6 +19,9 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
   @rating_systems [
     :openskill,
     :bar,
+    :bar_negative,
+    :leaderboard_2,
+    :leaderboard_3,
     :provisional_5,
     :provisional_10,
     :provisional_20,
@@ -283,6 +286,15 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
 
       :bar ->
         max(player.skill - player.uncertainty, 0)
+
+      :bar_negative ->
+        player.skill - player.uncertainity
+
+      :leaderboard_2 ->
+        player.skill - player.uncertainity * 2
+
+      :leaderboard_3 ->
+        player.skill - player.uncertainity * 3
 
       :provisional_50 ->
         min(num_matches / 50, 1) * (player.skill - player.uncertainty + offset)
