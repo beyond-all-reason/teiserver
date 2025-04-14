@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
 
   To run:
 
-  mix teiserver.prediction_stats
+  mix teiserver.prediction_stats --minteamsize=2 --maxteamsize=5
   mix teiserver.prediction_stats --doublecaptain
   """
 
@@ -39,19 +39,18 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
           doublecaptain: :boolean,
           offset: :integer,
           equalparties: :boolean,
-          noparties: :boolean
+          noparties: :boolean,
+          minteamsize: :integer,
+          maxteamsize: :integer
         ]
       )
 
-    min_team_size =
-      case Keyword.get(opts, :debug, false) do
-        true -> 2
-        false -> 8
-      end
+    min_team_size = Keyword.get(opts, :minteamsize, 8)
+    max_team_size = Keyword.get(opts, :maxteamsize, 8)
 
     Application.ensure_all_started(:teiserver)
 
-    match_ids = get_match_ids(min_team_size)
+    match_ids = get_match_ids(min_team_size, max_team_size)
 
     initial_errors = %{
       noob_matches: %{
@@ -123,26 +122,31 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
     end)
   end
 
-  defp get_match_ids(min_team_size) do
+  defp get_match_ids(min_team_size, max_team_size) do
     query = """
     select distinct  tbm.id, tbm.inserted_at  from
     teiserver_battle_matches tbm
     inner join teiserver_game_rating_logs tgrl
     on tgrl.match_id = tbm.id
     and tbm.team_size >= $1
-    and tbm.team_size <= 8
-    and tbm.team_count = $2
+    and tbm.team_size <= $2
+    and tbm.team_count = $3
     and tgrl.value is not null
     and tgrl.season = 1
     order by tbm.inserted_at DESC
-    limit $3;
+    limit $4;
 
     """
 
     team_count = 2
 
     sql_results =
-      Ecto.Adapters.SQL.query!(Repo, query, [min_team_size, team_count, @num_matches_to_process])
+      Ecto.Adapters.SQL.query!(Repo, query, [
+        min_team_size,
+        max_team_size,
+        team_count,
+        @num_matches_to_process
+      ])
 
     sql_results.rows
     |> Enum.map(fn [id, _inserted] ->
