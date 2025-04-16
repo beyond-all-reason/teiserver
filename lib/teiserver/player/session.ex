@@ -301,6 +301,12 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:party, {:accept_invite, party_id}})
   end
 
+  @spec decline_invite_to_party(T.userid(), Party.id()) ::
+          :ok | {:error, :not_in_a_party | :not_invited}
+  def decline_invite_to_party(user_id, party_id) do
+    GenServer.call(via_tuple(user_id), {:party, {:decline_invite, party_id}})
+  end
+
   @spec party_notify_invited(T.userid(), Party.state()) :: :ok
   def party_notify_invited(user_id, party_state) do
     GenServer.cast(via_tuple(user_id), {:party, {:invited, party_state}})
@@ -570,6 +576,23 @@ defmodule Teiserver.Player.Session do
             Enum.filter(invited, fn {_version, p_id} -> p_id != party_id end)
           end)
           |> put_in([:party, :current_party], party_state.id)
+          |> put_in([:party, :version], party_state.version)
+
+        {:reply, :ok, state}
+
+      {:error, _reason} = err ->
+        {:reply, err, state}
+    end
+  end
+
+  def handle_call({:party, {:decline_invite, party_id}}, _from, state) do
+    case Party.decline_invite(party_id, state.user.id) do
+      {:ok, party_state} ->
+        state =
+          state
+          |> update_in([:party, :invited_to], fn invited ->
+            Enum.filter(invited, fn p_id -> p_id != party_id end)
+          end)
           |> put_in([:party, :version], party_state.version)
 
         {:reply, :ok, state}

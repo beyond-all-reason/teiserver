@@ -514,6 +514,18 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("party/declineInvite", "request", _message_id, msg, state) do
+    party_id = msg["data"]["partyId"]
+
+    case Player.Session.decline_invite_to_party(state.user.id, party_id) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end

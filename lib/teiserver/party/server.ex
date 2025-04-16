@@ -48,6 +48,14 @@ defmodule Teiserver.Party.Server do
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
 
+  @spec decline_invite(id(), T.userid()) ::
+          {:ok, state()} | {:error, :invalid_party | :not_invited}
+  def decline_invite(party_id, user_id) do
+    GenServer.call(via_tuple(party_id), {:decline_invite, user_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_party}
+  end
+
   @doc """
   Get the party state
   """
@@ -126,6 +134,23 @@ defmodule Teiserver.Party.Server do
           |> Map.update!(:members, &add_member(&1, user_id))
 
         notify_updated(state)
+        {:reply, {:ok, state}, state}
+    end
+  end
+
+  def handle_call({:decline_invite, user_id}, _from, state) do
+    case Enum.split_with(state.invited, fn %{id: id} -> id == user_id end) do
+      {[], _} ->
+        {:reply, {:error, :not_invited}, state}
+
+      {[_], rest} ->
+        state =
+          state
+          |> bump()
+          |> Map.put(:invited, rest)
+
+        notify_updated(state)
+
         {:reply, {:ok, state}, state}
     end
   end

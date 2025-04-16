@@ -160,6 +160,35 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       assert %{"commandId" => "party/updated", "data" => %{"id" => ^party2_id}} =
                Tachyon.recv_message!(target.client)
     end
+
+    test "cannot decline for non existing party", ctx do
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.decline_party_invite!(ctx.client, "lolnope-thats-not-a-party")
+    end
+
+    test "cannot decline invite if not invited", ctx do
+      ctx2 = setup_client()
+
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.decline_party_invite!(ctx2.client, ctx.party_id)
+    end
+
+    test "can decline", ctx do
+      ctx2 = setup_client()
+
+      assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, ctx2.user.id)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+      assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(ctx2.client)
+
+      assert %{"status" => "success"} = Tachyon.decline_party_invite!(ctx2.client, ctx.party_id)
+
+      assert %{"commandId" => "party/updated", "data" => data} = Tachyon.recv_message!(ctx.client)
+      assert data["invited"] == []
+
+      # cannot decline twice
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.decline_party_invite!(ctx2.client, ctx.party_id)
+    end
   end
 
   describe "self event" do
