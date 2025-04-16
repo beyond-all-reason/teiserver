@@ -348,4 +348,10 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, resp} = recv_message(client)
     resp
   end
+
+  def accept_party_invite!(client, party_id) do
+    :ok = send_request(client, "party/acceptInvite", %{partyId: party_id})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
 end

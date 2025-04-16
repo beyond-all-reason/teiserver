@@ -38,4 +38,9 @@ defmodule Teiserver.Party do
   @spec create_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :already_invited}
   defdelegate create_invite(party_id, user_id), to: Party.Server
+
+  @spec accept_invite(id(), T.userid()) ::
+          {:ok, state()} | {:error, :invalid_party | :not_invited}
+  defdelegate accept_invite(party_id, user_id), to: Party.Server
+
 end

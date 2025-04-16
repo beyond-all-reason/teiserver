@@ -40,6 +40,14 @@ defmodule Teiserver.Party.Server do
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
 
+  @spec accept_invite(id(), T.userid()) ::
+          {:ok, state()} | {:error, :invalid_party | :not_invited}
+  def accept_invite(party_id, user_id) do
+    GenServer.call(via_tuple(party_id), {:accept_invite, user_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_party}
+  end
+
   @doc """
   Get the party state
   """
@@ -59,7 +67,7 @@ defmodule Teiserver.Party.Server do
     state = %{
       version: 0,
       id: party_id,
-      members: [%{id: user_id, joined_at: DateTime.utc_now()}],
+      members: add_member([], user_id),
       invited: []
     }
 
@@ -105,9 +113,36 @@ defmodule Teiserver.Party.Server do
     end
   end
 
+  def handle_call({:accept_invite, user_id}, _from, state) do
+    case Enum.split_with(state.invited, fn %{id: id} -> id == user_id end) do
+      {[], _} ->
+        {:reply, {:error, :not_invited}, state}
+
+      {[_], rest} ->
+        state =
+          state
+          |> bump()
+          |> Map.put(:invited, rest)
+          |> Map.update!(:members, &add_member(&1, user_id))
+
+        notify_updated(state)
+        {:reply, {:ok, state}, state}
+    end
+  end
+
+  defp notify_updated(state) do
+    for %{id: id} <- state.invited ++ state.members do
+      Player.party_notify_updated(id, state)
+    end
+
+    state
+  end
+
   defp via_tuple(party_id) do
     Party.Registry.via_tuple(party_id)
   end
 
   defp bump(state), do: Map.update!(state, :version, &(&1 + 1))
+
+  defp add_member(members, user_id), do: [%{id: user_id, joined_at: DateTime.utc_now()} | members]
 end
