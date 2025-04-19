@@ -83,6 +83,8 @@ defmodule TeiserverWeb.Router do
   scope "/microblog", TeiserverWeb.Microblog do
     pipe_through([:live_browser, :app_layout])
 
+    get "/upload/:upload_id", UploadController, :get_upload
+
     live_session :microblog_root,
       on_mount: [
         {Teiserver.Account.AuthPlug, :mount_current_user}
@@ -113,6 +115,8 @@ defmodule TeiserverWeb.Router do
 
       live "/admin/tags", Admin.TagLive.Index, :index
       live "/admin/tags/:id", Admin.TagLive.Show, :show
+
+      live "/admin/uploads", UploadLive.Index
     end
   end
 

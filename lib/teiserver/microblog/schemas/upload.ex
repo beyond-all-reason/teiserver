@@ -1,19 +1,20 @@
-defmodule Teiserver.Microblog.PollResponse do
+defmodule Teiserver.Microblog.Upload do
   @moduledoc false
   use TeiserverWeb, :schema
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
-  schema "microblog_poll_responses" do
-    belongs_to :post, Teiserver.Microblog.Post
-    belongs_to :user, Teiserver.Account.User
+  schema "microblog_uploads" do
+    belongs_to :uploader, Teiserver.Account.User
 
-    field :response, :string
+    field :filename, :string
+    field :type, :string
+    field :file_size, :integer
 
     timestamps(type: :utc_datetime)
   end
 
-  @required_fields ~w(post_id response)a
-  @optional_fields ~w(user_id)a
+  @required_fields ~w(uploader_id filename type file_size)a
+  @optional_fields ~w()a
 
   @doc """
   Builds a changeset based on the `struct` and `params`.

@@ -144,6 +144,9 @@ defmodule TeiserverWeb do
     quote do
       use Phoenix.LiveComponent
 
+      defguard is_connected?(socket) when socket.transport_pid != nil
+      def ok(socket), do: {:ok, socket}
+      def noreply(socket), do: {:noreply, socket}
       unquote(view_helpers())
       unquote(html_helpers())
     end

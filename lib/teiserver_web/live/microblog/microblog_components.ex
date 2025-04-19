@@ -53,6 +53,16 @@ defmodule TeiserverWeb.MicroblogComponents do
       >
         Tags
       </.sub_menu_button>
+
+      <.sub_menu_button
+        :if={allow?(@current_user, "Server")}
+        bsname={@view_colour}
+        icon="fa-upload"
+        active={@active == "uplaods"}
+        url={~p"/microblog/admin/uploads"}
+      >
+        Uploads
+      </.sub_menu_button>
     </div>
     """
   end

@@ -17,7 +17,10 @@ config :teiserver, Teiserver.Config,
   }
 
 config :teiserver,
-  ecto_repos: [Teiserver.Repo]
+  ecto_repos: [Teiserver.Repo],
+  blog_allow_upload: true,
+  blog_upload_path: "zignore/uploads",
+  blog_upload_extensions: ~w(.jpg .jpeg .png)
 
 # Configures the endpoint
 config :teiserver, TeiserverWeb.Endpoint,
