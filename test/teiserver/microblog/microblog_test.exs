@@ -117,7 +117,7 @@ defmodule Teiserver.MicroblogTest do
         view_count: 43
       }
 
-      assert {:ok, %Post{} = post} = Microblog.update_post(post, update_attrs)
+      assert {:ok, %Post{} = post} = Microblog.update_post(post, update_attrs, :updated)
       assert post.contents == "some updated contents"
       assert post.discord_post_id == 43
       assert post.title == "some updated title"
@@ -126,7 +126,7 @@ defmodule Teiserver.MicroblogTest do
 
     test "update_post/2 with invalid data returns error changeset" do
       post = post_fixture()
-      assert {:error, %Ecto.Changeset{}} = Microblog.update_post(post, @invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Microblog.update_post(post, @invalid_attrs, :updated)
       assert post == Microblog.get_post!(post.id)
     end
 

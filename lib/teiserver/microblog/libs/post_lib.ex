@@ -141,14 +141,14 @@ defmodule Teiserver.Microblog.PostLib do
   defp broadcast_create_post(value), do: value
 
   @doc """
-  Updates a post.
+  Updates a post. Reason allows us to inform consumers of the pubsub why it was updated
 
   ## Examples
 
-      iex> update_post(post, %{field: new_value})
+      iex> update_post(post, %{field: new_value}, :updated)
       {:ok, %Post{}}
 
-      iex> update_post(post, %{field: bad_value})
+      iex> update_post(post, %{field: bad_value}, :updated)
       {:error, %Ecto.Changeset{}}
 
   """

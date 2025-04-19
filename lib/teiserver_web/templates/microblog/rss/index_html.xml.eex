@@ -13,7 +13,7 @@
 
     <%= for post <- @posts do %>
       <%
-        {:safe, contents} = post.contents |> Earmark.as_html! |> raw
+        {:safe, contents} = post.contents |> MDEx.to_html! |> raw
       %>
       <item>
         <title><%= post.title %></title>

@@ -92,7 +92,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       {Map.get(@post, :contents, "")
       |> String.split("\n\n")
       |> hd
-      |> Earmark.as_html!()
+      |> MDEx.to_html!()
       |> Phoenix.HTML.raw()}
       <br />
     </div>
@@ -116,7 +116,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       <h4>
         {Map.get(@post, :title, "")} - {TimexHelper.date_to_str(Timex.now(), :hms_or_ymd)}
       </h4>
-      {Map.get(@post, :contents, "") |> Earmark.as_html!() |> Phoenix.HTML.raw()}
+      {Map.get(@post, :contents, "") |> MDEx.to_html!() |> Phoenix.HTML.raw()}
       <br />
     </div>
     """
