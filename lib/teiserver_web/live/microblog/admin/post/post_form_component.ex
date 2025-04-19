@@ -120,6 +120,16 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
               </div>
             <% end %>
           </div>
+          <div class="col">
+            <h4>Poll</h4>
+            <.input
+              field={@form[:poll_choices]}
+              type="textarea-array"
+              phx-debounce="100"
+              label="Poll choices"
+              rows="12"
+            />
+          </div>
         </div>
 
         <% disabled = if not @form.source.valid? or Enum.empty?(@selected_tags), do: "disabled" %>
@@ -208,6 +218,11 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   end
 
   def handle_event("save", %{"post" => post_params}, socket) do
+    post_params =
+      Map.merge(post_params, %{
+        "poster_id" => socket.assigns.current_user.id
+      })
+
     save_post(socket, socket.assigns.action, post_params)
   end
 

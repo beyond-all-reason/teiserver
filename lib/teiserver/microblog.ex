@@ -159,4 +159,33 @@ defmodule Teiserver.Microblog do
 
   @spec change_user_preference(UserPreference, map) :: Ecto.Changeset
   defdelegate change_user_preference(user_preference, attrs), to: UserPreferenceLib
+
+  alias Teiserver.Microblog.{PollResponse, PollResponseLib}
+
+  @spec list_poll_responses() :: [PollResponse]
+  defdelegate list_poll_responses(), to: PollResponseLib
+
+  @spec list_poll_responses(list) :: [PollResponse]
+  defdelegate list_poll_responses(args), to: PollResponseLib
+
+  @spec get_poll_response(Teiserver.user_id(), Post.id()) :: PollResponse.t() | nil
+  defdelegate get_poll_response(user_id, post_id), to: PollResponseLib
+
+  @spec create_poll_response() :: {:ok, PollResponse} | {:error, Ecto.Changeset}
+  defdelegate create_poll_response(), to: PollResponseLib
+
+  @spec create_poll_response(map) :: {:ok, PollResponse} | {:error, Ecto.Changeset}
+  defdelegate create_poll_response(attrs), to: PollResponseLib
+
+  @spec update_poll_response(PollResponse, map) :: {:ok, PollResponse} | {:error, Ecto.Changeset}
+  defdelegate update_poll_response(poll_response, attrs), to: PollResponseLib
+
+  @spec delete_poll_response(PollResponse) :: {:ok, PollResponse} | {:error, Ecto.Changeset}
+  defdelegate delete_poll_response(poll_response), to: PollResponseLib
+
+  @spec change_poll_response(PollResponse) :: Ecto.Changeset
+  defdelegate change_poll_response(poll_response), to: PollResponseLib
+
+  @spec change_poll_response(PollResponse, map) :: Ecto.Changeset
+  defdelegate change_poll_response(poll_response, attrs), to: PollResponseLib
 end

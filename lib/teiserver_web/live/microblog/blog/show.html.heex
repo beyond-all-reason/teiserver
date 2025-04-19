@@ -23,8 +23,21 @@
       )}
     </h3>
 
-    {@post.contents |> Earmark.as_html!() |> raw}
+    <div id="post-content" class="blog-post-content">
+      {@post.contents |> Earmark.as_html!() |> raw}
+    </div>
     <br /><br />
+    
+    <div :if={@post.poll_choices && not Enum.empty?(@post.poll_choices)} class="row mb-4">
+      <div class="col">
+        <strong>Poll results</strong> <br />
+        <TeiserverWeb.MicroblogComponents.poll_result post={@post} />
+      </div>
+
+      <div :if={@current_user} class="col">
+        <TeiserverWeb.MicroblogComponents.poll_response post={@post} response={@response} />
+      </div>
+    </div>
 
     <div class="float-end">
       <a

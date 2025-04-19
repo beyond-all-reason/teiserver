@@ -152,14 +152,14 @@ defmodule Teiserver.Microblog.PostLib do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_post(%Post{} = post, attrs) do
+  def update_post(%Post{} = post, attrs, reason \\ :updated) do
     post
     |> Post.changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_post
+    |> broadcast_update_post(reason)
   end
 
-  defp broadcast_update_post({:ok, %Post{} = post}) do
+  defp broadcast_update_post({:ok, %Post{} = post}, reason) do
     spawn(fn ->
       # We sleep this because sometimes the message is seen fast enough the database doesn't
       # show as having the new data (row lock maybe?)
@@ -171,6 +171,7 @@ defmodule Teiserver.Microblog.PostLib do
         %{
           channel: "microblog_posts",
           event: :post_updated,
+          reason: reason,
           post: post
         }
       )
@@ -179,7 +180,22 @@ defmodule Teiserver.Microblog.PostLib do
     {:ok, post}
   end
 
-  defp broadcast_update_post(value), do: value
+  defp broadcast_update_post(value, _), do: value
+
+  def update_post_response_cache(post) do
+    counts =
+      Teiserver.Microblog.PollResponseQueries.responses_by_choice(post.id)
+      |> Repo.all()
+      |> Map.new()
+
+    new_response_cache =
+      post.poll_choices
+      |> Map.new(fn c ->
+        {c, Map.get(counts, c, 0)}
+      end)
+
+    {:ok, _} = update_post(post, %{poll_result_cache: new_response_cache}, :new_response)
+  end
 
   @doc """
   Deletes a post.
@@ -195,6 +211,9 @@ defmodule Teiserver.Microblog.PostLib do
   """
   def delete_post(%Post{} = post) do
     query = "DELETE FROM microblog_post_tags WHERE post_id = $1;"
+    {:ok, _} = Ecto.Adapters.SQL.query(Repo, query, [post.id])
+
+    query = "DELETE FROM blog_poll_responses WHERE post_id = $1;"
     {:ok, _} = Ecto.Adapters.SQL.query(Repo, query, [post.id])
 
     Repo.delete(post)

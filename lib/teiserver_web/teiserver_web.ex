@@ -132,6 +132,8 @@ defmodule TeiserverWeb do
         only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
 
       defguard is_connected?(socket) when socket.transport_pid != nil
+      def ok(socket), do: {:ok, socket}
+      def noreply(socket), do: {:noreply, socket}
       unquote(verified_routes())
       unquote(view_helpers())
       unquote(html_helpers())
