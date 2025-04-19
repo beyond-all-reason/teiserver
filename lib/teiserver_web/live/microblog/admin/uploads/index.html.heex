@@ -1,5 +1,8 @@
-<TeiserverWeb.MicroblogComponents.sub_menu active="uploads" current_user={@current_user}
-  view_colour={@view_colour} />
+<TeiserverWeb.MicroblogComponents.sub_menu
+  active="uploads"
+  current_user={@current_user}
+  view_colour={@view_colour}
+/>
 
 <.table id="uploads-table" rows={@streams.user_uploads} table_class="table-sm table-hover">
   <:col :let={{_id, upload}} label="">

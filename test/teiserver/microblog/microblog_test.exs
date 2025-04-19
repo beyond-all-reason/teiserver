@@ -308,7 +308,9 @@ defmodule Teiserver.MicroblogTest do
 
     test "get_poll_response/1 returns the poll_response with given id" do
       poll_response = poll_response_fixture()
-      assert Microblog.get_poll_response(poll_response.user_id, poll_response.post_id) == poll_response
+
+      assert Microblog.get_poll_response(poll_response.user_id, poll_response.post_id) ==
+               poll_response
     end
 
     test "create_poll_response/1 with valid data creates a poll_response" do
@@ -337,7 +339,8 @@ defmodule Teiserver.MicroblogTest do
       assert {:error, %Ecto.Changeset{}} =
                Microblog.update_poll_response(poll_response, @invalid_attrs)
 
-      assert poll_response == Microblog.get_poll_response(poll_response.user_id, poll_response.post_id)
+      assert poll_response ==
+               Microblog.get_poll_response(poll_response.user_id, poll_response.post_id)
     end
 
     test "delete_poll_response/1 deletes the poll_response" do

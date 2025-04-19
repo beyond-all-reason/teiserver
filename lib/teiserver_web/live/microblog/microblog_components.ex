@@ -154,7 +154,6 @@ defmodule TeiserverWeb.MicroblogComponents do
     """
   end
 
-
   @doc """
   <TeiserverWeb.MicroblogComponents.poll_result post={@post} />
   """

@@ -27,7 +27,7 @@
       {@post.contents |> MDEx.to_html!() |> raw}
     </div>
     <br /><br />
-    
+
     <div :if={@post.poll_choices && not Enum.empty?(@post.poll_choices)} class="row mb-4">
       <div class="col">
         <strong>Poll results</strong> <br />

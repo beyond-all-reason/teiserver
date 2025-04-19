@@ -286,7 +286,10 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
     |> assign(:originally_selected_tags, assigns[:selected_tags] || [])
     |> assign(:recent_uploads, recent_uploads)
     |> assign(:uploaded_files, [])
-    |> allow_upload(:blog_file, accept: Application.get_env(:teiserver, :blog_upload_extensions), max_entries: 2)
+    |> allow_upload(:blog_file,
+      accept: Application.get_env(:teiserver, :blog_upload_extensions),
+      max_entries: 2
+    )
     |> assign(assigns)
     |> assign_form(changeset)
     |> ok
