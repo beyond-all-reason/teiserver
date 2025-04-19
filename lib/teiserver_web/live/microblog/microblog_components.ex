@@ -207,6 +207,7 @@ defmodule TeiserverWeb.MicroblogComponents do
 
     ~H"""
     <div>
+      <h4>Vote in the poll</h4>
       <div
         :for={choice <- @post.poll_choices}
         phx-click="poll-choice"

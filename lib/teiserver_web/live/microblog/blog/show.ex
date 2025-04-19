@@ -11,7 +11,9 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
     post = Microblog.get_post!(post_id_str, preload: [:poster, :tags])
     Microblog.increment_post_view_count(post.id)
 
-    response = Microblog.get_poll_response(socket.assigns.current_user.id, post.id)
+    response = if socket.assigns.current_user do
+      Microblog.get_poll_response(socket.assigns.current_user.id, post.id)
+    end
 
     socket
     |> assign(:response, response)
@@ -89,6 +91,11 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
     else
       {:noreply, socket}
     end
+  end
+
+  def handle_event("poll-choice", _, %{assigns: %{current_user: nil}} = socket) do
+    socket
+    |> noreply
   end
 
   def handle_event("poll-choice", %{"choice" => choice}, %{assigns: assigns} = socket) do

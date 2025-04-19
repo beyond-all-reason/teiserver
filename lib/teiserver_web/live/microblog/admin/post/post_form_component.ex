@@ -482,7 +482,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
     case Communication.new_discord_message(post.discord_channel_id, discord_content) do
       {:ok, %{id: message_id}} ->
-        Microblog.update_post(post, %{"discord_post_id" => message_id})
+        Microblog.update_post(post, %{"discord_post_id" => message_id}, :discord_post_id)
 
       _ ->
         :ok

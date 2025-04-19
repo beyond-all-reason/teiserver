@@ -12,12 +12,14 @@ defmodule TeiserverWeb.Admin.Microblog.UploadLive.Index do
       )
 
     socket
+    |> assign(:view_colour, Teiserver.Microblog.colours())
     |> stream(:user_uploads, user_uploads)
     |> ok
   end
 
   def mount(_params, _session, socket) do
     socket
+    |> assign(:view_colour, Teiserver.Microblog.colours())
     |> stream(:user_uploads, [])
     |> ok
   end

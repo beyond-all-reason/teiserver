@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
     {:noreply, stream_insert(socket, :posts, db_post, at: 0)}
   end
 
-  def handle_info(%{channel: "microblog_posts", event: :post_updated, post: post}, socket) do
+  def handle_info(%{channel: "microblog_posts", event: :post_updated, post: post} = msg, socket) do
     # If we're just adding a new response we don't want to ping the db to update anything
     # if the post is updated then we need to grab the tags and poster
     if msg.reason == :update do

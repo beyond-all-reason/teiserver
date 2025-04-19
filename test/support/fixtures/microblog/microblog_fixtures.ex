@@ -83,6 +83,39 @@ defmodule Teiserver.MicroblogFixtures do
   end
 
   @doc """
+  Generate a poll_response.
+  """
+  def poll_response_fixture(attrs \\ %{}) do
+    {:ok, poll_response} =
+      attrs
+      |> Enum.into(%{
+        post_id: post_fixture().id,
+        user_id: AccountFixtures.user_fixture().id,
+        response: "A"
+      })
+      |> Microblog.create_poll_response()
+
+    poll_response
+  end
+
+  @doc """
+  Generate an upload.
+  """
+  def upload_fixture(attrs \\ %{}) do
+    {:ok, upload} =
+      attrs
+      |> Enum.into(%{
+        uploader_id: AccountFixtures.user_fixture().id,
+        filename: "filename",
+        type: "image",
+        file_size: 123
+      })
+      |> Microblog.create_upload()
+
+    upload
+  end
+
+  @doc """
   Generate a user_preference.
   """
   def user_preference_fixture(attrs \\ %{}) do

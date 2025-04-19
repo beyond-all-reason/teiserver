@@ -213,7 +213,7 @@ defmodule Teiserver.Microblog.PostLib do
     query = "DELETE FROM microblog_post_tags WHERE post_id = $1;"
     {:ok, _} = Ecto.Adapters.SQL.query(Repo, query, [post.id])
 
-    query = "DELETE FROM blog_poll_responses WHERE post_id = $1;"
+    query = "DELETE FROM microblog_poll_responses WHERE post_id = $1;"
     {:ok, _} = Ecto.Adapters.SQL.query(Repo, query, [post.id])
 
     Repo.delete(post)
