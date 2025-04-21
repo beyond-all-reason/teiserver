@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Admin.Microblog.UploadLive.Index do
+defmodule TeiserverWeb.Microblog.Admin.UploadLive.Index do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
@@ -28,12 +28,10 @@ defmodule TeiserverWeb.Admin.Microblog.UploadLive.Index do
   def handle_event("delete", %{"id" => id}, socket) do
     upload = Microblog.get_upload!(id)
 
-    cond do
-      upload.uploader_id != socket.assigns.current_user.id ->
-        raise "Not your upload"
-
-      true ->
-        Microblog.delete_upload(upload)
+    if upload.uploader_id == socket.assigns.current_user.id do
+      Microblog.delete_upload(upload)
+    else
+      raise "Not your upload"
     end
 
     socket

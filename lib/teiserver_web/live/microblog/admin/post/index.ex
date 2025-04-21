@@ -2,7 +2,6 @@ defmodule TeiserverWeb.Microblog.Admin.PostLive.Index do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
-  import TeiserverWeb.MicroblogComponents
 
   @impl true
   def mount(_params, _session, socket) do

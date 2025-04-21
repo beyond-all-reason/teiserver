@@ -25,28 +25,28 @@ defmodule Teiserver.Microblog.UploadLib do
       iex> get_upload!(456)
       ** (Ecto.NoResultsError)
   """
-  @spec get_upload!(non_neg_integer()) :: Upload.t()
+  @spec get_upload!(Ecto.UUID.t()) :: Upload
   def get_upload!(upload_id) do
     [id: upload_id]
     |> UploadQueries.query_uploads()
     |> Repo.one!()
   end
 
-  @spec get_upload!(non_neg_integer(), list) :: Upload.t()
+  @spec get_upload!(Ecto.UUID.t(), list) :: Upload
   def get_upload!(upload_id, args) do
     ([id: upload_id] ++ args)
     |> UploadQueries.query_uploads()
     |> Repo.one!()
   end
 
-  @spec get_upload(non_neg_integer()) :: Upload.t() | nil
+  @spec get_upload(Ecto.UUID.t()) :: Upload | nil
   def get_upload(upload_id) do
     [id: upload_id]
     |> UploadQueries.query_uploads()
     |> Repo.one()
   end
 
-  @spec get_upload(non_neg_integer(), list) :: Upload.t() | nil
+  @spec get_upload(Ecto.UUID.t(), list) :: Upload | nil
   def get_upload(upload_id, args) do
     ([id: upload_id] ++ args)
     |> UploadQueries.query_uploads()

@@ -20,8 +20,8 @@ defmodule Teiserver.Microblog.PollResponseLib do
     |> Repo.all()
   end
 
-  @spec get_poll_response(Teiserver.user_id(), Teiserver.Microblog.Post.id()) ::
-          PollResponse.t() | nil
+  @spec get_poll_response(non_neg_integer(), non_neg_integer()) ::
+          PollResponse | nil
   def get_poll_response(user_id, post_id) do
     PollResponseQueries.query_poll_responses(
       where: [

@@ -116,7 +116,7 @@ defmodule TeiserverWeb.Router do
       live "/admin/tags", Admin.TagLive.Index, :index
       live "/admin/tags/:id", Admin.TagLive.Show, :show
 
-      live "/admin/uploads", UploadLive.Index
+      live "/admin/uploads", Admin.UploadLive.Index
     end
   end
 
