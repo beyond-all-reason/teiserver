@@ -207,54 +207,59 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
       players
       |> Enum.group_by(fn x -> x.team_id end)
 
-    [team1_party_count, team2_party_count] =
-      teams
-      |> Enum.map(fn {_key, v} ->
-        v
-        |> Enum.map(fn x -> x.party_id end)
-        |> Enum.filter(fn party_id -> Enum.any?(valid_party_ids, fn x -> x == party_id end) end)
-        |> length()
-      end)
+    with [team1_party_count, team2_party_count] <-
+           teams
+           |> Enum.map(fn {_key, v} ->
+             v
+             |> Enum.map(fn x -> x.party_id end)
+             |> Enum.filter(fn party_id ->
+               Enum.any?(valid_party_ids, fn x -> x == party_id end)
+             end)
+             |> length()
+           end) do
+      debug? = Keyword.get(opts, :debug, false)
 
-    debug? = Keyword.get(opts, :debug, false)
+      invalid_match? =
+        players |> Enum.any?(fn x -> x.num_matches == nil || x.skill > 100 end) && !debug?
 
-    invalid_match? =
-      players |> Enum.any?(fn x -> x.num_matches == nil || x.skill > 100 end) && !debug?
+      has_win_data? = players |> Enum.any?(fn x -> x.num_wins != nil end)
 
-    has_win_data? = players |> Enum.any?(fn x -> x.num_wins != nil end)
+      equal_parties? = team1_party_count == team2_party_count
+      no_parties? = team1_party_count == 0 && team2_party_count == 0
 
-    equal_parties? = team1_party_count == team2_party_count
-    no_parties? = team1_party_count == 0 && team2_party_count == 0
+      # If we only want matches with no parties, then filter out matches that have parties
+      invalid_match? = invalid_match? || (Keyword.get(opts, :noparties, false) && !no_parties?)
 
-    # If we only want matches with no parties, then filter out matches that have parties
-    invalid_match? = invalid_match? || (Keyword.get(opts, :noparties, false) && !no_parties?)
+      # If we only want matches with equal parties, then filter out matches where party count is not equal
+      invalid_match? =
+        invalid_match? || (Keyword.get(opts, :equalparties, false) && !equal_parties?)
 
-    # If we only want matches with equal parties, then filter out matches where party count is not equal
-    invalid_match? =
-      invalid_match? || (Keyword.get(opts, :equalparties, false) && !equal_parties?)
+      if(invalid_match?) do
+        %{
+          invalid_match?: true
+        }
+      else
+        has_noobs? =
+          players |> Enum.any?(fn x -> x.num_matches < @noob_matches_cutoff end)
 
-    if(invalid_match?) do
-      %{
-        invalid_match?: true
-      }
+        errors =
+          Enum.map(@rating_systems, fn rating_system ->
+            %{
+              rating_system: rating_system,
+              forecast_error: process_sql_result(teams, rating_system, opts)
+            }
+          end)
+
+        %{
+          errors: errors,
+          has_noobs?: has_noobs?,
+          invalid_match?: false,
+          has_win_data?: has_win_data?
+        }
+      end
     else
-      has_noobs? =
-        players |> Enum.any?(fn x -> x.num_matches < @noob_matches_cutoff end)
-
-      errors =
-        Enum.map(@rating_systems, fn rating_system ->
-          %{
-            rating_system: rating_system,
-            forecast_error: process_sql_result(teams, rating_system, opts)
-          }
-        end)
-
-      %{
-        errors: errors,
-        has_noobs?: has_noobs?,
-        invalid_match?: false,
-        has_win_data?: has_win_data?
-      }
+      _ ->
+        raise "Something went wrong with match #{match_id}"
     end
   end
 
