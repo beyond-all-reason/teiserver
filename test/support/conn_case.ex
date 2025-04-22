@@ -42,6 +42,7 @@ defmodule TeiserverWeb.ConnCase do
       Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, {:shared, self()})
     end
 
+    Teiserver.Support.Tachyon.tachyon_case_setup(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

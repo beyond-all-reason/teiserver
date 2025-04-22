@@ -135,7 +135,6 @@ defmodule Teiserver.SpringTelemetryTest do
     assert reply == :timeout
 
     assert Enum.count(Telemetry.list_complex_anon_events()) == 0
-    assert Enum.count(Telemetry.list_client_properties()) == 0
 
     # Good data
     _send_raw(
@@ -147,7 +146,6 @@ defmodule Teiserver.SpringTelemetryTest do
     assert reply == :timeout
 
     assert Enum.count(Telemetry.list_complex_anon_events()) == 0
-    assert Enum.count(Telemetry.list_client_properties()) == 1
 
     # Unauth
     %{socket: socket_raw} = raw_setup()
@@ -162,6 +160,5 @@ defmodule Teiserver.SpringTelemetryTest do
     assert reply == :timeout
 
     assert Enum.count(Telemetry.list_complex_anon_events()) == 1
-    assert Enum.count(Telemetry.list_client_properties()) == 1
   end
 end

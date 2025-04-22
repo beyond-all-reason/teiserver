@@ -2,6 +2,8 @@ defmodule Teiserver.Matchmaking.QueueSyncTest do
   use Teiserver.DataCase
   alias Teiserver.Matchmaking
 
+  @moduletag :tachyon
+
   test "default queue starts" do
     assert is_pid(Matchmaking.lookup_queue("1v1"))
   end
