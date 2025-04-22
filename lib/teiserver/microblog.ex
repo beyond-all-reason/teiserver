@@ -203,7 +203,7 @@ defmodule Teiserver.Microblog do
   @spec get_upload(Upload.id()) :: Upload.t() | nil
   defdelegate get_upload(upload_id), to: UploadLib
 
-  @spec get_upload!(Upload.id()) :: Upload.t() | nil
+  @spec get_upload(Upload.id()) :: Upload.t()
   defdelegate get_upload!(upload_id), to: UploadLib
 
   @spec create_upload() :: {:ok, Upload} | {:error, Ecto.Changeset}

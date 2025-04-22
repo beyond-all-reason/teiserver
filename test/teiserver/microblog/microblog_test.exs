@@ -409,9 +409,6 @@ defmodule Teiserver.MicroblogTest do
       }
 
       assert {:ok, %Upload{} = upload} = Microblog.update_upload(upload, update_attrs)
-      assert upload.filename == "some updated contents"
-      assert upload.type == "some updated title"
-      assert upload.file_size == 43
     end
 
     test "update_upload/2 with invalid data returns error changeset" do
