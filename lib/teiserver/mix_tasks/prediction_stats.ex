@@ -133,6 +133,7 @@ defmodule Mix.Tasks.Teiserver.PredictionStats do
     and tbm.team_count = $3
     and tgrl.value is not null
     and tgrl.season = 1
+    and tbm.game_type in ('Small Team', 'Large Team', 'Duel', 'Team')
     order by tbm.inserted_at DESC
     limit $4;
 
