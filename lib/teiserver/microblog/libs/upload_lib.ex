@@ -9,7 +9,7 @@ defmodule Teiserver.Microblog.UploadLib do
       iex> list_uploads()
       [%Upload{}, ...]
   """
-  @spec list_uploads(list) :: [Upload]
+  @spec list_uploads(list) :: [Upload.t()]
   def list_uploads(args \\ []) do
     args
     |> UploadQueries.query_uploads()
@@ -25,28 +25,28 @@ defmodule Teiserver.Microblog.UploadLib do
       iex> get_upload!(456)
       ** (Ecto.NoResultsError)
   """
-  @spec get_upload!(Ecto.UUID.t()) :: Upload
+  @spec get_upload!(Ecto.UUID.t()) :: Upload.t()
   def get_upload!(upload_id) do
     [id: upload_id]
     |> UploadQueries.query_uploads()
     |> Repo.one!()
   end
 
-  @spec get_upload!(Ecto.UUID.t(), list) :: Upload
+  @spec get_upload!(Ecto.UUID.t(), list) :: Upload.t()
   def get_upload!(upload_id, args) do
     ([id: upload_id] ++ args)
     |> UploadQueries.query_uploads()
     |> Repo.one!()
   end
 
-  @spec get_upload(Ecto.UUID.t()) :: Upload | nil
+  @spec get_upload(Ecto.UUID.t()) :: Upload.t() | nil
   def get_upload(upload_id) do
     [id: upload_id]
     |> UploadQueries.query_uploads()
     |> Repo.one()
   end
 
-  @spec get_upload(Ecto.UUID.t(), list) :: Upload | nil
+  @spec get_upload(Ecto.UUID.t(), list) :: Upload.t() | nil
   def get_upload(upload_id, args) do
     ([id: upload_id] ++ args)
     |> UploadQueries.query_uploads()

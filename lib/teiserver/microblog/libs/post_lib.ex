@@ -220,6 +220,8 @@ defmodule Teiserver.Microblog.PostLib do
       Repo.delete(post)
       |> broadcast_delete_post
     end)
+    # This returns {x, {y, z}}, we want to strip out teh x (which is hopefully an :ok)
+    |> elem(1)
   end
 
   defp broadcast_delete_post({:ok, %Post{} = post}) do

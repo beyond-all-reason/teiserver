@@ -194,33 +194,33 @@ defmodule Teiserver.Microblog do
 
   alias Teiserver.Microblog.{Upload, UploadLib}
 
-  @spec list_uploads() :: [Upload]
+  @spec list_uploads() :: [Upload.t()]
   defdelegate list_uploads(), to: UploadLib
 
-  @spec list_uploads(list) :: [Upload]
+  @spec list_uploads(list) :: [Upload.t()]
   defdelegate list_uploads(args), to: UploadLib
 
   @spec get_upload(Upload.id()) :: Upload.t() | nil
   defdelegate get_upload(upload_id), to: UploadLib
 
-  @spec get_upload(Upload.id()) :: Upload.t()
+  @spec get_upload!(Upload.id()) :: Upload.t()
   defdelegate get_upload!(upload_id), to: UploadLib
 
-  @spec create_upload() :: {:ok, Upload} | {:error, Ecto.Changeset}
+  @spec create_upload() :: {:ok, Upload.t()} | {:error, Ecto.Changeset}
   defdelegate create_upload(), to: UploadLib
 
-  @spec create_upload(map) :: {:ok, Upload} | {:error, Ecto.Changeset}
+  @spec create_upload(map) :: {:ok, Upload.t()} | {:error, Ecto.Changeset}
   defdelegate create_upload(attrs), to: UploadLib
 
-  @spec update_upload(Upload, map) :: {:ok, Upload} | {:error, Ecto.Changeset}
+  @spec update_upload(Upload.t(), map) :: {:ok, Upload.t()} | {:error, Ecto.Changeset}
   defdelegate update_upload(upload, attrs), to: UploadLib
 
-  @spec delete_upload(Upload) :: {:ok, Upload} | {:error, Ecto.Changeset}
+  @spec delete_upload(Upload.t()) :: {:ok, Upload.t()} | {:error, Ecto.Changeset}
   defdelegate delete_upload(upload), to: UploadLib
 
-  @spec change_upload(Upload) :: Ecto.Changeset
+  @spec change_upload(Upload.t()) :: Ecto.Changeset
   defdelegate change_upload(upload), to: UploadLib
 
-  @spec change_upload(Upload, map) :: Ecto.Changeset
+  @spec change_upload(Upload.t(), map) :: Ecto.Changeset
   defdelegate change_upload(upload, attrs), to: UploadLib
 end

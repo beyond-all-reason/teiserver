@@ -2,7 +2,7 @@ defmodule Teiserver.Microblog.PollResponseLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
   alias Teiserver.Microblog.{PollResponse, PollResponseQueries}
-  alias Phoenix.PubSub
+  alias Teiserver.Helpers.PubSubHelper
 
   @doc """
   Returns the list of poll_responses.
@@ -49,30 +49,10 @@ defmodule Teiserver.Microblog.PollResponseLib do
     %PollResponse{}
     |> PollResponse.changeset(attrs)
     |> Repo.insert()
-    |> broadcast_create_poll_response
+    |> PubSubHelper.broadcast_on_ok("microblog_poll_responses", :poll_response, %{
+      event: :poll_response_created
+    })
   end
-
-  defp broadcast_create_poll_response({:ok, %PollResponse{} = poll_response}) do
-    spawn(fn ->
-      # We sleep this because sometimes the message is seen fast enough the database doesn't
-      # show as having the new data (row lock maybe?)
-      :timer.sleep(1000)
-
-      PubSub.broadcast(
-        Teiserver.PubSub,
-        "microblog_poll_responses",
-        %{
-          channel: "microblog_poll_responses",
-          event: :poll_response_created,
-          poll_response: poll_response
-        }
-      )
-    end)
-
-    {:ok, poll_response}
-  end
-
-  defp broadcast_create_poll_response(value), do: value
 
   @doc """
   Updates a poll_response.
@@ -90,27 +70,9 @@ defmodule Teiserver.Microblog.PollResponseLib do
     poll_response
     |> PollResponse.changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_poll_response
-  end
-
-  defp broadcast_update_poll_response({:ok, %PollResponse{} = poll_response}) do
-    spawn(fn ->
-      # We sleep this because sometimes the message is seen fast enough the database doesn't
-      # show as having the new data (row lock maybe?)
-      :timer.sleep(1000)
-
-      PubSub.broadcast(
-        Teiserver.PubSub,
-        "microblog_poll_responses",
-        %{
-          channel: "microblog_poll_responses",
-          event: :poll_response_updated,
-          poll_response: poll_response
-        }
-      )
-    end)
-
-    {:ok, poll_response}
+    |> PubSubHelper.broadcast_on_ok("microblog_poll_responses", :poll_response, %{
+      event: :poll_response_updated
+    })
   end
 
   defp broadcast_update_poll_response(value), do: value
@@ -129,24 +91,10 @@ defmodule Teiserver.Microblog.PollResponseLib do
   """
   def delete_poll_response(%PollResponse{} = poll_response) do
     Repo.delete(poll_response)
-    |> broadcast_delete_poll_response
+    |> PubSubHelper.broadcast_on_ok("microblog_poll_responses", :poll_response, %{
+      event: :poll_response_deleted
+    })
   end
-
-  defp broadcast_delete_poll_response({:ok, %PollResponse{} = poll_response}) do
-    PubSub.broadcast(
-      Teiserver.PubSub,
-      "microblog_poll_responses",
-      %{
-        channel: "microblog_poll_responses",
-        event: :poll_response_deleted,
-        poll_response: poll_response
-      }
-    )
-
-    {:ok, poll_response}
-  end
-
-  defp broadcast_delete_poll_response(value), do: value
 
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking poll_response changes.
