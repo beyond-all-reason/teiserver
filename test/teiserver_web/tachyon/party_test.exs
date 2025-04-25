@@ -189,6 +189,41 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       assert %{"status" => "failed", "reason" => "invalid_request"} =
                Tachyon.decline_party_invite!(ctx2.client, ctx.party_id)
     end
+
+    test "cannot cancel non existing invites", ctx do
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.cancel_party_invite!(ctx.client, "-1237891")
+    end
+
+    test "must be in party to cancel invite", ctx do
+      ctx2 = setup_client()
+
+      assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, ctx2.user.id)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+      assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(ctx2.client)
+
+      # invited but not member of party
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.cancel_party_invite!(ctx2.client, ctx2.user.id)
+    end
+
+    test "can cancel invite", ctx do
+      ctx2 = setup_client()
+
+      assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, ctx2.user.id)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+      assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(ctx2.client)
+
+      assert %{"status" => "success"} = Tachyon.cancel_party_invite!(ctx.client, ctx2.user.id)
+      assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(ctx2.client)
+
+      # invite is now invalid
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.accept_party_invite!(ctx2.client, ctx.party_id)
+
+      assert %{"commandId" => "party/updated", "data" => data} = Tachyon.recv_message!(ctx.client)
+      assert data["invited"] == []
+    end
   end
 
   describe "self event" do

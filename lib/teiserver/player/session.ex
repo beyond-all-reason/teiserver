@@ -307,6 +307,12 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:party, {:decline_invite, party_id}})
   end
 
+  @spec cancel_invite_to_party(T.userid(), T.userid()) ::
+          :ok | {:error, :not_in_a_party | :not_invited}
+  def cancel_invite_to_party(user_id, invited_user_id) do
+    GenServer.call(via_tuple(user_id), {:party, {:cancel_invite, invited_user_id}})
+  end
+
   @spec party_notify_invited(T.userid(), Party.state()) :: :ok
   def party_notify_invited(user_id, party_state) do
     GenServer.cast(via_tuple(user_id), {:party, {:invited, party_state}})
@@ -315,6 +321,11 @@ defmodule Teiserver.Player.Session do
   @spec party_notify_updated(T.userid(), Party.state()) :: :ok
   def party_notify_updated(user_id, party_state) do
     GenServer.cast(via_tuple(user_id), {:party, {:updated, party_state}})
+  end
+
+  @spec party_notify_removed(T.userid(), Party.state()) :: :ok
+  def party_notify_removed(user_id, party_state) do
+    GenServer.cast(via_tuple(user_id), {:party, {:removed, party_state}})
   end
 
   ################################################################################
@@ -591,9 +602,28 @@ defmodule Teiserver.Player.Session do
         state =
           state
           |> update_in([:party, :invited_to], fn invited ->
-            Enum.filter(invited, fn p_id -> p_id != party_id end)
+            Enum.filter(invited, fn {_version, p_id} -> p_id != party_id end)
           end)
           |> put_in([:party, :version], party_state.version)
+
+        {:reply, :ok, state}
+
+      {:error, _reason} = err ->
+        {:reply, err, state}
+    end
+  end
+
+  def handle_call({:party, {:cancel_invite, _invited_user_id}}, _from, state)
+      when state.party.current_party == nil do
+    {:reply, {:error, :not_in_party}, state}
+  end
+
+  def handle_call({:party, {:cancel_invite, invited_user_id}}, _from, state) do
+    party_id = state.party.current_party
+
+    case Party.cancel_invite(party_id, invited_user_id) do
+      {:ok, party_state} ->
+        state = state |> put_in([:party, :version], party_state.version)
 
         {:reply, :ok, state}
 
@@ -771,6 +801,29 @@ defmodule Teiserver.Player.Session do
            id == party_state.id && v <= party_state.version
          end),
        do: send_to_player!({:party, {:updated, party_state}}, state)
+
+    {:noreply, state}
+  end
+
+  def handle_cast({:party, {:removed, party_state}}, state) do
+    state =
+      if party_state.id == state.party.current_party do
+        send_to_player!({:party, {:removed, party_state.id}}, state)
+
+        Map.update!(state, :party, fn st ->
+          %{st | version: 0, current_party: nil}
+        end)
+      else
+        case Enum.split_with(state.party.invited_to, fn {_v, id} -> party_state.id == id end) do
+          # got a stray message, maybe the player already left
+          {[], _} ->
+            state
+
+          {[_], rest} ->
+            send_to_player!({:party, {:removed, party_state.id}}, state)
+            put_in(state.party.invited_to, rest)
+        end
+      end
 
     {:noreply, state}
   end

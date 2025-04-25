@@ -170,6 +170,11 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "party/updated", event, state}
   end
 
+  def handle_info({:party, {:removed, party_id}}, state) do
+    event = %{partyId: party_id}
+    {:event, "party/removed", event, state}
+  end
+
   def handle_info({:timeout, message_id}, state)
       when is_map_key(state.pending_responses, message_id) do
     Logger.debug("User did not reply in time to request with id #{message_id}")
@@ -521,6 +526,16 @@ defmodule Teiserver.Player.TachyonHandler do
       :ok ->
         {:response, state}
 
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("party/cancelInvite", "request", _message_id, msg, state) do
+    with {:ok, user_id} <- parse_user_id(msg["data"]["userId"]),
+         :ok <- Player.Session.cancel_invite_to_party(state.user.id, user_id) do
+      {:response, state}
+    else
       {:error, reason} ->
         {:error_response, :invalid_request, to_string(reason), state}
     end

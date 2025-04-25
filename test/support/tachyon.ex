@@ -360,4 +360,10 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, resp} = recv_message(client)
     resp
   end
+
+  def cancel_party_invite!(client, user_id) do
+    :ok = send_request(client, "party/cancelInvite", %{userId: to_string(user_id)})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
 end

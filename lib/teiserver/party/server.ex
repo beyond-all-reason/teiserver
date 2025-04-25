@@ -57,6 +57,17 @@ defmodule Teiserver.Party.Server do
   end
 
   @doc """
+  cancel a pending invite. Any member can do that
+  """
+  @spec cancel_invite(id(), T.userid()) ::
+          {:ok, state()} | {:error, :invalid_party | :not_in_party | :not_invited}
+  def cancel_invite(party_id, user_id) do
+    GenServer.call(via_tuple(party_id), {:cancel_invite, user_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_party}
+  end
+
+  @doc """
   Get the party state
   """
   @spec get_state(id()) :: state() | nil
@@ -151,6 +162,19 @@ defmodule Teiserver.Party.Server do
 
         notify_updated(state)
 
+        {:reply, {:ok, state}, state}
+    end
+  end
+
+  def handle_call({:cancel_invite, user_id}, _from, state) do
+    case Enum.split_with(state.invited, fn %{id: id} -> id == user_id end) do
+      {[], _} ->
+        {:reply, {:error, :not_invited}, state}
+
+      {[_], rest} ->
+        state = state |> bump() |> Map.put(:invited, rest)
+        Player.party_notify_removed(user_id, state)
+        notify_updated(state)
         {:reply, {:ok, state}, state}
     end
   end

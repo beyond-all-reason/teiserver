@@ -10,7 +10,7 @@ defmodule Teiserver.Player do
   """
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Player, Matchmaking}
+  alias Teiserver.{Player, Matchmaking, Party}
 
   @doc """
   Returns the pid of the session registered with a given user id
@@ -89,4 +89,9 @@ defmodule Teiserver.Player do
   """
   defdelegate party_notify_updated(user_id, party_state), to: Player.Session
 
+  @doc """
+  Let the player know that they are no longer invited/member of the party
+  """
+  @spec party_notify_removed(T.userid(), Party.state()) :: :ok
+  defdelegate party_notify_removed(user_id, party_state), to: Player.Session
 end
