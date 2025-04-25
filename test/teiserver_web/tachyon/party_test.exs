@@ -108,11 +108,24 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       assert %{"status" => "success", "data" => %{"partyId" => party_id}} =
                Tachyon.create_party!(client)
 
+      ctx2 = setup_client()
+
+      assert %{"status" => "success", "data" => %{"partyId" => party2_id}} =
+               Tachyon.create_party!(ctx2.client)
+
+      Tachyon.invite_to_party!(ctx2.client, user.id)
+
       Tachyon.abrupt_disconnect!(client)
       %{client: client} = Tachyon.connect(user, swallow_first_event: false)
 
-      %{"commandId" => "user/self", "data" => %{"user" => event}} = Tachyon.recv_message!(client)
+      %{
+        "commandId" => "user/self",
+        "data" => %{"user" => %{"invitedToParties" => [invited_to]} = event}
+      } = Tachyon.recv_message!(client)
+
       assert %{"party" => %{"id" => ^party_id}} = event
+      assert invited_to["id"] == party2_id
+      assert hd(invited_to["invited"])["userId"] == to_string(user.id)
     end
   end
 

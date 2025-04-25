@@ -318,18 +318,18 @@ defmodule Teiserver.Player.Session do
     mon_ref = Process.monitor(new_conn_pid)
     Logger.info("session reused")
 
-    new_state = %{state | conn_pid: new_conn_pid, mon_ref: mon_ref}
+    {current_party, invited_to} = get_party_states(state.party)
 
-    case state.party.current_party do
-      nil ->
-        {:reply, {:ok, %{party: nil}}, new_state}
+    party_state = %{
+      version: if(current_party == nil, do: nil, else: current_party.version),
+      current_party: if(current_party == nil, do: nil, else: current_party.id),
+      invited_to: Enum.map(invited_to, fn st -> {st.version, st.id} end)
+    }
 
-      party_id ->
-        party_state = Party.get_state(party_id)
-        party = %{version: party_state.version, current_party: party_state.id}
-        new_state = %{state | party: party}
-        {:reply, {:ok, %{party: party_state}}, new_state}
-    end
+    new_state = %{state | conn_pid: new_conn_pid, mon_ref: mon_ref, party: party_state}
+
+    party = %{party: current_party, invited_to_parties: invited_to}
+    {:reply, {:ok, party}, new_state}
   end
 
   def handle_call(:conn_state, _from, state) do
@@ -937,4 +937,19 @@ defmodule Teiserver.Player.Session do
   end
 
   defp initial_party_state(), do: %{version: 0, current_party: nil, invited_to: []}
+
+  # Gather the state of all relevant parties for the given session
+  defp get_party_states(party_state) do
+    ids = [party_state.current_party | Enum.map(party_state.invited_to, fn {_, id} -> id end)]
+
+    tasks =
+      Enum.map(ids, fn id ->
+        Task.async(fn ->
+          if id == nil, do: nil, else: Party.get_state(id)
+        end)
+      end)
+
+    [current | invited_to] = Task.await_many(tasks)
+    {current, invited_to}
+  end
 end

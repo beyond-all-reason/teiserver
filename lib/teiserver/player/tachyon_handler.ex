@@ -62,7 +62,7 @@ defmodule Teiserver.Player.TachyonHandler do
         countryCode: user.country,
         status: :menu,
         party: party_state_to_tachyon(sess_state.party),
-        invitedToParties: [],
+        invitedToParties: Enum.map(sess_state.invited_to_parties, &party_state_to_tachyon/1),
         friendIds: Enum.map(friends, fn %{userId: uid} -> uid end),
         outgoingFriendRequest: outgoing,
         incomingFriendRequest: incoming,
@@ -518,7 +518,7 @@ defmodule Teiserver.Player.TachyonHandler do
     case Player.SessionSupervisor.start_session(user) do
       {:ok, session_pid} ->
         {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
-        {:ok, session_pid, %{party: nil}}
+        {:ok, session_pid, %{party: nil, invited_to_parties: []}}
 
       {:error, {:already_started, pid}} ->
         case Player.Session.replace_connection(pid, self()) do
