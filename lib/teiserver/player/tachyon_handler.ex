@@ -541,6 +541,16 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("party/kickMember", "request", _message_id, msg, state) do
+    with {:ok, target_id} <- parse_user_id(msg["data"]["userId"]),
+         :ok <- Player.Session.kick_party_member(state.user.id, target_id) do
+      {:response, state}
+    else
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end

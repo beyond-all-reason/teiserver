@@ -50,4 +50,8 @@ defmodule Teiserver.Party do
   @spec cancel_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :not_in_party | :not_invited}
   defdelegate cancel_invite(party_id, user_id), to: Party.Server
+
+  @spec kick_user(id(), user_kicking :: T.userid(), kicked_user :: T.userid()) ::
+          {:ok, state()} | {:error, :invalid_party | :invalid_target | :not_a_member}
+  defdelegate kick_user(party_id, actor_id, target_id), to: Party.Server
 end

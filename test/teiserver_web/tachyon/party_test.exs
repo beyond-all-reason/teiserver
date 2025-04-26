@@ -226,6 +226,41 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
     end
   end
 
+  describe "kick player" do
+    setup [{Tachyon, :setup_client}, :setup_party]
+
+    test "must be in a party" do
+      ctx = setup_client()
+
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.kick_player_from_party!(ctx.client, ctx.user.id)
+    end
+
+    test "must target an existing player", ctx do
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.kick_player_from_party!(ctx.client, "-1238791")
+    end
+
+    test "invited player is not valid target", ctx do
+      ctx2 = setup_client()
+      Tachyon.invite_to_party!(ctx.client, ctx2.user.id)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.kick_player_from_party!(ctx.client, ctx2.user.id)
+    end
+
+    test "works", ctx do
+      ctx2 = setup_client()
+      invite_and_accept([ctx.client], ctx2.client, ctx2.user.id)
+
+      assert %{"status" => "success"} = Tachyon.kick_player_from_party!(ctx.client, ctx2.user.id)
+      assert %{"commandId" => "party/updated", "data" => data} = Tachyon.recv_message!(ctx.client)
+      assert data["invited"] == []
+      assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(ctx2.client)
+    end
+  end
+
   describe "self event" do
     test "has the correct data" do
       user = Tachyon.create_user()

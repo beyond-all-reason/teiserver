@@ -366,4 +366,10 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, resp} = recv_message(client)
     resp
   end
+
+  def kick_player_from_party!(client, target_id) do
+    :ok = send_request(client, "party/kickMember", %{userId: to_string(target_id)})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
 end

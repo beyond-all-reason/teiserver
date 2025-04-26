@@ -313,6 +313,12 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:party, {:cancel_invite, invited_user_id}})
   end
 
+  @spec kick_party_member(actor_id :: T.userid(), target_id :: T.userid()) ::
+          :ok | {:error, :invalid_party | :invalid_target | :not_a_member}
+  def kick_party_member(actor_id, target_id) do
+    GenServer.call(via_tuple(actor_id), {:party, {:kick_player, target_id}})
+  end
+
   @spec party_notify_invited(T.userid(), Party.state()) :: :ok
   def party_notify_invited(user_id, party_state) do
     GenServer.cast(via_tuple(user_id), {:party, {:invited, party_state}})
@@ -628,6 +634,25 @@ defmodule Teiserver.Player.Session do
         {:reply, :ok, state}
 
       {:error, _reason} = err ->
+        {:reply, err, state}
+    end
+  end
+
+  def handle_call({:party, {:kick_player, _}}, _from, state)
+      when state.party.current_party == nil do
+    {:reply, {:error, :not_in_party}, state}
+  end
+
+  def handle_call({:party, {:kick_player, target_id}}, _from, state) do
+    party_id = state.party.current_party
+
+    case Party.kick_user(party_id, state.user.id, target_id) do
+      {:ok, party_state} ->
+        state = state |> put_in([:party, :version], party_state.version)
+
+        {:reply, :ok, state}
+
+      {:error, _} = err ->
         {:reply, err, state}
     end
   end

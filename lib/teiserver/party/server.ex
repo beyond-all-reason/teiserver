@@ -68,6 +68,18 @@ defmodule Teiserver.Party.Server do
   end
 
   @doc """
+  Kick the specified member from the party. The user doing the kicking must
+  be a member of the party (and not merely invited)
+  """
+  @spec kick_user(id(), user_kicking :: T.userid(), kicked_user :: T.userid()) ::
+          {:ok, state()} | {:error, :invalid_party | :invalid_target | :not_a_member}
+  def kick_user(party_id, actor_id, target_id) do
+    GenServer.call(via_tuple(party_id), {:kick_user, actor_id, target_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_party}
+  end
+
+  @doc """
   Get the party state
   """
   @spec get_state(id()) :: state() | nil
@@ -174,6 +186,25 @@ defmodule Teiserver.Party.Server do
       {[_], rest} ->
         state = state |> bump() |> Map.put(:invited, rest)
         Player.party_notify_removed(user_id, state)
+        notify_updated(state)
+        {:reply, {:ok, state}, state}
+    end
+  end
+
+  def handle_call({:kick_user, actor_id, target_id}, _from, state) do
+    member? = Enum.find(state.members, &(&1.id == actor_id)) != nil
+    other_members = Enum.split_with(state.members, &(&1.id == target_id))
+
+    case {member?, other_members} do
+      {false, _} ->
+        {:reply, {:error, :not_a_member}, state}
+
+      {_, {[], _}} ->
+        {:reply, {:error, :invalid_target}, state}
+
+      {true, {[_], rest}} ->
+        state = state |> bump() |> Map.put(:members, rest)
+        Player.party_notify_removed(target_id, state)
         notify_updated(state)
         {:reply, {:ok, state}, state}
     end
