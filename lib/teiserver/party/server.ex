@@ -16,7 +16,15 @@ defmodule Teiserver.Party.Server do
           version: integer(),
           id: id(),
           members: [%{id: T.userid(), joined_at: DateTime.t(), mon_ref: reference()}],
-          invited: [%{id: T.userid(), invited_at: DateTime.t(), mon_ref: reference()}]
+          invited: [
+            %{
+              id: T.userid(),
+              invited_at: DateTime.t(),
+              mon_ref: reference(),
+              valid_until: DateTime.t(),
+              timeout_ref: :timer.tref()
+            }
+          ]
         }
 
   @spec gen_party_id() :: id()
@@ -26,6 +34,11 @@ defmodule Teiserver.Party.Server do
   What is the site config key holding the max size of a party
   """
   def max_size_key(), do: "party.max-size"
+
+  @doc """
+  What is the site config key holding how long an invite is valid for (in seconds)
+  """
+  def invite_valid_duration_key(), do: "party.invite-valid-duration-s"
 
   @spec leave_party(id(), T.userid()) :: :ok | {:error, :invalid_party | :not_a_member}
   def leave_party(party_id, user_id) do
@@ -138,8 +151,19 @@ defmodule Teiserver.Party.Server do
         {:reply, {:error, :party_at_capacity}, state}
 
       true ->
+        valid_duration = Teiserver.Config.get_site_config_cache(invite_valid_duration_key())
+        valid_until = DateTime.add(DateTime.utc_now(), valid_duration, :second)
+        tref = :timer.send_after(valid_duration * 1000, {:invite_timeout, user_id})
+
         monitor = Player.monitor_session(user_id)
-        invite = %{id: user_id, invited_at: DateTime.utc_now(), mon_ref: monitor}
+
+        invite = %{
+          id: user_id,
+          invited_at: DateTime.utc_now(),
+          mon_ref: monitor,
+          valid_until: valid_until,
+          timeout_ref: tref
+        }
 
         new_state =
           state
@@ -150,8 +174,6 @@ defmodule Teiserver.Party.Server do
         for %{id: id} <- state.invited ++ state.members do
           Player.party_notify_updated(id, new_state)
         end
-
-        # TODO: add a timeout and cancel the invite after it
 
         {:reply, {:ok, new_state}, new_state}
     end
@@ -181,6 +203,7 @@ defmodule Teiserver.Party.Server do
 
       {[invited], rest} ->
         Process.demonitor(invited.mon_ref)
+        :timer.cancel(invited.timeout_ref)
 
         state =
           state
@@ -198,11 +221,8 @@ defmodule Teiserver.Party.Server do
       {[], _} ->
         {:reply, {:error, :not_invited}, state}
 
-      {[invited], rest} ->
-        Process.demonitor(invited.mon_ref)
-        state = state |> bump() |> Map.put(:invited, rest)
-        Player.party_notify_removed(user_id, state)
-        notify_updated(state)
+      {[invite], rest} ->
+        state = cancel_invite_internal(invite, rest, state)
         {:reply, {:ok, state}, state}
     end
   end
@@ -249,6 +269,17 @@ defmodule Teiserver.Party.Server do
     {:noreply, state}
   end
 
+  def handle_info({:invite_timeout, user_id}, state) do
+    case Enum.split_with(state.invited, &(&1.id == user_id)) do
+      {[invite], rest} ->
+        state = cancel_invite_internal(invite, rest, state)
+        {:noreply, state}
+
+      _ ->
+        {:noreply, state}
+    end
+  end
+
   defp notify_updated(state) do
     for %{id: id} <- state.invited ++ state.members do
       Player.party_notify_updated(id, state)
@@ -271,5 +302,14 @@ defmodule Teiserver.Party.Server do
 
   defp add_member(members, user_id, monitor) do
     [%{id: user_id, joined_at: DateTime.utc_now(), mon_ref: monitor} | members]
+  end
+
+  defp cancel_invite_internal(invite, other_invites, state) do
+    Process.demonitor(invite.mon_ref)
+    :timer.cancel(invite.timeout_ref)
+    state = state |> bump() |> Map.put(:invited, other_invites)
+    Player.party_notify_removed(invite.id, state)
+    notify_updated(state)
+    state
   end
 end

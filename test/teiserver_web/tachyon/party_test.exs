@@ -236,6 +236,22 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       assert %{"status" => "failed", "reason" => "invalid_request"} =
                Tachyon.invite_to_party!(ctx.client, at_capacity_ctx.user.id)
     end
+
+    test "timeout for invites", ctx do
+      ctx2 = setup_client()
+      assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, ctx2.user.id)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+      assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(ctx2.client)
+
+      party_pid = Teiserver.Party.lookup(ctx.party_id)
+      send(party_pid, {:invite_timeout, ctx2.user.id})
+
+      assert %{"commandId" => "party/updated", "data" => updated} =
+               Tachyon.recv_message!(ctx.client)
+
+      assert updated["invited"] == []
+      assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(ctx2.client)
+    end
   end
 
   describe "kick player" do

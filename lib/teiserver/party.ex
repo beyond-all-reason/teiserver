@@ -65,6 +65,15 @@ defmodule Teiserver.Party do
       description: "Maximum number of member + invited for parties",
       default: 3
     })
+
+    Config.add_site_config_type(%{
+      key: Party.Server.invite_valid_duration_key(),
+      section: "Tachyon",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "How long a party invite should be valid for (in seconds)",
+      default: 60 * 5
+    })
   end
 
   @spec update_max_size(integer()) :: :ok
