@@ -224,6 +224,18 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       assert %{"commandId" => "party/updated", "data" => data} = Tachyon.recv_message!(ctx.client)
       assert data["invited"] == []
     end
+
+    test "max size enforced", ctx do
+      Teiserver.Party.update_max_size(2)
+      ok_client = setup_client()
+      assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, ok_client.user.id)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+
+      at_capacity_ctx = setup_client()
+
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.invite_to_party!(ctx.client, at_capacity_ctx.user.id)
+    end
   end
 
   describe "kick player" do

@@ -292,15 +292,20 @@ defmodule Teiserver.Config do
   @spec get_site_config_cache(String.t()) :: any
   def get_site_config_cache(key) do
     Teiserver.cache_get_or_store(:config_site_cache, key, fn ->
-      case get_site_config(key) do
-        nil ->
-          default = get_site_config_default(key)
-          cast_site_config_value(key, default)
-
-        config ->
-          cast_site_config_value(key, config.value)
-      end
+      get_site_config_val(key)
     end)
+  end
+
+  @spec get_site_config_val(String.t()) :: any()
+  def get_site_config_val(key) do
+    case get_site_config(key) do
+      nil ->
+        default = get_site_config_default(key)
+        cast_site_config_value(key, default)
+
+      config ->
+        cast_site_config_value(key, config.value)
+    end
   end
 
   @spec get_site_config(String.t()) :: SiteConfig.t() | nil

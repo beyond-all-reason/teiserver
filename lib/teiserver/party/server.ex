@@ -22,6 +22,11 @@ defmodule Teiserver.Party.Server do
   @spec gen_party_id() :: id()
   def gen_party_id(), do: UUID.uuid4()
 
+  @doc """
+  What is the site config key holding the max size of a party
+  """
+  def max_size_key(), do: "party.max-size"
+
   @spec leave_party(id(), T.userid()) :: :ok | {:error, :invalid_party | :not_a_member}
   def leave_party(party_id, user_id) do
     GenServer.call(via_tuple(party_id), {:leave, user_id})
@@ -33,7 +38,7 @@ defmodule Teiserver.Party.Server do
   Create an invite for the given player, ensuring they're not alreay part of the party
   """
   @spec create_invite(id(), T.userid()) ::
-          {:ok, state()} | {:error, :invalid_party | :already_invited}
+          {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
   def create_invite(party_id, user_id) do
     GenServer.call(via_tuple(party_id), {:create_invite, user_id})
   catch
@@ -123,25 +128,32 @@ defmodule Teiserver.Party.Server do
     invited = Enum.find(state.invited, fn %{id: id} -> id == user_id end)
     member = Enum.find(state.members, fn %{id: id} -> id == user_id end)
 
-    if invited != nil || member != nil do
-      {:reply, {:error, :already_invited}, state}
-    else
-      monitor = Player.monitor_session(user_id)
-      invite = %{id: user_id, invited_at: DateTime.utc_now(), mon_ref: monitor}
+    max_size = Teiserver.Config.get_site_config_cache(max_size_key())
 
-      new_state =
-        state
-        |> Map.put(:invited, [invite | state.invited])
-        |> bump()
+    cond do
+      invited != nil || member != nil ->
+        {:reply, {:error, :already_invited}, state}
 
-      # don't send the updated event to the newly invited player
-      for %{id: id} <- state.invited ++ state.members do
-        Player.party_notify_updated(id, new_state)
-      end
+      Enum.count(state.invited) + Enum.count(state.members) >= max_size ->
+        {:reply, {:error, :party_at_capacity}, state}
 
-      # TODO: add a timeout and cancel the invite after it
+      true ->
+        monitor = Player.monitor_session(user_id)
+        invite = %{id: user_id, invited_at: DateTime.utc_now(), mon_ref: monitor}
 
-      {:reply, {:ok, new_state}, new_state}
+        new_state =
+          state
+          |> Map.put(:invited, [invite | state.invited])
+          |> bump()
+
+        # don't send the updated event to the newly invited player
+        for %{id: id} <- state.invited ++ state.members do
+          Player.party_notify_updated(id, new_state)
+        end
+
+        # TODO: add a timeout and cancel the invite after it
+
+        {:reply, {:ok, new_state}, new_state}
     end
   end
 
@@ -169,6 +181,7 @@ defmodule Teiserver.Party.Server do
 
       {[invited], rest} ->
         Process.demonitor(invited.mon_ref)
+
         state =
           state
           |> bump()

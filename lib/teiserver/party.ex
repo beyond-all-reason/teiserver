@@ -8,6 +8,7 @@ defmodule Teiserver.Party do
   with regard to invites.
   """
 
+  alias Teiserver.Config
   alias Teiserver.Party
   alias Teiserver.Data.Types, as: T
 
@@ -36,7 +37,7 @@ defmodule Teiserver.Party do
   defdelegate leave_party(party_id, user_id), to: Party.Server
 
   @spec create_invite(id(), T.userid()) ::
-          {:ok, state()} | {:error, :invalid_party | :already_invited}
+          {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
   defdelegate create_invite(party_id, user_id), to: Party.Server
 
   @spec accept_invite(id(), T.userid()) ::
@@ -54,4 +55,21 @@ defmodule Teiserver.Party do
   @spec kick_user(id(), user_kicking :: T.userid(), kicked_user :: T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :invalid_target | :not_a_member}
   defdelegate kick_user(party_id, actor_id, target_id), to: Party.Server
+
+  def setup_site_configs() do
+    Config.add_site_config_type(%{
+      key: Party.Server.max_size_key(),
+      section: "Tachyon",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "Maximum number of member + invited for parties",
+      default: 3
+    })
+  end
+
+  @spec update_max_size(integer()) :: :ok
+  def update_max_size(new_max_size) do
+    Config.update_site_config(Party.Server.max_size_key(), new_max_size)
+    :ok
+  end
 end
