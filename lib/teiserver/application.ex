@@ -126,7 +126,7 @@ defmodule Teiserver.Application do
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Throttles.Supervisor},
 
         # Bridge
-        start_discord_bridge_supervisor_if_requested(),
+        inject_discord_bridge_supervisor_if_requested(),
         Teiserver.Bridge.BridgeServer,
         concache_sup(:discord_bridge_dm_cache),
         concache_perm_sup(:discord_channel_cache),
@@ -197,7 +197,7 @@ defmodule Teiserver.Application do
     start_result
   end
 
-  defp start_discord_bridge_supervisor_if_requested do
+  defp inject_discord_bridge_supervisor_if_requested do
     if Teiserver.Communication.use_discord?() do
       {Teiserver.Bridge.BridgeSupervisor, name: Teiserver.Bridge.BridgeSupervisor}
     else
@@ -219,6 +219,11 @@ defmodule Teiserver.Application do
     ]
 
     :telemetry.attach_many("oban-logger", events, &Teiserver.Helper.ObanLogger.handle_event/4, [])
+
+    # Nostrum and the Discord bridge require post-Supervisor-startup steps
+    if Teiserver.Communication.use_discord?() do
+      Teiserver.Bridge.BridgeSupervisor.try_to_start_bridge_services()
+    end
 
     Teiserver.Startup.startup()
   end

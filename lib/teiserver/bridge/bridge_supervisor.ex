@@ -3,37 +3,31 @@ defmodule Teiserver.Bridge.BridgeSupervisor do
   require Logger
 
   def start_link(_) do
-    Supervisor.start_link(__MODULE__, [], name: __MODULE__)
+    DynamicSupervisor.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   def init(_) do
-    children = [
-      Supervisor.child_spec({Nostrum.Application, []}, restart: :temporary),
-      {Teiserver.Bridge.DiscordBridgeBot, name: Teiserver.Bridge.DiscordBridgeBot}
-    ]
-
-    # Allows catching process exits
-    Process.flag(:trap_exit, true)
-
-    Supervisor.init(children, strategy: :rest_for_one)
+    DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  def encapsulate_nostrum_startup do
-    nostrum_pid =
-      case Supervisor.start_child(__MODULE__, {Nostrum.Application, []}) do
-        {:ok, pid} ->
-          pid
+  def try_to_start_bridge_services do
+    case DynamicSupervisor.start_child(
+           Teiserver.Bridge.BridgeSupervisor,
+           Supervisor.child_spec({Nostrum.Application, []}, restart: :temporary)
+         ) do
+      {:ok, _nostrum_pid} ->
+        Logger.info("Nostrum started successfully. Starting DiscordBridgeBot...")
 
-        {:error, reason} ->
-          Logger.error("Nostrum failed: #{inspect(reason)}. Ignoring failure.")
-          []
-      end
+        DynamicSupervisor.start_child(
+          Teiserver.Bridge.BridgeSupervisor,
+          Supervisor.child_spec(
+            {Teiserver.Bridge.DiscordBridgeBot, name: Teiserver.Bridge.DiscordBridgeBot},
+            restart: :temporary
+          )
+        )
 
-    nostrum_pid
-  end
-
-  def handle_info({:EXIT, _pid, reason}, state) do
-    Logger.error("#{Teiserver.Bridge.BridgeServer.bot_name()} crashed: #{inspect(reason)}")
-    {:noreply, state}
+      {:error, reason} ->
+        Logger.error("Nostrum failed: #{inspect(reason)}. DiscordBridgeBot will NOT start.")
+    end
   end
 end
