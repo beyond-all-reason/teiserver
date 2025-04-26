@@ -32,7 +32,7 @@ defmodule Teiserver.Player do
   """
   @spec monitor_session(T.userid()) :: reference() | nil
   def monitor_session(user_id) do
-    pid = lookup_connection(user_id)
+    pid = lookup_session(user_id)
 
     if is_nil(pid) do
       nil

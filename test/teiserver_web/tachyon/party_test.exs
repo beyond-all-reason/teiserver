@@ -261,6 +261,57 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
     end
   end
 
+  describe "disconnections" do
+    setup [{Tachyon, :setup_client}, :setup_party]
+
+    test "updates when member leaves", ctx do
+      other_member = setup_client()
+      invite_and_accept([ctx.client], other_member.client, other_member.user.id)
+
+      invited = setup_client()
+      Tachyon.invite_to_party!(ctx.client, invited.user.id)
+      assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(invited.client)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(other_member.client)
+
+      Tachyon.disconnect!(ctx.client)
+
+      assert %{"commandId" => "party/updated", "data" => data} =
+               Tachyon.recv_message!(other_member.client)
+
+      assert %{"commandId" => "party/updated", "data" => ^data} =
+               Tachyon.recv_message!(invited.client)
+
+      assert Enum.count(data["members"]) == 1
+    end
+
+    test "updates when invited player leaves", ctx do
+      invited = setup_client()
+      Tachyon.invite_to_party!(ctx.client, invited.user.id)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+
+      Tachyon.disconnect!(invited.client)
+
+      assert %{"commandId" => "party/updated", "data" => data} =
+               Tachyon.recv_message!(ctx.client)
+
+      assert Enum.count(data["members"]) == 1
+      assert data["invited"] == []
+    end
+
+    test "declined invites don't send updates", ctx do
+      invited = setup_client()
+      Tachyon.invite_to_party!(ctx.client, invited.user.id)
+      assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(invited.client)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+      Tachyon.decline_party_invite!(invited.client, ctx.party_id)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+
+      Tachyon.disconnect!(invited.client)
+      assert {:error, :timeout} == Tachyon.recv_message(ctx.client)
+    end
+  end
+
   describe "self event" do
     test "has the correct data" do
       user = Tachyon.create_user()

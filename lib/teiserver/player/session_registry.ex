@@ -25,6 +25,13 @@ defmodule Teiserver.Player.SessionRegistry do
     end
   end
 
+  @doc """
+  Used only for test (for now), not sure if there's a case outside tests
+  """
+  def register(key, value) do
+    Horde.Registry.register(Teiserver.Player.SessionRegistry, key, value)
+  end
+
   def unregister(user_id) do
     Horde.Registry.unregister(__MODULE__, via_tuple(user_id))
   end

@@ -15,8 +15,8 @@ defmodule Teiserver.Party.Server do
           # versionning of the state to avoid races between call and cast
           version: integer(),
           id: id(),
-          members: [%{id: T.userid(), joined_at: DateTime.t()}],
-          invited: [%{id: T.userid(), invited_at: DateTime.t()}]
+          members: [%{id: T.userid(), joined_at: DateTime.t(), mon_ref: reference()}],
+          invited: [%{id: T.userid(), invited_at: DateTime.t(), mon_ref: reference()}]
         }
 
   @spec gen_party_id() :: id()
@@ -126,7 +126,8 @@ defmodule Teiserver.Party.Server do
     if invited != nil || member != nil do
       {:reply, {:error, :already_invited}, state}
     else
-      invite = %{id: user_id, invited_at: DateTime.utc_now()}
+      monitor = Player.monitor_session(user_id)
+      invite = %{id: user_id, invited_at: DateTime.utc_now(), mon_ref: monitor}
 
       new_state =
         state
@@ -149,12 +150,12 @@ defmodule Teiserver.Party.Server do
       {[], _} ->
         {:reply, {:error, :not_invited}, state}
 
-      {[_], rest} ->
+      {[invited], rest} ->
         state =
           state
           |> bump()
           |> Map.put(:invited, rest)
-          |> Map.update!(:members, &add_member(&1, user_id))
+          |> Map.update!(:members, &add_member(&1, user_id, invited.mon_ref))
 
         notify_updated(state)
         {:reply, {:ok, state}, state}
@@ -166,7 +167,8 @@ defmodule Teiserver.Party.Server do
       {[], _} ->
         {:reply, {:error, :not_invited}, state}
 
-      {[_], rest} ->
+      {[invited], rest} ->
+        Process.demonitor(invited.mon_ref)
         state =
           state
           |> bump()
@@ -183,7 +185,8 @@ defmodule Teiserver.Party.Server do
       {[], _} ->
         {:reply, {:error, :not_invited}, state}
 
-      {[_], rest} ->
+      {[invited], rest} ->
+        Process.demonitor(invited.mon_ref)
         state = state |> bump() |> Map.put(:invited, rest)
         Player.party_notify_removed(user_id, state)
         notify_updated(state)
@@ -202,12 +205,35 @@ defmodule Teiserver.Party.Server do
       {_, {[], _}} ->
         {:reply, {:error, :invalid_target}, state}
 
-      {true, {[_], rest}} ->
+      {true, {[member], rest}} ->
+        Process.demonitor(member.mon_ref)
         state = state |> bump() |> Map.put(:members, rest)
         Player.party_notify_removed(target_id, state)
         notify_updated(state)
         {:reply, {:ok, state}, state}
     end
+  end
+
+  @impl true
+  def handle_info({:DOWN, ref, :process, _pid, _reason}, state) do
+    in_members = Enum.split_with(state.members, &(&1.mon_ref == ref))
+    in_invited = Enum.split_with(state.invited, &(&1.mon_ref == ref))
+
+    state =
+      case {in_members, in_invited} do
+        {{[_], rest}, _} ->
+          Map.put(state, :members, rest)
+          |> notify_updated()
+
+        {_, {[_], rest}} ->
+          Map.put(state, :invited, rest)
+          |> notify_updated()
+
+        _ ->
+          state
+      end
+
+    {:noreply, state}
   end
 
   defp notify_updated(state) do
@@ -224,5 +250,13 @@ defmodule Teiserver.Party.Server do
 
   defp bump(state), do: Map.update!(state, :version, &(&1 + 1))
 
-  defp add_member(members, user_id), do: [%{id: user_id, joined_at: DateTime.utc_now()} | members]
+  defp add_member(members, user_id) do
+    monitor = Player.monitor_session(user_id)
+    if monitor == nil, do: raise("member not connected")
+    add_member(members, user_id, monitor)
+  end
+
+  defp add_member(members, user_id, monitor) do
+    [%{id: user_id, joined_at: DateTime.utc_now(), mon_ref: monitor} | members]
+  end
 end
