@@ -75,21 +75,29 @@ defmodule Teiserver.Asset do
   @spec set_engine_matchmaking(id :: integer() | String.t()) ::
           {:ok, Asset.Engine.t()} | {:error, :not_found}
   def set_engine_matchmaking(id) do
-    Repo.transaction(fn ->
-      case EngineQueries.get_engine(id: id) do
-        nil ->
-          Repo.rollback(:not_found)
+    res =
+      Repo.transaction(fn ->
+        case EngineQueries.get_engine(id: id) do
+          nil ->
+            Repo.rollback(:not_found)
 
-        engine ->
-          mm_engine = EngineQueries.get_engine(in_matchmaking: true)
+          engine ->
+            mm_engine = EngineQueries.get_engine(in_matchmaking: true)
 
-          if mm_engine != nil do
-            change_engine(mm_engine, %{in_matchmaking: false}) |> Repo.update!()
-          end
+            if mm_engine != nil do
+              change_engine(mm_engine, %{in_matchmaking: false}) |> Repo.update!()
+            end
 
-          change_engine(engine, %{in_matchmaking: true}) |> Repo.update!()
-      end
-    end)
+            change_engine(engine, %{in_matchmaking: true}) |> Repo.update!()
+        end
+      end)
+
+    case res do
+      {:ok, _} -> Teiserver.Matchmaking.restart_queues()
+      _ -> nil
+    end
+
+    res
   end
 
   @spec get_games() :: [Asset.Game.t()]
@@ -125,20 +133,28 @@ defmodule Teiserver.Asset do
   @spec set_game_matchmaking(id :: integer() | String.t()) ::
           {:ok, Asset.Game.t()} | {:error, :not_found}
   def set_game_matchmaking(id) do
-    Repo.transaction(fn ->
-      case GameQueries.get_game(id: id) do
-        nil ->
-          Repo.rollback(:not_found)
+    res =
+      Repo.transaction(fn ->
+        case GameQueries.get_game(id: id) do
+          nil ->
+            Repo.rollback(:not_found)
 
-        game ->
-          mm_game = GameQueries.get_game(in_matchmaking: true)
+          game ->
+            mm_game = GameQueries.get_game(in_matchmaking: true)
 
-          if mm_game != nil do
-            change_game(mm_game, %{in_matchmaking: false}) |> Repo.update!()
-          end
+            if mm_game != nil do
+              change_game(mm_game, %{in_matchmaking: false}) |> Repo.update!()
+            end
 
-          change_game(game, %{in_matchmaking: true}) |> Repo.update!()
-      end
-    end)
+            change_game(game, %{in_matchmaking: true}) |> Repo.update!()
+        end
+      end)
+
+    case res do
+      {:ok, _} -> Teiserver.Matchmaking.restart_queues()
+      _ -> nil
+    end
+
+    res
   end
 end

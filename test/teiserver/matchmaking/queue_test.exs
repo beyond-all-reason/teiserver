@@ -36,7 +36,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
 
   describe "joining" do
     test "works", %{user: user, queue_id: queue_id} do
-      assert :ok = Matchmaking.join_queue(queue_id, user.id)
+      assert {:ok, _pid} = Matchmaking.join_queue(queue_id, user.id)
 
       assert {:error, :already_queued} == Matchmaking.join_queue(queue_id, user.id)
     end
@@ -60,8 +60,8 @@ defmodule Teiserver.Matchmaking.QueueTest do
 
     test "paired user still in queue", %{user: user, queue_id: queue_id, queue_pid: queue_pid} do
       user2 = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
-      assert :ok = Matchmaking.join_queue(queue_id, user.id)
-      assert :ok = Matchmaking.join_queue(queue_id, user2.id)
+      assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, user.id)
+      assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, user2.id)
       send(queue_pid, :tick)
       assert {:error, :already_queued} == Matchmaking.join_queue(queue_id, user.id)
     end
@@ -74,7 +74,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
       assert {:error, :invalid_queue} =
                Matchmaking.leave_queue("lolnope that't not a queue", user.id)
 
-      :ok = Matchmaking.join_queue(queue_id, user.id)
+      {:ok, _pid} = Matchmaking.join_queue(queue_id, user.id)
       assert :ok = Matchmaking.leave_queue(queue_id, user.id)
     end
   end

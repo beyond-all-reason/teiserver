@@ -5,6 +5,7 @@ defmodule Teiserver.Matchmaking do
   @type queue :: Matchmaking.QueueServer.queue()
   @type queue_id :: Matchmaking.QueueServer.id()
   @type member :: Matchmaking.QueueServer.member()
+  @type join_error :: Matchmaking.QueueServer.join_error()
   @type join_result :: Matchmaking.QueueServer.join_result()
   @type leave_result :: Matchmaking.QueueServer.leave_result()
   @type lost_reason :: Matchmaking.PairingRoom.lost_reason()
@@ -60,4 +61,11 @@ defmodule Teiserver.Matchmaking do
   """
   @spec ready(pid(), ready_data()) :: :ok | {:error, term()}
   defdelegate ready(room_pid, user_id), to: Matchmaking.PairingRoom
+
+  @doc """
+  Kill and restart all matchmaking queues. This can be used to reset the
+  matchmaking state, for example when a new asset (game/engine) is set
+  It is a bit brutal but simple
+  """
+  defdelegate restart_queues(), to: Matchmaking.QueueSupervisor
 end
