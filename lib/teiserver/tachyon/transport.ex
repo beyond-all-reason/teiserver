@@ -119,6 +119,13 @@ defmodule Teiserver.Tachyon.Transport do
 
         {:reply, :ok, {:text, resp}, state}
 
+      {:error, %JsonXema.ValidationError{} = err} ->
+        resp =
+          Schema.error_response(command_id, message_id, :invalid_request, inspect(err))
+          |> Jason.encode!()
+
+        {:reply, :ok, {:text, resp}, state}
+
       {:error, err} ->
         resp =
           Schema.error_response(command_id, message_id, :internal_error, inspect(err))
