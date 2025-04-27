@@ -29,6 +29,7 @@ defmodule Teiserver.Account.Auth do
   def authorize(:update, conn, _), do: allow?(conn, "Moderator")
   def authorize(:applying, conn, _), do: allow?(conn, "Moderator")
   def authorize(:data_search, conn, _), do: allow?(conn, "Server")
+  def authorize(:relationships, conn, _), do: allow?(conn, "Moderator")
   def authorize(_, conn, _), do: allow?(conn, "admin.dev")
 end
 
@@ -85,8 +86,8 @@ end
 defmodule Teiserver.Staff do
   @moduledoc false
   @behaviour Bodyguard.Policy
-  import Teiserver.Account.AuthLib, only: [allow_any?: 2]
-  def authorize(_, conn, _), do: allow_any?(conn, ["Contributor", "Overwatch"])
+  import Teiserver.Account.AuthLib, only: [allow?: 2]
+  def authorize(_, conn, _), do: allow?(conn, "Contributor")
 end
 
 defmodule Teiserver.Auth do

@@ -2,7 +2,7 @@
 
 <div class="row">
   <.menu_card
-    :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
+    :if={allow?(@current_user, "Contributor")}
     icon={Teiserver.icon()}
     icon_class="fa-solid"
     url={~p"/teiserver/admin"}
@@ -29,7 +29,7 @@
   </.menu_card>
 
   <.menu_card
-    :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
+    :if={allow?(@current_user, "Contributor")}
     icon={StylingHelper.icon(:summary)}
     icon_class="fa-solid"
     url={~p"/teiserver/reports"}
