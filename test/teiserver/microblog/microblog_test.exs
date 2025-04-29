@@ -117,7 +117,7 @@ defmodule Teiserver.MicroblogTest do
         view_count: 43
       }
 
-      assert {:ok, %Post{} = post} = Microblog.update_post(post, update_attrs)
+      assert {:ok, %Post{} = post} = Microblog.update_post(post, update_attrs, :updated)
       assert post.contents == "some updated contents"
       assert post.discord_post_id == 43
       assert post.title == "some updated title"
@@ -126,7 +126,7 @@ defmodule Teiserver.MicroblogTest do
 
     test "update_post/2 with invalid data returns error changeset" do
       post = post_fixture()
-      assert {:error, %Ecto.Changeset{}} = Microblog.update_post(post, @invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Microblog.update_post(post, @invalid_attrs, :updated)
       assert post == Microblog.get_post!(post.id)
     end
 
@@ -291,6 +291,141 @@ defmodule Teiserver.MicroblogTest do
     test "change_user_preference/1 returns a user_preference changeset" do
       user_preference = user_preference_fixture()
       assert %Ecto.Changeset{} = Microblog.change_user_preference(user_preference)
+    end
+  end
+
+  describe "poll_responses" do
+    alias Teiserver.Microblog.PollResponse
+
+    import Teiserver.MicroblogFixtures
+
+    @invalid_attrs %{post_id: nil, tag_id: nil}
+
+    test "list_poll_responses/0 returns all poll_responses" do
+      poll_response = poll_response_fixture()
+      assert Microblog.list_poll_responses() == [poll_response]
+    end
+
+    test "get_poll_response/1 returns the poll_response with given id" do
+      poll_response = poll_response_fixture()
+
+      assert Microblog.get_poll_response(poll_response.user_id, poll_response.post_id) ==
+               poll_response
+    end
+
+    test "create_poll_response/1 with valid data creates a poll_response" do
+      post = post_fixture()
+      user = Teiserver.AccountFixtures.user_fixture()
+      valid_attrs = %{post_id: post.id, user_id: user.id, response: "A"}
+
+      assert {:ok, %PollResponse{} = _poll_response} = Microblog.create_poll_response(valid_attrs)
+    end
+
+    test "create_poll_response/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Microblog.create_poll_response(@invalid_attrs)
+    end
+
+    test "update_poll_response/2 with valid data updates the poll_response" do
+      poll_response = poll_response_fixture()
+      update_attrs = %{}
+
+      assert {:ok, %PollResponse{} = _poll_response} =
+               Microblog.update_poll_response(poll_response, update_attrs)
+    end
+
+    test "update_poll_response/2 with invalid data returns error changeset" do
+      poll_response = poll_response_fixture()
+
+      assert {:error, %Ecto.Changeset{}} =
+               Microblog.update_poll_response(poll_response, @invalid_attrs)
+
+      assert poll_response ==
+               Microblog.get_poll_response(poll_response.user_id, poll_response.post_id)
+    end
+
+    test "delete_poll_response/1 deletes the poll_response" do
+      poll_response = poll_response_fixture()
+      assert {:ok, %PollResponse{}} = Microblog.delete_poll_response(poll_response)
+
+      assert Microblog.get_poll_response(poll_response.user_id, poll_response.post_id) == nil
+    end
+
+    test "change_poll_response/1 returns a poll_response changeset" do
+      poll_response = poll_response_fixture()
+      assert %Ecto.Changeset{} = Microblog.change_poll_response(poll_response)
+    end
+  end
+
+  describe "uploads" do
+    alias Teiserver.Microblog.Upload
+
+    import Teiserver.{AccountFixtures, MicroblogFixtures}
+
+    @invalid_attrs %{
+      filename: nil,
+      type: nil,
+      file_size: nil
+    }
+
+    test "list_uploads/0 returns all uploads" do
+      upload = upload_fixture()
+      assert Microblog.list_uploads() == [upload]
+    end
+
+    test "get_upload!/1 returns the upload with given id" do
+      upload = upload_fixture()
+      assert Microblog.get_upload!(upload.id) == upload
+    end
+
+    test "create_upload/1 with valid data creates a upload" do
+      user = user_fixture()
+
+      valid_attrs = %{
+        filename: "some contents",
+        type: "some title",
+        file_size: 42,
+        uploader_id: user.id
+      }
+
+      assert {:ok, %Upload{} = upload} = Microblog.create_upload(valid_attrs)
+      assert upload.filename == "some contents"
+      assert upload.type == "some title"
+      assert upload.file_size == 42
+    end
+
+    test "create_upload/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Microblog.create_upload(@invalid_attrs)
+    end
+
+    test "update_upload/2 with valid data updates the upload" do
+      upload = upload_fixture()
+      user = user_fixture()
+
+      update_attrs = %{
+        filename: "some updated contents",
+        type: "some updated title",
+        file_size: 43,
+        uploader_id: user.id
+      }
+
+      assert {:ok, %Upload{} = upload} = Microblog.update_upload(upload, update_attrs)
+    end
+
+    test "update_upload/2 with invalid data returns error changeset" do
+      upload = upload_fixture()
+      assert {:error, %Ecto.Changeset{}} = Microblog.update_upload(upload, @invalid_attrs)
+      assert upload == Microblog.get_upload!(upload.id)
+    end
+
+    test "delete_upload/1 deletes the upload" do
+      upload = upload_fixture()
+      assert {:ok, %Upload{}} = Microblog.delete_upload(upload)
+      assert_raise Ecto.NoResultsError, fn -> Microblog.get_upload!(upload.id) end
+    end
+
+    test "change_upload/1 returns a upload changeset" do
+      upload = upload_fixture()
+      assert %Ecto.Changeset{} = Microblog.change_upload(upload)
     end
   end
 end

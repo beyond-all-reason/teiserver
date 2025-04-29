@@ -285,7 +285,7 @@ defmodule TeiserverWeb.CoreComponents do
   attr :type, :string,
     default: "text",
     values: ~w(checkbox color date datetime-local email file hidden month number password
-               range radio search select tel text textarea time url week)
+               range radio search select tel text textarea textarea-array time url week)
 
   attr :field, Phoenix.HTML.FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -354,16 +354,36 @@ defmodule TeiserverWeb.CoreComponents do
     ~H"""
     <div>
       <.label :if={@label} for={@id}>{@label}</.label>
-      <br />
+      <br :if={@label} />
       <textarea
         id={@id || @name}
         name={@name}
         class={[
-          "border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
+          "form-control border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
           @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
         ]}
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
+  def input(%{type: "textarea-array"} = assigns) do
+    ~H"""
+    <div phx-feedback-for={@name}>
+      <.label :if={@label} for={@id}>{@label}</.label>
+      <br :if={@label} />
+      <textarea
+        id={@id || @name}
+        name={@name}
+        class={[
+          "form-control phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
+          "border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
+          @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
+        ]}
+        {@rest}
+      ><%= Phoenix.HTML.Form.normalize_value("textarea", (@value || []) |> Enum.join("\n")) %></textarea>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """

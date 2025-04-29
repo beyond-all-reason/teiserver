@@ -51,6 +51,9 @@
               <.tag_badge :for={tag <- post.tags} tag={tag} />
             </div>
             <h5>
+              <span :if={post.poll_choices && not Enum.empty?(post.poll_choices)} class="me-2">
+                <Fontawesome.icon icon="square-poll-horizontal" style="solid" />
+              </span>
               {post.title} &nbsp;&nbsp;&nbsp;&nbsp;
               <span style={"color: #{post.poster.colour};"}>
                 <Fontawesome.icon icon={post.poster.icon} style="solid" />
@@ -60,7 +63,9 @@
             Posted at {date_to_str(post.inserted_at, format: :ymd_hms)}
             <br /><br />
 
-            {post.summary}
+            <div class="blog-post-content">
+              {post.summary}
+            </div>
             <br /><br />
             <em>Click for more details</em>
 

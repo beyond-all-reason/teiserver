@@ -53,6 +53,16 @@ defmodule TeiserverWeb.MicroblogComponents do
       >
         Tags
       </.sub_menu_button>
+
+      <.sub_menu_button
+        :if={allow?(@current_user, "Server")}
+        bsname={@view_colour}
+        icon="fa-upload"
+        active={@active == "uplaods"}
+        url={~p"/microblog/admin/uploads"}
+      >
+        Uploads
+      </.sub_menu_button>
     </div>
     """
   end
@@ -82,7 +92,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       {Map.get(@post, :contents, "")
       |> String.split("\n\n")
       |> hd
-      |> Earmark.as_html!()
+      |> MDEx.to_html!()
       |> Phoenix.HTML.raw()}
       <br />
     </div>
@@ -106,7 +116,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       <h4>
         {Map.get(@post, :title, "")} - {TimexHelper.date_to_str(Timex.now(), :hms_or_ymd)}
       </h4>
-      {Map.get(@post, :contents, "") |> Earmark.as_html!() |> Phoenix.HTML.raw()}
+      {Map.get(@post, :contents, "") |> MDEx.to_html!() |> Phoenix.HTML.raw()}
       <br />
     </div>
     """
@@ -141,6 +151,71 @@ defmodule TeiserverWeb.MicroblogComponents do
       <Fontawesome.icon icon={@tag.icon} style="solid" />
       {@tag.name}
     </span>
+    """
+  end
+
+  @doc """
+  <TeiserverWeb.MicroblogComponents.poll_result post={@post} />
+  """
+  attr :post, :map, required: true
+
+  def poll_result(assigns) do
+    # This allows us to show empty results even in the event of the cache being empty (e.g. there are no poll responses yet)
+    responses =
+      if assigns[:post].poll_result_cache do
+        assigns[:post].poll_result_cache
+        |> Enum.to_list()
+        |> Enum.sort_by(fn {_, v} -> v end, &>=/2)
+      else
+        assigns[:post].poll_choices
+        |> Enum.map(fn v -> {v, 0} end)
+      end
+
+    assigns =
+      assigns
+      |> assign(:responses, responses)
+
+    ~H"""
+    <div>
+      <div :for={{choice, result} <- @responses}>
+        {choice} - {result}
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  <TeiserverWeb.MicroblogComponents.poll_response post={@post} response={@response} />
+  Don't forget to implement
+    handle_event("poll-choice", %{"choice" => choice}, socket)
+  """
+  attr :post, :map, required: true
+  attr :response, :map
+
+  def poll_response(assigns) do
+    selected =
+      if assigns[:response] do
+        assigns[:response].response
+      else
+        nil
+      end
+
+    assigns =
+      assigns
+      |> assign(:selected, selected)
+
+    ~H"""
+    <div>
+      <h4>Vote in the poll</h4>
+      <div
+        :for={choice <- @post.poll_choices}
+        phx-click="poll-choice"
+        phx-value-choice={choice}
+        class={"btn btn-sm #{if @selected == choice, do: "btn-primary", else: "btn-outline-primary"} me-2"}
+      >
+        {choice}
+      </div>
+    </div>
     """
   end
 end

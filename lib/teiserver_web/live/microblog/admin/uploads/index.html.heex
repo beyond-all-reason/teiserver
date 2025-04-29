@@ -1,0 +1,23 @@
+<TeiserverWeb.MicroblogComponents.sub_menu
+  active="uploads"
+  current_user={@current_user}
+  view_colour={@view_colour}
+/>
+
+<.table id="uploads-table" rows={@streams.user_uploads} table_class="table-sm table-hover">
+  <:col :let={{_id, upload}} label="">
+    <a href={~p"/microblog/upload/#{upload.id}"}>
+      <img src={~p"/microblog/upload/#{upload.id}"} style="max-width: 150px; max-height: 150px;" />
+    </a>
+  </:col>
+  <:col :let={{_id, upload}} label="Code">
+    <input type="text" value={"![image](/microblog/upload/#{upload.id})"} class="form-control" />
+  </:col>
+  <:col :let={{_id, upload}} label="Type">{upload.type}</:col>
+  <:col :let={{_id, upload}} label="Size">{upload.file_size}</:col>
+  <:action :let={{_id, upload}}>
+    <div class="btn btn-danger" phx-click="delete" phx-value-id={upload.id}>
+      <Fontawesome.icon icon="trash" style="solid" /> Delete
+    </div>
+  </:action>
+</.table>

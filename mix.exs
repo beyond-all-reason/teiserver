@@ -103,7 +103,7 @@ defmodule Teiserver.MixProject do
       {:cowboy, "~> 2.9"},
       {:statistics, "~> 0.6.2"},
       {:csv, "~> 2.4"},
-      {:earmark, "~> 1.4"},
+      {:mdex, "~> 0.2"},
       {:ranch, "~> 1.8"},
       {:horde, "~> 0.9"},
       {:etop, "~> 0.7.0"},
