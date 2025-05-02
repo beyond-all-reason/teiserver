@@ -15,6 +15,7 @@ defmodule Teiserver.Party.Server do
           # versionning of the state to avoid races between call and cast
           version: integer(),
           id: id(),
+          pid: pid(),
           members: [%{id: T.userid(), joined_at: DateTime.t(), mon_ref: reference()}],
           invited: [
             %{
@@ -116,6 +117,7 @@ defmodule Teiserver.Party.Server do
     state = %{
       version: 0,
       id: party_id,
+      pid: self(),
       members: add_member([], user_id),
       invited: []
     }

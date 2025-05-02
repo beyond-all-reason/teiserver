@@ -338,6 +338,35 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       Tachyon.disconnect!(invited.client)
       assert {:error, :timeout} == Tachyon.recv_message(ctx.client)
     end
+
+    test "last member leaving notifies invited", ctx do
+      invited = setup_client()
+      Tachyon.invite_to_party!(ctx.client, invited.user.id)
+      assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(invited.client)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+
+      assert %{"status" => "success"} = Tachyon.leave_party!(ctx.client)
+      assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(invited.client)
+    end
+  end
+
+  test "handle party server going down" do
+    ctx1 = setup_client()
+
+    assert %{"status" => "success", "data" => %{"partyId" => party_id}} =
+             Tachyon.create_party!(ctx1.client)
+
+    ctx2 = setup_client()
+    Polling.poll_until_some(fn -> Teiserver.Party.lookup(party_id) end)
+
+    Tachyon.invite_to_party!(ctx1.client, ctx2.user.id)
+    assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(ctx2.client)
+    assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx1.client)
+
+    Process.exit(Teiserver.Party.lookup(party_id), :kill)
+
+    assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(ctx1.client)
+    assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(ctx2.client)
   end
 
   describe "self event" do

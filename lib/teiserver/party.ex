@@ -15,13 +15,13 @@ defmodule Teiserver.Party do
   @type id :: Party.Server.id()
   @type state :: Party.Server.state()
 
-  @spec create_party(T.userid()) :: {:ok, id()} | {:error, reason :: term()}
+  @spec create_party(T.userid()) :: {:ok, id(), pid()} | {:error, reason :: term()}
   def create_party(user_id) do
     party_id = Party.Server.gen_party_id()
 
     case Party.Supervisor.start_party(party_id, user_id) do
-      {:ok, _pid} -> {:ok, party_id}
-      {:ok, _pid, _info} -> {:ok, party_id}
+      {:ok, pid} -> {:ok, party_id, pid}
+      {:ok, pid, _info} -> {:ok, party_id, pid}
       :ignore -> {:error, :ignore}
       {:error, reason} -> {:error, reason}
     end

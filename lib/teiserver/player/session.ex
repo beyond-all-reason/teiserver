@@ -64,6 +64,7 @@ defmodule Teiserver.Player.Session do
           conn_pid: pid() | nil,
           matchmaking: matchmaking_state(),
           messaging_state: messaging_state(),
+          party: party_state(),
           user_subscriptions: MapSet.t(T.userid())
         }
 
@@ -522,8 +523,11 @@ defmodule Teiserver.Player.Session do
       {:reply, {:error, :already_in_party}, state}
     else
       case Party.create_party(state.user.id) do
-        {:ok, party_id} ->
-          state = put_in(state.party.current_party, party_id)
+        {:ok, party_id, pid} ->
+          state =
+            state
+            |> put_in([:party, :current_party], party_id)
+            |> Map.update!(:monitors, &MC.monitor(&1, pid, :current_party))
 
           {:reply, {:ok, party_id}, state}
 
@@ -541,9 +545,19 @@ defmodule Teiserver.Player.Session do
     party_id = state.party.current_party
 
     case Teiserver.Party.leave_party(state.party.current_party, state.user.id) do
-      :ok -> {:reply, :ok, put_in(state.party.current_party, nil)}
-      {:error, :not_a_member} -> {:reply, :ok, %{state | party: initial_party_state()}}
-      {:error, reason} -> {:reply, {:error, {party_id, reason}}, state}
+      :ok ->
+        state =
+          state
+          |> put_in([:party, :current_party], nil)
+          |> Map.update!(:monitors, &MC.demonitor_by_val(&1, :current_party))
+
+        {:reply, :ok, state}
+
+      {:error, :not_a_member} ->
+        {:reply, :ok, %{state | party: initial_party_state()}}
+
+      {:error, reason} ->
+        {:reply, {:error, {party_id, reason}}, state}
     end
   end
 
@@ -580,6 +594,10 @@ defmodule Teiserver.Player.Session do
           |> update_in([:party, :invited_to], fn invited ->
             [{party_state.version, party_state.id} | invited]
           end)
+          |> Map.update!(
+            :monitors,
+            &MC.monitor(&1, party_state.pid, {:invited_to_party, party_id})
+          )
 
         send_to_player!({:party, {:invited, party_state}}, state)
         {:reply, :ok, state}
@@ -919,6 +937,40 @@ defmodule Teiserver.Player.Session do
           %{matchmaking: {:pairing, %{paired_queue: _qid} = pairing_st}} ->
             state = leave_all_queues([pairing_st.paired_queue | pairing_st.frozen_queues], state)
             state = send_to_player({:matchmaking, {:cancelled, :server_error}}, state)
+            {:noreply, state}
+
+          _ ->
+            {:noreply, state}
+        end
+
+      :current_party ->
+        case state do
+          %{party: %{current_party: party_id}} ->
+            send_to_player!({:party, {:removed, party_id}}, state)
+
+            state =
+              Map.update!(state, :party, fn st ->
+                %{st | version: 0, current_party: nil}
+              end)
+
+            {:noreply, state}
+
+          _ ->
+            {:noreply, state}
+        end
+
+      {:invited_to_party, party_id} ->
+        case Enum.split_with(state.party.invited_to, fn {_version, p_id} ->
+               p_id == party_id
+             end) do
+          {[_], rest} ->
+            send_to_player!({:party, {:removed, party_id}}, state)
+
+            state =
+              Map.update!(state, :party, fn st ->
+                %{st | invited_to: rest}
+              end)
+
             {:noreply, state}
 
           _ ->
