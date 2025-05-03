@@ -198,34 +198,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
   @impl true
   def handle_call({:join_queue, new_member}, _from, state) do
-    member_ids =
-      Enum.flat_map(state.members, fn m -> m.player_ids end)
-      |> MapSet.new()
+    case member_can_join_queue?(new_member, state) do
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
 
-    pairing_player_ids =
-      for {_, player_ids} <- state.pairings, p_id <- player_ids do
-        p_id
-      end
-      |> MapSet.new()
-
-    new_ids = MapSet.new(new_member.player_ids)
-    is_queuing = !MapSet.disjoint?(member_ids, new_ids)
-    is_pairing = !MapSet.disjoint?(pairing_player_ids, new_ids)
-
-    cond do
-      Enum.count(new_member.player_ids) > state.queue.team_size ->
-        {:reply, {:error, :too_many_players}, state}
-
-      Enum.empty?(state.queue.engines) ->
-        {:reply, {:error, :missing_engines}, state}
-
-      Enum.empty?(state.queue.games) ->
-        {:reply, {:error, :missing_games}, state}
-
-      Enum.empty?(state.queue.maps) ->
-        {:reply, {:error, :missing_maps}, state}
-
-      !is_queuing && !is_pairing ->
+      :ok ->
         monitors =
           Enum.reduce(new_member.player_ids, state.monitors, fn user_id, monitors ->
             pid = Teiserver.Player.lookup_connection(user_id)
@@ -239,9 +216,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
         {:reply, {:ok, self()},
          %{state | members: [new_member | state.members], monitors: monitors}}
-
-      true ->
-        {:reply, {:error, :already_queued}, state}
     end
   end
 
@@ -378,6 +352,43 @@ defmodule Teiserver.Matchmaking.QueueServer do
         monitors = demonitor_players(canceled_members, state.monitors)
         PairingRoom.cancel(room_pid, player_id)
         {:ok, %{state | pairings: other_pairings, monitors: monitors}}
+    end
+  end
+
+  @spec member_can_join_queue?(member(), state()) :: :ok | {:error, reason :: term()}
+  defp member_can_join_queue?(member, state) do
+    member_ids =
+      Enum.flat_map(state.members, fn m -> m.player_ids end)
+      |> MapSet.new()
+
+    pairing_player_ids =
+      for {_, player_ids} <- state.pairings, p_id <- player_ids do
+        p_id
+      end
+      |> MapSet.new()
+
+    new_ids = MapSet.new(member.player_ids)
+    is_queuing = !MapSet.disjoint?(member_ids, new_ids)
+    is_pairing = !MapSet.disjoint?(pairing_player_ids, new_ids)
+
+    cond do
+      Enum.count(member.player_ids) > state.queue.team_size ->
+        {:error, :too_many_players}
+
+      Enum.empty?(state.queue.engines) ->
+        {:error, :missing_engines}
+
+      Enum.empty?(state.queue.games) ->
+        {:error, :missing_games}
+
+      Enum.empty?(state.queue.maps) ->
+        {:error, :missing_maps}
+
+      !is_queuing && !is_pairing ->
+        :ok
+
+      true ->
+        {:error, :already_queued}
     end
   end
 
