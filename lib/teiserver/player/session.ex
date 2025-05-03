@@ -415,20 +415,8 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_call({:matchmaking, :leave_queues}, _from, state) do
-    case state.matchmaking do
-      :no_matchmaking ->
-        {:reply, {:error, :not_queued}, state}
-
-      {:searching, %{joined_queues: joined_queues}} ->
-        new_state = leave_all_queues(joined_queues, state)
-        {:reply, :ok, new_state}
-
-      {:pairing, %{room: _pid} = pairing_state} ->
-        monitors = MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
-        queues_to_leave = [pairing_state.paired_queue | pairing_state.frozen_queues]
-        new_state = leave_all_queues(queues_to_leave, state)
-        {:reply, :ok, %{new_state | monitors: monitors}}
-    end
+    {resp, state} = leave_matchmaking(state)
+    {:reply, resp, state}
   end
 
   def handle_call({:matchmaking, :ready}, _from, state) do
@@ -1030,6 +1018,23 @@ defmodule Teiserver.Player.Session do
         end)
 
         {:error, reason}
+    end
+  end
+
+  defp leave_matchmaking(state) do
+    case state.matchmaking do
+      :no_matchmaking ->
+        {{:error, :not_queued}, state}
+
+      {:searching, %{joined_queues: joined_queues}} ->
+        new_state = leave_all_queues(joined_queues, state)
+        {:ok, new_state}
+
+      {:pairing, %{room: _pid} = pairing_state} ->
+        monitors = MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
+        queues_to_leave = [pairing_state.paired_queue | pairing_state.frozen_queues]
+        new_state = leave_all_queues(queues_to_leave, state)
+        {:ok, %{new_state | monitors: monitors}}
     end
   end
 
