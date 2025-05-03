@@ -103,4 +103,11 @@ defmodule Teiserver.Player do
   """
   @spec party_notify_removed(T.userid(), Party.state()) :: :ok
   defdelegate party_notify_removed(user_id, party_state), to: Player.Session
+
+  @doc """
+  notify the player that the party it is currently a member of just entered
+  matchmaking and it should join the specified queues.
+  """
+  @spec party_notify_join_queues(T.userid(), [Matchmaking.queue_id()], Party.state()) :: :ok
+  defdelegate party_notify_join_queues(user_id, queues, party_state), to: Player.Session
 end

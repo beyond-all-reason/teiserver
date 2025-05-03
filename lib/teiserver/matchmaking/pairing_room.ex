@@ -170,7 +170,6 @@ defmodule Teiserver.Matchmaking.PairingRoom do
       {[], _} ->
         {:reply, {:error, :no_match}, state}
 
-      # TODO tachyon_mvp: if no more player is waiting, starts the game
       {[_], rest} ->
         max = state.queue.team_count * state.queue.team_size
         current = max - Enum.count(rest)

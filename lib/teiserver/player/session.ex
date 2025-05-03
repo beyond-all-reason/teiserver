@@ -337,6 +337,11 @@ defmodule Teiserver.Player.Session do
     GenServer.cast(via_tuple(user_id), {:party, {:removed, party_state}})
   end
 
+  @spec party_notify_join_queues(T.userid(), [Matchmaking.queue_id()], Party.state()) :: :ok
+  def party_notify_join_queues(user_id, queues, party_state) do
+    GenServer.cast(via_tuple(user_id), {:party, {:join_queues, queues, party_state}})
+  end
+
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
@@ -392,18 +397,23 @@ defmodule Teiserver.Player.Session do
   def handle_call({:matchmaking, {:join_queues, queue_ids}}, _from, state) do
     case state.matchmaking do
       :no_matchmaking ->
-        case join_all_queues(state.user.id, state.monitors, queue_ids, []) do
-          {:ok, monitors, joined} ->
-            new_mm_state = {:searching, %{joined_queues: joined}}
+        case state.party.current_party do
+          nil ->
+            case join_matchmaking(queue_ids, state) do
+              {:ok, new_state} ->
+                {:reply, :ok, new_state}
 
-            new_state =
-              Map.replace!(state, :matchmaking, new_mm_state)
-              |> Map.replace!(:monitors, monitors)
+              {:error, err} ->
+                {:reply, {:error, err}, state}
+            end
 
-            {:reply, :ok, new_state}
-
-          {:error, err} ->
-            {:reply, {:error, err}, state}
+          party_id ->
+            with :ok <- Party.join_queues(party_id, queue_ids),
+                 {:ok, new_state} <- join_matchmaking(queue_ids, state) do
+              {:reply, :ok, new_state}
+            else
+              {:error, reason} -> {:reply, {:error, reason}, state}
+            end
         end
 
       {:searching, _} ->
@@ -739,7 +749,6 @@ defmodule Teiserver.Player.Session do
         state = Map.replace!(state, :monitors, monitors)
 
         q_ids = [q_id | frozen_queues]
-        state = send_to_player({:matchmaking, :notify_lost}, state)
 
         case reason do
           :timeout when not readied ->
@@ -753,15 +762,10 @@ defmodule Teiserver.Player.Session do
             {:noreply, state}
 
           _ ->
-            case join_all_queues(state.user.id, state.monitors, q_ids, []) do
-              {:ok, monitors, joined} ->
-                new_mm_state = {:searching, %{joined_queues: joined}}
+            state = send_to_player({:matchmaking, :notify_lost}, state)
 
-                new_state =
-                  state
-                  |> Map.replace!(:matchmaking, new_mm_state)
-                  |> Map.replace!(:monitors, monitors)
-
+            case join_matchmaking(q_ids, state) do
+              {:ok, new_state} ->
                 {:noreply, new_state}
 
               {:error, _err} ->
@@ -874,6 +878,46 @@ defmodule Teiserver.Player.Session do
       end
 
     {:noreply, state}
+  end
+
+  def handle_cast({:party, {:join_queues, _queues, party_state}}, state)
+      when state.party.current_party != party_state.id,
+      do: {:noreply, state}
+
+  def handle_cast({:party, {:join_queues, queues, party_state}}, state) do
+    case state.matchmaking do
+      :no_matchmaking ->
+        case join_matchmaking(queues, state) do
+          {:ok, new_state} ->
+            new_state = put_in(new_state.party.version, party_state.version)
+            new_state = send_to_player({:matchmaking, {:queues_joined, queues}}, new_state)
+            {:noreply, new_state}
+
+          {:error, err} ->
+            Logger.error("party join queues #{inspect(queues)} but errored with #{inspect(err)}")
+            raise "todo: cancel the matchmaking in the party, don't crash the genserver"
+        end
+
+      {:searching, qs} ->
+        if MapSet.new(queues) == MapSet.new(qs.joined_queues) do
+          # this happens for the player that initiated the queuing in the party
+          # or when 2 players hit "queue" at the same time
+          {:noreply, state}
+        else
+          Logger.error(
+            "party join queues #{inspect(queues)} but already in matchmaking #{inspect(state.matchmaking)}"
+          )
+
+          {:stop, :crash, state}
+        end
+
+      _ ->
+        Logger.error(
+          "party join queues #{inspect(queues)} but already in matchmaking #{inspect(state.matchmaking)}"
+        )
+
+        {:stop, :crash, state}
+    end
   end
 
   @impl true
@@ -999,15 +1043,36 @@ defmodule Teiserver.Player.Session do
     Player.SessionRegistry.via_tuple(user_id)
   end
 
-  @spec join_all_queues(T.userid(), MC.t(), [Matchmaking.queue_id()], [Matchmaking.queue_id()]) ::
-          {:ok, MC.t(), [Matchmaking.queue_id()]} | Matchmaking.join_error()
-  defp join_all_queues(_user_id, monitors, [], joined), do: {:ok, monitors, joined}
+  # assume all checks have been done, and make the current player join
+  # the specified queues, modifying the state accordingly and returning it
+  defp join_matchmaking(queue_ids, state) do
+    case join_all_queues(state.user.id, state.party.current_party, state.monitors, queue_ids, []) do
+      {:ok, monitors, joined} ->
+        new_mm_state = {:searching, %{joined_queues: joined}}
 
-  defp join_all_queues(user_id, monitors, [to_join | rest], joined) do
-    case Matchmaking.join_queue(to_join, user_id) do
+        new_state =
+          state
+          |> Map.replace!(:matchmaking, new_mm_state)
+          |> Map.replace!(:monitors, monitors)
+
+        {:ok, new_state}
+
+      {:error, err} ->
+        {:error, err}
+    end
+  end
+
+  @spec join_all_queues(T.userid(), Party.id() | nil, MC.t(), [Matchmaking.queue_id()], [
+          Matchmaking.queue_id()
+        ]) ::
+          {:ok, MC.t(), [Matchmaking.queue_id()]} | Matchmaking.join_error()
+  defp join_all_queues(_user_id, _party_id, monitors, [], joined), do: {:ok, monitors, joined}
+
+  defp join_all_queues(user_id, party_id, monitors, [to_join | rest], joined) do
+    case Matchmaking.join_queue(to_join, user_id, party_id) do
       {:ok, queue_pid} ->
         monitors = MC.monitor(monitors, queue_pid, {:mm_queue, to_join})
-        join_all_queues(user_id, monitors, rest, [to_join | joined])
+        join_all_queues(user_id, party_id, monitors, rest, [to_join | joined])
 
       # the `queue` message is all or nothing, so if joining a later queue need
       # to leave the queues already joined
