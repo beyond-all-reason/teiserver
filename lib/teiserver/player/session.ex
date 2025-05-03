@@ -733,7 +733,7 @@ defmodule Teiserver.Player.Session do
         {:noreply, state}
 
       {:searching, _} ->
-        state = send_to_player({:matchmaking, :notify_lost}, state)
+        state = send_to_player({:matchmaking, {:cancelled, reason}}, state)
         {:noreply, state}
 
       {:pairing,
