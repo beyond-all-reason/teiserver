@@ -81,6 +81,21 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     assert MapSet.new(["matchmaking/cancelled", "party/updated"]) == cmd_ids
   end
 
+  test "invites get cancelled when entering matchmaking" do
+    {_party_id, [m1, m2], [invited]} = setup_party(2, 1)
+    [q1] = [setup_queue(2)]
+
+    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q1.id])
+
+    assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(invited.client)
+    assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(m1.client)
+
+    msgs = Tachyon.drain(m2.client)
+    assert Enum.count(msgs) == 2
+    events = Enum.map(msgs, fn msg -> msg["commandId"] end) |> MapSet.new()
+    assert events == MapSet.new(["party/updated", "matchmaking/queuesJoined"])
+  end
+
   # setup n members and m invited users to a party
   defp setup_party(n_members, n_invited) do
     # start = :erlang.monotonic_time(:millisecond)

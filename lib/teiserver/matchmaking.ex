@@ -11,6 +11,7 @@ defmodule Teiserver.Matchmaking do
   @type join_result :: Matchmaking.QueueServer.join_result()
   @type leave_result :: Matchmaking.QueueServer.leave_result()
   @type lost_reason :: Matchmaking.PairingRoom.lost_reason()
+  @type cancelled_reason :: Matchmaking.QueueServer.cancelled_reason()
   @type ready_data :: Matchmaking.PairingRoom.ready_data()
 
   @spec lookup_queue(Matchmaking.QueueServer.id()) :: pid() | nil

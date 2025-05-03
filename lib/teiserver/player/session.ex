@@ -168,9 +168,14 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:matchmaking, :ready})
   end
 
-  @spec matchmaking_lost(T.userid(), Matchmaking.lost_reason()) :: :ok
-  def matchmaking_lost(user_id, reason) do
+  @spec matchmaking_notify_lost(T.userid(), Matchmaking.lost_reason()) :: :ok
+  def matchmaking_notify_lost(user_id, reason) do
     GenServer.cast(via_tuple(user_id), {:matchmaking, {:lost, reason}})
+  end
+
+  @spec matchmaking_notify_cancelled(T.userid(), Matchmaking.cancelled_reason()) :: :ok
+  def matchmaking_notify_cancelled(user_id, reason) do
+    GenServer.cast(via_tuple(user_id), {:matchmaking, {:cancelled, reason}})
   end
 
   @spec matchmaking_found_update(T.userid(), non_neg_integer(), pid()) :: :ok
@@ -549,6 +554,14 @@ defmodule Teiserver.Player.Session do
           |> put_in([:party, :current_party], nil)
           |> Map.update!(:monitors, &MC.demonitor_by_val(&1, :current_party))
 
+        {left_mm?, state} =
+          leave_matchmaking(state)
+
+        state =
+          if left_mm? == :ok,
+            do: send_to_player({:matchmaking, {:cancelled, :party_user_left}}, state),
+            else: state
+
         {:reply, :ok, state}
 
       {:error, :not_a_member} ->
@@ -731,7 +744,7 @@ defmodule Teiserver.Player.Session do
         {:noreply, state}
 
       {:searching, _} ->
-        state = send_to_player({:matchmaking, {:cancelled, reason}}, state)
+        state = send_to_player({:matchmaking, {:notify_lost, reason}}, state)
         {:noreply, state}
 
       {:pairing,
@@ -753,11 +766,13 @@ defmodule Teiserver.Player.Session do
         case reason do
           :timeout when not readied ->
             state = leave_all_queues(q_ids, state)
+            state = send_to_player({:matchmaking, :notify_lost}, state)
             state = send_to_player({:matchmaking, {:cancelled, reason}}, state)
             {:noreply, state}
 
           {:server_error, _details} ->
             state = leave_all_queues(q_ids, state)
+            state = send_to_player({:matchmaking, :notify_lost}, state)
             state = send_to_player({:matchmaking, {:cancelled, reason}}, state)
             {:noreply, state}
 
@@ -773,6 +788,17 @@ defmodule Teiserver.Player.Session do
                 {:noreply, %{state | matchmaking: initial_matchmaking_state()}}
             end
         end
+    end
+  end
+
+  def handle_cast({:matchmaking, {:cancelled, reason}}, state) do
+    case leave_matchmaking(state) do
+      {:ok, state} ->
+        state = send_to_player({:matchmaking, {:cancelled, reason}}, state)
+        {:noreply, state}
+
+      _ ->
+        {:noreply, state}
     end
   end
 

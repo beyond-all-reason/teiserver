@@ -82,6 +82,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
           # wait time and join count
         }
 
+  @type cancelled_reason ::
+          :intentional | {:server_error, term()} | :party_user_left | :ready_timeout
+
   @spec default_settings() :: settings()
   def default_settings() do
     %{tick_interval_ms: 5_000, max_distance: 15, pairing_timeout: 20_000}
@@ -431,7 +434,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           "Party #{party_id} failed to join, waiting for #{inspect(pending.waiting_for)}"
         )
 
-        Enum.each(pending.joined, &Player.matchmaking_notify_lost(&1, :cancel))
+        Enum.each(pending.joined, &Player.matchmaking_notify_cancelled(&1, :party_user_left))
         state = %{state | pending_parties: Map.delete(state.pending_parties, party_id)}
         {:noreply, state}
     end
@@ -466,8 +469,10 @@ defmodule Teiserver.Matchmaking.QueueServer do
       {[to_remove], _} ->
         monitors = demonitor_players(to_remove.player_ids, state.monitors)
 
-        # TODO tachyon_mvp: need to let all the other players know that they are
-        # being removed from the queue
+        for p_id when p_id != player_id <- to_remove.player_ids do
+          Player.matchmaking_notify_cancelled(p_id, :party_user_left)
+        end
+
         {:ok, %{state | members: new_members, monitors: monitors}}
 
       # there is no case with multiple member to remove since this is prevented when adding to a queue
