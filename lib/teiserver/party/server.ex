@@ -137,9 +137,20 @@ defmodule Teiserver.Party.Server do
   @spec handle_call(term(), GenServer.from(), state()) :: term()
   def handle_call({:leave, user_id}, _from, state) do
     case Enum.split_with(state.members, fn %{id: mid} -> mid == user_id end) do
-      {[], _} -> {:reply, {:error, :not_a_member}, state}
-      {[_], []} -> {:stop, :normal, :ok, %{state | members: []} |> bump()}
-      {[_], new_members} -> {:reply, :ok, %{state | members: new_members} |> bump()}
+      {[], _} ->
+        {:reply, {:error, :not_a_member}, state}
+
+      {[_], []} ->
+        {:stop, :normal, :ok, %{state | members: []} |> bump()}
+
+      {[_], new_members} ->
+        new_state = %{state | members: new_members} |> bump()
+
+        for %{id: id} <- state.invited ++ state.members do
+          Player.party_notify_updated(id, new_state)
+        end
+
+        {:reply, :ok, new_state}
     end
   end
 
