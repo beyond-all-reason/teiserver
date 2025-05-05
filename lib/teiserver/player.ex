@@ -11,6 +11,7 @@ defmodule Teiserver.Player do
 
   alias Teiserver.Data.Types, as: T
   alias Teiserver.{Player, Matchmaking, Party}
+  alias Teiserver.Helpers.MonitorCollection, as: MC
 
   @doc """
   Returns the pid of the session registered with a given user id
@@ -39,6 +40,14 @@ defmodule Teiserver.Player do
     else
       Process.monitor(pid)
     end
+  end
+
+  @doc """
+  Same as `monitor_session` but meant to be used with a `Teiserver.Helpers.MonitorCollection`
+  """
+  def add_session_monitor(monitors, user_id, key) do
+    pid = lookup_session(user_id)
+    MC.monitor(monitors, pid, key)
   end
 
   @spec conn_state(T.userid()) :: Player.Session.conn_state()

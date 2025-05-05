@@ -369,6 +369,18 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
     assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(ctx2.client)
   end
 
+  test "handle session death" do
+    ctx = setup_client()
+    setup_party(ctx.client)
+    ctx2 = setup_client()
+    party_id = invite_and_accept([ctx.client], ctx2.client, ctx2.user.id)
+
+    Process.exit(Teiserver.Player.SessionRegistry.lookup(ctx2.user.id), :kill)
+    assert %{"commandId" => "party/updated", "data" => data} = Tachyon.recv_message!(ctx.client)
+    assert length(data["members"]) == 1
+    assert hd(data["members"])["userId"] == to_string(ctx.user.id)
+  end
+
   describe "self event" do
     test "has the correct data" do
       user = Tachyon.create_user()

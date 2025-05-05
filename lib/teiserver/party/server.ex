@@ -6,6 +6,7 @@ defmodule Teiserver.Party.Server do
   alias Teiserver.Party
   alias Teiserver.Player
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.MonitorCollection, as: MC
 
   use GenServer, restart: :transient
   alias Teiserver.Data.Types, as: T
@@ -16,12 +17,12 @@ defmodule Teiserver.Party.Server do
           version: integer(),
           id: id(),
           pid: pid(),
-          members: [%{id: T.userid(), joined_at: DateTime.t(), mon_ref: reference()}],
+          monitors: MC.t(),
+          members: [%{id: T.userid(), joined_at: DateTime.t()}],
           invited: [
             %{
               id: T.userid(),
               invited_at: DateTime.t(),
-              mon_ref: reference(),
               valid_until: DateTime.t(),
               timeout_ref: :timer.tref()
             }
@@ -114,13 +115,16 @@ defmodule Teiserver.Party.Server do
 
   @impl true
   def init({party_id, user_id}) do
-    state = %{
-      version: 0,
-      id: party_id,
-      pid: self(),
-      members: add_member([], user_id),
-      invited: []
-    }
+    state =
+      %{
+        version: 0,
+        id: party_id,
+        pid: self(),
+        monitors: MC.new(),
+        members: [],
+        invited: []
+      }
+      |> add_member(user_id)
 
     {:ok, state}
   end
@@ -157,12 +161,9 @@ defmodule Teiserver.Party.Server do
         valid_until = DateTime.add(DateTime.utc_now(), valid_duration, :second)
         tref = :timer.send_after(valid_duration * 1000, {:invite_timeout, user_id})
 
-        monitor = Player.monitor_session(user_id)
-
         invite = %{
           id: user_id,
           invited_at: DateTime.utc_now(),
-          mon_ref: monitor,
           valid_until: valid_until,
           timeout_ref: tref
         }
@@ -170,6 +171,9 @@ defmodule Teiserver.Party.Server do
         new_state =
           state
           |> Map.put(:invited, [invite | state.invited])
+          |> Map.update!(:monitors, fn m ->
+            Player.add_session_monitor(m, user_id, {:invite, user_id})
+          end)
           |> bump()
 
         # don't send the updated event to the newly invited player
@@ -186,12 +190,12 @@ defmodule Teiserver.Party.Server do
       {[], _} ->
         {:reply, {:error, :not_invited}, state}
 
-      {[invited], rest} ->
+      {[_invited], rest} ->
         state =
           state
           |> bump()
           |> Map.put(:invited, rest)
-          |> Map.update!(:members, &add_member(&1, user_id, invited.mon_ref))
+          |> add_member(user_id)
 
         notify_updated(state)
         {:reply, {:ok, state}, state}
@@ -204,11 +208,13 @@ defmodule Teiserver.Party.Server do
         {:reply, {:error, :not_invited}, state}
 
       {[invited], rest} ->
-        Process.demonitor(invited.mon_ref)
         :timer.cancel(invited.timeout_ref)
 
         state =
           state
+          |> Map.update!(:monitors, fn mc ->
+            MC.demonitor_by_val(mc, {:invite, user_id})
+          end)
           |> bump()
           |> Map.put(:invited, rest)
 
@@ -240,9 +246,13 @@ defmodule Teiserver.Party.Server do
       {_, {[], _}} ->
         {:reply, {:error, :invalid_target}, state}
 
-      {true, {[member], rest}} ->
-        Process.demonitor(member.mon_ref)
-        state = state |> bump() |> Map.put(:members, rest)
+      {true, {[_member], rest}} ->
+        state =
+          state
+          |> bump()
+          |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:member, target_id}))
+          |> Map.put(:members, rest)
+
         Player.party_notify_removed(target_id, state)
         notify_updated(state)
         {:reply, {:ok, state}, state}
@@ -251,21 +261,25 @@ defmodule Teiserver.Party.Server do
 
   @impl true
   def handle_info({:DOWN, ref, :process, _pid, _reason}, state) do
-    in_members = Enum.split_with(state.members, &(&1.mon_ref == ref))
-    in_invited = Enum.split_with(state.invited, &(&1.mon_ref == ref))
+    val = MC.get_val(state.monitors, ref)
+    state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
 
     state =
-      case {in_members, in_invited} do
-        {{[_], rest}, _} ->
-          Map.put(state, :members, rest)
-          |> notify_updated()
-
-        {_, {[_], rest}} ->
-          Map.put(state, :invited, rest)
-          |> notify_updated()
-
-        _ ->
+      case val do
+        nil ->
           state
+
+        {:invite, user_id} ->
+          Map.update!(state, :invited, fn invites ->
+            Enum.filter(invites, fn i -> i.id != user_id end)
+          end)
+          |> notify_updated()
+
+        {:member, user_id} ->
+          Map.update!(state, :members, fn members ->
+            Enum.filter(members, fn m -> m.id != user_id end)
+          end)
+          |> notify_updated()
       end
 
     {:noreply, state}
@@ -296,20 +310,35 @@ defmodule Teiserver.Party.Server do
 
   defp bump(state), do: Map.update!(state, :version, &(&1 + 1))
 
-  defp add_member(members, user_id) do
-    monitor = Player.monitor_session(user_id)
-    if monitor == nil, do: raise("member not connected")
-    add_member(members, user_id, monitor)
-  end
+  defp add_member(state, user_id) do
+    state =
+      state
+      |> Map.update!(:members, fn members ->
+        [%{id: user_id, joined_at: DateTime.utc_now()} | members]
+      end)
 
-  defp add_member(members, user_id, monitor) do
-    [%{id: user_id, joined_at: DateTime.utc_now(), mon_ref: monitor} | members]
+    case MC.get_ref(state.monitors, {:invite, user_id}) do
+      nil ->
+        Map.update!(state, :monitors, fn mc ->
+          Player.add_session_monitor(mc, user_id, {:member, user_id})
+        end)
+
+      _ref ->
+        Map.update!(state, :monitors, fn mc ->
+          MC.replace_val!(mc, {:invite, user_id}, {:member, user_id})
+        end)
+    end
   end
 
   defp cancel_invite_internal(invite, other_invites, state) do
-    Process.demonitor(invite.mon_ref)
     :timer.cancel(invite.timeout_ref)
-    state = state |> bump() |> Map.put(:invited, other_invites)
+
+    state =
+      state
+      |> bump()
+      |> Map.put(:invited, other_invites)
+      |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:invite, invite.id}))
+
     Player.party_notify_removed(invite.id, state)
     notify_updated(state)
     state
