@@ -75,8 +75,6 @@ defmodule Teiserver.Microblog.PollResponseLib do
     })
   end
 
-  defp broadcast_update_poll_response(value), do: value
-
   @doc """
   Deletes a poll_response.
 
