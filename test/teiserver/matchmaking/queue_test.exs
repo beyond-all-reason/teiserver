@@ -20,7 +20,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
 
     AssetFixtures.create_map(stg_attr(id))
 
-    {:ok, pid} =
+    pid =
       QueueServer.init_state(%{
         id: id,
         name: id,
@@ -29,7 +29,8 @@ defmodule Teiserver.Matchmaking.QueueTest do
         engines: ["spring", "recoil"],
         games: ["BAR test version", "BAR release version"]
       })
-      |> QueueServer.start_link()
+      |> QueueServer.child_spec()
+      |> ExUnit.Callbacks.start_link_supervised!()
 
     {:ok, user: user, queue_id: id, queue_pid: pid}
   end
