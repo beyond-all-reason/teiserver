@@ -1,8 +1,9 @@
 defmodule Teiserver.Asset.GameTest do
-  use Teiserver.DataCase, async: true
+  use Teiserver.DataCase
   alias Teiserver.Asset
   alias Teiserver.AssetFixtures
 
+  @moduletag :tachyon
   describe "game queries" do
     test "get" do
       AssetFixtures.create_game(%{name: "game1"})

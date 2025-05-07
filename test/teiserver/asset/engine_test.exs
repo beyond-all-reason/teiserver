@@ -1,8 +1,9 @@
 defmodule Teiserver.Asset.EngineTest do
-  use Teiserver.DataCase, async: true
+  use Teiserver.DataCase
   alias Teiserver.Asset
   alias Teiserver.AssetFixtures
 
+  @moduletag :tachyon
   describe "engine queries" do
     test "get" do
       AssetFixtures.create_engine(%{name: "engine1"})

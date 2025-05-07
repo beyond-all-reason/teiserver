@@ -1,6 +1,7 @@
 defmodule Teiserver.Matchmaking do
   alias Teiserver.Matchmaking
   alias Teiserver.Data.Types, as: T
+  require Logger
 
   @type queue :: Matchmaking.QueueServer.queue()
   @type queue_id :: Matchmaking.QueueServer.id()
@@ -67,5 +68,15 @@ defmodule Teiserver.Matchmaking do
   matchmaking state, for example when a new asset (game/engine) is set
   It is a bit brutal but simple
   """
-  defdelegate restart_queues(), to: Matchmaking.QueueSupervisor
+  def restart_queues() do
+    Logger.info("Restarting all matchmaking queues")
+
+    :ok =
+      Supervisor.terminate_child(Matchmaking.System, Matchmaking.QueueSupervisor)
+
+    {:ok, _pid} =
+      Supervisor.restart_child(Matchmaking.System, Matchmaking.QueueSupervisor)
+
+    :ok
+  end
 end
