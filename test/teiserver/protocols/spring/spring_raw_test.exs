@@ -91,8 +91,7 @@ defmodule Teiserver.SpringRawTest do
     user = UserCacheLib.get_user_by_name(username)
 
     assert accepted == "ACCEPTED #{username}",
-      message:
-        "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.password_hash}. Accepted message is #{accepted}"
+      message: "Bad password, gave X03MO1qnZdYdgyfeuILPmQ==. Accepted message is #{accepted}"
 
     commands =
       remainder
@@ -126,39 +125,6 @@ defmodule Teiserver.SpringRawTest do
     {:error, :closed} = :gen_tcp.recv(socket, 0, 1000)
   end
 
-  # Currently not active
-  # test "CONFIRMAGREEMENT", %{socket: socket} do
-  #   user = new_user()
-  #   Teiserver.Account.update_user_stat(user.id, %{"verification_code" => "123456"})
-  #   user = UserCacheLib.update_user(%{user | verified: false, roles: []}, persist: true)
-
-  #   query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
-  #   Ecto.Adapters.SQL.query(Repo, query, [])
-  #   Teiserver.Account.UserCacheLib.recache_user(user.id)
-  #   _ = _recv_raw(socket)
-
-  #   # If we try to login as them we should get a specific failure
-  #   _send_raw(
-  #     socket,
-  #     "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
-  #   )
-
-  #   reply = _recv_raw(socket)
-  #   assert reply =~ "AGREEMENT User agreement goes here.\nAGREEMENT \nAGREEMENTEND\n"
-
-  #   # Verify user - bad code
-  #   _send_raw(socket, "CONFIRMAGREEMENT 000000000\n")
-  #   reply = _recv_raw(socket)
-  #   assert reply =~ "DENIED Incorrect code\n"
-
-  #   # Verify user - good code
-  #   _send_raw(socket, "CONFIRMAGREEMENT 123456\n")
-  #   reply = _recv_raw(socket)
-  #   assert reply =~ "ACCEPTED #{user.name}\n"
-  #   assert reply =~ "MOTD Message of the day\n"
-  #   assert reply =~ "LOGININFOEND\n"
-  # end
-
   test "RESETPASSWORDREQUEST", %{socket: socket} do
     _ = _recv_raw(socket)
 
@@ -171,11 +137,6 @@ defmodule Teiserver.SpringRawTest do
     reply = _recv_raw(socket)
     assert reply == "OK cmd=https://localhost/password_reset\n"
   end
-
-  # TODO - Implement STLS and find a way to test it
-  # test "STLS" do
-  #   flunk("Not tested")
-  # end
 
   test "login flood protection", %{socket: socket} do
     user = new_user()

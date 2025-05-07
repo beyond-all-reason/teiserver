@@ -17,8 +17,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
     user =
       GeneralTestLib.make_user(%{
         "data" => %{
-          "roles" => ["Verified"],
-          "password_hash" => hash
+          "roles" => ["Verified"]
         }
       })
 

@@ -27,7 +27,7 @@ defmodule Teiserver.CacheUser do
   @spec keys() :: [atom]
   def keys(),
     do:
-      ~w(id name email inserted_at clan_id permissions colour icon smurf_of_id last_login_timex last_played last_logout roles discord_id)a
+      ~w(id name password email inserted_at clan_id permissions colour icon smurf_of_id last_login_timex last_played last_logout roles discord_id)a
 
   # This is the version of keys with the extra fields we're going to be moving from data to the object itself
   # def keys(),
@@ -37,7 +37,6 @@ defmodule Teiserver.CacheUser do
     :rank,
     :country,
     :bot,
-    :password_hash,
     :verified,
     :email_change_code,
     :last_login,
@@ -53,7 +52,6 @@ defmodule Teiserver.CacheUser do
     :roles,
     :print_client_messages,
     :print_server_messages,
-    :spring_password,
     :discord_id,
     :discord_dm_channel,
     :discord_dm_channel_id,
@@ -66,7 +64,6 @@ defmodule Teiserver.CacheUser do
     country: "??",
     moderator: false,
     bot: false,
-    password_hash: nil,
     verified: false,
     email_change_code: nil,
     last_login: nil,
@@ -81,7 +78,6 @@ defmodule Teiserver.CacheUser do
     roles: [],
     print_client_messages: false,
     print_server_messages: false,
-    spring_password: true,
     discord_id: nil,
     discord_dm_channel: nil,
     discord_dm_channel_id: nil,
@@ -107,20 +103,10 @@ defmodule Teiserver.CacheUser do
     |> Kernel.>(0)
   end
 
-  @spec encrypt_password(any) :: binary | {binary, binary, {any, any, any, any, any}}
-  def encrypt_password(password) do
-    Argon2.hash_pwd_salt(password)
-  end
-
-  @spec spring_md5_password(String.t()) :: String.t()
-  def spring_md5_password(password) do
-    :crypto.hash(:md5, password) |> Base.encode64()
-  end
-
   @spec user_register_params(String.t(), String.t(), String.t(), map()) :: map()
   def user_register_params(name, email, password, extra_data \\ %{}) do
     name = clean_name(name)
-    encrypted_password = encrypt_password(password)
+    encrypted_password = Account.encrypt_password(password)
 
     data =
       @default_data
@@ -137,7 +123,6 @@ defmodule Teiserver.CacheUser do
       data:
         data
         |> Map.merge(%{
-          "password_hash" => encrypted_password,
           "verified" => false
         })
         |> Map.merge(extra_data)
@@ -146,7 +131,7 @@ defmodule Teiserver.CacheUser do
 
   def user_register_params_with_md5(name, email, md5_password, extra_data \\ %{}) do
     name = clean_name(name)
-    encrypted_password = encrypt_password(md5_password)
+    encrypted_password = Account.encrypt_password(md5_password)
 
     data =
       @default_data
@@ -163,7 +148,6 @@ defmodule Teiserver.CacheUser do
       data:
         data
         |> Map.merge(%{
-          "password_hash" => encrypted_password,
           "verified" => false
         })
         |> Map.merge(extra_data)
@@ -285,8 +269,6 @@ defmodule Teiserver.CacheUser do
         # Now add them to the cache
         user
         |> convert_user
-        |> Map.put(:password_hash, spring_md5_password(password))
-        |> Map.put(:spring_password, false)
         |> add_user
         |> update_user(persist: true)
 
@@ -373,10 +355,9 @@ defmodule Teiserver.CacheUser do
         host = get_user_by_id(bot_host_id)
 
         params =
-          user_register_params_with_md5(bot_name, host.email, host.password_hash, %{
+          user_register_params_with_md5(bot_name, host.email, host.password, %{
             "bot" => true,
             "verified" => true,
-            "password_hash" => host.password_hash,
             "roles" => ["Bot", "Verified"]
           })
           |> Map.merge(%{
@@ -736,11 +717,6 @@ defmodule Teiserver.CacheUser do
     :ok
   end
 
-  @spec test_password(String.t(), String.t()) :: boolean
-  def test_password(plain_password, encrypted_password) do
-    Argon2.verify_pass(plain_password, encrypted_password)
-  end
-
   @spec verify_user(T.user()) :: T.user()
   def verify_user(user) do
     Account.delete_user_stat_keys(user.id, ~w(verification_code))
@@ -958,7 +934,7 @@ defmodule Teiserver.CacheUser do
           Enum.member?(["", "0", nil], lobby_hash) == true and not is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
-          test_password(md5_password, user.password_hash) == false ->
+          Account.verify_md5_password(md5_password, user.password) == false ->
             if String.contains?(username, "@") do
               {:error,
                "Invalid password for username, check you are not using your email address as the name"}
@@ -1334,24 +1310,6 @@ defmodule Teiserver.CacheUser do
   def calculate_rank(userid) do
     method = Config.get_site_config_cache("profile.Rank method")
     calculate_rank(userid, method)
-  end
-
-  # Used to reset the spring password of the user when the site password is updated
-  def set_new_spring_password(userid, new_password) do
-    user = get_user_by_id(userid)
-
-    case user do
-      nil ->
-        nil
-
-      _ ->
-        md5_password = spring_md5_password(new_password)
-        encrypted_password = encrypt_password(md5_password)
-
-        update_user(%{user | password_hash: encrypted_password, verified: true},
-          persist: true
-        )
-    end
   end
 
   @spec allow?(T.userid() | T.user() | nil, String.t() | atom | [String.t()]) :: boolean()

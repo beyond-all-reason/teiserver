@@ -263,13 +263,13 @@ defmodule Teiserver.Account.UserLib do
     )
   end
 
-  def authenticate_user(conn, %User{} = user, plain_text_password) do
+  def authenticate_user(_conn, %User{} = user, plain_text_password) do
     verified_user =
-      if User.verify_password(plain_text_password, user.password) do
+      if Account.verify_plain_password(plain_text_password, user.password) do
         {:ok, user}
       else
         # Authentication failure handler
-        Account.spring_auth_check(conn, user, plain_text_password)
+        {:error, "Invalid credentials"}
       end
 
     with {:ok, user} <- verified_user,
