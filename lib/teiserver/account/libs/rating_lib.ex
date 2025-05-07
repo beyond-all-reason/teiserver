@@ -108,6 +108,16 @@ defmodule Teiserver.Account.RatingLib do
       order_by: [asc: ratings.uncertainty]
   end
 
+  def order_by(query, "Last updated new to old") do
+    from ratings in query,
+      order_by: [desc: ratings.last_updated]
+  end
+
+  def order_by(query, "Last updated old to new") do
+    from ratings in query,
+      order_by: [asc: ratings.last_updated]
+  end
+
   @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 

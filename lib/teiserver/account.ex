@@ -6,7 +6,7 @@ defmodule Teiserver.Account do
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub
   alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Config
+  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Account.UserLib
 
   @type t :: UserLib.t()
@@ -932,7 +932,7 @@ defmodule Teiserver.Account do
 
   def get_rating(user_id, rating_type_id)
       when is_integer(user_id) and is_integer(rating_type_id) do
-    get_rating(user_id, rating_type_id, Config.get_site_config_cache("rating.Season"))
+    get_rating(user_id, rating_type_id, MatchRatingLib.active_season())
   end
 
   def get_rating(user_id, rating_type_id, season)
@@ -952,7 +952,7 @@ defmodule Teiserver.Account do
 
   @spec get_player_highest_leaderboard_rating(T.userid()) :: number()
   def get_player_highest_leaderboard_rating(user_id) do
-    get_player_highest_leaderboard_rating(user_id, Config.get_site_config_cache("rating.Season"))
+    get_player_highest_leaderboard_rating(user_id, MatchRatingLib.active_season())
   end
 
   @spec get_player_highest_leaderboard_rating(T.userid(), integer()) :: number()
