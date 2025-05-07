@@ -170,12 +170,41 @@ defmodule Teiserver.Account.User do
     end
   end
 
+  def changeset(user, attrs, :password_md5) do
+    cond do
+      attrs["existing"] == nil or attrs["existing"] == Teiserver.Account.spring_md5_password("") ->
+        user
+        |> change_password(attrs)
+        |> add_error(
+          :password_confirmation,
+          "Please enter your existing password to change your password."
+        )
+
+      Teiserver.Account.verify_md5_password(attrs["existing"], user.password) == false ->
+        user
+        |> change_password(attrs)
+        |> add_error(:existing, "Incorrect password")
+
+      true ->
+        user
+        |> change_password(attrs)
+    end
+  end
+
   defp change_password(user, attrs) do
     user
     |> cast(attrs, [:password])
     |> validate_length(:password, min: 6)
     |> validate_confirmation(:password, message: "Does not match password")
-    |> put_password_hash()
+    |> put_md5_password_hash()
+  end
+
+  defp put_md5_password_hash(
+         %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
+       ) do
+    change(changeset,
+      password: Teiserver.Account.spring_md5_password(password) |> Argon2.hash_pwd_salt()
+    )
   end
 
   defp put_password_hash(

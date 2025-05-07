@@ -431,15 +431,12 @@ defmodule Teiserver.Protocols.SpringIn do
             reply(:servermsg, "Current password entered incorrectly", msg_id, state)
 
           true ->
-            encrypted_new_password = Account.encrypt_password(md5_new_password)
-            encrypted_old_password = Account.encrypt_password(md5_old_password)
-
             params = %{
-              existing: encrypted_old_password,
-              password: encrypted_new_password
+              existing: md5_old_password,
+              password: md5_new_password
             }
 
-            Account.update_user_password(state.user, params)
+            Account.update_user_md5_password(state.user, params)
 
             reply(
               :servermsg,
