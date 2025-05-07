@@ -222,8 +222,7 @@ defmodule TeiserverWeb.Admin.UserController do
           "ignored" => [],
           "roles" => ["Verified"],
           "bot" => user_params["bot"] == "true",
-          "moderator" => user_params["moderator"] == "true",
-          "password_hash" => "X03MO1qnZdYdgyfeuILPmQ=="
+          "moderator" => user_params["moderator"] == "true"
         }
       })
 

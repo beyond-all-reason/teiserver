@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Account.SetupController do
             Account.create_user(%{
               name: "root",
               email: "root@localhost",
-              password: true_key,
+              password: Account.spring_md5_password(true_key),
               permissions: ["Server", "Admin"],
               roles: ["Server", "Admin"],
               icon: "fa-solid fa-power-off",
