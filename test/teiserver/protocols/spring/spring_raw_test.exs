@@ -88,7 +88,6 @@ defmodule Teiserver.SpringRawTest do
 
     reply = _recv_until(socket)
     [accepted | remainder] = String.split(reply, "\n")
-    user = UserCacheLib.get_user_by_name(username)
 
     assert accepted == "ACCEPTED #{username}",
       message: "Bad password, gave X03MO1qnZdYdgyfeuILPmQ==. Accepted message is #{accepted}"

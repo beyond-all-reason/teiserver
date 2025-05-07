@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   def update_password(conn, %{"user" => user_params}) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
-    case Account.update_user_password(user, user_params) do
+    case Account.update_user_plain_password(user, user_params) do
       {:ok, _user} ->
         conn
         |> put_flash(:info, "Account password updated successfully.")
