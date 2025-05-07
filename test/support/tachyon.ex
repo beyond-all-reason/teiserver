@@ -4,7 +4,8 @@ defmodule Teiserver.Support.Tachyon do
 
   def tachyon_case_setup(tags) do
     if String.contains?(to_string(tags[:module]), "Tachyon") || tags[:tachyon] do
-      ExUnit.Callbacks.start_supervised!(Teiserver.Tachyon.System)
+      :ok = Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.Tachyon.System)
+      {:ok, _pid} = Supervisor.restart_child(Teiserver.Supervisor, Teiserver.Tachyon.System)
     end
   end
 

@@ -32,12 +32,9 @@ defmodule Teiserver.ServerCase do
     # all the tests that have side effects, this is a stopgap measure to avoid
     # more false failures.
     Teiserver.TeiserverTestLib.clear_all_con_caches()
+    Teiserver.Support.Tachyon.tachyon_case_setup(tags)
     Teiserver.DataCase.setup_sandbox(tags)
     Teiserver.Config.update_site_config("system.Use geoip", false)
-
-    unless tags[:async] do
-      ExUnit.Callbacks.start_supervised!(Teiserver.Tachyon.System)
-    end
 
     on_exit(&Teiserver.TeiserverTestLib.clear_all_con_caches/0)
     :ok
