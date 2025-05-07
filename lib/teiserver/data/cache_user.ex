@@ -103,32 +103,6 @@ defmodule Teiserver.CacheUser do
     |> Kernel.>(0)
   end
 
-  @spec user_register_params(String.t(), String.t(), String.t(), map()) :: map()
-  def user_register_params(name, email, password, extra_data \\ %{}) do
-    name = clean_name(name)
-    encrypted_password = Account.encrypt_password(password)
-
-    data =
-      @default_data
-      |> Map.new(fn {k, v} -> {to_string(k), v} end)
-
-    %{
-      name: name,
-      email: email,
-      password: encrypted_password,
-      colour: @default_colour,
-      icon: @default_icon,
-      roles: ["Verified"],
-      permissions: ["Verified"],
-      data:
-        data
-        |> Map.merge(%{
-          "verified" => false
-        })
-        |> Map.merge(extra_data)
-    }
-  end
-
   def user_register_params_with_md5(name, email, md5_password, extra_data \\ %{}) do
     name = clean_name(name)
     encrypted_password = Account.encrypt_password(md5_password)
@@ -152,55 +126,6 @@ defmodule Teiserver.CacheUser do
         })
         |> Map.merge(extra_data)
     }
-  end
-
-  @spec register_user(String.t(), String.t(), String.t()) :: :success | {:error, String.t()}
-  def register_user(name, email, password) do
-    name = String.trim(name)
-    email = String.trim(email)
-
-    max_username_length = Config.get_site_config_cache("teiserver.Username max length")
-
-    cond do
-      Config.get_site_config_cache("teiserver.Enable registrations") == false ->
-        {:error, "Registrations are currently disabled"}
-
-      WordLib.reserved_name?(name) ->
-        {:error, "That name is in restricted for use by the server, please choose another"}
-
-      WordLib.acceptable_name?(name) == false ->
-        {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
-
-      clean_name(name) |> String.length() > max_username_length ->
-        {:failure, "Max length #{max_username_length} characters"}
-
-      clean_name(name) != name ->
-        {:failure, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)"}
-
-      check_symbol_limit(name) ->
-        {:error, "Too many repeated symbols in name"}
-
-      get_user_by_name(name) ->
-        {:failure, "Username already taken"}
-
-      get_user_by_email(email) ->
-        {:failure, "Email already in use"}
-
-      valid_email?(email) == false ->
-        {:error, "Invalid email"}
-
-      valid_password?(password) == false ->
-        {:error, "Invalid password"}
-
-      true ->
-        case do_register_user(name, email, password) do
-          :ok ->
-            :success
-
-          :error ->
-            {:error, "Server error, please inform admin"}
-        end
-    end
   end
 
   @spec register_user_with_md5(String.t(), String.t(), String.t(), String.t()) ::
@@ -250,51 +175,6 @@ defmodule Teiserver.CacheUser do
           :error ->
             {:error, "Server error, please inform admin"}
         end
-    end
-  end
-
-  @spec do_register_user(String.t(), String.t(), String.t()) :: :ok | :error
-  defp do_register_user(name, email, password) do
-    name = String.trim(name)
-    email = String.trim(email)
-
-    params = user_register_params(name, email, password)
-
-    case Account.script_create_user(params) do
-      {:ok, user} ->
-        Account.update_user_stat(user.id, %{
-          "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string
-        })
-
-        # Now add them to the cache
-        user
-        |> convert_user
-        |> add_user
-        |> update_user(persist: true)
-
-        cond do
-          String.ends_with?(user.email, "@agents") ->
-            :ok
-
-          true ->
-            case EmailHelper.new_user(user) do
-              {:error, error} ->
-                Logger.error(
-                  "Error sending new user email - #{user.email} - #{Kernel.inspect(error)}"
-                )
-
-              :no_verify ->
-                verify_user(get_user_by_id(user.id))
-
-              :ok ->
-                :ok
-            end
-        end
-
-        :ok
-
-      {:error, _changeset} ->
-        :error
     end
   end
 

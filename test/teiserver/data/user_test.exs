@@ -42,7 +42,7 @@ defmodule Teiserver.Data.UserTest do
 
     assert result == {:error, "Invalid password"}
 
-    result = CacheUser.register_user("name", "name@email.e", "")
+    result = CacheUser.register_user_with_md5("name", "name@email.e", "")
     assert result == {:error, "Invalid password"}
   end
 
