@@ -14,7 +14,7 @@ defmodule Teiserver.Player.Session do
   require Logger
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Player, Matchmaking, Messaging, Account}
+  alias Teiserver.{Account, Matchmaking, Messaging, Party, Player}
   alias Teiserver.Helpers.BoundedQueue, as: BQ
   alias Phoenix.PubSub
 
@@ -45,6 +45,15 @@ defmodule Teiserver.Player.Session do
           # buffer per source, and the added complexity of having to limit
           # that total size
           buffer: BQ.t(Messaging.message())
+        }
+
+  @type party_state :: %{
+          # the last party state version gotten from the party through GenServer.call
+          # this is used to avoid races where the reply of the call would be processed
+          # before a message already in the mailbox
+          version: integer(),
+          current_party: Party.id(),
+          invited_to: [{integer(), Party.id()}]
         }
 
   @type state :: %{
@@ -79,7 +88,8 @@ defmodule Teiserver.Player.Session do
         subscribed?: false,
         buffer: BQ.new(@messaging_buffer_size)
       },
-      user_subscriptions: MapSet.new()
+      user_subscriptions: MapSet.new(),
+      party: initial_party_state()
     }
 
     broadcast_user_update!(user, :menu)
@@ -244,7 +254,8 @@ defmodule Teiserver.Player.Session do
   with another one. This is to avoid having the same player with several
   connections.
   """
-  @spec replace_connection(pid(), pid()) :: :ok | :died
+  @spec replace_connection(pid(), pid()) ::
+          {:ok, session_state :: %{party: party_state()}} | :died
   def replace_connection(sess_pid, new_conn_pid) do
     GenServer.call(sess_pid, {:replace, new_conn_pid})
   catch
@@ -267,6 +278,62 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(originator_id), {:user, {:unsubscribe_updates, user_ids}})
   end
 
+  @spec create_party(T.userid()) ::
+          {:ok, Party.id()} | {:error, :already_in_party} | {:error, reason :: term()}
+  def create_party(user_id) do
+    GenServer.call(via_tuple(user_id), {:party, :create})
+  end
+
+  @spec leave_party(T.userid()) :: :ok | {:error, :not_a_member} | {:error, reason :: term()}
+  def leave_party(user_id) do
+    GenServer.call(via_tuple(user_id), {:party, :leave})
+  end
+
+  @spec invite_to_party(T.userid(), T.userid()) ::
+          :ok | {:error, :not_in_a_party | :already_invited | :invalid_player | :timeout}
+  def invite_to_party(user_id, invited_user_id) do
+    GenServer.call(via_tuple(user_id), {:party, {:invite, invited_user_id}})
+  end
+
+  @spec accept_invite_to_party(T.userid(), Party.id()) ::
+          :ok | {:error, :not_in_a_party | :not_invited}
+  def accept_invite_to_party(user_id, party_id) do
+    GenServer.call(via_tuple(user_id), {:party, {:accept_invite, party_id}})
+  end
+
+  @spec decline_invite_to_party(T.userid(), Party.id()) ::
+          :ok | {:error, :not_in_a_party | :not_invited}
+  def decline_invite_to_party(user_id, party_id) do
+    GenServer.call(via_tuple(user_id), {:party, {:decline_invite, party_id}})
+  end
+
+  @spec cancel_invite_to_party(T.userid(), T.userid()) ::
+          :ok | {:error, :not_in_a_party | :not_invited}
+  def cancel_invite_to_party(user_id, invited_user_id) do
+    GenServer.call(via_tuple(user_id), {:party, {:cancel_invite, invited_user_id}})
+  end
+
+  @spec kick_party_member(actor_id :: T.userid(), target_id :: T.userid()) ::
+          :ok | {:error, :invalid_party | :invalid_target | :not_a_member}
+  def kick_party_member(actor_id, target_id) do
+    GenServer.call(via_tuple(actor_id), {:party, {:kick_player, target_id}})
+  end
+
+  @spec party_notify_invited(T.userid(), Party.state()) :: :ok
+  def party_notify_invited(user_id, party_state) do
+    GenServer.cast(via_tuple(user_id), {:party, {:invited, party_state}})
+  end
+
+  @spec party_notify_updated(T.userid(), Party.state()) :: :ok
+  def party_notify_updated(user_id, party_state) do
+    GenServer.cast(via_tuple(user_id), {:party, {:updated, party_state}})
+  end
+
+  @spec party_notify_removed(T.userid(), Party.state()) :: :ok
+  def party_notify_removed(user_id, party_state) do
+    GenServer.cast(via_tuple(user_id), {:party, {:removed, party_state}})
+  end
+
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
@@ -280,7 +347,18 @@ defmodule Teiserver.Player.Session do
     mon_ref = Process.monitor(new_conn_pid)
     Logger.info("session reused")
 
-    {:reply, :ok, %{state | conn_pid: new_conn_pid, mon_ref: mon_ref}}
+    {current_party, invited_to} = get_party_states(state.party)
+
+    party_state = %{
+      version: if(current_party == nil, do: nil, else: current_party.version),
+      current_party: if(current_party == nil, do: nil, else: current_party.id),
+      invited_to: Enum.map(invited_to, fn st -> {st.version, st.id} end)
+    }
+
+    new_state = %{state | conn_pid: new_conn_pid, mon_ref: mon_ref, party: party_state}
+
+    party = %{party: current_party, invited_to_parties: invited_to}
+    {:reply, {:ok, party}, new_state}
   end
 
   def handle_call(:conn_state, _from, state) do
@@ -432,6 +510,151 @@ defmodule Teiserver.Player.Session do
 
     new_subs = MapSet.difference(state.user_subscriptions, user_ids)
     {:reply, :ok, %{state | user_subscriptions: new_subs}}
+  end
+
+  def handle_call({:party, :create}, _from, state) do
+    if state.party.current_party != nil do
+      {:reply, {:error, :already_in_party}, state}
+    else
+      case Party.create_party(state.user.id) do
+        {:ok, party_id} ->
+          state = put_in(state.party.current_party, party_id)
+
+          {:reply, {:ok, party_id}, state}
+
+        {:error, reason} ->
+          {:reply, {:error, reason}, state}
+      end
+    end
+  end
+
+  def handle_call({:party, :leave}, _from, state)
+      when is_nil(state.party.current_party),
+      do: {:reply, {:error, :not_in_party}, state}
+
+  def handle_call({:party, :leave}, _from, state) do
+    party_id = state.party.current_party
+
+    case Teiserver.Party.leave_party(state.party.current_party, state.user.id) do
+      :ok -> {:reply, :ok, put_in(state.party.current_party, nil)}
+      {:error, :not_a_member} -> {:reply, :ok, %{state | party: initial_party_state()}}
+      {:error, reason} -> {:reply, {:error, {party_id, reason}}, state}
+    end
+  end
+
+  def handle_call({:party, {:invite, _}}, _from, state)
+      when is_nil(state.party.current_party),
+      do: {:reply, {:error, :not_in_party}, state}
+
+  def handle_call({:party, {:invite, user_id}}, _from, state) do
+    # go through the other session as well to ensure valid and connected player
+    msg = {:party, {:invite, state.party.current_party, user_id}}
+
+    try do
+      case GenServer.call(via_tuple(user_id), msg) do
+        :ok -> {:reply, :ok, state}
+        {:error, reason} -> {:reply, {:error, reason}, state}
+      end
+
+      # it is very unlikely that both sessions will call each other at the same time
+      # but if that happens, they will deadlock then timeout
+      # catch that and error out, it's better than crashing the session
+    catch
+      :exit, {:timeout, _} -> {:reply, {:error, :timeout}}
+    end
+  catch
+    :exit, {:noproc, _} ->
+      {:reply, {:error, :invalid_player}, state}
+  end
+
+  def handle_call({:party, {:invite, party_id, invited_id}}, _from, state) do
+    case Party.create_invite(party_id, invited_id) do
+      {:ok, party_state} ->
+        state =
+          state
+          |> update_in([:party, :invited_to], fn invited ->
+            [{party_state.version, party_state.id} | invited]
+          end)
+
+        send_to_player!({:party, {:invited, party_state}}, state)
+        {:reply, :ok, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:party, {:accept_invite, party_id}}, _from, state) do
+    case Party.accept_invite(party_id, state.user.id) do
+      {:ok, party_state} ->
+        state =
+          state
+          |> update_in([:party, :invited_to], fn invited ->
+            Enum.filter(invited, fn {_version, p_id} -> p_id != party_id end)
+          end)
+          |> put_in([:party, :current_party], party_state.id)
+          |> put_in([:party, :version], party_state.version)
+
+        {:reply, :ok, state}
+
+      {:error, _reason} = err ->
+        {:reply, err, state}
+    end
+  end
+
+  def handle_call({:party, {:decline_invite, party_id}}, _from, state) do
+    case Party.decline_invite(party_id, state.user.id) do
+      {:ok, party_state} ->
+        state =
+          state
+          |> update_in([:party, :invited_to], fn invited ->
+            Enum.filter(invited, fn {_version, p_id} -> p_id != party_id end)
+          end)
+          |> put_in([:party, :version], party_state.version)
+
+        {:reply, :ok, state}
+
+      {:error, _reason} = err ->
+        {:reply, err, state}
+    end
+  end
+
+  def handle_call({:party, {:cancel_invite, _invited_user_id}}, _from, state)
+      when state.party.current_party == nil do
+    {:reply, {:error, :not_in_party}, state}
+  end
+
+  def handle_call({:party, {:cancel_invite, invited_user_id}}, _from, state) do
+    party_id = state.party.current_party
+
+    case Party.cancel_invite(party_id, invited_user_id) do
+      {:ok, party_state} ->
+        state = state |> put_in([:party, :version], party_state.version)
+
+        {:reply, :ok, state}
+
+      {:error, _reason} = err ->
+        {:reply, err, state}
+    end
+  end
+
+  def handle_call({:party, {:kick_player, _}}, _from, state)
+      when state.party.current_party == nil do
+    {:reply, {:error, :not_in_party}, state}
+  end
+
+  def handle_call({:party, {:kick_player, target_id}}, _from, state) do
+    party_id = state.party.current_party
+
+    case Party.kick_user(party_id, state.user.id, target_id) do
+      {:ok, party_state} ->
+        state = state |> put_in([:party, :version], party_state.version)
+
+        {:reply, :ok, state}
+
+      {:error, _} = err ->
+        {:reply, err, state}
+    end
   end
 
   @impl true
@@ -597,6 +820,39 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
+  def handle_cast({:party, {:updated, party_state}}, state) do
+    if (state.party.current_party == party_state.id && state.party.version <= party_state.version) ||
+         Enum.any?(state.party.invited_to, fn {v, id} ->
+           id == party_state.id && v <= party_state.version
+         end),
+       do: send_to_player!({:party, {:updated, party_state}}, state)
+
+    {:noreply, state}
+  end
+
+  def handle_cast({:party, {:removed, party_state}}, state) do
+    state =
+      if party_state.id == state.party.current_party do
+        send_to_player!({:party, {:removed, party_state.id}}, state)
+
+        Map.update!(state, :party, fn st ->
+          %{st | version: 0, current_party: nil}
+        end)
+      else
+        case Enum.split_with(state.party.invited_to, fn {_v, id} -> party_state.id == id end) do
+          # got a stray message, maybe the player already left
+          {[], _} ->
+            state
+
+          {[_], rest} ->
+            send_to_player!({:party, {:removed, party_state.id}}, state)
+            put_in(state.party.invited_to, rest)
+        end
+      end
+
+    {:noreply, state}
+  end
+
   @impl true
   def handle_info({:DOWN, ref, :process, _, _reason}, state) when ref == state.mon_ref do
     # we don't care about cancelling the timer if the player reconnects since reconnection
@@ -741,6 +997,21 @@ defmodule Teiserver.Player.Session do
     state
   end
 
+  @spec send_to_player!(term(), state()) :: :ok
+  defp send_to_player!(message, state) do
+    # this is the same as send_to_player, but doesn't persist the message if
+    # there's no connection at that time.
+    # This should be used for messages where there's another way to recover
+    # state without having to rely on an interupted stream of events.
+    # For example, player get full party state upon connection, so party events
+    # can be not persisted
+    if state.conn_pid != nil do
+      send(state.conn_pid, message)
+    end
+
+    :ok
+  end
+
   defp do_subscribe_updates(user) do
     topic = user_topic(user.id)
     :ok = PubSub.subscribe(Teiserver.PubSub, topic)
@@ -788,5 +1059,22 @@ defmodule Teiserver.Player.Session do
         state: state
       }
     )
+  end
+
+  defp initial_party_state(), do: %{version: 0, current_party: nil, invited_to: []}
+
+  # Gather the state of all relevant parties for the given session
+  defp get_party_states(party_state) do
+    ids = [party_state.current_party | Enum.map(party_state.invited_to, fn {_, id} -> id end)]
+
+    tasks =
+      Enum.map(ids, fn id ->
+        Task.async(fn ->
+          if id == nil, do: nil, else: Party.get_state(id)
+        end)
+      end)
+
+    [current | invited_to] = Task.await_many(tasks)
+    {current, invited_to}
   end
 end

@@ -40,6 +40,12 @@ defmodule TeiserverWeb.ConnCase do
 
     unless tags[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, {:shared, self()})
+
+      :ok =
+        Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.Config.SiteConfigTypes.Cache)
+
+      {:ok, _pid} =
+        Supervisor.restart_child(Teiserver.Supervisor, Teiserver.Config.SiteConfigTypes.Cache)
     end
 
     Teiserver.Support.Tachyon.tachyon_case_setup(tags)

@@ -18,8 +18,6 @@ defmodule Teiserver.Support.Tachyon do
   def setup_client() do
     user = create_user()
     %{client: client, token: token} = connect(user)
-
-    ExUnit.Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
     {:ok, user: user, client: client, token: token}
   end
 
@@ -330,6 +328,48 @@ defmodule Teiserver.Support.Tachyon do
 
   def unsubscribe_updates!(client, user_ids) do
     :ok = send_request(client, "user/unsubscribeUpdates", %{userIds: user_ids})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def create_party!(client) do
+    :ok = send_request(client, "party/create")
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def leave_party!(client) do
+    :ok = send_request(client, "party/leave")
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def invite_to_party!(client, user_id) do
+    :ok = send_request(client, "party/invite", %{userId: to_string(user_id)})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def accept_party_invite!(client, party_id) do
+    :ok = send_request(client, "party/acceptInvite", %{partyId: party_id})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def decline_party_invite!(client, party_id) do
+    :ok = send_request(client, "party/declineInvite", %{partyId: party_id})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def cancel_party_invite!(client, user_id) do
+    :ok = send_request(client, "party/cancelInvite", %{userId: to_string(user_id)})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def kick_player_from_party!(client, target_id) do
+    :ok = send_request(client, "party/kickMember", %{userId: to_string(target_id)})
     {:ok, resp} = recv_message(client)
     resp
   end

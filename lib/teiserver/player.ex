@@ -10,7 +10,7 @@ defmodule Teiserver.Player do
   """
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Player, Matchmaking}
+  alias Teiserver.{Player, Matchmaking, Party}
 
   @doc """
   Returns the pid of the session registered with a given user id
@@ -32,7 +32,7 @@ defmodule Teiserver.Player do
   """
   @spec monitor_session(T.userid()) :: reference() | nil
   def monitor_session(user_id) do
-    pid = lookup_connection(user_id)
+    pid = lookup_session(user_id)
 
     if is_nil(pid) do
       nil
@@ -77,4 +77,21 @@ defmodule Teiserver.Player do
   """
   @spec battle_start(T.userid(), Teiserver.Autohost.start_response()) :: :ok
   defdelegate battle_start(user_id, battle_start_data), to: Player.Session
+
+  @doc """
+  Let the player know they've been invited to a party
+  """
+  defdelegate party_notify_invited(user_id, party_state), to: Player.Session
+
+  @doc """
+  Let the player know about the new state of a party they're a member of, or
+  have been invited to.
+  """
+  defdelegate party_notify_updated(user_id, party_state), to: Player.Session
+
+  @doc """
+  Let the player know that they are no longer invited/member of the party
+  """
+  @spec party_notify_removed(T.userid(), Party.state()) :: :ok
+  defdelegate party_notify_removed(user_id, party_state), to: Player.Session
 end

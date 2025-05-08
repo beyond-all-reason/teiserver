@@ -41,7 +41,8 @@ defmodule Teiserver.Player.TachyonHandler do
   @spec init(%{user: T.user()}) :: Handler.result()
   def init(initial_state) do
     # this is inside the process that maintain the connection
-    {:ok, session_pid} = setup_session(initial_state.user)
+    {:ok, session_pid, sess_state} = setup_session(initial_state.user)
+
     sess_monitor = Process.monitor(session_pid)
 
     state =
@@ -60,7 +61,8 @@ defmodule Teiserver.Player.TachyonHandler do
         clanId: user.clan_id,
         countryCode: user.country,
         status: :menu,
-        partyId: nil,
+        party: party_state_to_tachyon(sess_state.party),
+        invitedToParties: Enum.map(sess_state.invited_to_parties, &party_state_to_tachyon/1),
         friendIds: Enum.map(friends, fn %{userId: uid} -> uid end),
         outgoingFriendRequest: outgoing,
         incomingFriendRequest: incoming,
@@ -156,6 +158,21 @@ defmodule Teiserver.Player.TachyonHandler do
     }
 
     {:event, "user/updated", event, state}
+  end
+
+  def handle_info({:party, {:invited, party_state}}, state) do
+    event = %{party: party_state_to_tachyon(party_state)}
+    {:event, "party/invited", event, state}
+  end
+
+  def handle_info({:party, {:updated, party_state}}, state) do
+    event = party_state_to_tachyon(party_state)
+    {:event, "party/updated", event, state}
+  end
+
+  def handle_info({:party, {:removed, party_id}}, state) do
+    event = %{partyId: party_id}
+    {:event, "party/removed", event, state}
   end
 
   def handle_info({:timeout, message_id}, state)
@@ -452,6 +469,88 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("party/create", "request", _message_id, _msg, state) do
+    case Player.Session.create_party(state.user.id) do
+      {:ok, party_id} ->
+        data = %{partyId: party_id}
+        {:response, data, state}
+
+      {:error, :already_in_party} ->
+        {:error_response, :invalid_request, "Already in a party", state}
+
+      {:error, reason} ->
+        {:error_response, :internal_error, to_string(reason), state}
+    end
+  end
+
+  def handle_command("party/leave", "request", _message_id, _msg, state) do
+    case Player.Session.leave_party(state.user.id) do
+      :ok -> {:response, state}
+      {:error, :not_in_party} -> {:error_response, :invalid_request, "Not in a party", state}
+      {:error, reason} -> {:error_response, :internal_error, to_string(reason), state}
+    end
+  end
+
+  def handle_command("party/invite", "request", _message_id, msg, state) do
+    raw_user_id = msg["data"]["userId"]
+
+    with {:ok, id} <- parse_user_id(raw_user_id),
+         :ok <- Player.Session.invite_to_party(state.user.id, id) do
+      {:response, state}
+    else
+      {:error, reason} when reason in [:invalid_player, :invalid_user] ->
+        {:error_response, :invalid_request,
+         "User with id #{raw_user_id} isn't valid or connected"}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("party/acceptInvite", "request", _message_id, msg, state) do
+    party_id = msg["data"]["partyId"]
+
+    case Player.Session.accept_invite_to_party(state.user.id, party_id) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("party/declineInvite", "request", _message_id, msg, state) do
+    party_id = msg["data"]["partyId"]
+
+    case Player.Session.decline_invite_to_party(state.user.id, party_id) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("party/cancelInvite", "request", _message_id, msg, state) do
+    with {:ok, user_id} <- parse_user_id(msg["data"]["userId"]),
+         :ok <- Player.Session.cancel_invite_to_party(state.user.id, user_id) do
+      {:response, state}
+    else
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("party/kickMember", "request", _message_id, msg, state) do
+    with {:ok, target_id} <- parse_user_id(msg["data"]["userId"]),
+         :ok <- Player.Session.kick_party_member(state.user.id, target_id) do
+      {:response, state}
+    else
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
@@ -468,7 +567,7 @@ defmodule Teiserver.Player.TachyonHandler do
     case Player.SessionSupervisor.start_session(user) do
       {:ok, session_pid} ->
         {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
-        {:ok, session_pid}
+        {:ok, session_pid, %{party: nil, invited_to_parties: []}}
 
       {:error, {:already_started, pid}} ->
         case Player.Session.replace_connection(pid, self()) do
@@ -479,9 +578,9 @@ defmodule Teiserver.Player.TachyonHandler do
           :died ->
             setup_session(user)
 
-          :ok ->
+          {:ok, sess_state} ->
             {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
-            {:ok, pid}
+            {:ok, pid, sess_state}
         end
     end
   end
@@ -579,5 +678,27 @@ defmodule Teiserver.Player.TachyonHandler do
       end)
 
     {friends, incoming, outgoing}
+  end
+
+  defp party_state_to_tachyon(nil), do: nil
+
+  defp party_state_to_tachyon(party_state) do
+    %{
+      id: party_state.id,
+      members:
+        Enum.map(party_state.members, fn m ->
+          %{
+            userId: to_string(m.id),
+            joinedAt: DateTime.to_unix(m.joined_at, :microsecond)
+          }
+        end),
+      invited:
+        Enum.map(party_state.invited, fn m ->
+          %{
+            userId: to_string(m.id),
+            invitedAt: DateTime.to_unix(m.invited_at)
+          }
+        end)
+    }
   end
 end

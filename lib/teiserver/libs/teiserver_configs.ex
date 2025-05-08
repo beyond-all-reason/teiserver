@@ -14,6 +14,8 @@ defmodule Teiserver.TeiserverConfigs do
     debugging_configs()
     profile_configs()
     rating_configs()
+    tachyon_configs()
+    :ok
   end
 
   @spec site_configs :: any
@@ -671,5 +673,10 @@ defmodule Teiserver.TeiserverConfigs do
       description: "Active season",
       default: 1
     })
+  end
+
+  defp tachyon_configs do
+    Teiserver.Party.setup_site_configs()
+    :ok
   end
 end

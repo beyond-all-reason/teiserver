@@ -1,0 +1,21 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/party/updated/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "PartyUpdatedEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "party/updated" },
+        "data": {
+            "$ref": "../../definitions/partyState.json",
+            "title": "PartyUpdatedEventData"
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}
