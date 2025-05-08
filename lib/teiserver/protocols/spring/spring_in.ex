@@ -423,17 +423,20 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("CHANGEPASSWORD", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, md5_old_password, md5_new_password] ->
-        case CacheUser.test_password(
+        case Account.verify_md5_password(
                md5_old_password,
-               state.user.password_hash
+               state.user.password
              ) do
           false ->
             reply(:servermsg, "Current password entered incorrectly", msg_id, state)
 
           true ->
-            encrypted_new_password = CacheUser.encrypt_password(md5_new_password)
-            new_user = %{state.user | password_hash: encrypted_new_password}
-            CacheUser.update_user(new_user, persist: true)
+            params = %{
+              existing: md5_old_password,
+              password: md5_new_password
+            }
+
+            Account.update_user_md5_password(state.user, params)
 
             reply(
               :servermsg,

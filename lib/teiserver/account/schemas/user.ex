@@ -95,29 +95,6 @@ defmodule Teiserver.Account.User do
     cast(struct, %{permissions: permissions}, [:permissions])
   end
 
-  def changeset(user, attrs, :self_create) do
-    attrs =
-      attrs
-      |> remove_whitespace([:email])
-
-    user
-    |> cast(attrs, [:name, :email])
-    |> validate_required([:name, :email])
-    |> unique_constraint(:email)
-    |> change_password(attrs)
-  end
-
-  def changeset(user, attrs, :limited) do
-    attrs =
-      attrs
-      |> remove_whitespace([:email])
-
-    user
-    |> cast(attrs, ~w(name email icon colour clan_id)a)
-    |> validate_required([:name, :email])
-    |> unique_constraint(:email)
-  end
-
   def changeset(user, attrs, :server_limited_update_user) do
     attrs =
       attrs
@@ -158,7 +135,7 @@ defmodule Teiserver.Account.User do
           "Please enter your password to change your account details."
         )
 
-      verify_any_password(attrs["password"], user.password) == false ->
+      Teiserver.Account.verify_plain_password(attrs["password"], user.password) == false ->
         user
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
@@ -182,7 +159,28 @@ defmodule Teiserver.Account.User do
           "Please enter your existing password to change your password."
         )
 
-      verify_any_password(attrs["existing"], user.password) == false ->
+      Teiserver.Account.verify_plain_password(attrs["existing"], user.password) == false ->
+        user
+        |> change_password(attrs)
+        |> add_error(:existing, "Incorrect password")
+
+      true ->
+        user
+        |> change_password(attrs)
+    end
+  end
+
+  def changeset(user, attrs, :password_md5) do
+    cond do
+      attrs["existing"] == nil or attrs["existing"] == Teiserver.Account.spring_md5_password("") ->
+        user
+        |> change_password(attrs)
+        |> add_error(
+          :password_confirmation,
+          "Please enter your existing password to change your password."
+        )
+
+      Teiserver.Account.verify_md5_password(attrs["existing"], user.password) == false ->
         user
         |> change_password(attrs)
         |> add_error(:existing, "Incorrect password")
@@ -198,7 +196,15 @@ defmodule Teiserver.Account.User do
     |> cast(attrs, [:password])
     |> validate_length(:password, min: 6)
     |> validate_confirmation(:password, message: "Does not match password")
-    |> put_password_hash()
+    |> put_md5_password_hash()
+  end
+
+  defp put_md5_password_hash(
+         %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
+       ) do
+    change(changeset,
+      password: Teiserver.Account.spring_md5_password(password) |> Argon2.hash_pwd_salt()
+    )
   end
 
   defp put_password_hash(
@@ -208,23 +214,6 @@ defmodule Teiserver.Account.User do
   end
 
   defp put_password_hash(changeset), do: changeset
-
-  @spec verify_password(String.t(), String.t()) :: boolean
-  def verify_password(plain_text_password, encrypted) do
-    Argon2.verify_pass(plain_text_password, encrypted)
-  end
-
-  @spec verify_md5_password(String.t(), String.t()) :: boolean
-  def verify_md5_password(plain_text_password, encrypted) do
-    Teiserver.CacheUser.spring_md5_password(plain_text_password)
-    |> verify_password(encrypted)
-  end
-
-  @spec verify_md5_password(String.t(), String.t()) :: boolean
-  def verify_any_password(plain_text_password, encrypted) do
-    verify_password(plain_text_password, encrypted) or
-      verify_md5_password(plain_text_password, encrypted)
-  end
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
   def authorize(_, conn, _), do: allow?(conn, "admin.user")
