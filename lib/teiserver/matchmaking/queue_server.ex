@@ -13,6 +13,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   alias Teiserver.Matchmaking.{QueueRegistry, PairingRoom}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Asset
+  alias Teiserver.Helpers.MonitorCollection, as: MC
 
   @typedoc """
   member of a queue. Holds of the information required to match members together.
@@ -64,9 +65,10 @@ defmodule Teiserver.Matchmaking.QueueServer do
           settings: settings(),
           members: [member()],
           # storing monitors to evict players that disconnect
-          monitors: [{reference(), T.userid()}],
+          # also store pairing rooms
+          monitors: MC.t(),
           # list of pairing rooms and which players are in it
-          pairings: [{pid(), reference(), [T.userid()]}]
+          pairings: [{pid(), [T.userid()]}]
 
           # TODO: add some bits for telemetry (see QueueWaitServer) like avg
           # wait time and join count
@@ -105,7 +107,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
       },
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
       members: Map.get(attrs, :members, []),
-      monitors: [],
+      monitors: MC.new(),
       pairings: []
     }
   end
@@ -201,7 +203,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
       |> MapSet.new()
 
     pairing_player_ids =
-      for {_, _, player_ids} <- state.pairings, p_id <- player_ids do
+      for {_, player_ids} <- state.pairings, p_id <- player_ids do
         p_id
       end
       |> MapSet.new()
@@ -225,13 +227,18 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
       !is_queuing && !is_pairing ->
         monitors =
-          Enum.map(new_member.player_ids, fn user_id ->
-            {Teiserver.Player.monitor_session(user_id), user_id}
+          Enum.reduce(new_member.player_ids, state.monitors, fn user_id, monitors ->
+            pid = Teiserver.Player.lookup_connection(user_id)
+
+            if pid != nil do
+              MC.monitor(monitors, pid, {:player, user_id})
+            else
+              monitors
+            end
           end)
-          |> Enum.filter(fn {x, _} -> x != nil end)
 
         {:reply, {:ok, self()},
-         %{state | members: [new_member | state.members], monitors: monitors ++ state.monitors}}
+         %{state | members: [new_member | state.members], monitors: monitors}}
 
       true ->
         {:reply, {:error, :already_queued}, state}
@@ -254,10 +261,12 @@ defmodule Teiserver.Matchmaking.QueueServer do
   Rejoining the queue is not handled here, players will do that on their end
   """
   def handle_call({:disband_pairing, room_pid}, _from, state) do
-    case Enum.split_with(state.pairings, fn {p, _, _} -> p == room_pid end) do
-      {[{_, ref, player_ids}], rest} ->
-        Process.demonitor(ref, [:flush])
-        monitors = demonitor_players(player_ids, state.monitors)
+    case Enum.split_with(state.pairings, fn {p, _} -> p == room_pid end) do
+      {[{_, player_ids}], rest} ->
+        monitors =
+          demonitor_players(player_ids, state.monitors)
+          |> MC.demonitor_by_val({:room, room_pid})
+
         {:reply, :ok, %{state | pairings: rest, monitors: monitors}}
 
       _ ->
@@ -267,35 +276,35 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
   @impl true
   def handle_info({:DOWN, ref, :process, _object, _reason}, state) do
-    case Enum.find(state.monitors, fn {mref, _} -> mref == ref end) do
+    val = MC.get_val(state.monitors, ref)
+    state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
+
+    case val do
       nil ->
-        case(Enum.find(state.pairings, fn {_, mref, _} -> mref == ref end)) do
-          nil ->
-            {:noreply, state}
+        {:noreply, state}
 
-          {room_pid, _, player_ids} ->
-            Logger.info(
-              "pairing room went down #{inspect(room_pid)} with players: #{inspect(player_ids)}"
-            )
+      {:player, player_id} ->
+        Logger.debug("Player #{player_id} went down, removing from queue")
 
-            new_state =
-              Enum.reduce(player_ids, state, fn p_id, st ->
-                case remove_player(p_id, st) do
-                  :not_queued -> st
-                  {:ok, st} -> st
-                end
-              end)
-
-            {:noreply, new_state}
-        end
-
-      {_ref, user_id} ->
-        Logger.debug("Player #{user_id} went down, removing from queue #{state.id}")
-
-        case remove_player(user_id, state) do
+        case remove_player(player_id, state) do
           :not_queued -> {:noreply, state}
           {:ok, state} -> {:noreply, state}
         end
+
+      {:room, room_pid, player_ids} ->
+        Logger.info(
+          "pairing room went down #{inspect(room_pid)} with players: #{inspect(player_ids)}"
+        )
+
+        new_state =
+          Enum.reduce(player_ids, state, fn p_id, st ->
+            case remove_player(p_id, st) do
+              :not_queued -> st
+              {:ok, st} -> st
+            end
+          end)
+
+        {:noreply, new_state}
     end
   end
 
@@ -307,20 +316,20 @@ defmodule Teiserver.Matchmaking.QueueServer do
           state
 
         {:match, matches} ->
-          pairings =
-            for teams <- matches do
+          {pairings, monitors} =
+            Enum.reduce(matches, {[], state.monitors}, fn teams, {ts, monitors} ->
               {:ok, pid} =
                 PairingRoom.start(state.id, state.queue, teams, state.settings.pairing_timeout)
-
-              ref = Process.monitor(pid)
 
               player_ids =
                 for team <- teams, member <- team, player_id <- member.player_ids do
                   player_id
                 end
 
-              {pid, ref, player_ids}
-            end
+              monitors = MC.monitor(monitors, pid, {:room, pid, player_ids})
+
+              {[{pid, player_ids} | ts], monitors}
+            end)
 
           matched_members =
             for teams <- matches, team <- teams, member <- team do
@@ -335,6 +344,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
           state
           |> Map.put(:members, new_members)
+          |> Map.replace!(:monitors, monitors)
           |> Map.update(:pairings, pairings, fn ps -> pairings ++ ps end)
       end
 
@@ -348,7 +358,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
       end)
 
     {pairing_to_remove, other_pairings} =
-      Enum.split_with(state.pairings, fn {_, _, members} ->
+      Enum.split_with(state.pairings, fn {_, members} ->
         Enum.member?(members, player_id)
       end)
 
@@ -364,7 +374,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
         {:ok, %{state | members: new_members, monitors: monitors}}
 
       # there is no case with multiple member to remove since this is prevented when adding to a queue
-      {_, [{room_pid, _, canceled_members}]} ->
+      {_, [{room_pid, canceled_members}]} ->
         monitors = demonitor_players(canceled_members, state.monitors)
         PairingRoom.cancel(room_pid, player_id)
         {:ok, %{state | pairings: other_pairings, monitors: monitors}}
@@ -421,12 +431,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
   end
 
   defp demonitor_players(player_ids, monitors) do
-    {refs_to_remove, refs_to_keep} =
-      Enum.split_with(monitors, fn {_r, player_id} ->
-        Enum.member?(player_ids, player_id)
-      end)
-
-    Enum.each(refs_to_remove, fn {r, _} -> Process.demonitor(r, [:flush]) end)
-    refs_to_keep
+    Enum.reduce(player_ids, monitors, fn player_id, monitors ->
+      MC.demonitor_by_val(monitors, {:player, player_id}, [:flush])
+    end)
   end
 end
