@@ -135,6 +135,22 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     assert MapSet.new(["matchmaking/cancelled", "party/updated"]) == commands
   end
 
+  test "queue crash reset party matchmaking state" do
+    {_party_id, [m1, m2], _} = setup_party(2, 0)
+    [q1, q2] = [setup_queue(2), setup_queue(3)]
+
+    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q1.id])
+    assert %{"commandId" => "matchmaking/queuesJoined"} = Tachyon.recv_message!(m2.client)
+
+    Process.exit(q1.pid, :exit)
+    assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(m1.client)
+    assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(m2.client)
+
+    # can still join the other queue
+    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q2.id])
+    assert %{"commandId" => "matchmaking/queuesJoined"} = Tachyon.recv_message!(m2.client)
+  end
+
   # setup n members and m invited users to a party
   defp setup_party(n_members, n_invited) do
     # start = :erlang.monotonic_time(:millisecond)

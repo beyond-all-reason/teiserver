@@ -389,6 +389,9 @@ defmodule Teiserver.Party.Server do
             Enum.filter(members, fn m -> m.id != user_id end)
           end)
           |> notify_updated()
+
+        {:queue, _qid} ->
+          %{state | matchmaking: nil}
       end
 
     {:noreply, state}
