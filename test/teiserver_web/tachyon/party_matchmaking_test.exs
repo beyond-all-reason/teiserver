@@ -107,6 +107,34 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
              Tachyon.invite_to_party!(m1.client, invited.user.id)
   end
 
+  test "leave matchmaking when creating a party" do
+    founder = setup_client()
+    [q1] = [setup_queue(2)]
+    assert %{"status" => "success"} = Tachyon.join_queues!(founder.client, [q1.id])
+
+    assert %{"status" => "success"} = Tachyon.create_party!(founder.client)
+
+    assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(founder.client)
+  end
+
+  test "leave matchmaking when entering a party" do
+    {party_id, [founder], _} = setup_party(1, 0)
+    [q1] = [setup_queue(2)]
+    to_invite = setup_client()
+
+    assert %{"status" => "success"} = Tachyon.join_queues!(to_invite.client, [q1.id])
+    assert %{"status" => "success"} = Tachyon.invite_to_party!(founder.client, to_invite.user.id)
+    assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(to_invite.client)
+    assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(founder.client)
+
+    assert %{"status" => "success"} = Tachyon.accept_party_invite!(to_invite.client, party_id)
+    assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(founder.client)
+
+    messages = Tachyon.drain(to_invite.client)
+    commands = Enum.map(messages, &Map.get(&1, "commandId")) |> MapSet.new()
+    assert MapSet.new(["matchmaking/cancelled", "party/updated"]) == commands
+  end
+
   # setup n members and m invited users to a party
   defp setup_party(n_members, n_invited) do
     # start = :erlang.monotonic_time(:millisecond)

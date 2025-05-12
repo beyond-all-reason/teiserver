@@ -521,22 +521,29 @@ defmodule Teiserver.Player.Session do
     {:reply, :ok, %{state | user_subscriptions: new_subs}}
   end
 
+  def handle_call({:party, :create}, _from, state)
+      when state.party.current_party != nil,
+      do: {:reply, {:error, :already_in_party}, state}
+
   def handle_call({:party, :create}, _from, state) do
-    if state.party.current_party != nil do
-      {:reply, {:error, :already_in_party}, state}
-    else
-      case Party.create_party(state.user.id) do
-        {:ok, party_id, pid} ->
-          state =
-            state
-            |> put_in([:party, :current_party], party_id)
-            |> Map.update!(:monitors, &MC.monitor(&1, pid, :current_party))
+    case Party.create_party(state.user.id) do
+      {:ok, party_id, pid} ->
+        state =
+          state
+          |> put_in([:party, :current_party], party_id)
+          |> Map.update!(:monitors, &MC.monitor(&1, pid, :current_party))
 
-          {:reply, {:ok, party_id}, state}
+        case leave_matchmaking(state) do
+          {:ok, state} ->
+            state = send_to_player({:matchmaking, {:cancelled, :intentional}}, state)
+            {:reply, {:ok, party_id}, state}
 
-        {:error, reason} ->
-          {:reply, {:error, reason}, state}
-      end
+          _ ->
+            {:reply, {:ok, party_id}, state}
+        end
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
     end
   end
 
@@ -629,7 +636,14 @@ defmodule Teiserver.Player.Session do
           |> put_in([:party, :current_party], party_state.id)
           |> put_in([:party, :version], party_state.version)
 
-        {:reply, :ok, state}
+        case leave_matchmaking(state) do
+          {:ok, state} ->
+            state = send_to_player({:matchmaking, {:cancelled, :intentional}}, state)
+            {:reply, :ok, state}
+
+          _ ->
+            {:reply, :ok, state}
+        end
 
       {:error, _reason} = err ->
         {:reply, err, state}
