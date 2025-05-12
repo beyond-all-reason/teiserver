@@ -96,6 +96,17 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     assert events == MapSet.new(["party/updated", "matchmaking/queuesJoined"])
   end
 
+  test "cannot invite when in matchmaking" do
+    {_party_id, [m1, _m2], _} = setup_party(2, 0)
+    [q1] = [setup_queue(2)]
+
+    invited = setup_client()
+    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q1.id])
+
+    assert %{"status" => "failed", "reason" => "invalid_request"} =
+             Tachyon.invite_to_party!(m1.client, invited.user.id)
+  end
+
   # setup n members and m invited users to a party
   defp setup_party(n_members, n_invited) do
     # start = :erlang.monotonic_time(:millisecond)

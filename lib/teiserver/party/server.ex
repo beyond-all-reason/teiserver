@@ -185,6 +185,10 @@ defmodule Teiserver.Party.Server do
     end
   end
 
+  def handle_call({:create_invite, _user_id}, _from, state)
+      when state.matchmaking != nil,
+      do: {:reply, {:error, :party_in_matchmaking}, state}
+
   def handle_call({:create_invite, user_id}, _from, state) do
     invited = Enum.find(state.invited, fn %{id: id} -> id == user_id end)
     member = Enum.find(state.members, fn %{id: id} -> id == user_id end)
