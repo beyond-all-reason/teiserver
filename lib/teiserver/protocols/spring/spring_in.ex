@@ -432,11 +432,12 @@ defmodule Teiserver.Protocols.SpringIn do
 
           true ->
             params = %{
-              existing: md5_old_password,
-              password: md5_new_password
+              "existing" => md5_old_password,
+              "password" => md5_new_password
             }
 
-            Account.update_user_md5_password(state.user, params)
+            Account.get_user!(state.userid)
+            |> Account.update_user_md5_password(params)
 
             reply(
               :servermsg,

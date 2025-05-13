@@ -23,31 +23,36 @@ defmodule Teiserver.SpringRawTest do
     _ = _recv_raw(socket)
     existing = new_user()
     name = "TestUser_raw_reg"
+    password = Account.spring_md5_password("password")
 
     # Failure first - bad name
-    _send_raw(socket, "REGISTER bad-name password raw_register_email@email.com\n")
+    _send_raw(socket, "REGISTER bad-name #{password} raw_register_email@email.com\n")
     reply = _recv_raw(socket)
 
     assert reply =~
              "REGISTRATIONDENIED Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)\n"
 
     # Failure first - existing name
-    _send_raw(socket, "REGISTER #{existing.name} password raw_register_email@email.com\n")
+    _send_raw(socket, "REGISTER #{existing.name} #{password} raw_register_email@email.com\n")
     reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONDENIED Username already taken\n"
 
     # Failure first - existing email
-    _send_raw(socket, "REGISTER new_name_here password #{existing.email}\n")
+    _send_raw(socket, "REGISTER new_name_here #{password} #{existing.email}\n")
     reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONDENIED Email already attached to a user (#{existing.email})\n"
 
     # Too long
-    _send_raw(socket, "REGISTER longnamelongnamelongname password raw_register_email@email.com\n")
+    _send_raw(
+      socket,
+      "REGISTER longnamelongnamelongname #{password} raw_register_email@email.com\n"
+    )
+
     reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONDENIED Max length 20 characters\n"
 
     # Success second
-    _send_raw(socket, "REGISTER #{name} password raw_register_email@email.com\n")
+    _send_raw(socket, "REGISTER #{name} #{password} raw_register_email@email.com\n")
     reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONACCEPTED\n"
     user = UserCacheLib.get_user_by_name(name)
@@ -61,21 +66,22 @@ defmodule Teiserver.SpringRawTest do
   @tag :needs_attention
   test "LOGIN", %{socket: socket} do
     username = "test_user_raw"
+    password = Account.spring_md5_password("password")
 
     # We expect to be greeted by a welcome message
     reply = _recv_raw(socket)
     assert reply == "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
 
-    _send_raw(socket, "REGISTER #{username} X03MO1qnZdYdgyfeuILPmQ== #{username}@email.e\n")
+    _send_raw(socket, "REGISTER #{username} #{password} #{username}@email.e\n")
     _ = _recv_raw(socket)
     user = UserCacheLib.get_user_by_name(username)
     assert user != nil
-    UserCacheLib.update_user(%{user | verified: true})
+    Teiserver.CacheUser.verify_user(user)
 
     # First try to login with a bad-case username
     _send_raw(
       socket,
-      "LOGIN #{String.upcase(username)} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
+      "LOGIN #{String.upcase(username)} #{password} 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
     reply = _recv_raw(socket)
@@ -83,14 +89,14 @@ defmodule Teiserver.SpringRawTest do
 
     _send_raw(
       socket,
-      "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
+      "LOGIN #{username} #{password} 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
     reply = _recv_until(socket)
     [accepted | remainder] = String.split(reply, "\n")
 
     assert accepted == "ACCEPTED #{username}",
-      message: "Bad password, gave X03MO1qnZdYdgyfeuILPmQ==. Accepted message is #{accepted}"
+      message: "Bad password. Accepted message is #{accepted}"
 
     commands =
       remainder
@@ -109,6 +115,7 @@ defmodule Teiserver.SpringRawTest do
              ""
            ] or
              commands == [
+               "SERVERMSG",
                "MOTD",
                "ADDUSER",
                "CLIENTSTATUS",

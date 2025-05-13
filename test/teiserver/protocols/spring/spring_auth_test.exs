@@ -82,20 +82,33 @@ defmodule Teiserver.SpringAuthTest do
     assert reply ==
              "SERVERMSG No incomming match for MYSTATUS with data '\"\"'. Userid #{user.id}\n"
 
+    old_plain_password = "password"
+    new_plain_password = "new_password"
+    old_md5_password = Account.spring_md5_password(old_plain_password)
+    new_md5_password = Account.spring_md5_password(new_plain_password)
+
     # Now change the password - incorrectly
-    _send_raw(socket, "CHANGEPASSWORD wrong_pass new_pass\n")
+    _send_raw(socket, "CHANGEPASSWORD wrong_pass #{new_md5_password}\n")
     reply = _recv_raw(socket)
     assert reply == "SERVERMSG Current password entered incorrectly\n"
-    user = UserCacheLib.get_user_by_name(user.name)
-    assert Account.verify_plain_password("X03MO1qnZdYdgyfeuILPmQ==", user.password)
+    user = Account.get_user(user.id)
+
+    assert Account.verify_plain_password(old_plain_password, user.password)
+    assert Account.verify_md5_password(old_md5_password, user.password)
+    refute Account.verify_plain_password(new_plain_password, user.password)
+    refute Account.verify_md5_password(new_md5_password, user.password)
 
     # Change it correctly
-    _send_raw(socket, "CHANGEPASSWORD X03MO1qnZdYdgyfeuILPmQ== new_pass\n")
+    _send_raw(socket, "CHANGEPASSWORD #{old_md5_password} #{new_md5_password}\n")
     :timer.sleep(1000)
     reply = _recv_raw(socket)
     assert reply == "SERVERMSG Password changed, you will need to use it next time you login\n"
-    user = UserCacheLib.get_user_by_name(user.name)
-    assert Account.verify_plain_password("new_pass", user.password)
+    user = Account.get_user(user.id)
+
+    assert Account.verify_plain_password(new_plain_password, user.password)
+    assert Account.verify_md5_password(new_md5_password, user.password)
+    refute Account.verify_plain_password(old_plain_password, user.password)
+    refute Account.verify_md5_password(old_md5_password, user.password)
 
     # Test no match
     _send_raw(socket, "CHANGEPASSWORD nomatchname\n")
