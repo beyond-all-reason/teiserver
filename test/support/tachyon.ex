@@ -295,6 +295,10 @@ defmodule Teiserver.Support.Tachyon do
     send_message!(client, message, %{type: "player", userId: to_string(player_id)})
   end
 
+  def send_party_message(client, message) do
+    send_message!(client, message, %{type: :party})
+  end
+
   def subscribe_messaging!(client, opts \\ []) do
     since = Keyword.get(opts, :since, %{type: "latest"})
     :ok = send_request(client, "messaging/subscribeReceived", %{since: since})

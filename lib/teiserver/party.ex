@@ -63,6 +63,10 @@ defmodule Teiserver.Party do
   @spec matchmaking_notify_cancel(id()) :: :ok
   defdelegate matchmaking_notify_cancel(party_id), to: Party.Server
 
+  @spec send_message(id(), T.userid(), String.t()) ::
+          :ok | {:error, :invalid_request, reason :: term()}
+  defdelegate send_message(party_id, from_id, msg_content), to: Party.Server
+
   def setup_site_configs() do
     Config.add_site_config_type(%{
       key: Party.Server.max_size_key(),

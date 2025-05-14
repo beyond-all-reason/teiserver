@@ -151,5 +151,38 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
       assert %{"commandId" => "messaging/received", "data" => %{"message" => "second message"}} =
                Tachyon.recv_message!(ctx.receiver_client)
     end
+
+    test "messaging in party", ctx do
+      {:ok, invited} = Tachyon.setup_client()
+      assert %{"status" => "success"} = Tachyon.subscribe_messaging!(ctx.receiver_client)
+      assert %{"status" => "success"} = Tachyon.subscribe_messaging!(invited[:client])
+
+      %{"status" => "success", "data" => %{"partyId" => party_id}} =
+        Tachyon.create_party!(ctx.sender_client)
+
+      %{"status" => "success"} = Tachyon.invite_to_party!(ctx.sender_client, ctx.receiver.id)
+      %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.sender_client)
+      %{"status" => "success"} = Tachyon.invite_to_party!(ctx.sender_client, invited[:user].id)
+      Tachyon.accept_party_invite!(ctx.receiver_client, party_id)
+      Tachyon.drain(ctx.sender_client)
+      Tachyon.drain(ctx.receiver_client)
+      Tachyon.drain(invited[:client])
+
+      assert %{"status" => "success"} =
+               Tachyon.send_party_message(ctx.sender_client, "hello party")
+
+      assert %{"commandId" => "messaging/received", "data" => data} =
+               Tachyon.recv_message!(ctx.receiver_client)
+
+      assert data["message"] == "hello party"
+
+      assert data["source"] == %{
+               "type" => "party",
+               "partyId" => party_id,
+               "userId" => to_string(ctx.sender.id)
+             }
+
+      assert {:error, :timeout} = Tachyon.recv_message(invited[:client])
+    end
   end
 end

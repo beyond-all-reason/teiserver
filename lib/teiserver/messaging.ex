@@ -8,9 +8,11 @@ defmodule Teiserver.Messaging do
   defdelegate new(message, source, marker), to: Message
 
   @spec send(message(), entity()) :: :ok | {:error, :invalid_recipient}
-  def send(message, {:player, player_id}) do
-    Teiserver.Player.Session.send_dm(player_id, message)
-  end
+  def send(message, {:player, player_id}),
+    do: Teiserver.Player.Session.send_dm(player_id, message)
+
+  def send(message, {:party, party_id, player_id}),
+    do: Teiserver.Party.send_message(party_id, player_id, message)
 
   def send(_, _), do: {:error, :invalid_recipient}
 end
