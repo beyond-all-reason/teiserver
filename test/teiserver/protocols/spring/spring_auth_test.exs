@@ -682,7 +682,7 @@ CLIENTS test_room #{user.name}\n"
       CacheUser.user_register_params_with_md5(
         "test_user_bad_id",
         "test_user_bad_id@email.com",
-        "X03MO1qnZdYdgyfeuILPmQ=="
+        Account.spring_md5_password("password")
       )
       |> Teiserver.Account.create_user()
 

@@ -36,7 +36,7 @@ defmodule Central.Helpers.GeneralTestLib do
         "permissions" => permissions,
         "password" =>
           params["password"] ||
-            Account.spring_md5_password("password") |> Account.encrypt_password(),
+            Account.spring_md5_password("password"),
         "password_confirmation" => params["password"] || "password",
         "data" => params["data"] || %{}
       })

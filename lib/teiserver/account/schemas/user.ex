@@ -61,6 +61,7 @@ defmodule Teiserver.Account.User do
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> put_md5_password_hash()
   end
 
   def changeset(user, attrs, :script) do
@@ -74,8 +75,9 @@ defmodule Teiserver.Account.User do
       attrs,
       ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login_timex last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
     )
-    |> validate_required([:name, :email, :permissions])
+    |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> put_md5_password_hash()
   end
 
   def changeset(struct, params, nil), do: changeset(struct, params)
@@ -109,6 +111,7 @@ defmodule Teiserver.Account.User do
     |> unique_constraint(:email)
   end
 
+  # Updating email or name from user update form requires plain text password confirmation
   def changeset(user, attrs, :user_form) do
     attrs =
       attrs
@@ -138,6 +141,9 @@ defmodule Teiserver.Account.User do
     end
   end
 
+  # Updating password from password change form
+  # New password is in plain text
+  # Requires existing password confirmation
   def changeset(user, attrs, :password) do
     cond do
       attrs["existing"] == nil or attrs["existing"] == "" ->
@@ -159,6 +165,9 @@ defmodule Teiserver.Account.User do
     end
   end
 
+  # Updating password from in game password change form
+  # New password is in Spring MD5 hash
+  # Requires existing password confirmation
   def changeset(user, attrs, :password_md5) do
     cond do
       attrs["existing"] == nil or attrs["existing"] == Teiserver.Account.spring_md5_password("") ->
@@ -178,6 +187,14 @@ defmodule Teiserver.Account.User do
         user
         |> change_md5_password(attrs)
     end
+  end
+
+  # Updating password from password reset form doesn't require existing password
+  def changeset(user, attrs, :password_reset) do
+    user
+    |> cast(attrs, [:password])
+    |> validate_length(:password, min: 6)
+    |> put_plain_password_hash()
   end
 
   defp change_plain_password(user, attrs) do

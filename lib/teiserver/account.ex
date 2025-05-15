@@ -68,6 +68,9 @@ defmodule Teiserver.Account do
   @spec script_update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
   defdelegate script_update_user(user, attrs), to: UserLib
 
+  @spec password_reset_update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate password_reset_update_user(user, attrs), to: UserLib
+
   @spec delete_user(User) :: {:ok, User} | {:error, Ecto.Changeset}
   defdelegate delete_user(user), to: UserLib
 

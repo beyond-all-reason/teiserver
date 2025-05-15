@@ -40,7 +40,7 @@ defmodule Teiserver.TeiserverTestLib do
           CacheUser.user_register_params_with_md5(
             name,
             "#{name}@email.com",
-            "X03MO1qnZdYdgyfeuILPmQ==",
+            Account.spring_md5_password("password"),
             params
           )
           |> Account.create_user()
@@ -86,6 +86,7 @@ defmodule Teiserver.TeiserverTestLib do
     _ = _recv_raw(socket)
 
     # Now do our login
+    # X03MO1qnZdYdgyfeuILPmQ== = Account.spring_md5_password("password")
     _send_raw(
       socket,
       "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"

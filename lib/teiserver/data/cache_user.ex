@@ -105,7 +105,6 @@ defmodule Teiserver.CacheUser do
 
   def user_register_params_with_md5(name, email, md5_password, extra_data \\ %{}) do
     name = clean_name(name)
-    encrypted_password = Account.encrypt_password(md5_password)
 
     data =
       @default_data
@@ -114,7 +113,7 @@ defmodule Teiserver.CacheUser do
     %{
       name: name,
       email: email,
-      password: encrypted_password,
+      password: md5_password,
       colour: @default_colour,
       icon: @default_icon,
       roles: ["Verified"],

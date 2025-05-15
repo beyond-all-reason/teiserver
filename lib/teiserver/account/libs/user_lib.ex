@@ -205,6 +205,15 @@ defmodule Teiserver.Account.UserLib do
     |> broadcast_update_user()
   end
 
+  def password_reset_update_user(%User{} = user, attrs) do
+    Account.recache_user(user.id)
+
+    user
+    |> User.changeset(attrs, :password_reset)
+    |> Repo.update()
+    |> broadcast_update_user()
+  end
+
   @doc """
   Deletes a user.
 
