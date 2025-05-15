@@ -110,6 +110,31 @@ defmodule Teiserver.MixProject do
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},
       {:nostrum, "~> 0.10"},
+
+      # gun is a transitive dependency of nostrum. The version 2.1.0 works,
+      # while the next one, 2.2.0 produces the following error when starting
+      # with the discord bridge enabled
+      # 2025-05-15 11:31:53.669 [error] pid=<0.4991.0>  ** State machine <0.4991.0> terminating
+      # ** Last event = {cast,{request,<0.4981.0>,#Ref<0.545224783.3581673475.65925>,
+      #                                <<"GET">>,<<"/api/v10/gateway/bot?">>,
+      #                                [{<<"authorization">>, <<...>>
+      #  {<<"user-agent">>,
+      #                                  <<"DiscordBot (https://github.com/kraigie/nostrum, 0.10.4)">>}],
+      #                                <<>>,infinity}}
+      # ** When server state  = {connected,
+      #                          {state,<0.4981.0>,
+      #                           {up,#Ref<0.545224783.3581673475.65884>},
+      #                           "discord.com",443,<<"https">>,"discord.com",443,[],
+      #                           #{retry => 0,connect_timeout => 5000,
+      #                             domain_lookup_timeout => 5000,
+      #                             tls_handshake_timeout => 5000,
+      #                             tls_opts =>
+      #                              [{verify,verify_peer},
+      #                               {cacerts,
+      #
+      # So pin this down
+      {:gun, "== 2.1.0"},
+
       # nostrum and hackney both depends on certifi, but they resolve to diffenrent
       # versions, which screws over elixir-ls.
       {:certifi, "~> 2.13.0", override: true},
