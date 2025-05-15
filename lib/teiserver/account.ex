@@ -53,9 +53,6 @@ defmodule Teiserver.Account do
   @spec update_user_plain_password(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
   defdelegate update_user_plain_password(user, attrs), to: UserLib
 
-  @spec update_user_md5_password(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
-  defdelegate update_user_md5_password(user, attrs), to: UserLib
-
   @spec update_user_user_form(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
   defdelegate update_user_user_form(user, attrs), to: UserLib
 

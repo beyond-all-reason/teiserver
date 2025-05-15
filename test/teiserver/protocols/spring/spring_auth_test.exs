@@ -81,52 +81,6 @@ defmodule Teiserver.SpringAuthTest do
 
     assert reply ==
              "SERVERMSG No incomming match for MYSTATUS with data '\"\"'. Userid #{user.id}\n"
-
-    old_plain_password = "password"
-    new_plain_password = "new_password"
-    old_md5_password = Account.spring_md5_password(old_plain_password)
-    new_md5_password = Account.spring_md5_password(new_plain_password)
-
-    # Now change the password - incorrectly
-    _send_raw(socket, "CHANGEPASSWORD wrong_pass #{new_md5_password}\n")
-    reply = _recv_raw(socket)
-    assert reply == "SERVERMSG Current password entered incorrectly\n"
-    user = Account.get_user(user.id)
-
-    assert Account.verify_plain_password(old_plain_password, user.password)
-    assert Account.verify_md5_password(old_md5_password, user.password)
-    refute Account.verify_plain_password(new_plain_password, user.password)
-    refute Account.verify_md5_password(new_md5_password, user.password)
-
-    # Change it correctly
-    _send_raw(socket, "CHANGEPASSWORD #{old_md5_password} #{new_md5_password}\n")
-    :timer.sleep(1000)
-    reply = _recv_raw(socket)
-    assert reply == "SERVERMSG Password changed, you will need to use it next time you login\n"
-    user = Account.get_user(user.id)
-
-    assert Account.verify_plain_password(new_plain_password, user.password)
-    assert Account.verify_md5_password(new_md5_password, user.password)
-    refute Account.verify_plain_password(old_plain_password, user.password)
-    refute Account.verify_md5_password(old_md5_password, user.password)
-
-    # Test no match
-    _send_raw(socket, "CHANGEPASSWORD nomatchname\n")
-    reply = _recv_raw(socket)
-
-    assert reply ==
-             "SERVERMSG No incomming match for CHANGEPASSWORD with data '\"nomatchname\"'. Userid #{user.id}\n"
-
-    # Now test spamming it, this was only added to test a warning showed up for the
-    # status flood protection code
-    # _send_raw(socket, "MYSTATUS 125\n")
-    # _ = _recv_raw(socket)
-
-    # _send_raw(socket, "MYSTATUS 126\n")
-    # _ = _recv_raw(socket)
-
-    # _send_raw(socket, "MYSTATUS 127\n")
-    # _ = _recv_raw(socket)
   end
 
   test "IGNORELIST, IGNORE, UNIGNORE, SAYPRIVATE", %{socket: socket1, user: user} do

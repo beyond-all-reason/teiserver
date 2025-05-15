@@ -165,30 +165,6 @@ defmodule Teiserver.Account.User do
     end
   end
 
-  # Updating password from in game password change form
-  # New password is in Spring MD5 hash
-  # Requires existing password confirmation
-  def changeset(user, attrs, :password_md5) do
-    cond do
-      attrs["existing"] == nil or attrs["existing"] == Teiserver.Account.spring_md5_password("") ->
-        user
-        |> change_md5_password(attrs)
-        |> add_error(
-          :password_confirmation,
-          "Please enter your existing password to change your password."
-        )
-
-      Teiserver.Account.verify_md5_password(attrs["existing"], user.password) == false ->
-        user
-        |> change_md5_password(attrs)
-        |> add_error(:existing, "Incorrect password")
-
-      true ->
-        user
-        |> change_md5_password(attrs)
-    end
-  end
-
   # Updating password from password reset form doesn't require existing password
   def changeset(user, attrs, :password_reset) do
     user
@@ -203,14 +179,6 @@ defmodule Teiserver.Account.User do
     |> validate_length(:password, min: 6)
     |> validate_confirmation(:password, message: "Does not match password")
     |> put_plain_password_hash()
-  end
-
-  defp change_md5_password(user, attrs) do
-    user
-    |> cast(attrs, [:password])
-    |> validate_length(:password, min: 6)
-    |> validate_confirmation(:password, message: "Does not match password")
-    |> put_md5_password_hash()
   end
 
   defp put_plain_password_hash(

@@ -160,15 +160,6 @@ defmodule Teiserver.Account.UserLib do
     |> broadcast_update_user()
   end
 
-  def update_user_md5_password(%User{} = user, attrs) do
-    Account.recache_user(user.id)
-
-    user
-    |> User.changeset(attrs, :password_md5)
-    |> Repo.update()
-    |> broadcast_update_user()
-  end
-
   def update_user_user_form(%User{} = user, attrs) do
     Account.recache_user(user.id)
 
