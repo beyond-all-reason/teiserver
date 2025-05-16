@@ -418,15 +418,6 @@ defmodule TeiserverWeb.Router do
     post("/ratings/distribution_graph", RatingController, :distribution_graph)
   end
 
-  # API
-  scope "/teiserver/api", TeiserverWeb.API do
-    pipe_through :api
-    post "/login", SessionController, :login
-    post "/register", SessionController, :register
-    post "/request_token", SessionController, :request_token
-    get "/request_token", SessionController, :request_token_get
-  end
-
   scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do
     pipe_through([:api])
     get "/get_rating/:target_id/:type", SpadsController, :get_rating

@@ -151,7 +151,7 @@ defmodule Teiserver.Account.UserLib do
     |> broadcast_update_user()
   end
 
-  def update_user_password(%User{} = user, attrs) do
+  def update_user_plain_password(%User{} = user, attrs) do
     Account.recache_user(user.id)
 
     user
@@ -192,6 +192,15 @@ defmodule Teiserver.Account.UserLib do
 
     user
     |> User.changeset(attrs, :script)
+    |> Repo.update()
+    |> broadcast_update_user()
+  end
+
+  def password_reset_update_user(%User{} = user, attrs) do
+    Account.recache_user(user.id)
+
+    user
+    |> User.changeset(attrs, :password_reset)
     |> Repo.update()
     |> broadcast_update_user()
   end
@@ -263,13 +272,13 @@ defmodule Teiserver.Account.UserLib do
     )
   end
 
-  def authenticate_user(conn, %User{} = user, plain_text_password) do
+  def authenticate_user(_conn, %User{} = user, plain_text_password) do
     verified_user =
-      if User.verify_password(plain_text_password, user.password) do
+      if Account.verify_plain_password(plain_text_password, user.password) do
         {:ok, user}
       else
         # Authentication failure handler
-        Account.spring_auth_check(conn, user, plain_text_password)
+        {:error, "Invalid credentials"}
       end
 
     with {:ok, user} <- verified_user,

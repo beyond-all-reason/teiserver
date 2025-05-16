@@ -15,6 +15,7 @@ defmodule Teiserver.Account.AccountTestLib do
         email: data["email"] || "email_#{r}",
         colour: data["colour"] || "colour",
         icon: data["icon"] || "icon",
+        password: data["password"] || Teiserver.Account.spring_md5_password("password"),
         last_login_timex: data["last_login_timex"] || Timex.now()
       },
       :script

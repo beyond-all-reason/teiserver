@@ -13,7 +13,7 @@ defmodule Teiserver.AccountTest do
       name: "some name",
       permissions: [],
       email: "AnEmailAddress@email.com",
-      password: "some password"
+      password: Account.spring_md5_password("some password")
     }
     @update_attrs %{
       colour: "#0000AA",
@@ -21,7 +21,7 @@ defmodule Teiserver.AccountTest do
       permissions: [],
       name: "some updated name",
       email: "some updated email",
-      password: "some updated password"
+      password: Account.spring_md5_password("some updated password")
     }
     @invalid_attrs %{
       colour: nil,
@@ -99,6 +99,7 @@ defmodule Teiserver.AccountTest do
       assert user.name == "some name"
       assert user.permissions == []
       assert user.name == "some name"
+      assert Account.verify_md5_password(@valid_attrs.password, user.password)
     end
 
     test "create_user/1 with invalid data returns error changeset" do

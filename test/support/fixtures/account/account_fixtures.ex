@@ -23,8 +23,7 @@ defmodule Teiserver.AccountFixtures do
         colour: "#00AA00",
         icon: "fa-solid fa-user",
         permissions: permissions,
-        password: "password",
-        password_confirmation: "password",
+        password: Account.spring_md5_password("password"),
         data: %{}
       })
       |> Account.create_user()

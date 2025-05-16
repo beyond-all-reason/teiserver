@@ -4,10 +4,9 @@ defmodule TeiserverWeb.Admin.UserController do
   use TeiserverWeb, :controller
 
   alias Teiserver.{Account, Chat, Game}
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Account.User
   alias Teiserver.Account.{UserLib, RoleLib}
   alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Game.MatchRatingLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, float_parse: 1]
 
   plug(AssignPlug,
@@ -193,48 +192,6 @@ defmodule TeiserverWeb.Admin.UserController do
         conn
         |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: ~p"/teiserver/admin/user")
-    end
-  end
-
-  @spec new(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def new(conn, _params) do
-    changeset =
-      Account.change_user(%User{
-        icon: "fa-solid fa-user",
-        colour: "#AA0000"
-      })
-
-    conn
-    |> assign(:changeset, changeset)
-    |> add_breadcrumb(name: "New user", url: conn.request_path)
-    |> render("new.html")
-  end
-
-  @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def create(conn, %{"user" => user_params}) do
-    user_params =
-      Map.merge(user_params, %{
-        "password" => "pass",
-        "data" => %{
-          "rank" => 1,
-          "friends" => [],
-          "friend_requests" => [],
-          "ignored" => [],
-          "roles" => ["Verified"],
-          "bot" => user_params["bot"] == "true",
-          "moderator" => user_params["moderator"] == "true",
-          "password_hash" => "X03MO1qnZdYdgyfeuILPmQ=="
-        }
-      })
-
-    case Account.create_user(user_params) do
-      {:ok, _user} ->
-        conn
-        |> put_flash(:info, "User created successfully.")
-        |> redirect(to: ~p"/teiserver/admin/user")
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, "new.html", changeset: changeset)
     end
   end
 
