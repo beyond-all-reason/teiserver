@@ -177,6 +177,46 @@ If a player fail to answer a ready request within a timeout, that player is
 evicted from the queue, and all other players are put back where they were.
 
 
+## Matchmaking with parties
+
+This requires coordinating all the party members so that they all join the
+queues.
+
+`P1` and `P2` are both member of `Party`. When a player joins matchmaking,
+the party reserves a slot for all the required queues, then get locked:
+all pending invites are cancelled.
+This drastically simplify the state of the party.
+The party has the responsability to let all members know they should join
+the slot. Once all members joined the slot, they are considered in the queue
+and will be elligible for pairing.
+
+
+```mermaid
+sequenceDiagram
+    participant P2 as Player2
+    participant P1 as Player1
+    participant Party
+    participant MM as MMQueue
+
+    P1 ->> Party: join queues
+    activate Party
+    Party ->> MM: party join
+    MM ->> MM: reserve slot for members
+    MM ->> Party: :ok
+    Party ->> P2: queue-joined
+    Party ->> P1: :ok
+    deactivate Party
+
+    P1 ->> MM: party-join
+    MM ->> P1: :ok
+
+    P2 ->> MM: party-join
+    MM ->> P2: :ok
+
+    MM ->> MM: put all party members in queue proper
+```
+
+
 ## Listings
 
 We need a way to list online players + some info, as well as the lobbies. This
