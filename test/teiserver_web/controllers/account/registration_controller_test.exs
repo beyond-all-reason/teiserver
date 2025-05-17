@@ -46,6 +46,21 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
       assert html_response(resp, 400)
     end
 
+    test "name must be unique", %{conn: conn} do
+      attrs = valid_attrs()
+      resp = post(conn, ~p"/register", user: attrs)
+      assert redirected_to(resp) =~ "/"
+
+      assert %Teiserver.Account.User{} =
+               user = Teiserver.Account.get_user(nil, where: [email: attrs.email])
+
+      assert user.name == attrs.name
+
+      other = Map.put(attrs, :email, "otheremail@localhost.com")
+      resp = post(conn, ~p"/register", user: other)
+      assert html_response(resp, 400)
+    end
+
     test "cannot register if registration disabled", %{conn: conn} do
       Teiserver.Config.update_site_config("teiserver.Enable registrations", false)
       attrs = valid_attrs()

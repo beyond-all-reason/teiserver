@@ -2042,6 +2042,9 @@ defmodule Teiserver.Account do
   @spec rename_user(T.userid(), String.t(), boolean) :: :success | {:error, String.t()}
   defdelegate rename_user(userid, new_name, admin_action \\ false), to: Teiserver.CacheUser
 
+  @spec valid_name?(String.t(), boolean()) :: :ok | {:error, String.t()}
+  defdelegate valid_name?(new_name, admin_action), to: Teiserver.CacheUser
+
   @spec system_change_user_name(T.userid(), String.t()) :: :ok
   defdelegate system_change_user_name(userid, new_name), to: Teiserver.CacheUser
 

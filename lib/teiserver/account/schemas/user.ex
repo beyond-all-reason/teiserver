@@ -89,12 +89,16 @@ defmodule Teiserver.Account.User do
   def changeset(user, attrs, :register) do
     attrs = remove_whitespace(attrs, [:email])
 
-    # TODO: there should be a unique constraint on the name, but since it's
-    # not enforced yet
     user
     |> cast(attrs, [:name, :email, :password])
     |> unique_constraint(:email)
     |> validate_required([:name, :email, :password])
+    |> validate_change(:name, fn :name, name ->
+      case Teiserver.Account.valid_name?(name, false) do
+        :ok -> []
+        {:error, reason} -> [{:name, reason}]
+      end
+    end)
     |> validate_password()
     |> put_plain_password_hash()
   end

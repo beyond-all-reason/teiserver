@@ -307,11 +307,12 @@ defmodule Teiserver.CacheUser do
       true ->
         # TODO: create a unique index on lower(name) so that this check is fast
         # (and also redundant)
-        usr = Teiserver.Account.query_user(search: [name_lower: name], select: [:name])
+        users = Teiserver.Account.query_users(search: [name_lower: name], select: [:name])
 
-        if usr == nil || String.downcase(usr.name) != String.downcase(name),
-          do: :ok,
-          else: {:error, "Username already taken"}
+        case users do
+          [] -> :ok
+          _ -> {:error, "Username already taken"}
+        end
     end
   end
 
