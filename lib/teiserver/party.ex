@@ -9,8 +9,9 @@ defmodule Teiserver.Party do
   """
 
   alias Teiserver.Config
-  alias Teiserver.Party
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Matchmaking
+  alias Teiserver.Party
 
   @type id :: Party.Server.id()
   @type state :: Party.Server.state()
@@ -55,6 +56,12 @@ defmodule Teiserver.Party do
   @spec kick_user(id(), user_kicking :: T.userid(), kicked_user :: T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :invalid_target | :not_a_member}
   defdelegate kick_user(party_id, actor_id, target_id), to: Party.Server
+
+  @spec join_queues(id(), [Matchmaking.queue_id()]) :: :ok | {:error, reason :: term()}
+  defdelegate join_queues(party_id, queues), to: Party.Server
+
+  @spec matchmaking_notify_cancel(id()) :: :ok
+  defdelegate matchmaking_notify_cancel(party_id), to: Party.Server
 
   def setup_site_configs() do
     Config.add_site_config_type(%{

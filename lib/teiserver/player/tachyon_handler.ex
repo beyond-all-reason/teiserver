@@ -116,6 +116,11 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "matchmaking/cancelled", data, state}
   end
 
+  def handle_info({:matchmaking, {:queues_joined, queues}}, state) do
+    data = %{queues: queues}
+    {:event, "matchmaking/queuesJoined", data, state}
+  end
+
   def handle_info({:battle_start, data}, state) do
     {:request, "battle/start", data, [], state}
   end
@@ -250,6 +255,9 @@ defmodule Teiserver.Player.TachyonHandler do
 
           :missing_maps ->
             {:error_response, :internal_error, "missing map list", state}
+
+          :party_too_big ->
+            {:error_response, :invalid_request, "party too big", state}
 
           x ->
             {:error_response, x, state}

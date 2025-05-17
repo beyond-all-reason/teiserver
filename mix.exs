@@ -140,7 +140,7 @@ defmodule Teiserver.MixProject do
       {:certifi, "~> 2.13.0", override: true},
       {:websocket_sync_client,
        git: "https://github.com/geekingfrog/websocket_sync_client.git",
-       ref: "66e48fb256e279cd343276999a59ed48b9d8ae36",
+       ref: "e46ce1f37f889a37e57a825fb3cf79c5bac0e136",
        only: [:dev, :test]}
     ]
   end

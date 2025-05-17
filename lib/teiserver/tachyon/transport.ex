@@ -195,11 +195,11 @@ defmodule Teiserver.Tachyon.Transport do
     case result do
       {:event, cmd_id, state} ->
         message = Schema.event(cmd_id) |> Jason.encode!()
-        {:push, [{:text, message}], %{conn_state | handler_state: state}}
+        {:push, {:text, message}, %{conn_state | handler_state: state}}
 
       {:event, cmd_id, payload, state} ->
         message = Schema.event(cmd_id, payload) |> Jason.encode!()
-        {:push, [{:text, message}], %{conn_state | handler_state: state}}
+        {:push, {:text, message}, %{conn_state | handler_state: state}}
 
       {:response, state} ->
         message = Schema.response(command_id, message_id)
