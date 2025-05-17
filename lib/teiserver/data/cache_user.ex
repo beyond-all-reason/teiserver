@@ -92,7 +92,7 @@ defmodule Teiserver.CacheUser do
     |> Regex.replace(name, "")
   end
 
-  @spec check_symbol_limit(String.t()) :: Boolean.t()
+  @spec check_symbol_limit(String.t()) :: boolean()
   def check_symbol_limit(name) do
     name
     |> String.replace(~r/[[:alnum:]]/, "")
@@ -304,12 +304,14 @@ defmodule Teiserver.CacheUser do
       check_symbol_limit(name) ->
         {:error, "Too many repeated symbols in name"}
 
-      get_user_by_name(name) &&
-          get_user_by_name(name).name |> String.downcase() == String.downcase(name) ->
-        {:error, "Username already taken"}
-
       true ->
-        :ok
+        # TODO: create a unique index on lower(name) so that this check is fast
+        # (and also redundant)
+        usr = Teiserver.Account.query_user(search: [name_lower: name], select: [:name])
+
+        if usr == nil || String.downcase(usr.name) != String.downcase(name),
+          do: :ok,
+          else: {:error, "Username already taken"}
     end
   end
 
