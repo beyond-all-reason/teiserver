@@ -37,6 +37,18 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
       assert html_response(resp, 400)
     end
 
+    test "password confirmation required", %{conn: conn} do
+      attrs = Map.delete(valid_attrs(), :password_confirmation)
+      resp = post(conn, ~p"/register", user: attrs)
+      assert html_response(resp, 400)
+    end
+
+    test "password confirmation must match", %{conn: conn} do
+      attrs = Map.put(valid_attrs(), :password_confirmation, "differentpassword")
+      resp = post(conn, ~p"/register", user: attrs)
+      assert html_response(resp, 400)
+    end
+
     test "email must be unique", %{conn: conn} do
       resp = post(conn, ~p"/register", user: valid_attrs())
       assert redirected_to(resp) =~ "/"
@@ -76,5 +88,11 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
     end
   end
 
-  defp valid_attrs(), do: %{email: "blah@test.com", name: "aname", password: "blahblah"}
+  defp valid_attrs(),
+    do: %{
+      email: "blah@test.com",
+      name: "aname",
+      password: "blahblah",
+      password_confirmation: "blahblah"
+    }
 end

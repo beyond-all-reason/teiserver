@@ -93,6 +93,7 @@ defmodule Teiserver.Account.User do
     |> cast(attrs, [:name, :email, :password])
     |> unique_constraint(:email)
     |> validate_required([:name, :email, :password])
+    |> validate_confirmation(:password, required: true, message: "Passwords do not match")
     |> validate_change(:name, fn :name, name ->
       case Teiserver.Account.valid_name?(name, false) do
         :ok -> []
