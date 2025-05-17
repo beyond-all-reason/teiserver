@@ -139,6 +139,9 @@ defmodule TeiserverWeb.Router do
     post("/password_reset/:value", SessionController, :password_reset_post)
     get("/one_time_login/:value", SessionController, :one_time_login)
 
+    get("/register", RegistrationController, :new)
+    post("/register", RegistrationController, :create)
+
     get("/initial_setup/:key", SetupController, :setup)
   end
 
