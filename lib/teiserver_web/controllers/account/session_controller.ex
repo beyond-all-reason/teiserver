@@ -25,6 +25,7 @@ defmodule TeiserverWeb.Account.SessionController do
       |> Guardian.Plug.sign_out(clear_remember_me: true)
       |> assign(:changeset, changeset)
       |> assign(:action, Routes.account_session_path(conn, :login))
+      |> assign(:can_register?, Account.can_register_with_web?())
       |> render("new.html")
     end
   end

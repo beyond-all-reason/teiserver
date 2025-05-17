@@ -2,6 +2,12 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
   use TeiserverWeb.ConnCase
 
   describe "web registration of users" do
+    setup do
+      Teiserver.Config.update_site_config("teiserver.Enable registrations", true)
+      Teiserver.Config.update_site_config("teiserver.Require Chobby registration", false)
+      :ok
+    end
+
     test "can register a user", %{conn: conn} do
       attrs = valid_attrs()
       resp = post(conn, ~p"/register", user: attrs)
@@ -38,6 +44,20 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
       other = Map.put(valid_attrs(), :name, "othername")
       resp = post(conn, ~p"/register", user: other)
       assert html_response(resp, 400)
+    end
+
+    test "cannot register if registration disabled", %{conn: conn} do
+      Teiserver.Config.update_site_config("teiserver.Enable registrations", false)
+      attrs = valid_attrs()
+      resp = post(conn, ~p"/register", user: attrs)
+      assert html_response(resp, 403) =~ "Account creation disabled"
+    end
+
+    test "cannot register if web registration disabled", %{conn: conn} do
+      Teiserver.Config.update_site_config("teiserver.Require Chobby registration", true)
+      attrs = valid_attrs()
+      resp = post(conn, ~p"/register", user: attrs)
+      assert html_response(resp, 403) =~ "Account creation disabled"
     end
   end
 

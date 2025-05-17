@@ -2210,4 +2210,14 @@ defmodule Teiserver.Account do
     spring_md5_password(plain_text_password)
     |> verify_md5_password(argon_hash)
   end
+
+  @spec can_register?() :: boolean()
+  def can_register?(),
+    do: Teiserver.Config.get_site_config_cache("teiserver.Enable registrations")
+
+  @spec can_register_with_web?() :: boolean()
+  def can_register_with_web?() do
+    can_register?() &&
+      not Teiserver.Config.get_site_config_cache("teiserver.Require Chobby registration")
+  end
 end

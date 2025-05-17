@@ -2,6 +2,8 @@ defmodule TeiserverWeb.Account.RegistrationController do
   use TeiserverWeb, :controller
   alias Teiserver.Account
 
+  plug :registration_enabled?
+
   def new(conn, _params) do
     changeset = Account.change_user(%Account.User{})
 
@@ -26,6 +28,17 @@ defmodule TeiserverWeb.Account.RegistrationController do
         |> assign(:action, ~p"/register")
         |> put_status(:bad_request)
         |> render("new.html")
+    end
+  end
+
+  defp registration_enabled?(conn, _params) do
+    if Account.can_register_with_web?() do
+      conn
+    else
+      conn
+      |> put_status(:forbidden)
+      |> render("disabled.html")
+      |> halt()
     end
   end
 end
