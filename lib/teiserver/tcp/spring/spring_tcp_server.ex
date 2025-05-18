@@ -41,6 +41,9 @@ defmodule Teiserver.SpringTcpServer do
   def start_link(opts) do
     mode = if opts[:ssl], do: :ranch_ssl, else: :ranch_tcp
 
+    # https://www.erlang.org/docs/23/man/erlang#process_flag_max_heap_size
+    max_heap_size = 2_620_000
+
     # start_listener(Ref, Transport, TransOpts0, Protocol, ProtoOpts)
     if mode == :ranch_ssl do
       ssl_opts = get_ssl_opts()
@@ -54,7 +57,7 @@ defmodule Teiserver.SpringTcpServer do
             port: Application.get_env(:teiserver, Teiserver)[:ports][:tls]
           ],
         __MODULE__,
-        []
+        max_heap_size: max_heap_size
       )
     else
       :ranch.start_listener(
@@ -65,7 +68,7 @@ defmodule Teiserver.SpringTcpServer do
             port: Application.get_env(:teiserver, Teiserver)[:ports][:tcp]
           ],
         __MODULE__,
-        []
+        max_heap_size: max_heap_size
       )
     end
   end
