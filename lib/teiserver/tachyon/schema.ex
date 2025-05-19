@@ -125,7 +125,6 @@ defmodule Teiserver.Tachyon.Schema do
   def event(command_id, data \\ nil) do
     ev = %{
       type: :event,
-      status: :success,
       messageId: UUID.uuid4(),
       commandId: command_id
     }

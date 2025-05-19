@@ -72,7 +72,6 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       # subscribing should also be followed by an updated event to get the full state
       assert {:ok,
               %{
-                "status" => "success",
                 "commandId" => "user/updated",
                 "data" => %{"users" => [user_data]}
               }} =
@@ -94,7 +93,6 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       # subscribing should also be followed by an updated event to get the full state
       assert {:ok,
               %{
-                "status" => "success",
                 "commandId" => "user/updated",
                 "data" => %{"users" => [user_data]}
               }} =
@@ -113,12 +111,11 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       assert %{"status" => "success"} =
                Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
 
-      assert {:ok, %{"status" => "success"}} = Tachyon.recv_message(client)
+      assert {:ok, %{"commandId" => "user/updated"}} = Tachyon.recv_message(client)
       Tachyon.connect(other_user)
 
       assert {:ok,
               %{
-                "status" => "success",
                 "commandId" => "user/updated",
                 "data" => %{"users" => [user_data]}
               }} =
@@ -136,14 +133,15 @@ defmodule TeiserverWeb.Tachyon.UserTest do
                Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
 
       # get the full state
-      assert {:ok, %{"status" => "success", "data" => ev_data}} = Tachyon.recv_message(client)
+      assert {:ok, %{"commandId" => "user/updated", "data" => ev_data}} =
+               Tachyon.recv_message(client)
+
       assert hd(ev_data["users"])["status"] == "menu"
 
       Tachyon.disconnect!(ctx[:client])
 
       assert {:ok,
               %{
-                "status" => "success",
                 "commandId" => "user/updated",
                 "data" => %{"users" => [user_data]}
               }} =

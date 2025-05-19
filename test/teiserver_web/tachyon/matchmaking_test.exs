@@ -411,11 +411,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
       send(queue_pid, :tick)
 
-      assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
-               Tachyon.recv_message(client1)
-
-      assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
-               Tachyon.recv_message(client2)
+      assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client1)
+      assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client2)
 
       assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client1)
     end
@@ -446,8 +443,9 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     } do
       [client1, client2] = join_and_pair(app, queue_id, queue_pid, 2)
       assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client1)
-      assert %{"status" => "success"} = Tachyon.leave_queues!(client1)
+      assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(client1)
       assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(client2)
+      assert %{"status" => "success"} = Tachyon.leave_queues!(client1)
       assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(client2)
     end
 
@@ -472,11 +470,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       # another tick should match them again
       send(queue_pid, :tick)
 
-      assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
-               Tachyon.recv_message(client1)
-
-      assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
-               Tachyon.recv_message(client2)
+      assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client1)
+      assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client2)
     end
 
     test "two pairings on different queues", %{app: app} do
@@ -501,8 +496,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       send(q2v2_pid, :tick)
 
       for client <- [c1, c2, c3, c5] do
-        assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
-                 Tachyon.recv_message(client)
+        assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client)
       end
 
       # getting paired should withdraw the player from a queue so that it doesn't
@@ -515,8 +509,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         {:error, :timeout} ->
           nil
 
-        {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} ->
-          assert {:ok, %{"status" => "success", "commandId" => "matchmaking/lost"}} =
+        {:ok, %{"commandId" => "matchmaking/found"}} ->
+          assert {:ok, %{"commandId" => "matchmaking/lost"}} =
                    Tachyon.recv_message(c4, timeout: 5)
       end
 
@@ -539,8 +533,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       send(q_pid, :tick)
 
       for client <- clients do
-        assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
-                 Tachyon.recv_message(client)
+        assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client)
       end
 
       Enum.with_index(clients, 1)
@@ -575,8 +568,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       send(q_pid, :tick)
 
       for client <- clients do
-        assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
-                 Tachyon.recv_message(client)
+        assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client)
       end
 
       [c1, c2] = clients
@@ -742,8 +734,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     send(queue_pid, :tick)
 
     Enum.each(clients, fn client ->
-      assert {:ok, %{"status" => "success", "commandId" => "matchmaking/found"}} =
-               Tachyon.recv_message(client)
+      assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client)
     end)
 
     clients

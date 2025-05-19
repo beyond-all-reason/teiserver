@@ -41,7 +41,9 @@ defmodule Teiserver.Support.Tachyon do
   def connect(x, opts \\ [swallow_first_event: true])
 
   def connect(%Teiserver.OAuth.Token{} = token, opts) do
-    connect_opts = connect_options(token)
+    connect_opts =
+      connect_options(token)
+      |> Keyword.put_new(:default_timeout, 300)
 
     {:ok, client} = WSC.connect(tachyon_url(), connect_opts)
 

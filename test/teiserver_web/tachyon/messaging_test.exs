@@ -31,7 +31,9 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
       assert %{"status" => "success"} =
                Tachyon.send_dm!(ctx.sender_client, "coucou", ctx.receiver.id)
 
-      assert %{"status" => "success", "data" => data} = Tachyon.recv_message!(ctx.receiver_client)
+      assert %{"commandId" => "messaging/received", "data" => data} =
+               Tachyon.recv_message!(ctx.receiver_client)
+
       sender_id = to_string(ctx.sender.id)
 
       assert %{"message" => "coucou", "source" => %{"type" => "player", "userId" => ^sender_id}} =
@@ -56,7 +58,9 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
       assert %{"status" => "success"} =
                Tachyon.send_dm!(ctx.sender_client, "will be delivered", ctx.receiver.id)
 
-      assert %{"status" => "success", "data" => data} = Tachyon.recv_message!(receiver_client)
+      assert %{"commandId" => "messaging/received", "data" => data} =
+               Tachyon.recv_message!(receiver_client)
+
       assert data["message"] == "will be delivered"
     end
 
@@ -73,14 +77,19 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
       assert %{"status" => "success"} =
                Tachyon.subscribe_messaging!(receiver_client, since: %{type: "from_start"})
 
-      assert %{"status" => "success", "data" => data} = Tachyon.recv_message!(receiver_client)
+      assert %{"commandId" => "messaging/received", "data" => data} =
+               Tachyon.recv_message!(receiver_client)
+
       assert data["message"] == "will be stored"
 
       # and receive messages after
       assert %{"status" => "success"} =
                Tachyon.send_dm!(ctx.sender_client, "immediate delivery", ctx.receiver.id)
 
-      assert %{"status" => "success", "data" => %{"message" => "immediate delivery"}} =
+      assert %{
+               "commandId" => "messaging/received",
+               "data" => %{"message" => "immediate delivery"}
+             } =
                Tachyon.recv_message!(receiver_client)
     end
 
@@ -93,9 +102,9 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
       assert %{"status" => "success"} =
                Tachyon.send_dm!(ctx.sender_client, "second message", ctx.receiver.id)
 
-      assert %{"status" => "success"} = Tachyon.recv_message!(ctx.receiver_client)
+      assert %{"commandId" => "messaging/received"} = Tachyon.recv_message!(ctx.receiver_client)
 
-      assert %{"status" => "success", "data" => data2} =
+      assert %{"commandId" => "messaging/received", "data" => data2} =
                Tachyon.recv_message!(ctx.receiver_client)
 
       Tachyon.abrupt_disconnect!(ctx.receiver_client)
@@ -112,7 +121,7 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
                  since: %{type: "marker", value: data2["marker"]}
                )
 
-      assert %{"status" => "success", "data" => missed1} =
+      assert %{"commandId" => "messaging/received", "data" => missed1} =
                Tachyon.recv_message!(receiver_client)
 
       assert missed1["message"] == "will be stored"
@@ -127,8 +136,8 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
       assert %{"status" => "success"} =
                Tachyon.send_dm!(ctx.sender_client, "second message", ctx.receiver.id)
 
-      assert %{"status" => "success"} = Tachyon.recv_message!(ctx.receiver_client)
-      assert %{"status" => "success"} = Tachyon.recv_message!(ctx.receiver_client)
+      assert %{"commandId" => "messaging/received"} = Tachyon.recv_message!(ctx.receiver_client)
+      assert %{"commandId" => "messaging/received"} = Tachyon.recv_message!(ctx.receiver_client)
 
       assert %{"status" => "success", "data" => %{"hasMissedMessages" => true}} =
                Tachyon.subscribe_messaging!(ctx.receiver_client,
@@ -136,10 +145,10 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
                )
 
       # the whole buffer is sent again
-      assert %{"status" => "success", "data" => %{"message" => "first message"}} =
+      assert %{"commandId" => "messaging/received", "data" => %{"message" => "first message"}} =
                Tachyon.recv_message!(ctx.receiver_client)
 
-      assert %{"status" => "success", "data" => %{"message" => "second message"}} =
+      assert %{"commandId" => "messaging/received", "data" => %{"message" => "second message"}} =
                Tachyon.recv_message!(ctx.receiver_client)
     end
   end
