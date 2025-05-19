@@ -315,7 +315,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
       {[{_, player_ids}], rest} ->
         monitors =
           demonitor_players(player_ids, state.monitors)
-          |> MC.demonitor_by_val({:room, room_pid})
+          |> MC.demonitor_by_val({:room, room_pid, player_ids})
 
         {:reply, :ok, %{state | pairings: rest, monitors: monitors}}
 
