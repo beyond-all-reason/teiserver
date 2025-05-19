@@ -299,11 +299,8 @@ defmodule TeiserverWeb.Account.SessionController do
           "password" => pass1
         }
 
-        case Account.update_user(code.user, user_params) do
+        case Account.password_reset_update_user(code.user, user_params) do
           {:ok, user} ->
-            # User password reset successfully
-            Teiserver.CacheUser.set_new_spring_password(user.id, pass1)
-
             Teiserver.Logging.Helpers.add_anonymous_audit_log(
               conn,
               "Account:User password reset",

@@ -9,16 +9,10 @@ defmodule TeiserverWeb.TachyonControllerTest do
   defp setup_conn(_context) do
     conn = Phoenix.ConnTest.build_conn()
 
-    # this is the result of Argon2.hash_pwd_salt("X03MO1qnZdYdgyfeuILPmQ==")
-    # hardcoded to make the test go faster
-    hash =
-      "$argon2id$v=19$m=256,t=1,p=2$/HqwycYcnY5fUkGqjvAqvA$t12kWkj+6XYXnvX9USFR2XBsG7VKuumu/huXOkIXTz0"
-
     user =
       GeneralTestLib.make_user(%{
         "data" => %{
-          "roles" => ["Verified"],
-          "password_hash" => hash
+          "roles" => ["Verified"]
         }
       })
 

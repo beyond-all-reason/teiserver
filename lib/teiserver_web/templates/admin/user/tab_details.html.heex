@@ -105,14 +105,13 @@
 <%= if allow?(@conn, "Moderator") do %>
   <div class="row mt-2">
     <div class="col-md-6">
-      <textarea id="user_data" rows="28" class="form-control monospace m1"><%= Jason.encode! Map.drop(@user.data, ["password_hash", "ip"]), pretty: true %></textarea>
+      <textarea id="user_data" rows="28" class="form-control monospace m1"><%= Jason.encode! Map.drop(@user.data, ["ip"]), pretty: true %></textarea>
     </div>
     <div class="col-md-6">
       <table class="table table-sm">
         <tbody>
           <% keys =
             @user_stats
-            |> Map.drop(["password_hash", "ip"])
             |> Map.keys()
             |> Enum.sort() %>
           <%= for key <- keys do %>

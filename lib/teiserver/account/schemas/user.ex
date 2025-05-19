@@ -54,24 +54,14 @@ defmodule Teiserver.Account.User do
       |> remove_whitespace([:email])
       |> uniq_lists(~w(permissions roles)a)
 
-    if attrs["password"] == "" do
-      user
-      |> cast(
-        attrs,
-        ~w(name email icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_login_timex last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
-      )
-      |> validate_required([:name, :email, :permissions])
-      |> unique_constraint(:email)
-    else
-      user
-      |> cast(
-        attrs,
-        ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login_timex last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
-      )
-      |> validate_required([:name, :email, :password, :permissions])
-      |> unique_constraint(:email)
-      |> put_password_hash()
-    end
+    user
+    |> cast(
+      attrs,
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login_timex last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
+    )
+    |> validate_required([:name, :email, :password, :permissions])
+    |> unique_constraint(:email)
+    |> put_md5_password_hash()
   end
 
   def changeset(user, attrs, :script) do
@@ -85,37 +75,15 @@ defmodule Teiserver.Account.User do
       attrs,
       ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login_timex last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
     )
-    |> validate_required([:name, :email, :permissions])
+    |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> put_md5_password_hash()
   end
 
   def changeset(struct, params, nil), do: changeset(struct, params)
 
   def changeset(struct, permissions, :permissions) do
     cast(struct, %{permissions: permissions}, [:permissions])
-  end
-
-  def changeset(user, attrs, :self_create) do
-    attrs =
-      attrs
-      |> remove_whitespace([:email])
-
-    user
-    |> cast(attrs, [:name, :email])
-    |> validate_required([:name, :email])
-    |> unique_constraint(:email)
-    |> change_password(attrs)
-  end
-
-  def changeset(user, attrs, :limited) do
-    attrs =
-      attrs
-      |> remove_whitespace([:email])
-
-    user
-    |> cast(attrs, ~w(name email icon colour clan_id)a)
-    |> validate_required([:name, :email])
-    |> unique_constraint(:email)
   end
 
   def changeset(user, attrs, :server_limited_update_user) do
@@ -143,6 +111,7 @@ defmodule Teiserver.Account.User do
     |> unique_constraint(:email)
   end
 
+  # Updating email or name from user update form requires plain text password confirmation
   def changeset(user, attrs, :user_form) do
     attrs =
       attrs
@@ -158,7 +127,7 @@ defmodule Teiserver.Account.User do
           "Please enter your password to change your account details."
         )
 
-      verify_any_password(attrs["password"], user.password) == false ->
+      Teiserver.Account.verify_plain_password(attrs["password"], user.password) == false ->
         user
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
@@ -172,59 +141,65 @@ defmodule Teiserver.Account.User do
     end
   end
 
+  # Updating password from password change form
+  # New password is in plain text
+  # Requires existing password confirmation
   def changeset(user, attrs, :password) do
     cond do
       attrs["existing"] == nil or attrs["existing"] == "" ->
         user
-        |> change_password(attrs)
+        |> change_plain_password(attrs)
         |> add_error(
           :password_confirmation,
           "Please enter your existing password to change your password."
         )
 
-      verify_any_password(attrs["existing"], user.password) == false ->
+      Teiserver.Account.verify_plain_password(attrs["existing"], user.password) == false ->
         user
-        |> change_password(attrs)
+        |> change_plain_password(attrs)
         |> add_error(:existing, "Incorrect password")
 
       true ->
         user
-        |> change_password(attrs)
+        |> change_plain_password(attrs)
     end
   end
 
-  defp change_password(user, attrs) do
+  # Updating password from password reset form doesn't require existing password
+  def changeset(user, attrs, :password_reset) do
     user
     |> cast(attrs, [:password])
     |> validate_length(:password, min: 6)
-    |> validate_confirmation(:password, message: "Does not match password")
-    |> put_password_hash()
+    |> validate_confirmation(:password, message: "Passwords do not match")
+    |> put_plain_password_hash()
   end
 
-  defp put_password_hash(
+  defp change_plain_password(user, attrs) do
+    user
+    |> cast(attrs, [:password])
+    |> validate_length(:password, min: 6)
+    |> validate_confirmation(:password, message: "Passwords do not match")
+    |> put_plain_password_hash()
+  end
+
+  defp put_plain_password_hash(
          %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
        ) do
-    change(changeset, password: Argon2.hash_pwd_salt(password))
+    change(changeset,
+      password:
+        Teiserver.Account.spring_md5_password(password) |> Teiserver.Account.encrypt_password()
+    )
   end
 
-  defp put_password_hash(changeset), do: changeset
+  defp put_plain_password_hash(changeset), do: changeset
 
-  @spec verify_password(String.t(), String.t()) :: boolean
-  def verify_password(plain_text_password, encrypted) do
-    Argon2.verify_pass(plain_text_password, encrypted)
+  defp put_md5_password_hash(
+         %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
+       ) do
+    change(changeset, password: Teiserver.Account.encrypt_password(password))
   end
 
-  @spec verify_md5_password(String.t(), String.t()) :: boolean
-  def verify_md5_password(plain_text_password, encrypted) do
-    Teiserver.CacheUser.spring_md5_password(plain_text_password)
-    |> verify_password(encrypted)
-  end
-
-  @spec verify_md5_password(String.t(), String.t()) :: boolean
-  def verify_any_password(plain_text_password, encrypted) do
-    verify_password(plain_text_password, encrypted) or
-      verify_md5_password(plain_text_password, encrypted)
-  end
+  defp put_md5_password_hash(changeset), do: changeset
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
   def authorize(_, conn, _), do: allow?(conn, "admin.user")

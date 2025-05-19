@@ -408,7 +408,7 @@ defmodule Teiserver.MicroblogTest do
         uploader_id: user.id
       }
 
-      assert {:ok, %Upload{} = upload} = Microblog.update_upload(upload, update_attrs)
+      assert {:ok, %Upload{} = _upload} = Microblog.update_upload(upload, update_attrs)
     end
 
     test "update_upload/2 with invalid data returns error changeset" do

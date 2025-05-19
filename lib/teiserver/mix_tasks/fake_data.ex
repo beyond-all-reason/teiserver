@@ -48,17 +48,13 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       Account.create_user(%{
         name: "root",
         email: "root@localhost",
-        password: "password",
+        password: Account.spring_md5_password("password"),
         roles: ["Server", "Verified"],
         permissions: ["admin.dev.developer", "Server"],
         icon: "fa-solid fa-power-off",
         colour: "#00AA00",
         data: %{
-          lobby_client: "FakeData",
-          password_hash:
-            Teiserver.CacheUser.encrypt_password(
-              Teiserver.CacheUser.spring_md5_password("password")
-            )
+          lobby_client: "FakeData"
         }
       })
 
@@ -102,7 +98,6 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             data: %{
               lobby_client: "FakeData",
               bot: false,
-              password_hash: root_user.data.password_hash,
               roles: ["Verified"]
             },
             inserted_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert,

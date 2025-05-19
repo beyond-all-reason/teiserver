@@ -50,8 +50,8 @@ defmodule Teiserver.Account do
   @spec update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
   defdelegate update_user(user, attrs), to: UserLib
 
-  @spec update_user_password(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
-  defdelegate update_user_password(user, attrs), to: UserLib
+  @spec update_user_plain_password(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate update_user_plain_password(user, attrs), to: UserLib
 
   @spec update_user_user_form(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
   defdelegate update_user_user_form(user, attrs), to: UserLib
@@ -65,6 +65,9 @@ defmodule Teiserver.Account do
   @spec script_update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
   defdelegate script_update_user(user, attrs), to: UserLib
 
+  @spec password_reset_update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  defdelegate password_reset_update_user(user, attrs), to: UserLib
+
   @spec delete_user(User) :: {:ok, User} | {:error, Ecto.Changeset}
   defdelegate delete_user(user), to: UserLib
 
@@ -73,27 +76,6 @@ defmodule Teiserver.Account do
 
   @spec change_user(User, map) :: Ecto.Changeset
   defdelegate change_user(user, attrs), to: UserLib
-
-  @spec spring_auth_check(Plug.Conn.t(), User.t(), String.t()) ::
-          {:ok, User.t()} | {:error, String.t()}
-  def spring_auth_check(conn, user, plain_text_password) do
-    tei_user = get_user_by_id(user.id)
-    md5_password = Teiserver.CacheUser.spring_md5_password(plain_text_password)
-
-    if Teiserver.CacheUser.test_password(md5_password, tei_user.password_hash) do
-      update_user(user, %{password: plain_text_password})
-
-      {:ok, user}
-    else
-      Teiserver.Logging.Helpers.add_anonymous_audit_log(conn, "Account:Failed login", %{
-        reason: "Bad password",
-        user_id: user.id,
-        email: user.email
-      })
-
-      {:error, "Invalid credentials"}
-    end
-  end
 
   # User stat table
   alias Teiserver.Account.UserStat
@@ -2203,5 +2185,26 @@ defmodule Teiserver.Account do
     update_user_stat(userid, %{
       "hide_contributor_rank" => boolean_value
     })
+  end
+
+  @spec encrypt_password(any) :: binary | {binary, binary, {any, any, any, any, any}}
+  def encrypt_password(password) do
+    Argon2.hash_pwd_salt(password)
+  end
+
+  @spec spring_md5_password(String.t()) :: String.t()
+  def spring_md5_password(password) do
+    :crypto.hash(:md5, password) |> Base.encode64()
+  end
+
+  @spec verify_md5_password(String.t(), String.t()) :: boolean
+  def verify_md5_password(md5_password, argon_hash) do
+    Argon2.verify_pass(md5_password, argon_hash)
+  end
+
+  @spec verify_plain_password(String.t(), String.t()) :: boolean
+  def verify_plain_password(plain_text_password, argon_hash) do
+    spring_md5_password(plain_text_password)
+    |> verify_md5_password(argon_hash)
   end
 end

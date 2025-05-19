@@ -13,7 +13,7 @@ defmodule Teiserver.AccountTest do
       name: "some name",
       permissions: [],
       email: "AnEmailAddress@email.com",
-      password: "some password"
+      password: Account.spring_md5_password("some password")
     }
     @update_attrs %{
       colour: "#0000AA",
@@ -21,7 +21,7 @@ defmodule Teiserver.AccountTest do
       permissions: [],
       name: "some updated name",
       email: "some updated email",
-      password: "some updated password"
+      password: Account.spring_md5_password("some updated password")
     }
     @invalid_attrs %{
       colour: nil,
@@ -99,6 +99,7 @@ defmodule Teiserver.AccountTest do
       assert user.name == "some name"
       assert user.permissions == []
       assert user.name == "some name"
+      assert Account.verify_md5_password(@valid_attrs.password, user.password)
     end
 
     test "create_user/1 with invalid data returns error changeset" do
@@ -131,6 +132,151 @@ defmodule Teiserver.AccountTest do
       user = AccountTestLib.user_fixture()
       assert %Ecto.Changeset{} = Account.change_user(user)
     end
+
+    test "update_user/2 password update" do
+      user = AccountTestLib.user_fixture()
+
+      old_plain_password = "password"
+      old_md5_password = Account.spring_md5_password(old_plain_password)
+      new_plain_password = "new password"
+      new_md5_password = Account.spring_md5_password(new_plain_password)
+
+      refute_password_change(
+        old_plain_password,
+        old_md5_password,
+        new_plain_password,
+        new_md5_password,
+        user.password
+      )
+
+      # Try updating the password, this won't update the password because update_user/2
+      # uses :limited_with_data changeset which doesn't update the password
+      assert {:ok, %User{} = user} = Account.update_user(user, %{password: new_md5_password})
+
+      # Verify nothing changed
+      refute_password_change(
+        old_plain_password,
+        old_md5_password,
+        new_plain_password,
+        new_md5_password,
+        user.password
+      )
+    end
+
+    test "update_user_plain_password/2 password update" do
+      user = AccountTestLib.user_fixture()
+
+      old_plain_password = "password"
+      old_md5_password = Account.spring_md5_password(old_plain_password)
+      new_plain_password = "new password"
+      new_md5_password = Account.spring_md5_password(new_plain_password)
+
+      refute_password_change(
+        old_plain_password,
+        old_md5_password,
+        new_plain_password,
+        new_md5_password,
+        user.password
+      )
+
+      # Entering existing password is required
+      assert {:error,
+              %{
+                errors: [
+                  password_confirmation: {
+                    "Please enter your existing password to change your password.",
+                    []
+                  }
+                ]
+              }} = Account.update_user_plain_password(user, %{"password" => new_plain_password})
+
+      # Test entering incorrect existing password
+      assert {:error,
+              %{
+                errors: [
+                  existing: {
+                    "Incorrect password",
+                    []
+                  }
+                ]
+              }} =
+               Account.update_user_plain_password(user, %{
+                 "password" => new_plain_password,
+                 "existing" => "this is an incorrect password"
+               })
+
+      # This is used by password update form so only plain passwords are used
+      assert {:ok, %User{} = user} =
+               Account.update_user_plain_password(user, %{
+                 "password" => new_plain_password,
+                 "existing" => old_plain_password
+               })
+
+      # Verify password changed
+      assert_password_change(
+        old_plain_password,
+        old_md5_password,
+        new_plain_password,
+        new_md5_password,
+        user.password
+      )
+    end
+
+    test "password_reset_update_user/2 password update" do
+      user = AccountTestLib.user_fixture()
+
+      old_plain_password = "password"
+      old_md5_password = Account.spring_md5_password(old_plain_password)
+      new_plain_password = "new password"
+      new_md5_password = Account.spring_md5_password(new_plain_password)
+
+      refute_password_change(
+        old_plain_password,
+        old_md5_password,
+        new_plain_password,
+        new_md5_password,
+        user.password
+      )
+
+      assert {:ok, %User{} = user} =
+               Account.password_reset_update_user(user, %{
+                 "password" => new_plain_password
+               })
+
+      assert_password_change(
+        old_plain_password,
+        old_md5_password,
+        new_plain_password,
+        new_md5_password,
+        user.password
+      )
+    end
+  end
+
+  def assert_password_change(
+        old_plain_password,
+        old_md5_password,
+        new_plain_password,
+        new_md5_password,
+        argon_hash
+      ) do
+    assert Account.verify_md5_password(new_md5_password, argon_hash)
+    assert Account.verify_plain_password(new_plain_password, argon_hash)
+    refute Account.verify_md5_password(old_md5_password, argon_hash)
+    refute Account.verify_plain_password(old_plain_password, argon_hash)
+  end
+
+  def refute_password_change(
+        old_plain_password,
+        old_md5_password,
+        new_plain_password,
+        new_md5_password,
+        argon_hash
+      ) do
+    refute Account.verify_md5_password(new_md5_password, argon_hash)
+    refute Account.verify_plain_password(new_plain_password, argon_hash)
+    assert Account.verify_md5_password(old_md5_password, argon_hash)
+    assert Account.verify_plain_password(old_plain_password, argon_hash)
   end
 
   # describe "accolades" do

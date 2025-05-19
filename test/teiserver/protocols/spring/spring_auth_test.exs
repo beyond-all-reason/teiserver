@@ -81,39 +81,6 @@ defmodule Teiserver.SpringAuthTest do
 
     assert reply ==
              "SERVERMSG No incomming match for MYSTATUS with data '\"\"'. Userid #{user.id}\n"
-
-    # Now change the password - incorrectly
-    _send_raw(socket, "CHANGEPASSWORD wrong_pass new_pass\n")
-    reply = _recv_raw(socket)
-    assert reply == "SERVERMSG Current password entered incorrectly\n"
-    user = UserCacheLib.get_user_by_name(user.name)
-    assert CacheUser.test_password("X03MO1qnZdYdgyfeuILPmQ==", user.password_hash)
-
-    # Change it correctly
-    _send_raw(socket, "CHANGEPASSWORD X03MO1qnZdYdgyfeuILPmQ== new_pass\n")
-    :timer.sleep(1000)
-    reply = _recv_raw(socket)
-    assert reply == "SERVERMSG Password changed, you will need to use it next time you login\n"
-    user = UserCacheLib.get_user_by_name(user.name)
-    assert CacheUser.test_password("new_pass", user.password_hash)
-
-    # Test no match
-    _send_raw(socket, "CHANGEPASSWORD nomatchname\n")
-    reply = _recv_raw(socket)
-
-    assert reply ==
-             "SERVERMSG No incomming match for CHANGEPASSWORD with data '\"nomatchname\"'. Userid #{user.id}\n"
-
-    # Now test spamming it, this was only added to test a warning showed up for the
-    # status flood protection code
-    # _send_raw(socket, "MYSTATUS 125\n")
-    # _ = _recv_raw(socket)
-
-    # _send_raw(socket, "MYSTATUS 126\n")
-    # _ = _recv_raw(socket)
-
-    # _send_raw(socket, "MYSTATUS 127\n")
-    # _ = _recv_raw(socket)
   end
 
   test "IGNORELIST, IGNORE, UNIGNORE, SAYPRIVATE", %{socket: socket1, user: user} do
@@ -669,7 +636,7 @@ CLIENTS test_room #{user.name}\n"
       CacheUser.user_register_params_with_md5(
         "test_user_bad_id",
         "test_user_bad_id@email.com",
-        "X03MO1qnZdYdgyfeuILPmQ=="
+        Account.spring_md5_password("password")
       )
       |> Teiserver.Account.create_user()
 

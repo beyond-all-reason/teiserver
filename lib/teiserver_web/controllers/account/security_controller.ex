@@ -42,11 +42,8 @@ defmodule TeiserverWeb.Account.SecurityController do
   def update_password(conn, %{"user" => user_params}) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
-    case Account.update_user_password(user, user_params) do
+    case Account.update_user_plain_password(user, user_params) do
       {:ok, _user} ->
-        # User password updated
-        Teiserver.CacheUser.set_new_spring_password(user.id, user_params["password"])
-
         conn
         |> put_flash(:info, "Account password updated successfully.")
         |> redirect(to: Routes.ts_account_security_path(conn, :index))
