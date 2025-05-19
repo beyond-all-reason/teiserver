@@ -2198,13 +2198,13 @@ defmodule Teiserver.Account do
   end
 
   @spec verify_md5_password(String.t(), String.t()) :: boolean
-  def verify_md5_password(md5_password, encrypted) do
-    Argon2.verify_pass(md5_password, encrypted)
+  def verify_md5_password(md5_password, argon_hash) do
+    Argon2.verify_pass(md5_password, argon_hash)
   end
 
   @spec verify_plain_password(String.t(), String.t()) :: boolean
-  def verify_plain_password(plain_text_password, encrypted) do
+  def verify_plain_password(plain_text_password, argon_hash) do
     spring_md5_password(plain_text_password)
-    |> verify_md5_password(encrypted)
+    |> verify_md5_password(argon_hash)
   end
 end
