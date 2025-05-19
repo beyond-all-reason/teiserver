@@ -85,7 +85,8 @@ defmodule Teiserver.Player do
   @doc """
   It's go time! the player should join a game
   """
-  @spec battle_start(T.userid(), TachyonBattle.id(), Teiserver.Autohost.start_response()) :: :ok
+  @spec battle_start(T.userid(), {TachyonBattle.id(), pid()}, Teiserver.Autohost.start_response()) ::
+          :ok
   defdelegate battle_start(user_id, battle_id, battle_start_data), to: Player.Session
 
   @doc """

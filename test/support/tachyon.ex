@@ -347,7 +347,7 @@ defmodule Teiserver.Support.Tachyon do
   end
 
   def subscribe_updates!(client, user_ids) do
-    :ok = send_request(client, "user/subscribeUpdates", %{userIds: user_ids})
+    :ok = send_request(client, "user/subscribeUpdates", %{userIds: Enum.map(user_ids, &to_string/1)})
     {:ok, resp} = recv_message(client)
     resp
   end

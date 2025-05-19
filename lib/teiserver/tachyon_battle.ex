@@ -16,16 +16,16 @@ defmodule Teiserver.TachyonBattle do
   @type id :: T.id()
   @type start_script :: T.start_script()
 
-  @spec start_battle(Teiserver.Autohost.id()) :: {:ok, T.id()} | {:error, term()}
+  @spec start_battle(Teiserver.Autohost.id()) :: {:ok, T.id(), pid()} | {:error, term()}
   def start_battle(autohost_id) do
     battle_id = gen_id()
     # TODO: handle potential errors, like "already registered"
     case TachyonBattle.Supervisor.start_battle(battle_id, autohost_id) do
-      {:ok, _pid} ->
-        {:ok, battle_id}
+      {:ok, pid} ->
+        {:ok, battle_id, pid}
 
-      {:ok, _pid, _info} ->
-        {:ok, battle_id}
+      {:ok, pid, _info} ->
+        {:ok, battle_id, pid}
 
       err ->
         Logger.warning("Cannot start battle: #{inspect(err)}")
@@ -40,14 +40,14 @@ defmodule Teiserver.TachyonBattle do
   Start a battle process and connects it to the given autohost
   """
   @spec start_battle(Bot.id(), T.start_script()) ::
-          {:ok, Autohost.start_response()} | {:error, term()}
+          {:ok, {id(), pid()}, Autohost.start_response()} | {:error, term()}
   def start_battle(autohost_id, start_script) do
-    with {:ok, battle_id} <- start_battle(autohost_id) do
+    with {:ok, battle_id, pid} <- start_battle(autohost_id) do
       start_script = Map.put(start_script, :battleId, battle_id)
       Logger.info("Starting battle with id #{battle_id} on autohost #{autohost_id}")
 
       case Teiserver.Autohost.start_battle(autohost_id, start_script) do
-        {:ok, data} -> {:ok, battle_id, data}
+        {:ok, data} -> {:ok, {battle_id, pid}, data}
         x -> x
       end
     end

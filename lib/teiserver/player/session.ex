@@ -195,10 +195,19 @@ defmodule Teiserver.Player.Session do
   @doc """
   Let the player know that they are now in a battle
   """
-  @spec battle_start(T.userid(), TachyonBattle.id(), Teiserver.Autohost.start_response()) :: :ok
-  def battle_start(user_id, battle_id, battle_start_data) do
-    GenServer.cast(via_tuple(user_id), {:battle, {:start, battle_id, battle_start_data}})
+  @spec battle_start(T.userid(), {TachyonBattle.id(), pid()}, Teiserver.Autohost.start_response()) ::
+          :ok
+  def battle_start(user_id, battle_data, battle_start_data) do
+    GenServer.cast(via_tuple(user_id), {:battle, {:start, battle_data, battle_start_data}})
   end
+
+  @doc """
+  notify the teiserver side that the player left a battle. This is coming
+  from the engine
+  """
+  @spec notify_battle_left(T.userid(), TachyonBattle.id()) :: :ok
+  def notify_battle_left(user_id, battle_id) do
+    GenServer.cast(via_tuple(user_id), {:battle, {:left, battle_id}})
   end
 
   @doc """
@@ -856,8 +865,8 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:battle, {:start, battle_id, battle_start_data}}, state) do
-    Logger.info("starting battle #{inspect(battle_start_data)}")
+  def handle_cast({:battle, {:start, {battle_id, battle_pid}, battle_start_data}}, state) do
+    Logger.info("entering battle #{battle_id}")
 
     case state.matchmaking do
       {:pairing, %{readied: true, battle_password: pass, room: _room_pid}} ->
@@ -872,7 +881,13 @@ defmodule Teiserver.Player.Session do
         }
 
         state = send_to_player(state, {:battle_start, data})
-        monitors = MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
+
+        monitors =
+          MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
+          |> MC.monitor(battle_pid, {:battle, battle_id})
+
+        # TODO: this should ideally come from an engine event, but in first approximation it'll do
+        broadcast_user_update!(state.user, :playing)
 
         {:noreply,
          %{state | matchmaking: :no_matchmaking, monitors: monitors, battle: %{id: battle_id}}}
@@ -1090,6 +1105,11 @@ defmodule Teiserver.Player.Session do
           _ ->
             {:noreply, state}
         end
+
+      {:battle, battle_id} ->
+        Logger.info("battle #{battle_id} went down")
+        broadcast_user_update!(state.user, :menu)
+        {:noreply, %{state | battle: nil}}
     end
   end
 
