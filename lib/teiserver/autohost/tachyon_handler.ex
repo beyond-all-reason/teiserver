@@ -5,9 +5,13 @@ defmodule Teiserver.Autohost.TachyonHandler do
   This is treated separately from a player connection because they fulfill
   very different roles, have very different behaviour and states.
   """
-  alias Teiserver.Tachyon.{Handler, Schema}
   alias Teiserver.Autohost.Registry
   alias Teiserver.Bot.Bot
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.TachyonParser
+  alias Teiserver.Tachyon.{Handler, Schema}
+  alias Teiserver.TachyonBattle
+
   require Logger
   @behaviour Handler
 
@@ -145,7 +149,9 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:stop, :normal, 1000, [{:text, resp}], state}
   end
 
-  def handle_command("autohost/update", "event", _msg_id, _msg, state) do
+  def handle_command("autohost/update", "event", _msg_id, msg, state) do
+    parsed = parse_update_event(msg["data"])
+    Logger.debug("parsed message #{inspect(parsed)}")
     {:ok, state}
   end
 
@@ -185,5 +191,103 @@ defmodule Teiserver.Autohost.TachyonHandler do
           port: data["port"]
         }}}
     )
+  end
+
+  @type update_event_data ::
+          {:player_joined, %{user_id: T.userid(), player_number: integer()}}
+          | {:player_left, %{user_id: T.userid(), reason: :lost_connection | :left | :kicked}}
+          | {:player_defeated, %{user_id: T.userid()}}
+          | :start
+          | {:finished, %{user_id: T.userid(), winning_ally_teams: nonempty_list(integer())}}
+          | {:engine_message, %{message: String.t()}}
+          | {:engine_warning, %{message: String.t()}}
+          | {:engine_crash, %{details: String.t() | nil}}
+          | :engine_quit
+          | {:luamsg,
+             %{
+               user_id: T.userid(),
+               script: :ui | :game | :rules,
+               ui_mode: :all | :allies | :spectators | nil,
+               data: String.t()
+             }}
+  @type update_event :: %{
+          battle_id: TachyonBattle.id(),
+          time: DateTime.t(),
+          update: update_event_data()
+        }
+
+  # Note: this is not truly parsing, but more translating a known structure into
+  # something more idiomatic. The json schema handle the actual validation so
+  # when this function is called, the structure is known
+  @doc false
+  @spec parse_update_event(map()) :: {:ok, update_event()} | {:error, reason :: term()}
+  def parse_update_event(data) do
+    update = data["update"]
+
+    user_id =
+      case Map.get(update, "userId") do
+        nil -> {:ok, nil}
+        raw -> TachyonParser.parse_user_id(raw)
+      end
+
+    with {:ok, time} <- DateTime.from_unix(data["time"], :microsecond),
+         {:ok, user_id} <- user_id do
+      parsed_update =
+        case update["type"] do
+          "player_joined" ->
+            {:player_joined, %{user_id: user_id, player_number: update["playerNumber"]}}
+
+          "player_left" ->
+            reason =
+              case update["reason"] do
+                "lost_connection" -> :lost_connection
+                "left" -> :left
+                "kicked" -> :kicked
+              end
+
+            {:player_left, %{user_id: user_id, reason: reason}}
+
+          "player_defeated" ->
+            {:player_defeated, %{user_id: user_id}}
+
+          "start" ->
+            :start
+
+          "finished" ->
+            {:finished, %{user_id: user_id, winning_ally_teams: update["winningAllyTeams"]}}
+
+          "engine_message" ->
+            {:engine_message, %{message: update["message"]}}
+
+          "engine_warning" ->
+            {:engine_warning, %{message: update["message"]}}
+
+          "engine_crash" ->
+            {:engine_warning, %{details: Map.get(update, "details")}}
+
+          "engine_quit" ->
+            :engine_quit
+
+          "luamsg" ->
+            script =
+              case update["script"] do
+                "ui" -> :ui
+                "game" -> :game
+                "rules" -> :rules
+              end
+
+            ui_mode =
+              case Map.get(update, "uiMode") do
+                nil -> nil
+                "all" -> :all
+                "allies" -> :allies
+                "spectators" -> :spectators
+              end
+
+            {:luamsg, %{user_id: user_id, script: script, ui_mode: ui_mode, data: update["data"]}}
+        end
+
+      {:ok, %{battle_id: data["battleId"], time: time, update: parsed_update}}
+    end
   end
 end
