@@ -42,7 +42,8 @@ defmodule Teiserver.SpringTcpServer do
     mode = if opts[:ssl], do: :ranch_ssl, else: :ranch_tcp
 
     # https://www.erlang.org/docs/23/man/erlang#process_flag_max_heap_size
-    max_heap_size = 2_620_000
+    # 20 MB = 20 * 1024 * 1024 / 8 words = 2_621_440 words (1 word = 8 bytes)
+    max_heap_size = 2_621_440
 
     # start_listener(Ref, Transport, TransOpts0, Protocol, ProtoOpts)
     if mode == :ranch_ssl do
