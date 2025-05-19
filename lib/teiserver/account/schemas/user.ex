@@ -170,6 +170,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(attrs, [:password])
     |> validate_length(:password, min: 6)
+    |> validate_confirmation(:password, message: "Passwords do not match")
     |> put_plain_password_hash()
   end
 
@@ -177,7 +178,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(attrs, [:password])
     |> validate_length(:password, min: 6)
-    |> validate_confirmation(:password, message: "Does not match password")
+    |> validate_confirmation(:password, message: "Passwords do not match")
     |> put_plain_password_hash()
   end
 
