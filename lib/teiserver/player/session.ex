@@ -847,6 +847,8 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_cast({:battle_start, battle_start_data}, state) do
+    Logger.info("starting battle #{inspect(battle_start_data)}")
+
     case state.matchmaking do
       {:pairing, %{readied: true, battle_password: pass, room: _room_pid}} ->
         data = %{

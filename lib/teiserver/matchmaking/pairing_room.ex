@@ -136,17 +136,17 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           Teiserver.Player.matchmaking_notify_lost(p_id, {:server_error, reason})
         end
 
+        Logger.warning("Could not start battle because #{inspect(reason)}")
+
         {:stop, :normal, state}
 
       {:ok, host_data} ->
-        QueueServer.disband_pairing(state.queue_id, self())
-
         ids =
           for team <- state.teams, member <- team, p_id <- member.player_ids do
             p_id
           end
 
-        Logger.debug("Pairing completed for players " <> Enum.join(ids, ","))
+        Logger.info("Starting matchmaking battle for players" <> Enum.join(ids, ","))
 
         battle_start_data =
           host_data
@@ -157,6 +157,8 @@ defmodule Teiserver.Matchmaking.PairingRoom do
         for team <- state.teams, member <- team, p_id <- member.player_ids do
           Teiserver.Player.battle_start(p_id, battle_start_data)
         end
+
+        QueueServer.disband_pairing(state.queue_id, self())
 
         {:stop, :normal, state}
     end
