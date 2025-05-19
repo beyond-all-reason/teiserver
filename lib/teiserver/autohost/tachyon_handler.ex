@@ -25,6 +25,29 @@ defmodule Teiserver.Autohost.TachyonHandler do
           map: %{springName: String.t()}
         }
 
+  # TODO: there should be some kind of retry here
+  @spec start_battle(Bot.id(), Teiserver.Autohost.start_script()) ::
+          {:ok, start_response()} | {:error, term()}
+  def start_battle(autohost_id, start_script) do
+    case Registry.lookup(autohost_id) do
+      {pid, _} ->
+        send(pid, {:start_battle, start_script, self()})
+
+        # This receive is a bit iffy and may cause problem with controlled shutdown
+        # Ideally, the same way player work, there would be a GenServer decoupled
+        # from the actual websocket connection, but for now, this poor's man
+        # GenServer.call will have to do
+        receive do
+          {:start_battle_response, resp} -> resp
+        after
+          10_000 -> {:error, :timeout}
+        end
+
+      _ ->
+        {:error, :no_host_available}
+    end
+  end
+
   @impl Handler
   def connect(conn) do
     autohost = conn.assigns[:token].bot
@@ -131,27 +154,6 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:ok, state}
   end
 
-  # TODO: there should be some kind of retry here
-  @spec start_battle(Bot.id(), Teiserver.Autohost.start_script()) ::
-          {:ok, start_response()} | {:error, term()}
-  def start_battle(autohost_id, start_script) do
-    case Registry.lookup(autohost_id) do
-      {pid, _} ->
-        send(pid, {:start_battle, start_script, self()})
-
-        # This receive is a bit iffy and may cause problem with controlled shutdown
-        # Ideally, the same way player work, there would be a GenServer decoupled
-        # from the actual websocket connection, but for now, this poor's man
-        # GenServer.call will have to do
-        receive do
-          {:start_battle_response, resp} -> resp
-        after
-          10_000 -> {:error, :timeout}
-        end
-
-      _ ->
-        {:error, :no_host_available}
-    end
   end
 
   defp notify_autohost_started(reply_to, %{"status" => "failed", "reason" => reason} = msg) do
