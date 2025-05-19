@@ -15,6 +15,7 @@ defmodule Teiserver.Player.Session do
 
   alias Teiserver.Data.Types, as: T
   alias Teiserver.{Account, Matchmaking, Messaging, Party, Player}
+  alias Teiserver.TachyonBattle
   alias Teiserver.Helpers.BoundedQueue, as: BQ
   alias Phoenix.PubSub
   alias Teiserver.Helpers.MonitorCollection, as: MC
@@ -57,6 +58,12 @@ defmodule Teiserver.Player.Session do
           invited_to: [{integer(), Party.id()}]
         }
 
+  @type battle_state ::
+          nil
+          | %{
+              id: TachyonBattle.id()
+            }
+
   @type state :: %{
           user: T.user(),
           monitors: MC.t(),
@@ -65,7 +72,8 @@ defmodule Teiserver.Player.Session do
           matchmaking: matchmaking_state(),
           messaging_state: messaging_state(),
           party: party_state(),
-          user_subscriptions: MapSet.t(T.userid())
+          user_subscriptions: MapSet.t(T.userid()),
+          battle: battle_state()
         }
 
   # TODO: would be better to have that as a db setting, perhaps passed as an
@@ -92,7 +100,8 @@ defmodule Teiserver.Player.Session do
         buffer: BQ.new(@messaging_buffer_size)
       },
       user_subscriptions: MapSet.new(),
-      party: initial_party_state()
+      party: initial_party_state(),
+      battle: nil
     }
 
     broadcast_user_update!(user, :menu)
@@ -186,9 +195,10 @@ defmodule Teiserver.Player.Session do
   @doc """
   Let the player know that they are now in a battle
   """
-  @spec battle_start(T.userid(), Teiserver.Autohost.start_response()) :: :ok
-  def battle_start(user_id, battle_start_data) do
-    GenServer.cast(via_tuple(user_id), {:battle_start, battle_start_data})
+  @spec battle_start(T.userid(), TachyonBattle.id(), Teiserver.Autohost.start_response()) :: :ok
+  def battle_start(user_id, battle_id, battle_start_data) do
+    GenServer.cast(via_tuple(user_id), {:battle, {:start, battle_id, battle_start_data}})
+  end
   end
 
   @doc """
@@ -846,7 +856,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:battle_start, battle_start_data}, state) do
+  def handle_cast({:battle, {:start, battle_id, battle_start_data}}, state) do
     Logger.info("starting battle #{inspect(battle_start_data)}")
 
     case state.matchmaking do
@@ -863,7 +873,9 @@ defmodule Teiserver.Player.Session do
 
         state = send_to_player(state, {:battle_start, data})
         monitors = MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
-        {:noreply, %{state | matchmaking: :no_matchmaking, monitors: monitors}}
+
+        {:noreply,
+         %{state | matchmaking: :no_matchmaking, monitors: monitors, battle: %{id: battle_id}}}
 
       _ ->
         Logger.warning(

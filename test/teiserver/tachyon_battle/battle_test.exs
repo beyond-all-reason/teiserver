@@ -9,7 +9,7 @@ defmodule Teiserver.TachyonBattle.BattleTest do
     test "happy path" do
       autohost_id = 123
       Teiserver.Autohost.Registry.register(%{id: autohost_id})
-      {:ok, battle_id} = Battle.start_battle(autohost_id)
+      {:ok, battle_id, _pid} = Battle.start_battle(autohost_id)
       poll_until_some(fn -> Battle.lookup(battle_id) end)
     end
   end

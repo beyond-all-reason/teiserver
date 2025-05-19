@@ -45,7 +45,11 @@ defmodule Teiserver.TachyonBattle do
     with {:ok, battle_id} <- start_battle(autohost_id) do
       start_script = Map.put(start_script, :battleId, battle_id)
       Logger.info("Starting battle with id #{battle_id} on autohost #{autohost_id}")
-      Teiserver.Autohost.start_battle(autohost_id, start_script)
+
+      case Teiserver.Autohost.start_battle(autohost_id, start_script) do
+        {:ok, data} -> {:ok, battle_id, data}
+        x -> x
+      end
     end
   end
 
