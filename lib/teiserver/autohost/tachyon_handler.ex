@@ -14,8 +14,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   @type connected_state :: %{max_battles: non_neg_integer(), current_battles: non_neg_integer()}
   @type state :: %{
           autohost: Bot.t(),
-          state: :handshaking | {:connected, connected_state()},
-          pending_responses: Handler.pending_responses()
+          state: :handshaking | {:connected, connected_state()}
         }
 
   @type start_response :: %{
