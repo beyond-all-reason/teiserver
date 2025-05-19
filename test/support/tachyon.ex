@@ -82,6 +82,11 @@ defmodule Teiserver.Support.Tachyon do
         currentBattles: current
       })
 
+    %{"type" => "request", "commandId" => "autohost/subscribeUpdates"} =
+      request = recv_message!(client)
+
+    :ok = send_response(client, request, data: %{})
+
     client
   end
 

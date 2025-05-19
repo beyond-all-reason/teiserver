@@ -1,0 +1,212 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/autohost/update/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AutohostUpdateEvent",
+    "tachyon": {
+        "source": "autohost",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "autohost/update" },
+        "data": {
+            "title": "AutohostUpdateEventData",
+            "type": "object",
+            "properties": {
+                "battleId": { "type": "string", "format": "uuid" },
+                "time": { "$ref": "../../definitions/unixTime.json" },
+                "update": {
+                    "anyOf": [
+                        {
+                            "title": "StartUpdate",
+                            "description": "The battle has started.",
+                            "type": "object",
+                            "properties": { "type": { "const": "start" } },
+                            "required": ["type"]
+                        },
+                        {
+                            "title": "FinishedUpdate",
+                            "description": "The battle finished, generated once per every single player reporting who won.",
+                            "type": "object",
+                            "properties": {
+                                "type": { "const": "finished" },
+                                "userId": {
+                                    "$ref": "../../definitions/userId.json"
+                                },
+                                "winningAllyTeams": {
+                                    "description": "Ally team IDs",
+                                    "type": "array",
+                                    "items": { "type": "integer" },
+                                    "minItems": 1
+                                }
+                            },
+                            "required": ["type", "userId", "winningAllyTeams"]
+                        },
+                        {
+                            "title": "EngineMessageUpdate",
+                            "description": "A message from the engine, e.g. some ip is trying to connect.",
+                            "type": "object",
+                            "properties": {
+                                "type": { "const": "engine_message" },
+                                "message": { "type": "string" }
+                            },
+                            "required": ["type", "message"]
+                        },
+                        {
+                            "title": "EngineWarningUpdate",
+                            "description": "A warning from the engine.",
+                            "type": "object",
+                            "properties": {
+                                "type": { "const": "engine_warning" },
+                                "message": { "type": "string" }
+                            },
+                            "required": ["type", "message"]
+                        },
+                        {
+                            "title": "EngineQuitUpdate",
+                            "description": "The engine process for battle has quit cleanly, no more updates will be sent for this battle.",
+                            "type": "object",
+                            "properties": {
+                                "type": { "const": "engine_quit" }
+                            },
+                            "required": ["type"]
+                        },
+                        {
+                            "title": "EngineCrashUpdate",
+                            "description": "The engine process for battle has crashed, no more updates will be sent for this battle.",
+                            "type": "object",
+                            "properties": {
+                                "type": { "const": "engine_crash" },
+                                "details": {
+                                    "description": "Optional, short, details of the crash.",
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["type"]
+                        },
+                        {
+                            "title": "PlayerJoinedUpdate",
+                            "type": "object",
+                            "properties": {
+                                "type": { "const": "player_joined" },
+                                "userId": {
+                                    "$ref": "../../definitions/userId.json"
+                                },
+                                "playerNumber": {
+                                    "description": "Player number in the game, can be useful for custom commands",
+                                    "type": "integer"
+                                }
+                            },
+                            "required": ["type", "userId", "playerNumber"]
+                        },
+                        {
+                            "title": "PlayerLeftUpdate",
+                            "type": "object",
+                            "properties": {
+                                "type": { "const": "player_left" },
+                                "userId": {
+                                    "$ref": "../../definitions/userId.json"
+                                },
+                                "reason": {
+                                    "enum": [
+                                        "lost_connection",
+                                        "left",
+                                        "kicked"
+                                    ]
+                                }
+                            },
+                            "required": ["type", "userId", "reason"]
+                        },
+                        {
+                            "title": "PlayerChatUpdate",
+                            "anyOf": [
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": { "const": "player_chat" },
+                                        "userId": {
+                                            "$ref": "../../definitions/userId.json"
+                                        },
+                                        "message": { "type": "string" },
+                                        "destination": {
+                                            "enum": [
+                                                "allies",
+                                                "all",
+                                                "spectators"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "type",
+                                        "userId",
+                                        "message",
+                                        "destination"
+                                    ]
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": { "const": "player_chat" },
+                                        "userId": {
+                                            "$ref": "../../definitions/userId.json"
+                                        },
+                                        "message": { "type": "string" },
+                                        "destination": { "const": "player" },
+                                        "toUserId": {
+                                            "$ref": "../../definitions/userId.json"
+                                        }
+                                    },
+                                    "required": [
+                                        "type",
+                                        "userId",
+                                        "message",
+                                        "destination",
+                                        "toUserId"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "title": "PlayerDefeatedUpdate",
+                            "type": "object",
+                            "properties": {
+                                "type": { "const": "player_defeated" },
+                                "userId": {
+                                    "$ref": "../../definitions/userId.json"
+                                }
+                            },
+                            "required": ["type", "userId"]
+                        },
+                        {
+                            "title": "LuaMsgUpdate",
+                            "description": "This update is generated only for messages matching luamsgRegexp set in the battle start script.",
+                            "type": "object",
+                            "properties": {
+                                "type": { "const": "luamsg" },
+                                "userId": {
+                                    "$ref": "../../definitions/userId.json"
+                                },
+                                "script": { "enum": ["ui", "game", "rules"] },
+                                "uiMode": {
+                                    "description": "Set when script is 'ui'",
+                                    "enum": ["all", "allies", "spectators"]
+                                },
+                                "data": {
+                                    "type": "string",
+                                    "contentEncoding": "base64",
+                                    "contentMediaType": "application/octet-stream"
+                                }
+                            },
+                            "required": ["type", "userId", "script", "data"]
+                        }
+                    ]
+                }
+            },
+            "required": ["battleId", "time", "update"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

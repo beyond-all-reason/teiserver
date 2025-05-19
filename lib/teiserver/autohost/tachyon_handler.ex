@@ -51,13 +51,14 @@ defmodule Teiserver.Autohost.TachyonHandler do
   @impl Handler
   def connect(conn) do
     autohost = conn.assigns[:token].bot
-    {:ok, %{autohost: autohost, state: :handshaking, pending_responses: %{}}}
+    {:ok, %{autohost: autohost, state: :handshaking}}
   end
 
   @impl Handler
-  @spec init(state()) :: WebSock.handle_result()
+  @spec init(state()) :: Handler.result()
   def init(state) do
-    {:ok, state}
+    {:request, "autohost/subscribeUpdates",
+     %{since: DateTime.utc_now() |> DateTime.to_unix(:microsecond)}, [], state}
   end
 
   @impl Handler
@@ -144,6 +145,10 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:stop, :normal, 1000, [{:text, resp}], state}
   end
 
+  def handle_command("autohost/update", "event", _msg_id, _msg, state) do
+    {:ok, state}
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
@@ -154,6 +159,10 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:ok, state}
   end
 
+  def handle_response("autohost/subscribeUpdates", _, _response, state) do
+    # TODO: handle potential failure here
+    # for example, autohost refuses any subscription with `since` older than 5 minutes
+    {:ok, state}
   end
 
   defp notify_autohost_started(reply_to, %{"status" => "failed", "reason" => reason} = msg) do
