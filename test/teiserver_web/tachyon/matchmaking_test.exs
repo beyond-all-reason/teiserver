@@ -638,6 +638,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
       start_req = Tachyon.recv_message!(autohost_client)
       assert %{"commandId" => "autohost/start", "type" => "request", "data" => data} = start_req
+      battle_id = data["battleId"]
 
       host_data = %{
         ips: ["127.0.0.1"],
@@ -704,6 +705,13 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       for usr <- clients do
         %{"status" => "success", "data" => info} = Tachyon.user_info!(usr.client, usr.user.id)
         assert info["status"] == "playing"
+      end
+
+      Tachyon.autohost_send_update_event(autohost_client, Tachyon.autohost_engine_quit(battle_id))
+
+      for usr <- clients do
+        %{"commandId" => "user/updated", "data" => %{"users" => [%{"status" => "menu"}]}} =
+          Tachyon.recv_message!(usr.client)
       end
     end
 

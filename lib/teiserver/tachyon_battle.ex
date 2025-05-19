@@ -53,6 +53,9 @@ defmodule Teiserver.TachyonBattle do
     end
   end
 
+  @spec send_update_event(Teiserver.Autohost.update_event()) :: :ok
+  defdelegate send_update_event(event), to: TachyonBattle.Battle
+
   # keep this function private to dissuade caller to misuse the API.
   # Generating a battle id is meaningless unless the corresponding
   # Battle genserver is also started and connected to an autohost

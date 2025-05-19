@@ -222,7 +222,7 @@ defmodule Teiserver.Tachyon.Transport do
         req = Schema.request(cmd_id, payload)
 
         message_id = req.messageId
-        timeout = Keyword.get(opts, :timeout, :timer.seconds(10))
+        timeout = Keyword.get(opts, :timeout, :timer.seconds(10_000))
         tref = :erlang.send_after(timeout, self(), {:timeout, message_id})
 
         new_state =

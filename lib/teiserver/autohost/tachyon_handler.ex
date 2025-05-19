@@ -152,7 +152,16 @@ defmodule Teiserver.Autohost.TachyonHandler do
   def handle_command("autohost/update", "event", _msg_id, msg, state) do
     parsed = parse_update_event(msg["data"])
     Logger.debug("parsed message #{inspect(parsed)}")
-    {:ok, state}
+
+    case parsed do
+      {:ok, ev} ->
+        TachyonBattle.send_update_event(ev)
+        {:ok, state}
+
+      {:error, reason} ->
+        Logger.error("error parsing event: #{inspect(reason)} - #{inspect(msg["data"])}")
+        {:stop, {:shutdown, {:error, reason}}, state}
+    end
   end
 
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
