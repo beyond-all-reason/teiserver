@@ -1,6 +1,7 @@
 defmodule Teiserver.Matchmaking do
-  alias Teiserver.Matchmaking
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Matchmaking
+  alias Teiserver.Party
   require Logger
 
   @type queue :: Matchmaking.QueueServer.queue()
@@ -10,6 +11,7 @@ defmodule Teiserver.Matchmaking do
   @type join_result :: Matchmaking.QueueServer.join_result()
   @type leave_result :: Matchmaking.QueueServer.leave_result()
   @type lost_reason :: Matchmaking.PairingRoom.lost_reason()
+  @type cancelled_reason :: Matchmaking.QueueServer.cancelled_reason()
   @type ready_data :: Matchmaking.PairingRoom.ready_data()
 
   @spec lookup_queue(Matchmaking.QueueServer.id()) :: pid() | nil
@@ -28,8 +30,10 @@ defmodule Teiserver.Matchmaking do
   @doc """
   Request the player to join the specified queue.
   """
-  @spec join_queue(queue_id(), T.userid() | member()) :: join_result()
-  def join_queue(queue_id, member) when not is_map(member) do
+  @spec join_queue(queue_id(), T.userid() | member(), Party.id() | nil) :: join_result()
+  def join_queue(queue_id, member, party_id \\ nil)
+
+  def join_queue(queue_id, member, party_id) when not is_map(member) do
     member = %{
       id: UUID.uuid4(),
       player_ids: [member],
@@ -42,12 +46,16 @@ defmodule Teiserver.Matchmaking do
       increase_distance_after: 10
     }
 
-    join_queue(queue_id, member)
+    join_queue(queue_id, member, party_id)
   end
 
-  def join_queue(queue_id, member) do
-    Matchmaking.QueueServer.join_queue(queue_id, member)
+  def join_queue(queue_id, member, party_id) do
+    Matchmaking.QueueServer.join_queue(queue_id, member, party_id)
   end
+
+  @spec party_join_queue(queue_id(), Party.id(), [%{id: T.userid()}]) ::
+          {:ok, queue_pid :: pid()} | {:error, reason :: term()}
+  defdelegate party_join_queue(queue_id, party_id, players), to: Matchmaking.QueueServer
 
   @spec leave_queue(queue_id(), T.userid()) :: leave_result()
   def leave_queue(queue_id, user_id) do

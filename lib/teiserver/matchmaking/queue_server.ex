@@ -13,6 +13,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
   alias Teiserver.Matchmaking.{QueueRegistry, PairingRoom}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Asset
+  alias Teiserver.Party
+  alias Teiserver.Player
   alias Teiserver.Helpers.MonitorCollection, as: MC
 
   @typedoc """
@@ -68,11 +70,20 @@ defmodule Teiserver.Matchmaking.QueueServer do
           # also store pairing rooms
           monitors: MC.t(),
           # list of pairing rooms and which players are in it
-          pairings: [{pid(), [T.userid()]}]
+          pairings: [{pid(), [T.userid()]}],
+
+          # a buffer when a party is joining, to make sure all player are indeed
+          # committed to joining this queue
+          pending_parties: %{
+            Party.id() => %{waiting_for: [T.userid()], joined: [T.userid()], tref: :timer.tref()}
+          }
 
           # TODO: add some bits for telemetry (see QueueWaitServer) like avg
           # wait time and join count
         }
+
+  @type cancelled_reason ::
+          :intentional | {:server_error, term()} | :party_user_left | :ready_timeout
 
   @spec default_settings() :: settings()
   def default_settings() do
@@ -108,7 +119,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
       members: Map.get(attrs, :members, []),
       monitors: MC.new(),
-      pairings: []
+      pairings: [],
+      pending_parties: %{}
     }
   end
 
@@ -127,17 +139,36 @@ defmodule Teiserver.Matchmaking.QueueServer do
            | :too_many_players
            | :missing_engines
            | :missing_games
-           | :missing_maps}
+           | :missing_maps
+           | :party_too_big}
   @type join_result :: {:ok, queue_pid :: pid()} | join_error()
 
   @doc """
   Join the specified queue
   """
-  @spec join_queue(id(), member()) :: join_result()
-  def join_queue(queue_id, member) do
-    GenServer.call(via_tuple(queue_id), {:join_queue, member})
+  @spec join_queue(id(), member(), Party.id() | nil) :: join_result()
+  def join_queue(queue_id, member, party_id) do
+    if party_id == nil,
+      do: GenServer.call(via_tuple(queue_id), {:join_queue, member}),
+      else: GenServer.call(via_tuple(queue_id), {:join_queue, member, party_id})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_queue}
+  end
+
+  @doc """
+  Creates a "slot" in the queue for the party member to then join the queue.
+  All members must then call party_member_join_queue within a short time
+  or the operation is cancelled and all players already joined are kicked out
+  of the queue.
+  This is to ensure all party member are there as a unit and avoid race where
+  a member could disconnect in the middle of the joining process.
+  """
+  @spec party_join_queue(id(), Party.id(), [%{id: T.userid()}]) ::
+          {:ok, queue_pid :: pid()} | {:error, reason :: term()}
+  def party_join_queue(queue_id, party_id, players) do
+    GenServer.call(via_tuple(queue_id), {:party_join_queue, party_id, players})
+  catch
+    :exit, {:noproc, _} -> {:no, :invalid_queue}
   end
 
   @type leave_result :: :ok | {:error, {:not_queued, :invalid_queue}}
@@ -198,50 +229,69 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
   @impl true
   def handle_call({:join_queue, new_member}, _from, state) do
-    member_ids =
-      Enum.flat_map(state.members, fn m -> m.player_ids end)
-      |> MapSet.new()
+    case member_can_join_queue?(new_member, state) do
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
 
-    pairing_player_ids =
-      for {_, player_ids} <- state.pairings, p_id <- player_ids do
-        p_id
+      :ok ->
+        new_state = add_member_to_queue(state, new_member)
+        {:reply, {:ok, self()}, new_state}
+    end
+  end
+
+  @impl true
+  def handle_call({:join_queue, member, party_id}, _from, state) do
+    [player_id] = member.player_ids
+
+    with :ok <- member_can_join_queue?(member, state),
+         pending when pending != nil <- Map.get(state.pending_parties, party_id) do
+      case Enum.split_with(pending.waiting_for, &(&1 == player_id)) do
+        {[], _} ->
+          {:reply, {:error, :invalid_queue}, state}
+
+        {[_], []} ->
+          member =
+            %{
+              id: UUID.uuid4(),
+              player_ids: [player_id | pending.joined],
+              # TODO: get and aggregate rating somehow
+              rating: %{},
+              # TODO: get and aggregate avoids somehow
+              avoid: [],
+              joined_at: DateTime.utc_now(),
+              search_distance: 0,
+              increase_distance_after: 10
+            }
+
+          :timer.cancel(pending.tref)
+
+          new_state =
+            state
+            |> Map.update!(:pending_parties, &Map.delete(&1, party_id))
+            |> add_member_to_queue(member)
+
+          Logger.info("Party #{party_id} with members #{inspect(member.player_ids)} joined queue")
+
+          {:reply, {:ok, self()}, new_state}
+
+        {[_], rest} ->
+          pending =
+            pending
+            |> Map.replace!(:waiting_for, rest)
+            |> Map.update!(:joined, fn js -> [player_id | js] end)
+
+          new_state =
+            state
+            |> put_in([:pending_parties, party_id], pending)
+
+          {:reply, {:ok, self()}, new_state}
       end
-      |> MapSet.new()
+    else
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
 
-    new_ids = MapSet.new(new_member.player_ids)
-    is_queuing = !MapSet.disjoint?(member_ids, new_ids)
-    is_pairing = !MapSet.disjoint?(pairing_player_ids, new_ids)
-
-    cond do
-      Enum.count(new_member.player_ids) > state.queue.team_size ->
-        {:reply, {:error, :too_many_players}, state}
-
-      Enum.empty?(state.queue.engines) ->
-        {:reply, {:error, :missing_engines}, state}
-
-      Enum.empty?(state.queue.games) ->
-        {:reply, {:error, :missing_games}, state}
-
-      Enum.empty?(state.queue.maps) ->
-        {:reply, {:error, :missing_maps}, state}
-
-      !is_queuing && !is_pairing ->
-        monitors =
-          Enum.reduce(new_member.player_ids, state.monitors, fn user_id, monitors ->
-            pid = Teiserver.Player.lookup_connection(user_id)
-
-            if pid != nil do
-              MC.monitor(monitors, pid, {:player, user_id})
-            else
-              monitors
-            end
-          end)
-
-        {:reply, {:ok, self()},
-         %{state | members: [new_member | state.members], monitors: monitors}}
-
-      true ->
-        {:reply, {:error, :already_queued}, state}
+      nil ->
+        {:reply, {:error, :invalid_party}, state}
     end
   end
 
@@ -271,6 +321,28 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
       _ ->
         {:reply, :ok, state}
+    end
+  end
+
+  def handle_call({:party_join_queue, party_id, players}, _from, state) do
+    cond do
+      length(players) > state.queue.team_size ->
+        {:reply, {:error, :party_too_big}, state}
+
+      party_id in state.pending_parties ->
+        {:reply, {:error, :already_joined}, state}
+
+      true ->
+        # don't bother creating monitors for the players or the party
+        # since the entry gets removed after a short timeout.
+        state =
+          Map.update!(state, :pending_parties, fn p ->
+            ids = Enum.map(players, fn player -> player.id end)
+            tref = :timer.send_after(5000, {:cancel_party, party_id})
+            Map.put(p, party_id, %{waiting_for: ids, joined: [], tref: tref})
+          end)
+
+        {:reply, {:ok, self()}, state}
     end
   end
 
@@ -351,7 +423,35 @@ defmodule Teiserver.Matchmaking.QueueServer do
     {:noreply, new_state}
   end
 
+  def handle_info({:cancel_party, party_id}, state) do
+    case Map.get(state.pending_parties, party_id) do
+      nil ->
+        {:noreply, state}
+
+      pending ->
+        # a client failing to join should be infrequent, so log if that happens
+        Logger.info(
+          "Party #{party_id} failed to join, waiting for #{inspect(pending.waiting_for)}"
+        )
+
+        Enum.each(pending.joined, &Player.matchmaking_notify_cancelled(&1, :party_user_left))
+        state = %{state | pending_parties: Map.delete(state.pending_parties, party_id)}
+        {:noreply, state}
+    end
+  end
+
   defp remove_player(player_id, state) do
+    pending_party =
+      Enum.find(state.pending_parties, fn {_, x} ->
+        Enum.any?(x.waiting_for, &(player_id == &1)) || Enum.any?(x.joined, &(player_id == &1))
+      end)
+
+    if pending_party == nil,
+      do: remove_member(player_id, state),
+      else: remove_from_pending_parties(player_id, pending_party, state)
+  end
+
+  defp remove_member(player_id, state) do
     {to_remove, new_members} =
       Enum.split_with(state.members, fn member ->
         Enum.member?(member.player_ids, player_id)
@@ -369,8 +469,10 @@ defmodule Teiserver.Matchmaking.QueueServer do
       {[to_remove], _} ->
         monitors = demonitor_players(to_remove.player_ids, state.monitors)
 
-        # TODO tachyon_mvp: need to let all the other players know that they are
-        # being removed from the queue
+        for p_id when p_id != player_id <- to_remove.player_ids do
+          Player.matchmaking_notify_cancelled(p_id, :party_user_left)
+        end
+
         {:ok, %{state | members: new_members, monitors: monitors}}
 
       # there is no case with multiple member to remove since this is prevented when adding to a queue
@@ -379,6 +481,69 @@ defmodule Teiserver.Matchmaking.QueueServer do
         PairingRoom.cancel(room_pid, player_id)
         {:ok, %{state | pairings: other_pairings, monitors: monitors}}
     end
+  end
+
+  defp remove_from_pending_parties(player_id, {party_id, pending_party}, state) do
+    for p_id when p_id != player_id <- pending_party.waiting_for ++ pending_party.joined do
+      Player.matchmaking_notify_lost(p_id, :cancel)
+    end
+
+    Party.matchmaking_notify_cancel(party_id)
+    :timer.cancel(pending_party.tref)
+
+    Map.update!(state, :pending_parties, &Map.delete(&1, party_id))
+  end
+
+  @spec member_can_join_queue?(member(), state()) :: :ok | {:error, reason :: term()}
+  defp member_can_join_queue?(member, state) do
+    member_ids =
+      Enum.flat_map(state.members, fn m -> m.player_ids end)
+      |> MapSet.new()
+
+    pairing_player_ids =
+      for {_, player_ids} <- state.pairings, p_id <- player_ids do
+        p_id
+      end
+      |> MapSet.new()
+
+    new_ids = MapSet.new(member.player_ids)
+    is_queuing = !MapSet.disjoint?(member_ids, new_ids)
+    is_pairing = !MapSet.disjoint?(pairing_player_ids, new_ids)
+
+    cond do
+      Enum.count(member.player_ids) > state.queue.team_size ->
+        {:error, :too_many_players}
+
+      Enum.empty?(state.queue.engines) ->
+        {:error, :missing_engines}
+
+      Enum.empty?(state.queue.games) ->
+        {:error, :missing_games}
+
+      Enum.empty?(state.queue.maps) ->
+        {:error, :missing_maps}
+
+      !is_queuing && !is_pairing ->
+        :ok
+
+      true ->
+        {:error, :already_queued}
+    end
+  end
+
+  defp add_member_to_queue(state, new_member) do
+    monitors =
+      Enum.reduce(new_member.player_ids, state.monitors, fn user_id, monitors ->
+        pid = Teiserver.Player.lookup_connection(user_id)
+
+        if pid != nil do
+          MC.monitor(monitors, pid, {:player, user_id})
+        else
+          monitors
+        end
+      end)
+
+    %{state | members: [new_member | state.members], monitors: monitors}
   end
 
   @doc """

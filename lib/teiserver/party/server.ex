@@ -5,6 +5,7 @@ defmodule Teiserver.Party.Server do
 
   alias Teiserver.Party
   alias Teiserver.Player
+  alias Teiserver.Matchmaking
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
 
@@ -26,7 +27,8 @@ defmodule Teiserver.Party.Server do
               valid_until: DateTime.t(),
               timeout_ref: :timer.tref()
             }
-          ]
+          ],
+          matchmaking: nil | %{queues: [Matchmaking.queue_id()]}
         }
 
   @spec gen_party_id() :: id()
@@ -109,6 +111,34 @@ defmodule Teiserver.Party.Server do
     :exit, {:noproc, _} -> nil
   end
 
+  @doc """
+  Make all the members of the party join the specified matchmaking queues.
+  The party server will only notify the members that they should join the
+  specified queues.
+
+  Once the party is in matchmaking, it is "locked", all invites are cancelled
+  and no new invites can be sent.
+  We may revisit this decision later, but for now it drastically simplify the
+  interactions between parties and matchmaking by removing any potential of a
+  party member already being in matchmaking outside the party.
+  """
+  @spec join_queues(id(), [Matchmaking.queue_id()]) :: :ok | {:error, reason :: term()}
+  def join_queues(party_id, queues) do
+    GenServer.call(via_tuple(party_id), {:join_matchmaking_queues, queues})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_party}
+  end
+
+  @doc """
+  Let the party know that it is no longer in matchmaking. The responsability
+  to let the player know falls upon the matchmaking system, this is only
+  to set the party state.
+  """
+  @spec matchmaking_notify_cancel(id()) :: :ok
+  def matchmaking_notify_cancel(party_id) do
+    GenServer.cast(via_tuple(party_id), :lost_matchmaking_queue)
+  end
+
   def start_link({party_id, _user_id} = args) do
     GenServer.start_link(__MODULE__, args, name: via_tuple(party_id))
   end
@@ -122,7 +152,8 @@ defmodule Teiserver.Party.Server do
         pid: self(),
         monitors: MC.new(),
         members: [],
-        invited: []
+        invited: [],
+        matchmaking: nil
       }
       |> add_member(user_id)
 
@@ -153,6 +184,10 @@ defmodule Teiserver.Party.Server do
         {:reply, :ok, new_state}
     end
   end
+
+  def handle_call({:create_invite, _user_id}, _from, state)
+      when state.matchmaking != nil,
+      do: {:reply, {:error, :party_in_matchmaking}, state}
 
   def handle_call({:create_invite, user_id}, _from, state) do
     invited = Enum.find(state.invited, fn %{id: id} -> id == user_id end)
@@ -236,12 +271,12 @@ defmodule Teiserver.Party.Server do
   end
 
   def handle_call({:cancel_invite, user_id}, _from, state) do
-    case Enum.split_with(state.invited, fn %{id: id} -> id == user_id end) do
-      {[], _} ->
+    case Enum.find(state.invited, fn %{id: id} -> id == user_id end) do
+      nil ->
         {:reply, {:error, :not_invited}, state}
 
-      {[invite], rest} ->
-        state = cancel_invite_internal(invite, rest, state)
+      invite ->
+        state = cancel_invite_internal(invite, state)
         {:reply, {:ok, state}, state}
     end
   end
@@ -270,6 +305,69 @@ defmodule Teiserver.Party.Server do
     end
   end
 
+  def handle_call({:join_matchmaking_queues, _queues}, _from, state)
+      when not is_nil(state.matchmaking),
+      do: {:reply, {:error, :already_queued}, state}
+
+  def handle_call({:join_matchmaking_queues, queues}, _from, state) do
+    members_id = Enum.map(state.members, fn m -> %{id: m.id} end)
+
+    result =
+      Enum.reduce_while(queues, state.monitors, fn q_id, monitors ->
+        case Matchmaking.party_join_queue(q_id, state.id, members_id) do
+          {:ok, queue_pid} ->
+            {:cont, MC.monitor(monitors, queue_pid, {:queue, q_id})}
+
+          {:error, reason} ->
+            {:halt, {:error, reason, monitors}}
+        end
+      end)
+
+    case result do
+      {:error, reason, monitors} ->
+        # for simplicity, just demonitor everything, even if the queue may not
+        # have been joined yet
+        state =
+          Map.replace!(
+            state,
+            :monitors,
+            Enum.reduce(queues, monitors, &MC.demonitor_by_val(&2, {:queue, &1}))
+          )
+
+        {:reply, {:error, reason}, state}
+
+      monitors ->
+        state =
+          state
+          |> bump()
+          |> Map.replace!(:monitors, monitors)
+          |> Map.replace!(:matchmaking, %{queues: queues})
+
+        # when entering matchmaking, "lock" the party, all invites are cancelled
+        state = Enum.reduce(state.invited, state, &cancel_invite_internal(&1, &2))
+
+        for member <- state.members do
+          Player.party_notify_join_queues(member.id, queues, state)
+        end
+
+        {:reply, :ok, state}
+    end
+  end
+
+  @impl true
+  def handle_cast(:lost_matchmaking_queue, state)
+      when state.matchmaking == nil,
+      do: {:noreply, state}
+
+  def handle_cast(:lost_matchmaking_queue, state) do
+    monitors =
+      Enum.reduce(state.matchmaking.queues, state.monitors, fn queue_id, mc ->
+        MC.demonitor_by_val(mc, queue_id)
+      end)
+
+    {:noreply, %{state | monitors: monitors, matchmaking: nil}}
+  end
+
   @impl true
   def handle_info({:DOWN, ref, :process, _pid, _reason}, state) do
     val = MC.get_val(state.monitors, ref)
@@ -291,18 +389,21 @@ defmodule Teiserver.Party.Server do
             Enum.filter(members, fn m -> m.id != user_id end)
           end)
           |> notify_updated()
+
+        {:queue, _qid} ->
+          %{state | matchmaking: nil}
       end
 
     {:noreply, state}
   end
 
   def handle_info({:invite_timeout, user_id}, state) do
-    case Enum.split_with(state.invited, &(&1.id == user_id)) do
-      {[invite], rest} ->
-        state = cancel_invite_internal(invite, rest, state)
+    case Enum.find(state.invited, &(&1.id == user_id)) do
+      nil ->
         {:noreply, state}
 
-      _ ->
+      invite ->
+        state = cancel_invite_internal(invite, state)
         {:noreply, state}
     end
   end
@@ -341,13 +442,13 @@ defmodule Teiserver.Party.Server do
     end
   end
 
-  defp cancel_invite_internal(invite, other_invites, state) do
+  defp cancel_invite_internal(invite, state) do
     :timer.cancel(invite.timeout_ref)
 
     state =
       state
       |> bump()
-      |> Map.put(:invited, other_invites)
+      |> Map.update!(:invited, fn invites -> Enum.filter(invites, &(&1 != invite)) end)
       |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:invite, invite.id}))
 
     Player.party_notify_removed(invite.id, state)

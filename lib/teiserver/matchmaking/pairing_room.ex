@@ -170,7 +170,6 @@ defmodule Teiserver.Matchmaking.PairingRoom do
       {[], _} ->
         {:reply, {:error, :no_match}, state}
 
-      # TODO tachyon_mvp: if no more player is waiting, starts the game
       {[_], rest} ->
         max = state.queue.team_count * state.queue.team_size
         current = max - Enum.count(rest)
@@ -205,8 +204,18 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     # in the room and directly cancel everyone
     QueueServer.disband_pairing(state.queue_id, self())
 
-    for team <- state.teams, member <- team, p_id <- member.player_ids, p_id != user_id do
-      Teiserver.Player.matchmaking_notify_lost(p_id, :cancel)
+    for team <- state.teams, member <- team do
+      for p_id <- member.player_ids do
+        if p_id == user_id do
+          # when a user in a party leaves while in a pairing room, need to let know
+          # the other member of this party that this happened
+          for p_id <- member.player_ids, p_id != user_id do
+            Teiserver.Player.matchmaking_notify_cancelled(p_id, :party_user_left)
+          end
+        else
+          Teiserver.Player.matchmaking_notify_lost(p_id, :cancel)
+        end
+      end
     end
 
     {:stop, :normal, state}

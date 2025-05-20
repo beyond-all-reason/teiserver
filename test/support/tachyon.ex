@@ -196,6 +196,21 @@ defmodule Teiserver.Support.Tachyon do
   end
 
   @doc """
+  simple function to receive all message for a connection. Returns the list of
+  received messages when there's the first timeout.
+  """
+  def drain(client, recv_opts \\ []) do
+    drain(client, recv_opts, [])
+  end
+
+  defp drain(client, recv_opts, messages) do
+    case recv_message(client, recv_opts) do
+      {:ok, msg} -> drain(client, recv_opts, [msg | messages])
+      {:error, :timeout} -> Enum.reverse(messages)
+    end
+  end
+
+  @doc """
   Cleanly disconnect a client by sending a disconnect message before closing
   the connection.
   """
