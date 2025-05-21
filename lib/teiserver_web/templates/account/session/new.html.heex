@@ -36,6 +36,16 @@
             </div>
           </div>
 
+          <div :if={@can_register?} class="form-group m-2 mt-4">
+            <div class="row">
+              <div class="col-md-12">
+                <.link href={~p"/register"} class="btn btn-secondary btn-block">
+                  No account? Create one
+                </.link>
+              </div>
+            </div>
+          </div>
+
           <div class="form-group m-2 mt-4">
             <div class="row">
               <%= if Teiserver.Config.get_site_config_cache("site.Main site link") do %>

@@ -86,6 +86,24 @@ defmodule Teiserver.Account.User do
     cast(struct, %{permissions: permissions}, [:permissions])
   end
 
+  def changeset(user, attrs, :register) do
+    attrs = remove_whitespace(attrs, [:email])
+
+    user
+    |> cast(attrs, [:name, :email, :password])
+    |> unique_constraint(:email)
+    |> validate_required([:name, :email, :password])
+    |> validate_confirmation(:password, required: true, message: "Passwords do not match")
+    |> validate_change(:name, fn :name, name ->
+      case Teiserver.Account.valid_name?(name, false) do
+        :ok -> []
+        {:error, reason} -> [{:name, reason}]
+      end
+    end)
+    |> validate_password()
+    |> put_plain_password_hash()
+  end
+
   def changeset(user, attrs, :server_limited_update_user) do
     attrs =
       attrs
@@ -169,7 +187,7 @@ defmodule Teiserver.Account.User do
   def changeset(user, attrs, :password_reset) do
     user
     |> cast(attrs, [:password])
-    |> validate_length(:password, min: 6)
+    |> validate_password()
     |> validate_confirmation(:password, message: "Passwords do not match")
     |> put_plain_password_hash()
   end
@@ -177,10 +195,12 @@ defmodule Teiserver.Account.User do
   defp change_plain_password(user, attrs) do
     user
     |> cast(attrs, [:password])
-    |> validate_length(:password, min: 6)
-    |> validate_confirmation(:password, message: "Passwords do not match")
+    |> validate_password()
+    |> validate_confirmation(:password, message: "Does not match password")
     |> put_plain_password_hash()
   end
+
+  defp validate_password(changeset), do: validate_length(changeset, :password, min: 6)
 
   defp put_plain_password_hash(
          %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset

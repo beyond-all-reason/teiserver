@@ -92,7 +92,7 @@ defmodule Teiserver.CacheUser do
     |> Regex.replace(name, "")
   end
 
-  @spec check_symbol_limit(String.t()) :: Boolean.t()
+  @spec check_symbol_limit(String.t()) :: boolean()
   def check_symbol_limit(name) do
     name
     |> String.replace(~r/[[:alnum:]]/, "")
@@ -261,17 +261,10 @@ defmodule Teiserver.CacheUser do
   @spec rename_user(T.userid(), String.t(), boolean) :: :success | {:error, String.t()}
   def rename_user(userid, new_name, admin_action \\ false) do
     new_name = String.trim(new_name)
-    max_username_length = Config.get_site_config_cache("teiserver.Username max length")
 
     cond do
       is_restricted?(userid, ["Community", "Renaming"]) ->
         {:error, "Your account is restricted from renaming"}
-
-      admin_action == false and WordLib.reserved_name?(new_name) == true ->
-        {:error, "That name is in restricted for use by the server, please choose another"}
-
-      admin_action == false and WordLib.acceptable_name?(new_name) == false ->
-        {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
 
       admin_action == false and renamed_recently(userid) ->
         {:error, "Rename limit reached (2 times in 5 days or 3 times in 30 days)"}
@@ -279,22 +272,47 @@ defmodule Teiserver.CacheUser do
       admin_action == false and is_restricted?(userid, ["All chat", "Renaming"]) ->
         {:error, "Muted"}
 
-      clean_name(new_name) |> String.length() > max_username_length ->
+      true ->
+        case valid_name?(new_name, admin_action) do
+          :ok ->
+            do_rename_user(userid, new_name)
+            :success
+
+          {:error, reason} ->
+            {:error, reason}
+        end
+    end
+  end
+
+  @spec valid_name?(String.t(), boolean()) :: :ok | {:error, reason :: String.t()}
+  def valid_name?(name, admin_action) do
+    max_username_length = Config.get_site_config_cache("teiserver.Username max length")
+
+    cond do
+      admin_action == false and WordLib.reserved_name?(name) == true ->
+        {:error, "That name is in restricted for use by the server, please choose another"}
+
+      admin_action == false and WordLib.acceptable_name?(name) == false ->
+        {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
+
+      clean_name(name) |> String.length() > max_username_length ->
         {:error, "Max length #{max_username_length} characters"}
 
-      clean_name(new_name) != new_name ->
+      clean_name(name) != name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
 
-      check_symbol_limit(new_name) ->
+      check_symbol_limit(name) ->
         {:error, "Too many repeated symbols in name"}
 
-      get_user_by_name(new_name) &&
-          get_user_by_name(new_name).name |> String.downcase() == String.downcase(new_name) ->
-        {:error, "Username already taken"}
-
       true ->
-        do_rename_user(userid, new_name)
-        :success
+        # TODO: create a unique index on lower(name) so that this check is fast
+        # (and also redundant)
+        users = Teiserver.Account.query_users(search: [name_lower: name], select: [:name])
+
+        case users do
+          [] -> :ok
+          _ -> {:error, "Username already taken"}
+        end
     end
   end
 

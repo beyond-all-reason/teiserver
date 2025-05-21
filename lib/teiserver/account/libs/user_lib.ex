@@ -130,6 +130,13 @@ defmodule Teiserver.Account.UserLib do
     |> broadcast_create_user()
   end
 
+  def register_user(attrs \\ %{}) do
+    %User{}
+    |> User.changeset(attrs, :register)
+    |> Repo.insert()
+    |> broadcast_create_user()
+  end
+
   @doc """
   Updates a user.
 

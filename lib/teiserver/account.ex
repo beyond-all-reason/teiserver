@@ -44,6 +44,9 @@ defmodule Teiserver.Account do
   @spec create_user(map) :: {:ok, User} | {:error, Ecto.Changeset}
   defdelegate create_user(attrs), to: UserLib
 
+  @spec register_user(map) :: {:ok, User} | {:error, Ecto.Changeset.t()}
+  defdelegate register_user(attrs), to: UserLib
+
   @spec script_create_user(map) :: {:ok, User} | {:error, Ecto.Changeset}
   defdelegate script_create_user(attrs), to: UserLib
 
@@ -2039,6 +2042,9 @@ defmodule Teiserver.Account do
   @spec rename_user(T.userid(), String.t(), boolean) :: :success | {:error, String.t()}
   defdelegate rename_user(userid, new_name, admin_action \\ false), to: Teiserver.CacheUser
 
+  @spec valid_name?(String.t(), boolean()) :: :ok | {:error, String.t()}
+  defdelegate valid_name?(new_name, admin_action), to: Teiserver.CacheUser
+
   @spec system_change_user_name(T.userid(), String.t()) :: :ok
   defdelegate system_change_user_name(userid, new_name), to: Teiserver.CacheUser
 
@@ -2206,5 +2212,15 @@ defmodule Teiserver.Account do
   def verify_plain_password(plain_text_password, argon_hash) do
     spring_md5_password(plain_text_password)
     |> verify_md5_password(argon_hash)
+  end
+
+  @spec can_register?() :: boolean()
+  def can_register?(),
+    do: Teiserver.Config.get_site_config_cache("teiserver.Enable registrations")
+
+  @spec can_register_with_web?() :: boolean()
+  def can_register_with_web?() do
+    can_register?() &&
+      not Teiserver.Config.get_site_config_cache("teiserver.Require Chobby registration")
   end
 end

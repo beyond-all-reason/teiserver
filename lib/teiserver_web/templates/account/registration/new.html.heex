@@ -1,0 +1,48 @@
+<div class="row" style="padding-top: 15vh;" id="login-div">
+  <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3>
+          <img
+            src={Routes.static_path(@conn, "/images/logo/logo_favicon.png")}
+            height="42"
+            style="margin-right: 5px;"
+            class="d-inline align-top"
+          /> Create account
+        </h3>
+      </div>
+      <div class="card-body">
+        <CC.simple_form :let={f} for={@changeset} action={@action}>
+          <CC.error :if={@changeset.action}>
+            Oops, something went wrong! Please check the errors below.
+          </CC.error>
+          <div class="form-group m-2">
+            <CC.input
+              field={f[:name]}
+              type="text"
+              label="Name (can be changed later)"
+              autofocus="autofocus"
+            />
+          </div>
+          <div class="form-group m-2">
+            <CC.input field={f[:email]} type="email" label="Email" />
+          </div>
+          <div class="form-group m-2">
+            <CC.input field={f[:password]} type="password" label="Password" />
+          </div>
+          <div class="form-group m-2">
+            <CC.input field={f[:password_confirmation]} type="password" label="Confirm password" />
+          </div>
+
+          <div class="form-group m-2 mt-4">
+            <div class="row">
+              <div class="col-md-12">
+                <button class="btn btn-primary btn-block">Create account</button>
+              </div>
+            </div>
+          </div>
+        </CC.simple_form>
+      </div>
+    </div>
+  </div>
+</div>
