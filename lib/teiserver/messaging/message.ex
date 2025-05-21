@@ -2,7 +2,9 @@ defmodule Teiserver.Messaging.Message do
   @enforce_keys [:content, :source, :timestamp, :marker]
   defstruct [:content, :source, :timestamp, :marker]
 
-  @type entity :: {:player, Teiserver.Data.Types.userid()}
+  @type entity ::
+          {:player, Teiserver.Data.Types.userid()}
+          | {:party, Teiserver.Party.id(), Teiserver.Data.Types.userid()}
   @type t :: %__MODULE__{
           content: String.t(),
           source: entity(),

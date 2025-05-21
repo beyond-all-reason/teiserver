@@ -211,6 +211,11 @@ defmodule Teiserver.Player.Session do
     GenServer.cast(via_tuple(user_id), {:messaging, {:dm, message}})
   end
 
+  @spec send_party_message(T.userid(), String.t()) :: :ok | {:error, reason :: term()}
+  def send_party_message(user_id, message_content) do
+    GenServer.call(via_tuple(user_id), {:messaging, {:send_party_message, message_content}})
+  end
+
   @doc """
   notify the connected player that they received a new friend request.
   If the player isn't connected it's a no-op. They'll get the friend request
@@ -491,6 +496,17 @@ defmodule Teiserver.Player.Session do
       end
 
     {:reply, {:ok, has_missed_messages, msg_to_send}, state}
+  end
+
+  def handle_call({:messaging, {:send_party_message, _message_content}}, _from, state)
+      when state.party.current_party == nil,
+      do: {:reply, {:error, "not in party"}}
+
+  def handle_call({:messaging, {:send_party_message, message_content}}, _from, state) do
+    case Party.send_message(state.party.current_party, state.user.id, message_content) do
+      :ok -> {:reply, :ok, state}
+      {:error, :invalid_request, reason} -> {:reply, {:error, reason}, state}
+    end
   end
 
   def handle_call({:user, {:subscribe_updates, user_ids}}, _from, state) do
@@ -866,7 +882,7 @@ defmodule Teiserver.Player.Session do
 
     case {state.messaging_state.subscribed?, state.conn_pid} do
       {true, pid} when not is_nil(pid) ->
-        send(pid, {:messaging, {:dm_received, message}})
+        send(pid, {:messaging, {:received, message}})
         {:noreply, state}
 
       _ ->

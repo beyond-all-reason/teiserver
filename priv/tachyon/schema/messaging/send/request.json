@@ -17,12 +17,23 @@
             "type": "object",
             "properties": {
                 "target": {
-                    "type": "object",
-                    "properties": {
-                        "type": { "const": "player" },
-                        "userId": { "$ref": "../../definitions/userId.json" }
-                    },
-                    "required": ["type", "userId"]
+                    "anyOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": { "const": "player" },
+                                "userId": {
+                                    "$ref": "../../definitions/userId.json"
+                                }
+                            },
+                            "required": ["type", "userId"]
+                        },
+                        {
+                            "type": "object",
+                            "properties": { "type": { "const": "party" } },
+                            "required": ["type"]
+                        }
+                    ]
                 },
                 "message": { "type": "string", "maxLength": 512 }
             },

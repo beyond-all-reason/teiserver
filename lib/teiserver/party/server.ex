@@ -6,6 +6,7 @@ defmodule Teiserver.Party.Server do
   alias Teiserver.Party
   alias Teiserver.Player
   alias Teiserver.Matchmaking
+  alias Teiserver.Messaging
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
 
@@ -137,6 +138,14 @@ defmodule Teiserver.Party.Server do
   @spec matchmaking_notify_cancel(id()) :: :ok
   def matchmaking_notify_cancel(party_id) do
     GenServer.cast(via_tuple(party_id), :lost_matchmaking_queue)
+  end
+
+  @spec send_message(id(), T.userid(), String.t()) ::
+          :ok | {:error, :invalid_request, reason :: term()}
+  def send_message(party_id, from_id, msg_content) do
+    GenServer.call(via_tuple(party_id), {:send_message, from_id, msg_content})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_request, "invalid party"}
   end
 
   def start_link({party_id, _user_id} = args) do
@@ -351,6 +360,25 @@ defmodule Teiserver.Party.Server do
         end
 
         {:reply, :ok, state}
+    end
+  end
+
+  def handle_call({:send_message, from_id, msg_content}, _from, state) do
+    if Enum.find(state.members, &(&1.id == from_id)) == nil do
+      {:reply, {:error, :invalid_request, :not_a_party_member}, state}
+    else
+      msg =
+        Messaging.new(
+          msg_content,
+          {:party, state.id, from_id},
+          :erlang.monotonic_time(:micro_seconds)
+        )
+
+      for m <- state.members, m.id != from_id do
+        Messaging.send(msg, {:player, m.id})
+      end
+
+      {:reply, :ok, state}
     end
   end
 

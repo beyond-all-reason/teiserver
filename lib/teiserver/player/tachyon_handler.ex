@@ -125,7 +125,7 @@ defmodule Teiserver.Player.TachyonHandler do
     {:request, "battle/start", data, [], state}
   end
 
-  def handle_info({:messaging, {:dm_received, message}}, state) do
+  def handle_info({:messaging, {:received, message}}, state) do
     {:event, "messaging/received", message_to_tachyon(message), state}
   end
 
@@ -289,15 +289,27 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("messaging/send", "request", _message_id, msg, state) do
-    with {:ok, target} <- message_target_from_tachyon(msg["data"]["target"]),
-         msg <-
-           Messaging.new(
-             msg["data"]["message"],
-             {:player, state.user.id},
-             :erlang.monotonic_time(:micro_seconds)
-           ),
-         :ok <- Messaging.send(msg, target) do
-      {:response, state}
+    with {:ok, target} <- message_target_from_tachyon(msg["data"]["target"]) do
+      case target do
+        {:player, _} ->
+          msg =
+            Messaging.new(
+              msg["data"]["message"],
+              {:player, state.user.id},
+              :erlang.monotonic_time(:micro_seconds)
+            )
+
+          case Messaging.send(msg, target) do
+            :ok -> {:response, state}
+            {:error, :invalid_recipient} -> {:error_response, :invalid_target, state}
+          end
+
+        :party ->
+          case Player.Session.send_party_message(state.user.id, msg["data"]["message"]) do
+            :ok -> {:response, state}
+            {:error, reason} -> {:error_response, :invalid_request, inspect(reason), state}
+          end
+      end
     else
       {:error, :invalid_recipient} ->
         {:error_response, :invalid_target, state}
@@ -595,7 +607,11 @@ defmodule Teiserver.Player.TachyonHandler do
 
   defp message_source_to_tachyon(source) do
     case source do
-      {:player, player_id} -> %{type: "player", userId: to_string(player_id)}
+      {:player, player_id} ->
+        %{type: :player, userId: to_string(player_id)}
+
+      {:party, party_id, sender_id} ->
+        %{type: :party, partyId: party_id, userId: to_string(sender_id)}
     end
   end
 
@@ -606,6 +622,9 @@ defmodule Teiserver.Player.TachyonHandler do
           {user_id, ""} -> {:ok, {:player, user_id}}
           _ -> {:error, :invalid_recipient}
         end
+
+      "party" ->
+        {:ok, :party}
 
       _ ->
         {:error, :invalid_recipient}
