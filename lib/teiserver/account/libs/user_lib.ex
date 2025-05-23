@@ -132,7 +132,7 @@ defmodule Teiserver.Account.UserLib do
 
   def register_user(attrs \\ %{}) do
     %User{}
-    |> User.changeset(attrs, :register)
+    |> User.changeset(merge_default_params(attrs), :register)
     |> Repo.insert()
     |> broadcast_create_user()
   end
