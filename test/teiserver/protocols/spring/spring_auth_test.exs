@@ -430,7 +430,7 @@ CLIENTS test_room #{user.name}\n"
     reply = _recv_raw(socket)
     assert String.starts_with?(reply, "SERVERMSG")
     assert String.contains?(reply, "Invalid characters in name")
-    assert String.contains?(reply, "(only a-z, A-Z, 0-9, [, ] allowed)")
+    assert String.contains?(reply, "(only a-z, A-Z, 0-9, [, ] and _ allowed)")
 
     # Rename with existng name
     _send_raw(socket, "RENAMEACCOUNT #{watcher_user.name}\n")

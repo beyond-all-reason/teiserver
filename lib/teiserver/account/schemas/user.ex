@@ -90,7 +90,7 @@ defmodule Teiserver.Account.User do
     attrs = remove_whitespace(attrs, [:email])
 
     user
-    |> cast(attrs, [:name, :email, :password])
+    |> cast(attrs, [:name, :email, :password, :icon, :colour])
     |> unique_constraint(:email)
     |> validate_required([:name, :email, :password])
     |> validate_confirmation(:password, required: true, message: "Passwords do not match")
@@ -101,6 +101,12 @@ defmodule Teiserver.Account.User do
       end
     end)
     |> validate_password()
+    |> validate_change(:email, fn :email, email ->
+      case Teiserver.CacheUser.valid_email?(email) do
+        :ok -> []
+        {:error, reason} -> [{:email, reason}]
+      end
+    end)
     |> put_plain_password_hash()
   end
 

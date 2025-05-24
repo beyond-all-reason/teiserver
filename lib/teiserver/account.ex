@@ -47,10 +47,10 @@ defmodule Teiserver.Account do
   @spec register_user(map) :: {:ok, User} | {:error, Ecto.Changeset.t()}
   defdelegate register_user(attrs), to: UserLib
 
-  @spec script_create_user(map) :: {:ok, User} | {:error, Ecto.Changeset}
+  @spec script_create_user(map) :: {:ok, T.user()} | {:error, Ecto.Changeset.t()}
   defdelegate script_create_user(attrs), to: UserLib
 
-  @spec update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  @spec update_user(User, map) :: {:ok, T.user()} | {:error, Ecto.Changeset}
   defdelegate update_user(user, attrs), to: UserLib
 
   @spec update_user_plain_password(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
