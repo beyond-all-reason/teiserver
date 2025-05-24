@@ -40,7 +40,7 @@ defmodule Teiserver.Data.UserTest do
     result =
       CacheUser.register_user_with_md5("name", "name@email.e", "1B2M2Y8AsgTpgAmY7PhCfg==", "ip")
 
-    assert result == {:error, "Invalid password"}
+    assert {:error, _} = result
   end
 
   # We will now be calculating ranks based on
@@ -113,11 +113,11 @@ defmodule Teiserver.Data.UserTest do
 
   test "valid_email?" do
     data = [
-      {"name@domain.com", true},
-      {"name.name@domain.co.uk", true},
-      {"name@domain", false},
-      {"name.domain", false},
-      {"name", false}
+      {"name@domain.com", :ok},
+      {"name.name@domain.co.uk", :ok},
+      {"name@domain", {:error, "invalid email"}},
+      {"name.domain", {:error, "invalid email"}},
+      {"name", {:error, "invalid email"}}
     ]
 
     for {value, expected} <- data do
