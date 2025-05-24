@@ -155,7 +155,7 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A3 - *Disregarding the teamwork part of team game when done notoriously can result in you being ostracized from team games. You don\'t have to do everything an ally says but at the same time you are part of the team not against it; this includes giving allies an appropriate amount of space to build and respecting their claim to the available resources on the map.*');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A3 - *Disregarding the teamwork part of team games when done notoriously can result in being ostracized from team games. You don\'t have to do everything an ally says, but at the same time you are part of the team; being a good team player includes giving teammates an appropriate amount of space to build and respecting their claim to the available resources on the map.*');
       "
                   >
                     Teamwork/resources
@@ -181,7 +181,7 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A4 - Purposefully unpausing to disrupt a player reconnecting or to disrupt a discussion/vote to kickban a misbehaving player, unless a reasonable amount of time has passed, is unsportsmanlike and to be avoided.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) A4 - Unless a reasonable amount of time has passed, purposefully unpausing to disrupt a legitimately issued pause, or without attempting to learn the reason for a pause, is unsportsmanlike and to be avoided.');
       "
                   >
                     Unpausing
@@ -202,19 +202,16 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_restriction_All_lobbies').prop('checked', true);
-        $('#action_restriction_All_chat').prop('checked', true);
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B1 - Politics has no place in BAR.');
-        $('#action_expires').val('3 days');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B1 -  It is not okay to promote illegal or damaging topics including but not limited to gambling, drug use, self-harm, crypto scams, and the like. Politics, sexually explicit chat, and advertisements are examples of other inappropriate topics.');
       "
                   >
-                    B1 - politics
+                    B1 - Inappropriate Topics
                   </div>
 
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B2 - *Abuse especially on the grounds or context of sexism, racism, homophobia, disability, religion, ancestry and similar is never acceptable.*');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B2 - *Abuse especially on the grounds or context of gender, race, sexual orientation, disability, religion, ancestry, nationality, and similar is never acceptable.*');
       "
                   >
                     B2 - discrimination
@@ -223,7 +220,7 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B6 - Abuse of the draw tool. *Inappropriate drawings (hate-symbols and such) are communications abuse*.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B6 - Abuse of the draw tool. *Inappropriate drawings (hate-symbols, sexual or obscene imagery and such) are communications abuse*.');
       "
                   >
                     B6 - draw tool abuse
@@ -231,7 +228,7 @@ bsname = view_colour() %>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B2 - Spamming the main chat channel.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B6 - Spamming the main chat channel.');
         $('#action_restriction_Room_chat').prop('checked', true);
         $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_expires').val('7 days');
@@ -249,10 +246,10 @@ bsname = view_colour() %>
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_All_chat').prop('checked', true);
         $('#action_expires').val('5 days');
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C2 - Telling someone else to kill themselves is completely unacceptable.');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C2 - Hate speech, calls for a person to harm themselves, real-life threats, celebration of horrific events are all regarded as unacceptable.');
       "
                   >
-                    KYS
+                    Malicious Speech (KYS)
                   </div>
 
                   <div
@@ -271,7 +268,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_All_chat').prop('checked', true);
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Purposefully and publicly passing on consequential information to players in a game via things like spectator mode (we understand mistakes happen occasionally) is obviously a form of cheating.')
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Purposefully passing on consequential information to a game in progress via things like spectator chat (we understand mistakes happen occasionally) is obviously a form of cheating.')
         $('#action_expires').val('5 days');
       "
                   >
@@ -285,7 +282,7 @@ bsname = view_colour() %>
         $('#action_expires').val('1100 years');
       "
                   >
-                    One-off accont permaban
+                    One-off account permaban
                   </div>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}
@@ -298,7 +295,7 @@ bsname = view_colour() %>
         $('#action_expires').val('1100 years');
       "
                   >
-                    One-off accont permaban (hidden, for ban evaders)
+                    One-off account permaban (hidden, for ban evaders)
                   </div>
                 </div>
               </div>
@@ -416,7 +413,7 @@ bsname = view_colour() %>
         $('#action_restriction_Room_chat').prop('checked', true);
         $('#action_restriction_Matchmaking').prop('checked', true);
         $('#action_restriction_Community').prop('checked', true);
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B3 - **Nicknames and clan tags must not be offensive or inappropriate. Impersonation of other players and real-life figures is also forbidden.** Please rename from `#{@user.name}` (use the Account button in the top right, then go to Recover/Change) to a name not in breach of the Code of Conduct and use the #open-ticket discord channel to notify the moderation team and have the restriction lifted. The discord can be accessed at #{discord_link} ');
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B3 - **Nicknames and clan tags must not be offensive, inappropriate or contain politically charged phrases. Impersonation of other players and real-life figures is also forbidden. Player usernames must not contain references to modern political figures, contemporary movements, or historically controversial figures.** Please rename from `#{@user.name}` (use the Account button in the top right, then go to Recover/Change) to a name not in breach of the Code of Conduct and use the #open-ticket discord channel to notify the moderation team and have the restriction lifted. The discord can be accessed at #{discord_link} ');
         $('#action_expires').val('1100 years');
       "}
                   >
