@@ -14,6 +14,8 @@ defmodule Teiserver.Account do
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-user-alt"
 
+  defdelegate default_data(), to: Teiserver.Account.User
+
   @spec list_users() :: [User]
   defdelegate list_users(), to: UserLib
 

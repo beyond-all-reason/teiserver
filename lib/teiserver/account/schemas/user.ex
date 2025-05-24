@@ -47,6 +47,33 @@ defmodule Teiserver.Account.User do
     timestamps()
   end
 
+  def default_data() do
+    %{
+      rank: 0,
+      country: "??",
+      moderator: false,
+      bot: false,
+      verified: false,
+      email_change_code: nil,
+      last_login: nil,
+      last_login_mins: nil,
+      last_login_timex: nil,
+      restrictions: [],
+      restricted_until: nil,
+      shadowbanned: false,
+      lobby_hash: [],
+      hw_hash: nil,
+      chobby_hash: nil,
+      roles: [],
+      print_client_messages: false,
+      print_server_messages: false,
+      discord_id: nil,
+      discord_dm_channel: nil,
+      discord_dm_channel_id: nil,
+      steam_id: nil
+    }
+  end
+
   @doc false
   def changeset(user, attrs \\ %{}) do
     attrs =
