@@ -113,30 +113,6 @@ defmodule Teiserver.Account.User do
     cast(struct, %{permissions: permissions}, [:permissions])
   end
 
-  def changeset(user, attrs, :register) do
-    attrs = remove_whitespace(attrs, [:email])
-
-    user
-    |> cast(attrs, [:name, :email, :password, :icon, :colour])
-    |> unique_constraint(:email)
-    |> validate_required([:name, :email, :password])
-    |> validate_confirmation(:password, required: true, message: "Passwords do not match")
-    |> validate_change(:name, fn :name, name ->
-      case Teiserver.Account.valid_name?(name, false) do
-        :ok -> []
-        {:error, reason} -> [{:name, reason}]
-      end
-    end)
-    |> validate_password()
-    |> validate_change(:email, fn :email, email ->
-      case Teiserver.CacheUser.valid_email?(email) do
-        :ok -> []
-        {:error, reason} -> [{:email, reason}]
-      end
-    end)
-    |> put_plain_password_hash()
-  end
-
   def changeset(user, attrs, :server_limited_update_user) do
     attrs =
       attrs
@@ -225,6 +201,47 @@ defmodule Teiserver.Account.User do
     |> put_plain_password_hash()
   end
 
+  def changeset(user, attrs, :register, password_type) do
+    attrs = remove_whitespace(attrs, [:email])
+
+    data = default_data() |> Map.new(fn {k, v} -> {to_string(k), v} end)
+
+    attrs =
+      Map.merge(
+        %{
+          "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
+          "colour" => Teiserver.Helper.StylingHelper.random_colour()
+        },
+        attrs
+      )
+      |> Map.put("data", data)
+
+    user
+    |> cast(attrs, [:name, :email, :password, :icon, :colour, :data])
+    |> unique_constraint(:email)
+    |> validate_required([:name, :email, :password])
+    |> validate_confirmation(:password, required: true, message: "Passwords do not match")
+    |> validate_change(:name, fn :name, name ->
+      case Teiserver.Account.valid_name?(name, false) do
+        :ok -> []
+        {:error, reason} -> [{:name, reason}]
+      end
+    end)
+    |> validate_password()
+    |> validate_change(:email, fn :email, email ->
+      case Teiserver.CacheUser.valid_email?(email) do
+        :ok -> []
+        {:error, reason} -> [{:email, reason}]
+      end
+    end)
+    |> then(fn changeset ->
+      case password_type do
+        :plain_password -> put_plain_password_hash(changeset)
+        :md5_password -> put_md5_password_hash(changeset)
+      end
+    end)
+  end
+
   defp change_plain_password(user, attrs) do
     user
     |> cast(attrs, [:password])
@@ -233,7 +250,13 @@ defmodule Teiserver.Account.User do
     |> put_plain_password_hash()
   end
 
-  defp validate_password(changeset), do: validate_length(changeset, :password, min: 6)
+  defp validate_password(changeset) do
+    changeset
+    |> validate_length(:password, min: 6)
+    |> validate_exclusion(:password, ["1B2M2Y8AsgTpgAmY7PhCfg=="],
+      message: "password not allowed (legacy empty chobby pass)"
+    )
+  end
 
   defp put_plain_password_hash(
          %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset

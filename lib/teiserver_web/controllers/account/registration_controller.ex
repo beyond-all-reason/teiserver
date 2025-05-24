@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Account.RegistrationController do
   end
 
   def create(conn, params) do
-    case Account.register_user(Map.get(params, "user", %{})) do
+    case Account.register_user(Map.get(params, "user", %{}), :plain_password) do
       {:ok, _user} ->
         conn
         |> put_flash(:info, "Account created")

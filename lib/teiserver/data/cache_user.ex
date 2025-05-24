@@ -105,10 +105,20 @@ defmodule Teiserver.CacheUser do
     email = String.trim(email)
 
     with :ok <- valid_name?(name, false),
-         :ok <- valid_password?(md5_password),
          :ok <- valid_email?(email),
-         {:ok, user} <- do_register_user_with_md5(name, email, md5_password) do
-      post_user_creation_actions(user, ip)
+         {:ok, _user} <-
+           Account.register_user(
+             %{
+               "name" => String.trim(name),
+               "email" => String.trim(email),
+               "password" => md5_password,
+               # hack so that we can use the same code for web and chobby registration
+               # chobby does its own confirmation check
+               "password_confirmation" => md5_password
+             },
+             :md5_password,
+             ip
+           ) do
       :success
     else
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -120,16 +130,6 @@ defmodule Teiserver.CacheUser do
       {:error, reason} when is_binary(reason) ->
         {:error, reason}
     end
-  end
-
-  @spec do_register_user_with_md5(String.t(), String.t(), String.t()) ::
-          {:ok, T.user()} | {:error, Ecto.Changeset.t()}
-  defp do_register_user_with_md5(name, email, md5_password) do
-    name = String.trim(name)
-    email = String.trim(email)
-
-    params = user_register_params_with_md5(name, email, md5_password, %{})
-    Account.script_create_user(params)
   end
 
   @doc """
@@ -1220,21 +1220,6 @@ defmodule Teiserver.CacheUser do
       not String.contains?(email, "@") -> {:error, "invalid email"}
       not String.contains?(email, ".") -> {:error, "invalid email"}
       true -> :ok
-    end
-  end
-
-  @spec valid_password?(String.t()) :: :ok | {:error, reason :: term()}
-  def valid_password?(password) do
-    cond do
-      # Add additional password requirmenets here
-      String.length(password) == 0 ->
-        {:error, "empty password"}
-
-      password == "1B2M2Y8AsgTpgAmY7PhCfg==" ->
-        {:error, "password not allowed (legacy empty chobby pass)"}
-
-      true ->
-        :ok
     end
   end
 end

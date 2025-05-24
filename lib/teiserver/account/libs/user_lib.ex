@@ -130,15 +130,15 @@ defmodule Teiserver.Account.UserLib do
     |> broadcast_create_user()
   end
 
-  def register_user(attrs \\ %{}) do
+  def register_user(attrs \\ %{}, pass_type, ip \\ nil) do
     res =
       %User{}
-      |> User.changeset(merge_default_params(attrs), :register)
+      |> User.changeset(attrs, :register, pass_type)
       |> Repo.insert()
       |> broadcast_create_user()
 
     case res do
-      {:ok, user} -> {:ok, Teiserver.CacheUser.post_user_creation_actions(user, nil)}
+      {:ok, user} -> {:ok, Teiserver.CacheUser.post_user_creation_actions(user, ip)}
       err -> err
     end
   end
