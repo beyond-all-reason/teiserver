@@ -101,6 +101,12 @@ defmodule Teiserver.Account.User do
       end
     end)
     |> validate_password()
+    |> validate_change(:email, fn :email, email ->
+      case Teiserver.CacheUser.valid_email?(email) do
+        :ok -> []
+        {:error, reason} -> [{:email, reason}]
+      end
+    end)
     |> put_plain_password_hash()
   end
 
