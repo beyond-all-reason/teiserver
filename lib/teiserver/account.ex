@@ -2200,8 +2200,8 @@ defmodule Teiserver.Account do
     })
   end
 
-  @spec encrypt_password(any) :: binary | {binary, binary, {any, any, any, any, any}}
-  def encrypt_password(password) do
+  @spec hash_password(any) :: binary | {binary, binary, {any, any, any, any, any}}
+  def hash_password(password) do
     Argon2.hash_pwd_salt(password)
   end
 

@@ -263,7 +263,7 @@ defmodule Teiserver.Account.User do
        ) do
     change(changeset,
       password:
-        Teiserver.Account.spring_md5_password(password) |> Teiserver.Account.encrypt_password()
+        Teiserver.Account.spring_md5_password(password) |> Teiserver.Account.hash_password()
     )
   end
 
@@ -272,7 +272,7 @@ defmodule Teiserver.Account.User do
   defp put_md5_password_hash(
          %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
        ) do
-    change(changeset, password: Teiserver.Account.encrypt_password(password))
+    change(changeset, password: Teiserver.Account.hash_password(password))
   end
 
   defp put_md5_password_hash(changeset), do: changeset
