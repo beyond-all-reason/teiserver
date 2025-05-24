@@ -92,6 +92,18 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
       resp = post(conn, ~p"/register", user: attrs)
       assert html_response(resp, 403) =~ "Account creation disabled"
     end
+
+    test "account marked as verify when registration isn't required", %{conn: conn} do
+      Teiserver.Config.update_site_config("teiserver.Require email verification", false)
+      attrs = valid_attrs()
+      resp = post(conn, ~p"/register", user: attrs)
+      assert redirected_to(resp) =~ "/"
+
+      user =
+        Teiserver.Account.query_user(search: [email_lower: attrs.email])
+
+      assert Teiserver.CacheUser.is_verified?(user)
+    end
   end
 
   defp valid_attrs(),
