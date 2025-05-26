@@ -310,6 +310,16 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(originator_id), {:user, {:unsubscribe_updates, user_ids}})
   end
 
+  @doc """
+  get the transient user public infos like status (playing/menu ...)
+  """
+  def get_user_info(user_id) do
+    GenServer.call(via_tuple(user_id), {:user, :get_info})
+  catch
+    :exit, _ ->
+      %{status: :offline}
+  end
+
   @spec create_party(T.userid()) ::
           {:ok, Party.id()} | {:error, :already_in_party} | {:error, reason :: term()}
   def create_party(user_id) do
@@ -554,6 +564,16 @@ defmodule Teiserver.Player.Session do
 
     new_subs = MapSet.difference(state.user_subscriptions, user_ids)
     {:reply, :ok, %{state | user_subscriptions: new_subs}}
+  end
+
+  def handle_call({:user, :get_info}, _from, state) do
+    status =
+      cond do
+        state.battle != nil -> :playing
+        true -> :menu
+      end
+
+    {:reply, %{status: status}, state}
   end
 
   def handle_call({:party, :create}, _from, state)

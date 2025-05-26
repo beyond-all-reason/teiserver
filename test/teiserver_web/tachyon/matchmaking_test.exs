@@ -701,6 +701,10 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         assert usr_update["status"] == "playing"
       end
 
+      for usr <- clients do
+        %{"status" => "success", "data" => info} = Tachyon.user_info!(usr.client, usr.user.id)
+        assert info["status"] == "playing"
+      end
     end
 
     test "autohost errors propagates to clients",

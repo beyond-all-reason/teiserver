@@ -339,6 +339,8 @@ defmodule Teiserver.Player.TachyonHandler do
     user = Account.get_user_by_id(user_id)
 
     if user != nil do
+      %{status: status} = Player.Session.get_user_info(user.id)
+
       resp =
         %{
           userId: to_string(user.id),
@@ -346,7 +348,7 @@ defmodule Teiserver.Player.TachyonHandler do
           displayName: user.name,
           clanId: user.clan_id,
           countryCode: user.country,
-          status: :menu
+          status: status
         }
 
       {:response, resp, state}
