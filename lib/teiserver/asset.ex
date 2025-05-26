@@ -42,6 +42,10 @@ defmodule Teiserver.Asset do
     end)
   end
 
+  @type startbox :: MapLib.startbox()
+  @spec get_startboxes(Asset.Map.t(), number_of_teams :: non_neg_integer()) :: [startbox()] | nil
+  defdelegate get_startboxes(map, number_of_teams), to: MapLib
+
   @spec get_engines() :: [Asset.Engine.t()]
   defdelegate get_engines(), to: EngineQueries
 

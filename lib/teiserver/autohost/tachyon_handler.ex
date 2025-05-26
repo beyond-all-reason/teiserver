@@ -162,6 +162,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
         details -> "#{reason} - #{details}"
       end
 
+    Logger.error("failed to start a battle: #{msg}")
     send(reply_to, {:start_battle_response, {:error, msg}})
   end
 
