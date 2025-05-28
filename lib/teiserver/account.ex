@@ -14,6 +14,8 @@ defmodule Teiserver.Account do
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-user-alt"
 
+  defdelegate default_data(), to: Teiserver.Account.User
+
   @spec list_users() :: [User]
   defdelegate list_users(), to: UserLib
 
@@ -44,13 +46,18 @@ defmodule Teiserver.Account do
   @spec create_user(map) :: {:ok, User} | {:error, Ecto.Changeset}
   defdelegate create_user(attrs), to: UserLib
 
-  @spec register_user(map) :: {:ok, User} | {:error, Ecto.Changeset.t()}
-  defdelegate register_user(attrs), to: UserLib
+  @spec register_user(
+          map,
+          pass_type :: :md5_password | :plain_password | nil,
+          ip :: String.t() | nil
+        ) ::
+          {:ok, User} | {:error, Ecto.Changeset.t()}
+  defdelegate register_user(attrs, pass_type \\ nil, ip \\ nil), to: UserLib
 
-  @spec script_create_user(map) :: {:ok, User} | {:error, Ecto.Changeset}
+  @spec script_create_user(map) :: {:ok, T.user()} | {:error, Ecto.Changeset.t()}
   defdelegate script_create_user(attrs), to: UserLib
 
-  @spec update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  @spec update_user(User, map) :: {:ok, T.user()} | {:error, Ecto.Changeset}
   defdelegate update_user(user, attrs), to: UserLib
 
   @spec update_user_plain_password(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
@@ -2193,8 +2200,8 @@ defmodule Teiserver.Account do
     })
   end
 
-  @spec encrypt_password(any) :: binary | {binary, binary, {any, any, any, any, any}}
-  def encrypt_password(password) do
+  @spec hash_password(any) :: binary | {binary, binary, {any, any, any, any, any}}
+  def hash_password(password) do
     Argon2.hash_pwd_salt(password)
   end
 

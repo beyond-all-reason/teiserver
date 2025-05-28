@@ -47,6 +47,33 @@ defmodule Teiserver.Account.User do
     timestamps()
   end
 
+  def default_data() do
+    %{
+      rank: 0,
+      country: "??",
+      moderator: false,
+      bot: false,
+      verified: false,
+      email_change_code: nil,
+      last_login: nil,
+      last_login_mins: nil,
+      last_login_timex: nil,
+      restrictions: [],
+      restricted_until: nil,
+      shadowbanned: false,
+      lobby_hash: [],
+      hw_hash: nil,
+      chobby_hash: nil,
+      roles: [],
+      print_client_messages: false,
+      print_server_messages: false,
+      discord_id: nil,
+      discord_dm_channel: nil,
+      discord_dm_channel_id: nil,
+      steam_id: nil
+    }
+  end
+
   @doc false
   def changeset(user, attrs \\ %{}) do
     attrs =
@@ -84,24 +111,6 @@ defmodule Teiserver.Account.User do
 
   def changeset(struct, permissions, :permissions) do
     cast(struct, %{permissions: permissions}, [:permissions])
-  end
-
-  def changeset(user, attrs, :register) do
-    attrs = remove_whitespace(attrs, [:email])
-
-    user
-    |> cast(attrs, [:name, :email, :password])
-    |> unique_constraint(:email)
-    |> validate_required([:name, :email, :password])
-    |> validate_confirmation(:password, required: true, message: "Passwords do not match")
-    |> validate_change(:name, fn :name, name ->
-      case Teiserver.Account.valid_name?(name, false) do
-        :ok -> []
-        {:error, reason} -> [{:name, reason}]
-      end
-    end)
-    |> validate_password()
-    |> put_plain_password_hash()
   end
 
   def changeset(user, attrs, :server_limited_update_user) do
@@ -192,6 +201,47 @@ defmodule Teiserver.Account.User do
     |> put_plain_password_hash()
   end
 
+  def changeset(user, attrs, :register, password_type) do
+    attrs = remove_whitespace(attrs, [:email])
+
+    data = default_data() |> Map.new(fn {k, v} -> {to_string(k), v} end)
+
+    attrs =
+      Map.merge(
+        %{
+          "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
+          "colour" => Teiserver.Helper.StylingHelper.random_colour()
+        },
+        attrs
+      )
+      |> Map.put("data", data)
+
+    user
+    |> cast(attrs, [:name, :email, :password, :icon, :colour, :data])
+    |> unique_constraint(:email)
+    |> validate_required([:name, :email, :password])
+    |> validate_confirmation(:password, required: true, message: "Passwords do not match")
+    |> validate_change(:name, fn :name, name ->
+      case Teiserver.Account.valid_name?(name, false) do
+        :ok -> []
+        {:error, reason} -> [{:name, reason}]
+      end
+    end)
+    |> validate_password()
+    |> validate_change(:email, fn :email, email ->
+      case Teiserver.CacheUser.valid_email?(email) do
+        :ok -> []
+        {:error, reason} -> [{:email, reason}]
+      end
+    end)
+    |> then(fn changeset ->
+      case password_type do
+        :plain_password -> put_plain_password_hash(changeset)
+        :md5_password -> put_md5_password_hash(changeset)
+      end
+    end)
+  end
+
   defp change_plain_password(user, attrs) do
     user
     |> cast(attrs, [:password])
@@ -200,14 +250,20 @@ defmodule Teiserver.Account.User do
     |> put_plain_password_hash()
   end
 
-  defp validate_password(changeset), do: validate_length(changeset, :password, min: 6)
+  defp validate_password(changeset) do
+    changeset
+    |> validate_length(:password, min: 6)
+    |> validate_exclusion(:password, ["1B2M2Y8AsgTpgAmY7PhCfg=="],
+      message: "password not allowed (legacy empty chobby pass)"
+    )
+  end
 
   defp put_plain_password_hash(
          %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
        ) do
     change(changeset,
       password:
-        Teiserver.Account.spring_md5_password(password) |> Teiserver.Account.encrypt_password()
+        Teiserver.Account.spring_md5_password(password) |> Teiserver.Account.hash_password()
     )
   end
 
@@ -216,7 +272,7 @@ defmodule Teiserver.Account.User do
   defp put_md5_password_hash(
          %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
        ) do
-    change(changeset, password: Teiserver.Account.encrypt_password(password))
+    change(changeset, password: Teiserver.Account.hash_password(password))
   end
 
   defp put_md5_password_hash(changeset), do: changeset

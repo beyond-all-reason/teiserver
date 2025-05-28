@@ -49,6 +49,12 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
       assert html_response(resp, 400)
     end
 
+    test "email must have a @", %{conn: conn} do
+      attrs = Map.put(valid_attrs(), :email, "localhost")
+      resp = post(conn, ~p"/register", user: attrs)
+      assert html_response(resp, 400)
+    end
+
     test "email must be unique", %{conn: conn} do
       resp = post(conn, ~p"/register", user: valid_attrs())
       assert redirected_to(resp) =~ "/"
@@ -85,6 +91,18 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
       attrs = valid_attrs()
       resp = post(conn, ~p"/register", user: attrs)
       assert html_response(resp, 403) =~ "Account creation disabled"
+    end
+
+    test "account marked as verify when registration isn't required", %{conn: conn} do
+      Teiserver.Config.update_site_config("teiserver.Require email verification", false)
+      attrs = valid_attrs()
+      resp = post(conn, ~p"/register", user: attrs)
+      assert redirected_to(resp) =~ "/"
+
+      user =
+        Teiserver.Account.query_user(search: [email_lower: attrs.email])
+
+      assert Teiserver.CacheUser.is_verified?(user)
     end
   end
 

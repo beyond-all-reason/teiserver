@@ -199,12 +199,12 @@ defmodule Teiserver.Account.UserCacheLib do
     data =
       CacheUser.data_keys()
       |> Map.new(fn k ->
-        {k, Map.get(user.data || %{}, to_string(k), CacheUser.default_data()[k])}
+        {k, Map.get(user.data || %{}, to_string(k), Account.default_data()[k])}
       end)
 
     user
     |> Map.take(CacheUser.keys())
-    |> Map.merge(CacheUser.default_data())
+    |> Map.merge(Account.default_data())
     |> Map.merge(data)
   end
 
@@ -238,11 +238,11 @@ defmodule Teiserver.Account.UserCacheLib do
 
     data =
       CacheUser.data_keys()
-      |> Map.new(fn k -> {to_string(k), Map.get(user, k, CacheUser.default_data()[k])} end)
+      |> Map.new(fn k -> {to_string(k), Map.get(user, k, Account.default_data()[k])} end)
 
     obj_attrs =
       CacheUser.keys()
-      |> Map.new(fn k -> {to_string(k), Map.get(user, k, CacheUser.default_data()[k])} end)
+      |> Map.new(fn k -> {to_string(k), Map.get(user, k, Account.default_data()[k])} end)
 
     Account.script_update_user(db_user, Map.put(obj_attrs, "data", data))
   end

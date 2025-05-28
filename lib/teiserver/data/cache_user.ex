@@ -59,33 +59,6 @@ defmodule Teiserver.CacheUser do
   ]
   def data_keys(), do: @data_keys
 
-  @default_data %{
-    rank: 0,
-    country: "??",
-    moderator: false,
-    bot: false,
-    verified: false,
-    email_change_code: nil,
-    last_login: nil,
-    last_login_mins: nil,
-    last_login_timex: nil,
-    restrictions: [],
-    restricted_until: nil,
-    shadowbanned: false,
-    lobby_hash: [],
-    hw_hash: nil,
-    chobby_hash: nil,
-    roles: [],
-    print_client_messages: false,
-    print_server_messages: false,
-    discord_id: nil,
-    discord_dm_channel: nil,
-    discord_dm_channel_id: nil,
-    steam_id: nil
-  }
-
-  def default_data(), do: @default_data
-
   @spec clean_name(String.t()) :: String.t()
   def clean_name(name) do
     ~r/([^a-zA-Z0-9_\[\]\{\}]|\s)/
@@ -104,10 +77,8 @@ defmodule Teiserver.CacheUser do
   end
 
   def user_register_params_with_md5(name, email, md5_password, extra_data \\ %{}) do
-    name = clean_name(name)
-
     data =
-      @default_data
+      Teiserver.Account.default_data()
       |> Map.new(fn {k, v} -> {to_string(k), v} end)
 
     %{
@@ -132,92 +103,72 @@ defmodule Teiserver.CacheUser do
   def register_user_with_md5(name, email, md5_password, ip) do
     name = String.trim(name)
     email = String.trim(email)
-    max_username_length = Config.get_site_config_cache("teiserver.Username max length")
 
-    cond do
-      Config.get_site_config_cache("teiserver.Enable registrations") == false ->
-        {:error, "Registrations are currently disabled"}
-
-      WordLib.reserved_name?(name) ->
-        {:error, "That name is in restricted for use by the server, please choose another"}
-
-      WordLib.acceptable_name?(name) == false ->
-        {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
-
-      clean_name(name) |> String.length() > max_username_length ->
-        {:error, "Max length #{max_username_length} characters"}
-
-      clean_name(name) != name ->
-        {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)"}
-
-      check_symbol_limit(name) ->
-        {:error, "Too many repeated symbols in name"}
-
-      get_user_by_name(name) ->
-        {:error, "Username already taken"}
-
-      get_user_by_email(email) ->
-        {:error, "Email already attached to a user (#{email})"}
-
-      valid_email?(email) == false ->
-        {:error, "Invalid email"}
-
-      # MD5 hash of empty password from Chobby
-      md5_password == "1B2M2Y8AsgTpgAmY7PhCfg==" ->
-        {:error, "Invalid password"}
-
-      true ->
-        case do_register_user_with_md5(name, email, md5_password, ip) do
-          :ok ->
-            :success
-
-          :error ->
-            {:error, "Server error, please inform admin"}
+    with :ok <- valid_name?(name, false),
+         :ok <- valid_email?(email),
+         {:ok, _user} <-
+           Account.register_user(
+             %{
+               "name" => String.trim(name),
+               "email" => String.trim(email),
+               "password" => md5_password,
+               # hack so that we can use the same code for web and chobby registration
+               # chobby does its own confirmation check
+               "password_confirmation" => md5_password
+             },
+             :md5_password,
+             ip
+           ) do
+      :success
+    else
+      {:error, %Ecto.Changeset{} = changeset} ->
+        case changeset.errors[:email] do
+          nil -> {:error, "User creation failed"}
+          _ -> {:error, "Email already attached to a user"}
         end
+
+      {:error, reason} when is_binary(reason) ->
+        {:error, reason}
     end
   end
 
-  @spec do_register_user_with_md5(String.t(), String.t(), String.t(), String.t()) :: :ok | :error
-  defp do_register_user_with_md5(name, email, md5_password, ip) do
-    name = String.trim(name)
-    email = String.trim(email)
+  @doc """
+  Augment the user objects with various attributes like ip or icon.
+  Also handle the verification process.
 
-    params = user_register_params_with_md5(name, email, md5_password, %{})
+  This isn't ideal as it swallows errors from verification. Adding data like ip
+  after the fact is also backward and should be provided at user creation when
+  available instead of patching things up after the fact.
+  That however is a bigger refactor than I'm willing to make now
+  """
+  @spec post_user_creation_actions(user :: term(), String.t() | nil) :: T.user()
+  def post_user_creation_actions(user, ip \\ nil) do
+    Account.update_user_stat(user.id, %{
+      "first_ip" => ip,
+      "country" => Teiserver.Geoip.get_flag(ip),
+      "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string
+    })
 
-    case Account.script_create_user(params) do
-      {:ok, user} ->
-        Account.update_user_stat(user.id, %{
-          "first_ip" => ip,
-          "country" => Teiserver.Geoip.get_flag(ip),
-          "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string
-        })
+    # Now add them to the cache
+    user
+    |> convert_user
+    |> add_user
 
-        # Now add them to the cache
-        user
-        |> convert_user
-        |> add_user
+    if not String.ends_with?(user.email, "@agents") do
+      case EmailHelper.new_user(user) do
+        {:error, error} ->
+          Logger.error("Error sending new user email - #{user.email} - #{Kernel.inspect(error)}")
 
-        if not String.ends_with?(user.email, "@agents") do
-          case EmailHelper.new_user(user) do
-            {:error, error} ->
-              Logger.error(
-                "Error sending new user email - #{user.email} - #{Kernel.inspect(error)}"
-              )
+        :no_verify ->
+          verify_user(get_user_by_id(user.id))
+          :ok
 
-            :no_verify ->
-              verify_user(get_user_by_id(user.id))
-              :ok
-
-            :ok ->
-              :ok
-          end
-        end
-
-        :ok
-
-      {:error, _changeset} ->
-        :error
+        :ok ->
+          :ok
+      end
     end
+
+    user
   end
 
   def register_bot(bot_name, bot_host_id) do
@@ -299,7 +250,7 @@ defmodule Teiserver.CacheUser do
         {:error, "Max length #{max_username_length} characters"}
 
       clean_name(name) != name ->
-        {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
+        {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)"}
 
       check_symbol_limit(name) ->
         {:error, "Too many repeated symbols in name"}
@@ -795,7 +746,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec try_md5_login(String.t(), String.t(), String.t(), String.t(), String.t()) ::
-          {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
+          {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), integer()}
   def try_md5_login(username, md5_password, ip, lobby, lobby_hash) do
     wait_for_startup()
 
@@ -1262,22 +1213,13 @@ defmodule Teiserver.CacheUser do
 
   def has_all_roles?(user, role), do: has_all_roles?(user, [role])
 
-  @spec valid_email?(String.t()) :: boolean
+  @spec valid_email?(String.t()) :: :ok | {:error, reason :: String.t()}
   def valid_email?(email) do
     cond do
-      Application.get_env(:teiserver, Teiserver)[:accept_all_emails] -> true
-      not String.contains?(email, "@") -> false
-      not String.contains?(email, ".") -> false
-      true -> true
-    end
-  end
-
-  @spec valid_password?(String.t()) :: boolean
-  def valid_password?(password) do
-    cond do
-      # Add additional password requirmenets here
-      String.length(password) > 0 -> true
-      true -> false
+      Application.get_env(:teiserver, Teiserver)[:accept_all_emails] -> :ok
+      not String.contains?(email, "@") -> {:error, "invalid email"}
+      not String.contains?(email, ".") -> {:error, "invalid email"}
+      true -> :ok
     end
   end
 end
