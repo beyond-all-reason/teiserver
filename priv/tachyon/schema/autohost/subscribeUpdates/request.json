@@ -1,0 +1,25 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/autohost/subscribeUpdates/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AutohostSubscribeUpdatesRequest",
+    "tachyon": {
+        "source": "server",
+        "target": "autohost",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "autohost/subscribeUpdates" },
+        "data": {
+            "title": "AutohostSubscribeUpdatesRequestData",
+            "type": "object",
+            "properties": {
+                "since": { "$ref": "../../definitions/unixTime.json" }
+            },
+            "required": ["since"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

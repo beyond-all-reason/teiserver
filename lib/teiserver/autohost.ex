@@ -1,5 +1,6 @@
 defmodule Teiserver.Autohost do
   alias Teiserver.Autohost.Registry
+  alias Teiserver.Autohost.TachyonHandler
   alias Teiserver.Bot.Bot
   alias Teiserver.BotQueries
 
@@ -29,7 +30,10 @@ defmodule Teiserver.Autohost do
           password: String.t()
         }
 
-  @type start_response :: Teiserver.Autohost.TachyonHandler.start_response()
+  @type start_response :: TachyonHandler.start_response()
+
+  @type update_event_data :: TachyonHandler.update_event_data()
+  @type update_event :: TachyonHandler.update_event()
 
   defdelegate create_autohost(attrs \\ %{}), to: Teiserver.Bot, as: :create_bot
 

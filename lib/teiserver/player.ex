@@ -10,7 +10,7 @@ defmodule Teiserver.Player do
   """
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Player, Matchmaking, Party}
+  alias Teiserver.{Player, Matchmaking, Party, TachyonBattle}
   alias Teiserver.Helpers.MonitorCollection, as: MC
 
   @doc """
@@ -85,8 +85,9 @@ defmodule Teiserver.Player do
   @doc """
   It's go time! the player should join a game
   """
-  @spec battle_start(T.userid(), Teiserver.Autohost.start_response()) :: :ok
-  defdelegate battle_start(user_id, battle_start_data), to: Player.Session
+  @spec battle_start(T.userid(), {TachyonBattle.id(), pid()}, Teiserver.Autohost.start_response()) ::
+          :ok
+  defdelegate battle_start(user_id, battle_id, battle_start_data), to: Player.Session
 
   @doc """
   Let the player know they've been invited to a party

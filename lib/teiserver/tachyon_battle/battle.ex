@@ -12,7 +12,12 @@ defmodule Teiserver.TachyonBattle.Battle do
   @type state :: %{
           id: T.id(),
           autohost_id: Teiserver.Autohost.id(),
-          autohost_timeout: timeout()
+          autohost_timeout: timeout(),
+          # initialised: the battle is waiting for players to join and start the match
+          # finished: the battle is over, but there are still some player in the match,
+          # maybe looking at stats or whatever
+          # shutting_down: only used when the engine is terminating
+          battle_state: :initialised | :in_progress | :finished | :shutting_down
         }
 
   def start(%{battle_id: battle_id} = arg) do
@@ -21,6 +26,14 @@ defmodule Teiserver.TachyonBattle.Battle do
 
   def start_link(%{battle_id: battle_id} = arg) do
     GenServer.start_link(__MODULE__, arg, name: via_tuple(battle_id))
+  end
+
+  # TODO! handle the case where the battle isn't there somehow. This
+  # will become important when we start tracking event history for autohosts
+  # and doing state recovery
+  @spec send_update_event(Teiserver.Autohost.update_event()) :: :ok
+  def send_update_event(event) do
+    GenServer.call(via_tuple(event.battle_id), {:update_event, event})
   end
 
   @impl true
@@ -33,7 +46,8 @@ defmodule Teiserver.TachyonBattle.Battle do
       # the timeout is absurdly short because there is no real recovery if the
       # autohost goes away. When we implement state recovery this timeout
       # should be increased to a more reasonable value (1 min?)
-      autohost_timeout: Map.get(args, :autohost_timeout, 100)
+      autohost_timeout: Map.get(args, :autohost_timeout, 100),
+      battle_state: :initialised
     }
 
     # we need an overall timeout to avoid any potential zombie process
@@ -48,6 +62,17 @@ defmodule Teiserver.TachyonBattle.Battle do
 
       nil ->
         {:stop, :no_autohost}
+    end
+  end
+
+  @impl true
+  def handle_call({:update_event, ev}, _from, state) do
+    case ev.update do
+      :start -> {:reply, :ok, %{state | battle_state: :in_progress}}
+      {:finished, _} -> {:reply, :ok, %{state | battle_state: :finished}}
+      {:engine_crash, _} -> {:stop, :shutdown, :ok, %{state | battle_state: :shutting_down}}
+      :engine_quit -> {:stop, :shutdown, :ok, %{state | battle_state: :shutting_down}}
+      _ -> {:reply, :ok, state}
     end
   end
 

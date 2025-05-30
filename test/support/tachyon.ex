@@ -82,6 +82,11 @@ defmodule Teiserver.Support.Tachyon do
         currentBattles: current
       })
 
+    %{"type" => "request", "commandId" => "autohost/subscribeUpdates"} =
+      request = recv_message!(client)
+
+    :ok = send_response(client, request, data: %{})
+
     client
   end
 
@@ -342,7 +347,9 @@ defmodule Teiserver.Support.Tachyon do
   end
 
   def subscribe_updates!(client, user_ids) do
-    :ok = send_request(client, "user/subscribeUpdates", %{userIds: user_ids})
+    :ok =
+      send_request(client, "user/subscribeUpdates", %{userIds: Enum.map(user_ids, &to_string/1)})
+
     {:ok, resp} = recv_message(client)
     resp
   end
@@ -394,4 +401,15 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, resp} = recv_message(client)
     resp
   end
+
+  def autohost_send_update_event(client, data) do
+    :ok = send_event(client, "autohost/update", data)
+  end
+
+  def autohost_engine_quit(battle_id),
+    do: %{
+      battleId: battle_id,
+      time: DateTime.utc_now() |> DateTime.to_unix(:microsecond),
+      update: %{type: :engine_quit}
+    }
 end

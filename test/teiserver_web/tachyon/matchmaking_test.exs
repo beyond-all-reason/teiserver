@@ -439,13 +439,15 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       app: app,
       queue_pid: queue_pid
     } do
-      [client, _] = join_and_pair(app, queue_id, queue_pid, 2)
+      [%{client: client}, _] = join_and_pair(app, queue_id, queue_pid, 2)
       resp = Tachyon.join_queues!(client, [queue_id])
       assert %{"status" => "failed", "reason" => "already_queued"} = resp
     end
 
     test "cancelled event if queue dies during pairing", ctx do
-      [client1, client2] = join_and_pair(ctx.app, ctx.queue_id, ctx.queue_pid, 2)
+      [%{client: client1}, %{client: client2}] =
+        join_and_pair(ctx.app, ctx.queue_id, ctx.queue_pid, 2)
+
       Process.unlink(ctx.queue_pid)
       Process.exit(ctx.queue_pid, :kill)
 
@@ -458,7 +460,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       app: app,
       queue_pid: queue_pid
     } do
-      [client1, client2] = join_and_pair(app, queue_id, queue_pid, 2)
+      [%{client: client1}, %{client: client2}] = join_and_pair(app, queue_id, queue_pid, 2)
       assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client1)
       assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(client1)
       assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(client2)
@@ -471,7 +473,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       app: app,
       queue_pid: queue_pid
     } do
-      [client1, client2] = join_and_pair(app, queue_id, queue_pid, 2)
+      [%{client: client1}, %{client: client2}] = join_and_pair(app, queue_id, queue_pid, 2)
       assert %{"status" => "success"} = Tachyon.leave_queues!(client1)
 
       assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(client2)
@@ -613,15 +615,15 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
       # slurp all the received messages, each client get a foundUpdate event for
       # every ready sent
-      for client <- clients do
+      for %{client: client} <- clients do
         assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client)
 
-        for c <- clients do
+        for %{client: c} <- clients do
           assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c)
         end
       end
 
-      for client <- clients do
+      for %{client: client} <- clients do
         assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(client)
 
         assert %{
@@ -642,12 +644,18 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       queue_pid: queue_pid,
       autohost_client: autohost_client
     } do
-      clients =
-        join_and_pair(app, queue_id, queue_pid, 2)
-        |> all_ready_up!()
+      [usr1, usr2] = clients = join_and_pair(app, queue_id, queue_pid, 2)
+
+      %{"status" => "success"} = Tachyon.subscribe_updates!(usr1.client, [usr2.user.id])
+      %{"status" => "success"} = Tachyon.subscribe_updates!(usr2.client, [usr1.user.id])
+      %{"commandId" => "user/updated"} = Tachyon.recv_message!(usr1.client)
+      %{"commandId" => "user/updated"} = Tachyon.recv_message!(usr2.client)
+
+      all_ready_up!(clients)
 
       start_req = Tachyon.recv_message!(autohost_client)
       assert %{"commandId" => "autohost/start", "type" => "request", "data" => data} = start_req
+      battle_id = data["battleId"]
 
       host_data = %{
         ips: ["127.0.0.1"],
@@ -673,8 +681,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       end
 
       # Map will be randomly selected so we first check if the first client's map is in the map pool
-      [first_client | rest_clients] = clients
-      first_message = Tachyon.recv_message!(first_client)
+      first_message = Tachyon.recv_message!(usr1.client)
 
       assert %{
                "commandId" => "battle/start",
@@ -693,18 +700,35 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
       assert spring_name in maps
 
-      # and then if that the rest of clients have the same map
-      for client <- rest_clients do
-        assert %{
-                 "commandId" => "battle/start",
-                 "data" => %{
-                   "ip" => _ip,
-                   "port" => _port,
-                   "engine" => %{"version" => "105.1.1-2590-gb9462a0 bar"},
-                   "game" => %{"springName" => "Beyond All Reason test-26929-d709d32"},
-                   "map" => %{"springName" => ^spring_name}
-                 }
-               } = Tachyon.recv_message!(client)
+      # and then that the other client has the same map
+      assert %{
+               "commandId" => "battle/start",
+               "data" => %{
+                 "ip" => _ip,
+                 "port" => _port,
+                 "engine" => %{"version" => "105.1.1-2590-gb9462a0 bar"},
+                 "game" => %{"springName" => "Beyond All Reason test-26929-d709d32"},
+                 "map" => %{"springName" => ^spring_name}
+               }
+             } = Tachyon.recv_message!(usr2.client)
+
+      for usr <- clients do
+        %{"commandId" => "user/updated", "data" => %{"users" => [usr_update]}} =
+          Tachyon.recv_message!(usr.client)
+
+        assert usr_update["status"] == "playing"
+      end
+
+      for usr <- clients do
+        %{"status" => "success", "data" => info} = Tachyon.user_info!(usr.client, usr.user.id)
+        assert info["status"] == "playing"
+      end
+
+      Tachyon.autohost_send_update_event(autohost_client, Tachyon.autohost_engine_quit(battle_id))
+
+      for usr <- clients do
+        %{"commandId" => "user/updated", "data" => %{"users" => [%{"status" => "menu"}]}} =
+          Tachyon.recv_message!(usr.client)
       end
     end
 
@@ -725,7 +749,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       resp_data = [reason: "engine_version_not_available"]
       assert :ok = Tachyon.send_response(autohost_client, start_req, resp_data)
 
-      for client <- clients do
+      for %{client: client} <- clients do
         assert %{"commandId" => "matchmaking/lost"} = Tachyon.recv_message!(client)
 
         assert %{
@@ -741,29 +765,29 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   end
 
   defp join_and_pair(app, queue_id, queue_pid, number_of_player) do
-    clients =
+    data =
       Enum.map(1..number_of_player, fn _ ->
-        {:ok, %{client: client}} = setup_user(app)
+        {:ok, %{client: client} = data} = setup_user(app)
         assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue_id])
-        client
+        data
       end)
 
     send(queue_pid, :tick)
 
-    Enum.each(clients, fn client ->
+    Enum.each(data, fn %{client: client} ->
       assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client)
     end)
 
-    clients
+    data
   end
 
   defp all_ready_up!(clients) do
     # slurp all the received messages, each client get a foundUpdate event for
     # every ready sent
-    for client <- clients do
+    for %{client: client} <- clients do
       assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client)
 
-      for c <- clients do
+      for %{client: c} <- clients do
         assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c)
       end
     end

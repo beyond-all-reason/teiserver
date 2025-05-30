@@ -136,14 +136,15 @@ defmodule Teiserver.Tachyon.Transport do
   end
 
   def do_handle_command(command_id, "response", message_id, message, state) do
-    case Map.get(state.pending_responses, message_id) do
+    case Map.pop(state.pending_responses, message_id) do
       # We got a response but nothing registered, which is invalid
-      nil ->
+      {nil, _} ->
         {:stop, :normal,
          {1008, "Received response to message id #{message_id} but no request pending."}, state}
 
-      {tref, cb_state} ->
+      {{tref, cb_state}, new_pendings} ->
         :erlang.cancel_timer(tref)
+        state = Map.replace!(state, :pending_responses, new_pendings)
 
         if function_exported?(state.handler, :handle_response, 4) do
           result =
@@ -219,8 +220,9 @@ defmodule Teiserver.Tachyon.Transport do
 
       {:request, cmd_id, payload, opts, state} ->
         req = Schema.request(cmd_id, payload)
+
         message_id = req.messageId
-        timeout = Keyword.get(opts, :timeout, :timer.seconds(10))
+        timeout = Keyword.get(opts, :timeout, :timer.seconds(10_000))
         tref = :erlang.send_after(timeout, self(), {:timeout, message_id})
 
         new_state =

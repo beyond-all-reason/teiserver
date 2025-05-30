@@ -31,4 +31,50 @@ defmodule Teiserver.Autohost.AutohostTest do
   defp register_autohost(id, max, current) do
     Autohost.Registry.register(%{id: id, max_battles: max, current_battles: current})
   end
+
+  describe "message parser" do
+    alias Teiserver.Autohost.TachyonHandler, as: TH
+
+    test "start" do
+      msg = %{
+        "commandId" => "autohost/update",
+        "data" => %{
+          "battleId" => "d9eff7cb-ab31-4070-8bd8-376acf9c5095",
+          "time" => 1_748_191_579_196_000,
+          "update" => %{"type" => "start"}
+        },
+        "messageId" => "bb732bd7-c549-4f26-b29b-e1b8d2c99c96",
+        "type" => "event"
+      }
+
+      expected = %{
+        battle_id: "d9eff7cb-ab31-4070-8bd8-376acf9c5095",
+        time: DateTime.from_unix!(1_748_191_579_196_000, :microsecond),
+        update: :start
+      }
+
+      assert TH.parse_update_event(msg["data"]) == {:ok, expected}
+    end
+
+    test "finished" do
+      msg = %{
+        "commandId" => "autohost/update",
+        "data" => %{
+          "battleId" => "d9eff7cb-ab31-4070-8bd8-376acf9c5095",
+          "time" => 1_748_191_573_075_000,
+          "update" => %{"type" => "finished", "userId" => "43", "winningAllyTeams" => [1]}
+        },
+        "messageId" => "46dc384f-1ffe-4cac-8a77-1fd1927f0437",
+        "type" => "event"
+      }
+
+      expected = %{
+        battle_id: "d9eff7cb-ab31-4070-8bd8-376acf9c5095",
+        time: DateTime.from_unix!(1_748_191_573_075_000, :microsecond),
+        update: {:finished, %{user_id: 43, winning_ally_teams: [1]}}
+      }
+
+      assert TH.parse_update_event(msg["data"]) == {:ok, expected}
+    end
+  end
 end

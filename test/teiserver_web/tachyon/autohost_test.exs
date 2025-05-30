@@ -46,6 +46,10 @@ defmodule TeiserverWeb.Tachyon.Autohost do
 
   test "must send `status` as first message", %{token: token} do
     client = Tachyon.connect(token)
+
+    assert %{"type" => "request", "commandId" => "autohost/subscribeUpdates"} =
+             Tachyon.recv_message!(client)
+
     req = Tachyon.request("matchmaking/list") |> Jason.encode!()
 
     assert :ok == WSC.send_message(client, {:text, req})

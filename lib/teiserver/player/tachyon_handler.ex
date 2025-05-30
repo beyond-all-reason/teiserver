@@ -8,6 +8,7 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Data.Types, as: T
   alias Teiserver.{Account, Player, Matchmaking, Messaging}
+  alias Teiserver.Helpers.TachyonParser
 
   @behaviour Handler
 
@@ -338,6 +339,8 @@ defmodule Teiserver.Player.TachyonHandler do
     user = Account.get_user_by_id(user_id)
 
     if user != nil do
+      %{status: status} = Player.Session.get_user_info(user.id)
+
       resp =
         %{
           userId: to_string(user.id),
@@ -345,7 +348,7 @@ defmodule Teiserver.Player.TachyonHandler do
           displayName: user.name,
           clanId: user.clan_id,
           countryCode: user.country,
-          status: :menu
+          status: status
         }
 
       {:response, resp, state}
@@ -388,7 +391,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("friend/acceptRequest", "request", _message_id, msg, state) do
-    with {:ok, originator_id} <- parse_user_id(msg["data"]["from"]),
+    with {:ok, originator_id} <- TachyonParser.parse_user_id(msg["data"]["from"]),
          :ok <- Account.accept_friend_request(originator_id, state.user.id) do
       Player.Session.friend_request_accepted(originator_id, state.user.id)
       {:response, state}
@@ -402,7 +405,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("friend/rejectRequest", "request", _message_id, msg, state) do
-    with {:ok, originator_id} <- parse_user_id(msg["data"]["from"]),
+    with {:ok, originator_id} <- TachyonParser.parse_user_id(msg["data"]["from"]),
          :ok <- Account.decline_friend_request(originator_id, state.user.id) do
       Player.Session.friend_request_rejected(originator_id, state.user.id)
       {:response, state}
@@ -421,7 +424,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("friend/cancelRequest", "request", _message_id, msg, state) do
-    with {:ok, target_id} <- parse_user_id(msg["data"]["to"]),
+    with {:ok, target_id} <- TachyonParser.parse_user_id(msg["data"]["to"]),
          :ok <- Account.rescind_friend_request(state.user.id, target_id) do
       Player.Session.friend_request_cancelled(target_id, state.user.id)
       {:response, state}
@@ -435,7 +438,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("friend/remove", "request", _message_id, msg, state) do
-    with {:ok, target_id} <- parse_user_id(msg["data"]["userId"]),
+    with {:ok, target_id} <- TachyonParser.parse_user_id(msg["data"]["userId"]),
          %Account.Friend{} = friend <- Account.get_friend(state.user.id, target_id),
          {:ok, _changeset} <- Account.delete_friend(friend) do
       Player.Session.friend_removed(target_id, state.user.id)
@@ -454,7 +457,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("user/subscribeUpdates", "request", _message_id, msg, state) do
-    {ok_ids, invalid_ids} = parse_user_ids(msg["data"]["userIds"])
+    {ok_ids, invalid_ids} = TachyonParser.parse_user_ids(msg["data"]["userIds"])
 
     if not Enum.empty?(invalid_ids) do
       details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
@@ -472,7 +475,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("user/unsubscribeUpdates", "request", _message_id, msg, state) do
-    {ok_ids, invalid_ids} = parse_user_ids(msg["data"]["userIds"])
+    {ok_ids, invalid_ids} = TachyonParser.parse_user_ids(msg["data"]["userIds"])
 
     if not Enum.empty?(invalid_ids) do
       details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
@@ -514,7 +517,7 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("party/invite", "request", _message_id, msg, state) do
     raw_user_id = msg["data"]["userId"]
 
-    with {:ok, id} <- parse_user_id(raw_user_id),
+    with {:ok, id} <- TachyonParser.parse_user_id(raw_user_id),
          :ok <- Player.Session.invite_to_party(state.user.id, id) do
       {:response, state}
     else
@@ -552,7 +555,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("party/cancelInvite", "request", _message_id, msg, state) do
-    with {:ok, user_id} <- parse_user_id(msg["data"]["userId"]),
+    with {:ok, user_id} <- TachyonParser.parse_user_id(msg["data"]["userId"]),
          :ok <- Player.Session.cancel_invite_to_party(state.user.id, user_id) do
       {:response, state}
     else
@@ -562,7 +565,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("party/kickMember", "request", _message_id, msg, state) do
-    with {:ok, target_id} <- parse_user_id(msg["data"]["userId"]),
+    with {:ok, target_id} <- TachyonParser.parse_user_id(msg["data"]["userId"]),
          :ok <- Player.Session.kick_party_member(state.user.id, target_id) do
       {:response, state}
     else
@@ -652,27 +655,9 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  # that kind of parsing can probably be extracted, will likely be generally useful
-  @spec parse_user_ids([String.t()]) :: {[T.userid()], [String.t()]}
-  defp parse_user_ids(raw_ids) do
-    Enum.reduce(raw_ids, {[], []}, fn raw_id, {ok, invalid} ->
-      case Integer.parse(raw_id) do
-        {id, ""} -> {[id | ok], invalid}
-        _ -> {ok, [raw_id | invalid]}
-      end
-    end)
-  end
-
-  defp parse_user_id(raw) do
-    case Integer.parse(raw) do
-      {id, ""} -> {:ok, id}
-      _ -> {:error, :invalid_id}
-    end
-  end
-
   @spec get_user(String.t()) :: {:ok, T.user()} | {:error, :invalid_user}
   defp get_user(raw_id) do
-    with {:ok, user_id} <- parse_user_id(raw_id),
+    with {:ok, user_id} <- TachyonParser.parse_user_id(raw_id),
          user when not is_nil(user) <- Account.get_user(user_id) do
       {:ok, user}
     else
