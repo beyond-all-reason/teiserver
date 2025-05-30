@@ -10,9 +10,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   # from a crash, the important transient state would be lost.
   use GenServer, restart: :temporary
 
-  # import Teiserver.Matchmaking.QueueServer, only:
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Asset
 
   require Logger
 
@@ -119,7 +119,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
       id ->
         engine = select_engine(state.queue.engines)
         %{spring_game: game} = select_game(state.queue.games)
-        %{spring_name: map} = select_map(state.queue.maps)
+        map = select_map(state.queue.maps)
 
         start_battle(state, id, engine, game, map)
     end
@@ -152,7 +152,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           host_data
           |> Map.put(:engine, engine)
           |> Map.put(:game, %{springName: game})
-          |> Map.put(:map, %{springName: map})
+          |> Map.put(:map, %{springName: map.spring_name})
 
         for team <- state.teams, member <- team, p_id <- member.player_ids do
           Teiserver.Player.battle_start(p_id, battle_start_data)
@@ -234,28 +234,36 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     {:stop, :normal, state}
   end
 
-  @spec start_script(state(), %{version: String.t()}, String.t(), String.t()) ::
+  @spec start_script(state(), %{version: String.t()}, String.t(), Asset.Map.t()) ::
           Teiserver.TachyonBattle.start_script()
   defp start_script(state, engine, game, map) do
     %{
       engineVersion: engine.version,
       gameName: game,
-      mapName: map,
+      mapName: map.spring_name,
       startPosType: :ingame,
-      allyTeams: get_ally_teams(state)
+      allyTeams: get_ally_teams(state, map)
     }
   end
 
-  @spec get_ally_teams(state()) :: [Teiserver.Autohost.ally_team(), ...]
-  defp get_ally_teams(state) do
-    for team <- state.readied do
+  @spec get_ally_teams(state(), Asset.Map.t()) :: [Teiserver.Autohost.ally_team(), ...]
+  defp get_ally_teams(state, map) do
+    startboxes = Asset.get_startboxes(map, Enum.count(state.readied))
+
+    if startboxes == nil,
+      do:
+        raise(
+          "No startboxes found for map #{map.spring_name} and teams #{Enum.count(state.readied)}"
+        )
+
+    for {team, startbox} <- Enum.zip(state.readied, startboxes) do
       teams =
         for player <- team do
           player = player |> Map.drop([:user_id]) |> Map.put(:userId, to_string(player.user_id))
           %{players: [player]}
         end
 
-      %{teams: teams}
+      %{teams: teams, startBox: startbox}
     end
   end
 

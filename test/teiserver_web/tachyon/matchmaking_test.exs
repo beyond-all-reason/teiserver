@@ -69,6 +69,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
   defp setup_maps(id) do
     map_attrs(id)
+    |> Enum.map(&add_startboxes(&1, 2))
     |> Enum.each(&AssetFixtures.create_map/1)
   end
 
@@ -86,6 +87,22 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       games: game_versions(),
       maps: maps
     }
+  end
+
+  defp add_startboxes(attrs, n_teams) do
+    boxes = [
+      %{
+        "maxPlayersPerStartbox" => 8,
+        "startboxes" =>
+          for(
+            _ <- 1..n_teams,
+            into: [],
+            do: %{"poly" => [%{"x" => 0, "y" => 0}, %{"x" => 200, "y" => 200}]}
+          )
+      }
+    ]
+
+    Map.put(attrs, :startboxes_set, boxes)
   end
 
   defp mk_queue(attrs) do
