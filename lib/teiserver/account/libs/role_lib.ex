@@ -278,21 +278,16 @@ defmodule Teiserver.Account.RoleLib do
 
   def allowed_role_management("Admin") do
     staff_roles() ++
-      community_roles() ++ privileged_roles() ++ allowed_role_management("Moderator")
+      community_roles() ++
+      privileged_roles() ++ moderation_roles() ++ allowed_role_management("Moderator")
   end
 
   def allowed_role_management("Moderator") do
-    global_roles() ++ moderation_roles() ++ property_roles()
+    global_roles() ++ property_roles()
   end
 
   def allowed_role_management(_) do
     []
-  end
-
-  @spec roles_with_permissions() :: [String.t()]
-  def roles_with_permissions() do
-    management_roles() ++
-      moderation_roles() ++ staff_roles() ++ privileged_roles() ++ property_roles()
   end
 
   def calculate_permissions(roles) do
