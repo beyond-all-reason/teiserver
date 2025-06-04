@@ -53,6 +53,11 @@ defmodule Teiserver.Matchmaking.AlgosTest do
       counts = Enum.map(team, &Enum.count/1)
       assert MapSet.new(counts) == MapSet.new([1, 2])
     end
+
+    test "ordering doesn't matter" do
+      members = [mk_member(0), mk_member(1), mk_member([2, 3]), mk_member([4, 5])]
+      assert {:match, _} = Algos.ignore_os(3, 2, members)
+    end
   end
 
   defp mk_member(ids) when not is_list(ids), do: mk_member([ids])

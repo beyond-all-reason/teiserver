@@ -30,3 +30,7 @@ defmodule Teiserver.Matchmaking.Member do
           joined_at: DateTime.t()
         }
 end
+
+defimpl GroupLength, for: Teiserver.Matchmaking.Member do
+  def length(member), do: Kernel.length(member.player_ids)
+end
