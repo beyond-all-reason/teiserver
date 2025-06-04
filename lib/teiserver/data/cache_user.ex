@@ -112,6 +112,8 @@ defmodule Teiserver.CacheUser do
                "name" => String.trim(name),
                "email" => String.trim(email),
                "password" => md5_password,
+               "icon" => @default_icon,
+               "colour" => @default_colour,
                # hack so that we can use the same code for web and chobby registration
                # chobby does its own confirmation check
                "password_confirmation" => md5_password
