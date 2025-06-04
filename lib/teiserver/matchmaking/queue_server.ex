@@ -16,25 +16,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   alias Teiserver.Party
   alias Teiserver.Player
   alias Teiserver.Helpers.MonitorCollection, as: MC
-
-  @typedoc """
-  member of a queue. Holds of the information required to match members together.
-  A member can be a party of players. Parties must not be broken.
-  """
-  @type member :: %{
-          id: binary(),
-          player_ids: [T.userid()],
-          # maybe also add (aggregated) chevron if that's taking into account
-          # map keyed by the rating type to {skill, uncertainty}
-          # For example %{"duel" => {12, 3.2}}
-          rating: %{String.t() => {integer(), integer()}},
-          # aggregate of player to avoid for this member
-          avoid: [T.userid()],
-          joined_at: DateTime.t(),
-          search_distance: non_neg_integer(),
-          # how many ticks remaining before increasing the search distance
-          increase_distance_after: non_neg_integer()
-        }
+  alias Teiserver.Matchmaking.Member
 
   @type id :: String.t()
 
@@ -65,7 +47,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           id: id(),
           queue: queue(),
           settings: settings(),
-          members: [member()],
+          members: [Member.t()],
           # storing monitors to evict players that disconnect
           # also store pairing rooms
           monitors: MC.t(),
@@ -102,7 +84,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           optional(:games) => [%{spring_game: String.t()}],
           optional(:maps) => [Teiserver.Asset.Map.t()],
           optional(:settings) => settings(),
-          optional(:members) => [member()]
+          optional(:members) => [Member.t()]
         }) :: state()
   def init_state(attrs) do
     %{
@@ -146,7 +128,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @doc """
   Join the specified queue
   """
-  @spec join_queue(id(), member(), Party.id() | nil) :: join_result()
+  @spec join_queue(id(), Member.t(), Party.id() | nil) :: join_result()
   def join_queue(queue_id, member, party_id) do
     if party_id == nil,
       do: GenServer.call(via_tuple(queue_id), {:join_queue, member}),
@@ -250,18 +232,15 @@ defmodule Teiserver.Matchmaking.QueueServer do
           {:reply, {:error, :invalid_queue}, state}
 
         {[_], []} ->
-          member =
-            %{
-              id: UUID.uuid4(),
-              player_ids: [player_id | pending.joined],
-              # TODO: get and aggregate rating somehow
-              rating: %{},
-              # TODO: get and aggregate avoids somehow
-              avoid: [],
-              joined_at: DateTime.utc_now(),
-              search_distance: 0,
-              increase_distance_after: 10
-            }
+          member = %Member{
+            id: UUID.uuid4(),
+            player_ids: [player_id | pending.joined],
+            # TODO: get and aggregate rating somehow
+            rating: %{},
+            # TODO: get and aggregate avoids somehow
+            avoid: [],
+            joined_at: DateTime.utc_now(),
+          }
 
           :timer.cancel(pending.tref)
 
@@ -494,7 +473,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     Map.update!(state, :pending_parties, &Map.delete(&1, party_id))
   end
 
-  @spec member_can_join_queue?(member(), state()) :: :ok | {:error, reason :: term()}
+  @spec member_can_join_queue?(Member.t(), state()) :: :ok | {:error, reason :: term()}
   defp member_can_join_queue?(member, state) do
     member_ids =
       Enum.flat_map(state.members, fn m -> m.player_ids end)
@@ -554,7 +533,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   This returns a list of potential matches.
   A match is a list of teams, a team is a list of member
   """
-  @spec match_members(state()) :: :no_match | {:match, [[[member()]]]}
+  @spec match_members(state()) :: :no_match | {:match, [[[Member.t()]]]}
   def match_members(state) do
     case greedy_match(state.queue.team_size, state.queue.team_count, state.members, [], []) do
       [] -> :no_match
