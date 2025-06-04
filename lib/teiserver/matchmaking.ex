@@ -1,12 +1,13 @@
 defmodule Teiserver.Matchmaking do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Matchmaking
+  alias Teiserver.Matchmaking.Member
   alias Teiserver.Party
   require Logger
 
   @type queue :: Matchmaking.QueueServer.queue()
   @type queue_id :: Matchmaking.QueueServer.id()
-  @type member :: Matchmaking.QueueServer.member()
+  @type member :: Member.t()
   @type join_error :: Matchmaking.QueueServer.join_error()
   @type join_result :: Matchmaking.QueueServer.join_result()
   @type leave_result :: Matchmaking.QueueServer.leave_result()
@@ -34,16 +35,14 @@ defmodule Teiserver.Matchmaking do
   def join_queue(queue_id, member, party_id \\ nil)
 
   def join_queue(queue_id, member, party_id) when not is_map(member) do
-    member = %{
+    member = %Member{
       id: UUID.uuid4(),
       player_ids: [member],
       # TODO tachyon_mvp: fetch ratings for the player somehow
       rating: %{},
       # TODO tachyon_mvp: fetch the list of player id avoided by this player
       avoid: [],
-      joined_at: DateTime.utc_now(),
-      search_distance: 0,
-      increase_distance_after: 10
+      joined_at: DateTime.utc_now()
     }
 
     join_queue(queue_id, member, party_id)

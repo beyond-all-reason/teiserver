@@ -1,6 +1,7 @@
 defmodule Teiserver.MatchingTest do
   use ExUnit.Case
   import Teiserver.Matchmaking.QueueServer, only: [match_members: 1, init_state: 1]
+  alias Teiserver.Matchmaking.Member
 
   test "no members" do
     state = mk_state(1, 2, [])
@@ -73,7 +74,7 @@ defmodule Teiserver.MatchingTest do
   defp mk_member(ids) when not is_list(ids), do: mk_member([ids])
 
   defp mk_member(ids) do
-    %{
+    %Member{
       player_ids: ids,
       rating: %{},
       avoid: [],
