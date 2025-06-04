@@ -7,6 +7,7 @@ defmodule Teiserver.Matchmaking.Algos do
   """
 
   alias Teiserver.Matchmaking.Member
+  alias Teiserver.Helpers.Combi
 
   @doc """
   The simplest possible algorithm for matchmaking.
@@ -17,46 +18,64 @@ defmodule Teiserver.Matchmaking.Algos do
   This returns a list of potential matches.
   A match is a list of teams, a team is a list of member
   """
-  @spec ignore_os(team_size :: pos_integer(), team_count :: pos_integer(),
-          members: [Member.t()]
-        ) :: :no_match | {:match, [[[Member.t()]]]}
+  @spec ignore_os(team_size :: pos_integer(), team_count :: pos_integer(), members: [Member.t()]) ::
+          :no_match | {:match, [[[Member.t()]]]}
   def ignore_os(team_size, team_count, members) do
-    case greedy_match(team_size, team_count, members, [], []) do
+    case get_matches(team_size, team_count, members, []) do
       [] -> :no_match
       matches -> {:match, matches}
     end
   end
 
-  defp greedy_match(team_size, team_count, members, current_team, matched) do
-    # tachyon_mvp: this is a temporary algorithm
-    # it only looks at the number of players to fill a team
-    case members do
-      [] ->
-        Enum.chunk_every(matched, team_count, team_count, :discard)
+  def get_matches(team_size, team_count, members, acc) do
+    res =
+      match_stream(team_size, team_count, members)
+      |> Enum.take(1)
+      |> List.first()
 
-      members ->
-        current_size =
-          current_team |> Enum.map(fn member -> Enum.count(member.player_ids) end) |> Enum.sum()
+    case res do
+      nil ->
+        acc
 
-        case Enum.split_while(members, fn m ->
-               Enum.count(m.player_ids) + current_size > team_size
-             end) do
-          # current team cannot be completed, discard it
-          {_, []} ->
-            greedy_match(team_size, team_count, members, [], matched)
+      match ->
+        ids = for team <- match, member <- team, into: MapSet.new(), do: member.id
 
-          {too_big, [member | rest]} ->
-            to_add = Enum.count(member.player_ids)
-            rest = too_big ++ rest
+        remaining_members =
+          Enum.filter(members, fn m ->
+            not MapSet.member?(ids, m.id)
+          end)
 
-            cond do
-              current_size + to_add < team_size ->
-                greedy_match(team_size, team_count, rest, [member | current_team], matched)
-
-              current_size + to_add == team_size ->
-                greedy_match(team_size, team_count, rest, [], [[member | current_team] | matched])
-            end
-        end
+        get_matches(team_size, team_count, remaining_members, [match | acc])
     end
+  end
+
+  # Returns an enumerable of matches for the given members, team size and team count
+  # a match is a list of `team_count` teams. Each teams is a list of member such
+  # that the number of player in the team is `team_size`
+  @spec match_stream(
+          team_size :: pos_integer(),
+          team_count :: pos_integer(),
+          members :: [Member.t()]
+        ) :: Enumerable.t([[[Member.t()]]])
+  def match_stream(team_size, team_count, members) when team_count <= 1 do
+    Combi.combinations(members, team_size)
+    |> Stream.map(fn t -> [t] end)
+  end
+
+  def match_stream(team_size, team_count, members) do
+    teams = Combi.combinations(members, team_size)
+
+    Stream.flat_map(teams, fn team ->
+      ids = for member <- team, into: MapSet.new(), do: member.id
+
+      available_members =
+        Enum.filter(members, fn m ->
+          not MapSet.member?(ids, m.id)
+        end)
+
+      other_matches = match_stream(team_size, team_count - 1, available_members)
+
+      Stream.map(other_matches, fn teams -> [team | teams] end)
+    end)
   end
 end
