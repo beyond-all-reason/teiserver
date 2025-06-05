@@ -11,12 +11,13 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   use GenServer, restart: :temporary
 
   alias Teiserver.Matchmaking.QueueServer
+  alias Teiserver.Matchmaking.Member
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Asset
 
   require Logger
 
-  @type team :: [QueueServer.member()]
+  @type team :: [Member.t()]
   @type lost_reason :: :cancel | :timeout | {:server_error, term()}
   @type ready_data :: %{
           user_id: T.userid(),

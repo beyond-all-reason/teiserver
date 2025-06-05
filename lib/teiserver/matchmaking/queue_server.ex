@@ -16,25 +16,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
   alias Teiserver.Party
   alias Teiserver.Player
   alias Teiserver.Helpers.MonitorCollection, as: MC
-
-  @typedoc """
-  member of a queue. Holds of the information required to match members together.
-  A member can be a party of players. Parties must not be broken.
-  """
-  @type member :: %{
-          id: binary(),
-          player_ids: [T.userid()],
-          # maybe also add (aggregated) chevron if that's taking into account
-          # map keyed by the rating type to {skill, uncertainty}
-          # For example %{"duel" => {12, 3.2}}
-          rating: %{String.t() => {integer(), integer()}},
-          # aggregate of player to avoid for this member
-          avoid: [T.userid()],
-          joined_at: DateTime.t(),
-          search_distance: non_neg_integer(),
-          # how many ticks remaining before increasing the search distance
-          increase_distance_after: non_neg_integer()
-        }
+  alias Teiserver.Matchmaking.Member
+  alias Teiserver.Matchmaking.Algos
 
   @type id :: String.t()
 
@@ -49,6 +32,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
         }
 
   @typedoc """
+  what algorithm this queue should use to put players/party together?
+  """
+  @type algo :: :ignore_os
+
+  @typedoc """
   immutable specification of the queue
   """
   @type queue :: %{
@@ -56,6 +44,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           team_size: pos_integer(),
           team_count: pos_integer(),
           ranked: boolean(),
+          algo: algo(),
           engines: [%{version: String.t()}],
           games: [%{spring_game: String.t()}],
           maps: [Teiserver.Asset.Map.t()]
@@ -65,7 +54,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           id: id(),
           queue: queue(),
           settings: settings(),
-          members: [member()],
+          members: [Member.t()],
           # storing monitors to evict players that disconnect
           # also store pairing rooms
           monitors: MC.t(),
@@ -102,7 +91,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
           optional(:games) => [%{spring_game: String.t()}],
           optional(:maps) => [Teiserver.Asset.Map.t()],
           optional(:settings) => settings(),
-          optional(:members) => [member()]
+          optional(:members) => [Member.t()],
+          optional(:algo) => algo()
         }) :: state()
   def init_state(attrs) do
     %{
@@ -111,6 +101,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
         name: attrs.name,
         team_size: attrs.team_size,
         team_count: attrs.team_count,
+        algo: Map.get(attrs, :algo, :ignore_os),
         ranked: true,
         engines: Map.get(attrs, :engines, []),
         games: Map.get(attrs, :games, []),
@@ -146,7 +137,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @doc """
   Join the specified queue
   """
-  @spec join_queue(id(), member(), Party.id() | nil) :: join_result()
+  @spec join_queue(id(), Member.t(), Party.id() | nil) :: join_result()
   def join_queue(queue_id, member, party_id) do
     if party_id == nil,
       do: GenServer.call(via_tuple(queue_id), {:join_queue, member}),
@@ -250,18 +241,15 @@ defmodule Teiserver.Matchmaking.QueueServer do
           {:reply, {:error, :invalid_queue}, state}
 
         {[_], []} ->
-          member =
-            %{
-              id: UUID.uuid4(),
-              player_ids: [player_id | pending.joined],
-              # TODO: get and aggregate rating somehow
-              rating: %{},
-              # TODO: get and aggregate avoids somehow
-              avoid: [],
-              joined_at: DateTime.utc_now(),
-              search_distance: 0,
-              increase_distance_after: 10
-            }
+          member = %Member{
+            id: UUID.uuid4(),
+            player_ids: [player_id | pending.joined],
+            # TODO: get and aggregate rating somehow
+            rating: %{},
+            # TODO: get and aggregate avoids somehow
+            avoid: [],
+            joined_at: DateTime.utc_now()
+          }
 
           :timer.cancel(pending.tref)
 
@@ -494,7 +482,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     Map.update!(state, :pending_parties, &Map.delete(&1, party_id))
   end
 
-  @spec member_can_join_queue?(member(), state()) :: :ok | {:error, reason :: term()}
+  @spec member_can_join_queue?(Member.t(), state()) :: :ok | {:error, reason :: term()}
   defp member_can_join_queue?(member, state) do
     member_ids =
       Enum.flat_map(state.members, fn m -> m.player_ids end)
@@ -554,44 +542,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
   This returns a list of potential matches.
   A match is a list of teams, a team is a list of member
   """
-  @spec match_members(state()) :: :no_match | {:match, [[[member()]]]}
+  @spec match_members(state()) :: :no_match | {:match, [[[Member.t()]]]}
   def match_members(state) do
-    case greedy_match(state.queue.team_size, state.queue.team_count, state.members, [], []) do
-      [] -> :no_match
-      matches -> {:match, matches}
-    end
-  end
-
-  defp greedy_match(team_size, team_count, members, current_team, matched) do
-    # tachyon_mvp: this is a temporary algorithm
-    # it only looks at the number of players to fill a team
-    case members do
-      [] ->
-        Enum.chunk_every(matched, team_count, team_count, :discard)
-
-      members ->
-        current_size =
-          current_team |> Enum.map(fn member -> Enum.count(member.player_ids) end) |> Enum.sum()
-
-        case Enum.split_while(members, fn m ->
-               Enum.count(m.player_ids) + current_size > team_size
-             end) do
-          # current team cannot be completed, discard it
-          {_, []} ->
-            greedy_match(team_size, team_count, members, [], matched)
-
-          {too_big, [member | rest]} ->
-            to_add = Enum.count(member.player_ids)
-            rest = too_big ++ rest
-
-            cond do
-              current_size + to_add < team_size ->
-                greedy_match(team_size, team_count, rest, [member | current_team], matched)
-
-              current_size + to_add == team_size ->
-                greedy_match(team_size, team_count, rest, [], [[member | current_team] | matched])
-            end
-        end
+    case state.queue.algo do
+      :ignore_os ->
+        Algos.ignore_os(state.queue.team_size, state.queue.team_count, state.members)
     end
   end
 
