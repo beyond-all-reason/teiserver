@@ -6,15 +6,6 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
   use Teiserver.DataCase, async: true
   @moduletag :balance_test
   alias Teiserver.Battle.Balance.BruteForce
-  alias Teiserver.Helper.CombinationsHelper
-
-  test "combinations helper module" do
-    combos = CombinationsHelper.get_combinations(4)
-    assert combos == [[0, 1], [0, 2], [0, 3]]
-
-    combos = CombinationsHelper.get_combinations(12)
-    assert length(combos) == 462
-  end
 
   test "check for broken party" do
     party = ["kyutoryu", "fbots1998"]

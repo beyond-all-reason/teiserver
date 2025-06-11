@@ -98,9 +98,9 @@ defmodule Teiserver.Battle.Balance.BruteForce do
     end)
   end
 
-  @spec potential_teams(integer()) :: any()
+  @spec potential_teams(integer()) :: [integer()]
   def potential_teams(num_players) do
-    Teiserver.Helper.CombinationsHelper.get_combinations(num_players)
+    Teiserver.Helpers.Combi.get_single_teams(num_players)
   end
 
   def get_best_combo(players, parties) do
