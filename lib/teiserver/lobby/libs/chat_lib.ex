@@ -11,13 +11,8 @@ defmodule Teiserver.Lobby.ChatLib do
   def say(_userid, "!specafk" <> _, _lobby_id), do: :ok
 
   def say(userid, msg, lobby_id) do
-    # Fetch the lobby struct using lobby_id 
-  lobby = Lobby.get_lobby(lobby_id)
-    # Get the members list from the lobby, or [] if the lobby doesn't exist
-  members = if lobby, do: lobby.members, else: []
-
-    # Check if any member is an AI/bot (using CacheUser.is_bot?/1)
-  has_ai = Enum.any?(members, &CacheUser.is_bot?/1)
+    # Check if there are any AIs in the lobby using Battle.get_bots
+    has_ai = Battle.get_bots(lobby_id) |> Enum.any?()
 
     # Replace SPADS command (starting with !) with lowercase version to prevent bypassing with capitalised command names
     # Ignore !# bot commands like !#JSONRPC
@@ -28,7 +23,7 @@ defmodule Teiserver.Lobby.ChatLib do
         |> String.downcase()
         |> String.split()
         |> case do
-    # Only apply aliasing if there are NO bots/AIs in the lobby
+          # Only apply aliasing if there are no AIs in the lobby
           ["!cv", "joinas" | _] when not has_ai ->
             "!cv joinas spec"
 
