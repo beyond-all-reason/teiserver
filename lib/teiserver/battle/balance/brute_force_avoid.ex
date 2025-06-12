@@ -44,9 +44,9 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
     end)
   end
 
-  @spec potential_teams(integer()) :: any()
+  @spec potential_teams(integer()) :: [integer()]
   def potential_teams(num_players) do
-    Teiserver.Helper.CombinationsHelper.get_combinations(num_players)
+    Teiserver.Helpers.Combi.get_single_teams(num_players)
   end
 
   # Parties/avoids will be ignored if the team rating diff is too large

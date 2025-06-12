@@ -94,7 +94,6 @@ defmodule Teiserver.MixProject do
       {:dart_sass, "~> 0.7", only: [:dev]},
       {:tzdata, "~> 1.1.2"},
       {:ex_ulid, "~> 0.1.0"},
-      {:combination, "~> 0.0.3"},
       {:mock, "~> 0.3.0", only: :test},
 
       # Teiserver libs
