@@ -203,13 +203,27 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           if value != :error do
             {:ok, value} = value
 
-            if state.userid do
-              Telemetry.log_user_property(state.userid, event, value)
-            else
-              Telemetry.log_anon_property(hash, event, value)
-            end
+            if String.valid?(value) do
+              if state.userid do
+                Telemetry.log_user_property(state.userid, event, value)
+              else
+                Telemetry.log_anon_property(hash, event, value)
+              end
 
-            "success"
+              "success"
+            else
+              if state.userid do
+                Logger.error(
+                  "#{state.userid} update_client_property - contents contain invalid characters, data: #{value}"
+                )
+              else
+                Logger.error(
+                  "update_client_property - contents contain invalid characters, data: #{value}"
+                )
+              end
+
+              "contain invalid characters"
+            end
           else
             # Logger.error("update_client_property:bad base64 value - #{data}")
             "bad base64 value"
