@@ -198,7 +198,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
   @impl true
   def init(state) do
-    Logger.metadata(queue_id: state.id)
+    Logger.metadata(actor_type: :mm_queue, actor_id: state.id)
 
     if state.settings.tick_interval_ms != :manual do
       :timer.send_interval(state.settings.tick_interval_ms, :tick)
