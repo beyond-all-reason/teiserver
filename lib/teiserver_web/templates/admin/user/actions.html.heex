@@ -46,7 +46,7 @@
   </a>
 
   <.link
-    :if={allow?(@current_user, "Server")}
+    :if={allow?(@current_user, "Moderator")}
     href={~p"/admin/users/gdpr_clean/#{@user.id}"}
     data-confirm="Are you sure?"
     method="put"

@@ -30,6 +30,7 @@ defmodule Teiserver.Account.Auth do
   def authorize(:applying, conn, _), do: allow?(conn, "Moderator")
   def authorize(:data_search, conn, _), do: allow?(conn, "Server")
   def authorize(:relationships, conn, _), do: allow?(conn, "Moderator")
+  def authorize(:gdpr_clean, conn, _), do: allow?(conn, "Moderator")
   def authorize(_, conn, _), do: allow?(conn, "admin.dev")
 end
 
