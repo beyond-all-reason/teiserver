@@ -126,7 +126,6 @@ defmodule Teiserver.Application do
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Throttles.Supervisor},
 
         # Bridge
-        Teiserver.Bridge.BridgeServer,
         Teiserver.Bridge.DiscordSystem,
         concache_sup(:discord_bridge_dm_cache),
         concache_perm_sup(:discord_channel_cache),

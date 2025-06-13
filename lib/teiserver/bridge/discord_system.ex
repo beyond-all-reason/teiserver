@@ -10,12 +10,14 @@ defmodule Teiserver.Bridge.DiscordSystem do
   def init(_) do
     pid = DynamicSupervisor.init(strategy: :one_for_one)
 
-    Task.async(fn ->
-      DynamicSupervisor.start_child(
-        Teiserver.Bridge.DiscordSystem,
-        Supervisor.child_spec(Teiserver.Bridge.DiscordSupervisor, restart: :temporary)
-      )
-    end)
+    if Teiserver.Communication.use_discord?() do
+      Task.async(fn ->
+        DynamicSupervisor.start_child(
+          __MODULE__,
+          Supervisor.child_spec(Teiserver.Bridge.DiscordSupervisor, restart: :temporary)
+        )
+      end)
+    end
 
     pid
   end
