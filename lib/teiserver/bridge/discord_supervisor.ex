@@ -6,8 +6,7 @@ defmodule Teiserver.Bridge.DiscordSupervisor do
   end
 
   def init(_) do
-    Supervisor.init([{Nostrum.Application, []}, {Teiserver.Bridge.DiscordBridgeBot, []}],
-      restart: :temporary,
+    Supervisor.init([Nostrum.Application, Teiserver.Bridge.DiscordBridgeBot],
       strategy: :rest_for_one
     )
   end
