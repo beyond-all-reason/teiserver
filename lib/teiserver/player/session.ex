@@ -86,7 +86,7 @@ defmodule Teiserver.Player.Session do
 
   @impl true
   def init({conn_pid, user}) do
-    Logger.metadata(user_id: user.id)
+    Logger.metadata(actor_type: :session, user_id: user.id)
     monitors = MC.monitor(MC.new(), conn_pid, :connection)
 
     state = %{
