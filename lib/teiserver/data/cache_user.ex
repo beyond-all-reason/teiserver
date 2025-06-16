@@ -486,6 +486,8 @@ defmodule Teiserver.CacheUser do
   def send_direct_message(_, _, nil), do: :ok
 
   def send_direct_message(from_id, to_id, message) do
+    # Check if there are any AIs in the lobby using Battle.get_bots
+    has_ai = Battle.get_bots(lobby_id) |> Enum.any?()
     # Replace SPADS command (starting with !) with lowercase version to prevent bypassing with capitalised command names
     # Ignore !# bot commands like !#JSONRPC
     message =
@@ -494,10 +496,11 @@ defmodule Teiserver.CacheUser do
         |> String.trim()
         |> String.downcase()
         |> case do
-          ["!cv", "joinas" | _] ->
+          # Only apply aliasing if there are no AIs in the lobby
+          ["!cv", "joinas" | _] when not has_ai ->
             "!cv joinas spec"
 
-          ["!callvote", "joinas" | _] ->
+          ["!callvote", "joinas" | _] when not has_ai ->
             "!callvote joinas spec"
 
           ["!joinas" | _] ->
