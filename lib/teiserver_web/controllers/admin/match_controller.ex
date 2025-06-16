@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.MatchController do
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Battle, Game, Account}
+  alias Teiserver.{Battle, Account}
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
   require Logger
 
@@ -31,10 +31,7 @@ defmodule TeiserverWeb.Admin.MatchController do
         order_by: "Newest first"
       )
 
-    queues = Game.list_queues(order_by: "Name (A-Z)")
-
     conn
-    |> assign(:queues, queues)
     |> assign(:params, params)
     |> assign(:matches, matches)
     |> render("index.html")
@@ -56,10 +53,7 @@ defmodule TeiserverWeb.Admin.MatchController do
         order_by: "Newest first"
       )
 
-    queues = Game.list_queues(order_by: "Name (A-Z)")
-
     conn
-    |> assign(:queues, queues)
     |> assign(:params, params)
     |> assign(:matches, matches)
     |> render("index.html")
@@ -89,12 +83,10 @@ defmodule TeiserverWeb.Admin.MatchController do
         limit: params["limit"] || 100
       )
 
-    queues = Game.list_queues(order_by: "Name (A-Z)")
     user = Account.get_user_by_id(userid)
 
     conn
     |> assign(:user, user)
-    |> assign(:queues, queues)
     |> assign(:matches, matches)
     |> render("user_index.html")
   end

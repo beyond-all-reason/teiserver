@@ -275,11 +275,6 @@ defmodule TeiserverWeb.Router do
     delete("/security/delete_token/:id", SecurityController, :delete_token)
   end
 
-  scope "/teiserver/games", TeiserverWeb.Game, as: :ts_game do
-    pipe_through([:browser, :app_layout, :protected])
-    resources("/queues", QueueController)
-  end
-
   scope "/battle", TeiserverWeb.Battle.LobbyLive, as: :ts_battle do
     pipe_through([:browser, :app_layout, :protected])
 
@@ -321,13 +316,6 @@ defmodule TeiserverWeb.Router do
 
     live("/lobbies", Index, :index)
     live("/lobbies/show/:id", Show, :show)
-  end
-
-  scope "/teiserver/matchmaking", TeiserverWeb.Matchmaking.QueueLive, as: :ts_game do
-    pipe_through([:browser, :app_layout, :protected])
-
-    live("/queues", Index, :index)
-    live("/queues/:id", Show, :show)
   end
 
   scope "/teiserver/account", TeiserverWeb.Account.PartyLive, as: :ts_game do

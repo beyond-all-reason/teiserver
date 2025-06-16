@@ -421,27 +421,6 @@ defmodule Teiserver.TeiserverTestLib do
     gm
   end
 
-  @spec make_queue(String.t(), map()) :: Teiserver.Game.Queue.t()
-  def make_queue(name, params \\ %{}) do
-    {:ok, q} =
-      Teiserver.Game.create_queue(
-        Map.merge(
-          %{
-            "name" => name,
-            "team_size" => 1,
-            "icon" => "fa far-house",
-            "colour" => "#112233",
-            "settings" => %{},
-            "conditions" => %{},
-            "map_list" => []
-          },
-          params
-        )
-      )
-
-    q
-  end
-
   @spec make_battle(map()) :: map()
   def make_battle(params \\ %{}) do
     id = :rand.uniform(99_999_999) + 1_000_000
@@ -541,8 +520,6 @@ defmodule Teiserver.TeiserverTestLib do
     Teiserver.Telemetry.get_or_add_simple_lobby_event_type("remove_user_from_lobby")
 
     seed_badge_types()
-
-    seed_matchmaking_queues()
   end
 
   @doc """
@@ -582,21 +559,6 @@ defmodule Teiserver.TeiserverTestLib do
     |> ConCache.ets()
     |> :ets.tab2list()
     |> Enum.each(fn {key, _} -> ConCache.delete(cache, key) end)
-  end
-
-  def seed_matchmaking_queues() do
-    alias Teiserver.Game
-
-    Game.create_queue(%{
-      name: "1v1",
-      team_size: 1,
-      team_count: 2,
-      icon: "fa-user",
-      colour: "red",
-      conditions: %{},
-      settings: %{},
-      map_list: []
-    })
   end
 end
 

@@ -1,6 +1,5 @@
 <% lobby_bsname = Teiserver.Lobby.colours()
-queue_bsname = Teiserver.Game.QueueLib.colours()
-# policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
+policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
 
 <div class="row my-2">
   <div class="col-md-12">
@@ -81,43 +80,6 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
       </div>
 
       <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
-        <h4>Queues ({Enum.count(@queues)})</h4>
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Alive</th>
-              <th>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for {queue, wait} <- @queues do %>
-              <tr>
-                <td>{queue.id}</td>
-                <td>{queue.name}</td>
-                <td>
-                  <%= if wait == nil do %>
-                    <i class="fa-fw fa-regular fa-times text-danger"></i>
-                  <% else %>
-                    <i class="fa-fw fa-solid fa-check text-success"></i>
-                  <% end %>
-                </td>
-                <td>
-                  <.link
-                    navigate={Routes.ts_game_queue_show_path(@socket, :show, queue.id)}
-                    class={"btn btn-sm btn-outline-#{queue_bsname}"}
-                  >
-                    Show
-                  </.link>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
         <h4>Policies ({Enum.count(@policies)})</h4>
         <table class="table table-sm">
           <thead>
@@ -143,7 +105,7 @@ queue_bsname = Teiserver.Game.QueueLib.colours()
                 <td>
                   <.link
                     navigate={~p"/admin/dashboard/policy/#{policy.id}"}
-                    class={"btn btn-sm btn-outline-#{queue_bsname}"}
+                    class={"btn btn-sm btn-outline-#{policy_bsname}"}
                   >
                     Show
                   </.link>

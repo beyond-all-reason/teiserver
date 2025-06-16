@@ -14,7 +14,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   @spec colours :: atom
   def colours, do: :success2
 
-  @spec make_favourite(Queue.t()) :: map()
+  @spec make_favourite(term()) :: map()
   def make_favourite(lobby_policy) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),

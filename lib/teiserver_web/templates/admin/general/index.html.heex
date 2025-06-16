@@ -74,15 +74,6 @@
   </.menu_card>
 
   <.menu_card
-    :if={allow_any?(@current_user, ~w(Server))}
-    icon={Teiserver.Game.QueueLib.icon()}
-    url={~p"/teiserver/games/queues"}
-    size={:small}
-  >
-    Matchmaking
-  </.menu_card>
-
-  <.menu_card
     :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
     icon={Teiserver.Game.LobbyPolicyLib.icon()}
     url={~p"/admin/lobby_policies"}

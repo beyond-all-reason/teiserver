@@ -7,7 +7,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Config
 
   @splitter "---------------------------"
-  @always_allow ~w(help whoami whois discord coc mute unmute ignore unignore matchmaking website party)
+  @always_allow ~w(help whoami whois discord coc mute unmute ignore unignore website party)
   # These commands are handled by coordinator commands, but are not on the always allow list
   @mod_allow ~w(modparty unparty)
   @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no explain)
@@ -116,36 +116,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       "You can use the $explain command to see how balance is being calculated and why you are/are not being teamed with your party",
       "We are working on handling it within the new client and protocol, the website is only a temporary measure."
     ])
-
-    state
-  end
-
-  defp do_handle(%{command: "matchmaking", senderid: senderid} = _cmd, state) do
-    client = Account.get_client_by_id(senderid)
-
-    {:ok, code} =
-      Account.create_code(%{
-        value: ExULID.ULID.generate(),
-        purpose: "one_time_login",
-        expires: Timex.now() |> Timex.shift(minutes: 5),
-        user_id: senderid,
-        metadata: %{
-          ip: client.ip,
-          redirect: "/teiserver/matchmaking/queues"
-        }
-      })
-
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-    url = "https://#{host}/one_time_login/#{code.value}"
-
-    msg =
-      [
-        "Matchmaking is still in development so please report any bugs in it to the devs in the discord.",
-        "To join/leave queues you will need to use the website, you can access it with this link - #{url}"
-      ]
-      |> List.flatten()
-
-    CacheUser.send_direct_message(state.userid, senderid, msg)
 
     state
   end

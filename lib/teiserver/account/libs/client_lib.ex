@@ -62,22 +62,6 @@ defmodule Teiserver.Account.ClientLib do
     call_client(userid, {:change_party, party_id})
   end
 
-  # Queues
-  @spec add_client_to_queue(T.userid(), T.queue_id()) :: :ok | nil
-  def add_client_to_queue(userid, queue_id) do
-    cast_client(userid, {:add_to_queue, queue_id})
-  end
-
-  @spec remove_client_from_queue(T.userid(), T.queue_id()) :: :ok | nil
-  def remove_client_from_queue(userid, queue_id) do
-    cast_client(userid, {:remove_from_queue, queue_id})
-  end
-
-  @spec remove_client_from_all_queues(T.userid()) :: :ok | nil
-  def remove_client_from_all_queues(userid) do
-    cast_client(userid, :remove_from_all_queues)
-  end
-
   # Updates
   @spec merge_update_client(map()) :: nil | :ok
   def merge_update_client(%{userid: userid} = partial_client) do
