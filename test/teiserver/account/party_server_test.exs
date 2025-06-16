@@ -12,8 +12,7 @@ defmodule Teiserver.Account.PartyServerTest do
         id: id,
         leader: 1,
         members: [1],
-        pending_invites: [],
-        queues: []
+        pending_invites: []
       })
 
     assert is_pid(p)
@@ -24,8 +23,7 @@ defmodule Teiserver.Account.PartyServerTest do
                id: id,
                leader: 1,
                members: [1],
-               pending_invites: [],
-               queues: []
+               pending_invites: []
              }
            }
 
@@ -39,8 +37,7 @@ defmodule Teiserver.Account.PartyServerTest do
                id: id,
                leader: 1,
                members: [1],
-               pending_invites: [4, 3, 2],
-               queues: []
+               pending_invites: [4, 3, 2]
              }
            }
 
@@ -52,8 +49,7 @@ defmodule Teiserver.Account.PartyServerTest do
                id: id,
                leader: 1,
                members: [1],
-               pending_invites: [4, 3],
-               queues: []
+               pending_invites: [4, 3]
              }
            }
 
@@ -65,8 +61,7 @@ defmodule Teiserver.Account.PartyServerTest do
                id: id,
                leader: 1,
                members: [3, 1],
-               pending_invites: [4],
-               queues: []
+               pending_invites: [4]
              }
            }
 
@@ -78,8 +73,7 @@ defmodule Teiserver.Account.PartyServerTest do
                id: id,
                leader: 1,
                members: [4, 3, 1],
-               pending_invites: [],
-               queues: []
+               pending_invites: []
              }
            }
 
@@ -91,8 +85,7 @@ defmodule Teiserver.Account.PartyServerTest do
                id: id,
                leader: 4,
                members: [4, 3, 1],
-               pending_invites: [],
-               queues: []
+               pending_invites: []
              }
            }
 
@@ -104,8 +97,7 @@ defmodule Teiserver.Account.PartyServerTest do
                id: id,
                leader: 4,
                members: [4, 1],
-               pending_invites: [],
-               queues: []
+               pending_invites: []
              }
            }
 
@@ -117,8 +109,7 @@ defmodule Teiserver.Account.PartyServerTest do
                id: id,
                leader: 4,
                members: [4],
-               pending_invites: [],
-               queues: []
+               pending_invites: []
              }
            }
 
@@ -131,8 +122,7 @@ defmodule Teiserver.Account.PartyServerTest do
                id: id,
                leader: 4,
                members: [1, 4],
-               pending_invites: [],
-               queues: []
+               pending_invites: []
              }
            }
 
@@ -144,58 +134,7 @@ defmodule Teiserver.Account.PartyServerTest do
                id: id,
                leader: 1,
                members: [1],
-               pending_invites: [],
-               queues: []
-             }
-           }
-
-    # Join queue
-    GenServer.cast(p, {:join_queue, 123})
-
-    assert :sys.get_state(p) == %{
-             party: %Party{
-               id: id,
-               leader: 1,
-               members: [1],
-               pending_invites: [],
-               queues: [123]
-             }
-           }
-
-    # Leave queue
-    GenServer.cast(p, {:leave_queue, 444})
-
-    assert :sys.get_state(p) == %{
-             party: %Party{
-               id: id,
-               leader: 1,
-               members: [1],
-               pending_invites: [],
-               queues: [123]
-             }
-           }
-
-    GenServer.cast(p, {:leave_queue, 123})
-
-    assert :sys.get_state(p) == %{
-             party: %Party{
-               id: id,
-               leader: 1,
-               members: [1],
-               pending_invites: [],
-               queues: []
-             }
-           }
-
-    GenServer.cast(p, {:leave_queue, 123})
-
-    assert :sys.get_state(p) == %{
-             party: %Party{
-               id: id,
-               leader: 1,
-               members: [1],
-               pending_invites: [],
-               queues: []
+               pending_invites: []
              }
            }
 

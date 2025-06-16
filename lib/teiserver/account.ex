@@ -2113,15 +2113,6 @@ defmodule Teiserver.Account do
   @spec move_client_to_party(T.userid(), T.party_id()) :: :ok | nil
   defdelegate move_client_to_party(userid, party_id), to: ClientLib
 
-  @spec add_client_to_queue(T.userid(), T.queue_id()) :: :ok | nil
-  defdelegate add_client_to_queue(userid, queue_id), to: ClientLib
-
-  @spec remove_client_from_queue(T.userid(), T.queue_id()) :: :ok | nil
-  defdelegate remove_client_from_queue(userid, queue_id), to: ClientLib
-
-  @spec remove_client_from_all_queues(T.userid()) :: :ok | nil
-  defdelegate remove_client_from_all_queues(userid), to: ClientLib
-
   @spec get_client_pid(T.userid()) :: pid() | nil
   defdelegate get_client_pid(userid), to: ClientLib
 
@@ -2163,20 +2154,6 @@ defmodule Teiserver.Account do
 
   @spec move_user_to_party(T.party_id(), T.userid()) :: :ok | nil
   defdelegate move_user_to_party(party_id, userid), to: PartyLib
-
-  @doc """
-  Tells the party server to update it's internal reference to queue membership. Does not
-  affect the QueueWaitServer
-  """
-  @spec party_join_queue(T.party_id(), T.queue_id()) :: :ok | nil
-  defdelegate party_join_queue(party_id, queue_id), to: PartyLib
-
-  @doc """
-  Tells the party server to remove it's internal reference to queue membership. Does not
-  affect the QueueWaitServer
-  """
-  @spec party_leave_queue(T.party_id(), T.queue_id()) :: :ok | nil
-  defdelegate party_leave_queue(party_id, queue_id), to: PartyLib
 
   @spec party_exists?(T.party_id()) :: boolean()
   defdelegate party_exists?(party_id), to: PartyLib

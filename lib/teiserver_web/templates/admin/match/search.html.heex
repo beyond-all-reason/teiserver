@@ -51,25 +51,6 @@
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-              <label for="search_action" class="control-label">Queue: </label>
-              {central_component("icon_dropdown", %{
-                name: "search[queue]",
-                id: "search_queue",
-                insert_blank: %{
-                  id: "",
-                  name: "Any/All",
-                  icon: "fa-solid fa-square",
-                  colour: "#000000"
-                },
-                selected: @params["queue"] || "Any",
-                enumerable: [
-                  %{id: "no_queue", name: "No queue", icon: "fa-solid fa-stop", colour: "#AA0000"}
-                  | @queues
-                ]
-              })}
-            </div>
-
-            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="search_action" class="control-label">Game type: </label>
               {central_component("icon_dropdown", %{
                 name: "search[game_type]",

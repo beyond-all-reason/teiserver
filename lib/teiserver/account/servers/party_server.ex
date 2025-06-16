@@ -2,7 +2,6 @@ defmodule Teiserver.Account.PartyServer do
   use GenServer
   require Logger
   alias Teiserver.{Account}
-  alias Teiserver.Data.Matchmaking
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
@@ -200,14 +199,6 @@ defmodule Teiserver.Account.PartyServer do
     {:noreply, %{state | party: new_party}}
   end
 
-  def handle_cast({:join_queue, queue_id}, %{party: party} = state) do
-    {:noreply, %{state | party: %{party | queues: [queue_id | party.queues]}}}
-  end
-
-  def handle_cast({:leave_queue, queue_id}, %{party: party} = state) do
-    {:noreply, %{state | party: %{party | queues: List.delete(party.queues, queue_id)}}}
-  end
-
   @impl true
   def handle_info(%{channel: "teiserver_client_messages:" <> userid, event: :disconnected}, state) do
     {:noreply, %{state | party: remove_member(String.to_integer(userid), state)}}
@@ -239,13 +230,7 @@ defmodule Teiserver.Account.PartyServer do
 
     Account.move_client_to_party(userid, party.id)
 
-    # Now leave any queues we were in
-    party.queues
-    |> Enum.each(fn queue_id ->
-      Matchmaking.remove_group_from_queue(queue_id, party.id)
-    end)
-
-    %{party | pending_invites: new_invites, members: new_members, queues: []}
+    %{party | pending_invites: new_invites, members: new_members}
   end
 
   @spec remove_member(T.userid(), map()) :: map()
@@ -279,13 +264,7 @@ defmodule Teiserver.Account.PartyServer do
       Teiserver.Account.PartyLib.stop_party_server(party.id)
     end
 
-    # Now leave any queues we were in
-    party.queues
-    |> Enum.each(fn queue_id ->
-      Matchmaking.remove_group_from_queue(queue_id, party.id)
-    end)
-
-    %{party | queues: [], members: new_members, leader: new_leader}
+    %{party | members: new_members, leader: new_leader}
   end
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}

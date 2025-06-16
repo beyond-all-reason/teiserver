@@ -5,7 +5,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Teiserver
   alias Teiserver.{Battle, Coordinator, Game}
   alias Teiserver.Account.AccoladeLib
-  alias Teiserver.Data.Matchmaking
 
   @empty_telemetry_data %{
     client: %{
@@ -35,7 +34,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> assign(:telemetry_client, telemetry_data.client)
       |> assign(:telemetry_battle, telemetry_data.battle)
       |> assign(:total_connected_clients, telemetry_data.total_clients_connected)
-      |> update_queues
       |> update_policies
       |> update_lobbies
       |> update_server_pids
@@ -62,7 +60,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   def handle_info(:tick, socket) do
     {:noreply,
      socket
-     |> update_queues
      |> update_policies
      |> update_lobbies
      |> update_server_pids}
@@ -109,20 +106,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   def handle_event("restart-policies", _event, socket) do
     Game.pre_cache_policies()
     {:noreply, socket}
-  end
-
-  @spec update_queues(Plug.Socket.t()) :: Plug.Socket.t()
-  defp update_queues(socket) do
-    queues =
-      Matchmaking.list_queues()
-      |> Enum.map(fn queue ->
-        wait_pid = Matchmaking.get_queue_wait_pid(queue.id)
-        {queue, wait_pid}
-      end)
-      |> Enum.sort_by(fn t -> elem(t, 0).name end, &<=/2)
-
-    socket
-    |> assign(:queues, queues)
   end
 
   @spec update_policies(Plug.Socket.t()) :: Plug.Socket.t()

@@ -10,7 +10,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   @spec view_colour(String.t()) :: atom()
   def view_colour("clans"), do: Teiserver.Clans.ClanLib.colours()
   def view_colour("users"), do: Teiserver.Account.UserLib.colours()
-  def view_colour("queues"), do: Teiserver.Game.QueueLib.colours()
   def view_colour("telemetry"), do: Teiserver.Telemetry.TelemetryLib.colours()
   def view_colour("tools"), do: Teiserver.Admin.ToolLib.colours()
   def view_colour("chat"), do: Teiserver.Chat.LobbyMessageLib.colours()

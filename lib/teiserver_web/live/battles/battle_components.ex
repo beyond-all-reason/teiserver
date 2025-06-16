@@ -24,15 +24,6 @@ defmodule TeiserverWeb.Battle.BattleComponents do
 
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Game.QueueLib.icon()}
-        active={@active == "matchmaking"}
-        url={~p"/teiserver/matchmaking/queues"}
-      >
-        Matchmaking
-      </.sub_menu_button>
-
-      <.sub_menu_button
-        bsname={@view_colour}
         icon={Teiserver.Account.PartyLib.icon()}
         active={@active == "parties"}
         url={~p"/teiserver/account/parties"}
