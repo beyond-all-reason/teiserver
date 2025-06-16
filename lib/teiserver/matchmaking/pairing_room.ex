@@ -63,7 +63,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
   @impl true
   def init({queue_id, queue, teams, timeout}) do
-    Logger.metadata(queue_id: queue_id)
+    Logger.metadata(actor_type: :pairing_room)
 
     initial_state =
       %{
@@ -84,7 +84,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           end
       }
 
-    Logger.debug("Pairing room for players " <> Enum.join(initial_state.awaiting, ","))
+    Logger.info("Pairing room for players " <> Enum.join(initial_state.awaiting, ","))
 
     {:ok, initial_state, {:continue, {:notify_players, timeout}}}
   end

@@ -38,7 +38,7 @@ defmodule Teiserver.TachyonBattle.Battle do
 
   @impl true
   def init(%{battle_id: battle_id, autohost_id: autohost_id} = args) do
-    Logger.metadata(battle_id: battle_id)
+    Logger.metadata(actor_type: :battle, actor_id: battle_id)
 
     state = %{
       id: battle_id,
