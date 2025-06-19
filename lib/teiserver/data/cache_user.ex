@@ -505,6 +505,7 @@ defmodule Teiserver.CacheUser do
         message
         |> String.trim()
         |> String.downcase()
+        |> String.split()
         |> case do
           ["!cv", "joinas" | _] when not has_ai ->
             "!cv joinas spec"
