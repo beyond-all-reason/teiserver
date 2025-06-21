@@ -488,17 +488,37 @@ defmodule Teiserver.CacheUser do
   def send_direct_message(from_id, to_id, message) do
     # Replace SPADS command (starting with !) with lowercase version to prevent bypassing with capitalised command names
     # Ignore !# bot commands like !#JSONRPC
+    # Allow voting for joinas if there are AIs in the recipient's lobby, otherwise alias to spec
     message =
       if String.starts_with?(message, "!") and !String.starts_with?(message, "!#") do
         message
         |> String.trim()
         |> String.downcase()
+        |> String.split()
         |> case do
           ["!cv", "joinas" | _] ->
-            "!cv joinas spec"
+            has_ai =
+              case Teiserver.Client.get_client_by_id(to_id) do
+                %{lobby_id: lobby_id} when not is_nil(lobby_id) ->
+                  Teiserver.Battle.get_bots(lobby_id) |> Enum.any?()
+
+                _ ->
+                  false
+              end
+
+            if not has_ai, do: "!cv joinas spec", else: message
 
           ["!callvote", "joinas" | _] ->
-            "!callvote joinas spec"
+            has_ai =
+              case Teiserver.Client.get_client_by_id(to_id) do
+                %{lobby_id: lobby_id} when not is_nil(lobby_id) ->
+                  Teiserver.Battle.get_bots(lobby_id) |> Enum.any?()
+
+                _ ->
+                  false
+              end
+
+            if not has_ai, do: "!callvote joinas spec", else: message
 
           ["!joinas" | _] ->
             "!joinas spec"
