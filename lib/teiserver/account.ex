@@ -915,13 +915,13 @@ defmodule Teiserver.Account do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_rating(Integer.t() | List.t()) :: Rating.t()
-  @spec get_rating(Integer.t(), List.t()) :: Rating.t()
+  @spec get_rating(Integer.t() | List.t()) :: Rating.t() | nil
   def get_rating(args) do
     rating_query(args)
     |> Repo.one()
   end
 
+  @spec get_rating(Integer.t(), List.t()) :: Rating.t() | nil
   def get_rating(user_id, rating_type_id)
       when is_integer(user_id) and is_integer(rating_type_id) do
     get_rating(user_id, rating_type_id, MatchRatingLib.active_season())
