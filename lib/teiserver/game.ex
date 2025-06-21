@@ -375,6 +375,12 @@ defmodule Teiserver.Game do
     |> Repo.one!()
   end
 
+  @spec get_rating_type_by_name!(String.t()) :: RatingType.t()
+  def get_rating_type_by_name!(name) do
+    rating_type_query(search: [name: name])
+    |> Repo.one!()
+  end
+
   @spec get_or_add_rating_type(String.t()) :: non_neg_integer()
   def get_or_add_rating_type(name) do
     name = String.trim(name)
