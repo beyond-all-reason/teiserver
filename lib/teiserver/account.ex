@@ -1002,14 +1002,28 @@ defmodule Teiserver.Account do
   """
   @spec create_rating(map()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def create_rating(attrs \\ %{}) do
-    %Rating{}
-    |> Rating.changeset(attrs)
-    |> Repo.insert()
+    result =
+      %Rating{}
+      |> Rating.changeset(attrs)
+      |> Repo.insert()
+
+    case result do
+      {:ok, r} ->
+        Teiserver.cache_put(:teiserver_user_ratings, {r.user_id, r.rating_type_id, r.season}, r)
+
+      _ ->
+        nil
+    end
+
+    result
   end
 
   @spec update_rating(Rating.t(), map()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def update_rating(%Rating{} = rating, attrs) do
-    Teiserver.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
+    Teiserver.cache_delete(
+      :teiserver_user_ratings,
+      {rating.user_id, rating.rating_type_id, rating.season}
+    )
 
     rating
     |> Rating.changeset(attrs)
