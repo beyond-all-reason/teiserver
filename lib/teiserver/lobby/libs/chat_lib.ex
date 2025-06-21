@@ -13,6 +13,7 @@ defmodule Teiserver.Lobby.ChatLib do
   def say(userid, msg, lobby_id) do
     # Replace SPADS command (starting with !) with lowercase version to prevent bypassing with capitalised command names
     # Ignore !# bot commands like !#JSONRPC
+    # Allow voting for joinas if there are AIs in the lobby, otherwise alias to spec
     msg =
       if String.starts_with?(msg, "!") and !String.starts_with?(msg, "!#") do
         msg
@@ -21,10 +22,12 @@ defmodule Teiserver.Lobby.ChatLib do
         |> String.split()
         |> case do
           ["!cv", "joinas" | _] ->
-            "!cv joinas spec"
+            has_ai = Battle.get_bots(lobby_id) |> Enum.any?()
+            if not has_ai, do: "!cv joinas spec", else: msg
 
           ["!callvote", "joinas" | _] ->
-            "!callvote joinas spec"
+            has_ai = Battle.get_bots(lobby_id) |> Enum.any?()
+            if not has_ai, do: "!callvote joinas spec", else: msg
 
           ["!joinas" | _] ->
             "!joinas spec"
