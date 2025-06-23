@@ -1034,6 +1034,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   # Ensure no two players have the same player_number
+  # unless the game is unranked and players have set matching shareId values
   defp fix_ids(state) do
     players = list_players(state)
 
@@ -1045,18 +1046,66 @@ defmodule Teiserver.Coordinator.ConsulServer do
         |> Enum.uniq()
 
       # If they don't match then we have non-unique ids
+      # If we have non-unique ids, check if this is a ranked game
       if Enum.count(player_numbers) != Enum.count(players) do
-        players
-        |> Enum.map(fn c ->
-          {-c.team_number, BalanceLib.get_user_rating_value(c.userid, "Large Team"), c}
-        end)
-        |> Enum.sort()
-        |> Enum.reverse()
-        |> Enum.map(fn {_, _, c} -> c end)
-        |> Enum.reduce(0, fn player, acc ->
-          Client.update(%{player | player_number: acc}, :client_updated_battlestatus)
-          acc + 1
-        end)
+        modoptions = Teiserver.Battle.get_modoptions(state.lobby_id)
+        ranked_modoption = Map.get(modoptions || %{}, "ranked_game")
+
+        if ranked_modoption in ["true", "1", true] do
+          # For Ranked: Fix all ids as before (sort and reassign player_numbers)
+          players
+          |> Enum.map(fn c ->
+            {-c.team_number, BalanceLib.get_user_rating_value(c.userid, "Large Team"), c}
+          end)
+          |> Enum.sort()
+          |> Enum.reverse()
+          |> Enum.map(fn {_, _, c} -> c end)
+          |> Enum.reduce(0, fn player, acc ->
+            Client.update(%{player | player_number: acc}, :client_updated_battlestatus)
+            acc + 1
+          end)
+        else
+          # For Unranked: Query all players' shareIds preference and map them by user_id
+          import Ecto.Query
+          alias Teiserver.Config.UserConfig
+          alias Teiserver.Repo
+
+          user_ids = Enum.map(players, & &1.userid)
+
+          shareid_tuples =
+            from(uc in UserConfig,
+              where: uc.user_id in ^user_ids and uc.key == "shareId",
+              select: {uc.user_id, uc.value}
+            )
+            |> Repo.all()
+
+          shareid_map = Map.new(shareid_tuples)
+
+          # Assign each player's shareId (or nil) to :_share_id for grouping.
+          players_with_shareid =
+            Enum.map(players, fn player ->
+              share_id =
+                Map.get(shareid_map, player.userid)
+                |> (fn s -> if is_nil(s) or String.trim(s) == "", do: nil, else: s end).()
+
+              Map.put(player, :_share_id, share_id)
+            end)
+
+          # Group players by shareId
+          groups =
+            players_with_shareid
+            |> Enum.group_by(& &1._share_id)
+
+          # Sort groups by shareId (nil/blank first) and assign player_numbers
+          groups
+          |> Enum.sort_by(fn {share_id, _} -> share_id || "" end)
+          |> Enum.with_index()
+          |> Enum.each(fn {{_share_id, group_players}, idx} ->
+            Enum.each(group_players, fn player ->
+              Client.update(%{player | player_number: idx}, :client_updated_battlestatus)
+            end)
+          end)
+        end
       end
     end
   end
