@@ -95,6 +95,7 @@ defmodule Teiserver.MixProject do
       {:tzdata, "~> 1.1.2"},
       {:ex_ulid, "~> 0.1.0"},
       {:mock, "~> 0.3.0", only: :test},
+      {:observer_cli, "~> 1.8"},
 
       # Teiserver libs
       {:openskill,

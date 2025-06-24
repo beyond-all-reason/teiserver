@@ -174,4 +174,45 @@ defmodule Teiserver.Game.BalancerServerTest do
     poll_until_nil(fn -> GenServer.call(pid, :get_current_balance) end)
     assert Map.get(GenServer.call(pid, :report_state), :last_balance_hash, :not_found) == nil
   end
+
+  test "load 250 players in and run a balance pass or three, for perf testing" do
+    team_count = 2
+
+    players =
+      make_users_with_ranks(Enum.to_list(1..250))
+
+    {:ok, pid} = BalancerServer.start_link(data: %{lobby_id: 1})
+
+    first_balance_pass =
+      GenServer.call(
+        pid,
+        {:make_balance, team_count, [], players}
+      )
+
+    second_balance_pass_hash_reuse =
+      GenServer.call(
+        pid,
+        {:make_balance, team_count, [], players}
+      )
+
+    assert second_balance_pass_hash_reuse === first_balance_pass
+
+    player_list_with_one_less_player = tl(players)
+
+    third_balance_pass_with_fewer_players =
+      GenServer.call(
+        pid,
+        {:make_balance, team_count, [], player_list_with_one_less_player}
+      )
+
+    refute second_balance_pass_hash_reuse.hash == third_balance_pass_with_fewer_players.hash
+
+    refute second_balance_pass_hash_reuse.team_sizes ==
+             third_balance_pass_with_fewer_players.team_sizes
+
+    refute second_balance_pass_hash_reuse.team_groups ==
+             third_balance_pass_with_fewer_players.team_groups
+
+    refute second_balance_pass_hash_reuse.logs == third_balance_pass_with_fewer_players.logs
+  end
 end
