@@ -142,7 +142,10 @@ defmodule TeiserverWeb.API.SpadsController do
 
       balance_enabled == true ->
         opts = [
-          allow_groups: params["balanceMode"] != "skill"
+          # Balancing with parties in lobbies with large player counts can lead to OOM issues
+          # Balancing algorithmss in these conditions can generate a large number of combinations
+          # which can quickly fill up all available memory
+          allow_groups: Enum.count(player_data) <= 16 and params["balanceMode"] != "skill"
         ]
 
         balance_result =
