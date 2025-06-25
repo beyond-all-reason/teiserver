@@ -21,6 +21,7 @@ defmodule Teiserver.Account.RecordsReport do
       {"Peak players", get_top(~w(aggregates stats peak_user_counts player), params)},
       {"Unique users", get_top(~w(aggregates stats unique_users), params)},
       {"Unique players", get_top(~w(aggregates stats unique_players), params)},
+      {"Accounts created", get_top(~w(aggregates stats accounts_created), params)},
       {"Total time (days)", get_top(~w(aggregates minutes total), params) |> minutes_to_days},
       {"Player time (days)", get_top(~w(aggregates minutes player), params) |> minutes_to_days}
     ]
@@ -33,6 +34,7 @@ defmodule Teiserver.Account.RecordsReport do
       "Peak players" => today["aggregates"]["stats"]["peak_user_counts"]["player"],
       "Unique users" => today["aggregates"]["stats"]["unique_users"],
       "Unique players" => today["aggregates"]["stats"]["unique_players"],
+      "Accounts created" => today["aggregates"]["stats"]["accounts_created"],
       "Total time (days)" => today["aggregates"]["minutes"]["total"] |> Kernel.div(1440) |> round,
       "Player time (days)" =>
         today["aggregates"]["minutes"]["player"] |> Kernel.div(1440) |> round
