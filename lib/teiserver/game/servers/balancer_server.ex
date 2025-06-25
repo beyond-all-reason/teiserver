@@ -336,6 +336,9 @@ defmodule Teiserver.Game.BalancerServer do
       lobby_id
     )
 
+    # 50 MB = 50 * 1024 * 1024 / 8 words = 6_553_600 words (1 word = 8 bytes)
+    Process.flag(:max_heap_size, 6_553_600)
+
     :timer.send_interval(@tick_interval, :tick)
     send(self(), :startup)
     {:ok, empty_state(lobby_id)}
