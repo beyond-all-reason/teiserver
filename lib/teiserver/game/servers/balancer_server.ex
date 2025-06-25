@@ -11,7 +11,9 @@ defmodule Teiserver.Game.BalancerServer do
   @algos_allowing_fuzz ~w(loser_picks force_party)
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts[:data], [])
+    # https://www.erlang.org/docs/23/man/erlang#process_flag_max_heap_size
+    max_heap_size = 50 * 1024 * 1024 / 8
+    GenServer.start_link(__MODULE__, opts[:data], max_heap_size: max_heap_size)
   end
 
   @impl true

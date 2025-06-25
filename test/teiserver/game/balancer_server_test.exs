@@ -186,13 +186,13 @@ defmodule Teiserver.Game.BalancerServerTest do
     first_balance_pass =
       GenServer.call(
         pid,
-        {:make_balance, team_count, [], players}
+        {:make_balance, team_count, [{:algorithm, "loser_picks"}], players}
       )
 
     second_balance_pass_hash_reuse =
       GenServer.call(
         pid,
-        {:make_balance, team_count, [], players}
+        {:make_balance, team_count, [{:algorithm, "loser_picks"}], players}
       )
 
     assert second_balance_pass_hash_reuse === first_balance_pass
@@ -202,7 +202,8 @@ defmodule Teiserver.Game.BalancerServerTest do
     third_balance_pass_with_fewer_players =
       GenServer.call(
         pid,
-        {:make_balance, team_count, [], player_list_with_one_less_player}
+        {:make_balance, team_count, [{:algorithm, "loser_picks"}],
+         player_list_with_one_less_player}
       )
 
     refute second_balance_pass_hash_reuse.hash == third_balance_pass_with_fewer_players.hash
