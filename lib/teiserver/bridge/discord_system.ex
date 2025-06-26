@@ -8,7 +8,7 @@ defmodule Teiserver.Bridge.DiscordSystem do
 
   @impl true
   def init(_) do
-    pid = DynamicSupervisor.init(strategy: :one_for_one)
+    {:ok, sup_flags} = DynamicSupervisor.init(strategy: :one_for_one)
 
     if Teiserver.Communication.use_discord?() do
       Task.async(fn ->
@@ -19,6 +19,6 @@ defmodule Teiserver.Bridge.DiscordSystem do
       end)
     end
 
-    pid
+    {:ok, sup_flags}
   end
 end
