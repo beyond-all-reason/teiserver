@@ -78,9 +78,8 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def init(ref, socket, transport) do
-    # https://www.erlang.org/docs/23/man/erlang#process_flag_max_heap_size
-    # 20 MB = 20 * 1024 * 1024 / 8 words = 2_621_440 words (1 word = 8 bytes)
-    Process.flag(:max_heap_size, 2_621_440)
+    # 50 MB = 50 * 1024 * 1024 / 8 words = 6_553_600 words (1 word = 8 bytes)
+    Process.flag(:max_heap_size, 6_553_600)
 
     # If we've not started up yet, lets just delay for a moment
     # for some of the stuff to get sorted
