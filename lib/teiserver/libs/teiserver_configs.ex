@@ -246,6 +246,16 @@ defmodule Teiserver.TeiserverConfigs do
         "The time in milliseconds to wait until doing something when a user logs in (e.g. sending a message)",
       default: 2500
     })
+
+    add_site_config_type(%{
+      key: "teiserver.Sprint TCP Server max heap size",
+      section: "Legacy protocol",
+      type: "integer",
+      permissions: ["Server"],
+      description:
+        "Max heap size in words for the TCP server used by the legacy protocol. Default is 13_107_200 words or 100 MB = 100 * 1024 * 1024 / 8 words = 13_107_200 words (1 word = 8 bytes)",
+      default: 13_107_200
+    })
   end
 
   defp login_configs() do
