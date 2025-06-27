@@ -78,8 +78,10 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def init(ref, socket, transport) do
-    # 50 MB = 50 * 1024 * 1024 / 8 words = 6_553_600 words (1 word = 8 bytes)
-    Process.flag(:max_heap_size, 6_553_600)
+    Process.flag(
+      :max_heap_size,
+      Config.get_site_config_cache("teiserver.Sprint TCP Server max heap size")
+    )
 
     # If we've not started up yet, lets just delay for a moment
     # for some of the stuff to get sorted
