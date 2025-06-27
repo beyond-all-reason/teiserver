@@ -126,7 +126,7 @@ defmodule Teiserver.Application do
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Throttles.Supervisor},
 
         # Bridge
-        Teiserver.Bridge.BridgeServer,
+        Teiserver.Bridge.DiscordSystem,
         concache_sup(:discord_bridge_dm_cache),
         concache_perm_sup(:discord_channel_cache),
         concache_sup(:discord_bridge_account_codes, global_ttl: 300_000),
@@ -174,7 +174,7 @@ defmodule Teiserver.Application do
           id: Teiserver.RawSpringTcpServer,
           start: {Teiserver.SpringTcpServer, :start_link, [[]]}
         }
-      ] ++ discord_start()
+      ]
 
     children = Enum.filter(children, fn x -> not is_nil(x) end)
 
@@ -190,17 +190,6 @@ defmodule Teiserver.Application do
     startup_sub_functions(start_result)
 
     start_result
-  end
-
-  defp discord_start do
-    if Teiserver.Communication.use_discord?() do
-      [
-        Nostrum.Application,
-        {Teiserver.Bridge.DiscordBridgeBot, name: Teiserver.Bridge.DiscordBridgeBot}
-      ]
-    else
-      []
-    end
   end
 
   def startup_sub_functions({:error, _}), do: :error

@@ -166,6 +166,10 @@ defmodule Teiserver.Room do
     CacheUser.send_direct_message(from_id, Coordinator.get_coordinator_userid(), "$" <> msg)
   end
 
+  def send_message(from_id, room_name, messages) when is_list(messages) do
+    Enum.map(messages, fn msg -> send_message(from_id, room_name, msg) end)
+  end
+
   def send_message(from_id, room_name, msg) do
     user = Account.get_user_by_id(from_id)
 
