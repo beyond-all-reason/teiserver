@@ -546,7 +546,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   def match_members(state) do
     case state.queue.algo do
       :ignore_os ->
-        Algos.ignore_os(state.queue.team_size, state.queue.team_count, state.members)
+        Algos.ignore_os(state.members, state.queue.team_size, state.queue.team_count)
     end
   end
 

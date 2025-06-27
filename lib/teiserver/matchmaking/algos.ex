@@ -18,18 +18,22 @@ defmodule Teiserver.Matchmaking.Algos do
   This returns a list of potential matches.
   A match is a list of teams, a team is a list of member
   """
-  @spec ignore_os(team_size :: pos_integer(), team_count :: pos_integer(), members: [Member.t()]) ::
+  @spec ignore_os(
+          members :: [Member.t()],
+          team_size :: pos_integer(),
+          team_count :: pos_integer()
+        ) ::
           :no_match | {:match, [[[Member.t()]]]}
-  def ignore_os(team_size, team_count, members) do
-    case get_matches(team_size, team_count, members, []) do
+  def ignore_os(members, team_size, team_count) do
+    case get_matches(members, team_size, team_count, []) do
       [] -> :no_match
       matches -> {:match, matches}
     end
   end
 
-  def get_matches(team_size, team_count, members, acc) do
+  def get_matches(members, team_size, team_count, acc) do
     res =
-      match_stream(team_size, team_count, members)
+      match_stream(members, team_size, team_count)
       |> Enum.take(1)
       |> List.first()
 
@@ -45,7 +49,7 @@ defmodule Teiserver.Matchmaking.Algos do
             not MapSet.member?(ids, m.id)
           end)
 
-        get_matches(team_size, team_count, remaining_members, [match | acc])
+        get_matches(remaining_members, team_size, team_count, [match | acc])
     end
   end
 
@@ -53,16 +57,16 @@ defmodule Teiserver.Matchmaking.Algos do
   # a match is a list of `team_count` teams. Each teams is a list of member such
   # that the number of player in the team is `team_size`
   @spec match_stream(
+          members :: [Member.t()],
           team_size :: pos_integer(),
-          team_count :: pos_integer(),
-          members :: [Member.t()]
+          team_count :: pos_integer()
         ) :: Enumerable.t([[[Member.t()]]])
-  def match_stream(team_size, team_count, members) when team_count <= 1 do
+  def match_stream(members, team_size, team_count) when team_count <= 1 do
     Combi.combinations(members, team_size)
     |> Stream.map(fn t -> [t] end)
   end
 
-  def match_stream(team_size, team_count, members) do
+  def match_stream(members, team_size, team_count) do
     teams = Combi.combinations(members, team_size)
 
     Stream.flat_map(teams, fn team ->
@@ -73,7 +77,7 @@ defmodule Teiserver.Matchmaking.Algos do
           not MapSet.member?(ids, m.id)
         end)
 
-      other_matches = match_stream(team_size, team_count - 1, available_members)
+      other_matches = match_stream(available_members, team_size, team_count - 1)
 
       Stream.map(other_matches, fn teams -> [team | teams] end)
     end)
