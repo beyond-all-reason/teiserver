@@ -18,6 +18,8 @@ defmodule Teiserver.Matchmaking.Algos do
   The function to invoke to pair some members.
   It returns a list of valid matches. A match is a list of teams, a team is a
   list of member.
+
+  Optionally can pass a predicate to filter some matches
   """
   @callback get_matches(
               members :: [Member.t()],
@@ -28,11 +30,13 @@ defmodule Teiserver.Matchmaking.Algos do
           [Member.t()],
           team_size :: pos_integer(),
           team_count :: pos_integer(),
+          pred :: ([[Member.t()]] -> boolean),
           acc :: term()
         ) :: [[[Member.t()]]]
-  def match_members(members, team_size, team_count, acc \\ []) do
+  def match_members(members, team_size, team_count, pred, acc \\ []) do
     res =
       match_stream(members, team_size, team_count)
+      |> Stream.filter(pred)
       |> Enum.take(1)
       |> List.first()
 
@@ -48,7 +52,7 @@ defmodule Teiserver.Matchmaking.Algos do
             not MapSet.member?(ids, m.id)
           end)
 
-        match_members(remaining_members, team_size, team_count, [match | acc])
+        match_members(remaining_members, team_size, team_count, pred, [match | acc])
     end
   end
 

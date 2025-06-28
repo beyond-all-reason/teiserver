@@ -60,6 +60,19 @@ defmodule Teiserver.Battle.MatchLib do
     ]
   end
 
+  @doc """
+  Given a size for a team, returns the rated game type that should be applied
+  """
+  @spec game_type_for_team(team_size :: pos_integer(), team_count :: pos_integer()) :: binary()
+  def game_type_for_team(team_size, team_count \\ 2) do
+    cond do
+      team_count > 2 -> if team_size == 1, do: "FFA", else: "Team FFA"
+      team_size <= 1 -> "Duel"
+      team_size <= 5 -> "Small Team"
+      true -> "Large Team"
+    end
+  end
+
   @spec match_from_lobby(T.lobby_id()) :: {map(), [map()]} | nil
   def match_from_lobby(lobby_id) do
     %{
