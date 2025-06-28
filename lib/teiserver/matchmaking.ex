@@ -39,7 +39,7 @@ defmodule Teiserver.Matchmaking do
       id: UUID.uuid4(),
       player_ids: [member],
       # TODO tachyon_mvp: fetch ratings for the player somehow
-      rating: %{},
+      rating: %{skill: 0.0, uncertainty: 0.0},
       # TODO tachyon_mvp: fetch the list of player id avoided by this player
       avoid: [],
       joined_at: DateTime.utc_now()

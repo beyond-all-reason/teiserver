@@ -8,7 +8,6 @@ defmodule Teiserver.Matchmaking.Algo.BruteforceFilter do
   """
 
   alias Teiserver.Matchmaking.{Algos, Member}
-  alias Teiserver.Battle.MatchLib
   @behaviour Algos
 
   @impl true
@@ -21,19 +20,18 @@ defmodule Teiserver.Matchmaking.Algo.BruteforceFilter do
 
   @impl true
   def get_matches(members, st) do
-    pred = fn match -> filter_within_bounds(st.game_type, match) end
-
-    case Algos.match_members(members, st.team_size, st.team_count, pred) do
+    case Algos.match_members(members, st.team_size, st.team_count, &filter_within_bounds/1) do
       [] -> :no_match
       matches -> {:match, matches}
     end
   end
 
-  defp filter_within_bounds(game_type, match) do
+  defp filter_within_bounds(match) do
     team_skills =
       Enum.map(match, fn team ->
         Enum.map(team, fn m ->
-          Map.get(m.rating, game_type)
+          %{skill: skill, uncertainty: uncertainty} = m.rating
+          {skill, uncertainty}
         end)
       end)
 

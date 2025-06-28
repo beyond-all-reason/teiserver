@@ -8,11 +8,18 @@ defmodule Teiserver.Matchmaking.Member do
     :id,
     :player_ids,
     :joined_at,
-    rating: %{},
+    :rating,
     avoid: []
   ]
 
   alias Teiserver.Data.Types, as: T
+
+  @typedoc """
+  Aggregated player ratings for this member.
+  This is the associated rating for the queue this member is in.
+  For example %{skill: 23.4, uncertainty: 3.2}
+  """
+  @type rating :: %{skill: float(), uncertainty: float()}
 
   @typedoc """
   member of a queue. Holds of the information required to match members together.
@@ -21,10 +28,7 @@ defmodule Teiserver.Matchmaking.Member do
   @type t() :: %__MODULE__{
           id: binary(),
           player_ids: [T.userid()],
-          # maybe also add (aggregated) chevron if that's taking into account
-          # map keyed by the rating type to {skill, uncertainty}
-          # For example %{"duel" => {12, 3.2}}
-          rating: %{String.t() => {integer(), integer()}},
+          rating: rating(),
           # aggregate of player to avoid for this member
           avoid: [T.userid()],
           joined_at: DateTime.t()

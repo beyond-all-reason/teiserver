@@ -1,6 +1,5 @@
 defmodule Teiserver.Matchmaking.AlgosTest do
   use ExUnit.Case
-  alias Teiserver.Battle.MatchLib
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.Algo
 
@@ -93,16 +92,11 @@ defmodule Teiserver.Matchmaking.AlgosTest do
   defp mk_member(ids, rating) when not is_list(ids), do: mk_member([ids], rating)
   defp mk_member(ids, rating) when is_number(rating), do: mk_member(ids, {rating, 6})
 
-  defp mk_member(ids, rating) do
-    rating =
-      for typ <- MatchLib.list_rated_game_types(), into: %{} do
-        {typ, rating}
-      end
-
+  defp mk_member(ids, {skill, uncertainty}) do
     %Member{
       id: UUID.uuid4(),
       player_ids: ids,
-      rating: rating,
+      rating: %{skill: skill, uncertainty: uncertainty},
       avoid: [],
       joined_at: DateTime.utc_now()
     }

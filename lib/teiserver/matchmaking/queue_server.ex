@@ -252,7 +252,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
             id: UUID.uuid4(),
             player_ids: [player_id | pending.joined],
             # TODO: get and aggregate rating somehow
-            rating: %{},
+            rating: %{skill: 0, uncertainty: 0},
             # TODO: get and aggregate avoids somehow
             avoid: [],
             joined_at: DateTime.utc_now()
