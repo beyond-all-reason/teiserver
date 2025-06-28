@@ -12,6 +12,7 @@ defmodule Teiserver.Game.RatingType do
     field :name, :string
     field :colour, :string
     field :icon, :string
+    has_many :ratings, Teiserver.Account.Rating
   end
 
   @doc """

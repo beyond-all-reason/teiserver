@@ -8,7 +8,7 @@ defmodule Teiserver.Matchmaking.Algo.BruteforceFilter do
   """
 
   alias Teiserver.Matchmaking.{Algos, Member}
-  alias Teiserver.Battle.MatchLib
+
   @behaviour Algos
 
   @impl true

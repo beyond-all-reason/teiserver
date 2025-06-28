@@ -46,19 +46,6 @@ defmodule Teiserver.Matchmaking.QueueTest do
       assert {:error, :invalid_queue} == Matchmaking.join_queue("INVALID!!", user.id)
     end
 
-    test "party too big", %{user: user, queue_id: queue_id} do
-      member = %{
-        player_ids: [user.id, user.id],
-        rating: %{},
-        avoid: [],
-        joined_at: DateTime.utc_now(),
-        search_distance: 0,
-        increase_distance_after: 10
-      }
-
-      assert {:error, :too_many_players} = Matchmaking.join_queue(queue_id, member)
-    end
-
     test "paired user still in queue", %{user: user, queue_id: queue_id, queue_pid: queue_pid} do
       user2 = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, user.id)

@@ -942,6 +942,12 @@ defmodule Teiserver.Account do
     end)
   end
 
+  # def get_ratings(user_id, season \\ nil) do
+  #   season = if season == nil, do: MatchRatingLib.active_season(), else: season
+  #   q = rating_query(search: [user_id: user_id, season: season])
+  #   Teiserver.Game.get_ratings_for_user(preload: [ratings: q])
+  # end
+
   @spec get_player_highest_leaderboard_rating(T.userid()) :: number()
   def get_player_highest_leaderboard_rating(user_id) do
     get_player_highest_leaderboard_rating(user_id, MatchRatingLib.active_season())
