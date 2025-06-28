@@ -10,6 +10,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
   use GenServer
   require Logger
+  alias Teiserver.Battle.MatchLib
   alias Teiserver.Matchmaking.{QueueRegistry, PairingRoom}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Asset
@@ -144,11 +145,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @doc """
   Join the specified queue
   """
-  @spec join_queue(id(), Member.t(), Party.id() | nil) :: join_result()
-  def join_queue(queue_id, member, party_id) do
+  @spec join_queue(id(), T.userid(), Party.id() | nil) :: join_result()
+  def join_queue(queue_id, user_id, party_id) do
     if party_id == nil,
-      do: GenServer.call(via_tuple(queue_id), {:join_queue, member}),
-      else: GenServer.call(via_tuple(queue_id), {:join_queue, member, party_id})
+      do: GenServer.call(via_tuple(queue_id), {:join_queue, user_id}),
+      else: GenServer.call(via_tuple(queue_id), {:join_queue, user_id, party_id})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_queue}
   end
@@ -226,37 +227,31 @@ defmodule Teiserver.Matchmaking.QueueServer do
   end
 
   @impl true
-  def handle_call({:join_queue, new_member}, _from, state) do
-    case member_can_join_queue?(new_member, state) do
+  def handle_call({:join_queue, player_id}, _from, state) do
+    case member_can_join_queue?([player_id], state) do
       {:error, reason} ->
         {:reply, {:error, reason}, state}
 
       :ok ->
+        game_type = MatchLib.game_type(state.queue.team_size, state.queue.team_count)
+        new_member = Member.new([player_id], game_type)
         new_state = add_member_to_queue(state, new_member)
         {:reply, {:ok, self()}, new_state}
     end
   end
 
   @impl true
-  def handle_call({:join_queue, member, party_id}, _from, state) do
-    [player_id] = member.player_ids
+  def handle_call({:join_queue, player_id, party_id}, _from, state) do
+    game_type = MatchLib.game_type(state.queue.team_size, state.queue.team_count)
 
-    with :ok <- member_can_join_queue?(member, state),
+    with :ok <- member_can_join_queue?([player_id], state),
          pending when pending != nil <- Map.get(state.pending_parties, party_id) do
       case Enum.split_with(pending.waiting_for, &(&1 == player_id)) do
         {[], _} ->
           {:reply, {:error, :invalid_queue}, state}
 
         {[_], []} ->
-          member = %Member{
-            id: UUID.uuid4(),
-            player_ids: [player_id | pending.joined],
-            # TODO: get and aggregate rating somehow
-            rating: %{skill: 0, uncertainty: 0},
-            # TODO: get and aggregate avoids somehow
-            avoid: [],
-            joined_at: DateTime.utc_now()
-          }
+          member = Member.new([player_id | pending.joined], game_type)
 
           :timer.cancel(pending.tref)
 
@@ -489,8 +484,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
     Map.update!(state, :pending_parties, &Map.delete(&1, party_id))
   end
 
-  @spec member_can_join_queue?(Member.t(), state()) :: :ok | {:error, reason :: term()}
-  defp member_can_join_queue?(member, state) do
+  @spec member_can_join_queue?([T.userid()], state()) :: :ok | {:error, reason :: term()}
+  defp member_can_join_queue?(player_ids, state) do
     member_ids =
       Enum.flat_map(state.members, fn m -> m.player_ids end)
       |> MapSet.new()
@@ -501,12 +496,12 @@ defmodule Teiserver.Matchmaking.QueueServer do
       end
       |> MapSet.new()
 
-    new_ids = MapSet.new(member.player_ids)
+    new_ids = MapSet.new(player_ids)
     is_queuing = !MapSet.disjoint?(member_ids, new_ids)
     is_pairing = !MapSet.disjoint?(pairing_player_ids, new_ids)
 
     cond do
-      Enum.count(member.player_ids) > state.queue.team_size ->
+      Enum.count(player_ids) > state.queue.team_size ->
         {:error, :too_many_players}
 
       Enum.empty?(state.queue.engines) ->

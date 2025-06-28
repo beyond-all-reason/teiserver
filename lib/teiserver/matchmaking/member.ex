@@ -13,6 +13,7 @@ defmodule Teiserver.Matchmaking.Member do
   ]
 
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Battle.BalanceLib
 
   @typedoc """
   Aggregated player ratings for this member.
@@ -33,6 +34,44 @@ defmodule Teiserver.Matchmaking.Member do
           avoid: [T.userid()],
           joined_at: DateTime.t()
         }
+
+  @doc """
+  generate a member from the provided ids and game type (for ratings)
+  """
+  @spec new(T.userid() | [T.userid()], game_type :: String.t()) :: t()
+  def new(player_ids, game_type) when not is_list(player_ids), do: new([player_ids], game_type)
+
+  def new(player_ids, game_type) do
+    %__MODULE__{
+      id: UUID.uuid4(),
+      player_ids: player_ids,
+      rating: get_member_rating(player_ids, game_type),
+      # TODO tachyon_mvp: fetch the list of player id avoided by this player
+      avoid: [],
+      joined_at: DateTime.utc_now()
+    }
+  end
+
+  @spec get_member_rating([T.userid()], game_type :: String.t()) :: rating()
+  def get_member_rating(player_ids, game_type) do
+    default = BalanceLib.default_rating()
+    default = %{skill: default.rating_value, uncertainty: default.uncertainty}
+
+    case Enum.find(Teiserver.Game.get_ratings_for_users(player_ids), &(&1.name == game_type)) do
+      nil ->
+        default
+
+      rt ->
+        ratings = rt.ratings
+        n = Enum.count(ratings)
+        skill = Enum.sum_by(ratings, & &1.skill)
+        uncertainty = Enum.sum_by(ratings, & &1.uncertainty)
+
+        if n == 0,
+          do: default,
+          else: %{skill: skill / n, uncertainty: uncertainty / n}
+    end
+  end
 end
 
 defimpl GroupLength, for: Teiserver.Matchmaking.Member do

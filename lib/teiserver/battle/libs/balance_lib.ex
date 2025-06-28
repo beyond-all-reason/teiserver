@@ -583,8 +583,8 @@ defmodule Teiserver.Battle.BalanceLib do
     captain.member_id
   end
 
-  @spec default_rating :: List.t()
-  @spec default_rating(non_neg_integer()) :: List.t()
+  @spec default_rating() :: map()
+  @spec default_rating(non_neg_integer() | nil) :: map()
   def default_rating(rating_type_id \\ nil) do
     {skill, uncertainty} = Openskill.rating()
     rating_value = calculate_rating_value(skill, uncertainty)
