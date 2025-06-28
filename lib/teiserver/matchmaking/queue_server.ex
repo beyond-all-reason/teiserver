@@ -17,7 +17,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   alias Teiserver.Player
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Matchmaking.Member
-  alias Teiserver.Matchmaking.Algos
+  alias Teiserver.Matchmaking.Algo
 
   @type id :: String.t()
 
@@ -34,7 +34,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @typedoc """
   what algorithm this queue should use to put players/party together?
   """
-  @type algo :: :ignore_os
+  @type algo :: {module(), term()}
 
   @typedoc """
   immutable specification of the queue
@@ -92,16 +92,23 @@ defmodule Teiserver.Matchmaking.QueueServer do
           optional(:maps) => [Teiserver.Asset.Map.t()],
           optional(:settings) => settings(),
           optional(:members) => [Member.t()],
-          optional(:algo) => algo()
+          optional(:algo) => :ignore_os
         }) :: state()
   def init_state(attrs) do
+    alg_module =
+      case Map.get(attrs, :algo, :ignore_os) do
+        :ignore_os -> Algo.IgnoreOs
+      end
+
+    alg_state = apply(alg_module, :init, [attrs.team_size, attrs.team_count])
+
     %{
       id: attrs.id,
       queue: %{
         name: attrs.name,
         team_size: attrs.team_size,
         team_count: attrs.team_count,
-        algo: Map.get(attrs, :algo, :ignore_os),
+        algo: {alg_module, alg_state},
         ranked: true,
         engines: Map.get(attrs, :engines, []),
         games: Map.get(attrs, :games, []),
@@ -544,10 +551,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
   @spec match_members(state()) :: :no_match | {:match, [[[Member.t()]]]}
   def match_members(state) do
-    case state.queue.algo do
-      :ignore_os ->
-        Algos.ignore_os(state.members, state.queue.team_size, state.queue.team_count)
-    end
+    {alg_module, alg_state} = state.queue.algo
+    apply(alg_module, :get_matches, [state.members, alg_state])
   end
 
   defp demonitor_players(player_ids, monitors) do

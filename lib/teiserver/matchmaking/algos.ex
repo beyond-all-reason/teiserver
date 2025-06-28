@@ -1,85 +1,25 @@
 defmodule Teiserver.Matchmaking.Algos do
   @moduledoc """
-  Contains the algorithm for matchmaking.
-  Currently only has the `ignore_os` function, but is going to have
-  at least another one taking OS (and perhaps other parameters) into
-  account
+  Interface for matchmaking algorithms
   """
 
   alias Teiserver.Matchmaking.Member
-  alias Teiserver.Helpers.Combi
+
+  @type state :: term()
 
   @doc """
-  The simplest possible algorithm for matchmaking.
-  It only looks at filling the teams with the correct number of players
-  without looking at anything else like wait time or OS.
-  This is useful for testing.
-
-  This returns a list of potential matches.
-  A match is a list of teams, a team is a list of member
+  A way to initialize the module with some persistent state.
+  For example, a http client or getting some parameters from the DB
   """
-  @spec ignore_os(
-          members :: [Member.t()],
-          team_size :: pos_integer(),
-          team_count :: pos_integer()
-        ) ::
-          :no_match | {:match, [[[Member.t()]]]}
-  def ignore_os(members, team_size, team_count) do
-    case get_matches(members, team_size, team_count, []) do
-      [] -> :no_match
-      matches -> {:match, matches}
-    end
-  end
+  @callback init(team_size :: pos_integer(), team_count :: pos_integer()) :: state()
 
-  def get_matches(members, team_size, team_count, acc) do
-    res =
-      match_stream(members, team_size, team_count)
-      |> Enum.take(1)
-      |> List.first()
-
-    case res do
-      nil ->
-        acc
-
-      match ->
-        ids = for team <- match, member <- team, into: MapSet.new(), do: member.id
-
-        remaining_members =
-          Enum.filter(members, fn m ->
-            not MapSet.member?(ids, m.id)
-          end)
-
-        get_matches(remaining_members, team_size, team_count, [match | acc])
-    end
-  end
-
-  # Returns an enumerable of matches for the given members, team size and team count
-  # a match is a list of `team_count` teams. Each teams is a list of member such
-  # that the number of player in the team is `team_size`
-  @spec match_stream(
-          members :: [Member.t()],
-          team_size :: pos_integer(),
-          team_count :: pos_integer()
-        ) :: Enumerable.t([[[Member.t()]]])
-  def match_stream(members, team_size, team_count) when team_count <= 1 do
-    Combi.combinations(members, team_size)
-    |> Stream.map(fn t -> [t] end)
-  end
-
-  def match_stream(members, team_size, team_count) do
-    teams = Combi.combinations(members, team_size)
-
-    Stream.flat_map(teams, fn team ->
-      ids = for member <- team, into: MapSet.new(), do: member.id
-
-      available_members =
-        Enum.filter(members, fn m ->
-          not MapSet.member?(ids, m.id)
-        end)
-
-      other_matches = match_stream(available_members, team_size, team_count - 1)
-
-      Stream.map(other_matches, fn teams -> [team | teams] end)
-    end)
-  end
+  @doc """
+  The function to invoke to pair some members.
+  It returns a list of valid matches. A match is a list of teams, a team is a
+  list of member.
+  """
+  @callback get_matches(
+              members :: [Member.t()],
+              state :: state()
+            ) :: :no_match | {:match, [[[Member.t()]]]}
 end
