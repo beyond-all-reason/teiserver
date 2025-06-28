@@ -14,7 +14,7 @@ defmodule Teiserver.Matchmaking.Algo.IgnoreOs do
 
   @impl true
   def get_matches(members, {team_size, team_count}) do
-    case Algos.match_members(members, team_size, team_count, []) do
+    case Algos.match_members(members, team_size, team_count, fn _ -> true end) do
       [] -> :no_match
       matches -> {:match, matches}
     end

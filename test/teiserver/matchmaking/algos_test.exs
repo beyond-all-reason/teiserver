@@ -1,11 +1,17 @@
 defmodule Teiserver.Matchmaking.AlgosTest do
   use ExUnit.Case
+  alias Teiserver.Battle.MatchLib
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.Algo
 
   def ignore_os(members, team_size, team_count) do
     st = Algo.IgnoreOs.init(team_size, team_count)
     Algo.IgnoreOs.get_matches(members, st)
+  end
+
+  def brutefore_filter(members, team_size, team_count) do
+    st = Algo.BruteforceFilter.init(team_size, team_count)
+    Algo.BruteforceFilter.get_matches(members, st)
   end
 
   describe "ignore OS" do
@@ -65,13 +71,38 @@ defmodule Teiserver.Matchmaking.AlgosTest do
     end
   end
 
-  defp mk_member(ids) when not is_list(ids), do: mk_member([ids])
+  describe "bruteforce filter" do
+    test "works" do
+      [m1, m2] = members = Enum.map(1..2, &mk_member/1)
+      assert {:match, [[t1, t2]]} = brutefore_filter(members, 1, 2)
+      assert [m1] == t1
+      assert [m2] == t2
+    end
 
-  defp mk_member(ids) do
+    test "properly exclude unbalanced match" do
+      # 2 players are very low OS, and one is super high
+      members = [mk_member(1, 1), mk_member(2, 60), mk_member(3, 1)]
+
+      assert {:match, [match]} = brutefore_filter(members, 1, 2)
+      matched_ids = for team <- match, member <- team, p_id <- member.player_ids, do: p_id
+      assert MapSet.new(matched_ids) == MapSet.new([1, 3])
+    end
+  end
+
+  defp mk_member(ids, rating \\ {17, 6})
+  defp mk_member(ids, rating) when not is_list(ids), do: mk_member([ids], rating)
+  defp mk_member(ids, rating) when is_number(rating), do: mk_member(ids, {rating, 6})
+
+  defp mk_member(ids, rating) do
+    rating =
+      for typ <- MatchLib.list_rated_game_types(), into: %{} do
+        {typ, rating}
+      end
+
     %Member{
       id: UUID.uuid4(),
       player_ids: ids,
-      rating: %{},
+      rating: rating,
       avoid: [],
       joined_at: DateTime.utc_now()
     }
