@@ -137,7 +137,7 @@
         .x(function(d) { return x(dateFormat(d.date)) })
         .y0(function(d) { return y(d.skill) })
         .y1(function(d) { return y(d.skill + d.uncertainty) })
-        .curve(d3.curveCardinal)
+        .curve(d3.curveMonotoneX)
         )
 
     // Show bottom part of confidence interval
@@ -149,20 +149,7 @@
         .x(function(d) { return x(dateFormat(d.date)) })
         .y0(function(d) { return y(d.skill - d.uncertainty) })
         .y1(function(d) { return y(d.skill) })
-        .curve(d3.curveCardinal)
-        )
-
-    // Add skill value line (in middle of uncertainty)
-    g
-      .append("path")
-      .datum(data)
-      .attr("fill", "none")
-      .attr("stroke", colors.skillValueLine)
-      .attr("stroke-width", 1.5)
-      .attr("d", d3.line()
-        .x(function(d) { return x(dateFormat(d.date)) })
-        .y(function(d) { return y(d.skill) })
-        .curve(d3.curveCardinal)
+        .curve(d3.curveMonotoneX)
         )
 
     // Add skill value line (minimum of uncertainty)
@@ -175,7 +162,7 @@
       .attr("d", d3.line()
         .x(function(d) { return x(dateFormat(d.date)) })
         .y(function(d) { return y(d.rating_value) })
-        .curve(d3.curveCardinal)
+        .curve(d3.curveMonotoneX)
         )
 
     // Add X and Y axis
