@@ -93,12 +93,13 @@ defmodule Teiserver.Matchmaking.QueueServer do
           optional(:maps) => [Teiserver.Asset.Map.t()],
           optional(:settings) => settings(),
           optional(:members) => [Member.t()],
-          optional(:algo) => :ignore_os
+          optional(:algo) => :ignore_os | :bruteforce_filter
         }) :: state()
   def init_state(attrs) do
     alg_module =
       case Map.get(attrs, :algo, :ignore_os) do
         :ignore_os -> Algo.IgnoreOs
+        :bruteforce_filter -> Algo.BruteforceFilter
       end
 
     alg_state = apply(alg_module, :init, [attrs.team_size, attrs.team_count])
