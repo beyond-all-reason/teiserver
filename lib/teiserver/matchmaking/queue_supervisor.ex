@@ -27,7 +27,8 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
         team_size: 1,
         team_count: 2,
         engines: engines,
-        games: games
+        games: games,
+        algo: :bruteforce_filter
       }),
       QueueServer.init_state(%{
         id: "2v2",
@@ -35,7 +36,8 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
         team_size: 2,
         team_count: 2,
         engines: engines,
-        games: games
+        games: games,
+        algo: :bruteforce_filter
       })
     ]
   end
