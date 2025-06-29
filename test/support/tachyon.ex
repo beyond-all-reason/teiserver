@@ -10,7 +10,58 @@ defmodule Teiserver.Support.Tachyon do
   end
 
   def create_user() do
-    Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    set_ratings(user, 17)
+    user
+  end
+
+  @spec set_rating(Teiserver.Account.User.t(), rating_type :: String.t(), number() | map()) ::
+          Teiserver.Account.Rating.t()
+  def set_rating(user, rating_type, r) do
+    rating = Teiserver.Game.get_rating_type_by_name!(rating_type)
+    [r] = set_ratings(user, [{rating, r}])
+    r
+  end
+
+  @spec set_ratings(
+          Teiserver.Account.User.t(),
+          rating :: number() | [{Teiserver.Game.RatingType.t(), number() | map()}]
+        ) :: [Teiserver.Account.Rating.t()]
+  @doc """
+  Set rating for all game type for this user
+  """
+  def set_ratings(user, r) when is_number(r) do
+    ratings =
+      Teiserver.Game.list_rating_types()
+      |> Enum.map(fn rating -> {rating, r} end)
+
+    set_ratings(user, ratings)
+  end
+
+  def set_ratings(user, ratings) when is_list(ratings) do
+    for {rating_type, attrs} <- ratings do
+      attrs =
+        if is_number(attrs),
+          do: %{skill: attrs},
+          else: attrs
+
+      attrs =
+        Map.merge(
+          %{
+            user_id: user.id,
+            rating_type_id: rating_type.id,
+            rating_value: attrs.skill,
+            uncertainty: 1.0,
+            leaderboard_rating: 10,
+            last_updated: DateTime.utc_now(),
+            season: Teiserver.Game.MatchRatingLib.active_season()
+          },
+          attrs
+        )
+
+      {:ok, r} = Teiserver.Account.create_or_update_rating(attrs)
+      r
+    end
   end
 
   def setup_client(_context), do: setup_client()

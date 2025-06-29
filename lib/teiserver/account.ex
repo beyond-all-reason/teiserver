@@ -915,13 +915,13 @@ defmodule Teiserver.Account do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_rating(Integer.t() | List.t()) :: Rating.t()
-  @spec get_rating(Integer.t(), List.t()) :: Rating.t()
+  @spec get_rating(Integer.t() | List.t()) :: Rating.t() | nil
   def get_rating(args) do
     rating_query(args)
     |> Repo.one()
   end
 
+  @spec get_rating(Integer.t(), List.t()) :: Rating.t() | nil
   def get_rating(user_id, rating_type_id)
       when is_integer(user_id) and is_integer(rating_type_id) do
     get_rating(user_id, rating_type_id, MatchRatingLib.active_season())
@@ -941,6 +941,12 @@ defmodule Teiserver.Account do
       |> Repo.one()
     end)
   end
+
+  # def get_ratings(user_id, season \\ nil) do
+  #   season = if season == nil, do: MatchRatingLib.active_season(), else: season
+  #   q = rating_query(search: [user_id: user_id, season: season])
+  #   Teiserver.Game.get_ratings_for_user(preload: [ratings: q])
+  # end
 
   @spec get_player_highest_leaderboard_rating(T.userid()) :: number()
   def get_player_highest_leaderboard_rating(user_id) do
@@ -1002,14 +1008,28 @@ defmodule Teiserver.Account do
   """
   @spec create_rating(map()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def create_rating(attrs \\ %{}) do
-    %Rating{}
-    |> Rating.changeset(attrs)
-    |> Repo.insert()
+    result =
+      %Rating{}
+      |> Rating.changeset(attrs)
+      |> Repo.insert()
+
+    case result do
+      {:ok, r} ->
+        Teiserver.cache_put(:teiserver_user_ratings, {r.user_id, r.rating_type_id, r.season}, r)
+
+      _ ->
+        nil
+    end
+
+    result
   end
 
   @spec update_rating(Rating.t(), map()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def update_rating(%Rating{} = rating, attrs) do
-    Teiserver.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
+    Teiserver.cache_delete(
+      :teiserver_user_ratings,
+      {rating.user_id, rating.rating_type_id, rating.season}
+    )
 
     rating
     |> Rating.changeset(attrs)

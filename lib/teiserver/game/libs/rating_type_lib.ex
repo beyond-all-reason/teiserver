@@ -39,7 +39,7 @@ defmodule Teiserver.Game.RatingTypeLib do
     end)
   end
 
-  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
+  @spec _search(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -98,10 +98,18 @@ defmodule Teiserver.Game.RatingTypeLib do
       order_by: [desc: rating_types.id]
   end
 
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec preload(Ecto.Query.t(), [term()] | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
-  def preload(query, _preloads) do
-    query
+  def preload(query, preloads) do
+    case preloads[:ratings] do
+      nil -> query
+      rating_query -> _preload_user(query, rating_query)
+    end
+  end
+
+  defp _preload_user(query, rating_query) do
+    from rating_types in query,
+      preload: [ratings: ^rating_query]
   end
 end

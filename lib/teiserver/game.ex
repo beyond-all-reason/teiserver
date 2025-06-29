@@ -7,7 +7,7 @@ defmodule Teiserver.Game do
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
 
-  alias Teiserver.Game.{AchievementType, AchievementTypeLib}
+  alias Teiserver.Game.{AchievementType, AchievementTypeLib, MatchRatingLib}
 
   @spec achievement_type_query(List.t()) :: Ecto.Query.t()
   def achievement_type_query(args) do
@@ -373,6 +373,24 @@ defmodule Teiserver.Game do
   def get_rating_type!(id, args) do
     rating_type_query(id, args)
     |> Repo.one!()
+  end
+
+  @spec get_rating_type_by_name!(String.t()) :: RatingType.t()
+  def get_rating_type_by_name!(name) do
+    rating_type_query(search: [name: name])
+    |> Repo.one!()
+  end
+
+  @spec get_ratings_for_users(user_ids :: [integer()]) :: [RatingType.t()]
+  def get_ratings_for_users(user_ids),
+    do: get_ratings_for_users(user_ids, MatchRatingLib.active_season())
+
+  @spec get_ratings_for_users(user_ids :: [integer()], season :: integer()) :: [RatingType.t()]
+  def get_ratings_for_users(user_ids, season) do
+    query = Teiserver.Account.rating_query(search: [user_id_in: user_ids, season: season])
+
+    rating_type_query(preload: [ratings: query])
+    |> Repo.all()
   end
 
   @spec get_or_add_rating_type(String.t()) :: non_neg_integer()
