@@ -32,6 +32,7 @@ http_port = String.to_integer(System.get_env("TEI_PORT") || "4000")
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :teiserver, TeiserverWeb.Endpoint,
+  server: true,
   http: [ip: bind_ip, port: http_port],
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
@@ -41,7 +42,6 @@ config :teiserver, TeiserverWeb.Endpoint,
       :install_and_run,
       [:dark, ~w(--embed-source-map --source-map-urls=absolute --watch)]
     },
-    server: true,
     light_sass: {
       DartSass,
       :install_and_run,
