@@ -38,6 +38,7 @@ config :teiserver, TeiserverWeb.Endpoint,
       :install_and_run,
       [:dark, ~w(--embed-source-map --source-map-urls=absolute --watch)]
     },
+    server: true,
     light_sass: {
       DartSass,
       :install_and_run,
