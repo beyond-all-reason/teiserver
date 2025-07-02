@@ -42,9 +42,6 @@ Tested on Ubuntu 24.04
     # 2. Create & migrate your dev database
     sudo docker compose run --rm app mix ecto.create ecto.migrate
 
-    # 3. Start your Phoenix server
-    sudo docker compose up app
-
 `
 ## Fake Data
 `
@@ -52,7 +49,7 @@ Tested on Ubuntu 24.04
 
     sudo docker compose run --rm app mix teiserver.fakedata
 
-    docker compose up -d app
+    sudo docker compose up -d app
 `
 
 You can now login with the email 'root@localhost' and password 'password'

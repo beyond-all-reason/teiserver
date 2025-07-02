@@ -22,6 +22,9 @@ bind_ip =
   |> Enum.map(&String.to_integer/1)
   |> List.to_tuple()
 
+
+http_port = String.to_integer(System.get_env("TEI_PORT") || "4000")
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -29,7 +32,7 @@ bind_ip =
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :teiserver, TeiserverWeb.Endpoint,
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  http: [ip: bind_ip, port: http_port],
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
