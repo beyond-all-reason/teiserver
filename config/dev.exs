@@ -8,11 +8,10 @@ config :teiserver, Teiserver.Repo,
   password: System.get_env("TEI_DB_PASSWORD") || "123456789",
   database: System.get_env("TEI_DB_NAME") || "teiserver_dev",
   hostname: System.get_env("TEI_DB_HOSTNAME") || "localhost",
-  port:     String.to_integer(System.get_env("TEI_DB_PORT") || "5432"),
+  port: String.to_integer(System.get_env("TEI_DB_PORT") || "5432"),
   show_sensitive_data_on_connection_error: true,
   pool_size: 10,
   timeout: 180_000
-
 
 # Helper function to set the bind_ip for the container
 # Fallback to the original value if not set
@@ -21,7 +20,6 @@ bind_ip =
   |> String.split(".")
   |> Enum.map(&String.to_integer/1)
   |> List.to_tuple()
-
 
 http_port = String.to_integer(System.get_env("TEI_PORT") || "4000")
 
