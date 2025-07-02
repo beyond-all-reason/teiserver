@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: teiserver_dev
+      POSTGRES_PASSWORD: 123456789
+      POSTGRES_DB: teiserver_dev
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    env_file: .env
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/app
+      - app_deps:/app/deps
+      - app_build:/app/_build
+
+volumes:
+  db_data:
+  app_deps:
+  app_build:
