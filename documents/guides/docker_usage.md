@@ -45,8 +45,6 @@ Tested on Ubuntu 24.04
 `
 ## Fake Data
 `
-    sudo docker compose stop app
-
     sudo docker compose run --rm app mix teiserver.fakedata
 
     sudo docker compose up -d app
