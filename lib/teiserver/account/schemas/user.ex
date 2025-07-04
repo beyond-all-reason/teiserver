@@ -165,6 +165,12 @@ defmodule Teiserver.Account.User do
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
         |> unique_constraint(:email)
+        |> validate_change(:email, fn :email, email ->
+          case Teiserver.CacheUser.valid_email?(email) do
+            :ok -> []
+            {:error, reason} -> [{:email, reason}]
+          end
+        end)
     end
   end
 
