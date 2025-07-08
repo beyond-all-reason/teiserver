@@ -8,6 +8,7 @@ defmodule Teiserver.Battle.BalanceLib do
   alias Teiserver.Game.MatchRatingLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
   require Logger
+  require OpenTelemetry.Tracer, as: Tracer
   # These are default values and can be overridden as part of the call to create_balance()
 
   # Upper boundary is how far above the group value the members can be, lower is how far below it
@@ -116,74 +117,78 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   def create_balance(groups, team_count, opts) do
-    start_time = System.system_time(:microsecond)
-    groups = standardise_groups(groups)
+    Tracer.with_span "create_balance" do
+      start_time = System.system_time(:microsecond)
+      groups = standardise_groups(groups)
 
-    # We perform all our group calculations here and assign each group
-    # an ID that's used purely for this run of balance
-    expanded_groups =
-      groups
-      |> Enum.map(fn members ->
-        userids = Map.keys(members)
-        ratings = Map.values(members) |> Enum.map(fn x -> x.rating end)
+      # We perform all our group calculations here and assign each group
+      # an ID that's used purely for this run of balance
+      expanded_groups =
+        groups
+        |> Enum.map(fn members ->
+          userids = Map.keys(members)
+          ratings = Map.values(members) |> Enum.map(fn x -> x.rating end)
 
-        ranks =
-          Map.values(members)
-          |> Enum.map(fn x ->
-            cond do
-              Map.has_key?(x, :rank) -> x.rank
-              true -> 0
-            end
-          end)
+          ranks =
+            Map.values(members)
+            |> Enum.map(fn x ->
+              cond do
+                Map.has_key?(x, :rank) -> x.rank
+                true -> 0
+              end
+            end)
 
-        uncertainties =
-          Map.values(members)
-          |> Enum.map(fn x ->
-            cond do
-              Map.has_key?(x, :uncertainty) -> x.uncertainty
-              true -> 0
-            end
-          end)
+          uncertainties =
+            Map.values(members)
+            |> Enum.map(fn x ->
+              cond do
+                Map.has_key?(x, :uncertainty) -> x.uncertainty
+                true -> 0
+              end
+            end)
 
-        names =
-          members
-          |> Enum.map(fn {id, details} ->
-            cond do
-              Map.has_key?(details, :name) -> details.name
-              true -> "#{id}"
-            end
-          end)
+          names =
+            members
+            |> Enum.map(fn {id, details} ->
+              cond do
+                Map.has_key?(details, :name) -> details.name
+                true -> "#{id}"
+              end
+            end)
 
-        %{
-          members: userids,
-          ratings: ratings,
-          ranks: ranks,
-          names: names,
-          group_rating: Enum.sum(ratings),
-          count: Enum.count(ratings),
-          uncertainties: uncertainties
-        }
-      end)
+          %{
+            members: userids,
+            ratings: ratings,
+            ranks: ranks,
+            names: names,
+            group_rating: Enum.sum(ratings),
+            count: Enum.count(ratings),
+            uncertainties: uncertainties
+          }
+        end)
 
-    algo_name = opts[:algorithm] || get_default_algorithm()
+      algo_name = opts[:algorithm] || get_default_algorithm()
 
-    # Now we pass this to the algorithm and it does the rest!
-    balance_result =
-      case algorithm_modules()[algo_name] do
-        nil ->
-          raise "No balance module by the name of '#{algo_name}'"
+      # Now we pass this to the algorithm and it does the rest!
+      balance_result =
+        case algorithm_modules()[algo_name] do
+          nil ->
+            raise "No balance module by the name of '#{algo_name}'"
 
-        m ->
-          m.perform(expanded_groups, team_count, opts)
-      end
+          m ->
+            m.perform(expanded_groups, team_count, opts)
+        end
 
-    # Now expand the results and calculate stats
-    balance_result
-    |> expand_balance_result()
-    |> calculate_balance_stats
-    |> cleanup_result
-    |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
-    |> validate_result(groups, team_count, opts)
+      # Now expand the results and calculate stats
+      balance_result
+      |> expand_balance_result()
+      |> calculate_balance_stats
+      |> cleanup_result
+      |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
+      |> validate_result(groups, team_count, opts)
+
+      Tracer.set_attribute(:balance_result, balance_result)
+    end
   end
 
   def validate_result(result, groups, team_count, opts) do

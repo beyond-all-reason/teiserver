@@ -140,7 +140,16 @@ defmodule Teiserver.MixProject do
       {:websocket_sync_client,
        git: "https://github.com/geekingfrog/websocket_sync_client.git",
        ref: "d655018589f9ade836afb8df8ed5f45f53500173",
-       only: [:dev, :test]}
+       only: [:dev, :test]},
+
+      # OpenTelemetry is used to export logs, metrics, and traces to a separate server
+      {:opentelemetry, "~> 1.3"},
+      {:opentelemetry_api, "~> 1.2"},
+      {:opentelemetry_exporter, "~> 1.6"},
+      {:opentelemetry_phoenix, "~> 1.1"},
+      {:opentelemetry_cowboy, "~> 0.2"},
+      # if using ecto
+      {:opentelemetry_ecto, "~> 1.2"}
     ]
   end
 
