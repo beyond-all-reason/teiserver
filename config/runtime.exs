@@ -147,6 +147,9 @@ config :logger, :info_log, path: "#{log_root_path}/info.log"
 enable_discord_bridge =
   Teiserver.ConfigHelpers.get_env("TEI_ENABLE_DISCORD_BRIDGE", false, :bool)
 
+enable_opentelemetry =
+  Teiserver.ConfigHelpers.get_env("TEI_ENABLE_OPENTELEMETRY", false, :bool)
+
 config :teiserver, Teiserver,
   discord: "https://discord.gg/beyond-all-reason",
   enable_discord_bridge: enable_discord_bridge
@@ -169,4 +172,15 @@ if enable_discord_bridge do
     token: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_TOKEN"),
     guild_id: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_GUILD_ID"),
     bot_name: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_NAME")
+end
+
+if enable_opentelemetry do
+  config :opentelemetry,
+    resource: %{service: %{name: "teiserver"}},
+    span_processor: :batch,
+    traces_exporter: :otlp
+
+  config :opentelemetry_exporter,
+    otlp_protocol: :http_protobuf,
+    otlp_endpoint: Teiserver.ConfigHelpers.get_env("TEI_OPENTELEMETRY_ENDPOINT")
 end

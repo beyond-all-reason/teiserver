@@ -59,7 +59,8 @@ config :teiserver, Teiserver,
   heartbeat_interval: nil,
   heartbeat_timeout: nil,
   enable_discord_bridge: false,
-  accept_all_emails: true
+  accept_all_emails: true,
+  enable_opentelemetry: false
 
 # Watch static and templates for browser reloading.
 config :teiserver, TeiserverWeb.Endpoint,
