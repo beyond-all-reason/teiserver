@@ -140,7 +140,12 @@ defmodule Teiserver.MixProject do
       {:websocket_sync_client,
        git: "https://github.com/geekingfrog/websocket_sync_client.git",
        ref: "d655018589f9ade836afb8df8ed5f45f53500173",
-       only: [:dev, :test]}
+       only: [:dev, :test]},
+
+      # prometheus metrics scrape dependencies
+      {:prometheus_ecto, "~> 1.0"},
+      {:prometheus_phoenix, "~> 1.3.0"},
+      {:prometheus_plugs, "~> 1.1.5"}
     ]
   end
 
