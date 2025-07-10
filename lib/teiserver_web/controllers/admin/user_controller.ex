@@ -1073,7 +1073,8 @@ defmodule TeiserverWeb.Admin.UserController do
         Account.delete_user_stat_keys(user.id, [
           "first_ip",
           "country",
-          "last_ip"
+          "last_ip",
+          "previous_names"
         ])
 
         conn
