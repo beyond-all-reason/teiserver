@@ -13,4 +13,23 @@ defmodule Teiserver.TachyonBattle.BattleTest do
       poll_until_some(fn -> Battle.lookup(battle_id) end)
     end
   end
+
+  describe "send message" do
+    test "autohost is there" do
+      battle_id = to_string(UUID.uuid4())
+      autohost_id = :rand.uniform(1..10000000)
+      Teiserver.Autohost.Registry.register(%{id: autohost_id})
+
+      {:ok, _battle_pid} =
+        Battle.Battle.start_link(%{battle_id: battle_id, autohost_id: autohost_id})
+
+      task = Task.async(fn -> Battle.send_message(battle_id, "hello") end)
+
+      assert_receive {:call_client, "autohost/sendMessage",
+                      %{battleId: ^battle_id, message: "hello"}, from}
+
+      send(from, {from, %{"status" => "success"}})
+      assert Task.await(task) == :ok
+    end
+  end
 end

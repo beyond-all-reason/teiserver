@@ -1,6 +1,7 @@
 defmodule Teiserver.TachyonBattle.Battle do
   require Logger
 
+  alias Teiserver.Autohost
   alias Teiserver.TachyonBattle.Types, as: T
   alias Teiserver.TachyonBattle.Registry
 
@@ -12,6 +13,7 @@ defmodule Teiserver.TachyonBattle.Battle do
   @type state :: %{
           id: T.id(),
           autohost_id: Teiserver.Autohost.id(),
+          autohost_pid: pid(),
           autohost_timeout: timeout(),
           # initialised: the battle is waiting for players to join and start the match
           # finished: the battle is over, but there are still some player in the match,
@@ -36,6 +38,13 @@ defmodule Teiserver.TachyonBattle.Battle do
     GenServer.call(via_tuple(event.battle_id), {:update_event, event})
   end
 
+  @spec send_message(T.id(), String.t()) :: :ok | {:error, reason :: term()}
+  def send_message(battle_id, message) do
+    GenServer.call(via_tuple(battle_id), {:send_message, message})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_battle}
+  end
+
   @impl true
   def init(%{battle_id: battle_id, autohost_id: autohost_id} = args) do
     Logger.metadata(actor_type: :battle, actor_id: battle_id)
@@ -43,9 +52,11 @@ defmodule Teiserver.TachyonBattle.Battle do
     state = %{
       id: battle_id,
       autohost_id: autohost_id,
+      autohost_pid: nil,
       # the timeout is absurdly short because there is no real recovery if the
       # autohost goes away. When we implement state recovery this timeout
       # should be increased to a more reasonable value (1 min?)
+      # Need to also fix the autohost_pid when it comes back
       autohost_timeout: Map.get(args, :autohost_timeout, 100),
       battle_state: :initialised
     }
@@ -58,7 +69,7 @@ defmodule Teiserver.TachyonBattle.Battle do
       {pid, _} ->
         Logger.info("init battle for autohost #{autohost_id}")
         Process.monitor(pid)
-        {:ok, state}
+        {:ok, %{state | autohost_pid: pid}}
 
       nil ->
         {:stop, :no_autohost}
@@ -76,11 +87,23 @@ defmodule Teiserver.TachyonBattle.Battle do
     end
   end
 
+  def handle_call({:send_message, msg}, _from, state) do
+    case state.autohost_pid do
+      nil ->
+        {:reply, {:error, :no_autohost}, state}
+
+      pid ->
+        payload = %{battle_id: state.id, message: msg}
+        resp = Autohost.send_message(pid, payload)
+        {:reply, resp, state}
+    end
+  end
+
   @impl true
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
     timeout = state.autohost_timeout
     if timeout != :infinity, do: :timer.send_after(timeout, :autohost_timeout)
-    {:noreply, state}
+    {:noreply, %{state | autohost_pid: nil}}
   end
 
   def handle_info(:autohost_timeout, state) do
