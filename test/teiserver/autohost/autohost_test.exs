@@ -76,5 +76,31 @@ defmodule Teiserver.Autohost.AutohostTest do
 
       assert TH.parse_update_event(msg["data"]) == {:ok, expected}
     end
+
+    test "player chat broadcast" do
+      msg = %{
+        "commandId" => "autohost/update",
+        "data" => %{
+          "battleId" => "d9eff7cb-ab31-4070-8bd8-376acf9c5095",
+          "time" => 1_748_191_573_075_000,
+          "update" => %{
+            "destination" => "all",
+            "message" => "blah",
+            "type" => "player_chat",
+            "userId" => "5"
+          }
+        },
+        "messageId" => "46dc384f-1ffe-4cac-8a77-1fd1927f0437",
+        "type" => "event"
+      }
+
+      expected = %{
+        battle_id: "d9eff7cb-ab31-4070-8bd8-376acf9c5095",
+        time: DateTime.from_unix!(1_748_191_573_075_000, :microsecond),
+        update: {:player_chat_broadcast, %{destination: :all, message: "blah", user_id: 5}}
+      }
+
+      assert TH.parse_update_event(msg["data"]) == {:ok, expected}
+    end
   end
 end

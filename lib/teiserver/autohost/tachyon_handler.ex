@@ -212,6 +212,12 @@ defmodule Teiserver.Autohost.TachyonHandler do
           | {:engine_message, %{message: String.t()}}
           | {:engine_warning, %{message: String.t()}}
           | {:engine_crash, %{details: String.t() | nil}}
+          | {:player_chat_broadcast,
+             %{
+               destination: :allies | :all | :spectators,
+               message: String.t(),
+               user_id: T.userid()
+             }}
           | :engine_quit
           | {:luamsg,
              %{
@@ -256,6 +262,21 @@ defmodule Teiserver.Autohost.TachyonHandler do
               end
 
             {:player_left, %{user_id: user_id, reason: reason}}
+
+          "player_chat" ->
+            if update["destination"] == "player" do
+              {:error, "unimplement, player destination for player_chat event"}
+            else
+              dest =
+                case update["destination"] do
+                  "allies" -> :allies
+                  "all" -> :all
+                  "spectators" -> :spectators
+                end
+
+              {:player_chat_broadcast,
+               %{destination: dest, message: update["message"], user_id: user_id}}
+            end
 
           "player_defeated" ->
             {:player_defeated, %{user_id: user_id}}
