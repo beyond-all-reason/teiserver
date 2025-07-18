@@ -35,7 +35,7 @@ defmodule Teiserver.TachyonBattle.Battle do
   # and doing state recovery
   @spec send_update_event(Teiserver.Autohost.update_event()) :: :ok
   def send_update_event(event) do
-    GenServer.call(via_tuple(event.battle_id), {:update_event, event})
+    GenServer.cast(via_tuple(event.battle_id), {:update_event, event})
   end
 
   @spec send_message(T.id(), String.t()) :: :ok | {:error, reason :: term()}
@@ -77,16 +77,6 @@ defmodule Teiserver.TachyonBattle.Battle do
   end
 
   @impl true
-  def handle_call({:update_event, ev}, _from, state) do
-    case ev.update do
-      :start -> {:reply, :ok, %{state | battle_state: :in_progress}}
-      {:finished, _} -> {:reply, :ok, %{state | battle_state: :finished}}
-      {:engine_crash, _} -> {:stop, :shutdown, :ok, %{state | battle_state: :shutting_down}}
-      :engine_quit -> {:stop, :shutdown, :ok, %{state | battle_state: :shutting_down}}
-      _ -> {:reply, :ok, state}
-    end
-  end
-
   def handle_call({:send_message, msg}, _from, state) do
     case state.autohost_pid do
       nil ->
@@ -96,6 +86,17 @@ defmodule Teiserver.TachyonBattle.Battle do
         payload = %{battle_id: state.id, message: msg}
         resp = Autohost.send_message(pid, payload)
         {:reply, resp, state}
+    end
+  end
+
+  @impl true
+  def handle_cast({:update_event, ev}, state) do
+    case ev.update do
+      :start -> {:noreply, %{state | battle_state: :in_progress}}
+      {:finished, _} -> {:noreply, %{state | battle_state: :finished}}
+      {:engine_crash, _} -> {:stop, :shutdown, %{state | battle_state: :shutting_down}}
+      :engine_quit -> {:stop, :shutdown, %{state | battle_state: :shutting_down}}
+      _ -> {:noreply, state}
     end
   end
 
