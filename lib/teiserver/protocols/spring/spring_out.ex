@@ -737,6 +737,17 @@ defmodule Teiserver.Protocols.SpringOut do
       end
     end)
 
+    # Send BATTLETEAMS batch message
+    teams_data = 
+      Lobby.list_lobby_ids()
+      |> Enum.map(fn lobby_id ->
+        consul_state = Teiserver.Coordinator.call_consul(lobby_id, :get_all)
+        {lobby_id, %{teamSize: consul_state.host_teamsize, nbTeams: consul_state.host_teamcount}}
+      end)
+      |> Map.new()
+
+    send(self(), {:battle_teams, teams_data})
+
     # CLIENTSTATUS entries
     clients
     |> Enum.each(fn client ->
