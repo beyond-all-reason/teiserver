@@ -82,4 +82,8 @@ defmodule Teiserver.Autohost do
           :ok | {:error, reason :: term()}
   defdelegate send_message(autohost, payload),
     to: Teiserver.Autohost.TachyonHandler
+
+  @spec kill_battle(pid(), TachyonBattle.id()) :: :ok
+  defdelegate kill_battle(autohost, battle_id),
+    to: Teiserver.Autohost.TachyonHandler
 end

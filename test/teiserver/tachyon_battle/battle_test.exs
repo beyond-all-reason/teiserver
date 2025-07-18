@@ -1,6 +1,6 @@
 defmodule Teiserver.TachyonBattle.BattleTest do
   use Teiserver.DataCase
-  import Teiserver.Support.Polling, only: [poll_until_some: 1]
+  import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until: 2]
   alias Teiserver.TachyonBattle, as: Battle
 
   @moduletag :tachyon
@@ -30,5 +30,21 @@ defmodule Teiserver.TachyonBattle.BattleTest do
       GenServer.reply(from, :ok)
       assert Task.await(task) == :ok
     end
+  end
+
+  test "kill battle" do
+    battle_id = to_string(UUID.uuid4())
+    autohost_id = 1
+    Teiserver.Autohost.Registry.register(%{id: autohost_id})
+
+    {:ok, battle_pid} =
+      Battle.Battle.start_link(%{battle_id: battle_id, autohost_id: autohost_id})
+
+    task = Task.async(fn -> Battle.kill(battle_id) end)
+    assert_receive {:kill_battle, from, battle_id}
+    send(from, {:battle_killed, :ok})
+    assert Task.await(task) == :ok
+
+    poll_until(fn -> Process.alive?(battle_pid) end, &not/1)
   end
 end
