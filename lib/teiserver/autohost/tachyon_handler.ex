@@ -191,6 +191,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
                message: String.t(),
                user_id: T.userid()
              }}
+          | {:player_chat_dm, %{message: String.t(), user_id: T.userid(), to_user_id: T.userid()}}
           | :engine_quit
           | {:luamsg,
              %{
@@ -239,7 +240,17 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
         "player_chat" ->
           if update["destination"] == "player" do
-            {:error, "unimplement, player destination for player_chat event"}
+            case TachyonParser.parse_user_id(update["toUserId"]) do
+              {:ok, id} ->
+                update =
+                  {:player_chat_dm,
+                   %{message: update["message"], user_id: user_id, to_user_id: id}}
+
+                {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+
+              err ->
+                err
+            end
           else
             dest =
               case update["destination"] do
