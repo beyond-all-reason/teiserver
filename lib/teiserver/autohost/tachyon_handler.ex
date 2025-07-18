@@ -248,77 +248,87 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
     with {:ok, time} <- DateTime.from_unix(data["time"], :microsecond),
          {:ok, user_id} <- user_id do
-      parsed_update =
-        case update["type"] do
-          "player_joined" ->
-            {:player_joined, %{user_id: user_id, player_number: update["playerNumber"]}}
+      case update["type"] do
+        "player_joined" ->
+          update = {:player_joined, %{user_id: user_id, player_number: update["playerNumber"]}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
 
-          "player_left" ->
-            reason =
-              case update["reason"] do
-                "lost_connection" -> :lost_connection
-                "left" -> :left
-                "kicked" -> :kicked
-              end
-
-            {:player_left, %{user_id: user_id, reason: reason}}
-
-          "player_chat" ->
-            if update["destination"] == "player" do
-              {:error, "unimplement, player destination for player_chat event"}
-            else
-              dest =
-                case update["destination"] do
-                  "allies" -> :allies
-                  "all" -> :all
-                  "spectators" -> :spectators
-                end
-
-              {:player_chat_broadcast,
-               %{destination: dest, message: update["message"], user_id: user_id}}
+        "player_left" ->
+          reason =
+            case update["reason"] do
+              "lost_connection" -> :lost_connection
+              "left" -> :left
+              "kicked" -> :kicked
             end
 
-          "player_defeated" ->
-            {:player_defeated, %{user_id: user_id}}
+          update = {:player_left, %{user_id: user_id, reason: reason}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
 
-          "start" ->
-            :start
-
-          "finished" ->
-            {:finished, %{user_id: user_id, winning_ally_teams: update["winningAllyTeams"]}}
-
-          "engine_message" ->
-            {:engine_message, %{message: update["message"]}}
-
-          "engine_warning" ->
-            {:engine_warning, %{message: update["message"]}}
-
-          "engine_crash" ->
-            {:engine_warning, %{details: Map.get(update, "details")}}
-
-          "engine_quit" ->
-            :engine_quit
-
-          "luamsg" ->
-            script =
-              case update["script"] do
-                "ui" -> :ui
-                "game" -> :game
-                "rules" -> :rules
-              end
-
-            ui_mode =
-              case Map.get(update, "uiMode") do
-                nil -> nil
-                "all" -> :all
+        "player_chat" ->
+          if update["destination"] == "player" do
+            {:error, "unimplement, player destination for player_chat event"}
+          else
+            dest =
+              case update["destination"] do
                 "allies" -> :allies
+                "all" -> :all
                 "spectators" -> :spectators
               end
 
-            {:luamsg, %{user_id: user_id, script: script, ui_mode: ui_mode, data: update["data"]}}
-        end
+            update =
+              {:player_chat_broadcast,
+               %{destination: dest, message: update["message"], user_id: user_id}}
 
-      {:ok, %{battle_id: data["battleId"], time: time, update: parsed_update}}
+            {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+          end
+
+        "player_defeated" ->
+          update = {:player_defeated, %{user_id: user_id}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+
+        "start" ->
+          {:ok, %{battle_id: data["battleId"], time: time, update: :start}}
+
+        "finished" ->
+          update =
+            {:finished, %{user_id: user_id, winning_ally_teams: update["winningAllyTeams"]}}
+
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+
+        "engine_message" ->
+          update = {:engine_message, %{message: update["message"]}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+
+        "engine_warning" ->
+          {:engine_warning, %{message: update["message"]}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+
+        "engine_crash" ->
+          {:engine_warning, %{details: Map.get(update, "details")}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+
+        "engine_quit" ->
+          {:ok, %{battle_id: data["battleId"], time: time, update: :engine_quit}}
+
+        "luamsg" ->
+          script =
+            case update["script"] do
+              "ui" -> :ui
+              "game" -> :game
+              "rules" -> :rules
+            end
+
+          ui_mode =
+            case Map.get(update, "uiMode") do
+              nil -> nil
+              "all" -> :all
+              "allies" -> :allies
+              "spectators" -> :spectators
+            end
+
+          {:luamsg, %{user_id: user_id, script: script, ui_mode: ui_mode, data: update["data"]}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+      end
     end
   end
 end
