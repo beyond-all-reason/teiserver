@@ -45,6 +45,13 @@ defmodule Teiserver.TachyonBattle.Battle do
     :exit, {:noproc, _} -> {:error, :invalid_battle}
   end
 
+  @spec kill(T.id()) :: :ok | {:error, reason :: term()}
+  def kill(battle_id) do
+    GenServer.call(via_tuple(battle_id), :kill)
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_battle}
+  end
+
   @impl true
   def init(%{battle_id: battle_id, autohost_id: autohost_id} = args) do
     Logger.metadata(actor_type: :battle, actor_id: battle_id)
@@ -89,14 +96,47 @@ defmodule Teiserver.TachyonBattle.Battle do
     end
   end
 
+  def handle_call(:kill, _from, state) do
+    case state.autohost_pid do
+      nil ->
+        {:reply, {:error, :no_autohost}, state}
+
+      pid ->
+        resp = Autohost.kill_battle(pid, state.id)
+        {:reply, resp, state}
+    end
+
+    # Note that we don't terminate the battle process here.
+    # I believe it should happen when, after closing the engine, autohost
+    # should send :engine_quit message (or something similar)
+    # if that's not the case, we should terminate here
+  end
+
   @impl true
   def handle_cast({:update_event, ev}, state) do
     case ev.update do
-      :start -> {:noreply, %{state | battle_state: :in_progress}}
-      {:finished, _} -> {:noreply, %{state | battle_state: :finished}}
-      {:engine_crash, _} -> {:stop, :shutdown, %{state | battle_state: :shutting_down}}
-      :engine_quit -> {:stop, :shutdown, %{state | battle_state: :shutting_down}}
-      _ -> {:noreply, state}
+      :start ->
+        {:noreply, %{state | battle_state: :in_progress}}
+
+      {:finished, _} ->
+        {:noreply, %{state | battle_state: :finished}}
+
+      {:engine_crash, _} ->
+        {:stop, :shutdown, %{state | battle_state: :shutting_down}}
+
+      :engine_quit ->
+        {:stop, :shutdown, %{state | battle_state: :shutting_down}}
+
+      {:player_chat_broadcast, %{destination: :all, message: "!stop"}} ->
+        if state.autohost_pid != nil do
+          Autohost.kill_battle(state.autohost_pid, state.id)
+          {:noreply, state}
+        else
+          {:noreply, state}
+        end
+
+      _ ->
+        {:noreply, state}
     end
   end
 

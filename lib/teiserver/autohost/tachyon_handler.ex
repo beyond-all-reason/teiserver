@@ -81,6 +81,24 @@ defmodule Teiserver.Autohost.TachyonHandler do
     end
   end
 
+  @spec kill_battle(pid(), TachyonBattle.id()) :: :ok
+  def kill_battle(autohost, battle_id) when is_pid(autohost) do
+    response = Transport.call_client(autohost, "autohost/kill", %{battleId: battle_id})
+
+    case response["status"] do
+      "success" ->
+        :ok
+
+      "failed" ->
+        err = response["reason"]
+
+        case Map.get(response, "details") do
+          nil -> {:error, err}
+          details -> {:error, "#{err} - #{details}"}
+        end
+    end
+  end
+
   @impl Handler
   def connect(conn) do
     autohost = conn.assigns[:token].bot
@@ -94,7 +112,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
      %{since: DateTime.utc_now() |> DateTime.to_unix(:microsecond)}, [], state}
   end
 
-  @impl Handler
+  @impl true
   def handle_info(_msg, state) do
     {:ok, state}
   end
