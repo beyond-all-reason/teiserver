@@ -31,24 +31,8 @@ defmodule Teiserver.Matchmaking do
   @doc """
   Request the player to join the specified queue.
   """
-  @spec join_queue(queue_id(), T.userid() | member(), Party.id() | nil) :: join_result()
-  def join_queue(queue_id, member, party_id \\ nil)
-
-  def join_queue(queue_id, member, party_id) when not is_map(member) do
-    member = %Member{
-      id: UUID.uuid4(),
-      player_ids: [member],
-      # TODO tachyon_mvp: fetch ratings for the player somehow
-      rating: %{},
-      # TODO tachyon_mvp: fetch the list of player id avoided by this player
-      avoid: [],
-      joined_at: DateTime.utc_now()
-    }
-
-    join_queue(queue_id, member, party_id)
-  end
-
-  def join_queue(queue_id, member, party_id) do
+  @spec join_queue(queue_id(), T.userid(), Party.id() | nil) :: join_result()
+  def join_queue(queue_id, member, party_id \\ nil) do
     Matchmaking.QueueServer.join_queue(queue_id, member, party_id)
   end
 

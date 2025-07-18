@@ -1,0 +1,183 @@
+# matchmaking with OS
+
+```elixir
+Mix.install([
+  {:vega_lite, "~> 0.1.6"},
+  {:kino_vega_lite, "~> 0.1.11"},
+  {:openskill, git: "https://github.com/beyond-all-reason/openskill.ex.git", branch: "master"},
+  {:elixir_uuid, "~> 1.2"},
+  {:teiserver, path: __DIR__}
+])
+```
+
+## Parameters
+
+```elixir
+alias VegaLite, as: Vl
+alias Teiserver.Matchmaking.{Algo, Member}
+```
+
+```elixir
+# how many tick to run the simulation for
+number_of_ticks = 400
+
+# match parameters
+team_size = 1
+team_count = 2
+
+# See https://github.com/beyond-all-reason/teiserver/issues/679
+# to get the "correct" value for the normal distribution of rating
+{mu, sigma} = {18.964, 8.484}
+
+
+# which algo to use for matchmaking
+alg_module = Algo.BruteforceFilter
+```
+
+```elixir
+gen_rating = fn() ->
+  rating = Statistics.Distributions.Normal.rand(mu, sigma)
+  # completely arbitrary
+  uncertainty = :rand.uniform() * (7.0 - 2.0) + 2.0
+  %{rating: rating, uncertainty: uncertainty}
+end
+
+gen_player = fn(p_id) ->
+  %Member{
+    id: UUID.uuid4(),
+    player_ids: [p_id],
+    rating: gen_rating.(),
+    joined_at: DateTime.utc_now()
+  }
+end
+
+game_type = Teiserver.Battle.MatchLib.game_type(team_size, team_count)
+
+# eyeballing the graphs of matches, there are roughly, per day
+# 650 duels
+# 500 small team game
+# 950 large team
+# 110 ffa
+# it's probably not evenly distributed, so let's say this happens over
+# 20h (arbitrary).
+# the arrival time is then very roughly, per minute:
+# 1.08 for duels
+# 3.3 for small team (assuming 4 players per team)
+# 0.9 for ffa (assuming 10 players per match)
+# 12.6 for large team (16 players per match)
+
+# expectation that λ events happen during the time interval
+# here, it's the number of player joining the queue between two ticks
+# Assuming one tick every 30 seconds.
+lambda = 1.5
+
+id_gen = Stream.iterate(1000, &(&1 + 1))
+
+# This is a stream where each element is an array of %Member that joined during this tick.
+members_per_tick =
+  Stream.unfold({0, id_gen}, fn {tick, id_gen} ->
+    # number of player arriving this tick, it's always an integer but
+    # rand() returns a float
+    n = trunc(Statistics.Distributions.Poisson.rand(lambda))
+
+    {ps, id_gen} = Enum.reduce(1..n, {[], id_gen}, fn _, {players, id_gen} ->
+      # note that doing take and drop runs the element twice, so if there were
+      # any side effect that would be run twice. Fortunately this is not the case here
+      [id] = Enum.take(id_gen, 1)
+      id_gen = Stream.drop(id_gen, 1)
+      player = gen_player.(id) |> Map.put(:tick, tick)
+      {[player | players], id_gen}
+    end)
+    {ps, {tick+1, id_gen}}
+  end)
+
+```
+
+```elixir
+alg_st = apply(alg_module, :init, [team_size, team_count])
+
+# stream of match generated using the matchmaking algorithm on the members of the queue
+match_stream =
+    members_per_tick
+    |> Stream.take(number_of_ticks)
+    |> Stream.with_index()
+    |> Stream.transform([], fn {members, tick}, members_in_queue ->
+    members_in_queue = members_in_queue ++ members
+
+    result = apply(alg_module, :get_matches, [members_in_queue, alg_st])  
+      
+    case result do
+      :no_match ->
+        {[], members_in_queue}
+
+      {:match, matches} ->
+        # first, add the win proba for each matched member
+        matches =
+          for match <- matches do
+            ratings =
+              for team <- match do
+                Enum.map(team, fn m ->
+                  {m.rating.rating, m.rating.uncertainty}
+                end)
+              end
+
+            win_probas = Openskill.predict_win(ratings)
+
+            Enum.zip_with([match, win_probas], fn [members, win_proba] ->
+              Enum.map(members, fn m ->
+                m
+                |> Map.put(:win_proba, win_proba)
+                |> Map.put(:matched_after, tick - m.tick)
+              end)
+            end)
+          end
+
+
+        matched_members = List.flatten(matches)
+
+        remaining_members =
+          Enum.filter(members_in_queue, fn m ->
+            Enum.find(matched_members, fn x -> x.id == m.id end) == nil
+          end)
+
+        {matches, remaining_members}
+
+    end
+  end)
+  |> Enum.to_list()
+```
+
+```elixir
+data = match_stream
+  |> Enum.to_list()
+  |> List.flatten()
+  |> Enum.map(&Map.from_struct/1)
+  |> Enum.map(fn m ->
+    m
+    |> Map.put(:skill, m.rating.rating)
+    |> Map.put(:display_win_proba, Float.round(m.win_proba, 2))
+  end)
+
+Enum.take(data, 2) |> IO.inspect(label: "sample")
+
+Vl.new(width: 700)
+|> Vl.data_from_values(data, only: ["matched_after", "win_proba", "skill", "display_win_proba"])
+|> Vl.mark(:point)
+|> Vl.encode_field(:x, "matched_after", type: :quantitative)
+|> Vl.encode_field(:y, "win_proba", type: :quantitative)
+|> Vl.encode(:tooltip, [
+  [field: "skill", type: :quantitative],
+  [field: "display_win_proba", type: :quantitative]
+])
+```
+
+```elixir
+Enum.each(match_stream, fn match ->
+  for team <- match do
+    for member <- team do
+      Float.round(member.rating.rating, 2)
+    end
+  end
+  |> IO.inspect()
+end)
+```
