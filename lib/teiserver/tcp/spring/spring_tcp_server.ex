@@ -411,7 +411,8 @@ defmodule Teiserver.SpringTcpServer do
 
     # Check for team size/count changes
     new_state = 
-      if Map.has_key?(new_values, :host_teamsize) or Map.has_key?(new_values, :host_teamcount) do
+      if Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") and
+         (Map.has_key?(new_values, :host_teamsize) or Map.has_key?(new_values, :host_teamcount)) do
         consul_state = Teiserver.Coordinator.call_consul(lobby_id, :get_all)
         teams_data = %{teamSize: consul_state.host_teamsize, nbTeams: consul_state.host_teamcount}
         SpringOut.reply(:battle, :battle_teams_update, {lobby_id, teams_data}, nil, new_state)
