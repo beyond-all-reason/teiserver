@@ -9,7 +9,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   alias Teiserver.Bot.Bot
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.TachyonParser
-  alias Teiserver.Tachyon.{Handler, Schema}
+  alias Teiserver.Tachyon.{Handler, Schema, Transport}
   alias Teiserver.TachyonBattle
 
   require Logger
@@ -35,16 +35,21 @@ defmodule Teiserver.Autohost.TachyonHandler do
   def start_battle(autohost_id, start_script) do
     case Registry.lookup(autohost_id) do
       {pid, _} ->
-        send(pid, {:start_battle, start_script, self()})
+        response = Transport.call_client(pid, "autohost/start", start_script)
 
-        # This receive is a bit iffy and may cause problem with controlled shutdown
-        # Ideally, the same way player work, there would be a GenServer decoupled
-        # from the actual websocket connection, but for now, this poor's man
-        # GenServer.call will have to do
-        receive do
-          {:start_battle_response, resp} -> resp
-        after
-          10_000 -> {:error, :timeout}
+        case response do
+          %{"status" => "failed", "reason" => reason} ->
+            msg =
+              case response["details"] do
+                nil -> reason
+                details -> "#{reason} - #{details}"
+              end
+
+            Logger.error("failed to start a battle: #{msg}")
+            {:error, msg}
+
+          %{"status" => "success", "data" => data} ->
+            {:ok, %{ips: data["ips"], port: data["port"]}}
         end
 
       _ ->
@@ -66,10 +71,6 @@ defmodule Teiserver.Autohost.TachyonHandler do
   end
 
   @impl Handler
-  def handle_info({:start_battle, start_script, sender}, state) do
-    {:request, "autohost/start", start_script, [cb_state: sender], state}
-  end
-
   def handle_info(_msg, state) do
     {:ok, state}
   end
@@ -169,38 +170,10 @@ defmodule Teiserver.Autohost.TachyonHandler do
   end
 
   @impl true
-  def handle_response("autohost/start", reply_to, response, state) do
-    notify_autohost_started(reply_to, response)
-    {:ok, state}
-  end
-
   def handle_response("autohost/subscribeUpdates", _, _response, state) do
     # TODO: handle potential failure here
     # for example, autohost refuses any subscription with `since` older than 5 minutes
     {:ok, state}
-  end
-
-  defp notify_autohost_started(reply_to, %{"status" => "failed", "reason" => reason} = msg) do
-    msg =
-      case msg["details"] do
-        nil -> reason
-        details -> "#{reason} - #{details}"
-      end
-
-    Logger.error("failed to start a battle: #{msg}")
-    send(reply_to, {:start_battle_response, {:error, msg}})
-  end
-
-  defp notify_autohost_started(reply_to, %{"status" => "success", "data" => data}) do
-    send(
-      reply_to,
-      {:start_battle_response,
-       {:ok,
-        %{
-          ips: data["ips"],
-          port: data["port"]
-        }}}
-    )
   end
 
   @type update_event_data ::
