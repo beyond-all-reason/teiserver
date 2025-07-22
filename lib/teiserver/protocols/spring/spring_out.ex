@@ -739,26 +739,10 @@ defmodule Teiserver.Protocols.SpringOut do
 
     # Send BATTLETEAMS batch message
     if Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") do
-      ttl_ms = 1_000
-      now = System.monotonic_time(:millisecond)
-      teams_data =
-        case Teiserver.cache_get(:application_temp_cache, :battle_teams) do
-          {cached, ts} when now - ts < ttl_ms ->
-            cached
-          _ ->
-            lobby_ids = Lobby.list_lobby_ids()
-            tasks = Enum.map(lobby_ids, fn lobby_id ->
-              Task.async(fn ->
-                team_config = Teiserver.Coordinator.get_team_config(lobby_id)
-                {lobby_id, %{teamSize: team_config.host_teamsize, nbTeams: team_config.host_teamcount}}
-              end)
-            end)
-            data = Task.await_many(tasks, 2_000) |> Map.new()
-            Teiserver.cache_put(:application_temp_cache, :battle_teams, {data, now})
-            data
-        end
-
-      send(self(), {:battle_teams, teams_data})
+      teams_data = Teiserver.Battle.get_battle_teams_batch()
+      if teams_data do
+        send(self(), {:battle_teams, teams_data})
+      end
     end
 
     # CLIENTSTATUS entries
