@@ -750,7 +750,7 @@ defmodule Teiserver.Protocols.SpringOut do
               Lobby.list_lobby_ids()
               |> Task.async_stream(
                 fn lobby_id ->
-                  team_config = Teiserver.Coordinator.call_consul(lobby_id, :get_team_config)
+                  team_config = Teiserver.Coordinator.get_team_config(lobby_id)
                   {lobby_id, %{teamSize: team_config.host_teamsize, nbTeams: team_config.host_teamcount}}
                 end,
                 max_concurrency: 16,
