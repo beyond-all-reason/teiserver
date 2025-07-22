@@ -740,7 +740,7 @@ defmodule Teiserver.Protocols.SpringOut do
     # Send BATTLETEAMS batch message
     if Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") do
       ttl_ms = 1_000
-      now = System.system_time(:millisecond)
+      now = System.monotonic_time(:millisecond)
       teams_data =
         case Teiserver.cache_get(:application_temp_cache, :battle_teams) do
           {cached, ts} when now - ts < ttl_ms ->
