@@ -746,18 +746,14 @@ defmodule Teiserver.Protocols.SpringOut do
           {cached, ts} when now - ts < ttl_ms ->
             cached
           _ ->
-            data =
-              Lobby.list_lobby_ids()
-              |> Task.async_stream(
-                fn lobby_id ->
-                  team_config = Teiserver.Coordinator.get_team_config(lobby_id)
-                  {lobby_id, %{teamSize: team_config.host_teamsize, nbTeams: team_config.host_teamcount}}
-                end,
-                max_concurrency: 16,
-                timeout: 2_000
-              )
-              |> Enum.map(fn {:ok, result} -> result end)
-              |> Map.new()
+            lobby_ids = Lobby.list_lobby_ids()
+            tasks = Enum.map(lobby_ids, fn lobby_id ->
+              Task.async(fn ->
+                team_config = Teiserver.Coordinator.get_team_config(lobby_id)
+                {lobby_id, %{teamSize: team_config.host_teamsize, nbTeams: team_config.host_teamcount}}
+              end)
+            end)
+            data = Task.await_many(tasks, 2_000) |> Map.new()
             Teiserver.cache_put(:application_temp_cache, :battle_teams, {data, now})
             data
         end
