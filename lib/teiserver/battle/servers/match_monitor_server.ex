@@ -88,6 +88,20 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
+  # Spring crashed
+  def handle_info(
+        {:new_message, from_id, "autohosts", "* Spring crashed ! (running time" <> rest},
+        state
+      ) do
+    client = Client.get_client_by_id(from_id)
+    Battle.stop_match(client.lobby_id)
+
+    match_id = Battle.get_match_id_from_userid(from_id)
+    Telemetry.log_simple_lobby_event(nil, match_id, "lobby.spring_crashed")
+
+    {:noreply, state}
+  end
+
   # Battle manually stopped
   def handle_info(
         {:new_message, from_id, "autohosts", "* Stopping server (by " <> username},
