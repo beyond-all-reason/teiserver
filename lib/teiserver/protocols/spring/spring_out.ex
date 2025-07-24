@@ -737,6 +737,13 @@ defmodule Teiserver.Protocols.SpringOut do
       end
     end)
 
+    # Send BATTLETEAMS message
+    teams_data = Teiserver.Battle.get_team_config(:all)
+
+    if teams_data do
+      send(self(), {:battle_teams, teams_data})
+    end
+
     # CLIENTSTATUS entries
     clients
     |> Enum.each(fn client ->

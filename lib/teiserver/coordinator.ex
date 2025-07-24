@@ -291,6 +291,11 @@ defmodule Teiserver.Coordinator do
     CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
   end
 
+  @spec get_team_config(integer()) :: map()
+  def get_team_config(lobby_id) do
+    call_consul(lobby_id, :get_team_config)
+  end
+
   # Debug stuff
   @spec list_all_internal_servers :: [T.lobby_id()]
   def list_all_internal_servers() do

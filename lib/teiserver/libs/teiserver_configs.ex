@@ -432,6 +432,16 @@ defmodule Teiserver.TeiserverConfigs do
       description: "Maximum team size to be considered as a small team game",
       default: 5
     })
+
+    add_site_config_type(%{
+      key: "lobby.Broadcast Battle Teams Information",
+      section: "Lobbies",
+      type: "boolean",
+      permissions: ["Admin"],
+      description:
+        "Enable broadcasting of battle teamSize and nbTeams data to clients to allow exact computation of lobby sizes instead of all lobbies being X/16 sized",
+      default: false
+    })
   end
 
   defp discord_configs() do

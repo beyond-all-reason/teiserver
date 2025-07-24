@@ -60,4 +60,13 @@ defmodule Teiserver.Protocols.Spring.BattleOut do
   end
 
   def do_reply(:extra_data, _, _state), do: ""
+
+  def do_reply(:battle_teams, data, _state) do
+    encoded_data =
+      data
+      |> Jason.encode!()
+      |> Base.encode64(padding: false)
+
+    "s.battle.teams #{encoded_data}\n"
+  end
 end

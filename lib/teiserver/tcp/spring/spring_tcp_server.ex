@@ -409,6 +409,16 @@ defmodule Teiserver.SpringTcpServer do
         end
       end
 
+    # Check for team size/count changes
+    new_state =
+      if Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") and
+           (Map.has_key?(new_values, :host_teamsize) or Map.has_key?(new_values, :host_teamcount)) do
+        teams_data = Teiserver.Battle.get_team_config(lobby_id)
+        SpringOut.reply(:battle, :battle_teams, teams_data, nil, new_state)
+      else
+        new_state
+      end
+
     {:noreply, new_state}
   end
 
@@ -626,6 +636,11 @@ defmodule Teiserver.SpringTcpServer do
   def handle_info({:login_event, :add_user_to_battle, userid, lobby_id}, state) do
     client = Account.get_client_by_id(userid)
     new_state = user_join_battle(client, lobby_id, nil, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info({:battle_teams, teams_data}, state) do
+    new_state = SpringOut.reply(:battle, :battle_teams, teams_data, nil, state)
     {:noreply, new_state}
   end
 

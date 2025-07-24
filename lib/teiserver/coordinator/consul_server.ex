@@ -82,6 +82,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:reply, result, state}
   end
 
+  def handle_call(:get_team_config, _from, state) do
+    {:reply, %{host_teamsize: state.host_teamsize, host_teamcount: state.host_teamcount}, state}
+  end
+
   # Infos
   @impl true
   def handle_info(:tick, state) do
