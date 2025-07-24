@@ -438,7 +438,8 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Lobbies",
       type: "boolean",
       permissions: ["Admin"],
-      description: "Enable broadcasting of battle teamSize and nbTeams data to clients to allow exact computation of lobby sizes instead of all lobbies beind X/16 sized",
+      description:
+        "Enable broadcasting of battle teamSize and nbTeams data to clients to allow exact computation of lobby sizes instead of all lobbies being X/16 sized",
       default: false
     })
   end

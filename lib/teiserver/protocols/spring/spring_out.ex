@@ -737,12 +737,11 @@ defmodule Teiserver.Protocols.SpringOut do
       end
     end)
 
-    # Send BATTLETEAMS batch message
-    if Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") do
-      teams_data = Teiserver.Battle.get_battle_teams_batch()
-      if teams_data do
-        send(self(), {:battle_teams, teams_data})
-      end
+    # Send BATTLETEAMS message
+    teams_data = Teiserver.Battle.get_team_config(:all)
+
+    if teams_data do
+      send(self(), {:battle_teams, teams_data})
     end
 
     # CLIENTSTATUS entries
