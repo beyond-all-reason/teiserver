@@ -271,19 +271,22 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    socket =
-      if Account.can_send_friend_request?(current_user.id, user.id) do
-        Account.create_friend_request(current_user.id, user.id)
+    case Account.create_friend_request(current_user.id, user.id) do
+      {:ok, _} ->
+        socket =
+          socket
+          |> put_flash(:success, "Friend request sent")
+          |> get_relationships_and_permissions()
 
-        socket
-        |> put_flash(:success, "Friend request sent")
-        |> get_relationships_and_permissions()
-      else
-        socket
-        |> put_flash(:warning, "Unable to create friend request")
-      end
+        {:noreply, socket}
 
-    {:noreply, socket}
+      {:error, reason} ->
+        socket =
+          socket
+          |> put_flash(:warning, "Unable to create friend request: #{reason}")
+
+        {:noreply, socket}
+    end
   end
 
   defp client_connected(user_id) do

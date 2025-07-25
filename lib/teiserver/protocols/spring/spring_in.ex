@@ -515,7 +515,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username] ->
         target_userid = Account.get_userid_from_name(username)
 
-        if Account.can_send_friend_request?(state.userid, target_userid) do
+        if target_userid && state.userid do
           Account.create_friend_request(%{
             from_user_id: state.userid,
             to_user_id: target_userid
