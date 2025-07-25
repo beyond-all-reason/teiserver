@@ -22,11 +22,55 @@ defmodule TeiserverWeb.API.Admin.UserController do
 
     case Account.script_create_user(params) do
       {:ok, user} ->
-        with :ok <- update_user_stats(user.id, params),
-             {:ok, tokens} <- issue_tokens(user, params) do
-          json(conn, %{user: user_to_map(user), credentials: tokens})
-        else
-          {:error, reason} -> conn |> put_status(400) |> json(%{error: reason})
+        update_user_stats(user.id, params)
+
+        case OAuth.get_application_by_uid("user_admin") do
+          app when not is_nil(app) ->
+            case OAuth.create_token(
+                   user,
+                   %{
+                     id: app.id,
+                     scopes: app.scopes
+                   },
+                   create_refresh: true,
+                   scopes: app.scopes
+                 ) do
+              {:ok, token} ->
+                credentials = %{access_token: token.value}
+
+                if token.refresh_token,
+                  do: Map.put(credentials, :refresh_token, token.refresh_token.value),
+                  else: credentials
+
+                user_data =
+                  Map.take(
+                    user,
+                    ~w(id name email icon colour roles permissions restrictions shadowbanned last_login last_played)a
+                  )
+
+                timestamps = %{
+                  inserted_at: Map.get(user, :inserted_at),
+                  updated_at: Map.get(user, :updated_at)
+                }
+
+                json(conn, %{user: Map.merge(user_data, timestamps), credentials: credentials})
+
+              {:error, :invalid_scope} ->
+                conn |> put_status(400) |> json(%{error: "Invalid scope for OAuth application"})
+
+              {:error, %Ecto.Changeset{} = changeset} ->
+                conn
+                |> put_status(400)
+                |> json(%{error: "Token creation failed: " <> format_changeset_errors(changeset)})
+            end
+
+          nil ->
+            conn
+            |> put_status(400)
+            |> json(%{
+              error:
+                "user_admin OAuth application not found. Please run 'mix teiserver.tachyon_setup' to create it."
+            })
         end
 
       {:error, changeset} ->
@@ -41,10 +85,53 @@ defmodule TeiserverWeb.API.Admin.UserController do
         conn |> put_status(404) |> json(%{error: "User not found"})
 
       user ->
-        with {:ok, tokens} <- issue_tokens(user, %{}) do
-          json(conn, %{user: user_to_map(user), credentials: tokens})
-        else
-          {:error, reason} -> conn |> put_status(400) |> json(%{error: reason})
+        case OAuth.get_application_by_uid("user_admin") do
+          app when not is_nil(app) ->
+            case OAuth.create_token(
+                   user,
+                   %{
+                     id: app.id,
+                     scopes: app.scopes
+                   },
+                   create_refresh: true,
+                   scopes: app.scopes
+                 ) do
+              {:ok, token} ->
+                credentials = %{access_token: token.value}
+
+                if token.refresh_token,
+                  do: Map.put(credentials, :refresh_token, token.refresh_token.value),
+                  else: credentials
+
+                user_data =
+                  Map.take(
+                    user,
+                    ~w(id name email icon colour roles permissions restrictions shadowbanned last_login last_played)a
+                  )
+
+                timestamps = %{
+                  inserted_at: Map.get(user, :inserted_at),
+                  updated_at: Map.get(user, :updated_at)
+                }
+
+                json(conn, %{user: Map.merge(user_data, timestamps), credentials: credentials})
+
+              {:error, :invalid_scope} ->
+                conn |> put_status(400) |> json(%{error: "Invalid scope for OAuth application"})
+
+              {:error, %Ecto.Changeset{} = changeset} ->
+                conn
+                |> put_status(400)
+                |> json(%{error: "Token creation failed: " <> format_changeset_errors(changeset)})
+            end
+
+          nil ->
+            conn
+            |> put_status(400)
+            |> json(%{
+              error:
+                "user_admin OAuth application not found. Please run 'mix teiserver.tachyon_setup' to create it."
+            })
         end
     end
   end
@@ -55,43 +142,6 @@ defmodule TeiserverWeb.API.Admin.UserController do
     stat_fields = Map.take(params, @stat_fields)
     if stat_fields != %{}, do: Account.update_user_stat(user_id, stat_fields)
     :ok
-  end
-
-  defp issue_tokens(user, params) do
-    case OAuth.get_application_by_uid("user_admin") do
-      app when not is_nil(app) ->
-        case OAuth.create_token(user, app,
-               expires_in: params["token_expires_in"] || 86_400,
-               scopes: app.scopes
-             ) do
-          {:ok, token} ->
-            credentials = %{access_token: token.value}
-
-            if token.refresh_token,
-              do: Map.put(credentials, :refresh_token, token.refresh_token.value),
-              else: credentials
-
-            {:ok, credentials}
-
-          err ->
-            err
-        end
-
-      nil ->
-        {:error,
-         "user_admin OAuth application not found. Please run 'mix teiserver.tachyon_setup' to create it."}
-    end
-  end
-
-  defp user_to_map(user) do
-    Map.take(
-      user,
-      ~w(id name email icon colour roles permissions restrictions shadowbanned last_login last_played)a
-    )
-    |> Map.merge(%{
-      inserted_at: Map.get(user, :inserted_at),
-      updated_at: Map.get(user, :updated_at)
-    })
   end
 
   defp format_changeset_errors(changeset) do
