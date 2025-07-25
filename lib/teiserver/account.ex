@@ -1887,42 +1887,73 @@ defmodule Teiserver.Account do
 
   """
   def create_friend_request(attrs \\ %{}) do
-    result =
-      %FriendRequest{}
-      |> FriendRequest.changeset(attrs)
-      |> Repo.insert()
-
-    case result do
-      {:ok, friend_request} ->
-        PubSub.broadcast(
-          Teiserver.PubSub,
-          "account_user_relationships:#{friend_request.to_user_id}",
-          %{
-            channel: "account_user_relationships:#{friend_request.to_user_id}",
-            event: :new_incoming_friend_request,
-            userid: friend_request.to_user_id,
-            from_id: friend_request.from_user_id
-          }
-        )
-
-        Teiserver.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
-        Teiserver.cache_delete(:account_outgoing_friend_request_cache, friend_request.to_user_id)
-
-      _ ->
-        :ok
-    end
-
-    result
+    # NOTE: All call sites must now handle {:error, reason} returns from create_friend_request/2
+    from_user_id = Map.get(attrs, :from_user_id)
+    to_user_id = Map.get(attrs, :to_user_id)
+    create_friend_request(from_user_id, to_user_id)
   end
 
   def create_friend_request(from_user_id, to_user_id) do
     if from_user_id == to_user_id do
       {:error, "Cannot add yourself as a friend"}
     else
-      create_friend_request(%{
-        from_user_id: from_user_id,
-        to_user_id: to_user_id
-      })
+      {allowed, reason} = can_send_friend_request_with_reason?(from_user_id, to_user_id)
+
+      if not allowed do
+        {:error, reason}
+      else
+        Repo.transaction(fn ->
+          existing =
+            Repo.one(
+              from fr in FriendRequest,
+                where:
+                  (fr.from_user_id == ^from_user_id and fr.to_user_id == ^to_user_id) or
+                    (fr.from_user_id == ^to_user_id and fr.to_user_id == ^from_user_id)
+            )
+
+          if existing do
+            Repo.rollback("Pending request exists")
+          else
+            case %FriendRequest{from_user_id: from_user_id, to_user_id: to_user_id}
+                 |> FriendRequest.changeset(%{})
+                 |> Repo.insert() do
+              {:ok, struct} -> struct
+              {:error, changeset} -> Repo.rollback(changeset)
+            end
+          end
+        end)
+        |> case do
+          {:ok, friend_request} ->
+            PubSub.broadcast(
+              Teiserver.PubSub,
+              "account_user_relationships:#{friend_request.to_user_id}",
+              %{
+                channel: "account_user_relationships:#{friend_request.to_user_id}",
+                event: :new_incoming_friend_request,
+                userid: friend_request.to_user_id,
+                from_id: friend_request.from_user_id
+              }
+            )
+
+            Teiserver.cache_delete(
+              :account_incoming_friend_request_cache,
+              friend_request.to_user_id
+            )
+
+            Teiserver.cache_delete(
+              :account_outgoing_friend_request_cache,
+              friend_request.from_user_id
+            )
+
+            {:ok, friend_request}
+
+          {:error, reason} ->
+            {:error, reason}
+
+          {:error, _, reason, _} ->
+            {:error, reason}
+        end
+      end
     end
   end
 
