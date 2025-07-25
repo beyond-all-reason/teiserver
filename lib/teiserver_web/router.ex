@@ -434,6 +434,8 @@ defmodule TeiserverWeb.Router do
     pipe_through([:oauth_api])
 
     post "/assets/update_maps", AssetController, :update_maps
+    post "/users", UserController, :create
+    get "/users/:email", UserController, :show
   end
 
   # ADMIN
