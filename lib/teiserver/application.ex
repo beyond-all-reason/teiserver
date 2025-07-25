@@ -17,6 +17,11 @@ defmodule Teiserver.Application do
     LoggerBackends.add({LoggerFileBackend, :notice_log})
     LoggerBackends.add({LoggerFileBackend, :info_log})
 
+    Teiserver.PrometheusMetrics.PhoenixInstrumenter.setup()
+    Teiserver.PrometheusMetrics.PipelineInstrumenter.setup()
+    Teiserver.PrometheusMetrics.RepoInstrumenter.setup()
+    Teiserver.PrometheusMetrics.PrometheusExporter.setup()
+
     # List all child processes to be supervised
     children =
       [
