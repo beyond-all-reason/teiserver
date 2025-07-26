@@ -1,9 +1,11 @@
 defmodule TeiserverWeb.Tachyon.Autohost do
   use TeiserverWeb.ConnCase, async: false
+
+  alias Teiserver.Autohost
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Tachyon
-  import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until: 2, poll_until: 3]
   alias WebsocketSyncClient, as: WSC
+  import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until: 2, poll_until: 3]
 
   def create_autohost() do
     name = for _ <- 1..20, into: "", do: <<Enum.random(?a..?z)>>
@@ -105,5 +107,24 @@ defmodule TeiserverWeb.Tachyon.Autohost do
       ])
 
     assert list == expected
+  end
+
+  test "can send message and get response", %{token: token} do
+    client = Tachyon.connect_autohost!(token, 10, 0)
+
+    {pid, %{max_battles: 10, current_battles: 0}} =
+      poll_until_some(fn -> Autohost.lookup_autohost(token.bot_id) end)
+
+    task =
+      Task.async(fn ->
+        Autohost.send_message(pid, %{battle_id: "battle_id", message: "hello"})
+      end)
+
+    assert %{"type" => "request", "commandId" => "autohost/sendMessage"} =
+             req = Tachyon.recv_message!(client)
+
+    assert req["data"] == %{"battleId" => "battle_id", "message" => "hello"}
+    Tachyon.send_response(client, req)
+    assert Task.await(task, 150) == :ok
   end
 end

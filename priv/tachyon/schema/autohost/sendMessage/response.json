@@ -1,0 +1,43 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/autohost/sendMessage/response.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AutohostSendMessageResponse",
+    "tachyon": {
+        "source": "autohost",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "anyOf": [
+        {
+            "title": "AutohostSendMessageOkResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "autohost/sendMessage" },
+                "status": { "const": "success" }
+            },
+            "required": ["type", "messageId", "commandId", "status"]
+        },
+        {
+            "title": "AutohostSendMessageFailResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "autohost/sendMessage" },
+                "status": { "const": "failed" },
+                "reason": {
+                    "enum": [
+                        "internal_error",
+                        "unauthorized",
+                        "invalid_request",
+                        "command_unimplemented"
+                    ]
+                },
+                "details": { "type": "string" }
+            },
+            "required": ["type", "messageId", "commandId", "status", "reason"]
+        }
+    ]
+}

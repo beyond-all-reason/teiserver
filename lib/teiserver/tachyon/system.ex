@@ -11,8 +11,8 @@ defmodule Teiserver.Tachyon.System do
   def init(_) do
     children = [
       Teiserver.Tachyon.Schema.cache_spec(),
-      Teiserver.TachyonBattle.System,
       Teiserver.Autohost.System,
+      Teiserver.TachyonBattle.System,
       Teiserver.Matchmaking.System,
       Teiserver.Party.System,
       Teiserver.Player.System
