@@ -90,7 +90,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   # Spring crashed
   def handle_info(
-        {:new_message, from_id, "autohosts", "* Spring crashed ! (running time" <> rest},
+        {:new_message, from_id, "autohosts", "* Spring crashed ! (running time" <> _rest},
         state
       ) do
     client = Client.get_client_by_id(from_id)
