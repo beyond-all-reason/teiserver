@@ -36,6 +36,7 @@ defmodule Teiserver.Tachyon.Transport do
   and
   :gen.call (https://github.com/erlang/otp/blob/OTP-28.0.2/lib/stdlib/src/gen.erl#L221-L227)
   """
+  @spec call_client(pid(), Schema.command_id(), term(), timeout() | nil) :: term()
   def call_client(pid, cmd_id, payload, timeout \\ 5_000) when is_pid(pid) do
     req_id = Process.monitor(pid, alias: :reply_demonitor)
     send(pid, {:call_client, cmd_id, payload, req_id})

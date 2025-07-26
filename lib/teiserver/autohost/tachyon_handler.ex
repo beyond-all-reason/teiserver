@@ -21,13 +21,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
           state: :handshaking | {:connected, connected_state()}
         }
 
-  @type start_response :: %{
-          ips: [String.t()],
-          port: integer(),
-          engine: %{version: String.t()},
-          game: %{springName: String.t()},
-          map: %{springName: String.t()}
-        }
+  @type start_response :: %{ips: [String.t()], port: integer()}
 
   # TODO: there should be some kind of retry here
   @spec start_battle(Bot.id(), Teiserver.Autohost.start_script()) ::
