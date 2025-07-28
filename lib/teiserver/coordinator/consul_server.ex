@@ -471,6 +471,29 @@ defmodule Teiserver.Coordinator.ConsulServer do
         ChatLib.say(userid, "!boss", state.lobby_id)
       end)
 
+      # Broadcast team configuration changes to lobby server
+      if Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") do
+        team_config_changes =
+          host_data
+          |> Map.take([:host_teamsize, :host_teamcount])
+          |> Map.filter(fn {k, v} ->
+            v != nil and v != 0 and Map.get(state, k) != v
+          end)
+
+        if not Enum.empty?(team_config_changes) do
+          PubSub.broadcast(
+            Teiserver.PubSub,
+            "teiserver_global_lobby_updates",
+            %{
+              channel: "teiserver_global_lobby_updates",
+              event: :updated_values,
+              lobby_id: state.lobby_id,
+              new_values: team_config_changes
+            }
+          )
+        end
+      end
+
       player_count_changed(new_state)
       {:noreply, new_state}
     else
