@@ -27,9 +27,14 @@ defmodule Teiserver.Account.FriendRequestLib do
       to_id == nil ->
         {false, "nil to_id"}
 
+      from_id == to_id ->
+        {false, "Cannot add yourself as a friend"}
+
       Account.get_friend(from_id, to_id) != nil ->
         {false, "Already friends"}
 
+      # Check for existing outgoing request (from current user to target)
+      # Note: We don't check for incoming requests here because they should trigger auto-accept
       Account.get_friend_request(from_id, to_id) != nil ->
         {false, "Existing request"}
 
