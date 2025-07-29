@@ -435,7 +435,7 @@ defmodule TeiserverWeb.Router do
 
     post "/assets/update_maps", AssetController, :update_maps
     post "/users", UserController, :create
-    get "/users/:email", UserController, :show
+    post "/users/refresh_token", UserController, :refresh_token
   end
 
   # ADMIN

@@ -32,18 +32,6 @@ defmodule Teiserver.Tachyon.Tasks.SetupApps do
     })
   end
 
-  def ensure_user_admin_app() do
-    root = find_root_user!()
-
-    ensure_app(%{
-      name: "user admin",
-      uid: "user_admin",
-      owner_id: root.id,
-      scopes: ["admin.user"],
-      description: "To automate user management and creation for load testing."
-    })
-  end
-
   defp ensure_app(app_attrs) do
     case ApplicationQueries.get_application_by_uid(app_attrs.uid) do
       %Teiserver.OAuth.Application{} = app ->
