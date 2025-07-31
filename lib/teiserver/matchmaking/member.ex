@@ -64,8 +64,8 @@ defmodule Teiserver.Matchmaking.Member do
       rt ->
         ratings = rt.ratings
         n = Enum.count(ratings)
-        skill = Enum.sum_by(ratings, & &1.skill)
-        uncertainty = Enum.sum_by(ratings, & &1.uncertainty)
+        skill = Enum.sum(Enum.map(ratings, & &1.skill))
+        uncertainty = Enum.sum(Enum.map(ratings, & &1.uncertainty))
 
         if n == 0,
           do: default,
