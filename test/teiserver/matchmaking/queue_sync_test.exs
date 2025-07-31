@@ -4,6 +4,11 @@ defmodule Teiserver.Matchmaking.QueueSyncTest do
 
   @moduletag :tachyon
 
+  setup(_) do
+    Teiserver.Support.Polling.poll_until(&Teiserver.Matchmaking.list_queues/0, &(&1 != []))
+    :ok
+  end
+
   test "default queue starts" do
     assert is_pid(Matchmaking.lookup_queue("1v1"))
   end

@@ -60,15 +60,21 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   end
 
   def start_link(init_arg) do
-    {:ok, sup} = Horde.DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
-
-    Enum.each(default_queues(), &start_queue!/1)
-
-    {:ok, sup}
+    Horde.DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
   @impl true
   def init(_) do
+    Supervisor.start_link(
+      [
+        {Task,
+         fn ->
+           Enum.each(default_queues(), &start_queue!/1)
+         end}
+      ],
+      strategy: :one_for_one
+    )
+
     Horde.DynamicSupervisor.init(strategy: :one_for_one, members: :auto)
   end
 end

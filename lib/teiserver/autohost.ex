@@ -70,6 +70,10 @@ defmodule Teiserver.Autohost do
       |> Enum.find(fn %{max_battles: m, current_battles: c} -> m > c end)
 
     if autohost_val == nil, do: nil, else: autohost_val[:id]
+  catch
+    # this can happen when the registry is going down, and you get
+    # (EXIT) no process: the process is not alive
+    :error, :badarg -> nil
   end
 
   @spec start_battle(Bot.id(), start_script()) ::
