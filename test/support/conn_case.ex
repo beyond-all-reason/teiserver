@@ -32,6 +32,29 @@ defmodule TeiserverWeb.ConnCase do
     end
   end
 
+  @doc """
+  wrapper around ExUnit.test where the teardown of the tachyon system is done
+  synchronously.
+  This aleviate the problem of flooding test logs with errors around sql sandbox
+  when the teardown happens after the test exited, and during that time
+  some process try to access the db.
+  """
+  defmacro teitest(message, var \\ quote(do: _), content) do
+    body =
+      quote do
+        try do
+          unquote(content)
+        after
+          :ok = Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.Tachyon.System)
+        end
+      end
+
+    quote do
+      require ExUnit.Case
+      test(unquote(message), unquote(var), unquote(do: body))
+    end
+  end
+
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Teiserver.Repo)
     Teiserver.TeiserverTestLib.clear_all_con_caches()
