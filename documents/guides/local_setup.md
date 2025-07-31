@@ -181,5 +181,16 @@ The attached `.git-blame-ignore-revs` file contains a list of commit hashes whic
 
 See [this blog post by Stefan Judis](https://www.stefanjudis.com/today-i-learned/how-to-exclude-commits-from-git-blame/) for reference.
 
+### Git hooks
+The `.githooks` directory contains a `pre-commit` Git hook that will run `mix format` on staged files before they get commited.
+To use this (and other Git hooks) you have to first make them executable with
+```
+chmod +x .githooks/pre-commit
+```
+then use the following command to change the location where Git looks for hook scripts (from the default `.git/hooks`) to the `.githooks` directory
+```
+git config core.hooksPath .githooks
+```
+
 ### Next Steps
 If you want to develop features that interact with the lobby, then you will need to [set up SPADS](/documents/guides/spads_install.md).

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -eo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+# Get all staged files that have been added, copied, or modified
+FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -n "$FILES" ]; then
+  echo "Running mix format on staged files..."
+  # Format all staged files
+  echo "$FILES" | xargs mix format
+
+  # Re-stage formatted files
+  echo "$FILES" | xargs git add
+fi
