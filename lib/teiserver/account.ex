@@ -1907,56 +1907,53 @@ defmodule Teiserver.Account do
 
         existing_request ->
           # Auto-accept the existing request
-          result = FriendRequestLib.accept_friend_request(existing_request)
+          with :ok <- FriendRequestLib.accept_friend_request(existing_request) do
+            # Send pubsub broadcasts for both users to update UI
+            PubSub.broadcast(
+              Teiserver.PubSub,
+              "account_user_relationships:#{existing_request.from_user_id}",
+              %{
+                channel: "account_user_relationships:#{existing_request.from_user_id}",
+                event: :friend_request_accepted,
+                userid: existing_request.from_user_id,
+                accepter_id: existing_request.to_user_id
+              }
+            )
 
-          case result do
-            :ok ->
-              # Send pubsub broadcasts for both users to update UI
-              PubSub.broadcast(
-                Teiserver.PubSub,
-                "account_user_relationships:#{existing_request.from_user_id}",
-                %{
-                  channel: "account_user_relationships:#{existing_request.from_user_id}",
-                  event: :friend_request_accepted,
-                  userid: existing_request.from_user_id,
-                  accepter_id: existing_request.to_user_id
-                }
-              )
+            PubSub.broadcast(
+              Teiserver.PubSub,
+              "account_user_relationships:#{existing_request.to_user_id}",
+              %{
+                channel: "account_user_relationships:#{existing_request.to_user_id}",
+                event: :friend_request_accepted,
+                userid: existing_request.to_user_id,
+                accepter_id: existing_request.from_user_id
+              }
+            )
 
-              PubSub.broadcast(
-                Teiserver.PubSub,
-                "account_user_relationships:#{existing_request.to_user_id}",
-                %{
-                  channel: "account_user_relationships:#{existing_request.to_user_id}",
-                  event: :friend_request_accepted,
-                  userid: existing_request.to_user_id,
-                  accepter_id: existing_request.from_user_id
-                }
-              )
+            # Clear caches for both users
+            Teiserver.cache_delete(
+              :account_incoming_friend_request_cache,
+              existing_request.from_user_id
+            )
 
-              # Clear caches for both users
-              Teiserver.cache_delete(
-                :account_incoming_friend_request_cache,
-                existing_request.from_user_id
-              )
+            Teiserver.cache_delete(
+              :account_outgoing_friend_request_cache,
+              existing_request.from_user_id
+            )
 
-              Teiserver.cache_delete(
-                :account_outgoing_friend_request_cache,
-                existing_request.from_user_id
-              )
+            Teiserver.cache_delete(
+              :account_incoming_friend_request_cache,
+              existing_request.to_user_id
+            )
 
-              Teiserver.cache_delete(
-                :account_incoming_friend_request_cache,
-                existing_request.to_user_id
-              )
+            Teiserver.cache_delete(
+              :account_outgoing_friend_request_cache,
+              existing_request.to_user_id
+            )
 
-              Teiserver.cache_delete(
-                :account_outgoing_friend_request_cache,
-                existing_request.to_user_id
-              )
-
-              {:ok, :auto_accepted}
-
+            {:ok, :auto_accepted}
+          else
             {:error, reason} ->
               {:error, reason}
           end
@@ -1998,11 +1995,8 @@ defmodule Teiserver.Account do
 
         {:ok, friend_request}
 
-      {:error, reason} ->
-        {:error, reason}
-
-      {:error, _, reason, _} ->
-        {:error, reason}
+      {:error, changeset} ->
+        {:error, changeset}
     end
   end
 
