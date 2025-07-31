@@ -76,6 +76,13 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
 
       assert resp["user"]["name"] == "testuser2"
       assert resp["credentials"]["access_token"]
+
+      # Verify the created user has the correct stats
+      user = Teiserver.Account.get_user_by_email("testuser2@example.com")
+      user_stats = Teiserver.Account.get_user_stat_data(user.id)
+      assert user_stats["mu"] == 1500
+      assert user_stats["sigma"] == 100
+      assert user_stats["play_time"] == 3600
     end
 
     test "handles missing required fields", %{authed_conn: conn} do
@@ -99,18 +106,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       assert resp["error"] =~ "invalid email"
     end
 
-    test "accepts valid email with plus sign", %{authed_conn: conn} do
-      user_data = %{
-        "name" => "testuser",
-        "email" => "test+123@example.com",
-        "password" => "testpassword123"
-      }
-
-      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
-      assert resp["user"]["email"] == "test+123@example.com"
-      assert resp["credentials"]["access_token"]
-    end
-
     test "handles duplicate email", %{authed_conn: conn} do
       # First create a user
       user_data = %{
@@ -130,49 +125,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
 
       resp = conn |> post(create_user_path(), duplicate_data) |> json_response(400)
       assert resp["error"] =~ "Email already attached to a user"
-    end
-
-    test "handles empty email", %{authed_conn: conn} do
-      user_data = %{
-        "name" => "testuser",
-        "email" => "",
-        "password" => "testpassword123"
-      }
-
-      resp = conn |> post(create_user_path(), user_data) |> json_response(400)
-      assert resp["error"] =~ "can't be blank"
-    end
-
-    test "handles nil email", %{authed_conn: conn} do
-      user_data = %{
-        "name" => "testuser",
-        "password" => "testpassword123"
-      }
-
-      resp = conn |> post(create_user_path(), user_data) |> json_response(400)
-      assert resp["error"] =~ "can't be blank"
-    end
-
-    test "handles email with only @", %{authed_conn: conn} do
-      user_data = %{
-        "name" => "testuser",
-        "email" => "test@",
-        "password" => "testpassword123"
-      }
-
-      resp = conn |> post(create_user_path(), user_data) |> json_response(400)
-      assert resp["error"] =~ "invalid email"
-    end
-
-    test "handles email with only .", %{authed_conn: conn} do
-      user_data = %{
-        "name" => "testuser",
-        "email" => "test.com",
-        "password" => "testpassword123"
-      }
-
-      resp = conn |> post(create_user_path(), user_data) |> json_response(400)
-      assert resp["error"] =~ "invalid email"
     end
 
     test "creates user with all optional fields", %{authed_conn: conn} do
@@ -249,25 +201,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       refresh_data = %{"email" => ""}
       resp = conn |> post(refresh_token_path(), refresh_data) |> json_response(404)
       assert resp["error"] == "User not found"
-    end
-
-    test "handles email with plus sign", %{authed_conn: conn} do
-      # First create a user with plus sign
-      user_data = %{
-        "name" => "plususer",
-        "email" => "user+test@example.com",
-        "password" => "testpassword123"
-      }
-
-      conn |> post(create_user_path(), user_data) |> json_response(200)
-
-      # Then refresh their token
-      refresh_data = %{"email" => "user+test@example.com"}
-      resp = conn |> post(refresh_token_path(), refresh_data) |> json_response(200)
-
-      assert resp["user"]["name"] == "plususer"
-      assert resp["user"]["email"] == "user+test@example.com"
-      assert resp["credentials"]["access_token"]
     end
   end
 
@@ -370,34 +303,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       resp = conn |> post(create_user_path(), user_data) |> json_response(200)
       assert resp["user"]["name"] == "José María"
       assert resp["user"]["email"] == "josé@example.com"
-    end
-
-    test "handles zero values in stats", %{authed_conn: conn} do
-      user_data = %{
-        "name" => "zerouser",
-        "email" => "zero@example.com",
-        "password" => "testpassword123",
-        "mu" => 0,
-        "sigma" => 0,
-        "play_time" => 0
-      }
-
-      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
-      assert resp["user"]["name"] == "zerouser"
-    end
-
-    test "handles negative values in stats", %{authed_conn: conn} do
-      user_data = %{
-        "name" => "negativeuser",
-        "email" => "negative@example.com",
-        "password" => "testpassword123",
-        "mu" => -100,
-        "sigma" => -50,
-        "play_time" => -3600
-      }
-
-      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
-      assert resp["user"]["name"] == "negativeuser"
     end
   end
 

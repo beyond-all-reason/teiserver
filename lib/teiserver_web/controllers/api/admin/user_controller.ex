@@ -61,7 +61,7 @@ defmodule TeiserverWeb.API.Admin.UserController do
   end
 
   defp update_stats_if_needed(user_id, stat_fields) do
-    if Map.size(stat_fields) > 0 do
+    if map_size(stat_fields) > 0 do
       Account.update_user_stat(user_id, stat_fields)
     else
       {:ok, nil}
@@ -84,23 +84,17 @@ defmodule TeiserverWeb.API.Admin.UserController do
     end
   end
 
-  @dialyzer {:no_return, create_user_token: 2}
   defp create_user_token(user, app) do
-    with {:ok, token} <-
-           OAuth.create_token(
-             user,
-             %{
-               id: app.id,
-               scopes: app.scopes
-             },
-             create_refresh: true,
-             scopes: app.scopes
-           ) do
-      {:ok, token}
-    end
+    OAuth.create_token(
+      user,
+      %{
+        id: app.id,
+        scopes: app.scopes
+      },
+      create_refresh: true
+    )
   end
 
-  @dialyzer {:nowarn_function, build_user_response: 2}
   defp build_user_response(user, token) do
     credentials = %{
       access_token: token.value,
@@ -121,7 +115,7 @@ defmodule TeiserverWeb.API.Admin.UserController do
     %{user: Map.merge(user_data, timestamps), credentials: credentials}
   end
 
-  defp handle_error(conn, {:error, changeset}) when is_struct(changeset, Ecto.Changeset) do
+  defp handle_error(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn |> put_status(400) |> json(%{error: format_changeset_errors(changeset)})
   end
 
