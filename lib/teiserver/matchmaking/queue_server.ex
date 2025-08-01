@@ -325,6 +325,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
+  @impl true
+  def handle_call(:get_state, _from, state) do
+    {:reply, {:ok, state}, state}
+  end
+
   @doc """
   The pairing room is gone for one reason or another
   Rejoining the queue is not handled here, players will do that on their end

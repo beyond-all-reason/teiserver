@@ -608,6 +608,14 @@ defmodule TeiserverWeb.Router do
       ] do
       live "/chat", ChatLive.Index, :index
     end
+
+    live_session :admin_matchmaking_liveview,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        {Teiserver.Account.AuthPlug, {:authorise, "Admin"}}
+      ] do
+      live "/matchmaking", MatchmakingLive.Index, :index
+    end
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
