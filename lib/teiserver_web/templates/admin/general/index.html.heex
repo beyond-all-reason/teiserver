@@ -92,6 +92,15 @@
   </.menu_card>
 
   <.menu_card
+    :if={allow_any?(@current_user, ~w(Admin))}
+    icon="fa-solid fa-users"
+    url={~p"/admin/matchmaking"}
+    size={:small}
+  >
+    Matchmaking
+  </.menu_card>
+
+  <.menu_card
     :if={allow_any?(@conn, ~w(Contributor Overwatch))}
     icon={Teiserver.Communication.TextCallbackLib.icon()}
     url={~p"/admin/text_callbacks"}

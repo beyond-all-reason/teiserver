@@ -22,14 +22,22 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
   @type id :: String.t()
 
+  # Internal queue statistics (without player_count)
+  @typep internal_stats :: %{
+           total_joined: non_neg_integer(),
+           total_left: non_neg_integer(),
+           total_wait_time_s: non_neg_integer(),
+           total_matched: non_neg_integer()
+         }
   @typedoc """
-  Queue statistics for monitoring
+  Queue statistics for monitoring (includes player_count)
   """
   @type stats :: %{
           total_joined: non_neg_integer(),
           total_left: non_neg_integer(),
           total_wait_time_s: non_neg_integer(),
-          total_matched: non_neg_integer()
+          total_matched: non_neg_integer(),
+          player_count: non_neg_integer()
         }
 
   @typedoc """
@@ -79,7 +87,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           },
 
           # queue statistics for monitoring
-          stats: stats()
+          stats: internal_stats()
         }
 
   @type cancelled_reason ::
@@ -258,13 +266,25 @@ defmodule Teiserver.Matchmaking.QueueServer do
           |> add_member_to_queue(new_member)
           |> update_in([:stats, :total_joined], &(&1 + 1))
 
+        broadcast_update(new_state)
         {:reply, {:ok, self()}, new_state}
     end
   end
 
   @impl true
   def handle_call(:get_stats, _from, state) do
-    {:reply, {:ok, state.stats}, state}
+    player_count = calculate_player_count(state)
+    private_stats = Map.put(state.stats, :player_count, player_count)
+
+    public_stats = %{
+      total_joined: private_stats.total_joined,
+      total_left: private_stats.total_left,
+      total_wait_time_s: private_stats.total_wait_time_s,
+      total_matched: private_stats.total_matched,
+      player_count: private_stats.player_count
+    }
+
+    {:reply, {:ok, public_stats}, state}
   end
 
   @impl true
@@ -290,6 +310,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
           Logger.info("Party #{party_id} with members #{inspect(member.player_ids)} joined queue")
 
+          broadcast_update(new_state)
           {:reply, {:ok, self()}, new_state}
 
         {[_], rest} ->
@@ -321,6 +342,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
       {:ok, state} ->
         new_state = update_in(state, [:stats, :total_left], &(&1 + 1))
+        broadcast_update(new_state)
         {:reply, :ok, new_state}
     end
   end
@@ -442,15 +464,19 @@ defmodule Teiserver.Matchmaking.QueueServer do
             end
             |> Enum.sum()
 
-          state
-          |> Map.put(:members, new_members)
-          |> Map.replace!(:monitors, monitors)
-          |> Map.update(:pairings, pairings, fn ps -> pairings ++ ps end)
-          |> Map.update!(:stats, fn stats ->
-            stats
-            |> Map.update!(:total_matched, &(&1 + length(matches)))
-            |> Map.update!(:total_wait_time_s, &(&1 + total_wait_time))
-          end)
+          new_state =
+            state
+            |> Map.put(:members, new_members)
+            |> Map.replace!(:monitors, monitors)
+            |> Map.update(:pairings, pairings, fn ps -> pairings ++ ps end)
+            |> Map.update!(:stats, fn stats ->
+              stats
+              |> Map.update!(:total_matched, &(&1 + length(matches)))
+              |> Map.update!(:total_wait_time_s, &(&1 + total_wait_time))
+            end)
+
+          broadcast_update(new_state)
+          new_state
       end
 
     {:noreply, new_state}
@@ -604,7 +630,19 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
   @spec get_stats(id()) :: {:ok, stats()} | {:error, :not_found}
   def get_stats(queue_id) do
-    via_tuple = QueueRegistry.via_tuple(queue_id)
-    GenServer.call(via_tuple, :get_stats, 1000)
+    via_tuple = via_tuple(queue_id)
+    GenServer.call(via_tuple, :get_stats)
+  end
+
+  @spec calculate_player_count(state()) :: non_neg_integer()
+  defp calculate_player_count(state) do
+    Enum.sum_by(state.members, fn member -> length(member.player_ids) end)
+  end
+
+  @spec broadcast_update(state()) :: :ok
+  defp broadcast_update(state) do
+    player_count = calculate_player_count(state)
+    stats = Map.put(state.stats, :player_count, player_count)
+    Teiserver.Matchmaking.broadcast_queue_update(state.id, stats)
   end
 end

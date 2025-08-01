@@ -1,0 +1,60 @@
+<TeiserverWeb.Admin.AdminComponents.sub_menu
+  active="matchmaking"
+  view_colour={@view_colour}
+  current_user={@current_user}
+/>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <h2>Matchmaking Queues</h2>
+
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>Queue ID</th>
+          <th>Name</th>
+          <th>Team Size</th>
+          <th>Team Count</th>
+          <th>Total Players</th>
+          <th>Total Joined</th>
+          <th>Total Left</th>
+          <th>Total Matched</th>
+          <th>Total Wait Time (s)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= if Enum.empty?(@queues) do %>
+          <tr>
+            <td colspan="9" class="text-center">
+              No active matchmaking queues found.
+            </td>
+          </tr>
+        <% else %>
+          <%= for {queue_id, queue} <- @queues do %>
+            <tr>
+              <td>{queue_id}</td>
+              <td>{queue.name}</td>
+              <td>{queue.team_size}</td>
+              <td>{queue.team_count}</td>
+              <td>
+                {queue.stats.player_count}
+              </td>
+              <td>
+                {queue.stats.total_joined}
+              </td>
+              <td>
+                {queue.stats.total_left}
+              </td>
+              <td>
+                {queue.stats.total_matched}
+              </td>
+              <td>
+                {queue.stats.total_wait_time_s}
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
