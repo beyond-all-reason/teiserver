@@ -722,4 +722,6 @@ defmodule Teiserver.Battle do
 
   @spec get_lobby_balance_mode(T.lobby_id()) :: :solo | :grouped
   defdelegate get_lobby_balance_mode(lobby_id), to: LobbyLib
+
+  defdelegate get_team_config(arg), to: Teiserver.Lobby.LobbyLib
 end

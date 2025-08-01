@@ -515,4 +515,45 @@ defmodule Teiserver.Lobby.LobbyLib do
   def get_lobby_balance_mode(lobby_id) do
     Coordinator.call_balancer(lobby_id, :get_balance_mode)
   end
+
+  @spec get_team_config(:all | integer()) :: map() | nil
+  def get_team_config(:all) do
+    if Teiserver.Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") do
+      ttl_ms = 1_000
+      now = System.monotonic_time(:millisecond)
+
+      case Teiserver.cache_get(:application_temp_cache, :battle_teams) do
+        {cached, ts} when now - ts < ttl_ms ->
+          cached
+
+        _ ->
+          lobby_ids = Lobby.list_lobby_ids()
+
+          tasks =
+            Enum.map(lobby_ids, fn lobby_id ->
+              Task.async(fn ->
+                team_config = Teiserver.Coordinator.get_team_config(lobby_id)
+
+                {lobby_id,
+                 %{teamSize: team_config.host_teamsize, nbTeams: team_config.host_teamcount}}
+              end)
+            end)
+
+          data = Task.await_many(tasks, 2_000) |> Map.new()
+          Teiserver.cache_put(:application_temp_cache, :battle_teams, {data, now})
+          data
+      end
+    else
+      nil
+    end
+  end
+
+  def get_team_config(lobby_id) when is_integer(lobby_id) do
+    if Teiserver.Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") do
+      team_config = Teiserver.Coordinator.get_team_config(lobby_id)
+      %{lobby_id => %{teamSize: team_config.host_teamsize, nbTeams: team_config.host_teamcount}}
+    else
+      nil
+    end
+  end
 end
