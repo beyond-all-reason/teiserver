@@ -3,6 +3,7 @@ defmodule Teiserver.Autohost do
   alias Teiserver.Autohost.TachyonHandler
   alias Teiserver.Bot.Bot
   alias Teiserver.BotQueries
+  alias Teiserver.TachyonBattle
 
   @type id :: Teiserver.Bot.Bot.id()
   @type reg_value :: Registry.reg_value()
@@ -75,5 +76,14 @@ defmodule Teiserver.Autohost do
   @spec start_battle(Bot.id(), start_script()) ::
           {:ok, start_response()} | {:error, term()}
   defdelegate start_battle(bot_id, start_script),
+    to: Teiserver.Autohost.TachyonHandler
+
+  @spec send_message(pid(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
+          :ok | {:error, reason :: term()}
+  defdelegate send_message(autohost, payload),
+    to: Teiserver.Autohost.TachyonHandler
+
+  @spec kill_battle(pid(), TachyonBattle.id()) :: :ok
+  defdelegate kill_battle(autohost, battle_id),
     to: Teiserver.Autohost.TachyonHandler
 end

@@ -26,6 +26,44 @@ defmodule Teiserver.Tachyon.Transport do
     )
   end
 
+  @doc """
+  This is similar to GenServer.call but targets a tachyon client. It sends
+  a request with the given command id and payload, then wait for a response
+  from the client and returns it "synchronously"
+
+  The code is heavily inspired from
+  https://www.erlang.org/doc/apps/erts/erlang.html#monitor/3
+  and
+  :gen.call (https://github.com/erlang/otp/blob/OTP-28.0.2/lib/stdlib/src/gen.erl#L221-L227)
+  """
+  @spec call_client(pid(), Schema.command_id(), term(), timeout() | nil) :: term()
+  def call_client(pid, cmd_id, payload, timeout \\ 5_000) when is_pid(pid) do
+    req_id = Process.monitor(pid, alias: :reply_demonitor)
+    send(pid, {:call_client, cmd_id, payload, req_id})
+
+    receive do
+      {^req_id, reply} ->
+        Process.demonitor(req_id, [:flush])
+        reply
+
+      {:DOWN, ^req_id, _, _, :noconnection} ->
+        node = node(pid)
+        exit({{:nodedown, node}, {__MODULE__, :call_client, [pid, cmd_id, payload, timeout]}})
+
+      {:DOWN, ^req_id, _, _, reason} ->
+        exit({reason, {__MODULE__, :call_client, [pid, cmd_id, payload, timeout]}})
+    after
+      timeout ->
+        Process.demonitor(req_id, [:flush])
+
+        receive do
+          {^req_id, reply} -> reply
+        after
+          0 -> exit({:timeout, {__MODULE__, :call_client, [pid, cmd_id, payload, timeout]}})
+        end
+    end
+  end
+
   # dummy handle_in for now
   @impl true
   def handle_in({"test_ping\n", opcode: :text}, state) do
@@ -69,6 +107,11 @@ defmodule Teiserver.Tachyon.Transport do
     {:stop, :timeout,
      {1008, "Response to request with message id #{message_id} not received in time."},
      %{state | pending_responses: pendings}}
+  end
+
+  def handle_info({:call_client, cmd_id, payload, req_id}, state) do
+    opts = [cb_state: {:call_client_resp, req_id}]
+    handle_result({:request, cmd_id, payload, opts, state.handler_state}, state)
   end
 
   def handle_info(msg, state) do
@@ -146,13 +189,20 @@ defmodule Teiserver.Tachyon.Transport do
         :erlang.cancel_timer(tref)
         state = Map.replace!(state, :pending_responses, new_pendings)
 
-        if function_exported?(state.handler, :handle_response, 4) do
-          result =
-            state.handler.handle_response(command_id, cb_state, message, state.handler_state)
+        case cb_state do
+          {:call_client_resp, req_id} ->
+            send(req_id, {req_id, message})
+            {:ok, state}
 
-          handle_result(result, command_id, message_id, state)
-        else
-          {:ok, state}
+          cb_state ->
+            if function_exported?(state.handler, :handle_response, 4) do
+              result =
+                state.handler.handle_response(command_id, cb_state, message, state.handler_state)
+
+              handle_result(result, command_id, message_id, state)
+            else
+              {:ok, state}
+            end
         end
     end
   end

@@ -1,6 +1,7 @@
 defmodule Teiserver.TachyonBattle.Battle do
   require Logger
 
+  alias Teiserver.Autohost
   alias Teiserver.TachyonBattle.Types, as: T
   alias Teiserver.TachyonBattle.Registry
 
@@ -12,6 +13,7 @@ defmodule Teiserver.TachyonBattle.Battle do
   @type state :: %{
           id: T.id(),
           autohost_id: Teiserver.Autohost.id(),
+          autohost_pid: pid(),
           autohost_timeout: timeout(),
           # initialised: the battle is waiting for players to join and start the match
           # finished: the battle is over, but there are still some player in the match,
@@ -33,7 +35,21 @@ defmodule Teiserver.TachyonBattle.Battle do
   # and doing state recovery
   @spec send_update_event(Teiserver.Autohost.update_event()) :: :ok
   def send_update_event(event) do
-    GenServer.call(via_tuple(event.battle_id), {:update_event, event})
+    GenServer.cast(via_tuple(event.battle_id), {:update_event, event})
+  end
+
+  @spec send_message(T.id(), String.t()) :: :ok | {:error, reason :: term()}
+  def send_message(battle_id, message) do
+    GenServer.call(via_tuple(battle_id), {:send_message, message})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_battle}
+  end
+
+  @spec kill(T.id()) :: :ok | {:error, reason :: term()}
+  def kill(battle_id) do
+    GenServer.call(via_tuple(battle_id), :kill)
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_battle}
   end
 
   @impl true
@@ -43,9 +59,11 @@ defmodule Teiserver.TachyonBattle.Battle do
     state = %{
       id: battle_id,
       autohost_id: autohost_id,
+      autohost_pid: nil,
       # the timeout is absurdly short because there is no real recovery if the
       # autohost goes away. When we implement state recovery this timeout
       # should be increased to a more reasonable value (1 min?)
+      # Need to also fix the autohost_pid when it comes back
       autohost_timeout: Map.get(args, :autohost_timeout, 100),
       battle_state: :initialised
     }
@@ -58,7 +76,7 @@ defmodule Teiserver.TachyonBattle.Battle do
       {pid, _} ->
         Logger.info("init battle for autohost #{autohost_id}")
         Process.monitor(pid)
-        {:ok, state}
+        {:ok, %{state | autohost_pid: pid}}
 
       nil ->
         {:stop, :no_autohost}
@@ -66,13 +84,59 @@ defmodule Teiserver.TachyonBattle.Battle do
   end
 
   @impl true
-  def handle_call({:update_event, ev}, _from, state) do
+  def handle_call({:send_message, msg}, _from, state) do
+    case state.autohost_pid do
+      nil ->
+        {:reply, {:error, :no_autohost}, state}
+
+      pid ->
+        payload = %{battle_id: state.id, message: msg}
+        resp = Autohost.send_message(pid, payload)
+        {:reply, resp, state}
+    end
+  end
+
+  def handle_call(:kill, _from, state) do
+    case state.autohost_pid do
+      nil ->
+        {:reply, {:error, :no_autohost}, state}
+
+      pid ->
+        resp = Autohost.kill_battle(pid, state.id)
+        {:reply, resp, state}
+    end
+
+    # Note that we don't terminate the battle process here.
+    # I believe it should happen when, after closing the engine, autohost
+    # should send :engine_quit message (or something similar)
+    # if that's not the case, we should terminate here
+  end
+
+  @impl true
+  def handle_cast({:update_event, ev}, state) do
     case ev.update do
-      :start -> {:reply, :ok, %{state | battle_state: :in_progress}}
-      {:finished, _} -> {:reply, :ok, %{state | battle_state: :finished}}
-      {:engine_crash, _} -> {:stop, :shutdown, :ok, %{state | battle_state: :shutting_down}}
-      :engine_quit -> {:stop, :shutdown, :ok, %{state | battle_state: :shutting_down}}
-      _ -> {:reply, :ok, state}
+      :start ->
+        {:noreply, %{state | battle_state: :in_progress}}
+
+      {:finished, _} ->
+        {:noreply, %{state | battle_state: :finished}}
+
+      {:engine_crash, _} ->
+        {:stop, :shutdown, %{state | battle_state: :shutting_down}}
+
+      :engine_quit ->
+        {:stop, :shutdown, %{state | battle_state: :shutting_down}}
+
+      {:player_chat_broadcast, %{destination: :all, message: "!stop"}} ->
+        if state.autohost_pid != nil do
+          Autohost.kill_battle(state.autohost_pid, state.id)
+          {:noreply, state}
+        else
+          {:noreply, state}
+        end
+
+      _ ->
+        {:noreply, state}
     end
   end
 
@@ -80,7 +144,7 @@ defmodule Teiserver.TachyonBattle.Battle do
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
     timeout = state.autohost_timeout
     if timeout != :infinity, do: :timer.send_after(timeout, :autohost_timeout)
-    {:noreply, state}
+    {:noreply, %{state | autohost_pid: nil}}
   end
 
   def handle_info(:autohost_timeout, state) do

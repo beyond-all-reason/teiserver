@@ -82,10 +82,12 @@ defmodule Teiserver.Player do
   @spec matchmaking_leave_queues(T.userid()) :: Matchmaking.leave_result()
   defdelegate matchmaking_leave_queues(user_id), to: Player.Session, as: :leave_queues
 
+  @type start_data :: Player.Session.start_data()
+
   @doc """
   It's go time! the player should join a game
   """
-  @spec battle_start(T.userid(), {TachyonBattle.id(), pid()}, Teiserver.Autohost.start_response()) ::
+  @spec battle_start(T.userid(), {TachyonBattle.id(), pid()}, start_data()) ::
           :ok
   defdelegate battle_start(user_id, battle_id, battle_start_data), to: Player.Session
 

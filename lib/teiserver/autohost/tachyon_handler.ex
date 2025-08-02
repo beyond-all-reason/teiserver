@@ -9,7 +9,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   alias Teiserver.Bot.Bot
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.TachyonParser
-  alias Teiserver.Tachyon.{Handler, Schema}
+  alias Teiserver.Tachyon.{Handler, Schema, Transport}
   alias Teiserver.TachyonBattle
 
   require Logger
@@ -21,13 +21,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
           state: :handshaking | {:connected, connected_state()}
         }
 
-  @type start_response :: %{
-          ips: [String.t()],
-          port: integer(),
-          engine: %{version: String.t()},
-          game: %{springName: String.t()},
-          map: %{springName: String.t()}
-        }
+  @type start_response :: %{ips: [String.t()], port: integer()}
 
   # TODO: there should be some kind of retry here
   @spec start_battle(Bot.id(), Teiserver.Autohost.start_script()) ::
@@ -35,20 +29,67 @@ defmodule Teiserver.Autohost.TachyonHandler do
   def start_battle(autohost_id, start_script) do
     case Registry.lookup(autohost_id) do
       {pid, _} ->
-        send(pid, {:start_battle, start_script, self()})
+        response = Transport.call_client(pid, "autohost/start", start_script)
 
-        # This receive is a bit iffy and may cause problem with controlled shutdown
-        # Ideally, the same way player work, there would be a GenServer decoupled
-        # from the actual websocket connection, but for now, this poor's man
-        # GenServer.call will have to do
-        receive do
-          {:start_battle_response, resp} -> resp
-        after
-          10_000 -> {:error, :timeout}
+        case response do
+          %{"status" => "failed", "reason" => reason} ->
+            msg =
+              case response["details"] do
+                nil -> reason
+                details -> "#{reason} - #{details}"
+              end
+
+            Logger.error("failed to start a battle: #{msg}")
+            {:error, msg}
+
+          %{"status" => "success", "data" => data} ->
+            {:ok, %{ips: data["ips"], port: data["port"]}}
         end
 
       _ ->
         {:error, :no_host_available}
+    end
+  end
+
+  @doc """
+  send a message to the autohost with the given pid
+  this calls returns when the ack to the request has been received.
+  """
+  @spec send_message(pid(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
+          :ok | {:error, reason :: term()}
+  def send_message(autohost, payload) when is_pid(autohost) do
+    payload = %{battleId: payload.battle_id, message: payload.message}
+    response = Transport.call_client(autohost, "autohost/sendMessage", payload)
+
+    case response["status"] do
+      "success" ->
+        :ok
+
+      "failed" ->
+        err = response["reason"]
+
+        case Map.get(response, "details") do
+          nil -> {:error, err}
+          details -> {:error, "#{err} - #{details}"}
+        end
+    end
+  end
+
+  @spec kill_battle(pid(), TachyonBattle.id()) :: :ok
+  def kill_battle(autohost, battle_id) when is_pid(autohost) do
+    response = Transport.call_client(autohost, "autohost/kill", %{battleId: battle_id})
+
+    case response["status"] do
+      "success" ->
+        :ok
+
+      "failed" ->
+        err = response["reason"]
+
+        case Map.get(response, "details") do
+          nil -> {:error, err}
+          details -> {:error, "#{err} - #{details}"}
+        end
     end
   end
 
@@ -65,11 +106,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
      %{since: DateTime.utc_now() |> DateTime.to_unix(:microsecond)}, [], state}
   end
 
-  @impl Handler
-  def handle_info({:start_battle, start_script, sender}, state) do
-    {:request, "autohost/start", start_script, [cb_state: sender], state}
-  end
-
+  @impl true
   def handle_info(_msg, state) do
     {:ok, state}
   end
@@ -169,38 +206,10 @@ defmodule Teiserver.Autohost.TachyonHandler do
   end
 
   @impl true
-  def handle_response("autohost/start", reply_to, response, state) do
-    notify_autohost_started(reply_to, response)
-    {:ok, state}
-  end
-
   def handle_response("autohost/subscribeUpdates", _, _response, state) do
     # TODO: handle potential failure here
     # for example, autohost refuses any subscription with `since` older than 5 minutes
     {:ok, state}
-  end
-
-  defp notify_autohost_started(reply_to, %{"status" => "failed", "reason" => reason} = msg) do
-    msg =
-      case msg["details"] do
-        nil -> reason
-        details -> "#{reason} - #{details}"
-      end
-
-    Logger.error("failed to start a battle: #{msg}")
-    send(reply_to, {:start_battle_response, {:error, msg}})
-  end
-
-  defp notify_autohost_started(reply_to, %{"status" => "success", "data" => data}) do
-    send(
-      reply_to,
-      {:start_battle_response,
-       {:ok,
-        %{
-          ips: data["ips"],
-          port: data["port"]
-        }}}
-    )
   end
 
   @type update_event_data ::
@@ -212,6 +221,13 @@ defmodule Teiserver.Autohost.TachyonHandler do
           | {:engine_message, %{message: String.t()}}
           | {:engine_warning, %{message: String.t()}}
           | {:engine_crash, %{details: String.t() | nil}}
+          | {:player_chat_broadcast,
+             %{
+               destination: :allies | :all | :spectators,
+               message: String.t(),
+               user_id: T.userid()
+             }}
+          | {:player_chat_dm, %{message: String.t(), user_id: T.userid(), to_user_id: T.userid()}}
           | :engine_quit
           | {:luamsg,
              %{
@@ -242,62 +258,97 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
     with {:ok, time} <- DateTime.from_unix(data["time"], :microsecond),
          {:ok, user_id} <- user_id do
-      parsed_update =
-        case update["type"] do
-          "player_joined" ->
-            {:player_joined, %{user_id: user_id, player_number: update["playerNumber"]}}
+      case update["type"] do
+        "player_joined" ->
+          update = {:player_joined, %{user_id: user_id, player_number: update["playerNumber"]}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
 
-          "player_left" ->
-            reason =
-              case update["reason"] do
-                "lost_connection" -> :lost_connection
-                "left" -> :left
-                "kicked" -> :kicked
-              end
+        "player_left" ->
+          reason =
+            case update["reason"] do
+              "lost_connection" -> :lost_connection
+              "left" -> :left
+              "kicked" -> :kicked
+            end
 
-            {:player_left, %{user_id: user_id, reason: reason}}
+          update = {:player_left, %{user_id: user_id, reason: reason}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
 
-          "player_defeated" ->
-            {:player_defeated, %{user_id: user_id}}
+        "player_chat" ->
+          if update["destination"] == "player" do
+            case TachyonParser.parse_user_id(update["toUserId"]) do
+              {:ok, id} ->
+                update =
+                  {:player_chat_dm,
+                   %{message: update["message"], user_id: user_id, to_user_id: id}}
 
-          "start" ->
-            :start
+                {:ok, %{battle_id: data["battleId"], time: time, update: update}}
 
-          "finished" ->
-            {:finished, %{user_id: user_id, winning_ally_teams: update["winningAllyTeams"]}}
-
-          "engine_message" ->
-            {:engine_message, %{message: update["message"]}}
-
-          "engine_warning" ->
-            {:engine_warning, %{message: update["message"]}}
-
-          "engine_crash" ->
-            {:engine_warning, %{details: Map.get(update, "details")}}
-
-          "engine_quit" ->
-            :engine_quit
-
-          "luamsg" ->
-            script =
-              case update["script"] do
-                "ui" -> :ui
-                "game" -> :game
-                "rules" -> :rules
-              end
-
-            ui_mode =
-              case Map.get(update, "uiMode") do
-                nil -> nil
-                "all" -> :all
+              err ->
+                err
+            end
+          else
+            dest =
+              case update["destination"] do
                 "allies" -> :allies
+                "all" -> :all
                 "spectators" -> :spectators
               end
 
-            {:luamsg, %{user_id: user_id, script: script, ui_mode: ui_mode, data: update["data"]}}
-        end
+            update =
+              {:player_chat_broadcast,
+               %{destination: dest, message: update["message"], user_id: user_id}}
 
-      {:ok, %{battle_id: data["battleId"], time: time, update: parsed_update}}
+            {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+          end
+
+        "player_defeated" ->
+          update = {:player_defeated, %{user_id: user_id}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+
+        "start" ->
+          {:ok, %{battle_id: data["battleId"], time: time, update: :start}}
+
+        "finished" ->
+          update =
+            {:finished, %{user_id: user_id, winning_ally_teams: update["winningAllyTeams"]}}
+
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+
+        "engine_message" ->
+          update = {:engine_message, %{message: update["message"]}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+
+        "engine_warning" ->
+          {:engine_warning, %{message: update["message"]}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+
+        "engine_crash" ->
+          {:engine_warning, %{details: Map.get(update, "details")}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+
+        "engine_quit" ->
+          {:ok, %{battle_id: data["battleId"], time: time, update: :engine_quit}}
+
+        "luamsg" ->
+          script =
+            case update["script"] do
+              "ui" -> :ui
+              "game" -> :game
+              "rules" -> :rules
+            end
+
+          ui_mode =
+            case Map.get(update, "uiMode") do
+              nil -> nil
+              "all" -> :all
+              "allies" -> :allies
+              "spectators" -> :spectators
+            end
+
+          {:luamsg, %{user_id: user_id, script: script, ui_mode: ui_mode, data: update["data"]}}
+          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+      end
     end
   end
 end
