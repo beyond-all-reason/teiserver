@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "redirects when data is valid", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
-          "email" => "tsuser2@tsuser2",
+          "email" => "tsuser2@test.local",
           "data" => %{}
         })
 
@@ -101,7 +101,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "redirects when data is valid", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
-          "email" => "tsuser_rename@tsuser_rename",
+          "email" => "tsuser_rename@test.local",
           "data" => %{}
         })
 
@@ -119,7 +119,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "renders errors when data is invalid", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
-          "email" => "tsuser_rename_bad@tsuser_rename_bad",
+          "email" => "tsuser_rename_bad@test.local",
           "data" => %{}
         })
 
