@@ -55,6 +55,23 @@ defmodule Teiserver.Matchmaking do
   defdelegate ready(room_pid, user_id), to: Matchmaking.PairingRoom
 
   @doc """
+  Get statistics for a specific queue
+  """
+  @spec get_stats(queue_id :: String.t()) :: {:ok, map()} | {:error, :not_found}
+  def get_stats(queue_id) do
+    case Matchmaking.QueueRegistry.lookup(queue_id) do
+      nil ->
+        {:error, :not_found}
+
+      pid ->
+        case GenServer.call(pid, :get_stats, 1000) do
+          {:ok, stats} -> {:ok, stats}
+          _ -> {:error, :not_found}
+        end
+    end
+  end
+
+  @doc """
   Kill and restart all matchmaking queues. This can be used to reset the
   matchmaking state, for example when a new asset (game/engine) is set
   It is a bit brutal but simple

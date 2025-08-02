@@ -172,7 +172,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     user =
       Account.get_user(nil,
         search: [
-          email: "accolades_bot@teiserver"
+          email: "accolades_bot@teiserver.local"
         ]
       )
 
@@ -182,7 +182,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
         {:ok, account} =
           Account.script_create_user(%{
             name: "AccoladesBot",
-            email: "accolades_bot@teiserver",
+            email: "accolades_bot@teiserver.local",
             icon:
               "fa-solid #{Teiserver.Account.AccoladeLib.icon()}" |> String.replace(" far ", " "),
             colour: "#0066AA",

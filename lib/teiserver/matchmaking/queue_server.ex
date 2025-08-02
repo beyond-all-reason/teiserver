@@ -247,16 +247,19 @@ defmodule Teiserver.Matchmaking.QueueServer do
       :ok ->
         game_type = MatchLib.game_type(state.queue.team_size, state.queue.team_count)
         new_member = Member.new([player_id], game_type)
-        new_state = add_member_to_queue(state, new_member)
-        # Update stats
-        new_state = update_stats(new_state, :total_joined, 1)
+
+        new_state =
+          state
+          |> add_member_to_queue(new_member)
+          |> update_in([:stats, :total_joined], &(&1 + 1))
+
         {:reply, {:ok, self()}, new_state}
     end
   end
 
   @impl true
-  def handle_call(:get_state, _from, state) do
-    {:reply, {:ok, state}, state}
+  def handle_call(:get_stats, _from, state) do
+    {:reply, {:ok, state.stats}, state}
   end
 
   @impl true
@@ -278,7 +281,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
             state
             |> Map.update!(:pending_parties, &Map.delete(&1, party_id))
             |> add_member_to_queue(member)
-            |> update_stats(:total_joined, length(member.player_ids))
+            |> update_in([:stats, :total_joined], &(&1 + length(member.player_ids)))
 
           Logger.info("Party #{party_id} with members #{inspect(member.player_ids)} joined queue")
 
@@ -312,8 +315,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
         {:reply, {:error, :not_queued}, state}
 
       {:ok, state} ->
-        # Update stats for leaving
-        new_state = update_stats(state, :total_left, 1)
+        new_state = update_in(state, [:stats, :total_left], &(&1 + 1))
         {:reply, :ok, new_state}
     end
   end
@@ -393,7 +395,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
   end
 
   @impl true
-  def handle_info(:tick, state) do
+  def handle_info(:tick, state), do: handle_info({:tick, DateTime.utc_now()}, state)
+
+  def handle_info({:tick, now}, state) do
     new_state =
       case match_members(state) do
         :no_match ->
@@ -428,12 +432,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
           # Calculate total wait time for all matched members
           total_wait_time =
-            matches
-            |> Enum.flat_map(fn teams ->
-              for team <- teams, member <- team do
-                DateTime.diff(DateTime.utc_now(), member.joined_at, :second)
-              end
-            end)
+            for teams <- matches, team <- teams, member <- team do
+              DateTime.diff(now, member.joined_at, :second)
+            end
             |> Enum.sum()
 
           state
@@ -585,12 +586,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
   def match_members(state) do
     {alg_module, alg_state} = state.queue.algo
     apply(alg_module, :get_matches, [state.members, alg_state])
-  end
-
-  defp update_stats(state, stat_key, increment) do
-    Map.update!(state, :stats, fn stats ->
-      Map.update!(stats, stat_key, &(&1 + increment))
-    end)
   end
 
   defp demonitor_players(player_ids, monitors) do
