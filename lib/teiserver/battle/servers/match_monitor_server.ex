@@ -413,7 +413,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     user =
       Account.get_user(nil,
         search: [
-          email: "match_monitor@teiserver.local"
+          email: "match_monitor@teiserver"
         ]
       )
 
@@ -423,7 +423,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         {:ok, account} =
           Account.create_user(%{
             name: "AutohostMonitor",
-            email: "match_monitor@teiserver.local",
+            email: "match_monitor@teiserver",
             icon: "fa-solid fa-camera-cctv",
             colour: "#00AA66",
             password: Account.make_bot_password(),

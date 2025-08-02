@@ -404,7 +404,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     user =
       Account.get_user(nil,
         search: [
-          email: "bridge@teiserver.local"
+          email: "bridge@teiserver"
         ]
       )
 
@@ -414,7 +414,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         {:ok, account} =
           Account.script_create_user(%{
             name: bot_name(),
-            email: "bridge@teiserver.local",
+            email: "bridge@teiserver",
             icon: "fa-brands fa-discord",
             colour: "#0066AA",
             password: Account.make_bot_password(),

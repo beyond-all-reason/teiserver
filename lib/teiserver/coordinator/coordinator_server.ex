@@ -320,7 +320,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     user =
       Account.get_user(nil,
         search: [
-          email: "coordinator@teiserver.local"
+          email: "coordinator@teiserver"
         ]
       )
 
@@ -330,7 +330,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         {:ok, account} =
           Account.script_create_user(%{
             name: "Coordinator",
-            email: "coordinator@teiserver.local",
+            email: "coordinator@teiserver",
             icon: "fa-solid fa-sitemap",
             colour: "#AA00AA",
             password: Account.make_bot_password(),
