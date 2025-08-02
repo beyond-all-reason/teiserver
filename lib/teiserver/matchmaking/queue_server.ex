@@ -196,6 +196,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     # if the queue is gone for whatever reason, the pairing room should be
     # killed as well, and nothing will happen
     :exit, {:noproc, _} -> :ok
+    :error, :badarg -> :ok
   end
 
   @spec start_link(state()) :: GenServer.on_start()
