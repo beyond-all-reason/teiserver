@@ -66,4 +66,80 @@ defmodule Teiserver.Matchmaking.QueueTest do
       assert :ok = Matchmaking.leave_queue(queue_id, user.id)
     end
   end
+
+  describe "queue statistics" do
+    test "initial stats are zero", %{queue_id: queue_id} do
+      # Initially stats should be zero
+      {:ok, stats} = Matchmaking.get_stats(queue_id)
+      assert stats.total_joined == 0
+      assert stats.total_left == 0
+      assert stats.total_matched == 0
+      assert stats.total_wait_time_s == 0
+    end
+
+    test "tracks joins and leaves", %{user: user, queue_id: queue_id} do
+      # Initially stats should be zero
+      {:ok, stats} = Matchmaking.get_stats(queue_id)
+      assert stats.total_joined == 0
+      assert stats.total_left == 0
+      assert stats.total_matched == 0
+      assert stats.total_wait_time_s == 0
+
+      # Join the queue
+      {:ok, _pid} = Matchmaking.join_queue(queue_id, user.id)
+      {:ok, stats} = Matchmaking.get_stats(queue_id)
+      assert stats.total_joined == 1
+      assert stats.total_left == 0
+
+      # Leave the queue
+      :ok = Matchmaking.leave_queue(queue_id, user.id)
+      {:ok, stats} = Matchmaking.get_stats(queue_id)
+      assert stats.total_joined == 1
+      assert stats.total_left == 1
+    end
+
+    test "tracks party joins", %{queue_id: queue_id} do
+      user1 = Central.Helpers.GeneralTestLib.make_user()
+      party_id = UUID.uuid4()
+
+      # Create a party with 1 player (valid for team_size: 1 queue)
+      {:ok, _pid} = Matchmaking.party_join_queue(queue_id, party_id, [user1])
+      {:ok, stats} = Matchmaking.get_stats(queue_id)
+      # No stats updated yet, party is pending
+      assert stats.total_joined == 0
+
+      # Now actually join the queue with the party
+      {:ok, _pid} = Matchmaking.join_queue(queue_id, user1.id, party_id)
+      {:ok, stats} = Matchmaking.get_stats(queue_id)
+      # Now the player has joined
+      assert stats.total_joined == 1
+      assert stats.total_left == 0
+    end
+
+    test "tracks wait time when matches are created", %{queue_id: queue_id} do
+      user1 = Central.Helpers.GeneralTestLib.make_user()
+      user2 = Central.Helpers.GeneralTestLib.make_user()
+
+      # Join first user
+      {:ok, _pid} = Matchmaking.join_queue(queue_id, user1.id)
+      {:ok, stats} = Matchmaking.get_stats(queue_id)
+      assert stats.total_joined == 1
+      assert stats.total_wait_time_s == 0
+
+      # Join second user (this should trigger a match)
+      {:ok, _pid} = Matchmaking.join_queue(queue_id, user2.id)
+
+      # Trigger the tick with a specific time for testing
+      now = DateTime.utc_now()
+      queue_pid = Matchmaking.QueueRegistry.lookup(queue_id)
+      send(queue_pid, {:tick, now})
+
+      # Check that wait time was recorded
+      {:ok, stats} = Matchmaking.get_stats(queue_id)
+      assert stats.total_joined == 2
+      assert stats.total_matched == 1
+      # Wait time should be calculated based on the time we passed
+      assert stats.total_wait_time_s >= 0
+    end
+  end
 end
