@@ -185,7 +185,8 @@ defmodule Teiserver.OAuth do
             :scopes => Application.scopes(),
             optional(:original_scopes) => Application.scopes()
           },
-          create_refresh: boolean() | options()
+          create_refresh: boolean() | options(),
+          scopes: Application.scopes()
         ) ::
           {:ok, Token.t()} | {:error, :invalid_scope | Ecto.Changeset.t()}
   def create_token(user_id, application, opts \\ [])
