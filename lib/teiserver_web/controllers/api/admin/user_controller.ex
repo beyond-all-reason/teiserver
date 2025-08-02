@@ -91,7 +91,8 @@ defmodule TeiserverWeb.API.Admin.UserController do
         id: app.id,
         scopes: app.scopes
       },
-      create_refresh: true
+      create_refresh: true,
+      scopes: app.scopes
     )
   end
 
