@@ -12,7 +12,7 @@ defmodule Teiserver.Account.AccountTestLib do
       %User{},
       %{
         name: data["name"] || "name_#{r}",
-        email: data["email"] || "email_#{r}",
+        email: data["email"] || "email_#{r}@test.local",
         colour: data["colour"] || "colour",
         icon: data["icon"] || "icon",
         password: data["password"] || Teiserver.Account.spring_md5_password("password"),
