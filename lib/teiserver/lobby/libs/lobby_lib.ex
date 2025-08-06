@@ -532,16 +532,31 @@ defmodule Teiserver.Lobby.LobbyLib do
           tasks =
             Enum.map(lobby_ids, fn lobby_id ->
               Task.async(fn ->
-                team_config = Teiserver.Coordinator.get_team_config(lobby_id)
+                try do
+                  case Teiserver.Coordinator.get_team_config(lobby_id, 4_000) do
+                    %{host_teamsize: team_size, host_teamcount: team_count} ->
+                      {lobby_id, %{teamSize: team_size, nbTeams: team_count}}
 
-                {lobby_id,
-                 %{teamSize: team_config.host_teamsize, nbTeams: team_config.host_teamcount}}
+                    _ ->
+                      nil
+                  end
+                catch
+                  _, _ -> nil
+                end
               end)
             end)
 
-          data = Task.await_many(tasks, 2_000) |> Map.new()
-          Teiserver.cache_put(:application_temp_cache, :battle_teams, {data, now})
-          data
+          data =
+            Task.await_many(tasks)
+            |> Enum.reject(&is_nil/1)
+            |> Map.new()
+
+          if map_size(data) == 0 do
+            nil
+          else
+            Teiserver.cache_put(:application_temp_cache, :battle_teams, {data, now})
+            data
+          end
       end
     else
       nil
@@ -550,8 +565,17 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   def get_team_config(lobby_id) when is_integer(lobby_id) do
     if Teiserver.Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") do
-      team_config = Teiserver.Coordinator.get_team_config(lobby_id)
-      %{lobby_id => %{teamSize: team_config.host_teamsize, nbTeams: team_config.host_teamcount}}
+      try do
+        case Teiserver.Coordinator.get_team_config(lobby_id) do
+          %{host_teamsize: team_size, host_teamcount: team_count} ->
+            %{lobby_id => %{teamSize: team_size, nbTeams: team_count}}
+
+          _ ->
+            nil
+        end
+      catch
+        _, _ -> nil
+      end
     else
       nil
     end
