@@ -34,4 +34,32 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
     Polling.poll_until(&Teiserver.Autohost.find_autohost/0, &is_nil/1)
     Polling.poll_until(fn -> Process.alive?(pid) end, &(&1 == false))
   end
+
+  test "stop battle", %{autohost: autohost, autohost_client: autohost_client} do
+    Polling.poll_until_some(&Teiserver.Autohost.find_autohost/0)
+    battle_id = "whatever"
+
+    assert {:ok, _pid} =
+             TachyonBattle.Battle.start(%{
+               battle_id: battle_id,
+               autohost_id: autohost.id,
+               autohost_timeout: 1
+             })
+
+    ev = %{
+      battleId: battle_id,
+      time: 1_705_432_698_000_000,
+      update: %{
+        type: "player_chat",
+        userId: "123",
+        message: "!stop",
+        destination: "all"
+      }
+    }
+
+    Tachyon.autohost_send_update_event(autohost_client, ev)
+
+    assert %{"commandId" => "autohost/kill", "data" => %{"battleId" => ^battle_id}} =
+             Tachyon.recv_message!(autohost_client)
+  end
 end

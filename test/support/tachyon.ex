@@ -196,6 +196,9 @@ defmodule Teiserver.Support.Tachyon do
           nil -> resp
           x -> Map.put(resp, :details, x)
         end
+
+      true ->
+        Map.put(resp, :status, :success)
     end
   end
 

@@ -192,10 +192,18 @@ defmodule Teiserver.Player.Session do
     GenServer.cast(via_tuple(user_id), {:matchmaking, {:found_update, ready_count, room_pid}})
   end
 
+  @type start_data :: %{
+          ips: [String.t()],
+          port: integer(),
+          engine: %{version: String.t()},
+          game: %{springName: String.t()},
+          map: %{springName: String.t()}
+        }
+
   @doc """
   Let the player know that they are now in a battle
   """
-  @spec battle_start(T.userid(), {TachyonBattle.id(), pid()}, Teiserver.Autohost.start_response()) ::
+  @spec battle_start(T.userid(), {TachyonBattle.id(), pid()}, start_data()) ::
           :ok
   def battle_start(user_id, battle_data, battle_start_data) do
     GenServer.cast(via_tuple(user_id), {:battle, {:start, battle_data, battle_start_data}})
