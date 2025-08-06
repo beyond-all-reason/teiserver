@@ -738,11 +738,11 @@ defmodule Teiserver.Protocols.SpringOut do
     end)
 
     # Send BATTLETEAMS message
-    teams_data = Teiserver.Battle.get_team_config(:all)
-
-    if teams_data do
+    # Make this async to avoid blocking login
+    Task.start(fn ->
+      teams_data = Teiserver.Battle.get_team_config(:all)
       send(self(), {:battle_teams, teams_data})
-    end
+    end)
 
     # CLIENTSTATUS entries
     clients
