@@ -1887,12 +1887,90 @@ defmodule Teiserver.Account do
 
   """
   def create_friend_request(attrs \\ %{}) do
-    result =
-      %FriendRequest{}
-      |> FriendRequest.changeset(attrs)
-      |> Repo.insert()
+    # NOTE: All call sites must now handle {:error, reason} returns from create_friend_request/2
+    from_user_id = Map.get(attrs, :from_user_id)
+    to_user_id = Map.get(attrs, :to_user_id)
+    create_friend_request(from_user_id, to_user_id)
+  end
 
-    case result do
+  def create_friend_request(from_user_id, to_user_id) do
+    {allowed, reason} = can_send_friend_request_with_reason?(from_user_id, to_user_id)
+
+    if not allowed do
+      {:error, reason}
+    else
+      # Check for auto-accept scenario
+      case get_friend_request(to_user_id, from_user_id) do
+        nil ->
+          # No existing request, create new one
+          create_new_friend_request(from_user_id, to_user_id)
+
+        existing_request ->
+          # Auto-accept the existing request
+          with :ok <- FriendRequestLib.accept_friend_request(existing_request) do
+            # Send pubsub broadcasts for both users to update UI
+            PubSub.broadcast(
+              Teiserver.PubSub,
+              "account_user_relationships:#{existing_request.from_user_id}",
+              %{
+                channel: "account_user_relationships:#{existing_request.from_user_id}",
+                event: :friend_request_accepted,
+                userid: existing_request.from_user_id,
+                accepter_id: existing_request.to_user_id
+              }
+            )
+
+            PubSub.broadcast(
+              Teiserver.PubSub,
+              "account_user_relationships:#{existing_request.to_user_id}",
+              %{
+                channel: "account_user_relationships:#{existing_request.to_user_id}",
+                event: :friend_request_accepted,
+                userid: existing_request.to_user_id,
+                accepter_id: existing_request.from_user_id
+              }
+            )
+
+            # Clear caches for both users
+            Teiserver.cache_delete(
+              :account_incoming_friend_request_cache,
+              existing_request.from_user_id
+            )
+
+            Teiserver.cache_delete(
+              :account_outgoing_friend_request_cache,
+              existing_request.from_user_id
+            )
+
+            Teiserver.cache_delete(
+              :account_incoming_friend_request_cache,
+              existing_request.to_user_id
+            )
+
+            Teiserver.cache_delete(
+              :account_outgoing_friend_request_cache,
+              existing_request.to_user_id
+            )
+
+            {:ok, :auto_accepted}
+          else
+            {:error, reason} ->
+              {:error, reason}
+          end
+      end
+    end
+  end
+
+  defp create_new_friend_request(from_user_id, to_user_id) do
+    Repo.transaction(fn ->
+      case %FriendRequest{from_user_id: from_user_id, to_user_id: to_user_id}
+           |> FriendRequest.changeset(%{})
+           |> Repo.insert() do
+        {:ok, struct} -> struct
+        {:error, changeset} -> Repo.rollback(changeset)
+      end
+    end)
+    |> case do
       {:ok, friend_request} ->
         PubSub.broadcast(
           Teiserver.PubSub,
@@ -1905,24 +1983,20 @@ defmodule Teiserver.Account do
           }
         )
 
-        Teiserver.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
-        Teiserver.cache_delete(:account_outgoing_friend_request_cache, friend_request.to_user_id)
+        Teiserver.cache_delete(
+          :account_incoming_friend_request_cache,
+          friend_request.to_user_id
+        )
 
-      _ ->
-        :ok
-    end
+        Teiserver.cache_delete(
+          :account_outgoing_friend_request_cache,
+          friend_request.from_user_id
+        )
 
-    result
-  end
+        {:ok, friend_request}
 
-  def create_friend_request(from_user_id, to_user_id) do
-    if from_user_id == to_user_id do
-      {:error, "Cannot add yourself as a friend"}
-    else
-      create_friend_request(%{
-        from_user_id: from_user_id,
-        to_user_id: to_user_id
-      })
+      {:error, changeset} ->
+        {:error, changeset}
     end
   end
 

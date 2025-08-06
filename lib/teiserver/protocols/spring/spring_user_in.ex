@@ -17,13 +17,9 @@ defmodule Teiserver.Protocols.Spring.UserIn do
             {n, :no_user}
 
           user ->
-            case Account.can_send_friend_request_with_reason?(state.userid, user.id) do
-              {true, _} ->
-                {:ok, _} = Account.create_friend_request(state.userid, user.id)
-                {n, :success}
-
-              {false, reason} ->
-                {n, reason}
+            case Account.create_friend_request(state.userid, user.id) do
+              {:ok, _} -> {n, :success}
+              {:error, reason} -> {n, reason}
             end
         end
       end)
