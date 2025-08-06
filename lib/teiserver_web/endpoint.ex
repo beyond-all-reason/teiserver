@@ -58,5 +58,11 @@ defmodule TeiserverWeb.Endpoint do
   # Set :encryption_salt if you would also like to encrypt it.
   plug(Plug.Session, @session_options)
 
+  # makes the /metrics URL happen
+  plug(Teiserver.PrometheusMetrics.PrometheusExporter)
+
+  # measures pipeline exec times
+  plug(Teiserver.PrometheusMetrics.PipelineInstrumenter)
+
   plug(TeiserverWeb.Router)
 end
