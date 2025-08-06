@@ -14,6 +14,7 @@ defmodule Teiserver.Matchmaking do
   @type lost_reason :: Matchmaking.PairingRoom.lost_reason()
   @type cancelled_reason :: Matchmaking.QueueServer.cancelled_reason()
   @type ready_data :: Matchmaking.PairingRoom.ready_data()
+  @type stats :: Matchmaking.QueueServer.stats()
 
   @spec lookup_queue(Matchmaking.QueueServer.id()) :: pid() | nil
   def lookup_queue(queue_id) do
@@ -53,6 +54,12 @@ defmodule Teiserver.Matchmaking do
   """
   @spec ready(pid(), ready_data()) :: :ok | {:error, term()}
   defdelegate ready(room_pid, user_id), to: Matchmaking.PairingRoom
+
+  @doc """
+  Get statistics for a specific queue
+  """
+  @spec get_stats(queue_id :: String.t()) :: {:ok, stats()} | {:error, :not_found}
+  defdelegate get_stats(queue_id), to: Matchmaking.QueueServer
 
   @doc """
   Kill and restart all matchmaking queues. This can be used to reset the

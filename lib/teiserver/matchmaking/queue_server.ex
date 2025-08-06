@@ -23,6 +23,16 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @type id :: String.t()
 
   @typedoc """
+  Queue statistics for monitoring
+  """
+  @type stats :: %{
+          total_joined: non_neg_integer(),
+          total_left: non_neg_integer(),
+          total_wait_time_s: non_neg_integer(),
+          total_matched: non_neg_integer()
+        }
+
+  @typedoc """
   Internal settings for the queue so it's easier to control the frequency of
   ticks and whatnot
   """
@@ -66,10 +76,10 @@ defmodule Teiserver.Matchmaking.QueueServer do
           # committed to joining this queue
           pending_parties: %{
             Party.id() => %{waiting_for: [T.userid()], joined: [T.userid()], tref: :timer.tref()}
-          }
+          },
 
-          # TODO: add some bits for telemetry (see QueueWaitServer) like avg
-          # wait time and join count
+          # queue statistics for monitoring
+          stats: stats()
         }
 
   @type cancelled_reason ::
@@ -120,7 +130,13 @@ defmodule Teiserver.Matchmaking.QueueServer do
       members: Map.get(attrs, :members, []),
       monitors: MC.new(),
       pairings: [],
-      pending_parties: %{}
+      pending_parties: %{},
+      stats: %{
+        total_joined: 0,
+        total_left: 0,
+        total_wait_time_s: 0,
+        total_matched: 0
+      }
     }
   end
 
@@ -236,9 +252,19 @@ defmodule Teiserver.Matchmaking.QueueServer do
       :ok ->
         game_type = MatchLib.game_type(state.queue.team_size, state.queue.team_count)
         new_member = Member.new([player_id], game_type)
-        new_state = add_member_to_queue(state, new_member)
+
+        new_state =
+          state
+          |> add_member_to_queue(new_member)
+          |> update_in([:stats, :total_joined], &(&1 + 1))
+
         {:reply, {:ok, self()}, new_state}
     end
+  end
+
+  @impl true
+  def handle_call(:get_stats, _from, state) do
+    {:reply, {:ok, state.stats}, state}
   end
 
   @impl true
@@ -260,6 +286,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
             state
             |> Map.update!(:pending_parties, &Map.delete(&1, party_id))
             |> add_member_to_queue(member)
+            |> update_in([:stats, :total_joined], &(&1 + length(member.player_ids)))
 
           Logger.info("Party #{party_id} with members #{inspect(member.player_ids)} joined queue")
 
@@ -293,7 +320,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
         {:reply, {:error, :not_queued}, state}
 
       {:ok, state} ->
-        {:reply, :ok, state}
+        new_state = update_in(state, [:stats, :total_left], &(&1 + 1))
+        {:reply, :ok, new_state}
     end
   end
 
@@ -372,7 +400,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
   end
 
   @impl true
-  def handle_info(:tick, state) do
+  def handle_info(:tick, state), do: handle_info({:tick, DateTime.utc_now()}, state)
+
+  def handle_info({:tick, now}, state) do
     new_state =
       case match_members(state) do
         :no_match ->
@@ -405,10 +435,22 @@ defmodule Teiserver.Matchmaking.QueueServer do
               not Enum.member?(matched_members, m.id)
             end)
 
+          # Calculate total wait time for all matched members
+          total_wait_time =
+            for teams <- matches, team <- teams, member <- team do
+              DateTime.diff(now, member.joined_at, :second)
+            end
+            |> Enum.sum()
+
           state
           |> Map.put(:members, new_members)
           |> Map.replace!(:monitors, monitors)
           |> Map.update(:pairings, pairings, fn ps -> pairings ++ ps end)
+          |> Map.update!(:stats, fn stats ->
+            stats
+            |> Map.update!(:total_matched, &(&1 + length(matches)))
+            |> Map.update!(:total_wait_time_s, &(&1 + total_wait_time))
+          end)
       end
 
     {:noreply, new_state}
@@ -555,5 +597,14 @@ defmodule Teiserver.Matchmaking.QueueServer do
     Enum.reduce(player_ids, monitors, fn player_id, monitors ->
       MC.demonitor_by_val(monitors, {:player, player_id}, [:flush])
     end)
+  end
+
+  @doc """
+  Get statistics for this queue
+  """
+  @spec get_stats(id()) :: {:ok, stats()} | {:error, :not_found}
+  def get_stats(queue_id) do
+    via_tuple = QueueRegistry.via_tuple(queue_id)
+    GenServer.call(via_tuple, :get_stats, 1000)
   end
 end
