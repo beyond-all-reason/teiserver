@@ -8,9 +8,11 @@ defmodule Teiserver.TachyonLobby do
 
   @type id() :: Lobby.id()
 
-  @spec create() ::
+  @spec create(Lobby.start_params()) ::
           {:ok, %{pid: pid(), id: id()}}
           | {:error, {:already_started, pid()} | :max_children | term()}
-  defdelegate create(), to: TachyonLobby.Supervisor, as: :start_lobby
+  defdelegate create(start_params), to: TachyonLobby.Supervisor, as: :start_lobby
 
+  @spec lookup(Lobby.id()) :: pid() | nil
+  defdelegate lookup(lobby_id), to: TachyonLobby.Registry
 end

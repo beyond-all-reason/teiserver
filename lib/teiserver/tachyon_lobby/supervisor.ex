@@ -3,13 +3,13 @@ defmodule Teiserver.TachyonLobby.Supervisor do
 
   alias Teiserver.TachyonLobby.Lobby
 
-  @spec start_lobby() ::
+  @spec start_lobby(Lobby.start_params()) ::
           {:ok, %{pid: pid(), id: Lobby.id()}}
           | {:error, {:already_started, pid()} | :max_children | term()}
-  def start_lobby() do
+  def start_lobby(start_params) do
     id = Lobby.gen_id()
 
-    case Horde.DynamicSupervisor.start_child(__MODULE__, {Lobby, %{id: id}}) do
+    case Horde.DynamicSupervisor.start_child(__MODULE__, {Lobby, {id, start_params}}) do
       {:ok, pid} -> {:ok, %{id: id, pid: pid}}
       {:error, err} -> {:error, err}
       x -> raise "Unsupported return type for child lobby #{inspect(x)}"
