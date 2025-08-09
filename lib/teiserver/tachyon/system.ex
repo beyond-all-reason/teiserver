@@ -14,6 +14,7 @@ defmodule Teiserver.Tachyon.System do
       Teiserver.Autohost.System,
       Teiserver.TachyonBattle.System,
       Teiserver.Matchmaking.System,
+      Teiserver.TachyonLobby.System,
       Teiserver.Party.System,
       Teiserver.Player.System
     ]
