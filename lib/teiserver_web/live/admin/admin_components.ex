@@ -53,6 +53,16 @@ defmodule TeiserverWeb.Admin.AdminComponents do
       >
         Moderation
       </.sub_menu_button>
+
+      <.sub_menu_button
+        :if={allow?(@current_user, "Admin")}
+        bsname={@view_colour}
+        icon="fa-solid fa-users"
+        active={@active == "matchmaking"}
+        url={~p"/admin/matchmaking"}
+      >
+        Matchmaking
+      </.sub_menu_button>
     </div>
     """
   end
