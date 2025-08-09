@@ -3,6 +3,7 @@ defmodule Teiserver.Matchmaking do
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Party
+  alias Phoenix.PubSub
   require Logger
 
   @type queue :: Matchmaking.QueueServer.queue()
@@ -27,6 +28,22 @@ defmodule Teiserver.Matchmaking do
   @spec list_queues() :: [{queue_id(), queue()}]
   def list_queues() do
     Matchmaking.QueueRegistry.list()
+  end
+
+  @doc """
+  Return the list of queues with their stats and player counts
+  """
+  @spec list_queues_with_stats() :: [{queue_id(), map()}]
+  def list_queues_with_stats() do
+    list_queues()
+    |> Enum.map(fn {queue_id, queue} ->
+      {:ok, stats} = get_stats(queue_id)
+
+      {queue_id,
+       Map.merge(queue, %{
+         stats: stats
+       })}
+    end)
   end
 
   @doc """
@@ -60,6 +77,39 @@ defmodule Teiserver.Matchmaking do
   """
   @spec get_stats(queue_id :: String.t()) :: {:ok, stats()} | {:error, :not_found}
   defdelegate get_stats(queue_id), to: Matchmaking.QueueServer
+
+  @doc """
+  Subscribe to matchmaking queue updates.
+  The subscription will receive messages with the following structure:
+  %{
+    channel: "matchmaking_queues",
+    event: :queue_updated,
+    queue_id: queue_id,
+    stats: stats
+  }
+  Where stats includes player_count, total_joined, total_left, total_matched, and total_wait_time_s.
+  """
+  @spec subscribe_to_queue_updates() :: :ok
+  def subscribe_to_queue_updates() do
+    PubSub.subscribe(Teiserver.PubSub, "matchmaking_queues")
+  end
+
+  @doc """
+  Broadcast queue update to all subscribers
+  """
+  @spec broadcast_queue_update(queue_id :: String.t(), stats :: stats()) :: :ok
+  def broadcast_queue_update(queue_id, stats) do
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "matchmaking_queues",
+      %{
+        channel: "matchmaking_queues",
+        event: :queue_updated,
+        queue_id: queue_id,
+        stats: stats
+      }
+    )
+  end
 
   @doc """
   Kill and restart all matchmaking queues. This can be used to reset the
