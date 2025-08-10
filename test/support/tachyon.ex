@@ -6,6 +6,12 @@ defmodule Teiserver.Support.Tachyon do
     if String.contains?(to_string(tags[:module]), "Tachyon") || tags[:tachyon] do
       :ok = Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.Tachyon.System)
       {:ok, _pid} = Supervisor.restart_child(Teiserver.Supervisor, Teiserver.Tachyon.System)
+
+      # this reduces the noise when processes attempt to do sql when the test
+      # and the sandbox with it are already wound down
+      ExUnit.Callbacks.on_exit(fn ->
+        Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.Tachyon.System)
+      end)
     end
   end
 
