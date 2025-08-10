@@ -14,8 +14,11 @@ defmodule Teiserver.TachyonLobby.List do
 
   use GenServer
 
+  alias Teiserver.Helpers.PubSubHelper
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.TachyonLobby.Lobby
+
+  @update_topic "teiserver_tachyonlobby_list"
 
   @type overview :: %{
           name: String.t(),
@@ -28,6 +31,7 @@ defmodule Teiserver.TachyonLobby.List do
 
   @typep state :: %{
            monitors: MC.t(),
+           counter: non_neg_integer(),
            lobbies: %{Lobby.id() => overview()}
          }
 
@@ -49,7 +53,32 @@ defmodule Teiserver.TachyonLobby.List do
   # ets table that can be directly read from other processes
   @spec list() :: %{Lobby.id() => overview()}
   def list() do
+    {_, list} = GenServer.call(__MODULE__, :list)
+    list
+  end
+
+  @doc """
+  Subscribe the calling process to updates to the list of lobbies.
+  Returns the list of lobbies alongside a counter so that the subscribing
+  process can avoid race conditions.
+
+  For example, there could be the following:
+  P1 subscribes
+  P1 calls to get the list
+  Update is broadcasted
+  P1 gets the list back
+  P1 gets the broadcasted update, but it has already been processed and reflected
+  in the list call. It should be ignored
+  """
+  # similar comment regarding potential perf issue sending large messages
+  @spec subscribe_updates() :: {non_neg_integer(), %{Lobby.id() => overview()}}
+  def subscribe_updates() do
+    PubSubHelper.subscribe(@update_topic)
     GenServer.call(__MODULE__, :list)
+  end
+
+  def unsubscribe_updates() do
+    PubSubHelper.unsubscribe(@update_topic)
   end
 
   @spec start_link(term()) :: GenServer.on_start()
@@ -60,12 +89,12 @@ defmodule Teiserver.TachyonLobby.List do
   @impl true
   @spec init(term()) :: {:ok, state()}
   def init(_) do
-    {:ok, %{monitors: MC.new(), lobbies: %{}}}
+    {:ok, %{monitors: MC.new(), counter: 0, lobbies: %{}}}
   end
 
   @impl true
   def handle_call(:list, _from, state) do
-    {:reply, state.lobbies, state}
+    {:reply, {state.counter, state.lobbies}, state}
   end
 
   @impl true
@@ -73,6 +102,14 @@ defmodule Teiserver.TachyonLobby.List do
     state =
       put_in(state, [:lobbies, lobby_id], overview)
       |> Map.update!(:monitors, &MC.monitor(&1, lobby_pid, lobby_id))
+      |> Map.update!(:counter, &(&1 + 1))
+
+    PubSubHelper.broadcast(@update_topic, %{
+      event: :add_lobby,
+      counter: state.counter,
+      lobby_id: lobby_id,
+      overview: overview
+    })
 
     {:noreply, state}
   end
@@ -84,6 +121,13 @@ defmodule Teiserver.TachyonLobby.List do
     state =
       Map.update!(state, :monitors, &MC.demonitor_by_val(&1, lobby_id))
       |> Map.update!(:lobbies, &Map.delete(&1, lobby_id))
+      |> Map.update!(:counter, &(&1 + 1))
+
+    PubSubHelper.broadcast(@update_topic, %{
+      event: :remove_lobby,
+      counter: state.counter,
+      lobby_id: lobby_id
+    })
 
     {:noreply, state}
   end

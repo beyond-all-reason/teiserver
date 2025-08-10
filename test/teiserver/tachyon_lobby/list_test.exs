@@ -29,6 +29,34 @@ defmodule Teiserver.TachyonLobby.ListTest do
     poll_until(&Lobby.list/0, &(map_size(&1) == 0))
   end
 
+  test "update subscription" do
+    assert {initial_counter, %{}} = Lobby.subscribe_updates()
+
+    {:ok, pid} =
+      Task.start(fn ->
+        Lobby.List.register_lobby(self(), "lobby-id", overview_fixture())
+        :timer.sleep(:infinity)
+      end)
+
+    assert_receive %{
+                     topic: "teiserver_tachyonlobby_list",
+                     event: :add_lobby,
+                     lobby_id: "lobby-id"
+                   } = ev
+
+    assert ev.counter > initial_counter
+
+    Process.exit(pid, :kill)
+
+    assert_receive %{
+      topic: "teiserver_tachyonlobby_list",
+      event: :remove_lobby,
+      lobby_id: "lobby-id"
+    } = ev2
+
+    assert ev2.counter > ev.counter
+  end
+
   defp overview_fixture() do
     %{
       name: "lobby name",

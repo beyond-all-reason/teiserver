@@ -15,6 +15,10 @@ defmodule Teiserver.TachyonLobby do
   @spec list() :: %{Lobby.id() => overview()}
   defdelegate list(), to: TachyonLobby.List
 
+  @spec subscribe_updates() :: {non_neg_integer(), %{Lobby.id() => overview()}}
+  defdelegate subscribe_updates(), to: TachyonLobby.List
+  defdelegate unsubscribe_updates(), to: TachyonLobby.List
+
   @spec create(Lobby.start_params()) ::
           {:ok, pid(), details()}
           | {:error, {:already_started, pid()} | :max_children | term()}
