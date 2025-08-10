@@ -81,6 +81,11 @@ defmodule Teiserver.TachyonLobby.List do
     PubSubHelper.unsubscribe(@update_topic)
   end
 
+  @spec update_lobby(Lobby.id(), map()) :: :ok
+  def update_lobby(lobby_id, changes) do
+    GenServer.cast(__MODULE__, {:update, lobby_id, changes})
+  end
+
   @spec start_link(term()) :: GenServer.on_start()
   def start_link(_) do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
@@ -109,6 +114,22 @@ defmodule Teiserver.TachyonLobby.List do
       counter: state.counter,
       lobby_id: lobby_id,
       overview: overview
+    })
+
+    {:noreply, state}
+  end
+
+  def handle_cast({:update, lobby_id, changes}, state) do
+    state =
+      state
+      |> Map.update!(:counter, &(&1 + 1))
+      |> update_in([:lobbies, lobby_id], fn overview -> Map.merge(overview, changes) end)
+
+    PubSubHelper.broadcast(@update_topic, %{
+      event: :updated,
+      counter: state.counter,
+      lobby_id: lobby_id,
+      changes: changes
     })
 
     {:noreply, state}

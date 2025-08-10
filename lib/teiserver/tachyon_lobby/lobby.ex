@@ -9,6 +9,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Asset
   alias Teiserver.Data.Types, as: T
   alias Teiserver.TachyonLobby
+  alias Teiserver.Helpers.MonitorCollection, as: MC
 
   @type id :: String.t()
 
@@ -67,6 +68,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   """
   @type start_params :: %{
           creator_user_id: T.userid(),
+          creator_pid: pid(),
           name: String.t(),
           map_name: String.t(),
           ally_team_config: [
@@ -94,6 +96,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @typep state :: %{
            id: id(),
+           monitors: MC.t(),
            name: String.t(),
            map_name: String.t(),
            game_version: String.t(),
@@ -133,8 +136,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def init({id, start_params}) do
     Logger.metadata(actor_type: :lobby, actor_id: id)
 
+    monitors =
+      MC.new() |> MC.monitor(start_params.creator_pid, {:user, start_params.creator_user_id})
+
     state = %{
       id: id,
+      monitors: monitors,
       name: start_params.name,
       map_name: start_params.map_name,
       game_version: "BAR-27755-75d0172",
@@ -177,6 +184,26 @@ defmodule Teiserver.TachyonLobby.Lobby do
       )
 
     {:reply, {:ok, details}, state}
+  end
+
+  @impl true
+  def handle_info({:DOWN, ref, :process, _obj, _reason}, state) do
+    val = MC.get_val(state.monitors, ref)
+    state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
+
+    state =
+      case val do
+        {:user, user_id} ->
+          state = %{state | players: Map.delete(state.players, user_id)}
+          TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
+          state
+      end
+
+    if Enum.empty?(state.players) do
+      {:stop, {:shutdown, :empty}, state}
+    else
+      {:noreply, state}
+    end
   end
 
   @spec via_tuple(id()) :: GenServer.name()
