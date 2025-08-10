@@ -148,6 +148,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
       }
     }
 
+    TachyonLobby.List.register_lobby(self(), id, %{
+      name: state.name,
+      player_count: map_size(state.players),
+      max_player_count:
+        Enum.sum(
+          for at <- state.ally_team_config, team <- at.teams do
+            at.max_teams * team.max_players
+          end
+        ),
+      map_name: state.map_name,
+      engine_version: state.engine_version,
+      game_version: state.game_version
+    })
+
     {:ok, state}
   end
 

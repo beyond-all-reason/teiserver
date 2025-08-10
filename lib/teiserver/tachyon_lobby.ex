@@ -8,6 +8,12 @@ defmodule Teiserver.TachyonLobby do
 
   @type id :: Lobby.id()
   @type details :: Lobby.details()
+  @type overview :: TachyonLobby.List.overview()
+  @type team :: Lobby.team()
+  @type ally_team_config :: Lobby.ally_team_config()
+
+  @spec list() :: %{Lobby.id() => overview()}
+  defdelegate list(), to: TachyonLobby.List
 
   @spec create(Lobby.start_params()) ::
           {:ok, pid(), details()}

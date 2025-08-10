@@ -15,8 +15,8 @@ defmodule Teiserver.TachyonLobby.System do
   def init(_) do
     children = [
       TachyonLobby.Registry,
-      TachyonLobby.List,
-      TachyonLobby.Supervisor
+      TachyonLobby.Supervisor,
+      TachyonLobby.List
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
