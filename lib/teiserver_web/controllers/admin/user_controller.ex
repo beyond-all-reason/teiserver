@@ -1063,7 +1063,7 @@ defmodule TeiserverWeb.Admin.UserController do
         new_user =
           Map.merge(user, %{
             name: Ecto.UUID.generate(),
-            email: "#{user.id}@#{user.id}",
+            email: "#{user.id}@#{user.id}.#{user.id}",
             password: UserLib.make_bot_password(),
             country: "??"
           })
