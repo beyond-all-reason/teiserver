@@ -468,7 +468,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           state.lobby_id
         )
 
-        ChatLib.say(userid, "!boss", state.lobby_id)
+        ChatLib.say(userid, "!unboss #{username}", state.lobby_id)
       end)
 
       # Broadcast team configuration changes to lobby server
