@@ -71,17 +71,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           creator_pid: pid(),
           name: String.t(),
           map_name: String.t(),
-          ally_team_config: [
-            %{
-              max_teams: pos_integer(),
-              start_box: Asset.startbox(),
-              teams: [
-                %{
-                  max_players: pos_integer()
-                }
-              ]
-            }
-          ]
+          ally_team_config: ally_team_config()
         }
 
   @typep player :: %{
@@ -91,7 +81,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
            # is likely always going to be 0.
            # For example, a player in the first ally team, in the second spot
            # would have: {0, 1, 0}
-           team: {non_neg_integer(), non_neg_integer(), non_neg_integer()}
+           id: T.userid(),
+           pid: pid(),
+           team: team()
          }
 
   @typep state :: %{
@@ -101,17 +93,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            map_name: String.t(),
            game_version: String.t(),
            engine_version: String.t(),
-           ally_team_config: [
-             %{
-               max_teams: pos_integer(),
-               start_box: Asset.startbox(),
-               teams: [
-                 %{
-                   max_players: pos_integer()
-                 }
-               ]
-             }
-           ],
+           ally_team_config: ally_team_config(),
            # used to track the players in the lobby.
            players: %{T.userid() => player()}
          }
@@ -129,6 +111,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec start_link({id(), start_params()}) :: GenServer.on_start()
   def start_link({id, _start_params} = args) do
     GenServer.start_link(__MODULE__, args, name: via_tuple(id))
+  end
+
+  @spec join(id(), T.userid(), pid()) ::
+          {:ok, lobby_pid :: pid(), details()} | {:error, reason :: term()}
+  def join(lobby_id, user_id, pid) do
+    GenServer.call(via_tuple(lobby_id), {:join, user_id, pid})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
   @impl true
@@ -150,6 +140,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       players: %{
         start_params.creator_user_id => %{
           user_id: start_params.creator_user_id,
+          id: start_params.creator_user_id,
+          pid: start_params.creator_pid,
           team: {0, 0, 0}
         }
       }
@@ -174,16 +166,30 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @impl true
   def handle_call(:get_details, _from, state) do
-    details =
-      Map.take(state, [:id, :name, :map_name, :game_version, :engine_version, :ally_team_config])
-      |> Map.put(
-        :members,
-        for {p_id, p} <- state.players, into: %{} do
-          {p_id, Map.put(p, :type, :player)}
-        end
-      )
+    {:reply, {:ok, get_details_from_state(state)}, state}
+  end
 
-    {:reply, {:ok, details}, state}
+  def handle_call({:join, user_id, pid}, _from, state) do
+    # find the least full team
+    team = find_team(state.ally_team_config, Map.values(state.players))
+
+    case team do
+      nil ->
+        {:reply, {:error, :lobby_full}, state}
+
+      team ->
+        state =
+          put_in(state, [:players, user_id], %{
+            id: user_id,
+            pid: pid,
+            team: team
+          })
+          |> Map.update!(:monitors, &MC.monitor(&1, pid, {:user, user_id}))
+
+        broadcast_update({:add_player, user_id, team, state})
+
+        {:reply, {:ok, self(), get_details_from_state(state)}, state}
+    end
   end
 
   @impl true
@@ -209,5 +215,85 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec via_tuple(id()) :: GenServer.name()
   defp via_tuple(lobby_id) do
     TachyonLobby.Registry.via_tuple(lobby_id)
+  end
+
+  defp get_details_from_state(state) do
+    Map.take(state, [
+      :id,
+      :name,
+      :map_name,
+      :game_version,
+      :engine_version,
+      :ally_team_config
+    ])
+    |> Map.put(
+      :members,
+      Enum.map(state.players, fn {p_id, p} ->
+        {p_id, %{id: p.id, type: :player, team: p.team}}
+      end)
+      |> Enum.into(%{})
+    )
+  end
+
+  defp broadcast_update({:add_player, user_id, team, state}) do
+    TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
+
+    for {p_id, p} <- state.players, p_id != user_id do
+      send(
+        p.pid,
+        {:lobby, state.id, {:updated, [%{event: :add_player, id: user_id, team: team}]}}
+      )
+    end
+
+    :ok
+  end
+
+  # this function isn't too efficient, but it's never going to be run on
+  # massive inputs since the engine cannot support more than 254 players anyway
+  @spec find_team(ally_team_config(), [player()]) :: team() | nil
+  defp find_team(ally_team_config, players) do
+    # find the least full ally team
+    ally_team =
+      for {at, at_idx} <- Enum.with_index(ally_team_config) do
+        total_capacity = Enum.sum_by(at.teams, fn t -> t.max_players end)
+
+        players_in_ally_team =
+          Enum.filter(players, fn %{team: {x, _, _}} -> x == at_idx end)
+          |> Enum.count()
+
+        capacity = total_capacity - players_in_ally_team
+        {capacity, at_idx, at.teams}
+      end
+      |> Enum.filter(fn {c, _, _} -> c > 0 end)
+      # select the biggest capacity with the lowest index
+      |> Enum.min(
+        fn {c1, idx1, _}, {c2, idx2, _} ->
+          c1 >= c2 && idx1 <= idx2
+        end,
+        fn -> nil end
+      )
+
+    case ally_team do
+      nil ->
+        nil
+
+      {_, at_idx, teams} ->
+        {_, t_idx, p_idx} =
+          for {t, t_idx} <- Enum.with_index(teams) do
+            player_count =
+              Enum.filter(players, fn %{team: {x, y, _}} ->
+                x == at_idx && y == t_idx
+              end)
+              |> Enum.count()
+
+            capacity = t.max_players - player_count
+            {capacity, t_idx, player_count}
+          end
+          |> Enum.filter(fn {c, _, _} -> c > 0 end)
+          # guarantee not to raise an exception
+          |> Enum.min()
+
+        {at_idx, t_idx, p_idx}
+    end
   end
 end

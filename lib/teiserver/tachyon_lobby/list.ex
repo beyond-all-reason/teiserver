@@ -126,7 +126,7 @@ defmodule Teiserver.TachyonLobby.List do
       |> update_in([:lobbies, lobby_id], fn overview -> Map.merge(overview, changes) end)
 
     PubSubHelper.broadcast(@update_topic, %{
-      event: :updated,
+      event: :update_lobby,
       counter: state.counter,
       lobby_id: lobby_id,
       changes: changes

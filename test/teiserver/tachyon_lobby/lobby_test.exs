@@ -27,6 +27,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     {:ok, pid, details} = Lobby.create(start_params)
     p = poll_until_some(fn -> Lobby.lookup(details.id) end)
+    {:ok, pid, details} = Lobby.create(mk_start_params([1, 1]))
+    p = poll_until_some(fn -> Lobby.lookup(details.id) end)
     assert p == pid
   end
 
@@ -35,26 +37,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     {:ok, pid} =
       Task.start(fn ->
-        start_params = %{
-          creator_user_id: "1234",
-          creator_pid: self(),
-          name: "test create lobby",
-          map_name: "irrelevant map name",
-          ally_team_config: [
-            %{
-              max_teams: 1,
-              start_box: %{top: 0, left: 0, bottom: 1, right: 0.2},
-              teams: [%{max_players: 1}]
-            },
-            %{
-              max_teams: 1,
-              start_box: %{top: 0, left: 0.8, bottom: 1, right: 1},
-              teams: [%{max_players: 1}]
-            }
-          ]
-        }
-
-        {:ok, _pid, details} = Lobby.create(start_params)
+        {:ok, _pid, details} = Lobby.create(mk_start_params([1, 1]))
         send(test_pid, {:lobby_id, details.id})
 
         :timer.sleep(:infinity)
@@ -65,5 +48,64 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     Process.exit(pid, :kill)
     poll_until_nil(fn -> Lobby.lookup(lobby_id) end)
+  end
+
+  describe "joining" do
+    test "invalid lobby" do
+      assert {:error, :invalid_lobby} == Lobby.join("nope", "user-id", self())
+    end
+
+    test "can join lobby" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, _, details} = Lobby.join(id, "other-user-id", sink_pid)
+      assert details.members["other-user-id"].team == {1, 0, 0}
+
+      assert_receive {:lobby, ^id,
+                      {:updated, [%{event: :add_player, id: "other-user-id", team: {1, 0, 0}}]}}
+    end
+
+    test "join the most empty team" do
+      # create a lobby 2 vs 15. Players should be put in the largest team
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 15]))
+      {:ok, _, details} = Lobby.join(id, "user2", self())
+      assert details.members["user2"].team == {1, 0, 0}
+      {:ok, _, details} = Lobby.join(id, "user3", self())
+      assert details.members["user3"].team == {1, 1, 0}
+    end
+
+    test "lobby full" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1]))
+      {:error, :lobby_full} = Lobby.join(id, "user2", self())
+    end
+
+    test "participants get updated events on join" do
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, "user2", sink_pid)
+
+      assert_receive {:lobby, ^id,
+                      {:updated, [%{id: "user2", event: :add_player, team: {1, 0, 0}}]}}
+    end
+  end
+
+  defp mk_start_params(teams) do
+    %{
+      creator_user_id: "1234",
+      creator_pid: self(),
+      name: "test create lobby",
+      map_name: "irrelevant map name",
+      ally_team_config:
+        Enum.map(teams, fn max_team ->
+          x = for _ <- 1..max_team, do: %{max_players: 1}
+
+          %{
+            max_teams: max_team,
+            start_box: %{top: 0, left: 0, bottom: 1, right: 0.2},
+            teams: x
+          }
+        end)
+    }
   end
 end

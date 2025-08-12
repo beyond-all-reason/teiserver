@@ -3,6 +3,7 @@ defmodule Teiserver.TachyonLobby do
   Everything related to lobbies using tachyon
   """
 
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
 
@@ -31,4 +32,7 @@ defmodule Teiserver.TachyonLobby do
 
   @spec lookup(Lobby.id()) :: pid() | nil
   defdelegate lookup(lobby_id), to: TachyonLobby.Registry
+
+  @spec join(id(), T.userid(), pid()) :: {:ok, lobby_pid :: pid()} | {:error, reason :: term()}
+  defdelegate join(lobby_id, user_id, pid), to: Lobby
 end
