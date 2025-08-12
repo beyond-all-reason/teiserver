@@ -57,7 +57,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
     assert ev2.counter > ev.counter
   end
 
-  test "get updates when player joins lobby" do
+  test "get updates when player joins or leaves lobby" do
     {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
 
     {:ok, _pid, %{id: id}} =
@@ -68,6 +68,23 @@ defmodule Teiserver.TachyonLobby.ListTest do
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
     {:ok, _, _} = Lobby.join(id, "user2", sink_pid)
     assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
+
+    :ok = Lobby.leave(id, "user2")
+    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 1}}
+  end
+
+  test "remove update when last player leaves" do
+    {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+
+    {:ok, _pid, %{id: id}} =
+      mk_start_params([2, 2])
+      |> Map.replace!(:creator_pid, sink_pid)
+      |> Lobby.create()
+
+    assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
+
+    :ok = Lobby.leave(id, "1234")
+    assert_receive %{lobby_id: ^id, event: :remove_lobby}
   end
 
   defp overview_fixture() do

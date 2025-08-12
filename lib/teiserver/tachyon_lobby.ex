@@ -35,4 +35,7 @@ defmodule Teiserver.TachyonLobby do
 
   @spec join(id(), T.userid(), pid()) :: {:ok, lobby_pid :: pid()} | {:error, reason :: term()}
   defdelegate join(lobby_id, user_id, pid), to: Lobby
+
+  @spec leave(id(), T.userid()) :: :ok | {:error, reason :: term()}
+  defdelegate leave(lobby_id, user_id), to: Lobby
 end

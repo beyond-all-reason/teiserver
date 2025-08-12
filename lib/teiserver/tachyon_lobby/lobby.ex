@@ -121,6 +121,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
+  @spec leave(id(), T.userid()) :: :ok | {:error, reason :: term()}
+  def leave(lobby_id, user_id) do
+    GenServer.call(via_tuple(lobby_id), {:leave, user_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
   @impl true
   @spec init({id(), start_params()}) :: {:ok, state()}
   def init({id, start_params}) do
@@ -192,6 +199,54 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  def handle_call({:leave, user_id}, _from, state) when not is_map_key(state.players, user_id),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:leave, user_id}, _from, state) do
+    {%{team: {at_idx, t_idx, p_idx}} = removed, players} =
+      Map.pop!(state.players, user_id)
+
+    # reorg the other players to keep the team indices consecutive
+    # ally team won't change
+    {player_changes, updated_players} =
+      Enum.reduce(players, {[], %{}}, fn {p_id, p}, {player_changes, players} ->
+        {x, y, z} = p.team
+
+        cond do
+          x == at_idx && y >= t_idx && p_idx == 0 ->
+            # p_idx == 0 means the player removed was the last one on their team
+            # so its team can be "removed", and all teams with a higher index should
+            # be moved back by 1
+            team = {x, y - 1, z}
+
+            {[{:player_moved, p_id, team} | player_changes],
+             Map.put(players, p_id, %{p | team: team})}
+
+          x == at_idx && y >= t_idx && z >= p_idx ->
+            # similar there, but we only shuffle the players in the same team (archons)
+            team = {x, y, z - 1}
+
+            {[{:player_moved, p_id, team} | player_changes],
+             Map.put(players, p_id, %{p | team: team})}
+
+          true ->
+            {player_changes, Map.put(players, p_id, p)}
+        end
+      end)
+
+    state =
+      Map.update!(state, :monitors, &MC.demonitor_by_val(&1, removed.id))
+      |> Map.put(:players, updated_players)
+
+    if map_size(state.players) == 0 do
+      {:reply, :ok, state, {:continue, :empty}}
+    else
+      broadcast_update({:remove_player, user_id, player_changes, state})
+
+      {:reply, :ok, state}
+    end
+  end
+
   @impl true
   def handle_info({:DOWN, ref, :process, _obj, _reason}, state) do
     val = MC.get_val(state.monitors, ref)
@@ -210,6 +265,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
     else
       {:noreply, state}
     end
+  end
+
+  @impl true
+  def handle_continue(:empty, state) do
+    {:stop, {:shutdown, :empty}, state}
   end
 
   @spec via_tuple(id()) :: GenServer.name()
@@ -246,6 +306,19 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
 
     :ok
+  end
+
+  defp broadcast_update({:remove_player, user_id, player_changes, state}) do
+    TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
+
+    events =
+      for {:player_moved, p_id, team} <- player_changes,
+          do: %{event: :change_player, id: p_id, team: team}
+
+    events = [%{event: :remove_player, id: user_id} | events]
+
+    for {_p_id, p} <- state.players,
+        do: send(p.pid, {:lobby, state.id, {:updated, events}})
   end
 
   # this function isn't too efficient, but it's never going to be run on

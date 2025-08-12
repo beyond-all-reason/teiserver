@@ -90,6 +90,70 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "leaving" do
+    test "cannot leave lobby if not in the lobby" do
+      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 1]))
+      {:error, :not_in_lobby} = Lobby.leave(id, "not here")
+    end
+
+    test "cannot leave lobby if already left" do
+      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 1]))
+      {:ok, _pid, _details} = Lobby.join(id, "user2", self())
+      :ok = Lobby.leave(id, "user2")
+      {:error, :not_in_lobby} = Lobby.leave(id, "user2")
+    end
+
+    test "can leave lobby" do
+      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, _details} = Lobby.join(id, "user2", self())
+      {:ok, _pid, _details} = Lobby.join(id, "user3", self())
+      {:ok, _pid, details} = Lobby.join(id, "user4", self())
+
+      # user 2 and 4 should be on the same team
+      assert details.members["user2"].team == {1, 0, 0}
+      assert details.members["user4"].team == {1, 1, 0}
+      :ok = Lobby.leave(id, "user2")
+
+      # join again to get the details
+      {:ok, _pid, details} = Lobby.join(id, "user2", self())
+      assert details.members["user4"].team == {1, 0, 0}
+      assert details.members["user2"].team == {1, 1, 0}
+    end
+
+    test "leaving lobby send updates to remaining members" do
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, _details} = Lobby.join(id, "user2", sink_pid)
+      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
+
+      :ok = Lobby.leave(id, "user2")
+      assert_received {:lobby, ^id, {:updated, [%{event: :remove_player, id: "user2"}]}}
+    end
+
+    test "reshuffling player on leave sends updates" do
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, _details} = Lobby.join(id, "user2", sink_pid)
+      {:ok, _pid, _details} = Lobby.join(id, "user3", sink_pid)
+      {:ok, _pid, _details} = Lobby.join(id, "user4", sink_pid)
+
+      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
+      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
+      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
+
+      :ok = Lobby.leave(id, "user2")
+      assert_received {:lobby, ^id, {:updated, events}}
+
+      expected =
+        MapSet.new([
+          %{event: :remove_player, id: "user2"},
+          %{event: :change_player, id: "user4", team: {1, 0, 0}}
+        ])
+
+      assert expected == MapSet.new(events)
+    end
+  end
+
   defp mk_start_params(teams) do
     %{
       creator_user_id: "1234",
