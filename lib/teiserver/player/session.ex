@@ -1305,7 +1305,8 @@ defmodule Teiserver.Player.Session do
       # we get the same struct every time, possibly with nil values for some keys
       # but in the meantime, just defensively get the country
       country: Map.get(user, :country, "??"),
-      status: status
+      status: status,
+      roles: Teiserver.Player.TachyonHandler.convert_teiserver_roles_to_tachyon(user.roles)
     }
 
     PubSub.broadcast!(
