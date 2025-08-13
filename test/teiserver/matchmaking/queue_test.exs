@@ -71,23 +71,51 @@ defmodule Teiserver.Matchmaking.QueueTest do
     test "initial stats are zero", %{queue_id: queue_id} do
       # Initially stats should be zero
       {:ok, stats} = Matchmaking.get_stats(queue_id)
-      assert stats == %{total_joined: 0, total_left: 0, total_matched: 0, total_wait_time_s: 0}
+
+      assert stats == %{
+               total_joined: 0,
+               total_left: 0,
+               total_matched: 0,
+               total_wait_time_s: 0,
+               player_count: 0
+             }
     end
 
     test "tracks joins and leaves", %{user: user, queue_id: queue_id} do
       # Initially stats should be zero
       {:ok, stats} = Matchmaking.get_stats(queue_id)
-      assert stats == %{total_joined: 0, total_left: 0, total_matched: 0, total_wait_time_s: 0}
+
+      assert stats == %{
+               total_joined: 0,
+               total_left: 0,
+               total_matched: 0,
+               total_wait_time_s: 0,
+               player_count: 0
+             }
 
       # Join the queue
       {:ok, _pid} = Matchmaking.join_queue(queue_id, user.id)
       {:ok, stats} = Matchmaking.get_stats(queue_id)
-      assert stats == %{total_joined: 1, total_left: 0, total_matched: 0, total_wait_time_s: 0}
+
+      assert stats == %{
+               total_joined: 1,
+               total_left: 0,
+               total_matched: 0,
+               total_wait_time_s: 0,
+               player_count: 1
+             }
 
       # Leave the queue
       :ok = Matchmaking.leave_queue(queue_id, user.id)
       {:ok, stats} = Matchmaking.get_stats(queue_id)
-      assert stats == %{total_joined: 1, total_left: 1, total_matched: 0, total_wait_time_s: 0}
+
+      assert stats == %{
+               total_joined: 1,
+               total_left: 1,
+               total_matched: 0,
+               total_wait_time_s: 0,
+               player_count: 0
+             }
     end
 
     test "tracks party joins", %{queue_id: queue_id} do
@@ -98,13 +126,25 @@ defmodule Teiserver.Matchmaking.QueueTest do
       {:ok, _pid} = Matchmaking.party_join_queue(queue_id, party_id, [user1])
       {:ok, stats} = Matchmaking.get_stats(queue_id)
       # No stats updated yet, party is pending
-      assert stats == %{total_joined: 0, total_left: 0, total_matched: 0, total_wait_time_s: 0}
+      assert stats == %{
+               total_joined: 0,
+               total_left: 0,
+               total_matched: 0,
+               total_wait_time_s: 0,
+               player_count: 0
+             }
 
       # Now actually join the queue with the party
       {:ok, _pid} = Matchmaking.join_queue(queue_id, user1.id, party_id)
       {:ok, stats} = Matchmaking.get_stats(queue_id)
       # Now the player has joined
-      assert stats == %{total_joined: 1, total_left: 0, total_matched: 0, total_wait_time_s: 0}
+      assert stats == %{
+               total_joined: 1,
+               total_left: 0,
+               total_matched: 0,
+               total_wait_time_s: 0,
+               player_count: 1
+             }
     end
 
     test "tracks wait time when matches are created", %{queue_id: queue_id} do
@@ -114,7 +154,14 @@ defmodule Teiserver.Matchmaking.QueueTest do
       # Join first user
       {:ok, _pid} = Matchmaking.join_queue(queue_id, user1.id)
       {:ok, stats} = Matchmaking.get_stats(queue_id)
-      assert stats == %{total_joined: 1, total_left: 0, total_matched: 0, total_wait_time_s: 0}
+
+      assert stats == %{
+               total_joined: 1,
+               total_left: 0,
+               total_matched: 0,
+               total_wait_time_s: 0,
+               player_count: 1
+             }
 
       # Join second user (this should trigger a match)
       {:ok, _pid} = Matchmaking.join_queue(queue_id, user2.id)
