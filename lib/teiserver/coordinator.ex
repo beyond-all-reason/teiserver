@@ -119,15 +119,15 @@ defmodule Teiserver.Coordinator do
     end
   end
 
-  @spec call_consul(pid() | T.lobby_id(), any) :: any
-  def call_consul(lobby_id, msg) when is_integer(lobby_id) do
+  @spec call_consul(pid() | T.lobby_id(), any, timeout()) :: any
+  def call_consul(lobby_id, msg, timeout \\ 5_000) when is_integer(lobby_id) do
     case get_consul_pid(lobby_id) do
       nil ->
         nil
 
       pid ->
         try do
-          GenServer.call(pid, msg)
+          GenServer.call(pid, msg, timeout)
 
           # If the process has somehow died, we just return nil
         catch
@@ -291,9 +291,9 @@ defmodule Teiserver.Coordinator do
     CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
   end
 
-  @spec get_team_config(integer()) :: map()
-  def get_team_config(lobby_id) do
-    call_consul(lobby_id, :get_team_config)
+  @spec get_team_config(integer(), timeout()) :: map()
+  def get_team_config(lobby_id, timeout \\ 5_000) do
+    call_consul(lobby_id, :get_team_config, timeout)
   end
 
   # Debug stuff
