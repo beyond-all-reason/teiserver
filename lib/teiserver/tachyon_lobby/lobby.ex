@@ -215,9 +215,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
     state =
       case val do
         {:user, user_id} ->
-          state = %{state | players: Map.delete(state.players, user_id)}
-          TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
-          state
+          case remove_player(user_id, state) do
+            {:ok, state} -> state
+            _ -> state
+          end
       end
 
     if Enum.empty?(state.players) do

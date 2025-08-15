@@ -152,6 +152,16 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       assert expected == MapSet.new(events)
     end
+
+    test "player pid dying means player is removed from lobby" do
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, _details} = Lobby.join(id, "user2", sink_pid)
+      assert_receive {:lobby, ^id, {:updated, [%{event: :add_player}]}}
+
+      Process.exit(sink_pid, :kill)
+      assert_receive {:lobby, ^id, {:updated, [%{event: :remove_player, id: "user2"}]}}
+    end
   end
 
   defp mk_start_params(teams) do
