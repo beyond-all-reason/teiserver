@@ -66,7 +66,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
       |> Lobby.create()
 
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
-    {:ok, _, _} = Lobby.join(id, "user2", sink_pid)
+    {:ok, _, _} = Lobby.join(id, %{id: "user2"}, sink_pid)
     assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
 
     :ok = Lobby.leave(id, "user2")
@@ -100,7 +100,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
 
   defp mk_start_params(teams) do
     %{
-      creator_user_id: "1234",
+      creator_data: %{id: "1234"},
       creator_pid: self(),
       name: "test create lobby",
       map_name: "irrelevant map name",

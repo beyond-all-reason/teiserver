@@ -26,6 +26,27 @@ defmodule Teiserver.TachyonLobby.Lobby do
         ]
 
   @typedoc """
+  Data required for a player to join a lobby. This allow lobbies to
+  be agnostic of how players are represented in the system
+  """
+  @type player_join_data :: %{
+          id: T.userid()
+        }
+
+  @typedoc """
+  the parameters required to create a new lobby.
+  It's enough data to generate the initial lobby internal state, which in
+  turn can be used to start a battle
+  """
+  @type start_params :: %{
+          creator_data: player_join_data(),
+          creator_pid: pid(),
+          name: String.t(),
+          map_name: String.t(),
+          ally_team_config: ally_team_config()
+        }
+
+  @typedoc """
   These represent the indices respectively into
   {ally team index, team index, player index}
   since we don't really support "archon mode" though, the player index
@@ -59,19 +80,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
                 id: Teiserver.TachyonBattle.id(),
                 started_at: DateTime.t()
               }
-        }
-
-  @typedoc """
-  the parameters required to create a new lobby.
-  It's enough data to generate the initial lobby internal state, which in
-  turn can be used to start a battle
-  """
-  @type start_params :: %{
-          creator_user_id: T.userid(),
-          creator_pid: pid(),
-          name: String.t(),
-          map_name: String.t(),
-          ally_team_config: ally_team_config()
         }
 
   @typep player :: %{
@@ -113,10 +121,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
     GenServer.start_link(__MODULE__, args, name: via_tuple(id))
   end
 
-  @spec join(id(), T.userid(), pid()) ::
+  @spec join(id(), player_join_data(), pid()) ::
           {:ok, lobby_pid :: pid(), details()} | {:error, reason :: term()}
-  def join(lobby_id, user_id, pid) do
-    GenServer.call(via_tuple(lobby_id), {:join, user_id, pid})
+  def join(lobby_id, join_data, pid) do
+    GenServer.call(via_tuple(lobby_id), {:join, join_data, pid})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
@@ -134,7 +142,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     Logger.metadata(actor_type: :lobby, actor_id: id)
 
     monitors =
-      MC.new() |> MC.monitor(start_params.creator_pid, {:user, start_params.creator_user_id})
+      MC.new() |> MC.monitor(start_params.creator_pid, {:user, start_params.creator_data.id})
 
     state = %{
       id: id,
@@ -145,9 +153,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       engine_version: "2025.04.08",
       ally_team_config: start_params.ally_team_config,
       players: %{
-        start_params.creator_user_id => %{
-          user_id: start_params.creator_user_id,
-          id: start_params.creator_user_id,
+        start_params.creator_data.id => %{
+          id: start_params.creator_data.id,
           pid: start_params.creator_pid,
           team: {0, 0, 0}
         }
@@ -176,9 +183,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:reply, {:ok, get_details_from_state(state)}, state}
   end
 
-  def handle_call({:join, user_id, pid}, _from, state) do
+  def handle_call({:join, join_data, pid}, _from, state) do
     # find the least full team
     team = find_team(state.ally_team_config, Map.values(state.players))
+    user_id = join_data.id
 
     case team do
       nil ->

@@ -6,27 +6,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   @moduletag :tachyon
 
   test "create a lobby" do
-    start_params = %{
-      creator_user_id: "1234",
-      creator_pid: self(),
-      name: "test create lobby",
-      map_name: "irrelevant map name",
-      ally_team_config: [
-        %{
-          max_teams: 1,
-          start_box: %{top: 0, left: 0, bottom: 1, right: 0.2},
-          teams: [%{max_players: 1}]
-        },
-        %{
-          max_teams: 1,
-          start_box: %{top: 0, left: 0.8, bottom: 1, right: 1},
-          teams: [%{max_players: 1}]
-        }
-      ]
-    }
-
-    {:ok, _pid, details} = Lobby.create(start_params)
-    poll_until_some(fn -> Lobby.lookup(details.id) end)
     {:ok, pid, details} = Lobby.create(mk_start_params([1, 1]))
     p = poll_until_some(fn -> Lobby.lookup(details.id) end)
     assert p == pid
@@ -52,14 +31,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   describe "joining" do
     test "invalid lobby" do
-      assert {:error, :invalid_lobby} == Lobby.join("nope", "user-id", self())
+      assert {:error, :invalid_lobby} == Lobby.join("nope", mk_player("user-id"), self())
     end
 
     test "can join lobby" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
 
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
-      {:ok, _, details} = Lobby.join(id, "other-user-id", sink_pid)
+      {:ok, _, details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
       assert details.members["other-user-id"].team == {1, 0, 0}
 
       assert_receive {:lobby, ^id,
@@ -69,21 +48,21 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "join the most empty team" do
       # create a lobby 2 vs 15. Players should be put in the largest team
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 15]))
-      {:ok, _, details} = Lobby.join(id, "user2", self())
+      {:ok, _, details} = Lobby.join(id, mk_player("user2"), self())
       assert details.members["user2"].team == {1, 0, 0}
-      {:ok, _, details} = Lobby.join(id, "user3", self())
+      {:ok, _, details} = Lobby.join(id, mk_player("user3"), self())
       assert details.members["user3"].team == {1, 1, 0}
     end
 
     test "lobby full" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1]))
-      {:error, :lobby_full} = Lobby.join(id, "user2", self())
+      {:error, :lobby_full} = Lobby.join(id, mk_player("user2"), self())
     end
 
     test "participants get updated events on join" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
-      {:ok, _, _details} = Lobby.join(id, "user2", sink_pid)
+      {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
 
       assert_receive {:lobby, ^id,
                       {:updated, [%{id: "user2", event: :add_player, team: {1, 0, 0}}]}}
@@ -98,16 +77,16 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     test "cannot leave lobby if already left" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 1]))
-      {:ok, _pid, _details} = Lobby.join(id, "user2", self())
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
       :ok = Lobby.leave(id, "user2")
       {:error, :not_in_lobby} = Lobby.leave(id, "user2")
     end
 
     test "can leave lobby" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
-      {:ok, _pid, _details} = Lobby.join(id, "user2", self())
-      {:ok, _pid, _details} = Lobby.join(id, "user3", self())
-      {:ok, _pid, details} = Lobby.join(id, "user4", self())
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user3"), self())
+      {:ok, _pid, details} = Lobby.join(id, mk_player("user4"), self())
 
       # user 2 and 4 should be on the same team
       assert details.members["user2"].team == {1, 0, 0}
@@ -115,7 +94,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.leave(id, "user2")
 
       # join again to get the details
-      {:ok, _pid, details} = Lobby.join(id, "user2", self())
+      {:ok, _pid, details} = Lobby.join(id, mk_player("user2"), self())
       assert details.members["user4"].team == {1, 0, 0}
       assert details.members["user2"].team == {1, 1, 0}
     end
@@ -123,7 +102,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "leaving lobby send updates to remaining members" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
-      {:ok, _pid, _details} = Lobby.join(id, "user2", sink_pid)
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
       assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
 
       :ok = Lobby.leave(id, "user2")
@@ -133,9 +112,9 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "reshuffling player on leave sends updates" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
-      {:ok, _pid, _details} = Lobby.join(id, "user2", sink_pid)
-      {:ok, _pid, _details} = Lobby.join(id, "user3", sink_pid)
-      {:ok, _pid, _details} = Lobby.join(id, "user4", sink_pid)
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user3"), sink_pid)
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user4"), sink_pid)
 
       assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
       assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
@@ -155,8 +134,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     test "player pid dying means player is removed from lobby" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
-      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
-      {:ok, _pid, _details} = Lobby.join(id, "user2", sink_pid)
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
       assert_receive {:lobby, ^id, {:updated, [%{event: :add_player}]}}
 
       Process.exit(sink_pid, :kill)
@@ -166,7 +145,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   defp mk_start_params(teams) do
     %{
-      creator_user_id: "1234",
+      creator_data: %{id: "1234"},
       creator_pid: self(),
       name: "test create lobby",
       map_name: "irrelevant map name",
@@ -181,5 +160,9 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
           }
         end)
     }
+  end
+
+  defp mk_player(user_id) do
+    %{id: user_id}
   end
 end
