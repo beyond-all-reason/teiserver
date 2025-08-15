@@ -8,6 +8,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   alias Teiserver.Asset
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
   alias Teiserver.Helpers.MonitorCollection, as: MC
 
@@ -30,7 +31,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   be agnostic of how players are represented in the system
   """
   @type player_join_data :: %{
-          id: T.userid()
+          id: T.userid(),
+          name: String.t()
         }
 
   @typedoc """
@@ -90,6 +92,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
            # For example, a player in the first ally team, in the second spot
            # would have: {0, 1, 0}
            id: T.userid(),
+           name: String.t(),
+           # used to generate the start script, and then will be sent to the
+           # player so they can join the battle
+           password: String.t(),
            pid: pid(),
            team: team()
          }
@@ -155,6 +161,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       players: %{
         start_params.creator_data.id => %{
           id: start_params.creator_data.id,
+          name: start_params.creator_data.name,
+          password: gen_password(),
           pid: start_params.creator_pid,
           team: {0, 0, 0}
         }
@@ -196,6 +204,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
         state =
           put_in(state, [:players, user_id], %{
             id: user_id,
+            name: join_data.name,
+            password: gen_password(),
             pid: pid,
             team: team
           })
@@ -384,4 +394,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     {:ok, state}
   end
+
+  defp gen_password(), do: :crypto.strong_rand_bytes(16) |> Base.encode16()
 end

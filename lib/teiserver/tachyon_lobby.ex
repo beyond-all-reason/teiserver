@@ -33,8 +33,10 @@ defmodule Teiserver.TachyonLobby do
   @spec lookup(Lobby.id()) :: pid() | nil
   defdelegate lookup(lobby_id), to: TachyonLobby.Registry
 
-  @spec join(id(), T.userid(), pid()) :: {:ok, lobby_pid :: pid()} | {:error, reason :: term()}
-  defdelegate join(lobby_id, user_id, pid), to: Lobby
+  @type player_join_data :: Lobby.player_join_data()
+  @spec join(id(), player_join_data(), pid()) ::
+          {:ok, lobby_pid :: pid(), details()} | {:error, reason :: term()}
+  defdelegate join(lobby_id, join_data, pid), to: Lobby
 
   @spec leave(id(), T.userid()) :: :ok | {:error, reason :: term()}
   defdelegate leave(lobby_id, user_id), to: Lobby

@@ -145,7 +145,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   defp mk_start_params(teams) do
     %{
-      creator_data: %{id: "1234"},
+      creator_data: %{id: "1234", name: "name-1234"},
       creator_pid: self(),
       name: "test create lobby",
       map_name: "irrelevant map name",
@@ -163,6 +163,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   end
 
   defp mk_player(user_id) do
-    %{id: user_id}
+    %{id: user_id, name: "name-#{user_id}"}
   end
 end
