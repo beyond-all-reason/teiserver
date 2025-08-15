@@ -40,4 +40,7 @@ defmodule Teiserver.TachyonLobby do
 
   @spec leave(id(), T.userid()) :: :ok | {:error, reason :: term()}
   defdelegate leave(lobby_id, user_id), to: Lobby
+
+  @spec start_battle(id(), T.userid()) :: :ok | {:error, reason :: term()}
+  defdelegate start_battle(lobby_id, user_id), to: Lobby
 end

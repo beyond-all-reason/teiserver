@@ -7,10 +7,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
   use GenServer, restart: :transient
 
   alias Teiserver.Asset
+  alias Teiserver.Autohost
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.MonitorCollection, as: MC
+  alias Teiserver.Player
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
-  alias Teiserver.Helpers.MonitorCollection, as: MC
 
   @type id :: String.t()
 
@@ -109,7 +111,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
            engine_version: String.t(),
            ally_team_config: ally_team_config(),
            # used to track the players in the lobby.
-           players: %{T.userid() => player()}
+           players: %{T.userid() => player()},
+           current_battle:
+             nil
+             | %{
+                 id: Teiserver.TachyonBattle.id(),
+                 started_at: DateTime.t()
+               }
          }
 
   @spec gen_id() :: id()
@@ -142,6 +150,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
+  @spec start_battle(id(), T.userid()) :: :ok | {:error, reason :: term()}
+  def start_battle(lobby_id, user_id) do
+    GenServer.call(via_tuple(lobby_id), {:start_battle, user_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
   @impl true
   @spec init({id(), start_params()}) :: {:ok, state()}
   def init({id, start_params}) do
@@ -166,7 +181,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
           pid: start_params.creator_pid,
           team: {0, 0, 0}
         }
-      }
+      },
+      current_battle: nil
     }
 
     TachyonLobby.List.register_lobby(self(), id, %{
@@ -227,6 +243,40 @@ defmodule Teiserver.TachyonLobby.Lobby do
       {:ok, state} when map_size(state.players) > 0 -> {:reply, :ok, state}
       {:ok, state} -> {:reply, :ok, state, {:continue, :empty}}
       {:error, _} = err -> {:reply, err, state}
+    end
+  end
+
+  def handle_call({:start_battle, user_id}, _from, state)
+      when not is_map_key(state.players, user_id),
+      do: {:reply, {:error, :not_a_player_in_lobby}, state}
+
+  def handle_call({:start_battle, _user_id}, _from, state) do
+    with autohost_id when autohost_id != nil <- Autohost.find_autohost(),
+         {:ok, {battle_id, _} = battle_data, host_data} <-
+           TachyonBattle.start_battle(
+             autohost_id,
+             gen_start_script(state)
+           ) do
+      start_data = %{
+        ips: host_data.ips,
+        port: host_data.port,
+        engine: %{version: state.engine_version},
+        game: %{springName: state.game_version},
+        map: %{springName: state.map_name}
+      }
+
+      for {p_id, _p} <- state.players, do: Player.battle_start(p_id, battle_data, start_data)
+      state = %{state | current_battle: %{id: battle_id, started_at: DateTime.utc_now()}}
+
+      {:reply, :ok, state}
+    else
+      nil ->
+        Logger.warning("No autohost available to start lobby battle")
+        {:reply, {:error, :no_autohost}, state}
+
+      {:error, reason} ->
+        Logger.error("Cannot start lobby battle: #{inspect(reason)}")
+        {:reply, {:error, reason}, state}
     end
   end
 
@@ -401,4 +451,46 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   defp gen_password(), do: :crypto.strong_rand_bytes(16) |> Base.encode16()
+
+  @spec gen_start_script(state()) :: TachyonBattle.start_script()
+  defp gen_start_script(state) do
+    sorted =
+      Map.values(state.players)
+      |> Enum.sort_by(& &1.team)
+      |> Enum.group_by(&elem(&1.team, 0))
+
+    ally_teams =
+      for i <- 0..(map_size(sorted) - 1) do
+        at = sorted[i]
+        at_config = Enum.at(state.ally_team_config, i)
+
+        teams = Enum.group_by(at, &elem(&1.team, 1))
+
+        teams =
+          for j <- 0..(map_size(teams) - 1) do
+            ps = teams[j]
+
+            players =
+              for p <- ps do
+                %{
+                  userId: to_string(p.id),
+                  name: p.name,
+                  password: p.password
+                }
+              end
+
+            %{players: players}
+          end
+
+        %{teams: teams, startBox: at_config.start_box}
+      end
+
+    %{
+      engineVersion: state.engine_version,
+      gameName: state.game_version,
+      mapName: state.map_name,
+      startPosType: :ingame,
+      allyTeams: ally_teams
+    }
+  end
 end

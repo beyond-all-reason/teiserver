@@ -149,6 +149,22 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "start battle" do
+    test "lobby must be valid" do
+      {:error, :invalid_lobby} = Lobby.start_battle("nolobby", "user1")
+    end
+
+    test "must be in lobby" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :not_a_player_in_lobby} = Lobby.start_battle(id, "not in lobby")
+    end
+
+    # can't really test the full path when starting a battle without a ws connection
+    # because TachyonBattle.start_battle does a sync call to the autohost and
+    # blocks until it gets the response
+    # see tests in teiserver_web/tachyon_lobby for these bits
+  end
+
   defp mk_start_params(teams) do
     %{
       creator_data: %{id: "1234", name: "name-1234"},
