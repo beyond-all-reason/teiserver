@@ -67,7 +67,8 @@ defmodule Teiserver.Player.TachyonHandler do
         friendIds: Enum.map(friends, fn %{userId: uid} -> uid end),
         outgoingFriendRequest: outgoing,
         incomingFriendRequest: incoming,
-        ignoreIds: []
+        ignoreIds: [],
+        roles: convert_teiserver_roles_to_tachyon(user.roles)
       }
     }
 
@@ -158,7 +159,8 @@ defmodule Teiserver.Player.TachyonHandler do
           username: user_state.username,
           clanId: user_state.clan_id,
           country: user_state.country,
-          status: user_state.status
+          status: user_state.status,
+          roles: user_state.roles
         }
       ]
     }
@@ -348,7 +350,8 @@ defmodule Teiserver.Player.TachyonHandler do
           displayName: user.name,
           clanId: user.clan_id,
           countryCode: user.country,
-          status: status
+          status: status,
+          roles: convert_teiserver_roles_to_tachyon(user.roles)
         }
 
       {:response, resp, state}
@@ -712,5 +715,24 @@ defmodule Teiserver.Player.TachyonHandler do
           }
         end)
     }
+  end
+
+  @doc """
+  Converts Teiserver role names to Tachyon role names.
+  Only roles that have Tachyon equivalents are included.
+  """
+  def convert_teiserver_roles_to_tachyon(teiserver_roles) when is_list(teiserver_roles) do
+    teiserver_roles
+    |> Enum.map(fn role ->
+      case role do
+        "Contributor" -> "contributor"
+        "Admin" -> "admin"
+        "Moderator" -> "moderator"
+        "Caster" -> "tournament_caster"
+        "Tournament winner" -> "tournament_winner"
+        _ -> nil
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
   end
 end
