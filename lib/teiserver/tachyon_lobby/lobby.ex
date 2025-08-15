@@ -199,51 +199,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
-  def handle_call({:leave, user_id}, _from, state) when not is_map_key(state.players, user_id),
-    do: {:reply, {:error, :not_in_lobby}, state}
-
   def handle_call({:leave, user_id}, _from, state) do
-    {%{team: {at_idx, t_idx, p_idx}} = removed, players} =
-      Map.pop!(state.players, user_id)
-
-    # reorg the other players to keep the team indices consecutive
-    # ally team won't change
-    {player_changes, updated_players} =
-      Enum.reduce(players, {[], %{}}, fn {p_id, p}, {player_changes, players} ->
-        {x, y, z} = p.team
-
-        cond do
-          x == at_idx && y >= t_idx && p_idx == 0 ->
-            # p_idx == 0 means the player removed was the last one on their team
-            # so its team can be "removed", and all teams with a higher index should
-            # be moved back by 1
-            team = {x, y - 1, z}
-
-            {[{:player_moved, p_id, team} | player_changes],
-             Map.put(players, p_id, %{p | team: team})}
-
-          x == at_idx && y >= t_idx && z >= p_idx ->
-            # similar there, but we only shuffle the players in the same team (archons)
-            team = {x, y, z - 1}
-
-            {[{:player_moved, p_id, team} | player_changes],
-             Map.put(players, p_id, %{p | team: team})}
-
-          true ->
-            {player_changes, Map.put(players, p_id, p)}
-        end
-      end)
-
-    state =
-      Map.update!(state, :monitors, &MC.demonitor_by_val(&1, removed.id))
-      |> Map.put(:players, updated_players)
-
-    if map_size(state.players) == 0 do
-      {:reply, :ok, state, {:continue, :empty}}
-    else
-      broadcast_update({:remove_player, user_id, player_changes, state})
-
-      {:reply, :ok, state}
+    case remove_player(user_id, state) do
+      {:ok, state} when map_size(state.players) > 0 -> {:reply, :ok, state}
+      {:ok, state} -> {:reply, :ok, state, {:continue, :empty}}
+      {:error, _} = err -> {:reply, err, state}
     end
   end
 
@@ -368,5 +328,51 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
         {at_idx, t_idx, p_idx}
     end
+  end
+
+  @spec remove_player(T.userid(), state()) :: {:ok, state()} | {:error, :not_in_lobby}
+  defp remove_player(user_id, state) when not is_map_key(state.players, user_id),
+    do: {:error, :not_in_lobby}
+
+  defp remove_player(user_id, state) do
+    {%{team: {at_idx, t_idx, p_idx}} = removed, players} =
+      Map.pop!(state.players, user_id)
+
+    # reorg the other players to keep the team indices consecutive
+    # ally team won't change
+    {player_changes, updated_players} =
+      Enum.reduce(players, {[], %{}}, fn {p_id, p}, {player_changes, players} ->
+        {x, y, z} = p.team
+
+        cond do
+          x == at_idx && y >= t_idx && p_idx == 0 ->
+            # p_idx == 0 means the player removed was the last one on their team
+            # so its team can be "removed", and all teams with a higher index should
+            # be moved back by 1
+            team = {x, y - 1, z}
+
+            {[{:player_moved, p_id, team} | player_changes],
+             Map.put(players, p_id, %{p | team: team})}
+
+          x == at_idx && y >= t_idx && z >= p_idx ->
+            # similar there, but we only shuffle the players in the same team (archons)
+            team = {x, y, z - 1}
+
+            {[{:player_moved, p_id, team} | player_changes],
+             Map.put(players, p_id, %{p | team: team})}
+
+          true ->
+            {player_changes, Map.put(players, p_id, p)}
+        end
+      end)
+
+    state =
+      Map.update!(state, :monitors, &MC.demonitor_by_val(&1, removed.id))
+      |> Map.put(:players, updated_players)
+
+    if map_size(state.players) > 0,
+      do: broadcast_update({:remove_player, user_id, player_changes, state})
+
+    {:ok, state}
   end
 end

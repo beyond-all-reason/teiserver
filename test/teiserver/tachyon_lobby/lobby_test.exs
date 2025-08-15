@@ -25,8 +25,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       ]
     }
 
-    {:ok, pid, details} = Lobby.create(start_params)
-    p = poll_until_some(fn -> Lobby.lookup(details.id) end)
+    {:ok, _pid, details} = Lobby.create(start_params)
+    poll_until_some(fn -> Lobby.lookup(details.id) end)
     {:ok, pid, details} = Lobby.create(mk_start_params([1, 1]))
     p = poll_until_some(fn -> Lobby.lookup(details.id) end)
     assert p == pid
@@ -92,19 +92,19 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   describe "leaving" do
     test "cannot leave lobby if not in the lobby" do
-      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 1]))
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 1]))
       {:error, :not_in_lobby} = Lobby.leave(id, "not here")
     end
 
     test "cannot leave lobby if already left" do
-      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 1]))
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 1]))
       {:ok, _pid, _details} = Lobby.join(id, "user2", self())
       :ok = Lobby.leave(id, "user2")
       {:error, :not_in_lobby} = Lobby.leave(id, "user2")
     end
 
     test "can leave lobby" do
-      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, "user2", self())
       {:ok, _pid, _details} = Lobby.join(id, "user3", self())
       {:ok, _pid, details} = Lobby.join(id, "user4", self())
@@ -122,7 +122,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     test "leaving lobby send updates to remaining members" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
-      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, "user2", sink_pid)
       assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
 
@@ -132,7 +132,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     test "reshuffling player on leave sends updates" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
-      {:ok, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, "user2", sink_pid)
       {:ok, _pid, _details} = Lobby.join(id, "user3", sink_pid)
       {:ok, _pid, _details} = Lobby.join(id, "user4", sink_pid)
