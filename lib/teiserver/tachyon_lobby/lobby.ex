@@ -12,6 +12,54 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @type id :: String.t()
 
+  @type ally_team_config :: [
+          %{
+            max_teams: pos_integer(),
+            start_box: Asset.startbox(),
+            teams: [
+              %{
+                max_players: pos_integer()
+              }
+            ]
+          }
+        ]
+
+  @typedoc """
+  These represent the indices respectively into
+  {ally team index, team index, player index}
+  since we don't really support "archon mode" though, the player index
+  is likely always going to be 0.
+  For example, a player in the first ally team, in the second spot
+  would have: {0, 1, 0}
+  """
+  @type team :: {non_neg_integer(), non_neg_integer(), non_neg_integer()}
+
+  @typedoc """
+  The public state of the lobby. Anything that clients need to know about
+  when in a lobby should be exposed in the details object
+  """
+  @type details :: %{
+          id: id(),
+          name: String.t(),
+          map_name: String.t(),
+          game_version: String.t(),
+          engine_version: String.t(),
+          ally_team_config: ally_team_config(),
+          members: %{
+            T.userid() => %{
+              type: :player,
+              id: T.userid(),
+              team: team()
+            }
+          },
+          current_battle:
+            nil
+            | %{
+                id: Teiserver.TachyonBattle.id(),
+                started_at: DateTime.t()
+              }
+        }
+
   @typedoc """
   the parameters required to create a new lobby.
   It's enough data to generate the initial lobby internal state, which in
@@ -68,6 +116,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec gen_id() :: id()
   def gen_id(), do: UUID.uuid4()
 
+  @spec get_details(id()) :: {:ok, details()} | {:error, reason :: term()}
+  def get_details(id) do
+    GenServer.call(via_tuple(id), :get_details)
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_battle}
+  end
+
   @spec start_link({id(), start_params()}) :: GenServer.on_start()
   def start_link({id, _start_params} = args) do
     GenServer.start_link(__MODULE__, args, name: via_tuple(id))
@@ -94,6 +149,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
 
     {:ok, state}
+  end
+
+  @impl true
+  def handle_call(:get_details, _from, state) do
+    details =
+      Map.take(state, [:id, :name, :map_name, :game_version, :engine_version, :ally_team_config])
+      |> Map.put(
+        :members,
+        for {p_id, p} <- state.players, into: %{} do
+          {p_id, Map.put(p, :type, :player)}
+        end
+      )
+
+    {:reply, {:ok, details}, state}
   end
 
   @spec via_tuple(id()) :: GenServer.name()

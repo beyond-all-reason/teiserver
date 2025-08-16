@@ -24,8 +24,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       ]
     }
 
-    {:ok, %{pid: pid, id: id}} = Lobby.create(start_params)
-    p = poll_until_some(fn -> Lobby.lookup(id) end)
+    {:ok, pid, details} = Lobby.create(start_params)
+    p = poll_until_some(fn -> Lobby.lookup(details.id) end)
     assert p == pid
   end
 end

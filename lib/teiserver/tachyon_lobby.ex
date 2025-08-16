@@ -6,12 +6,18 @@ defmodule Teiserver.TachyonLobby do
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
 
-  @type id() :: Lobby.id()
+  @type id :: Lobby.id()
+  @type details :: Lobby.details()
 
   @spec create(Lobby.start_params()) ::
-          {:ok, %{pid: pid(), id: id()}}
+          {:ok, pid(), details()}
           | {:error, {:already_started, pid()} | :max_children | term()}
-  defdelegate create(start_params), to: TachyonLobby.Supervisor, as: :start_lobby
+  def create(start_params) do
+    with {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
+         {:ok, details} <- Lobby.get_details(id) do
+      {:ok, pid, details}
+    end
+  end
 
   @spec lookup(Lobby.id()) :: pid() | nil
   defdelegate lookup(lobby_id), to: TachyonLobby.Registry
