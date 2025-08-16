@@ -500,4 +500,10 @@ defmodule Teiserver.Support.Tachyon do
       }
     end
   end
+
+  def join_lobby!(client, lobby_id) do
+    :ok = send_request(client, "lobby/join", %{id: lobby_id})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
 end

@@ -345,6 +345,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp broadcast_update({:remove_player, user_id, player_changes, state}) do
     TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
 
+    # TODO: a potential optimisation is to coalesce all these events into one
+    # all the :change_player can be merged into one single map change
     events =
       for {:player_moved, p_id, team} <- player_changes,
           do: %{event: :change_player, id: p_id, team: team}

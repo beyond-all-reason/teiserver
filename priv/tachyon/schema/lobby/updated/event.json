@@ -1,0 +1,119 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/updated/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LobbyUpdatedEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "lobby/updated" },
+        "data": {
+            "title": "LobbyUpdatedEventData",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "mapName": { "type": "string" },
+                "engineVersion": { "type": "string" },
+                "gameVersion": { "type": "string" },
+                "allyTeams": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^(.*)$": {
+                            "anyOf": [
+                                {
+                                    "description": "this represent an array, items should be sorted lexicographically on their keys",
+                                    "type": "object",
+                                    "properties": {
+                                        "startBox": {
+                                            "$ref": "../../definitions/startBox.json"
+                                        },
+                                        "maxTeams": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "teams": {
+                                            "type": "object",
+                                            "patternProperties": {
+                                                "^(.*)$": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "maxPlayers": {
+                                                                    "type": "integer",
+                                                                    "minimum": 1
+                                                                }
+                                                            }
+                                                        },
+                                                        { "type": "null" }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": ["teams"]
+                                },
+                                { "type": "null" }
+                            ]
+                        }
+                    }
+                },
+                "members": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^(.*)$": {
+                            "anyOf": [
+                                {
+                                    "description": "A user currently assigned to a team represented by the indices [allyTeamIdx, teamIdx, playerIdx]",
+                                    "type": "object",
+                                    "properties": {
+                                        "type": { "const": "player" },
+                                        "id": {
+                                            "$ref": "../../definitions/userId.json"
+                                        },
+                                        "team": {
+                                            "type": "array",
+                                            "items": [
+                                                { "type": "integer" },
+                                                { "type": "integer" },
+                                                { "type": "integer" }
+                                            ],
+                                            "additionalItems": false,
+                                            "minItems": 3,
+                                            "maxItems": 3
+                                        }
+                                    },
+                                    "required": ["type", "id", "team"]
+                                },
+                                { "type": "null" }
+                            ]
+                        }
+                    }
+                },
+                "currentBattle": {
+                    "anyOf": [
+                        {
+                            "description": "If a battle is currently happening, here are the info",
+                            "type": "object",
+                            "properties": {
+                                "id": { "type": "string" },
+                                "startedAt": {
+                                    "$ref": "../../definitions/unixTime.json"
+                                }
+                            },
+                            "required": ["id", "startedAt"]
+                        },
+                        { "type": "null" }
+                    ]
+                }
+            },
+            "required": ["id"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

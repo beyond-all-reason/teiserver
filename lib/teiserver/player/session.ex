@@ -414,6 +414,12 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, {:create, start_params}})
   end
 
+  @spec join_lobby(T.userid(), TachyonLobby.id()) ::
+          {:ok, TachyonLobby.details()} | {:error, reason :: term()}
+  def join_lobby(user_id, lobby_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, {:join, lobby_id}})
+  end
+
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
@@ -804,6 +810,32 @@ defmodule Teiserver.Player.Session do
       })
 
     case TachyonLobby.create(data) do
+      {:ok, pid, details} ->
+        state =
+          state
+          |> Map.update!(:monitors, &MC.monitor(&1, pid, {:lobby, details.id}))
+          |> Map.put(:lobby, %{id: details.id})
+
+        {:reply, {:ok, details}, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:lobby, {:join, lobby_id}}, _from, state) when state.lobby.id == lobby_id do
+    case TachyonLobby.join(lobby_id, %{id: state.user.id, name: state.user.name}, self()) do
+      # no need to setup any monitors or update the state since we're already in the lobby
+      {:ok, _, details} -> {:reply, {:ok, details}, state}
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:lobby, {:join, _}}, _from, state) when state.lobby != nil,
+    do: {:reply, {:error, :already_in_lobby}, state}
+
+  def handle_call({:lobby, {:join, lobby_id}}, _from, state) do
+    case TachyonLobby.join(lobby_id, %{id: state.user.id, name: state.user.name}, self()) do
       {:ok, pid, details} ->
         state =
           state
@@ -1221,6 +1253,14 @@ defmodule Teiserver.Player.Session do
         state
       end
 
+    {:noreply, state}
+  end
+
+  def handle_info({:lobby, lobby_id, _}, state) when state.lobby.id != lobby_id,
+    do: {:noreply, state}
+
+  def handle_info({:lobby, lobby_id, event}, state) do
+    state = send_to_player(state, {:lobby, lobby_id, event})
     {:noreply, state}
   end
 

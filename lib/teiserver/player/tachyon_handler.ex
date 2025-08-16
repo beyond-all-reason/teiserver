@@ -170,6 +170,28 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "party/removed", event, state}
   end
 
+  def handle_info({:lobby, lobby_id, {:updated, updates}}, state) do
+    events =
+      Enum.map(updates, fn %{event: :add_player} = ev ->
+        {x, y, z} = ev.team
+
+        data = %{
+          id: lobby_id,
+          members: %{
+            to_string(ev.id) => %{
+              type: :player,
+              id: to_string(ev.id),
+              team: [x, y, z]
+            }
+          }
+        }
+
+        {"lobby/updated", data}
+      end)
+
+    {:event, events, state}
+  end
+
   def handle_info({:timeout, message_id}, state)
       when is_map_key(state.pending_responses, message_id) do
     Logger.debug("User did not reply in time to request with id #{message_id}")
@@ -590,6 +612,17 @@ defmodule Teiserver.Player.TachyonHandler do
       {:ok, details} ->
         data = lobby_details_to_tachyon(details)
 
+        {:response, data, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/join", "request", _msg_id, msg, state) do
+    case Player.Session.join_lobby(state.user.id, msg["data"]["id"]) do
+      {:ok, details} ->
+        data = lobby_details_to_tachyon(details)
         {:response, data, state}
 
       {:error, reason} ->
