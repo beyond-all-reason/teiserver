@@ -20,6 +20,7 @@ defmodule Teiserver.TachyonLobby do
   defdelegate subscribe_updates(), to: TachyonLobby.List
   defdelegate unsubscribe_updates(), to: TachyonLobby.List
 
+  @type start_params :: Lobby.start_params()
   @spec create(Lobby.start_params()) ::
           {:ok, pid(), details()}
           | {:error, {:already_started, pid()} | :max_children | term()}

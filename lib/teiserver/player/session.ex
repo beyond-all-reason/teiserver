@@ -15,6 +15,7 @@ defmodule Teiserver.Player.Session do
 
   alias Teiserver.Data.Types, as: T
   alias Teiserver.{Account, Matchmaking, Messaging, Party, Player}
+  alias Teiserver.TachyonLobby
   alias Teiserver.TachyonBattle
   alias Teiserver.Helpers.BoundedQueue, as: BQ
   alias Phoenix.PubSub
@@ -54,7 +55,7 @@ defmodule Teiserver.Player.Session do
           # this is used to avoid races where the reply of the call would be processed
           # before a message already in the mailbox
           version: integer(),
-          current_party: Party.id(),
+          current_party: Party.id() | nil,
           invited_to: [{integer(), Party.id()}]
         }
 
@@ -67,13 +68,13 @@ defmodule Teiserver.Player.Session do
   @type state :: %{
           user: T.user(),
           monitors: MC.t(),
-          mon_ref: reference(),
           conn_pid: pid() | nil,
           matchmaking: matchmaking_state(),
           messaging_state: messaging_state(),
           party: party_state(),
           user_subscriptions: MapSet.t(T.userid()),
-          battle: battle_state()
+          battle: battle_state(),
+          lobby: nil | %{id: TachyonLobby.id()}
         }
 
   # TODO: would be better to have that as a db setting, perhaps passed as an
@@ -85,6 +86,7 @@ defmodule Teiserver.Player.Session do
   end
 
   @impl true
+  @spec init({pid(), T.user()}) :: {:ok, state()}
   def init({conn_pid, user}) do
     Logger.metadata(actor_type: :session, user_id: user.id)
     monitors = MC.monitor(MC.new(), conn_pid, :connection)
@@ -101,7 +103,8 @@ defmodule Teiserver.Player.Session do
       },
       user_subscriptions: MapSet.new(),
       party: initial_party_state(),
-      battle: nil
+      battle: nil,
+      lobby: nil
     }
 
     broadcast_user_update!(user, :menu)
@@ -395,6 +398,20 @@ defmodule Teiserver.Player.Session do
   @spec party_notify_join_queues(T.userid(), [Matchmaking.queue_id()], Party.state()) :: :ok
   def party_notify_join_queues(user_id, queues, party_state) do
     GenServer.cast(via_tuple(user_id), {:party, {:join_queues, queues, party_state}})
+  end
+
+  @typedoc """
+  the same as Lobby.start_params, but without any creator data, these are filled by the session
+  """
+  @type lobby_start_params :: %{
+          name: String.t(),
+          map_name: String.t(),
+          ally_team_config: TachyonLobby.ally_team_config()
+        }
+  @spec create_lobby(T.userid(), lobby_start_params()) ::
+          {:ok, TachyonLobby.details()} | {:error, reason :: term()}
+  def create_lobby(user_id, start_params) do
+    GenServer.call(via_tuple(user_id), {:lobby, {:create, start_params}})
   end
 
   ################################################################################
@@ -773,6 +790,30 @@ defmodule Teiserver.Player.Session do
 
       {:error, _} = err ->
         {:reply, err, state}
+    end
+  end
+
+  def handle_call({:lobby, {:create, _start_params}}, _from, state) when state.lobby != nil,
+    do: {:reply, {:error, :already_in_lobby}, state}
+
+  def handle_call({:lobby, {:create, start_params}}, _from, state) do
+    data =
+      Map.merge(start_params, %{
+        creator_data: %{id: state.user.id, name: state.user.name},
+        creator_pid: self()
+      })
+
+    case TachyonLobby.create(data) do
+      {:ok, pid, details} ->
+        state =
+          state
+          |> Map.update!(:monitors, &MC.monitor(&1, pid, {:lobby, details.id}))
+          |> Map.put(:lobby, %{id: details.id})
+
+        {:reply, {:ok, details}, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
     end
   end
 
@@ -1338,6 +1379,7 @@ defmodule Teiserver.Player.Session do
     )
   end
 
+  @spec initial_party_state() :: party_state()
   defp initial_party_state(), do: %{version: 0, current_party: nil, invited_to: []}
 
   # Gather the state of all relevant parties for the given session

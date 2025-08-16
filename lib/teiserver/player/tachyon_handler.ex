@@ -564,6 +564,39 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/create", "request", _msg_id, msg, state) do
+    create_data = %{
+      name: msg["data"]["name"],
+      map_name: msg["data"]["mapName"],
+      ally_team_config:
+        for at <- msg["data"]["allyTeamConfig"] do
+          sb = at["startBox"]
+          teams = for t <- at["teams"], do: %{max_players: t["maxPlayers"]}
+
+          %{
+            max_teams: at["maxTeams"],
+            start_box: %{
+              top: sb["top"],
+              bottom: sb["bottom"],
+              left: sb["left"],
+              right: sb["right"]
+            },
+            teams: teams
+          }
+        end
+    }
+
+    case Player.Session.create_lobby(state.user.id, create_data) do
+      {:ok, details} ->
+        data = lobby_details_to_tachyon(details)
+
+        {:response, data, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
@@ -743,5 +776,46 @@ defmodule Teiserver.Player.TachyonHandler do
       end
     end)
     |> Enum.reject(&is_nil/1)
+  end
+
+  defp lobby_details_to_tachyon(details) do
+    members =
+      Enum.map(details.members, fn {p_id, %{team: {x, y, z}} = p} ->
+        {to_string(p_id),
+         %{
+           id: to_string(p_id),
+           type: p.type,
+           team: [x, y, z]
+         }}
+      end)
+      |> Enum.into(%{})
+
+    ally_team_config =
+      for {at, at_idx} <- Enum.with_index(details.ally_team_config), into: %{} do
+        teams =
+          for {t, t_idx} <- Enum.with_index(at.teams), into: %{} do
+            idx = t_idx |> to_string() |> String.pad_leading(3, "0")
+            {idx, %{maxPlayers: t.max_players}}
+          end
+
+        idx = at_idx |> to_string() |> String.pad_leading(3, "0")
+
+        {idx,
+         %{
+           teams: teams,
+           maxTeams: at.max_teams,
+           startBox: at.start_box
+         }}
+      end
+
+    %{
+      id: details.id,
+      name: details.name,
+      members: members,
+      mapName: details.map_name,
+      engineVersion: details.engine_version,
+      gameVersion: details.game_version,
+      allyTeamConfig: ally_team_config
+    }
   end
 end
