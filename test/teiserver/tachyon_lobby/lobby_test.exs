@@ -45,6 +45,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
                       {:updated, [%{event: :add_player, id: "other-user-id", team: {1, 0, 0}}]}}
     end
 
+    test "is idempotent" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 1]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), self())
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), self())
+    end
+
     test "join the most empty team" do
       # create a lobby 2 vs 15. Players should be put in the largest team
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 15]))

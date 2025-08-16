@@ -191,6 +191,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:reply, {:ok, get_details_from_state(state)}, state}
   end
 
+  def handle_call({:join, join_data, _pid}, _from, state)
+      when is_map_key(join_data.id, state.players) do
+    {:reply, {:ok, self(), get_details_from_state(state)}, state}
+  end
+
   def handle_call({:join, join_data, pid}, _from, state) do
     # find the least full team
     team = find_team(state.ally_team_config, Map.values(state.players))
