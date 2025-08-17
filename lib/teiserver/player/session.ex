@@ -420,6 +420,11 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, {:join, lobby_id}})
   end
 
+  @spec leave_lobby(T.userid()) :: :ok | {:error, reason :: term()}
+  def leave_lobby(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :leave})
+  end
+
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
@@ -843,6 +848,24 @@ defmodule Teiserver.Player.Session do
           |> Map.put(:lobby, %{id: details.id})
 
         {:reply, {:ok, details}, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:lobby, :leave}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :leave}, _from, state) do
+    case TachyonLobby.leave(state.lobby.id, state.user.id) do
+      :ok ->
+        state =
+          state
+          |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:lobby, state.lobby.id}, [:flush]))
+          |> Map.replace!(:lobby, nil)
+
+        {:reply, :ok, state}
 
       {:error, reason} ->
         {:reply, {:error, reason}, state}

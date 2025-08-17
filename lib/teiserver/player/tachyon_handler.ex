@@ -171,23 +171,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_info({:lobby, lobby_id, {:updated, updates}}, state) do
-    events =
-      Enum.map(updates, fn %{event: :add_player} = ev ->
-        {x, y, z} = ev.team
-
-        data = %{
-          id: lobby_id,
-          members: %{
-            to_string(ev.id) => %{
-              type: :player,
-              id: to_string(ev.id),
-              team: [x, y, z]
-            }
-          }
-        }
-
-        {"lobby/updated", data}
-      end)
+    events = Enum.map(updates, &lobby_update_to_tachyon(lobby_id, &1))
 
     {:event, events, state}
   end
@@ -630,6 +614,16 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/leave", "request", _msg_id, _msg, state) do
+    case Player.Session.leave_lobby(state.user.id) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
@@ -850,5 +844,27 @@ defmodule Teiserver.Player.TachyonHandler do
       gameVersion: details.game_version,
       allyTeamConfig: ally_team_config
     }
+  end
+
+  defp lobby_update_to_tachyon(lobby_id, %{event: :add_player} = ev) do
+    {x, y, z} = ev.team
+
+    data = %{
+      id: lobby_id,
+      members: %{
+        to_string(ev.id) => %{
+          type: :player,
+          id: to_string(ev.id),
+          team: [x, y, z]
+        }
+      }
+    }
+
+    {"lobby/updated", data}
+  end
+
+  defp lobby_update_to_tachyon(lobby_id, %{event: :remove_player} = ev) do
+    data = %{id: lobby_id, members: %{to_string(ev.id) => nil}}
+    {"lobby/updated", data}
   end
 end

@@ -35,19 +35,6 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
   end
 
   describe "join lobby" do
-    defp setup_lobby(%{client: client}) do
-      lobby_data = %{
-        name: "test lobby",
-        map_name: "test-map",
-        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
-      }
-
-      %{"status" => "success", "data" => %{"id" => lobby_id}} =
-        Tachyon.create_lobby!(client, lobby_data)
-
-      {:ok, lobby_id: lobby_id}
-    end
-
     setup [{Tachyon, :setup_client}, :setup_lobby]
 
     test "works", %{user: user, lobby_id: lobby_id} do
@@ -87,5 +74,42 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
       assert is_map_key(data["members"][to_string(ctx2[:user].id)], "team")
     end
+  end
+
+  describe "leave lobby" do
+    setup [{Tachyon, :setup_client}, :setup_lobby]
+
+    test "works", %{client: client} do
+      %{"status" => "success"} = Tachyon.leave_lobby!(client)
+    end
+
+    test "must be in lobby" do
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      %{"status" => "failed", "reason" => "invalid_request"} =
+        Tachyon.leave_lobby!(ctx2[:client])
+    end
+
+    test "remaining members get updated events", %{client: client, lobby_id: lobby_id} do
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(client)
+      %{"status" => "success"} = Tachyon.leave_lobby!(ctx2[:client])
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+      assert data["members"][to_string(ctx2[:user].id)] == nil
+    end
+  end
+
+  defp setup_lobby(%{client: client}) do
+    lobby_data = %{
+      name: "test lobby",
+      map_name: "test-map",
+      ally_team_config: Tachyon.mk_ally_team_config(2, 1)
+    }
+
+    %{"status" => "success", "data" => %{"id" => lobby_id}} =
+      Tachyon.create_lobby!(client, lobby_data)
+
+    {:ok, lobby_id: lobby_id}
   end
 end
