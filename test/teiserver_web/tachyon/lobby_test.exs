@@ -155,6 +155,68 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "listing" do
+    setup [{Tachyon, :setup_client}]
+
+    test "subscribe updates", %{client: client} do
+      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+      %{"commandId" => "lobby/listUpdated", "data" => data} = Tachyon.recv_message!(client)
+      assert data["updates"] == [%{"type" => "setList", "overviews" => []}]
+
+      # create lobby with another client so that only list updates are sent to
+      # the original client, it makes the tests a bit simpler
+      {:ok, ctx2} = Tachyon.setup_client()
+      {:ok, lobby_id: lobby_id} = setup_lobby(%{client: ctx2[:client]})
+
+      %{
+        "commandId" => "lobby/listUpdated",
+        "data" => %{
+          "updates" => [
+            %{
+              "type" => "added",
+              "overview" => %{"id" => ^lobby_id}
+            }
+          ]
+        }
+      } = Tachyon.recv_message!(client)
+
+      {:ok, ctx3} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx3[:client], lobby_id)
+
+      %{"commandId" => "lobby/listUpdated", "data" => data} = Tachyon.recv_message!(client)
+
+      assert data["updates"] == [
+               %{
+                 "type" => "updated",
+                 "overview" => %{
+                   "id" => lobby_id,
+                   "playerCount" => 2,
+                   "currentBattle" => nil
+                 }
+               }
+             ]
+
+      %{"status" => "success"} = Tachyon.leave_lobby!(ctx3[:client])
+
+      %{
+        "commandId" => "lobby/listUpdated",
+        "data" => %{
+          "updates" => [
+            %{
+              "overview" => %{"id" => ^lobby_id, "playerCount" => 1}
+            }
+          ]
+        }
+      } = Tachyon.recv_message!(client)
+
+      Tachyon.drain(ctx2[:client])
+      %{"status" => "success"} = Tachyon.leave_lobby!(ctx2[:client])
+
+      %{"commandId" => "lobby/listUpdated", "data" => data} = Tachyon.recv_message!(client)
+      assert data["updates"] == [%{"id" => lobby_id, "type" => "removed"}]
+    end
+  end
+
   defp setup_lobby(%{client: client}) do
     lobby_data = %{
       name: "test lobby",

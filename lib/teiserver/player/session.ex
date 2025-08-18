@@ -74,7 +74,8 @@ defmodule Teiserver.Player.Session do
           party: party_state(),
           user_subscriptions: MapSet.t(T.userid()),
           battle: battle_state(),
-          lobby: nil | %{id: TachyonLobby.id()}
+          lobby: nil | %{id: TachyonLobby.id()},
+          lobby_list_subscription: nil | %{counter: non_neg_integer()}
         }
 
   # TODO: would be better to have that as a db setting, perhaps passed as an
@@ -104,7 +105,8 @@ defmodule Teiserver.Player.Session do
       user_subscriptions: MapSet.new(),
       party: initial_party_state(),
       battle: nil,
-      lobby: nil
+      lobby: nil,
+      lobby_list_subscription: nil
     }
 
     broadcast_user_update!(user, :menu)
@@ -445,6 +447,11 @@ defmodule Teiserver.Player.Session do
   @spec start_lobby_battle(T.userid(), TachyonLobby.id()) :: :ok | {:error, reason :: term}
   def start_lobby_battle(user_id, lobby_id) do
     GenServer.call(via_tuple(user_id), {:lobby, {:start_battle, lobby_id}})
+  end
+
+  @spec subscribe_lobby_list(T.userid()) :: {:ok, %{TachyonLobby.id() => TachyonLobby.overview()}}
+  def subscribe_lobby_list(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :subscribe_list})
   end
 
   ################################################################################
@@ -913,6 +920,11 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_call({:lobby, :subscribe_list}, _from, state) do
+    {counter, list} = TachyonLobby.subscribe_updates()
+    {:reply, {:ok, list}, %{state | lobby_list_subscription: %{counter: counter}}}
+  end
+
   @impl true
   def handle_cast(
         {:matchmaking, {:notify_found, queue_id, room_pid, timeout_ms}},
@@ -1361,6 +1373,43 @@ defmodule Teiserver.Player.Session do
 
   def handle_info({:lobby, lobby_id, event}, state) do
     state = send_to_player(state, {:lobby, lobby_id, event})
+    {:noreply, state}
+  end
+
+  def handle_info(
+        %{
+          topic: "teiserver_tachyonlobby_list",
+          counter: c
+        },
+        state
+      )
+      when state.lobby_list_subscription == nil or state.lobby_list_subscription.counter >= c do
+    {:noreply, state}
+  end
+
+  def handle_info(
+        %{
+          topic: "teiserver_tachyonlobby_list",
+          counter: c
+        } = ev,
+        state
+      ) do
+    state = put_in(state.lobby_list_subscription.counter, c)
+
+    case ev.event do
+      :add_lobby ->
+        send_to_player!({:lobby_list, {:add_lobby, ev.lobby_id, ev.overview}}, state)
+
+      :update_lobby ->
+        send_to_player!({:lobby_list, {:update_lobby, ev.lobby_id, ev.changes}}, state)
+
+      :remove_lobby ->
+        send_to_player!({:lobby_list, {:remove_lobby, ev.lobby_id}}, state)
+
+      _ ->
+        raise "Unknow lobby_list event: #{inspect(ev)}"
+    end
+
     {:noreply, state}
   end
 

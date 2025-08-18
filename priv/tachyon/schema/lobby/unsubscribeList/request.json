@@ -1,0 +1,17 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/unsubscribeList/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LobbyUnsubscribeListRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "lobby/unsubscribeList" }
+    },
+    "required": ["type", "messageId", "commandId"]
+}

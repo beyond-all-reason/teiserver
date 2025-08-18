@@ -176,6 +176,40 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, events, state}
   end
 
+  def handle_info({:lobby_list, {:add_lobby, lobby_id, overview}}, state) do
+    data = %{
+      updates: [
+        %{
+          type: :added,
+          overview: lobby_overview_to_tachyon(lobby_id, overview)
+        }
+      ]
+    }
+
+    {:event, "lobby/listUpdated", data, state}
+  end
+
+  def handle_info({:lobby_list, {:update_lobby, lobby_id, overview}}, state) do
+    data = %{
+      updates: [
+        %{
+          type: :updated,
+          overview: lobby_overview_to_tachyon(lobby_id, overview)
+        }
+      ]
+    }
+
+    {:event, "lobby/listUpdated", data, state}
+  end
+
+  def handle_info({:lobby_list, {:remove_lobby, lobby_id}}, state) do
+    data = %{
+      updates: [%{type: :removed, id: lobby_id}]
+    }
+
+    {:event, "lobby/listUpdated", data, state}
+  end
+
   def handle_info({:timeout, message_id}, state)
       when is_map_key(state.pending_responses, message_id) do
     Logger.debug("User did not reply in time to request with id #{message_id}")
@@ -634,6 +668,27 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/subscribeList" = cmd_id, "request", msg_id, _msg, state) do
+    case Player.Session.subscribe_lobby_list(state.user.id) do
+      {:ok, list} ->
+        resp = Schema.response(cmd_id, msg_id)
+
+        ev =
+          Schema.event("lobby/listUpdated", %{
+            updates: [
+              %{
+                type: :setList,
+                overviews:
+                  Enum.map(list, fn {id, overview} -> lobby_overview_to_tachyon(id, overview) end)
+              }
+            ]
+          })
+
+        messages = [resp, ev] |> Enum.map(fn data -> {:text, Jason.encode!(data)} end)
+        {:push, messages, state}
+    end
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
@@ -876,5 +931,26 @@ defmodule Teiserver.Player.TachyonHandler do
   defp lobby_update_to_tachyon(lobby_id, %{event: :remove_player} = ev) do
     data = %{id: lobby_id, members: %{to_string(ev.id) => nil}}
     {"lobby/updated", data}
+  end
+
+  # handle partial overview object
+  defp lobby_overview_to_tachyon(lobby_id, overview) do
+    keys = [
+      {:name, :name},
+      {:player_count, :playerCount},
+      {:max_player_count, :maxPlayerCount},
+      {:map_name, :mapName},
+      {:engine_version, :engineVersion},
+      {:game_version, :gameVersion}
+    ]
+
+    init = %{id: lobby_id, currentBattle: nil}
+
+    Enum.reduce(keys, init, fn {k, tachyon_k}, m ->
+      case Map.get(overview, k) do
+        nil -> m
+        val -> Map.put(m, tachyon_k, val)
+      end
+    end)
   end
 end
