@@ -78,6 +78,18 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, user: user, client: client, token: token}
   end
 
+  # for when you only need an oauth app
+  def setup_app(_context) do
+    owner = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+
+    app =
+      OAuthFixtures.app_attrs(owner.id)
+      |> Map.put(:uid, UUID.uuid4())
+      |> OAuthFixtures.create_app()
+
+    {:ok, app: app}
+  end
+
   def setup_autohost(context) do
     autohost = Teiserver.BotFixtures.create_bot()
 
@@ -509,6 +521,12 @@ defmodule Teiserver.Support.Tachyon do
 
   def leave_lobby!(client) do
     :ok = send_request(client, "lobby/leave")
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def start_lobby_battle!(client, lobby_id) do
+    :ok = send_request(client, "lobby/startBattle", %{id: lobby_id})
     {:ok, resp} = recv_message(client)
     resp
   end

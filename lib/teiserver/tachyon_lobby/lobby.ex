@@ -265,7 +265,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
         map: %{springName: state.map_name}
       }
 
-      for {p_id, _p} <- state.players, do: Player.battle_start(p_id, battle_data, start_data)
+      for {p_id, p} <- state.players,
+          do: Player.lobby_battle_start(p_id, battle_data, start_data, p.password)
+
       state = %{state | current_battle: %{id: battle_id, started_at: DateTime.utc_now()}}
 
       {:reply, :ok, state}

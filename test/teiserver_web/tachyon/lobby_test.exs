@@ -100,6 +100,61 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "start battle" do
+    setup [
+      {Tachyon, :setup_client},
+      {Tachyon, :setup_app},
+      {Tachyon, :setup_autohost},
+      :setup_lobby
+    ]
+
+    test "must be in lobby", ctx do
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      %{"status" => "failed", "reason" => "invalid_request"} =
+        Tachyon.start_lobby_battle!(ctx2[:client], ctx[:lobby_id])
+    end
+
+    test "must be in correct lobby", ctx do
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      lobby_data = %{
+        name: "test lobby",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
+      }
+
+      %{"status" => "success", "data" => %{"id" => other_lobby_id}} =
+        Tachyon.create_lobby!(ctx2[:client], lobby_data)
+
+      %{"status" => "failed", "reason" => "invalid_request"} =
+        Tachyon.start_lobby_battle!(ctx[:client], other_lobby_id)
+    end
+
+    test "can start battle", ctx do
+      Tachyon.send_request(ctx[:client], "lobby/startBattle", %{id: ctx[:lobby_id]})
+
+      %{"commandId" => "autohost/start"} =
+        start_req = Tachyon.recv_message!(ctx[:autohost_client])
+
+      start_req_response = %{
+        port: 32781,
+        ips: ["127.0.0.1"]
+      }
+
+      Tachyon.send_response(ctx[:autohost_client], start_req, data: start_req_response)
+
+      %{"status" => "success", "commandId" => "lobby/startBattle"} =
+        Tachyon.recv_message!(ctx[:client])
+
+      # client should then receive a request to start a battle from server
+      %{"commandId" => "battle/start", "type" => "request"} =
+        req = Tachyon.recv_message!(ctx[:client])
+
+      Tachyon.send_response(ctx[:client], req)
+    end
+  end
+
   defp setup_lobby(%{client: client}) do
     lobby_data = %{
       name: "test lobby",

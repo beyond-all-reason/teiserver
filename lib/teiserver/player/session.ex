@@ -213,6 +213,23 @@ defmodule Teiserver.Player.Session do
   end
 
   @doc """
+  Let the player know that the lobby they are in as just started a battle
+  """
+  @spec lobby_battle_start(
+          T.userid(),
+          {TachyonBattle.id(), pid()},
+          start_data(),
+          password :: String.t()
+        ) ::
+          :ok
+  def lobby_battle_start(user_id, battle_data, battle_start_data, password) do
+    GenServer.cast(
+      via_tuple(user_id),
+      {:battle, {:lobby_start, battle_data, battle_start_data, password}}
+    )
+  end
+
+  @doc """
   notify the teiserver side that the player left a battle. This is coming
   from the engine
   """
@@ -423,6 +440,11 @@ defmodule Teiserver.Player.Session do
   @spec leave_lobby(T.userid()) :: :ok | {:error, reason :: term()}
   def leave_lobby(user_id) do
     GenServer.call(via_tuple(user_id), {:lobby, :leave})
+  end
+
+  @spec start_lobby_battle(T.userid(), TachyonLobby.id()) :: :ok | {:error, reason :: term}
+  def start_lobby_battle(user_id, lobby_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, {:start_battle, lobby_id}})
   end
 
   ################################################################################
@@ -872,6 +894,25 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_call({:lobby, {:start_battle, lobby_id}}, _from, state)
+      when state.lobby.id != lobby_id,
+      do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, {:start_battle, lobby_id}}, _from, state) do
+    case TachyonLobby.start_battle(lobby_id, state.user.id) do
+      # the update of the state wrt to current battle is done by the lobby
+      # itself using Session.battle_start to notify all members
+      # this simplify the request/response cycle by avoiding any interleaving
+      # where the client that starts the battle would receive the server's battle/start
+      # request while waiting for the response to lobby/startBattle response
+      :ok ->
+        {:reply, :ok, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
   @impl true
   def handle_cast(
         {:matchmaking, {:notify_found, queue_id, room_pid, timeout_ms}},
@@ -1030,6 +1071,42 @@ defmodule Teiserver.Player.Session do
         )
 
         {:noreply, state}
+    end
+  end
+
+  def handle_cast(
+        {:battle, {:lobby_start, {battle_id, battle_pid}, battle_start_data, password}},
+        state
+      ) do
+    Logger.info("entering lobby battle #{battle_id}")
+
+    case state.lobby do
+      nil ->
+        Logger.warning(
+          "User received a request to start a battle but is not in a state to do so #{inspect(state)}"
+        )
+
+        {:noreply, state}
+
+      %{id: _} ->
+        data = %{
+          username: state.user.name,
+          password: password,
+          ip: hd(battle_start_data.ips),
+          port: battle_start_data.port,
+          engine: battle_start_data.engine,
+          game: battle_start_data.game,
+          map: battle_start_data.map
+        }
+
+        state = send_to_player(state, {:battle_start, data})
+
+        monitors = MC.monitor(state.monitors, battle_pid, {:battle, battle_id})
+
+        # TODO: this should ideally come from an engine event, but in first approximation it'll do
+        broadcast_user_update!(state.user, :playing)
+
+        {:noreply, %{state | monitors: monitors, battle: %{id: battle_id}}}
     end
   end
 

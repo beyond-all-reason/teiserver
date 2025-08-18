@@ -1,0 +1,23 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/startBattle/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LobbyStartBattleRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "lobby/startBattle" },
+        "data": {
+            "title": "LobbyStartBattleRequestData",
+            "type": "object",
+            "properties": { "id": { "type": "string" } },
+            "required": ["id"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}
