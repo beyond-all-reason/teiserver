@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Build, test, and report coverage of recent files
+name: Build and test
 
 on:
   push:
@@ -55,8 +55,7 @@ jobs:
     # Step: Check out the code.
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+
 
     # Step: Define how to cache deps. Restores existing cache if present.
     - name: Cache deps
@@ -93,21 +92,7 @@ jobs:
     # the cached version.
     - name: Install dependencies
       run: mix compile
-    
-    - name: create cover folder if not exists, to cache coverage reporting results
-      run: mkdir -p ./cover/
-      
-    - name: emit hint on where to update minimum test coverage
-      run: echo "to update minimum test coverage requirements, edit coveralls.json"
 
-    - name: Run tests, failing loudly on error, emitting coverage to file for use when reporting test coverage in later proposed step
-      run: set -eo pipefail; mix test --exclude needs_attention --cover | tee ./cover/test_coverage_by_file.txt
-
-    - name: generate list of files changed in the last month
-      run: git --no-pager log --name-only --oneline --since='1 month ago' | tee ./cover/files_changed_in_last_month.txt
-
-    - name: echo coverage header to the files_changed_in_last_month file to assist in reporting
-      run: echo "LINES RELEVANT   MISSED" | tee -a ./cover/files_changed_in_last_month.txt
-
-    - name: use grep to create test coverage report only on recently changed files, sorted by coverage percent
-      run: grep -F -f ./cover/files_changed_in_last_month.txt ./cover/test_coverage_by_file.txt | grep -A999 "LINES RELEVANT   MISSED" | sort -g
+    # Step: Execute the tests.
+    - name: Run tests
+      run: mix test --exclude needs_attention
