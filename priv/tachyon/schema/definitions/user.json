@@ -8,7 +8,30 @@
         "displayName": { "type": "string" },
         "clanId": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
         "countryCode": { "type": "string" },
-        "status": { "enum": ["offline", "menu", "playing", "lobby"] }
+        "status": { "enum": ["offline", "menu", "playing", "lobby"] },
+        "rating": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "description": "Key is omitted when the player isn't rated yet.",
+                    "type": "number"
+                }
+            },
+            "required": ["value"]
+        },
+        "roles": {
+            "type": "array",
+            "items": {
+                "enum": [
+                    "contributor",
+                    "admin",
+                    "moderator",
+                    "tournament_winner",
+                    "tournament_caster"
+                ]
+            },
+            "uniqueItems": true
+        }
     },
     "required": ["userId", "username", "displayName", "clanId", "status"]
 }

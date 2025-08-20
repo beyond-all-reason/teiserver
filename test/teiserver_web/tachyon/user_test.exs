@@ -2,9 +2,9 @@ defmodule TeiserverWeb.Tachyon.UserTest do
   use TeiserverWeb.ConnCase, async: false
   alias Teiserver.Support.Tachyon
 
-  describe "info" do
-    setup [{Tachyon, :setup_client}]
+  setup [{Tachyon, :setup_client}]
 
+  describe "info" do
     test "works", %{user: user, client: client} do
       %{id: user_id, name: name, clan_id: clan_id} = user
       %{country: country} = Teiserver.Account.get_user_by_id(user_id)
@@ -27,6 +27,18 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       assert %{"status" => "failed", "reason" => "unknown_user"} =
                Tachyon.user_info!(client, "999999999")
     end
+
+    test "returns translated roles" do
+      user =
+        Central.Helpers.GeneralTestLib.make_user(%{
+          "data" => %{"roles" => ["Verified", "Admin", "Contributor"]}
+        })
+
+      %{client: client} = Tachyon.connect(user)
+
+      resp = Tachyon.user_info!(client, to_string(user.id))
+      assert MapSet.new(resp["data"]["roles"]) == MapSet.new(["admin", "contributor"])
+    end
   end
 
   describe "self event" do
@@ -45,11 +57,24 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       assert userdata["clanId"] == user.clan_id
       assert userdata["status"] == "menu"
     end
+
+    test "filters out unmappable roles in tachyon messages" do
+      user =
+        Central.Helpers.GeneralTestLib.make_user(%{
+          "data" => %{"roles" => ["Verified", "Contributor"]}
+        })
+
+      %{client: client} = Tachyon.connect(user, swallow_first_event: false)
+
+      {:ok, %{"data" => %{"user" => userdata}}} = Tachyon.recv_message(client)
+
+      # Test that only Tachyon-compatible roles are sent
+      # "Verified" filtered out
+      assert userdata["roles"] == ["contributor"]
+    end
   end
 
   describe "updates" do
-    setup [{Tachyon, :setup_client}]
-
     test "must pass valid user ids", %{client: client} do
       assert %{"status" => "failed", "reason" => "invalid_request"} =
                Tachyon.subscribe_updates!(client, ["invalid-user-id"])
@@ -171,6 +196,22 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
       Tachyon.disconnect!(ctx[:client])
       assert {:error, :timeout} = Tachyon.recv_message(client)
+    end
+
+    test "broadcasts translated roles" do
+      user =
+        Central.Helpers.GeneralTestLib.make_user(%{
+          "data" => %{"roles" => ["Verified", "Moderator"]}
+        })
+
+      %{client: client} = Tachyon.connect(user)
+
+      # Subscribe to user updates
+      Tachyon.subscribe_updates!(client, [to_string(user.id)])
+
+      # Get the update event
+      {:ok, %{"data" => %{"users" => [user_data]}}} = Tachyon.recv_message(client)
+      assert user_data["roles"] == ["moderator"]
     end
   end
 end
