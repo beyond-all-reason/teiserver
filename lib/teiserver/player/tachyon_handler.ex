@@ -52,25 +52,7 @@ defmodule Teiserver.Player.TachyonHandler do
     user = initial_state.user
     Logger.metadata(user_id: user.id)
 
-    {friends, incoming, outgoing} = get_user_friends(state.user.id)
-
-    event = %{
-      user: %{
-        userId: to_string(user.id),
-        username: user.name,
-        displayName: user.name,
-        clanId: user.clan_id,
-        countryCode: user.country,
-        status: :menu,
-        party: party_state_to_tachyon(sess_state.party),
-        invitedToParties: Enum.map(sess_state.invited_to_parties, &party_state_to_tachyon/1),
-        friendIds: Enum.map(friends, fn %{userId: uid} -> uid end),
-        outgoingFriendRequest: outgoing,
-        incomingFriendRequest: incoming,
-        ignoreIds: [],
-        roles: convert_teiserver_roles_to_tachyon(user.roles)
-      }
-    }
+    event = build_user_self_event(user, sess_state)
 
     {:event, "user/self", event, state}
   end
@@ -160,12 +142,17 @@ defmodule Teiserver.Player.TachyonHandler do
           clanId: user_state.clan_id,
           country: user_state.country,
           status: user_state.status,
-          roles: user_state.roles
+          roles: convert_teiserver_roles_to_tachyon(user_state.roles)
         }
       ]
     }
 
     {:event, "user/updated", event, state}
+  end
+
+  def handle_info({:user, {:role_updated, roles}}, state) do
+    event = build_user_self_event(%{state.user | roles: roles}, state)
+    {:event, "user/self", event, state}
   end
 
   def handle_info({:party, {:invited, party_state}}, state) do
@@ -579,6 +566,28 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
+  end
+
+  defp build_user_self_event(user, sess_state) do
+    {friends, incoming, outgoing} = get_user_friends(user.id)
+
+    %{
+      user: %{
+        userId: to_string(user.id),
+        username: user.name,
+        displayName: user.name,
+        clanId: user.clan_id,
+        countryCode: user.country,
+        status: :menu,
+        party: party_state_to_tachyon(sess_state.party),
+        invitedToParties: Enum.map(sess_state.invited_to_parties, &party_state_to_tachyon/1),
+        friendIds: Enum.map(friends, fn %{userId: uid} -> uid end),
+        outgoingFriendRequest: outgoing,
+        incomingFriendRequest: incoming,
+        ignoreIds: [],
+        roles: convert_teiserver_roles_to_tachyon(user.roles)
+      }
+    }
   end
 
   # Ensure a session is started for the given user id. Register both the session

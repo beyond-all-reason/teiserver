@@ -265,6 +265,8 @@ defmodule TeiserverWeb.Admin.UserController do
       |> Enum.reject(&(&1 == nil))
       |> Enum.uniq()
 
+    roles_changed = MapSet.new(new_roles) != MapSet.new(user.roles)
+
     permissions =
       new_roles
       |> Enum.map(fn role_name ->
@@ -306,6 +308,10 @@ defmodule TeiserverWeb.Admin.UserController do
         case change_result do
           {:ok, user} ->
             Account.decache_user(user.id)
+
+            if roles_changed do
+              Teiserver.Player.update_user_roles(user.id, user.roles)
+            end
 
             conn
             |> put_flash(:info, "User updated successfully.")
