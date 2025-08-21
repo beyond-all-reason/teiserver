@@ -27,7 +27,7 @@ defmodule Teiserver.CacheUser do
   @spec keys() :: [atom]
   def keys(),
     do:
-      ~w(id name password email inserted_at clan_id permissions colour icon smurf_of_id last_login_timex last_played last_logout roles discord_id)a
+      ~w(id name password email inserted_at clan_id permissions colour icon smurf_of_id last_login_timex last_login last_played last_logout roles discord_id)a
 
   # This is the version of keys with the extra fields we're going to be moving from data to the object itself
   # def keys(),
@@ -946,7 +946,7 @@ defmodule Teiserver.CacheUser do
 
     user = %{
       user
-      | last_login: round(System.system_time(:second) / 60),
+      | last_login: Timex.now(),  # Set as proper datetime
         last_login_timex: Timex.now(),
         last_login_mins: round(System.system_time(:second) / 60),
         country: country,

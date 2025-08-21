@@ -239,6 +239,23 @@ defmodule Teiserver.Account.UserCacheLib do
     data =
       CacheUser.data_keys()
       |> Map.new(fn k -> {to_string(k), Map.get(user, k, Account.default_data()[k])} end)
+      |> Map.put("last_login", 
+          case Map.get(user, :last_login) do
+            dt when is_map(dt) -> 
+              # Try to convert to Unix timestamp, if it fails, keep original
+              try do
+                unix_mins = div(Timex.to_unix(dt), 60)
+                Logger.info("persist_user: Converting last_login datetime #{inspect(dt)} to Unix minutes: #{unix_mins}")
+                unix_mins
+              rescue
+                _ -> 
+                  Logger.info("persist_user: last_login is not a convertible datetime: #{inspect(dt)}")
+                  dt
+              end
+            other -> 
+              Logger.info("persist_user: last_login is not a map: #{inspect(other)}")
+              other
+          end)
 
     obj_attrs =
       CacheUser.keys()
