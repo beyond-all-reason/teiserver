@@ -13,7 +13,7 @@ defmodule Teiserver.Account.RelationshipLibTest do
 
     user3 =
       AccountTestLib.user_fixture(%{
-        "last_login_timex" => old_login
+        "last_login" => old_login
       })
 
     assert user1.id != nil

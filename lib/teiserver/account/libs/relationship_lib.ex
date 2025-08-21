@@ -397,8 +397,8 @@ defmodule Teiserver.Account.RelationshipLib do
       using account_users au
       where au.id = ar.to_user_id
       and ar.from_user_id = $1
-      and (au.last_login_timex is null OR
-      abs(DATE_PART('day', (now()- au.last_login_timex ))) > $2);
+      and (au.last_login is null OR
+      abs(DATE_PART('day', (now()- au.last_login ))) > $2);
     """
 
     results =
@@ -419,8 +419,8 @@ defmodule Teiserver.Account.RelationshipLib do
       join account_users au
       on au.id = ar.to_user_id
       and ar.from_user_id = $1
-      and (au.last_login_timex is null OR
-      abs(DATE_PART('day', (now()- au.last_login_timex ))) > $2);
+      and (au.last_login is null OR
+      abs(DATE_PART('day', (now()- au.last_login ))) > $2);
       """
 
     result =

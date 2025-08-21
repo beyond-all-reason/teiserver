@@ -17,7 +17,7 @@
     {central_component("detail_line",
       label: "Last login",
       value:
-        date_to_str(@user.last_login_timex,
+        date_to_str(@user.last_login,
           format: :hms_or_hms_ymd,
           tz: @tz
         )
