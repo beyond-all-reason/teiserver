@@ -239,20 +239,6 @@ defmodule Teiserver.Account.UserCacheLib do
     data =
       CacheUser.data_keys()
       |> Map.new(fn k -> {to_string(k), Map.get(user, k, Account.default_data()[k])} end)
-      |> Map.put(
-        "last_login",
-        case Map.get(user, :last_login) do
-          dt when is_map(dt) ->
-            try do
-              div(Timex.to_unix(dt), 60)
-            rescue
-              _ -> Map.get(user, :last_login)
-            end
-
-          _ ->
-            Map.get(user, :last_login)
-        end
-      )
 
     obj_attrs =
       CacheUser.keys()

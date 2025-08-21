@@ -945,8 +945,7 @@ defmodule Teiserver.CacheUser do
 
     user = %{
       user
-      | # Set as proper datetime
-        last_login: Timex.now(),
+      | last_login: Timex.now(),
         last_login_mins: round(System.system_time(:second) / 60),
         country: country,
         rank: rank,

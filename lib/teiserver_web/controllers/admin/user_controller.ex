@@ -626,7 +626,7 @@ defmodule TeiserverWeb.Admin.UserController do
           |> Enum.map(fn {_, user} -> user end)
           |> Enum.sort_by(
             fn user ->
-              user.data["last_login"]
+              user.last_login
             end,
             &>=/2
           )
