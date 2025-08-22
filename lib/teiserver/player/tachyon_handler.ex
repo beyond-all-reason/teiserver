@@ -53,7 +53,6 @@ defmodule Teiserver.Player.TachyonHandler do
     Logger.metadata(user_id: user.id)
 
     event = build_user_self_event(user, sess_state)
-
     {:event, "user/self", event, state}
   end
 
@@ -142,7 +141,7 @@ defmodule Teiserver.Player.TachyonHandler do
           clanId: user_state.clan_id,
           country: user_state.country,
           status: user_state.status,
-          roles: convert_teiserver_roles_to_tachyon(user_state.roles)
+          roles: roles_to_tachyon(user_state.roles)
         }
       ]
     }
@@ -338,7 +337,7 @@ defmodule Teiserver.Player.TachyonHandler do
           clanId: user.clan_id,
           countryCode: user.country,
           status: status,
-          roles: convert_teiserver_roles_to_tachyon(user.roles)
+          roles: roles_to_tachyon(user.roles)
         }
 
       {:response, resp, state}
@@ -585,7 +584,7 @@ defmodule Teiserver.Player.TachyonHandler do
         outgoingFriendRequest: outgoing,
         incomingFriendRequest: incoming,
         ignoreIds: [],
-        roles: convert_teiserver_roles_to_tachyon(user.roles)
+        roles: roles_to_tachyon(user.roles)
       }
     }
   end
@@ -726,11 +725,9 @@ defmodule Teiserver.Player.TachyonHandler do
     }
   end
 
-  @doc """
-  Converts Teiserver role names to Tachyon role names.
-  Only roles that have Tachyon equivalents are included.
-  """
-  def convert_teiserver_roles_to_tachyon(teiserver_roles) when is_list(teiserver_roles) do
+  # Converts Teiserver role names to Tachyon role names.
+  # Only roles that have Tachyon equivalents are included.
+  defp roles_to_tachyon(teiserver_roles) when is_list(teiserver_roles) do
     teiserver_roles
     |> Enum.map(fn role ->
       case role do
