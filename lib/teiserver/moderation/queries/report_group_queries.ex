@@ -14,7 +14,8 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
     |> do_preload(args[:preload])
     |> do_order_by(args[:order_by])
     |> query_select(args[:select])
-    |> limit_query(args[:limit] || 50)
+    |> limit_query(args[:limit])
+    |> offset_query(args[:offset])
   end
 
   @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()

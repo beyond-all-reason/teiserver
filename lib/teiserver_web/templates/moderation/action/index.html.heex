@@ -87,6 +87,21 @@
             <% end %>
           </tbody>
         </table>
+
+        <%= if assigns[:total_pages] do %>
+          <.pagination
+            page={@page}
+            total_pages={@total_pages}
+            base_url="/moderation/action"
+            limit={@limit}
+            total_count={@total_count}
+            current_count={@current_count}
+            show_go_to={@total_pages > 5}
+            class="mt-3"
+            include_params={["search", "target_id", "reporter_id", "expiry", "limit"]}
+            current_params={@conn.params}
+          />
+        <% end %>
       </div>
     </div>
   </div>

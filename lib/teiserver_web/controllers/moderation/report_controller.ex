@@ -21,51 +21,43 @@ defmodule TeiserverWeb.Moderation.ReportController do
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
-    reports =
-      Moderation.list_reports(
-        search: [
-          target_id: params["target_id"],
-          reporter_id: params["reporter_id"]
-        ],
-        preload: [:target, :reporter, :responses],
-        order_by: "Newest first"
-      )
+    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
+    limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
 
-    target =
-      if params["target_id"] do
-        Account.get_user(params["target_id"])
-      end
+    search_args = [
+      target_id: params["target_id"],
+      reporter_id: params["reporter_id"]
+    ]
 
-    conn
-    |> assign(:target, target)
-    |> assign(:target_id, params["target_id"])
-    |> assign(:reports, reports)
-    |> assign(:params, params)
-    |> render("index.html")
-  end
-
-  @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def search(conn, %{"search" => params}) do
-    reports =
-      Moderation.list_reports(
-        search: [
-          state: params["state"]
-        ],
-        preload: [:target, :reporter, :responses],
-        order_by: params["order"]
-      )
-
-    reports =
+    # Add type filter to search args if not "Any"
+    search_args =
       case params["kind"] do
-        "Chat" ->
-          reports |> Enum.filter(fn report -> String.contains?(report.type, "chat") end)
-
-        "Actions" ->
-          reports |> Enum.filter(fn report -> String.contains?(report.type, "actions") end)
-
-        "Any" ->
-          reports
+        "Chat" -> Keyword.put(search_args, :type, "chat")
+        "Actions" -> Keyword.put(search_args, :type, "actions")
+        "Any" -> search_args
+        nil -> search_args
       end
+
+    # Add state filter if not "Any"
+    search_args =
+      case params["state"] do
+        "Open" -> Keyword.put(search_args, :state, "open")
+        "Resolved" -> Keyword.put(search_args, :state, "resolved")
+        "Any" -> search_args
+        nil -> search_args
+      end
+
+    total_count = Moderation.count_reports(search: search_args)
+    total_pages = div(total_count - 1, limit) + 1
+
+    reports =
+      Moderation.list_reports(
+        search: search_args,
+        preload: [:target, :reporter, :responses],
+        order_by: params["order"] || "Newest first",
+        limit: limit,
+        offset: page * limit
+      )
 
     target =
       if params["target_id"] do
@@ -75,8 +67,13 @@ defmodule TeiserverWeb.Moderation.ReportController do
     conn
     |> assign(:target, target)
     |> assign(:target_id, params["target_id"])
-    |> assign(:params, params)
     |> assign(:reports, reports)
+    |> assign(:page, page)
+    |> assign(:limit, limit)
+    |> assign(:total_pages, total_pages)
+    |> assign(:total_count, total_count)
+    |> assign(:current_count, Enum.count(reports))
+    |> assign(:params, Map.put(params, "limit", limit))
     |> render("index.html")
   end
 

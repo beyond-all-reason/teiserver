@@ -20,19 +20,18 @@
 
 <div class="search-row">
   <form
-    action={Routes.moderation_action_path(@conn, :search)}
-    method="post"
+    action={Routes.moderation_action_path(@conn, :index)}
+    method="get"
     class="form-horizontal"
     id="search-box"
   >
-    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
     <input type="hidden" name="search" value="true" />
 
     <div class="row">
       <div class="col-md-4 col-xl-2 search-form-input">
         <label for="search_order" class="control-label">Expiry: </label>
         {central_component("icon_dropdown", %{
-          name: "search[expiry]",
+          name: "expiry",
           id: "search_expiry",
           selected: @params["expiry"] || "All",
           enumerable: [
@@ -49,7 +48,7 @@
       <div class="col-md-4 col-xl-2 search-form-input">
         <label for="search_order" class="control-label">Order by: </label>
         {central_component("icon_dropdown", %{
-          name: "search[order]",
+          name: "order",
           id: "search_order",
           selected: @params["order"] || "Newest first",
           enumerable: [
@@ -65,12 +64,7 @@
     <div class="row">
       <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
         &nbsp;<br />
-        <input
-          type="submit"
-          value="Search"
-          name="form.submitted"
-          class={"btn btn-#{bsname} btn-block"}
-        />
+        <input type="submit" value="Search" class={"btn btn-#{bsname} btn-block"} />
       </div>
     </div>
   </form>

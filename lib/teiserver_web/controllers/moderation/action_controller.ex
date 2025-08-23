@@ -23,39 +23,59 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
+    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
+    limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
+
+    search_args = extract_search_params(params)
+
+    total_count = Moderation.count_actions(search: search_args)
+    total_pages = div(total_count - 1, limit) + 1
+
     actions =
       Moderation.list_actions(
-        search: [
-          target_id: params["target_id"],
-          reporter_id: params["reporter_id"]
-        ],
+        search: search_args,
         preload: [:target],
-        order_by: "Most recently inserted first"
+        order_by: params["order"] || "Most recently inserted first",
+        limit: limit,
+        offset: page * limit
       )
 
     conn
-    |> assign(:params, %{})
     |> assign(:actions, actions)
+    |> assign(:page, page)
+    |> assign(:limit, limit)
+    |> assign(:total_pages, total_pages)
+    |> assign(:total_count, total_count)
+    |> assign(:current_count, Enum.count(actions))
+    |> assign(:params, Map.put(params, "limit", limit))
     |> render("index.html")
   end
 
-  @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def search(conn, %{"search" => params}) do
-    actions =
-      Moderation.list_actions(
-        search: [
-          target_id: params["target_id"],
-          reporter_id: params["reporter_id"],
-          expiry: params["expiry"]
-        ],
-        preload: [:target],
-        order_by: params["order"]
-      )
+  defp extract_search_params(params) do
+    search_params = []
 
-    conn
-    |> assign(:params, params)
-    |> assign(:actions, actions)
-    |> render("index.html")
+    search_params =
+      if params["target_id"] && params["target_id"] != "" do
+        [target_id: params["target_id"]] ++ search_params
+      else
+        search_params
+      end
+
+    search_params =
+      if params["reporter_id"] && params["reporter_id"] != "" do
+        [reporter_id: params["reporter_id"]] ++ search_params
+      else
+        search_params
+      end
+
+    search_params =
+      if params["expiry"] && params["expiry"] != "All" do
+        [expiry: params["expiry"]] ++ search_params
+      else
+        search_params
+      end
+
+    search_params
   end
 
   @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()

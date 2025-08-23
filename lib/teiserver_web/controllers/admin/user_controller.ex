@@ -25,19 +25,24 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
+    page =
+      (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
+
+    limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
+    search_term = get_search_term(params)
+
     users =
       Account.list_users(
-        search: [
-          basic_search: Map.get(params, "s", "") |> String.trim()
-        ],
+        search: [basic_search: search_term],
         order_by: "Newest first",
-        limit: 50
+        limit: limit,
+        offset: page * limit
       )
 
-    # Sometimes we get a lot of matches so it can be good to put in place exact matches too
+    # Add exact matches on first page for non-empty searches
     exact_match =
-      if Enum.count(users) > 20 && params["s"] do
-        Account.list_users(search: [name_lower: params["s"]])
+      if should_show_exact_match?(page, users, search_term) do
+        Account.list_users(search: [name_lower: search_term])
       else
         []
       end
@@ -47,14 +52,27 @@ defmodule TeiserverWeb.Admin.UserController do
 
     user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
 
+    total_users =
+      if search_term == "" do
+        Account.count_users()
+      else
+        Account.count_users(search: [basic_search: search_term])
+      end
+
+    total_pages = div(total_users - 1, limit) + 1
+
     if Enum.count(users) == 1 do
-      conn
-      |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
+      conn |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
     else
       conn
       |> add_breadcrumb(name: "List users", url: conn.request_path)
       |> assign(:users, Enum.zip(users, user_stats))
-      |> assign(:params, search_defaults(conn))
+      |> assign(:page, page)
+      |> assign(:limit, limit)
+      |> assign(:total_pages, total_pages)
+      |> assign(:total_count, total_users)
+      |> assign(:current_count, Enum.count(users))
+      |> assign(:params, Map.put(params, "limit", limit))
       |> render("index.html")
     end
   end
@@ -62,6 +80,11 @@ defmodule TeiserverWeb.Admin.UserController do
   @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
     params = Map.merge(search_defaults(conn), params)
+
+    page =
+      (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
+
+    limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
 
     id_list =
       if params["previous_names"] != nil and params["previous_names"] != "" do
@@ -87,7 +110,8 @@ defmodule TeiserverWeb.Admin.UserController do
            previous_names: params["previous_names"],
            mod_action: params["mod_action"]
          ],
-         limit: params["limit"] || 50,
+         limit: limit,
+         offset: page * limit,
          order_by: params["order"] || "Name (A-Z)"
        ) ++
          Account.list_users(search: [id_in: id_list]))
@@ -95,9 +119,29 @@ defmodule TeiserverWeb.Admin.UserController do
 
     user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
 
+    total_users =
+      Account.count_users(
+        search: [
+          name_or_email: Map.get(params, "name", "") |> String.trim(),
+          bot: params["bot"],
+          has_role: params["role"],
+          ip: params["ip"],
+          lobby_client: params["lobby_client"],
+          previous_names: params["previous_names"],
+          mod_action: params["mod_action"]
+        ]
+      )
+
+    total_pages = div(total_users - 1, limit) + 1
+
     conn
     |> add_breadcrumb(name: "User search", url: conn.request_path)
-    |> assign(:params, params)
+    |> assign(:page, page)
+    |> assign(:limit, limit)
+    |> assign(:total_pages, total_pages)
+    |> assign(:total_count, total_users)
+    |> assign(:current_count, Enum.count(users))
+    |> assign(:params, Map.put(params, "limit", limit))
     |> assign(:users, Enum.zip(users, user_stats))
     |> render("index.html")
   end
@@ -366,7 +410,15 @@ defmodule TeiserverWeb.Admin.UserController do
         filter = params["filter"]
         filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter]
         season = MatchRatingLib.active_season()
-        limit = (params["limit"] || "50") |> int_parse
+
+        page =
+          (params["page"] || "1")
+          |> to_string()
+          |> String.to_integer()
+          |> max(1)
+          |> then(&(&1 - 1))
+
+        limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
 
         ratings =
           Account.list_ratings(
@@ -380,6 +432,15 @@ defmodule TeiserverWeb.Admin.UserController do
             {rating.rating_type.name, rating}
           end)
 
+        total_count =
+          Game.count_rating_logs(
+            search: [
+              user_id: user.id,
+              rating_type_id: filter_type_id,
+              season: season
+            ]
+          )
+
         logs =
           Game.list_rating_logs(
             search: [
@@ -389,6 +450,7 @@ defmodule TeiserverWeb.Admin.UserController do
             ],
             order_by: "Newest first",
             limit: limit,
+            offset: page * limit,
             preload: [:match, :match_membership]
           )
 
@@ -406,6 +468,8 @@ defmodule TeiserverWeb.Admin.UserController do
             }
           end
 
+        total_pages = div(total_count - 1, limit) + 1
+
         conn
         |> assign(:filter, filter || "rating-all")
         |> assign(:user, user)
@@ -415,6 +479,11 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
         |> assign(:stats, stats)
         |> add_breadcrumb(name: "Ratings: #{user.name}", url: conn.request_path)
+        |> assign(:page, page)
+        |> assign(:limit, limit)
+        |> assign(:total_pages, total_pages)
+        |> assign(:total_count, total_count)
+        |> assign(:current_count, Enum.count(logs))
         |> render("ratings.html")
 
       _ ->
@@ -1050,8 +1119,16 @@ defmodule TeiserverWeb.Admin.UserController do
   @spec search_defaults(Plug.Conn.t()) :: map()
   defp search_defaults(_conn) do
     %{
-      "limit" => 50
+      "limit" => "50"
     }
+  end
+
+  defp get_search_term(params, key \\ "s") do
+    Map.get(params, key, "") |> String.trim()
+  end
+
+  defp should_show_exact_match?(page, users, search_term) do
+    page == 0 && Enum.count(users) > 20 && search_term != ""
   end
 
   @spec gdpr_clean(Plug.Conn.t(), map()) :: Plug.Conn.t()

@@ -29,7 +29,7 @@ defmodule TeiserverWeb.Admin.AdminComponents do
         bsname={@view_colour}
         icon={Teiserver.Battle.MatchLib.icon()}
         active={@active == "matches"}
-        url={~p"/teiserver/admin/matches/search"}
+        url={~p"/teiserver/admin/matches"}
       >
         Matches
       </.sub_menu_button>
