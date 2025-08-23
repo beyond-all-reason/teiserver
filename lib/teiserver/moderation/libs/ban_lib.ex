@@ -79,6 +79,12 @@ defmodule Teiserver.Moderation.BanLib do
       where: bans.inserted_at < ^dt
   end
 
+  def _search(query, :name, name) do
+    from bans in query,
+      left_join: sources in assoc(bans, :source),
+      where: ilike(sources.name, ^"%#{name}%")
+  end
+
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 

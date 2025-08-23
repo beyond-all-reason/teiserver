@@ -7,132 +7,164 @@
 
 <div class="row section-menu">
   <div class="col-md-12">
-    <%= if @target_id do %>
-      <div class="float-end">
-        <%= if allow?(@conn, "teiserver.staff.moderator") do %>
-          <a
-            class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
-            href={~p"/teiserver/admin/user/#{@target_id}"}
-          >
-            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" /> &nbsp;
-            View user
-          </a>
-        <% end %>
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <TeiserverWeb.Moderation.ReportComponents.section_menu
+          active={if @conn.params["search"] == "true", do: "search", else: "index"}
+          view_colour={view_colour()}
+          current_user={@current_user}
+        />
+        <br /><br />
 
-        <a
-          class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
-          href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@target_id}_"}
-        >
-          <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" /> &nbsp;
-          Action user
-        </a>
-      </div>
-      <br /><br />
-    <% end %>
-
-    <%= if @target && @target.smurf_of_id do %>
-      <div class="alert alert-primary">
-        {@target.name} has been flagged as a smurf, these reports are not worth acting on.
-      </div>
-    <% end %>
-
-    {render(TeiserverWeb.Moderation.ReportView, "search.html", assigns)}
-
-    <h4>Listing Reports</h4>
-
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <th>&nbsp;</th>
-          <th>Target</th>
-          <th>Type</th>
-          <th>Extra text</th>
-
-          <th>Reporter</th>
-          <th>Datetime</th>
-          <th>Responses</th>
-
-          <th colspan="3">&nbsp;</th>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for report <- @reports do %>
-          <tr>
-            <td style="width: 30px;">
-              <%= if report.result_id do %>
-                <a
-                  href={Routes.moderation_action_path(@conn, :show, report.result_id)}
-                  class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()}"}
-                >
-                  <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
-                </a>
-              <% end %>
-
-              <%= if report.closed do %>
-                <span class={"btn btn-sm btn-#{bsname}"}>
-                  <Fontawesome.icon icon="folder-closed" style="solid" />
-                </span>
-              <% end %>
-            </td>
-
-            <td>
+        <%= if @target_id do %>
+          <div class="float-end">
+            <%= if allow?(@conn, "teiserver.staff.moderator") do %>
               <a
-                href={~p"/moderation/report/user/#{report.target_id}"}
-                class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}
+                class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
+                href={~p"/teiserver/admin/user/#{@target_id}"}
               >
-                <Fontawesome.icon
-                  icon={Teiserver.Helper.StylingHelper.icon(:user)}
-                  style="regular"
-                />
+                <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" /> &nbsp;
+                View user
               </a>
-              &nbsp; {report.target.name}
-            </td>
-
-            <td>{report.type}/{report.sub_type}</td>
-            <td>{String.slice(report.extra_text || "", 0..40)}</td>
-
-            <td>
-              <a href={Routes.moderation_report_path(@conn, :user, report.reporter_id)}>
-                {report.reporter.name}
-              </a>
-            </td>
-
-            <td>{date_to_str(report.inserted_at, format: :hms_or_ymd)}</td>
-
-            <td>{Enum.count(report.responses)}</td>
-
-            <td>
-              <a
-                href={Routes.moderation_report_path(@conn, :show, report.id)}
-                class="btn btn-secondary btn-sm"
-              >
-                Details
-              </a>
-            </td>
-
-            <%= if report.match_id do %>
-              <td>
-                <a href={~p"/battle/#{report.match_id}"} class="btn btn-secondary btn-sm">
-                  Match
-                </a>
-              </td>
-              <td>
-                <a
-                  href={
-                    ~p"/battle/chat/#{report.match_id}/#{report.target_id}/#{report.reporter_id}"
-                  }
-                  class="btn btn-secondary btn-sm"
-                >
-                  Chat
-                </a>
-              </td>
-            <% else %>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
             <% end %>
-          </tr>
+
+            <a
+              class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.icon()}"}
+              href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@target_id}_"}
+            >
+              <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
+              &nbsp;
+              Action user
+            </a>
+          </div>
+          <br /><br />
         <% end %>
-      </tbody>
-    </table>
+
+        <%= if @target && @target.smurf_of_id do %>
+          <div class="alert alert-primary">
+            {@target.name} has been flagged as a smurf, these reports are not worth acting on.
+          </div>
+        <% end %>
+
+        <%= if @conn.params["search"] == "true" do %>
+          {render(TeiserverWeb.Moderation.ReportView, "search.html", assigns)}
+        <% end %>
+
+        <h4>Listing Reports</h4>
+
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>&nbsp;</th>
+              <th>Target</th>
+              <th>Type</th>
+              <th>Extra text</th>
+
+              <th>Reporter</th>
+              <th>Datetime</th>
+              <th>Responses</th>
+
+              <th colspan="3">&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for report <- @reports do %>
+              <tr>
+                <td style="width: 30px;">
+                  <%= if report.result_id do %>
+                    <a
+                      href={Routes.moderation_action_path(@conn, :show, report.result_id)}
+                      class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()}"}
+                    >
+                      <Fontawesome.icon
+                        icon={Teiserver.Moderation.ActionLib.icon()}
+                        style="solid"
+                      />
+                    </a>
+                  <% end %>
+
+                  <%= if report.closed do %>
+                    <span class={"btn btn-sm btn-#{bsname}"}>
+                      <Fontawesome.icon icon="folder-closed" style="solid" />
+                    </span>
+                  <% end %>
+                </td>
+
+                <td>
+                  <a
+                    href={~p"/moderation/report/user/#{report.target_id}"}
+                    class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}
+                  >
+                    <Fontawesome.icon
+                      icon={Teiserver.Helper.StylingHelper.icon(:user)}
+                      style="regular"
+                    />
+                  </a>
+                  &nbsp; {report.target.name}
+                </td>
+
+                <td>{report.type}/{report.sub_type}</td>
+                <td>{String.slice(report.extra_text || "", 0..40)}</td>
+
+                <td>
+                  <a href={Routes.moderation_report_path(@conn, :user, report.reporter_id)}>
+                    {report.reporter.name}
+                  </a>
+                </td>
+
+                <td>{date_to_str(report.inserted_at, format: :hms_or_ymd)}</td>
+
+                <td>{Enum.count(report.responses)}</td>
+
+                <td>
+                  <a
+                    href={Routes.moderation_report_path(@conn, :show, report.id)}
+                    class="btn btn-secondary btn-sm"
+                  >
+                    Details
+                  </a>
+                </td>
+
+                <%= if report.match_id do %>
+                  <td>
+                    <a href={~p"/battle/#{report.match_id}"} class="btn btn-secondary btn-sm">
+                      Match
+                    </a>
+                  </td>
+                  <td>
+                    <a
+                      href={
+                        ~p"/battle/chat/#{report.match_id}/#{report.target_id}/#{report.reporter_id}"
+                      }
+                      class="btn btn-secondary btn-sm"
+                    >
+                      Chat
+                    </a>
+                  </td>
+                <% else %>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                <% end %>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+
+        <%= if assigns[:total_pages] do %>
+          <.pagination
+            page={@page}
+            total_pages={@total_pages}
+            base_url="/moderation/report"
+            limit={@limit}
+            total_count={@total_count}
+            current_count={@current_count}
+            show_go_to={@total_pages > 5}
+            class="mt-3"
+            include_params={["target_id", "reporter_id", "limit", "kind", "state", "order"]}
+            current_params={@conn.params}
+          />
+        <% end %>
+      </div>
+    </div>
   </div>
 </div>

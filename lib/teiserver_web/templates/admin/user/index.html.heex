@@ -131,6 +131,21 @@ is_moderator = allow?(@conn, "Moderator") %>
             <% end %>
           </tbody>
         </table>
+
+        <%= if assigns[:total_pages] do %>
+          <.pagination
+            page={@page}
+            total_pages={@total_pages}
+            base_url="/teiserver/admin/user"
+            limit={@limit}
+            total_count={@total_count}
+            current_count={@current_count}
+            show_go_to={@total_pages > 5}
+            class="mt-3"
+            include_params={["s", "limit"]}
+            current_params={Map.merge(@conn.params, %{"limit" => @limit})}
+          />
+        <% end %>
       </div>
     </div>
   </div>

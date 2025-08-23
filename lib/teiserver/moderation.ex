@@ -49,7 +49,23 @@ defmodule Teiserver.Moderation do
   def list_reports(args \\ []) do
     report_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> QueryHelpers.offset_query(args[:offset])
     |> Repo.all()
+  end
+
+  @doc """
+  Returns the count of reports.
+
+  ## Examples
+
+      iex> count_reports()
+      42
+
+  """
+  @spec count_reports(List.t()) :: integer()
+  def count_reports(args \\ []) do
+    report_query(args)
+    |> Repo.aggregate(:count, :id)
   end
 
   @doc """
@@ -255,6 +271,9 @@ defmodule Teiserver.Moderation do
 
   @spec list_report_groups(list) :: [ComplexServerEventType.t()]
   defdelegate list_report_groups(args), to: ReportGroupLib
+
+  @spec count_report_groups(list) :: integer()
+  defdelegate count_report_groups(args), to: ReportGroupLib
 
   @spec get_report_group!(non_neg_integer) :: ComplexServerEventType.t()
   defdelegate get_report_group!(id), to: ReportGroupLib
@@ -502,7 +521,23 @@ defmodule Teiserver.Moderation do
   def list_actions(args \\ []) do
     action_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> QueryHelpers.offset_query(args[:offset])
     |> Repo.all()
+  end
+
+  @doc """
+  Returns the count of actions.
+
+  ## Examples
+
+      iex> count_actions()
+      42
+
+  """
+  @spec count_actions(List.t()) :: integer()
+  def count_actions(args \\ []) do
+    action_query(args)
+    |> Repo.aggregate(:count, :id)
   end
 
   @doc """
@@ -964,7 +999,23 @@ defmodule Teiserver.Moderation do
   def list_bans(args \\ []) do
     ban_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> QueryHelpers.offset_query(args[:offset])
     |> Repo.all()
+  end
+
+  @doc """
+  Returns the count of bans.
+
+  ## Examples
+
+      iex> count_bans()
+      42
+
+  """
+  @spec count_bans(List.t()) :: integer()
+  def count_bans(args \\ []) do
+    ban_query(args)
+    |> Repo.aggregate(:count, :id)
   end
 
   @doc """

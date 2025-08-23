@@ -37,11 +37,10 @@ defmodule TeiserverWeb.Moderation.ReportComponents do
     </.section_menu_button>
 
     <.section_menu_button
-      :if={@active == "show"}
       bsname={@view_colour}
       icon={StylingHelper.icon(:search)}
-      active={true}
-      url={~p"/moderation/report/search"}
+      active={@active == "search"}
+      url={~p"/moderation/report?search=true"}
     >
       Search
     </.section_menu_button>
