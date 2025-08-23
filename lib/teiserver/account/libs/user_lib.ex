@@ -64,6 +64,18 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.all()
   end
 
+  @spec count_users() :: integer
+  def count_users() do
+    count_users([])
+  end
+
+  @spec count_users(list) :: integer
+  def count_users(args) do
+    args
+    |> UserQueries.count_users()
+    |> Repo.aggregate(:count, :id)
+  end
+
   @doc """
   Gets a single user.
 

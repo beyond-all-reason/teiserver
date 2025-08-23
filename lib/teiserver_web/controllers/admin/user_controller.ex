@@ -25,19 +25,21 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
+    {page, page_size} = parse_page_params(params, 50)
+    search_term = get_search_term(params)
+
     users =
       Account.list_users(
-        search: [
-          basic_search: Map.get(params, "s", "") |> String.trim()
-        ],
+        search: [basic_search: search_term],
         order_by: "Newest first",
-        limit: 50
+        limit: page_size,
+        offset: page * page_size
       )
 
-    # Sometimes we get a lot of matches so it can be good to put in place exact matches too
+    # Add exact matches on first page for non-empty searches
     exact_match =
-      if Enum.count(users) > 20 && params["s"] do
-        Account.list_users(search: [name_lower: params["s"]])
+      if should_show_exact_match?(page, users, search_term) do
+        Account.list_users(search: [name_lower: search_term])
       else
         []
       end
@@ -47,14 +49,23 @@ defmodule TeiserverWeb.Admin.UserController do
 
     user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
 
+    # Get total count for pagination
+    total_users = if search_term == "" do
+      Account.count_users()
+    else
+      Account.count_users(search: [basic_search: search_term])
+    end
+    
+    {total_pages, last_page} = calculate_pagination_info(total_users, page_size, page)
+
     if Enum.count(users) == 1 do
-      conn
-      |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
+      conn |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
     else
       conn
       |> add_breadcrumb(name: "List users", url: conn.request_path)
       |> assign(:users, Enum.zip(users, user_stats))
-      |> assign(:params, search_defaults(conn))
+      |> assign(:params, Map.put(params, "limit", page_size))
+      |> assign_pagination_data(page, page_size, total_pages, last_page, total_users, Enum.count(users))
       |> render("index.html")
     end
   end
@@ -62,6 +73,7 @@ defmodule TeiserverWeb.Admin.UserController do
   @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
     params = Map.merge(search_defaults(conn), params)
+    {page, page_size} = parse_page_params(params)
 
     id_list =
       if params["previous_names"] != nil and params["previous_names"] != "" do
@@ -87,7 +99,8 @@ defmodule TeiserverWeb.Admin.UserController do
            previous_names: params["previous_names"],
            mod_action: params["mod_action"]
          ],
-         limit: params["limit"] || 50,
+         limit: page_size,
+         offset: page * page_size,
          order_by: params["order"] || "Name (A-Z)"
        ) ++
          Account.list_users(search: [id_in: id_list]))
@@ -95,10 +108,25 @@ defmodule TeiserverWeb.Admin.UserController do
 
     user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
 
+    # Get total count and pagination info
+    total_users = Account.count_users(
+      search: [
+        name_or_email: Map.get(params, "name", "") |> String.trim(),
+        bot: params["bot"],
+        has_role: params["role"],
+        ip: params["ip"],
+        lobby_client: params["lobby_client"],
+        previous_names: params["previous_names"],
+        mod_action: params["mod_action"]
+      ]
+    )
+    {total_pages, last_page} = calculate_pagination_info(total_users, page_size, page)
+
     conn
     |> add_breadcrumb(name: "User search", url: conn.request_path)
-    |> assign(:params, params)
+    |> assign(:params, Map.put(params, "limit", page_size))
     |> assign(:users, Enum.zip(users, user_stats))
+    |> assign_pagination_data(page, page_size, total_pages, last_page, total_users, Enum.count(users))
     |> render("index.html")
   end
 
@@ -1052,6 +1080,37 @@ defmodule TeiserverWeb.Admin.UserController do
     %{
       "limit" => 50
     }
+  end
+
+  # Helper functions for pagination
+  defp parse_page_params(params, default_page_size \\ 50) do
+    page = (params["page"] || "1") |> int_parse |> max(1) |> then(&(&1 - 1))
+    page_size = (params["limit"] || default_page_size) |> int_parse |> max(1)
+    {page, page_size}
+  end
+
+  defp calculate_pagination_info(total_users, page_size, page) do
+    total_pages = max(1, div(total_users - 1, page_size) + 1)
+    last_page = page >= total_pages - 1
+    {total_pages, last_page}
+  end
+
+  defp assign_pagination_data(conn, page, page_size, total_pages, last_page, total_users, current_count) do
+    conn
+    |> assign(:page, page)
+    |> assign(:last_page, last_page)
+    |> assign(:page_size, page_size)
+    |> assign(:total_pages, total_pages)
+    |> assign(:total_count, total_users)
+    |> assign(:current_count, current_count)
+  end
+
+  defp get_search_term(params, key \\ "s") do
+    Map.get(params, key, "") |> String.trim()
+  end
+
+  defp should_show_exact_match?(page, users, search_term) do
+    page == 0 && Enum.count(users) > 20 && search_term != ""
   end
 
   @spec gdpr_clean(Plug.Conn.t(), map()) :: Plug.Conn.t()
