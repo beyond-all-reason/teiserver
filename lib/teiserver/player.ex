@@ -114,4 +114,10 @@ defmodule Teiserver.Player do
   """
   @spec party_notify_join_queues(T.userid(), [Matchmaking.queue_id()], Party.state()) :: :ok
   defdelegate party_notify_join_queues(user_id, queues, party_state), to: Player.Session
+
+  @doc """
+  Sends a user/self event to a user when their roles are updated
+  """
+  @spec update_user_roles(T.userid(), [String.t()]) :: :ok
+  defdelegate update_user_roles(user_id, roles), to: Player.Session
 end

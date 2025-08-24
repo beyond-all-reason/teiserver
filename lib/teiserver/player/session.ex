@@ -328,6 +328,14 @@ defmodule Teiserver.Player.Session do
       %{status: :offline}
   end
 
+  @doc """
+  Sends a user/self event to a user when their roles are updated
+  """
+  @spec update_user_roles(T.userid(), [String.t()]) :: :ok
+  def update_user_roles(user_id, roles) do
+    GenServer.cast(via_tuple(user_id), {:user, {:role_updated, roles}})
+  end
+
   @spec create_party(T.userid()) ::
           {:ok, Party.id()} | {:error, :already_in_party} | {:error, reason :: term()}
   def create_party(user_id) do
@@ -964,6 +972,12 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
+  def handle_cast({:user, {:role_updated, roles}}, state) do
+    send_to_player!({:user, {:role_updated, roles}}, state)
+    new_state = %{state | user: %{state.user | roles: roles}}
+    {:noreply, new_state}
+  end
+
   def handle_cast({:party, {:updated, party_state}}, state) do
     if (state.party.current_party == party_state.id && state.party.version <= party_state.version) ||
          Enum.any?(state.party.invited_to, fn {v, id} ->
@@ -1306,7 +1320,7 @@ defmodule Teiserver.Player.Session do
       # but in the meantime, just defensively get the country
       country: Map.get(user, :country, "??"),
       status: status,
-      roles: Teiserver.Player.TachyonHandler.convert_teiserver_roles_to_tachyon(user.roles)
+      roles: user.roles
     }
 
     PubSub.broadcast!(
