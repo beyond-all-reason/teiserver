@@ -136,5 +136,18 @@
         <% end %>
       </tbody>
     </table>
+
+    <%= if assigns[:total_pages] do %>
+      <.pagination
+        page={@page}
+        total_pages={@total_pages}
+        base_url={build_url(%{rating_type: @rating_type, limit: @limit})}
+        page_size={@limit}
+        total_count={@total_count}
+        current_count={@current_count}
+        show_go_to={@total_pages > 5}
+        class="mt-3"
+      />
+    <% end %>
   </div>
 </div>
