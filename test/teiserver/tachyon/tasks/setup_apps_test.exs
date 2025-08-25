@@ -32,5 +32,12 @@ defmodule Teiserver.Tachyon.Tasks.SetupAppsTest do
 
       %Application{} = ApplicationQueries.get_application_by_uid("asset_admin")
     end
+
+    test "user admin app" do
+      assert ApplicationQueries.get_application_by_uid("user_admin") == nil
+      SetupApps.ensure_user_admin_app()
+
+      %Application{} = ApplicationQueries.get_application_by_uid("user_admin")
+    end
   end
 end
