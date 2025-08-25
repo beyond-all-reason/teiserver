@@ -2,7 +2,7 @@ defmodule TeiserverWeb.API.Admin.UserController do
   use TeiserverWeb, :controller
   alias Teiserver.{Account, OAuth}
 
-  plug Teiserver.OAuth.Plug.EnsureAuthenticated, scopes: ["tachyon.lobby"]
+  plug Teiserver.OAuth.Plug.EnsureAuthenticated, scopes: ["admin.user"]
 
   @stat_fields ["mu", "sigma", "play_time", "spec_time", "lobby_time"]
   @default_params %{

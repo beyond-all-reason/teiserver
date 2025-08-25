@@ -29,7 +29,7 @@ defmodule Teiserver.OAuth.Application do
   end
 
   def allowed_scopes do
-    ["tachyon.lobby", "admin.map", "admin.engine"]
+    ["tachyon.lobby", "admin.map", "admin.engine", "admin.user"]
   end
 
   def changeset(application, attrs) do
