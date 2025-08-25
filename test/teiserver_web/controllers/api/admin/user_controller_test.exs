@@ -20,12 +20,8 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
     {:ok, oauth_app: app}
   end
 
-  defp setup_token(%{user: user}) do
-    OAuthFixtures.setup_token(user)
-  end
-
   defp setup_authed_conn(%{conn: conn, user: user}) do
-    %{token: token} = OAuthFixtures.setup_token(user, scopes: ["tachyon.lobby"])
+    %{token: token} = OAuthFixtures.setup_token(user, scopes: ["admin.user"])
     {:ok, authed_conn: auth_conn(conn, token), token: token}
   end
 
@@ -33,13 +29,19 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
   defp refresh_token_path(), do: ~p"/teiserver/api/admin/users/refresh_token"
 
   describe "auth" do
-    setup [:setup_user, :setup_token]
+    setup [:setup_user]
 
     test "requires a bearer token", %{conn: conn} do
       post(conn, create_user_path(), %{}) |> json_response(401)
     end
 
-    test "can access with token", %{conn: conn, token: token} do
+    test "must have correct scopes", %{conn: conn, user: user} do
+      %{token: token} = OAuthFixtures.setup_token(user, scopes: ["tachyon.lobby"])
+      conn |> auth_conn(token) |> post(create_user_path(), %{}) |> json_response(401)
+    end
+
+    test "can access with token", %{conn: conn, user: user} do
+      %{token: token} = OAuthFixtures.setup_token(user, scopes: ["admin.user"])
       conn |> auth_conn(token) |> post(create_user_path(), %{}) |> json_response(400)
     end
   end
