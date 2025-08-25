@@ -92,8 +92,17 @@ defmodule Teiserver.Account.User do
   end
 
   def changeset(user, attrs, :script) do
+    data = default_data() |> Map.new(fn {k, v} -> {to_string(k), v} end)
+
     attrs =
-      attrs
+      Map.merge(
+        %{
+          "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
+          "colour" => Teiserver.Helper.StylingHelper.random_colour()
+        },
+        attrs
+      )
+      |> Map.put("data", data)
       |> remove_whitespace([:email])
       |> uniq_lists(~w(permissions roles)a)
 
