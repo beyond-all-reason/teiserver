@@ -534,7 +534,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
 
   def get_inactive_friends(friends, days_cutoff) do
     Enum.filter(friends, fn friend ->
-      last_login = friend.other_user.last_login_timex
+      last_login = friend.other_user.last_login
       days = get_days_diff(last_login, Timex.now())
       days > days_cutoff
     end)

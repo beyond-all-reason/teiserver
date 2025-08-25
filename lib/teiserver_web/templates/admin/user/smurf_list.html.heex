@@ -160,7 +160,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                   <% end %>
 
                   <td>
-                    {date_to_str(((@user.data["last_login"] || 0) * 60) |> Timex.from_unix(),
+                    {date_to_str(@user.last_login,
                       format: :hms_or_ymd,
                       tz: @tz
                     )}
@@ -228,7 +228,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                     <% end %>
 
                     <td>
-                      {date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix(),
+                      {date_to_str(user.last_login,
                         format: :hms_or_ymd,
                         tz: @tz
                       )}

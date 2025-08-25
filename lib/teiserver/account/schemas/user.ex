@@ -28,7 +28,6 @@ defmodule Teiserver.Account.User do
 
     # Start time of their last match
     field :last_login, :utc_datetime
-    field :last_login_timex, :utc_datetime
     field :last_played, :utc_datetime
     field :last_logout, :utc_datetime
 
@@ -57,7 +56,6 @@ defmodule Teiserver.Account.User do
       email_change_code: nil,
       last_login: nil,
       last_login_mins: nil,
-      last_login_timex: nil,
       restrictions: [],
       restricted_until: nil,
       shadowbanned: false,
@@ -84,7 +82,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login_timex last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
@@ -100,7 +98,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login_timex last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)

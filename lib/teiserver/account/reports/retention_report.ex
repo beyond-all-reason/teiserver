@@ -51,8 +51,7 @@ defmodule Teiserver.Account.RetentionReport do
         limit: :infinity
       )
       |> Enum.map(fn user ->
-        last_login_secs = user.data["last_login"] * 60
-        last_login = Timex.from_unix(last_login_secs)
+        last_login = user.data["last_login"]
 
         last_played =
           day_logs
@@ -70,7 +69,7 @@ defmodule Teiserver.Account.RetentionReport do
             end
           end)
 
-        if last_played != nil do
+        if last_played != nil and last_login != nil do
           %{
             last_login: Timex.diff(user.inserted_at, last_login, :days) |> abs,
             last_played: Timex.diff(user.inserted_at, last_played, :days) |> abs

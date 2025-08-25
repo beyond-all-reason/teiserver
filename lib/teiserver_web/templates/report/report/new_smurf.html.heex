@@ -102,7 +102,7 @@
                 </td>
 
                 <td>
-                  {date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix(),
+                  {date_to_str(user.data["last_login"],
                     format: :hms_or_ymd,
                     tz: @tz
                   )}
