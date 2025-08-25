@@ -169,6 +169,46 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "party/removed", event, state}
   end
 
+  def handle_info({:lobby, lobby_id, {:updated, updates}}, state) do
+    events = Enum.map(updates, &lobby_update_to_tachyon(lobby_id, &1))
+
+    {:event, events, state}
+  end
+
+  def handle_info({:lobby_list, {:add_lobby, lobby_id, overview}}, state) do
+    data = %{
+      updates: [
+        %{
+          type: :added,
+          overview: lobby_overview_to_tachyon(lobby_id, overview)
+        }
+      ]
+    }
+
+    {:event, "lobby/listUpdated", data, state}
+  end
+
+  def handle_info({:lobby_list, {:update_lobby, lobby_id, overview}}, state) do
+    data = %{
+      updates: [
+        %{
+          type: :updated,
+          overview: lobby_overview_to_tachyon(lobby_id, overview)
+        }
+      ]
+    }
+
+    {:event, "lobby/listUpdated", data, state}
+  end
+
+  def handle_info({:lobby_list, {:remove_lobby, lobby_id}}, state) do
+    data = %{
+      updates: [%{type: :removed, id: lobby_id}]
+    }
+
+    {:event, "lobby/listUpdated", data, state}
+  end
+
   def handle_info({:timeout, message_id}, state)
       when is_map_key(state.pending_responses, message_id) do
     Logger.debug("User did not reply in time to request with id #{message_id}")
@@ -563,6 +603,91 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/create", "request", _msg_id, msg, state) do
+    create_data = %{
+      name: msg["data"]["name"],
+      map_name: msg["data"]["mapName"],
+      ally_team_config:
+        for at <- msg["data"]["allyTeamConfig"] do
+          sb = at["startBox"]
+          teams = for t <- at["teams"], do: %{max_players: t["maxPlayers"]}
+
+          %{
+            max_teams: at["maxTeams"],
+            start_box: %{
+              top: sb["top"],
+              bottom: sb["bottom"],
+              left: sb["left"],
+              right: sb["right"]
+            },
+            teams: teams
+          }
+        end
+    }
+
+    case Player.Session.create_lobby(state.user.id, create_data) do
+      {:ok, details} ->
+        data = lobby_details_to_tachyon(details)
+
+        {:response, data, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/join", "request", _msg_id, msg, state) do
+    case Player.Session.join_lobby(state.user.id, msg["data"]["id"]) do
+      {:ok, details} ->
+        data = lobby_details_to_tachyon(details)
+        {:response, data, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/leave", "request", _msg_id, _msg, state) do
+    case Player.Session.leave_lobby(state.user.id) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/startBattle", "request", _msg_id, msg, state) do
+    case Player.Session.start_lobby_battle(state.user.id, msg["data"]["id"]) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/subscribeList" = cmd_id, "request", msg_id, _msg, state) do
+    case Player.Session.subscribe_lobby_list(state.user.id) do
+      {:ok, list} ->
+        resp = Schema.response(cmd_id, msg_id)
+
+        ev =
+          Schema.event("lobby/listUpdated", %{
+            updates: [
+              %{
+                type: :setList,
+                overviews:
+                  Enum.map(list, fn {id, overview} -> lobby_overview_to_tachyon(id, overview) end)
+              }
+            ]
+          })
+
+        messages = [resp, ev] |> Enum.map(fn data -> {:text, Jason.encode!(data)} end)
+        {:push, messages, state}
+    end
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
@@ -740,5 +865,89 @@ defmodule Teiserver.Player.TachyonHandler do
       end
     end)
     |> Enum.reject(&is_nil/1)
+  end
+
+  defp lobby_details_to_tachyon(details) do
+    members =
+      Enum.map(details.members, fn {p_id, %{team: {x, y, z}} = p} ->
+        {to_string(p_id),
+         %{
+           id: to_string(p_id),
+           type: p.type,
+           team: [x, y, z]
+         }}
+      end)
+      |> Enum.into(%{})
+
+    ally_team_config =
+      for {at, at_idx} <- Enum.with_index(details.ally_team_config), into: %{} do
+        teams =
+          for {t, t_idx} <- Enum.with_index(at.teams), into: %{} do
+            idx = t_idx |> to_string() |> String.pad_leading(3, "0")
+            {idx, %{maxPlayers: t.max_players}}
+          end
+
+        idx = at_idx |> to_string() |> String.pad_leading(3, "0")
+
+        {idx,
+         %{
+           teams: teams,
+           maxTeams: at.max_teams,
+           startBox: at.start_box
+         }}
+      end
+
+    %{
+      id: details.id,
+      name: details.name,
+      members: members,
+      mapName: details.map_name,
+      engineVersion: details.engine_version,
+      gameVersion: details.game_version,
+      allyTeamConfig: ally_team_config
+    }
+  end
+
+  defp lobby_update_to_tachyon(lobby_id, %{event: :add_player} = ev) do
+    {x, y, z} = ev.team
+
+    data = %{
+      id: lobby_id,
+      members: %{
+        to_string(ev.id) => %{
+          type: :player,
+          id: to_string(ev.id),
+          team: [x, y, z]
+        }
+      }
+    }
+
+    {"lobby/updated", data}
+  end
+
+  defp lobby_update_to_tachyon(lobby_id, %{event: :remove_player} = ev) do
+    data = %{id: lobby_id, members: %{to_string(ev.id) => nil}}
+    {"lobby/updated", data}
+  end
+
+  # handle partial overview object
+  defp lobby_overview_to_tachyon(lobby_id, overview) do
+    keys = [
+      {:name, :name},
+      {:player_count, :playerCount},
+      {:max_player_count, :maxPlayerCount},
+      {:map_name, :mapName},
+      {:engine_version, :engineVersion},
+      {:game_version, :gameVersion}
+    ]
+
+    init = %{id: lobby_id, currentBattle: nil}
+
+    Enum.reduce(keys, init, fn {k, tachyon_k}, m ->
+      case Map.get(overview, k) do
+        nil -> m
+        val -> Map.put(m, tachyon_k, val)
+      end
+    end)
   end
 end

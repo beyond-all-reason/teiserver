@@ -1,0 +1,17 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/leave/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LobbyLeaveRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "lobby/leave" }
+    },
+    "required": ["type", "messageId", "commandId"]
+}

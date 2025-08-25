@@ -1,0 +1,47 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/create/response.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LobbyCreateResponse",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "anyOf": [
+        {
+            "title": "LobbyCreateOkResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "lobby/create" },
+                "status": { "const": "success" },
+                "data": {
+                    "$ref": "../../definitions/lobbyDetails.json",
+                    "title": "LobbyCreateOkResponseData"
+                }
+            },
+            "required": ["type", "messageId", "commandId", "status", "data"]
+        },
+        {
+            "title": "LobbyCreateFailResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "lobby/create" },
+                "status": { "const": "failed" },
+                "reason": {
+                    "enum": [
+                        "internal_error",
+                        "unauthorized",
+                        "invalid_request",
+                        "command_unimplemented"
+                    ]
+                },
+                "details": { "type": "string" }
+            },
+            "required": ["type", "messageId", "commandId", "status", "reason"]
+        }
+    ]
+}

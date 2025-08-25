@@ -1,0 +1,37 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/lobbyOverview.json",
+    "title": "LobbyOverview",
+    "description": "Simplified view of a lobby for list display purposes.",
+    "type": "object",
+    "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "playerCount": { "type": "integer" },
+        "maxPlayerCount": { "type": "integer" },
+        "mapName": { "type": "string" },
+        "engineVersion": { "type": "string" },
+        "gameVersion": { "type": "string" },
+        "currentBattle": {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "startedAt": { "$ref": "../definitions/unixTime.json" }
+                    },
+                    "required": ["startedAt"]
+                },
+                { "type": "null" }
+            ]
+        }
+    },
+    "required": [
+        "id",
+        "name",
+        "playerCount",
+        "maxPlayerCount",
+        "mapName",
+        "engineVersion",
+        "gameVersion",
+        "currentBattle"
+    ]
+}

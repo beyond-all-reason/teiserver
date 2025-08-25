@@ -78,6 +78,18 @@ defmodule Teiserver.Support.Tachyon do
     {:ok, user: user, client: client, token: token}
   end
 
+  # for when you only need an oauth app
+  def setup_app(_context) do
+    owner = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+
+    app =
+      OAuthFixtures.app_attrs(owner.id)
+      |> Map.put(:uid, UUID.uuid4())
+      |> OAuthFixtures.create_app()
+
+    {:ok, app: app}
+  end
+
   def setup_autohost(context) do
     autohost = Teiserver.BotFixtures.create_bot()
 
@@ -472,4 +484,62 @@ defmodule Teiserver.Support.Tachyon do
       time: DateTime.utc_now() |> DateTime.to_unix(:microsecond),
       update: %{type: :engine_quit}
     }
+
+  def create_lobby!(client, lobby_data) do
+    data = %{
+      name: lobby_data.name,
+      mapName: lobby_data.map_name,
+      allyTeamConfig: lobby_data.ally_team_config
+    }
+
+    :ok = send_request(client, "lobby/create", data)
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  @doc """
+  utility function to help create simple ally team config.
+  For example: mk_ally_team_config(2, 1) for a duel setting
+  """
+  def mk_ally_team_config(n_ally_team, n_team) do
+    for _ <- 1..n_ally_team do
+      teams = for _ <- 1..n_team, do: %{maxPlayers: 1}
+
+      %{
+        maxTeams: n_team,
+        startBox: %{top: 0, bottom: 1, left: 0, right: 1},
+        teams: teams
+      }
+    end
+  end
+
+  def join_lobby!(client, lobby_id) do
+    :ok = send_request(client, "lobby/join", %{id: lobby_id})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def leave_lobby!(client) do
+    :ok = send_request(client, "lobby/leave")
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def start_lobby_battle!(client, lobby_id) do
+    :ok = send_request(client, "lobby/startBattle", %{id: lobby_id})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def subscribe_lobby_list!(client) do
+    :ok = send_request(client, "lobby/subscribeList")
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def unsubscribe_lobby_list!(client) do
+    :ok = send_request(client, "lobby/subscribeList")
+    {:ok, resp} = recv_message(client)
+    resp
+  end
 end

@@ -15,6 +15,7 @@ defmodule Teiserver.Player.Session do
 
   alias Teiserver.Data.Types, as: T
   alias Teiserver.{Account, Matchmaking, Messaging, Party, Player}
+  alias Teiserver.TachyonLobby
   alias Teiserver.TachyonBattle
   alias Teiserver.Helpers.BoundedQueue, as: BQ
   alias Phoenix.PubSub
@@ -54,7 +55,7 @@ defmodule Teiserver.Player.Session do
           # this is used to avoid races where the reply of the call would be processed
           # before a message already in the mailbox
           version: integer(),
-          current_party: Party.id(),
+          current_party: Party.id() | nil,
           invited_to: [{integer(), Party.id()}]
         }
 
@@ -67,13 +68,14 @@ defmodule Teiserver.Player.Session do
   @type state :: %{
           user: T.user(),
           monitors: MC.t(),
-          mon_ref: reference(),
           conn_pid: pid() | nil,
           matchmaking: matchmaking_state(),
           messaging_state: messaging_state(),
           party: party_state(),
           user_subscriptions: MapSet.t(T.userid()),
-          battle: battle_state()
+          battle: battle_state(),
+          lobby: nil | %{id: TachyonLobby.id()},
+          lobby_list_subscription: nil | %{counter: non_neg_integer()}
         }
 
   # TODO: would be better to have that as a db setting, perhaps passed as an
@@ -85,6 +87,7 @@ defmodule Teiserver.Player.Session do
   end
 
   @impl true
+  @spec init({pid(), T.user()}) :: {:ok, state()}
   def init({conn_pid, user}) do
     Logger.metadata(actor_type: :session, user_id: user.id)
     monitors = MC.monitor(MC.new(), conn_pid, :connection)
@@ -101,7 +104,9 @@ defmodule Teiserver.Player.Session do
       },
       user_subscriptions: MapSet.new(),
       party: initial_party_state(),
-      battle: nil
+      battle: nil,
+      lobby: nil,
+      lobby_list_subscription: nil
     }
 
     broadcast_user_update!(user, :menu)
@@ -207,6 +212,23 @@ defmodule Teiserver.Player.Session do
           :ok
   def battle_start(user_id, battle_data, battle_start_data) do
     GenServer.cast(via_tuple(user_id), {:battle, {:start, battle_data, battle_start_data}})
+  end
+
+  @doc """
+  Let the player know that the lobby they are in as just started a battle
+  """
+  @spec lobby_battle_start(
+          T.userid(),
+          {TachyonBattle.id(), pid()},
+          start_data(),
+          password :: String.t()
+        ) ::
+          :ok
+  def lobby_battle_start(user_id, battle_data, battle_start_data, password) do
+    GenServer.cast(
+      via_tuple(user_id),
+      {:battle, {:lobby_start, battle_data, battle_start_data, password}}
+    )
   end
 
   @doc """
@@ -395,6 +417,41 @@ defmodule Teiserver.Player.Session do
   @spec party_notify_join_queues(T.userid(), [Matchmaking.queue_id()], Party.state()) :: :ok
   def party_notify_join_queues(user_id, queues, party_state) do
     GenServer.cast(via_tuple(user_id), {:party, {:join_queues, queues, party_state}})
+  end
+
+  @typedoc """
+  the same as Lobby.start_params, but without any creator data, these are filled by the session
+  """
+  @type lobby_start_params :: %{
+          name: String.t(),
+          map_name: String.t(),
+          ally_team_config: TachyonLobby.ally_team_config()
+        }
+  @spec create_lobby(T.userid(), lobby_start_params()) ::
+          {:ok, TachyonLobby.details()} | {:error, reason :: term()}
+  def create_lobby(user_id, start_params) do
+    GenServer.call(via_tuple(user_id), {:lobby, {:create, start_params}})
+  end
+
+  @spec join_lobby(T.userid(), TachyonLobby.id()) ::
+          {:ok, TachyonLobby.details()} | {:error, reason :: term()}
+  def join_lobby(user_id, lobby_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, {:join, lobby_id}})
+  end
+
+  @spec leave_lobby(T.userid()) :: :ok | {:error, reason :: term()}
+  def leave_lobby(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :leave})
+  end
+
+  @spec start_lobby_battle(T.userid(), TachyonLobby.id()) :: :ok | {:error, reason :: term}
+  def start_lobby_battle(user_id, lobby_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, {:start_battle, lobby_id}})
+  end
+
+  @spec subscribe_lobby_list(T.userid()) :: {:ok, %{TachyonLobby.id() => TachyonLobby.overview()}}
+  def subscribe_lobby_list(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :subscribe_list})
   end
 
   ################################################################################
@@ -776,6 +833,98 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_call({:lobby, {:create, _start_params}}, _from, state) when state.lobby != nil,
+    do: {:reply, {:error, :already_in_lobby}, state}
+
+  def handle_call({:lobby, {:create, start_params}}, _from, state) do
+    data =
+      Map.merge(start_params, %{
+        creator_data: %{id: state.user.id, name: state.user.name},
+        creator_pid: self()
+      })
+
+    case TachyonLobby.create(data) do
+      {:ok, pid, details} ->
+        state =
+          state
+          |> Map.update!(:monitors, &MC.monitor(&1, pid, {:lobby, details.id}))
+          |> Map.put(:lobby, %{id: details.id})
+
+        {:reply, {:ok, details}, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:lobby, {:join, lobby_id}}, _from, state) when state.lobby.id == lobby_id do
+    case TachyonLobby.join(lobby_id, %{id: state.user.id, name: state.user.name}, self()) do
+      # no need to setup any monitors or update the state since we're already in the lobby
+      {:ok, _, details} -> {:reply, {:ok, details}, state}
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:lobby, {:join, _}}, _from, state) when state.lobby != nil,
+    do: {:reply, {:error, :already_in_lobby}, state}
+
+  def handle_call({:lobby, {:join, lobby_id}}, _from, state) do
+    case TachyonLobby.join(lobby_id, %{id: state.user.id, name: state.user.name}, self()) do
+      {:ok, pid, details} ->
+        state =
+          state
+          |> Map.update!(:monitors, &MC.monitor(&1, pid, {:lobby, details.id}))
+          |> Map.put(:lobby, %{id: details.id})
+
+        {:reply, {:ok, details}, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:lobby, :leave}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :leave}, _from, state) do
+    case TachyonLobby.leave(state.lobby.id, state.user.id) do
+      :ok ->
+        state =
+          state
+          |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:lobby, state.lobby.id}, [:flush]))
+          |> Map.replace!(:lobby, nil)
+
+        {:reply, :ok, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:lobby, {:start_battle, lobby_id}}, _from, state)
+      when state.lobby.id != lobby_id,
+      do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, {:start_battle, lobby_id}}, _from, state) do
+    case TachyonLobby.start_battle(lobby_id, state.user.id) do
+      # the update of the state wrt to current battle is done by the lobby
+      # itself using Session.battle_start to notify all members
+      # this simplify the request/response cycle by avoiding any interleaving
+      # where the client that starts the battle would receive the server's battle/start
+      # request while waiting for the response to lobby/startBattle response
+      :ok ->
+        {:reply, :ok, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:lobby, :subscribe_list}, _from, state) do
+    {counter, list} = TachyonLobby.subscribe_updates()
+    {:reply, {:ok, list}, %{state | lobby_list_subscription: %{counter: counter}}}
+  end
+
   @impl true
   def handle_cast(
         {:matchmaking, {:notify_found, queue_id, room_pid, timeout_ms}},
@@ -934,6 +1083,42 @@ defmodule Teiserver.Player.Session do
         )
 
         {:noreply, state}
+    end
+  end
+
+  def handle_cast(
+        {:battle, {:lobby_start, {battle_id, battle_pid}, battle_start_data, password}},
+        state
+      ) do
+    Logger.info("entering lobby battle #{battle_id}")
+
+    case state.lobby do
+      nil ->
+        Logger.warning(
+          "User received a request to start a battle but is not in a state to do so #{inspect(state)}"
+        )
+
+        {:noreply, state}
+
+      %{id: _} ->
+        data = %{
+          username: state.user.name,
+          password: password,
+          ip: hd(battle_start_data.ips),
+          port: battle_start_data.port,
+          engine: battle_start_data.engine,
+          game: battle_start_data.game,
+          map: battle_start_data.map
+        }
+
+        state = send_to_player(state, {:battle_start, data})
+
+        monitors = MC.monitor(state.monitors, battle_pid, {:battle, battle_id})
+
+        # TODO: this should ideally come from an engine event, but in first approximation it'll do
+        broadcast_user_update!(state.user, :playing)
+
+        {:noreply, %{state | monitors: monitors, battle: %{id: battle_id}}}
     end
   end
 
@@ -1183,6 +1368,51 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
+  def handle_info({:lobby, lobby_id, _}, state) when state.lobby.id != lobby_id,
+    do: {:noreply, state}
+
+  def handle_info({:lobby, lobby_id, event}, state) do
+    state = send_to_player(state, {:lobby, lobby_id, event})
+    {:noreply, state}
+  end
+
+  def handle_info(
+        %{
+          topic: "teiserver_tachyonlobby_list",
+          counter: c
+        },
+        state
+      )
+      when state.lobby_list_subscription == nil or state.lobby_list_subscription.counter >= c do
+    {:noreply, state}
+  end
+
+  def handle_info(
+        %{
+          topic: "teiserver_tachyonlobby_list",
+          counter: c
+        } = ev,
+        state
+      ) do
+    state = put_in(state.lobby_list_subscription.counter, c)
+
+    case ev.event do
+      :add_lobby ->
+        send_to_player!({:lobby_list, {:add_lobby, ev.lobby_id, ev.overview}}, state)
+
+      :update_lobby ->
+        send_to_player!({:lobby_list, {:update_lobby, ev.lobby_id, ev.changes}}, state)
+
+      :remove_lobby ->
+        send_to_player!({:lobby_list, {:remove_lobby, ev.lobby_id}}, state)
+
+      _ ->
+        raise "Unknow lobby_list event: #{inspect(ev)}"
+    end
+
+    {:noreply, state}
+  end
+
   defp via_tuple(user_id) do
     Player.SessionRegistry.via_tuple(user_id)
   end
@@ -1338,6 +1568,7 @@ defmodule Teiserver.Player.Session do
     )
   end
 
+  @spec initial_party_state() :: party_state()
   defp initial_party_state(), do: %{version: 0, current_party: nil, invited_to: []}
 
   # Gather the state of all relevant parties for the given session

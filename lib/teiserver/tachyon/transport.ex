@@ -244,6 +244,15 @@ defmodule Teiserver.Tachyon.Transport do
           WebSock.handle_result()
   defp handle_result(result, command_id, message_id, conn_state) do
     case result do
+      {:event, events, state} when is_list(events) ->
+        messages =
+          Enum.map(events, fn {cmd_id, payload} ->
+            msg = Schema.event(cmd_id, payload) |> Jason.encode!()
+            {:text, msg}
+          end)
+
+        {:push, messages, %{conn_state | handler_state: state}}
+
       {:event, cmd_id, state} ->
         message = Schema.event(cmd_id) |> Jason.encode!()
         {:push, {:text, message}, %{conn_state | handler_state: state}}
