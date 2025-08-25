@@ -21,6 +21,7 @@ defmodule Mix.Tasks.Teiserver.TachyonSetup do
     Teiserver.Repo.start_link()
     SetupApps.ensure_lobby_app()
     SetupApps.ensure_asset_admin_app()
+    SetupApps.ensure_user_admin_app()
 
     case SetupAssets.ensure_engine() do
       {:ok, {:created, engine}} ->
