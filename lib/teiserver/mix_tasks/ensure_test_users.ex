@@ -71,7 +71,12 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
             name: user,
             email: "#{user}@test.local",
             password: "password",
-            roles: ["Verified"]
+            # roles and permissions are so confusing
+            roles: ["Verified"],
+            permissions: ["Verified"],
+            data: %{
+              roles: ["Verified"]
+            }
           })
 
         resp = HTTPoison.post!(url, data, headers)
