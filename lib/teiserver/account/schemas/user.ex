@@ -90,6 +90,28 @@ defmodule Teiserver.Account.User do
   end
 
   def changeset(user, attrs, :script) do
+    attrs =
+      attrs
+      |> remove_whitespace([:email])
+      |> uniq_lists(~w(permissions roles)a)
+
+    user
+    |> cast(
+      attrs,
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
+    )
+    |> validate_required([:name, :email, :password, :permissions])
+    |> unique_constraint(:email)
+    |> validate_change(:email, fn :email, email ->
+      case Teiserver.CacheUser.valid_email?(email) do
+        :ok -> []
+        {:error, reason} -> [{:email, reason}]
+      end
+    end)
+    |> put_md5_password_hash()
+  end
+
+  def changeset(user, attrs, :script_create) do
     # this is a bit of a hack to allow this changeset to be called from
     # both code (with atoms) and from admin API (with strings)
     attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
