@@ -32,7 +32,7 @@ defmodule Teiserver.Account.VerifiedReport do
       |> Enum.group_by(
         fn user ->
           cond do
-            user.data["last_login"] == nil -> :never_logged_in
+            user.last_login == nil -> :never_logged_in
             Enum.member?(user.roles, "Verified") == false -> :unverified
             true -> :verified
           end

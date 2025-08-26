@@ -51,7 +51,7 @@ defmodule Teiserver.Account.RetentionReport do
         limit: :infinity
       )
       |> Enum.map(fn user ->
-        last_login = user.data["last_login"]
+        last_login = user.last_login
 
         last_played =
           day_logs
