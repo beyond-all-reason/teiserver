@@ -90,8 +90,24 @@ defmodule Teiserver.Account.User do
   end
 
   def changeset(user, attrs, :script) do
+    # this is a bit of a hack to allow this changeset to be called from
+    # both code (with atoms) and from admin API (with strings)
+    attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
+
+    data =
+      default_data()
+      |> Map.new(fn {k, v} -> {to_string(k), v} end)
+      |> Map.merge(Map.get(attrs, "data", %{}))
+
     attrs =
-      attrs
+      Map.merge(
+        %{
+          "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
+          "colour" => Teiserver.Helper.StylingHelper.random_colour()
+        },
+        attrs
+      )
+      |> Map.put("data", data)
       |> remove_whitespace([:email])
       |> uniq_lists(~w(permissions roles)a)
 
