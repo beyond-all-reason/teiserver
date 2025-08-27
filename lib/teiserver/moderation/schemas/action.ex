@@ -14,7 +14,7 @@ defmodule Teiserver.Moderation.Action do
 
     field :hidden, :boolean, default: false
 
-    field :discord_message_id, :integer
+    field :discord_message_id, :bigint
 
     belongs_to :report_group, Teiserver.Moderation.ReportGroup
 
