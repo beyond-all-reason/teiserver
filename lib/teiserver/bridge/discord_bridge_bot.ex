@@ -7,8 +7,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   alias Teiserver.{Room, Moderation, Communication}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands, CommandLib}
   alias Teiserver.{Config}
+  alias Teiserver.Repo
   alias Nostrum.Api
   require Logger
+  import Ecto.Query
 
   @emoticon_map %{
     "🙂" => ":)",
@@ -302,12 +304,40 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
           "# [Moderation report #{report.type}/#{report.sub_type}](#{url})#{match_icon}",
           "**Target:** [#{report.target.name}](https://#{host}/teiserver/admin/user/#{report.target.id})",
           "**Reporter:** [#{report.reporter.name}](https://#{host}/teiserver/admin/user/#{report.reporter.id})",
-          "**Reason:** #{format_link(report.extra_text)}",
-          "#{outstanding_msg}"
+          "**Reason:** #{format_link(report.extra_text)}"
         ]
+
+      reports =
+        from(r in Moderation.Report,
+          where: r.match_id == ^report.match_id and r.type == ^report.type
+        )
+        |> Repo.all()
+
+      msg =
+        with true <- length(reports) > 1,
+             first_report <- hd(reports),
+             false <- is_nil(first_report.discord_message_id) do
+          first_report_link =
+            "https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{first_report.discord_message_id}"
+
+          msg ++ ["**First report:** #{first_report_link}"]
+        else
+          _ -> msg
+        end
+
+      msg =
+        (msg ++ ["#{outstanding_msg}"])
         |> Enum.join("\n")
 
-      Api.Message.create(channel, msg)
+      {status, message_data} = Communication.new_discord_message(channel, msg)
+
+      if status == :ok do
+        message_id = message_data.id
+        Moderation.update_report(report, %{discord_message_id: message_id})
+
+        if length(reports) > 1,
+          do: Communication.create_discord_reaction(channel, message_id, "🔼")
+      end
     end
   end
 

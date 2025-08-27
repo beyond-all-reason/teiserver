@@ -183,7 +183,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   the channel name from the database Teiserver.Communication.DiscordChannel objects
   """
   @spec new_discord_message(String.t() | non_neg_integer(), String.t()) ::
-          map | nil | {:error, String.t()}
+          {:ok, Nostrum.Struct.Message.t()} | {:error, any}
   def new_discord_message(maybe_channel_id, message) do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
@@ -250,6 +250,19 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
+  @spec create_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
+          map | nil | {:error, String.t()}
+  def create_discord_reaction(maybe_channel_id, message_id, icon) do
+    if use_discord?() do
+      case get_channel_id_from_any(maybe_channel_id) do
+        nil -> {:error, "No channel found"}
+        channel_id -> Nostrum.Api.Message.react(channel_id, message_id, icon)
+      end
+    else
+      {:error, :discord_disabled}
+    end
+  end
+
   @spec get_channel_id_from_any(any) :: non_neg_integer() | nil
   defp get_channel_id_from_any(identifier) when is_integer(identifier) do
     if identifier < 999_999 do
@@ -278,6 +291,6 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
   @spec get_guild_id() :: integer | nil
   def get_guild_id() do
-    Application.get_env(:teiserver, DiscordBridgeBot)[:guild_id]
+    Application.get_env(:teiserver, Teiserver.Bridge.DiscordBridgeBot)[:guild_id]
   end
 end

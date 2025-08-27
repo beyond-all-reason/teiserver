@@ -10,6 +10,7 @@ defmodule Teiserver.Moderation.Report do
     field :sub_type, :string
     field :extra_text, :string
     field :closed, :boolean, default: false
+    field :discord_message_id, :integer
 
     belongs_to :match, Teiserver.Battle.Match
     field :relationship, :string
@@ -30,7 +31,7 @@ defmodule Teiserver.Moderation.Report do
     struct
     |> cast(
       params,
-      ~w(reporter_id target_id type sub_type extra_text match_id relationship result_id closed report_group_id)a
+      ~w(reporter_id target_id type sub_type extra_text match_id discord_message_id relationship result_id closed report_group_id)a
     )
     |> validate_required(~w(reporter_id target_id type sub_type closed)a)
   end

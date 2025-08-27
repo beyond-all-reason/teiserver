@@ -230,7 +230,7 @@ defmodule Teiserver.Communication do
   defdelegate pre_cache_discord_channels(), to: DiscordChannelLib
 
   @spec new_discord_message(String.t() | non_neg_integer(), String.t()) ::
-          map | nil | {:error, String.t()}
+          {:ok, Nostrum.Struct.Message.t()} | {:error, any}
   defdelegate new_discord_message(channel_id, message), to: DiscordChannelLib
 
   @spec edit_discord_message(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
@@ -243,6 +243,10 @@ defmodule Teiserver.Communication do
 
   @spec send_discord_dm(T.userid(), String.t()) :: map | nil | {:error, String.t()}
   defdelegate send_discord_dm(userid, message), to: DiscordChannelLib
+
+  @spec create_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
+          map | nil | {:error, String.t()}
+  defdelegate create_discord_reaction(channel_id, message_id, emoji), to: DiscordChannelLib
 
   @doc """
   Returns true if we are using discord in this environment and false if we are not.
