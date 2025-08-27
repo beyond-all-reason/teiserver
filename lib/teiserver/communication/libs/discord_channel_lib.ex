@@ -290,6 +290,6 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
   @spec get_guild_id() :: integer | nil
   def get_guild_id() do
-    Application.get_env(:teiserver, DiscordBridgeBot)[:guild_id]
+    Application.get_env(:teiserver, Teiserver.Bridge.DiscordBridgeBot)[:guild_id]
   end
 end
