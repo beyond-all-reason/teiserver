@@ -420,7 +420,9 @@ defmodule Teiserver.Party.Server do
           %{state | matchmaking: nil}
       end
 
-    {:noreply, state}
+    if state.members == [],
+      do: {:stop, :normal, state},
+      else: {:noreply, state}
   end
 
   def handle_info({:invite_timeout, user_id}, state) do
