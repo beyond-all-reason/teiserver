@@ -20,7 +20,7 @@ defmodule Teiserver.Party do
   def create_party(user_id) do
     party_id = Party.Server.gen_party_id()
 
-    case Party.Supervisor.start_party(party_id, user_id) do
+    case Party.Supervisor.start_party(party_id, user_id, self()) do
       {:ok, pid} -> {:ok, party_id, pid}
       {:ok, pid, _info} -> {:ok, party_id, pid}
       :ignore -> {:error, :ignore}

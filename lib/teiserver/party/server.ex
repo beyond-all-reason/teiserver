@@ -58,7 +58,7 @@ defmodule Teiserver.Party.Server do
   @spec create_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
   def create_invite(party_id, user_id) do
-    GenServer.call(via_tuple(party_id), {:create_invite, user_id})
+    GenServer.call(via_tuple(party_id), {:create_invite, user_id, self()})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
@@ -66,7 +66,7 @@ defmodule Teiserver.Party.Server do
   @spec accept_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :not_invited}
   def accept_invite(party_id, user_id) do
-    GenServer.call(via_tuple(party_id), {:accept_invite, user_id})
+    GenServer.call(via_tuple(party_id), {:accept_invite, user_id, self()})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
@@ -148,12 +148,12 @@ defmodule Teiserver.Party.Server do
     :exit, {:noproc, _} -> {:error, :invalid_request, "invalid party"}
   end
 
-  def start_link({party_id, _user_id} = args) do
+  def start_link({party_id, _user_id, _creator_pid} = args) do
     GenServer.start_link(__MODULE__, args, name: via_tuple(party_id))
   end
 
   @impl true
-  def init({party_id, user_id}) do
+  def init({party_id, user_id, creator_pid}) do
     state =
       %{
         version: 0,
@@ -164,7 +164,7 @@ defmodule Teiserver.Party.Server do
         invited: [],
         matchmaking: nil
       }
-      |> add_member(user_id)
+      |> add_member(user_id, creator_pid)
 
     {:ok, state}
   end
@@ -194,11 +194,11 @@ defmodule Teiserver.Party.Server do
     end
   end
 
-  def handle_call({:create_invite, _user_id}, _from, state)
+  def handle_call({:create_invite, _user_id, _user_pid}, _from, state)
       when state.matchmaking != nil,
       do: {:reply, {:error, :party_in_matchmaking}, state}
 
-  def handle_call({:create_invite, user_id}, _from, state) do
+  def handle_call({:create_invite, user_id, user_pid}, _from, state) do
     invited = Enum.find(state.invited, fn %{id: id} -> id == user_id end)
     member = Enum.find(state.members, fn %{id: id} -> id == user_id end)
 
@@ -226,9 +226,7 @@ defmodule Teiserver.Party.Server do
         new_state =
           state
           |> Map.put(:invited, [invite | state.invited])
-          |> Map.update!(:monitors, fn m ->
-            Player.add_session_monitor(m, user_id, {:invite, user_id})
-          end)
+          |> Map.update!(:monitors, &MC.monitor(&1, user_pid, {:invite, user_id}))
           |> bump()
 
         # don't send the updated event to the newly invited player
@@ -240,7 +238,7 @@ defmodule Teiserver.Party.Server do
     end
   end
 
-  def handle_call({:accept_invite, user_id}, _from, state) do
+  def handle_call({:accept_invite, user_id, user_pid}, _from, state) do
     case Enum.split_with(state.invited, fn %{id: id} -> id == user_id end) do
       {[], _} ->
         {:reply, {:error, :not_invited}, state}
@@ -250,7 +248,7 @@ defmodule Teiserver.Party.Server do
           state
           |> bump()
           |> Map.put(:invited, rest)
-          |> add_member(user_id)
+          |> add_member(user_id, user_pid)
 
         notify_updated(state)
         {:reply, {:ok, state}, state}
@@ -450,7 +448,7 @@ defmodule Teiserver.Party.Server do
 
   defp bump(state), do: Map.update!(state, :version, &(&1 + 1))
 
-  defp add_member(state, user_id) do
+  defp add_member(state, user_id, user_pid) do
     state =
       state
       |> Map.update!(:members, fn members ->
@@ -460,7 +458,7 @@ defmodule Teiserver.Party.Server do
     case MC.get_ref(state.monitors, {:invite, user_id}) do
       nil ->
         Map.update!(state, :monitors, fn mc ->
-          Player.add_session_monitor(mc, user_id, {:member, user_id})
+          MC.monitor(mc, user_pid, {:member, user_id})
         end)
 
       _ref ->
