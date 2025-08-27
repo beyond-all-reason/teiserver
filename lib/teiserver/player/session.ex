@@ -680,8 +680,6 @@ defmodule Teiserver.Player.Session do
       do: {:reply, {:error, :not_in_party}, state}
 
   def handle_call({:party, :leave}, _from, state) do
-    party_id = state.party.current_party
-
     case Teiserver.Party.leave_party(state.party.current_party, state.user.id) do
       :ok ->
         state =
@@ -703,7 +701,7 @@ defmodule Teiserver.Player.Session do
         {:reply, :ok, %{state | party: initial_party_state()}}
 
       {:error, reason} ->
-        {:reply, {:error, {party_id, reason}}, state}
+        {:reply, {:error, reason}, state}
     end
   end
 
