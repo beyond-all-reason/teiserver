@@ -183,7 +183,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   the channel name from the database Teiserver.Communication.DiscordChannel objects
   """
   @spec new_discord_message(String.t() | non_neg_integer(), String.t()) ::
-          map | nil | {:error, String.t()}
+          {:ok, Nostrum.Struct.Message.t()} | {:error, any}
   def new_discord_message(maybe_channel_id, message) do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
