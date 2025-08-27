@@ -317,10 +317,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       msg =
         if length(reports) > 1 do
           first_report = hd(reports)
-          IO.inspect(first_report.discord_message_id)
           if not is_nil(first_report.discord_message_id) do
             first_report_link = "https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{first_report.discord_message_id}"
-            IO.inspect(first_report_link)
             msg = msg ++ ["**First report:** #{first_report_link}"]
           else
             msg
