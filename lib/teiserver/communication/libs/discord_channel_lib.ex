@@ -251,9 +251,11 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   end
 
   @spec create_discord_reaction(integer(), integer(), String.t()) :: any()
-  def create_discord_reaction(channel_id, message_id, icon) do
+  def create_discord_reaction(maybe_channel_id, message_id, icon) do
     if use_discord?() do
-      Nostrum.Api.Message.react(channel_id, message_id, icon)
+      case get_channel_id_from_any(maybe_channel_id) do
+        nil -> {:error, "No channel found"}
+        channel_id -> Nostrum.Api.Message.react(channel_id, message_id, icon)
     end
   end
 

@@ -329,40 +329,18 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
           msg
         end
 
-      IO.inspect(msg)
       msg = msg ++ ["#{outstanding_msg}"]
       |> Enum.join("\n")
 
       {status, message_data} = Teiserver.Communication.new_discord_message(channel, msg)
       message_id = message_data.id
       if status == :ok do
-        #IO.inspect("before")
         Moderation.update_report(report, %{discord_message_id: message_id})
-        #IO.inspect("after")
-
 
         if length(reports) > 1 do
           first_report = hd(reports)
-
-          reports =
-            from(r in Teiserver.Moderation.Report,
-              where: r.type == ^report.type and r.id > ^first_report.id and r.id <= ^report.id
-            )
-            |> Repo.all()
-
-          #IO.inspect(reports, pretty: true, limit: :infinity)
-          #IO.inspect(length(reports), label: "count")
-
-          count =
-            from(r in Teiserver.Moderation.Report,
-              where: r.type == ^report.type and r.id > ^first_report.id and r.id <= ^report.id
-            )
-            |> Repo.aggregate(:count, :id)
-
-          icon = if count > 4, do: "⏫", else: "🔼"
+          icon = "🔼"
           Teiserver.Communication.create_discord_reaction(channel, message_id, icon)
-        else
-          IO.puts("less than 2 reports")
         end
       end
     end
