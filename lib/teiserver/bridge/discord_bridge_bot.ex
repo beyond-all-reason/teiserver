@@ -308,7 +308,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         ]
 
       reports =
-        from(r in Teiserver.Moderation.Report,
+        from(r in Moderation.Report,
           where: r.match_id == ^report.match_id and r.type == ^report.type
         )
         |> Repo.all()
@@ -329,15 +329,14 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         (msg ++ ["#{outstanding_msg}"])
         |> Enum.join("\n")
 
-      {status, message_data} = Teiserver.Communication.new_discord_message(channel, msg)
+      {status, message_data} = Communication.new_discord_message(channel, msg)
 
       if status == :ok do
         message_id = message_data.id
         Moderation.update_report(report, %{discord_message_id: message_id})
 
-        if length(reports) > 1 do
-          Teiserver.Communication.create_discord_reaction(channel, message_id, "🔼")
-        end
+        if length(reports) > 1,
+          do: Communication.create_discord_reaction(channel, message_id, "🔼")
       end
     end
   end
