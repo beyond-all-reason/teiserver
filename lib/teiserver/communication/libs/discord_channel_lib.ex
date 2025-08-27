@@ -250,7 +250,8 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
-  @spec create_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) :: map | nil | {:error, String.t()}
+  @spec create_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
+          map | nil | {:error, String.t()}
   def create_discord_reaction(maybe_channel_id, message_id, icon) do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do

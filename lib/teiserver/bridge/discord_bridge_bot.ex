@@ -299,7 +299,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
             ""
         end
 
-
       msg =
         [
           "# [Moderation report #{report.type}/#{report.sub_type}](#{url})#{match_icon}",
@@ -318,22 +317,25 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         with true <- length(reports) > 1,
              first_report <- hd(reports),
              false <- is_nil(first_report.discord_message_id) do
-          first_report_link = "https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{first_report.discord_message_id}"
+          first_report_link =
+            "https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{first_report.discord_message_id}"
+
           msg ++ ["**First report:** #{first_report_link}"]
         else
           _ -> msg
         end
 
-      msg = msg ++ ["#{outstanding_msg}"]
-      |> Enum.join("\n")
+      msg =
+        (msg ++ ["#{outstanding_msg}"])
+        |> Enum.join("\n")
 
       {status, message_data} = Teiserver.Communication.new_discord_message(channel, msg)
+
       if status == :ok do
         message_id = message_data.id
         Moderation.update_report(report, %{discord_message_id: message_id})
 
         if length(reports) > 1 do
-          first_report = hd(reports)
           Teiserver.Communication.create_discord_reaction(channel, message_id, "🔼")
         end
       end
