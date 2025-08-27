@@ -1,4 +1,4 @@
-defmodule Teiserver.Repo.Migrations.AddMessageId do
+defmodule Teiserver.Repo.Migrations.AddReportDiscordMessageId do
   use Ecto.Migration
 
   def change do
