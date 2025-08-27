@@ -7,8 +7,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   alias Teiserver.{Room, Moderation, Communication}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands, CommandLib}
   alias Teiserver.{Config}
+  alias Teiserver.Repo
   alias Nostrum.Api
   require Logger
+  import Ecto.Query
 
   @emoticon_map %{
     "🙂" => ":)",
@@ -297,17 +299,72 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
             ""
         end
 
+
       msg =
         [
           "# [Moderation report #{report.type}/#{report.sub_type}](#{url})#{match_icon}",
           "**Target:** [#{report.target.name}](https://#{host}/teiserver/admin/user/#{report.target.id})",
           "**Reporter:** [#{report.reporter.name}](https://#{host}/teiserver/admin/user/#{report.reporter.id})",
-          "**Reason:** #{format_link(report.extra_text)}",
-          "#{outstanding_msg}"
+          "**Reason:** #{format_link(report.extra_text)}"
         ]
-        |> Enum.join("\n")
 
-      Api.Message.create(channel, msg)
+      reports =
+        from(r in Teiserver.Moderation.Report,
+          where: r.match_id == ^report.match_id and r.type == ^report.type
+        )
+        |> Repo.all()
+
+      msg =
+        if length(reports) > 1 do
+          first_report = hd(reports)
+          IO.inspect(first_report.discord_message_id)
+          if not is_nil(first_report.discord_message_id) do
+            first_report_link = "https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{first_report.discord_message_id}"
+            IO.inspect(first_report_link)
+            msg = msg ++ ["**First report:** #{first_report_link}"]
+          else
+            msg
+          end
+        else
+          msg
+        end
+
+      IO.inspect(msg)
+      msg = msg ++ ["#{outstanding_msg}"]
+      |> Enum.join("\n")
+
+      {status, message_data} = Teiserver.Communication.new_discord_message(channel, msg)
+      message_id = message_data.id
+      if status == :ok do
+        #IO.inspect("before")
+        Moderation.update_report(report, %{discord_message_id: message_id})
+        #IO.inspect("after")
+
+
+        if length(reports) > 1 do
+          first_report = hd(reports)
+
+          reports =
+            from(r in Teiserver.Moderation.Report,
+              where: r.type == ^report.type and r.id > ^first_report.id and r.id <= ^report.id
+            )
+            |> Repo.all()
+
+          #IO.inspect(reports, pretty: true, limit: :infinity)
+          #IO.inspect(length(reports), label: "count")
+
+          count =
+            from(r in Teiserver.Moderation.Report,
+              where: r.type == ^report.type and r.id > ^first_report.id and r.id <= ^report.id
+            )
+            |> Repo.aggregate(:count, :id)
+
+          icon = if count > 4, do: "⏫", else: "🔼"
+          Teiserver.Communication.create_discord_reaction(channel, message_id, icon)
+        else
+          IO.puts("less than 2 reports")
+        end
+      end
     end
   end
 

@@ -244,6 +244,9 @@ defmodule Teiserver.Communication do
   @spec send_discord_dm(T.userid(), String.t()) :: map | nil | {:error, String.t()}
   defdelegate send_discord_dm(userid, message), to: DiscordChannelLib
 
+  @spec create_discord_reaction(integer(), integer(), String.t()) :: :ok | {:error, any()}
+  defdelegate create_discord_reaction(channel_id, message_id, emoji), to: DiscordChannelLib
+
   @doc """
   Returns true if we are using discord in this environment and false if we are not.
   """

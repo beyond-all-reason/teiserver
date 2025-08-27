@@ -250,6 +250,13 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
+  @spec create_discord_reaction(integer(), integer(), String.t()) :: any()
+  def create_discord_reaction(channel_id, message_id, icon) do
+    if use_discord?() do
+      Nostrum.Api.Message.react(channel_id, message_id, icon)
+    end
+  end
+
   @spec get_channel_id_from_any(any) :: non_neg_integer() | nil
   defp get_channel_id_from_any(identifier) when is_integer(identifier) do
     if identifier < 999_999 do
