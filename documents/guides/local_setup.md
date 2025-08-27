@@ -102,31 +102,6 @@ telnet localhost 8200
 openssl s_client -connect localhost:8201
 ```
 
-### config/dev.secret.exs
-If you want to do things like have a discord bot in development you don't want these details going into git. It is advisable to create a file `config/dev.secret.exs` where you can put these config details. I would suggest a file like so:
-```elixir
-import Config
-
-config :teiserver, Teiserver,
-  enable_discord_bridge: true
-
-config :teiserver, DiscordBridgeBot,
-  token: "------",
-  bot_name: "Teiserver Bridge DEV",
-  bridges: [
-    {"---", "main"},
-    {"---", "promote"},
-    {"---", "moderation-reports"},
-    {"---", "moderation-actions"}
-  ]
-
-# Comment the below block to enable background jobs to take place locally
-config :teiserver, Oban,
-  queues: false,
-  crontab: false
-
-```
-
 ### Fake data
 Running this:
 ```bash
@@ -135,6 +110,9 @@ mix teiserver.fakedata
 
 Will generate a large amount of fake data and setup a root account for you. The account will have full access to everything and the database will be populated with false data as if generated over a period of time to make development and testing easier.
 
+
+### Working on Discord bot
+If you want to develop the Discord bridge bot follow [this setup guide](https://github.com/beyond-all-reason/teiserver/blob/master/documents/guides/discord_bot.md).
 
 ### Working on tachyon
 
