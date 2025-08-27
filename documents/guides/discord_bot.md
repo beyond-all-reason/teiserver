@@ -1,44 +1,39 @@
-## Creating your bot
-- Go to https://discord.com/developers/applications/ and create a new application.
-- Pick a name for the application
-- Give it an icon
-- Go to the bot option and enable it as a bot
+## Creating your bot and adding it to your server
+1. Go to https://discord.com/developers/applications/ and create a new application
+2. Pick a name for the application
+3. Go to Bot tab
+4. Click reset token to get the access token, copy it, you will need it later for configuration
+5. Make sure “Message Content Intent” is enabled
+6. Go to OAuth2 tab
+7. In OAuth2 URL Generator select the following:
+  - Scopes: `bot`, `application.commands`
+  - Bot Permissions: `Administrator`
+8. Select Integration type Guild install
+9. Copy and open the generated URL to add the bot to your server
 
-### Adding it to your server
-Still in the discord application page
-- Go to OAuth2 tab
-- Copy ClientID
-- Put it into this url
-
-> https://discord.com/oauth2/authorize?scope=bot+applications.commands&client_id=**client_id**
-
-Go to that URL and follow the steps to add your bot to the server of your choosing. If you get a grant or token related error ensure in the Bot tab that "Requires Oauth2 code grant" is set to off.
-
-Congratulations, your bot is set up!
-
-### Configuring it to bridge
-
+### Bot configuration
 You need to set the following environment variables:
-
 ```
 TEI_ENABLE_DISCORD_BRIDGE=true
 TEI_DISCORD_BOT_TOKEN={{ TOKEN }}
 TEI_DISCORD_GUILD_ID=xxx
 TEI_DISCORD_BOT_NAME=test-teiserver-self-server
-TEI_DISCORD_BOT_EMAIL=test-teiserver-self-server@teiserver
 ```
 
-- TOKEN: The bot token found the Discord application for the bot in the bot tab
-- GUILD_ID: this is the server ID, see [this discord article](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID) to see how to get it.
-- bot_name: The display name of the bot, if you don't have this correct the bot can respond to it's own messages creating an infinite loop
+- TOKEN: The bot token generated while creating the bot
+- GUILD_ID: Server ID
+- BOT_NAME: The display name of the bot, if you don't have this correct the bot can respond to it's own messages creating an infinite loop
 
-To get a channel ID in your discord settings enable developer mode in advanced settings. Then right click the channel you wish to bridge to and select `Copy ID`. Paste that ID into the first element of the tuple and replace the second element with the room you wish to bridge to.
+> The easiest way to get Discord server, channel, message or user IDs is by enabling developer mode in Discord's advanced settigns. Right click the server, channel, message or user you wish to copy the ID from and select `Copy ID`. Check [this discord article](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID) for details.
 
 ### Server startup
-The easiest way to test the bridge is working is to look for the startup message in discord. Get the [channel id](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID#h_01HRSTXPS5FMK2A5SMVSX4JW4E) and set it as a db settings through the web ui:
-* go under [the web ui](http://localhost:4000/teiserver/admin/site#Discord)
-* fill the channel id under `#server-updates`
-* when starting the server with `mix phx.server`, you should get a message from the bot in that channel.
+You can test if the bot is working by using a commands like `$unit corjugg`.
+
+The easiest way to test that the bridge is working is to look for the startup message in Discord.
+Get the [channel id](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID#h_01HRSTXPS5FMK2A5SMVSX4JW4E) and set it as a db setting through the web UI
+1. Go to [Discord site config](http://localhost:4000/teiserver/admin/site#Discord)
+2. Fill the channel ID under `#server-updates`
+3. When starting the server with `mix phx.server`, you should get a message from the bot in that channel.
 
 ### Moderator actions
 If one of the bridge channels is called "moderation-reports" then it will not bridge the normal way and instead be used for bridging user reports.
