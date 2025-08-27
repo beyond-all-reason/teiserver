@@ -531,15 +531,23 @@ defmodule Teiserver.Player.TachyonHandler do
         {:error_response, :invalid_request, "Already in a party", state}
 
       {:error, reason} ->
-        {:error_response, :internal_error, to_string(reason), state}
+        {:error_response, :internal_error, inspect(reason), state}
     end
   end
 
   def handle_command("party/leave", "request", _message_id, _msg, state) do
     case Player.Session.leave_party(state.user.id) do
-      :ok -> {:response, state}
-      {:error, :not_in_party} -> {:error_response, :invalid_request, "Not in a party", state}
-      {:error, reason} -> {:error_response, :internal_error, to_string(reason), state}
+      :ok ->
+        {:response, state}
+
+      {:error, :not_in_party} ->
+        {:error_response, :invalid_request, "Not in a party", state}
+
+      {:error, :invalid_party} ->
+        {:error_response, :invalid_request, "Invalid party", state}
+
+      {:error, reason} ->
+        {:error_response, :internal_error, inspect(reason), state}
     end
   end
 
@@ -555,7 +563,7 @@ defmodule Teiserver.Player.TachyonHandler do
          "User with id #{raw_user_id} isn't valid or connected"}
 
       {:error, reason} ->
-        {:error_response, :invalid_request, to_string(reason), state}
+        {:error_response, :invalid_request, inspect(reason), state}
     end
   end
 
@@ -567,7 +575,7 @@ defmodule Teiserver.Player.TachyonHandler do
         {:response, state}
 
       {:error, reason} ->
-        {:error_response, :invalid_request, to_string(reason), state}
+        {:error_response, :invalid_request, inspect(reason), state}
     end
   end
 
@@ -579,7 +587,7 @@ defmodule Teiserver.Player.TachyonHandler do
         {:response, state}
 
       {:error, reason} ->
-        {:error_response, :invalid_request, to_string(reason), state}
+        {:error_response, :invalid_request, inspect(reason), state}
     end
   end
 
@@ -589,7 +597,7 @@ defmodule Teiserver.Player.TachyonHandler do
       {:response, state}
     else
       {:error, reason} ->
-        {:error_response, :invalid_request, to_string(reason), state}
+        {:error_response, :invalid_request, inspect(reason), state}
     end
   end
 
@@ -599,7 +607,7 @@ defmodule Teiserver.Player.TachyonHandler do
       {:response, state}
     else
       {:error, reason} ->
-        {:error_response, :invalid_request, to_string(reason), state}
+        {:error_response, :invalid_request, inspect(reason), state}
     end
   end
 
