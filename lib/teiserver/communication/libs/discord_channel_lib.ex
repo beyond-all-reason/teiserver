@@ -195,6 +195,19 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
+  @spec get_discord_message(non_neg_integer | String.t(), non_neg_integer) ::
+          {:ok, Nostrum.Struct.Message.t()} | {:error, any()} | nil
+  def get_discord_message(maybe_channel_id, message_id) do
+    if use_discord?() do
+      case get_channel_id_from_any(maybe_channel_id) do
+        nil -> {:error, "No channel found"}
+        channel_id -> Nostrum.Api.Message.get(channel_id, message_id)
+      end
+    else
+      {:error, :discord_disabled}
+    end
+  end
+
   @spec edit_discord_message(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
           map | nil | {:error, String.t()}
   def edit_discord_message(maybe_channel_id, message_id, new_message)
@@ -257,6 +270,19 @@ defmodule Teiserver.Communication.DiscordChannelLib do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
         channel_id -> Nostrum.Api.Message.react(channel_id, message_id, icon)
+      end
+    else
+      {:error, :discord_disabled}
+    end
+  end
+
+  @spec delete_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
+          map | nil | {:error, String.t()}
+  def delete_discord_reaction(maybe_channel_id, message_id, emoji) do
+    if use_discord?() do
+      case get_channel_id_from_any(maybe_channel_id) do
+        nil -> {:error, "No channel found"}
+        channel_id -> Nostrum.Api.Message.unreact(channel_id, message_id, emoji)
       end
     else
       {:error, :discord_disabled}
