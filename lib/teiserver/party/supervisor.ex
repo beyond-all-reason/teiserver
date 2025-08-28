@@ -11,10 +11,13 @@ defmodule Teiserver.Party.Supervisor do
   @doc """
   Create a new party
   """
-  @spec start_party(Party.Server.id(), T.userid()) ::
+  @spec start_party(Party.Server.id(), T.userid(), pid()) ::
           DynamicSupervisor.on_start_child()
-  def start_party(party_id, user_id) do
-    DynamicSupervisor.start_child(__MODULE__, {Teiserver.Party.Server, {party_id, user_id}})
+  def start_party(party_id, user_id, creator_pid) do
+    DynamicSupervisor.start_child(
+      __MODULE__,
+      {Teiserver.Party.Server, {party_id, user_id, creator_pid}}
+    )
   end
 
   def start_link(init_arg) do

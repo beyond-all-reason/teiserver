@@ -369,6 +369,11 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       assert %{"status" => "success"} = Tachyon.leave_party!(ctx.client)
       assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(invited.client)
     end
+
+    test "last member disconnecting terminates party", ctx do
+      Tachyon.disconnect!(ctx.client)
+      Polling.poll_until_nil(fn -> Teiserver.Party.lookup(ctx.party_id) end)
+    end
   end
 
   test "handle party server going down" do
