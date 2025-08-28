@@ -16,7 +16,9 @@ defmodule Teiserver.HookServer do
         end
 
       :updated_report ->
-        :ok
+        if Teiserver.Communication.use_discord?() do
+          Teiserver.Bridge.DiscordBridgeBot.update_report(data.report)
+        end
 
       :new_action ->
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)

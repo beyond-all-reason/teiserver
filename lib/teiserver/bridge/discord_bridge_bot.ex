@@ -304,7 +304,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
           "# [Moderation report #{report.type}/#{report.sub_type}](#{url})#{match_icon}",
           "**Target:** [#{report.target.name}](https://#{host}/teiserver/admin/user/#{report.target.id})",
           "**Reporter:** [#{report.reporter.name}](https://#{host}/teiserver/admin/user/#{report.reporter.id})",
-          "**Reason:** #{format_link(report.extra_text)}"
+          "**Reason:** #{format_link(report.extra_text)}",
+          "**Status:** Open",
         ]
 
       reports =
@@ -339,6 +340,62 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
           do: Communication.create_discord_reaction(channel, message_id, "🔼")
       end
     end
+  end
+
+  @spec update_report(Moderation.Report.t()) :: any
+  def update_report(%{discord_message_id: nil}), do: :ok
+  def update_report(report) do
+      channel =
+      cond do
+        report.type == "actions" ->
+          Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
+
+        true ->
+          Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
+      end
+
+      if channel do
+        case Api.Message.get(channel, report.discord_message_id) do
+          {:ok, msg} ->
+            {new_content, reactions} =
+              if not is_nil(report.result_id) do
+                new_content =
+                  cond do
+                    report.closed ->
+                      String.replace(msg.content, "**Status:** Closed :file_folder:", "**Status:** Actioned :hammer:")
+                    true ->
+                      String.replace(msg.content, "**Status:** Open", "**Status:** Actioned :hammer:")
+                  end
+
+                {new_content, [delete: "📁", create: "🔨"]}
+              else
+                {new_content, reactions} =
+                  if report.closed do
+                    {
+                      String.replace(msg.content, "**Status:** Open", "**Status:** Closed :file_folder:"),
+                      [create: "📁"]
+                    }
+                  else
+                    {
+                      String.replace(msg.content, "**Status:** Closed :file_folder:", "**Status:** Open"),
+                      [delete: "📁"]
+                    }
+                  end
+              end
+
+            Enum.each(reactions, fn {action, emoji} ->
+              case action do
+                :create -> Communication.create_discord_reaction(channel, msg.id, emoji)
+                :delete -> Communication.delete_discord_reaction(channel, msg.id, emoji)
+              end
+            end)
+
+            Communication.edit_discord_message(channel, msg.id, new_content)
+
+          {:error, %{status_code: _} = api_error} ->
+            IO.warn("Report message #{report.discord_message_id} was not found: #{inspect(api_error)}")
+        end
+      end
   end
 
   def gdt_check() do

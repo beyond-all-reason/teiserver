@@ -248,6 +248,10 @@ defmodule Teiserver.Communication do
           map | nil | {:error, String.t()}
   defdelegate create_discord_reaction(channel_id, message_id, emoji), to: DiscordChannelLib
 
+  @spec delete_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
+          map | nil | {:error, String.t()}
+  defdelegate delete_discord_reaction(channel_id, message_id, emoji), to: DiscordChannelLib
+
   @doc """
   Returns true if we are using discord in this environment and false if we are not.
   """

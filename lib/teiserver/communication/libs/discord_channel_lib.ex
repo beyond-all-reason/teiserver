@@ -263,6 +263,19 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
+  @spec delete_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
+          map | nil | {:error, String.t()}
+  def delete_discord_reaction(maybe_channel_id, message_id, emoji) do
+    if use_discord?() do
+      case get_channel_id_from_any(maybe_channel_id) do
+        nil -> {:error, "No channel found"}
+        channel_id -> Nostrum.Api.Message.unreact(channel_id, message_id, emoji)
+      end
+    else
+      {:error, :discord_disabled}
+    end
+  end
+
   @spec get_channel_id_from_any(any) :: non_neg_integer() | nil
   defp get_channel_id_from_any(identifier) when is_integer(identifier) do
     if identifier < 999_999 do
