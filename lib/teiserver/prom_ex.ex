@@ -61,7 +61,7 @@ defmodule Teiserver.PromEx do
     [
       # PromEx built in plugins
       Plugins.Application,
-      Plugins.Beam
+      Plugins.Beam,
       # {Plugins.Phoenix, router: TeiserverWeb.Router, endpoint: TeiserverWeb.Endpoint},
       # Plugins.Ecto,
       # Plugins.Oban,
@@ -70,7 +70,7 @@ defmodule Teiserver.PromEx do
       # Plugins.Broadway,
 
       # Add your own PromEx metrics plugins
-      # Teiserver.Users.PromExPlugin
+      Teiserver.Monitoring.Tachyon
     ]
   end
 
