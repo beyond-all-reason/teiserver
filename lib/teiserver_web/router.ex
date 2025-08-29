@@ -51,6 +51,11 @@ defmodule TeiserverWeb.Router do
     plug(:accepts, ["json"])
   end
 
+  pipeline :spads_api do
+    plug(:accepts, ["json"])
+    plug(Teiserver.Plugs.BasicAuthBotPlug)
+  end
+
   pipeline :token_api do
     plug(:accepts, ["json"])
     plug(:put_secure_browser_headers)
@@ -410,12 +415,13 @@ defmodule TeiserverWeb.Router do
   end
 
   scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do
-    pipe_through([:api])
+    pipe_through([:spads_api])
     get "/get_rating/:target_id/:type", SpadsController, :get_rating
     get "/get_rating/:caller_id/:target_id/:type", SpadsController, :get_rating
 
     get "/balance_battle", SpadsController, :balance_battle
     post "/balance_battle", SpadsController, :balance_battle
+    post "/end_game_data", SpadsController, :end_game_data
   end
 
   scope "/teiserver/api/public", TeiserverWeb.API, as: :ts do
