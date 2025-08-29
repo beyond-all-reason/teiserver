@@ -158,6 +158,12 @@ defmodule Teiserver.Application do
 
         # Telemetry
         {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
+        # serve metrics on a different port so that it's easier at the proxy
+        # level to control access and scrape stuff
+        {Plug.Cowboy,
+         scheme: :http,
+         plug: TeiserverWeb.Monitoring.Router,
+         options: [port: TeiserverWeb.Monitoring.Router.port()]},
         Teiserver.Communication.Cache,
 
         # this must be before Endpoint. Endpoint takes care of ws connection upgrade
