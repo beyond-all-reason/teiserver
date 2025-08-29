@@ -32,6 +32,7 @@ defmodule Teiserver.Battle do
     |> MatchLib.order_by(args[:order_by])
     |> QueryHelpers.query_select(args[:select])
     |> QueryHelpers.limit_query(args[:limit])
+    |> QueryHelpers.offset_query(args[:offset])
   end
 
   @doc """
@@ -47,7 +48,26 @@ defmodule Teiserver.Battle do
   def list_matches(args \\ []) do
     match_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> QueryHelpers.offset_query(args[:offset])
     |> Repo.all()
+  end
+
+  @doc """
+  Returns the count of matches matching the given criteria.
+
+  ## Examples
+
+      iex> count_matches()
+      42
+
+      iex> count_matches(search: [has_started: true])
+      35
+
+  """
+  @spec count_matches(List.t()) :: integer()
+  def count_matches(args \\ []) do
+    match_query(args)
+    |> Repo.aggregate(:count, :id)
   end
 
   @doc """

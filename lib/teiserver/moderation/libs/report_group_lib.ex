@@ -41,6 +41,13 @@ defmodule Teiserver.Moderation.ReportGroupLib do
     |> Repo.all()
   end
 
+  @spec count_report_groups(list) :: integer()
+  def count_report_groups(args \\ []) do
+    args
+    |> ReportGroupQueries.query_report_groups()
+    |> Repo.aggregate(:count, :id)
+  end
+
   @doc """
   Gets a single report_group.
 

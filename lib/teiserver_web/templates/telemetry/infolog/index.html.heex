@@ -106,6 +106,21 @@
             <% end %>
           </tbody>
         </table>
+
+        <div class="mt-3">
+          <.pagination
+            page={@page}
+            total_pages={@total_pages}
+            base_url="/telemetry/infolog"
+            limit={@limit}
+            total_count={@total_count}
+            current_count={@current_count}
+            show_go_to={@total_pages > 5}
+            class="mt-3"
+            include_params={["search", "limit", "type", "engine", "game", "shorterror", "order"]}
+            current_params={@conn.params}
+          />
+        </div>
       </div>
     </div>
   </div>

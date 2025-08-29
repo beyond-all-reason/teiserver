@@ -17,16 +17,3 @@
   bsname: bsname,
   url: ~p"/telemetry/infolog?search=true"
 )}
-
-<%= case @active do %>
-  <% "index" -> %>
-    &nbsp;&nbsp;&nbsp;
-    <a href={~p"/telemetry/infolog/?page=#{@page - 1}"} class="btn btn-secondary">
-      Prev
-    </a>
-
-    <a href={~p"/telemetry/infolog/?page=#{@page + 1}"} class="btn btn-secondary">
-      Next
-    </a>
-  <% _ -> %>
-<% end %>

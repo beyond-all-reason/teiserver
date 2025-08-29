@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
   use TeiserverWeb, :live_view
   alias Teiserver.{Moderation}
   alias Teiserver.Moderation.ReportLib
+  import TeiserverWeb.PaginationComponents, only: [pagination: 1, build_pagination_url: 4]
 
   @impl true
   def mount(params, _session, socket) do
@@ -11,6 +12,11 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
       |> assign(:view_colour, Teiserver.Moderation.colour())
       |> assign(:outstanding_report_groups, 0)
       |> assign(:report_groups, nil)
+      |> assign(:page, 0)
+      |> assign(:limit, 50)
+      |> assign(:total_pages, 1)
+      |> assign(:total_count, 0)
+      |> assign(:current_count, 0)
       |> default_filters(params)
       |> add_breadcrumb(name: "Moderation", url: ~p"/moderation")
       |> add_breadcrumb(name: "Overwatch", url: ~p"/moderation/overwatch")
@@ -26,21 +32,68 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     {:ok, socket}
   end
 
-  # @impl true
-  # def handle_params(params, _url, socket) do
-  #   {:noreply, apply_action(socket, socket.assigns.live_action, params)}
-  # end
+  @impl true
+  def handle_params(params, _url, socket) do
+    socket =
+      socket
+      |> default_filters(params)
+      |> recalculate_outstanding_report_groups
 
-  # defp apply_action(socket, _live_action, _params) do
-  #   socket
-  # end
+    {:noreply, socket}
+  end
 
   @impl true
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]
 
-    new_filters = Map.put(filters, key, value)
+    new_filters =
+      filters
+      |> Map.put(key, value)
+      # Reset to first page when any filter changes
+      |> Map.put("page", "1")
+
+    socket =
+      socket
+      |> assign(:filters, new_filters)
+      |> recalculate_outstanding_report_groups
+
+    # Update URL to reflect the new filters and reset page to 1
+    {:noreply,
+     push_patch(socket,
+       to:
+         build_pagination_url(
+           "/moderation/overwatch",
+           new_filters,
+           [
+             "actioned-filter",
+             "closed-filter",
+             "kind-filter",
+             "timeframe-filter",
+             "target_id",
+             "limit"
+           ],
+           %{"page" => "1"}
+         )
+     )}
+  end
+
+  def handle_event("page-change", %{"page" => page}, %{assigns: %{filters: filters}} = socket) do
+    new_filters = Map.put(filters, "page", page)
+
+    socket =
+      socket
+      |> assign(:filters, new_filters)
+      |> recalculate_outstanding_report_groups
+
+    {:noreply, socket}
+  end
+
+  def handle_event("limit-change", %{"limit" => limit}, %{assigns: %{filters: filters}} = socket) do
+    new_filters =
+      Map.put(filters, "limit", limit)
+      # Reset to first page when changing limit
+      |> Map.put("page", "1")
 
     socket =
       socket
@@ -58,9 +111,20 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
           "closed-filter" => "Open",
           "kind-filter" => "Any",
           "timeframe-filter" => "standard",
-          "target_id" => Map.get(params, "target_id")
+          "target_id" => Map.get(params, "target_id"),
+          "page" => Map.get(params, "page", "1"),
+          "limit" => Map.get(params, "limit", "50")
         },
-        socket.assigns[:filters] || %{}
+        # Override defaults with URL parameters if they exist
+        %{
+          "actioned-filter" => Map.get(params, "actioned-filter"),
+          "closed-filter" => Map.get(params, "closed-filter"),
+          "kind-filter" => Map.get(params, "kind-filter"),
+          "timeframe-filter" => Map.get(params, "timeframe-filter")
+        }
+        |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+        |> Map.new()
+        |> Map.merge(socket.assigns[:filters] || %{})
       )
 
     socket
@@ -98,6 +162,22 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
         "Chat" -> "chat"
       end
 
+    page = (filters["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
+    limit = (filters["limit"] || "50") |> String.to_integer() |> max(1)
+
+    total_count =
+      Moderation.count_report_groups(
+        where: [
+          closed: closed_filter,
+          actioned: actioned_filter,
+          inserted_after: timeframe,
+          has_reports_of_kind: kind,
+          target_id: filters["target_id"]
+        ]
+      )
+
+    total_pages = ceil(total_count / limit) |> trunc()
+
     report_groups =
       Moderation.list_report_groups(
         where: [
@@ -108,11 +188,18 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
           target_id: filters["target_id"]
         ],
         order_by: ["Newest first"],
-        limit: 50,
+        limit: limit,
+        offset: page * limit,
         preload: [:target]
       )
 
     socket
     |> assign(:report_groups, report_groups)
+    # Keep as 0-based for pagination component
+    |> assign(:page, page)
+    |> assign(:limit, limit)
+    |> assign(:total_pages, total_pages)
+    |> assign(:total_count, total_count)
+    |> assign(:current_count, Enum.count(report_groups))
   end
 end

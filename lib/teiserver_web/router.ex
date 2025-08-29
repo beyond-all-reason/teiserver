@@ -383,8 +383,6 @@ defmodule TeiserverWeb.Router do
 
     # Infologs
     get("/infolog/download/:id", InfologController, :download)
-    get("/infolog/search", InfologController, :index)
-    post("/infolog/search", InfologController, :search)
     resources("/infolog", InfologController, only: [:index, :show, :delete])
   end
 
@@ -492,8 +490,6 @@ defmodule TeiserverWeb.Router do
 
     get("/", GeneralController, :index)
 
-    get("/report/search", ReportController, :search)
-    post("/report/search", ReportController, :search)
     get("/report/user/:id", ReportController, :user)
     resources("/report", ReportController, only: [:index, :show, :delete])
     post("/report/:id/respond", ReportController, :respond)
@@ -502,7 +498,6 @@ defmodule TeiserverWeb.Router do
     put("/report/:id/open", ReportController, :open)
 
     get("/action/search", ActionController, :search)
-    post("/action/search", ActionController, :search)
     get("/action/new_with_user", ActionController, :new_with_user)
     put("/action/halt/:id", ActionController, :halt)
     put("/action/re-post/:id", ActionController, :re_post)

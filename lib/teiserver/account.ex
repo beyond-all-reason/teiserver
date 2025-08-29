@@ -22,6 +22,12 @@ defmodule Teiserver.Account do
   @spec list_users(list) :: [User]
   defdelegate list_users(args), to: UserLib
 
+  @spec count_users() :: integer
+  defdelegate count_users(), to: UserLib
+
+  @spec count_users(list) :: integer
+  defdelegate count_users(args), to: UserLib
+
   @spec get_user!(non_neg_integer()) :: User.t()
   defdelegate get_user!(user_id), to: UserLib
 

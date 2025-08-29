@@ -71,23 +71,37 @@ defmodule TeiserverWeb.Admin.MatchController do
 
   @spec user_show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def user_show(conn, params = %{"user_id" => userid}) do
+    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
+    limit = (params["limit"] || "100") |> String.to_integer() |> max(1)
+
+    search_params = [user_id: userid]
+
+    total_count = Battle.count_matches(search: search_params)
+
     matches =
       Battle.list_matches(
-        search: [
-          user_id: userid
-        ],
+        search: search_params,
         preload: [
           :queue
         ],
         order_by: "Newest first",
-        limit: params["limit"] || 100
+        limit: limit,
+        offset: page * limit
       )
+
+    total_pages = div(total_count - 1, limit) + 1
 
     user = Account.get_user_by_id(userid)
 
     conn
     |> assign(:user, user)
     |> assign(:matches, matches)
+    |> assign(:page, page)
+    |> assign(:limit, limit)
+    |> assign(:total_pages, total_pages)
+    |> assign(:total_count, total_count)
+    |> assign(:current_count, Enum.count(matches))
+    |> assign(:params, Map.put(params, "limit", limit))
     |> render("user_index.html")
   end
 
