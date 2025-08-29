@@ -20,6 +20,7 @@ defmodule Teiserver.Application do
     # List all child processes to be supervised
     children =
       [
+        Teiserver.PromEx,
         # Migrations
         {Ecto.Migrator,
          repos: Application.fetch_env!(:teiserver, :ecto_repos),

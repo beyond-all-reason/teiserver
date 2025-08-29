@@ -83,6 +83,16 @@ config :teiserver, Oban,
   queues: false,
   crontab: false
 
+config :teiserver, Teiserver.PromEx,
+  grafana: [
+    host: System.get_env("GRAFANA_HOST", "http://localhost:3000"),
+    auth_token: System.get_env("GRAFANA_TOKEN", ""),
+    # use the mix task prom_ex.dashboard.publish to manually publish
+    upload_dashboards_on_start: false,
+    folder_name: "Teiserver",
+    annotate_app_lifecycle: true
+  ]
+
 try do
   import_config "dev.secret.exs"
 rescue
