@@ -170,3 +170,6 @@ if enable_discord_bridge do
     guild_id: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_GUILD_ID"),
     bot_name: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_NAME")
 end
+
+config :teiserver, TeiserverWeb.Monitoring,
+  prometheus_password: Teiserver.ConfigHelpers.get_env("TEI_PROMETHEUS_PASSWORD", :unset)

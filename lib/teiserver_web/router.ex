@@ -1,6 +1,16 @@
 defmodule TeiserverWeb.Router do
   use TeiserverWeb, :router
 
+  pipeline :metrics_auth do
+    plug Teiserver.Monitoring.AuthPlug
+  end
+
+  scope "/metrics" do
+    pipe_through :metrics_auth
+
+    forward "/", PromEx.Plug, prom_ex_module: Teiserver.PromEx
+  end
+
   pipeline :logging_live_auth do
     plug Bodyguard.Plug.Authorize,
       policy: Teiserver.Logging.LiveLib,
