@@ -12,8 +12,19 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
     ]
 
   describe "ratings" do
+    test "unauthorized", %{conn: conn} do
+      conn = get(conn, Routes.ts_spads_path(conn, :get_rating, 1, "Large Team"))
+      assert response(conn, 401)
+    end
+
     test "non-user", %{conn: conn} do
-      conn = get(conn, Routes.ts_spads_path(conn, :get_rating, -1, "Team"))
+      user = new_bot_user()
+
+      conn =
+        conn
+        |> put_authorization_header(user)
+        |> get(Routes.ts_spads_path(conn, :get_rating, -1, "Large Team"))
+
       response = response(conn, 200)
       data = Jason.decode!(response)
 
@@ -21,9 +32,9 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
     end
 
     test "existing user", %{conn: conn} do
-      user = new_user()
+      user = new_bot_user()
       Teiserver.TeiserverTestLib.clear_cache(:teiserver_game_rating_types)
-      rating_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
+      rating_type_id = MatchRatingLib.rating_type_name_lookup()["Large Team"]
 
       {:ok, _} =
         Account.create_rating(%{
@@ -44,7 +55,11 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
       Client.join_battle(user.id, lobby_id, true)
 
-      conn = get(conn, Routes.ts_spads_path(conn, :get_rating, user.id, "Team"))
+      conn =
+        conn
+        |> put_authorization_header(user)
+        |> get(Routes.ts_spads_path(conn, :get_rating, user.id, "Large Team"))
+
       response = response(conn, 200)
       data = Jason.decode!(response)
 
@@ -53,10 +68,20 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
   end
 
   describe "balance" do
+    test "unauthorized", %{conn: conn} do
+      conn = get(conn, Routes.ts_spads_path(conn, :balance_battle, %{}))
+      assert response(conn, 401)
+    end
+
     test "empty data", %{conn: conn} do
+      user = new_bot_user()
       params = %{"bots" => "{}", "players" => "{}"}
 
-      conn = get(conn, Routes.ts_spads_path(conn, :balance_battle, params))
+      conn =
+        conn
+        |> put_authorization_header(user)
+        |> get(Routes.ts_spads_path(conn, :balance_battle, params))
+
       response = response(conn, 200)
       data = Jason.decode!(response)
 
@@ -64,9 +89,14 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
     end
 
     test "bad decode", %{conn: conn} do
+      user = new_bot_user()
       params = %{"bots" => "{}", "players" => "{123 - 123}"}
 
-      conn = get(conn, Routes.ts_spads_path(conn, :balance_battle, params))
+      conn =
+        conn
+        |> put_authorization_header(user)
+        |> get(Routes.ts_spads_path(conn, :balance_battle, params))
+
       response = response(conn, 200)
       data = Jason.decode!(response)
 
@@ -74,6 +104,8 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
     end
 
     test "bots", %{conn: conn} do
+      user = new_bot_user()
+
       params = %{
         "bots" =>
           "{'BARbarianAI(1)': {'color': {'red': 243, 'blue': 0, 'green': 0}, 'skill': 20, 'battleStatus': {'team': 0, 'mode': 1, 'bonus': 0, 'ready': 1, 'side': 0, 'sync': 1, 'id': 2}, 'aiDll': 'BARb', 'owner': 'Teifion'}}",
@@ -83,7 +115,11 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
         "teamSize" => "2.0"
       }
 
-      conn = get(conn, Routes.ts_spads_path(conn, :balance_battle, params))
+      conn =
+        conn
+        |> put_authorization_header(user)
+        |> get(Routes.ts_spads_path(conn, :balance_battle, params))
+
       response = response(conn, 200)
       data = Jason.decode!(response)
 
@@ -109,5 +145,22 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
       assert SpadsController.is_non_empty_balance_result?(balance_result) == false
     end
+  end
+
+  describe "end game data" do
+    test "unauthorized", %{conn: conn} do
+      conn = post(conn, Routes.ts_spads_path(conn, :end_game_data))
+      assert response(conn, 401)
+    end
+  end
+
+  def new_bot_user() do
+    new_user()
+    |> Teiserver.CacheUser.add_roles(["Bot"])
+  end
+
+  def put_authorization_header(conn, user) do
+    conn
+    |> put_req_header("authorization", "Basic #{Base.encode64("#{user.name}:password")}")
   end
 end

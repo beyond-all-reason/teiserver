@@ -3,7 +3,6 @@ defmodule TeiserverWeb.API.SpadsController do
   alias Teiserver.Config
   alias Teiserver.{Account, Coordinator, Battle}
   alias Teiserver.Battle.{BalanceLib, MatchLib}
-  alias Teiserver.Data.Types, as: T
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
@@ -22,13 +21,6 @@ defmodule TeiserverWeb.API.SpadsController do
         "type" => type
       }) do
     target_id = int_parse(target_id_str)
-    lobby = get_member_lobby(target_id)
-
-    host_ip =
-      case lobby do
-        nil -> nil
-        _ -> Account.get_client_by_id(lobby.founder_id).ip
-      end
 
     actual_type =
       case type do
@@ -36,18 +28,8 @@ defmodule TeiserverWeb.API.SpadsController do
         v -> v
       end
 
-    conn_ip =
-      conn
-      |> Teiserver.Logging.LoggingPlug.get_ip_from_conn()
-      |> Tuple.to_list()
-      |> Enum.join(".")
-
     {rating_value, uncertainty} =
-      if host_ip != conn_ip do
-        BalanceLib.get_user_rating_value_uncertainty_pair(-1, "Duel")
-      else
-        BalanceLib.get_user_rating_value_uncertainty_pair(target_id, actual_type)
-      end
+      BalanceLib.get_user_rating_value_uncertainty_pair(target_id, actual_type)
 
     max_uncertainty =
       Config.get_site_config_cache("teiserver.Uncertainty required to show rating")
@@ -218,22 +200,20 @@ defmodule TeiserverWeb.API.SpadsController do
     end
   end
 
+  @spec end_game_data(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def end_game_data(conn, params) do
+    Battle.save_match_stats(params["data"])
+
+    conn
+    |> put_status(200)
+    |> render("empty.json")
+  end
+
   def is_non_empty_balance_result?(balance_result) do
     cond do
       balance_result == nil -> false
       balance_result.team_sizes == %{} -> false
       true -> true
-    end
-  end
-
-  @spec get_member_lobby(non_neg_integer()) :: T.lobby() | nil
-  defp get_member_lobby(userid) do
-    case Account.get_client_by_id(userid) do
-      nil ->
-        nil
-
-      client ->
-        Battle.get_lobby(client.lobby_id)
     end
   end
 end
