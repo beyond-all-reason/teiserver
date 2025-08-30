@@ -42,7 +42,11 @@ defmodule TeiserverWeb.Endpoint do
   )
 
   plug(Plug.RequestId)
-  plug(Plug.Telemetry, event_prefix: [:phoenix, :endpoint])
+
+  # to avoid having tons of logs about the metrics endpoint
+  plug Unplug,
+    if: {Unplug.Predicates.RequestPathNotIn, ["/metrics"]},
+    do: {Plug.Telemetry, event_prefix: [:phoenix, :endpoint]}
 
   plug(Plug.Parsers,
     parsers: [:urlencoded, {:multipart, length: 500_000_000}, :json],

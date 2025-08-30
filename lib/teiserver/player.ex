@@ -124,4 +124,10 @@ defmodule Teiserver.Player do
   """
   @spec update_user_roles(T.userid(), [String.t()]) :: :ok
   defdelegate update_user_roles(user_id, roles), to: Player.Session
+
+  @doc """
+  How many players are currently connected?
+  """
+  @spec connected_count() :: non_neg_integer()
+  defdelegate connected_count(), to: Player.Registry
 end
