@@ -309,10 +309,14 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         ]
 
       reports =
-        from(r in Moderation.Report,
-          where: r.match_id == ^report.match_id and r.type == ^report.type
-        )
-        |> Repo.all()
+        if is_nil(report.match_id) do
+          []
+        else
+          from(r in Moderation.Report,
+            where: r.match_id == ^report.match_id and r.type == ^report.type
+          )
+          |> Repo.all()
+        end
 
       msg =
         with true <- length(reports) > 1,
@@ -407,7 +411,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
             end
           end)
 
-          Communication.edit_discord_message(channel, msg.id, new_content)
+          if msg.content != new_content,
+            do: Communication.edit_discord_message(channel, msg.id, new_content)
 
         {:error, reason} ->
           Logger.warning("Report message #{report.discord_message_id} was not found: #{reason}")
