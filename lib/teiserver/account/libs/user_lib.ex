@@ -123,9 +123,9 @@ defmodule Teiserver.Account.UserLib do
     |> broadcast_create_user()
   end
 
-  def script_create_user(attrs \\ %{}) do
+  def script_create_user(attrs \\ %{}, pass_type \\ :md5_password) do
     %User{}
-    |> User.changeset(attrs, :script_create)
+    |> User.changeset(attrs, :script_create, pass_type)
     |> Repo.insert()
     |> broadcast_create_user()
   end

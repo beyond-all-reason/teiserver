@@ -195,7 +195,7 @@ defmodule Teiserver.CacheUser do
             email: String.replace(host.email, "@", ".bot#{bot_name}@")
           })
 
-        case Account.script_create_user(params) do
+        case Account.script_create_user(params, :hash) do
           {:ok, user} ->
             # Now add them to the cache
             user

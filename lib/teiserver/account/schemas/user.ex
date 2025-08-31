@@ -111,7 +111,7 @@ defmodule Teiserver.Account.User do
     |> put_md5_password_hash()
   end
 
-  def changeset(user, attrs, :script_create) do
+  def changeset(user, attrs, :script_create, password_type) do
     # this is a bit of a hack to allow this changeset to be called from
     # both code (with atoms) and from admin API (with strings)
     attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
@@ -146,7 +146,14 @@ defmodule Teiserver.Account.User do
         {:error, reason} -> [{:email, reason}]
       end
     end)
-    |> put_md5_password_hash()
+    |> then(fn changeset ->
+      case password_type do
+        :plain_password -> put_plain_password_hash(changeset)
+        :md5_password -> put_md5_password_hash(changeset)
+        # Used when registering bots, the bot owner's password hash is passed and should be stored directly
+        :hash -> changeset
+      end
+    end)
   end
 
   def changeset(struct, params, nil), do: changeset(struct, params)
