@@ -150,6 +150,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
     BridgeServer.cast_bridge(:READY)
     add_command(:textcb)
+    add_command(:findreport)
     :ignore
   end
 
@@ -162,6 +163,27 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     # IO.puts ""
 
     :noop
+  end
+
+  # Teiserver.Bridge.DiscordBridgeBot.add_command(:findreport)
+  @spec add_command(atom) :: any
+  def add_command(:findreport) do
+    command = %{
+      name: "findreports",
+      description: "Find reports by the action message id",
+      options: [
+        %{
+          # type3 = String
+          type: 3,
+          name: "message_id",
+          description: "Message ID of the actions discord message",
+          required: true
+        }
+      ],
+      nsfw: false
+    }
+
+    Api.ApplicationCommand.create_guild_command(588_390_691_973_890_049, command)
   end
 
   # Teiserver.Bridge.DiscordBridgeBot.add_command(:textcb)
@@ -313,7 +335,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
           []
         else
           from(r in Moderation.Report,
-            where: r.match_id == ^report.match_id and r.type == ^report.type
+            where: r.match_id == ^report.match_id and r.type == ^report.type,
+            order_by: [asc: r.inserted_at]
           )
           |> Repo.all()
         end
