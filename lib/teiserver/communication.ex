@@ -233,6 +233,12 @@ defmodule Teiserver.Communication do
           {:ok, Nostrum.Struct.Message.t()} | {:error, any}
   defdelegate new_discord_message(channel_id, message), to: DiscordChannelLib
 
+  @spec new_interaction_response(String.t()) :: map
+  defdelegate new_interaction_response(message), to: DiscordChannelLib
+
+  @spec new_interaction_response(String.t(), non_neg_integer()) :: map
+  defdelegate new_interaction_response(message, flag), to: DiscordChannelLib
+
   @spec get_discord_message(non_neg_integer | String.t(), non_neg_integer) ::
           {:ok, Nostrum.Struct.Message.t()} | {:error, any()} | nil
   defdelegate get_discord_message(channel_id, message_id), to: DiscordChannelLib
