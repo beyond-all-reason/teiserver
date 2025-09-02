@@ -66,22 +66,11 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
 
           Communication.set_last_triggered_time(text_callback, interaction.channel_id)
 
-          %{
-            # ChannelMessageWithSource
-            type: 4,
-            data: %{
-              content: text_callback.response
-            }
-          }
+          Communication.new_interaction_response(text_callback.response)
         else
-          %{
-            # ChannelMessageWithSource
-            type: 4,
-            data: %{
-              content:
-                "Sorry, I don't want to spam messages. Give it a few minutes before asking again."
-            }
-          }
+          Communication.new_interaction_response(
+            "Sorry, I don't want to spam messages. Give it a few minutes before asking again."
+          )
         end
     end
   end

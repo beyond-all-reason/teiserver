@@ -195,6 +195,17 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
+  @spec new_interaction_response(String.t(), non_neg_integer()) :: map
+  def new_interaction_response(message, flag \\ 0) do
+    %{
+      type: 4,
+      data: %{
+        content: message,
+        flags: flag
+      }
+    }
+  end
+
   @spec get_discord_message(non_neg_integer | String.t(), non_neg_integer) ::
           {:ok, Nostrum.Struct.Message.t()} | {:error, any()} | nil
   def get_discord_message(maybe_channel_id, message_id) do

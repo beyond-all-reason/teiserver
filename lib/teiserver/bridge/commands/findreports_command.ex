@@ -36,7 +36,7 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
 
   @impl true
   @spec execute(interaction :: Nostrum.Struct.Interaction.t(), options_map :: map()) :: map()
-  def execute(interaction, options_map) do
+  def execute(_interaction, options_map) do
     message_id_str = options_map["message_id"]
 
     content =
@@ -108,14 +108,6 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
         end
       end
 
-    %{
-      # CHANNEL_MESSAGE_WITH_SOURCE
-      type: 4,
-      data: %{
-        content: content,
-        # ephemeral
-        flags: 64
-      }
-    }
+    Communication.new_interaction_response(content, 64)
   end
 end

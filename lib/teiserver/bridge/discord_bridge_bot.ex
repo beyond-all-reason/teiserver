@@ -183,7 +183,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       nsfw: false
     }
 
-    Api.ApplicationCommand.create_guild_command(588_390_691_973_890_049, command)
+    Api.ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
   end
 
   # Teiserver.Bridge.DiscordBridgeBot.add_command(:textcb)
@@ -218,7 +218,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       nsfw: false
     }
 
-    Api.ApplicationCommand.create_global_command(command)
+    Api.ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
   end
 
   # Meant to be used manually
