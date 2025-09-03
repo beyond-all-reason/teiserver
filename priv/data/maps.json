@@ -1,0 +1,447 @@
+{
+  "maps": [
+    {
+      "displayName": "Avalanche",
+      "matchmakingQueues": [
+        "1v1"
+      ],
+      "modoptions": {
+      },
+      "springName": "Avalanche 3.4",
+      "startboxesSet": [
+          {
+              "maxPlayersPerStartbox": 1,
+              "startboxes": [
+                  {
+                      "poly": [
+                          {
+                              "x": 0,
+                              "y": 0
+                          },
+                          {
+                              "x": 50,
+                              "y": 50
+                          }
+                      ]
+                  },
+                  {
+                      "poly": [
+                          {
+                              "x": 150,
+                              "y": 150
+                          },
+                          {
+                              "x": 200,
+                              "y": 200
+                          }
+                      ]
+                  }
+              ]
+          }
+      ],
+      "thumbnail": "https://maps-metadata.beyondallreason.dev/i/fit-in/640x640/filters:format(webp):quality(85)/rowy-1f075.appspot.com/maps/XnCjzq4LvLB6mik5aib1/photo/zsZJEIhOImwEdhXIieKn-avalanche_3.4.jpg"
+    },
+    {
+      "displayName": "Quicksilver",
+      "matchmakingQueues": [
+        "1v1"
+      ],
+      "modoptions": {},
+      "springName": "Quicksilver Remake 1.24",
+      "startboxesSet": [
+        {
+          "maxPlayersPerStartbox": 1,
+          "startboxes": [
+            {
+              "poly": [
+                {
+                  "x": 0,
+                  "y": 0
+                },
+                {
+                  "x": 200,
+                  "y": 63
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 0,
+                  "y": 150
+                },
+                {
+                  "x": 200,
+                  "y": 200
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "thumbnail": "https://maps-metadata.beyondallreason.dev/i/fit-in/640x640/filters:format(webp):quality(85)/rowy-1f075.appspot.com/maps/Jdb4pZyLQPb0IkSmaVrO/photo/ITwy4hNgCKfIhqaKztjZ-Quicksilver_Remake_1.24.jpg"
+    },
+    {
+      "displayName": "Acidic Quarry",
+      "matchmakingQueues": [
+        "FFA",
+        "2v2"
+      ],
+      "modoptions": {},
+      "springName": "AcidicQuarry 5.17",
+      "startboxesSet": [
+        {
+          "maxPlayersPerStartbox": 1,
+          "startboxes": [
+            {
+              "poly": [
+                {
+                  "x": 15,
+                  "y": 15
+                },
+                {
+                  "x": 60,
+                  "y": 60
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 140,
+                  "y": 140
+                },
+                {
+                  "x": 185,
+                  "y": 185
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 15,
+                  "y": 140
+                },
+                {
+                  "x": 60,
+                  "y": 185
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 140,
+                  "y": 15
+                },
+                {
+                  "x": 185,
+                  "y": 60
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "maxPlayersPerStartbox": 2,
+          "startboxes": [
+            {
+              "poly": [
+                {
+                  "x": 15,
+                  "y": 15
+                },
+                {
+                  "x": 60,
+                  "y": 185
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 140,
+                  "y": 15
+                },
+                {
+                  "x": 185,
+                  "y": 185
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "maxPlayersPerStartbox": 1,
+          "startboxes": [
+            {
+              "poly": [
+                {
+                  "x": 15,
+                  "y": 140
+                },
+                {
+                  "x": 60,
+                  "y": 185
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 140,
+                  "y": 15
+                },
+                {
+                  "x": 185,
+                  "y": 60
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 140,
+                  "y": 140
+                },
+                {
+                  "x": 185,
+                  "y": 185
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "thumbnail": "https://maps-metadata.beyondallreason.dev/i/fit-in/640x640/filters:format(webp):quality(85)/rowy-1f075.appspot.com/maps/zzzzzzzzzzzzzzzzzzzx/photo/AEzy0dju5vzdMZPMnqjH-AcidicQuarry_5.16.jpg"
+    },
+    {
+      "displayName": "Tetrad",
+      "matchmakingQueues": [
+        "2v2v2v2",
+        "3v3",
+        "4v4",
+        "FFA"
+      ],
+      "modoptions": {},
+      "springName": "Tetrad_V2",
+      "startboxesSet": [
+        {
+          "maxPlayersPerStartbox": 2,
+          "startboxes": [
+            {
+              "poly": [
+                {
+                  "x": 0,
+                  "y": 0
+                },
+                {
+                  "x": 60,
+                  "y": 60
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 0,
+                  "y": 140
+                },
+                {
+                  "x": 60,
+                  "y": 200
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 140,
+                  "y": 0
+                },
+                {
+                  "x": 200,
+                  "y": 60
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 140,
+                  "y": 140
+                },
+                {
+                  "x": 200,
+                  "y": 200
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "maxPlayersPerStartbox": 4,
+          "startboxes": [
+            {
+              "poly": [
+                {
+                  "x": 0,
+                  "y": 0
+                },
+                {
+                  "x": 44,
+                  "y": 200
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 156,
+                  "y": 0
+                },
+                {
+                  "x": 200,
+                  "y": 200
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "thumbnail": "https://maps-metadata.beyondallreason.dev/i/fit-in/640x640/filters:format(webp):quality(85)/rowy-1f075.appspot.com/maps/T9CfXfwVVubXUcJbMNra/photo/RTeYQoM3sqz3nZeS0J0e-tetrad_v2.jpg"
+    },
+    {
+      "displayName": "Canis River",
+      "matchmakingQueues": [
+        "1v1",
+        "3v3",
+        "4v4"
+      ],
+      "modoptions": {},
+      "springName": "Canis River v1.4",
+      "startboxesSet": [
+        {
+          "maxPlayersPerStartbox": 4,
+          "startboxes": [
+            {
+              "poly": [
+                {
+                  "x": 0,
+                  "y": 140
+                },
+                {
+                  "x": 115,
+                  "y": 200
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 85,
+                  "y": 0
+                },
+                {
+                  "x": 200,
+                  "y": 60
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "thumbnail": "https://maps-metadata.beyondallreason.dev/i/fit-in/640x640/filters:format(webp):quality(85)/rowy-1f075.appspot.com/maps/9jHSyg8smAwuk6d3HZgm/photo/D6aSxk25DPbFmhPo9uiD-canis_river_minimap.jpg"
+    },
+    {
+      "displayName": "All That Glitters",
+      "matchmakingQueues": [
+        "6v6",
+        "7v7",
+        "8v8"
+      ],
+      "modoptions": {
+          "mapmetadata_startpos": "eJyNkstqhEAQRf-l1i66yn66zQ-4yC64kMQQYaKD3SEZpP899MsMTKDdiNS5zam-usN1tbOb18VCt0OP4fkDnZS6gRt0SgjfQI8sz1suKAIjtYmknEDD20yIIqFMONMZcBZBm4FAKSPRxGUkvGgIqZCkEUWjhclEpDOyrGxUBsQDKHrSDNNdVLxLsXPCNJcsKopbKEl5Htc9zJjN4aYBFHHLJGYgVQDqMBidgYm76qLgKimItdFh_oBIXXHOvW_ATeMndC87XC_jbdpsP23PcaQbsPPbZCO0btxcet3WywQdvG_r4qABex2_l36dFwdd-Lq-OSLjvD0E6D7gptePh0R7n_jfwusRUY_IekTVIxr8EEJnGzK1hpBVK0Ks74V0InOiazxRNp5oG2Uoakg_3NP6FabkB_8LJUU1FA"
+      },
+      "springName": "All That Glitters v2.2",
+      "startboxesSet": [
+          {
+              "maxPlayersPerStartbox": 8,
+              "startboxes": [
+                  {
+                      "poly": [
+                          {
+                              "x": 0,
+                              "y": 0
+                          },
+                          {
+                              "x": 200,
+                              "y": 40
+                          }
+                      ]
+                  },
+                  {
+                      "poly": [
+                          {
+                              "x": 0,
+                              "y": 160
+                          },
+                          {
+                              "x": 200,
+                              "y": 200
+                          }
+                      ]
+                  }
+              ]
+          }
+      ],
+      "thumbnail": "https://maps-metadata.beyondallreason.dev/i/fit-in/640x640/filters:format(webp):quality(85)/rowy-1f075.appspot.com/maps/fR1RVNhtF6IpcVo9ULC0/photo/vEqwkLGqh3bcLxVxIG0T-glitters2.2.jpg"
+    },
+    {
+      "displayName": "Supreme Isthmus",
+      "matchmakingQueues": [
+        "5v5",
+        "6v6",
+        "7v7",
+        "8v8"
+      ],
+      "modoptions": {
+        "mapmetadata_startpos": "eJyNksFqhDAQht9lzkIzk4mTeO0LeOit7EFaS4WtLsalXRbfvTgxy4IL7kUk3zf5k1-vcBpiN3VDH6G6Qo3L8w8qQSzgApUQ-rmAGs0KENmVijAYVJRn0CAFRY4ToZUEKVkBWxuU2Jwj6wh765RwJhRIiRUSJS6TQE4JOWOUlJnwOoNESvIBvJW0btjoZjmf0KW9EIWV5HxyaFMFwdsF5Hh2IY0Is4bkdA4hpXgnCiQDK2ki-HRgn4FHXtONaHq41exk7dKUdp4LmNrmB6r3K5yOzaUdY92Ob7rkC4jdZxsVxqkZp_Q6DscWKohtAwXEU_Pb10PXT1AtX3kubsLUfnxvDLo3mm7cCPZe-BqHftoovK-4faXcKC8PTyz33qNLe5gPi_JcRWG3IjR7HSHuXw_pCeeJsnHb9uOe0O0VheXS1CH9cq_DeVml-TD_A7ALNtk"
+      },
+      "springName": "Supreme Isthmus v2.1",
+      "startboxesSet": [
+        {
+          "maxPlayersPerStartbox": 8,
+          "startboxes": [
+            {
+              "poly": [
+                {
+                  "x": 0,
+                  "y": 120
+                },
+                {
+                  "x": 80,
+                  "y": 200
+                }
+              ]
+            },
+            {
+              "poly": [
+                {
+                  "x": 120,
+                  "y": 0
+                },
+                {
+                  "x": 200,
+                  "y": 80
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "thumbnail": "https://maps-metadata.beyondallreason.dev/i/fit-in/640x640/filters:format(webp):quality(85)/rowy-1f075.appspot.com/maps/ACgCe99NC8yZFecMwRCm/photo/UqqPuTiEnwSHueRztAHk-supreme2.1mini.png"
+    }
+  ]
+}

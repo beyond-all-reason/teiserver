@@ -1,8 +1,6 @@
 defmodule Mix.Tasks.Teiserver.TachyonSetup do
   @usage_str "Usage: `mix teiserver.tachyon_setup`"
 
-  require Logger
-
   @moduledoc """
   Ensure there is an OAuth app for tachyon lobby and another one to control
   assets like maps and engines with bots.
@@ -25,19 +23,32 @@ defmodule Mix.Tasks.Teiserver.TachyonSetup do
 
     case SetupAssets.ensure_engine() do
       {:ok, {:created, engine}} ->
-        Logger.info("Engine created with name #{engine.name}")
+        Mix.shell().info("Engine created with name #{engine.name}")
 
       {:ok, {:updated, engine}} ->
-        Logger.info("Engine with name #{engine.name} set up for matchmaking")
+        Mix.shell().info("Engine with name #{engine.name} set up for matchmaking")
 
       {:ok, {:noop, _}} ->
-        Logger.info("Engine already setup for matchmaking")
+        Mix.shell().info("Engine already setup for matchmaking")
     end
 
     case SetupAssets.ensure_game() do
-      {:ok, {:created, game}} -> Logger.info("game created with name #{game.name}")
-      {:ok, {:updated, game}} -> Logger.info("game with name #{game.name} set up for matchmaking")
-      {:ok, {:noop, _}} -> Logger.info("game already setup for matchmaking")
+      {:ok, {:created, game}} ->
+        Mix.shell().info("game created with name #{game.name}")
+
+      {:ok, {:updated, game}} ->
+        Mix.shell().info("game with name #{game.name} set up for matchmaking")
+
+      {:ok, {:noop, _}} ->
+        Mix.shell().info("game already setup for matchmaking")
+    end
+
+    case SetupAssets.ensure_maps() do
+      {:ok, {:updated, %{deleted_count: deleted, created_count: created}}} ->
+        Mix.shell().info("Updated maps: deleted #{deleted}, created #{created}")
+
+      {:error, {:update, reason, _changeset}} ->
+        Mix.shell().error("Failed to update maps: #{reason}")
     end
   end
 end
