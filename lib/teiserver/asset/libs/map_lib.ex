@@ -3,6 +3,9 @@ defmodule Teiserver.Asset.MapLib do
   alias Ecto.Multi
   alias Teiserver.Repo
 
+  @spec icon :: String.t()
+  def icon, do: "fa-solid fa-map"
+
   @spec create_maps([map()]) ::
           {:ok, [Asset.Map.t()]} | {:error, String.t(), Ecto.Changeset.t(), map()}
   def create_maps(map_attrs) do
