@@ -2156,10 +2156,10 @@ defmodule Teiserver.Account do
   @spec has_all_roles?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
   defdelegate has_all_roles?(user_or_userid, roles), to: Teiserver.CacheUser
 
-  @spec is_moderator?(T.userid()) :: boolean()
+  @spec is_moderator?(T.userid() | T.user()) :: boolean()
   defdelegate is_moderator?(userid), to: Teiserver.CacheUser
 
-  @spec is_bot?(T.userid()) :: boolean()
+  @spec is_bot?(T.userid() | T.user()) :: boolean()
   defdelegate is_bot?(userid), to: Teiserver.CacheUser
 
   @spec is_restricted?(T.userid() | T.user(), String.t()) :: boolean()
