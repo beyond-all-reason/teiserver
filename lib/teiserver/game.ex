@@ -537,7 +537,26 @@ defmodule Teiserver.Game do
   def list_rating_logs(args \\ []) do
     rating_log_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> QueryHelpers.offset_query(args[:offset])
     |> Repo.all()
+  end
+
+  @doc """
+  Returns the count of rating_logs matching the given criteria.
+
+  ## Examples
+
+      iex> count_rating_logs()
+      42
+
+      iex> count_rating_logs(search: [user_id: 123])
+      15
+
+  """
+  @spec count_rating_logs(List.t()) :: integer()
+  def count_rating_logs(args \\ []) do
+    rating_log_query(args)
+    |> Repo.aggregate(:count, :id)
   end
 
   @doc """

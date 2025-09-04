@@ -104,6 +104,21 @@
             <% end %>
           </tbody>
         </table>
+
+        <%= if assigns[:total_pages] do %>
+          <.pagination
+            page={@page}
+            total_pages={@total_pages}
+            base_url={Routes.ts_admin_match_path(@conn, :user_show, @user.id)}
+            limit={@limit}
+            total_count={@total_count}
+            current_count={@current_count}
+            show_go_to={@total_pages > 5}
+            class="mt-3"
+            include_params={["limit"]}
+            current_params={%{"limit" => @limit}}
+          />
+        <% end %>
       </div>
     </div>
   </div>

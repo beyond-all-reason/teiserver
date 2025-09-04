@@ -22,15 +22,6 @@
         <hr />
 
         <div class="float-end">
-          {central_component("section_menu_button",
-            name: "all_games",
-            label: "500 games",
-            active: @filter,
-            url: "?filter=#{@filter}&limit=500",
-            icon: "",
-            bsname: bsname
-          )}
-
           <a
             class={"btn btn-outline-#{bsname}"}
             href={Routes.ts_admin_user_path(@conn, :ratings_form, @user)}
@@ -195,6 +186,21 @@
             <% end %>
           </tbody>
         </table>
+
+        <%= if assigns[:total_pages] do %>
+          <.pagination
+            page={@page}
+            total_pages={@total_pages}
+            base_url={Routes.ts_admin_user_path(@conn, :ratings, @user.id)}
+            limit={@limit}
+            total_count={@total_count}
+            current_count={@current_count}
+            show_go_to={@total_pages > 5}
+            class="mt-3"
+            include_params={["filter", "limit"]}
+            current_params={Map.merge(@conn.params, %{"limit" => @limit})}
+          />
+        <% end %>
       </div>
     </div>
   </div>

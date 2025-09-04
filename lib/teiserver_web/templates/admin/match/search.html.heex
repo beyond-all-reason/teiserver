@@ -18,12 +18,6 @@
 <script src={Routes.static_path(@conn, "/js/select2.js")}>
 </script>
 
-{central_component("picker_script",
-  module: Teiserver.Account.UserLib,
-  name: "account_user",
-  title: "User search"
-)}
-
 <div class="row">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
@@ -33,27 +27,31 @@
         </div>
 
         <form
-          action={Routes.ts_admin_match_path(@conn, :search)}
-          method="post"
+          action={Routes.ts_admin_match_path(@conn, :index)}
+          method="get"
           class="form-horizontal"
           id="search-box"
           style="display: none;"
         >
-          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+          <input type="hidden" name="search" value="true" />
 
           <div class="row">
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-              <label for="teiserver-user-search" class="control-label">User: </label>
-              {render(TeiserverWeb.Account.UserView, "picker.html",
-                input_name: "search[account_user]",
-                value: @params["account_user"]
-              )}
+              <label for="account_user" class="control-label">User: </label>
+              <input
+                type="text"
+                name="account_user"
+                id="account_user"
+                value={@params["account_user"]}
+                placeholder="Username (partial OK, e.g., SomePlayer or Some)"
+                class="form-control"
+              />
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="search_action" class="control-label">Game type: </label>
               {central_component("icon_dropdown", %{
-                name: "search[game_type]",
+                name: "game_type",
                 id: "search_game_type",
                 selected: @params["game_type"] || "Any",
                 enumerable: [
@@ -97,12 +95,7 @@
 
             <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
               &nbsp;<br />
-              <input
-                type="submit"
-                value="Search"
-                name="form.submitted"
-                class={"btn btn-#{bsname} btn-block"}
-              />
+              <input type="submit" value="Search" class={"btn btn-#{bsname} btn-block"} />
             </div>
           </div>
         </form>

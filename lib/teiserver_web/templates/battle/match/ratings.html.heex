@@ -28,7 +28,7 @@
                   name: rt,
                   label: raw("#{rt} &nbsp;&nbsp;&nbsp; #{@ratings[rt].rating_value |> round(2)}"),
                   active: @filter,
-                  url: "?filter=#{rt}",
+                  url: "?filter=#{rt}&limit=#{@limit}",
                   icon: "",
                   bsname: bsname
                 )}

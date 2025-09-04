@@ -88,6 +88,28 @@
             </div>
           </:col>
         </.table>
+
+        <%= if assigns[:total_pages] do %>
+          <.pagination
+            page={@page}
+            total_pages={@total_pages}
+            base_url="/battle"
+            limit={@limit}
+            total_count={@total_count}
+            current_count={@current_count}
+            show_go_to={@total_pages > 5}
+            class="mt-3"
+            include_params={["limit", "game-type", "opponent", "ally"]}
+            current_params={
+              %{
+                "limit" => @limit,
+                "game-type" => @filters["game-type"],
+                "opponent" => @filters["opponent"],
+                "ally" => @filters["ally"]
+              }
+            }
+          />
+        <% end %>
       </div>
     </div>
   </div>

@@ -18,44 +18,32 @@ defmodule TeiserverWeb.Telemetry.InfologController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
-    page = (params["page"] || "0") |> int_parse |> max(0)
-    limit = 100
+    page = (params["page"] || "1") |> int_parse |> max(1) |> then(&(&1 - 1))
+    limit = (params["limit"] || "100") |> int_parse |> max(1)
+
+    search_params = extract_search_params(params)
+
+    total_count = Telemetry.count_infologs(search: search_params)
+    total_pages = div(total_count - 1, limit) + 1
 
     infologs =
       Telemetry.list_infologs(
-        search: [],
+        search: search_params,
         preload: [:user],
         select: ~w(id user_hash user_id log_type timestamp metadata size)a,
-        order_by: "Newest first",
+        order_by: params["order"] || "Newest first",
         limit: limit,
         offset: page * limit
       )
 
     conn
     |> assign(:page, page)
+    |> assign(:limit, limit)
+    |> assign(:total_pages, total_pages)
+    |> assign(:total_count, total_count)
+    |> assign(:current_count, length(infologs))
     |> assign(:infologs, infologs)
     |> assign(:params, params)
-    |> render("index.html")
-  end
-
-  @spec search(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def search(conn, %{"search" => params}) do
-    infologs =
-      Telemetry.list_infologs(
-        search: [
-          log_type: params["type"],
-          engine: params["engine"],
-          game: params["game"],
-          shorterror: params["shorterror"]
-        ],
-        preload: [:user],
-        select: ~w(id user_hash user_id log_type timestamp metadata size)a,
-        order_by: params["order"]
-      )
-
-    conn
-    |> assign(:params, params)
-    |> assign(:infologs, infologs)
     |> render("index.html")
   end
 
@@ -90,5 +78,40 @@ defmodule TeiserverWeb.Telemetry.InfologController do
     conn
     |> put_flash(:info, "Infolog deleted successfully.")
     |> redirect(to: ~p"/telemetry/infolog")
+  end
+
+  # Helper function to extract search parameters from the request
+  defp extract_search_params(params) do
+    search_params = []
+
+    search_params =
+      if params["type"] && params["type"] != "Any" do
+        [log_type: params["type"]] ++ search_params
+      else
+        search_params
+      end
+
+    search_params =
+      if params["engine"] && params["engine"] != "" do
+        [engine: params["engine"]] ++ search_params
+      else
+        search_params
+      end
+
+    search_params =
+      if params["game"] && params["game"] != "" do
+        [game: params["game"]] ++ search_params
+      else
+        search_params
+      end
+
+    search_params =
+      if params["shorterror"] && params["shorterror"] != "" do
+        [shorterror: params["shorterror"]] ++ search_params
+      else
+        search_params
+      end
+
+    search_params
   end
 end
