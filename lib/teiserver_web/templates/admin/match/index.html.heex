@@ -45,43 +45,44 @@
 
         <h4>Listing Matches</h4>
 
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>Map</th>
-              <th>Queue</th>
-
-              <th>Teams</th>
-              <th>Team size</th>
-              <th>Duration</th>
-              <th>Finished</th>
-              <th colspan="1">&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for match <- @matches do %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td>{match.game_type}</td>
-                <td>{match.map}</td>
-
-                <td>{if match.queue != nil, do: match.queue.name}</td>
-
-                <td>{match.team_count}</td>
-                <td>{match.team_size}</td>
-
-                <td>{if match.finished, do: duration_to_str_short(match.game_duration)}</td>
-                <td>{date_to_str(match.finished, format: :ymd_hms)}</td>
-
-                <td>
-                  <a href={~p"/battle/#{match.id}"} class="btn btn-secondary btn-sm">
-                    Show
-                  </a>
-                </td>
+                <th>Type</th>
+                <th>Map</th>
+                <th>Queue</th>
+                <th>Teams</th>
+                <th>Team size</th>
+                <th>Duration</th>
+                <th>Finished</th>
+                <th>&nbsp;</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for match <- @matches do %>
+                <tr>
+                  <td>{match.game_type}</td>
+                  <td>{match.map}</td>
+
+                  <td>{if match.queue != nil, do: match.queue.name}</td>
+
+                  <td>{match.team_count}</td>
+                  <td>{match.team_size}</td>
+
+                  <td>{if match.finished, do: duration_to_str_short(match.game_duration)}</td>
+                  <td>{date_to_str(match.finished, format: :ymd_hms)}</td>
+
+                  <td>
+                    <a href={~p"/battle/#{match.id}"} class="btn btn-secondary btn-sm">
+                      Show
+                    </a>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
 
         <div class="mt-3">
           <.pagination

@@ -27,43 +27,45 @@
 
         <h4>Listing Accolades</h4>
 
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th colspan="2">Badge</th>
-              <th>Recipient</th>
-              <th>Given by</th>
-              <th colspan="2">&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for accolade <- @accolades do %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td
-                  style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"}
-                  width="22"
-                >
-                  {central_component("icon", icon: accolade.badge_type.icon)}
-                </td>
-                <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
-                  {accolade.badge_type.name}
-                </td>
-
-                <td>{accolade.recipient.name}</td>
-                <td>{accolade.giver.name}</td>
-
-                <td>
-                  <a
-                    href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)}
-                    class="btn btn-secondary btn-sm"
-                  >
-                    Show
-                  </a>
-                </td>
+                <th colspan="2">Badge</th>
+                <th>Recipient</th>
+                <th>Given by</th>
+                <th colspan="2">&nbsp;</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for accolade <- @accolades do %>
+                <tr>
+                  <td
+                    style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"}
+                    width="22"
+                  >
+                    {central_component("icon", icon: accolade.badge_type.icon)}
+                  </td>
+                  <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
+                    {accolade.badge_type.name}
+                  </td>
+
+                  <td>{accolade.recipient.name}</td>
+                  <td>{accolade.giver.name}</td>
+
+                  <td>
+                    <a
+                      href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      Show
+                    </a>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

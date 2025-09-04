@@ -66,74 +66,76 @@
           </div>
         </form>
 
-        <table class="table table-sm table-hover mt-4">
-          <thead>
-            <tr>
-              <th>New user</th>
-              <th>Status</th>
-              <th>Last login</th>
-              <th>Last played</th>
-              <th>Registered</th>
-
-              <th>Duel</th>
-              <th>FFA</th>
-              <th>Team</th>
-
-              <th>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for user <- @relevant_evaders do %>
-              <% stats = @user_stats[user.id] %>
-
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mt-4">
+            <thead>
               <tr>
-                <td>{user.name}</td>
-                <td>
-                  <TeiserverWeb.UserComponents.status_icon user={user} />
-                </td>
+                <th>New user</th>
+                <th>Status</th>
+                <th>Last login</th>
+                <th>Last played</th>
+                <th>Registered</th>
 
-                <td>
-                  {date_to_str(user.last_login,
-                    format: :hms_or_ymd,
-                    tz: @tz
-                  )}
-                </td>
-                <td>
-                  {date_to_str(user.last_played,
-                    format: :hms_or_ymd,
-                    tz: @tz
-                  )}
-                </td>
-                <td>{date_to_str(user.inserted_at, format: :hms_or_ymd)}</td>
+                <th>Duel</th>
+                <th>FFA</th>
+                <th>Team</th>
 
-                <td>
-                  <%= if stats["recent_count.duel"] do %>
-                    {stats["win_rate.duel"]}% of {stats["recent_count.duel"]}
-                  <% end %>
-                </td>
-                <td>
-                  <%= if stats["recent_count.ffa"] do %>
-                    {stats["win_rate.ffa"]}% of {stats["recent_count.ffa"]}
-                  <% end %>
-                </td>
-                <td>
-                  <%= if stats["recent_count.team"] do %>
-                    {stats["win_rate.team"]}% of {stats["recent_count.team"]}
-                  <% end %>
-                </td>
-
-                <td>
-                  <a
-                    href={Routes.ts_admin_user_path(@conn, :smurf_search, user.id)}
-                    class="btn btn-secondary btn-sm"
-                  >
-                    Show
-                  </a>
-                </td>
+                <th>&nbsp;</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for user <- @relevant_evaders do %>
+                <% stats = @user_stats[user.id] %>
+
+                <tr>
+                  <td>{user.name}</td>
+                  <td>
+                    <TeiserverWeb.UserComponents.status_icon user={user} />
+                  </td>
+
+                  <td>
+                    {date_to_str(user.last_login,
+                      format: :hms_or_ymd,
+                      tz: @tz
+                    )}
+                  </td>
+                  <td>
+                    {date_to_str(user.last_played,
+                      format: :hms_or_ymd,
+                      tz: @tz
+                    )}
+                  </td>
+                  <td>{date_to_str(user.inserted_at, format: :hms_or_ymd)}</td>
+
+                  <td>
+                    <%= if stats["recent_count.duel"] do %>
+                      {stats["win_rate.duel"]}% of {stats["recent_count.duel"]}
+                    <% end %>
+                  </td>
+                  <td>
+                    <%= if stats["recent_count.ffa"] do %>
+                      {stats["win_rate.ffa"]}% of {stats["recent_count.ffa"]}
+                    <% end %>
+                  </td>
+                  <td>
+                    <%= if stats["recent_count.team"] do %>
+                      {stats["win_rate.team"]}% of {stats["recent_count.team"]}
+                    <% end %>
+                  </td>
+
+                  <td>
+                    <a
+                      href={Routes.ts_admin_user_path(@conn, :smurf_search, user.id)}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      Show
+                    </a>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

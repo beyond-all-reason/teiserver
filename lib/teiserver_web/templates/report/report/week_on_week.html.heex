@@ -77,32 +77,58 @@
 
         <div class="row mt-3">
           <div class="col">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>Week number</th>
-
-                  <th>Monday</th>
-                  <th>Tuesday</th>
-                  <th>Wednesday</th>
-                  <th>Thursday</th>
-                  <th>Friday</th>
-                  <th>Saturday</th>
-                  <th>Sunday</th>
-
-                  <th>Week metric</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for week <- @weeks do %>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
                   <tr>
-                    <td>{week}</td>
+                    <th>Week number</th>
 
-                    <%= for day <- 1..7 do %>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                    <th>Saturday</th>
+                    <th>Sunday</th>
+
+                    <th>Week metric</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <%= for week <- @weeks do %>
+                    <tr>
+                      <td>{week}</td>
+
+                      <%= for day <- 1..7 do %>
+                        <td>
+                          <% delta = @delta_map[{week, day}] %>
+
+                          {format_number(@data_map[{week, day}])}
+                          <%= if delta do %>
+                            &nbsp;&nbsp;&nbsp;
+                            <%= cond do %>
+                              <% delta > 0 -> %>
+                                <span class="text-success">
+                                  {delta}% <i class="fa-fw fa-solid fa-up"></i>
+                                </span>
+                              <% delta < 0 -> %>
+                                <span class="text-danger">
+                                  {delta}% <i class="fa-fw fa-solid fa-down"></i>
+                                </span>
+                              <% true -> %>
+                                <span class="text-secondary">
+                                  {delta}
+                                  <i class="fa-fw fa-solid fa-pause"></i>
+                                </span>
+                            <% end %>
+                          <% end %>
+                        </td>
+                      <% end %>
+
                       <td>
-                        <% delta = @delta_map[{week, day}] %>
+                        <% delta = @week_deltas[week] %>
 
-                        {format_number(@data_map[{week, day}])}
+                        {format_number(@week_data[week])}
                         <%= if delta do %>
                           &nbsp;&nbsp;&nbsp;
                           <%= cond do %>
@@ -122,35 +148,11 @@
                           <% end %>
                         <% end %>
                       </td>
-                    <% end %>
-
-                    <td>
-                      <% delta = @week_deltas[week] %>
-
-                      {format_number(@week_data[week])}
-                      <%= if delta do %>
-                        &nbsp;&nbsp;&nbsp;
-                        <%= cond do %>
-                          <% delta > 0 -> %>
-                            <span class="text-success">
-                              {delta}% <i class="fa-fw fa-solid fa-up"></i>
-                            </span>
-                          <% delta < 0 -> %>
-                            <span class="text-danger">
-                              {delta}% <i class="fa-fw fa-solid fa-down"></i>
-                            </span>
-                          <% true -> %>
-                            <span class="text-secondary">
-                              {delta}
-                              <i class="fa-fw fa-solid fa-pause"></i>
-                            </span>
-                        <% end %>
-                      <% end %>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

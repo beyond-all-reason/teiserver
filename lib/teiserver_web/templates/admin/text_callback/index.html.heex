@@ -27,64 +27,66 @@
 
         <h4>Listing Text callbacks</h4>
 
-        <table class="table table-sm table-hover">
-          <thead>
-            <tr>
-              <th colspan="2">Callback</th>
-
-              <th>Enabled</th>
-
-              <th>Triggers</th>
-
-              <th>Response</th>
-
-              <th colspan="2">&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for text_callback <- @text_callbacks do %>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover">
+            <thead>
               <tr>
-                <td style={"background-color: #{text_callback.colour}; color: #FFF;"} width="22">
-                  {central_component("icon", icon: text_callback.icon)}
-                </td>
-                <td style={"background-color: #{rgba_css text_callback.colour};"}>
-                  {text_callback.name}
-                </td>
+                <th colspan="2">Callback</th>
 
-                <td>
-                  <%= if text_callback.enabled do %>
-                    <i class="fa-fw fa-solid fa-check text-success"></i>
-                  <% else %>
-                    <i class="fa-fw fa-solid fa-times text-danger"></i>
-                  <% end %>
-                </td>
+                <th>Enabled</th>
 
-                <td>{Enum.join(text_callback.triggers, ", ")}</td>
+                <th>Triggers</th>
 
-                <td>{String.slice(text_callback.response, 0..100)}</td>
+                <th>Response</th>
 
-                <td>
-                  <a
-                    href={~p"/admin/text_callbacks/#{text_callback.id}"}
-                    class={"btn btn-outline-#{bsname} btn-sm"}
-                  >
-                    <i class="fa-fw fa-regular fa-eye"></i> Show
-                  </a>
-                </td>
-                <td>
-                  <%= if allow?(@conn, "Admin") do %>
+                <th colspan="2">&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for text_callback <- @text_callbacks do %>
+                <tr>
+                  <td style={"background-color: #{text_callback.colour}; color: #FFF;"} width="22">
+                    {central_component("icon", icon: text_callback.icon)}
+                  </td>
+                  <td style={"background-color: #{rgba_css text_callback.colour};"}>
+                    {text_callback.name}
+                  </td>
+
+                  <td>
+                    <%= if text_callback.enabled do %>
+                      <i class="fa-fw fa-solid fa-check text-success"></i>
+                    <% else %>
+                      <i class="fa-fw fa-solid fa-times text-danger"></i>
+                    <% end %>
+                  </td>
+
+                  <td>{Enum.join(text_callback.triggers, ", ")}</td>
+
+                  <td>{String.slice(text_callback.response, 0..100)}</td>
+
+                  <td>
                     <a
-                      href={~p"/admin/text_callbacks/#{text_callback.id}/edit"}
+                      href={~p"/admin/text_callbacks/#{text_callback.id}"}
                       class={"btn btn-outline-#{bsname} btn-sm"}
                     >
-                      <i class="fa-solid fa-wrench"></i> Edit
+                      <i class="fa-fw fa-regular fa-eye"></i> Show
                     </a>
-                  <% end %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
+                  </td>
+                  <td>
+                    <%= if allow?(@conn, "Admin") do %>
+                      <a
+                        href={~p"/admin/text_callbacks/#{text_callback.id}/edit"}
+                        class={"btn btn-outline-#{bsname} btn-sm"}
+                      >
+                        <i class="fa-solid fa-wrench"></i> Edit
+                      </a>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

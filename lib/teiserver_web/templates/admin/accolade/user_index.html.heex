@@ -30,83 +30,87 @@
         <div class="row">
           <div class="col-md-6">
             <h4>Accolades given by {@user.name}</h4>
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th colspan="2">Badge</th>
-                  <th>Recipient</th>
-                  <th colspan="2">&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for accolade <- @accolades do %>
-                  <%= if accolade.giver_id == @userid and accolade.badge_type != nil do %>
-                    <tr>
-                      <td
-                        style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"}
-                        width="22"
-                      >
-                        {central_component("icon", icon: accolade.badge_type.icon)}
-                      </td>
-                      <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
-                        {accolade.badge_type.name}
-                      </td>
-                      <td>{accolade.recipient.name}</td>
-
-                      <td>{date_to_str(accolade.inserted_at, format: :hms_or_dmy)}</td>
-                      <td>
-                        <a
-                          href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)}
-                          class="btn btn-secondary btn-sm"
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th colspan="2">Badge</th>
+                    <th>Recipient</th>
+                    <th colspan="2">&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <%= for accolade <- @accolades do %>
+                    <%= if accolade.giver_id == @userid and accolade.badge_type != nil do %>
+                      <tr>
+                        <td
+                          style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"}
+                          width="22"
                         >
-                          Show
-                        </a>
-                      </td>
-                    </tr>
+                          {central_component("icon", icon: accolade.badge_type.icon)}
+                        </td>
+                        <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
+                          {accolade.badge_type.name}
+                        </td>
+                        <td>{accolade.recipient.name}</td>
+
+                        <td>{date_to_str(accolade.inserted_at, format: :hms_or_dmy)}</td>
+                        <td>
+                          <a
+                            href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)}
+                            class="btn btn-secondary btn-sm"
+                          >
+                            Show
+                          </a>
+                        </td>
+                      </tr>
+                    <% end %>
                   <% end %>
-                <% end %>
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
           <div class="col-md-6">
             <h4>Received</h4>
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th colspan="2">Badge</th>
-                  <th>Giver</th>
-                  <th colspan="2">&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for accolade <- @accolades do %>
-                  <%= if accolade.recipient_id == @userid and accolade.badge_type != nil do %>
-                    <tr>
-                      <td
-                        style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"}
-                        width="22"
-                      >
-                        {central_component("icon", icon: accolade.badge_type.icon)}
-                      </td>
-                      <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
-                        {accolade.badge_type.name}
-                      </td>
-                      <td>{accolade.giver.name}</td>
-
-                      <td>{date_to_str(accolade.inserted_at, format: :hms_or_dmy)}</td>
-                      <td>
-                        <a
-                          href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)}
-                          class="btn btn-secondary btn-sm"
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th colspan="2">Badge</th>
+                    <th>Giver</th>
+                    <th colspan="2">&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <%= for accolade <- @accolades do %>
+                    <%= if accolade.recipient_id == @userid and accolade.badge_type != nil do %>
+                      <tr>
+                        <td
+                          style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"}
+                          width="22"
                         >
-                          Show
-                        </a>
-                      </td>
-                    </tr>
+                          {central_component("icon", icon: accolade.badge_type.icon)}
+                        </td>
+                        <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
+                          {accolade.badge_type.name}
+                        </td>
+                        <td>{accolade.giver.name}</td>
+
+                        <td>{date_to_str(accolade.inserted_at, format: :hms_or_dmy)}</td>
+                        <td>
+                          <a
+                            href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)}
+                            class="btn btn-secondary btn-sm"
+                          >
+                            Show
+                          </a>
+                        </td>
+                      </tr>
+                    <% end %>
                   <% end %>
-                <% end %>
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

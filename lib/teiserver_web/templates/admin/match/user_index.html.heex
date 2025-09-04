@@ -40,70 +40,72 @@
 
         <h4>Listing Matches</h4>
 
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>Map</th>
-              <th>Outcome</th>
-              <th>Teams</th>
-              <th>Team size</th>
-              <th>Duration (mins)</th>
-              <th>Finished</th>
-              <th colspan="1">&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for match <- @matches do %>
-              <% member_ids =
-                match.members
-                |> Enum.filter(fn mm -> mm.user_id == @user.id end)
-
-              win =
-                case member_ids do
-                  [] -> false
-                  [member] -> match.winning_team == member.team_id
-                end %>
-
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td>{match.game_type}</td>
-                <td>{match.map}</td>
-
-                <td>
-                  <%= cond do %>
-                    <% win -> %>
-                      Won
-                    <% match.data["export_data"]["result"] == "undecided" -> %>
-                      Undecided
-                    <% true -> %>
-                      &nbsp;
-                  <% end %>
-                </td>
-
-                <td>{match.team_count}</td>
-                <td>{match.team_size}</td>
-
-                <td>
-                  <%= case {match.finished, match.started} do %>
-                    <% {nil, _} -> %>
-                      Never finished
-                    <% {_, nil} -> %>
-                      Never started
-                    <% _ -> %>
-                      {Timex.diff(match.finished, match.started, :minute)}
-                  <% end %>
-                </td>
-                <td>{date_to_str(match.finished, format: :ymd_hms)}</td>
-
-                <td>
-                  <a href={~p"/battle/#{match.id}"} class="btn btn-secondary btn-sm">
-                    Show
-                  </a>
-                </td>
+                <th>Type</th>
+                <th>Map</th>
+                <th>Outcome</th>
+                <th>Teams</th>
+                <th>Team size</th>
+                <th>Duration (mins)</th>
+                <th>Finished</th>
+                <th>&nbsp;</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for match <- @matches do %>
+                <% member_ids =
+                  match.members
+                  |> Enum.filter(fn mm -> mm.user_id == @user.id end)
+
+                win =
+                  case member_ids do
+                    [] -> false
+                    [member] -> match.winning_team == member.team_id
+                  end %>
+
+                <tr>
+                  <td>{match.game_type}</td>
+                  <td>{match.map}</td>
+
+                  <td>
+                    <%= cond do %>
+                      <% win -> %>
+                        Won
+                      <% match.data["export_data"]["result"] == "undecided" -> %>
+                        Undecided
+                      <% true -> %>
+                        &nbsp;
+                    <% end %>
+                  </td>
+
+                  <td>{match.team_count}</td>
+                  <td>{match.team_size}</td>
+
+                  <td>
+                    <%= case {match.finished, match.started} do %>
+                      <% {nil, _} -> %>
+                        Never finished
+                      <% {_, nil} -> %>
+                        Never started
+                      <% _ -> %>
+                        {Timex.diff(match.finished, match.started, :minute)}
+                    <% end %>
+                  </td>
+                  <td>{date_to_str(match.finished, format: :ymd_hms)}</td>
+
+                  <td>
+                    <a href={~p"/battle/#{match.id}"} class="btn btn-secondary btn-sm">
+                      Show
+                    </a>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
 
         <%= if assigns[:total_pages] do %>
           <.pagination

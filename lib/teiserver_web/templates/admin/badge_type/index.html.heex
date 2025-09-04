@@ -27,47 +27,49 @@
 
         <h4>Listing Badge Types</h4>
 
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th colspan="2">Name</th>
-              <th>Purposes</th>
-              <th>Restriction</th>
-
-              <th colspan="2">&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for badge_type <- @badge_types do %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
-                  {central_component("icon", icon: badge_type.icon)}
-                </td>
-                <td>{badge_type.name}</td>
-                <td>{badge_type.purpose}</td>
-                <td>{badge_type.restriction}</td>
+                <th colspan="2">Name</th>
+                <th>Purposes</th>
+                <th>Restriction</th>
 
-                <td>
-                  <a
-                    href={Routes.ts_admin_badge_type_path(@conn, :show, badge_type.id)}
-                    class="btn btn-secondary btn-sm"
-                  >
-                    Show
-                  </a>
-                </td>
-
-                <td>
-                  <a
-                    href={Routes.ts_admin_badge_type_path(@conn, :edit, badge_type.id)}
-                    class="btn btn-secondary btn-sm"
-                  >
-                    Edit
-                  </a>
-                </td>
+                <th colspan="2">&nbsp;</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for badge_type <- @badge_types do %>
+                <tr>
+                  <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
+                    {central_component("icon", icon: badge_type.icon)}
+                  </td>
+                  <td>{badge_type.name}</td>
+                  <td>{badge_type.purpose}</td>
+                  <td>{badge_type.restriction}</td>
+
+                  <td>
+                    <a
+                      href={Routes.ts_admin_badge_type_path(@conn, :show, badge_type.id)}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      Show
+                    </a>
+                  </td>
+
+                  <td>
+                    <a
+                      href={Routes.ts_admin_badge_type_path(@conn, :edit, badge_type.id)}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      Edit
+                    </a>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

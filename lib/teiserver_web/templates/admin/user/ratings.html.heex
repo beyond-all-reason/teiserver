@@ -86,106 +86,108 @@
           </div>
         <% end %>
 
-        <table class="table table-sm mt-3">
-          <thead>
-            <tr>
-              <th>Game</th>
-              <%= if @filter in ["Small Team", "Large Team"] do %>
-                <th>Play</th>
-              <% end %>
-              <th>Players</th>
-              <th>Type</th>
-              <th colspan="2">Rating</th>
-              <th colspan="2">Skill</th>
-              <th colspan="2">Uncertainty</th>
-              <th>&nbsp;</th>
-              <th>Date</th>
-              <th>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for log <- @logs do %>
-              <% {text_class, icon} =
-                if log.value["skill_change"] > 0 do
-                  {"text-success", "up"}
-                else
-                  {"text-danger", "down"}
-                end
-
-              {exit_status, play_percentage} =
-                if log.match.game_type in ["Small Team", "Large Team"] do
-                  exit_status =
-                    Teiserver.Battle.MatchLib.calculate_exit_status(
-                      log.match_membership.left_after,
-                      log.match.game_duration
-                    )
-
-                  play_percentage =
-                    if exit_status != :stayed do
-                      (log.match_membership.left_after / log.match.game_duration * 100) |> round
-                    end
-
-                  {exit_status, play_percentage}
-                else
-                  {:stayed, nil}
-                end %>
+        <div class="table-responsive">
+          <table class="table table-sm mt-3">
+            <thead>
               <tr>
-                <%= if log.match do %>
-                  <td>{log.match.map}</td>
-
-                  <%= if @filter in ["Small Team", "Large Team"] do %>
-                    <td>
-                      <%= case exit_status do %>
-                        <% :stayed -> %>
-                        <% :early -> %>
-                          <i class="fa-fw fa-solid fa-clock text-warning"></i>
-                          &nbsp; {play_percentage}%
-                        <% :abandoned -> %>
-                          <i class="fa-fw fa-solid fa-person-running text-danger"></i>
-                          &nbsp; {play_percentage}%
-                        <% :noshow -> %>
-                          <i class="fa-fw fa-solid fa-user-ninja text-info2"></i>
-                      <% end %>
-                    </td>
-                  <% end %>
-                  <td>{log.match.team_size * log.match.team_count}</td>
-                <% else %>
-                  <td colspan="3">{log.value["reason"] || "No match"}</td>
+                <th>Game</th>
+                <%= if @filter in ["Small Team", "Large Team"] do %>
+                  <th>Play</th>
                 <% end %>
-                <td>{@rating_type_id_lookup[log.rating_type_id]}</td>
-
-                <td>{round(log.value["rating_value"], 2)}</td>
-                <td class={text_class}>
-                  {round(log.value["rating_value_change"], 2)}
-                </td>
-
-                <td>{round(log.value["skill"], 2)}</td>
-                <td class={text_class}>
-                  {round(log.value["skill_change"] || 0, 2)}
-                </td>
-
-                <td>{round(log.value["uncertainty"], 2)}</td>
-                <td>
-                  {round(log.value["uncertainty_change"] || 0, 2)}
-                </td>
-
-                <td class={text_class}>
-                  <i class={"fa-fw fa-solid fa-#{icon}"}></i>
-                </td>
-                <td>{date_to_str(log.inserted_at, format: :hms_or_dmy)}</td>
-                <%= if log.match do %>
-                  <td>
-                    <a href={~p"/battle/#{log.match.id}"} class="btn btn-secondary btn-sm">
-                      Show
-                    </a>
-                  </td>
-                <% else %>
-                  <td>&nbsp;</td>
-                <% end %>
+                <th>Players</th>
+                <th>Type</th>
+                <th colspan="2">Rating</th>
+                <th colspan="2">Skill</th>
+                <th colspan="2">Uncertainty</th>
+                <th>&nbsp;</th>
+                <th>Date</th>
+                <th>&nbsp;</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for log <- @logs do %>
+                <% {text_class, icon} =
+                  if log.value["skill_change"] > 0 do
+                    {"text-success", "up"}
+                  else
+                    {"text-danger", "down"}
+                  end
+
+                {exit_status, play_percentage} =
+                  if log.match.game_type in ["Small Team", "Large Team"] do
+                    exit_status =
+                      Teiserver.Battle.MatchLib.calculate_exit_status(
+                        log.match_membership.left_after,
+                        log.match.game_duration
+                      )
+
+                    play_percentage =
+                      if exit_status != :stayed do
+                        (log.match_membership.left_after / log.match.game_duration * 100) |> round
+                      end
+
+                    {exit_status, play_percentage}
+                  else
+                    {:stayed, nil}
+                  end %>
+                <tr>
+                  <%= if log.match do %>
+                    <td>{log.match.map}</td>
+
+                    <%= if @filter in ["Small Team", "Large Team"] do %>
+                      <td>
+                        <%= case exit_status do %>
+                          <% :stayed -> %>
+                          <% :early -> %>
+                            <i class="fa-fw fa-solid fa-clock text-warning"></i>
+                            &nbsp; {play_percentage}%
+                          <% :abandoned -> %>
+                            <i class="fa-fw fa-solid fa-person-running text-danger"></i>
+                            &nbsp; {play_percentage}%
+                          <% :noshow -> %>
+                            <i class="fa-fw fa-solid fa-user-ninja text-info2"></i>
+                        <% end %>
+                      </td>
+                    <% end %>
+                    <td>{log.match.team_size * log.match.team_count}</td>
+                  <% else %>
+                    <td colspan="3">{log.value["reason"] || "No match"}</td>
+                  <% end %>
+                  <td>{@rating_type_id_lookup[log.rating_type_id]}</td>
+
+                  <td>{round(log.value["rating_value"], 2)}</td>
+                  <td class={text_class}>
+                    {round(log.value["rating_value_change"], 2)}
+                  </td>
+
+                  <td>{round(log.value["skill"], 2)}</td>
+                  <td class={text_class}>
+                    {round(log.value["skill_change"] || 0, 2)}
+                  </td>
+
+                  <td>{round(log.value["uncertainty"], 2)}</td>
+                  <td>
+                    {round(log.value["uncertainty_change"] || 0, 2)}
+                  </td>
+
+                  <td class={text_class}>
+                    <i class={"fa-fw fa-solid fa-#{icon}"}></i>
+                  </td>
+                  <td>{date_to_str(log.inserted_at, format: :hms_or_dmy)}</td>
+                  <%= if log.match do %>
+                    <td>
+                      <a href={~p"/battle/#{log.match.id}"} class="btn btn-secondary btn-sm">
+                        Show
+                      </a>
+                    </td>
+                  <% else %>
+                    <td>&nbsp;</td>
+                  <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
 
         <%= if assigns[:total_pages] do %>
           <.pagination

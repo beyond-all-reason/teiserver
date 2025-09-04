@@ -21,81 +21,81 @@ moderator = allow?(@current_user, "Moderator") %>
           <% end %>
         </h4>
 
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Map</th>
-              <th colspan="3">Status</th>
-              <th>Members</th>
-              <th>Players</th>
-              <th>Spectators</th>
-
-              <th colspan="1"></th>
-
-              <%= if moderator do %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Map</th>
+                <th colspan="3">Status</th>
+                <th>Members</th>
+                <th>Players</th>
+                <th>Spectators</th>
                 <th>&nbsp;</th>
-              <% end %>
-            </tr>
-          </thead>
-          <tbody id="lobbies">
-            <%= for lobby <- @lobbies do %>
-              <%= if lobby != nil do %>
-                <tr id={"lobby-#{lobby.id}"}>
-                  <td>{lobby.name}</td>
-                  <td>{lobby.map_name}</td>
-                  <td>
-                    <%= if lobby.in_progress do %>
-                      <i class="fa-fw fa-solid fa-play"></i>
-                    <% end %>
-                  </td>
-                  <td>
-                    <%= if lobby.locked do %>
-                      <i class="fa-fw fa-solid fa-lock"></i>
-                    <% end %>
-                  </td>
-                  <td>
-                    <%= if lobby.passworded do %>
-                      <i class="fa-fw fa-solid fa-key"></i>
-                    <% end %>
-                  </td>
-                  <td>{lobby.member_count}</td>
-                  <td>{lobby.player_count}</td>
-                  <td>{lobby.member_count - lobby.player_count}</td>
+                <%= if moderator do %>
+                  <th>&nbsp;</th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody id="lobbies">
+              <%= for lobby <- @lobbies do %>
+                <%= if lobby != nil do %>
+                  <tr id={"lobby-#{lobby.id}"}>
+                    <td>{lobby.name}</td>
+                    <td>{lobby.map_name}</td>
+                    <td>
+                      <%= if lobby.in_progress do %>
+                        <i class="fa-fw fa-solid fa-play"></i>
+                      <% end %>
+                    </td>
+                    <td>
+                      <%= if lobby.locked do %>
+                        <i class="fa-fw fa-solid fa-lock"></i>
+                      <% end %>
+                    </td>
+                    <td>
+                      <%= if lobby.passworded do %>
+                        <i class="fa-fw fa-solid fa-key"></i>
+                      <% end %>
+                    </td>
+                    <td>{lobby.member_count}</td>
+                    <td>{lobby.player_count}</td>
+                    <td>{lobby.member_count - lobby.player_count}</td>
 
-                  <%= if @can_join do %>
-                    <%= if @client != nil do %>
+                    <%= if @can_join do %>
+                      <%= if @client != nil do %>
+                        <td>
+                          <span
+                            class={"btn btn-sm btn-#{bsname}"}
+                            phx-click="join"
+                            phx-value-lobby_id={lobby.id}
+                          >
+                            Join
+                          </span>
+                        </td>
+                      <% else %>
+                        <td></td>
+                      <% end %>
+
                       <td>
-                        <span
-                          class={"btn btn-sm btn-#{bsname}"}
-                          phx-click="join"
-                          phx-value-lobby_id={lobby.id}
-                        >
-                          Join
+                        <span>
+                          <.link
+                            navigate={~p"/tournament/lobbies/show/#{lobby.id}"}
+                            class="btn btn-sm btn-outline-#{bsname}"
+                          >
+                            Show
+                          </.link>
                         </span>
                       </td>
                     <% else %>
-                      <td></td>
+                      <td colspan="2">&nbsp;</td>
                     <% end %>
-
-                    <td>
-                      <span>
-                        <.link
-                          navigate={~p"/tournament/lobbies/show/#{lobby.id}"}
-                          class="btn btn-sm btn-outline-#{bsname}"
-                        >
-                          Show
-                        </.link>
-                      </span>
-                    </td>
-                  <% else %>
-                    <td colspan="2">&nbsp;</td>
-                  <% end %>
-                </tr>
+                  </tr>
+                <% end %>
               <% end %>
-            <% end %>
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

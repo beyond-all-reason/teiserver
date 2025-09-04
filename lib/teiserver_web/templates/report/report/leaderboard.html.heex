@@ -99,88 +99,90 @@ user_moderator = allow?(@current_user, "Moderator") %>
         <textarea rows="1" class="form-control" style="font-family: monospace;"><%= @csv_data %></textarea>
         <br />
 
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>&nbsp;</th>
-              <th colspan="2">Player</th>
-              <th>&nbsp;</th>
-
-              <th>Leaderboard rating</th>
-              <th>Game rating</th>
-
-              <th>Skill</th>
-              <th>Uncertainty</th>
-
-              <th>Days since update</th>
-
-              <%= if @extra_data do %>
-                <th>Games</th>
-                <th>Win rate</th>
-                <th>Stay %</th>
-                <th>Early %</th>
-                <th>Abandon %</th>
-                <th>NoShow %</th>
-              <% end %>
-
-              <%= if user_moderator do %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
                 <th>&nbsp;</th>
-              <% end %>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for {rating, pos} <- Enum.with_index(@ratings) do %>
-              <% age = Timex.diff(Timex.now(), rating.last_updated, :days) %>
+                <th colspan="2">Player</th>
+                <th>&nbsp;</th>
 
-              <tr style={"background-color: #{rgba_css rating.user.colour};"}>
-                <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                  #{pos + 1}
-                </td>
-                <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                  {central_component("icon", icon: rating.user.icon)}
-                </td>
-                <td><TeiserverWeb.UserComponents.status_icon user={rating.user} /></td>
-                <td>{rating.user.name}</td>
+                <th>Leaderboard rating</th>
+                <th>Game rating</th>
 
-                <td>{rating.leaderboard_rating |> round(2)}</td>
-                <td>{rating.rating_value |> round(2)}</td>
-                <td>{rating.skill |> round(2)}</td>
-                <td>{rating.uncertainty |> round(2)}</td>
+                <th>Skill</th>
+                <th>Uncertainty</th>
 
-                <td>{age}</td>
+                <th>Days since update</th>
 
                 <%= if @extra_data do %>
-                  <%= if @extra_data[rating.user_id] do %>
-                    <td>{@extra_data[rating.user_id].count}</td>
-                    <td>
-                      {percent(
-                        @extra_data[rating.user_id].wins / @extra_data[rating.user_id].count
-                      )}%
-                    </td>
-
-                    <td>{@extra_data[rating.user_id].stayed}</td>
-                    <td>{@extra_data[rating.user_id].early}</td>
-                    <td>{@extra_data[rating.user_id].abandoned}</td>
-                    <td>{@extra_data[rating.user_id].noshow}</td>
-                  <% else %>
-                    <td colspan="2">&nbsp;</td>
-                  <% end %>
+                  <th>Games</th>
+                  <th>Win rate</th>
+                  <th>Stay %</th>
+                  <th>Early %</th>
+                  <th>Abandon %</th>
+                  <th>NoShow %</th>
                 <% end %>
 
                 <%= if user_moderator do %>
-                  <td>
-                    <a
-                      href={Routes.ts_admin_user_path(@conn, :ratings, rating.user_id) <> "?filter=#{@params["game_type"]}"}
-                      class="btn btn-sm btn-secondary"
-                    >
-                      Show
-                    </a>
-                  </td>
+                  <th>&nbsp;</th>
                 <% end %>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for {rating, pos} <- Enum.with_index(@ratings) do %>
+                <% age = Timex.diff(Timex.now(), rating.last_updated, :days) %>
+
+                <tr style={"background-color: #{rgba_css rating.user.colour};"}>
+                  <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
+                    #{pos + 1}
+                  </td>
+                  <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
+                    {central_component("icon", icon: rating.user.icon)}
+                  </td>
+                  <td><TeiserverWeb.UserComponents.status_icon user={rating.user} /></td>
+                  <td>{rating.user.name}</td>
+
+                  <td>{rating.leaderboard_rating |> round(2)}</td>
+                  <td>{rating.rating_value |> round(2)}</td>
+                  <td>{rating.skill |> round(2)}</td>
+                  <td>{rating.uncertainty |> round(2)}</td>
+
+                  <td>{age}</td>
+
+                  <%= if @extra_data do %>
+                    <%= if @extra_data[rating.user_id] do %>
+                      <td>{@extra_data[rating.user_id].count}</td>
+                      <td>
+                        {percent(
+                          @extra_data[rating.user_id].wins / @extra_data[rating.user_id].count
+                        )}%
+                      </td>
+
+                      <td>{@extra_data[rating.user_id].stayed}</td>
+                      <td>{@extra_data[rating.user_id].early}</td>
+                      <td>{@extra_data[rating.user_id].abandoned}</td>
+                      <td>{@extra_data[rating.user_id].noshow}</td>
+                    <% else %>
+                      <td colspan="2">&nbsp;</td>
+                    <% end %>
+                  <% end %>
+
+                  <%= if user_moderator do %>
+                    <td>
+                      <a
+                        href={Routes.ts_admin_user_path(@conn, :ratings, rating.user_id) <> "?filter=#{@params["game_type"]}"}
+                        class="btn btn-sm btn-secondary"
+                      >
+                        Show
+                      </a>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

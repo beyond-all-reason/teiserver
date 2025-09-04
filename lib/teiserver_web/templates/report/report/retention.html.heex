@@ -133,34 +133,36 @@
           </div>
         <% end %>
 
-        <table class="table">
-          <thead>
-            <tr>
-              <th>&nbsp;</th>
-              <%= for d <- Range.new(1, @max_key) do %>
-                <th>{d}</th>
-              <% end %>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Count</td>
-              <%= for d <- Range.new(0, @max_key) do %>
-                <td>{Map.get(@play_retention_grouping, d, 0)}</td>
-              <% end %>
-            </tr>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>&nbsp;</th>
+                <%= for d <- Range.new(1, @max_key) do %>
+                  <th>{d}</th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Count</td>
+                <%= for d <- Range.new(0, @max_key) do %>
+                  <td>{Map.get(@play_retention_grouping, d, 0)}</td>
+                <% end %>
+              </tr>
 
-            <tr>
-              <td>As %</td>
-              <%= for d <- Range.new(0, @max_key) do %>
-                <td>
-                  {raw = Map.get(@play_retention_grouping, d, 0) / max(@user_count, 1)
-                  round(raw * 1000) / 10}
-                </td>
-              <% end %>
-            </tr>
-          </tbody>
-        </table>
+              <tr>
+                <td>As %</td>
+                <%= for d <- Range.new(0, @max_key) do %>
+                  <td>
+                    {raw = Map.get(@play_retention_grouping, d, 0) / max(@user_count, 1)
+                    round(raw * 1000) / 10}
+                  </td>
+                <% end %>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
