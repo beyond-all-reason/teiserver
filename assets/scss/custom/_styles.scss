@@ -243,7 +243,6 @@ body {
 
 //Ratings table
 .table-ratings {
-  table-layout: fixed;
   font-size: 0.9rem;
 }
 
@@ -252,18 +251,24 @@ body {
   width: 12.5rem;
 }
 
+//Change columns - ensure minimum width for icons to stay on same line
+.table-ratings tr td:nth-child(5),
+.table-ratings tr td:nth-child(7),
+.table-ratings tr td:nth-child(9),
+.table-ratings tr td:nth-child(11) {
+  min-width: 4.5rem;
+}
+
 .table-ratings th {
-  padding: 0.5rem
+  padding: 0.5rem;
+  min-width: 5rem;
 }
 
 .table-ratings td {
-  padding: 0.5rem
+  padding: 0.5rem;
+  min-width: 3rem;
 }
 
-// Make the delta column closer to the associated value
-.table-ratings .column-delta {
-  transform: translate(-1.6rem, 0rem)
-}
 
 
 // We want out outline buttons to be filled in when you mouseover or activate them

@@ -74,29 +74,31 @@
         </form>
         <br /><br />
 
-        <table class="table table-sm table-striped">
-          <thead>
-            <tr>
-              <th>Condition</th>
-              <th>Count</th>
-              <th>% of total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for {condition, count} <- @data.rows do %>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped">
+            <thead>
               <tr>
-                <td>{condition}</td>
-                <td>{count}</td>
-                <td>{round(100 * (count / @data.total))}%</td>
+                <th>Condition</th>
+                <th>Count</th>
+                <th>% of total</th>
               </tr>
-            <% end %>
-            <tr>
-              <td>Total</td>
-              <td>{@data.total}</td>
-              <td>&nbsp;</td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for {condition, count} <- @data.rows do %>
+                <tr>
+                  <td>{condition}</td>
+                  <td>{count}</td>
+                  <td>{round(100 * (count / @data.total))}%</td>
+                </tr>
+              <% end %>
+              <tr>
+                <td>Total</td>
+                <td>{@data.total}</td>
+                <td>&nbsp;</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

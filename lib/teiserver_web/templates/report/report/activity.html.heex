@@ -89,24 +89,27 @@
         <h4>
           Date range: {@data.start_date} to {@data.end_date}, {day_count} days
         </h4>
-        <table class="table" style="width: 600px;">
-          <thead>
-            <tr>
-              <th>Hours played</th>
-              <th>Player count</th>
-              <th>Cumulative Player count</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for {hours, count} <- @data.player_counts do %>
+
+        <div class="table-responsive">
+          <table class="table" style="width: 600px;">
+            <thead>
               <tr>
-                <td>{hours}</td>
-                <td>{format_number(count)}</td>
-                <td>{format_number(@data.cumulative_player_counts[hours])}</td>
+                <th>Hours played</th>
+                <th>Player count</th>
+                <th>Cumulative Player count</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for {hours, count} <- @data.player_counts do %>
+                <tr>
+                  <td>{hours}</td>
+                  <td>{format_number(count)}</td>
+                  <td>{format_number(@data.cumulative_player_counts[hours])}</td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

@@ -1,53 +1,73 @@
-<div class="container">
-  <h1>List of OAuth applications</h1>
+<% bsname = view_colour() %>
 
-  <p>
-    <div class="btn btn-sm btn-outline-success">
-      <Phx.link href={~p"/teiserver/admin/oauth_application/new"}>Create application</Phx.link>
-    </div>
-  </p>
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Listing OAuth applications</h4>
+          <.link
+            href={~p"/teiserver/admin/oauth_application/new"}
+            class={"btn btn-outline-#{bsname}"}
+          >
+            Create application
+          </.link>
+        </div>
 
-  <%= if length(@app_and_stats) > 0 do %>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>id</th>
-          <th>client id (uid)</th>
-          <th>name</th>
-          <th>owner</th>
-          <th>scopes</th>
-          <th>code/token/creds</th>
-          <th>actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for {app, stats} <- @app_and_stats do %>
-          <tr>
-            <td>{app.id}</td>
-            <td>{app.uid}</td>
-            <td>{app.name}</td>
-            <%= if is_nil(app.owner) do %>
-              <td>No owner</td>
-            <% else %>
-              <td>{app.owner.name} ({app.owner.email})</td>
-            <% end %>
-            <td>{Enum.join(app.scopes, ", ")}</td>
-            <td>
-              {stats.code_count} / {stats.token_count} / {stats.credential_count}
-            </td>
-            <td>
-              <Phx.link href={~p"/teiserver/admin/oauth_application/#{app.id}"}>
-                <button type="button" class="btn btn-primary btn-sm">show</button>
-              </Phx.link>
-              <Phx.link href={~p"/teiserver/admin/oauth_application/#{app.id}/edit"}>
-                <button type="button" class="btn btn-primary btn-sm">Edit</button>
-              </Phx.link>
-            </td>
-          </tr>
+        <%= if length(@app_and_stats) > 0 do %>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Client ID (UID)</th>
+                  <th>Name</th>
+                  <th>Owner</th>
+                  <th>Scopes</th>
+                  <th>Code/Token/Creds</th>
+                  <th>&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= for {app, stats} <- @app_and_stats do %>
+                  <tr>
+                    <td>{app.id}</td>
+                    <td>{app.uid}</td>
+                    <td>{app.name}</td>
+                    <%= if is_nil(app.owner) do %>
+                      <td>No owner</td>
+                    <% else %>
+                      <td>{app.owner.name} ({app.owner.email})</td>
+                    <% end %>
+                    <td>{Enum.join(app.scopes, ", ")}</td>
+                    <td>
+                      {stats.code_count} / {stats.token_count} / {stats.credential_count}
+                    </td>
+                    <td>
+                      <div class="d-flex gap-1 flex-wrap">
+                        <a
+                          href={~p"/teiserver/admin/oauth_application/#{app.id}"}
+                          class="btn btn-secondary btn-sm"
+                        >
+                          Show
+                        </a>
+                        <a
+                          href={~p"/teiserver/admin/oauth_application/#{app.id}/edit"}
+                          class="btn btn-secondary btn-sm"
+                        >
+                          Edit
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <p>No applications!</p>
         <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    No applications!
-  <% end %>
+      </div>
+    </div>
+  </div>
 </div>

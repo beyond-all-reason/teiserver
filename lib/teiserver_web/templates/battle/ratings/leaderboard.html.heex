@@ -20,58 +20,60 @@
         )}
         <br /><br />
         The leaderboard weighs uncertainty a lot more than lobby balance. As a result the number you see here will not be the same as the value you see ingame.
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>&nbsp;</th>
-              <th colspan="2">Player</th>
-
-              <th>Rating</th>
-
-              <th>Days since update</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= if @my_rating do %>
-              <% age = Timex.diff(Timex.now(), @my_rating.last_updated, :days) %>
-
-              <tr style={"background-color: #{rgba_css @current_user.colour};"}>
-                <td style={"background-color: #{@current_user.colour}; color: #FFF;"} width="22">
-                  &nbsp;
-                </td>
-                <td style={"background-color: #{@current_user.colour}; color: #FFF;"} width="22">
-                  {central_component("icon", icon: @current_user.icon)}
-                </td>
-                <td>{@current_user.name}</td>
-
-                <td>{@my_rating.leaderboard_rating |> round(2)}</td>
-
-                <td>{age}</td>
-              </tr>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td colspan="5">&nbsp;</td>
+                <th>&nbsp;</th>
+                <th colspan="2">Player</th>
+
+                <th>Rating</th>
+
+                <th>Days since update</th>
               </tr>
-            <% end %>
+            </thead>
+            <tbody>
+              <%= if @my_rating do %>
+                <% age = Timex.diff(Timex.now(), @my_rating.last_updated, :days) %>
 
-            <%= for {rating, pos} <- Enum.with_index(@ratings) do %>
-              <% age = Timex.diff(Timex.now(), rating.last_updated, :days) %>
+                <tr style={"background-color: #{rgba_css @current_user.colour};"}>
+                  <td style={"background-color: #{@current_user.colour}; color: #FFF;"} width="22">
+                    &nbsp;
+                  </td>
+                  <td style={"background-color: #{@current_user.colour}; color: #FFF;"} width="22">
+                    {central_component("icon", icon: @current_user.icon)}
+                  </td>
+                  <td>{@current_user.name}</td>
 
-              <tr style={"background-color: #{rgba_css rating.user.colour};"}>
-                <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                  #{pos + 1}
-                </td>
-                <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                  {central_component("icon", icon: rating.user.icon)}
-                </td>
-                <td>{rating.user.name}</td>
+                  <td>{@my_rating.leaderboard_rating |> round(2)}</td>
 
-                <td>{rating.leaderboard_rating |> round(2)}</td>
+                  <td>{age}</td>
+                </tr>
+                <tr>
+                  <td colspan="5">&nbsp;</td>
+                </tr>
+              <% end %>
 
-                <td>{age}</td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
+              <%= for {rating, pos} <- Enum.with_index(@ratings) do %>
+                <% age = Timex.diff(Timex.now(), rating.last_updated, :days) %>
+
+                <tr style={"background-color: #{rgba_css rating.user.colour};"}>
+                  <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
+                    #{pos + 1}
+                  </td>
+                  <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
+                    {central_component("icon", icon: rating.user.icon)}
+                  </td>
+                  <td>{rating.user.name}</td>
+
+                  <td>{rating.leaderboard_rating |> round(2)}</td>
+
+                  <td>{age}</td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

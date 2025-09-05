@@ -54,88 +54,95 @@
       </div>
     <% end %>
 
-    <table class="table table-sm table-hover table-ratings mt-3 cursor-pointer">
-      <thead>
-        <tr class="">
-          <th>Map name</th>
-          <th>Players</th>
-          <th>Type</th>
-          <th colspan="2">Skill</th>
-          <th colspan="2">Uncertainty</th>
-          <th colspan="2">
-            Match Rating
-            <small class="text-secondary">(Skill - Uncertainty, non-negative only)</small>
-          </th>
-          <th colspan="2">
-            Leaderboard Rating <small class="text-secondary">(Skill - 3 x Uncertainty)</small>
-          </th>
-          <th>Date</th>
-          <th>&nbsp;</th>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for log <- @logs do %>
-          <% {skill_text_class, skill_icon} =
-            cond do
-              log.value["skill_change"] > 0 -> {"text-success column-delta", "arrow-up"}
-              log.value["skill_change"] < 0 -> {"text-danger column-delta", "arrow-down"}
-              true -> {"text-warning column-delta", "pause"}
-            end %>
-          <% {uncertainty_text_class, uncertainty_icon} =
-            cond do
-              log.value["uncertainty_change"] > 0 -> {"text-secondary column-delta", "arrow-up"}
-              log.value["uncertainty_change"] < 0 -> {"text-secondary column-delta", "arrow-down"}
-              true -> {"text-secondary column-delta", "pause"}
-            end %>
-          <tr class="position-relative">
-            <%= if log.match do %>
-              <td>
-                {log.match.map}
-              </td>
-              <td>{log.match.team_size * log.match.team_count}</td>
-            <% else %>
-              <td colspan="2">{log.value["reason"] || "No match"}</td>
-            <% end %>
-            <td>{@rating_type_id_lookup[log.rating_type_id]}</td>
-            <td>{round(log.value["skill"], 2)}</td>
-            <td class={skill_text_class}>
-              <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
-
-              {round(log.value["skill_change"], 2)}
-            </td>
-            <td>{round(log.value["uncertainty"], 2)}</td>
-            <td class={uncertainty_text_class}>
-              <i class={"fa-fw fa-solid fa-#{uncertainty_icon}"}></i>
-
-              {round(log.value["uncertainty_change"], 2)}
-            </td>
-            <td>{round(log.value["rating_value"], 2)}</td>
-            <td class={skill_text_class}>
-              <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
-
-              {round(log.value["rating_value_change"], 2)}
-            </td>
-
-            <td>{round(log.value["skill"] - 3 * log.value["uncertainty"], 2)}</td>
-            <td class={skill_text_class}>
-              <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
-
-              {round(log.value["skill_change"] - 3 * log.value["uncertainty_change"], 2)}
-            </td>
-
-            <td>{date_to_str(log.inserted_at, format: :hms_or_dmy, tz: @tz)}</td>
-
-            <%= if log.match do %>
-              <td>
-                <.link navigate={~p"/battle/#{log.match_id}"} class="stretched-link"></.link>
-              </td>
-            <% else %>
-              <td>&nbsp;</td>
-            <% end %>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover table-ratings mt-3 cursor-pointer">
+        <thead>
+          <tr class="">
+            <th>Map name</th>
+            <th>Players</th>
+            <th>Type</th>
+            <th colspan="2">Skill</th>
+            <th colspan="2">Uncertainty</th>
+            <th colspan="2">
+              Match Rating
+              <small class="text-secondary">(Skill - Uncertainty, non-negative only)</small>
+            </th>
+            <th colspan="2">
+              Leaderboard Rating <small class="text-secondary">(Skill - 3 x Uncertainty)</small>
+            </th>
+            <th>Date</th>
+            <th>&nbsp;</th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <%= for log <- @logs do %>
+            <% {skill_text_class, skill_icon} =
+              cond do
+                log.value["skill_change"] > 0 -> {"text-success column-delta", "arrow-up"}
+                log.value["skill_change"] < 0 -> {"text-danger column-delta", "arrow-down"}
+                true -> {"text-warning column-delta", "pause"}
+              end %>
+            <% {uncertainty_text_class, uncertainty_icon} =
+              cond do
+                log.value["uncertainty_change"] > 0 ->
+                  {"text-secondary column-delta", "arrow-up"}
+
+                log.value["uncertainty_change"] < 0 ->
+                  {"text-secondary column-delta", "arrow-down"}
+
+                true ->
+                  {"text-secondary column-delta", "pause"}
+              end %>
+            <tr class="position-relative">
+              <%= if log.match do %>
+                <td>
+                  {log.match.map}
+                </td>
+                <td>{log.match.team_size * log.match.team_count}</td>
+              <% else %>
+                <td colspan="2">{log.value["reason"] || "No match"}</td>
+              <% end %>
+              <td>{@rating_type_id_lookup[log.rating_type_id]}</td>
+              <td>{round(log.value["skill"], 2)}</td>
+              <td class={skill_text_class}>
+                <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
+
+                {round(log.value["skill_change"], 2)}
+              </td>
+              <td>{round(log.value["uncertainty"], 2)}</td>
+              <td class={uncertainty_text_class}>
+                <i class={"fa-fw fa-solid fa-#{uncertainty_icon}"}></i>
+
+                {round(log.value["uncertainty_change"], 2)}
+              </td>
+              <td>{round(log.value["rating_value"], 2)}</td>
+              <td class={skill_text_class}>
+                <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
+
+                {round(log.value["rating_value_change"], 2)}
+              </td>
+
+              <td>{round(log.value["skill"] - 3 * log.value["uncertainty"], 2)}</td>
+              <td class={skill_text_class}>
+                <i class={"fa-fw fa-solid fa-#{skill_icon}"}></i>
+
+                {round(log.value["skill_change"] - 3 * log.value["uncertainty_change"], 2)}
+              </td>
+
+              <td>{date_to_str(log.inserted_at, format: :hms_or_dmy, tz: @tz)}</td>
+
+              <%= if log.match do %>
+                <td>
+                  <.link navigate={~p"/battle/#{log.match_id}"} class="stretched-link"></.link>
+                </td>
+              <% else %>
+                <td>&nbsp;</td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
 
     <%= if assigns[:total_pages] do %>
       <.pagination

@@ -83,34 +83,39 @@
           Lists users sorted by number of mutes
         </div>
 
-        <table class="table table-sm mt-3">
-          <thead>
-            <tr>
-              <th>&nbsp;</th>
-              <th>Ignore count</th>
-              <th>{String.capitalize(@state_past_tense)} by</th>
-              <th>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for [userid, username, state_count, from_names] <- @results do %>
+        <div class="table-responsive">
+          <table class="table table-sm mt-3">
+            <thead>
               <tr>
-                <td>{username}</td>
-                <td>{state_count}</td>
-                <td>
-                  {from_names |> Enum.join(", ")}
-                </td>
-                <td>
-                  <%= if allow?(@conn, "Moderator") do %>
-                    <a href={~p"/teiserver/admin/user/#{userid}"} class="btn btn-secondary btn-sm">
-                      Show
-                    </a>
-                  <% end %>
-                </td>
+                <th>&nbsp;</th>
+                <th>Ignore count</th>
+                <th>{String.capitalize(@state_past_tense)} by</th>
+                <th>&nbsp;</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for [userid, username, state_count, from_names] <- @results do %>
+                <tr>
+                  <td>{username}</td>
+                  <td>{state_count}</td>
+                  <td>
+                    {from_names |> Enum.join(", ")}
+                  </td>
+                  <td>
+                    <%= if allow?(@conn, "Moderator") do %>
+                      <a
+                        href={~p"/teiserver/admin/user/#{userid}"}
+                        class="btn btn-secondary btn-sm"
+                      >
+                        Show
+                      </a>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

@@ -77,28 +77,30 @@
           <div class="col-md-12">
             <h5>Total games: {format_number(@total_total)}</h5>
 
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>Map</th>
-                  <th>Count</th>
-                  <th>Team 1 favour</th>
-                  <th>Average duration</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for {map, stats} <- @data do %>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
                   <tr>
-                    <td>{map}</td>
-                    <td>
-                      {format_number(stats.count)} ({percent(stats.count / @total_total)}%)
-                    </td>
-                    <td>{percent(stats.team1_favour)}%</td>
-                    <td>{duration_to_str_short(stats.avg_duration)}</td>
+                    <th>Map</th>
+                    <th>Count</th>
+                    <th>Team 1 favour</th>
+                    <th>Average duration</th>
                   </tr>
-                <% end %>
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  <%= for {map, stats} <- @data do %>
+                    <tr>
+                      <td>{map}</td>
+                      <td>
+                        {format_number(stats.count)} ({percent(stats.count / @total_total)}%)
+                      </td>
+                      <td>{percent(stats.team1_favour)}%</td>
+                      <td>{duration_to_str_short(stats.avg_duration)}</td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

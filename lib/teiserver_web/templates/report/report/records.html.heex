@@ -61,32 +61,34 @@
           </button>
         </form>
 
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Record</th>
-              <th>Today</th>
-
-              <%= for i <- 1..@top_count do %>
-                <th>Pos: {i}</th>
-                <th>Date</th>
-              <% end %>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for {key, rows} <- @records do %>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
               <tr>
-                <td>{key}</td>
-                <td>{format_number(@today[key])}</td>
+                <th>Record</th>
+                <th>Today</th>
 
-                <%= for [date, value] <- rows do %>
-                  <td>{format_number(value)}</td>
-                  <td>{date_to_str(date, format: :ymd)}</td>
+                <%= for i <- 1..@top_count do %>
+                  <th>Pos: {i}</th>
+                  <th>Date</th>
                 <% end %>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for {key, rows} <- @records do %>
+                <tr>
+                  <td>{key}</td>
+                  <td>{format_number(@today[key])}</td>
+
+                  <%= for [date, value] <- rows do %>
+                    <td>{format_number(value)}</td>
+                    <td>{date_to_str(date, format: :ymd)}</td>
+                  <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

@@ -499,7 +499,7 @@ defmodule TeiserverWeb.CoreComponents do
       end
 
     ~H"""
-    <div class="">
+    <div class="table-responsive">
       <table class={"table #{@table_class}"}>
         <thead class="">
           <tr>

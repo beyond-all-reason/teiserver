@@ -26,85 +26,88 @@
         <br /><br />
 
         <h4>Listing Codes</h4>
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Purpose</th>
-              <th>Expires</th>
-              <th>Value</th>
-              <th colspan="4">&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for code <- @codes do %>
-              <% path =
-                case code.purpose do
-                  "one_time_login" ->
-                    [value | _] = String.split(code.value, "$")
-                    Routes.account_session_path(@conn, :one_time_login, value)
 
-                  "reset_password" ->
-                    Routes.account_session_path(@conn, :password_reset_form, code.value)
-
-                  _ ->
-                    ""
-                end %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td>{code.user.name}</td>
-                <td>{code.purpose}</td>
-                <td>
-                  {if Timex.compare(code.expires, Timex.now()) != 1 do
-                    "Expired"
-                  else
-                    date_to_str(code.expires, format: :hms_or_dmy, tz: @tz)
-                  end}
-                </td>
-                <td style="font-family:monospace;">{code.value}</td>
-
-                <td>
-                  {link("+ 6h",
-                    to: Routes.admin_code_path(@conn, :extend, code, "6"),
-                    class: "btn btn-outline-secondary btn-sm",
-                    method: "put"
-                  )} &nbsp; {link("+ 24h",
-                    to: Routes.admin_code_path(@conn, :extend, code, "24"),
-                    class: "btn btn-outline-secondary btn-sm",
-                    method: "put"
-                  )} &nbsp; {link("+ 7d",
-                    to: Routes.admin_code_path(@conn, :extend, code, "168"),
-                    class: "btn btn-outline-secondary btn-sm",
-                    method: "put"
-                  )}
-                </td>
-
-                <td>
-                  <a href={path} class="btn btn-outline-secondary btn-sm">
-                    <i class="fa fa-link"></i> Link
-                  </a>
-                </td>
-
-                <td>
-                  <a
-                    href={~p"/teiserver/admin/user/#{code.user_id}"}
-                    class="btn btn-secondary btn-sm"
-                  >
-                    <i class="fa fa-eye"></i> Show user
-                  </a>
-                </td>
-
-                <td>
-                  {link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
-                    to: Routes.admin_code_path(@conn, :delete, code),
-                    method: :delete,
-                    data: [confirm: "Are you sure?"],
-                    class: "btn btn-danger btn-sm"
-                  )}
-                </td>
+                <th>User</th>
+                <th>Purpose</th>
+                <th>Expires</th>
+                <th>Value</th>
+                <th colspan="4">&nbsp;</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for code <- @codes do %>
+                <% path =
+                  case code.purpose do
+                    "one_time_login" ->
+                      [value | _] = String.split(code.value, "$")
+                      Routes.account_session_path(@conn, :one_time_login, value)
+
+                    "reset_password" ->
+                      Routes.account_session_path(@conn, :password_reset_form, code.value)
+
+                    _ ->
+                      ""
+                  end %>
+                <tr>
+                  <td>{code.user.name}</td>
+                  <td>{code.purpose}</td>
+                  <td>
+                    {if Timex.compare(code.expires, Timex.now()) != 1 do
+                      "Expired"
+                    else
+                      date_to_str(code.expires, format: :hms_or_dmy, tz: @tz)
+                    end}
+                  </td>
+                  <td style="font-family:monospace;">{code.value}</td>
+
+                  <td>
+                    {link("+ 6h",
+                      to: Routes.admin_code_path(@conn, :extend, code, "6"),
+                      class: "btn btn-outline-secondary btn-sm",
+                      method: "put"
+                    )} &nbsp; {link("+ 24h",
+                      to: Routes.admin_code_path(@conn, :extend, code, "24"),
+                      class: "btn btn-outline-secondary btn-sm",
+                      method: "put"
+                    )} &nbsp; {link("+ 7d",
+                      to: Routes.admin_code_path(@conn, :extend, code, "168"),
+                      class: "btn btn-outline-secondary btn-sm",
+                      method: "put"
+                    )}
+                  </td>
+
+                  <td>
+                    <a href={path} class="btn btn-outline-secondary btn-sm">
+                      <i class="fa fa-link"></i> Link
+                    </a>
+                  </td>
+
+                  <td>
+                    <a
+                      href={~p"/teiserver/admin/user/#{code.user_id}"}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      <i class="fa fa-eye"></i> Show user
+                    </a>
+                  </td>
+
+                  <td>
+                    {link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
+                      to: Routes.admin_code_path(@conn, :delete, code),
+                      method: :delete,
+                      data: [confirm: "Are you sure?"],
+                      class: "btn btn-danger btn-sm"
+                    )}
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

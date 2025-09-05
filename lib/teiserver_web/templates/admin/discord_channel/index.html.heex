@@ -27,56 +27,61 @@
 
         <h4>Listing Discord channels</h4>
 
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th colspan="2">Channel</th>
-
-              <th>ID</th>
-
-              <th>View perm</th>
-              <th>Post perm</th>
-
-              <th colspan="2">&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for discord_channel <- @discord_channels do %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td style={"background-color: #{discord_channel.colour}; color: #FFF;"} width="22">
-                  <Fontawesome.icon icon={discord_channel.icon} style="regular" />
-                </td>
-                <td style={"background-color: #{rgba_css discord_channel.colour};"}>
-                  {discord_channel.name}
-                </td>
+                <th colspan="2">Channel</th>
 
-                <td>{discord_channel.channel_id}</td>
+                <th>ID</th>
 
-                <td>{discord_channel.view_permission}</td>
-                <td>{discord_channel.post_permission}</td>
+                <th>View perm</th>
+                <th>Post perm</th>
 
-                <td>
-                  <a
-                    href={~p"/admin/discord_channels/#{discord_channel.id}"}
-                    class={"btn btn-outline-#{bsname} btn-sm"}
+                <th colspan="2">&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for discord_channel <- @discord_channels do %>
+                <tr>
+                  <td
+                    style={"background-color: #{discord_channel.colour}; color: #FFF;"}
+                    width="22"
                   >
-                    <i class="fa-fw fa-regular fa-eye"></i> Show
-                  </a>
-                </td>
-                <td>
-                  <%= if allow?(@conn, "Admin") do %>
+                    <Fontawesome.icon icon={discord_channel.icon} style="regular" />
+                  </td>
+                  <td style={"background-color: #{rgba_css discord_channel.colour};"}>
+                    {discord_channel.name}
+                  </td>
+
+                  <td>{discord_channel.channel_id}</td>
+
+                  <td>{discord_channel.view_permission}</td>
+                  <td>{discord_channel.post_permission}</td>
+
+                  <td>
                     <a
-                      href={~p"/admin/discord_channels/#{discord_channel.id}/edit"}
+                      href={~p"/admin/discord_channels/#{discord_channel.id}"}
                       class={"btn btn-outline-#{bsname} btn-sm"}
                     >
-                      <i class="fa-solid fa-wrench"></i> Edit
+                      <i class="fa-fw fa-regular fa-eye"></i> Show
                     </a>
-                  <% end %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
+                  </td>
+                  <td>
+                    <%= if allow?(@conn, "Admin") do %>
+                      <a
+                        href={~p"/admin/discord_channels/#{discord_channel.id}/edit"}
+                        class={"btn btn-outline-#{bsname} btn-sm"}
+                      >
+                        <i class="fa-solid fa-wrench"></i> Edit
+                      </a>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

@@ -27,89 +27,91 @@
 
         <h4>Listing Lobby policies</h4>
 
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th colspan="2">Policy</th>
-
-              <th>Enabled</th>
-
-              <th>Agent format</th>
-
-              <th>Preset</th>
-
-              <th>Size</th>
-              <th>Rank</th>
-              <th>Rating</th>
-              <th>Uncertainty</th>
-
-              <th>Maps</th>
-              <th>Names</th>
-
-              <th colspan="2">&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for lobby_policy <- @lobby_policies do %>
-              <% first_name =
-                case lobby_policy.agent_name_list do
-                  [n | _] -> n
-                  _ -> ""
-                end %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td style={"background-color: #{lobby_policy.colour}; color: #FFF;"} width="22">
-                  {central_component("icon", icon: lobby_policy.icon)}
-                </td>
-                <td style={"background-color: #{rgba_css lobby_policy.colour};"}>
-                  {lobby_policy.lobby_name_format}
-                </td>
+                <th colspan="2">Policy</th>
 
-                <td>
-                  <%= if lobby_policy.enabled do %>
-                    <i class="fa-fw fa-solid fa-check text-success"></i>
-                  <% else %>
-                    <i class="fa-fw fa-solid fa-times text-danger"></i>
-                  <% end %>
-                </td>
+                <th>Enabled</th>
 
-                <td>{lobby_policy.agent_name_format}</td>
+                <th>Agent format</th>
 
-                <td>{lobby_policy.preset}</td>
+                <th>Preset</th>
 
-                <td>{"#{lobby_policy.min_teamsize} - #{lobby_policy.max_teamsize}"}</td>
-                <td>{"#{lobby_policy.min_rank} - #{lobby_policy.max_rank}"}</td>
-                <td>{"#{lobby_policy.min_rating} - #{lobby_policy.max_rating}"}</td>
-                <td>
-                  {"#{lobby_policy.min_uncertainty} - #{lobby_policy.max_uncertainty}"}
-                </td>
+                <th>Size</th>
+                <th>Rank</th>
+                <th>Rating</th>
+                <th>Uncertainty</th>
 
-                <td>{Enum.count(lobby_policy.map_list)}</td>
-                <td>
-                  {Enum.count(lobby_policy.agent_name_list)} ({first_name})
-                </td>
+                <th>Maps</th>
+                <th>Names</th>
 
-                <td>
-                  <a
-                    href={Routes.admin_lobby_policy_path(@conn, :show, lobby_policy.id)}
-                    class={"btn btn-outline-#{bsname} btn-sm"}
-                  >
-                    <i class="fa-fw fa-regular fa-eye"></i> Show
-                  </a>
-                </td>
-                <td>
-                  <%= if allow?(@conn, "Server") do %>
+                <th colspan="2">&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for lobby_policy <- @lobby_policies do %>
+                <% first_name =
+                  case lobby_policy.agent_name_list do
+                    [n | _] -> n
+                    _ -> ""
+                  end %>
+                <tr>
+                  <td style={"background-color: #{lobby_policy.colour}; color: #FFF;"} width="22">
+                    {central_component("icon", icon: lobby_policy.icon)}
+                  </td>
+                  <td style={"background-color: #{rgba_css lobby_policy.colour};"}>
+                    {lobby_policy.lobby_name_format}
+                  </td>
+
+                  <td>
+                    <%= if lobby_policy.enabled do %>
+                      <i class="fa-fw fa-solid fa-check text-success"></i>
+                    <% else %>
+                      <i class="fa-fw fa-solid fa-times text-danger"></i>
+                    <% end %>
+                  </td>
+
+                  <td>{lobby_policy.agent_name_format}</td>
+
+                  <td>{lobby_policy.preset}</td>
+
+                  <td>{"#{lobby_policy.min_teamsize} - #{lobby_policy.max_teamsize}"}</td>
+                  <td>{"#{lobby_policy.min_rank} - #{lobby_policy.max_rank}"}</td>
+                  <td>{"#{lobby_policy.min_rating} - #{lobby_policy.max_rating}"}</td>
+                  <td>
+                    {"#{lobby_policy.min_uncertainty} - #{lobby_policy.max_uncertainty}"}
+                  </td>
+
+                  <td>{Enum.count(lobby_policy.map_list)}</td>
+                  <td>
+                    {Enum.count(lobby_policy.agent_name_list)} ({first_name})
+                  </td>
+
+                  <td>
                     <a
-                      href={Routes.admin_lobby_policy_path(@conn, :edit, lobby_policy.id)}
+                      href={Routes.admin_lobby_policy_path(@conn, :show, lobby_policy.id)}
                       class={"btn btn-outline-#{bsname} btn-sm"}
                     >
-                      <i class="fa-solid fa-wrench"></i> Edit
+                      <i class="fa-fw fa-regular fa-eye"></i> Show
                     </a>
-                  <% end %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
+                  </td>
+                  <td>
+                    <%= if allow?(@conn, "Server") do %>
+                      <a
+                        href={Routes.admin_lobby_policy_path(@conn, :edit, lobby_policy.id)}
+                        class={"btn btn-outline-#{bsname} btn-sm"}
+                      >
+                        <i class="fa-solid fa-wrench"></i> Edit
+                      </a>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

@@ -51,86 +51,91 @@ is_moderator = allow?(@conn, "Moderator") %>
 
         <h4>Listing Users ({Enum.count(@users)})</h4>
 
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th colspan="2">Name</th>
-              <%= if is_moderator do %>
-                <th>Email</th>
-              <% end %>
-              <th>Client</th>
-              <th>Status</th>
-              <%= if is_moderator do %>
-                <th>HW</th>
-              <% end %>
-              <th>Roles</th>
-              <th>Registered</th>
-
-              <%= if is_moderator do %>
-                <th colspan="2">&nbsp;</th>
-              <% else %>
-                <th>&nbsp;</th>
-              <% end %>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for {user, user_stats} <- @users do %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-                  {central_component("icon", icon: user.icon)}
-                </td>
-                <td>{user.name}</td>
+                <th colspan="2">Name</th>
                 <%= if is_moderator do %>
-                  <td>{user.email}</td>
+                  <th>Email</th>
                 <% end %>
-                <td>{user_stats["lobby_client"]}</td>
-
-                <td>
-                  <TeiserverWeb.UserComponents.status_icon user={user} />
-                </td>
-
+                <th>Client</th>
+                <th>Status</th>
                 <%= if is_moderator do %>
-                  <td>
-                    <%= if user_stats["hardware:cpuinfo"] != "" and user_stats["hardware:cpuinfo"] != nil do %>
-                      {user_stats["hardware:cpuinfo"]}
-                      <br />
-                      {user_stats["hardware:gpuinfo"]}
-                    <% else %>
-                      &nbsp;
-                    <% end %>
-                  </td>
+                  <th>HW</th>
                 <% end %>
-
-                <td>
-                  {if Enum.member?(user.roles || [], "Trusted"), do: "Trusted "}
-                  {if Enum.member?(user.roles || [], "Contributor"), do: "Contributor "}
-                  {if Enum.member?(user.roles || [], "Moderator"), do: "Moderator"}
-                </td>
-
-                <td>
-                  {date_to_str(user.inserted_at, format: :dmy)}
-                </td>
-
-                <td>
-                  <a href={~p"/teiserver/admin/user/#{user.id}"} class="btn btn-secondary btn-sm">
-                    Show
-                  </a>
-                </td>
+                <th>Roles</th>
+                <th>Registered</th>
 
                 <%= if is_moderator do %>
-                  <td>
-                    <a
-                      href={~p"/teiserver/admin/user/#{user.id}/edit"}
-                      class="btn btn-secondary btn-sm"
-                    >
-                      Edit
-                    </a>
-                  </td>
+                  <th colspan="2">&nbsp;</th>
+                <% else %>
+                  <th>&nbsp;</th>
                 <% end %>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for {user, user_stats} <- @users do %>
+                <tr>
+                  <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
+                    {central_component("icon", icon: user.icon)}
+                  </td>
+                  <td>{user.name}</td>
+                  <%= if is_moderator do %>
+                    <td>{user.email}</td>
+                  <% end %>
+                  <td>{user_stats["lobby_client"]}</td>
+
+                  <td>
+                    <TeiserverWeb.UserComponents.status_icon user={user} />
+                  </td>
+
+                  <%= if is_moderator do %>
+                    <td>
+                      <%= if user_stats["hardware:cpuinfo"] != "" and user_stats["hardware:cpuinfo"] != nil do %>
+                        {user_stats["hardware:cpuinfo"]}
+                        <br />
+                        {user_stats["hardware:gpuinfo"]}
+                      <% else %>
+                        &nbsp;
+                      <% end %>
+                    </td>
+                  <% end %>
+
+                  <td>
+                    {if Enum.member?(user.roles || [], "Trusted"), do: "Trusted "}
+                    {if Enum.member?(user.roles || [], "Contributor"), do: "Contributor "}
+                    {if Enum.member?(user.roles || [], "Moderator"), do: "Moderator"}
+                  </td>
+
+                  <td>
+                    {date_to_str(user.inserted_at, format: :dmy)}
+                  </td>
+
+                  <td>
+                    <a
+                      href={~p"/teiserver/admin/user/#{user.id}"}
+                      class="btn btn-secondary btn-sm"
+                    >
+                      Show
+                    </a>
+                  </td>
+
+                  <%= if is_moderator do %>
+                    <td>
+                      <a
+                        href={~p"/teiserver/admin/user/#{user.id}/edit"}
+                        class="btn btn-secondary btn-sm"
+                      >
+                        Edit
+                      </a>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
 
         <%= if assigns[:total_pages] do %>
           <.pagination

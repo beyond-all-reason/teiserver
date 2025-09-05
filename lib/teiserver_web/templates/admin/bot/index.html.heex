@@ -1,41 +1,58 @@
-<div class="container">
-  <h1>List of bots</h1>
+<% bsname = view_colour() %>
 
-  <p>
-    <div class="btn btn-sm btn-outline-success">
-      <Phx.link href={~p"/teiserver/admin/bot/new"}>Create bot</Phx.link>
-    </div>
-  </p>
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Listing Bots</h4>
+          <.link href={~p"/teiserver/admin/bot/new"} class={"btn btn-outline-#{bsname}"}>
+            Create bot
+          </.link>
+        </div>
 
-  <%= if length(@bots) > 0 do %>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>id</th>
-          <th>name</th>
-          <th>credentials</th>
-          <th>actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for bot <- @bots do %>
-          <tr>
-            <td>{bot.id}</td>
-            <td>{bot.name}</td>
-            <td>{Map.get(@cred_counts, bot.id, 0)}</td>
-            <td>
-              <Phx.link href={~p"/teiserver/admin/bot/#{bot.id}"}>
-                <button type="button" class="btn btn-primary btn-sm">show</button>
-              </Phx.link>
-              <Phx.link href={~p"/teiserver/admin/bot/#{bot.id}/edit"}>
-                <button type="button" class="btn btn-primary btn-sm">Edit</button>
-              </Phx.link>
-            </td>
-          </tr>
+        <%= if length(@bots) > 0 do %>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Credentials</th>
+                  <th>&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= for bot <- @bots do %>
+                  <tr>
+                    <td>{bot.id}</td>
+                    <td>{bot.name}</td>
+                    <td>{Map.get(@cred_counts, bot.id, 0)}</td>
+                    <td>
+                      <div class="d-flex gap-1 flex-wrap">
+                        <a
+                          href={~p"/teiserver/admin/bot/#{bot.id}"}
+                          class="btn btn-secondary btn-sm"
+                        >
+                          Show
+                        </a>
+                        <a
+                          href={~p"/teiserver/admin/bot/#{bot.id}/edit"}
+                          class="btn btn-secondary btn-sm"
+                        >
+                          Edit
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <p>No bots!</p>
         <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    No bot!
-  <% end %>
+      </div>
+    </div>
+  </div>
 </div>
