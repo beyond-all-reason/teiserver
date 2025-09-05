@@ -1,0 +1,89 @@
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="alert alert-info mb-3">
+      <i class="fa-solid fa-info-circle"></i>
+      <strong>Under Development:</strong>
+      This page shows the map pools used for matchmaking and is currently under development.
+    </div>
+
+    <div class="mb-3">
+      <a
+        href="https://www.beyondallreason.info/maps"
+        target="_blank"
+        class="btn btn-outline-primary btn-sm"
+      >
+        <i class="fa-solid fa-external-link-alt"></i> View on beyondallreason.info
+      </a>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <label for="queue-filter" class="control-label">Filter by Queue:</label>
+        <form phx-change="filter-by-queue">
+          <select id="queue-filter" class="form-select" name="queue">
+            <option value="all" selected={@selected_queue == "all"}>All Maps</option>
+            <%= for queue <- @available_queues do %>
+              <option value={queue} selected={@selected_queue == queue}>{queue}</option>
+            <% end %>
+          </select>
+        </form>
+      </div>
+    </div>
+
+    <%= if Enum.empty?(@filtered_maps) do %>
+      <div class="alert alert-info">
+        <i class="fa-solid fa-info-circle"></i> No maps found for the selected queue.
+      </div>
+    <% else %>
+      <div class="row">
+        <%= for map <- @filtered_maps do %>
+          <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+            <a
+              href={"https://www.beyondallreason.info/map/#{map_display_name_to_url(map.display_name)}"}
+              target="_blank"
+              class="card h-100 text-decoration-none"
+              style="display: block;"
+            >
+              <%= if map.thumbnail_url do %>
+                <img
+                  src={map.thumbnail_url}
+                  class="card-img-top"
+                  alt={map.display_name}
+                  style="height: 150px; object-fit: cover;"
+                />
+              <% else %>
+                <div
+                  class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                  style="height: 150px;"
+                >
+                  <i class="fa-solid fa-map fa-3x text-muted"></i>
+                </div>
+              <% end %>
+
+              <div class="card-body d-flex flex-column">
+                <h6 class="card-title">{map.display_name}</h6>
+                <p class="card-text text-muted small mb-2">
+                  <code>{map.spring_name}</code>
+                </p>
+
+                <%= if map.matchmaking_queues && length(map.matchmaking_queues) > 0 do %>
+                  <div class="mt-auto">
+                    <div class="d-flex flex-wrap gap-1">
+                      <%= for queue <- map.matchmaking_queues do %>
+                        <span class="badge bg-primary">{queue}</span>
+                      <% end %>
+                    </div>
+                  </div>
+                <% else %>
+                  <div class="mt-auto">
+                    <span class="badge bg-secondary">No queues</span>
+                  </div>
+                <% end %>
+              </div>
+            </a>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
