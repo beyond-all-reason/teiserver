@@ -664,6 +664,15 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "relationships.Maximum relationships per user",
+      section: "User permissions",
+      type: "integer",
+      permissions: ["Server"],
+      description: "Maximum number of friends, ignores, avoids, or blocks a user can have.",
+      default: 300
+    })
+
+    add_site_config_type(%{
       key: "user.Default light mode",
       section: "Interface",
       type: "boolean",

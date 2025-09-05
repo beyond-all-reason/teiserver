@@ -63,16 +63,19 @@ defmodule Teiserver.Account.RelationshipLib do
     })
   end
 
-  @spec ignore_user(T.userid(), T.userid()) :: {:ok, Account.Relationship.t()}
+  @spec ignore_user(T.userid(), T.userid()) ::
+          {:ok, Account.Relationship.t()} | {:error, String.t()}
   def ignore_user(from_user_id, to_user_id)
       when is_integer(from_user_id) and is_integer(to_user_id) do
-    decache_relationships(from_user_id)
+    with :ok <- check_relationship_limit(from_user_id, :ignore) do
+      decache_relationships(from_user_id)
 
-    Account.upsert_relationship(%{
-      from_user_id: from_user_id,
-      to_user_id: to_user_id,
-      ignore: true
-    })
+      Account.upsert_relationship(%{
+        from_user_id: from_user_id,
+        to_user_id: to_user_id,
+        ignore: true
+      })
+    end
   end
 
   @spec unignore_user(T.userid(), T.userid()) :: {:ok, Account.Relationship.t()}
@@ -87,28 +90,34 @@ defmodule Teiserver.Account.RelationshipLib do
     })
   end
 
-  @spec avoid_user(T.userid(), T.userid()) :: {:ok, Account.Relationship.t()}
+  @spec avoid_user(T.userid(), T.userid()) ::
+          {:ok, Account.Relationship.t()} | {:error, String.t()}
   def avoid_user(from_user_id, to_user_id)
       when is_integer(from_user_id) and is_integer(to_user_id) do
-    decache_relationships(from_user_id)
+    with :ok <- check_relationship_limit(from_user_id, :avoid) do
+      decache_relationships(from_user_id)
 
-    Account.upsert_relationship(%{
-      from_user_id: from_user_id,
-      to_user_id: to_user_id,
-      state: "avoid"
-    })
+      Account.upsert_relationship(%{
+        from_user_id: from_user_id,
+        to_user_id: to_user_id,
+        state: "avoid"
+      })
+    end
   end
 
-  @spec block_user(T.userid(), T.userid()) :: {:ok, Account.Relationship.t()}
+  @spec block_user(T.userid(), T.userid()) ::
+          {:ok, Account.Relationship.t()} | {:error, String.t()}
   def block_user(from_user_id, to_user_id)
       when is_integer(from_user_id) and is_integer(to_user_id) do
-    decache_relationships(from_user_id)
+    with :ok <- check_relationship_limit(from_user_id, :block) do
+      decache_relationships(from_user_id)
 
-    Account.upsert_relationship(%{
-      from_user_id: from_user_id,
-      to_user_id: to_user_id,
-      state: "block"
-    })
+      Account.upsert_relationship(%{
+        from_user_id: from_user_id,
+        to_user_id: to_user_id,
+        state: "block"
+      })
+    end
   end
 
   @spec reset_relationship_state(T.userid(), T.userid()) :: {:ok, Account.Relationship.t()}
@@ -152,6 +161,34 @@ defmodule Teiserver.Account.RelationshipLib do
     Teiserver.cache_delete(:account_blocking_this_cache, userid)
 
     :ok
+  end
+
+  @doc """
+  Checks if a user has reached the maximum number of relationships of a given type.
+
+  Returns `:ok` if the user is under the limit, or `{:error, reason}` if they've reached it.
+  The limit is configurable via the admin interface.
+  """
+  @spec check_relationship_limit(T.userid(), :friend | :ignore | :avoid | :block) ::
+          :ok | {:error, String.t()}
+  def check_relationship_limit(user_id, relationship_type) do
+    max_relationships =
+      Config.get_site_config_cache("relationships.Maximum relationships per user")
+
+    current_count =
+      case relationship_type do
+        :friend -> Account.list_friend_ids_of_user(user_id) |> length()
+        :ignore -> list_userids_ignored_by_userid(user_id) |> length()
+        :avoid -> list_userids_avoided_by_userid(user_id) |> length()
+        :block -> list_userids_blocked_by_userid(user_id) |> length()
+      end
+
+    if current_count >= max_relationships do
+      type_name = relationship_type |> to_string() |> Kernel.<>("s")
+      {:error, "Maximum #{max_relationships} #{type_name} reached"}
+    else
+      :ok
+    end
   end
 
   @spec list_userids_followed_by_userid(T.userid()) :: [T.userid()]
