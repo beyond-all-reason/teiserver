@@ -122,12 +122,18 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    Account.ignore_user(current_user.id, user.id)
-
     socket =
-      socket
-      |> put_flash(:success, "You are now ignoring #{user.name}")
-      |> get_relationship()
+      case Account.ignore_user(current_user.id, user.id) do
+        {:ok, _} ->
+          socket
+          |> put_flash(:success, "You are now ignoring #{user.name}")
+          |> get_relationship()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to ignore user: #{reason}")
+          |> get_relationship()
+      end
 
     {:noreply, socket}
   end
@@ -137,12 +143,18 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    Account.avoid_user(current_user.id, user.id)
-
     socket =
-      socket
-      |> put_flash(:success, "You are now avoiding #{user.name}")
-      |> get_relationship()
+      case Account.avoid_user(current_user.id, user.id) do
+        {:ok, _} ->
+          socket
+          |> put_flash(:success, "You are now avoiding #{user.name}")
+          |> get_relationship()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to avoid user: #{reason}")
+          |> get_relationship()
+      end
 
     {:noreply, socket}
   end
@@ -152,12 +164,18 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    Account.block_user(current_user.id, user.id)
-
     socket =
-      socket
-      |> put_flash(:success, "You are now blocking #{user.name}")
-      |> get_relationship()
+      case Account.block_user(current_user.id, user.id) do
+        {:ok, _} ->
+          socket
+          |> put_flash(:success, "You are now blocking #{user.name}")
+          |> get_relationship()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to block user: #{reason}")
+          |> get_relationship()
+      end
 
     {:noreply, socket}
   end
