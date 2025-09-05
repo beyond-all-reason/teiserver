@@ -484,7 +484,15 @@ defmodule Teiserver.Protocols.SpringIn do
         target_userid = Account.get_userid_from_name(username)
 
         if target_userid && state.userid do
-          Account.accept_friend_request(target_userid, state.userid)
+          case Account.accept_friend_request(target_userid, state.userid) do
+            :ok ->
+              :ok
+
+            {:error, reason} ->
+              Logger.warning(
+                "Failed to accept friend request from #{username} for #{state.userid}: #{reason}"
+              )
+          end
         end
 
         state
@@ -500,7 +508,15 @@ defmodule Teiserver.Protocols.SpringIn do
         target_userid = Account.get_userid_from_name(username)
 
         if target_userid && state.userid do
-          Account.decline_friend_request(target_userid, state.userid)
+          case Account.decline_friend_request(target_userid, state.userid) do
+            :ok ->
+              :ok
+
+            {:error, reason} ->
+              Logger.warning(
+                "Failed to decline friend request from #{username} for #{state.userid}: #{reason}"
+              )
+          end
         end
 
         state
@@ -516,10 +532,18 @@ defmodule Teiserver.Protocols.SpringIn do
         target_userid = Account.get_userid_from_name(username)
 
         if target_userid && state.userid do
-          Account.create_friend_request(%{
-            from_user_id: state.userid,
-            to_user_id: target_userid
-          })
+          case Account.create_friend_request(%{
+                 from_user_id: state.userid,
+                 to_user_id: target_userid
+               }) do
+            {:ok, _} ->
+              :ok
+
+            {:error, reason} ->
+              Logger.warning(
+                "Failed to create friend request to #{username} for #{state.userid}: #{reason}"
+              )
+          end
         end
 
         state
@@ -535,7 +559,13 @@ defmodule Teiserver.Protocols.SpringIn do
         target_userid = Account.get_userid_from_name(username)
 
         if target_userid && state.userid do
-          Account.ignore_user(state.userid, target_userid)
+          case Account.ignore_user(state.userid, target_userid) do
+            {:ok, _} ->
+              :ok
+
+            {:error, reason} ->
+              Logger.warning("Failed to ignore user #{username} for #{state.userid}: #{reason}")
+          end
         end
 
       _ ->

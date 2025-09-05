@@ -209,14 +209,20 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   def handle_event("ignore-user", %{"userid" => userid_str}, socket) do
     userid = String.to_integer(userid_str)
 
-    Account.ignore_user(socket.assigns.current_user.id, userid)
-
-    username = Account.get_username_by_id(userid)
-
     socket =
-      socket
-      |> put_flash(:success, "#{username} is now ignored")
-      |> get_avoids()
+      case Account.ignore_user(socket.assigns.current_user.id, userid) do
+        {:ok, _} ->
+          username = Account.get_username_by_id(userid)
+
+          socket
+          |> put_flash(:success, "#{username} is now ignored")
+          |> get_avoids()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to ignore user: #{reason}")
+          |> get_avoids()
+      end
 
     {:noreply, socket}
   end
@@ -239,14 +245,20 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   def handle_event("avoid-user", %{"userid" => userid_str}, socket) do
     userid = String.to_integer(userid_str)
 
-    Account.avoid_user(socket.assigns.current_user.id, userid)
-
-    username = Account.get_username_by_id(userid)
-
     socket =
-      socket
-      |> put_flash(:success, "#{username} is now avoided")
-      |> get_avoids()
+      case Account.avoid_user(socket.assigns.current_user.id, userid) do
+        {:ok, _} ->
+          username = Account.get_username_by_id(userid)
+
+          socket
+          |> put_flash(:success, "#{username} is now avoided")
+          |> get_avoids()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to avoid user: #{reason}")
+          |> get_avoids()
+      end
 
     {:noreply, socket}
   end
@@ -254,14 +266,20 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   def handle_event("block-user", %{"userid" => userid_str}, socket) do
     userid = String.to_integer(userid_str)
 
-    Account.block_user(socket.assigns.current_user.id, userid)
-
-    username = Account.get_username_by_id(userid)
-
     socket =
-      socket
-      |> put_flash(:success, "#{username} is now blocked")
-      |> get_avoids()
+      case Account.block_user(socket.assigns.current_user.id, userid) do
+        {:ok, _} ->
+          username = Account.get_username_by_id(userid)
+
+          socket
+          |> put_flash(:success, "#{username} is now blocked")
+          |> get_avoids()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to block user: #{reason}")
+          |> get_avoids()
+      end
 
     {:noreply, socket}
   end

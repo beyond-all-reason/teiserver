@@ -404,12 +404,19 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         if CacheUser.is_moderator?(user) do
           Coordinator.send_to_user(senderid, "You cannot block moderators.")
         else
-          Account.ignore_user(senderid, user.id)
+          case Account.ignore_user(senderid, user.id) do
+            {:ok, _} ->
+              Coordinator.send_to_user(
+                senderid,
+                "#{user.name} is now ignored, you can unmute them with the $unignore command or via the account section of the server website."
+              )
 
-          Coordinator.send_to_user(
-            senderid,
-            "#{user.name} is now ignored, you can unmute them with the $unignore command or via the account section of the server website."
-          )
+            {:error, reason} ->
+              Coordinator.send_to_user(
+                senderid,
+                "Failed to ignore #{user.name}: #{reason}"
+              )
+          end
         end
     end
 
