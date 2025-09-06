@@ -40,7 +40,12 @@
                     }
                 },
                 "ignoreIds": { "type": "array", "items": { "type": "string" } },
-                "currentBattle": { "$ref": "../definitions/privateBattle.json" }
+                "currentBattle": {
+                    "$ref": "../definitions/privateBattle.json"
+                },
+                "currentLobby": {
+                    "anyOf": [{ "type": "string" }, { "type": "null" }]
+                }
             },
             "required": [
                 "party",
@@ -48,7 +53,8 @@
                 "friendIds",
                 "outgoingFriendRequest",
                 "incomingFriendRequest",
-                "ignoreIds"
+                "ignoreIds",
+                "currentLobby"
             ]
         }
     ]
