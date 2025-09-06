@@ -1538,8 +1538,8 @@ defmodule Teiserver.Player.Session do
       :add_lobby ->
         send_to_player!({:lobby_list, {:add_lobby, ev.lobby_id, ev.overview}}, state)
 
-      :update_lobby ->
-        send_to_player!({:lobby_list, {:update_lobby, ev.lobby_id, ev.changes}}, state)
+      :update_lobbies ->
+        send_to_player!({:lobby_list, {:update_lobbies, ev.changes}}, state)
 
       :remove_lobby ->
         send_to_player!({:lobby_list, {:remove_lobby, ev.lobby_id}}, state)
