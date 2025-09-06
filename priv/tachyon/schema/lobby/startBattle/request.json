@@ -11,13 +11,7 @@
     "properties": {
         "type": { "const": "request" },
         "messageId": { "type": "string" },
-        "commandId": { "const": "lobby/startBattle" },
-        "data": {
-            "title": "LobbyStartBattleRequestData",
-            "type": "object",
-            "properties": { "id": { "type": "string" } },
-            "required": ["id"]
-        }
+        "commandId": { "const": "lobby/startBattle" }
     },
-    "required": ["type", "messageId", "commandId", "data"]
+    "required": ["type", "messageId", "commandId"]
 }

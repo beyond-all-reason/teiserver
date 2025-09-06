@@ -117,27 +117,11 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       :setup_lobby
     ]
 
-    test "must be in lobby", ctx do
+    test "must be in lobby" do
       {:ok, ctx2} = Tachyon.setup_client()
 
       %{"status" => "failed", "reason" => "invalid_request"} =
-        Tachyon.start_lobby_battle!(ctx2[:client], ctx[:lobby_id])
-    end
-
-    test "must be in correct lobby", ctx do
-      {:ok, ctx2} = Tachyon.setup_client()
-
-      lobby_data = %{
-        name: "test lobby",
-        map_name: "test-map",
-        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
-      }
-
-      %{"status" => "success", "data" => %{"id" => other_lobby_id}} =
-        Tachyon.create_lobby!(ctx2[:client], lobby_data)
-
-      %{"status" => "failed", "reason" => "invalid_request"} =
-        Tachyon.start_lobby_battle!(ctx[:client], other_lobby_id)
+        Tachyon.start_lobby_battle!(ctx2[:client])
     end
 
     test "can start battle", ctx do

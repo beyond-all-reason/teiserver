@@ -668,8 +668,8 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command("lobby/startBattle", "request", _msg_id, msg, state) do
-    case Player.Session.start_lobby_battle(state.user.id, msg["data"]["id"]) do
+  def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
+    case Player.Session.start_lobby_battle(state.user.id) do
       :ok ->
         {:response, state}
 
