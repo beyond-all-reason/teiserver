@@ -6,6 +6,7 @@ defmodule Teiserver.Monitoring.Tachyon do
   use PromEx.Plugin
 
   @tachyon_player_metrics_event_name [:prom_ex, :plugin, :tachyon, :player]
+  @tachyon_party_metrics_event_name [:prom_ex, :plugin, :tachyon, :party]
 
   @impl true
   def polling_metrics(opts) do
@@ -25,7 +26,13 @@ defmodule Teiserver.Monitoring.Tachyon do
         last_value(
           [:teiserver, :tachyon, :player, :count],
           event_name: @tachyon_player_metrics_event_name,
-          description: "how many players are connected?",
+          description: "how many players are connected",
+          measurement: :count
+        ),
+        last_value(
+          [:teiserver, :tachyon, :party, :count],
+          event_name: @tachyon_party_metrics_event_name,
+          description: "how many parties",
           measurement: :count
         )
       ]
@@ -34,8 +41,10 @@ defmodule Teiserver.Monitoring.Tachyon do
 
   @doc false
   def execute_tachyon_player_metrics() do
-    count = Teiserver.Player.connected_count()
+    player_count = Teiserver.Player.connected_count()
+    :telemetry.execute(@tachyon_player_metrics_event_name, %{count: player_count}, %{})
 
-    :telemetry.execute(@tachyon_player_metrics_event_name, %{count: count}, %{})
+    party_count = Teiserver.Party.count()
+    :telemetry.execute(@tachyon_party_metrics_event_name, %{count: party_count}, %{})
   end
 end
