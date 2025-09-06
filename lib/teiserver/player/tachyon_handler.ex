@@ -954,16 +954,28 @@ defmodule Teiserver.Player.TachyonHandler do
       {:max_player_count, :maxPlayerCount},
       {:map_name, :mapName},
       {:engine_version, :engineVersion},
-      {:game_version, :gameVersion}
+      {:game_version, :gameVersion},
+      {:current_battle, :currentBattle, &lobby_current_battle_to_tachyon/1}
     ]
 
     init = %{id: lobby_id, currentBattle: nil}
 
-    Enum.reduce(keys, init, fn {k, tachyon_k}, m ->
-      case Map.get(overview, k) do
-        nil -> m
-        val -> Map.put(m, tachyon_k, val)
-      end
+    Enum.reduce(keys, init, fn
+      {k, tachyon_k}, m ->
+        case Map.get(overview, k) do
+          nil -> m
+          val -> Map.put(m, tachyon_k, val)
+        end
+
+      {k, tachyon_k, f}, m ->
+        case Map.get(overview, k) do
+          nil -> m
+          val -> Map.put(m, tachyon_k, f.(val))
+        end
     end)
+  end
+
+  defp lobby_current_battle_to_tachyon(battle) do
+    %{startedAt: DateTime.to_unix(battle.started_at, :microsecond)}
   end
 end

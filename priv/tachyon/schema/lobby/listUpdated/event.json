@@ -72,7 +72,23 @@
                                             "engineVersion": {
                                                 "type": "string"
                                             },
-                                            "gameVersion": { "type": "string" }
+                                            "gameVersion": { "type": "string" },
+                                            "currentBattle": {
+                                                "anyOf": [
+                                                    {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "startedAt": {
+                                                                "$ref": "../../definitions/unixTime.json"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "startedAt"
+                                                        ]
+                                                    },
+                                                    { "type": "null" }
+                                                ]
+                                            }
                                         },
                                         "required": ["id"]
                                     }

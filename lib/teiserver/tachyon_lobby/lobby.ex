@@ -196,7 +196,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
         ),
       map_name: state.map_name,
       engine_version: state.engine_version,
-      game_version: state.game_version
+      game_version: state.game_version,
+      current_battle: nil
     })
 
     {:ok, state}
@@ -268,7 +269,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
       for {p_id, p} <- state.players,
           do: Player.lobby_battle_start(p_id, battle_data, start_data, p.password)
 
-      state = %{state | current_battle: %{id: battle_id, started_at: DateTime.utc_now()}}
+      now = DateTime.utc_now()
+      state = %{state | current_battle: %{id: battle_id, started_at: now}}
+      TachyonLobby.List.update_lobby(state.id, %{current_battle: %{started_at: now}})
 
       {:reply, :ok, state}
     else

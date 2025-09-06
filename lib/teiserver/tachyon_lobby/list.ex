@@ -26,7 +26,8 @@ defmodule Teiserver.TachyonLobby.List do
           max_player_count: non_neg_integer(),
           map_name: String.t(),
           engine_version: String.t(),
-          game_version: String.t()
+          game_version: String.t(),
+          current_battle: nil | %{started_at: DateTime.t()}
         }
 
   @typep state :: %{
