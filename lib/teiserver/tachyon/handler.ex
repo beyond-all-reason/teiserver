@@ -21,6 +21,7 @@ defmodule Teiserver.Tachyon.Handler do
           {:event, Schema.command_id(), payload :: term(), state :: term()}
           | {:response, state :: term()}
           | {:response, payload :: term(), state :: term()}
+          | {:response, {resp :: term(), events: [term()]}, state :: term()}
           | {:error_response, reason :: String.t() | atom(), state :: term()}
           | {:error_response, reason :: String.t() | atom(), details :: String.t(),
              state :: term()}

@@ -265,6 +265,11 @@ defmodule Teiserver.Tachyon.Transport do
         message = Schema.response(command_id, message_id)
         {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
 
+      {:response, {resp_payload, events}, state} ->
+        resp = {:text, Schema.response(command_id, message_id, resp_payload) |> Jason.encode!()}
+        messages = Enum.map(events, fn ev -> {:text, ev |> Jason.encode!()} end)
+        {:push, [resp | messages], %{conn_state | handler_state: state}}
+
       {:response, payload, state} ->
         message = Schema.response(command_id, message_id, payload)
         {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
