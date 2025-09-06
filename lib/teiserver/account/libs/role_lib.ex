@@ -165,6 +165,13 @@ defmodule Teiserver.Account.RoleLib do
       contains: ~w(Overwatch)
     },
     %{
+      name: "Event Organizer",
+      colour: "#00AA88",
+      icon: "fa-solid fa-bullhorn",
+      contains: ~w(),
+      badge: true
+    },
+    %{
       name: "Moderator",
       colour: "#FFAA00",
       icon: "fa-solid fa-gavel",
@@ -258,7 +265,14 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec community_roles :: [String.t()]
   def community_roles() do
-    ["Mentor", "Academy manager", "Promo team", "Community team", "Blog helper"]
+    [
+      "Mentor",
+      "Academy manager",
+      "Promo team",
+      "Community team",
+      "Blog helper",
+      "Event Organizer"
+    ]
   end
 
   @spec privileged_roles :: [String.t()]
