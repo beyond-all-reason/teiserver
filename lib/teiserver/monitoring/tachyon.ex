@@ -9,6 +9,24 @@ defmodule Teiserver.Monitoring.Tachyon do
   @tachyon_party_metrics_event_name [:prom_ex, :plugin, :tachyon, :party]
 
   @impl true
+  def event_metrics(_opts) do
+    Event.build(
+      :teiserver_tachyon_event_metrics,
+      [
+        # Telemetry.Metrics.summary(
+        distribution(
+          [:teiserver, :tachyon, :request, :duration],
+          event_name: [:tachyon, :request],
+          measurement: :duration,
+          reporter_options: [
+            buckets: [1, 10, 50, 100, 150, 250, 500, 1_000]
+          ]
+        )
+      ]
+    )
+  end
+
+  @impl true
   def polling_metrics(opts) do
     poll_rate = Keyword.get(opts, :poll_rate, 5_000)
 
