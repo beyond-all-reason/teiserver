@@ -883,7 +883,9 @@ defmodule Teiserver.Player.TachyonHandler do
          %{
            id: to_string(p_id),
            type: p.type,
-           team: [x, y, z]
+           allyTeam: to_string(x),
+           team: to_string(y),
+           player: to_string(z)
          }}
       end)
       |> Enum.into(%{})
@@ -926,7 +928,9 @@ defmodule Teiserver.Player.TachyonHandler do
         to_string(ev.id) => %{
           type: :player,
           id: to_string(ev.id),
-          team: [x, y, z]
+          allyTeam: to_string(x),
+          team: to_string(y),
+          player: to_string(z)
         }
       }
     }
