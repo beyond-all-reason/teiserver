@@ -289,16 +289,11 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command("matchmaking/cancel" = cmd_id, "request", message_id, _message, state) do
+  def handle_command("matchmaking/cancel", "request", _message_id, _message, state) do
     case Player.Session.leave_queues(state.user.id) do
       :ok ->
-        messages = [
-          {:text, Schema.response(cmd_id, message_id) |> Jason.encode!()},
-          {:text,
-           Schema.event("matchmaking/cancelled", %{reason: :intentional}) |> Jason.encode!()}
-        ]
-
-        {:push, messages, state}
+        {:response, {nil, [Schema.event("matchmaking/cancelled", %{reason: :intentional})]},
+         state}
 
       {:error, reason} ->
         {:error_response, reason, state}
@@ -340,21 +335,20 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command("messaging/subscribeReceived" = cmd_id, "request", message_id, msg, state) do
+  def handle_command("messaging/subscribeReceived", "request", _message_id, msg, state) do
     since = parse_since(msg["data"]["since"])
 
     {:ok, has_missed_messages, msg_to_send} =
       Player.Session.subscribe_received(state.user.id, since)
 
-    response = Schema.response(cmd_id, message_id, %{hasMissedMessages: has_missed_messages})
+    response = %{hasMissedMessages: has_missed_messages}
 
     msg_to_send =
       Enum.map(msg_to_send, fn msg ->
         Schema.event("messaging/received", message_to_tachyon(msg))
       end)
 
-    messages = [response | msg_to_send] |> Enum.map(fn data -> {:text, Jason.encode!(data)} end)
-    {:push, messages, state}
+    {:response, {response, msg_to_send}, state}
   end
 
   def handle_command("user/info", "request", _message_id, msg, state) do
@@ -680,11 +674,9 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command("lobby/subscribeList" = cmd_id, "request", msg_id, _msg, state) do
+  def handle_command("lobby/subscribeList", "request", _msg_id, _msg, state) do
     case Player.Session.subscribe_lobby_list(state.user.id) do
       {:ok, list} ->
-        resp = Schema.response(cmd_id, msg_id)
-
         ev =
           Schema.event("lobby/listReset", %{
             lobbies:
@@ -694,8 +686,7 @@ defmodule Teiserver.Player.TachyonHandler do
               |> Enum.into(%{})
           })
 
-        messages = [resp, ev] |> Enum.map(fn data -> {:text, Jason.encode!(data)} end)
-        {:push, messages, state}
+        {:response, {nil, [ev]}, state}
     end
   end
 
