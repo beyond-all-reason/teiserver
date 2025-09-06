@@ -650,6 +650,9 @@ defmodule Teiserver.Player.TachyonHandler do
         data = lobby_details_to_tachyon(details)
         {:response, data, state}
 
+      {:error, :lobby_full} ->
+        {:error_response, :lobby_full, state}
+
       {:error, reason} ->
         {:error_response, :invalid_request, to_string(reason), state}
     end

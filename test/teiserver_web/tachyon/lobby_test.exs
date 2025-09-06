@@ -68,6 +68,15 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         Tachyon.join_lobby!(ctx2[:client], lobby_id)
     end
 
+    test "lobby full", %{lobby_id: lobby_id} do
+      {:ok, ctx2} = Tachyon.setup_client()
+      {:ok, ctx3} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+
+      %{"status" => "failed", "reason" => "lobby_full"} =
+        Tachyon.join_lobby!(ctx3[:client], lobby_id)
+    end
+
     test "members get updated events on join", %{client: client, lobby_id: lobby_id} do
       {:ok, ctx2} = Tachyon.setup_client()
       %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
