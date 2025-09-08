@@ -1094,6 +1094,15 @@ defmodule Teiserver.CacheUser do
   def is_moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
   def is_moderator?(_), do: false
 
+  @spec is_event_organizer?(T.userid() | T.user()) :: boolean()
+  def is_event_organizer?(nil), do: false
+
+  def is_event_organizer?(userid) when is_integer(userid),
+    do: is_event_organizer?(get_user_by_id(userid))
+
+  def is_event_organizer?(%{roles: roles}), do: Enum.member?(roles, "Event Organizer")
+  def is_event_organizer?(_), do: false
+
   @spec is_contributor?(T.userid() | T.user()) :: boolean()
   def is_contributor?(nil), do: false
   def is_contributor?(userid) when is_integer(userid), do: is_contributor?(get_user_by_id(userid))
