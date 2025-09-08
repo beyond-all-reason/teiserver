@@ -244,6 +244,15 @@ defmodule Teiserver.Battle.MatchLib do
       preload: [members: members]
   end
 
+  def _search(query, :username, username) do
+    from matches in query,
+      join: members in assoc(matches, :members),
+      join: users in assoc(members, :user),
+      where: ilike(users.name, ^"%#{username}%"),
+      distinct: true,
+      preload: [members: members]
+  end
+
   def _search(query, :user_id_in, user_ids) do
     from matches in query,
       join: members in assoc(matches, :members),

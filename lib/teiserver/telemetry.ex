@@ -939,6 +939,12 @@ defmodule Teiserver.Telemetry do
     |> Repo.all()
   end
 
+  @spec count_infologs(List.t()) :: non_neg_integer()
+  def count_infologs(args \\ []) do
+    infolog_query(args)
+    |> Repo.aggregate(:count, :id)
+  end
+
   @spec get_infolog(Integer.t(), List.t()) :: List.t()
   def get_infolog(id, args \\ []) do
     infolog_query(id, args)

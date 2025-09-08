@@ -21,16 +21,32 @@ defmodule TeiserverWeb.Moderation.BanController do
   plug :add_breadcrumb, name: "Bans", url: "/teiserver/bans"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def index(conn, _params) do
+  def index(conn, params) do
+    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
+    limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
+
+    search_args = extract_search_params(params)
+
+    total_count = Moderation.count_bans(search: search_args)
+    total_pages = div(total_count - 1, limit) + 1
+
     bans =
       Moderation.list_bans(
-        search: [],
+        search: search_args,
         preload: [:adder, :source],
-        order_by: "Newest first"
+        order_by: params["order"] || "Newest first",
+        limit: limit,
+        offset: page * limit
       )
 
     conn
     |> assign(:bans, bans)
+    |> assign(:page, page)
+    |> assign(:limit, limit)
+    |> assign(:total_pages, total_pages)
+    |> assign(:total_count, total_count)
+    |> assign(:current_count, Enum.count(bans))
+    |> assign(:params, Map.put(params, "limit", limit))
     |> render("index.html")
   end
 
@@ -347,5 +363,18 @@ defmodule TeiserverWeb.Moderation.BanController do
         |> put_flash(:info, "Ban disabled.")
         |> redirect(to: Routes.moderation_ban_path(conn, :index))
     end
+  end
+
+  defp extract_search_params(params) do
+    search_params = []
+
+    search_params =
+      if params["name"] && params["name"] != "" do
+        [name: params["name"]] ++ search_params
+      else
+        search_params
+      end
+
+    search_params
   end
 end

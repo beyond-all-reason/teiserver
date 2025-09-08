@@ -82,6 +82,21 @@
             <% end %>
           </tbody>
         </table>
+
+        <div class="mt-3">
+          <.pagination
+            page={@page}
+            total_pages={@total_pages}
+            base_url="/teiserver/admin/matches"
+            limit={@limit}
+            total_count={@total_count}
+            current_count={@current_count}
+            show_go_to={@total_pages > 5}
+            class="mt-3"
+            include_params={["account_user", "queue", "game_type", "search", "limit"]}
+            current_params={@params}
+          />
+        </div>
       </div>
     </div>
   </div>

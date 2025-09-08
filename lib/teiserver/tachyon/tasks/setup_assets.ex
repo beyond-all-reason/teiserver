@@ -1,6 +1,6 @@
 defmodule Teiserver.Tachyon.Tasks.SetupAssets do
   @moduledoc """
-  Seed the database with game and engine version so that matchmaking
+  Seed the database with game, engine, and map assets so that matchmaking
   works out of the box.
   Does nothing if there are already assets setup.
   """
@@ -70,5 +70,35 @@ defmodule Teiserver.Tachyon.Tasks.SetupAssets do
       game ->
         {:ok, {:noop, game}}
     end
+  end
+
+  def ensure_maps do
+    maps_data = load_maps_from_json()
+
+    case Asset.update_maps(maps_data) do
+      {:ok, stats} -> {:ok, {:updated, stats}}
+      {:error, reason} -> {:error, {:update, reason, nil}}
+    end
+  end
+
+  defp load_maps_from_json do
+    json_path = Path.join([Application.app_dir(:teiserver), "priv", "data", "maps.json"])
+    content = File.read!(json_path)
+    %{"maps" => maps} = Jason.decode!(content)
+
+    maps
+    |> Enum.map(&transform_map_data/1)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  defp transform_map_data(map_json) do
+    %{
+      "spring_name" => map_json["springName"],
+      "display_name" => map_json["displayName"],
+      "matchmaking_queues" => map_json["matchmakingQueues"] || [],
+      "thumbnail_url" => map_json["thumbnail"],
+      "startboxes_set" => map_json["startboxesSet"] || [],
+      "modoptions" => map_json["modoptions"] || %{}
+    }
   end
 end

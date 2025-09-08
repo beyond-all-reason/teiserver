@@ -11,6 +11,15 @@
       url: Routes.moderation_ban_path(@conn, :index)
     )}
 
+    {central_component("section_menu_button",
+      name: "search",
+      label: "Search",
+      active: @active,
+      icon: StylingHelper.icon(:search),
+      bsname: bsname,
+      url: Routes.moderation_ban_path(@conn, :index) <> "?search=true"
+    )}
+
     <%= if allow?(@conn, "Moderator") do %>
       {central_component("section_menu_button",
         name: "new",

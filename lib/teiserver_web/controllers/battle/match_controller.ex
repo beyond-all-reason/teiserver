@@ -92,6 +92,9 @@ defmodule TeiserverWeb.Battle.MatchController do
     filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter] || 1
     season = MatchRatingLib.active_season()
 
+    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
+    limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
+
     ratings =
       Account.list_ratings(
         search: [
@@ -104,6 +107,15 @@ defmodule TeiserverWeb.Battle.MatchController do
         {rating.rating_type.name, rating}
       end)
 
+    total_count =
+      Game.count_rating_logs(
+        search: [
+          user_id: user.id,
+          rating_type_id: filter_type_id,
+          season: season
+        ]
+      )
+
     logs =
       Game.list_rating_logs(
         search: [
@@ -112,9 +124,13 @@ defmodule TeiserverWeb.Battle.MatchController do
           season: season
         ],
         order_by: "Newest first",
-        limit: 50,
+        limit: limit,
+        offset: page * limit,
         preload: [:match, :match_membership]
       )
+
+    total_pages = max(1, div(total_count - 1, limit) + 1)
+    current_count = Enum.count(logs)
 
     games = Enum.count(logs) |> max(1)
     wins = Enum.count(logs, fn l -> l.match_membership.win end)
@@ -139,6 +155,12 @@ defmodule TeiserverWeb.Battle.MatchController do
     |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
     |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
     |> assign(:stats, stats)
+    |> assign(:page, page)
+    |> assign(:limit, limit)
+    |> assign(:total_pages, total_pages)
+    |> assign(:total_count, total_count)
+    |> assign(:current_count, current_count)
+    |> assign(:params, params)
     |> add_breadcrumb(name: "Ratings: #{user.name}", url: conn.request_path)
     |> render("ratings.html")
   end

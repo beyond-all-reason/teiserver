@@ -16,6 +16,22 @@ defmodule Teiserver.Account.UserQueries do
     |> do_order_by(args[:order_by])
     |> query_select(args[:select])
     |> limit_query(args[:limit] || 50)
+    |> offset_query(args[:offset])
+  end
+
+  @spec count_users(list) :: Ecto.Query.t()
+  def count_users(args) do
+    query = from(users in User)
+
+    query
+    |> do_where(id: args[:id])
+    |> do_where(args[:where])
+    |> do_where(args[:search])
+    |> do_preload(args[:preload])
+    |> do_order_by(args[:order_by])
+    |> query_select(args[:select])
+
+    # No limit or offset for counting
   end
 
   @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()

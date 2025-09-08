@@ -20,19 +20,17 @@
   </div>
 
   <form
-    action={~p"/telemetry/infolog/search"}
-    method="post"
+    action={~p"/telemetry/infolog"}
+    method="get"
     class="form-horizontal"
     id="search-box"
     style="display: none;"
   >
-    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-
     <div class="row">
       <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_order" class="control-label">Type: </label>
         {central_component("icon_dropdown", %{
-          name: "search[type]",
+          name: "type",
           id: "search_type",
           selected: @params["type"] || "Any",
           enumerable: [
@@ -51,7 +49,7 @@
       <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_order" class="control-label">Order by: </label>
         {central_component("icon_dropdown", %{
-          name: "search[order]",
+          name: "order",
           id: "search_order",
           selected: @params["order"] || "Newest first",
           enumerable: [
@@ -67,7 +65,7 @@
         <label for="search_engine" class="control-label">Engine: </label>
         <input
           type="text"
-          name="search[engine]"
+          name="engine"
           id="search_engine"
           value={@params["engine"]}
           placeholder=""
@@ -79,7 +77,7 @@
         <label for="search_game" class="control-label">Game: </label>
         <input
           type="text"
-          name="search[game]"
+          name="game"
           id="search_game"
           value={@params["game"]}
           placeholder=""
@@ -91,7 +89,7 @@
         <label for="search_shorterror" class="control-label">Errorcode: </label>
         <input
           type="text"
-          name="search[shorterror]"
+          name="shorterror"
           id="search_shorterror"
           value={@params["shorterror"]}
           placeholder=""
@@ -103,12 +101,7 @@
     <div class="row">
       <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
         &nbsp;<br />
-        <input
-          type="submit"
-          value="Search"
-          name="form.submitted"
-          class={"btn btn-#{bsname} btn-block"}
-        />
+        <input type="submit" value="Search" class={"btn btn-#{bsname} btn-block"} />
       </div>
     </div>
   </form>

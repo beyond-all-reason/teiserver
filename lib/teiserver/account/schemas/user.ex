@@ -111,44 +111,6 @@ defmodule Teiserver.Account.User do
     |> put_md5_password_hash()
   end
 
-  def changeset(user, attrs, :script_create) do
-    # this is a bit of a hack to allow this changeset to be called from
-    # both code (with atoms) and from admin API (with strings)
-    attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
-
-    data =
-      default_data()
-      |> Map.new(fn {k, v} -> {to_string(k), v} end)
-      |> Map.merge(Map.get(attrs, "data", %{}))
-
-    attrs =
-      Map.merge(
-        %{
-          "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
-          "colour" => Teiserver.Helper.StylingHelper.random_colour()
-        },
-        attrs
-      )
-      |> Map.put("data", data)
-      |> remove_whitespace([:email])
-      |> uniq_lists(~w(permissions roles)a)
-
-    user
-    |> cast(
-      attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
-    )
-    |> validate_required([:name, :email, :password, :permissions])
-    |> unique_constraint(:email)
-    |> validate_change(:email, fn :email, email ->
-      case Teiserver.CacheUser.valid_email?(email) do
-        :ok -> []
-        {:error, reason} -> [{:email, reason}]
-      end
-    end)
-    |> put_md5_password_hash()
-  end
-
   def changeset(struct, params, nil), do: changeset(struct, params)
 
   def changeset(struct, permissions, :permissions) do
@@ -247,6 +209,51 @@ defmodule Teiserver.Account.User do
     |> validate_password()
     |> validate_confirmation(:password, message: "Passwords do not match")
     |> put_plain_password_hash()
+  end
+
+  def changeset(user, attrs, :script_create, password_type) do
+    # this is a bit of a hack to allow this changeset to be called from
+    # both code (with atoms) and from admin API (with strings)
+    attrs = Map.new(attrs, fn {k, v} -> {to_string(k), v} end)
+
+    data =
+      default_data()
+      |> Map.new(fn {k, v} -> {to_string(k), v} end)
+      |> Map.merge(Map.get(attrs, "data", %{}))
+
+    attrs =
+      Map.merge(
+        %{
+          "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
+          "colour" => Teiserver.Helper.StylingHelper.random_colour()
+        },
+        attrs
+      )
+      |> Map.put("data", data)
+      |> remove_whitespace([:email])
+      |> uniq_lists(~w(permissions roles)a)
+
+    user
+    |> cast(
+      attrs,
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
+    )
+    |> validate_required([:name, :email, :password, :permissions])
+    |> unique_constraint(:email)
+    |> validate_change(:email, fn :email, email ->
+      case Teiserver.CacheUser.valid_email?(email) do
+        :ok -> []
+        {:error, reason} -> [{:email, reason}]
+      end
+    end)
+    |> then(fn changeset ->
+      case password_type do
+        :plain_password -> put_plain_password_hash(changeset)
+        :md5_password -> put_md5_password_hash(changeset)
+        # Used when registering bots, the bot owner's password hash is passed and should be stored directly
+        :hash -> changeset
+      end
+    end)
   end
 
   def changeset(user, attrs, :register, password_type) do

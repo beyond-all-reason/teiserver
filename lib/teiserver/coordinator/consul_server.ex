@@ -1013,7 +1013,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         true
 
       # Allow all except Admin only commands for moderators
-      client.moderator and not Enum.member?(@admin_commands, cmd.command) ->
+      CacheUser.is_moderator?(user) and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       Enum.member?(@host_commands, cmd.command) and is_host ->
