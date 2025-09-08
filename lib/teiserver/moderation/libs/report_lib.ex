@@ -187,7 +187,6 @@ defmodule Teiserver.Moderation.ReportLib do
       where: reports.closed or not is_nil(reports.result_id)
   end
 
-
   def _search(query, :has_discord_message_id, true) do
     from reports in query,
       where: not is_nil(reports.discord_message_id)
@@ -211,7 +210,6 @@ defmodule Teiserver.Moderation.ReportLib do
   def _search(query, :type, "actions") do
     from reports in query,
       where: reports.type == "actions"
-
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
