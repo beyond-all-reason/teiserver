@@ -44,7 +44,10 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       user2 = Tachyon.create_user()
 
       assert %{"status" => "failed", "reason" => "invalid_request"} =
+               resp =
                Tachyon.invite_to_party!(ctx.client, user2.id)
+
+      assert resp["details"] =~ "User with id"
     end
 
     test "must be in party", ctx do

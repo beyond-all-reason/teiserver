@@ -560,7 +560,7 @@ defmodule Teiserver.Player.TachyonHandler do
     else
       {:error, reason} when reason in [:invalid_player, :invalid_user] ->
         {:error_response, :invalid_request,
-         "User with id #{raw_user_id} isn't valid or connected"}
+         "User with id #{raw_user_id} isn't valid or connected", state}
 
       {:error, reason} ->
         {:error_response, :invalid_request, inspect(reason), state}
