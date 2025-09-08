@@ -7,10 +7,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   alias Teiserver.{Room, Moderation, Communication}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands, CommandLib}
   alias Teiserver.{Config}
-  alias Teiserver.Repo
   alias Nostrum.Api
   require Logger
-  import Ecto.Query
 
   @emoticon_map %{
     "🙂" => ":)",
@@ -334,11 +332,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         if is_nil(report.match_id) do
           []
         else
-          from(r in Moderation.Report,
-            where: r.match_id == ^report.match_id and r.type == ^report.type,
-            order_by: [asc: r.inserted_at]
+          Moderation.list_reports(
+            search: [match_id: report.match_id, type: report.type],
+            odered_by: "Oldest first"
           )
-          |> Repo.all()
         end
 
       msg =

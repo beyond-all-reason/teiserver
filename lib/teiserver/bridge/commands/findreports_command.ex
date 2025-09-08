@@ -50,7 +50,7 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
             else
               reports =
                 Moderation.list_reports(
-                  search: [result_id: action.id],
+                  search: [result_id: action.id, has_discord_message_id: true],
                   order_by: "Newest first"
                 )
 
