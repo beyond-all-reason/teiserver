@@ -134,6 +134,11 @@ defmodule Teiserver.Moderation.ActionLib do
       where: actions.inserted_at < ^datetime
   end
 
+  def _search(query, :discord_message_id, discord_message_id) do
+    from actions in query,
+      where: actions.discord_message_id == ^discord_message_id
+  end
+
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 

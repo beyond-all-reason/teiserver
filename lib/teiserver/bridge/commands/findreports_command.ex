@@ -2,14 +2,11 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
   @moduledoc """
   Calls the bot to link all connected reports discord messages
   """
-  alias Teiserver.Bridge.{BridgeServer}
-  alias Teiserver.{Communication, Room, Logging, Config}
+  alias Teiserver.{Communication, Config}
   alias Teiserver.Moderation
-  import Ecto.Query
-  alias Teiserver.Repo
-  alias Teiserver.Moderation.Action
 
   @behaviour Teiserver.Bridge.BridgeCommandBehaviour
+  @ephemeral 64
 
   @impl true
   @spec name() :: String.t()
@@ -46,23 +43,19 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
         case Integer.parse(message_id_str) do
           {message_id, ""} ->
             action =
-              from(a in Moderation.Action,
-                where: a.discord_message_id == ^message_id
-              )
-              |> Repo.one()
+              Moderation.get_action(search: [discord_message_id: message_id])
 
             if action == nil do
-              "Please provide a valid message id"
+              "Unable to find an action with the provided message ID"
             else
               reports =
-                from(r in Moderation.Report,
-                  where: r.result_id == ^action.id
+                Moderation.list_reports(
+                  search: [result_id: action.id],
+                  order_by: "Newest first"
                 )
-                |> Repo.all()
 
               report_links =
                 reports
-                |> Enum.filter(&(&1.discord_message_id != nil))
                 |> Enum.map(fn report ->
                   channel =
                     case report.type do
@@ -108,6 +101,6 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
         end
       end
 
-    Communication.new_interaction_response(content, 64)
+    Communication.new_interaction_response(content, @ephemeral)
   end
 end
