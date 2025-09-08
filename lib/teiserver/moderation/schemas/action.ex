@@ -16,6 +16,7 @@ defmodule Teiserver.Moderation.Action do
 
     field :discord_message_id, :integer
 
+    # No longer set nowadays
     belongs_to :report_group, Teiserver.Moderation.ReportGroup
 
     timestamps()

@@ -7,10 +7,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   alias Teiserver.{Room, Moderation, Communication}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands, CommandLib}
   alias Teiserver.{Config}
-  alias Teiserver.Repo
   alias Nostrum.Api
   require Logger
-  import Ecto.Query
 
   @emoticon_map %{
     "🙂" => ":)",
@@ -150,6 +148,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
     BridgeServer.cast_bridge(:READY)
     add_command(:textcb)
+    add_command(:findreport)
     :ignore
   end
 
@@ -162,6 +161,27 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     # IO.puts ""
 
     :noop
+  end
+
+  # Teiserver.Bridge.DiscordBridgeBot.add_command(:findreport)
+  @spec add_command(atom) :: any
+  def add_command(:findreport) do
+    command = %{
+      name: "findreports",
+      description: "Find reports by the action message id",
+      options: [
+        %{
+          # type3 = String
+          type: 3,
+          name: "message_id",
+          description: "Message ID of the actions discord message",
+          required: true
+        }
+      ],
+      nsfw: false
+    }
+
+    Api.ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
   end
 
   # Teiserver.Bridge.DiscordBridgeBot.add_command(:textcb)
@@ -196,7 +216,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       nsfw: false
     }
 
-    Api.ApplicationCommand.create_global_command(command)
+    Api.ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
   end
 
   # Meant to be used manually
@@ -312,10 +332,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         if is_nil(report.match_id) do
           []
         else
-          from(r in Moderation.Report,
-            where: r.match_id == ^report.match_id and r.type == ^report.type
+          Moderation.list_reports(
+            search: [match_id: report.match_id, type: report.type],
+            odered_by: "Oldest first"
           )
-          |> Repo.all()
         end
 
       msg =
