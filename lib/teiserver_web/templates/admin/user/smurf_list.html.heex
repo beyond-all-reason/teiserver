@@ -106,175 +106,178 @@ is_moderator = allow?(@conn, "Moderator") %>
 
         <div class="row">
           <div class="col-md-12">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th colspan="3">Name/Domain</th>
-                  <th>Client</th>
-                  <th>Status</th>
-
-                  <th>Winrate</th>
-                  <th>Recents</th>
-                  <th>Play time</th>
-                  <th>games allied</th>
-                  <th>games vs</th>
-
-                  <%= for type <- @key_types do %>
-                    <th>{short_name[type] || type}</th>
-                  <% end %>
-
-                  <th>Last login</th>
-                  <th>Registered</th>
-
-                  <%= if is_moderator do %>
-                    <th colspan="3">&nbsp;</th>
-                  <% else %>
-                    <th>&nbsp;</th>
-                  <% end %>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="selected-user-row">
-                  <td style={"background-color: #{@user.colour}; color: #FFF;"} width="22">
-                    {central_component("icon", icon: @user.icon)}
-                  </td>
-                  <td>{@user.name}</td>
-                  <td>{@user.email}</td>
-                  <td>{@user.data["lobby_client"]}</td>
-
-                  <td>
-                    <TeiserverWeb.UserComponents.status_icon user={@user} />
-                  </td>
-
-                  <td>{@stats["win_rate.team"]}</td>
-                  <td>{@stats["recent_count.team"]}</td>
-                  <% hours = ((@stats["player_minutes"] || 0) / 60) |> round %>
-                  <td>
-                    {"#{hours}h"}
-                  </td>
-
-                  <%= for _type <- @key_types do %>
-                    <td>
-                      -
-                    </td>
-                  <% end %>
-
-                  <td>
-                    {date_to_str(@user.last_login,
-                      format: :hms_or_ymd,
-                      tz: @tz
-                    )}
-                  </td>
-
-                  <td>
-                    {date_to_str(@user.inserted_at, format: :hms_or_ymd)}
-                  </td>
-
-                  <td>
-                    <a
-                      href={~p"/teiserver/admin/user/#{@user.id}"}
-                      class="btn btn-secondary btn-sm"
-                    >
-                      Show
-                    </a>
-                  </td>
-                </tr>
-
-                <tr class="under-selected-user-row">
-                  <td colspan="18" style="height: 5px;"></td>
-                </tr>
-
-                <%= for user <- @users do %>
-                  <% user_stats = @stats_map[user.id] %>
-
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
                   <tr>
-                    <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-                      {central_component("icon", icon: user.icon)}
+                    <th colspan="3">Name/Domain</th>
+                    <th>Client</th>
+                    <th>Status</th>
+
+                    <th>Winrate</th>
+                    <th>Recents</th>
+                    <th>Play time</th>
+                    <th>games allied</th>
+                    <th>games vs</th>
+
+                    <%= for type <- @key_types do %>
+                      <th>{short_name[type] || type}</th>
+                    <% end %>
+
+                    <th>Last login</th>
+                    <th>Registered</th>
+
+                    <%= if is_moderator do %>
+                      <th colspan="3">&nbsp;</th>
+                    <% else %>
+                      <th>&nbsp;</th>
+                    <% end %>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="selected-user-row">
+                    <td style={"background-color: #{@user.colour}; color: #FFF;"} width="22">
+                      {central_component("icon", icon: @user.icon)}
                     </td>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>{user.data["lobby_client"]}</td>
+                    <td>{@user.name}</td>
+                    <td>{@user.email}</td>
+                    <td>{@user.data["lobby_client"]}</td>
 
                     <td>
-                      <TeiserverWeb.UserComponents.status_icon user={user} />
+                      <TeiserverWeb.UserComponents.status_icon user={@user} />
                     </td>
 
-                    <td>{user_stats["win_rate.team"]}</td>
-                    <td>{user_stats["recent_count.team"]}</td>
-                    <% hours = ((user_stats["player_minutes"] || 0) / 60) |> round %>
+                    <td>{@stats["win_rate.team"]}</td>
+                    <td>{@stats["recent_count.team"]}</td>
+                    <% hours = ((@stats["player_minutes"] || 0) / 60) |> round %>
                     <td>
                       {"#{hours}h"}
                     </td>
 
-                    <%= for type <- @key_types do %>
+                    <%= for _type <- @key_types do %>
                       <td>
-                        <%= if Map.has_key?(@key_lookup, {type, user.id}) do %>
-                          <% match = @key_lookup[{type, user.id}]
-                          user_key = @user_key_lookup[match.value] %>
-
-                          <i
-                            class={"fa-fw fa-regular #{type_icons[type]} text-#{type_colours[type]}"}
-                            title={"Matching key against #{date_to_str(match.last_updated, format: :ymd)}"}
-                          >
-                          </i>
-                          <span class="key-date">
-                            {date_to_str(match.last_updated, format: :ymd)}/{date_to_str(
-                              user_key.last_updated,
-                              format: :ymd
-                            )}
-                          </span>
-                        <% end %>
+                        -
                       </td>
                     <% end %>
 
                     <td>
-                      {date_to_str(user.last_login,
+                      {date_to_str(@user.last_login,
                         format: :hms_or_ymd,
                         tz: @tz
                       )}
                     </td>
 
                     <td>
-                      {date_to_str(user.inserted_at, format: :hms_or_ymd)}
+                      {date_to_str(@user.inserted_at, format: :hms_or_ymd)}
                     </td>
 
                     <td>
                       <a
-                        href={~p"/teiserver/admin/user/#{user.id}"}
+                        href={~p"/teiserver/admin/user/#{@user.id}"}
                         class="btn btn-secondary btn-sm"
                       >
                         Show
                       </a>
                     </td>
+                  </tr>
 
-                    <td>
-                      <a
-                        href={
-                          ~p"/teiserver/reports/show/time_compare?report[account_user1]=%23#{@user.id}&report[account_user2]=%23#{user.id}"
-                        }
-                        class="btn btn-secondary btn-sm"
-                      >
-                        Compare
-                      </a>
-                    </td>
+                  <tr class="under-selected-user-row">
+                    <td colspan="18" style="height: 5px;"></td>
+                  </tr>
 
-                    <%= if is_moderator and user.smurf_of_id == nil and @user.smurf_of_id == nil do %>
+                  <%= for user <- @users do %>
+                    <% user_stats = @stats_map[user.id] %>
+
+                    <tr>
+                      <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
+                        {central_component("icon", icon: user.icon)}
+                      </td>
+                      <td>{user.name}</td>
+                      <td>{user.email}</td>
+                      <td>{user.data["lobby_client"]}</td>
+
                       <td>
-                        {link(raw("<i class='far fa-fw fa-link'></i> Smurf link"),
-                          to: ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}",
-                          method: :put,
-                          # data: [confirm: "Are you sure?"],
-                          class: "btn btn-sm btn-warning"
+                        <TeiserverWeb.UserComponents.status_icon user={user} />
+                      </td>
+
+                      <td>{user_stats["win_rate.team"]}</td>
+                      <td>{user_stats["recent_count.team"]}</td>
+                      <% hours = ((user_stats["player_minutes"] || 0) / 60) |> round %>
+                      <td>
+                        {"#{hours}h"}
+                      </td>
+
+                      <%= for type <- @key_types do %>
+                        <td>
+                          <%= if Map.has_key?(@key_lookup, {type, user.id}) do %>
+                            <% match = @key_lookup[{type, user.id}]
+                            user_key = @user_key_lookup[match.value] %>
+
+                            <i
+                              class={"fa-fw fa-regular #{type_icons[type]} text-#{type_colours[type]}"}
+                              title={"Matching key against #{date_to_str(match.last_updated, format: :ymd)}"}
+                            >
+                            </i>
+                            <span class="key-date">
+                              {date_to_str(match.last_updated, format: :ymd)}/{date_to_str(
+                                user_key.last_updated,
+                                format: :ymd
+                              )}
+                            </span>
+                          <% end %>
+                        </td>
+                      <% end %>
+
+                      <td>
+                        {date_to_str(user.last_login,
+                          format: :hms_or_ymd,
+                          tz: @tz
                         )}
                       </td>
-                    <% else  # TODO if @user.smurf_of_id == nil, link to parent? %>
-                      <td></td>
-                    <% end %>
-                    <!-- TODO auto-bump or at least propose smurf warning number based on number of linked accounts? -->
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
+
+                      <td>
+                        {date_to_str(user.inserted_at, format: :hms_or_ymd)}
+                      </td>
+
+                      <td>
+                        <a
+                          href={~p"/teiserver/admin/user/#{user.id}"}
+                          class="btn btn-secondary btn-sm"
+                        >
+                          Show
+                        </a>
+                      </td>
+
+                      <td>
+                        <a
+                          href={
+                            ~p"/teiserver/reports/show/time_compare?report[account_user1]=%23#{@user.id}&report[account_user2]=%23#{user.id}"
+                          }
+                          class="btn btn-secondary btn-sm"
+                        >
+                          Compare
+                        </a>
+                      </td>
+
+                      <%= if is_moderator and user.smurf_of_id == nil and @user.smurf_of_id == nil do %>
+                        <td>
+                          {link(raw("<i class='far fa-fw fa-link'></i> Smurf link"),
+                            to:
+                              ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}",
+                            method: :put,
+                            # data: [confirm: "Are you sure?"],
+                            class: "btn btn-sm btn-warning"
+                          )}
+                        </td>
+                      <% else  # TODO if @user.smurf_of_id == nil, link to parent? %>
+                        <td></td>
+                      <% end %>
+                      <!-- TODO auto-bump or at least propose smurf warning number based on number of linked accounts? -->
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -282,95 +285,104 @@ is_moderator = allow?(@conn, "Moderator") %>
           <div class="col-xl-4 col-xxl-6">
             <h4>Key counts</h4>
             A high number of keys here can increase the chances of a false positive
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Count</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for {type_name, count} <- @key_count_by_type_name do %>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
                   <tr>
-                    <td>
-                      <i class={"fa-fw fa-regular #{type_icons[type_name]} text-#{type_colours[type_name]}"}>
-                      </i>
-                      &nbsp; {type_name}
-                    </td>
-                    <td>
-                      {count}
-                    </td>
+                    <th>Type</th>
+                    <th>Count</th>
                   </tr>
-                <% end %>
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  <%= for {type_name, count} <- @key_count_by_type_name do %>
+                    <tr>
+                      <td>
+                        <i class={"fa-fw fa-regular #{type_icons[type_name]} text-#{type_colours[type_name]}"}>
+                        </i>
+                        &nbsp; {type_name}
+                      </td>
+                      <td>
+                        {count}
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div :if={allow?(@conn, "Moderator")} class="col-xl-8 col-xxl-6">
             <h4>Key list</h4>
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Value</th>
-                  <th>Updated</th>
-                  <th>&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for key <- @all_user_keys do %>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
                   <tr>
-                    <td>
-                      <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
-                      </i>
-                      &nbsp; {key.type.name}
-                    </td>
-                    <td>
-                      <%= if String.length(key.value) > 50 do %>
-                        {key.value |> String.slice(0, 50)}...
-                      <% else %>
-                        {key.value}
-                      <% end %>
-                    </td>
-                    <td>
-                      {date_to_str(key.last_updated, format: :hms_or_ymd)}
-                    </td>
-                    <td :if={allow?(@conn, "Server")}>
-                      {link("Delete",
-                        to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id),
-                        class: "btn btn-danger btn-sm",
-                        method: "delete",
-                        data: [confirm: "Are you sure?"]
-                      )}
-                    </td>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Updated</th>
+                    <th>&nbsp;</th>
                   </tr>
-                <% end %>
-
-                <%= if allow?(@conn, "Server") do %>
-                  <tr>
-                    <form
-                      action={~p"/teiserver/admin/users/create_smurf_key/#{@user.id}"}
-                      method="post"
-                    >
-                      <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+                </thead>
+                <tbody>
+                  <%= for key <- @all_user_keys do %>
+                    <tr>
                       <td>
-                        <.input type="select" options={Map.keys(type_icons)} name="key" value="" />
+                        <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
+                        </i>
+                        &nbsp; {key.type.name}
                       </td>
-
                       <td>
-                        <.input type="text" name="value" value="" />
+                        <%= if String.length(key.value) > 50 do %>
+                          {key.value |> String.slice(0, 50)}...
+                        <% else %>
+                          {key.value}
+                        <% end %>
                       </td>
+                      <td>
+                        {date_to_str(key.last_updated, format: :hms_or_ymd)}
+                      </td>
+                      <td :if={allow?(@conn, "Server")}>
+                        {link("Delete",
+                          to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id),
+                          class: "btn btn-danger btn-sm",
+                          method: "delete",
+                          data: [confirm: "Are you sure?"]
+                        )}
+                      </td>
+                    </tr>
+                  <% end %>
 
-                      <td colspan="2">
-                        <button type="submit" class={"btn btn-#{bsname} btn-sm btn-block"}>
-                          Add key
-                        </button>
-                      </td>
-                    </form>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
+                  <%= if allow?(@conn, "Server") do %>
+                    <tr>
+                      <form
+                        action={~p"/teiserver/admin/users/create_smurf_key/#{@user.id}"}
+                        method="post"
+                      >
+                        <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+                        <td>
+                          <.input
+                            type="select"
+                            options={Map.keys(type_icons)}
+                            name="key"
+                            value=""
+                          />
+                        </td>
+
+                        <td>
+                          <.input type="text" name="value" value="" />
+                        </td>
+
+                        <td colspan="2">
+                          <button type="submit" class={"btn btn-#{bsname} btn-sm btn-block"}>
+                            Add key
+                          </button>
+                        </td>
+                      </form>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

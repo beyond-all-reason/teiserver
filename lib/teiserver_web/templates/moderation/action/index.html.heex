@@ -30,63 +30,65 @@
 
         <h4>Listing Actions</h4>
 
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Name</th>
-
-              <th>Reason</th>
-              <th>Restrictions</th>
-
-              <th>Started</th>
-              <th>Expires</th>
-              <th>Duration</th>
-
-              <th colspan="2">&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for action <- @actions do %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td>{action.target.name}</td>
-                <td>{action.reason |> String.slice(0..100)}</td>
-                <td>{action.restrictions |> Enum.join(", ")}</td>
+                <th>Name</th>
 
-                <td>{action.inserted_at |> date_to_str(format: :hms_or_ymd)}</td>
-                <%= if action.expires do %>
-                  <%= if Timex.compare(Timex.now(), action.expires) == 1 do %>
-                    <td>Expired</td>
-                  <% else %>
-                    <td>{action.expires |> date_to_str(format: :hms_or_ymd)}</td>
-                  <% end %>
+                <th>Reason</th>
+                <th>Restrictions</th>
 
-                  <td>{duration_to_str(action.inserted_at, action.expires)}</td>
-                <% else %>
-                  <td colspan="2" class="text-warning">
-                    Permanent
-                  </td>
-                <% end %>
+                <th>Started</th>
+                <th>Expires</th>
+                <th>Duration</th>
 
-                <td>
-                  <a href={~p"/moderation/action/#{action.id}"} class="btn btn-secondary btn-sm">
-                    Show
-                  </a>
-                </td>
-
-                <td>
-                  <%= if allow?(@conn, "Moderator") do %>
-                    <a
-                      href={~p"/teiserver/admin/user/#{action.target_id}"}
-                      class="btn btn-secondary btn-sm"
-                    >
-                      User
-                    </a>
-                  <% end %>
-                </td>
+                <th colspan="2">&nbsp;</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for action <- @actions do %>
+                <tr>
+                  <td>{action.target.name}</td>
+                  <td>{action.reason |> String.slice(0..100)}</td>
+                  <td>{action.restrictions |> Enum.join(", ")}</td>
+
+                  <td>{action.inserted_at |> date_to_str(format: :hms_or_ymd)}</td>
+                  <%= if action.expires do %>
+                    <%= if Timex.compare(Timex.now(), action.expires) == 1 do %>
+                      <td>Expired</td>
+                    <% else %>
+                      <td>{action.expires |> date_to_str(format: :hms_or_ymd)}</td>
+                    <% end %>
+
+                    <td>{duration_to_str(action.inserted_at, action.expires)}</td>
+                  <% else %>
+                    <td colspan="2" class="text-warning">
+                      Permanent
+                    </td>
+                  <% end %>
+
+                  <td>
+                    <a href={~p"/moderation/action/#{action.id}"} class="btn btn-secondary btn-sm">
+                      Show
+                    </a>
+                  </td>
+
+                  <td>
+                    <%= if allow?(@conn, "Moderator") do %>
+                      <a
+                        href={~p"/teiserver/admin/user/#{action.target_id}"}
+                        class="btn btn-secondary btn-sm"
+                      >
+                        User
+                      </a>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
 
         <%= if assigns[:total_pages] do %>
           <.pagination

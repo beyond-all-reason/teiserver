@@ -40,34 +40,36 @@
         <div class="tab-content">
           <%= for {group_name, group_configs} <- @site_configs do %>
             <div class="tab-pane" id={"#{remove_spaces group_name}_tab"} style="padding:5px;">
-              <table class="table">
-                <tbody>
-                  <%= for the_config <- group_configs do %>
-                    <% value = get_site_config_cache(the_config.key) %>
-                    <tr>
-                      <td>
-                        <label>
-                          {config_name(the_config.key)}
-                        </label>
-                      </td>
-                      <td>
-                        {value}
-                      </td>
+              <div class="table-responsive">
+                <table class="table">
+                  <tbody>
+                    <%= for the_config <- group_configs do %>
+                      <% value = get_site_config_cache(the_config.key) %>
+                      <tr>
+                        <td>
+                          <label>
+                            {config_name(the_config.key)}
+                          </label>
+                        </td>
+                        <td>
+                          {value}
+                        </td>
 
-                      <td style="min-width:50px;">
-                        {link("Edit",
-                          to: Routes.admin_site_config_path(@conn, :edit, the_config.key),
-                          class: "btn btn-secondary btn-sm"
-                        )}
-                      </td>
+                        <td style="min-width:50px;">
+                          {link("Edit",
+                            to: Routes.admin_site_config_path(@conn, :edit, the_config.key),
+                            class: "btn btn-secondary btn-sm"
+                          )}
+                        </td>
 
-                      <td>
-                        {raw(the_config.description)}
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
+                        <td>
+                          {raw(the_config.description)}
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
             </div>
           <% end %>
         </div>

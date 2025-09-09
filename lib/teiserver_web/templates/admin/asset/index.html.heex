@@ -1,123 +1,149 @@
-<div class="container">
-  <h1>Engine versions</h1>
+<% bsname = view_colour() %>
 
-  <p>
-    <div class="btn btn-sm btn-outline-success">
-      <Phx.link href={~p"/teiserver/admin/asset/engine/new"}>Add engine</Phx.link>
-    </div>
-  </p>
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Engine Versions</h4>
+          <.link href={~p"/teiserver/admin/asset/engine/new"} class={"btn btn-outline-#{bsname}"}>
+            Add engine
+          </.link>
+        </div>
 
-  <%= if length(@engines) > 0 do %>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Created at</th>
-          <th>Matchmaking?</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for engine <- @engines do %>
-          <tr style="vertical-align: middle;">
-            <td>{engine.name}</td>
-            <td>
-              {Timex.format!(engine.inserted_at, "{YYYY}-{0M}-{0D} {0h24}:{0m}:{0s} {Zabbr}")}
-            </td>
-            <td>
-              <Fontawesome.icon :if={engine.in_matchmaking} icon="check" style="solid" />
-            </td>
-            <td>
-              <CC.simple_form
-                for={}
-                action={~p"/teiserver/admin/asset/engine/#{engine.id}"}
-                method="delete"
-                style="display: inline-block;"
-              >
-                <:actions>
-                  <CC.button type="submit" class="btn-sm btn-danger">Delete</CC.button>
-                </:actions>
-              </CC.simple_form>
+        <%= if length(@engines) > 0 do %>
+          <div class="table-responsive">
+            <table class="table table-sm" style="table-layout: fixed; width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 30%;">Name</th>
+                  <th style="width: 35%;">Created At</th>
+                  <th style="width: 15%;">Matchmaking?</th>
+                  <th style="width: 20%;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= for engine <- @engines do %>
+                  <tr style="vertical-align: middle;">
+                    <td>{engine.name}</td>
+                    <td>
+                      {Timex.format!(
+                        engine.inserted_at,
+                        "{YYYY}-{0M}-{0D} {0h24}:{0m}:{0s} {Zabbr}"
+                      )}
+                    </td>
+                    <td>
+                      <Fontawesome.icon :if={engine.in_matchmaking} icon="check" style="solid" />
+                    </td>
+                    <td>
+                      <div class="d-flex gap-1 flex-wrap align-items-baseline">
+                        <CC.simple_form
+                          for={}
+                          action={~p"/teiserver/admin/asset/engine/#{engine.id}"}
+                          method="delete"
+                          style="display: inline-block; vertical-align: top;"
+                        >
+                          <:actions>
+                            <CC.button type="submit" class="btn-sm btn-danger">Delete</CC.button>
+                          </:actions>
+                        </CC.simple_form>
 
-              <CC.simple_form
-                for={}
-                action={~p"/teiserver/admin/asset/engine/#{engine.id}/set_matchmaking"}
-                method="post"
-                style="display: inline-block;"
-              >
-                <CC.button
-                  type="submit"
-                  class="btn-sm btn-success"
-                  disabled={engine.in_matchmaking}
-                >
-                  Set matchmaking
-                </CC.button>
-              </CC.simple_form>
-            </td>
-          </tr>
+                        <CC.simple_form
+                          for={}
+                          action={~p"/teiserver/admin/asset/engine/#{engine.id}/set_matchmaking"}
+                          method="post"
+                          style="display: inline-block; vertical-align: top;"
+                        >
+                          <CC.button
+                            type="submit"
+                            class="btn-sm btn-success"
+                            disabled={engine.in_matchmaking}
+                          >
+                            Set matchmaking
+                          </CC.button>
+                        </CC.simple_form>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <p>No engines!</p>
         <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    No engine !
-  <% end %>
 
-  <h2>Game versions</h2>
+        <hr class="my-4" />
 
-  <p>
-    <div class="btn btn-sm btn-outline-success">
-      <Phx.link href={~p"/teiserver/admin/asset/game/new"}>Add game version</Phx.link>
-    </div>
-  </p>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Game Versions</h4>
+          <.link href={~p"/teiserver/admin/asset/game/new"} class={"btn btn-outline-#{bsname}"}>
+            Add game version
+          </.link>
+        </div>
 
-  <%= if length(@games) > 0 do %>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Created at</th>
-          <th>Matchmaking?</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <%= for game <- @games do %>
-          <tr style="vertical-align: middle;">
-            <td>{game.name}</td>
-            <td>
-              {Timex.format!(game.inserted_at, "{YYYY}-{0M}-{0D} {0h24}:{0m}:{0s} {Zabbr}")}
-            </td>
-            <td>
-              <Fontawesome.icon :if={game.in_matchmaking} icon="check" style="solid" />
-            </td>
-            <td>
-              <CC.simple_form
-                for={}
-                action={~p"/teiserver/admin/asset/game/#{game.id}"}
-                method="delete"
-                style="display: inline-block;"
-              >
-                <:actions>
-                  <CC.button type="submit" class="btn-sm btn-danger">Delete</CC.button>
-                </:actions>
-              </CC.simple_form>
+        <%= if length(@games) > 0 do %>
+          <div class="table-responsive">
+            <table class="table table-sm" style="table-layout: fixed; width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 30%;">Name</th>
+                  <th style="width: 35%;">Created At</th>
+                  <th style="width: 15%;">Matchmaking?</th>
+                  <th style="width: 20%;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= for game <- @games do %>
+                  <tr style="vertical-align: middle;">
+                    <td>{game.name}</td>
+                    <td>
+                      {Timex.format!(
+                        game.inserted_at,
+                        "{YYYY}-{0M}-{0D} {0h24}:{0m}:{0s} {Zabbr}"
+                      )}
+                    </td>
+                    <td>
+                      <Fontawesome.icon :if={game.in_matchmaking} icon="check" style="solid" />
+                    </td>
+                    <td>
+                      <div class="d-flex gap-1 flex-wrap align-items-baseline">
+                        <CC.simple_form
+                          for={}
+                          action={~p"/teiserver/admin/asset/game/#{game.id}"}
+                          method="delete"
+                          style="display: inline-block; vertical-align: top;"
+                        >
+                          <:actions>
+                            <CC.button type="submit" class="btn-sm btn-danger">Delete</CC.button>
+                          </:actions>
+                        </CC.simple_form>
 
-              <CC.simple_form
-                for={}
-                action={~p"/teiserver/admin/asset/game/#{game.id}/set_matchmaking"}
-                method="post"
-                style="display: inline-block;"
-              >
-                <CC.button type="submit" class="btn-sm btn-success" disabled={game.in_matchmaking}>
-                  Set matchmaking
-                </CC.button>
-              </CC.simple_form>
-            </td>
-          </tr>
+                        <CC.simple_form
+                          for={}
+                          action={~p"/teiserver/admin/asset/game/#{game.id}/set_matchmaking"}
+                          method="post"
+                          style="display: inline-block; vertical-align: top;"
+                        >
+                          <CC.button
+                            type="submit"
+                            class="btn-sm btn-success"
+                            disabled={game.in_matchmaking}
+                          >
+                            Set matchmaking
+                          </CC.button>
+                        </CC.simple_form>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <p>No game versions!</p>
         <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    No game version !
-  <% end %>
+      </div>
+    </div>
+  </div>
 </div>

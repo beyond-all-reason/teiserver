@@ -27,46 +27,48 @@
 
         <h4>Listing Bans</h4>
 
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Enabled</th>
-              <th>Reason</th>
-              <th>Values</th>
-              <th>Added by</th>
-              <th colspan="1">&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for ban <- @bans do %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
               <tr>
-                <td>{ban.source.name}</td>
-                <td>
-                  <%= if ban.enabled do %>
-                    <i class="fa-fw fa-solid fa-check"></i>
-                  <% end %>
-                </td>
-
-                <td>{ban.reason}</td>
-                <td>{Enum.count(ban.key_values)}</td>
-
-                <td>{ban.added_by.name}</td>
-
-                <td>
-                  <%= if allow?(@conn, "Reviewer") do %>
-                    <a
-                      href={Routes.moderation_ban_path(@conn, :show, ban.id)}
-                      class="btn btn-secondary btn-sm"
-                    >
-                      Show
-                    </a>
-                  <% end %>
-                </td>
+                <th>Name</th>
+                <th>Enabled</th>
+                <th>Reason</th>
+                <th>Values</th>
+                <th>Added by</th>
+                <th colspan="1">&nbsp;</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <%= for ban <- @bans do %>
+                <tr>
+                  <td>{ban.source.name}</td>
+                  <td>
+                    <%= if ban.enabled do %>
+                      <i class="fa-fw fa-solid fa-check"></i>
+                    <% end %>
+                  </td>
+
+                  <td>{ban.reason}</td>
+                  <td>{Enum.count(ban.key_values)}</td>
+
+                  <td>{ban.added_by.name}</td>
+
+                  <td>
+                    <%= if allow?(@conn, "Reviewer") do %>
+                      <a
+                        href={Routes.moderation_ban_path(@conn, :show, ban.id)}
+                        class="btn btn-secondary btn-sm"
+                      >
+                        Show
+                      </a>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
 
         <%= if assigns[:total_pages] do %>
           <.pagination
