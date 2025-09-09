@@ -269,6 +269,12 @@ defmodule TeiserverWeb.Router do
     end
   end
 
+  scope "/maps", TeiserverWeb.MapsLive, as: :maps do
+    pipe_through([:live_browser, :app_layout])
+
+    live "/", Index, :index
+  end
+
   scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do
     pipe_through([:browser, :app_layout, :protected])
 
