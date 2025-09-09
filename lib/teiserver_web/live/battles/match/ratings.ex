@@ -47,9 +47,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
         "page" => to_string(validated.page)
       })
 
-    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
-    limit = (params["limit"] || "100") |> String.to_integer() |> max(1)
-
     # Decode the rating_type if it comes from URL params (to handle %20 vs +)
     rating_type =
       case Map.get(params, "rating_type") do
@@ -60,8 +57,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     socket =
       socket
       |> assign(:rating_type, rating_type)
-      |> assign(:page, page)
-      |> assign(:limit, limit)
+      |> assign(:page, validated.page)
+      |> assign(:limit, validated.limit)
       |> update_match_list()
 
     {:noreply, socket}
