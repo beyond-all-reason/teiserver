@@ -37,13 +37,22 @@ defmodule TeiserverWeb.Validators.PaginationParams do
   def validate_limit(_), do: 50
 
   @doc """
-  Validates limit parameter and returns a map with validated values.
+  Validates page and limit parameters and returns a map with validated values.
   This is the main function that should be used by both plugs and LiveViews.
   """
   def validate_params(params) do
+    page =
+      if not is_nil(params["page"]) do
+        case Integer.parse(params["page"]) do
+          {int, _} -> int |> max(1)
+          # Some pages like the phoenix live dashboard can user string "page" params (e.g. "home") which can't be parsed as integers
+          :error -> params["page"]
+        end
+      end
+
     %{
       limit: validate_limit(params["limit"] || "50"),
-      page: (params["page"] || "1") |> String.to_integer() |> max(1)
+      page: page
     }
   end
 end

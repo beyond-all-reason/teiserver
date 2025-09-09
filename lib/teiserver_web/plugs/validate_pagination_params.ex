@@ -13,10 +13,18 @@ defmodule TeiserverWeb.Plugs.ValidatePaginationParams do
     # Update the params with validated values
     updated_params =
       conn.params
-      |> Map.put("limit", to_string(validated.limit))
-      |> Map.put("page", to_string(validated.page))
+      |> put_if_present("limit", to_string(validated.limit))
+      |> put_if_present("page", to_string(validated.page))
 
     # Update the connection with validated params
     %{conn | params: updated_params}
+  end
+
+  defp put_if_present(params, key, value) do
+    if Map.has_key?(params, key) do
+      Map.put(params, key, to_string(value))
+    else
+      params
+    end
   end
 end
