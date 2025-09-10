@@ -16,6 +16,8 @@ defmodule TeiserverWeb.Moderation.ReportController do
     sub_menu_active: "report"
   )
 
+  plug TeiserverWeb.Plugs.ValidatePaginationParams
+
   plug :add_breadcrumb, name: "Moderation", url: "/moderation"
   plug :add_breadcrumb, name: "Reports", url: "/moderation/reports"
 

@@ -16,6 +16,8 @@ defmodule TeiserverWeb.Battle.MatchController do
     sub_menu_active: "match"
   )
 
+  plug TeiserverWeb.Plugs.ValidatePaginationParams
+
   plug :add_breadcrumb, name: "Matches", url: "/battle"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()

@@ -18,6 +18,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
     sub_menu_active: "action"
   )
 
+  plug TeiserverWeb.Plugs.ValidatePaginationParams
+
   plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
   plug :add_breadcrumb, name: "Actions", url: "/teiserver/actions"
 

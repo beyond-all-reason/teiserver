@@ -13,6 +13,8 @@ defmodule TeiserverWeb.Telemetry.InfologController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
+  plug TeiserverWeb.Plugs.ValidatePaginationParams
+
   plug(:add_breadcrumb, name: "Telemetry", url: "/telemetry")
   plug(:add_breadcrumb, name: "Infologs", url: "/telemetry/infolog")
 

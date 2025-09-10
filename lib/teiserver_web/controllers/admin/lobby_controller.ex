@@ -16,6 +16,8 @@ defmodule TeiserverWeb.Admin.LobbyController do
     user: {Teiserver.Account.AuthLib, :current_user}
   )
 
+  plug TeiserverWeb.Plugs.ValidatePaginationParams
+
   plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
   plug(:add_breadcrumb, name: "Users", url: "/teiserver/admin/user")
 

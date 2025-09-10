@@ -15,6 +15,8 @@ defmodule TeiserverWeb.Admin.MatchController do
     sub_menu_active: "match"
   )
 
+  plug TeiserverWeb.Plugs.ValidatePaginationParams
+
   plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
   plug :add_breadcrumb, name: "Matches", url: "/teiserver/admin/matches"
 

@@ -20,7 +20,6 @@ defmodule TeiserverWeb.Router do
     plug(Teiserver.Account.AuthPipeline)
     plug(Teiserver.Account.AuthPlug)
     plug(Teiserver.Plugs.CachePlug)
-    plug(TeiserverWeb.Plugs.ValidatePaginationParams)
   end
 
   pipeline :live_browser do

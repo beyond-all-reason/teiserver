@@ -41,6 +41,9 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
   def handle_params(params, _url, socket) do
     validated = TeiserverWeb.Validators.PaginationParams.validate_params(params)
 
+    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
+    limit = (params["limit"] || "100") |> String.to_integer() |> max(1)
+
     params =
       Map.merge(params, %{
         "limit" => to_string(validated.limit),
@@ -57,8 +60,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     socket =
       socket
       |> assign(:rating_type, rating_type)
-      |> assign(:page, validated.page)
-      |> assign(:limit, validated.limit)
+      |> assign(:page, page)
+      |> assign(:limit, limit)
       |> update_match_list()
 
     {:noreply, socket}

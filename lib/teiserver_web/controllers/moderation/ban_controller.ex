@@ -17,6 +17,8 @@ defmodule TeiserverWeb.Moderation.BanController do
     sub_menu_active: "ban"
   )
 
+  plug TeiserverWeb.Plugs.ValidatePaginationParams
+
   plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
   plug :add_breadcrumb, name: "Bans", url: "/teiserver/bans"
 

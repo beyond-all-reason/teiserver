@@ -43,7 +43,6 @@ defmodule TeiserverWeb.Validators.PaginationParams do
   def validate_page(raw) when is_binary(raw) do
     case Integer.parse(raw) do
       {i, _} -> max(1, i)
-      # Some pages like the phoenix live dashboard can user string "page" params (e.g. "home") which can't be parsed as integers
       :error -> 1
     end
   end
