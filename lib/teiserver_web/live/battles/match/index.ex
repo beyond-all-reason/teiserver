@@ -25,16 +25,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
-    validated = TeiserverWeb.Validators.PaginationParams.validate_params(params)
-
-    params =
-      Map.merge(params, %{
-        "limit" => to_string(validated.limit),
-        "page" => to_string(validated.page)
-      })
-
-    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
-    limit = (params["limit"] || "100") |> String.to_integer() |> max(1)
+    parsed = TeiserverWeb.Parsers.PaginationParams.parse_params(params)
 
     # Update filters from URL params
     updated_filters =
@@ -45,8 +36,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
 
     socket =
       socket
-      |> assign(:page, page)
-      |> assign(:limit, limit)
+      |> assign(:page, parsed.page)
+      |> assign(:limit, parsed.limit)
       |> assign(:filters, updated_filters)
       |> update_match_list()
 

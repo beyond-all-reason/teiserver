@@ -16,6 +16,8 @@ defmodule TeiserverWeb.Battle.MatchController do
     sub_menu_active: "match"
   )
 
+  plug TeiserverWeb.Plugs.PaginationParams
+
   plug :add_breadcrumb, name: "Matches", url: "/battle"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
@@ -92,8 +94,8 @@ defmodule TeiserverWeb.Battle.MatchController do
     filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter] || 1
     season = MatchRatingLib.active_season()
 
-    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
-    limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
+    page = params["page"] - 1
+    limit = params["limit"]
 
     ratings =
       Account.list_ratings(

@@ -26,12 +26,12 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
-    validated = TeiserverWeb.Validators.PaginationParams.validate_params(params)
+    parsed = TeiserverWeb.Parsers.PaginationParams.parse_params(params)
 
     params =
       Map.merge(params, %{
-        "limit" => to_string(validated.limit),
-        "page" => to_string(validated.page)
+        "limit" => parsed.limit,
+        "page" => parsed.page
       })
 
     socket =
@@ -162,9 +162,9 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
         "Chat" -> "chat"
       end
 
-    validated = TeiserverWeb.Validators.PaginationParams.validate_params(filters)
-    page = (validated.page - 1) |> max(0)
-    limit = validated.limit
+    parsed = TeiserverWeb.Parsers.PaginationParams.parse_params(filters)
+    page = parsed.page - 1
+    limit = parsed.limit
 
     total_count =
       Moderation.count_report_groups(

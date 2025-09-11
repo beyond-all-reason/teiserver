@@ -20,15 +20,16 @@ defmodule TeiserverWeb.Admin.UserController do
     user: {Teiserver.Account.AuthLib, :current_user}
   )
 
+  plug TeiserverWeb.Plugs.PaginationParams
+
   plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
   plug(:add_breadcrumb, name: "Users", url: "/teiserver/admin/user")
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
-    page =
-      (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
+    page = params["page"] - 1
+    limit = params["limit"]
 
-    limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
     search_term = get_search_term(params)
 
     users =
@@ -78,13 +79,9 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def search(conn, %{"search" => params}) do
-    params = Map.merge(search_defaults(conn), params)
-
-    page =
-      (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
-
-    limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
+  def search(conn, params) do
+    page = params["page"] - 1
+    limit = params["limit"]
 
     id_list =
       if params["previous_names"] != nil and params["previous_names"] != "" do
@@ -417,14 +414,9 @@ defmodule TeiserverWeb.Admin.UserController do
         filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter]
         season = MatchRatingLib.active_season()
 
-        page =
-          (params["page"] || "1")
-          |> to_string()
-          |> String.to_integer()
-          |> max(1)
-          |> then(&(&1 - 1))
+        page = params["page"] - 1
 
-        limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
+        limit = params["limit"] - 1
 
         ratings =
           Account.list_ratings(

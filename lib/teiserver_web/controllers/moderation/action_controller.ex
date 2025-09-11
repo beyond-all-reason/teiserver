@@ -18,13 +18,15 @@ defmodule TeiserverWeb.Moderation.ActionController do
     sub_menu_active: "action"
   )
 
+  plug TeiserverWeb.Plugs.PaginationParams
+
   plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
   plug :add_breadcrumb, name: "Actions", url: "/teiserver/actions"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
-    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
-    limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
+    page = params["page"] - 1
+    limit = params["limit"]
 
     search_args = extract_search_params(params)
 
