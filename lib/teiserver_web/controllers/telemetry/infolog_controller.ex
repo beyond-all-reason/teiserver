@@ -13,15 +13,15 @@ defmodule TeiserverWeb.Telemetry.InfologController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug TeiserverWeb.Plugs.ValidatePaginationParams
+  plug TeiserverWeb.Plugs.PaginationParams
 
   plug(:add_breadcrumb, name: "Telemetry", url: "/telemetry")
   plug(:add_breadcrumb, name: "Infologs", url: "/telemetry/infolog")
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
-    page = (params["page"] || "1") |> int_parse |> max(1) |> then(&(&1 - 1))
-    limit = (params["limit"] || "100") |> int_parse |> max(1)
+    page = params["page"] - 1
+    limit = params["limit"]
 
     search_params = extract_search_params(params)
 

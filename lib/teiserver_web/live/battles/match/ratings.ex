@@ -39,16 +39,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
 
   @impl true
   def handle_params(params, _url, socket) do
-    validated = TeiserverWeb.Validators.PaginationParams.validate_params(params)
-
-    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
-    limit = (params["limit"] || "100") |> String.to_integer() |> max(1)
-
-    params =
-      Map.merge(params, %{
-        "limit" => to_string(validated.limit),
-        "page" => to_string(validated.page)
-      })
+    parsed = TeiserverWeb.Parsers.PaginationParams.parse_params(params)
 
     # Decode the rating_type if it comes from URL params (to handle %20 vs +)
     rating_type =
@@ -60,8 +51,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     socket =
       socket
       |> assign(:rating_type, rating_type)
-      |> assign(:page, page)
-      |> assign(:limit, limit)
+      |> assign(:page, parsed.page)
+      |> assign(:limit, parsed.limit)
       |> update_match_list()
 
     {:noreply, socket}

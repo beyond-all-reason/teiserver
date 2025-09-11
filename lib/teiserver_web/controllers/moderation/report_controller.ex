@@ -16,15 +16,15 @@ defmodule TeiserverWeb.Moderation.ReportController do
     sub_menu_active: "report"
   )
 
-  plug TeiserverWeb.Plugs.ValidatePaginationParams
+  plug TeiserverWeb.Plugs.PaginationParams
 
   plug :add_breadcrumb, name: "Moderation", url: "/moderation"
   plug :add_breadcrumb, name: "Reports", url: "/moderation/reports"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
-    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
-    limit = (params["limit"] || "50") |> String.to_integer() |> max(1)
+    page = params["page"] - 1
+    limit = params["limit"]
 
     search_args = [
       target_id: params["target_id"],

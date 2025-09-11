@@ -15,17 +15,17 @@ defmodule TeiserverWeb.Admin.MatchController do
     sub_menu_active: "match"
   )
 
-  plug TeiserverWeb.Plugs.ValidatePaginationParams
+  plug TeiserverWeb.Plugs.PaginationParams
 
   plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
   plug :add_breadcrumb, name: "Matches", url: "/teiserver/admin/matches"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
-    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
-    limit = (params["limit"] || "100") |> String.to_integer() |> max(1)
-
     username = Map.get(params, "account_user", "") |> String.trim()
+
+    page = params["page"] - 1
+    limit = params["limit"]
 
     search_criteria =
       [
@@ -72,8 +72,8 @@ defmodule TeiserverWeb.Admin.MatchController do
 
   @spec user_show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def user_show(conn, params = %{"user_id" => userid}) do
-    page = (params["page"] || "1") |> String.to_integer() |> max(1) |> then(&(&1 - 1))
-    limit = (params["limit"] || "100") |> String.to_integer() |> max(1)
+    page = params["page"] - 1
+    limit = params["limit"]
 
     search_params = [user_id: userid]
 
