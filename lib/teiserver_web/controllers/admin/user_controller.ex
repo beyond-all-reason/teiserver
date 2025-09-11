@@ -79,9 +79,7 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def search(conn, %{"search" => params}) do
-    params = Map.merge(search_defaults(conn), params)
-
+  def search(conn, params) do
     page = params["page"] - 1
     limit = params["limit"]
 
