@@ -62,8 +62,8 @@ defmodule Teiserver.PromEx do
       # PromEx built in plugins
       Plugins.Application,
       Plugins.Beam,
-      # {Plugins.Phoenix, router: TeiserverWeb.Router, endpoint: TeiserverWeb.Endpoint},
-      # Plugins.Ecto,
+      {Plugins.Phoenix, router: TeiserverWeb.Router, endpoint: TeiserverWeb.Endpoint},
+      Plugins.Ecto,
       # Plugins.Oban,
       # Plugins.PhoenixLiveView,
       # Plugins.Absinthe,
@@ -88,9 +88,9 @@ defmodule Teiserver.PromEx do
     [
       # PromEx built in Grafana dashboards
       {:prom_ex, "application.json"},
-      {:prom_ex, "beam.json"}
-      # {:prom_ex, "phoenix.json"},
-      # {:prom_ex, "ecto.json"},
+      {:prom_ex, "beam.json"},
+      {:prom_ex, "phoenix.json"},
+      {:prom_ex, "ecto.json"}
       # {:prom_ex, "oban.json"},
       # {:prom_ex, "phoenix_live_view.json"},
       # {:prom_ex, "absinthe.json"},
