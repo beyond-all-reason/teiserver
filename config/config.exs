@@ -186,6 +186,13 @@ config :teiserver, :time_zone_database, Tzdata.TimeZoneDatabase
 
 config :xema, loader: Teiserver.Tachyon.SchemaLoader
 
+config :teiserver, Teiserver.PromEx,
+  disabled: false,
+  manual_metrics_start_delay: :no_delay,
+  drop_metrics_groups: [],
+  grafana: :disabled,
+  metrics_server: :disabled
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
