@@ -36,7 +36,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
 
     socket =
       socket
-      |> assign(:page, parsed.page)
+      |> assign(:page, parsed.page - 1)
       |> assign(:limit, parsed.limit)
       |> assign(:filters, updated_filters)
       |> update_match_list()
