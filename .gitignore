@@ -60,7 +60,6 @@ runtime/
 /remote/
 /zignore/
 /hot_reload
-/rel/
 /source_deploy
 /source_deploy.tar.gz
 central.tar.gz
