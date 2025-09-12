@@ -88,7 +88,7 @@
 
       <div :if={@stage == :extra_text} class="card-body">
         <h5>Extra info:</h5>
-        The more information you can provide the better, some useful items include:
+        Please provide some information about what you are reporting:
         <ul>
           <li>A description of what was done or specific words said</li>
           <li>
@@ -110,8 +110,8 @@
           phx-debounce="200"
         />
         <span
-          class={"btn btn-#{@view_colour} float-end mt-2"}
-          phx-click="submit-extra-text"
+          class={"btn btn-#{@view_colour} float-end mt-2 #{if @extra_text in [nil, ""], do: "disabled"}"}
+          phx-click={unless @extra_text in [nil, ""], do: "submit-extra-text"}
           id="submit-report-btn"
         >
           Submit report
