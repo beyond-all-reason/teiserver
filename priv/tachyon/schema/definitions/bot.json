@@ -5,8 +5,7 @@
     "properties": {
         "hostUserId": {
             "description": "UserId of the player hosting this AI",
-            "type": "string",
-            "format": "uuid"
+            "type": "string"
         },
         "name": { "type": "string" },
         "aiShortName": {

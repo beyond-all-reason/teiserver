@@ -11,7 +11,7 @@
         "allyTeamConfig": {
             "type": "object",
             "patternProperties": {
-                "^(0|[1-9][0-9]*)$": {
+                "^(.*)$": {
                     "description": "this represent an array, items should be sorted lexicographically on their keys",
                     "type": "object",
                     "properties": {
@@ -20,7 +20,7 @@
                         "teams": {
                             "type": "object",
                             "patternProperties": {
-                                "^(0|[1-9][0-9]*)$": {
+                                "^(.*)$": {
                                     "type": "object",
                                     "properties": {
                                         "maxPlayers": {
@@ -41,24 +41,15 @@
             "type": "object",
             "patternProperties": {
                 "^(.*)$": {
-                    "description": "A user currently assigned to a team represented by the indices [allyTeamIdx, teamIdx, playerIdx]",
                     "type": "object",
                     "properties": {
                         "type": { "const": "player" },
                         "id": { "$ref": "../definitions/userId.json" },
-                        "team": {
-                            "type": "array",
-                            "items": [
-                                { "type": "integer" },
-                                { "type": "integer" },
-                                { "type": "integer" }
-                            ],
-                            "additionalItems": false,
-                            "minItems": 3,
-                            "maxItems": 3
-                        }
+                        "allyTeam": { "type": "string" },
+                        "team": { "type": "string" },
+                        "player": { "type": "string" }
                     },
-                    "required": ["type", "id", "team"]
+                    "required": ["type", "id", "allyTeam", "team", "player"]
                 }
             }
         },
@@ -66,10 +57,9 @@
             "description": "If a battle is currently happening, here are the info",
             "type": "object",
             "properties": {
-                "id": { "type": "string" },
                 "startedAt": { "$ref": "../definitions/unixTime.json" }
             },
-            "required": ["id", "startedAt"]
+            "required": ["startedAt"]
         }
     },
     "required": [

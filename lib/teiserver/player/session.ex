@@ -444,9 +444,9 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, :leave})
   end
 
-  @spec start_lobby_battle(T.userid(), TachyonLobby.id()) :: :ok | {:error, reason :: term}
-  def start_lobby_battle(user_id, lobby_id) do
-    GenServer.call(via_tuple(user_id), {:lobby, {:start_battle, lobby_id}})
+  @spec start_lobby_battle(T.userid()) :: :ok | {:error, reason :: term}
+  def start_lobby_battle(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :start_battle})
   end
 
   @spec subscribe_lobby_list(T.userid()) :: {:ok, %{TachyonLobby.id() => TachyonLobby.overview()}}
@@ -899,12 +899,12 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:lobby, {:start_battle, lobby_id}}, _from, state)
-      when state.lobby.id != lobby_id,
+  def handle_call({:lobby, :start_battle}, _from, state)
+      when state.lobby == nil,
       do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, {:start_battle, lobby_id}}, _from, state) do
-    case TachyonLobby.start_battle(lobby_id, state.user.id) do
+  def handle_call({:lobby, :start_battle}, _from, state) do
+    case TachyonLobby.start_battle(state.lobby.id, state.user.id) do
       # the update of the state wrt to current battle is done by the lobby
       # itself using Session.battle_start to notify all members
       # this simplify the request/response cycle by avoiding any interleaving

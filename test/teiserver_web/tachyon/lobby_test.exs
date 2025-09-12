@@ -68,6 +68,15 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         Tachyon.join_lobby!(ctx2[:client], lobby_id)
     end
 
+    test "lobby full", %{lobby_id: lobby_id} do
+      {:ok, ctx2} = Tachyon.setup_client()
+      {:ok, ctx3} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+
+      %{"status" => "failed", "reason" => "lobby_full"} =
+        Tachyon.join_lobby!(ctx3[:client], lobby_id)
+    end
+
     test "members get updated events on join", %{client: client, lobby_id: lobby_id} do
       {:ok, ctx2} = Tachyon.setup_client()
       %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
@@ -108,27 +117,11 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       :setup_lobby
     ]
 
-    test "must be in lobby", ctx do
+    test "must be in lobby" do
       {:ok, ctx2} = Tachyon.setup_client()
 
       %{"status" => "failed", "reason" => "invalid_request"} =
-        Tachyon.start_lobby_battle!(ctx2[:client], ctx[:lobby_id])
-    end
-
-    test "must be in correct lobby", ctx do
-      {:ok, ctx2} = Tachyon.setup_client()
-
-      lobby_data = %{
-        name: "test lobby",
-        map_name: "test-map",
-        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
-      }
-
-      %{"status" => "success", "data" => %{"id" => other_lobby_id}} =
-        Tachyon.create_lobby!(ctx2[:client], lobby_data)
-
-      %{"status" => "failed", "reason" => "invalid_request"} =
-        Tachyon.start_lobby_battle!(ctx[:client], other_lobby_id)
+        Tachyon.start_lobby_battle!(ctx2[:client])
     end
 
     test "can start battle", ctx do
@@ -156,7 +149,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
   end
 
   describe "listing" do
-    setup [{Tachyon, :setup_client}]
+    setup [{Tachyon, :setup_client}, {Tachyon, :setup_app}, {Tachyon, :setup_autohost}]
 
     test "subscribe updates", %{client: client} do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
@@ -214,6 +207,40 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       %{"commandId" => "lobby/listUpdated", "data" => data} = Tachyon.recv_message!(client)
       assert data["updates"] == [%{"id" => lobby_id, "type" => "removed"}]
+    end
+
+    test "start battle", %{client: client} = ctx do
+      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+      %{"commandId" => "lobby/listUpdated"} = Tachyon.recv_message!(client)
+
+      # create lobby with another client so that only list updates are sent to
+      # the original client, it makes the tests a bit simpler
+      {:ok, ctx2} = Tachyon.setup_client()
+      {:ok, lobby_id: lobby_id} = setup_lobby(%{client: ctx2[:client]})
+
+      %{"commandId" => "lobby/listUpdated"} = Tachyon.recv_message!(client)
+
+      # simulate starting the battle
+      Tachyon.send_request(ctx2[:client], "lobby/startBattle", %{id: ctx2[:lobby_id]})
+
+      %{"commandId" => "autohost/start"} =
+        start_req = Tachyon.recv_message!(ctx[:autohost_client])
+
+      start_req_response = %{
+        port: 32781,
+        ips: ["127.0.0.1"]
+      }
+
+      Tachyon.send_response(ctx[:autohost_client], start_req, data: start_req_response)
+
+      %{"status" => "success", "commandId" => "lobby/startBattle"} =
+        Tachyon.recv_message!(ctx2[:client])
+
+      %{"commandId" => "lobby/listUpdated", "data" => %{"updates" => [update]}} =
+        Tachyon.recv_message!(client)
+
+      assert update["overview"]["currentBattle"]["startedAt"] != nil
+      assert update["overview"]["id"] == lobby_id
     end
   end
 

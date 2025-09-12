@@ -650,6 +650,9 @@ defmodule Teiserver.Player.TachyonHandler do
         data = lobby_details_to_tachyon(details)
         {:response, data, state}
 
+      {:error, :lobby_full} ->
+        {:error_response, :lobby_full, state}
+
       {:error, reason} ->
         {:error_response, :invalid_request, to_string(reason), state}
     end
@@ -665,8 +668,8 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command("lobby/startBattle", "request", _msg_id, msg, state) do
-    case Player.Session.start_lobby_battle(state.user.id, msg["data"]["id"]) do
+  def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
+    case Player.Session.start_lobby_battle(state.user.id) do
       :ok ->
         {:response, state}
 
@@ -717,6 +720,7 @@ defmodule Teiserver.Player.TachyonHandler do
         outgoingFriendRequest: outgoing,
         incomingFriendRequest: incoming,
         ignoreIds: [],
+        currentLobby: nil,
         roles: roles_to_tachyon(user.roles)
       }
     }
@@ -882,7 +886,9 @@ defmodule Teiserver.Player.TachyonHandler do
          %{
            id: to_string(p_id),
            type: p.type,
-           team: [x, y, z]
+           allyTeam: to_string(x),
+           team: to_string(y),
+           player: to_string(z)
          }}
       end)
       |> Enum.into(%{})
@@ -925,7 +931,9 @@ defmodule Teiserver.Player.TachyonHandler do
         to_string(ev.id) => %{
           type: :player,
           id: to_string(ev.id),
-          team: [x, y, z]
+          allyTeam: to_string(x),
+          team: to_string(y),
+          player: to_string(z)
         }
       }
     }
@@ -946,16 +954,28 @@ defmodule Teiserver.Player.TachyonHandler do
       {:max_player_count, :maxPlayerCount},
       {:map_name, :mapName},
       {:engine_version, :engineVersion},
-      {:game_version, :gameVersion}
+      {:game_version, :gameVersion},
+      {:current_battle, :currentBattle, &lobby_current_battle_to_tachyon/1}
     ]
 
     init = %{id: lobby_id, currentBattle: nil}
 
-    Enum.reduce(keys, init, fn {k, tachyon_k}, m ->
-      case Map.get(overview, k) do
-        nil -> m
-        val -> Map.put(m, tachyon_k, val)
-      end
+    Enum.reduce(keys, init, fn
+      {k, tachyon_k}, m ->
+        case Map.get(overview, k) do
+          nil -> m
+          val -> Map.put(m, tachyon_k, val)
+        end
+
+      {k, tachyon_k, f}, m ->
+        case Map.get(overview, k) do
+          nil -> m
+          val -> Map.put(m, tachyon_k, f.(val))
+        end
     end)
+  end
+
+  defp lobby_current_battle_to_tachyon(battle) do
+    %{startedAt: DateTime.to_unix(battle.started_at, :microsecond)}
   end
 end

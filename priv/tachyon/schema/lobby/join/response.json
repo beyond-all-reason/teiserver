@@ -33,6 +33,7 @@
                 "status": { "const": "failed" },
                 "reason": {
                     "enum": [
+                        "lobby_full",
                         "internal_error",
                         "unauthorized",
                         "invalid_request",
