@@ -42,13 +42,6 @@ WORKDIR /build
 ENV MIX_ENV="prod"
 
 COPY mix.exs mix.lock ./
-{# This is a hack to force disable discord integration, there is not any other
- # way to do it in config... and that's not the worst part...
- # https://github.com/beyond-all-reason/teiserver/issues/237
- #}
-{% if not teiserver_discord_integration %}
-RUN sed -i -E 's/:nostrum(.*)runtime:.*/:nostrum\1runtime: false}/' mix.exs
-{% endif %}
 RUN mix deps.get
 
 RUN mkdir config
