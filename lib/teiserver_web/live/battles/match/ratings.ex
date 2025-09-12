@@ -51,7 +51,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     socket =
       socket
       |> assign(:rating_type, rating_type)
-      |> assign(:page, parsed.page)
+      |> assign(:page, parsed.page - 1)
       |> assign(:limit, parsed.limit)
       |> update_match_list()
 
