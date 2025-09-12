@@ -52,11 +52,7 @@ COPY config/dev.exs config/
 RUN MIX_ENV=dev mix deps.compile
 
 # Now time to compile dependencies for prod.
-# We touch empty secrets and compile to avoid recompiling when the secrets
-# are changed. This assumes that the secrets don't impact the compilation
-# of the project dependencies.
 COPY config/prod.exs config/
-RUN touch config/prod.secret.exs
 RUN mix deps.compile
 
 COPY priv priv
@@ -67,9 +63,6 @@ RUN MIX_ENV=dev mix assets.deploy
 
 # Compile for prod
 COPY lib lib
-# This should really not be here
-# https://github.com/beyond-all-reason/teiserver/issues/236
-COPY config/prod.secret.exs config/
 RUN mix compile
 
 # Create release files
@@ -93,8 +86,6 @@ WORKDIR "/app"
 ENV MIX_ENV="prod"
 
 COPY --from=builder /build/_build/${MIX_ENV}/rel/teiserver  ./
-RUN mkdir src
-COPY --from=builder /build/config/prod.secret.exs src/prod.secret.exs
 
 ENTRYPOINT ["tini", "--"]
 CMD /app/bin/teiserver start
