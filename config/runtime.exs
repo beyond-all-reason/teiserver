@@ -52,16 +52,20 @@ config :teiserver, Teiserver,
   node_name: Teiserver.ConfigHelpers.get_env("TEI_NODE_NAME", "local"),
   enable_managed_lobbies: true,
   user_agreement:
-    "A verification code has been sent to your email address. Please read our terms of service at https://#{domain_name}/privacy_policy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
+    Application.get_env(:teiserver, Teiserver)[:user_agreement] ||
+      "A verification code has been sent to your email address. Please read our terms of service at https://#{domain_name}/privacy_policy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
+
+repo_env = Application.get_env(:teiserver, Teiserver.Repo)
 
 config :teiserver, Teiserver.Repo,
-  hostname: Teiserver.ConfigHelpers.get_env("TEI_DB_HOSTNAME", "localhost"),
-  username: Teiserver.ConfigHelpers.get_env("TEI_DB_USERNAME", "teiserver_dev"),
-  password: Teiserver.ConfigHelpers.get_env("TEI_DB_PASSWORD", "123456789"),
-  database: Teiserver.ConfigHelpers.get_env("TEI_DB_NAME", "teiserver_dev"),
-  pool_size: 40,
-  timeout: 120_000,
-  queue_interval: 2000
+  hostname: Teiserver.ConfigHelpers.get_env("TEI_DB_HOSTNAME", repo_env[:hostname]),
+  username: Teiserver.ConfigHelpers.get_env("TEI_DB_USERNAME", repo_env[:username]),
+  password: Teiserver.ConfigHelpers.get_env("TEI_DB_PASSWORD", repo_env[:password]),
+  database: Teiserver.ConfigHelpers.get_env("TEI_DB_NAME", repo_env[:database]),
+  pool_size: Teiserver.ConfigHelpers.get_env("TEI_DB_POOL_SIZE", repo_env[:pool_size], :int),
+  timeout: Teiserver.ConfigHelpers.get_env("TEI_DB_TIMEOUT", repo_env[:timeout], :int),
+  queue_interval:
+    Teiserver.ConfigHelpers.get_env("TEI_DB_QUEUE_INTERVAL", repo_env[:queue_interval], :int)
 
 check_origin =
   if Teiserver.ConfigHelpers.get_env("TEI_SHOULD_CHECK_ORIGIN", false, :bool) do
@@ -70,19 +74,31 @@ check_origin =
     false
   end
 
+endpoint_defaults = Application.get_env(:teiserver, TeiserverWeb.Endpoint)
+
 config :teiserver, TeiserverWeb.Endpoint,
-  url: [host: domain_name],
+  url: [host: endpoint_defaults[:url][:host] || domain_name],
   check_origin: check_origin,
-  http: [:inet6, port: Teiserver.ConfigHelpers.get_env("TEI_PORT", "4000", :int)],
+  http: [
+    :inet6,
+    port:
+      Teiserver.ConfigHelpers.get_env(
+        "TEI_PORT",
+        endpoint_defaults[:http][:port] || 4000,
+        :int
+      )
+  ],
   # the default is meant for ease of local dev
   secret_key_base:
     Teiserver.ConfigHelpers.get_env(
       "TEI_HTTP_SECRET_KEY_BASE",
-      "6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy"
+      endpoint_defaults[:secret_key_base]
     )
 
 use_tls? = Teiserver.ConfigHelpers.get_env("TEI_TLS_PRIVATE_KEY_PATH", nil) != nil
 config :teiserver, Teiserver, use_tls?: use_tls?
+
+tei_defaults = Application.get_env(:teiserver, Teiserver)
 
 if use_tls? do
   certificates = [
@@ -93,8 +109,10 @@ if use_tls? do
 
   config :teiserver, Teiserver,
     ports: [
-      tcp: Teiserver.ConfigHelpers.get_env("TEI_SPRING_TCP_PORT", 8200, :int),
-      tls: Teiserver.ConfigHelpers.get_env("TEI_SPRING_TLS_PORT", 8201, :int)
+      tcp:
+        Teiserver.ConfigHelpers.get_env("TEI_SPRING_TCP_PORT", tei_defaults[:ports][:tcp], :int),
+      tls:
+        Teiserver.ConfigHelpers.get_env("TEI_SPRING_TLS_PORT", tei_defaults[:ports][:tls], :int)
     ],
     certs: certificates
 
@@ -159,7 +177,8 @@ if use_tls? do
 else
   config :teiserver, Teiserver,
     ports: [
-      tcp: Teiserver.ConfigHelpers.get_env("TEI_SPRING_TCP_PORT", 8200, :int)
+      tcp:
+        Teiserver.ConfigHelpers.get_env("TEI_SPRING_TCP_PORT", tei_defaults[:ports][:tcp], :int)
     ]
 end
 
@@ -169,11 +188,12 @@ config :teiserver, Teiserver.Account.Guardian,
   secret_key:
     Teiserver.ConfigHelpers.get_env(
       "TEI_GUARDIAN_SECRET_KEY",
-      "9vJcJOYwsjdIQ9IhfOI5F9GQMykuNjBW58FY9S/TqMsq6gRdKgY05jscQAFVKfwa"
+      Application.get_env(:teiserver, Teiserver.Account.Guardian)[:secret_key]
     ),
   ttl: {30, :days}
 
-config :teiserver, Teiserver.OAuth, issuer: "https://#{domain_name}"
+config :teiserver, Teiserver.OAuth,
+  issuer: Application.get_env(:teiserver, Teiserver.OAuth)[:issuer] || "https://#{domain_name}"
 
 if Teiserver.ConfigHelpers.get_env("TEI_ENABLE_EMAIL_INTEGRATION", false, :bool) do
   config :teiserver, Teiserver.Mailer,

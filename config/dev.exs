@@ -35,6 +35,8 @@ config :teiserver, TeiserverWeb.Endpoint,
     }
   ]
 
+config :teiserver, Teiserver.OAuth, issuer: "http://localhost:4000"
+
 config :dart_sass,
   version: "1.61.0",
   light: [
