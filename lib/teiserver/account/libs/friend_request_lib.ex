@@ -44,6 +44,12 @@ defmodule Teiserver.Account.FriendRequestLib do
       Account.does_a_avoid_b?(to_id, from_id) ->
         {false, "Avoided"}
 
+      Teiserver.Account.RelationshipLib.check_relationship_limit(from_id, :friend) != :ok ->
+        {false, "You have reached the maximum number of friends"}
+
+      Teiserver.Account.RelationshipLib.check_relationship_limit(to_id, :friend) != :ok ->
+        {false, "This user has reached the maximum number of friends"}
+
       true ->
         {true, :ok}
     end
