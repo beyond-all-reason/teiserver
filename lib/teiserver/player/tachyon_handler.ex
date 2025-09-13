@@ -20,15 +20,15 @@ defmodule Teiserver.Player.TachyonHandler do
 
   @impl Handler
   def connect(conn) do
-    {a, b, c, d} = conn.remote_ip
-    ipv4_address = "#{a}.#{b}.#{c}.#{d}"
-
     lobby_client = conn.assigns[:token].application.uid
     user = conn.assigns[:token].owner
 
-    case Teiserver.CacheUser.tachyon_login(user, ipv4_address, lobby_client) do
-      {:ok, user} ->
-        {:ok, %{user: user}}
+    with addr when is_list(addr) <- :inet.ntoa(conn.remote_ip),
+         {:ok, user} <- Teiserver.CacheUser.tachyon_login(user, to_string(addr), lobby_client) do
+      {:ok, %{user: user}}
+    else
+      {:error, :einval} ->
+        {:error, 404, "Invalid remote address"}
 
       {:error, :rate_limited, msg} ->
         {:error, 429, msg}

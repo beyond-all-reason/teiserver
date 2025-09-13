@@ -1,0 +1,7 @@
+# Increase number of concurrent ports/sockets
++Q 65536
+
+# Disable busy waiting following https://stressgrid.com/blog/beam_cpu_usage/
++sbwt none
++sbwtdcpu none
++sbwtdio none

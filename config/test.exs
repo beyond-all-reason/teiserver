@@ -49,6 +49,8 @@ config :teiserver, TeiserverWeb.Endpoint,
   # doesn't work with the test Plug.Conn used for "regular" http requests
   server: true
 
+config :teiserver, Teiserver.OAuth, issuer: "http://localhost:4002"
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 
