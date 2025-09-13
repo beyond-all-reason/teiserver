@@ -290,8 +290,7 @@ defmodule TeiserverWeb.NavComponents do
 
     ~H"""
     <.link navigate={@url} class={"btn btn-outline-#{@bsname} #{@active_class}"}>
-      <Fontawesome.icon :if={@icon} icon={@icon} style={if @active, do: "solid", else: "regular"} />
-      &nbsp; {render_slot(@inner_block)}
+      <Fontawesome.icon :if={@icon} icon={@icon} style="solid" /> &nbsp; {render_slot(@inner_block)}
     </.link>
     """
   end

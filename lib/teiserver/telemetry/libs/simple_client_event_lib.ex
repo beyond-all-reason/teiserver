@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.SimpleClientEventLib do
   def colour(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-slider"
+  def icon(), do: "fa-grip-lines"
 
   @spec log_simple_client_event(T.userid(), String.t()) ::
           {:error, Ecto.Changeset} | {:ok, SimpleClientEvent}

@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventLib do
   def colour(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-scanner-touchscreen"
+  def icon(), do: "fa-chess-pawn"
 
   @spec log_simple_match_event(T.userid(), T.match_id(), String.t(), non_neg_integer) ::
           {:error, Ecto.Changeset} | {:ok, SimpleMatchEvent}

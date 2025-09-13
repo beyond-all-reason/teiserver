@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
           </.tab_nav>
 
           <.tab_nav url={~p"/profile/#{@userid}/playtime"} selected={@tab == "playtime"}>
-            <Fontawesome.icon icon="fa-timer" style="solid" /> Playtime
+            <Fontawesome.icon icon="fa-stopwatch" style="solid" /> Playtime
           </.tab_nav>
 
           <.tab_nav
