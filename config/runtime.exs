@@ -172,8 +172,7 @@ if use_tls? do
     force_ssl: [hsts: true],
     root: ".",
     cache_static_manifest: "priv/static/cache_manifest.json",
-    server: true,
-    version: Mix.Project.config()[:version]
+    server: true
 else
   config :teiserver, Teiserver,
     ports: [
