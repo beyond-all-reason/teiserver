@@ -11,8 +11,8 @@ defmodule Fontawesome do
   attr :icon_atom, :atom
   attr :class, :string, default: ""
   attr :size, :string, default: nil
-  attr :weight, :string, default: "regular"
-  attr :style, :string, default: "regular"
+  attr :weight, :string, default: "solid"
+  attr :style, :string, default: "solid"
   attr :css_style, :string, default: ""
 
   @spec icon(map) :: Phoenix.LiveView.Rendered.t()
@@ -68,7 +68,7 @@ defmodule Fontawesome do
 
   def icon_lookup(:filter), do: "fa-filter"
 
-  def icon_lookup(:summary), do: "fa-user-chart"
+  def icon_lookup(:summary), do: "fa-info"
 
   def icon_lookup(:chart), do: "fa-chart-line"
 
