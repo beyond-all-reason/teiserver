@@ -221,16 +221,25 @@ defmodule Teiserver.Tachyon.Transport do
 
     elapsed = :erlang.monotonic_time(:millisecond) - start
 
-    is_response? =
+    response_details =
       case result do
-        {:response, _} -> true
-        {:response, _, _} -> true
-        {:error_response, _, _} -> true
-        {:error_response, _, _, _} -> true
+        {:response, _} -> {:resp, :ok}
+        {:response, _, _} -> {:resp, :ok}
+        {:error_response, code, _} -> {:resp, code}
+        {:error_response, code, _, _} -> {:resp, code}
         _ -> false
       end
 
-    if is_response?, do: :telemetry.execute([:tachyon, :request], %{duration: elapsed})
+    case response_details do
+      {:resp, code} ->
+        :telemetry.execute([:tachyon, :request], %{duration: elapsed, count: 1}, %{
+          command_id: command_id,
+          code: code
+        })
+
+      _ ->
+        nil
+    end
 
     try do
       handle_result(result, command_id, message_id, state)
