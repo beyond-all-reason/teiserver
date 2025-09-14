@@ -159,7 +159,11 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       # create lobby with another client so that only list updates are sent to
       # the original client, it makes the tests a bit simpler
       {:ok, ctx2} = Tachyon.setup_client()
-      {:ok, lobby_id: lobby_id} = setup_lobby(%{client: ctx2[:client]})
+
+      {:ok, lobby_id: lobby_id} =
+        setup_lobby(%{client: ctx2[:client]}, %{
+          ally_team_config: Tachyon.mk_ally_team_config(2, 2)
+        })
 
       %{
         "commandId" => "lobby/listUpdated",
@@ -167,11 +171,13 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
           "updates" => [
             %{
               "type" => "added",
-              "overview" => %{"id" => ^lobby_id}
+              "overview" => %{"id" => ^lobby_id} = overview
             }
           ]
         }
       } = Tachyon.recv_message!(client)
+
+      assert overview["maxPlayerCount"] == 4
 
       {:ok, ctx3} = Tachyon.setup_client()
       %{"status" => "success"} = Tachyon.join_lobby!(ctx3[:client], lobby_id)
@@ -244,12 +250,14 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
-  defp setup_lobby(%{client: client}) do
-    lobby_data = %{
-      name: "test lobby",
-      map_name: "test-map",
-      ally_team_config: Tachyon.mk_ally_team_config(2, 1)
-    }
+  defp setup_lobby(%{client: client}, overrides \\ %{}) do
+    lobby_data =
+      %{
+        name: "test lobby",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
+      }
+      |> Map.merge(overrides)
 
     %{"status" => "success", "data" => %{"id" => lobby_id}} =
       Tachyon.create_lobby!(client, lobby_data)

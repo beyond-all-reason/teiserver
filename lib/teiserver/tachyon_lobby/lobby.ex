@@ -191,7 +191,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       max_player_count:
         Enum.sum(
           for at <- state.ally_team_config, team <- at.teams do
-            at.max_teams * team.max_players
+            team.max_players
           end
         ),
       map_name: state.map_name,
