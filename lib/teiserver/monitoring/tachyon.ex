@@ -13,14 +13,20 @@ defmodule Teiserver.Monitoring.Tachyon do
     Event.build(
       :teiserver_tachyon_event_metrics,
       [
-        # Telemetry.Metrics.summary(
         distribution(
           [:teiserver, :tachyon, :request, :duration],
           event_name: [:tachyon, :request],
           measurement: :duration,
           reporter_options: [
             buckets: [1, 10, 50, 100, 150, 250, 500, 1_000]
-          ]
+          ],
+          tags: [:command_id]
+        ),
+        counter(
+          [:teiserver, :tachyon, :request, :count],
+          event_name: [:tachyon, :request],
+          measurement: :count,
+          tags: [:command_id, :code]
         )
       ]
     )
