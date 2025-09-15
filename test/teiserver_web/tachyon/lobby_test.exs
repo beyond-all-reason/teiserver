@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
   alias Teiserver.Support.Tachyon
 
   describe "create lobby" do
-    setup [{Tachyon, :setup_client}]
+    setup [:setup_assets, {Tachyon, :setup_client}]
 
     test "can create lobby", %{client: client, user: user} do
       lobby_data = %{
@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
   end
 
   describe "join lobby" do
-    setup [{Tachyon, :setup_client}, :setup_lobby]
+    setup [:setup_assets, {Tachyon, :setup_client}, :setup_lobby]
 
     test "works", %{user: user, lobby_id: lobby_id} do
       {:ok, ctx2} = Tachyon.setup_client()
@@ -86,7 +86,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
   end
 
   describe "leave lobby" do
-    setup [{Tachyon, :setup_client}, :setup_lobby]
+    setup [:setup_assets, {Tachyon, :setup_client}, :setup_lobby]
 
     test "works", %{client: client} do
       %{"status" => "success"} = Tachyon.leave_lobby!(client)
@@ -111,6 +111,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
   describe "start battle" do
     setup [
+      :setup_assets,
       {Tachyon, :setup_client},
       {Tachyon, :setup_app},
       {Tachyon, :setup_autohost},
@@ -149,7 +150,12 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
   end
 
   describe "listing" do
-    setup [{Tachyon, :setup_client}, {Tachyon, :setup_app}, {Tachyon, :setup_autohost}]
+    setup [
+      :setup_assets,
+      {Tachyon, :setup_client},
+      {Tachyon, :setup_app},
+      {Tachyon, :setup_autohost}
+    ]
 
     test "subscribe updates", %{client: client} do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
@@ -263,5 +269,14 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       Tachyon.create_lobby!(client, lobby_data)
 
     {:ok, lobby_id: lobby_id}
+  end
+
+  defp setup_assets(_ctx) do
+    game = Teiserver.AssetFixtures.create_game(%{name: "test-lobby-game", in_matchmaking: true})
+
+    engine =
+      Teiserver.AssetFixtures.create_engine(%{name: "test-lobby-engine", in_matchmaking: true})
+
+    {:ok, game: game, engine: engine}
   end
 end

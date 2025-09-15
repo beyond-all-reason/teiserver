@@ -52,6 +52,9 @@ defmodule Teiserver.Asset do
   @spec get_engine(EngineQueries.where_opts()) :: Asset.Engine.t() | nil
   defdelegate get_engine(attr), to: EngineQueries
 
+  @spec get_default_lobby_engine() :: Asset.Engine.t() | nil
+  defdelegate get_default_lobby_engine(), to: EngineQueries
+
   def change_engine(%Asset.Engine{} = engine \\ %Asset.Engine{}, attrs \\ %{}) do
     Asset.Engine.changeset(engine, attrs)
   end
@@ -109,6 +112,9 @@ defmodule Teiserver.Asset do
 
   @spec get_game(GameQueries.where_opts()) :: Asset.Game.t() | nil
   defdelegate get_game(attr), to: GameQueries
+
+  @spec get_default_lobby_game() :: Asset.Game.t() | nil
+  defdelegate get_default_lobby_game(), to: GameQueries
 
   def change_game(%Asset.Game{} = game \\ %Asset.Game{}, attrs \\ %{}) do
     Asset.Game.changeset(game, attrs)

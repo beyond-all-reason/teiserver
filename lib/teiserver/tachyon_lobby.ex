@@ -6,6 +6,7 @@ defmodule Teiserver.TachyonLobby do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
+  alias Teiserver.Asset
 
   @type id :: Lobby.id()
   @type details :: Lobby.details()
@@ -24,6 +25,25 @@ defmodule Teiserver.TachyonLobby do
   @spec create(Lobby.start_params()) ::
           {:ok, pid(), details()}
           | {:error, {:already_started, pid()} | :max_children | term()}
+  def create(start_params)
+      when not is_map_key(start_params, :game_version) or start_params.game_version == nil do
+    # This is certainly not what we want to have long term, but for now it makes
+    # it easier to change this parameter than having to redeploy
+    case Asset.get_default_lobby_game() do
+      nil -> {:error, :no_game_version_found}
+      game -> Map.put(start_params, :game_version, game.name) |> create()
+    end
+  end
+
+  def create(start_params)
+      when not is_map_key(start_params, :engine_version) or start_params.engine_version == nil do
+    # Same as above, it's unlikely we end up with that but it'll do for now
+    case Asset.get_default_lobby_engine() do
+      nil -> {:error, :no_engine_version_found}
+      game -> Map.put(start_params, :engine_version, game.name) |> create()
+    end
+  end
+
   def create(start_params) do
     with {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
          {:ok, details} <- Lobby.get_details(id) do
