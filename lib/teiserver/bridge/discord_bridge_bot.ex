@@ -322,8 +322,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       msg =
         [
           "# [Moderation report #{report.type}/#{report.sub_type}](#{url})#{match_icon}",
-          "**Target:** [#{report.target.name}](https://#{host}/teiserver/admin/user/#{report.target.id})",
-          "**Reporter:** [#{report.reporter.name}](https://#{host}/teiserver/admin/user/#{report.reporter.id})",
+          "**Target:** [#{report.target.name}](https://#{host}/moderation/report/user/#{report.target.id})",
+          "**Reporter:** [#{report.reporter.name}](https://#{host}/moderation/report/user/#{report.reporter.id})",
           "**Reason:** #{format_link(report.extra_text)}",
           "**Status:** Open"
         ]
