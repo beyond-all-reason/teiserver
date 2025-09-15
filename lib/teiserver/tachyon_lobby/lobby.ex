@@ -43,11 +43,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
   turn can be used to start a battle
   """
   @type start_params :: %{
-          creator_data: player_join_data(),
-          creator_pid: pid(),
-          name: String.t(),
-          map_name: String.t(),
-          ally_team_config: ally_team_config()
+          required(:creator_data) => player_join_data(),
+          required(:creator_pid) => pid(),
+          required(:name) => String.t(),
+          required(:map_name) => String.t(),
+          required(:ally_team_config) => ally_team_config(),
+          optional(:game_version) => String.t()
         }
 
   @typedoc """
@@ -170,7 +171,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       monitors: monitors,
       name: start_params.name,
       map_name: start_params.map_name,
-      game_version: "BAR-27755-75d0172",
+      game_version: start_params.game_version,
       engine_version: "2025.04.08",
       ally_team_config: start_params.ally_team_config,
       players: %{

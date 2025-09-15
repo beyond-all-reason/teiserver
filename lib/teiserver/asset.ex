@@ -110,6 +110,9 @@ defmodule Teiserver.Asset do
   @spec get_game(GameQueries.where_opts()) :: Asset.Game.t() | nil
   defdelegate get_game(attr), to: GameQueries
 
+  @spec get_default_lobby_game() :: Asset.Game.t() | nil
+  defdelegate get_default_lobby_game(), to: GameQueries
+
   def change_game(%Asset.Game{} = game \\ %Asset.Game{}, attrs \\ %{}) do
     Asset.Game.changeset(game, attrs)
   end
