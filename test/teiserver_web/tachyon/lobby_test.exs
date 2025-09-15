@@ -273,6 +273,10 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
   defp setup_assets(_ctx) do
     game = Teiserver.AssetFixtures.create_game(%{name: "test-lobby-game", in_matchmaking: true})
-    {:ok, game: game}
+
+    engine =
+      Teiserver.AssetFixtures.create_engine(%{name: "test-lobby-engine", in_matchmaking: true})
+
+    {:ok, game: game, engine: engine}
   end
 end

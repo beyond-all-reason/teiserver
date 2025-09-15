@@ -35,6 +35,15 @@ defmodule Teiserver.TachyonLobby do
     end
   end
 
+  def create(start_params)
+      when not is_map_key(start_params, :engine_version) or start_params.engine_version == nil do
+    # Same as above, it's unlikely we end up with that but it'll do for now
+    case Asset.get_default_lobby_engine() do
+      nil -> {:error, :no_engine_version_found}
+      game -> Map.put(start_params, :engine_version, game.name) |> create()
+    end
+  end
+
   def create(start_params) do
     with {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
          {:ok, details} <- Lobby.get_details(id) do

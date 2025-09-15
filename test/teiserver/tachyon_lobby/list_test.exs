@@ -105,6 +105,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
       name: "test create lobby",
       map_name: "irrelevant map name",
       game_version: "fake game version",
+      engine_version: "fake engine version",
       ally_team_config:
         Enum.map(teams, fn max_team ->
           x = for _ <- 1..max_team, do: %{max_players: 1}

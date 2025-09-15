@@ -32,6 +32,26 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     assert details.game_version == game.name
   end
 
+  test "must have engine in db" do
+    result =
+      mk_start_params([1, 1])
+      |> Map.drop([:engine_version])
+      |> Lobby.create()
+
+    assert result == {:error, :no_engine_version_found}
+  end
+
+  test "get default engine from db" do
+    engine = AssetFixtures.create_engine(%{name: "test-engine", in_matchmaking: true})
+
+    {:ok, _pid, details} =
+      mk_start_params([1, 1])
+      |> Map.drop([:engine_version])
+      |> Lobby.create()
+
+    assert details.engine_version == engine.name
+  end
+
   test "exit when no more players" do
     test_pid = self()
 
@@ -193,6 +213,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       name: "test create lobby",
       map_name: "irrelevant map name",
       game_version: "fake game version",
+      engine_version: "fake engine version",
       ally_team_config:
         Enum.map(teams, fn max_team ->
           x = for _ <- 1..max_team, do: %{max_players: 1}

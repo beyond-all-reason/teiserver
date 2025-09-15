@@ -48,7 +48,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
           required(:name) => String.t(),
           required(:map_name) => String.t(),
           required(:ally_team_config) => ally_team_config(),
-          optional(:game_version) => String.t()
+          optional(:game_version) => String.t(),
+          optional(:engine_version) => String.t()
         }
 
   @typedoc """
@@ -172,7 +173,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       name: start_params.name,
       map_name: start_params.map_name,
       game_version: start_params.game_version,
-      engine_version: "2025.04.08",
+      engine_version: start_params.engine_version,
       ally_team_config: start_params.ally_team_config,
       players: %{
         start_params.creator_data.id => %{
