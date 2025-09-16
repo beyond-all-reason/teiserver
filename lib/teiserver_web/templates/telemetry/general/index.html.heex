@@ -22,6 +22,7 @@
   <.menu_card
     :if={allow?(@current_user, "Server")}
     icon={Teiserver.Telemetry.SimpleClientEventLib.icon()}
+    icon_class="solid"
     url={~p"/telemetry/simple_client_events/summary"}
     size={:small}
   >

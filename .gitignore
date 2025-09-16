@@ -47,14 +47,15 @@ runtime/
 /priv/certs/
 /priv/static/assets/
 
+# running mix phx.digest will create a lot of "digested" files
+/priv/static/**/*-[0-9a-f]*.*
+/priv/static/**/*.gz
+/priv/static/cache_manifest.json
 
 # Other
 /assets/static/images/landing/*
 /assets/static/images/logo/*
 /assets/static/favicon.*
-/priv/static/webfonts/fa-*
-*fontawesome.js
-*fontawesome.css
 /assets/static/js/ace
 /backups/
 /remote/
