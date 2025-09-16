@@ -39,34 +39,40 @@ defmodule Teiserver.SpringTcpServer do
 
   # Called at startup
   def start_link(opts) do
-    mode = if opts[:ssl], do: :ranch_ssl, else: :ranch_tcp
+    use_tls? = Application.get_env(:teiserver, Teiserver)[:use_tls?]
 
     # start_listener(Ref, Transport, TransOpts0, Protocol, ProtoOpts)
-    if mode == :ranch_ssl do
-      ssl_opts = get_ssl_opts()
-
-      :ranch.start_listener(
-        make_ref(),
-        :ranch_ssl,
-        ssl_opts ++
+    case {use_tls?, Keyword.get(opts, :ssl, false)} do
+      {_, false} ->
+        :ranch.start_listener(
+          make_ref(),
+          :ranch_tcp,
           get_standard_tcp_opts() ++
-          [
-            port: Application.get_env(:teiserver, Teiserver)[:ports][:tls]
-          ],
-        __MODULE__,
-        []
-      )
-    else
-      :ranch.start_listener(
-        make_ref(),
-        :ranch_tcp,
-        get_standard_tcp_opts() ++
-          [
-            port: Application.get_env(:teiserver, Teiserver)[:ports][:tcp]
-          ],
-        __MODULE__,
-        []
-      )
+            [
+              port: Application.get_env(:teiserver, Teiserver)[:ports][:tcp]
+            ],
+          __MODULE__,
+          []
+        )
+
+      {false, true} ->
+        Logger.info("not using ssl, bailing out of ssl listener")
+        :ignore
+
+      {true, true} ->
+        ssl_opts = get_ssl_opts()
+
+        :ranch.start_listener(
+          make_ref(),
+          :ranch_ssl,
+          ssl_opts ++
+            get_standard_tcp_opts() ++
+            [
+              port: Application.get_env(:teiserver, Teiserver)[:ports][:tls]
+            ],
+          __MODULE__,
+          []
+        )
     end
   end
 
