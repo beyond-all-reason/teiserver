@@ -165,7 +165,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     :ok
   end
 
-  @spec run(%Date{}, boolean()) :: :ok
+  @spec run(Date.t(), boolean()) :: :ok
   def run(date, cleanup) do
     data =
       0..@segment_count
@@ -507,7 +507,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     Map.put(stats, :matches, get_matches_from_day(date))
   end
 
-  @spec get_matches_from_day(%Date{}) :: map()
+  @spec get_matches_from_day(Date.t()) :: map()
   defp get_matches_from_day(the_date) do
     the_date = Timex.to_datetime(the_date)
 

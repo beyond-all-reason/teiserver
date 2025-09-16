@@ -273,7 +273,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
 
   @spec get_result(RA.state()) :: RA.result() | RA.simple_result()
   def get_result(state) do
-    if(Enum.count(state.parties) == 0 && Enum.count(state.avoids) == 0) do
+    if(Enum.empty?(state.parties) && Enum.empty?(state.avoids)) do
       do_simple_draft(state)
     else
       do_brute_force_and_draft(state)
