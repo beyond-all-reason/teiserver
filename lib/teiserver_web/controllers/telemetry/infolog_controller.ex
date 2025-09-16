@@ -1,7 +1,6 @@
 defmodule TeiserverWeb.Telemetry.InfologController do
   use TeiserverWeb, :controller
   alias Teiserver.Telemetry
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "telemetry",
