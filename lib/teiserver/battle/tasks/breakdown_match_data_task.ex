@@ -4,8 +4,8 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
   """
   alias Teiserver.Battle
 
-  @spec perform(%Date{}) :: map()
-  @spec perform(%Date{}, %Date{}) :: map()
+  @spec perform(Date.t()) :: map()
+  @spec perform(Date.t(), Date.t()) :: map()
   def perform(start_date) do
     perform(start_date, Timex.shift(start_date, days: 1))
   end
@@ -30,7 +30,7 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
     }
   end
 
-  @spec get_matches(%Date{}, %Date{}) :: [map()]
+  @spec get_matches(Date.t(), Date.t()) :: [map()]
   defp get_matches(start_date, end_date) do
     start_date = Timex.to_datetime(start_date)
     end_date = Timex.to_datetime(end_date)

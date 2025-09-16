@@ -50,7 +50,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
   # To re-run yesterday's data
   # Teiserver.Logging.Tasks.PersistMatchDayTask.run(Timex.today |> Timex.shift(days: -1))
 
-  @spec run(%Date{}) :: :ok
+  @spec run(Date.t()) :: :ok
   def run(date) do
     data = BreakdownMatchDataTask.perform(date)
 
