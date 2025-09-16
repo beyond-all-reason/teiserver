@@ -200,7 +200,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   def handle_info(
-        data = %{channel: "teiserver_client_messages:" <> _, event: :received_direct_message},
+        %{channel: "teiserver_client_messages:" <> _, event: :received_direct_message} = data,
         state
       ) do
     username = CacheUser.get_username(data.sender_id)

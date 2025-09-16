@@ -1287,7 +1287,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # end
 
   @spec say_command(map(), map()) :: map()
-  def say_command(cmd = %{silent: true}, state), do: log_command(cmd, state)
+  def say_command(%{silent: true} = cmd, state), do: log_command(cmd, state)
 
   def say_command(cmd, state) do
     message = "$ " <> command_as_message(cmd)

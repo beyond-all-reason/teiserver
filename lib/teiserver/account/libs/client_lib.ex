@@ -133,7 +133,7 @@ defmodule Teiserver.Account.ClientLib do
     client
   end
 
-  def replace_update_client(%{userid: userid} = client, reason = :client_updated_status) do
+  def replace_update_client(%{userid: userid} = client, :client_updated_status = reason) do
     # Update the process with it
     cast_client(userid, {:update_client, client})
 
