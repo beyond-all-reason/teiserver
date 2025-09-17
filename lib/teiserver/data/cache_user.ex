@@ -915,6 +915,9 @@ defmodule Teiserver.CacheUser do
     end
   end
 
+  # TODO: once we got rid of spring, do_login should not accept the IP as a string
+  # but as a :inet.ip_address which is what we get from the conn object
+  # And then we need to stringify it as usual when storing in DB
   @spec do_login(T.user(), String.t(), String.t(), String.t()) :: {:ok, T.user()}
   def do_login(user, ip, lobby_client, lobby_hash) do
     stats = Account.get_user_stat_data(user.id)
