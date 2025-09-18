@@ -44,6 +44,7 @@ config :teiserver, DiscordBridgeBot,
   ]
 
 config :teiserver, TeiserverWeb.Endpoint,
+  url: [host: "localhost"],
   http: [port: 4002],
   # Spawn a real server. This is required for websocket upgrade since it
   # doesn't work with the test Plug.Conn used for "regular" http requests

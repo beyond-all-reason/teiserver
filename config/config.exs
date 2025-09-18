@@ -24,7 +24,6 @@ config :teiserver,
 
 # Configures the endpoint
 config :teiserver, TeiserverWeb.Endpoint,
-  url: [host: "localhost"],
   # This is overriden in your secret config, it's here only to allow things to run easily
   secret_key_base: "6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy",
   live_view: [signing_salt: "wZVVigZo"],
