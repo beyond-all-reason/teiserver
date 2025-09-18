@@ -7,7 +7,7 @@ defmodule Teiserver.Account.CodeLib do
   def colours(), do: :info
 
   @spec icon :: String.t()
-  def icon(), do: "fa-regular fa-diamond"
+  def icon(), do: "fa-solid fa-diamond"
 
   @doc """
   Returns a list of the code types we can manually use (e.g. not password_reset)

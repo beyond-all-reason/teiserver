@@ -8,7 +8,7 @@ defmodule Teiserver.Logging.UserActivityDayLogLib do
   def colours(), do: :warning
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-wave-pulse"
+  def icon(), do: "fa-solid fa-wave-pulse"
 
   @spec get_user_activity_day_logs :: Ecto.Query.t()
   def get_user_activity_day_logs() do

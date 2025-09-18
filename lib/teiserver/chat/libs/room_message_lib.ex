@@ -4,7 +4,7 @@ defmodule Teiserver.Chat.RoomMessageLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-comment"
+  def icon, do: "fa-solid fa-comment"
 
   @spec colours :: atom
   def colours, do: :default

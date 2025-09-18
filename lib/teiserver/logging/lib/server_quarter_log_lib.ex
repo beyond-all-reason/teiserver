@@ -7,7 +7,7 @@ defmodule Teiserver.Logging.ServerQuarterLogLib do
   def colours(), do: :warning2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-bar-chart"
+  def icon(), do: "fa-solid fa-bar-chart"
 
   @spec get_server_quarter_logs :: Ecto.Query.t()
   def get_server_quarter_logs() do

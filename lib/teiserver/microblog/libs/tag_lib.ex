@@ -5,7 +5,7 @@ defmodule Teiserver.Microblog.TagLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-tags"
+  def icon, do: "fa-solid fa-tags"
 
   @spec colours :: atom
   def colours, do: :default

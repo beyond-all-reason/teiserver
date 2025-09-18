@@ -154,7 +154,7 @@ defmodule TeiserverWeb.UserComponents do
             onclick="$('#signout-form').submit();"
             id="signout-link"
           >
-            <i class="fa-regular fa-sign-out fa-fw"></i> &nbsp;
+            <i class="fa-solid fa-sign-out fa-fw"></i> &nbsp;
             Sign out {@current_user.name}
           </a>
         </form>

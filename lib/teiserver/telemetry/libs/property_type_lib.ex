@@ -4,7 +4,7 @@ defmodule Teiserver.Telemetry.PropertyTypeLib do
   alias Teiserver.Telemetry.{PropertyType, PropertyTypeQueries}
 
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-tags"
+  def icon, do: "fa-solid fa-tags"
 
   @spec colours :: atom
   def colours, do: :info2

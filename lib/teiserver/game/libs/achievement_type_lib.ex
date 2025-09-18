@@ -4,7 +4,7 @@ defmodule Teiserver.Game.AchievementTypeLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-star"
+  def icon, do: "fa-solid fa-star"
 
   @spec colour :: atom
   def colour, do: :info2

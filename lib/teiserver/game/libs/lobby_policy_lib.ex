@@ -9,7 +9,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-box"
+  def icon, do: "fa-solid fa-box"
 
   @spec colours :: atom
   def colours, do: :success2

@@ -23,10 +23,10 @@
 
       <%= for r <- Enum.take(recents, 15) do %>
         <a class="dropdown-item" href={r.url}>
-          <i class={"fa-regular #{r.type_icon} fa-fw"} style={"color: #{r.type_colour}"}></i>
+          <i class={"fa-solid #{r.type_icon} fa-fw"} style={"color: #{r.type_colour}"}></i>
 
           <%= if r.item_icon do %>
-            <i class={"fa-regular #{r.item_icon} fa-fw"} style={"color: #{r.item_colour}"}></i>
+            <i class={"fa-solid #{r.item_icon} fa-fw"} style={"color: #{r.item_colour}"}></i>
           <% else %>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <% end %>

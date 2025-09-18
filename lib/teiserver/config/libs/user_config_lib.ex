@@ -9,5 +9,5 @@ defmodule Teiserver.Config.UserConfigLib do
   def colours(), do: :success
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-cog"
+  def icon(), do: "fa-solid fa-cog"
 end

@@ -5,7 +5,7 @@ defmodule Teiserver.Moderation.ResponseLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-reply"
+  def icon, do: "fa-solid fa-reply"
 
   @spec colour :: atom
   def colour, do: :info2

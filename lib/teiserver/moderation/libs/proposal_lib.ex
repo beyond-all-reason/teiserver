@@ -5,7 +5,7 @@ defmodule Teiserver.Moderation.ProposalLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-booth-curtain"
+  def icon, do: "fa-solid fa-booth-curtain"
 
   @spec colour :: atom
   def colour, do: :success

@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   # @create_attrs %{
   #   colour: "#AA0000",
   #   email: "some email",
-  #   icon: "fa-regular fa-home",
+  #   icon: "fa-solid fa-home",
   #   name: "some name",
   #   permissions: [],
   #   username: "some username",
