@@ -7,7 +7,7 @@ defmodule Teiserver.Logging.MatchMonthLogLib do
   def colours(), do: :warning2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-bar-chart"
+  def icon(), do: "fa-solid fa-bar-chart"
 
   @spec get_match_month_logs :: Ecto.Query.t()
   def get_match_month_logs() do

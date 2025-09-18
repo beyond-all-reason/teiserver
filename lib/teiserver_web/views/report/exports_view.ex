@@ -5,5 +5,5 @@ defmodule TeiserverWeb.Report.ExportsView do
   def view_colour(), do: :info
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-download"
+  def icon(), do: "fa-solid fa-download"
 end

@@ -33,7 +33,7 @@
             name: "filter-hourly-users",
             label: "Users",
             active: "filter-#{@filter}",
-            icon: "fa-regular fa-grid-4",
+            icon: "fa-solid fa-grid-4",
             bsname: bsname,
             url: "?filter=hourly-users"
           )}
@@ -42,7 +42,7 @@
             name: "filter-hourly-players",
             label: "Players",
             active: "filter-#{@filter}",
-            icon: "fa-regular fa-grid-4",
+            icon: "fa-solid fa-grid-4",
             bsname: bsname,
             url: "?filter=hourly-players"
           )}
@@ -51,7 +51,7 @@
             name: "filter-hourly-battles",
             label: "Battles",
             active: "filter-#{@filter}",
-            icon: "fa-regular fa-grid-4",
+            icon: "fa-solid fa-grid-4",
             bsname: bsname,
             url: "?filter=hourly-battles"
           )}
@@ -130,11 +130,11 @@
         <%= if String.starts_with?(@filter, "hourly-") do %>
           &nbsp;&nbsp;&nbsp;&nbsp;
           <span class={"btn btn-#{bsname}"} onclick='$(".hourly-view-span").show();'>
-            <i class="fa-fw fa-regular fa-eye"></i> Show numbers
+            <i class="fa-fw fa-solid fa-eye"></i> Show numbers
           </span>
 
           <span class={"btn btn-#{bsname}"} onclick='$(".hourly-view-span").hide();'>
-            <i class="fa-fw fa-regular fa-eye-slash"></i> Hide numbers
+            <i class="fa-fw fa-solid fa-eye-slash"></i> Hide numbers
           </span>
         <% end %>
 

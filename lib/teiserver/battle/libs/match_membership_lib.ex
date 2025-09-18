@@ -4,7 +4,7 @@ defmodule Teiserver.Battle.MatchMembershipLib do
   alias Teiserver.Battle.MatchMembership
 
   def colours(), do: :primary2
-  def icon(), do: "fa-regular fa-users"
+  def icon(), do: "fa-solid fa-users"
 
   @spec get_match_memberships() :: Ecto.Query.t()
   def get_match_memberships do

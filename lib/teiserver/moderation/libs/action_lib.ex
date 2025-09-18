@@ -7,7 +7,7 @@ defmodule Teiserver.Moderation.ActionLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-triangle-exclamation"
+  def icon, do: "fa-solid fa-triangle-exclamation"
 
   @spec colour :: atom
   def colour, do: :primary

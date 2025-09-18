@@ -7,7 +7,7 @@ defmodule Teiserver.Logging.ServerMinuteLogLib do
   def colours(), do: :warning2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-monitor-heart-rate"
+  def icon(), do: "fa-solid fa-monitor-heart-rate"
 
   @spec get_server_minute_logs :: Ecto.Query.t()
   def get_server_minute_logs() do

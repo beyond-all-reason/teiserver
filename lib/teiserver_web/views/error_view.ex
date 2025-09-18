@@ -2,7 +2,7 @@ defmodule TeiserverWeb.ErrorView do
   use TeiserverWeb, :view
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-exclamation-triangle"
+  def icon(), do: "fa-solid fa-exclamation-triangle"
 
   @spec view_colour() :: atom
   def view_colour(), do: :danger2

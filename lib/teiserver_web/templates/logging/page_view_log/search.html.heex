@@ -28,7 +28,7 @@
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
         <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">
-          <i class="fa-regular fa-fw fa-search"></i> Show search form
+          <i class="fa-solid fa-fw fa-search"></i> Show search form
         </div>
 
         <form
@@ -68,7 +68,7 @@
                 selected: @params["section"],
                 enumerable: [
                   %{id: "any", name: "Any section", icon: "fa-solid fa-th", colour: fg},
-                  %{id: "admin", icon: "fa-regular fa-user-circle", colour: fg}
+                  %{id: "admin", icon: "fa-solid fa-user-circle", colour: fg}
                 ]
               })}
             </div>
@@ -117,9 +117,9 @@
                 id: "search_search_group",
                 selected: @params["order"],
                 enumerable: [
-                  %{id: "Newest first", icon: "fa-regular fa-sort-numeric-down", colour: fg},
-                  %{id: "Oldest first", icon: "fa-regular fa-sort-numeric-up", colour: fg},
-                  %{id: "Slowest", icon: "fa-regular fa-hourglass-end", colour: fg}
+                  %{id: "Newest first", icon: "fa-solid fa-sort-numeric-down", colour: fg},
+                  %{id: "Oldest first", icon: "fa-solid fa-sort-numeric-up", colour: fg},
+                  %{id: "Slowest", icon: "fa-solid fa-hourglass-end", colour: fg}
                 ]
               })}
             </div>

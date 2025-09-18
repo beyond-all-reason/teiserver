@@ -7,7 +7,7 @@ defmodule Teiserver.Logging.MatchDayLogLib do
   def colours(), do: :success2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-monitor-heart-rate"
+  def icon(), do: "fa-solid fa-monitor-heart-rate"
 
   @spec get_match_day_logs :: Ecto.Query.t()
   def get_match_day_logs() do

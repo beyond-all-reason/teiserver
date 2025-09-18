@@ -7,7 +7,7 @@ defmodule Teiserver.Account.BadgeTypeLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-certificate"
+  def icon, do: "fa-solid fa-certificate"
 
   @spec colours :: atom
   def colours, do: :warning2
@@ -137,7 +137,7 @@ defmodule Teiserver.Account.BadgeTypeLib do
   def nil_badge_type() do
     %{
       name: "No badge",
-      icon: "fa-regular fa-square",
+      icon: "fa-solid fa-square",
       colour: "#555",
       description: "",
       purposes: []

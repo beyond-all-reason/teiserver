@@ -4,7 +4,7 @@ defmodule Teiserver.Account.SmurfKeyLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-key"
+  def icon, do: "fa-solid fa-key"
 
   @spec colours :: atom
   def colours, do: :info

@@ -97,7 +97,7 @@ policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
                 <td>{policy.name}</td>
                 <td>
                   <%= if organiser == nil do %>
-                    <i class="fa-fw fa-regular fa-times text-danger"></i>
+                    <i class="fa-fw fa-solid fa-times text-danger"></i>
                   <% else %>
                     <i class="fa-fw fa-solid fa-check text-success"></i>
                   <% end %>
@@ -131,7 +131,7 @@ policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
                 <td>{server_name}</td>
                 <td>
                   <%= if server_pid == nil do %>
-                    <i class="fa-fw fa-regular fa-times text-danger"></i>
+                    <i class="fa-fw fa-solid fa-times text-danger"></i>
                   <% else %>
                     <i class="fa-fw fa-solid fa-check text-success"></i>
                   <% end %>
@@ -164,21 +164,21 @@ policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
             <td>{lobby.name}</td>
             <td>
               <%= if consul == nil do %>
-                <i class="fa-fw fa-regular fa-times text-danger"></i>
+                <i class="fa-fw fa-solid fa-times text-danger"></i>
               <% else %>
                 <i class="fa-fw fa-solid fa-check text-success"></i>
               <% end %>
             </td>
             <td>
               <%= if balancer == nil do %>
-                <i class="fa-fw fa-regular fa-times text-danger"></i>
+                <i class="fa-fw fa-solid fa-times text-danger"></i>
               <% else %>
                 <i class="fa-fw fa-solid fa-check text-success"></i>
               <% end %>
             </td>
             <td>
               <%= if throttle == nil do %>
-                <i class="fa-fw fa-regular fa-times text-danger"></i>
+                <i class="fa-fw fa-solid fa-times text-danger"></i>
               <% else %>
                 <i class="fa-fw fa-solid fa-check text-success"></i>
               <% end %>

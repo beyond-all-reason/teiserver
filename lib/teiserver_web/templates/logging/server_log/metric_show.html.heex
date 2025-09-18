@@ -56,7 +56,7 @@
               <%= if @today do %>
                 &nbsp;&nbsp;&nbsp;
                 <a href="?recache=true" class={"btn btn-outline-#{bsname}"}>
-                  <i class="fa-fw fa-regular fa-sync"></i> &nbsp;
+                  <i class="fa-fw fa-solid fa-sync"></i> &nbsp;
                   Force refresh
                 </a>
               <% end %>
@@ -81,7 +81,7 @@
               <%= if Map.has_key?(@data, "average_user_counts") do %>
                 <li class="nav-item">
                   <a href="#hourly_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                    <i class="fa-regular fa-fw fa-hourglass"></i> Hourly
+                    <i class="fa-solid fa-fw fa-hourglass"></i> Hourly
                   </a>
                 </li>
               <% end %>
@@ -96,7 +96,7 @@
 
               <li class="nav-item">
                 <a href="#raw_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <i class="fa-regular fa-fw fa-code"></i> Raw data
+                  <i class="fa-solid fa-fw fa-code"></i> Raw data
                 </a>
               </li>
             </ul>

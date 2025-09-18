@@ -7,7 +7,7 @@ defmodule Teiserver.Telemetry.TelemetryLib do
   def colours(), do: :warning2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-heart-pulse"
+  def icon(), do: "fa-solid fa-heart-pulse"
 
   @spec get_totals_and_reset :: map()
   def get_totals_and_reset() do
