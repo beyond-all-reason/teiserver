@@ -135,7 +135,7 @@ defmodule Teiserver.Moderation do
   """
   def get_report(id, args \\ []) when not is_list(id) do
     report_query(id, args)
-    |> Repo.one
+    |> Repo.one()
   end
 
   @doc """
