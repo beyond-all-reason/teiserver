@@ -119,25 +119,24 @@ defmodule Teiserver.Moderation do
     |> Repo.one!()
   end
 
-  # Uncomment this if needed, default files do not need this function
-  # @doc """
-  # Gets a single report.
+  @doc """
+  Gets a single report.
 
-  # Returns `nil` if the Report does not exist.
+  Returns `nil` if the Report does not exist.
 
-  # ## Examples
+  ## Examples
 
-  #     iex> get_report(123)
-  #     %Report{}
+      iex> get_report(123)
+      %Report{}
 
-  #     iex> get_report(456)
-  #     nil
+      iex> get_report(456)
+      nil
 
-  # """
-  # def get_report(id, args \\ []) when not is_list(id) do
-  #   report_query(id, args)
-  #   |> Repo.one
-  # end
+  """
+  def get_report(id, args \\ []) when not is_list(id) do
+    report_query(id, args)
+    |> Repo.one
+  end
 
   @doc """
   Creates a report.
