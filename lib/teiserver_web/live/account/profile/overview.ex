@@ -151,12 +151,18 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    Account.ignore_user(current_user.id, user.id)
-
     socket =
-      socket
-      |> put_flash(:success, "You are now ignoring #{user.name}")
-      |> get_relationships_and_permissions()
+      case Account.ignore_user(current_user.id, user.id) do
+        {:ok, _} ->
+          socket
+          |> put_flash(:success, "You are now ignoring #{user.name}")
+          |> get_relationships_and_permissions()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to ignore user: #{reason}")
+          |> get_relationships_and_permissions()
+      end
 
     {:noreply, socket}
   end
@@ -181,12 +187,18 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    Account.avoid_user(current_user.id, user.id)
-
     socket =
-      socket
-      |> put_flash(:success, "You are now avoiding #{user.name}")
-      |> get_relationships_and_permissions()
+      case Account.avoid_user(current_user.id, user.id) do
+        {:ok, _} ->
+          socket
+          |> put_flash(:success, "You are now avoiding #{user.name}")
+          |> get_relationships_and_permissions()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to avoid user: #{reason}")
+          |> get_relationships_and_permissions()
+      end
 
     {:noreply, socket}
   end
@@ -196,12 +208,18 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    Account.block_user(current_user.id, user.id)
-
     socket =
-      socket
-      |> put_flash(:success, "You are now blocking #{user.name}")
-      |> get_relationships_and_permissions()
+      case Account.block_user(current_user.id, user.id) do
+        {:ok, _} ->
+          socket
+          |> put_flash(:success, "You are now blocking #{user.name}")
+          |> get_relationships_and_permissions()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to block user: #{reason}")
+          |> get_relationships_and_permissions()
+      end
 
     {:noreply, socket}
   end
@@ -211,12 +229,18 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    Account.decline_friend_request(current_user.id, user.id)
-
     socket =
-      socket
-      |> put_flash(:success, "Request from #{user.name} declined")
-      |> get_relationships_and_permissions()
+      case Account.decline_friend_request(current_user.id, user.id) do
+        :ok ->
+          socket
+          |> put_flash(:success, "Request from #{user.name} declined")
+          |> get_relationships_and_permissions()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to decline friend request: #{reason}")
+          |> get_relationships_and_permissions()
+      end
 
     {:noreply, socket}
   end
@@ -226,12 +250,18 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    Account.accept_friend_request(user.id, current_user.id)
-
     socket =
-      socket
-      |> put_flash(:success, "Request accepted, you are now friends with #{user.name}")
-      |> get_relationships_and_permissions()
+      case Account.accept_friend_request(user.id, current_user.id) do
+        :ok ->
+          socket
+          |> put_flash(:success, "Request accepted, you are now friends with #{user.name}")
+          |> get_relationships_and_permissions()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to accept friend request: #{reason}")
+          |> get_relationships_and_permissions()
+      end
 
     {:noreply, socket}
   end
@@ -241,12 +271,18 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    Account.decline_friend_request(user.id, current_user.id)
-
     socket =
-      socket
-      |> put_flash(:success, "Friend request declined")
-      |> get_relationships_and_permissions()
+      case Account.decline_friend_request(user.id, current_user.id) do
+        :ok ->
+          socket
+          |> put_flash(:success, "Friend request declined")
+          |> get_relationships_and_permissions()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to decline friend request: #{reason}")
+          |> get_relationships_and_permissions()
+      end
 
     {:noreply, socket}
   end
@@ -256,12 +292,18 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    Account.rescind_friend_request(current_user.id, user.id)
-
     socket =
-      socket
-      |> put_flash(:success, "Friend request rescinded")
-      |> get_relationships_and_permissions()
+      case Account.rescind_friend_request(current_user.id, user.id) do
+        :ok ->
+          socket
+          |> put_flash(:success, "Friend request rescinded")
+          |> get_relationships_and_permissions()
+
+        {:error, reason} ->
+          socket
+          |> put_flash(:warning, "Failed to rescind friend request: #{reason}")
+          |> get_relationships_and_permissions()
+      end
 
     {:noreply, socket}
   end
