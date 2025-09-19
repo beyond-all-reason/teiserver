@@ -96,7 +96,7 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
         end
 
       if content == [] do
-        "No Report Link or Action Link/Notes available"
+        "No Report Link available"
       else
         Enum.join(content, "\n")
       end
