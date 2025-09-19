@@ -121,6 +121,8 @@ config :logger, :info_log,
   metadata: metadata,
   level: :info
 
+config :logger, :console, metadata: metadata
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 

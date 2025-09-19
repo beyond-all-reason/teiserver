@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.API.BattleView do
   use TeiserverWeb, :view
 
-  def render("create.json", battle = %{outcome: :success}) do
+  def render("create.json", %{outcome: :success} = battle) do
     %{outcome: :success, lobby_id: battle.id}
   end
 

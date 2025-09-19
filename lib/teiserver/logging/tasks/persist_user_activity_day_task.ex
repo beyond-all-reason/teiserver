@@ -37,7 +37,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
     :ok
   end
 
-  @spec run(%Date{}) :: :ok
+  @spec run(Date.t()) :: :ok
   def run(date) do
     data =
       date

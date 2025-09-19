@@ -8,10 +8,9 @@ defmodule TeiserverWeb.API.BattleController do
     user: {Teiserver.Account.AuthLib, :current_user}
   )
 
-  def create(conn, _battle = %{"outcome" => "completed"}) do
+  def create(conn, %{"outcome" => "completed"}) do
     conn
     |> put_status(201)
-    # |> render("create.json", %{outcome: :success, id: dbbattle.id})
     |> render("create.json", %{outcome: :success, id: 1})
   end
 

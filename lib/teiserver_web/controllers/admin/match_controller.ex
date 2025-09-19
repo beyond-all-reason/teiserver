@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Admin.MatchController do
   end
 
   @spec user_show(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def user_show(conn, params = %{"user_id" => userid}) do
+  def user_show(conn, %{"user_id" => userid} = params) do
     page = params["page"] - 1
     limit = params["limit"]
 

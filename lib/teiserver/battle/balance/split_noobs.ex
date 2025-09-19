@@ -58,7 +58,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     cond do
       team_count != 2 -> {:error, "Team count not equal to 2."}
       has_imbalanced_captains?(initial_state) -> {:ok, :brute_force}
-      length(initial_state.parties) == 0 -> {:ok, :simple_draft}
+      Enum.empty?(initial_state.parties) -> {:ok, :simple_draft}
       true -> {:ok, :brute_force}
     end
   end
@@ -136,7 +136,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
 
   @spec log_parties([[String.t()]]) :: String.t()
   def log_parties(parties) do
-    if(length(parties) == 0) do
+    if(Enum.empty?(parties)) do
       "None"
     else
       Enum.map(parties, fn party ->

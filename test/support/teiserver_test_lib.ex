@@ -114,11 +114,11 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket, user: user, pid: pid}
   end
 
-  def _send_lines(state = %{mock: true}, msg) do
+  def _send_lines(%{mock: true} = state, msg) do
     state.protocol_in.data_in(msg, state)
   end
 
-  def _send_raw(socket = {:sslsocket, _, _}, msg) do
+  def _send_raw({:sslsocket, _, _} = socket, msg) do
     :ok = :ssl.send(socket, msg)
     :timer.sleep(100)
   end
@@ -156,7 +156,7 @@ defmodule Teiserver.TeiserverTestLib do
     end
   end
 
-  def _recv_raw(socket = {:sslsocket, _, _}) do
+  def _recv_raw({:sslsocket, _, _} = socket) do
     case :ssl.recv(socket, 0, 500) do
       {:ok, reply} -> reply |> to_string
       {:error, :timeout} -> :timeout
@@ -182,7 +182,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_until(socket), do: _recv_until(socket, "")
 
-  def _recv_until(socket = {:sslsocket, _, _}, acc) do
+  def _recv_until({:sslsocket, _, _} = socket, acc) do
     case :ssl.recv(socket, 0, 1000) do
       {:ok, reply} ->
         _recv_until(socket, acc <> to_string(reply))
