@@ -4,6 +4,7 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
   """
   alias Teiserver.{Communication, Config}
   alias Teiserver.Moderation
+  require Logger
 
   @behaviour Teiserver.Bridge.BridgeCommandBehaviour
   @ephemeral 64
@@ -73,25 +74,10 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
       "chat" ->
         Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
 
-      "other" ->
-        Config.get_site_config_cache("teiserver.Discord channel #moderation-actions")
-
       _ ->
-        nil
+        Logger.error("Unknown report type #{type}")
+        raise "Unknown report type #{type}"
     end
-  end
-
-  defp get_action_content(action) do
-    jump_link =
-      if action.discord_message_id != nil,
-        do: [
-          "**Action Link:**",
-          "- https://discord.com/channels/#{Communication.get_guild_id()}/#{get_channel("other")}/#{action.discord_message_id}"
-        ],
-        else: []
-
-    notes = if action.notes != nil, do: ["**Notes:**", action.notes], else: []
-    {jump_link, notes}
   end
 
   defp handle_report_id(id_str) do
@@ -99,7 +85,7 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
          report when not is_nil(report) <- Moderation.get_report(report_id) do
       channel = get_channel(report.type)
 
-      report_link =
+      content =
         if report.discord_message_id == nil or channel == nil do
           []
         else
@@ -108,18 +94,6 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
             "- https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{report.discord_message_id}"
           ]
         end
-
-      action = if report.result_id != nil, do: Moderation.get_action(report.result_id), else: nil
-
-      {action_link, notes} =
-        if action != nil do
-          get_action_content(action)
-        else
-          # Default values when action is nil
-          {[], []}
-        end
-
-      content = report_link ++ action_link ++ notes
 
       if content == [] do
         "No Report Link or Action Link/Notes available"
@@ -151,7 +125,7 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
         end)
 
       # Grab notes
-      {_, notes} = get_action_content(action)
+      notes = if action.notes != nil, do: ["**Notes:**", action.notes], else: []
 
       # Combine Report links with notes
       content =
