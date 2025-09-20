@@ -3,9 +3,9 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
   alias Teiserver.Support.Tachyon
 
-  describe "create lobby" do
-    setup [:setup_assets, {Tachyon, :setup_client}]
+  setup [:setup_assets, {Tachyon, :setup_client}]
 
+  describe "create lobby" do
     test "can create lobby", %{client: client, user: user} do
       lobby_data = %{
         name: "test lobby",
@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
   end
 
   describe "join lobby" do
-    setup [:setup_assets, {Tachyon, :setup_client}, :setup_lobby]
+    setup [:setup_lobby]
 
     test "works", %{user: user, lobby_id: lobby_id} do
       {:ok, ctx2} = Tachyon.setup_client()
@@ -86,7 +86,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
   end
 
   describe "leave lobby" do
-    setup [:setup_assets, {Tachyon, :setup_client}, :setup_lobby]
+    setup [:setup_lobby]
 
     test "works", %{client: client} do
       %{"status" => "success"} = Tachyon.leave_lobby!(client)
@@ -111,8 +111,6 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
   describe "start battle" do
     setup [
-      :setup_assets,
-      {Tachyon, :setup_client},
       {Tachyon, :setup_app},
       {Tachyon, :setup_autohost},
       :setup_lobby
@@ -151,8 +149,6 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
   describe "listing" do
     setup [
-      :setup_assets,
-      {Tachyon, :setup_client},
       {Tachyon, :setup_app},
       {Tachyon, :setup_autohost}
     ]
