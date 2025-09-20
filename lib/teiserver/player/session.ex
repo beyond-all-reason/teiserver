@@ -454,6 +454,11 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, :subscribe_list})
   end
 
+  @spec unsubscribe_lobby_list(T.userid()) :: :ok
+  def unsubscribe_lobby_list(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :unsubscribe_list})
+  end
+
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
@@ -921,6 +926,11 @@ defmodule Teiserver.Player.Session do
   def handle_call({:lobby, :subscribe_list}, _from, state) do
     {counter, list} = TachyonLobby.subscribe_updates()
     {:reply, {:ok, list}, %{state | lobby_list_subscription: %{counter: counter}}}
+  end
+
+  def handle_call({:lobby, :unsubscribe_list}, _from, state) do
+    TachyonLobby.unsubscribe_updates()
+    {:reply, :ok, %{state | lobby_list_subscription: nil}}
   end
 
   @impl true

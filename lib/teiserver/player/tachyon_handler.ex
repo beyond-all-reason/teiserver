@@ -699,6 +699,11 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/unsubscribeList", "request", _msg_id, _msg, state) do
+    :ok = Player.Session.unsubscribe_lobby_list(state.user.id)
+    {:response, state}
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
