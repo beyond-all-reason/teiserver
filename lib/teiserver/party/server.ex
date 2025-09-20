@@ -438,7 +438,7 @@ defmodule Teiserver.Party.Server do
 
   defp notify_updated(state) do
     for %{id: id} <- state.invited ++ state.members do
-      Player.party_notify_updated(id, state)
+      Player.party_notify_updated(id, Map.drop(state, [:monitors]))
     end
 
     state
