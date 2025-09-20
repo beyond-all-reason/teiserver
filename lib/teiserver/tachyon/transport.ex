@@ -268,6 +268,16 @@ defmodule Teiserver.Tachyon.Transport do
           WebSock.handle_result()
   defp handle_result(result, command_id, message_id, conn_state) do
     case result do
+      {:event, evs, _} when is_list(evs) -> Enum.map(evs, fn {cmd_id, _} -> cmd_id end)
+      {:event, cmd_id, _} -> [cmd_id]
+      {:event, cmd_id, _payload, _} -> [cmd_id]
+      _ -> []
+    end
+    |> Enum.each(fn cmd_id ->
+      :telemetry.execute([:tachyon, :event], %{count: 1}, %{command_id: cmd_id})
+    end)
+
+    case result do
       {:event, events, state} when is_list(events) ->
         messages =
           Enum.map(events, fn {cmd_id, payload} ->
