@@ -1165,10 +1165,17 @@ defmodule Teiserver.Player.Session do
     if (state.party.current_party == party_state.id && state.party.version <= party_state.version) ||
          Enum.any?(state.party.invited_to, fn {v, id} ->
            id == party_state.id && v <= party_state.version
-         end),
-       do: send_to_player!({:party, {:updated, party_state}}, state)
+         end) do
+      state =
+        if state.party.current_party == party_state.id,
+          do: put_in(state.party.version, party_state.version),
+          else: state
 
-    {:noreply, state}
+      send_to_player!({:party, {:updated, party_state}}, state)
+      {:noreply, state}
+    else
+      {:noreply, state}
+    end
   end
 
   def handle_cast({:party, {:removed, party_state}}, state) do
