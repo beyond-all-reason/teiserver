@@ -252,6 +252,18 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  test "get lobby/left event when lobby dies", ctx do
+    {:ok, lobby_id: lobby_id} = setup_lobby(ctx)
+    lobby_pid = Teiserver.TachyonLobby.lookup(lobby_id)
+    assert is_pid(lobby_pid)
+    Process.exit(lobby_pid, :kill)
+
+    %{"commandId" => "lobby/left"} = Tachyon.recv_message!(ctx[:client])
+
+    # can create another lobby afterwards (session state is cleaned)
+    {:ok, _} = setup_lobby(ctx)
+  end
+
   defp setup_lobby(%{client: client}, overrides \\ %{}) do
     lobby_data =
       %{

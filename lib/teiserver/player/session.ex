@@ -1331,6 +1331,11 @@ defmodule Teiserver.Player.Session do
             {:noreply, state}
         end
 
+      {:lobby, lobby_id} ->
+        Logger.info("Lobby #{lobby_id} went down")
+        send_to_player!({:lobby, lobby_id, {:left, "lobby crashed"}}, state)
+        {:noreply, %{state | lobby: nil}}
+
       {:battle, battle_id} ->
         Logger.info("battle #{battle_id} went down")
         broadcast_user_update!(state.user, :menu)
