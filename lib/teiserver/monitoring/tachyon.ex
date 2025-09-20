@@ -27,6 +27,12 @@ defmodule Teiserver.Monitoring.Tachyon do
           event_name: [:tachyon, :request],
           measurement: :count,
           tags: [:command_id, :code]
+        ),
+        counter(
+          [:teiserver, :tachyon, :event, :count],
+          event_name: [:tachyon, :event],
+          measurement: :count,
+          tags: [:command_id]
         )
       ]
     )
