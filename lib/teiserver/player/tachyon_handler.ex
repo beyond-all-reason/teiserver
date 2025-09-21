@@ -176,36 +176,17 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_info({:lobby_list, {:add_lobby, lobby_id, overview}}, state) do
-    data = %{
-      updates: [
-        %{
-          type: :added,
-          overview: lobby_overview_to_tachyon(lobby_id, overview)
-        }
-      ]
-    }
-
+    data = %{lobbies: %{lobby_id => lobby_overview_to_tachyon(lobby_id, overview)}}
     {:event, "lobby/listUpdated", data, state}
   end
 
   def handle_info({:lobby_list, {:update_lobby, lobby_id, overview}}, state) do
-    data = %{
-      updates: [
-        %{
-          type: :updated,
-          overview: lobby_overview_to_tachyon(lobby_id, overview)
-        }
-      ]
-    }
-
+    data = %{lobbies: %{lobby_id => lobby_overview_to_tachyon(lobby_id, overview)}}
     {:event, "lobby/listUpdated", data, state}
   end
 
   def handle_info({:lobby_list, {:remove_lobby, lobby_id}}, state) do
-    data = %{
-      updates: [%{type: :removed, id: lobby_id}]
-    }
-
+    data = %{lobbies: %{lobby_id => nil}}
     {:event, "lobby/listUpdated", data, state}
   end
 
@@ -691,14 +672,12 @@ defmodule Teiserver.Player.TachyonHandler do
         resp = Schema.response(cmd_id, msg_id)
 
         ev =
-          Schema.event("lobby/listUpdated", %{
-            updates: [
-              %{
-                type: :setList,
-                overviews:
-                  Enum.map(list, fn {id, overview} -> lobby_overview_to_tachyon(id, overview) end)
-              }
-            ]
+          Schema.event("lobby/listReset", %{
+            lobbies:
+              Enum.map(list, fn {id, overview} ->
+                {id, lobby_overview_to_tachyon(id, overview)}
+              end)
+              |> Enum.into(%{})
           })
 
         messages = [resp, ev] |> Enum.map(fn data -> {:text, Jason.encode!(data)} end)

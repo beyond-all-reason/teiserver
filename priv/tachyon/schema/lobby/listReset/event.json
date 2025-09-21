@@ -1,0 +1,32 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/listReset/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LobbyListResetEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "lobby/listReset" },
+        "data": {
+            "title": "LobbyListResetEventData",
+            "type": "object",
+            "properties": {
+                "lobbies": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^(.*)$": {
+                            "$ref": "../../definitions/lobbyOverview.json"
+                        }
+                    }
+                }
+            },
+            "required": ["lobbies"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}
