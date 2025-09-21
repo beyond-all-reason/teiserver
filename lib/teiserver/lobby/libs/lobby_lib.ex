@@ -505,6 +505,18 @@ defmodule Teiserver.Lobby.LobbyLib do
     Lobby.stop_battle_lobby_throttle(lobby_id)
   end
 
+  def disable_live_lobby_feature(disabled?) do
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "teiserver_lobby_web",
+      %{
+        channel: "teiserver_lobby_web",
+        event: :update_live_lobby_feature,
+        disabled?: disabled?
+      }
+    )
+  end
+
   # Balance related
   @spec get_lobby_current_balance(T.lobby_id()) :: map() | nil
   def get_lobby_current_balance(lobby_id) do

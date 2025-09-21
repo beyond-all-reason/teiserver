@@ -442,6 +442,17 @@ defmodule Teiserver.TeiserverConfigs do
         "Enable broadcasting of battle teamSize and nbTeams data to clients to allow exact computation of lobby sizes instead of all lobbies being X/16 sized",
       default: false
     })
+
+    add_site_config_type(%{
+      key: "lobby.Disable lobby live view on website",
+      section: "Lobbies",
+      type: "boolean",
+      permissions: ["Admin"],
+      description:
+        "It seems that the lobby views are very cpu hungry when lobby count is high. This is an attempt to troubleshoot and live disabling it.",
+      default: false,
+      update_callback: &Teiserver.Lobby.disable_live_lobby_feature(&1)
+    })
   end
 
   defp discord_configs() do
