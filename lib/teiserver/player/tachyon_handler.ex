@@ -400,9 +400,16 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("friend/sendRequest", "request", _message_id, msg, state) do
     with {:ok, target} <- get_user(msg["data"]["to"]),
-         {:ok, %Account.FriendRequest{}} <-
-           Account.create_friend_request(state.user.id, target.id) do
-      Player.Session.friend_request_received(target.id, state.user.id)
+         {:ok, data} <- Account.create_friend_request(state.user.id, target.id) do
+      case data do
+        %Account.FriendRequest{} ->
+          Player.Session.friend_request_received(target.id, state.user.id)
+
+        :auto_accepted ->
+          Player.Session.friend_request_accepted(target.id, state.user.id)
+          Player.Session.friend_request_accepted(state.user.id, target.id)
+      end
+
       {:response, state}
     else
       {:error, :invalid_user} ->
