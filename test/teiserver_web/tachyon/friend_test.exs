@@ -97,6 +97,22 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
                Tachyon.recv_message!(ctx[:client2])
     end
 
+    test "mutual requests", ctx do
+      assert %{"status" => "success"} =
+               Tachyon.send_friend_request!(ctx[:client], ctx[:user2].id)
+
+      %{"commandId" => "friend/requestReceived"} = Tachyon.recv_message!(ctx[:client2])
+
+      assert %{"status" => "success"} =
+               Tachyon.send_friend_request!(ctx[:client2], ctx[:user].id)
+
+      %{"commandId" => "friend/requestAccepted"} = Tachyon.recv_message!(ctx[:client])
+      %{"commandId" => "friend/requestAccepted"} = Tachyon.recv_message!(ctx[:client2])
+
+      [f1] = Teiserver.Account.list_friends_for_user(%{id: ctx[:user].id})
+      assert f1.user1_id == ctx[:user].id || f1.user2_id == ctx[:user2].id
+    end
+
     test "accept from invalid user", ctx do
       assert %{"status" => "failed", "reason" => "invalid_user"} =
                Tachyon.accept_friend_request!(ctx[:client], "wtfid")
