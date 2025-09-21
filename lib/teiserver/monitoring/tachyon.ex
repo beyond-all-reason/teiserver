@@ -23,6 +23,17 @@ defmodule Teiserver.Monitoring.Tachyon do
           tags: [:command_id]
         ),
         counter(
+          [:teiserver, :tachyon, :login, :ok],
+          event_name: [:tachyon, :login, :ok],
+          measurement: :count
+        ),
+        counter(
+          [:teiserver, :tachyon, :login, :error],
+          event_name: [:tachyon, :login, :error],
+          measurement: :count,
+          tags: [:reason]
+        ),
+        counter(
           [:teiserver, :tachyon, :request, :count],
           event_name: [:tachyon, :request],
           measurement: :count,
