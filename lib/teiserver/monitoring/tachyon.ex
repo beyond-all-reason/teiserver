@@ -34,6 +34,18 @@ defmodule Teiserver.Monitoring.Tachyon do
           tags: [:reason]
         ),
         counter(
+          [:tachyon, :disconnect],
+          event_name: [:tachyon, :disconnect],
+          measurement: :count,
+          description: "normal logout with system/disconnect"
+        ),
+        counter(
+          [:tachyon, :abrupt_disconnect],
+          event_name: [:tachyon, :abrupt_disconnect],
+          measurement: :count,
+          description: "stopped connection without normal disconnect message"
+        ),
+        counter(
           [:tachyon, :request, :count],
           event_name: [:tachyon, :request],
           measurement: :count,
