@@ -13,32 +13,21 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       socket
       |> AuthPlug.live_call(session)
 
-    client = Account.get_client_by_id(socket.assigns[:current_user].id)
     moderator = allow?(socket.assigns[:current_user], "Moderator")
 
     socket =
       socket
       |> assign(:moderator, moderator)
 
-    lobbies =
-      Lobby.list_lobbies()
-      |> Enum.map(fn lobby ->
-        Map.merge(lobby, %{
-          member_count: Battle.get_lobby_member_count(lobby.id) || 0,
-          player_count: Battle.get_lobby_player_count(lobby.id) || 0,
-          uuid: Battle.get_lobby_match_uuid(lobby.id)
-        })
-      end)
-      |> filter_lobbies(socket)
-      |> sort_lobbies
+    disabled? = Teiserver.Config.get_site_config_cache("lobby.Disable lobby live view on website")
 
     socket =
       socket
+      |> populate_initial_assigns()
       |> add_breadcrumb(name: "Battles", url: "/battle/lobbies")
-      |> assign(:client, client)
       |> assign(:site_menu_active, "lobbies")
       |> assign(:view_colour, Lobby.colours())
-      |> assign(:lobbies, lobbies)
+      |> assign(:disabled?, disabled?)
 
     {:ok, socket}
   end
@@ -53,6 +42,14 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   @impl true
+  def handle_info(%{channel: "teiserver_global_lobby_updates"}, socket)
+      when socket.assigns.disabled?,
+      do: {:noreply, socket}
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket)
+      when socket.assigns.disabled?,
+      do: {:noreply, socket}
+
   def handle_info(
         %{
           channel: "teiserver_global_lobby_updates",
@@ -127,6 +124,26 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     {:noreply, socket}
   end
 
+  def handle_info(
+        %{
+          channel: "teiserver_lobby_web",
+          event: :update_live_lobby_feature,
+          disabled?: disabled?
+        },
+        socket
+      ) do
+    socket = assign(socket, :disabled?, disabled?)
+
+    if disabled? do
+      unsubscribe_topics(socket.assigns[:current_user].id)
+      socket = socket |> assign(:lobbies, []) |> assign(:client, nil)
+      {:noreply, socket}
+    else
+      subscribe_topics(socket.assigns[:current_user].id)
+      {:noreply, populate_initial_assigns(socket)}
+    end
+  end
+
   @impl true
   def handle_event("join", _, %{assigns: %{client: nil}} = socket) do
     {:noreply, socket}
@@ -167,16 +184,51 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
+    subscribe_topics(socket.assigns[:current_user].id)
+    PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_web")
+
+    socket
+    |> assign(:page_title, "Listing Battles")
+    |> assign(:battle, nil)
+  end
+
+  defp subscribe_topics(user_id) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_global_lobby_updates")
 
     :ok =
       PubSub.subscribe(
         Teiserver.PubSub,
-        "teiserver_client_messages:#{socket.assigns[:current_user].id}"
+        "teiserver_client_messages:#{user_id}"
       )
+  end
+
+  defp unsubscribe_topics(user_id) do
+    :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_global_lobby_updates")
+
+    :ok =
+      PubSub.unsubscribe(
+        Teiserver.PubSub,
+        "teiserver_client_messages:#{user_id}"
+      )
+  end
+
+  defp populate_initial_assigns(socket) do
+    client = Account.get_client_by_id(socket.assigns[:current_user].id)
+
+    lobbies =
+      Lobby.list_lobbies()
+      |> Enum.map(fn lobby ->
+        Map.merge(lobby, %{
+          member_count: Battle.get_lobby_member_count(lobby.id),
+          player_count: Battle.get_lobby_player_count(lobby.id),
+          uuid: Battle.get_lobby_match_uuid(lobby.id)
+        })
+      end)
+      |> filter_lobbies(socket)
+      |> sort_lobbies
 
     socket
-    |> assign(:page_title, "Listing Battles")
-    |> assign(:battle, nil)
+    |> assign(:lobbies, lobbies)
+    |> assign(:client, client)
   end
 end

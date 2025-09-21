@@ -11,16 +11,19 @@
       <% member_count = @lobbies |> Enum.reduce(0, fn b, acc -> acc + b.member_count end)
       player_count = @lobbies |> Enum.reduce(0, fn b, acc -> acc + b.player_count end)
       spectator_count = member_count - player_count %>
-      <%= if Enum.empty?(@lobbies) do %>
-        No lobbies found
-      <% else %>
-        Lobbies: {Enum.count(@lobbies)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        Total members: {member_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        Players: {player_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        Spectators: {spectator_count}
+      <%= cond do %>
+        <% @disabled? -> %>
+          Feature temporarily disabled, sorry for the inconvenience
+        <% Enum.empty?(@lobbies) -> %>
+          No lobbies found
+        <% true -> %>
+          Lobbies: {Enum.count(@lobbies)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          Total members: {member_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          Players: {player_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          Spectators: {spectator_count}
       <% end %>
     </h4>
-    <div class="table-responsive">
+    <div :if={!@disabled?} class="table-responsive">
       <table class="table table-sm table-hover">
         <thead>
           <tr>

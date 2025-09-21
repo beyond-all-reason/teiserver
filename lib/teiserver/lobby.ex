@@ -117,6 +117,7 @@ defmodule Teiserver.Lobby do
   defdelegate list_lobby_players!(id), to: LobbyLib
   defdelegate add_lobby(lobby), to: LobbyLib
   defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyLib
+  defdelegate disable_live_lobby_feature(disabled?), to: LobbyLib
 
   @spec create_new_lobby(map) :: T.lobby() | {:error, String.t()}
   defdelegate create_new_lobby(data), to: LobbyLib
