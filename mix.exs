@@ -38,7 +38,7 @@ defmodule Teiserver.MixProject do
     [
       mod: {Teiserver.Application, []},
       included_applications: [:nostrum],
-      extra_applications: [:logger, :runtime_tools, :os_mon, :iex] ++ nostrum_extras
+      extra_applications: [:logger, :runtime_tools, :tools, :os_mon, :iex] ++ nostrum_extras
     ]
   end
 
