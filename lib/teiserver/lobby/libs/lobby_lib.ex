@@ -346,7 +346,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     call_lobby(lobby_id, :get_member_list)
   end
 
-  @spec get_lobby_member_count(T.lobby_id()) :: integer() | :lobby
+  @spec get_lobby_member_count(T.lobby_id()) :: integer()
   def get_lobby_member_count(lobby_id) do
     call_lobby(lobby_id, :get_member_count)
   end
@@ -356,7 +356,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     call_lobby(lobby_id, :get_spectator_count)
   end
 
-  @spec get_lobby_player_count(T.lobby_id()) :: integer() | :lobby
+  @spec get_lobby_player_count(T.lobby_id()) :: integer()
   def get_lobby_player_count(lobby_id) do
     call_lobby(lobby_id, :get_player_count)
   end

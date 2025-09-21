@@ -24,8 +24,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       Lobby.list_lobbies()
       |> Enum.map(fn lobby ->
         Map.merge(lobby, %{
-          member_count: Battle.get_lobby_member_count(lobby.id) || 0,
-          player_count: Battle.get_lobby_player_count(lobby.id) || 0,
+          member_count: Battle.get_lobby_member_count(lobby.id),
+          player_count: Battle.get_lobby_player_count(lobby.id),
           uuid: Battle.get_lobby_match_uuid(lobby.id)
         })
       end)
