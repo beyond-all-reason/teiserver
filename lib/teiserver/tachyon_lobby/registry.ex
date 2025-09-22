@@ -25,6 +25,11 @@ defmodule Teiserver.TachyonLobby.Registry do
     end
   end
 
+  @spec list_lobbies() :: [{Lobby.id(), pid()}]
+  def list_lobbies() do
+    Horde.Registry.select(__MODULE__, [{{:"$1", :"$2", :_}, [], [{{:"$1", :"$2"}}]}])
+  end
+
   @impl true
   def init(init_args) do
     Horde.Registry.init(init_args)

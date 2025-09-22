@@ -4,7 +4,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
   """
 
   require Logger
-  use GenServer, restart: :transient
+
+  # lobby process holds transient state about a specific lobby. If this process
+  # goes down, there is no point restarting since the state will be lost
+  use GenServer, restart: :temporary
 
   alias Teiserver.Asset
   alias Teiserver.Autohost
@@ -125,6 +128,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec gen_id() :: id()
   def gen_id(), do: UUID.uuid4()
 
+  # note: this uses a pid and not a lobby id because it's (currently) only
+  # used by the lobby list process to bootstrap its state, and at that time
+  # it has the pid (from the registry).
+  # but if the needs arise, this could be overloaded to use a lobby id
+  # and the usual via_tuple mechanism
+  @spec get_overview(pid()) :: TachyonLobby.List.overview() | nil
+  def get_overview(lobby_pid) do
+    GenServer.call(lobby_pid, :get_overview)
+  catch
+    :exit, {:noproc, _} -> nil
+  end
+
   @spec get_details(id()) :: {:ok, details()} | {:error, reason :: term()}
   def get_details(id) do
     GenServer.call(via_tuple(id), :get_details)
@@ -194,6 +209,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @impl true
   def handle_call(:get_details, _from, state) do
     {:reply, {:ok, get_details_from_state(state)}, state}
+  end
+
+  def handle_call(:get_overview, _from, state) do
+    {:reply, get_overview_from_state(state), state}
   end
 
   def handle_call({:join, join_data, _pid}, _from, state)
