@@ -187,21 +187,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       current_battle: nil
     }
 
-    TachyonLobby.List.register_lobby(self(), id, %{
-      name: state.name,
-      player_count: map_size(state.players),
-      max_player_count:
-        Enum.sum(
-          for at <- state.ally_team_config, team <- at.teams do
-            team.max_players
-          end
-        ),
-      map_name: state.map_name,
-      engine_version: state.engine_version,
-      game_version: state.game_version,
-      current_battle: nil
-    })
-
+    TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
     {:ok, state}
   end
 
@@ -316,6 +302,24 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec via_tuple(id()) :: GenServer.name()
   defp via_tuple(lobby_id) do
     TachyonLobby.Registry.via_tuple(lobby_id)
+  end
+
+  @spec get_overview_from_state(state :: state()) :: TachyonLobby.List.overview()
+  defp get_overview_from_state(state) do
+    %{
+      name: state.name,
+      player_count: map_size(state.players),
+      max_player_count:
+        Enum.sum(
+          for at <- state.ally_team_config, team <- at.teams do
+            team.max_players
+          end
+        ),
+      map_name: state.map_name,
+      engine_version: state.engine_version,
+      game_version: state.game_version,
+      current_battle: nil
+    }
   end
 
   defp get_details_from_state(state) do
