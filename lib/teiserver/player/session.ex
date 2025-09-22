@@ -1399,11 +1399,13 @@ defmodule Teiserver.Player.Session do
   def handle_info(
         %{
           topic: "teiserver_tachyonlobby_list",
-          counter: c
+          counter: c,
+          event: event
         },
         state
       )
-      when state.lobby_list_subscription == nil or state.lobby_list_subscription.counter >= c do
+      when event != :reset_list and
+             (state.lobby_list_subscription == nil or state.lobby_list_subscription.counter >= c) do
     {:noreply, state}
   end
 
@@ -1426,8 +1428,11 @@ defmodule Teiserver.Player.Session do
       :remove_lobby ->
         send_to_player!({:lobby_list, {:remove_lobby, ev.lobby_id}}, state)
 
+      :reset_list ->
+        send_to_player!({:lobby_list, {:reset_list, ev.lobbies}}, state)
+
       _ ->
-        raise "Unknow lobby_list event: #{inspect(ev)}"
+        raise "Unknow lobby_list event: #{inspect(ev.event)} -- #{inspect(ev)}"
     end
 
     {:noreply, state}

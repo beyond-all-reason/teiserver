@@ -194,6 +194,16 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "lobby/listUpdated", data, state}
   end
 
+  def handle_info({:lobby_list, {:reset_list, lobbies}}, state) do
+    lobbies =
+      Enum.map(lobbies, fn {lobby_id, overview} ->
+        {lobby_id, lobby_overview_to_tachyon(lobby_id, overview)}
+      end)
+      |> Enum.into(%{})
+
+    {:event, "lobby/listReset", %{lobbies: lobbies}, state}
+  end
+
   def handle_info({:timeout, message_id}, state)
       when is_map_key(state.pending_responses, message_id) do
     Logger.debug("User did not reply in time to request with id #{message_id}")

@@ -265,6 +265,32 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       assert update[lobby_id]["currentBattle"]["startedAt"] != nil
       assert update[lobby_id]["id"] == lobby_id
     end
+
+    test "list reset", %{client: client} do
+      # create lobby with another client so that only list updates are sent to
+      # the original client, it makes the tests a bit simpler
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      {:ok, lobby_id: lobby_id} =
+        setup_lobby(%{client: ctx2[:client]}, %{
+          ally_team_config: Tachyon.mk_ally_team_config(2, 2)
+        })
+
+      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+
+      %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => lobbies}} =
+        Tachyon.recv_message!(client)
+
+      assert is_map_key(lobbies, lobby_id)
+
+      Process.whereis(Teiserver.TachyonLobby.List)
+      |> Process.exit(:kill)
+
+      %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => lobbies2}} =
+        Tachyon.recv_message!(client)
+
+      assert lobbies == lobbies2
+    end
   end
 
   test "get lobby/left event when lobby dies", ctx do
