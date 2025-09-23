@@ -162,7 +162,15 @@
             current_count={@current_count}
             show_go_to={@total_pages > 5}
             class="mt-3"
-            include_params={["target_id", "reporter_id", "limit", "kind", "state", "order"]}
+            include_params={[
+              "search",
+              "target_id",
+              "reporter_id",
+              "limit",
+              "kind",
+              "state",
+              "order"
+            ]}
             current_params={@conn.params}
           />
         <% end %>
