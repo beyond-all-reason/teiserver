@@ -90,12 +90,14 @@ defmodule Teiserver.Moderation.BanLib do
 
   def order_by(query, "Name (A-Z)") do
     from bans in query,
-      order_by: [asc: bans.name]
+      left_join: sources in assoc(bans, :source),
+      order_by: [asc: sources.name]
   end
 
   def order_by(query, "Name (Z-A)") do
     from bans in query,
-      order_by: [desc: bans.name]
+      left_join: sources in assoc(bans, :source),
+      order_by: [desc: sources.name]
   end
 
   def order_by(query, "Newest first") do

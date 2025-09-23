@@ -225,6 +225,18 @@ defmodule Teiserver.Moderation.ReportLib do
       order_by: [asc: reports.inserted_at]
   end
 
+  def order_by(query, "Name (A-Z)") do
+    from reports in query,
+      left_join: targets in assoc(reports, :target),
+      order_by: [asc: targets.name]
+  end
+
+  def order_by(query, "Name (Z-A)") do
+    from reports in query,
+      left_join: targets in assoc(reports, :target),
+      order_by: [desc: targets.name]
+  end
+
   @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
