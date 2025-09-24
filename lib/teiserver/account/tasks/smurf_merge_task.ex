@@ -125,7 +125,13 @@ defmodule Teiserver.Account.SmurfMergeTask do
       limit: :infinity
     )
     |> Enum.each(fn %{id: ignorer_id} ->
-      Account.ignore_user(ignorer_id, to_id)
+      case Account.ignore_user(ignorer_id, to_id) do
+        {:ok, _} ->
+          :ok
+
+        {:error, reason} ->
+          Logger.warning("Failed to ignore user #{to_id} for #{ignorer_id}: #{reason}")
+      end
     end)
 
     :ok
