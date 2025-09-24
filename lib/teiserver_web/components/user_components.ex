@@ -27,7 +27,9 @@ defmodule TeiserverWeb.UserComponents do
         if(assigns.user.smurf_of_id != nil,
           do: {"primary", Teiserver.Moderation.ActionLib.action_icon("Smurf")}
         ),
-        if(Enum.member?(user.roles, "Smurfer"), do: {"info2", "fa-solid fa-split"}),
+        if(Enum.member?(user.roles, "Smurfer"),
+          do: {"info2", "fa-solid fa-arrows-split-up-and-left"}
+        ),
         if(ban_status == "banned",
           do: {"danger2", Teiserver.Moderation.ActionLib.action_icon("Ban")}
         ),
@@ -42,7 +44,7 @@ defmodule TeiserverWeb.UserComponents do
         ),
         if(Enum.member?(user.roles, "Trusted"), do: {"", "fa-solid fa-check"}),
         if(not Enum.member?(user.roles, "Verified"),
-          do: {"info", "fa-solid fa-square-question"}
+          do: {"info", "fa-solid fa-user-secret"}
         )
       ]
       |> Enum.reject(&(&1 == nil))

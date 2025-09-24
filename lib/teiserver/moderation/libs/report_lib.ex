@@ -43,7 +43,7 @@ defmodule Teiserver.Moderation.ReportLib do
       ],
       "actions" => [
         {"Noob", "noob", "fa-chevrons-up"},
-        {"Griefing", "griefing", "fa-face-angry-horns"},
+        {"Griefing", "griefing", "fa-face-angry"},
         {"Cheating", "cheating", "fa-cards"},
         {"Other", "other", "fa-face-unamused"}
       ]
@@ -67,7 +67,7 @@ defmodule Teiserver.Moderation.ReportLib do
       ],
       "actions" => [
         {"Noob", "noob", "fa-chevrons-up"},
-        {"Griefing", "griefing", "fa-face-angry-horns"},
+        {"Griefing", "griefing", "fa-face-angry"},
         {"Cheating", "cheating", "fa-cards"},
         {"Other", "other", "fa-face-unamused"}
       ]

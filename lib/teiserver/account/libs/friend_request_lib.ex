@@ -9,7 +9,7 @@ defmodule Teiserver.Account.FriendRequestLib do
   def colours(), do: :success
 
   @spec icon :: String.t()
-  def icon(), do: "fa-user-question"
+  def icon(), do: "fa-user-plus"
 
   @spec can_send_friend_request?(T.userid(), T.userid()) :: boolean
   def can_send_friend_request?(from_id, to_id) do
