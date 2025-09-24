@@ -155,8 +155,9 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "subscribe list updates", %{client: client} do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-      %{"commandId" => "lobby/listUpdated", "data" => data} = Tachyon.recv_message!(client)
-      assert data["updates"] == [%{"type" => "setList", "overviews" => []}]
+
+      %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => %{}}} =
+        Tachyon.recv_message!(client)
 
       # create lobby with another client so that only list updates are sent to
       # the original client, it makes the tests a bit simpler
@@ -170,51 +171,44 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{
         "commandId" => "lobby/listUpdated",
         "data" => %{
-          "updates" => [
-            %{
-              "type" => "added",
-              "overview" => %{"id" => ^lobby_id} = overview
-            }
-          ]
+          "lobbies" => lobbies
         }
       } = Tachyon.recv_message!(client)
 
-      assert overview["maxPlayerCount"] == 4
+      assert lobbies[lobby_id]["maxPlayerCount"] == 4
 
       {:ok, ctx3} = Tachyon.setup_client()
       %{"status" => "success"} = Tachyon.join_lobby!(ctx3[:client], lobby_id)
 
-      %{"commandId" => "lobby/listUpdated", "data" => data} = Tachyon.recv_message!(client)
+      %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => lobbies}} =
+        Tachyon.recv_message!(client)
 
-      assert data["updates"] == [
+      assert lobbies[lobby_id] ==
                %{
-                 "type" => "updated",
-                 "overview" => %{
-                   "id" => lobby_id,
-                   "playerCount" => 2,
-                   "currentBattle" => nil
-                 }
+                 "id" => lobby_id,
+                 "playerCount" => 2,
+                 "currentBattle" => nil
                }
-             ]
 
       %{"status" => "success"} = Tachyon.leave_lobby!(ctx3[:client])
 
       %{
         "commandId" => "lobby/listUpdated",
         "data" => %{
-          "updates" => [
-            %{
-              "overview" => %{"id" => ^lobby_id, "playerCount" => 1}
-            }
-          ]
+          "lobbies" => lobbies
         }
       } = Tachyon.recv_message!(client)
+
+      assert lobbies[lobby_id]["playerCount"] == 1
 
       Tachyon.drain(ctx2[:client])
       %{"status" => "success"} = Tachyon.leave_lobby!(ctx2[:client])
 
-      %{"commandId" => "lobby/listUpdated", "data" => data} = Tachyon.recv_message!(client)
-      assert data["updates"] == [%{"id" => lobby_id, "type" => "removed"}]
+      %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => lobbies}} =
+        Tachyon.recv_message!(client)
+
+      assert is_map_key(lobbies, lobby_id)
+      assert lobbies[lobby_id] == nil
     end
 
     test "unsubscribe list updates", %{client: client} do
@@ -239,7 +233,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "start battle", %{client: client} = ctx do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-      %{"commandId" => "lobby/listUpdated"} = Tachyon.recv_message!(client)
+      %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
 
       # create lobby with another client so that only list updates are sent to
       # the original client, it makes the tests a bit simpler
@@ -264,11 +258,11 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"status" => "success", "commandId" => "lobby/startBattle"} =
         Tachyon.recv_message!(ctx2[:client])
 
-      %{"commandId" => "lobby/listUpdated", "data" => %{"updates" => [update]}} =
+      %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => update}} =
         Tachyon.recv_message!(client)
 
-      assert update["overview"]["currentBattle"]["startedAt"] != nil
-      assert update["overview"]["id"] == lobby_id
+      assert update[lobby_id]["currentBattle"]["startedAt"] != nil
+      assert update[lobby_id]["id"] == lobby_id
     end
   end
 
