@@ -25,6 +25,9 @@
     class="form-horizontal"
     id="search-box"
   >
+    <input type="hidden" name="search" value="true" />
+    <input type="hidden" name="limit" value={@params["limit"] || "50"} />
+
     <div class="row">
       <div class="col-md-4 col-lg-3 col-xl-2 mt-2">
         <label for="search_state" class="control-label">State: </label>
