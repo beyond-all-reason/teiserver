@@ -1244,7 +1244,7 @@ defmodule Teiserver.Player.Session do
   end
 
   @impl true
-  def handle_info({:DOWN, ref, :process, _, _reason}, state) do
+  def handle_info({:DOWN, ref, :process, _, reason}, state) do
     val = MC.get_val(state.monitors, ref)
     state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
 
@@ -1338,8 +1338,13 @@ defmodule Teiserver.Player.Session do
             {:noreply, state}
         end
 
+      {:lobby, lobby_id} ->
+        Logger.info("Lobby #{lobby_id} went down because #{inspect(reason)}")
+        send_to_player!({:lobby, lobby_id, {:left, "lobby crashed"}}, state)
+        {:noreply, %{state | lobby: nil}}
+
       {:battle, battle_id} ->
-        Logger.info("battle #{battle_id} went down")
+        Logger.info("battle #{battle_id} went down because #{inspect(reason)}")
         broadcast_user_update!(state.user, :menu)
         {:noreply, %{state | battle: nil}}
     end
