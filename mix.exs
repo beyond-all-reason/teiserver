@@ -143,7 +143,8 @@ defmodule Teiserver.MixProject do
        git: "https://github.com/geekingfrog/websocket_sync_client.git",
        ref: "d655018589f9ade836afb8df8ed5f45f53500173",
        only: [:dev, :test]},
-      {:httpoison, "~> 2.0", only: [:dev, :test]}
+      {:httpoison, "~> 2.0", only: [:dev, :test]},
+      {:nimble_totp, "~> 1.0"}
     ]
   end
 
