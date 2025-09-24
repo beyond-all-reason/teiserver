@@ -84,10 +84,10 @@ defmodule TeiserverWeb.Admin.UserController do
     limit = params["limit"]
 
     id_list =
-      if params["previous_names"] != nil and params["previous_names"] != "" do
+      if params["search"]["previous_names"] != nil and params["search"]["previous_names"] != "" do
         Account.list_user_stats(
           search: [
-            data_contains: {"previous_names", params["previous_names"]}
+            data_contains: {"previous_names", params["search"]["previous_names"]}
           ],
           select: [:user_id]
         )
@@ -96,16 +96,18 @@ defmodule TeiserverWeb.Admin.UserController do
         []
       end
 
+    IO.inspect(id_list, label: "Users")
+
     users =
       (Account.list_users(
          search: [
            name_or_email: Map.get(params, "name", "") |> String.trim(),
-           bot: params["bot"],
-           has_role: params["role"],
-           ip: params["ip"],
-           lobby_client: params["lobby_client"],
-           previous_names: params["previous_names"],
-           mod_action: params["mod_action"]
+           bot: params["search"]["bot"],
+           has_role: params["search"]["role"],
+           ip: params["search"]["ip"],
+           lobby_client: params["search"]["lobby_client"],
+           previous_names: params["search"]["previous_names"],
+           mod_action: params["search"]["mod_action"]
          ],
          limit: limit,
          offset: page * limit,
@@ -120,12 +122,12 @@ defmodule TeiserverWeb.Admin.UserController do
       Account.count_users(
         search: [
           name_or_email: Map.get(params, "name", "") |> String.trim(),
-          bot: params["bot"],
-          has_role: params["role"],
-          ip: params["ip"],
-          lobby_client: params["lobby_client"],
-          previous_names: params["previous_names"],
-          mod_action: params["mod_action"]
+          bot: params["search"]["bot"],
+          has_role: params["search"]["role"],
+          ip: params["search"]["ip"],
+          lobby_client: params["search"]["lobby_client"],
+          previous_names: params["search"]["previous_names"],
+          mod_action: params["search"]["mod_action"]
         ]
       )
 
@@ -138,7 +140,7 @@ defmodule TeiserverWeb.Admin.UserController do
     |> assign(:total_pages, total_pages)
     |> assign(:total_count, total_users)
     |> assign(:current_count, Enum.count(users))
-    |> assign(:params, Map.put(params, "limit", limit))
+    |> assign(:params, params)
     |> assign(:users, Enum.zip(users, user_stats))
     |> render("index.html")
   end
