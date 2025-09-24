@@ -213,8 +213,9 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "unsubscribe list updates", %{client: client} do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-      %{"commandId" => "lobby/listUpdated", "data" => data} = Tachyon.recv_message!(client)
-      assert data["updates"] == [%{"type" => "setList", "overviews" => []}]
+
+      %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => %{}}} =
+        Tachyon.recv_message!(client)
 
       %{"status" => "success"} = Tachyon.unsubscribe_lobby_list!(client)
 
