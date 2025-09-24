@@ -153,7 +153,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       {Tachyon, :setup_autohost}
     ]
 
-    test "subscribe updates", %{client: client} do
+    test "subscribe list updates", %{client: client} do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
       %{"commandId" => "lobby/listUpdated", "data" => data} = Tachyon.recv_message!(client)
       assert data["updates"] == [%{"type" => "setList", "overviews" => []}]
@@ -215,6 +215,26 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       %{"commandId" => "lobby/listUpdated", "data" => data} = Tachyon.recv_message!(client)
       assert data["updates"] == [%{"id" => lobby_id, "type" => "removed"}]
+    end
+
+    test "unsubscribe list updates", %{client: client} do
+      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+      %{"commandId" => "lobby/listUpdated", "data" => data} = Tachyon.recv_message!(client)
+      assert data["updates"] == [%{"type" => "setList", "overviews" => []}]
+
+      %{"status" => "success"} = Tachyon.unsubscribe_lobby_list!(client)
+
+      # create lobby with another client so that only list updates are sent to
+      # the original client, it makes the tests a bit simpler
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      {:ok, lobby_id: _lobby_id} =
+        setup_lobby(%{client: ctx2[:client]}, %{
+          ally_team_config: Tachyon.mk_ally_team_config(2, 2)
+        })
+
+      # make sure no updates are sent
+      assert {:error, :timeout} = Tachyon.recv_message(client)
     end
 
     test "start battle", %{client: client} = ctx do
