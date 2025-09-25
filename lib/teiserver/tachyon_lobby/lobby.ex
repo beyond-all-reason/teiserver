@@ -63,7 +63,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   For example, a player in the first ally team, in the second spot
   would have: {0, 1, 0}
   """
-  @type team :: {non_neg_integer(), non_neg_integer(), non_neg_integer()}
+  @type team ::
+          {allyTeam :: non_neg_integer(), team :: non_neg_integer(), player :: non_neg_integer()}
 
   @typedoc """
   The public state of the lobby. Anything that clients need to know about
@@ -79,7 +80,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
           members: %{
             T.userid() => %{
               type: :player,
-              id: T.userid(),
               team: team()
             }
           },
@@ -92,12 +92,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
         }
 
   @typep player :: %{
-           # These represent the indices respectively into
-           # {ally team index, team index, player index}
-           # since we don't really support "archon mode" though, the player index
-           # is likely always going to be 0.
-           # For example, a player in the first ally team, in the second spot
-           # would have: {0, 1, 0}
            id: T.userid(),
            name: String.t(),
            # used to generate the start script, and then will be sent to the
@@ -357,7 +351,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> Map.put(
       :members,
       Enum.map(state.players, fn {p_id, p} ->
-        {p_id, %{id: p.id, type: :player, team: p.team}}
+        {p_id, %{type: :player, team: p.team}}
       end)
       |> Enum.into(%{})
     )
