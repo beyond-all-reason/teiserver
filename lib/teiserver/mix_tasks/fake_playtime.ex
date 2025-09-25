@@ -20,7 +20,7 @@ defmodule Mix.Tasks.Teiserver.FakePlaytime do
       ],
       select: [:id, :name]
     )
-    |> Enum.map(fn user ->
+    |> Enum.each(fn user ->
       update_stats(user.id, random_playtime())
     end)
 

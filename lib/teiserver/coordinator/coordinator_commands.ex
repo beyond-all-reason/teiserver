@@ -492,7 +492,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       |> String.downcase()
     end)
     |> Enum.uniq()
-    |> Enum.reduce(nil, fn target, _ ->
+    |> Enum.each(fn target ->
       case CacheUser.get_userid(target) do
         nil ->
           :ok
