@@ -2,30 +2,46 @@ defmodule Teiserver.Account.TOTPLib do
   use TeiserverWeb, :library
   alias Teiserver.Account.{User, TOTP}
 
-  @spec validate_totp(binary(), String.t()) :: any
-  defp validate_totp(secret, otp) do
+  @spec validate_totp(User.t(), String.t()) :: any
+  def validate_totp(%User{id: _user_id} = user, otp) do
     now = System.os_time(:second)
 
-    cond do
-      NimbleTOTP.valid?(secret, otp, time: now) ->
-        {:ok, "valid"}
+    case get_user_totp(user) do
+      {:inactive, nil} ->
+        {:error, :inactive}
 
-      NimbleTOTP.valid?(secret, otp, time: System.os_time(:second) - 5) ->
-        {:ok, "grace"}
+      {:active, totp} ->
+        cond do
+          validate_last_used(totp, otp) ->
+            {:error, :used}
 
-      true ->
-        {:error, "invalid"}
+          NimbleTOTP.valid?(totp.secret, otp, time: now) ->
+            change_totp(totp, %{last_used: otp})
+            {:ok, :valid}
+
+          NimbleTOTP.valid?(totp.secret, otp, time: System.os_time(:second) - 5) ->
+            change_totp(totp, %{last_used: otp})
+            {:ok, :grace}
+
+          true ->
+            {:error, :invalid}
+        end
     end
+  end
+
+  @spec validate_last_used(TOTP.t(), String.t()) :: boolean
+  def validate_last_used(%TOTP{last_used: last_used}, otp) do
+    last_used == otp
   end
 
   @spec get_or_generate_user_secret(User.t()) :: binary()
   def get_or_generate_user_secret(%User{id: _user_id} = user) do
     case get_user_totp(user) do
-      nil ->
+      {:inactive, nil} ->
         {:ok, totp} = generate_secret(user)
         totp.secret
 
-      totp ->
+      {:active, totp} ->
         totp.secret
     end
   end
@@ -35,31 +51,44 @@ defmodule Teiserver.Account.TOTPLib do
     secret = NimbleTOTP.secret()
 
     case get_user_totp(user) do
-      nil ->
+      {:inactive, nil} ->
         %TOTP{}
         |> TOTP.changeset(%{user_id: user_id, secret: secret})
         |> Repo.insert()
 
-      totp ->
+      {:active, totp} ->
         totp
         |> TOTP.changeset(%{secret: secret})
         |> Repo.update()
     end
   end
 
-  def change_totp(%User{} = user, attrs \\ %{}) do
-    totp = get_user_totp(user)
-    TOTP.changeset(totp, attrs)
+  @spec get_user_totp(User.t()) :: {:ok | :inactive, TOTP.t() | nil}
+  def get_user_totp(%User{id: user_id}) do
+    case Repo.get_by(TOTP, user_id: user_id) do
+      nil ->
+        {:inactive, nil}
+
+      totp ->
+        {:active, totp}
+    end
   end
 
-  @spec get_totp_status(User.t()) :: boolean
-  def get_totp_status(%User{id: _user_id} = user) do
-    user_totp = get_user_totp(user)
-    user_totp.active
+  @spec change_totp(User.t() | TOTP.t(), Map.t()) ::
+          {:ok, TOTP.t()} | {:error, nil | Ecto.Changeset.t()}
+  def change_totp(%User{} = user, attrs) do
+    case get_user_totp(user) do
+      {:inactive, nil} ->
+        {:error, nil}
+
+      {:active, totp} ->
+        change_totp(totp, attrs)
+    end
   end
 
-  @spec get_user_totp(User.t()) :: TOTP.t() | nil
-  defp get_user_totp(%User{id: user_id}) do
-    Repo.get_by(TOTP, user_id: user_id)
+  def change_totp(%TOTP{} = totp, attrs) do
+    totp
+    |> TOTP.changeset(attrs)
+    |> Repo.update()
   end
 end
