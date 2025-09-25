@@ -48,6 +48,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       {:ok, ctx2} = Tachyon.setup_client()
       %{"status" => "success", "data" => data} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
       assert is_map_key(data["members"], to_string(user.id))
+      assert data["members"][to_string(ctx2[:user].id)]["type"] == "spec"
     end
 
     test "is idempotent", %{client: client, lobby_id: lobby_id} do
@@ -75,6 +76,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         Tachyon.join_lobby!(ctx2[:client], lobby_id)
     end
 
+    @tag :skip
     test "lobby full", %{lobby_id: lobby_id} do
       {:ok, ctx2} = Tachyon.setup_client()
       {:ok, ctx3} = Tachyon.setup_client()
@@ -86,11 +88,9 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "members get updated events on join", %{client: client, lobby_id: lobby_id} do
       {:ok, ctx2} = Tachyon.setup_client()
-      %{"status" => "success", "data" => details} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+      %{"status" => "success", "data" => _details} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
       %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
-      player_data = data["members"][to_string(ctx2[:user].id)]
-      assert is_map_key(player_data, "team")
-      assert is_map_key(details["allyTeamConfig"], player_data["allyTeam"])
+      assert %{"type" => "spec"} = data["members"][to_string(ctx2[:user].id)]
     end
   end
 
@@ -162,6 +162,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       {Tachyon, :setup_autohost}
     ]
 
+    # lobby/joinAllyTeam not implemented yet, so no listUpdate
+    @tag :skip
     test "subscribe list updates", %{client: client} do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
 

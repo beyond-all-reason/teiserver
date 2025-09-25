@@ -75,24 +75,32 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert {:error, :invalid_lobby} == Lobby.join("nope", mk_player("user-id"), self())
     end
 
-    test "can join lobby" do
+    test "can join lobby as spectator" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
 
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _, details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
-      assert details.members["other-user-id"].team == {1, 0, 0}
+      assert details.members["other-user-id"].type == :spec
+      assert details.members["other-user-id"].join_queue_position == nil
 
       assert_receive {:lobby, ^id,
                       {:updated,
-                       [%{event: :updated, updates: %{"other-user-id" => %{team: {1, 0, 0}}}}]}}
+                       [
+                         %{
+                           event: :updated,
+                           updates: %{"other-user-id" => %{type: :spec}}
+                         }
+                       ]}}
     end
 
     test "is idempotent" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 1]))
-      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), self())
-      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), self())
+      {:ok, _, details} = Lobby.join(id, mk_player("other-user-id"), self())
+      {:ok, _, details2} = Lobby.join(id, mk_player("other-user-id"), self())
+      assert details == details2
     end
 
+    @tag :skip
     test "join the most empty team" do
       # create a lobby 2 vs 15. Players should be put in the largest team
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 15]))
@@ -102,6 +110,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert details.members["user3"].team == {1, 1, 0}
     end
 
+    @tag :skip
     test "lobby full" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1]))
       {:error, :lobby_full} = Lobby.join(id, mk_player("user2"), self())
@@ -113,7 +122,13 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
 
       assert_receive {:lobby, ^id,
-                      {:updated, [%{event: :updated, updates: %{"user2" => %{team: {1, 0, 0}}}}]}}
+                      {:updated,
+                       [
+                         %{
+                           event: :updated,
+                           updates: %{"user2" => %{type: :spec}}
+                         }
+                       ]}}
     end
   end
 
@@ -130,23 +145,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:error, :not_in_lobby} = Lobby.leave(id, "user2")
     end
 
-    test "can leave lobby" do
-      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
-      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
-      {:ok, _pid, _details} = Lobby.join(id, mk_player("user3"), self())
-      {:ok, _pid, details} = Lobby.join(id, mk_player("user4"), self())
-
-      # user 2 and 4 should be on the same team
-      assert details.members["user2"].team == {1, 0, 0}
-      assert details.members["user4"].team == {1, 1, 0}
-      :ok = Lobby.leave(id, "user2")
-
-      # join again to get the details
-      {:ok, _pid, details} = Lobby.join(id, mk_player("user2"), self())
-      assert details.members["user4"].team == {1, 0, 0}
-      assert details.members["user2"].team == {1, 1, 0}
-    end
-
     test "leaving lobby send updates to remaining members" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
@@ -157,6 +155,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_received {:lobby, ^id, {:updated, [%{event: :updated, updates: %{"user2" => nil}}]}}
     end
 
+    @tag :skip
     test "reshuffling player on leave sends updates" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
@@ -178,6 +177,17 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     test "player pid dying means player is removed from lobby" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      Process.exit(sink_pid, :kill)
+      assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: %{"1234" => nil}}]}}
+    end
+
+    test "spectator pid dying means is removed from lobby" do
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
       assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
@@ -194,7 +204,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     test "must be in lobby" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
-      {:error, :not_a_player_in_lobby} = Lobby.start_battle(id, "not in lobby")
+      {:error, :not_in_lobby} = Lobby.start_battle(id, "not in lobby")
     end
 
     # can't really test the full path when starting a battle without a ws connection

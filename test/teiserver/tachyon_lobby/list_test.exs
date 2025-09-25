@@ -57,6 +57,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
     assert ev2.counter > ev.counter
   end
 
+  @tag :skip
   test "get updates when player joins or leaves lobby" do
     {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 

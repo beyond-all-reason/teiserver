@@ -78,10 +78,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
           engine_version: String.t(),
           ally_team_config: ally_team_config(),
           members: %{
-            T.userid() => %{
-              type: :player,
-              team: team()
-            }
+            T.userid() =>
+              %{
+                type: :player,
+                team: team()
+              }
+              | %{type: :spec, join_queue_position: number() | nil}
           },
           current_battle:
             nil
@@ -101,6 +103,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
            team: team()
          }
 
+  @typep spectator :: %{
+           id: T.userid(),
+           name: String.t(),
+           # used to generate the start script, and then will be sent to the
+           # player so they can join the battle
+           password: String.t(),
+           pid: pid(),
+           join_queue_position: number() | nil
+         }
+
   @typep state :: %{
            id: id(),
            monitors: MC.t(),
@@ -111,6 +123,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            ally_team_config: ally_team_config(),
            # used to track the players in the lobby.
            players: %{T.userid() => player()},
+           spectators: %{T.userid() => spectator()},
            current_battle:
              nil
              | %{
@@ -193,6 +206,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           team: {0, 0, 0}
         }
       },
+      spectators: %{},
       current_battle: nil
     }
 
@@ -211,48 +225,54 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   def handle_call({:join, join_data, _pid}, _from, state)
-      when is_map_key(join_data.id, state.players) do
+      when is_map_key(join_data.id, state.players) or is_map_key(join_data.id, state.spectators) do
     {:reply, {:ok, self(), get_details_from_state(state)}, state}
   end
 
   def handle_call({:join, join_data, pid}, _from, state) do
-    # find the least full team
-    team = find_team(state.ally_team_config, Map.values(state.players))
     user_id = join_data.id
 
-    case team do
-      nil ->
-        {:reply, {:error, :lobby_full}, state}
+    state =
+      put_in(state, [:spectators, user_id], %{
+        id: user_id,
+        name: join_data.name,
+        password: gen_password(),
+        pid: pid,
+        join_queue_position: nil
+      })
+      |> Map.update!(:monitors, &MC.monitor(&1, pid, {:user, user_id}))
 
-      team ->
-        state =
-          put_in(state, [:players, user_id], %{
-            id: user_id,
-            name: join_data.name,
-            password: gen_password(),
-            pid: pid,
-            team: team
-          })
-          |> Map.update!(:monitors, &MC.monitor(&1, pid, {:user, user_id}))
+    update = %{type: :spec}
+    broadcast_update({:update, user_id, %{user_id => update}}, state)
 
-        TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
-        broadcast_update({:update, user_id, %{user_id => %{team: team}}}, state)
-
-        {:reply, {:ok, self(), get_details_from_state(state)}, state}
-    end
+    {:reply, {:ok, self(), get_details_from_state(state)}, state}
   end
 
-  def handle_call({:leave, user_id}, _from, state) do
+  def handle_call({:leave, user_id}, _from, state) when is_map_key(state.players, user_id) do
     case remove_player(user_id, state) do
-      {:ok, state} when map_size(state.players) > 0 -> {:reply, :ok, state}
-      {:ok, state} -> {:reply, :ok, state, {:continue, :empty}}
-      {:error, _} = err -> {:reply, err, state}
+      state when map_size(state.players) > 0 or map_size(state.spectators) > 0 ->
+        {:reply, :ok, state}
+
+      state ->
+        {:reply, :ok, state, {:continue, :empty}}
     end
   end
+
+  def handle_call({:leave, user_id}, _from, state) when is_map_key(state.spectators, user_id) do
+    state = remove_spectator(user_id, state)
+
+    if map_size(state.players) > 0 or map_size(state.spectators) > 0 do
+      {:reply, :ok, state}
+    else
+      {:reply, :ok, state, {:continue, :empty}}
+    end
+  end
+
+  def handle_call({:leave, _user_id}, _from, state), do: {:reply, {:error, :not_in_lobby}, state}
 
   def handle_call({:start_battle, user_id}, _from, state)
-      when not is_map_key(state.players, user_id),
-      do: {:reply, {:error, :not_a_player_in_lobby}, state}
+      when not is_map_key(state.players, user_id) and not is_map_key(state.spectators, user_id),
+      do: {:reply, {:error, :not_in_lobby}, state}
 
   def handle_call({:start_battle, _user_id}, _from, state) do
     with autohost_id when autohost_id != nil <- Autohost.find_autohost(),
@@ -298,13 +318,19 @@ defmodule Teiserver.TachyonLobby.Lobby do
         {:user, user_id} ->
           Logger.debug("user #{user_id} disappeared from the lobby because #{inspect(reason)}")
 
-          case remove_player(user_id, state) do
-            {:ok, state} -> state
-            _ -> state
+          cond do
+            is_map_key(state.players, user_id) ->
+              remove_player(user_id, state)
+
+            is_map_key(state.spectators, user_id) ->
+              remove_spectator(user_id, state)
           end
+
+        nil ->
+          state
       end
 
-    if Enum.empty?(state.players) do
+    if Enum.empty?(state.players) and Enum.empty?(state.spectators) do
       {:noreply, state, {:continue, :empty}}
     else
       {:noreply, state}
@@ -340,7 +366,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
   end
 
+  @spec get_details_from_state(state()) :: details()
   defp get_details_from_state(state) do
+    players =
+      Enum.map(state.players, fn {p_id, p} ->
+        {p_id, %{type: :player, team: p.team}}
+      end)
+      |> Enum.into(%{})
+
+    spectators =
+      Enum.map(state.spectators, fn {s_id, s} ->
+        {s_id, %{type: :spec, join_queue_position: s.join_queue_position}}
+      end)
+      |> Enum.into(%{})
+
     Map.take(state, [
       :id,
       :name,
@@ -349,79 +388,87 @@ defmodule Teiserver.TachyonLobby.Lobby do
       :engine_version,
       :ally_team_config
     ])
-    |> Map.put(
-      :members,
-      Enum.map(state.players, fn {p_id, p} ->
-        {p_id, %{type: :player, team: p.team}}
-      end)
-      |> Enum.into(%{})
-    )
+    |> Map.put(:members, Map.merge(players, spectators))
   end
+
+  # temporarily commented out until I get to implement lobby/joinQueue
+  # # this function isn't too efficient, but it's never going to be run on
+  # # massive inputs since the engine cannot support more than 254 players anyway
+  # @spec find_team(ally_team_config(), [player()]) :: team() | nil
+  # defp find_team(ally_team_config, players) do
+  #   # find the least full ally team
+  #   ally_team =
+  #     for {at, at_idx} <- Enum.with_index(ally_team_config) do
+  #       total_capacity = Enum.sum_by(at.teams, fn t -> t.max_players end)
+  #
+  #       players_in_ally_team =
+  #         Enum.filter(players, fn %{team: {x, _, _}} -> x == at_idx end)
+  #         |> Enum.count()
+  #
+  #       capacity = total_capacity - players_in_ally_team
+  #       {capacity, at_idx, at.teams}
+  #     end
+  #     |> Enum.filter(fn {c, _, _} -> c > 0 end)
+  #     # select the biggest capacity with the lowest index
+  #     |> Enum.min(
+  #       fn {c1, idx1, _}, {c2, idx2, _} ->
+  #         c1 >= c2 && idx1 <= idx2
+  #       end,
+  #       fn -> nil end
+  #     )
+  #
+  #   case ally_team do
+  #     nil ->
+  #       nil
+  #
+  #     {_, at_idx, teams} ->
+  #       {_, t_idx, p_idx} =
+  #         for {t, t_idx} <- Enum.with_index(teams) do
+  #           player_count =
+  #             Enum.filter(players, fn %{team: {x, y, _}} ->
+  #               x == at_idx && y == t_idx
+  #             end)
+  #             |> Enum.count()
+  #
+  #           capacity = t.max_players - player_count
+  #           {capacity, t_idx, player_count}
+  #         end
+  #         |> Enum.filter(fn {c, _, _} -> c > 0 end)
+  #         # guarantee not to raise an exception
+  #         |> Enum.min()
+  #
+  #       {at_idx, t_idx, p_idx}
+  #   end
+  # end
 
   defp broadcast_update({:update, user_id, updates}, state) do
-    for {p_id, p} <- state.players, p_id != user_id do
-      send(
-        p.pid,
-        {:lobby, state.id, {:updated, [%{event: :updated, updates: updates}]}}
-      )
-    end
-
-    :ok
+    events = [%{event: :updated, updates: updates}]
+    broadcast_to_members(state, user_id, {:lobby, state.id, {:updated, events}})
   end
 
-  # this function isn't too efficient, but it's never going to be run on
-  # massive inputs since the engine cannot support more than 254 players anyway
-  @spec find_team(ally_team_config(), [player()]) :: team() | nil
-  defp find_team(ally_team_config, players) do
-    # find the least full ally team
-    ally_team =
-      for {at, at_idx} <- Enum.with_index(ally_team_config) do
-        total_capacity = Enum.sum_by(at.teams, fn t -> t.max_players end)
-
-        players_in_ally_team =
-          Enum.filter(players, fn %{team: {x, _, _}} -> x == at_idx end)
-          |> Enum.count()
-
-        capacity = total_capacity - players_in_ally_team
-        {capacity, at_idx, at.teams}
-      end
-      |> Enum.filter(fn {c, _, _} -> c > 0 end)
-      # select the biggest capacity with the lowest index
-      |> Enum.min(
-        fn {c1, idx1, _}, {c2, idx2, _} ->
-          c1 >= c2 && idx1 <= idx2
-        end,
-        fn -> nil end
-      )
-
-    case ally_team do
-      nil ->
-        nil
-
-      {_, at_idx, teams} ->
-        {_, t_idx, p_idx} =
-          for {t, t_idx} <- Enum.with_index(teams) do
-            player_count =
-              Enum.filter(players, fn %{team: {x, y, _}} ->
-                x == at_idx && y == t_idx
-              end)
-              |> Enum.count()
-
-            capacity = t.max_players - player_count
-            {capacity, t_idx, player_count}
-          end
-          |> Enum.filter(fn {c, _, _} -> c > 0 end)
-          # guarantee not to raise an exception
-          |> Enum.min()
-
-        {at_idx, t_idx, p_idx}
+  defp broadcast_to_members(state, sender_id, message) do
+    for {p_id, p} <- state.players, p_id != sender_id do
+      send(p.pid, message)
     end
+
+    for {s_id, s} <- state.spectators, s_id != sender_id do
+      send(s.pid, message)
+    end
+
+    state
   end
 
-  @spec remove_player(T.userid(), state()) :: {:ok, state()} | {:error, :not_in_lobby}
-  defp remove_player(user_id, state) when not is_map_key(state.players, user_id),
-    do: {:error, :not_in_lobby}
+  # temporarily commented out until I implement lobby/joinQueue
+  # defp find_spec_queue_pos(spectators) do
+  #   if Enum.empty?(spectators) do
+  #     1
+  #   else
+  #     {_, s} = Enum.max_by(spectators, fn {_, s} -> s.join_queue_position end)
+  #     s.join_queue_position
+  #   end
+  # end
 
+  @spec remove_player(T.userid(), state()) :: state()
   defp remove_player(user_id, state) do
     {%{team: {at_idx, t_idx, p_idx}} = removed, players} =
       Map.pop!(state.players, user_id)
@@ -461,13 +508,27 @@ defmodule Teiserver.TachyonLobby.Lobby do
       Map.update!(state, :monitors, &MC.demonitor_by_val(&1, removed.id))
       |> Map.put(:players, updated_players)
 
-    if map_size(state.players) > 0 do
+    # avoid sending a useless lobby list update when the last member of the lobby
+    # just left. The caller of this function will detect the lobby is empty and
+    # terminate the process, which will trigger the final lobby list update for
+    # this lobby
+    if map_size(state.players) > 0 || map_size(state.spectators) > 0 do
       TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
       updates = Map.new(changes) |> Map.put(user_id, nil)
       broadcast_update({:update, user_id, updates}, state)
     end
 
-    {:ok, state}
+    state
+  end
+
+  @spec remove_player(T.userid(), state()) :: state()
+  defp remove_spectator(user_id, state) do
+    state =
+      Map.update!(state, :spectators, &Map.delete(&1, user_id))
+      |> Map.update!(:monitors, &MC.demonitor_by_val(&1, user_id))
+
+    broadcast_update({:update, user_id, %{user_id => nil}}, state)
+    state
   end
 
   defp gen_password(), do: :crypto.strong_rand_bytes(16) |> Base.encode16()

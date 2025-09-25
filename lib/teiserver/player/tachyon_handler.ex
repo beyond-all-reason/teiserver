@@ -891,17 +891,10 @@ defmodule Teiserver.Player.TachyonHandler do
 
   defp lobby_details_to_tachyon(details) do
     members =
-      Enum.map(details.members, fn {p_id, p} ->
-        {to_string(p_id),
-         Map.merge(
-           %{
-             id: to_string(p_id),
-             type: p.type
-           },
-           lobby_team_to_tachyon(p.team)
-         )}
+      Enum.map(details.members, fn {m_id, m} ->
+        {to_string(m_id), member_update_to_tachyon(m_id, m, true)}
       end)
-      |> Enum.into(%{})
+      |> Map.new()
 
     ally_team_config =
       for {at, at_idx} <- Enum.with_index(details.ally_team_config), into: %{} do
@@ -932,28 +925,10 @@ defmodule Teiserver.Player.TachyonHandler do
     }
   end
 
-  defp lobby_update_to_tachyon(lobby_id, %{event: :add_player} = ev) do
-    data = %{
-      id: lobby_id,
-      members: %{
-        to_string(ev.id) =>
-          Map.merge(
-            %{
-              type: :player,
-              id: to_string(ev.id)
-            },
-            lobby_team_to_tachyon(ev.team)
-          )
-      }
-    }
-
-    {"lobby/updated", data}
-  end
-
   defp lobby_update_to_tachyon(lobby_id, %{event: :updated} = ev) do
     members =
       Enum.map(ev.updates, fn {p_id, updates} ->
-        {to_string(p_id), player_update_to_tachyon(p_id, updates)}
+        {to_string(p_id), member_update_to_tachyon(p_id, updates, false)}
       end)
       |> Enum.into(%{})
 
@@ -961,15 +936,32 @@ defmodule Teiserver.Player.TachyonHandler do
     {"lobby/updated", data}
   end
 
-  defp player_update_to_tachyon(_p_id, nil), do: nil
+  # omit_nil? is there so we can use the same function for both the initial
+  # object and any subsequent json patch style updates
+  # because the initial object cannot have nil keys, so just skip them if any
+  defp member_update_to_tachyon(_m_id, nil, _omit_nil?), do: nil
 
-  defp player_update_to_tachyon(p_id, updates) do
-    case Map.get(updates, :team) do
-      nil -> %{}
-      t -> lobby_team_to_tachyon(t)
-    end
-    |> Map.put(:id, to_string(p_id))
-    |> Map.put(:type, :player)
+  defp member_update_to_tachyon(m_id, updates, omit_nil?) do
+    base =
+      case Map.get(updates, :team) do
+        nil -> %{}
+        t -> lobby_team_to_tachyon(t)
+      end
+      |> Map.put(:id, to_string(m_id))
+
+    other_keys = [{:type, :type}, {:join_queue_position, :joinQueuePosition}]
+
+    Enum.reduce(other_keys, base, fn {k, tachyon_k}, m ->
+      if is_map_key(updates, k) do
+        val = updates[k]
+
+        if val == nil && omit_nil?,
+          do: m,
+          else: Map.put(m, tachyon_k, updates[k])
+      else
+        m
+      end
+    end)
   end
 
   # handle partial overview object
