@@ -19,14 +19,5 @@ defmodule Teiserver.Account.TOTP do
     |> cast(attrs, [:user_id, :secret, :last_used])
     |> validate_required([:user_id, :secret])
     |> unique_constraint(:user_id)
-    |> put_new_active()
-  end
-
-  def put_new_active(changeset) do
-    if changeset.data.__meta__.state == :built and get_change(changeset, :active) == nil do
-      put_change(changeset, :active, false)
-    else
-      changeset
-    end
   end
 end
