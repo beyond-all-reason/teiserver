@@ -29,7 +29,7 @@
             <% end %>
 
             <a
-              class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.icon()}"}
+              class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
               href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@target_id}_"}
             >
               <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />

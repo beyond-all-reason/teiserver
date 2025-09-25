@@ -13,16 +13,16 @@ defmodule Teiserver.Account.RelationshipLib do
   def icon(), do: "fa-solid fa-users"
 
   @spec icon_follow :: String.t()
-  def icon_follow(), do: "fa-eyes"
+  def icon_follow(), do: "fa-heart"
 
   @spec icon_ignore :: String.t()
-  def icon_ignore(), do: "fa-volume-slash"
+  def icon_ignore(), do: "fa-microphone-slash"
 
   @spec icon_avoid :: String.t()
   def icon_avoid(), do: "fa-ban"
 
   @spec icon_block :: String.t()
-  def icon_block(), do: "fa-octagon-exclamation"
+  def icon_block(), do: "fa-hand"
 
   @spec verb_of_state(String.t() | map) :: String.t()
   def verb_of_state("follow"), do: "following"
