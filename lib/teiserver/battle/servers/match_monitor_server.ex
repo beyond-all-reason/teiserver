@@ -70,22 +70,34 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   # Room messages
   def handle_info({:new_message, from_id, "autohosts", "* Launching game..."}, state) do
-    client = Client.get_client_by_id(from_id)
-    Battle.start_match(client.lobby_id)
-    {:noreply, state}
+    case Client.get_client_by_id(from_id) do
+      nil ->
+        Logger.warning("Cannot start match: client #{from_id} not found")
+        {:noreply, state}
+
+      client ->
+        Battle.start_match(client.lobby_id)
+        {:noreply, state}
+    end
   end
 
   def handle_info(
         {:new_message, from_id, "autohosts", "* Server stopped (running time" <> _},
         state
       ) do
-    client = Client.get_client_by_id(from_id)
-    Battle.stop_match(client.lobby_id)
+    case Client.get_client_by_id(from_id) do
+      nil ->
+        Logger.warning("Cannot stop match: client #{from_id} not found")
+        {:noreply, state}
 
-    match_id = Battle.get_match_id_from_userid(from_id)
-    Telemetry.log_simple_lobby_event(nil, match_id, "lobby.match_stopped")
+      client ->
+        Battle.stop_match(client.lobby_id)
 
-    {:noreply, state}
+        match_id = Battle.get_match_id_from_userid(from_id)
+        Telemetry.log_simple_lobby_event(nil, match_id, "lobby.match_stopped")
+
+        {:noreply, state}
+    end
   end
 
   # Spring crashed
@@ -93,13 +105,19 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         {:new_message, from_id, "autohosts", "* Spring crashed ! (running time" <> _rest},
         state
       ) do
-    client = Client.get_client_by_id(from_id)
-    Battle.stop_match(client.lobby_id)
+    case Client.get_client_by_id(from_id) do
+      nil ->
+        Logger.warning("Cannot stop match: client #{from_id} not found")
+        {:noreply, state}
 
-    match_id = Battle.get_match_id_from_userid(from_id)
-    Telemetry.log_simple_lobby_event(nil, match_id, "lobby.spring_crashed")
+      client ->
+        Battle.stop_match(client.lobby_id)
 
-    {:noreply, state}
+        match_id = Battle.get_match_id_from_userid(from_id)
+        Telemetry.log_simple_lobby_event(nil, match_id, "lobby.spring_crashed")
+
+        {:noreply, state}
+    end
   end
 
   # Battle manually stopped
