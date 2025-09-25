@@ -161,7 +161,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec join(id(), player_join_data(), pid()) ::
           {:ok, lobby_pid :: pid(), details()} | {:error, reason :: term()}
-  def join(lobby_id, join_data, pid) do
+  def join(lobby_id, join_data, pid \\ self()) do
     GenServer.call(via_tuple(lobby_id), {:join, join_data, pid})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
@@ -170,6 +170,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec leave(id(), T.userid()) :: :ok | {:error, reason :: term()}
   def leave(lobby_id, user_id) do
     GenServer.call(via_tuple(lobby_id), {:leave, user_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
+  @spec join_ally_team(id(), T.userid(), allyTeam :: non_neg_integer()) ::
+          {:ok, details()}
+          | {:error,
+             reason :: :invalid_lobby | :not_in_lobby | :invalid_ally_team | :ally_team_full}
+  def join_ally_team(lobby_id, user_id, ally_team) do
+    GenServer.call(via_tuple(lobby_id), {:join_ally_team, user_id, ally_team})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
@@ -269,6 +279,82 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   def handle_call({:leave, _user_id}, _from, state), do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:join_ally_team, user_id, _ally_team}, _from, state)
+      when not is_map_key(state.players, user_id) and not is_map_key(state.spectators, user_id),
+      do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:join_ally_team, user_id, _ally_team}, _from, state)
+      when not is_map_key(state.players, user_id) and not is_map_key(state.spectators, user_id),
+      do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:join_ally_team, _user_id, ally_team}, _from, state)
+      when ally_team >= length(state.ally_team_config) or ally_team < 0,
+      do: {:reply, {:error, :invalid_ally_team}, state}
+
+  def handle_call({:join_ally_team, user_id, ally_team}, _from, state) do
+    ally_team_capacity = Enum.at(state.ally_team_config, ally_team).max_teams
+
+    team_count =
+      Enum.filter(state.players, fn {_, %{team: {at, _, _}}} -> at == ally_team end)
+      |> Enum.count()
+
+    already_there? =
+      case state.players[user_id] do
+        nil -> false
+        %{team: {at, _, _}} -> at == ally_team
+      end
+
+    cond do
+      already_there? ->
+        # TODO: broadcast this update
+        {:reply, {:ok, get_details_from_state(state)}, state}
+
+      team_count >= ally_team_capacity ->
+        {:reply, {:error, :ally_team_full}, state}
+
+      true ->
+        # we guarantee that teams are consecutive in the ally team (without gap)
+        # so we can use the team_count as the index for the new team in the ally team
+        team = {ally_team, team_count, 0}
+
+        case {state.players[user_id], state.spectators[user_id]} do
+          {_player, nil} ->
+            # we're moving a player from a different ally team
+            changes = [{user_id, team} | do_remove_player(user_id, state.players)]
+
+            change_map =
+              for({user_id, team} <- changes, do: {user_id, %{team: team}})
+              |> Enum.into(%{})
+
+            broadcast_update({:update, nil, change_map}, state)
+
+            updated_players =
+              Enum.reduce(changes, state.players, fn {p_id, team}, players ->
+                put_in(players, [p_id, :team], team)
+              end)
+
+            state = Map.replace!(state, :players, updated_players)
+            {:reply, {:ok, get_details_from_state(state)}, state}
+
+          {nil, s} ->
+            # Adding a spec into an ally team. The way we construct the team
+            # means it doesn't require any reshuffling of existing players
+            player = s |> Map.delete(:join_queue_position) |> Map.put(:team, team)
+
+            state =
+              state
+              |> Map.update!(:spectators, &Map.delete(&1, user_id))
+              |> Map.update!(:players, &Map.put(&1, user_id, player))
+
+            update = %{user_id => %{team: team, type: :player, join_queue_position: nil}}
+            TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
+            broadcast_update({:update, nil, update}, state)
+
+            {:reply, {:ok, get_details_from_state(state)}, state}
+        end
+    end
+  end
 
   def handle_call({:start_battle, user_id}, _from, state)
       when not is_map_key(state.players, user_id) and not is_map_key(state.spectators, user_id),
@@ -470,42 +556,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec remove_player(T.userid(), state()) :: state()
   defp remove_player(user_id, state) do
-    {%{team: {at_idx, t_idx, p_idx}} = removed, players} =
-      Map.pop!(state.players, user_id)
-
-    # reorg the other players to keep the team indices consecutive
-    # ally team won't change
-    changes =
-      Enum.reduce(players, [], fn {p_id, p}, changes ->
-        {x, y, z} = p.team
-
-        cond do
-          x == at_idx && y >= t_idx && p_idx == 0 ->
-            # p_idx == 0 means the player removed was the last one on their team
-            # so its team can be "removed", and all teams with a higher index should
-            # be moved back by 1
-            team = {x, y - 1, z}
-
-            [{p_id, %{team: team}} | changes]
-
-          x == at_idx && y >= t_idx && z >= p_idx ->
-            # similar there, but we only shuffle the players in the same team (archons)
-            team = {x, y, z - 1}
-
-            [{p_id, %{team: team}} | changes]
-
-          true ->
-            changes
-        end
-      end)
+    changes = do_remove_player(user_id, state.players)
 
     updated_players =
-      Enum.reduce(changes, players, fn {p_id, %{team: team}}, ps ->
+      Enum.reduce(changes, state.players, fn {p_id, team}, ps ->
         put_in(ps, [p_id, :team], team)
       end)
+      |> Map.delete(user_id)
 
     state =
-      Map.update!(state, :monitors, &MC.demonitor_by_val(&1, removed.id))
+      Map.update!(state, :monitors, &MC.demonitor_by_val(&1, user_id))
       |> Map.put(:players, updated_players)
 
     # avoid sending a useless lobby list update when the last member of the lobby
@@ -514,14 +574,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
     # this lobby
     if map_size(state.players) > 0 || map_size(state.spectators) > 0 do
       TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
-      updates = Map.new(changes) |> Map.put(user_id, nil)
+
+      updates =
+        changes
+        |> Enum.map(fn {u_id, team} -> {u_id, %{team: team}} end)
+        |> Map.new()
+        |> Map.put(user_id, nil)
+
       broadcast_update({:update, user_id, updates}, state)
     end
 
     state
   end
 
-  @spec remove_player(T.userid(), state()) :: state()
+  @spec remove_spectator(T.userid(), state()) :: state()
   defp remove_spectator(user_id, state) do
     state =
       Map.update!(state, :spectators, &Map.delete(&1, user_id))
@@ -529,6 +595,40 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     broadcast_update({:update, user_id, %{user_id => nil}}, state)
     state
+  end
+
+  # pure function that remove the given user from the players and adjust
+  # all ally team and team configuration to account for that
+  # returns the list of {player_id, new_team} that were modified in the process
+  @spec do_remove_player(T.userid(), %{T.userid() => player()}) :: [{T.userid(), team()}]
+  defp do_remove_player(user_id, players) do
+    {%{team: {at_idx, t_idx, p_idx}}, players} =
+      Map.pop!(players, user_id)
+
+    # reorg the other players to keep the team indices consecutive
+    # ally team won't change
+    Enum.reduce(players, [], fn {p_id, p}, player_changes ->
+      {x, y, z} = p.team
+
+      cond do
+        x == at_idx && y >= t_idx && p_idx == 0 ->
+          # p_idx == 0 means the player removed was the last one on their team
+          # so its team can be "removed", and all teams with a higher index should
+          # be moved back by 1
+          team = {x, y - 1, z}
+
+          [{p_id, team} | player_changes]
+
+        x == at_idx && y >= t_idx && z >= p_idx ->
+          # similar there, but we only shuffle the players in the same team (archons)
+          team = {x, y, z - 1}
+
+          [{p_id, team} | player_changes]
+
+        true ->
+          player_changes
+      end
+    end)
   end
 
   defp gen_password(), do: :crypto.strong_rand_bytes(16) |> Base.encode16()

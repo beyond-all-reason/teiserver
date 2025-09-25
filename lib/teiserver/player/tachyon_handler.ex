@@ -670,6 +670,22 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/joinAllyTeam", "request", _msg_id, msg, state) do
+    with {:ok, ally_team} <- TachyonParser.parse_int(msg["data"]["allyTeam"]),
+         :ok <- Player.Session.join_ally_team(state.user.id, ally_team) do
+      {:response, state}
+    else
+      {:error, :invalid_int} ->
+        {:error_response, :invalid_request, "Invalid ally team", state}
+
+      {:error, reason} when reason in [:not_in_lobby, :ally_team_full] ->
+        {:error_response, reason, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
     case Player.Session.start_lobby_battle(state.user.id) do
       :ok ->

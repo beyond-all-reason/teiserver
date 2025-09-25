@@ -57,8 +57,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
     assert ev2.counter > ev.counter
   end
 
-  @tag :skip
-  test "get updates when player joins or leaves lobby" do
+  test "get updates when player joins or leaves teams" do
     {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
     {:ok, _pid, %{id: id}} =
@@ -68,9 +67,27 @@ defmodule Teiserver.TachyonLobby.ListTest do
 
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
     {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+    {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
     assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
 
     :ok = Lobby.leave(id, "user2")
+    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 1}}
+  end
+
+  test "get updates when player dies" do
+    {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+
+    {:ok, _pid, %{id: id}} =
+      mk_start_params([2, 2])
+      |> Map.replace!(:creator_pid, sink_pid)
+      |> Lobby.create()
+
+    assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
+    {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+    {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
+    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
+
+    Process.exit(sink_pid, :exit)
     assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 1}}
   end
 
