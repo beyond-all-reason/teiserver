@@ -10,6 +10,9 @@
         >
           <i class="fa-fw fa-solid fa-lock"></i> Change password
         </a>
+        <.link navigate={Routes.ts_account_security_totp_path(@conn, :totp)}>
+          <button type="button">Two Factor Authentication</button>
+        </.link>
 
         <h4>User tokens</h4>
         <%= if Enum.empty?(@user_tokens) do %>

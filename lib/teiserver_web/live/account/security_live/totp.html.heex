@@ -1,0 +1,42 @@
+<div class="security-page">
+  <h2>Two-Factor Authentication (2FA)</h2>
+
+  <%= if @otp_status == :inactive do %>
+    <p>2FA is currently <strong>disabled</strong>.</p>
+
+    <button phx-click="enable_2fa">Enable 2FA</button>
+
+    <div class="otp-setup">
+      <h3>Scan QR Code</h3>
+      <img
+        src={"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=#{@otp_uri}"}
+        alt="QR Code for 2FA"
+      />
+
+      <p>Or use this URI manually:</p>
+      <code>{@otp_uri}</code>
+
+      <div class="otp-input">
+        <label>Input OTP:</label>
+        <input type="text" name="otp_input" value={@otp_input} phx-change="update_otp" />
+      </div>
+
+      <%= if @error do %>
+        <p class="error">{@error}</p>
+      <% end %>
+
+      <div class="buttons">
+        <button phx-click="back">Back</button>
+        <button phx-click="save_otp">Save</button>
+      </div>
+    </div>
+  <% else %>
+    <p>2FA is currently <strong>enabled</strong>.</p>
+
+    <div class="buttons">
+      <button phx-click="enable_2fa">Reset 2FA</button>
+      <button phx-click="disable_2fa">Disable 2FA</button>
+      <button phx-click="back">Back</button>
+    </div>
+  <% end %>
+</div>
