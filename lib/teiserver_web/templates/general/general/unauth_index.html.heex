@@ -5,11 +5,11 @@
     <nav class="navbar navbar-expand-lg navbar-light pt-4 px-0">
       <a class="navbar-brand" href={~p"/"}>
         <img
-          src={Routes.static_path(@conn, "/images/logo/square_logo.svg")}
-          width="30"
+          src={Routes.static_path(@conn, "/images/logo/logo.svg")}
+          alt="BAR Logo"
+          style="height: 24px; width: auto;"
           class="mr-2"
         />
-        {Application.get_env(:teiserver, Teiserver)[:site_title]}
       </a>
       <button
         class="navbar-toggler"
