@@ -26,6 +26,10 @@ defmodule TeiserverWeb.Account.SecurityController do
     |> render("index.html")
   end
 
+  @spec totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def totp(conn, _params) do
+  end
+
   @spec edit_password(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit_password(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
