@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   use TeiserverWeb, :controller
 
   alias Teiserver.Account
-
+  alias Teiserver.Account.{TOTP, TOTPLib}
   plug(:add_breadcrumb, name: "Account", url: "/teiserver/account")
   plug(:add_breadcrumb, name: "Security", url: "/teiserver/account/security")
 
@@ -28,6 +28,65 @@ defmodule TeiserverWeb.Account.SecurityController do
 
   @spec totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def totp(conn, _params) do
+    user = Account.get_user!(conn.assigns.current_user.id)
+    {status, _totp} = TOTPLib.get_user_totp(user)
+
+    conn
+    |> add_breadcrumb(name: "TOTP", url: conn.request_path)
+    |> assign(:status, status)
+    |> assign(:user, user)
+    |> render("totp.html")
+  end
+
+  @spec edit_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def edit_totp(conn, _params) do
+    user = Account.get_user!(conn.assigns.current_user.id)
+    {status, totp} = TOTPLib.get_user_totp(user)
+
+    secret =
+      case totp do
+        nil ->
+          NimbleTOTP.secret()
+
+        _ ->
+          totp.secret
+      end
+
+    changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: secret})
+    otpauth_uri = NimbleTOTP.otpauth_uri("BAR:#{user.name}", secret, issuer: "Beyond All Reason")
+
+    conn
+    |> add_breadcrumb(name: "edit_totp", url: conn.request_path)
+    |> assign(:changeset, changeset)
+    |> assign(:status, status)
+    |> assign(:user, user)
+    |> assign(:otpauth_uri, otpauth_uri)
+    |> render("edit_totp.html")
+  end
+
+  @spec update_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def update_totp(conn, %{"totp" => totp_params}) do
+    IO.inspect(totp_params, label: "TOTP Params")
+    user = Account.get_user!(conn.assigns.current_user.id)
+
+    case TOTPLib.validate_totp(totp_params["secret"], totp_params["otp"]) do
+      {:ok, _} ->
+        TOTPLib.set_secret(user, totp_params["secret"])
+
+        conn
+        |> put_flash(:info, "Account password updated successfully.")
+        |> redirect(to: Routes.ts_account_security_path(conn, :totp))
+
+      {:error, _reason} ->
+        changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: totp_params["secret"]})
+
+        conn
+        |> assign(:changeset, changeset)
+        |> assign(:status, totp_params["status"])
+        |> assign(:user, user)
+        |> assign(:otpauth_uri, totp_params["otpauth_uri"])
+        |> render("edit_totp.html")
+    end
   end
 
   @spec edit_password(Plug.Conn.t(), map()) :: Plug.Conn.t()

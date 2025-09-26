@@ -1,0 +1,62 @@
+<TeiserverWeb.AccountComponents.sub_menu active="security" view_colour={view_colour()} />
+
+<div class="row" style="padding-top: 10vh;">
+  <div class="col-sm-10 col-sm-offset-1 col-md-8 offset-md-2 col-xl-6 offset-xl-3">
+    <div class="card card-default">
+      <div class="card-header">
+        <h3 class="card-title">
+          <img
+            src={Routes.static_path(@conn, "/images/logo/logo_favicon.png")}
+            height="42"
+            style="margin-right: 5px;"
+            class="d-inline align-top"
+          /> Edit TOTP
+        </h3>
+      </div>
+      <div class="card-body">
+        <%= form_for @changeset, Routes.ts_account_security_path(@conn, :update_totp), fn f -> %>
+          <div class="mb-4 text-center">
+            <!-- QR Code -->
+            <%= if @otpauth_uri do %>
+              <img
+                src={"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=#{URI.encode(@otpauth_uri)}"}
+                alt="TOTP QR Code"
+                class="mx-auto"
+              />
+            <% end %>
+          </div>
+
+          <div class="mb-4">
+            <!-- Display the otpauth_uri -->
+            <%= if @otpauth_uri do %>
+              <p class="text-sm text-gray-600 break-all">{@otpauth_uri}</p>
+            <% end %>
+          </div>
+
+          <div class="mb-4">
+            <!-- OTP input field -->
+            {label(f, :otp, "OTP", class: "block text-sm font-medium text-gray-700")}
+            {text_input(f, :otp,
+              class:
+                "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            )}
+            {error_tag(f, :otp)}
+          </div>
+          
+<!-- Hidden fields to submit extra data -->
+          {hidden_input(f, :status, value: @status)}
+          {hidden_input(f, :secret, value: f.data.secret)}
+          {hidden_input(f, :otpauth_uri, value: @otpauth_uri)}
+
+          <div class="d-flex justify-content-end gap-2">
+            {link("Cancel",
+              to: Routes.ts_account_security_path(@conn, :totp),
+              class: "btn btn-secondary"
+            )}
+            {submit("Save", class: "btn btn-primary")}
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

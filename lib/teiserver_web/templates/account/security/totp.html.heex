@@ -1,0 +1,64 @@
+<TeiserverWeb.AccountComponents.sub_menu active="security" view_colour={view_colour()} />
+
+<div class="row" style="padding-top: 10vh;">
+  <div class="col-sm-10 col-sm-offset-1 col-md-8 offset-md-2 col-xl-6 offset-xl-3">
+    <div class="card card-default">
+      <div class="card-header">
+        <h3 class="card-title">
+          <img
+            src={Routes.static_path(@conn, "/images/logo/logo_favicon.png")}
+            height="42"
+            style="margin-right: 5px;"
+            class="d-inline align-top"
+          /> Edit account password
+        </h3>
+      </div>
+      <div class="card-body d-flex flex-column" style="min-height: 300px;">
+        <div class="mb-4">
+          <strong>Status:</strong>
+          <%= case @status do %>
+            <% :active -> %>
+              Active
+            <% :inactive -> %>
+              Inactive
+          <% end %>
+        </div>
+
+        <div class="flex-grow-1"></div>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            {link("Back",
+              to: Routes.ts_account_security_path(@conn, :index),
+              class: "btn btn-secondary"
+            )}
+          </div>
+
+          <div class="d-flex gap-2">
+            <%= if @status == :inactive do %>
+              {link("Enable TOTP",
+                to: Routes.ts_account_security_path(@conn, :edit_totp),
+                class: "btn btn-primary"
+              )}
+            <% else %>
+              {button("Reset TOTP",
+                type: "button",
+                phx_click: "reset_totp",
+                class: "btn btn-warning"
+              )}
+              {button("Disable TOTP",
+                type: "button",
+                phx_click: "disable_totp",
+                class: "btn btn-danger"
+              )}
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <!-- card-body -->
+    </div>
+    <!-- card -->
+  </div>
+  <!-- col -->
+</div>
+<!-- row -->
