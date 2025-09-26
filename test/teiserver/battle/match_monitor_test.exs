@@ -16,7 +16,7 @@ defmodule Teiserver.Battle.MatchMonitorTest do
 
   # This test is to ensure long messages are not being truncated
   # it is currently flakey, but not in isolation :(
-  # error: 
+  # error:
   # test/teiserver/battle/match_monitor_test.exs:18
   #    Assertion with == failed
   #    code:  assert result == "SAYPRIVATE AutohostMonitor endGameData eyJrZXkiOiJ2YWx1ZSJ9\n"
@@ -60,5 +60,28 @@ defmodule Teiserver.Battle.MatchMonitorTest do
 
     assert result =~ "X19fX19fX19fX19fX19fX19fQ==\n"
     assert String.length(result) == 3588
+  end
+
+  test "does not crash when lobby is unavailable" do
+    # This test verifies that MatchMonitorServer doesn't crash when
+    # trying to start a match for a non-existent lobby
+
+    # Get the MatchMonitorServer PID
+    monitor_pid = Teiserver.Battle.MatchMonitorServer.get_match_monitor_pid()
+    assert monitor_pid != nil
+
+    # Send a launch message for a non-existent lobby
+    send(monitor_pid, {:new_message, 99999, "autohosts", "* Launching game..."})
+
+    # Verify the server is still running (hasn't crashed)
+    Teiserver.Support.Polling.poll_until(
+      fn ->
+        Process.alive?(monitor_pid)
+      end,
+      fn alive -> alive == true end
+    )
+
+    # Verify the server is still registered
+    assert Teiserver.Battle.MatchMonitorServer.get_match_monitor_pid() == monitor_pid
   end
 end

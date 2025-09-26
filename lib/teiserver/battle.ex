@@ -302,7 +302,7 @@ defmodule Teiserver.Battle do
     current_balance = get_lobby_current_balance(lobby_id)
 
     case MatchLib.match_from_lobby(lobby_id) do
-      {match_params, members} ->
+      {:ok, {match_params, members}} ->
         # We want to ensure any existing memberships for this match are removed
         member_ids = Enum.map(members, fn %{user_id: user_id} -> user_id end)
 
@@ -355,8 +355,8 @@ defmodule Teiserver.Battle do
             :ok
         end
 
-      nil ->
-        # No human players, we're not going to create a match with that!
+      {:error, :unavailable} ->
+        Logger.warning("Cannot start match for lobby #{lobby_id}: lobby unavailable")
         :ok
     end
 
