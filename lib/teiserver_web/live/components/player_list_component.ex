@@ -5,14 +5,15 @@ defmodule TeiserverWeb.Components.PlayerListComponent do
 
   @impl true
   def update_many(list_of_assigns) do
-    assigns = hd(list_of_assigns)
+    list_of_assigns
+    |> Enum.map(fn
+      {assigns, socket} ->
+        {_, updated_socket} = update(assigns, socket)
+        updated_socket
 
-    [
-      Map.merge(
-        %{},
-        assigns
-      )
-    ]
+      assigns when is_map(assigns) ->
+        raise "update_many called with assigns only, expected {assigns, socket} tuple"
+    end)
   end
 
   @impl true
