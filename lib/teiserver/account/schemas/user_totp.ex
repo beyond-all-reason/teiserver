@@ -1,9 +1,10 @@
 defmodule Teiserver.Account.TOTP do
   use TeiserverWeb, :schema
-  # alias Teiserver.Account.TOTPLib
 
   @primary_key {:user_id, :id, autogenerate: false}
   @foreign_key_type :id
+
+  @type t :: term()
 
   schema "teiserver_account_user_totps" do
     belongs_to :user, Teiserver.Account.User, define_field: false, type: :id

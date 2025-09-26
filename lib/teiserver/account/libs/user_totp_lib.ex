@@ -97,7 +97,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec set_totp(User.t() | TOTP.t(), Map.t()) ::
+  @spec set_totp(User.t() | TOTP.t(), map()) ::
           {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
   def set_totp(%User{} = user, attrs) do
     case get_user_totp(user) do
