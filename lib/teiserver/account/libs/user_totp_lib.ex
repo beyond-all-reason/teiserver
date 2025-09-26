@@ -72,7 +72,7 @@ defmodule Teiserver.Account.TOTPLib do
 
   @spec set_secret(User.t(), String.t()) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
   def set_secret(%User{} = user, secret) do
-    set_totp(user, %{secret: secret})
+    set_totp(user, %{user_id: user.id, secret: secret})
   end
 
   @spec disable_totp(User.t()) :: {:ok, TOTP.t() | nil} | {:error, Ecto.Changeset.t()}

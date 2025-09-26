@@ -10,7 +10,7 @@
             height="42"
             style="margin-right: 5px;"
             class="d-inline align-top"
-          /> Edit account password
+          /> Two Factor Authentication
         </h3>
       </div>
       <div class="card-body d-flex flex-column" style="min-height: 300px;">
@@ -41,24 +41,17 @@
                 class: "btn btn-primary"
               )}
             <% else %>
-              {button("Reset TOTP",
-                type: "button",
-                phx_click: "reset_totp",
-                class: "btn btn-warning"
+              {link("Reset TOTP",
+                to: Routes.ts_account_security_path(@conn, :edit_totp),
+                class: "btn btn-primary"
               )}
-              {button("Disable TOTP",
-                type: "button",
-                phx_click: "disable_totp",
-                class: "btn btn-danger"
-              )}
+              <%= form_for @conn, Routes.ts_account_security_path(@conn, :disable_totp), [method: :post], fn _f -> %>
+                {submit("Disable TOTP", class: "btn btn-danger")}
+              <% end %>
             <% end %>
           </div>
         </div>
       </div>
-      <!-- card-body -->
     </div>
-    <!-- card -->
   </div>
-  <!-- col -->
 </div>
-<!-- row -->
