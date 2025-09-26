@@ -503,6 +503,7 @@ defmodule Teiserver.Player.Session do
     end
 
     broadcast_user_update!(state.user, :offline)
+    :telemetry.execute([:tachyon, :disconnect], %{count: 1})
 
     {:stop, :normal, :ok, %{state | matchmaking: initial_matchmaking_state()}}
   end
@@ -1267,6 +1268,7 @@ defmodule Teiserver.Player.Session do
         # should be fairly low (and rate limited) so too many messages isn't an issue
         {:ok, _} = :timer.send_after(2_000, :player_timeout)
         Logger.info("Player disconnected abruptly")
+        :telemetry.execute([:tachyon, :abrupt_disconnect], %{count: 1})
 
         state =
           state

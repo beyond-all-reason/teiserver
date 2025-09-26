@@ -31,6 +31,9 @@ defmodule Teiserver.Party do
   @spec lookup(id()) :: pid() | nil
   defdelegate lookup(party_id), to: Party.Registry
 
+  @spec count() :: non_neg_integer()
+  defdelegate count(), to: Party.Registry
+
   @spec get_state(id()) :: state() | nil
   defdelegate get_state(party_id), to: Party.Server
 

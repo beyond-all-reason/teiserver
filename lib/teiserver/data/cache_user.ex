@@ -878,9 +878,12 @@ defmodule Teiserver.CacheUser do
           error: "Smurf"
         })
 
+        :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{reason: :smurf})
+
         {:error, @smurf_string}
 
       login_flood_check(user.id) == :block ->
+        :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{reason: :rate_limited})
         {:error, :rate_limited, "Flood protection - Please wait 20 seconds and try again"}
 
       is_restricted?(user, ["Permanently banned"]) ->
@@ -888,12 +891,16 @@ defmodule Teiserver.CacheUser do
           error: "Permanently banned"
         })
 
+        :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{reason: :banned})
+
         {:error, "Banned account"}
 
       is_restricted?(user, ["Login"]) ->
         Telemetry.log_complex_server_event(user.id, "Banned login", %{
           error: "Suspended"
         })
+
+        :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{reason: :suspended})
 
         {:error, @suspended_string}
 
@@ -907,10 +914,13 @@ defmodule Teiserver.CacheUser do
           last_ip: ip
         })
 
+        :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{reason: :not_verified})
+
         {:error, "Account is not verified"}
 
       true ->
         # TODO: copy/paste the capacity restriction and queuing from try_md5_login later
+        :telemetry.execute([:tachyon, :login, :ok], %{count: 1})
         do_login(user, ip, lobby_client, lobby_hash)
     end
   end
