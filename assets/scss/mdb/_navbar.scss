@@ -30,6 +30,26 @@
   position: absolute;
 }
 
+// Only apply absolute positioning when navbar is expanded (not collapsed)
+@media (min-width: 992px) {
+  .navbar-nav .dropdown-menu {
+    position: absolute;
+  }
+}
+
+// When navbar is collapsed, let dropdowns flow naturally
+@media (max-width: 991px) {
+  .navbar-nav .dropdown-menu {
+    position: static;
+    float: none;
+    width: auto;
+    margin-top: 0;
+    background-color: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+}
+
 .navbar-light {
   .navbar-toggler-icon {
     background-image: none;
