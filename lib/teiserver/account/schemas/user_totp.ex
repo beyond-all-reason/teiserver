@@ -8,8 +8,7 @@ defmodule Teiserver.Account.TOTP do
 
   schema "teiserver_account_user_totps" do
     belongs_to :user, Teiserver.Account.User, define_field: false, type: :id
-    # Contains a base32 encoded binary
-    field :secret, :string
+    field :secret, :binary
     field :last_used, :string, default: nil
 
     timestamps()

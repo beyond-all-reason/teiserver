@@ -9,8 +9,6 @@ defmodule Teiserver.Account.TOTPLib do
         {:inactive, nil}
 
       totp ->
-        {:ok, decoded_secret} = Base.decode32(totp.secret)
-        totp = %{totp | secret: decoded_secret}
         {:active, totp}
     end
   end
@@ -59,11 +57,6 @@ defmodule Teiserver.Account.TOTPLib do
   defp set_totp(%User{} = user, attrs) do
     case get_user_totp(user) do
       {:inactive, nil} ->
-        attrs =
-          Map.update(attrs, :secret, nil, fn secret ->
-            Base.encode32(secret, padding: false)
-          end)
-
         TOTP.changeset(%TOTP{}, attrs)
         |> Repo.insert()
 
@@ -73,11 +66,6 @@ defmodule Teiserver.Account.TOTPLib do
   end
 
   defp set_totp(%TOTP{} = totp, attrs) do
-    attrs =
-      Map.update(attrs, :secret, nil, fn secret ->
-        Base.encode32(secret, padding: false)
-      end)
-
     totp
     |> TOTP.changeset(attrs)
     |> Repo.update()
