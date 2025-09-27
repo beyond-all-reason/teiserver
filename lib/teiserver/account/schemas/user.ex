@@ -43,8 +43,6 @@ defmodule Teiserver.Account.User do
 
     has_one :user_stat, Teiserver.Account.UserStat
 
-    has_one :user_totp, Teiserver.Account.TOTP
-
     timestamps()
   end
 
