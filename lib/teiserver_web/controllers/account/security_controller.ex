@@ -44,11 +44,19 @@ defmodule TeiserverWeb.Account.SecurityController do
     changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: encoded_secret})
     otpauth_uri = NimbleTOTP.otpauth_uri("BAR:#{user.name}", secret, issuer: "Beyond All Reason")
 
+    qr_svg =
+      otpauth_uri
+      |> EQRCode.encode()
+      |> EQRCode.svg(width: 250)
+
+    # |> EQRCode.svg(color: "#b22603" ,shape: "circle", width: 300, background_color: :transparent)
+
     conn
     |> add_breadcrumb(name: "edit_totp", url: conn.request_path)
     |> assign(:changeset, changeset)
     |> assign(:user, user)
     |> assign(:otpauth_uri, otpauth_uri)
+    |> assign(:qr_svg, qr_svg)
     |> render("edit_totp.html")
   end
 

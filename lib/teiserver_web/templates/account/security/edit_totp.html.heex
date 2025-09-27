@@ -15,43 +15,40 @@
       </div>
       <div class="card-body">
         <%= form_for @changeset, ~p"/teiserver/account/security/totp/update", fn f -> %>
-          <div class="mb-4 text-center">
-            <!-- QR Code -->
-            <%= if @otpauth_uri do %>
-              <img
-                src={"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=#{URI.encode(@otpauth_uri)}"}
-                alt="TOTP QR Code"
-                class="mx-auto"
-              />
-            <% end %>
+          
+<!-- QR Code -->
+          <div class="bg-gray-800 p-6 mb-4">
+            {raw(@qr_svg)}
           </div>
-
+          
+<!-- OTP URI text -->
           <div class="mb-4">
-            <!-- Display the otpauth_uri -->
-            <%= if @otpauth_uri do %>
-              <p class="text-sm text-gray-600 break-all">{@otpauth_uri}</p>
-            <% end %>
+            <p class="text-sm text-gray-600 break-all">{@otpauth_uri}</p>
           </div>
-
+          
+<!-- OTP input -->
           <div class="mb-4">
-            <!-- OTP input field -->
-            {label(f, :otp, "OTP", class: "block text-sm font-medium text-gray-700")}
-            {text_input(f, :otp,
-              class:
-                "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            )}
+            {label(f, :otp, "OTP", class: "form-label text-white")}
+            {text_input(f, :otp, class: "form-control")}
             {error_tag(f, :otp)}
           </div>
 
           {hidden_input(f, :secret, value: f.data.secret)}
           {hidden_input(f, :otpauth_uri, value: @otpauth_uri)}
-
-          <div class="d-flex justify-content-end gap-2">
-            {link("Cancel",
-              to: ~p"/teiserver/account/security/totp",
-              class: "btn btn-secondary"
-            )}
-            {submit("Save", class: "btn btn-primary")}
+          
+<!-- Buttons aligned left/right -->
+          <div class="d-flex justify-content-between align-items-end mt-4">
+            <!-- Left button -->
+            <div>
+              <a href={~p"/teiserver/account/security/totp"} class="btn btn-secondary">
+                <i class="fa-fw fa-solid fa-arrow-left"></i> Back
+              </a>
+            </div>
+            
+<!-- Right button -->
+            <div>
+              {submit("Save", class: "btn btn-primary")}
+            </div>
           </div>
         <% end %>
       </div>
