@@ -3,6 +3,7 @@ defmodule Teiserver.Tachyon.Handler do
   Interface for connecting a tachyon client and process tachyon commands
   """
 
+  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Tachyon.Schema
 
   @typedoc """
@@ -28,7 +29,7 @@ defmodule Teiserver.Tachyon.Handler do
 
   @type result :: tachyon_result() | WebSock.handle_result()
 
-  @optional_callbacks handle_response: 4
+  @optional_callbacks handle_response: 4, init_rate_limiter: 1
 
   @doc """
   Called when upgrading the http connection to websocket.
@@ -47,6 +48,11 @@ defmodule Teiserver.Tachyon.Handler do
   Same as `WebSock.init/1`
   """
   @callback init(term()) :: result()
+
+  @doc """
+  if required, should return a rate limiter. The state returned from `init` is the argument
+  """
+  @callback init_rate_limiter(term()) :: BurstyRateLimiter.t()
 
   @doc """
   Same as `WebSock.handle_info/2`

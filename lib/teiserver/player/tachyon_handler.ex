@@ -4,6 +4,7 @@ defmodule Teiserver.Player.TachyonHandler do
   """
 
   require Logger
+  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Tachyon.Schema
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Data.Types, as: T
@@ -54,6 +55,11 @@ defmodule Teiserver.Player.TachyonHandler do
 
     event = build_user_self_event(user, sess_state)
     {:event, "user/self", event, state}
+  end
+
+  @impl Handler
+  def init_rate_limiter(_state) do
+    BurstyRateLimiter.per_second(10) |> BurstyRateLimiter.with_burst(20)
   end
 
   @impl Handler
