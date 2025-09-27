@@ -46,6 +46,7 @@ defmodule Teiserver.Account.AuthPlug do
       conn
       |> assign(:current_user, nil)
       |> assign(:user_token, nil)
+      |> assign(:totp_status, nil)
       |> Phoenix.Controller.put_flash(:danger, "You are banned")
       |> Guardian.Plug.sign_out(clear_remember_me: true)
       |> Phoenix.Controller.redirect(to: ~p"/logout")
