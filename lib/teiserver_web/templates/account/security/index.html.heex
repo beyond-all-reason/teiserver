@@ -5,12 +5,12 @@
     <div class="card card-primary">
       <div class="card-body">
         <a
-          href={Routes.ts_account_security_path(@conn, :edit_password)}
-          class="btn float-end btn-danger"
+          href={~p"/teiserver/account/security/edit_password"}
+          class="btn float-end btn-danger m-2"
         >
           <i class="fa-fw fa-solid fa-lock"></i> Change password
         </a>
-        <a href={Routes.ts_account_security_path(@conn, :totp)} class="btn float-end btn-danger">
+        <a href={~p"/teiserver/account/security/totp"} class="btn float-end btn-danger m-2">
           <i class="fa-fw fa-solid fa-lock"></i> 2FA Settings
         </a>
 

@@ -14,7 +14,7 @@
         </h3>
       </div>
       <div class="card-body">
-        <%= form_for @changeset, Routes.ts_account_security_path(@conn, :update_totp), fn f -> %>
+        <%= form_for @changeset, ~p"/teiserver/account/security/totp/update", fn f -> %>
           <div class="mb-4 text-center">
             <!-- QR Code -->
             <%= if @otpauth_uri do %>
@@ -42,14 +42,13 @@
             )}
             {error_tag(f, :otp)}
           </div>
-          
-<!-- Hidden fields to submit extra data -->
+
           {hidden_input(f, :secret, value: f.data.secret)}
           {hidden_input(f, :otpauth_uri, value: @otpauth_uri)}
 
           <div class="d-flex justify-content-end gap-2">
             {link("Cancel",
-              to: Routes.ts_account_security_path(@conn, :totp),
+              to: ~p"/teiserver/account/security/totp",
               class: "btn btn-secondary"
             )}
             {submit("Save", class: "btn btn-primary")}
