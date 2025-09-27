@@ -44,7 +44,6 @@
           </div>
           
 <!-- Hidden fields to submit extra data -->
-          {hidden_input(f, :status, value: @status)}
           {hidden_input(f, :secret, value: f.data.secret)}
           {hidden_input(f, :otpauth_uri, value: @otpauth_uri)}
 

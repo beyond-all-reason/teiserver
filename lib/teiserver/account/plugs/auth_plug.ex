@@ -29,10 +29,18 @@ defmodule Teiserver.Account.AuthPlug do
       Logger.metadata([user_id: user.id] ++ Logger.metadata())
     end
 
+    #    IO.inspect(user)
+    totp_status =
+      case user do
+        nil -> nil
+        _ -> Teiserver.Account.TOTPLib.get_user_totp_status(user)
+      end
+
     conn =
       conn
       |> assign(:user_token, user_token)
       |> assign(:current_user, user)
+      |> assign(:totp_status, totp_status)
 
     if banned_user?(conn) do
       conn

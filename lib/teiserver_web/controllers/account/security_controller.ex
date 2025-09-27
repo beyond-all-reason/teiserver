@@ -29,11 +29,9 @@ defmodule TeiserverWeb.Account.SecurityController do
   @spec totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
-    status = TOTPLib.get_user_totp_status(user)
 
     conn
     |> add_breadcrumb(name: "totp", url: conn.request_path)
-    |> assign(:status, status)
     |> assign(:user, user)
     |> render("totp.html")
   end
@@ -41,7 +39,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   @spec edit_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit_totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
-    {status, secret} = TOTPLib.get_or_generate_secret(user)
+    {_status, secret} = TOTPLib.get_or_generate_secret(user)
     encoded_secret = Base.encode32(secret, padding: false)
     changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: encoded_secret})
     otpauth_uri = NimbleTOTP.otpauth_uri("BAR:#{user.name}", secret, issuer: "Beyond All Reason")
@@ -49,7 +47,6 @@ defmodule TeiserverWeb.Account.SecurityController do
     conn
     |> add_breadcrumb(name: "edit_totp", url: conn.request_path)
     |> assign(:changeset, changeset)
-    |> assign(:status, status)
     |> assign(:user, user)
     |> assign(:otpauth_uri, otpauth_uri)
     |> render("edit_totp.html")
@@ -73,7 +70,6 @@ defmodule TeiserverWeb.Account.SecurityController do
 
         conn
         |> assign(:changeset, changeset)
-        |> assign(:status, totp_params["status"])
         |> assign(:user, user)
         |> assign(:otpauth_uri, totp_params["otpauth_uri"])
         |> render("edit_totp.html")
@@ -87,7 +83,7 @@ defmodule TeiserverWeb.Account.SecurityController do
 
     conn
     |> add_breadcrumb(name: "totp", url: conn.request_path)
-    |> assign(:status, :inactive)
+    |> assign(:totp_status, :inactive)
     |> assign(:user, user)
     |> render("totp.html")
   end
