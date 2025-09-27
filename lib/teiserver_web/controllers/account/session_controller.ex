@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Account.SessionController do
   use TeiserverWeb, :controller
   alias Teiserver.Account
+  alias Teiserver.Account.TOTPLib
   alias Teiserver.Config
   alias Teiserver.Logging.LoggingPlug
   alias Account.{Guardian, User, UserLib}
@@ -24,6 +25,7 @@ defmodule TeiserverWeb.Account.SessionController do
       conn
       |> Guardian.Plug.sign_out(clear_remember_me: true)
       |> assign(:changeset, changeset)
+      |> assign(:user, nil)
       |> assign(:action, Routes.account_session_path(conn, :login))
       |> assign(:can_register?, Account.can_register_with_web?())
       |> render("new.html")
@@ -34,9 +36,45 @@ defmodule TeiserverWeb.Account.SessionController do
   def login(conn, %{"user" => %{"email" => email, "password" => password}}) do
     email = String.trim(email)
 
-    conn
-    |> UserLib.authenticate_user(email, password)
-    |> login_reply(conn)
+    case UserLib.authenticate_user(conn, email, password) do
+      {:ok, user} ->
+        case TOTPLib.get_user_totp_status(user) do
+          :active ->
+            conn
+            |> assign(:status, :active)
+            |> assign(:user, user)
+            |> render("new.html")
+
+          :inactive ->
+            login_reply({:ok, user}, conn)
+        end
+
+      {:error, reason} ->
+        login_reply({:error, reason}, conn)
+    end
+  end
+
+  def verify_totp(conn, %{"user_id" => user_id, "otp" => otp}) do
+    user = UserLib.get_user(user_id)
+
+    case TOTPLib.validate_totp(user, otp) do
+      {:ok, _} ->
+        login_reply({:ok, user}, conn)
+
+      {:error, reason} ->
+        flash_message =
+          case reason do
+            :used -> "OTP has already been used."
+            :invalid -> "Invalid OTP."
+            _ -> "There was a problem verifying the OTP."
+          end
+
+        conn
+        |> put_flash(:warning, flash_message)
+        |> assign(:status, :active)
+        |> assign(:user, user)
+        |> render("new.html")
+    end
   end
 
   @spec one_time_login(Plug.Conn.t(), map()) :: Plug.Conn.t()

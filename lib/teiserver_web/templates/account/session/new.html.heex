@@ -12,63 +12,94 @@
         </h3>
       </div>
       <div class="card-body">
-        <%= form_for @changeset, @action, fn f -> %>
-          <div class="form-group m-2">
-            {label(f, :email, class: "control-label")}
-            {text_input(f, :email, class: "form-control", autofocus: "autofocus")}
-            {error_tag(f, :email)}
-          </div>
+        <%= if @user do %>
+          <!-- OTP verification form -->
 
-          <div class="form-group m-2">
-            {label(f, :password, class: "control-label")}
-            {password_input(f, :password, class: "form-control")}
-            {error_tag(f, :password)}
-          </div>
+          <form action={Routes.account_session_path(@conn, :verify_totp)} method="post">
+            <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+            <input type="hidden" name="user_id" value={@user.id} />
+            <input type="password" style="display:none" />
 
-          <div class="form-group m-2 mt-4">
-            <div class="row">
-              <div class="col-md-6 d-none">
-                &nbsp;
-              </div>
-              <div class="col-md-12">
-                {submit("Sign In", class: "btn btn-primary btn-block")}
+            <div class="form-group">
+              <label for="otp">OTP</label>
+              
+<!-- keep it text so password managers don't insert saved passwords -->
+              <input
+                type="text"
+                name="otp"
+                id="otp"
+                class="form-control"
+                autofocus
+                required
+                autocomplete="one-time-code"
+                placeholder="Enter 6-digit code"
+              />
+            </div>
+
+            <div class="mt-3">
+              <input type="submit" value="Verify OTP" class="btn btn-primary btn-block" />
+            </div>
+          </form>
+        <% else %>
+          <!-- Original login form -->
+          <%= form_for @changeset, @action, fn f -> %>
+            <div class="form-group m-2">
+              {label(f, :email, class: "control-label")}
+              {text_input(f, :email, class: "form-control", autofocus: "autofocus")}
+              {error_tag(f, :email)}
+            </div>
+
+            <div class="form-group m-2">
+              {label(f, :password, class: "control-label")}
+              {password_input(f, :password, class: "form-control")}
+              {error_tag(f, :password)}
+            </div>
+
+            <div class="form-group m-2 mt-4">
+              <div class="row">
+                <div class="col-md-6 d-none">
+                  &nbsp;
+                </div>
+                <div class="col-md-12">
+                  {submit("Sign In", class: "btn btn-primary btn-block")}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div :if={@can_register?} class="form-group m-2 mt-4">
-            <div class="row">
-              <div class="col-md-12">
-                <.link href={~p"/register"} class="btn btn-secondary btn-block">
-                  No account? Create one
-                </.link>
+            <div :if={@can_register?} class="form-group m-2 mt-4">
+              <div class="row">
+                <div class="col-md-12">
+                  <.link href={~p"/register"} class="btn btn-secondary btn-block">
+                    No account? Create one
+                  </.link>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="form-group m-2 mt-4">
-            <div class="row">
-              <%= if Teiserver.Config.get_site_config_cache("site.Main site link") do %>
+            <div class="form-group m-2 mt-4">
+              <div class="row">
+                <%= if Teiserver.Config.get_site_config_cache("site.Main site link") do %>
+                  <div class="col-md-4">
+                    <a
+                      href={Teiserver.Config.get_site_config_cache("site.Main site link")}
+                      class="btn btn-secondary btn-block"
+                    >
+                      Main site
+                    </a>
+                  </div>
+                <% end %>
+
                 <div class="col-md-4">
                   <a
-                    href={Teiserver.Config.get_site_config_cache("site.Main site link")}
+                    href={Routes.account_session_path(@conn, :forgot_password)}
                     class="btn btn-secondary btn-block"
                   >
-                    Main site
+                    Forgotten password
                   </a>
                 </div>
-              <% end %>
-
-              <div class="col-md-4">
-                <a
-                  href={Routes.account_session_path(@conn, :forgot_password)}
-                  class="btn btn-secondary btn-block"
-                >
-                  Forgotten password
-                </a>
               </div>
             </div>
-          </div>
+          <% end %>
         <% end %>
       </div>
     </div>

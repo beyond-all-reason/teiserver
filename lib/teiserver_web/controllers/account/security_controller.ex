@@ -29,8 +29,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   @spec totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
-    TOTPLib.set_secret(user, NimbleTOTP.secret())
-    {status, _totp} = TOTPLib.get_user_totp(user)
+    status = TOTPLib.get_user_totp_status(user)
 
     conn
     |> add_breadcrumb(name: "totp", url: conn.request_path)
@@ -43,7 +42,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   def edit_totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
     {status, secret} = TOTPLib.get_or_generate_secret(user)
-    encoded_secret = Base.encode32(secret)
+    encoded_secret = Base.encode32(secret, padding: false)
     changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: encoded_secret})
     otpauth_uri = NimbleTOTP.otpauth_uri("BAR:#{user.name}", secret, issuer: "Beyond All Reason")
 
@@ -63,7 +62,7 @@ defmodule TeiserverWeb.Account.SecurityController do
 
     case TOTPLib.validate_totp(decoded_secret, totp_params["otp"]) do
       {:ok, _} ->
-        TOTPLib.set_secret(user, totp_params["secret"])
+        TOTPLib.set_secret(user, decoded_secret)
 
         conn
         |> put_flash(:info, "TOTP updated successfully.")
