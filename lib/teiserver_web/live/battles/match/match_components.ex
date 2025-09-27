@@ -52,7 +52,7 @@ defmodule TeiserverWeb.Battle.MatchComponents do
       </.section_menu_button>
 
       <.section_menu_button
-        :if={allow?(@current_user, "Reviewer")}
+        :if={allow?(@current_user, "Overwatch")}
         bsname={@view_colour}
         icon={StylingHelper.icon(:chat)}
         active={@active == "chat"}
