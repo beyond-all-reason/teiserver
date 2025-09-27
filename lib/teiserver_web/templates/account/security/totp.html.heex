@@ -36,7 +36,7 @@
 
           <div class="d-flex gap-2">
             <%= if @totp_status == :inactive do %>
-              {link("Enable TOTP",
+              {link("Enable 2FA",
                 to: ~p"/teiserver/account/security/totp/edit",
                 class: "btn btn-primary"
               )}
@@ -46,7 +46,7 @@
                 class: "btn btn-primary"
               )}
               <%= form_for @conn, ~p"/teiserver/account/security/totp/disable", [method: :post], fn _f -> %>
-                {submit("Disable TOTP", class: "btn btn-danger")}
+                {submit("Disable 2FA", class: "btn btn-danger")}
               <% end %>
             <% end %>
           </div>

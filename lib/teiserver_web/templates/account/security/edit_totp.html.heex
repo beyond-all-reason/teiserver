@@ -10,42 +10,35 @@
             height="42"
             style="margin-right: 5px;"
             class="d-inline align-top"
-          /> Edit TOTP
+          /> Set Two Factor Authentication
         </h3>
       </div>
       <div class="card-body">
         <%= form_for @changeset, ~p"/teiserver/account/security/totp/update", fn f -> %>
-          
-<!-- QR Code -->
           <div class="bg-gray-800 p-6 mb-4">
             {raw(@qr_svg)}
           </div>
-          
-<!-- OTP URI text -->
+
           <div class="mb-4">
             <p class="text-sm text-gray-600 break-all">{@otpauth_uri}</p>
           </div>
-          
-<!-- OTP input -->
+
           <div class="mb-4">
-            {label(f, :otp, "OTP", class: "form-label text-white")}
+            {label(f, :otp, "One Time Password", class: "form-label text-white")}
             {text_input(f, :otp, class: "form-control")}
             {error_tag(f, :otp)}
           </div>
 
           {hidden_input(f, :secret, value: f.data.secret)}
           {hidden_input(f, :otpauth_uri, value: @otpauth_uri)}
-          
-<!-- Buttons aligned left/right -->
+
           <div class="d-flex justify-content-between align-items-end mt-4">
-            <!-- Left button -->
             <div>
               <a href={~p"/teiserver/account/security/totp"} class="btn btn-secondary">
                 <i class="fa-fw fa-solid fa-arrow-left"></i> Back
               </a>
             </div>
-            
-<!-- Right button -->
+
             <div>
               {submit("Save", class: "btn btn-primary")}
             </div>
