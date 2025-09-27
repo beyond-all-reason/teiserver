@@ -346,7 +346,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         else
           Moderation.list_reports(
             search: [match_id: report.match_id, type: report.type],
-            odered_by: "Oldest first"
+            order_by: "Oldest first"
           )
         end
 
