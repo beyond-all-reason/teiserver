@@ -644,6 +644,7 @@ defmodule TeiserverWeb.Router do
     put("/users/rename_post/:id", UserController, :rename_post)
     get("/users/reset_password/:id", UserController, :reset_password)
     get("/users/relationships/:id", UserController, :relationships)
+    put("/users/:id/disable_totp", UserController, :disable_totp)
     get("/users/action/:id/:action", UserController, :perform_action)
     put("/users/action/:id/:action", UserController, :perform_action)
     get("/users/smurf_search/:id", UserController, :smurf_search)
