@@ -41,9 +41,8 @@ defmodule TeiserverWeb.Account.SessionController do
         case TOTPLib.get_user_totp_status(user) do
           :active ->
             conn
-            |> assign(:status, :active)
             |> assign(:user, user)
-            |> render("new.html")
+            |> render("totp.html")
 
           :inactive ->
             login_reply({:ok, user}, conn)
@@ -51,6 +50,20 @@ defmodule TeiserverWeb.Account.SessionController do
 
       {:error, reason} ->
         login_reply({:error, reason}, conn)
+    end
+  end
+
+  def otp(conn, _params) do
+    user = Guardian.Plug.current_resource(conn)
+
+    case TOTPLib.get_user_totp_status(user) do
+      :active ->
+        conn
+        |> assign(:user, user)
+        |> render("totp.html")
+
+      :inactive ->
+        login_reply({:ok, user}, conn)
     end
   end
 
@@ -71,9 +84,8 @@ defmodule TeiserverWeb.Account.SessionController do
 
         conn
         |> put_flash(:warning, flash_message)
-        |> assign(:status, :active)
         |> assign(:user, user)
-        |> render("new.html")
+        |> render("totp.html")
     end
   end
 
