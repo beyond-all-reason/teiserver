@@ -2,7 +2,7 @@ defmodule Teiserver.Account.TOTP do
   use TeiserverWeb, :schema
 
   @type t :: %__MODULE__{
-          user_id: Integer.t(),
+          user_id: integer(),
           secret: binary,
           last_used: String.t() | nil,
           inserted_at: NaiveDateTime.t() | nil,
