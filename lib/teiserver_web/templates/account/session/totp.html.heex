@@ -12,15 +12,14 @@
         </h3>
       </div>
       <div class="card-body">
-        <form action={Routes.account_session_path(@conn, :verify_totp)} method="post">
+        <form action={~p"/otp/verify"} method="post">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
           <input type="hidden" name="user_id" value={@user.id} />
           <input type="password" style="display:none" />
 
           <div class="form-group">
             <label for="otp">OTP</label>
-            
-<!-- keep it text so password managers don't insert saved passwords -->
+
             <input
               type="text"
               name="otp"
