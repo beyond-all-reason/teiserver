@@ -74,10 +74,16 @@ defmodule TeiserverWeb.Account.SecurityController do
       {:error, _reason} ->
         changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: totp_params["secret"]})
 
+        qr_svg =
+          totp_params["otpauth_uri"]
+          |> EQRCode.encode()
+          |> EQRCode.svg(width: 250)
+
         conn
         |> assign(:changeset, changeset)
         |> assign(:user, user)
         |> assign(:otpauth_uri, totp_params["otpauth_uri"])
+        |> assign(:qr_svg, qr_svg)
         |> render("edit_totp.html")
     end
   end
