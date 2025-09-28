@@ -3,6 +3,10 @@ defmodule Teiserver.Account.TOTPLib do
   alias Teiserver.Account.{User, TOTP}
 
   @spec get_user_totp(User.t()) :: {:active, TOTP.t()} | {:inactive, nil}
+  defp get_user_totp(%User{id: nil}) do
+    {:inactive, nil}
+  end
+
   defp get_user_totp(%User{id: user_id}) do
     case Repo.get_by(TOTP, user_id: user_id) do
       nil ->
@@ -54,6 +58,11 @@ defmodule Teiserver.Account.TOTPLib do
 
   @spec set_totp(User.t() | TOTP.t(), map()) ::
           {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
+  defp set_totp(%User{id: nil} = _user, _attrs) do
+    changeset = TOTP.changeset(%TOTP{}, %{})
+    {:error, %{changeset | errors: [user: {"user must be persisted", []}]}}
+  end
+
   defp set_totp(%User{} = user, attrs) do
     case get_user_totp(user) do
       {:inactive, nil} ->
@@ -77,7 +86,7 @@ defmodule Teiserver.Account.TOTPLib do
   end
 
   @spec set_last_used(User.t(), String.t()) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
-  defp set_last_used(%User{} = user, last_used) do
+  def set_last_used(%User{} = user, last_used) do
     set_totp(user, %{user_id: user.id, last_used: last_used})
   end
 
