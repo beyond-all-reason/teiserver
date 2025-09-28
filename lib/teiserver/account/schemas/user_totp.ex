@@ -1,10 +1,16 @@
 defmodule Teiserver.Account.TOTP do
   use TeiserverWeb, :schema
 
+  @type t :: %__MODULE__{
+          user_id: Integer.t(),
+          secret: binary,
+          last_used: String.t() | nil,
+          inserted_at: NaiveDateTime.t() | nil,
+          updated_at: NaiveDateTime.t() | nil
+        }
+
   @primary_key {:user_id, :id, autogenerate: false}
   @foreign_key_type :id
-
-  @type t :: term()
 
   schema "teiserver_account_user_totps" do
     belongs_to :user, Teiserver.Account.User, define_field: false, type: :id
