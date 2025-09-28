@@ -374,7 +374,38 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
         if length(reports) > 1,
           do: Communication.create_discord_reaction(channel, message_id, "🔼")
+
+        if check_duplicates(report),
+          do:
+            Communication.create_discord_reaction(
+              channel,
+              message_id,
+              Communication.discord_emoji(":thiswatched:", 1_047_256_452_697_423_894)
+            )
       end
+    end
+  end
+
+  @spec check_duplicates(Report.t()) :: boolean
+  defp check_duplicates(report) do
+    duplicates =
+      Moderation.list_reports(
+        search: [
+          match_id: report.match_id,
+          reporter_id: report.reporter.id,
+          target_id: report.target.id
+        ],
+        order_by: "Oldest first"
+      )
+
+    IO.puts("check_duplicates")
+
+    if length(duplicates) > 1 do
+      IO.puts(true)
+      true
+    else
+      IO.puts(false)
+      false
     end
   end
 
