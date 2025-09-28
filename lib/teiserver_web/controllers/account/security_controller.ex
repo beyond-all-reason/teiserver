@@ -49,8 +49,6 @@ defmodule TeiserverWeb.Account.SecurityController do
       |> EQRCode.encode()
       |> EQRCode.svg(width: 250)
 
-    # |> EQRCode.svg(color: "#b22603" ,shape: "circle", width: 300, background_color: :transparent)
-
     conn
     |> add_breadcrumb(name: "edit_totp", url: conn.request_path)
     |> assign(:changeset, changeset)

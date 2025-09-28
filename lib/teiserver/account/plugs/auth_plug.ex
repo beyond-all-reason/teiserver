@@ -29,7 +29,6 @@ defmodule Teiserver.Account.AuthPlug do
       Logger.metadata([user_id: user.id] ++ Logger.metadata())
     end
 
-    #    IO.inspect(user)
     totp_status =
       case user do
         nil -> nil
