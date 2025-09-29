@@ -307,8 +307,15 @@ defmodule Teiserver.Account.UserLib do
       end
 
     with {:ok, user} <- verified_user,
-         :ok <- can_login(user) do
+         :ok <- can_login(user),
+         :inactive <- Account.get_user_totp_status(user) do
       {:ok, user}
+    else
+      {:error, "Invalid credentials"} ->
+        verified_user
+
+      :active ->
+        {:requires_2fa, user}
     end
   end
 

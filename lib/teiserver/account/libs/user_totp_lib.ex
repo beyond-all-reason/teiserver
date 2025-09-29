@@ -45,7 +45,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_last_used_otp(User.t()) :: any
+  @spec get_last_used_otp(User.t()) :: :inactive | String.t()
   def get_last_used_otp(%User{id: _user_id} = user) do
     case get_user_totp(user) do
       {:inactive, nil} ->
@@ -86,7 +86,7 @@ defmodule Teiserver.Account.TOTPLib do
   end
 
   @spec set_last_used(User.t(), String.t()) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
-  def set_last_used(%User{} = user, last_used) do
+  defp set_last_used(%User{} = user, last_used) do
     set_totp(user, %{user_id: user.id, last_used: last_used})
   end
 
@@ -101,29 +101,27 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec validate_totp(User.t() | binary, String.t()) ::
+  @spec validate_totp(User.t(), String.t()) ::
           {:ok, :valid | :grace} | {:error, :inactive | :invalid | :used}
   def validate_totp(%User{id: _user_id} = user, otp) do
-    case get_user_totp(user) do
+    with {:active, totp} <- get_user_totp(user),
+         false <- totp.last_used == otp,
+         {:ok, info} <- validate_totp(totp.secret, otp) do
+      set_last_used(user, otp)
+      {:ok, info}
+    else
       {:inactive, nil} ->
         {:error, :inactive}
 
-      {:active, totp} ->
-        if validate_last_used(totp.last_used, otp) do
-          {:error, :used}
-        else
-          case validate_totp(totp.secret, otp) do
-            {:ok, info} ->
-              set_last_used(user, otp)
-              {:ok, info}
+      true ->
+        {:error, :used}
 
-            {:error, :invalid} ->
-              {:error, :invalid}
-          end
-        end
+      {:error, :invalid} ->
+        {:error, :invalid}
     end
   end
 
+  @spec validate_totp(binary, String.t()) :: {:ok, :valid | :grace} | {:error, :invalid}
   def validate_totp(secret, otp) do
     now = System.os_time(:second)
 
@@ -139,8 +137,14 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec validate_last_used(String.t(), String.t()) :: boolean
-  def validate_last_used(last_used, otp) do
-    last_used == otp
+  @spec generate_otpauth_uri(User.t()) :: {:new | :existing, String.t()}
+  def generate_otpauth_uri(user) do
+    {status, secret} = get_user_secret(user.id)
+    {status, generate_otpauth_uri(user.name, secret)}
+  end
+
+  @spec generate_otpauth_uri(String.t(), binary) :: String.t()
+  def generate_otpauth_uri(name, secret) do
+    NimbleTOTP.otpauth_uri("BAR:#{name}", secret, issuer: "Beyond All Reason")
   end
 end

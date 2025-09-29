@@ -1,7 +1,6 @@
 defmodule TeiserverWeb.Account.SessionController do
   use TeiserverWeb, :controller
   alias Teiserver.Account
-  alias Teiserver.Account.TOTPLib
   alias Teiserver.Config
   alias Teiserver.Logging.LoggingPlug
   alias Account.{Guardian, User, UserLib}
@@ -25,7 +24,6 @@ defmodule TeiserverWeb.Account.SessionController do
       conn
       |> Guardian.Plug.sign_out(clear_remember_me: true)
       |> assign(:changeset, changeset)
-      |> assign(:user, nil)
       |> assign(:action, Routes.account_session_path(conn, :login))
       |> assign(:can_register?, Account.can_register_with_web?())
       |> render("new.html")
@@ -38,39 +36,36 @@ defmodule TeiserverWeb.Account.SessionController do
 
     case UserLib.authenticate_user(conn, email, password) do
       {:ok, user} ->
-        case TOTPLib.get_user_totp_status(user) do
-          :active ->
-            conn
-            |> assign(:user, user)
-            |> render("totp.html")
+        login_reply({:ok, user}, conn)
 
-          :inactive ->
-            login_reply({:ok, user}, conn)
-        end
+      {:requires_2fa, user} ->
+        conn
+        |> assign(:user, user)
+        |> render("totp.html")
 
       {:error, reason} ->
         login_reply({:error, reason}, conn)
     end
   end
 
-  def otp(conn, _params) do
-    user = Guardian.Plug.current_resource(conn)
-
-    case TOTPLib.get_user_totp_status(user) do
-      :active ->
-        conn
-        |> assign(:user, user)
-        |> render("totp.html")
-
-      :inactive ->
-        login_reply({:ok, user}, conn)
-    end
-  end
+  #  def otp(conn, _params) do
+  #    user = Guardian.Plug.current_resource(conn)
+  #
+  #    case Account.get_user_totp_status(user) do
+  #      :active ->
+  #        conn
+  #        |> assign(:user, user)
+  #        |> render("totp.html")
+  #
+  #      :inactive ->
+  #        login_reply({:ok, user}, conn)
+  #    end
+  #  end
 
   def verify_totp(conn, %{"user_id" => user_id, "otp" => otp}) do
     user = UserLib.get_user(user_id)
 
-    case TOTPLib.validate_totp(user, otp) do
+    case Account.validate_totp(user, otp) do
       {:ok, _} ->
         login_reply({:ok, user}, conn)
 
