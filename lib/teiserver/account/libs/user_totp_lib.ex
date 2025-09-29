@@ -2,11 +2,6 @@ defmodule Teiserver.Account.TOTPLib do
   use TeiserverWeb, :library
   alias Teiserver.Account.{User, TOTP}
 
-  @spec get_user_totp(User.t()) :: {:active, TOTP.t()} | {:inactive, nil}
-  defp get_user_totp(%User{id: nil}) do
-    {:inactive, nil}
-  end
-
   defp get_user_totp(%User{id: user_id}) do
     case Repo.get_by(TOTP, user_id: user_id) do
       nil ->
@@ -86,7 +81,7 @@ defmodule Teiserver.Account.TOTPLib do
   end
 
   @spec set_last_used(User.t(), String.t()) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
-  defp set_last_used(%User{} = user, last_used) do
+  def set_last_used(%User{} = user, last_used) do
     set_totp(user, %{user_id: user.id, last_used: last_used})
   end
 
@@ -121,15 +116,13 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec validate_totp(binary, String.t()) :: {:ok, :valid | :grace} | {:error, :invalid}
-  def validate_totp(secret, otp) do
-    now = System.os_time(:second)
-
+  @spec validate_totp(binary, String.t(), integer) :: {:ok, :valid | :grace} | {:error, :invalid}
+  def validate_totp(secret, otp, time \\ System.os_time(:second)) do
     cond do
-      NimbleTOTP.valid?(secret, otp, time: now) ->
+      NimbleTOTP.valid?(secret, otp, time: time) ->
         {:ok, :valid}
 
-      NimbleTOTP.valid?(secret, otp, time: now - 5) ->
+      NimbleTOTP.valid?(secret, otp, time: time - 5) ->
         {:ok, :grace}
 
       true ->

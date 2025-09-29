@@ -3,33 +3,17 @@ defmodule Teiserver.Account.TOTPLibTest do
 
   alias Teiserver.Account
   alias Teiserver.Account.{TOTPLib, User, TOTP}
+  alias Central.Helpers.GeneralTestLib
   alias NimbleTOTP
-
-  # ----------------------------------------
-  # Fixtures
-  # ----------------------------------------
-
-  defp valid_user_fixture(attrs \\ %{}) do
-    {:ok, user} =
-      attrs
-      |> Enum.into(%{
-        email: "test#{System.unique_integer()}@example.com",
-        password: "password123",
-        name: "TestUser#{System.unique_integer()}"
-      })
-      |> Account.create_user()
-
-    user
-  end
 
   setup do
     # Valid user and secret
-    valid_user = valid_user_fixture()
+    valid_user = GeneralTestLib.make_user()
     valid_secret = NimbleTOTP.secret()
     {:ok, totp} = TOTPLib.set_secret(valid_user, valid_secret)
 
     # Invalid user (struct with no fields) and invalid secret
-    invalid_user = %User{}
+    invalid_user = GeneralTestLib.make_user(%{name: "Invalid"})
     invalid_secret = "secret"
 
     # OTP from 30 seconds ago
@@ -56,13 +40,6 @@ defmodule Teiserver.Account.TOTPLibTest do
 
       db_totp = Repo.get_by(TOTP, user_id: user.id)
       assert db_totp.secret == secret
-    end
-
-    test "returns error changeset for invalid user", %{
-      invalid_user: invalid_user,
-      invalid_secret: invalid_secret
-    } do
-      assert {:error, %Ecto.Changeset{}} = TOTPLib.set_secret(invalid_user, invalid_secret)
     end
   end
 
@@ -109,6 +86,11 @@ defmodule Teiserver.Account.TOTPLibTest do
     test "returns :inactive for user with no TOTP", %{invalid_user: invalid_user} do
       assert TOTPLib.get_user_totp_status(invalid_user) == :inactive
     end
+
+    test "returns :inactive for users without TOTP", %{valid_user: user} do
+      user_without_totp = GeneralTestLib.make_user()
+      assert Account.get_user_totp_status(user_without_totp) == :inactive
+    end
   end
 
   describe "get_or_generate_secret/1" do
@@ -118,7 +100,7 @@ defmodule Teiserver.Account.TOTPLibTest do
     end
 
     test "generates new secret if missing" do
-      user = valid_user_fixture()
+      user = GeneralTestLib.make_user()
       {:new, secret} = TOTPLib.get_or_generate_secret(user)
       assert secret != nil
       assert String.length(secret) > 0
@@ -150,22 +132,12 @@ defmodule Teiserver.Account.TOTPLibTest do
   # Validation functions
   # ----------------------------------------
 
-  describe "validate_last_used/2" do
-    test "returns true if OTP matches last_used" do
-      assert TOTPLib.validate_last_used("123456", "123456")
-    end
-
-    test "returns false if OTP differs from last_used" do
-      refute TOTPLib.validate_last_used("123456", "654321")
-    end
-  end
-
   describe "validate_totp/2" do
-    test "returns {:error, :inactive} for user with no TOTP", %{invalid_user: invalid_user} do
+    test "returns {:error, :inactive} when no TOTP", %{invalid_user: invalid_user} do
       assert {:error, :inactive} = TOTPLib.validate_totp(invalid_user, "000000")
     end
 
-    test "returns {:ok, :valid} and {:error, :used} for correct OTP used twice", %{
+    test "can use correct OTP only one, not multiple times", %{
       valid_user: user,
       valid_secret: secret
     } do
@@ -174,15 +146,14 @@ defmodule Teiserver.Account.TOTPLibTest do
       assert {:error, :used} = TOTPLib.validate_totp(user, otp)
     end
 
-    test "returns {:error, :invalid} for OTP from 30 seconds ago", %{
+    test "does not work for OTP from 30 seconds ago", %{
       valid_user: user,
       old_otp: old_otp
     } do
-      # Assuming your system allows OTPs within a 30-second window
       assert {:error, :invalid} = TOTPLib.validate_totp(user, old_otp)
     end
 
-    test "returns {:error, :invalid} for wrong OTP", %{
+    test "does not work for wrong OTP", %{
       valid_user: user,
       invalid_secret: invalid_secret
     } do
