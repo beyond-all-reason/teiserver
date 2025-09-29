@@ -15,8 +15,17 @@
       </div>
       <div class="card-body">
         <%= form_for @changeset, ~p"/teiserver/account/security/totp/update", fn f -> %>
-          <div class="bg-gray-800 p-6 mb-4">
-            {raw(@qr_svg)}
+          <div class="bg-gray-800 p-6 mb-4 d-flex align-items-center" style="gap: 20px;">
+            <div>
+              {raw(@qr_svg)}
+            </div>
+
+            <div class="text-white" style="max-width: 400px;">
+              <p class="text-sm">
+                Open your Authenticator Application, scan the QR code or enter the link
+                and enter the one-time password for Teiserver you just set up.
+              </p>
+            </div>
           </div>
 
           <div class="mb-4">

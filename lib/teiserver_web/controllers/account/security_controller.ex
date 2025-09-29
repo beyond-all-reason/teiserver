@@ -69,7 +69,7 @@ defmodule TeiserverWeb.Account.SecurityController do
         Account.set_secret(user, decoded_secret)
 
         conn
-        |> put_flash(:info, "TOTP updated successfully.")
+        |> put_flash(:info, "2FA set successfully.")
         |> redirect(to: Routes.ts_account_security_path(conn, :totp))
 
       {:error, _reason} ->
@@ -81,6 +81,7 @@ defmodule TeiserverWeb.Account.SecurityController do
           |> EQRCode.svg(width: 250)
 
         conn
+        |> put_flash(:warning, "Wrong OTP entered.")
         |> assign(:changeset, changeset)
         |> assign(:user, user)
         |> assign(:otpauth_uri, totp_params["otpauth_uri"])

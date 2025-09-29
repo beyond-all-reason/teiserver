@@ -139,8 +139,9 @@ defmodule Teiserver.Account.TOTPLib do
 
   @spec generate_otpauth_uri(User.t()) :: {:new | :existing, String.t()}
   def generate_otpauth_uri(user) do
-    {status, secret} = get_user_secret(user.id)
-    {status, generate_otpauth_uri(user.name, secret)}
+    {status, secret} = get_or_generate_secret(user)
+    otpauth_uri = generate_otpauth_uri(user.name, secret)
+    {status, otpauth_uri}
   end
 
   @spec generate_otpauth_uri(String.t(), binary) :: String.t()
