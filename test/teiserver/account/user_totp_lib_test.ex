@@ -1,31 +1,17 @@
 defmodule Teiserver.Account.TOTPLibTest do
   use Teiserver.DataCase, async: false
 
-  alias Teiserver.Account
-  alias Teiserver.Account.{TOTPLib, User, TOTP}
+  alias Teiserver.Account.{TOTPLib, TOTP}
   alias Central.Helpers.GeneralTestLib
   alias NimbleTOTP
 
-  setup do
-    # Valid user and secret
-    valid_user = GeneralTestLib.make_user()
-    valid_secret = NimbleTOTP.secret()
-    {:ok, totp} = TOTPLib.set_secret(valid_user, valid_secret)
+  defp users(_context) do
+    user_with_totp = GeneralTestLib.make_user(%{name: "has_totp"})
+    user_without_totp = GeneralTestLib.make_user(%{name: "has_no_totp"})
 
-    # Invalid user (struct with no fields) and invalid secret
-    invalid_user = GeneralTestLib.make_user(%{name: "Invalid"})
-    invalid_secret = "secret"
-
-    # OTP from 30 seconds ago
-    old_otp = NimbleTOTP.verification_code(valid_secret, time: System.os_time(:second) - 30)
-
-    {:ok,
-     valid_user: valid_user,
-     invalid_user: invalid_user,
-     valid_secret: valid_secret,
-     invalid_secret: invalid_secret,
-     totp: totp,
-     old_otp: old_otp}
+    secret = NimbleTOTP.secret()
+    {:ok, _totp} = TOTPLib.set_secret(user_with_totp, secret)
+    %{user_without_totp: user_without_totp, user_with_totp: user_with_totp, secret: secret}
   end
 
   # ----------------------------------------
@@ -33,7 +19,9 @@ defmodule Teiserver.Account.TOTPLibTest do
   # ----------------------------------------
 
   describe "set_secret/2" do
-    test "sets secret for valid user", %{valid_user: user} do
+    setup [:users]
+
+    test "sets secret for user", %{user_without_totp: user} do
       secret = NimbleTOTP.secret()
       assert {:ok, totp} = TOTPLib.set_secret(user, secret)
       assert totp.secret == secret
@@ -44,7 +32,9 @@ defmodule Teiserver.Account.TOTPLibTest do
   end
 
   describe "set_last_used/2" do
-    test "updates last_used for valid user", %{valid_user: user} do
+    setup [:users]
+
+    test "updates last_used for user with secret", %{user_with_totp: user} do
       last_used = "123456"
       assert {:ok, totp} = TOTPLib.set_last_used(user, last_used)
       assert totp.last_used == last_used
@@ -53,14 +43,17 @@ defmodule Teiserver.Account.TOTPLibTest do
       assert db_totp.last_used == last_used
     end
 
-    test "returns error changeset for invalid user", %{invalid_user: invalid_user} do
+    test "does not update last_used for user without secret", %{user_without_totp: user} do
       last_used = "123456"
-      assert {:error, %Ecto.Changeset{}} = TOTPLib.set_last_used(invalid_user, last_used)
+      assert {:inactive, user} = TOTPLib.set_last_used(user, last_used)
+      assert :inactive = TOTPLib.get_user_totp_status(user)
     end
   end
 
   describe "disable_totp/1" do
-    test "removes TOTP for active user", %{valid_user: user, valid_secret: secret} do
+    setup [:users]
+
+    test "removes TOTP for user with TOTP", %{user_with_totp: user, secret: secret} do
       {:ok, deleted_totp} = TOTPLib.disable_totp(user)
       assert deleted_totp.secret == secret
 
@@ -68,7 +61,7 @@ defmodule Teiserver.Account.TOTPLibTest do
       assert db_totp == nil
     end
 
-    test "returns {:ok, nil} for user with no TOTP", %{valid_user: user} do
+    test "handles user without secret", %{user_without_totp: user} do
       TOTPLib.disable_totp(user)
       assert {:ok, nil} = TOTPLib.disable_totp(user)
     end
@@ -79,28 +72,26 @@ defmodule Teiserver.Account.TOTPLibTest do
   # ----------------------------------------
 
   describe "get_user_totp_status/1" do
-    test "returns :active for user with TOTP", %{valid_user: user} do
+    setup [:users]
+
+    test "returns :active for user with TOTP", %{user_with_totp: user} do
       assert TOTPLib.get_user_totp_status(user) == :active
     end
 
-    test "returns :inactive for user with no TOTP", %{invalid_user: invalid_user} do
-      assert TOTPLib.get_user_totp_status(invalid_user) == :inactive
-    end
-
-    test "returns :inactive for users without TOTP", %{valid_user: user} do
-      user_without_totp = GeneralTestLib.make_user()
-      assert Account.get_user_totp_status(user_without_totp) == :inactive
+    test "returns :inactive for user with no TOTP", %{user_without_totp: user} do
+      assert TOTPLib.get_user_totp_status(user) == :inactive
     end
   end
 
   describe "get_or_generate_secret/1" do
-    test "returns existing secret if present", %{valid_user: user, valid_secret: secret} do
+    setup [:users]
+
+    test "returns existing secret from user with TOTP", %{user_with_totp: user, secret: secret} do
       {:existing, returned} = TOTPLib.get_or_generate_secret(user)
       assert returned == secret
     end
 
-    test "generates new secret if missing" do
-      user = GeneralTestLib.make_user()
+    test "generates new secret if not set", %{user_without_totp: user} do
       {:new, secret} = TOTPLib.get_or_generate_secret(user)
       assert secret != nil
       assert String.length(secret) > 0
@@ -108,56 +99,62 @@ defmodule Teiserver.Account.TOTPLibTest do
   end
 
   describe "get_user_secret/1" do
-    test "returns secret for active user", %{valid_user: user, valid_secret: secret} do
+    setup [:users]
+
+    test "returns secret for active user", %{user_with_totp: user, secret: secret} do
       assert TOTPLib.get_user_secret(user) == secret
     end
 
-    test "returns :inactive for user with no TOTP", %{invalid_user: invalid_user} do
-      assert TOTPLib.get_user_secret(invalid_user) == :inactive
+    test "returns :inactive for user with no TOTP", %{user_without_totp: user} do
+      assert TOTPLib.get_user_secret(user) == :inactive
     end
   end
 
   describe "get_last_used_otp/1" do
-    test "returns last_used for active user", %{valid_user: user} do
+    setup [:users]
+
+    test "returns last_used for active user", %{user_with_totp: user} do
       {:ok, _} = TOTPLib.set_last_used(user, "654321")
       assert TOTPLib.get_last_used_otp(user) == "654321"
     end
 
-    test "returns :inactive for user with no TOTP", %{invalid_user: invalid_user} do
-      assert TOTPLib.get_last_used_otp(invalid_user) == :inactive
+    test "returns :inactive for user with no TOTP", %{user_without_totp: user} do
+      assert TOTPLib.get_last_used_otp(user) == :inactive
     end
   end
 
   # ----------------------------------------
-  # Validation functions
+  # Verification and otpauth_uri generation
   # ----------------------------------------
 
   describe "validate_totp/2" do
-    test "returns {:error, :inactive} when no TOTP", %{invalid_user: invalid_user} do
-      assert {:error, :inactive} = TOTPLib.validate_totp(invalid_user, "000000")
+    setup [:users]
+
+    test "can use correct OTP only once, not multiple times", %{
+      user_with_totp: user,
+      secret: secret
+    } do
+      otp = NimbleTOTP.verification_code(secret, time: 30)
+      assert {:ok, :valid} = TOTPLib.validate_totp(user, otp, 30)
+      assert {:error, :used} = TOTPLib.validate_totp(user, otp, 30)
     end
 
-    test "can use correct OTP only one, not multiple times", %{
-      valid_user: user,
-      valid_secret: secret
+    test "allows otp to be used up to 5 seconds after it runs out", %{
+      user_with_totp: user,
+      secret: secret
     } do
-      otp = NimbleTOTP.verification_code(secret)
-      assert {:ok, :valid} = TOTPLib.validate_totp(user, otp)
-      assert {:error, :used} = TOTPLib.validate_totp(user, otp)
+      otp = NimbleTOTP.verification_code(secret, time: 30)
+      assert {:ok, :grace} = TOTPLib.validate_totp(user, otp, 64)
+      assert {:error, :invalid} = TOTPLib.validate_totp(user, otp, 65)
     end
 
-    test "does not work for OTP from 30 seconds ago", %{
-      valid_user: user,
-      old_otp: old_otp
-    } do
-      assert {:error, :invalid} = TOTPLib.validate_totp(user, old_otp)
+    test "handles no TOTP", %{user_without_totp: user} do
+      assert {:error, :inactive} = TOTPLib.validate_totp(user, "000000")
     end
 
-    test "does not work for wrong OTP", %{
-      valid_user: user,
-      invalid_secret: invalid_secret
-    } do
-      assert {:error, :invalid} = TOTPLib.validate_totp(user, invalid_secret)
+    test "does not work for wrong/outdated OTP", %{user_with_totp: user, secret: secret} do
+      otp = NimbleTOTP.verification_code(secret, time: 30)
+      assert {:error, :invalid} = TOTPLib.validate_totp(user, otp, 90)
     end
   end
 end
