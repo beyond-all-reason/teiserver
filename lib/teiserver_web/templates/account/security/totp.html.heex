@@ -41,8 +41,8 @@
                 class: "btn btn-primary"
               )}
             <% else %>
-              {link("Reset TOTP",
-                to: ~p"/teiserver/account/security/totp/edit",
+              {link("Reset 2FA",
+                to: ~p"/teiserver/account/security/totp/reset",
                 class: "btn btn-primary"
               )}
               <%= form_for @conn, ~p"/teiserver/account/security/totp/disable", [method: :post], fn _f -> %>

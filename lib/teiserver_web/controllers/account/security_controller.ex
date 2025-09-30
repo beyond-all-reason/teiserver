@@ -90,6 +90,28 @@ defmodule TeiserverWeb.Account.SecurityController do
     end
   end
 
+  @spec reset_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def reset_totp(conn, _params) do
+    user = Account.get_user!(conn.assigns.current_user.id)
+    secret = NimbleTOTP.secret()
+    encoded_secret = Base.encode32(secret, padding: false)
+    changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: encoded_secret})
+    otpauth_uri = Account.generate_otpauth_uri(user.name, secret)
+
+    qr_svg =
+      otpauth_uri
+      |> EQRCode.encode()
+      |> EQRCode.svg(width: 250)
+
+    conn
+    |> add_breadcrumb(name: "edit_totp", url: conn.request_path)
+    |> assign(:changeset, changeset)
+    |> assign(:user, user)
+    |> assign(:otpauth_uri, otpauth_uri)
+    |> assign(:qr_svg, qr_svg)
+    |> render("edit_totp.html")
+  end
+
   @spec disable_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def disable_totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)

@@ -287,6 +287,7 @@ defmodule TeiserverWeb.Router do
     get("/security/totp", SecurityController, :totp)
     get("/security/totp/edit", SecurityController, :edit_totp)
     post("/security/totp/update", SecurityController, :update_totp)
+    get("/security/totp/reset", SecurityController, :reset_totp)
     post("/security/totp/disable", SecurityController, :disable_totp)
     put("/security/update_password", SecurityController, :update_password)
     delete("/security/delete_token/:id", SecurityController, :delete_token)
