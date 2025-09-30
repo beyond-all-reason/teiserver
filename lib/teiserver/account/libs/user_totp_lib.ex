@@ -80,9 +80,14 @@ defmodule Teiserver.Account.TOTPLib do
     set_totp(user, %{user_id: user.id, secret: secret})
   end
 
-  @spec set_last_used(User.t(), String.t()) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
+  @spec set_last_used(User.t(), String.t()) ::
+          {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()} | {:inactive, User.t()}
   def set_last_used(%User{} = user, last_used) do
-    set_totp(user, %{user_id: user.id, last_used: last_used})
+    if get_user_totp_status(user) == :active do
+      set_totp(user, %{user_id: user.id, last_used: last_used})
+    else
+      {:inactive, user}
+    end
   end
 
   @spec disable_totp(User.t()) :: {:ok, TOTP.t() | nil} | {:error, Ecto.Changeset.t()}
@@ -96,28 +101,30 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec validate_totp(User.t(), String.t()) ::
+  def validate_totp(user_or_secret, otp, time \\ System.os_time(:second))
+
+  @spec validate_totp(User.t(), String.t(), integer) ::
           {:ok, :valid | :grace} | {:error, :inactive | :invalid | :used}
-  def validate_totp(%User{id: _user_id} = user, otp) do
+  def validate_totp(%User{} = user, otp, time) do
     with {:active, totp} <- get_user_totp(user),
-         false <- totp.last_used == otp,
-         {:ok, info} <- validate_totp(totp.secret, otp) do
+         {:ok, info} <- validate_totp(totp.secret, otp, time),
+         false <- totp.last_used == otp do
       set_last_used(user, otp)
       {:ok, info}
     else
       {:inactive, nil} ->
         {:error, :inactive}
 
-      true ->
-        {:error, :used}
-
       {:error, :invalid} ->
         {:error, :invalid}
+
+      true ->
+        {:error, :used}
     end
   end
 
   @spec validate_totp(binary, String.t(), integer) :: {:ok, :valid | :grace} | {:error, :invalid}
-  def validate_totp(secret, otp, time \\ System.os_time(:second)) do
+  def validate_totp(secret, otp, time) do
     cond do
       NimbleTOTP.valid?(secret, otp, time: time) ->
         {:ok, :valid}
