@@ -5,7 +5,8 @@ defmodule Teiserver.Repo.Migrations.CreateUserTotps do
     create table(:teiserver_account_user_totps, primary_key: false) do
       add :user_id, references(:account_users, on_delete: :delete_all), primary_key: true
       add :secret, :binary, null: false
-      add :last_used, :string, default: false, null: true
+      add :last_used, :naive_datetime, null: true
+      add :wrong_otp, :integer, default: 0, null: false
 
       timestamps()
     end

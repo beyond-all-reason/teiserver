@@ -2,6 +2,8 @@ defmodule Teiserver.Account.TOTPLib do
   use TeiserverWeb, :library
   alias Teiserver.Account.{User, TOTP}
 
+  @grace 5
+
   defp get_user_totp(%User{id: user_id}) do
     case Repo.get_by(TOTP, user_id: user_id) do
       nil ->
@@ -40,7 +42,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_last_used_otp(User.t()) :: :inactive | String.t()
+  @spec get_last_used_otp(User.t()) :: :inactive | NaiveDateTime.t()
   def get_last_used_otp(%User{id: _user_id} = user) do
     case get_user_totp(user) do
       {:inactive, nil} ->
@@ -80,7 +82,7 @@ defmodule Teiserver.Account.TOTPLib do
     set_totp(user, %{user_id: user.id, secret: secret})
   end
 
-  @spec set_last_used(User.t(), String.t()) ::
+  @spec set_last_used(User.t(), NaiveDateTime.t()) ::
           {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()} | {:inactive, User.t()}
   def set_last_used(%User{} = user, last_used) do
     if get_user_totp_status(user) == :active do
@@ -107,19 +109,24 @@ defmodule Teiserver.Account.TOTPLib do
           {:ok, :valid | :grace} | {:error, :inactive | :invalid | :used}
   def validate_totp(%User{} = user, otp, time) do
     with {:active, totp} <- get_user_totp(user),
-         {:ok, info} <- validate_totp(totp.secret, otp, time),
-         false <- totp.last_used == otp do
-      set_last_used(user, otp)
+         {:ok, info} <- validate_totp(totp.secret, otp, time, since: totp.last_used) do
+      last_used = time |> DateTime.from_unix!() |> DateTime.to_naive()
+
+      case info do
+        :valid ->
+          set_last_used(user, last_used)
+
+        :grace ->
+          set_last_used(user, NaiveDateTime.add(last_used, -@grace, :second))
+      end
+
       {:ok, info}
     else
       {:inactive, nil} ->
         {:error, :inactive}
 
-      {:error, :invalid} ->
-        {:error, :invalid}
-
-      true ->
-        {:error, :used}
+      {:error, status} ->
+        {:error, status}
     end
   end
 
@@ -129,7 +136,7 @@ defmodule Teiserver.Account.TOTPLib do
       NimbleTOTP.valid?(secret, otp, time: time) ->
         {:ok, :valid}
 
-      NimbleTOTP.valid?(secret, otp, time: time - 5) ->
+      NimbleTOTP.valid?(secret, otp, time: time - @grace) ->
         {:ok, :grace}
 
       true ->
@@ -137,12 +144,30 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  #  @spec generate_otpauth_uri(User.t()) :: {:new | :existing, String.t()}
-  #  def generate_otpauth_uri(user) do
-  #    {status, secret} = get_or_generate_secret(user)
-  #    otpauth_uri = generate_otpauth_uri(user.name, secret)
-  #    {status, otpauth_uri}
-  #  end
+  @spec validate_totp(binary, String.t(), NaiveDateTime.t()) ::
+          {:ok, :valid | :grace} | {:error, :invalid | :used}
+  def validate_totp(secret, otp, time, since: last_used) do
+    if is_nil(last_used) do
+      validate_totp(secret, otp, time)
+    else
+      cond do
+        NimbleTOTP.valid?(secret, otp, time: time, since: last_used) ->
+          {:ok, :valid}
+
+        NimbleTOTP.valid?(secret, otp, time: time - @grace, since: last_used) ->
+          {:ok, :grace}
+
+        true ->
+          case validate_totp(secret, otp, time) do
+            {:error, :invalid} ->
+              {:error, :invalid}
+
+            _ ->
+              {:error, :used}
+          end
+      end
+    end
+  end
 
   @spec generate_otpauth_uri(String.t(), binary) :: String.t()
   def generate_otpauth_uri(name, secret) do
