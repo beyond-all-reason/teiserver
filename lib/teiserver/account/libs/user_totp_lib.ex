@@ -20,6 +20,22 @@ defmodule Teiserver.Account.TOTPLib do
     status
   end
 
+  @spec get_account_locked(User.t()) :: :active | :locked
+  def get_account_locked(%User{} = user) do
+    {_status, totp} = get_user_totp(user)
+
+    cond do
+      is_nil(totp) ->
+        :active
+
+      totp.wrong_otp < 5 ->
+        :active
+
+      totp.wrong_otp >= 5 ->
+        :locked
+    end
+  end
+
   @spec get_or_generate_secret(User.t()) :: {:new | :existing, binary()}
   def get_or_generate_secret(%User{id: _user_id} = user) do
     case get_user_totp(user) do
@@ -103,12 +119,25 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
+  defp increase_wrong_otp_counter(%TOTP{} = totp) do
+    from(t in TOTP, where: t.user_id == ^totp.user_id)
+    |> Repo.update_all(inc: [wrong_otp: 1])
+  end
+
+  def reset_wrong_otp_counter(totp) do
+    from(t in TOTP, where: t.user_id == ^totp.user_id)
+    |> Repo.update_all(set: [wrong_otp: 0])
+  end
+
   def validate_totp(user_or_secret, otp, time \\ System.os_time(:second))
 
   @spec validate_totp(User.t(), String.t(), integer) ::
-          {:ok, :valid | :grace} | {:error, :inactive | :invalid | :used}
+          {:ok, :valid | :grace} | {:error, :inactive | :invalid | :used | :locked}
   def validate_totp(%User{} = user, otp, time) do
-    with {:active, totp} <- get_user_totp(user),
+    {status, totp} = get_user_totp(user)
+
+    with :active <- status,
+         :active <- get_account_locked(user),
          {:ok, info} <- validate_totp(totp.secret, otp, time, since: totp.last_used) do
       last_used = time |> DateTime.from_unix!() |> DateTime.to_naive()
 
@@ -120,12 +149,22 @@ defmodule Teiserver.Account.TOTPLib do
           set_last_used(user, NaiveDateTime.add(last_used, -@grace, :second))
       end
 
+      reset_wrong_otp_counter(totp)
       {:ok, info}
     else
-      {:inactive, nil} ->
+      :inactive ->
         {:error, :inactive}
 
+      :locked ->
+        {:error, :locked}
+
       {:error, status} ->
+        if status == :invalid do
+          increase_wrong_otp_counter(totp)
+        else
+          reset_wrong_otp_counter(totp)
+        end
+
         {:error, status}
     end
   end
