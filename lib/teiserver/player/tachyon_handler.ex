@@ -410,10 +410,14 @@ defmodule Teiserver.Player.TachyonHandler do
       {:error, :invalid_user} ->
         {:error_response, :invalid_user, state}
 
-      # this is a bit scuffed and could be refactored so that `create_friend_request`
-      # returns an atom instead of a raw string
-      {:error, err} when is_binary(err) ->
-        {:error_response, :invalid_user, state}
+      {:error, :already_in_friendlist} ->
+        {:error_response, :already_in_friendlist, state}
+
+      {:error, :outgoing_capacity_reached} ->
+        {:error_response, :outgoing_capacity_reached, state}
+
+      {:error, :incoming_capacity_reached} ->
+        {:error_response, :incoming_capacity_reached, state}
 
       err ->
         Logger.error("cannot create friend request #{inspect(err)}")
