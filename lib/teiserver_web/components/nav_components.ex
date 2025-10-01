@@ -121,7 +121,7 @@ defmodule TeiserverWeb.NavComponents do
             />
 
             <.top_nav_item
-              :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
+              :if={allow_any?(@current_user, ~w(Contributor))}
               text="Admin"
               route={~p"/teiserver/admin"}
               active={@active == "admin"}
