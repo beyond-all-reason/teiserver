@@ -78,7 +78,7 @@ defmodule Teiserver.Account.TOTPLibTest do
     setup [:users]
 
     test "returns :active for user without TOTP", %{user_without_totp: user} do
-      assert TOTPLib.get_account_locked(user) == :active
+      assert TOTPLib.get_account_locked(user) == false
     end
 
     test "returns :active until 4 wrong otp entry, then :inactive", %{
@@ -88,11 +88,11 @@ defmodule Teiserver.Account.TOTPLibTest do
       otp = NimbleTOTP.verification_code(secret, time: 0)
 
       for _i <- 1..5 do
-        assert TOTPLib.get_account_locked(user) == :active
+        assert TOTPLib.get_account_locked(user) == false
         TOTPLib.validate_totp(user, otp, 100)
       end
 
-      assert TOTPLib.get_account_locked(user) == :locked
+      assert TOTPLib.get_account_locked(user) == true
     end
   end
 

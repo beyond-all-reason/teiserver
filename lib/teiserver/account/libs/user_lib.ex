@@ -4,7 +4,7 @@ defmodule Teiserver.Account.UserLib do
   require Logger
   alias Phoenix.PubSub
   alias Teiserver.{Account, Logging}
-  alias Teiserver.Account.{User, RoleLib, UserQueries}
+  alias Teiserver.Account.{User, RoleLib, UserQueries, TOTPLib}
 
   # Functions
   @spec icon :: String.t()
@@ -307,15 +307,8 @@ defmodule Teiserver.Account.UserLib do
       end
 
     with {:ok, user} <- verified_user,
-         :ok <- can_login(user),
-         :inactive <- Account.get_user_totp_status(user) do
+         :ok <- can_login(user) do
       {:ok, user}
-    else
-      {:error, "Invalid credentials"} ->
-        verified_user
-
-      :active ->
-        {:requires_2fa, user}
     end
   end
 
@@ -420,6 +413,13 @@ defmodule Teiserver.Account.UserLib do
       user.smurf_of_id != nil ->
         {:error,
          "Alt account detected. Please log in using your original account instead. If you're not sure what that account is or have trouble accessing it, please contact the moderation team at https://discord.gg/beyond-all-reason -> #open-ticket"}
+
+      TOTPLib.get_account_locked(user) ->
+        {:error,
+         "The 2FA one time password has been entered wrong too many times. Please reset your password to remove 2FA from your account."}
+
+      Account.get_user_totp_status(user) == :active ->
+        {:requires_2fa, user}
 
       true ->
         :ok

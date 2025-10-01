@@ -72,9 +72,21 @@ defmodule TeiserverWeb.Account.SessionController do
       {:error, reason} ->
         flash_message =
           case reason do
-            :used -> "OTP has already been used."
-            :invalid -> "Invalid OTP."
-            _ -> "There was a problem verifying the OTP."
+            :used ->
+              "OTP has already been used."
+
+            :invalid ->
+              "Invalid OTP."
+
+            :locked ->
+              login_reply(
+                {:error,
+                 "The 2FA one time password has been entered wrong too many times. Please reset your password to remove 2FA from your account."},
+                conn
+              )
+
+            _ ->
+              "There was a problem verifying the OTP."
           end
 
         conn

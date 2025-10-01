@@ -26,13 +26,13 @@ defmodule Teiserver.Account.TOTPLib do
 
     cond do
       is_nil(totp) ->
-        :active
+        false
 
       totp.wrong_otp < 5 ->
-        :active
+        false
 
       totp.wrong_otp >= 5 ->
-        :locked
+        true
     end
   end
 
@@ -137,7 +137,7 @@ defmodule Teiserver.Account.TOTPLib do
     {status, totp} = get_user_totp(user)
 
     with :active <- status,
-         :active <- get_account_locked(user),
+         false <- get_account_locked(user),
          {:ok, info} <- validate_totp(totp.secret, otp, time, since: totp.last_used) do
       last_used = time |> DateTime.from_unix!() |> DateTime.to_naive()
 
@@ -155,7 +155,7 @@ defmodule Teiserver.Account.TOTPLib do
       :inactive ->
         {:error, :inactive}
 
-      :locked ->
+      true ->
         {:error, :locked}
 
       {:error, status} ->
