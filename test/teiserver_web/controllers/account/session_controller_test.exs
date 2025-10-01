@@ -5,6 +5,42 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
   alias Teiserver.Account
   alias Teiserver.Account.Guardian
   alias Teiserver.Config
+  alias Phoenix.ConnTest
+
+  describe "login" do
+    setup do
+      GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
+      |> Teiserver.TeiserverTestLib.conn_setup()
+    end
+
+    test "no OTP check when no secret", %{conn: conn, user: user} do
+      conn = GeneralTestLib.login(conn, user.email)
+
+      assert redirected_to(conn) == ~p"/"
+      assert ConnTest.get_flash(conn, :info) == "Welcome back!"
+      assert Guardian.Plug.current_resource(conn).id == user.id
+    end
+
+    test "OTP check when secret set", %{conn: conn, user: user} do
+      {_, secret} = Account.get_or_generate_secret(user)
+      Account.set_secret(user, secret)
+      conn = GeneralTestLib.login(conn, user.email)
+
+      assert redirected_to(conn) == ~p"/otp"
+      assert get_session(conn, :pending_2fa_user_id) == user.id
+    end
+
+    test "OTP check for user", %{conn: conn, user: user} do
+      {_, secret} = Account.get_or_generate_secret(user)
+      Account.set_secret(user, secret)
+      otp = NimbleTOTP.verification_code(secret)
+      conn = GeneralTestLib.login_opt(conn, user, otp)
+
+      assert redirected_to(conn) == ~p"/"
+      assert ConnTest.get_flash(conn, :info) == "Welcome back!"
+      assert Guardian.Plug.current_resource(conn).id == user.id
+    end
+  end
 
   describe "one time codes" do
     setup do
