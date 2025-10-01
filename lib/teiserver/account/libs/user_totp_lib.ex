@@ -20,7 +20,7 @@ defmodule Teiserver.Account.TOTPLib do
     status
   end
 
-  @spec get_account_locked(User.t()) :: :active | :locked
+  @spec get_account_locked(User.t()) :: boolean
   def get_account_locked(%User{} = user) do
     {_status, totp} = get_user_totp(user)
 

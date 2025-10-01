@@ -40,33 +40,29 @@ defmodule TeiserverWeb.Account.SessionController do
 
       {:requires_2fa, user} ->
         conn
-        |> assign(:user, user)
-        |> render("totp.html")
+        |> put_session(:pending_2fa_user_id, user.id)
+        |> redirect(to: ~p"/otp")
 
       {:error, reason} ->
         login_reply({:error, reason}, conn)
     end
   end
 
-  #  def otp(conn, _params) do
-  #    user = Guardian.Plug.current_resource(conn)
-  #
-  #    case Account.get_user_totp_status(user) do
-  #      :active ->
-  #        conn
-  #        |> assign(:user, user)
-  #        |> render("totp.html")
-  #
-  #      :inactive ->
-  #        login_reply({:ok, user}, conn)
-  #    end
-  #  end
+  def otp(conn, _params) do
+    user_id = get_session(conn, :pending_2fa_user_id)
+    user = Account.get_user!(user_id)
+
+    conn
+    |> assign(:user, user)
+    |> render("totp.html")
+  end
 
   def verify_totp(conn, %{"user_id" => user_id, "otp" => otp}) do
     user = UserLib.get_user(user_id)
 
     case Account.validate_totp(user, otp) do
       {:ok, _} ->
+        delete_session(conn, :pending_2fa_user_id)
         login_reply({:ok, user}, conn)
 
       {:error, reason} ->
