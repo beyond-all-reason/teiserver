@@ -60,7 +60,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_last_used_otp(integer) :: :inactive | NaiveDateTime.t()
+  @spec get_last_used_otp(integer) :: :inactive | DateTime.t()
   def get_last_used_otp(user_id) do
     case get_user_totp(user_id) do
       {:inactive, nil} ->
@@ -104,11 +104,12 @@ defmodule Teiserver.Account.TOTPLib do
     set_totp(user_id, %{user_id: user_id, secret: secret})
   end
 
-  @spec set_last_used(User.t(), NaiveDateTime.t()) ::
+  @spec set_last_used(User.t(), integer) ::
           {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()} | {:inactive, User.t()}
   def set_last_used(%User{id: user_id} = user, last_used) do
     if get_user_totp_status(user_id) == :active do
-      set_totp(user_id, %{user_id: user_id, last_used: last_used})
+      {:ok, utc_datetime} = DateTime.from_unix(last_used, :second)
+      set_totp(user_id, %{user_id: user_id, last_used: utc_datetime})
     else
       {:inactive, user}
     end
@@ -145,14 +146,12 @@ defmodule Teiserver.Account.TOTPLib do
     with :active <- status,
          false <- get_account_locked(user_id),
          {:ok, info} <- validate_totp(totp.secret, otp, time, since: totp.last_used) do
-      last_used = time |> DateTime.from_unix!() |> DateTime.to_naive()
-
       case info do
         :valid ->
-          set_last_used(user, last_used)
+          set_last_used(user, time)
 
         :grace ->
-          set_last_used(user, NaiveDateTime.add(last_used, -@grace, :second))
+          set_last_used(user, time - @grace)
       end
 
       reset_wrong_otp_counter(totp)
@@ -189,13 +188,13 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec validate_totp(binary, String.t(), NaiveDateTime.t(), keyword()) ::
+  @spec validate_totp(binary, String.t(), integer, keyword()) ::
           {:ok, :valid | :grace} | {:error, :invalid}
   def validate_totp(secret, otp, time, since: nil) do
     validate_totp(secret, otp, time)
   end
 
-  @spec validate_totp(binary, String.t(), NaiveDateTime.t(), keyword()) ::
+  @spec validate_totp(binary, String.t(), integer, keyword()) ::
           {:ok, :valid | :grace} | {:error, :invalid | :used}
   def validate_totp(secret, otp, time, since: last_used) do
     cond do

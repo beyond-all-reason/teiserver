@@ -15,7 +15,7 @@ defmodule Teiserver.Account.TOTPLibTest do
   end
 
   defp last_used(_context) do
-    %{last_used: ~N[2025-01-01 00:00:00]}
+    %{last_used_integer: 30, last_used_utc: ~U[1970-01-01 00:00:30Z]}
   end
 
   # ----------------------------------------
@@ -38,12 +38,16 @@ defmodule Teiserver.Account.TOTPLibTest do
   describe "set_last_used/2" do
     setup [:users, :last_used]
 
-    test "updates last_used for user with secret", %{user_with_totp: user, last_used: last_used} do
-      assert {:ok, totp} = TOTPLib.set_last_used(user, last_used)
-      assert totp.last_used == last_used
+    test "updates last_used for user with secret", %{
+      user_with_totp: user,
+      last_used_integer: last_used_integer,
+      last_used_utc: last_used_utc
+    } do
+      assert {:ok, totp} = TOTPLib.set_last_used(user, last_used_integer)
+      assert totp.last_used == last_used_utc
 
       db_totp = Repo.get_by(TOTP, user_id: user.id)
-      assert db_totp.last_used == last_used
+      assert db_totp.last_used == last_used_utc
     end
 
     test "does not update last_used for user without secret", %{user_without_totp: user} do
@@ -137,9 +141,13 @@ defmodule Teiserver.Account.TOTPLibTest do
   describe "get_last_used_otp/1" do
     setup [:users, :last_used]
 
-    test "returns last_used for active user", %{user_with_totp: user, last_used: last_used} do
-      {:ok, _} = TOTPLib.set_last_used(user, last_used)
-      assert TOTPLib.get_last_used_otp(user.id) == last_used
+    test "returns last_used for active user", %{
+      user_with_totp: user,
+      last_used_integer: last_used_integer,
+      last_used_utc: last_used_utc
+    } do
+      {:ok, _} = TOTPLib.set_last_used(user, last_used_integer)
+      assert TOTPLib.get_last_used_otp(user.id) == last_used_utc
     end
 
     test "returns :inactive for user with no TOTP", %{user_without_totp: user} do
