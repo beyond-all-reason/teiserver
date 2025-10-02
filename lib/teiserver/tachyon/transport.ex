@@ -208,6 +208,8 @@ defmodule Teiserver.Tachyon.Transport do
   end
 
   def do_handle_command(command_id, message_type, message_id, message, state) do
+    start = :erlang.monotonic_time(:millisecond)
+
     result =
       state.handler.handle_command(
         command_id,
@@ -216,6 +218,28 @@ defmodule Teiserver.Tachyon.Transport do
         message,
         state.handler_state
       )
+
+    elapsed = :erlang.monotonic_time(:millisecond) - start
+
+    response_details =
+      case result do
+        {:response, _} -> {:resp, :ok}
+        {:response, _, _} -> {:resp, :ok}
+        {:error_response, code, _} -> {:resp, code}
+        {:error_response, code, _, _} -> {:resp, code}
+        _ -> false
+      end
+
+    case response_details do
+      {:resp, code} ->
+        :telemetry.execute([:tachyon, :request], %{duration: elapsed, count: 1}, %{
+          command_id: command_id,
+          code: code
+        })
+
+      _ ->
+        nil
+    end
 
     try do
       handle_result(result, command_id, message_id, state)
@@ -244,6 +268,16 @@ defmodule Teiserver.Tachyon.Transport do
           WebSock.handle_result()
   defp handle_result(result, command_id, message_id, conn_state) do
     case result do
+      {:event, evs, _} when is_list(evs) -> Enum.map(evs, fn {cmd_id, _} -> cmd_id end)
+      {:event, cmd_id, _} -> [cmd_id]
+      {:event, cmd_id, _payload, _} -> [cmd_id]
+      _ -> []
+    end
+    |> Enum.each(fn cmd_id ->
+      :telemetry.execute([:tachyon, :event], %{count: 1}, %{command_id: cmd_id})
+    end)
+
+    case result do
       {:event, events, state} when is_list(events) ->
         messages =
           Enum.map(events, fn {cmd_id, payload} ->
@@ -264,6 +298,11 @@ defmodule Teiserver.Tachyon.Transport do
       {:response, state} ->
         message = Schema.response(command_id, message_id)
         {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
+
+      {:response, {resp_payload, events}, state} ->
+        resp = {:text, Schema.response(command_id, message_id, resp_payload) |> Jason.encode!()}
+        messages = Enum.map(events, fn ev -> {:text, ev |> Jason.encode!()} end)
+        {:push, [resp | messages], %{conn_state | handler_state: state}}
 
       {:response, payload, state} ->
         message = Schema.response(command_id, message_id, payload)
