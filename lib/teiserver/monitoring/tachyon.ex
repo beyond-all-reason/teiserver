@@ -18,12 +18,12 @@ defmodule Teiserver.Monitoring.Tachyon do
 
   defp tachyon_player_metrics(poll_rate) do
     Polling.build(
-      :tachyon_player_polling_metrics,
+      :teiserver_tachyon_player_polling_metrics,
       poll_rate,
       {__MODULE__, :execute_tachyon_player_metrics, []},
       [
         last_value(
-          [:tachyon, :player, :count],
+          [:teiserver, :tachyon, :player, :count],
           event_name: @tachyon_player_metrics_event_name,
           description: "how many players are connected?",
           measurement: :count
