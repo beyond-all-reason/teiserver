@@ -32,7 +32,7 @@ defmodule Teiserver.Account.AuthPlug do
     totp_status =
       case user do
         nil -> nil
-        _ -> Teiserver.Account.TOTPLib.get_user_totp_status(user)
+        _ -> Teiserver.Account.TOTPLib.get_user_totp_status(user.id)
       end
 
     conn =

@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   @spec edit_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit_totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
-    {_status, secret} = Account.get_or_generate_secret(user)
+    {_status, secret} = Account.get_or_generate_secret(user.id)
     encoded_secret = Base.encode32(secret, padding: false)
     changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: encoded_secret})
     otpauth_uri = Account.generate_otpauth_uri(user.name, secret)
@@ -66,7 +66,7 @@ defmodule TeiserverWeb.Account.SecurityController do
 
     case Account.validate_totp(decoded_secret, totp_params["otp"]) do
       {:ok, _} ->
-        Account.set_secret(user, decoded_secret)
+        Account.set_secret(user.id, decoded_secret)
 
         conn
         |> put_flash(:info, "2FA set successfully.")
@@ -115,7 +115,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   @spec disable_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def disable_totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
-    Account.disable_totp(user)
+    Account.disable_totp(user.id)
 
     conn
     |> add_breadcrumb(name: "totp", url: conn.request_path)

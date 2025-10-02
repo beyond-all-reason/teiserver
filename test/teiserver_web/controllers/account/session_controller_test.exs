@@ -22,8 +22,8 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
     end
 
     test "OTP check when secret set", %{conn: conn, user: user} do
-      {_, secret} = Account.get_or_generate_secret(user)
-      Account.set_secret(user, secret)
+      {_, secret} = Account.get_or_generate_secret(user.id)
+      Account.set_secret(user.id, secret)
       conn = GeneralTestLib.login(conn, user.email)
 
       assert redirected_to(conn) == ~p"/otp"
@@ -31,8 +31,8 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
     end
 
     test "OTP check for user", %{conn: conn, user: user} do
-      {_, secret} = Account.get_or_generate_secret(user)
-      Account.set_secret(user, secret)
+      {_, secret} = Account.get_or_generate_secret(user.id)
+      Account.set_secret(user.id, secret)
       otp = NimbleTOTP.verification_code(secret)
       conn = GeneralTestLib.login_opt(conn, user, otp)
 

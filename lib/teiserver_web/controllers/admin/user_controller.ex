@@ -192,7 +192,7 @@ defmodule TeiserverWeb.Admin.UserController do
         user_stats = Account.get_user_stat_data(user.id)
         client = Account.get_client_by_id(user.id)
 
-        client_totp = TOTPLib.get_user_totp_status(user)
+        client_totp = TOTPLib.get_user_totp_status(user.id)
 
         json_user =
           Map.drop(user, [
@@ -410,7 +410,7 @@ defmodule TeiserverWeb.Admin.UserController do
   @spec disable_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def disable_totp(conn, %{"id" => id}) do
     user = Account.get_user(id)
-    Teiserver.Account.TOTPLib.disable_totp(user)
+    Teiserver.Account.TOTPLib.disable_totp(user.id)
 
     conn
     |> put_flash(:info, "Disabled 2FA for #{user.name}")

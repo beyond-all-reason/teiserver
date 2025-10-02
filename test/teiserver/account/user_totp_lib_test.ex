@@ -10,7 +10,7 @@ defmodule Teiserver.Account.TOTPLibTest do
     user_without_totp = GeneralTestLib.make_user(%{name: "has_no_totp"})
 
     secret = NimbleTOTP.secret()
-    {:ok, _totp} = TOTPLib.set_secret(user_with_totp, secret)
+    {:ok, _totp} = TOTPLib.set_secret(user_with_totp.id, secret)
     %{user_without_totp: user_without_totp, user_with_totp: user_with_totp, secret: secret}
   end
 
@@ -27,7 +27,7 @@ defmodule Teiserver.Account.TOTPLibTest do
 
     test "sets secret for user", %{user_without_totp: user} do
       secret = NimbleTOTP.secret()
-      assert {:ok, totp} = TOTPLib.set_secret(user, secret)
+      assert {:ok, totp} = TOTPLib.set_secret(user.id, secret)
       assert totp.secret == secret
 
       db_totp = Repo.get_by(TOTP, user_id: user.id)
@@ -49,7 +49,7 @@ defmodule Teiserver.Account.TOTPLibTest do
     test "does not update last_used for user without secret", %{user_without_totp: user} do
       last_used = "123456"
       assert {:inactive, user} = TOTPLib.set_last_used(user, last_used)
-      assert :inactive = TOTPLib.get_user_totp_status(user)
+      assert :inactive = TOTPLib.get_user_totp_status(user.id)
     end
   end
 
@@ -57,7 +57,7 @@ defmodule Teiserver.Account.TOTPLibTest do
     setup [:users]
 
     test "removes TOTP for user with TOTP", %{user_with_totp: user, secret: secret} do
-      {:ok, deleted_totp} = TOTPLib.disable_totp(user)
+      {:ok, deleted_totp} = TOTPLib.disable_totp(user.id)
       assert deleted_totp.secret == secret
 
       db_totp = Repo.get_by(TOTP, user_id: user.id)
@@ -65,8 +65,7 @@ defmodule Teiserver.Account.TOTPLibTest do
     end
 
     test "handles user without secret", %{user_without_totp: user} do
-      TOTPLib.disable_totp(user)
-      assert {:ok, nil} = TOTPLib.disable_totp(user)
+      assert {:ok, nil} = TOTPLib.disable_totp(user.id)
     end
   end
 
@@ -78,7 +77,7 @@ defmodule Teiserver.Account.TOTPLibTest do
     setup [:users]
 
     test "returns :active for user without TOTP", %{user_without_totp: user} do
-      assert TOTPLib.get_account_locked(user) == false
+      assert TOTPLib.get_account_locked(user.id) == false
     end
 
     test "returns :active until 4 wrong otp entry, then :inactive", %{
@@ -88,11 +87,11 @@ defmodule Teiserver.Account.TOTPLibTest do
       otp = NimbleTOTP.verification_code(secret, time: 0)
 
       for _i <- 1..5 do
-        assert TOTPLib.get_account_locked(user) == false
+        assert TOTPLib.get_account_locked(user.id) == false
         TOTPLib.validate_totp(user, otp, 100)
       end
 
-      assert TOTPLib.get_account_locked(user) == true
+      assert TOTPLib.get_account_locked(user.id) == true
     end
   end
 
@@ -100,11 +99,11 @@ defmodule Teiserver.Account.TOTPLibTest do
     setup [:users]
 
     test "returns :active for user with TOTP", %{user_with_totp: user} do
-      assert TOTPLib.get_user_totp_status(user) == :active
+      assert TOTPLib.get_user_totp_status(user.id) == :active
     end
 
     test "returns :inactive for user with no TOTP", %{user_without_totp: user} do
-      assert TOTPLib.get_user_totp_status(user) == :inactive
+      assert TOTPLib.get_user_totp_status(user.id) == :inactive
     end
   end
 
@@ -112,12 +111,12 @@ defmodule Teiserver.Account.TOTPLibTest do
     setup [:users]
 
     test "returns existing secret from user with TOTP", %{user_with_totp: user, secret: secret} do
-      {:existing, returned} = TOTPLib.get_or_generate_secret(user)
+      {:existing, returned} = TOTPLib.get_or_generate_secret(user.id)
       assert returned == secret
     end
 
     test "generates new secret if not set", %{user_without_totp: user} do
-      {:new, secret} = TOTPLib.get_or_generate_secret(user)
+      {:new, secret} = TOTPLib.get_or_generate_secret(user.id)
       assert secret != nil
       assert String.length(secret) > 0
     end
@@ -127,11 +126,11 @@ defmodule Teiserver.Account.TOTPLibTest do
     setup [:users]
 
     test "returns secret for active user", %{user_with_totp: user, secret: secret} do
-      assert TOTPLib.get_user_secret(user) == secret
+      assert TOTPLib.get_user_secret(user.id) == secret
     end
 
     test "returns :inactive for user with no TOTP", %{user_without_totp: user} do
-      assert TOTPLib.get_user_secret(user) == :inactive
+      assert TOTPLib.get_user_secret(user.id) == :inactive
     end
   end
 
@@ -140,11 +139,11 @@ defmodule Teiserver.Account.TOTPLibTest do
 
     test "returns last_used for active user", %{user_with_totp: user, last_used: last_used} do
       {:ok, _} = TOTPLib.set_last_used(user, last_used)
-      assert TOTPLib.get_last_used_otp(user) == last_used
+      assert TOTPLib.get_last_used_otp(user.id) == last_used
     end
 
     test "returns :inactive for user with no TOTP", %{user_without_totp: user} do
-      assert TOTPLib.get_last_used_otp(user) == :inactive
+      assert TOTPLib.get_last_used_otp(user.id) == :inactive
     end
   end
 

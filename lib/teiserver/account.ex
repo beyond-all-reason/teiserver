@@ -94,30 +94,27 @@ defmodule Teiserver.Account do
   @spec change_user(User, map) :: Ecto.Changeset
   defdelegate change_user(user, attrs), to: UserLib
 
-  @spec get_user_totp_status(User.t()) :: :active | :inactive
-  defdelegate get_user_totp_status(user), to: TOTPLib
+  @spec get_user_totp_status(integer) :: :active | :inactive
+  defdelegate get_user_totp_status(user_id), to: TOTPLib
 
-  @spec get_or_generate_secret(User.t()) :: {:new | :existing, binary()}
-  defdelegate get_or_generate_secret(user), to: TOTPLib
+  @spec get_or_generate_secret(integer) :: {:new | :existing, binary()}
+  defdelegate get_or_generate_secret(user_id), to: TOTPLib
 
-  @spec get_user_secret(User.t()) :: binary | nil
-  defdelegate get_user_secret(user), to: TOTPLib
+  @spec get_user_secret(integer) :: binary | nil
+  defdelegate get_user_secret(user_id), to: TOTPLib
 
-  @spec get_last_used_otp(User.t()) :: :inactive | String.t()
-  defdelegate get_last_used_otp(user), to: TOTPLib
+  @spec get_last_used_otp(integer) :: :inactive | String.t()
+  defdelegate get_last_used_otp(user_id), to: TOTPLib
 
-  @spec set_secret(User.t(), binary) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
-  defdelegate set_secret(user, secret), to: TOTPLib
+  @spec set_secret(integer, binary) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
+  defdelegate set_secret(user_id, secret), to: TOTPLib
 
-  @spec disable_totp(User.t()) :: {:ok, TOTP.t() | nil} | {:error, Ecto.Changeset.t()}
-  defdelegate disable_totp(user), to: TOTPLib
+  @spec disable_totp(integer) :: {:ok, TOTP.t() | nil} | {:error, Ecto.Changeset.t()}
+  defdelegate disable_totp(user_id), to: TOTPLib
 
   @spec validate_totp(User.t() | binary, String.t()) ::
           {:ok, :valid | :grace} | {:error, :inactive | :invalid | :used}
   defdelegate validate_totp(user_or_secret, otp), to: TOTPLib
-
-  #  @spec generate_otpauth_uri(User.t()) :: {:new | :existing, String.t()}
-  #  defdelegate generate_otpauth_uri(user), to: TOTPLib
 
   @spec generate_otpauth_uri(String.t(), binary) :: String.t()
   defdelegate generate_otpauth_uri(name, secret), to: TOTPLib
