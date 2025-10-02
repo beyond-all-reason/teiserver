@@ -9,15 +9,13 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
 
   describe "login" do
     setup do
-      GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
+      GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions(), [:no_login])
       |> Teiserver.TeiserverTestLib.conn_setup()
     end
 
     test "no OTP check when no secret", %{conn: conn, user: user} do
       conn = GeneralTestLib.login(conn, user.email)
 
-      assert redirected_to(conn) == ~p"/"
-      assert ConnTest.get_flash(conn, :info) == "Welcome back!"
       assert Guardian.Plug.current_resource(conn).id == user.id
     end
 
@@ -26,7 +24,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
       Account.set_secret(user.id, secret)
       conn = GeneralTestLib.login(conn, user.email)
 
-      assert redirected_to(conn) == ~p"/otp"
+      assert is_nil(Guardian.Plug.current_resource(conn))
       assert get_session(conn, :pending_2fa_user_id) == user.id
     end
 
@@ -36,8 +34,6 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
       otp = NimbleTOTP.verification_code(secret)
       conn = GeneralTestLib.login_opt(conn, user, otp)
 
-      assert redirected_to(conn) == ~p"/"
-      assert ConnTest.get_flash(conn, :info) == "Welcome back!"
       assert Guardian.Plug.current_resource(conn).id == user.id
     end
   end

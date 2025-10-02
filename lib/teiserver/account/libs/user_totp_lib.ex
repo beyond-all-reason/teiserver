@@ -190,13 +190,13 @@ defmodule Teiserver.Account.TOTPLib do
 
   @spec validate_totp(binary, String.t(), integer, keyword()) ::
           {:ok, :valid | :grace} | {:error, :invalid}
-  def validate_totp(secret, otp, time, since: nil) do
+  defp validate_totp(secret, otp, time, since: nil) do
     validate_totp(secret, otp, time)
   end
 
   @spec validate_totp(binary, String.t(), integer, keyword()) ::
           {:ok, :valid | :grace} | {:error, :invalid | :used}
-  def validate_totp(secret, otp, time, since: last_used) do
+  defp validate_totp(secret, otp, time, since: last_used) do
     cond do
       NimbleTOTP.valid?(secret, otp, time: time, since: last_used) ->
         {:ok, :valid}
