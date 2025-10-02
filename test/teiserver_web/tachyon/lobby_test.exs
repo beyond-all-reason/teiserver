@@ -16,6 +16,13 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"status" => "success", "data" => data} = Tachyon.create_lobby!(client, lobby_data)
       user_id = to_string(user.id)
       %{"type" => "player", "id" => ^user_id} = data["members"][user_id]
+      player_data = data["members"][user_id]
+      assert is_map_key(data["allyTeamConfig"], player_data["allyTeam"])
+
+      assert is_map_key(
+               data["allyTeamConfig"][player_data["allyTeam"]]["teams"],
+               player_data["team"]
+             )
     end
 
     test "cannot create lobby when already in lobby", %{client: client} do
@@ -79,9 +86,11 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "members get updated events on join", %{client: client, lobby_id: lobby_id} do
       {:ok, ctx2} = Tachyon.setup_client()
-      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+      %{"status" => "success", "data" => details} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
       %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
-      assert is_map_key(data["members"][to_string(ctx2[:user].id)], "team")
+      player_data = data["members"][to_string(ctx2[:user].id)]
+      assert is_map_key(player_data, "team")
+      assert is_map_key(details["allyTeamConfig"], player_data["allyTeam"])
     end
   end
 
