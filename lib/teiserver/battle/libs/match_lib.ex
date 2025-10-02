@@ -60,69 +60,78 @@ defmodule Teiserver.Battle.MatchLib do
     ]
   end
 
-  @spec match_from_lobby(T.lobby_id()) :: {map(), [map()]} | nil
+  @spec match_from_lobby(T.lobby_id()) :: {:ok, {map(), [map()]}} | {:error, :unavailable}
   def match_from_lobby(lobby_id) do
-    %{
-      lobby: lobby,
-      match_uuid: match_uuid,
-      server_uuid: server_uuid,
-      modoptions: modoptions,
-      bots: bots,
-      member_list: member_list,
-      # player_list: player_list,
-      queue_id: queue_id
-    } = Battle.get_combined_lobby_state(lobby_id)
+    case Battle.get_combined_lobby_state(lobby_id) do
+      nil ->
+        Logger.warning("Cannot create match from lobby #{lobby_id}: lobby unavailable")
+        {:error, :unavailable}
 
-    teams =
-      member_list
-      |> Account.list_clients()
-      |> Enum.filter(fn c -> c.player == true end)
-      |> Enum.group_by(fn c -> c.team_number end)
+      state ->
+        %{
+          lobby: lobby,
+          match_uuid: match_uuid,
+          server_uuid: server_uuid,
+          modoptions: modoptions,
+          bots: bots,
+          member_list: member_list,
+          # player_list: player_list,
+          queue_id: queue_id
+        } = state
 
-    if teams != %{} do
-      team_count = teams |> Enum.count()
+        teams =
+          member_list
+          |> Account.list_clients()
+          |> Enum.filter(fn c -> c.player == true end)
+          |> Enum.group_by(fn c -> c.team_number end)
 
-      team_size =
-        teams
-        |> Enum.map(fn {_, t} -> t |> Enum.count() end)
-        |> Enum.max(fn -> 0 end)
+        if teams != %{} do
+          team_count = teams |> Enum.count()
 
-      game_type = game_type(team_size, team_count, bots)
+          team_size =
+            teams
+            |> Enum.map(fn {_, t} -> t |> Enum.count() end)
+            |> Enum.max(fn -> 0 end)
 
-      match = %{
-        uuid: match_uuid,
-        server_uuid: server_uuid,
-        map: lobby.map_name,
-        data: nil,
-        tags: modoptions,
-        team_count: team_count,
-        team_size: team_size,
-        passworded: lobby.passworded,
-        game_type: game_type,
-        founder_id: lobby.founder_id,
-        bots: bots,
-        queue_id: queue_id,
-        started: Timex.now(),
-        finished: nil
-      }
+          game_type = game_type(team_size, team_count, bots)
 
-      members =
-        member_list
-        |> Account.list_clients()
-        |> Enum.filter(fn c -> c.player == true end)
-        |> Enum.map(fn client ->
-          %{
-            user_id: client.userid,
-            team_id: client.team_number,
-            party_id: client.party_id
+          match = %{
+            uuid: match_uuid,
+            server_uuid: server_uuid,
+            map: lobby.map_name,
+            data: nil,
+            tags: modoptions,
+            team_count: team_count,
+            team_size: team_size,
+            passworded: lobby.passworded,
+            game_type: game_type,
+            founder_id: lobby.founder_id,
+            bots: bots,
+            queue_id: queue_id,
+            started: Timex.now(),
+            finished: nil
           }
-        end)
 
-      {match, members}
-    else
-      Logger.error("EmptyTeamsMatch Lobby: #{lobby_id}\nMembers: #{Kernel.inspect(member_list)}")
+          members =
+            member_list
+            |> Account.list_clients()
+            |> Enum.filter(fn c -> c.player == true end)
+            |> Enum.map(fn client ->
+              %{
+                user_id: client.userid,
+                team_id: client.team_number,
+                party_id: client.party_id
+              }
+            end)
 
-      nil
+          {:ok, {match, members}}
+        else
+          Logger.error(
+            "EmptyTeamsMatch Lobby: #{lobby_id}\nMembers: #{Kernel.inspect(member_list)}"
+          )
+
+          {:error, :unavailable}
+        end
     end
   end
 
