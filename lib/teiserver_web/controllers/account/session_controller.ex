@@ -366,6 +366,7 @@ defmodule TeiserverWeb.Account.SessionController do
 
             # Now delete the code, it's been used
             Account.delete_code(code)
+            Account.disable_totp(user.id)
 
             conn
             |> put_flash(

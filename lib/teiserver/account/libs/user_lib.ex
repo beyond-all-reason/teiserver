@@ -223,7 +223,6 @@ defmodule Teiserver.Account.UserLib do
 
   def password_reset_update_user(%User{} = user, attrs) do
     Account.recache_user(user.id)
-    TOTPLib.disable_totp(user.id)
 
     user
     |> User.changeset(attrs, :password_reset)
