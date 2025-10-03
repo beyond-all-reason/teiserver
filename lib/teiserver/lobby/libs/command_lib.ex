@@ -84,7 +84,7 @@ defmodule Teiserver.Lobby.CommandLib do
   end
 
   @spec say_command(map(), T.lobby_id()) :: any()
-  def say_command(cmd = %{silent: true}, state), do: log_command(cmd, state)
+  def say_command(%{silent: true} = cmd, state), do: log_command(cmd, state)
 
   def say_command(cmd, lobby_id) do
     message = "$ " <> command_as_message(cmd)

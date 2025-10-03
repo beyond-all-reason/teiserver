@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   @page_size 500
 
   @spec lobby_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def lobby_chat(conn, params = %{"id" => match_id}) do
+  def lobby_chat(conn, %{"id" => match_id} = params) do
     match_id = int_parse(match_id)
 
     {page, page_size} =
@@ -98,7 +98,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   end
 
   @spec server_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def server_chat(conn, params = %{"id" => server_uuid}) do
+  def server_chat(conn, %{"id" => server_uuid} = params) do
     match_ids =
       Battle.list_matches(
         search: [server_uuid: server_uuid],

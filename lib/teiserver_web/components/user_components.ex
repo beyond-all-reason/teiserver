@@ -27,7 +27,9 @@ defmodule TeiserverWeb.UserComponents do
         if(assigns.user.smurf_of_id != nil,
           do: {"primary", Teiserver.Moderation.ActionLib.action_icon("Smurf")}
         ),
-        if(Enum.member?(user.roles, "Smurfer"), do: {"info2", "fa-solid fa-split"}),
+        if(Enum.member?(user.roles, "Smurfer"),
+          do: {"info2", "fa-solid fa-arrows-split-up-and-left"}
+        ),
         if(ban_status == "banned",
           do: {"danger2", Teiserver.Moderation.ActionLib.action_icon("Ban")}
         ),
@@ -42,7 +44,7 @@ defmodule TeiserverWeb.UserComponents do
         ),
         if(Enum.member?(user.roles, "Trusted"), do: {"", "fa-solid fa-check"}),
         if(not Enum.member?(user.roles, "Verified"),
-          do: {"info", "fa-solid fa-square-question"}
+          do: {"info", "fa-solid fa-user-secret"}
         )
       ]
       |> Enum.reject(&(&1 == nil))
@@ -74,42 +76,45 @@ defmodule TeiserverWeb.UserComponents do
       |> assign(recents: recents)
 
     ~H"""
-    <div :if={not Enum.empty?(@recents)} class="nav-item dropdown mx-2">
+    <li :if={not Enum.empty?(@recents)} class="nav-item dropdown">
       <a
-        class="dropdown-toggle dropdown-toggle-icon-only"
+        class="nav-link dropdown-toggle"
         href="#"
         data-bs-toggle="dropdown"
         aria-haspopup="true"
         aria-expanded="false"
         id="user-recents-link"
       >
-        <i class="fa-solid fa-clock fa-fw fa-lg"></i>
+        <i class="fa-solid fa-clock fa-fw"></i>
       </a>
-      <div
+      <ul
         class="dropdown-menu dropdown-menu-end"
         aria-labelledby="user-recents-link"
         style="min-width: 300px; max-width: 500px;"
       >
-        <span class="dropdown-header" style="font-weight: bold;">
-          Recent items
-        </span>
-
-        <a :for={r <- @recents} class="dropdown-item" href={r.url}>
-          <Fontawesome.icon icon={r.type_icon} style="regular" css_style={"color: #{r.type_colour}"} />
-
-          <%= if r.item_icon do %>
+        <li><span class="dropdown-header" style="font-weight: bold;">Recent items</span></li>
+        <li :for={r <- @recents}>
+          <a class="dropdown-item" href={r.url}>
             <Fontawesome.icon
-              icon={r.item_icon}
+              icon={r.type_icon}
               style="regular"
-              css_style={"color: #{r.item_colour}"}
+              css_style={"color: #{r.type_colour}"}
             />
-          <% else %>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <% end %>
-          &nbsp; {r.item_label}
-        </a>
-      </div>
-    </div>
+
+            <%= if r.item_icon do %>
+              <Fontawesome.icon
+                icon={r.item_icon}
+                style="regular"
+                css_style={"color: #{r.item_colour}"}
+              />
+            <% else %>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <% end %>
+            &nbsp; {r.item_label}
+          </a>
+        </li>
+      </ul>
+    </li>
     """
   end
 
@@ -120,46 +125,47 @@ defmodule TeiserverWeb.UserComponents do
 
   def account_dropdown(assigns) do
     ~H"""
-    <div class="nav-item dropdown mx-2">
+    <li class="nav-item dropdown">
       <a
-        class="dropdown-toggle dropdown-toggle-icon-only"
+        class="nav-link dropdown-toggle"
         href="#"
         data-bs-toggle="dropdown"
         aria-haspopup="true"
         aria-expanded="false"
         id="user-dropdown-link"
       >
-        <i class="fa-solid fa-user fa-fw fa-lg"></i>
+        <i class="fa-solid fa-user fa-fw"></i>
       </a>
-      <div
+      <ul
         class="dropdown-menu dropdown-menu-end"
         aria-labelledby="user-dropdown-link"
         style="min-width: 300px; max-width: 500px;"
       >
-        <a class="dropdown-item" href={~p"/profile"}>
-          <i class={"fa-fw #{Teiserver.Account.icon()}"}></i> &nbsp;
-          Account
-        </a>
-
-        <hr style="margin: 0;" />
-
-        <form action={~p"/logout"} method="post" class="link" id="signout-form" style="margin: 0;">
-          <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
-
-          <a
-            class="dropdown-item"
-            data-submit="parent"
-            href="#"
-            rel="nofollow"
-            onclick="$('#signout-form').submit();"
-            id="signout-link"
-          >
-            <i class="fa-solid fa-sign-out fa-fw"></i> &nbsp;
-            Sign out {@current_user.name}
+        <li>
+          <a class="dropdown-item" href={~p"/profile"}>
+            <i class={"fa-fw #{Teiserver.Account.icon()}"}></i> &nbsp;
+            Profile
           </a>
-        </form>
-      </div>
-    </div>
+        </li>
+        <li>
+          <form action={~p"/logout"} method="post" class="link" id="signout-form" style="margin: 0;">
+            <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
+
+            <a
+              class="dropdown-item"
+              data-submit="parent"
+              href="#"
+              rel="nofollow"
+              onclick="$('#signout-form').submit();"
+              id="signout-link"
+            >
+              <i class="fa-solid fa-sign-out fa-fw"></i> &nbsp;
+              Sign out {@current_user.name}
+            </a>
+          </form>
+        </li>
+      </ul>
+    </li>
     """
   end
 end

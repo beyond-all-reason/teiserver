@@ -42,7 +42,6 @@ defmodule Teiserver.TachyonLobby.List do
   @spec register_lobby(pid(), Lobby.id(), overview()) :: :ok
   def register_lobby(lobby_pid, lobby_id, overview) do
     GenServer.cast(__MODULE__, {:register, {lobby_pid, lobby_id, overview}})
-    :ok
   end
 
   @doc """
@@ -76,6 +75,8 @@ defmodule Teiserver.TachyonLobby.List do
   def subscribe_updates() do
     PubSubHelper.subscribe(@update_topic)
     GenServer.call(__MODULE__, :list)
+  catch
+    :exit, {:noproc, _} -> {0, %{}}
   end
 
   def unsubscribe_updates() do
@@ -93,9 +94,45 @@ defmodule Teiserver.TachyonLobby.List do
   end
 
   @impl true
-  @spec init(term()) :: {:ok, state()}
+  @spec init(term()) :: {:ok, state(), {:continue, term()}}
   def init(_) do
-    {:ok, %{monitors: MC.new(), counter: 0, lobbies: %{}}}
+    state = %{monitors: MC.new(), counter: 0, lobbies: %{}}
+    {:ok, state, {:continue, :bootstrap_state}}
+  end
+
+  @impl true
+  def handle_continue(:bootstrap_state, state) do
+    {monitors, lobbies} =
+      Teiserver.TachyonLobby.Registry.list_lobbies()
+      |> Task.async_stream(
+        fn {lobby_id, pid} ->
+          case Lobby.get_overview(pid) do
+            nil -> nil
+            overview -> {lobby_id, pid, overview}
+          end
+        end,
+        ordered: false
+      )
+      |> Stream.filter(fn
+        {:ok, x} when not is_nil(x) -> true
+        _ -> false
+      end)
+      |> Enum.reduce(
+        {state.monitors, state.lobbies},
+        fn {:ok, {lobby_id, pid, overview}}, {monitors, lobbies} ->
+          {MC.monitor(monitors, pid, lobby_id), Map.put(lobbies, lobby_id, overview)}
+        end
+      )
+
+    counter = 0
+
+    PubSubHelper.broadcast(@update_topic, %{
+      event: :reset_list,
+      counter: counter,
+      lobbies: lobbies
+    })
+
+    {:noreply, %{monitors: monitors, counter: counter, lobbies: lobbies}}
   end
 
   @impl true

@@ -74,5 +74,22 @@ defmodule TeiserverWeb.Tachyon.TransportTest do
       WSC.send_message(client, {:text, "test_ping"})
       assert {:error, :disconnected} = WSC.recv(client)
     end
+
+    test "rate limit", %{client: client, user: user} do
+      %{"status" => "success"} = Tachyon.server_stats!(client)
+
+      conn_pid = Teiserver.Player.lookup_connection(user.id)
+      assert is_pid(conn_pid)
+
+      {:ok, rl} = Teiserver.Tachyon.Transport._test_rate_limiter_acquire(conn_pid, 20)
+
+      assert rl.stored_permits < 0
+      Tachyon.send_request(client, "system/serverStats")
+      {:ok, {:text, msg}} = WSC.recv(client)
+      assert msg =~ "Rate limited"
+
+      WSC.send_message(client, {:text, "test_ping"})
+      assert {:error, :disconnected} = WSC.recv(client)
+    end
   end
 end

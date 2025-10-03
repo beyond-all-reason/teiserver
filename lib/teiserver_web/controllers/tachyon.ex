@@ -17,7 +17,12 @@ defmodule TeiserverWeb.TachyonController do
     with {:ok, subprotocol, handler} <- handler_for_version(conn),
          {:ok, state} <- handler.connect(conn) do
       try do
-        conn_state = %{handler_state: state, handler: handler}
+        rate_limiter =
+          if function_exported?(handler, :init_rate_limiter, 1),
+            do: handler.init_rate_limiter(state),
+            else: nil
+
+        conn_state = %{handler_state: state, handler: handler, rate_limiter: rate_limiter}
 
         conn
         |> put_resp_header(@subprotocol_hdr_name, subprotocol)

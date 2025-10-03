@@ -92,7 +92,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
   end
 
-  def handle_info(data = %{channel: "teiserver_party:" <> _, event: :updated_values}, socket) do
+  def handle_info(%{channel: "teiserver_party:" <> _, event: :updated_values} = data, socket) do
     new_party =
       socket.assigns.party
       |> Map.merge(data.new_values)
@@ -103,7 +103,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
      |> build_user_lookup}
   end
 
-  def handle_info(data = %{channel: "teiserver_liveview_client:" <> _}, socket) do
+  def handle_info(%{channel: "teiserver_liveview_client:" <> _} = data, socket) do
     socket =
       case data.event do
         :joined_lobby ->
@@ -244,7 +244,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   end
 
   @spec leader?(map()) :: boolean
-  defp leader?(socket = %{assigns: %{current_user: %{id: user_id}, party: %{leader: leader_id}}}) do
+  defp leader?(%{assigns: %{current_user: %{id: user_id}, party: %{leader: leader_id}}} = socket) do
     moderator = allow?(socket, "Moderator")
     moderator or leader_id == user_id
   end

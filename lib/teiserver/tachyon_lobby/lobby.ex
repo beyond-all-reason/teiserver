@@ -4,7 +4,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
   """
 
   require Logger
-  use GenServer, restart: :transient
+
+  # lobby process holds transient state about a specific lobby. If this process
+  # goes down, there is no point restarting since the state will be lost
+  use GenServer, restart: :temporary
 
   alias Teiserver.Asset
   alias Teiserver.Autohost
@@ -125,6 +128,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec gen_id() :: id()
   def gen_id(), do: UUID.uuid4()
 
+  # note: this uses a pid and not a lobby id because it's (currently) only
+  # used by the lobby list process to bootstrap its state, and at that time
+  # it has the pid (from the registry).
+  # but if the needs arise, this could be overloaded to use a lobby id
+  # and the usual via_tuple mechanism
+  @spec get_overview(pid()) :: TachyonLobby.List.overview() | nil
+  def get_overview(lobby_pid) do
+    GenServer.call(lobby_pid, :get_overview)
+  catch
+    :exit, {:noproc, _} -> nil
+  end
+
   @spec get_details(id()) :: {:ok, details()} | {:error, reason :: term()}
   def get_details(id) do
     GenServer.call(via_tuple(id), :get_details)
@@ -187,27 +202,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
       current_battle: nil
     }
 
-    TachyonLobby.List.register_lobby(self(), id, %{
-      name: state.name,
-      player_count: map_size(state.players),
-      max_player_count:
-        Enum.sum(
-          for at <- state.ally_team_config, team <- at.teams do
-            team.max_players
-          end
-        ),
-      map_name: state.map_name,
-      engine_version: state.engine_version,
-      game_version: state.game_version,
-      current_battle: nil
-    })
-
+    TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
+    Logger.info("Lobby created by user #{start_params.creator_data.id}")
     {:ok, state}
   end
 
   @impl true
   def handle_call(:get_details, _from, state) do
     {:reply, {:ok, get_details_from_state(state)}, state}
+  end
+
+  def handle_call(:get_overview, _from, state) do
+    {:reply, get_overview_from_state(state), state}
   end
 
   def handle_call({:join, join_data, _pid}, _from, state)
@@ -288,13 +294,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   @impl true
-  def handle_info({:DOWN, ref, :process, _obj, _reason}, state) do
+  def handle_info({:DOWN, ref, :process, _obj, reason}, state) do
     val = MC.get_val(state.monitors, ref)
     state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
 
     state =
       case val do
         {:user, user_id} ->
+          Logger.debug("user #{user_id} disappeared from the lobby because #{inspect(reason)}")
+
           case remove_player(user_id, state) do
             {:ok, state} -> state
             _ -> state
@@ -302,7 +310,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       end
 
     if Enum.empty?(state.players) do
-      {:stop, {:shutdown, :empty}, state}
+      {:noreply, state, {:continue, :empty}}
     else
       {:noreply, state}
     end
@@ -310,12 +318,31 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @impl true
   def handle_continue(:empty, state) do
+    Logger.info("Lobby shutting down because empty")
     {:stop, {:shutdown, :empty}, state}
   end
 
   @spec via_tuple(id()) :: GenServer.name()
   defp via_tuple(lobby_id) do
     TachyonLobby.Registry.via_tuple(lobby_id)
+  end
+
+  @spec get_overview_from_state(state :: state()) :: TachyonLobby.List.overview()
+  defp get_overview_from_state(state) do
+    %{
+      name: state.name,
+      player_count: map_size(state.players),
+      max_player_count:
+        Enum.sum(
+          for at <- state.ally_team_config, team <- at.teams do
+            team.max_players
+          end
+        ),
+      map_name: state.map_name,
+      engine_version: state.engine_version,
+      game_version: state.game_version,
+      current_battle: nil
+    }
   end
 
   defp get_details_from_state(state) do

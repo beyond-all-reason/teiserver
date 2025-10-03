@@ -454,6 +454,11 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, :subscribe_list})
   end
 
+  @spec unsubscribe_lobby_list(T.userid()) :: :ok
+  def unsubscribe_lobby_list(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :unsubscribe_list})
+  end
+
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
@@ -462,7 +467,10 @@ defmodule Teiserver.Player.Session do
 
   @impl true
   def handle_call({:replace, new_conn_pid}, _from, state) do
-    monitors = MC.demonitor_by_val(state.monitors, :connection, [:flush])
+    monitors =
+      MC.demonitor_by_val(state.monitors, :connection, [:flush])
+      |> MC.monitor(new_conn_pid, :connection)
+
     Logger.info("session reused")
 
     {current_party, invited_to} = get_party_states(state.party)
@@ -498,6 +506,7 @@ defmodule Teiserver.Player.Session do
     end
 
     broadcast_user_update!(state.user, :offline)
+    :telemetry.execute([:tachyon, :disconnect], %{count: 1})
 
     {:stop, :normal, :ok, %{state | matchmaking: initial_matchmaking_state()}}
   end
@@ -923,6 +932,11 @@ defmodule Teiserver.Player.Session do
     {:reply, {:ok, list}, %{state | lobby_list_subscription: %{counter: counter}}}
   end
 
+  def handle_call({:lobby, :unsubscribe_list}, _from, state) do
+    TachyonLobby.unsubscribe_updates()
+    {:reply, :ok, %{state | lobby_list_subscription: nil}}
+  end
+
   @impl true
   def handle_cast(
         {:matchmaking, {:notify_found, queue_id, room_pid, timeout_ms}},
@@ -1244,7 +1258,7 @@ defmodule Teiserver.Player.Session do
   end
 
   @impl true
-  def handle_info({:DOWN, ref, :process, _, _reason}, state) do
+  def handle_info({:DOWN, ref, :process, _, reason}, state) do
     val = MC.get_val(state.monitors, ref)
     state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
 
@@ -1256,7 +1270,8 @@ defmodule Teiserver.Player.Session do
         # we don't care about cancelling the timer if the player reconnects since reconnection
         # should be fairly low (and rate limited) so too many messages isn't an issue
         {:ok, _} = :timer.send_after(2_000, :player_timeout)
-        Logger.info("Player disconnected abruptly")
+        Logger.info("Player disconnected abruptly because #{inspect(reason)}")
+        :telemetry.execute([:tachyon, :abrupt_disconnect], %{count: 1})
 
         state =
           state
@@ -1338,8 +1353,13 @@ defmodule Teiserver.Player.Session do
             {:noreply, state}
         end
 
+      {:lobby, lobby_id} ->
+        Logger.info("Lobby #{lobby_id} went down because #{inspect(reason)}")
+        send_to_player!({:lobby, lobby_id, {:left, "lobby crashed"}}, state)
+        {:noreply, %{state | lobby: nil}}
+
       {:battle, battle_id} ->
-        Logger.info("battle #{battle_id} went down")
+        Logger.info("battle #{battle_id} went down because #{inspect(reason)}")
         broadcast_user_update!(state.user, :menu)
         {:noreply, %{state | battle: nil}}
     end
@@ -1384,11 +1404,13 @@ defmodule Teiserver.Player.Session do
   def handle_info(
         %{
           topic: "teiserver_tachyonlobby_list",
-          counter: c
+          counter: c,
+          event: event
         },
         state
       )
-      when state.lobby_list_subscription == nil or state.lobby_list_subscription.counter >= c do
+      when event != :reset_list and
+             (state.lobby_list_subscription == nil or state.lobby_list_subscription.counter >= c) do
     {:noreply, state}
   end
 
@@ -1411,8 +1433,11 @@ defmodule Teiserver.Player.Session do
       :remove_lobby ->
         send_to_player!({:lobby_list, {:remove_lobby, ev.lobby_id}}, state)
 
+      :reset_list ->
+        send_to_player!({:lobby_list, {:reset_list, ev.lobbies}}, state)
+
       _ ->
-        raise "Unknow lobby_list event: #{inspect(ev)}"
+        raise "Unknow lobby_list event: #{inspect(ev.event)} -- #{inspect(ev)}"
     end
 
     {:noreply, state}

@@ -58,7 +58,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
   end
 
   test "get updates when player joins or leaves lobby" do
-    {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
     {:ok, _pid, %{id: id}} =
       mk_start_params([2, 2])
@@ -74,7 +74,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
   end
 
   test "remove update when last player leaves" do
-    {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
     {:ok, _pid, %{id: id}} =
       mk_start_params([2, 2])
@@ -85,6 +85,45 @@ defmodule Teiserver.TachyonLobby.ListTest do
 
     :ok = Lobby.leave(id, "1234")
     assert_receive %{lobby_id: ^id, event: :remove_lobby}
+  end
+
+  test "restore state on startup" do
+    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+
+    {:ok, pid1, %{id: id1}} =
+      mk_start_params([2, 2])
+      |> Map.replace!(:creator_pid, sink_pid)
+      |> Map.replace!(:name, "first lobby")
+      |> Lobby.create()
+
+    {:ok, pid2, %{id: id2}} =
+      mk_start_params([2, 2])
+      |> Map.replace!(:creator_pid, sink_pid)
+      |> Map.replace!(:name, "second lobby")
+      |> Lobby.create()
+
+    Supervisor.terminate_child(Lobby.System, Lobby.List)
+
+    # While the list process is dead, terminate a lobby and create a new one
+    Process.exit(pid1, :kill)
+
+    {:ok, _pid, %{id: id3}} =
+      mk_start_params([2, 2])
+      |> Map.replace!(:creator_pid, sink_pid)
+      |> Map.replace!(:name, "third lobby")
+      |> Lobby.create()
+
+    assert {_initial_counter, %{}} = Lobby.subscribe_updates()
+    Supervisor.restart_child(Lobby.System, Lobby.List)
+
+    assert_receive %{event: :reset_list, lobbies: lobbies}
+    assert not is_map_key(lobbies, id1), "first lobby is no more"
+    assert is_map_key(lobbies, id2), "second lobby is there"
+    assert is_map_key(lobbies, id3), "new lobby is registered"
+
+    # and stopping a lobby after restart still works (aka, monitors are set up)
+    Process.exit(pid2, :kill)
+    assert_receive %{event: :remove_lobby, lobby_id: ^id2}
   end
 
   defp overview_fixture() do

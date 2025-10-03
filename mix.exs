@@ -45,7 +45,14 @@ defmodule Teiserver.MixProject do
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(:dev), do: ["lib", "test/support"]
-  defp elixirc_paths(_), do: ["lib"]
+
+  # mix tasks aren't available in production (no mix installed)
+  # this also avoid compilation warnings/error because some dependencies
+  # aren't available in prod for these tasks (like httpoison)
+  defp elixirc_paths(_) do
+    Path.wildcard("lib/**/*.ex")
+    |> Enum.reject(&String.starts_with?(&1, "lib/teiserver/mix_tasks/"))
+  end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
@@ -145,7 +152,8 @@ defmodule Teiserver.MixProject do
        only: [:dev, :test]},
       {:httpoison, "~> 2.0", only: [:dev, :test]},
       {:nimble_totp, "~> 1.0"},
-      {:eqrcode, "~> 0.2.1"}
+      {:eqrcode, "~> 0.2.1"},
+      {:recon, "~> 2.5.6"}
     ]
   end
 

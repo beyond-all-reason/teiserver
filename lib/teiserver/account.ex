@@ -1577,16 +1577,16 @@ defmodule Teiserver.Account do
   @spec follow_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
   defdelegate follow_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec ignore_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
+  @spec ignore_user(T.userid(), T.userid()) :: {:ok, Relationship.t()} | {:error, String.t()}
   defdelegate ignore_user(from_user_id, to_user_id), to: RelationshipLib
 
   @spec unignore_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
   defdelegate unignore_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec avoid_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
+  @spec avoid_user(T.userid(), T.userid()) :: {:ok, Relationship.t()} | {:error, String.t()}
   defdelegate avoid_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec block_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
+  @spec block_user(T.userid(), T.userid()) :: {:ok, Relationship.t()} | {:error, String.t()}
   defdelegate block_user(from_user_id, to_user_id), to: RelationshipLib
 
   @spec reset_relationship_state(T.userid(), T.userid()) :: {:ok, Relationship.t()}

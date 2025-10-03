@@ -72,7 +72,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
   end
 
   def handle_info(
-        data = %{channel: "teiserver_party:" <> party_id, event: :updated_values},
+        %{channel: "teiserver_party:" <> party_id, event: :updated_values} = data,
         socket
       ) do
     new_parties =

@@ -43,7 +43,7 @@ defmodule Teiserver.Moderation.ReportLib do
       ],
       "actions" => [
         {"Noob", "noob", "fa-chevrons-up"},
-        {"Griefing", "griefing", "fa-face-angry-horns"},
+        {"Griefing", "griefing", "fa-face-angry"},
         {"Cheating", "cheating", "fa-cards"},
         {"Other", "other", "fa-face-unamused"}
       ]
@@ -67,7 +67,7 @@ defmodule Teiserver.Moderation.ReportLib do
       ],
       "actions" => [
         {"Noob", "noob", "fa-chevrons-up"},
-        {"Griefing", "griefing", "fa-face-angry-horns"},
+        {"Griefing", "griefing", "fa-face-angry"},
         {"Cheating", "cheating", "fa-cards"},
         {"Other", "other", "fa-face-unamused"}
       ]
@@ -223,6 +223,18 @@ defmodule Teiserver.Moderation.ReportLib do
   def order_by(query, "Oldest first") do
     from reports in query,
       order_by: [asc: reports.inserted_at]
+  end
+
+  def order_by(query, "Name (A-Z)") do
+    from reports in query,
+      left_join: targets in assoc(reports, :target),
+      order_by: [asc: targets.name]
+  end
+
+  def order_by(query, "Name (Z-A)") do
+    from reports in query,
+      left_join: targets in assoc(reports, :target),
+      order_by: [desc: targets.name]
   end
 
   @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()

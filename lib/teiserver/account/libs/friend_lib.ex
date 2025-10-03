@@ -6,7 +6,7 @@ defmodule Teiserver.Account.FriendLib do
   def colours(), do: :success
 
   @spec icon :: String.t()
-  def icon(), do: "fa-user-plus"
+  def icon(), do: "fa-user-group"
 
   @spec list_friend_ids_of_user(T.userid()) :: [T.userid()]
   def list_friend_ids_of_user(userid) do

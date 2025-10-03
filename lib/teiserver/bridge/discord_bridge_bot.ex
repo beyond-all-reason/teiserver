@@ -173,9 +173,21 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         %{
           # type3 = String
           type: 3,
-          name: "message_id",
+          name: "id",
           description: "Message ID of the actions discord message",
           required: true
+        },
+        %{
+          # type3 = String
+          type: 3,
+          name: "mode",
+          description: "Mode to search with by id",
+          required: false,
+          choices: [
+            %{name: "Message ID", value: "message_id"},
+            %{name: "Report ID", value: "report_id"}
+          ],
+          default_value: "message_id"
         }
       ],
       nsfw: false
@@ -334,7 +346,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         else
           Moderation.list_reports(
             search: [match_id: report.match_id, type: report.type],
-            odered_by: "Oldest first"
+            order_by: "Oldest first"
           )
         end
 

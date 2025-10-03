@@ -34,7 +34,7 @@
   <div class="col">
     <h4 class="text-success">
       Friends
-      &nbsp; <Fontawesome.icon icon={Teiserver.Account.FriendLib.icon()} style="regular" />
+      &nbsp; <Fontawesome.icon icon={Teiserver.Account.FriendLib.icon()} style="solid" />
     </h4>
     <div :if={@show_help} class="help-box">
       Friends can instantly jump into the same lobby as each other and see additional information when looking at each other's profiles.
@@ -61,7 +61,7 @@
   <div class="col">
     <h4 class="text-info2">
       Incoming requests
-      &nbsp; <Fontawesome.icon icon="down-to-bracket" style="regular" />
+      &nbsp; <Fontawesome.icon icon=" fa-person-arrow-down-to-line" style="solid" />
     </h4>
     <div :if={@show_help} class="help-box">
       These people are not your friends (yet) but they want to be!
@@ -100,7 +100,7 @@
   <div class="col">
     <h4 class="text-primary">
       Outgoing requests
-      &nbsp; <Fontawesome.icon icon="up-from-bracket" style="regular" />
+      &nbsp; <Fontawesome.icon icon="fa-person-arrow-up-from-line" style="solid" />
     </h4>
     <div :if={@show_help} class="help-box">
       These are people you've asked to be friends, you're just waiting on their reply.
@@ -125,7 +125,7 @@
     <h4 class="text-info">
       Follows
       &nbsp;
-      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_follow()} style="regular" />
+      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_follow()} style="solid" />
     </h4>
     <div :if={@show_help} class="help-box">
       While it currently doesn't do anything, following will be a way to keep track of those you want to without them having to accept you as a friend (e.g. streamers, devs or other figures of interest).
@@ -142,7 +142,7 @@
       </:col>z
       <:col :let={follow} label="">
         <.link class="btn btn-secondary btn-sm" navigate={~p"/profile/#{follow.to_user.id}"}>
-          <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="regular" /> Profile
+          <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" /> Profile
         </.link>
       </:col>
 
@@ -152,7 +152,7 @@
           phx-value-userid={follow.to_user.id}
           class="btn btn-secondary btn-sm"
         >
-          <Fontawesome.icon icon="times" style="regular" /> Un-follow
+          <Fontawesome.icon icon="times" style="solid" /> Un-follow
         </span>
       </:col>
     </.table>
@@ -164,7 +164,7 @@
     <h4 class="text-warning">
       Ignores
       &nbsp;
-      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="regular" />
+      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="solid" />
     </h4>
     <div :if={@show_help} class="help-box">
       If someone is ignored they cannot direct message you and you will not see their chat messages in the lobby. Muting ingame is currently a separate action and not linked to this.
@@ -177,7 +177,7 @@
           phx-value-userid={avoid.to_user.id}
           class="btn btn-secondary btn-sm"
         >
-          <Fontawesome.icon icon="times" style="regular" /> Un-ignore
+          <Fontawesome.icon icon="times" style="solid" /> Un-ignore
         </span>
       </:col>
       <:col :let={ignore} label="">
@@ -186,7 +186,7 @@
           phx-value-userid={ignore.to_user.id}
           class="btn btn-secondary btn-sm"
         >
-          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
+          <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="solid" />
           Avoid
         </span>
       </:col>
@@ -196,7 +196,7 @@
     <h4 class="text-danger">
       Avoids
       &nbsp;
-      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="regular" />
+      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="solid" />
     </h4>
     <div :if={@show_help} class="help-box">
       If you avoid someone, there's less chance the balance algorithm will place you on the same team. However, avoids will be broken if the algorithm cannot balance teams fairly. This feature is still under development.
@@ -209,7 +209,7 @@
           phx-value-userid={avoid.to_user.id}
           class="btn btn-secondary btn-sm"
         >
-          <Fontawesome.icon icon="times" style="regular" /> Un-avoid
+          <Fontawesome.icon icon="times" style="solid" /> Un-avoid
         </span>
       </:col>
       <:col :let={avoid} label="">
@@ -218,7 +218,7 @@
           phx-value-userid={avoid.to_user.id}
           class="btn btn-secondary btn-sm"
         >
-          <Fontawesome.icon icon="arrow-right" style="regular" /> Block
+          <Fontawesome.icon icon="arrow-right" style="solid" /> Block
         </span>
       </:col>
     </.table>
@@ -227,7 +227,7 @@
     <h4 class="text-danger2">
       Blocks
       &nbsp;
-      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="regular" />
+      <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="solid" />
     </h4>
     <div :if={@show_help} class="help-box">
       In addition to the effects of avoiding; if enough members of a lobby are blocking someone they will not be able to join the lobby at all.
@@ -240,7 +240,7 @@
           phx-value-userid={block.to_user.id}
           class="btn btn-secondary btn-sm"
         >
-          <Fontawesome.icon icon="arrow-left" style="regular" /> Avoid
+          <Fontawesome.icon icon="arrow-left" style="solid" /> Avoid
         </span>
       </:col>
     </.table>
@@ -282,7 +282,7 @@
     <div :if={@found_user}>
       <h3 class="mb-4 py-1" style={"background-color: #{@found_user.colour};"}>
         <div class="d-inline-block px-2 py-1 mx-1">
-          <Fontawesome.icon icon={@found_user.icon} style="regular" size="sm" />
+          <Fontawesome.icon icon={@found_user.icon} style="solid" size="sm" />
         </div>
 
         {@found_user.name} &nbsp;&nbsp;&nbsp;&nbsp;

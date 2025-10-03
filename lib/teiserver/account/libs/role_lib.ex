@@ -22,14 +22,14 @@ defmodule Teiserver.Account.RoleLib do
     %{
       name: "Raptor",
       colour: "#AA6600",
-      icon: "fa-solid fa-drumstick",
+      icon: "fa-solid fa-egg",
       contains: ~w(),
       badge: true
     },
     %{
       name: "Scavenger",
       colour: "#660066",
-      icon: "fa-solid fa-user-robot",
+      icon: "fa-solid fa-robot",
       contains: ~w(),
       badge: true
     },

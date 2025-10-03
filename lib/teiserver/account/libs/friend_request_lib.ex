@@ -9,7 +9,7 @@ defmodule Teiserver.Account.FriendRequestLib do
   def colours(), do: :success
 
   @spec icon :: String.t()
-  def icon(), do: "fa-user-question"
+  def icon(), do: "fa-user-plus"
 
   @spec can_send_friend_request?(T.userid(), T.userid()) :: boolean
   def can_send_friend_request?(from_id, to_id) do
@@ -44,6 +44,12 @@ defmodule Teiserver.Account.FriendRequestLib do
       Account.does_a_avoid_b?(to_id, from_id) ->
         {false, "Avoided"}
 
+      Teiserver.Account.RelationshipLib.check_relationship_limit(from_id, :friend) != :ok ->
+        {false, "You have reached the maximum number of friends"}
+
+      Teiserver.Account.RelationshipLib.check_relationship_limit(to_id, :friend) != :ok ->
+        {false, "This user has reached the maximum number of friends"}
+
       true ->
         {true, :ok}
     end
@@ -65,21 +71,26 @@ defmodule Teiserver.Account.FriendRequestLib do
   def accept_friend_request(%FriendRequest{} = req) do
     case Account.get_friend(req.from_user_id, req.to_user_id) do
       nil ->
-        {:ok, _friend} = Account.create_friend(req.from_user_id, req.to_user_id)
-        Account.delete_friend_request(req)
+        case Account.create_friend(req.from_user_id, req.to_user_id) do
+          {:ok, _friend} ->
+            Account.delete_friend_request(req)
 
-        PubSub.broadcast(
-          Teiserver.PubSub,
-          "account_user_relationships:#{req.from_user_id}",
-          %{
-            channel: "account_user_relationships:#{req.from_user_id}",
-            event: :friend_request_accepted,
-            userid: req.from_user_id,
-            accepter_id: req.to_user_id
-          }
-        )
+            PubSub.broadcast(
+              Teiserver.PubSub,
+              "account_user_relationships:#{req.from_user_id}",
+              %{
+                channel: "account_user_relationships:#{req.from_user_id}",
+                event: :friend_request_accepted,
+                userid: req.from_user_id,
+                accepter_id: req.to_user_id
+              }
+            )
 
-        :ok
+            :ok
+
+          {:error, changeset} ->
+            {:error, "Failed to create friendship: #{inspect(changeset.errors)}"}
+        end
 
       _ ->
         Account.delete_friend_request(req)
