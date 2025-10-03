@@ -43,8 +43,7 @@ defmodule Teiserver.Account.TOTPLibTest do
       last_used_integer: last_used_integer,
       last_used_utc: last_used_utc
     } do
-      assert {:ok, totp} = TOTPLib.set_last_used(user, last_used_integer)
-      assert totp.last_used == last_used_utc
+      assert :ok = TOTPLib.set_last_used(user.id, last_used_integer)
 
       db_totp = Repo.get_by(TOTP, user_id: user.id)
       assert db_totp.last_used == last_used_utc
@@ -52,7 +51,7 @@ defmodule Teiserver.Account.TOTPLibTest do
 
     test "does not update last_used for user without secret", %{user_without_totp: user} do
       last_used = "123456"
-      assert {:inactive, user} = TOTPLib.set_last_used(user, last_used)
+      assert :inactive = TOTPLib.set_last_used(user.id, last_used)
       assert :inactive = TOTPLib.get_user_totp_status(user.id)
     end
   end
@@ -60,16 +59,15 @@ defmodule Teiserver.Account.TOTPLibTest do
   describe "disable_totp/1" do
     setup [:users]
 
-    test "removes TOTP for user with TOTP", %{user_with_totp: user, secret: secret} do
-      {:ok, deleted_totp} = TOTPLib.disable_totp(user.id)
-      assert deleted_totp.secret == secret
+    test "removes TOTP for user with TOTP", %{user_with_totp: user} do
+      TOTPLib.disable_totp(user.id)
 
       db_totp = Repo.get_by(TOTP, user_id: user.id)
       assert db_totp == nil
     end
 
     test "handles user without secret", %{user_without_totp: user} do
-      assert {:ok, nil} = TOTPLib.disable_totp(user.id)
+      assert :ok = TOTPLib.disable_totp(user.id)
     end
   end
 
@@ -146,7 +144,7 @@ defmodule Teiserver.Account.TOTPLibTest do
       last_used_integer: last_used_integer,
       last_used_utc: last_used_utc
     } do
-      {:ok, _} = TOTPLib.set_last_used(user, last_used_integer)
+      :ok = TOTPLib.set_last_used(user.id, last_used_integer)
       assert TOTPLib.get_last_used_otp(user.id) == last_used_utc
     end
 

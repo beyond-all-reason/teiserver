@@ -104,25 +104,38 @@ defmodule Teiserver.Account.TOTPLib do
     set_totp(user_id, %{user_id: user_id, secret: secret})
   end
 
-  @spec set_last_used(User.t(), integer) ::
+  @spec set_last_used(integer, integer) ::
           {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()} | {:inactive, User.t()}
-  def set_last_used(%User{id: user_id} = user, last_used) do
+  def set_last_used(user_id, last_used) do
     if get_user_totp_status(user_id) == :active do
       {:ok, utc_datetime} = DateTime.from_unix(last_used, :second)
-      set_totp(user_id, %{user_id: user_id, last_used: utc_datetime})
+
+      case set_totp(user_id, %{user_id: user_id, last_used: utc_datetime}) do
+        {:ok, _} ->
+          :ok
+
+        {:error, changeset} ->
+          {:error, changeset}
+      end
     else
-      {:inactive, user}
+      :inactive
     end
   end
 
-  @spec disable_totp(integer) :: {:ok, TOTP.t() | nil} | {:error, Ecto.Changeset.t()}
+  @spec disable_totp(integer) :: :ok | :error
   def disable_totp(user_id) do
     case get_user_totp(user_id) do
       {:active, totp} ->
-        Repo.delete(totp)
+        case Repo.delete(totp) do
+          {:ok, _} ->
+            :ok
+
+          {:error, changeset} ->
+            {:error, changeset}
+        end
 
       {:inactive, _} ->
-        {:ok, nil}
+        :ok
     end
   end
 
@@ -140,7 +153,7 @@ defmodule Teiserver.Account.TOTPLib do
 
   @spec validate_totp(User.t(), String.t(), integer) ::
           {:ok, :valid | :grace} | {:error, :inactive | :invalid | :used | :locked}
-  def validate_totp(%User{id: user_id} = user, otp, time) do
+  def validate_totp(%User{id: user_id}, otp, time) do
     {status, totp} = get_user_totp(user_id)
 
     with :active <- status,
@@ -148,10 +161,10 @@ defmodule Teiserver.Account.TOTPLib do
          {:ok, info} <- validate_totp(totp.secret, otp, time, since: totp.last_used) do
       case info do
         :valid ->
-          set_last_used(user, time)
+          set_last_used(user_id, time)
 
         :grace ->
-          set_last_used(user, time - @grace)
+          set_last_used(user_id, time - @grace)
       end
 
       reset_wrong_otp_counter(totp)

@@ -109,7 +109,7 @@ defmodule Teiserver.Account do
   @spec set_secret(integer, binary) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
   defdelegate set_secret(user_id, secret), to: TOTPLib
 
-  @spec disable_totp(integer) :: {:ok, TOTP.t() | nil} | {:error, Ecto.Changeset.t()}
+  @spec disable_totp(integer) :: :ok | :error
   defdelegate disable_totp(user_id), to: TOTPLib
 
   @spec validate_totp(User.t() | binary, String.t()) ::
