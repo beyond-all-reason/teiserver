@@ -235,7 +235,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
           })
           |> Map.update!(:monitors, &MC.monitor(&1, pid, {:user, user_id}))
 
-        broadcast_update({:add_player, user_id, team, state})
+        TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
+        broadcast_update({:update, user_id, %{user_id => %{team: team}}}, state)
 
         {:reply, {:ok, self(), get_details_from_state(state)}, state}
     end
@@ -357,32 +358,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
     )
   end
 
-  defp broadcast_update({:add_player, user_id, team, state}) do
-    TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
-
+  defp broadcast_update({:update, user_id, updates}, state) do
     for {p_id, p} <- state.players, p_id != user_id do
       send(
         p.pid,
-        {:lobby, state.id, {:updated, [%{event: :add_player, id: user_id, team: team}]}}
+        {:lobby, state.id, {:updated, [%{event: :updated, updates: updates}]}}
       )
     end
 
     :ok
-  end
-
-  defp broadcast_update({:remove_player, user_id, player_changes, state}) do
-    TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
-
-    # TODO: a potential optimisation is to coalesce all these events into one
-    # all the :change_player can be merged into one single map change
-    events =
-      for {:player_moved, p_id, team} <- player_changes,
-          do: %{event: :change_player, id: p_id, team: team}
-
-    events = [%{event: :remove_player, id: user_id} | events]
-
-    for {_p_id, p} <- state.players,
-        do: send(p.pid, {:lobby, state.id, {:updated, events}})
   end
 
   # this function isn't too efficient, but it's never going to be run on
@@ -444,8 +428,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     # reorg the other players to keep the team indices consecutive
     # ally team won't change
-    {player_changes, updated_players} =
-      Enum.reduce(players, {[], %{}}, fn {p_id, p}, {player_changes, players} ->
+    changes =
+      Enum.reduce(players, [], fn {p_id, p}, changes ->
         {x, y, z} = p.team
 
         cond do
@@ -455,27 +439,33 @@ defmodule Teiserver.TachyonLobby.Lobby do
             # be moved back by 1
             team = {x, y - 1, z}
 
-            {[{:player_moved, p_id, team} | player_changes],
-             Map.put(players, p_id, %{p | team: team})}
+            [{p_id, %{team: team}} | changes]
 
           x == at_idx && y >= t_idx && z >= p_idx ->
             # similar there, but we only shuffle the players in the same team (archons)
             team = {x, y, z - 1}
 
-            {[{:player_moved, p_id, team} | player_changes],
-             Map.put(players, p_id, %{p | team: team})}
+            [{p_id, %{team: team}} | changes]
 
           true ->
-            {player_changes, Map.put(players, p_id, p)}
+            changes
         end
+      end)
+
+    updated_players =
+      Enum.reduce(changes, players, fn {p_id, %{team: team}}, ps ->
+        put_in(ps, [p_id, :team], team)
       end)
 
     state =
       Map.update!(state, :monitors, &MC.demonitor_by_val(&1, removed.id))
       |> Map.put(:players, updated_players)
 
-    if map_size(state.players) > 0,
-      do: broadcast_update({:remove_player, user_id, player_changes, state})
+    if map_size(state.players) > 0 do
+      TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
+      updates = Map.new(changes) |> Map.put(user_id, nil)
+      broadcast_update({:update, user_id, updates}, state)
+    end
 
     {:ok, state}
   end

@@ -78,12 +78,13 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "can join lobby" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
 
-      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _, details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
       assert details.members["other-user-id"].team == {1, 0, 0}
 
       assert_receive {:lobby, ^id,
-                      {:updated, [%{event: :add_player, id: "other-user-id", team: {1, 0, 0}}]}}
+                      {:updated,
+                       [%{event: :updated, updates: %{"other-user-id" => %{team: {1, 0, 0}}}}]}}
     end
 
     test "is idempotent" do
@@ -107,12 +108,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "participants get updated events on join" do
-      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
 
       assert_receive {:lobby, ^id,
-                      {:updated, [%{id: "user2", event: :add_player, team: {1, 0, 0}}]}}
+                      {:updated, [%{event: :updated, updates: %{"user2" => %{team: {1, 0, 0}}}}]}}
     end
   end
 
@@ -147,46 +148,42 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "leaving lobby send updates to remaining members" do
-      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
-      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
+      assert_received {:lobby, ^id, {:updated, [%{event: :updated}]}}
 
       :ok = Lobby.leave(id, "user2")
-      assert_received {:lobby, ^id, {:updated, [%{event: :remove_player, id: "user2"}]}}
+      assert_received {:lobby, ^id, {:updated, [%{event: :updated, updates: %{"user2" => nil}}]}}
     end
 
     test "reshuffling player on leave sends updates" do
-      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user3"), sink_pid)
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user4"), sink_pid)
 
-      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
-      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
-      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
+      assert_received {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      assert_received {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      assert_received {:lobby, ^id, {:updated, [%{event: :updated}]}}
 
       :ok = Lobby.leave(id, "user2")
-      assert_received {:lobby, ^id, {:updated, events}}
+      assert_received {:lobby, ^id, {:updated, [%{updates: updates}]}}
 
-      expected =
-        MapSet.new([
-          %{event: :remove_player, id: "user2"},
-          %{event: :change_player, id: "user4", team: {1, 0, 0}}
-        ])
+      expected = %{"user2" => nil, "user4" => %{team: {1, 0, 0}}}
 
-      assert expected == MapSet.new(events)
+      assert updates == expected
     end
 
     test "player pid dying means player is removed from lobby" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
-      assert_receive {:lobby, ^id, {:updated, [%{event: :add_player}]}}
+      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
 
       Process.exit(sink_pid, :kill)
-      assert_receive {:lobby, ^id, {:updated, [%{event: :remove_player, id: "user2"}]}}
+      assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: %{"user2" => nil}}]}}
     end
   end
 

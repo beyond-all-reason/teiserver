@@ -950,9 +950,26 @@ defmodule Teiserver.Player.TachyonHandler do
     {"lobby/updated", data}
   end
 
-  defp lobby_update_to_tachyon(lobby_id, %{event: :remove_player} = ev) do
-    data = %{id: lobby_id, members: %{to_string(ev.id) => nil}}
+  defp lobby_update_to_tachyon(lobby_id, %{event: :updated} = ev) do
+    members =
+      Enum.map(ev.updates, fn {p_id, updates} ->
+        {to_string(p_id), player_update_to_tachyon(p_id, updates)}
+      end)
+      |> Enum.into(%{})
+
+    data = %{id: lobby_id, members: members}
     {"lobby/updated", data}
+  end
+
+  defp player_update_to_tachyon(_p_id, nil), do: nil
+
+  defp player_update_to_tachyon(p_id, updates) do
+    case Map.get(updates, :team) do
+      nil -> %{}
+      t -> lobby_team_to_tachyon(t)
+    end
+    |> Map.put(:id, to_string(p_id))
+    |> Map.put(:type, :player)
   end
 
   # handle partial overview object
