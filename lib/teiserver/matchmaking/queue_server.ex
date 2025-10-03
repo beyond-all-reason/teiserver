@@ -248,6 +248,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
     queue = %{state.queue | engines: engines, games: games, maps: maps}
 
+    QueueRegistry.update_value(state.id, fn _ -> queue end)
+
     {:noreply, %{state | queue: queue}}
   end
 
