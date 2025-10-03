@@ -132,7 +132,7 @@
   </.menu_card>
 
   <.menu_card
-    :if={allow_any?(@conn, ~w(Server Admin))}
+    :if={allow_any?(@conn, ~w(Admin))}
     icon={Teiserver.AssetLib.icon()}
     url={~p"/teiserver/admin/asset"}
     size={:small}
