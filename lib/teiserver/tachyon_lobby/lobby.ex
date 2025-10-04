@@ -184,6 +184,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
+  @spec spectate(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
+  def spectate(lobby_id, user_id) do
+    GenServer.call(via_tuple(lobby_id), {:spectate, user_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
   @spec start_battle(id(), T.userid()) :: :ok | {:error, reason :: term()}
   def start_battle(lobby_id, user_id) do
     GenServer.call(via_tuple(lobby_id), {:start_battle, user_id})
@@ -354,6 +361,39 @@ defmodule Teiserver.TachyonLobby.Lobby do
             {:reply, {:ok, get_details_from_state(state)}, state}
         end
     end
+  end
+
+  def handle_call({:spectate, user_id}, _from, state)
+      when not is_map_key(state.players, user_id) and not is_map_key(state.spectators, user_id),
+      do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:spectate, user_id}, _from, state)
+      when is_map_key(state.spectators, user_id) do
+    {:reply, :ok, state}
+  end
+
+  def handle_call({:spectate, user_id}, _from, state) when is_map_key(state.players, user_id) do
+    changes = do_remove_player(user_id, state.players)
+
+    {spec, updated_players} =
+      Enum.reduce(changes, state.players, fn {p_id, team}, ps ->
+        put_in(ps, [p_id, :team], team)
+      end)
+      |> Map.pop!(user_id)
+
+    spec = spec |> Map.delete(:team) |> Map.put(:join_queue_position, nil)
+
+    state =
+      state
+      |> Map.put(:players, updated_players)
+      |> put_in([:spectators, user_id], spec)
+
+    change_map =
+      for({u_id, team} <- changes, do: {u_id, %{team: team}}, into: %{})
+      |> Map.put(user_id, %{team: nil, type: :spec})
+
+    broadcast_update({:update, nil, change_map}, state)
+    {:reply, :ok, state}
   end
 
   def handle_call({:start_battle, user_id}, _from, state)

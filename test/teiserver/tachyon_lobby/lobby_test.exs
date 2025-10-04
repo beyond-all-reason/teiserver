@@ -173,6 +173,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         event: :updated,
         updates: %{"user2" => %{team: {1, 0, 0}, type: :player, join_queue_position: nil}}
       }
+
       assert_receive {:lobby, ^id, {:updated, [^expected]}}
     end
 
@@ -308,6 +309,32 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       Process.exit(sink_pid, :kill)
       assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: %{"user2" => nil}}]}}
+    end
+  end
+
+  describe "spectate" do
+    test "must target valid lobby" do
+      {:error, :invalid_lobby} = Lobby.spectate("nolobby", "user1")
+    end
+
+    test "must be in lobby" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :not_in_lobby} = Lobby.spectate(id, "not in lobby")
+    end
+
+    test "works" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      :ok = Lobby.spectate(id, @default_user_id)
+      expected = %{@default_user_id => %{type: :spec, team: nil}}
+      assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: ^expected}]}}
+    end
+
+    test "is idempotent" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      :ok = Lobby.spectate(id, @default_user_id)
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.spectate(id, @default_user_id)
+      refute_receive _, 30
     end
   end
 

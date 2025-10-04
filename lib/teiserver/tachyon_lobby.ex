@@ -59,6 +59,9 @@ defmodule Teiserver.TachyonLobby do
           {:ok, lobby_pid :: pid(), details()} | {:error, reason :: term()}
   defdelegate join(lobby_id, join_data, pid \\ self()), to: Lobby
 
+  @spec spectate(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
+  defdelegate spectate(lobby_id, user_id), to: Lobby
+
   @spec leave(id(), T.userid()) :: :ok | {:error, reason :: term()}
   defdelegate leave(lobby_id, user_id), to: Lobby
 

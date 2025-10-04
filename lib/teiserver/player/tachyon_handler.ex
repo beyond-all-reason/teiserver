@@ -686,6 +686,19 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/spectate", "request", _msg_id, _msg, state) do
+    case Player.Session.lobby_spectate(state.user.id) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} when reason in [:not_in_lobby] ->
+        {:error_response, reason, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
     case Player.Session.start_lobby_battle(state.user.id) do
       :ok ->
@@ -908,7 +921,7 @@ defmodule Teiserver.Player.TachyonHandler do
   defp lobby_details_to_tachyon(details) do
     members =
       Enum.map(details.members, fn {m_id, m} ->
-        {to_string(m_id), member_update_to_tachyon(m_id, m, true)}
+        {to_string(m_id), member_update_to_tachyon(to_string(m_id), m, true)}
       end)
       |> Map.new()
 
@@ -944,7 +957,7 @@ defmodule Teiserver.Player.TachyonHandler do
   defp lobby_update_to_tachyon(lobby_id, %{event: :updated} = ev) do
     members =
       Enum.map(ev.updates, fn {p_id, updates} ->
-        {to_string(p_id), member_update_to_tachyon(p_id, updates, false)}
+        {to_string(p_id), member_update_to_tachyon(to_string(p_id), updates, false)}
       end)
       |> Enum.into(%{})
 
@@ -959,11 +972,18 @@ defmodule Teiserver.Player.TachyonHandler do
 
   defp member_update_to_tachyon(m_id, updates, omit_nil?) do
     base =
-      case Map.get(updates, :team) do
-        nil -> %{}
-        t -> lobby_team_to_tachyon(t)
+      if is_map_key(updates, :team) do
+        val = updates.team
+
+        cond do
+          val == nil && omit_nil? -> %{}
+          val == nil -> %{allyTeam: nil, team: nil, player: nil}
+          true -> lobby_team_to_tachyon(val)
+        end
+      else
+        %{}
       end
-      |> Map.put(:id, to_string(m_id))
+      |> Map.put(:id, m_id)
 
     other_keys = [{:type, :type}, {:join_queue_position, :joinQueuePosition}]
 

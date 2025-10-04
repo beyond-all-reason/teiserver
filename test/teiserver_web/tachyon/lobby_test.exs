@@ -116,6 +116,24 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "spectate" do
+    setup [:setup_lobby]
+
+    test "works", %{client: client, user: user} do
+      %{"status" => "success"} = Tachyon.spectate!(client)
+
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+
+      user_id = to_string(user.id)
+
+      %{
+        "members" => %{
+          ^user_id => %{"type" => "spec", "allyTeam" => nil, "team" => nil, "player" => nil}
+        }
+      } = data
+    end
+  end
+
   describe "start battle" do
     setup [
       {Tachyon, :setup_app},
