@@ -131,10 +131,17 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
 
     test "can start battle", ctx do
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], ctx[:lobby_id])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
+
       Tachyon.send_request(ctx[:client], "lobby/startBattle", %{id: ctx[:lobby_id]})
 
       %{"commandId" => "autohost/start"} =
         start_req = Tachyon.recv_message!(ctx[:autohost_client])
+
+      uid2 = to_string(ctx2[:user].id)
+      [%{"userId" => ^uid2}] = start_req["data"]["spectators"]
 
       start_req_response = %{
         port: 32781,

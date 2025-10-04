@@ -375,7 +375,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         map: %{springName: state.map_name}
       }
 
-      for {p_id, p} <- state.players,
+      for {p_id, p} <- Enum.concat(state.players, state.spectators),
           do: Player.lobby_battle_start(p_id, battle_data, start_data, p.password)
 
       now = DateTime.utc_now()
@@ -671,7 +671,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
       gameName: state.game_version,
       mapName: state.map_name,
       startPosType: :ingame,
-      allyTeams: ally_teams
+      allyTeams: ally_teams,
+      spectators:
+        Enum.map(state.spectators, fn {_s_id, s} ->
+          %{userId: to_string(s.id), name: s.name, password: s.name}
+        end)
     }
   end
 end
