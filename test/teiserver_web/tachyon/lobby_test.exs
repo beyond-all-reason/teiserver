@@ -133,6 +133,27 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "join queue" do
+    setup [:setup_lobby]
+
+    test "works", %{client: client, lobby_id: lobby_id} do
+      {:ok, ctx2} = Tachyon.setup_client()
+      {:ok, ctx3} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(client)
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx3[:client], lobby_id)
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(client)
+
+      Tachyon.lobby_join_queue!(ctx2[:client])
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+      assert is_map_key(data["players"], to_string(ctx2[:user].id))
+
+      Tachyon.lobby_join_queue!(ctx3[:client])
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+      assert is_map_key(data["spectators"], to_string(ctx3[:user].id))
+    end
+  end
+
   describe "start battle" do
     setup [
       {Tachyon, :setup_app},
