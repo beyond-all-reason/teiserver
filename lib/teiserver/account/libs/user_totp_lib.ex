@@ -197,7 +197,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec validate_totp(binary, String.t(), integer(), keyword()) ::
+  @spec validate_totp(binary(), String.t(), integer(), keyword()) ::
           {:ok, :valid | :grace} | {:error, :invalid | :used}
   defp validate_totp(secret, otp, time, since: nil) do
     validate_totp(secret, otp, time)
