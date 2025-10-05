@@ -392,6 +392,118 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "wait queue" do
+    test "with invalid lobby" do
+      {:error, :invalid_lobby} = Lobby.join_queue("not-a-lobby", "user1")
+    end
+
+    test "not in lobby" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :not_in_lobby} = Lobby.join_queue(id, "not in lobby")
+    end
+
+    test "can immediately join when spot available" do
+      %{id: id} = setup_full_lobby()
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{players: %{"2" => %{team: {1, 0, 0}}}} = updates
+    end
+
+    test "is idempotent" do
+      %{id: id} = setup_full_lobby()
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert is_map_key(details.players, "2")
+      assert %{players: %{"2" => %{team: {1, 0, 0}}}} = updates
+      :ok = Lobby.join_queue(id, "2")
+      refute_receive _, 30
+    end
+
+    test "join wait queue when full" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      :ok = Lobby.join_queue(id, "4")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"4" => %{join_queue_position: 2}}} = updates
+    end
+
+    test "join team when player become spectator" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      :ok = Lobby.spectate(id, "2")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+
+      assert %{spectators: %{"3" => nil}, players: %{"3" => %{team: {1, 0, 0}}}} = updates
+    end
+
+    test "join team when player leaves the lobby" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      :ok = Lobby.leave(id, "2")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+
+      assert %{players: %{"2" => nil, "3" => %{team: {1, 0, 0}}}} = updates
+    end
+
+    test "join team when player disappear" do
+      %{id: id} = ctx = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      Process.unlink(ctx[:users]["2"].pid)
+      Process.exit(ctx[:users]["2"].pid, :kill)
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+
+      assert %{players: %{"3" => %{team: {1, 0, 0}}, "2" => nil}} = updates
+    end
+
+    test "spec queue positions works" do
+      %{id: id} = ctx = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      :ok = Lobby.join_queue(id, "4")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"4" => %{join_queue_position: 2}}} = updates
+
+      # make sure that user2 rejoining is put at the back of the queue
+      :ok = Lobby.leave(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      {:ok, _, _} = Lobby.join(id, ctx.users["2"])
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"2" => %{join_queue_position: 3}}} = updates
+    end
+  end
+
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the
   # teiserver_web/tachyon/lobby_test.exs file
@@ -481,5 +593,39 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   defp mk_player(user_id) do
     %{id: user_id, name: "name-#{user_id}"}
+  end
+
+  # create a lobby with a few specs already in. Simplify the logic when
+  # it comes to testing in-lobby interaction
+  defp setup_full_lobby(teams \\ [2, 2]) do
+    {:ok, lobby_pid, %{id: id}} = mk_start_params(teams) |> Lobby.create()
+
+    users =
+      Enum.map([2, 3, 4, 5], fn i ->
+        {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+        player_id = to_string(i)
+        player = mk_player(player_id)
+        {:ok, _, _details} = Lobby.join(id, player, sink_pid)
+        {to_string(i), Map.put(player, :pid, sink_pid)}
+      end)
+      |> Map.new()
+
+    {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+    assert map_size(details.players) == 1
+    assert map_size(details.spectators) == 4
+
+    # after getting the details, it should be guaranteed that all updates are
+    # in the inbox, so no need to wait
+    drain_msg_queue()
+
+    %{lobby_pid: lobby_pid, id: id, users: users, details: details}
+  end
+
+  defp drain_msg_queue(timeout \\ 0, acc \\ []) do
+    receive do
+      msg -> drain_msg_queue(timeout, [msg | acc])
+    after
+      timeout -> Enum.reverse(acc)
+    end
   end
 end
