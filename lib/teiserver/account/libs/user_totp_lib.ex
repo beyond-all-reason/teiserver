@@ -1,11 +1,12 @@
 defmodule Teiserver.Account.TOTPLib do
   use TeiserverWeb, :library
   alias Teiserver.Account.{User, TOTP}
+  alias Teiserver.Data.Types, as: T
 
-  @grace 5
+  @otp_grace_time 5
   @allowed_invalid_attempts 5
 
-  @spec get_user_totp(integer) :: {:inactive, nil} | {:active, TOTP.t()}
+  @spec get_user_totp(T.userid()) :: {:inactive, nil} | {:active, TOTP.t()}
   defp get_user_totp(user_id) do
     case Repo.get_by(TOTP, user_id: user_id) do
       nil ->
@@ -16,13 +17,13 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_user_totp_status(integer) :: :active | :inactive
+  @spec get_user_totp_status(T.userid() | TOTP.t()) :: :active | :inactive
   def get_user_totp_status(user_id) do
     {status, _totp} = get_user_totp(user_id)
     status
   end
 
-  @spec get_account_locked(integer) :: boolean
+  @spec get_account_locked(T.userid()) :: boolean()
   def get_account_locked(user_id) do
     {_status, totp} = get_user_totp(user_id)
 
@@ -38,7 +39,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_or_generate_secret(integer) :: {:new | :existing, binary()}
+  @spec get_or_generate_secret(T.userid()) :: {:new | :existing, binary()}
   def get_or_generate_secret(user_id) do
     case get_user_totp(user_id) do
       {:inactive, nil} ->
@@ -49,7 +50,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_user_secret(integer) :: binary | nil
+  @spec get_user_secret(T.userid()) :: :inactive | binary() | nil
   def get_user_secret(user_id) do
     case get_user_totp(user_id) do
       {:inactive, nil} ->
@@ -60,7 +61,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_last_used_otp(integer) :: :inactive | DateTime.t()
+  @spec get_last_used_otp(T.userid()) :: :inactive | DateTime.t()
   def get_last_used_otp(user_id) do
     case get_user_totp(user_id) do
       {:inactive, nil} ->
@@ -71,23 +72,19 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec set_totp(nil, map()) ::
+  @spec set_totp(TOTP.t() | T.userid() | nil, map()) ::
           {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
   defp set_totp(nil, _attrs) do
     changeset = TOTP.changeset(%TOTP{}, %{})
     {:error, %{changeset | errors: [user: {"user must be persisted", []}]}}
   end
 
-  @spec set_totp(TOTP.t(), map()) ::
-          {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
   defp set_totp(%TOTP{} = totp, attrs) do
     totp
     |> TOTP.changeset(attrs)
     |> Repo.update()
   end
 
-  @spec set_totp(integer, map()) ::
-          {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
   defp set_totp(user_id, attrs) do
     case get_user_totp(user_id) do
       {:inactive, nil} ->
@@ -99,12 +96,12 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec set_secret(integer, binary) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
+  @spec set_secret(T.userid(), binary()) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
   def set_secret(user_id, secret) do
     set_totp(user_id, %{user_id: user_id, secret: secret})
   end
 
-  @spec set_last_used(integer, integer) ::
+  @spec set_last_used(T.userid(), integer()) ::
           {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()} | {:inactive, User.t()}
   def set_last_used(user_id, last_used) do
     if get_user_totp_status(user_id) == :active do
@@ -122,7 +119,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec disable_totp(integer) :: :ok | :error
+  @spec disable_totp(T.userid()) :: :ok | :error
   def disable_totp(user_id) do
     case get_user_totp(user_id) do
       {:active, totp} ->
@@ -151,7 +148,7 @@ defmodule Teiserver.Account.TOTPLib do
 
   def validate_totp(user_or_secret, otp, time \\ System.os_time(:second))
 
-  @spec validate_totp(User.t(), String.t(), integer) ::
+  @spec validate_totp(User.t(), String.t(), integer()) ::
           {:ok, :valid | :grace} | {:error, :inactive | :invalid | :used | :locked}
   def validate_totp(%User{id: user_id}, otp, time) do
     {status, totp} = get_user_totp(user_id)
@@ -164,11 +161,11 @@ defmodule Teiserver.Account.TOTPLib do
           set_last_used(user_id, time)
 
         :grace ->
-          set_last_used(user_id, time - @grace)
+          set_last_used(user_id, time - @otp_grace_time)
       end
 
       reset_wrong_otp_counter(totp)
-      {:ok, info}
+      :ok
     else
       :inactive ->
         {:error, :inactive}
@@ -187,13 +184,12 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec validate_totp(binary, String.t(), integer) :: {:ok, :valid | :grace} | {:error, :invalid}
   def validate_totp(secret, otp, time) do
     cond do
       NimbleTOTP.valid?(secret, otp, time: time) ->
         {:ok, :valid}
 
-      NimbleTOTP.valid?(secret, otp, time: time - @grace) ->
+      NimbleTOTP.valid?(secret, otp, time: time - @otp_grace_time) ->
         {:ok, :grace}
 
       true ->
@@ -201,20 +197,18 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec validate_totp(binary, String.t(), integer, keyword()) ::
-          {:ok, :valid | :grace} | {:error, :invalid}
+  @spec validate_totp(binary, String.t(), integer(), keyword()) ::
+          {:ok, :valid | :grace} | {:error, :invalid | :used}
   defp validate_totp(secret, otp, time, since: nil) do
     validate_totp(secret, otp, time)
   end
 
-  @spec validate_totp(binary, String.t(), integer, keyword()) ::
-          {:ok, :valid | :grace} | {:error, :invalid | :used}
   defp validate_totp(secret, otp, time, since: last_used) do
     cond do
       NimbleTOTP.valid?(secret, otp, time: time, since: last_used) ->
         {:ok, :valid}
 
-      NimbleTOTP.valid?(secret, otp, time: time - @grace, since: last_used) ->
+      NimbleTOTP.valid?(secret, otp, time: time - @otp_grace_time, since: last_used) ->
         {:ok, :grace}
 
       true ->
@@ -230,7 +224,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec generate_otpauth_uri(String.t(), binary) :: String.t()
+  @spec generate_otpauth_uri(String.t(), binary()) :: String.t()
   def generate_otpauth_uri(name, secret) do
     NimbleTOTP.otpauth_uri("BAR:#{name}", secret, issuer: "Beyond All Reason")
   end

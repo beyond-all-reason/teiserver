@@ -97,6 +97,9 @@ defmodule Teiserver.Account do
   @spec get_user_totp_status(integer) :: :active | :inactive
   defdelegate get_user_totp_status(user_id), to: TOTPLib
 
+  @spec get_account_locked(integer) :: boolean()
+  defdelegate get_account_locked(user_id), to: TOTPLib
+
   @spec get_or_generate_secret(integer) :: {:new | :existing, binary()}
   defdelegate get_or_generate_secret(user_id), to: TOTPLib
 

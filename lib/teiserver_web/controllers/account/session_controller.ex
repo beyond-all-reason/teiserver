@@ -61,7 +61,7 @@ defmodule TeiserverWeb.Account.SessionController do
     user = UserLib.get_user(user_id)
 
     case Account.validate_totp(user, otp) do
-      {:ok, _} ->
+      :ok ->
         delete_session(conn, :pending_2fa_user_id)
         login_reply({:ok, user}, conn)
 

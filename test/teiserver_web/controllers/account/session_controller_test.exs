@@ -5,7 +5,6 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
   alias Teiserver.Account
   alias Teiserver.Account.Guardian
   alias Teiserver.Config
-  alias Phoenix.ConnTest
 
   describe "login" do
     setup do

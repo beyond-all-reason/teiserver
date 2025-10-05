@@ -165,10 +165,10 @@ defmodule Teiserver.Account.TOTPLibTest do
       secret: secret
     } do
       otp = NimbleTOTP.verification_code(secret, time: 30)
-      assert {:ok, :valid} = TOTPLib.validate_totp(user, otp, 30)
+      assert :ok = TOTPLib.validate_totp(user, otp, 30)
       assert {:error, :used} = TOTPLib.validate_totp(user, otp, 31)
       otp = NimbleTOTP.verification_code(secret, time: 90)
-      assert {:ok, :valid} = TOTPLib.validate_totp(user, otp, 90)
+      assert :ok = TOTPLib.validate_totp(user, otp, 90)
     end
 
     test "allows otp to be used up to 5 seconds after it runs out", %{
@@ -176,7 +176,7 @@ defmodule Teiserver.Account.TOTPLibTest do
       secret: secret
     } do
       otp = NimbleTOTP.verification_code(secret, time: 30)
-      assert {:ok, :grace} = TOTPLib.validate_totp(user, otp, 64)
+      assert :ok = TOTPLib.validate_totp(user, otp, 64)
       assert {:error, :invalid} = TOTPLib.validate_totp(user, otp, 65)
     end
 
