@@ -455,6 +455,11 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, :spectate})
   end
 
+  @spec lobby_join_queue(T.userid()) :: :ok | {:error, reason :: term()}
+  def lobby_join_queue(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :join_queue})
+  end
+
   @spec lobby_start_battle(T.userid()) :: :ok | {:error, reason :: term}
   def lobby_start_battle(user_id) do
     GenServer.call(via_tuple(user_id), {:lobby, :start_battle})
@@ -919,6 +924,13 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:lobby, :spectate}, _from, state) do
     {:reply, TachyonLobby.spectate(state.lobby.id, state.user.id), state}
+  end
+
+  def handle_call({:lobby, :join_queue}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :join_queue}, _from, state) do
+    {:reply, TachyonLobby.join_queue(state.lobby.id, state.user.id), state}
   end
 
   def handle_call({:lobby, :leave}, _from, state) when is_nil(state.lobby),

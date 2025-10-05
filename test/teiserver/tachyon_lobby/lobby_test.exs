@@ -243,22 +243,25 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:error, :not_in_lobby} = Lobby.leave(id, "user2")
     end
 
-    @tag :skip
     test "can leave lobby" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user3"), self())
-      {:ok, _pid, details} = Lobby.join(id, mk_player("user4"), self())
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user4"), self())
 
-      # user 2 and 4 should be on the same team
-      assert details.members["user2"].team == {1, 0, 0}
-      assert details.members["user4"].team == {1, 1, 0}
-      :ok = Lobby.leave(id, "user2")
+      {:ok, _details} = Lobby.join_ally_team(id, "user3", 1)
+      {:ok, details} = Lobby.join_ally_team(id, "user4", 1)
+
+      # user 3 and 4 should be on the same team
+      assert details.players["user3"].team == {1, 0, 0}
+      assert details.players["user4"].team == {1, 1, 0}
+      :ok = Lobby.leave(id, "user3")
 
       # join again to get the details
-      {:ok, _pid, details} = Lobby.join(id, mk_player("user2"), self())
-      assert details.members["user4"].team == {1, 0, 0}
-      assert details.members["user2"].team == {1, 1, 0}
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user3"), self())
+      {:ok, details} = Lobby.join_ally_team(id, "user3", 1)
+      assert details.players["user4"].team == {1, 0, 0}
+      assert details.players["user3"].team == {1, 1, 0}
     end
 
     test "can leave lobby and rejoin" do
