@@ -69,10 +69,10 @@ defmodule TeiserverWeb.Account.SessionController do
         flash_message =
           case reason do
             :used ->
-              "OTP has already been used."
+              "Code has already been used."
 
             :invalid ->
-              "Invalid OTP."
+              "Invalid code."
 
             :locked ->
               login_reply(
@@ -82,7 +82,7 @@ defmodule TeiserverWeb.Account.SessionController do
               )
 
             _ ->
-              "There was a problem verifying the OTP."
+              "There was a problem verifying the code."
           end
 
         conn
