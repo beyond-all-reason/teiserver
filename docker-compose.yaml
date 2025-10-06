@@ -47,6 +47,7 @@ services:
       # Dev settings
       MIX_ENV: dev
       GENERATE_FAKE_DATA: "false"
+      IN_DOCKER: "true"
     ports:
       - "4000:4000" # HTTP
       - "8080:8080" # HTTP

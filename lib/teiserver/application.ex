@@ -12,7 +12,11 @@ defmodule Teiserver.Application do
 
   @impl true
   def start(_type, _args) do
-    LoggerBackends.add(LoggerBackends.Console)
+    # Skip console logger in Docker to avoid duplicate logs (Docker captures stdout already)
+    unless System.get_env("IN_DOCKER") == "true" do
+      LoggerBackends.add(LoggerBackends.Console)
+    end
+
     LoggerBackends.add({LoggerFileBackend, :error_log})
     LoggerBackends.add({LoggerFileBackend, :notice_log})
     LoggerBackends.add({LoggerFileBackend, :info_log})
