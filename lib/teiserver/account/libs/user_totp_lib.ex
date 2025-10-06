@@ -3,7 +3,6 @@ defmodule Teiserver.Account.TOTPLib do
   alias Teiserver.Account.{User, TOTP}
   alias Teiserver.Data.Types, as: T
 
-  @otp_grace_time 5
   @allowed_invalid_attempts 5
 
   @spec get_user_totp(T.userid()) :: {:inactive, nil} | {:active, TOTP.t()}
@@ -149,21 +148,13 @@ defmodule Teiserver.Account.TOTPLib do
   def validate_totp(user_or_secret, otp, time \\ System.os_time(:second))
 
   @spec validate_totp(User.t(), String.t(), integer()) ::
-          {:ok, :valid | :grace} | {:error, :inactive | :invalid | :used | :locked}
+          :ok | {:error, :inactive | :invalid | :used | :locked}
   def validate_totp(%User{id: user_id}, otp, time) do
     {status, totp} = get_user_totp(user_id)
 
     with :active <- status,
          false <- get_account_locked(user_id),
-         {:ok, info} <- validate_totp(totp.secret, otp, time, since: totp.last_used) do
-      case info do
-        :valid ->
-          set_last_used(user_id, time)
-
-        :grace ->
-          set_last_used(user_id, time - @otp_grace_time)
-      end
-
+         :ok <- validate_totp(totp.secret, otp, time, since: totp.last_used) do
       reset_wrong_otp_counter(totp)
       :ok
     else
@@ -187,10 +178,7 @@ defmodule Teiserver.Account.TOTPLib do
   def validate_totp(secret, otp, time) do
     cond do
       NimbleTOTP.valid?(secret, otp, time: time) ->
-        {:ok, :valid}
-
-      NimbleTOTP.valid?(secret, otp, time: time - @otp_grace_time) ->
-        {:ok, :grace}
+        :ok
 
       true ->
         {:error, :invalid}
@@ -206,10 +194,7 @@ defmodule Teiserver.Account.TOTPLib do
   defp validate_totp(secret, otp, time, since: last_used) do
     cond do
       NimbleTOTP.valid?(secret, otp, time: time, since: last_used) ->
-        {:ok, :valid}
-
-      NimbleTOTP.valid?(secret, otp, time: time - @otp_grace_time, since: last_used) ->
-        {:ok, :grace}
+        :ok
 
       true ->
         # Second test is needed. If :since is provided and NimbleTOTP.valid? returns false, it could either be that the OTP is wrong, or that it got used.
