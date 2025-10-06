@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Account.SecurityController do
     {_status, decoded_secret} = Base.decode32(totp_params["secret"])
 
     case Account.validate_totp(decoded_secret, totp_params["otp"]) do
-      {:ok, _} ->
+      :ok ->
         Account.set_secret(user.id, decoded_secret)
 
         conn

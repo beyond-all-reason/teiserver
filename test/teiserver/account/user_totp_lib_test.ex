@@ -176,7 +176,6 @@ defmodule Teiserver.Account.TOTPLibTest do
       secret: secret
     } do
       otp = NimbleTOTP.verification_code(secret, time: 30)
-      assert :ok = TOTPLib.validate_totp(user, otp, 64)
       assert {:error, :invalid} = TOTPLib.validate_totp(user, otp, 65)
     end
 

@@ -155,6 +155,7 @@ defmodule Teiserver.Account.TOTPLib do
     with :active <- status,
          false <- get_account_locked(user_id),
          :ok <- validate_totp(totp.secret, otp, time, since: totp.last_used) do
+      set_last_used(user_id, time)
       reset_wrong_otp_counter(totp)
       :ok
     else
@@ -186,7 +187,7 @@ defmodule Teiserver.Account.TOTPLib do
   end
 
   @spec validate_totp(binary(), String.t(), integer(), keyword()) ::
-          {:ok, :valid | :grace} | {:error, :invalid | :used}
+          :ok | {:error, :invalid | :used}
   defp validate_totp(secret, otp, time, since: nil) do
     validate_totp(secret, otp, time)
   end
