@@ -10,6 +10,7 @@ defmodule Teiserver.Moderation.ReportGroup do
     field :report_count, :integer, default: 0
     field :vote_count, :integer, default: 0
     field :action_count, :integer, default: 0
+    field :discord_message_id, :integer
 
     has_many :actions, Teiserver.Moderation.Action
     has_many :reports, Teiserver.Moderation.Report

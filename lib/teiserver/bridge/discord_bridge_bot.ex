@@ -304,79 +304,102 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       end
 
     if channel do
-      report = Moderation.get_report!(report.id, preload: [:reporter, :target])
+      report_group = Moderation.get_report_group!(report.id, preload: [:reporter, :target])
 
-      host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-      url = "https://#{host}/moderation/report?target_id=#{report.target_id}"
+      if length(report_group) > 1 do
+        report_group_first = hd(report_group)
 
-      match_icon =
-        cond do
-          report.match_id == nil -> ""
-          true -> ":crossed_swords:"
+        case Communication.get_discord_message(channel, report_group_first.discord_message_id) do
+          {:ok, msg} ->
+            String.replace(
+              msg.content,
+              ~r/\*\*Group amount:\*\* (\d+)/,
+              "**Group amount: #{length(report_group)}"
+            )
+
+          {:error, reason} ->
+            Logger.warning("Report message #{report.discord_message_id} was not found: #{reason}")
+            :error
         end
+      else
+        report = Moderation.get_report!(report.id, preload: [:reporter, :target])
 
-      outstanding_count =
-        Moderation.list_outstanding_reports_against_user(report.target_id)
-        |> Enum.count()
+        host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+        # url = "https://#{host}/moderation/report?target_id=#{report.target_id}"
+        url = "https://#{host}/moderation/overwatch/report_group/#{report_group.id}"
 
-      outstanding_msg =
-        cond do
-          outstanding_count > 5 ->
-            "**Outstanding count:** #{outstanding_count} :warning:"
+        match_icon =
+          cond do
+            report.match_id == nil -> ""
+            true -> ":crossed_swords:"
+          end
 
-          outstanding_count > 1 ->
-            "**Outstanding count:** #{outstanding_count}"
+        outstanding_count =
+          Moderation.list_outstanding_reports_against_user(report.target_id)
+          |> Enum.count()
 
-          true ->
-            ""
+        #        outstanding_msg =
+        #          cond do
+        #            outstanding_count > 5 ->
+        #              "**Outstanding count:** #{outstanding_count} :warning:"
+        #
+        #            outstanding_count > 1 ->
+        #              "**Outstanding count:** #{outstanding_count}"
+        #
+        #            true ->
+        #              ""
+        #          end
+
+        msg =
+          [
+            "# [Moderation report #{report.type}/#{report.sub_type}](#{url})#{match_icon}",
+            "**Target:** [#{report.target.name}](https://#{host}/moderation/report/user/#{report.target.id})",
+            "**Reporter:** [#{report.reporter.name}](https://#{host}/moderation/report/user/#{report.reporter.id})",
+            "**Reason:** #{format_link(report.extra_text)}",
+            "**Status:** Open",
+            "**Group amount: ** 1"
+          ]
+
+        reports =
+          if is_nil(report.match_id) do
+            []
+          else
+            Moderation.list_reports(
+              search: [match_id: report.match_id, type: report.type],
+              order_by: "Oldest first"
+            )
+          end
+
+        msg =
+          with true <- length(reports) > 1,
+               first_report <- hd(reports),
+               false <- is_nil(first_report.discord_message_id) do
+            first_report_link =
+              "<##{first_report.discord_message_id}>"
+
+            msg ++ ["**First report:** #{first_report_link}"]
+          else
+            _ -> msg
+          end
+
+        msg =
+          (msg ++ ["#{outstanding_msg}"])
+          |> Enum.join("\n")
+
+        {status, message_data} = Communication.new_discord_message(channel, msg)
+
+        if status == :ok do
+          message_id = message_data.id
+          Moderation.update_report(report, %{discord_message_id: message_id})
+
+          if length(reports) > 1,
+            do: Communication.create_discord_reaction(channel, message_id, "🔼")
         end
-
-      msg =
-        [
-          "# [Moderation report #{report.type}/#{report.sub_type}](#{url})#{match_icon}",
-          "**Target:** [#{report.target.name}](https://#{host}/moderation/report/user/#{report.target.id})",
-          "**Reporter:** [#{report.reporter.name}](https://#{host}/moderation/report/user/#{report.reporter.id})",
-          "**Reason:** #{format_link(report.extra_text)}",
-          "**Status:** Open"
-        ]
-
-      reports =
-        if is_nil(report.match_id) do
-          []
-        else
-          Moderation.list_reports(
-            search: [match_id: report.match_id, type: report.type],
-            order_by: "Oldest first"
-          )
-        end
-
-      msg =
-        with true <- length(reports) > 1,
-             first_report <- hd(reports),
-             false <- is_nil(first_report.discord_message_id) do
-          first_report_link =
-            "https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{first_report.discord_message_id}"
-
-          msg ++ ["**First report:** #{first_report_link}"]
-        else
-          _ -> msg
-        end
-
-      msg =
-        (msg ++ ["#{outstanding_msg}"])
-        |> Enum.join("\n")
-
-      {status, message_data} = Communication.new_discord_message(channel, msg)
-
-      if status == :ok do
-        message_id = message_data.id
-        Moderation.update_report(report, %{discord_message_id: message_id})
-
-        if length(reports) > 1,
-          do: Communication.create_discord_reaction(channel, message_id, "🔼")
       end
     end
   end
+
+  # TODO: add update_report_group(Moderation.ReportGroup.t())
 
   @spec update_report(Moderation.Report.t()) :: any
   def update_report(%{discord_message_id: nil}), do: :ok
@@ -394,54 +417,56 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     if channel do
       case Communication.get_discord_message(channel, report.discord_message_id) do
         {:ok, msg} ->
-          {new_content, reactions} =
-            if not is_nil(report.result_id) do
-              new_content =
-                cond do
-                  report.closed ->
-                    String.replace(
-                      msg.content,
-                      "**Status:** Closed :file_folder:",
-                      "**Status:** Actioned :hammer:"
-                    )
+          if not String.contains?(msg, "**Group amount:**") do
+            {new_content, reactions} =
+              if not is_nil(report.result_id) do
+                new_content =
+                  cond do
+                    report.closed ->
+                      String.replace(
+                        msg.content,
+                        "**Status:** Closed :file_folder:",
+                        "**Status:** Actioned :hammer:"
+                      )
 
-                  true ->
+                    true ->
+                      String.replace(
+                        msg.content,
+                        "**Status:** Open",
+                        "**Status:** Actioned :hammer:"
+                      )
+                  end
+
+                {new_content, [delete: "📁", create: "🔨"]}
+              else
+                if report.closed do
+                  {
                     String.replace(
                       msg.content,
                       "**Status:** Open",
-                      "**Status:** Actioned :hammer:"
-                    )
+                      "**Status:** Closed :file_folder:"
+                    ),
+                    [create: "📁"]
+                  }
+                else
+                  {
+                    String.replace(
+                      msg.content,
+                      "**Status:** Closed :file_folder:",
+                      "**Status:** Open"
+                    ),
+                    [delete: "📁"]
+                  }
                 end
-
-              {new_content, [delete: "📁", create: "🔨"]}
-            else
-              if report.closed do
-                {
-                  String.replace(
-                    msg.content,
-                    "**Status:** Open",
-                    "**Status:** Closed :file_folder:"
-                  ),
-                  [create: "📁"]
-                }
-              else
-                {
-                  String.replace(
-                    msg.content,
-                    "**Status:** Closed :file_folder:",
-                    "**Status:** Open"
-                  ),
-                  [delete: "📁"]
-                }
               end
-            end
 
-          Enum.each(reactions, fn {action, emoji} ->
-            case action do
-              :create -> Communication.create_discord_reaction(channel, msg.id, emoji)
-              :delete -> Communication.delete_discord_reaction(channel, msg.id, emoji)
-            end
-          end)
+            Enum.each(reactions, fn {action, emoji} ->
+              case action do
+                :create -> Communication.create_discord_reaction(channel, msg.id, emoji)
+                :delete -> Communication.delete_discord_reaction(channel, msg.id, emoji)
+              end
+            end)
+          end
 
           if msg.content != new_content,
             do: Communication.edit_discord_message(channel, msg.id, new_content)

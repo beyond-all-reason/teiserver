@@ -262,6 +262,9 @@ defmodule Teiserver.Communication do
           map | nil | {:error, String.t()}
   defdelegate delete_discord_reaction(channel_id, message_id, emoji), to: DiscordChannelLib
 
+  @spec discord_emoji(String.t(), non_neg_integer) :: Nostrum.Struct.Emoji.t()
+  defdelegate discord_emoji(emoji_name, emoji_id), to: DiscordChannelLib
+
   @doc """
   Returns true if we are using discord in this environment and false if we are not.
   """
