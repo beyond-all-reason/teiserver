@@ -229,11 +229,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
           {:error, "No channel found"}
 
         channel_id ->
-          try do
-            Nostrum.Api.Message.edit(channel_id, message_id, content: new_message)
-          rescue
-            e -> {:error, e}
-          end
+          Nostrum.Api.Message.edit(channel_id, message_id, content: new_message)
       end
     else
       {:error, :discord_disabled}
