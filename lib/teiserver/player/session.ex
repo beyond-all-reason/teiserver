@@ -467,7 +467,10 @@ defmodule Teiserver.Player.Session do
 
   @impl true
   def handle_call({:replace, new_conn_pid}, _from, state) do
-    monitors = MC.demonitor_by_val(state.monitors, :connection, [:flush])
+    monitors =
+      MC.demonitor_by_val(state.monitors, :connection, [:flush])
+      |> MC.monitor(new_conn_pid, :connection)
+
     Logger.info("session reused")
 
     {current_party, invited_to} = get_party_states(state.party)
@@ -503,6 +506,7 @@ defmodule Teiserver.Player.Session do
     end
 
     broadcast_user_update!(state.user, :offline)
+    :telemetry.execute([:tachyon, :disconnect], %{count: 1})
 
     {:stop, :normal, :ok, %{state | matchmaking: initial_matchmaking_state()}}
   end
@@ -1266,7 +1270,8 @@ defmodule Teiserver.Player.Session do
         # we don't care about cancelling the timer if the player reconnects since reconnection
         # should be fairly low (and rate limited) so too many messages isn't an issue
         {:ok, _} = :timer.send_after(2_000, :player_timeout)
-        Logger.info("Player disconnected abruptly")
+        Logger.info("Player disconnected abruptly because #{inspect(reason)}")
+        :telemetry.execute([:tachyon, :abrupt_disconnect], %{count: 1})
 
         state =
           state

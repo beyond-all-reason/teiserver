@@ -62,6 +62,14 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
     assert_receive({:DOWN, ^ref, :process, _, _}, 1000, "Session should have died")
   end
 
+  test "session re-setup connection monitor correctly after reconnect", ctx do
+    assert Player.conn_state(ctx.user.id) == :connected
+    Tachyon.abrupt_disconnect!(ctx.client)
+    new_client = Tachyon.connect(ctx.token)
+    Tachyon.abrupt_disconnect!(new_client)
+    poll_until(fn -> Player.conn_state(ctx.user.id) end, &(&1 == :reconnecting))
+  end
+
   defp ensure_connected(client) do
     WSC.send_message(client, {:text, "test_ping"})
     Tachyon.recv_message!(client)

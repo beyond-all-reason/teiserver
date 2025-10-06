@@ -4,6 +4,7 @@ defmodule Teiserver.Player.TachyonHandler do
   """
 
   require Logger
+  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Tachyon.Schema
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Data.Types, as: T
@@ -54,6 +55,11 @@ defmodule Teiserver.Player.TachyonHandler do
 
     event = build_user_self_event(user, sess_state)
     {:event, "user/self", event, state}
+  end
+
+  @impl Handler
+  def init_rate_limiter(_state) do
+    BurstyRateLimiter.per_second(10) |> BurstyRateLimiter.with_burst(20)
   end
 
   @impl Handler
@@ -289,16 +295,11 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command("matchmaking/cancel" = cmd_id, "request", message_id, _message, state) do
+  def handle_command("matchmaking/cancel", "request", _message_id, _message, state) do
     case Player.Session.leave_queues(state.user.id) do
       :ok ->
-        messages = [
-          {:text, Schema.response(cmd_id, message_id) |> Jason.encode!()},
-          {:text,
-           Schema.event("matchmaking/cancelled", %{reason: :intentional}) |> Jason.encode!()}
-        ]
-
-        {:push, messages, state}
+        {:response, {nil, [Schema.event("matchmaking/cancelled", %{reason: :intentional})]},
+         state}
 
       {:error, reason} ->
         {:error_response, reason, state}
@@ -340,21 +341,20 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command("messaging/subscribeReceived" = cmd_id, "request", message_id, msg, state) do
+  def handle_command("messaging/subscribeReceived", "request", _message_id, msg, state) do
     since = parse_since(msg["data"]["since"])
 
     {:ok, has_missed_messages, msg_to_send} =
       Player.Session.subscribe_received(state.user.id, since)
 
-    response = Schema.response(cmd_id, message_id, %{hasMissedMessages: has_missed_messages})
+    response = %{hasMissedMessages: has_missed_messages}
 
     msg_to_send =
       Enum.map(msg_to_send, fn msg ->
         Schema.event("messaging/received", message_to_tachyon(msg))
       end)
 
-    messages = [response | msg_to_send] |> Enum.map(fn data -> {:text, Jason.encode!(data)} end)
-    {:push, messages, state}
+    {:response, {response, msg_to_send}, state}
   end
 
   def handle_command("user/info", "request", _message_id, msg, state) do
@@ -680,11 +680,9 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command("lobby/subscribeList" = cmd_id, "request", msg_id, _msg, state) do
+  def handle_command("lobby/subscribeList", "request", _msg_id, _msg, state) do
     case Player.Session.subscribe_lobby_list(state.user.id) do
       {:ok, list} ->
-        resp = Schema.response(cmd_id, msg_id)
-
         ev =
           Schema.event("lobby/listReset", %{
             lobbies:
@@ -694,8 +692,7 @@ defmodule Teiserver.Player.TachyonHandler do
               |> Enum.into(%{})
           })
 
-        messages = [resp, ev] |> Enum.map(fn data -> {:text, Jason.encode!(data)} end)
-        {:push, messages, state}
+        {:response, {nil, [ev]}, state}
     end
   end
 
@@ -884,17 +881,25 @@ defmodule Teiserver.Player.TachyonHandler do
     |> Enum.reject(&is_nil/1)
   end
 
+  defp lobby_team_to_tachyon({x, y, z}) do
+    %{
+      allyTeam: x |> to_string() |> String.pad_leading(3, "0"),
+      team: y |> to_string() |> String.pad_leading(3, "0"),
+      player: z |> to_string() |> String.pad_leading(3, "0")
+    }
+  end
+
   defp lobby_details_to_tachyon(details) do
     members =
-      Enum.map(details.members, fn {p_id, %{team: {x, y, z}} = p} ->
+      Enum.map(details.members, fn {p_id, p} ->
         {to_string(p_id),
-         %{
-           id: to_string(p_id),
-           type: p.type,
-           allyTeam: to_string(x),
-           team: to_string(y),
-           player: to_string(z)
-         }}
+         Map.merge(
+           %{
+             id: to_string(p_id),
+             type: p.type
+           },
+           lobby_team_to_tachyon(p.team)
+         )}
       end)
       |> Enum.into(%{})
 
@@ -928,18 +933,17 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   defp lobby_update_to_tachyon(lobby_id, %{event: :add_player} = ev) do
-    {x, y, z} = ev.team
-
     data = %{
       id: lobby_id,
       members: %{
-        to_string(ev.id) => %{
-          type: :player,
-          id: to_string(ev.id),
-          allyTeam: to_string(x),
-          team: to_string(y),
-          player: to_string(z)
-        }
+        to_string(ev.id) =>
+          Map.merge(
+            %{
+              type: :player,
+              id: to_string(ev.id)
+            },
+            lobby_team_to_tachyon(ev.team)
+          )
       }
     }
 

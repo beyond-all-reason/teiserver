@@ -203,6 +203,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
 
     TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
+    Logger.info("Lobby created by user #{start_params.creator_data.id}")
     {:ok, state}
   end
 
@@ -293,13 +294,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   @impl true
-  def handle_info({:DOWN, ref, :process, _obj, _reason}, state) do
+  def handle_info({:DOWN, ref, :process, _obj, reason}, state) do
     val = MC.get_val(state.monitors, ref)
     state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
 
     state =
       case val do
         {:user, user_id} ->
+          Logger.debug("user #{user_id} disappeared from the lobby because #{inspect(reason)}")
+
           case remove_player(user_id, state) do
             {:ok, state} -> state
             _ -> state
@@ -307,7 +310,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       end
 
     if Enum.empty?(state.players) do
-      {:stop, {:shutdown, :empty}, state}
+      {:noreply, state, {:continue, :empty}}
     else
       {:noreply, state}
     end
@@ -315,6 +318,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @impl true
   def handle_continue(:empty, state) do
+    Logger.info("Lobby shutting down because empty")
     {:stop, {:shutdown, :empty}, state}
   end
 

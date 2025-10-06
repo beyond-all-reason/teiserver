@@ -7,11 +7,13 @@ defmodule Teiserver.Tachyon.Transport do
 
   @behaviour WebSock
   require Logger
+  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Tachyon.{Schema, Handler}
 
   @type connection_state() :: %{
           handler: term(),
           handler_state: term(),
+          rate_limiter: BurstyRateLimiter.t() | nil,
           pending_responses: Handler.pending_responses()
         }
 
@@ -64,6 +66,20 @@ defmodule Teiserver.Tachyon.Transport do
     end
   end
 
+  # for testing purpose only, to manipulate the state of the rate limiter
+  @doc false
+  def _test_rate_limiter_acquire(pid, n) do
+    r = make_ref()
+    send(pid, {:_rate_limiter_acquire, n, {self(), r}})
+
+    receive do
+      {:reply, ^r, result} -> result
+    after
+      5000 ->
+        raise "timout"
+    end
+  end
+
   # dummy handle_in for now
   @impl true
   def handle_in({"test_ping\n", opcode: :text}, state) do
@@ -78,9 +94,17 @@ defmodule Teiserver.Tachyon.Transport do
 
   def handle_in({msg, opcode: :text}, state) do
     with {:ok, parsed} <- Jason.decode(msg),
-         {:ok, command_id, message_type, message_id} <- Schema.parse_envelope(parsed) do
+         {:ok, command_id, message_type, message_id} <- Schema.parse_envelope(parsed),
+         {:ok, rl} <- rate_limit(command_id, parsed, state.rate_limiter) do
+      state = %{state | rate_limiter: rl}
       handle_command(command_id, message_type, message_id, parsed, state)
     else
+      {:error, :request_too_big} ->
+        {:stop, :normal, 1008, [{:text, "Request too big"}], state}
+
+      {:error, to_wait} when is_number(to_wait) ->
+        {:stop, :normal, 1008, [{:text, "Rate limited"}], state}
+
       {:error, err} ->
         {:stop, :normal, 1008, [{:text, "Invalid json sent #{inspect(err)}"}], state}
     end
@@ -112,6 +136,29 @@ defmodule Teiserver.Tachyon.Transport do
   def handle_info({:call_client, cmd_id, payload, req_id}, state) do
     opts = [cb_state: {:call_client_resp, req_id}]
     handle_result({:request, cmd_id, payload, opts, state.handler_state}, state)
+  end
+
+  def handle_info({:_rate_limiter_acquire, n, {from, r}}, state) do
+    state =
+      case state.rate_limiter do
+        nil ->
+          send(from, {:reply, r, nil})
+          state
+
+        rl ->
+          result = BurstyRateLimiter.try_acquire(rl, n, :erlang.monotonic_time(:millisecond))
+
+          state =
+            case BurstyRateLimiter.try_acquire(rl, n, :erlang.monotonic_time(:millisecond)) do
+              {:ok, rl} -> %{state | rate_limiter: rl}
+              _ -> state
+            end
+
+          send(from, {:reply, r, result})
+          state
+      end
+
+    {:ok, state}
   end
 
   def handle_info(msg, state) do
@@ -208,6 +255,8 @@ defmodule Teiserver.Tachyon.Transport do
   end
 
   def do_handle_command(command_id, message_type, message_id, message, state) do
+    start = :erlang.monotonic_time(:millisecond)
+
     result =
       state.handler.handle_command(
         command_id,
@@ -216,6 +265,28 @@ defmodule Teiserver.Tachyon.Transport do
         message,
         state.handler_state
       )
+
+    elapsed = :erlang.monotonic_time(:millisecond) - start
+
+    response_details =
+      case result do
+        {:response, _} -> {:resp, :ok}
+        {:response, _, _} -> {:resp, :ok}
+        {:error_response, code, _} -> {:resp, code}
+        {:error_response, code, _, _} -> {:resp, code}
+        _ -> false
+      end
+
+    case response_details do
+      {:resp, code} ->
+        :telemetry.execute([:tachyon, :request], %{duration: elapsed, count: 1}, %{
+          command_id: command_id,
+          code: code
+        })
+
+      _ ->
+        nil
+    end
 
     try do
       handle_result(result, command_id, message_id, state)
@@ -244,6 +315,16 @@ defmodule Teiserver.Tachyon.Transport do
           WebSock.handle_result()
   defp handle_result(result, command_id, message_id, conn_state) do
     case result do
+      {:event, evs, _} when is_list(evs) -> Enum.map(evs, fn {cmd_id, _} -> cmd_id end)
+      {:event, cmd_id, _} -> [cmd_id]
+      {:event, cmd_id, _payload, _} -> [cmd_id]
+      _ -> []
+    end
+    |> Enum.each(fn cmd_id ->
+      :telemetry.execute([:tachyon, :event], %{count: 1}, %{command_id: cmd_id})
+    end)
+
+    case result do
       {:event, events, state} when is_list(events) ->
         messages =
           Enum.map(events, fn {cmd_id, payload} ->
@@ -264,6 +345,11 @@ defmodule Teiserver.Tachyon.Transport do
       {:response, state} ->
         message = Schema.response(command_id, message_id)
         {:push, {:text, Jason.encode!(message)}, %{conn_state | handler_state: state}}
+
+      {:response, {resp_payload, events}, state} ->
+        resp = {:text, Schema.response(command_id, message_id, resp_payload) |> Jason.encode!()}
+        messages = Enum.map(events, fn ev -> {:text, ev |> Jason.encode!()} end)
+        {:push, [resp | messages], %{conn_state | handler_state: state}}
 
       {:response, payload, state} ->
         message = Schema.response(command_id, message_id, payload)
@@ -312,6 +398,13 @@ defmodule Teiserver.Tachyon.Transport do
       {:stop, reason, close_details, messages, state} ->
         {:stop, reason, close_details, messages, %{conn_state | handler_state: state}}
     end
+  end
+
+  defp rate_limit(_command_id, _parsed, nil), do: {:ok, nil}
+
+  defp rate_limit(_command_id, _parsed, rl) do
+    cost = 1
+    BurstyRateLimiter.try_acquire(rl, cost, :erlang.monotonic_time(:millisecond))
   end
 
   defp schedule_ping() do

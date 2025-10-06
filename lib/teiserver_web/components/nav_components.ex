@@ -5,6 +5,7 @@ defmodule TeiserverWeb.NavComponents do
   # import TeiserverWeb.Gettext
 
   import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+  import Phoenix.HTML, only: [raw: 1]
 
   use Phoenix.VerifiedRoutes,
     endpoint: TeiserverWeb.Endpoint,
@@ -44,25 +45,30 @@ defmodule TeiserverWeb.NavComponents do
     <nav class="navbar navbar-expand-lg m-0 p-0" id="top-nav">
       <!-- Container wrapper -->
       <div class="container-fluid">
-        <!-- Collapsible wrapper -->
+        <!-- Navbar brand -->
+        <a class="navbar-brand" href="/">
+          <img src={~p"/images/logo/logo.svg"} alt="BAR Logo" style="height: 24px; width: auto;" />
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <!-- Navbar brand -->
-          <a class="navbar-brand mt-2 mt-lg-0" href="/">
-            <i
-              class={"fa-fw #{Application.get_env(:teiserver, Teiserver)[:site_icon]}"}
-              style="margin: -4px 20px 0 0px;"
-            >
-            </i>
-            <span id="page-title">
-              {Application.get_env(:teiserver, Teiserver)[:site_title]}
-            </span>
-          </a>
-          <!-- Left links -->
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <!-- Left navigation -->
+          <ul class="navbar-nav me-auto">
             <.top_nav_item text="Home" active={@active == "central_home"} route={~p"/"} />
 
             <.top_nav_item
-              text="My account"
+              text={raw("My&nbsp;Account")}
               active={@active == "teiserver_account"}
               route={~p"/profile"}
             />
@@ -121,30 +127,30 @@ defmodule TeiserverWeb.NavComponents do
             />
 
             <.top_nav_item
-              :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
+              :if={allow_any?(@current_user, ~w(Contributor))}
               text="Admin"
               route={~p"/teiserver/admin"}
               active={@active == "admin"}
             />
           </ul>
-          <!-- Left links -->
+          <!-- Left navigation -->
+
+          <!-- Right elements -->
+          <ul class="navbar-nav">
+            <%= if @current_user do %>
+              <TeiserverWeb.UserComponents.recents_dropdown current_user={@current_user} />
+              <TeiserverWeb.UserComponents.account_dropdown current_user={@current_user} />
+            <% else %>
+              <li class="nav-item">
+                <a class="nav-link" href={~p"/login"}>
+                  Sign in
+                </a>
+              </li>
+            <% end %>
+          </ul>
+          <!-- Right elements -->
         </div>
         <!-- Collapsible wrapper -->
-
-        <!-- Right elements -->
-        <div class="d-flex align-items-center">
-          <%= if @current_user do %>
-            <TeiserverWeb.UserComponents.recents_dropdown current_user={@current_user} />
-            <TeiserverWeb.UserComponents.account_dropdown current_user={@current_user} />
-
-            <div style="width: 300px; display: inline-block;"></div>
-          <% else %>
-            <a class="nav-link" href={~p"/login"}>
-              Sign in
-            </a>
-          <% end %>
-        </div>
-        <!-- Right elements -->
       </div>
     </nav>
     """
