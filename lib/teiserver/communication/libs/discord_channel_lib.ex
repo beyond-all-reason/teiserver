@@ -225,8 +225,11 @@ defmodule Teiserver.Communication.DiscordChannelLib do
       when is_integer(message_id) do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
-        nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.Message.edit(channel_id, message_id, content: new_message)
+        nil ->
+          {:error, "No channel found"}
+
+        channel_id ->
+          Nostrum.Api.Message.edit(channel_id, message_id, content: new_message)
       end
     else
       {:error, :discord_disabled}
@@ -276,11 +279,11 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
   @spec create_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
           map | nil | {:error, String.t()}
-  def create_discord_reaction(maybe_channel_id, message_id, icon) do
+  def create_discord_reaction(maybe_channel_id, message_id, emoji) do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.Message.react(channel_id, message_id, icon)
+        channel_id -> Nostrum.Api.Message.react(channel_id, message_id, URI.encode(emoji))
       end
     else
       {:error, :discord_disabled}
@@ -293,7 +296,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.Message.unreact(channel_id, message_id, emoji)
+        channel_id -> Nostrum.Api.Message.unreact(channel_id, message_id, URI.encode(emoji))
       end
     else
       {:error, :discord_disabled}
