@@ -1,0 +1,70 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: teiserver
+      POSTGRES_PASSWORD: teiserver_dev_password
+      POSTGRES_DB: teiserver_dev
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U teiserver -d teiserver_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  teiserver:
+    container_name: teiserver
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database
+      POSTGRES_HOSTNAME: postgres
+      POSTGRES_USER: teiserver
+      POSTGRES_PASSWORD: teiserver_dev_password
+      POSTGRES_DB: teiserver_dev
+
+      # Application
+      PHX_HOST: localhost
+      PHX_SERVER: "true"
+      SECRET_KEY_BASE: "dev_secret_key_base_change_in_production_min_64_chars_long_string"
+
+      # Game settings
+      GAME_NAME: "Beyond All Reason"
+      GAME_NAME_SHORT: "BAR"
+      WEBSITE: "https://www.beyondallreason.info"
+      PRIVACY_EMAIL: "privacy@beyondallreason.info"
+
+      # Dev settings
+      MIX_ENV: dev
+      GENERATE_FAKE_DATA: "false"
+    ports:
+      - "4000:4000" # HTTP
+      - "8080:8080" # HTTP
+      - "8200:8200" # Tachyon WebSocket
+      - "8201:8201" # Spring protocol
+      - "8202:8202" # Spring protocol (UDP)
+    volumes:
+      # Mount source code for live reload
+      - ./lib:/app/lib
+      - ./config:/app/config
+      - ./priv:/app/priv
+      - ./assets:/app/assets
+      - ./test:/app/test
+      # Don't mount these (container-managed)
+      # - deps
+      # - _build
+    stdin_open: true
+    tty: true
+
+volumes:
+  postgres_data:

@@ -617,6 +617,8 @@ defmodule Teiserver.Player.TachyonHandler do
     create_data = %{
       name: msg["data"]["name"],
       map_name: msg["data"]["mapName"],
+      game_version: msg["data"]["gameVersion"] || "byar:test",
+      engine_version: msg["data"]["engineVersion"] || "105.1.1-2544-g058c8ea BAR105",
       ally_team_config:
         for at <- msg["data"]["allyTeamConfig"] do
           sb = at["startBox"]
@@ -699,6 +701,44 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("lobby/unsubscribeList", "request", _msg_id, _msg, state) do
     :ok = Player.Session.unsubscribe_lobby_list(state.user.id)
     {:response, state}
+  end
+
+  def handle_command("lobby/updateMods", "request", _msg_id, msg, state) do
+    mods = parse_mods(msg["data"]["mods"])
+    lobby_id = msg["data"]["lobbyId"]
+
+    case Player.Session.update_lobby_mods(state.user.id, lobby_id, mods) do
+      :ok ->
+        {:response, state}
+
+      {:error, :insufficient_permissions} ->
+        {:error_response, :insufficient_permissions, state}
+
+      {:error, :not_in_lobby} ->
+        {:error_response, :not_in_lobby, state}
+
+      {:error, :too_many_mods} ->
+        {:error_response, :too_many_mods, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/updateSync", "request", _msg_id, msg, state) do
+    sync = parse_sync_status(msg["data"]["sync"])
+    lobby_id = msg["data"]["lobbyId"]
+
+    case Player.Session.update_lobby_sync(state.user.id, lobby_id, sync) do
+      :ok ->
+        {:response, state}
+
+      {:error, :not_in_lobby} ->
+        {:error_response, :not_in_lobby, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
   end
 
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
@@ -892,14 +932,24 @@ defmodule Teiserver.Player.TachyonHandler do
   defp lobby_details_to_tachyon(details) do
     members =
       Enum.map(details.members, fn {p_id, p} ->
-        {to_string(p_id),
-         Map.merge(
-           %{
-             id: to_string(p_id),
-             type: p.type
-           },
-           lobby_team_to_tachyon(p.team)
-         )}
+        base_member =
+          Map.merge(
+            %{
+              id: to_string(p_id),
+              type: p.type
+            },
+            lobby_team_to_tachyon(p.team)
+          )
+
+        # Add sync status if present
+        member_with_sync =
+          if Map.has_key?(p, :sync) && p.sync do
+            Map.put(base_member, :sync, sync_status_to_tachyon(p.sync))
+          else
+            base_member
+          end
+
+        {to_string(p_id), member_with_sync}
       end)
       |> Enum.into(%{})
 
@@ -921,15 +971,27 @@ defmodule Teiserver.Player.TachyonHandler do
          }}
       end
 
-    %{
+    base = %{
       id: details.id,
+      bossId: to_string(details.boss_id),
       name: details.name,
       members: members,
       mapName: details.map_name,
       engineVersion: details.engine_version,
       gameVersion: details.game_version,
-      allyTeamConfig: ally_team_config
+      allyTeamConfig: ally_team_config,
+      mods: Enum.map(details.mods, &mod_to_tachyon/1)
     }
+
+    # Add current battle if present
+    if details.current_battle do
+      Map.put(base, :currentBattle, %{
+        id: details.current_battle.id,
+        startedAt: DateTime.to_unix(details.current_battle.started_at, :microsecond)
+      })
+    else
+      base
+    end
   end
 
   defp lobby_update_to_tachyon(lobby_id, %{event: :add_player} = ev) do
@@ -952,6 +1014,24 @@ defmodule Teiserver.Player.TachyonHandler do
 
   defp lobby_update_to_tachyon(lobby_id, %{event: :remove_player} = ev) do
     data = %{id: lobby_id, members: %{to_string(ev.id) => nil}}
+    {"lobby/updated", data}
+  end
+
+  defp lobby_update_to_tachyon(lobby_id, %{event: :mods_changed} = ev) do
+    data = %{
+      id: lobby_id,
+      mods: Enum.map(ev.mods, &mod_to_tachyon/1)
+    }
+
+    {"lobby/updated", data}
+  end
+
+  defp lobby_update_to_tachyon(lobby_id, %{event: :boss_changed} = ev) do
+    data = %{
+      id: lobby_id,
+      bossId: to_string(ev.boss_id)
+    }
+
     {"lobby/updated", data}
   end
 
@@ -986,5 +1066,49 @@ defmodule Teiserver.Player.TachyonHandler do
 
   defp lobby_current_battle_to_tachyon(battle) do
     %{startedAt: DateTime.to_unix(battle.started_at, :microsecond)}
+  end
+
+  # Parse mods from JSON protocol format to Elixir maps
+  defp parse_mods(mods_data) when is_list(mods_data) do
+    Enum.map(mods_data, fn mod ->
+      %{
+        name: mod["name"],
+        archive_name: mod["archiveName"],
+        git_ref: mod["gitRef"],
+        repository: mod["repository"],
+        type: mod["type"]
+      }
+    end)
+  end
+
+  # Convert mod from Elixir map to JSON protocol format
+  defp mod_to_tachyon(mod) do
+    %{
+      name: mod.name,
+      archiveName: mod.archive_name,
+      gitRef: mod.git_ref,
+      repository: mod.repository,
+      type: mod.type
+    }
+  end
+
+  # Parse sync status from JSON protocol format
+  defp parse_sync_status(sync_data) do
+    %{
+      map: sync_data["map"],
+      engine: sync_data["engine"],
+      game: sync_data["game"],
+      mods: sync_data["mods"]
+    }
+  end
+
+  # Convert sync status to JSON protocol format
+  defp sync_status_to_tachyon(sync) do
+    %{
+      map: sync.map,
+      engine: sync.engine,
+      game: sync.game,
+      mods: sync.mods
+    }
   end
 end

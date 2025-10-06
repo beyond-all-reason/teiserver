@@ -1,0 +1,43 @@
+# Elixir
+/_build/
+/deps/
+*.ez
+
+# Database
+*.dump
+*.sql
+
+# Logs
+erl_crash.dump
+*.log
+
+# Node/NPM (if any frontend assets)
+node_modules/
+npm-debug.log
+
+# Environment files
+.env
+.env.*
+runtime/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+docker-compose.override.yml
+
+# Git
+.git/
+.gitignore
+
+# Test coverage
+cover/
+

@@ -459,6 +459,17 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, :unsubscribe_list})
   end
 
+  @spec update_lobby_mods(T.userid(), TachyonLobby.id(), [TachyonLobby.mod()]) ::
+          :ok | {:error, reason :: term()}
+  def update_lobby_mods(user_id, lobby_id, mods) do
+    GenServer.call(via_tuple(user_id), {:lobby, {:update_mods, lobby_id, mods}})
+  end
+
+  @spec update_lobby_sync(T.userid(), TachyonLobby.id(), map()) :: :ok | {:error, reason :: term()}
+  def update_lobby_sync(user_id, lobby_id, sync_status) do
+    GenServer.call(via_tuple(user_id), {:lobby, {:update_sync, lobby_id, sync_status}})
+  end
+
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
@@ -935,6 +946,26 @@ defmodule Teiserver.Player.Session do
   def handle_call({:lobby, :unsubscribe_list}, _from, state) do
     TachyonLobby.unsubscribe_updates()
     {:reply, :ok, %{state | lobby_list_subscription: nil}}
+  end
+
+  def handle_call({:lobby, {:update_mods, _lobby_id, _mods}}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, {:update_mods, lobby_id, mods}}, _from, state) do
+    case TachyonLobby.update_mods(lobby_id, state.user.id, mods) do
+      :ok -> {:reply, :ok, state}
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:lobby, {:update_sync, _lobby_id, _sync}}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, {:update_sync, lobby_id, sync_status}}, _from, state) do
+    case TachyonLobby.update_sync(lobby_id, state.user.id, sync_status) do
+      :ok -> {:reply, :ok, state}
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
   end
 
   @impl true

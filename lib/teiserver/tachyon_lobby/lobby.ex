@@ -71,11 +71,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
   """
   @type details :: %{
           id: id(),
+          boss_id: T.userid(),
           name: String.t(),
           map_name: String.t(),
           game_version: String.t(),
           engine_version: String.t(),
           ally_team_config: ally_team_config(),
+          mods: [mod()],
           members: %{
             T.userid() => %{
               type: :player,
@@ -89,6 +91,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
                 id: Teiserver.TachyonBattle.id(),
                 started_at: DateTime.t()
               }
+        }
+
+  @typedoc """
+  A mod/mutator that can be applied to the game.
+  Order matters - mods are loaded in sequence and later mods can override earlier ones.
+  """
+  @type mod :: %{
+          name: String.t(),
+          archive_name: String.t(),
+          git_ref: String.t(),
+          repository: String.t(),
+          type: String.t()
         }
 
   @typep player :: %{
@@ -109,12 +123,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @typep state :: %{
            id: id(),
+           boss_id: T.userid(),
            monitors: MC.t(),
            name: String.t(),
            map_name: String.t(),
            game_version: String.t(),
            engine_version: String.t(),
            ally_team_config: ally_team_config(),
+           mods: [mod()],
            # used to track the players in the lobby.
            players: %{T.userid() => player()},
            current_battle:
@@ -167,6 +183,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
+  @spec update_mods(id(), T.userid(), [mod()]) :: :ok | {:error, reason :: term()}
+  def update_mods(lobby_id, user_id, mods) do
+    GenServer.call(via_tuple(lobby_id), {:update_mods, user_id, mods})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
+  @spec update_sync(id(), T.userid(), map()) :: :ok | {:error, reason :: term()}
+  def update_sync(lobby_id, user_id, sync_status) do
+    GenServer.call(via_tuple(lobby_id), {:update_sync, user_id, sync_status})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
   @spec start_battle(id(), T.userid()) :: :ok | {:error, reason :: term()}
   def start_battle(lobby_id, user_id) do
     GenServer.call(via_tuple(lobby_id), {:start_battle, user_id})
@@ -184,12 +214,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     state = %{
       id: id,
+      boss_id: start_params.creator_data.id,
       monitors: monitors,
       name: start_params.name,
       map_name: start_params.map_name,
       game_version: start_params.game_version,
       engine_version: start_params.engine_version,
       ally_team_config: start_params.ally_team_config,
+      mods: [],
       players: %{
         start_params.creator_data.id => %{
           id: start_params.creator_data.id,
@@ -203,7 +235,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
 
     TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
-    Logger.info("Lobby created by user #{start_params.creator_data.id}")
+    Logger.info("Lobby created by user #{start_params.creator_data.id} (boss)")
     {:ok, state}
   end
 
@@ -252,6 +284,38 @@ defmodule Teiserver.TachyonLobby.Lobby do
       {:ok, state} when map_size(state.players) > 0 -> {:reply, :ok, state}
       {:ok, state} -> {:reply, :ok, state, {:continue, :empty}}
       {:error, _} = err -> {:reply, err, state}
+    end
+  end
+
+  def handle_call({:update_mods, user_id, new_mods}, _from, state) do
+    cond do
+      not is_map_key(state.players, user_id) ->
+        {:reply, {:error, :not_in_lobby}, state}
+
+      state.boss_id != user_id ->
+        {:reply, {:error, :insufficient_permissions}, state}
+
+      length(new_mods) > 10 ->
+        {:reply, {:error, :too_many_mods}, state}
+
+      true ->
+        state = %{state | mods: new_mods}
+        broadcast_update({:mods_changed, new_mods, state})
+        {:reply, :ok, state}
+    end
+  end
+
+  def handle_call({:update_sync, user_id, sync_status}, _from, state) do
+    if is_map_key(state.players, user_id) do
+      # Update the player's sync status
+      updated_player = Map.put(state.players[user_id], :sync, sync_status)
+      state = put_in(state.players[user_id], updated_player)
+
+      # Broadcast the updated sync status to all lobby members
+      broadcast_update({:player_sync_updated, user_id, sync_status, state})
+      {:reply, :ok, state}
+    else
+      {:reply, {:error, :not_in_lobby}, state}
     end
   end
 
@@ -348,11 +412,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp get_details_from_state(state) do
     Map.take(state, [
       :id,
+      :boss_id,
       :name,
       :map_name,
       :game_version,
       :engine_version,
-      :ally_team_config
+      :ally_team_config,
+      :mods
     ])
     |> Map.put(
       :members,
@@ -389,6 +455,36 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     for {_p_id, p} <- state.players,
         do: send(p.pid, {:lobby, state.id, {:updated, events}})
+  end
+
+  defp broadcast_update({:mods_changed, new_mods, state}) do
+    for {_p_id, p} <- state.players do
+      send(p.pid, {:lobby, state.id, {:updated, [%{event: :mods_changed, mods: new_mods}]}})
+    end
+
+    :ok
+  end
+
+  defp broadcast_update({:boss_changed, new_boss_id, state}) do
+    for {_p_id, p} <- state.players do
+      send(
+        p.pid,
+        {:lobby, state.id, {:updated, [%{event: :boss_changed, boss_id: new_boss_id}]}}
+      )
+    end
+
+    :ok
+  end
+
+  defp broadcast_update({:player_sync_updated, user_id, sync_status, state}) do
+    for {_p_id, p} <- state.players do
+      send(
+        p.pid,
+        {:lobby, state.id, {:updated, [%{event: :player_sync_updated, user_id: user_id, sync: sync_status}]}}
+      )
+    end
+
+    :ok
   end
 
   # this function isn't too efficient, but it's never going to be run on
@@ -480,6 +576,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
       Map.update!(state, :monitors, &MC.demonitor_by_val(&1, removed.id))
       |> Map.put(:players, updated_players)
 
+    # Transfer boss status if boss left and lobby not empty
+    state =
+      if user_id == state.boss_id && map_size(updated_players) > 0 do
+        # Pick first remaining player as new boss
+        new_boss_id = updated_players |> Map.keys() |> List.first()
+        Logger.info("Boss #{user_id} left, transferring to user #{new_boss_id}")
+        broadcast_update({:boss_changed, new_boss_id, state})
+        %{state | boss_id: new_boss_id}
+      else
+        state
+      end
+
     if map_size(state.players) > 0,
       do: broadcast_update({:remove_player, user_id, player_changes, state})
 
@@ -521,12 +629,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
         %{teams: teams, startBox: at_config.start_box}
       end
 
-    %{
+    script = %{
       engineVersion: state.engine_version,
       gameName: state.game_version,
       mapName: state.map_name,
       startPosType: :ingame,
       allyTeams: ally_teams
     }
+
+    # Add mods if present (order matters!)
+    # Send FULL mod objects so autohost can download missing mods
+    if length(state.mods) > 0 do
+      Map.put(script, :mods, state.mods)
+    else
+      script
+    end
   end
 end

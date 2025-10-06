@@ -1,0 +1,54 @@
+# Dockerfile for Teiserver development
+# This creates a container with hot-reload support
+
+ARG ELIXIR_VERSION=1.18.4
+ARG OTP_VERSION=26.2.5.14
+ARG DEBIAN_VERSION=trixie-20250811
+
+FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    curl \
+    inotify-tools \
+    postgresql-client \
+    geoip-bin \
+    geoip-database \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install hex and rebar
+RUN mix local.hex --force && \
+    mix local.rebar --force
+
+# Set working directory
+WORKDIR /app
+
+# Set environment
+ENV MIX_ENV=dev
+
+# Copy dependency files
+COPY mix.exs mix.lock ./
+
+# Install dependencies
+RUN mix deps.get && mix deps.compile
+
+# Copy application code
+COPY . .
+
+# Compile application
+RUN mix compile
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Use entrypoint for setup automation
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Start Phoenix server
+CMD ["iex", "-S", "mix", "phx.server"]
+

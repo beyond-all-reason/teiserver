@@ -4,10 +4,10 @@ config :teiserver, Teiserver.Setup, key: "dev_key"
 
 # Configure your database
 config :teiserver, Teiserver.Repo,
-  username: "teiserver_dev",
-  password: "123456789",
-  database: "teiserver_dev",
-  hostname: "localhost",
+  username: System.get_env("POSTGRES_USER") || "teiserver_dev",
+  password: System.get_env("POSTGRES_PASSWORD") || "123456789",
+  database: System.get_env("POSTGRES_DB") || "teiserver_dev",
+  hostname: System.get_env("POSTGRES_HOSTNAME") || "localhost",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10,
   timeout: 180_000
@@ -70,6 +70,7 @@ config :teiserver, TeiserverWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
+      ~r"lib/teiserver/.*(ex|heex)$",
       ~r"lib/teiserver_web/(controllers|live|components|live_components|views|templates)/.*(ex|heex)$"
     ]
   ]
