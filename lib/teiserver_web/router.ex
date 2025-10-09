@@ -271,7 +271,12 @@ defmodule TeiserverWeb.Router do
   scope "/maps", TeiserverWeb.MapsLive, as: :maps do
     pipe_through([:live_browser, :app_layout])
 
-    live "/", Index, :index
+    live_session :maps,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :mount_current_user}
+      ] do
+      live "/", Index, :index
+    end
   end
 
   scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do
