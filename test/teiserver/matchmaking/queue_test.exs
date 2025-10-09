@@ -3,6 +3,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.AssetFixtures
+  alias Teiserver.Support.Polling
 
   @moduletag :tachyon
 
@@ -18,7 +19,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
     user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
     id = UUID.uuid4()
 
-    AssetFixtures.create_map(stg_attr(id))
+    map = AssetFixtures.create_map(stg_attr(id))
 
     initial_state =
       QueueServer.init_state(%{
@@ -32,7 +33,21 @@ defmodule Teiserver.Matchmaking.QueueTest do
 
     {:ok, pid} = QueueServer.start_link(initial_state)
 
-    {:ok, user: user, queue_id: id, queue_pid: pid}
+    {:ok, user: user, queue_id: id, queue_pid: pid, map: map}
+  end
+
+  describe "listing" do
+    test "has correct data", %{queue_id: queue_id, map: map} do
+      queues =
+        Polling.poll_until(
+          fn -> Matchmaking.list_queues() |> Enum.into(%{}) end,
+          fn queues ->
+            is_map_key(queues, queue_id) && queues[queue_id].maps != []
+          end
+        )
+
+      assert queues[queue_id].maps == [map]
+    end
   end
 
   describe "joining" do

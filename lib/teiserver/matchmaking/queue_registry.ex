@@ -43,4 +43,8 @@ defmodule Teiserver.Matchmaking.QueueRegistry do
   def list() do
     Horde.Registry.select(__MODULE__, [{{:"$1", :_, :"$2"}, [], [{{:"$1", :"$2"}}]}])
   end
+
+  def update_value(id, callback) do
+    Horde.Registry.update_value(__MODULE__, id, callback)
+  end
 end
