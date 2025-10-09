@@ -2,6 +2,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   use TeiserverWeb, :queries
 
   alias Teiserver.OAuth.{Application, TokenQueries, CodeQueries, CredentialQueries}
+  alias Teiserver.Data.Types, as: T
 
   @doc """
   Returns the application corresponding to the given uid/client id
@@ -87,5 +88,72 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   def where_uid(query, uid) do
     from [app: app] in query,
       where: app.uid == ^uid
+  end
+
+  @doc """
+  Returns all OAuth applications that the user has authorized (has tokens for, including expired ones).
+  """
+  @spec list_authorized_applications(T.userid()) :: [Application.t()]
+  def list_authorized_applications(user_id) do
+    base_query()
+    |> join(:left, [app], token in Teiserver.OAuth.Token,
+      on: token.application_id == app.id and token.owner_id == ^user_id
+    )
+    |> where([app, token], not is_nil(token.id))
+    |> distinct([app, token], true)
+    |> preload(:owner)
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the count of active tokens for each application that the user has authorized.
+  Counts only the user's tokens, not all tokens for the application.
+  """
+  @spec get_application_token_counts(T.userid()) :: %{
+          Application.id() => non_neg_integer()
+        }
+  def get_application_token_counts(user_id) do
+    from(token in Teiserver.OAuth.Token,
+      where: token.owner_id == ^user_id,
+      where: token.expires_at > ^DateTime.utc_now(),
+      group_by: token.application_id,
+      select: {token.application_id, count(token.id)}
+    )
+    |> Repo.all()
+    |> Enum.into(%{})
+  end
+
+  @doc """
+  Deletes all tokens (access and refresh) for a specific application and user.
+  Returns the count of deleted tokens.
+  """
+  @spec delete_user_application_tokens(T.userid(), Application.id()) ::
+          non_neg_integer()
+  def delete_user_application_tokens(user_id, application_id) do
+    {count, _} =
+      from(token in Teiserver.OAuth.Token,
+        where: token.owner_id == ^user_id,
+        where: token.application_id == ^application_id
+      )
+      |> Repo.delete_all()
+
+    count
+  end
+
+  @doc """
+  Deletes all authorization codes for a specific application and user.
+  Returns the count of deleted codes.
+  """
+  @spec delete_user_application_codes(T.userid(), Application.id()) ::
+          non_neg_integer()
+  def delete_user_application_codes(user_id, application_id) do
+    {count, _} =
+      from(code in Teiserver.OAuth.Code,
+        where: code.owner_id == ^user_id,
+        where: code.application_id == ^application_id
+      )
+      |> Repo.delete_all()
+
+    count
   end
 end

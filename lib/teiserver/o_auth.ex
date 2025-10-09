@@ -516,6 +516,42 @@ defmodule Teiserver.OAuth do
     end
   end
 
+  @doc """
+  Returns all OAuth applications that the user has authorized (has tokens for, including expired ones).
+  """
+  @spec list_authorized_applications(T.userid()) :: [Application.t()]
+  defdelegate list_authorized_applications(user_id), to: ApplicationQueries
+
+  @doc """
+  Returns the count of active tokens for each application that the user has authorized.
+  Counts only the user's tokens, not all tokens for the application.
+  """
+  @spec get_application_token_counts(T.userid()) :: %{
+          Application.id() => non_neg_integer()
+        }
+  defdelegate get_application_token_counts(user_id), to: ApplicationQueries
+
+  @doc """
+  Revokes all tokens and codes for a specific application for a user.
+  This includes access tokens, refresh tokens, and authorization codes.
+  """
+  @spec revoke_application_access(T.userid(), Application.id()) ::
+          :ok | {:error, term()}
+  def revoke_application_access(user_id, application_id) do
+    Repo.transaction(fn ->
+      _token_count =
+        ApplicationQueries.delete_user_application_tokens(user_id, application_id)
+
+      _code_count = ApplicationQueries.delete_user_application_codes(user_id, application_id)
+
+      :ok
+    end)
+    |> case do
+      {:ok, result} -> result
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
   defp check_expiry(obj, now) do
     if Timex.after?(now, Map.fetch!(obj, :expires_at)) do
       {:error, :expired}

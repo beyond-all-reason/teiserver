@@ -289,6 +289,7 @@ defmodule TeiserverWeb.Router do
     get("/security/edit_password", SecurityController, :edit_password)
     put("/security/update_password", SecurityController, :update_password)
     delete("/security/delete_token/:id", SecurityController, :delete_token)
+    delete("/security/revoke_oauth/:id", SecurityController, :revoke_oauth_application)
   end
 
   scope "/battle", TeiserverWeb.Battle.LobbyLive, as: :ts_battle do
