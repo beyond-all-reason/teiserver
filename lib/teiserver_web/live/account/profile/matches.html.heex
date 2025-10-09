@@ -8,6 +8,83 @@
 
 <div class="row mt-2 mb-3">
   <div class="col">
-    List of recent matches goes here
+    <%= if @can_view_matches do %>
+      <div class="row mt-2">
+        <div class="col">
+          <.table
+            id="matches"
+            rows={@matches}
+            table_class="table-sm table-hover"
+            row_click={fn match -> JS.navigate(~p"/battle/#{match.id}") end}
+          >
+            <:col :let={match} label="Map">{match.map}</:col>
+            <:col :let={match} label="Players">{match.team_count * match.team_size}</:col>
+            <:col :let={match} label="Type">{match.game_type}</:col>
+            <:col :let={match} label="Outcome">
+              <%= if hd(match.members).win do %>
+                <Fontawesome.icon icon="trophy" style="solid" class="text-success" /> &nbsp;
+                Win
+              <% else %>
+                Loss
+              <% end %>
+            </:col>
+            <:col :let={match} label="Skill">
+              <%= if @can_view_ratings && match.skill do %>
+                {round(match.skill, 1)}
+              <% end %>
+            </:col>
+            <:col :let={match} label="Rating Change">
+              <%= if @can_view_ratings && match.rating_change do %>
+                <% {text_class, icon} = rating_change_display_class_and_icon(match.rating_change) %>
+                <span class={text_class}>
+                  <Fontawesome.icon icon={icon} style="solid" class="me-1" />
+                  {if match.rating_change > 0, do: "+", else: ""}{round(match.rating_change, 1)}
+                </span>
+              <% end %>
+            </:col>
+            <:col :let={match} label="Duration">
+              {if match.finished && match.started,
+                do: duration_to_str_short(Timex.diff(match.finished, match.started, :second)),
+                else: "N/A"}
+            </:col>
+            <:col :let={match} label="Date">
+              {date_to_str(match.finished, format: :hms_or_ymd, tz: @tz)}
+            </:col>
+
+            <:col :let={match} label="">
+              <div class="visually-hidden">
+                <.link navigate={~p"/battle/#{match.id}"}>
+                  Show
+                </.link>
+              </div>
+            </:col>
+          </.table>
+
+          <%= if assigns[:total_pages] do %>
+            <.pagination
+              page={@page}
+              total_pages={@total_pages}
+              base_url={~p"/profile/#{@user.id}/matches"}
+              limit={@limit}
+              total_count={@total_count}
+              current_count={@current_count}
+              show_go_to={@total_pages > 5}
+              class="mt-3"
+              include_params={["limit"]}
+              current_params={
+                %{
+                  "limit" => @limit
+                }
+              }
+            />
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="alert alert-info" role="alert">
+        <h4 class="alert-heading">Match History Private</h4>
+        <p>This user has chosen to keep their match history private.</p>
+      </div>
+    <% end %>
   </div>
 </div>
