@@ -17,6 +17,7 @@
             "type": "object",
             "properties": {
                 "id": { "type": "string" },
+                "name": { "type": "string" },
                 "mapName": { "type": "string" },
                 "engineVersion": { "type": "string" },
                 "gameVersion": { "type": "string" },
@@ -69,22 +70,38 @@
                         "^(.*)$": {
                             "anyOf": [
                                 {
-                                    "type": "object",
-                                    "properties": {
-                                        "type": { "const": "player" },
-                                        "id": {
-                                            "$ref": "../../definitions/userId.json"
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "type": { "const": "player" },
+                                                "id": {
+                                                    "$ref": "../../definitions/userId.json"
+                                                },
+                                                "allyTeam": {
+                                                    "type": "string"
+                                                },
+                                                "team": { "type": "string" },
+                                                "player": { "type": "string" }
+                                            },
+                                            "required": ["type", "id"]
                                         },
-                                        "allyTeam": { "type": "string" },
-                                        "team": { "type": "string" },
-                                        "player": { "type": "string" }
-                                    },
-                                    "required": [
-                                        "type",
-                                        "id",
-                                        "allyTeam",
-                                        "team",
-                                        "player"
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "type": { "const": "spec" },
+                                                "id": {
+                                                    "$ref": "../../definitions/userId.json"
+                                                },
+                                                "joinQueuePosition": {
+                                                    "anyOf": [
+                                                        { "type": "number" },
+                                                        { "type": "null" }
+                                                    ]
+                                                }
+                                            },
+                                            "required": ["type", "id"]
+                                        }
                                     ]
                                 },
                                 { "type": "null" }

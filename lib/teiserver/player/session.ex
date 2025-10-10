@@ -444,6 +444,17 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, :leave})
   end
 
+  @spec join_ally_team(T.userid(), ally_team_idx :: non_neg_integer()) ::
+          :ok | {:error, reason :: term()}
+  def join_ally_team(user_id, ally_team) do
+    GenServer.call(via_tuple(user_id), {:lobby, {:join_ally_team, ally_team}})
+  end
+
+  @spec lobby_spectate(T.userid()) :: :ok | {:error, reason :: term()}
+  def lobby_spectate(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :spectate})
+  end
+
   @spec start_lobby_battle(T.userid()) :: :ok | {:error, reason :: term}
   def start_lobby_battle(user_id) do
     GenServer.call(via_tuple(user_id), {:lobby, :start_battle})
@@ -888,6 +899,26 @@ defmodule Teiserver.Player.Session do
       {:error, reason} ->
         {:reply, {:error, reason}, state}
     end
+  end
+
+  def handle_call({:lobby, {:join_ally_team, _}}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, {:join_ally_team, ally_team}}, _from, state) do
+    resp =
+      case TachyonLobby.join_ally_team(state.lobby.id, state.user.id, ally_team) do
+        {:ok, _details} -> :ok
+        x -> x
+      end
+
+    {:reply, resp, state}
+  end
+
+  def handle_call({:lobby, :spectate}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :spectate}, _from, state) do
+    {:reply, TachyonLobby.spectate(state.lobby.id, state.user.id), state}
   end
 
   def handle_call({:lobby, :leave}, _from, state) when is_nil(state.lobby),

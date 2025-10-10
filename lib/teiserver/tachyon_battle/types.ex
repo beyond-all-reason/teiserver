@@ -10,11 +10,12 @@ defmodule Teiserver.TachyonBattle.Types do
   # redeclaration of Autohost.start_script(), but without the battle id
   # https://elixirforum.com/t/typespec-combining-maps/31416
   @type start_script :: %{
-          engineVersion: String.t(),
-          gameName: String.t(),
-          mapName: String.t(),
-          startPosType: :fixed | :random | :ingame | :beforegame,
-          allyTeams: [ally_team(), ...]
+          required(:engineVersion) => String.t(),
+          required(:gameName) => String.t(),
+          required(:mapName) => String.t(),
+          required(:startPosType) => :fixed | :random | :ingame | :beforegame,
+          required(:allyTeams) => [ally_team(), ...],
+          optional(:spectators) => [player()]
         }
 
   @type ally_team :: %{

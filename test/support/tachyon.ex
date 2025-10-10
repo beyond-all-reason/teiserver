@@ -525,6 +525,18 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
+  def join_ally_team!(client, ally_team) do
+    :ok = send_request(client, "lobby/joinAllyTeam", %{allyTeam: ally_team})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def spectate!(client) do
+    :ok = send_request(client, "lobby/spectate")
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
   def start_lobby_battle!(client) do
     :ok = send_request(client, "lobby/startBattle")
     {:ok, resp} = recv_message(client)

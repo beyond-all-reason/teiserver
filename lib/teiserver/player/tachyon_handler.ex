@@ -674,6 +674,35 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/joinAllyTeam", "request", _msg_id, msg, state) do
+    with {:ok, ally_team} <- TachyonParser.parse_int(msg["data"]["allyTeam"]),
+         :ok <- Player.Session.join_ally_team(state.user.id, ally_team) do
+      {:response, state}
+    else
+      {:error, :invalid_int} ->
+        {:error_response, :invalid_request, "Invalid ally team", state}
+
+      {:error, reason} when reason in [:not_in_lobby, :ally_team_full] ->
+        {:error_response, reason, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/spectate", "request", _msg_id, _msg, state) do
+    case Player.Session.lobby_spectate(state.user.id) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} when reason in [:not_in_lobby] ->
+        {:error_response, reason, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
     case Player.Session.start_lobby_battle(state.user.id) do
       :ok ->
@@ -895,17 +924,10 @@ defmodule Teiserver.Player.TachyonHandler do
 
   defp lobby_details_to_tachyon(details) do
     members =
-      Enum.map(details.members, fn {p_id, p} ->
-        {to_string(p_id),
-         Map.merge(
-           %{
-             id: to_string(p_id),
-             type: p.type
-           },
-           lobby_team_to_tachyon(p.team)
-         )}
+      Enum.map(details.members, fn {m_id, m} ->
+        {to_string(m_id), member_update_to_tachyon(to_string(m_id), m, true)}
       end)
-      |> Enum.into(%{})
+      |> Map.new()
 
     ally_team_config =
       for {at, at_idx} <- Enum.with_index(details.ally_team_config), into: %{} do
@@ -936,27 +958,50 @@ defmodule Teiserver.Player.TachyonHandler do
     }
   end
 
-  defp lobby_update_to_tachyon(lobby_id, %{event: :add_player} = ev) do
-    data = %{
-      id: lobby_id,
-      members: %{
-        to_string(ev.id) =>
-          Map.merge(
-            %{
-              type: :player,
-              id: to_string(ev.id)
-            },
-            lobby_team_to_tachyon(ev.team)
-          )
-      }
-    }
+  defp lobby_update_to_tachyon(lobby_id, %{event: :updated} = ev) do
+    members =
+      Enum.map(ev.updates, fn {p_id, updates} ->
+        {to_string(p_id), member_update_to_tachyon(to_string(p_id), updates, false)}
+      end)
+      |> Enum.into(%{})
 
+    data = %{id: lobby_id, members: members}
     {"lobby/updated", data}
   end
 
-  defp lobby_update_to_tachyon(lobby_id, %{event: :remove_player} = ev) do
-    data = %{id: lobby_id, members: %{to_string(ev.id) => nil}}
-    {"lobby/updated", data}
+  # omit_nil? is there so we can use the same function for both the initial
+  # object and any subsequent json patch style updates
+  # because the initial object cannot have nil keys, so just skip them if any
+  defp member_update_to_tachyon(_m_id, nil, _omit_nil?), do: nil
+
+  defp member_update_to_tachyon(m_id, updates, omit_nil?) do
+    base =
+      if is_map_key(updates, :team) do
+        val = updates.team
+
+        cond do
+          val == nil && omit_nil? -> %{}
+          val == nil -> %{allyTeam: nil, team: nil, player: nil}
+          true -> lobby_team_to_tachyon(val)
+        end
+      else
+        %{}
+      end
+      |> Map.put(:id, m_id)
+
+    other_keys = [{:type, :type}, {:join_queue_position, :joinQueuePosition}]
+
+    Enum.reduce(other_keys, base, fn {k, tachyon_k}, m ->
+      if is_map_key(updates, k) do
+        val = updates[k]
+
+        if val == nil && omit_nil?,
+          do: m,
+          else: Map.put(m, tachyon_k, updates[k])
+      else
+        m
+      end
+    end)
   end
 
   # handle partial overview object

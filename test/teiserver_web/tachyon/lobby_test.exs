@@ -48,6 +48,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       {:ok, ctx2} = Tachyon.setup_client()
       %{"status" => "success", "data" => data} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
       assert is_map_key(data["members"], to_string(user.id))
+      assert data["members"][to_string(ctx2[:user].id)]["type"] == "spec"
     end
 
     test "is idempotent", %{client: client, lobby_id: lobby_id} do
@@ -75,22 +76,19 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         Tachyon.join_lobby!(ctx2[:client], lobby_id)
     end
 
-    test "lobby full", %{lobby_id: lobby_id} do
+    test "ally team full", %{lobby_id: lobby_id} do
       {:ok, ctx2} = Tachyon.setup_client()
-      {:ok, ctx3} = Tachyon.setup_client()
       %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
 
-      %{"status" => "failed", "reason" => "lobby_full"} =
-        Tachyon.join_lobby!(ctx3[:client], lobby_id)
+      %{"status" => "failed", "reason" => "ally_team_full"} =
+        Tachyon.join_ally_team!(ctx2[:client], "000")
     end
 
     test "members get updated events on join", %{client: client, lobby_id: lobby_id} do
       {:ok, ctx2} = Tachyon.setup_client()
-      %{"status" => "success", "data" => details} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+      %{"status" => "success", "data" => _details} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
       %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
-      player_data = data["members"][to_string(ctx2[:user].id)]
-      assert is_map_key(player_data, "team")
-      assert is_map_key(details["allyTeamConfig"], player_data["allyTeam"])
+      assert %{"type" => "spec"} = data["members"][to_string(ctx2[:user].id)]
     end
   end
 
@@ -118,6 +116,24 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "spectate" do
+    setup [:setup_lobby]
+
+    test "works", %{client: client, user: user} do
+      %{"status" => "success"} = Tachyon.spectate!(client)
+
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+
+      user_id = to_string(user.id)
+
+      %{
+        "members" => %{
+          ^user_id => %{"type" => "spec", "allyTeam" => nil, "team" => nil, "player" => nil}
+        }
+      } = data
+    end
+  end
+
   describe "start battle" do
     setup [
       {Tachyon, :setup_app},
@@ -133,10 +149,17 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
 
     test "can start battle", ctx do
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], ctx[:lobby_id])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
+
       Tachyon.send_request(ctx[:client], "lobby/startBattle", %{id: ctx[:lobby_id]})
 
       %{"commandId" => "autohost/start"} =
         start_req = Tachyon.recv_message!(ctx[:autohost_client])
+
+      uid2 = to_string(ctx2[:user].id)
+      [%{"userId" => ^uid2}] = start_req["data"]["spectators"]
 
       start_req_response = %{
         port: 32781,
@@ -187,7 +210,10 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       assert lobbies[lobby_id]["maxPlayerCount"] == 4
 
       {:ok, ctx3} = Tachyon.setup_client()
-      %{"status" => "success"} = Tachyon.join_lobby!(ctx3[:client], lobby_id)
+      %{"status" => "success", "data" => data} = Tachyon.join_lobby!(ctx3[:client], lobby_id)
+      assert is_map_key(data["allyTeamConfig"], "000")
+      %{"status" => "success"} = Tachyon.join_ally_team!(ctx3[:client], "000")
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx3[:client])
 
       %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => lobbies}} =
         Tachyon.recv_message!(client)
