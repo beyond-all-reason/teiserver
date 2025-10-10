@@ -174,6 +174,10 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
+  def validate_totp(secret, otp, time), do: validate_totp(secret, otp, time, since: nil)
+
+  @spec validate_totp(User.t(), String.t(), DateTime.t()) ::
+          :ok | {:error, :invalid | :used}
   defp validate_totp(secret, otp, time, since: last_used) do
     cond do
       NimbleTOTP.valid?(secret, otp, time: time, since: last_used) ->
