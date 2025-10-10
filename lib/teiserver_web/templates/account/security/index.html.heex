@@ -2,7 +2,7 @@
 
 <div class="row">
   <div class="col-md-12">
-    <div class="card card-primary">
+    <div class="card card-primary mb-4">
       <div class="card-body">
         <a
           href={~p"/teiserver/account/security/edit_password"}
@@ -55,5 +55,79 @@
         <% end %>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <h4>OAuth Applications</h4>
+    <%= if Enum.empty?(@oauth_applications) do %>
+      <div class="text-muted">
+        <i class="fa-fw fa-solid fa-info-circle"></i> You have no authorized OAuth applications.
+      </div>
+    <% else %>
+      <div class="row g-3">
+        <%= for app <- @oauth_applications do %>
+          <div class="col-lg-6 col-md-12">
+            <div class={"card h-100 border-start border-4 #{if Enum.any?(app.scopes, &String.starts_with?(&1, "admin.")), do: "border-success", else: "border-primary"}"}>
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <h5 class="card-title mb-0">{app.name}</h5>
+                  <span class="badge bg-secondary">
+                    {Map.get(@oauth_token_counts, app.id, 0)} {if Map.get(
+                                                                    @oauth_token_counts,
+                                                                    app.id,
+                                                                    0
+                                                                  ) == 1,
+                                                                  do: "token",
+                                                                  else: "tokens"}
+                  </span>
+                </div>
+
+                <div class="mb-3">
+                  <div class="row g-2">
+                    <div class="col-sm-4">
+                      <small class="text-muted">Client ID</small>
+                      <div class="fw-bold text-truncate" title={app.uid}>{app.uid}</div>
+                    </div>
+                    <div class="col-sm-8">
+                      <small class="text-muted">Scopes</small>
+                      <div class="fw-bold">{Enum.join(app.scopes, ", ")}</div>
+                    </div>
+                  </div>
+
+                  <%= if app.description do %>
+                    <div class="mt-2">
+                      <small class="text-muted">Description</small>
+                      <div class="text-muted">{app.description}</div>
+                    </div>
+                  <% end %>
+
+                  <div class="mt-2">
+                    <small class="text-muted">Authorized</small>
+                    <div class="text-muted">
+                      <i class="fa-fw fa-solid fa-calendar-alt me-1"></i>
+                      {date_to_str(app.inserted_at, format: :ymd_hms)}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-auto">
+                  {link(raw("<i class=\"fa-fw fa-solid fa-times\"></i> Revoke Access"),
+                    to: Routes.ts_account_security_path(@conn, :revoke_oauth_application, app),
+                    method: :delete,
+                    data: [
+                      confirm:
+                        "Are you sure you want to revoke access to #{app.name}? This will invalidate all tokens for this application."
+                    ],
+                    class: "btn btn-outline-danger btn-sm w-100"
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 </div>

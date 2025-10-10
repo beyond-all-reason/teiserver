@@ -6,7 +6,6 @@ defmodule TeiserverWeb.MapsLive.Index do
   def mount(_params, _session, socket) do
     socket =
       socket
-      |> assign(:site_menu_active, "maps")
       |> assign(:view_colour, :default)
       |> assign(:maps, [])
       |> assign(:filtered_maps, [])

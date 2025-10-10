@@ -7,6 +7,7 @@ defmodule Teiserver.Protocols.SpringIn do
   """
   require Logger
   alias Teiserver.{Account, Lobby, Coordinator, Battle, Room, CacheUser, Client, Config}
+  alias Teiserver.Account.FriendRequestLib
   alias Phoenix.PubSub
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
@@ -540,8 +541,10 @@ defmodule Teiserver.Protocols.SpringIn do
               :ok
 
             {:error, reason} ->
+              user_friendly_reason = FriendRequestLib.error_atom_to_user_friendly_string(reason)
+
               Logger.warning(
-                "Failed to create friend request to #{username} for #{state.userid}: #{reason}"
+                "Failed to create friend request to #{username} for #{state.userid}: #{user_friendly_reason}"
               )
           end
         end

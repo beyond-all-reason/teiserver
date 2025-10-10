@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
   use TeiserverWeb.ConnCase
   alias Teiserver.Support.Tachyon
   alias Teiserver.Account
+  alias Teiserver.Config
 
   describe "friends" do
     setup [{Tachyon, :setup_client}]
@@ -80,6 +81,69 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
     test "request to self", ctx do
       assert %{"status" => "failed", "reason" => "invalid_user"} =
                Tachyon.send_friend_request!(ctx[:client], ctx[:user].id)
+    end
+
+    test "request to user who ignores sender", ctx do
+      Account.ignore_user(ctx[:user2].id, ctx[:user].id)
+
+      assert %{"status" => "failed", "reason" => "invalid_user"} =
+               Tachyon.send_friend_request!(ctx[:client], ctx[:user2].id)
+    end
+
+    test "request to user who avoids sender", ctx do
+      Account.avoid_user(ctx[:user2].id, ctx[:user].id)
+
+      assert %{"status" => "failed", "reason" => "invalid_user"} =
+               Tachyon.send_friend_request!(ctx[:client], ctx[:user2].id)
+    end
+
+    test "request when already friends", ctx do
+      {:ok, _} = Account.create_friend(ctx[:user].id, ctx[:user2].id)
+
+      assert %{"status" => "failed", "reason" => "already_in_friendlist"} =
+               Tachyon.send_friend_request!(ctx[:client], ctx[:user2].id)
+    end
+
+    test "request when outgoing capacity reached", ctx do
+      on_exit(fn ->
+        Teiserver.cache_delete(:config_site_cache, "relationships.Maximum relationships per user")
+      end)
+
+      limit = 2
+      Config.update_site_config("relationships.Maximum relationships per user", limit)
+
+      # Create users to reach the limit
+      {:ok, ctx3} = Tachyon.setup_client()
+      {:ok, ctx4} = Tachyon.setup_client()
+
+      # Add 2 friends (reaching the limit)
+      {:ok, _} = Account.create_friend(ctx[:user].id, ctx3[:user].id)
+      {:ok, _} = Account.create_friend(ctx[:user].id, ctx4[:user].id)
+
+      # Try to send a friend request - should fail due to limit
+      assert %{"status" => "failed", "reason" => "outgoing_capacity_reached"} =
+               Tachyon.send_friend_request!(ctx[:client], ctx[:user2].id)
+    end
+
+    test "request when incoming capacity reached", ctx do
+      on_exit(fn ->
+        Teiserver.cache_delete(:config_site_cache, "relationships.Maximum relationships per user")
+      end)
+
+      limit = 2
+      Config.update_site_config("relationships.Maximum relationships per user", limit)
+
+      # Create users to reach the target's limit
+      {:ok, ctx3} = Tachyon.setup_client()
+      {:ok, ctx4} = Tachyon.setup_client()
+
+      # Add 2 friends to target user (reaching the limit)
+      {:ok, _} = Account.create_friend(ctx[:user2].id, ctx3[:user].id)
+      {:ok, _} = Account.create_friend(ctx[:user2].id, ctx4[:user].id)
+
+      # Try to send a friend request - should fail due to target's limit
+      assert %{"status" => "failed", "reason" => "incoming_capacity_reached"} =
+               Tachyon.send_friend_request!(ctx[:client], ctx[:user2].id)
     end
 
     test "request success", ctx do

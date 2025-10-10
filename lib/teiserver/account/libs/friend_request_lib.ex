@@ -11,6 +11,29 @@ defmodule Teiserver.Account.FriendRequestLib do
   @spec icon :: String.t()
   def icon(), do: "fa-user-plus"
 
+  @spec error_atom_to_user_friendly_string(atom() | String.t()) :: String.t()
+  def error_atom_to_user_friendly_string(reason) do
+    case reason do
+      :invalid_user ->
+        "Invalid user"
+
+      :already_in_friendlist ->
+        "Already friends"
+
+      :outgoing_capacity_reached ->
+        "You have reached the maximum number of friends"
+
+      :incoming_capacity_reached ->
+        "This user has reached the maximum number of friends"
+
+      atom when is_atom(atom) ->
+        to_string(atom) |> String.replace("_", " ") |> String.capitalize()
+
+      string when is_binary(string) ->
+        string
+    end
+  end
+
   @spec can_send_friend_request?(T.userid(), T.userid()) :: boolean
   def can_send_friend_request?(from_id, to_id) do
     {result, _} = can_send_friend_request_with_reason?(from_id, to_id)
@@ -18,37 +41,37 @@ defmodule Teiserver.Account.FriendRequestLib do
   end
 
   @spec can_send_friend_request_with_reason?(T.userid(), T.userid()) ::
-          {true, :ok} | {false, String.t()}
+          {true, :ok} | {false, atom()}
   def can_send_friend_request_with_reason?(from_id, to_id) do
     cond do
       from_id == nil ->
-        {false, "nil from_id"}
+        {false, :invalid_user}
 
       to_id == nil ->
-        {false, "nil to_id"}
+        {false, :invalid_user}
 
       from_id == to_id ->
-        {false, "Cannot add yourself as a friend"}
+        {false, :invalid_user}
 
       Account.get_friend(from_id, to_id) != nil ->
-        {false, "Already friends"}
+        {false, :already_in_friendlist}
 
       # Check for existing outgoing request (from current user to target)
       # Note: We don't check for incoming requests here because they should trigger auto-accept
       Account.get_friend_request(from_id, to_id) != nil ->
-        {false, "Existing request"}
+        {false, :already_in_friendlist}
 
       Account.does_a_ignore_b?(to_id, from_id) ->
-        {false, "Ignored"}
+        {false, :invalid_user}
 
       Account.does_a_avoid_b?(to_id, from_id) ->
-        {false, "Avoided"}
+        {false, :invalid_user}
 
       Teiserver.Account.RelationshipLib.check_relationship_limit(from_id, :friend) != :ok ->
-        {false, "You have reached the maximum number of friends"}
+        {false, :outgoing_capacity_reached}
 
       Teiserver.Account.RelationshipLib.check_relationship_limit(to_id, :friend) != :ok ->
-        {false, "This user has reached the maximum number of friends"}
+        {false, :incoming_capacity_reached}
 
       true ->
         {true, :ok}

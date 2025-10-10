@@ -1,6 +1,7 @@
 defmodule Teiserver.Protocols.Spring.UserIn do
   @moduledoc false
   alias Teiserver.Account
+  alias Teiserver.Account.FriendRequestLib
   alias Teiserver.Protocols.SpringIn
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
@@ -19,7 +20,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
           user ->
             case Account.create_friend_request(state.userid, user.id) do
               {:ok, _} -> {n, :success}
-              {:error, reason} -> {n, reason}
+              {:error, reason} -> {n, FriendRequestLib.error_atom_to_user_friendly_string(reason)}
             end
         end
       end)

@@ -273,7 +273,12 @@ defmodule TeiserverWeb.Router do
   scope "/maps", TeiserverWeb.MapsLive, as: :maps do
     pipe_through([:live_browser, :app_layout])
 
-    live "/", Index, :index
+    live_session :maps,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :mount_current_user}
+      ] do
+      live "/", Index, :index
+    end
   end
 
   scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do
@@ -291,6 +296,7 @@ defmodule TeiserverWeb.Router do
     post("/security/totp/disable", SecurityController, :disable_totp)
     put("/security/update_password", SecurityController, :update_password)
     delete("/security/delete_token/:id", SecurityController, :delete_token)
+    delete("/security/revoke_oauth/:id", SecurityController, :revoke_oauth_application)
   end
 
   scope "/battle", TeiserverWeb.Battle.LobbyLive, as: :ts_battle do

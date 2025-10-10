@@ -323,9 +323,12 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         {:noreply, socket}
 
       {:error, reason} ->
+        user_friendly_message =
+          Teiserver.Account.FriendRequestLib.error_atom_to_user_friendly_string(reason)
+
         socket =
           socket
-          |> put_flash(:warning, "Unable to create friend request: #{reason}")
+          |> put_flash(:warning, "Unable to create friend request: #{user_friendly_message}")
 
         {:noreply, socket}
     end
