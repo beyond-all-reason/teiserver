@@ -106,8 +106,8 @@ defmodule Teiserver.Account do
   @spec get_user_secret(integer) :: binary | nil
   defdelegate get_user_secret(user_id), to: TOTPLib
 
-  @spec get_last_used_otp(integer) :: :inactive | String.t()
-  defdelegate get_last_used_otp(user_id), to: TOTPLib
+  @spec get_last_used(integer) :: :inactive | String.t()
+  defdelegate get_last_used(user_id), to: TOTPLib
 
   @spec set_secret(integer, binary) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
   defdelegate set_secret(user_id, secret), to: TOTPLib

@@ -60,8 +60,8 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_last_used_otp(T.userid()) :: :inactive | DateTime.t()
-  def get_last_used_otp(user_id) do
+  @spec get_last_used(T.userid()) :: :inactive | DateTime.t()
+  def get_last_used(user_id) do
     case get_user_totp(user_id) do
       {:inactive, nil} ->
         :inactive
@@ -100,13 +100,11 @@ defmodule Teiserver.Account.TOTPLib do
     set_totp(user_id, %{user_id: user_id, secret: secret})
   end
 
-  @spec set_last_used(T.userid(), integer()) ::
+  @spec set_last_used(T.userid(), DateTime.t()) ::
           {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()} | {:inactive, User.t()}
   def set_last_used(user_id, last_used) do
     if get_user_totp_status(user_id) == :active do
-      {:ok, utc_datetime} = DateTime.from_unix(last_used, :second)
-
-      case set_totp(user_id, %{user_id: user_id, last_used: utc_datetime}) do
+      case set_totp(user_id, %{user_id: user_id, last_used: last_used}) do
         {:ok, _} ->
           :ok
 
@@ -145,9 +143,9 @@ defmodule Teiserver.Account.TOTPLib do
     |> Repo.update_all(set: [wrong_otp: 0])
   end
 
-  def validate_totp(user_or_secret, otp, time \\ System.os_time(:second))
+  def validate_totp(user_or_secret, otp, time \\ DateTime.utc_now())
 
-  @spec validate_totp(User.t(), String.t(), integer()) ::
+  @spec validate_totp(User.t(), String.t(), DateTime.t()) ::
           :ok | {:error, :inactive | :invalid | :used | :locked}
   def validate_totp(%User{id: user_id}, otp, time) do
     {status, totp} = get_user_totp(user_id)
@@ -176,22 +174,6 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  def validate_totp(secret, otp, time) do
-    cond do
-      NimbleTOTP.valid?(secret, otp, time: time) ->
-        :ok
-
-      true ->
-        {:error, :invalid}
-    end
-  end
-
-  @spec validate_totp(binary(), String.t(), integer(), keyword()) ::
-          :ok | {:error, :invalid | :used}
-  defp validate_totp(secret, otp, time, since: nil) do
-    validate_totp(secret, otp, time)
-  end
-
   defp validate_totp(secret, otp, time, since: last_used) do
     cond do
       NimbleTOTP.valid?(secret, otp, time: time, since: last_used) ->
@@ -200,12 +182,12 @@ defmodule Teiserver.Account.TOTPLib do
       true ->
         # Second test is needed. If :since is provided and NimbleTOTP.valid? returns false, it could either be that the OTP is wrong, or that it got used.
         # To figure out which one it is, we need to test a second time without since, as a false this time indicates that the OTP is invalid, and a True that it got used
-        case validate_totp(secret, otp, time) do
-          {:error, :invalid} ->
-            {:error, :invalid}
-
-          _ ->
+        cond do
+          NimbleTOTP.valid?(secret, otp, time: time) ->
             {:error, :used}
+
+          true ->
+            {:error, :invalid}
         end
     end
   end
