@@ -77,13 +77,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
           game_version: String.t(),
           engine_version: String.t(),
           ally_team_config: ally_team_config(),
-          members: %{
-            T.userid() =>
-              %{
-                type: :player,
-                team: team()
-              }
-              | %{type: :spec, join_queue_position: number() | nil}
+          players: %{
+            T.userid() => %{team: team()}
+          },
+          spectators: %{
+            join_queue_position: number() | nil
           },
           current_battle:
             nil
@@ -259,8 +257,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       })
       |> Map.update!(:monitors, &MC.monitor(&1, pid, {:user, user_id}))
 
-    update = %{type: :spec}
-    broadcast_update({:update, user_id, %{user_id => update}}, state)
+    update = %{join_queue_position: nil}
+    broadcast_update({:update, user_id, %{spectators: %{user_id => update}}}, state)
 
     {:reply, {:ok, self(), get_details_from_state(state)}, state}
   end
@@ -334,7 +332,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
               for({user_id, team} <- changes, do: {user_id, %{team: team}})
               |> Enum.into(%{})
 
-            broadcast_update({:update, nil, change_map}, state)
+            broadcast_update({:update, nil, %{players: change_map}}, state)
 
             updated_players =
               Enum.reduce(changes, state.players, fn {p_id, team}, players ->
@@ -354,7 +352,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
               |> Map.update!(:spectators, &Map.delete(&1, user_id))
               |> Map.update!(:players, &Map.put(&1, user_id, player))
 
-            update = %{user_id => %{team: team, type: :player, join_queue_position: nil}}
+            update = %{
+              players: %{user_id => %{team: team}},
+              spectators: %{user_id => nil}
+            }
+
             TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
             broadcast_update({:update, nil, update}, state)
 
@@ -388,9 +390,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> Map.put(:players, updated_players)
       |> put_in([:spectators, user_id], spec)
 
-    change_map =
+    player_changes =
       for({u_id, team} <- changes, do: {u_id, %{team: team}}, into: %{})
-      |> Map.put(user_id, %{team: nil, type: :spec})
+      |> Map.put(user_id, nil)
+
+    change_map = %{players: player_changes, spectators: %{user_id => %{join_queue_position: nil}}}
 
     broadcast_update({:update, nil, change_map}, state)
     {:reply, :ok, state}
@@ -496,13 +500,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp get_details_from_state(state) do
     players =
       Enum.map(state.players, fn {p_id, p} ->
-        {p_id, %{type: :player, team: p.team}}
+        {p_id, %{team: p.team}}
       end)
       |> Enum.into(%{})
 
     spectators =
       Enum.map(state.spectators, fn {s_id, s} ->
-        {s_id, %{type: :spec, join_queue_position: s.join_queue_position}}
+        {s_id, %{join_queue_position: s.join_queue_position}}
       end)
       |> Enum.into(%{})
 
@@ -514,7 +518,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       :engine_version,
       :ally_team_config
     ])
-    |> Map.put(:members, Map.merge(players, spectators))
+    |> Map.put(:players, players)
+    |> Map.put(:spectators, spectators)
   end
 
   # temporarily commented out until I get to implement lobby/joinQueue
@@ -621,7 +626,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         |> Map.new()
         |> Map.put(user_id, nil)
 
-      broadcast_update({:update, user_id, updates}, state)
+      broadcast_update({:update, user_id, %{players: updates}}, state)
     end
 
     state
@@ -633,7 +638,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       Map.update!(state, :spectators, &Map.delete(&1, user_id))
       |> Map.update!(:monitors, &MC.demonitor_by_val(&1, user_id))
 
-    broadcast_update({:update, user_id, %{user_id => nil}}, state)
+    broadcast_update({:update, user_id, %{spectators: %{user_id => nil}}}, state)
     state
   end
 

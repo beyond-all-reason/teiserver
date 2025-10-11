@@ -82,15 +82,16 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _, details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
-      assert details.members["other-user-id"].type == :spec
-      assert details.members["other-user-id"].join_queue_position == nil
+      assert details.spectators["other-user-id"].join_queue_position == nil
 
       assert_receive {:lobby, ^id,
                       {:updated,
                        [
                          %{
                            event: :updated,
-                           updates: %{"other-user-id" => %{type: :spec}}
+                           updates: %{
+                             spectators: %{"other-user-id" => %{join_queue_position: nil}}
+                           }
                          }
                        ]}}
     end
@@ -112,7 +113,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
                        [
                          %{
                            event: :updated,
-                           updates: %{"user2" => %{type: :spec}}
+                           updates: %{spectators: %{"user2" => %{join_queue_position: nil}}}
                          }
                        ]}}
 
@@ -120,7 +121,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
 
-      expected_updates = %{"user2" => %{type: :spec}}
+      expected_updates = %{spectators: %{"user2" => %{join_queue_position: nil}}}
 
       assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: ^expected_updates}]}}
     end
@@ -153,7 +154,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
       {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
       {:ok, details} = Lobby.join_ally_team(id, "user2", 1)
-      assert %{team: {1, _, _}, type: :player} = details.members["user2"]
+      assert %{team: {1, _, _}} = details.players["user2"]
 
       # is idempotent
       {:ok, details2} = Lobby.join_ally_team(id, "user2", 1)
@@ -171,7 +172,10 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       expected = %{
         event: :updated,
-        updates: %{"user2" => %{team: {1, 0, 0}, type: :player, join_queue_position: nil}}
+        updates: %{
+          players: %{"user2" => %{team: {1, 0, 0}}},
+          spectators: %{"user2" => nil}
+        }
       }
 
       assert_receive {:lobby, ^id, {:updated, [^expected]}}
@@ -182,10 +186,10 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
       {:ok, details} = Lobby.join_ally_team(id, "user2", 1)
-      assert %{team: {1, _, _}, type: :player} = details.members["user2"]
+      assert %{team: {1, _, _}} = details.players["user2"]
 
       {:ok, details} = Lobby.join_ally_team(id, "user2", 0)
-      assert %{team: {0, _, _}, type: :player} = details.members["user2"]
+      assert %{team: {0, _, _}} = details.players["user2"]
     end
 
     test "other players are reshuffled" do
@@ -197,20 +201,17 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, details} = Lobby.join_ally_team(id, "user2", 0)
 
       expected_update = %{
-        "user2" => %{
-          type: :player,
-          team: {0, 1, 0},
-          join_queue_position: nil
-        }
+        players: %{"user2" => %{team: {0, 1, 0}}},
+        spectators: %{"user2" => nil}
       }
 
       assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: ^expected_update}]}}
 
-      assert %{team: {0, _, _}, type: :player} = details.members["user2"]
+      assert %{team: {0, _, _}} = details.players["user2"]
 
       # moving from ally team 0 to 1 should reorder "user2" in the first ally team
       {:ok, details} = Lobby.join_ally_team(id, @default_user_id, 1)
-      %{@default_user_id => %{team: {1, 0, 0}}, "user2" => %{team: {0, 0, 0}}} = details.members
+      %{@default_user_id => %{team: {1, 0, 0}}, "user2" => %{team: {0, 0, 0}}} = details.players
     end
   end
 
@@ -260,7 +261,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_received {:lobby, ^id, {:updated, [%{event: :updated}]}}
 
       :ok = Lobby.leave(id, "user2")
-      assert_received {:lobby, ^id, {:updated, [%{event: :updated, updates: %{"user2" => nil}}]}}
+      expected = %{spectators: %{"user2" => nil}}
+      assert_received {:lobby, ^id, {:updated, [%{event: :updated, updates: ^expected}]}}
     end
 
     test "reshuffling player on leave sends updates" do
@@ -284,7 +286,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       expected_event = %{
         event: :updated,
-        updates: %{"user2" => nil, "user3" => %{team: {1, 0, 0}}}
+        updates: %{players: %{"user2" => nil, "user3" => %{team: {1, 0, 0}}}}
       }
 
       assert_received {:lobby, ^id, {:updated, [^expected_event]}}
@@ -298,7 +300,9 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
       Process.exit(sink_pid, :kill)
-      assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: %{"1234" => nil}}]}}
+
+      assert_receive {:lobby, ^id,
+                      {:updated, [%{event: :updated, updates: %{players: %{"1234" => nil}}}]}}
     end
 
     test "spectator pid dying means is removed from lobby" do
@@ -308,7 +312,9 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
 
       Process.exit(sink_pid, :kill)
-      assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: %{"user2" => nil}}]}}
+
+      assert_receive {:lobby, ^id,
+                      {:updated, [%{event: :updated, updates: %{spectators: %{"user2" => nil}}}]}}
     end
   end
 
@@ -325,7 +331,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "works" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       :ok = Lobby.spectate(id, @default_user_id)
-      expected = %{@default_user_id => %{type: :spec, team: nil}}
+
+      expected = %{
+        players: %{@default_user_id => nil},
+        spectators: %{@default_user_id => %{join_queue_position: nil}}
+      }
+
       assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: ^expected}]}}
     end
 
