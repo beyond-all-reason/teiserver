@@ -134,19 +134,19 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
   defp recalculate_outstanding_report_groups(
          %{assigns: %{current_user: _current_user, filters: filters}} = socket
        ) do
-    closed_filter =
-      case filters["closed-filter"] do
-        "Open" -> false
-        "Closed" -> true
-        _ -> nil
-      end
+    #    closed_filter =
+    #      case filters["closed-filter"] do
+    #        "Open" -> false
+    #        "Closed" -> true
+    #        _ -> nil
+    #      end
 
-    actioned_filter =
-      case filters["actioned-filter"] do
-        "Actioned" -> true
-        "Un-actioned" -> false
-        _ -> nil
-      end
+    #    actioned_filter =
+    #      case filters["actioned-filter"] do
+    #        "Actioned" -> true
+    #        "Un-actioned" -> false
+    #        _ -> nil
+    #      end
 
     timeframe =
       case filters["timeframe-filter"] do
@@ -155,12 +155,12 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
         _ -> nil
       end
 
-    kind =
-      case filters["kind-filter"] do
-        "Any" -> nil
-        "Actions" -> "actions"
-        "Chat" -> "chat"
-      end
+    #    kind =
+    #      case filters["kind-filter"] do
+    #        "Any" -> nil
+    #        "Actions" -> "actions"
+    #        "Chat" -> "chat"
+    #      end
 
     parsed = TeiserverWeb.Parsers.PaginationParams.parse_params(filters)
     page = parsed.page - 1
@@ -169,11 +169,11 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     total_count =
       Moderation.count_report_groups(
         where: [
-          closed: closed_filter,
-          actioned: actioned_filter,
-          inserted_after: timeframe,
-          has_reports_of_kind: kind,
-          target_id: filters["target_id"]
+          #          closed: closed_filter,
+          #          actioned: actioned_filter,
+          inserted_after: timeframe
+          #          has_reports_of_kind: kind,
+          #          target_id: filters["target_id"]
         ]
       )
 
@@ -182,16 +182,16 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     report_groups =
       Moderation.list_report_groups(
         where: [
-          closed: closed_filter,
-          actioned: actioned_filter,
-          inserted_after: timeframe,
-          has_reports_of_kind: kind,
-          target_id: filters["target_id"]
+          #          closed: closed_filter,
+          #          actioned: actioned_filter,
+          inserted_after: timeframe
+          #          has_reports_of_kind: kind,
+          #          target_id: filters["target_id"]
         ],
+        preload: [:reports, :targets],
         order_by: ["Newest first"],
         limit: limit,
-        offset: page * limit,
-        preload: [:target]
+        offset: page * limit
       )
 
     socket

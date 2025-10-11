@@ -114,17 +114,10 @@
         <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
       </span>
     <% end %>
-
-    <%= if report_group.closed do %>
-      <span class={"btn btn-sm btn-#{@view_colour}"}>
-        <Fontawesome.icon icon="folder-closed" style="solid" />
-      </span>
-    <% end %>
   </:col>
 
-  <:col :let={report_group} label="Target">{report_group.target.name}</:col>
+  <:col :let={report_group} label="Match ID">{report_group.match_id}</:col>
   <:col :let={report_group} label="Reports">{report_group.report_count}</:col>
-  <:col :let={report_group} label="Votes">{report_group.vote_count}</:col>
   <:col :let={report_group} label="Actions">{report_group.action_count}</:col>
   <:col :let={report_group} label="Created">
     {report_group.inserted_at |> date_to_str(format: :hms_or_ymd)}
@@ -153,7 +146,7 @@
     <.link
       :if={report_group.match_id}
       class="btn btn-secondary btn-sm"
-      navigate={~p"/battle/chat/#{report_group.match_id}/#{report_group.target_id}"}
+      navigate={~p"/battle/chat/#{report_group.match_id}"}
     >
       Chat
     </.link>

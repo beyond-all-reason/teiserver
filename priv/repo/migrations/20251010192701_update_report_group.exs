@@ -6,6 +6,7 @@ defmodule Teiserver.Repo.Migrations.UpdateReportGroup do
       remove :target_id
       remove :closed
       remove :vote_count
+      add :type, :string
     end
 
     drop table(:moderation_report_group_votes)

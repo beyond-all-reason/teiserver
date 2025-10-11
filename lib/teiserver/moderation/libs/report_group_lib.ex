@@ -20,7 +20,7 @@ defmodule Teiserver.Moderation.ReportGroupLib do
       item_type: "moderation_report_group",
       item_colour: colour(),
       item_icon: icon(),
-      item_label: "#{report_group.target.name}",
+      item_label: "#{report_group.match_id}",
       url: "/moderation/overwatch/report_group/#{report_group.id}"
     }
   end

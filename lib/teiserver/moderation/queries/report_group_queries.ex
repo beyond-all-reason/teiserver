@@ -42,10 +42,10 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
       where: report_groups.id in ^id_list
   end
 
-  defp _where(query, :target_id, target_id) do
-    from report_groups in query,
-      where: report_groups.target_id == ^target_id
-  end
+  #  defp _where(query, :target_id, target_id) do
+  #    from report_groups in query,
+  #      where: report_groups.target_id == ^target_id
+  #  end
 
   defp _where(query, :match_id, false) do
     from report_groups in query,
@@ -57,22 +57,22 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
       where: report_groups.match_id == ^match_id
   end
 
-  defp _where(query, :closed, closed) do
-    from report_groups in query,
-      where: report_groups.closed == ^closed
-  end
-
-  defp _where(query, :actioned, true) do
-    from report_groups in query,
-      where: report_groups.action_count > 0
-  end
-
-  defp _where(query, :actioned, false) do
-    from report_groups in query,
-      where: report_groups.action_count == 0
-  end
-
-  defp _where(query, :actioned, _), do: query
+  #  defp _where(query, :closed, closed) do
+  #    from report_groups in query,
+  #      where: report_groups.closed == ^closed
+  #  end
+  #
+  #  defp _where(query, :actioned, true) do
+  #    from report_groups in query,
+  #      where: report_groups.action_count > 0
+  #  end
+  #
+  #  defp _where(query, :actioned, false) do
+  #    from report_groups in query,
+  #      where: report_groups.action_count == 0
+  #  end
+  #
+  #  defp _where(query, :actioned, _), do: query
 
   defp _where(query, :inserted_after, datetime) do
     from report_groups in query,
@@ -119,21 +119,25 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
     end)
   end
 
-  defp _preload(query, :target) do
-    from report_groups in query,
-      join: targets in assoc(report_groups, :target),
-      preload: [target: targets]
+  defp _preload(query, :targets) do
+    from [report_group: report_group, report: report] in query,
+      left_join: target in assoc(report, :target),
+      as: :target,
+      preload: [reports: {report, target: target}]
   end
 
   defp _preload(query, :actions) do
-    from report_groups in query,
-      left_join: actions in assoc(report_groups, :actions),
+    from [report_group: report_group] in query,
+      left_join: actions in assoc(report_group, :actions),
+      as: :action,
       preload: [actions: actions]
   end
 
   defp _preload(query, :reports) do
-    from report_groups in query,
-      left_join: reports in assoc(report_groups, :reports),
+    from report_group in query,
+      as: :report_group,
+      left_join: reports in assoc(report_group, :reports),
+      as: :report,
       preload: [reports: reports]
 
     # TODO add reporters here

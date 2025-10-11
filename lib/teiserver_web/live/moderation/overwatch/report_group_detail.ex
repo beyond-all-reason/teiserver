@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
       socket
       |> assign(:report_group, report_group)
       |> add_breadcrumb(
-        name: "Report group #{report_group.target.name}",
+        name: "Report group #{report_group.id}",
         url: ~p"/moderation/overwatch/report_group/#{id}"
       )
 
@@ -41,18 +41,18 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   end
 
   @impl true
-  def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
-    [key] = event["_target"]
-    value = event[key]
-
-    new_filters = Map.put(filters, key, value)
-
-    socket =
-      socket
-      |> assign(:filters, new_filters)
-
-    {:noreply, socket}
-  end
+  #  def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
+  #    [key] = event["_target"]
+  #    value = event[key]
+  #
+  #    new_filters = Map.put(filters, key, value)
+  #
+  #    socket =
+  #      socket
+  #      |> assign(:filters, new_filters)
+  #
+  #    {:noreply, socket}
+  #  end
 
   def handle_event("close-group", _event, %{assigns: %{report_group: report_group}} = socket) do
     {:ok, _} = Moderation.update_report_group(report_group, %{"closed" => "true"})
@@ -71,6 +71,6 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   end
 
   defp get_report_group(id) do
-    Moderation.get_report_group!(id, preload: [:target, :actions, :reports])
+    Moderation.get_report_group!(id, preload: [:reports, :targets, :actions])
   end
 end
