@@ -242,7 +242,7 @@ defmodule Teiserver.Moderation do
   end
 
   def create_report_group_and_report(report_params) do
-    report_group = get_or_make_report_group(report_params.target_id, report_params.match_id)
+    report_group = get_or_make_report_group(report_params.match_id)
 
     report_params =
       Map.merge(report_params, %{
@@ -300,8 +300,8 @@ defmodule Teiserver.Moderation do
   @spec change_report_group(ComplexServerEventType, map) :: Ecto.Changeset
   defdelegate change_report_group(report_group, attrs), to: ReportGroupLib
 
-  @spec get_or_make_report_group(T.userid(), T.match_id() | nil) :: ReportGroup.t()
-  defdelegate get_or_make_report_group(target_id, match_id), to: ReportGroupLib
+  @spec get_or_make_report_group(T.match_id() | nil) :: ReportGroup.t()
+  defdelegate get_or_make_report_group(match_id), to: ReportGroupLib
 
   alias Teiserver.Moderation.{Response, ResponseLib}
 

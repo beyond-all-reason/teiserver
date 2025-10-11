@@ -81,10 +81,9 @@ defmodule Teiserver.Moderation.ReportGroupLib do
     |> Repo.one()
   end
 
-  def get_report_group(target_id, match_id) do
+  def get_report_group(match_id) do
     ReportGroupQueries.query_report_groups(
       where: [
-        target_id: target_id,
         match_id: match_id
       ]
     )
@@ -155,11 +154,11 @@ defmodule Teiserver.Moderation.ReportGroupLib do
     ReportGroup.changeset(report_group, attrs)
   end
 
-  @spec get_or_make_report_group(T.userid(), T.match_id()) :: ReportGroup.t()
-  def get_or_make_report_group(target_id, match_id) when is_integer(match_id) do
-    case get_report_group(target_id, match_id) do
+  @spec get_or_make_report_group(T.match_id()) :: ReportGroup.t()
+  def get_or_make_report_group(match_id) when is_integer(match_id) do
+    case get_report_group(match_id) do
       nil ->
-        {:ok, rg} = create_report_group(%{target_id: target_id, match_id: match_id})
+        {:ok, rg} = create_report_group(%{match_id: match_id})
         rg
 
       r ->
@@ -167,23 +166,23 @@ defmodule Teiserver.Moderation.ReportGroupLib do
     end
   end
 
-  def get_or_make_report_group(target_id, nil) do
-    report_group =
-      get_report_group(nil,
-        where: [
-          target_id: target_id,
-          match_id: false,
-          closed: false
-        ]
-      )
-
-    case report_group do
-      nil ->
-        {:ok, rg} = create_report_group(%{target_id: target_id})
-        rg
-
-      _ ->
-        report_group
-    end
-  end
+  #  def get_or_make_report_group(target_id, nil) do
+  #    report_group =
+  #      get_report_group(nil,
+  #        where: [
+  #          target_id: target_id,
+  #          match_id: false,
+  #          closed: false
+  #        ]
+  #      )
+  #
+  #    case report_group do
+  #      nil ->
+  #        {:ok, rg} = create_report_group(%{target_id: target_id})
+  #        rg
+  #
+  #      _ ->
+  #        report_group
+  #    end
+  #  end
 end
