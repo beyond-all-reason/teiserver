@@ -1026,26 +1026,13 @@ defmodule Teiserver.Player.TachyonHandler do
 
   defp spectator_update_to_tachyon(p_id, updates, omit_nil?) do
     base = %{id: p_id}
-    keys = [{:join_queue_position, :joinQueuePosition}]
-
-    Enum.reduce(keys, base, fn {k, tachyon_k}, m ->
-      if is_map_key(updates, k) do
-        val = Map.get(m, k)
-
-        cond do
-          val == nil && omit_nil? -> m
-          val == nil -> Map.put(m, tachyon_k, nil)
-          true -> Map.put(m, tachyon_k, val)
-        end
-      else
-        m
-      end
-    end)
+    key_mapping = [{:join_queue_position, :joinQueuePosition}]
+    to_json_merge_patch(base, updates, key_mapping, omit_nil?)
   end
 
   # handle partial overview object
   defp lobby_overview_to_tachyon(lobby_id, overview) do
-    keys = [
+    key_mapping = [
       {:name, :name},
       {:player_count, :playerCount},
       {:max_player_count, :maxPlayerCount},
@@ -1055,24 +1042,41 @@ defmodule Teiserver.Player.TachyonHandler do
       {:current_battle, :currentBattle, &lobby_current_battle_to_tachyon/1}
     ]
 
-    init = %{id: lobby_id, currentBattle: nil}
-
-    Enum.reduce(keys, init, fn
-      {k, tachyon_k}, m ->
-        case Map.get(overview, k) do
-          nil -> m
-          val -> Map.put(m, tachyon_k, val)
-        end
-
-      {k, tachyon_k, f}, m ->
-        case Map.get(overview, k) do
-          nil -> m
-          val -> Map.put(m, tachyon_k, f.(val))
-        end
-    end)
+    base = %{id: lobby_id, currentBattle: nil}
+    to_json_merge_patch(base, overview, key_mapping, true)
   end
 
   defp lobby_current_battle_to_tachyon(battle) do
     %{startedAt: DateTime.to_unix(battle.started_at, :microsecond)}
+  end
+
+  defp to_json_merge_patch(initial_map, map_to_transform, key_mapping, omit_nil?) do
+    Enum.reduce(key_mapping, initial_map, fn
+      {k, tachyon_k}, m ->
+        if is_map_key(map_to_transform, k) do
+          val = Map.get(map_to_transform, k)
+
+          cond do
+            val == nil && omit_nil? -> m
+            val == nil -> Map.put(m, tachyon_k, nil)
+            true -> Map.put(m, tachyon_k, val)
+          end
+        else
+          m
+        end
+
+      {k, tachyon_k, f}, m ->
+        if is_map_key(map_to_transform, k) do
+          val = Map.get(map_to_transform, k)
+
+          cond do
+            val == nil && omit_nil? -> m
+            val == nil -> Map.put(m, tachyon_k, nil)
+            true -> Map.put(m, tachyon_k, f.(val))
+          end
+        else
+          m
+        end
+    end)
   end
 end
