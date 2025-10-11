@@ -15,8 +15,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       %{"status" => "success", "data" => data} = Tachyon.create_lobby!(client, lobby_data)
       user_id = to_string(user.id)
-      %{"type" => "player", "id" => ^user_id} = data["members"][user_id]
-      player_data = data["members"][user_id]
+      %{"id" => ^user_id} = data["players"][user_id]
+      player_data = data["players"][user_id]
       assert is_map_key(data["allyTeamConfig"], player_data["allyTeam"])
 
       assert is_map_key(
@@ -47,8 +47,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     test "works", %{user: user, lobby_id: lobby_id} do
       {:ok, ctx2} = Tachyon.setup_client()
       %{"status" => "success", "data" => data} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
-      assert is_map_key(data["members"], to_string(user.id))
-      assert data["members"][to_string(ctx2[:user].id)]["type"] == "spec"
+      assert is_map_key(data["players"], to_string(user.id))
+      assert is_map_key(data["spectators"], to_string(ctx2[:user].id))
     end
 
     test "is idempotent", %{client: client, lobby_id: lobby_id} do
@@ -88,7 +88,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       {:ok, ctx2} = Tachyon.setup_client()
       %{"status" => "success", "data" => _details} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
       %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
-      assert %{"type" => "spec"} = data["members"][to_string(ctx2[:user].id)]
+      assert is_map_key(data["spectators"], to_string(ctx2[:user].id))
     end
   end
 
@@ -112,7 +112,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(client)
       %{"status" => "success"} = Tachyon.leave_lobby!(ctx2[:client])
       %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
-      assert data["members"][to_string(ctx2[:user].id)] == nil
+      assert data["spectators"][to_string(ctx2[:user].id)] == nil
     end
   end
 
@@ -127,9 +127,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       user_id = to_string(user.id)
 
       %{
-        "members" => %{
-          ^user_id => %{"type" => "spec", "allyTeam" => nil, "team" => nil, "player" => nil}
-        }
+        "players" => %{^user_id => nil},
+        "spectators" => %{^user_id => %{"id" => ^user_id, "joinQueuePosition" => nil}}
       } = data
     end
   end

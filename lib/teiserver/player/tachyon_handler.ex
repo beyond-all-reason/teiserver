@@ -923,9 +923,15 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   defp lobby_details_to_tachyon(details) do
-    members =
-      Enum.map(details.members, fn {m_id, m} ->
-        {to_string(m_id), member_update_to_tachyon(to_string(m_id), m, true)}
+    players =
+      Enum.map(details.players, fn {p_id, p} ->
+        {to_string(p_id), player_update_to_tachyon(to_string(p_id), p, true)}
+      end)
+      |> Map.new()
+
+    spectators =
+      Enum.map(details.spectators, fn {s_id, s} ->
+        {to_string(s_id), spectator_update_to_tachyon(to_string(s_id), s, true)}
       end)
       |> Map.new()
 
@@ -950,7 +956,8 @@ defmodule Teiserver.Player.TachyonHandler do
     %{
       id: details.id,
       name: details.name,
-      members: members,
+      players: players,
+      spectators: spectators,
       mapName: details.map_name,
       engineVersion: details.engine_version,
       gameVersion: details.game_version,
@@ -959,45 +966,77 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   defp lobby_update_to_tachyon(lobby_id, %{event: :updated} = ev) do
-    members =
-      Enum.map(ev.updates, fn {p_id, updates} ->
-        {to_string(p_id), member_update_to_tachyon(to_string(p_id), updates, false)}
-      end)
-      |> Enum.into(%{})
+    data =
+      %{id: lobby_id}
+      |> then(fn m ->
+        case Map.get(ev.updates, :players) do
+          nil ->
+            m
 
-    data = %{id: lobby_id, members: members}
+          players ->
+            players =
+              Enum.map(players, fn {p_id, updates} ->
+                {to_string(p_id), player_update_to_tachyon(to_string(p_id), updates, false)}
+              end)
+              |> Map.new()
+
+            Map.put(m, :players, players)
+        end
+      end)
+      |> then(fn m ->
+        case Map.get(ev.updates, :spectators) do
+          nil ->
+            m
+
+          spectators ->
+            specs =
+              Enum.map(spectators, fn {s_id, updates} ->
+                {to_string(s_id), spectator_update_to_tachyon(to_string(s_id), updates, false)}
+              end)
+              |> Map.new()
+
+            Map.put(m, :spectators, specs)
+        end
+      end)
+
     {"lobby/updated", data}
   end
 
   # omit_nil? is there so we can use the same function for both the initial
   # object and any subsequent json patch style updates
   # because the initial object cannot have nil keys, so just skip them if any
-  defp member_update_to_tachyon(_m_id, nil, _omit_nil?), do: nil
+  defp player_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
 
-  defp member_update_to_tachyon(m_id, updates, omit_nil?) do
-    base =
-      if is_map_key(updates, :team) do
-        val = updates.team
+  defp player_update_to_tachyon(p_id, updates, omit_nil?) do
+    if is_map_key(updates, :team) do
+      val = updates.team
+
+      cond do
+        val == nil && omit_nil? -> %{}
+        val == nil -> %{allyTeam: nil, team: nil, player: nil}
+        true -> lobby_team_to_tachyon(val)
+      end
+    else
+      %{}
+    end
+    |> Map.put(:id, p_id)
+  end
+
+  defp spectator_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
+
+  defp spectator_update_to_tachyon(p_id, updates, omit_nil?) do
+    base = %{id: p_id}
+    keys = [{:join_queue_position, :joinQueuePosition}]
+
+    Enum.reduce(keys, base, fn {k, tachyon_k}, m ->
+      if is_map_key(updates, k) do
+        val = Map.get(m, k)
 
         cond do
-          val == nil && omit_nil? -> %{}
-          val == nil -> %{allyTeam: nil, team: nil, player: nil}
-          true -> lobby_team_to_tachyon(val)
+          val == nil && omit_nil? -> m
+          val == nil -> Map.put(m, tachyon_k, nil)
+          true -> Map.put(m, tachyon_k, val)
         end
-      else
-        %{}
-      end
-      |> Map.put(:id, m_id)
-
-    other_keys = [{:type, :type}, {:join_queue_position, :joinQueuePosition}]
-
-    Enum.reduce(other_keys, base, fn {k, tachyon_k}, m ->
-      if is_map_key(updates, k) do
-        val = updates[k]
-
-        if val == nil && omit_nil?,
-          do: m,
-          else: Map.put(m, tachyon_k, updates[k])
       else
         m
       end
