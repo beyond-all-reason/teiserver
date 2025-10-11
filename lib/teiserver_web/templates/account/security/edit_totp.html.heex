@@ -1,0 +1,59 @@
+<TeiserverWeb.AccountComponents.sub_menu active="security" view_colour={view_colour()} />
+
+<div class="row" style="padding-top: 10vh;">
+  <div class="col-sm-10 col-sm-offset-1 col-md-8 offset-md-2 col-xl-6 offset-xl-3">
+    <div class="card card-default">
+      <div class="card-header">
+        <h3 class="card-title">
+          <img
+            src={Routes.static_path(@conn, "/images/logo/logo_favicon.png")}
+            height="42"
+            style="margin-right: 5px;"
+            class="d-inline align-top"
+          /> Set Two Factor Authentication
+        </h3>
+      </div>
+      <div class="card-body">
+        <%= form_for @changeset, ~p"/teiserver/account/security/totp/update", fn f -> %>
+          <div class="bg-gray-800 p-6 mb-4 d-flex align-items-center" style="gap: 20px;">
+            <div>
+              {raw(@qr_svg)}
+            </div>
+
+            <div class="text-white" style="max-width: 400px;">
+              <p class="text-sm">
+                Open your Authenticator Application, scan the QR code or enter the link
+                and enter the one-time password for Teiserver you just set up.
+              </p>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <p class="text-sm text-gray-600 break-all">{@otpauth_uri}</p>
+          </div>
+
+          <div class="mb-4">
+            {label(f, :otp, "One Time Password", class: "form-label text-white")}
+            {text_input(f, :otp, class: "form-control")}
+            {error_tag(f, :otp)}
+          </div>
+
+          {hidden_input(f, :secret, value: f.data.secret)}
+          {hidden_input(f, :otpauth_uri, value: @otpauth_uri)}
+
+          <div class="d-flex justify-content-between align-items-end mt-4">
+            <div>
+              <a href={~p"/teiserver/account/security/totp"} class="btn btn-secondary">
+                <i class="fa-fw fa-solid fa-arrow-left"></i> Back
+              </a>
+            </div>
+
+            <div>
+              {submit("Save", class: "btn btn-primary")}
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

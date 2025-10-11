@@ -151,6 +151,8 @@ defmodule Teiserver.MixProject do
        ref: "d655018589f9ade836afb8df8ed5f45f53500173",
        only: [:dev, :test]},
       {:httpoison, "~> 2.0", only: [:dev, :test]},
+      {:nimble_totp, "~> 1.0"},
+      {:eqrcode, "~> 0.2.1"},
       {:recon, "~> 2.5.6"}
     ]
   end

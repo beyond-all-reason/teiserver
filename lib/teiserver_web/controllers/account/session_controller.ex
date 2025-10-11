@@ -34,9 +34,62 @@ defmodule TeiserverWeb.Account.SessionController do
   def login(conn, %{"user" => %{"email" => email, "password" => password}}) do
     email = String.trim(email)
 
+    case UserLib.authenticate_user(conn, email, password) do
+      {:ok, user} ->
+        login_reply({:ok, user}, conn)
+
+      {:requires_2fa, user} ->
+        conn
+        |> put_session(:pending_2fa_user_id, user.id)
+        |> redirect(to: ~p"/otp")
+
+      {:error, reason} ->
+        login_reply({:error, reason}, conn)
+    end
+  end
+
+  def otp(conn, _params) do
+    user_id = get_session(conn, :pending_2fa_user_id)
+    user = Account.get_user!(user_id)
+
     conn
-    |> UserLib.authenticate_user(email, password)
-    |> login_reply(conn)
+    |> assign(:user, user)
+    |> render("totp.html")
+  end
+
+  def verify_totp(conn, %{"user_id" => user_id, "otp" => otp}) do
+    user = UserLib.get_user(user_id)
+
+    case Account.validate_totp(user, otp) do
+      :ok ->
+        delete_session(conn, :pending_2fa_user_id)
+        login_reply({:ok, user}, conn)
+
+      {:error, reason} ->
+        flash_message =
+          case reason do
+            :used ->
+              "Code has already been used."
+
+            :invalid ->
+              "Invalid code."
+
+            :locked ->
+              login_reply(
+                {:error,
+                 "The 2FA one time password has been entered wrong too many times. Please reset your password to remove 2FA from your account."},
+                conn
+              )
+
+            _ ->
+              "There was a problem verifying the code."
+          end
+
+        conn
+        |> put_flash(:warning, flash_message)
+        |> assign(:user, user)
+        |> render("totp.html")
+    end
   end
 
   @spec one_time_login(Plug.Conn.t(), map()) :: Plug.Conn.t()
@@ -313,6 +366,7 @@ defmodule TeiserverWeb.Account.SessionController do
 
             # Now delete the code, it's been used
             Account.delete_code(code)
+            Account.disable_totp(user.id)
 
             conn
             |> put_flash(

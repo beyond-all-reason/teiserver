@@ -1,0 +1,42 @@
+<div class="row" style="padding-top: 15vh;" id="login-div">
+  <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3>
+          <img
+            src={Routes.static_path(@conn, "/images/logo/logo_favicon.png")}
+            height="42"
+            style="margin-right: 5px;"
+            class="d-inline align-top"
+          /> Sign In
+        </h3>
+      </div>
+      <div class="card-body">
+        <form action={~p"/otp/verify"} method="post">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+          <input type="hidden" name="user_id" value={@user.id} />
+          <input type="password" style="display:none" />
+
+          <div class="form-group">
+            <label for="otp">One Time Password</label>
+
+            <input
+              type="text"
+              name="otp"
+              id="otp"
+              class="form-control"
+              autofocus
+              required
+              autocomplete="one-time-code"
+              placeholder="Enter 6-digit code"
+            />
+          </div>
+
+          <div class="mt-3">
+            <input type="submit" value="Verify OTP" class="btn btn-primary btn-block" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -6,6 +6,37 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
   alias Teiserver.Account.Guardian
   alias Teiserver.Config
 
+  describe "login" do
+    setup do
+      GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions(), [:no_login])
+      |> Teiserver.TeiserverTestLib.conn_setup()
+    end
+
+    test "no OTP check when no secret", %{conn: conn, user: user} do
+      conn = GeneralTestLib.login(conn, user.email)
+
+      assert Guardian.Plug.current_resource(conn).id == user.id
+    end
+
+    test "OTP check when secret set", %{conn: conn, user: user} do
+      {_, secret} = Account.get_or_generate_secret(user.id)
+      Account.set_secret(user.id, secret)
+      conn = GeneralTestLib.login(conn, user.email)
+
+      assert is_nil(Guardian.Plug.current_resource(conn))
+      assert get_session(conn, :pending_2fa_user_id) == user.id
+    end
+
+    test "OTP check for user", %{conn: conn, user: user} do
+      {_, secret} = Account.get_or_generate_secret(user.id)
+      Account.set_secret(user.id, secret)
+      otp = NimbleTOTP.verification_code(secret)
+      conn = GeneralTestLib.login_opt(conn, user, otp)
+
+      assert Guardian.Plug.current_resource(conn).id == user.id
+    end
+  end
+
   describe "one time codes" do
     setup do
       Config.update_site_config("user.Enable one time links", true)

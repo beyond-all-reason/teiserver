@@ -81,6 +81,11 @@ defmodule Central.Helpers.GeneralTestLib do
     |> post("/login", %{"user" => %{email: email, password: "password"}})
   end
 
+  def login_opt(conn, user, otp) do
+    conn
+    |> post("/otp/verify", %{"user_id" => user.id, "otp" => otp})
+  end
+
   def data_setup(flags \\ []) do
     user =
       if :user in flags do

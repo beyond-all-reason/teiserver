@@ -414,6 +414,13 @@ defmodule Teiserver.Account.UserLib do
         {:error,
          "Alt account detected. Please log in using your original account instead. If you're not sure what that account is or have trouble accessing it, please contact the moderation team at https://discord.gg/beyond-all-reason -> #open-ticket"}
 
+      Account.get_account_locked(user.id) ->
+        {:error,
+         "The 2FA one time password has been entered wrong too many times. Please reset your password to remove 2FA from your account."}
+
+      Account.get_user_totp_status(user.id) == :active ->
+        {:requires_2fa, user}
+
       true ->
         :ok
     end
