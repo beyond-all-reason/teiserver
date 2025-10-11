@@ -14,10 +14,6 @@ defmodule Teiserver.Account.TOTPLibTest do
     %{user_without_totp: user_without_totp, user_with_totp: user_with_totp, secret: secret}
   end
 
-  #  defp datetimes(_context) do
-  #    %{datetime_valid: ~U[1970-01-01 00:00:30Z], datetime_invalid: ~U[1970-01-01 00:01:00Z]}
-  #  end
-
   # ----------------------------------------
   # Database write functions
   # ----------------------------------------
