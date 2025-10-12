@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   require Logger
 
   alias Teiserver.Account
+  alias Teiserver.Account.TOTP
   alias Teiserver.OAuth
 
   plug(:add_breadcrumb, name: "Account", url: "/teiserver/account")
@@ -31,6 +32,103 @@ defmodule TeiserverWeb.Account.SecurityController do
     |> assign(:oauth_applications, oauth_applications)
     |> assign(:oauth_token_counts, oauth_token_counts)
     |> render("index.html")
+  end
+
+  @spec totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def totp(conn, _params) do
+    user = Account.get_user!(conn.assigns.current_user.id)
+
+    conn
+    |> add_breadcrumb(name: "totp", url: conn.request_path)
+    |> assign(:user, user)
+    |> render("totp.html")
+  end
+
+  @spec edit_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def edit_totp(conn, _params) do
+    user = Account.get_user!(conn.assigns.current_user.id)
+    {_status, secret} = Account.get_or_generate_secret(user.id)
+    encoded_secret = Base.encode32(secret, padding: false)
+    changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: encoded_secret})
+    otpauth_uri = Account.generate_otpauth_uri(user.name, secret)
+
+    qr_svg =
+      otpauth_uri
+      |> EQRCode.encode()
+      |> EQRCode.svg(width: 250)
+
+    conn
+    |> add_breadcrumb(name: "edit_totp", url: conn.request_path)
+    |> assign(:changeset, changeset)
+    |> assign(:user, user)
+    |> assign(:otpauth_uri, otpauth_uri)
+    |> assign(:qr_svg, qr_svg)
+    |> render("edit_totp.html")
+  end
+
+  @spec update_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def update_totp(conn, %{"totp" => totp_params}) do
+    user = Account.get_user!(conn.assigns.current_user.id)
+    {_status, decoded_secret} = Base.decode32(totp_params["secret"])
+
+    case Account.validate_totp(decoded_secret, totp_params["otp"]) do
+      :ok ->
+        Account.set_secret(user.id, decoded_secret)
+
+        conn
+        |> put_flash(:info, "2FA set successfully.")
+        |> redirect(to: Routes.ts_account_security_path(conn, :totp))
+
+      {:error, _reason} ->
+        changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: totp_params["secret"]})
+
+        qr_svg =
+          totp_params["otpauth_uri"]
+          |> EQRCode.encode()
+          |> EQRCode.svg(width: 250)
+
+        conn
+        |> put_flash(:warning, "Wrong OTP entered.")
+        |> assign(:changeset, changeset)
+        |> assign(:user, user)
+        |> assign(:otpauth_uri, totp_params["otpauth_uri"])
+        |> assign(:qr_svg, qr_svg)
+        |> render("edit_totp.html")
+    end
+  end
+
+  @spec reset_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def reset_totp(conn, _params) do
+    user = Account.get_user!(conn.assigns.current_user.id)
+    secret = NimbleTOTP.secret()
+    encoded_secret = Base.encode32(secret, padding: false)
+    changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: encoded_secret})
+    otpauth_uri = Account.generate_otpauth_uri(user.name, secret)
+
+    qr_svg =
+      otpauth_uri
+      |> EQRCode.encode()
+      |> EQRCode.svg(width: 250)
+
+    conn
+    |> add_breadcrumb(name: "edit_totp", url: conn.request_path)
+    |> assign(:changeset, changeset)
+    |> assign(:user, user)
+    |> assign(:otpauth_uri, otpauth_uri)
+    |> assign(:qr_svg, qr_svg)
+    |> render("edit_totp.html")
+  end
+
+  @spec disable_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def disable_totp(conn, _params) do
+    user = Account.get_user!(conn.assigns.current_user.id)
+    Account.disable_totp(user.id)
+
+    conn
+    |> add_breadcrumb(name: "totp", url: conn.request_path)
+    |> assign(:totp_status, :inactive)
+    |> assign(:user, user)
+    |> render("totp.html")
   end
 
   @spec edit_password(Plug.Conn.t(), map()) :: Plug.Conn.t()

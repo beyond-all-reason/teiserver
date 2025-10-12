@@ -135,6 +135,8 @@ defmodule TeiserverWeb.Router do
 
     get("/login", SessionController, :new)
     post("/login", SessionController, :login)
+    get("/otp", SessionController, :otp)
+    post("/otp/verify", SessionController, :verify_totp)
     get("/logout", SessionController, :logout)
     post("/logout", SessionController, :logout)
 
@@ -287,6 +289,11 @@ defmodule TeiserverWeb.Router do
 
     get("/security", SecurityController, :index)
     get("/security/edit_password", SecurityController, :edit_password)
+    get("/security/totp", SecurityController, :totp)
+    get("/security/totp/edit", SecurityController, :edit_totp)
+    post("/security/totp/update", SecurityController, :update_totp)
+    get("/security/totp/reset", SecurityController, :reset_totp)
+    post("/security/totp/disable", SecurityController, :disable_totp)
     put("/security/update_password", SecurityController, :update_password)
     delete("/security/delete_token/:id", SecurityController, :delete_token)
     delete("/security/revoke_oauth/:id", SecurityController, :revoke_oauth_application)
@@ -645,6 +652,7 @@ defmodule TeiserverWeb.Router do
     put("/users/rename_post/:id", UserController, :rename_post)
     get("/users/reset_password/:id", UserController, :reset_password)
     get("/users/relationships/:id", UserController, :relationships)
+    put("/users/:id/disable_totp", UserController, :disable_totp)
     get("/users/action/:id/:action", UserController, :perform_action)
     put("/users/action/:id/:action", UserController, :perform_action)
     get("/users/smurf_search/:id", UserController, :smurf_search)

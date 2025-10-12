@@ -7,7 +7,7 @@ defmodule Teiserver.Account do
   alias Phoenix.PubSub
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Account.UserLib
+  alias Teiserver.Account.{UserLib, TOTP, TOTPLib}
 
   @type t :: UserLib.t()
 
@@ -93,6 +93,31 @@ defmodule Teiserver.Account do
 
   @spec change_user(User, map) :: Ecto.Changeset
   defdelegate change_user(user, attrs), to: UserLib
+
+  @spec get_user_totp_status(integer) :: :active | :inactive
+  defdelegate get_user_totp_status(user_id), to: TOTPLib
+
+  @spec get_account_locked(integer) :: boolean()
+  defdelegate get_account_locked(user_id), to: TOTPLib
+
+  @spec get_or_generate_secret(integer) :: {:new | :existing, binary()}
+  defdelegate get_or_generate_secret(user_id), to: TOTPLib
+
+  @spec get_user_secret(integer) :: binary | nil
+  defdelegate get_user_secret(user_id), to: TOTPLib
+
+  @spec set_secret(integer, binary) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
+  defdelegate set_secret(user_id, secret), to: TOTPLib
+
+  @spec disable_totp(integer) :: :ok | :error
+  defdelegate disable_totp(user_id), to: TOTPLib
+
+  @spec validate_totp(User.t() | binary, String.t()) ::
+          :ok | {:error, :inactive | :invalid | :used}
+  defdelegate validate_totp(user_or_secret, otp), to: TOTPLib
+
+  @spec generate_otpauth_uri(String.t(), binary) :: String.t()
+  defdelegate generate_otpauth_uri(name, secret), to: TOTPLib
 
   # User stat table
   alias Teiserver.Account.UserStat

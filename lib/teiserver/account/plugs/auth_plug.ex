@@ -29,15 +29,23 @@ defmodule Teiserver.Account.AuthPlug do
       Logger.metadata([user_id: user.id] ++ Logger.metadata())
     end
 
+    totp_status =
+      case user do
+        nil -> nil
+        _ -> Teiserver.Account.TOTPLib.get_user_totp_status(user.id)
+      end
+
     conn =
       conn
       |> assign(:user_token, user_token)
       |> assign(:current_user, user)
+      |> assign(:totp_status, totp_status)
 
     if banned_user?(conn) do
       conn
       |> assign(:current_user, nil)
       |> assign(:user_token, nil)
+      |> assign(:totp_status, nil)
       |> Phoenix.Controller.put_flash(:danger, "You are banned")
       |> Guardian.Plug.sign_out(clear_remember_me: true)
       |> Phoenix.Controller.redirect(to: ~p"/logout")
