@@ -358,11 +358,57 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:error, :not_in_lobby} = Lobby.start_battle(id, "not in lobby")
     end
+  end
 
-    # can't really test the full path when starting a battle without a ws connection
-    # because TachyonBattle.start_battle does a sync call to the autohost and
-    # blocks until it gets the response
-    # see tests in teiserver_web/tachyon_lobby for these bits
+  describe "start script" do
+    test "with 1 player" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{allyTeams: [%{teams: [%{players: [%{userId: @default_user_id}]}]}]} = start_script
+    end
+
+    test "with a spec" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
+
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{spectators: [%{userId: "other-user-id"}]} = start_script
+    end
+
+    test "with 2 players in the same team" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
+      {:ok, _} = Lobby.join_ally_team(id, "other-user-id", 0)
+
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{allyTeams: [%{teams: [t1, t2]}]} = start_script
+      %{players: [%{userId: @default_user_id}]} = t1
+      %{players: [%{userId: "other-user-id"}]} = t2
+    end
+
+    test "1 ally team with a player leaving then joining" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
+      {:ok, _} = Lobby.join_ally_team(id, "other-user-id", 0)
+      :ok = Lobby.spectate(id, @default_user_id)
+      {:ok, _} = Lobby.join_ally_team(id, @default_user_id, 0)
+
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{allyTeams: [%{teams: [t1, t2]}]} = start_script
+      %{players: [%{userId: "other-user-id"}]} = t1
+      %{players: [%{userId: @default_user_id}]} = t2
+    end
+
+    test "2 ally teams" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
+      {:ok, _} = Lobby.join_ally_team(id, "other-user-id", 1)
+
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{allyTeams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
+      %{players: [%{userId: @default_user_id}]} = t1
+      %{players: [%{userId: "other-user-id"}]} = t2
+    end
   end
 
   defp mk_start_params(teams) do

@@ -189,6 +189,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
+  @doc """
+  This should only be used for tests, because there is some gnarly logic in
+  generating the start script and it's a bit hard to test end to end
+  """
+  @spec get_start_script(id()) :: TachyonBattle.start_script()
+  def get_start_script(lobby_id) do
+    GenServer.call(via_tuple(lobby_id), :get_start_script)
+  end
+
   @spec start_battle(id(), T.userid()) :: :ok | {:error, reason :: term()}
   def start_battle(lobby_id, user_id) do
     GenServer.call(via_tuple(lobby_id), {:start_battle, user_id})
@@ -438,6 +447,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  def handle_call(:get_start_script, _from, state), do: {:reply, gen_start_script(state), state}
+
   @impl true
   def handle_info({:DOWN, ref, :process, _obj, reason}, state) do
     val = MC.get_val(state.monitors, ref)
@@ -684,24 +695,22 @@ defmodule Teiserver.TachyonLobby.Lobby do
       Map.values(state.players)
       |> Enum.sort_by(& &1.team)
       |> Enum.group_by(&elem(&1.team, 0))
+      |> Map.values()
 
     ally_teams =
-      for i <- 0..(map_size(sorted) - 1) do
-        at = sorted[i]
-        at_config = Enum.at(state.ally_team_config, i)
-
-        teams = Enum.group_by(at, &elem(&1.team, 1))
+      for {at, at_config} <- Enum.zip(sorted, state.ally_team_config) do
+        teams =
+          Enum.group_by(at, &elem(&1.team, 1))
+          |> Map.values()
 
         teams =
-          for j <- 0..(map_size(teams) - 1) do
-            ps = teams[j]
-
+          for team <- teams do
             players =
-              for p <- ps do
+              for player <- team do
                 %{
-                  userId: to_string(p.id),
-                  name: p.name,
-                  password: p.password
+                  userId: to_string(player.id),
+                  name: player.name,
+                  password: player.password
                 }
               end
 
