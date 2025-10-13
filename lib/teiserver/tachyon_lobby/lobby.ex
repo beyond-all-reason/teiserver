@@ -621,7 +621,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> Map.delete(user_id)
 
     state =
-      Map.update!(state, :monitors, &MC.demonitor_by_val(&1, user_id))
+      Map.update!(state, :monitors, &MC.demonitor_by_val(&1, {:user, user_id}))
       |> Map.put(:players, updated_players)
 
     # avoid sending a useless lobby list update when the last member of the lobby
@@ -647,7 +647,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp remove_spectator(user_id, state) do
     state =
       Map.update!(state, :spectators, &Map.delete(&1, user_id))
-      |> Map.update!(:monitors, &MC.demonitor_by_val(&1, user_id))
+      |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:user, user_id}))
 
     broadcast_update({:update, user_id, %{spectators: %{user_id => nil}}}, state)
     state

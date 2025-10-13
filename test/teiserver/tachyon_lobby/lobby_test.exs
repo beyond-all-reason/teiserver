@@ -316,6 +316,34 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id,
                       {:updated, [%{event: :updated, updates: %{spectators: %{"user2" => nil}}}]}}
     end
+
+    test "spec leaving removes monitors" do
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, lobby_pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
+
+      :ok = Lobby.leave(id, "user2")
+      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      Process.exit(sink_pid, :kill)
+      refute_receive _, 30
+      assert Process.alive?(lobby_pid)
+    end
+
+    test "player leaving removes monitors" do
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, lobby_pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
+      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
+
+      :ok = Lobby.leave(id, "user2")
+      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      Process.exit(sink_pid, :kill)
+      refute_receive _, 30
+      assert Process.alive?(lobby_pid)
+    end
   end
 
   describe "spectate" do
