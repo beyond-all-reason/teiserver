@@ -395,7 +395,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
-  describe "wait queue" do
+  describe "join queue" do
     test "with invalid lobby" do
       {:error, :invalid_lobby} = Lobby.join_queue("not-a-lobby", "user1")
     end
@@ -412,7 +412,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert %{players: %{"2" => %{team: {1, 0, 0}}}} = updates
     end
 
-    test "is idempotent" do
+    test "doesn't queue if spaces are available" do
       %{id: id} = setup_full_lobby()
       :ok = Lobby.join_queue(id, "2")
       assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
@@ -421,6 +421,24 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert %{players: %{"2" => %{team: {1, 0, 0}}}} = updates
       :ok = Lobby.join_queue(id, "2")
       refute_receive _, 30
+    end
+
+    test "player can join the back of the queue" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: _}]}}
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      %{spectators: %{"3" => %{join_queue_position: pos}}} = updates
+
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+
+      # player 2 is at the back of the queue now
+      assert %{spectators: %{"2" => %{join_queue_position: pos2}}} = updates
+      assert pos2 > pos
+      # and player 3 is now playing
+      %{spectators: %{"3" => nil}, players: %{"3" => %{}}} = updates
     end
 
     test "join wait queue when full" do
@@ -435,6 +453,22 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.join_queue(id, "4")
       assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
       assert %{spectators: %{"4" => %{join_queue_position: 2}}} = updates
+    end
+
+    test "when in queue calling again does nothing" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      # joining the queue again should not change anything
+      :ok = Lobby.join_queue(id, "3")
+      refute_receive _, 30
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert details.spectators["3"].join_queue_position == 1
     end
 
     test "join team when player become spectator" do

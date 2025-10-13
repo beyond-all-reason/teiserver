@@ -445,40 +445,75 @@ defmodule Teiserver.TachyonLobby.Lobby do
       when not is_map_key(state.players, user_id) and not is_map_key(state.spectators, user_id),
       do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:join_queue, user_id}, _from, state) when is_map_key(state.players, user_id),
-    do: {:reply, :ok, state}
-
   def handle_call({:join_queue, user_id}, _from, state) do
-    state =
-      case find_team(state.ally_team_config, state.players) do
-        nil ->
-          pos = find_spec_queue_pos(state.spectators)
+    cond do
+      # already in the join queue, do nothing. This avoid someone
+      # losing their position if they fat-finger the button
+      get_in(state.spectators[user_id].join_queue_position) != nil ->
+        {:reply, :ok, state}
 
-          state =
-            update_in(state.spectators[user_id], fn s ->
-              s |> Map.put(:join_queue_position, pos)
-            end)
+      # there is no one in the join queue. So going into the join queue will immediately put
+      # the player back into an ally team. Although they may end up in a different ally team
+      # it is largely useless, so for simplicity sake, ignore the join_queue command
+      is_map_key(state.players, user_id) and
+          Enum.count(state.spectators, fn {_, s} -> s.join_queue_position != nil end) == 0 ->
+        {:reply, :ok, state}
 
-          update = %{spectators: %{user_id => %{join_queue_position: pos}}}
-          broadcast_update({:update, nil, update}, state)
+      # swap the player with the first in the join queue
+      is_map_key(state.players, user_id) ->
+        # TODO: swap the player with the first in the join queue + corresponding updates
+        {s_id, s} = get_first_player_in_join_queue(state.spectators)
+        player = state.players[user_id]
+        new_player = s |> Map.delete(:join_queue_position) |> Map.put(:team, player.team)
+        pos = find_spec_queue_pos(state.spectators)
+        new_spec = player |> Map.delete(:team) |> Map.put(:join_queue_position, pos)
 
-        team ->
-          update = %{spectators: %{user_id => nil}, players: %{user_id => %{team: team}}}
+        state =
+          state
+          |> Map.update!(:players, &(Map.put(&1, s_id, new_player) |> Map.delete(user_id)))
+          |> Map.update!(:spectators, &(Map.put(&1, user_id, new_spec) |> Map.delete(s_id)))
 
-          player =
-            state.spectators[user_id]
-            |> Map.delete(:join_queue_position)
-            |> Map.put(:team, team)
+        changes = %{
+          players: %{user_id => nil, s_id => %{team: player.team}},
+          spectators: %{user_id => %{join_queue_position: pos}, s_id => nil}
+        }
 
-          state =
-            state
-            |> put_in([:players, user_id], player)
-            |> Map.update!(:spectators, &Map.delete(&1, user_id))
+        broadcast_update({:update, nil, changes}, state)
+        {:reply, :ok, state}
 
-          broadcast_update({:update, nil, update}, state)
-      end
+      # spec getting into the join queue
+      true ->
+        state =
+          case find_team(state.ally_team_config, state.players) do
+            nil ->
+              pos = find_spec_queue_pos(state.spectators)
 
-    {:reply, :ok, state}
+              state =
+                update_in(state.spectators[user_id], fn s ->
+                  s |> Map.put(:join_queue_position, pos)
+                end)
+
+              update = %{spectators: %{user_id => %{join_queue_position: pos}}}
+              broadcast_update({:update, nil, update}, state)
+
+            team ->
+              update = %{spectators: %{user_id => nil}, players: %{user_id => %{team: team}}}
+
+              player =
+                state.spectators[user_id]
+                |> Map.delete(:join_queue_position)
+                |> Map.put(:team, team)
+
+              state =
+                state
+                |> put_in([:players, user_id], player)
+                |> Map.update!(:spectators, &Map.delete(&1, user_id))
+
+              broadcast_update({:update, nil, update}, state)
+          end
+
+        {:reply, :ok, state}
+    end
   end
 
   def handle_call({:start_battle, user_id}, _from, state)
