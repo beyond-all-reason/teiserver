@@ -399,7 +399,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_call({:spectate, user_id}, _from, state)
       when is_map_key(state.spectators, user_id) do
-    {:reply, :ok, state}
+    if state.spectators[user_id].join_queue_position == nil do
+      {:reply, :ok, state}
+    else
+      state = put_in(state.spectators[user_id].join_queue_position, nil)
+      update = %{spectators: %{user_id => %{join_queue_position: nil}}}
+      broadcast_update({:update, nil, update}, state)
+      {:reply, :ok, state}
+    end
   end
 
   def handle_call({:spectate, user_id}, _from, state) when is_map_key(state.players, user_id) do

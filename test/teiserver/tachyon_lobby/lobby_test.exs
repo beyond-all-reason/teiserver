@@ -455,6 +455,20 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert %{spectators: %{"4" => %{join_queue_position: 2}}} = updates
     end
 
+    test "can go from join queue to spectator" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      :ok = Lobby.spectate(id, "3")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"3" => %{join_queue_position: nil}}} = updates
+    end
+
     test "when in queue calling again does nothing" do
       %{id: id} = setup_full_lobby([1, 1])
       :ok = Lobby.join_queue(id, "2")
