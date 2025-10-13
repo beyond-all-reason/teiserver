@@ -448,36 +448,40 @@ defmodule Teiserver.TachyonLobby.Lobby do
     do: {:reply, :ok, state}
 
   def handle_call({:join_queue, user_id}, _from, state) do
-    state =
-      case find_team(state.ally_team_config, state.players) do
-        nil ->
-          pos = find_spec_queue_pos(state.spectators)
+    if get_in(state.spectators[user_id].join_queue_position) != nil do
+      {:reply, :ok, state}
+    else
+      state =
+        case find_team(state.ally_team_config, state.players) do
+          nil ->
+            pos = find_spec_queue_pos(state.spectators)
 
-          state =
-            update_in(state.spectators[user_id], fn s ->
-              s |> Map.put(:join_queue_position, pos)
-            end)
+            state =
+              update_in(state.spectators[user_id], fn s ->
+                s |> Map.put(:join_queue_position, pos)
+              end)
 
-          update = %{spectators: %{user_id => %{join_queue_position: pos}}}
-          broadcast_update({:update, nil, update}, state)
+            update = %{spectators: %{user_id => %{join_queue_position: pos}}}
+            broadcast_update({:update, nil, update}, state)
 
-        team ->
-          update = %{spectators: %{user_id => nil}, players: %{user_id => %{team: team}}}
+          team ->
+            update = %{spectators: %{user_id => nil}, players: %{user_id => %{team: team}}}
 
-          player =
-            state.spectators[user_id]
-            |> Map.delete(:join_queue_position)
-            |> Map.put(:team, team)
+            player =
+              state.spectators[user_id]
+              |> Map.delete(:join_queue_position)
+              |> Map.put(:team, team)
 
-          state =
-            state
-            |> put_in([:players, user_id], player)
-            |> Map.update!(:spectators, &Map.delete(&1, user_id))
+            state =
+              state
+              |> put_in([:players, user_id], player)
+              |> Map.update!(:spectators, &Map.delete(&1, user_id))
 
-          broadcast_update({:update, nil, update}, state)
-      end
+            broadcast_update({:update, nil, update}, state)
+        end
 
-    {:reply, :ok, state}
+      {:reply, :ok, state}
+    end
   end
 
   def handle_call({:start_battle, user_id}, _from, state)

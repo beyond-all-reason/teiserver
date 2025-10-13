@@ -395,7 +395,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
-  describe "wait queue" do
+  describe "join queue" do
     test "with invalid lobby" do
       {:error, :invalid_lobby} = Lobby.join_queue("not-a-lobby", "user1")
     end
@@ -435,6 +435,22 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.join_queue(id, "4")
       assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
       assert %{spectators: %{"4" => %{join_queue_position: 2}}} = updates
+    end
+
+    test "when in queue calling again does nothing" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      # joining the queue again should not change anything
+      :ok = Lobby.join_queue(id, "3")
+      refute_receive _, 30
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert details.spectators["3"].join_queue_position == 1
     end
 
     test "join team when player become spectator" do
