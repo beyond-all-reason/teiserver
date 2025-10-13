@@ -641,8 +641,8 @@ defmodule Teiserver.Player.Session do
 
       {:reply, {:error, {:invalid_ids, diff}}, state}
     else
-      Enum.each(users, &do_subscribe_updates/1)
       new_state = Map.update!(state, :user_subscriptions, &MapSet.union(&1, MapSet.new(user_ids)))
+      Enum.each(users, &do_subscribe_updates(state.user_subscriptions, &1))
       {:reply, :ok, new_state}
     end
   end
@@ -1579,9 +1579,13 @@ defmodule Teiserver.Player.Session do
     :ok
   end
 
-  defp do_subscribe_updates(user) do
-    topic = user_topic(user.id)
-    :ok = PubSub.subscribe(Teiserver.PubSub, topic)
+  defp do_subscribe_updates(subs, user) do
+    # PubSub.subscribe isn't idempotent, duplicate subscription result
+    # in duplicate messages being delivered
+    if !MapSet.member?(subs, user.id) do
+      topic = user_topic(user.id)
+      :ok = PubSub.subscribe(Teiserver.PubSub, topic)
+    end
 
     case Player.SessionRegistry.lookup(user.id) do
       # player is offline, simulate the broadcast ourselves
