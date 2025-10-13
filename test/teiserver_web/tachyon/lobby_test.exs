@@ -325,6 +325,29 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       assert lobbies == lobbies2
     end
+
+    test "avoid duplicate subscription", %{client: client} do
+      # create lobby with another client so that only list updates are sent to
+      # the original client, it makes the tests a bit simpler
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+
+      %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
+
+      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+
+      # still get the full list on subsequent subscribes
+      %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
+
+      {:ok, _} =
+        setup_lobby(%{client: ctx2[:client]}, %{
+          ally_team_config: Tachyon.mk_ally_team_config(2, 2)
+        })
+
+      %{"commandId" => "lobby/listUpdated"} = Tachyon.recv_message!(client)
+      {:error, :timeout} = Tachyon.recv_message(client)
+    end
   end
 
   test "get lobby/left event when lobby dies", ctx do

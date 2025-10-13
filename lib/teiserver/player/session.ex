@@ -959,8 +959,13 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_call({:lobby, :subscribe_list}, _from, state) do
-    {counter, list} = TachyonLobby.subscribe_updates()
-    {:reply, {:ok, list}, %{state | lobby_list_subscription: %{counter: counter}}}
+    if state.lobby_list_subscription == nil do
+      {counter, list} = TachyonLobby.subscribe_updates()
+      {:reply, {:ok, list}, %{state | lobby_list_subscription: %{counter: counter}}}
+    else
+      list = TachyonLobby.list()
+      {:reply, {:ok, list}, state}
+    end
   end
 
   def handle_call({:lobby, :unsubscribe_list}, _from, state) do
