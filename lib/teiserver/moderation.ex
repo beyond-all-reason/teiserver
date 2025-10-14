@@ -303,6 +303,12 @@ defmodule Teiserver.Moderation do
   @spec get_or_make_report_group(T.match_id() | nil) :: ReportGroup.t()
   defdelegate get_or_make_report_group(match_id), to: ReportGroupLib
 
+  @spec open_report_group(ReportGroup.t()) :: :ok
+  defdelegate open_report_group(report_group), to: ReportGroupLib
+
+  @spec close_report_group(ReportGroup.t()) :: :ok
+  defdelegate close_report_group(report_group), to: ReportGroupLib
+
   alias Teiserver.Moderation.{Response, ResponseLib}
 
   @spec response_query(List.t()) :: Ecto.Query.t()

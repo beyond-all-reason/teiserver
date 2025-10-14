@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   use TeiserverWeb, :live_view
   alias Teiserver.{Moderation}
   alias Teiserver.Moderation.ReportGroupLib
+  import TeiserverWeb.Moderation.ReportGroupActions
 
   @impl true
   def mount(%{"id" => id_str}, _session, socket) when is_connected?(socket) do
@@ -11,14 +12,28 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
     report_group = get_report_group(id)
 
     report_group
+    |> Map.update!(:reports, fn reports ->
+      Enum.sort_by(reports, & &1.target.id, &<=/2)
+    end)
     |> ReportGroupLib.make_favourite()
     |> insert_recently(socket)
+
+    targets =
+      report_group.reports
+      # get all targets
+      |> Enum.map(& &1.target)
+      # remove duplicates
+      |> Enum.uniq_by(& &1.id)
+      # sort by id ascending
+      |> Enum.sort_by(& &1.id, &<=/2)
 
     # TODO also assign reporter info here, it's needed for report authors and chat link
 
     socket =
       socket
       |> assign(:report_group, report_group)
+      |> assign(:targets, targets)
+      |> assign(:show_menu, %{})
       |> add_breadcrumb(
         name: "Report group #{report_group.id}",
         url: ~p"/moderation/overwatch/report_group/#{id}"
@@ -55,7 +70,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   #  end
 
   def handle_event("close-group", _event, %{assigns: %{report_group: report_group}} = socket) do
-    {:ok, _} = Moderation.update_report_group(report_group, %{"closed" => "true"})
+    Moderation.close_report_group(report_group)
 
     {:noreply,
      socket
@@ -63,14 +78,23 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   end
 
   def handle_event("open-group", _event, %{assigns: %{report_group: report_group}} = socket) do
-    {:ok, _} = Moderation.update_report_group(report_group, %{"closed" => "false"})
+    Moderation.open_report_group(report_group)
 
     {:noreply,
      socket
      |> assign(:report_group, get_report_group(report_group.id))}
   end
 
+  def handle_event("toggle_dropdown", %{"key" => key}, socket) do
+    show_menu = Map.update(socket.assigns.show_menu, key, true, &(!&1))
+    {:noreply, assign(socket, show_menu: show_menu)}
+  end
+
+  def handle_event("close_all_dropdowns", _params, socket) do
+    {:noreply, assign(socket, show_menu: %{})}
+  end
+
   defp get_report_group(id) do
-    Moderation.get_report_group!(id, preload: [:reports, :targets, :actions])
+    Moderation.get_report_group!(id, preload: [:reports, :reporters, :targets, :actions])
   end
 end

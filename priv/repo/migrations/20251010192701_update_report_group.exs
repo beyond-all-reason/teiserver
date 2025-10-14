@@ -4,13 +4,18 @@ defmodule Teiserver.Repo.Migrations.UpdateReportGroup do
   def up do
     alter table(:moderation_report_groups) do
       remove :target_id
-      remove :closed
       remove :vote_count
       add :type, :string
     end
 
     drop table(:moderation_report_group_votes)
     drop table(:moderation_report_group_messages)
+
+    # Remove entries without a match
+    execute("""
+    DELETE FROM moderation_report_groups
+    WHERE match_id IS NULL;
+    """)
 
     # Combine duplicate moderation_report_groups by match_id
     execute("""
@@ -84,6 +89,19 @@ defmodule Teiserver.Repo.Migrations.UpdateReportGroup do
     WHERE mrg.id = ANY(g.all_ids)
       AND mrg.id <> g.keep_id;
     """)
+
+    # Make match id the primary key
+    #    execute("""
+    #    ALTER TABLE moderation_report_group DROP CONSTRAINT moderation_report_group_pkey;
+    #    """)
+    #
+    #    alter table(:moderation_report_group) do
+    #      remove :id
+    #    end
+    #
+    #    alter table(:moderation_report_group) do
+    #      modify :match_id, references(:matches, type: :integer, on_delete: :delete_all), null: false
+    #    end
   end
 
   def down do

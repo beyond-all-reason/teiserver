@@ -8,6 +8,7 @@ defmodule Teiserver.Moderation.ReportGroup do
     field :report_count, :integer, default: 0
     field :action_count, :integer, default: 0
     field :type, :string
+    field :closed, :boolean, default: false
 
     has_many :actions, Teiserver.Moderation.Action
     has_many :reports, Teiserver.Moderation.Report
@@ -20,7 +21,7 @@ defmodule Teiserver.Moderation.ReportGroup do
     struct
     |> cast(
       params,
-      ~w(match_id report_count action_count)a
+      ~w(match_id report_count action_count closed)a
     )
   end
 

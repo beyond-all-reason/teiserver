@@ -2,7 +2,8 @@ defmodule Teiserver.Moderation.ReportGroupLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
   # alias Teiserver.Moderation
-  alias Teiserver.Moderation.{ReportGroup, ReportGroupQueries}
+  alias Teiserver.Moderation.{ReportGroup, ReportGroupQueries, Report}
+  import Ecto.Query
   # alias Phoenix.PubSub
 
   @spec colour :: atom
@@ -154,7 +155,11 @@ defmodule Teiserver.Moderation.ReportGroupLib do
     ReportGroup.changeset(report_group, attrs)
   end
 
-  @spec get_or_make_report_group(T.match_id()) :: ReportGroup.t()
+  @spec get_or_make_report_group(T.match_id()) :: :error | ReportGroup.t()
+  def get_or_make_report_group(nil) do
+    :error
+  end
+
   def get_or_make_report_group(match_id) when is_integer(match_id) do
     case get_report_group(match_id) do
       nil ->
@@ -163,6 +168,39 @@ defmodule Teiserver.Moderation.ReportGroupLib do
 
       r ->
         r
+    end
+  end
+
+  @spec open_report_group(ReportGroup.t()) :: :ok | :error
+  def open_report_group(%ReportGroup{} = report_group) do
+    from(report in Report,
+      where: report.match_id == ^report_group.match_id and report.closed == true
+    )
+    |> Repo.update_all(set: [closed: false])
+
+    case update_report_group(report_group, %{closed: false}) do
+      {:ok, _} ->
+        :ok
+
+      _ ->
+        :error
+    end
+  end
+
+  @spec close_report_group(ReportGroup.t()) :: :ok | :error
+  def close_report_group(%ReportGroup{} = report_group) do
+    from(report in Report,
+      where: report.match_id == ^report_group.match_id and is_nil(report.result_id)
+    )
+    |> Repo.update_all(set: [closed: true])
+
+    case update_report_group(report_group, %{closed: true}) do
+      {:ok, updated_group} ->
+        IO.inspect(updated_group)
+        :ok
+
+      _ ->
+        :error
     end
   end
 

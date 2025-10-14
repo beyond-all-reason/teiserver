@@ -11,11 +11,6 @@
       view_colour={@view_colour}
       current_user={@current_user}
     >
-      <a class="btn btn-outline-warning" href={~p"/moderation/overwatch/target/#{3}"}>
-        <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />&nbsp;
-        Other reports
-      </a>
-
       <%= if @report_group.match_id do %>
         <a
           href={~p"/battle/#{@report_group.match_id}"}
@@ -25,7 +20,7 @@
         </a>
 
         <a
-          href={~p"/battle/chat/#{@report_group.match_id}/"}
+          href={"/battle/chat/#{@report_group.match_id}/#{Enum.map(@targets, & &1.id) |> Enum.join("/")}"}
           class={"btn btn-outline-#{Teiserver.Chat.LobbyMessageLib.colours()}"}
         >
           <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" />
@@ -34,29 +29,59 @@
       <% end %>
 
       <%= if allow?(@current_user, "Moderator") do %>
-        <a
-          class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
-          href={~p"/admin/chat?userid=#{3}"}
-        >
-          <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" />&nbsp;
-          User chat
-        </a>
+        <div class="dropdown" style="display: inline-block;">
+          <div
+            class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
+            phx-click="toggle_dropdown"
+            phx-value-key="user-chat"
+            aria-haspopup="true"
+            aria-expanded={Map.get(@show_menu, "user-chat", false)}
+            phx-click-away="close_all_dropdowns"
+          >
+            <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" />&nbsp
+            User chat
+          </div>
+          <%= if Map.get(@show_menu, "user-chat", false) do %>
+            <.report_group_actions targets={@targets} path={~p"/admin/chat?userid="} />
+          <% end %>
+        </div>
 
-        <a
-          class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
-          href={~p"/teiserver/admin/user/#{3}"}
-        >
-          <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />&nbsp;
-          View user
-        </a>
+        <div class="dropdown" style="display: inline-block;">
+          <div
+            class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
+            phx-click="toggle_dropdown"
+            phx-value-key="view-user"
+            aria-haspopup="true"
+            aria-expanded={Map.get(@show_menu, "view-user", false)}
+            phx-click-away="close_all_dropdowns"
+          >
+            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />&nbsp;
+            View user
+          </div>
+          <%= if Map.get(@show_menu, "view-user", false) do %>
+            <.report_group_actions targets={@targets} path={~p"/teiserver/admin/user/"} />
+          <% end %>
+        </div>
 
-        <a
-          class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
-          href={"#{Routes.moderation_action_path(@socket, :new_with_user)}?teiserver_user=%23#{3}_"}
-        >
-          <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />&nbsp;
-          Action user
-        </a>
+        <div class="dropdown" style="display: inline-block;">
+          <div
+            class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
+            phx-click="toggle_dropdown"
+            phx-value-key="action-user"
+            aria-haspopup="true"
+            aria-expanded={Map.get(@show_menu, "action-user", false)}
+            phx-click-away="close_all_dropdowns"
+          >
+            <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />&nbsp;
+            Action user
+          </div>
+          <%= if Map.get(@show_menu, "action-user", false) do %>
+            <.report_group_actions
+              targets={@targets}
+              path={~p"/moderation/action/new_with_user?teiserver_user=%23"}
+            />
+          <% end %>
+        </div>
       <% end %>
     </TeiserverWeb.Moderation.OverwatchComponents.section_menu>
     <br /><br />
@@ -64,22 +89,20 @@
     <div :if={@report_group}>
       <div class="float-end">
         <%= if allow?(@current_user, "Moderator") do %>
-          <%= if false do %>
+          <%= if @report_group.closed == true do %>
             <span class={"btn btn-outline-#{@view_colour}"} phx-click="open-group">
               <Fontawesome.icon icon="folder-open" style="solid" /> Open
             </span>
           <% else %>
-            <%= if @report_group.action_count == 0 do %>
-              <span class={"btn btn-outline-#{@view_colour}"} phx-click="close-group">
-                <Fontawesome.icon icon="folder-closed" style="solid" /> Close
-              </span>
-            <% end %>
+            <span class={"btn btn-outline-#{@view_colour}"} phx-click="close-group">
+              <Fontawesome.icon icon="folder-closed" style="solid" /> Close
+            </span>
           <% end %>
         <% end %>
       </div>
 
       <h3>
-        Report group for SpryCadmiumCommando
+        Report group for Match {@report_group.match_id}
         <%= if @report_group.action_count > 0 do %>
           &nbsp;
           <Fontawesome.icon
@@ -129,9 +152,10 @@
               <% end %>
             </:col>
             <:col :let={report} label="Target">{report.target.name}</:col>
+            <:col :let={report} label="Reporter">{report.reporter.name}</:col>
             <:col :let={report} label="Type">{report.type}/{report.sub_type}</:col>
             <:col :let={report} label="Description">{report.extra_text}</:col>
-            <:col :let={report} label="Type">
+            <:col :let={report} label="Date">
               {date_to_str(report.inserted_at, format: :hms_or_ymd)}
             </:col>
           </.table>

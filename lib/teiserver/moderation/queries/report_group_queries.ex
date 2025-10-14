@@ -119,6 +119,13 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
     end)
   end
 
+  defp _preload(query, :reporters) do
+    from [report_group: report_group, report: report] in query,
+      left_join: reporter in assoc(report, :reporter),
+      as: :reporter,
+      preload: [reports: {report, reporter: reporter}]
+  end
+
   defp _preload(query, :targets) do
     from [report_group: report_group, report: report] in query,
       left_join: target in assoc(report, :target),
