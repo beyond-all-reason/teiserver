@@ -23,6 +23,8 @@ defmodule Teiserver.Moderation.ReportGroup do
       params,
       ~w(match_id report_count action_count closed)a
     )
+    |> validate_required([:match_id])
+    |> unique_constraint(:match_id)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()

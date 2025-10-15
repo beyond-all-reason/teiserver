@@ -155,11 +155,7 @@ defmodule Teiserver.Moderation.ReportGroupLib do
     ReportGroup.changeset(report_group, attrs)
   end
 
-  @spec get_or_make_report_group(T.match_id()) :: :error | ReportGroup.t()
-  def get_or_make_report_group(nil) do
-    :error
-  end
-
+  @spec get_or_make_report_group(T.match_id()) :: ReportGroup.t() | {:error, Ecto.Changeset.t()}
   def get_or_make_report_group(match_id) when is_integer(match_id) do
     case get_report_group(match_id) do
       nil ->
