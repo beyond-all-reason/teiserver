@@ -97,4 +97,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   defp get_report_group(id) do
     Moderation.get_report_group!(id, preload: [:reports, :reporters, :targets, :actions])
   end
+
+  @spec view_colour() :: atom
+  def view_colour, do: Teiserver.Moderation.ReportLib.colour()
 end

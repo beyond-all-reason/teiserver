@@ -89,19 +89,6 @@ defmodule Teiserver.Repo.Migrations.UpdateReportGroup do
     WHERE mrg.id = ANY(g.all_ids)
       AND mrg.id <> g.keep_id;
     """)
-
-    # Make match id the primary key
-    #    execute("""
-    #    ALTER TABLE moderation_report_group DROP CONSTRAINT moderation_report_group_pkey;
-    #    """)
-    #
-    #    alter table(:moderation_report_group) do
-    #      remove :id
-    #    end
-    #
-    #    alter table(:moderation_report_group) do
-    #      modify :match_id, references(:matches, type: :integer, on_delete: :delete_all), null: false
-    #    end
   end
 
   def down do
