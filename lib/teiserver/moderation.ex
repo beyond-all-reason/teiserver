@@ -241,6 +241,16 @@ defmodule Teiserver.Moderation do
     Report.changeset(report, %{})
   end
 
+  def create_report_group_and_report(%{match_id: nil} = report_params) do
+    case create_report(report_params) do
+      {:ok, report} ->
+        {:ok, nil, report}
+
+      result ->
+        result
+    end
+  end
+
   def create_report_group_and_report(report_params) do
     report_group = get_or_make_report_group(report_params.match_id)
 
