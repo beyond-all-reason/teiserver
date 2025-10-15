@@ -165,7 +165,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
-  @spec leave(id(), T.userid()) :: :ok | {:error, reason :: term()}
+  @spec leave(id(), T.userid()) :: :ok | {:error, reason :: :lobby_full | term()}
   def leave(lobby_id, user_id) do
     GenServer.call(via_tuple(lobby_id), {:leave, user_id})
   catch
@@ -249,8 +249,19 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   def handle_call({:join, join_data, _pid}, _from, state)
-      when is_map_key(join_data.id, state.players) or is_map_key(join_data.id, state.spectators) do
+      when is_map_key(state.players, join_data.id) or is_map_key(state.spectators, join_data.id) do
     {:reply, {:ok, self(), get_details_from_state(state)}, state}
+  end
+
+  # 251 is the (current) engine limit for specs + players + bots
+  # we also need to enforce this limit on the battle itself, this is where
+  # it's actually important. We could theoretically have more than 251
+  # lobby members, but it would be rather awkward to only have a subset
+  # then in the battle. It's overall simpler to also limit the lobby size
+  # (though the members of the lobby may not be the one in the battle itself)
+  def handle_call({:join, _join_data, _pid}, _from, state)
+      when map_size(state.spectators) + map_size(state.players) >= 251 do
+    {:reply, {:error, :lobby_full}, state}
   end
 
   def handle_call({:join, join_data, pid}, _from, state) do

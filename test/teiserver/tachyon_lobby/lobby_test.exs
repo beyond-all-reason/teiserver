@@ -125,6 +125,21 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: ^expected_updates}]}}
     end
+
+    test "lobby full" do
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+
+      for i <- 1..250 do
+        {:ok, _, _} = Lobby.join(id, mk_player("user#{i}"), sink_pid)
+      end
+
+      # there should be 250 specs and 1 player now, which is the absolute limit
+      {:error, :lobby_full} = Lobby.join(id, mk_player("user251"), sink_pid)
+
+      # user already in the lobby are still fine
+      {:ok, _, _} = Lobby.join(id, mk_player("user10"), sink_pid)
+    end
   end
 
   describe "joining an ally team" do
