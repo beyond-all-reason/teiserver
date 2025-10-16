@@ -5,6 +5,7 @@
     "type": "object",
     "properties": {
         "id": { "type": "string" },
+        "name": { "type": "string" },
         "mapName": { "type": "string" },
         "engineVersion": { "type": "string" },
         "gameVersion": { "type": "string" },
@@ -37,19 +38,31 @@
                 }
             }
         },
-        "members": {
+        "players": {
             "type": "object",
             "patternProperties": {
                 "^(.*)$": {
                     "type": "object",
                     "properties": {
-                        "type": { "const": "player" },
                         "id": { "$ref": "../definitions/userId.json" },
                         "allyTeam": { "type": "string" },
                         "team": { "type": "string" },
                         "player": { "type": "string" }
                     },
-                    "required": ["type", "id", "allyTeam", "team", "player"]
+                    "required": ["id", "allyTeam", "team", "player"]
+                }
+            }
+        },
+        "spectators": {
+            "type": "object",
+            "patternProperties": {
+                "^(.*)$": {
+                    "type": "object",
+                    "properties": {
+                        "id": { "$ref": "../definitions/userId.json" },
+                        "joinQueuePosition": { "type": "number" }
+                    },
+                    "required": ["id"]
                 }
             }
         },
@@ -64,10 +77,12 @@
     },
     "required": [
         "id",
+        "name",
         "mapName",
         "engineVersion",
         "gameVersion",
         "allyTeamConfig",
-        "members"
+        "players",
+        "spectators"
     ]
 }

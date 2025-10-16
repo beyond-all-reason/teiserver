@@ -57,10 +57,19 @@ defmodule Teiserver.TachyonLobby do
   @type player_join_data :: Lobby.player_join_data()
   @spec join(id(), player_join_data(), pid()) ::
           {:ok, lobby_pid :: pid(), details()} | {:error, reason :: term()}
-  defdelegate join(lobby_id, join_data, pid), to: Lobby
+  defdelegate join(lobby_id, join_data, pid \\ self()), to: Lobby
+
+  @spec spectate(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
+  defdelegate spectate(lobby_id, user_id), to: Lobby
 
   @spec leave(id(), T.userid()) :: :ok | {:error, reason :: term()}
   defdelegate leave(lobby_id, user_id), to: Lobby
+
+  @spec join_ally_team(id(), T.userid(), allyTeam :: non_neg_integer()) ::
+          {:ok, details()}
+          | {:error,
+             reason :: :invalid_lobby | :not_in_lobby | :invalid_ally_team | :ally_team_full}
+  defdelegate join_ally_team(lobby_id, user_id, ally_team), to: Lobby
 
   @spec update_mods(id(), T.userid(), [Lobby.mod()]) :: :ok | {:error, reason :: term()}
   defdelegate update_mods(lobby_id, user_id, mods), to: Lobby

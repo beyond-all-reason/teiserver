@@ -198,6 +198,34 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       assert {:error, :timeout} = Tachyon.recv_message(client)
     end
 
+    test "avoid duplicate subscription", %{client: client} do
+      {:ok, ctx} = Tachyon.setup_client()
+      other_user = ctx[:user]
+
+      assert %{"status" => "success"} =
+               Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
+
+      # get the full state
+      assert {:ok, %{"commandId" => "user/updated", "data" => ev_data}} =
+               Tachyon.recv_message(client)
+
+      # subscribe again!
+      assert %{"status" => "success"} =
+               Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
+
+      # still get full state
+      assert {:ok, %{"commandId" => "user/updated", "data" => ev_data2}} =
+               Tachyon.recv_message(client)
+
+      assert ev_data == ev_data2
+
+      Tachyon.disconnect!(ctx[:client])
+
+      # don't get duplicates
+      assert {:ok, %{"commandId" => "user/updated"}} = Tachyon.recv_message(client)
+      assert {:error, :timeout} == Tachyon.recv_message(client)
+    end
+
     test "broadcasts translated roles" do
       user =
         Central.Helpers.GeneralTestLib.make_user(%{

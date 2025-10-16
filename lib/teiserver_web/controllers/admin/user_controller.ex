@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Admin.UserController do
   use TeiserverWeb, :controller
 
   alias Teiserver.{Account, Chat, Game}
-  alias Teiserver.Account.{UserLib, RoleLib}
+  alias Teiserver.Account.{UserLib, RoleLib, TOTPLib}
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Game.MatchRatingLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, float_parse: 1]
@@ -95,8 +95,6 @@ defmodule TeiserverWeb.Admin.UserController do
       else
         []
       end
-
-    IO.inspect(id_list, label: "Users")
 
     users =
       (Account.list_users(
@@ -194,6 +192,8 @@ defmodule TeiserverWeb.Admin.UserController do
         user_stats = Account.get_user_stat_data(user.id)
         client = Account.get_client_by_id(user.id)
 
+        client_totp = TOTPLib.get_user_totp_status(user.id)
+
         json_user =
           Map.drop(user, [
             :__struct__,
@@ -217,6 +217,7 @@ defmodule TeiserverWeb.Admin.UserController do
         conn
         |> assign(:user, user)
         |> assign(:client, client)
+        |> assign(:client_totp, client_totp)
         |> assign(:user_stats, user_stats)
         |> assign(:role_data, RoleLib.role_data())
         |> assign(:section_menu_active, "show")
@@ -404,6 +405,16 @@ defmodule TeiserverWeb.Admin.UserController do
             |> redirect(to: ~p"/teiserver/admin/user/#{user}")
         end
     end
+  end
+
+  @spec disable_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def disable_totp(conn, %{"id" => id}) do
+    user = Account.get_user(id)
+    Teiserver.Account.TOTPLib.disable_totp(user.id)
+
+    conn
+    |> put_flash(:info, "Disabled 2FA for #{user.name}")
+    |> redirect(to: ~p"/teiserver/admin/user/#{user}")
   end
 
   @spec ratings(Plug.Conn.t(), map) :: Plug.Conn.t()

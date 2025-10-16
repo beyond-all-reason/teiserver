@@ -410,10 +410,14 @@ defmodule Teiserver.Player.TachyonHandler do
       {:error, :invalid_user} ->
         {:error_response, :invalid_user, state}
 
-      # this is a bit scuffed and could be refactored so that `create_friend_request`
-      # returns an atom instead of a raw string
-      {:error, err} when is_binary(err) ->
-        {:error_response, :invalid_user, state}
+      {:error, :already_in_friendlist} ->
+        {:error_response, :already_in_friendlist, state}
+
+      {:error, :outgoing_capacity_reached} ->
+        {:error_response, :outgoing_capacity_reached, state}
+
+      {:error, :incoming_capacity_reached} ->
+        {:error_response, :incoming_capacity_reached, state}
 
       err ->
         Logger.error("cannot create friend request #{inspect(err)}")
@@ -666,6 +670,35 @@ defmodule Teiserver.Player.TachyonHandler do
     case Player.Session.leave_lobby(state.user.id) do
       :ok ->
         {:response, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/joinAllyTeam", "request", _msg_id, msg, state) do
+    with {:ok, ally_team} <- TachyonParser.parse_int(msg["data"]["allyTeam"]),
+         :ok <- Player.Session.join_ally_team(state.user.id, ally_team) do
+      {:response, state}
+    else
+      {:error, :invalid_int} ->
+        {:error_response, :invalid_request, "Invalid ally team", state}
+
+      {:error, reason} when reason in [:not_in_lobby, :ally_team_full] ->
+        {:error_response, reason, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/spectate", "request", _msg_id, _msg, state) do
+    case Player.Session.lobby_spectate(state.user.id) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} when reason in [:not_in_lobby] ->
+        {:error_response, reason, state}
 
       {:error, reason} ->
         {:error_response, :invalid_request, to_string(reason), state}
@@ -930,28 +963,17 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   defp lobby_details_to_tachyon(details) do
-    members =
-      Enum.map(details.members, fn {p_id, p} ->
-        base_member =
-          Map.merge(
-            %{
-              id: to_string(p_id),
-              type: p.type
-            },
-            lobby_team_to_tachyon(p.team)
-          )
-
-        # Add sync status if present
-        member_with_sync =
-          if Map.has_key?(p, :sync) && p.sync do
-            Map.put(base_member, :sync, sync_status_to_tachyon(p.sync))
-          else
-            base_member
-          end
-
-        {to_string(p_id), member_with_sync}
+    players =
+      Enum.map(details.players, fn {p_id, p} ->
+        {to_string(p_id), player_update_to_tachyon(to_string(p_id), p, true)}
       end)
-      |> Enum.into(%{})
+      |> Map.new()
+
+    spectators =
+      Enum.map(details.spectators, fn {s_id, s} ->
+        {to_string(s_id), spectator_update_to_tachyon(to_string(s_id), s, true)}
+      end)
+      |> Map.new()
 
     ally_team_config =
       for {at, at_idx} <- Enum.with_index(details.ally_team_config), into: %{} do
@@ -975,7 +997,8 @@ defmodule Teiserver.Player.TachyonHandler do
       id: details.id,
       bossId: to_string(details.boss_id),
       name: details.name,
-      members: members,
+      players: players,
+      spectators: spectators,
       mapName: details.map_name,
       engineVersion: details.engine_version,
       gameVersion: details.game_version,
@@ -994,27 +1017,66 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  defp lobby_update_to_tachyon(lobby_id, %{event: :add_player} = ev) do
-    data = %{
-      id: lobby_id,
-      members: %{
-        to_string(ev.id) =>
-          Map.merge(
-            %{
-              type: :player,
-              id: to_string(ev.id)
-            },
-            lobby_team_to_tachyon(ev.team)
-          )
-      }
-    }
+  defp lobby_update_to_tachyon(lobby_id, %{event: :updated} = ev) do
+    data =
+      %{id: lobby_id}
+      |> then(fn m ->
+        case Map.get(ev.updates, :players) do
+          nil ->
+            m
+
+          players ->
+            players =
+              Enum.map(players, fn {p_id, updates} ->
+                {to_string(p_id), player_update_to_tachyon(to_string(p_id), updates, false)}
+              end)
+              |> Map.new()
+
+            Map.put(m, :players, players)
+        end
+      end)
+      |> then(fn m ->
+        case Map.get(ev.updates, :spectators) do
+          nil ->
+            m
+
+          spectators ->
+            specs =
+              Enum.map(spectators, fn {s_id, updates} ->
+                {to_string(s_id), spectator_update_to_tachyon(to_string(s_id), updates, false)}
+              end)
+              |> Map.new()
+
+            Map.put(m, :spectators, specs)
+        end
+      end)
 
     {"lobby/updated", data}
   end
 
-  defp lobby_update_to_tachyon(lobby_id, %{event: :remove_player} = ev) do
-    data = %{id: lobby_id, members: %{to_string(ev.id) => nil}}
-    {"lobby/updated", data}
+  defp player_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
+
+  defp player_update_to_tachyon(p_id, updates, omit_nil?) do
+    if is_map_key(updates, :team) do
+      val = updates.team
+
+      cond do
+        val == nil && omit_nil? -> %{}
+        val == nil -> %{allyTeam: nil, team: nil, player: nil}
+        true -> lobby_team_to_tachyon(val)
+      end
+    else
+      %{}
+    end
+    |> Map.put(:id, p_id)
+  end
+
+  defp spectator_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
+
+  defp spectator_update_to_tachyon(p_id, updates, omit_nil?) do
+    base = %{id: p_id}
+    key_mapping = [{:join_queue_position, :joinQueuePosition}]
+    to_json_merge_patch(base, updates, key_mapping, omit_nil?)
   end
 
   defp lobby_update_to_tachyon(lobby_id, %{event: :mods_changed} = ev) do
@@ -1037,7 +1099,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   # handle partial overview object
   defp lobby_overview_to_tachyon(lobby_id, overview) do
-    keys = [
+    key_mapping = [
       {:name, :name},
       {:player_count, :playerCount},
       {:max_player_count, :maxPlayerCount},
@@ -1047,19 +1109,40 @@ defmodule Teiserver.Player.TachyonHandler do
       {:current_battle, :currentBattle, &lobby_current_battle_to_tachyon/1}
     ]
 
-    init = %{id: lobby_id, currentBattle: nil}
+    base = %{id: lobby_id, currentBattle: nil}
+    to_json_merge_patch(base, overview, key_mapping, true)
+  end
 
-    Enum.reduce(keys, init, fn
+  defp lobby_current_battle_to_tachyon(battle) do
+    %{startedAt: DateTime.to_unix(battle.started_at, :microsecond)}
+  end
+
+  defp to_json_merge_patch(initial_map, map_to_transform, key_mapping, omit_nil?) do
+    Enum.reduce(key_mapping, initial_map, fn
       {k, tachyon_k}, m ->
-        case Map.get(overview, k) do
-          nil -> m
-          val -> Map.put(m, tachyon_k, val)
+        if is_map_key(map_to_transform, k) do
+          val = Map.get(map_to_transform, k)
+
+          cond do
+            val == nil && omit_nil? -> m
+            val == nil -> Map.put(m, tachyon_k, nil)
+            true -> Map.put(m, tachyon_k, val)
+          end
+        else
+          m
         end
 
       {k, tachyon_k, f}, m ->
-        case Map.get(overview, k) do
-          nil -> m
-          val -> Map.put(m, tachyon_k, f.(val))
+        if is_map_key(map_to_transform, k) do
+          val = Map.get(map_to_transform, k)
+
+          cond do
+            val == nil && omit_nil? -> m
+            val == nil -> Map.put(m, tachyon_k, nil)
+            true -> Map.put(m, tachyon_k, f.(val))
+          end
+        else
+          m
         end
     end)
   end
@@ -1102,13 +1185,53 @@ defmodule Teiserver.Player.TachyonHandler do
     }
   end
 
-  # Convert sync status to JSON protocol format
+  # Helper function to apply sync status to player/spectator data
+  defp apply_sync_status(base_map, player_data) do
+    if Map.has_key?(player_data, :sync) && player_data.sync do
+      Map.put(base_map, :sync, sync_status_to_tachyon(player_data.sync))
+    else
+      base_map
+    end
+  end
+
+  # Convert sync status to tachyon format
   defp sync_status_to_tachyon(sync) do
     %{
-      map: sync.map,
-      engine: sync.engine,
-      game: sync.game,
-      mods: sync.mods
+      status: sync.status,
+      progress: sync.progress || 0
     }
+  end
+
+  # Player update conversion with sync status support
+  defp player_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
+
+  defp player_update_to_tachyon(p_id, updates, omit_nil?) do
+    base = %{id: p_id}
+
+    # Handle team information
+    team_data = if is_map_key(updates, :team) do
+      val = updates.team
+      cond do
+        val == nil && omit_nil? -> %{}
+        val == nil -> %{allyTeam: nil, team: nil, player: nil}
+        true -> lobby_team_to_tachyon(val)
+      end
+    else
+      %{}
+    end
+
+    # Apply sync status if present
+    result = Map.merge(base, team_data)
+    apply_sync_status(result, updates)
+  end
+
+  # Spectator update conversion with sync status support
+  defp spectator_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
+
+  defp spectator_update_to_tachyon(p_id, updates, omit_nil?) do
+    base = %{id: p_id}
+    key_mapping = [{:join_queue_position, :joinQueuePosition}]
+    result = to_json_merge_patch(base, updates, key_mapping, omit_nil?)
+    apply_sync_status(result, updates)
   end
 end

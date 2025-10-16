@@ -22,10 +22,7 @@
         <%= if report.match_id do %>
           <td>{report.relationship}</td>
           <td>
-            <a
-              href={Routes.ts_admin_match_path(@conn, :show, report.match_id)}
-              class="btn btn-secondary btn-sm"
-            >
+            <a href={~p"/battle/#{report.match_id}"} class="btn btn-secondary btn-sm">
               Match
             </a>
           </td>

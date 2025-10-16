@@ -9,12 +9,13 @@ defmodule Teiserver.Autohost do
   @type reg_value :: Registry.reg_value()
 
   @type start_script :: %{
-          battleId: Teiserver.TachyonBattle.id(),
-          engineVersion: String.t(),
-          gameName: String.t(),
-          mapName: String.t(),
-          startPosType: :fixed | :random | :ingame | :beforegame,
-          allyTeams: [ally_team(), ...]
+          required(:battleId) => Teiserver.TachyonBattle.id(),
+          required(:engineVersion) => String.t(),
+          required(:gameName) => String.t(),
+          required(:mapName) => String.t(),
+          required(:startPosType) => :fixed | :random | :ingame | :beforegame,
+          required(:allyTeams) => [ally_team(), ...],
+          optional(:spectators) => [player()]
         }
 
   @type ally_team :: %{
