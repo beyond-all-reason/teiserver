@@ -441,7 +441,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
               spectators: %{user_id => nil}
             }
 
-            TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
+            broadcast_player_count_change(state)
             broadcast_update({:update, nil, update}, state)
 
             {:reply, {:ok, get_details_from_state(state)}, state}
@@ -842,6 +842,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
     broadcast_to_members(state, user_id, {:lobby, state.id, {:updated, events}})
   end
 
+  defp broadcast_player_count_change(state) do
+    count = Enum.count(state.players, fn {_, p} -> Map.get(p, :pid) != nil end)
+    TachyonLobby.List.update_lobby(state.id, %{player_count: count})
+    state
+  end
+
   defp broadcast_to_members(state, sender_id, message) do
     for {p_id, p} <- state.players, p_id != sender_id, is_map_key(p, :pid) do
       send(p.pid, message)
@@ -949,6 +955,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> Enum.reject(&Enum.empty?(elem(&1, 1)))
       |> Map.new()
 
+    broadcast_player_count_change(state)
     broadcast_update({:update, user_id, updates}, state)
     state
   end
