@@ -555,6 +555,121 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "bots" do
+    test "need valid lobby" do
+      {:error, :invalid_lobby} =
+        Lobby.add_bot("doesn't exist", 0, "random-user-id", "bot short name")
+    end
+
+    test "must be in lobby" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :not_in_lobby} = Lobby.add_bot(id, "random-user-id", 0, "bot short name")
+    end
+
+    test "must specify valid ally team" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :invalid_ally_team} = Lobby.add_bot(id, @default_user_id, 10, "bot short name")
+      {:error, :invalid_ally_team} = Lobby.add_bot(id, @default_user_id, -1, "bot short name")
+    end
+
+    test "must have space in ally team" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:error, :ally_team_full} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
+    end
+
+    test "add_bot works" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+
+      %{
+        event: :updated,
+        updates: %{
+          bots: %{
+            ^bot_id => %{
+              team: {1, 0, 0},
+              host_user_id: @default_user_id,
+              short_name: "bot short name"
+            }
+          }
+        }
+      } = update
+    end
+
+    test "bots correctly put in teams" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([3, 3]))
+
+      {:ok, bot_id1} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+      %{updates: %{bots: %{^bot_id1 => %{team: {0, 1, 0}}}}} = update
+
+      {:ok, bot_id2} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+      %{updates: %{bots: %{^bot_id2 => %{team: {0, 2, 0}}}}} = update
+    end
+
+    test "bots are taken into account for team capacity" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, _bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      {:error, :ally_team_full} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+    end
+
+    test "creator leaving also removes bots" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, bot_id1} = Lobby.add_bot(id, "other-user-id", 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, bot_id2} = Lobby.add_bot(id, "other-user-id", 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.leave(id, "other-user-id")
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+
+      %{
+        event: :updated,
+        updates: %{
+          bots: %{^bot_id1 => nil, ^bot_id2 => nil},
+          spectators: %{"other-user-id" => nil}
+        }
+      } = update
+    end
+
+    test "bot leaving because spec host left allow join queue to get in" do
+      %{id: id} = setup_full_lobby()
+
+      # fill the lobby with bots
+      {:ok, bot_id1} = Lobby.add_bot(id, "2", 0, "bot")
+      {:ok, bot_id2} = Lobby.add_bot(id, "2", 1, "bot")
+      {:ok, bot_id3} = Lobby.add_bot(id, "2", 1, "bot")
+
+      # also fill a bit the join queue
+      :ok = Lobby.join_queue(id, "3")
+      :ok = Lobby.join_queue(id, "4")
+
+      for _ <- 1..5, do: assert_receive({:lobby, ^id, {:updated, _}})
+
+      # player 2 leaving should make all the bots leave and the space should be
+      # taken up by the players in the join queue
+      :ok = Lobby.leave(id, "2")
+
+      assert_receive({:lobby, ^id, {:updated, [%{updates: update}]}})
+
+      # bots should be gone
+      %{bots: %{^bot_id1 => nil, ^bot_id2 => nil, ^bot_id3 => nil}} = update
+
+      # players in join queue should be in team now
+      assert update.players["3"].team != nil
+      assert update.players["4"].team != nil
+      %{spectators: %{"2" => nil, "3" => nil, "4" => nil}} = update
+    end
+  end
+
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the
   # teiserver_web/tachyon/lobby_test.exs file

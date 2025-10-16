@@ -91,6 +91,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
               }
         }
 
+  # represent the ID of a user or a bot slated to play in the game (no spec)
+  @typep player_id :: T.userid() | String.t()
+
   @typep player :: %{
            id: T.userid(),
            name: String.t(),
@@ -111,6 +114,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
            join_queue_position: number() | nil
          }
 
+  @typep bot :: %{
+           id: String.t(),
+           team: team(),
+           host_user_id: T.userid(),
+           short_name: String.t(),
+           name: String.t() | nil,
+           version: String.t() | nil,
+           options: %{String.t() => String.t()}
+         }
+
   @typep state :: %{
            id: id(),
            monitors: MC.t(),
@@ -120,8 +133,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
            engine_version: String.t(),
            ally_team_config: ally_team_config(),
            # used to track the players in the lobby.
-           players: %{T.userid() => player()},
+           players: %{player_id() => player() | bot()},
            spectators: %{T.userid() => spectator()},
+           bot_idx_counter: non_neg_integer(),
            current_battle:
              nil
              | %{
@@ -189,6 +203,39 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
+  @type add_bot_opt ::
+          {:name, String.t()} | {:version, String.t()} | {:options, %{String.t() => String.t()}}
+  @type add_bot_opts :: [add_bot_opt]
+
+  @spec add_bot(
+          id(),
+          T.userid(),
+          ally_team :: non_neg_integer(),
+          short_name :: String.t(),
+          add_bot_opts()
+        ) :: {:ok, bot_id :: String.t()} | {:error, reason :: term()}
+  def add_bot(
+        lobby_id,
+        user_id,
+        ally_team,
+        short_name,
+        opts \\ []
+      ) do
+    GenServer.call(
+      via_tuple(lobby_id),
+      {:add_bot, user_id,
+       %{
+         ally_team: ally_team,
+         short_name: short_name,
+         name: opts[:name],
+         version: opts[:version],
+         options: Keyword.get(opts, :options, %{})
+       }}
+    )
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
   @doc """
   This should only be used for tests, because there is some gnarly logic in
   generating the start script and it's a bit hard to test end to end
@@ -239,6 +286,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         }
       },
       spectators: %{},
+      bot_idx_counter: 0,
       current_battle: nil
     }
 
@@ -328,9 +376,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def handle_call({:join_ally_team, user_id, ally_team}, _from, state) do
     ally_team_capacity = Enum.at(state.ally_team_config, ally_team).max_teams
 
-    team_count =
-      Enum.filter(state.players, fn {_, %{team: {at, _, _}}} -> at == ally_team end)
-      |> Enum.count()
+    in_team_count = team_count(ally_team, state.players)
 
     already_there? =
       case state.players[user_id] do
@@ -343,13 +389,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
         # TODO: broadcast this update
         {:reply, {:ok, get_details_from_state(state)}, state}
 
-      team_count >= ally_team_capacity ->
+      in_team_count >= ally_team_capacity ->
         {:reply, {:error, :ally_team_full}, state}
 
       true ->
         # we guarantee that teams are consecutive in the ally team (without gap)
-        # so we can use the team_count as the index for the new team in the ally team
-        team = {ally_team, team_count, 0}
+        # so we can use the in_team_count as the index for the new team in the ally team
+        team = {ally_team, in_team_count, 0}
 
         case {state.players[user_id], state.spectators[user_id]} do
           {player, nil} ->
@@ -430,6 +476,45 @@ defmodule Teiserver.TachyonLobby.Lobby do
     change_map = %{players: player_changes, spectators: spec_changes}
     broadcast_update({:update, nil, change_map}, state)
     {:reply, :ok, state}
+  end
+
+  def handle_call({:add_bot, user_id, _add_data}, _from, state)
+      when not is_map_key(state.players, user_id) and not is_map_key(state.spectators, user_id),
+      do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:add_bot, _user_id, add_data}, _from, state)
+      when add_data.ally_team >= length(state.ally_team_config) or add_data.ally_team < 0,
+      do: {:reply, {:error, :invalid_ally_team}, state}
+
+  def handle_call({:add_bot, user_id, add_data}, _from, state) do
+    ally_team = add_data.ally_team
+    ally_team_capacity = Enum.at(state.ally_team_config, ally_team).max_teams
+
+    in_team_count = team_count(ally_team, state.players)
+
+    if in_team_count >= ally_team_capacity do
+      {:reply, {:error, :ally_team_full}, state}
+    else
+      bot_id = "bot-#{state.bot_idx_counter}"
+
+      bot = %{
+        id: bot_id,
+        team: {ally_team, in_team_count, 0},
+        host_user_id: user_id,
+        short_name: add_data.short_name,
+        name: add_data.name,
+        version: add_data.version,
+        options: add_data.options
+      }
+
+      state =
+        put_in(state.players[bot.id], bot)
+        |> Map.update!(:bot_idx_counter, &(&1 + 1))
+
+      broadcast_update({:update, nil, %{players: %{bot.id => bot}}}, state)
+
+      {:reply, {:ok, bot.id}, state}
+    end
   end
 
   def handle_call({:join_queue, user_id}, _from, state)
@@ -647,20 +732,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> Map.put(:spectators, spectators)
   end
 
+  # find an empty slot for a player/bot to play
   # this function isn't too efficient, but it's never going to be run on
   # massive inputs since the engine cannot support more than 254 players anyway
-  @spec find_team(ally_team_config(), %{T.userid() => player()}) :: team() | nil
+  @spec find_team(ally_team_config(), %{player_id() => player() | bot()}) :: team() | nil
   defp find_team(ally_team_config, players) do
     # find the least full ally team
     ally_team =
       for {at, at_idx} <- Enum.with_index(ally_team_config) do
         total_capacity = Enum.sum_by(at.teams, fn t -> t.max_players end)
 
-        players_in_ally_team =
-          Enum.filter(players, fn {_, %{team: {x, _, _}}} -> x == at_idx end)
-          |> Enum.count()
-
-        capacity = total_capacity - players_in_ally_team
+        capacity = total_capacity - team_count(at_idx, players)
         {capacity, at_idx, at.teams}
       end
       |> Enum.filter(fn {c, _, _} -> c > 0 end)
@@ -695,13 +777,34 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  # return the number of players + bots in the given ally team
+  defp team_count(ally_team, players) do
+    Enum.count(players, fn {_, %{team: {at, _, _}}} -> at == ally_team end)
+  end
+
   defp broadcast_update({:update, user_id, updates}, state) do
+    # internally bots and humans are in the same `players` group. But when
+    # sending these updates for client consumption, they want players and bots
+    # as separate.
+    updates =
+      if is_map_key(updates, :players) do
+        {players, rest} = Map.pop!(updates, :players)
+        {bots, players} = Enum.split_with(players, &bot_id?(elem(&1, 0)))
+
+        %{players: Map.new(players), bots: Map.new(bots)}
+        |> Enum.filter(&(elem(&1, 1) != %{}))
+        |> Map.new()
+        |> Map.merge(rest)
+      else
+        updates
+      end
+
     events = [%{event: :updated, updates: updates}]
     broadcast_to_members(state, user_id, {:lobby, state.id, {:updated, events}})
   end
 
   defp broadcast_to_members(state, sender_id, message) do
-    for {p_id, p} <- state.players, p_id != sender_id do
+    for {p_id, p} <- state.players, p_id != sender_id, is_map_key(p, :pid) do
       send(p.pid, message)
     end
 
@@ -745,13 +848,19 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec remove_player(T.userid(), state()) :: state()
   defp remove_player(user_id, state) do
-    {updated_players, changes} = do_remove_player(user_id, state.players)
+    # if the user leaving is associated with any bot, we need to remove all of
+    # them as well.
+    bot_ids_to_remove =
+      Enum.filter(state.players, fn {_bot_id, b} -> Map.get(b, :host_user_id) == user_id end)
+      |> Enum.map(&elem(&1, 0))
+
+    {updated_players, changes} = do_remove_players([user_id | bot_ids_to_remove], state.players)
 
     state =
       Map.update!(state, :monitors, &MC.demonitor_by_val(&1, {:user, user_id}))
       |> Map.replace!(:players, updated_players)
 
-    {state, new_player_id} = add_player_from_join_queue(state)
+    {state, fill_changes} = fill_players_from_join_queue(state)
 
     # avoid sending a useless lobby list update when the last member of the lobby
     # just left. The caller of this function will detect the lobby is empty and
@@ -760,15 +869,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
     if map_size(state.players) > 0 || map_size(state.spectators) > 0 do
       TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
 
+      player_changes = Map.merge(changes, Map.get(fill_changes, :players, %{}))
+      spec_changes = Map.get(fill_changes, :spectators, %{})
+
       change_map =
-        if new_player_id == nil do
-          %{players: changes}
-        else
-          %{
-            players: Map.put(changes, new_player_id, %{team: state.players[new_player_id].team}),
-            spectators: %{new_player_id => nil}
-          }
-        end
+        %{players: player_changes, spectators: spec_changes}
+        |> Enum.reject(&Enum.empty?(elem(&1, 1)))
+        |> Map.new()
 
       broadcast_update({:update, user_id, change_map}, state)
     end
@@ -778,19 +885,40 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec remove_spectator(T.userid(), state()) :: state()
   defp remove_spectator(user_id, state) do
+    bot_ids_to_remove =
+      Enum.filter(state.players, fn {_bot_id, b} -> Map.get(b, :host_user_id) == user_id end)
+      |> Enum.map(&elem(&1, 0))
+
+    {updated_players, changes} = do_remove_players(bot_ids_to_remove, state.players)
+    state = Map.replace!(state, :players, updated_players)
+
+    {state, fill_changes} = fill_players_from_join_queue(state)
+
     state =
       Map.update!(state, :spectators, &Map.delete(&1, user_id))
       |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:user, user_id}))
+      |> Map.replace!(:players, updated_players)
 
-    broadcast_update({:update, user_id, %{spectators: %{user_id => nil}}}, state)
+    player_changes = Map.merge(changes, Map.get(fill_changes, :players, %{}))
+
+    spec_changes =
+      Map.get(fill_changes, :spectators, %{})
+      |> Map.put(user_id, nil)
+
+    updates =
+      %{players: player_changes, spectators: spec_changes}
+      |> Enum.reject(&Enum.empty?(elem(&1, 1)))
+      |> Map.new()
+
+    broadcast_update({:update, user_id, updates}, state)
     state
   end
 
   # pure function that remove the given user from the players and adjust
   # all ally team and team configuration to account for that
-  # returns the updated map of player alongside a map of changes made the process.
-  @spec do_remove_player(T.userid(), %{T.userid() => player()}) ::
-          {%{T.userid() => player()}, %{T.userid() => %{team: team} | nil}}
+  # returns the updated map of players alongside a map of changes made the process.
+  @spec do_remove_player(T.userid(), %{player_id() => player() | bot()}) ::
+          {%{player_id() => player() | bot()}, %{player_id() => %{team: team} | nil}}
   defp do_remove_player(user_id, players) do
     {%{team: {at_idx, t_idx, p_idx}}, players} =
       Map.pop!(players, user_id)
@@ -834,9 +962,19 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {updated_players, changes}
   end
 
+  # same as do_remove_player, but for multiple players. Useful when removing a
+  # player/spec and its associated bots
+  @spec do_remove_players([T.userid()], %{player_id() => player() | bot()}) ::
+          {%{player_id() => player() | bot()}, %{player_id() => %{team: team} | nil}}
+  defp do_remove_players(player_ids, players) do
+    Enum.reduce(player_ids, {players, %{}}, fn player_id, {players, changes} ->
+      {updated_players, new_changes} = do_remove_player(player_id, players)
+      {updated_players, Map.merge(changes, new_changes)}
+    end)
+  end
+
   # Add the first player from the join queue to the player list and returns the
   # updated state alongside the player id that was added
-  # Assumes there is a spot available in an ally team
   @spec add_player_from_join_queue(state()) :: {state(), T.userid() | nil}
   defp add_player_from_join_queue(state) do
     player_to_add =
@@ -845,9 +983,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
           nil
 
         {id, p} ->
-          team = find_team(state.ally_team_config, state.players)
-          p = p |> Map.put(:team, team) |> Map.delete(:join_queue_position)
-          {id, p}
+          case find_team(state.ally_team_config, state.players) do
+            nil ->
+              nil
+
+            team ->
+              p = p |> Map.put(:team, team) |> Map.delete(:join_queue_position)
+              {id, p}
+          end
       end
 
     case player_to_add do
@@ -863,7 +1006,33 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  defp fill_players_from_join_queue(state, player_ids \\ []) do
+    {state, new_player_id} = add_player_from_join_queue(state)
+
+    if new_player_id == nil do
+      changes =
+        if player_ids == [] do
+          %{}
+        else
+          player_changes =
+            Enum.map(player_ids, fn x -> {x, %{team: state.players[x].team}} end)
+            |> Map.new()
+
+          spec_changes = Enum.map(player_ids, fn x -> {x, nil} end) |> Map.new()
+          %{players: player_changes, spectators: spec_changes}
+        end
+
+      {state, changes}
+    else
+      fill_players_from_join_queue(state, [new_player_id | player_ids])
+    end
+  end
+
   defp gen_password(), do: :crypto.strong_rand_bytes(16) |> Base.encode16()
+
+  # in tests, some user ids are string
+  defp bot_id?(id) when is_integer(id), do: false
+  defp bot_id?(id), do: String.starts_with?(id, "bot")
 
   @spec gen_start_script(state()) :: TachyonBattle.start_script()
   defp gen_start_script(state) do
