@@ -81,6 +81,9 @@ defmodule Teiserver.TachyonLobby do
               ),
               to: Lobby
 
+  @spec remove_bot(id(), bot_id :: String.t()) :: :ok | {:error, :invalid_bot_id | term()}
+  defdelegate remove_bot(lobby_id, bot_id), to: Lobby
+
   @spec join_queue(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   defdelegate join_queue(lobby_id, user_id), to: Lobby
 

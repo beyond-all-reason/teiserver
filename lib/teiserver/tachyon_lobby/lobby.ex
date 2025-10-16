@@ -246,6 +246,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
+  @spec remove_bot(id(), bot_id :: String.t()) :: :ok | {:error, :invalid_bot_id | term()}
+  def remove_bot(lobby_id, bot_id) do
+    GenServer.call(via_tuple(lobby_id), {:remove_bot, bot_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
   @doc """
   This should only be used for tests, because there is some gnarly logic in
   generating the start script and it's a bit hard to test end to end
@@ -525,6 +532,25 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       {:reply, {:ok, bot.id}, state}
     end
+  end
+
+  def handle_call({:remove_bot, bot_id}, _from, state) when not is_map_key(state.players, bot_id),
+    do: {:reply, {:error, :invalid_bot_id}, state}
+
+  def handle_call({:remove_bot, bot_id}, _from, state) do
+    {updated_players, changes} = do_remove_player(bot_id, state.players)
+    state = Map.replace!(state, :players, updated_players)
+    {state, fill_changes} = fill_players_from_join_queue(state)
+
+    change_map =
+      if fill_changes == %{} do
+        %{players: changes}
+      else
+        Map.update!(fill_changes, :players, &Map.merge(changes, &1))
+      end
+
+    broadcast_update({:update, nil, change_map}, state)
+    {:reply, :ok, state}
   end
 
   def handle_call({:join_queue, user_id}, _from, state)
@@ -903,14 +929,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> Enum.map(&elem(&1, 0))
 
     {updated_players, changes} = do_remove_players(bot_ids_to_remove, state.players)
-    state = Map.replace!(state, :players, updated_players)
-
-    {state, fill_changes} = fill_players_from_join_queue(state)
 
     state =
-      Map.update!(state, :spectators, &Map.delete(&1, user_id))
-      |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:user, user_id}))
+      state
       |> Map.replace!(:players, updated_players)
+      |> Map.update!(:spectators, &Map.delete(&1, user_id))
+      |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:user, user_id}))
+
+    {state, fill_changes} = fill_players_from_join_queue(state)
 
     player_changes = Map.merge(changes, Map.get(fill_changes, :players, %{}))
 

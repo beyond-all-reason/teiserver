@@ -694,6 +694,71 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert update.players["4"].team != nil
       %{spectators: %{"2" => nil, "3" => nil, "4" => nil}} = update
     end
+
+    test "correct id required to remove bot" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :invalid_bot_id} = Lobby.remove_bot(id, "lolnope")
+    end
+
+    test "remove_bot works" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.remove_bot(id, bot_id)
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+      %{updates: %{bots: %{^bot_id => nil}}} = update
+    end
+
+    test "removing a bot reshuffle the teams" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, bot_id1} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      {:ok, bot_id2} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.remove_bot(id, bot_id1)
+
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+      %{updates: %{bots: %{^bot_id1 => nil, ^bot_id2 => %{team: {1, 0, 0}}}}} = update
+    end
+
+    test "removing bot allow specs in join queue to get the spot" do
+      # Setup
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "other-user-id")
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+      %{updates: %{spectators: %{"other-user-id" => %{join_queue_position: 1}}}} = update
+
+      # Act
+      :ok = Lobby.remove_bot(id, bot_id)
+
+      # Assert
+      assert_receive {:lobby, ^id, {:updated, [%{updates: update}]}}
+      # bot is gone
+      %{bots: %{^bot_id => nil}} = update
+      # and player took its place
+      %{spectators: %{"other-user-id" => nil}, players: %{"other-user-id" => %{team: _}}} = update
+    end
+
+    test "player in join queue with bot leaves" do
+      %{id: id} = setup_full_lobby([1, 1])
+      {:ok, bot_id} = Lobby.add_bot(id, "2", 1, "bot")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.leave(id, "2")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+
+      assert %{spectators: %{"2" => nil}, bots: %{bot_id => nil}} == updates
+    end
   end
 
   # these tests are a bit anemic because they also require a connected autohost
