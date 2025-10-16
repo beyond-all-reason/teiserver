@@ -39,7 +39,10 @@ RUN mix deps.get && mix deps.compile
 # Copy application code
 COPY . .
 
-# Compile application
+# Format and fix code issues
+RUN mix credo --strict || true
+RUN mix format
+
 RUN mix compile
 
 # Copy entrypoint script

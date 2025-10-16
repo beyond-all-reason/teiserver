@@ -1017,6 +1017,54 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+
+  defp player_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
+
+  defp player_update_to_tachyon(p_id, updates, omit_nil?) do
+    base = if is_map_key(updates, :team) do
+      val = updates.team
+
+      cond do
+        val == nil && omit_nil? -> %{}
+        val == nil -> %{allyTeam: nil, team: nil, player: nil}
+        true -> lobby_team_to_tachyon(val)
+      end
+    else
+      %{}
+    end
+    |> Map.put(:id, p_id)
+
+    apply_sync_status(base, updates)
+  end
+
+  defp spectator_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
+
+  defp spectator_update_to_tachyon(p_id, updates, omit_nil?) do
+    base = %{id: p_id}
+    key_mapping = [{:join_queue_position, :joinQueuePosition}]
+    result = to_json_merge_patch(base, updates, key_mapping, omit_nil?)
+
+    apply_sync_status(result, updates)
+  end
+
+  defp lobby_update_to_tachyon(lobby_id, %{event: :mods_changed} = ev) do
+    data = %{
+      id: lobby_id,
+      mods: Enum.map(ev.mods, &mod_to_tachyon/1)
+    }
+
+    {"lobby/updated", data}
+  end
+
+  defp lobby_update_to_tachyon(lobby_id, %{event: :boss_changed} = ev) do
+    data = %{
+      id: lobby_id,
+      bossId: to_string(ev.boss_id)
+    }
+
+    {"lobby/updated", data}
+  end
+
   defp lobby_update_to_tachyon(lobby_id, %{event: :updated} = ev) do
     data =
       %{id: lobby_id}
@@ -1050,49 +1098,6 @@ defmodule Teiserver.Player.TachyonHandler do
             Map.put(m, :spectators, specs)
         end
       end)
-
-    {"lobby/updated", data}
-  end
-
-  defp player_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
-
-  defp player_update_to_tachyon(p_id, updates, omit_nil?) do
-    if is_map_key(updates, :team) do
-      val = updates.team
-
-      cond do
-        val == nil && omit_nil? -> %{}
-        val == nil -> %{allyTeam: nil, team: nil, player: nil}
-        true -> lobby_team_to_tachyon(val)
-      end
-    else
-      %{}
-    end
-    |> Map.put(:id, p_id)
-  end
-
-  defp spectator_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
-
-  defp spectator_update_to_tachyon(p_id, updates, omit_nil?) do
-    base = %{id: p_id}
-    key_mapping = [{:join_queue_position, :joinQueuePosition}]
-    to_json_merge_patch(base, updates, key_mapping, omit_nil?)
-  end
-
-  defp lobby_update_to_tachyon(lobby_id, %{event: :mods_changed} = ev) do
-    data = %{
-      id: lobby_id,
-      mods: Enum.map(ev.mods, &mod_to_tachyon/1)
-    }
-
-    {"lobby/updated", data}
-  end
-
-  defp lobby_update_to_tachyon(lobby_id, %{event: :boss_changed} = ev) do
-    data = %{
-      id: lobby_id,
-      bossId: to_string(ev.boss_id)
-    }
 
     {"lobby/updated", data}
   end
@@ -1147,10 +1152,6 @@ defmodule Teiserver.Player.TachyonHandler do
     end)
   end
 
-  defp lobby_current_battle_to_tachyon(battle) do
-    %{startedAt: DateTime.to_unix(battle.started_at, :microsecond)}
-  end
-
   # Parse mods from JSON protocol format to Elixir maps
   defp parse_mods(mods_data) when is_list(mods_data) do
     Enum.map(mods_data, fn mod ->
@@ -1202,36 +1203,4 @@ defmodule Teiserver.Player.TachyonHandler do
     }
   end
 
-  # Player update conversion with sync status support
-  defp player_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
-
-  defp player_update_to_tachyon(p_id, updates, omit_nil?) do
-    base = %{id: p_id}
-
-    # Handle team information
-    team_data = if is_map_key(updates, :team) do
-      val = updates.team
-      cond do
-        val == nil && omit_nil? -> %{}
-        val == nil -> %{allyTeam: nil, team: nil, player: nil}
-        true -> lobby_team_to_tachyon(val)
-      end
-    else
-      %{}
-    end
-
-    # Apply sync status if present
-    result = Map.merge(base, team_data)
-    apply_sync_status(result, updates)
-  end
-
-  # Spectator update conversion with sync status support
-  defp spectator_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
-
-  defp spectator_update_to_tachyon(p_id, updates, omit_nil?) do
-    base = %{id: p_id}
-    key_mapping = [{:join_queue_position, :joinQueuePosition}]
-    result = to_json_merge_patch(base, updates, key_mapping, omit_nil?)
-    apply_sync_status(result, updates)
-  end
 end

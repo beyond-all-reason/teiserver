@@ -610,18 +610,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> Map.put(:spectators, spectators)
   end
 
-  defp broadcast_update({:add_player, user_id, team, state}) do
-    TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
+  # defp broadcast_update({:add_player, user_id, team, state}) do
+  #   TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
 
-    for {p_id, p} <- state.players, p_id != user_id do
-      send(
-        p.pid,
-        {:lobby, state.id, {:updated, [%{event: :add_player, id: user_id, team: team}]}}
-      )
-    end
+  #   for {p_id, p} <- state.players, p_id != user_id do
+  #     send(
+  #       p.pid,
+  #       {:lobby, state.id, {:updated, [%{event: :add_player, id: user_id, team: team}]}}
+  #     )
+  #   end
 
-    :ok
-  end
+  #   :ok
+  # end
 
   defp broadcast_update({:remove_player, user_id, player_changes, state}) do
     TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
@@ -668,83 +668,114 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :ok
   end
 
-  # this function isn't too efficient, but it's never going to be run on
-  # massive inputs since the engine cannot support more than 254 players anyway
-  @spec find_team(ally_team_config(), [player()]) :: team() | nil
-  defp find_team(ally_team_config, players) do
-    # find the least full ally team
-    ally_team =
-      for {at, at_idx} <- Enum.with_index(ally_team_config) do
-        total_capacity = Enum.sum_by(at.teams, fn t -> t.max_players end)
+  # # this function isn't too efficient, but it's never going to be run on
+  # # massive inputs since the engine cannot support more than 254 players anyway
+  # @spec find_team(ally_team_config(), [player()]) :: team() | nil
+  # defp find_team(ally_team_config, players) do
+  #   # find the least full ally team
+  #   ally_team =
+  #     for {at, at_idx} <- Enum.with_index(ally_team_config) do
+  #       total_capacity = Enum.sum_by(at.teams, fn t -> t.max_players end)
+  #
+  #       players_in_ally_team =
+  #         Enum.filter(players, fn %{team: {x, _, _}} -> x == at_idx end)
+  #         |> Enum.count()
+  #
+  #       capacity = total_capacity - players_in_ally_team
+  #       {capacity, at_idx, at.teams}
+  #     end
+  #     |> Enum.filter(fn {c, _, _} -> c > 0 end)
+  #     # select the biggest capacity with the lowest index
+  #     |> Enum.min(
+  #       fn {c1, idx1, _}, {c2, idx2, _} ->
+  #         c1 >= c2 && idx1 <= idx2
+  #       end,
+  #       fn -> nil end
+  #     )
+  #
+  #   case ally_team do
+  #     nil ->
+  #       nil
+  #
+  #     {_, at_idx, teams} ->
+  #       {_, t_idx, p_idx} =
+  #         for {t, t_idx} <- Enum.with_index(teams) do
+  #           player_count =
+  #             Enum.filter(players, fn %{team: {x, y, _}} ->
+  #               x == at_idx && y == t_idx
+  #             end)
+  #             |> Enum.count()
+  #
+  #           capacity = t.max_players - player_count
+  #           {capacity, t_idx, player_count}
+  #         end
+  #         |> Enum.filter(fn {c, _, _} -> c > 0 end)
+  #         # guarantee not to raise an exception
+  #         |> Enum.min()
+  #
+  #       {at_idx, t_idx, p_idx}
+  #   end
+  # end
 
-        players_in_ally_team =
-          Enum.filter(players, fn %{team: {x, _, _}} -> x == at_idx end)
-          |> Enum.count()
-
-        capacity = total_capacity - players_in_ally_team
-        {capacity, at_idx, at.teams}
-      end
-      |> Enum.filter(fn {c, _, _} -> c > 0 end)
-      # select the biggest capacity with the lowest index
-      |> Enum.min(
-        fn {c1, idx1, _}, {c2, idx2, _} ->
-          c1 >= c2 && idx1 <= idx2
-        end,
-        fn -> nil end
-      )
-
-    case ally_team do
-      nil ->
-        nil
-
-      {_, at_idx, teams} ->
-        {_, t_idx, p_idx} =
-          for {t, t_idx} <- Enum.with_index(teams) do
-            player_count =
-              Enum.filter(players, fn %{team: {x, y, _}} ->
-                x == at_idx && y == t_idx
-              end)
-              |> Enum.count()
-
-            capacity = t.max_players - player_count
-            {capacity, t_idx, player_count}
-          end
-          |> Enum.filter(fn {c, _, _} -> c > 0 end)
-          # guarantee not to raise an exception
-          |> Enum.min()
-
-        {at_idx, t_idx, p_idx}
-    end
+  defp broadcast_update({:update, user_id, updates}, state) do
+    events = [%{event: :updated, updates: updates}]
+    broadcast_to_members(state, user_id, {:lobby, state.id, {:updated, events}})
   end
+
+  defp broadcast_to_members(state, sender_id, message) do
+    for {p_id, p} <- state.players, p_id != sender_id do
+      send(p.pid, message)
+    end
+
+    for {s_id, s} <- state.spectators, s_id != sender_id do
+      send(s.pid, message)
+    end
+
+    state
+  end
+
+  # temporarily commented out until I implement lobby/joinQueue
+  # defp find_spec_queue_pos(spectators) do
+  #   if Enum.empty?(spectators) do
+  #     1
+  #   else
+  #     {_, s} = Enum.max_by(spectators, fn {_, s} -> s.join_queue_position end)
+  #     s.join_queue_position
+  #   end
+  # end
 
   @spec remove_player(T.userid(), state()) :: state()
   defp remove_player(user_id, state) do
-    changes = do_remove_player(user_id, state.players)
+    {player_changes, updated_players} = do_remove_player(user_id, state.players)
 
-    updated_players =
-      Enum.reduce(changes, state.players, fn {p_id, team}, ps ->
-        put_in(ps, [p_id, :team], team)
+    # Apply the team changes to get the final player list
+    final_players =
+      Enum.reduce(player_changes, updated_players, fn {p_id, team}, players ->
+        put_in(players, [p_id, :team], team)
       end)
-      |> Map.delete(user_id)
 
     state =
       Map.update!(state, :monitors, &MC.demonitor_by_val(&1, {:user, user_id}))
-      |> Map.put(:players, updated_players)
+      |> Map.put(:players, final_players)
+
+    # Transfer boss status if boss left and lobby not empty
+    state =
+      if user_id == state.boss_id && map_size(final_players) > 0 do
+        # Pick first remaining player as new boss
+        new_boss_id = final_players |> Map.keys() |> List.first()
+        Logger.info("Boss #{user_id} left, transferring to user #{new_boss_id}")
+        broadcast_update({:boss_changed, new_boss_id, state})
+        %{state | boss_id: new_boss_id}
+      else
+        state
+      end
 
     # avoid sending a useless lobby list update when the last member of the lobby
     # just left. The caller of this function will detect the lobby is empty and
     # terminate the process, which will trigger the final lobby list update for
     # this lobby
     if map_size(state.players) > 0 || map_size(state.spectators) > 0 do
-      TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
-
-      updates =
-        changes
-        |> Enum.map(fn {u_id, team} -> {u_id, %{team: team}} end)
-        |> Map.new()
-        |> Map.put(user_id, nil)
-
-      broadcast_update({:update, user_id, %{players: updates}}, state)
+      broadcast_update({:remove_player, user_id, player_changes, state})
     end
 
     state
@@ -765,54 +796,34 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # returns the list of {player_id, new_team} that were modified in the process
   @spec do_remove_player(T.userid(), %{T.userid() => player()}) :: [{T.userid(), team()}]
   defp do_remove_player(user_id, players) do
-    {%{team: {at_idx, t_idx, p_idx}}, players} =
+    {%{team: {at_idx, t_idx, p_idx}}, updated_players} =
       Map.pop!(players, user_id)
 
     # reorg the other players to keep the team indices consecutive
     # ally team won't change
-    Enum.reduce(players, [], fn {p_id, p}, player_changes ->
-      {x, y, z} = p.team
+    player_changes =
+      Enum.reduce(updated_players, [], fn {p_id, p}, acc ->
+        {x, y, z} = p.team
 
-      cond do
-        x == at_idx && y >= t_idx && p_idx == 0 ->
-          # p_idx == 0 means the player removed was the last one on their team
-          # so its team can be "removed", and all teams with a higher index should
-          # be moved back by 1
-          team = {x, y - 1, z}
+        cond do
+          x == at_idx && y >= t_idx && p_idx == 0 ->
+            # p_idx == 0 means the player removed was the last one on their team
+            # so its team can be "removed", and all teams with a higher index should
+            # be moved back by 1
+            team = {x, y - 1, z}
+            [{p_id, team} | acc]
 
-          [{p_id, team} | player_changes]
-
-        x == at_idx && y >= t_idx && z >= p_idx ->
-          # similar there, but we only shuffle the players in the same team (archons)
-          team = {x, y, z - 1}
-
-          [{p_id, team} | player_changes]
+          x == at_idx && y >= t_idx && z >= p_idx ->
+            # similar there, but we only shuffle the players in the same team (archons)
+            team = {x, y, z - 1}
+            [{p_id, team} | acc]
 
           true ->
-            {player_changes, Map.put(players, p_id, p)}
+            acc
         end
       end)
 
-    state =
-      Map.update!(state, :monitors, &MC.demonitor_by_val(&1, removed.id))
-      |> Map.put(:players, updated_players)
-
-    # Transfer boss status if boss left and lobby not empty
-    state =
-      if user_id == state.boss_id && map_size(updated_players) > 0 do
-        # Pick first remaining player as new boss
-        new_boss_id = updated_players |> Map.keys() |> List.first()
-        Logger.info("Boss #{user_id} left, transferring to user #{new_boss_id}")
-        broadcast_update({:boss_changed, new_boss_id, state})
-        %{state | boss_id: new_boss_id}
-      else
-        state
-      end
-
-    if map_size(state.players) > 0,
-      do: broadcast_update({:remove_player, user_id, player_changes, state})
-
-    {:ok, state}
+    {player_changes, updated_players}
   end
 
   defp gen_password(), do: :crypto.strong_rand_bytes(16) |> Base.encode16()
@@ -860,8 +871,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         end)
     }
 
-    # Add mods if present (order matters!)
-    # Send FULL mod objects so autohost can download missing mods
+    # Add mods if present (order matter)
     if length(state.mods) > 0 do
       Map.put(script, :mods, state.mods)
     else
