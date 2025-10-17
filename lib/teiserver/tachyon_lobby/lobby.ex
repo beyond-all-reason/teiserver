@@ -352,20 +352,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
         team = {ally_team, team_count, 0}
 
         case {state.players[user_id], state.spectators[user_id]} do
-          {_player, nil} ->
+          {player, nil} ->
             # we're moving a player from a different ally team
-            changes = [{user_id, team} | do_remove_player(user_id, state.players)]
+            {updated_players, changes} = do_remove_player(user_id, state.players)
 
-            change_map =
-              for({user_id, team} <- changes, do: {user_id, %{team: team}})
-              |> Enum.into(%{})
-
-            broadcast_update({:update, nil, %{players: change_map}}, state)
-
-            updated_players =
-              Enum.reduce(changes, state.players, fn {p_id, team}, players ->
-                put_in(players, [p_id, :team], team)
-              end)
+            updated_players = Map.put(updated_players, user_id, Map.put(player, :team, team))
+            changes = Map.put(changes, user_id, %{team: team})
+            broadcast_update({:update, nil, %{players: changes}}, state)
 
             state = Map.replace!(state, :players, updated_players)
             {:reply, {:ok, get_details_from_state(state)}, state}
@@ -410,13 +403,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   def handle_call({:spectate, user_id}, _from, state) when is_map_key(state.players, user_id) do
-    changes = do_remove_player(user_id, state.players)
-
-    {spec, updated_players} =
-      Enum.reduce(changes, state.players, fn {p_id, team}, ps ->
-        put_in(ps, [p_id, :team], team)
-      end)
-      |> Map.pop!(user_id)
+    spec = Map.get(state.players, user_id)
+    {updated_players, player_changes} = do_remove_player(user_id, state.players)
 
     spec = spec |> Map.delete(:team) |> Map.put(:join_queue_position, nil)
 
@@ -424,10 +412,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
       state
       |> Map.put(:players, updated_players)
       |> put_in([:spectators, user_id], spec)
-
-    player_changes =
-      for({u_id, team} <- changes, do: {u_id, %{team: team}}, into: %{})
-      |> Map.put(user_id, nil)
 
     {state, new_player_id} = add_player_from_join_queue(state)
 
@@ -761,17 +745,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec remove_player(T.userid(), state()) :: state()
   defp remove_player(user_id, state) do
-    changes = do_remove_player(user_id, state.players)
-
-    updated_players =
-      Enum.reduce(changes, state.players, fn {p_id, team}, ps ->
-        put_in(ps, [p_id, :team], team)
-      end)
-      |> Map.delete(user_id)
+    {updated_players, changes} = do_remove_player(user_id, state.players)
 
     state =
       Map.update!(state, :monitors, &MC.demonitor_by_val(&1, {:user, user_id}))
-      |> Map.put(:players, updated_players)
+      |> Map.replace!(:players, updated_players)
 
     {state, new_player_id} = add_player_from_join_queue(state)
 
@@ -782,23 +760,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
     if map_size(state.players) > 0 || map_size(state.spectators) > 0 do
       TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
 
-      updates =
-        changes
-        |> Enum.map(fn {u_id, team} -> {u_id, %{team: team}} end)
-        |> Map.new()
-        |> Map.put(user_id, nil)
-        |> then(fn m ->
-          if new_player_id == nil,
-            do: m,
-            else: Map.put(m, new_player_id, %{team: state.players[new_player_id].team})
-        end)
-
-      change_map = %{players: updates}
-
       change_map =
-        if new_player_id == nil,
-          do: change_map,
-          else: Map.put(change_map, :spectators, %{new_player_id => nil})
+        if new_player_id == nil do
+          %{players: changes}
+        else
+          %{
+            players: Map.put(changes, new_player_id, %{team: state.players[new_player_id].team}),
+            spectators: %{new_player_id => nil}
+          }
+        end
 
       broadcast_update({:update, user_id, change_map}, state)
     end
@@ -818,36 +788,50 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   # pure function that remove the given user from the players and adjust
   # all ally team and team configuration to account for that
-  # returns the list of {player_id, new_team} that were modified in the process
-  @spec do_remove_player(T.userid(), %{T.userid() => player()}) :: [{T.userid(), team()}]
+  # returns the updated map of player alongside a map of changes made the process.
+  @spec do_remove_player(T.userid(), %{T.userid() => player()}) ::
+          {%{T.userid() => player()}, %{T.userid() => %{team: team} | nil}}
   defp do_remove_player(user_id, players) do
     {%{team: {at_idx, t_idx, p_idx}}, players} =
       Map.pop!(players, user_id)
 
     # reorg the other players to keep the team indices consecutive
     # ally team won't change
-    Enum.reduce(players, [], fn {p_id, p}, player_changes ->
-      {x, y, z} = p.team
+    changes =
+      Enum.reduce(players, [], fn {p_id, p}, player_changes ->
+        {x, y, z} = p.team
 
-      cond do
-        x == at_idx && y >= t_idx && p_idx == 0 ->
-          # p_idx == 0 means the player removed was the last one on their team
-          # so its team can be "removed", and all teams with a higher index should
-          # be moved back by 1
-          team = {x, y - 1, z}
+        cond do
+          x == at_idx && y >= t_idx && p_idx == 0 ->
+            # p_idx == 0 means the player removed was the last one on their team
+            # so its team can be "removed", and all teams with a higher index should
+            # be moved back by 1
+            team = {x, y - 1, z}
 
-          [{p_id, team} | player_changes]
+            [{p_id, team} | player_changes]
 
-        x == at_idx && y >= t_idx && z >= p_idx ->
-          # similar there, but we only shuffle the players in the same team (archons)
-          team = {x, y, z - 1}
+          x == at_idx && y >= t_idx && z >= p_idx ->
+            # similar there, but we only shuffle the players in the same team (archons)
+            team = {x, y, z - 1}
 
-          [{p_id, team} | player_changes]
+            [{p_id, team} | player_changes]
 
-        true ->
-          player_changes
-      end
-    end)
+          true ->
+            player_changes
+        end
+      end)
+
+    updated_players =
+      Enum.reduce(changes, players, fn {p_id, team}, players ->
+        put_in(players, [p_id, :team], team)
+      end)
+      |> Map.delete(user_id)
+
+    changes =
+      Enum.reduce(changes, %{}, fn {p_id, team}, m -> Map.put(m, p_id, %{team: team}) end)
+      |> Map.put(user_id, nil)
+
+    {updated_players, changes}
   end
 
   # Add the first player from the join queue to the player list and returns the
