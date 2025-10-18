@@ -421,7 +421,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     cond do
       already_there? ->
-        # TODO: broadcast this update
         {:reply, {:ok, get_details_from_state(state)}, state}
 
       in_team_count >= ally_team_capacity ->
