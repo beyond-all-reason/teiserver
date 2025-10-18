@@ -543,6 +543,49 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
+  def lobby_add_bot!(client, ally_team, short_name, opt_data) do
+    data =
+      %{
+        allyTeam: ally_team,
+        shortName: short_name,
+        name: opt_data[:name],
+        version: opt_data[:version],
+        options: opt_data[:options]
+      }
+      |> Enum.filter(&(elem(&1, 1) != nil))
+      |> Map.new()
+
+    :ok = send_request(client, "lobby/addBot", data)
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def lobby_remove_bot!(client, bot_id) do
+    :ok = send_request(client, "lobby/removeBot", %{id: bot_id})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def lobby_update_bot!(client, bot_id, data) do
+    update_data =
+      Enum.reduce(
+        [{:name, :name}, {:short_name, :shortName}, {:version, :version}, {:options, :options}],
+        %{id: bot_id},
+        fn
+          {k, tk}, m ->
+            if Keyword.has_key?(data, k) do
+              Map.put(m, tk, data[k])
+            else
+              m
+            end
+        end
+      )
+
+    :ok = send_request(client, "lobby/updateBot", update_data)
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
   def lobby_start_battle!(client) do
     :ok = send_request(client, "lobby/startBattle")
     {:ok, resp} = recv_message(client)

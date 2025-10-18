@@ -226,6 +226,127 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "bots" do
+    setup [:setup_lobby]
+
+    test "can add bot", %{client: client, user: user} do
+      %{"status" => "success", "data" => %{"id" => bot_id}} =
+        Tachyon.lobby_add_bot!(client, "001", "short name", version: "botv0")
+
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+
+      %{
+        "bots" => %{
+          ^bot_id => bot_data
+        }
+      } = data
+
+      user_id = to_string(user.id)
+
+      %{
+        "id" => ^bot_id,
+        "hostUserId" => ^user_id,
+        "shortName" => "short name",
+        "version" => "botv0",
+        "allyTeam" => "001"
+      } = bot_data
+    end
+
+    test "get bot in details on joining", %{client: client, lobby_id: lobby_id} do
+      %{"status" => "success", "data" => %{"id" => bot_id}} =
+        Tachyon.lobby_add_bot!(client, "001", "short name", version: "botv0")
+
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success", "data" => data} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+      assert is_map_key(data["bots"], bot_id)
+    end
+
+    test "removing bot requires correct id", %{client: client} do
+      %{"status" => "success"} =
+        Tachyon.lobby_add_bot!(client, "001", "short name", version: "botv0")
+
+      %{"commandId" => "lobby/updated", "data" => _} = Tachyon.recv_message!(client)
+
+      %{"status" => "failed", "reason" => "invalid_request", "details" => "invalid_bot_id"} =
+        Tachyon.lobby_remove_bot!(client, "definitely-not-a-bot-id")
+    end
+
+    test "can remove bot", %{client: client} do
+      %{"status" => "success", "data" => %{"id" => bot_id}} =
+        Tachyon.lobby_add_bot!(client, "001", "short name", version: "botv0")
+
+      %{"commandId" => "lobby/updated", "data" => _} = Tachyon.recv_message!(client)
+
+      %{"status" => "success"} = Tachyon.lobby_remove_bot!(client, bot_id)
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+
+      %{"bots" => %{^bot_id => nil}} = data
+    end
+
+    test "can update bot properties", %{client: client} do
+      %{"status" => "success", "data" => %{"id" => bot_id}} =
+        Tachyon.lobby_add_bot!(client, "001", "short name", version: "botv0")
+
+      %{"commandId" => "lobby/updated", "data" => _} = Tachyon.recv_message!(client)
+
+      update_data = [
+        name: "new name",
+        short_name: "new short name",
+        version: "v2",
+        options: %{opt1: "one", opt2: "two"}
+      ]
+
+      %{"status" => "success"} = Tachyon.lobby_update_bot!(client, bot_id, update_data)
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+
+      %{
+        "bots" => %{
+          ^bot_id => bot_data
+        }
+      } = data
+
+      %{
+        "id" => ^bot_id,
+        "shortName" => "new short name",
+        "name" => "new name",
+        "version" => "v2",
+        "options" => %{"opt1" => "one", "opt2" => "two"}
+      } = bot_data
+    end
+
+    test "partial update also work", %{client: client} do
+      %{"status" => "success", "data" => %{"id" => bot_id}} =
+        Tachyon.lobby_add_bot!(client, "001", "short name",
+          version: "botv0",
+          options: %{opt1: "one"}
+        )
+
+      %{"commandId" => "lobby/updated", "data" => _} = Tachyon.recv_message!(client)
+
+      update_data = [
+        short_name: "new short name",
+        version: nil,
+        options: %{opt2: "two"}
+      ]
+
+      %{"status" => "success"} = Tachyon.lobby_update_bot!(client, bot_id, update_data)
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+
+      %{
+        "bots" => %{
+          ^bot_id => bot_data
+        }
+      } = data
+
+      %{
+        "id" => ^bot_id,
+        "shortName" => "new short name",
+        "version" => nil,
+        "options" => %{"opt2" => "two"}
+      } = bot_data
+    end
+  end
+
   describe "listing" do
     setup [
       {Tachyon, :setup_app},

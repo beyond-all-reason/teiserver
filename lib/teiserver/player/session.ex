@@ -460,6 +460,28 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, :join_queue})
   end
 
+  @spec lobby_add_bot(
+          T.userid(),
+          ally_team :: non_neg_integer(),
+          short_name :: String.t(),
+          opts :: TachyonLobby.add_bot_opts()
+        ) :: {:ok, bot_id :: String.t()} | {:error, reason :: term()}
+  def lobby_add_bot(user_id, ally_team, short_name, opts \\ []) do
+    GenServer.call(via_tuple(user_id), {:lobby, :add_bot, ally_team, short_name, opts})
+  end
+
+  @spec lobby_remove_bot(T.userid(), bot_id :: String.t()) ::
+          :ok | {:error, :invalid_bot_id | term()}
+  def lobby_remove_bot(user_id, bot_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :remove_bot, bot_id})
+  end
+
+  @spec lobby_update_bot(T.userid(), TachyonLobby.bot_update_data()) ::
+          :ok | {:error, :invalid_bot_id | term()}
+  def lobby_update_bot(user_id, data) do
+    GenServer.call(via_tuple(user_id), {:lobby, :update_bot, data})
+  end
+
   @spec lobby_start_battle(T.userid()) :: :ok | {:error, reason :: term}
   def lobby_start_battle(user_id) do
     GenServer.call(via_tuple(user_id), {:lobby, :start_battle})
@@ -931,6 +953,28 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:lobby, :join_queue}, _from, state) do
     {:reply, TachyonLobby.join_queue(state.lobby.id, state.user.id), state}
+  end
+
+  def handle_call({:lobby, :add_bot, _, _, _}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :add_bot, ally_team, short_name, opts}, _from, state) do
+    {:reply, TachyonLobby.add_bot(state.lobby.id, state.user.id, ally_team, short_name, opts),
+     state}
+  end
+
+  def handle_call({:lobby, :remove_bot, _}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :remove_bot, bot_id}, _from, state) do
+    {:reply, TachyonLobby.remove_bot(state.lobby.id, bot_id), state}
+  end
+
+  def handle_call({:lobby, :update_bot, _data}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :update_bot, data}, _from, state) do
+    {:reply, TachyonLobby.update_bot(state.lobby.id, data), state}
   end
 
   def handle_call({:lobby, :leave}, _from, state) when is_nil(state.lobby),

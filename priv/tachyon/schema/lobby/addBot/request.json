@@ -1,0 +1,40 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/addBot/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LobbyAddBotRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "lobby/addBot" },
+        "data": {
+            "title": "LobbyAddBotRequestData",
+            "type": "object",
+            "properties": {
+                "allyTeam": { "type": "string" },
+                "name": {
+                    "description": "name to display in the lobby",
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "shortName": {
+                    "description": "Short name of the bot. Used to uniquely identify which bot to run",
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "version": { "type": "string" },
+                "options": {
+                    "type": "object",
+                    "patternProperties": { "^(.*)$": { "type": "string" } }
+                }
+            },
+            "required": ["allyTeam", "shortName"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}
