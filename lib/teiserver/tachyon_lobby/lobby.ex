@@ -1123,4 +1123,21 @@ defmodule Teiserver.TachyonLobby.Lobby do
         end)
     }
   end
+
+  @doc """
+  apply some updates onto a base map according to json merge patch semantics
+
+  This function could be extracted out in a more general module but for now
+  that'll do.
+  """
+  @spec patch_merge(base :: map(), updates :: map()) :: map()
+  def patch_merge(base, updates) do
+    Enum.reduce(updates, base, fn {k, v}, m ->
+      cond do
+        v == nil -> Map.delete(m, k)
+        is_map(v) -> Map.update(m, k, v, &patch_merge(&1, v))
+        true -> Map.put(m, k, v)
+      end
+    end)
+  end
 end
