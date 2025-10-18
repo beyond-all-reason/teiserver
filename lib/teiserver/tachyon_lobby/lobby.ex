@@ -83,6 +83,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
           spectators: %{
             join_queue_position: number() | nil
           },
+          bots: %{
+            String.t() => %{
+              host_user_id: T.userid(),
+              team: team(),
+              name: String.t(),
+              short_name: String.t() | nil,
+              version: String.t() | nil,
+              options: %{String.t() => String.t()}
+            }
+          },
           current_battle:
             nil
             | %{
@@ -707,8 +717,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec get_details_from_state(state()) :: details()
   defp get_details_from_state(state) do
+    {players, bots} = Enum.split_with(state.players, fn {_, p} -> is_map_key(p, :pid) end)
+
     players =
-      Enum.map(state.players, fn {p_id, p} ->
+      Enum.map(players, fn {p_id, p} ->
         {p_id, %{team: p.team}}
       end)
       |> Enum.into(%{})
@@ -730,6 +742,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     ])
     |> Map.put(:players, players)
     |> Map.put(:spectators, spectators)
+    |> Map.put(:bots, Map.new(bots))
   end
 
   # find an empty slot for a player/bot to play

@@ -597,6 +597,32 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       } = update
     end
 
+    test "lobby details has the bots" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+
+      {:ok, bot_id} =
+        Lobby.add_bot(id, @default_user_id, 1, "bot short name",
+          name: "bot name",
+          version: "version",
+          options: %{
+            "option1" => "val1"
+          }
+        )
+
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+
+      refute is_map_key(details.players, bot_id)
+
+      %{
+        host_user_id: @default_user_id,
+        team: {1, 0, 0},
+        short_name: "bot short name",
+        name: "bot name",
+        version: "version",
+        options: %{"option1" => "val1"}
+      } = details.bots[bot_id]
+    end
+
     test "bots correctly put in teams" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([3, 3]))
 
