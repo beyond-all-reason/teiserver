@@ -759,6 +759,26 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       assert %{spectators: %{"2" => nil}, bots: %{bot_id => nil}} == updates
     end
+
+    test "update needs correct id" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :invalid_bot_id} = Lobby.update_bot(id, %{id: "lolnope"})
+    end
+
+    test "can update some properties" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.update_bot(id, %{id: bot_id, name: "botv2", short_name: "short v2"})
+
+      # we got the events
+      assert_receive {:lobby, ^id, {:updated, [%{updates: update}]}}
+      %{bots: %{^bot_id => %{name: "botv2", short_name: "short v2"}}} = update
+
+      # and the details are also correct
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      %{name: "botv2", short_name: "short v2"} = details.bots[bot_id]
+    end
   end
 
   # these tests are a bit anemic because they also require a connected autohost

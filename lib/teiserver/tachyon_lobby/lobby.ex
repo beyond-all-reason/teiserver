@@ -101,6 +101,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
               }
         }
 
+  @typedoc """
+  sparse map of everything that can be changed for a given bot
+  """
+  @type bot_update_data :: %{
+          required(:id) => String.t(),
+          optional(:name) => String.t(),
+          optional(:short_name) => String.t(),
+          optional(:version) => String.t(),
+          optional(:options) => %{String.t() => String.t()}
+        }
+
   # represent the ID of a user or a bot slated to play in the game (no spec)
   @typep player_id :: T.userid() | String.t()
 
@@ -249,6 +260,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec remove_bot(id(), bot_id :: String.t()) :: :ok | {:error, :invalid_bot_id | term()}
   def remove_bot(lobby_id, bot_id) do
     GenServer.call(via_tuple(lobby_id), {:remove_bot, bot_id})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
+  @spec update_bot(id(), bot_update_data()) :: :ok | {:error, reason :: :invalid_bot_id | term()}
+  def update_bot(lobby_id, update_data) do
+    GenServer.call(via_tuple(lobby_id), {:update_bot, update_data})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
@@ -550,6 +568,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
       end
 
     broadcast_update({:update, nil, change_map}, state)
+    {:reply, :ok, state}
+  end
+
+  def handle_call({:update_bot, %{id: bot_id}}, _from, state)
+      when not is_map_key(state.players, bot_id),
+      do: {:reply, {:error, :invalid_bot_id}, state}
+
+  def handle_call({:update_bot, %{id: bot_id} = update_data}, _from, state) do
+    patch_merge(state.players[bot_id], update_data)
+    state = update_in(state.players[bot_id], &patch_merge(&1, update_data))
+    broadcast_update({:update, nil, %{players: %{bot_id => update_data}}}, state)
     {:reply, :ok, state}
   end
 
