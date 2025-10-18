@@ -845,6 +845,17 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       %{players: [%{userId: @default_user_id}]} = t1
       %{players: [%{userId: "other-user-id"}]} = t2
     end
+
+    test "with a bot" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{allyTeams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
+      %{players: [%{userId: @default_user_id}]} = t1
+      %{bots: [%{hostUserId: @default_user_id, aiShortName: "bot short name"}]} = t2
+      assert not is_map_key(t1, :bots)
+      assert not is_map_key(t2, :players)
+    end
   end
 
   # again, this should probably be exatracted in a more general module

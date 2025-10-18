@@ -681,6 +681,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       }
 
       for {p_id, p} <- Enum.concat(state.players, state.spectators),
+          is_map_key(p, :password),
           do: Player.lobby_battle_start(p_id, battle_data, start_data, p.password)
 
       now = DateTime.utc_now()
@@ -1125,8 +1126,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
         teams =
           for team <- teams do
+            {players, bots} = Enum.split_with(team, fn p -> is_map_key(p, :pid) end)
+
             players =
-              for player <- team do
+              for player <- players do
                 %{
                   userId: to_string(player.id),
                   name: player.name,
@@ -1134,7 +1137,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
                 }
               end
 
-            %{players: players}
+            bots =
+              for bot <- bots do
+                %{
+                  hostUserId: to_string(bot.host_user_id),
+                  name: Map.get(bot, :name),
+                  aiShortName: bot.short_name,
+                  aiVersion: Map.get(bot, :version),
+                  aiOptions: bot.options
+                }
+                |> Enum.reject(fn {_, v} -> v == nil || v == %{} end)
+                |> Map.new()
+              end
+
+            %{players: players, bots: bots} |> Enum.reject(&Enum.empty?(elem(&1, 1))) |> Map.new()
           end
 
         %{teams: teams, startBox: at_config.start_box}
