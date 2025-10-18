@@ -241,15 +241,17 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         }
       } = data
 
-      user_id = to_string(user.id)
-
-      %{
-        "id" => ^bot_id,
-        "hostUserId" => ^user_id,
-        "shortName" => "short name",
-        "version" => "botv0",
-        "allyTeam" => "001"
-      } = bot_data
+      assert bot_data == %{
+               "id" => bot_id,
+               "hostUserId" => to_string(user.id),
+               "shortName" => "short name",
+               "version" => "botv0",
+               "name" => nil,
+               "options" => %{},
+               "allyTeam" => "001",
+               "team" => "000",
+               "player" => "000"
+             }
     end
 
     test "get bot in details on joining", %{client: client, lobby_id: lobby_id} do

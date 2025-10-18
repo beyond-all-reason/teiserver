@@ -111,6 +111,65 @@
                         }
                     }
                 },
+                "bots": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^(.*)$": {
+                            "anyOf": [
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": { "type": "string" },
+                                        "allyTeam": { "type": "string" },
+                                        "team": { "type": "string" },
+                                        "player": { "type": "string" },
+                                        "name": {
+                                            "anyOf": [
+                                                {
+                                                    "description": "name to display in the lobby",
+                                                    "type": "string"
+                                                },
+                                                { "type": "null" }
+                                            ]
+                                        },
+                                        "shortName": {
+                                            "description": "Short name of the bot. Used to uniquely identify which bot to run",
+                                            "type": "string"
+                                        },
+                                        "version": {
+                                            "anyOf": [
+                                                { "type": "string" },
+                                                { "type": "null" }
+                                            ]
+                                        },
+                                        "options": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "patternProperties": {
+                                                        "^(.*)$": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "null"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                { "type": "null" }
+                                            ]
+                                        }
+                                    },
+                                    "required": ["id", "version", "options"]
+                                },
+                                { "type": "null" }
+                            ]
+                        }
+                    }
+                },
                 "currentBattle": {
                     "anyOf": [
                         {
