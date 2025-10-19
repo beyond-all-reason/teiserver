@@ -1007,6 +1007,22 @@ defmodule Teiserver.Player.TachyonHandler do
             Map.put(m, :spectators, specs)
         end
       end)
+      |> then(fn m ->
+        if is_map_key(ev.updates, :current_battle) do
+          battle = ev.updates.current_battle
+
+          if battle == nil do
+            Map.put(m, :currentBattle, nil)
+          else
+            Map.put(m, :currentBattle, %{
+              id: battle.id,
+              startedAt: DateTime.to_unix(battle.started_at, :microsecond)
+            })
+          end
+        else
+          m
+        end
+      end)
 
     {"lobby/updated", data}
   end

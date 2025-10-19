@@ -176,6 +176,10 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       Tachyon.send_response(ctx[:client], req)
 
+      # and also an update message
+      %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
+      %{"currentBattle" => %{"startedAt" => _}} = updated
+
       # new client should see there's a battle ongoing
       {:ok, ctx3} = Tachyon.setup_client()
 

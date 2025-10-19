@@ -444,6 +444,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       now = DateTime.utc_now()
       state = %{state | current_battle: %{id: battle_id, started_at: now}}
+
+      broadcast_update({:update, nil, %{current_battle: state.current_battle}}, state)
       TachyonLobby.List.update_lobby(state.id, %{current_battle: %{started_at: now}})
 
       {:reply, :ok, state}
