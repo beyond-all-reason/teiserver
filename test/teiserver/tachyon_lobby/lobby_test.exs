@@ -770,6 +770,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert details.name == "new name"
       assert_receive {:lobby, ^id, {:updated, %{name: "new name"}}}
     end
+
+    test "map name" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert details.map_name == "new map"
+      assert_receive {:lobby, ^id, {:updated, %{map_name: "new map"}}}
+    end
   end
 
   # these tests are a bit anemic because they also require a connected autohost

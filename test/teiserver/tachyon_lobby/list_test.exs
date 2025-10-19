@@ -182,6 +182,13 @@ defmodule Teiserver.TachyonLobby.ListTest do
       Lobby.update_properties(id, "1234", %{name: "new name"})
       assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{name: "new name"}}
     end
+
+    test "map name" do
+      {_, id, _} = mk_lobby()
+      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
+      Lobby.update_properties(id, "1234", %{map_name: "new map"})
+      assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{map_name: "new map"}}
+    end
   end
 
   defp overview_fixture() do

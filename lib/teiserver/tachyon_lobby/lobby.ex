@@ -174,6 +174,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:move_spec_to_player, T.userid(), player_data :: map()}
            | {:move_player_to_spec, T.userid(), spec_data :: map()}
            | {:update_lobby_name, new_name :: String.t()}
+           | {:update_map_name, new_name :: String.t()}
 
   @spec gen_id() :: id()
   def gen_id(), do: UUID.uuid4()
@@ -282,7 +283,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   @type lobby_update_data :: %{
-          optional(:name) => String.t()
+          optional(:name) => String.t(),
+          optional(:map_name) => String.t()
         }
 
   @doc """
@@ -856,6 +858,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp new_state_from_event({:update_lobby_name, new_name}, state),
     do: Map.replace!(state, :name, new_name)
 
+  defp new_state_from_event({:update_map_name, new_name}, state),
+    do: Map.replace!(state, :map_name, new_name)
+
   # avoid sending a useless lobby list update when the last member of the lobby
   # just left. The caller of this function will detect the lobby is empty and
   # terminate the process, which will trigger the final lobby list update for
@@ -912,6 +917,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp update_change_from_event({:update_lobby_name, new_name}, change_map),
     do: Map.put(change_map, :name, new_name)
 
+  defp update_change_from_event({:update_map_name, new_name}, change_map),
+    do: Map.put(change_map, :map_name, new_name)
+
   defp broadcast_list_updates(_events, _starting_state, final_state)
        when map_size(final_state.players) == 0 and map_size(final_state.spectators) == 0,
        do: final_state
@@ -921,6 +929,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       Enum.reduce(events, %{}, fn ev, change_map ->
         case ev do
           {:update_lobby_name, new_name} -> Map.put(change_map, :name, new_name)
+          {:update_map_name, new_name} -> Map.put(change_map, :map_name, new_name)
           _ -> change_map
         end
       end)
@@ -1259,6 +1268,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     {:ok, [{:update_lobby_name, new_name}]}
   end
+
+  defp update_property(:map_name, new_name, _state),
+    do: {:ok, [{:update_map_name, new_name}]}
 
   defp update_property(prop, _, _), do: {:error, "update #{prop} is not supported"}
 
