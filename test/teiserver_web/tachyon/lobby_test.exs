@@ -178,7 +178,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       # and also an update message
       %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
-      %{"currentBattle" => %{"startedAt" => _}} = updated
+      %{"currentBattle" => %{"startedAt" => _, "id" => battle_id}} = updated
 
       # can't start a battle when one is ongoing
       %{
@@ -194,7 +194,14 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"status" => "success", "data" => data} =
         Tachyon.join_lobby!(ctx3[:client], ctx[:lobby_id])
 
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
+
       %{"currentBattle" => %{"startedAt" => _start_ts}} = data
+
+      # when battle terminates members should get notified
+      Teiserver.TachyonBattle.lookup(battle_id) |> Process.exit(:kill)
+      %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
+      %{"currentBattle" => nil} = updated
     end
   end
 
@@ -318,6 +325,18 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       assert update[lobby_id]["currentBattle"]["startedAt"] != nil
       assert update[lobby_id]["id"] == lobby_id
+
+      # bit of a hack to get the battle id :/
+      {:ok, %{current_battle: %{id: battle_id}}} =
+        Teiserver.TachyonLobby.Lobby.get_details(lobby_id)
+
+      # get update when battle terminates
+      Teiserver.TachyonBattle.lookup(battle_id) |> Process.exit(:kill)
+
+      %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => update}} =
+        Tachyon.recv_message!(client)
+
+      assert update[lobby_id]["currentBattle"] == nil
     end
 
     test "list reset", %{client: client} do

@@ -198,7 +198,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
     GenServer.call(via_tuple(lobby_id), :get_start_script)
   end
 
-  @spec start_battle(id(), T.userid()) :: :ok | {:error, reason :: :not_in_lobby | :battle_already_started | term()}
+  @spec start_battle(id(), T.userid()) ::
+          :ok | {:error, reason :: :not_in_lobby | :battle_already_started | term()}
   def start_battle(lobby_id, user_id) do
     GenServer.call(via_tuple(lobby_id), {:start_battle, user_id})
   catch
@@ -430,7 +431,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_call({:start_battle, _user_id}, _from, state) do
     with autohost_id when autohost_id != nil <- Autohost.find_autohost(),
-         {:ok, {battle_id, _} = battle_data, host_data} <-
+         {:ok, {battle_id, battle_pid} = battle_data, host_data} <-
            TachyonBattle.start_battle(
              autohost_id,
              gen_start_script(state)
@@ -447,7 +448,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
           do: Player.lobby_battle_start(p_id, battle_data, start_data, p.password)
 
       now = DateTime.utc_now()
-      state = %{state | current_battle: %{id: battle_id, started_at: now}}
+
+      state =
+        %{state | current_battle: %{id: battle_id, started_at: now}}
+        |> Map.update!(:monitors, &MC.monitor(&1, battle_pid, :current_battle))
 
       broadcast_update({:update, nil, %{current_battle: state.current_battle}}, state)
       TachyonLobby.List.update_lobby(state.id, %{current_battle: %{started_at: now}})
@@ -483,6 +487,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
             is_map_key(state.spectators, user_id) ->
               remove_spectator(user_id, state)
           end
+
+        :current_battle ->
+          state = Map.put(state, :current_battle, nil)
+          broadcast_update({:update, nil, %{current_battle: nil}}, state)
+          TachyonLobby.List.update_lobby(state.id, %{current_battle: nil})
+          state
 
         nil ->
           state
