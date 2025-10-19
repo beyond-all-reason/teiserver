@@ -58,12 +58,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
   end
 
   test "get updates when player joins or leaves teams" do
-    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
-
-    {:ok, _pid, %{id: id}} =
-      mk_start_params([2, 2])
-      |> Map.replace!(:creator_pid, sink_pid)
-      |> Lobby.create()
+    {sink_pid, id, _} = mk_lobby()
 
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
     {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
@@ -75,12 +70,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
   end
 
   test "bots are not counted in player count" do
-    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
-
-    {:ok, _pid, %{id: id}} =
-      mk_start_params([2, 2])
-      |> Map.replace!(:creator_pid, sink_pid)
-      |> Lobby.create()
+    {sink_pid, id, _} = mk_lobby()
 
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
     {:ok, _bot_id1} = Lobby.add_bot(id, "1234", 1, "bot")
@@ -91,29 +81,20 @@ defmodule Teiserver.TachyonLobby.ListTest do
   end
 
   test "get updates when player dies" do
-    {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
-
-    {:ok, _pid, %{id: id}} =
-      mk_start_params([2, 2])
-      |> Map.replace!(:creator_pid, sink_pid)
-      |> Lobby.create()
+    {sink_pid, id, _} = mk_lobby()
 
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
     {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
     {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
     assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
 
+    Process.unlink(sink_pid)
     Process.exit(sink_pid, :exit)
     assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 1}}
   end
 
   test "remove update when last player leaves" do
-    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
-
-    {:ok, _pid, %{id: id}} =
-      mk_start_params([2, 2])
-      |> Map.replace!(:creator_pid, sink_pid)
-      |> Lobby.create()
+    {_sink_pid, id, _} = mk_lobby()
 
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
 
@@ -224,5 +205,16 @@ defmodule Teiserver.TachyonLobby.ListTest do
           }
         end)
     }
+  end
+
+  defp mk_lobby() do
+    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+
+    {:ok, pid, %{id: id}} =
+      mk_start_params([2, 2])
+      |> Map.replace!(:creator_pid, sink_pid)
+      |> Lobby.create()
+
+    {sink_pid, id, pid}
   end
 end
