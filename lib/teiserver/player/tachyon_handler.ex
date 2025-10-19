@@ -651,7 +651,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/join", "request", _msg_id, msg, state) do
-    case Player.Session.join_lobby(state.user.id, msg["data"]["id"]) do
+    case Player.Session.lobby_join(state.user.id, msg["data"]["id"]) do
       {:ok, details} ->
         data = lobby_details_to_tachyon(details)
         {:response, data, state}
@@ -665,7 +665,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/leave", "request", _msg_id, _msg, state) do
-    case Player.Session.leave_lobby(state.user.id) do
+    case Player.Session.lobby_leave(state.user.id) do
       :ok ->
         {:response, state}
 
@@ -676,7 +676,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("lobby/joinAllyTeam", "request", _msg_id, msg, state) do
     with {:ok, ally_team} <- TachyonParser.parse_int(msg["data"]["allyTeam"]),
-         :ok <- Player.Session.join_ally_team(state.user.id, ally_team) do
+         :ok <- Player.Session.lobby_join_ally_team(state.user.id, ally_team) do
       {:response, state}
     else
       {:error, :invalid_int} ->
@@ -704,7 +704,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
-    case Player.Session.start_lobby_battle(state.user.id) do
+    case Player.Session.lobby_start_battle(state.user.id) do
       :ok ->
         {:response, state}
 
