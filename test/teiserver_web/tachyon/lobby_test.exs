@@ -147,7 +147,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         Tachyon.lobby_start_battle!(ctx2[:client])
     end
 
-    test "can start battle", ctx do
+    test "battle lifecycle", ctx do
       {:ok, ctx2} = Tachyon.setup_client()
       %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], ctx[:lobby_id])
       %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
@@ -179,6 +179,14 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       # and also an update message
       %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
       %{"currentBattle" => %{"startedAt" => _}} = updated
+
+      # can't start a battle when one is ongoing
+      %{
+        "status" => "failed",
+        "reason" => "invalid_request",
+        "details" => "battle_already_started"
+      } =
+        Tachyon.lobby_start_battle!(ctx[:client])
 
       # new client should see there's a battle ongoing
       {:ok, ctx3} = Tachyon.setup_client()

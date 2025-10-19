@@ -198,7 +198,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     GenServer.call(via_tuple(lobby_id), :get_start_script)
   end
 
-  @spec start_battle(id(), T.userid()) :: :ok | {:error, reason :: term()}
+  @spec start_battle(id(), T.userid()) :: :ok | {:error, reason :: :not_in_lobby | :battle_already_started | term()}
   def start_battle(lobby_id, user_id) do
     GenServer.call(via_tuple(lobby_id), {:start_battle, user_id})
   catch
@@ -423,6 +423,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def handle_call({:start_battle, user_id}, _from, state)
       when not is_map_key(state.players, user_id) and not is_map_key(state.spectators, user_id),
       do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:start_battle, _user_id}, _from, state)
+      when state.current_battle != nil,
+      do: {:reply, {:error, :battle_already_started}, state}
 
   def handle_call({:start_battle, _user_id}, _from, state) do
     with autohost_id when autohost_id != nil <- Autohost.find_autohost(),

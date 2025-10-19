@@ -71,6 +71,7 @@ defmodule Teiserver.TachyonLobby do
              reason :: :invalid_lobby | :not_in_lobby | :invalid_ally_team | :ally_team_full}
   defdelegate join_ally_team(lobby_id, user_id, ally_team), to: Lobby
 
-  @spec start_battle(id(), T.userid()) :: :ok | {:error, reason :: term()}
+  @spec start_battle(id(), T.userid()) ::
+          :ok | {:error, reason :: :not_in_lobby | :battle_already_started | term()}
   defdelegate start_battle(lobby_id, user_id), to: Lobby
 end
