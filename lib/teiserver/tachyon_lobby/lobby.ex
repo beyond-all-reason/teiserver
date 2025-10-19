@@ -739,7 +739,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       allyTeams: ally_teams,
       spectators:
         Enum.map(state.spectators, fn {_s_id, s} ->
-          %{userId: to_string(s.id), name: s.name, password: s.name}
+          %{userId: to_string(s.id), name: s.name, password: s.password}
         end)
     }
   end
