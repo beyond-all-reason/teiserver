@@ -538,7 +538,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       :map_name,
       :game_version,
       :engine_version,
-      :ally_team_config
+      :ally_team_config,
+      :current_battle
     ])
     |> Map.put(:players, players)
     |> Map.put(:spectators, spectators)

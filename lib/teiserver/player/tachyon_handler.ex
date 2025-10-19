@@ -963,6 +963,15 @@ defmodule Teiserver.Player.TachyonHandler do
       gameVersion: details.game_version,
       allyTeamConfig: ally_team_config
     }
+    |> then(fn m ->
+      case details.current_battle do
+        nil ->
+          m
+
+        b ->
+          Map.put(m, :currentBattle, %{startedAt: DateTime.to_unix(b.started_at, :microsecond)})
+      end
+    end)
   end
 
   defp lobby_update_to_tachyon(lobby_id, %{event: :updated} = ev) do

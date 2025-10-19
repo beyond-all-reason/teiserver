@@ -392,6 +392,10 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  # these tests are a bit anemic because they also require a connected autohost
+  # and it's a lot of setup. There are some end to end tests in the
+  # teiserver_web/tachyon/lobby_test.exs file
+  # though this section could also be expanded
   describe "start battle" do
     test "lobby must be valid" do
       {:error, :invalid_lobby} = Lobby.start_battle("nolobby", "user1")
