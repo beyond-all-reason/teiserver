@@ -10,7 +10,6 @@ defmodule Teiserver.Moderation.ReportGroup do
     field :type, :string
     field :closed, :boolean, default: false
 
-    has_many :actions, Teiserver.Moderation.Action
     has_many :reports, Teiserver.Moderation.Report
 
     timestamps()

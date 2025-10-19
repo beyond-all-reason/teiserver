@@ -109,16 +109,24 @@
   }
 >
   <:col :let={report_group} label="">
-    <%= if report_group.action_count > 0 do %>
-      <span class={"text-#{Teiserver.Moderation.ActionLib.colour()}"}>
-        <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
-      </span>
+    <%= cond do %>
+      <% report_group.closed -> %>
+        <span class={"btn btn-sm btn-#{view_colour()}"}>
+          <Fontawesome.icon icon="folder-closed" style="solid" />
+        </span>
+      <% true -> %>
+        <span></span>
     <% end %>
   </:col>
-
   <:col :let={report_group} label="Match ID">{report_group.match_id}</:col>
   <:col :let={report_group} label="Reports">{report_group.report_count}</:col>
-  <:col :let={report_group} label="Actions">{report_group.action_count}</:col>
+  <:col :let={report_group} label="Actions">
+    {report_group.reports
+    |> Enum.map(& &1.result)
+    |> Enum.filter(& &1)
+    |> Enum.uniq_by(& &1.id)
+    |> Enum.count()}
+  </:col>
   <:col :let={report_group} label="Created">
     {report_group.inserted_at |> date_to_str(format: :hms_or_ymd)}
   </:col>

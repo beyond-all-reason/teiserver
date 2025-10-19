@@ -302,10 +302,12 @@ defmodule TeiserverWeb.Moderation.ReportController do
 
   @spec close(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def close(conn, %{"id" => id}) do
-    report = Moderation.get_report!(id)
+    report = Moderation.get_report!(id, preload: [:report_group])
 
     case Moderation.update_report(report, %{"closed" => true}) do
       {:ok, _report} ->
+        Moderation.close_report_group_if_no_open_reports(report.report_group)
+
         conn
         |> put_flash(:info, "Report closed successfully.")
         |> redirect(to: Routes.moderation_report_path(conn, :index))
@@ -319,10 +321,12 @@ defmodule TeiserverWeb.Moderation.ReportController do
 
   @spec open(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def open(conn, %{"id" => id}) do
-    report = Moderation.get_report!(id)
+    report = Moderation.get_report!(id, preload: [:report_group])
 
     case Moderation.update_report(report, %{"closed" => false}) do
       {:ok, _report} ->
+        Moderation.update_report_group(report.report_group, %{closed: false})
+
         conn
         |> put_flash(:info, "Report re-opened successfully.")
         |> redirect(to: Routes.moderation_report_path(conn, :index))

@@ -1,10 +1,8 @@
 defmodule Teiserver.Moderation.ReportGroupLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
-  # alias Teiserver.Moderation
   alias Teiserver.Moderation.{ReportGroup, ReportGroupQueries, Report}
   import Ecto.Query
-  # alias Phoenix.PubSub
 
   @spec colour :: atom
   def colour(), do: :warning
@@ -82,7 +80,8 @@ defmodule Teiserver.Moderation.ReportGroupLib do
     |> Repo.one()
   end
 
-  def get_report_group(match_id) do
+  @spec get_report_group_by_match_id(non_neg_integer()) :: ReportGroup.t() | nil
+  def get_report_group_by_match_id(match_id) do
     ReportGroupQueries.query_report_groups(
       where: [
         match_id: match_id
@@ -157,7 +156,7 @@ defmodule Teiserver.Moderation.ReportGroupLib do
 
   @spec get_or_make_report_group(T.match_id()) :: ReportGroup.t() | {:error, Ecto.Changeset.t()}
   def get_or_make_report_group(match_id) when is_integer(match_id) do
-    case get_report_group(match_id) do
+    case get_report_group_by_match_id(match_id) do
       nil ->
         {:ok, rg} = create_report_group(%{match_id: match_id})
         rg
@@ -197,6 +196,21 @@ defmodule Teiserver.Moderation.ReportGroupLib do
 
       _ ->
         :error
+    end
+  end
+
+  @spec close_report_group_if_no_open_reports(ReportGroup.t()) :: any
+  def close_report_group_if_no_open_reports(%ReportGroup{} = report_group) do
+    report_group = Repo.preload(report_group, :reports)
+
+    unresolved =
+      report_group.reports
+      |> Enum.any?(fn report ->
+        not report.closed and is_nil(report.result)
+      end)
+
+    unless unresolved do
+      update_report_group(report_group, %{closed: true})
     end
   end
 

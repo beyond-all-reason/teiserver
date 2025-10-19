@@ -162,7 +162,7 @@
         </div>
         <div class="col-md-6">
           <h4>
-            Actions ({Enum.count(@report_group.actions)})
+            Actions ({Enum.count(@actions)})
             <Fontawesome.icon
               icon={Teiserver.Moderation.ActionLib.icon()}
               style="solid"
@@ -171,7 +171,7 @@
           </h4>
           <.table
             id="actions-table"
-            rows={@report_group.actions}
+            rows={@actions}
             table_class="table-sm table-hover"
             row_click={fn action -> JS.navigate(~p"/moderation/action/#{action.id}") end}
           >

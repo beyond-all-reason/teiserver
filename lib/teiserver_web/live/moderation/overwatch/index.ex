@@ -188,7 +188,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
           #          has_reports_of_kind: kind,
           #          target_id: filters["target_id"]
         ],
-        preload: [:reports, :targets],
+        preload: [:reports, :targets, :actions],
         order_by: ["Newest first"],
         limit: limit,
         offset: page * limit
@@ -202,4 +202,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     |> assign(:total_count, total_count)
     |> assign(:current_count, Enum.count(report_groups))
   end
+
+  @spec view_colour() :: atom
+  def view_colour(), do: Teiserver.Moderation.ReportLib.colour()
 end

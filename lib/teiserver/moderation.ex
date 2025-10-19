@@ -263,7 +263,8 @@ defmodule Teiserver.Moderation do
       {:ok, report} ->
         {:ok, report_group} =
           Teiserver.Moderation.update_report_group(report_group, %{
-            report_count: report_group.report_count + 1
+            report_count: report_group.report_count + 1,
+            closed: false
           })
 
         {:ok, report_group, report}
@@ -289,6 +290,9 @@ defmodule Teiserver.Moderation do
 
   @spec get_report_group!(non_neg_integer, list) :: ComplexServerEventType.t()
   defdelegate get_report_group!(id, args), to: ReportGroupLib
+
+  @spec get_report_group_by_match_id(non_neg_integer()) :: ReportGroup.t() | nil
+  defdelegate get_report_group_by_match_id(match_id), to: ReportGroupLib
 
   @spec create_report_group() :: {:ok, ComplexServerEventType.t()} | {:error, Ecto.Changeset}
   defdelegate create_report_group(), to: ReportGroupLib
@@ -318,6 +322,9 @@ defmodule Teiserver.Moderation do
 
   @spec close_report_group(ReportGroup.t()) :: :ok
   defdelegate close_report_group(report_group), to: ReportGroupLib
+
+  @spec close_report_group_if_no_open_reports(ReportGroup.t()) :: any
+  defdelegate close_report_group_if_no_open_reports(report_group), to: ReportGroupLib
 
   alias Teiserver.Moderation.{Response, ResponseLib}
 

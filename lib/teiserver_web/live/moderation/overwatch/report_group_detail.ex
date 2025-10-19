@@ -20,12 +20,16 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
 
     targets =
       report_group.reports
-      # get all targets
       |> Enum.map(& &1.target)
-      # remove duplicates
       |> Enum.uniq_by(& &1.id)
-      # sort by id ascending
       |> Enum.sort_by(& &1.id, &<=/2)
+
+    actions =
+      report_group.reports
+      |> Enum.map(& &1.result)
+      |> Enum.filter(& &1)
+      |> Enum.uniq_by(& &1.id)
+      |> Enum.sort_by(& &1.id)
 
     # TODO also assign reporter info here, it's needed for report authors and chat link
 
@@ -33,6 +37,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
       socket
       |> assign(:report_group, report_group)
       |> assign(:targets, targets)
+      |> assign(:actions, actions)
       |> assign(:show_menu, %{})
       |> add_breadcrumb(
         name: "Report group #{report_group.id}",
