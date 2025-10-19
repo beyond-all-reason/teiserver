@@ -867,8 +867,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         updates
       end
 
-    events = [%{event: :updated, updates: updates}]
-    broadcast_to_members(state, user_id, {:lobby, state.id, {:updated, events}})
+    broadcast_to_members(state, user_id, {:lobby, state.id, {:updated, updates}})
   end
 
   defp broadcast_player_count_change(state) do
