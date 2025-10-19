@@ -175,6 +175,15 @@ defmodule Teiserver.TachyonLobby.ListTest do
     assert_receive %{event: :remove_lobby, lobby_id: ^id2}
   end
 
+  describe "lobby updates" do
+    test "name" do
+      {_, id, _} = mk_lobby()
+      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
+      Lobby.update_properties(id, "1234", %{name: "new name"})
+      assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{name: "new name"}}
+    end
+  end
+
   defp overview_fixture() do
     %{
       name: "lobby name",

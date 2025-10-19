@@ -750,6 +750,28 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "updates" do
+    test "need valid lobby" do
+      assert {:error, :invalid_lobby} ==
+               Lobby.update_properties("lolnope", @default_user_id, %{name: "nope"})
+    end
+
+    test "only supported properties" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+
+      {:error, _} =
+        Lobby.update_properties(id, @default_user_id, %{definitely_not_supported: "nope"})
+    end
+
+    test "name work" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      :ok = Lobby.update_properties(id, @default_user_id, %{name: "new name"})
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert details.name == "new name"
+      assert_receive {:lobby, ^id, {:updated, %{name: "new name"}}}
+    end
+  end
+
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the
   # teiserver_web/tachyon/lobby_test.exs file

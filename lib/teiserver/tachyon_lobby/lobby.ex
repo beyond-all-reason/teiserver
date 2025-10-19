@@ -173,6 +173,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:remove_spec_from_lobby, T.userid()}
            | {:move_spec_to_player, T.userid(), player_data :: map()}
            | {:move_player_to_spec, T.userid(), spec_data :: map()}
+           | {:update_lobby_name, new_name :: String.t()}
 
   @spec gen_id() :: id()
   def gen_id(), do: UUID.uuid4()
@@ -276,6 +277,21 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec update_bot(id(), bot_update_data()) :: :ok | {:error, reason :: :invalid_bot_id | term()}
   def update_bot(lobby_id, update_data) do
     GenServer.call(via_tuple(lobby_id), {:update_bot, update_data})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
+  @type lobby_update_data :: %{
+          optional(:name) => String.t()
+        }
+
+  @doc """
+  Update lobby properties, like ally team config, names and whatnot
+  """
+  @spec update_properties(id(), T.userid(), lobby_update_data()) ::
+          :ok | {:error, :invalid_lobby | term()}
+  def update_properties(lobby_id, user_id, update_data) do
+    GenServer.call(via_tuple(lobby_id), {:update_properties, user_id, update_data})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
@@ -567,6 +583,32 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:reply, :ok, state}
   end
 
+  def handle_call({:update_properties, _, data}, _from, state) when map_size(data) == 0,
+    do: {:reply, :ok, state}
+
+  def handle_call({:update_properties, _user_id, data}, _from, state) do
+    {final_state, events, errors} =
+      Enum.reduce(data, {state, [], []}, fn {k, v}, {state, events, errors} ->
+        case update_property(k, v, state) do
+          {:error, msg} ->
+            {state, events, [msg | errors]}
+
+          {:ok, new_events} ->
+            updated_state = new_state_from_events(new_events, state)
+            {updated_state, events ++ new_events, errors}
+        end
+      end)
+
+    if Enum.empty?(errors) do
+      broadcast_updates(events, final_state)
+      broadcast_list_updates(events, state, final_state)
+      {:reply, :ok, final_state}
+    else
+      message = Enum.join(errors, ", ")
+      {:reply, {:error, "Cannot update lobby: #{message}"}, state}
+    end
+  end
+
   def handle_call({:join_queue, user_id}, _from, state)
       when not is_map_key(state.players, user_id) and not is_map_key(state.spectators, user_id),
       do: {:reply, {:error, :not_in_lobby}, state}
@@ -811,6 +853,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> put_in([:spectators, p_id], spec)
   end
 
+  defp new_state_from_event({:update_lobby_name, new_name}, state),
+    do: Map.replace!(state, :name, new_name)
+
   # avoid sending a useless lobby list update when the last member of the lobby
   # just left. The caller of this function will detect the lobby is empty and
   # terminate the process, which will trigger the final lobby list update for
@@ -862,6 +907,26 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> put_in([:players, p_id], nil)
     |> Map.put_new(:spectators, %{})
     |> put_in([:spectators, p_id], spec_data)
+  end
+
+  defp update_change_from_event({:update_lobby_name, new_name}, change_map),
+    do: Map.put(change_map, :name, new_name)
+
+  defp broadcast_list_updates(_events, _starting_state, final_state)
+       when map_size(final_state.players) == 0 and map_size(final_state.spectators) == 0,
+       do: final_state
+
+  defp broadcast_list_updates(events, _starting_state, final_state) do
+    change_map =
+      Enum.reduce(events, %{}, fn ev, change_map ->
+        case ev do
+          {:update_lobby_name, new_name} -> Map.put(change_map, :name, new_name)
+          _ -> change_map
+        end
+      end)
+
+    if change_map != %{}, do: TachyonLobby.List.update_lobby(final_state.id, change_map)
+    final_state
   end
 
   # find an empty slot for a player/bot to play
@@ -1184,6 +1249,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
         end)
     }
   end
+
+  @spec update_property(atom(), term(), state()) :: {:ok, [event()]} | {:error, String.t()}
+  defp update_property(:name, new_name, _state) do
+    # we can expand lobby name validation later
+    if new_name == "" do
+      {:error, "name must not be empty"}
+    end
+
+    {:ok, [{:update_lobby_name, new_name}]}
+  end
+
+  defp update_property(prop, _, _), do: {:error, "update #{prop} is not supported"}
 
   @doc """
   apply some updates onto a base map according to json merge patch semantics
