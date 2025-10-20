@@ -11,8 +11,15 @@ defmodule Teiserver.Repo.Migrations.UpdateReportGroup do
     drop table(:moderation_report_group_votes)
     drop table(:moderation_report_group_messages)
 
-    # Remove entries without a match
     execute("""
+    -- Remove report_group_id from reports, which don't have a match id
+    UPDATE moderation_reports r
+    SET report_group_id = NULL
+    WHERE report_group_id IN (
+    SELECT id FROM moderation_report_groups WHERE match_id IS NULL
+    );
+
+    -- Remove Report Groups without a match
     DELETE FROM moderation_report_groups
     WHERE match_id IS NULL;
     """)
