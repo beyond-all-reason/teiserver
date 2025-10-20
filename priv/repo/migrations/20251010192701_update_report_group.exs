@@ -8,6 +8,10 @@ defmodule Teiserver.Repo.Migrations.UpdateReportGroup do
       add :type, :string
     end
 
+    alter table(:moderation_actions) do
+      remove :report_group_id
+    end
+
     drop table(:moderation_report_group_votes)
     drop table(:moderation_report_group_messages)
 
