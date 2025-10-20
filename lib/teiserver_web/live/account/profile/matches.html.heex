@@ -28,9 +28,9 @@
                 Loss
               <% end %>
             </:col>
-            <:col :let={match} label="Skill">
-              <%= if @can_view_ratings && match.skill do %>
-                {round(match.skill, 1)}
+            <:col :let={match} label="Rating">
+              <%= if @can_view_ratings && match.rating do %>
+                {round(match.rating, 2)}
               <% end %>
             </:col>
             <:col :let={match} label="Rating Change">
@@ -38,7 +38,7 @@
                 <% {text_class, icon} = rating_change_display_class_and_icon(match.rating_change) %>
                 <span class={text_class}>
                   <Fontawesome.icon icon={icon} style="solid" class="me-1" />
-                  {if match.rating_change > 0, do: "+", else: ""}{round(match.rating_change, 1)}
+                  {if match.rating_change > 0, do: "+", else: ""}{round(match.rating_change, 2)}
                 </span>
               <% end %>
             </:col>
