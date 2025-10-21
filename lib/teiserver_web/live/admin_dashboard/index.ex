@@ -160,7 +160,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       {"Coordinator", Coordinator.get_coordinator_pid()},
       {"Accolades", AccoladeLib.get_accolade_bot_pid()},
       {"Match Monitor", Teiserver.Battle.MatchMonitorServer.get_match_monitor_pid()},
-      {"Automod", Teiserver.Coordinator.AutomodServer.get_automod_pid()}
+      {"Automod", Teiserver.Coordinator.AutomodServer.get_automod_pid()},
+      {"Discord Bridge Bot", Teiserver.Bridge.BridgeServer.get_bridge_pid()}
     ]
 
     socket
