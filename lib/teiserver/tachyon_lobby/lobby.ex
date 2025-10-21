@@ -175,6 +175,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:move_player_to_spec, T.userid(), spec_data :: map()}
            | {:update_lobby_name, new_name :: String.t()}
            | {:update_map_name, new_name :: String.t()}
+           | {:update_ally_team_config, new_config :: ally_team_config()}
 
   @spec gen_id() :: id()
   def gen_id(), do: UUID.uuid4()
@@ -284,7 +285,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @type lobby_update_data :: %{
           optional(:name) => String.t(),
-          optional(:map_name) => String.t()
+          optional(:map_name) => String.t(),
+          optional(:ally_team_config) => ally_team_config()
         }
 
   @doc """
@@ -861,6 +863,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp new_state_from_event({:update_map_name, new_name}, state),
     do: Map.replace!(state, :map_name, new_name)
 
+  defp new_state_from_event({:update_ally_team_config, new_config}, state),
+    do: Map.replace!(state, :ally_team_config, new_config)
+
   # avoid sending a useless lobby list update when the last member of the lobby
   # just left. The caller of this function will detect the lobby is empty and
   # terminate the process, which will trigger the final lobby list update for
@@ -920,6 +925,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp update_change_from_event({:update_map_name, new_name}, change_map),
     do: Map.put(change_map, :map_name, new_name)
 
+  defp update_change_from_event({:update_ally_team_config, new_config}, change_map),
+    do: Map.put(change_map, :ally_team_config, new_config)
+
   defp broadcast_list_updates(_events, _starting_state, final_state)
        when map_size(final_state.players) == 0 and map_size(final_state.spectators) == 0,
        do: final_state
@@ -928,9 +936,28 @@ defmodule Teiserver.TachyonLobby.Lobby do
     change_map =
       Enum.reduce(events, %{}, fn ev, change_map ->
         case ev do
-          {:update_lobby_name, new_name} -> Map.put(change_map, :name, new_name)
-          {:update_map_name, new_name} -> Map.put(change_map, :map_name, new_name)
-          _ -> change_map
+          {:update_lobby_name, new_name} ->
+            Map.put(change_map, :name, new_name)
+
+          {:update_map_name, new_name} ->
+            Map.put(change_map, :map_name, new_name)
+
+          {:update_ally_team_config, new_config} ->
+            change_map
+            |> Map.put(
+              :max_player_count,
+              Enum.sum(
+                for at <- new_config, team <- at.teams do
+                  team.max_players
+                end
+              )
+            )
+            # although the player count may not have changed, for simplicity sake
+            # just include it. We're already sending a message anyway
+            |> Map.put(:player_count, map_size(final_state.players))
+
+          _ ->
+            change_map
         end
       end)
 
@@ -1271,6 +1298,72 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp update_property(:map_name, new_name, _state),
     do: {:ok, [{:update_map_name, new_name}]}
+
+  defp update_property(:ally_team_config, new_config, state) do
+    spec_ids =
+      Enum.map(state.players, fn {p_id, %{team: {x, y, z}}} ->
+        with at_config when not is_nil(at_config) <- Enum.at(new_config, x),
+             team_config when not is_nil(team_config) <- Enum.at(at_config.teams, y) do
+          if y < at_config.max_teams && z < team_config.max_players,
+            do: nil,
+            else: p_id
+        else
+          nil -> p_id
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    {bot_ids, player_ids} = Enum.split_with(spec_ids, &bot_id?/1)
+
+    position_offset =
+      case get_first_player_in_join_queue(state.spectators) do
+        nil -> 0
+        spec_id -> state.spectators[spec_id].join_queue_position - Enum.count(player_ids) - 1
+      end
+
+    spec_events =
+      Enum.with_index(player_ids, position_offset)
+      |> Enum.map(fn {p_id, pos} -> {:move_player_to_spec, p_id, %{join_queue_position: pos}} end)
+
+    bot_events = Enum.map(bot_ids, fn b_id -> {:remove_player_from_lobby, b_id} end)
+    remove_events = [{:update_ally_team_config, new_config} | spec_events ++ bot_events]
+
+    state = new_state_from_events(remove_events, state)
+
+    {_final_state, add_events} = fill_players_from_join_queue(state)
+
+    # We put players in join queue, and then fill the teams with
+    # the join queue, which means we can have events like
+    # :move_player_to_spec and later :move_spec_to_player
+    # which would generate an update with %{spectators: %{x => nil}}
+    # where x was never a spectator to beging with.
+    # So we need to detect these events and replace the pair with a :move_player
+    # event instead.
+    added_ids = Enum.map(add_events, fn {:move_spec_to_player, id, _} -> id end)
+
+    ids_to_fix = MapSet.intersection(MapSet.new(player_ids), MapSet.new(added_ids))
+
+    final_events =
+      Enum.map(remove_events ++ add_events, fn ev ->
+        case ev do
+          {:move_player_to_spec, x, _} ->
+            if MapSet.member?(ids_to_fix, x),
+              do: nil,
+              else: ev
+
+          {:move_spec_to_player, x, data} ->
+            if MapSet.member?(ids_to_fix, x),
+              do: {:move_player, x, data.team},
+              else: ev
+
+          _ ->
+            ev
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    {:ok, final_events}
+  end
 
   defp update_property(prop, _, _), do: {:error, "update #{prop} is not supported"}
 

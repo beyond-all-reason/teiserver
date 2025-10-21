@@ -189,6 +189,32 @@ defmodule Teiserver.TachyonLobby.ListTest do
       Lobby.update_properties(id, "1234", %{map_name: "new map"})
       assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{map_name: "new map"}}
     end
+
+    test "expand ally team config" do
+      {_, id, _} = mk_lobby([1, 1])
+      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
+      config = mk_start_params([2, 2]).ally_team_config
+      Lobby.update_properties(id, "1234", %{ally_team_config: config})
+
+      assert_receive %{
+        event: :update_lobby,
+        lobby_id: ^id,
+        changes: %{max_player_count: 4, player_count: 1}
+      }
+    end
+
+    test "ally team config change triggers player count change" do
+      {sink_pid, id, _} = mk_lobby([1, 1])
+      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
+      {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
+      assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
+
+      config = mk_start_params([1]).ally_team_config
+      Lobby.update_properties(id, "1234", %{ally_team_config: config})
+      assert_receive %{event: :update_lobby, lobby_id: ^id, changes: changes}
+      %{player_count: 1} = changes
+    end
   end
 
   defp overview_fixture() do
@@ -223,11 +249,11 @@ defmodule Teiserver.TachyonLobby.ListTest do
     }
   end
 
-  defp mk_lobby() do
+  defp mk_lobby(team_config \\ [2, 2]) do
     {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
     {:ok, pid, %{id: id}} =
-      mk_start_params([2, 2])
+      mk_start_params(team_config)
       |> Map.replace!(:creator_pid, sink_pid)
       |> Lobby.create()
 
