@@ -651,7 +651,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/join", "request", _msg_id, msg, state) do
-    case Player.Session.join_lobby(state.user.id, msg["data"]["id"]) do
+    case Player.Session.lobby_join(state.user.id, msg["data"]["id"]) do
       {:ok, details} ->
         data = lobby_details_to_tachyon(details)
         {:response, data, state}
@@ -665,7 +665,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/leave", "request", _msg_id, _msg, state) do
-    case Player.Session.leave_lobby(state.user.id) do
+    case Player.Session.lobby_leave(state.user.id) do
       :ok ->
         {:response, state}
 
@@ -676,7 +676,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("lobby/joinAllyTeam", "request", _msg_id, msg, state) do
     with {:ok, ally_team} <- TachyonParser.parse_int(msg["data"]["allyTeam"]),
-         :ok <- Player.Session.join_ally_team(state.user.id, ally_team) do
+         :ok <- Player.Session.lobby_join_ally_team(state.user.id, ally_team) do
       {:response, state}
     else
       {:error, :invalid_int} ->
@@ -704,7 +704,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
-    case Player.Session.start_lobby_battle(state.user.id) do
+    case Player.Session.lobby_start_battle(state.user.id) do
       :ok ->
         {:response, state}
 
@@ -963,6 +963,15 @@ defmodule Teiserver.Player.TachyonHandler do
       gameVersion: details.game_version,
       allyTeamConfig: ally_team_config
     }
+    |> then(fn m ->
+      case details.current_battle do
+        nil ->
+          m
+
+        b ->
+          Map.put(m, :currentBattle, %{startedAt: DateTime.to_unix(b.started_at, :microsecond)})
+      end
+    end)
   end
 
   defp lobby_update_to_tachyon(lobby_id, %{event: :updated} = ev) do
@@ -996,6 +1005,22 @@ defmodule Teiserver.Player.TachyonHandler do
               |> Map.new()
 
             Map.put(m, :spectators, specs)
+        end
+      end)
+      |> then(fn m ->
+        if is_map_key(ev.updates, :current_battle) do
+          battle = ev.updates.current_battle
+
+          if battle == nil do
+            Map.put(m, :currentBattle, nil)
+          else
+            Map.put(m, :currentBattle, %{
+              id: battle.id,
+              startedAt: DateTime.to_unix(battle.started_at, :microsecond)
+            })
+          end
+        else
+          m
         end
       end)
 

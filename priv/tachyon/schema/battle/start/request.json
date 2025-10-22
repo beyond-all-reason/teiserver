@@ -1,4 +1,6 @@
 {
+    "$id": "https://schema.beyondallreason.dev/tachyon/battle/start/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "BattleStartRequest",
     "tachyon": {
         "source": "server",
@@ -11,7 +13,7 @@
         "messageId": { "type": "string" },
         "commandId": { "const": "battle/start" },
         "data": {
-            "$ref": "../definitions/privateBattle.json",
+            "$ref": "../../definitions/privateBattle.json",
             "title": "BattleStartRequestData"
         }
     },
