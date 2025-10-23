@@ -703,6 +703,19 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/joinQueue", "request", _msg_id, _msg, state) do
+    case Player.Session.lobby_join_queue(state.user.id) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} when reason in [:not_in_lobby] ->
+        {:error_response, reason, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
     case Player.Session.lobby_start_battle(state.user.id) do
       :ok ->
