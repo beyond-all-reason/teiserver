@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
 
   alias Teiserver.{Moderation, Account}
   alias Teiserver.Account.UserLib
-  alias Teiserver.Moderation.{Report, ReportLib, Response}
+  alias Teiserver.Moderation.{Report, ReportLib, Response, ReportGroupLib}
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Moderation.Report,
@@ -86,6 +86,16 @@ defmodule TeiserverWeb.Moderation.ReportController do
         preload: [:target, :reporter, :responses, :match]
       )
 
+    report_group_id =
+      case report.match do
+        nil ->
+          nil
+
+        match ->
+          report_group = ReportGroupLib.get_report_group_by_match_id(match.id)
+          report_group.id
+      end
+
     fav =
       report
       |> ReportLib.make_favourite()
@@ -137,6 +147,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
 
     conn
     |> assign(:report, report)
+    |> assign(:report_group_id, report_group_id)
     |> assign(:actions, actions)
     |> assign(:accuracy, round(accuracy * 100))
     |> assign(:your_response, your_response)
