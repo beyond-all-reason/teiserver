@@ -118,7 +118,14 @@
         <span></span>
     <% end %>
   </:col>
-  <:col :let={report_group} label="Match ID">{report_group.match_id}</:col>
+  <:col :let={report_group} label="Report Group ID">{report_group.id}</:col>
+  <:col :let={report_group} label="Targets">
+    {report_group.reports
+    |> Enum.map(& &1.target)
+    |> Enum.uniq_by(& &1.id)
+    |> Enum.map(& &1.name)
+    |> Enum.join(", ")}
+  </:col>
   <:col :let={report_group} label="Reports">{report_group.report_count}</:col>
   <:col :let={report_group} label="Actions">
     {report_group.reports
