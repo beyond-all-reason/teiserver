@@ -1,11 +1,16 @@
 ## Purpose of SPADS installation
-If you have a local running version of TeiServer, you can point Chobby to localhost and login. However, you won't be able to see any battle rooms. To see battle rooms you will need to install SPADS.
+If you have a local running version of Teiserver, you can point Chobby to localhost and login. However, you won't be able to see any battle rooms. To see battle rooms you will need to install and setup SPADS.
+
+There are several ways to install SPADS, but the recommended method when using Teiserver and Beyond All Reason is to follow the local testing instructions in the [Ansible SPADS Setup](https://github.com/beyond-all-reason/ansible-spads-setup?tab=readme-ov-file#ansible-spads-setup). This Ansible playbook is up to date and used for production setups. It automates most of the installation and setup process and is significantly faster than doing it manually.
+
+
+> [!IMPORTANT]
+> The recommended way to set up SPADS is with the Ansible playbook. The section below is here just in case you don't want to use Ansible.
+
 
 ## Create a bot account to be used by SPADS
-Run TeiServer locally, login as root@localhost and go to 
+Run Teiserver locally, login as root@localhost and go to 
 http://localhost:4000/teiserver/admin/user
-
-You should see many users here assuming you have run [Teifion's fake data script](https://github.com/beyond-all-reason/teiserver/blob/master/documents/guides/local_setup.md#fake-data).
 
 Search for a user that has FakeData as the client (i.e. a normal user). Then Edit User > Tick "Bot" and "Verified" > Save Changes
 

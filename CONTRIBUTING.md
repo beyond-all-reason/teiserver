@@ -1,8 +1,7 @@
 # Welcome to BAR
 
 There is documentation and guides under [documents/guides/](./documents/guides/).
-Particularly relevant is the [local setup guide](./documents/guides/local_setup.md) to get started
-developping teiserver.
+Particularly relevant is the [development guide](./documents/guides/development.md) for getting started with developing teiserver.
 
 # Running tests
 
