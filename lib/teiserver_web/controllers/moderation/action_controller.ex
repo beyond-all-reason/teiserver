@@ -230,6 +230,16 @@ defmodule TeiserverWeb.Moderation.ActionController do
         ActionLib.maybe_create_discord_post(action)
 
         if not Enum.empty?(report_ids) do
+          unique_match_ids =
+            Moderation.list_reports(search: [id_list: report_ids], limit: :infinity)
+            |> Enum.map(& &1.match_id)
+            |> Enum.uniq()
+
+          Enum.each(unique_match_ids, fn match_id ->
+            report_group = Moderation.get_report_group_by_match_id(match_id)
+            Moderation.close_report_group_if_no_open_reports(report_group)
+          end)
+
           Moderation.list_reports(search: [id_list: report_ids], limit: :infinity)
           |> Enum.each(fn report ->
             Moderation.update_report(report, %{
