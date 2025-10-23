@@ -1,35 +1,38 @@
-This is still a work in progress but loosely the sequence of steps you will need to take to setup a Teiserver is:
+# Local setup
+This guide should contain all the necessary steps for setting up Teiserver locally.
 
-## Local/Dev
-### Install services
+## Install services
 You will need to install:
-- [Elixir/Erlang installed](https://elixir-lang.org/install.html).
-- [Postresql](https://www.postgresql.org/download).
+- [Elixir + Erlang](https://elixir-lang.org/install.html).
+- [PostreSQL](https://www.postgresql.org/download).
 
-Make sure that you have the correct version of elixir (currently using 1.18) and otp (currently 26.2.5.2). You can find the dependency requirement [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
-You can use [asdf](https://github.com/asdf-vm/asdf) or [mise](https://mise.jdx.dev/dev-tools/) to install the correct version, picked up from the file `.tool-version`.
+Make sure that you have the correct version of Elixir (currently using 1.18) and Erlang OTP (currently 26.2.5.2). You can find the dependency requirement [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
+
+> [!TIP]
+> You can use [asdf](https://github.com/asdf-vm/asdf) or [mise](https://mise.jdx.dev/dev-tools/) to install the correct version, it will be picked up from the file `.tool-version`.
 
 
-### Clone repo
+## Clone repo
 ```bash
 git clone git@github.com:beyond-all-reason/teiserver.git
 cd teiserver
 ```
 
-### Install build tools (gcc, g++, make) and cryptographic libraries
-#### Ubuntu/Debian
+## Install build tools (gcc, g++, make) and cryptographic libraries
+### Ubuntu/Debian
 ```bash
 sudo apt update
 sudo apt install build-essential libssl-dev
 ```
 
-### Elixir setup
+## Elixir setup
+Download and compile the dependencies:
 ```bash
 mix deps.get
 mix deps.compile
 ```
 
-### Postgres setup
+## Postgres setup
 If you want to change the username or password then you will need to update the relevant files in [config](/config).
 ```bash
 sudo su postgres
@@ -52,7 +55,7 @@ mix ecto.create
 mix ecto.migrate
 ```
 
-#### Localhost certs
+### Localhost certs
 To run the TLS server locally you will also need to create localhost certificates in `priv/certs` using the following commands
 
 ```bash
@@ -66,25 +69,25 @@ openssl req -x509 -out localhost.crt -keyout localhost.key \
 cd ../..
 ```
 
-### SASS
-We use sass for our css generation and you'll need to run this to get it started.
+## SASS
+We use sass for our CSS generation and you'll need to run this to get it started.
 ```bash
 mix sass.install
 ```
 
-### Running it
-Standard mode
+## Running Teiserver
+### Standard mode
 ```bash
 mix phx.server
 ```
 
-Interactive REPL mode
+### Interactive REPL mode
 ```
 iex -S mix phx.server
 ```
 If all goes to plan you should be able to access your site locally at [http://localhost:4000/](http://localhost:4000/).
 
-### Configuration
+## Configuration
 Most of the configuration takes place in [config/config.exs](config/config.exs) with the other config files overriding for specific environments. The first block of `config.exs` contains a bunch of keys and values, which you can update.
 
 ### Connecting to the spring party of your server locally
@@ -92,3 +95,6 @@ Most of the configuration takes place in [config/config.exs](config/config.exs) 
 telnet localhost 8200
 openssl s_client -connect localhost:8201
 ```
+
+## What's next?
+You should now be ready to start developing Teiserver!<br> Check out the [development guide](documents/guides/development.md) to help you with getting started.

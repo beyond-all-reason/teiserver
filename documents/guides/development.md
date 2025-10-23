@@ -1,4 +1,6 @@
 # Development
+After finishing the local setup you are ready to start developing Teiserver.
+This guide should hopefully help you with getting started by showing you some helpful commands and giving you a short introduction to different Teiserver components.
 
 ## Useful tools and commands
 ### Fake data
@@ -75,7 +77,7 @@ mix teiserver.gen_token --user CheerfulBeigeKarganeth --app generic_lobby
 which generates an access token valid for 24h. These help a lot when attempting to manually test the API.
 
 ### Spring protocol
-The [Spring Lobby protocol](https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html) is the old protocol, in use until everything is ready to switch to fully switch to Tachyon.
+The [Spring Lobby protocol](https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html) is the old protocol, in use until everything is ready to fully switch to Tachyon.
 
 Over time the protocol has been extended with additional commands, mainly for the needs of Beyond All Reason, most are also handled by the Chobby client.<br>
 The extensions add additional information to lobbies (e.g. team configurations and title updates), broadcast system events (e.g. shutdown) or make party management, user relationships management (e.g. friends, avoids) and reporting easier and possible through the client.
@@ -84,7 +86,7 @@ The documentation of the added commands is [here](documents/spring/extensions.md
 
 The relevant code for Spring protocol and it's extensions is mostly in the [this](lib/teiserver/protocols/spring) directory.
 
-For testing Spring related features you will likely want to set up [SPADS](/documents/guides/spads_install.md).
+For testing Spring related features you will likely want to [set up SPADS](/documents/guides/spads_install.md).
 
 
 ### Discord bot
@@ -92,7 +94,7 @@ Teiserver also hosts a Discord bot.<br>
 It was originally introduced as a bridge between Discord and game `#main` channels but has since been expanded with additional features, some of which are: posting moderation action messages and new report messages in the relevant Discord channels, support for custom commands (e.g. looking up units and text callbacks, checking your account stats), linking your Discord account to Teiserver (for receiving lobby/game notifications on Discord, e.g. exiting join queue, game starting), updating player/lobby counter channels on Discord.
 
 > [!IMPORTANT]
-> The Discord bot is intended to be used only on a single server per Teiserver instance.
+> The Discord bot is intended to be used only on a single Discord server per Teiserver instance.
 
 [Nostrum](https://hexdocs.pm/nostrum/intro.html) is the Elixir library used for interacting with Discord.
 
@@ -104,12 +106,12 @@ If you want to develop the Discord bridge bot follow [this setup guide](https://
 Teiserver is using the [Openskill](https://openskill.me/) rating system for rating players. 
 
 > [!INFO]
-> For more information about Openskill and the rating and balancing system in general check out [BAR official guide](https://www.beyondallreason.info/guide/rating-and-lobby-balance).
+> For more information about Openskill and the rating and balancing system in general check out [this BAR official guide](https://www.beyondallreason.info/guide/rating-and-lobby-balance).
 
 The Elixir Openskill library used by Teiserver and Beyond All Reason is [here](https://github.com/beyond-all-reason/openskill.ex).
 
 ### Balancing
-Teiserver is responsible for balancing games based on the Openskill rating.
+Teiserver is responsible for balancing games based on Openskill ratings.
 There are several balancing algorithms available, each with its own advantages and disadvantages.
 
 Currently SPADS sends a balance request to Teiserver over SPADS API when it detects that the lobby state changed to require a rebalance or a `!balance` commands is used, Teiserver then balances the game using the default balance algorithm and returns the team configuration to SPADS.
