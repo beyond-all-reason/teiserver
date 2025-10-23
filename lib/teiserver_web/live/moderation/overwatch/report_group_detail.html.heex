@@ -28,7 +28,7 @@
         </a>
       <% end %>
 
-      <%= if allow?(@current_user, "Moderator") do %>
+      <%= if allow?(@current_user, ~w(Reviewer)) do %>
         <div class="dropdown" style="display: inline-block;">
           <div
             class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
@@ -45,24 +45,26 @@
             <.report_group_actions targets={@targets} path={~p"/admin/chat?userid="} />
           <% end %>
         </div>
+      <% end %>
 
-        <div class="dropdown" style="display: inline-block;">
-          <div
-            class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
-            phx-click="toggle_dropdown"
-            phx-value-key="view-user"
-            aria-haspopup="true"
-            aria-expanded={Map.get(@show_menu, "view-user", false)}
-            phx-click-away="close_all_dropdowns"
-          >
-            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />&nbsp;
-            View user
-          </div>
-          <%= if Map.get(@show_menu, "view-user", false) do %>
-            <.report_group_actions targets={@targets} path={~p"/teiserver/admin/user/"} />
-          <% end %>
+      <div class="dropdown" style="display: inline-block;">
+        <div
+          class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
+          phx-click="toggle_dropdown"
+          phx-value-key="view-user"
+          aria-haspopup="true"
+          aria-expanded={Map.get(@show_menu, "view-user", false)}
+          phx-click-away="close_all_dropdowns"
+        >
+          <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" />&nbsp;
+          View user
         </div>
+        <%= if Map.get(@show_menu, "view-user", false) do %>
+          <.report_group_actions targets={@targets} path={~p"/moderation/report/user/"} />
+        <% end %>
+      </div>
 
+      <%= if allow?(@current_user, ~w(Moderator)) do %>
         <div class="dropdown" style="display: inline-block;">
           <div
             class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
