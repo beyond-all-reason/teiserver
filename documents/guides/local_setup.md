@@ -4,7 +4,7 @@ This guide should contain all the necessary steps for setting up Teiserver local
 ## Install services
 You will need to install:
 - [Elixir + Erlang](https://elixir-lang.org/install.html).
-- [PostreSQL](https://www.postgresql.org/download).
+- [PostgreSQL](https://www.postgresql.org/download).
 
 Make sure that you have the correct version of Elixir (currently using 1.18) and Erlang OTP (currently 26.2.5.2). You can find the dependency requirement [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
 
@@ -97,4 +97,4 @@ openssl s_client -connect localhost:8201
 ```
 
 ## What's next?
-You should now be ready to start developing Teiserver!<br> Check out the [development guide](documents/guides/development.md) to help you with getting started.
+You should now be ready to start developing Teiserver!<br> Check out the [development guide](/development.md) to help you with getting started.

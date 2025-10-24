@@ -19,7 +19,7 @@ Check the [development](/documents/guides/development.md) guide for help with ge
 - [Architecture](/documents/architecture.md)
 - [Testing](/documents/guides/testing.md)
 
-> [!INFO]
+> [!NOTE]
 > Check [BAR infrastructure documentation](https://beyond-all-reason.github.io/infrastructure/current_infra/) to see Teiserver's role in the larger BAR infrastructure.
 
 ### Contributing
