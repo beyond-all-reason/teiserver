@@ -28,7 +28,7 @@ Teiserver.Account.update_user(user, %{"password" => "password"})
 ```
 
 ### Ignore large `mix format` passes in `git blame`
-In ![PR #304](https://github.com/beyond-all-reason/teiserver/pull/304) we've started requiring compliance with `mix format` - this meant we had to use that on the entire codebase.
+In https://github.com/beyond-all-reason/teiserver/pull/304 we've started requiring compliance with `mix format` - this meant we had to use that on the entire codebase.
 
 This obviously breaks `git blame`, but you can sidestep that by using
 ```bash
@@ -37,7 +37,7 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 
 The attached `.git-blame-ignore-revs` file contains a list of commit hashes which modify a large number of lines with trivial changes.
 
-> [!INFO]
+> [!NOTE]
 > See [this blog post by Stefan Judis](https://www.stefanjudis.com/today-i-learned/how-to-exclude-commits-from-git-blame/) for reference.
 
 
@@ -105,7 +105,7 @@ If you want to develop the Discord bridge bot follow [this setup guide](https://
 ### Rating
 Teiserver is using the [Openskill](https://openskill.me/) rating system for rating players. 
 
-> [!INFO]
+> [!NOTE]
 > For more information about Openskill and the rating and balancing system in general check out [this BAR official guide](https://www.beyondallreason.info/guide/rating-and-lobby-balance).
 
 The Elixir Openskill library used by Teiserver and Beyond All Reason is [here](https://github.com/beyond-all-reason/openskill.ex).
