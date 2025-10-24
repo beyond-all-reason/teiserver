@@ -653,7 +653,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/join", "request", _msg_id, msg, state) do
-    case Player.Session.join_lobby(state.user.id, msg["data"]["id"]) do
+    case Player.Session.lobby_join(state.user.id, msg["data"]["id"]) do
       {:ok, details} ->
         data = lobby_details_to_tachyon(details)
         {:response, data, state}
@@ -667,7 +667,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/leave", "request", _msg_id, _msg, state) do
-    case Player.Session.leave_lobby(state.user.id) do
+    case Player.Session.lobby_leave(state.user.id) do
       :ok ->
         {:response, state}
 
@@ -678,7 +678,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("lobby/joinAllyTeam", "request", _msg_id, msg, state) do
     with {:ok, ally_team} <- TachyonParser.parse_int(msg["data"]["allyTeam"]),
-         :ok <- Player.Session.join_ally_team(state.user.id, ally_team) do
+         :ok <- Player.Session.lobby_join_ally_team(state.user.id, ally_team) do
       {:response, state}
     else
       {:error, :invalid_int} ->
@@ -705,8 +705,21 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/joinQueue", "request", _msg_id, _msg, state) do
+    case Player.Session.lobby_join_queue(state.user.id) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} when reason in [:not_in_lobby] ->
+        {:error_response, reason, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
-    case Player.Session.start_lobby_battle(state.user.id) do
+    case Player.Session.lobby_start_battle(state.user.id) do
       :ok ->
         {:response, state}
 
@@ -1005,16 +1018,15 @@ defmodule Teiserver.Player.TachyonHandler do
       allyTeamConfig: ally_team_config,
       mods: Enum.map(details.mods, &mod_to_tachyon/1)
     }
+    |> then(fn m ->
+      case details.current_battle do
+        nil ->
+          m
 
-    # Add current battle if present
-    if details.current_battle do
-      Map.put(base, :currentBattle, %{
-        id: details.current_battle.id,
-        startedAt: DateTime.to_unix(details.current_battle.started_at, :microsecond)
-      })
-    else
-      base
-    end
+        b ->
+          Map.put(m, :currentBattle, %{startedAt: DateTime.to_unix(b.started_at, :microsecond)})
+      end
+    end)
   end
 
 
@@ -1098,8 +1110,52 @@ defmodule Teiserver.Player.TachyonHandler do
             Map.put(m, :spectators, specs)
         end
       end)
+      |> then(fn m ->
+        if is_map_key(ev.updates, :current_battle) do
+          battle = ev.updates.current_battle
+
+          if battle == nil do
+            Map.put(m, :currentBattle, nil)
+          else
+            Map.put(m, :currentBattle, %{
+              id: battle.id,
+              startedAt: DateTime.to_unix(battle.started_at, :microsecond)
+            })
+          end
+        else
+          m
+        end
+      end)
 
     {"lobby/updated", data}
+  end
+
+  # omit_nil? is there so we can use the same function for both the initial
+  # object and any subsequent json patch style updates
+  # because the initial object cannot have nil keys, so just skip them if any
+  defp player_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
+
+  defp player_update_to_tachyon(p_id, updates, omit_nil?) do
+    if is_map_key(updates, :team) do
+      val = updates.team
+
+      cond do
+        val == nil && omit_nil? -> %{}
+        val == nil -> %{allyTeam: nil, team: nil, player: nil}
+        true -> lobby_team_to_tachyon(val)
+      end
+    else
+      %{}
+    end
+    |> Map.put(:id, p_id)
+  end
+
+  defp spectator_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
+
+  defp spectator_update_to_tachyon(p_id, updates, omit_nil?) do
+    base = %{id: p_id}
+    key_mapping = [{:join_queue_position, :joinQueuePosition}]
+    to_json_merge_patch(base, updates, key_mapping, omit_nil?)
   end
 
   # handle partial overview object

@@ -537,7 +537,13 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
-  def start_lobby_battle!(client) do
+  def lobby_join_queue!(client) do
+    :ok = send_request(client, "lobby/joinQueue")
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def lobby_start_battle!(client) do
     :ok = send_request(client, "lobby/startBattle")
     {:ok, resp} = recv_message(client)
     resp

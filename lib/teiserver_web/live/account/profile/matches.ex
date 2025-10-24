@@ -118,8 +118,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Matches do
 
       match
       |> Map.put(:rating_log, rating_log)
-      |> Map.put(:rating_change, rating_log && rating_log.value["rating_value_change"])
-      |> Map.put(:skill, rating_log && rating_log.value["skill"])
+      |> Map.put(:rating_change, rating_log && get_in(rating_log.value, ["rating_value_change"]))
+      |> Map.put(:rating, rating_log && get_in(rating_log.value, ["rating_value"]))
     end)
   end
 

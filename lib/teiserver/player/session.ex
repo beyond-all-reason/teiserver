@@ -433,20 +433,20 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, {:create, start_params}})
   end
 
-  @spec join_lobby(T.userid(), TachyonLobby.id()) ::
+  @spec lobby_join(T.userid(), TachyonLobby.id()) ::
           {:ok, TachyonLobby.details()} | {:error, reason :: term()}
-  def join_lobby(user_id, lobby_id) do
+  def lobby_join(user_id, lobby_id) do
     GenServer.call(via_tuple(user_id), {:lobby, {:join, lobby_id}})
   end
 
-  @spec leave_lobby(T.userid()) :: :ok | {:error, reason :: term()}
-  def leave_lobby(user_id) do
+  @spec lobby_leave(T.userid()) :: :ok | {:error, reason :: term()}
+  def lobby_leave(user_id) do
     GenServer.call(via_tuple(user_id), {:lobby, :leave})
   end
 
-  @spec join_ally_team(T.userid(), ally_team_idx :: non_neg_integer()) ::
+  @spec lobby_join_ally_team(T.userid(), ally_team_idx :: non_neg_integer()) ::
           :ok | {:error, reason :: term()}
-  def join_ally_team(user_id, ally_team) do
+  def lobby_join_ally_team(user_id, ally_team) do
     GenServer.call(via_tuple(user_id), {:lobby, {:join_ally_team, ally_team}})
   end
 
@@ -455,8 +455,13 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, :spectate})
   end
 
-  @spec start_lobby_battle(T.userid()) :: :ok | {:error, reason :: term}
-  def start_lobby_battle(user_id) do
+  @spec lobby_join_queue(T.userid()) :: :ok | {:error, reason :: term()}
+  def lobby_join_queue(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :join_queue})
+  end
+
+  @spec lobby_start_battle(T.userid()) :: :ok | {:error, reason :: term}
+  def lobby_start_battle(user_id) do
     GenServer.call(via_tuple(user_id), {:lobby, :start_battle})
   end
 
@@ -930,6 +935,13 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:lobby, :spectate}, _from, state) do
     {:reply, TachyonLobby.spectate(state.lobby.id, state.user.id), state}
+  end
+
+  def handle_call({:lobby, :join_queue}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :join_queue}, _from, state) do
+    {:reply, TachyonLobby.join_queue(state.lobby.id, state.user.id), state}
   end
 
   def handle_call({:lobby, :leave}, _from, state) when is_nil(state.lobby),
