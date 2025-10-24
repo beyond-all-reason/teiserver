@@ -1,35 +1,38 @@
-This is still a work in progress but loosely the sequence of steps you will need to take to setup a Teiserver is:
+# Local setup
+This guide should contain all the necessary steps for setting up Teiserver locally.
 
-## Local/Dev
-### Install services
+## Install services
 You will need to install:
-- [Elixir/Erlang installed](https://elixir-lang.org/install.html).
-- [Postresql](https://www.postgresql.org/download).
+- [Elixir + Erlang](https://elixir-lang.org/install.html).
+- [PostreSQL](https://www.postgresql.org/download).
 
-Make sure that you have the correct version of elixir (currently using 1.18) and otp (currently 26.2.5.2). You can find the dependency requirement [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
-You can use [asdf](https://github.com/asdf-vm/asdf) or [mise](https://mise.jdx.dev/dev-tools/) to install the correct version, picked up from the file `.tool-version`.
+Make sure that you have the correct version of Elixir (currently using 1.18) and Erlang OTP (currently 26.2.5.2). You can find the dependency requirement [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
+
+> [!TIP]
+> You can use [asdf](https://github.com/asdf-vm/asdf) or [mise](https://mise.jdx.dev/dev-tools/) to install the correct version, it will be picked up from the file `.tool-version`.
 
 
-### Clone repo
+## Clone repo
 ```bash
 git clone git@github.com:beyond-all-reason/teiserver.git
 cd teiserver
 ```
 
-### Install build tools (gcc, g++, make) and cryptographic libraries
-#### Ubuntu/Debian
+## Install build tools (gcc, g++, make) and cryptographic libraries
+### Ubuntu/Debian
 ```bash
 sudo apt update
 sudo apt install build-essential libssl-dev
 ```
 
-### Elixir setup
+## Elixir setup
+Download and compile the dependencies:
 ```bash
 mix deps.get
 mix deps.compile
 ```
 
-### Postgres setup
+## Postgres setup
 If you want to change the username or password then you will need to update the relevant files in [config](/config).
 ```bash
 sudo su postgres
@@ -52,7 +55,7 @@ mix ecto.create
 mix ecto.migrate
 ```
 
-#### Localhost certs
+### Localhost certs
 To run the TLS server locally you will also need to create localhost certificates in `priv/certs` using the following commands
 
 ```bash
@@ -66,25 +69,25 @@ openssl req -x509 -out localhost.crt -keyout localhost.key \
 cd ../..
 ```
 
-### SASS
-We use sass for our css generation and you'll need to run this to get it started.
+## SASS
+We use sass for our CSS generation and you'll need to run this to get it started.
 ```bash
 mix sass.install
 ```
 
-### Running it
-Standard mode
+## Running Teiserver
+### Standard mode
 ```bash
 mix phx.server
 ```
 
-Interactive REPL mode
+### Interactive REPL mode
 ```
 iex -S mix phx.server
 ```
 If all goes to plan you should be able to access your site locally at [http://localhost:4000/](http://localhost:4000/).
 
-### Configuration
+## Configuration
 Most of the configuration takes place in [config/config.exs](config/config.exs) with the other config files overriding for specific environments. The first block of `config.exs` contains a bunch of keys and values, which you can update.
 
 ### Connecting to the spring party of your server locally
@@ -93,73 +96,5 @@ telnet localhost 8200
 openssl s_client -connect localhost:8201
 ```
 
-### Fake data
-Running this:
-```bash
-mix teiserver.fakedata
-```
-
-Will generate a large amount of fake data and setup a root account for you. The account will have full access to everything and the database will be populated with false data as if generated over a period of time to make development and testing easier.
-
-
-### Working on Discord bot
-If you want to develop the Discord bridge bot follow [this setup guide](https://github.com/beyond-all-reason/teiserver/blob/master/documents/guides/discord_bot.md).
-
-### Working on tachyon
-
-Tachyon is the [new protocol](https://beyond-all-reason.github.io/infrastructure/new_client/) under development.
-* The new client [is over there](https://github.com/beyond-all-reason/bar-lobby), it'll replace the existing client (chobby).
-* The new autohost starting games [is over there](https://github.com/beyond-all-reason/recoil-autohost) and will more or less replace SPADS, although a lot of what spads is currently doing will be done in teiserver.
-* Teiserver is still the same, although the tachyon related code is isolated from the spring one.
-
-For developping tachyon, you should also run
-```bash
-mix teiserver.tachyon_setup
-```
-This setup the oauth applications required for tachyon.
-
-There is also `mix teiserver.gen_token --user CheerfulBeigeKarganeth --app generic_lobby` to generate access token valid for 24h. These help a lot when attempting to manually test the API.
-
-
-### Resetting your user password
-When running locally it's likely you won't want to connect the server to an email account, as such password resets need to be done a little differently.
-
-Run your server with `iex -S mix phx.server` and then once it has started up use the following code to update your password.
-
-```elixir
-user = Teiserver.Repo.get_by(Teiserver.Account.User, email: "root@localhost")
-Teiserver.Account.update_user(user, %{"password" => "password"})
-```
-
-### Main 3rd party dependencies
-The main dependencies of the project are:
-- [Phoenix framework](https://www.phoenixframework.org/), a web framework with a role similar to Django or Rails.
-- [Ecto](https://github.com/elixir-ecto/ecto), database ORM
-- [Ranch](https://github.com/ninenines/ranch), a tcp server
-- [Oban](https://github.com/sorentwo/oban), a backend job processing framework.
-
-### Ignore large `mix format` passes in `git blame`
-In ![PR #304](https://github.com/beyond-all-reason/teiserver/pull/304) we've started requiring compliance with `mix format` - this meant we had to use that on the entire codebase.
-
-This obviously breaks `git blame`, but you can sidestep that by using
-```bash
-git config blame.ignoreRevsFile .git-blame-ignore-revs
-```
-
-The attached `.git-blame-ignore-revs` file contains a list of commit hashes which modify a large number of lines with trivial changes.
-
-See [this blog post by Stefan Judis](https://www.stefanjudis.com/today-i-learned/how-to-exclude-commits-from-git-blame/) for reference.
-
-### Git hooks
-The `.githooks` directory contains a `pre-commit` Git hook that will run `mix format` on staged files before they get commited.
-To use this (and other Git hooks) you have to first make them executable with
-```
-chmod +x .githooks/pre-commit
-```
-then use the following command to change the location where Git looks for hook scripts (from the default `.git/hooks`) to the `.githooks` directory
-```
-git config core.hooksPath .githooks
-```
-
-### Next Steps
-If you want to develop features that interact with the lobby, then you will need to [set up SPADS](/documents/guides/spads_install.md).
+## What's next?
+You should now be ready to start developing Teiserver!<br> Check out the [development guide](documents/guides/development.md) to help you with getting started.

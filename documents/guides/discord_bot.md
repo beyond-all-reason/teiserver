@@ -24,6 +24,7 @@ TEI_DISCORD_BOT_NAME=test-teiserver-self-server
 - GUILD_ID: Server ID
 - BOT_NAME: The display name of the bot, if you don't have this correct the bot can respond to it's own messages creating an infinite loop
 
+> [!TIP]
 > The easiest way to get Discord server, channel, message or user IDs is by enabling developer mode in Discord's advanced settigns. Right click the server, channel, message or user you wish to copy the ID from and select `Copy ID`. Check [this discord article](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID) for details.
 
 ### Server startup
