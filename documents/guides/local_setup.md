@@ -97,4 +97,4 @@ openssl s_client -connect localhost:8201
 ```
 
 ## What's next?
-You should now be ready to start developing Teiserver!<br> Check out the [development guide](/development.md) to help you with getting started.
+You should now be ready to start developing Teiserver!<br> Check out the [development guide](/documents/guides/development.md) to help you with getting started.
