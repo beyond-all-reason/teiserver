@@ -82,12 +82,11 @@ The [Spring Lobby protocol](https://springrts.com/dl/LobbyProtocol/ProtocolDescr
 Over time the protocol has been extended with additional commands, mainly for the needs of Beyond All Reason, most are also handled by the Chobby client.<br>
 The extensions add additional information to lobbies (e.g. team configurations and title updates), broadcast system events (e.g. shutdown) or make party management, user relationships management (e.g. friends, avoids) and reporting easier and possible through the client.
 
-The documentation of the added commands is [here](documents/spring/extensions.md).
+The documentation of the added commands is [here](/documents/spring/extensions.md).
 
-The relevant code for Spring protocol and it's extensions is mostly in the [this](lib/teiserver/protocols/spring) directory.
+The relevant code for Spring protocol and it's extensions is mostly in the [this](/lib/teiserver/protocols/spring) directory.
 
 For testing Spring related features you will likely want to [set up SPADS](/documents/guides/spads_install.md).
-
 
 ### Discord bot
 Teiserver also hosts a Discord bot.<br>
@@ -98,9 +97,18 @@ It was originally introduced as a bridge between Discord and game `#main` channe
 
 [Nostrum](https://hexdocs.pm/nostrum/intro.html) is the Elixir library used for interacting with Discord.
 
-Most of the relevant Discord bridge bot code is in [this](lib/teiserver/bridge) directory.
+Most of the relevant Discord bridge bot code is in [this](/lib/teiserver/bridge) directory.
 
 If you want to develop the Discord bridge bot follow [this setup guide](https://github.com/beyond-all-reason/teiserver/blob/master/documents/guides/discord_bot.md).
+
+### APIs
+Teiserver currently has 2 APIs: public API and SPADS API.
+#### Public API
+Available publicly without authentication, currently used for getting [leaderboards](https://www.beyondallreason.info/leaderboards).<br>
+Check [Public Controller](/lib/teiserver_web/controllers/api/public_controller.ex).
+#### SPADS API
+Protected and only used by SPADS autohosts to request player ratings, balance games and send end game data to Teiserver.<br>
+Check [SPADS Controller](/lib/teiserver_web/controllers/api/spads_controller.ex).
 
 ### Rating
 Teiserver is using the [Openskill](https://openskill.me/) rating system for rating players. 
@@ -114,11 +122,11 @@ The Elixir Openskill library used by Teiserver and Beyond All Reason is [here](h
 Teiserver is responsible for balancing games based on Openskill ratings.
 There are several balancing algorithms available, each with its own advantages and disadvantages.
 
-Currently SPADS sends a balance request to Teiserver over SPADS API when it detects that the lobby state changed to require a rebalance or a `!balance` commands is used, Teiserver then balances the game using the default balance algorithm and returns the team configuration to SPADS.
+Currently SPADS sends a balance request to Teiserver (over SPADS API) when it detects that the lobby state changed to require a rebalance or after a `!balance` command is used, Teiserver then balances the game using the default balance algorithm and returns the team configuration to SPADS.
 
 Eventually we want to move the balance algorithms to some external solver which should be more performant and allow development of balance algorithms independently of Teiserver. No work has been done on this so far.
 
-The balance alrogirhtms are located in [this](lib/teiserver/battle/balance) directory.
+The balance alrogirhtms are located in [this](/lib/teiserver/battle/balance) directory.
 
 ## Main 3rd party dependencies
 The main dependencies of the project are:
