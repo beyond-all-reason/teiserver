@@ -716,6 +716,69 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/addBot", "request", _msg_id, %{"data" => data}, state) do
+    opts =
+      [{:name, data["name"]}, {:version, data["version"]}, {:options, data["options"]}]
+      |> Enum.filter(&(elem(&1, 1) != nil))
+
+    with {:ok, ally_team} <- TachyonParser.parse_int(data["allyTeam"]),
+         {:ok, bot_id} <-
+           Player.Session.lobby_add_bot(state.user.id, ally_team, data["shortName"], opts) do
+      {:response, %{id: bot_id}, state}
+    else
+      {:error, :invalid_int} ->
+        {:error_response, :invalid_request, "Invalid ally team", state}
+
+      {:error, reason} when reason in [:not_in_lobby, :ally_team_full] ->
+        {:error_response, reason, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/removeBot", "request", _msg_id, msg, state) do
+    case Player.Session.lobby_remove_bot(state.user.id, msg["data"]["id"]) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} when reason in [:not_in_lobby, :invalid_bot] ->
+        {:error_response, reason, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/updateBot", "request", _msg_id, %{"data" => data}, state) do
+    keys = [
+      {"name", :name},
+      {"shortName", :short_name},
+      {"version", :version},
+      {"options", :options}
+    ]
+
+    update_data =
+      Enum.reduce(keys, %{id: data["id"]}, fn {tk, k}, m ->
+        if is_map_key(data, tk) do
+          Map.put(m, k, Map.get(data, tk))
+        else
+          m
+        end
+      end)
+
+    case Player.Session.lobby_update_bot(state.user.id, update_data) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} when reason in [:not_in_lobby, :invalid_bot] ->
+        {:error_response, reason, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
     case Player.Session.lobby_start_battle(state.user.id) do
       :ok ->
@@ -948,6 +1011,12 @@ defmodule Teiserver.Player.TachyonHandler do
       end)
       |> Map.new()
 
+    bots =
+      Enum.map(details.bots, fn {b_id, b} ->
+        {b_id, bot_update_to_tachyon(b_id, b, true)}
+      end)
+      |> Map.new()
+
     ally_team_config =
       for {at, at_idx} <- Enum.with_index(details.ally_team_config), into: %{} do
         teams =
@@ -971,6 +1040,7 @@ defmodule Teiserver.Player.TachyonHandler do
       name: details.name,
       players: players,
       spectators: spectators,
+      bots: bots,
       mapName: details.map_name,
       engineVersion: details.engine_version,
       gameVersion: details.game_version,
@@ -1036,6 +1106,21 @@ defmodule Teiserver.Player.TachyonHandler do
           m
         end
       end)
+      |> then(fn m ->
+        case Map.get(ev.updates, :bots) do
+          nil ->
+            m
+
+          bots ->
+            bots =
+              Enum.map(bots, fn {b_id, updates} ->
+                {b_id, bot_update_to_tachyon(b_id, updates, false)}
+              end)
+              |> Map.new()
+
+            Map.put(m, :bots, bots)
+        end
+      end)
 
     {"lobby/updated", data}
   end
@@ -1065,6 +1150,34 @@ defmodule Teiserver.Player.TachyonHandler do
   defp spectator_update_to_tachyon(p_id, updates, omit_nil?) do
     base = %{id: p_id}
     key_mapping = [{:join_queue_position, :joinQueuePosition}]
+    to_json_merge_patch(base, updates, key_mapping, omit_nil?)
+  end
+
+  defp bot_update_to_tachyon(_b_id, nil, _omit_nil?), do: nil
+
+  defp bot_update_to_tachyon(b_id, updates, omit_nil?) do
+    base =
+      if is_map_key(updates, :team) do
+        val = updates.team
+
+        cond do
+          val == nil && omit_nil? -> %{}
+          val == nil -> %{allyTeam: nil, team: nil, player: nil}
+          true -> lobby_team_to_tachyon(val)
+        end
+      else
+        %{}
+      end
+      |> Map.put(:id, b_id)
+
+    key_mapping = [
+      {:host_user_id, :hostUserId, &to_string/1},
+      {:short_name, :shortName},
+      {:name, :name},
+      {:version, :version},
+      {:options, :options}
+    ]
+
     to_json_merge_patch(base, updates, key_mapping, omit_nil?)
   end
 

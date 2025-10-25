@@ -66,6 +66,52 @@
                 }
             }
         },
+        "bots": {
+            "type": "object",
+            "patternProperties": {
+                "^(.*)$": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "description": "server assigned unique identifier for the bot",
+                            "type": "string"
+                        },
+                        "hostUserId": {
+                            "$ref": "../definitions/userId.json",
+                            "description": "which player will run the bot. It is the same as the player that added the bot."
+                        },
+                        "allyTeam": { "type": "string" },
+                        "team": { "type": "string" },
+                        "player": { "type": "string" },
+                        "name": {
+                            "description": "name to display in the lobby",
+                            "type": "string",
+                            "maxLength": 20
+                        },
+                        "shortName": {
+                            "description": "short name of the bot. Used to uniquely identify which bot to run",
+                            "type": "string",
+                            "maxLength": 20
+                        },
+                        "version": { "type": "string" },
+                        "options": {
+                            "type": "object",
+                            "patternProperties": {
+                                "^(.*)$": { "type": "string" }
+                            }
+                        }
+                    },
+                    "required": [
+                        "id",
+                        "hostUserId",
+                        "allyTeam",
+                        "team",
+                        "player",
+                        "shortName"
+                    ]
+                }
+            }
+        },
         "currentBattle": {
             "description": "If a battle is currently happening, here are the info",
             "type": "object",
@@ -83,6 +129,7 @@
         "gameVersion",
         "allyTeamConfig",
         "players",
-        "spectators"
+        "spectators",
+        "bots"
     ]
 }
