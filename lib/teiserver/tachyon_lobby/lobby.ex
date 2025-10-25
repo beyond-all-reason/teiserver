@@ -72,11 +72,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
   """
   @type details :: %{
           id: id(),
+          boss_id: T.userid(),
           name: String.t(),
           map_name: String.t(),
           game_version: String.t(),
           engine_version: String.t(),
           ally_team_config: ally_team_config(),
+          mods: [mod()],
           players: %{
             T.userid() => %{team: team()}
           },
@@ -89,6 +91,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
                 id: Teiserver.TachyonBattle.id(),
                 started_at: DateTime.t()
               }
+        }
+
+  @typedoc """
+  A mod/mutator that can be applied to the game.
+  Order matters - mods are loaded in sequence and later mods can override earlier ones.
+  """
+  @type mod :: %{
+          name: String.t(),
+          archive_name: String.t(),
+          git_ref: String.t(),
+          repository: String.t(),
+          type: String.t()
         }
 
   @typep player :: %{
@@ -113,12 +127,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @typep state :: %{
            id: id(),
+           boss_id: T.userid(),
            monitors: MC.t(),
            name: String.t(),
            map_name: String.t(),
            game_version: String.t(),
            engine_version: String.t(),
            ally_team_config: ally_team_config(),
+           mods: [mod()],
            # used to track the players in the lobby.
            players: %{T.userid() => player()},
            spectators: %{T.userid() => spectator()},
@@ -198,6 +214,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
     GenServer.call(via_tuple(lobby_id), :get_start_script)
   end
 
+  @spec update_mods(id(), T.userid(), [mod()]) :: :ok | {:error, reason :: term()}
+  def update_mods(lobby_id, user_id, mods) do
+    GenServer.call(via_tuple(lobby_id), {:update_mods, user_id, mods})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
+  @spec update_sync(id(), T.userid(), map()) :: :ok | {:error, reason :: term()}
+  def update_sync(lobby_id, user_id, sync_status) do
+    GenServer.call(via_tuple(lobby_id), {:update_sync, user_id, sync_status})
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
   @spec join_queue(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   def join_queue(lobby_id, user_id) do
     GenServer.call(via_tuple(lobby_id), {:join_queue, user_id})
@@ -223,12 +253,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     state = %{
       id: id,
+      boss_id: start_params.creator_data.id,
       monitors: monitors,
       name: start_params.name,
       map_name: start_params.map_name,
       game_version: start_params.game_version,
       engine_version: start_params.engine_version,
       ally_team_config: start_params.ally_team_config,
+      mods: [],
       players: %{
         start_params.creator_data.id => %{
           id: start_params.creator_data.id,
@@ -243,7 +275,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
 
     TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
-    Logger.info("Lobby created by user #{start_params.creator_data.id}")
+    Logger.info("Lobby created by user #{start_params.creator_data.id} (boss)")
     {:ok, state}
   end
 
@@ -523,6 +555,38 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  def handle_call({:update_mods, user_id, new_mods}, _from, state) do
+    cond do
+      not is_map_key(state.players, user_id) ->
+        {:reply, {:error, :not_in_lobby}, state}
+
+      state.boss_id != user_id ->
+        {:reply, {:error, :insufficient_permissions}, state}
+
+      length(new_mods) > 10 ->
+        {:reply, {:error, :too_many_mods}, state}
+
+      true ->
+        state = %{state | mods: new_mods}
+        broadcast_update({:mods_changed, new_mods, state})
+        {:reply, :ok, state}
+    end
+  end
+
+  def handle_call({:update_sync, user_id, sync_status}, _from, state) do
+    if is_map_key(state.players, user_id) do
+      # Update the player's sync status
+      updated_player = Map.put(state.players[user_id], :sync, sync_status)
+      state = put_in(state.players[user_id], updated_player)
+
+      # Broadcast the updated sync status to all lobby members
+      broadcast_update({:player_sync_updated, user_id, sync_status, state})
+      {:reply, :ok, state}
+    else
+      {:reply, {:error, :not_in_lobby}, state}
+    end
+  end
+
   def handle_call({:start_battle, user_id}, _from, state)
       when not is_map_key(state.players, user_id) and not is_map_key(state.spectators, user_id),
       do: {:reply, {:error, :not_in_lobby}, state}
@@ -652,12 +716,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     Map.take(state, [
       :id,
+      :boss_id,
       :name,
       :map_name,
       :game_version,
       :engine_version,
       :ally_team_config,
-      :current_battle
+      :current_battle,
+      :mods
     ])
     |> Map.put(:players, players)
     |> Map.put(:spectators, spectators)
@@ -711,6 +777,64 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  # defp broadcast_update({:add_player, user_id, team, state}) do
+  #   TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
+
+  #   for {p_id, p} <- state.players, p_id != user_id do
+  #     send(
+  #       p.pid,
+  #       {:lobby, state.id, {:updated, [%{event: :add_player, id: user_id, team: team}]}}
+  #     )
+  #   end
+
+  #   :ok
+  # end
+
+  defp broadcast_update({:remove_player, user_id, player_changes, state}) do
+    TachyonLobby.List.update_lobby(state.id, %{player_count: map_size(state.players)})
+
+    # TODO: a potential optimisation is to coalesce all these events into one
+    # all the :change_player can be merged into one single map change
+    events =
+      for {:player_moved, p_id, team} <- player_changes,
+          do: %{event: :change_player, id: p_id, team: team}
+
+    events = [%{event: :remove_player, id: user_id} | events]
+
+    for {_p_id, p} <- state.players,
+        do: send(p.pid, {:lobby, state.id, {:updated, events}})
+  end
+
+  defp broadcast_update({:mods_changed, new_mods, state}) do
+    for {_p_id, p} <- state.players do
+      send(p.pid, {:lobby, state.id, {:updated, [%{event: :mods_changed, mods: new_mods}]}})
+    end
+
+    :ok
+  end
+
+  defp broadcast_update({:boss_changed, new_boss_id, state}) do
+    for {_p_id, p} <- state.players do
+      send(
+        p.pid,
+        {:lobby, state.id, {:updated, [%{event: :boss_changed, boss_id: new_boss_id}]}}
+      )
+    end
+
+    :ok
+  end
+
+  defp broadcast_update({:player_sync_updated, user_id, sync_status, state}) do
+    for {_p_id, p} <- state.players do
+      send(
+        p.pid,
+        {:lobby, state.id, {:updated, [%{event: :player_sync_updated, user_id: user_id, sync: sync_status}]}}
+      )
+    end
+
+    :ok
+  end
+
   defp broadcast_update({:update, user_id, updates}, state) do
     events = [%{event: :updated, updates: updates}]
     broadcast_to_members(state, user_id, {:lobby, state.id, {:updated, events}})
@@ -761,17 +885,29 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec remove_player(T.userid(), state()) :: state()
   defp remove_player(user_id, state) do
-    changes = do_remove_player(user_id, state.players)
+    {player_changes, updated_players} = do_remove_player(user_id, state.players)
 
-    updated_players =
-      Enum.reduce(changes, state.players, fn {p_id, team}, ps ->
-        put_in(ps, [p_id, :team], team)
+    # Apply the team changes to get the final player list
+    final_players =
+      Enum.reduce(player_changes, updated_players, fn {p_id, team}, players ->
+        put_in(players, [p_id, :team], team)
       end)
-      |> Map.delete(user_id)
 
     state =
       Map.update!(state, :monitors, &MC.demonitor_by_val(&1, {:user, user_id}))
-      |> Map.put(:players, updated_players)
+      |> Map.put(:players, final_players)
+
+    # Transfer boss status if boss left and lobby not empty
+    state =
+      if user_id == state.boss_id && map_size(final_players) > 0 do
+        # Pick first remaining player as new boss
+        new_boss_id = final_players |> Map.keys() |> List.first()
+        Logger.info("Boss #{user_id} left, transferring to user #{new_boss_id}")
+        broadcast_update({:boss_changed, new_boss_id, state})
+        %{state | boss_id: new_boss_id}
+      else
+        state
+      end
 
     {state, new_player_id} = add_player_from_join_queue(state)
 
@@ -821,33 +957,63 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # returns the list of {player_id, new_team} that were modified in the process
   @spec do_remove_player(T.userid(), %{T.userid() => player()}) :: [{T.userid(), team()}]
   defp do_remove_player(user_id, players) do
-    {%{team: {at_idx, t_idx, p_idx}}, players} =
+    {%{team: {at_idx, t_idx, p_idx}}, updated_players} =
       Map.pop!(players, user_id)
 
     # reorg the other players to keep the team indices consecutive
     # ally team won't change
-    Enum.reduce(players, [], fn {p_id, p}, player_changes ->
-      {x, y, z} = p.team
+    player_changes =
+      Enum.reduce(updated_players, [], fn {p_id, p}, acc ->
+        {x, y, z} = p.team
 
-      cond do
-        x == at_idx && y >= t_idx && p_idx == 0 ->
-          # p_idx == 0 means the player removed was the last one on their team
-          # so its team can be "removed", and all teams with a higher index should
-          # be moved back by 1
-          team = {x, y - 1, z}
+        cond do
+          x == at_idx && y >= t_idx && p_idx == 0 ->
+            # p_idx == 0 means the player removed was the last one on their team
+            # so its team can be "removed", and all teams with a higher index should
+            # be moved back by 1
+            team = {x, y - 1, z}
+            [{p_id, team} | acc]
 
-          [{p_id, team} | player_changes]
+          x == at_idx && y >= t_idx && z >= p_idx ->
+            # similar there, but we only shuffle the players in the same team (archons)
+            team = {x, y, z - 1}
+            [{p_id, team} | acc]
 
-        x == at_idx && y >= t_idx && z >= p_idx ->
-          # similar there, but we only shuffle the players in the same team (archons)
-          team = {x, y, z - 1}
+          true ->
+            player_changes
+        end
+      end)
 
-          [{p_id, team} | player_changes]
+    {player_changes, updated_players}
+  end
 
-        true ->
-          player_changes
+  # Add the first player from the join queue to the player list and returns the
+  # updated state alongside the player id that was added
+  # Assumes there is a spot available in an ally team
+  @spec add_player_from_join_queue(state()) :: {state(), T.userid() | nil}
+  defp add_player_from_join_queue(state) do
+    player_to_add =
+      case get_first_player_in_join_queue(state.spectators) do
+        nil ->
+          nil
+
+        {id, p} ->
+          team = find_team(state.ally_team_config, state.players)
+          p = p |> Map.put(:team, team) |> Map.delete(:join_queue_position)
+          {id, p}
       end
-    end)
+
+    case player_to_add do
+      nil ->
+        {state, nil}
+
+      {id, p} ->
+        state =
+          put_in(state.players[id], p)
+          |> Map.update!(:spectators, &Map.delete(&1, id))
+
+        {state, id}
+    end
   end
 
   # Add the first player from the join queue to the player list and returns the
@@ -912,7 +1078,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         %{teams: teams, startBox: at_config.start_box}
       end
 
-    %{
+    script = %{
       engineVersion: state.engine_version,
       gameName: state.game_version,
       mapName: state.map_name,
@@ -923,5 +1089,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
           %{userId: to_string(s.id), name: s.name, password: s.password}
         end)
     }
+
+    # Add mods if present (order matter)
+    if length(state.mods) > 0 do
+      Map.put(script, :mods, state.mods)
+    else
+      script
+    end
   end
 end

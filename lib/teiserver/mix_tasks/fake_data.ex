@@ -273,6 +273,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
           preload: [:members]
         )
         |> Enum.shuffle()
+        |> Enum.filter(fn match -> length(match.members) >= 2 end)
         |> Enum.take(report_count)
         |> Enum.map(fn match ->
           [reporter, target | _] = Enum.shuffle(match.members) |> Enum.take(2)
