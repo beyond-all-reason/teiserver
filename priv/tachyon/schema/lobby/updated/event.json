@@ -21,7 +21,7 @@
                 "mapName": { "type": "string" },
                 "engineVersion": { "type": "string" },
                 "gameVersion": { "type": "string" },
-                "allyTeams": {
+                "allyTeamConfig": {
                     "type": "object",
                     "patternProperties": {
                         "^(.*)$": {
