@@ -1,0 +1,45 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/removeBot/response.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LobbyRemoveBotResponse",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "anyOf": [
+        {
+            "title": "LobbyRemoveBotOkResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "lobby/removeBot" },
+                "status": { "const": "success" }
+            },
+            "required": ["type", "messageId", "commandId", "status"]
+        },
+        {
+            "title": "LobbyRemoveBotFailResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "lobby/removeBot" },
+                "status": { "const": "failed" },
+                "reason": {
+                    "enum": [
+                        "not_in_lobby",
+                        "invalid_bot",
+                        "internal_error",
+                        "unauthorized",
+                        "invalid_request",
+                        "command_unimplemented"
+                    ]
+                },
+                "details": { "type": "string" }
+            },
+            "required": ["type", "messageId", "commandId", "status", "reason"]
+        }
+    ]
+}

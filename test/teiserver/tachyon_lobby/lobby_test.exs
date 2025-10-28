@@ -555,6 +555,232 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "bots" do
+    test "need valid lobby" do
+      {:error, :invalid_lobby} =
+        Lobby.add_bot("doesn't exist", 0, "random-user-id", "bot short name")
+    end
+
+    test "must be in lobby" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :not_in_lobby} = Lobby.add_bot(id, "random-user-id", 0, "bot short name")
+    end
+
+    test "must specify valid ally team" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :invalid_ally_team} = Lobby.add_bot(id, @default_user_id, 10, "bot short name")
+      {:error, :invalid_ally_team} = Lobby.add_bot(id, @default_user_id, -1, "bot short name")
+    end
+
+    test "must have space in ally team" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:error, :ally_team_full} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
+    end
+
+    test "add_bot works" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+
+      %{
+        event: :updated,
+        updates: %{
+          bots: %{
+            ^bot_id => %{
+              team: {1, 0, 0},
+              host_user_id: @default_user_id,
+              short_name: "bot short name"
+            }
+          }
+        }
+      } = update
+    end
+
+    test "lobby details has the bots" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+
+      {:ok, bot_id} =
+        Lobby.add_bot(id, @default_user_id, 1, "bot short name",
+          name: "bot name",
+          version: "version",
+          options: %{
+            "option1" => "val1"
+          }
+        )
+
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+
+      refute is_map_key(details.players, bot_id)
+
+      %{
+        host_user_id: @default_user_id,
+        team: {1, 0, 0},
+        short_name: "bot short name",
+        name: "bot name",
+        version: "version",
+        options: %{"option1" => "val1"}
+      } = details.bots[bot_id]
+    end
+
+    test "bots correctly put in teams" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([3, 3]))
+
+      {:ok, bot_id1} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+      %{updates: %{bots: %{^bot_id1 => %{team: {0, 1, 0}}}}} = update
+
+      {:ok, bot_id2} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+      %{updates: %{bots: %{^bot_id2 => %{team: {0, 2, 0}}}}} = update
+    end
+
+    test "bots are taken into account for team capacity" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, _bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      {:error, :ally_team_full} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+    end
+
+    test "creator leaving also removes bots" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, bot_id1} = Lobby.add_bot(id, "other-user-id", 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, bot_id2} = Lobby.add_bot(id, "other-user-id", 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.leave(id, "other-user-id")
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+
+      %{
+        event: :updated,
+        updates: %{
+          bots: %{^bot_id1 => nil, ^bot_id2 => nil},
+          spectators: %{"other-user-id" => nil}
+        }
+      } = update
+    end
+
+    test "bot leaving because spec host left allow join queue to get in" do
+      %{id: id} = setup_full_lobby()
+
+      # fill the lobby with bots
+      {:ok, bot_id1} = Lobby.add_bot(id, "2", 0, "bot")
+      {:ok, bot_id2} = Lobby.add_bot(id, "2", 1, "bot")
+      {:ok, bot_id3} = Lobby.add_bot(id, "2", 1, "bot")
+
+      # also fill a bit the join queue
+      :ok = Lobby.join_queue(id, "3")
+      :ok = Lobby.join_queue(id, "4")
+
+      for _ <- 1..5, do: assert_receive({:lobby, ^id, {:updated, _}})
+
+      # player 2 leaving should make all the bots leave and the space should be
+      # taken up by the players in the join queue
+      :ok = Lobby.leave(id, "2")
+
+      assert_receive({:lobby, ^id, {:updated, [%{updates: update}]}})
+
+      # bots should be gone
+      %{bots: %{^bot_id1 => nil, ^bot_id2 => nil, ^bot_id3 => nil}} = update
+
+      # players in join queue should be in team now
+      assert update.players["3"].team != nil
+      assert update.players["4"].team != nil
+      %{spectators: %{"2" => nil, "3" => nil, "4" => nil}} = update
+    end
+
+    test "correct id required to remove bot" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :invalid_bot_id} = Lobby.remove_bot(id, "lolnope")
+    end
+
+    test "remove_bot works" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.remove_bot(id, bot_id)
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+      %{updates: %{bots: %{^bot_id => nil}}} = update
+    end
+
+    test "removing a bot reshuffle the teams" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, bot_id1} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      {:ok, bot_id2} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.remove_bot(id, bot_id1)
+
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+      %{updates: %{bots: %{^bot_id1 => nil, ^bot_id2 => %{team: {1, 0, 0}}}}} = update
+    end
+
+    test "removing bot allow specs in join queue to get the spot" do
+      # Setup
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "other-user-id")
+      assert_receive {:lobby, ^id, {:updated, [update]}}
+      %{updates: %{spectators: %{"other-user-id" => %{join_queue_position: 1}}}} = update
+
+      # Act
+      :ok = Lobby.remove_bot(id, bot_id)
+
+      # Assert
+      assert_receive {:lobby, ^id, {:updated, [%{updates: update}]}}
+      # bot is gone
+      %{bots: %{^bot_id => nil}} = update
+      # and player took its place
+      %{spectators: %{"other-user-id" => nil}, players: %{"other-user-id" => %{team: _}}} = update
+    end
+
+    test "player in join queue with bot leaves" do
+      %{id: id} = setup_full_lobby([1, 1])
+      {:ok, bot_id} = Lobby.add_bot(id, "2", 1, "bot")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.leave(id, "2")
+      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+
+      assert %{spectators: %{"2" => nil}, bots: %{bot_id => nil}} == updates
+    end
+
+    test "update needs correct id" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :invalid_bot_id} = Lobby.update_bot(id, %{id: "lolnope"})
+    end
+
+    test "can update some properties" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.update_bot(id, %{id: bot_id, name: "botv2", short_name: "short v2"})
+
+      # we got the events
+      assert_receive {:lobby, ^id, {:updated, [%{updates: update}]}}
+      %{bots: %{^bot_id => %{name: "botv2", short_name: "short v2"}}} = update
+
+      # and the details are also correct
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      %{name: "botv2", short_name: "short v2"} = details.bots[bot_id]
+    end
+  end
+
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the
   # teiserver_web/tachyon/lobby_test.exs file
@@ -618,6 +844,53 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       %{allyTeams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
       %{players: [%{userId: @default_user_id}]} = t1
       %{players: [%{userId: "other-user-id"}]} = t2
+    end
+
+    test "with a bot" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{allyTeams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
+      %{players: [%{userId: @default_user_id}]} = t1
+      %{bots: [%{hostUserId: @default_user_id, aiShortName: "bot short name"}]} = t2
+      assert not is_map_key(t1, :bots)
+      assert not is_map_key(t2, :players)
+    end
+  end
+
+  # again, this should probably be exatracted in a more general module
+  describe "patch merge" do
+    import Teiserver.TachyonLobby.Lobby, only: [patch_merge: 2]
+
+    test "update a simple (non map) value" do
+      assert patch_merge(%{key: "s1"}, %{key: "s2"}) == %{key: "s2"}
+
+      result = patch_merge(%{"string-key" => "s1"}, %{"string-key" => "s2"})
+      assert result == %{"string-key" => "s2"}
+    end
+
+    test "can add new keys" do
+      result = patch_merge(%{key: "foo"}, %{other: 2})
+      assert result == %{key: "foo", other: 2}
+    end
+
+    test "can delete keys when value is nil" do
+      result = patch_merge(%{foo: "fooval", bar: "barkey"}, %{bar: nil})
+      assert result == %{foo: "fooval"}
+    end
+
+    test "set map as value when new key" do
+      result = patch_merge(%{}, %{foo: %{key: "val"}})
+      assert result == %{foo: %{key: "val"}}
+    end
+
+    test "can recursively update nested maps" do
+      result =
+        patch_merge(%{foo: %{key: "base-key", foo: "bar"}}, %{
+          foo: %{key: 2, foo: nil, bar: "updated"}
+        })
+
+      assert result == %{foo: %{key: 2, bar: "updated"}}
     end
   end
 
