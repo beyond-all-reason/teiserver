@@ -175,10 +175,10 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "party/removed", event, state}
   end
 
-  def handle_info({:lobby, lobby_id, {:updated, updates}}, state) do
-    events = Enum.map(updates, &lobby_update_to_tachyon(lobby_id, &1))
+  def handle_info({:lobby, lobby_id, {:updated, update}}, state) do
+    data = lobby_update_to_tachyon(lobby_id, update)
 
-    {:event, events, state}
+    {:event, "lobby/updated", data, state}
   end
 
   def handle_info({:lobby, lobby_id, {:left, reason}}, state) do
@@ -1057,11 +1057,11 @@ defmodule Teiserver.Player.TachyonHandler do
     end)
   end
 
-  defp lobby_update_to_tachyon(lobby_id, %{event: :updated} = ev) do
+  defp lobby_update_to_tachyon(lobby_id, update_map) do
     data =
       %{id: lobby_id}
       |> then(fn m ->
-        case Map.get(ev.updates, :players) do
+        case Map.get(update_map, :players) do
           nil ->
             m
 
@@ -1076,7 +1076,7 @@ defmodule Teiserver.Player.TachyonHandler do
         end
       end)
       |> then(fn m ->
-        case Map.get(ev.updates, :spectators) do
+        case Map.get(update_map, :spectators) do
           nil ->
             m
 
@@ -1091,8 +1091,8 @@ defmodule Teiserver.Player.TachyonHandler do
         end
       end)
       |> then(fn m ->
-        if is_map_key(ev.updates, :current_battle) do
-          battle = ev.updates.current_battle
+        if is_map_key(update_map, :current_battle) do
+          battle = update_map.current_battle
 
           if battle == nil do
             Map.put(m, :currentBattle, nil)
@@ -1107,7 +1107,7 @@ defmodule Teiserver.Player.TachyonHandler do
         end
       end)
       |> then(fn m ->
-        case Map.get(ev.updates, :bots) do
+        case Map.get(update_map, :bots) do
           nil ->
             m
 
@@ -1122,7 +1122,7 @@ defmodule Teiserver.Player.TachyonHandler do
         end
       end)
 
-    {"lobby/updated", data}
+    data
   end
 
   # omit_nil? is there so we can use the same function for both the initial

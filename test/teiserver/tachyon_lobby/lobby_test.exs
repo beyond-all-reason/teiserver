@@ -85,15 +85,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert details.spectators["other-user-id"].join_queue_position == nil
 
       assert_receive {:lobby, ^id,
-                      {:updated,
-                       [
-                         %{
-                           event: :updated,
-                           updates: %{
-                             spectators: %{"other-user-id" => %{join_queue_position: nil}}
-                           }
-                         }
-                       ]}}
+                      {:updated, %{spectators: %{"other-user-id" => %{join_queue_position: nil}}}}}
     end
 
     test "is idempotent" do
@@ -109,13 +101,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
 
       assert_receive {:lobby, ^id,
-                      {:updated,
-                       [
-                         %{
-                           event: :updated,
-                           updates: %{spectators: %{"user2" => %{join_queue_position: nil}}}
-                         }
-                       ]}}
+                      {:updated, %{spectators: %{"user2" => %{join_queue_position: nil}}}}}
 
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
@@ -123,7 +109,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       expected_updates = %{spectators: %{"user2" => %{join_queue_position: nil}}}
 
-      assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: ^expected_updates}]}}
+      assert_receive {:lobby, ^id, {:updated, ^expected_updates}}
     end
 
     test "lobby full" do
@@ -185,15 +171,9 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _, _details} = Lobby.join(id, mk_player("user2"))
       {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
 
-      expected = %{
-        event: :updated,
-        updates: %{
-          players: %{"user2" => %{team: {1, 0, 0}}},
-          spectators: %{"user2" => nil}
-        }
-      }
+      expected = %{players: %{"user2" => %{team: {1, 0, 0}}}, spectators: %{"user2" => nil}}
 
-      assert_receive {:lobby, ^id, {:updated, [^expected]}}
+      assert_receive {:lobby, ^id, {:updated, ^expected}}
     end
 
     test "can change ally team" do
@@ -220,7 +200,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         spectators: %{"user2" => nil}
       }
 
-      assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: ^expected_update}]}}
+      assert_receive {:lobby, ^id, {:updated, ^expected_update}}
 
       assert %{team: {0, _, _}} = details.players["user2"]
 
@@ -276,11 +256,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
-      assert_received {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      assert_received {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.leave(id, "user2")
       expected = %{spectators: %{"user2" => nil}}
-      assert_received {:lobby, ^id, {:updated, [%{event: :updated, updates: ^expected}]}}
+      assert_received {:lobby, ^id, {:updated, ^expected}}
     end
 
     test "reshuffling player on leave sends updates" do
@@ -290,24 +270,21 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user3"), sink_pid)
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user4"), sink_pid)
 
-      assert_received {:lobby, ^id, {:updated, [%{event: :updated}]}}
-      assert_received {:lobby, ^id, {:updated, [%{event: :updated}]}}
-      assert_received {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      assert_received {:lobby, ^id, {:updated, %{}}}
+      assert_received {:lobby, ^id, {:updated, %{}}}
+      assert_received {:lobby, ^id, {:updated, %{}}}
 
       {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
       {:ok, _details} = Lobby.join_ally_team(id, "user3", 1)
 
-      assert_received {:lobby, ^id, {:updated, [%{event: :updated}]}}
-      assert_received {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      assert_received {:lobby, ^id, {:updated, %{}}}
+      assert_received {:lobby, ^id, {:updated, %{}}}
 
       :ok = Lobby.leave(id, "user2")
 
-      expected_event = %{
-        event: :updated,
-        updates: %{players: %{"user2" => nil, "user3" => %{team: {1, 0, 0}}}}
-      }
+      expected = %{players: %{"user2" => nil, "user3" => %{team: {1, 0, 0}}}}
 
-      assert_received {:lobby, ^id, {:updated, [^expected_event]}}
+      assert_received {:lobby, ^id, {:updated, ^expected}}
     end
 
     test "player pid dying means player is removed from lobby" do
@@ -319,30 +296,28 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
       Process.exit(sink_pid, :kill)
 
-      assert_receive {:lobby, ^id,
-                      {:updated, [%{event: :updated, updates: %{players: %{"1234" => nil}}}]}}
+      assert_receive {:lobby, ^id, {:updated, %{players: %{"1234" => nil}}}}
     end
 
     test "spectator pid dying means is removed from lobby" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
-      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      assert_receive {:lobby, ^id, {:updated, %{}}}
 
       Process.exit(sink_pid, :kill)
 
-      assert_receive {:lobby, ^id,
-                      {:updated, [%{event: :updated, updates: %{spectators: %{"user2" => nil}}}]}}
+      assert_receive {:lobby, ^id, {:updated, %{spectators: %{"user2" => nil}}}}
     end
 
     test "spec leaving removes monitors" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
       {:ok, lobby_pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
-      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      assert_receive {:lobby, ^id, {:updated, %{}}}
 
       :ok = Lobby.leave(id, "user2")
-      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      assert_receive {:lobby, ^id, {:updated, %{}}}
       Process.exit(sink_pid, :kill)
       refute_receive _, 30
       assert Process.alive?(lobby_pid)
@@ -352,12 +327,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
       {:ok, lobby_pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
-      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      assert_receive {:lobby, ^id, {:updated, %{}}}
       {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
-      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      assert_receive {:lobby, ^id, {:updated, %{}}}
 
       :ok = Lobby.leave(id, "user2")
-      assert_receive {:lobby, ^id, {:updated, [%{event: :updated}]}}
+      assert_receive {:lobby, ^id, {:updated, %{}}}
       Process.exit(sink_pid, :kill)
       refute_receive _, 30
       assert Process.alive?(lobby_pid)
@@ -383,7 +358,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         spectators: %{@default_user_id => %{join_queue_position: nil}}
       }
 
-      assert_receive {:lobby, ^id, {:updated, [%{event: :updated, updates: ^expected}]}}
+      assert_receive {:lobby, ^id, {:updated, ^expected}}
     end
 
     test "is idempotent" do
@@ -408,14 +383,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "can immediately join when spot available" do
       %{id: id} = setup_full_lobby()
       :ok = Lobby.join_queue(id, "2")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{players: %{"2" => %{team: {1, 0, 0}}}} = updates
     end
 
     test "doesn't queue if spaces are available" do
       %{id: id} = setup_full_lobby()
       :ok = Lobby.join_queue(id, "2")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
       assert is_map_key(details.players, "2")
       assert %{players: %{"2" => %{team: {1, 0, 0}}}} = updates
@@ -426,13 +401,13 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "player can join the back of the queue" do
       %{id: id} = setup_full_lobby([1, 1])
       :ok = Lobby.join_queue(id, "2")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: _}]}}
+      assert_receive {:lobby, ^id, {:updated, _}}
       :ok = Lobby.join_queue(id, "3")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       %{spectators: %{"3" => %{join_queue_position: pos}}} = updates
 
       :ok = Lobby.join_queue(id, "2")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
 
       # player 2 is at the back of the queue now
       assert %{spectators: %{"2" => %{join_queue_position: pos2}}} = updates
@@ -447,11 +422,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.join_queue(id, "3")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
 
       :ok = Lobby.join_queue(id, "4")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{spectators: %{"4" => %{join_queue_position: 2}}} = updates
     end
 
@@ -461,11 +436,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.join_queue(id, "3")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
 
       :ok = Lobby.spectate(id, "3")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{spectators: %{"3" => %{join_queue_position: nil}}} = updates
     end
 
@@ -475,7 +450,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.join_queue(id, "3")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
 
       # joining the queue again should not change anything
@@ -491,11 +466,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.join_queue(id, "3")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
 
       :ok = Lobby.spectate(id, "2")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
 
       assert %{spectators: %{"3" => nil}, players: %{"3" => %{team: {1, 0, 0}}}} = updates
     end
@@ -506,11 +481,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.join_queue(id, "3")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
 
       :ok = Lobby.leave(id, "2")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
 
       assert %{players: %{"2" => nil, "3" => %{team: {1, 0, 0}}}} = updates
     end
@@ -521,12 +496,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.join_queue(id, "3")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
 
       Process.unlink(ctx[:users]["2"].pid)
       Process.exit(ctx[:users]["2"].pid, :kill)
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
 
       assert %{players: %{"3" => %{team: {1, 0, 0}}, "2" => nil}} = updates
     end
@@ -537,11 +512,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.join_queue(id, "3")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
 
       :ok = Lobby.join_queue(id, "4")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{spectators: %{"4" => %{join_queue_position: 2}}} = updates
 
       # make sure that user2 rejoining is put at the back of the queue
@@ -550,7 +525,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _, _} = Lobby.join(id, ctx.users["2"])
       assert_receive {:lobby, ^id, {:updated, _}}
       :ok = Lobby.join_queue(id, "2")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
       assert %{spectators: %{"2" => %{join_queue_position: 3}}} = updates
     end
   end
@@ -581,17 +556,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
       {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
 
-      assert_receive {:lobby, ^id, {:updated, [update]}}
+      assert_receive {:lobby, ^id, {:updated, update}}
 
       %{
-        event: :updated,
-        updates: %{
-          bots: %{
-            ^bot_id => %{
-              team: {1, 0, 0},
-              host_user_id: @default_user_id,
-              short_name: "bot short name"
-            }
+        bots: %{
+          ^bot_id => %{
+            team: {1, 0, 0},
+            host_user_id: @default_user_id,
+            short_name: "bot short name"
           }
         }
       } = update
@@ -627,12 +599,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([3, 3]))
 
       {:ok, bot_id1} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
-      assert_receive {:lobby, ^id, {:updated, [update]}}
-      %{updates: %{bots: %{^bot_id1 => %{team: {0, 1, 0}}}}} = update
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{bots: %{^bot_id1 => %{team: {0, 1, 0}}}} = update
 
       {:ok, bot_id2} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
-      assert_receive {:lobby, ^id, {:updated, [update]}}
-      %{updates: %{bots: %{^bot_id2 => %{team: {0, 2, 0}}}}} = update
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{bots: %{^bot_id2 => %{team: {0, 2, 0}}}} = update
     end
 
     test "bots are taken into account for team capacity" do
@@ -655,14 +627,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.leave(id, "other-user-id")
-      assert_receive {:lobby, ^id, {:updated, [update]}}
+      assert_receive {:lobby, ^id, {:updated, update}}
 
       %{
-        event: :updated,
-        updates: %{
-          bots: %{^bot_id1 => nil, ^bot_id2 => nil},
-          spectators: %{"other-user-id" => nil}
-        }
+        bots: %{^bot_id1 => nil, ^bot_id2 => nil},
+        spectators: %{"other-user-id" => nil}
       } = update
     end
 
@@ -684,7 +653,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       # taken up by the players in the join queue
       :ok = Lobby.leave(id, "2")
 
-      assert_receive({:lobby, ^id, {:updated, [%{updates: update}]}})
+      assert_receive({:lobby, ^id, {:updated, update}})
 
       # bots should be gone
       %{bots: %{^bot_id1 => nil, ^bot_id2 => nil, ^bot_id3 => nil}} = update
@@ -705,8 +674,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
       assert_receive {:lobby, ^id, {:updated, _}}
       :ok = Lobby.remove_bot(id, bot_id)
-      assert_receive {:lobby, ^id, {:updated, [update]}}
-      %{updates: %{bots: %{^bot_id => nil}}} = update
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{bots: %{^bot_id => nil}} = update
     end
 
     test "removing a bot reshuffle the teams" do
@@ -717,8 +686,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
       :ok = Lobby.remove_bot(id, bot_id1)
 
-      assert_receive {:lobby, ^id, {:updated, [update]}}
-      %{updates: %{bots: %{^bot_id1 => nil, ^bot_id2 => %{team: {1, 0, 0}}}}} = update
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{bots: %{^bot_id1 => nil, ^bot_id2 => %{team: {1, 0, 0}}}} = update
     end
 
     test "removing bot allow specs in join queue to get the spot" do
@@ -732,14 +701,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.join_queue(id, "other-user-id")
-      assert_receive {:lobby, ^id, {:updated, [update]}}
-      %{updates: %{spectators: %{"other-user-id" => %{join_queue_position: 1}}}} = update
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{spectators: %{"other-user-id" => %{join_queue_position: 1}}} = update
 
       # Act
       :ok = Lobby.remove_bot(id, bot_id)
 
       # Assert
-      assert_receive {:lobby, ^id, {:updated, [%{updates: update}]}}
+      assert_receive {:lobby, ^id, {:updated, update}}
       # bot is gone
       %{bots: %{^bot_id => nil}} = update
       # and player took its place
@@ -755,7 +724,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.leave(id, "2")
-      assert_receive {:lobby, ^id, {:updated, [%{updates: updates}]}}
+      assert_receive {:lobby, ^id, {:updated, updates}}
 
       assert %{spectators: %{"2" => nil}, bots: %{bot_id => nil}} == updates
     end
@@ -772,7 +741,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.update_bot(id, %{id: bot_id, name: "botv2", short_name: "short v2"})
 
       # we got the events
-      assert_receive {:lobby, ^id, {:updated, [%{updates: update}]}}
+      assert_receive {:lobby, ^id, {:updated, update}}
       %{bots: %{^bot_id => %{name: "botv2", short_name: "short v2"}}} = update
 
       # and the details are also correct
