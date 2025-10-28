@@ -34,4 +34,17 @@ defmodule Teiserver.Helpers.Collections do
       end
     end)
   end
+
+  @doc """
+  recursively traverse a map and produce a map without any nil value
+  """
+  def remove_nil_vals(map) do
+    Enum.map(map, fn {k, v} ->
+      if is_map(v),
+        do: {k, remove_nil_vals(v)},
+        else: {k, v}
+    end)
+    |> Enum.filter(&(elem(&1, 1) != nil))
+    |> Map.new()
+  end
 end

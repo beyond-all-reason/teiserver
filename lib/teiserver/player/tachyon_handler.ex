@@ -4,7 +4,7 @@ defmodule Teiserver.Player.TachyonHandler do
   """
 
   require Logger
-  alias Teiserver.Helpers.BurstyRateLimiter
+  alias Teiserver.Helpers.{BurstyRateLimiter, Collections}
   alias Teiserver.Tachyon.Schema
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Data.Types, as: T
@@ -1048,278 +1048,144 @@ defmodule Teiserver.Player.TachyonHandler do
     Enum.map(data, fn d -> %{max_players: d["maxPlayers"]} end)
   end
 
-  defp lobby_team_to_tachyon({x, y, z}) do
-    %{
-      allyTeam: x |> to_string(),
-      team: y |> to_string(),
-      player: z |> to_string()
-    }
-  end
-
   defp lobby_details_to_tachyon(details) do
-    players =
-      Enum.map(details.players, fn {p_id, p} ->
-        {to_string(p_id), player_update_to_tachyon(to_string(p_id), p, true)}
-      end)
-      |> Map.new()
-
-    spectators =
-      Enum.map(details.spectators, fn {s_id, s} ->
-        {to_string(s_id), spectator_update_to_tachyon(to_string(s_id), s, true)}
-      end)
-      |> Map.new()
-
-    bots =
-      Enum.map(details.bots, fn {b_id, b} ->
-        {b_id, bot_update_to_tachyon(b_id, b, true)}
-      end)
-      |> Map.new()
-
-    ally_team_config =
-      for {at, at_idx} <- Enum.with_index(details.ally_team_config), into: %{} do
-        teams =
-          for {t, t_idx} <- Enum.with_index(at.teams), into: %{} do
-            {to_string(t_idx), %{maxPlayers: t.max_players}}
-          end
-
-        {to_string(at_idx),
-         %{
-           teams: teams,
-           maxTeams: at.max_teams,
-           startBox: at.start_box
-         }}
-      end
-
-    %{
-      id: details.id,
-      name: details.name,
-      players: players,
-      spectators: spectators,
-      bots: bots,
-      mapName: details.map_name,
-      engineVersion: details.engine_version,
-      gameVersion: details.game_version,
-      allyTeamConfig: ally_team_config
+    mappings = %{
+      id: :id,
+      players: {:players, &player_updates_to_tachyon/1},
+      spectators: {:spectators, &spectator_updates_to_tachyon/1},
+      bots: {:bots, &bot_updates_to_tachyon/1},
+      current_battle:
+        {:currentBattle,
+         %{id: :id, started_at: {:startedAt, &DateTime.to_unix(&1, :microsecond)}}},
+      name: :name,
+      map_name: :mapName,
+      ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
+      engine_version: :engineVersion,
+      game_version: :gameVersion
     }
-    |> then(fn m ->
-      case details.current_battle do
-        nil ->
-          m
 
-        b ->
-          Map.put(m, :currentBattle, %{startedAt: DateTime.to_unix(b.started_at, :microsecond)})
-      end
-    end)
+    Collections.transform_map(details, mappings)
+    |> Collections.remove_nil_vals()
   end
 
   defp lobby_update_to_tachyon(lobby_id, update_map) do
-    data =
-      %{id: lobby_id}
-      |> then(fn m ->
-        case Map.get(update_map, :players) do
-          nil ->
-            m
+    mappings = %{
+      players: {:players, &player_updates_to_tachyon/1},
+      spectators: {:spectators, &spectator_updates_to_tachyon/1},
+      bots: {:bots, &bot_updates_to_tachyon/1},
+      current_battle:
+        {:currentBattle,
+         %{id: :id, started_at: {:startedAt, &DateTime.to_unix(&1, :microsecond)}}},
+      name: :name,
+      map_name: :mapName,
+      ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1}
+    }
 
-          players ->
-            players =
-              Enum.map(players, fn {p_id, updates} ->
-                {to_string(p_id), player_update_to_tachyon(to_string(p_id), updates, false)}
-              end)
-              |> Map.new()
-
-            Map.put(m, :players, players)
-        end
-      end)
-      |> then(fn m ->
-        case Map.get(update_map, :spectators) do
-          nil ->
-            m
-
-          spectators ->
-            specs =
-              Enum.map(spectators, fn {s_id, updates} ->
-                {to_string(s_id), spectator_update_to_tachyon(to_string(s_id), updates, false)}
-              end)
-              |> Map.new()
-
-            Map.put(m, :spectators, specs)
-        end
-      end)
-      |> then(fn m ->
-        if is_map_key(update_map, :current_battle) do
-          battle = update_map.current_battle
-
-          if battle == nil do
-            Map.put(m, :currentBattle, nil)
-          else
-            Map.put(m, :currentBattle, %{
-              id: battle.id,
-              startedAt: DateTime.to_unix(battle.started_at, :microsecond)
-            })
-          end
-        else
-          m
-        end
-      end)
-      |> then(fn m ->
-        case Map.get(update_map, :bots) do
-          nil ->
-            m
-
-          bots ->
-            bots =
-              Enum.map(bots, fn {b_id, updates} ->
-                {b_id, bot_update_to_tachyon(b_id, updates, false)}
-              end)
-              |> Map.new()
-
-            Map.put(m, :bots, bots)
-        end
-      end)
-      |> then(fn m ->
-        case Map.get(update_map, :name) do
-          nil -> m
-          v -> Map.put(m, :name, v)
-        end
-      end)
-      |> then(fn m ->
-        case Map.get(update_map, :map_name) do
-          nil -> m
-          v -> Map.put(m, :mapName, v)
-        end
-      end)
-      |> then(fn m ->
-        case Map.get(update_map, :ally_team_config) do
-          nil ->
-            m
-
-          v ->
-            val =
-              for {at, i} <- Enum.with_index(v), into: %{} do
-                {to_string(i),
-                 %{
-                   maxTeams: at.max_teams,
-                   # internal representation is the same as tachyon for startbox
-                   startBox: at.start_box,
-                   teams:
-                     for {team, i} <- Enum.with_index(at.teams), into: %{} do
-                       {to_string(i), %{maxPlayers: team.max_players}}
-                     end
-                 }}
-              end
-
-            Map.put(m, :allyTeamConfig, val)
-        end
-      end)
-
-    # TODO: this is getting out of control, figure out a way to serialize these things.
-
-    data
+    Map.merge(%{id: lobby_id}, Collections.transform_map(update_map, mappings))
   end
 
-  # omit_nil? is there so we can use the same function for both the initial
-  # object and any subsequent json patch style updates
-  # because the initial object cannot have nil keys, so just skip them if any
-  defp player_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
+  defp player_updates_to_tachyon(nil), do: nil
 
-  defp player_update_to_tachyon(p_id, updates, omit_nil?) do
-    if is_map_key(updates, :team) do
-      val = updates.team
+  defp player_updates_to_tachyon(updates) do
+    Enum.reduce(updates, %{}, fn
+      {p_id, nil}, m ->
+        Map.put(m, to_string(p_id), nil)
 
-      cond do
-        val == nil && omit_nil? -> %{}
-        val == nil -> %{allyTeam: nil, team: nil, player: nil}
-        true -> lobby_team_to_tachyon(val)
-      end
-    else
-      %{}
+      {p_id, player_updates}, m ->
+        val =
+          get_tachyon_teams(player_updates)
+          |> Map.put(:id, to_string(p_id))
+
+        Map.put(m, to_string(p_id), val)
+    end)
+  end
+
+  defp spectator_updates_to_tachyon(nil), do: nil
+
+  defp spectator_updates_to_tachyon(updates) do
+    Enum.reduce(updates, %{}, fn
+      {s_id, nil}, m ->
+        Map.put(m, to_string(s_id), nil)
+
+      {s_id, spec_updates}, m ->
+        mappings = %{join_queue_position: :joinQueuePosition}
+        val = Map.merge(%{id: to_string(s_id)}, Collections.transform_map(spec_updates, mappings))
+        Map.put(m, to_string(s_id), val)
+    end)
+  end
+
+  defp bot_updates_to_tachyon(nil), do: nil
+
+  defp bot_updates_to_tachyon(updates) do
+    Enum.reduce(updates, %{}, fn
+      {b_id, nil}, m ->
+        Map.put(m, to_string(b_id), nil)
+
+      {b_id, bot_updates}, m ->
+        mappings = %{
+          host_user_id: {:hostUserId, &to_string/1},
+          short_name: :shortName,
+          name: :name,
+          version: :version,
+          options: :options
+        }
+
+        val =
+          get_tachyon_teams(bot_updates)
+          |> Map.put(:id, to_string(b_id))
+          |> Map.merge(Collections.transform_map(bot_updates, mappings))
+
+        Map.put(m, to_string(b_id), val)
+    end)
+  end
+
+  defp ally_team_config_to_tachyon(config) do
+    for {at, i} <- Enum.with_index(config), into: %{} do
+      {to_string(i),
+       %{
+         maxTeams: at.max_teams,
+         # internal representation is the same as tachyon for startbox
+         startBox: at.start_box,
+         teams:
+           for {team, i} <- Enum.with_index(at.teams), into: %{} do
+             {to_string(i), %{maxPlayers: team.max_players}}
+           end
+       }}
     end
-    |> Map.put(:id, p_id)
-  end
-
-  defp spectator_update_to_tachyon(_p_id, nil, _omit_nil?), do: nil
-
-  defp spectator_update_to_tachyon(p_id, updates, omit_nil?) do
-    base = %{id: p_id}
-    key_mapping = [{:join_queue_position, :joinQueuePosition}]
-    to_json_merge_patch(base, updates, key_mapping, omit_nil?)
-  end
-
-  defp bot_update_to_tachyon(_b_id, nil, _omit_nil?), do: nil
-
-  defp bot_update_to_tachyon(b_id, updates, omit_nil?) do
-    base =
-      if is_map_key(updates, :team) do
-        val = updates.team
-
-        cond do
-          val == nil && omit_nil? -> %{}
-          val == nil -> %{allyTeam: nil, team: nil, player: nil}
-          true -> lobby_team_to_tachyon(val)
-        end
-      else
-        %{}
-      end
-      |> Map.put(:id, b_id)
-
-    key_mapping = [
-      {:host_user_id, :hostUserId, &to_string/1},
-      {:short_name, :shortName},
-      {:name, :name},
-      {:version, :version},
-      {:options, :options}
-    ]
-
-    to_json_merge_patch(base, updates, key_mapping, omit_nil?)
   end
 
   # handle partial overview object
   defp lobby_overview_to_tachyon(lobby_id, overview) do
-    key_mapping = [
-      {:name, :name},
-      {:player_count, :playerCount},
-      {:max_player_count, :maxPlayerCount},
-      {:map_name, :mapName},
-      {:engine_version, :engineVersion},
-      {:game_version, :gameVersion},
-      {:current_battle, :currentBattle, &lobby_current_battle_to_tachyon/1}
-    ]
+    mapping_spec = %{
+      name: :name,
+      player_count: :playerCount,
+      max_player_count: :maxPlayerCount,
+      map_name: :mapName,
+      engine_version: :engineVersion,
+      game_version: :gameVersion,
+      current_battle:
+        {:currentBattle, %{started_at: {:startedAt, &DateTime.to_unix(&1, :microsecond)}}}
+    }
 
-    base = %{id: lobby_id, currentBattle: nil}
-    to_json_merge_patch(base, overview, key_mapping, true)
+    base =
+      get_tachyon_teams(overview) |> Map.put(:id, lobby_id) |> Map.put(:currentBattle, nil)
+
+    Map.merge(base, Collections.transform_map(overview, mapping_spec))
   end
 
-  defp lobby_current_battle_to_tachyon(battle) do
-    %{startedAt: DateTime.to_unix(battle.started_at, :microsecond)}
-  end
+  defp get_tachyon_teams(data) do
+    if is_map_key(data, :team) do
+      val = data.team
 
-  defp to_json_merge_patch(initial_map, map_to_transform, key_mapping, omit_nil?) do
-    Enum.reduce(key_mapping, initial_map, fn
-      {k, tachyon_k}, m ->
-        if is_map_key(map_to_transform, k) do
-          val = Map.get(map_to_transform, k)
+      case val do
+        nil ->
+          %{allyTeam: nil, team: nil, player: nil}
 
-          cond do
-            val == nil && omit_nil? -> m
-            val == nil -> Map.put(m, tachyon_k, nil)
-            true -> Map.put(m, tachyon_k, val)
-          end
-        else
-          m
-        end
-
-      {k, tachyon_k, f}, m ->
-        if is_map_key(map_to_transform, k) do
-          val = Map.get(map_to_transform, k)
-
-          cond do
-            val == nil && omit_nil? -> m
-            val == nil -> Map.put(m, tachyon_k, nil)
-            true -> Map.put(m, tachyon_k, f.(val))
-          end
-        else
-          m
-        end
-    end)
+        {x, y, z} ->
+          %{allyTeam: to_string(x), team: to_string(y), player: to_string(z)}
+      end
+    else
+      %{}
+    end
   end
 end
