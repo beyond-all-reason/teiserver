@@ -47,4 +47,13 @@ defmodule Teiserver.Helpers.Collections do
     |> Enum.filter(&(elem(&1, 1) != nil))
     |> Map.new()
   end
+
+  def zip_with_padding(enum1, enum2, padding, acc \\ []) do
+    case {enum1, enum2} do
+      {[], []} -> :lists.reverse(acc)
+      {[], [x | rest]} -> zip_with_padding([], rest, padding, [{padding, x} | acc])
+      {[x | rest], []} -> zip_with_padding(rest, [], padding, [{x, padding} | acc])
+      {[x | rest1], [y | rest2]} -> zip_with_padding(rest1, rest2, padding, [{x, y} | acc])
+    end
+  end
 end

@@ -1141,16 +1141,23 @@ defmodule Teiserver.Player.TachyonHandler do
 
   defp ally_team_config_to_tachyon(config) do
     for {at, i} <- Enum.with_index(config), into: %{} do
-      {to_string(i),
-       %{
-         maxTeams: at.max_teams,
-         # internal representation is the same as tachyon for startbox
-         startBox: at.start_box,
-         teams:
-           for {team, i} <- Enum.with_index(at.teams), into: %{} do
-             {to_string(i), %{maxPlayers: team.max_players}}
-           end
-       }}
+      val =
+        if at == nil do
+          nil
+        else
+          %{
+            maxTeams: at.max_teams,
+            # internal representation is the same as tachyon for startbox
+            startBox: at.start_box,
+            teams:
+              for {team, i} <- Enum.with_index(at.teams), into: %{} do
+                val = if team == nil, do: nil, else: %{maxPlayers: team.max_players}
+                {to_string(i), val}
+              end
+          }
+        end
+
+      {to_string(i), val}
     end
   end
 

@@ -175,7 +175,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:move_player_to_spec, T.userid(), spec_data :: map()}
            | {:update_lobby_name, new_name :: String.t()}
            | {:update_map_name, new_name :: String.t()}
-           | {:update_ally_team_config, new_config :: ally_team_config()}
+           | {:update_ally_team_config, old_config :: ally_team_config(),
+              new_config :: ally_team_config()}
 
   @spec gen_id() :: id()
   def gen_id(), do: UUID.uuid4()
@@ -633,7 +634,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       # swap the player with the first in the join queue
       is_map_key(state.players, user_id) ->
-        # TODO: swap the player with the first in the join queue + corresponding updates
         s_id = get_first_player_in_join_queue(state.spectators)
         player = state.players[user_id]
         pos = find_spec_queue_pos(state.spectators)
@@ -863,7 +863,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp new_state_from_event({:update_map_name, new_name}, state),
     do: Map.replace!(state, :map_name, new_name)
 
-  defp new_state_from_event({:update_ally_team_config, new_config}, state),
+  defp new_state_from_event({:update_ally_team_config, _, new_config}, state),
     do: Map.replace!(state, :ally_team_config, new_config)
 
   # avoid sending a useless lobby list update when the last member of the lobby
@@ -924,8 +924,25 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp update_change_from_event({:update_map_name, new_name}, change_map),
     do: Map.put(change_map, :map_name, new_name)
 
-  defp update_change_from_event({:update_ally_team_config, new_config}, change_map),
-    do: Map.put(change_map, :ally_team_config, new_config)
+  defp update_change_from_event({:update_ally_team_config, old_config, new_config}, change_map) do
+    changes =
+      Teiserver.Helpers.Collections.zip_with_padding(old_config, new_config, nil)
+      |> Enum.map(fn
+        {_old_at, nil} ->
+          nil
+
+        {nil, new_at} ->
+          new_at
+
+        {old_at, new_at} ->
+          Map.update!(new_at, :teams, fn new_teams ->
+            Teiserver.Helpers.Collections.zip_with_padding(old_at.teams, new_teams, nil)
+            |> Enum.map(fn {_old_team, new_team} -> new_team end)
+          end)
+      end)
+
+    Map.put(change_map, :ally_team_config, changes)
+  end
 
   defp broadcast_list_updates(_events, _starting_state, final_state)
        when map_size(final_state.players) == 0 and map_size(final_state.spectators) == 0,
@@ -941,7 +958,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           {:update_map_name, new_name} ->
             Map.put(change_map, :map_name, new_name)
 
-          {:update_ally_team_config, new_config} ->
+          {:update_ally_team_config, _, new_config} ->
             change_map
             |> Map.put(
               :max_player_count,
@@ -1325,7 +1342,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> Enum.map(fn {p_id, pos} -> {:move_player_to_spec, p_id, %{join_queue_position: pos}} end)
 
     bot_events = Enum.map(bot_ids, fn b_id -> {:remove_player_from_lobby, b_id} end)
-    remove_events = [{:update_ally_team_config, new_config} | spec_events ++ bot_events]
+
+    remove_events = [
+      {:update_ally_team_config, state.ally_team_config, new_config} | spec_events ++ bot_events
+    ]
 
     state = new_state_from_events(remove_events, state)
 
