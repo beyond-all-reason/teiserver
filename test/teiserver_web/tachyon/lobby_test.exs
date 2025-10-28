@@ -231,7 +231,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "can add bot", %{client: client, user: user} do
       %{"status" => "success", "data" => %{"id" => bot_id}} =
-        Tachyon.lobby_add_bot!(client, "001", "short name", version: "botv0")
+        Tachyon.lobby_add_bot!(client, "1", "short name", version: "botv0")
 
       %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
 
@@ -248,9 +248,9 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
                "version" => "botv0",
                "name" => nil,
                "options" => %{},
-               "allyTeam" => "001",
-               "team" => "000",
-               "player" => "000"
+               "allyTeam" => "1",
+               "team" => "0",
+               "player" => "0"
              }
     end
 
@@ -349,6 +349,44 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "update" do
+    setup [:setup_lobby]
+
+    test "must be in lobby" do
+      {:ok, ctx} = Tachyon.setup_client()
+
+      %{"status" => "failed", "reason" => "invalid_request"} =
+        Tachyon.lobby_update!(ctx[:client], %{name: "new name"})
+    end
+
+    test "all attributes works", %{client: client, lobby_id: lobby_id} do
+      update_data = %{
+        name: "new name",
+        mapName: "new map name",
+        allyTeamConfig: Tachyon.mk_ally_team_config(1, 1)
+      }
+
+      %{"status" => "success"} = Tachyon.lobby_update!(client, update_data)
+
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+
+      expected = %{
+        "allyTeamConfig" => %{
+          "0" => %{
+            "maxTeams" => 1,
+            "startBox" => %{"bottom" => 1, "left" => 0, "right" => 1, "top" => 0},
+            "teams" => %{"0" => %{"maxPlayers" => 1}}
+          }
+        },
+        "id" => lobby_id,
+        "mapName" => "new map name",
+        "name" => "new name"
+      }
+
+      assert data == expected
+    end
+  end
+
   describe "listing" do
     setup [
       {Tachyon, :setup_app},
@@ -381,8 +419,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       {:ok, ctx3} = Tachyon.setup_client()
       %{"status" => "success", "data" => data} = Tachyon.join_lobby!(ctx3[:client], lobby_id)
-      assert is_map_key(data["allyTeamConfig"], "000")
-      %{"status" => "success"} = Tachyon.join_ally_team!(ctx3[:client], "000")
+      assert is_map_key(data["allyTeamConfig"], "0")
+      %{"status" => "success"} = Tachyon.join_ally_team!(ctx3[:client], "0")
       %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx3[:client])
 
       %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => lobbies}} =

@@ -482,6 +482,12 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, :update_bot, data})
   end
 
+  @spec lobby_update_properties(T.userid(), TachyonLobby.lobby_update_data()) ::
+          :ok | {:error, :invalid_lobby | term()}
+  def lobby_update_properties(user_id, data) do
+    GenServer.call(via_tuple(user_id), {:lobby, :update_properties, data})
+  end
+
   @spec lobby_start_battle(T.userid()) :: :ok | {:error, reason :: term}
   def lobby_start_battle(user_id) do
     GenServer.call(via_tuple(user_id), {:lobby, :start_battle})
@@ -975,6 +981,13 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:lobby, :update_bot, data}, _from, state) do
     {:reply, TachyonLobby.update_bot(state.lobby.id, data), state}
+  end
+
+  def handle_call({:lobby, :update_properties, _data}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :update_properties, data}, _from, state) do
+    {:reply, TachyonLobby.update_properties(state.lobby.id, state.user.id, data), state}
   end
 
   def handle_call({:lobby, :leave}, _from, state) when is_nil(state.lobby),

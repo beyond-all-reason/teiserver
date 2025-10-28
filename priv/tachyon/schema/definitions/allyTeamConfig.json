@@ -1,0 +1,25 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/allyTeamConfig.json",
+    "title": "AllyTeamConfig",
+    "description": "each object describes an ally team",
+    "type": "array",
+    "items": {
+        "description": "config for this ally team",
+        "type": "object",
+        "properties": {
+            "maxTeams": { "type": "integer", "minimum": 1 },
+            "startBox": { "$ref": "../definitions/startBox.json" },
+            "teams": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "maxPlayers": { "type": "integer", "minimum": 1 }
+                    },
+                    "required": ["maxPlayers"]
+                }
+            }
+        },
+        "required": ["maxTeams", "startBox", "teams"]
+    }
+}

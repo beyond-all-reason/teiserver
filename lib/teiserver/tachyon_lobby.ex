@@ -88,6 +88,11 @@ defmodule Teiserver.TachyonLobby do
   @spec update_bot(id(), bot_update_data()) :: :ok | {:error, reason :: :invalid_bot_id | term()}
   defdelegate update_bot(lobby_id, update_data), to: Lobby
 
+  @type lobby_update_data :: Lobby.lobby_update_data()
+  @spec update_properties(id(), T.userid(), lobby_update_data()) ::
+          :ok | {:error, :invalid_lobby | term()}
+  defdelegate update_properties(lobby_id, user_id, update_data), to: Lobby
+
   @spec join_queue(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   defdelegate join_queue(lobby_id, user_id), to: Lobby
 
