@@ -59,6 +59,13 @@
             Filter by reporter
           </a>
 
+          <%= if not is_nil(@report_group_id) do %>
+            {link(raw("<i class='fa-solid fa-fw fa-folder-open'></i> Report Group"),
+              to: ~p"/moderation/overwatch/report_group/#{@report_group_id}",
+              class: "btn btn-outline-#{bsname}"
+            )}
+          <% end %>
+
           <a
             class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
             href={~p"/moderation/report/user/#{@report.target_id}"}

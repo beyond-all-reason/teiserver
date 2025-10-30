@@ -16,9 +16,6 @@ defmodule Teiserver.Moderation.Action do
 
     field :discord_message_id, :integer
 
-    # No longer set nowadays
-    belongs_to :report_group, Teiserver.Moderation.ReportGroup
-
     timestamps()
   end
 
@@ -32,7 +29,7 @@ defmodule Teiserver.Moderation.Action do
     struct
     |> cast(
       params,
-      ~w(target_id report_group_id reason restrictions score_modifier expires notes hidden discord_message_id appeal_status)a
+      ~w(target_id reason restrictions score_modifier expires notes hidden discord_message_id appeal_status)a
     )
     |> validate_required(~w(target_id reason restrictions expires score_modifier)a)
     |> adjust_restrictions
