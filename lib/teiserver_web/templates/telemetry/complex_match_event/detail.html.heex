@@ -90,7 +90,21 @@
                           <Fontawesome.icon icon={:show} style="solid" /> Show
                         </.link>
                       <% else %>
-                        {value}
+                        <%= if is_list(value) and Enum.all?(value, &is_map/1) do %>
+                          <ul>
+                            <%= for map <- value do %>
+                              <li>
+                                <ul>
+                                  <%= for {k, v} <- map do %>
+                                    <li>{k}: {v}</li>
+                                  <% end %>
+                                </ul>
+                              </li>
+                            <% end %>
+                          </ul>
+                        <% else %>
+                          {value}
+                        <% end %>
                       <% end %>
                     </td>
                   <% end %>
