@@ -17,7 +17,10 @@
         <%= form_for @changeset, ~p"/teiserver/account/security/totp/update", fn f -> %>
           <div class="bg-gray-800 p-6 mb-4 d-flex align-items-center" style="gap: 20px;">
             <div>
-              {raw(@qr_svg)}
+              <img
+                src={@qr_img_src}
+                alt="QR code you can scan to register this with the multi factor authentication application of your choice"
+              />
             </div>
 
             <div class="text-white" style="max-width: 400px;">
