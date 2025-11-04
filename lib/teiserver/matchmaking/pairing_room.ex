@@ -129,7 +129,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   defp start_battle(state, host_id, engine, game, map) do
     start_script = start_script(state, engine, game, map)
 
-    case Teiserver.TachyonBattle.start_battle(host_id, start_script) do
+    case Teiserver.TachyonBattle.start_battle(host_id, start_script, true) do
       {:error, reason} ->
         QueueServer.disband_pairing(state.queue_id, self())
 

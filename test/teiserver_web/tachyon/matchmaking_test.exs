@@ -724,7 +724,53 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         assert info["status"] == "playing"
       end
 
+      battle = Teiserver.TachyonBattle.lookup(battle_id)
+      match_id = GenServer.call(battle, :get_match_id)
+      match = Teiserver.Battle.get_match!(match_id)
+      memberships = Teiserver.Battle.get_match_memberships(match_id)
+
+      assert match.map == spring_name
+      assert match.game_version in (game_versions() |> Enum.map(fn game -> game.spring_game end))
+
+      assert match.engine_version in (engine_versions()
+                                      |> Enum.map(fn engine -> engine.version end))
+
+      assert match.started
+      refute match.finished
+      assert match.game_type == "Duel"
+      assert length(memberships) == 2
+
+      for member <- memberships do
+        assert member.user_id in (user_ids |> Enum.map(fn id -> String.to_integer(id) end))
+        assert member.team_id in [0, 1]
+        refute member.win
+      end
+
+      winning_team_id = 0
+
+      for user_id <- user_ids do
+        Tachyon.autohost_send_update_event(
+          autohost_client,
+          Tachyon.autohost_finished(battle_id, user_id, [winning_team_id])
+        )
+      end
+
+      assert Polling.poll_until_some(fn -> Teiserver.Battle.get_match!(match_id).finished end)
+      memberships = Teiserver.Battle.get_match_memberships(match_id)
+
+      for member <- memberships do
+        if member.team_id == winning_team_id do
+          assert member.win
+        else
+          refute member.win
+        end
+      end
+
       Tachyon.autohost_send_update_event(autohost_client, Tachyon.autohost_engine_quit(battle_id))
+
+      assert Polling.poll_until_true(fn ->
+               Teiserver.Game.count_rating_logs(search: [match_id: match_id]) == 2
+             end)
 
       for usr <- clients do
         %{"commandId" => "user/updated", "data" => %{"users" => [%{"status" => "menu"}]}} =

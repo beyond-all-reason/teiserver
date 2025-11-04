@@ -44,6 +44,11 @@ defmodule Teiserver.Battle.MatchMembershipLib do
       where: match_memberships.match_id == ^match_id
   end
 
+  def _search(query, :team_id, team_id) do
+    from match_memberships in query,
+      where: match_memberships.team_id == ^team_id
+  end
+
   @spec preload(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 

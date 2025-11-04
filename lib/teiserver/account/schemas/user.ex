@@ -11,7 +11,7 @@ defmodule Teiserver.Account.User do
   schema "account_users" do
     field :name, :string
     field :email, :string
-    field :password, :string
+    field :password, :string, redact: true
 
     field :icon, :string
     field :colour, :string

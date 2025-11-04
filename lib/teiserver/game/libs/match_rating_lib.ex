@@ -82,7 +82,7 @@ defmodule Teiserver.Game.MatchRatingLib do
           Config.get_site_config_cache("matchmaking.Time to treat game as ranked") ->
         {:error, :too_short}
 
-      Map.get(match.tags, "game/modoptions/ranked_game", "1") == "0" ->
+      Map.get(match.tags || %{}, "game/modoptions/ranked_game", "1") == "0" ->
         {:error, :unranked_tag}
 
       # If rerate? is set to true we skip the next few checks

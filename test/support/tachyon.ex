@@ -478,6 +478,13 @@ defmodule Teiserver.Support.Tachyon do
     :ok = send_event(client, "autohost/update", data)
   end
 
+  def autohost_finished(battle_id, user_id, winning_ally_teams),
+    do: %{
+      battleId: battle_id,
+      time: DateTime.utc_now() |> DateTime.to_unix(:microsecond),
+      update: %{type: :finished, userId: user_id, winningAllyTeams: winning_ally_teams}
+    }
+
   def autohost_engine_quit(battle_id),
     do: %{
       battleId: battle_id,

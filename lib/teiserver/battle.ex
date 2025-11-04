@@ -196,6 +196,25 @@ defmodule Teiserver.Battle do
   end
 
   @doc """
+  Creates a Tachyon match.
+
+  ## Examples
+
+      iex> create_tachyon_match(%{field: value})
+      {:ok, %Match{}}
+
+      iex> create_tachyon_match(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_tachyon_match(map()) :: {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
+  def create_tachyon_match(attrs \\ %{}) do
+    %Match{}
+    |> Match.create_tachyon_match(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
   Creates a match based on starting a lobby.
 
   ## Examples
@@ -231,6 +250,25 @@ defmodule Teiserver.Battle do
   def update_match(%Match{} = match, attrs) do
     match
     |> Match.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Updates a Tachyon match.
+
+  ## Examples
+
+      iex> update_tachyon_match(match, %{field: new_value})
+      {:ok, %Match{}}
+
+      iex> update_tachyon_match(match, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_tachyon_match(Match.t(), map()) :: {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
+  def update_tachyon_match(%Match{} = match, attrs) do
+    match
+    |> Match.update_tachyon_match(attrs)
     |> Repo.update()
   end
 
@@ -363,6 +401,112 @@ defmodule Teiserver.Battle do
     Coordinator.cast_consul(lobby_id, :match_start)
     :ok
   end
+
+  @spec create_match_from_start_script(Teiserver.TachyonBattle.start_script(), boolean()) ::
+          {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
+  def create_match_from_start_script(start_script, is_matchmaking) do
+    ally_teams = start_script.allyTeams
+
+    team_count = ally_teams |> Enum.count()
+
+    team_size =
+      ally_teams
+      |> Enum.map(&Enum.count(&1.teams))
+      |> Enum.max()
+
+    game_type = MatchLib.game_type(team_size, team_count)
+
+    match_params = %{
+      map: start_script.mapName,
+      engine_version: start_script.engineVersion,
+      game_version: start_script.gameName,
+      team_count: team_count,
+      team_size: team_size,
+      game_type: game_type,
+      passworded: false,
+      matchmaking: is_matchmaking,
+      bots: Map.new(),
+      tags: Map.new(),
+      started: DateTime.utc_now()
+    }
+
+    case create_tachyon_match(match_params) do
+      {:ok, match} ->
+        Repo.transaction(fn ->
+          for {ally_team, index} <- Enum.with_index(ally_teams),
+              team <- ally_team.teams,
+              player <- team.players do
+            %{
+              match_id: match.id,
+              team_id: index,
+              user_id: String.to_integer(player.userId)
+            }
+            |> create_match_membership()
+          end
+        end)
+
+        Telemetry.increment(:matches_started)
+
+        {:ok, match}
+
+      error ->
+        Logger.error("Error creating tachyon matchmaking match: #{Kernel.inspect(error)}")
+        error
+    end
+  end
+
+  def start_tachyon_match(match_id, time) do
+    match = get_match!(match_id)
+
+    update_tachyon_match(match, %{started: time})
+  end
+
+  # Called once per player to report who won
+  def end_tachyon_match(match_id, time, _user_id, winning_ally_teams \\ []) do
+    match = get_match!(match_id)
+
+    already_finished? = match.finished != nil
+    winning_ally_team = List.first(winning_ally_teams)
+
+    # TODO Currently trusting the first received event, should be reworked to accept what the majority agrees on
+    if winning_ally_teams != match.winning_team do
+      Logger.warning("Match #{match_id} winning team conflict!")
+    end
+
+    cond do
+      not already_finished? and winning_ally_team != nil ->
+        Repo.transaction(fn ->
+          list_match_memberships(search: [match_id: match.id, team_id: winning_ally_team])
+          |> Enum.each(fn membership ->
+            update_match_membership(membership, %{win: true})
+          end)
+
+          update_tachyon_match(match, %{
+            finished: time,
+            winning_team: winning_ally_team,
+            processed: true
+          })
+        end)
+
+      not already_finished? ->
+        update_tachyon_match(match, %{finished: time, processed: true})
+
+      true ->
+        {:ok, match}
+    end
+  end
+
+  def end_tachyon_match(match_id, time) do
+    match = get_match!(match_id)
+
+    if match.finished == nil do
+      update_tachyon_match(match, %{finished: time, processed: true})
+    else
+      {:ok, match}
+    end
+  end
+
+  defdelegate rate_tachyon_match(match_id), to: Teiserver.Game.MatchRatingLib, as: :rate_match
 
   @spec stop_match(nil | T.lobby_id()) :: :ok
   def stop_match(nil), do: :ok
@@ -540,6 +684,12 @@ defmodule Teiserver.Battle do
   #   |> MatchMembershipLib.search(user_id: user_id, match_id: match_id)
   #   |> Repo.one!()
   # end
+
+  def get_match_memberships(match_id) do
+    MatchMembershipLib.get_match_memberships()
+    |> MatchMembershipLib.search(match_id: match_id)
+    |> Repo.all()
+  end
 
   def get_match_membership(user_id, match_id) do
     MatchMembershipLib.get_match_memberships()

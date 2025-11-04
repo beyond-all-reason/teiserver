@@ -5,6 +5,7 @@ defmodule Teiserver.TachyonBattle.Types do
   """
 
   @type id :: String.t()
+  @type match_id :: non_neg_integer()
 
   # unfortunately typespecs don't support merging maps, so this is a
   # redeclaration of Autohost.start_script(), but without the battle id

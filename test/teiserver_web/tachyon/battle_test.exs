@@ -26,6 +26,7 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
     assert {:ok, pid} =
              TachyonBattle.Battle.start(%{
                battle_id: "whatever",
+               match_id: 123,
                autohost_id: autohost.id,
                autohost_timeout: 1
              })
@@ -42,6 +43,7 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
     assert {:ok, _pid} =
              TachyonBattle.Battle.start(%{
                battle_id: battle_id,
+               match_id: 123,
                autohost_id: autohost.id,
                autohost_timeout: 1
              })
