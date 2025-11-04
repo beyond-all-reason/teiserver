@@ -493,7 +493,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   @spec get_bridge_pid() :: pid
-  defp get_bridge_pid() do
+  def get_bridge_pid() do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
   end
 end

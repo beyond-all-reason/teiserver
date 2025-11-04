@@ -96,8 +96,6 @@ defmodule TeiserverWeb.Admin.UserController do
         []
       end
 
-    IO.inspect(id_list, label: "Users")
-
     users =
       (Account.list_users(
          search: [

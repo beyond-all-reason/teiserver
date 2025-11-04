@@ -5,6 +5,7 @@
     "type": "object",
     "properties": {
         "id": { "type": "string" },
+        "name": { "type": "string" },
         "mapName": { "type": "string" },
         "engineVersion": { "type": "string" },
         "gameVersion": { "type": "string" },
@@ -37,19 +38,77 @@
                 }
             }
         },
-        "members": {
+        "players": {
             "type": "object",
             "patternProperties": {
                 "^(.*)$": {
                     "type": "object",
                     "properties": {
-                        "type": { "const": "player" },
                         "id": { "$ref": "../definitions/userId.json" },
                         "allyTeam": { "type": "string" },
                         "team": { "type": "string" },
                         "player": { "type": "string" }
                     },
-                    "required": ["type", "id", "allyTeam", "team", "player"]
+                    "required": ["id", "allyTeam", "team", "player"]
+                }
+            }
+        },
+        "spectators": {
+            "type": "object",
+            "patternProperties": {
+                "^(.*)$": {
+                    "type": "object",
+                    "properties": {
+                        "id": { "$ref": "../definitions/userId.json" },
+                        "joinQueuePosition": { "type": "number" }
+                    },
+                    "required": ["id"]
+                }
+            }
+        },
+        "bots": {
+            "type": "object",
+            "patternProperties": {
+                "^(.*)$": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "description": "server assigned unique identifier for the bot",
+                            "type": "string"
+                        },
+                        "hostUserId": {
+                            "$ref": "../definitions/userId.json",
+                            "description": "which player will run the bot. It is the same as the player that added the bot."
+                        },
+                        "allyTeam": { "type": "string" },
+                        "team": { "type": "string" },
+                        "player": { "type": "string" },
+                        "name": {
+                            "description": "name to display in the lobby",
+                            "type": "string",
+                            "maxLength": 20
+                        },
+                        "shortName": {
+                            "description": "short name of the bot. Used to uniquely identify which bot to run",
+                            "type": "string",
+                            "maxLength": 20
+                        },
+                        "version": { "type": "string" },
+                        "options": {
+                            "type": "object",
+                            "patternProperties": {
+                                "^(.*)$": { "type": "string" }
+                            }
+                        }
+                    },
+                    "required": [
+                        "id",
+                        "hostUserId",
+                        "allyTeam",
+                        "team",
+                        "player",
+                        "shortName"
+                    ]
                 }
             }
         },
@@ -64,10 +123,13 @@
     },
     "required": [
         "id",
+        "name",
         "mapName",
         "engineVersion",
         "gameVersion",
         "allyTeamConfig",
-        "members"
+        "players",
+        "spectators",
+        "bots"
     ]
 }

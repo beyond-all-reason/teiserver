@@ -6,6 +6,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   @moduletag :tachyon
 
+  @default_user_id "1234"
+
   test "create a lobby" do
     {:ok, pid, details} = Lobby.create(mk_start_params([1, 1]))
     p = poll_until_some(fn -> Lobby.lookup(details.id) end)
@@ -75,44 +77,136 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert {:error, :invalid_lobby} == Lobby.join("nope", mk_player("user-id"), self())
     end
 
-    test "can join lobby" do
+    test "as a spectator" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
 
-      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _, details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
-      assert details.members["other-user-id"].team == {1, 0, 0}
+      assert details.spectators["other-user-id"].join_queue_position == nil
 
       assert_receive {:lobby, ^id,
-                      {:updated, [%{event: :add_player, id: "other-user-id", team: {1, 0, 0}}]}}
+                      {:updated, %{spectators: %{"other-user-id" => %{join_queue_position: nil}}}}}
     end
 
     test "is idempotent" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 1]))
-      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), self())
-      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), self())
-    end
-
-    test "join the most empty team" do
-      # create a lobby 2 vs 15. Players should be put in the largest team
-      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 15]))
-      {:ok, _, details} = Lobby.join(id, mk_player("user2"), self())
-      assert details.members["user2"].team == {1, 0, 0}
-      {:ok, _, details} = Lobby.join(id, mk_player("user3"), self())
-      assert details.members["user3"].team == {1, 1, 0}
-    end
-
-    test "lobby full" do
-      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1]))
-      {:error, :lobby_full} = Lobby.join(id, mk_player("user2"), self())
+      {:ok, _, details} = Lobby.join(id, mk_player("other-user-id"), self())
+      {:ok, _, details2} = Lobby.join(id, mk_player("other-user-id"), self())
+      assert details == details2
     end
 
     test "participants get updated events on join" do
-      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
 
       assert_receive {:lobby, ^id,
-                      {:updated, [%{id: "user2", event: :add_player, team: {1, 0, 0}}]}}
+                      {:updated, %{spectators: %{"user2" => %{join_queue_position: nil}}}}}
+
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+
+      expected_updates = %{spectators: %{"user2" => %{join_queue_position: nil}}}
+
+      assert_receive {:lobby, ^id, {:updated, ^expected_updates}}
+    end
+
+    test "lobby full" do
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+
+      for i <- 1..250 do
+        {:ok, _, _} = Lobby.join(id, mk_player("user#{i}"), sink_pid)
+      end
+
+      # there should be 250 specs and 1 player now, which is the absolute limit
+      {:error, :lobby_full} = Lobby.join(id, mk_player("user251"), sink_pid)
+
+      # user already in the lobby are still fine
+      {:ok, _, _} = Lobby.join(id, mk_player("user10"), sink_pid)
+    end
+  end
+
+  describe "joining an ally team" do
+    test "must be valid lobby" do
+      {:error, :invalid_lobby} = Lobby.join_ally_team("nope", "user", 0)
+    end
+
+    test "must be in lobby" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:error, :not_in_lobby} = Lobby.leave(id, "not here")
+    end
+
+    test "must target valid ally team" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"))
+      {:error, :invalid_ally_team} = Lobby.join_ally_team(id, "user2", 2)
+    end
+
+    test "ally team must have empty space" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"))
+      {:error, :ally_team_full} = Lobby.join_ally_team(id, "user2", 0)
+    end
+
+    test "works" do
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      {:ok, details} = Lobby.join_ally_team(id, "user2", 1)
+      assert %{team: {1, _, _}} = details.players["user2"]
+
+      # is idempotent
+      {:ok, details2} = Lobby.join_ally_team(id, "user2", 1)
+      assert details == details2
+    end
+
+    test "player moving also get updates" do
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      {:ok, _, _details} = Lobby.join(id, mk_player("user2"))
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
+
+      expected = %{players: %{"user2" => %{team: {1, 0, 0}}}, spectators: %{"user2" => nil}}
+
+      assert_receive {:lobby, ^id, {:updated, ^expected}}
+    end
+
+    test "can change ally team" do
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      {:ok, details} = Lobby.join_ally_team(id, "user2", 1)
+      assert %{team: {1, _, _}} = details.players["user2"]
+
+      {:ok, details} = Lobby.join_ally_team(id, "user2", 0)
+      assert %{team: {0, _, _}} = details.players["user2"]
+    end
+
+    test "other players are reshuffled" do
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      assert_receive _
+
+      {:ok, details} = Lobby.join_ally_team(id, "user2", 0)
+
+      expected_update = %{
+        players: %{"user2" => %{team: {0, 1, 0}}},
+        spectators: %{"user2" => nil}
+      }
+
+      assert_receive {:lobby, ^id, {:updated, ^expected_update}}
+
+      assert %{team: {0, _, _}} = details.players["user2"]
+
+      # moving from ally team 0 to 1 should reorder "user2" in the first ally team
+      {:ok, details} = Lobby.join_ally_team(id, @default_user_id, 1)
+      %{@default_user_id => %{team: {1, 0, 0}}, "user2" => %{team: {0, 0, 0}}} = details.players
     end
   end
 
@@ -133,63 +227,533 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user3"), self())
-      {:ok, _pid, details} = Lobby.join(id, mk_player("user4"), self())
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user4"), self())
 
-      # user 2 and 4 should be on the same team
-      assert details.members["user2"].team == {1, 0, 0}
-      assert details.members["user4"].team == {1, 1, 0}
-      :ok = Lobby.leave(id, "user2")
+      {:ok, _details} = Lobby.join_ally_team(id, "user3", 1)
+      {:ok, details} = Lobby.join_ally_team(id, "user4", 1)
+
+      # user 3 and 4 should be on the same team
+      assert details.players["user3"].team == {1, 0, 0}
+      assert details.players["user4"].team == {1, 1, 0}
+      :ok = Lobby.leave(id, "user3")
 
       # join again to get the details
-      {:ok, _pid, details} = Lobby.join(id, mk_player("user2"), self())
-      assert details.members["user4"].team == {1, 0, 0}
-      assert details.members["user2"].team == {1, 1, 0}
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user3"), self())
+      {:ok, details} = Lobby.join_ally_team(id, "user3", 1)
+      assert details.players["user4"].team == {1, 0, 0}
+      assert details.players["user3"].team == {1, 1, 0}
+    end
+
+    test "can leave lobby and rejoin" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      player = mk_player("user2")
+      {:ok, _pid, _details} = Lobby.join(id, player, self())
+      :ok = Lobby.leave(id, "user2")
+      {:ok, _pid, _details} = Lobby.join(id, player, self())
     end
 
     test "leaving lobby send updates to remaining members" do
-      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
-      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
+      assert_received {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.leave(id, "user2")
-      assert_received {:lobby, ^id, {:updated, [%{event: :remove_player, id: "user2"}]}}
+      expected = %{spectators: %{"user2" => nil}}
+      assert_received {:lobby, ^id, {:updated, ^expected}}
     end
 
     test "reshuffling player on leave sends updates" do
-      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user3"), sink_pid)
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user4"), sink_pid)
 
-      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
-      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
-      assert_received {:lobby, ^id, {:updated, [%{event: :add_player}]}}
+      assert_received {:lobby, ^id, {:updated, %{}}}
+      assert_received {:lobby, ^id, {:updated, %{}}}
+      assert_received {:lobby, ^id, {:updated, %{}}}
+
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
+      {:ok, _details} = Lobby.join_ally_team(id, "user3", 1)
+
+      assert_received {:lobby, ^id, {:updated, %{}}}
+      assert_received {:lobby, ^id, {:updated, %{}}}
 
       :ok = Lobby.leave(id, "user2")
-      assert_received {:lobby, ^id, {:updated, events}}
 
-      expected =
-        MapSet.new([
-          %{event: :remove_player, id: "user2"},
-          %{event: :change_player, id: "user4", team: {1, 0, 0}}
-        ])
+      expected = %{players: %{"user2" => nil, "user3" => %{team: {1, 0, 0}}}}
 
-      assert expected == MapSet.new(events)
+      assert_received {:lobby, ^id, {:updated, ^expected}}
     end
 
     test "player pid dying means player is removed from lobby" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      Process.exit(sink_pid, :kill)
+
+      assert_receive {:lobby, ^id, {:updated, %{players: %{"1234" => nil}}}}
+    end
+
+    test "spectator pid dying means is removed from lobby" do
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
-      assert_receive {:lobby, ^id, {:updated, [%{event: :add_player}]}}
+      assert_receive {:lobby, ^id, {:updated, %{}}}
 
       Process.exit(sink_pid, :kill)
-      assert_receive {:lobby, ^id, {:updated, [%{event: :remove_player, id: "user2"}]}}
+
+      assert_receive {:lobby, ^id, {:updated, %{spectators: %{"user2" => nil}}}}
+    end
+
+    test "spec leaving removes monitors" do
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, lobby_pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, %{}}}
+
+      :ok = Lobby.leave(id, "user2")
+      assert_receive {:lobby, ^id, {:updated, %{}}}
+      Process.exit(sink_pid, :kill)
+      refute_receive _, 30
+      assert Process.alive?(lobby_pid)
+    end
+
+    test "player leaving removes monitors" do
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+      {:ok, lobby_pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, %{}}}
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
+      assert_receive {:lobby, ^id, {:updated, %{}}}
+
+      :ok = Lobby.leave(id, "user2")
+      assert_receive {:lobby, ^id, {:updated, %{}}}
+      Process.exit(sink_pid, :kill)
+      refute_receive _, 30
+      assert Process.alive?(lobby_pid)
     end
   end
 
+  describe "spectate" do
+    test "must target valid lobby" do
+      {:error, :invalid_lobby} = Lobby.spectate("nolobby", "user1")
+    end
+
+    test "must be in lobby" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :not_in_lobby} = Lobby.spectate(id, "not in lobby")
+    end
+
+    test "works" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      :ok = Lobby.spectate(id, @default_user_id)
+
+      expected = %{
+        players: %{@default_user_id => nil},
+        spectators: %{@default_user_id => %{join_queue_position: nil}}
+      }
+
+      assert_receive {:lobby, ^id, {:updated, ^expected}}
+    end
+
+    test "is idempotent" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      :ok = Lobby.spectate(id, @default_user_id)
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.spectate(id, @default_user_id)
+      refute_receive _, 30
+    end
+  end
+
+  describe "join queue" do
+    test "with invalid lobby" do
+      {:error, :invalid_lobby} = Lobby.join_queue("not-a-lobby", "user1")
+    end
+
+    test "not in lobby" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :not_in_lobby} = Lobby.join_queue(id, "not in lobby")
+    end
+
+    test "can immediately join when spot available" do
+      %{id: id} = setup_full_lobby()
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{players: %{"2" => %{team: {1, 0, 0}}}} = updates
+    end
+
+    test "doesn't queue if spaces are available" do
+      %{id: id} = setup_full_lobby()
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert is_map_key(details.players, "2")
+      assert %{players: %{"2" => %{team: {1, 0, 0}}}} = updates
+      :ok = Lobby.join_queue(id, "2")
+      refute_receive _, 30
+    end
+
+    test "player can join the back of the queue" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      %{spectators: %{"3" => %{join_queue_position: pos}}} = updates
+
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+
+      # player 2 is at the back of the queue now
+      assert %{spectators: %{"2" => %{join_queue_position: pos2}}} = updates
+      assert pos2 > pos
+      # and player 3 is now playing
+      %{spectators: %{"3" => nil}, players: %{"3" => %{}}} = updates
+    end
+
+    test "join wait queue when full" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      :ok = Lobby.join_queue(id, "4")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{spectators: %{"4" => %{join_queue_position: 2}}} = updates
+    end
+
+    test "can go from join queue to spectator" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      :ok = Lobby.spectate(id, "3")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{spectators: %{"3" => %{join_queue_position: nil}}} = updates
+    end
+
+    test "when in queue calling again does nothing" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      # joining the queue again should not change anything
+      :ok = Lobby.join_queue(id, "3")
+      refute_receive _, 30
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert details.spectators["3"].join_queue_position == 1
+    end
+
+    test "join team when player become spectator" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      :ok = Lobby.spectate(id, "2")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+
+      assert %{spectators: %{"3" => nil}, players: %{"3" => %{team: {1, 0, 0}}}} = updates
+    end
+
+    test "join team when player leaves the lobby" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      :ok = Lobby.leave(id, "2")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+
+      assert %{players: %{"2" => nil, "3" => %{team: {1, 0, 0}}}} = updates
+    end
+
+    test "join team when player disappear" do
+      %{id: id} = ctx = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      Process.unlink(ctx[:users]["2"].pid)
+      Process.exit(ctx[:users]["2"].pid, :kill)
+      assert_receive {:lobby, ^id, {:updated, updates}}
+
+      assert %{players: %{"3" => %{team: {1, 0, 0}}, "2" => nil}} = updates
+    end
+
+    test "spec queue positions works" do
+      %{id: id} = ctx = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{spectators: %{"3" => %{join_queue_position: 1}}} = updates
+
+      :ok = Lobby.join_queue(id, "4")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{spectators: %{"4" => %{join_queue_position: 2}}} = updates
+
+      # make sure that user2 rejoining is put at the back of the queue
+      :ok = Lobby.leave(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      {:ok, _, _} = Lobby.join(id, ctx.users["2"])
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+      assert %{spectators: %{"2" => %{join_queue_position: 3}}} = updates
+    end
+  end
+
+  describe "bots" do
+    test "need valid lobby" do
+      {:error, :invalid_lobby} =
+        Lobby.add_bot("doesn't exist", 0, "random-user-id", "bot short name")
+    end
+
+    test "must be in lobby" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :not_in_lobby} = Lobby.add_bot(id, "random-user-id", 0, "bot short name")
+    end
+
+    test "must specify valid ally team" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :invalid_ally_team} = Lobby.add_bot(id, @default_user_id, 10, "bot short name")
+      {:error, :invalid_ally_team} = Lobby.add_bot(id, @default_user_id, -1, "bot short name")
+    end
+
+    test "must have space in ally team" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:error, :ally_team_full} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
+    end
+
+    test "add_bot works" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+
+      assert_receive {:lobby, ^id, {:updated, update}}
+
+      %{
+        bots: %{
+          ^bot_id => %{
+            team: {1, 0, 0},
+            host_user_id: @default_user_id,
+            short_name: "bot short name"
+          }
+        }
+      } = update
+    end
+
+    test "lobby details has the bots" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+
+      {:ok, bot_id} =
+        Lobby.add_bot(id, @default_user_id, 1, "bot short name",
+          name: "bot name",
+          version: "version",
+          options: %{
+            "option1" => "val1"
+          }
+        )
+
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+
+      refute is_map_key(details.players, bot_id)
+
+      %{
+        host_user_id: @default_user_id,
+        team: {1, 0, 0},
+        short_name: "bot short name",
+        name: "bot name",
+        version: "version",
+        options: %{"option1" => "val1"}
+      } = details.bots[bot_id]
+    end
+
+    test "bots correctly put in teams" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([3, 3]))
+
+      {:ok, bot_id1} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{bots: %{^bot_id1 => %{team: {0, 1, 0}}}} = update
+
+      {:ok, bot_id2} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{bots: %{^bot_id2 => %{team: {0, 2, 0}}}} = update
+    end
+
+    test "bots are taken into account for team capacity" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, _bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      {:error, :ally_team_full} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+    end
+
+    test "creator leaving also removes bots" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
+
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, bot_id1} = Lobby.add_bot(id, "other-user-id", 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, bot_id2} = Lobby.add_bot(id, "other-user-id", 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.leave(id, "other-user-id")
+      assert_receive {:lobby, ^id, {:updated, update}}
+
+      %{
+        bots: %{^bot_id1 => nil, ^bot_id2 => nil},
+        spectators: %{"other-user-id" => nil}
+      } = update
+    end
+
+    test "bot leaving because spec host left allow join queue to get in" do
+      %{id: id} = setup_full_lobby()
+
+      # fill the lobby with bots
+      {:ok, bot_id1} = Lobby.add_bot(id, "2", 0, "bot")
+      {:ok, bot_id2} = Lobby.add_bot(id, "2", 1, "bot")
+      {:ok, bot_id3} = Lobby.add_bot(id, "2", 1, "bot")
+
+      # also fill a bit the join queue
+      :ok = Lobby.join_queue(id, "3")
+      :ok = Lobby.join_queue(id, "4")
+
+      for _ <- 1..5, do: assert_receive({:lobby, ^id, {:updated, _}})
+
+      # player 2 leaving should make all the bots leave and the space should be
+      # taken up by the players in the join queue
+      :ok = Lobby.leave(id, "2")
+
+      assert_receive({:lobby, ^id, {:updated, update}})
+
+      # bots should be gone
+      %{bots: %{^bot_id1 => nil, ^bot_id2 => nil, ^bot_id3 => nil}} = update
+
+      # players in join queue should be in team now
+      assert update.players["3"].team != nil
+      assert update.players["4"].team != nil
+      %{spectators: %{"2" => nil, "3" => nil, "4" => nil}} = update
+    end
+
+    test "correct id required to remove bot" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :invalid_bot_id} = Lobby.remove_bot(id, "lolnope")
+    end
+
+    test "remove_bot works" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.remove_bot(id, bot_id)
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{bots: %{^bot_id => nil}} = update
+    end
+
+    test "removing a bot reshuffle the teams" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, bot_id1} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      {:ok, bot_id2} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.remove_bot(id, bot_id1)
+
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{bots: %{^bot_id1 => nil, ^bot_id2 => %{team: {1, 0, 0}}}} = update
+    end
+
+    test "removing bot allow specs in join queue to get the spot" do
+      # Setup
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "other-user-id")
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{spectators: %{"other-user-id" => %{join_queue_position: 1}}} = update
+
+      # Act
+      :ok = Lobby.remove_bot(id, bot_id)
+
+      # Assert
+      assert_receive {:lobby, ^id, {:updated, update}}
+      # bot is gone
+      %{bots: %{^bot_id => nil}} = update
+      # and player took its place
+      %{spectators: %{"other-user-id" => nil}, players: %{"other-user-id" => %{team: _}}} = update
+    end
+
+    test "player in join queue with bot leaves" do
+      %{id: id} = setup_full_lobby([1, 1])
+      {:ok, bot_id} = Lobby.add_bot(id, "2", 1, "bot")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.leave(id, "2")
+      assert_receive {:lobby, ^id, {:updated, updates}}
+
+      assert %{spectators: %{"2" => nil}, bots: %{bot_id => nil}} == updates
+    end
+
+    test "update needs correct id" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :invalid_bot_id} = Lobby.update_bot(id, %{id: "lolnope"})
+    end
+
+    test "can update some properties" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.update_bot(id, %{id: bot_id, name: "botv2", short_name: "short v2"})
+
+      # we got the events
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{bots: %{^bot_id => %{name: "botv2", short_name: "short v2"}}} = update
+
+      # and the details are also correct
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      %{name: "botv2", short_name: "short v2"} = details.bots[bot_id]
+    end
+  end
+
+  # these tests are a bit anemic because they also require a connected autohost
+  # and it's a lot of setup. There are some end to end tests in the
+  # teiserver_web/tachyon/lobby_test.exs file
+  # though this section could also be expanded
   describe "start battle" do
     test "lobby must be valid" do
       {:error, :invalid_lobby} = Lobby.start_battle("nolobby", "user1")
@@ -197,18 +761,111 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     test "must be in lobby" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
-      {:error, :not_a_player_in_lobby} = Lobby.start_battle(id, "not in lobby")
+      {:error, :not_in_lobby} = Lobby.start_battle(id, "not in lobby")
+    end
+  end
+
+  describe "start script" do
+    test "with 1 player" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{allyTeams: [%{teams: [%{players: [%{userId: @default_user_id}]}]}]} = start_script
     end
 
-    # can't really test the full path when starting a battle without a ws connection
-    # because TachyonBattle.start_battle does a sync call to the autohost and
-    # blocks until it gets the response
-    # see tests in teiserver_web/tachyon_lobby for these bits
+    test "with a spec" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
+
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{spectators: [%{userId: "other-user-id"}]} = start_script
+    end
+
+    test "with 2 players in the same team" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
+      {:ok, _} = Lobby.join_ally_team(id, "other-user-id", 0)
+
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{allyTeams: [%{teams: [t1, t2]}]} = start_script
+      %{players: [%{userId: @default_user_id}]} = t1
+      %{players: [%{userId: "other-user-id"}]} = t2
+    end
+
+    test "1 ally team with a player leaving then joining" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
+      {:ok, _} = Lobby.join_ally_team(id, "other-user-id", 0)
+      :ok = Lobby.spectate(id, @default_user_id)
+      {:ok, _} = Lobby.join_ally_team(id, @default_user_id, 0)
+
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{allyTeams: [%{teams: [t1, t2]}]} = start_script
+      %{players: [%{userId: "other-user-id"}]} = t1
+      %{players: [%{userId: @default_user_id}]} = t2
+    end
+
+    test "2 ally teams" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
+      {:ok, _} = Lobby.join_ally_team(id, "other-user-id", 1)
+
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{allyTeams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
+      %{players: [%{userId: @default_user_id}]} = t1
+      %{players: [%{userId: "other-user-id"}]} = t2
+    end
+
+    test "with a bot" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
+      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      %{allyTeams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
+      %{players: [%{userId: @default_user_id}]} = t1
+      %{bots: [%{hostUserId: @default_user_id, aiShortName: "bot short name"}]} = t2
+      assert not is_map_key(t1, :bots)
+      assert not is_map_key(t2, :players)
+    end
+  end
+
+  # again, this should probably be exatracted in a more general module
+  describe "patch merge" do
+    import Teiserver.TachyonLobby.Lobby, only: [patch_merge: 2]
+
+    test "update a simple (non map) value" do
+      assert patch_merge(%{key: "s1"}, %{key: "s2"}) == %{key: "s2"}
+
+      result = patch_merge(%{"string-key" => "s1"}, %{"string-key" => "s2"})
+      assert result == %{"string-key" => "s2"}
+    end
+
+    test "can add new keys" do
+      result = patch_merge(%{key: "foo"}, %{other: 2})
+      assert result == %{key: "foo", other: 2}
+    end
+
+    test "can delete keys when value is nil" do
+      result = patch_merge(%{foo: "fooval", bar: "barkey"}, %{bar: nil})
+      assert result == %{foo: "fooval"}
+    end
+
+    test "set map as value when new key" do
+      result = patch_merge(%{}, %{foo: %{key: "val"}})
+      assert result == %{foo: %{key: "val"}}
+    end
+
+    test "can recursively update nested maps" do
+      result =
+        patch_merge(%{foo: %{key: "base-key", foo: "bar"}}, %{
+          foo: %{key: 2, foo: nil, bar: "updated"}
+        })
+
+      assert result == %{foo: %{key: 2, bar: "updated"}}
+    end
   end
 
   defp mk_start_params(teams) do
     %{
-      creator_data: %{id: "1234", name: "name-1234"},
+      creator_data: %{id: @default_user_id, name: "name-#{@default_user_id}"},
       creator_pid: self(),
       name: "test create lobby",
       map_name: "irrelevant map name",
@@ -229,5 +886,39 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   defp mk_player(user_id) do
     %{id: user_id, name: "name-#{user_id}"}
+  end
+
+  # create a lobby with a few specs already in. Simplify the logic when
+  # it comes to testing in-lobby interaction
+  defp setup_full_lobby(teams \\ [2, 2]) do
+    {:ok, lobby_pid, %{id: id}} = mk_start_params(teams) |> Lobby.create()
+
+    users =
+      Enum.map([2, 3, 4, 5], fn i ->
+        {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+        player_id = to_string(i)
+        player = mk_player(player_id)
+        {:ok, _, _details} = Lobby.join(id, player, sink_pid)
+        {to_string(i), Map.put(player, :pid, sink_pid)}
+      end)
+      |> Map.new()
+
+    {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+    assert map_size(details.players) == 1
+    assert map_size(details.spectators) == 4
+
+    # after getting the details, it should be guaranteed that all updates are
+    # in the inbox, so no need to wait
+    drain_msg_queue()
+
+    %{lobby_pid: lobby_pid, id: id, users: users, details: details}
+  end
+
+  defp drain_msg_queue(timeout \\ 0, acc \\ []) do
+    receive do
+      msg -> drain_msg_queue(timeout, [msg | acc])
+    after
+      timeout -> Enum.reverse(acc)
+    end
   end
 end

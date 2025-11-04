@@ -57,34 +57,83 @@ defmodule Teiserver.TachyonLobby.ListTest do
     assert ev2.counter > ev.counter
   end
 
-  test "get updates when player joins or leaves lobby" do
-    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
-
-    {:ok, _pid, %{id: id}} =
-      mk_start_params([2, 2])
-      |> Map.replace!(:creator_pid, sink_pid)
-      |> Lobby.create()
+  test "get updates when player joins or leaves teams" do
+    {sink_pid, id, _} = mk_lobby()
 
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
     {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+    {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
     assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
 
     :ok = Lobby.leave(id, "user2")
     assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 1}}
   end
 
-  test "remove update when last player leaves" do
-    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+  test "bots are not counted in player count" do
+    {sink_pid, id, _} = mk_lobby()
 
-    {:ok, _pid, %{id: id}} =
-      mk_start_params([2, 2])
-      |> Map.replace!(:creator_pid, sink_pid)
-      |> Lobby.create()
+    assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
+    {:ok, _bot_id1} = Lobby.add_bot(id, "1234", 1, "bot")
+    {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+    {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
+
+    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
+  end
+
+  test "get updates when player dies" do
+    {sink_pid, id, _} = mk_lobby()
+
+    assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
+    {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+    {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
+    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
+
+    Process.unlink(sink_pid)
+    Process.exit(sink_pid, :exit)
+    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 1}}
+  end
+
+  test "remove update when last player leaves" do
+    {_sink_pid, id, _} = mk_lobby()
 
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
 
     :ok = Lobby.leave(id, "1234")
     assert_receive %{lobby_id: ^id, event: :remove_lobby}
+  end
+
+  test "get update when spec with bot leaves" do
+    {:ok, _lobby_pid, %{id: id}} = mk_start_params([2, 2]) |> Lobby.create()
+
+    _users =
+      Enum.map([2, 3, 4, 5], fn i ->
+        {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+        player_id = to_string(i)
+        player = %{id: player_id, name: "name-#{player_id}"}
+        {:ok, _, _details} = Lobby.join(id, player, sink_pid)
+        {to_string(i), Map.put(player, :pid, sink_pid)}
+      end)
+      |> Map.new()
+
+    for _ <- 2..5, do: assert_receive({:lobby, ^id, {:updated, _}})
+
+    # fill the lobby with bots
+    {:ok, _bot_id1} = Lobby.add_bot(id, "2", 0, "bot")
+    {:ok, _bot_id2} = Lobby.add_bot(id, "2", 1, "bot")
+    {:ok, _bot_id3} = Lobby.add_bot(id, "2", 1, "bot")
+
+    # also fill a bit the join queue
+    :ok = Lobby.join_queue(id, "3")
+    :ok = Lobby.join_queue(id, "4")
+
+    for _ <- 1..5, do: assert_receive({:lobby, ^id, {:updated, _}})
+
+    assert {_initial_counter, %{^id => %{player_count: 1}}} = Lobby.subscribe_updates()
+
+    # player 2 leaving should make all the bots leave and the space should be
+    # taken up by the players in the join queue
+    :ok = Lobby.leave(id, "2")
+    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 3}}
   end
 
   test "restore state on startup" do
@@ -156,5 +205,16 @@ defmodule Teiserver.TachyonLobby.ListTest do
           }
         end)
     }
+  end
+
+  defp mk_lobby() do
+    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+
+    {:ok, pid, %{id: id}} =
+      mk_start_params([2, 2])
+      |> Map.replace!(:creator_pid, sink_pid)
+      |> Lobby.create()
+
+    {sink_pid, id, pid}
   end
 end

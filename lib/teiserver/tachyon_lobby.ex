@@ -57,11 +57,50 @@ defmodule Teiserver.TachyonLobby do
   @type player_join_data :: Lobby.player_join_data()
   @spec join(id(), player_join_data(), pid()) ::
           {:ok, lobby_pid :: pid(), details()} | {:error, reason :: term()}
-  defdelegate join(lobby_id, join_data, pid), to: Lobby
+  defdelegate join(lobby_id, join_data, pid \\ self()), to: Lobby
+
+  @spec spectate(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
+  defdelegate spectate(lobby_id, user_id), to: Lobby
+
+  @type add_bot_opt ::
+          {:name, String.t()} | {:version, String.t()} | {:options, %{String.t() => String.t()}}
+  @type add_bot_opts :: [add_bot_opt]
+  @spec add_bot(
+          id(),
+          T.userid(),
+          ally_team :: non_neg_integer(),
+          short_name :: String.t(),
+          add_bot_opts()
+        ) :: {:ok, bot_id :: String.t()} | {:error, reason :: term()}
+  defdelegate add_bot(
+                lobby_id,
+                user_id,
+                ally_team,
+                short_name,
+                opts \\ []
+              ),
+              to: Lobby
+
+  @spec remove_bot(id(), bot_id :: String.t()) :: :ok | {:error, :invalid_bot_id | term()}
+  defdelegate remove_bot(lobby_id, bot_id), to: Lobby
+
+  @type bot_update_data :: Lobby.bot_update_data()
+  @spec update_bot(id(), bot_update_data()) :: :ok | {:error, reason :: :invalid_bot_id | term()}
+  defdelegate update_bot(lobby_id, update_data), to: Lobby
+
+  @spec join_queue(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
+  defdelegate join_queue(lobby_id, user_id), to: Lobby
 
   @spec leave(id(), T.userid()) :: :ok | {:error, reason :: term()}
   defdelegate leave(lobby_id, user_id), to: Lobby
 
-  @spec start_battle(id(), T.userid()) :: :ok | {:error, reason :: term()}
+  @spec join_ally_team(id(), T.userid(), allyTeam :: non_neg_integer()) ::
+          {:ok, details()}
+          | {:error,
+             reason :: :invalid_lobby | :not_in_lobby | :invalid_ally_team | :ally_team_full}
+  defdelegate join_ally_team(lobby_id, user_id, ally_team), to: Lobby
+
+  @spec start_battle(id(), T.userid()) ::
+          :ok | {:error, reason :: :not_in_lobby | :battle_already_started | term()}
   defdelegate start_battle(lobby_id, user_id), to: Lobby
 end

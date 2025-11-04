@@ -433,19 +433,57 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, {:create, start_params}})
   end
 
-  @spec join_lobby(T.userid(), TachyonLobby.id()) ::
+  @spec lobby_join(T.userid(), TachyonLobby.id()) ::
           {:ok, TachyonLobby.details()} | {:error, reason :: term()}
-  def join_lobby(user_id, lobby_id) do
+  def lobby_join(user_id, lobby_id) do
     GenServer.call(via_tuple(user_id), {:lobby, {:join, lobby_id}})
   end
 
-  @spec leave_lobby(T.userid()) :: :ok | {:error, reason :: term()}
-  def leave_lobby(user_id) do
+  @spec lobby_leave(T.userid()) :: :ok | {:error, reason :: term()}
+  def lobby_leave(user_id) do
     GenServer.call(via_tuple(user_id), {:lobby, :leave})
   end
 
-  @spec start_lobby_battle(T.userid()) :: :ok | {:error, reason :: term}
-  def start_lobby_battle(user_id) do
+  @spec lobby_join_ally_team(T.userid(), ally_team_idx :: non_neg_integer()) ::
+          :ok | {:error, reason :: term()}
+  def lobby_join_ally_team(user_id, ally_team) do
+    GenServer.call(via_tuple(user_id), {:lobby, {:join_ally_team, ally_team}})
+  end
+
+  @spec lobby_spectate(T.userid()) :: :ok | {:error, reason :: term()}
+  def lobby_spectate(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :spectate})
+  end
+
+  @spec lobby_join_queue(T.userid()) :: :ok | {:error, reason :: term()}
+  def lobby_join_queue(user_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :join_queue})
+  end
+
+  @spec lobby_add_bot(
+          T.userid(),
+          ally_team :: non_neg_integer(),
+          short_name :: String.t(),
+          opts :: TachyonLobby.add_bot_opts()
+        ) :: {:ok, bot_id :: String.t()} | {:error, reason :: term()}
+  def lobby_add_bot(user_id, ally_team, short_name, opts \\ []) do
+    GenServer.call(via_tuple(user_id), {:lobby, :add_bot, ally_team, short_name, opts})
+  end
+
+  @spec lobby_remove_bot(T.userid(), bot_id :: String.t()) ::
+          :ok | {:error, :invalid_bot_id | term()}
+  def lobby_remove_bot(user_id, bot_id) do
+    GenServer.call(via_tuple(user_id), {:lobby, :remove_bot, bot_id})
+  end
+
+  @spec lobby_update_bot(T.userid(), TachyonLobby.bot_update_data()) ::
+          :ok | {:error, :invalid_bot_id | term()}
+  def lobby_update_bot(user_id, data) do
+    GenServer.call(via_tuple(user_id), {:lobby, :update_bot, data})
+  end
+
+  @spec lobby_start_battle(T.userid()) :: :ok | {:error, reason :: term}
+  def lobby_start_battle(user_id) do
     GenServer.call(via_tuple(user_id), {:lobby, :start_battle})
   end
 
@@ -630,8 +668,8 @@ defmodule Teiserver.Player.Session do
 
       {:reply, {:error, {:invalid_ids, diff}}, state}
     else
-      Enum.each(users, &do_subscribe_updates/1)
       new_state = Map.update!(state, :user_subscriptions, &MapSet.union(&1, MapSet.new(user_ids)))
+      Enum.each(users, &do_subscribe_updates(state.user_subscriptions, &1))
       {:reply, :ok, new_state}
     end
   end
@@ -890,6 +928,55 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_call({:lobby, {:join_ally_team, _}}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, {:join_ally_team, ally_team}}, _from, state) do
+    resp =
+      case TachyonLobby.join_ally_team(state.lobby.id, state.user.id, ally_team) do
+        {:ok, _details} -> :ok
+        x -> x
+      end
+
+    {:reply, resp, state}
+  end
+
+  def handle_call({:lobby, :spectate}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :spectate}, _from, state) do
+    {:reply, TachyonLobby.spectate(state.lobby.id, state.user.id), state}
+  end
+
+  def handle_call({:lobby, :join_queue}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :join_queue}, _from, state) do
+    {:reply, TachyonLobby.join_queue(state.lobby.id, state.user.id), state}
+  end
+
+  def handle_call({:lobby, :add_bot, _, _, _}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :add_bot, ally_team, short_name, opts}, _from, state) do
+    {:reply, TachyonLobby.add_bot(state.lobby.id, state.user.id, ally_team, short_name, opts),
+     state}
+  end
+
+  def handle_call({:lobby, :remove_bot, _}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :remove_bot, bot_id}, _from, state) do
+    {:reply, TachyonLobby.remove_bot(state.lobby.id, bot_id), state}
+  end
+
+  def handle_call({:lobby, :update_bot, _data}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :update_bot, data}, _from, state) do
+    {:reply, TachyonLobby.update_bot(state.lobby.id, data), state}
+  end
+
   def handle_call({:lobby, :leave}, _from, state) when is_nil(state.lobby),
     do: {:reply, {:error, :not_in_lobby}, state}
 
@@ -928,8 +1015,13 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_call({:lobby, :subscribe_list}, _from, state) do
-    {counter, list} = TachyonLobby.subscribe_updates()
-    {:reply, {:ok, list}, %{state | lobby_list_subscription: %{counter: counter}}}
+    if state.lobby_list_subscription == nil do
+      {counter, list} = TachyonLobby.subscribe_updates()
+      {:reply, {:ok, list}, %{state | lobby_list_subscription: %{counter: counter}}}
+    else
+      list = TachyonLobby.list()
+      {:reply, {:ok, list}, state}
+    end
   end
 
   def handle_call({:lobby, :unsubscribe_list}, _from, state) do
@@ -1548,9 +1640,13 @@ defmodule Teiserver.Player.Session do
     :ok
   end
 
-  defp do_subscribe_updates(user) do
-    topic = user_topic(user.id)
-    :ok = PubSub.subscribe(Teiserver.PubSub, topic)
+  defp do_subscribe_updates(subs, user) do
+    # PubSub.subscribe isn't idempotent, duplicate subscription result
+    # in duplicate messages being delivered
+    if !MapSet.member?(subs, user.id) do
+      topic = user_topic(user.id)
+      :ok = PubSub.subscribe(Teiserver.PubSub, topic)
+    end
 
     case Player.SessionRegistry.lookup(user.id) do
       # player is offline, simulate the broadcast ourselves
