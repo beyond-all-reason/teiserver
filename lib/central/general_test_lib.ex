@@ -83,7 +83,7 @@ defmodule Central.Helpers.GeneralTestLib do
 
   def login_opt(conn, user, otp) do
     conn
-    |> post("/otp/verify", %{"user_id" => user.id, "otp" => otp})
+    |> post("/otp", %{"user_id" => user.id, "otp" => otp})
   end
 
   def data_setup(flags \\ []) do

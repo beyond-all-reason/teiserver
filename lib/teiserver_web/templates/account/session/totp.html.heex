@@ -12,7 +12,7 @@
         </h3>
       </div>
       <div class="card-body">
-        <form action={~p"/otp/verify"} method="post">
+        <form action={~p"/otp"} method="post">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
           <input type="hidden" name="user_id" value={@user.id} />
           <input type="password" style="display:none" />

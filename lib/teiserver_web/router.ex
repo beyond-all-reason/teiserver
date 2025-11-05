@@ -136,7 +136,7 @@ defmodule TeiserverWeb.Router do
     get("/login", SessionController, :new)
     post("/login", SessionController, :login)
     get("/otp", SessionController, :otp)
-    post("/otp/verify", SessionController, :verify_totp)
+    post("/otp", SessionController, :verify_totp)
     get("/logout", SessionController, :logout)
     post("/logout", SessionController, :logout)
 
