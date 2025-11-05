@@ -750,6 +750,163 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "updates" do
+    test "need valid lobby" do
+      assert {:error, :invalid_lobby} ==
+               Lobby.update_properties("lolnope", @default_user_id, %{name: "nope"})
+    end
+
+    test "only supported properties" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+
+      {:error, _} =
+        Lobby.update_properties(id, @default_user_id, %{definitely_not_supported: "nope"})
+    end
+
+    test "name work" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      :ok = Lobby.update_properties(id, @default_user_id, %{name: "new name"})
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert details.name == "new name"
+      assert_receive {:lobby, ^id, {:updated, %{name: "new name"}}}
+    end
+
+    test "map name" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert details.map_name == "new map"
+      assert_receive {:lobby, ^id, {:updated, %{map_name: "new map"}}}
+    end
+  end
+
+  describe "update ally team" do
+    test "work" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      new_ally_team_config = mk_start_params([1, 1]).ally_team_config
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{ally_team_config: new_ally_team_config})
+
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert details.ally_team_config == new_ally_team_config
+      assert_receive {:lobby, ^id, {:updated, %{ally_team_config: ^new_ally_team_config}}}
+    end
+
+    test "put join queue in newly created spots" do
+      %{id: id} = setup_full_lobby([1])
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, %{spectators: %{"2" => %{join_queue_position: _}}}}}
+
+      new_ally_team_config = mk_start_params([1, 1]).ally_team_config
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{ally_team_config: new_ally_team_config})
+
+      assert_receive {:lobby, ^id, {:updated, %{players: %{"2" => %{team: {1, 0, 0}}}}}}
+    end
+
+    test "put extra players in join queue" do
+      %{id: id} = setup_full_lobby([1, 1])
+      {:ok, _} = Lobby.join_ally_team(id, "2", 1)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      new_ally_team_config = mk_start_params([1]).ally_team_config
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{ally_team_config: new_ally_team_config})
+
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{players: %{"2" => nil}, spectators: %{"2" => %{join_queue_position: pos}}} = update
+      refute is_nil(pos), "player kicked out of team is in the join queue"
+    end
+
+    test "extra players and bots" do
+      %{id: id} = setup_full_lobby([1, 3])
+      {:ok, _bot1} = Lobby.add_bot(id, "2", 1, "bot 1")
+      {:ok, bot2} = Lobby.add_bot(id, "2", 1, "bot 2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, _} = Lobby.join_ally_team(id, "2", 1)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      new_ally_team_config = mk_start_params([1, 1]).ally_team_config
+      :ok = Lobby.update_properties(id, "2", %{ally_team_config: new_ally_team_config})
+
+      # check that the bot is removed from the lobby, but the player is put in the join queue
+      assert_receive {:lobby, ^id, {:updated, update}}
+
+      %{
+        bots: %{^bot2 => nil},
+        players: %{"2" => nil},
+        spectators: %{"2" => %{join_queue_position: _}}
+      } =
+        update
+
+      refute is_map_key(update.spectators, bot2)
+    end
+
+    test "can change player's teams when there is space" do
+      %{id: id} = setup_full_lobby([1, 1])
+      {:ok, _} = Lobby.join_ally_team(id, "2", 1)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      new_ally_team_config = mk_start_params([2]).ally_team_config
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{ally_team_config: new_ally_team_config})
+
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{players: %{"2" => %{team: {0, 1, 0}}}} = update
+      refute is_map_key(update, :spectators), "no spec was moved #{inspect(update)}"
+    end
+
+    test "with moved and excess players" do
+      %{id: id} = setup_full_lobby([2, 2])
+      {:ok, _} = Lobby.join_ally_team(id, "2", 1)
+      assert_receive {:lobby, ^id, {:updated, _}}
+      {:ok, _} = Lobby.join_ally_team(id, "3", 1)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      new_ally_team_config = mk_start_params([2]).ally_team_config
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{ally_team_config: new_ally_team_config})
+
+      expected_update = %{
+        players: %{"2" => %{team: {0, 1, 0}}, "3" => nil},
+        spectators: %{"3" => %{join_queue_position: 1}},
+        ally_team_config: new_ally_team_config
+      }
+
+      assert_receive {:lobby, ^id, {:updated, ^expected_update}}
+    end
+
+    test "ejected players go at the beginning of the join queue" do
+      %{id: id} = setup_full_lobby([1, 1])
+      {:ok, _} = Lobby.join_ally_team(id, "2", 1)
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.join_queue(id, "3")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      new_ally_team_config = mk_start_params([1]).ally_team_config
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{ally_team_config: new_ally_team_config})
+
+      assert_receive {:lobby, ^id, {:updated, update}}
+
+      %{
+        players: %{"2" => nil},
+        spectators: %{"2" => %{join_queue_position: pos}},
+        ally_team_config: ^new_ally_team_config
+      } = update
+
+      refute is_nil(pos), "player is now in join queue"
+    end
+  end
+
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the
   # teiserver_web/tachyon/lobby_test.exs file

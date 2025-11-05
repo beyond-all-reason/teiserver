@@ -618,6 +618,8 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/create", "request", _msg_id, msg, state) do
+    # TODO: the `lobby/update` has very similar logic. There should be a way
+    # to combine the parsing
     create_data = %{
       name: msg["data"]["name"],
       map_name: msg["data"]["mapName"],
@@ -773,6 +775,24 @@ defmodule Teiserver.Player.TachyonHandler do
 
       {:error, reason} when reason in [:not_in_lobby, :invalid_bot] ->
         {:error_response, reason, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/update", "request", _msg_id, %{"data" => data}, state) do
+    keys = [
+      {"name", :name},
+      {"mapName", :map_name},
+      {"allyTeamConfig", :ally_team_config, &ally_team_config_from_tachyon/1}
+    ]
+
+    update_data = Enum.reduce(keys, %{}, &convert_key(&1, data, &2))
+
+    case Player.Session.lobby_update_properties(state.user.id, update_data) do
+      :ok ->
+        {:response, state}
 
       {:error, reason} ->
         {:error_response, :invalid_request, to_string(reason), state}
@@ -990,11 +1010,49 @@ defmodule Teiserver.Player.TachyonHandler do
     |> Enum.reject(&is_nil/1)
   end
 
+  defp ally_team_config_from_tachyon(data) do
+    keys = [
+      {"maxTeams", :max_teams},
+      {"startBox", :start_box, &start_box_from_tachyon/1},
+      {"teams", :teams, &teams_from_tachyon/1}
+    ]
+
+    Enum.map(data, fn d -> Enum.reduce(keys, %{}, &convert_key(&1, d, &2)) end)
+  end
+
+  defp start_box_from_tachyon(data) do
+    keys = [{"top", :top}, {"bottom", :bottom}, {"left", :left}, {"right", :right}]
+    Enum.reduce(keys, %{}, &convert_key(&1, data, &2))
+  end
+
+  # util function to convert keys in a map, with a possible transformation for the val
+  defp convert_key(key_spec, data, map) do
+    case key_spec do
+      {from_k, to_k} ->
+        if is_map_key(data, from_k) do
+          Map.put(map, to_k, Map.get(data, from_k))
+        else
+          map
+        end
+
+      {from_k, to_k, f} ->
+        if is_map_key(data, from_k) do
+          Map.put(map, to_k, f.(Map.get(data, from_k)))
+        else
+          map
+        end
+    end
+  end
+
+  defp teams_from_tachyon(data) do
+    Enum.map(data, fn d -> %{max_players: d["maxPlayers"]} end)
+  end
+
   defp lobby_team_to_tachyon({x, y, z}) do
     %{
-      allyTeam: x |> to_string() |> String.pad_leading(3, "0"),
-      team: y |> to_string() |> String.pad_leading(3, "0"),
-      player: z |> to_string() |> String.pad_leading(3, "0")
+      allyTeam: x |> to_string(),
+      team: y |> to_string(),
+      player: z |> to_string()
     }
   end
 
@@ -1021,13 +1079,10 @@ defmodule Teiserver.Player.TachyonHandler do
       for {at, at_idx} <- Enum.with_index(details.ally_team_config), into: %{} do
         teams =
           for {t, t_idx} <- Enum.with_index(at.teams), into: %{} do
-            idx = t_idx |> to_string() |> String.pad_leading(3, "0")
-            {idx, %{maxPlayers: t.max_players}}
+            {to_string(t_idx), %{maxPlayers: t.max_players}}
           end
 
-        idx = at_idx |> to_string() |> String.pad_leading(3, "0")
-
-        {idx,
+        {to_string(at_idx),
          %{
            teams: teams,
            maxTeams: at.max_teams,
@@ -1121,6 +1176,43 @@ defmodule Teiserver.Player.TachyonHandler do
             Map.put(m, :bots, bots)
         end
       end)
+      |> then(fn m ->
+        case Map.get(update_map, :name) do
+          nil -> m
+          v -> Map.put(m, :name, v)
+        end
+      end)
+      |> then(fn m ->
+        case Map.get(update_map, :map_name) do
+          nil -> m
+          v -> Map.put(m, :mapName, v)
+        end
+      end)
+      |> then(fn m ->
+        case Map.get(update_map, :ally_team_config) do
+          nil ->
+            m
+
+          v ->
+            val =
+              for {at, i} <- Enum.with_index(v), into: %{} do
+                {to_string(i),
+                 %{
+                   maxTeams: at.max_teams,
+                   # internal representation is the same as tachyon for startbox
+                   startBox: at.start_box,
+                   teams:
+                     for {team, i} <- Enum.with_index(at.teams), into: %{} do
+                       {to_string(i), %{maxPlayers: team.max_players}}
+                     end
+                 }}
+              end
+
+            Map.put(m, :allyTeamConfig, val)
+        end
+      end)
+
+    # TODO: this is getting out of control, figure out a way to serialize these things.
 
     data
   end

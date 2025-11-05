@@ -1,7 +1,7 @@
 {
-    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/create/request.json",
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/update/request.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "LobbyCreateRequest",
+    "title": "LobbyUpdateRequest",
     "tachyon": {
         "source": "user",
         "target": "server",
@@ -11,18 +11,20 @@
     "properties": {
         "type": { "const": "request" },
         "messageId": { "type": "string" },
-        "commandId": { "const": "lobby/create" },
+        "commandId": { "const": "lobby/update" },
         "data": {
-            "title": "LobbyCreateRequestData",
+            "title": "LobbyUpdateRequestData",
             "type": "object",
             "properties": {
-                "name": { "type": "string" },
+                "name": {
+                    "description": "to rename the lobby",
+                    "type": "string"
+                },
                 "mapName": { "type": "string" },
                 "allyTeamConfig": {
                     "$ref": "../../definitions/allyTeamConfig.json"
                 }
-            },
-            "required": ["name", "mapName", "allyTeamConfig"]
+            }
         }
     },
     "required": ["type", "messageId", "commandId", "data"]

@@ -592,6 +592,12 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
+  def lobby_update!(client, update_data) do
+    :ok = send_request(client, "lobby/update", update_data)
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
   def subscribe_lobby_list!(client) do
     :ok = send_request(client, "lobby/subscribeList")
     {:ok, resp} = recv_message(client)
