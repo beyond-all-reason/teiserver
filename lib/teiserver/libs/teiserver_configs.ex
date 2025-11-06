@@ -314,7 +314,7 @@ defmodule Teiserver.TeiserverConfigs do
     add_site_config_type(%{
       key: "teiserver.Uncertainty required to show rating",
       section: "Lobbies",
-      type: "integer",
+      type: "float",
       permissions: ["Admin"],
       description: "The maximum value uncertainty can be before in-game rating is shown ",
       default: 10

@@ -36,7 +36,7 @@ defmodule TeiserverWeb.API.SpadsController do
 
     rating_value =
       if uncertainty > max_uncertainty do
-        0
+        "??"
       else
         rating_value
       end
