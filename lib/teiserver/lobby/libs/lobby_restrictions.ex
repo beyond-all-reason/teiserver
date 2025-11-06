@@ -108,15 +108,27 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     ]
   end
 
-  def get_failed_rating_check_text(player_rating, consul_state, rating_type) do
+  def get_failed_rating_check_text(
+        player_rating,
+        consul_state,
+        rating_type,
+        is_rating_hidden \\ false
+      ) do
     bounds = get_rating_bounds_for_title(consul_state)
     player_rating_text = player_rating |> Decimal.from_float() |> Decimal.round(2)
 
-    [
-      @splitter,
-      "You don't meet the rating requirements for this lobby (#{bounds}). Your #{rating_type} match rating is #{player_rating_text}. Learn more about rating here:",
-      "https://www.beyondallreason.info/guide/rating-and-lobby-balance#openskill"
-    ]
+    if is_rating_hidden do
+      [
+        @splitter,
+        "This lobby has rating restrictions (#{bounds}). You won't be able to join until you play enough #{rating_type} matches for your rating to be visible."
+      ]
+    else
+      [
+        @splitter,
+        "You don't meet the rating requirements for this lobby (#{bounds}). Your #{rating_type} match rating is #{player_rating_text}. Learn more about rating here:",
+        "https://www.beyondallreason.info/guide/rating-and-lobby-balance#openskill"
+      ]
+    end
   end
 
   defp allow_bypass_rank_check?(user) do
@@ -164,16 +176,28 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
 
     rating_type = MatchLib.game_type(team_size, team_count)
 
-    {player_rating, _player_uncertainty} =
+    {player_rating, player_uncertainty} =
       BalanceLib.get_user_rating_value_uncertainty_pair(user_id, rating_type)
+
+    max_uncertainty =
+      Config.get_site_config_cache("teiserver.Uncertainty required to show rating")
+
+    is_rating_hidden = player_uncertainty > max_uncertainty
+
+    player_rating =
+      if is_rating_hidden do
+        0
+      else
+        player_rating
+      end
 
     cond do
       state.minimum_rating_to_play != nil and player_rating < state.minimum_rating_to_play ->
-        msg = get_failed_rating_check_text(player_rating, state, rating_type)
+        msg = get_failed_rating_check_text(player_rating, state, rating_type, is_rating_hidden)
         {:error, msg}
 
       state.maximum_rating_to_play != nil and player_rating > state.maximum_rating_to_play ->
-        msg = get_failed_rating_check_text(player_rating, state, rating_type)
+        msg = get_failed_rating_check_text(player_rating, state, rating_type, is_rating_hidden)
         {:error, msg}
 
       true ->
