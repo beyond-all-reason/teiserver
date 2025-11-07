@@ -187,6 +187,21 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert %{team: {0, _, _}} = details.players["user2"]
     end
 
+    test "changing ally team updates" do
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, _} = Lobby.join_ally_team(id, "user2", 1)
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{players: %{"user2" => %{team: {1, 0, 0}}}} = update
+
+      {:ok, _} = Lobby.join_ally_team(id, "user2", 0)
+      assert_receive {:lobby, ^id, {:updated, update}}
+      %{players: %{"user2" => %{team: {0, 1, 0}}}} = update
+    end
+
     test "other players are reshuffled" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))

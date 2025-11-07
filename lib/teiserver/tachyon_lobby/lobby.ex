@@ -467,7 +467,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
             events = [{:move_player, user_id, team} | remove_events]
 
             state = new_state_from_events(events, state)
-            broadcast_updates(remove_events, state)
+            broadcast_updates(events, state)
 
             {:reply, {:ok, get_details_from_state(state)}, state}
 
@@ -876,8 +876,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
        do: state
 
   defp broadcast_updates(events, state) do
-    change_map =
-      Enum.reduce(events, %{}, &update_change_from_event/2)
+    change_map = Enum.reduce(events, %{}, &update_change_from_event/2)
 
     broadcast_update({:update, nil, change_map}, state)
     state
