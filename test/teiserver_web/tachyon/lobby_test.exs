@@ -90,6 +90,13 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
       assert is_map_key(data["spectators"], to_string(ctx2[:user].id))
     end
+
+    test "user/self event has lobby data", %{client: client, lobby_id: lobby_id, token: token} do
+      Tachyon.abrupt_disconnect!(client)
+      client = Tachyon.connect(token, swallow_first_event: false)
+      %{"commandId" => "user/self", "data" => data} = Tachyon.recv_message!(client)
+      assert data["user"]["currentLobby"] == lobby_id
+    end
   end
 
   describe "leave lobby" do
