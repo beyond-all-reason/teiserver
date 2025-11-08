@@ -177,6 +177,8 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
       {:ok, socket1: socket1, user1: user1, socket2: socket2, user2: user2, party_id: party_id}
     end
 
+    # https://github.com/beyond-all-reason/teiserver/actions/runs/19192835180/job/54869643283
+    @tag :needs_attention
     test "leave party", %{socket1: sock1, user2: user2, socket2: sock2, party_id: party_id} do
       leave_party!(sock2)
 
