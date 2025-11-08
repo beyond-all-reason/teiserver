@@ -686,7 +686,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
          {:ok, {battle_id, battle_pid} = battle_data, host_data} <-
            TachyonBattle.start_battle(
              autohost_id,
-             gen_start_script(state)
+             gen_start_script(state),
+             false
            ) do
       start_data = %{
         ips: host_data.ips,

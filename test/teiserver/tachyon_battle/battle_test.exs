@@ -8,8 +8,9 @@ defmodule Teiserver.TachyonBattle.BattleTest do
   describe "start battle" do
     test "happy path" do
       autohost_id = :rand.uniform(10_000_000)
+      match_id = :rand.uniform(10_000_000)
       Teiserver.Autohost.Registry.register(%{id: autohost_id})
-      {:ok, battle_id, _pid} = Battle.start_battle(autohost_id)
+      {:ok, battle_id, _pid} = Battle.start_battle_process(autohost_id, match_id)
       poll_until_some(fn -> Battle.lookup(battle_id) end)
     end
   end
@@ -17,11 +18,16 @@ defmodule Teiserver.TachyonBattle.BattleTest do
   describe "send message" do
     test "autohost is there" do
       battle_id = to_string(UUID.uuid4())
+      match_id = :rand.uniform(10_000_000)
       autohost_id = :rand.uniform(10_000_000)
       Teiserver.Autohost.Registry.register(%{id: autohost_id})
 
       {:ok, _battle_pid} =
-        Battle.Battle.start_link(%{battle_id: battle_id, autohost_id: autohost_id})
+        Battle.Battle.start_link(%{
+          battle_id: battle_id,
+          match_id: match_id,
+          autohost_id: autohost_id
+        })
 
       task = Task.async(fn -> Battle.send_message(battle_id, "hello") end)
 
@@ -35,11 +41,16 @@ defmodule Teiserver.TachyonBattle.BattleTest do
 
   test "kill battle" do
     battle_id = to_string(UUID.uuid4())
+    match_id = :rand.uniform(10_000_000)
     autohost_id = :rand.uniform(10_000_000)
     Teiserver.Autohost.Registry.register(%{id: autohost_id})
 
     {:ok, _battle_pid} =
-      Battle.Battle.start_link(%{battle_id: battle_id, autohost_id: autohost_id})
+      Battle.Battle.start_link(%{
+        battle_id: battle_id,
+        match_id: match_id,
+        autohost_id: autohost_id
+      })
 
     task = Task.async(fn -> Battle.kill(battle_id) end)
     assert_receive {:call_client, "autohost/kill", %{battleId: ^battle_id}, from}

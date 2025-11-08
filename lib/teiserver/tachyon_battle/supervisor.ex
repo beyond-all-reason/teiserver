@@ -14,11 +14,12 @@ defmodule Teiserver.TachyonBattle.Supervisor do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  @spec start_battle(T.id(), Teiserver.Autohost.id()) :: DynamicSupervisor.on_start_child()
-  def start_battle(battle_id, autohost_id) do
+  @spec start_battle(T.id(), T.match_id(), Teiserver.Autohost.id()) ::
+          DynamicSupervisor.on_start_child()
+  def start_battle(battle_id, match_id, autohost_id) do
     DynamicSupervisor.start_child(
       __MODULE__,
-      {Battle, %{battle_id: battle_id, autohost_id: autohost_id}}
+      {Battle, %{battle_id: battle_id, match_id: match_id, autohost_id: autohost_id}}
     )
   end
 end

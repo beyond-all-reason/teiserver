@@ -40,4 +40,11 @@ defmodule Teiserver.Support.Polling do
   def poll_until_nil(f, opts \\ []) do
     poll_until(f, &is_nil/1, opts)
   end
+
+  @doc """
+  convenience function to poll until f returns true
+  """
+  def poll_until_true(f, opts \\ []) do
+    poll_until(f, fn x -> x == true end, opts)
+  end
 end
