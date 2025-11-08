@@ -851,7 +851,7 @@ defmodule Teiserver.Player.TachyonHandler do
         outgoingFriendRequest: outgoing,
         incomingFriendRequest: incoming,
         ignoreIds: [],
-        currentLobby: nil,
+        currentLobby: sess_state[:current_lobby],
         roles: roles_to_tachyon(user.roles)
       }
     }

@@ -527,8 +527,14 @@ defmodule Teiserver.Player.Session do
 
     new_state = %{state | conn_pid: new_conn_pid, monitors: monitors, party: party_state}
 
-    party = %{party: current_party, invited_to_parties: invited_to}
-    {:reply, {:ok, party}, new_state}
+    # used to create the first user/self event
+    self_state = %{
+      party: current_party,
+      invited_to_parties: invited_to,
+      current_lobby: get_in(state.lobby.id)
+    }
+
+    {:reply, {:ok, self_state}, new_state}
   end
 
   def handle_call(:conn_state, _from, state) do
