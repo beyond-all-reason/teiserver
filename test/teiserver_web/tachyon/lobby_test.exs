@@ -359,7 +359,20 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         Tachyon.lobby_update!(ctx[:client], %{name: "new name"})
     end
 
-    test "all attributes works", %{client: client, lobby_id: lobby_id} do
+    test "all attributes works" do
+      {:ok, ctx} = Tachyon.setup_client()
+      client = ctx[:client]
+
+      lobby_data =
+        %{
+          name: "test lobby",
+          map_name: "test-map",
+          ally_team_config: Tachyon.mk_ally_team_config(2, 2)
+        }
+
+      %{"status" => "success", "data" => %{"id" => lobby_id}} =
+        Tachyon.create_lobby!(client, lobby_data)
+
       update_data = %{
         name: "new name",
         mapName: "new map name",
@@ -375,8 +388,9 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
           "0" => %{
             "maxTeams" => 1,
             "startBox" => %{"bottom" => 1, "left" => 0, "right" => 1, "top" => 0},
-            "teams" => %{"0" => %{"maxPlayers" => 1}}
-          }
+            "teams" => %{"0" => %{"maxPlayers" => 1}, "1" => nil}
+          },
+          "1" => nil
         },
         "id" => lobby_id,
         "mapName" => "new map name",

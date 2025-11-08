@@ -805,7 +805,44 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
       assert details.ally_team_config == new_ally_team_config
-      assert_receive {:lobby, ^id, {:updated, %{ally_team_config: ^new_ally_team_config}}}
+      assert_receive {:lobby, ^id, {:updated, %{ally_team_config: patch_config}}}
+
+      assert patch_config == [
+               %{
+                 max_teams: 1,
+                 start_box: %{top: 0, left: 0, bottom: 1, right: 0.2},
+                 teams: [%{max_players: 1}, nil]
+               },
+               %{
+                 max_teams: 1,
+                 start_box: %{top: 0, left: 0, bottom: 1, right: 0.2},
+                 teams: [%{max_players: 1}, nil]
+               }
+             ]
+    end
+
+    test "ally team config diff with less ally team teams" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1, 1]))
+      new_ally_team_config = mk_start_params([1, 1]).ally_team_config
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{ally_team_config: new_ally_team_config})
+
+      assert_receive {:lobby, ^id, {:updated, %{ally_team_config: patch_config}}}
+      # deleted ally team shows as nil
+      [_, _, nil] = patch_config
+    end
+
+    test "ally team config diff with less teams" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([3]))
+      new_ally_team_config = mk_start_params([2]).ally_team_config
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{ally_team_config: new_ally_team_config})
+
+      assert_receive {:lobby, ^id, {:updated, %{ally_team_config: patch_config}}}
+      # deleted team shows as nil
+      [%{max_teams: 2, teams: [_, _, nil]}] = patch_config
     end
 
     test "put join queue in newly created spots" do
@@ -889,13 +926,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok =
         Lobby.update_properties(id, @default_user_id, %{ally_team_config: new_ally_team_config})
 
-      expected_update = %{
-        players: %{"2" => %{team: {0, 1, 0}}, "3" => nil},
-        spectators: %{"3" => %{join_queue_position: 1}},
-        ally_team_config: new_ally_team_config
-      }
+      assert_receive {:lobby, ^id, {:updated, update}}
 
-      assert_receive {:lobby, ^id, {:updated, ^expected_update}}
+      %{
+        players: %{"2" => %{team: {0, 1, 0}}, "3" => nil},
+        spectators: %{"3" => %{join_queue_position: 1}}
+      } = update
     end
 
     test "ejected players go at the beginning of the join queue" do
@@ -914,8 +950,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       %{
         players: %{"2" => nil},
-        spectators: %{"2" => %{join_queue_position: pos}},
-        ally_team_config: ^new_ally_team_config
+        spectators: %{"2" => %{join_queue_position: pos}}
       } = update
 
       refute is_nil(pos), "player is now in join queue"
