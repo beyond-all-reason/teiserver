@@ -475,7 +475,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
           {false, _s} ->
             # Adding a spec into an ally team. The way we construct the team
             # means it doesn't require any reshuffling of existing players
-            # player = s |> Map.delete(:join_queue_position) |> Map.put(:team, team)
             events = [{:move_spec_to_player, user_id, %{team: team}}]
             state = new_state_from_events(events, state)
             broadcast_updates(events, state)
@@ -664,9 +663,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
               broadcast_update({:update, nil, update}, state)
 
             team ->
+              initial_state = state
               events = [{:move_spec_to_player, user_id, %{team: team}}]
               state = new_state_from_events(events, state)
               broadcast_updates(events, state)
+              broadcast_list_updates(events, initial_state, state)
           end
 
         {:reply, :ok, state}
@@ -949,7 +950,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
        when map_size(final_state.players) == 0 and map_size(final_state.spectators) == 0,
        do: final_state
 
-  defp broadcast_list_updates(events, _starting_state, final_state) do
+  defp broadcast_list_updates(events, starting_state, final_state) do
     change_map =
       Enum.reduce(events, %{}, fn ev, change_map ->
         case ev do
@@ -977,6 +978,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
             change_map
         end
       end)
+
+    change_map =
+      if map_size(starting_state.players) != map_size(final_state.players) do
+        Map.put(change_map, :player_count, map_size(final_state.players))
+      else
+        change_map
+      end
 
     if change_map != %{}, do: TachyonLobby.List.update_lobby(final_state.id, change_map)
     final_state
