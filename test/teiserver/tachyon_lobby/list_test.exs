@@ -69,6 +69,16 @@ defmodule Teiserver.TachyonLobby.ListTest do
     assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 1}}
   end
 
+  test "get updates when spec becomes player with join queue" do
+    {sink_pid, id, _} = mk_lobby()
+
+    assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
+    {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+    :ok = Lobby.join_queue(id, "user2")
+    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: changes}
+    assert changes == %{player_count: 2}
+  end
+
   test "bots are not counted in player count" do
     {sink_pid, id, _} = mk_lobby()
 
