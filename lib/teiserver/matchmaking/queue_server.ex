@@ -65,7 +65,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
           algo: algo(),
           engines: [%{version: String.t()}],
           games: [%{spring_game: String.t()}],
-          maps: [Teiserver.Asset.Map.t()]
+          maps: [Teiserver.Asset.Map.t()],
+          version: String.t()
         }
 
   @type state :: %{
@@ -132,6 +133,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
         engines: attrs.engines,
         games: attrs.games,
         maps: attrs.maps,
+        version: compute_version(attrs.engines, attrs.games, attrs.maps)
       },
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
       members: Map.get(attrs, :members, []),
@@ -158,6 +160,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @type join_error ::
           {:error,
            :invalid_queue
+           | :version_mismatch
            | :already_queued
            | :too_many_players
            | :missing_engines
@@ -169,11 +172,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @doc """
   Join the specified queue
   """
-  @spec join_queue(id(), T.userid(), Party.id() | nil) :: join_result()
-  def join_queue(queue_id, user_id, party_id) do
+  @spec join_queue(id(), version :: String.t(), T.userid(), Party.id() | nil) :: join_result()
+  def join_queue(queue_id, version, user_id, party_id) do
     if party_id == nil,
-      do: GenServer.call(via_tuple(queue_id), {:join_queue, user_id}),
-      else: GenServer.call(via_tuple(queue_id), {:join_queue, user_id, party_id})
+      do: GenServer.call(via_tuple(queue_id), {:join_queue, version, user_id}),
+      else: GenServer.call(via_tuple(queue_id), {:join_queue, version, user_id, party_id})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_queue}
   end
@@ -186,10 +189,10 @@ defmodule Teiserver.Matchmaking.QueueServer do
   This is to ensure all party member are there as a unit and avoid race where
   a member could disconnect in the middle of the joining process.
   """
-  @spec party_join_queue(id(), Party.id(), [%{id: T.userid()}]) ::
+  @spec party_join_queue(id(), version :: String.t(), Party.id(), [%{id: T.userid()}]) ::
           {:ok, queue_pid :: pid()} | {:error, reason :: term()}
-  def party_join_queue(queue_id, party_id, players) do
-    GenServer.call(via_tuple(queue_id), {:party_join_queue, party_id, players})
+  def party_join_queue(queue_id, version, party_id, players) do
+    GenServer.call(via_tuple(queue_id), {:party_join_queue, version, party_id, players})
   catch
     :exit, {:noproc, _} -> {:no, :invalid_queue}
   end
@@ -262,8 +265,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
-  @impl true
-  def handle_call({:join_queue, player_id, party_id}, _from, state) do
+  def handle_call({:join_queue, version, _, _party_id}, _from, state)
+      when state.queue.version != version,
+      do: {:reply, {:error, :version_mismatch}, state}
+
+  def handle_call({:join_queue, _version, player_id, party_id}, _from, state) do
     game_type = MatchLib.game_type(state.queue.team_size, state.queue.team_count)
 
     with :ok <- member_can_join_queue?([player_id], state),
@@ -356,7 +362,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
-  def handle_call({:party_join_queue, party_id, players}, _from, state) do
+  def handle_call({:party_join_queue, version, _party_id, _players}, _from, state)
+      when state.queue.version != version,
+      do: {:reply, {:error, :version_mismatch}, state}
+
+  def handle_call({:party_join_queue, _version, party_id, players}, _from, state) do
     cond do
       length(players) > state.queue.team_size ->
         {:reply, {:error, :party_too_big}, state}
@@ -489,6 +499,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
         {:noreply, state}
     end
   end
+
+  defp compute_version(engines, games, maps),
+    do: :erlang.phash2({engines, games, maps}) |> to_string()
 
   defp remove_player(player_id, state) do
     pending_party =
