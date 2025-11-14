@@ -274,22 +274,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
   end
 
   @impl true
-  def handle_call(:get_stats, _from, state) do
-    player_count = calculate_player_count(state)
-    private_stats = Map.put(state.stats, :player_count, player_count)
-
-    public_stats = %{
-      total_joined: private_stats.total_joined,
-      total_left: private_stats.total_left,
-      total_wait_time_s: private_stats.total_wait_time_s,
-      total_matched: private_stats.total_matched,
-      player_count: private_stats.player_count
-    }
-
-    {:reply, {:ok, public_stats}, state}
-  end
-
-  @impl true
   def handle_call({:join_queue, player_id, party_id}, _from, state) do
     game_type = MatchLib.game_type(state.queue.team_size, state.queue.team_count)
 
@@ -334,6 +318,22 @@ defmodule Teiserver.Matchmaking.QueueServer do
       nil ->
         {:reply, {:error, :invalid_party}, state}
     end
+  end
+
+  @impl true
+  def handle_call(:get_stats, _from, state) do
+    player_count = calculate_player_count(state)
+    private_stats = Map.put(state.stats, :player_count, player_count)
+
+    public_stats = %{
+      total_joined: private_stats.total_joined,
+      total_left: private_stats.total_left,
+      total_wait_time_s: private_stats.total_wait_time_s,
+      total_matched: private_stats.total_matched,
+      player_count: private_stats.player_count
+    }
+
+    {:reply, {:ok, public_stats}, state}
   end
 
   @impl true
