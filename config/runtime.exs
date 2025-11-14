@@ -192,7 +192,9 @@ config :teiserver, Teiserver.Account.Guardian,
   ttl: {30, :days}
 
 config :teiserver, Teiserver.OAuth,
-  issuer: Application.get_env(:teiserver, Teiserver.OAuth)[:issuer] || "https://#{domain_name}"
+  issuer:
+    Teiserver.ConfigHelpers.get_env("TEI_OAUTH_ISSUER", nil) ||
+      Application.get_env(:teiserver, Teiserver.OAuth)[:issuer] || "https://#{domain_name}"
 
 if Teiserver.ConfigHelpers.get_env("TEI_ENABLE_EMAIL_INTEGRATION", false, :bool) do
   config :teiserver, Teiserver.Mailer,
