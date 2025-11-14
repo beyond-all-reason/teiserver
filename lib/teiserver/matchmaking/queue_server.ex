@@ -13,7 +13,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Matchmaking.{QueueRegistry, PairingRoom}
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Asset
   alias Teiserver.Party
   alias Teiserver.Player
   alias Teiserver.Helpers.MonitorCollection, as: MC
@@ -106,9 +105,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
           required(:name) => String.t(),
           required(:team_size) => pos_integer(),
           required(:team_count) => pos_integer(),
-          optional(:engines) => [%{version: String.t()}],
-          optional(:games) => [%{spring_game: String.t()}],
-          optional(:maps) => [Teiserver.Asset.Map.t()],
+          required(:engines) => [%{version: String.t()}],
+          required(:games) => [%{spring_game: String.t()}],
+          required(:maps) => [Teiserver.Asset.Map.t()],
           optional(:settings) => settings(),
           optional(:members) => [Member.t()],
           optional(:algo) => :ignore_os | :bruteforce_filter
@@ -130,9 +129,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
         team_count: attrs.team_count,
         algo: {alg_module, alg_state},
         ranked: true,
-        engines: Map.get(attrs, :engines, []),
-        games: Map.get(attrs, :games, []),
-        maps: Map.get(attrs, :maps, [])
+        engines: attrs.engines,
+        games: attrs.games,
+        maps: attrs.maps,
       },
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
       members: Map.get(attrs, :members, []),
@@ -237,24 +236,14 @@ defmodule Teiserver.Matchmaking.QueueServer do
       :timer.send_interval(state.settings.tick_interval_ms, :tick)
     end
 
-    {:ok, state, {:continue, :init_engines_games_maps}}
+    {:ok, state}
   end
 
   @impl true
-  def handle_continue(:init_engines_games_maps, state) do
-    engines = state.queue.engines
-    games = state.queue.games
-    maps = Asset.get_maps_for_queue(state.id)
+  def handle_call({:join_queue, version, _}, _from, state) when state.queue.version != version,
+    do: {:reply, {:error, :version_mismatch}, state}
 
-    queue = %{state.queue | engines: engines, games: games, maps: maps}
-
-    QueueRegistry.update_value(state.id, fn _ -> queue end)
-
-    {:noreply, %{state | queue: queue}}
-  end
-
-  @impl true
-  def handle_call({:join_queue, player_id}, _from, state) do
+  def handle_call({:join_queue, _version, player_id}, _from, state) do
     case member_can_join_queue?([player_id], state) do
       {:error, reason} ->
         {:reply, {:error, reason}, state}

@@ -28,7 +28,8 @@ defmodule Teiserver.Matchmaking.QueueTest do
         team_size: 1,
         team_count: 2,
         engines: ["spring", "recoil"],
-        games: ["BAR test version", "BAR release version"]
+        games: ["BAR test version", "BAR release version"],
+        maps: [map]
       })
 
     {:ok, pid} = QueueServer.start_link(initial_state)
