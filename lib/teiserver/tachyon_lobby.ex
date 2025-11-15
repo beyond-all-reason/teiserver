@@ -54,6 +54,9 @@ defmodule Teiserver.TachyonLobby do
   @spec lookup(Lobby.id()) :: pid() | nil
   defdelegate lookup(lobby_id), to: TachyonLobby.Registry
 
+  @spec count() :: non_neg_integer()
+  defdelegate count(), to: TachyonLobby.Registry
+
   @type player_join_data :: Lobby.player_join_data()
   @spec join(id(), player_join_data(), pid()) ::
           {:ok, lobby_pid :: pid(), details()} | {:error, reason :: term()}
