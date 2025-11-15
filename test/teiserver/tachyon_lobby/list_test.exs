@@ -63,10 +63,48 @@ defmodule Teiserver.TachyonLobby.ListTest do
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
     {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
     {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
-    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
+    Lobby.List.broadcast_updates()
+    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
 
     :ok = Lobby.leave(id, "user2")
-    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 1}}
+    Lobby.List.broadcast_updates()
+    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 1}}}
+  end
+
+  test "batch updates" do
+    {sink_pid, id, _} = mk_lobby([3, 3])
+
+    assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
+    {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+    {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
+    {:ok, _, _} = Lobby.join(id, %{id: "user3", name: "name-user3"}, sink_pid)
+    {:ok, _details} = Lobby.join_ally_team(id, "user3", 1)
+    Lobby.List.broadcast_updates()
+    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 3}}}
+  end
+
+  test "batch updates across lobbies" do
+    {sink_pid, id1, _} = mk_lobby()
+    {_, id2, _} = mk_lobby()
+    assert {_initial_counter, _} = Lobby.subscribe_updates()
+
+    {:ok, _, _} = Lobby.join(id1, %{id: "user2", name: "name-user2"}, sink_pid)
+    {:ok, _details} = Lobby.join_ally_team(id1, "user2", 1)
+    {:ok, _, _} = Lobby.join(id2, %{id: "user3", name: "name-user3"}, sink_pid)
+    {:ok, _details} = Lobby.join_ally_team(id2, "user3", 1)
+
+    Lobby.List.broadcast_updates()
+
+    assert_receive %{
+      event: :update_lobbies,
+      changes: %{^id1 => %{player_count: 2}, ^id2 => %{player_count: 2}}
+    }
+  end
+
+  test "don't send updates if no changes" do
+    {_initial_counter, _} = Lobby.subscribe_updates()
+    Lobby.List.broadcast_updates()
+    refute_receive %{event: :update_lobbies}, 100
   end
 
   test "get updates when spec becomes player with join queue" do
@@ -75,8 +113,8 @@ defmodule Teiserver.TachyonLobby.ListTest do
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
     {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
     :ok = Lobby.join_queue(id, "user2")
-    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: changes}
-    assert changes == %{player_count: 2}
+    Lobby.List.broadcast_updates()
+    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
   end
 
   test "bots are not counted in player count" do
@@ -86,8 +124,9 @@ defmodule Teiserver.TachyonLobby.ListTest do
     {:ok, _bot_id1} = Lobby.add_bot(id, "1234", 1, "bot")
     {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
     {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
+    Lobby.List.broadcast_updates()
 
-    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
+    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
   end
 
   test "get updates when player dies" do
@@ -96,11 +135,12 @@ defmodule Teiserver.TachyonLobby.ListTest do
     assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
     {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
     {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
-    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
+    Lobby.List.broadcast_updates()
+    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
 
     Process.unlink(sink_pid)
     Process.exit(sink_pid, :exit)
-    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 1}}
+    assert_receive %{event: :remove_lobby, lobby_id: ^id}
   end
 
   test "remove update when last player leaves" do
@@ -143,7 +183,8 @@ defmodule Teiserver.TachyonLobby.ListTest do
     # player 2 leaving should make all the bots leave and the space should be
     # taken up by the players in the join queue
     :ok = Lobby.leave(id, "2")
-    assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 3}}
+    Lobby.List.broadcast_updates()
+    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 3}}}
   end
 
   test "restore state on startup" do
@@ -190,14 +231,16 @@ defmodule Teiserver.TachyonLobby.ListTest do
       {_, id, _} = mk_lobby()
       assert {_initial_counter, %{}} = Lobby.subscribe_updates()
       Lobby.update_properties(id, "1234", %{name: "new name"})
-      assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{name: "new name"}}
+      Lobby.List.broadcast_updates()
+      assert_receive %{event: :update_lobbies, changes: %{^id => %{name: "new name"}}}
     end
 
     test "map name" do
       {_, id, _} = mk_lobby()
       assert {_initial_counter, %{}} = Lobby.subscribe_updates()
       Lobby.update_properties(id, "1234", %{map_name: "new map"})
-      assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{map_name: "new map"}}
+      Lobby.List.broadcast_updates()
+      assert_receive %{event: :update_lobbies, changes: %{^id => %{map_name: "new map"}}}
     end
 
     test "expand ally team config" do
@@ -205,11 +248,11 @@ defmodule Teiserver.TachyonLobby.ListTest do
       assert {_initial_counter, %{}} = Lobby.subscribe_updates()
       config = mk_start_params([2, 2]).ally_team_config
       Lobby.update_properties(id, "1234", %{ally_team_config: config})
+      Lobby.List.broadcast_updates()
 
       assert_receive %{
-        event: :update_lobby,
-        lobby_id: ^id,
-        changes: %{max_player_count: 4, player_count: 1}
+        event: :update_lobbies,
+        changes: %{^id => %{max_player_count: 4, player_count: 1}}
       }
     end
 
@@ -218,12 +261,13 @@ defmodule Teiserver.TachyonLobby.ListTest do
       assert {_initial_counter, %{}} = Lobby.subscribe_updates()
       {:ok, _, _} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
       {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
-      assert_receive %{event: :update_lobby, lobby_id: ^id, changes: %{player_count: 2}}
+      Lobby.List.broadcast_updates()
+      assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
 
       config = mk_start_params([1]).ally_team_config
       Lobby.update_properties(id, "1234", %{ally_team_config: config})
-      assert_receive %{event: :update_lobby, lobby_id: ^id, changes: changes}
-      %{player_count: 1} = changes
+      Lobby.List.broadcast_updates()
+      assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 1}}}
     end
   end
 
