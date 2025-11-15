@@ -4,6 +4,7 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   """
 
   use Horde.DynamicSupervisor
+  alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Asset
 
@@ -57,6 +58,15 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
       pid ->
         Horde.DynamicSupervisor.terminate_child(__MODULE__, pid)
     end
+  end
+
+  @spec start_pairing_room(QueueServer.id(), QueueServer.queue(), [PairingRoom.team()], timeout()) ::
+          {:ok, pid()} | {:error, term()}
+  def start_pairing_room(queue_id, queue, teams, timeout) do
+    Horde.DynamicSupervisor.start_child(
+      __MODULE__,
+      {PairingRoom, {queue_id, queue, teams, timeout}}
+    )
   end
 
   def start_link(init_arg) do
