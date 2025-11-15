@@ -329,8 +329,8 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
-  def join_queues!(client, queue_ids) do
-    req = request("matchmaking/queue", %{queues: queue_ids})
+  def join_queues!(client, queues) do
+    req = request("matchmaking/queue", %{queues: queues})
     :ok = WSC.send_message(client, {:text, req |> Jason.encode!()})
     {:ok, resp} = recv_message(client)
     resp

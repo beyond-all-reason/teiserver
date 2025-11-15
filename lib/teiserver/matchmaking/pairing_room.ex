@@ -28,7 +28,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   @spec start(QueueServer.id(), QueueServer.queue(), [team()], timeout()) ::
           {:ok, pid()} | {:error, term()}
   def start(queue_id, queue, teams, timeout) do
-    GenServer.start(__MODULE__, {queue_id, queue, teams, timeout})
+    GenServer.start_link(__MODULE__, {queue_id, queue, teams, timeout})
   end
 
   @doc """

@@ -116,7 +116,11 @@ defmodule Teiserver.Player do
   notify the player that the party it is currently a member of just entered
   matchmaking and it should join the specified queues.
   """
-  @spec party_notify_join_queues(T.userid(), [Matchmaking.queue_id()], Party.state()) :: :ok
+  @spec party_notify_join_queues(
+          T.userid(),
+          [{Matchmaking.queue_id(), version :: String.t()}],
+          Party.state()
+        ) :: :ok
   defdelegate party_notify_join_queues(user_id, queues, party_state), to: Player.Session
 
   @doc """

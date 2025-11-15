@@ -28,12 +28,14 @@ defmodule Teiserver.Matchmaking.QueueTest do
         team_size: 1,
         team_count: 2,
         engines: ["spring", "recoil"],
-        games: ["BAR test version", "BAR release version"]
+        games: ["BAR test version", "BAR release version"],
+        maps: [map]
       })
 
     {:ok, pid} = QueueServer.start_link(initial_state)
 
-    {:ok, user: user, queue_id: id, queue_pid: pid, map: map}
+    {:ok,
+     user: user, queue_id: id, queue_pid: pid, version: initial_state.queue.version, map: map}
   end
 
   describe "listing" do
@@ -51,33 +53,42 @@ defmodule Teiserver.Matchmaking.QueueTest do
   end
 
   describe "joining" do
-    test "works", %{user: user, queue_id: queue_id} do
-      assert {:ok, _pid} = Matchmaking.join_queue(queue_id, user.id)
+    test "works", %{user: user, queue_id: queue_id, version: version} do
+      assert {:ok, _pid} = Matchmaking.join_queue(queue_id, version, user.id)
 
-      assert {:error, :already_queued} == Matchmaking.join_queue(queue_id, user.id)
+      assert {:error, :already_queued} == Matchmaking.join_queue(queue_id, version, user.id)
     end
 
-    test "invalid queue", %{user: user} do
-      assert {:error, :invalid_queue} == Matchmaking.join_queue("INVALID!!", user.id)
+    test "invalid queue", %{user: user, version: version} do
+      assert {:error, :invalid_queue} == Matchmaking.join_queue("INVALID!!", version, user.id)
     end
 
-    test "paired user still in queue", %{user: user, queue_id: queue_id, queue_pid: queue_pid} do
+    test "invalid version", %{user: user, queue_id: queue_id} do
+      assert {:error, :version_mismatch} == Matchmaking.join_queue(queue_id, "INVALID!!", user.id)
+    end
+
+    test "paired user still in queue", %{
+      user: user,
+      queue_id: queue_id,
+      queue_pid: queue_pid,
+      version: version
+    } do
       user2 = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
-      assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, user.id)
-      assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, user2.id)
+      assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
+      assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user2.id)
       send(queue_pid, :tick)
-      assert {:error, :already_queued} == Matchmaking.join_queue(queue_id, user.id)
+      assert {:error, :already_queued} == Matchmaking.join_queue(queue_id, version, user.id)
     end
   end
 
   describe "leaving" do
-    test "works", %{user: user, queue_id: queue_id} do
+    test "works", %{user: user, queue_id: queue_id, version: version} do
       assert {:error, :not_queued} = Matchmaking.leave_queue(queue_id, user.id)
 
       assert {:error, :invalid_queue} =
                Matchmaking.leave_queue("lolnope that't not a queue", user.id)
 
-      {:ok, _pid} = Matchmaking.join_queue(queue_id, user.id)
+      {:ok, _pid} = Matchmaking.join_queue(queue_id, version, user.id)
       assert :ok = Matchmaking.leave_queue(queue_id, user.id)
     end
   end
@@ -96,7 +107,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
              }
     end
 
-    test "tracks joins and leaves", %{user: user, queue_id: queue_id} do
+    test "tracks joins and leaves", %{user: user, queue_id: queue_id, version: version} do
       # Initially stats should be zero
       {:ok, stats} = Matchmaking.get_stats(queue_id)
 
@@ -109,7 +120,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
              }
 
       # Join the queue
-      {:ok, _pid} = Matchmaking.join_queue(queue_id, user.id)
+      {:ok, _pid} = Matchmaking.join_queue(queue_id, version, user.id)
       {:ok, stats} = Matchmaking.get_stats(queue_id)
 
       assert stats == %{
@@ -133,12 +144,12 @@ defmodule Teiserver.Matchmaking.QueueTest do
              }
     end
 
-    test "tracks party joins", %{queue_id: queue_id} do
+    test "tracks party joins", %{queue_id: queue_id, version: version} do
       user1 = Central.Helpers.GeneralTestLib.make_user()
       party_id = UUID.uuid4()
 
       # Create a party with 1 player (valid for team_size: 1 queue)
-      {:ok, _pid} = Matchmaking.party_join_queue(queue_id, party_id, [user1])
+      {:ok, _pid} = Matchmaking.party_join_queue(queue_id, version, party_id, [user1])
       {:ok, stats} = Matchmaking.get_stats(queue_id)
       # No stats updated yet, party is pending
       assert stats == %{
@@ -150,7 +161,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
              }
 
       # Now actually join the queue with the party
-      {:ok, _pid} = Matchmaking.join_queue(queue_id, user1.id, party_id)
+      {:ok, _pid} = Matchmaking.join_queue(queue_id, version, user1.id, party_id)
       {:ok, stats} = Matchmaking.get_stats(queue_id)
       # Now the player has joined
       assert stats == %{
@@ -162,12 +173,12 @@ defmodule Teiserver.Matchmaking.QueueTest do
              }
     end
 
-    test "tracks wait time when matches are created", %{queue_id: queue_id} do
+    test "tracks wait time when matches are created", %{queue_id: queue_id, version: version} do
       user1 = Central.Helpers.GeneralTestLib.make_user()
       user2 = Central.Helpers.GeneralTestLib.make_user()
 
       # Join first user
-      {:ok, _pid} = Matchmaking.join_queue(queue_id, user1.id)
+      {:ok, _pid} = Matchmaking.join_queue(queue_id, version, user1.id)
       {:ok, stats} = Matchmaking.get_stats(queue_id)
 
       assert stats == %{
@@ -179,7 +190,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
              }
 
       # Join second user (this should trigger a match)
-      {:ok, _pid} = Matchmaking.join_queue(queue_id, user2.id)
+      {:ok, _pid} = Matchmaking.join_queue(queue_id, version, user2.id)
 
       # Trigger the tick with a specific time for testing
       now = DateTime.utc_now()

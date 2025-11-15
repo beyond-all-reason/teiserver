@@ -249,6 +249,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
         %{
           id: qid,
+          version: queue.version,
           name: queue.name,
           numOfTeams: queue.team_count,
           teamSize: queue.team_size,
@@ -263,9 +264,10 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("matchmaking/queue", "request", _message_id, message, state) do
-    queue_ids = message["data"]["queues"]
+    queues =
+      Enum.map(message["data"]["queues"], fn x -> {x["id"], x["version"]} end)
 
-    case Player.Session.join_queues(state.user.id, queue_ids) do
+    case Player.Session.join_queues(state.user.id, queues) do
       :ok ->
         {:response, state}
 
@@ -273,6 +275,9 @@ defmodule Teiserver.Player.TachyonHandler do
         case reason do
           :invalid_queue ->
             {:error_response, :invalid_queue_specified, state}
+
+          :version_mismatch ->
+            {:error_response, :version_mismatch, state}
 
           :too_many_players ->
             {:error_response, :invalid_request, "too many player for a playlist", state}

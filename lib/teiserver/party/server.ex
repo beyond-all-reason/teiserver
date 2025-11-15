@@ -29,7 +29,7 @@ defmodule Teiserver.Party.Server do
               timeout_ref: :timer.tref()
             }
           ],
-          matchmaking: nil | %{queues: [Matchmaking.queue_id()]}
+          matchmaking: nil | %{queues: [{Matchmaking.queue_id(), version :: String.t()}]}
         }
 
   @spec gen_party_id() :: id()
@@ -123,7 +123,8 @@ defmodule Teiserver.Party.Server do
   interactions between parties and matchmaking by removing any potential of a
   party member already being in matchmaking outside the party.
   """
-  @spec join_queues(id(), [Matchmaking.queue_id()]) :: :ok | {:error, reason :: term()}
+  @spec join_queues(id(), [{Matchmaking.queue_id(), version :: String.t()}]) ::
+          :ok | {:error, reason :: term()}
   def join_queues(party_id, queues) do
     GenServer.call(via_tuple(party_id), {:join_matchmaking_queues, queues})
   catch
@@ -320,8 +321,8 @@ defmodule Teiserver.Party.Server do
     members_id = Enum.map(state.members, fn m -> %{id: m.id} end)
 
     result =
-      Enum.reduce_while(queues, state.monitors, fn q_id, monitors ->
-        case Matchmaking.party_join_queue(q_id, state.id, members_id) do
+      Enum.reduce_while(queues, state.monitors, fn {q_id, version}, monitors ->
+        case Matchmaking.party_join_queue(q_id, version, state.id, members_id) do
           {:ok, queue_pid} ->
             {:cont, MC.monitor(monitors, queue_pid, {:queue, q_id})}
 
@@ -338,7 +339,7 @@ defmodule Teiserver.Party.Server do
           Map.replace!(
             state,
             :monitors,
-            Enum.reduce(queues, monitors, &MC.demonitor_by_val(&2, {:queue, &1}))
+            Enum.reduce(queues, monitors, &MC.demonitor_by_val(&2, {:queue, elem(&1, 0)}))
           )
 
         {:reply, {:error, reason}, state}
