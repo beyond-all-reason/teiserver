@@ -10,6 +10,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   # from a crash, the important transient state would be lost.
   use GenServer, restart: :temporary
 
+  alias Teiserver.Matchmaking.QueueSupervisor
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Data.Types, as: T
@@ -28,7 +29,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   @spec start(QueueServer.id(), QueueServer.queue(), [team()], timeout()) ::
           {:ok, pid()} | {:error, term()}
   def start(queue_id, queue, teams, timeout) do
-    GenServer.start_link(__MODULE__, {queue_id, queue, teams, timeout})
+    QueueSupervisor.start_pairing_room(queue_id, queue, teams, timeout)
   end
 
   @doc """
@@ -60,6 +61,10 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           # the players for members are flatten
           readied: [[%{user_id: T.userid(), name: String.t(), password: String.t()}], ...]
         }
+
+  def start_link(init_arg) do
+    GenServer.start(__MODULE__, init_arg)
+  end
 
   @impl true
   def init({queue_id, queue, teams, timeout}) do
