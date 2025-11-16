@@ -49,14 +49,15 @@ defmodule Teiserver.Matchmaking do
   @doc """
   Request the player to join the specified queue.
   """
-  @spec join_queue(queue_id(), T.userid(), Party.id() | nil) :: join_result()
-  def join_queue(queue_id, member, party_id \\ nil) do
-    Matchmaking.QueueServer.join_queue(queue_id, member, party_id)
+  @spec join_queue(queue_id(), version :: String.t(), T.userid(), Party.id() | nil) ::
+          join_result()
+  def join_queue(queue_id, version, member, party_id \\ nil) do
+    Matchmaking.QueueServer.join_queue(queue_id, version, member, party_id)
   end
 
-  @spec party_join_queue(queue_id(), Party.id(), [%{id: T.userid()}]) ::
+  @spec party_join_queue(queue_id(), version :: String.t(), Party.id(), [%{id: T.userid()}]) ::
           {:ok, queue_pid :: pid()} | {:error, reason :: term()}
-  defdelegate party_join_queue(queue_id, party_id, players), to: Matchmaking.QueueServer
+  defdelegate party_join_queue(queue_id, version, party_id, players), to: Matchmaking.QueueServer
 
   @spec leave_queue(queue_id(), T.userid()) :: leave_result()
   def leave_queue(queue_id, user_id) do

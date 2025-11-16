@@ -21,7 +21,8 @@
                         "intentional",
                         "server_error",
                         "party_user_left",
-                        "ready_timeout"
+                        "ready_timeout",
+                        "version_changed"
                     ]
                 }
             },

@@ -22,5 +22,8 @@ defmodule Teiserver.Geoip do
     else
       default || "??"
     end
+  rescue
+    _e in ErlangError ->
+      "??"
   end
 end

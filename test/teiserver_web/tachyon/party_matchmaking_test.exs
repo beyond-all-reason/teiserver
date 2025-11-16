@@ -14,7 +14,11 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     {_party_id, [m1, m2], _} = setup_party(2, 0)
     [q1, q2] = [setup_queue(2), setup_queue(3)]
 
-    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q1.id, q2.id])
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(m1.client, [
+               %{id: q1.id, version: q1.version},
+               %{id: q2.id, version: q2.version}
+             ])
 
     assert %{"commandId" => "matchmaking/queuesJoined", "data" => data} =
              Tachyon.recv_message!(m2.client)
@@ -27,10 +31,14 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     {_party_id, [m3, m4], _} = setup_party(2, 0)
     [q1] = [setup_queue(2)]
 
-    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q1.id])
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(m1.client, [%{id: q1.id, version: q1.version}])
+
     assert %{"commandId" => "matchmaking/queuesJoined"} = Tachyon.recv_message!(m2.client)
 
-    assert %{"status" => "success"} = Tachyon.join_queues!(m3.client, [q1.id])
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(m3.client, [%{id: q1.id, version: q1.version}])
+
     assert %{"commandId" => "matchmaking/queuesJoined"} = Tachyon.recv_message!(m4.client)
 
     send(q1.pid, :tick)
@@ -54,7 +62,11 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     {_party_id, [m1, m2], _} = setup_party(2, 0)
     [q1, q2] = [setup_queue(2), setup_queue(3)]
 
-    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q1.id, q2.id])
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(m1.client, [
+               %{id: q1.id, version: q1.version},
+               %{id: q2.id, version: q2.version}
+             ])
 
     assert %{"commandId" => "matchmaking/queuesJoined"} = Tachyon.recv_message!(m2.client)
 
@@ -66,7 +78,11 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     {_party_id, [m1, m2], _} = setup_party(2, 0)
     [q1, q2] = [setup_queue(2), setup_queue(3)]
 
-    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q1.id, q2.id])
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(m1.client, [
+               %{id: q1.id, version: q1.version},
+               %{id: q2.id, version: q2.version}
+             ])
 
     assert %{"commandId" => "matchmaking/queuesJoined"} =
              Tachyon.recv_message!(m2.client)
@@ -85,7 +101,8 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     {_party_id, [m1, m2], [invited]} = setup_party(2, 1)
     [q1] = [setup_queue(2)]
 
-    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q1.id])
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(m1.client, [%{id: q1.id, version: q1.version}])
 
     assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(invited.client)
     assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(m1.client)
@@ -101,7 +118,9 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     [q1] = [setup_queue(2)]
 
     invited = setup_client()
-    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q1.id])
+
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(m1.client, [%{id: q1.id, version: q1.version}])
 
     assert %{"status" => "failed", "reason" => "invalid_request"} =
              Tachyon.invite_to_party!(m1.client, invited.user.id)
@@ -110,7 +129,9 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
   test "leave matchmaking when creating a party" do
     founder = setup_client()
     [q1] = [setup_queue(2)]
-    assert %{"status" => "success"} = Tachyon.join_queues!(founder.client, [q1.id])
+
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(founder.client, [%{id: q1.id, version: q1.version}])
 
     assert %{"status" => "success"} = Tachyon.create_party!(founder.client)
 
@@ -122,7 +143,9 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     [q1] = [setup_queue(2)]
     to_invite = setup_client()
 
-    assert %{"status" => "success"} = Tachyon.join_queues!(to_invite.client, [q1.id])
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(to_invite.client, [%{id: q1.id, version: q1.version}])
+
     assert %{"status" => "success"} = Tachyon.invite_to_party!(founder.client, to_invite.user.id)
     assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(to_invite.client)
     assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(founder.client)
@@ -139,7 +162,9 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     {_party_id, [m1, m2], _} = setup_party(2, 0)
     [q1, q2] = [setup_queue(2), setup_queue(3)]
 
-    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q1.id])
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(m1.client, [%{id: q1.id, version: q1.version}])
+
     assert %{"commandId" => "matchmaking/queuesJoined"} = Tachyon.recv_message!(m2.client)
 
     Process.exit(q1.pid, :exit)
@@ -147,13 +172,14 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(m2.client)
 
     # can still join the other queue
-    assert %{"status" => "success"} = Tachyon.join_queues!(m1.client, [q2.id])
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(m1.client, [%{id: q2.id, version: q2.version}])
+
     assert %{"commandId" => "matchmaking/queuesJoined"} = Tachyon.recv_message!(m2.client)
   end
 
   # setup n members and m invited users to a party
   defp setup_party(n_members, n_invited) do
-    # start = :erlang.monotonic_time(:millisecond)
     founder = setup_client()
 
     members =
@@ -197,8 +223,6 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
       Enum.map(members ++ invited, fn m -> Task.async(fn -> Tachyon.drain(m.client) end) end)
     )
 
-    # duration = :erlang.monotonic_time(:millisecond) - start
-    # IO.puts("setup party took #{duration} ms")
     {party_id, members, invited}
   end
 
@@ -225,11 +249,11 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
       maps: Teiserver.Asset.get_maps_for_queue(queue_id)
     }
 
-    {:ok, pid} =
-      QueueServer.init_state(map_attrs)
-      |> QueueSupervisor.start_queue!()
+    state = QueueServer.init_state(map_attrs)
+    {:ok, pid} = QueueSupervisor.start_queue!(state)
+    version = state.queue.version
 
-    %{id: queue_id, pid: pid}
+    %{id: queue_id, pid: pid, version: version}
   end
 
   defp setup_client() do

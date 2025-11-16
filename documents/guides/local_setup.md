@@ -87,6 +87,19 @@ iex -S mix phx.server
 ```
 If all goes to plan you should be able to access your site locally at [http://localhost:4000/](http://localhost:4000/).
 
+### Release version
+```bash
+MIX_ENV=prod mix release --overwrite
+set -o allexport; source teiserver.env; set +o allexport
+_build/prod/rel/teiserver/bin/teiserver start
+# or if you also want a shell
+_build/prod/rel/teiserver/bin/teiserver start_iex
+```
+
+This should start the server in "production mode", which is useful when doing
+performance testing to avoid module loading issues with iex.
+
+
 ## Configuration
 Most of the configuration takes place in [config/config.exs](config/config.exs) with the other config files overriding for specific environments. The first block of `config.exs` contains a bunch of keys and values, which you can update.
 

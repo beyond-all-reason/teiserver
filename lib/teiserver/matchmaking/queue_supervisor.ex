@@ -29,6 +29,7 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
         team_count: 2,
         engines: engines,
         games: games,
+        maps: Asset.get_maps_for_queue("1v1"),
         algo: :bruteforce_filter
       }),
       QueueServer.init_state(%{
@@ -38,6 +39,7 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
         team_count: 2,
         engines: engines,
         games: games,
+        maps: Asset.get_maps_for_queue("2v2"),
         algo: :bruteforce_filter
       })
     ]

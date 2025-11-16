@@ -25,6 +25,9 @@ defmodule Teiserver.TachyonLobby.Registry do
     end
   end
 
+  @spec count() :: non_neg_integer()
+  def count(), do: Horde.Registry.count(__MODULE__)
+
   @spec list_lobbies() :: [{Lobby.id(), pid()}]
   def list_lobbies() do
     Horde.Registry.select(__MODULE__, [{{:"$1", :"$2", :_}, [], [{{:"$1", :"$2"}}]}])

@@ -33,7 +33,9 @@ defmodule Teiserver.TachyonLobby.List do
   @typep state :: %{
            monitors: MC.t(),
            counter: non_neg_integer(),
-           lobbies: %{Lobby.id() => overview()}
+           lobbies: %{Lobby.id() => overview()},
+           # the map is a partial overview
+           changes: %{Lobby.id() => map()}
          }
 
   @doc """
@@ -96,9 +98,15 @@ defmodule Teiserver.TachyonLobby.List do
   @impl true
   @spec init(term()) :: {:ok, state(), {:continue, term()}}
   def init(_) do
-    state = %{monitors: MC.new(), counter: 0, lobbies: %{}}
+    :timer.send_interval(5_000, :broadcast_updates)
+    state = %{monitors: MC.new(), counter: 0, lobbies: %{}, changes: %{}}
     {:ok, state, {:continue, :bootstrap_state}}
   end
+
+  @doc """
+  used in tests to force the update instead of waiting for the timer
+  """
+  def broadcast_updates(), do: Process.whereis(__MODULE__) |> send(:broadcast_updates)
 
   @impl true
   def handle_continue(:bootstrap_state, state) do
@@ -132,7 +140,7 @@ defmodule Teiserver.TachyonLobby.List do
       lobbies: lobbies
     })
 
-    {:noreply, %{monitors: monitors, counter: counter, lobbies: lobbies}}
+    {:noreply, %{state | monitors: monitors, counter: counter, lobbies: lobbies}}
   end
 
   @impl true
@@ -162,13 +170,9 @@ defmodule Teiserver.TachyonLobby.List do
       state
       |> Map.update!(:counter, &(&1 + 1))
       |> update_in([:lobbies, lobby_id], fn overview -> Map.merge(overview, changes) end)
-
-    PubSubHelper.broadcast(@update_topic, %{
-      event: :update_lobby,
-      counter: state.counter,
-      lobby_id: lobby_id,
-      changes: changes
-    })
+      |> Map.update!(:changes, fn chs ->
+        Map.update(chs, lobby_id, changes, &Map.merge(&1, changes))
+      end)
 
     {:noreply, state}
   end
@@ -180,6 +184,7 @@ defmodule Teiserver.TachyonLobby.List do
     state =
       Map.update!(state, :monitors, &MC.demonitor_by_val(&1, lobby_id))
       |> Map.update!(:lobbies, &Map.delete(&1, lobby_id))
+      |> Map.update!(:changes, &Map.delete(&1, lobby_id))
       |> Map.update!(:counter, &(&1 + 1))
 
     PubSubHelper.broadcast(@update_topic, %{
@@ -189,5 +194,17 @@ defmodule Teiserver.TachyonLobby.List do
     })
 
     {:noreply, state}
+  end
+
+  def handle_info(:broadcast_updates, state) do
+    if state.changes != %{} do
+      PubSubHelper.broadcast(@update_topic, %{
+        event: :update_lobbies,
+        counter: state.counter,
+        changes: state.changes
+      })
+    end
+
+    {:noreply, Map.replace!(state, :changes, %{})}
   end
 end

@@ -18,11 +18,28 @@
             "properties": {
                 "queues": {
                     "type": "array",
-                    "items": { "type": "string" },
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": { "type": "string" },
+                            "version": { "type": "string" }
+                        },
+                        "required": ["id", "version"]
+                    },
                     "minItems": 1
                 }
             },
-            "required": ["queues"]
+            "required": ["queues"],
+            "examples": [
+                {
+                    "queues": [
+                        {
+                            "id": "1v1",
+                            "version": "27n6cr76nyfqic73647c1328c94"
+                        }
+                    ]
+                }
+            ]
         }
     },
     "required": ["type", "messageId", "commandId", "data"]

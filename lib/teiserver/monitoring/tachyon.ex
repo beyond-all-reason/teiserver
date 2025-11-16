@@ -7,6 +7,7 @@ defmodule Teiserver.Monitoring.Tachyon do
 
   @tachyon_player_metrics_event_name [:prom_ex, :plugin, :tachyon, :player]
   @tachyon_party_metrics_event_name [:prom_ex, :plugin, :tachyon, :party]
+  @tachyon_lobby_metrics_event_name [:prom_ex, :plugin, :tachyon, :lobby]
 
   @impl true
   def event_metrics(_opts) do
@@ -66,7 +67,8 @@ defmodule Teiserver.Monitoring.Tachyon do
     poll_rate = Keyword.get(opts, :poll_rate, 5_000)
 
     [
-      tachyon_player_metrics(poll_rate)
+      tachyon_player_metrics(poll_rate),
+      tachyon_lobby_metrics(poll_rate)
     ]
   end
 
@@ -92,6 +94,22 @@ defmodule Teiserver.Monitoring.Tachyon do
     )
   end
 
+  defp tachyon_lobby_metrics(poll_rate) do
+    Polling.build(
+      :teiserver_tachyon_lobby_polling_metrics,
+      poll_rate,
+      {__MODULE__, :execute_tachyon_lobby_metrics, []},
+      [
+        last_value(
+          [:teiserver, :tachyon, :lobby, :count],
+          event_name: @tachyon_lobby_metrics_event_name,
+          description: "how many custom lobbies",
+          measurement: :count
+        )
+      ]
+    )
+  end
+
   @doc false
   def execute_tachyon_player_metrics() do
     player_count = Teiserver.Player.connected_count()
@@ -99,5 +117,11 @@ defmodule Teiserver.Monitoring.Tachyon do
 
     party_count = Teiserver.Party.count()
     :telemetry.execute(@tachyon_party_metrics_event_name, %{count: party_count}, %{})
+  end
+
+  @doc false
+  def execute_tachyon_lobby_metrics() do
+    lobby_count = Teiserver.TachyonLobby.count()
+    :telemetry.execute(@tachyon_lobby_metrics_event_name, %{count: lobby_count}, %{})
   end
 end

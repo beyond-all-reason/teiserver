@@ -27,14 +27,14 @@ defmodule Teiserver.Player.Session do
           :no_matchmaking
           | {:searching,
              %{
-               joined_queues: nonempty_list(Matchmaking.queue_id())
+               joined_queues: nonempty_list({Matchmaking.queue_id(), version :: String.t()})
              }}
           | {:pairing,
              %{
-               paired_queue: Matchmaking.queue_id(),
+               paired_queue: {Matchmaking.queue_id(), version :: String.t()},
                room: pid(),
                # a list of the other queues to rejoin in case the pairing fails
-               frozen_queues: [Matchmaking.queue_id()],
+               frozen_queues: [{Matchmaking.queue_id(), version :: String.t()}],
                readied: boolean(),
                battle_password: String.t()
              }}
@@ -150,7 +150,8 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), :disconnect)
   end
 
-  @spec join_queues(T.userid(), [Matchmaking.queue_id()]) :: :ok | Matchmaking.join_error()
+  @spec join_queues(T.userid(), [{Matchmaking.queue_id(), version :: String.t()}]) ::
+          :ok | Matchmaking.join_error()
   def join_queues(user_id, queue_ids) do
     GenServer.call(via_tuple(user_id), {:matchmaking, {:join_queues, queue_ids}})
   end
@@ -414,7 +415,11 @@ defmodule Teiserver.Player.Session do
     GenServer.cast(via_tuple(user_id), {:party, {:removed, party_state}})
   end
 
-  @spec party_notify_join_queues(T.userid(), [Matchmaking.queue_id()], Party.state()) :: :ok
+  @spec party_notify_join_queues(
+          T.userid(),
+          [{Matchmaking.queue_id(), version :: String.t()}],
+          Party.state()
+        ) :: :ok
   def party_notify_join_queues(user_id, queues, party_state) do
     GenServer.cast(via_tuple(user_id), {:party, {:join_queues, queues, party_state}})
   end
@@ -565,12 +570,12 @@ defmodule Teiserver.Player.Session do
   def handle_call({:matchmaking, {:join_queues, []}}, _from, state),
     do: {:reply, {:error, :invalid_request}, state}
 
-  def handle_call({:matchmaking, {:join_queues, queue_ids}}, _from, state) do
+  def handle_call({:matchmaking, {:join_queues, queues}}, _from, state) do
     case state.matchmaking do
       :no_matchmaking ->
         case state.party.current_party do
           nil ->
-            case join_matchmaking(queue_ids, state) do
+            case join_matchmaking(queues, state) do
               {:ok, new_state} ->
                 {:reply, :ok, new_state}
 
@@ -579,8 +584,8 @@ defmodule Teiserver.Player.Session do
             end
 
           party_id ->
-            with :ok <- Party.join_queues(party_id, queue_ids),
-                 {:ok, new_state} <- join_matchmaking(queue_ids, state) do
+            with :ok <- Party.join_queues(party_id, queues),
+                 {:ok, new_state} <- join_matchmaking(queues, state) do
               {:reply, :ok, new_state}
             else
               {:error, reason} -> {:reply, {:error, reason}, state}
@@ -1053,16 +1058,16 @@ defmodule Teiserver.Player.Session do
         {:matchmaking, {:notify_found, queue_id, room_pid, timeout_ms}},
         %{matchmaking: {:searching, %{joined_queues: joined}}} = state
       ) do
-    if Enum.find(joined, &(&1 == queue_id)) == nil do
+    if Enum.find(joined, fn {qid, _} -> qid == queue_id end) == nil do
       {:noreply, state}
     else
       state = send_to_player(state, {:matchmaking, {:notify_found, queue_id, timeout_ms}})
 
       {[paired_queue], other_queues} =
-        Enum.split_with(joined, fn qid -> qid == queue_id end)
+        Enum.split_with(joined, fn {qid, _} -> qid == queue_id end)
 
       monitors =
-        Enum.reduce(other_queues, state.monitors, fn qid, monitors ->
+        Enum.reduce(other_queues, state.monitors, fn {qid, _}, monitors ->
           Matchmaking.leave_queue(qid, state.user.id)
           MC.demonitor_by_val(monitors, {:mm_queue, qid}, [:flush])
         end)
@@ -1090,6 +1095,7 @@ defmodule Teiserver.Player.Session do
     # match the same player at the same time.
     # Do log it since it should not happen too often unless something is wrong
     Logger.info("Got a matchmaking found but in state #{inspect(state.matchmaking)}")
+    IO.puts("Got a matchmaking found but in state #{inspect(state.matchmaking)}")
 
     Matchmaking.cancel(room_pid, state.user.id)
     {:noreply, state}
@@ -1335,9 +1341,11 @@ defmodule Teiserver.Player.Session do
       :no_matchmaking ->
         case join_matchmaking(queues, state) do
           {:ok, new_state} ->
+            queue_ids = Enum.map(queues, &elem(&1, 0))
+
             new_state =
               put_in(new_state.party.version, party_state.version)
-              |> send_to_player({:matchmaking, {:queues_joined, queues}})
+              |> send_to_player({:matchmaking, {:queues_joined, queue_ids}})
 
             {:noreply, new_state}
 
@@ -1538,8 +1546,8 @@ defmodule Teiserver.Player.Session do
       :add_lobby ->
         send_to_player!({:lobby_list, {:add_lobby, ev.lobby_id, ev.overview}}, state)
 
-      :update_lobby ->
-        send_to_player!({:lobby_list, {:update_lobby, ev.lobby_id, ev.changes}}, state)
+      :update_lobbies ->
+        send_to_player!({:lobby_list, {:update_lobbies, ev.changes}}, state)
 
       :remove_lobby ->
         send_to_player!({:lobby_list, {:remove_lobby, ev.lobby_id}}, state)
@@ -1560,8 +1568,8 @@ defmodule Teiserver.Player.Session do
 
   # assume all checks have been done, and make the current player join
   # the specified queues, modifying the state accordingly and returning it
-  defp join_matchmaking(queue_ids, state) do
-    case join_all_queues(state.user.id, state.party.current_party, state.monitors, queue_ids, []) do
+  defp join_matchmaking(queues, state) do
+    case join_all_queues(state.user.id, state.party.current_party, state.monitors, queues, []) do
       {:ok, monitors, joined} ->
         new_mm_state = {:searching, %{joined_queues: joined}}
 
@@ -1577,14 +1585,20 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  @spec join_all_queues(T.userid(), Party.id() | nil, MC.t(), [Matchmaking.queue_id()], [
-          Matchmaking.queue_id()
-        ]) ::
+  @spec join_all_queues(
+          T.userid(),
+          Party.id() | nil,
+          MC.t(),
+          [{Matchmaking.queue_id(), version :: String.t()}],
+          [{Matchmaking.queue_id(), version :: String.t()}]
+        ) ::
           {:ok, MC.t(), [Matchmaking.queue_id()]} | Matchmaking.join_error()
   defp join_all_queues(_user_id, _party_id, monitors, [], joined), do: {:ok, monitors, joined}
 
   defp join_all_queues(user_id, party_id, monitors, [to_join | rest], joined) do
-    case Matchmaking.join_queue(to_join, user_id, party_id) do
+    {qid, version} = to_join
+
+    case Matchmaking.join_queue(qid, version, user_id, party_id) do
       {:ok, queue_pid} ->
         monitors = MC.monitor(monitors, queue_pid, {:mm_queue, to_join})
         join_all_queues(user_id, party_id, monitors, rest, [to_join | joined])
@@ -1592,7 +1606,7 @@ defmodule Teiserver.Player.Session do
       # the `queue` message is all or nothing, so if joining a later queue need
       # to leave the queues already joined
       {:error, reason} ->
-        Enum.each(joined, fn qid ->
+        Enum.each(joined, fn {qid, _} ->
           Matchmaking.leave_queue(qid, user_id)
           MC.demonitor_by_val(monitors, {:mm_queue, qid}, [:flush])
         end)
@@ -1624,7 +1638,7 @@ defmodule Teiserver.Player.Session do
     # what should be done in that case
     monitors =
       Enum.reduce(queues_to_leave, state.monitors, fn
-        qid, monitors ->
+        {qid, _version}, monitors ->
           Matchmaking.leave_queue(qid, state.user.id)
           MC.demonitor_by_val(monitors, {:mm_queue, qid}, [:flush])
       end)
