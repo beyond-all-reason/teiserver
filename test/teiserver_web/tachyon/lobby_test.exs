@@ -416,6 +416,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "subscribe list updates", %{client: client} do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+      ExUnit.Callbacks.start_link_supervised!({Task, &continuously_send_list_update/0})
 
       %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => %{}}} =
         Tachyon.recv_message!(client)
@@ -498,6 +499,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "start battle", %{client: client} = ctx do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+      ExUnit.Callbacks.start_link_supervised!({Task, &continuously_send_list_update/0})
       %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
 
       # create lobby with another client so that only list updates are sent to
@@ -626,5 +628,12 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       Teiserver.AssetFixtures.create_engine(%{name: "test-lobby-engine", in_matchmaking: true})
 
     {:ok, game: game, engine: engine}
+  end
+
+  # to force the list update without having to rely on a slow update timer
+  defp continuously_send_list_update() do
+    Teiserver.TachyonLobby.List.broadcast_updates()
+    :timer.sleep(10)
+    continuously_send_list_update()
   end
 end
