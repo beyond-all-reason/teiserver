@@ -5,7 +5,7 @@
 If you run your local Teiserver, you can connect to it through a client like Chobby by changing the server address to `localhost` and logging in. However, there won't see any lobbies. Lobbies are hosted and managed by SPADS so you will need to set it up first if you wish to work with them.
 
 ## SPADS installation
-There are several ways to install SPADS, but the recommended method when using Teiserver and Beyond All Reason is to follow the local testing instructions in the [Ansible SPADS Setup](https://github.com/beyond-all-reason/ansible-spads-setup?tab=readme-ov-file#ansible-spads-setup). This Ansible playbook is up to date and used for production setups. It automates most of the installation and setup process and is significantly faster than doing it manually.
+There are several ways to install SPADS, but the recommended method when using Teiserver and Beyond All Reason is to follow the local testing instructions in the [Ansible SPADS Setup](https://github.com/beyond-all-reason/ansible-spads-setup?tab=readme-ov-file#local-testing). This Ansible playbook is up to date and used for production setups. It automates most of the installation and setup process and is significantly faster than doing it manually.
 
 
 > [!IMPORTANT]
