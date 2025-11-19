@@ -5,8 +5,6 @@ defmodule Teiserver.Moderation.ReportGroup do
   schema "moderation_report_groups" do
     belongs_to :match, Teiserver.Battle.Match
 
-    field :report_count, :integer, default: 0
-    field :action_count, :integer, default: 0
     field :type, :string
     field :closed, :boolean, default: false
 
