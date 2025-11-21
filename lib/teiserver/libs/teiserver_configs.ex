@@ -294,7 +294,7 @@ defmodule Teiserver.TeiserverConfigs do
       section: "Login",
       type: "integer",
       permissions: ["Admin"],
-      description: "The cap for number of concurrent users, set to 0 to be infinite",
+      description: "The cap for number of concurrent users",
       default: 1000,
       value_label: ""
     })
