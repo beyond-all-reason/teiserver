@@ -17,7 +17,7 @@ defmodule Teiserver.OAuth.Code do
         }
 
   schema "oauth_codes" do
-    field :value, :string
+    field :value, :string, redact: true
     belongs_to :owner, Teiserver.Account.User, primary_key: true
     belongs_to :application, OAuth.Application, primary_key: true
     field :scopes, {:array, :string}
@@ -53,5 +53,12 @@ defmodule Teiserver.OAuth.Code do
       :challenge_method
     ])
     |> Ecto.Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
+    |> hash_code()
   end
+
+  defp hash_code(%Ecto.Changeset{valid?: true, changes: %{value: value}} = changeset) do
+    change(changeset, value: Teiserver.Helper.HashHelper.hash_with_fixed_salt(value))
+  end
+
+  defp hash_code(changeset), do: changeset
 end
