@@ -54,7 +54,7 @@ defmodule Teiserver.SpringTcpServerTest do
     [agreement_full, agreement_empty, agreement_end | _] = String.split(reply, "\n")
 
     assert agreement_full ==
-             "AGREEMENT User agreement goes here."
+             "AGREEMENT A verification code has been sent to your email address. Please read our terms of service at https://beyondallreason.info/privacy_policy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
 
     assert agreement_empty == "AGREEMENT "
     assert agreement_end == "AGREEMENTEND"
