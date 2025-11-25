@@ -52,8 +52,7 @@ config :teiserver, Teiserver,
   node_name: Teiserver.ConfigHelpers.get_env("TEI_NODE_NAME", "local"),
   enable_managed_lobbies: true,
   user_agreement:
-    Application.get_env(:teiserver, Teiserver)[:user_agreement] ||
-      "A verification code has been sent to your email address. Please read our terms of service at https://#{domain_name}/privacy_policy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
+    "A verification code has been sent to your email address. Please read our terms of service at https://#{domain_name}/privacy_policy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
 
 repo_env = Application.get_env(:teiserver, Teiserver.Repo)
 
