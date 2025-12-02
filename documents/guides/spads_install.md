@@ -111,7 +111,8 @@ The first time you do this it will ask you to run it again with a parameter to t
 ## Launch the lobby
 Run Beyond All Reason exe. Login as a user (but not the SPADS bot). You can go back to TeiServer to see the list of users. Use `password` as the password. If all is well, you should be able to see a battle room when you login to multiplayer.
 
-# Potential Errors
+## Potential Errors
+
 ### Geo IP Errors when you start a match
 You may get an error to do with geoip when you start a match. In that case, go to [localhost:4000](http://localhost:4000)
 Admin > Site Config > System
