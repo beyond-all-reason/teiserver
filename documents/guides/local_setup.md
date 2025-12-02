@@ -8,9 +8,14 @@ You can use [mise](https://mise.jdx.dev/dev-tools/) to automatically manage the
 dependencies and application tasks, this method streamlines the development
 setup.
 
-- Run `mise setup`
-- Run `mise run 'setup:certs:*'` (optional, creates ssl/tls certificates,
-requires openssl installed). Note this step might take a while to finish.
+Run `mise setup`.
+
+This should:
+
+- Configure a local postgres installation at `tmp/postgres` that can be managed
+with `mise pg:start` and `mise pg:stop`.
+- Set up the encryption certificates.
+- Create and migrate the development and test databases for teiserver.
 
 ## Manual setup
 

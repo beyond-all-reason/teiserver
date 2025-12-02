@@ -1,5 +1,3 @@
-If you've not already setup your server you might want to check out [documents/guides/production_setup_linux.md](/documents/guides/production_setup_linux.md).
-
 ### Requirements
 - A production server setup
 - Locally running Elixir

@@ -128,12 +128,8 @@ sequenceDiagram
 Lobbies monitor the player session process to check if they are still connected.
 When that process dies, the player should be removed from the lobby.
 
-
-
-
 ## Matchmaking, player and lobby interactions
 
-Matchmaking can be done using the approach described in [the matchmaking dev guide](./matchmaking.md).
 A matchmaking queue is a process, global across the cluster, spawned at startup.
 For MVP the queue is a single process, but this could be partitionned by buckets later.
 For MVP, the queues will be hardcoded, but that could be DB driven in the future.
