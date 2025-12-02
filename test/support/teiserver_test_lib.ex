@@ -1,6 +1,6 @@
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
-  alias Teiserver.{Client, CacheUser, Account}
+  alias Teiserver.{Client, CacheUser, Account, SpringTcpServer}
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Coordinator.CoordinatorServer
   alias Teiserver.Data.Types, as: T
@@ -8,7 +8,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   @spec raw_setup :: %{socket: port()}
   def raw_setup() do
-    {:ok, socket} = :gen_tcp.connect(@host, 9200, active: false)
+    {:ok, socket} = :gen_tcp.connect(@host, get_listener_port(:tcp), active: false)
     %{socket: socket}
   end
 
@@ -17,12 +17,19 @@ defmodule Teiserver.TeiserverTestLib do
   @spec spring_tls_setup :: %{socket: port()}
   def spring_tls_setup() do
     {:ok, socket} =
-      :ssl.connect(@host, 9201,
+      :ssl.connect(
+        @host,
+        get_listener_port(:tls),
         active: false,
         verify: :verify_none
       )
 
     %{socket: socket}
+  end
+
+  def get_listener_port(transport_type) do
+    SpringTcpServer.get_listener_socket_opts(transport_type)
+    |> Keyword.fetch!(:port)
   end
 
   @spec new_user_name :: String.t()
@@ -60,8 +67,8 @@ defmodule Teiserver.TeiserverTestLib do
     end
   end
 
-  @spec async_auth_setup(module(), nil | map()) :: %{user: map(), state: map()}
-  def async_auth_setup(protocol, user \\ nil) do
+  @spec async_auth_setup(map() | nil) :: %{user: map(), state: map()}
+  def async_auth_setup(user \\ nil) do
     user = if user, do: user, else: new_user()
 
     token = CacheUser.create_token(user)
@@ -73,8 +80,7 @@ defmodule Teiserver.TeiserverTestLib do
 
     Client.login(user, :test, "127.0.0.1")
 
-    state = mock_async_state(protocol.protocol_in(), protocol.protocol_out(), user)
-    %{user: user, state: state}
+    %{user: user, state: mock_async_state(user)}
   end
 
   @spec auth_setup(nil | map()) :: %{socket: port(), user: map(), pid: pid()}
@@ -112,10 +118,6 @@ defmodule Teiserver.TeiserverTestLib do
     # that time, the test has ended and the SQL sandbox closed.
     ExUnit.Callbacks.on_exit(fn -> Teiserver.Client.disconnect(user.id) end)
     %{socket: socket, user: user, pid: pid}
-  end
-
-  def _send_lines(%{mock: true} = state, msg) do
-    state.protocol_in.data_in(msg, state)
   end
 
   def _send_raw({:sslsocket, _, _} = socket, msg) do
@@ -209,8 +211,8 @@ defmodule Teiserver.TeiserverTestLib do
     }
   end
 
-  def mock_state_raw(protocol_in, protocol_out, socket \\ nil) do
-    socket = if socket, do: socket, else: mock_socket()
+  def mock_state_raw() do
+    socket = mock_socket()
 
     %{
       # Connection state
@@ -218,8 +220,6 @@ defmodule Teiserver.TeiserverTestLib do
       last_msg: System.system_time(:second) - 5,
       socket: socket,
       transport: socket.transport,
-      protocol_in: protocol_in,
-      protocol_out: protocol_out,
       ip: "127.0.0.1",
 
       # Client state
@@ -242,8 +242,8 @@ defmodule Teiserver.TeiserverTestLib do
     }
   end
 
-  def mock_state_auth(protocol_in, protocol_out, socket \\ nil) do
-    socket = if socket, do: socket, else: mock_socket()
+  def mock_state_auth(opts \\ %{}) do
+    socket = mock_socket()
     user = new_user()
     Client.login(user, :test, "127.0.0.1")
 
@@ -253,8 +253,6 @@ defmodule Teiserver.TeiserverTestLib do
       last_msg: System.system_time(:second) - 5,
       socket: socket,
       transport: socket.transport,
-      protocol_in: protocol_in,
-      protocol_out: protocol_out,
       ip: "127.0.0.1",
 
       # Client state
@@ -273,6 +271,7 @@ defmodule Teiserver.TeiserverTestLib do
       exempt_from_cmd_throttle: true,
       script_password: nil
     }
+    |> Map.merge(opts)
   end
 
   defp make_async_transport() do
@@ -283,7 +282,7 @@ defmodule Teiserver.TeiserverTestLib do
     }
   end
 
-  def mock_async_state(protocol_in, protocol_out, user \\ nil) do
+  def mock_async_state(user \\ nil) do
     socket = mock_socket()
     user = if user, do: user, else: new_user()
 
@@ -297,8 +296,6 @@ defmodule Teiserver.TeiserverTestLib do
       last_msg: System.system_time(:second) - 5,
       socket: socket,
       transport: make_async_transport(),
-      protocol_in: protocol_in,
-      protocol_out: protocol_out,
       ip: "127.0.0.1",
 
       # Client state

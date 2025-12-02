@@ -12,182 +12,33 @@ defmodule Teiserver.SpringTcpServer do
   @init_timeout 60_000
 
   @behaviour :ranch_protocol
-  @spec get_ssl_opts :: [
-          {:cacertfile, String.t()} | {:certfile, String.t()} | {:keyfile, String.t()}
-        ]
-  def get_ssl_opts() do
-    {certfile, cacertfile, keyfile} = {
-      Application.get_env(:teiserver, Teiserver)[:certs][:certfile],
-      Application.get_env(:teiserver, Teiserver)[:certs][:cacertfile],
-      Application.get_env(:teiserver, Teiserver)[:certs][:keyfile]
-    }
-
-    [
-      certfile: certfile,
-      cacertfile: cacertfile,
-      keyfile: keyfile
-    ]
-  end
-
-  def get_standard_tcp_opts() do
-    [
-      max_connections: :infinity,
-      nodelay: false,
-      delay_send: true
-    ]
-  end
-
-  # Called at startup
-  def start_link(opts) do
-    use_tls? = Application.get_env(:teiserver, Teiserver)[:use_tls?]
-
-    # start_listener(Ref, Transport, TransOpts0, Protocol, ProtoOpts)
-    case {use_tls?, Keyword.get(opts, :ssl, false)} do
-      {_, false} ->
-        :ranch.start_listener(
-          make_ref(),
-          :ranch_tcp,
-          get_standard_tcp_opts() ++
-            [
-              port: Application.get_env(:teiserver, Teiserver)[:ports][:tcp]
-            ],
-          __MODULE__,
-          []
-        )
-
-      {false, true} ->
-        Logger.info("not using ssl, bailing out of ssl listener")
-        :ignore
-
-      {true, true} ->
-        ssl_opts = get_ssl_opts()
-
-        :ranch.start_listener(
-          make_ref(),
-          :ranch_ssl,
-          ssl_opts ++
-            get_standard_tcp_opts() ++
-            [
-              port: Application.get_env(:teiserver, Teiserver)[:ports][:tls]
-            ],
-          __MODULE__,
-          []
-        )
-    end
-  end
 
   # Called on new connection
+  # NOTE: socket arg is deprecated since ranch 1.6 and was removed on 2.0
+  # we use :ranch.handshake to retrieve it instead
   @impl true
-  def start_link(ref, socket, transport, _opts) do
-    pid = :proc_lib.spawn_link(__MODULE__, :init, [ref, socket, transport])
+  def start_link(ref, _socket, transport, opts) do
+    pid = :proc_lib.spawn_link(__MODULE__, :init, [ref, transport, opts])
     {:ok, pid}
   end
 
-  def init(ref, socket, transport) do
+  def init(ref, transport, _opts) do
     Process.flag(
       :max_heap_size,
       Config.get_site_config_cache("teiserver.Sprint TCP Server max heap size")
     )
 
-    # If we've not started up yet, lets just delay for a moment
-    # for some of the stuff to get sorted
-    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
-         true do
-      :timer.sleep(1000)
-    end
+    state = init_state(ref, transport)
 
-    {:ok, {ip, _}} = transport.peername(socket)
+    case Teiserver.Config.get_site_config_cache("system.Redirect url") do
+      nil ->
+        loop(state)
 
-    ip =
-      ip
-      |> Tuple.to_list()
-      |> Enum.join(".")
+      redirect_ip ->
+        redirect_args = {redirect_ip, get_redirect_port(state)}
+        SpringOut.reply(:redirect, redirect_args, nil, state)
 
-    :ranch.accept_ack(ref)
-    transport.setopts(socket, [{:active, true}])
-
-    heartbeat = Application.get_env(:teiserver, Teiserver)[:heartbeat_interval]
-
-    if heartbeat do
-      :timer.send_interval(heartbeat, self(), :heartbeat)
-    end
-
-    :timer.send_interval(60_000, self(), :message_count)
-
-    # Set nodelay and delay_send values as the opts above don't always seem to do it
-    case socket do
-      {:sslsocket, {:gen_tcp, port, _, _}, _} ->
-        :inet.setopts(port, [{:nodelay, false}, {:delay_send, true}])
-
-      _ ->
-        :inet.setopts(socket, [{:nodelay, false}, {:delay_send, true}])
-    end
-
-    state = %{
-      # Connection state
-      message_part: "",
-      last_msg: System.system_time(:second),
-      socket: socket,
-      transport: transport,
-      protocol_in:
-        Application.get_env(:teiserver, Teiserver)[:default_spring_protocol].protocol_in(),
-      protocol_out:
-        Application.get_env(:teiserver, Teiserver)[:default_spring_protocol].protocol_out(),
-      ip: ip,
-
-      # Client state
-      userid: nil,
-      username: nil,
-      lobby_host: false,
-      user: nil,
-      queues: [],
-      ready_queue_id: nil,
-      queued_userid: nil,
-
-      # Connection microstate
-      msg_id: nil,
-      lobby_id: nil,
-      party_id: nil,
-      room_member_cache: %{},
-      known_users: %{},
-      known_battles: [],
-      print_client_messages: false,
-      print_server_messages: false,
-      script_password: nil,
-      exempt_from_cmd_throttle: false,
-      cmd_timestamps: [],
-      status_timestamps: [],
-      app_status: nil,
-      protocol_optimisation: :full,
-      pending_messages: [],
-
-      # Caching app configs
-      flood_rate_limit_count:
-        Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
-      flood_rate_window_size:
-        Config.get_site_config_cache("teiserver.Spring flood rate window size"),
-      last_action_timestamp: nil,
-      server_messages: 0,
-      server_batches: 0,
-      client_messages: 0
-    }
-
-    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
-
-    redirect_url = Config.get_site_config_cache("system.Redirect url")
-
-    if redirect_url != nil do
-      SpringOut.reply(:redirect, redirect_url, nil, state)
-      send(self(), :terminate)
-      state
-    else
-      send(self(), {:action, {:welcome, nil}})
-
-      if Config.get_site_config_cache("system.Disconnect unauthenticated sockets") do
-        Process.send_after(self(), :init_timeout, @init_timeout)
-      end
-
-      :gen_server.enter_loop(__MODULE__, [], state)
+        send(self(), :terminate)
     end
   end
 
@@ -305,15 +156,13 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Heartbeat allows us to kill stale connections
-  def handle_info(:heartbeat, state) do
+  def handle_info(:heartbeat, %{heartbeat_timeout: heartbeat_timeout} = state) do
     diff = System.system_time(:second) - state.last_msg
 
-    if diff > Application.get_env(:teiserver, Teiserver)[:heartbeat_timeout] do
+    if diff > heartbeat_timeout do
       SpringOut.reply(:disconnect, "Heartbeat", nil, state)
 
-      if state.username do
-        Logger.info("Heartbeat timeout for #{state.username}")
-      end
+      Logger.info("Heartbeat timeout for #{Map.get(state, :username, state.ip)}")
 
       {:stop, :normal, state}
     else
@@ -1295,9 +1144,6 @@ defmodule Teiserver.SpringTcpServer do
       :ring ->
         SpringOut.reply(:ring, {data, state.userid}, nil, state)
 
-      :welcome ->
-        SpringOut.reply(:welcome, nil, nil, state)
-
       :login_end ->
         SpringOut.reply(:login_end, nil, nil, state)
 
@@ -1382,13 +1228,9 @@ defmodule Teiserver.SpringTcpServer do
     :ok = state.transport.setopts(state.socket, [{:active, false}])
 
     ssl_opts =
-      get_ssl_opts() ++
-        [
-          {:packet, :line},
-          {:mode, :list},
-          {:verify, :verify_none},
-          {:ssl_imp, :new}
-        ]
+      get_listener_socket_opts(:tls)
+      |> Keyword.take([:certfile, :cacertfile, :keyfile])
+      |> Keyword.merge(upgrade_handshake_opts())
 
     case :ranch_ssl.handshake(state.socket, ssl_opts, 5000) do
       {:ok, new_socket} ->
@@ -1412,5 +1254,167 @@ defmodule Teiserver.SpringTcpServer do
       },
       defaults
     )
+  end
+
+  def get_listener_socket_opts(transport_type) do
+    Application.get_env(:teiserver, Teiserver.SpringTcpServer)
+    |> get_in([:listeners, transport_type, :socket_opts])
+  end
+
+  defp init_state(ref, transport) do
+    socket = init_socket(ref, transport)
+
+    {:ok, {address, port}} = transport.peername(socket)
+
+    ip =
+      Tuple.to_list(address)
+      |> Enum.join(".")
+
+    spring_config = Application.get_env(:teiserver, Teiserver.SpringTcpServer)
+
+    %{
+      # Connection state
+      message_part: "",
+      last_msg: System.system_time(:second),
+      socket: socket,
+      transport: transport,
+      ip: ip,
+      port: port,
+
+      # Client state
+      userid: nil,
+      username: nil,
+      lobby_host: false,
+      user: nil,
+      queues: [],
+      ready_queue_id: nil,
+      queued_userid: nil,
+
+      # Connection microstate
+      msg_id: nil,
+      lobby_id: nil,
+      party_id: nil,
+      room_member_cache: %{},
+      known_users: %{},
+      known_battles: [],
+      print_client_messages: false,
+      print_server_messages: false,
+      script_password: nil,
+      exempt_from_cmd_throttle: false,
+      cmd_timestamps: [],
+      status_timestamps: [],
+      app_status: nil,
+      protocol_optimisation: :full,
+      pending_messages: [],
+
+      # Caching app configs
+      flood_rate_limit_count:
+        Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
+      flood_rate_window_size:
+        Config.get_site_config_cache("teiserver.Spring flood rate window size"),
+      last_action_timestamp: nil,
+      server_messages: 0,
+      server_batches: 0,
+      client_messages: 0
+    }
+    |> Map.merge(%{
+      heartbeat_timeout: Keyword.get(spring_config, :heartbeat_timeout),
+      heartbeat_interval: Keyword.get(spring_config, :heartbeat_interval)
+    })
+  end
+
+  defp init_socket(ref, transport) do
+    {:ok, socket} = :ranch.handshake(ref)
+
+    transport.setopts(socket, [{:active, true}])
+
+    {transport_type, inet_port} = get_transport_type_port(socket)
+
+    # NOTE: Set again the opts below as via child_spec above don't always seem
+    # to do it
+    reset_opts = [nodelay: false, delay_send: true]
+
+    transport_opts =
+      get_listener_socket_opts(transport_type)
+      |> Keyword.take(Keyword.keys(reset_opts))
+
+    :inet.setopts(inet_port, Keyword.merge(reset_opts, transport_opts))
+
+    socket
+  end
+
+  defp loop(state) do
+    # If we've not started up yet, lets just delay for a moment
+    # for some of the stuff to get sorted
+    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
+         true do
+      :timer.sleep(1000)
+    end
+
+    hearbeat_interval = Map.get(state, :heartbeat_interval)
+
+    if hearbeat_interval != nil do
+      :timer.send_interval(hearbeat_interval, self(), :heartbeat)
+    end
+
+    :timer.send_interval(60_000, self(), :message_count)
+
+    :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
+
+    SpringOut.reply(:welcome, nil, nil, state)
+
+    if Config.get_site_config_cache("system.Disconnect unauthenticated sockets") do
+      Process.send_after(self(), :init_timeout, @init_timeout)
+    end
+
+    :gen_server.enter_loop(__MODULE__, [], state)
+  end
+
+  # NOTE: Should retrieve the redirection port from somewhere else, the new
+  # server is not assured to use the same port for this transport_type
+  defp get_redirect_port(state) do
+    get_transport_type_port(state.socket)
+    |> elem(0)
+    |> get_listener_socket_opts()
+    |> Keyword.fetch!(:port)
+  end
+
+  # NOTE: This is the elixir intrinsic *port* type, not the socket port
+  defp get_transport_type_port({:sslsocket, {:gen_tcp, port, _, _}, _} = _socket),
+    do: {:tls, port}
+
+  defp get_transport_type_port(port) when is_port(port),
+    do: {:tcp, port}
+
+  defp upgrade_handshake_opts() do
+    [
+      # See: https://www.erlang.org/doc/apps/kernel/inet.html#setopts/2
+      # > These packet types only have effect on receiving.
+      # > ...
+      # > On receiving, however, one message is sent to the controlling process
+      # > for each complete packet received, and, similarly, each call to
+      # > gen_tcp:recv/2,3 returns one complete packet. The header is not stripped
+      # > off.
+      # > ...
+      # > Line mode, a packet is a line-terminated with newline, lines longer
+      # > than the receive buffer are truncated
+      packet: :line,
+
+      # See: https://www.erlang.org/doc/apps/kernel/inet.html#setopts/2
+      # > Received Packet is delivered as defined by Mode.
+      #
+      # See: https://www.erlang.org/doc/apps/kernel/gen_tcp.html#listen/2
+      # > Received `Packet`s are delivered as lists of bytes,
+      mode: :list,
+
+      # FIXME: This looks sketchy!
+      # Why don't we verify the certificate when we do a TLS upgrade?
+      verify: :verify_none
+
+      # NOTE: Deprecated since OTP-17, has no effect.
+      # For newest version mentioning this option see:
+      # https://www.erlang.org/docs/22/apps/ssl/ssl.pdf
+      # ssl_imp: :new
+    ]
   end
 end

@@ -1,21 +1,21 @@
 defmodule Teiserver.Protocols.Spring.SpringBattleHostAsyncTest do
   use Teiserver.ServerCase, async: true
-  alias Teiserver.Protocols.Spring
   alias Teiserver.Client
 
   # Seems flaky on CI, but can't reproduce locally
   # https://github.com/beyond-all-reason/teiserver/actions/runs/10629702218/job/29467089868
   @moduletag :needs_attention
 
+  alias Teiserver.Protocols.SpringIn
+
   import Teiserver.TeiserverTestLib,
     only: [
-      async_auth_setup: 1,
-      _send_lines: 2,
+      async_auth_setup: 0,
       _recv_lines: 0
     ]
 
   setup do
-    %{user: user, state: state} = async_auth_setup(Spring)
+    %{user: user, state: state} = async_auth_setup()
     {:ok, state: state, user: user}
   end
 
@@ -24,11 +24,11 @@ defmodule Teiserver.Protocols.Spring.SpringBattleHostAsyncTest do
   end
 
   test "battle commands when not in a battle", %{state: state, user: user} do
-    _send_lines(state, "LEAVEBATTLE\n")
+    SpringIn.data_in("LEAVEBATTLE\n", state)
     reply = _recv_lines()
     assert reply == ""
 
-    _send_lines(state, "MYBATTLESTATUS 123 123\n")
+    SpringIn.data_in("MYBATTLESTATUS 123 123\n", state)
     reply = _recv_lines()
     teardown(user)
     assert reply == ""

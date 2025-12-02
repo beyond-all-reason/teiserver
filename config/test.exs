@@ -15,15 +15,17 @@ config :teiserver, Teiserver.Repo,
   pool_size: 50,
   timeout: 300_000
 
+config :teiserver, Teiserver.SpringTcpServer,
+  listeners: [
+    tcp: [socket_opts: [port: 9200]],
+    tls: [socket_opts: [port: 9201]]
+  ]
+
 config :teiserver, Teiserver,
   certs: [
     keyfile: "priv/certs/localhost.key",
     certfile: "priv/certs/localhost.crt",
     cacertfile: "priv/certs/localhost.crt"
-  ],
-  ports: [
-    tcp: 9200,
-    tls: 9201
   ],
   test_mode: true,
   enable_hooks: false,
@@ -46,6 +48,8 @@ config :teiserver, DiscordBridgeBot,
 config :teiserver, TeiserverWeb.Endpoint,
   url: [host: "localhost"],
   http: [port: 4002],
+  # We don't spawn the https endpoint in test
+  https: nil,
   # Spawn a real server. This is required for websocket upgrade since it
   # doesn't work with the test Plug.Conn used for "regular" http requests
   server: true

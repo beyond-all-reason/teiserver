@@ -1,12 +1,15 @@
 defmodule Teiserver.SpringTcpServerTest do
   use Teiserver.ServerCase, async: false
 
-  alias Teiserver.Account.UserCacheLib
-  alias Teiserver.{Account, Client, Room}
   require Logger
+
+  import Mock
 
   import Teiserver.TeiserverTestLib,
     only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, auth_setup: 0, new_user: 0]
+
+  alias Teiserver.Account.UserCacheLib
+  alias Teiserver.{Account, Client, Room, TeiserverTestLib}
 
   setup do
     Teiserver.Coordinator.start_coordinator()
@@ -105,6 +108,25 @@ defmodule Teiserver.SpringTcpServerTest do
     _send_raw(socket, "EXIT\n")
     _ = _recv_raw(socket)
     {:error, :closed} = :gen_tcp.recv(socket, 0, 1000)
+  end
+
+  test "when redirect site config is set sends REDIRECT and closes" do
+    redirect_ip = "1.2.3.4"
+    redirect_port = TeiserverTestLib.get_listener_port(:tcp)
+
+    with_mock(
+      Teiserver.Config,
+      [:passthrough],
+      get_site_config_cache: fn
+        "system.Redirect url" -> redirect_ip
+        other -> passthrough([other])
+      end
+    ) do
+      %{socket: socket} = raw_setup()
+
+      assert _recv_raw(socket) == "REDIRECT #{redirect_ip} #{redirect_port}\n"
+      {:error, :closed} = :gen_tcp.recv(socket, 0, 1000)
+    end
   end
 
   @tag :needs_attention
