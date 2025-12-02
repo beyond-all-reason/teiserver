@@ -7,8 +7,8 @@ helpful commands and giving you a short introduction to different Teiserver
 components.
 
 The first things you want to do is check your setup is healthy by running the
-tests and checking the Teiserver services are up and running, see [[#Testing]]
-and [[#Running Teiserver]].
+tests and checking the Teiserver services are up and running, see [testing](#testing)
+and [running Teiserver](#running-teiserver).
 
 ## Testing
 
