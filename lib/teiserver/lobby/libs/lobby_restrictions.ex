@@ -289,8 +289,11 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
       |> Map.get(:name)
 
     cond do
+      state.ranked == false ->
+        {:error, "You cannot set a limit if the lobby is unranked"}
+
       allwelcome_name?(name) ->
-        {:error, "You cannot set a rating limit if all are welcome to the game"}
+        {:error, "You cannot set a limit if all are welcome to the game"}
 
       true ->
         :ok

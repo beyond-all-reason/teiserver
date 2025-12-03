@@ -59,7 +59,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_call(:get_consul_state, _from, state) do
     result =
-      ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_uncertainty_to_play maximum_uncertainty_to_play level_to_spectate locks bans timeouts welcome_message join_queue low_priority_join_queue approved_users host_bosses host_preset host_teamsize host_teamcount player_limit)a
+      ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_uncertainty_to_play maximum_uncertainty_to_play level_to_spectate locks bans timeouts welcome_message join_queue low_priority_join_queue approved_users host_bosses host_preset host_teamsize host_teamcount player_limit ranked)a
       |> Map.new(fn key ->
         {key, Map.get(state, key)}
       end)
@@ -436,6 +436,45 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     {:noreply, state}
+  end
+
+  def handle_info(
+        %{
+          channel: "teiserver_lobby_updates",
+          event: :set_modoptions,
+          options: %{"game/modoptions/ranked_game" => ranked}
+        },
+        state
+      ) do
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+
+    if ranked == "0" do
+      new_state =
+        Map.merge(state, %{
+          minimum_rating_to_play: 0,
+          maximum_rating_to_play: LobbyRestrictions.rating_upper_bound(),
+          minimum_rank_to_play: 0,
+          maximum_rank_to_play: LobbyRestrictions.rank_upper_bound(),
+          ranked: false
+        })
+
+      {:noreply, new_state}
+    else
+      {:noreply, %{state | ranked: true}}
+    end
+  end
+
+  def handle_info(
+        %{
+          channel: "teiserver_lobby_updates",
+          event: :remove_modoptions,
+          options: %{"game/modoptions/ranked_game" => _ranked}
+        },
+        state
+      ) do
+    # Default to ranked true
+    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+    {:noreply, %{state | ranked: true}}
   end
 
   def handle_info(%{channel: "teiserver_lobby_updates"}, state) do
@@ -831,29 +870,34 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp user_allowed_to_play?(user, client, state) do
     userid = user.id
 
-    rating_check_result = LobbyRestrictions.check_rating_to_play(userid, state)
-
-    rank_check_result = LobbyRestrictions.check_rank_to_play(user, state)
-
     cond do
-      rating_check_result != :ok ->
-        {_, msg} = rating_check_result
-        CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
-        false
-
-      rank_check_result != :ok ->
-        {_, msg} = rank_check_result
-        CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
-        false
-
       not Enum.empty?(client.queues) ->
         false
 
       Account.is_moderator?(user) ->
         true
 
-      true ->
+      state.ranked == false ->
         true
+
+      true ->
+        rating_check_result = LobbyRestrictions.check_rating_to_play(userid, state)
+        rank_check_result = LobbyRestrictions.check_rank_to_play(user, state)
+
+        cond do
+          rating_check_result != :ok ->
+            {_, msg} = rating_check_result
+            CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
+            false
+
+          rank_check_result != :ok ->
+            {_, msg} = rank_check_result
+            CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
+            false
+
+          true ->
+            true
+        end
     end
   end
 
@@ -1367,7 +1411,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       balance_result: nil,
       balance_algorithm: BalanceLib.get_default_algorithm(),
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
-      showmatch: true
+      showmatch: true,
+      ranked: true
     }
   end
 
