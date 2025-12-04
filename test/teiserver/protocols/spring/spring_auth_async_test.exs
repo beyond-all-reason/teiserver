@@ -1,18 +1,17 @@
 defmodule Teiserver.SpringAuthAsyncTest do
   use Teiserver.ServerCase, async: false
   alias Teiserver.Client
-  alias Teiserver.Protocols.Spring
+  alias Teiserver.Protocols.SpringIn
 
   import Teiserver.TeiserverTestLib,
     only: [
-      async_auth_setup: 1,
-      _send_lines: 2,
+      async_auth_setup: 0,
       _recv_lines: 0,
       _recv_lines: 1
     ]
 
   setup do
-    %{user: user, state: state} = async_auth_setup(Spring)
+    %{user: user, state: state} = async_auth_setup()
     {:ok, state: state, user: user}
   end
 
@@ -21,14 +20,14 @@ defmodule Teiserver.SpringAuthAsyncTest do
   end
 
   test "PING", %{state: state, user: user} do
-    _send_lines(state, "#4 PING\n")
+    SpringIn.data_in("#4 PING\n", state)
     reply = _recv_lines()
     teardown(user)
     assert reply == "#4 PONG\n"
   end
 
   test "GETUSERINFO", %{state: state, user: user} do
-    _send_lines(state, "GETUSERINFO\n")
+    SpringIn.data_in("GETUSERINFO\n", state)
     reply = _recv_lines(3)
     teardown(user)
     assert reply =~ "SERVERMSG Registration date: "

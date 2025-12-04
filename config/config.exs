@@ -35,7 +35,54 @@ config :teiserver, TeiserverWeb.Endpoint,
   debug_errors: Config.config_env() == :dev,
   code_reloader: Config.config_env() == :dev,
   check_origin: Config.config_env() == :prod,
-  version: Mix.Project.config()[:version]
+  version: Mix.Project.config()[:version],
+  https: [
+    versions: [:"tlsv1.2"],
+    port: 8888,
+    otp_app: :teiserver,
+    ciphers: [
+      ~c"ECDHE-ECDSA-AES256-GCM-SHA384",
+      ~c"ECDHE-RSA-AES256-GCM-SHA384",
+      ~c"ECDHE-ECDSA-AES256-SHA384",
+      ~c"ECDHE-RSA-AES256-SHA384",
+      ~c"ECDHE-ECDSA-DES-CBC3-SHA",
+      ~c"ECDH-ECDSA-AES256-GCM-SHA384",
+      ~c"ECDH-RSA-AES256-GCM-SHA384",
+      ~c"ECDH-ECDSA-AES256-SHA384",
+      ~c"ECDH-RSA-AES256-SHA384",
+      ~c"DHE-DSS-AES256-GCM-SHA384",
+      ~c"DHE-DSS-AES256-SHA256",
+      ~c"AES256-GCM-SHA384",
+      ~c"AES256-SHA256",
+      ~c"ECDHE-ECDSA-AES128-GCM-SHA256",
+      ~c"ECDHE-RSA-AES128-GCM-SHA256",
+      ~c"ECDHE-ECDSA-AES128-SHA256",
+      ~c"ECDHE-RSA-AES128-SHA256",
+      ~c"ECDH-ECDSA-AES128-GCM-SHA256",
+      ~c"ECDH-RSA-AES128-GCM-SHA256",
+      ~c"ECDH-ECDSA-AES128-SHA256",
+      ~c"ECDH-RSA-AES128-SHA256",
+      ~c"DHE-DSS-AES128-GCM-SHA256",
+      ~c"DHE-DSS-AES128-SHA256",
+      ~c"AES128-GCM-SHA256",
+      ~c"AES128-SHA256",
+      ~c"ECDHE-ECDSA-AES256-SHA",
+      ~c"ECDHE-RSA-AES256-SHA",
+      ~c"DHE-DSS-AES256-SHA",
+      ~c"ECDH-ECDSA-AES256-SHA",
+      ~c"ECDH-RSA-AES256-SHA",
+      ~c"AES256-SHA",
+      ~c"ECDHE-ECDSA-AES128-SHA",
+      ~c"ECDHE-RSA-AES128-SHA",
+      ~c"DHE-DSS-AES128-SHA",
+      ~c"ECDH-ECDSA-AES128-SHA",
+      ~c"ECDH-RSA-AES128-SHA",
+      ~c"AES128-SHA"
+    ],
+    secure_renegotiate: true,
+    reuse_sessions: true,
+    honor_cipher_order: true
+  ]
 
 config :esbuild,
   version: "0.14.41",
@@ -46,28 +93,46 @@ config :esbuild,
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 
+config :teiserver, Teiserver.SpringTcpServer,
+  # Heatbeat interval in ms
+  heartbeat_interval: 30_000,
+  # Heartbeat timeout in seconds
+  heartbeat_timeout: 120,
+  # For each listener config see `:ranch.opts()`
+  # https://ninenines.eu/docs/en/ranch/2.2/manual/ranch/#_transport_opts_socketopts
+  listeners: [
+    tcp: [
+      max_connections: :infinity,
+      socket_opts: [
+        # this is may be overriden with env variable TEI_SPRING_TCP_PORT on config/runtime.exs
+        port: 8200,
+        nodelay: false,
+        delay_send: true
+      ]
+    ],
+    tls: [
+      max_connections: :infinity,
+      socket_opts: [
+        # this is may be overriden with env variable TEI_SPRING_TLS_PORT on config/runtime.exs
+        port: 8201,
+        nodelay: false,
+        delay_send: true
+      ]
+    ]
+  ]
+
 config :teiserver, Teiserver,
-  ports: [
-    tcp: 8200,
-    tls: 8201
-  ],
   website: [
     url: "mywebsite.com"
   ],
   enable_benchmark: false,
   enable_hooks: true,
-
-  # Heatbeat interval is ms
-  heartbeat_interval: 30_000,
-  # Heartbeat timeout is seconds
-  heartbeat_timeout: 120,
   test_mode: false,
   server_admin_name: "Server Admin",
   game_name: "Full game name",
   game_name_short: "Game",
   main_website: "https://site.com/",
   discord: nil,
-  default_spring_protocol: Teiserver.Protocols.Spring,
   github_repo: "https://github.com/beyond-all-reason/teiserver",
   enable_discord_bridge: true,
   enable_coordinator_mode: true,

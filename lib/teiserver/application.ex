@@ -35,7 +35,7 @@ defmodule Teiserver.Application do
         Teiserver.Repo,
         TeiserverWeb.Presence,
         {Teiserver.General.CacheClusterServer, name: Teiserver.General.CacheClusterServer},
-        {Oban, oban_config()},
+        {Oban, Application.get_env(:teiserver, Oban, [])},
 
         # Store refers to something that is typically only updated at startup
         # and should not be clustered
@@ -173,18 +173,12 @@ defmodule Teiserver.Application do
         # Start the endpoint after the rest of the systems are up
         TeiserverWeb.Endpoint,
 
-        # Ranch servers
-        %{
-          id: Teiserver.SSLSpringTcpServer,
-          start: {Teiserver.SpringTcpServer, :start_link, [[ssl: true]]}
-        },
-        %{
-          id: Teiserver.RawSpringTcpServer,
-          start: {Teiserver.SpringTcpServer, :start_link, [[]]}
-        }
+        # Start the ranch TCP listener process for the Spring protocol
+        spring_server_child(Teiserver.RawSpringTcpServer, :tcp),
+        # Start the ranch TLS listener process for the Spring protocol
+        spring_server_child(Teiserver.SSLSpringTcpServer, :tls)
       ]
-
-    children = Enum.filter(children, fn x -> not is_nil(x) end)
+      |> Enum.reject(&is_nil/1)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -218,10 +212,6 @@ defmodule Teiserver.Application do
     Teiserver.Startup.startup()
   end
 
-  defp oban_config do
-    Application.get_env(:teiserver, Oban)
-  end
-
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
   @impl true
@@ -244,5 +234,27 @@ defmodule Teiserver.Application do
     )
 
     state
+  end
+
+  def spring_server_child(ref, transport_type) do
+    Application.get_env(:teiserver, Teiserver.SpringTcpServer)
+    |> Keyword.fetch!(:listeners)
+    |> Keyword.get(transport_type, [])
+    |> spring_server_listener_child(ref, transport_type)
+  end
+
+  # When the listener is not configured we dont start the listener
+  defp spring_server_listener_child(listener_opts, _ref, _transport)
+       when listener_opts in [nil, false, []],
+       do: nil
+
+  defp spring_server_listener_child(listener_opts, ref, :tcp) when is_list(listener_opts) do
+    listener_opts = Map.new(listener_opts)
+    :ranch.child_spec(ref, :ranch_tcp, listener_opts, Teiserver.SpringTcpServer, [])
+  end
+
+  defp spring_server_listener_child(listener_opts, ref, :tls) when is_list(listener_opts) do
+    listener_opts = Map.new(listener_opts)
+    :ranch.child_spec(ref, :ranch_ssl, listener_opts, Teiserver.SpringTcpServer, [])
   end
 end

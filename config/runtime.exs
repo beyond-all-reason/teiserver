@@ -94,90 +94,78 @@ config :teiserver, TeiserverWeb.Endpoint,
       endpoint_defaults[:secret_key_base]
     )
 
-use_tls? = Teiserver.ConfigHelpers.get_env("TEI_TLS_PRIVATE_KEY_PATH", nil) != nil
-config :teiserver, Teiserver, use_tls?: use_tls?
+spring_listeners =
+  Application.get_env(:teiserver, Teiserver.SpringTcpServer)
+  |> Keyword.fetch!(:listeners)
 
 tei_defaults = Application.get_env(:teiserver, Teiserver)
 
+spring_listeners =
+  Application.get_env(:teiserver, Teiserver.SpringTcpServer)
+  |> Keyword.fetch!(:listeners)
+
+spring_listeners =
+  if Keyword.get(spring_listeners, :tcp) do
+    # If TCP listener is enabled put the port option
+    get_and_update_in(spring_listeners, [:tcp, :socket_opts, :port], fn default ->
+      {default, Teiserver.ConfigHelpers.get_env("TEI_SPRING_TCP_PORT", default, :int)}
+    end)
+    |> elem(1)
+  else
+    spring_listeners
+  end
+
+use_tls? =
+  Teiserver.ConfigHelpers.get_env("TEI_TLS_PRIVATE_KEY_PATH", nil) != nil
+
 if use_tls? do
-  certificates = [
-    keyfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_PRIVATE_KEY_PATH"),
-    certfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_CERT_PATH"),
-    cacertfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_CA_CERT_PATH")
+  cert_opts = [
+    keyfile: System.get_env("TEI_TLS_PRIVATE_KEY_PATH"),
+    certfile: System.get_env("TEI_TLS_CERT_PATH"),
+    cacertfile: System.get_env("TEI_TLS_CA_CERT_PATH")
   ]
 
-  config :teiserver, Teiserver,
-    ports: [
-      tcp:
-        Teiserver.ConfigHelpers.get_env("TEI_SPRING_TCP_PORT", tei_defaults[:ports][:tcp], :int),
-      tls:
-        Teiserver.ConfigHelpers.get_env("TEI_SPRING_TLS_PORT", tei_defaults[:ports][:tls], :int)
-    ],
-    certs: certificates
+  spring_listeners =
+    if Keyword.get(spring_listeners, :tls) do
+      # If TLS listener is enabled put the certificate and port options
+      get_and_update_in(
+        spring_listeners,
+        [:tls, :socket_opts],
+        fn socket_opts ->
+          new_opts = Keyword.merge(socket_opts, cert_opts)
 
-  config :teiserver, TeiserverWeb.Endpoint,
-    https:
-      certificates ++
-        [
-          versions: [:"tlsv1.2"],
+          default_port = Keyword.fetch!(socket_opts, :port)
+          port = Teiserver.ConfigHelpers.get_env("TEI_SPRING_TLS_PORT", default_port, :int)
+
+          {socket_opts, Keyword.put(new_opts, :port, port)}
+        end
+      )
+      |> elem(1)
+    else
+      spring_listeners
+    end
+
+  config :teiserver, Teiserver.SpringTcpServer, listeners: spring_listeners
+
+  if Keyword.get(endpoint_defaults, :https) do
+    config :teiserver, TeiserverWeb.Endpoint,
+      force_ssl: [hsts: true],
+      root: ".",
+      cache_static_manifest: "priv/static/cache_manifest.json",
+      server: true,
+      https:
+        Keyword.merge(
+          cert_opts,
           # dhfile is not supported for tls 1.3
           # https://www.erlang.org/doc/man/ssl.html#type-dh_file
-          dhfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_DH_FILE_PATH", "/etc/ssl/dhparam.pem"),
-          port: 8888,
-          otp_app: :teiserver,
-          ciphers: [
-            ~c"ECDHE-ECDSA-AES256-GCM-SHA384",
-            ~c"ECDHE-RSA-AES256-GCM-SHA384",
-            ~c"ECDHE-ECDSA-AES256-SHA384",
-            ~c"ECDHE-RSA-AES256-SHA384",
-            ~c"ECDHE-ECDSA-DES-CBC3-SHA",
-            ~c"ECDH-ECDSA-AES256-GCM-SHA384",
-            ~c"ECDH-RSA-AES256-GCM-SHA384",
-            ~c"ECDH-ECDSA-AES256-SHA384",
-            ~c"ECDH-RSA-AES256-SHA384",
-            ~c"DHE-DSS-AES256-GCM-SHA384",
-            ~c"DHE-DSS-AES256-SHA256",
-            ~c"AES256-GCM-SHA384",
-            ~c"AES256-SHA256",
-            ~c"ECDHE-ECDSA-AES128-GCM-SHA256",
-            ~c"ECDHE-RSA-AES128-GCM-SHA256",
-            ~c"ECDHE-ECDSA-AES128-SHA256",
-            ~c"ECDHE-RSA-AES128-SHA256",
-            ~c"ECDH-ECDSA-AES128-GCM-SHA256",
-            ~c"ECDH-RSA-AES128-GCM-SHA256",
-            ~c"ECDH-ECDSA-AES128-SHA256",
-            ~c"ECDH-RSA-AES128-SHA256",
-            ~c"DHE-DSS-AES128-GCM-SHA256",
-            ~c"DHE-DSS-AES128-SHA256",
-            ~c"AES128-GCM-SHA256",
-            ~c"AES128-SHA256",
-            ~c"ECDHE-ECDSA-AES256-SHA",
-            ~c"ECDHE-RSA-AES256-SHA",
-            ~c"DHE-DSS-AES256-SHA",
-            ~c"ECDH-ECDSA-AES256-SHA",
-            ~c"ECDH-RSA-AES256-SHA",
-            ~c"AES256-SHA",
-            ~c"ECDHE-ECDSA-AES128-SHA",
-            ~c"ECDHE-RSA-AES128-SHA",
-            ~c"DHE-DSS-AES128-SHA",
-            ~c"ECDH-ECDSA-AES128-SHA",
-            ~c"ECDH-RSA-AES128-SHA",
-            ~c"AES128-SHA"
-          ],
-          secure_renegotiate: true,
-          reuse_sessions: true,
-          honor_cipher_order: true
-        ],
-    force_ssl: [hsts: true],
-    root: ".",
-    cache_static_manifest: "priv/static/cache_manifest.json",
-    server: true
+          dhfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_DH_FILE_PATH", "/etc/ssl/dhparam.pem")
+        )
+  end
 else
-  config :teiserver, Teiserver,
-    ports: [
-      tcp:
-        Teiserver.ConfigHelpers.get_env("TEI_SPRING_TCP_PORT", tei_defaults[:ports][:tcp], :int)
-    ]
+  config :teiserver, Teiserver.SpringTcpServer,
+    listeners: Keyword.put(spring_listeners, :tls, nil)
+
+  config :teiserver, TeiserverWeb.Endpoint, https: nil
 end
 
 config :teiserver, Teiserver.Account.Guardian,

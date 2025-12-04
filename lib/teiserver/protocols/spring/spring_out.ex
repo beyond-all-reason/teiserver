@@ -87,8 +87,8 @@ defmodule Teiserver.Protocols.SpringOut do
     "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
   end
 
-  defp do_reply(:redirect, url) do
-    "REDIRECT #{url} #{Application.get_env(:teiserver, Teiserver)[:ports][:tcp]}\n"
+  defp do_reply(:redirect, {ip, port}) do
+    "REDIRECT #{ip} #{port}\n"
   end
 
   defp do_reply(:compflags, nil) do
@@ -807,7 +807,7 @@ defmodule Teiserver.Protocols.SpringOut do
           case Map.has_key?(state_acc.known_users, member_id) do
             false ->
               client = Client.get_client_by_id(member_id)
-              state_acc.protocol_out.reply(:user_logged_in, client, nil, state)
+              reply(:user_logged_in, client, nil, state)
 
               %{
                 state_acc

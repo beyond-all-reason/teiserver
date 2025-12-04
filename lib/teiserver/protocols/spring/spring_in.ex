@@ -1424,7 +1424,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # @spec engage_flood_protection(map()) :: {:stop, String.t(), map()}
   # defp engage_flood_protection(state) do
-  #   state.protocol_out.reply(:disconnect, "Spring status flood protection", nil, state)
+  #   reply(:disconnect, "Spring status flood protection", nil, state)
   #   CacheUser.set_flood_level(state.userid, 10)
   #   Client.disconnect(state.userid, "SpringIn.status.flood_protection")
   #   Logger.error("Spring Status command overflow from #{state.username}/#{state.userid}")

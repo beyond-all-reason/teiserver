@@ -12,6 +12,10 @@ config :teiserver, Teiserver.Repo,
   pool_size: 10,
   timeout: 180_000
 
+config :teiserver, Teiserver.SpringTcpServer,
+  heartbeat_interval: nil,
+  heartbeat_timeout: nil
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -55,12 +59,6 @@ config :teiserver, Teiserver,
     certfile: "priv/certs/localhost.crt",
     cacertfile: "priv/certs/localhost.crt"
   ],
-  ports: [
-    tcp: 8200,
-    tls: 8201
-  ],
-  heartbeat_interval: nil,
-  heartbeat_timeout: nil,
   enable_discord_bridge: false,
   accept_all_emails: true
 

@@ -1,14 +1,6 @@
 defmodule Teiserver.Protocols.Spring do
   @moduledoc false
   alias Teiserver.BitParse
-  alias Teiserver.Protocols.SpringIn
-  alias Teiserver.Protocols.SpringOut
-
-  @spec protocol_in :: Teiserver.Protocols.SpringIn
-  def protocol_in(), do: SpringIn
-
-  @spec protocol_out :: Teiserver.Protocols.SpringOut
-  def protocol_out(), do: SpringOut
 
   @spec parse_client_status(String.t()) :: map()
   def parse_client_status(status_str) do
