@@ -16,6 +16,7 @@ TEI_TLS_PRIVATE_KEY_PATH = "{{vars.certs_path}}/localhost.key"
 TEI_TLS_CERT_PATH = "{{vars.certs_path}}/localhost.crt"
 TEI_TLS_CA_CERT_PATH = "{{vars.certs_path}}/localhost.crt"
 TEI_TLS_DH_FILE_PATH = "{{vars.certs_path}}/dh-params.pem"
+PGPASSWORD = "123456789"
 
 [tasks."setup:db"]
 depends = ["pg:start"]
