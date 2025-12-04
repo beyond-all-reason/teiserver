@@ -34,8 +34,7 @@ defmodule Teiserver.Player.Registry do
       {:ok, pid} ->
         {:ok, pid}
 
-      {:error, {:already_registered, _}} ->
-        existing_conn_pid = lookup(user_id)
+      {:error, {:already_registered, existing_conn_pid}} ->
         Horde.Registry.unregister(__MODULE__, via_tuple(user_id))
         Process.send(existing_conn_pid, :force_disconnect, [])
         :timer.sleep(1)
