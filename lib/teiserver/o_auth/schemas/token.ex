@@ -18,7 +18,7 @@ defmodule Teiserver.OAuth.Token do
         }
 
   schema "oauth_tokens" do
-    field :value, :string
+    field :value, :string, redact: true
     belongs_to :owner, Teiserver.Account.User
     belongs_to :application, OAuth.Application, primary_key: true
     field :scopes, {:array, :string}
@@ -51,5 +51,12 @@ defmodule Teiserver.OAuth.Token do
     |> cast_assoc(:refresh_token)
     |> validate_required([:value, :application_id, :scopes, :expires_at, :type])
     |> Ecto.Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
+    |> hash_token()
   end
+
+  defp hash_token(%Ecto.Changeset{valid?: true, changes: %{value: value}} = changeset) do
+    change(changeset, value: Teiserver.Helper.HashHelper.hash_with_fixed_salt(value))
+  end
+
+  defp hash_token(changeset), do: changeset
 end
