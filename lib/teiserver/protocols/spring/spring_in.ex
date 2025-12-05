@@ -81,7 +81,15 @@ defmodule Teiserver.Protocols.SpringIn do
     state =
       case tuple do
         {command, data, msg_id} ->
+          start = :erlang.monotonic_time(:millisecond)
+
           state = do_handle(command, data, msg_id, state)
+
+          elapsed = :erlang.monotonic_time(:millisecond) - start
+
+          :telemetry.execute([:spring, :in], %{duration: elapsed, count: 1}, %{
+            command: command
+          })
 
           if Enum.member?(@action_commands, command) do
             Map.put(state, :last_action_timestamp, System.system_time(:second))
