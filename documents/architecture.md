@@ -43,4 +43,20 @@ Keyed to the id of the user, these represent users registered with the system. T
 Keyed to the id of the user, these represent the users currently logged in. Client contains both the PID of the client and a Module reference to the protocol in use.
 
 ##### Battles
-Does what it says on the tin.
+Teiserver.Battle is a context that groups Lobby and Match related functions from LobbyLib and MatchLib.
+
+(Note that Chobby and SPADS use the term `Battle` for what is represented by a `Match` in Teiserver.)
+
+##### Lobby
+Lobby in teiserver is what you expect from a lobby, it's state handled by the LobbyServer genserver, managing things like name, player list, spectators, bots, map, modoptions and the current match.
+
+#### Match
+Match contains actual data for a specific in game match, stored in DB.
+Match itself is created when the lobby is initialised and remains in an empty state until started by the MMS at which point it's filled based on lobby state at the time. After MatchMonitorServer informs a match is finished, a new empty one will be created again.
+
+
+#### MatchMonitorServer
+The lobbies don't connect to MatchMonitorServer (MMS) directly, instead SPADS sends messages to AutohostMonitor (managed by MMS) (either directly via DM or in the #autohosts room). MMS then updates the match state or logs events and messages.
+
+#### Room
+Room is a chat room, e.g. #main, #newbie, #autohosts
