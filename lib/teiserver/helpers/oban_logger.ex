@@ -43,8 +43,8 @@ defmodule Teiserver.Helper.ObanLogger do
   end
 
   def handle_event([:oban, :job, :stop], %{duration: duration}, meta, _) do
-    ms = System.convert_time_unit(duration, :native, :millisecond)
-
-    Logger.info("[Oban] stop #{meta.worker} ran in #{ms}ms")
+    Logger.info(
+      "[Oban] stop #{meta.worker} ran in #{System.convert_time_unit(duration, :native, :millisecond)}ms"
+    )
   end
 end
