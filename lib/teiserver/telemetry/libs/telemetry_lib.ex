@@ -71,7 +71,37 @@ defmodule Teiserver.Telemetry.TelemetryLib do
       last_value("spring_raw.global_battle_updated"),
       last_value("spring_raw.add_user_to_battle"),
       last_value("spring_raw.remove_user_from_battle"),
-      last_value("spring_raw.kick_user_from_battle")
+      last_value("spring_raw.kick_user_from_battle"),
+      distribution(
+        [:teiserver, :spring, :in, :duration],
+        event_name: [:spring, :in],
+        measurement: :duration,
+        reporter_options: [
+          buckets: [1, 10, 50, 100, 150, 250, 500, 1_000]
+        ],
+        tags: [:command]
+      ),
+      distribution(
+        [:teiserver, :spring, :out, :duration],
+        event_name: [:spring, :out],
+        measurement: :duration,
+        reporter_options: [
+          buckets: [1, 10, 50, 100, 150, 250, 500, 1_000]
+        ],
+        tags: [:command]
+      ),
+      counter(
+        [:teiserver, :spring, :in, :count],
+        event_name: [:spring, :in],
+        measurement: :count,
+        tags: [:command]
+      ),
+      counter(
+        [:teiserver, :spring, :out, :count],
+        event_name: [:spring, :event],
+        measurement: :count,
+        tags: [:command]
+      )
     ]
   end
 

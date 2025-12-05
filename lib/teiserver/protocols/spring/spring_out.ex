@@ -29,6 +29,8 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec reply(atom(), atom(), nil | String.t() | tuple() | list(), String.t(), map) :: map
   def reply(namespace, reply_cmd, data, msg_id, state) do
+    start = :erlang.monotonic_time(:millisecond)
+
     msg =
       case namespace do
         :battle -> BattleOut.do_reply(reply_cmd, data, state)
@@ -38,6 +40,12 @@ defmodule Teiserver.Protocols.SpringOut do
         :spring -> do_reply(reply_cmd, data)
         :party -> PartyOut.do_reply(reply_cmd, data, state)
       end
+
+    elapsed = :erlang.monotonic_time(:millisecond) - start
+
+    :telemetry.execute([:spring, :out], %{duration: elapsed, count: 1}, %{
+      command: reply_cmd
+    })
 
     if Config.get_site_config_cache("debug.Print outgoing messages") or
          state.print_server_messages do
