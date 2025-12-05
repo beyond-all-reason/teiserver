@@ -6,7 +6,7 @@ defmodule Teiserver.Helper.ObanLogger do
     # Logger.warning("[Oban] :started #{meta.worker} at #{measure.system_time}")
   end
 
-  def handle_event([:oban, :job, :exception], _measure, meta, _) do
+  def handle_event([:oban, :job, :exception], %{duration: duration}, meta, nil) do
     # data = %{
     #   conn: %{
     #     request_path: "Oban:#{meta.worker}",
@@ -19,8 +19,11 @@ defmodule Teiserver.Helper.ObanLogger do
     #   stack: meta.stack
     # }
 
-    error_str = Kernel.inspect(meta.error)
-    Logger.error("[Oban] [failure] #{error_str}")
+    error_str = inspect(meta.reason)
+
+    Logger.warning(
+      "[Oban] [failure] [#{meta.queue}] #{meta.worker} failed in #{duration} - #{error_str}"
+    )
   end
 
   def handle_event([:oban, :circuit, :trip], _measure, _meta, _) do
@@ -39,9 +42,9 @@ defmodule Teiserver.Helper.ObanLogger do
     Logger.error("[Oban] [failure]")
   end
 
-  def handle_event([:oban, :job, event], measure, meta, _) do
+  def handle_event([:oban, :job, :stop], %{duration: duration}, meta, _) do
     Logger.info(
-      "[Oban] #{event} #{meta.worker} ran in #{System.convert_time_unit(measure.duration, :native, :millisecond)}ms"
+      "[Oban] stop #{meta.worker} ran in #{System.convert_time_unit(duration, :native, :millisecond)}ms"
     )
   end
 end
