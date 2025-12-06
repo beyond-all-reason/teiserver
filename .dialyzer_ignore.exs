@@ -23,7 +23,6 @@
   {"lib/teiserver/account/reports/growth_report.ex", :callback_spec_type_mismatch},
   {"lib/teiserver/account/reports/growth_report.ex", :no_return},
   {"lib/teiserver/account/reports/growth_report.ex", :call},
-  {"lib/teiserver/account/reports/open_skill_report.ex", :invalid_contract},
   {"lib/teiserver/account/reports/population_report.ex", :no_return},
   {"lib/teiserver/account/reports/population_report.ex", :call},
   {"lib/teiserver/account/reports/population_report.ex", :pattern_match},
