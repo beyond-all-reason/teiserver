@@ -28,7 +28,6 @@
   {"lib/teiserver/account/reports/population_report.ex", :pattern_match},
   {"lib/teiserver/account/reports/population_report.ex", :invalid_contract},
   {"lib/teiserver/account/reports/population_report.ex", :unused_fun},
-  {"lib/teiserver/account/reports/records_report.ex", :invalid_contract},
   {"lib/teiserver/account/reports/time_compare_report.ex", :invalid_contract},
   {"lib/teiserver/account/reports/time_compare_report.ex", :call},
   {"lib/teiserver/account/reports/tournament_report.ex", :invalid_contract},
