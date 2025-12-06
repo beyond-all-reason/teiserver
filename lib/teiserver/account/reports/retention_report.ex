@@ -18,7 +18,7 @@ defmodule Teiserver.Account.RetentionReport do
     - Have played at least once
   and splits them into groups of how long after they registered they last played
   """
-  @spec run(Plug.Conn.t(), map()) :: {map(), map()}
+  @spec run(Plug.Conn.t(), map()) :: map()
   def run(_conn, params) do
     params = apply_defaults(params)
     skip0 = params["skip0"] == "true"
