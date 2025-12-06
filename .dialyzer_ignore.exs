@@ -33,7 +33,6 @@
   {"lib/teiserver/account/reports/time_compare_report.ex", :invalid_contract},
   {"lib/teiserver/account/reports/time_compare_report.ex", :call},
   {"lib/teiserver/account/reports/tournament_report.ex", :invalid_contract},
-  {"lib/teiserver/account/reports/week_on_week_report.ex", :invalid_contract},
   {"lib/teiserver/account/schemas/accolade.ex", :unknown_type},
   {"lib/teiserver/account/schemas/badge_type.ex", :unknown_type},
   {"lib/teiserver/account/schemas/friend.ex", :unknown_type},
