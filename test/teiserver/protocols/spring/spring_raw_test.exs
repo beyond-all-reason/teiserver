@@ -2,13 +2,22 @@ defmodule Teiserver.SpringRawTest do
   use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,
-    only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, new_user: 0]
+    only: [
+      raw_setup: 1,
+      _send_raw: 2,
+      _recv_raw: 1,
+      _recv_until: 1,
+      new_user: 0,
+      start_spring_server: 1
+    ]
 
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account
 
-  setup do
-    %{socket: socket} = raw_setup()
+  setup :start_spring_server
+
+  setup(context) do
+    %{socket: socket} = raw_setup(context)
     {:ok, socket: socket}
   end
 

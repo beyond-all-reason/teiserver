@@ -157,7 +157,8 @@ defmodule TeiserverWeb.TachyonControllerTest do
       assert is_pid(conn_pid)
 
       # make sure we can still connect with chobby
-      %{socket: sock} = Teiserver.TeiserverTestLib.auth_setup(user)
+      {:ok, server_context} = Teiserver.TeiserverTestLib.start_spring_server()
+      %{socket: sock} = Teiserver.TeiserverTestLib.auth_setup(server_context, user)
       assert is_port(sock)
       Teiserver.Client.disconnect(user.id)
       WSC.disconnect(client)

@@ -237,10 +237,15 @@ defmodule Teiserver.Application do
   end
 
   def spring_server_child(ref, transport_type) do
-    Application.get_env(:teiserver, Teiserver.SpringTcpServer)
-    |> Keyword.fetch!(:listeners)
-    |> Keyword.get(transport_type, [])
-    |> spring_server_listener_child(ref, transport_type)
+    listeners =
+      Application.get_env(:teiserver, Teiserver.SpringTcpServer)
+      |> Keyword.fetch!(:listeners)
+
+    if Keyword.get(listeners, :disable_startup) != true do
+      listeners
+      |> Keyword.get(transport_type, [])
+      |> spring_server_listener_child(ref, transport_type)
+    end
   end
 
   # When the listener is not configured we dont start the listener

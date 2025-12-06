@@ -201,6 +201,7 @@ defmodule Teiserver.Account.PartyServer do
 
   @impl true
   def handle_info(%{channel: "teiserver_client_messages:" <> userid, event: :disconnected}, state) do
+    Logger.debug("Member disconnected: #{userid}")
     {:noreply, %{state | party: remove_member(String.to_integer(userid), state)}}
   end
 
@@ -234,7 +235,17 @@ defmodule Teiserver.Account.PartyServer do
   end
 
   @spec remove_member(T.userid(), map()) :: map()
-  def remove_member(userid, %{party: party} = _state) do
+  def remove_member(userid, %{party: %{members: members} = party} = state) do
+    if Enum.member?(members, userid) do
+      do_remove_member(userid, state)
+    else
+      Logger.debug("Failed member leave for #{userid}, not a member")
+
+      party
+    end
+  end
+
+  defp do_remove_member(userid, %{party: party}) do
     new_members = List.delete(party.members, userid)
 
     PubSub.broadcast(
