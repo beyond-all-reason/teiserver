@@ -20,7 +20,6 @@
   {"lib/teiserver/account/queries/friend_request_queries.ex", :unknown_type},
   {"lib/teiserver/account/queries/relationship_queries.ex", :unknown_type},
   {"lib/teiserver/account/queries/user_queries.ex", :unknown_type},
-  {"lib/teiserver/account/reports/growth_report.ex", :callback_spec_type_mismatch},
   {"lib/teiserver/account/reports/growth_report.ex", :no_return},
   {"lib/teiserver/account/reports/growth_report.ex", :call},
   {"lib/teiserver/account/reports/population_report.ex", :no_return},
