@@ -12,7 +12,7 @@ defmodule Teiserver.Account.BanEvasionReport do
   @spec permissions() :: String.t()
   def permissions(), do: "Moderator"
 
-  @spec run(Plug.Conn.t(), map()) :: {map(), map()}
+  @spec run(Plug.Conn.t(), map()) :: map()
   def run(_conn, params) do
     params = apply_defaults(params)
     valid_types = get_valid_key_types()
