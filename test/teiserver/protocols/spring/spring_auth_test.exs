@@ -8,20 +8,23 @@ defmodule Teiserver.SpringAuthTest do
 
   import Teiserver.TeiserverTestLib,
     only: [
-      auth_setup: 0,
       auth_setup: 1,
+      auth_setup: 2,
       _send_raw: 2,
       _recv_raw: 1,
       # _recv_binary: 1,
       _recv_until: 1,
       new_user: 0,
-      new_user: 2
+      new_user: 2,
+      start_spring_server: 1
     ]
 
   import Teiserver.Support.Polling, only: [poll_until: 3]
 
-  setup do
-    %{socket: socket, user: user} = auth_setup()
+  setup :start_spring_server
+
+  setup(context) do
+    %{socket: socket, user: user} = auth_setup(context)
     {:ok, socket: socket, user: user}
   end
 
@@ -83,9 +86,9 @@ defmodule Teiserver.SpringAuthTest do
              "SERVERMSG No incomming match for MYSTATUS with data '\"\"'. Userid #{user.id}\n"
   end
 
-  test "IGNORELIST, IGNORE, UNIGNORE, SAYPRIVATE", %{socket: socket1, user: user} do
+  test "IGNORELIST, IGNORE, UNIGNORE, SAYPRIVATE", %{socket: socket1, user: user} = context do
     user2 = new_user()
-    %{socket: socket2} = auth_setup(user2)
+    %{socket: socket2} = auth_setup(context, user2)
     reply = _recv_raw(socket1)
     assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
     assert reply =~ " LuaLobby Chobby\n"
@@ -131,9 +134,9 @@ IGNORELISTEND\n"
   end
 
   # TODO: Make this work
-  # test "SAYPRIVATE with special characters", %{socket: socket1, user: user} do
+  # test "SAYPRIVATE with special characters", %{socket: socket1, user: user} = context do
   #   user2 = new_user()
-  #   %{socket: socket2} = auth_setup(user2)
+  #   %{socket: socket2} = auth_setup(context, user2)
   #   reply = _recv_raw(socket1)
   #   assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
   #   assert reply =~ " LuaLobby Chobby\n"
@@ -143,12 +146,13 @@ IGNORELISTEND\n"
   #   assert reply == "SAIDPRIVATE #{user2.name} тест!\n"
   # end
 
-  test "FRIENDLIST, ADDFRIEND, REMOVEFRIEIND, ACCEPTFRIENDREQUEST, DECLINEFRIENDREQUEST", %{
-    socket: socket1,
-    user: user
-  } do
+  test "FRIENDLIST, ADDFRIEND, REMOVEFRIEIND, ACCEPTFRIENDREQUEST, DECLINEFRIENDREQUEST",
+       %{
+         socket: socket1,
+         user: user
+       } = context do
     user2 = new_user()
-    %{socket: socket2} = auth_setup(user2)
+    %{socket: socket2} = auth_setup(context, user2)
     reply = _recv_raw(socket1)
     assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
     assert reply =~ " LuaLobby Chobby\n"
@@ -249,7 +253,8 @@ CLIENTS test_room #{user.name}\n"
   end
 
   @tag :needs_attention
-  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: user1} do
+  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE",
+       %{socket: socket1, user: user1} = context do
     hash = "-1540855590"
 
     # Give user Bot role so they can manage battle
@@ -269,7 +274,7 @@ CLIENTS test_room #{user.name}\n"
     lobby_id = int_parse(lobby_id)
 
     user2 = new_user()
-    %{socket: socket2} = auth_setup(user2)
+    %{socket: socket2} = auth_setup(context, user2)
     _ = _recv_raw(socket1)
 
     _send_raw(socket2, "JOINBATTLE #{lobby_id} empty sPassword\n")
@@ -384,9 +389,9 @@ CLIENTS test_room #{user.name}\n"
     assert reply == :timeout
   end
 
-  test "ring", %{socket: socket1, user: user1} do
+  test "ring", %{socket: socket1, user: user1} = context do
     user2 = new_user()
-    %{socket: socket2} = auth_setup(user2)
+    %{socket: socket2} = auth_setup(context, user2)
     reply = _recv_raw(socket1)
     assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
 
@@ -412,11 +417,11 @@ CLIENTS test_room #{user.name}\n"
     assert reply =~ "s.battles.id_list "
   end
 
-  test "RENAMEACCOUNT", %{socket: socket, user: user} do
+  test "RENAMEACCOUNT", %{socket: socket, user: user} = context do
     old_name = user.name
     new_name = "test_user_rename"
     userid = user.id
-    %{socket: watcher, user: watcher_user} = auth_setup()
+    %{socket: watcher, user: watcher_user} = auth_setup(context)
     _recv_raw(socket)
 
     # Check our starting situation
@@ -465,7 +470,7 @@ CLIENTS test_room #{user.name}\n"
 
     # No need to send an exit, it's already sorted out!
     # we should try to login though, it should be rejected as rename in progress
-    %{socket: socket} = Teiserver.TeiserverTestLib.raw_setup()
+    %{socket: socket} = Teiserver.TeiserverTestLib.raw_setup(context)
     _ = _recv_raw(socket)
 
     # Now we get flood protection after the rename
@@ -620,9 +625,9 @@ CLIENTS test_room #{user.name}\n"
   #   assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 2
   # end
 
-  test "User age" do
+  test "User age", context do
     user = new_user("test_user_rank_test", %{"rank" => 5})
-    %{socket: socket} = auth_setup(user)
+    %{socket: socket} = auth_setup(context, user)
 
     # [in_game, away, r3, r2, r1, mod, bot]
     new_status = Integer.undigits(Enum.reverse([0, 1, 0, 0, 0, 0, 0]), 2)
@@ -660,9 +665,9 @@ CLIENTS test_room #{user.name}\n"
     Client.disconnect(bad_user.id)
   end
 
-  test "GETIP", %{user: user, socket: socket} do
+  test "GETIP", %{user: user, socket: socket} = context do
     ip_user = new_user("test_user_ip_user", %{})
-    %{socket: _socket} = auth_setup(ip_user)
+    %{socket: _socket} = auth_setup(context, ip_user)
     _recv_until(socket)
 
     # Mod/Bot only so timeout to start with
@@ -679,9 +684,9 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "test_user_ip_user is currently bound to 127.0.0.1\n"
   end
 
-  test "GETUSERID", %{user: user, socket: socket} do
+  test "GETUSERID", %{user: user, socket: socket} = context do
     ip_user = new_user("test_user_id_user", %{})
-    %{socket: _socket} = auth_setup(ip_user)
+    %{socket: _socket} = auth_setup(context, ip_user)
     _recv_until(socket)
 
     # Mod/Bot only so timeout to start with
@@ -698,9 +703,9 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "The ID for test_user_id_user is 1993717506 0d04a635e200f308 #{ip_user.id}\n"
   end
 
-  # test "Unicode support - TCP", %{socket: socket1, user: user} do
+  # test "Unicode support - TCP", %{socket: socket1, user: user} = context do
   #   user2 = new_user()
-  #   %{socket: socket2} = auth_setup(user2)
+  #   %{socket: socket2} = auth_setup(context, user2)
   #   reply = _recv_raw(socket1)
   #   assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
   #   assert reply =~ " LuaLobby Chobby\n"

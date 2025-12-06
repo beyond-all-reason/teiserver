@@ -6,14 +6,25 @@ defmodule Teiserver.SpringTcpServerTest do
   import Mock
 
   import Teiserver.TeiserverTestLib,
-    only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, auth_setup: 0, new_user: 0]
+    only: [
+      raw_setup: 1,
+      _send_raw: 2,
+      _recv_raw: 1,
+      _recv_until: 1,
+      auth_setup: 1,
+      new_user: 0,
+      start_spring_server: 1
+    ]
 
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.{Account, Client, Room, TeiserverTestLib}
 
-  setup do
-    Teiserver.Coordinator.start_coordinator()
-    %{socket: socket} = raw_setup()
+  setup :start_spring_server
+
+  setup(context) do
+    Teiserver.TeiserverTestLib.start_coordinator!()
+
+    %{socket: socket} = raw_setup(context)
     {:ok, socket: socket}
   end
 
@@ -110,7 +121,7 @@ defmodule Teiserver.SpringTcpServerTest do
     {:error, :closed} = :gen_tcp.recv(socket, 0, 1000)
   end
 
-  test "when redirect site config is set sends REDIRECT and closes" do
+  test "when redirect site config is set sends REDIRECT and closes", context do
     redirect_ip = "1.2.3.4"
     redirect_port = TeiserverTestLib.get_listener_port(:tcp)
 
@@ -122,16 +133,17 @@ defmodule Teiserver.SpringTcpServerTest do
         other -> passthrough([other])
       end
     ) do
-      %{socket: socket} = raw_setup()
+      %{socket: socket} = raw_setup(context)
 
       assert _recv_raw(socket) == "REDIRECT #{redirect_ip} #{redirect_port}\n"
       {:error, :closed} = :gen_tcp.recv(socket, 0, 1000)
     end
   end
 
+  # NOTE: All needs_attention tests in this module fail because of the coordinator state being shared between tests
   @tag :needs_attention
-  test "bad sequences" do
-    %{socket: socket, user: user} = auth_setup()
+  test "bad sequences", context do
+    %{socket: socket, user: user} = auth_setup(context)
     client = Client.get_client_by_name(user.name)
     tcp_pid = client.tcp_pid
     coordinator_userid = Teiserver.Coordinator.get_coordinator_userid()
@@ -144,9 +156,9 @@ defmodule Teiserver.SpringTcpServerTest do
              coordinator_userid => %{lobby_id: nil}
            }
 
-    %{socket: s1, user: u1} = auth_setup()
-    %{socket: _s2, user: u2} = auth_setup()
-    %{socket: _s3, user: u3} = auth_setup()
+    %{socket: s1, user: u1} = auth_setup(context)
+    %{socket: _s2, user: u2} = auth_setup(context)
+    %{socket: _s3, user: u3} = auth_setup(context)
 
     u1_client = %{
       userid: u1.id,
@@ -355,18 +367,20 @@ defmodule Teiserver.SpringTcpServerTest do
     # _ = _recv_raw(s3)
   end
 
+  @tag :needs_attention
   # this test is quite annoying because, when running only this module, it passes
   # but when ran with other tests around, it'll fail
   # the fault likely lies elsewhere, good luck to the brave soul tackling that
   @tag :needs_attention
-  test "dud users mode" do
+  test "dud users mode", context do
     # Here we're testing if the user isn't even known
     non_user = new_user()
-    %{user: dud} = auth_setup()
-    %{socket: socket, user: user} = auth_setup()
+    %{user: dud} = auth_setup(context)
+    %{socket: socket, user: user} = auth_setup(context)
 
     client = Client.get_client_by_name(user.name)
     tcp_pid = client.tcp_pid
+
     coordinator_id = Client.get_client_by_name("Coordinator").userid
 
     # --- User logs out

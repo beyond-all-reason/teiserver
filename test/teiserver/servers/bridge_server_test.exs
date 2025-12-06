@@ -4,11 +4,9 @@ defmodule Teiserver.BridgeServerTest do
   alias Teiserver.{CacheUser, Room}
   alias Teiserver.Bridge.BridgeServer
 
-  import Teiserver.TeiserverTestLib,
-    only: [auth_setup: 0]
-
   test "bridge server" do
-    %{user: spring_user} = auth_setup()
+    {:ok, server_context} = Teiserver.TeiserverTestLib.start_spring_server()
+    %{user: spring_user} = Teiserver.TeiserverTestLib.auth_setup(server_context)
 
     bridge_userid = BridgeServer.get_bridge_userid()
 
