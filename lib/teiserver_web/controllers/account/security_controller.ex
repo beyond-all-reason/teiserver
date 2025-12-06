@@ -84,17 +84,19 @@ defmodule TeiserverWeb.Account.SecurityController do
       {:error, _reason} ->
         changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: totp_params["secret"]})
 
-        qr_svg =
-          totp_params["otpauth_uri"]
-          |> EQRCode.encode()
-          |> EQRCode.svg(width: 250)
+        qr_img_src =
+          "data:image/png;base64," <>
+            (totp_params["otpauth_uri"]
+             |> EQRCode.encode()
+             |> EQRCode.png(width: 250)
+             |> Base.encode64())
 
         conn
         |> put_flash(:warning, "Wrong OTP entered.")
         |> assign(:changeset, changeset)
         |> assign(:user, user)
         |> assign(:otpauth_uri, totp_params["otpauth_uri"])
-        |> assign(:qr_svg, qr_svg)
+        |> assign(:qr_img_src, qr_img_src)
         |> render("edit_totp.html")
     end
   end
@@ -107,17 +109,19 @@ defmodule TeiserverWeb.Account.SecurityController do
     changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: encoded_secret})
     otpauth_uri = Account.generate_otpauth_uri(user.name, secret)
 
-    qr_svg =
-      otpauth_uri
-      |> EQRCode.encode()
-      |> EQRCode.svg(width: 250)
+    qr_img_src =
+      "data:image/png;base64," <>
+        (otpauth_uri
+         |> EQRCode.encode()
+         |> EQRCode.png(width: 250)
+         |> Base.encode64())
 
     conn
     |> add_breadcrumb(name: "edit_totp", url: conn.request_path)
     |> assign(:changeset, changeset)
     |> assign(:user, user)
     |> assign(:otpauth_uri, otpauth_uri)
-    |> assign(:qr_svg, qr_svg)
+    |> assign(:qr_img_src, qr_img_src)
     |> render("edit_totp.html")
   end
 
