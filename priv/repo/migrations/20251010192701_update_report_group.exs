@@ -51,25 +51,25 @@ defmodule Teiserver.Repo.Migrations.UpdateReportGroup do
       AND r.report_group_id <> g.keep_id;
     """)
 
-    execute("""
-    WITH grouped AS (
-      SELECT
-        match_id,
-        MIN(id) AS keep_id,
-        SUM(report_count) AS total_reports,
-        SUM(action_count) AS total_actions,
-        ARRAY_AGG(id) AS all_ids
-      FROM moderation_report_groups
-      GROUP BY match_id
-      HAVING COUNT(*) > 1
-    )
-    UPDATE moderation_report_groups mrg
-    SET
-      report_count = g.total_reports,
-      action_count = g.total_actions
-    FROM grouped g
-    WHERE mrg.id = g.keep_id;
-    """)
+    #    execute("""
+    #    WITH grouped AS (
+    #      SELECT
+    #        match_id,
+    #        MIN(id) AS keep_id,
+    #        SUM(report_count) AS total_reports,
+    #        SUM(action_count) AS total_actions,
+    #        ARRAY_AGG(id) AS all_ids
+    #      FROM moderation_report_groups
+    #      GROUP BY match_id
+    #      HAVING COUNT(*) > 1
+    #    )
+    #    UPDATE moderation_report_groups mrg
+    #    SET
+    #      report_count = g.total_reports,
+    #      action_count = g.total_actions
+    #    FROM grouped g
+    #    WHERE mrg.id = g.keep_id;
+    #    """)
 
     execute("""
     WITH grouped AS (
