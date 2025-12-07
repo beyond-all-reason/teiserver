@@ -10,7 +10,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @tick_interval 60_000
 
-  @spec check_user(T.userid()) :: nil
+  @spec check_user(T.userid()) :: String.t()
   def check_user(userid) do
     check_wrapper(userid)
   end

@@ -883,7 +883,7 @@ defmodule Teiserver.SpringTcpServer do
   # Depending on our current understanding of where the user is
   # we will send a selection of commands on the assumption this
   # genserver is incorrect and needs to alter its state accordingly
-  @spec user_join_battle(T.client(), T.lobby_id(), String.t(), T.spring_tcp_state()) ::
+  @spec user_join_battle(nil, T.lobby_id(), String.t(), T.spring_tcp_state()) ::
           T.spring_tcp_state()
   defp user_join_battle(nil, _, _, state) do
     state

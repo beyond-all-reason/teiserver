@@ -12,7 +12,7 @@ defmodule Teiserver.Account.RecordsReport do
 
   @top_count 3
 
-  @spec run(Plug.Conn.t(), map()) :: {nil, map()}
+  @spec run(Plug.Conn.t(), map()) :: map()
   def run(_conn, params) do
     params = default_params(params)
 

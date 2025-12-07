@@ -10,7 +10,7 @@ defmodule Teiserver.Game.MappingReport do
 
   @threshold 10
 
-  @spec run(Plug.Conn.t(), map()) :: {map(), map()}
+  @spec run(Plug.Conn.t(), map()) :: map()
   def run(_conn, params) do
     params = apply_defaults(params)
 

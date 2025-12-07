@@ -9,7 +9,7 @@ defmodule Teiserver.Moderation.ActivityReport do
   @spec permissions() :: String.t()
   def permissions(), do: "Overwatch"
 
-  @spec run(Plug.Conn.t(), map()) :: {map(), map()}
+  @spec run(Plug.Conn.t(), map()) :: map()
   def run(_conn, params) do
     params = apply_defaults(params)
 
