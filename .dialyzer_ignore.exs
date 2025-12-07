@@ -86,7 +86,6 @@
   {"lib/teiserver/coordinator.ex", :unknown_type},
   {"lib/teiserver/coordinator.ex", :no_return},
   {"lib/teiserver/coordinator.ex", :call},
-  {"lib/teiserver/coordinator/automod_server.ex", :invalid_contract},
   {"lib/teiserver/coordinator/automod_server.ex", :unknown_type},
   {"lib/teiserver/coordinator/consul_commands.ex", :call},
   {"lib/teiserver/coordinator/consul_server.ex", :unknown_type},
