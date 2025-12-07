@@ -241,8 +241,18 @@ defmodule Teiserver.Moderation do
     Report.changeset(report, %{})
   end
 
+  def create_report_group_and_report(%{match_id: nil} = report_params) do
+    case create_report(report_params) do
+      {:ok, report} ->
+        {:ok, nil, report}
+
+      result ->
+        result
+    end
+  end
+
   def create_report_group_and_report(report_params) do
-    report_group = get_or_make_report_group(report_params.target_id, report_params.match_id)
+    report_group = get_or_make_report_group(report_params.match_id)
 
     report_params =
       Map.merge(report_params, %{
@@ -253,7 +263,8 @@ defmodule Teiserver.Moderation do
       {:ok, report} ->
         {:ok, report_group} =
           Teiserver.Moderation.update_report_group(report_group, %{
-            report_count: report_group.report_count + 1
+            report_count: report_group.report_count + 1,
+            closed: false
           })
 
         {:ok, report_group, report}
@@ -280,6 +291,9 @@ defmodule Teiserver.Moderation do
   @spec get_report_group!(non_neg_integer, list) :: ComplexServerEventType.t()
   defdelegate get_report_group!(id, args), to: ReportGroupLib
 
+  @spec get_report_group_by_match_id(non_neg_integer()) :: ReportGroup.t() | nil
+  defdelegate get_report_group_by_match_id(match_id), to: ReportGroupLib
+
   @spec create_report_group() :: {:ok, ComplexServerEventType.t()} | {:error, Ecto.Changeset}
   defdelegate create_report_group(), to: ReportGroupLib
 
@@ -300,8 +314,17 @@ defmodule Teiserver.Moderation do
   @spec change_report_group(ComplexServerEventType, map) :: Ecto.Changeset
   defdelegate change_report_group(report_group, attrs), to: ReportGroupLib
 
-  @spec get_or_make_report_group(T.userid(), T.match_id() | nil) :: ReportGroup.t()
-  defdelegate get_or_make_report_group(target_id, match_id), to: ReportGroupLib
+  @spec get_or_make_report_group(T.match_id() | nil) :: ReportGroup.t()
+  defdelegate get_or_make_report_group(match_id), to: ReportGroupLib
+
+  @spec open_report_group(ReportGroup.t()) :: :ok
+  defdelegate open_report_group(report_group), to: ReportGroupLib
+
+  @spec close_report_group(ReportGroup.t()) :: :ok
+  defdelegate close_report_group(report_group), to: ReportGroupLib
+
+  @spec close_report_group_if_no_open_reports(ReportGroup.t()) :: any
+  defdelegate close_report_group_if_no_open_reports(report_group), to: ReportGroupLib
 
   alias Teiserver.Moderation.{Response, ResponseLib}
 

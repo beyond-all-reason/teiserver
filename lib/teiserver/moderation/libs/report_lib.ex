@@ -284,4 +284,11 @@ defmodule Teiserver.Moderation.ReportLib do
       on: responses.user_id == ^userid,
       preload: [responses: responses]
   end
+
+  def _preload(query, :report_group) do
+    from reports in query,
+      left_join: report_group in assoc(reports, :report_group),
+      as: :report_group,
+      preload: [report_group: report_group]
+  end
 end
