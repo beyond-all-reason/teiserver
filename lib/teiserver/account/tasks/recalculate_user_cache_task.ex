@@ -14,7 +14,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
   @match_cache_recent_days 7
   @match_cache_max_days 31
 
-  @spec match_processed(map(), T.userid()) :: :ok
+  @spec match_processed(map(), T.userid()) :: no_return()
   def match_processed(match, userid) do
     case match.game_type do
       "Duel" -> do_match_processed_duel(userid)

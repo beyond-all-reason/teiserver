@@ -41,7 +41,6 @@
   {"lib/teiserver/account/servers/party_server.ex", :no_return},
   {"lib/teiserver/account/servers/party_server.ex", :call},
   {"lib/teiserver/account/servers/party_server.ex", :unknown_type},
-  {"lib/teiserver/account/tasks/recalculate_user_cache_task.ex", :invalid_contract},
   {"lib/teiserver/battle.ex", :unknown_type},
   {"lib/teiserver/battle.ex", :call},
   {"lib/teiserver/battle.ex", :no_return},
