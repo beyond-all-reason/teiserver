@@ -171,7 +171,6 @@
   {"lib/teiserver/moderation/libs/response_lib.ex", :unknown_type},
   {"lib/teiserver/moderation/libs/test_lib.ex", :unknown_type},
   {"lib/teiserver/moderation/queries/report_group_queries.ex", :unknown_type},
-  {"lib/teiserver/moderation/reports/activity_report.ex", :invalid_contract},
   {"lib/teiserver/moderation/schemas/action.ex", :unknown_type},
   {"lib/teiserver/moderation/schemas/ban.ex", :unknown_type},
   {"lib/teiserver/moderation/schemas/proposal.ex", :unknown_type},
