@@ -190,7 +190,6 @@
   {"lib/teiserver/protocols/spring/spring_user_in.ex", :call},
   {"lib/teiserver/tcp/spring/spring_tcp_server.ex", :call},
   {"lib/teiserver/tcp/spring/spring_tcp_server.ex", :no_return},
-  {"lib/teiserver/tcp/spring/spring_tcp_server.ex", :invalid_contract},
   {"lib/teiserver/telemetry.ex", :unknown_type},
   {"lib/teiserver/telemetry.ex", :invalid_contract},
   {"lib/teiserver/telemetry/libs/anon_property_lib.ex", :unknown_type},
