@@ -11,7 +11,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
   # end
 
   test "text based test" do
-    Coordinator.start_coordinator()
+    TeiserverTestLib.start_coordinator!()
 
     user = TeiserverTestLib.new_user()
     lobby_id = TeiserverTestLib.make_lobby(%{name: "ExplainCommandTestText"})
