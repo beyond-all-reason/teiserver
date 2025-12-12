@@ -93,7 +93,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
       order_by: [asc: lobby_policies.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, _preloads) do

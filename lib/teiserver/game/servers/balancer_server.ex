@@ -9,7 +9,7 @@ defmodule Teiserver.Game.BalancerServer do
   @tick_interval 2_000
   # Balance algos that allow fuzz; randomness will be added to match rating before processing
   @algos_allowing_fuzz ~w(loser_picks force_party)
-  @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
+  @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end

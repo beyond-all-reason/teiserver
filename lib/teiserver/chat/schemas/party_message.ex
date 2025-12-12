@@ -22,6 +22,6 @@ defmodule Teiserver.Chat.PartyMessage do
     |> validate_required(~w(content party_id inserted_at user_id)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
   def authorize(_, conn, _), do: allow?(conn, "chat")
 end

@@ -22,7 +22,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     :ok
   end
 
-  @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
+  @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end

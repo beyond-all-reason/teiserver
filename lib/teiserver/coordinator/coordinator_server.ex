@@ -17,7 +17,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     "Attempting to circumvent this moderation with a new account is not okay and can lead to suspension or banning."
   ]
 
-  @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
+  @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end

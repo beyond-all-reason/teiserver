@@ -31,6 +31,6 @@ defmodule Teiserver.Account.Relationship do
     |> validate_required(~w(from_user_id to_user_id)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
   def authorize(:index, conn, _), do: allow?(conn, "Moderator")
 end

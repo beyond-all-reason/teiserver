@@ -36,7 +36,7 @@ defmodule Teiserver.Moderation.Report do
     |> validate_required(~w(reporter_id target_id type sub_type closed)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
   def authorize(:index, conn, _), do: allow?(conn, "Overwatch")
   def authorize(:search, conn, _), do: allow?(conn, "Overwatch")
   def authorize(:show, conn, _), do: allow?(conn, "Overwatch")

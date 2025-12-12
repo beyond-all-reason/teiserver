@@ -26,7 +26,7 @@ defmodule Teiserver.Microblog.PostQueries do
     end)
   end
 
-  @spec _where(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
+  @spec _where(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
   defp _where(query, _, ""), do: query
   defp _where(query, _, nil), do: query
 
@@ -108,7 +108,7 @@ defmodule Teiserver.Microblog.PostQueries do
       order_by: [asc: posts.inserted_at]
   end
 
-  @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec do_preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
   defp do_preload(query, nil), do: query
 
   defp do_preload(query, preloads) do

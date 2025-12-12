@@ -41,7 +41,7 @@ defmodule Teiserver.Moderation.Proposal do
     |> validate_length(:restrictions, min: 1)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
   def authorize(:conclude, conn, _), do: allow?(conn, "Moderator")
   def authorize(_, conn, _), do: allow?(conn, "Overwatch")
 end

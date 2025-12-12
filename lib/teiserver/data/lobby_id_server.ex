@@ -49,7 +49,7 @@ defmodule Teiserver.LobbyIdServer do
     end
   end
 
-  @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
+  @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(_) do
     GenServer.start_link(__MODULE__, [], [])
   end
