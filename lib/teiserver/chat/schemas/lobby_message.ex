@@ -23,7 +23,7 @@ defmodule Teiserver.Chat.LobbyMessage do
     |> validate_required(~w(content inserted_at user_id)a)
   end
 
-  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
   def authorize(:index, conn, _), do: allow?(conn, "Reviewer")
   def authorize(_, conn, _), do: allow?(conn, "Moderator")
 end

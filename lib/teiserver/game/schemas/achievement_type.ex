@@ -26,6 +26,6 @@ defmodule Teiserver.Game.AchievementType do
     |> validate_required(~w(name grouping icon colour description rarity)a)
   end
 
-  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
   def authorize(_action, conn, _params), do: allow?(conn, "Admin")
 end

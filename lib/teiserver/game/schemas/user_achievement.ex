@@ -22,6 +22,6 @@ defmodule Teiserver.Game.UserAchievement do
     |> validate_required(~w(user_id achievement_type_id achieved inserted_at)a)
   end
 
-  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
   def authorize(_, conn, _), do: allow?(conn, "account")
 end

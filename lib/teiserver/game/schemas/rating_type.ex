@@ -29,6 +29,6 @@ defmodule Teiserver.Game.RatingType do
     |> validate_required(~w(name icon colour)a)
   end
 
-  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
   def authorize(_action, conn, _params), do: allow?(conn, "Admin")
 end
