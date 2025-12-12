@@ -78,7 +78,7 @@ defmodule Teiserver.Telemetry.UserPropertyQueries do
       order_by: [asc: user_properties.timestamp]
   end
 
-  @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec do_preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
   defp do_preload(query, nil), do: query
 
   defp do_preload(query, preloads) do

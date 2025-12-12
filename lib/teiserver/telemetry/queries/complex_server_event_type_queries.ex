@@ -77,7 +77,7 @@ defmodule Teiserver.Telemetry.ComplexServerEventTypeQueries do
       order_by: [desc: complex_server_event_types.id]
   end
 
-  @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec do_preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
   defp do_preload(query, nil), do: query
 
   defp do_preload(query, preloads) do

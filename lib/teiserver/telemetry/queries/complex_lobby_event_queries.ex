@@ -82,7 +82,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventQueries do
       order_by: [asc: complex_lobby_events.timestamp]
   end
 
-  @spec do_preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec do_preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
   defp do_preload(query, nil), do: query
 
   defp do_preload(query, preloads) do
