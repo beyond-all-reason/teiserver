@@ -123,7 +123,6 @@
   {"lib/teiserver/logging.ex", :call},
   {"lib/teiserver/logging.ex", :unknown_type},
   {"lib/teiserver/logging/lib/logging_helpers.ex", :unknown_type},
-  {"lib/teiserver/logging/lib/logging_plug.ex", :unknown_type},
   {"lib/teiserver/logging/lib/logging_test_lib.ex", :unknown_type},
   {"lib/teiserver/logging/lib/logging_test_lib.ex", :call},
   {"lib/teiserver/logging/tasks/aggregate_logs_task.ex", :no_return},
