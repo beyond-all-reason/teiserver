@@ -72,7 +72,7 @@ defmodule Teiserver.Account.SmurfKeyTypeLib do
       order_by: [desc: property_types.id]
   end
 
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, _preloads) do
