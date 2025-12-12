@@ -6,7 +6,6 @@
   {"lib/teiserver/account/accolades/accolade_bot_server.ex", :unknown_type},
   {"lib/teiserver/account/accolades/accolade_bot_server.ex", :no_return},
   {"lib/teiserver/account/accolades/accolade_bot_server.ex", :call},
-  {"lib/teiserver/account/libs/accolade_lib.ex", :unknown_type},
   {"lib/teiserver/account/libs/auth_lib.ex", :unknown_type},
   {"lib/teiserver/account/libs/badge_type_lib.ex", :unknown_type},
   {"lib/teiserver/account/libs/client_lib.ex", :unknown_type},
