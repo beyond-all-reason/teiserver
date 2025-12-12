@@ -26,6 +26,6 @@ defmodule Teiserver.Account.BadgeType do
     |> validate_required(~w(name icon colour purpose)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(_, conn, _), do: allow?(conn, "Admin")
 end

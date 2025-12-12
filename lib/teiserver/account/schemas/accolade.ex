@@ -25,6 +25,6 @@ defmodule Teiserver.Account.Accolade do
     |> foreign_key_constraint(:badge_type_id)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(_, conn, _), do: allow?(conn, "Moderator")
 end

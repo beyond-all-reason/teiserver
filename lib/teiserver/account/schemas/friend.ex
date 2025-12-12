@@ -22,6 +22,6 @@ defmodule Teiserver.Account.Friend do
     |> validate_required(~w(user1_id user2_id)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(:index, conn, _), do: allow?(conn, "Moderator")
 end

@@ -24,6 +24,6 @@ defmodule Teiserver.Chat.DirectMessage do
     |> validate_required(~w(content inserted_at from_id to_id delivered)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(:index, conn, _), do: allow?(conn, "Moderator")
 end

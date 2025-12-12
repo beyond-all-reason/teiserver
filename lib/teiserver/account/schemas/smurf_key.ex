@@ -22,6 +22,6 @@ defmodule Teiserver.Account.SmurfKey do
     |> validate_required(~w(value type_id user_id last_updated)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(_, conn, _), do: allow?(conn, "Moderator")
 end

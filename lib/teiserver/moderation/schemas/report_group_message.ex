@@ -25,7 +25,7 @@ defmodule Teiserver.Moderation.ReportGroupMessage do
     |> validate_required(~w(report_group_id user_id content)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(:index, conn, _), do: allow?(conn, "Overwatch")
   def authorize(:search, conn, _), do: allow?(conn, "Overwatch")
   def authorize(:show, conn, _), do: allow?(conn, "Overwatch")

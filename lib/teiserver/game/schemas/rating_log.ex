@@ -27,6 +27,6 @@ defmodule Teiserver.Game.RatingLog do
     |> validate_required(~w(user_id rating_type_id value inserted_at season)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(_, conn, _), do: allow?(conn, "Admin")
 end

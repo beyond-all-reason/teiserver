@@ -66,7 +66,7 @@ defmodule Teiserver.Account.BadgeTypeLib do
     end)
   end
 
-  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
+  @spec _search(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 

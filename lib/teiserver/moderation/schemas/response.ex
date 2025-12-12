@@ -23,7 +23,7 @@ defmodule Teiserver.Moderation.Response do
     |> validate_required(~w(report_id user_id action accurate)a)
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), map()) :: Boolean.t()
+  @spec authorize(atom(), Plug.Conn.t(), map()) :: Boolean.t()
   def authorize(:index, conn, _), do: allow?(conn, "Overwatch")
   def authorize(:search, conn, _), do: allow?(conn, "Overwatch")
   def authorize(:show, conn, _), do: allow?(conn, "Overwatch")
