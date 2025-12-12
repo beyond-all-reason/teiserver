@@ -12,7 +12,6 @@
   {"lib/teiserver/account/libs/client_lib.ex", :unknown_type},
   {"lib/teiserver/account/libs/friend_lib.ex", :unknown_type},
   {"lib/teiserver/account/libs/friend_request_lib.ex", :unknown_type},
-  {"lib/teiserver/account/libs/rating_lib.ex", :unknown_type},
   {"lib/teiserver/account/libs/relationship_lib.ex", :unknown_type},
   {"lib/teiserver/account/libs/smurf_key_lib.ex", :unknown_type},
   {"lib/teiserver/account/libs/smurf_key_type_lib.ex", :unknown_type},
