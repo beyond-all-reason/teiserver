@@ -10,7 +10,7 @@ defmodule Teiserver.SpringInternalTest do
         s
         |> Spring.parse_client_status()
         |> Spring.create_client_status()
-        |> to_string
+        |> to_string()
 
       assert s == result, message: "Status #{s}, got: #{result}"
     end
@@ -24,7 +24,7 @@ defmodule Teiserver.SpringInternalTest do
         s
         |> Spring.parse_battle_status()
         |> Spring.create_battle_status()
-        |> to_string
+        |> to_string()
 
       assert s == result, message: "Status #{s}, got: #{result}"
     end

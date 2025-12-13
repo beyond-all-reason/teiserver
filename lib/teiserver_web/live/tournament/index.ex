@@ -53,7 +53,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
         },
         socket
       ) do
-    {:noreply, socket |> get_lobbies}
+    {:noreply, socket |> get_lobbies()}
   end
 
   # Client action

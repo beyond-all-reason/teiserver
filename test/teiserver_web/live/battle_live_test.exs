@@ -112,7 +112,7 @@ defmodule TeiserverWeb.Live.BattleTest do
         join
         |> String.replace("JOINBATTLE ", "")
         |> String.replace(" gameHash", "")
-        |> int_parse
+        |> int_parse()
 
       {:ok, view, html} = live(conn, "/battle/lobbies/show/#{lobby_id}")
       assert html =~ "LiveBattleShow"

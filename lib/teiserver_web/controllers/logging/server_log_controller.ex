@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Logging.ServerLogController do
   @spec metric_list(Plug.Conn.t(), map) :: Plug.Conn.t()
   def metric_list(conn, %{"filter" => "graph-" <> graph} = params) do
     unit = Map.get(params, "unit", "day")
-    limit = Map.get(params, "limit", "31") |> int_parse
+    limit = Map.get(params, "limit", "31") |> int_parse()
 
     logs =
       case unit do
@@ -298,7 +298,7 @@ defmodule TeiserverWeb.Logging.ServerLogController do
 
   def metric_list(conn, params) do
     unit = Map.get(params, "unit", "day")
-    limit = Map.get(params, "limit", "31") |> int_parse
+    limit = Map.get(params, "limit", "31") |> int_parse()
 
     logs =
       case unit do

@@ -115,7 +115,7 @@ defmodule Teiserver.Microblog.PostLib do
     %Post{}
     |> Post.changeset(attrs)
     |> Repo.insert()
-    |> broadcast_create_post
+    |> broadcast_create_post()
   end
 
   defp broadcast_create_post({:ok, %Post{} = post}) do
@@ -218,7 +218,7 @@ defmodule Teiserver.Microblog.PostLib do
       {:ok, _} = Ecto.Adapters.SQL.query(Repo, query, [post.id])
 
       Repo.delete(post)
-      |> broadcast_delete_post
+      |> broadcast_delete_post()
     end)
     # This returns {x, {y, z}}, we want to strip out teh x (which is hopefully an :ok)
     |> elem(1)

@@ -79,7 +79,7 @@ defmodule Teiserver.Helper.ColourHelper do
 
   def rgba_css(colour, custom_alpha \\ 0.1) do
     colour
-    |> new
+    |> new()
     |> as_css_style(custom_alpha)
   end
 end

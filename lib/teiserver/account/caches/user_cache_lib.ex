@@ -57,8 +57,8 @@ defmodule Teiserver.Account.UserCacheLib do
 
   def get_user_by_name(username) do
     username
-    |> get_userid
-    |> get_user_by_id
+    |> get_userid()
+    |> get_user_by_id()
   end
 
   @spec get_user_by_email(String.t()) :: T.user() | nil
@@ -114,8 +114,8 @@ defmodule Teiserver.Account.UserCacheLib do
 
     Teiserver.cache_get_or_store(:users, id, fn ->
       Account.get_user(id)
-      |> convert_user
-      |> add_user
+      |> convert_user()
+      |> add_user()
     end)
   end
 
@@ -149,9 +149,9 @@ defmodule Teiserver.Account.UserCacheLib do
 
   def get_user_by_discord_id(discord_id) do
     discord_id
-    |> to_string
-    |> get_userid_by_discord_id
-    |> get_user_by_id
+    |> to_string()
+    |> get_userid_by_discord_id()
+    |> get_user_by_id()
   end
 
   @spec list_users(list) :: list
@@ -172,8 +172,8 @@ defmodule Teiserver.Account.UserCacheLib do
     Teiserver.Account.decache_relationships(id)
 
     Account.get_user(id)
-    |> convert_user
-    |> add_user
+    |> convert_user()
+    |> add_user()
 
     :ok
   end
@@ -182,8 +182,8 @@ defmodule Teiserver.Account.UserCacheLib do
     Teiserver.Account.recache_user(user.id)
 
     user
-    |> convert_user
-    |> add_user
+    |> convert_user()
+    |> add_user()
 
     :ok
   end

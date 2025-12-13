@@ -100,7 +100,7 @@ defmodule Teiserver.SpringRawTest do
 
     commands =
       remainder
-      |> Enum.map(fn line -> String.split(line, " ") |> hd end)
+      |> Enum.map(fn line -> String.split(line, " ") |> hd() end)
       |> Enum.uniq()
 
     # Due to things running concurrently it's possible either of these will be the case

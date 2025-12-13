@@ -99,7 +99,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
          |> assign(:id, id)
          |> assign(:lobby, lobby)
          |> assign(:modoptions, modoptions)
-         |> get_consul_state
+         |> get_consul_state()
          |> assign(:users, users)
          |> assign(:clients, clients)
          |> assign(:stats, stats)
@@ -172,7 +172,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
   def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do
     socket =
       socket
-      |> get_consul_state
+      |> get_consul_state()
 
     {:noreply, socket}
   end
@@ -188,7 +188,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
       socket
       |> assign(:battle, battle)
       |> assign(:modoptions, modoptions)
-      |> get_consul_state
+      |> get_consul_state()
 
     # Players
     # TODO: This can likely be optimised somewhat
@@ -262,7 +262,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
     {:noreply,
      socket
      |> assign(:battle, battle)
-     |> get_consul_state
+     |> get_consul_state()
      |> assign(:users, users)
      |> assign(:clients, clients)
      |> assign(:ratings, ratings)

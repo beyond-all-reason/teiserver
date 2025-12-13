@@ -126,10 +126,10 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
     # Hours should be rounded down to make it more
     # accurate for determining if a chevron threshold is reached
-    total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> trunc
-    player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> trunc
-    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> trunc
-    lobby_hours = (Map.get(stats, "lobby_minutes", 0) / 60) |> trunc
+    total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> trunc()
+    player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> trunc()
+    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> trunc()
+    lobby_hours = (Map.get(stats, "lobby_minutes", 0) / 60) |> trunc()
 
     host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/profile/#{senderid}"
@@ -374,7 +374,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         "You already have a discord account linked; the discord link is: #{Application.get_env(:teiserver, Teiserver)[:discord]}"
       )
     else
-      code = (:rand.uniform(899_999) + 100_000) |> to_string
+      code = (:rand.uniform(899_999) + 100_000) |> to_string()
       Teiserver.cache_put(:discord_bridge_account_codes, senderid, code)
 
       CacheUser.send_direct_message(state.userid, senderid, [

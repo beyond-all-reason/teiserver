@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       |> assign(:stage, :loading)
       |> assign(:extra_text, "")
       |> add_breadcrumb(name: "Report user", url: ~p"/moderation/report_user")
-      |> apply_structure
+      |> apply_structure()
 
     {:ok, socket}
   end
@@ -32,9 +32,9 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
         user_id: user.id
       })
       |> assign(:stage, :type)
-      |> allowed_to_use_form
-      |> get_user_matches
-      |> get_relationship
+      |> allowed_to_use_form()
+      |> get_user_matches()
+      |> get_relationship()
 
     {:noreply, socket}
   end

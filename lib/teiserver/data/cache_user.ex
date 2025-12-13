@@ -147,13 +147,13 @@ defmodule Teiserver.CacheUser do
     Account.update_user_stat(user.id, %{
       "first_ip" => ip,
       "country" => Teiserver.Geoip.get_flag(ip),
-      "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string
+      "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string()
     })
 
     # Now add them to the cache
     user
-    |> convert_user
-    |> add_user
+    |> convert_user()
+    |> add_user()
 
     if not String.ends_with?(user.email, "@agents") do
       case EmailHelper.new_user(user) do
@@ -199,8 +199,8 @@ defmodule Teiserver.CacheUser do
           {:ok, user} ->
             # Now add them to the cache
             user
-            |> convert_user
-            |> add_user
+            |> convert_user()
+            |> add_user()
 
           {:error, changeset} ->
             Logger.error(
@@ -275,8 +275,8 @@ defmodule Teiserver.CacheUser do
       |> Map.get("rename_log", [])
 
     now = System.system_time(:second)
-    since_rename_two = now - ((Enum.slice(rename_log, 1..1) ++ [0, 0, 0]) |> hd)
-    since_rename_three = now - ((Enum.slice(rename_log, 2..2) ++ [0, 0, 0]) |> hd)
+    since_rename_two = now - ((Enum.slice(rename_log, 1..1) ++ [0, 0, 0]) |> hd())
+    since_rename_three = now - ((Enum.slice(rename_log, 2..2) ++ [0, 0, 0]) |> hd())
 
     cond do
       # VIPs ignore time based rename restrictions
@@ -940,7 +940,7 @@ defmodule Teiserver.CacheUser do
     rank =
       cond do
         stats["rank_override"] != nil ->
-          stats["rank_override"] |> int_parse
+          stats["rank_override"] |> int_parse()
 
         true ->
           calculate_rank(user.id)

@@ -290,7 +290,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           Client.get_client_by_id(userid).player
         end)
         |> Enum.map(fn {userid, seen_at} ->
-          seconds_ago = ((now - seen_at) / 1000) |> round
+          seconds_ago = ((now - seen_at) / 1000) |> round()
           {userid, seconds_ago}
         end)
         |> Enum.sort_by(fn {_userid, seconds_ago} -> seconds_ago end, &<=/2)

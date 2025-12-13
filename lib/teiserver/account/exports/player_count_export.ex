@@ -109,7 +109,7 @@ defmodule Teiserver.Account.PlayerCountExport do
       ]
     end)
     |> Enum.to_list()
-    |> add_csv_headings
+    |> add_csv_headings()
     |> CSV.encode()
     |> Enum.to_list()
   end

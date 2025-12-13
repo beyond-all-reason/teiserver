@@ -14,7 +14,7 @@ defmodule Teiserver.Telemetry.ExportSimpleLobbyEventsTask do
     end_date = Timex.to_datetime(end_date)
 
     query_lobby(event_types, start_date, end_date)
-    |> add_csv_headings
+    |> add_csv_headings()
     |> CSV.encode()
     |> Enum.to_list()
   end

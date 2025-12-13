@@ -526,7 +526,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       Timex.diff(match.finished, match.started, :second) >= battle_minimum_seconds
     end)
     |> Enum.reduce(@match_blank_acc, &add_match/2)
-    |> second_pass
+    |> second_pass()
     |> Map.drop(@drop_keys)
   end
 

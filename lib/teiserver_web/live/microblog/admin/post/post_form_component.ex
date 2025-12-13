@@ -292,7 +292,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
     )
     |> assign(assigns)
     |> assign_form(changeset)
-    |> ok
+    |> ok()
   end
 
   defp error_to_string(:too_large), do: "Too large"
@@ -387,13 +387,13 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   def handle_event("show-upload-form", _, socket) do
     socket
     |> assign(:show_upload_form, true)
-    |> noreply
+    |> noreply()
   end
 
   def handle_event("hide-upload-form", _, socket) do
     socket
     |> assign(:show_upload_form, false)
-    |> noreply
+    |> noreply()
   end
 
   defp save_post(socket, :edit, post_params) do

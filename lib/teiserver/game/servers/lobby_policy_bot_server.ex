@@ -318,7 +318,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
           pick_random_map(state)
         end
 
-        team_count = new_status["nbTeams"] |> int_parse
+        team_count = new_status["nbTeams"] |> int_parse()
 
         cond do
           team_count > state.lobby_policy.max_teamcount ->
@@ -333,7 +333,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
             :ok
         end
 
-        team_size = new_status["teamSize"] |> int_parse
+        team_size = new_status["teamSize"] |> int_parse()
 
         cond do
           team_size > state.lobby_policy.max_teamsize ->

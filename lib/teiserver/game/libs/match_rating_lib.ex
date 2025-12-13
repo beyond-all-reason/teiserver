@@ -667,7 +667,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     winning_team =
       team_scores
       |> Enum.sort_by(fn {_id, score} -> score end, &>=/2)
-      |> hd
+      |> hd()
       |> elem(0)
 
     %{

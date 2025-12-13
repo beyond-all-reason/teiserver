@@ -115,7 +115,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
     |> Enum.reduce(@empty_result, fn log, acc ->
       extend_segment(acc, log)
     end)
-    |> post_process
+    |> post_process()
   end
 
   @spec month_so_far() :: map()
@@ -130,7 +130,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
     |> Enum.reduce(@empty_result, fn log, acc ->
       extend_segment(acc, log)
     end)
-    |> post_process
+    |> post_process()
     |> Jason.encode!()
     |> Jason.decode!()
 

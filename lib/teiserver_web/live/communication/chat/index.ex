@@ -11,8 +11,8 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
       |> assign(:messages, [])
       |> assign(:usernames, %{})
       |> add_breadcrumb(name: "Chat", url: "/chat")
-      |> default_filters
-      |> get_messages
+      |> default_filters()
+      |> get_messages()
 
     {:ok, socket}
   end
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
     socket =
       socket
       |> assign(:filters, new_filters)
-      |> get_messages
+      |> get_messages()
 
     {:noreply, socket}
   end

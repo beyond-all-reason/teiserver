@@ -105,7 +105,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
         "triggers" =>
           (discord_channel_params["triggers"] || "")
           |> String.downcase()
-          |> convert_textarea_to_array
+          |> convert_textarea_to_array()
           |> Enum.sort()
       })
 

@@ -83,7 +83,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Preferences do
 
         socket
         |> assign(:user_preferences, new_user_preferences)
-        |> calculate_remaining_tags
+        |> calculate_remaining_tags()
       end
 
     {:noreply, socket}
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Preferences do
     {:noreply,
      socket
      |> assign(:user_preferences, new_user_preferences)
-     |> calculate_remaining_tags}
+     |> calculate_remaining_tags()}
   end
 
   def handle_event("disable-tag", %{"tag-id" => tag_id_str}, socket) do
@@ -134,7 +134,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Preferences do
     {:noreply,
      socket
      |> assign(:user_preferences, new_user_preferences)
-     |> calculate_remaining_tags}
+     |> calculate_remaining_tags()}
   end
 
   def handle_event("reset-tag", %{"tag-id" => tag_id_str}, socket) do
@@ -158,13 +158,13 @@ defmodule TeiserverWeb.Microblog.BlogLive.Preferences do
     {:noreply,
      socket
      |> assign(:user_preferences, new_user_preferences)
-     |> calculate_remaining_tags}
+     |> calculate_remaining_tags()}
   end
 
   defp load_preferences(%{assigns: %{current_user: nil}} = socket) do
     socket
     |> assign(:user_preferences, nil)
-    |> calculate_remaining_tags
+    |> calculate_remaining_tags()
   end
 
   defp load_preferences(%{assigns: %{current_user: current_user}} = socket)
@@ -173,13 +173,13 @@ defmodule TeiserverWeb.Microblog.BlogLive.Preferences do
 
     socket
     |> assign(:user_preferences, user_preferences)
-    |> calculate_remaining_tags
+    |> calculate_remaining_tags()
   end
 
   defp load_preferences(socket) do
     socket
     |> assign(:user_preferences, nil)
-    |> calculate_remaining_tags
+    |> calculate_remaining_tags()
   end
 
   defp calculate_remaining_tags(%{assigns: assigns} = socket) do

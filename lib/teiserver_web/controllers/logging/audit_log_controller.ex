@@ -72,7 +72,7 @@ defmodule TeiserverWeb.Logging.AuditLogController do
   defp form_params(params \\ %{}) do
     %{
       "action" => Map.get(params, "action", ""),
-      "user_id" => Map.get(params, "account_user", "") |> get_hash_id,
+      "user_id" => Map.get(params, "account_user", "") |> get_hash_id(),
       "account_user" => Map.get(params, "account_user", ""),
       "order" => Map.get(params, "order", "Newest first"),
       "limit" => Map.get(params, "limit", "50")

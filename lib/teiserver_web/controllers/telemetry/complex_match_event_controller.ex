@@ -72,11 +72,11 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
         limit: 1,
         select: [:value]
       )
-      |> hd
+      |> hd()
       |> Map.get(:value)
       |> Map.keys()
 
-    default_key = schema_keys |> Enum.sort() |> hd
+    default_key = schema_keys |> Enum.sort() |> hd()
 
     key = Map.get(params, "key", default_key)
 

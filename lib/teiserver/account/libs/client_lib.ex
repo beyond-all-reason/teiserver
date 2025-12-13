@@ -33,7 +33,7 @@ defmodule Teiserver.Account.ClientLib do
 
   def get_clients(id_list) do
     id_list
-    |> list_clients
+    |> list_clients()
   end
 
   @spec list_client_ids() :: [T.userid()]

@@ -176,9 +176,9 @@ defmodule Teiserver.Bridge.MessageCommands do
   def handle_command({user, _}, "whoami", _remaining, channel) do
     stats = Account.get_user_stat_data(user.id)
 
-    total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> round
-    player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round
-    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round
+    total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> round()
+    player_hours = (Map.get(stats, "player_minutes", 0) / 60) |> round()
+    spectator_hours = (Map.get(stats, "spectator_minutes", 0) / 60) |> round()
 
     host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/profile/#{user.id}"

@@ -49,7 +49,7 @@ defmodule Teiserver.SpringRegressionTest do
       join
       |> String.replace("JOINBATTLE ", "")
       |> String.replace(" gameHash", "")
-      |> int_parse
+      |> int_parse()
 
     assert battle_status == "REQUESTBATTLESTATUS"
 

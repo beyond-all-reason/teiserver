@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
       |> assign(:message_changeset, nil)
       |> add_breadcrumb(name: "Chat", url: "/chat")
       |> assign(:message_timestamps, [])
-      |> check_if_can_send
+      |> check_if_can_send()
 
     {:ok, socket}
   end
@@ -145,7 +145,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
         order_by: "Newest first"
       )
 
-    last_poster_id = messages |> hd |> Map.get(:user_id)
+    last_poster_id = messages |> hd() |> Map.get(:user_id)
 
     # Now reverse them for display purposes
     messages =

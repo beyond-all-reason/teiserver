@@ -1,6 +1,6 @@
 <% {fg, bg, bsname} = assigns[:module].colours() |> colours()
 # icon = assigns[:module].icon()
-uid = Enum.random(100_000..999_999) |> to_string %>
+uid = Enum.random(100_000..999_999) |> to_string() %>
 
 <style type="text/css">
   .<%= assigns[:name] %>-picker-row {
