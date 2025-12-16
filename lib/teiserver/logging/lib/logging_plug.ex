@@ -11,7 +11,7 @@ defmodule Teiserver.Logging.LoggingPlug do
     %{}
   end
 
-  @spec call(Plug.Conn.t(), List.t()) :: Plug.Conn.t()
+  @spec call(Plug.Conn.t(), list()) :: Plug.Conn.t()
   def call(conn, _ops) do
     start_tick = :os.system_time(:micro_seconds)
 
@@ -32,7 +32,7 @@ defmodule Teiserver.Logging.LoggingPlug do
     end)
   end
 
-  @spec convert_from_x_real_ip(String.t()) :: Tuple.t()
+  @spec convert_from_x_real_ip(String.t()) :: tuple()
   defp convert_from_x_real_ip(ip) do
     if String.contains?(ip, ":") do
       ip
@@ -46,7 +46,7 @@ defmodule Teiserver.Logging.LoggingPlug do
     end
   end
 
-  @spec get_user_id(Plug.Conn.t()) :: nil | Integer.t()
+  @spec get_user_id(Plug.Conn.t()) :: nil | integer()
   defp get_user_id(conn) do
     if conn.assigns[:current_user] == nil do
       nil

@@ -90,7 +90,7 @@ defmodule Teiserver.Moderation.ReportLib do
     end)
   end
 
-  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
+  @spec _search(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -237,7 +237,7 @@ defmodule Teiserver.Moderation.ReportLib do
       order_by: [desc: targets.name]
   end
 
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, preloads) do
