@@ -42,7 +42,7 @@ When successful, the following services should be available:
 The website should be available via the URLs below:
 
 - HTTP: [http://localhost:4000/]
-- HTTPS: [https://localhost:8080/]
+- HTTPS: [https://localhost:8888/]
 
 ### Spring Lobby Server
 
