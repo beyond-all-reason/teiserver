@@ -305,7 +305,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   This should only be used for tests, because there is some gnarly logic in
   generating the start script and it's a bit hard to test end to end
   """
-  @spec get_start_script(id()) :: TachyonBattle.start_script()
+  @spec get_start_script(id()) :: Autohost.start_script()
   def get_start_script(lobby_id) do
     GenServer.call(via_tuple(lobby_id), :get_start_script)
   end
@@ -1252,7 +1252,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp bot_id?(id) when is_integer(id), do: false
   defp bot_id?(id), do: String.starts_with?(id, "bot")
 
-  @spec gen_start_script(state()) :: TachyonBattle.start_script()
+  @spec gen_start_script(state()) :: Autohost.start_script()
   defp gen_start_script(state) do
     sorted =
       Map.values(state.players)

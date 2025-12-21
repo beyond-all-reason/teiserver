@@ -243,7 +243,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   end
 
   @spec start_script(state(), %{version: String.t()}, String.t(), Asset.Map.t()) ::
-          Teiserver.TachyonBattle.start_script()
+          Teiserver.Autohost.start_script()
   defp start_script(state, engine, game, map) do
     %{
       engineVersion: engine.version,

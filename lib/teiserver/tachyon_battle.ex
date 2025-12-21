@@ -14,7 +14,6 @@ defmodule Teiserver.TachyonBattle do
   alias Teiserver.{TachyonBattle, Autohost, Battle}
 
   @type id :: T.id()
-  @type start_script :: T.start_script()
 
   @spec lookup(T.id()) :: pid() | nil
   defdelegate lookup(battle_id), to: TachyonBattle.Registry
@@ -22,18 +21,16 @@ defmodule Teiserver.TachyonBattle do
   @doc """
   Start a battle process and connects it to the given autohost
   """
-  @spec start_battle(Bot.id(), T.start_script(), boolean()) ::
+  @spec start_battle(Bot.id(), Autohost.start_script(), boolean()) ::
           {:ok, {id(), pid()}, Autohost.start_response()} | {:error, term()}
   def start_battle(autohost_id, start_script, is_matchmaking) do
     with {:ok, match} <- Battle.create_match_from_start_script(start_script, is_matchmaking),
          {:ok, battle_id, pid} <- start_battle_process(autohost_id, match.id) do
-      start_script = Map.put(start_script, :battleId, battle_id)
-
       Logger.info(
         "Starting battle with id #{battle_id} and match id #{match.id} on autohost #{autohost_id}"
       )
 
-      case Teiserver.Autohost.start_battle(autohost_id, start_script) do
+      case Teiserver.Autohost.start_battle(autohost_id, battle_id, start_script) do
         {:ok, data} -> {:ok, {battle_id, pid}, data}
         x -> x
       end

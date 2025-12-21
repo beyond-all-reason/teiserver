@@ -402,7 +402,7 @@ defmodule Teiserver.Battle do
     :ok
   end
 
-  @spec create_match_from_start_script(Teiserver.TachyonBattle.start_script(), boolean()) ::
+  @spec create_match_from_start_script(Teiserver.Autohost.start_script(), boolean()) ::
           {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
   def create_match_from_start_script(start_script, is_matchmaking) do
     ally_teams = start_script.allyTeams

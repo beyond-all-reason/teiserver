@@ -9,7 +9,6 @@ defmodule Teiserver.Autohost do
   @type reg_value :: Registry.reg_value()
 
   @type start_script :: %{
-          required(:battleId) => Teiserver.TachyonBattle.id(),
           required(:engineVersion) => String.t(),
           required(:gameName) => String.t(),
           required(:mapName) => String.t(),
@@ -74,9 +73,9 @@ defmodule Teiserver.Autohost do
     if autohost_val == nil, do: nil, else: autohost_val[:id]
   end
 
-  @spec start_battle(Bot.id(), start_script()) ::
+  @spec start_battle(Bot.id(), Teiserver.TachyonBattle.id(), start_script()) ::
           {:ok, start_response()} | {:error, term()}
-  defdelegate start_battle(bot_id, start_script),
+  defdelegate start_battle(bot_id, battle_id, start_script),
     to: Teiserver.Autohost.TachyonHandler
 
   @spec send_message(pid(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::

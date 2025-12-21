@@ -24,11 +24,12 @@ defmodule Teiserver.Autohost.TachyonHandler do
   @type start_response :: %{ips: [String.t()], port: integer()}
 
   # TODO: there should be some kind of retry here
-  @spec start_battle(Bot.id(), Teiserver.Autohost.start_script()) ::
+  @spec start_battle(Bot.id(), Teiserver.TachyonBattle.id(), Teiserver.Autohost.start_script()) ::
           {:ok, start_response()} | {:error, term()}
-  def start_battle(autohost_id, start_script) do
+  def start_battle(autohost_id, battle_id, start_script) do
     case Registry.lookup(autohost_id) do
       {pid, _} ->
+        start_script = Map.put(start_script, :battleId, battle_id)
         response = Transport.call_client(pid, "autohost/start", start_script)
 
         case response do
