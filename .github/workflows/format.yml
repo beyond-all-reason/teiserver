@@ -17,7 +17,7 @@ on:
 env:
   MIX_ENV: test
   ELIXIR_VER: '1.19.4'
-  OTP_VER: '26.2.5.14'
+  OTP_VER: '26.2.5.1'
 
 permissions:
   contents: read

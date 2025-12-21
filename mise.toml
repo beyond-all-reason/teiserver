@@ -1,6 +1,6 @@
 [tools]
 postgres = "15"
-erlang = "26.2.5.14"
+erlang = "26.2.5.1"
 elixir = "1.19.4-otp-26"
 
 [vars]
