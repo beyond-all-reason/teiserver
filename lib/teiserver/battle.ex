@@ -405,7 +405,7 @@ defmodule Teiserver.Battle do
   @spec create_match_from_start_script(Teiserver.Autohost.start_script(), boolean()) ::
           {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
   def create_match_from_start_script(start_script, is_matchmaking) do
-    ally_teams = start_script.allyTeams
+    ally_teams = start_script.ally_teams
 
     team_count = ally_teams |> Enum.count()
 
@@ -417,9 +417,9 @@ defmodule Teiserver.Battle do
     game_type = MatchLib.game_type(team_size, team_count)
 
     match_params = %{
-      map: start_script.mapName,
-      engine_version: start_script.engineVersion,
-      game_version: start_script.gameName,
+      map: start_script.map_name,
+      engine_version: start_script.engine_version,
+      game_version: start_script.game_name,
       team_count: team_count,
       team_size: team_size,
       game_type: game_type,
@@ -439,7 +439,7 @@ defmodule Teiserver.Battle do
             %{
               match_id: match.id,
               team_id: index,
-              user_id: String.to_integer(player.userId)
+              user_id: player.user_id
             }
             |> create_match_membership()
           end

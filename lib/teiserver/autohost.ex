@@ -4,17 +4,19 @@ defmodule Teiserver.Autohost do
   alias Teiserver.Bot.Bot
   alias Teiserver.BotQueries
   alias Teiserver.TachyonBattle
+  alias Teiserver.Data.Types, as: T
 
   @type id :: Teiserver.Bot.Bot.id()
   @type reg_value :: Registry.reg_value()
 
   @type start_script :: %{
-          required(:engineVersion) => String.t(),
-          required(:gameName) => String.t(),
-          required(:mapName) => String.t(),
-          required(:startPosType) => :fixed | :random | :ingame | :beforegame,
-          required(:allyTeams) => [ally_team(), ...],
-          optional(:spectators) => [player()]
+          required(:engine_version) => String.t(),
+          required(:game_name) => String.t(),
+          required(:map_name) => String.t(),
+          required(:start_pos_type) => :fixed | :random | :ingame | :beforegame,
+          required(:ally_teams) => [ally_team(), ...],
+          optional(:spectators) => [player()],
+          optional(:bots) => [bot()]
         }
 
   @type ally_team :: %{
@@ -26,9 +28,17 @@ defmodule Teiserver.Autohost do
         }
 
   @type player :: %{
-          userId: String.t(),
+          user_id: T.userid(),
           name: String.t(),
           password: String.t()
+        }
+
+  @type bot :: %{
+          host_user_id: T.userid(),
+          name: String.t(),
+          ai_short_name: String.t(),
+          ai_version: String.t(),
+          ai_options: %{String.t() => term()}
         }
 
   @type start_response :: TachyonHandler.start_response()

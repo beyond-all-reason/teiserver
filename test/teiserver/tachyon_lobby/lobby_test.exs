@@ -976,7 +976,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "with 1 player" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
-      %{allyTeams: [%{teams: [%{players: [%{userId: @default_user_id}]}]}]} = start_script
+      %{ally_teams: [%{teams: [%{players: [%{user_id: @default_user_id}]}]}]} = start_script
     end
 
     test "with a spec" do
@@ -984,7 +984,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
 
       start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
-      %{spectators: [%{userId: "other-user-id"}]} = start_script
+      %{spectators: [%{user_id: "other-user-id"}]} = start_script
     end
 
     test "with 2 players in the same team" do
@@ -993,9 +993,9 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _} = Lobby.join_ally_team(id, "other-user-id", 0)
 
       start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
-      %{allyTeams: [%{teams: [t1, t2]}]} = start_script
-      %{players: [%{userId: @default_user_id}]} = t1
-      %{players: [%{userId: "other-user-id"}]} = t2
+      %{ally_teams: [%{teams: [t1, t2]}]} = start_script
+      %{players: [%{user_id: @default_user_id}]} = t1
+      %{players: [%{user_id: "other-user-id"}]} = t2
     end
 
     test "1 ally team with a player leaving then joining" do
@@ -1006,9 +1006,9 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _} = Lobby.join_ally_team(id, @default_user_id, 0)
 
       start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
-      %{allyTeams: [%{teams: [t1, t2]}]} = start_script
-      %{players: [%{userId: "other-user-id"}]} = t1
-      %{players: [%{userId: @default_user_id}]} = t2
+      %{ally_teams: [%{teams: [t1, t2]}]} = start_script
+      %{players: [%{user_id: "other-user-id"}]} = t1
+      %{players: [%{user_id: @default_user_id}]} = t2
     end
 
     test "2 ally teams" do
@@ -1017,18 +1017,18 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _} = Lobby.join_ally_team(id, "other-user-id", 1)
 
       start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
-      %{allyTeams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
-      %{players: [%{userId: @default_user_id}]} = t1
-      %{players: [%{userId: "other-user-id"}]} = t2
+      %{ally_teams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
+      %{players: [%{user_id: @default_user_id}]} = t1
+      %{players: [%{user_id: "other-user-id"}]} = t2
     end
 
     test "with a bot" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
       start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
-      %{allyTeams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
-      %{players: [%{userId: @default_user_id}]} = t1
-      %{bots: [%{hostUserId: @default_user_id, aiShortName: "bot short name"}]} = t2
+      %{ally_teams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
+      %{players: [%{user_id: @default_user_id}]} = t1
+      %{bots: [%{host_user_id: @default_user_id, ai_short_name: "bot short name"}]} = t2
       assert not is_map_key(t1, :bots)
       assert not is_map_key(t2, :players)
     end

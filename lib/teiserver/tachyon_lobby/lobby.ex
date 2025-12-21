@@ -1273,7 +1273,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
             players =
               for player <- players do
                 %{
-                  userId: to_string(player.id),
+                  user_id: player.id,
                   name: player.name,
                   password: player.password
                 }
@@ -1282,11 +1282,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
             bots =
               for bot <- bots do
                 %{
-                  hostUserId: to_string(bot.host_user_id),
+                  host_user_id: bot.host_user_id,
                   name: Map.get(bot, :name),
-                  aiShortName: bot.short_name,
-                  aiVersion: Map.get(bot, :version),
-                  aiOptions: bot.options
+                  ai_short_name: bot.short_name,
+                  ai_version: Map.get(bot, :version),
+                  ai_options: bot.options
                 }
                 |> Enum.reject(fn {_, v} -> v == nil || v == %{} end)
                 |> Map.new()
@@ -1299,14 +1299,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
       end
 
     %{
-      engineVersion: state.engine_version,
-      gameName: state.game_version,
-      mapName: state.map_name,
-      startPosType: :ingame,
-      allyTeams: ally_teams,
+      engine_version: state.engine_version,
+      game_name: state.game_version,
+      map_name: state.map_name,
+      start_pos_type: :ingame,
+      ally_teams: ally_teams,
       spectators:
         Enum.map(state.spectators, fn {_s_id, s} ->
-          %{userId: to_string(s.id), name: s.name, password: s.password}
+          %{user_id: s.id, name: s.name, password: s.password}
         end)
     }
   end
