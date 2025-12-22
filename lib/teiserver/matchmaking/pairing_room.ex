@@ -243,14 +243,14 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   end
 
   @spec start_script(state(), %{version: String.t()}, String.t(), Asset.Map.t()) ::
-          Teiserver.TachyonBattle.start_script()
+          Teiserver.Autohost.start_script()
   defp start_script(state, engine, game, map) do
     %{
-      engineVersion: engine.version,
-      gameName: game,
-      mapName: map.spring_name,
-      startPosType: :ingame,
-      allyTeams: get_ally_teams(state, map)
+      engine_version: engine.version,
+      game_name: game,
+      map_name: map.spring_name,
+      start_pos_type: :ingame,
+      ally_teams: get_ally_teams(state, map)
     }
   end
 
@@ -267,7 +267,6 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     for {team, startbox} <- Enum.zip(state.readied, startboxes) do
       teams =
         for player <- team do
-          player = player |> Map.drop([:user_id]) |> Map.put(:userId, to_string(player.user_id))
           %{players: [player]}
         end
 

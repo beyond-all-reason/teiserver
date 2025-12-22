@@ -8,7 +8,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   alias Teiserver.Autohost.Registry
   alias Teiserver.Bot.Bot
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helpers.TachyonParser
+  alias Teiserver.Helpers.{TachyonParser, Collections}
   alias Teiserver.Tachyon.{Handler, Schema, Transport}
   alias Teiserver.TachyonBattle
 
@@ -24,11 +24,31 @@ defmodule Teiserver.Autohost.TachyonHandler do
   @type start_response :: %{ips: [String.t()], port: integer()}
 
   # TODO: there should be some kind of retry here
-  @spec start_battle(Bot.id(), Teiserver.Autohost.start_script()) ::
+  @spec start_battle(Bot.id(), Teiserver.TachyonBattle.id(), Teiserver.Autohost.start_script()) ::
           {:ok, start_response()} | {:error, term()}
-  def start_battle(autohost_id, start_script) do
+  def start_battle(autohost_id, battle_id, start_script) do
+    mappings = %{
+      engine_version: :engineVersion,
+      game_name: :gameName,
+      map_name: :mapName,
+      start_pos_type: :startPosType,
+      ally_teams:
+        {:allyTeams,
+         %{
+           teams: {:teams, %{players: {:players, &player_to_tachyon/1}}}
+         }},
+      spectators: {:spectators, &player_to_tachyon/1}
+    }
+
+    start_script =
+      start_script
+      |> Collections.transform_map(mappings)
+      |> Collections.remove_nil_vals()
+      |> Map.put(:battleId, battle_id)
+
     case Registry.lookup(autohost_id) do
       {pid, _} ->
+        start_script = Map.put(start_script, :battleId, battle_id)
         response = Transport.call_client(pid, "autohost/start", start_script)
 
         case response do
@@ -350,5 +370,15 @@ defmodule Teiserver.Autohost.TachyonHandler do
           {:ok, %{battle_id: data["battleId"], time: time, update: update}}
       end
     end
+  end
+
+  def player_to_tachyon(p) when is_list(p), do: Enum.map(p, &player_to_tachyon/1)
+
+  def player_to_tachyon(p) do
+    %{
+      userId: to_string(p.user_id),
+      name: p.name,
+      password: p.password
+    }
   end
 end
