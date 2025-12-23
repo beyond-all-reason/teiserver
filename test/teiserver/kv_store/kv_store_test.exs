@@ -69,4 +69,27 @@ defmodule Teiserver.KvStore.KvStoreTest do
              %{store: "test_store1", key: "key2", value: "val2"}
            ]) == blobs
   end
+
+  test "can delete a blob" do
+    :ok = KV.put("test_store", "key", "val")
+    assert KV.get("test_store", "key") != nil
+    :ok = KV.delete("test_store", "key")
+    assert KV.get("test_store", "key") == nil
+  end
+
+  test "deletes is fine with non existant blob" do
+    :ok = KV.delete("store", "key")
+  end
+
+  test "can delete many blobs at once" do
+    :ok = KV.put("test_store1", "key1", "val1")
+    :ok = KV.put("test_store1", "key2", "val2")
+    :ok = KV.put("test_store2", "key1", "val1")
+
+    assert 2 == KV.delete_many([{"test_store1", "key2"}, {"test_store2", "key1"}])
+
+    assert KV.get("test_store1", "key1") != nil
+    assert KV.get("test_store1", "key2") == nil
+    assert KV.get("test_store2", "key1") == nil
+  end
 end

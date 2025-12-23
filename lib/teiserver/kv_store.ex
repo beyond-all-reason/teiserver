@@ -20,4 +20,10 @@ defmodule Teiserver.KvStore do
   @spec put_many([%{store: String.t(), key: String.t(), value: binary()}]) ::
           :ok | {:error, [Ecto.Changeset.t()]}
   defdelegate put_many(vals), to: Queries
+
+  @spec delete(store :: String.t(), key :: String.t()) :: :ok | {:error, Ecto.Changeset.t()}
+  defdelegate delete(store, key), to: Queries
+
+  @spec delete_many([{store :: String.t(), key :: String.t()}]) :: non_neg_integer()
+  defdelegate delete_many(keys), to: Queries
 end

@@ -76,4 +76,21 @@ defmodule Teiserver.KvStore.Queries do
     )
     |> Repo.all()
   end
+
+  @spec delete(store :: String.t(), key :: String.t()) :: :ok | {:error, Ecto.Changeset.t()}
+  def delete(store, key) do
+    case Repo.delete(%Blob{store: store, key: key}, allow_stale: true) do
+      {:ok, _} -> :ok
+      x -> x
+    end
+  end
+
+  @spec delete_many([{store :: String.t(), key :: String.t()}]) :: non_neg_integer()
+  def delete_many(keys) do
+    Enum.reduce(keys, Blob, fn {store, k}, q ->
+      from blob in q, or_where: blob.store == ^store and blob.key == ^k
+    end)
+    |> Repo.delete_all()
+    |> elem(0)
+  end
 end
