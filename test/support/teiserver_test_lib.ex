@@ -532,9 +532,6 @@ defmodule Teiserver.TeiserverTestLib do
   def start_coordinator!() do
     assert {:ok, pid} = Teiserver.Coordinator.start_coordinator()
 
-    # Wait until the coordinator account exists
-    # Teiserver.Support.Polling.poll_until_some(&Teiserver.Coordinator.get_coordinator_userid/0)
-
     on_exit(fn ->
       assert :ok =
                DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, pid)

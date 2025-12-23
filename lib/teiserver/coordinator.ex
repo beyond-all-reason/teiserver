@@ -4,7 +4,8 @@ defmodule Teiserver.Coordinator do
   alias Teiserver.Data.Types, as: T
   require Logger
 
-  @spec start_coordinator() :: {:error, String.t()} | DynamicSupervisor.on_start_child()
+  @spec start_coordinator() ::
+          {:error, {:already_started, pid()}} | DynamicSupervisor.on_start_child()
   def start_coordinator() do
     case get_coordinator_pid() do
       nil ->
@@ -14,8 +15,8 @@ defmodule Teiserver.Coordinator do
           name: Teiserver.Coordinator.CoordinatorServer, data: %{}
         })
 
-      _pid ->
-        {:error, "Already started"}
+      pid ->
+        {:error, {:already_started, pid}}
     end
   end
 
