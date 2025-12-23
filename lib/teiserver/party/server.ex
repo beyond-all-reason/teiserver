@@ -5,6 +5,8 @@ defmodule Teiserver.Party.Server do
 
   @behaviour :gen_statem
 
+  require Logger
+
   alias Teiserver.Party
   alias Teiserver.Player
   alias Teiserver.Matchmaking
@@ -22,6 +24,7 @@ defmodule Teiserver.Party.Server do
           pid: pid(),
           monitors: MC.t(),
           members: %{T.userid() => %{id: T.userid(), joined_at: DateTime.t()}},
+          ids_to_rejoin: MapSet.t(T.userid()),
           invited: %{
             T.userid() => %{
               id: T.userid(),
@@ -54,12 +57,23 @@ defmodule Teiserver.Party.Server do
   end
 
   @doc """
+  To be called when the system is starting up and recovering from a restart.
+  The player has to already be in the party (member or invited).
+  """
+  @spec rejoin(id(), T.userid(), pid() | nil) :: :ok | {:error, :invalid_party | :not_a_member}
+  def rejoin(party_id, user_id, pid \\ self()) do
+    :gen_statem.call(via_tuple(party_id), {:rejoin, user_id, pid}, 5000)
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_party}
+  end
+
+  @doc """
   Create an invite for the given player, ensuring they're not alreay part of the party
   """
   @spec create_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
-  def create_invite(party_id, user_id) do
-    :gen_statem.call(via_tuple(party_id), {:create_invite, user_id, self()}, 5000)
+  def create_invite(party_id, user_id, pid \\ self()) do
+    :gen_statem.call(via_tuple(party_id), {:create_invite, user_id, pid}, 5000)
   catch
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
@@ -173,6 +187,9 @@ defmodule Teiserver.Party.Server do
 
   @impl :gen_statem
   def init({party_id, {:user, user_id, creator_pid}}) do
+    Process.flag(:trap_exit, true)
+    Logger.metadata(actor_type: :party, actor_id: party_id)
+
     data =
       %{
         version: 0,
@@ -181,11 +198,49 @@ defmodule Teiserver.Party.Server do
         monitors: MC.new(),
         members: %{},
         invited: %{},
+        ids_to_rejoin: MapSet.new(),
         matchmaking: nil
       }
       |> add_member(user_id, creator_pid)
 
     {:ok, :running, data}
+  end
+
+  def init({party_id, {:snapshot, serialized_state}}) do
+    Process.flag(:trap_exit, true)
+    Logger.metadata(actor_type: :party, actor_id: party_id)
+    Logger.debug("Restoring party from snapshot")
+
+    snapshot = :erlang.binary_to_term(serialized_state)
+    now = DateTime.utc_now()
+
+    expired_invite_ids =
+      Enum.filter(snapshot.invited, fn {_, i} -> not DateTime.before?(now, i.valid_until) end)
+      |> Enum.map(fn {id, _} -> id end)
+      |> MapSet.new()
+
+    invited =
+      for {id, i} <- snapshot.invited, not MapSet.member?(expired_invite_ids, id), into: %{} do
+        duration = max(1, DateTime.diff(i.valid_until, now))
+        tref = :timer.send_after(duration, {:invite_timeout, i.id})
+        {id, Map.put(i, :timeout_ref, tref)}
+      end
+
+    data = %{
+      version: snapshot.version,
+      id: party_id,
+      pid: self(),
+      monitors: MC.new(),
+      members: snapshot.members,
+      ids_to_rejoin: MapSet.difference(snapshot.ids_to_rejoin, expired_invite_ids),
+      invited: invited,
+      # no restoration of matchmaking yet
+      matchmaking: nil
+    }
+
+    # TODO: set a state timeout to tear down everything if stays in :starting_up
+    # for too long
+    {:ok, :starting_up, data}
   end
 
   @impl :gen_statem
@@ -419,6 +474,71 @@ defmodule Teiserver.Party.Server do
     {:keep_state, %{data | monitors: monitors, matchmaking: nil}}
   end
 
+  def handle_event({:call, from}, {:rejoin, user_id, user_pid}, :starting_up, data) do
+    if MapSet.member?(data.ids_to_rejoin, user_id) do
+      data =
+        data
+        |> Map.update!(:ids_to_rejoin, &MapSet.delete(&1, user_id))
+        |> Map.update!(:monitors, fn mc ->
+          val =
+            if is_map_key(data.members, user_id),
+              do: {:member, user_id},
+              else: {:invite, user_id}
+
+          MC.monitor(mc, user_pid, val)
+        end)
+
+      actions = [{:reply, from, {:ok, data}}]
+
+      if MapSet.size(data.ids_to_rejoin) == 0 do
+        Logger.debug("all member rejoined, start up completed")
+        {:next_state, :running, data, actions}
+      else
+        {:keep_state, data, actions}
+      end
+    else
+      {:keep_state, data, [{:reply, from, {:error, :not_a_member}}]}
+    end
+  end
+
+  def handle_event({:call, from}, {:rejoin, _user_id}, _state, data) do
+    {:keep_state, data, [{:reply, from, {:error, :invalid_party}}]}
+  end
+
+  def handle_event(:info, {:invite_timeout, user_id}, :running, data) do
+    case Map.get(data.invited, user_id) do
+      nil ->
+        {:keep_state, data}
+
+      invite ->
+        data = cancel_invite_internal(invite, data)
+        {:keep_state, data}
+    end
+  end
+
+  def handle_event(:info, {:DOWN, ref, :process, _pid, :shutdown}, state, data) do
+    val = MC.get_val(data.monitors, ref)
+    data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
+
+    data =
+      case val do
+        {:invite, user_id} when is_map_key(data.invited, user_id) ->
+          Map.update!(data, :ids_to_rejoin, &MapSet.put(&1, user_id))
+
+        {:member, user_id} when is_map_key(data.members, user_id) ->
+          Map.update!(data, :ids_to_rejoin, &MapSet.put(&1, user_id))
+
+        _ ->
+          data
+      end
+
+    case state do
+      :running -> {:next_state, :shutting_down, data}
+      _ -> {:keep_state, data}
+    end
+  end
+
+  # when the reason isn't :shutdown, assume a crash from the peer and fix state accordingly
   def handle_event(:info, {:DOWN, ref, :process, _pid, _reason}, :running, data) do
     val = MC.get_val(data.monitors, ref)
     data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
@@ -445,16 +565,45 @@ defmodule Teiserver.Party.Server do
       else: {:keep_state, data}
   end
 
-  def handle_event(:info, {:invite_timeout, user_id}, :running, data) do
-    case Map.get(data.invited, user_id) do
-      nil ->
-        {:keep_state, data}
+  def handle_event({:call, from}, _, :shutting_down, data) do
+    {:keep_state, data, [{:reply, from, {:error, :party_shutting_down}}]}
+  end
 
-      invite ->
-        data = cancel_invite_internal(invite, data)
-        {:keep_state, data}
+  def handle_event({:call, _from}, _, :starting_up, data) do
+    {:keep_state, data, [:postpone]}
+  end
+
+  def handle_event(:info, _, :starting_up, data) do
+    {:keep_state, data, [:postpone]}
+  end
+
+  @impl :gen_statem
+  def terminate(:shutdown, :shutting_down, data) do
+    # by that time, the party should have received all the :shutdown signals
+    cond do
+      MapSet.size(data.ids_to_rejoin) != Enum.count(data.members) + Enum.count(data.invited) ->
+        Logger.warning("Missing ids to rejoin, refusing to snapshot invalid state")
+
+      Teiserver.Tachyon.should_restore_state?() ->
+        to_save =
+          data
+          |> Map.take([:version, :members, :ids_to_rejoin, :invited])
+          |> Map.update!(:invited, fn invited ->
+            Enum.map(invited, fn {user_id, invite} ->
+              {user_id, Map.drop(invite, [:timeout_ref])}
+            end)
+            |> Map.new()
+          end)
+          |> :erlang.term_to_binary()
+
+        Teiserver.KvStore.put("party", data.id, to_save)
+
+      true ->
+        nil
     end
   end
+
+  def terminate(_reason, _state, _data), do: nil
 
   defp notify_updated(data) do
     for id <- Stream.concat(Map.keys(data.invited), Map.keys(data.members)) do

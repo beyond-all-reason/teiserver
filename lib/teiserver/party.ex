@@ -8,6 +8,8 @@ defmodule Teiserver.Party do
   with regard to invites.
   """
 
+  require Logger
+
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Matchmaking
@@ -16,17 +18,30 @@ defmodule Teiserver.Party do
   @type id :: Party.Server.id()
   @type state :: Party.Server.state()
 
-  @spec create_party(T.userid()) :: {:ok, id(), pid()} | {:error, reason :: term()}
-  def create_party(user_id) do
+  @spec create_party(T.userid(), pid() | nil) :: {:ok, id(), pid()} | {:error, reason :: term()}
+  def create_party(user_id, pid \\ self()) do
     party_id = Party.Server.gen_party_id()
 
-    case Party.Supervisor.start_party(party_id, user_id, self()) do
+    case Party.Supervisor.start_party(party_id, user_id, pid) do
       {:ok, pid} -> {:ok, party_id, pid}
       {:ok, pid, _info} -> {:ok, party_id, pid}
       :ignore -> {:error, :ignore}
       {:error, reason} -> {:error, reason}
     end
   end
+
+  def restore_parties() do
+    Teiserver.Tachyon.System.restore_state("party", __MODULE__, :restore_party)
+  end
+
+  def restore_party(id, serialized_state) do
+    Party.Supervisor.start_party_from_snapshot(id, serialized_state)
+  end
+
+  @spec rejoin(id(), T.userid(), pid() | nil) ::
+          {:ok, state()} | {:error, :invalid_party | :not_a_member}
+  def rejoin(party_id, user_id), do: rejoin(party_id, user_id, self())
+  defdelegate rejoin(party_id, user_id, pid), to: Party.Server
 
   @spec lookup(id()) :: pid() | nil
   defdelegate lookup(party_id), to: Party.Registry
@@ -42,7 +57,11 @@ defmodule Teiserver.Party do
 
   @spec create_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
-  defdelegate create_invite(party_id, user_id), to: Party.Server
+  def create_invite(party_id, user_id), do: create_invite(party_id, user_id, self())
+
+  @spec create_invite(id(), T.userid(), pid()) ::
+          {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
+  defdelegate create_invite(party_id, user_id, pid), to: Party.Server
 
   @spec accept_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :not_invited}
