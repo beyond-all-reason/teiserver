@@ -6,7 +6,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   alias Teiserver.Player
   alias Teiserver.AssetFixtures
   alias Teiserver.Asset
-  alias Teiserver.Matchmaking.{QueueSupervisor, QueueServer}
+  alias Teiserver.Matchmaking.{QueueSupervisor, QueueServer, PairingRoom}
 
   defp altair_attr(id),
     do: %{
@@ -627,14 +627,12 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
 
     test "timeout puts ready players back in queue", %{app: app} do
-      timeout_ms = 5
       uuid = UUID.uuid4()
 
       setup_maps(uuid)
 
       {:ok, queue_id: q_id, queue_pid: q_pid, queue_version: version} =
         queue_attrs(uuid, 1)
-        |> put_in([:settings, :pairing_timeout], timeout_ms)
         |> mk_queue()
 
       clients =
@@ -654,21 +652,35 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client)
       end
 
+      # this isn't great, but it's better than relying on waiting for some ms. Because
+      # waiting is flaky as it depends on the scheduler and the speed of
+      # the cpu.
+      pairing_room_pid =
+        DynamicSupervisor.which_children(Teiserver.Matchmaking.QueueSupervisor)
+        |> Enum.find(fn {_, _pid, _, m} ->
+          m == [PairingRoom]
+        end)
+        |> elem(1)
+
+      assert is_pid(pairing_room_pid)
+
       [c1, c2] = clients
       Tachyon.matchmaking_ready!(c1)
       assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c1)
       assert %{"commandId" => "matchmaking/foundUpdate"} = Tachyon.recv_message!(c2)
 
+      PairingRoom.timeout(pairing_room_pid)
+
       # c1 should get lost event and still be in the queue
       # c2 should get lost event but not be in the queue anymore
       assert %{"commandId" => "matchmaking/lost"} =
-               Tachyon.recv_message!(c1, timeout: timeout_ms + 3)
+               Tachyon.recv_message!(c1)
 
       assert %{"commandId" => "matchmaking/lost"} =
-               Tachyon.recv_message!(c2, timeout: timeout_ms + 3)
+               Tachyon.recv_message!(c2)
 
       assert %{"commandId" => "matchmaking/cancelled", "data" => %{"reason" => "ready_timeout"}} =
-               Tachyon.recv_message!(c2, timeout: 2)
+               Tachyon.recv_message!(c2)
 
       assert %{"reason" => "already_queued"} =
                Tachyon.join_queues!(c1, [%{id: q_id, version: version}])

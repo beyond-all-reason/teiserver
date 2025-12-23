@@ -48,6 +48,11 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     :exit, _ -> :ok
   end
 
+  @doc """
+  to be used in test to trigger a pairing timeout
+  """
+  def timeout(room_pid), do: send(room_pid, :timeout)
+
   # TODO tachyon_mvp: transform this state into a simple state machine when
   # adding the step to setup the match (finding host and sending start script
   # to every player)
