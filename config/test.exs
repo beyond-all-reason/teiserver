@@ -16,9 +16,12 @@ config :teiserver, Teiserver.Repo,
   timeout: 300_000
 
 config :teiserver, Teiserver.SpringTcpServer,
+  # Don't start listeners at startup, we'll start manually
+  disable_startup: true,
+  # Set port 0 to allow concurrent servers (uses random port for each new child)
   listeners: [
-    tcp: [socket_opts: [port: 9200]],
-    tls: [socket_opts: [port: 9201]]
+    tcp: [socket_opts: [port: 0]],
+    tls: [socket_opts: [port: 0]]
   ]
 
 config :teiserver, Teiserver,

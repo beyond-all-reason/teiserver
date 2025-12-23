@@ -6,10 +6,12 @@ defmodule Teiserver.SpringBattleHostTest do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TeiserverTestLib,
-    only: [auth_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1]
+    only: [auth_setup: 1, _send_raw: 2, _recv_raw: 1, _recv_until: 1, start_spring_server: 1]
 
-  setup do
-    %{socket: socket, user: user} = auth_setup()
+  setup :start_spring_server
+
+  setup(context) do
+    %{socket: socket, user: user} = auth_setup(context)
     {:ok, socket: socket, user: user}
   end
 
@@ -40,10 +42,10 @@ defmodule Teiserver.SpringBattleHostTest do
   end
 
   @tag :needs_attention
-  test "!rehost bug test", %{socket: host_socket, user: host_user} do
-    %{socket: watcher_socket} = auth_setup()
-    %{socket: p1_socket, user: p1_user} = auth_setup()
-    %{socket: p2_socket, user: p2_user} = auth_setup()
+  test "!rehost bug test", %{socket: host_socket, user: host_user} = context do
+    %{socket: watcher_socket} = auth_setup(context)
+    %{socket: p1_socket, user: p1_user} = auth_setup(context)
+    %{socket: p2_socket, user: p2_user} = auth_setup(context)
 
     # Open battle
     _send_raw(
@@ -88,7 +90,7 @@ defmodule Teiserver.SpringBattleHostTest do
   end
 
   @tag :needs_attention
-  test "host battle test", %{socket: socket, user: user} do
+  test "host battle test", %{socket: socket, user: user} = context do
     _send_raw(
       socket,
       "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\tgameTitle\tgameName\n"
@@ -127,7 +129,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert Enum.empty?(battle.players)
 
     # Now create a user to join the battle
-    %{socket: socket2, user: user2} = auth_setup()
+    %{socket: socket2, user: user2} = auth_setup(context)
 
     # Check user1 hears about this
     reply = _recv_raw(socket)
@@ -162,7 +164,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply =~ "FORCEQUITBATTLE\nLEFTBATTLE #{lobby_id} #{user2.name}\n"
 
     # Add user 3
-    %{socket: socket3, user: user3} = auth_setup()
+    %{socket: socket3, user: user3} = auth_setup(context)
 
     _send_raw(socket2, "JOINBATTLE #{lobby_id} empty script_password3\n")
     _send_raw(socket, "JOINBATTLEACCEPT #{user2.name}\n")
