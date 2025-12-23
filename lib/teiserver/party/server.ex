@@ -149,12 +149,12 @@ defmodule Teiserver.Party.Server do
     :exit, {:noproc, _} -> {:error, :invalid_request, "invalid party"}
   end
 
-  def start_link({party_id, _user_id, _creator_pid} = args) do
+  def start_link({party_id, _} = args) do
     GenServer.start_link(__MODULE__, args, name: via_tuple(party_id))
   end
 
   @impl true
-  def init({party_id, user_id, creator_pid}) do
+  def init({party_id, {:user, user_id, creator_pid}}) do
     state =
       %{
         version: 0,

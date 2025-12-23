@@ -16,7 +16,7 @@ defmodule Teiserver.Party.Supervisor do
   def start_party(party_id, user_id, creator_pid) do
     DynamicSupervisor.start_child(
       __MODULE__,
-      {Teiserver.Party.Server, {party_id, user_id, creator_pid}}
+      {Teiserver.Party.Server, {party_id, {:user, user_id, creator_pid}}}
     )
   end
 
