@@ -55,7 +55,7 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
     assert sess_pid != nil
     ref = Process.monitor(sess_pid)
     poll_until(fn -> Player.lookup_connection(user.id) end, &is_nil/1)
-    send(sess_pid, :player_timeout)
+    send(sess_pid, :connection_timeout)
     assert_receive({:DOWN, ^ref, :process, _, _}, 1000, "Session should have died")
   end
 
