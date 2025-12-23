@@ -35,7 +35,7 @@ defmodule Teiserver.Player.SessionTest do
     setup [:setup_session, :setup_config]
 
     test "can restart a session after shutdown", %{user: user, sess_pid: sess_pid} do
-      Teiserver.Tachyon.System.restart()
+      Teiserver.Tachyon.restart_system()
       Polling.poll_until(fn -> nil end, fn _ -> not Process.alive?(sess_pid) end)
 
       Polling.poll_until_some(fn -> Player.lookup_session(user.id) end)
