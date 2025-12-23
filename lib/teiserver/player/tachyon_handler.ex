@@ -51,7 +51,7 @@ defmodule Teiserver.Player.TachyonHandler do
       initial_state |> Map.put(:sess_monitor, sess_monitor) |> Map.put(:pending_responses, %{})
 
     user = initial_state.user
-    Logger.metadata(user_id: user.id)
+    Logger.metadata(actor_type: :connection, actor_id: to_string(user.id))
 
     event = build_user_self_event(user, sess_state)
     {:event, "user/self", event, state}
