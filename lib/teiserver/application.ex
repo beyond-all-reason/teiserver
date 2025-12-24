@@ -156,6 +156,10 @@ defmodule Teiserver.Application do
         # System throttle
         {Teiserver.Account.LoginThrottleServer, name: Teiserver.Account.LoginThrottleServer},
 
+        # this must be before Endpoint. Endpoint takes care of ws connection upgrade
+        # and makes use of the tachyon systems spawned under this module.
+        Teiserver.Tachyon.System,
+
         # Telemetry
         {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
         # serve metrics on a different port so that it's easier at the proxy
@@ -165,10 +169,6 @@ defmodule Teiserver.Application do
          plug: TeiserverWeb.Monitoring.Router,
          options: [port: TeiserverWeb.Monitoring.Router.port()]},
         Teiserver.Communication.Cache,
-
-        # this must be before Endpoint. Endpoint takes care of ws connection upgrade
-        # and makes use of the tachyon systems spawned under this module.
-        Teiserver.Tachyon.System,
 
         # Start the endpoint after the rest of the systems are up
         TeiserverWeb.Endpoint,
