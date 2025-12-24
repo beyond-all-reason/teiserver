@@ -197,7 +197,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def get_details(id) do
     GenServer.call(via_tuple(id), :get_details)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_battle}
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
   @spec start_link({id(), start_params()}) :: GenServer.on_start()
