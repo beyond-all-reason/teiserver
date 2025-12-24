@@ -139,16 +139,18 @@ defmodule Teiserver.Player.Session do
 
   @impl GenServer
   def terminate(:shutdown, state) do
-    # store more stuff as we enable the restoration of
-    # more state at startup
-    to_save =
-      %{
-        user_id: state.user.id,
-        party: state.party
-      }
-      |> :erlang.term_to_binary()
+    if Teiserver.Tachyon.should_restore_state?() do
+      # store more stuff as we enable the restoration of
+      # more state at startup
+      to_save =
+        %{
+          user_id: state.user.id,
+          party: state.party
+        }
+        |> :erlang.term_to_binary()
 
-    Teiserver.KvStore.put("session", to_string(state.user.id), to_save)
+      Teiserver.KvStore.put("session", to_string(state.user.id), to_save)
+    end
   end
 
   def terminate(_reason, _state), do: nil
@@ -572,6 +574,7 @@ defmodule Teiserver.Player.Session do
   @impl true
   def handle_call({:replace, new_conn_pid}, _from, state) do
     original_conn_pid = state.conn_pid
+
     monitors =
       MC.demonitor_by_val(state.monitors, :connection, [:flush])
       |> MC.monitor(new_conn_pid, :connection)

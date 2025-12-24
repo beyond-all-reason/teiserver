@@ -11,6 +11,11 @@ defmodule Teiserver.Player.SessionTest do
     {:ok, user: user, sess_pid: sess_pid}
   end
 
+  def setup_config(_) do
+    Teiserver.Tachyon.enable_state_restoration()
+    ExUnit.Callbacks.on_exit(fn -> Teiserver.Tachyon.disable_state_restoration() end)
+  end
+
   describe "user updates" do
     setup [:setup_session]
 
@@ -27,7 +32,7 @@ defmodule Teiserver.Player.SessionTest do
   end
 
   describe "restore from snapshots" do
-    setup [:setup_session]
+    setup [:setup_session, :setup_config]
 
     test "can restart a session after shutdown", %{user: user, sess_pid: sess_pid} do
       Teiserver.Tachyon.System.restart()

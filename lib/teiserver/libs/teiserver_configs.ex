@@ -725,6 +725,7 @@ defmodule Teiserver.TeiserverConfigs do
   end
 
   defp tachyon_configs do
+    Teiserver.Tachyon.setup_site_configs()
     Teiserver.Party.setup_site_configs()
     :ok
   end
