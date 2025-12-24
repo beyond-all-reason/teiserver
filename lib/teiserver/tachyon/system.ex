@@ -38,6 +38,14 @@ defmodule Teiserver.Tachyon.System do
   Then delete all these blobs (regardless of what happens during the restoration)
   """
   def restore_state(store_name, module, function) do
+    if Teiserver.Tachyon.Config.should_restore_state?() do
+      do_restore_state(store_name, module, function)
+    else
+      Logger.debug("State restoration disabled")
+    end
+  end
+
+  def do_restore_state(store_name, module, function) do
     blobs = Teiserver.KvStore.scan(store_name)
     Logger.info("Attempting to restore #{length(blobs)} from #{store_name}")
 
