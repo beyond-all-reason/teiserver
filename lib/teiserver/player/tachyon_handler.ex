@@ -57,6 +57,12 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "user/self", event, state}
   end
 
+  def force_disconnect(nil), do: :ok
+
+  def force_disconnect(pid) when is_pid(pid) do
+    send(pid, :force_disconnect)
+  end
+
   @impl Handler
   def init_rate_limiter(_state) do
     BurstyRateLimiter.per_second(10) |> BurstyRateLimiter.with_burst(20)
@@ -224,7 +230,13 @@ defmodule Teiserver.Player.TachyonHandler do
     {:stop, :normal, state}
   end
 
-  def handle_info(%{}, state) do
+  def handle_info(:force_disconnect, state) do
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
+    # TODO: send a proper tachyon message to inform the client it is getting disconnected
+    {:stop, :normal, state}
+  end
+
+  def handle_info(_msg, state) do
     {:ok, state}
   end
 
@@ -895,7 +907,8 @@ defmodule Teiserver.Player.TachyonHandler do
           :died ->
             setup_session(user)
 
-          {:ok, sess_state} ->
+          {:ok, old_conn_pid, sess_state} ->
+            force_disconnect(old_conn_pid)
             {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
             {:ok, pid, sess_state}
         end

@@ -39,10 +39,7 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
     client: client,
     token: token
   } do
-    opts = Tachyon.connect_options(token)
-    {:ok, client2} = WSC.connect(Tachyon.tachyon_url(), opts)
-    on_exit(fn -> Tachyon.cleanup_connection(client2, token) end)
-    ensure_connected(client2)
+    _client2 = Tachyon.connect(token)
     WSC.send_message(client, {:text, "test_ping"})
     assert {:error, :disconnected} == WSC.recv(client)
   end
@@ -68,11 +65,5 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
     new_client = Tachyon.connect(ctx.token)
     Tachyon.abrupt_disconnect!(new_client)
     poll_until(fn -> Player.conn_state(ctx.user.id) end, &(&1 == :reconnecting))
-  end
-
-  defp ensure_connected(client) do
-    WSC.send_message(client, {:text, "test_ping"})
-    Tachyon.recv_message!(client)
-    assert {:ok, {:text, "test_pong"}} == WSC.recv(client)
   end
 end

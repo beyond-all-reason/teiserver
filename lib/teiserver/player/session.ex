@@ -319,7 +319,7 @@ defmodule Teiserver.Player.Session do
   connections.
   """
   @spec replace_connection(pid(), pid()) ::
-          {:ok, session_state :: %{party: party_state()}} | :died
+          {:ok, old_conn_pid :: pid() | nil, session_state :: %{party: party_state()}} | :died
   def replace_connection(sess_pid, new_conn_pid) do
     GenServer.call(sess_pid, {:replace, new_conn_pid})
   catch
@@ -517,6 +517,7 @@ defmodule Teiserver.Player.Session do
 
   @impl true
   def handle_call({:replace, new_conn_pid}, _from, state) do
+    original_conn_pid = state.conn_pid
     monitors =
       MC.demonitor_by_val(state.monitors, :connection, [:flush])
       |> MC.monitor(new_conn_pid, :connection)
@@ -540,7 +541,7 @@ defmodule Teiserver.Player.Session do
       current_lobby: get_in(state.lobby.id)
     }
 
-    {:reply, {:ok, self_state}, new_state}
+    {:reply, {:ok, original_conn_pid, self_state}, new_state}
   end
 
   def handle_call(:conn_state, _from, state) do
