@@ -64,7 +64,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     {:noreply,
      socket
      |> assign(:parties, new_parties)
-     |> build_user_lookup}
+     |> build_user_lookup()}
   end
 
   def handle_info(%{channel: "teiserver_party:" <> _, event: :message}, socket) do
@@ -88,7 +88,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     {:noreply,
      socket
      |> assign(:parties, new_parties)
-     |> build_user_lookup}
+     |> build_user_lookup()}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do

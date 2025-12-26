@@ -14,8 +14,8 @@ defmodule TeiserverWeb.Account.SettingsLive.Index do
       |> assign(:show_descriptions, false)
       |> assign(:temp_value, nil)
       |> assign(:selected_key, nil)
-      |> load_config_types
-      |> load_user_configs
+      |> load_config_types()
+      |> load_user_configs()
 
     {:ok, socket}
   end

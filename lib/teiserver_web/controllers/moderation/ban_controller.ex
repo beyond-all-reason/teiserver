@@ -66,7 +66,7 @@ defmodule TeiserverWeb.Moderation.BanController do
             "Moderation:Ban updated",
             "Moderation:Ban enacted"
           ],
-          details_equal: {"ban_id", ban.id |> to_string}
+          details_equal: {"ban_id", ban.id |> to_string()}
         ],
         joins: [:user],
         order_by: "Newest first"

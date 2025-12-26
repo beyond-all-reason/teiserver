@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
     |> assign(:page_view_logs, page_view_logs)
     |> assign(:show_search, Map.has_key?(params, "search"))
     |> assign(:params, form_params())
-    |> search_dropdowns
+    |> search_dropdowns()
     |> assign(:quick_search, Map.get(params, "s", ""))
     |> render("index.html")
   end
@@ -61,7 +61,7 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
     |> assign(:params, params)
     |> assign(:page_view_logs, page_view_logs)
     |> assign(:show_search, "hidden")
-    |> search_dropdowns
+    |> search_dropdowns()
     |> render("index.html")
   end
 
@@ -92,7 +92,7 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
       "path" => Map.get(params, "path", ""),
       "order" => Map.get(params, "order", "Newest first"),
       "limit" => Map.get(params, "limit", "50"),
-      "user_id" => Map.get(params, "account_user", "") |> get_hash_id,
+      "user_id" => Map.get(params, "account_user", "") |> get_hash_id(),
       "account_user" => Map.get(params, "account_user", ""),
       "start_date" => Map.get(params, "start_date", ""),
       "end_date" => Map.get(params, "end_date", "")

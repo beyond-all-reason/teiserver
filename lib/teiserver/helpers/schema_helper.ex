@@ -357,7 +357,7 @@ defmodule Teiserver.Helper.SchemaHelper do
   end
 
   defp ensure_field_exists!(%{types: types, data: data}, field) do
-    unless Map.has_key?(types, field) do
+    if !Map.has_key?(types, field) do
       raise ArgumentError, "unknown field #{inspect(field)} in #{inspect(data)}"
     end
 

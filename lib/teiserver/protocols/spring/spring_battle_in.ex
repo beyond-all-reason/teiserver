@@ -20,8 +20,8 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
       {:ok, data} ->
         host_data = %{
           # host_bosses: [User.get_userid(data["boss"])],
-          host_teamsize: data["teamSize"] |> int_parse,
-          host_teamcount: data["nbTeams"] |> int_parse
+          host_teamsize: data["teamSize"] |> int_parse(),
+          host_teamcount: data["nbTeams"] |> int_parse()
         }
 
         Coordinator.cast_consul(state.lobby_id, {:host_update, state.userid, host_data})

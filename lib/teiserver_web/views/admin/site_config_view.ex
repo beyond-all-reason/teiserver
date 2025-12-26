@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Admin.SiteConfigView do
   def config_name(config_key) do
     config_key
     |> String.split(".")
-    |> tl
+    |> tl()
   end
 
   @spec view_colour :: atom()

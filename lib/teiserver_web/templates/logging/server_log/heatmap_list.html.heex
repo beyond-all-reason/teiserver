@@ -47,7 +47,7 @@
             style={"background-color: ##{heatmap(value, maximum, "black-red")};"}
           >
             <span class="hourly-view-span">
-              {value |> round() |> format_number}
+              {value |> round() |> format_number()}
             </span>
           </td>
         <% end %>

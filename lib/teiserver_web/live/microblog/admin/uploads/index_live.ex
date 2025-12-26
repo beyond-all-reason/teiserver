@@ -14,14 +14,14 @@ defmodule TeiserverWeb.Microblog.Admin.UploadLive.Index do
     socket
     |> assign(:view_colour, Teiserver.Microblog.colours())
     |> stream(:user_uploads, user_uploads)
-    |> ok
+    |> ok()
   end
 
   def mount(_params, _session, socket) do
     socket
     |> assign(:view_colour, Teiserver.Microblog.colours())
     |> stream(:user_uploads, [])
-    |> ok
+    |> ok()
   end
 
   @impl true
@@ -36,14 +36,14 @@ defmodule TeiserverWeb.Microblog.Admin.UploadLive.Index do
 
     socket
     |> stream_delete(:user_uploads, %{id: id})
-    |> noreply
+    |> noreply()
   end
 
   @impl true
   def handle_params(params, _url, socket) do
     socket
     |> apply_action(socket.assigns.live_action, params)
-    |> noreply
+    |> noreply()
   end
 
   defp apply_action(socket, _action, _params) do

@@ -98,12 +98,12 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
             limit: 1,
             select: [:value]
           )
-          |> hd
+          |> hd()
           |> Map.get(:value)
           |> Map.keys()
       end
 
-    default_key = schema_keys |> Enum.sort() |> hd
+    default_key = schema_keys |> Enum.sort() |> hd()
 
     key = Map.get(params, "key", default_key)
 

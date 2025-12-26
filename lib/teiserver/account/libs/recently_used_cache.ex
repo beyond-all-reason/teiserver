@@ -8,7 +8,7 @@ defmodule Teiserver.Account.RecentlyUsedCache do
   def insert_recently(%{user_id: user_id} = item) do
     new_items =
       user_id
-      |> get_recently
+      |> get_recently()
       |> Enum.filter(fn r ->
         r.item_id != item.item_id or r.item_type != item.item_type
       end)
@@ -25,7 +25,7 @@ defmodule Teiserver.Account.RecentlyUsedCache do
     |> Map.merge(%{
       user_id: id
     })
-    |> insert_recently
+    |> insert_recently()
   end
 
   # If we don't have the user yet we don't want to insert anything
@@ -66,6 +66,6 @@ defmodule Teiserver.Account.RecentlyUsedCache do
     |> Map.merge(%{
       user_id: conn.assigns[:current_user].id
     })
-    |> remove_recently
+    |> remove_recently()
   end
 end

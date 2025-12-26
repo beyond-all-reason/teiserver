@@ -87,7 +87,7 @@ defmodule TeiserverWeb.Logging.MatchLogController do
   def day_metrics_graph(conn, params) do
     params =
       Map.merge(params, %{
-        "days" => Map.get(params, "days", 31) |> int_parse
+        "days" => Map.get(params, "days", 31) |> int_parse()
       })
 
     logs =
@@ -180,7 +180,7 @@ defmodule TeiserverWeb.Logging.MatchLogController do
   def month_metrics_graph(conn, params) do
     params =
       Map.merge(params, %{
-        "months" => Map.get(params, "months", 13) |> int_parse
+        "months" => Map.get(params, "months", 13) |> int_parse()
       })
 
     logs =

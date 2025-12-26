@@ -91,7 +91,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       </h4>
       {Map.get(@post, :contents, "")
       |> String.split("\n\n")
-      |> hd
+      |> hd()
       |> MDEx.to_html!()
       |> Phoenix.HTML.raw()}
       <br />

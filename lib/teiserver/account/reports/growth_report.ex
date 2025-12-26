@@ -21,7 +21,7 @@ defmodule Teiserver.Account.GrowthReport do
 
     limit =
       params["limit"]
-      |> int_parse
+      |> int_parse()
 
     server_data =
       get_server_logs(params["time_unit"], limit)

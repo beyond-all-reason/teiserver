@@ -475,7 +475,7 @@ defmodule TeiserverWeb.Admin.UserController do
             %{
               games: games,
               winrate: wins / games,
-              first_log: logs |> Enum.reverse() |> hd
+              first_log: logs |> Enum.reverse() |> hd()
             }
           end
 
@@ -555,8 +555,8 @@ defmodule TeiserverWeb.Admin.UserController do
 
             existing_rating = Account.get_rating(user.id, rating_type_id)
             user_rating = existing_rating || BalanceLib.default_rating()
-            new_skill = changes["skill"] |> float_parse
-            new_uncertainty = changes["uncertainty"] |> float_parse
+            new_skill = changes["skill"] |> float_parse()
+            new_uncertainty = changes["uncertainty"] |> float_parse()
             new_rating_value = BalanceLib.calculate_rating_value(new_skill, new_uncertainty)
 
             new_leaderboard_rating =
@@ -946,7 +946,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def full_chat(conn, %{"id" => id} = params) do
     page =
       Map.get(params, "page", 0)
-      |> int_parse
+      |> int_parse()
       |> max(0)
 
     user = Account.get_user!(id)

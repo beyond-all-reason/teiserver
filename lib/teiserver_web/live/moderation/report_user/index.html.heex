@@ -112,7 +112,7 @@
         />
         <span
           class={"btn btn-#{@view_colour} float-end mt-2 #{if @extra_text in [nil, ""], do: "disabled"}"}
-          phx-click={unless @extra_text in [nil, ""], do: "submit-extra-text"}
+          phx-click={if @extra_text not in [nil, ""], do: "submit-extra-text"}
           id="submit-report-btn"
         >
           Submit report

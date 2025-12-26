@@ -149,7 +149,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_raw({:sslsocket, _, _} = socket) do
     case :ssl.recv(socket, 0, 500) do
-      {:ok, reply} -> reply |> to_string
+      {:ok, reply} -> reply |> to_string()
       {:error, :timeout} -> :timeout
       {:error, :closed} -> :closed
     end
@@ -157,7 +157,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_raw(socket) do
     case :gen_tcp.recv(socket, 0, 500) do
-      {:ok, reply} -> reply |> to_string
+      {:ok, reply} -> reply |> to_string()
       {:error, :timeout} -> :timeout
       {:error, :closed} -> :closed
     end

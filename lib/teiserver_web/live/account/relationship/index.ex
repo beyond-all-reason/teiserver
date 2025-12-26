@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       |> assign(:site_menu_active, "teiserver_account")
       |> assign(:view_colour, Account.RelationshipLib.colour())
       |> assign(:show_help, false)
-      |> put_empty_relationships
+      |> put_empty_relationships()
       |> assign(:purge_cutoff, get_default_purge_cutoff_option())
       |> assign(:purge_cutoff_options, get_purge_cutoff_options())
 
@@ -28,24 +28,24 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket
     |> assign(:page_title, "Relationships - Friends")
     |> assign(:tab, :friend)
-    |> put_empty_relationships
-    |> get_friends
+    |> put_empty_relationships()
+    |> get_friends()
   end
 
   defp apply_action(socket, :follow, _params) do
     socket
     |> assign(:page_title, "Relationships - Following")
     |> assign(:tab, :follow)
-    |> put_empty_relationships
-    |> get_follows
+    |> put_empty_relationships()
+    |> get_follows()
   end
 
   defp apply_action(socket, :avoid, _params) do
     socket
     |> assign(:page_title, "Relationships - Avoids")
     |> assign(:tab, :avoid)
-    |> put_empty_relationships
-    |> get_avoids
+    |> put_empty_relationships()
+    |> get_avoids()
   end
 
   defp apply_action(socket, :search, _params) do
@@ -53,8 +53,8 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> assign(:page_title, "Relationships - Player search")
     |> assign(:tab, :search)
     |> assign(:role_data, Account.RoleLib.role_data())
-    |> put_empty_relationships
-    |> update_user_search
+    |> put_empty_relationships()
+    |> update_user_search()
   end
 
   defp apply_action(socket, :clean, _params) do
@@ -83,7 +83,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket =
       socket
       |> assign(:search_terms, new_search)
-      |> update_user_search
+      |> update_user_search()
 
     {:noreply, socket}
   end
@@ -96,8 +96,8 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
         :ok ->
           socket
           |> put_flash(:success, "Friend request accepted")
-          |> get_friends
-          |> update_user_search
+          |> get_friends()
+          |> update_user_search()
 
         {:error, reason} ->
           socket
@@ -116,8 +116,8 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
         :ok ->
           socket
           |> put_flash(:success, "Friend request declined")
-          |> get_friends
-          |> update_user_search
+          |> get_friends()
+          |> update_user_search()
 
         {:error, reason} ->
           socket
@@ -164,8 +164,8 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
         :ok ->
           socket
           |> put_flash(:success, "Friend request rescinded")
-          |> get_friends
-          |> update_user_search
+          |> get_friends()
+          |> update_user_search()
 
         {:error, reason} ->
           socket

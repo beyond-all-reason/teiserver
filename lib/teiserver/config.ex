@@ -39,7 +39,7 @@ defmodule Teiserver.Config do
 
     if user_configs[key] != nil do
       get_user_config(user_id, key)
-      |> delete_user_config
+      |> delete_user_config()
     end
   end
 
@@ -50,12 +50,12 @@ defmodule Teiserver.Config do
       create_user_config(%{
         "user_id" => user_id,
         "key" => key,
-        "value" => value |> to_string
+        "value" => value |> to_string()
       })
     else
       get_user_config(user_id, key)
       |> update_user_config(%{
-        "value" => value |> to_string
+        "value" => value |> to_string()
       })
     end
   end
@@ -245,7 +245,7 @@ defmodule Teiserver.Config do
     default_label =
       config.key
       |> String.split(".")
-      |> tl
+      |> tl()
 
     config =
       Map.merge(
@@ -426,7 +426,7 @@ defmodule Teiserver.Config do
     default_label =
       config.key
       |> String.split(".")
-      |> tl
+      |> tl()
 
     config =
       Map.merge(

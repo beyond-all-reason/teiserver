@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     socket =
       socket
       |> default_filters(params)
-      |> recalculate_outstanding_report_groups
+      |> recalculate_outstanding_report_groups()
 
     {:noreply, socket}
   end
@@ -56,7 +56,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     socket =
       socket
       |> assign(:filters, new_filters)
-      |> recalculate_outstanding_report_groups
+      |> recalculate_outstanding_report_groups()
 
     # Update URL to reflect the new filters and reset page to 1
     {:noreply,
@@ -84,7 +84,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     socket =
       socket
       |> assign(:filters, new_filters)
-      |> recalculate_outstanding_report_groups
+      |> recalculate_outstanding_report_groups()
 
     {:noreply, socket}
   end
@@ -98,7 +98,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     socket =
       socket
       |> assign(:filters, new_filters)
-      |> recalculate_outstanding_report_groups
+      |> recalculate_outstanding_report_groups()
 
     {:noreply, socket}
   end

@@ -480,7 +480,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         String.replace(acc, "<@!#{m.id}>", m.username)
       end)
       |> String.replace(~r/<#[0-9]+> ?/, "")
-      |> convert_emoticons
+      |> convert_emoticons()
       |> String.split("\n")
 
     bridge_user_id = BridgeServer.get_bridge_userid()

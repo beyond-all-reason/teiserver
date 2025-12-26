@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
         socket
         |> assign(:tags, tags)
         |> load_preferences()
-        |> list_posts
+        |> list_posts()
       else
         socket
         |> assign(:tags, [])
@@ -50,10 +50,10 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
 
       socket
       |> stream_insert(:posts, db_post, at: -1)
-      |> noreply
+      |> noreply()
     else
       socket
-      |> noreply
+      |> noreply()
     end
   end
 

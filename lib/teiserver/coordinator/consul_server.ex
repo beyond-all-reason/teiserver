@@ -193,7 +193,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
        | join_queue: state.join_queue |> List.delete(userid),
          low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid)
      }
-     |> queue_size_changed}
+     |> queue_size_changed()}
   end
 
   def handle_info({:user_joined, userid}, state) do
@@ -1439,7 +1439,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end)
 
     %{state | join_queue: join_queue, low_priority_join_queue: low_priority_join_queue}
-    |> queue_size_changed
+    |> queue_size_changed()
   end
 
   @spec get_queue(map()) :: [T.userid()]

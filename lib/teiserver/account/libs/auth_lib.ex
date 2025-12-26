@@ -25,7 +25,7 @@ defmodule Teiserver.Account.AuthLib do
 
     modules =
       permission_list
-      |> Enum.map(fn p -> p |> String.split(".") |> hd end)
+      |> Enum.map(fn p -> p |> String.split(".") |> hd() end)
       |> Enum.uniq()
 
     permission_list ++ sections ++ modules

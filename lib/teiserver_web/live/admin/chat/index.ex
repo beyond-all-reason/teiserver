@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
           |> assign(:usernames, %{})
           |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
           |> add_breadcrumb(name: "Chat", url: "/admin/chat")
-          |> default_filters
+          |> default_filters()
           |> assign(:searching, false)
           |> assign(:usernames, %{})
           |> assign(:messages, [])

@@ -46,7 +46,7 @@
     )}
 
     <% mins = rem(@stats["player_minutes"] || 0, 60)
-    hours = (:math.floor(@stats["player_minutes"] || 0) / 60) |> round %>
+    hours = (:math.floor(@stats["player_minutes"] || 0) / 60) |> round() %>
     {central_component("detail_line",
       label: "Player time",
       value: "#{hours} hours, #{mins} minutes",
@@ -54,7 +54,7 @@
     )}
 
     <% mins = rem(@stats["spectator_minutes"] || 0, 60)
-    hours = (:math.floor(@stats["spectator_minutes"] || 0) / 60) |> round %>
+    hours = (:math.floor(@stats["spectator_minutes"] || 0) / 60) |> round() %>
     {central_component("detail_line",
       label: "Spectator time",
       value: "#{hours} hours, #{mins} minutes",

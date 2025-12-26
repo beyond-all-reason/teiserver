@@ -168,7 +168,7 @@ defmodule Teiserver.Account.TournamentReport do
       aggregate_data =
         name_rating_pairs
         |> Enum.map(fn {_, rating} -> rating end)
-        |> aggregate_team_ratings
+        |> aggregate_team_ratings()
 
       captain =
         name_rating_pairs
@@ -258,7 +258,7 @@ defmodule Teiserver.Account.TournamentReport do
   defp apply_defaults(params) do
     Map.merge(
       %{
-        "game_type" => MatchRatingLib.rating_type_list() |> hd,
+        "game_type" => MatchRatingLib.rating_type_list() |> hd(),
         "value_type" => "Leaderboard rating"
       },
       Map.get(params, "report", %{})

@@ -126,7 +126,7 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
             team_skills
             |> Enum.reject(fn {rating, _id} -> rating > low_rating end)
             |> Enum.shuffle()
-            |> hd
+            |> hd()
             |> elem(1)
           else
             hd(team_skills)

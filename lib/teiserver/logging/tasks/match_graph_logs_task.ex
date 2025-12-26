@@ -22,7 +22,7 @@ defmodule Teiserver.Logging.MatchGraphLogsTask do
         name =
           String.split(field_name, ".")
           |> Enum.reverse()
-          |> hd
+          |> hd()
 
         [name | build_line(logs, field_name)]
     end)
@@ -73,7 +73,7 @@ defmodule Teiserver.Logging.MatchGraphLogsTask do
         name =
           String.split(field_name, ".")
           |> Enum.reverse()
-          |> hd
+          |> hd()
 
         [name | build_line(converted_logs, field_name)]
     end)
@@ -124,7 +124,7 @@ defmodule Teiserver.Logging.MatchGraphLogsTask do
         name =
           String.split(field_name, ".")
           |> Enum.reverse()
-          |> hd
+          |> hd()
 
         [name | build_line(converted_logs, field_name)]
     end)

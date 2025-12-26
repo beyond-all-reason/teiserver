@@ -30,7 +30,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
           |> assign(:error_message, nil)
           |> assign(:hide_contributor_rank, hide_contributor_rank)
           |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
-          |> user_assigns
+          |> user_assigns()
       end
 
     {:ok, socket}

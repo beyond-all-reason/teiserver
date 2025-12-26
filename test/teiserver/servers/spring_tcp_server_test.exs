@@ -90,7 +90,7 @@ defmodule Teiserver.SpringTcpServerTest do
 
     commands =
       remainder
-      |> Enum.map(fn line -> String.split(line, " ") |> hd end)
+      |> Enum.map(fn line -> String.split(line, " ") |> hd() end)
       |> Enum.uniq()
 
     assert "MOTD" in commands

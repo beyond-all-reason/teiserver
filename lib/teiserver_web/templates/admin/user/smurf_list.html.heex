@@ -149,7 +149,7 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                     <td>{@stats["win_rate.team"]}</td>
                     <td>{@stats["recent_count.team"]}</td>
-                    <% hours = ((@stats["player_minutes"] || 0) / 60) |> round %>
+                    <% hours = ((@stats["player_minutes"] || 0) / 60) |> round() %>
                     <td>
                       {"#{hours}h"}
                     </td>
@@ -202,7 +202,7 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                       <td>{user_stats["win_rate.team"]}</td>
                       <td>{user_stats["recent_count.team"]}</td>
-                      <% hours = ((user_stats["player_minutes"] || 0) / 60) |> round %>
+                      <% hours = ((user_stats["player_minutes"] || 0) / 60) |> round() %>
                       <td>
                         {"#{hours}h"}
                       </td>

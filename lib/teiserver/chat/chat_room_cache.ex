@@ -69,7 +69,7 @@ defmodule Teiserver.Room do
       nil ->
         # No room, we need to make one!
         create_room(name, author_id, clan_id)
-        |> add_room
+        |> add_room()
 
       room ->
         room

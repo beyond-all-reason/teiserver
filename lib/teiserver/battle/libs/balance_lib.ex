@@ -180,8 +180,8 @@ defmodule Teiserver.Battle.BalanceLib do
     # Now expand the results and calculate stats
     balance_result
     |> expand_balance_result()
-    |> calculate_balance_stats
-    |> cleanup_result
+    |> calculate_balance_stats()
+    |> cleanup_result()
     |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
     |> validate_result(groups, team_count, opts)
   end
@@ -737,8 +737,8 @@ defmodule Teiserver.Battle.BalanceLib do
         max_score = max(max_score, 1)
 
         ((1 - min_score / max_score) * 100)
-        |> round
-        |> abs
+        |> round()
+        |> abs()
     end
   end
 
@@ -777,7 +777,7 @@ defmodule Teiserver.Battle.BalanceLib do
     |> Enum.map(fn userid ->
       get_user_balance_rating_value(userid, rating_type)
     end)
-    |> balance_group_by_ratings
+    |> balance_group_by_ratings()
   end
 
   @spec balance_group_by_ratings([number()]) :: number()

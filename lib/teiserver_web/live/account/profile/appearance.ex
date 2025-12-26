@@ -23,7 +23,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
           |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
-          |> list_icons
+          |> list_icons()
       end
 
     {:ok, socket}

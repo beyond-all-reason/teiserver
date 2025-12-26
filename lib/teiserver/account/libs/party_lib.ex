@@ -225,7 +225,7 @@ defmodule Teiserver.Account.PartyLib do
   end
 
   defp trim_message(msg) when is_list(msg) do
-    Enum.join(msg, "\n") |> trim_message
+    Enum.join(msg, "\n") |> trim_message()
   end
 
   defp trim_message(msg) do

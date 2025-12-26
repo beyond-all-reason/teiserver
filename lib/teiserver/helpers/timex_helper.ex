@@ -257,7 +257,7 @@ defmodule Teiserver.Helper.TimexHelper do
       |> convert(tz || Local.lookup())
       |> Timex.format!("{D}")
       |> String.to_integer()
-      |> suffix
+      |> suffix()
 
     Timex.format!(the_time, "{D}#{suffix} {Mfull} {YYYY}")
   end
@@ -331,8 +331,8 @@ defmodule Teiserver.Helper.TimexHelper do
 
   def duration_to_str(t1, t2) do
     Timex.diff(t1, t2, :second)
-    |> abs
-    |> duration_to_str
+    |> abs()
+    |> duration_to_str()
   end
 
   @minute 60
@@ -341,7 +341,7 @@ defmodule Teiserver.Helper.TimexHelper do
   def duration_to_str(seconds) do
     cond do
       seconds >= @day ->
-        days = (seconds / @day) |> :math.floor() |> round
+        days = (seconds / @day) |> :math.floor() |> round()
 
         if days == 1 do
           "#{days} day"
@@ -350,7 +350,7 @@ defmodule Teiserver.Helper.TimexHelper do
         end
 
       seconds >= @hour ->
-        hours = (seconds / @hour) |> :math.floor() |> round
+        hours = (seconds / @hour) |> :math.floor() |> round()
 
         if hours == 1 do
           "#{hours} hour"
@@ -368,7 +368,7 @@ defmodule Teiserver.Helper.TimexHelper do
   def duration_to_str_short(seconds) do
     {days, remaining} =
       if seconds >= @day do
-        days = (seconds / @day) |> :math.floor() |> round
+        days = (seconds / @day) |> :math.floor() |> round()
         {days, seconds - days * @day}
       else
         {0, seconds}
@@ -376,7 +376,7 @@ defmodule Teiserver.Helper.TimexHelper do
 
     {hours, remaining} =
       if remaining >= @hour do
-        hours = (remaining / @hour) |> :math.floor() |> round
+        hours = (remaining / @hour) |> :math.floor() |> round()
         {hours, remaining - hours * @hour}
       else
         {0, remaining}
@@ -384,7 +384,7 @@ defmodule Teiserver.Helper.TimexHelper do
 
     {minutes, remaining} =
       if remaining >= @minute do
-        minutes = (remaining / @minute) |> :math.floor() |> round
+        minutes = (remaining / @minute) |> :math.floor() |> round()
         {minutes, remaining - minutes * @minute}
       else
         {0, remaining}

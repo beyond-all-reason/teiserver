@@ -129,7 +129,7 @@
                   <tr>
                     <td>{index + 1}</td>
                     <td>{key}</td>
-                    <td>{count |> format_number}</td>
+                    <td>{count |> format_number()}</td>
                     <td>{(count / @stats[:total]) |> percent(1)}%</td>
                   </tr>
                 <% end %>
@@ -144,7 +144,7 @@
                 <%= for {key, value} <- @stats do %>
                   <tr>
                     <td>{key}</td>
-                    <td>{value |> format_number}</td>
+                    <td>{value |> format_number()}</td>
                   </tr>
                 <% end %>
               </tbody>

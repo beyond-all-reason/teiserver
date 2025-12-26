@@ -61,7 +61,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     lobbies =
       [lobby | socket.assigns[:lobbies]]
       |> filter_lobbies(socket)
-      |> sort_lobbies
+      |> sort_lobbies()
 
     {:noreply, assign(socket, :lobbies, lobbies)}
   end
@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       socket.assigns[:lobbies]
       |> Enum.filter(fn b -> b.id != lobby_id end)
       |> filter_lobbies(socket)
-      |> sort_lobbies
+      |> sort_lobbies()
 
     {:noreply, assign(socket, :lobbies, lobbies)}
   end
@@ -102,7 +102,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
         end
       end)
       |> filter_lobbies(socket)
-      |> sort_lobbies
+      |> sort_lobbies()
 
     {:noreply, assign(socket, :lobbies, lobbies)}
   end
@@ -225,7 +225,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
         })
       end)
       |> filter_lobbies(socket)
-      |> sort_lobbies
+      |> sort_lobbies()
 
     socket
     |> assign(:lobbies, lobbies)
