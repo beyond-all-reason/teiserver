@@ -318,7 +318,7 @@ defmodule Teiserver.Party.Server do
       do: {:reply, {:error, :already_queued}, state}
 
   def handle_call({:join_matchmaking_queues, queues}, _from, state) do
-    members_id = Enum.map(state.members, fn m -> %{id: m.id} end)
+    members_id = Enum.map(state.members, fn m -> m.id end)
 
     result =
       Enum.reduce_while(queues, state.monitors, fn {q_id, version}, monitors ->
