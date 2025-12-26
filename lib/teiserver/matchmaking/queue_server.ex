@@ -83,7 +83,13 @@ defmodule Teiserver.Matchmaking.QueueServer do
           # a buffer when a party is joining, to make sure all player are indeed
           # committed to joining this queue
           pending_parties: %{
-            Party.id() => %{waiting_for: [T.userid()], joined: [T.userid()], tref: :timer.tref()}
+            Party.id() => %{
+              waiting_for: [T.userid()],
+              joined: [T.userid()],
+              sess_pids: [pid()],
+              member: Member.t(),
+              tref: :timer.tref()
+            }
           },
 
           # queue statistics for monitoring
@@ -174,9 +180,15 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
   @spec join_queue(id(), version :: String.t(), T.userid(), Party.id() | nil) :: join_result()
   def join_queue(queue_id, version, user_id, party_id) do
-    if party_id == nil,
-      do: GenServer.call(via_tuple(queue_id), {:join_queue, version, user_id}),
-      else: GenServer.call(via_tuple(queue_id), {:join_queue, version, user_id, party_id})
+    sess_pid = self()
+
+    if party_id == nil do
+      game_type = GenServer.call(via_tuple(queue_id), :get_game_type)
+      member = Member.new([user_id], game_type)
+      GenServer.call(via_tuple(queue_id), {:join_queue, version, {member, sess_pid}})
+    else
+      GenServer.call(via_tuple(queue_id), {:join_queue, version, {user_id, sess_pid}, party_id})
+    end
   catch
     :exit, {:noproc, _} -> {:error, :invalid_queue}
   end
@@ -189,10 +201,12 @@ defmodule Teiserver.Matchmaking.QueueServer do
   This is to ensure all party member are there as a unit and avoid race where
   a member could disconnect in the middle of the joining process.
   """
-  @spec party_join_queue(id(), version :: String.t(), Party.id(), [%{id: T.userid()}]) ::
+  @spec party_join_queue(id(), version :: String.t(), Party.id(), [T.userid()]) ::
           {:ok, queue_pid :: pid()} | {:error, reason :: term()}
-  def party_join_queue(queue_id, version, party_id, players) do
-    GenServer.call(via_tuple(queue_id), {:party_join_queue, version, party_id, players})
+  def party_join_queue(queue_id, version, party_id, player_ids) do
+    game_type = GenServer.call(via_tuple(queue_id), :get_game_type)
+    member = Member.new(player_ids, game_type)
+    GenServer.call(via_tuple(queue_id), {:party_join_queue, version, party_id, member})
   catch
     :exit, {:noproc, _} -> {:no, :invalid_queue}
   end
@@ -243,21 +257,25 @@ defmodule Teiserver.Matchmaking.QueueServer do
   end
 
   @impl true
+  def handle_call(:get_game_type, _from, state) do
+    game_type = MatchLib.game_type(state.queue.team_size, state.queue.team_count)
+    {:reply, game_type, state}
+  end
+
   def handle_call({:join_queue, version, _}, _from, state) when state.queue.version != version,
     do: {:reply, {:error, :version_mismatch}, state}
 
-  def handle_call({:join_queue, _version, player_id}, _from, state) do
-    case member_can_join_queue?([player_id], state) do
+  def handle_call({:join_queue, _version, {new_member, sess_pid}}, _from, state) do
+    case member_can_join_queue?(new_member.player_ids, state) do
       {:error, reason} ->
         {:reply, {:error, reason}, state}
 
       :ok ->
-        game_type = MatchLib.game_type(state.queue.team_size, state.queue.team_count)
-        new_member = Member.new([player_id], game_type)
+        [player_id] = new_member.player_ids
 
         new_state =
           state
-          |> add_member_to_queue(new_member)
+          |> add_member_to_queue(new_member, [{player_id, sess_pid}])
           |> update_in([:stats, :total_joined], &(&1 + 1))
 
         broadcast_update(new_state)
@@ -269,9 +287,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
       when state.queue.version != version,
       do: {:reply, {:error, :version_mismatch}, state}
 
-  def handle_call({:join_queue, _version, player_id, party_id}, _from, state) do
-    game_type = MatchLib.game_type(state.queue.team_size, state.queue.team_count)
-
+  def handle_call({:join_queue, _version, {player_id, sess_pid}, party_id}, _from, state) do
     with :ok <- member_can_join_queue?([player_id], state),
          pending when pending != nil <- Map.get(state.pending_parties, party_id) do
       case Enum.split_with(pending.waiting_for, &(&1 == player_id)) do
@@ -279,14 +295,13 @@ defmodule Teiserver.Matchmaking.QueueServer do
           {:reply, {:error, :invalid_queue}, state}
 
         {[_], []} ->
-          member = Member.new([player_id | pending.joined], game_type)
-
+          member = pending.member
           :timer.cancel(pending.tref)
 
           new_state =
             state
             |> Map.update!(:pending_parties, &Map.delete(&1, party_id))
-            |> add_member_to_queue(member)
+            |> add_member_to_queue(member, pending.sess_pids)
             |> update_in([:stats, :total_joined], &(&1 + length(member.player_ids)))
 
           Logger.info("Party #{party_id} with members #{inspect(member.player_ids)} joined queue")
@@ -299,6 +314,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
             pending
             |> Map.replace!(:waiting_for, rest)
             |> Map.update!(:joined, fn js -> [player_id | js] end)
+            |> Map.update!(:sess_pids, fn pids -> [{player_id, sess_pid} | pids] end)
 
           new_state =
             state
@@ -362,13 +378,13 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
-  def handle_call({:party_join_queue, version, _party_id, _players}, _from, state)
+  def handle_call({:party_join_queue, version, _party_id, _member}, _from, state)
       when state.queue.version != version,
       do: {:reply, {:error, :version_mismatch}, state}
 
-  def handle_call({:party_join_queue, _version, party_id, players}, _from, state) do
+  def handle_call({:party_join_queue, _version, party_id, member}, _from, state) do
     cond do
-      length(players) > state.queue.team_size ->
+      length(member.player_ids) > state.queue.team_size ->
         {:reply, {:error, :party_too_big}, state}
 
       party_id in state.pending_parties ->
@@ -379,9 +395,15 @@ defmodule Teiserver.Matchmaking.QueueServer do
         # since the entry gets removed after a short timeout.
         state =
           Map.update!(state, :pending_parties, fn p ->
-            ids = Enum.map(players, fn player -> player.id end)
             tref = :timer.send_after(5000, {:cancel_party, party_id})
-            Map.put(p, party_id, %{waiting_for: ids, joined: [], tref: tref})
+
+            Map.put(p, party_id, %{
+              waiting_for: member.player_ids,
+              joined: [],
+              member: member,
+              sess_pids: [],
+              tref: tref
+            })
           end)
 
         {:reply, {:ok, self()}, state}
@@ -594,11 +616,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
-  defp add_member_to_queue(state, new_member) do
+  defp add_member_to_queue(state, new_member, pids) do
     monitors =
-      Enum.reduce(new_member.player_ids, state.monitors, fn user_id, monitors ->
-        pid = Teiserver.Player.lookup_connection(user_id)
-
+      Enum.reduce(pids, state.monitors, fn {user_id, pid}, monitors ->
         if pid != nil do
           MC.monitor(monitors, pid, {:player, user_id})
         else

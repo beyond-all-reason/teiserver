@@ -149,7 +149,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
       party_id = UUID.uuid4()
 
       # Create a party with 1 player (valid for team_size: 1 queue)
-      {:ok, _pid} = Matchmaking.party_join_queue(queue_id, version, party_id, [user1])
+      {:ok, _pid} = Matchmaking.party_join_queue(queue_id, version, party_id, [user1.id])
       {:ok, stats} = Matchmaking.get_stats(queue_id)
       # No stats updated yet, party is pending
       assert stats == %{
