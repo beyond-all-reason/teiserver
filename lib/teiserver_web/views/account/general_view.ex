@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Account.GeneralView do
   def view_colour("relationships"), do: :info
   def view_colour("customisation"), do: Teiserver.Config.UserConfigLib.colours()
   def view_colour("preferences"), do: Teiserver.Config.UserConfigLib.colours()
-  def view_colour("clans"), do: Teiserver.Clans.ClanLib.colours()
+  def view_colour("clans"), do: Teiserver.Clan.ClanLib.colours()
   def view_colour("achievements"), do: Teiserver.Game.AchievementTypeLib.colour()
 
   def view_colour("details"), do: :primary

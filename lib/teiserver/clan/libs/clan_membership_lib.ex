@@ -1,11 +1,11 @@
-defmodule Teiserver.Clans.ClanInviteLib do
+defmodule Teiserver.Clan.ClanMembershipLib do
   use TeiserverWeb, :library
-  alias Teiserver.Clans.ClanInvite
+  alias Teiserver.Clan.ClanMembership
 
   # Queries
-  @spec get_clan_invites() :: Ecto.Query.t()
-  def get_clan_invites do
-    from(clan_invites in ClanInvite)
+  @spec get_clan_memberships() :: Ecto.Query.t()
+  def get_clan_memberships do
+    from(clan_memberships in ClanMembership)
   end
 
   @spec search(Ecto.Query.t(), map() | keyword() | nil) :: Ecto.Query.t()
@@ -22,13 +22,13 @@ defmodule Teiserver.Clans.ClanInviteLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :clan_id, clan_id) do
-    from clan_invites in query,
-      where: clan_invites.clan_id == ^clan_id
+    from clan_memberships in query,
+      where: clan_memberships.clan_id == ^clan_id
   end
 
   def _search(query, :user_id, user_id) do
-    from clan_invites in query,
-      where: clan_invites.user_id == ^user_id
+    from clan_memberships in query,
+      where: clan_memberships.user_id == ^user_id
   end
 
   @spec preload(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
@@ -40,8 +40,8 @@ defmodule Teiserver.Clans.ClanInviteLib do
   end
 
   def _preload_clan(query) do
-    from clan_invites in query,
-      left_join: clan in assoc(clan_invites, :clan),
+    from clan_memberships in query,
+      left_join: clan in assoc(clan_memberships, :clan),
       preload: [clan: clan]
   end
 end

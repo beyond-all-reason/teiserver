@@ -1,15 +1,20 @@
-defmodule Teiserver.Clans.Clan do
+defmodule Teiserver.Clan.ClanSchema do
   use TeiserverWeb, :schema
 
-  # TODO: this type is incomplete
+  @moduledoc """
+  The Clan schema
+  """
+
+  @typedoc """
+  The Clan schema type
+  """
   @type t :: %__MODULE__{
           name: String.t(),
           tag: String.t(),
           colour: String.t(),
           icon: String.t(),
           description: String.t(),
-          rating: String.t(),
-          homepage: String.t()
+          rating: String.t()
         }
 
   schema "teiserver_clans" do
@@ -22,10 +27,9 @@ defmodule Teiserver.Clans.Clan do
     field :description, :string
 
     field :rating, :map, default: %{}
-    field :homepage, :map, default: %{}
 
-    has_many :memberships, Teiserver.Clans.ClanMembership, foreign_key: :clan_id
-    has_many :invites, Teiserver.Clans.ClanInvite, foreign_key: :clan_id
+    has_many :memberships, Teiserver.Clan.ClanMembership, foreign_key: :clan_id
+    has_many :invites, Teiserver.Clan.ClanInvite, foreign_key: :clan_id
 
     many_to_many :members, Teiserver.Account.User,
       join_through: "teiserver_clan_memberships",
@@ -48,8 +52,8 @@ defmodule Teiserver.Clans.Clan do
       |> remove_characters(~w(tag)a, [~r/[\[\]]/])
 
     struct
-    |> cast(params, ~w(name tag icon colour description rating homepage)a)
-    |> validate_required(~w(name tag icon colour description rating homepage)a)
+    |> cast(params, ~w(name tag icon colour description rating)a)
+    |> validate_required(~w(name tag icon colour description rating)a)
   end
 
   def authorize(_, conn, _), do: allow?(conn, "clan")

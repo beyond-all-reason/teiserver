@@ -1,20 +1,23 @@
-defmodule Teiserver.Clans do
+defmodule Teiserver.Clan do
   @moduledoc """
-  The Clans context.
+  This module handles clans: their creation, updating, deletion and searching.
+  It also manages clan memberships and invites.
   """
 
   import Ecto.Query, warn: false
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
 
-  alias Teiserver.Clans.Clan
-  alias Teiserver.Clans.ClanLib
+  alias Teiserver.Clan.ClanSchema
+  alias Teiserver.Clan.ClanLib
 
-  def clan_query(args) do
+  @spec clan_query(nil | maybe_improper_list() | map()) :: Ecto.Query.t()
+  defp clan_query(args) do
     clan_query(nil, args)
   end
 
-  def clan_query(id, args) do
+  @spec clan_query(any(), nil | maybe_improper_list() | map()) :: Ecto.Query.t()
+  defp clan_query(id, args) do
     ClanLib.query_clans()
     |> ClanLib.search(%{id: id})
     |> ClanLib.search(args[:search])
@@ -29,9 +32,9 @@ defmodule Teiserver.Clans do
   ## Examples
 
       iex> list_clans()
-      [%Clan{}, ...]
-
+      [%ClanSchema{}, ...]
   """
+  @spec list_clans(nil | maybe_improper_list() | map()) :: any()
   def list_clans(args \\ []) do
     clan_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
@@ -46,12 +49,13 @@ defmodule Teiserver.Clans do
   ## Examples
 
       iex> get_clan!(123)
-      %Clan{}
+      %ClanSchema{}
 
       iex> get_clan!(456)
       ** (Ecto.NoResultsError)
 
   """
+  @spec get_clan!(any()) :: any()
   def get_clan!(id) when not is_list(id) do
     Teiserver.cache_get_or_store(:teiserver_clan_cache_bang, id, fn ->
       clan_query(id, [])
@@ -59,33 +63,20 @@ defmodule Teiserver.Clans do
     end)
   end
 
+  @spec get_clan!(nil | maybe_improper_list() | map()) :: any()
   def get_clan!(args) do
     clan_query(nil, args)
     |> Repo.one!()
   end
 
+  @spec get_clan!(any(), nil | maybe_improper_list() | map()) :: any()
   def get_clan!(id, args) do
     clan_query(id, args)
     |> Repo.one!()
   end
 
-  @doc """
-  Gets a single clan.
-
-  Returns `nil` if the Clan does not exist.
-
-  ## Examples
-
-      iex> get_clan(123)
-      %Clan{}
-
-      iex> get_clan(456)
-      nil
-
-  """
   def get_clan(nil), do: nil
   def get_clan(id), do: get_clan(id, [])
-
   def get_clan(nil, _), do: nil
 
   def get_clan(id, args) when not is_list(id) do
@@ -94,25 +85,42 @@ defmodule Teiserver.Clans do
   end
 
   @doc """
-  Creates a clan.
+  Creates a new clan with the given parameters.
+
+  ## Parameters
+  - `params`: A map containing the attributes required to create a clan.
+
+  ## Returns
+  - `{:ok, clan}`: If the clan is successfully created, returns a tuple with `:ok` and the created clan.
+  - `{:error, changeset}`: If there is an error during creation, returns a tuple with `:error` and the changeset containing validation errors.
 
   ## Examples
 
-      iex> create_clan(%{field: value})
+      iex> create_clan(%{name: "Warriors", description: "A clan of warriors"})
       {:ok, %Clan{}}
 
-      iex> create_clan(%{field: bad_value})
+      iex> create_clan(%{name: nil})
       {:error, %Ecto.Changeset{}}
-
   """
+  @spec create_clan(map()) :: {:ok, ClanSchema.t()} | {:error, Ecto.Changeset.t()}
   def create_clan(attrs \\ %{}) do
-    %Clan{}
-    |> Clan.changeset(attrs)
+    %ClanSchema{}
+    |> ClanSchema.changeset(attrs)
     |> Repo.insert()
   end
 
   @doc """
-  Updates a clan.
+  Updates a clan with the given attributes.
+
+  ## Parameters
+
+    - `clan`: The clan to be updated.
+    - `attrs`: A map of attributes to update the clan with.
+
+  ## Returns
+
+    - `{:ok, %Clan{}}` if the update is successful.
+    - `{:error, %Ecto.Changeset{}}` if the update fails due to validation errors.
 
   ## Examples
 
@@ -121,18 +129,26 @@ defmodule Teiserver.Clans do
 
       iex> update_clan(clan, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
-
   """
-  def update_clan(%Clan{} = clan, attrs) do
+  def update_clan(%ClanSchema{} = clan, attrs) do
     Teiserver.cache_delete(:teiserver_clan_cache_bang, clan.id)
 
     clan
-    |> Clan.changeset(attrs)
+    |> ClanSchema.changeset(attrs)
     |> Repo.update()
   end
 
   @doc """
-  Deletes a Clan.
+  Deletes a Clan from the database.
+
+  ## Parameters
+
+    - clan: The `%Clan{}` struct representing the clan to be deleted.
+
+  ## Returns
+
+    - `{:ok, %Clan{}}` if the clan was successfully deleted.
+    - `{:error, %Ecto.Changeset{}}` if there was an error during deletion.
 
   ## Examples
 
@@ -141,9 +157,8 @@ defmodule Teiserver.Clans do
 
       iex> delete_clan(clan)
       {:error, %Ecto.Changeset{}}
-
   """
-  def delete_clan(%Clan{} = clan) do
+  def delete_clan(%ClanSchema{} = clan) do
     Repo.delete(clan)
   end
 
@@ -156,12 +171,12 @@ defmodule Teiserver.Clans do
       %Ecto.Changeset{source: %Clan{}}
 
   """
-  def change_clan(%Clan{} = clan) do
-    Clan.changeset(clan, %{})
+  def change_clan(%ClanSchema{} = clan) do
+    ClanSchema.changeset(clan, %{})
   end
 
-  alias Teiserver.Clans.ClanInvite
-  alias Teiserver.Clans.ClanInviteLib
+  alias Teiserver.Clan.ClanInvite
+  alias Teiserver.Clan.ClanInviteLib
 
   @doc """
   Returns the list of clan_invites.
@@ -292,8 +307,8 @@ defmodule Teiserver.Clans do
     ClanInvite.changeset(clan_invite, %{})
   end
 
-  alias Teiserver.Clans.ClanMembership
-  alias Teiserver.Clans.ClanMembershipLib
+  alias Teiserver.Clan.ClanMembership
+  alias Teiserver.Clan.ClanMembershipLib
 
   @doc """
   Returns the list of clan_memberships.

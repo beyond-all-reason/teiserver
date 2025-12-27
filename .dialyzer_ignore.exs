@@ -46,7 +46,7 @@
   {"lib/teiserver/chat.ex", :unknown_type},
   {"lib/teiserver/chat/chat_room_cache.ex", :call},
   {"lib/teiserver/chat/chat_room_cache.ex", :no_return},
-  {"lib/teiserver/clans.ex", :unknown_type},
+  {"lib/teiserver/clan.ex", :unknown_type},
   {"lib/teiserver/communication.ex", :unknown_type},
   {"lib/teiserver/communication.ex", :invalid_contract},
   {"lib/teiserver/communication/libs/discord_channel_lib.ex", :unknown_type},

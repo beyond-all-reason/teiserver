@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def icon(), do: StylingHelper.icon(:info)
 
   @spec view_colour(String.t()) :: atom()
-  def view_colour("clans"), do: Teiserver.Clans.ClanLib.colours()
+  def view_colour("clans"), do: Teiserver.Clan.ClanLib.colours()
   def view_colour("users"), do: Teiserver.Account.UserLib.colours()
   def view_colour("telemetry"), do: Teiserver.Telemetry.TelemetryLib.colours()
   def view_colour("tools"), do: Teiserver.Admin.ToolLib.colours()

@@ -9,7 +9,7 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.{Room, CacheUser, Account, Telemetry, Clans, Coordinator}
+  alias Teiserver.{Room, CacheUser, Account, Telemetry, Clan, Coordinator}
   alias Teiserver.Lobby
   alias Teiserver.Account.ClientLib
   # alias Teiserver.Helper.TimexHelper
@@ -93,7 +93,7 @@ defmodule Teiserver.Client do
     stats = Account.get_user_stat_data(user.id)
 
     clan_tag =
-      case Clans.get_clan(user.clan_id) do
+      case Clan.get_clan(user.clan_id) do
         nil -> nil
         clan -> clan.tag
       end

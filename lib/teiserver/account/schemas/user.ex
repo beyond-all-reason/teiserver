@@ -38,7 +38,7 @@ defmodule Teiserver.Account.User do
     has_many :user_configs, Teiserver.Config.UserConfig
 
     # Extra user.ex relations go here
-    belongs_to :clan, Teiserver.Clans.Clan
+    belongs_to :clan, Teiserver.Clan.ClanSchema
     belongs_to :smurf_of, Teiserver.Account.User
 
     has_one :user_stat, Teiserver.Account.UserStat

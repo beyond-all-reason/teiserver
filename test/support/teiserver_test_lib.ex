@@ -354,10 +354,10 @@ defmodule Teiserver.TeiserverTestLib do
     ["Verified"]
   end
 
-  @spec make_clan(String.t(), map()) :: Teiserver.Clans.Clan.t()
+  @spec make_clan(String.t(), map()) :: Teiserver.Clan.ClanSchema.t()
   def make_clan(name, params \\ %{}) do
     {:ok, c} =
-      Teiserver.Clans.create_clan(
+      Teiserver.Clan.create_clan(
         Map.merge(
           %{
             "name" => name,
@@ -406,10 +406,10 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   @spec make_clan_membership(integer(), integer(), map()) ::
-          Teiserver.Clans.ClanMembership.t()
+          Teiserver.Clan.ClanMembership.t()
   def make_clan_membership(clan_id, user_id, data \\ %{}) do
     {:ok, gm} =
-      Teiserver.Clans.create_clan_membership(%{
+      Teiserver.Clan.create_clan_membership(%{
         "clan_id" => clan_id,
         "user_id" => user_id,
         "role" => data["role"] || "Member"
