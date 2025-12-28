@@ -71,11 +71,11 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
       Map.merge(lobby_policy_params, %{
         "map_list" =>
           (lobby_policy_params["map_list"] || "")
-          |> convert_textarea_to_array
+          |> convert_textarea_to_array()
           |> Enum.sort(),
         "agent_name_list" =>
           (lobby_policy_params["agent_name_list"] || "")
-          |> convert_textarea_to_array
+          |> convert_textarea_to_array()
           |> Enum.sort()
       })
 
@@ -113,11 +113,11 @@ defmodule TeiserverWeb.Admin.LobbyPolicyController do
       Map.merge(lobby_policy_params, %{
         "map_list" =>
           (lobby_policy_params["map_list"] || "")
-          |> convert_textarea_to_array
+          |> convert_textarea_to_array()
           |> Enum.sort(),
         "agent_name_list" =>
           (lobby_policy_params["agent_name_list"] || "")
-          |> convert_textarea_to_array
+          |> convert_textarea_to_array()
           |> Enum.sort()
       })
 

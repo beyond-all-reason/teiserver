@@ -155,7 +155,7 @@ defmodule Teiserver.Moderation do
     %Report{}
     |> Report.changeset(attrs)
     |> Repo.insert()
-    |> broadcast_create_report
+    |> broadcast_create_report()
   end
 
   def broadcast_create_report({:ok, report}) do
@@ -191,7 +191,7 @@ defmodule Teiserver.Moderation do
     report
     |> Report.changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_report
+    |> broadcast_update_report()
   end
 
   def broadcast_update_report({:ok, report}) do
@@ -403,7 +403,7 @@ defmodule Teiserver.Moderation do
     %Response{}
     |> Response.changeset(attrs)
     |> Repo.insert()
-    |> broadcast_create_response
+    |> broadcast_create_response()
   end
 
   def broadcast_create_response({:ok, response}) do
@@ -440,7 +440,7 @@ defmodule Teiserver.Moderation do
     response
     |> Response.changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_response
+    |> broadcast_update_response()
   end
 
   def broadcast_update_response({:ok, response}) do
@@ -805,7 +805,7 @@ defmodule Teiserver.Moderation do
     %Proposal{}
     |> Proposal.changeset(attrs)
     |> Repo.insert()
-    |> broadcast_create_proposal
+    |> broadcast_create_proposal()
   end
 
   def broadcast_create_proposal({:ok, proposal}) do
@@ -842,7 +842,7 @@ defmodule Teiserver.Moderation do
     proposal
     |> Proposal.changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_proposal
+    |> broadcast_update_proposal()
   end
 
   def broadcast_update_proposal({:ok, proposal}) do
@@ -1084,7 +1084,7 @@ defmodule Teiserver.Moderation do
     %Ban{}
     |> Ban.changeset(attrs)
     |> Repo.insert()
-    |> broadcast_create_ban
+    |> broadcast_create_ban()
   end
 
   def broadcast_create_ban({:ok, ban}) do

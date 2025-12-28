@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       |> assign(:highlight_map, %{})
       |> assign(:extra_url_parts, "")
       |> default_filters(params)
-      |> update_highlight_map_at_mount
+      |> update_highlight_map_at_mount()
 
     {:ok, socket}
   end
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
     socket =
       socket
       |> assign(:filters, new_filters)
-      |> get_messages
+      |> get_messages()
 
     {:noreply, socket}
   end

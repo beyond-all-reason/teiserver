@@ -59,11 +59,11 @@ defmodule Teiserver.Account.BanEvasionReport do
 
     _max_play_age =
       params["max_play_age"]
-      |> int_parse
+      |> int_parse()
 
     max_account_age =
       params["max_account_age"]
-      |> int_parse
+      |> int_parse()
 
     relevant_evaders =
       Account.list_users(

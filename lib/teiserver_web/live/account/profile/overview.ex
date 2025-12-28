@@ -34,8 +34,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
           |> assign(:user, user)
           |> assign(:role_data, Account.RoleLib.role_data())
           |> assign(:client, Account.get_client_by_id(userid))
-          |> get_relationships_and_permissions
-          |> assign_accolade_notification
+          |> get_relationships_and_permissions()
+          |> assign_accolade_notification()
       end
 
     {:ok, socket}

@@ -100,8 +100,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
               bot: false,
               roles: ["Verified"]
             },
-            inserted_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert,
-            updated_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert
+            inserted_at:
+              Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert(),
+            updated_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert()
           }
         end)
         |> Enum.to_list()
@@ -135,7 +136,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       lobby_count =
         user_count
         |> Kernel.div(6)
-        |> round
+        |> round()
         |> max(1)
 
       logs =
@@ -214,7 +215,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     end)
 
     # And monthly
-    months = (@settings.days / 31) |> :math.ceil() |> round
+    months = (@settings.days / 31) |> :math.ceil() |> round()
 
     Range.new(0, months)
     |> Enum.each(fn _day ->
@@ -250,7 +251,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
               date
               |> Timex.to_datetime()
               |> Timex.shift(minutes: 10 + :rand.uniform(1000))
-              |> time_convert
+              |> time_convert()
 
             %{
               reporter_id: reporter_id,
@@ -276,7 +277,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         |> Enum.take(report_count)
         |> Enum.map(fn match ->
           [reporter, target | _] = Enum.shuffle(match.members) |> Enum.take(2)
-          report_time = match.started |> Timex.shift(minutes: 20) |> time_convert
+          report_time = match.started |> Timex.shift(minutes: 20) |> time_convert()
 
           relationship =
             cond do
@@ -321,7 +322,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
       Range.new(0, matches_per_day())
       |> Enum.each(fn _ ->
-        max_size = Enum.count(users) |> Kernel.div(2) |> :math.floor() |> round
+        max_size = Enum.count(users) |> Kernel.div(2) |> :math.floor() |> round()
         team_size = min(:rand.uniform(8), max_size)
         shuffled_users = Enum.shuffle(users)
         team1 = shuffled_users |> Enum.take(team_size)

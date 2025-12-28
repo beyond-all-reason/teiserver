@@ -36,7 +36,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       preload: [],
       limit: 1
     )
-    |> post_process_match
+    |> post_process_match()
 
     :ok
   end
@@ -117,7 +117,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
             {k,
              v
              |> NumberHelper.int_parse()
-             |> round}
+             |> round()}
           end)
 
         player_data =

@@ -37,7 +37,7 @@ defmodule Teiserver.Account.TimeSpentReport do
         params["end_date"]
       )
 
-    userid = get_hash_id(params["account_user"]) |> to_string
+    userid = get_hash_id(params["account_user"]) |> to_string()
 
     columns =
       Logging.list_user_activity_day_logs(

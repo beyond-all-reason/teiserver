@@ -107,7 +107,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
     match_count =
       case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date, rating_type_id]) do
         {:ok, results} ->
-          results.rows |> List.flatten() |> hd
+          results.rows |> List.flatten() |> hd()
 
         {a, b} ->
           raise "ERR: #{a}, #{b}"

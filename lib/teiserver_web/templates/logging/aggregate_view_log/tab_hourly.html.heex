@@ -44,7 +44,7 @@
             style={"background-color: ##{heatmap(Enum.fetch!(@log.hourly_views, i), maximum, "black-red")};"}
           >
             <span class="hourly-view-span">
-              {Enum.fetch!(@log.hourly_views, i) |> round() |> format_number}
+              {Enum.fetch!(@log.hourly_views, i) |> round() |> format_number()}
             </span>
           </td>
         <% end %>
@@ -58,7 +58,7 @@
             style={"background-color: ##{heatmap(Enum.fetch!(@log.hourly_uniques, i), maximum, "black-red")};"}
           >
             <span class="hourly-view-span">
-              {Enum.fetch!(@log.hourly_uniques, i) |> round() |> format_number}
+              {Enum.fetch!(@log.hourly_uniques, i) |> round() |> format_number()}
             </span>
           </td>
         <% end %>

@@ -25,7 +25,7 @@ defmodule TeiserverWeb.Microblog.RssController do
       posts
       |> Enum.map(fn p -> p.updated_at end)
       |> Enum.sort_by(fn v -> v end, &TimexHelper.greater_than/2)
-      |> hd
+      |> hd()
 
     conn
     |> put_resp_content_type("text/xml")
@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Microblog.RssController do
       posts
       |> Enum.map(fn p -> p.updated_at end)
       |> Enum.sort_by(fn v -> v end, &TimexHelper.greater_than/2)
-      |> hd
+      |> hd()
 
     conn
     |> put_resp_content_type("text/xml")

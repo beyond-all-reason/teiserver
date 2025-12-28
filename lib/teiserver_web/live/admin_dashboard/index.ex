@@ -34,9 +34,9 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> assign(:telemetry_client, telemetry_data.client)
       |> assign(:telemetry_battle, telemetry_data.battle)
       |> assign(:total_connected_clients, telemetry_data.total_clients_connected)
-      |> update_policies
-      |> update_lobbies
-      |> update_server_pids
+      |> update_policies()
+      |> update_lobbies()
+      |> update_server_pids()
 
     :timer.send_interval(5_000, :tick)
 
@@ -60,9 +60,9 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   def handle_info(:tick, socket) do
     {:noreply,
      socket
-     |> update_policies
-     |> update_lobbies
-     |> update_server_pids}
+     |> update_policies()
+     |> update_lobbies()
+     |> update_server_pids()}
   end
 
   def handle_info(%{channel: "teiserver_telemetry", data: data}, socket) do

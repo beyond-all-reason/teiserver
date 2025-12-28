@@ -20,7 +20,7 @@
               <% else %>
                 &nbsp;&nbsp;&nbsp;
                 <em>
-                  {the_config.description |> String.slice(0..90) |> raw}
+                  {the_config.description |> String.slice(0..90) |> raw()}
                 </em>
               <% end %>
             </td>
