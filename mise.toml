@@ -26,7 +26,7 @@ run = "mix do ecto.drop, ecto.setup"
 [tasks."setup:deps"]
 run = "mix deps.get"
 
-[tasks."setup"]
+[tasks.setup]
 depends = ["pg:setup", "setup:deps"]
 description = "Sets up the application dependencies from scratch"
 run = [{ task = "setup:certs:*" }, { tasks = ["setup:sass", "setup:db"] }]
@@ -41,7 +41,7 @@ run = "{{vars.pg_status}} || {{vars.pg_ctl}} start"
 [tasks."pg:stop"]
 description = "Stops the local postgres instance"
 run = '''
-{{vars.pg_status}} && {{vars.pg_ctl}} stop || echo "Server already not running"
+{{vars.pg_status}} && {{vars.pg_ctl}} stop || echo "Server already stopped"
 '''
 
 [tasks."pg:setup"]
@@ -55,10 +55,10 @@ run = [
   { task = "pg:start" },
   """
   psql -U postgres <<EOF
-    CREATE USER teiserver_dev WITH PASSWORD '123456789';
+    CREATE USER teiserver_dev WITH PASSWORD '{{env.PGPASSWORD}}';
     ALTER USER teiserver_dev WITH SUPERUSER;
 
-    CREATE USER teiserver_test WITH PASSWORD '123456789';
+    CREATE USER teiserver_test WITH PASSWORD '{{env.PGPASSWORD}}';
     ALTER USER teiserver_test WITH SUPERUSER;
 EOF
   """,
@@ -70,6 +70,7 @@ outputs = ["{{env.TEI_TLS_DH_FILE_PATH}}"]
 run = "openssl dhparam -out {{env.TEI_TLS_DH_FILE_PATH}} 2048"
 
 [tasks."setup:certs:cert"]
+shell = "bash -c"
 sources = ["mise.toml"]
 outputs = ["{{env.TEI_TLS_CERT_PATH}}", "{{env.TEI_TLS_PRIVATE_KEY_PATH}}"]
 env.CERT_SSL_CONFIG = '''
