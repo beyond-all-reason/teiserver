@@ -98,7 +98,7 @@ defmodule Teiserver.Telemetry.TelemetryLib do
       ),
       counter(
         [:teiserver, :spring, :out, :count],
-        event_name: [:spring, :event],
+        event_name: [:spring, :out],
         measurement: :count,
         tags: [:command]
       )
