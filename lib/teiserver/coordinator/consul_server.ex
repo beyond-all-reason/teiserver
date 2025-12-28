@@ -450,13 +450,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     if ranked == "0" do
       new_state =
-        Map.merge(state, %{
-          minimum_rating_to_play: 0,
-          maximum_rating_to_play: LobbyRestrictions.rating_upper_bound(),
-          minimum_rank_to_play: 0,
-          maximum_rank_to_play: LobbyRestrictions.rank_upper_bound(),
-          ranked: false
-        })
+        cond do
+          Config.get_site_config_cache("lobby.Unranked lobby restrictions") == false ->
+            Map.merge(state, %{
+              minimum_rating_to_play: 0,
+              maximum_rating_to_play: LobbyRestrictions.rating_upper_bound(),
+              minimum_rank_to_play: 0,
+              maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()
+            })
+
+          true ->
+            state
+        end
+        |> Map.merge(%{ranked: false})
 
       {:noreply, new_state}
     else
@@ -877,7 +883,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Account.is_moderator?(user) ->
         true
 
-      state.ranked == false ->
+      state.ranked == false and
+          Config.get_site_config_cache("lobby.Unranked lobby restrictions") == false ->
         true
 
       true ->
