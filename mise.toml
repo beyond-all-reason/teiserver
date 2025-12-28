@@ -91,3 +91,8 @@ openssl req -x509 \
   -subj '/CN=localhost' -extensions EXT \
   -config <(printf "${CERT_SSL_CONFIG}")
 '''
+
+[tasks.tests]
+description = "Run tests, except those tagged with `:needs_attention`"
+run = "mix test --exclude needs_attention"
+alias = "t"
