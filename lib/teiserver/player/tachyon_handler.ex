@@ -992,17 +992,17 @@ defmodule Teiserver.Player.TachyonHandler do
     %{
       id: party_state.id,
       members:
-        Enum.map(party_state.members, fn m ->
+        Enum.map(party_state.members, fn {_id, m} ->
           %{
             userId: to_string(m.id),
             joinedAt: DateTime.to_unix(m.joined_at, :microsecond)
           }
         end),
       invited:
-        Enum.map(party_state.invited, fn m ->
+        Enum.map(party_state.invited, fn {_id, m} ->
           %{
             userId: to_string(m.id),
-            invitedAt: DateTime.to_unix(m.invited_at)
+            invitedAt: DateTime.to_unix(m.invited_at, :microsecond)
           }
         end)
     }
