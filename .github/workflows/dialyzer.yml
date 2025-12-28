@@ -16,8 +16,6 @@ on:
 # Sets the ENV `MIX_ENV` to `test` for running tests
 env:
   MIX_ENV: test
-  ELIXIR_VER: '1.19.4'
-  OTP_VER: '26.2.5.1'
 
 permissions:
   contents: read
@@ -28,16 +26,20 @@ jobs:
     name: Dialyzer
 
     steps:
-    # Step: Setup Elixir + Erlang image as the base.
-    - name: Set up Elixir
-      uses: erlef/setup-beam@v1
-      with:
-        otp-version: ${{ env.OTP_VER }}
-        elixir-version: ${{ env.ELIXIR_VER }}
-
-    # Step: Check out the code.
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Read Elixir and Erlang versions from mise.toml
+      id: versions
+      run: |
+        echo "elixir=$(sed -n 's|elixir = \"\(.*\)\"|\1|p' mise.toml)" >> "$GITHUB_OUTPUT"
+        echo "erlang=$(sed -n 's|erlang = \"\(.*\)\"|\1|p' mise.toml)" >> "$GITHUB_OUTPUT"
+
+    - name: Setup Elixir and Erlang
+      uses: erlef/setup-beam@v1
+      with:
+        otp-version: ${{ steps.versions.outputs.erlang }}
+        elixir-version: ${{ steps.versions.outputs.elixir }}
 
     # Step: Define how to cache deps. Restores existing cache if present.
     - name: Cache deps
