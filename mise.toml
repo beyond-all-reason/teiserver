@@ -41,7 +41,7 @@ run = "{{vars.pg_status}} || {{vars.pg_ctl}} start"
 [tasks."pg:stop"]
 description = "Stops the local postgres instance"
 run = '''
-{{vars.pg_status}} && {{vars.pg_ctl}} stop || echo "Server already not running"
+{{vars.pg_status}} && {{vars.pg_ctl}} stop || echo "Server already stopped"
 '''
 
 [tasks."pg:setup"]
