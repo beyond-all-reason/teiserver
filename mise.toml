@@ -96,3 +96,9 @@ openssl req -x509 \
 description = "Run tests, except those tagged with `:needs_attention`"
 run = "mix test --exclude needs_attention"
 alias = "t"
+
+[tasks.server]
+description = "Start the Phoenix application with debugging enabled" # https://hexdocs.pm/elixir/debugging.html#pry
+depends = [ "pg:start" ]
+run = "iex --dbg pry -S mix phx.server"
+alias = "s"

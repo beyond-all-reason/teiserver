@@ -25,10 +25,10 @@ To run Teiserver locally you can use:
 mix phx.server
 ```
 
-Or run it in interactive mode (a REPL is available):
+Or run it in interactive mode with [debugging enabled](https://hexdocs.pm/elixir/debugging.html#pry) (a REPL is available):
 
 ```bash
-iex -S mix phx.server
+iex --dbg pry -S mix phx.server
 ```
 
 > [!WARNING]
