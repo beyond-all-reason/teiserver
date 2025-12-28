@@ -55,10 +55,10 @@ run = [
   { task = "pg:start" },
   """
   psql -U postgres <<EOF
-    CREATE USER teiserver_dev WITH PASSWORD '123456789';
+    CREATE USER teiserver_dev WITH PASSWORD '{{env.PGPASSWORD}}';
     ALTER USER teiserver_dev WITH SUPERUSER;
 
-    CREATE USER teiserver_test WITH PASSWORD '123456789';
+    CREATE USER teiserver_test WITH PASSWORD '{{env.PGPASSWORD}}';
     ALTER USER teiserver_test WITH SUPERUSER;
 EOF
   """,
