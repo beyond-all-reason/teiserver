@@ -26,7 +26,7 @@ run = "mix do ecto.drop, ecto.setup"
 [tasks."setup:deps"]
 run = "mix deps.get"
 
-[tasks."setup"]
+[tasks.setup]
 depends = ["pg:setup", "setup:deps"]
 description = "Sets up the application dependencies from scratch"
 run = [{ task = "setup:certs:*" }, { tasks = ["setup:sass", "setup:db"] }]
