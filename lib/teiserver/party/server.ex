@@ -20,15 +20,15 @@ defmodule Teiserver.Party.Server do
           id: id(),
           pid: pid(),
           monitors: MC.t(),
-          members: [%{id: T.userid(), joined_at: DateTime.t()}],
-          invited: [
-            %{
+          members: %{T.userid() => %{id: T.userid(), joined_at: DateTime.t()}},
+          invited: %{
+            T.userid() => %{
               id: T.userid(),
               invited_at: DateTime.t(),
               valid_until: DateTime.t(),
               timeout_ref: :timer.tref()
             }
-          ],
+          },
           matchmaking: nil | %{queues: [{Matchmaking.queue_id(), version :: String.t()}]}
         }
 
@@ -161,8 +161,8 @@ defmodule Teiserver.Party.Server do
         id: party_id,
         pid: self(),
         monitors: MC.new(),
-        members: [],
-        invited: [],
+        members: %{},
+        invited: %{},
         matchmaking: nil
       }
       |> add_member(user_id, creator_pid)
@@ -177,17 +177,18 @@ defmodule Teiserver.Party.Server do
 
   @spec handle_call(term(), GenServer.from(), state()) :: term()
   def handle_call({:leave, user_id}, _from, state) do
-    case Enum.split_with(state.members, fn %{id: mid} -> mid == user_id end) do
-      {[], _} ->
+    # case Enum.split_with(state.members, fn %{id: mid} -> mid == user_id end) do
+    case Map.pop(state.members, user_id) do
+      {nil, _} ->
         {:reply, {:error, :not_a_member}, state}
 
-      {[_], []} ->
+      {_, rest} when map_size(rest) == 0 ->
         {:stop, :normal, :ok, %{state | members: []} |> bump()}
 
-      {[_], new_members} ->
+      {_, new_members} ->
         new_state = %{state | members: new_members} |> bump()
 
-        for %{id: id} <- state.invited ++ state.members do
+        for id <- Stream.concat(Map.keys(state.invited), Map.keys(state.members)) do
           Player.party_notify_updated(id, new_state)
         end
 
@@ -200,8 +201,8 @@ defmodule Teiserver.Party.Server do
       do: {:reply, {:error, :party_in_matchmaking}, state}
 
   def handle_call({:create_invite, user_id, user_pid}, _from, state) do
-    invited = Enum.find(state.invited, fn %{id: id} -> id == user_id end)
-    member = Enum.find(state.members, fn %{id: id} -> id == user_id end)
+    invited = Map.get(state.invited, user_id)
+    member = Map.get(state.members, user_id)
 
     max_size = Teiserver.Config.get_site_config_cache(max_size_key())
 
@@ -226,12 +227,12 @@ defmodule Teiserver.Party.Server do
 
         new_state =
           state
-          |> Map.put(:invited, [invite | state.invited])
+          |> Map.update!(:invited, &Map.put(&1, user_id, invite))
           |> Map.update!(:monitors, &MC.monitor(&1, user_pid, {:invite, user_id}))
           |> bump()
 
         # don't send the updated event to the newly invited player
-        for %{id: id} <- state.invited ++ state.members do
+        for id <- Stream.concat(Map.keys(state.invited), Map.keys(state.members)) do
           Player.party_notify_updated(id, new_state)
         end
 
@@ -240,11 +241,12 @@ defmodule Teiserver.Party.Server do
   end
 
   def handle_call({:accept_invite, user_id, user_pid}, _from, state) do
-    case Enum.split_with(state.invited, fn %{id: id} -> id == user_id end) do
-      {[], _} ->
+    # case Enum.split_with(state.invited, fn %{id: id} -> id == user_id end) do
+    case Map.pop(state.invited, user_id) do
+      {nil, _} ->
         {:reply, {:error, :not_invited}, state}
 
-      {[_invited], rest} ->
+      {_, rest} ->
         state =
           state
           |> bump()
@@ -257,11 +259,12 @@ defmodule Teiserver.Party.Server do
   end
 
   def handle_call({:decline_invite, user_id}, _from, state) do
-    case Enum.split_with(state.invited, fn %{id: id} -> id == user_id end) do
-      {[], _} ->
+    # case Enum.split_with(state.invited, fn %{id: id} -> id == user_id end) do
+    case Map.pop(state.invited, user_id) do
+      {nil, _} ->
         {:reply, {:error, :not_invited}, state}
 
-      {[invited], rest} ->
+      {invited, rest} ->
         :timer.cancel(invited.timeout_ref)
 
         state =
@@ -279,7 +282,7 @@ defmodule Teiserver.Party.Server do
   end
 
   def handle_call({:cancel_invite, user_id}, _from, state) do
-    case Enum.find(state.invited, fn %{id: id} -> id == user_id end) do
+    case Map.get(state.invited, user_id) do
       nil ->
         {:reply, {:error, :not_invited}, state}
 
@@ -290,17 +293,18 @@ defmodule Teiserver.Party.Server do
   end
 
   def handle_call({:kick_user, actor_id, target_id}, _from, state) do
-    member? = Enum.find(state.members, &(&1.id == actor_id)) != nil
-    other_members = Enum.split_with(state.members, &(&1.id == target_id))
+    member? = Map.has_key?(state.members, actor_id)
+    # Enum.split_with(state.members, &(&1.id == target_id))
+    {target, rest} = Map.pop(state.members, target_id)
 
-    case {member?, other_members} do
+    case {member?, target} do
       {false, _} ->
         {:reply, {:error, :not_a_member}, state}
 
-      {_, {[], _}} ->
+      {_, nil} ->
         {:reply, {:error, :invalid_target}, state}
 
-      {true, {[_member], rest}} ->
+      {true, _member} ->
         state =
           state
           |> bump()
@@ -318,7 +322,7 @@ defmodule Teiserver.Party.Server do
       do: {:reply, {:error, :already_queued}, state}
 
   def handle_call({:join_matchmaking_queues, queues}, _from, state) do
-    members_id = Enum.map(state.members, fn m -> m.id end)
+    members_id = Map.keys(state.members)
 
     result =
       Enum.reduce_while(queues, state.monitors, fn {q_id, version}, monitors ->
@@ -352,10 +356,13 @@ defmodule Teiserver.Party.Server do
           |> Map.replace!(:matchmaking, %{queues: queues})
 
         # when entering matchmaking, "lock" the party, all invites are cancelled
-        state = Enum.reduce(state.invited, state, &cancel_invite_internal(&1, &2))
+        state =
+          Enum.reduce(state.invited, state, fn {_user_id, invite}, state ->
+            cancel_invite_internal(invite, state)
+          end)
 
-        for member <- state.members do
-          Player.party_notify_join_queues(member.id, queues, state)
+        for id <- Map.keys(state.members) do
+          Player.party_notify_join_queues(id, queues, state)
         end
 
         {:reply, :ok, state}
@@ -363,21 +370,23 @@ defmodule Teiserver.Party.Server do
   end
 
   def handle_call({:send_message, from_id, msg_content}, _from, state) do
-    if Enum.find(state.members, &(&1.id == from_id)) == nil do
-      {:reply, {:error, :invalid_request, :not_a_party_member}, state}
-    else
-      msg =
-        Messaging.new(
-          msg_content,
-          {:party, state.id, from_id},
-          :erlang.monotonic_time(:micro_seconds)
-        )
+    case Map.get(state.members, from_id) do
+      nil ->
+        {:reply, {:error, :invalid_request, :not_a_party_member}, state}
 
-      for m <- state.members, m.id != from_id do
-        Messaging.send(msg, {:player, m.id})
-      end
+      _ ->
+        msg =
+          Messaging.new(
+            msg_content,
+            {:party, state.id, from_id},
+            :erlang.monotonic_time(:micro_seconds)
+          )
 
-      {:reply, :ok, state}
+        for id <- Map.keys(state.members), id != from_id do
+          Messaging.send(msg, {:player, id})
+        end
+
+        {:reply, :ok, state}
     end
   end
 
@@ -406,28 +415,24 @@ defmodule Teiserver.Party.Server do
           state
 
         {:invite, user_id} ->
-          Map.update!(state, :invited, fn invites ->
-            Enum.filter(invites, fn i -> i.id != user_id end)
-          end)
+          Map.update!(state, :invited, &Map.delete(&1, user_id))
           |> notify_updated()
 
         {:member, user_id} ->
-          Map.update!(state, :members, fn members ->
-            Enum.filter(members, fn m -> m.id != user_id end)
-          end)
+          Map.update!(state, :members, &Map.delete(&1, user_id))
           |> notify_updated()
 
         {:queue, _qid} ->
           %{state | matchmaking: nil}
       end
 
-    if state.members == [],
+    if Enum.empty?(state.members),
       do: {:stop, :normal, state},
       else: {:noreply, state}
   end
 
   def handle_info({:invite_timeout, user_id}, state) do
-    case Enum.find(state.invited, &(&1.id == user_id)) do
+    case Map.get(state.invited, user_id) do
       nil ->
         {:noreply, state}
 
@@ -438,7 +443,7 @@ defmodule Teiserver.Party.Server do
   end
 
   defp notify_updated(state) do
-    for %{id: id} <- state.invited ++ state.members do
+    for id <- Stream.concat(Map.keys(state.invited), Map.keys(state.members)) do
       Player.party_notify_updated(id, Map.drop(state, [:monitors]))
     end
 
@@ -453,10 +458,11 @@ defmodule Teiserver.Party.Server do
 
   defp add_member(state, user_id, user_pid) do
     state =
-      state
-      |> Map.update!(:members, fn members ->
-        [%{id: user_id, joined_at: DateTime.utc_now()} | members]
-      end)
+      Map.update!(
+        state,
+        :members,
+        &Map.put(&1, user_id, %{id: user_id, joined_at: DateTime.utc_now()})
+      )
 
     case MC.get_ref(state.monitors, {:invite, user_id}) do
       nil ->
@@ -477,7 +483,7 @@ defmodule Teiserver.Party.Server do
     state =
       state
       |> bump()
-      |> Map.update!(:invited, fn invites -> Enum.filter(invites, &(&1 != invite)) end)
+      |> Map.update!(:invited, &Map.delete(&1, invite.id))
       |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:invite, invite.id}))
 
     Player.party_notify_removed(invite.id, state)
