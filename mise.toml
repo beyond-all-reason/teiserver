@@ -70,6 +70,7 @@ outputs = ["{{env.TEI_TLS_DH_FILE_PATH}}"]
 run = "openssl dhparam -out {{env.TEI_TLS_DH_FILE_PATH}} 2048"
 
 [tasks."setup:certs:cert"]
+shell = "bash -c"
 sources = ["mise.toml"]
 outputs = ["{{env.TEI_TLS_CERT_PATH}}", "{{env.TEI_TLS_PRIVATE_KEY_PATH}}"]
 env.CERT_SSL_CONFIG = '''
