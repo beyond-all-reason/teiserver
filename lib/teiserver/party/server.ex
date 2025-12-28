@@ -202,7 +202,10 @@ defmodule Teiserver.Party.Server do
         {:stop_and_reply, :normal, [{:reply, from, :ok}], %{data | members: %{}} |> bump()}
 
       {_, new_members} ->
-        new_data = %{data | members: new_members} |> bump()
+        new_data =
+          %{data | members: new_members}
+          |> bump()
+          |> Map.update!(:monitors, &MC.demonitor_by_val(&1, user_id))
 
         for id <- Stream.concat(Map.keys(data.invited), Map.keys(data.members)) do
           Player.party_notify_updated(id, new_data)
