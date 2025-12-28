@@ -227,7 +227,8 @@ defmodule Teiserver.TeiserverTestLib do
       print_client_messages: false,
       print_server_messages: false,
       exempt_from_cmd_throttle: true,
-      script_password: nil
+      script_password: nil,
+      last_message_invalid: false
     }
   end
 
@@ -258,7 +259,8 @@ defmodule Teiserver.TeiserverTestLib do
       print_client_messages: false,
       print_server_messages: false,
       exempt_from_cmd_throttle: true,
-      script_password: nil
+      script_password: nil,
+      last_message_invalid: false
     }
     |> Map.merge(opts)
   end
@@ -293,7 +295,8 @@ defmodule Teiserver.TeiserverTestLib do
       print_client_messages: false,
       print_server_messages: false,
       exempt_from_cmd_throttle: true,
-      script_password: nil
+      script_password: nil,
+      last_message_invalid: false
     }
   end
 
