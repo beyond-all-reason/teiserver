@@ -1315,7 +1315,8 @@ defmodule Teiserver.SpringTcpServer do
       last_action_timestamp: nil,
       server_messages: 0,
       server_batches: 0,
-      client_messages: 0
+      client_messages: 0,
+      last_message_invalid: false
     }
     |> Map.merge(%{
       heartbeat_timeout: Keyword.get(spring_config, :heartbeat_timeout),

@@ -87,6 +87,8 @@ defmodule Teiserver.Protocols.SpringIn do
 
           elapsed = :erlang.monotonic_time(:millisecond) - start
 
+          command = if state.last_message_invalid, do: "INVALID", else: command
+
           :telemetry.execute([:spring, :in], %{duration: elapsed, count: 1}, %{
             command: command
           })
@@ -106,7 +108,7 @@ defmodule Teiserver.Protocols.SpringIn do
       throw("nil state returned while handling: #{data}")
     end
 
-    %{state | last_msg: System.system_time(:second)}
+    %{state | last_msg: System.system_time(:second), last_message_invalid: false}
   end
 
   defp _clean(nil), do: nil
@@ -1384,7 +1386,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
     Logger.info(msg)
     reply(:servermsg, msg, msg_id, state)
-    state
+    %{state | last_message_invalid: true}
   end
 
   @spec deny(map(), String.t()) :: map()
