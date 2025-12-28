@@ -21,7 +21,7 @@ PGPASSWORD = "123456789"
 [tasks."setup:db"]
 depends = ["pg:start"]
 description = "Sets up the application database"
-run = "mix do ecto.drop, ecto.setup"
+run = "mix do ecto.drop + ecto.setup"
 
 [tasks."setup:deps"]
 run = "mix deps.get"
