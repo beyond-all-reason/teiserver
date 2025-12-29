@@ -92,4 +92,12 @@ defmodule Teiserver.KvStore.KvStoreTest do
     assert KV.get("test_store1", "key2") == nil
     assert KV.get("test_store2", "key1") == nil
   end
+
+  test "delete_many with empty list doesn't do anything" do
+    :ok = KV.put("test_store1", "key1", "val1")
+
+    KV.delete_many([])
+
+    assert KV.get("test_store1", "key1") != nil
+  end
 end
