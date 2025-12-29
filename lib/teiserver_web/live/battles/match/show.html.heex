@@ -184,7 +184,10 @@
                   </td>
 
                   <td style={"background-color: #{rgba_css m.user.colour};"}>
-                    <a href={~p"/profile/#{m.user_id}"} style="text-decoration: none; color: inherit;">
+                    <a 
+                      href={~p"/profile/#{m.user_id}"} 
+                      style="text-decoration: none; color: inherit;"
+                    >
                       {m.user.name}
                     </a>
                   </td>
@@ -342,7 +345,10 @@
                       <Fontawesome.icon icon={m.user.icon} style="" />
                     </td>
                     <td style={"background-color: #{rgba_css m.user.colour};"}>
-                      <a href={~p"/profile/#{m.user_id}"} style="text-decoration: none; color: inherit;">
+                      <a 
+                        href={~p"/profile/#{m.user_id}"} 
+                        style="text-decoration: none; color: inherit;"
+                      >
                         {m.user.name}
                       </a>
                     </td>
@@ -444,7 +450,10 @@
                   {party_colour, party_idx} = Map.get(@parties, m.party_id, {nil, nil}) %>
                   <tr>
                     <td>
-                      <a href={~p"/profile/#{m.user_id}"} style="text-decoration: none; color: inherit;">
+                      <a 
+                        href={~p"/profile/#{m.user_id}"} 
+                        style="text-decoration: none; color: inherit;"
+                      >
                         {m.user.name}
                       </a>
                     </td>
