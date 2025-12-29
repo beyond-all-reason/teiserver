@@ -20,6 +20,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     "Partied Team"
   ]
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO Remove "Team" from here once the split is done
 
   @spec rating_type_list() :: [String.t()]

@@ -631,6 +631,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/create", "request", _msg_id, msg, state) do
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: the `lobby/update` has very similar logic. There should be a way
     # to combine the parsing
     create_data = %{

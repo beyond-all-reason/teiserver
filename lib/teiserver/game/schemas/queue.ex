@@ -9,6 +9,7 @@ defmodule Teiserver.Game.Queue do
   """
   use TeiserverWeb, :schema
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: this type is incomplete
   @type t :: %__MODULE__{
           name: String.t(),

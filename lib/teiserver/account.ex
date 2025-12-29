@@ -2217,6 +2217,7 @@ defmodule Teiserver.Account do
   @spec update_client(T.userid(), map()) :: nil | :ok
   defdelegate update_client(userid, partial_client), to: ClientLib
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: Remove these in favour of update_client
   @spec merge_update_client(map()) :: nil | :ok
   defdelegate merge_update_client(client), to: ClientLib

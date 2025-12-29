@@ -133,6 +133,7 @@ IGNORELISTEND\n"
     assert reply == "SAIDPRIVATE #{user2.name} What about now?\n"
   end
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: Make this work
   # test "SAYPRIVATE with special characters", %{socket: socket1, user: user} = context do
   #   user2 = new_user()

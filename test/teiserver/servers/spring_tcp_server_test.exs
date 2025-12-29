@@ -300,6 +300,7 @@ defmodule Teiserver.SpringTcpServerTest do
            }
 
     assert r == "CLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{lobby_id + 1} #{u1.name}\n"
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: Find out why the below doesn't happen
     # assert r == "LEFTBATTLE #{lobby_id} #{u1.name}\nJOINEDBATTLE #{lobby_id + 1} #{u1.name}\n"
 
@@ -332,6 +333,7 @@ defmodule Teiserver.SpringTcpServerTest do
     :timer.sleep(500)
     r = _recv_raw(socket)
 
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: Sometimes this fails for no apparent reason, unable to reproduce since the above
     # 500 sleep call but I seem to recall that previously not helping
     expected =

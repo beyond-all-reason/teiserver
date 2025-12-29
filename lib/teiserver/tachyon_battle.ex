@@ -41,6 +41,7 @@ defmodule Teiserver.TachyonBattle do
           {:ok, T.id(), pid()} | {:error, term()}
   def start_battle_process(autohost_id, match_id) do
     battle_id = gen_id()
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: handle potential errors, like "already registered"
     case TachyonBattle.Supervisor.start_battle(battle_id, match_id, autohost_id) do
       {:ok, pid} ->

@@ -176,6 +176,7 @@ defmodule Teiserver.Lobby do
       }
     )
 
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: Depreciate this
     if client != nil and client.protocol == :spring do
       send(client.tcp_pid, {:force_join_battle, lobby_id, script_password})
@@ -514,6 +515,7 @@ defmodule Teiserver.Lobby do
               {:failure, "Battle closed"}
 
             host_client ->
+              # credo:disable-for-next-line Credo.Check.Design.TagTODO
               # TODO: Depreciate
               send(host_client.tcp_pid, {:request_user_join_lobby, userid})
 
@@ -604,6 +606,7 @@ defmodule Teiserver.Lobby do
     client = Client.get_client_by_id(userid)
 
     if client != nil and client.protocol == :spring do
+      # credo:disable-for-next-line Credo.Check.Design.TagTODO
       # TODO: SpringLegacy depreciation
       send(client.tcp_pid, {:join_battle_request_response, lobby_id, :accept, nil})
     end
@@ -643,6 +646,7 @@ defmodule Teiserver.Lobby do
     client = Client.get_client_by_id(userid)
 
     if client do
+      # credo:disable-for-next-line Credo.Check.Design.TagTODO
       # TODO: Depreciate
       send(client.tcp_pid, {:join_battle_request_response, lobby_id, :deny, reason})
     end
