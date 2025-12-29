@@ -23,7 +23,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: mix format
+    name: Lint and style checks
 
     steps:
     - name: Checkout code
