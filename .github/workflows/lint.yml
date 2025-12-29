@@ -1,8 +1,3 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Lint and style checks
 
 on:
@@ -13,8 +8,8 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
 
-# Sets the ENV `MIX_ENV` to `test` for running tests
 env:
+  # Ensure we're fetching the right dependencies for continuous integration
   MIX_ENV: test
 
 permissions:
@@ -64,15 +59,11 @@ jobs:
         restore-keys: |
           ${{ env.cache-name }}
 
-    # Step: Download project dependencies. If unchanged, uses
-    # the cached version.
     - name: Install dependencies
       run: mix deps.get
 
-    # Step: Compile the current project. If unchanged, uses
-    # the cached version.
-    - name: Install dependencies
+    - name: Compile the project
       run: mix compile
 
-    - name: mix format
+    - name: Ensure Elixir code is formatted # https://hexdocs.pm/mix/Mix.Tasks.Format.html
       run: mix format --check-formatted
