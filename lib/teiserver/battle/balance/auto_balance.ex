@@ -87,7 +87,7 @@ defmodule Teiserver.Battle.Balance.AutoBalance do
   # If the top two players are in the same party, this will return true
   @spec has_op_party?([DB.player()]) :: boolean()
   def has_op_party?(players) do
-    if(Enum.count(players) >= 2) do
+    if Enum.count(players) >= 2 do
       sorted_players =
         Enum.sort_by(
           players,

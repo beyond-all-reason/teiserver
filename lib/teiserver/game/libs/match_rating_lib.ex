@@ -754,7 +754,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   defp save_rating_logs(match_id, win_ratings, loss_ratings, opts) do
     rerate? = Keyword.get(opts, :rerate?, false)
 
-    if(rerate?) do
+    if rerate? do
       Ecto.Multi.new()
       |> Ecto.Multi.run(:delete_existing, fn repo, _ ->
         query = """

@@ -525,10 +525,7 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("user/unsubscribeUpdates", "request", _message_id, msg, state) do
     {ok_ids, invalid_ids} = TachyonParser.parse_user_ids(msg["data"]["userIds"])
 
-    if not Enum.empty?(invalid_ids) do
-      details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
-      {:error_response, :invalid_request, details, state}
-    else
+    if Enum.empty?(invalid_ids) do
       case Player.Session.unsubscribe_updates(state.user.id, ok_ids) do
         :ok ->
           {:response, state}
@@ -537,6 +534,9 @@ defmodule Teiserver.Player.TachyonHandler do
           details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
           {:error_response, :invalid_request, details, state}
       end
+    else
+      details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
+      {:error_response, :invalid_request, details, state}
     end
   end
 

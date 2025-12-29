@@ -505,7 +505,7 @@ defmodule Teiserver.CacheUser do
                   false
               end
 
-            if not has_ai, do: "!cv joinas spec", else: message
+            if has_ai, do: message, else: "!cv joinas spec"
 
           ["!callvote", "joinas" | _] ->
             has_ai =
@@ -517,7 +517,7 @@ defmodule Teiserver.CacheUser do
                   false
               end
 
-            if not has_ai, do: "!callvote joinas spec", else: message
+            if has_ai, do: message, else: "!callvote joinas spec"
 
           ["!joinas" | _] ->
             "!joinas spec"

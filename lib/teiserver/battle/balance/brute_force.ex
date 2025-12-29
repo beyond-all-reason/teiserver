@@ -132,7 +132,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec get_st_dev([BF.player()]) :: any()
   def get_st_dev(team) do
-    if(length(team) > 0) do
+    if length(team) > 0 do
       ratings = Enum.map(team, fn player -> player.rating end)
       Statistics.stdev(ratings)
     else
@@ -142,7 +142,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec get_captain_rating([BF.player()]) :: any()
   def get_captain_rating(team) do
-    if(length(team) > 0) do
+    if length(team) > 0 do
       captain = Enum.max_by(team, fn player -> player.rating end, &>=/2)
       captain.rating
     else

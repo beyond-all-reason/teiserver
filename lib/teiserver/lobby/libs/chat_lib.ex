@@ -23,11 +23,11 @@ defmodule Teiserver.Lobby.ChatLib do
         |> case do
           ["!cv", "joinas" | _] ->
             has_ai = Battle.get_bots(lobby_id) |> Enum.any?()
-            if not has_ai, do: "!cv joinas spec", else: msg
+            if has_ai, do: msg, else: "!cv joinas spec"
 
           ["!callvote", "joinas" | _] ->
             has_ai = Battle.get_bots(lobby_id) |> Enum.any?()
-            if not has_ai, do: "!callvote joinas spec", else: msg
+            if has_ai, do: msg, else: "!callvote joinas spec"
 
           ["!joinas" | _] ->
             "!joinas spec"
