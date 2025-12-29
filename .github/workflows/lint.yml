@@ -37,35 +37,32 @@ jobs:
 
     - name: Setup Elixir and Erlang
       uses: erlef/setup-beam@v1
+      id: setup-beam
       with:
         otp-version: ${{ steps.versions.outputs.erlang }}
         elixir-version: ${{ steps.versions.outputs.elixir }}
 
-    # Step: Define how to cache deps. Restores existing cache if present.
-    - name: Cache deps
+    - name: Cache dependencies
       id: cache-deps
       uses: actions/cache@v4
       env:
-        cache-name: cache-elixir-deps
+        cache-name: cache-deps-${{ runner.os }}-${{ steps.setup-beam.outputs.otp-version }}-${{ steps.setup-beam.outputs.elixir-version }}-
       with:
         path: deps
-        key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
+        key: ${{ env.cache-name }}${{ hashFiles('**/mix.lock') }}
         restore-keys: |
-          ${{ runner.os }}-mix-${{ env.cache-name }}-
+          ${{ env.cache-name }}
 
-    # Step: Define how to cache the `_build` directory. After the first run,
-    # this speeds up tests runs a lot. This includes not re-compiling our
-    # project's downloaded deps every run.
     - name: Cache compiled build
       id: cache-build
       uses: actions/cache@v4
       env:
-        cache-name: cache-compiled-build
+        cache-name: cache-build-${{ runner.os }}-${{ steps.setup-beam.outputs.otp-version }}-${{ steps.setup-beam.outputs.elixir-version }}-
       with:
         path: _build
-        key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
+        key: ${{ env.cache-name }}${{ hashFiles('**/mix.lock') }}
         restore-keys: |
-          ${{ runner.os }}-mix-${{ env.cache-name }}-
+          ${{ env.cache-name }}
 
     # Step: Download project dependencies. If unchanged, uses
     # the cached version.
