@@ -65,6 +65,9 @@ jobs:
     - name: Find unused dependencies # https://hexdocs.pm/mix/Mix.Tasks.Deps.Unlock.html
       run: mix deps.unlock --check-unused
 
+    - name: Check for retired dependencies # https://hexdocs.pm/hex/Mix.Tasks.Hex.Audit.html
+      run: mix hex.audit
+
     - name: Ensure Elixir code is formatted # https://hexdocs.pm/mix/Mix.Tasks.Format.html
       run: mix format --check-formatted
 
