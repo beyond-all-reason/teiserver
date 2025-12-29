@@ -86,6 +86,8 @@ defmodule Teiserver.KvStore.Queries do
   end
 
   @spec delete_many([{store :: String.t(), key :: String.t()}]) :: non_neg_integer()
+  def delete_many([]), do: 0
+
   def delete_many(keys) do
     Enum.reduce(keys, Blob, fn {store, k}, q ->
       from blob in q, or_where: blob.store == ^store and blob.key == ^k
