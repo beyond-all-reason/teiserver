@@ -38,9 +38,12 @@ defmodule Teiserver.Party do
     Party.Supervisor.start_party_from_snapshot(id, serialized_state)
   end
 
-  @spec rejoin(id(), T.userid(), pid() | nil) ::
+  @spec rejoin(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :not_a_member}
   def rejoin(party_id, user_id), do: rejoin(party_id, user_id, self())
+
+  @spec rejoin(id(), T.userid(), pid() | nil) ::
+          {:ok, state()} | {:error, :invalid_party | :not_a_member}
   defdelegate rejoin(party_id, user_id, pid), to: Party.Server
 
   @spec lookup(id()) :: pid() | nil

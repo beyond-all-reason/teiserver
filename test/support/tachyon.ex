@@ -4,6 +4,7 @@ defmodule Teiserver.Support.Tachyon do
 
   def tachyon_case_setup(tags) do
     if String.contains?(to_string(tags[:module]), "Tachyon") || tags[:tachyon] do
+      Teiserver.Tachyon.disable_state_restoration()
       Teiserver.Tachyon.restart_system()
 
       # this reduces the noise when processes attempt to do sql when the test

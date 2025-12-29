@@ -60,7 +60,8 @@ defmodule Teiserver.Party.Server do
   To be called when the system is starting up and recovering from a restart.
   The player has to already be in the party (member or invited).
   """
-  @spec rejoin(id(), T.userid(), pid() | nil) :: :ok | {:error, :invalid_party | :not_a_member}
+  @spec rejoin(id(), T.userid(), pid() | nil) ::
+          {:ok, state()} | {:error, :invalid_party | :not_a_member}
   def rejoin(party_id, user_id, pid \\ self()) do
     :gen_statem.call(via_tuple(party_id), {:rejoin, user_id, pid}, 5000)
   catch
