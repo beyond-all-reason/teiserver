@@ -563,12 +563,39 @@ defmodule Teiserver.Player.Session do
     user = Account.get_user!(snapshot.user_id)
 
     state = initial_empty_state(user)
-    broadcast_user_update!(user, :menu)
 
-    Logger.debug("session restored from snapshot")
+    case restore_parties(state, snapshot.party) do
+      {:ok, state} ->
+        broadcast_user_update!(user, :menu)
 
-    {:ok, _} = :timer.send_after(@connection_timeout, :connection_timeout)
-    {:noreply, state}
+        Logger.debug("session restored from snapshot")
+
+        {:ok, _} = :timer.send_after(@connection_timeout, :connection_timeout)
+        {:noreply, state}
+
+      {:error, err} ->
+        Logger.warning("Could not restore session: #{inspect(err)}")
+        {:stop, :normal}
+    end
+  end
+
+  defp restore_parties(state, snap) when snap.current_party == nil, do: {:ok, state}
+
+  defp restore_parties(state, party_snapshot) do
+    # TODO: need to also handle the invites
+    case Party.rejoin(party_snapshot.current_party, state.user.id) do
+      {:ok, party_state} ->
+        state =
+          state
+          |> put_in([:party, :current_party], party_state.id)
+          |> put_in([:party, :version], party_state.version)
+          |> Map.update!(:monitors, &MC.monitor(&1, party_state.pid, :current_party))
+
+        {:ok, state}
+
+      x ->
+        x
+    end
   end
 
   @impl true
@@ -583,11 +610,12 @@ defmodule Teiserver.Player.Session do
 
     {current_party, invited_to} = get_party_states(state.party)
 
-    party_state = %{
-      version: if(current_party == nil, do: nil, else: current_party.version),
-      current_party: if(current_party == nil, do: nil, else: current_party.id),
-      invited_to: Enum.map(invited_to, fn st -> {st.version, st.id} end)
-    }
+    party_state =
+      %{
+        version: if(current_party == nil, do: nil, else: current_party.version),
+        current_party: if(current_party == nil, do: nil, else: current_party.id),
+        invited_to: Enum.map(invited_to, fn st -> {st.version, st.id} end)
+      }
 
     new_state = %{state | conn_pid: new_conn_pid, monitors: monitors, party: party_state}
 
@@ -1806,7 +1834,12 @@ defmodule Teiserver.Player.Session do
     tasks =
       Enum.map(ids, fn id ->
         Task.async(fn ->
-          if id == nil, do: nil, else: Party.get_state(id)
+          if id == nil do
+            nil
+          else
+            Party.get_state(id)
+            |> Map.take([:id, :version, :members, :invited, :matchmaking])
+          end
         end)
       end)
 
