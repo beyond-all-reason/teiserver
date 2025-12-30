@@ -28,9 +28,6 @@ You will need to install:
 
 Make sure that you have the correct version of Elixir (currently using 1.19.4) and Erlang OTP (currently 26.2.5.1). You can find the dependency requirement [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
 
-> [!TIP]
-> You can use [asdf](https://github.com/asdf-vm/asdf) to install the correct version, it will be picked up from the file `.tool-versions`.
-
 ### Install build tools (gcc, g++, make) and cryptographic libraries
 
 #### Ubuntu/Debian
