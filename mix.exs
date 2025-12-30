@@ -105,6 +105,7 @@ defmodule Teiserver.MixProject do
       {:excoveralls, "~> 0.15.3", only: :test, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4.7", only: [:dev, :test], runtime: false},
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:dart_sass, "~> 0.7", only: [:dev]},
       {:tzdata, "~> 1.1.2"},
       {:ex_ulid, "~> 0.1.0"},
