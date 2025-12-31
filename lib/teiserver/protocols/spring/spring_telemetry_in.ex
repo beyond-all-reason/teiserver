@@ -6,6 +6,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   # import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: Less nested hackyness
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("upload_infolog", data, msg_id, state) do
@@ -174,6 +175,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           case Spring.decode_value(value64) do
             {:ok, _value} ->
               if state.userid do
+                # credo:disable-for-next-line Credo.Check.Design.TagTODO
                 # TODO: Do stuff with live client events
                 # Telemetry.log_live_client_event(state.userid, event_name, value)
                 # for now, they're prefixed with underscores to silence warnings

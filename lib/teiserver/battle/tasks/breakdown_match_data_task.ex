@@ -96,6 +96,7 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
       |> Enum.frequencies()
       |> Map.new()
 
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: change this to be based on data["player_count"]
     # we were not tracking player count as a separate number so can't be done yet
     weighted_count =

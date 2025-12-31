@@ -75,6 +75,7 @@ defmodule TeiserverWeb.Live.ClientTest do
       assert html =~ "Battle:"
 
       # Log out the user
+      # credo:disable-for-next-line Credo.Check.Design.TagFIXME
       # FIXME: this part is failing because the liveview subscribes to old pubsubs
       _send_raw(socket, "EXIT\n")
       assert_redirect(view, "/teiserver/admin/client", 250)

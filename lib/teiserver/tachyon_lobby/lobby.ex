@@ -628,7 +628,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       # the player back into an ally team. Although they may end up in a different ally team
       # it is largely useless, so for simplicity sake, ignore the join_queue command
       is_map_key(state.players, user_id) and
-          Enum.count(state.spectators, fn {_, s} -> s.join_queue_position != nil end) == 0 ->
+          Enum.all?(state.spectators, fn {_, s} -> s.join_queue_position == nil end) ->
         {:reply, :ok, state}
 
       # swap the player with the first in the join queue

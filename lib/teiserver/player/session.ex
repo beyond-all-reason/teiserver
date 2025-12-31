@@ -78,6 +78,7 @@ defmodule Teiserver.Player.Session do
           lobby_list_subscription: nil | %{counter: non_neg_integer()}
         }
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: would be better to have that as a db setting, perhaps passed as an
   # argument to init()
   @messaging_buffer_size 200
@@ -1200,6 +1201,7 @@ defmodule Teiserver.Player.Session do
           MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
           |> MC.monitor(battle_pid, {:battle, battle_id})
 
+        # credo:disable-for-next-line Credo.Check.Design.TagTODO
         # TODO: this should ideally come from an engine event, but in first approximation it'll do
         broadcast_user_update!(state.user, :playing)
 
@@ -1241,9 +1243,9 @@ defmodule Teiserver.Player.Session do
         }
 
         state = send_to_player(state, {:battle_start, data})
-
         monitors = MC.monitor(state.monitors, battle_pid, {:battle, battle_id})
 
+        # credo:disable-for-next-line Credo.Check.Design.TagTODO
         # TODO: this should ideally come from an engine event, but in first approximation it'll do
         broadcast_user_update!(state.user, :playing)
 
@@ -1633,6 +1635,7 @@ defmodule Teiserver.Player.Session do
   end
 
   defp leave_all_queues(queues_to_leave, state) do
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO tachyon_mvp: leaving queue ignore failure there.
     # It is a bit unclear what kind of failure can happen, and also
     # what should be done in that case
@@ -1649,6 +1652,7 @@ defmodule Teiserver.Player.Session do
   end
 
   defp send_to_player(state, message) do
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO tachyon_mvp: what should server do if the connection is down at that time?
     # The best is likely to store it and send the notification upon reconnection
     if state.conn_pid != nil do
@@ -1686,6 +1690,7 @@ defmodule Teiserver.Player.Session do
       nil ->
         broadcast_user_update!(user, :offline)
 
+      # credo:disable-for-next-line Credo.Check.Design.TagTODO
       # TODO: needs to store a monitor in the state to handle the case where the
       # session dies before it can process this message.
       pid ->

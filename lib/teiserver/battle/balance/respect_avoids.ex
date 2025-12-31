@@ -193,7 +193,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   end
 
   defp get_party_logs(state) do
-    if(Enum.count(state.parties) > 0) do
+    if Enum.count(state.parties) > 0 do
       state.parties
       |> Enum.map(fn party ->
         player_names =
@@ -273,7 +273,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
 
   @spec get_result(RA.state()) :: RA.result() | RA.simple_result()
   def get_result(state) do
-    if(Enum.empty?(state.parties) && Enum.empty?(state.avoids)) do
+    if Enum.empty?(state.parties) && Enum.empty?(state.avoids) do
       do_simple_draft(state)
     else
       do_brute_force_and_draft(state)
@@ -339,7 +339,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
     first_team_pick_priority = get_pick_priority(first_team)
     second_team_pick_priority = get_pick_priority(second_team)
 
-    if(first_team_pick_priority > second_team_pick_priority) do
+    if first_team_pick_priority > second_team_pick_priority do
       :first_team
     else
       :second_team
@@ -433,7 +433,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   # This will not be displayed in chobby ui or player list; it's only used for balance
   # It will be used when calculating team deviation
   defp adjusted_rating(rating, uncertainty, rank) do
-    if(is_newish_player?(rank, uncertainty)) do
+    if is_newish_player?(rank, uncertainty) do
       # For newish players we assume they are the worst in the lobby e.g. 0 match rating and
       # then they converge to their true rating over time
       # Once their uncertainty is low enough, we fully trust their rating

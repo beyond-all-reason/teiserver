@@ -1408,6 +1408,7 @@ defmodule Teiserver.SpringTcpServer do
       # > Received `Packet`s are delivered as lists of bytes,
       mode: :list,
 
+      # credo:disable-for-next-line Credo.Check.Design.TagFIXME
       # FIXME: This looks sketchy!
       # Why don't we verify the certificate when we do a TLS upgrade?
       verify: :verify_none

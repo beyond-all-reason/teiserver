@@ -468,6 +468,7 @@ defmodule Teiserver.Battle do
     already_finished? = match.finished != nil
     winning_ally_team = List.first(winning_ally_teams)
 
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO Currently trusting the first received event, should be reworked to accept what the majority agrees on
     if winning_ally_team != nil && match.winning_team != nil &&
          winning_ally_team != match.winning_team do
@@ -619,6 +620,7 @@ defmodule Teiserver.Battle do
             # because the bot itself is in a new lobby since the last one finished
             script_tags = data["battleContext"]["scriptTags"]
 
+            # credo:disable-for-next-line Credo.Check.Design.TagTODO
             # TODO the server/match/id is legacy and should be removed
             # After updating Teiserver, there may be some ongoing matches with the legacy tags
             id = script_tags["game/server_match_id"] || script_tags["server/match/id"]

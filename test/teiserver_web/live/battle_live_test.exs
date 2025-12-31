@@ -134,6 +134,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
       # Currently we don't show spectators, we just want to ensure it doesn't crash
       _html = render(view)
+      # credo:disable-for-next-line Credo.Check.Design.TagTODO
       # TODO: handle showing of spectators
 
       # # Team 0

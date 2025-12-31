@@ -443,6 +443,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   end
 
   defp do_handle(%{command: "modparty", senderid: senderid, remaining: targets} = _cmd, state) do
+    # credo:disable-for-lines:9 Credo.Check.Warning.UnusedEnumOperation
     targets
     |> String.split(" ")
     |> Enum.map(fn name ->

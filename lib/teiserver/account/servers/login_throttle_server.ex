@@ -351,6 +351,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
             {key, new_queue}
           end)
 
+        # credo:disable-for-next-line Credo.Check.Design.TagFIXME
         # FIXME: Waited for counter can be here with the now_ms value
         new_heartbeats = Map.drop(state.heartbeats, released_users)
 

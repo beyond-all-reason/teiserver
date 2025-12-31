@@ -43,12 +43,12 @@ defmodule Teiserver.Account.WeekOnWeekReport do
         previous_key = {week - 1, weekday}
         previous_value = data_map[previous_key]
 
-        if previous_value not in [nil, 0] do
+        if previous_value in [nil, 0] do
+          {key, nil}
+        else
           delta = NumberHelper.percent(this_value / previous_value) - 100
 
           {key, delta}
-        else
-          {key, nil}
         end
       end)
 
@@ -80,12 +80,12 @@ defmodule Teiserver.Account.WeekOnWeekReport do
         previous_key = key - 1
         previous_value = week_data[previous_key]
 
-        if previous_value not in [nil, 0] do
+        if previous_value in [nil, 0] do
+          {key, nil}
+        else
           delta = NumberHelper.percent(this_value / previous_value) - 100
 
           {key, delta}
-        else
-          {key, nil}
         end
       end)
 

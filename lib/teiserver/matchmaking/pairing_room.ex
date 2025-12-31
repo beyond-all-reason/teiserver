@@ -53,6 +53,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   """
   def timeout(room_pid), do: send(room_pid, :timeout)
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO tachyon_mvp: transform this state into a simple state machine when
   # adding the step to setup the match (finding host and sending start script
   # to every player)
@@ -279,6 +280,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     end
   end
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO implement some smarter engine/game selection logic here in the future, get first for now
   @spec select_engine([%{version: String.t()}]) :: %{version: String.t()}
   def select_engine(engines) do

@@ -23,6 +23,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
   @type start_response :: %{ips: [String.t()], port: integer()}
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: there should be some kind of retry here
   @spec start_battle(Bot.id(), Teiserver.TachyonBattle.id(), Teiserver.Autohost.start_script()) ::
           {:ok, start_response()} | {:error, term()}
@@ -167,6 +168,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
            current_battles: current
          }) do
       {:error, {:already_registered, _pid}} ->
+        # credo:disable-for-next-line Credo.Check.Design.TagTODO
         # TODO: maybe we should handle that by disconnecting the existing one?
         {:stop, :normal, state}
 
@@ -227,6 +229,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
   @impl true
   def handle_response("autohost/subscribeUpdates", _, _response, state) do
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: handle potential failure here
     # for example, autohost refuses any subscription with `since` older than 5 minutes
     {:ok, state}

@@ -49,6 +49,7 @@ defmodule Teiserver.Matchmaking.Algo.BruteforceFilter do
   # we could also stretch it if the member's skill is at one extreme of
   # the distribution
   defp acceptable_win_proba(%Member{} = _member) do
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: actually do something based on the member
     {0.3, 0.7}
   end
