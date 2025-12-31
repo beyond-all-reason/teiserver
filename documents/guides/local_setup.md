@@ -17,6 +17,15 @@ with `mise pg:start` and `mise pg:stop`.
 - Set up the encryption certificates.
 - Create and migrate the development and test databases for teiserver.
 
+> [!WARNING]  
+> Mise is not self contained, it will compile erlang *and* postgres from source,
+> which takes some time, and requires you have a bunch of base libraries and
+> compilers installed in your system. See a list in the [postgres mise-plugin dependencies](https://github.com/mise-plugins/mise-postgres?tab=readme-ov-file#dependencies).
+> 
+> If you don't want to pollute your base system with all those libraries, you
+> can consider development in [Distrobox](https://distrobox.it/) which allows
+> you to easily fully delete it after you are done.
+
 ## Manual setup
 
 ### Install services
