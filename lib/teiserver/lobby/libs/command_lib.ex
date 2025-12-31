@@ -38,6 +38,7 @@ defmodule Teiserver.Lobby.CommandLib do
 
     lookup =
       module_list
+      # credo:disable-for-lines:14 Credo.Check.Refactor.FilterFilter
       |> Enum.filter(fn m ->
         m |> Module.split() |> Enum.take(3) == ["Teiserver", "Lobby", "Commands"]
       end)

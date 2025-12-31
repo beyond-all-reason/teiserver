@@ -24,6 +24,7 @@ defmodule Teiserver.Bridge.CommandLib do
 
     lookup =
       module_list
+      # credo:disable-for-lines:17 Credo.Check.Refactor.FilterFilter
       |> Enum.filter(fn m ->
         m |> Module.split() |> Enum.take(3) == ["Teiserver", "Bridge", "Commands"]
       end)

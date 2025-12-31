@@ -70,6 +70,7 @@ defmodule Teiserver.CacheUser do
     |> String.replace(~r/[[:alnum:]]/, "")
     |> String.graphemes()
     |> Enum.frequencies()
+    # credo:disable-for-lines:2 Credo.Check.Refactor.FilterCount
     |> Enum.filter(fn {_, val} -> val > 2 end)
     |> Enum.count()
     |> Kernel.>(0)

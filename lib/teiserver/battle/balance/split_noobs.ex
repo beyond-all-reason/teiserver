@@ -139,6 +139,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     if Enum.empty?(parties) do
       "None"
     else
+      # credo:disable-for-lines:4 Credo.Check.Refactor.MapJoin
       Enum.map(parties, fn party ->
         "(#{Enum.join(party, ", ")})"
       end)
@@ -240,6 +241,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
 
     logs = [
       "Perform brute force with the following players to get the best score.",
+      # credo:disable-for-next-line Credo.Check.Refactor.MapJoin
       "Players: #{Enum.join(Enum.map(state.top_experienced, fn x -> log_player(x) end), ", ")}",
       @splitter,
       "Brute force result:",
@@ -250,6 +252,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
       "Score: #{format(combo_result.score)} (lower is better)",
       @splitter,
       "Draft remaining players (ordered from best to worst).",
+      # credo:disable-for-next-line Credo.Check.Refactor.MapJoin
       "Remaining: #{Enum.join(Enum.map(remaining, fn x -> log_player(x) end), ", ")}"
     ]
 

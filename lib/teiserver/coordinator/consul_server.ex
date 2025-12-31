@@ -1289,6 +1289,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       _ ->
         member_list
         |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+        # credo:disable-for-lines:2 Credo.Check.Refactor.FilterFilter
         |> Enum.filter(fn client -> client != nil end)
         |> Enum.filter(fn client -> client.lobby_id == lobby_id end)
     end

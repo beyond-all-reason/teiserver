@@ -256,6 +256,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec log_parties([[String.t()]]) :: String.t()
   def log_parties(parties) do
+    # credo:disable-for-lines:4 Credo.Check.Refactor.MapJoin
     Enum.map(parties, fn party ->
       "[#{Enum.join(party, ", ")}]"
     end)
@@ -264,6 +265,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec log_team([BF.player()]) :: String.t()
   defp log_team(team) do
+    # credo:disable-for-lines:4 Credo.Check.Refactor.MapJoin
     Enum.map(team, fn x ->
       x.name
     end)

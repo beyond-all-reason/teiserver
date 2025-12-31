@@ -126,6 +126,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
         :bruteforce_filter -> Algo.BruteforceFilter
       end
 
+    # credo:disable-for-next-line Credo.Check.Refactor.Apply
     alg_state = apply(alg_module, :init, [attrs.team_size, attrs.team_count])
 
     %{
@@ -640,6 +641,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @spec match_members(state()) :: :no_match | {:match, [[[Member.t()]]]}
   def match_members(state) do
     {alg_module, alg_state} = state.queue.algo
+    # credo:disable-for-next-line Credo.Check.Refactor.Apply
     apply(alg_module, :get_matches, [state.members, alg_state])
   end
 
