@@ -68,6 +68,9 @@ jobs:
     - name: Check for retired dependencies # https://hexdocs.pm/hex/Mix.Tasks.Hex.Audit.html
       run: mix hex.audit
 
+    - name: Check for vulnerable dependencies # https://github.com/mirego/mix_audit
+      run: mix deps.audit
+
     - name: Ensure Elixir code is formatted # https://hexdocs.pm/mix/Mix.Tasks.Format.html
       run: mix format --check-formatted
 
