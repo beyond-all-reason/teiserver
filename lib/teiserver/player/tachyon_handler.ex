@@ -327,6 +327,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("messaging/send", "request", _message_id, msg, state) do
+    # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
     with {:ok, target} <- message_target_from_tachyon(msg["data"]["target"]) do
       case target do
         {:player, _} ->

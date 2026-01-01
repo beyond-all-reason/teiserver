@@ -88,6 +88,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
   def do_handle("decline_invite_to_party", data, msg_id, state) do
     cmd_id = "c.party.decline_invite_to_party"
 
+    # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
     with [party_id] <- String.split(data) |> Enum.map(&String.trim/1) do
       # no need to unsubscribe here because it'll be done when handling the
       # :invite_cancelled event

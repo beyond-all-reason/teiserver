@@ -120,6 +120,7 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   def _recv_lines(), do: _recv_lines(1)
+  # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
   def _recv_lines(:until_timeout), do: _recv_lines(99999)
 
   def _recv_lines(lines) do

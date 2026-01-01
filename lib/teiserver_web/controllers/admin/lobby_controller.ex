@@ -108,6 +108,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
 
     {page, page_size} =
       if params["page"] == "all" do
+        # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
         {0, 10000}
       else
         {Map.get(params, "page", 0)

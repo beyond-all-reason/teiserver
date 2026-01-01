@@ -11,6 +11,7 @@ defmodule Teiserver.Telemetry.TelemetryLib do
 
   @spec get_totals_and_reset :: map()
   def get_totals_and_reset() do
+    # credo:disable-for-next-line Credo.Check.Readability.PreferImplicitTry
     try do
       GenServer.call(TelemetryServer, :get_totals_and_reset)
       # In certain situations (e.g. just after startup) it can be
