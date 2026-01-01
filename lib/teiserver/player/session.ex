@@ -579,22 +579,62 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  defp restore_parties(state, snap) when snap.current_party == nil, do: {:ok, state}
-
   defp restore_parties(state, party_snapshot) do
-    # TODO: need to also handle the invites
-    case Party.rejoin(party_snapshot.current_party, state.user.id) do
-      {:ok, party_state} ->
-        state =
-          state
-          |> put_in([:party, :current_party], party_state.id)
-          |> put_in([:party, :version], party_state.version)
-          |> Map.update!(:monitors, &MC.monitor(&1, party_state.pid, :current_party))
+    with {:ok, state} <- rejoin_current_party(state, party_snapshot) do
+      rejoin_invite_parties(state, party_snapshot)
+    end
+  end
 
-        {:ok, state}
+  defp rejoin_current_party(state, party_snapshot) do
+    if party_snapshot.current_party == nil do
+      {:ok, state}
+    else
+      case Party.rejoin(party_snapshot.current_party, state.user.id) do
+        {:ok, party_state} ->
+          state =
+            state
+            |> put_in([:party, :current_party], party_state.id)
+            |> put_in([:party, :version], party_state.version)
+            |> Map.update!(:monitors, &MC.monitor(&1, party_state.pid, :current_party))
 
-      x ->
-        x
+          {:ok, state}
+
+        x ->
+          x
+      end
+    end
+  end
+
+  defp rejoin_invite_parties(state, party_snapshot) do
+    result =
+      Enum.reduce_while(party_snapshot.invited_to, state, fn {_, id}, state ->
+        case Party.rejoin(id, state.user.id) do
+          {:ok, party_state} ->
+            state =
+              state
+              |> update_in([:party, :invited_to], fn invites ->
+                [{party_state.version, id} | invites]
+              end)
+              |> Map.update!(
+                :monitors,
+                &MC.monitor(&1, party_state.pid, {:invited_to_party, id})
+              )
+
+            {:cont, state}
+
+          x ->
+            # for simplicity, "undo" everything, even if not yet there
+            for id <- party_snapshot.invited_ids do
+              MC.demonitor_by_val(state.monitors, {:invited_to_party, id})
+            end
+
+            {:halt, x}
+        end
+      end)
+
+    case result do
+      {:error, err} -> {:error, err}
+      st -> {:ok, st}
     end
   end
 
