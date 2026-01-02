@@ -1,5 +1,4 @@
 [
-  {"lib/central/input_helper.ex", :guard_fail},
   {"lib/teiserver.ex", :invalid_contract},
   {"lib/teiserver/account.ex", :unknown_type},
   {"lib/teiserver/account.ex", :invalid_contract},
