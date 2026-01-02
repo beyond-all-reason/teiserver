@@ -778,6 +778,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # Battles
   # OPENBATTLE type natType password port maxPlayers gameHash rank mapHash {engineName} {engineVersion} {map} {title} {gameName}
+  # credo:disable-for-previous-line Credo.Check.Readability.MaxLineLength
   defp do_handle("OPENBATTLE", data, msg_id, state) do
     response =
       case Regex.run(

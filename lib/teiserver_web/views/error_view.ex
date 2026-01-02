@@ -30,15 +30,6 @@ defmodule TeiserverWeb.ErrorView do
 
   def render("500.html", %{reason: _} = error) do
     case error.reason do
-      #       %Decimal.Error{message: "Error converting decimal value of " <> v} ->
-      #         render "500_graceful.html", Map.merge(error, %{
-      #           msg: "The system tried converting some text into a number: #{v}. Unfortunately the system isn't sure how to convert this. If you can spot the issue then hit the back button and try again.",
-      #           info: """
-      # error: #{error.reason |> Kernel.inspect}
-      # value: #{v}
-      # """
-      #         })
-
       %Timex.Parse.ParseError{message: "Expected" <> _v} ->
         render(
           "500_graceful.html",
