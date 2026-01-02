@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.SmurfKeyType do
   use TeiserverWeb, :schema
 
-  schema "teiserver_account_smurf_key_types" do
+  typed_schema "teiserver_account_smurf_key_types" do
     field :name, :string
   end
 

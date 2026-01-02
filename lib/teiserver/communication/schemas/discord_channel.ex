@@ -2,7 +2,7 @@ defmodule Teiserver.Communication.DiscordChannel do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "communication_discord_channels" do
+  typed_schema "communication_discord_channels" do
     field :name, :string
     field :channel_id, :integer
 

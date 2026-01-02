@@ -13,7 +13,7 @@ defmodule Teiserver.Clans.Clan do
           homepage: String.t()
         }
 
-  schema "teiserver_clans" do
+  typed_schema "teiserver_clans" do
     field :name, :string
     field :tag, :string
 

@@ -2,7 +2,7 @@ defmodule Teiserver.Account.UserToken do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "account_user_tokens" do
+  typed_schema "account_user_tokens" do
     field :value, :string
     field :user_agent, :string
     field :ip, :string

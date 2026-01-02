@@ -17,7 +17,7 @@ defmodule Teiserver.OAuth.Application do
           updated_at: DateTime.t()
         }
 
-  schema "oauth_applications" do
+  typed_schema "oauth_applications" do
     field :name, :string
     belongs_to :owner, Teiserver.Account.User, primary_key: true
     field :uid, :string

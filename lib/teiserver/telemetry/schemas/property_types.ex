@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.PropertyType do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "telemetry_property_types" do
+  typed_schema "telemetry_property_types" do
     field :name, :string
   end
 

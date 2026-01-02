@@ -10,7 +10,7 @@ defmodule Teiserver.KvStore.Blob do
         }
 
   @primary_key false
-  schema "blob" do
+  typed_schema "blob" do
     field :store, :string, primary_key: true
     field :key, :string, primary_key: true
     field :value, :binary

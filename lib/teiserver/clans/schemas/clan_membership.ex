@@ -10,7 +10,7 @@ defmodule Teiserver.Clans.ClanMembership do
         }
 
   @primary_key false
-  schema "teiserver_clan_memberships" do
+  typed_schema "teiserver_clan_memberships" do
     field :role, :string
 
     belongs_to :user, Teiserver.Account.User, primary_key: true

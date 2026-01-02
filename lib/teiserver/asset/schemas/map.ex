@@ -11,7 +11,7 @@ defmodule Teiserver.Asset.Map do
         }
 
   @primary_key {:spring_name, :string, autogenerate: false}
-  schema "asset_maps" do
+  typed_schema "asset_maps" do
     field :display_name, :string
     # this is not using a normalised representation for simplicity, because
     # we'll never have thousands of maps in these array

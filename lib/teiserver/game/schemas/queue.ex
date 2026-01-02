@@ -22,7 +22,7 @@ defmodule Teiserver.Game.Queue do
           map_list: list(String.t())
         }
 
-  schema "teiserver_game_queues" do
+  typed_schema "teiserver_game_queues" do
     field :name, :string
     field :team_size, :integer
     field :team_count, :integer, default: 2

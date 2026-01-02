@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.Infolog do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "telemetry_infologs" do
+  typed_schema "telemetry_infologs" do
     field :user_hash, :string
     belongs_to :user, Teiserver.Account.User
     field :log_type, :string

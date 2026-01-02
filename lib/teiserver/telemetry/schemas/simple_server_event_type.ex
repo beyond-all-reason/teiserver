@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.SimpleServerEventType do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "telemetry_simple_server_event_types" do
+  typed_schema "telemetry_simple_server_event_types" do
     field :name, :string
   end
 

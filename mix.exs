@@ -110,6 +110,8 @@ defmodule Teiserver.MixProject do
       {:tzdata, "~> 1.1.2"},
       {:ex_ulid, "~> 0.1.0"},
       {:mock, "~> 0.3.0", only: :test},
+      # Provides a DSL on top of Ecto.Schema to define schemas with typespecs without all the boilerplate code.
+      {:typed_ecto_schema, "~> 0.4.3", runtime: false},
 
       # Teiserver libs
       {:openskill,

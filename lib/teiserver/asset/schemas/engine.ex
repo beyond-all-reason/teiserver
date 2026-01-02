@@ -14,7 +14,7 @@ defmodule Teiserver.Asset.Engine do
           updated_at: DateTime.t()
         }
 
-  schema "asset_engines" do
+  typed_schema "asset_engines" do
     field :name, :string
     field :in_matchmaking, :boolean
     timestamps()

@@ -3,7 +3,7 @@ defmodule Teiserver.Moderation.Action do
   use TeiserverWeb, :schema
   alias Teiserver.Helper.TimexHelper
 
-  schema "moderation_actions" do
+  typed_schema "moderation_actions" do
     belongs_to :target, Teiserver.Account.User
     field :reason, :string
     field :appeal_status, :string

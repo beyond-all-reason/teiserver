@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.BadgeType do
   use TeiserverWeb, :schema
 
-  schema "teiserver_account_badge_types" do
+  typed_schema "teiserver_account_badge_types" do
     field :name, :string
     field :icon, :string
     field :colour, :string

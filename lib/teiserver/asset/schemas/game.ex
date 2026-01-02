@@ -14,7 +14,7 @@ defmodule Teiserver.Asset.Game do
           updated_at: DateTime.t()
         }
 
-  schema "asset_games" do
+  typed_schema "asset_games" do
     field :name, :string
     field :in_matchmaking, :boolean
     timestamps()

@@ -8,7 +8,7 @@ defmodule Teiserver.Config.SiteConfig do
         }
 
   @primary_key false
-  schema "config_site" do
+  typed_schema "config_site" do
     field :key, :string, primary_key: true
     field :value, :string
 

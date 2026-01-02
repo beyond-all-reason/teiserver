@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.ComplexAnonEvent do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "telemetry_complex_anon_events" do
+  typed_schema "telemetry_complex_anon_events" do
     field :hash, :string
     belongs_to :event_type, Teiserver.Telemetry.ComplexClientEventType
 

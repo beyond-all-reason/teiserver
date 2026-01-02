@@ -12,7 +12,7 @@ defmodule Teiserver.OAuth.Credential do
           hashed_secret: binary()
         }
 
-  schema "oauth_credentials" do
+  typed_schema "oauth_credentials" do
     belongs_to :application, OAuth.Application
     belongs_to :bot, Teiserver.Bot.Bot, primary_key: true
     field :client_id, :string

@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.ComplexClientEvent do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "telemetry_complex_client_events" do
+  typed_schema "telemetry_complex_client_events" do
     belongs_to :user, Teiserver.Account.User
     belongs_to :event_type, Teiserver.Telemetry.ComplexClientEventType
 

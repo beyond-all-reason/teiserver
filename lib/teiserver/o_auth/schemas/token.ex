@@ -17,7 +17,7 @@ defmodule Teiserver.OAuth.Token do
           bot: Teiserver.Bot.Bot.t()
         }
 
-  schema "oauth_tokens" do
+  typed_schema "oauth_tokens" do
     field :value, :string
     belongs_to :owner, Teiserver.Account.User
     belongs_to :application, OAuth.Application, primary_key: true

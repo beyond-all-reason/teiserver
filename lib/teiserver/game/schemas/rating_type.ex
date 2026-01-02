@@ -8,7 +8,7 @@ defmodule Teiserver.Game.RatingType do
           icon: String.t()
         }
 
-  schema "teiserver_game_rating_types" do
+  typed_schema "teiserver_game_rating_types" do
     field :name, :string
     field :colour, :string
     field :icon, :string

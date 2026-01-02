@@ -16,7 +16,7 @@ defmodule Teiserver.OAuth.Code do
           challenge_method: :plain | :S256 | nil
         }
 
-  schema "oauth_codes" do
+  typed_schema "oauth_codes" do
     field :value, :string
     belongs_to :owner, Teiserver.Account.User, primary_key: true
     belongs_to :application, OAuth.Application, primary_key: true

@@ -3,7 +3,7 @@ defmodule Teiserver.Microblog.Upload do
   use TeiserverWeb, :schema
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
-  schema "microblog_uploads" do
+  typed_schema "microblog_uploads" do
     belongs_to :uploader, Teiserver.Account.User
 
     field :filename, :string

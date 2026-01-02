@@ -8,7 +8,7 @@ defmodule Teiserver.Bot.Bot do
           name: String.t()
         }
 
-  schema "teiserver_bots" do
+  typed_schema "teiserver_bots" do
     field :name, :string
 
     timestamps(type: :utc_datetime)
