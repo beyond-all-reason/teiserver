@@ -87,6 +87,7 @@ defmodule Mix.Tasks.Teiserver.SeasonalUncertaintyResetTask do
       end)
       |> Teiserver.Repo.transaction()
 
+    # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
     with {:ok, result} <- sql_transaction_result do
       time_taken = System.system_time(:millisecond) - start_time
 

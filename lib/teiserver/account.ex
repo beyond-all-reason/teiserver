@@ -1941,6 +1941,7 @@ defmodule Teiserver.Account do
 
         existing_request ->
           # Auto-accept the existing request
+          # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
           with :ok <- FriendRequestLib.accept_friend_request(existing_request) do
             # Send pubsub broadcasts for both users to update UI
             PubSub.broadcast(

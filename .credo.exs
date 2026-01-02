@@ -15,7 +15,19 @@
         # TODO: Enable this check by deleting the line below, then fix the issues
         {Credo.Check.Refactor.CyclomaticComplexity, false},
         # TODO: Enable this check by deleting the line below, then fix the issues
-        {Credo.Check.Refactor.CondStatements, false}
+        {Credo.Check.Refactor.CondStatements, false},
+        # TODO: Enable this check by deleting the line below, then fix the issues
+        {Credo.Check.Readability.ParenthesesOnZeroArityDefs, false},
+        # TODO: Enable this check by deleting the line below, then fix the issues
+        {Credo.Check.Readability.AliasOrder, false},
+        # TODO: Enable this check by deleting the line below, then fix the issues
+        {Credo.Check.Readability.ModuleDoc, false},
+        # TODO: Enable this check by deleting the line below, then fix the issues
+        {Credo.Check.Readability.UnnecessaryAliasExpansion, false},
+        # TODO: Enable this check by deleting the line below, then fix the issues
+        {Credo.Check.Readability.PredicateFunctionNames, false},
+        # TODO: Enable this check by deleting the line below, then fix the issues
+        {Credo.Check.Readability.MaxLineLength, false}
       ]
     }
   ]

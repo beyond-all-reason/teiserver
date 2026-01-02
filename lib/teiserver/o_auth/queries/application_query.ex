@@ -21,6 +21,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   def get_application_by_id(nil), do: nil
 
   def get_application_by_id(id) do
+    # credo:disable-for-next-line Credo.Check.Readability.PreferImplicitTry
     try do
       base_query() |> preload(:owner) |> where_id(id) |> Repo.one()
     rescue

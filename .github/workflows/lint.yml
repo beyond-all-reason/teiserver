@@ -77,6 +77,5 @@ jobs:
     - name: Compile the project
       run: mix compile
 
-    # TODO: We need to ignore issues we haven't addressed yet.
     - name: Lint Elixir code to enforce code consistency # https://hexdocs.pm/credo/
-      run: mix credo --ignore Readability
+      run: mix credo
