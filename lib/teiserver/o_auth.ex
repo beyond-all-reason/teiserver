@@ -410,7 +410,7 @@ defmodule Teiserver.OAuth do
       application_id: app_id,
       bot_id: bot_id,
       client_id: client_id,
-      hashed_secret: Argon2.hash_pwd_salt(secret)
+      hashed_secret: secret
     }
 
     result =
