@@ -34,6 +34,11 @@ defmodule Teiserver.Protocols.SpringIn do
 
   @action_commands ~w(SAY SAYEX SAYPRIVATE SAYBATTLE SAYBATTLEPRIVATEEX JOINBATTLE LEAVEBATTLE)
 
+  # Commands that don't require the user to be logged in
+  @unauthenticated_commands ~w(
+    PING STLS LOGIN REGISTER CONFIRMAGREEMENT RESETPASSWORDREQUEST EXIT CHANGEPASSWORD c.telemetry.upload_infolog
+  )
+
   @spec data_in(String.t(), map()) :: map()
   def data_in(data, state) do
     if Config.get_site_config_cache("debug.Print incoming messages") or
@@ -81,22 +86,30 @@ defmodule Teiserver.Protocols.SpringIn do
     state =
       case tuple do
         {command, data, msg_id} ->
-          start = :erlang.monotonic_time(:millisecond)
+          if command not in @unauthenticated_commands and state.userid == nil do
+            Logger.info("Unauthenticated command '#{command} #{data}' from #{state.ip}")
 
-          state = do_handle(command, data, msg_id, state)
+            reply(:denied, "Unauthenticated", msg_id, state)
 
-          elapsed = :erlang.monotonic_time(:millisecond) - start
-
-          command = if state.last_message_invalid, do: "INVALID", else: command
-
-          :telemetry.execute([:spring, :in], %{duration: elapsed, count: 1}, %{
-            command: command
-          })
-
-          if Enum.member?(@action_commands, command) do
-            Map.put(state, :last_action_timestamp, System.system_time(:second))
-          else
             state
+          else
+            start = :erlang.monotonic_time(:millisecond)
+
+            state = do_handle(command, data, msg_id, state)
+
+            elapsed = :erlang.monotonic_time(:millisecond) - start
+
+            command = if state.last_message_invalid, do: "INVALID", else: command
+
+            :telemetry.execute([:spring, :in], %{duration: elapsed, count: 1}, %{
+              command: command
+            })
+
+            if Enum.member?(@action_commands, command) do
+              Map.put(state, :last_action_timestamp, System.system_time(:second))
+            else
+              state
+            end
           end
 
         nil ->
