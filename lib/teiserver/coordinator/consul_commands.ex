@@ -446,15 +446,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
               balance.time_taken < 1000 ->
                 "Time taken: #{balance.time_taken}us"
 
-              # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
-              balance.time_taken < 1000_000 ->
+              balance.time_taken < 1_000_000 ->
                 t = round(balance.time_taken / 1000)
                 "Time taken: #{t}ms"
 
-              # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
-              balance.time_taken < 1000_000_000 ->
-                # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
-                t = round(balance.time_taken / 1000_000)
+              balance.time_taken < 1_000_000_000 ->
+                t = round(balance.time_taken / 1_000_000)
                 "Time taken: #{t}s"
             end
 
