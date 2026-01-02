@@ -95,7 +95,8 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       export_data["players"]
       |> Map.new(fn stats -> {stats["accountId"], stats["win"] == 1} end)
 
-    # If users renamed after the start of the match but before it gets processed they couldn't be matched to their teamStats
+    # If users renamed after the start of the match but before it gets processed they couldn't be matched
+    # to their teamStats
     name_map =
       export_data["players"]
       |> Map.new(fn stats -> {stats["accountId"], stats["name"]} end)

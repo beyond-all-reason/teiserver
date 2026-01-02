@@ -29,10 +29,6 @@ defmodule Teiserver.CacheUser do
     do:
       ~w(id name password email inserted_at clan_id permissions colour icon smurf_of_id last_login last_played last_logout roles discord_id)a
 
-  # This is the version of keys with the extra fields we're going to be moving from data to the object itself
-  # def keys(),
-  #   do: ~w(id name email inserted_at clan_id permissions colour icon smurf_of_id roles restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id)a
-
   @data_keys [
     :rank,
     :country,
