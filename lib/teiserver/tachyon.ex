@@ -11,4 +11,13 @@ defmodule Teiserver.Tachyon do
 
   @spec should_restore_state?() :: boolean()
   defdelegate should_restore_state?(), to: Config
+
+  @spec get_restoration_timeout() :: non_neg_integer()
+  defdelegate get_restoration_timeout(), to: Config
+
+  @spec set_restoration_timeout(non_neg_integer()) :: :ok
+  defdelegate set_restoration_timeout(t), to: Config
+
+  @spec reset_restoration_timeout() :: :ok
+  defdelegate reset_restoration_timeout(), to: Config
 end
