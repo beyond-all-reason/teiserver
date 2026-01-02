@@ -74,6 +74,22 @@ defmodule Teiserver.Party.PartyTest do
 
       {:ok, _} = Party.rejoin(party_id, 456)
     end
+
+    test "timeout if no rejoin in time" do
+      sink_pid = mk_sink()
+      {:ok, party_id, _party_pid} = Party.create_party(123, sink_pid)
+      Process.exit(sink_pid, :shutdown)
+
+      Teiserver.Tachyon.set_restoration_timeout(0)
+      ExUnit.Callbacks.on_exit(fn -> Teiserver.Tachyon.reset_restoration_timeout() end)
+
+      Teiserver.Tachyon.restart_system()
+      # we are going to assume that 2ms is enough time for the party to be restored
+      # and then timeout. The actual restoration logic is already tested earlier in
+      # this file so assume it works
+      :timer.sleep(2)
+      Polling.poll_until_nil(fn -> Teiserver.Party.lookup(party_id) end)
+    end
   end
 
   def setup_config(_) do

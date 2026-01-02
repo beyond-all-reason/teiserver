@@ -11,6 +11,7 @@ defmodule Teiserver.Party.Server do
   alias Teiserver.Player
   alias Teiserver.Matchmaking
   alias Teiserver.Messaging
+  alias Teiserver.Tachyon
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
 
@@ -239,9 +240,10 @@ defmodule Teiserver.Party.Server do
       matchmaking: nil
     }
 
-    # TODO: set a state timeout to tear down everything if stays in :starting_up
-    # for too long
-    {:ok, :starting_up, data}
+    timeout = Tachyon.get_restoration_timeout()
+    actions = [{:state_timeout, timeout, :snapshot_timeout}]
+
+    {:ok, :starting_up, data, actions}
   end
 
   @impl :gen_statem
@@ -578,6 +580,11 @@ defmodule Teiserver.Party.Server do
     {:keep_state, data, [:postpone]}
   end
 
+  def handle_event(:state_timeout, :snapshot_timeout, :starting_up, data) do
+    Logger.warning("failed to recover before time out. Missing #{inspect(data.ids_to_rejoin)}")
+    {:stop, :normal}
+  end
+
   @impl :gen_statem
   def terminate(:shutdown, :shutting_down, data) do
     # by that time, the party should have received all the :shutdown signals
@@ -585,7 +592,7 @@ defmodule Teiserver.Party.Server do
       MapSet.size(data.ids_to_rejoin) != Enum.count(data.members) + Enum.count(data.invited) ->
         Logger.warning("Missing ids to rejoin, refusing to snapshot invalid state")
 
-      Teiserver.Tachyon.should_restore_state?() ->
+      Tachyon.should_restore_state?() ->
         to_save =
           data
           |> Map.take([:version, :members, :ids_to_rejoin, :invited])
