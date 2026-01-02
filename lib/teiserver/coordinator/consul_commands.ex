@@ -283,6 +283,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     else
       lines =
         state.last_seen_map
+        # credo:disable-for-lines:6 Credo.Check.Refactor.FilterFilter
         |> Enum.filter(fn {userid, seen_at} ->
           Enum.member?(lobby.players, userid) and now - seen_at > min_diff_ms
         end)

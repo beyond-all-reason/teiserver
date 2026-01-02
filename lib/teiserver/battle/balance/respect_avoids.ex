@@ -195,6 +195,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   defp get_party_logs(state) do
     if Enum.count(state.parties) > 0 do
       state.parties
+      # credo:disable-for-lines:9 Credo.Check.Refactor.MapJoin
       |> Enum.map(fn party ->
         player_names =
           Enum.map(party, fn x ->
@@ -291,6 +292,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
 
     logs = [
       "Perform brute force with the following players to get the best score.",
+      # credo:disable-for-next-line Credo.Check.Refactor.MapJoin
       "Players: #{Enum.join(Enum.map(state.top_experienced, fn x -> x.name end), ", ")}",
       @splitter,
       "Brute force result:",
@@ -301,6 +303,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
       "Score: #{format(combo_result.score)} (lower is better)",
       @splitter,
       "Draft remaining players (ordered from best to worst).",
+      # credo:disable-for-next-line Credo.Check.Refactor.MapJoin
       "Remaining: #{Enum.join(Enum.map(remaining, fn x -> x.name end), ", ")}"
     ]
 

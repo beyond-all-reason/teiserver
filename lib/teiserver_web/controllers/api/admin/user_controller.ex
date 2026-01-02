@@ -128,6 +128,7 @@ defmodule TeiserverWeb.API.Admin.UserController do
 
   defp format_changeset_errors(changeset) do
     changeset.errors
+    # credo:disable-for-lines:2 Credo.Check.Refactor.MapJoin
     |> Enum.map(fn {field, {message, _}} -> "#{field}: #{message}" end)
     |> Enum.join(", ")
   end

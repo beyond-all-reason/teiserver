@@ -71,6 +71,7 @@ defmodule Teiserver.Battle.Balance.AutoBalance do
 
   @spec get_parties_count([BT.expanded_group()]) :: number()
   def get_parties_count(expanded_group) do
+    # credo:disable-for-lines:4 Credo.Check.Refactor.FilterCount
     Enum.filter(expanded_group, fn x ->
       x[:count] >= 2
     end)

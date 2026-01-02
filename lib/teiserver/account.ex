@@ -1928,9 +1928,7 @@ defmodule Teiserver.Account do
   def create_friend_request(from_user_id, to_user_id) do
     {allowed, reason} = can_send_friend_request_with_reason?(from_user_id, to_user_id)
 
-    if not allowed do
-      {:error, reason}
-    else
+    if allowed do
       # Check for auto-accept scenario
       case get_friend_request(to_user_id, from_user_id) do
         nil ->
@@ -1990,6 +1988,8 @@ defmodule Teiserver.Account do
               {:error, reason}
           end
       end
+    else
+      {:error, reason}
     end
   end
 

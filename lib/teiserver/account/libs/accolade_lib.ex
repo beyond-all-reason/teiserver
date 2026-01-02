@@ -287,6 +287,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
     teammate_ids =
       memberships
+      # credo:disable-for-lines:2 Credo.Check.Refactor.FilterFilter
       |> Enum.filter(fn m -> m.team_id == their_membership.team_id and m.user_id != userid end)
       |> Enum.filter(fn m -> allow_accolades_for_user?(m.user_id) end)
       |> Enum.map(fn m -> m.user_id end)

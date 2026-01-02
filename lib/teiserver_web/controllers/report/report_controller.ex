@@ -91,6 +91,7 @@ defmodule TeiserverWeb.Report.ReportController do
           raise "No handler for name of '#{name}'"
       end
 
+    # credo:disable-for-next-line Credo.Check.Refactor.Apply
     if allow?(conn.assigns.current_user, apply(module, :permissions, [])) do
       assigns =
         case module.run(conn, params) do
