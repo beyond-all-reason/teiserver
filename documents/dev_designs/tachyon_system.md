@@ -63,6 +63,28 @@ sequenceDiagram
     Session ->> Session: wait until timeout
 ```
 
+## Reconnection and state restoration after node restart
+
+When the node goes down, if the site config `tachyon.should-restore-state` is set to true,
+then processes will attempt to store part of their state when terminating with `:shutdown` reason.
+At startup, these snapshots are then used to recreate the process and bootstrap them.
+This process is not meant to recover from a crash of teiserver, only graceful shutdown are supported.
+
+The sessions and parties currently implement this logic.
+When a party detect a member is `DOWN` with a `:shutdown` reason, it itself enters a shutdown
+state where it will freeze its own state, waiting for its turn to shut down.
+At startup, parties are set up before sessions. The process will wait for a short duration
+for session to rejoin the party. When a session restarts, it then connects to the relevant
+parties. This allows every process to re-setup their monitors and synchronise their states
+before being fully ready.
+
+None of that requires the actual player connection to come back and thus should be fairly
+quick and predictable.
+
+Unfortunately, this logic is rather custom to all the relevant process, there is no
+generic solution to automatically restore state.
+
+
 ## Autohosts
 
 Autohosts connects to the server and are ready to be summoned to host a game by a lobby.
