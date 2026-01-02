@@ -129,6 +129,10 @@ defmodule Teiserver.Account do
   end
 
   def user_stat_query(id, args) do
+    if id == nil and args[:search] == nil do
+      raise ArgumentError, "user_stat_query called without either user id or search parameters"
+    end
+
     UserStatLib.query_user_stats()
     |> UserStatLib.search(%{user_id: id})
     |> UserStatLib.search(args[:search])
