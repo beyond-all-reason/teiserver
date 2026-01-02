@@ -289,7 +289,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
       |> Map.get(:name)
 
     cond do
-      state.ranked == false ->
+      not state.ranked and not Config.get_site_config_cache("lobby.Unranked lobby restrictions") ->
         {:error, "You cannot set a limit if the lobby is unranked"}
 
       allwelcome_name?(name) ->
