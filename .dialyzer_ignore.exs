@@ -1,5 +1,4 @@
 [
-  {"lib/teiserver.ex", :invalid_contract},
   {"lib/teiserver/account.ex", :unknown_type},
   {"lib/teiserver/account.ex", :invalid_contract},
   # This started after inverting a condition in an `if/else` statement. It's hard to fix with all the other ignored warnings here.
