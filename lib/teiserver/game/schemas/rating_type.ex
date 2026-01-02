@@ -1,13 +1,6 @@
 defmodule Teiserver.Game.RatingType do
   use TeiserverWeb, :schema
 
-  @type t() :: %__MODULE__{
-          id: integer(),
-          name: String.t(),
-          colour: String.t(),
-          icon: String.t()
-        }
-
   typed_schema "teiserver_game_rating_types" do
     field :name, :string
     field :colour, :string

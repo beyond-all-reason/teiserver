@@ -14,15 +14,6 @@ defmodule Teiserver.Microblog.Upload do
   end
 
   @type id :: Ecto.UUID.t()
-  @type t :: %__MODULE__{
-          id: id(),
-          uploader: Teiserver.Account.User.t(),
-          filename: String.t(),
-          type: String.t(),
-          file_size: integer(),
-          inserted_at: DateTime.t(),
-          updated_at: DateTime.t()
-        }
 
   @required_fields ~w(uploader_id filename type file_size)a
   @optional_fields ~w()a

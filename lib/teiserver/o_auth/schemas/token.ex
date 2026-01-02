@@ -3,19 +3,6 @@ defmodule Teiserver.OAuth.Token do
   use TeiserverWeb, :schema
 
   alias Teiserver.OAuth
-  alias Teiserver.Account.User
-
-  @type t :: %__MODULE__{
-          value: String.t(),
-          owner: User.t(),
-          application: OAuth.Application.t(),
-          scopes: OAuth.Application.scopes(),
-          original_scopes: OAuth.Application.scopes(),
-          expires_at: DateTime.t(),
-          type: :access | :refresh,
-          refresh_token: t() | nil,
-          bot: Teiserver.Bot.Bot.t()
-        }
 
   typed_schema "oauth_tokens" do
     field :value, :string

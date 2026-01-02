@@ -1,14 +1,6 @@
 defmodule Teiserver.Clans.ClanMembership do
   use TeiserverWeb, :schema
 
-  # credo:disable-for-next-line Credo.Check.Design.TagTODO
-  # TODO: this type is incomplete
-  @type t :: %__MODULE__{
-          role: String.t(),
-          user: any(),
-          clan: any()
-        }
-
   @primary_key false
   typed_schema "teiserver_clan_memberships" do
     field :role, :string

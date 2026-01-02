@@ -1,17 +1,6 @@
 defmodule Teiserver.Account.Rating do
   use TeiserverWeb, :schema
 
-  @type t() :: %__MODULE__{
-          rating_type: Teiserver.Game.RatingType.t(),
-          season: integer(),
-          rating_value: number(),
-          skill: number(),
-          uncertainty: number(),
-          leaderboard_rating: number(),
-          num_matches: non_neg_integer(),
-          num_wins: non_neg_integer()
-        }
-
   @primary_key false
   typed_schema "teiserver_account_ratings" do
     belongs_to :user, Teiserver.Account.User, primary_key: true

@@ -1,14 +1,6 @@
 defmodule Teiserver.KvStore.Blob do
   use TeiserverWeb, :schema
 
-  @type t :: %__MODULE__{
-          store: String.t(),
-          key: String.t(),
-          value: binary(),
-          inserted_at: DateTime.t(),
-          updated_at: DateTime.t()
-        }
-
   @primary_key false
   typed_schema "blob" do
     field :store, :string, primary_key: true

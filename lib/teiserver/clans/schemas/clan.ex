@@ -1,18 +1,6 @@
 defmodule Teiserver.Clans.Clan do
   use TeiserverWeb, :schema
 
-  # credo:disable-for-next-line Credo.Check.Design.TagTODO
-  # TODO: this type is incomplete
-  @type t :: %__MODULE__{
-          name: String.t(),
-          tag: String.t(),
-          colour: String.t(),
-          icon: String.t(),
-          description: String.t(),
-          rating: String.t(),
-          homepage: String.t()
-        }
-
   typed_schema "teiserver_clans" do
     field :name, :string
     field :tag, :string

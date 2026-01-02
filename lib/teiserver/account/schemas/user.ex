@@ -5,10 +5,6 @@ defmodule Teiserver.Account.User do
 
   alias Argon2
 
-  # credo:disable-for-next-line Credo.Check.Design.TagTODO
-  # TODO: this is where a user should be defined. This is only a placeholder for now
-  @type t :: term()
-
   typed_schema "account_users" do
     field :name, :string
     field :email, :string

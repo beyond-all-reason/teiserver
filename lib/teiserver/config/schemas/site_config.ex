@@ -2,11 +2,6 @@ defmodule Teiserver.Config.SiteConfig do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  @type t :: %__MODULE__{
-          key: String.t(),
-          value: String.t()
-        }
-
   @primary_key false
   typed_schema "config_site" do
     field :key, :string, primary_key: true

@@ -3,10 +3,6 @@ defmodule Teiserver.Bot.Bot do
   use TeiserverWeb, :schema
 
   @type id :: integer()
-  @type t :: %__MODULE__{
-          id: id(),
-          name: String.t()
-        }
 
   typed_schema "teiserver_bots" do
     field :name, :string
