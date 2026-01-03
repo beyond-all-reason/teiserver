@@ -1,0 +1,27 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/clan/invited/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ClanInvitedEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "clan/invited" },
+        "data": {
+            "title": "ClanInvitedEventData",
+            "type": "object",
+            "properties": {
+                "clanBaseData": {
+                    "$ref": "../../definitions/clanBaseData.json"
+                }
+            },
+            "required": ["clanBaseData"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

@@ -1,0 +1,27 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/clan/kicked/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ClanKickedEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "clan/kicked" },
+        "data": {
+            "title": "ClanKickedEventData",
+            "type": "object",
+            "properties": {
+                "clanBaseData": {
+                    "$ref": "../../definitions/clanBaseData.json"
+                }
+            },
+            "required": ["clanBaseData"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

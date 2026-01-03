@@ -1,0 +1,25 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/clan/cancel/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ClanCancelRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "clan/cancel" },
+        "data": {
+            "title": "ClanCancelRequestData",
+            "type": "object",
+            "properties": {
+                "userId": { "$ref": "../../definitions/userId.json" }
+            },
+            "required": ["userId"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

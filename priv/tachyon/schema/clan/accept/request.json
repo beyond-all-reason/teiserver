@@ -1,0 +1,25 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/clan/accept/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ClanAcceptRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "clan/accept" },
+        "data": {
+            "title": "ClanAcceptRequestData",
+            "type": "object",
+            "properties": {
+                "clanId": { "$ref": "../../definitions/clanId.json" }
+            },
+            "required": ["clanId"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}
