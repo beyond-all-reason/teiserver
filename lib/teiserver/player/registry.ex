@@ -36,7 +36,7 @@ defmodule Teiserver.Player.Registry do
 
       {:error, {:already_registered, existing_conn_pid}} ->
         Horde.Registry.unregister(__MODULE__, via_tuple(user_id))
-        Process.send(existing_conn_pid, :force_disconnect, [])
+        Teiserver.Player.TachyonHandler.force_disconnect(existing_conn_pid)
         :timer.sleep(1)
         register_and_kill_existing(user_id)
     end
