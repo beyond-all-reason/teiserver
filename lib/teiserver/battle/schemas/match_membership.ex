@@ -3,7 +3,7 @@ defmodule Teiserver.Battle.MatchMembership do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "teiserver_battle_match_memberships" do
+  typed_schema "teiserver_battle_match_memberships" do
     field :team_id, :integer, default: nil
 
     field :win, :boolean, default: nil

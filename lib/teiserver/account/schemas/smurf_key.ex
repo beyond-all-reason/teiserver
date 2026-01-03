@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.SmurfKey do
   use TeiserverWeb, :schema
 
-  schema "teiserver_account_smurf_keys" do
+  typed_schema "teiserver_account_smurf_keys" do
     belongs_to :user, Teiserver.Account.User
     belongs_to :type, Teiserver.Account.SmurfKeyType
     field :value, :string

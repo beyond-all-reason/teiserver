@@ -2,7 +2,7 @@ defmodule Teiserver.Logging.ServerQuarterLog do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "teiserver_server_quarter_logs" do
+  typed_schema "teiserver_server_quarter_logs" do
     field :year, :integer, primary_key: true
     field :quarter, :integer, primary_key: true
     field :date, :date

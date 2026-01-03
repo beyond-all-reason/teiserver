@@ -3,7 +3,7 @@ defmodule Teiserver.Account.Relationship do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "account_relationships" do
+  typed_schema "account_relationships" do
     belongs_to :from_user, Teiserver.Account.User, primary_key: true
     belongs_to :to_user, Teiserver.Account.User, primary_key: true
 

@@ -3,7 +3,7 @@ defmodule Teiserver.Microblog.PollResponse do
   use TeiserverWeb, :schema
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
-  schema "microblog_poll_responses" do
+  typed_schema "microblog_poll_responses" do
     belongs_to :post, Teiserver.Microblog.Post
     belongs_to :user, Teiserver.Account.User
 

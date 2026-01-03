@@ -2,7 +2,7 @@ defmodule Teiserver.Moderation.Ban do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "moderation_bans" do
+  typed_schema "moderation_bans" do
     belongs_to :source, Teiserver.Account.User
     belongs_to :added_by, Teiserver.Account.User
 

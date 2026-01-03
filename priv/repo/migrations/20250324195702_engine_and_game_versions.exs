@@ -1,6 +1,5 @@
 defmodule Teiserver.Repo.Migrations.EngineAndGameVersions do
   use Ecto.Migration
-  use Ecto.Schema
 
   def change do
     create_if_not_exists table("asset_engines") do

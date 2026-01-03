@@ -2,7 +2,7 @@ defmodule Teiserver.Logging.MatchDayLog do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "teiserver_match_day_logs" do
+  typed_schema "teiserver_match_day_logs" do
     field :date, :date, primary_key: true
     field :data, :map
   end

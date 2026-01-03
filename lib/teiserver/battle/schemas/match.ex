@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.Match do
   use TeiserverWeb, :schema
 
-  schema "teiserver_battle_matches" do
+  typed_schema "teiserver_battle_matches" do
     field :server_uuid, :string
     field :uuid, :string
     field :game_id, :string

@@ -3,7 +3,7 @@ defmodule Teiserver.Telemetry.AnonProperty do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "telemetry_anon_properties" do
+  typed_schema "telemetry_anon_properties" do
     field :hash, :string, primary_key: true
     belongs_to :property_type, Teiserver.Telemetry.PropertyType, primary_key: true
 

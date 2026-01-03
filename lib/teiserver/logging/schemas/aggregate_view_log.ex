@@ -3,7 +3,7 @@ defmodule Teiserver.Logging.AggregateViewLog do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "aggregate_view_logs" do
+  typed_schema "aggregate_view_logs" do
     field :date, :date, primary_key: true
 
     field :total_views, :integer

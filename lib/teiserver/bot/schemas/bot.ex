@@ -3,12 +3,8 @@ defmodule Teiserver.Bot.Bot do
   use TeiserverWeb, :schema
 
   @type id :: integer()
-  @type t :: %__MODULE__{
-          id: id(),
-          name: String.t()
-        }
 
-  schema "teiserver_bots" do
+  typed_schema "teiserver_bots" do
     field :name, :string
 
     timestamps(type: :utc_datetime)

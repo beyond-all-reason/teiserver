@@ -3,7 +3,7 @@ defmodule Teiserver.Microblog.PostTag do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "microblog_post_tags" do
+  typed_schema "microblog_post_tags" do
     belongs_to :post, Teiserver.Microblog.Post, primary_key: true
     belongs_to :tag, Teiserver.Microblog.Tag, primary_key: true
   end

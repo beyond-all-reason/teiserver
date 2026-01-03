@@ -2,7 +2,7 @@ defmodule Teiserver.Logging.ServerMinuteLog do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "teiserver_server_minute_logs" do
+  typed_schema "teiserver_server_minute_logs" do
     field :timestamp, :utc_datetime, primary_key: true
     field :data, :map
   end

@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.SimpleAnonEvent do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "telemetry_simple_anon_events" do
+  typed_schema "telemetry_simple_anon_events" do
     field :hash, :string, primary_key: true
     belongs_to :event_type, Teiserver.Telemetry.SimpleClientEventType
     field :timestamp, :utc_datetime

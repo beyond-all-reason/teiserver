@@ -3,7 +3,7 @@ defmodule Teiserver.Telemetry.UserProperty do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "telemetry_user_properties" do
+  typed_schema "telemetry_user_properties" do
     belongs_to :user, Teiserver.Account.User, primary_key: true
     belongs_to :property_type, Teiserver.Telemetry.PropertyType, primary_key: true
 

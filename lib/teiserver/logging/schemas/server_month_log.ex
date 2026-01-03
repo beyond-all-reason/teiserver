@@ -2,7 +2,7 @@ defmodule Teiserver.Logging.ServerMonthLog do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "teiserver_server_month_logs" do
+  typed_schema "teiserver_server_month_logs" do
     field :year, :integer, primary_key: true
     field :month, :integer, primary_key: true
     field :date, :date

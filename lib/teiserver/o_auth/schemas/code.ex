@@ -3,20 +3,8 @@ defmodule Teiserver.OAuth.Code do
   use TeiserverWeb, :schema
 
   alias Teiserver.OAuth
-  alias Teiserver.Account.User
 
-  @type t :: %__MODULE__{
-          value: String.t(),
-          owner: User.t(),
-          application: OAuth.Application.t(),
-          scopes: OAuth.Application.scopes(),
-          expires_at: DateTime.t(),
-          redirect_uri: String.t() | nil,
-          challenge: String.t() | nil,
-          challenge_method: :plain | :S256 | nil
-        }
-
-  schema "oauth_codes" do
+  typed_schema "oauth_codes" do
     field :value, :string
     belongs_to :owner, Teiserver.Account.User, primary_key: true
     belongs_to :application, OAuth.Application, primary_key: true

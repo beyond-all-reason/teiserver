@@ -1,7 +1,7 @@
 defmodule Teiserver.Game.AchievementType do
   use TeiserverWeb, :schema
 
-  schema "teiserver_achievement_types" do
+  typed_schema "teiserver_achievement_types" do
     field :name, :string
     field :grouping, :string
 

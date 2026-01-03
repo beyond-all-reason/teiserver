@@ -2,7 +2,7 @@ defmodule Teiserver.Microblog.Post do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "microblog_posts" do
+  typed_schema "microblog_posts" do
     belongs_to :poster, Teiserver.Account.User
 
     field :title, :string

@@ -2,7 +2,7 @@ defmodule Teiserver.Moderation.Report do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "moderation_reports" do
+  typed_schema "moderation_reports" do
     belongs_to :reporter, Teiserver.Account.User
     belongs_to :target, Teiserver.Account.User
 

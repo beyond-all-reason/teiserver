@@ -2,7 +2,7 @@ defmodule Teiserver.Moderation.Proposal do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "moderation_proposals" do
+  typed_schema "moderation_proposals" do
     belongs_to :proposer, Teiserver.Account.User
     belongs_to :target, Teiserver.Account.User
     belongs_to :action, Teiserver.Moderation.Action

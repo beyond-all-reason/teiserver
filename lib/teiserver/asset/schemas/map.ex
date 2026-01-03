@@ -1,17 +1,8 @@
 defmodule Teiserver.Asset.Map do
   use TeiserverWeb, :schema
 
-  @type t :: %__MODULE__{
-          spring_name: String.t(),
-          display_name: String.t(),
-          matchmaking_queues: [Teiserver.Matchmaking.queue_id()],
-          thumbnail_url: String.t(),
-          startboxes_set: [map()],
-          modoptions: map()
-        }
-
   @primary_key {:spring_name, :string, autogenerate: false}
-  schema "asset_maps" do
+  typed_schema "asset_maps" do
     field :display_name, :string
     # this is not using a normalised representation for simplicity, because
     # we'll never have thousands of maps in these array

@@ -3,7 +3,7 @@ defmodule Teiserver.Logging.UserActivityDayLog do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "telemetry_user_activity_day_logs" do
+  typed_schema "telemetry_user_activity_day_logs" do
     field :date, :date, primary_key: true
     field :data, :map
   end

@@ -2,7 +2,7 @@ defmodule Teiserver.Chat.DirectMessage do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "direct_messages" do
+  typed_schema "direct_messages" do
     field :content, :string
     field :inserted_at, :utc_datetime
     field :delivered, :boolean, default: false

@@ -1,7 +1,7 @@
 defmodule Teiserver.Chat.PartyMessage do
   use TeiserverWeb, :schema
 
-  schema "teiserver_party_messages" do
+  typed_schema "teiserver_party_messages" do
     field :content, :string
     field :party_id, :string
     field :inserted_at, :utc_datetime

@@ -3,7 +3,7 @@ defmodule Teiserver.Account.Friend do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "account_friends" do
+  typed_schema "account_friends" do
     belongs_to :user1, Teiserver.Account.User, primary_key: true
     belongs_to :user2, Teiserver.Account.User, primary_key: true
 

@@ -3,7 +3,7 @@ defmodule Teiserver.Moderation.Response do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "moderation_responses" do
+  typed_schema "moderation_responses" do
     belongs_to :report, Teiserver.Moderation.Report, primary_key: true
     belongs_to :user, Teiserver.Account.User, primary_key: true
 
