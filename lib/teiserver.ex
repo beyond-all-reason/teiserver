@@ -32,7 +32,7 @@ defmodule Teiserver do
     Teiserver.Account.AccoladeLib.live_debug()
   end
 
-  @spec manually_delete_user(T.userid()) :: {:ok, map()} | {:error, map()}
+  @spec manually_delete_user(T.userid()) :: :ok
   def manually_delete_user(id) do
     Application.put_env(:elixir, :ansi_enabled, true)
     Teiserver.Admin.DeleteUserTask.delete_users([id])

@@ -64,34 +64,34 @@ defmodule Teiserver.Account do
           {:ok, T.user()} | {:error, Ecto.Changeset.t()}
   defdelegate script_create_user(attrs, pass_type \\ :md5_password), to: UserLib
 
-  @spec update_user(User, map) :: {:ok, T.user()} | {:error, Ecto.Changeset}
+  @spec update_user(User.t(), map) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate update_user(user, attrs), to: UserLib
 
-  @spec update_user_plain_password(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  @spec update_user_plain_password(User.t(), map) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate update_user_plain_password(user, attrs), to: UserLib
 
-  @spec update_user_user_form(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  @spec update_user_user_form(User.t(), map) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate update_user_user_form(user, attrs), to: UserLib
 
-  @spec server_limited_update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  @spec server_limited_update_user(User.t(), map) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate server_limited_update_user(user, attrs), to: UserLib
 
-  @spec server_update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  @spec server_update_user(User.t(), map) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate server_update_user(user, attrs), to: UserLib
 
-  @spec script_update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  @spec script_update_user(User.t(), map) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate script_update_user(user, attrs), to: UserLib
 
-  @spec password_reset_update_user(User, map) :: {:ok, User} | {:error, Ecto.Changeset}
+  @spec password_reset_update_user(User.t(), map) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate password_reset_update_user(user, attrs), to: UserLib
 
-  @spec delete_user(User) :: {:ok, User} | {:error, Ecto.Changeset}
+  @spec delete_user(User.t()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate delete_user(user), to: UserLib
 
-  @spec change_user(User) :: Ecto.Changeset
+  @spec change_user(User.t()) :: Ecto.Changeset.t()
   defdelegate change_user(user), to: UserLib
 
-  @spec change_user(User, map) :: Ecto.Changeset
+  @spec change_user(User.t(), map) :: Ecto.Changeset.t()
   defdelegate change_user(user, attrs), to: UserLib
 
   @spec get_user_totp_status(integer) :: :active | :inactive
