@@ -58,7 +58,12 @@ defmodule Teiserver.Player.Registry do
   end
 
   @spec connected_count() :: non_neg_integer()
-  def connected_count(), do: Horde.Registry.count(__MODULE__)
+  def connected_count() do
+    case Horde.Registry.count(__MODULE__) do
+      :undefined -> 0
+      x -> x
+    end
+  end
 
   def child_spec(_) do
     Supervisor.child_spec(Horde.Registry,

@@ -26,7 +26,12 @@ defmodule Teiserver.TachyonLobby.Registry do
   end
 
   @spec count() :: non_neg_integer()
-  def count(), do: Horde.Registry.count(__MODULE__)
+  def count() do
+    case Horde.Registry.count(__MODULE__) do
+      :undefined -> 0
+      x -> x
+    end
+  end
 
   @spec list_lobbies() :: [{Lobby.id(), pid()}]
   def list_lobbies() do
