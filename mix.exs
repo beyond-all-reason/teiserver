@@ -80,6 +80,7 @@ defmodule Teiserver.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:prom_ex, "~> 1.11.0"},
+      {:peep, "~> 3.5.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
