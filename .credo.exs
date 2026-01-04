@@ -25,9 +25,7 @@
         # TODO: Enable this check by deleting the line below, then fix the issues
         {Credo.Check.Readability.UnnecessaryAliasExpansion, false},
         # TODO: Enable this check by deleting the line below, then fix the issues
-        {Credo.Check.Readability.PredicateFunctionNames, false},
-        # TODO: Enable this check by deleting the line below, then fix the issues
-        {Credo.Check.Readability.MaxLineLength, false}
+        {Credo.Check.Readability.PredicateFunctionNames, false}
       ]
     }
   ]

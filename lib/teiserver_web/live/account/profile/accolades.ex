@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
     {unique_giver_count, total_accolades} = AccoladeLib.get_unique_giver_count(viewed_user_id)
 
     # The summary will contain a message for the number of unique users that have gifted this user an accolade.
-    # If someone recieves accolades from the same person their unique count will not increase (but it will still show in the list).
+    # Multiple accolades from the same person won't increase their unique count. They are still in the list though.
     message =
       cond do
         total_accolades == 0 ->

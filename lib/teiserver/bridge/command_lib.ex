@@ -16,8 +16,6 @@ defmodule Teiserver.Bridge.CommandLib do
       Teiserver.store_get(:discord_command_cache, "no_command")
   end
 
-  # Currently moved the command to this lib, need to test to ensure it is added at startup then need to ensure after updating the text callback it updates the commands handled by the bot
-
   @spec cache_discord_commands() :: :ok
   def cache_discord_commands() do
     {:ok, module_list} = :application.get_key(:teiserver, :modules)

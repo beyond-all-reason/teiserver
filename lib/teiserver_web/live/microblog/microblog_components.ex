@@ -160,7 +160,8 @@ defmodule TeiserverWeb.MicroblogComponents do
   attr :post, :map, required: true
 
   def poll_result(assigns) do
-    # This allows us to show empty results even in the event of the cache being empty (e.g. there are no poll responses yet)
+    # This allows us to show empty results even in the event of the cache being empty
+    # (e.g. there are no poll responses yet)
     responses =
       if assigns[:post].poll_result_cache do
         assigns[:post].poll_result_cache

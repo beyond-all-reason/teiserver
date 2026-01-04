@@ -28,10 +28,13 @@ defmodule Teiserver.Battle.Balance.AutoBalance do
         num_players = Enum.count(players)
 
         cond do
-          # respect_avoids keeps parties if it can find a combination where team ratings are similar. It could potentially allow op parties. If there is NOT an op party, respect_avoids is less risky and can be used.
+          # respect_avoids keeps parties if it can find a combination where team ratings are similar. It could
+          # potentially allow op parties. If there is NOT an op party, respect_avoids is less risky and can be used.
           # respect_avoids also treats noobs as worst in lobby.
           num_players <= 16 && !has_op_party?(players) -> RespectAvoids
-          # split_noobs will keep parties together if it can find a combination where team rating is similar and team standard deviation is similar. It can split up op parties if it would result in team standard deviation diff that is too large.
+          # split_noobs will keep parties together if it can find a combination where team rating is similar and team
+          # standard deviation is similar. It can split up op parties if it would result in team standard deviation
+          # diff that is too large.
           has_noobs?(players) -> SplitNoobs
           get_parties_count(expanded_group) >= 1 -> SplitNoobs
           true -> LoserPicks
