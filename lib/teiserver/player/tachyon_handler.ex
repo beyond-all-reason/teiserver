@@ -843,6 +843,15 @@ defmodule Teiserver.Player.TachyonHandler do
     {:response, state}
   end
 
+  # Clan commands: clan/viewList including conversion to tachyon schema
+  def handle_command("clan/viewList", "request", _message_id, _message, state) do
+    clans = Teiserver.Clan.list_clans()
+
+    converted_clans = Enum.map(clans, &convert_clanBaseData_to_tachyon_schema/1)
+
+    {:response, %{clansBaseData: converted_clans}, state}
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
@@ -1207,5 +1216,14 @@ defmodule Teiserver.Player.TachyonHandler do
     else
       %{}
     end
+  end
+
+  # RALA Function to convert clan to Tachyon schema
+  defp convert_clanBaseData_to_tachyon_schema(clan) do
+    %{
+      clanId: clan.id,
+      tag: clan.tag,
+      name: clan.name
+    }
   end
 end
