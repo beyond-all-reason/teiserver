@@ -84,7 +84,6 @@ defmodule Teiserver.Monitoring.Buckets do
     end
   end
 
-  # hack since :gb_trees.larger/2 is only available from otp 27
   defp larger(key, tree) do
     case :gb_trees.iterator_from(key, tree) |> :gb_trees.next() do
       :none -> :none
