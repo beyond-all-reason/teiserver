@@ -48,7 +48,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
       |> assign(:client, client)
       |> assign(:user, user)
       |> assign(:party, nil)
-      |> build_user_lookup
+      |> build_user_lookup()
 
     {:ok, socket}
   end
@@ -70,7 +70,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
         {:noreply,
          socket
          |> add_breadcrumb(
-           name: "#{leader_name |> possessive} party",
+           name: "#{leader_name |> possessive()} party",
            url: "/teiserver/account/parties"
          )
          |> assign(:site_menu_active, "parties")
@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
          |> assign(:user_lookup, %{})
          |> assign(:party_id, party_id)
          |> assign(:party, party)
-         |> build_user_lookup}
+         |> build_user_lookup()}
       else
         {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
       end
@@ -100,7 +100,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     {:noreply,
      socket
      |> assign(:party, new_party)
-     |> build_user_lookup}
+     |> build_user_lookup()}
   end
 
   def handle_info(%{channel: "teiserver_liveview_client:" <> _} = data, socket) do
@@ -112,7 +112,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
           socket
           |> assign(:lobby_user_ids, lobby_user_ids)
-          |> build_user_lookup
+          |> build_user_lookup()
 
         :left_lobby ->
           :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
@@ -157,7 +157,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     {:noreply,
      socket
      |> assign(:lobby_user_ids, extra_ids)
-     |> build_user_lookup}
+     |> build_user_lookup()}
   end
 
   def handle_info(
@@ -169,7 +169,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     {:noreply,
      socket
      |> assign(:lobby_user_ids, extra_ids)
-     |> build_user_lookup}
+     |> build_user_lookup()}
   end
 
   def handle_info(%{channel: "teiserver_lobby_updates"}, socket) do

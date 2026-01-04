@@ -39,7 +39,7 @@ defmodule Teiserver.Microblog.Post do
     params =
       params
       |> trim_strings(~w(title summary contents)a)
-      |> convert_poll_choices
+      |> convert_poll_choices()
 
     struct
     |> cast(

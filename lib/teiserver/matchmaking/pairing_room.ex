@@ -48,6 +48,12 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     :exit, _ -> :ok
   end
 
+  @doc """
+  to be used in test to trigger a pairing timeout
+  """
+  def timeout(room_pid), do: send(room_pid, :timeout)
+
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO tachyon_mvp: transform this state into a simple state machine when
   # adding the step to setup the match (finding host and sending start script
   # to every player)
@@ -243,14 +249,14 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   end
 
   @spec start_script(state(), %{version: String.t()}, String.t(), Asset.Map.t()) ::
-          Teiserver.TachyonBattle.start_script()
+          Teiserver.Autohost.start_script()
   defp start_script(state, engine, game, map) do
     %{
-      engineVersion: engine.version,
-      gameName: game,
-      mapName: map.spring_name,
-      startPosType: :ingame,
-      allyTeams: get_ally_teams(state, map)
+      engine_version: engine.version,
+      game_name: game,
+      map_name: map.spring_name,
+      start_pos_type: :ingame,
+      ally_teams: get_ally_teams(state, map)
     }
   end
 
@@ -267,7 +273,6 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     for {team, startbox} <- Enum.zip(state.readied, startboxes) do
       teams =
         for player <- team do
-          player = player |> Map.drop([:user_id]) |> Map.put(:userId, to_string(player.user_id))
           %{players: [player]}
         end
 
@@ -275,6 +280,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     end
   end
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO implement some smarter engine/game selection logic here in the future, get first for now
   @spec select_engine([%{version: String.t()}]) :: %{version: String.t()}
   def select_engine(engines) do

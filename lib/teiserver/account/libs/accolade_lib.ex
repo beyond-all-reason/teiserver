@@ -283,10 +283,11 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_possible_ratings(T.userid(), [map()]) :: any
   def get_possible_ratings(userid, memberships) do
-    their_membership = Enum.filter(memberships, fn m -> m.user_id == userid end) |> hd
+    their_membership = Enum.filter(memberships, fn m -> m.user_id == userid end) |> hd()
 
     teammate_ids =
       memberships
+      # credo:disable-for-lines:2 Credo.Check.Refactor.FilterFilter
       |> Enum.filter(fn m -> m.team_id == their_membership.team_id and m.user_id != userid end)
       |> Enum.filter(fn m -> allow_accolades_for_user?(m.user_id) end)
       |> Enum.map(fn m -> m.user_id end)
@@ -422,7 +423,7 @@ order by name;"
             end)
             |> Enum.filter(fn p -> p == :ok end)
 
-          rate = (Enum.count(pings) / child_count * 100) |> round
+          rate = (Enum.count(pings) / child_count * 100) |> round()
 
           Logger.info(
             "Out of #{child_count} children, #{Enum.count(pings)} respond to ping (#{rate}%)"

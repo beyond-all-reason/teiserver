@@ -23,7 +23,7 @@ defmodule Teiserver.Account.OpenSkillReport do
         "180 days" -> Timex.today() |> Timex.shift(days: -180) |> Timex.to_datetime()
       end
 
-    uncertainty = params["uncertainty"] |> int_parse
+    uncertainty = params["uncertainty"] |> int_parse()
 
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[params["rating_type"]]
     metric_column_name = convert_metric_name_to_db_column_name(params["metric"])

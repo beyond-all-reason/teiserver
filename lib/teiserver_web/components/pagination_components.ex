@@ -375,6 +375,7 @@ defmodule TeiserverWeb.PaginationComponents do
   # Helper function for building query strings consistently
   defp build_query_string(params) do
     params
+    # credo:disable-for-lines:2 Credo.Check.Refactor.MapJoin
     |> Enum.map(fn {k, v} -> "#{k}=#{URI.encode_www_form(to_string(v))}" end)
     |> Enum.join("&")
   end

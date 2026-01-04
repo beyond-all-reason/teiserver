@@ -19,6 +19,7 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
   # Parties will be split if team diff is too large. It either uses absolute value or percentage
   # See get_max_team_diff function below for full details
   @max_team_diff_abs 10
+  # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
   @max_team_diff_importance 10000
   @party_importance 1000
   @avoid_importance 10
@@ -66,7 +67,7 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
 
   @spec get_captain_rating([BF.player()]) :: any()
   def get_captain_rating(team) do
-    if(length(team) > 0) do
+    if length(team) > 0 do
       captain = Enum.max_by(team, fn player -> player.rating end, &>=/2)
       captain.rating
     else

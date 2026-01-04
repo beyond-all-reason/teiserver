@@ -132,7 +132,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec get_st_dev([BF.player()]) :: any()
   def get_st_dev(team) do
-    if(length(team) > 0) do
+    if length(team) > 0 do
       ratings = Enum.map(team, fn player -> player.rating end)
       Statistics.stdev(ratings)
     else
@@ -142,7 +142,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec get_captain_rating([BF.player()]) :: any()
   def get_captain_rating(team) do
-    if(length(team) > 0) do
+    if length(team) > 0 do
       captain = Enum.max_by(team, fn player -> player.rating end, &>=/2)
       captain.rating
     else
@@ -256,6 +256,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec log_parties([[String.t()]]) :: String.t()
   def log_parties(parties) do
+    # credo:disable-for-lines:4 Credo.Check.Refactor.MapJoin
     Enum.map(parties, fn party ->
       "[#{Enum.join(party, ", ")}]"
     end)
@@ -264,6 +265,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec log_team([BF.player()]) :: String.t()
   defp log_team(team) do
+    # credo:disable-for-lines:4 Credo.Check.Refactor.MapJoin
     Enum.map(team, fn x ->
       x.name
     end)

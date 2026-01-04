@@ -1315,7 +1315,8 @@ defmodule Teiserver.SpringTcpServer do
       last_action_timestamp: nil,
       server_messages: 0,
       server_batches: 0,
-      client_messages: 0
+      client_messages: 0,
+      last_message_invalid: false
     }
     |> Map.merge(%{
       heartbeat_timeout: Keyword.get(spring_config, :heartbeat_timeout),
@@ -1407,6 +1408,7 @@ defmodule Teiserver.SpringTcpServer do
       # > Received `Packet`s are delivered as lists of bytes,
       mode: :list,
 
+      # credo:disable-for-next-line Credo.Check.Design.TagFIXME
       # FIXME: This looks sketchy!
       # Why don't we verify the certificate when we do a TLS upgrade?
       verify: :verify_none

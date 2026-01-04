@@ -80,7 +80,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
   end
 
   defp fix_pronouns(message, current_user_id, viewed_user_id, viewed_user_name) do
-    if(current_user_id != viewed_user_id) do
+    if current_user_id != viewed_user_id do
       # When viewing someone else's accolades, replace "you" with person's name
       String.replace(message, "You have", "#{viewed_user_name} has")
     else

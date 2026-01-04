@@ -402,10 +402,10 @@ defmodule Teiserver.Battle do
     :ok
   end
 
-  @spec create_match_from_start_script(Teiserver.TachyonBattle.start_script(), boolean()) ::
+  @spec create_match_from_start_script(Teiserver.Autohost.start_script(), boolean()) ::
           {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
   def create_match_from_start_script(start_script, is_matchmaking) do
-    ally_teams = start_script.allyTeams
+    ally_teams = start_script.ally_teams
 
     team_count = ally_teams |> Enum.count()
 
@@ -417,9 +417,9 @@ defmodule Teiserver.Battle do
     game_type = MatchLib.game_type(team_size, team_count)
 
     match_params = %{
-      map: start_script.mapName,
-      engine_version: start_script.engineVersion,
-      game_version: start_script.gameName,
+      map: start_script.map_name,
+      engine_version: start_script.engine_version,
+      game_version: start_script.game_name,
       team_count: team_count,
       team_size: team_size,
       game_type: game_type,
@@ -439,7 +439,7 @@ defmodule Teiserver.Battle do
             %{
               match_id: match.id,
               team_id: index,
-              user_id: String.to_integer(player.userId)
+              user_id: player.user_id
             }
             |> create_match_membership()
           end
@@ -468,6 +468,7 @@ defmodule Teiserver.Battle do
     already_finished? = match.finished != nil
     winning_ally_team = List.first(winning_ally_teams)
 
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO Currently trusting the first received event, should be reworked to accept what the majority agrees on
     if winning_ally_team != nil && match.winning_team != nil &&
          winning_ally_team != match.winning_team do
@@ -619,6 +620,7 @@ defmodule Teiserver.Battle do
             # because the bot itself is in a new lobby since the last one finished
             script_tags = data["battleContext"]["scriptTags"]
 
+            # credo:disable-for-next-line Credo.Check.Design.TagTODO
             # TODO the server/match/id is legacy and should be removed
             # After updating Teiserver, there may be some ongoing matches with the legacy tags
             id = script_tags["game/server_match_id"] || script_tags["server/match/id"]

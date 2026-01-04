@@ -72,7 +72,7 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
         d = Timex.diff(match.finished, match.started, :second)
 
         (:math.floor(d / 300) * 5)
-        |> round
+        |> round()
       end)
       |> Enum.frequencies()
       |> Map.new()
@@ -96,6 +96,7 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
       |> Enum.frequencies()
       |> Map.new()
 
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: change this to be based on data["player_count"]
     # we were not tracking player count as a separate number so can't be done yet
     weighted_count =
@@ -112,7 +113,7 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
         total_count: Enum.count(matches),
         weighted_count: weighted_count,
         total_duration_seconds: total_duration,
-        mean_duration_seconds: (total_duration / max(Enum.count(matches), 1)) |> round
+        mean_duration_seconds: (total_duration / max(Enum.count(matches), 1)) |> round()
       }
     }
   end

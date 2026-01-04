@@ -96,7 +96,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
         "triggers" =>
           (text_callback_params["triggers"] || "")
           |> String.downcase()
-          |> convert_textarea_to_array
+          |> convert_textarea_to_array()
           |> Enum.sort()
       })
 
@@ -133,7 +133,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
         "triggers" =>
           (text_callback_params["triggers"] || "")
           |> String.downcase()
-          |> convert_textarea_to_array
+          |> convert_textarea_to_array()
           |> Enum.sort()
       })
 

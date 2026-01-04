@@ -303,10 +303,8 @@ defmodule Teiserver.OAuth do
 
   defp check_verifier(%Code{challenge_method: :S256, challenge: challenge}, verifier) do
     with :ok <- valid_verifier(verifier),
-         {:ok, challenge} <- Base.url_decode64(challenge, padding: false, ignore: :whitespace),
-         :ok <-
-           compare_hash(challenge, :crypto.hash(:sha256, verifier)) do
-      :ok
+         {:ok, challenge} <- Base.url_decode64(challenge, padding: false, ignore: :whitespace) do
+      compare_hash(challenge, :crypto.hash(:sha256, verifier))
     end
   end
 

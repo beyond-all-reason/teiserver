@@ -4,18 +4,19 @@ defmodule Teiserver.Autohost do
   alias Teiserver.Bot.Bot
   alias Teiserver.BotQueries
   alias Teiserver.TachyonBattle
+  alias Teiserver.Data.Types, as: T
 
   @type id :: Teiserver.Bot.Bot.id()
   @type reg_value :: Registry.reg_value()
 
   @type start_script :: %{
-          required(:battleId) => Teiserver.TachyonBattle.id(),
-          required(:engineVersion) => String.t(),
-          required(:gameName) => String.t(),
-          required(:mapName) => String.t(),
-          required(:startPosType) => :fixed | :random | :ingame | :beforegame,
-          required(:allyTeams) => [ally_team(), ...],
-          optional(:spectators) => [player()]
+          required(:engine_version) => String.t(),
+          required(:game_name) => String.t(),
+          required(:map_name) => String.t(),
+          required(:start_pos_type) => :fixed | :random | :ingame | :beforegame,
+          required(:ally_teams) => [ally_team(), ...],
+          optional(:spectators) => [player()],
+          optional(:bots) => [bot()]
         }
 
   @type ally_team :: %{
@@ -27,9 +28,17 @@ defmodule Teiserver.Autohost do
         }
 
   @type player :: %{
-          userId: String.t(),
+          user_id: T.userid(),
           name: String.t(),
           password: String.t()
+        }
+
+  @type bot :: %{
+          host_user_id: T.userid(),
+          name: String.t(),
+          ai_short_name: String.t(),
+          ai_version: String.t(),
+          ai_options: %{String.t() => term()}
         }
 
   @type start_response :: TachyonHandler.start_response()
@@ -74,9 +83,9 @@ defmodule Teiserver.Autohost do
     if autohost_val == nil, do: nil, else: autohost_val[:id]
   end
 
-  @spec start_battle(Bot.id(), start_script()) ::
+  @spec start_battle(Bot.id(), Teiserver.TachyonBattle.id(), start_script()) ::
           {:ok, start_response()} | {:error, term()}
-  defdelegate start_battle(bot_id, start_script),
+  defdelegate start_battle(bot_id, battle_id, start_script),
     to: Teiserver.Autohost.TachyonHandler
 
   @spec send_message(pid(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::

@@ -32,6 +32,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     GenServer.start_link(__MODULE__, arg, name: via_tuple(battle_id))
   end
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO! handle the case where the battle isn't there somehow. This
   # will become important when we start tracking event history for autohosts
   # and doing state recovery

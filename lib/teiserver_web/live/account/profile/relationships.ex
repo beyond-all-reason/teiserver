@@ -22,8 +22,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Relationships do
           |> assign(:view_colour, Teiserver.Account.UserLib.colours())
           |> assign(:user, user)
           |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
-          |> get_mutuals
-          |> check_page_permissions
+          |> get_mutuals()
+          |> check_page_permissions()
       end
 
     {:ok, socket}

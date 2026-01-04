@@ -20,14 +20,14 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
     |> assign(:response, response)
     |> assign(:post, post)
     |> assign(:site_menu_active, "microblog")
-    |> ok
+    |> ok()
   end
 
   def mount(_params, _session, socket) do
     socket
     |> assign(:post, nil)
     |> assign(:site_menu_active, "microblog")
-    |> ok
+    |> ok()
   end
 
   @impl true
@@ -95,7 +95,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
 
   def handle_event("poll-choice", _, %{assigns: %{current_user: nil}} = socket) do
     socket
-    |> noreply
+    |> noreply()
   end
 
   def handle_event("poll-choice", %{"choice" => choice}, %{assigns: assigns} = socket) do
@@ -120,6 +120,6 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
 
     socket
     |> assign(:response, response)
-    |> noreply
+    |> noreply()
   end
 end

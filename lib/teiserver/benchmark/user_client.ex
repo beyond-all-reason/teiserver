@@ -33,7 +33,7 @@ defmodule Teiserver.Benchmark.UserClient do
         ids =
           ids
           |> String.split(" ")
-          |> int_parse
+          |> int_parse()
 
         join_battle(Enum.random(ids), state)
 
@@ -77,7 +77,7 @@ defmodule Teiserver.Benchmark.UserClient do
 
   defp _recv(socket) do
     case :gen_tcp.recv(socket, 0, 50) do
-      {:ok, reply} -> reply |> to_string
+      {:ok, reply} -> reply |> to_string()
       {:error, :timeout} -> :timeout
     end
   end

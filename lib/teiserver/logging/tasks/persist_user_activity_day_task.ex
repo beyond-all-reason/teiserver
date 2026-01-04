@@ -41,8 +41,8 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
   def run(date) do
     data =
       date
-      |> get_logs
-      |> sum_user_activity
+      |> get_logs()
+      |> sum_user_activity()
 
     # Delete old log if it exists
     delete_query =

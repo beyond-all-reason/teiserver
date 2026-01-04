@@ -121,6 +121,7 @@ defmodule Teiserver.Tachyon.Transport do
   end
 
   def handle_info(:force_disconnect, state) do
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: send a proper tachyon message to inform the client it is getting disconnected
     {:stop, :normal, state}
   end

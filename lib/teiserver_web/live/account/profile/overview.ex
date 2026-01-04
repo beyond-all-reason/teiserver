@@ -34,8 +34,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
           |> assign(:user, user)
           |> assign(:role_data, Account.RoleLib.role_data())
           |> assign(:client, Account.get_client_by_id(userid))
-          |> get_relationships_and_permissions
-          |> assign_accolade_notification
+          |> get_relationships_and_permissions()
+          |> assign_accolade_notification()
       end
 
     {:ok, socket}
@@ -337,10 +337,10 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   defp client_connected(user_id) do
     client = Account.get_client_by_id(user_id)
 
-    if not is_nil(client) do
-      :ok
-    else
+    if is_nil(client) do
       {:error, "Client is not connected"}
+    else
+      :ok
     end
   end
 

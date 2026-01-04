@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Logging.AggregateViewLogView do
 
   def convert_load_time(load_time) do
     (round(load_time / 10) / 100)
-    |> to_string
+    |> to_string()
   end
 
   def heatmap(value, maximum, "green-red") do
@@ -20,9 +20,9 @@ defmodule TeiserverWeb.Logging.AggregateViewLogView do
     ]
     |> Enum.map_join(fn colour ->
       colour
-      |> round
+      |> round()
       |> Integer.to_string(16)
-      |> to_string
+      |> to_string()
       |> String.pad_leading(2, "0")
     end)
   end
@@ -37,9 +37,9 @@ defmodule TeiserverWeb.Logging.AggregateViewLogView do
     ]
     |> Enum.map_join(fn colour ->
       colour
-      |> round
+      |> round()
       |> Integer.to_string(16)
-      |> to_string
+      |> to_string()
       |> String.pad_leading(2, "0")
     end)
   end
@@ -54,9 +54,9 @@ defmodule TeiserverWeb.Logging.AggregateViewLogView do
     ]
     |> Enum.map_join(fn colour ->
       colour
-      |> round
+      |> round()
       |> Integer.to_string(16)
-      |> to_string
+      |> to_string()
       |> String.pad_leading(2, "0")
     end)
   end
@@ -71,9 +71,9 @@ defmodule TeiserverWeb.Logging.AggregateViewLogView do
     ]
     |> Enum.map_join(fn colour ->
       colour
-      |> round
+      |> round()
       |> Integer.to_string(16)
-      |> to_string
+      |> to_string()
       |> String.pad_leading(2, "0")
     end)
   end

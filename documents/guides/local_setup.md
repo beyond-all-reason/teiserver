@@ -17,6 +17,15 @@ with `mise pg:start` and `mise pg:stop`.
 - Set up the encryption certificates.
 - Create and migrate the development and test databases for teiserver.
 
+> [!WARNING]  
+> Mise is not self contained, it will compile erlang *and* postgres from source,
+> which takes some time, and requires you have a bunch of base libraries and
+> compilers installed in your system. See a list in the [postgres mise-plugin dependencies](https://github.com/mise-plugins/mise-postgres?tab=readme-ov-file#dependencies).
+> 
+> If you don't want to pollute your base system with all those libraries, you
+> can consider development in [Distrobox](https://distrobox.it/) which allows
+> you to easily fully delete it after you are done.
+
 ## Manual setup
 
 ### Install services
@@ -26,10 +35,7 @@ You will need to install:
 - [Elixir + Erlang](https://elixir-lang.org/install.html).
 - [PostgreSQL](https://www.postgresql.org/download).
 
-Make sure that you have the correct version of Elixir (currently using 1.18) and Erlang OTP (currently 26.2.5.2). You can find the dependency requirement [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
-
-> [!TIP]
-> You can use [asdf](https://github.com/asdf-vm/asdf) to install the correct version, it will be picked up from the file `.tool-versions`.
+Make sure that you have the correct version of Elixir (currently using 1.19.4) and Erlang OTP (currently 26.2.5.1). You can find the dependency requirement [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
 
 ### Install build tools (gcc, g++, make) and cryptographic libraries
 

@@ -70,6 +70,7 @@ defmodule Teiserver.CacheUser do
     |> String.replace(~r/[[:alnum:]]/, "")
     |> String.graphemes()
     |> Enum.frequencies()
+    # credo:disable-for-lines:2 Credo.Check.Refactor.FilterCount
     |> Enum.filter(fn {_, val} -> val > 2 end)
     |> Enum.count()
     |> Kernel.>(0)
@@ -147,13 +148,13 @@ defmodule Teiserver.CacheUser do
     Account.update_user_stat(user.id, %{
       "first_ip" => ip,
       "country" => Teiserver.Geoip.get_flag(ip),
-      "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string
+      "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string()
     })
 
     # Now add them to the cache
     user
-    |> convert_user
-    |> add_user
+    |> convert_user()
+    |> add_user()
 
     if not String.ends_with?(user.email, "@agents") do
       case EmailHelper.new_user(user) do
@@ -199,8 +200,8 @@ defmodule Teiserver.CacheUser do
           {:ok, user} ->
             # Now add them to the cache
             user
-            |> convert_user
-            |> add_user
+            |> convert_user()
+            |> add_user()
 
           {:error, changeset} ->
             Logger.error(
@@ -257,6 +258,7 @@ defmodule Teiserver.CacheUser do
         {:error, "Too many repeated symbols in name"}
 
       true ->
+        # credo:disable-for-next-line Credo.Check.Design.TagTODO
         # TODO: create a unique index on lower(name) so that this check is fast
         # (and also redundant)
         users = Teiserver.Account.query_users(search: [name_lower: name], select: [:name])
@@ -275,8 +277,8 @@ defmodule Teiserver.CacheUser do
       |> Map.get("rename_log", [])
 
     now = System.system_time(:second)
-    since_rename_two = now - ((Enum.slice(rename_log, 1..1) ++ [0, 0, 0]) |> hd)
-    since_rename_three = now - ((Enum.slice(rename_log, 2..2) ++ [0, 0, 0]) |> hd)
+    since_rename_two = now - ((Enum.slice(rename_log, 1..1) ++ [0, 0, 0]) |> hd())
+    since_rename_three = now - ((Enum.slice(rename_log, 2..2) ++ [0, 0, 0]) |> hd())
 
     cond do
       # VIPs ignore time based rename restrictions
@@ -505,7 +507,7 @@ defmodule Teiserver.CacheUser do
                   false
               end
 
-            if not has_ai, do: "!cv joinas spec", else: message
+            if has_ai, do: message, else: "!cv joinas spec"
 
           ["!callvote", "joinas" | _] ->
             has_ai =
@@ -517,7 +519,7 @@ defmodule Teiserver.CacheUser do
                   false
               end
 
-            if not has_ai, do: "!callvote joinas spec", else: message
+            if has_ai, do: message, else: "!callvote joinas spec"
 
           ["!joinas" | _] ->
             "!joinas spec"
@@ -919,12 +921,14 @@ defmodule Teiserver.CacheUser do
         {:error, "Account is not verified"}
 
       true ->
+        # credo:disable-for-next-line Credo.Check.Design.TagTODO
         # TODO: copy/paste the capacity restriction and queuing from try_md5_login later
         :telemetry.execute([:tachyon, :login, :ok], %{count: 1})
         do_login(user, ip, lobby_client, lobby_hash)
     end
   end
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: once we got rid of spring, do_login should not accept the IP as a string
   # but as a :inet.ip_address which is what we get from the conn object
   # And then we need to stringify it as usual when storing in DB
@@ -940,7 +944,7 @@ defmodule Teiserver.CacheUser do
     rank =
       cond do
         stats["rank_override"] != nil ->
-          stats["rank_override"] |> int_parse
+          stats["rank_override"] |> int_parse()
 
         true ->
           calculate_rank(user.id)
@@ -1077,6 +1081,7 @@ defmodule Teiserver.CacheUser do
     ])
   end
 
+  # credo:disable-for-lines:8 Credo.Check.Readability.PredicateFunctionNames
   @spec is_shadowbanned?(T.userid() | T.user()) :: boolean()
   def is_shadowbanned?(nil), do: true
 
@@ -1095,18 +1100,21 @@ defmodule Teiserver.CacheUser do
     :ok
   end
 
+  # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
   @spec is_bot?(T.userid() | T.user()) :: boolean()
   def is_bot?(nil), do: false
   def is_bot?(userid) when is_integer(userid), do: is_bot?(get_user_by_id(userid))
   def is_bot?(%{roles: roles}), do: Enum.member?(roles, "Bot")
   def is_bot?(_), do: false
 
+  # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
   @spec is_moderator?(T.userid() | T.user()) :: boolean()
   def is_moderator?(nil), do: false
   def is_moderator?(userid) when is_integer(userid), do: is_moderator?(get_user_by_id(userid))
   def is_moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
   def is_moderator?(_), do: false
 
+  # credo:disable-for-lines:8 Credo.Check.Readability.PredicateFunctionNames
   @spec is_event_organizer?(T.userid() | T.user()) :: boolean()
   def is_event_organizer?(nil), do: false
 
@@ -1267,6 +1275,7 @@ defmodule Teiserver.CacheUser do
       not String.contains?(email, ".") ->
         {:error, "invalid email"}
 
+      # credo:disable-for-next-line Credo.Check.Design.TagTODO
       # TODO: create a unique index on lower(email) so that this check is fast
       # (and also redundant)
       Teiserver.Account.query_users(search: [email_lower: email], select: [:email]) != [] ->

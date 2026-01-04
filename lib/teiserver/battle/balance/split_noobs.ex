@@ -136,9 +136,10 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
 
   @spec log_parties([[String.t()]]) :: String.t()
   def log_parties(parties) do
-    if(Enum.empty?(parties)) do
+    if Enum.empty?(parties) do
       "None"
     else
+      # credo:disable-for-lines:4 Credo.Check.Refactor.MapJoin
       Enum.map(parties, fn party ->
         "(#{Enum.join(party, ", ")})"
       end)
@@ -240,6 +241,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
 
     logs = [
       "Perform brute force with the following players to get the best score.",
+      # credo:disable-for-next-line Credo.Check.Refactor.MapJoin
       "Players: #{Enum.join(Enum.map(state.top_experienced, fn x -> log_player(x) end), ", ")}",
       @splitter,
       "Brute force result:",
@@ -250,6 +252,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
       "Score: #{format(combo_result.score)} (lower is better)",
       @splitter,
       "Draft remaining players (ordered from best to worst).",
+      # credo:disable-for-next-line Credo.Check.Refactor.MapJoin
       "Remaining: #{Enum.join(Enum.map(remaining, fn x -> log_player(x) end), ", ")}"
     ]
 
@@ -278,7 +281,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     first_team_pick_priority = get_pick_priority(first_team)
     second_team_pick_priority = get_pick_priority(second_team)
 
-    if(first_team_pick_priority > second_team_pick_priority) do
+    if first_team_pick_priority > second_team_pick_priority do
       :first_team
     else
       :second_team
@@ -368,7 +371,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   # This will not be displayed in chobby ui or player list; it's only used for balance
   # It will be used when calculating team deviation
   defp adjusted_rating(rating, uncertainty, rank) do
-    if(is_newish_player?(rank, uncertainty)) do
+    if is_newish_player?(rank, uncertainty) do
       # For newish players we assume they are the worst in the lobby e.g. 0 match rating and
       # then they converge to their true rating over time
       # Once their uncertainty is low enough, we fully trust their rating

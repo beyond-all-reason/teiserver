@@ -85,8 +85,9 @@ defmodule TeiserverWeb.Live.BattleTest do
 
     @tag :needs_attention
     test "show - valid battle", %{conn: conn} do
+      {:ok, server_context} = Teiserver.TeiserverTestLib.start_spring_server()
       # Lets create a battle
-      %{socket: host_socket, user: host_user} = TeiserverTestLib.auth_setup()
+      %{socket: host_socket, user: host_user} = TeiserverTestLib.auth_setup(server_context)
       CacheUser.add_roles(host_user, ["Bot"])
 
       _send_raw(
@@ -112,15 +113,15 @@ defmodule TeiserverWeb.Live.BattleTest do
         join
         |> String.replace("JOINBATTLE ", "")
         |> String.replace(" gameHash", "")
-        |> int_parse
+        |> int_parse()
 
       {:ok, view, html} = live(conn, "/battle/lobbies/show/#{lobby_id}")
       assert html =~ "LiveBattleShow"
       assert html =~ "Speed metal"
 
-      %{user: user1, socket: socket1} = TeiserverTestLib.auth_setup()
-      %{user: user2, socket: socket2} = TeiserverTestLib.auth_setup()
-      %{user: user3, socket: socket3} = TeiserverTestLib.auth_setup()
+      %{user: user1, socket: socket1} = TeiserverTestLib.auth_setup(server_context)
+      %{user: user2, socket: socket2} = TeiserverTestLib.auth_setup(server_context)
+      %{user: user3, socket: socket3} = TeiserverTestLib.auth_setup(server_context)
 
       _send_raw(socket1, "JOINBATTLE #{lobby_id} empty script_password\n")
       _send_raw(socket2, "JOINBATTLE #{lobby_id} empty script_password\n")
@@ -133,6 +134,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
       # Currently we don't show spectators, we just want to ensure it doesn't crash
       _html = render(view)
+      # credo:disable-for-next-line Credo.Check.Design.TagTODO
       # TODO: handle showing of spectators
 
       # # Team 0

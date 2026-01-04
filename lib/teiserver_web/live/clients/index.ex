@@ -25,7 +25,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> Map.new(fn {userid, _} ->
         {
           userid,
-          CacheUser.get_user_by_id(userid) |> limited_user
+          CacheUser.get_user_by_id(userid) |> limited_user()
         }
       end)
 
@@ -42,7 +42,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> assign(:users, users)
       |> assign(:extra_menu_content, @extra_menu_content)
       |> assign(:filters, ["people", "normal"])
-      |> apply_filters
+      |> apply_filters()
 
     {:ok, socket}
   end
@@ -82,7 +82,7 @@ defmodule TeiserverWeb.ClientLive.Index do
           assigns.users[userid]
         else
           CacheUser.get_user_by_id(userid)
-          |> limited_user
+          |> limited_user()
         end
       end)
       |> Map.new(fn user -> {user.id, user} end)
@@ -91,7 +91,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       socket
       |> assign(:clients, clients)
       |> assign(:users, users)
-      |> apply_filters
+      |> apply_filters()
 
     {:noreply, socket}
   end
@@ -102,7 +102,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       [filter | socket.assigns.filters]
       |> Enum.uniq()
 
-    {:noreply, assign(socket, :filters, new_filters) |> apply_filters}
+    {:noreply, assign(socket, :filters, new_filters) |> apply_filters()}
   end
 
   def handle_event("remove-filter:" <> filter, _event, socket) do
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       socket.assigns.filters
       |> List.delete(filter)
 
-    {:noreply, assign(socket, :filters, new_filters) |> apply_filters}
+    {:noreply, assign(socket, :filters, new_filters) |> apply_filters()}
   end
 
   defp apply_action(socket, :index, _params) do

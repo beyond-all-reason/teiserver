@@ -1,0 +1,81 @@
+name: Lint and style checks
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+env:
+  # Ensure we're fetching the right dependencies for continuous integration
+  MIX_ENV: test
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Lint and style checks
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Read Elixir and Erlang versions from mise.toml
+      id: versions
+      run: |
+        echo "elixir=$(sed -n 's|elixir = \"\(.*\)\"|\1|p' mise.toml)" >> "$GITHUB_OUTPUT"
+        echo "erlang=$(sed -n 's|erlang = \"\(.*\)\"|\1|p' mise.toml)" >> "$GITHUB_OUTPUT"
+
+    - name: Setup Elixir and Erlang
+      uses: erlef/setup-beam@v1
+      id: setup-beam
+      with:
+        otp-version: ${{ steps.versions.outputs.erlang }}
+        elixir-version: ${{ steps.versions.outputs.elixir }}
+
+    - name: Cache dependencies
+      id: cache-deps
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-deps-${{ runner.os }}-${{ steps.setup-beam.outputs.otp-version }}-${{ steps.setup-beam.outputs.elixir-version }}-
+      with:
+        path: deps
+        key: ${{ env.cache-name }}${{ hashFiles('**/mix.lock') }}
+        restore-keys: |
+          ${{ env.cache-name }}
+
+    - name: Cache compiled build
+      id: cache-build
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-build-${{ runner.os }}-${{ steps.setup-beam.outputs.otp-version }}-${{ steps.setup-beam.outputs.elixir-version }}-
+      with:
+        path: _build
+        key: ${{ env.cache-name }}${{ hashFiles('**/mix.lock') }}
+        restore-keys: |
+          ${{ env.cache-name }}
+
+    - name: Install dependencies
+      run: mix deps.get
+
+    - name: Find unused dependencies # https://hexdocs.pm/mix/Mix.Tasks.Deps.Unlock.html
+      run: mix deps.unlock --check-unused
+
+    - name: Check for retired dependencies # https://hexdocs.pm/hex/Mix.Tasks.Hex.Audit.html
+      run: mix hex.audit
+
+    - name: Check for vulnerable dependencies # https://github.com/mirego/mix_audit
+      run: mix deps.audit
+
+    - name: Ensure Elixir code is formatted # https://hexdocs.pm/mix/Mix.Tasks.Format.html
+      run: mix format --check-formatted
+
+    - name: Compile the project
+      run: mix compile
+
+    - name: Lint Elixir code to enforce code consistency # https://hexdocs.pm/credo/
+      run: mix credo

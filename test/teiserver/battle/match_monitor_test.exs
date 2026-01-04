@@ -3,10 +3,11 @@ defmodule Teiserver.Battle.MatchMonitorTest do
 
   import Teiserver.TeiserverTestLib,
     only: [
-      auth_setup: 0,
+      auth_setup: 1,
       _send_raw: 2,
       _recv_raw: 1,
-      _recv_until: 1
+      _recv_until: 1,
+      start_spring_server: 0
     ]
 
   setup do
@@ -27,7 +28,8 @@ defmodule Teiserver.Battle.MatchMonitorTest do
   # with seed 273979
   @tag :needs_attention
   test "spring send" do
-    %{socket: socket, user: _user} = auth_setup()
+    {:ok, server_context} = start_spring_server()
+    %{socket: socket, user: _user} = auth_setup(server_context)
 
     # monitor_userid = Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
 
@@ -71,6 +73,7 @@ defmodule Teiserver.Battle.MatchMonitorTest do
     assert monitor_pid != nil
 
     # Send a launch message for a non-existent lobby
+    # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
     send(monitor_pid, {:new_message, 99999, "autohosts", "* Launching game..."})
 
     # Verify the server is still running (hasn't crashed)

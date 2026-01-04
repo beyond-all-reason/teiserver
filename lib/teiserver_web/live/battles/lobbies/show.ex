@@ -204,6 +204,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> assign(:consul, consul_state)
 
     # Players
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: This can likely be optimised somewhat
     socket =
       case player_changes do

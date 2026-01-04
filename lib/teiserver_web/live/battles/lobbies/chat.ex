@@ -100,7 +100,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
          |> assign(:user_map, %{})
          |> assign(:clients, clients)
          |> assign(:view_colour, Teiserver.Lobby.colours())
-         |> update_user_map}
+         |> update_user_map()}
     end
   end
 
@@ -189,7 +189,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       {:noreply,
        socket
        |> assign(:messages, messages)
-       |> update_user_map}
+       |> update_user_map()}
     else
       {:noreply, socket}
     end
@@ -207,6 +207,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       |> assign(:lobby, lobby)
 
     # Players
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: This can likely be optimised somewhat
     socket =
       case player_changes do

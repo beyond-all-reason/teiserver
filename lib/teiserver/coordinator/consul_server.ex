@@ -193,7 +193,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
        | join_queue: state.join_queue |> List.delete(userid),
          low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid)
      }
-     |> queue_size_changed}
+     |> queue_size_changed()}
   end
 
   def handle_info({:user_joined, userid}, state) do
@@ -450,13 +450,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     if ranked == "0" do
       new_state =
-        Map.merge(state, %{
-          minimum_rating_to_play: 0,
-          maximum_rating_to_play: LobbyRestrictions.rating_upper_bound(),
-          minimum_rank_to_play: 0,
-          maximum_rank_to_play: LobbyRestrictions.rank_upper_bound(),
-          ranked: false
-        })
+        cond do
+          Config.get_site_config_cache("lobby.Unranked lobby restrictions") == false ->
+            Map.merge(state, %{
+              minimum_rating_to_play: 0,
+              maximum_rating_to_play: LobbyRestrictions.rating_upper_bound(),
+              minimum_rank_to_play: 0,
+              maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()
+            })
+
+          true ->
+            state
+        end
+        |> Map.merge(%{ranked: false})
 
       {:noreply, new_state}
     else
@@ -852,6 +858,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         end
 
       :clan ->
+        # credo:disable-for-next-line Credo.Check.Design.TagTODO
         # TODO: Implement
         :player
     end
@@ -877,7 +884,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Account.is_moderator?(user) ->
         true
 
-      state.ranked == false ->
+      state.ranked == false and
+          Config.get_site_config_cache("lobby.Unranked lobby restrictions") == false ->
         true
 
       true ->
@@ -1281,6 +1289,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       _ ->
         member_list
         |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+        # credo:disable-for-lines:2 Credo.Check.Refactor.FilterFilter
         |> Enum.filter(fn client -> client != nil end)
         |> Enum.filter(fn client -> client.lobby_id == lobby_id end)
     end
@@ -1439,7 +1448,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end)
 
     %{state | join_queue: join_queue, low_priority_join_queue: low_priority_join_queue}
-    |> queue_size_changed
+    |> queue_size_changed()
   end
 
   @spec get_queue(map()) :: [T.userid()]

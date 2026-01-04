@@ -111,13 +111,13 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
     logs
     |> select([l], avg(l.load_time))
     |> Repo.one()
-    |> c_round
+    |> c_round()
   end
 
   defp get_guest_view_count(logs) do
     logs
     |> where([l], is_nil(l.user_id))
-    |> count
+    |> count()
   end
 
   defp get_guest_unique_ip_count(logs) do

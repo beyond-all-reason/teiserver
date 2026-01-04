@@ -395,26 +395,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       case Communication.get_discord_message(channel, report.discord_message_id) do
         {:ok, msg} ->
           {new_content, reactions} =
-            if not is_nil(report.result_id) do
-              new_content =
-                cond do
-                  report.closed ->
-                    String.replace(
-                      msg.content,
-                      "**Status:** Closed :file_folder:",
-                      "**Status:** Actioned :hammer:"
-                    )
-
-                  true ->
-                    String.replace(
-                      msg.content,
-                      "**Status:** Open",
-                      "**Status:** Actioned :hammer:"
-                    )
-                end
-
-              {new_content, [delete: "📁", create: "🔨"]}
-            else
+            if is_nil(report.result_id) do
               if report.closed do
                 {
                   String.replace(
@@ -434,6 +415,25 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
                   [delete: "📁"]
                 }
               end
+            else
+              new_content =
+                cond do
+                  report.closed ->
+                    String.replace(
+                      msg.content,
+                      "**Status:** Closed :file_folder:",
+                      "**Status:** Actioned :hammer:"
+                    )
+
+                  true ->
+                    String.replace(
+                      msg.content,
+                      "**Status:** Open",
+                      "**Status:** Actioned :hammer:"
+                    )
+                end
+
+              {new_content, [delete: "📁", create: "🔨"]}
             end
 
           Enum.each(reactions, fn {action, emoji} ->
@@ -480,7 +480,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         String.replace(acc, "<@!#{m.id}>", m.username)
       end)
       |> String.replace(~r/<#[0-9]+> ?/, "")
-      |> convert_emoticons
+      |> convert_emoticons()
       |> String.split("\n")
 
     bridge_user_id = BridgeServer.get_bridge_userid()

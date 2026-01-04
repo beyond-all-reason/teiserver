@@ -136,6 +136,7 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
       left_join: reports in assoc(report_groups, :reports),
       preload: [reports: reports]
 
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO add reporters here
   end
 

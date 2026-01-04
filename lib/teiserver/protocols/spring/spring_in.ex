@@ -34,6 +34,13 @@ defmodule Teiserver.Protocols.SpringIn do
 
   @action_commands ~w(SAY SAYEX SAYPRIVATE SAYBATTLE SAYBATTLEPRIVATEEX JOINBATTLE LEAVEBATTLE)
 
+  # Commands that don't require the user to be logged in
+  @unauthenticated_commands ~w(
+    PING STLS LOGIN REGISTER CONFIRMAGREEMENT RESETPASSWORDREQUEST EXIT CHANGEPASSWORD
+    c.telemetry.upload_infolog c.telemetry.update_client_property c.telemetry.log_client_event c.telemetry.simple_client_event c.telemetry.complex_client_event
+    c.auth.login_queue_heartbeat
+  )
+
   @spec data_in(String.t(), map()) :: map()
   def data_in(data, state) do
     if Config.get_site_config_cache("debug.Print incoming messages") or
@@ -81,20 +88,30 @@ defmodule Teiserver.Protocols.SpringIn do
     state =
       case tuple do
         {command, data, msg_id} ->
-          start = :erlang.monotonic_time(:millisecond)
+          if command not in @unauthenticated_commands and state.userid == nil do
+            Logger.info("Unauthenticated command '#{command} #{data}' from #{state.ip}")
 
-          state = do_handle(command, data, msg_id, state)
+            reply(:denied, "Unauthenticated", msg_id, state)
 
-          elapsed = :erlang.monotonic_time(:millisecond) - start
-
-          :telemetry.execute([:spring, :in], %{duration: elapsed, count: 1}, %{
-            command: command
-          })
-
-          if Enum.member?(@action_commands, command) do
-            Map.put(state, :last_action_timestamp, System.system_time(:second))
-          else
             state
+          else
+            start = :erlang.monotonic_time(:millisecond)
+
+            state = do_handle(command, data, msg_id, state)
+
+            elapsed = :erlang.monotonic_time(:millisecond) - start
+
+            command = if state.last_message_invalid, do: "INVALID", else: command
+
+            :telemetry.execute([:spring, :in], %{duration: elapsed, count: 1}, %{
+              command: command
+            })
+
+            if Enum.member?(@action_commands, command) do
+              Map.put(state, :last_action_timestamp, System.system_time(:second))
+            else
+              state
+            end
           end
 
         nil ->
@@ -106,7 +123,7 @@ defmodule Teiserver.Protocols.SpringIn do
       throw("nil state returned while handling: #{data}")
     end
 
-    %{state | last_msg: System.system_time(:second)}
+    %{state | last_msg: System.system_time(:second), last_message_invalid: false}
   end
 
   defp _clean(nil), do: nil
@@ -1055,7 +1072,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username, team_colour] ->
         client_id = CacheUser.get_userid(username)
         value = int_parse(team_colour)
-        Lobby.force_change_client(state.userid, client_id, %{team_colour: value |> to_string})
+        Lobby.force_change_client(state.userid, client_id, %{team_colour: value |> to_string()})
 
       _ ->
         _no_match(state, "FORCETEAMCOLOR", msg_id, data)
@@ -1108,7 +1125,7 @@ defmodule Teiserver.Protocols.SpringIn do
                   name: name,
                   owner_name: state.username,
                   owner_id: state.userid,
-                  team_colour: team_colour |> to_string,
+                  team_colour: team_colour |> to_string(),
                   ai_dll: ai_dll
                 },
                 Spring.parse_battle_status(battlestatus)
@@ -1132,7 +1149,7 @@ defmodule Teiserver.Protocols.SpringIn do
           new_bot =
             Map.merge(
               %{
-                team_colour: team_colour |> to_string
+                team_colour: team_colour |> to_string()
               },
               Spring.parse_battle_status(battlestatus)
             )
@@ -1182,7 +1199,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
           String.starts_with?(lowercase_msg, "!bset tweakdefs") ||
               String.starts_with?(lowercase_msg, "!bset tweakunits") ->
-            msg |> String.trim() |> String.slice(0..16384)
+            msg |> String.trim() |> String.slice(0..16_384)
 
           String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
             msg |> String.trim() |> String.slice(0..1024)
@@ -1208,7 +1225,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
           String.starts_with?(lowercase_msg, "!bset tweakdefs") ||
               String.starts_with?(lowercase_msg, "!bset tweakunits") ->
-            msg |> String.trim() |> String.slice(0..16384)
+            msg |> String.trim() |> String.slice(0..16_384)
 
           String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
             msg |> String.trim() |> String.slice(0..1024)
@@ -1316,7 +1333,7 @@ defmodule Teiserver.Protocols.SpringIn do
         new_client =
           (existing || %{})
           |> Map.merge(updates)
-          |> Map.put(:team_colour, team_colour |> to_string)
+          |> Map.put(:team_colour, team_colour |> to_string())
 
         # This one needs a bit more nuance, for now we'll wrap it in this
         # later it's possible we don't want players updating their status
@@ -1384,7 +1401,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
     Logger.info(msg)
     reply(:servermsg, msg, msg_id, state)
-    state
+    %{state | last_message_invalid: true}
   end
 
   @spec deny(map(), String.t()) :: map()

@@ -19,8 +19,8 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.User do
     socket =
       if connected?(socket) do
         socket
-        |> recalculate_outstanding_report_groups
-        |> get_action_list
+        |> recalculate_outstanding_report_groups()
+        |> get_action_list()
       else
         socket
       end
@@ -47,8 +47,8 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.User do
     socket =
       socket
       |> assign(:filters, new_filters)
-      |> recalculate_outstanding_report_groups
-      |> get_action_list
+      |> recalculate_outstanding_report_groups()
+      |> get_action_list()
 
     {:noreply, socket}
   end

@@ -52,9 +52,8 @@ defmodule Teiserver.Tachyon.Schema do
   @spec parse_message(command_id(), message_type(), term()) ::
           :ok | {:missing_schema, command_id(), message_type()} | {:error, map()}
   def parse_message(command_id, type, json) do
-    with {:ok, schema} <- get_schema(command_id, type),
-         :ok <- JsonXema.validate(schema, json) do
-      :ok
+    with {:ok, schema} <- get_schema(command_id, type) do
+      JsonXema.validate(schema, json)
     end
   end
 

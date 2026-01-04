@@ -25,8 +25,10 @@ defmodule TeiserverWeb.Live.ClientTest do
 
       # Sleeps are to allow for the throttle server to update us
 
+      {:ok, server_context} = Teiserver.TeiserverTestLib.start_spring_server()
+
       # Time to add a client
-      %{socket: socket1, user: user1} = TeiserverTestLib.auth_setup()
+      %{socket: socket1, user: user1} = TeiserverTestLib.auth_setup(server_context)
 
       :timer.sleep(@sleep_time)
       html = render(view)
@@ -34,7 +36,7 @@ defmodule TeiserverWeb.Live.ClientTest do
       assert html =~ "#{user1.name}"
 
       # Another
-      %{socket: socket2, user: user2} = TeiserverTestLib.auth_setup()
+      %{socket: socket2, user: user2} = TeiserverTestLib.auth_setup(server_context)
       :timer.sleep(@sleep_time)
       html = render(view)
       assert html =~ "Clients - "
@@ -60,7 +62,8 @@ defmodule TeiserverWeb.Live.ClientTest do
 
     @tag :needs_attention
     test "show - valid client", %{conn: conn} do
-      %{socket: socket, user: user} = TeiserverTestLib.auth_setup()
+      {:ok, server_context} = Teiserver.TeiserverTestLib.start_spring_server()
+      %{socket: socket, user: user} = TeiserverTestLib.auth_setup(server_context)
       # client = Client.get_client_by_id(user.id)
 
       {:ok, view, html} = live(conn, "/teiserver/admin/client/#{user.id}")
@@ -72,6 +75,7 @@ defmodule TeiserverWeb.Live.ClientTest do
       assert html =~ "Battle:"
 
       # Log out the user
+      # credo:disable-for-next-line Credo.Check.Design.TagFIXME
       # FIXME: this part is failing because the liveview subscribes to old pubsubs
       _send_raw(socket, "EXIT\n")
       assert_redirect(view, "/teiserver/admin/client", 250)
@@ -84,7 +88,8 @@ defmodule TeiserverWeb.Live.ClientTest do
     end
 
     test "force disconnect client", %{conn: conn} do
-      %{user: user} = TeiserverTestLib.auth_setup()
+      {:ok, server_context} = Teiserver.TeiserverTestLib.start_spring_server()
+      %{user: user} = TeiserverTestLib.auth_setup(server_context)
 
       {:ok, view, _html} = live(conn, "/teiserver/admin/client/#{user.id}")
       assert Client.get_client_by_id(user.id) != nil

@@ -1,31 +1,20 @@
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
+  import ExUnit.Assertions
+  import ExUnit.Callbacks
   alias Teiserver.{Client, CacheUser, Account, SpringTcpServer}
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Coordinator.CoordinatorServer
   alias Teiserver.Data.Types, as: T
   @host ~c"127.0.0.1"
 
-  @spec raw_setup :: %{socket: port()}
-  def raw_setup() do
-    {:ok, socket} = :gen_tcp.connect(@host, get_listener_port(:tcp), active: false)
-    %{socket: socket}
-  end
+  @spec raw_setup(map()) :: %{socket: port()}
+  def raw_setup(context), do: do_connect_socket(context, :tcp)
 
   # Looks like we might want to use https://erlang.org/documentation/doc-12.0/lib/ssl-10.4/doc/html/ssl.html#connect-2
   # and upgrade the connection instead?
-  @spec spring_tls_setup :: %{socket: port()}
-  def spring_tls_setup() do
-    {:ok, socket} =
-      :ssl.connect(
-        @host,
-        get_listener_port(:tls),
-        active: false,
-        verify: :verify_none
-      )
-
-    %{socket: socket}
-  end
+  @spec spring_tls_setup(map()) :: %{socket: port()}
+  def spring_tls_setup(context), do: do_connect_socket(context, :tls)
 
   def get_listener_port(transport_type) do
     SpringTcpServer.get_listener_socket_opts(transport_type)
@@ -84,10 +73,10 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   @spec auth_setup(nil | map()) :: %{socket: port(), user: map(), pid: pid()}
-  def auth_setup(user \\ nil) do
+  def auth_setup(context, user \\ nil) do
     user = if user, do: user, else: new_user()
 
-    %{socket: socket} = raw_setup()
+    %{socket: socket} = raw_setup(context)
     # Ignore the TASSERVER
     _ = _recv_raw(socket)
 
@@ -131,6 +120,7 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   def _recv_lines(), do: _recv_lines(1)
+  # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
   def _recv_lines(:until_timeout), do: _recv_lines(99999)
 
   def _recv_lines(lines) do
@@ -160,7 +150,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_raw({:sslsocket, _, _} = socket) do
     case :ssl.recv(socket, 0, 500) do
-      {:ok, reply} -> reply |> to_string
+      {:ok, reply} -> reply |> to_string()
       {:error, :timeout} -> :timeout
       {:error, :closed} -> :closed
     end
@@ -168,7 +158,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_raw(socket) do
     case :gen_tcp.recv(socket, 0, 500) do
-      {:ok, reply} -> reply |> to_string
+      {:ok, reply} -> reply |> to_string()
       {:error, :timeout} -> :timeout
       {:error, :closed} -> :closed
     end
@@ -238,7 +228,8 @@ defmodule Teiserver.TeiserverTestLib do
       print_client_messages: false,
       print_server_messages: false,
       exempt_from_cmd_throttle: true,
-      script_password: nil
+      script_password: nil,
+      last_message_invalid: false
     }
   end
 
@@ -269,17 +260,10 @@ defmodule Teiserver.TeiserverTestLib do
       print_client_messages: false,
       print_server_messages: false,
       exempt_from_cmd_throttle: true,
-      script_password: nil
+      script_password: nil,
+      last_message_invalid: false
     }
     |> Map.merge(opts)
-  end
-
-  defp make_async_transport() do
-    send = fn _x, _y -> nil end
-
-    %{
-      send: send
-    }
   end
 
   def mock_async_state(user \\ nil) do
@@ -312,7 +296,8 @@ defmodule Teiserver.TeiserverTestLib do
       print_client_messages: false,
       print_server_messages: false,
       exempt_from_cmd_throttle: true,
-      script_password: nil
+      script_password: nil,
+      last_message_invalid: false
     }
   end
 
@@ -446,38 +431,6 @@ defmodule Teiserver.TeiserverTestLib do
     |> Teiserver.Lobby.add_lobby()
   end
 
-  defp seed_badge_types() do
-    # Create the badge types
-    if Enum.empty?(AccoladeLib.get_badge_types()) do
-      {:ok, _badge_type1} =
-        Account.create_badge_type(%{
-          name: "Badge A",
-          icon: "i",
-          colour: "c",
-          purpose: "Accolade",
-          description: "Description for the first badge"
-        })
-
-      {:ok, _badge_type2} =
-        Account.create_badge_type(%{
-          name: "Badge B",
-          icon: "i",
-          colour: "c",
-          purpose: "Accolade",
-          description: "Description for the second badge"
-        })
-
-      {:ok, _badge_type3} =
-        Account.create_badge_type(%{
-          name: "Badge C",
-          icon: "i",
-          colour: "c",
-          purpose: "Accolade",
-          description: "Description for the third badge"
-        })
-    end
-  end
-
   def create_moderation_user_report(target_id, reporter_id, params \\ %{}) do
     Teiserver.Moderation.create_report_group_and_report(
       Map.merge(
@@ -556,6 +509,107 @@ defmodule Teiserver.TeiserverTestLib do
     |> ConCache.ets()
     |> :ets.tab2list()
     |> Enum.each(fn {key, _} -> ConCache.delete(cache, key) end)
+  end
+
+  def start_spring_server(context \\ %{}) do
+    listener_types = Map.get(context, :start_spring_server, :tcp) |> List.wrap()
+
+    listeners =
+      for transport_type <- listener_types do
+        ref = make_ref()
+        child_spec = Teiserver.Application.spring_server_child(ref, transport_type)
+
+        assert {:ok, pid} = Supervisor.start_child(Teiserver.Supervisor, child_spec)
+
+        {transport_type, %{pid: pid, port: :ranch.get_port(ref), ref: ref}}
+      end
+
+    on_exit(fn ->
+      for %{ref: ref} <- listeners do
+        assert :ok = :ranch.stop_listener(ref)
+      end
+    end)
+
+    {:ok, %{spring_server: Map.new(listeners)}}
+  end
+
+  def start_coordinator!() do
+    assert {:ok, pid} = Teiserver.Coordinator.start_coordinator()
+
+    on_exit(fn ->
+      assert :ok =
+               DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, pid)
+    end)
+  end
+
+  defp do_connect_socket(context, :tcp),
+    do: do_connect_socket(context, :tcp, transport: :gen_tcp)
+
+  defp do_connect_socket(context, :tls),
+    do: do_connect_socket(context, :tls, verify: :verify_none, transport: :ssl)
+
+  defp do_connect_socket(context, transport_type, opts) do
+    {transport, opts} = Keyword.pop!(opts, :transport)
+    port = get_in(context, [:spring_server, transport_type, :port])
+
+    assert is_integer(port),
+           """
+           Spring server was not started, must do one of either:
+
+               {:ok, server_context} = Teiserver.TeiserverTestLib.start_spring_server(%{start_spring_server: #{inspect(transport_type)}})
+               setup_function(server_context)
+
+               @import Teiserver.TeiserverTestLib
+               @moduletag start_spring_server: #{inspect(transport_type)}
+               setup start_spring_server
+               text "bla", context do
+                 setup_function(context)
+               end
+
+           Where setup_function is raw_setup or spring_tls_setup
+           """
+
+    socket_opts = Keyword.merge(opts, active: false)
+
+    {:ok, socket} = transport.connect(@host, port, socket_opts)
+
+    %{socket: socket}
+  end
+
+  defp make_async_transport() do
+    %{send: fn _x, _y -> nil end}
+  end
+
+  defp seed_badge_types() do
+    # Create the badge types
+    if Enum.empty?(AccoladeLib.get_badge_types()) do
+      {:ok, _badge_type1} =
+        Account.create_badge_type(%{
+          name: "Badge A",
+          icon: "i",
+          colour: "c",
+          purpose: "Accolade",
+          description: "Description for the first badge"
+        })
+
+      {:ok, _badge_type2} =
+        Account.create_badge_type(%{
+          name: "Badge B",
+          icon: "i",
+          colour: "c",
+          purpose: "Accolade",
+          description: "Description for the second badge"
+        })
+
+      {:ok, _badge_type3} =
+        Account.create_badge_type(%{
+          name: "Badge C",
+          icon: "i",
+          colour: "c",
+          purpose: "Accolade",
+          description: "Description for the third badge"
+        })
+    end
   end
 end
 

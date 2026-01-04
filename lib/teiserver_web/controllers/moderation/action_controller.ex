@@ -95,7 +95,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
             "Moderation:Action updated",
             "Moderation:Action created"
           ],
-          details_equal: {"action_id", action.id |> to_string}
+          details_equal: {"action_id", action.id |> to_string()}
         ],
         joins: [:user],
         order_by: "Newest first"

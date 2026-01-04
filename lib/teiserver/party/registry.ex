@@ -14,7 +14,12 @@ defmodule Teiserver.Party.Registry do
   end
 
   @spec count() :: non_neg_integer()
-  def count(), do: Horde.Registry.count(__MODULE__)
+  def count() do
+    case Horde.Registry.count(__MODULE__) do
+      :undefined -> 0
+      x -> x
+    end
+  end
 
   def start_link() do
     Horde.Registry.start_link(keys: :unique, name: __MODULE__)

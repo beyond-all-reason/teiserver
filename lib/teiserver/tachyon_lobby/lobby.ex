@@ -197,7 +197,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def get_details(id) do
     GenServer.call(via_tuple(id), :get_details)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_battle}
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
   @spec start_link({id(), start_params()}) :: GenServer.on_start()
@@ -305,7 +305,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   This should only be used for tests, because there is some gnarly logic in
   generating the start script and it's a bit hard to test end to end
   """
-  @spec get_start_script(id()) :: TachyonBattle.start_script()
+  @spec get_start_script(id()) :: Autohost.start_script()
   def get_start_script(lobby_id) do
     GenServer.call(via_tuple(lobby_id), :get_start_script)
   end
@@ -628,7 +628,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       # the player back into an ally team. Although they may end up in a different ally team
       # it is largely useless, so for simplicity sake, ignore the join_queue command
       is_map_key(state.players, user_id) and
-          Enum.count(state.spectators, fn {_, s} -> s.join_queue_position != nil end) == 0 ->
+          Enum.all?(state.spectators, fn {_, s} -> s.join_queue_position == nil end) ->
         {:reply, :ok, state}
 
       # swap the player with the first in the join queue
@@ -1252,7 +1252,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp bot_id?(id) when is_integer(id), do: false
   defp bot_id?(id), do: String.starts_with?(id, "bot")
 
-  @spec gen_start_script(state()) :: TachyonBattle.start_script()
+  @spec gen_start_script(state()) :: Autohost.start_script()
   defp gen_start_script(state) do
     sorted =
       Map.values(state.players)
@@ -1273,7 +1273,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
             players =
               for player <- players do
                 %{
-                  userId: to_string(player.id),
+                  user_id: player.id,
                   name: player.name,
                   password: player.password
                 }
@@ -1282,11 +1282,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
             bots =
               for bot <- bots do
                 %{
-                  hostUserId: to_string(bot.host_user_id),
+                  host_user_id: bot.host_user_id,
                   name: Map.get(bot, :name),
-                  aiShortName: bot.short_name,
-                  aiVersion: Map.get(bot, :version),
-                  aiOptions: bot.options
+                  ai_short_name: bot.short_name,
+                  ai_version: Map.get(bot, :version),
+                  ai_options: bot.options
                 }
                 |> Enum.reject(fn {_, v} -> v == nil || v == %{} end)
                 |> Map.new()
@@ -1299,14 +1299,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
       end
 
     %{
-      engineVersion: state.engine_version,
-      gameName: state.game_version,
-      mapName: state.map_name,
-      startPosType: :ingame,
-      allyTeams: ally_teams,
+      engine_version: state.engine_version,
+      game_name: state.game_version,
+      map_name: state.map_name,
+      start_pos_type: :ingame,
+      ally_teams: ally_teams,
       spectators:
         Enum.map(state.spectators, fn {_s_id, s} ->
-          %{userId: to_string(s.id), name: s.name, password: s.password}
+          %{user_id: s.id, name: s.name, password: s.password}
         end)
     }
   end

@@ -189,6 +189,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       [%{"userId" => ^uid2}] = start_req["data"]["spectators"]
 
       start_req_response = %{
+        # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
         port: 32781,
         ips: ["127.0.0.1"]
       }
@@ -516,6 +517,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         start_req = Tachyon.recv_message!(ctx[:autohost_client])
 
       start_req_response = %{
+        # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
         port: 32781,
         ips: ["127.0.0.1"]
       }

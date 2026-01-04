@@ -129,6 +129,10 @@ defmodule Teiserver.Account do
   end
 
   def user_stat_query(id, args) do
+    if id == nil and args[:search] == nil do
+      raise ArgumentError, "user_stat_query called without either user id or search parameters"
+    end
+
     UserStatLib.query_user_stats()
     |> UserStatLib.search(%{user_id: id})
     |> UserStatLib.search(args[:search])
@@ -1928,9 +1932,7 @@ defmodule Teiserver.Account do
   def create_friend_request(from_user_id, to_user_id) do
     {allowed, reason} = can_send_friend_request_with_reason?(from_user_id, to_user_id)
 
-    if not allowed do
-      {:error, reason}
-    else
+    if allowed do
       # Check for auto-accept scenario
       case get_friend_request(to_user_id, from_user_id) do
         nil ->
@@ -1939,6 +1941,7 @@ defmodule Teiserver.Account do
 
         existing_request ->
           # Auto-accept the existing request
+          # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
           with :ok <- FriendRequestLib.accept_friend_request(existing_request) do
             # Send pubsub broadcasts for both users to update UI
             PubSub.broadcast(
@@ -1990,6 +1993,8 @@ defmodule Teiserver.Account do
               {:error, reason}
           end
       end
+    else
+      {:error, reason}
     end
   end
 
@@ -2217,6 +2222,7 @@ defmodule Teiserver.Account do
   @spec update_client(T.userid(), map()) :: nil | :ok
   defdelegate update_client(userid, partial_client), to: ClientLib
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: Remove these in favour of update_client
   @spec merge_update_client(map()) :: nil | :ok
   defdelegate merge_update_client(client), to: ClientLib

@@ -32,7 +32,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
         {0, 10_000}
       else
         {Map.get(params, "page", 0)
-         |> int_parse
+         |> int_parse()
          |> max(0), @page_size}
       end
 
@@ -108,10 +108,11 @@ defmodule TeiserverWeb.Admin.LobbyController do
 
     {page, page_size} =
       if params["page"] == "all" do
+        # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
         {0, 10000}
       else
         {Map.get(params, "page", 0)
-         |> int_parse
+         |> int_parse()
          |> max(0), @page_size}
       end
 

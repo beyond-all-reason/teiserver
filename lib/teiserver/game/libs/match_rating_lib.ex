@@ -20,6 +20,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     "Partied Team"
   ]
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO Remove "Team" from here once the split is done
 
   @spec rating_type_list() :: [String.t()]
@@ -667,7 +668,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     winning_team =
       team_scores
       |> Enum.sort_by(fn {_id, score} -> score end, &>=/2)
-      |> hd
+      |> hd()
       |> elem(0)
 
     %{
@@ -754,7 +755,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   defp save_rating_logs(match_id, win_ratings, loss_ratings, opts) do
     rerate? = Keyword.get(opts, :rerate?, false)
 
-    if(rerate?) do
+    if rerate? do
       Ecto.Multi.new()
       |> Ecto.Multi.run(:delete_existing, fn repo, _ ->
         query = """

@@ -15,8 +15,8 @@ defmodule Teiserver.Account.LeaderboardReport do
   def run(_conn, params) do
     params = apply_defaults(params)
 
-    days = params["days"] |> int_parse
-    limit = params["limit"] |> int_parse
+    days = params["days"] |> int_parse()
+    limit = params["limit"] |> int_parse()
 
     activity_time =
       Timex.today()
@@ -122,7 +122,7 @@ defmodule Teiserver.Account.LeaderboardReport do
         extra.noshow
       ]
     end)
-    |> add_csv_headings
+    |> add_csv_headings()
     |> CSV.encode(separator: ?\t)
     |> Enum.to_list()
   end
@@ -132,7 +132,7 @@ defmodule Teiserver.Account.LeaderboardReport do
       %{
         "days" => "35",
         "limit" => "50",
-        "game_type" => MatchRatingLib.rating_type_list() |> hd,
+        "game_type" => MatchRatingLib.rating_type_list() |> hd(),
         "extended" => "false"
       },
       Map.get(params, "report", %{})

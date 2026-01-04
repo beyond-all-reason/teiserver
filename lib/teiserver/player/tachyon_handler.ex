@@ -327,6 +327,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("messaging/send", "request", _message_id, msg, state) do
+    # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
     with {:ok, target} <- message_target_from_tachyon(msg["data"]["target"]) do
       case target do
         {:player, _} ->
@@ -507,10 +508,7 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("user/subscribeUpdates", "request", _message_id, msg, state) do
     {ok_ids, invalid_ids} = TachyonParser.parse_user_ids(msg["data"]["userIds"])
 
-    if not Enum.empty?(invalid_ids) do
-      details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
-      {:error_response, :invalid_request, details, state}
-    else
+    if Enum.empty?(invalid_ids) do
       case Player.Session.subscribe_updates(state.user.id, ok_ids) do
         :ok ->
           {:response, state}
@@ -519,16 +517,16 @@ defmodule Teiserver.Player.TachyonHandler do
           details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
           {:error_response, :invalid_request, details, state}
       end
+    else
+      details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
+      {:error_response, :invalid_request, details, state}
     end
   end
 
   def handle_command("user/unsubscribeUpdates", "request", _message_id, msg, state) do
     {ok_ids, invalid_ids} = TachyonParser.parse_user_ids(msg["data"]["userIds"])
 
-    if not Enum.empty?(invalid_ids) do
-      details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
-      {:error_response, :invalid_request, details, state}
-    else
+    if Enum.empty?(invalid_ids) do
       case Player.Session.unsubscribe_updates(state.user.id, ok_ids) do
         :ok ->
           {:response, state}
@@ -537,6 +535,9 @@ defmodule Teiserver.Player.TachyonHandler do
           details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
           {:error_response, :invalid_request, details, state}
       end
+    else
+      details = "invalid user ids: #{Enum.join(invalid_ids, ", ")}"
+      {:error_response, :invalid_request, details, state}
     end
   end
 
@@ -631,6 +632,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/create", "request", _msg_id, msg, state) do
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: the `lobby/update` has very similar logic. There should be a way
     # to combine the parsing
     create_data = %{

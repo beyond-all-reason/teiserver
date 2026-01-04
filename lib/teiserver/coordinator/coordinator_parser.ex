@@ -17,7 +17,8 @@ defmodule Teiserver.Coordinator.Parser do
         :say
 
       String.slice(msg, 0..0) == "$" and String.length(msg) > 1 ->
-        cmd_name = msg |> String.replace("$", "") |> String.downcase() |> String.split(" ") |> hd
+        cmd_name =
+          msg |> String.replace("$", "") |> String.downcase() |> String.split(" ") |> hd()
 
         if Enum.member?(@passthrough, cmd_name) do
           :say
@@ -49,8 +50,8 @@ defmodule Teiserver.Coordinator.Parser do
       error: nil,
       senderid: userid
     }
-    |> parse_silence
-    |> parse_command_name
+    |> parse_silence()
+    |> parse_command_name()
   end
 
   defp parse_silence(%{remaining: remaining} = cmd) do

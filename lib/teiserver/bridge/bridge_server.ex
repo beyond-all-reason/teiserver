@@ -387,7 +387,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
     new_message =
       message
-      |> convert_emoticons
+      |> convert_emoticons()
 
     Api.Message.create(channel, "**#{author}**: #{new_message}")
   end

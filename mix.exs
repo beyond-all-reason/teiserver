@@ -5,7 +5,7 @@ defmodule Teiserver.MixProject do
     [
       app: :teiserver,
       version: "0.1.0",
-      elixir: ">= 1.12.2",
+      elixir: ">= 1.19.4",
       description: description(),
       package: package(),
       dialyzer: dialyzer(),
@@ -14,8 +14,13 @@ defmodule Teiserver.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [
+      test_coverage: [tool: ExCoveralls]
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
@@ -75,6 +80,7 @@ defmodule Teiserver.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:prom_ex, "~> 1.11.0"},
+      {:peep, "~> 3.5.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
@@ -99,7 +105,8 @@ defmodule Teiserver.MixProject do
       {:elixir_uuid, "~> 1.2"},
       {:excoveralls, "~> 0.15.3", only: :test, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4.7", only: [:dev, :test], runtime: false},
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:dart_sass, "~> 0.7", only: [:dev]},
       {:tzdata, "~> 1.1.2"},
       {:ex_ulid, "~> 0.1.0"},
@@ -113,7 +120,7 @@ defmodule Teiserver.MixProject do
       {:csv, "~> 2.4"},
       {:mdex, "~> 0.2"},
       {:ranch, "~> 1.8"},
-      {:horde, "~> 0.9"},
+      {:horde, "~> 0.10"},
       {:etop, "~> 0.7.0"},
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},

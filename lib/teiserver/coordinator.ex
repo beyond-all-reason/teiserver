@@ -4,29 +4,19 @@ defmodule Teiserver.Coordinator do
   alias Teiserver.Data.Types, as: T
   require Logger
 
-  @spec do_start() :: :ok | :already_started
-  defp do_start() do
-    # Start the supervisor server
-    result =
-      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
-        Teiserver.Coordinator.CoordinatorServer,
-        name: Teiserver.Coordinator.CoordinatorServer, data: %{}
-      })
-
-    case result do
-      {:ok, _coordinator_pid} -> :ok
-      {:failure, "Already started"} -> :already_started
-    end
-  end
-
-  @spec start_coordinator() :: :ok | {:failure, String.t()}
+  @spec start_coordinator() ::
+          {:error, {:already_started, pid()}} | DynamicSupervisor.on_start_child()
   def start_coordinator() do
-    cond do
-      get_coordinator_pid() != nil ->
-        {:failure, "Already started"}
+    case get_coordinator_pid() do
+      nil ->
+        # Start the supervisor server
+        DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
+          Teiserver.Coordinator.CoordinatorServer,
+          name: Teiserver.Coordinator.CoordinatorServer, data: %{}
+        })
 
-      true ->
-        do_start()
+      pid ->
+        {:error, {:already_started, pid}}
     end
   end
 

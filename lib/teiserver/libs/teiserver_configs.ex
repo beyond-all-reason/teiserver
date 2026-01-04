@@ -453,6 +453,15 @@ defmodule Teiserver.TeiserverConfigs do
       default: false,
       update_callback: &Teiserver.Lobby.disable_live_lobby_feature(&1)
     })
+
+    add_site_config_type(%{
+      key: "lobby.Unranked lobby restrictions",
+      section: "Lobbies",
+      type: "boolean",
+      permissions: ["Admin"],
+      description: "If enabled unranked lobbies can have rating and rank restrictions set.",
+      default: true
+    })
   end
 
   defp discord_configs() do

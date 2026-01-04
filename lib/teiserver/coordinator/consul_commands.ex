@@ -283,6 +283,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     else
       lines =
         state.last_seen_map
+        # credo:disable-for-lines:6 Credo.Check.Refactor.FilterFilter
         |> Enum.filter(fn {userid, seen_at} ->
           Enum.member?(lobby.players, userid) and now - seen_at > min_diff_ms
         end)
@@ -290,7 +291,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           Client.get_client_by_id(userid).player
         end)
         |> Enum.map(fn {userid, seen_at} ->
-          seconds_ago = ((now - seen_at) / 1000) |> round
+          seconds_ago = ((now - seen_at) / 1000) |> round()
           {userid, seconds_ago}
         end)
         |> Enum.sort_by(fn {_userid, seconds_ago} -> seconds_ago end, &<=/2)
@@ -445,11 +446,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
               balance.time_taken < 1000 ->
                 "Time taken: #{balance.time_taken}us"
 
+              # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
               balance.time_taken < 1000_000 ->
                 t = round(balance.time_taken / 1000)
                 "Time taken: #{t}ms"
 
+              # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
               balance.time_taken < 1000_000_000 ->
+                # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
                 t = round(balance.time_taken / 1000_000)
                 "Time taken: #{t}s"
             end

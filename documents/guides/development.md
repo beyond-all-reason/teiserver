@@ -25,10 +25,10 @@ To run Teiserver locally you can use:
 mix phx.server
 ```
 
-Or run it in interactive mode (a REPL is available):
+Or run it in interactive mode with [debugging enabled](https://hexdocs.pm/elixir/debugging.html#pry) (a REPL is available):
 
 ```bash
-iex -S mix phx.server
+iex --dbg pry -S mix phx.server
 ```
 
 > [!WARNING]
@@ -41,8 +41,8 @@ When successful, the following services should be available:
 
 The website should be available via the URLs below:
 
-- HTTP: [http://localhost:4000/]
-- HTTPS: [https://localhost:8888/]
+- HTTP: http://localhost:4000/
+- HTTPS: https://localhost:8888/
 
 ### Spring Lobby Server
 

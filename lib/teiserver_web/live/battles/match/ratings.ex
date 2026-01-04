@@ -69,7 +69,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
       socket
       |> assign(:filters, new_filters)
       |> assign(:page, 0)
-      |> update_match_list
+      |> update_match_list()
 
     {:noreply, socket}
   end

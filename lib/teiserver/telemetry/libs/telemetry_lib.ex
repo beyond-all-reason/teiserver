@@ -11,6 +11,7 @@ defmodule Teiserver.Telemetry.TelemetryLib do
 
   @spec get_totals_and_reset :: map()
   def get_totals_and_reset() do
+    # credo:disable-for-next-line Credo.Check.Readability.PreferImplicitTry
     try do
       GenServer.call(TelemetryServer, :get_totals_and_reset)
       # In certain situations (e.g. just after startup) it can be
@@ -77,7 +78,7 @@ defmodule Teiserver.Telemetry.TelemetryLib do
         event_name: [:spring, :in],
         measurement: :duration,
         reporter_options: [
-          buckets: [1, 10, 50, 100, 150, 250, 500, 1_000]
+          buckets: [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181]
         ],
         tags: [:command]
       ),
@@ -86,7 +87,7 @@ defmodule Teiserver.Telemetry.TelemetryLib do
         event_name: [:spring, :out],
         measurement: :duration,
         reporter_options: [
-          buckets: [1, 10, 50, 100, 150, 250, 500, 1_000]
+          buckets: [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181]
         ],
         tags: [:command]
       ),
@@ -98,7 +99,7 @@ defmodule Teiserver.Telemetry.TelemetryLib do
       ),
       counter(
         [:teiserver, :spring, :out, :count],
-        event_name: [:spring, :event],
+        event_name: [:spring, :out],
         measurement: :count,
         tags: [:command]
       )
