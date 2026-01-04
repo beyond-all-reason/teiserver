@@ -19,8 +19,10 @@ defmodule Teiserver.OAuth.CodeQueries do
   end
 
   def where_code(query, value) do
+    hashed_value = Teiserver.Helper.HashHelper.hash_with_fixed_salt(value)
+
     from e in query,
-      where: e.value == ^value
+      where: e.value == ^hashed_value
   end
 
   def where_app_ids(query, app_ids) do

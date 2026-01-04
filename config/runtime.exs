@@ -34,10 +34,11 @@ config :teiserver, Teiserver.Setup,
   key: Teiserver.ConfigHelpers.get_env("TEI_SETUP_ROOT_KEY", nil)
 
 config :teiserver,
-  blog_allow_upload: System.get_env("TEI_BLOG_ALLOW_UPLOAD") == "TRUE",
+  blog_allow_upload: Teiserver.ConfigHelpers.get_env("TEI_BLOG_ALLOW_UPLOAD", false, :bool),
   blog_upload_path: System.get_env("TEI_BLOG_UPLOAD_PATH"),
   blog_upload_extensions:
-    System.get_env("TEI_BLOG_UPLOAD_EXTENSIONS", ".jpg .jpeg .png") |> String.split(" ")
+    System.get_env("TEI_BLOG_UPLOAD_EXTENSIONS", ".jpg .jpeg .png") |> String.split(" "),
+  argon2_salt: Teiserver.ConfigHelpers.get_env("TEI_ARGON2_SALT", "default_salt_value_goes_Here")
 
 config :teiserver, Teiserver,
   game_name: "Beyond All Reason",

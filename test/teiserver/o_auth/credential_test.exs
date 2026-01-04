@@ -33,6 +33,7 @@ defmodule Teiserver.OAuth.CredentialTest do
     assert cred.application.uid == app.uid
     # sanity check to make sure we're not storing cleartext password
     refute cred.hashed_secret =~ "very-secret"
+    assert Argon2.verify_pass("very-secret", cred.hashed_secret)
   end
 
   test "can get a token from credentials", %{app: app, bot: bot} do
