@@ -415,7 +415,7 @@ defmodule Teiserver.Account do
     accolade_query(nil, args)
   end
 
-  @spec accolade_query(integer(), keyword()) :: Ecto.Query.t()
+  @spec accolade_query(integer() | nil, keyword()) :: Ecto.Query.t()
   def accolade_query(id, args) do
     AccoladeLib.query_accolades()
     |> AccoladeLib.search(%{id: id})
