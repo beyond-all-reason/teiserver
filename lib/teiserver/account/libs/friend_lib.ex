@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.FriendLib do
   @moduledoc false
   alias Teiserver.Account
+  alias Teiserver.Data.Types, as: T
 
   @spec colours :: atom
   def colours(), do: :success
