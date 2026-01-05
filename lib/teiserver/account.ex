@@ -570,7 +570,7 @@ defmodule Teiserver.Account do
     smurf_key_query(nil, args)
   end
 
-  @spec smurf_key_query(integer(), keyword()) :: Ecto.Query.t()
+  @spec smurf_key_query(integer() | nil, keyword()) :: Ecto.Query.t()
   def smurf_key_query(id, args) do
     SmurfKeyLib.query_smurf_keys()
     |> SmurfKeyLib.search(%{id: id})
