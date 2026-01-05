@@ -81,6 +81,7 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
       {"resetchevlevels", [],
        "Resets the chevron level restrictions to not exist. Requires boss privileges.",
        :everybody},
+      # credo:disable-for-lines:4 Credo.Check.Readability.MaxLineLength
       # {"resetranklevels", [], "Resets the rank level limits to not exist. Player limiting commands are designed to be used with $rename, please be careful not to abuse them. Requires boss privileges.", :everybody},
       # {"minranklevel", ["min-level"], "Sets the minimum rank level for players, you must be at least this rank to be a player. Requires boss privileges.", :everybody},
       # {"maxranklevel", ["max-level"], "Sets the maximum rank level for players, you must be at below this rank to be a player. Requires boss privileges.", :everybody},

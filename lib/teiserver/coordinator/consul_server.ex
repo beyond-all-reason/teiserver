@@ -694,8 +694,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   @spec request_user_change_status(T.client(), T.client(), map()) :: {boolean, map() | nil}
-  # defp request_user_change_status(new_client, %{moderator: true, ready: false}, _state), do: {true, %{new_client | player: false}}
-  # defp request_user_change_status(new_client, %{moderator: true}, _state), do: {true, new_client}
   defp request_user_change_status(_new_client, nil, _state), do: {false, nil}
 
   defp request_user_change_status(new_client, %{userid: userid} = existing, state) do
@@ -809,11 +807,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       cond do
         Enum.empty?(get_queue(state)) ->
           {change, new_client}
-
-        # Made redundant from the ChatLib.say("$joinq") above
-        # hd(get_queue(state)) != userid and new_client.player == true and existing.player == false ->
-        #   ChatLib.sayprivateex(state.coordinator_id, userid, "You are not part of the join queue so cannot become a player. Add yourself to the queue by chatting $joinq", state.lobby_id)
-        #   {false, nil}
 
         true ->
           {change, new_client}

@@ -194,7 +194,8 @@ defmodule Teiserver.Game.BalancerServer do
     |> Base.encode64()
   end
 
-  # long term, there in interest in confirming do_make_balance is a stateless pure function, which would make it easier to test
+  # long term, there in interest in confirming do_make_balance is a stateless pure function, which would make it easier
+  # to test
   @spec do_make_balance(non_neg_integer(), [T.client()], List.t()) :: map()
   defp do_make_balance(team_count, players, opts) do
     team_size = calculate_team_size(team_count, players)
@@ -228,8 +229,10 @@ defmodule Teiserver.Game.BalancerServer do
     end
   end
 
-  # This function is run before balancing but calculates the expected team size after balancing, which is important for determining whether a game is small or large team.
-  # After balancing the team size will equal the number of players divided by team count rounded up. So if team 1 has 6 players and team 2 has 4 players, after balancing this will become a 5v5 not 6v4.
+  # This function is run before balancing but calculates the expected team size after balancing, which is important for
+  # determining whether a game is small or large team.
+  # After balancing the team size will equal the number of players divided by team count rounded up. So if team 1 has
+  # 6 players and team 2 has 4 players, after balancing this will become a 5v5 not 6v4.
   # After balancing, the team size will be as even as possible.
   @spec calculate_team_size(non_neg_integer(), [T.client()]) :: non_neg_integer()
   def calculate_team_size(team_count, players) do

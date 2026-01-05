@@ -184,8 +184,9 @@ defmodule Teiserver.Account.TOTPLib do
         :ok
 
       true ->
-        # Second test is needed. If :since is provided and NimbleTOTP.valid? returns false, it could either be that the OTP is wrong, or that it got used.
-        # To figure out which one it is, we need to test a second time without since, as a false this time indicates that the OTP is invalid, and a True that it got used
+        # Second test is needed. If :since is provided and NimbleTOTP.valid? returns false, it could either be that
+        # the OTP is wrong, or that it got used. To figure out which one it is, we need to test a second time without
+        # since, as a false this time indicates that the OTP is invalid, and a True that it got used
         cond do
           NimbleTOTP.valid?(secret, otp, time: time) ->
             {:error, :used}
