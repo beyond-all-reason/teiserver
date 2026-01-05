@@ -964,6 +964,7 @@ defmodule Teiserver.Account do
     get_rating(user_id, rating_type_id, MatchRatingLib.active_season())
   end
 
+  @spec get_rating(T.userid(), integer(), integer()) :: Rating.t() | nil
   def get_rating(user_id, rating_type_id, season)
       when is_integer(user_id) and is_integer(rating_type_id) and is_integer(season) do
     Teiserver.cache_get_or_store(:teiserver_user_ratings, {user_id, rating_type_id, season}, fn ->
