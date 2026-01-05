@@ -252,7 +252,7 @@ defmodule Teiserver.Account do
     badge_type_query(nil, args)
   end
 
-  @spec badge_type_query(integer(), keyword()) :: Ecto.Query.t()
+  @spec badge_type_query(integer() | nil, keyword()) :: Ecto.Query.t()
   def badge_type_query(id, args) do
     BadgeTypeLib.query_badge_types()
     |> BadgeTypeLib.search(%{id: id})
