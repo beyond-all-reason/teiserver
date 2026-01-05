@@ -2,7 +2,7 @@ defmodule Teiserver.Telemetry.SimpleLobbyEvent do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "telemetry_simple_lobby_events" do
+  typed_schema "telemetry_simple_lobby_events" do
     belongs_to :user, Teiserver.Account.User
     belongs_to :match, Teiserver.Battle.Match
     belongs_to :event_type, Teiserver.Telemetry.SimpleLobbyEventType

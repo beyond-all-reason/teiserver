@@ -5,14 +5,8 @@ defmodule Teiserver.OAuth.Credential do
   alias Teiserver.OAuth
 
   @type id :: non_neg_integer()
-  @type t :: %__MODULE__{
-          application: OAuth.Application.t(),
-          bot: Teiserver.Bot.Bot.t(),
-          bot_id: Teiserver.Bot.id(),
-          hashed_secret: binary()
-        }
 
-  schema "oauth_credentials" do
+  typed_schema "oauth_credentials" do
     belongs_to :application, OAuth.Application
     belongs_to :bot, Teiserver.Bot.Bot, primary_key: true
     field :client_id, :string

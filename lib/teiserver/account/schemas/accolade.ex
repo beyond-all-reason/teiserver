@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.Accolade do
   use TeiserverWeb, :schema
 
-  schema "teiserver_account_accolades" do
+  typed_schema "teiserver_account_accolades" do
     belongs_to :recipient, Teiserver.Account.User
     belongs_to :giver, Teiserver.Account.User
     belongs_to :badge_type, Teiserver.Account.BadgeType

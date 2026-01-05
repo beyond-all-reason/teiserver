@@ -1,23 +1,12 @@
 defmodule Teiserver.OAuth.Application do
   @moduledoc false
   use TeiserverWeb, :schema
-  alias Teiserver.Account.User
 
   @type id() :: non_neg_integer()
   @type app_id() :: String.t()
   @type scopes() :: nonempty_list(String.t())
-  @type t :: %__MODULE__{
-          name: String.t(),
-          owner: User.t(),
-          uid: app_id(),
-          scopes: scopes(),
-          redirect_uris: [String.t()],
-          description: String.t(),
-          inserted_at: DateTime.t(),
-          updated_at: DateTime.t()
-        }
 
-  schema "oauth_applications" do
+  typed_schema "oauth_applications" do
     field :name, :string
     belongs_to :owner, Teiserver.Account.User, primary_key: true
     field :uid, :string

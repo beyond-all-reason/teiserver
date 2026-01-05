@@ -2,7 +2,7 @@ defmodule Teiserver.Microblog.Tag do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "microblog_tags" do
+  typed_schema "microblog_tags" do
     field :name, :string
     field :colour, :string
     field :icon, :string

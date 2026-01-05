@@ -2,7 +2,7 @@ defmodule Teiserver.Communication.TextCallback do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "communication_text_callbacks" do
+  typed_schema "communication_text_callbacks" do
     field :name, :string
 
     field :icon, :string

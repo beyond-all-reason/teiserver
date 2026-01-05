@@ -1,9 +1,9 @@
 defmodule Teiserver.Config.UserConfig do
   @moduledoc false
-  use Ecto.Schema
+  use TypedEctoSchema
   import Ecto.Changeset
 
-  schema "config_user" do
+  typed_schema "config_user" do
     field :key, :string
     field :value, :string
     field :user_id, :id
