@@ -29,9 +29,8 @@ defmodule Teiserver.Matchmaking.PairingTest do
       teams = [[m1], [m2]]
       {:ok, pid} = PairingRoom.start("queue_id", queue_attrs(), teams, 20_000)
 
-      # credo:disable-for-lines:2 Credo.Check.Readability.LargeNumbers
       assert {:error, :no_match} =
-               PairingRoom.ready(pid, %{user_id: -81234, name: "irrelevant", password: "pass"})
+               PairingRoom.ready(pid, %{user_id: -81_234, name: "irrelevant", password: "pass"})
     end
 
     test "can join" do
