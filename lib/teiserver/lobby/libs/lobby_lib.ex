@@ -348,17 +348,17 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec get_lobby_member_count(T.lobby_id()) :: integer()
   def get_lobby_member_count(lobby_id) do
-    call_lobby(lobby_id, :get_member_count)
+    call_lobby(lobby_id, :get_member_count) || 0
   end
 
   @spec get_lobby_spectator_count(T.lobby_id()) :: integer()
   def get_lobby_spectator_count(lobby_id) do
-    call_lobby(lobby_id, :get_spectator_count)
+    call_lobby(lobby_id, :get_spectator_count) || 0
   end
 
   @spec get_lobby_player_count(T.lobby_id()) :: integer()
   def get_lobby_player_count(lobby_id) do
-    call_lobby(lobby_id, :get_player_count)
+    call_lobby(lobby_id, :get_player_count) || 0
   end
 
   @spec list_lobby_players(T.lobby_id()) :: [T.client()] | nil
