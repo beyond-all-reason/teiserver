@@ -36,7 +36,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # Commands that don't require the user to be logged in
   @unauthenticated_commands ~w(
-    PING STLS LOGIN REGISTER CONFIRMAGREEMENT RESETPASSWORDREQUEST EXIT CHANGEPASSWORD
+    PING STLS LOGIN REGISTER CONFIRMAGREEMENT RESETPASSWORDREQUEST EXIT CHANGEPASSWORD LISTCOMPFLAGS
     c.telemetry.upload_infolog c.telemetry.update_client_property c.telemetry.log_client_event c.telemetry.simple_client_event c.telemetry.complex_client_event
     c.auth.login_queue_heartbeat
   )
@@ -780,6 +780,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # Battles
   # OPENBATTLE type natType password port maxPlayers gameHash rank mapHash {engineName} {engineVersion} {map} {title} {gameName}
+  # credo:disable-for-previous-line Credo.Check.Readability.MaxLineLength
   defp do_handle("OPENBATTLE", data, msg_id, state) do
     response =
       case Regex.run(

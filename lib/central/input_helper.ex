@@ -78,7 +78,7 @@ defmodule Central.Helpers.InputHelper do
       label = label(form, field, humanize(field), label_opts)
       description = opts[:description] || ""
       error = TeiserverWeb.ErrorHelpers.error_tag(form, field)
-      [label, description, input, error || ""]
+      [label, description, input, error]
     end
   end
 

@@ -2,7 +2,7 @@ defmodule Teiserver.Account.Code do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "account_codes" do
+  typed_schema "account_codes" do
     field :value, :string
     # E.g. password reset
     field :purpose, :string

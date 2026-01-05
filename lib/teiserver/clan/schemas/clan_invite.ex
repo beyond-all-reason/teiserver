@@ -2,7 +2,7 @@ defmodule Teiserver.Clan.ClanInvite do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "teiserver_clan_invites" do
+  typed_schema "teiserver_clan_invites" do
     field :response, :string
 
     belongs_to :user, Teiserver.Account.User, primary_key: true

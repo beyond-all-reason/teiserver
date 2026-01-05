@@ -16,29 +16,6 @@ defmodule Teiserver.Account.SmurfMergeTask do
     :ok
   end
 
-  # defp merge_actions(from_id, to_id, "true") do
-  #   fields = ~w(target_id location location_id reason reporter_id response_text response_action followup code_references action_data responded_at expires responder_id inserted_at updated_at)a
-
-  #   new_reports = Account.list_reports(
-  #     search: [target_id: from_id],
-  #     limit: :infinity
-  #   )
-  #     |> Enum.map(fn report ->
-  #       fields
-  #         |> Map.new(fn k ->
-  #           {k, Map.get(report, k)}
-  #         end)
-  #         |> Map.put(:target_id, to_id)
-  #     end)
-
-  #   Ecto.Multi.new()
-  #     |> Ecto.Multi.insert_all(:insert_all, Teiserver.Account.Report, new_reports)
-  #     |> Repo.transaction()
-
-  #   :ok
-  # end
-  # defp merge_actions(_from_id, _to_id, "false"), do: :ok
-
   @spec merge_ratings(T.userid(), T.userid(), String.t()) :: :ok
   defp merge_ratings(_from_id, _to_id, "false"), do: :ok
 

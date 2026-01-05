@@ -2,7 +2,7 @@ defmodule Teiserver.Moderation.ReportGroup do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "moderation_report_groups" do
+  typed_schema "moderation_report_groups" do
     belongs_to :target, Teiserver.Account.User
     belongs_to :match, Teiserver.Battle.Match
 

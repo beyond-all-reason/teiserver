@@ -2,7 +2,7 @@ defmodule Teiserver.Logging.PageViewLog do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "page_view_logs" do
+  typed_schema "page_view_logs" do
     field :path, :string
     field :section, :string
     field :method, :string

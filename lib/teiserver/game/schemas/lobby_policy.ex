@@ -2,7 +2,7 @@ defmodule Teiserver.Game.LobbyPolicy do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "lobby_policies" do
+  typed_schema "lobby_policies" do
     field :name, :string
     field :preset, :string
 

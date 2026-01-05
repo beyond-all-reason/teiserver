@@ -2,7 +2,7 @@ defmodule Teiserver.Chat.LobbyMessage do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "teiserver_lobby_messages" do
+  typed_schema "teiserver_lobby_messages" do
     field :content, :string
     field :inserted_at, :utc_datetime
     belongs_to :user, Teiserver.Account.User

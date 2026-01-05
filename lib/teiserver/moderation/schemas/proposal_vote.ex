@@ -3,7 +3,7 @@ defmodule Teiserver.Moderation.ProposalVote do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "moderation_proposal_votes" do
+  typed_schema "moderation_proposal_votes" do
     field :vote, :integer, default: 0
 
     belongs_to :user, Teiserver.Account.User, primary_key: true

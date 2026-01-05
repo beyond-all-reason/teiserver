@@ -77,5 +77,5 @@ jobs:
     - name: Compile the project
       run: mix compile
 
-    - name: Lint Elixir code to enforce code consistency # https://hexdocs.pm/credo/
-      run: mix credo
+    - name: Lint Elixir code to enforce code consistency # Credo's strict analysis: https://hexdocs.pm/credo/basic_usage.html#strict-analysis
+      run: mix credo --strict

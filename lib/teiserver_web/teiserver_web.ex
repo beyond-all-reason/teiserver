@@ -220,7 +220,7 @@ defmodule TeiserverWeb do
 
   def schema do
     quote do
-      use Ecto.Schema
+      use TypedEctoSchema
       import Ecto.Changeset
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
       import Teiserver.Helper.SchemaHelper

@@ -2,7 +2,7 @@ defmodule Teiserver.Logging.AuditLog do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "audit_logs" do
+  typed_schema "audit_logs" do
     field :action, :string
     field :details, :map
     field :ip, :string

@@ -73,8 +73,7 @@ defmodule Teiserver.Battle.MatchMonitorTest do
     assert monitor_pid != nil
 
     # Send a launch message for a non-existent lobby
-    # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
-    send(monitor_pid, {:new_message, 99999, "autohosts", "* Launching game..."})
+    send(monitor_pid, {:new_message, 99_999, "autohosts", "* Launching game..."})
 
     # Verify the server is still running (hasn't crashed)
     Teiserver.Support.Polling.poll_until(

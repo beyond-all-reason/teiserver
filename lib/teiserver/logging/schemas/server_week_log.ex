@@ -2,7 +2,7 @@ defmodule Teiserver.Logging.ServerWeekLog do
   use TeiserverWeb, :schema
 
   @primary_key false
-  schema "teiserver_server_week_logs" do
+  typed_schema "teiserver_server_week_logs" do
     field :year, :integer, primary_key: true
     field :week, :integer, primary_key: true
     field :date, :date

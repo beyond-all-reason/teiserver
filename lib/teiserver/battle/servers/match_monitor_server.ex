@@ -292,8 +292,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         if host == nil do
           Logger.error("No host found for from_id: #{from_id} for message #{to}:#{msg}")
 
-          # Optionally, handle the case here, such as by sending a message back to the user or taking other corrective actions.
-          # Just returning {:noreply, state} for now.
+          # Optionally, handle the case here, such as by sending a message back to the user or taking other corrective
+          # actions. Just returning {:noreply, state} for now.
           {:noreply, state}
         else
           case to do

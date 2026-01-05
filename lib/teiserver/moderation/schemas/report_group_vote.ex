@@ -2,7 +2,7 @@ defmodule Teiserver.Moderation.ReportGroupVote do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  schema "moderation_report_group_votes" do
+  typed_schema "moderation_report_group_votes" do
     belongs_to :report_group, Teiserver.Moderation.ReportGroup
     belongs_to :user, Teiserver.Account.User
 
