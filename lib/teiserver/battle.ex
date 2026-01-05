@@ -84,8 +84,8 @@ defmodule Teiserver.Battle do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_match!(Integer.t() | List.t()) :: Match.t()
-  @spec get_match!(Integer.t(), List.t()) :: Match.t()
+  @spec get_match!(T.match_id() | keyword()) :: Match.t()
+  @spec get_match!(T.match_id(), keyword()) :: Match.t()
   def get_match!(id) when not is_list(id) do
     match_query(id, [])
     |> Repo.one!()
@@ -115,8 +115,8 @@ defmodule Teiserver.Battle do
       nil
 
   """
-  @spec get_match(Integer.t() | List.t()) :: Match.t()
-  @spec get_match(Integer.t(), List.t()) :: Match.t()
+  @spec get_match(T.match_id() | keyword()) :: Match.t() | nil
+  @spec get_match(T.match_id(), keyword()) :: Match.t() | nil
   def get_match(id) when not is_list(id) do
     match_query(id, [])
     |> Repo.one()

@@ -1,10 +1,6 @@
 [
   # This started after inverting a condition in an `if/else` statement. It's hard to fix with all the other ignored warnings here.
   {"lib/teiserver/account.ex", :guard_fail},
-  {"lib/teiserver/account/accolades/accolade_bot_server.ex", :pattern_match},
-  {"lib/teiserver/account/accolades/accolade_bot_server.ex", :unknown_type},
-  {"lib/teiserver/account/accolades/accolade_bot_server.ex", :no_return},
-  {"lib/teiserver/account/accolades/accolade_bot_server.ex", :call},
   {"lib/teiserver/account/reports/growth_report.ex", :no_return},
   {"lib/teiserver/account/reports/growth_report.ex", :call},
   {"lib/teiserver/account/reports/population_report.ex", :no_return},
