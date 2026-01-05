@@ -4,6 +4,8 @@ defmodule Teiserver.Telemetry.SimpleServerEventTest do
   alias Teiserver.{Telemetry}
   alias Teiserver.TeiserverTestLib
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/20708759718/job/59444391469
+  @tag :needs_attention
   test "simple server events" do
     r = :rand.uniform(999_999_999)
 
