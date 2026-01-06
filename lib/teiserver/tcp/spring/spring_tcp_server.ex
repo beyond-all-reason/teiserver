@@ -28,17 +28,22 @@ defmodule Teiserver.SpringTcpServer do
       Config.get_site_config_cache("teiserver.Sprint TCP Server max heap size")
     )
 
-    state = init_state(ref, transport)
+    case init_state(ref, transport) do
+      {:ok, state} ->
+        case Teiserver.Config.get_site_config_cache("system.Redirect url") do
+          nil ->
+            loop(state)
 
-    case Teiserver.Config.get_site_config_cache("system.Redirect url") do
-      nil ->
-        loop(state)
+          redirect_ip ->
+            redirect_args = {redirect_ip, get_redirect_port(state)}
+            SpringOut.reply(:redirect, redirect_args, nil, state)
 
-      redirect_ip ->
-        redirect_args = {redirect_ip, get_redirect_port(state)}
-        SpringOut.reply(:redirect, redirect_args, nil, state)
+            send(self(), :terminate)
+        end
 
-        send(self(), :terminate)
+      {:error, err} ->
+        Logger.debug("Cannot start tcp connection because #{inspect(err)}")
+        {:stop, :normal, nil}
     end
   end
 
@@ -1264,64 +1269,71 @@ defmodule Teiserver.SpringTcpServer do
   defp init_state(ref, transport) do
     socket = init_socket(ref, transport)
 
-    {:ok, {address, port}} = transport.peername(socket)
+    case transport.peername(socket) do
+      {:error, err} ->
+        {:error, err}
 
-    ip =
-      Tuple.to_list(address)
-      |> Enum.join(".")
+      {:ok, {address, port}} ->
+        ip =
+          Tuple.to_list(address)
+          |> Enum.join(".")
 
-    spring_config = Application.get_env(:teiserver, Teiserver.SpringTcpServer)
+        spring_config = Application.get_env(:teiserver, Teiserver.SpringTcpServer)
 
-    %{
-      # Connection state
-      message_part: "",
-      last_msg: System.system_time(:second),
-      socket: socket,
-      transport: transport,
-      ip: ip,
-      port: port,
+        state =
+          %{
+            # Connection state
+            message_part: "",
+            last_msg: System.system_time(:second),
+            socket: socket,
+            transport: transport,
+            ip: ip,
+            port: port,
 
-      # Client state
-      userid: nil,
-      username: nil,
-      lobby_host: false,
-      user: nil,
-      queues: [],
-      ready_queue_id: nil,
-      queued_userid: nil,
+            # Client state
+            userid: nil,
+            username: nil,
+            lobby_host: false,
+            user: nil,
+            queues: [],
+            ready_queue_id: nil,
+            queued_userid: nil,
 
-      # Connection microstate
-      msg_id: nil,
-      lobby_id: nil,
-      party_id: nil,
-      room_member_cache: %{},
-      known_users: %{},
-      known_battles: [],
-      print_client_messages: false,
-      print_server_messages: false,
-      script_password: nil,
-      exempt_from_cmd_throttle: false,
-      cmd_timestamps: [],
-      status_timestamps: [],
-      app_status: nil,
-      protocol_optimisation: :full,
-      pending_messages: [],
+            # Connection microstate
+            msg_id: nil,
+            lobby_id: nil,
+            party_id: nil,
+            room_member_cache: %{},
+            known_users: %{},
+            known_battles: [],
+            print_client_messages: false,
+            print_server_messages: false,
+            script_password: nil,
+            exempt_from_cmd_throttle: false,
+            cmd_timestamps: [],
+            status_timestamps: [],
+            app_status: nil,
+            protocol_optimisation: :full,
+            pending_messages: [],
 
-      # Caching app configs
-      flood_rate_limit_count:
-        Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
-      flood_rate_window_size:
-        Config.get_site_config_cache("teiserver.Spring flood rate window size"),
-      last_action_timestamp: nil,
-      server_messages: 0,
-      server_batches: 0,
-      client_messages: 0,
-      last_message_invalid: false
-    }
-    |> Map.merge(%{
-      heartbeat_timeout: Keyword.get(spring_config, :heartbeat_timeout),
-      heartbeat_interval: Keyword.get(spring_config, :heartbeat_interval)
-    })
+            # Caching app configs
+            flood_rate_limit_count:
+              Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
+            flood_rate_window_size:
+              Config.get_site_config_cache("teiserver.Spring flood rate window size"),
+            last_action_timestamp: nil,
+            server_messages: 0,
+            server_batches: 0,
+            client_messages: 0,
+            last_message_invalid: false
+          }
+          |> Map.merge(%{
+            heartbeat_timeout: Keyword.get(spring_config, :heartbeat_timeout),
+            heartbeat_interval: Keyword.get(spring_config, :heartbeat_interval)
+          })
+
+        {:ok, state}
+    end
   end
 
   defp init_socket(ref, transport) do
