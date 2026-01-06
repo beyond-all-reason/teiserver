@@ -286,6 +286,10 @@ defmodule Teiserver.Protocols.SpringOut do
     "REMOVESTARTRECT #{team}\n"
   end
 
+  defp do_reply(:add_script_tags, nil) do
+    "SETSCRIPTTAGS\n"
+  end
+
   defp do_reply(:add_script_tags, tags) do
     tags =
       tags
