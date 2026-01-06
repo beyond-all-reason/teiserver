@@ -284,8 +284,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @spec allowed_to_set_restrictions(map()) :: :ok | {:error, String.t()}
   def allowed_to_set_restrictions(state) do
     name =
-      state.lobby_id
-      |> Battle.get_lobby()
+      (Battle.get_lobby(state.lobby_id) || %{})
       |> Map.get(:name)
 
     cond do
@@ -299,6 +298,8 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
         :ok
     end
   end
+
+  defp allwelcome_name?(nil), do: false
 
   defp allwelcome_name?(name) do
     name =
