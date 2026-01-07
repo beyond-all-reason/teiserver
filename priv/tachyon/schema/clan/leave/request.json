@@ -1,0 +1,25 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/clan/leave/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ClanLeaveRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "clan/leave" },
+        "data": {
+            "title": "ClanLeaveRequestData",
+            "type": "object",
+            "properties": {
+                "userId": { "$ref": "../../definitions/userId.json" }
+            },
+            "required": ["userId"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

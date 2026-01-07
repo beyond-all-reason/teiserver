@@ -1,6 +1,10 @@
-defmodule Teiserver.Clans.ClanLib do
+defmodule Teiserver.Clan.ClanLib do
   use TeiserverWeb, :library
-  alias Teiserver.Clans.Clan
+  alias Teiserver.Clan.ClanSchema
+
+  @moduledoc """
+  Clan library functions
+  """
 
   # Functions
   @spec icon :: String.t()
@@ -9,7 +13,7 @@ defmodule Teiserver.Clans.ClanLib do
   @spec colours :: atom
   def colours, do: :info2
 
-  @spec make_favourite(Clan.t()) :: map()
+  @spec make_favourite(ClanSchema.t()) :: map()
   def make_favourite(clan) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
@@ -29,7 +33,7 @@ defmodule Teiserver.Clans.ClanLib do
   # Queries
   @spec query_clans() :: Ecto.Query.t()
   def query_clans do
-    from(clans in Clan)
+    from(clans in ClanSchema)
   end
 
   @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()

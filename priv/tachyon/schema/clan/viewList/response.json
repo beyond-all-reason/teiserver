@@ -1,0 +1,56 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/clan/viewList/response.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ClanViewListResponse",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "anyOf": [
+        {
+            "title": "ClanViewListOkResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "clan/viewList" },
+                "status": { "const": "success" },
+                "data": {
+                    "title": "ClanViewListOkResponseData",
+                    "type": "object",
+                    "properties": {
+                        "clansBaseData": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "../../definitions/clanBaseData.json"
+                            }
+                        }
+                    },
+                    "required": ["clansBaseData"]
+                }
+            },
+            "required": ["type", "messageId", "commandId", "status", "data"]
+        },
+        {
+            "title": "ClanViewListFailResponse",
+            "type": "object",
+            "properties": {
+                "type": { "const": "response" },
+                "messageId": { "type": "string" },
+                "commandId": { "const": "clan/viewList" },
+                "status": { "const": "failed" },
+                "reason": {
+                    "enum": [
+                        "internal_error",
+                        "unauthorized",
+                        "invalid_request",
+                        "command_unimplemented"
+                    ]
+                },
+                "details": { "type": "string" }
+            },
+            "required": ["type", "messageId", "commandId", "status", "reason"]
+        }
+    ]
+}

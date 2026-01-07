@@ -5,7 +5,18 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   """
   use GenServer
   alias Teiserver.Config
-  alias Teiserver.{Account, CacheUser, Clans, Room, Coordinator, Client, Moderation, Telemetry}
+
+  alias Teiserver.{
+    Account,
+    CacheUser,
+    Clan,
+    Room,
+    Coordinator,
+    Client,
+    Moderation,
+    Telemetry
+  }
+
   alias Teiserver.Lobby
   alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
@@ -68,7 +79,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     end)
 
     # Now join the clan channels
-    Clans.list_clans()
+    Clan.list_clans()
     |> Enum.each(fn clan ->
       room_name = Room.clan_room_name(clan.tag)
       Room.get_or_make_room(room_name, user.id, clan.id)

@@ -272,7 +272,7 @@ defmodule Teiserver.Protocols.SpringIn do
         # Do we have a clan?
         if user.clan_id do
           :timer.sleep(200)
-          clan = Teiserver.Clans.get_clan!(user.clan_id)
+          clan = Teiserver.Clan.get_clan!(user.clan_id)
           room_name = Room.clan_room_name(clan.tag)
           SpringOut.do_join_room(new_state, room_name)
         end

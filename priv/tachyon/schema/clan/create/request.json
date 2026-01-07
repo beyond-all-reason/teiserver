@@ -1,0 +1,27 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/clan/create/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ClanCreateRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "clan/create" },
+        "data": {
+            "title": "ClanCreateRequestData",
+            "type": "object",
+            "properties": {
+                "clanBaseData": {
+                    "$ref": "../../definitions/clanBaseData.json"
+                }
+            },
+            "required": ["clanBaseData"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}
