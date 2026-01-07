@@ -83,20 +83,46 @@ defmodule Teiserver.Player.Session do
   # argument to init()
   @messaging_buffer_size 200
 
-  def start_link({_conn_pid, user} = arg) do
-    GenServer.start_link(__MODULE__, arg, name: via_tuple(user.id))
+  @connection_timeout 30_000
+
+  def start_link({user_id, arg}) do
+    GenServer.start_link(__MODULE__, arg, name: via_tuple(user_id))
   end
 
   @impl true
-  @spec init({pid(), T.user()}) :: {:ok, state()}
-  def init({conn_pid, user}) do
-    Logger.metadata(actor_type: :session, user_id: user.id)
-    monitors = MC.monitor(MC.new(), conn_pid, :connection)
+  @spec init({:manual, pid(), T.user()} | {:snapshot, term()}) ::
+          {:ok, state()} | {:continue, term()}
+  def init({:manual, conn_pid, user}) do
+    Process.flag(:trap_exit, true)
+    Logger.metadata(actor_type: :session, user_id: user.id, actor_id: user.id)
 
-    state = %{
+    state =
+      initial_empty_state(user)
+      |> Map.update!(:monitors, &MC.monitor(&1, conn_pid, :connection))
+      |> Map.replace!(:conn_pid, conn_pid)
+
+    broadcast_user_update!(user, :menu)
+
+    Logger.debug("init session #{inspect(self())}")
+    Logger.info("session started")
+
+    {:ok, state}
+  end
+
+  def init({:snapshot, snapshot}) do
+    Logger.metadata(actor_type: :session, actor_id: snapshot.user_id)
+    {:ok, %{}, {:continue, {:snapshot, snapshot}}}
+  end
+
+  defp initial_matchmaking_state() do
+    :no_matchmaking
+  end
+
+  defp initial_empty_state(user) do
+    %{
       user: user,
-      monitors: monitors,
-      conn_pid: conn_pid,
+      monitors: MC.new(),
+      conn_pid: nil,
       matchmaking: initial_matchmaking_state(),
       messaging_state: %{
         store_messages?: true,
@@ -109,18 +135,25 @@ defmodule Teiserver.Player.Session do
       lobby: nil,
       lobby_list_subscription: nil
     }
-
-    broadcast_user_update!(user, :menu)
-
-    Logger.debug("init session #{inspect(self())}")
-    Logger.info("session started")
-
-    {:ok, state}
   end
 
-  defp initial_matchmaking_state() do
-    :no_matchmaking
+  @impl GenServer
+  def terminate(:shutdown, state) do
+    if Teiserver.Tachyon.should_restore_state?() do
+      # store more stuff as we enable the restoration of
+      # more state at startup
+      to_save =
+        %{
+          user_id: state.user.id,
+          party: state.party
+        }
+        |> :erlang.term_to_binary()
+
+      Teiserver.KvStore.put("session", to_string(state.user.id), to_save)
+    end
   end
+
+  def terminate(_reason, _state), do: nil
 
   ################################################################################
   #                                                                              #
@@ -319,7 +352,7 @@ defmodule Teiserver.Player.Session do
   connections.
   """
   @spec replace_connection(pid(), pid()) ::
-          {:ok, session_state :: %{party: party_state()}} | :died
+          {:ok, old_conn_pid :: pid() | nil, session_state :: %{party: party_state()}} | :died
   def replace_connection(sess_pid, new_conn_pid) do
     GenServer.call(sess_pid, {:replace, new_conn_pid})
   catch
@@ -509,6 +542,16 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, :unsubscribe_list})
   end
 
+  def restore_sessions() do
+    Teiserver.Tachyon.System.restore_state("session", __MODULE__, :restore_session)
+  end
+
+  def restore_session(_blob_key, blob_value) do
+    snapshot = :erlang.binary_to_term(blob_value)
+
+    Player.SessionSupervisor.start_session_from_snapshot(snapshot.user_id, snapshot)
+  end
+
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
@@ -516,7 +559,89 @@ defmodule Teiserver.Player.Session do
   ################################################################################
 
   @impl true
+  def handle_continue({:snapshot, snapshot}, _state) do
+    user = Account.get_user!(snapshot.user_id)
+
+    state = initial_empty_state(user)
+
+    case restore_parties(state, snapshot.party) do
+      {:ok, state} ->
+        broadcast_user_update!(user, :menu)
+
+        Logger.debug("session restored from snapshot")
+
+        {:ok, _} = :timer.send_after(@connection_timeout, :connection_timeout)
+        {:noreply, state}
+
+      {:error, err} ->
+        Logger.warning("Could not restore session: #{inspect(err)}")
+        {:stop, :normal}
+    end
+  end
+
+  defp restore_parties(state, party_snapshot) do
+    with {:ok, state} <- rejoin_current_party(state, party_snapshot) do
+      rejoin_invite_parties(state, party_snapshot)
+    end
+  end
+
+  defp rejoin_current_party(state, party_snapshot) do
+    if party_snapshot.current_party == nil do
+      {:ok, state}
+    else
+      case Party.rejoin(party_snapshot.current_party, state.user.id) do
+        {:ok, party_state} ->
+          state =
+            state
+            |> put_in([:party, :current_party], party_state.id)
+            |> put_in([:party, :version], party_state.version)
+            |> Map.update!(:monitors, &MC.monitor(&1, party_state.pid, :current_party))
+
+          {:ok, state}
+
+        x ->
+          x
+      end
+    end
+  end
+
+  defp rejoin_invite_parties(state, party_snapshot) do
+    result =
+      Enum.reduce_while(party_snapshot.invited_to, state, fn {_, id}, state ->
+        case Party.rejoin(id, state.user.id) do
+          {:ok, party_state} ->
+            state =
+              state
+              |> update_in([:party, :invited_to], fn invites ->
+                [{party_state.version, id} | invites]
+              end)
+              |> Map.update!(
+                :monitors,
+                &MC.monitor(&1, party_state.pid, {:invited_to_party, id})
+              )
+
+            {:cont, state}
+
+          x ->
+            # for simplicity, "undo" everything, even if not yet there
+            for id <- party_snapshot.invited_ids do
+              MC.demonitor_by_val(state.monitors, {:invited_to_party, id})
+            end
+
+            {:halt, x}
+        end
+      end)
+
+    case result do
+      {:error, err} -> {:error, err}
+      st -> {:ok, st}
+    end
+  end
+
+  @impl true
   def handle_call({:replace, new_conn_pid}, _from, state) do
+    original_conn_pid = state.conn_pid
+
     monitors =
       MC.demonitor_by_val(state.monitors, :connection, [:flush])
       |> MC.monitor(new_conn_pid, :connection)
@@ -525,11 +650,12 @@ defmodule Teiserver.Player.Session do
 
     {current_party, invited_to} = get_party_states(state.party)
 
-    party_state = %{
-      version: if(current_party == nil, do: nil, else: current_party.version),
-      current_party: if(current_party == nil, do: nil, else: current_party.id),
-      invited_to: Enum.map(invited_to, fn st -> {st.version, st.id} end)
-    }
+    party_state =
+      %{
+        version: if(current_party == nil, do: nil, else: current_party.version),
+        current_party: if(current_party == nil, do: nil, else: current_party.id),
+        invited_to: Enum.map(invited_to, fn st -> {st.version, st.id} end)
+      }
 
     new_state = %{state | conn_pid: new_conn_pid, monitors: monitors, party: party_state}
 
@@ -540,7 +666,7 @@ defmodule Teiserver.Player.Session do
       current_lobby: get_in(state.lobby.id)
     }
 
-    {:reply, {:ok, self_state}, new_state}
+    {:reply, {:ok, original_conn_pid, self_state}, new_state}
   end
 
   def handle_call(:conn_state, _from, state) do
@@ -1096,7 +1222,6 @@ defmodule Teiserver.Player.Session do
     # match the same player at the same time.
     # Do log it since it should not happen too often unless something is wrong
     Logger.info("Got a matchmaking found but in state #{inspect(state.matchmaking)}")
-    IO.puts("Got a matchmaking found but in state #{inspect(state.matchmaking)}")
 
     Matchmaking.cancel(room_pid, state.user.id)
     {:noreply, state}
@@ -1390,7 +1515,7 @@ defmodule Teiserver.Player.Session do
       :connection ->
         # we don't care about cancelling the timer if the player reconnects since reconnection
         # should be fairly low (and rate limited) so too many messages isn't an issue
-        {:ok, _} = :timer.send_after(2_000, :player_timeout)
+        {:ok, _} = :timer.send_after(@connection_timeout, :connection_timeout)
         Logger.info("Player disconnected abruptly because #{inspect(reason)}")
         :telemetry.execute([:tachyon, :abrupt_disconnect], %{count: 1})
 
@@ -1486,7 +1611,14 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_info(:player_timeout, state) do
+  def handle_info({:EXIT, from_pid, :normal}, state) when from_pid != self(),
+    do: {:noreply, state}
+
+  # :please_die is used in test
+  def handle_info({:EXIT, _from_pid, :please_die}, state), do: {:stop, :normal, state}
+  def handle_info({:EXIT, _from_pid, reason}, state), do: {:stop, reason, state}
+
+  def handle_info(:connection_timeout, state) do
     if is_nil(state.conn_pid) do
       Logger.debug("Player timed out, stopping session")
       {:stop, :normal, state}
@@ -1742,7 +1874,12 @@ defmodule Teiserver.Player.Session do
     tasks =
       Enum.map(ids, fn id ->
         Task.async(fn ->
-          if id == nil, do: nil, else: Party.get_state(id)
+          if id == nil do
+            nil
+          else
+            Party.get_state(id)
+            |> Map.take([:id, :version, :members, :invited, :matchmaking])
+          end
         end)
       end)
 

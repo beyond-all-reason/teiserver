@@ -14,7 +14,11 @@ defmodule Teiserver.Player.System do
     children = [
       Teiserver.Player.SessionRegistry,
       Teiserver.Player.SessionSupervisor,
-      Teiserver.Player.Registry
+      Teiserver.Player.Registry,
+      Supervisor.child_spec(
+        {Teiserver.Tachyon.SyncTask, %{mfa: [Teiserver.Player.Session, :restore_sessions, []]}},
+        id: RestoreSessionTask
+      )
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

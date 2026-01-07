@@ -446,6 +446,54 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
     end
   end
 
+  describe "party restoration" do
+    setup [{Tachyon, :setup_client}]
+
+    test "parties stays across restart", %{client: client, token: token} do
+      Teiserver.Tachyon.enable_state_restoration()
+      assert %{"status" => "success", "data" => data} = Tachyon.create_party!(client)
+      %{"partyId" => party_id} = data
+
+      Teiserver.Tachyon.restart_system()
+      assert {:error, :disconnected} == Tachyon.recv_message(client)
+
+      client = Tachyon.connect(token, swallow_first_event: false)
+
+      {:ok, %{"commandId" => "user/self", "data" => data}} = Tachyon.recv_message(client)
+      assert get_in(data, ["user", "party", "id"]) == party_id
+
+      # make sure the session correctly monitors the session
+      Teiserver.Party.lookup(party_id)
+      |> Process.exit(:kill)
+
+      %{"commandId" => "party/removed"} = Tachyon.recv_message!(client)
+    end
+
+    test "parties invites stays across restart", %{client: client} do
+      Teiserver.Tachyon.enable_state_restoration()
+      assert %{"status" => "success", "data" => data} = Tachyon.create_party!(client)
+      %{"partyId" => party_id} = data
+      ctx2 = setup_client()
+
+      assert %{"status" => "success"} = Tachyon.invite_to_party!(client, ctx2.user.id)
+      assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(ctx2.client)
+
+      Teiserver.Tachyon.restart_system()
+      assert {:error, :disconnected} == Tachyon.recv_message(ctx2.client)
+
+      client = Tachyon.connect(ctx2.token, swallow_first_event: false)
+
+      {:ok, %{"commandId" => "user/self", "data" => data}} = Tachyon.recv_message(client)
+      assert [%{"id" => ^party_id}] = data["user"]["invitedToParties"]
+
+      # make sure the session correctly monitors the session
+      Teiserver.Party.lookup(party_id)
+      |> Process.exit(:kill)
+
+      %{"commandId" => "party/removed"} = Tachyon.recv_message!(client)
+    end
+  end
+
   defp setup_party(%{client: client}), do: setup_party(client)
 
   defp setup_party(client) do
