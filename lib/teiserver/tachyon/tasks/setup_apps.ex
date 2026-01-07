@@ -16,6 +16,11 @@ defmodule Teiserver.Tachyon.Tasks.SetupApps do
       uid: "generic_lobby",
       owner_id: root.id,
       scopes: ["tachyon.lobby"],
+      redirect_uris: [
+        "http://localhost/oauth2callback",
+        "http://127.0.0.1/oauth2callback",
+        "http://[::1]/oauth2callback"
+      ],
       description: "To support autohost and players using tachyon."
     })
   end
