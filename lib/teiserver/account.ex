@@ -9,8 +9,6 @@ defmodule Teiserver.Account do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Account.{User, UserLib, TOTP, TOTPLib}
 
-  @type t :: UserLib.t()
-
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-user-alt"
 
@@ -249,12 +247,12 @@ defmodule Teiserver.Account do
 
   alias Teiserver.Account.{BadgeType, BadgeTypeLib}
 
-  @spec badge_type_query(List.t()) :: Ecto.Query.t()
+  @spec badge_type_query(keyword()) :: Ecto.Query.t()
   def badge_type_query(args) do
     badge_type_query(nil, args)
   end
 
-  @spec badge_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  @spec badge_type_query(integer() | nil, keyword()) :: Ecto.Query.t()
   def badge_type_query(id, args) do
     BadgeTypeLib.query_badge_types()
     |> BadgeTypeLib.search(%{id: id})
@@ -273,14 +271,14 @@ defmodule Teiserver.Account do
       [%BadgeType{}, ...]
 
   """
-  @spec list_badge_types(List.t()) :: List.t()
+  @spec list_badge_types(keyword()) :: list()
   def list_badge_types(args \\ []) do
     badge_type_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
     |> Repo.all()
   end
 
-  @spec list_accolade_types() :: List.t()
+  @spec list_accolade_types() :: list()
   def list_accolade_types() do
     args = [search: [purpose: "Accolade"], order_by: "Name (A-Z)"]
 
@@ -302,8 +300,8 @@ defmodule Teiserver.Account do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_badge_type!(Integer.t() | List.t()) :: BadgeType.t()
-  @spec get_badge_type!(Integer.t(), List.t()) :: BadgeType.t()
+  @spec get_badge_type!(integer() | keyword()) :: BadgeType.t()
+  @spec get_badge_type!(integer(), keyword()) :: BadgeType.t()
   def get_badge_type!(id) when not is_list(id) do
     badge_type_query(id, [])
     |> Repo.one!()
@@ -412,12 +410,12 @@ defmodule Teiserver.Account do
   alias Teiserver.Account.Accolade
   alias Teiserver.Account.AccoladeLib
 
-  @spec accolade_query(List.t()) :: Ecto.Query.t()
+  @spec accolade_query(keyword()) :: Ecto.Query.t()
   def accolade_query(args) do
     accolade_query(nil, args)
   end
 
-  @spec accolade_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  @spec accolade_query(integer() | nil, keyword()) :: Ecto.Query.t()
   def accolade_query(id, args) do
     AccoladeLib.query_accolades()
     |> AccoladeLib.search(%{id: id})
@@ -436,7 +434,7 @@ defmodule Teiserver.Account do
       [%Accolade{}, ...]
 
   """
-  @spec list_accolades(List.t()) :: List.t()
+  @spec list_accolades(keyword()) :: list()
   def list_accolades(args \\ []) do
     accolade_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
@@ -457,8 +455,8 @@ defmodule Teiserver.Account do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_accolade!(Integer.t() | List.t()) :: Accolade.t()
-  @spec get_accolade!(Integer.t(), List.t()) :: Accolade.t()
+  @spec get_accolade!(integer() | keyword()) :: Accolade.t()
+  @spec get_accolade!(integer(), keyword()) :: Accolade.t()
   def get_accolade!(id) when not is_list(id) do
     accolade_query(id, [])
     |> Repo.one!()
@@ -567,12 +565,12 @@ defmodule Teiserver.Account do
   alias Teiserver.Account.SmurfKey
   alias Teiserver.Account.SmurfKeyLib
 
-  @spec smurf_key_query(List.t()) :: Ecto.Query.t()
+  @spec smurf_key_query(keyword()) :: Ecto.Query.t()
   def smurf_key_query(args) do
     smurf_key_query(nil, args)
   end
 
-  @spec smurf_key_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  @spec smurf_key_query(integer() | nil, keyword()) :: Ecto.Query.t()
   def smurf_key_query(id, args) do
     SmurfKeyLib.query_smurf_keys()
     |> SmurfKeyLib.search(%{id: id})
@@ -591,7 +589,7 @@ defmodule Teiserver.Account do
       [%SmurfKey{}, ...]
 
   """
-  @spec list_smurf_keys(List.t()) :: List.t()
+  @spec list_smurf_keys(keyword()) :: list()
   def list_smurf_keys(args \\ []) do
     smurf_key_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
@@ -612,8 +610,8 @@ defmodule Teiserver.Account do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_smurf_key!(Integer.t() | List.t()) :: SmurfKey.t()
-  @spec get_smurf_key!(Integer.t(), List.t()) :: SmurfKey.t()
+  @spec get_smurf_key!(integer() | keyword()) :: SmurfKey.t()
+  @spec get_smurf_key!(integer(), keyword()) :: SmurfKey.t()
   def get_smurf_key!(id) when not is_list(id) do
     smurf_key_query(id, [])
     |> Repo.one!()
@@ -643,8 +641,8 @@ defmodule Teiserver.Account do
       nil
 
   """
-  @spec get_smurf_key(Integer.t() | List.t()) :: SmurfKey.t()
-  @spec get_smurf_key(Integer.t(), List.t()) :: SmurfKey.t()
+  @spec get_smurf_key(integer() | keyword()) :: SmurfKey.t()
+  @spec get_smurf_key(integer(), keyword()) :: SmurfKey.t()
   def get_smurf_key(id) when not is_list(id) do
     smurf_key_query(id, [])
     |> Repo.one()
@@ -660,7 +658,7 @@ defmodule Teiserver.Account do
     |> Repo.one()
   end
 
-  @spec get_smurf_key(T.user_id(), non_neg_integer(), String.t()) :: list()
+  @spec get_smurf_key(T.userid(), non_neg_integer(), String.t()) :: list()
   def get_smurf_key(user_id, type_id, value) do
     smurf_key_query(nil,
       search: [
@@ -791,12 +789,12 @@ defmodule Teiserver.Account do
   alias Teiserver.Account.SmurfKeyType
   alias Teiserver.Account.SmurfKeyTypeLib
 
-  @spec smurf_key_type_query(List.t()) :: Ecto.Query.t()
+  @spec smurf_key_type_query(keyword()) :: Ecto.Query.t()
   def smurf_key_type_query(args) do
     smurf_key_type_query(nil, args)
   end
 
-  @spec smurf_key_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  @spec smurf_key_type_query(integer() | nil, keyword()) :: Ecto.Query.t()
   def smurf_key_type_query(id, args) do
     SmurfKeyTypeLib.query_smurf_key_types()
     |> SmurfKeyTypeLib.search(%{id: id})
@@ -815,7 +813,7 @@ defmodule Teiserver.Account do
       [%SmurfKeyType{}, ...]
 
   """
-  @spec list_smurf_key_types(List.t()) :: List.t()
+  @spec list_smurf_key_types(keyword()) :: list()
   def list_smurf_key_types(args \\ []) do
     smurf_key_type_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
@@ -836,8 +834,8 @@ defmodule Teiserver.Account do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_smurf_key_type(Integer.t() | List.t()) :: SmurfKeyType.t()
-  @spec get_smurf_key_type(Integer.t(), List.t()) :: SmurfKeyType.t()
+  @spec get_smurf_key_type(integer() | keyword()) :: SmurfKeyType.t()
+  @spec get_smurf_key_type(integer(), keyword()) :: SmurfKeyType.t()
   def get_smurf_key_type(id) when not is_list(id) do
     smurf_key_type_query(id, [])
     |> Repo.one()
@@ -915,7 +913,7 @@ defmodule Teiserver.Account do
 
   alias Teiserver.Account.{Rating, RatingLib}
 
-  @spec rating_query(List.t()) :: Ecto.Query.t()
+  @spec rating_query(keyword()) :: Ecto.Query.t()
   def rating_query(args) do
     RatingLib.query_ratings()
     |> RatingLib.search(args[:search])
@@ -934,7 +932,7 @@ defmodule Teiserver.Account do
       [%Rating{}, ...]
 
   """
-  @spec list_ratings(List.t()) :: List.t()
+  @spec list_ratings(keyword()) :: list()
   def list_ratings(args \\ []) do
     rating_query(args)
     |> Repo.all()
@@ -954,18 +952,19 @@ defmodule Teiserver.Account do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_rating(Integer.t() | List.t()) :: Rating.t() | nil
+  @spec get_rating(integer() | keyword()) :: Rating.t() | nil
   def get_rating(args) do
     rating_query(args)
     |> Repo.one()
   end
 
-  @spec get_rating(Integer.t(), List.t()) :: Rating.t() | nil
+  @spec get_rating(T.userid(), integer()) :: Rating.t() | nil
   def get_rating(user_id, rating_type_id)
       when is_integer(user_id) and is_integer(rating_type_id) do
     get_rating(user_id, rating_type_id, MatchRatingLib.active_season())
   end
 
+  @spec get_rating(T.userid(), integer(), integer()) :: Rating.t() | nil
   def get_rating(user_id, rating_type_id, season)
       when is_integer(user_id) and is_integer(rating_type_id) and is_integer(season) do
     Teiserver.cache_get_or_store(:teiserver_user_ratings, {user_id, rating_type_id, season}, fn ->
@@ -2210,7 +2209,7 @@ defmodule Teiserver.Account do
   @spec client_exists?(T.userid()) :: boolean()
   defdelegate client_exists?(userid), to: ClientLib
 
-  @spec get_clients([T.userid()]) :: List.t()
+  @spec get_clients([T.userid()]) :: list()
   defdelegate get_clients(id_list), to: ClientLib
 
   @spec list_client_ids() :: [T.userid()]

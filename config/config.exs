@@ -258,6 +258,7 @@ config :teiserver, Teiserver.PromEx,
   manual_metrics_start_delay: :no_delay,
   drop_metrics_groups: [],
   grafana: :disabled,
+  ets_flush_interval: 20_000,
   metrics_server: :disabled
 
 # Import environment specific config. This must remain at the bottom

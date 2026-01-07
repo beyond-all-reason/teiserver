@@ -51,10 +51,16 @@ defmodule Teiserver.Player.TachyonHandler do
       initial_state |> Map.put(:sess_monitor, sess_monitor) |> Map.put(:pending_responses, %{})
 
     user = initial_state.user
-    Logger.metadata(user_id: user.id)
+    Logger.metadata(actor_type: :connection, actor_id: to_string(user.id))
 
     event = build_user_self_event(user, sess_state)
     {:event, "user/self", event, state}
+  end
+
+  def force_disconnect(nil), do: :ok
+
+  def force_disconnect(pid) when is_pid(pid) do
+    send(pid, :force_disconnect)
   end
 
   @impl Handler
@@ -224,7 +230,13 @@ defmodule Teiserver.Player.TachyonHandler do
     {:stop, :normal, state}
   end
 
-  def handle_info(%{}, state) do
+  def handle_info(:force_disconnect, state) do
+    # credo:disable-for-next-line Credo.Check.Design.TagTODO
+    # TODO: send a proper tachyon message to inform the client it is getting disconnected
+    {:stop, :normal, state}
+  end
+
+  def handle_info(_msg, state) do
     {:ok, state}
   end
 
@@ -895,7 +907,8 @@ defmodule Teiserver.Player.TachyonHandler do
           :died ->
             setup_session(user)
 
-          {:ok, sess_state} ->
+          {:ok, old_conn_pid, sess_state} ->
+            force_disconnect(old_conn_pid)
             {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
             {:ok, pid, sess_state}
         end
@@ -992,17 +1005,17 @@ defmodule Teiserver.Player.TachyonHandler do
     %{
       id: party_state.id,
       members:
-        Enum.map(party_state.members, fn m ->
+        Enum.map(party_state.members, fn {_id, m} ->
           %{
             userId: to_string(m.id),
             joinedAt: DateTime.to_unix(m.joined_at, :microsecond)
           }
         end),
       invited:
-        Enum.map(party_state.invited, fn m ->
+        Enum.map(party_state.invited, fn {_id, m} ->
           %{
             userId: to_string(m.id),
-            invitedAt: DateTime.to_unix(m.invited_at)
+            invitedAt: DateTime.to_unix(m.invited_at, :microsecond)
           }
         end)
     }
