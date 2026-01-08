@@ -39,8 +39,6 @@
   {"lib/teiserver/bridge/discord_bridge_bot.ex", :no_return},
   {"lib/teiserver/bridge/discord_bridge_bot.ex", :call},
   {"lib/teiserver/chat.ex", :unknown_type},
-  {"lib/teiserver/chat/chat_room_cache.ex", :call},
-  {"lib/teiserver/chat/chat_room_cache.ex", :no_return},
   {"lib/teiserver/clans.ex", :unknown_type},
   {"lib/teiserver/communication.ex", :unknown_type},
   {"lib/teiserver/communication.ex", :invalid_contract},
