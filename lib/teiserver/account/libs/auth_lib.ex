@@ -185,7 +185,7 @@ defmodule Teiserver.Account.AuthLib do
   end
 
   # This is used as part of the permission system getting the current user
-  @spec current_user(Plug.Conn.t()) :: User.t() | nil
+  @spec current_user(Plug.Conn.t()) :: Teiserver.Account.User.t() | nil
   def current_user(conn) do
     conn.assigns[:current_user]
   end

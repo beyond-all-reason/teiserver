@@ -28,7 +28,7 @@ defmodule Teiserver.Account.ClientLib do
     call_client(userid, :get_client_state)
   end
 
-  @spec get_clients([T.userid()]) :: List.t()
+  @spec get_clients([T.userid()]) :: list(T.client())
   def get_clients([]), do: []
 
   def get_clients(id_list) do
