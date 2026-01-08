@@ -195,9 +195,6 @@
   {"lib/teiserver_web/templates/battle/match/index.html.heex", :call},
   {"lib/teiserver_web/templates/battle/match/ratings.html.heex", :no_return},
   {"lib/teiserver_web/templates/battle/match/ratings.html.heex", :call},
-  {"test/support/tachyon.ex", :no_return},
-  {"test/support/tachyon.ex", :call},
-  {"test/support/teiserver_test_lib.ex", :call},
   {"test/support/teiserver_test_lib.ex", :no_return},
   {"test/support/teiserver_test_lib.ex", :unused_fun}
 ]
