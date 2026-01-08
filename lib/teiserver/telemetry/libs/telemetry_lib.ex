@@ -34,7 +34,7 @@ defmodule Teiserver.Telemetry.TelemetryLib do
     GenServer.cast(TelemetryServer, msg)
   end
 
-  @spec metrics() :: List.t()
+  @spec metrics() :: list()
   def metrics() do
     [
       last_value("teiserver.client.total"),
