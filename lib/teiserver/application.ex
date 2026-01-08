@@ -29,7 +29,6 @@ defmodule Teiserver.Application do
         # Start phoenix pubsub
         {Phoenix.PubSub, name: Teiserver.PubSub},
         {Task.Supervisor, name: Teiserver.TaskSupervisor},
-        TeiserverWeb.Telemetry,
 
         # Start the Ecto repository
         Teiserver.Repo,

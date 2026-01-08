@@ -105,15 +105,4 @@ defmodule Teiserver.Telemetry.TelemetryLib do
       )
     ]
   end
-
-  @spec periodic_measurements() :: List.t()
-  def periodic_measurements() do
-    [
-      # {Teiserver.Telemetry, :measure_users, []},
-      # {:process_info,
-      #   event: [:teiserver, :ts],
-      #   name: Teiserver.Telemetry.TelemetryServer,
-      #   keys: [:message_queue_len, :memory]}
-    ]
-  end
 end
