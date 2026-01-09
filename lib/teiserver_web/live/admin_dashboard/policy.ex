@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.AdminDashLive.Policy do
   use TeiserverWeb, :live_view
+  alias Phoenix.LiveView.Socket
   alias Phoenix.PubSub
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
@@ -73,7 +74,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
     {:noreply, socket}
   end
 
-  @spec get_policy_bots(Plug.Socket.t()) :: Plug.Socket.t()
+  @spec get_policy_bots(Socket.t()) :: Socket.t()
   defp get_policy_bots(socket) do
     bots = Game.call_lobby_organiser(socket.assigns.id, :get_agent_status)
 

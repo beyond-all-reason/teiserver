@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.AdminDashLive.Index do
   use TeiserverWeb, :live_view
+  alias Phoenix.LiveView.Socket
   alias Phoenix.PubSub
 
   alias Teiserver
@@ -108,7 +109,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     {:noreply, socket}
   end
 
-  @spec update_policies(Plug.Socket.t()) :: Plug.Socket.t()
+  @spec update_policies(Socket.t()) :: Socket.t()
   defp update_policies(socket) do
     policies =
       Game.list_lobby_policies()
@@ -122,7 +123,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     |> assign(:policies, policies)
   end
 
-  @spec update_lobbies(Plug.Socket.t()) :: Plug.Socket.t()
+  @spec update_lobbies(Socket.t()) :: Socket.t()
   defp update_lobbies(socket) do
     lobbies =
       Battle.list_lobby_ids()
@@ -147,7 +148,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     |> assign(:lobbies, lobbies)
   end
 
-  @spec update_server_pids(Plug.Socket.t()) :: Plug.Socket.t()
+  @spec update_server_pids(Socket.t()) :: Socket.t()
   defp update_server_pids(socket) do
     lobby_id_server_pid =
       case Horde.Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
