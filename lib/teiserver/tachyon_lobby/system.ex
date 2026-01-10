@@ -16,7 +16,11 @@ defmodule Teiserver.TachyonLobby.System do
     children = [
       TachyonLobby.Registry,
       TachyonLobby.Supervisor,
-      TachyonLobby.List
+      TachyonLobby.List,
+      Supervisor.child_spec(
+        {Teiserver.Tachyon.SyncTask, %{mfa: [Teiserver.TachyonLobby, :restore_lobbies, []]}},
+        id: RestoreLobbyTask
+      )
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

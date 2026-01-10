@@ -161,7 +161,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
              | %{
                  id: Teiserver.TachyonBattle.id(),
                  started_at: DateTime.t()
-               }
+               },
+           ids_to_rejoin: MapSet.t(T.userid())
          }
 
   # the list of events used by the various internal functions
@@ -246,6 +247,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec spectate(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   def spectate(lobby_id, user_id) do
     :gen_statem.call(via_tuple(lobby_id), {:spectate, user_id}, @default_call_timeout)
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
+  @spec rejoin(id(), T.userid(), pid()) ::
+          {:ok, lobby_pid :: pid(), details()} | {:error, :invalid_lobby}
+  def rejoin(lobby_id, user_id, pid) do
+    :gen_statem.call(via_tuple(lobby_id), {:rejoin, user_id, pid}, @default_call_timeout)
   catch
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
@@ -347,8 +356,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def callback_mode(), do: :handle_event_function
 
   @impl :gen_statem
-  @spec init({id(), start_params()}) :: {:ok, term(), state()}
-  def init({id, start_params}) do
+  @spec init({id(), {:user, start_params()} | {:snapshot, binary()}}) :: {:ok, term(), state()}
+  def init({id, {:user, start_params}}) do
     Process.flag(:trap_exit, true)
     Logger.metadata(actor_type: :lobby, actor_id: id)
 
@@ -374,12 +383,38 @@ defmodule Teiserver.TachyonLobby.Lobby do
       },
       spectators: %{},
       bot_idx_counter: 0,
-      current_battle: nil
+      current_battle: nil,
+      ids_to_rejoin: MapSet.new()
     }
 
     TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
     Logger.info("Lobby created by user #{start_params.creator_data.id}")
     {:ok, :running, state}
+  end
+
+  def init({id, {:snapshot, serialized_data}}) do
+    Process.flag(:trap_exit, true)
+    Logger.metadata(actor_type: :lobby, actor_id: id)
+    Logger.debug("Restoring lobby from snapshot")
+
+    snapshot = :erlang.binary_to_term(serialized_data)
+
+    player_ids =
+      for {id, x} <- snapshot.players, !is_map_key(x, :host_user_id) do
+        id
+      end
+
+    ids_to_rejoin = MapSet.new(Enum.concat(player_ids, Map.keys(snapshot.spectators)))
+
+    data =
+      snapshot
+      |> Map.put(:monitors, MC.new())
+      |> Map.put(:ids_to_rejoin, ids_to_rejoin)
+
+    timeout = Tachyon.get_restoration_timeout()
+    actions = [{:state_timeout, timeout, :snapshot_timeout}]
+
+    {:ok, :starting_up, data, actions}
   end
 
   @impl :gen_statem
@@ -389,6 +424,47 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event({:call, from}, :get_overview, _state, data) do
     {:keep_state, data, [{:reply, from, get_overview_from_state(data)}]}
+  end
+
+  def handle_event({:call, from}, {:rejoin, _user_id, _user_pid}, state, data)
+      when state != :starting_up,
+      do: {:keep_state, data, [{:reply, from, {:error, :invalid_lobby}}]}
+
+  def handle_event({:call, from}, {:rejoin, user_id, user_pid}, :starting_up, data) do
+    if MapSet.member?(data.ids_to_rejoin, user_id) do
+      ids_left = MapSet.delete(data.ids_to_rejoin, user_id)
+
+      players =
+        if is_map_key(data.players, user_id),
+          do: put_in(data.players, [user_id, :pid], user_pid),
+          else: data.players
+
+      spectators =
+        if is_map_key(data.spectators, user_id),
+          do: put_in(data.spectators, [user_id, :pid], user_pid),
+          else: data.spectators
+
+      data =
+        %{data | players: players, spectators: spectators, ids_to_rejoin: ids_left}
+        |> Map.update!(:monitors, &MC.monitor(&1, user_pid, {:user, user_id}))
+
+      actions = [{:reply, from, {:ok, self(), get_details_from_state(data)}}]
+
+      if MapSet.size(ids_left) == 0 do
+        Logger.debug("all member rejoined, start up completed")
+        # TODO: handle list update
+        # TachyonLobby.List.register_lobby(self(), data.id, get_overview_from_state(data))
+        {:next_state, :running, data, actions}
+      else
+        {:keep_state, data, actions}
+      end
+    else
+      {:keep_state, data, [{:reply, from, {:error, :invalid_lobby}}]}
+    end
+  end
+
+  def handle_event({:call, _from}, _, :starting_up, data) do
+    {:keep_state, data, [{:postpone, true}]}
   end
 
   def handle_event({:call, from}, _, :shutting_down, data) do
@@ -814,6 +890,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def handle_event(:internal, :empty, _state, data) do
     Logger.info("Lobby shutting down because empty")
     {:stop, {:shutdown, :empty}, data}
+  end
+
+  def handle_event(:state_timeout, :snapshot_timeout, :starting_up, data) do
+    Logger.warning("failed to recover before time out. Missing #{inspect(data.ids_to_rejoin)}")
+    {:stop, :normal}
   end
 
   @impl :gen_statem

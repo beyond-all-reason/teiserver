@@ -145,7 +145,8 @@ defmodule Teiserver.Player.Session do
       to_save =
         %{
           user_id: state.user.id,
-          party: state.party
+          party: state.party,
+          lobby_id: get_in(state.lobby.id)
         }
         |> :erlang.term_to_binary()
 
@@ -564,15 +565,15 @@ defmodule Teiserver.Player.Session do
 
     state = initial_empty_state(user)
 
-    case restore_parties(state, snapshot.party) do
-      {:ok, state} ->
-        broadcast_user_update!(user, :menu)
+    with {:ok, state} <- restore_parties(state, snapshot.party),
+         {:ok, state} <- rejoin_lobby(state, snapshot.lobby_id) do
+      broadcast_user_update!(user, :menu)
 
-        Logger.debug("session restored from snapshot")
+      Logger.debug("session restored from snapshot")
 
-        {:ok, _} = :timer.send_after(@connection_timeout, :connection_timeout)
-        {:noreply, state}
-
+      {:ok, _} = :timer.send_after(@connection_timeout, :connection_timeout)
+      {:noreply, state}
+    else
       {:error, err} ->
         Logger.warning("Could not restore session: #{inspect(err)}")
         {:stop, :normal}
@@ -635,6 +636,23 @@ defmodule Teiserver.Player.Session do
     case result do
       {:error, err} -> {:error, err}
       st -> {:ok, st}
+    end
+  end
+
+  defp rejoin_lobby(state, nil), do: {:ok, state}
+
+  defp rejoin_lobby(state, lobby_id) do
+    case TachyonLobby.rejoin(lobby_id, state.user.id) do
+      {:ok, lobby_pid, details} ->
+        state =
+          state
+          |> Map.update!(:monitors, &MC.monitor(&1, lobby_pid, {:lobby, details.id}))
+          |> Map.put(:lobby, %{id: details.id})
+
+        {:ok, state}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 

@@ -966,18 +966,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     setup [:setup_restore_config]
 
-    test "save snapshot when user shutdown" do
-      sink_pid = mk_sink()
-
-      {:ok, _pid, %{id: id}} =
-        mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
-
-      Process.exit(sink_pid, :shutdown)
-
-      Tachyon.restart_system()
-      assert Teiserver.KvStore.get("lobby", id) != nil
-    end
-
     test "no snapshot when normal exit" do
       sink_pid = mk_sink()
 
@@ -986,6 +974,47 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       Tachyon.restart_system()
       assert Teiserver.KvStore.get("lobby", id) == nil
+    end
+
+    test "can rejoin lobby from snapshot" do
+      sink_pid = mk_sink()
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      Process.exit(sink_pid, :shutdown)
+      Tachyon.restart_system()
+
+      sink_pid = mk_sink()
+      {:ok, _, details} = Lobby.rejoin(id, @default_user_id, sink_pid)
+      assert is_map_key(details.players, @default_user_id)
+    end
+
+    test "must rejoin first before being able to leave" do
+      sink_pid = mk_sink()
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      Process.exit(sink_pid, :shutdown)
+      Tachyon.restart_system()
+
+      # another player is attempting to join before the lobby is fully up
+      join_task =
+        Task.async(fn ->
+          {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
+          :ok
+        end)
+
+      # timeout
+      assert Task.yield(join_task, 10) == nil
+
+      sink_pid = mk_sink()
+      {:ok, _, details} = Lobby.rejoin(id, @default_user_id, sink_pid)
+      assert is_map_key(details.players, @default_user_id)
+
+      # now the call is handled
+      assert Task.await(join_task) == :ok
     end
   end
 
