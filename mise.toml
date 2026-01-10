@@ -26,6 +26,14 @@ run = "mix do ecto.drop + ecto.setup"
 [tasks."setup:deps"]
 run = "mix deps.get"
 
+[tasks."setup:tachyon"]
+description = "On demand task that sets up the tachyon ouath application that allows the new bar lobby to connect"
+run = "mix teiserver.tachyon_setup"
+
+[tasks."setup:fakedata"]
+description = "On demand task that sets up fake data for testing"
+run = "mix teiserver.fakedata"
+
 [tasks.setup]
 depends = ["pg:setup", "setup:deps"]
 description = "Sets up the application dependencies from scratch"
