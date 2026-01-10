@@ -26,16 +26,16 @@ defmodule Teiserver.Account do
   @spec count_users(list) :: integer
   defdelegate count_users(args), to: UserLib
 
-  @spec get_user!(non_neg_integer()) :: User.t()
+  @spec get_user!(T.userid()) :: User.t()
   defdelegate get_user!(user_id), to: UserLib
 
-  @spec get_user!(non_neg_integer(), list) :: User.t() | nil
+  @spec get_user!(T.userid(), keyword()) :: User.t() | nil
   defdelegate get_user!(user_id, args), to: UserLib
 
-  @spec get_user(non_neg_integer()) :: User.t() | nil
+  @spec get_user(T.userid()) :: User.t() | nil
   defdelegate get_user(user_id), to: UserLib
 
-  @spec get_user(non_neg_integer(), list) :: User.t() | nil
+  @spec get_user(T.userid() | nil, keyword()) :: User.t() | nil
   defdelegate get_user(user_id, args), to: UserLib
 
   @spec query_users(list) :: [User.t()]

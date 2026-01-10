@@ -97,7 +97,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.one!()
   end
 
-  @spec get_user(non_neg_integer() | nil, list) :: User.t() | nil
+  @spec get_user(non_neg_integer() | nil, keyword()) :: User.t() | nil
   def get_user(user_id, args \\ []) do
     (args ++ [id: user_id])
     |> UserQueries.query_users()
