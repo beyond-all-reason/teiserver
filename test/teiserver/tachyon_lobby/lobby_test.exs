@@ -3,6 +3,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until_nil: 1]
   alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.AssetFixtures
+  alias Teiserver.Tachyon
 
   @moduletag :tachyon
 
@@ -957,6 +958,37 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "state restoration" do
+    def setup_restore_config(_) do
+      Tachyon.enable_state_restoration()
+      ExUnit.Callbacks.on_exit(fn -> Tachyon.disable_state_restoration() end)
+    end
+
+    setup [:setup_restore_config]
+
+    test "save snapshot when user shutdown" do
+      sink_pid = mk_sink()
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      Process.exit(sink_pid, :shutdown)
+
+      Tachyon.restart_system()
+      assert Teiserver.KvStore.get("lobby", id) != nil
+    end
+
+    test "no snapshot when normal exit" do
+      sink_pid = mk_sink()
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      Tachyon.restart_system()
+      assert Teiserver.KvStore.get("lobby", id) == nil
+    end
+  end
+
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the
   # teiserver_web/tachyon/lobby_test.exs file
@@ -1127,5 +1159,10 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     after
       timeout -> Enum.reverse(acc)
     end
+  end
+
+  defp mk_sink(name \\ :sink) do
+    Supervisor.child_spec({Task, fn -> :timer.sleep(:infinity) end}, id: name)
+    |> ExUnit.Callbacks.start_supervised!()
   end
 end

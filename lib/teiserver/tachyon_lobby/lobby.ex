@@ -12,6 +12,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Player
+  alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
 
@@ -348,6 +349,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @impl :gen_statem
   @spec init({id(), start_params()}) :: {:ok, term(), state()}
   def init({id, start_params}) do
+    Process.flag(:trap_exit, true)
     Logger.metadata(actor_type: :lobby, actor_id: id)
 
     monitors =
@@ -387,6 +389,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event({:call, from}, :get_overview, _state, data) do
     {:keep_state, data, [{:reply, from, get_overview_from_state(data)}]}
+  end
+
+  def handle_event({:call, from}, _, :shutting_down, data) do
+    {:keep_state, data, [{:reply, from, {:error, :shutting_down}}]}
   end
 
   def handle_event({:call, from}, {:join, join_data, _pid}, _state, data)
@@ -752,6 +758,21 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def handle_event({:call, from}, :get_start_script, _state, data),
     do: {:keep_state, data, [{:reply, from, gen_start_script(data)}]}
 
+  def handle_event(:info, {:DOWN, ref, :process, _pid, :shutdown}, state, data) do
+    val = MC.get_val(data.monitors, ref)
+    data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
+
+    case state do
+      :shutting_down -> {:keep_state, data}
+      _ -> {:next_state, :shutting_down, data}
+    end
+  end
+
+  # only DOWN events matter when shutting down the lobby, everything else should be ignored
+  def handle_event(:info, _, :shutting_down, data) do
+    {:keep_state, data}
+  end
+
   def handle_event(:info, {:DOWN, ref, :process, _obj, reason}, _state, data) do
     val = MC.get_val(data.monitors, ref)
     data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
@@ -786,10 +807,34 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  def handle_event(:info, {:EXIT, _pid, reason}, _state, _data) do
+    {:stop, reason}
+  end
+
   def handle_event(:internal, :empty, _state, data) do
     Logger.info("Lobby shutting down because empty")
     {:stop, {:shutdown, :empty}, data}
   end
+
+  @impl :gen_statem
+  def terminate(:shutdown, :shutting_down, data) do
+    if Tachyon.should_restore_state?() do
+      to_save =
+        data
+        |> Map.drop([:monitors])
+        |> Map.update!(:players, fn ps ->
+          for {k, v} <- ps, into: %{}, do: {k, Map.delete(v, :pid)}
+        end)
+        |> Map.update!(:spectators, fn ps ->
+          for {k, v} <- ps, into: %{}, do: {k, Map.delete(v, :pid)}
+        end)
+        |> :erlang.term_to_binary()
+
+      Teiserver.KvStore.put("lobby", data.id, to_save)
+    end
+  end
+
+  def terminate(_reason, _state, _data), do: nil
 
   @spec via_tuple(id()) :: GenServer.name()
   defp via_tuple(lobby_id) do
