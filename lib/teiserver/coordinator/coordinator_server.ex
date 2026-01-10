@@ -315,7 +315,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
 
-  @spec get_coordinator_account() :: Teiserver.Account.CacheUser.t()
+  @spec get_coordinator_account() :: Teiserver.CacheUser.t()
   def get_coordinator_account() do
     user =
       Account.get_user(nil,
