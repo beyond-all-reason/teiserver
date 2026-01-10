@@ -2,6 +2,8 @@ defmodule Teiserver.Battle.Balance.BalanceTypes do
   @moduledoc false
   # alias Teiserver.Battle.Balance.BalanceTypes, as: BT
 
+  alias Teiserver.Data.Types, as: T
+
   @type rating_value() :: float()
   @type player_group() :: %{T.userid() => rating_value()}
   @type expanded_group() :: %{
