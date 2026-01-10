@@ -34,7 +34,7 @@ defmodule Teiserver.Telemetry.TelemetryLib do
     GenServer.cast(TelemetryServer, msg)
   end
 
-  @spec metrics() :: List.t()
+  @spec metrics() :: list()
   def metrics() do
     [
       last_value("teiserver.client.total"),
@@ -103,17 +103,6 @@ defmodule Teiserver.Telemetry.TelemetryLib do
         measurement: :count,
         tags: [:command]
       )
-    ]
-  end
-
-  @spec periodic_measurements() :: List.t()
-  def periodic_measurements() do
-    [
-      # {Teiserver.Telemetry, :measure_users, []},
-      # {:process_info,
-      #   event: [:teiserver, :ts],
-      #   name: Teiserver.Telemetry.TelemetryServer,
-      #   keys: [:message_queue_len, :memory]}
     ]
   end
 end

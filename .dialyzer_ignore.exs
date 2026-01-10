@@ -125,7 +125,6 @@
   {"lib/teiserver/telemetry/libs/simple_lobby_event_type_lib.ex", :invalid_contract},
   {"lib/teiserver/telemetry/libs/simple_match_event_type_lib.ex", :invalid_contract},
   {"lib/teiserver/telemetry/libs/simple_server_event_type_lib.ex", :invalid_contract},
-  {"lib/teiserver/telemetry/libs/telemetry_lib.ex", :unknown_type},
   {"lib/teiserver_web/controllers/account/session_controller.ex", :pattern_match},
   {"lib/teiserver_web/controllers/admin/discord_channel_controller.ex", :pattern_match},
   {"lib/teiserver_web/controllers/admin/lobby_controller.ex", :no_return},

@@ -20,9 +20,6 @@ defmodule Teiserver.Telemetry do
   @spec metrics() :: List.t()
   defdelegate metrics(), to: TelemetryLib
 
-  @spec periodic_measurements() :: List.t()
-  defdelegate periodic_measurements(), to: TelemetryLib
-
   # ------------------------
   # ------------------------ Complex Event Types ------------------------
   # ------------------------
