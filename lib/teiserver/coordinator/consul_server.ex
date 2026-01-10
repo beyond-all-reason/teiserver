@@ -925,7 +925,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def is_on_friendlist?(userid, state, :all) do
     member_ids =
-      Battle.get_lobby(state.lobby_id)
+      (Battle.get_lobby(state.lobby_id) || %{})
       |> Map.get(:players, [])
 
     # If battle has no players it'll succeed regardless
