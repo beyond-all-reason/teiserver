@@ -77,7 +77,6 @@
   {"lib/teiserver/logging/tasks/aggregate_logs_task.ex", :unused_fun},
   {"lib/teiserver/logging/tasks/persist_server_day_task.ex", :call},
   {"lib/teiserver/logging/tasks/persist_server_day_task.ex", :invalid_contract},
-  {"lib/teiserver/microblog.ex", :unknown_type},
   {"lib/teiserver/microblog.ex", :invalid_contract},
   {"lib/teiserver/microblog/libs/post_lib.ex", :invalid_contract},
   {"lib/teiserver/microblog/libs/post_tag_lib.ex", :invalid_contract},
