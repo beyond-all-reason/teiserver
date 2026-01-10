@@ -54,7 +54,8 @@ defmodule Teiserver.Telemetry.AnonPropertyLib do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_anon_property!(String.t(), String.t() | non_neg_integer()) :: UserProperty.t()
+  @spec get_anon_property!(String.t(), String.t() | non_neg_integer()) ::
+          Teiserver.Telemetry.UserProperty.t()
   def get_anon_property!(hash, property_type_id) when is_integer(property_type_id) do
     [hash: hash, property_type_id: property_type_id]
     |> AnonPropertyQueries.query_anon_properties()
@@ -66,7 +67,8 @@ defmodule Teiserver.Telemetry.AnonPropertyLib do
     get_anon_property!(hash, property_type_id)
   end
 
-  @spec get_anon_property(String.t(), String.t() | non_neg_integer()) :: UserProperty.t() | nil
+  @spec get_anon_property(String.t(), String.t() | non_neg_integer()) ::
+          Teiserver.Telemetry.UserProperty.t() | nil
   def get_anon_property(hash, property_type_id) when is_integer(property_type_id) do
     [hash: hash, property_type_id: property_type_id]
     |> AnonPropertyQueries.query_anon_properties()

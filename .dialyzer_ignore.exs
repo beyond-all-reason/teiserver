@@ -97,7 +97,6 @@
   {"lib/teiserver/tcp/spring/spring_tcp_server.ex", :no_return},
   {"lib/teiserver/telemetry.ex", :unknown_type},
   {"lib/teiserver/telemetry.ex", :invalid_contract},
-  {"lib/teiserver/telemetry/libs/anon_property_lib.ex", :unknown_type},
   {"lib/teiserver/telemetry/libs/complex_client_event_type_lib.ex", :invalid_contract},
   {"lib/teiserver/telemetry/libs/complex_lobby_event_lib.ex", :invalid_contract},
   {"lib/teiserver/telemetry/libs/complex_lobby_event_type_lib.ex", :invalid_contract},
