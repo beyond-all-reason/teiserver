@@ -1,12 +1,15 @@
 defmodule Teiserver.TachyonLobby.Registry do
   alias Teiserver.TachyonLobby.Lobby
 
-  use Horde.Registry
-
-  def start_link(_) do
-    Horde.Registry.start_link(__MODULE__, [keys: :unique, strategy: :one_for_one, members: :auto],
-      name: __MODULE__
+  def child_spec(_) do
+    Supervisor.child_spec(Registry,
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, []}
     )
+  end
+
+  def start_link() do
+    Registry.start_link(keys: :unique, name: __MODULE__)
   end
 
   @doc """
@@ -14,12 +17,12 @@ defmodule Teiserver.TachyonLobby.Registry do
   """
   @spec via_tuple(Lobby.id()) :: GenServer.name()
   def via_tuple(queue_id) do
-    {:via, Horde.Registry, {__MODULE__, queue_id}}
+    {:via, Registry, {__MODULE__, queue_id}}
   end
 
   @spec lookup(Lobby.id()) :: pid() | nil
   def lookup(lobby_id) do
-    case Horde.Registry.lookup(__MODULE__, lobby_id) do
+    case Registry.lookup(__MODULE__, lobby_id) do
       [{pid, _}] -> pid
       _ -> nil
     end
@@ -27,19 +30,11 @@ defmodule Teiserver.TachyonLobby.Registry do
 
   @spec count() :: non_neg_integer()
   def count() do
-    case Horde.Registry.count(__MODULE__) do
-      :undefined -> 0
-      x -> x
-    end
+    Registry.count(__MODULE__)
   end
 
   @spec list_lobbies() :: [{Lobby.id(), pid()}]
   def list_lobbies() do
-    Horde.Registry.select(__MODULE__, [{{:"$1", :"$2", :_}, [], [{{:"$1", :"$2"}}]}])
-  end
-
-  @impl true
-  def init(init_args) do
-    Horde.Registry.init(init_args)
+    Registry.select(__MODULE__, [{{:"$1", :"$2", :_}, [], [{{:"$1", :"$2"}}]}])
   end
 end
