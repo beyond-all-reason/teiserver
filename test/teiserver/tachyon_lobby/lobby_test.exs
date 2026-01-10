@@ -1016,6 +1016,27 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       # now the call is handled
       assert Task.await(join_task) == :ok
     end
+
+    test "list updates when lobby is restored" do
+      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
+      sink_pid = mk_sink()
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      drain_msg_queue()
+
+      Process.exit(sink_pid, :shutdown)
+      Tachyon.restart_system()
+
+      sink_pid = mk_sink()
+      {:ok, _, _details} = Lobby.rejoin(id, @default_user_id, sink_pid)
+      assert_receive %{event: :reset_list, lobbies: lobbies}
+      assert lobbies == %{}
+
+      Lobby.List.broadcast_updates()
+      assert_receive %{event: :add_lobby, lobby_id: ^id}
+    end
   end
 
   # these tests are a bit anemic because they also require a connected autohost

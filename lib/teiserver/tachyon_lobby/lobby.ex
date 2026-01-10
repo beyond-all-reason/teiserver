@@ -452,8 +452,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       if MapSet.size(ids_left) == 0 do
         Logger.debug("all member rejoined, start up completed")
-        # TODO: handle list update
-        # TachyonLobby.List.register_lobby(self(), data.id, get_overview_from_state(data))
+        TachyonLobby.List.register_lobby(self(), data.id, get_overview_from_state(data))
         {:next_state, :running, data, actions}
       else
         {:keep_state, data, actions}
