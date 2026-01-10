@@ -26,6 +26,18 @@
             </.section_menu_button_patch>
           <% end %>
         <% end %>
+
+        <form method="post" class="w-fit">
+          <.input
+            type="select"
+            label="Season"
+            options={@seasons}
+            id="season"
+            name="season"
+            value={@filters["season"]}
+            phx-change="filter-update"
+          />
+        </form>
       </div>
     </div>
 
