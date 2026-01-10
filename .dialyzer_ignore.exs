@@ -163,8 +163,6 @@
   {"lib/teiserver_web/live/account/relationship/index.html.heex", :call},
   {"lib/teiserver_web/live/admin/chat/index.html.heex", :no_return},
   {"lib/teiserver_web/live/admin/chat/index.html.heex", :call},
-  {"lib/teiserver_web/live/admin_dashboard/index.ex", :unknown_type},
-  {"lib/teiserver_web/live/admin_dashboard/policy.ex", :unknown_type},
   {"lib/teiserver_web/live/battles/match/chat.ex", :no_return},
   {"lib/teiserver_web/live/battles/match/chat.ex", :call},
   {"lib/teiserver_web/live/battles/match/chat.html.heex", :no_return},
