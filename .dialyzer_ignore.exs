@@ -123,7 +123,6 @@
   {"lib/teiserver_web/controllers/logging/aggregate_view_log_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/logging/match_log_controller.ex", :call},
   {"lib/teiserver_web/controllers/logging/match_log_controller.ex", :no_return},
-  {"lib/teiserver_web/controllers/logging/page_view_log_controller.ex", :unknown_type},
   {"lib/teiserver_web/controllers/moderation/proposal_controller.ex", :exact_eq},
   {"lib/teiserver_web/controllers/telemetry/complex_client_event_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/telemetry/complex_client_event_controller.ex", :call},

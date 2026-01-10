@@ -99,7 +99,7 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
     }
   end
 
-  @spec search_dropdowns(Plag.Conn.t()) :: Plug.Conn.t()
+  @spec search_dropdowns(Plug.Conn.t()) :: Plug.Conn.t()
   def search_dropdowns(conn) do
     conn
   end
