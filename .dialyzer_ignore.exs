@@ -17,7 +17,6 @@
   {"lib/teiserver/battle.ex", :call},
   {"lib/teiserver/battle.ex", :no_return},
   {"lib/teiserver/battle/balance/balance_types.ex", :unknown_type},
-  {"lib/teiserver/battle/balance/loser_picks.ex", :invalid_contract},
   {"lib/teiserver/battle/libs/balance_lib.ex", :call},
   {"lib/teiserver/battle/servers/match_monitor_server.ex", :unknown_type},
   {"lib/teiserver/battle/servers/match_monitor_server.ex", :call},
