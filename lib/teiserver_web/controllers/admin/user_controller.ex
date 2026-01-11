@@ -199,7 +199,6 @@ defmodule TeiserverWeb.Admin.UserController do
             :__struct__,
             :__meta__,
             :user_configs,
-            :clan,
             :smurf_of,
             :user_stat,
             :data
