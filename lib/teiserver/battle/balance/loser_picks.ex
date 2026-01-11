@@ -23,14 +23,14 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
   @splitter "------------------------------------------------------"
   @type algorithm_state ::
           %{
-            group_pairs: list,
-            teams: map,
-            logs: list,
-            solo_players: list,
-            opts: list,
-            remaining_picks: list,
-            solo_players: list,
-            max_teamsize: integer
+            group_pairs: list(),
+            teams: map(),
+            logs: list(),
+            solo_players: list(),
+            opts: list(),
+            remaining_picks: list(),
+            solo_players: list(),
+            max_teamsize: non_neg_integer()
           }
 
   @doc """
