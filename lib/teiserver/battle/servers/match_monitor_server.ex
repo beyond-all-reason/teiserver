@@ -9,6 +9,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.Account.CalculateSmurfKeyTask
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.Data.Types, as: T
 
   @spec do_start() :: :ok
   def do_start() do
@@ -440,7 +441,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     state
   end
 
-  @spec get_match_monitor_account() :: Teiserver.Account.CacheUser.t()
+  @spec get_match_monitor_account() :: Teiserver.CacheUser.t()
   def get_match_monitor_account() do
     user =
       Account.get_user(nil,

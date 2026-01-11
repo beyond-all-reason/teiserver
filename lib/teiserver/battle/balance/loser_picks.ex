@@ -21,12 +21,17 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
   import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   @splitter "------------------------------------------------------"
-  @type algorithm_state :: %{
-          teams: map,
-          logs: list,
-          solo_players: list,
-          opts: list
-        }
+  @type algorithm_state ::
+          %{
+            group_pairs: list,
+            teams: map,
+            logs: list,
+            solo_players: list,
+            opts: list,
+            remaining_picks: list,
+            solo_players: list,
+            max_teamsize: integer
+          }
 
   @doc """
   Each round the team with the lowest score picks, if a team has the maximum number of players
