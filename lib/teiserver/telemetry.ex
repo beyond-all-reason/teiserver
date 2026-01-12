@@ -4,6 +4,9 @@ defmodule Teiserver.Telemetry do
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Telemetry.ComplexServerEventType
+  alias Teiserver.Telemetry.UserProperty
+  alias Teiserver.Telemetry.Infolog
 
   # Erlang telemetry stuff
   alias Teiserver.Telemetry.TelemetryLib
@@ -17,7 +20,7 @@ defmodule Teiserver.Telemetry do
   @spec cast_to_server(any) :: :ok
   defdelegate cast_to_server(msg), to: TelemetryLib
 
-  @spec metrics() :: List.t()
+  @spec metrics() :: list()
   defdelegate metrics(), to: TelemetryLib
 
   # ------------------------
@@ -904,12 +907,12 @@ defmodule Teiserver.Telemetry do
 
   alias Teiserver.Telemetry.{Infolog, InfologLib}
 
-  @spec infolog_query(List.t()) :: Ecto.Query.t()
+  @spec infolog_query(keyword()) :: Ecto.Query.t()
   def infolog_query(args) do
     infolog_query(nil, args)
   end
 
-  @spec infolog_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  @spec infolog_query(non_neg_integer() | nil, keyword()) :: Ecto.Query.t()
   def infolog_query(id, args) do
     InfologLib.query_infologs()
     |> InfologLib.search(%{id: id})
@@ -929,20 +932,20 @@ defmodule Teiserver.Telemetry do
       [%Infolog{}, ...]
 
   """
-  @spec list_infologs(List.t()) :: List.t()
+  @spec list_infologs(keyword()) :: list()
   def list_infologs(args \\ []) do
     infolog_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 100)
     |> Repo.all()
   end
 
-  @spec count_infologs(List.t()) :: non_neg_integer()
+  @spec count_infologs(keyword()) :: non_neg_integer()
   def count_infologs(args \\ []) do
     infolog_query(args)
     |> Repo.aggregate(:count, :id)
   end
 
-  @spec get_infolog(Integer.t(), List.t()) :: List.t()
+  @spec get_infolog(non_neg_integer(), keyword()) :: Infolog.t() | nil
   def get_infolog(id, args \\ []) do
     infolog_query(id, args)
     |> Repo.one()
