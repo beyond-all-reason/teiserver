@@ -95,6 +95,7 @@ defmodule Teiserver.Protocols.Spring.UserOut do
 
   def do_reply(:whois_name, {:ok, user}, _state) do
     ratings = get_user_ratings(user)
+
     encoded_data =
       user
       |> Map.take(~w(id name country icon colour)a)
@@ -116,6 +117,7 @@ defmodule Teiserver.Protocols.Spring.UserOut do
 
   def do_reply(:whois, {:ok, user}, _state) do
     ratings = get_user_ratings(user)
+
     encoded_data =
       user
       |> Map.take(~w(name country icon colour)a)
@@ -124,21 +126,6 @@ defmodule Teiserver.Protocols.Spring.UserOut do
       |> Base.encode64(padding: false)
 
     "s.user.whois #{user.id} #{encoded_data}\n"
-  end
-
-  defp get_user_ratings(user) do
-    MatchRatingLib.rating_type_name_lookup()
-    |> Enum.map(fn {name, type_id} ->
-      case Account.get_rating(user.id, type_id) do
-        nil ->
-          nil
-
-        rating ->
-          {name, %{skill: rating.skill, uncertainty: rating.uncertainty}}
-      end
-    end)
-    |> Enum.reject(&is_nil/1)
-    |> Map.new()
   end
 
   # From pubsubs
@@ -169,5 +156,20 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   def do_reply(event, msg, _state) do
     Logger.error("No handler for event `#{event}` with msg #{inspect(msg)}")
     "\n"
+  end
+
+  defp get_user_ratings(user) do
+    MatchRatingLib.rating_type_name_lookup()
+    |> Enum.map(fn {name, type_id} ->
+      case Account.get_rating(user.id, type_id) do
+        nil ->
+          nil
+
+        rating ->
+          {name, %{skill: rating.skill, uncertainty: rating.uncertainty}}
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+    |> Map.new()
   end
 end
