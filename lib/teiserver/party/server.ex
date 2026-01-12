@@ -585,6 +585,10 @@ defmodule Teiserver.Party.Server do
     {:stop, :normal}
   end
 
+  def handle_event(:info, {:EXIT, _pid, reason}, _state, _data) do
+    {:stop, reason}
+  end
+
   @impl :gen_statem
   def terminate(:shutdown, :shutting_down, data) do
     # by that time, the party should have received all the :shutdown signals
