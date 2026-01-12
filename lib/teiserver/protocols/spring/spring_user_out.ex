@@ -1,6 +1,8 @@
 defmodule Teiserver.Protocols.Spring.UserOut do
   @moduledoc false
   require Logger
+  alias Teiserver.Account
+  alias Teiserver.Game.MatchRatingLib
 
   @spec do_reply(atom(), nil | String.t() | tuple() | list(), map()) :: String.t()
   def do_reply(_, _, %{userid: nil}), do: ""
@@ -92,9 +94,11 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(:whois_name, {:ok, user}, _state) do
+    ratings = get_user_ratings(user)
     encoded_data =
       user
       |> Map.take(~w(id name country icon colour)a)
+      |> Map.put(:ratings, ratings)
       |> Jason.encode!()
       |> Base.encode64(padding: false)
 
@@ -111,13 +115,30 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   end
 
   def do_reply(:whois, {:ok, user}, _state) do
+    ratings = get_user_ratings(user)
     encoded_data =
       user
       |> Map.take(~w(name country icon colour)a)
+      |> Map.put(:ratings, ratings)
       |> Jason.encode!()
       |> Base.encode64(padding: false)
 
     "s.user.whois #{user.id} #{encoded_data}\n"
+  end
+
+  defp get_user_ratings(user) do
+    MatchRatingLib.rating_type_name_lookup()
+    |> Enum.map(fn {name, type_id} ->
+      case Account.get_rating(user.id, type_id) do
+        nil ->
+          nil
+
+        rating ->
+          {name, %{skill: rating.skill, uncertainty: rating.uncertainty}}
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+    |> Map.new()
   end
 
   # From pubsubs
