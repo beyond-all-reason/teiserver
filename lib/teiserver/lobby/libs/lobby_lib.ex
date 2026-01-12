@@ -547,7 +547,8 @@ defmodule Teiserver.Lobby.LobbyLib do
                 try do
                   case Teiserver.Coordinator.get_team_config(lobby_id, 4_000) do
                     %{host_teamsize: team_size, host_teamcount: team_count} ->
-                      {lobby_id, %{teamSize: team_size, nbTeams: team_count}}
+                      rating_type = Teiserver.Battle.MatchLib.game_type(team_size, team_count)
+                      {lobby_id, %{teamSize: team_size, nbTeams: team_count, ratingType: rating_type}}
 
                     _ ->
                       nil
@@ -580,7 +581,8 @@ defmodule Teiserver.Lobby.LobbyLib do
       try do
         case Teiserver.Coordinator.get_team_config(lobby_id) do
           %{host_teamsize: team_size, host_teamcount: team_count} ->
-            %{lobby_id => %{teamSize: team_size, nbTeams: team_count}}
+            rating_type = Teiserver.Battle.MatchLib.game_type(team_size, team_count)
+            %{lobby_id => %{teamSize: team_size, nbTeams: team_count, ratingType: rating_type}}
 
           _ ->
             nil
