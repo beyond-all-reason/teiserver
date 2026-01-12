@@ -18,12 +18,12 @@ defmodule Teiserver.Battle do
   alias Teiserver.Protocols.Spring
   require Logger
 
-  @spec match_query(List.t()) :: Ecto.Query.t()
+  @spec match_query(keyword()) :: Ecto.Query.t()
   def match_query(args) do
     match_query(nil, args)
   end
 
-  @spec match_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  @spec match_query(T.match_id(), keyword()) :: Ecto.Query.t()
   def match_query(id, args) do
     MatchLib.query_matches()
     |> MatchLib.search(%{id: id})
@@ -44,7 +44,7 @@ defmodule Teiserver.Battle do
       [%Match{}, ...]
 
   """
-  @spec list_matches(List.t()) :: List.t()
+  @spec list_matches(keyword()) :: list()
   def list_matches(args \\ []) do
     match_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
@@ -64,7 +64,7 @@ defmodule Teiserver.Battle do
       35
 
   """
-  @spec count_matches(List.t()) :: integer()
+  @spec count_matches(keyword()) :: integer()
   def count_matches(args \\ []) do
     match_query(args)
     |> Repo.aggregate(:count, :id)
