@@ -7,15 +7,11 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   alias Teiserver.Battle.{BalanceLib, MatchLib}
   alias Teiserver.Battle
 
-  @rank_upper_bound 1000
-  @rank_min_chev_level 1
-  @rank_max_chev_level 8
+  @rank_upper_bound 7
   @rating_upper_bound 1000
   @splitter "------------------------------------------------------"
   @spec rank_upper_bound() :: number
   def rank_upper_bound, do: @rank_upper_bound
-  def rank_min_chev_level, do: @rank_min_chev_level
-  def rank_max_chev_level, do: @rank_max_chev_level
   def rating_upper_bound, do: @rating_upper_bound
 
   def get_lobby_restrictions_welcome_text(state) do

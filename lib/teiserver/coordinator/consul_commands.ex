@@ -771,13 +771,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state
 
           {chev_level, _} ->
-            if chev_level < LobbyRestrictions.rank_min_chev_level() or
-                 chev_level > LobbyRestrictions.rank_max_chev_level() do
+            max_chev_level = LobbyRestrictions.rank_upper_bound() + 1
+
+            if chev_level < 1 or chev_level > max_chev_level do
               Lobby.sayprivateex(
                 state.coordinator_id,
                 senderid,
                 [
-                  "Chev level must be between #{LobbyRestrictions.rank_min_chev_level()} and #{LobbyRestrictions.rank_max_chev_level()}."
+                  "Chev level must be between 1 and #{max_chev_level}."
                 ],
                 state.lobby_id
               )
@@ -838,13 +839,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state
 
           {chev_level, _} ->
-            if chev_level < LobbyRestrictions.rank_min_chev_level() or
-                 chev_level > LobbyRestrictions.rank_max_chev_level() do
+            max_chev_level = LobbyRestrictions.rank_upper_bound() + 1
+
+            if chev_level < 1 or chev_level > max_chev_level do
               Lobby.sayprivateex(
                 state.coordinator_id,
                 senderid,
                 [
-                  "Chev level must be between #{LobbyRestrictions.rank_min_chev_level()} and #{LobbyRestrictions.rank_max_chev_level()}."
+                  "Chev level must be between 1 and #{max_chev_level}."
                 ],
                 state.lobby_id
               )
