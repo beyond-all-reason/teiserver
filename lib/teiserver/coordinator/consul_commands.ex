@@ -455,7 +455,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
               balance.time_taken < 1_000_000_000 ->
                 t = round(balance.time_taken / 1_000_000)
                 "Time taken: #{t}s"
-            end
+        end
 
           [
             time_taken
@@ -794,7 +794,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
                 minimum_rank_to_play: level,
                 maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()
               })
-            end
+        end
           end
 
       # Not Allowed to set restrictions
