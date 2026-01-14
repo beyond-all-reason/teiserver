@@ -773,12 +773,21 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state
 
           {chev_level, _} ->
+<<<<<<< Updated upstream
             if chev_level < @min_chev_level or chev_level > @max_chev_level do
+=======
+            if chev_level < LobbyRestrictions.rank_min_chev_level() or
+                 chev_level > LobbyRestrictions.rank_max_chev_level() do
+>>>>>>> Stashed changes
               Lobby.sayprivateex(
                 state.coordinator_id,
                 senderid,
                 [
+<<<<<<< Updated upstream
                   "Chev level must be between #{@min_chev_level} and #{@max_chev_level}."
+=======
+                  "Chev level must be between #{LobbyRestrictions.rank_min_chev_level()} and #{LobbyRestrictions.rank_max_chev_level()}."
+>>>>>>> Stashed changes
                 ],
                 state.lobby_id
               )
@@ -794,6 +803,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
                 minimum_rank_to_play: level,
                 maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()
               })
+<<<<<<< Updated upstream
+=======
+            end
+>>>>>>> Stashed changes
         end
           end
 
@@ -839,12 +852,21 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state
 
           {chev_level, _} ->
+<<<<<<< Updated upstream
             if chev_level < @min_chev_level or chev_level > @max_chev_level do
+=======
+            if chev_level < LobbyRestrictions.rank_min_chev_level() or
+                 chev_level > LobbyRestrictions.rank_max_chev_level() do
+>>>>>>> Stashed changes
               Lobby.sayprivateex(
                 state.coordinator_id,
                 senderid,
                 [
+<<<<<<< Updated upstream
                   "Chev level must be between #{@min_chev_level} and #{@max_chev_level}."
+=======
+                  "Chev level must be between #{LobbyRestrictions.rank_min_chev_level()} and #{LobbyRestrictions.rank_max_chev_level()}."
+>>>>>>> Stashed changes
                 ],
                 state.lobby_id
               )
@@ -861,7 +883,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
                 minimum_rank_to_play: 0
               })
             end
+<<<<<<< Updated upstream
           end
+=======
+        end
+>>>>>>> Stashed changes
 
       {:error, error_msg} ->
         Lobby.sayex(
