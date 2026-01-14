@@ -453,7 +453,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
               balance.time_taken < 1_000_000_000 ->
                 t = round(balance.time_taken / 1_000_000)
                 "Time taken: #{t}s"
-        end
+            end
 
           [
             time_taken
