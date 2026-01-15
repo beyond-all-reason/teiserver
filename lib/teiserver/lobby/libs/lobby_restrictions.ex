@@ -7,7 +7,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   alias Teiserver.Battle.{BalanceLib, MatchLib}
   alias Teiserver.Battle
 
-  @rank_upper_bound 1000
+  @rank_upper_bound 7
   @rating_upper_bound 1000
   @splitter "------------------------------------------------------"
   @spec rank_upper_bound() :: number

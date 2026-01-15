@@ -771,15 +771,30 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state
 
           {chev_level, _} ->
-            ConsulServer.say_command(cmd, state)
-            LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-            Process.send_after(self(), :recheck_membership, 0)
-            level = chev_level - 1
+            max_chev_level = LobbyRestrictions.rank_upper_bound() + 1
 
-            Map.merge(state, %{
-              minimum_rank_to_play: level,
-              maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()
-            })
+            if chev_level < 1 or chev_level > max_chev_level do
+              Lobby.sayprivateex(
+                state.coordinator_id,
+                senderid,
+                [
+                  "Chev level must be between 1 and #{max_chev_level}."
+                ],
+                state.lobby_id
+              )
+
+              state
+            else
+              ConsulServer.say_command(cmd, state)
+              LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+              Process.send_after(self(), :recheck_membership, 0)
+              level = chev_level - 1
+
+              Map.merge(state, %{
+                minimum_rank_to_play: level,
+                maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()
+              })
+            end
         end
 
       # Not Allowed to set restrictions
@@ -824,15 +839,30 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state
 
           {chev_level, _} ->
-            ConsulServer.say_command(cmd, state)
-            LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-            Process.send_after(self(), :recheck_membership, 0)
-            level = chev_level - 1
+            max_chev_level = LobbyRestrictions.rank_upper_bound() + 1
 
-            Map.merge(state, %{
-              maximum_rank_to_play: level,
-              minimum_rank_to_play: 0
-            })
+            if chev_level < 1 or chev_level > max_chev_level do
+              Lobby.sayprivateex(
+                state.coordinator_id,
+                senderid,
+                [
+                  "Chev level must be between 1 and #{max_chev_level}."
+                ],
+                state.lobby_id
+              )
+
+              state
+            else
+              ConsulServer.say_command(cmd, state)
+              LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
+              Process.send_after(self(), :recheck_membership, 0)
+              level = chev_level - 1
+
+              Map.merge(state, %{
+                maximum_rank_to_play: level,
+                minimum_rank_to_play: 0
+              })
+            end
         end
 
       {:error, error_msg} ->
