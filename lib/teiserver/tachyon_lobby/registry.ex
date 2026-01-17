@@ -31,6 +31,9 @@ defmodule Teiserver.TachyonLobby.Registry do
   @spec count() :: non_neg_integer()
   def count() do
     Registry.count(__MODULE__)
+  rescue
+    # when the registry isn't up (yet), can happen with telemetry polling
+    _e in ArgumentError -> 0
   end
 
   @spec list_lobbies() :: [{Lobby.id(), pid()}]
