@@ -3,6 +3,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until_nil: 1]
   alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.AssetFixtures
+  alias Teiserver.Tachyon
 
   @moduletag :tachyon
 
@@ -957,6 +958,87 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "state restoration" do
+    def setup_restore_config(_) do
+      Tachyon.enable_state_restoration()
+      ExUnit.Callbacks.on_exit(fn -> Tachyon.disable_state_restoration() end)
+    end
+
+    setup [:setup_restore_config]
+
+    test "no snapshot when normal exit" do
+      sink_pid = mk_sink()
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      Tachyon.restart_system()
+      assert Teiserver.KvStore.get("lobby", id) == nil
+    end
+
+    test "can rejoin lobby from snapshot" do
+      sink_pid = mk_sink()
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      Process.exit(sink_pid, :shutdown)
+      Tachyon.restart_system()
+
+      sink_pid = mk_sink()
+      {:ok, _, details} = Lobby.rejoin(id, @default_user_id, sink_pid)
+      assert is_map_key(details.players, @default_user_id)
+    end
+
+    test "must rejoin first before being able to leave" do
+      sink_pid = mk_sink()
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      Process.exit(sink_pid, :shutdown)
+      Tachyon.restart_system()
+
+      # another player is attempting to join before the lobby is fully up
+      join_task =
+        Task.async(fn ->
+          {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
+          :ok
+        end)
+
+      # timeout
+      assert Task.yield(join_task, 10) == nil
+
+      sink_pid = mk_sink()
+      {:ok, _, details} = Lobby.rejoin(id, @default_user_id, sink_pid)
+      assert is_map_key(details.players, @default_user_id)
+
+      # now the call is handled
+      assert Task.await(join_task) == :ok
+    end
+
+    test "list updates when lobby is restored" do
+      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
+      sink_pid = mk_sink()
+
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
+
+      drain_msg_queue()
+
+      Process.exit(sink_pid, :shutdown)
+      Tachyon.restart_system()
+
+      sink_pid = mk_sink()
+      {:ok, _, _details} = Lobby.rejoin(id, @default_user_id, sink_pid)
+      assert_receive %{event: :reset_list, lobbies: lobbies}
+      assert lobbies == %{}
+
+      Lobby.List.broadcast_updates()
+      assert_receive %{event: :add_lobby, lobby_id: ^id}
+    end
+  end
+
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the
   # teiserver_web/tachyon/lobby_test.exs file
@@ -1127,5 +1209,10 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     after
       timeout -> Enum.reverse(acc)
     end
+  end
+
+  defp mk_sink(name \\ :sink) do
+    Supervisor.child_spec({Task, fn -> :timer.sleep(:infinity) end}, id: name)
+    |> ExUnit.Callbacks.start_supervised!()
   end
 end

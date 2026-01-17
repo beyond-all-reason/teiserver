@@ -9,11 +9,18 @@ defmodule Teiserver.TachyonLobby.Supervisor do
   def start_lobby(start_params) do
     id = Lobby.gen_id()
 
-    case Horde.DynamicSupervisor.start_child(__MODULE__, {Lobby, {id, start_params}}) do
+    case Horde.DynamicSupervisor.start_child(__MODULE__, {Lobby, {id, {:user, start_params}}}) do
       {:ok, pid} -> {:ok, %{id: id, pid: pid}}
       {:error, err} -> {:error, err}
       x -> raise "Unsupported return type for child lobby #{inspect(x)}"
     end
+  end
+
+  def start_lobby_from_snapshot(lobby_id, serialized_state) do
+    Horde.DynamicSupervisor.start_child(
+      __MODULE__,
+      {Lobby, {lobby_id, {:snapshot, serialized_state}}}
+    )
   end
 
   def start_link(init_arg) do

@@ -51,6 +51,22 @@ defmodule Teiserver.TachyonLobby do
     end
   end
 
+  @spec rejoin(id(), T.userid()) ::
+          {:ok, lobby_pid :: pid(), details()} | {:error, :invalid_lobby}
+  def rejoin(lobby_id, user_id), do: rejoin(lobby_id, user_id, self())
+
+  @spec rejoin(id(), T.userid(), pid()) ::
+          {:ok, lobby_pid :: pid(), details()} | {:error, :invalid_lobby}
+  defdelegate rejoin(lobby_id, user_id, pid), to: Lobby
+
+  def restore_lobbies() do
+    Teiserver.Tachyon.System.restore_state("lobby", __MODULE__, :restore_lobby)
+  end
+
+  def restore_lobby(id, serialized_state) do
+    TachyonLobby.Supervisor.start_lobby_from_snapshot(id, serialized_state)
+  end
+
   @spec lookup(Lobby.id()) :: pid() | nil
   defdelegate lookup(lobby_id), to: TachyonLobby.Registry
 

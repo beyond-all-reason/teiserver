@@ -596,6 +596,33 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "lobby restoration" do
+    setup [{Tachyon, :setup_client}]
+
+    test "can create lobby", %{client: client, token: token} do
+      Teiserver.Tachyon.enable_state_restoration()
+
+      lobby_data = %{
+        name: "test lobby",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
+      }
+
+      %{"status" => "success", "data" => data} = Tachyon.create_lobby!(client, lobby_data)
+      lobby_id = data["id"]
+      Teiserver.Tachyon.restart_system()
+      assert {:error, :disconnected} == Tachyon.recv_message(client)
+
+      client = Tachyon.connect(token, swallow_first_event: false)
+      {:ok, %{"commandId" => "user/self", "data" => data}} = Tachyon.recv_message(client)
+      assert data["user"]["currentLobby"] == lobby_id
+
+      # make sure the session correctly monitors the lobby
+      Teiserver.TachyonLobby.lookup(lobby_id) |> Process.exit(:kill)
+      %{"commandId" => "lobby/left"} = Tachyon.recv_message!(client)
+    end
+  end
+
   test "get lobby/left event when lobby dies", ctx do
     {:ok, lobby_id: lobby_id} = setup_lobby(ctx)
     lobby_pid = Teiserver.TachyonLobby.lookup(lobby_id)
