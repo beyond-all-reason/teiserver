@@ -123,8 +123,16 @@ defmodule Teiserver.Autohost.TachyonHandler do
   @impl Handler
   @spec init(state()) :: Handler.result()
   def init(state) do
-    {:request, "autohost/subscribeUpdates",
-     %{since: DateTime.utc_now() |> DateTime.to_unix(:microsecond)}, [], state}
+    Logger.metadata(actor_type: :autohost_conn, actor_id: state.autohost.id)
+    case Teiserver.Autohost.SessionSupervisor.start_session(state.autohost, self()) do
+      {:ok, _pid} ->
+        {:request, "autohost/subscribeUpdates",
+         %{since: DateTime.utc_now() |> DateTime.to_unix(:microsecond)}, [], state}
+
+      {:error, reason} ->
+        Logger.warning("Cannot start autohost session: #{inspect(reason)}")
+        {:stop, :normal}
+    end
   end
 
   @impl true
