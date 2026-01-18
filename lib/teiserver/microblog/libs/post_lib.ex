@@ -253,7 +253,8 @@ defmodule Teiserver.Microblog.PostLib do
     Post.changeset(post, attrs)
   end
 
-  @spec increment_post_view_count(non_neg_integer()) :: Ecto.Changeset
+  @spec increment_post_view_count(non_neg_integer()) ::
+          {:ok, %{:num_rows => non_neg_integer(), optional(any) => any}}
   def increment_post_view_count(post_id) when is_integer(post_id) do
     query = "UPDATE microblog_posts SET view_count = view_count + 1 WHERE id = $1;"
     {:ok, _} = Ecto.Adapters.SQL.query(Repo, query, [post_id])

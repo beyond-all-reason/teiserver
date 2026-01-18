@@ -94,7 +94,6 @@
   {"lib/teiserver/logging/tasks/persist_server_day_task.ex", :no_return},
   {"lib/teiserver/logging/tasks/persist_server_day_task.ex", :unused_fun},
   {"lib/teiserver/microblog.ex", :invalid_contract},
-  {"lib/teiserver/microblog/libs/post_lib.ex", :invalid_contract},
   {"lib/teiserver/microblog/libs/post_tag_lib.ex", :invalid_contract},
   {"lib/teiserver/mix_tasks/fake_data.ex", :no_return},
   {"lib/teiserver/moderation.ex", :unknown_type},
