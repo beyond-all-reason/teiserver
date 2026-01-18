@@ -28,7 +28,6 @@
   {"lib/teiserver/battle/tasks/post_match_process_task.ex", :no_return},
   {"lib/teiserver/battle/tasks/post_match_process_task.ex", :call},
   {"lib/teiserver/battle/tasks/post_match_process_task.ex", :unused_fun},
-  {"lib/teiserver/bridge/bridge_server.ex", :unknown_type},
   {"lib/teiserver/bridge/chat_commands.ex", :call},
   {"lib/teiserver/bridge/commands/findreports_command.ex", :pattern_match},
   {"lib/teiserver/bridge/discord_bridge_bot.ex", :guard_fail},

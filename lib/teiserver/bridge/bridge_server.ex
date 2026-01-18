@@ -41,7 +41,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     send(bridge_pid, message)
   end
 
-  @spec send_direct_message(T.user_id(), String.t()) :: :ok | nil
+  @spec send_direct_message(T.userid(), String.t()) :: :ok | nil
   def send_direct_message(userid, message) do
     user = Account.get_user_by_id(userid)
 
