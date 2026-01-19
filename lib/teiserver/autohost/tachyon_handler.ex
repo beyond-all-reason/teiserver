@@ -10,6 +10,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.{TachyonParser, Collections}
   alias Teiserver.Tachyon.{Handler, Schema, Transport}
+  alias Teiserver.Autohost
   alias Teiserver.TachyonBattle
 
   require Logger
@@ -18,58 +19,12 @@ defmodule Teiserver.Autohost.TachyonHandler do
   @type connected_state :: %{max_battles: non_neg_integer(), current_battles: non_neg_integer()}
   @type state :: %{
           autohost: Bot.t(),
+          session_pid: pid(),
           state: :handshaking | {:connected, connected_state()}
         }
 
-  @type start_response :: %{ips: [String.t()], port: integer()}
-
-  # credo:disable-for-next-line Credo.Check.Design.TagTODO
-  # TODO: there should be some kind of retry here
-  @spec start_battle(Bot.id(), Teiserver.TachyonBattle.id(), Teiserver.Autohost.start_script()) ::
-          {:ok, start_response()} | {:error, term()}
-  def start_battle(autohost_id, battle_id, start_script) do
-    mappings = %{
-      engine_version: :engineVersion,
-      game_name: :gameName,
-      map_name: :mapName,
-      start_pos_type: :startPosType,
-      ally_teams:
-        {:allyTeams,
-         %{
-           teams: {:teams, %{players: {:players, &player_to_tachyon/1}}}
-         }},
-      spectators: {:spectators, &player_to_tachyon/1}
-    }
-
-    start_script =
-      start_script
-      |> Collections.transform_map(mappings)
-      |> Collections.remove_nil_vals()
-      |> Map.put(:battleId, battle_id)
-
-    case Registry.lookup(autohost_id) do
-      {pid, _} ->
-        start_script = Map.put(start_script, :battleId, battle_id)
-        response = Transport.call_client(pid, "autohost/start", start_script)
-
-        case response do
-          %{"status" => "failed", "reason" => reason} ->
-            msg =
-              case response["details"] do
-                nil -> reason
-                details -> "#{reason} - #{details}"
-              end
-
-            Logger.error("failed to start a battle: #{msg}")
-            {:error, msg}
-
-          %{"status" => "success", "data" => data} ->
-            {:ok, %{ips: data["ips"], port: data["port"]}}
-        end
-
-      _ ->
-        {:error, :no_host_available}
-    end
+  def start_battle(conn_pid, battle_id, start_script) do
+    send(conn_pid, {:start_battle, battle_id, start_script})
   end
 
   @doc """
@@ -124,18 +79,45 @@ defmodule Teiserver.Autohost.TachyonHandler do
   @spec init(state()) :: Handler.result()
   def init(state) do
     Logger.metadata(actor_type: :autohost_conn, actor_id: state.autohost.id)
+
     case Teiserver.Autohost.SessionSupervisor.start_session(state.autohost, self()) do
-      {:ok, _pid} ->
+      {:ok, session_pid} ->
+        state = Map.put(state, :session_pid, session_pid)
+
         {:request, "autohost/subscribeUpdates",
          %{since: DateTime.utc_now() |> DateTime.to_unix(:microsecond)}, [], state}
 
       {:error, reason} ->
         Logger.warning("Cannot start autohost session: #{inspect(reason)}")
-        {:stop, :normal}
+        {:stop, :normal, state}
     end
   end
 
   @impl true
+  def handle_info({:start_battle, battle_id, start_script}, state) do
+    mappings = %{
+      engine_version: :engineVersion,
+      game_name: :gameName,
+      map_name: :mapName,
+      start_pos_type: :startPosType,
+      ally_teams:
+        {:allyTeams,
+         %{
+           teams: {:teams, %{players: {:players, &player_to_tachyon/1}}}
+         }},
+      spectators: {:spectators, &player_to_tachyon/1}
+    }
+
+    start_script =
+      start_script
+      |> Collections.transform_map(mappings)
+      |> Collections.remove_nil_vals()
+      |> Map.put(:battleId, battle_id)
+
+    opts = [cb_state: battle_id]
+    {:request, "autohost/start", start_script, opts, state}
+  end
+
   def handle_info(_msg, state) do
     {:ok, state}
   end
@@ -240,6 +222,30 @@ defmodule Teiserver.Autohost.TachyonHandler do
     # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: handle potential failure here
     # for example, autohost refuses any subscription with `since` older than 5 minutes
+    {:ok, state}
+  end
+
+  def handle_response("autohost/start", _battle_id, _resp, state) when state.session_pid == nil,
+    do: {:ok, state}
+
+  def handle_response("autohost/start", battle_id, response, state) do
+    resp =
+      case response do
+        %{"status" => "failed", "reason" => reason} ->
+          msg =
+            case response["details"] do
+              nil -> reason
+              details -> "#{reason} - #{details}"
+            end
+
+          Logger.error("failed to start a battle: #{msg}")
+          {:error, msg}
+
+        %{"status" => "success", "data" => data} ->
+          {:ok, %{ips: data["ips"], port: data["port"]}}
+      end
+
+    Autohost.Session.reply_battle_started(state.session_pid, battle_id, resp)
     {:ok, state}
   end
 

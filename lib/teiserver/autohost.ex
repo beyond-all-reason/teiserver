@@ -1,4 +1,5 @@
 defmodule Teiserver.Autohost do
+  alias Teiserver.Autohost.Session
   alias Teiserver.Autohost.Registry
   alias Teiserver.Autohost.TachyonHandler
   alias Teiserver.Bot.Bot
@@ -41,7 +42,7 @@ defmodule Teiserver.Autohost do
           ai_options: %{String.t() => term()}
         }
 
-  @type start_response :: TachyonHandler.start_response()
+  @type start_response :: Session.start_response()
 
   @type update_event_data :: TachyonHandler.update_event_data()
   @type update_event :: TachyonHandler.update_event()
@@ -86,7 +87,7 @@ defmodule Teiserver.Autohost do
   @spec start_battle(Bot.id(), Teiserver.TachyonBattle.id(), start_script()) ::
           {:ok, start_response()} | {:error, term()}
   defdelegate start_battle(bot_id, battle_id, start_script),
-    to: Teiserver.Autohost.TachyonHandler
+    to: Session
 
   @spec send_message(pid(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
           :ok | {:error, reason :: term()}
