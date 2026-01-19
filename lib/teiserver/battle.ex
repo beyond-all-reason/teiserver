@@ -435,7 +435,7 @@ defmodule Teiserver.Battle do
         Repo.transaction(fn ->
           for {ally_team, index} <- Enum.with_index(ally_teams),
               team <- ally_team.teams,
-              player <- team.players do
+              player <- Map.get(team, :players, []) do
             %{
               match_id: match.id,
               team_id: index,
