@@ -9,6 +9,7 @@ defmodule Teiserver.Autohost.Session do
 
   alias Teiserver.Bot.Bot
   alias Teiserver.Autohost
+  alias Teiserver.Autohost.TachyonHandler
   alias Teiserver.TachyonBattle
 
   require Logger
@@ -75,7 +76,7 @@ defmodule Teiserver.Autohost.Session do
   end
 
   @impl :gen_statem
-  @spec init({Bot.t(), pid()}) :: {:ok, state(), data()}
+  @spec init({Bot.t(), pid()}) :: {:ok, state(), data(), term()}
   def init({autohost, conn_pid}) do
     Logger.metadata(actor_type: :autohost_session, actor_id: autohost.id)
     Process.link(conn_pid)
@@ -89,10 +90,17 @@ defmodule Teiserver.Autohost.Session do
       active_battles: %{}
     }
 
-    {:ok, :handshaking, data}
+    {:ok, :handshaking, data, [{:next_event, :internal, :subscribe_updates}]}
   end
 
   @impl :gen_statem
+  def handle_event(:internal, :subscribe_updates, _state, data) do
+    case TachyonHandler.subscribe_updates(data.conn_pid, DateTime.utc_now()) do
+      :ok -> {:keep_state, data}
+      {:error, reason} -> {:stop, {:error, reason}}
+    end
+  end
+
   def handle_event({:call, from}, {:start_battle, _, _}, _state, data) when data.conn_pid == nil,
     do: {:keep_state, data, [{:reply, from, {:error, :no_host_available}}]}
 

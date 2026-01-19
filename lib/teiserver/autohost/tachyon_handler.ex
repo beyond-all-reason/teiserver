@@ -27,6 +27,30 @@ defmodule Teiserver.Autohost.TachyonHandler do
     send(conn_pid, {:start_battle, battle_id, start_script})
   end
 
+  @spec subscribe_updates(pid(), DateTime.t()) :: :ok | {:error, reason :: term()}
+  def subscribe_updates(conn_pid, since) do
+    payload = %{since: DateTime.to_unix(since, :microsecond)}
+    response = Transport.call_client(conn_pid, "autohost/subscribeUpdates", payload)
+
+    case response do
+      %{"status" => "failed", "reason" => reason} ->
+        msg =
+          case response["details"] do
+            nil -> reason
+            details -> "#{reason} - #{details}"
+          end
+
+        Logger.error("failed to subscribe to autohost updates: #{inspect(msg)}")
+        {:error, msg}
+
+      %{"status" => "success"} ->
+        :ok
+    end
+  catch
+    # in case the connection is terminating midway
+    :exit, {:normal, _} -> :ok
+  end
+
   @doc """
   send a message to the autohost with the given pid
   this calls returns when the ack to the request has been received.
@@ -83,9 +107,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
     case Teiserver.Autohost.SessionSupervisor.start_session(state.autohost, self()) do
       {:ok, session_pid} ->
         state = Map.put(state, :session_pid, session_pid)
-
-        {:request, "autohost/subscribeUpdates",
-         %{since: DateTime.utc_now() |> DateTime.to_unix(:microsecond)}, [], state}
+        {:ok, state}
 
       {:error, reason} ->
         Logger.warning("Cannot start autohost session: #{inspect(reason)}")
@@ -218,13 +240,6 @@ defmodule Teiserver.Autohost.TachyonHandler do
   end
 
   @impl true
-  def handle_response("autohost/subscribeUpdates", _, _response, state) do
-    # credo:disable-for-next-line Credo.Check.Design.TagTODO
-    # TODO: handle potential failure here
-    # for example, autohost refuses any subscription with `since` older than 5 minutes
-    {:ok, state}
-  end
-
   def handle_response("autohost/start", _battle_id, _resp, state) when state.session_pid == nil,
     do: {:ok, state}
 
