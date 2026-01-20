@@ -28,7 +28,8 @@ defmodule Teiserver.Autohost.Session do
            max_battles: non_neg_integer(),
            current_battles: non_neg_integer(),
            pending_battles: %{TachyonBattle.id() => {GenServer.from(), Autohost.start_script()}},
-           active_battles: %{TachyonBattle.id() => battle_data()}
+           active_battles: %{TachyonBattle.id() => battle_data()},
+           pending_replies: %{reference() => GenServer.from()}
          }
 
   # irrelevant for now
@@ -138,7 +139,8 @@ defmodule Teiserver.Autohost.Session do
       max_battles: 0,
       current_battles: 0,
       pending_battles: %{},
-      active_battles: %{}
+      active_battles: %{},
+      pending_replies: %{}
     }
 
     {:ok, :handshaking, data, [{:next_event, :internal, :subscribe_updates}]}
@@ -158,6 +160,20 @@ defmodule Teiserver.Autohost.Session do
   def handle_event({:call, from}, {:start_battle, battle_id, start_script}, _state, data) do
     Teiserver.Autohost.TachyonHandler.start_battle(data.conn_pid, battle_id, start_script)
     data = Map.update!(data, :pending_battles, &Map.put(&1, battle_id, {from, start_script}))
+    {:keep_state, data}
+  end
+
+  def handle_event({:call, from}, {:send_message, _}, _state, data) when data.conn_pid == nil,
+    do: {:keep_state, data, [{:reply, from, {:error, :no_autohost}}]}
+
+  def handle_event({:call, from}, {:send_message, %{battle_id: battle_id}}, _state, data)
+      when not is_map_key(data.active_battles, battle_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :invalid_battle}}]}
+
+  def handle_event({:call, from}, {:send_message, payload}, _state, data) do
+    ref = make_ref()
+    TachyonHandler.send_message(data.conn_pid, ref, payload)
+    data = Map.update!(data, :pending_replies, &Map.put(&1, ref, from))
     {:keep_state, data}
   end
 
@@ -202,6 +218,18 @@ defmodule Teiserver.Autohost.Session do
 
         {:keep_state, data}
     end
+  end
+
+  def handle_event(:info, {:reply_send_message, ref, _}, _state, data)
+      when not is_map_key(data.pending_replies, ref) do
+    {:keep_state, data}
+  end
+
+  def handle_event(:info, {:reply_send_message, ref, resp}, _state, data) do
+    {from, pending_replies} = Map.pop!(data.pending_replies, ref)
+    data = %{data | pending_replies: pending_replies}
+    GenServer.reply(from, resp)
+    {:keep_state, data}
   end
 
   defp via_tuple(autohost_id) do

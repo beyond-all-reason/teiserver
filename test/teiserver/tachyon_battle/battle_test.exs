@@ -7,7 +7,6 @@ defmodule Teiserver.TachyonBattle.BattleTest do
   @moduletag :tachyon
 
   describe "start battle" do
-    @tag :skip
     test "happy path" do
       autohost_id = :rand.uniform(10_000_000)
       match_id = :rand.uniform(10_000_000)
@@ -18,12 +17,18 @@ defmodule Teiserver.TachyonBattle.BattleTest do
   end
 
   describe "send message" do
-    @tag :skip
     test "autohost is there" do
       battle_id = to_string(UUID.uuid4())
       match_id = :rand.uniform(10_000_000)
       autohost_id = :rand.uniform(10_000_000)
-      Autohost.SessionRegistry.register(%{id: autohost_id})
+
+      autohost_sess_pid =
+        ExUnit.Callbacks.start_link_supervised!(
+          Autohost.Session.child_spec({%{id: autohost_id}, self()})
+        )
+
+      assert_receive {:call_client, "autohost/subscribeUpdates", _, ref}
+      send(ref, {ref, %{"status" => "success"}})
 
       {:ok, _battle_pid} =
         Battle.Battle.start_link(%{
@@ -34,15 +39,13 @@ defmodule Teiserver.TachyonBattle.BattleTest do
 
       task = Task.async(fn -> Battle.send_message(battle_id, "hello") end)
 
-      assert_receive {:call_client, "autohost/sendMessage",
-                      %{battleId: ^battle_id, message: "hello"}, from}
+      assert_receive {:send_message, ref, %{battle_id: ^battle_id, message: "hello"}}
 
-      send(from, {from, %{"status" => "success"}})
+      Autohost.Session.reply_send_message(autohost_sess_pid, ref, :ok)
       assert Task.await(task) == :ok
     end
   end
 
-  @tag :skip
   test "kill battle" do
     battle_id = to_string(UUID.uuid4())
     match_id = :rand.uniform(10_000_000)

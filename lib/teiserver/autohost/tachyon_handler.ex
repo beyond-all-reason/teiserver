@@ -51,26 +51,11 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
   @doc """
   send a message to the autohost with the given pid
-  this calls returns when the ack to the request has been received.
   """
-  @spec send_message(pid(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
-          :ok | {:error, reason :: term()}
-  def send_message(autohost, payload) when is_pid(autohost) do
-    payload = %{battleId: payload.battle_id, message: payload.message}
-    response = Transport.call_client(autohost, "autohost/sendMessage", payload)
-
-    case response["status"] do
-      "success" ->
-        :ok
-
-      "failed" ->
-        err = response["reason"]
-
-        case Map.get(response, "details") do
-          nil -> {:error, err}
-          details -> {:error, "#{err} - #{details}"}
-        end
-    end
+  @spec send_message(pid(), reference(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
+          :ok
+  def send_message(conn_pid, ref, payload) when is_pid(conn_pid) do
+    send(conn_pid, {:send_message, ref, payload})
   end
 
   @spec kill_battle(pid(), TachyonBattle.id()) :: :ok
@@ -136,6 +121,12 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
     opts = [cb_state: battle_id]
     {:request, "autohost/start", start_script, opts, state}
+  end
+
+  def handle_info({:send_message, ref, payload}, state) do
+    payload = %{battleId: payload.battle_id, message: payload.message}
+    opts = [cb_state: ref]
+    {:request, "autohost/sendMessage", payload, opts, state}
   end
 
   def handle_info(_msg, state) do
@@ -230,6 +221,25 @@ defmodule Teiserver.Autohost.TachyonHandler do
       end
 
     Session.reply_start_battle(state.session_pid, battle_id, resp)
+    {:ok, state}
+  end
+
+  def handle_response("autohost/sendMessage", ref, response, state) do
+    resp =
+      case response["status"] do
+        "success" ->
+          :ok
+
+        "failed" ->
+          err = response["reason"]
+
+          case Map.get(response, "details") do
+            nil -> {:error, err}
+            details -> {:error, "#{err} - #{details}"}
+          end
+      end
+
+    Session.reply_send_message(state.session_pid, ref, resp)
     {:ok, state}
   end
 

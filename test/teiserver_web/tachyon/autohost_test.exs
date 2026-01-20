@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
 
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Tachyon
+  alias Teiserver.Autohost
   alias WebsocketSyncClient, as: WSC
   import Teiserver.Support.Polling, only: [poll_until: 2, poll_until: 3]
 
@@ -106,25 +107,23 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     end)
   end
 
-  # skip until send_message is also refactored
-  @tag :skip
   test "can send message and get response", %{token: token} do
-    _client = Tachyon.connect_autohost!(token, 10, 0)
+    client = Tachyon.connect_autohost!(token, 10, 0)
 
     poll_until(fn -> Teiserver.Autohost.lookup_autohost(token.bot_id) end, fn {_, details} ->
       details.max_battles == 10 && details.current_battles == 0
     end)
 
-    # task =
-    #   Task.async(fn ->
-    #     Autohost.send_message(pid, %{battle_id: "battle_id", message: "hello"})
-    #   end)
-    #
-    # assert %{"type" => "request", "commandId" => "autohost/sendMessage"} =
-    #          req = Tachyon.recv_message!(client)
-    #
-    # assert req["data"] == %{"battleId" => "battle_id", "message" => "hello"}
-    # Tachyon.send_response(client, req)
-    # assert Task.await(task, 150) == :ok
+    task =
+      Task.async(fn ->
+        Autohost.send_message(token.bot_id, %{battle_id: "battle_id", message: "hello"})
+      end)
+
+    assert %{"type" => "request", "commandId" => "autohost/sendMessage"} =
+             req = Tachyon.recv_message!(client)
+
+    assert req["data"] == %{"battleId" => "battle_id", "message" => "hello"}
+    Tachyon.send_response(client, req)
+    assert Task.await(task, 150) == :ok
   end
 end

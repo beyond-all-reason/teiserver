@@ -94,10 +94,9 @@ defmodule Teiserver.Autohost do
   defdelegate start_battle(bot_id, battle_id, start_script),
     to: Session
 
-  @spec send_message(pid(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
+  @spec send_message(Bot.id(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
           :ok | {:error, reason :: term()}
-  defdelegate send_message(autohost, payload),
-    to: Teiserver.Autohost.TachyonHandler
+  defdelegate send_message(autohost, payload), to: Teiserver.Autohost.Session
 
   @spec kill_battle(pid(), TachyonBattle.id()) :: :ok
   defdelegate kill_battle(autohost, battle_id),
