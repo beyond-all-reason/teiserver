@@ -5,22 +5,20 @@ defmodule Teiserver.Autohost.TachyonHandler do
   This is treated separately from a player connection because they fulfill
   very different roles, have very different behaviour and states.
   """
-  alias Teiserver.Autohost.Registry
+  alias Teiserver.Autohost.Session
   alias Teiserver.Bot.Bot
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.{TachyonParser, Collections}
   alias Teiserver.Tachyon.{Handler, Schema, Transport}
-  alias Teiserver.Autohost
   alias Teiserver.TachyonBattle
 
   require Logger
   @behaviour Handler
 
-  @type connected_state :: %{max_battles: non_neg_integer(), current_battles: non_neg_integer()}
   @type state :: %{
           autohost: Bot.t(),
           session_pid: pid(),
-          state: :handshaking | {:connected, connected_state()}
+          state: :handshaking | :connected
         }
 
   def start_battle(conn_pid, battle_id, start_script) do
@@ -159,44 +157,15 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
   def handle_command("autohost/status", "event", _msg_id, msg, %{state: :handshaking} = state) do
     %{"data" => %{"maxBattles" => max_battles, "currentBattles" => current}} = msg
-
-    Logger.info(
-      "Autohost (id=#{state.autohost.id}) connecting #{state.autohost.id} with #{inspect(msg["data"])}"
-    )
-
-    state = %{
-      state
-      | state:
-          {:connected,
-           %{
-             max_battles: max_battles,
-             current_battles: current
-           }}
-    }
-
-    case Registry.register(%{
-           id: state.autohost.id,
-           max_battles: max_battles,
-           current_battles: current
-         }) do
-      {:error, {:already_registered, _pid}} ->
-        # credo:disable-for-next-line Credo.Check.Design.TagTODO
-        # TODO: maybe we should handle that by disconnecting the existing one?
-        {:stop, :normal, state}
-
-      _ ->
-        {:ok, state}
-    end
+    Session.update_capacity(state.session_pid, max_battles, current)
+    state = %{state | state: :connected}
+    {:ok, state}
   end
 
   def handle_command("autohost/status", "event", _, msg, state) do
     %{"data" => %{"maxBattles" => max_battles, "currentBattles" => current}} = msg
-
-    Registry.update_value(state.autohost.id, fn _ ->
-      %{id: state.autohost.id, max_battles: max_battles, current_battles: current}
-    end)
-
-    state = %{state | state: {:connected, %{max_battles: max_battles, current_battles: current}}}
+    Session.update_capacity(state.session_pid, max_battles, current)
+    state = %{state | state: :connected}
     {:ok, state}
   end
 
@@ -260,7 +229,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
           {:ok, %{ips: data["ips"], port: data["port"]}}
       end
 
-    Autohost.Session.reply_battle_started(state.session_pid, battle_id, resp)
+    Session.reply_start_battle(state.session_pid, battle_id, resp)
     {:ok, state}
   end
 

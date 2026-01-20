@@ -1,6 +1,6 @@
 defmodule Teiserver.Autohost do
   alias Teiserver.Autohost.Session
-  alias Teiserver.Autohost.Registry
+  alias Teiserver.Autohost.SessionRegistry
   alias Teiserver.Autohost.TachyonHandler
   alias Teiserver.Bot.Bot
   alias Teiserver.BotQueries
@@ -8,7 +8,7 @@ defmodule Teiserver.Autohost do
   alias Teiserver.Data.Types, as: T
 
   @type id :: Teiserver.Bot.Bot.id()
-  @type reg_value :: Registry.reg_value()
+  @type reg_value :: SessionRegistry.reg_value()
 
   @type start_script :: %{
           required(:engine_version) => String.t(),
@@ -61,15 +61,20 @@ defmodule Teiserver.Autohost do
   defdelegate get_by_id(id), to: BotQueries
 
   @doc """
-  Returns the pid of the autohost registered with a given id
+  Returns the data associated with an autohost session
   """
   @spec lookup_autohost(Bot.id()) :: {pid(), reg_value()} | nil
   def lookup_autohost(bot_id) do
+    SessionRegistry.lookup(bot_id)
+  end
+
+  @spec lookup_autohost(Bot.id()) :: {pid(), reg_value()} | nil
+  def lookup_autohost_connection(bot_id) do
     Teiserver.Autohost.Registry.lookup(bot_id)
   end
 
   @spec list() :: [reg_value()]
-  defdelegate list(), to: Registry
+  defdelegate list(), to: SessionRegistry
 
   @doc """
   Given some search params (none for now), find a autohost that is connected,
@@ -78,7 +83,7 @@ defmodule Teiserver.Autohost do
   @spec find_autohost(term()) :: id() | nil
   def find_autohost(_params \\ %{}) do
     autohost_val =
-      Registry.list()
+      SessionRegistry.list()
       |> Enum.find(fn %{max_battles: m, current_battles: c} -> m > c end)
 
     if autohost_val == nil, do: nil, else: autohost_val[:id]

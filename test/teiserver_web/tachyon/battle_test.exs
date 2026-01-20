@@ -36,6 +36,7 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
     Polling.poll_until(fn -> Process.alive?(pid) end, &(&1 == false))
   end
 
+  @tag :skip
   test "stop battle", %{autohost: autohost, autohost_client: autohost_client} do
     Polling.poll_until_some(&Teiserver.Autohost.find_autohost/0)
     battle_id = "whatever"

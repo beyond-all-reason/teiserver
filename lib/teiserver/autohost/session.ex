@@ -9,7 +9,7 @@ defmodule Teiserver.Autohost.Session do
 
   alias Teiserver.Bot.Bot
   alias Teiserver.Autohost
-  alias Teiserver.Autohost.TachyonHandler
+  alias Teiserver.Autohost.{TachyonHandler, SessionRegistry}
   alias Teiserver.TachyonBattle
 
   require Logger
@@ -25,6 +25,8 @@ defmodule Teiserver.Autohost.Session do
   @typep data :: %{
            autohost: Bot.t(),
            conn_pid: pid(),
+           max_battles: non_neg_integer(),
+           current_battles: non_neg_integer(),
            pending_battles: %{TachyonBattle.id() => {GenServer.from(), Autohost.start_script()}},
            active_battles: %{TachyonBattle.id() => battle_data()}
          }
@@ -71,8 +73,54 @@ defmodule Teiserver.Autohost.Session do
           TachyonBattle.id(),
           {:ok, start_response()} | {:error, term()}
         ) :: :ok
+
   def reply_start_battle(session_pid, battle_id, resp) do
     send(session_pid, {:reply_start_battle, battle_id, resp})
+  end
+
+  @doc """
+  send a message to the autohost with the given id
+  this calls returns when the ack to the request has been received.
+  """
+  @spec send_message(Bot.id(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
+          :ok | {:error, reason :: term()}
+  def send_message(autohost_id, payload) do
+    :gen_statem.call(via_tuple(autohost_id), {:send_message, payload}, @default_call_timeout)
+  catch
+    :exit, {:noproc, _} -> {:error, :no_autohost}
+  end
+
+  @spec reply_send_message(pid(), reference(), :ok | {:error, reason :: term()}) :: :ok
+  def reply_send_message(session_pid, ref, resp) do
+    send(session_pid, {:reply_send_message, ref, resp})
+  end
+
+  @doc """
+  to track how many battles the autohost can handle
+  """
+  @spec update_capacity(pid(), non_neg_integer(), non_neg_integer()) :: :ok
+  def update_capacity(session_pid, max_battles, current_battles) do
+    send(session_pid, {:update_capacity, max_battles, current_battles})
+  end
+
+  @spec handle_update_event(pid(), event :: TachyonHandler.update_event()) :: :ok
+  def handle_update_event(session_pid, event) do
+    send(session_pid, {:update_event, event})
+  end
+
+  @doc """
+  Ask the autohost to terminate the given battle
+  """
+  @spec kill_battle(pid(), TachyonBattle.id()) :: :ok | {:error, term()}
+  def kill_battle(session_pid, battle_id) do
+    :gen_statem.call(session_pid, {:kill_battle, battle_id}, @default_call_timeout)
+  catch
+    :exit, {:noproc, _} -> {:error, :no_autohost}
+  end
+
+  @spec reply_kill_battle(pid(), reference(), :ok | {:error, reason :: term()}) :: :ok
+  def reply_kill_battle(session_pid, ref, resp) do
+    send(session_pid, {:reply_kill_battle, ref, resp})
   end
 
   @impl :gen_statem
@@ -82,10 +130,13 @@ defmodule Teiserver.Autohost.Session do
     Process.link(conn_pid)
     Process.flag(:trap_exit, true)
     Logger.info("session started")
+    SessionRegistry.set_value(autohost.id, 0, 0)
 
     data = %{
       autohost: autohost,
       conn_pid: conn_pid,
+      max_battles: 0,
+      current_battles: 0,
       pending_battles: %{},
       active_battles: %{}
     }
@@ -154,6 +205,6 @@ defmodule Teiserver.Autohost.Session do
   end
 
   defp via_tuple(autohost_id) do
-    Autohost.SessionRegistry.via_tuple(autohost_id)
+    SessionRegistry.via_tuple(autohost_id)
   end
 end
