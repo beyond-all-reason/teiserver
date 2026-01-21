@@ -91,21 +91,8 @@ defmodule Teiserver.Game.MatchRatingsExport do
 
   # Gets the list of ids but chunks them so we don't try to do too much at once
   defp calculate_match_pages(start_date, end_date, rating_type_id) do
-    query = """
-      SELECT COUNT(id)
-      FROM teiserver_battle_matches
-      WHERE
-        started >= $1
-        AND finished < $2
-        AND rating_type_id = $3
-        AND processed = true
-        AND winning_team IS NOT NULL
-        AND finished IS NOT NULL
-        AND started IS NOT NULL
-    """
-
     match_count =
-      case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date, rating_type_id]) do
+      case get_match_count_query(start_date, end_date, rating_type_id) do
         {:ok, results} ->
           results.rows |> List.flatten() |> hd()
 
@@ -121,6 +108,28 @@ defmodule Teiserver.Game.MatchRatingsExport do
     |> Enum.map(fn page_number ->
       {page_number * @id_chunk_size, @id_chunk_size, page_count}
     end)
+  end
+
+  defp get_match_count_query(start_date, end_date, rating_type_id) do
+    query = """
+      SELECT COUNT(id)
+      FROM teiserver_battle_matches
+      WHERE
+        started >= $1
+        AND finished < $2
+        AND processed = true
+        AND winning_team IS NOT NULL
+        AND finished IS NOT NULL
+        AND started IS NOT NULL
+    """
+
+    if(rating_type_id == nil) do
+      Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date])
+    else
+      query = query <> " AND rating_type_id = $3"
+
+      Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date, rating_type_id])
+    end
   end
 
   defp get_match_ids_in_chunk(start_date, end_date, rating_type_id, offset, limit) do
