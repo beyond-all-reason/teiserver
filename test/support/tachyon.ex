@@ -1,6 +1,7 @@
 defmodule Teiserver.Support.Tachyon do
   alias WebsocketSyncClient, as: WSC
   alias Teiserver.OAuthFixtures
+  alias Teiserver.Support.Polling
 
   def tachyon_case_setup(tags) do
     if String.contains?(to_string(tags[:module]), "Tachyon") || tags[:tachyon] do
@@ -155,6 +156,13 @@ defmodule Teiserver.Support.Tachyon do
       request = recv_message!(client)
 
     :ok = send_response(client, request, data: %{})
+
+    Polling.poll_until_true(fn ->
+      case Teiserver.Autohost.lookup_autohost(token.bot_id) do
+        nil -> false
+        {_, val} -> val.max_battles == max_battles && val.current_battles == current
+      end
+    end)
 
     client
   end

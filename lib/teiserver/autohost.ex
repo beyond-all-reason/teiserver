@@ -100,5 +100,5 @@ defmodule Teiserver.Autohost do
 
   @spec kill_battle(pid(), TachyonBattle.id()) :: :ok
   defdelegate kill_battle(autohost, battle_id),
-    to: Teiserver.Autohost.TachyonHandler
+    to: Teiserver.Autohost.Session
 end

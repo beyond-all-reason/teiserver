@@ -114,9 +114,33 @@ defmodule TeiserverWeb.Tachyon.Autohost do
       details.max_battles == 10 && details.current_battles == 0
     end)
 
+    battle_id = "battle_id"
+
+    start_script = %{
+      engine_version: "engineversion",
+      game_name: "game name",
+      map_name: "very map",
+      start_pos_type: :fixed,
+      ally_teams: [
+        %{
+          teams: [%{user_id: 123, name: "player name", password: "123"}]
+        }
+      ]
+    }
+
+    start_task =
+      Task.async(fn ->
+        Teiserver.Autohost.start_battle(token.bot_id, battle_id, start_script)
+      end)
+
+    %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(client)
+    Tachyon.send_response(client, req, data: %{ips: ["1.2.3.4"], port: 1234})
+
+    {:ok, _} = Task.await(start_task)
+
     task =
       Task.async(fn ->
-        Autohost.send_message(token.bot_id, %{battle_id: "battle_id", message: "hello"})
+        Autohost.send_message(token.bot_id, %{battle_id: battle_id, message: "hello"})
       end)
 
     assert %{"type" => "request", "commandId" => "autohost/sendMessage"} =

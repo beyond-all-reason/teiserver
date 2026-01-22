@@ -36,7 +36,6 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
     Polling.poll_until(fn -> Process.alive?(pid) end, &(&1 == false))
   end
 
-  @tag :skip
   test "stop battle", %{autohost: autohost, autohost_client: autohost_client} do
     Polling.poll_until_some(&Teiserver.Autohost.find_autohost/0)
     battle_id = "whatever"
@@ -48,6 +47,28 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
                autohost_id: autohost.id,
                autohost_timeout: 1
              })
+
+    start_script = %{
+      engine_version: "engineversion",
+      game_name: "game name",
+      map_name: "very map",
+      start_pos_type: :fixed,
+      ally_teams: [
+        %{
+          teams: [%{user_id: 123, name: "player name", password: "123"}]
+        }
+      ]
+    }
+
+    start_task =
+      Task.async(fn ->
+        Teiserver.Autohost.start_battle(autohost.id, battle_id, start_script)
+      end)
+
+    %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(autohost_client)
+    Tachyon.send_response(autohost_client, req, data: %{ips: ["1.2.3.4"], port: 1234})
+
+    {:ok, _} = Task.await(start_task)
 
     ev = %{
       battleId: battle_id,

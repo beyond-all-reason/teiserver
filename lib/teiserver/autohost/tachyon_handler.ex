@@ -58,22 +58,9 @@ defmodule Teiserver.Autohost.TachyonHandler do
     send(conn_pid, {:send_message, ref, payload})
   end
 
-  @spec kill_battle(pid(), TachyonBattle.id()) :: :ok
-  def kill_battle(autohost, battle_id) when is_pid(autohost) do
-    response = Transport.call_client(autohost, "autohost/kill", %{battleId: battle_id})
-
-    case response["status"] do
-      "success" ->
-        :ok
-
-      "failed" ->
-        err = response["reason"]
-
-        case Map.get(response, "details") do
-          nil -> {:error, err}
-          details -> {:error, "#{err} - #{details}"}
-        end
-    end
+  @spec kill_battle(pid(), reference(), TachyonBattle.id()) :: :ok | {:error, reason :: term()}
+  def kill_battle(conn_pid, ref, battle_id) when is_pid(conn_pid) do
+    send(conn_pid, {:kill_battle, ref, battle_id})
   end
 
   @impl Handler
@@ -127,6 +114,11 @@ defmodule Teiserver.Autohost.TachyonHandler do
     payload = %{battleId: payload.battle_id, message: payload.message}
     opts = [cb_state: ref]
     {:request, "autohost/sendMessage", payload, opts, state}
+  end
+
+  def handle_info({:kill_battle, ref, battle_id}, state) do
+    opts = [cb_state: ref]
+    {:request, "autohost/kill", %{battleId: battle_id}, opts, state}
   end
 
   def handle_info(_msg, state) do
@@ -186,7 +178,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
     case parsed do
       {:ok, ev} ->
-        TachyonBattle.send_update_event(ev)
+        Session.handle_update_event(state.session_pid, ev)
         {:ok, state}
 
       {:error, reason} ->
@@ -240,6 +232,25 @@ defmodule Teiserver.Autohost.TachyonHandler do
       end
 
     Session.reply_send_message(state.session_pid, ref, resp)
+    {:ok, state}
+  end
+
+  def handle_response("autohost/kill", ref, response, state) do
+    resp =
+      case response["status"] do
+        "success" ->
+          :ok
+
+        "failed" ->
+          err = response["reason"]
+
+          case Map.get(response, "details") do
+            nil -> {:error, err}
+            details -> {:error, "#{err} - #{details}"}
+          end
+      end
+
+    Session.reply_kill_battle(state.session_pid, ref, resp)
     {:ok, state}
   end
 

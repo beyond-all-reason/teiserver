@@ -177,6 +177,32 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data}
   end
 
+  def handle_event({:call, from}, {:kill_battle, _battle_id}, _state, data)
+      when data.conn_pid == nil,
+      do: {:keep_state, data, [{:reply, from, {:error, :no_autohost}}]}
+
+  def handle_event({:call, from}, {:kill_battle, battle_id}, _state, data)
+      when not is_map_key(data.active_battles, battle_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :invalid_battle}}]}
+
+  def handle_event({:call, from}, {:kill_battle, battle_id}, _state, data) do
+    ref = make_ref()
+    TachyonHandler.kill_battle(data.conn_pid, ref, battle_id)
+    data = Map.update!(data, :pending_replies, &Map.put(&1, ref, from))
+    {:keep_state, data}
+  end
+
+  def handle_event(:info, {:reply_kill_battle, ref, _}, _state, data)
+      when not is_map_key(data.pending_replies, ref),
+      do: {:keep_state, data}
+
+  def handle_event(:info, {:reply_kill_battle, ref, resp}, _state, data) do
+    {from, pending_replies} = Map.pop!(data.pending_replies, ref)
+    data = %{data | pending_replies: pending_replies}
+    GenServer.reply(from, resp)
+    {:keep_state, data}
+  end
+
   def handle_event(:info, {:EXIT, from, reason}, _state, data) do
     Logger.info(
       "Exit sent from #{inspect(from)} because #{inspect(reason)}. Conn pid is #{inspect(data.conn_pid)}"
@@ -229,6 +255,11 @@ defmodule Teiserver.Autohost.Session do
     {from, pending_replies} = Map.pop!(data.pending_replies, ref)
     data = %{data | pending_replies: pending_replies}
     GenServer.reply(from, resp)
+    {:keep_state, data}
+  end
+
+  def handle_event(:info, {:update_event, event}, _state, data) do
+    TachyonBattle.send_update_event(event)
     {:keep_state, data}
   end
 
