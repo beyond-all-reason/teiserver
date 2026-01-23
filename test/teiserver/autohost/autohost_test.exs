@@ -29,7 +29,7 @@ defmodule Teiserver.Autohost.AutohostTest do
   end
 
   defp register_autohost(id, max, current) do
-    Autohost.Registry.register(%{id: id, max_battles: max, current_battles: current})
+    Autohost.SessionRegistry.register(%{id: id, max_battles: max, current_battles: current})
   end
 
   describe "message parser" do

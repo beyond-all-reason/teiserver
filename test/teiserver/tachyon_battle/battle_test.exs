@@ -2,6 +2,7 @@ defmodule Teiserver.TachyonBattle.BattleTest do
   use Teiserver.DataCase
   import Teiserver.Support.Polling, only: [poll_until_some: 1]
   alias Teiserver.TachyonBattle, as: Battle
+  alias Teiserver.Autohost
 
   @moduletag :tachyon
 
@@ -9,7 +10,7 @@ defmodule Teiserver.TachyonBattle.BattleTest do
     test "happy path" do
       autohost_id = :rand.uniform(10_000_000)
       match_id = :rand.uniform(10_000_000)
-      Teiserver.Autohost.Registry.register(%{id: autohost_id})
+      Autohost.SessionRegistry.register(%{id: autohost_id})
       {:ok, battle_id, _pid} = Battle.start_battle_process(autohost_id, match_id)
       poll_until_some(fn -> Battle.lookup(battle_id) end)
     end
@@ -20,7 +21,14 @@ defmodule Teiserver.TachyonBattle.BattleTest do
       battle_id = to_string(UUID.uuid4())
       match_id = :rand.uniform(10_000_000)
       autohost_id = :rand.uniform(10_000_000)
-      Teiserver.Autohost.Registry.register(%{id: autohost_id})
+
+      autohost_sess_pid =
+        ExUnit.Callbacks.start_link_supervised!(
+          Autohost.Session.child_spec({%{id: autohost_id}, self()})
+        )
+
+      assert_receive {:call_client, "autohost/subscribeUpdates", _, ref}
+      send(ref, {ref, %{"status" => "success"}})
 
       {:ok, _battle_pid} =
         Battle.Battle.start_link(%{
@@ -29,12 +37,38 @@ defmodule Teiserver.TachyonBattle.BattleTest do
           autohost_id: autohost_id
         })
 
+      start_script = %{
+        engine_version: "engineversion",
+        game_name: "game name",
+        map_name: "very map",
+        start_pos_type: :fixed,
+        ally_teams: [
+          %{
+            teams: [%{user_id: 123, name: "player name", password: "123"}]
+          }
+        ]
+      }
+
+      start_task =
+        Task.async(fn ->
+          Autohost.start_battle(autohost_id, battle_id, start_script)
+        end)
+
+      assert_receive {:start_battle, ^battle_id, _start_script}
+
+      Autohost.Session.reply_start_battle(
+        autohost_sess_pid,
+        battle_id,
+        {:ok, %{ips: ["1.2.3.4"], port: 1234}}
+      )
+
       task = Task.async(fn -> Battle.send_message(battle_id, "hello") end)
 
-      assert_receive {:call_client, "autohost/sendMessage",
-                      %{battleId: ^battle_id, message: "hello"}, from}
+      assert_receive {:send_message, ref, %{battle_id: ^battle_id, message: "hello"}}
 
-      send(from, {from, %{"status" => "success"}})
+      Task.await(start_task)
+
+      Autohost.Session.reply_send_message(autohost_sess_pid, ref, :ok)
       assert Task.await(task) == :ok
     end
   end
@@ -43,7 +77,7 @@ defmodule Teiserver.TachyonBattle.BattleTest do
     battle_id = to_string(UUID.uuid4())
     match_id = :rand.uniform(10_000_000)
     autohost_id = :rand.uniform(10_000_000)
-    Teiserver.Autohost.Registry.register(%{id: autohost_id})
+    Autohost.SessionRegistry.register(%{id: autohost_id})
 
     {:ok, _battle_pid} =
       Battle.Battle.start_link(%{
@@ -53,9 +87,10 @@ defmodule Teiserver.TachyonBattle.BattleTest do
       })
 
     task = Task.async(fn -> Battle.kill(battle_id) end)
-    assert_receive {:call_client, "autohost/kill", %{battleId: ^battle_id}, from}
-    resp = %{"status" => "success"}
-    send(from, {from, resp})
-    assert Task.await(task) == :ok
+    assert_receive {:"$gen_call", reply_to, {:kill_battle, ^battle_id}}
+    resp = %{ips: ["1.2.3.4"], port: 1234}
+    GenServer.reply(reply_to, {:ok, resp})
+
+    assert Task.await(task) == {:ok, resp}
   end
 end

@@ -89,13 +89,13 @@ defmodule Teiserver.TachyonBattle.Battle do
 
   @impl true
   def handle_call({:send_message, msg}, _from, state) do
-    case state.autohost_pid do
+    case state.autohost_id do
       nil ->
         {:reply, {:error, :no_autohost}, state}
 
-      pid ->
+      id ->
         payload = %{battle_id: state.id, message: msg}
-        resp = Autohost.send_message(pid, payload)
+        resp = Autohost.send_message(id, payload)
         {:reply, resp, state}
     end
   end
