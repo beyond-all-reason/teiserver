@@ -32,8 +32,7 @@ defmodule Teiserver.Autohost.Session do
            pending_replies: %{reference() => GenServer.from()}
          }
 
-  # irrelevant for now
-  @typep state :: :handshaking
+  @typep state :: :handshaking | :connected
 
   def child_spec({autohost, _conn_pid} = args) do
     %{
@@ -154,6 +153,10 @@ defmodule Teiserver.Autohost.Session do
     end
   end
 
+  def handle_event({:call, _}, _, :handshaking, data) do
+    {:keep_state, data, [{:postpone, true}]}
+  end
+
   def handle_event({:call, from}, {:start_battle, _, _}, _state, data) when data.conn_pid == nil,
     do: {:keep_state, data, [{:reply, from, {:error, :no_host_available}}]}
 
@@ -211,10 +214,14 @@ defmodule Teiserver.Autohost.Session do
     {:stop, reason}
   end
 
-  def handle_event(:info, {:update_capacity, max_battles, current_battles}, _state, data) do
+  def handle_event(:info, {:update_capacity, max_battles, current_battles}, state, data) do
     data = %{data | max_battles: max_battles, current_battles: current_battles}
     SessionRegistry.set_value(data.autohost.id, max_battles, current_battles)
-    {:keep_state, data}
+
+    case state do
+      :handshaking -> {:next_state, :connected, data}
+      _ -> {:keep_state, data}
+    end
   end
 
   def handle_event(:info, {:reply_start_battle, battle_id, _resp}, _state, data)

@@ -31,6 +31,8 @@ defmodule Teiserver.TachyonBattle.BattleTest do
           Autohost.Session.child_spec({%{id: autohost_id}, self()})
         )
 
+      Autohost.Session.update_capacity(autohost_sess_pid, 10, 0)
+
       assert_receive {:call_client, "autohost/subscribeUpdates", _, ref}
       send(ref, {ref, %{"status" => "success"}})
 

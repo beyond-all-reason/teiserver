@@ -2,6 +2,7 @@ defmodule Teiserver.Autohost.AutohostTest do
   use Teiserver.DataCase, async: false
   import Teiserver.Support.Polling, only: [poll_until: 2, poll_until_nil: 1]
 
+  alias Teiserver.BotFixtures
   alias Teiserver.Autohost
 
   @moduletag :tachyon
@@ -30,6 +31,29 @@ defmodule Teiserver.Autohost.AutohostTest do
 
   defp register_autohost(id, max, current) do
     Autohost.SessionRegistry.register(%{id: id, max_battles: max, current_battles: current})
+  end
+
+  describe "autohost state" do
+    test "postpone calls until autohost updates capacity" do
+      autohost = BotFixtures.create_bot()
+
+      sess_pid =
+        Autohost.Session.child_spec({autohost, self()})
+        |> ExUnit.Callbacks.start_link_supervised!()
+
+      assert_receive({:call_client, "autohost/subscribeUpdates", _, ref})
+      send(ref, {ref, %{"status" => "success"}})
+
+      Task.async(fn ->
+        Autohost.start_battle(autohost.id, "battle_id", BotFixtures.start_script())
+      end)
+
+      refute_receive {:start_battle, "battle_id", _}
+      # need to update capacity first, only then the autohost is considered fully online
+      Autohost.Session.update_capacity(sess_pid, 10, 0)
+
+      assert_receive {:start_battle, "battle_id", _}
+    end
   end
 
   describe "message parser" do
