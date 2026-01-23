@@ -25,11 +25,7 @@ defmodule Teiserver.TachyonBattle do
           {:ok, {id(), pid()}, Autohost.start_response()} | {:error, term()}
   def start_battle(autohost_id, start_script, is_matchmaking) do
     with {:ok, match} <- Battle.create_match_from_start_script(start_script, is_matchmaking),
-         {:ok, battle_id, pid} <- start_battle_process(autohost_id, match.id) do
-      Logger.info(
-        "Starting battle with id #{battle_id} and match id #{match.id} on autohost #{autohost_id}"
-      )
-
+         {:ok, battle_id, pid} <- start_battle_process(autohost_id, match.id, start_script) do
       case Teiserver.Autohost.start_battle(autohost_id, battle_id, start_script) do
         {:ok, data} -> {:ok, {battle_id, pid}, data}
         x -> x
@@ -37,13 +33,13 @@ defmodule Teiserver.TachyonBattle do
     end
   end
 
-  @spec start_battle_process(Teiserver.Autohost.id(), T.match_id()) ::
+  @spec start_battle_process(Teiserver.Autohost.id(), T.match_id(), Autohost.start_script()) ::
           {:ok, T.id(), pid()} | {:error, term()}
-  def start_battle_process(autohost_id, match_id) do
+  def start_battle_process(autohost_id, match_id, start_script) do
     battle_id = gen_id()
     # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: handle potential errors, like "already registered"
-    case TachyonBattle.Supervisor.start_battle(battle_id, match_id, autohost_id) do
+    case TachyonBattle.Supervisor.start_battle(battle_id, match_id, autohost_id, start_script) do
       {:ok, pid} ->
         {:ok, battle_id, pid}
 

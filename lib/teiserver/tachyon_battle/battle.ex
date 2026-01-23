@@ -17,6 +17,7 @@ defmodule Teiserver.TachyonBattle.Battle do
           autohost_id: Teiserver.Autohost.id(),
           autohost_pid: pid(),
           autohost_timeout: timeout(),
+          start_script: Teiserver.Autohost.start_script(),
           # initialised: the battle is waiting for players to join and start the match
           # finished: the battle is over, but there are still some player in the match,
           # maybe looking at stats or whatever
@@ -56,14 +57,26 @@ defmodule Teiserver.TachyonBattle.Battle do
   end
 
   @impl true
-  def init(%{battle_id: battle_id, match_id: match_id, autohost_id: autohost_id} = args) do
+  def init(
+        %{
+          battle_id: battle_id,
+          match_id: match_id,
+          autohost_id: autohost_id,
+          start_script: start_script
+        } = args
+      ) do
     Logger.metadata(actor_type: :battle, actor_id: battle_id)
+
+    Logger.info(
+      "Starting battle with id #{battle_id} and match id #{match_id} on autohost #{autohost_id}"
+    )
 
     state = %{
       id: battle_id,
       match_id: match_id,
       autohost_id: autohost_id,
       autohost_pid: nil,
+      start_script: start_script,
       # the timeout is absurdly short because there is no real recovery if the
       # autohost goes away. When we implement state recovery this timeout
       # should be increased to a more reasonable value (1 min?)
