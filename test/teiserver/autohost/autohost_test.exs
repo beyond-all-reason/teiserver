@@ -45,7 +45,7 @@ defmodule Teiserver.Autohost.AutohostTest do
       send(ref, {ref, %{"status" => "success"}})
 
       Task.async(fn ->
-        Autohost.start_battle(autohost.id, "battle_id", BotFixtures.start_script())
+        Autohost.start_battle(autohost.id, "battle_id", self(), BotFixtures.start_script())
       end)
 
       refute_receive {:start_battle, "battle_id", _}
@@ -141,7 +141,8 @@ defmodule Teiserver.Autohost.AutohostTest do
     battle_id = to_string(UUID.uuid4())
 
     Task.async(fn ->
-      Autohost.start_battle(autohost.id, battle_id, BotFixtures.start_script())
+      Autohost.start_battle(autohost.id, battle_id, self(), BotFixtures.start_script())
+      :timer.sleep(:infinity)
     end)
 
     assert_receive {:start_battle, ^battle_id, _}

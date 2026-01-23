@@ -11,6 +11,7 @@ defmodule Teiserver.Autohost.Session do
   alias Teiserver.Autohost
   alias Teiserver.Autohost.{TachyonHandler, SessionRegistry}
   alias Teiserver.TachyonBattle
+  alias Teiserver.Helpers.MonitorCollection, as: MC
 
   require Logger
 
@@ -28,6 +29,7 @@ defmodule Teiserver.Autohost.Session do
   @typep data :: %{
            autohost: Bot.t(),
            conn_pid: pid(),
+           monitors: MC.t(),
            max_battles: non_neg_integer(),
            current_battles: non_neg_integer(),
            pending_battles: %{TachyonBattle.id() => {GenServer.from(), Autohost.start_script()}},
@@ -55,12 +57,12 @@ defmodule Teiserver.Autohost.Session do
   @type start_response :: %{ips: [String.t()], port: integer()}
   # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: there should be some kind of retry here
-  @spec start_battle(Bot.id(), TachyonBattle.id(), Autohost.start_script()) ::
+  @spec start_battle(Bot.id(), TachyonBattle.id(), pid(), Autohost.start_script()) ::
           {:ok, start_response()} | {:error, term()}
-  def start_battle(autohost_id, battle_id, start_script) do
+  def start_battle(autohost_id, battle_id, battle_pid, start_script) do
     :gen_statem.call(
       via_tuple(autohost_id),
-      {:start_battle, battle_id, start_script},
+      {:start_battle, battle_id, battle_pid, start_script},
       @default_call_timeout
     )
   catch
@@ -150,6 +152,7 @@ defmodule Teiserver.Autohost.Session do
     data = %{
       autohost: autohost,
       conn_pid: conn_pid,
+      monitors: MC.new(),
       max_battles: 0,
       current_battles: 0,
       pending_battles: %{},
@@ -174,12 +177,23 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data, [{:postpone, true}]}
   end
 
-  def handle_event({:call, from}, {:start_battle, _, _}, _state, data) when data.conn_pid == nil,
-    do: {:keep_state, data, [{:reply, from, {:error, :no_host_available}}]}
+  def handle_event({:call, from}, {:start_battle, _, _, _}, _state, data)
+      when data.conn_pid == nil,
+      do: {:keep_state, data, [{:reply, from, {:error, :no_host_available}}]}
 
-  def handle_event({:call, from}, {:start_battle, battle_id, start_script}, _state, data) do
+  def handle_event(
+        {:call, from},
+        {:start_battle, battle_id, battle_pid, start_script},
+        _state,
+        data
+      ) do
     Teiserver.Autohost.TachyonHandler.start_battle(data.conn_pid, battle_id, start_script)
-    data = Map.update!(data, :pending_battles, &Map.put(&1, battle_id, {from, start_script}))
+
+    data =
+      data
+      |> Map.update!(:pending_battles, &Map.put(&1, battle_id, {from, start_script}))
+      |> Map.update!(:monitors, &MC.monitor(&1, battle_pid, {:battle, battle_id}))
+
     {:keep_state, data}
   end
 
@@ -224,6 +238,21 @@ defmodule Teiserver.Autohost.Session do
     {from, pending_replies} = Map.pop!(data.pending_replies, ref)
     data = %{data | pending_replies: pending_replies}
     GenServer.reply(from, resp)
+    {:keep_state, data}
+  end
+
+  def handle_event(:info, {:DOWN, ref, :process, _pid, _reason}, _state, data) do
+    val = MC.get_val(data.monitors, ref)
+    data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
+
+    data =
+      case val do
+        {:battle, battle_id} ->
+          data
+          |> Map.update!(:pending_battles, &Map.delete(&1, battle_id))
+          |> Map.update!(:active_battles, &Map.delete(&1, battle_id))
+      end
+
     {:keep_state, data}
   end
 
