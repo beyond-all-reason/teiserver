@@ -101,4 +101,7 @@ defmodule Teiserver.Autohost do
   @spec kill_battle(pid(), TachyonBattle.id()) :: :ok
   defdelegate kill_battle(autohost, battle_id),
     to: Teiserver.Autohost.Session
+
+  @spec ack_update_event(pid(), TachyonBattle.id(), DateTime.t()) :: :ok
+  defdelegate ack_update_event(session_pid, battle_id, timestamp), to: Teiserver.Autohost.Session
 end

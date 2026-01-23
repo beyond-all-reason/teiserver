@@ -54,6 +54,99 @@ defmodule Teiserver.Autohost.AutohostTest do
 
       assert_receive {:start_battle, "battle_id", _}
     end
+
+    test "default subscribe messages from now" do
+      ctx = setup_autohost()
+      ctx = Map.merge(ctx, setup_battle(ctx.autohost, ctx.pid))
+      sub_start = Autohost.Session.inspect_subscription_start(ctx.autohost.id)
+
+      assert_in_delta DateTime.to_unix(sub_start, :millisecond),
+                      DateTime.to_unix(DateTime.utc_now(), :millisecond),
+                      5
+    end
+
+    test "track update messages" do
+      ctx = setup_autohost()
+      ctx = Map.merge(ctx, setup_battle(ctx.autohost, ctx.pid))
+      t0 = ~U[2026-01-23 12:34:56.00Z]
+      event = %{message_id: "123", battle_id: ctx.battle_id, time: t0}
+      Autohost.Session.handle_update_event(ctx.pid, event)
+
+      sub_start = Autohost.Session.inspect_subscription_start(ctx.autohost.id)
+      assert sub_start == DateTime.shift(t0, microsecond: {-1, 6})
+    end
+
+    test "track updates with ack" do
+      ctx = setup_autohost()
+      ctx = Map.merge(ctx, setup_battle(ctx.autohost, ctx.pid))
+      t0 = ~U[2026-01-23 12:34:56.00Z]
+      event = %{message_id: "123", battle_id: ctx.battle_id, time: t0}
+      Autohost.Session.handle_update_event(ctx.pid, event)
+      Autohost.Session.ack_update_event(ctx.pid, ctx.battle_id, t0)
+
+      sub_start = Autohost.Session.inspect_subscription_start(ctx.autohost.id)
+      assert sub_start == t0
+    end
+
+    test "track multiple update message same battle" do
+      ctx = setup_autohost()
+      %{battle_id: battle_id} = setup_battle(ctx.autohost, ctx.pid)
+
+      t0 = ~U[2026-01-23 03:00:00.00Z]
+      event0 = %{message_id: "123", battle_id: battle_id, time: t0}
+
+      t1 = ~U[2026-01-23 12:34:56.00Z]
+      event1 = %{message_id: "123", battle_id: battle_id, time: t1}
+
+      Autohost.Session.handle_update_event(ctx.pid, event0)
+      Autohost.Session.handle_update_event(ctx.pid, event1)
+
+      sub_start = Autohost.Session.inspect_subscription_start(ctx.autohost.id)
+      assert sub_start == DateTime.shift(t0, microsecond: {-1, 6})
+    end
+
+    test "track update message across multiple battles" do
+      ctx = setup_autohost()
+      %{battle_id: bid1} = setup_battle(ctx.autohost, ctx.pid)
+      %{battle_id: bid2} = setup_battle(ctx.autohost, ctx.pid)
+
+      t0 = ~U[2026-01-23 03:00:00.00Z]
+      event0 = %{message_id: "123", battle_id: bid1, time: t0}
+
+      t1 = ~U[2026-01-23 12:34:56.00Z]
+      event1 = %{message_id: "123", battle_id: bid2, time: t1}
+
+      Autohost.Session.handle_update_event(ctx.pid, event0)
+      Autohost.Session.handle_update_event(ctx.pid, event1)
+
+      sub_start = Autohost.Session.inspect_subscription_start(ctx.autohost.id)
+      assert sub_start == DateTime.shift(t0, microsecond: {-1, 6})
+    end
+  end
+
+  defp setup_autohost() do
+    autohost = BotFixtures.create_bot()
+
+    sess_pid =
+      Autohost.Session.child_spec({autohost, self()})
+      |> ExUnit.Callbacks.start_link_supervised!()
+
+    assert_receive({:call_client, "autohost/subscribeUpdates", _, ref})
+    send(ref, {ref, %{"status" => "success"}})
+    Autohost.Session.update_capacity(sess_pid, 10, 0)
+    %{autohost: autohost, pid: sess_pid}
+  end
+
+  defp setup_battle(autohost, pid) do
+    battle_id = to_string(UUID.uuid4())
+
+    Task.async(fn ->
+      Autohost.start_battle(autohost.id, battle_id, BotFixtures.start_script())
+    end)
+
+    assert_receive {:start_battle, ^battle_id, _}
+    Autohost.Session.reply_start_battle(pid, battle_id, {:ok, %{ips: ["1.2.3.4"], port: 1234}})
+    %{battle_id: battle_id}
   end
 
   describe "message parser" do

@@ -19,7 +19,10 @@ defmodule Teiserver.Autohost.Session do
   @typep battle_data :: %{
            start_script: Autohost.start_script(),
            ips: [String.t()],
-           port: non_neg_integer()
+           port: non_neg_integer(),
+           # it is guaranteed that the event timestamp is unique per battle
+           pending_acks: :queue.queue(time: DateTime.t()),
+           last_acked_ts: DateTime.t() | nil
          }
 
   @typep data :: %{
@@ -108,6 +111,11 @@ defmodule Teiserver.Autohost.Session do
     send(session_pid, {:update_event, event})
   end
 
+  @spec ack_update_event(pid(), TachyonBattle.id(), DateTime.t()) :: :ok
+  def ack_update_event(session_pid, battle_id, timestamp) do
+    send(session_pid, {:ack_update_event, battle_id, timestamp})
+  end
+
   @doc """
   Ask the autohost to terminate the given battle
   """
@@ -121,6 +129,13 @@ defmodule Teiserver.Autohost.Session do
   @spec reply_kill_battle(pid(), reference(), :ok | {:error, reason :: term()}) :: :ok
   def reply_kill_battle(session_pid, ref, resp) do
     send(session_pid, {:reply_kill_battle, ref, resp})
+  end
+
+  @doc """
+  should only be used for testing, get the `since` for subscribeUpdates
+  """
+  def inspect_subscription_start(autohost_id) do
+    :gen_statem.call(via_tuple(autohost_id), :inspect_subscription_start, @default_call_timeout)
   end
 
   @impl :gen_statem
@@ -147,7 +162,9 @@ defmodule Teiserver.Autohost.Session do
 
   @impl :gen_statem
   def handle_event(:internal, :subscribe_updates, _state, data) do
-    case TachyonHandler.subscribe_updates(data.conn_pid, DateTime.utc_now()) do
+    since = get_subscription_start(data)
+
+    case TachyonHandler.subscribe_updates(data.conn_pid, since) do
       :ok -> {:keep_state, data}
       {:error, reason} -> {:stop, {:error, reason}}
     end
@@ -195,6 +212,10 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data}
   end
 
+  def handle_event({:call, from}, :inspect_subscription_start, _state, data) do
+    {:keep_state, data, [{:reply, from, get_subscription_start(data)}]}
+  end
+
   def handle_event(:info, {:reply_kill_battle, ref, _}, _state, data)
       when not is_map_key(data.pending_replies, ref),
       do: {:keep_state, data}
@@ -239,7 +260,9 @@ defmodule Teiserver.Autohost.Session do
         battle_data = %{
           start_script: start_script,
           ips: start_response.ips,
-          port: start_response.port
+          port: start_response.port,
+          pending_acks: :queue.new(),
+          last_acked_ts: nil
         }
 
         data =
@@ -265,12 +288,72 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data}
   end
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
+  # TODO: will need to "resurrect" a battle if we ever get into this situation.
+  # Because the autohost is the ultimate source of truth when it comes to running
+  # battle, so if it tells teiserver that something is running, we need to
+  # create a corresponding process. But for now, just drop the message
+  def handle_event(:info, {:update_event, %{battle_id: battle_id}}, _state, data)
+      when not is_map_key(data.active_battles, battle_id),
+      do: {:keep_state, data}
+
   def handle_event(:info, {:update_event, event}, _state, data) do
     TachyonBattle.send_update_event(event)
+
+    data =
+      data
+      |> update_in([:active_battles, event.battle_id, :pending_acks], &:queue.in(event.time, &1))
+
+    {:keep_state, data}
+  end
+
+  def handle_event(:info, {:ack_update_event, battle_id, _}, _state, data)
+      when not is_map_key(data.active_battles, battle_id),
+      do: {:keep_state, data}
+
+  def handle_event(:info, {:ack_update_event, battle_id, timestamp}, _state, data) do
+    data =
+      update_in(data, [:active_battles, battle_id], fn battle_data ->
+        case :queue.out(battle_data.pending_acks) do
+          {{:value, ^timestamp}, q2} ->
+            %{battle_data | pending_acks: q2, last_acked_ts: timestamp}
+
+          {:empty, _} ->
+            Logger.warning("battle #{battle_id} acked a message but nothing is waiting")
+            data
+            # battle should *always* ack message in order, so if the acked message is
+            # not the first in the queue, something is seriously wrong
+        end
+      end)
+
     {:keep_state, data}
   end
 
   defp via_tuple(autohost_id) do
     SessionRegistry.via_tuple(autohost_id)
+  end
+
+  # the typespec for DateTime.shift/2 requires the duration pair for
+  # :microsecond to have non negative integer.
+  # but it works just fine with negative number
+  @dialyzer {:nowarn_function, get_subscription_start: 1}
+  defp get_subscription_start(state) do
+    for {_, battle_data} <- state.active_battles do
+      case {battle_data.last_acked_ts, :queue.peek(battle_data.pending_acks)} do
+        {x, _} when not is_nil(x) ->
+          x
+
+        {nil, {:value, x}} ->
+          # subscriptions work with a strict bound: anything `>` than the provided
+          # timestamp. Which means if we return the exact timestamp of the last event
+          # this specific event won't be returned.
+          DateTime.shift(x, microsecond: {-1, 6})
+
+        _ ->
+          nil
+      end
+    end
+    |> Enum.reject(&is_nil/1)
+    |> Enum.min(fn -> DateTime.utc_now() end)
   end
 end
