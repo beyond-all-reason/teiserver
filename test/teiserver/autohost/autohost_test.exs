@@ -60,6 +60,8 @@ defmodule Teiserver.Autohost.AutohostTest do
     alias Teiserver.Autohost.TachyonHandler, as: TH
 
     test "start" do
+      msg_id = "bb732bd7-c549-4f26-b29b-e1b8d2c99c96"
+
       msg = %{
         "commandId" => "autohost/update",
         "data" => %{
@@ -67,20 +69,23 @@ defmodule Teiserver.Autohost.AutohostTest do
           "time" => 1_748_191_579_196_000,
           "update" => %{"type" => "start"}
         },
-        "messageId" => "bb732bd7-c549-4f26-b29b-e1b8d2c99c96",
+        "messageId" => msg_id,
         "type" => "event"
       }
 
       expected = %{
+        message_id: msg_id,
         battle_id: "d9eff7cb-ab31-4070-8bd8-376acf9c5095",
         time: DateTime.from_unix!(1_748_191_579_196_000, :microsecond),
         update: :start
       }
 
-      assert TH.parse_update_event(msg["data"]) == {:ok, expected}
+      assert TH.parse_update_event(msg_id, msg["data"]) == {:ok, expected}
     end
 
     test "finished" do
+      msg_id = "46dc384f-1ffe-4cac-8a77-1fd1927f0437"
+
       msg = %{
         "commandId" => "autohost/update",
         "data" => %{
@@ -88,20 +93,23 @@ defmodule Teiserver.Autohost.AutohostTest do
           "time" => 1_748_191_573_075_000,
           "update" => %{"type" => "finished", "userId" => "43", "winningAllyTeams" => [1]}
         },
-        "messageId" => "46dc384f-1ffe-4cac-8a77-1fd1927f0437",
+        "messageId" => msg_id,
         "type" => "event"
       }
 
       expected = %{
+        message_id: msg_id,
         battle_id: "d9eff7cb-ab31-4070-8bd8-376acf9c5095",
         time: DateTime.from_unix!(1_748_191_573_075_000, :microsecond),
         update: {:finished, %{user_id: 43, winning_ally_teams: [1]}}
       }
 
-      assert TH.parse_update_event(msg["data"]) == {:ok, expected}
+      assert TH.parse_update_event(msg_id, msg["data"]) == {:ok, expected}
     end
 
     test "player chat broadcast" do
+      msg_id = "46dc384f-1ffe-4cac-8a77-1fd1927f0437"
+
       msg = %{
         "commandId" => "autohost/update",
         "data" => %{
@@ -114,20 +122,23 @@ defmodule Teiserver.Autohost.AutohostTest do
             "userId" => "5"
           }
         },
-        "messageId" => "46dc384f-1ffe-4cac-8a77-1fd1927f0437",
+        "messageId" => msg_id,
         "type" => "event"
       }
 
       expected = %{
+        message_id: msg_id,
         battle_id: "d9eff7cb-ab31-4070-8bd8-376acf9c5095",
         time: DateTime.from_unix!(1_748_191_573_075_000, :microsecond),
         update: {:player_chat_broadcast, %{destination: :all, message: "blah", user_id: 5}}
       }
 
-      assert TH.parse_update_event(msg["data"]) == {:ok, expected}
+      assert TH.parse_update_event(msg_id, msg["data"]) == {:ok, expected}
     end
 
     test "player chat dm" do
+      msg_id = "46dc384f-1ffe-4cac-8a77-1fd1927f0437"
+
       msg = %{
         "commandId" => "autohost/update",
         "data" => %{
@@ -141,20 +152,23 @@ defmodule Teiserver.Autohost.AutohostTest do
             "toUserId" => "42"
           }
         },
-        "messageId" => "46dc384f-1ffe-4cac-8a77-1fd1927f0437",
+        "messageId" => msg_id,
         "type" => "event"
       }
 
       expected = %{
+        message_id: msg_id,
         battle_id: "d9eff7cb-ab31-4070-8bd8-376acf9c5095",
         time: DateTime.from_unix!(1_748_191_573_075_000, :microsecond),
         update: {:player_chat_dm, %{to_user_id: 42, message: "blah", user_id: 5}}
       }
 
-      assert TH.parse_update_event(msg["data"]) == {:ok, expected}
+      assert TH.parse_update_event(msg_id, msg["data"]) == {:ok, expected}
     end
 
     test "player chat dm, invalid target" do
+      msg_id = "46dc384f-1ffe-4cac-8a77-1fd1927f0437"
+
       msg = %{
         "commandId" => "autohost/update",
         "data" => %{
@@ -168,11 +182,11 @@ defmodule Teiserver.Autohost.AutohostTest do
             "toUserId" => "not-a-number"
           }
         },
-        "messageId" => "46dc384f-1ffe-4cac-8a77-1fd1927f0437",
+        "messageId" => msg_id,
         "type" => "event"
       }
 
-      assert {:error, _} = TH.parse_update_event(msg["data"])
+      assert {:error, _} = TH.parse_update_event(msg_id, msg["data"])
     end
   end
 end
