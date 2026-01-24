@@ -213,6 +213,14 @@ defmodule Teiserver.Account.ClientLib do
     end
   end
 
+  @spec count_client() :: non_neg_integer()
+  def count_client() do
+    case Horde.Registry.count(Teiserver.ClientRegistry) do
+      :undefined -> 0
+      n -> n
+    end
+  end
+
   @spec cast_client(T.userid(), any) :: any | nil
   def cast_client(userid, msg) do
     case get_client_pid(userid) do

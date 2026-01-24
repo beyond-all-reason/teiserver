@@ -1,7 +1,6 @@
 defmodule Teiserver.Protocols.Spring.AuthIn do
   @moduledoc false
 
-  alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Protocols.SpringIn
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   require Logger
@@ -11,8 +10,8 @@ defmodule Teiserver.Protocols.Spring.AuthIn do
     state
   end
 
+  # this should be removed from chobby, we can rely on regular pings only
   def do_handle("login_queue_heartbeat", _, msg_id, state) do
-    LoginThrottleServer.heartbeat(self(), state.queued_userid)
     reply(:spring, :login_queued, nil, msg_id, state)
   end
 

@@ -2250,6 +2250,9 @@ defmodule Teiserver.Account do
   @spec call_client(T.userid(), any) :: any | nil
   defdelegate call_client(userid, msg), to: ClientLib
 
+  @spec count_client() :: non_neg_integer()
+  defdelegate count_client(), to: ClientLib
+
   # Party stuff
   alias Teiserver.Account.PartyLib
 
