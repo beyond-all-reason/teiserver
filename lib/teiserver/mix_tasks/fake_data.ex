@@ -8,6 +8,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   alias Teiserver.{Account, Logging, Battle, Moderation}
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Battle.MatchLib
+  alias Teiserver.Game.MatchRatingLib
   require Logger
 
   @settings %{
@@ -16,6 +17,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     memory: 1024 * 1024 * 1024,
     maps: ["Koom valley", "Comet catcher", "Tabula"]
   }
+
+  @latest_season 2
 
   defp matches_per_day, do: :rand.uniform(5) + 2
   defp users_per_day, do: :rand.uniform(5) + 2
@@ -28,6 +31,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     # Accounts
     make_accounts()
 
+    make_matches()
+    set_active_season(@latest_season)
     make_matches()
     make_telemetry()
     make_moderation()
@@ -304,119 +309,128 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   end
 
   defp make_matches() do
-    Range.new(0, @settings.days)
-    |> Enum.each(fn day ->
-      date = Timex.today() |> Timex.shift(days: -day)
+    match_ids =
+      Range.new(0, @settings.days)
+      |> Enum.flat_map(fn day ->
+        date =
+          Timex.today()
+          |> Timex.shift(days: -day, years: -(@latest_season - MatchRatingLib.active_season()))
 
-      users =
-        Account.list_users(
-          search: [
-            inserted_after: Timex.to_datetime(date),
-            not_has_role: "Bot"
-          ],
-          select: [:id, :name]
-        )
-        |> Enum.map(fn %{id: id, name: name} -> {id, name} end)
+        users =
+          Account.list_users(
+            search: [
+              inserted_after: Timex.to_datetime(date),
+              not_has_role: "Bot"
+            ],
+            select: [:id, :name]
+          )
+          |> Enum.map(fn %{id: id, name: name} -> {id, name} end)
 
-      server_uuid = UUID.uuid1()
+        server_uuid = UUID.uuid1()
 
-      Range.new(0, matches_per_day())
-      |> Enum.each(fn _ ->
-        max_size = Enum.count(users) |> Kernel.div(2) |> :math.floor() |> round()
-        team_size = min(:rand.uniform(8), max_size)
-        shuffled_users = Enum.shuffle(users)
-        team1 = shuffled_users |> Enum.take(team_size)
-        team2 = shuffled_users |> Enum.reverse() |> Enum.take(team_size)
-        team_count = 2
-        num_players = team_size * team_count
-        game_type = MatchLib.game_type(team_size, team_count)
+        Range.new(0, matches_per_day())
+        |> Enum.map(fn _ ->
+          max_size = Enum.count(users) |> Kernel.div(2) |> :math.floor() |> round()
+          team_size = min(:rand.uniform(8), max_size)
+          shuffled_users = Enum.shuffle(users)
+          team1 = shuffled_users |> Enum.take(team_size)
+          team2 = shuffled_users |> Enum.reverse() |> Enum.take(team_size)
+          team_count = 2
+          num_players = team_size * team_count
+          game_type = MatchLib.game_type(team_size, team_count)
 
-        team1_score =
-          team1
-          |> Enum.map(fn {_, name} -> String.length(name) end)
-          |> Enum.sum()
+          team1_score =
+            team1
+            |> Enum.map(fn {_, name} -> String.length(name) end)
+            |> Enum.sum()
 
-        team2_score =
-          team2
-          |> Enum.map(fn {_, name} -> String.length(name) end)
-          |> Enum.sum()
+          team2_score =
+            team2
+            |> Enum.map(fn {_, name} -> String.length(name) end)
+            |> Enum.sum()
 
-        start_time = Timex.shift(date |> Timex.to_datetime(), minutes: 10 + :rand.uniform(1000))
-        end_time = Timex.shift(start_time, minutes: 10 + :rand.uniform(120))
+          start_time = Timex.shift(date |> Timex.to_datetime(), minutes: 10 + :rand.uniform(1000))
+          end_time = Timex.shift(start_time, minutes: 10 + :rand.uniform(120))
 
-        {:ok, match} =
-          Battle.create_match(%{
-            server_uuid: server_uuid,
-            uuid: UUID.uuid1(),
-            map: Enum.random(@settings.maps),
-            data: %{},
-            tags: %{},
-            winning_team: if(team1_score > team2_score, do: 0, else: 1),
-            team_count: team_count,
-            team_size: team_size,
-            passworded: false,
-            processed: true,
-            game_type: game_type,
+          {:ok, match} =
+            Battle.create_match(%{
+              server_uuid: server_uuid,
+              uuid: UUID.uuid1(),
+              map: Enum.random(@settings.maps),
+              data: %{},
+              tags: %{},
+              winning_team: if(team1_score > team2_score, do: 0, else: 1),
+              team_count: team_count,
+              team_size: team_size,
+              passworded: false,
+              processed: true,
+              game_type: game_type,
 
-            # All rooms are hosted by the same user for now
-            founder_id: 1,
-            bots: %{},
-            queue_id: nil,
-            started: start_time,
-            finished: end_time
-          })
+              # All rooms are hosted by the same user for now
+              founder_id: 1,
+              bots: %{},
+              queue_id: nil,
+              started: start_time,
+              finished: end_time
+            })
 
-        memberships1 =
-          team1
-          |> Enum.map(fn {userid, _} ->
-            %{
-              team_id: 0,
-              win: match.winning_team == 0,
-              stats: %{
-                "damageDealt" => :rand.uniform(1000) * 10,
-                "damageReceived" => :rand.uniform(1000) * 10,
-                "metalProduced" => :rand.uniform(1000) * 100,
-                "metalUsed" => :rand.uniform(1000) * 100,
-                "energyProduced" => :rand.uniform(1000) * 1000,
-                "energyUsed" => :rand.uniform(1000) * 1000
-              },
-              party_id: get_party_id(num_players),
-              user_id: userid,
-              match_id: match.id
-            }
-          end)
+          memberships1 =
+            team1
+            |> Enum.map(fn {userid, _} ->
+              %{
+                team_id: 0,
+                win: match.winning_team == 0,
+                stats: %{
+                  "damageDealt" => :rand.uniform(1000) * 10,
+                  "damageReceived" => :rand.uniform(1000) * 10,
+                  "metalProduced" => :rand.uniform(1000) * 100,
+                  "metalUsed" => :rand.uniform(1000) * 100,
+                  "energyProduced" => :rand.uniform(1000) * 1000,
+                  "energyUsed" => :rand.uniform(1000) * 1000
+                },
+                party_id: get_party_id(num_players),
+                user_id: userid,
+                match_id: match.id
+              }
+            end)
 
-        memberships2 =
-          team2
-          |> Enum.map(fn {userid, _} ->
-            %{
-              team_id: 1,
-              win: match.winning_team == 1,
-              stats: %{
-                "damageDealt" => :rand.uniform(1000) * 10,
-                "damageReceived" => :rand.uniform(1000) * 10,
-                "metalProduced" => :rand.uniform(1000) * 100,
-                "metalUsed" => :rand.uniform(1000) * 100,
-                "energyProduced" => :rand.uniform(1000) * 1000,
-                "energyUsed" => :rand.uniform(1000) * 1000
-              },
-              party_id: get_party_id(num_players),
-              user_id: userid,
-              match_id: match.id
-            }
-          end)
+          memberships2 =
+            team2
+            |> Enum.map(fn {userid, _} ->
+              %{
+                team_id: 1,
+                win: match.winning_team == 1,
+                stats: %{
+                  "damageDealt" => :rand.uniform(1000) * 10,
+                  "damageReceived" => :rand.uniform(1000) * 10,
+                  "metalProduced" => :rand.uniform(1000) * 100,
+                  "metalUsed" => :rand.uniform(1000) * 100,
+                  "energyProduced" => :rand.uniform(1000) * 1000,
+                  "energyUsed" => :rand.uniform(1000) * 1000
+                },
+                party_id: get_party_id(num_players),
+                user_id: userid,
+                match_id: match.id
+              }
+            end)
 
-        Ecto.Multi.new()
-        |> Ecto.Multi.insert_all(
-          :insert_all,
-          Battle.MatchMembership,
-          memberships1 ++ memberships2
-        )
-        |> Teiserver.Repo.transaction()
+          Ecto.Multi.new()
+          |> Ecto.Multi.insert_all(
+            :insert_all,
+            Battle.MatchMembership,
+            memberships1 ++ memberships2
+          )
+          |> Teiserver.Repo.transaction()
+
+          match.id
+        end)
       end)
-    end)
 
-    Teiserver.Game.MatchRatingLib.reset_and_re_rate("all")
+    Teiserver.Game.MatchRatingLib.re_rate_specific_matches(match_ids)
+  end
+
+  defp set_active_season(season) do
+    Teiserver.Config.update_site_config("rating.Season", season)
   end
 
   defp make_one_time_code() do
