@@ -37,6 +37,8 @@ defmodule Teiserver.Party.Server do
           matchmaking: nil | %{queues: [{Matchmaking.queue_id(), version :: String.t()}]}
         }
 
+  @default_call_timeout 5000
+
   @spec gen_party_id() :: id()
   def gen_party_id(), do: UUID.uuid4()
 
@@ -52,7 +54,7 @@ defmodule Teiserver.Party.Server do
 
   @spec leave_party(id(), T.userid()) :: :ok | {:error, :invalid_party | :not_a_member}
   def leave_party(party_id, user_id) do
-    :gen_statem.call(via_tuple(party_id), {:leave, user_id}, 5000)
+    :gen_statem.call(via_tuple(party_id), {:leave, user_id}, @default_call_timeout)
   catch
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
@@ -64,7 +66,7 @@ defmodule Teiserver.Party.Server do
   @spec rejoin(id(), T.userid(), pid() | nil) ::
           {:ok, state()} | {:error, :invalid_party | :not_a_member}
   def rejoin(party_id, user_id, pid \\ self()) do
-    :gen_statem.call(via_tuple(party_id), {:rejoin, user_id, pid}, 5000)
+    :gen_statem.call(via_tuple(party_id), {:rejoin, user_id, pid}, @default_call_timeout)
   catch
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
@@ -75,7 +77,7 @@ defmodule Teiserver.Party.Server do
   @spec create_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
   def create_invite(party_id, user_id, pid \\ self()) do
-    :gen_statem.call(via_tuple(party_id), {:create_invite, user_id, pid}, 5000)
+    :gen_statem.call(via_tuple(party_id), {:create_invite, user_id, pid}, @default_call_timeout)
   catch
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
@@ -83,7 +85,11 @@ defmodule Teiserver.Party.Server do
   @spec accept_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :not_invited}
   def accept_invite(party_id, user_id) do
-    :gen_statem.call(via_tuple(party_id), {:accept_invite, user_id, self()}, 5000)
+    :gen_statem.call(
+      via_tuple(party_id),
+      {:accept_invite, user_id, self()},
+      @default_call_timeout
+    )
   catch
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
@@ -91,7 +97,7 @@ defmodule Teiserver.Party.Server do
   @spec decline_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :not_invited}
   def decline_invite(party_id, user_id) do
-    :gen_statem.call(via_tuple(party_id), {:decline_invite, user_id}, 5000)
+    :gen_statem.call(via_tuple(party_id), {:decline_invite, user_id}, @default_call_timeout)
   catch
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
@@ -102,7 +108,7 @@ defmodule Teiserver.Party.Server do
   @spec cancel_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :not_in_party | :not_invited}
   def cancel_invite(party_id, user_id) do
-    :gen_statem.call(via_tuple(party_id), {:cancel_invite, user_id}, 5000)
+    :gen_statem.call(via_tuple(party_id), {:cancel_invite, user_id}, @default_call_timeout)
   catch
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
@@ -114,7 +120,11 @@ defmodule Teiserver.Party.Server do
   @spec kick_user(id(), user_kicking :: T.userid(), kicked_user :: T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :invalid_target | :not_a_member}
   def kick_user(party_id, actor_id, target_id) do
-    :gen_statem.call(via_tuple(party_id), {:kick_user, actor_id, target_id}, 5000)
+    :gen_statem.call(
+      via_tuple(party_id),
+      {:kick_user, actor_id, target_id},
+      @default_call_timeout
+    )
   catch
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
@@ -124,7 +134,7 @@ defmodule Teiserver.Party.Server do
   """
   @spec get_state(id()) :: state() | nil
   def get_state(party_id) do
-    :gen_statem.call(via_tuple(party_id), :get_state, 5000)
+    :gen_statem.call(via_tuple(party_id), :get_state, @default_call_timeout)
   catch
     :exit, {:noproc, _} -> nil
   end
@@ -143,7 +153,11 @@ defmodule Teiserver.Party.Server do
   @spec join_queues(id(), [{Matchmaking.queue_id(), version :: String.t()}]) ::
           :ok | {:error, reason :: term()}
   def join_queues(party_id, queues) do
-    :gen_statem.call(via_tuple(party_id), {:join_matchmaking_queues, queues}, 5000)
+    :gen_statem.call(
+      via_tuple(party_id),
+      {:join_matchmaking_queues, queues},
+      @default_call_timeout
+    )
   catch
     :exit, {:noproc, _} -> {:error, :invalid_party}
   end
@@ -161,7 +175,11 @@ defmodule Teiserver.Party.Server do
   @spec send_message(id(), T.userid(), String.t()) ::
           :ok | {:error, :invalid_request, reason :: term()}
   def send_message(party_id, from_id, msg_content) do
-    :gen_statem.call(via_tuple(party_id), {:send_message, from_id, msg_content}, 5000)
+    :gen_statem.call(
+      via_tuple(party_id),
+      {:send_message, from_id, msg_content},
+      @default_call_timeout
+    )
   catch
     :exit, {:noproc, _} -> {:error, :invalid_request, "invalid party"}
   end
