@@ -3,6 +3,7 @@ defmodule Teiserver.TachyonBattle.BattleTest do
   import Teiserver.Support.Polling, only: [poll_until_some: 1]
   alias Teiserver.TachyonBattle, as: Battle
   alias Teiserver.Autohost
+  alias Teiserver.BotFixtures
 
   @moduletag :tachyon
 
@@ -11,7 +12,10 @@ defmodule Teiserver.TachyonBattle.BattleTest do
       autohost_id = :rand.uniform(10_000_000)
       match_id = :rand.uniform(10_000_000)
       Autohost.SessionRegistry.register(%{id: autohost_id})
-      {:ok, battle_id, _pid} = Battle.start_battle_process(autohost_id, match_id)
+
+      {:ok, battle_id, _pid} =
+        Battle.start_battle_process(autohost_id, match_id, BotFixtures.start_script())
+
       poll_until_some(fn -> Battle.lookup(battle_id) end)
     end
   end
@@ -30,24 +34,15 @@ defmodule Teiserver.TachyonBattle.BattleTest do
       assert_receive {:call_client, "autohost/subscribeUpdates", _, ref}
       send(ref, {ref, %{"status" => "success"}})
 
+      start_script = BotFixtures.start_script()
+
       {:ok, _battle_pid} =
         Battle.Battle.start_link(%{
           battle_id: battle_id,
           match_id: match_id,
-          autohost_id: autohost_id
+          autohost_id: autohost_id,
+          start_script: start_script
         })
-
-      start_script = %{
-        engine_version: "engineversion",
-        game_name: "game name",
-        map_name: "very map",
-        start_pos_type: :fixed,
-        ally_teams: [
-          %{
-            teams: [%{user_id: 123, name: "player name", password: "123"}]
-          }
-        ]
-      }
 
       start_task =
         Task.async(fn ->
@@ -83,7 +78,8 @@ defmodule Teiserver.TachyonBattle.BattleTest do
       Battle.Battle.start_link(%{
         battle_id: battle_id,
         match_id: match_id,
-        autohost_id: autohost_id
+        autohost_id: autohost_id,
+        start_script: BotFixtures.start_script()
       })
 
     task = Task.async(fn -> Battle.kill(battle_id) end)

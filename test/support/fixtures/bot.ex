@@ -10,4 +10,18 @@ defmodule Teiserver.BotFixtures do
     {:ok, bot} = Bot.create_bot(%{name: name})
     bot
   end
+
+  def start_script() do
+    %{
+      engine_version: "engineversion",
+      game_name: "game name",
+      map_name: "very map",
+      start_pos_type: :fixed,
+      ally_teams: [
+        %{
+          teams: [%{user_id: 123, name: "player name", password: "123"}]
+        }
+      ]
+    }
+  end
 end
