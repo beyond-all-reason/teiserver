@@ -31,7 +31,10 @@ defmodule Teiserver.DataCase do
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
+    Teiserver.Account.LoginThrottleServer.set_tick_period(:infinity)
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Teiserver.Repo, shared: not tags[:async])
+    allow = Process.whereis(Teiserver.Account.LoginThrottleServer)
+    Ecto.Adapters.SQL.Sandbox.allow(Teiserver.Repo, self(), allow)
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
   end
 

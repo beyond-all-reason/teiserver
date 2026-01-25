@@ -14,6 +14,8 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   setup _ctx do
     LoginThrottleServer.restart()
     LoginThrottleServer.set_tick_period(:infinity)
+    # ensure the rate limiter doesn't interfere with any tests
+    LoginThrottleServer.reset_rate_limiter(1000, true)
   end
 
   test "can stop user from login" do
@@ -94,6 +96,25 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
 
     assert_receive {:login_accepted, id}, 5
     assert user2.id == id
+  end
+
+  test "respect login throttle" do
+    set_capacity(0)
+    LoginThrottleServer.reset_rate_limiter(1)
+    {user1, t1} = {new_user(), oneshot_pid()}
+    user2 = new_user()
+
+    assert LoginThrottleServer.attempt_login(t1.pid, user1.id) == false
+    assert LoginThrottleServer.attempt_login(self(), user2.id) == false
+    assert LoginThrottleServer.get_queue_length() == 2
+
+    set_capacity(2)
+    LoginThrottleServer.tick()
+
+    assert_receive {:login_accepted, id}, 5
+    assert id == user1.id
+    refute_receive {:login_accepted, _}, 5
+    assert LoginThrottleServer.get_queue_length() == 1
   end
 
   defp set_capacity(n) do
