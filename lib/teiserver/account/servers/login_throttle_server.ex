@@ -40,6 +40,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @spec get_queue_length :: non_neg_integer()
   def get_queue_length() do
     GenServer.call(__MODULE__, :queue_size)
+  catch
+    :exit, {:noproc, _} -> 0
   end
 
   @doc """
