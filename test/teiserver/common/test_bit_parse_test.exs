@@ -4,6 +4,8 @@ defmodule Teiserver.TestBitParse do
 
   test "bit_parse" do
     values = [
+      {"0", 1, [0]},
+      {"0", 4, [0, 0, 0, 0]},
       {"1", 4, [0, 0, 0, 1]},
       {"12", 4, [1, 1, 0, 0]},
       {"12", 5, [0, 1, 1, 0, 0]},
