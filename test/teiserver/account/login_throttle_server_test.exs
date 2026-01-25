@@ -13,6 +13,9 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
 
   setup _ctx do
     LoginThrottleServer.restart()
+    :ok = Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.ClientRegistry)
+    Supervisor.restart_child(Teiserver.Supervisor, Teiserver.ClientRegistry)
+
     LoginThrottleServer.set_tick_period(:infinity)
     # ensure the rate limiter doesn't interfere with any tests
     LoginThrottleServer.reset_rate_limiter(1000, true)
@@ -98,7 +101,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert user2.id == id
   end
 
-  test "respect login throttle" do
+  test "respect rate limiter" do
     set_capacity(0)
     LoginThrottleServer.reset_rate_limiter(1)
     {user1, t1} = {new_user(), oneshot_pid()}
