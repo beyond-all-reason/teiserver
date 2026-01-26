@@ -43,7 +43,6 @@ defmodule Teiserver.Room do
 
   @spec can_join_room?(T.userid(), String.t()) :: true | {false, String.t()}
   def can_join_room?(userid, room_name) do
-    room = get_or_make_room(room_name, userid)
     user = Account.get_user_by_id(userid)
 
     cond do
@@ -53,11 +52,15 @@ defmodule Teiserver.Room do
       CacheUser.is_moderator?(user) == true ->
         true
 
-      room.clan_id ->
-        if user.clan_id == room.clan_id, do: true, else: {false, "Clan room"}
-
       true ->
-        true
+        case Chat.RoomServer.can_join_room?(room_name, user) do
+          :invalid_room ->
+            get_or_make_room(room_name, userid, user.clan_id)
+            true
+
+          x ->
+            x
+        end
     end
   end
 

@@ -31,6 +31,13 @@ defmodule Teiserver.Chat.RoomServer do
     :exit, {:noproc, _} -> {:error, :invalid_room}
   end
 
+  @spec can_join_room?(String.t(), T.user()) :: true | :invalid_room | {false, String.t()}
+  def can_join_room?(name, user) do
+    GenServer.call(via_tuple(name), {:can_join_room?, user})
+  catch
+    :exit, {:noproc, _} -> :invalid_room
+  end
+
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: via_tuple(args.name))
   end
@@ -69,6 +76,17 @@ defmodule Teiserver.Chat.RoomServer do
       update_member_count(state)
       {:reply, {:ok, :joined}, state}
     end
+  end
+
+  def handle_call({:can_join_room?, user}, _from, state) do
+    result =
+      cond do
+        state.clan_id == nil -> true
+        state.clan_id == user.clan_id -> true
+        true -> {false, "Clan room"}
+      end
+
+    {:reply, result, state}
   end
 
   defp update_member_count(state) do
