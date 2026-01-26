@@ -139,22 +139,6 @@ defmodule Teiserver.Room do
     "clan_#{safe_name}"
   end
 
-  def add_room(room) do
-    Teiserver.cache_put(:rooms, room.name, room)
-
-    Teiserver.cache_update(:lists, :rooms, fn value ->
-      value = value || []
-
-      new_value =
-        [room.name | value]
-        |> Enum.uniq()
-
-      {:ok, new_value}
-    end)
-
-    room
-  end
-
   @spec list_rooms() :: [{String.t(), member_count :: non_neg_integer()}]
   defdelegate list_rooms(), to: Chat.RoomRegistry
 
