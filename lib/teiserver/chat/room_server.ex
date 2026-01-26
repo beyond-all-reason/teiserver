@@ -38,6 +38,13 @@ defmodule Teiserver.Chat.RoomServer do
     :exit, {:noproc, _} -> :invalid_room
   end
 
+  @spec stop_room(String.t()) :: :ok
+  def stop_room(name) do
+    GenServer.call(via_tuple(name), :stop)
+  catch
+    :exit, {:noproc, _} -> :ok
+  end
+
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: via_tuple(args.name))
   end
@@ -87,6 +94,10 @@ defmodule Teiserver.Chat.RoomServer do
       end
 
     {:reply, result, state}
+  end
+
+  def handle_call(:stop, _from, state) do
+    {:stop, :shutdown, :ok, state}
   end
 
   defp update_member_count(state) do

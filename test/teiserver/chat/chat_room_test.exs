@@ -69,4 +69,15 @@ defmodule Teiserver.Chat.ChatRoomTest do
     assert Room.can_join_room?(ctx.user.id, "new room") == true
     %{name: "new room"} = Room.get_room("new room")
   end
+
+  test "can remove room" do
+    name = "room name"
+    Room.get_or_make_room(name, 123)
+    :ok = Room.remove_room(name)
+    assert Room.get_room(name) == nil
+  end
+
+  test "removing non existing room is fine" do
+    assert :ok == Room.remove_room("no room")
+  end
 end

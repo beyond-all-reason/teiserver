@@ -35,7 +35,7 @@ defmodule Teiserver.Room do
   end
 
   def remove_room(room_name) do
-    Teiserver.cache_delete(:rooms, room_name)
+    Chat.RoomServer.stop_room(room_name)
   end
 
   @spec get_room(String.t()) :: room() | nil
