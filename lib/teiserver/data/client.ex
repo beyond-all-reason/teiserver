@@ -240,14 +240,16 @@ defmodule Teiserver.Client do
     end
   end
 
+  # TODO: will fix that later
   @spec leave_rooms(Integer.t()) :: List.t()
-  def leave_rooms(userid) do
-    Room.list_rooms()
-    |> Enum.each(fn room ->
-      if userid in room.members do
-        Room.remove_user_from_room(userid, room.name)
-      end
-    end)
+  def leave_rooms(_userid) do
+    raise "not implemented"
+    # Room.list_rooms()
+    # |> Enum.each(fn room ->
+    #   if userid in room.members do
+    #     Room.remove_user_from_room(userid, room.name)
+    #   end
+    # end)
   end
 
   @spec disconnect(T.userid(), nil | String.t()) :: nil | :ok | {:error, any}

@@ -6,6 +6,8 @@ defmodule Teiserver.Room do
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
+  @type room :: Chat.RoomServer.room()
+
   @dont_log_room ~w(autohosts)
 
   @spec create_room(map()) :: map()
@@ -36,11 +38,8 @@ defmodule Teiserver.Room do
     Teiserver.cache_delete(:rooms, room_name)
   end
 
-  # When the room is cached, it will be a map. If cache is not hit, it's nil.
-  @spec get_room(String.t()) :: map() | nil
-  def get_room(name) do
-    Teiserver.cache_get(:rooms, name)
-  end
+  @spec get_room(String.t()) :: room() | nil
+  defdelegate get_room(name), to: Chat.RoomServer
 
   @spec can_join_room?(T.userid(), String.t()) :: true | {false, String.t()}
   def can_join_room?(userid, room_name) do
@@ -62,13 +61,12 @@ defmodule Teiserver.Room do
     end
   end
 
-  @spec get_or_make_room(String.t(), T.userid(), T.clan_id() | nil) :: map()
+  @spec get_or_make_room(String.t(), T.userid(), T.clan_id() | nil) :: Chat.RoomServer.room()
   def get_or_make_room(name, author_id, clan_id \\ nil) do
-    case Teiserver.cache_get(:rooms, name) do
+    case Chat.RoomServer.get_room(name) do
       nil ->
-        # No room, we need to make one!
-        create_room(name, author_id, clan_id)
-        |> add_room()
+        {:ok, _pid} = Chat.RoomSupervisor.start_room(name, author_id, "", "", clan_id)
+        get_or_make_room(name, author_id, clan_id)
 
       room ->
         room
@@ -155,10 +153,8 @@ defmodule Teiserver.Room do
     room
   end
 
-  def list_rooms() do
-    (Teiserver.cache_get(:lists, :rooms) || [])
-    |> Enum.map(fn room_name -> Teiserver.cache_get(:rooms, room_name) end)
-  end
+  @spec list_rooms() :: [{String.t(), member_count :: non_neg_integer()}]
+  defdelegate list_rooms(), to: Chat.RoomRegistry
 
   @spec send_message(T.userid(), String.t(), String.t()) :: nil | :ok
   def send_message(from_id, _room_name, "$" <> msg) do
