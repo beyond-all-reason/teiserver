@@ -74,24 +74,23 @@ defmodule Teiserver.Room do
   end
 
   def add_user_to_room(userid, room_name) do
-    Teiserver.cache_update(:rooms, room_name, fn room_state ->
-      new_state =
-        if Enum.member?(room_state.members, userid) do
-          # No change takes place, they're already in the room!
-          room_state
-        else
-          PubSub.broadcast(
-            Teiserver.PubSub,
-            "room:#{room_name}",
-            {:add_user_to_room, userid, room_name}
-          )
+    case Chat.RoomServer.join_room(room_name, userid) do
+      {:ok, :already_present} ->
+        :ok
 
-          new_members = [userid | room_state.members]
-          Map.put(room_state, :members, new_members)
-        end
+      {:ok, :joined} ->
+        PubSub.broadcast(
+          Teiserver.PubSub,
+          "room:#{room_name}",
+          {:add_user_to_room, userid, room_name}
+        )
 
-      {:ok, new_state}
-    end)
+        :ok
+
+      # not great, but we keep the same semantics from ets based impl
+      {:error, :invalid_room} ->
+        :ok
+    end
   end
 
   def remove_user_from_room(userid, room_name) do
