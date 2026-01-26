@@ -455,8 +455,8 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:list_channels, nil) do
     channels =
       Room.list_rooms()
-      |> Enum.map(fn room ->
-        "CHANNEL #{room.name} #{Enum.count(room.members)}\n"
+      |> Enum.map(fn {name, member_count} ->
+        "CHANNEL #{name} #{member_count}\n"
       end)
 
     (["CHANNELS\n"] ++ channels ++ ["ENDOFCHANNELS\n"])
