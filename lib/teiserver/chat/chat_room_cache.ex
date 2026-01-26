@@ -8,8 +8,6 @@ defmodule Teiserver.Room do
 
   @type room :: Chat.RoomServer.room()
 
-  @dont_log_room ~w(autohosts)
-
   @spec create_room(map()) :: map()
   def create_room(%{name: _} = room) do
     Map.merge(
@@ -142,18 +140,22 @@ defmodule Teiserver.Room do
   @spec list_rooms() :: [{String.t(), member_count :: non_neg_integer()}]
   defdelegate list_rooms(), to: Chat.RoomRegistry
 
-  @spec send_message(T.userid(), String.t(), String.t()) :: nil | :ok
+  @spec send_message(T.userid() | T.user(), String.t(), String.t() | [String.t()]) :: nil | :ok
   def send_message(from_id, _room_name, "$" <> msg) do
     CacheUser.send_direct_message(from_id, Coordinator.get_coordinator_userid(), "$" <> msg)
   end
 
   def send_message(from_id, room_name, messages) when is_list(messages) do
-    Enum.map(messages, fn msg -> send_message(from_id, room_name, msg) end)
+    user = Account.get_user_by_id(from_id)
+    if user != nil, do: Enum.map(messages, fn msg -> send_message(user, room_name, msg) end)
   end
 
-  def send_message(from_id, room_name, msg) do
+  def send_message(from_id, room_name, msg) when is_integer(from_id) do
     user = Account.get_user_by_id(from_id)
+    if user != nil, do: send_message(user, room_name, msg)
+  end
 
+  def send_message(user, room_name, msg) do
     if CacheUser.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
@@ -164,47 +166,8 @@ defmodule Teiserver.Room do
       CacheUser.shadowban_user(user.id)
     end
 
-    if allow?(from_id) do
-      case get_room(room_name) do
-        nil ->
-          nil
-
-        _room ->
-          insert_result =
-            if not Enum.member?(@dont_log_room, room_name) do
-              Chat.create_room_message(%{
-                content: msg,
-                chat_room: room_name,
-                inserted_at: Timex.now(),
-                user_id: from_id
-              })
-            end
-
-          message_object =
-            case insert_result do
-              {:ok, message_object} -> message_object
-              _ -> %{}
-            end
-
-          PubSub.broadcast(
-            Teiserver.PubSub,
-            "room_chat:#{room_name}",
-            %{
-              channel: "room_chat",
-              event: :message_received,
-              room_name: room_name,
-              id: Map.get(message_object, :id, nil),
-              content: msg,
-              user_id: from_id
-            }
-          )
-
-          PubSub.broadcast(
-            Teiserver.PubSub,
-            "room:#{room_name}",
-            {:new_message, from_id, room_name, msg}
-          )
-      end
+    if allow?(user.id) do
+      Chat.RoomServer.send_message(room_name, user.id, msg)
     end
   end
 
@@ -225,6 +188,8 @@ defmodule Teiserver.Room do
     if allow?(from_id) do
       Chat.RoomServer.send_message_ex(room_name, from_id, msg)
     end
+
+    :ok
   end
 
   @spec allow?(T.userid()) :: boolean()

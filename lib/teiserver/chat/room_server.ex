@@ -48,6 +48,13 @@ defmodule Teiserver.Chat.RoomServer do
     :exit, {:noproc, _} -> :ok
   end
 
+  @spec send_message(String.t(), T.userid(), String.t()) :: :ok
+  def send_message(name, user_id, message) do
+    GenServer.call(via_tuple(name), {:send_message, user_id, message})
+  catch
+    :exit, {:noproc, _} -> :ok
+  end
+
   @spec send_message_ex(String.t(), T.userid(), String.t()) :: :ok
   def send_message_ex(name, user_id, message) do
     GenServer.call(via_tuple(name), {:send_message_ex, user_id, message})
@@ -108,6 +115,51 @@ defmodule Teiserver.Chat.RoomServer do
 
   def handle_call(:stop, _from, state) do
     {:stop, :shutdown, :ok, state}
+  end
+
+  def handle_call({:send_message, userid, message}, _from, state) do
+    if MapSet.member?(state.members, userid) do
+      msg_object =
+        if state.name in @dont_log_room do
+          nil
+        else
+          msg =
+            Chat.create_room_message(%{
+              content: message,
+              chat_room: state.name,
+              inserted_at: DateTime.utc_now(),
+              user_id: userid
+            })
+
+          case msg do
+            {:ok, msg_obj} -> msg_obj
+            _ -> nil
+          end
+        end
+
+      msg_id = if msg_object != nil, do: msg_object.id, else: nil
+
+      PubSub.broadcast(
+        Teiserver.PubSub,
+        "room_chat:#{state.name}",
+        %{
+          channel: "room_chat",
+          event: :message_received,
+          room_name: state.name,
+          id: msg_id,
+          content: message,
+          user_id: userid
+        }
+      )
+
+      PubSub.broadcast(
+        Teiserver.PubSub,
+        "room:#{state.name}",
+        {:new_message, userid, state.name, message}
+      )
+    end
+
+    {:reply, :ok, state}
   end
 
   def handle_call({:send_message_ex, userid, message}, _from, state) do

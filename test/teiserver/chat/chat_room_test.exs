@@ -82,6 +82,50 @@ defmodule Teiserver.Chat.ChatRoomTest do
     assert :ok == Room.remove_room("no room")
   end
 
+  describe "send_message" do
+    test "can send message", ctx do
+      name = "room name"
+      Room.get_or_make_room(name, ctx.user.id)
+      Room.add_user_to_room(ctx.user.id, name)
+      PubSub.subscribe(Teiserver.PubSub, "room:#{name}")
+      PubSub.subscribe(Teiserver.PubSub, "room_chat")
+
+      Room.send_message(ctx.user.id, name, "message!")
+
+      user_id = ctx.user.id
+      assert_receive {:new_message, ^user_id, ^name, "message!"}
+      assert Chat.get_room_message!(nil, search: [chat_room: name]).content == "message!"
+    end
+
+    test "can send multiple messages", ctx do
+      name = "room name"
+      Room.get_or_make_room(name, ctx.user.id)
+      Room.add_user_to_room(ctx.user.id, name)
+      PubSub.subscribe(Teiserver.PubSub, "room:#{name}")
+      PubSub.subscribe(Teiserver.PubSub, "room_chat:#{name}")
+
+      Room.send_message(ctx.user.id, name, ["message1", "message2"])
+
+      user_id = ctx.user.id
+      assert_receive {:new_message, ^user_id, ^name, "message1"}
+      assert_receive {:new_message, ^user_id, ^name, "message2"}
+      [msg1, msg2] = Chat.list_room_messages(search: [chat_room: name])
+      assert MapSet.new([msg1.content, msg2.content]) == MapSet.new(["message1", "message2"])
+
+      assert_receive %{channel: "room_chat", event: :message_received, room_name: ^name}
+      assert_receive %{channel: "room_chat", event: :message_received, room_name: ^name}
+    end
+
+    test "only member can send message", ctx do
+      name = "room name"
+      PubSub.subscribe(Teiserver.PubSub, "room:#{name}")
+      PubSub.subscribe(Teiserver.PubSub, "room_chat")
+      Room.get_or_make_room(name, ctx.user.id)
+      Room.send_message(ctx.user.id, name, "message!")
+      refute_receive {:new_message, _, _, _}
+    end
+  end
+
   describe "send_message_ex" do
     test "can send message", ctx do
       name = "room name"
