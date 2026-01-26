@@ -9,7 +9,6 @@
 - Quick items
 - User config types
 - ConCache.put(:lists, :clients, [])
-- ConCache.put(:lists, :rooms, [])
 - ConCache.insert_new(:lists, :lobbies, [])}
 - ConCache.put(:id_counters, :battle, 1)
 - User list precache (active)
@@ -26,7 +25,6 @@
 #### Keep but will need work to cache based on state of cluster
 - ConCache.put(:lists, :clients, [])
 - ConCache.insert_new(:lists, :lobbies, [])}
-- ConCache.put(:lists, :rooms, [])
 
 #### Keep - No race-conditions and no duplication (uses db/store not cache)
 - Site config types

@@ -118,7 +118,6 @@ defmodule Teiserver.Application do
         concache_sup(:teiserver_clan_cache_bang),
 
         # Caches - Chat
-        concache_perm_sup(:rooms),
         Teiserver.Chat.RoomSystem,
         {Teiserver.HookServer, name: Teiserver.HookServer},
 
