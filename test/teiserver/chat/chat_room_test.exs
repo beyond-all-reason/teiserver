@@ -3,6 +3,7 @@ defmodule Teiserver.Chat.ChatRoomTest do
 
   alias Phoenix.PubSub
   alias Teiserver.Room
+  alias Teiserver.Chat
 
   setup do
     :ok = Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.Chat.RoomSystem)
@@ -79,5 +80,29 @@ defmodule Teiserver.Chat.ChatRoomTest do
 
   test "removing non existing room is fine" do
     assert :ok == Room.remove_room("no room")
+  end
+
+  describe "send_message_ex" do
+    test "can send message", ctx do
+      name = "room name"
+      PubSub.subscribe(Teiserver.PubSub, "room:#{name}")
+      Room.get_or_make_room(name, ctx.user.id)
+      Room.add_user_to_room(ctx.user.id, name)
+      Room.send_message_ex(ctx.user.id, name, "message!")
+
+      user_id = ctx.user.id
+      assert_receive {:new_message_ex, ^user_id, ^name, "message!"}
+      msg = Chat.get_room_message!(nil, search: [chat_room: name])
+      assert msg.user_id == user_id
+      assert msg.content == "message!"
+    end
+
+    test "only member can send message", ctx do
+      name = "room name"
+      PubSub.subscribe(Teiserver.PubSub, "room:#{name}")
+      Room.get_or_make_room(name, ctx.user.id)
+      Room.send_message_ex(ctx.user.id, name, "message!")
+      refute_receive {:new_message_ex, _, _, _}
+    end
   end
 end

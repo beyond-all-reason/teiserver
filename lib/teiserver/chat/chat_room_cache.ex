@@ -164,7 +164,7 @@ defmodule Teiserver.Room do
       CacheUser.shadowban_user(user.id)
     end
 
-    if allow?(from_id, room_name) do
+    if allow?(from_id) do
       case get_room(room_name) do
         nil ->
           nil
@@ -222,34 +222,13 @@ defmodule Teiserver.Room do
       CacheUser.shadowban_user(user.id)
     end
 
-    if allow?(from_id, room_name) do
-      case get_room(room_name) do
-        nil ->
-          nil
-
-        room ->
-          if from_id in room.members do
-            if not Enum.member?(@dont_log_room, room_name) do
-              Chat.create_room_message(%{
-                content: msg,
-                chat_room: room_name,
-                inserted_at: Timex.now(),
-                user_id: from_id
-              })
-            end
-
-            PubSub.broadcast(
-              Teiserver.PubSub,
-              "room:#{room_name}",
-              {:new_message_ex, from_id, room_name, msg}
-            )
-          end
-      end
+    if allow?(from_id) do
+      Chat.RoomServer.send_message_ex(room_name, from_id, msg)
     end
   end
 
-  @spec allow?(T.userid(), String.t()) :: boolean()
-  def allow?(userid, _room_name) do
+  @spec allow?(T.userid()) :: boolean()
+  def allow?(userid) do
     cond do
       CacheUser.is_shadowbanned?(userid) ->
         false

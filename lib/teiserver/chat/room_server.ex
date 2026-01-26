@@ -3,6 +3,7 @@ defmodule Teiserver.Chat.RoomServer do
 
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Chat
+  alias Phoenix.PubSub
   require Logger
 
   @type room :: %{
@@ -15,6 +16,8 @@ defmodule Teiserver.Chat.RoomServer do
         }
 
   @typep state :: room()
+
+  @dont_log_room ~w(autohosts)
 
   @spec get_room(String.t()) :: room() | nil
   def get_room(name) do
@@ -41,6 +44,13 @@ defmodule Teiserver.Chat.RoomServer do
   @spec stop_room(String.t()) :: :ok
   def stop_room(name) do
     GenServer.call(via_tuple(name), :stop)
+  catch
+    :exit, {:noproc, _} -> :ok
+  end
+
+  @spec send_message_ex(String.t(), T.userid(), String.t()) :: :ok
+  def send_message_ex(name, user_id, message) do
+    GenServer.call(via_tuple(name), {:send_message_ex, user_id, message})
   catch
     :exit, {:noproc, _} -> :ok
   end
@@ -98,6 +108,27 @@ defmodule Teiserver.Chat.RoomServer do
 
   def handle_call(:stop, _from, state) do
     {:stop, :shutdown, :ok, state}
+  end
+
+  def handle_call({:send_message_ex, userid, message}, _from, state) do
+    if MapSet.member?(state.members, userid) do
+      if state.name not in @dont_log_room do
+        Chat.create_room_message(%{
+          content: message,
+          chat_room: state.name,
+          inserted_at: DateTime.utc_now(),
+          user_id: userid
+        })
+      end
+
+      PubSub.broadcast(
+        Teiserver.PubSub,
+        "room:#{state.name}",
+        {:new_message_ex, userid, state.name, message}
+      )
+    end
+
+    {:reply, :ok, state}
   end
 
   defp update_member_count(state) do
