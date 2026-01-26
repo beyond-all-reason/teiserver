@@ -3,6 +3,7 @@ defmodule Teiserver.Chat.RoomServer do
 
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Chat
+  alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Phoenix.PubSub
   require Logger
 
@@ -12,7 +13,8 @@ defmodule Teiserver.Chat.RoomServer do
           author_id: T.userid(),
           topic: String.t(),
           password: String.t(),
-          clan_id: T.clan_id()
+          clan_id: T.clan_id(),
+          monitors: MC.t()
         }
 
   @typep state :: room()
@@ -26,12 +28,19 @@ defmodule Teiserver.Chat.RoomServer do
     :exit, {:noproc, _} -> nil
   end
 
-  @spec join_room(String.t(), T.userid()) ::
+  @spec join_room(String.t(), T.userid(), pid() | nil) ::
           {:ok, :joined | :already_present} | {:error, :invalid_room}
-  def join_room(name, user_id) do
-    GenServer.call(via_tuple(name), {:join_room, user_id})
+  def join_room(name, user_id, pid \\ self()) do
+    GenServer.call(via_tuple(name), {:join_room, user_id, pid})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_room}
+  end
+
+  @spec leave_room(String.t(), T.userid()) :: :ok
+  def leave_room(name, user_id) do
+    GenServer.call(via_tuple(name), {:leave_room, user_id})
+  catch
+    :exit, {:noproc, _} -> :ok
   end
 
   @spec can_join_room?(String.t(), T.user()) :: true | :invalid_room | {false, String.t()}
@@ -78,7 +87,8 @@ defmodule Teiserver.Chat.RoomServer do
       author_id: args.author_id,
       topic: args.topic,
       password: args.password,
-      clan_id: args.clan_id
+      clan_id: args.clan_id,
+      monitors: MC.new()
     }
 
     update_member_count(state)
@@ -91,14 +101,37 @@ defmodule Teiserver.Chat.RoomServer do
     {:reply, state, state}
   end
 
-  def handle_call({:join_room, userid}, _from, state) do
+  def handle_call({:join_room, userid, pid}, _from, state) do
     if MapSet.member?(state.members, userid) do
       {:reply, {:ok, :already_present}, state}
     else
-      state = Map.update!(state, :members, &MapSet.put(&1, userid))
+      state =
+        state
+        |> Map.update!(:members, &MapSet.put(&1, userid))
+        |> Map.update!(:monitors, &MC.monitor(&1, pid, userid))
 
       update_member_count(state)
       {:reply, {:ok, :joined}, state}
+    end
+  end
+
+  def handle_call({:leave_room, userid}, _from, state) do
+    if MapSet.member?(state.members, userid) do
+      state =
+        state
+        |> Map.update!(:monitors, &MC.demonitor_by_val(&1, userid))
+        |> Map.update!(:members, &MapSet.delete(&1, userid))
+
+      PubSub.broadcast(
+        Teiserver.PubSub,
+        "room:#{state.name}",
+        {:remove_user_from_room, userid, state.name}
+      )
+
+      update_member_count(state)
+      {:reply, :ok, state}
+    else
+      {:reply, :ok, state}
     end
   end
 
@@ -181,6 +214,22 @@ defmodule Teiserver.Chat.RoomServer do
     end
 
     {:reply, :ok, state}
+  end
+
+  @impl true
+  def handle_info({:DOWN, ref, :process, _pid, _reason}, state) do
+    val = MC.get_val(state.monitors, ref)
+    state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
+
+    case val do
+      nil ->
+        {:noreply, state}
+
+      userid ->
+        state = Map.update!(state, :members, &MapSet.delete(&1, userid))
+        update_member_count(state)
+        {:noreply, state}
+    end
   end
 
   defp update_member_count(state) do

@@ -82,6 +82,50 @@ defmodule Teiserver.Chat.ChatRoomTest do
     assert :ok == Room.remove_room("no room")
   end
 
+  test "can leave room" do
+    name = "room name"
+    PubSub.subscribe(Teiserver.PubSub, "room:#{name}")
+    Room.get_or_make_room(name, 123)
+    Room.add_user_to_room(123, name)
+    assert_received {:add_user_to_room, 123, ^name}
+
+    Room.remove_user_from_room(123, name)
+    assert_received {:remove_user_from_room, 123, ^name}
+    assert Room.list_rooms() == [{name, 0}]
+  end
+
+  test "leaving room twice doesn't send multiple messages" do
+    name = "room name"
+    PubSub.subscribe(Teiserver.PubSub, "room:#{name}")
+    Room.get_or_make_room(name, 123)
+    Room.add_user_to_room(123, name)
+    assert_received {:add_user_to_room, 123, ^name}
+
+    Room.remove_user_from_room(123, name)
+    assert_received {:remove_user_from_room, 123, ^name}
+    Room.remove_user_from_room(123, name)
+    refute_received {:remove_user_from_room, 123, ^name}
+  end
+
+  test "user is removed from room automatically" do
+    sink_task =
+      Task.async(fn ->
+        receive do
+          _x -> nil
+        end
+      end)
+
+    name = "room name"
+    Room.get_or_make_room(name, 123)
+    Room.add_user_to_room(123, name, sink_task.pid)
+
+    send(sink_task.pid, nil)
+    Task.await(sink_task)
+    room = Room.get_room(name)
+    assert not MapSet.member?(room.members, 123)
+    assert Room.list_rooms() == [{name, 0}]
+  end
+
   describe "send_message" do
     test "can send message", ctx do
       name = "room name"

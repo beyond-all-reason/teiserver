@@ -74,8 +74,8 @@ defmodule Teiserver.Room do
     end
   end
 
-  def add_user_to_room(userid, room_name) do
-    case Chat.RoomServer.join_room(room_name, userid) do
+  def add_user_to_room(userid, room_name, pid \\ self()) do
+    case Chat.RoomServer.join_room(room_name, userid, pid) do
       {:ok, :already_present} ->
         :ok
 
@@ -95,36 +95,7 @@ defmodule Teiserver.Room do
   end
 
   def remove_user_from_room(userid, room_name) do
-    Teiserver.cache_update(:rooms, room_name, fn room_state ->
-      new_state =
-        if Enum.member?(room_state.members, userid) do
-          PubSub.broadcast(
-            Teiserver.PubSub,
-            "room:#{room_name}",
-            {:remove_user_from_room, userid, room_name}
-          )
-
-          new_members = Enum.filter(room_state.members, fn m -> m != userid end)
-          Map.put(room_state, :members, new_members)
-        else
-          # No change takes place, they've already left the room
-          room_state
-        end
-
-      {:ok, new_state}
-    end)
-  end
-
-  @spec remove_user_from_any_room(integer() | nil) :: list()
-  def remove_user_from_any_room(nil), do: []
-
-  def remove_user_from_any_room(userid) do
-    list_rooms()
-    |> Enum.filter(fn r -> r && Enum.member?(r.members, userid) end)
-    |> Enum.map(fn r ->
-      remove_user_from_room(userid, r.name)
-      r.name
-    end)
+    Chat.RoomServer.leave_room(room_name, userid)
   end
 
   @spec clan_room_name(String.t()) :: String.t()

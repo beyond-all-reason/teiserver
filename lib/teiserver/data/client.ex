@@ -9,7 +9,7 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.{Room, CacheUser, Account, Telemetry, Clans, Coordinator}
+  alias Teiserver.{CacheUser, Account, Telemetry, Clans, Coordinator}
   alias Teiserver.Lobby
   alias Teiserver.Account.ClientLib
   # alias Teiserver.Helper.TimexHelper
@@ -240,18 +240,6 @@ defmodule Teiserver.Client do
     end
   end
 
-  # TODO: will fix that later
-  @spec leave_rooms(Integer.t()) :: List.t()
-  def leave_rooms(_userid) do
-    raise "not implemented"
-    # Room.list_rooms()
-    # |> Enum.each(fn room ->
-    #   if userid in room.members do
-    #     Room.remove_user_from_room(userid, room.name)
-    #   end
-    # end)
-  end
-
   @spec disconnect(T.userid(), nil | String.t()) :: nil | :ok | {:error, any}
   def disconnect(userid, reason \\ nil) do
     case get_client_by_id(userid) do
@@ -276,8 +264,6 @@ defmodule Teiserver.Client do
 
     Telemetry.log_simple_server_event(client.userid, "disconnect:#{reason}")
     Lobby.remove_user_from_any_lobby(client.userid)
-    Room.remove_user_from_any_room(client.userid)
-    leave_rooms(client.userid)
 
     # If they are part of a party, lets leave it
     Account.leave_party(client.party_id, client.userid)
