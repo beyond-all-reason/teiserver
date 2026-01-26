@@ -5,6 +5,8 @@ defmodule Teiserver.BitParse do
   The reason being [0,0,1,0] and [0,0,0,0,1,0] would both be represented
   the same way with an integer
   """
+
+  @spec parse_bits(String.t(), non_neg_integer()) :: nonempty_list(0 | 1)
   def parse_bits(string, bit_length) do
     int = String.to_integer(string)
 
