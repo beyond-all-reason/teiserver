@@ -135,6 +135,9 @@ defmodule Teiserver.TachyonBattle.Battle do
 
   @impl true
   def handle_cast({:update_event, ev}, state) do
+    if state.autohost_pid != nil,
+      do: Autohost.ack_update_event(state.autohost_pid, state.id, ev.time)
+
     case ev.update do
       :start ->
         Battle.start_tachyon_match(state.match_id, ev.time)
