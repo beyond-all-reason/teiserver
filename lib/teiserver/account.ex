@@ -7,7 +7,7 @@ defmodule Teiserver.Account do
   alias Phoenix.PubSub
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Account.{User, UserLib, TOTP, TOTPLib}
+  alias Teiserver.Account.{User, UserLib, TOTP, TOTPLib, LoginThrottleServer}
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-user-alt"
@@ -2250,6 +2250,9 @@ defmodule Teiserver.Account do
   @spec call_client(T.userid(), any) :: any | nil
   defdelegate call_client(userid, msg), to: ClientLib
 
+  @spec count_client() :: non_neg_integer()
+  defdelegate count_client(), to: ClientLib
+
   # Party stuff
   alias Teiserver.Account.PartyLib
 
@@ -2335,4 +2338,6 @@ defmodule Teiserver.Account do
     can_register?() &&
       not Teiserver.Config.get_site_config_cache("teiserver.Require Chobby registration")
   end
+
+  defdelegate reset_login_rate_limiter(rate), to: LoginThrottleServer, as: :reset_rate_limiter
 end

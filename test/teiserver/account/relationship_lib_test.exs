@@ -10,6 +10,9 @@ defmodule Teiserver.Account.RelationshipLibTest do
     user1 = AccountTestLib.user_fixture()
     user2 = AccountTestLib.user_fixture()
 
+    # ensure this limit doesn't come into play
+    Config.update_site_config("relationships.Maximum relationships per user", 1000)
+
     old_login = DateTime.add(Timex.now(), -32, :day)
 
     user3 =

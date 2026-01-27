@@ -5,187 +5,132 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   alias Teiserver.Config
   alias Teiserver.Account
   alias Teiserver.Account.LoginThrottleServer
-  alias Teiserver.Common.PubsubListener
 
   import Teiserver.TeiserverTestLib,
     only: [
       new_user: 0
     ]
 
-  @sleep_time 500
+  setup _ctx do
+    LoginThrottleServer.restart()
+    :ok = Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.ClientRegistry)
+    Supervisor.restart_child(Teiserver.Supervisor, Teiserver.ClientRegistry)
 
-  # For reasons unknown this test often results in the wrong number of people
-  # being released at various stages. I have no idea why (but it does work in prod)
-  @tag :needs_attention
-  test "multiple queues" do
-    pid = LoginThrottleServer.get_login_throttle_server_pid()
-    LoginThrottleServer.set_value(:releases_per_tick, 1)
-    # LoginThrottleServer.set_value(:set_tick_period, 60_000)
-    send(pid, :disable_tick_timer)
+    LoginThrottleServer.set_tick_period(:infinity)
+    # ensure the rate limiter doesn't interfere with any tests
+    LoginThrottleServer.reset_rate_limiter(1000, true)
+  end
 
-    Teiserver.TeiserverConfigs.teiserver_configs()
-    Config.update_site_config("system.User limit", 10)
+  test "can stop user from login" do
+    set_capacity(0)
+    user = new_user()
+    assert LoginThrottleServer.attempt_login(self(), user.id) == false
+    refute_receive {:login_accepted, _}, 5
+  end
 
-    throttle_listener = PubsubListener.new_listener(["teiserver_liveview_login_throttle"])
-
+  test "bots ignore limits" do
+    set_capacity(0)
     bot = new_user()
+    bot_id = bot.id
     Account.update_cache_user(bot.id, %{roles: ["Bot"]})
-    bot_listener = PubsubListener.new_listener([])
+    assert LoginThrottleServer.attempt_login(self(), bot_id) == true
+    assert_receive {:login_accepted, ^bot_id}, 5
+  end
 
-    moderator = new_user()
-    Account.update_cache_user(moderator.id, %{roles: ["Moderator"]})
-    moderator_listener = PubsubListener.new_listener([])
+  test "can immediately log in when there is capacity" do
+    set_capacity(1)
+    user = new_user()
+    assert LoginThrottleServer.attempt_login(self(), user.id) == true
+  end
 
-    contributor = new_user()
-    Account.update_cache_user(contributor.id, %{roles: ["Contributor"]})
-    contributor_listener = PubsubListener.new_listener([])
+  test "can login when capacity becomes available" do
+    set_capacity(0)
+    user = new_user()
+    assert LoginThrottleServer.attempt_login(self(), user.id) == false
+    assert LoginThrottleServer.get_queue_length() == 1
+    set_capacity(1)
+    LoginThrottleServer.tick()
+    assert_receive {:login_accepted, _}, 5
+  end
 
-    vip = new_user()
-    Account.update_cache_user(vip.id, %{roles: ["VIP"]})
-    vip_listener = PubsubListener.new_listener([])
+  test "works with many players" do
+    set_capacity(0)
 
-    standard = new_user()
-    Account.update_cache_user(standard.id, %{roles: ["Standard"]})
-    standard_listener = PubsubListener.new_listener([])
+    {user1, t1} = {new_user(), oneshot_pid()}
+    {user2, t2} = {new_user(), oneshot_pid()}
+    user3 = new_user()
 
-    assert PubsubListener.get(throttle_listener) == []
+    assert LoginThrottleServer.attempt_login(t1.pid, user1.id) == false
+    assert LoginThrottleServer.attempt_login(t2.pid, user2.id) == false
+    assert LoginThrottleServer.attempt_login(self(), user3.id) == false
+    assert LoginThrottleServer.get_queue_length() == 3
 
-    send(pid, %{
-      channel: "teiserver_telemetry",
-      event: :data,
-      data: %{
-        client: %{
-          total: 10
-        }
-      }
-    })
+    set_capacity(2)
+    LoginThrottleServer.tick()
 
-    send(pid, :tick)
-    :timer.sleep(@sleep_time)
+    assert_receive {:login_accepted, id1}, 5
+    assert_receive {:login_accepted, id2}, 5
+    # the messages are coming from tasks, so their order depends on the scheduler
+    assert MapSet.new([id1, id2]) == MapSet.new([user1.id, user2.id])
+    refute_receive {:login_accepted, _}, 5
+  end
 
-    # Bots should get in regardless of capacity, no messages for the listener
-    r = LoginThrottleServer.attempt_login(bot_listener, bot.id)
-    assert r == true
-    assert PubsubListener.get(bot_listener) == []
+  test "ignore players that have disconnected" do
+    set_capacity(0)
+    {user1, t1} = {new_user(), oneshot_pid()}
+    user2 = new_user()
 
-    # Moderators have to wait in the queue
-    r = LoginThrottleServer.attempt_login(moderator_listener, moderator.id)
-    assert r == false
-    assert PubsubListener.get(moderator_listener) == []
+    assert LoginThrottleServer.attempt_login(t1.pid, user1.id) == false
+    assert LoginThrottleServer.attempt_login(self(), user2.id) == false
+    assert LoginThrottleServer.get_queue_length() == 2
 
-    # Now do the same for the other users
-    r = LoginThrottleServer.attempt_login(contributor_listener, contributor.id)
-    assert r == false
-    assert PubsubListener.get(contributor_listener) == []
+    set_capacity(1)
+    send(t1.pid, nil)
+    Task.await(t1)
+    # now, t1 is dead
 
-    r = LoginThrottleServer.attempt_login(vip_listener, vip.id)
-    assert r == false
-    assert PubsubListener.get(vip_listener) == []
+    # members aren't cleaned up when DOWN is received
+    assert LoginThrottleServer.get_queue_length() == 2
 
-    r = LoginThrottleServer.attempt_login(standard_listener, standard.id)
-    assert r == false
-    assert PubsubListener.get(standard_listener) == []
+    # attempt to aleviate a potential race, where the DOWN message from the
+    # task reach the throttling server too late
+    :timer.sleep(5)
+    LoginThrottleServer.tick()
 
-    state = :sys.get_state(pid)
-    assert state.queues.moderator == [moderator.id]
-    assert state.queues.contributor == [contributor.id]
-    assert state.queues.vip == [vip.id]
-    assert state.queues.standard == [standard.id]
+    assert_receive {:login_accepted, id}, 5
+    assert user2.id == id
+  end
 
-    assert Enum.count(state.recent_logins) == 1
+  test "respect rate limiter" do
+    set_capacity(0)
+    LoginThrottleServer.reset_rate_limiter(1)
+    {user1, t1} = {new_user(), oneshot_pid()}
+    user2 = new_user()
 
-    # We let one through (the bot) even though we were at capacity
-    assert state.remaining_capacity == -1
+    assert LoginThrottleServer.attempt_login(t1.pid, user1.id) == false
+    assert LoginThrottleServer.attempt_login(self(), user2.id) == false
+    assert LoginThrottleServer.get_queue_length() == 2
 
-    # Now we alter the capacity and see what happens
-    send(pid, %{
-      channel: "teiserver_telemetry",
-      event: :data,
-      data: %{
-        client: %{
-          total: 9
-        }
-      }
-    })
+    set_capacity(2)
+    LoginThrottleServer.tick()
 
-    send(pid, :tick)
+    assert_receive {:login_accepted, id}, 5
+    assert id == user1.id
+    refute_receive {:login_accepted, _}, 5
+    assert LoginThrottleServer.get_queue_length() == 1
+  end
 
-    # Give it a chance to dequeue
-    :timer.sleep(@sleep_time)
+  defp set_capacity(n) do
+    Config.update_site_config("system.User limit", n)
+  end
 
-    assert PubsubListener.get(moderator_listener) == [{:login_accepted, moderator.id}]
-    assert PubsubListener.get(contributor_listener) == []
-    assert PubsubListener.get(vip_listener) == []
-    assert PubsubListener.get(standard_listener) == []
+  defp oneshot_pid() do
+    parent = self()
 
-    state = :sys.get_state(pid)
-    assert state.queues.moderator == []
-    assert state.queues.contributor == [contributor.id]
-    assert state.queues.vip == [vip.id]
-    assert state.queues.standard == [standard.id]
-
-    assert Enum.count(state.recent_logins) == 2
-
-    :timer.sleep(@sleep_time)
-
-    # Ensure no more updates in the meantime, should only happen when we tell it to tick
-    assert PubsubListener.get(moderator_listener) == []
-    assert PubsubListener.get(contributor_listener) == []
-    assert PubsubListener.get(vip_listener) == []
-    assert PubsubListener.get(standard_listener) == []
-
-    # Flush the throttle messages
-    PubsubListener.get(throttle_listener)
-
-    # Now approve the rest of them
-    send(pid, %{
-      channel: "teiserver_telemetry",
-      event: :data,
-      data: %{
-        client: %{
-          total: 4
-        }
-      }
-    })
-
-    state = :sys.get_state(pid)
-    assert state.remaining_capacity == 6
-
-    throttle_messages = PubsubListener.get(throttle_listener)
-
-    assert throttle_messages == [
-             %{
-               channel: "teiserver_liveview_login_throttle",
-               event: :updated_capacity,
-               remaining_capacity: 6
-             }
-           ]
-
-    # Dequeue the next more
-    send(pid, :tick)
-    :timer.sleep(@sleep_time)
-
-    assert PubsubListener.get(moderator_listener) == []
-    assert PubsubListener.get(contributor_listener) == [{:login_accepted, contributor.id}]
-    assert PubsubListener.get(vip_listener) == []
-    assert PubsubListener.get(standard_listener) == []
-
-    send(pid, :tick)
-
-    # Give it a chance to dequeue
-    :timer.sleep(@sleep_time)
-
-    assert PubsubListener.get(moderator_listener) == []
-    assert PubsubListener.get(contributor_listener) == [{:login_accepted, contributor.id}]
-    assert PubsubListener.get(vip_listener) == [{:login_accepted, vip.id}]
-    assert PubsubListener.get(standard_listener) == [{:login_accepted, standard.id}]
-
-    state = :sys.get_state(pid)
-    assert state.queues.moderator == []
-    assert state.queues.contributor == []
-    assert state.queues.vip == []
-    assert state.queues.standard == []
-
-    assert Enum.count(state.recent_logins) == 5
+    Task.async(fn ->
+      receive do
+        x -> send(parent, x)
+      end
+    end)
   end
 end

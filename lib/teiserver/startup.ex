@@ -41,8 +41,6 @@ defmodule Teiserver.Startup do
     Teiserver.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
     Teiserver.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
 
-    Teiserver.Account.LoginThrottleServer.startup()
-
     # Give everything else a chance to have started up
     spawn(fn ->
       :timer.sleep(1000)

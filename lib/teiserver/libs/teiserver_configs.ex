@@ -300,6 +300,17 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "system.Login rate",
+      section: "Login",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "How many user per minutes should be able to log in",
+      default: 200,
+      value_label: "",
+      update_callback: fn rate -> Teiserver.Account.reset_login_rate_limiter(rate) end
+    })
+
+    add_site_config_type(%{
       key: "system.Login message",
       section: "Login",
       type: "string",

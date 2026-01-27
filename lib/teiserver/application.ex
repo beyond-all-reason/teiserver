@@ -153,7 +153,7 @@ defmodule Teiserver.Application do
         {Teiserver.Game.AchievementServer, name: Teiserver.Game.AchievementServer},
 
         # System throttle
-        {Teiserver.Account.LoginThrottleServer, name: Teiserver.Account.LoginThrottleServer},
+        Teiserver.Account.LoginThrottleServer,
 
         # this must be before Endpoint. Endpoint takes care of ws connection upgrade
         # and makes use of the tachyon systems spawned under this module.
