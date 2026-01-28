@@ -3,7 +3,7 @@ defmodule Teiserver.Account.Code do
   use TeiserverWeb, :schema
 
   typed_schema "account_codes" do
-    field :value, :string
+    field :value, :string, redact: true
     # E.g. password reset
     field :purpose, :string
     field :metadata, :map
