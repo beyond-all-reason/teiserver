@@ -6,7 +6,7 @@ defmodule Teiserver.Account.TOTP do
 
   typed_schema "teiserver_account_user_totps" do
     belongs_to :user, Teiserver.Account.User, define_field: false, type: :id
-    field :secret, :binary
+    field :secret, :binary, redact: true
     field :last_used, :utc_datetime, default: nil
     field :wrong_otp, :integer, default: 0
 
