@@ -10,7 +10,7 @@ defmodule Teiserver.OAuth.Credential do
     belongs_to :application, OAuth.Application
     belongs_to :bot, Teiserver.Bot.Bot, primary_key: true
     field :client_id, :string
-    field :hashed_secret, :binary
+    field :hashed_secret, :binary, redact: true
 
     timestamps(type: :utc_datetime)
   end

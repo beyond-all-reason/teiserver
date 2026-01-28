@@ -3,7 +3,7 @@ defmodule Teiserver.Account.UserToken do
   use TeiserverWeb, :schema
 
   typed_schema "account_user_tokens" do
-    field :value, :string
+    field :value, :string, redact: true
     field :user_agent, :string
     field :ip, :string
 

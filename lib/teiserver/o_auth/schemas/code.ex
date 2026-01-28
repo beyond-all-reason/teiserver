@@ -5,13 +5,13 @@ defmodule Teiserver.OAuth.Code do
   alias Teiserver.OAuth
 
   typed_schema "oauth_codes" do
-    field :value, :string
+    field :value, :string, redact: true
     belongs_to :owner, Teiserver.Account.User, primary_key: true
     belongs_to :application, OAuth.Application, primary_key: true
     field :scopes, {:array, :string}
     field :expires_at, :utc_datetime
     field :redirect_uri, :string
-    field :challenge, :string
+    field :challenge, :string, redact: true
     field :challenge_method, Ecto.Enum, values: [:plain, :S256]
 
     timestamps()

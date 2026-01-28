@@ -5,7 +5,7 @@ defmodule Teiserver.OAuth.Token do
   alias Teiserver.OAuth
 
   typed_schema "oauth_tokens" do
-    field :value, :string
+    field :value, :string, redact: true
     belongs_to :owner, Teiserver.Account.User
     belongs_to :application, OAuth.Application, primary_key: true
     field :scopes, {:array, :string}

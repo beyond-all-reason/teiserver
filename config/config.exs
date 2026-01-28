@@ -188,6 +188,23 @@ config :logger, :info_log,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Filter sensitive parameters from logs
+# See: https://hexdocs.pm/phoenix/Phoenix.Logger.html#module-parameter-filtering
+config :phoenix, :filter_parameters, [
+  "password",
+  "secret",
+  "token",
+  "api_key",
+  "cookie",
+  "authorization",
+  "bearer",
+  "credential",
+  "session",
+  "access_token",
+  "refresh_token",
+  "password_hash"
+]
+
 # This secret key is overwritten in prod.secret.exs
 config :teiserver, Teiserver.Account.Guardian,
   issuer: "teiserver",
