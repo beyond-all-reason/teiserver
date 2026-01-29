@@ -24,7 +24,7 @@ Check the [development](/documents/guides/development.md) guide for help with ge
 
 ### Contributing
 
-All contributors are welcome; if you spot an issue or bug open an issue in this repo or visit *#teiserver-spads* channel on [BAR Discord](https://discord.gg/beyond-all-reason). Pull requests are also welcome; even if it's just a spelling mistake.
+All contributors are welcome; if you spot an issue or bug open an issue in this repo or visit *#teiserver-spads* channel on [BAR Discord](https://discord.gg/beyond-all-reason). Pull requests are also welcome; even if it's just a spelling mistake, however if using AI tools please follow our [AI Usage Policy](/AI_POLICY.md).
 
 
 #### Special thanks
