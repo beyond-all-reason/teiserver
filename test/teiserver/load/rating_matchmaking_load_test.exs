@@ -73,12 +73,13 @@ defmodule Teiserver.Load.RatingMatchmakingLoadTest do
       player_pool =
         1..20
         |> Enum.map(fn i ->
-          {i, %{
-            rating: 20.0 + :rand.uniform() * 15,
-            uncertainty: 2.0 + :rand.uniform() * 3,
-            rank: :rand.uniform(10),
-            name: "Player_#{i}"
-          }}
+          {i,
+           %{
+             rating: 20.0 + :rand.uniform() * 15,
+             uncertainty: 2.0 + :rand.uniform() * 3,
+             rank: :rand.uniform(10),
+             name: "Player_#{i}"
+           }}
         end)
         |> Map.new()
 
@@ -139,12 +140,13 @@ defmodule Teiserver.Load.RatingMatchmakingLoadTest do
       player_pool =
         1..50
         |> Enum.map(fn i ->
-          {i, %{
-            rating: 15.0 + :rand.uniform() * 20,
-            uncertainty: 2.0 + :rand.uniform() * 4,
-            rank: :rand.uniform(15),
-            name: "LargePlayer_#{i}"
-          }}
+          {i,
+           %{
+             rating: 15.0 + :rand.uniform() * 20,
+             uncertainty: 2.0 + :rand.uniform() * 4,
+             rank: :rand.uniform(15),
+             name: "LargePlayer_#{i}"
+           }}
         end)
         |> Map.new()
 

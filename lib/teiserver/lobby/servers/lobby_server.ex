@@ -142,10 +142,17 @@ defmodule Teiserver.Battle.LobbyServer do
         )
 
         {:noreply,
-         %{state | state: :lobby, match_uuid: uuid, match_id: new_match.id, modoptions: modoptions}}
+         %{
+           state
+           | state: :lobby,
+             match_uuid: uuid,
+             match_id: new_match.id,
+             modoptions: modoptions
+         }}
 
       {:error, reason} ->
         Logger.error("Error creating match for lobby #{state.id}: #{inspect(reason)}")
+
         # If we can't create a match, we can't switch back to lobby state properly with a new match ID.
         # However, keeping the process alive is better than crashing.
         # We'll stay in the current state (presumably :in_progress) or switch to :lobby but without updating match info?
@@ -157,11 +164,11 @@ defmodule Teiserver.Battle.LobbyServer do
 
   def handle_cast({:add_user, userid, _script_password}, state) do
     new_members = [userid | state.member_list] |> Enum.uniq()
-    
+
     # Update cache
     client = Account.get_client_by_id(userid)
     new_cache = Map.put(state.client_cache, userid, client)
-    
+
     {:noreply, %{state | member_list: new_members, client_cache: new_cache}}
   end
 
@@ -522,14 +529,25 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   # Client updates
-  def handle_info(%{channel: "teiserver_lobby_updates", event: :client_updated, client: client}, state) do
+  def handle_info(
+        %{channel: "teiserver_lobby_updates", event: :client_updated, client: client},
+        state
+      ) do
     new_cache = Map.put(state.client_cache, client.userid, client)
     {:noreply, %{state | client_cache: new_cache}}
   end
 
   # Note: The client parameter here is actually a partial_client containing only changed fields
   # We must merge it into the existing cached client to avoid corrupting the cache
-  def handle_info(%{channel: "teiserver_lobby_updates", event: :updated_client_battlestatus, userid: userid, client: partial_client}, state) do
+  def handle_info(
+        %{
+          channel: "teiserver_lobby_updates",
+          event: :updated_client_battlestatus,
+          userid: userid,
+          client: partial_client
+        },
+        state
+      ) do
     new_cache =
       case Map.get(state.client_cache, userid) do
         nil ->

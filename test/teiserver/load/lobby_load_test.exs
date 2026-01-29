@@ -116,7 +116,8 @@ defmodule Teiserver.Load.LobbyLoadTest do
         |> Lobby.create_lobby()
         |> Lobby.add_lobby()
 
-      user_count = 14  # Leave room for host, stay under max_players
+      # Leave room for host, stay under max_players
+      user_count = 14
 
       # Create users that will join
       users =
@@ -158,6 +159,7 @@ defmodule Teiserver.Load.LobbyLoadTest do
       Enum.each(users, fn user ->
         Client.disconnect(user.id)
       end)
+
       Client.disconnect(host.id)
 
       assert successful >= user_count * 0.80,
@@ -282,7 +284,8 @@ defmodule Teiserver.Load.LobbyLoadTest do
         1..operation_count
         |> Enum.map(fn _ ->
           Task.async(fn ->
-            operation = Enum.random([:list, :list, :get])  # More reads than writes
+            # More reads than writes
+            operation = Enum.random([:list, :list, :get])
 
             case operation do
               :list ->
@@ -291,6 +294,7 @@ defmodule Teiserver.Load.LobbyLoadTest do
 
               :get ->
                 lobby = Enum.random(initial_lobbies)
+
                 if lobby do
                   result = Lobby.get_lobby(lobby.id)
                   if result, do: :ok, else: :error
