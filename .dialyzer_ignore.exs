@@ -79,7 +79,6 @@
   {"lib/teiserver/lobby/libs/lobby_lib.ex", :unknown_type},
   {"lib/teiserver/lobby/libs/lobby_lib.ex", :no_return},
   {"lib/teiserver/lobby/servers/lobby_index_throttle.ex", :guard_fail},
-  {"lib/teiserver/lobby/servers/lobby_server.ex", :no_return},
   {"lib/teiserver/logging.ex", :no_return},
   {"lib/teiserver/logging.ex", :call},
   {"lib/teiserver/logging/lib/logging_test_lib.ex", :unknown_type},
