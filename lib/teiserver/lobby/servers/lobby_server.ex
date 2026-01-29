@@ -91,11 +91,17 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, Enum.count(player_list), new_state}
   end
 
+  # Catch-all to prevent crashes from unexpected calls
+  def handle_call(msg, _from, state) do
+    Logger.debug("LobbyServer##{state.id} received unexpected call: #{inspect(msg)}")
+    {:reply, {:error, :unknown_call}, state}
+  end
+
   @impl true
   def handle_cast(:start_match, state) do
     player_list =
-      state.member_list
-      |> Account.list_clients()
+      state.client_cache
+      |> Enum.map(fn {_id, client} -> client end)
       |> Enum.reject(&(&1 == nil))
       |> Enum.filter(fn client -> client.player == true and client.lobby_id == state.id end)
 
@@ -112,40 +118,57 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_cast(:stop_match, state) do
-    {:ok, new_match} = Battle.create_match_from_founder_id(state.founder_id)
-    uuid = Battle.generate_lobby_uuid([state.id])
+    case Battle.create_match_from_founder_id(state.founder_id) do
+      {:ok, new_match} ->
+        uuid = Battle.generate_lobby_uuid([state.id])
 
-    options = %{
-      "server/match/uuid" => new_match.server_uuid,
-      "game/server_match_id" => new_match.id
-    }
+        options = %{
+          "server/match/uuid" => new_match.server_uuid,
+          "game/server_match_id" => new_match.id
+        }
 
-    modoptions = state.modoptions |> Map.merge(options)
+        modoptions = state.modoptions |> Map.merge(options)
 
-    # Need to broadcast the new uuid
-    PubSub.broadcast(
-      Teiserver.PubSub,
-      "teiserver_lobby_updates:#{state.id}",
-      %{
-        channel: "teiserver_lobby_updates",
-        event: :set_modoptions,
-        lobby_id: state.id,
-        options: options
-      }
-    )
+        # Need to broadcast the new uuid
+        PubSub.broadcast(
+          Teiserver.PubSub,
+          "teiserver_lobby_updates:#{state.id}",
+          %{
+            channel: "teiserver_lobby_updates",
+            event: :set_modoptions,
+            lobby_id: state.id,
+            options: options
+          }
+        )
 
-    {:noreply,
-     %{state | state: :lobby, match_uuid: uuid, match_id: new_match.id, modoptions: modoptions}}
+        {:noreply,
+         %{state | state: :lobby, match_uuid: uuid, match_id: new_match.id, modoptions: modoptions}}
+
+      {:error, reason} ->
+        Logger.error("Error creating match for lobby #{state.id}: #{inspect(reason)}")
+        # If we can't create a match, we can't switch back to lobby state properly with a new match ID.
+        # However, keeping the process alive is better than crashing.
+        # We'll stay in the current state (presumably :in_progress) or switch to :lobby but without updating match info?
+        # Switching to :lobby without new match info might be confusing but safer.
+        # Let's keep it simple: log and don't update state for now, effectively forcing them to try again or re-lobby.
+        {:noreply, state}
+    end
   end
 
   def handle_cast({:add_user, userid, _script_password}, state) do
     new_members = [userid | state.member_list] |> Enum.uniq()
-    {:noreply, %{state | member_list: new_members}}
+    
+    # Update cache
+    client = Account.get_client_by_id(userid)
+    new_cache = Map.put(state.client_cache, userid, client)
+    
+    {:noreply, %{state | member_list: new_members, client_cache: new_cache}}
   end
 
   def handle_cast({:remove_user, userid}, state) do
     new_members = List.delete(state.member_list, userid)
-    {:noreply, %{state | member_list: new_members}}
+    new_cache = Map.delete(state.client_cache, userid)
+    {:noreply, %{state | member_list: new_members, client_cache: new_cache}}
   end
 
   def handle_cast({:set_password, nil}, state) do
@@ -451,6 +474,12 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state | bots: new_bots}}
   end
 
+  # Catch-all to prevent crashes from unexpected casts
+  def handle_cast(msg, state) do
+    Logger.debug("LobbyServer##{state.id} received unexpected cast: #{inspect(msg)}")
+    {:noreply, state}
+  end
+
   @impl true
   def handle_info(:tick, state) do
     state = check_lobby_values(state)
@@ -492,6 +521,33 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, new_state}
   end
 
+  # Client updates
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :client_updated, client: client}, state) do
+    new_cache = Map.put(state.client_cache, client.userid, client)
+    {:noreply, %{state | client_cache: new_cache}}
+  end
+
+  # Note: The client parameter here is actually a partial_client containing only changed fields
+  # We must merge it into the existing cached client to avoid corrupting the cache
+  def handle_info(%{channel: "teiserver_lobby_updates", event: :updated_client_battlestatus, userid: userid, client: partial_client}, state) do
+    new_cache =
+      case Map.get(state.client_cache, userid) do
+        nil ->
+          # No existing client in cache, fetch fresh copy
+          case Account.get_client_by_id(userid) do
+            nil -> state.client_cache
+            full_client -> Map.put(state.client_cache, userid, full_client)
+          end
+
+        existing_client ->
+          # Merge partial update into existing client
+          updated_client = Map.merge(existing_client, partial_client)
+          Map.put(state.client_cache, userid, updated_client)
+      end
+
+    {:noreply, %{state | client_cache: new_cache}}
+  end
+
   def handle_info(%{channel: "teiserver_server", event: "stop"}, state) do
     Battle.say(
       state.coordinator_id,
@@ -506,6 +562,12 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, state}
   end
 
+  # Catch-all to prevent crashes from unexpected messages
+  def handle_info(msg, state) do
+    Logger.debug("LobbyServer##{state.id} received unexpected message: #{inspect(msg)}")
+    {:noreply, state}
+  end
+
   # Internal
   @spec get_player_list(map()) :: {list(), map()}
   defp get_player_list(%{state: :lobby} = state) do
@@ -513,8 +575,8 @@ defmodule Teiserver.Battle.LobbyServer do
 
     if cache_age > @player_list_cache_age_max do
       player_list =
-        state.member_list
-        |> Account.list_clients()
+        state.client_cache
+        |> Enum.map(fn {_id, client} -> client end)
         |> Enum.reject(&(&1 == nil))
         |> Enum.filter(fn client -> client.player == true and client.lobby_id == state.id end)
 
@@ -645,7 +707,7 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   @impl true
-  @spec init(map()) :: {:ok, map()}
+  @spec init(map()) :: {:ok, map()} | {:stop, any()}
   def init(%{lobby: %{id: id}} = data) do
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
@@ -660,34 +722,40 @@ defmodule Teiserver.Battle.LobbyServer do
 
     :timer.send_interval(2_000, :tick)
 
-    {:ok, match} = Battle.create_match_from_founder_id(data.lobby.founder_id)
-    match_uuid = Battle.generate_lobby_uuid([match.id])
+    case Battle.create_match_from_founder_id(data.lobby.founder_id) do
+      {:ok, match} ->
+        match_uuid = Battle.generate_lobby_uuid([match.id])
+        server_uuid = ExULID.ULID.generate()
 
-    server_uuid = ExULID.ULID.generate()
+        options = %{
+          "game/modoptions/ranked_game" => "1",
+          "server/match/uuid" => match.server_uuid,
+          "game/server_match_id" => match.id
+        }
 
-    options = %{
-      "game/modoptions/ranked_game" => "1",
-      "server/match/uuid" => match.server_uuid,
-      "game/server_match_id" => match.id
-    }
+        {:ok,
+         %{
+           id: id,
+           lobby: data.lobby,
+           founder_id: data.lobby.founder_id,
+           coordinator_id: Coordinator.get_coordinator_userid(),
+           modoptions: options,
+           server_uuid: server_uuid,
+           match_uuid: match_uuid,
+           match_id: match.id,
+           queue_id: nil,
+           bots: %{},
+           member_list: [],
+           client_cache: %{},
+           player_list: [],
+           player_list_last_updated: 0,
+           balance_mode: :party,
+           state: :lobby
+         }}
 
-    {:ok,
-     %{
-       id: id,
-       lobby: data.lobby,
-       founder_id: data.lobby.founder_id,
-       coordinator_id: Coordinator.get_coordinator_userid(),
-       modoptions: options,
-       server_uuid: server_uuid,
-       match_uuid: match_uuid,
-       match_id: match.id,
-       queue_id: nil,
-       bots: %{},
-       member_list: [],
-       player_list: [],
-       player_list_last_updated: 0,
-       balance_mode: :party,
-       state: :lobby
-     }}
+      {:error, reason} ->
+        Logger.error("LobbyServer##{id} failed to create match: #{inspect(reason)}")
+        {:stop, {:match_creation_failed, reason}}
+    end
   end
 end

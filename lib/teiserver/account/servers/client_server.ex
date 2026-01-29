@@ -81,6 +81,12 @@ defmodule Teiserver.Account.ClientServer do
     {:reply, :ok, %{state | client: new_client}}
   end
 
+  # Catch-all to prevent crashes from unexpected calls
+  def handle_call(msg, _from, state) do
+    Logger.debug("ClientServer##{state.userid} received unexpected call: #{inspect(msg)}")
+    {:reply, {:error, :unknown_call}, state}
+  end
+
   @impl true
   def handle_cast({:update_values, partial_client}, state) do
     new_client = Map.merge(state.client, partial_client)
@@ -176,6 +182,20 @@ defmodule Teiserver.Account.ClientServer do
       }
     )
 
+    if new_client.lobby_id do
+      PubSub.broadcast(
+        Teiserver.PubSub,
+        "teiserver_lobby_updates:#{new_client.lobby_id}",
+        %{
+          channel: "teiserver_lobby_updates",
+          event: :client_updated,
+          lobby_id: new_client.lobby_id,
+          userid: state.userid,
+          client: new_client
+        }
+      )
+    end
+
     {:noreply, %{state | client: new_client}}
   end
 
@@ -201,6 +221,12 @@ defmodule Teiserver.Account.ClientServer do
     {:noreply, %{state | client: new_client}}
   end
 
+  # Catch-all to prevent crashes from unexpected casts
+  def handle_cast(msg, state) do
+    Logger.debug("ClientServer##{state.userid} received unexpected cast: #{inspect(msg)}")
+    {:noreply, state}
+  end
+
   @impl true
   def handle_info(:heartbeat, %{client: client_state} = state) do
     cond do
@@ -214,6 +240,12 @@ defmodule Teiserver.Account.ClientServer do
         :ok
     end
 
+    {:noreply, state}
+  end
+
+  # Catch-all to prevent crashes from unexpected messages
+  def handle_info(msg, state) do
+    Logger.debug("ClientServer##{state.userid} received unexpected message: #{inspect(msg)}")
     {:noreply, state}
   end
 
