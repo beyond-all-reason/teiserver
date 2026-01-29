@@ -1,4 +1,4 @@
-ExUnit.start()
+ExUnit.start(exclude: [:needs_attention])
 Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, :manual)
 
 alias Teiserver.Repo

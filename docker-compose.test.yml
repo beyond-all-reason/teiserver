@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: teiserver
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: teiserver_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U teiserver -d teiserver_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    image: teiserver:test
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MIX_ENV: test
+      TEI_DB_HOSTNAME: db
+      TEI_DB_USERNAME: teiserver
+      TEI_DB_PASSWORD: password
+      TEI_DB_NAME: teiserver_test
+      SECRET_KEY_BASE: "Hu4hmU25X2J8gL0G4x6tq7O9z3n8c5v1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"
+    volumes:
+      - .:/build
+      - /build/_build
+      - /build/deps
+    working_dir: /build
+    command: ["mix", "test"]
