@@ -39,6 +39,31 @@ defmodule TeiserverWeb.Microblog.RssControllerTest do
     end
   end
 
+  describe "XML escaping" do
+    setup do
+      tag = tag_fixture(name: "Test&Tag")
+
+      post =
+        post_fixture(
+          title: "Q&A Session <test>",
+          contents: "Some content with & and < symbols"
+        )
+
+      _post_tag = post_tag_fixture(post_id: post.id, tag_id: tag.id)
+      %{special_post: post, tag: tag}
+    end
+
+    test "special chars escaped", %{conn: conn} do
+      conn = get(conn, ~p"/microblog/rss")
+      resp = response(conn, 200)
+      assert resp =~ "Q&amp;A Session"
+      assert resp =~ "&lt;test&gt;"
+      # Verify the tags are escaped too
+      assert resp =~ "Test&amp;Tag"
+      refute resp =~ "<title>Q&A"
+    end
+  end
+
   describe "Auth" do
     setup [:filler_posts, :auth_setup]
 
