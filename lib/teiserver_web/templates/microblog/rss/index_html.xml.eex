@@ -16,16 +16,16 @@
         {:safe, contents} = post.contents |> MDEx.to_html! |> raw
       %>
       <item>
-        <title><%= post.title %></title>
-        <author><%= post.poster.name %></author>
-        <posted_to><%= if post.discord_channel, do: post.discord_channel.name, else: "none" %></posted_to>
+        <title><%= post.title |> html_escape |> safe_to_string %></title>
+        <author><%= post.poster.name |> html_escape |> safe_to_string %></author>
+        <posted_to><%= (if post.discord_channel, do: post.discord_channel.name, else: "none") |> html_escape |> safe_to_string %></posted_to>
         <link><%= ~p"/microblog/show/#{post.id}" %></link>
         <id><%= post.id %></id>
         <guid><%= "#{post.id}/#{post.updated_at |> guid_date()}" %></guid>
         <last_updated><%= post.updated_at |> format_date %></last_updated>
         <description><%= "<![CDATA[#{post.summary |> html_escape |> safe_to_string}]]>" %></description>
         <contents><%= "<![CDATA[#{contents}]]>" %></contents>
-        <tags><%= post.tags |> Enum.map(fn t -> t.name end) |> Enum.join(", ") %></tags>
+        <tags><%= post.tags |> Enum.map(fn t -> t.name end) |> Enum.join(", ") |> html_escape |> safe_to_string %></tags>
         <pubDate><%= post.inserted_at |> format_date %></pubDate>
       </item>
     <% end %>
