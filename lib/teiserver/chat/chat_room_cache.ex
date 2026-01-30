@@ -66,8 +66,11 @@ defmodule Teiserver.Room do
   def get_or_make_room(name, author_id, clan_id \\ nil) do
     case Chat.RoomServer.get_room(name) do
       nil ->
-        {:ok, _pid} = Chat.RoomSupervisor.start_room(name, author_id, "", "", clan_id)
-        get_or_make_room(name, author_id, clan_id)
+        case Chat.RoomSupervisor.start_room(name, author_id, "", "", clan_id) do
+          {:ok, _pid} -> get_or_make_room(name, author_id, clan_id)
+          {:ok, _pid, _info} -> get_or_make_room(name, author_id, clan_id)
+          {:error, {:already_started, _pid}} -> get_or_make_room(name, author_id, clan_id)
+        end
 
       room ->
         room
