@@ -336,7 +336,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
         "name" => "loadtestuser",
         "email" => "loadtestuser@example.com",
         "password" => "testpassword123",
-        "access_token_ttl" => 86400
+        "access_token_ttl" => 86_400
       }
 
       resp = conn |> post(create_user_path(), user_data) |> json_response(200)
@@ -348,7 +348,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
 
       now = DateTime.utc_now()
       diff_seconds = DateTime.diff(token.expires_at, now)
-      assert diff_seconds >= 82800 and diff_seconds <= 90000
+      assert diff_seconds >= 82_800 and diff_seconds <= 90_000
     end
 
     test "creates user with default TTL when access_token_ttl not provided", %{authed_conn: conn} do
