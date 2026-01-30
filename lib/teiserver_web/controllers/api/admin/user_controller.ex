@@ -29,21 +29,24 @@ defmodule TeiserverWeb.API.Admin.UserController do
 
   def create(conn, params) do
     params = Map.merge(@default_params, params)
+    token_opts = build_token_opts(params)
 
     with {:ok, user} <- Account.script_create_user(params),
          :ok <- update_user_stats(user.id, params),
          {:ok, app} <- get_generic_lobby_app(),
-         {:ok, token} <- create_user_token(user, app) do
+         {:ok, token} <- create_user_token(user, app, token_opts) do
       json(conn, build_user_response(user, token))
     else
       error -> handle_error(conn, error)
     end
   end
 
-  def refresh_token(conn, %{"email" => email}) do
+  def refresh_token(conn, %{"email" => email} = params) do
+    token_opts = build_token_opts(params)
+
     with {:ok, user} <- get_user_by_email(email),
          {:ok, app} <- get_generic_lobby_app(),
-         {:ok, token} <- create_user_token(user, app) do
+         {:ok, token} <- create_user_token(user, app, token_opts) do
       json(conn, build_user_response(user, token))
     else
       error -> handle_error(conn, error)
@@ -86,16 +89,30 @@ defmodule TeiserverWeb.API.Admin.UserController do
     end
   end
 
-  defp create_user_token(user, app) do
+  defp create_user_token(user, app, opts) do
     OAuth.create_token(
       user,
       %{
         id: app.id,
         scopes: app.scopes
       },
-      create_refresh: true,
-      scopes: app.scopes
+      [create_refresh: true, scopes: app.scopes] ++ opts
     )
+  end
+
+  defp build_token_opts(params) do
+    case Map.get(params, "access_token_ttl") do
+      nil ->
+        []
+
+      ttl_seconds when is_integer(ttl_seconds) and ttl_seconds > 0 ->
+        # Convert seconds to minutes for OAuth.create_token
+        ttl_minutes = div(ttl_seconds, 60)
+        [access_token_ttl: max(ttl_minutes, 1)]
+
+      _ ->
+        []
+    end
   end
 
   defp build_user_response(user, token) do

@@ -308,5 +308,135 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
     end
   end
 
+  describe "access_token_ttl parameter" do
+    setup [:setup_user, :setup_generic_lobby_app, :setup_authed_conn]
+
+    test "creates user with custom access_token_ttl", %{authed_conn: conn} do
+      user_data = %{
+        "name" => "ttluser",
+        "email" => "ttluser@example.com",
+        "password" => "testpassword123",
+        "access_token_ttl" => 3600
+      }
+
+      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
+
+      assert resp["credentials"]["access_token"]
+
+      token = Teiserver.OAuth.TokenQueries.get_token(resp["credentials"]["access_token"])
+      assert token != nil
+
+      now = DateTime.utc_now()
+      diff_seconds = DateTime.diff(token.expires_at, now)
+      assert diff_seconds >= 3300 and diff_seconds <= 3900
+    end
+
+    test "creates user with very long access_token_ttl for load testing", %{authed_conn: conn} do
+      user_data = %{
+        "name" => "loadtestuser",
+        "email" => "loadtestuser@example.com",
+        "password" => "testpassword123",
+        "access_token_ttl" => 86400
+      }
+
+      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
+
+      assert resp["credentials"]["access_token"]
+
+      token = Teiserver.OAuth.TokenQueries.get_token(resp["credentials"]["access_token"])
+      assert token != nil
+
+      now = DateTime.utc_now()
+      diff_seconds = DateTime.diff(token.expires_at, now)
+      assert diff_seconds >= 82800 and diff_seconds <= 90000
+    end
+
+    test "creates user with default TTL when access_token_ttl not provided", %{authed_conn: conn} do
+      user_data = %{
+        "name" => "defaultttluser",
+        "email" => "defaultttluser@example.com",
+        "password" => "testpassword123"
+      }
+
+      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
+
+      assert resp["credentials"]["access_token"]
+
+      token = Teiserver.OAuth.TokenQueries.get_token(resp["credentials"]["access_token"])
+      assert token != nil
+
+      now = DateTime.utc_now()
+      diff_seconds = DateTime.diff(token.expires_at, now)
+      assert diff_seconds >= 1500 and diff_seconds <= 2100
+    end
+
+    test "refresh_token with custom access_token_ttl", %{authed_conn: conn} do
+      user_data = %{
+        "name" => "refreshttluser",
+        "email" => "refreshttluser@example.com",
+        "password" => "testpassword123"
+      }
+
+      conn |> post(create_user_path(), user_data) |> json_response(200)
+
+      refresh_data = %{
+        "email" => "refreshttluser@example.com",
+        "access_token_ttl" => 7200
+      }
+
+      resp = conn |> post(refresh_token_path(), refresh_data) |> json_response(200)
+
+      assert resp["credentials"]["access_token"]
+
+      token = Teiserver.OAuth.TokenQueries.get_token(resp["credentials"]["access_token"])
+      assert token != nil
+
+      now = DateTime.utc_now()
+      diff_seconds = DateTime.diff(token.expires_at, now)
+      assert diff_seconds >= 6900 and diff_seconds <= 7500
+    end
+
+    test "ignores invalid access_token_ttl values", %{authed_conn: conn} do
+      # Test with negative value - should use default
+      user_data = %{
+        "name" => "invalidttluser",
+        "email" => "invalidttluser@example.com",
+        "password" => "testpassword123",
+        "access_token_ttl" => -100
+      }
+
+      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
+
+      assert resp["credentials"]["access_token"]
+
+      token = Teiserver.OAuth.TokenQueries.get_token(resp["credentials"]["access_token"])
+      assert token != nil
+
+      now = DateTime.utc_now()
+      diff_seconds = DateTime.diff(token.expires_at, now)
+      assert diff_seconds >= 1500 and diff_seconds <= 2100
+    end
+
+    test "ignores non-integer access_token_ttl values", %{authed_conn: conn} do
+      user_data = %{
+        "name" => "stringttluser",
+        "email" => "stringttluser@example.com",
+        "password" => "testpassword123",
+        "access_token_ttl" => "invalid"
+      }
+
+      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
+
+      assert resp["credentials"]["access_token"]
+
+      token = Teiserver.OAuth.TokenQueries.get_token(resp["credentials"]["access_token"])
+      assert token != nil
+
+      now = DateTime.utc_now()
+      diff_seconds = DateTime.diff(token.expires_at, now)
+      assert diff_seconds >= 1500 and diff_seconds <= 2100
+    end
+  end
+
   defp auth_conn(conn, token), do: put_req_header(conn, "authorization", "Bearer #{token.value}")
 end
