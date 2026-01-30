@@ -108,7 +108,9 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
       <.form for={@form} phx-target={@myself} phx-change="validate" phx-submit="save" id="post-form">
         <div class="row mb-4">
           <div class="col-md-12 col-lg-8 col-xl-6">
-            <label for="post_title" class="control-label">Title:</label>
+            <label for="post_title" class="control-label">
+              Title <span class="text-danger">*</span>:
+            </label>
             <.input field={@form[:title]} type="text" autofocus="autofocus" phx-debounce="100" />
             <br />
             <label for="poster_alias" class="control-label">Contributor Alias:</label>
@@ -140,7 +142,9 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
             ><%= @form[:summary].value %></textarea>
             <br />
 
-            <label for="post_contents" class="control-label">Contents:</label>
+            <label for="post_contents" class="control-label">
+              Contents <span class="text-danger">*</span>:
+            </label>
             <span class="float-end monospace">
               <span style="font-size: 1.2em; font-weight: bold;"># Heading</span>
               &nbsp;&nbsp; <em>__italic__</em>
@@ -159,7 +163,10 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
             ><%= @form[:contents].value %></textarea>
           </div>
           <div class="col">
-            <h4>Tags ({Enum.count(@selected_tags)})</h4>
+            <h4>
+              Tags ({Enum.count(@selected_tags)})
+              <span class="text-danger" style="font-size: 0.8em;">(Required)</span>
+            </h4>
             <%= for tag <- @tags do %>
               <%= if Enum.member?(@selected_tags, tag.id) do %>
                 <span
