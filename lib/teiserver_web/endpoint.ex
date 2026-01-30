@@ -11,8 +11,9 @@ defmodule TeiserverWeb.Endpoint do
 
   socket("/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]])
 
+  # log: :debug reduces verbosity to avoid logging sensitive connection params
   socket("/socket", TeiserverWeb.UserSocket,
-    websocket: true,
+    websocket: [log: :debug],
     longpoll: false
   )
 
