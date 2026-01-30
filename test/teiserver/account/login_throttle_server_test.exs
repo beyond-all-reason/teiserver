@@ -120,7 +120,10 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   end
 
   defp set_capacity(n) do
-    Config.update_site_config("system.User limit", n)
+    # this is a hack because there seems to be some flakyness with `count_client`
+    # from other tests
+    current_count = Teiserver.Account.count_client()
+    Config.update_site_config("system.User limit", current_count + n)
   end
 
   defp oneshot_pid() do
