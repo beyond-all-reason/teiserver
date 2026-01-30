@@ -1006,7 +1006,7 @@ defmodule Teiserver.Protocols.SpringIn do
           flag
         end)
         |> Map.new(fn t ->
-          [k, v] = String.split(t, "=")
+          [k, v] = String.split(t, "=", parts: 2)
           {String.downcase(k), v}
         end)
 
