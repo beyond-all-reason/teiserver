@@ -34,7 +34,6 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     bot_id = bot.id
     Account.update_cache_user(bot.id, %{roles: ["Bot"]})
     assert LoginThrottleServer.attempt_login(self(), bot_id) == true
-    assert_receive {:login_accepted, ^bot_id}, 5
   end
 
   test "can immediately log in when there is capacity" do

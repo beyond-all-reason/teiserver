@@ -72,7 +72,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @spec set_tick_period(non_neg_integer() | :infinity) :: :ok
   def set_tick_period(new_interval) do
     GenServer.cast(__MODULE__, {:set_tick_period, new_interval})
-    # send_login_throttle_server({:set_tick_period, new_interval})
   end
 
   @doc """
@@ -104,7 +103,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     new_state =
       if can_login? do
-        send(pid, {:login_accepted, userid})
         state
       else
         add_user_to_queue(state, pid, userid)
