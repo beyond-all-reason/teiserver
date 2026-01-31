@@ -7,12 +7,14 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
   @impl true
   def mount(params, _ession, socket) do
     game_types = Battle.MatchLib.list_rated_game_types()
+    active_season = MatchRatingLib.active_season()
+    seasons = Enum.to_list(1..active_season)
 
     user_ratings =
       Account.list_ratings(
         search: [
           user_id: socket.assigns.current_user.id,
-          season: MatchRatingLib.active_season()
+          season: active_season
         ],
         preload: [:rating_type]
       )
@@ -26,6 +28,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
       |> assign(:view_colour, Battle.MatchLib.colours())
       |> assign(:game_types, game_types)
       |> assign(:user_ratings, user_ratings)
+      |> assign(:seasons, seasons)
       |> assign(:rating_type, Map.get(params, "rating_type", "Large Team"))
       |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
       |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
@@ -115,13 +118,19 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     socket
   end
 
-  defp run_match_query(_filters, rating_type, user, page, limit) do
+  defp run_match_query(filters, rating_type, user, page, limit) do
     filter_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type] || 1
+
+    season =
+      case Integer.parse(filters["season"]) do
+        {n, ""} -> n
+        :error -> MatchRatingLib.active_season()
+      end
 
     search_params = [
       user_id: user.id,
       rating_type_id: filter_type_id,
-      season: MatchRatingLib.active_season()
+      season: season
     ]
 
     total_count = Game.count_rating_logs(search: search_params)
@@ -162,7 +171,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     |> assign(:filters, %{
       "game-type" => "Any type",
       "opponent" => "",
-      "ally" => ""
+      "ally" => "",
+      "season" => Integer.to_string(MatchRatingLib.active_season())
     })
   end
 
