@@ -215,7 +215,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   defp get_capacity() do
     total_limit = Config.get_site_config_cache("system.User limit")
-    count = Account.count_client()
+    count = Account.count_non_bot_clients()
     total_limit - count
   end
 end
