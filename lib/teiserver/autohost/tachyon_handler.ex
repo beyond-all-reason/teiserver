@@ -172,8 +172,8 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:stop, :normal, 1000, [{:text, resp}], state}
   end
 
-  def handle_command("autohost/update", "event", _msg_id, msg, state) do
-    parsed = parse_update_event(msg["data"])
+  def handle_command("autohost/update", "event", msg_id, msg, state) do
+    parsed = parse_update_event(msg_id, msg["data"])
     Logger.debug("parsed message #{inspect(parsed)}")
 
     case parsed do
@@ -279,6 +279,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
                data: String.t()
              }}
   @type update_event :: %{
+          message_id: Schema.message_id(),
           battle_id: TachyonBattle.id(),
           time: DateTime.t(),
           update: update_event_data()
@@ -288,8 +289,9 @@ defmodule Teiserver.Autohost.TachyonHandler do
   # something more idiomatic. The json schema handle the actual validation so
   # when this function is called, the structure is known
   @doc false
-  @spec parse_update_event(map()) :: {:ok, update_event()} | {:error, reason :: term()}
-  def parse_update_event(data) do
+  @spec parse_update_event(Schema.message_id(), map()) ::
+          {:ok, update_event()} | {:error, reason :: term()}
+  def parse_update_event(msg_id, data) do
     update = data["update"]
 
     user_id =
@@ -300,10 +302,12 @@ defmodule Teiserver.Autohost.TachyonHandler do
 
     with {:ok, time} <- DateTime.from_unix(data["time"], :microsecond),
          {:ok, user_id} <- user_id do
+      base = %{message_id: msg_id, battle_id: data["battleId"], time: time}
+
       case update["type"] do
         "player_joined" ->
           update = {:player_joined, %{user_id: user_id, player_number: update["playerNumber"]}}
-          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+          {:ok, Map.put(base, :update, update)}
 
         "player_left" ->
           reason =
@@ -314,7 +318,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
             end
 
           update = {:player_left, %{user_id: user_id, reason: reason}}
-          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+          {:ok, Map.put(base, :update, update)}
 
         "player_chat" ->
           if update["destination"] == "player" do
@@ -324,7 +328,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
                   {:player_chat_dm,
                    %{message: update["message"], user_id: user_id, to_user_id: id}}
 
-                {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+                {:ok, Map.put(base, :update, update)}
 
               err ->
                 err
@@ -341,36 +345,36 @@ defmodule Teiserver.Autohost.TachyonHandler do
               {:player_chat_broadcast,
                %{destination: dest, message: update["message"], user_id: user_id}}
 
-            {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+            {:ok, Map.put(base, :update, update)}
           end
 
         "player_defeated" ->
           update = {:player_defeated, %{user_id: user_id}}
-          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+          {:ok, Map.put(base, :update, update)}
 
         "start" ->
-          {:ok, %{battle_id: data["battleId"], time: time, update: :start}}
+          {:ok, Map.put(base, :update, :start)}
 
         "finished" ->
           update =
             {:finished, %{user_id: user_id, winning_ally_teams: update["winningAllyTeams"]}}
 
-          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+          {:ok, Map.put(base, :update, update)}
 
         "engine_message" ->
           update = {:engine_message, %{message: update["message"]}}
-          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+          {:ok, Map.put(base, :update, update)}
 
         "engine_warning" ->
           {:engine_warning, %{message: update["message"]}}
-          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+          {:ok, Map.put(base, :update, update)}
 
         "engine_crash" ->
           {:engine_warning, %{details: Map.get(update, "details")}}
-          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+          {:ok, Map.put(base, :update, update)}
 
         "engine_quit" ->
-          {:ok, %{battle_id: data["battleId"], time: time, update: :engine_quit}}
+          {:ok, Map.put(base, :update, :engine_quit)}
 
         "luamsg" ->
           script =
@@ -389,7 +393,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
             end
 
           {:luamsg, %{user_id: user_id, script: script, ui_mode: ui_mode, data: update["data"]}}
-          {:ok, %{battle_id: data["battleId"], time: time, update: update}}
+          {:ok, Map.put(base, :update, update)}
       end
     end
   end

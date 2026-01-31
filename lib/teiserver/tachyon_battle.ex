@@ -26,7 +26,7 @@ defmodule Teiserver.TachyonBattle do
   def start_battle(autohost_id, start_script, is_matchmaking) do
     with {:ok, match} <- Battle.create_match_from_start_script(start_script, is_matchmaking),
          {:ok, battle_id, pid} <- start_battle_process(autohost_id, match.id, start_script) do
-      case Teiserver.Autohost.start_battle(autohost_id, battle_id, start_script) do
+      case Teiserver.Autohost.start_battle(autohost_id, battle_id, pid, start_script) do
         {:ok, data} -> {:ok, {battle_id, pid}, data}
         x -> x
       end

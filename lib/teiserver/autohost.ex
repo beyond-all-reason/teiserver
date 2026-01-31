@@ -89,9 +89,9 @@ defmodule Teiserver.Autohost do
     if autohost_val == nil, do: nil, else: autohost_val[:id]
   end
 
-  @spec start_battle(Bot.id(), Teiserver.TachyonBattle.id(), start_script()) ::
+  @spec start_battle(Bot.id(), Teiserver.TachyonBattle.id(), pid(), start_script()) ::
           {:ok, start_response()} | {:error, term()}
-  defdelegate start_battle(bot_id, battle_id, start_script),
+  defdelegate start_battle(bot_id, battle_id, battle_pid, start_script),
     to: Session
 
   @spec send_message(Bot.id(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
@@ -101,4 +101,7 @@ defmodule Teiserver.Autohost do
   @spec kill_battle(pid(), TachyonBattle.id()) :: :ok
   defdelegate kill_battle(autohost, battle_id),
     to: Teiserver.Autohost.Session
+
+  @spec ack_update_event(pid(), TachyonBattle.id(), DateTime.t()) :: :ok
+  defdelegate ack_update_event(session_pid, battle_id, timestamp), to: Teiserver.Autohost.Session
 end

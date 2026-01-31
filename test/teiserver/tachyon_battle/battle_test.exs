@@ -31,6 +31,8 @@ defmodule Teiserver.TachyonBattle.BattleTest do
           Autohost.Session.child_spec({%{id: autohost_id}, self()})
         )
 
+      Autohost.Session.update_capacity(autohost_sess_pid, 10, 0)
+
       assert_receive {:call_client, "autohost/subscribeUpdates", _, ref}
       send(ref, {ref, %{"status" => "success"}})
 
@@ -44,9 +46,11 @@ defmodule Teiserver.TachyonBattle.BattleTest do
           start_script: start_script
         })
 
+      pid = self()
+
       start_task =
         Task.async(fn ->
-          Autohost.start_battle(autohost_id, battle_id, start_script)
+          Autohost.start_battle(autohost_id, battle_id, pid, start_script)
         end)
 
       assert_receive {:start_battle, ^battle_id, _start_script}

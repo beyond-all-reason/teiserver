@@ -11,6 +11,7 @@ defmodule Teiserver.Autohost.Session do
   alias Teiserver.Autohost
   alias Teiserver.Autohost.{TachyonHandler, SessionRegistry}
   alias Teiserver.TachyonBattle
+  alias Teiserver.Helpers.MonitorCollection, as: MC
 
   require Logger
 
@@ -19,12 +20,16 @@ defmodule Teiserver.Autohost.Session do
   @typep battle_data :: %{
            start_script: Autohost.start_script(),
            ips: [String.t()],
-           port: non_neg_integer()
+           port: non_neg_integer(),
+           # it is guaranteed that the event timestamp is unique per battle
+           pending_acks: :queue.queue(time: DateTime.t()),
+           last_acked_ts: DateTime.t() | nil
          }
 
   @typep data :: %{
            autohost: Bot.t(),
            conn_pid: pid(),
+           monitors: MC.t(),
            max_battles: non_neg_integer(),
            current_battles: non_neg_integer(),
            pending_battles: %{TachyonBattle.id() => {GenServer.from(), Autohost.start_script()}},
@@ -32,8 +37,7 @@ defmodule Teiserver.Autohost.Session do
            pending_replies: %{reference() => GenServer.from()}
          }
 
-  # irrelevant for now
-  @typep state :: :handshaking
+  @typep state :: :handshaking | :connected
 
   def child_spec({autohost, _conn_pid} = args) do
     %{
@@ -53,12 +57,12 @@ defmodule Teiserver.Autohost.Session do
   @type start_response :: %{ips: [String.t()], port: integer()}
   # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: there should be some kind of retry here
-  @spec start_battle(Bot.id(), TachyonBattle.id(), Autohost.start_script()) ::
+  @spec start_battle(Bot.id(), TachyonBattle.id(), pid(), Autohost.start_script()) ::
           {:ok, start_response()} | {:error, term()}
-  def start_battle(autohost_id, battle_id, start_script) do
+  def start_battle(autohost_id, battle_id, battle_pid, start_script) do
     :gen_statem.call(
       via_tuple(autohost_id),
-      {:start_battle, battle_id, start_script},
+      {:start_battle, battle_id, battle_pid, start_script},
       @default_call_timeout
     )
   catch
@@ -109,6 +113,11 @@ defmodule Teiserver.Autohost.Session do
     send(session_pid, {:update_event, event})
   end
 
+  @spec ack_update_event(pid(), TachyonBattle.id(), DateTime.t()) :: :ok
+  def ack_update_event(session_pid, battle_id, timestamp) do
+    send(session_pid, {:ack_update_event, battle_id, timestamp})
+  end
+
   @doc """
   Ask the autohost to terminate the given battle
   """
@@ -124,6 +133,13 @@ defmodule Teiserver.Autohost.Session do
     send(session_pid, {:reply_kill_battle, ref, resp})
   end
 
+  @doc """
+  should only be used for testing, get the `since` for subscribeUpdates
+  """
+  def inspect_subscription_start(autohost_id) do
+    :gen_statem.call(via_tuple(autohost_id), :inspect_subscription_start, @default_call_timeout)
+  end
+
   @impl :gen_statem
   @spec init({Bot.t(), pid()}) :: {:ok, state(), data(), term()}
   def init({autohost, conn_pid}) do
@@ -136,6 +152,7 @@ defmodule Teiserver.Autohost.Session do
     data = %{
       autohost: autohost,
       conn_pid: conn_pid,
+      monitors: MC.new(),
       max_battles: 0,
       current_battles: 0,
       pending_battles: %{},
@@ -148,18 +165,35 @@ defmodule Teiserver.Autohost.Session do
 
   @impl :gen_statem
   def handle_event(:internal, :subscribe_updates, _state, data) do
-    case TachyonHandler.subscribe_updates(data.conn_pid, DateTime.utc_now()) do
+    since = get_subscription_start(data)
+
+    case TachyonHandler.subscribe_updates(data.conn_pid, since) do
       :ok -> {:keep_state, data}
       {:error, reason} -> {:stop, {:error, reason}}
     end
   end
 
-  def handle_event({:call, from}, {:start_battle, _, _}, _state, data) when data.conn_pid == nil,
-    do: {:keep_state, data, [{:reply, from, {:error, :no_host_available}}]}
+  def handle_event({:call, _}, _, :handshaking, data) do
+    {:keep_state, data, [{:postpone, true}]}
+  end
 
-  def handle_event({:call, from}, {:start_battle, battle_id, start_script}, _state, data) do
+  def handle_event({:call, from}, {:start_battle, _, _, _}, _state, data)
+      when data.conn_pid == nil,
+      do: {:keep_state, data, [{:reply, from, {:error, :no_host_available}}]}
+
+  def handle_event(
+        {:call, from},
+        {:start_battle, battle_id, battle_pid, start_script},
+        _state,
+        data
+      ) do
     Teiserver.Autohost.TachyonHandler.start_battle(data.conn_pid, battle_id, start_script)
-    data = Map.update!(data, :pending_battles, &Map.put(&1, battle_id, {from, start_script}))
+
+    data =
+      data
+      |> Map.update!(:pending_battles, &Map.put(&1, battle_id, {from, start_script}))
+      |> Map.update!(:monitors, &MC.monitor(&1, battle_pid, {:battle, battle_id}))
+
     {:keep_state, data}
   end
 
@@ -192,6 +226,10 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data}
   end
 
+  def handle_event({:call, from}, :inspect_subscription_start, _state, data) do
+    {:keep_state, data, [{:reply, from, get_subscription_start(data)}]}
+  end
+
   def handle_event(:info, {:reply_kill_battle, ref, _}, _state, data)
       when not is_map_key(data.pending_replies, ref),
       do: {:keep_state, data}
@@ -203,6 +241,21 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data}
   end
 
+  def handle_event(:info, {:DOWN, ref, :process, _pid, _reason}, _state, data) do
+    val = MC.get_val(data.monitors, ref)
+    data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
+
+    data =
+      case val do
+        {:battle, battle_id} ->
+          data
+          |> Map.update!(:pending_battles, &Map.delete(&1, battle_id))
+          |> Map.update!(:active_battles, &Map.delete(&1, battle_id))
+      end
+
+    {:keep_state, data}
+  end
+
   def handle_event(:info, {:EXIT, from, reason}, _state, data) do
     Logger.info(
       "Exit sent from #{inspect(from)} because #{inspect(reason)}. Conn pid is #{inspect(data.conn_pid)}"
@@ -211,10 +264,14 @@ defmodule Teiserver.Autohost.Session do
     {:stop, reason}
   end
 
-  def handle_event(:info, {:update_capacity, max_battles, current_battles}, _state, data) do
+  def handle_event(:info, {:update_capacity, max_battles, current_battles}, state, data) do
     data = %{data | max_battles: max_battles, current_battles: current_battles}
     SessionRegistry.set_value(data.autohost.id, max_battles, current_battles)
-    {:keep_state, data}
+
+    case state do
+      :handshaking -> {:next_state, :connected, data}
+      _ -> {:keep_state, data}
+    end
   end
 
   def handle_event(:info, {:reply_start_battle, battle_id, _resp}, _state, data)
@@ -232,7 +289,9 @@ defmodule Teiserver.Autohost.Session do
         battle_data = %{
           start_script: start_script,
           ips: start_response.ips,
-          port: start_response.port
+          port: start_response.port,
+          pending_acks: :queue.new(),
+          last_acked_ts: nil
         }
 
         data =
@@ -258,12 +317,72 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data}
   end
 
+  # credo:disable-for-next-line Credo.Check.Design.TagTODO
+  # TODO: will need to "resurrect" a battle if we ever get into this situation.
+  # Because the autohost is the ultimate source of truth when it comes to running
+  # battle, so if it tells teiserver that something is running, we need to
+  # create a corresponding process. But for now, just drop the message
+  def handle_event(:info, {:update_event, %{battle_id: battle_id}}, _state, data)
+      when not is_map_key(data.active_battles, battle_id),
+      do: {:keep_state, data}
+
   def handle_event(:info, {:update_event, event}, _state, data) do
     TachyonBattle.send_update_event(event)
+
+    data =
+      data
+      |> update_in([:active_battles, event.battle_id, :pending_acks], &:queue.in(event.time, &1))
+
+    {:keep_state, data}
+  end
+
+  def handle_event(:info, {:ack_update_event, battle_id, _}, _state, data)
+      when not is_map_key(data.active_battles, battle_id),
+      do: {:keep_state, data}
+
+  def handle_event(:info, {:ack_update_event, battle_id, timestamp}, _state, data) do
+    data =
+      update_in(data, [:active_battles, battle_id], fn battle_data ->
+        case :queue.out(battle_data.pending_acks) do
+          {{:value, ^timestamp}, q2} ->
+            %{battle_data | pending_acks: q2, last_acked_ts: timestamp}
+
+          {:empty, _} ->
+            Logger.warning("battle #{battle_id} acked a message but nothing is waiting")
+            data
+            # battle should *always* ack message in order, so if the acked message is
+            # not the first in the queue, something is seriously wrong
+        end
+      end)
+
     {:keep_state, data}
   end
 
   defp via_tuple(autohost_id) do
     SessionRegistry.via_tuple(autohost_id)
+  end
+
+  # the typespec for DateTime.shift/2 requires the duration pair for
+  # :microsecond to have non negative integer.
+  # but it works just fine with negative number
+  @dialyzer {:nowarn_function, get_subscription_start: 1}
+  defp get_subscription_start(state) do
+    for {_, battle_data} <- state.active_battles do
+      case {battle_data.last_acked_ts, :queue.peek(battle_data.pending_acks)} do
+        {x, _} when not is_nil(x) ->
+          x
+
+        {nil, {:value, x}} ->
+          # subscriptions work with a strict bound: anything `>` than the provided
+          # timestamp. Which means if we return the exact timestamp of the last event
+          # this specific event won't be returned.
+          DateTime.shift(x, microsecond: {-1, 6})
+
+        _ ->
+          nil
+      end
+    end
+    |> Enum.reject(&is_nil/1)
+    |> Enum.min(fn -> DateTime.utc_now() end)
   end
 end

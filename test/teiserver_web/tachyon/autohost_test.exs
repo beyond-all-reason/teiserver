@@ -128,9 +128,11 @@ defmodule TeiserverWeb.Tachyon.Autohost do
       ]
     }
 
+    pid = self()
+
     start_task =
       Task.async(fn ->
-        Teiserver.Autohost.start_battle(token.bot_id, battle_id, start_script)
+        Teiserver.Autohost.start_battle(token.bot_id, battle_id, pid, start_script)
       end)
 
     %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(client)
