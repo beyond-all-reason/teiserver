@@ -122,7 +122,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   defp set_capacity(n) do
     # this is a hack because there seems to be some flakyness with `count_client`
     # from other tests
-    current_count = Teiserver.Account.count_client()
+    current_count = Teiserver.Account.count_non_bot_clients()
     Config.update_site_config("system.User limit", current_count + n)
   end
 
