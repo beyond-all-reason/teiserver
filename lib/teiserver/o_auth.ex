@@ -206,6 +206,8 @@ defmodule Teiserver.OAuth do
   defp do_create_token(owner_attr, application, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
     scopes = opts[:scopes]
+    # Allow custom access token TTL in minutes, default to 30 minutes
+    access_token_ttl = Keyword.get(opts, :access_token_ttl, 30)
 
     if Enum.empty?(scopes) ||
          not MapSet.subset?(MapSet.new(scopes), MapSet.new(application.scopes)) do
@@ -217,7 +219,7 @@ defmodule Teiserver.OAuth do
           application_id: application.id,
           scopes: scopes,
           original_scopes: Map.get(application, :original_scopes, application.scopes),
-          expires_at: Timex.add(now, Timex.Duration.from_minutes(30)),
+          expires_at: Timex.add(now, Timex.Duration.from_minutes(access_token_ttl)),
           type: :access
         }
         |> Map.merge(owner_attr)
