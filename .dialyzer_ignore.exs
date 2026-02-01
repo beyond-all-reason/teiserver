@@ -95,6 +95,7 @@
   {"lib/teiserver/microblog.ex", :invalid_contract},
   {"lib/teiserver/microblog/libs/post_tag_lib.ex", :invalid_contract},
   {"lib/teiserver/mix_tasks/fake_data.ex", :no_return},
+  {"lib/teiserver/mix_tasks/fake_data.ex", :unused_fun},
   {"lib/teiserver/moderation.ex", :unknown_type},
   {"lib/teiserver/moderation.ex", :invalid_contract},
   {"lib/teiserver/moderation/libs/report_group_lib.ex", :call},
