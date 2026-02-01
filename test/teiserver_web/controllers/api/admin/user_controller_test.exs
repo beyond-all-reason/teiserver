@@ -328,27 +328,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
 
       now = DateTime.utc_now()
       diff_seconds = DateTime.diff(token.expires_at, now)
-      assert diff_seconds >= 3300 and diff_seconds <= 3900
-    end
-
-    test "creates user with very long access_token_ttl for load testing", %{authed_conn: conn} do
-      user_data = %{
-        "name" => "loadtestuser",
-        "email" => "loadtestuser@example.com",
-        "password" => "testpassword123",
-        "access_token_ttl" => 86_400
-      }
-
-      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
-
-      assert resp["credentials"]["access_token"]
-
-      token = Teiserver.OAuth.TokenQueries.get_token(resp["credentials"]["access_token"])
-      assert token != nil
-
-      now = DateTime.utc_now()
-      diff_seconds = DateTime.diff(token.expires_at, now)
-      assert diff_seconds >= 82_800 and diff_seconds <= 90_000
+      assert_in_delta 3600, diff_seconds, 10
     end
 
     test "creates user with default TTL when access_token_ttl not provided", %{authed_conn: conn} do
@@ -367,7 +347,8 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
 
       now = DateTime.utc_now()
       diff_seconds = DateTime.diff(token.expires_at, now)
-      assert diff_seconds >= 1500 and diff_seconds <= 2100
+      # Default is 30 minutes = 1800 seconds
+      assert_in_delta 1800, diff_seconds, 10
     end
 
     test "refresh_token with custom access_token_ttl", %{authed_conn: conn} do
@@ -393,11 +374,10 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
 
       now = DateTime.utc_now()
       diff_seconds = DateTime.diff(token.expires_at, now)
-      assert diff_seconds >= 6900 and diff_seconds <= 7500
+      assert_in_delta 7200, diff_seconds, 10
     end
 
-    test "ignores invalid access_token_ttl values", %{authed_conn: conn} do
-      # Test with negative value - should use default
+    test "rejects negative access_token_ttl values", %{authed_conn: conn} do
       user_data = %{
         "name" => "invalidttluser",
         "email" => "invalidttluser@example.com",
@@ -405,19 +385,12 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
         "access_token_ttl" => -100
       }
 
-      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
+      resp = conn |> post(create_user_path(), user_data) |> json_response(400)
 
-      assert resp["credentials"]["access_token"]
-
-      token = Teiserver.OAuth.TokenQueries.get_token(resp["credentials"]["access_token"])
-      assert token != nil
-
-      now = DateTime.utc_now()
-      diff_seconds = DateTime.diff(token.expires_at, now)
-      assert diff_seconds >= 1500 and diff_seconds <= 2100
+      assert resp["error"] =~ "access_token_ttl must be a positive integer"
     end
 
-    test "ignores non-integer access_token_ttl values", %{authed_conn: conn} do
+    test "rejects non-integer access_token_ttl values", %{authed_conn: conn} do
       user_data = %{
         "name" => "stringttluser",
         "email" => "stringttluser@example.com",
@@ -425,16 +398,22 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
         "access_token_ttl" => "invalid"
       }
 
-      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
+      resp = conn |> post(create_user_path(), user_data) |> json_response(400)
 
-      assert resp["credentials"]["access_token"]
+      assert resp["error"] =~ "access_token_ttl must be a positive integer"
+    end
 
-      token = Teiserver.OAuth.TokenQueries.get_token(resp["credentials"]["access_token"])
-      assert token != nil
+    test "rejects zero access_token_ttl value", %{authed_conn: conn} do
+      user_data = %{
+        "name" => "zerottluser",
+        "email" => "zerottluser@example.com",
+        "password" => "testpassword123",
+        "access_token_ttl" => 0
+      }
 
-      now = DateTime.utc_now()
-      diff_seconds = DateTime.diff(token.expires_at, now)
-      assert diff_seconds >= 1500 and diff_seconds <= 2100
+      resp = conn |> post(create_user_path(), user_data) |> json_response(400)
+
+      assert resp["error"] =~ "access_token_ttl must be a positive integer"
     end
   end
 

@@ -18,20 +18,22 @@ defmodule TeiserverWeb.API.Admin.UserController do
     :user_not_found => 404,
     :app_not_found => 400,
     :invalid_scope => 400,
+    :invalid_ttl => 400,
     :default => 400
   }
 
   @error_messages %{
     :user_not_found => "User not found",
     :app_not_found => @app_not_found_error,
-    :invalid_scope => "Invalid scope for OAuth application"
+    :invalid_scope => "Invalid scope for OAuth application",
+    :invalid_ttl => "access_token_ttl must be a positive integer (seconds)"
   }
 
   def create(conn, params) do
     params = Map.merge(@default_params, params)
-    token_opts = build_token_opts(params)
 
-    with {:ok, user} <- Account.script_create_user(params),
+    with {:ok, token_opts} <- build_token_opts(params),
+         {:ok, user} <- Account.script_create_user(params),
          :ok <- update_user_stats(user.id, params),
          {:ok, app} <- get_generic_lobby_app(),
          {:ok, token} <- create_user_token(user, app, token_opts) do
@@ -42,9 +44,8 @@ defmodule TeiserverWeb.API.Admin.UserController do
   end
 
   def refresh_token(conn, %{"email" => email} = params) do
-    token_opts = build_token_opts(params)
-
-    with {:ok, user} <- get_user_by_email(email),
+    with {:ok, token_opts} <- build_token_opts(params),
+         {:ok, user} <- get_user_by_email(email),
          {:ok, app} <- get_generic_lobby_app(),
          {:ok, token} <- create_user_token(user, app, token_opts) do
       json(conn, build_user_response(user, token))
@@ -103,15 +104,13 @@ defmodule TeiserverWeb.API.Admin.UserController do
   defp build_token_opts(params) do
     case Map.get(params, "access_token_ttl") do
       nil ->
-        []
+        {:ok, []}
 
       ttl_seconds when is_integer(ttl_seconds) and ttl_seconds > 0 ->
-        # Convert seconds to minutes for OAuth.create_token
-        ttl_minutes = div(ttl_seconds, 60)
-        [access_token_ttl: max(ttl_minutes, 1)]
+        {:ok, [access_token_ttl: Timex.Duration.from_seconds(ttl_seconds)]}
 
       _ ->
-        []
+        {:error, :invalid_ttl}
     end
   end
 
