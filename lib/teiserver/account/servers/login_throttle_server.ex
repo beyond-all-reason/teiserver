@@ -101,11 +101,14 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     can_login? = category == :instant or (capacity > 0 && :queue.is_empty(state.queue))
 
-    new_state =
+    {new_state, can_login?} =
       if can_login? do
-        state
+        case BurstyRateLimiter.try_acquire(state.rate_limiter) do
+          {:ok, updated_rl} -> {%{state | rate_limiter: updated_rl}, true}
+          _ -> {add_user_to_queue(state, pid, userid), false}
+        end
       else
-        add_user_to_queue(state, pid, userid)
+        {add_user_to_queue(state, pid, userid), false}
       end
 
     {:reply, can_login?, new_state}
