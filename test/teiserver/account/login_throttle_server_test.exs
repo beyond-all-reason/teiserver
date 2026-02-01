@@ -102,7 +102,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
 
   test "respect rate limiter" do
     set_capacity(0)
-    LoginThrottleServer.reset_rate_limiter(1)
+    LoginThrottleServer.reset_rate_limiter(1, true)
     {user1, t1} = {new_user(), oneshot_pid()}
     user2 = new_user()
 
