@@ -119,6 +119,17 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     assert LoginThrottleServer.get_queue_length() == 1
   end
 
+  test "respect rate limiter even when there is capacity" do
+    set_capacity(100)
+    LoginThrottleServer.reset_rate_limiter(1, false)
+    {user1, t1} = {new_user(), oneshot_pid()}
+    user2 = new_user()
+
+    assert LoginThrottleServer.attempt_login(t1.pid, user1.id) == true
+    assert LoginThrottleServer.attempt_login(self(), user2.id) == false
+    assert LoginThrottleServer.get_queue_length() == 1
+  end
+
   defp set_capacity(n) do
     # this is a hack because there seems to be some flakyness with `count_client`
     # from other tests
