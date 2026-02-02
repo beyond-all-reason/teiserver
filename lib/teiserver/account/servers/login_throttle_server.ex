@@ -30,7 +30,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     Logger.metadata(actor_id: "LoginThrottleServer")
     {:ok, timer_ref} = :timer.send_interval(@default_tick_period, :tick)
     default_rate = Teiserver.Config.get_site_config_cache("system.Login rate")
-    rate_limiter = BurstyRateLimiter.per_minute(default_rate) |> BurstyRateLimiter.set_empty()
+    rate_limiter = BurstyRateLimiter.per_second(default_rate) |> BurstyRateLimiter.set_empty()
 
     state = %{
       tick_timer_ref: timer_ref,
@@ -58,12 +58,22 @@ defmodule Teiserver.Account.LoginThrottleServer do
   end
 
   @doc """
-  Reset the rate limiter to a new rate (user / minute).
+  Reset the rate limiter to a new rate (user / second).
   If should_fill? is true, the new rate limiter will be flush with permits and
   will let players in right away.
   """
-  def reset_rate_limiter(rate, should_fill? \\ false) do
-    GenServer.call(__MODULE__, {:reset_rate_limiter, rate, should_fill?})
+  def reset_rate_limiter(%BurstyRateLimiter{} = rl) do
+    GenServer.call(__MODULE__, {:reset_rate_limiter, rl})
+  end
+
+  @spec reset_rate_limiter(rate :: non_neg_integer(), should_fill? :: boolean()) :: :ok
+  def reset_rate_limiter(rate, should_fill? \\ false) when is_number(rate) do
+    rl = BurstyRateLimiter.per_second(rate)
+
+    rl =
+      if should_fill?, do: BurstyRateLimiter.set_full(rl), else: BurstyRateLimiter.set_empty(rl)
+
+    reset_rate_limiter(rl)
   end
 
   @doc """
@@ -114,12 +124,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     {:reply, can_login?, new_state}
   end
 
-  def handle_call({:reset_rate_limiter, rate, should_fill?}, _from, state) do
-    rl = BurstyRateLimiter.per_minute(rate)
-
-    rl =
-      if should_fill?, do: BurstyRateLimiter.set_full(rl), else: BurstyRateLimiter.set_empty(rl)
-
+  def handle_call({:reset_rate_limiter, %BurstyRateLimiter{} = rl}, _from, state) do
     {:reply, :ok, %{state | rate_limiter: rl}}
   end
 
@@ -218,7 +223,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   defp get_capacity() do
     total_limit = Config.get_site_config_cache("system.User limit")
-    count = Account.count_client()
+    count = Account.count_non_bot_clients()
     total_limit - count
   end
 end

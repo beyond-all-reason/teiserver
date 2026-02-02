@@ -102,7 +102,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
 
   test "respect rate limiter" do
     set_capacity(0)
-    LoginThrottleServer.reset_rate_limiter(1)
+    LoginThrottleServer.reset_rate_limiter(1, true)
     {user1, t1} = {new_user(), oneshot_pid()}
     user2 = new_user()
 
@@ -133,7 +133,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   defp set_capacity(n) do
     # this is a hack because there seems to be some flakyness with `count_client`
     # from other tests
-    current_count = Teiserver.Account.count_client()
+    current_count = Teiserver.Account.count_non_bot_clients()
     Config.update_site_config("system.User limit", current_count + n)
   end
 

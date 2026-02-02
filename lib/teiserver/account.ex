@@ -2253,6 +2253,9 @@ defmodule Teiserver.Account do
   @spec count_client() :: non_neg_integer()
   defdelegate count_client(), to: ClientLib
 
+  @spec count_non_bot_clients() :: non_neg_integer()
+  defdelegate count_non_bot_clients(), to: ClientLib
+
   # Party stuff
   alias Teiserver.Account.PartyLib
 
