@@ -43,7 +43,11 @@
         <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
           {central_component("icon", icon: m.user.icon)}
         </td>
-        <td style={"background-color: #{rgba_css m.user.colour};"}>{m.user.name}</td>
+        <td style={"background-color: #{rgba_css m.user.colour};"}>
+          <a href={~p"/profile/#{m.user_id}"} style="text-decoration: none; color: inherit;">
+            {m.user.name}
+          </a>
+        </td>
 
         <%= if party_colour do %>
           <td style={"background-color: #{party_colour};"} width="50">&nbsp;</td>
