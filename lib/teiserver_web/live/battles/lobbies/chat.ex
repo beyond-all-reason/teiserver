@@ -144,8 +144,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         if Account.client_exists?(current_user.id) do
           Lobby.say(current_user.id, "web: #{content}", id)
         else
-          coordinator_id = Coordinator.get_coordinator_userid()
-          Lobby.say(coordinator_id, "#{current_user.name} (web): #{content}", id)
+          Coordinator.get_coordinator_userid()
+          |> Lobby.say("#{current_user.name} (web): #{content}", id)
         end
     end
 
