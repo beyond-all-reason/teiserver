@@ -317,7 +317,13 @@ defmodule Teiserver.Protocols.Spring.UserIn do
           )
 
         {:error, reason} ->
-          reply(:user, :relationship_change, {"ignore_by_id", userid_str, {:error, reason}}, msg_id, state)
+          reply(
+            :user,
+            :relationship_change,
+            {"ignore_by_id", userid_str, {:error, reason}},
+            msg_id,
+            state
+          )
       end
     else
       reply(:user, :relationship_change, {"ignore_by_id", userid_str, :error}, msg_id, state)
@@ -350,7 +356,13 @@ defmodule Teiserver.Protocols.Spring.UserIn do
           reply(:user, :relationship_change, {"block_by_id", userid_str, :success}, msg_id, state)
 
         {:error, reason} ->
-          reply(:user, :relationship_change, {"block_by_id", userid_str, {:error, reason}}, msg_id, state)
+          reply(
+            :user,
+            :relationship_change,
+            {"block_by_id", userid_str, {:error, reason}},
+            msg_id,
+            state
+          )
       end
     else
       reply(:user, :relationship_change, {"block_by_id", userid_str, :error}, msg_id, state)
@@ -383,7 +395,13 @@ defmodule Teiserver.Protocols.Spring.UserIn do
           reply(:user, :relationship_change, {"avoid_by_id", userid_str, :success}, msg_id, state)
 
         {:error, reason} ->
-          reply(:user, :relationship_change, {"avoid_by_id", userid_str, {:error, reason}}, msg_id, state)
+          reply(
+            :user,
+            :relationship_change,
+            {"avoid_by_id", userid_str, {:error, reason}},
+            msg_id,
+            state
+          )
       end
     else
       reply(:user, :relationship_change, {"avoid_by_id", userid_str, :error}, msg_id, state)
