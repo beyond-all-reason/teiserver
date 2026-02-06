@@ -140,7 +140,7 @@ defmodule Teiserver.OAuth do
     app_id = attrs.id
 
     if ApplicationQueries.application_allows_code?(app_id) do
-      {selector, _verifier, hashed_verifier, full_code} = TokenHash.generate_token()
+      {selector, hashed_verifier, full_code} = TokenHash.generate_token()
 
       code_attrs = %{
         selector: selector,
@@ -213,7 +213,7 @@ defmodule Teiserver.OAuth do
          not MapSet.subset?(MapSet.new(scopes), MapSet.new(application.scopes)) do
       {:error, :invalid_scope}
     else
-      {selector, _verifier, hashed_verifier, full_token} = TokenHash.generate_token()
+      {selector, hashed_verifier, full_token} = TokenHash.generate_token()
 
       token_attrs =
         %{
@@ -229,7 +229,7 @@ defmodule Teiserver.OAuth do
 
       {refresh_attrs, refresh_value} =
         if Keyword.get(opts, :create_refresh, true) do
-          {refresh_selector, _refresh_verifier, refresh_hashed, refresh_full} =
+          {refresh_selector, refresh_hashed, refresh_full} =
             TokenHash.generate_token()
 
           attrs =

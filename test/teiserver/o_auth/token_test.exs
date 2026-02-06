@@ -19,7 +19,7 @@ defmodule Teiserver.OAuth.TokenTest do
   end
 
   test "token must have an owner", %{app: app} do
-    {selector, _verifier, hashed_verifier, _full_token} = TokenHash.generate_token()
+    {selector, hashed_verifier, _full_token} = TokenHash.generate_token()
 
     assert {:error, _} =
              Teiserver.OAuth.Token.changeset(%Teiserver.OAuth.Token{}, %{
