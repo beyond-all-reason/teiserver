@@ -4,14 +4,17 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
   the development of anything requiring OAuth tokens like tachyon protocol.
   """
 
-  alias Teiserver.OAuth.{ApplicationQueries, Token}
+  alias Teiserver.OAuth.{ApplicationQueries, Token, TokenHash}
 
   @spec create_token(String.t(), String.t() | nil) :: {:ok, Token.t()} | {:error, term()}
   def create_token(username_or_email, app_uid \\ nil) do
     with {:ok, user} <- get_user(username_or_email),
          {:ok, app} <- get_app(app_uid) do
+      {selector, hashed_verifier, full_token} = TokenHash.generate_token()
+
       token_attr = %{
-        value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
+        selector: selector,
+        hashed_verifier: hashed_verifier,
         owner_id: user.id,
         application_id: app.id,
         scopes: app.scopes,
@@ -20,9 +23,9 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
         refresh_token: nil
       }
 
-      %Token{}
-      |> Token.changeset(token_attr)
-      |> Teiserver.Repo.insert()
+      with {:ok, token} <- %Token{} |> Token.changeset(token_attr) |> Teiserver.Repo.insert() do
+        {:ok, %{token | value: full_token}}
+      end
     else
       {:error, msg} -> {:error, msg}
     end

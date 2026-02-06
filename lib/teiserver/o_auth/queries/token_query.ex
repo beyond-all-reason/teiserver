@@ -1,20 +1,36 @@
 defmodule Teiserver.OAuth.TokenQueries do
   use TeiserverWeb, :queries
-  alias Teiserver.OAuth.{Application, Token}
+  alias Teiserver.OAuth.{Application, Token, TokenHash}
 
   @doc """
-  Return the db object corresponding to the given token.
-  This doesn't validate anything, use the context function instead
+  Return the token for the given value. Doesn't validate expiry.
   """
   def get_token(nil), do: nil
 
-  def get_token(value) do
-    base_query()
-    |> where_token(value)
-    |> preload(:application)
-    |> preload(:owner)
-    |> preload(:bot)
-    |> Repo.one()
+  def get_token(value) when is_binary(value) do
+    case TokenHash.parse_token(value) do
+      {:ok, {selector, verifier}} -> get_token_by_selector_and_verify(selector, verifier)
+      :error -> nil
+    end
+  end
+
+  defp get_token_by_selector_and_verify(selector, verifier) do
+    token =
+      base_query()
+      |> where_selector(selector)
+      |> preload(:application)
+      |> preload(:owner)
+      |> preload(:bot)
+      |> Repo.one()
+
+    case token do
+      nil ->
+        TokenHash.hash_verifier(verifier)
+        nil
+
+      token ->
+        if TokenHash.verify_verifier(verifier, token.hashed_verifier), do: token, else: nil
+    end
   end
 
   def base_query() do
@@ -22,9 +38,8 @@ defmodule Teiserver.OAuth.TokenQueries do
       as: :token
   end
 
-  def where_token(query, value) do
-    from e in query,
-      where: e.value == ^value
+  def where_selector(query, selector) do
+    from e in query, where: e.selector == ^selector
   end
 
   def where_app_ids(query, app_ids) do

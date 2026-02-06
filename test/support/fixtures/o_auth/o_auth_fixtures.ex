@@ -1,5 +1,5 @@
 defmodule Teiserver.OAuthFixtures do
-  alias Teiserver.OAuth.{Application, Code, Token, Credential}
+  alias Teiserver.OAuth.{Application, Code, Token, Credential, TokenHash}
   alias Teiserver.Repo
 
   def app_attrs(owner_id) do
@@ -24,9 +24,11 @@ defmodule Teiserver.OAuthFixtures do
   def code_attrs(user_id, app) do
     now = DateTime.utc_now()
     {verifier, challenge, method} = generate_challenge()
+    {selector, hashed_verifier, full_code} = TokenHash.generate_token()
 
     %{
-      value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
+      selector: selector,
+      hashed_verifier: hashed_verifier,
       owner_id: user_id,
       application_id: app.id,
       scopes: app.scopes,
@@ -34,30 +36,36 @@ defmodule Teiserver.OAuthFixtures do
       redirect_uri: List.first(app.redirect_uris),
       challenge: challenge,
       challenge_method: method,
-      _verifier: verifier
+      _verifier: verifier,
+      _full_code: full_code
     }
   end
 
   def create_code(attrs) do
-    %Code{} |> Code.changeset(attrs) |> Repo.insert!()
+    code = %Code{} |> Code.changeset(attrs) |> Repo.insert!()
+    %{code | value: attrs[:_full_code]}
   end
 
   def token_attrs(user_id, application) do
     now = DateTime.utc_now()
+    {selector, hashed_verifier, full_token} = TokenHash.generate_token()
 
     %{
-      value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
+      selector: selector,
+      hashed_verifier: hashed_verifier,
       owner_id: user_id,
       application_id: application.id,
       scopes: application.scopes,
       expires_at: Timex.add(now, Timex.Duration.from_days(60)),
       type: :access,
-      refresh_token: nil
+      refresh_token: nil,
+      _full_token: full_token
     }
   end
 
   def create_token(attrs) do
-    %Token{} |> Token.changeset(attrs) |> Repo.insert!()
+    token = %Token{} |> Token.changeset(attrs) |> Repo.insert!()
+    %{token | value: attrs[:_full_token]}
   end
 
   def credential_attrs(bot, app_id) do

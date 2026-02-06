@@ -20,7 +20,8 @@ defmodule Teiserver.OAuth.CodeTest do
 
   test "can get valid code", %{user: user, app: app} do
     assert {:ok, code, _} = create_code(user, app)
-    assert {:ok, ^code} = OAuth.get_valid_code(code.value)
+    assert {:ok, fetched} = OAuth.get_valid_code(code.value)
+    assert fetched.id == code.id
     assert {:error, :no_code} = OAuth.get_valid_code(nil)
   end
 
@@ -101,7 +102,8 @@ defmodule Teiserver.OAuth.CodeTest do
     count = OAuth.delete_expired_codes()
     assert count == 1
     assert {:error, :no_code} = OAuth.get_valid_code(expired_code.value)
-    assert {:ok, ^valid_code} = OAuth.get_valid_code(valid_code.value)
+    assert {:ok, fetched} = OAuth.get_valid_code(valid_code.value)
+    assert fetched.id == valid_code.id
   end
 
   test "can pass custom time when deleting codes", %{user: user, app: app} do
