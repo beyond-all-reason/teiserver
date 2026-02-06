@@ -24,7 +24,7 @@ defmodule Teiserver.OAuthFixtures do
   def code_attrs(user_id, app) do
     now = DateTime.utc_now()
     {verifier, challenge, method} = generate_challenge()
-    {selector, _token_verifier, hashed_verifier, full_code} = TokenHash.generate_token()
+    {selector, hashed_verifier, full_code} = TokenHash.generate_token()
 
     %{
       selector: selector,
@@ -48,7 +48,7 @@ defmodule Teiserver.OAuthFixtures do
 
   def token_attrs(user_id, application) do
     now = DateTime.utc_now()
-    {selector, _verifier, hashed_verifier, full_token} = TokenHash.generate_token()
+    {selector, hashed_verifier, full_token} = TokenHash.generate_token()
 
     %{
       selector: selector,

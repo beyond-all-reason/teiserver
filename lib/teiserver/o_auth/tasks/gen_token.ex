@@ -10,7 +10,7 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
   def create_token(username_or_email, app_uid \\ nil) do
     with {:ok, user} <- get_user(username_or_email),
          {:ok, app} <- get_app(app_uid) do
-      {selector, _verifier, hashed_verifier, full_token} = TokenHash.generate_token()
+      {selector, hashed_verifier, full_token} = TokenHash.generate_token()
 
       token_attr = %{
         selector: selector,

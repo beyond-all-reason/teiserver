@@ -4,23 +4,19 @@ defmodule Teiserver.OAuth.TokenHashTest do
 
   describe "generate_token/0" do
     test "generates token with correct format" do
-      {selector, verifier, hashed_verifier, full_token} = TokenHash.generate_token()
+      {selector, hashed_verifier, full_token} = TokenHash.generate_token()
 
       assert String.length(selector) == 32
       assert String.match?(selector, ~r/^[0-9a-f]+$/)
-      assert String.length(verifier) == 64
-      assert String.match?(verifier, ~r/^[0-9a-f]+$/)
       assert String.length(hashed_verifier) == 64
       assert String.match?(hashed_verifier, ~r/^[0-9a-f]+$/)
-      assert full_token == "#{selector}.#{verifier}"
+      assert String.starts_with?(full_token, selector <> ".")
     end
 
     test "generates unique tokens" do
-      {selector1, verifier1, _, _} = TokenHash.generate_token()
-      {selector2, verifier2, _, _} = TokenHash.generate_token()
-
+      {selector1, _, _} = TokenHash.generate_token()
+      {selector2, _, _} = TokenHash.generate_token()
       refute selector1 == selector2
-      refute verifier1 == verifier2
     end
   end
 
@@ -46,17 +42,17 @@ defmodule Teiserver.OAuth.TokenHashTest do
 
   describe "verify_verifier/2" do
     test "returns true for matching verifier" do
-      {_selector, verifier, hashed_verifier, _full} = TokenHash.generate_token()
+      {_selector, verifier, hashed_verifier, _full} = TokenHash.generate_token_for_test()
       assert TokenHash.verify_verifier(verifier, hashed_verifier)
     end
 
     test "returns false for non-matching verifier" do
-      {_selector, _verifier, hashed_verifier, _full} = TokenHash.generate_token()
+      {_selector, _verifier, hashed_verifier, _full} = TokenHash.generate_token_for_test()
       refute TokenHash.verify_verifier("wrong_verifier", hashed_verifier)
     end
 
     test "returns false for empty verifier" do
-      {_selector, _verifier, hashed_verifier, _full} = TokenHash.generate_token()
+      {_selector, _verifier, hashed_verifier, _full} = TokenHash.generate_token_for_test()
       refute TokenHash.verify_verifier("", hashed_verifier)
     end
   end

@@ -14,10 +14,20 @@ defmodule Teiserver.OAuth.TokenHash do
   end
 
   @doc """
-  Returns {selector, verifier, hashed_verifier, full_token}.
+  Returns {selector, hashed_verifier, full_token}.
   """
-  @spec generate_token() :: {String.t(), String.t(), String.t(), String.t()}
+  @spec generate_token() :: {String.t(), String.t(), String.t()}
   def generate_token do
+    selector = :crypto.strong_rand_bytes(16) |> Base.encode16(case: :lower)
+    verifier = :crypto.strong_rand_bytes(32) |> Base.encode16(case: :lower)
+    {selector, hash_verifier(verifier), "#{selector}.#{verifier}"}
+  end
+
+  @doc """
+  Like generate_token/0 but also returns the raw verifier. Only for testing.
+  """
+  @spec generate_token_for_test() :: {String.t(), String.t(), String.t(), String.t()}
+  def generate_token_for_test do
     selector = :crypto.strong_rand_bytes(16) |> Base.encode16(case: :lower)
     verifier = :crypto.strong_rand_bytes(32) |> Base.encode16(case: :lower)
     {selector, verifier, hash_verifier(verifier), "#{selector}.#{verifier}"}
