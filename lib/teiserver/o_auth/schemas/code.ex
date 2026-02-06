@@ -5,7 +5,10 @@ defmodule Teiserver.OAuth.Code do
   alias Teiserver.OAuth
 
   typed_schema "oauth_codes" do
-    field :value, :string, redact: true
+    field :selector, :string
+    field :hashed_verifier, :string, redact: true
+    field :value, :string, redact: true, virtual: true
+
     belongs_to :owner, Teiserver.Account.User, primary_key: true
     belongs_to :application, OAuth.Application, primary_key: true
     field :scopes, {:array, :string}
@@ -22,7 +25,8 @@ defmodule Teiserver.OAuth.Code do
 
     code
     |> cast(attrs, [
-      :value,
+      :selector,
+      :hashed_verifier,
       :owner_id,
       :application_id,
       :scopes,
@@ -32,7 +36,8 @@ defmodule Teiserver.OAuth.Code do
       :challenge_method
     ])
     |> validate_required([
-      :value,
+      :selector,
+      :hashed_verifier,
       :owner_id,
       :application_id,
       :scopes,

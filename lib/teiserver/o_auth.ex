@@ -11,7 +11,8 @@ defmodule Teiserver.OAuth do
     ApplicationQueries,
     CodeQueries,
     TokenQueries,
-    CredentialQueries
+    CredentialQueries,
+    TokenHash
   }
 
   alias Teiserver.Account.User
@@ -139,10 +140,11 @@ defmodule Teiserver.OAuth do
     app_id = attrs.id
 
     if ApplicationQueries.application_allows_code?(app_id) do
-      # don't do any validation on the challenge yet, this is done when exchanging
-      # the code for a token
-      attrs = %{
-        value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
+      {selector, _verifier, hashed_verifier, full_code} = TokenHash.generate_token()
+
+      code_attrs = %{
+        selector: selector,
+        hashed_verifier: hashed_verifier,
         owner_id: user_id,
         application_id: app_id,
         scopes: attrs.scopes,
@@ -152,9 +154,9 @@ defmodule Teiserver.OAuth do
         challenge_method: Map.get(attrs, :challenge_method)
       }
 
-      %Code{}
-      |> Code.changeset(attrs)
-      |> Repo.insert()
+      with {:ok, code} <- %Code{} |> Code.changeset(code_attrs) |> Repo.insert() do
+        {:ok, %{code | value: full_code}}
+      end
     else
       {:error, :invalid_flow}
     end
@@ -211,9 +213,12 @@ defmodule Teiserver.OAuth do
          not MapSet.subset?(MapSet.new(scopes), MapSet.new(application.scopes)) do
       {:error, :invalid_scope}
     else
+      {selector, _verifier, hashed_verifier, full_token} = TokenHash.generate_token()
+
       token_attrs =
         %{
-          value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
+          selector: selector,
+          hashed_verifier: hashed_verifier,
           application_id: application.id,
           scopes: scopes,
           original_scopes: Map.get(application, :original_scopes, application.scopes),
@@ -222,29 +227,45 @@ defmodule Teiserver.OAuth do
         }
         |> Map.merge(owner_attr)
 
-      refresh_attrs =
+      {refresh_attrs, refresh_value} =
         if Keyword.get(opts, :create_refresh, true) do
-          %{
-            value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
-            application_id: application.id,
-            scopes: scopes,
-            original_scopes: application.scopes,
-            # there's no real recourse when the refresh token expires and it's
-            # quite annoying, so make it "never" expire.
-            expires_at: Timex.add(now, Timex.Duration.from_days(365 * 100)),
-            type: :refresh,
-            refresh_token: nil
-          }
-          |> Map.merge(owner_attr)
+          {refresh_selector, _refresh_verifier, refresh_hashed, refresh_full} =
+            TokenHash.generate_token()
+
+          attrs =
+            %{
+              selector: refresh_selector,
+              hashed_verifier: refresh_hashed,
+              application_id: application.id,
+              scopes: scopes,
+              original_scopes: application.scopes,
+              # there's no real recourse when the refresh token expires and it's
+              # quite annoying, so make it "never" expire.
+              expires_at: Timex.add(now, Timex.Duration.from_days(365 * 100)),
+              type: :refresh,
+              refresh_token: nil
+            }
+            |> Map.merge(owner_attr)
+
+          {attrs, refresh_full}
         else
-          nil
+          {nil, nil}
         end
 
       token_attrs = Map.put(token_attrs, :refresh_token, refresh_attrs)
 
-      %Token{}
-      |> Token.changeset(token_attrs)
-      |> Repo.insert()
+      with {:ok, token} <- %Token{} |> Token.changeset(token_attrs) |> Repo.insert() do
+        token = %{token | value: full_token}
+
+        token =
+          if token.refresh_token do
+            %{token | refresh_token: %{token.refresh_token | value: refresh_value}}
+          else
+            token
+          end
+
+        {:ok, token}
+      end
     end
   end
 
@@ -362,7 +383,7 @@ defmodule Teiserver.OAuth do
           if Ecto.assoc_loaded?(token.application) do
             token
           else
-            TokenQueries.get_token(token.value)
+            Repo.preload(token, [:application, :owner, :bot])
           end
 
         scopes = Keyword.get(opts, :scopes, token.scopes)
