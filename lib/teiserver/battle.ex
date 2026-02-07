@@ -802,6 +802,9 @@ defmodule Teiserver.Battle do
   @spec get_lobby_member_list(T.lobby_id()) :: [T.userid()] | nil
   defdelegate get_lobby_member_list(id), to: LobbyLib
 
+  @spec get_lobby_script_passwords(T.lobby_id()) :: %{T.userid() => String.t()} | nil
+  defdelegate get_lobby_script_passwords(id), to: LobbyLib
+
   @spec list_lobby_players(T.lobby_id()) :: [T.client()] | nil
   defdelegate list_lobby_players(id), to: LobbyLib
 
