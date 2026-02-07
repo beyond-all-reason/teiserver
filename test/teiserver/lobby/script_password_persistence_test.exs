@@ -1,8 +1,4 @@
 defmodule Teiserver.Lobby.ScriptPasswordPersistenceTest do
-  @moduledoc """
-  Tests for issue #438: script_password must be stored in the LobbyServer
-  so it can be recovered when clients (particularly SPADS) reconnect.
-  """
   use Teiserver.ServerCase, async: false
 
   alias Teiserver.{Battle, Lobby}
@@ -28,15 +24,11 @@ defmodule Teiserver.Lobby.ScriptPasswordPersistenceTest do
 
       Lobby.add_user_to_battle(user.id, lobby_id, "removable_pw")
       :timer.sleep(100)
-
-      passwords = Battle.get_lobby_script_passwords(lobby_id)
-      assert passwords[user.id] == "removable_pw"
+      assert Battle.get_lobby_script_passwords(lobby_id)[user.id] == "removable_pw"
 
       Lobby.remove_user_from_battle(user.id, lobby_id)
       :timer.sleep(100)
-
-      passwords = Battle.get_lobby_script_passwords(lobby_id)
-      refute Map.has_key?(passwords, user.id)
+      refute Map.has_key?(Battle.get_lobby_script_passwords(lobby_id), user.id)
     end
 
     test "stores distinct passwords for multiple users" do
@@ -57,50 +49,39 @@ defmodule Teiserver.Lobby.ScriptPasswordPersistenceTest do
       assert map_size(passwords) == 3
     end
 
-    test "get_lobby_script_passwords returns nil for non-existent lobby" do
-      result = Battle.get_lobby_script_passwords(999_999_999)
-      assert result == nil
+    test "returns nil for non-existent lobby" do
+      assert Battle.get_lobby_script_passwords(999_999_999) == nil
     end
 
-    test "password is updated if user rejoins with different password" do
+    test "password is updated on rejoin" do
       lobby_id = make_lobby()
       user = new_user()
 
       Lobby.add_user_to_battle(user.id, lobby_id, "first_pw")
       :timer.sleep(100)
+      assert Battle.get_lobby_script_passwords(lobby_id)[user.id] == "first_pw"
 
-      passwords = Battle.get_lobby_script_passwords(lobby_id)
-      assert passwords[user.id] == "first_pw"
-
-      # Remove and re-add with different password
       Lobby.remove_user_from_battle(user.id, lobby_id)
       :timer.sleep(50)
       Lobby.add_user_to_battle(user.id, lobby_id, "second_pw")
       :timer.sleep(100)
-
-      passwords = Battle.get_lobby_script_passwords(lobby_id)
-      assert passwords[user.id] == "second_pw"
+      assert Battle.get_lobby_script_passwords(lobby_id)[user.id] == "second_pw"
     end
 
-    test "add_user_to_battle/2 auto-generates a script_password that is stored" do
+    test "add_user_to_battle/2 auto-generates a stored password" do
       lobby_id = make_lobby()
       user = new_user()
 
-      # The 2-arg version generates a random password
       Lobby.add_user_to_battle(user.id, lobby_id)
       :timer.sleep(100)
 
-      passwords = Battle.get_lobby_script_passwords(lobby_id)
-      assert Map.has_key?(passwords, user.id)
-      assert is_binary(passwords[user.id])
-      assert String.length(passwords[user.id]) > 0
+      password = Battle.get_lobby_script_passwords(lobby_id)[user.id]
+      assert is_binary(password) and byte_size(password) > 0
     end
 
-    test "script_passwords start empty for new lobby" do
+    test "starts empty for new lobby" do
       lobby_id = make_lobby()
-
-      passwords = Battle.get_lobby_script_passwords(lobby_id)
-      assert passwords == %{}
+      assert Battle.get_lobby_script_passwords(lobby_id) == %{}
     end
   end
 end
