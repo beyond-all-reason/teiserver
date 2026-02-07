@@ -495,7 +495,9 @@ defmodule Teiserver.SpringTcpServer do
 
   def handle_info({:login_event, :add_user_to_battle, userid, lobby_id}, state) do
     client = Account.get_client_by_id(userid)
-    new_state = user_join_battle(client, lobby_id, nil, state)
+    script_passwords = Teiserver.Battle.get_lobby_script_passwords(lobby_id) || %{}
+    script_password = Map.get(script_passwords, userid)
+    new_state = user_join_battle(client, lobby_id, script_password, state)
     {:noreply, new_state}
   end
 

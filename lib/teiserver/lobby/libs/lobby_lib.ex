@@ -346,6 +346,11 @@ defmodule Teiserver.Lobby.LobbyLib do
     call_lobby(lobby_id, :get_member_list)
   end
 
+  @spec get_lobby_script_passwords(T.lobby_id()) :: %{T.userid() => String.t()} | nil
+  def get_lobby_script_passwords(lobby_id) do
+    call_lobby(lobby_id, :get_script_passwords)
+  end
+
   @spec get_lobby_member_count(T.lobby_id()) :: integer()
   def get_lobby_member_count(lobby_id) do
     call_lobby(lobby_id, :get_member_count) || 0

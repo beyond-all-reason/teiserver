@@ -72,6 +72,10 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, state.member_list, state}
   end
 
+  def handle_call(:get_script_passwords, _from, state) do
+    {:reply, state.script_passwords, state}
+  end
+
   def handle_call(:get_spectator_count, _from, state) do
     {player_list, new_state} = get_player_list(state)
     {:reply, Enum.count(state.member_list) - Enum.count(player_list), new_state}
@@ -138,14 +142,16 @@ defmodule Teiserver.Battle.LobbyServer do
      %{state | state: :lobby, match_uuid: uuid, match_id: new_match.id, modoptions: modoptions}}
   end
 
-  def handle_cast({:add_user, userid, _script_password}, state) do
+  def handle_cast({:add_user, userid, script_password}, state) do
     new_members = [userid | state.member_list] |> Enum.uniq()
-    {:noreply, %{state | member_list: new_members}}
+    new_script_passwords = Map.put(state.script_passwords, userid, script_password)
+    {:noreply, %{state | member_list: new_members, script_passwords: new_script_passwords}}
   end
 
   def handle_cast({:remove_user, userid}, state) do
     new_members = List.delete(state.member_list, userid)
-    {:noreply, %{state | member_list: new_members}}
+    new_script_passwords = Map.delete(state.script_passwords, userid)
+    {:noreply, %{state | member_list: new_members, script_passwords: new_script_passwords}}
   end
 
   def handle_cast({:set_password, nil}, state) do
@@ -684,6 +690,7 @@ defmodule Teiserver.Battle.LobbyServer do
        queue_id: nil,
        bots: %{},
        member_list: [],
+       script_passwords: %{},
        player_list: [],
        player_list_last_updated: 0,
        balance_mode: :party,

@@ -734,6 +734,8 @@ defmodule Teiserver.Protocols.SpringOut do
       })
 
       if lobby != nil and Map.has_key?(lobby, :players) do
+        script_passwords = Battle.get_lobby_script_passwords(lobby_id) || %{}
+
         lobby.players
         |> Enum.each(fn player_id ->
           msg = %{
@@ -741,7 +743,7 @@ defmodule Teiserver.Protocols.SpringOut do
             event: :joined_lobby,
             lobby_id: lobby_id,
             client: Account.get_client_by_id(player_id),
-            script_password: nil
+            script_password: Map.get(script_passwords, player_id)
           }
 
           send(self(), msg)
