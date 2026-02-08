@@ -22,29 +22,29 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   end
 
   test "can stop user from login" do
-    set_capacity(0)
     user = new_user()
+    set_capacity(0)
     assert LoginThrottleServer.attempt_login(self(), user.id) == false
     refute_receive {:login_accepted, _}, 5
   end
 
   test "bots ignore limits" do
-    set_capacity(0)
     bot = new_user()
     bot_id = bot.id
     Account.update_cache_user(bot.id, %{roles: ["Bot"]})
+    set_capacity(0)
     assert LoginThrottleServer.attempt_login(self(), bot_id) == true
   end
 
   test "can immediately log in when there is capacity" do
-    set_capacity(1)
     user = new_user()
+    set_capacity(1)
     assert LoginThrottleServer.attempt_login(self(), user.id) == true
   end
 
   test "can login when capacity becomes available" do
-    set_capacity(0)
     user = new_user()
+    set_capacity(0)
     assert LoginThrottleServer.attempt_login(self(), user.id) == false
     assert LoginThrottleServer.get_queue_length() == 1
     set_capacity(1)
@@ -53,12 +53,11 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   end
 
   test "works with many players" do
-    set_capacity(0)
-
     {user1, t1} = {new_user(), oneshot_pid()}
     {user2, t2} = {new_user(), oneshot_pid()}
     user3 = new_user()
 
+    set_capacity(0)
     assert LoginThrottleServer.attempt_login(t1.pid, user1.id) == false
     assert LoginThrottleServer.attempt_login(t2.pid, user2.id) == false
     assert LoginThrottleServer.attempt_login(self(), user3.id) == false
@@ -75,10 +74,10 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   end
 
   test "ignore players that have disconnected" do
-    set_capacity(0)
     {user1, t1} = {new_user(), oneshot_pid()}
     user2 = new_user()
 
+    set_capacity(0)
     assert LoginThrottleServer.attempt_login(t1.pid, user1.id) == false
     assert LoginThrottleServer.attempt_login(self(), user2.id) == false
     assert LoginThrottleServer.get_queue_length() == 2
@@ -101,11 +100,11 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   end
 
   test "respect rate limiter" do
-    set_capacity(0)
     LoginThrottleServer.reset_rate_limiter(1, true)
     {user1, t1} = {new_user(), oneshot_pid()}
     user2 = new_user()
 
+    set_capacity(0)
     assert LoginThrottleServer.attempt_login(t1.pid, user1.id) == false
     assert LoginThrottleServer.attempt_login(self(), user2.id) == false
     assert LoginThrottleServer.get_queue_length() == 2
@@ -120,11 +119,11 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   end
 
   test "respect rate limiter even when there is capacity" do
-    set_capacity(100)
     LoginThrottleServer.reset_rate_limiter(1, false)
     {user1, t1} = {new_user(), oneshot_pid()}
     user2 = new_user()
 
+    set_capacity(100)
     assert LoginThrottleServer.attempt_login(t1.pid, user1.id) == true
     assert LoginThrottleServer.attempt_login(self(), user2.id) == false
     assert LoginThrottleServer.get_queue_length() == 1
