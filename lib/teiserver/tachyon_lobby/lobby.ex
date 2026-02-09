@@ -65,6 +65,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @type team ::
           {allyTeam :: non_neg_integer(), team :: non_neg_integer(), player :: non_neg_integer()}
 
+  @type asset_status :: :missing | :downloading | :ready
+
   @typedoc """
   The public state of the lobby. Anything that clients need to know about
   when in a lobby should be exposed in the details object
@@ -77,7 +79,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           engine_version: String.t(),
           ally_team_config: ally_team_config(),
           players: %{
-            T.userid() => %{team: team()}
+            T.userid() => %{team: team(), ready?: boolean(), asset_status: asset_status()}
           },
           spectators: %{
             join_queue_position: number() | nil
@@ -121,7 +123,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
            # player so they can join the battle
            password: String.t(),
            pid: pid(),
-           team: team()
+           team: team(),
+           ready?: boolean(),
+           asset_status: asset_status()
          }
 
   @typep spectator :: %{
@@ -378,7 +382,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
           name: start_params.creator_data.name,
           password: gen_password(),
           pid: start_params.creator_pid,
-          team: {0, 0, 0}
+          team: {0, 0, 0},
+          ready?: false,
+          asset_status: :ready
         }
       },
       spectators: %{},
@@ -945,7 +951,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     players =
       Enum.map(players, fn {p_id, p} ->
-        {p_id, %{team: p.team}}
+        {p_id, Map.take(p, [:team, :ready?, :asset_status])}
       end)
       |> Enum.into(%{})
 
@@ -974,8 +980,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
     do: Enum.reduce(events, state, &new_state_from_event/2)
 
   @spec new_state_from_event(event(), state()) :: state()
-  defp new_state_from_event({:move_player, p_id, team}, state),
-    do: put_in(state.players[p_id].team, team)
+  defp new_state_from_event({:move_player, p_id, team}, state) do
+    update_in(state.players[p_id], fn p ->
+      Map.merge(p, %{team: team, ready?: false, asset_status: :ready})
+    end)
+  end
 
   defp new_state_from_event({:remove_player_from_lobby, p_id}, state) do
     state
@@ -990,6 +999,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   defp new_state_from_event({:move_spec_to_player, p_id, player_data}, state) do
+    player_data = Map.merge(%{ready?: false, asset_status: :ready}, player_data)
+
     player =
       Map.merge(state.spectators[p_id], player_data)
       |> Map.delete(:join_queue_position)
@@ -1038,7 +1049,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
     change_map
     |> Map.put_new(:players, %{})
     |> Map.update!(:players, fn players ->
-      players |> Map.put_new(p_id, %{}) |> put_in([p_id, :team], team)
+      players
+      |> Map.put_new(p_id, %{})
+      |> update_in([p_id], fn p ->
+        Map.merge(%{team: team, ready?: false, asset_status: :ready}, p)
+      end)
     end)
   end
 
@@ -1055,6 +1070,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   defp update_change_from_event({:move_spec_to_player, p_id, player_data}, change_map) do
+    player_data = Map.merge(%{ready?: false, asset_status: :ready}, player_data)
+
     change_map
     |> Map.put_new(:players, %{})
     |> put_in([:players, p_id], player_data)
@@ -1372,7 +1389,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
               nil
 
             team ->
-              {id, %{team: team}}
+              {id, %{team: team, ready?: false, asset_status: :ready}}
           end
       end
 

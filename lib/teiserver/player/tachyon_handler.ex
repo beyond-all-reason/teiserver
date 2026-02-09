@@ -1120,9 +1120,15 @@ defmodule Teiserver.Player.TachyonHandler do
         Map.put(m, to_string(p_id), nil)
 
       {p_id, player_updates}, m ->
+        mappings = %{
+          ready?: :isReady,
+          asset_status: :assetStatus
+        }
+
         val =
           get_tachyon_teams(player_updates)
           |> Map.put(:id, to_string(p_id))
+          |> Map.merge(Collections.transform_map(player_updates, mappings))
 
         Map.put(m, to_string(p_id), val)
     end)

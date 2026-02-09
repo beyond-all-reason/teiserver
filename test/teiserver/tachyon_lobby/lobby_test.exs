@@ -153,10 +153,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     test "works" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
-      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, _pid, %{id: id} = create_details} = Lobby.create(mk_start_params([1, 1]))
+      assert %{ready?: false, asset_status: :ready} = create_details.players[@default_user_id]
       {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
       {:ok, details} = Lobby.join_ally_team(id, "user2", 1)
       assert %{team: {1, _, _}} = details.players["user2"]
+      assert %{ready?: false, asset_status: :ready} = details.players["user2"]
 
       # is idempotent
       {:ok, details2} = Lobby.join_ally_team(id, "user2", 1)
@@ -172,7 +174,10 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _, _details} = Lobby.join(id, mk_player("user2"))
       {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
 
-      expected = %{players: %{"user2" => %{team: {1, 0, 0}}}, spectators: %{"user2" => nil}}
+      expected = %{
+        players: %{"user2" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready}},
+        spectators: %{"user2" => nil}
+      }
 
       assert_receive {:lobby, ^id, {:updated, ^expected}}
     end
@@ -212,7 +217,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, details} = Lobby.join_ally_team(id, "user2", 0)
 
       expected_update = %{
-        players: %{"user2" => %{team: {0, 1, 0}}},
+        players: %{"user2" => %{team: {0, 1, 0}, ready?: false, asset_status: :ready}},
         spectators: %{"user2" => nil}
       }
 
@@ -298,7 +303,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       :ok = Lobby.leave(id, "user2")
 
-      expected = %{players: %{"user2" => nil, "user3" => %{team: {1, 0, 0}}}}
+      expected = %{
+        players: %{
+          "user2" => nil,
+          "user3" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready}
+        }
+      }
 
       assert_received {:lobby, ^id, {:updated, ^expected}}
     end
@@ -488,7 +498,10 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.spectate(id, "2")
       assert_receive {:lobby, ^id, {:updated, updates}}
 
-      assert %{spectators: %{"3" => nil}, players: %{"3" => %{team: {1, 0, 0}}}} = updates
+      assert %{
+               spectators: %{"3" => nil},
+               players: %{"3" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready}}
+             } = updates
     end
 
     test "join team when player leaves the lobby" do
@@ -503,7 +516,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.leave(id, "2")
       assert_receive {:lobby, ^id, {:updated, updates}}
 
-      assert %{players: %{"2" => nil, "3" => %{team: {1, 0, 0}}}} = updates
+      assert %{
+               players: %{
+                 "2" => nil,
+                 "3" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready}
+               }
+             } = updates
     end
 
     test "join team when player disappear" do
@@ -519,7 +537,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       Process.exit(ctx[:users]["2"].pid, :kill)
       assert_receive {:lobby, ^id, {:updated, updates}}
 
-      assert %{players: %{"3" => %{team: {1, 0, 0}}, "2" => nil}} = updates
+      assert %{
+               players: %{
+                 "3" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready},
+                 "2" => nil
+               }
+             } = updates
     end
 
     test "spec queue positions works" do
@@ -856,7 +879,13 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok =
         Lobby.update_properties(id, @default_user_id, %{ally_team_config: new_ally_team_config})
 
-      assert_receive {:lobby, ^id, {:updated, %{players: %{"2" => %{team: {1, 0, 0}}}}}}
+      assert_receive {:lobby, ^id,
+                      {:updated,
+                       %{
+                         players: %{
+                           "2" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready}
+                         }
+                       }}}
     end
 
     test "put extra players in join queue" do
