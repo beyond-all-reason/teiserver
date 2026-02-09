@@ -1068,6 +1068,60 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "update player status" do
+    test "must be valid lobby" do
+      {:error, :invalid_lobby} = Lobby.update_client_status("nolobby", "user1", %{ready?: true})
+    end
+
+    test "must be in lobby" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      {:error, :not_in_lobby} = Lobby.update_client_status(id, "user1", %{ready?: true})
+    end
+
+    test "can update properties one by one" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      :ok = Lobby.update_client_status(id, @default_user_id, %{ready?: true})
+      expected = %{players: %{@default_user_id => %{ready?: true}}}
+      assert_receive {:lobby, ^id, {:updated, ^expected}}
+
+      :ok = Lobby.update_client_status(id, @default_user_id, %{asset_status: :downloading})
+      expected = %{players: %{@default_user_id => %{asset_status: :downloading}}}
+      assert_receive {:lobby, ^id, {:updated, ^expected}}
+    end
+
+    test "can update multiple properties at once" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+
+      :ok =
+        Lobby.update_client_status(id, @default_user_id, %{
+          ready?: true,
+          asset_status: :downloading
+        })
+
+      expected = %{players: %{@default_user_id => %{ready?: true, asset_status: :downloading}}}
+      assert_receive {:lobby, ^id, {:updated, ^expected}}
+    end
+
+    # in the future we may want to avoid sending events if there is no changes
+    # it would cost a bit more cpu to potentially save a few messages, but this
+    # could also be handled by client. For now, keep implementation simple
+    # and always process the request
+    test "send event if no changes" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      :ok = Lobby.update_client_status(id, @default_user_id, %{ready?: false})
+      expected = %{players: %{@default_user_id => %{ready?: false}}}
+      assert_receive {:lobby, ^id, {:updated, ^expected}}, 30
+    end
+
+    test "only player can update status" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([1, 1]))
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
+
+      {:error, :not_a_player} = Lobby.update_client_status(id, "other-user-id", %{ready?: true})
+    end
+  end
+
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the
   # teiserver_web/tachyon/lobby_test.exs file
