@@ -145,6 +145,28 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
       assert SpadsController.is_non_empty_balance_result?(balance_result) == false
     end
+
+    test "can detect malformed balance results" do
+      assert SpadsController.is_non_empty_balance_result?(nil) == false
+      assert SpadsController.is_non_empty_balance_result?(%{}) == false
+      assert SpadsController.is_non_empty_balance_result?(%{team_sizes: []}) == false
+      assert SpadsController.is_non_empty_balance_result?(%{team_sizes: nil}) == false
+      assert SpadsController.is_non_empty_balance_result?(%{team_sizes: %{1 => 0}}) == false
+      assert SpadsController.is_non_empty_balance_result?(%{team_sizes: %{1 => nil}}) == false
+      assert SpadsController.is_non_empty_balance_result?(%{team_sizes: %{1 => 4}}) == true
+    end
+
+    test "can derive team dimensions from balance result" do
+      assert SpadsController.get_balance_team_dimensions(nil) == :error
+      assert SpadsController.get_balance_team_dimensions(%{}) == :error
+      assert SpadsController.get_balance_team_dimensions(%{team_sizes: []}) == :error
+      assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{}}) == :error
+      assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => 0}}) == :error
+      assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => nil}}) == :error
+
+      assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => 8, 2 => 6}}) ==
+               {:ok, {2, 8}}
+    end
   end
 
   describe "end game data" do
