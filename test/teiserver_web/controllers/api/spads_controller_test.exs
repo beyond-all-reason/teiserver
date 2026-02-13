@@ -150,7 +150,8 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{}}) == :error
       assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => 0}}) == :error
       assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => nil}}) == :error
-      assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => 4}}) == {:ok, {1, 4}}
+      assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => 4}}) ==
+               {:ok, {1, 4}}
 
       assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => 8, 2 => 6}}) ==
                {:ok, {2, 8}}

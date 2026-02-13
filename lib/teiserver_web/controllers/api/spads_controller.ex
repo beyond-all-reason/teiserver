@@ -213,5 +213,4 @@ defmodule TeiserverWeb.API.SpadsController do
       _ -> :error
     end
   end
-
 end
