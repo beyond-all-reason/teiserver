@@ -418,6 +418,25 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "update client status" do
+    setup [:setup_lobby]
+
+    test "must be in lobby" do
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      %{"status" => "failed", "reason" => "invalid_request"} =
+        Tachyon.lobby_update_client_status(ctx2[:client], %{"isReady" => true})
+    end
+
+    test "can update status", ctx do
+      %{"status" => "success"} =
+        Tachyon.lobby_update_client_status(ctx.client, %{"isReady" => true})
+
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(ctx.client)
+      assert data["players"][to_string(ctx.user.id)]["isReady"] == true
+    end
+  end
+
   describe "listing" do
     setup [
       {Tachyon, :setup_app},

@@ -826,6 +826,19 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/updateClientStatus", "request", _msg_id, %{"data" => data}, state) do
+    mappings = %{"isReady" => :ready?, "assetStatus" => {:asset_status, &parse_asset_status/1}}
+    change_status = Collections.transform_map(data, mappings)
+
+    case Player.Session.lobby_update_client_status(state.user.id, change_status) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
     case Player.Session.lobby_start_battle(state.user.id) do
       :ok ->
@@ -959,6 +972,15 @@ defmodule Teiserver.Player.TachyonHandler do
       {m, ""} -> {:marker, m}
       # invalid markers won't be found in the queue
       _ -> {:marker, :invalid}
+    end
+  end
+
+  defp parse_asset_status(status) do
+    # the json schema validation already prevent values outside this enum
+    case status do
+      "missing" -> :missing
+      "downloading" -> :downloading
+      "ready" -> :ready
     end
   end
 
