@@ -214,7 +214,4 @@ defmodule TeiserverWeb.API.SpadsController do
     end
   end
 
-  def is_non_empty_balance_result?(balance_result) do
-    match?({:ok, _}, get_balance_team_dimensions(balance_result))
-  end
 end

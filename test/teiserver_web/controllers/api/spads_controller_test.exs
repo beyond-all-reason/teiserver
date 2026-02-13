@@ -126,7 +126,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       assert data == %{}
     end
 
-    test "can detect empty balance result" do
+    test "can derive team dimensions from balance result" do
       # This is the default balance result when no players
       # Defined inside balance_lib.ex
       balance_result = %{
@@ -143,26 +143,14 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
         has_parties?: false
       }
 
-      assert SpadsController.is_non_empty_balance_result?(balance_result) == false
-    end
-
-    test "can detect malformed balance results" do
-      assert SpadsController.is_non_empty_balance_result?(nil) == false
-      assert SpadsController.is_non_empty_balance_result?(%{}) == false
-      assert SpadsController.is_non_empty_balance_result?(%{team_sizes: []}) == false
-      assert SpadsController.is_non_empty_balance_result?(%{team_sizes: nil}) == false
-      assert SpadsController.is_non_empty_balance_result?(%{team_sizes: %{1 => 0}}) == false
-      assert SpadsController.is_non_empty_balance_result?(%{team_sizes: %{1 => nil}}) == false
-      assert SpadsController.is_non_empty_balance_result?(%{team_sizes: %{1 => 4}}) == true
-    end
-
-    test "can derive team dimensions from balance result" do
+      assert SpadsController.get_balance_team_dimensions(balance_result) == :error
       assert SpadsController.get_balance_team_dimensions(nil) == :error
       assert SpadsController.get_balance_team_dimensions(%{}) == :error
       assert SpadsController.get_balance_team_dimensions(%{team_sizes: []}) == :error
       assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{}}) == :error
       assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => 0}}) == :error
       assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => nil}}) == :error
+      assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => 4}}) == {:ok, {1, 4}}
 
       assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => 8, 2 => 6}}) ==
                {:ok, {2, 8}}
