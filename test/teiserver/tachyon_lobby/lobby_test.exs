@@ -817,6 +817,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert details.map_name == "new map"
       assert_receive {:lobby, ^id, {:updated, %{map_name: "new map"}}}
     end
+
+    test "only players can change the map" do
+      %{id: id} = setup_full_lobby([1, 1])
+      {:error, _} = Lobby.update_properties(id, "2", %{map_name: "new map"})
+    end
   end
 
   describe "update ally team" do

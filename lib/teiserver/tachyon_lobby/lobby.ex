@@ -1573,8 +1573,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:ok, [{:update_lobby_name, new_name}]}
   end
 
-  defp update_property(:map_name, new_name, _state, _user_id),
-    do: {:ok, [{:update_map_name, new_name}]}
+  defp update_property(:map_name, new_name, state, user_id) do
+    cond do
+      not is_map_key(state.players, user_id) -> {:error, "Only players can change the map"}
+      true -> {:ok, [{:update_map_name, new_name}]}
+    end
+  end
 
   defp update_property(:ally_team_config, new_config, state, _user_id) do
     {:ok, [{:update_ally_team_config, state.ally_team_config, new_config}]}
