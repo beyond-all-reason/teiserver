@@ -68,11 +68,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @type asset_status :: :missing | :downloading | :ready
 
   @type vote_action :: {:change_map, String.t()} | :start
+  @type vote_ballot :: :yes | :no | :abstain
   @type vote_state :: %{
           id: String.t(),
           action: vote_action,
           initiator: T.userid(),
-          voters: %{T.userid() => :pending | :yes | :no | :abstain},
+          voters: %{T.userid() => :pending | vote_ballot()},
           until: DateTime.t(),
           quorum: non_neg_integer(),
           majority: non_neg_integer()
@@ -199,7 +200,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:update_ally_team_config, old_config :: ally_team_config(),
               new_config :: ally_team_config()}
            | {:start_vote, vote_state()}
+           | {:cast_vote, T.userid(), vote_ballot()}
            | :vote_timeout
+           | :vote_ended
 
   @spec gen_id() :: id()
   def gen_id(), do: UUID.uuid4()
@@ -357,6 +360,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :gen_statem.call(
       via_tuple(lobby_id),
       {:update_properties, user_id, update_data},
+      @default_call_timeout
+    )
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+  end
+
+  @spec vote_submit(id(), T.userid(), {String.t(), vote_ballot()}) ::
+          :ok | {:error, :invalid_lobby | :invalid_vote}
+  def vote_submit(lobby_id, user_id, ballot) do
+    :gen_statem.call(
+      via_tuple(lobby_id),
+      {:vote_submit, user_id, ballot},
       @default_call_timeout
     )
   catch
@@ -769,6 +784,21 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  def handle_event({:call, from}, {:vote_submit, _user_id, {vote_id, _}}, _state, data)
+      when data.current_vote.id != vote_id,
+      do: {:keep_state, data, [{:reply, from, {:error, :invalid_vote}}]}
+
+  def handle_event({:call, from}, {:vote_submit, user_id, {_vote_id, ballot}}, _state, data) do
+    if is_map_key(data.current_vote.voters, user_id) do
+      event = {:cast_vote, user_id, ballot}
+      aggregate = process_events([event], data) |> broadcast_updates()
+      process_event_actions(aggregate)
+      {:keep_state, aggregate.data, [{:reply, from, :ok}]}
+    else
+      {:keep_state, data, [{:reply, from, {:error, :invalid_vote}}]}
+    end
+  end
+
   def handle_event({:call, from}, {:join_queue, user_id}, _state, data)
       when not is_map_key(data.players, user_id) and not is_map_key(data.spectators, user_id),
       do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
@@ -933,7 +963,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       when data.current_vote.id == vote_id do
     event = :vote_timeout
     aggregate = process_events([event], data) |> broadcast_updates()
-    broadcast_to_members(aggregate.data, nil, {:lobby, data.id, {:vote_timeout, vote_id}})
+    process_event_actions(aggregate)
     {:keep_state, aggregate.data}
   end
 
@@ -1030,10 +1060,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # Given a list of events to process (in the event sourcing way) and the initial
   # state to apply these events to, returns the final state alongside any
   # potential update events that should also be broadcasted to members
-  @typep aggregate :: %{data: state(), updates: [event()]}
+  @typep aggregate :: %{data: state(), updates: [event()], actions: [event_actions()]}
+  @typep event_actions :: {:vote_ended, final_vote :: vote_state(), outcome :: term()}
   @spec process_events([event()], state()) :: aggregate()
   defp process_events(events, state),
-    do: Enum.reduce(events, %{data: state, updates: []}, &process_event/2)
+    do: Enum.reduce(events, %{data: state, updates: [], actions: []}, &process_event/2)
 
   @spec process_event(event(), %{data: state(), updates: [event()]}) :: %{
           data: state(),
@@ -1048,17 +1079,23 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   defp process_event({:remove_player_from_lobby, p_id} = ev, aggregate) do
-    aggregate
-    |> update_in([:data, :players], &Map.delete(&1, p_id))
-    |> update_in([:data, :monitors], &MC.demonitor_by_val(&1, {:user, p_id}))
-    |> update_in([:updates], &[ev | &1])
+    aggregate =
+      aggregate
+      |> update_in([:data, :players], &Map.delete(&1, p_id))
+      |> update_in([:data, :monitors], &MC.demonitor_by_val(&1, {:user, p_id}))
+      |> update_in([:updates], &[ev | &1])
+
+    process_event({:cast_vote, p_id, :abstain}, aggregate)
   end
 
   defp process_event({:remove_spec_from_lobby, s_id} = ev, aggregate) do
-    aggregate
-    |> update_in([:data, :spectators], &Map.delete(&1, s_id))
-    |> update_in([:data, :monitors], &MC.demonitor_by_val(&1, {:user, s_id}))
-    |> update_in([:updates], &[ev | &1])
+    aggregate =
+      aggregate
+      |> update_in([:data, :spectators], &Map.delete(&1, s_id))
+      |> update_in([:data, :monitors], &MC.demonitor_by_val(&1, {:user, s_id}))
+      |> update_in([:updates], &[ev | &1])
+
+    process_event({:cast_vote, s_id, :abstain}, aggregate)
   end
 
   defp process_event({:move_spec_to_player, p_id, player_data} = ev, aggregate) do
@@ -1223,12 +1260,50 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> Map.update!(:updates, &[ev | &1])
   end
 
+  defp process_event({:cast_vote, user_id, _ballot}, aggregate)
+       when is_nil(aggregate.data.current_vote) or
+              not is_map_key(aggregate.data.current_vote.voters, user_id),
+       do: aggregate
+
+  defp process_event({:cast_vote, user_id, ballot} = ev, aggregate) do
+    new_aggregate = aggregate |> put_in([:data, :current_vote, :voters, user_id], ballot)
+
+    case vote_result(new_aggregate.data.current_vote) do
+      :undecided ->
+        Map.update!(new_aggregate, :updates, &[ev | &1])
+
+      {:ended, result} ->
+        vote = new_aggregate.data.current_vote
+
+        new_aggregate =
+          new_aggregate
+          |> put_in([:data, :current_vote], nil)
+          |> Map.update!(:actions, &[{:vote_ended, vote, result} | &1])
+
+        new_aggregate =
+          case {result, vote.action} do
+            {:failed, _} ->
+              new_aggregate
+
+            {:passed, {:change_map, new_map}} ->
+              process_event({:update_map_name, new_map}, new_aggregate)
+              # just let the thing crash if a new vote action shows up. It'll be easy
+              # to spot and fix/add support. :start isn't yet supported
+          end
+
+        Map.update!(new_aggregate, :updates, &[:vote_ended | &1])
+    end
+  end
+
   # don't bother cancelling the timer. The event handler checks the vote id
   # and it allows us not to worry about storing the tref
   defp process_event(:vote_timeout = ev, aggregate) do
+    vote_ev = {:vote_ended, aggregate.data.current_vote, :timeout}
+
     aggregate
     |> put_in([:data, :current_vote], nil)
     |> Map.update!(:updates, &[ev | &1])
+    |> Map.update!(:actions, &[vote_ev | &1])
   end
 
   # avoid sending a useless lobby list update when the last member of the lobby
@@ -1326,7 +1401,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp update_change_from_event({:start_vote, vote}, change_map),
     do: Map.put(change_map, :current_vote, vote)
 
+  defp update_change_from_event({:cast_vote, user_id, ballot}, change_map) do
+    change_map
+    |> Map.put_new(:current_vote, %{})
+    |> Map.update!(:current_vote, &Map.put_new(&1, :voters, %{}))
+    |> put_in([:current_vote, :voters, user_id], ballot)
+  end
+
   defp update_change_from_event(:vote_timeout, change_map),
+    do: Map.put(change_map, :current_vote, nil)
+
+  defp update_change_from_event(:vote_ended, change_map),
     do: Map.put(change_map, :current_vote, nil)
 
   defp broadcast_list_updates(_events, _starting_state, final_state)
@@ -1511,6 +1596,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         ]
 
     aggregate = process_events(events, state) |> broadcast_updates()
+    process_event_actions(aggregate)
     broadcast_player_count_change(aggregate.data)
   end
 
@@ -1525,6 +1611,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         [{:remove_spec_from_lobby, user_id}, :repack_players, :fill_from_join_queue]
 
     aggregate = process_events(events, state) |> broadcast_updates()
+    process_event_actions(aggregate)
     broadcast_player_count_change(aggregate.data)
   end
 
@@ -1646,10 +1733,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
             if p.id == user_id, do: {p.id, :yes}, else: {p.id, :pending}
           end
 
-        quorum =
-          if rem(map_size(voters), 2) == 0,
-            do: map_size(voters) / 2 + 1,
-            else: (map_size(voters) / 2) |> :math.ceil() |> trunc()
+        # ensure we need absolute majority.
+        # 0.501 works until 254 players, which is the hard limit of players
+        # in a game
+        quorum = (map_size(voters) * 0.501) |> :math.ceil() |> trunc()
 
         vote = %{
           id: UUID.uuid4(),
@@ -1675,6 +1762,24 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   defp update_property(prop, _, _, _), do: {:error, "update #{prop} is not supported"}
+
+  defp process_event_actions(aggregate),
+    do: Enum.each(aggregate.actions, &process_event_action(&1, aggregate.data))
+
+  defp process_event_action({:vote_ended, vote, outcome}, fsm_data) do
+    broadcast_to_members(fsm_data, nil, {:lobby, fsm_data.id, {:vote_ended, vote.id, outcome}})
+  end
+
+  @spec vote_result(vote_state()) :: :undecided | {:ended, :passed | :failed}
+  defp vote_result(vote) do
+    votes = for {_, v} <- vote.voters, do: v
+
+    cond do
+      Enum.count(votes, &(&1 != :pending)) < vote.quorum -> :undecided
+      Enum.count(votes, &(&1 == :yes)) >= vote.majority -> {:ended, :passed}
+      true -> {:ended, :failed}
+    end
+  end
 
   @doc """
   apply some updates onto a base map according to json merge patch semantics
