@@ -18,32 +18,36 @@ defmodule TeiserverWeb.API.Admin.UserController do
     :user_not_found => 404,
     :app_not_found => 400,
     :invalid_scope => 400,
+    :invalid_ttl => 400,
     :default => 400
   }
 
   @error_messages %{
     :user_not_found => "User not found",
     :app_not_found => @app_not_found_error,
-    :invalid_scope => "Invalid scope for OAuth application"
+    :invalid_scope => "Invalid scope for OAuth application",
+    :invalid_ttl => "access_token_ttl must be a positive integer (seconds)"
   }
 
   def create(conn, params) do
     params = Map.merge(@default_params, params)
 
-    with {:ok, user} <- Account.script_create_user(params),
+    with {:ok, token_opts} <- build_token_opts(params),
+         {:ok, user} <- Account.script_create_user(params),
          :ok <- update_user_stats(user.id, params),
          {:ok, app} <- get_generic_lobby_app(),
-         {:ok, token} <- create_user_token(user, app) do
+         {:ok, token} <- create_user_token(user, app, token_opts) do
       json(conn, build_user_response(user, token))
     else
       error -> handle_error(conn, error)
     end
   end
 
-  def refresh_token(conn, %{"email" => email}) do
-    with {:ok, user} <- get_user_by_email(email),
+  def refresh_token(conn, %{"email" => email} = params) do
+    with {:ok, token_opts} <- build_token_opts(params),
+         {:ok, user} <- get_user_by_email(email),
          {:ok, app} <- get_generic_lobby_app(),
-         {:ok, token} <- create_user_token(user, app) do
+         {:ok, token} <- create_user_token(user, app, token_opts) do
       json(conn, build_user_response(user, token))
     else
       error -> handle_error(conn, error)
@@ -86,16 +90,28 @@ defmodule TeiserverWeb.API.Admin.UserController do
     end
   end
 
-  defp create_user_token(user, app) do
+  defp create_user_token(user, app, opts) do
     OAuth.create_token(
       user,
       %{
         id: app.id,
         scopes: app.scopes
       },
-      create_refresh: true,
-      scopes: app.scopes
+      [create_refresh: true, scopes: app.scopes] ++ opts
     )
+  end
+
+  defp build_token_opts(params) do
+    case Map.get(params, "access_token_ttl") do
+      nil ->
+        {:ok, []}
+
+      ttl_seconds when is_integer(ttl_seconds) and ttl_seconds > 0 ->
+        {:ok, [access_token_ttl: Timex.Duration.from_seconds(ttl_seconds)]}
+
+      _ ->
+        {:error, :invalid_ttl}
+    end
   end
 
   defp build_user_response(user, token) do

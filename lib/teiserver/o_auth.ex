@@ -185,8 +185,12 @@ defmodule Teiserver.OAuth do
             :scopes => Application.scopes(),
             optional(:original_scopes) => Application.scopes()
           },
-          create_refresh: boolean() | options(),
-          scopes: Application.scopes()
+          [
+            {:create_refresh, boolean()}
+            | {:scopes, Application.scopes()}
+            | {:now, DateTime.t()}
+            | {:access_token_ttl, Timex.Duration.t()}
+          ]
         ) ::
           {:ok, Token.t()} | {:error, :invalid_scope | Ecto.Changeset.t()}
   def create_token(user_id, application, opts \\ [])
@@ -206,6 +210,7 @@ defmodule Teiserver.OAuth do
   defp do_create_token(owner_attr, application, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
     scopes = opts[:scopes]
+    access_token_ttl = Keyword.get(opts, :access_token_ttl, Timex.Duration.from_minutes(30))
 
     if Enum.empty?(scopes) ||
          not MapSet.subset?(MapSet.new(scopes), MapSet.new(application.scopes)) do
@@ -217,7 +222,7 @@ defmodule Teiserver.OAuth do
           application_id: application.id,
           scopes: scopes,
           original_scopes: Map.get(application, :original_scopes, application.scopes),
-          expires_at: Timex.add(now, Timex.Duration.from_minutes(30)),
+          expires_at: Timex.add(now, access_token_ttl),
           type: :access
         }
         |> Map.merge(owner_attr)
