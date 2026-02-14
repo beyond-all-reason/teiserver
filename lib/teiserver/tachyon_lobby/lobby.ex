@@ -719,20 +719,19 @@ defmodule Teiserver.TachyonLobby.Lobby do
       do: {:keep_state, fsm_data, [{:reply, from, :ok}]}
 
   def handle_event({:call, from}, {:update_properties, user_id, data}, _state, fsm_data) do
-    {final_data, events, errors} =
-      Enum.reduce(data, {fsm_data, [], []}, fn {k, v}, {data, events, errors} ->
-        case update_property(k, v, data, user_id) do
+    {events, errors} =
+      Enum.reduce(data, {[], []}, fn {k, v}, {events, errors} ->
+        case update_property(k, v, fsm_data, user_id) do
           {:error, msg} ->
-            {data, events, [msg | errors]}
+            {events, [msg | errors]}
 
           {:ok, new_events} ->
-            updated_data = process_events(new_events, data).data
-            {updated_data, events ++ new_events, errors}
+            {events ++ new_events, errors}
         end
       end)
 
     if Enum.empty?(errors) do
-      broadcast_updates(%{data: final_data, updates: events})
+      final_data = process_events(events, fsm_data) |> broadcast_updates() |> Map.get(:data)
       broadcast_list_updates(events, fsm_data, final_data)
       {:keep_state, final_data, [{:reply, from, :ok}]}
     else
@@ -1107,9 +1106,75 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   defp process_event({:update_ally_team_config, _, new_config} = ev, aggregate) do
-    aggregate
-    |> put_in([:data, :ally_team_config], new_config)
-    |> update_in([:updates], &[ev | &1])
+    state = aggregate.data
+
+    spec_ids =
+      Enum.map(state.players, fn {p_id, %{team: {x, y, z}}} ->
+        with at_config when not is_nil(at_config) <- Enum.at(new_config, x),
+             team_config when not is_nil(team_config) <- Enum.at(at_config.teams, y) do
+          if y < at_config.max_teams && z < team_config.max_players,
+            do: nil,
+            else: p_id
+        else
+          nil -> p_id
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    {bot_ids, player_ids} = Enum.split_with(spec_ids, &bot_id?/1)
+
+    position_offset =
+      case get_first_player_in_join_queue(state.spectators) do
+        nil -> 0
+        spec_id -> state.spectators[spec_id].join_queue_position - Enum.count(player_ids) - 1
+      end
+
+    spec_events =
+      Enum.with_index(player_ids, position_offset)
+      |> Enum.map(fn {p_id, pos} -> {:move_player_to_spec, p_id, %{join_queue_position: pos}} end)
+
+    bot_events = Enum.map(bot_ids, fn b_id -> {:remove_player_from_lobby, b_id} end)
+
+    events = spec_events ++ bot_events ++ [:repack_players, :fill_from_join_queue]
+
+    new_aggregate = process_events(events, Map.replace!(state, :ally_team_config, new_config))
+
+    # We put players in join queue, and then fill the teams with
+    # the join queue, which means we can have events like
+    # :move_player_to_spec and later :move_spec_to_player
+    # which would generate an update with %{spectators: %{x => nil}}
+    # where x was never a spectator to beging with.
+    # So we need to detect these events and replace the pair with a :move_player
+    # event instead.
+    added_ids =
+      Enum.map(new_aggregate.updates, fn
+        {:move_spec_to_player, id, _} -> id
+        _ -> nil
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    ids_to_fix = MapSet.intersection(MapSet.new(player_ids), MapSet.new(added_ids))
+
+    final_events =
+      Enum.map(new_aggregate.updates, fn ev ->
+        case ev do
+          {:move_player_to_spec, x, _} ->
+            if MapSet.member?(ids_to_fix, x),
+              do: nil,
+              else: ev
+
+          {:move_spec_to_player, x, data} ->
+            if MapSet.member?(ids_to_fix, x),
+              do: {:move_player, x, data.team},
+              else: ev
+
+          _ ->
+            ev
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    new_aggregate |> put_in([:updates], [ev | final_events] ++ aggregate.updates)
   end
 
   # avoid sending a useless lobby list update when the last member of the lobby
@@ -1432,17 +1497,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
-  defp fill_players_from_join_queue(state, events \\ []) do
-    case add_player_from_join_queue(state) do
-      nil ->
-        {state, Enum.reverse(events)}
-
-      event ->
-        state = process_event(event, %{data: state, updates: []}).data
-        fill_players_from_join_queue(state, [event | events])
-    end
-  end
-
   defp gen_password(), do: :crypto.strong_rand_bytes(16) |> Base.encode16()
 
   # in tests, some user ids are string
@@ -1523,72 +1577,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     do: {:ok, [{:update_map_name, new_name}]}
 
   defp update_property(:ally_team_config, new_config, state, _user_id) do
-    spec_ids =
-      Enum.map(state.players, fn {p_id, %{team: {x, y, z}}} ->
-        with at_config when not is_nil(at_config) <- Enum.at(new_config, x),
-             team_config when not is_nil(team_config) <- Enum.at(at_config.teams, y) do
-          if y < at_config.max_teams && z < team_config.max_players,
-            do: nil,
-            else: p_id
-        else
-          nil -> p_id
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
-
-    {bot_ids, player_ids} = Enum.split_with(spec_ids, &bot_id?/1)
-
-    position_offset =
-      case get_first_player_in_join_queue(state.spectators) do
-        nil -> 0
-        spec_id -> state.spectators[spec_id].join_queue_position - Enum.count(player_ids) - 1
-      end
-
-    spec_events =
-      Enum.with_index(player_ids, position_offset)
-      |> Enum.map(fn {p_id, pos} -> {:move_player_to_spec, p_id, %{join_queue_position: pos}} end)
-
-    bot_events = Enum.map(bot_ids, fn b_id -> {:remove_player_from_lobby, b_id} end)
-
-    remove_events = [
-      {:update_ally_team_config, state.ally_team_config, new_config} | spec_events ++ bot_events
-    ]
-
-    state = process_events(remove_events, state).data
-
-    {_final_state, add_events} = fill_players_from_join_queue(state)
-
-    # We put players in join queue, and then fill the teams with
-    # the join queue, which means we can have events like
-    # :move_player_to_spec and later :move_spec_to_player
-    # which would generate an update with %{spectators: %{x => nil}}
-    # where x was never a spectator to beging with.
-    # So we need to detect these events and replace the pair with a :move_player
-    # event instead.
-    added_ids = Enum.map(add_events, fn {:move_spec_to_player, id, _} -> id end)
-
-    ids_to_fix = MapSet.intersection(MapSet.new(player_ids), MapSet.new(added_ids))
-
-    final_events =
-      Enum.map(remove_events ++ add_events, fn ev ->
-        case ev do
-          {:move_player_to_spec, x, _} ->
-            if MapSet.member?(ids_to_fix, x),
-              do: nil,
-              else: ev
-
-          {:move_spec_to_player, x, data} ->
-            if MapSet.member?(ids_to_fix, x),
-              do: {:move_player, x, data.team},
-              else: ev
-
-          _ ->
-            ev
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
-
-    {:ok, final_events}
+    {:ok, [{:update_ally_team_config, state.ally_team_config, new_config}]}
   end
 
   defp update_property(prop, _, _, _), do: {:error, "update #{prop} is not supported"}
