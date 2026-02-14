@@ -169,14 +169,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
            ids_to_rejoin: MapSet.t(T.userid())
          }
 
-  # the list of events used by the various internal functions
-  # a player (user or bot) changes team
+  # the list of internal events used to manipulate the lobby data, but also
+  # for updates to broadcast to members
+  # for more info on specific events, check how they are handled by `process_event/2`
   @typep event ::
            {:move_player, player_id(), team()}
            | {:remove_player_from_lobby, player_id()}
            | {:remove_spec_from_lobby, T.userid()}
            | {:move_spec_to_player, T.userid(), player_data :: map()}
            | {:move_player_to_spec, T.userid(), spec_data :: map()}
+           | :repack_players
+           | :fill_from_join_queue
            | {:update_client_status, T.userid(), client_status :: map()}
            | {:update_lobby_name, new_name :: String.t()}
            | {:update_map_name, new_name :: String.t()}
@@ -587,11 +590,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
         case {is_map_key(data.players, user_id), data.spectators[user_id]} do
           {true, nil} ->
             # we're moving a player from a different ally team
-            remove_events = do_remove_player(user_id, data.players)
-            events = [{:move_player, user_id, team} | remove_events]
-
-            data = new_state_from_events(events, data)
-            broadcast_updates(events, data)
+            events = [{:move_player, user_id, team}, :repack_players]
+            data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
 
             {:keep_state, data, [{:reply, from, {:ok, get_details_from_state(data)}}]}
 
@@ -599,8 +599,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
             # Adding a spec into an ally team. The way we construct the team
             # means it doesn't require any reshuffling of existing players
             events = [{:move_spec_to_player, user_id, %{team: team}}]
-            data = new_state_from_events(events, data)
-            broadcast_updates(events, data)
+            data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
             broadcast_player_count_change(data)
 
             {:keep_state, data, [{:reply, from, {:ok, get_details_from_state(data)}}]}
@@ -626,18 +625,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event({:call, from}, {:spectate, user_id}, _state, data)
       when is_map_key(data.players, user_id) do
-    remove_events = do_remove_player(user_id, data.players)
+    events = [
+      {:move_player_to_spec, user_id, %{join_queue_position: nil}},
+      :repack_players,
+      :fill_from_join_queue
+    ]
 
-    events = [{:move_player_to_spec, user_id, %{join_queue_position: nil}} | remove_events]
-    data = new_state_from_events(events, data)
-
-    {events, data} =
-      case add_player_from_join_queue(data) do
-        nil -> {events, data}
-        ev -> {[ev | events], new_state_from_events([ev], data)}
-      end
-
-    broadcast_updates(events, data)
+    data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
 
     {:keep_state, data, [{:reply, from, :ok}]}
   end
@@ -655,8 +649,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def handle_event({:call, from}, {:update_client_status, user_id, update_data}, _state, data) do
     supported_properties = [:ready?, :asset_status]
     event = {:update_client_status, user_id, Map.take(update_data, supported_properties)}
-    data = new_state_from_events([event], data)
-    broadcast_updates([event], data)
+    data = process_events([event], data) |> broadcast_updates() |> Map.get(:data)
     {:keep_state, data, [{:reply, from, :ok}]}
   end
 
@@ -704,19 +697,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
       do: {:keep_state, data, [{:reply, from, {:error, :invalid_bot_id}}]}
 
   def handle_event({:call, from}, {:remove_bot, bot_id}, _state, data) do
-    events = do_remove_player(bot_id, data.players)
-    events = [{:remove_player_from_lobby, bot_id} | events]
-    data = new_state_from_events(events, data)
+    events = [{:remove_player_from_lobby, bot_id}, :repack_players, :fill_from_join_queue]
+    aggregate = process_events(events, data) |> broadcast_updates()
 
-    {events, data} =
-      case add_player_from_join_queue(data) do
-        nil -> {events, data}
-        ev -> {[ev | events], new_state_from_events([ev], data)}
-      end
-
-    broadcast_updates(events, data)
-
-    {:keep_state, data, [{:reply, from, :ok}]}
+    {:keep_state, aggregate.data, [{:reply, from, :ok}]}
   end
 
   def handle_event({:call, from}, {:update_bot, %{id: bot_id}}, _state, data)
@@ -734,21 +718,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
       when map_size(data) == 0,
       do: {:keep_state, fsm_data, [{:reply, from, :ok}]}
 
-  def handle_event({:call, from}, {:update_properties, _user_id, data}, _state, fsm_data) do
-    {final_data, events, errors} =
-      Enum.reduce(data, {fsm_data, [], []}, fn {k, v}, {data, events, errors} ->
-        case update_property(k, v, data) do
+  def handle_event({:call, from}, {:update_properties, user_id, data}, _state, fsm_data) do
+    {events, errors} =
+      Enum.reduce(data, {[], []}, fn {k, v}, {events, errors} ->
+        case update_property(k, v, fsm_data, user_id) do
           {:error, msg} ->
-            {data, events, [msg | errors]}
+            {events, [msg | errors]}
 
           {:ok, new_events} ->
-            updated_data = new_state_from_events(new_events, data)
-            {updated_data, events ++ new_events, errors}
+            {events ++ new_events, errors}
         end
       end)
 
     if Enum.empty?(errors) do
-      broadcast_updates(events, final_data)
+      final_data = process_events(events, fsm_data) |> broadcast_updates() |> Map.get(:data)
       broadcast_list_updates(events, fsm_data, final_data)
       {:keep_state, final_data, [{:reply, from, :ok}]}
     else
@@ -786,8 +769,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           {:move_player_to_spec, user_id, %{join_queue_position: pos}}
         ]
 
-        data = new_state_from_events(events, data)
-        broadcast_updates(events, data)
+        data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
 
         {:keep_state, data, [{:reply, from, :ok}]}
 
@@ -809,8 +791,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
             team ->
               initial_state = data
               events = [{:move_spec_to_player, user_id, %{team: team}}]
-              data = new_state_from_events(events, data)
-              broadcast_updates(events, data)
+              data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
               broadcast_list_updates(events, initial_state, data)
           end
 
@@ -1006,78 +987,210 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> Map.put(:bots, Map.new(bots))
   end
 
-  @spec new_state_from_events([event()], state()) :: state()
-  defp new_state_from_events(events, state),
-    do: Enum.reduce(events, state, &new_state_from_event/2)
+  # Given a list of events to process (in the event sourcing way) and the initial
+  # state to apply these events to, returns the final state alongside any
+  # potential update events that should also be broadcasted to members
+  @typep aggregate :: %{data: state(), updates: [event()]}
+  @spec process_events([event()], state()) :: aggregate()
+  defp process_events(events, state),
+    do: Enum.reduce(events, %{data: state, updates: []}, &process_event/2)
 
-  @spec new_state_from_event(event(), state()) :: state()
-  defp new_state_from_event({:move_player, p_id, team}, state) do
-    update_in(state.players[p_id], fn p ->
+  @spec process_event(event(), %{data: state(), updates: [event()]}) :: %{
+          data: state(),
+          updates: [event()]
+        }
+  defp process_event({:move_player, p_id, team} = ev, aggregate) do
+    aggregate
+    |> update_in([:data, :players, p_id], fn p ->
       Map.merge(p, %{team: team, ready?: false, asset_status: :ready})
     end)
+    |> update_in([:updates], &[ev | &1])
   end
 
-  defp new_state_from_event({:remove_player_from_lobby, p_id}, state) do
-    state
-    |> Map.update!(:players, &Map.delete(&1, p_id))
-    |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:user, p_id}))
+  defp process_event({:remove_player_from_lobby, p_id} = ev, aggregate) do
+    aggregate
+    |> update_in([:data, :players], &Map.delete(&1, p_id))
+    |> update_in([:data, :monitors], &MC.demonitor_by_val(&1, {:user, p_id}))
+    |> update_in([:updates], &[ev | &1])
   end
 
-  defp new_state_from_event({:remove_spec_from_lobby, s_id}, state) do
-    state
-    |> Map.update!(:spectators, &Map.delete(&1, s_id))
-    |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:user, s_id}))
+  defp process_event({:remove_spec_from_lobby, s_id} = ev, aggregate) do
+    aggregate
+    |> update_in([:data, :spectators], &Map.delete(&1, s_id))
+    |> update_in([:data, :monitors], &MC.demonitor_by_val(&1, {:user, s_id}))
+    |> update_in([:updates], &[ev | &1])
   end
 
-  defp new_state_from_event({:move_spec_to_player, p_id, player_data}, state) do
+  defp process_event({:move_spec_to_player, p_id, player_data} = ev, aggregate) do
     player_data = Map.merge(%{ready?: false, asset_status: :ready}, player_data)
 
     player =
-      Map.merge(state.spectators[p_id], player_data)
+      Map.merge(aggregate.data.spectators[p_id], player_data)
       |> Map.delete(:join_queue_position)
 
-    state
-    |> Map.update!(:spectators, &Map.delete(&1, p_id))
-    |> put_in([:players, p_id], player)
+    aggregate
+    |> update_in([:data, :spectators], &Map.delete(&1, p_id))
+    |> put_in([:data, :players, p_id], player)
+    |> update_in([:updates], &[ev | &1])
   end
 
-  defp new_state_from_event({:move_player_to_spec, p_id, spec_data}, state) do
+  defp process_event({:move_player_to_spec, p_id, spec_data} = ev, aggregate) do
     spec =
-      Map.merge(state.players[p_id], spec_data)
+      Map.merge(aggregate.data.players[p_id], spec_data)
       |> Map.delete(:team)
 
-    state
-    |> Map.update!(:players, &Map.delete(&1, p_id))
-    |> put_in([:spectators, p_id], spec)
+    aggregate
+    |> update_in([:data, :players], &Map.delete(&1, p_id))
+    |> put_in([:data, :spectators, p_id], spec)
+    |> update_in([:updates], &[ev | &1])
   end
 
-  defp new_state_from_event({:update_client_status, p_id, changes}, state) do
-    update_in(state.players[p_id], &Map.merge(&1, changes))
+  # given a state where the players may not be all on consecutive ally team and
+  # teams, re-assign all required player.team so that they are all consecutive
+  # player should never change ally team when doing so, only teams
+  # and since archon isn't really supported, this ends up only repacking the teams
+  defp process_event(:repack_players, aggregate) do
+    data = aggregate.data
+
+    repacked_players =
+      for {_at, at_idx} <- Enum.with_index(data.ally_team_config) do
+        Enum.filter(data.players, fn {_, %{team: {p_at, _, _}}} -> at_idx == p_at end)
+        |> Enum.map(fn {_, p} -> p end)
+        |> Enum.sort_by(& &1.team)
+        |> Enum.with_index()
+        |> Enum.map(fn {p, idx} -> {p.id, Map.update!(p, :team, &put_elem(&1, 1, idx))} end)
+      end
+      |> List.flatten()
+      |> Enum.into(%{})
+
+    events =
+      Enum.map(repacked_players, fn {p_id, p} ->
+        if data.players[p_id].team != p.team do
+          {:move_player, p_id, p.team}
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    aggregate
+    |> put_in([:data, :players], repacked_players)
+    |> update_in([:updates], &(events ++ &1))
   end
 
-  defp new_state_from_event({:update_lobby_name, new_name}, state),
-    do: Map.replace!(state, :name, new_name)
+  defp process_event(:fill_from_join_queue, aggregate) do
+    case add_player_from_join_queue(aggregate.data) do
+      nil ->
+        aggregate
 
-  defp new_state_from_event({:update_map_name, new_name}, state),
-    do: Map.replace!(state, :map_name, new_name)
+      ev ->
+        new_aggregate = process_event(ev, aggregate)
+        process_event(:fill_from_join_queue, new_aggregate)
+    end
+  end
 
-  defp new_state_from_event({:update_ally_team_config, _, new_config}, state),
-    do: Map.replace!(state, :ally_team_config, new_config)
+  defp process_event({:update_client_status, p_id, changes} = ev, aggregate) do
+    aggregate
+    |> update_in([:data, :players, p_id], &Map.merge(&1, changes))
+    |> update_in([:updates], &[ev | &1])
+  end
+
+  defp process_event({:update_lobby_name, new_name} = ev, aggregate) do
+    aggregate
+    |> put_in([:data, :name], new_name)
+    |> update_in([:updates], &[ev | &1])
+  end
+
+  defp process_event({:update_map_name, new_name} = ev, aggregate) do
+    aggregate
+    |> put_in([:data, :map_name], new_name)
+    |> update_in([:updates], &[ev | &1])
+  end
+
+  defp process_event({:update_ally_team_config, _, new_config} = ev, aggregate) do
+    state = aggregate.data
+
+    spec_ids =
+      Enum.map(state.players, fn {p_id, %{team: {x, y, z}}} ->
+        with at_config when not is_nil(at_config) <- Enum.at(new_config, x),
+             team_config when not is_nil(team_config) <- Enum.at(at_config.teams, y) do
+          if y < at_config.max_teams && z < team_config.max_players,
+            do: nil,
+            else: p_id
+        else
+          nil -> p_id
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    {bot_ids, player_ids} = Enum.split_with(spec_ids, &bot_id?/1)
+
+    position_offset =
+      case get_first_player_in_join_queue(state.spectators) do
+        nil -> 0
+        spec_id -> state.spectators[spec_id].join_queue_position - Enum.count(player_ids) - 1
+      end
+
+    spec_events =
+      Enum.with_index(player_ids, position_offset)
+      |> Enum.map(fn {p_id, pos} -> {:move_player_to_spec, p_id, %{join_queue_position: pos}} end)
+
+    bot_events = Enum.map(bot_ids, fn b_id -> {:remove_player_from_lobby, b_id} end)
+
+    events = spec_events ++ bot_events ++ [:repack_players, :fill_from_join_queue]
+
+    new_aggregate = process_events(events, Map.replace!(state, :ally_team_config, new_config))
+
+    # We put players in join queue, and then fill the teams with
+    # the join queue, which means we can have events like
+    # :move_player_to_spec and later :move_spec_to_player
+    # which would generate an update with %{spectators: %{x => nil}}
+    # where x was never a spectator to beging with.
+    # So we need to detect these events and replace the pair with a :move_player
+    # event instead.
+    added_ids =
+      Enum.map(new_aggregate.updates, fn
+        {:move_spec_to_player, id, _} -> id
+        _ -> nil
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    ids_to_fix = MapSet.intersection(MapSet.new(player_ids), MapSet.new(added_ids))
+
+    final_events =
+      Enum.map(new_aggregate.updates, fn ev ->
+        case ev do
+          {:move_player_to_spec, x, _} ->
+            if MapSet.member?(ids_to_fix, x),
+              do: nil,
+              else: ev
+
+          {:move_spec_to_player, x, data} ->
+            if MapSet.member?(ids_to_fix, x),
+              do: {:move_player, x, data.team},
+              else: ev
+
+          _ ->
+            ev
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    new_aggregate |> put_in([:updates], [ev | final_events] ++ aggregate.updates)
+  end
 
   # avoid sending a useless lobby list update when the last member of the lobby
   # just left. The caller of this function will detect the lobby is empty and
   # terminate the process, which will trigger the final lobby list update for
   # this lobby
-  @spec broadcast_updates([event()], state()) :: state()
-  defp broadcast_updates(_events, state)
-       when map_size(state.players) == 0 and map_size(state.spectators) == 0,
-       do: state
+  @spec broadcast_updates(aggregate()) :: aggregate()
+  defp broadcast_updates(%{data: data} = aggregate)
+       when map_size(data.players) == 0 and map_size(data.spectators) == 0,
+       do: aggregate
 
-  defp broadcast_updates(events, state) do
-    change_map = Enum.reduce(events, %{}, &update_change_from_event/2)
+  defp broadcast_updates(aggregate) do
+    change_map = Enum.reduce(aggregate.updates, %{}, &update_change_from_event/2)
 
-    broadcast_update({:update, nil, change_map}, state)
-    state
+    broadcast_update({:update, nil, change_map}, aggregate.data)
+    aggregate
   end
 
   defp update_change_from_event({:move_player, p_id, team}, change_map) do
@@ -1121,6 +1234,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> Map.put_new(:spectators, %{})
     |> put_in([:spectators, p_id], spec_data)
   end
+
+  defp update_change_from_event(:repack_players, change_map), do: change_map
 
   defp update_change_from_event({:update_client_status, p_id, changes}, change_map) do
     change_map
@@ -1328,12 +1443,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
       Enum.filter(state.players, fn {_bot_id, b} -> Map.get(b, :host_user_id) == user_id end)
       |> Enum.map(&elem(&1, 0))
 
-    events = remove_players_from_lobby([user_id | bot_ids_to_remove], state)
-    state = new_state_from_events(events, state)
-    {final_state, fill_events} = fill_players_from_join_queue(state)
+    events =
+      Enum.map([user_id | bot_ids_to_remove], fn id -> {:remove_player_from_lobby, id} end) ++
+        [
+          :repack_players,
+          :fill_from_join_queue
+        ]
 
-    broadcast_updates(events ++ fill_events, final_state)
-    broadcast_player_count_change(final_state)
+    aggregate = process_events(events, state) |> broadcast_updates()
+    broadcast_player_count_change(aggregate.data)
   end
 
   @spec remove_spectator_from_lobby(T.userid(), state()) :: state()
@@ -1342,76 +1460,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
       Enum.filter(state.players, fn {_bot_id, b} -> Map.get(b, :host_user_id) == user_id end)
       |> Enum.map(&elem(&1, 0))
 
-    events = remove_players_from_lobby(bot_ids_to_remove, state)
-    events = [{:remove_spec_from_lobby, user_id} | events]
+    events =
+      Enum.map(bot_ids_to_remove, fn id -> {:remove_player_from_lobby, id} end) ++
+        [{:remove_spec_from_lobby, user_id}, :repack_players, :fill_from_join_queue]
 
-    state = new_state_from_events(events, state)
-    {final_state, fill_events} = fill_players_from_join_queue(state)
-
-    broadcast_updates(events ++ fill_events, final_state)
-    broadcast_player_count_change(final_state)
-  end
-
-  # pure function that remove the given user from the players and adjust
-  # all ally teams and teams to account for that so that there is no gap
-  # in teams and ally teams.
-  # for example, if an ally team looks like [p1, p2, p3] and p2 leaves, then
-  # p3 will get adjusted so that its team is {0,1,0} leading to [p1, p3]
-  # because this function is called in different contexts where what happens
-  # to the removed player can change, the events returned do not include anything
-  # related to the given player.
-  # It is the responsability of the caller to add the correct event, which
-  # can be remove from lobby, move to a different team, or become a spectator
-  @spec do_remove_player(T.userid(), %{player_id() => player() | bot()}) :: [event()]
-  # {%{player_id() => player() | bot()}, %{player_id() => %{team: team} | nil}}
-  defp do_remove_player(user_id, players) do
-    {%{team: {at_idx, t_idx, p_idx}}, players} =
-      Map.pop!(players, user_id)
-
-    # reorg the other players to keep the team indices consecutive
-    # ally team won't change
-    changes =
-      Enum.reduce(players, [], fn {p_id, p}, player_changes ->
-        {x, y, z} = p.team
-
-        cond do
-          x == at_idx && y >= t_idx && p_idx == 0 ->
-            # p_idx == 0 means the player removed was the last one on their team
-            # so its team can be "removed", and all teams with a higher index should
-            # be moved back by 1
-            team = {x, y - 1, z}
-
-            [{:move_player, p_id, team} | player_changes]
-
-          x == at_idx && y >= t_idx && z >= p_idx ->
-            # similar there, but we only shuffle the players in the same team (archons)
-            team = {x, y, z - 1}
-
-            [{:move_player, p_id, team} | player_changes]
-
-          true ->
-            player_changes
-        end
-      end)
-
-    changes
-  end
-
-  # remove the given players from lobby completely
-  # it has to compute the intermediate states that will be thrown away
-  # so it's not optimal on this side, maybe revisit that later if lobbies
-  # prove to eat too much cpu (I highly doubt it will be the case)
-  @spec remove_players_from_lobby([T.userid()], state()) :: [event()]
-  defp remove_players_from_lobby(player_ids, state) do
-    {_, events} =
-      Enum.reduce(player_ids, {state, []}, fn player_id, {state, events} ->
-        new_events = do_remove_player(player_id, state.players)
-        new_events = [{:remove_player_from_lobby, player_id} | new_events]
-        new_state = new_state_from_events(new_events, state)
-        {new_state, events ++ new_events}
-      end)
-
-    events
+    aggregate = process_events(events, state) |> broadcast_updates()
+    broadcast_player_count_change(aggregate.data)
   end
 
   # Add the first player from the join queue to the player list and returns the
@@ -1440,17 +1494,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       {id, player_data} ->
         {:move_spec_to_player, id, player_data}
-    end
-  end
-
-  defp fill_players_from_join_queue(state, events \\ []) do
-    case add_player_from_join_queue(state) do
-      nil ->
-        {state, Enum.reverse(events)}
-
-      event ->
-        state = new_state_from_event(event, state)
-        fill_players_from_join_queue(state, [event | events])
     end
   end
 
@@ -1519,8 +1562,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
   end
 
-  @spec update_property(atom(), term(), state()) :: {:ok, [event()]} | {:error, String.t()}
-  defp update_property(:name, new_name, _state) do
+  @spec update_property(atom(), term(), state(), T.userid()) ::
+          {:ok, [event()]} | {:error, String.t()}
+  defp update_property(:name, new_name, _state, _user_id) do
     # we can expand lobby name validation later
     if new_name == "" do
       {:error, "name must not be empty"}
@@ -1529,79 +1573,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:ok, [{:update_lobby_name, new_name}]}
   end
 
-  defp update_property(:map_name, new_name, _state),
+  defp update_property(:map_name, new_name, _state, _user_id),
     do: {:ok, [{:update_map_name, new_name}]}
 
-  defp update_property(:ally_team_config, new_config, state) do
-    spec_ids =
-      Enum.map(state.players, fn {p_id, %{team: {x, y, z}}} ->
-        with at_config when not is_nil(at_config) <- Enum.at(new_config, x),
-             team_config when not is_nil(team_config) <- Enum.at(at_config.teams, y) do
-          if y < at_config.max_teams && z < team_config.max_players,
-            do: nil,
-            else: p_id
-        else
-          nil -> p_id
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
-
-    {bot_ids, player_ids} = Enum.split_with(spec_ids, &bot_id?/1)
-
-    position_offset =
-      case get_first_player_in_join_queue(state.spectators) do
-        nil -> 0
-        spec_id -> state.spectators[spec_id].join_queue_position - Enum.count(player_ids) - 1
-      end
-
-    spec_events =
-      Enum.with_index(player_ids, position_offset)
-      |> Enum.map(fn {p_id, pos} -> {:move_player_to_spec, p_id, %{join_queue_position: pos}} end)
-
-    bot_events = Enum.map(bot_ids, fn b_id -> {:remove_player_from_lobby, b_id} end)
-
-    remove_events = [
-      {:update_ally_team_config, state.ally_team_config, new_config} | spec_events ++ bot_events
-    ]
-
-    state = new_state_from_events(remove_events, state)
-
-    {_final_state, add_events} = fill_players_from_join_queue(state)
-
-    # We put players in join queue, and then fill the teams with
-    # the join queue, which means we can have events like
-    # :move_player_to_spec and later :move_spec_to_player
-    # which would generate an update with %{spectators: %{x => nil}}
-    # where x was never a spectator to beging with.
-    # So we need to detect these events and replace the pair with a :move_player
-    # event instead.
-    added_ids = Enum.map(add_events, fn {:move_spec_to_player, id, _} -> id end)
-
-    ids_to_fix = MapSet.intersection(MapSet.new(player_ids), MapSet.new(added_ids))
-
-    final_events =
-      Enum.map(remove_events ++ add_events, fn ev ->
-        case ev do
-          {:move_player_to_spec, x, _} ->
-            if MapSet.member?(ids_to_fix, x),
-              do: nil,
-              else: ev
-
-          {:move_spec_to_player, x, data} ->
-            if MapSet.member?(ids_to_fix, x),
-              do: {:move_player, x, data.team},
-              else: ev
-
-          _ ->
-            ev
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
-
-    {:ok, final_events}
+  defp update_property(:ally_team_config, new_config, state, _user_id) do
+    {:ok, [{:update_ally_team_config, state.ally_team_config, new_config}]}
   end
 
-  defp update_property(prop, _, _), do: {:error, "update #{prop} is not supported"}
+  defp update_property(prop, _, _, _), do: {:error, "update #{prop} is not supported"}
 
   @doc """
   apply some updates onto a base map according to json merge patch semantics

@@ -24,7 +24,7 @@
                 "allyTeamConfig": {
                     "type": "object",
                     "patternProperties": {
-                        "^(.*)$": {
+                        "^.*$": {
                             "anyOf": [
                                 {
                                     "description": "this represent an array, items should be sorted lexicographically on their keys",
@@ -40,7 +40,7 @@
                                         "teams": {
                                             "type": "object",
                                             "patternProperties": {
-                                                "^(.*)$": {
+                                                "^.*$": {
                                                     "anyOf": [
                                                         {
                                                             "type": "object",
@@ -67,7 +67,7 @@
                 "players": {
                     "type": "object",
                     "patternProperties": {
-                        "^(.*)$": {
+                        "^.*$": {
                             "anyOf": [
                                 {
                                     "type": "object",
@@ -97,7 +97,7 @@
                 "spectators": {
                     "type": "object",
                     "patternProperties": {
-                        "^(.*)$": {
+                        "^.*$": {
                             "anyOf": [
                                 {
                                     "type": "object",
@@ -122,12 +122,15 @@
                 "bots": {
                     "type": "object",
                     "patternProperties": {
-                        "^(.*)$": {
+                        "^.*$": {
                             "anyOf": [
                                 {
                                     "type": "object",
                                     "properties": {
                                         "id": { "type": "string" },
+                                        "hostUserId": {
+                                            "$ref": "../../definitions/userId.json"
+                                        },
                                         "allyTeam": { "type": "string" },
                                         "team": { "type": "string" },
                                         "player": { "type": "string" },
@@ -155,7 +158,7 @@
                                                 {
                                                     "type": "object",
                                                     "patternProperties": {
-                                                        "^(.*)$": {
+                                                        "^.*$": {
                                                             "anyOf": [
                                                                 {
                                                                     "type": "string"
