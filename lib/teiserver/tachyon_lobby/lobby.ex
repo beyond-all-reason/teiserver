@@ -734,10 +734,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
       when map_size(data) == 0,
       do: {:keep_state, fsm_data, [{:reply, from, :ok}]}
 
-  def handle_event({:call, from}, {:update_properties, _user_id, data}, _state, fsm_data) do
+  def handle_event({:call, from}, {:update_properties, user_id, data}, _state, fsm_data) do
     {final_data, events, errors} =
       Enum.reduce(data, {fsm_data, [], []}, fn {k, v}, {data, events, errors} ->
-        case update_property(k, v, data) do
+        case update_property(k, v, data, user_id) do
           {:error, msg} ->
             {data, events, [msg | errors]}
 
@@ -1519,8 +1519,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
   end
 
-  @spec update_property(atom(), term(), state()) :: {:ok, [event()]} | {:error, String.t()}
-  defp update_property(:name, new_name, _state) do
+  @spec update_property(atom(), term(), state(), T.userid()) ::
+          {:ok, [event()]} | {:error, String.t()}
+  defp update_property(:name, new_name, _state, _user_id) do
     # we can expand lobby name validation later
     if new_name == "" do
       {:error, "name must not be empty"}
@@ -1529,10 +1530,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:ok, [{:update_lobby_name, new_name}]}
   end
 
-  defp update_property(:map_name, new_name, _state),
+  defp update_property(:map_name, new_name, _state, _user_id),
     do: {:ok, [{:update_map_name, new_name}]}
 
-  defp update_property(:ally_team_config, new_config, state) do
+  defp update_property(:ally_team_config, new_config, state, _user_id) do
     spec_ids =
       Enum.map(state.players, fn {p_id, %{team: {x, y, z}}} ->
         with at_config when not is_nil(at_config) <- Enum.at(new_config, x),
@@ -1601,7 +1602,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:ok, final_events}
   end
 
-  defp update_property(prop, _, _), do: {:error, "update #{prop} is not supported"}
+  defp update_property(prop, _, _, _), do: {:error, "update #{prop} is not supported"}
 
   @doc """
   apply some updates onto a base map according to json merge patch semantics
