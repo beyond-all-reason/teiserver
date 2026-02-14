@@ -426,9 +426,42 @@ bsname = view_colour() %>
         $('#action_restriction_Bridging').prop('checked', true);
         $('#action_reason').val('Manual unbridging.');
         $('#action_expires').val('1100 years');
+        $('#discord_cleanup_section').show();
+        $('#action_delete_discord_messages').prop('checked', true);
       "
                   >
                     Unbridge
+                  </div>
+
+                  <div id="discord_cleanup_section" style="display: none;" class="mt-2 p-2 border rounded">
+                    <div class="form-check">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="action_delete_discord_messages"
+                        name="action[delete_discord_messages]"
+                        value="true"
+                        onchange="$('#discord_hours_group').toggle(this.checked)"
+                      />
+                      <label class="form-check-label" for="action_delete_discord_messages">
+                        Delete bridged Discord messages
+                      </label>
+                    </div>
+                    <div id="discord_hours_group" class="form-group mt-1">
+                      <label for="action_delete_discord_hours" class="form-label small">
+                        Hours of messages to delete
+                      </label>
+                      <input
+                        type="number"
+                        class="form-control form-control-sm"
+                        id="action_delete_discord_hours"
+                        name="action[delete_discord_hours]"
+                        value="1"
+                        min="1"
+                        max="72"
+                        style="width: 100px"
+                      />
+                    </div>
                   </div>
                   <div
                     class={"btn btn-outline-#{bsname} btn-block"}

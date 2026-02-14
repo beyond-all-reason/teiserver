@@ -238,6 +238,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
           end)
         end
 
+        maybe_delete_discord_messages(action_params, action.target_id)
+
         add_audit_log(conn, "Moderation:Action created", %{action_id: action.id})
 
         conn
@@ -401,4 +403,27 @@ defmodule TeiserverWeb.Moderation.ActionController do
     |> put_flash(:info, "Action deleted.")
     |> redirect(to: Routes.moderation_action_path(conn, :index))
   end
+
+  defp maybe_delete_discord_messages(action_params, target_id) do
+    restrictions = action_params["restrictions"] || []
+    delete_messages? = action_params["delete_discord_messages"] == "true"
+    hours = parse_hours(action_params["delete_discord_hours"])
+
+    if delete_messages? and "Bridging" in restrictions and hours > 0 do
+      Task.start(fn ->
+        Teiserver.Bridge.DiscordMessageCleanup.delete_user_bridged_messages(target_id, hours)
+      end)
+    end
+  end
+
+  defp parse_hours(nil), do: 0
+
+  defp parse_hours(str) when is_binary(str) do
+    case Integer.parse(str) do
+      {n, _} when n > 0 -> n
+      _ -> 0
+    end
+  end
+
+  defp parse_hours(_), do: 0
 end
