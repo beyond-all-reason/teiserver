@@ -1,27 +1,36 @@
 defmodule Teiserver.OAuth.CodeQueries do
   use TeiserverWeb, :queries
-  alias Teiserver.OAuth.Application
-  alias Teiserver.OAuth.Code
+  alias Teiserver.OAuth.{Application, Code, TokenHash}
 
-  @doc """
-  Return the db object corresponding to the given code.
-  This doesn't validate anything, use the context function instead
-  """
   @spec get_code(String.t() | nil) :: Code.t() | nil
   def get_code(nil), do: nil
 
-  def get_code(code) do
-    base_query() |> where_code(code) |> Repo.one()
+  def get_code(value) when is_binary(value) do
+    case TokenHash.parse_token(value) do
+      {:ok, {selector, verifier}} -> get_code_by_selector_and_verify(selector, verifier)
+      :error -> nil
+    end
   end
 
-  def base_query() do
-    from code in Code, as: :code
+  defp get_code_by_selector_and_verify(selector, verifier) do
+    code =
+      base_query()
+      |> where_selector(selector)
+      |> Repo.one()
+
+    case code do
+      nil ->
+        TokenHash.hash_verifier(verifier)
+        nil
+
+      code ->
+        if TokenHash.verify_verifier(verifier, code.hashed_verifier), do: code, else: nil
+    end
   end
 
-  def where_code(query, value) do
-    from e in query,
-      where: e.value == ^value
-  end
+  def base_query(), do: from(code in Code, as: :code)
+
+  def where_selector(query, selector), do: from(e in query, where: e.selector == ^selector)
 
   def where_app_ids(query, app_ids) do
     from [code: code] in query,

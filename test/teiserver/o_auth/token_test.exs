@@ -2,6 +2,7 @@ defmodule Teiserver.OAuth.TokenTest do
   use Teiserver.DataCase, async: true
   alias Teiserver.OAuthFixtures
   alias Teiserver.OAuth
+  alias Teiserver.OAuth.TokenHash
 
   setup do
     user = Teiserver.TeiserverTestLib.new_user()
@@ -18,9 +19,12 @@ defmodule Teiserver.OAuth.TokenTest do
   end
 
   test "token must have an owner", %{app: app} do
+    {selector, hashed_verifier, _full_token} = TokenHash.generate_token()
+
     assert {:error, _} =
              Teiserver.OAuth.Token.changeset(%Teiserver.OAuth.Token{}, %{
-               value: "coucou",
+               selector: selector,
+               hashed_verifier: hashed_verifier,
                application_id: app.id,
                scopes: ["tachyon.lobby"],
                expires_at: DateTime.utc_now(),
@@ -37,6 +41,27 @@ defmodule Teiserver.OAuth.TokenTest do
     assert token.type == :access
     assert token.refresh_token.type == :refresh
     assert token.scopes == app.scopes
+  end
+
+  test "tokens are created with hashed verifier", %{user: user, app: app} do
+    assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
+
+    assert token.selector != nil
+    assert token.hashed_verifier != nil
+    assert String.length(token.hashed_verifier) == 64
+    assert String.match?(token.hashed_verifier, ~r/^[0-9a-f]+$/)
+    assert String.contains?(token.value, ".")
+
+    assert token.refresh_token.selector != nil
+    assert token.refresh_token.hashed_verifier != nil
+    assert String.length(token.refresh_token.hashed_verifier) == 64
+  end
+
+  test "token value does not contain plaintext verifier in hash", %{user: user, app: app} do
+    assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
+
+    [_selector, verifier] = String.split(token.value, ".", parts: 2)
+    refute token.hashed_verifier == verifier
   end
 
   test "can create a token without refresh token", %{user: user, app: app} do
@@ -97,11 +122,7 @@ defmodule Teiserver.OAuth.TokenTest do
   end
 
   test "can delete expired token", %{user: user, app: app} do
-    assert {:ok, token, _attr} =
-             create_token(user, app,
-               expires_at: ~U[2500-01-01 12:23:34Z],
-               value: "far-future-token"
-             )
+    assert {:ok, token, _attr} = create_token(user, app, expires_at: ~U[2500-01-01 12:23:34Z])
 
     now = DateTime.add(token.expires_at, 1, :day)
     count = OAuth.delete_expired_tokens(now)
@@ -119,7 +140,7 @@ defmodule Teiserver.OAuth.TokenTest do
       |> Map.put(:expires_at, expires_at)
       |> Map.put(:scopes, Keyword.get(opts, :scopes, app.scopes))
 
-    code = OAuthFixtures.create_token(attrs)
-    {:ok, code, attrs}
+    token = OAuthFixtures.create_token(attrs)
+    {:ok, token, attrs}
   end
 end

@@ -5,7 +5,10 @@ defmodule Teiserver.OAuth.Token do
   alias Teiserver.OAuth
 
   typed_schema "oauth_tokens" do
-    field :value, :string, redact: true
+    field :selector, :string
+    field :hashed_verifier, :string, redact: true
+    field :value, :string, redact: true, virtual: true
+
     belongs_to :owner, Teiserver.Account.User
     belongs_to :application, OAuth.Application, primary_key: true
     field :scopes, {:array, :string}
@@ -26,7 +29,8 @@ defmodule Teiserver.OAuth.Token do
 
     token
     |> cast(attrs, [
-      :value,
+      :selector,
+      :hashed_verifier,
       :owner_id,
       :application_id,
       :scopes,
@@ -36,7 +40,14 @@ defmodule Teiserver.OAuth.Token do
       :bot_id
     ])
     |> cast_assoc(:refresh_token)
-    |> validate_required([:value, :application_id, :scopes, :expires_at, :type])
+    |> validate_required([
+      :selector,
+      :hashed_verifier,
+      :application_id,
+      :scopes,
+      :expires_at,
+      :type
+    ])
     |> Ecto.Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
   end
 end
