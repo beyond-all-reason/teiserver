@@ -77,7 +77,15 @@
                                         },
                                         "allyTeam": { "type": "string" },
                                         "team": { "type": "string" },
-                                        "player": { "type": "string" }
+                                        "player": { "type": "string" },
+                                        "isReady": { "type": "boolean" },
+                                        "assetStatus": {
+                                            "enum": [
+                                                "missing",
+                                                "downloading",
+                                                "ready"
+                                            ]
+                                        }
                                     },
                                     "required": ["id"]
                                 },

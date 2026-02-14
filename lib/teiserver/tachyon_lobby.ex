@@ -59,6 +59,11 @@ defmodule Teiserver.TachyonLobby do
           {:ok, lobby_pid :: pid(), details()} | {:error, :invalid_lobby}
   defdelegate rejoin(lobby_id, user_id, pid), to: Lobby
 
+  @type client_status_update_data :: Lobby.client_status_update_data()
+  @spec update_client_status(id(), T.userid(), client_status_update_data()) ::
+          :ok | {:error, :invalid_lobby | :not_in_lobby}
+  defdelegate update_client_status(lobby_id, user_id, update_data), to: Lobby
+
   def restore_lobbies() do
     Teiserver.Tachyon.System.restore_state("lobby", __MODULE__, :restore_lobby)
   end

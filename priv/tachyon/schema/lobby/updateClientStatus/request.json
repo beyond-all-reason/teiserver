@@ -1,0 +1,25 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/updateClientStatus/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LobbyUpdateClientStatusRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "lobby/updateClientStatus" },
+        "data": {
+            "title": "LobbyUpdateClientStatusRequestData",
+            "type": "object",
+            "properties": {
+                "isReady": { "type": "boolean" },
+                "assetStatus": { "enum": ["missing", "downloading", "ready"] }
+            }
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

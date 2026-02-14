@@ -84,6 +84,16 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         Tachyon.join_ally_team!(ctx2[:client], "000")
     end
 
+    test "can join ally team", %{lobby_id: lobby_id} do
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+
+      %{"status" => "success"} = Tachyon.join_ally_team!(ctx2[:client], "001")
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(ctx2[:client])
+      player_data = data["players"][to_string(ctx2[:user].id)]
+      assert %{"isReady" => false, "assetStatus" => "ready"} = player_data
+    end
+
     test "members get updated events on join", %{client: client, lobby_id: lobby_id} do
       {:ok, ctx2} = Tachyon.setup_client()
       %{"status" => "success", "data" => _details} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
@@ -405,6 +415,25 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       }
 
       assert data == expected
+    end
+  end
+
+  describe "update client status" do
+    setup [:setup_lobby]
+
+    test "must be in lobby" do
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      %{"status" => "failed", "reason" => "invalid_request"} =
+        Tachyon.lobby_update_client_status(ctx2[:client], %{"isReady" => true})
+    end
+
+    test "can update status", ctx do
+      %{"status" => "success"} =
+        Tachyon.lobby_update_client_status(ctx.client, %{"isReady" => true})
+
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(ctx.client)
+      assert data["players"][to_string(ctx.user.id)]["isReady"] == true
     end
   end
 
