@@ -67,6 +67,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @type asset_status :: :missing | :downloading | :ready
 
+  @type vote_action :: {:change_map, String.t()} | :start
+  @type vote_state :: %{
+          id: String.t(),
+          action: vote_action,
+          initiator: T.userid(),
+          voters: %{T.userid() => :pending | :yes | :no | :abstain},
+          until: DateTime.t(),
+          quorum: non_neg_integer(),
+          majority: non_neg_integer()
+        }
+
   @typedoc """
   The public state of the lobby. Anything that clients need to know about
   when in a lobby should be exposed in the details object
@@ -99,7 +110,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
             | %{
                 id: Teiserver.TachyonBattle.id(),
                 started_at: DateTime.t()
-              }
+              },
+          current_vote: nil | vote_state()
         }
 
   @typedoc """
@@ -166,7 +178,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
                  id: Teiserver.TachyonBattle.id(),
                  started_at: DateTime.t()
                },
-           ids_to_rejoin: MapSet.t(T.userid())
+           ids_to_rejoin: MapSet.t(T.userid()),
+           current_vote: nil | vote_state()
          }
 
   # the list of internal events used to manipulate the lobby data, but also
@@ -185,6 +198,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:update_map_name, new_name :: String.t()}
            | {:update_ally_team_config, old_config :: ally_team_config(),
               new_config :: ally_team_config()}
+           | {:start_vote, vote_state()}
+           | :vote_timeout
 
   @spec gen_id() :: id()
   def gen_id(), do: UUID.uuid4()
@@ -372,6 +387,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :exit, {:noproc, _} -> {:error, :invalid_lobby}
   end
 
+  @doc """
+  used only for testing
+  """
+  def trigger_vote_timeout(lobby_id, vote_id) do
+    TachyonLobby.Registry.lookup(lobby_id) |> send({:vote_timeout, vote_id})
+  end
+
   @impl :gen_statem
   def callback_mode(), do: :handle_event_function
 
@@ -406,7 +428,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       spectators: %{},
       bot_idx_counter: 0,
       current_battle: nil,
-      ids_to_rejoin: MapSet.new()
+      ids_to_rejoin: MapSet.new(),
+      current_vote: nil
     }
 
     TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
@@ -475,6 +498,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
       if MapSet.size(ids_left) == 0 do
         Logger.debug("all member rejoined, start up completed")
         TachyonLobby.List.register_lobby(self(), data.id, get_overview_from_state(data))
+
+        if data.current_vote != nil do
+          diff = max(0, DateTime.diff(data.current_vote.until, DateTime.utc_now(), :millisecond))
+          :timer.send_after(diff, {:vote_timeout, data.current_vote.id})
+        end
+
         {:next_state, :running, data, actions}
       else
         {:keep_state, data, actions}
@@ -900,6 +929,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  def handle_event(:info, {:vote_timeout, vote_id}, _state, data)
+      when data.current_vote.id == vote_id do
+    event = :vote_timeout
+    aggregate = process_events([event], data) |> broadcast_updates()
+    broadcast_to_members(aggregate.data, nil, {:lobby, data.id, {:vote_timeout, vote_id}})
+    {:keep_state, aggregate.data}
+  end
+
+  def handle_event(:info, {:vote_timeout, _vote_id}, _state, data), do: {:keep_state, data}
+
   def handle_event(:info, {:EXIT, _pid, reason}, _state, _data) do
     {:stop, reason}
   end
@@ -980,7 +1019,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       :game_version,
       :engine_version,
       :ally_team_config,
-      :current_battle
+      :current_battle,
+      :current_vote
     ])
     |> Map.put(:players, players)
     |> Map.put(:spectators, spectators)
@@ -1177,6 +1217,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
     new_aggregate |> put_in([:updates], [ev | final_events] ++ aggregate.updates)
   end
 
+  defp process_event({:start_vote, vote_state} = ev, aggregate) do
+    aggregate
+    |> put_in([:data, :current_vote], vote_state)
+    |> Map.update!(:updates, &[ev | &1])
+  end
+
+  # don't bother cancelling the timer. The event handler checks the vote id
+  # and it allows us not to worry about storing the tref
+  defp process_event(:vote_timeout = ev, aggregate) do
+    aggregate
+    |> put_in([:data, :current_vote], nil)
+    |> Map.update!(:updates, &[ev | &1])
+  end
+
   # avoid sending a useless lobby list update when the last member of the lobby
   # just left. The caller of this function will detect the lobby is empty and
   # terminate the process, which will trigger the final lobby list update for
@@ -1268,6 +1322,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     Map.put(change_map, :ally_team_config, changes)
   end
+
+  defp update_change_from_event({:start_vote, vote}, change_map),
+    do: Map.put(change_map, :current_vote, vote)
+
+  defp update_change_from_event(:vote_timeout, change_map),
+    do: Map.put(change_map, :current_vote, nil)
 
   defp broadcast_list_updates(_events, _starting_state, final_state)
        when map_size(final_state.players) == 0 and map_size(final_state.spectators) == 0,
@@ -1575,8 +1635,38 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp update_property(:map_name, new_name, state, user_id) do
     cond do
-      not is_map_key(state.players, user_id) -> {:error, "Only players can change the map"}
-      true -> {:ok, [{:update_map_name, new_name}]}
+      not is_map_key(state.players, user_id) ->
+        {:error, "Only players can change the map"}
+
+      Enum.count(state.players, fn {_, p} -> not bot_id?(p.id) end) > 1 ->
+        vote_duration_s = 60
+
+        voters =
+          for {_, p} <- state.players, !bot_id?(p.id), into: %{} do
+            if p.id == user_id, do: {p.id, :yes}, else: {p.id, :pending}
+          end
+
+        quorum =
+          if rem(map_size(voters), 2) == 0,
+            do: map_size(voters) / 2 + 1,
+            else: (map_size(voters) / 2) |> :math.ceil() |> trunc()
+
+        vote = %{
+          id: UUID.uuid4(),
+          action: {:change_map, new_name},
+          initiator: user_id,
+          voters: voters,
+          until: DateTime.utc_now() |> DateTime.shift(Duration.new!(second: vote_duration_s)),
+          quorum: quorum,
+          majority: quorum
+        }
+
+        :timer.send_after(vote_duration_s * 1000, {:vote_timeout, vote.id})
+
+        {:ok, [{:start_vote, vote}]}
+
+      true ->
+        {:ok, [{:update_map_name, new_name}]}
     end
   end
 

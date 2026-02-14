@@ -822,6 +822,43 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       %{id: id} = setup_full_lobby([1, 1])
       {:error, _} = Lobby.update_properties(id, "2", %{map_name: "new map"})
     end
+
+    test "changing map with 2 players requires a vote" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      {:ok, original_details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert details.map_name == original_details.map_name
+      vote = details.current_vote
+      assert vote != nil
+      assert vote.voters[@default_user_id] == :yes, "initiator is always yes"
+      assert vote.voters["2"] == :pending, "other voters are pending"
+      assert vote.action == {:change_map, "new map"}
+
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote_update}}}
+      assert vote_update.id == vote.id
+    end
+
+    test "vote timeout triggers event" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      Teiserver.TachyonLobby.Lobby.trigger_vote_timeout(id, vote.id)
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
+      vote_id = vote.id
+      assert_receive {:lobby, ^id, {:vote_timeout, ^vote_id}}
+    end
+
+    test "vote timeout is bound to a current vote" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+
+      Teiserver.TachyonLobby.Lobby.trigger_vote_timeout(id, "definitely-not-a-vote-id")
+      refute_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}, 30
+    end
   end
 
   describe "update ally team" do
