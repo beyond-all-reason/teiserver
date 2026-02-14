@@ -1,4 +1,6 @@
 {
+    "$id": "https://schema.beyondallreason.dev/tachyon/matchmaking/list/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "MatchmakingListRequest",
     "tachyon": {
         "source": "user",

@@ -30,7 +30,7 @@
                 "version": { "type": "string" },
                 "options": {
                     "type": "object",
-                    "patternProperties": { "^(.*)$": { "type": "string" } }
+                    "patternProperties": { "^.*$": { "type": "string" } }
                 }
             },
             "required": ["allyTeam", "shortName"]

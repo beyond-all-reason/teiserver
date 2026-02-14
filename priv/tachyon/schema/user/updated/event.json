@@ -20,65 +20,46 @@
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "allOf": [
-                            {
-                                "type": "object",
-                                "properties": {
-                                    "userId": {
-                                        "type": "string",
-                                        "examples": ["351"]
-                                    },
-                                    "username": { "type": "string" },
-                                    "displayName": { "type": "string" },
-                                    "clanId": {
-                                        "anyOf": [
-                                            { "type": "string" },
-                                            { "type": "null" }
-                                        ]
-                                    },
-                                    "partyId": {
-                                        "anyOf": [
-                                            { "type": "string" },
-                                            { "type": "null" }
-                                        ]
-                                    },
-                                    "scopes": {
-                                        "type": "array",
-                                        "items": { "type": "string" }
-                                    },
-                                    "countryCode": { "type": "string" },
-                                    "status": {
-                                        "enum": [
-                                            "offline",
-                                            "menu",
-                                            "playing",
-                                            "lobby"
-                                        ]
-                                    }
-                                }
+                        "properties": {
+                            "userId": {
+                                "$ref": "../../definitions/userId.json"
                             },
-                            {
+                            "username": { "type": "string" },
+                            "displayName": { "type": "string" },
+                            "clanId": {
+                                "anyOf": [
+                                    { "type": "string" },
+                                    { "type": "null" }
+                                ]
+                            },
+                            "countryCode": { "type": "string" },
+                            "status": {
+                                "enum": ["offline", "menu", "playing", "lobby"]
+                            },
+                            "rating": {
                                 "type": "object",
                                 "properties": {
-                                    "friendIds": {
-                                        "type": "array",
-                                        "items": { "type": "string" }
-                                    },
-                                    "outgoingFriendRequestIds": {
-                                        "type": "array",
-                                        "items": { "type": "string" }
-                                    },
-                                    "incomingFriendRequestIds": {
-                                        "type": "array",
-                                        "items": { "type": "string" }
-                                    },
-                                    "ignoreIds": {
-                                        "type": "array",
-                                        "items": { "type": "string" }
+                                    "value": {
+                                        "description": "Key is omitted when the player isn't rated yet.",
+                                        "type": "number"
                                     }
-                                }
+                                },
+                                "required": ["value"]
+                            },
+                            "roles": {
+                                "type": "array",
+                                "items": {
+                                    "enum": [
+                                        "contributor",
+                                        "admin",
+                                        "moderator",
+                                        "tournament_winner",
+                                        "tournament_caster"
+                                    ]
+                                },
+                                "uniqueItems": true
                             }
-                        ]
+                        }
                     }
                 }
             },
