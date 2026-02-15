@@ -9,7 +9,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   alias Teiserver.Data.Types, as: T
   require Logger
 
-  @max_lobby_name_length 70
+  @max_lobby_name_length 100
   def max_lobby_name_length, do: @max_lobby_name_length
 
   @spec get_lobby(T.lobby_id()) :: T.lobby() | nil
