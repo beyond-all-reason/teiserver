@@ -2342,5 +2342,6 @@ defmodule Teiserver.Account do
       not Teiserver.Config.get_site_config_cache("teiserver.Require Chobby registration")
   end
 
+  defdelegate set_login_limit(limit), to: LoginThrottleServer
   defdelegate reset_login_rate_limiter(rate), to: LoginThrottleServer, as: :reset_rate_limiter
 end

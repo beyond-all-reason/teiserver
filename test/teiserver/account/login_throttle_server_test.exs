@@ -2,7 +2,6 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   @moduledoc false
 
   use Teiserver.DataCase, async: false
-  alias Teiserver.Config
   alias Teiserver.Account
   alias Teiserver.Account.LoginThrottleServer
 
@@ -133,7 +132,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     # this is a hack because there seems to be some flakyness with `count_client`
     # from other tests
     current_count = Teiserver.Account.count_non_bot_clients()
-    Config.update_site_config("system.User limit", current_count + n)
+    LoginThrottleServer.set_login_limit(current_count + n)
   end
 
   defp oneshot_pid() do

@@ -13,6 +13,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @typep member :: %{pid: pid(), mon_ref: reference(), user_id: T.userid()}
   @typep state :: %{
            tick_timer_ref: :timer.tref() | nil,
+           total_limit: non_neg_integer(),
            queue: :queue.queue(member()),
            monitors: MapSet.t(pid()),
            rate_limiter: BurstyRateLimiter.t()
@@ -34,6 +35,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
     state = %{
       tick_timer_ref: timer_ref,
+      total_limit: Config.get_site_config_cache("system.User limit"),
       queue: :queue.new(),
       monitors: MapSet.new(),
       rate_limiter: rate_limiter
@@ -55,6 +57,10 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @spec attempt_login(pid(), T.userid()) :: boolean()
   def attempt_login(pid, userid) do
     GenServer.call(__MODULE__, {:attempt_login, pid, userid})
+  end
+
+  def set_login_limit(limit) do
+    GenServer.call(__MODULE__, {:set_login_limit, limit})
   end
 
   @doc """
@@ -107,7 +113,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   def handle_call({:attempt_login, pid, userid}, _from, state) do
     category = categorise_user(userid)
-    capacity = get_capacity()
+    capacity = get_capacity(state.total_limit)
 
     can_login? = category == :instant or (capacity > 0 && :queue.is_empty(state.queue))
 
@@ -128,9 +134,13 @@ defmodule Teiserver.Account.LoginThrottleServer do
     {:reply, :ok, %{state | rate_limiter: rl}}
   end
 
+  def handle_call({:set_login_limit, limit}, _from, state) do
+    {:reply, :ok, %{state | total_limit: limit}}
+  end
+
   @impl true
   def handle_info(:tick, state) do
-    capacity = get_capacity()
+    capacity = get_capacity(state.total_limit)
 
     if capacity <= 0 do
       {:noreply, state}
@@ -221,8 +231,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     end
   end
 
-  defp get_capacity() do
-    total_limit = Config.get_site_config_cache("system.User limit")
+  defp get_capacity(total_limit) do
     count = Account.count_non_bot_clients()
     total_limit - count
   end
