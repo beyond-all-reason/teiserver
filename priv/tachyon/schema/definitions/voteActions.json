@@ -1,0 +1,19 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/voteActions.json",
+    "title": "VoteActions",
+    "anyOf": [
+        {
+            "type": "object",
+            "properties": { "type": { "const": "start" } },
+            "required": ["type"]
+        },
+        {
+            "type": "object",
+            "properties": {
+                "type": { "const": "changeMap" },
+                "newMapName": { "type": "string" }
+            },
+            "required": ["type", "newMapName"]
+        }
+    ]
+}

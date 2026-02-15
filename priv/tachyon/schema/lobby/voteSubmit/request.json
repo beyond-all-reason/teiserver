@@ -1,0 +1,26 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/voteSubmit/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LobbyVoteSubmitRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "lobby/voteSubmit" },
+        "data": {
+            "title": "LobbyVoteSubmitRequestData",
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "vote": { "enum": ["yes", "no", "abstain"] }
+            },
+            "required": ["id", "vote"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}
