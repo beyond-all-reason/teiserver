@@ -12,7 +12,7 @@
         "allyTeamConfig": {
             "type": "object",
             "patternProperties": {
-                "^(.*)$": {
+                "^.*$": {
                     "description": "this represent an array, items should be sorted lexicographically on their keys",
                     "type": "object",
                     "properties": {
@@ -21,7 +21,7 @@
                         "teams": {
                             "type": "object",
                             "patternProperties": {
-                                "^(.*)$": {
+                                "^.*$": {
                                     "type": "object",
                                     "properties": {
                                         "maxPlayers": {
@@ -41,7 +41,7 @@
         "players": {
             "type": "object",
             "patternProperties": {
-                "^(.*)$": {
+                "^.*$": {
                     "type": "object",
                     "properties": {
                         "id": { "$ref": "../definitions/userId.json" },
@@ -56,7 +56,7 @@
         "spectators": {
             "type": "object",
             "patternProperties": {
-                "^(.*)$": {
+                "^.*$": {
                     "type": "object",
                     "properties": {
                         "id": { "$ref": "../definitions/userId.json" },
@@ -69,7 +69,7 @@
         "bots": {
             "type": "object",
             "patternProperties": {
-                "^(.*)$": {
+                "^.*$": {
                     "type": "object",
                     "properties": {
                         "id": {
@@ -97,7 +97,7 @@
                         "options": {
                             "type": "object",
                             "patternProperties": {
-                                "^(.*)$": { "type": "string" }
+                                "^.*$": { "type": "string" }
                             }
                         }
                     },
@@ -119,6 +119,31 @@
                 "startedAt": { "$ref": "../definitions/unixTime.json" }
             },
             "required": ["startedAt"]
+        },
+        "currentVote": {
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "action": { "$ref": "../definitions/voteActions.json" },
+                "initiator": { "$ref": "../definitions/userId.json" },
+                "voters": {
+                    "description": "indexed by the userId. The initiator is also included in this object",
+                    "type": "object",
+                    "patternProperties": {
+                        "^.*$": {
+                            "type": "object",
+                            "properties": {
+                                "vote": {
+                                    "enum": ["pending", "yes", "no", "abstain"]
+                                }
+                            },
+                            "required": ["vote"]
+                        }
+                    }
+                },
+                "until": { "$ref": "../definitions/unixTime.json" }
+            },
+            "required": ["id", "action", "initiator", "voters", "until"]
         }
     },
     "required": [

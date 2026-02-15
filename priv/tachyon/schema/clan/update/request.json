@@ -13,10 +13,8 @@
         "messageId": { "type": "string" },
         "commandId": { "const": "clan/update" },
         "data": {
-            "title": "ClanUpdateRequestData",
-            "type": "object",
-            "properties": { "clan": { "$ref": "../../definitions/clan.json" } },
-            "required": ["clan"]
+            "$ref": "../../definitions/clanUpdateableData.json",
+            "title": "ClanUpdateRequestData"
         }
     },
     "required": ["type", "messageId", "commandId", "data"]

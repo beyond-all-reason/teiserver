@@ -45,6 +45,10 @@
                 },
                 "currentLobby": {
                     "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "clanInvites": {
+                    "type": "array",
+                    "items": { "$ref": "../definitions/clanId.json" }
                 }
             },
             "required": [
@@ -54,7 +58,8 @@
                 "outgoingFriendRequest",
                 "incomingFriendRequest",
                 "ignoreIds",
-                "currentLobby"
+                "currentLobby",
+                "clanInvites"
             ]
         }
     ]

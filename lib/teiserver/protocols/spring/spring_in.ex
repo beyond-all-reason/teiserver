@@ -269,14 +269,6 @@ defmodule Teiserver.Protocols.SpringIn do
           SpringOut.do_login_accepted(state, user, optimisation_level)
           |> Map.put(:party_id, nil)
 
-        # Do we have a clan?
-        if user.clan_id do
-          :timer.sleep(200)
-          clan = Teiserver.Clan.get_clan!(user.clan_id)
-          room_name = Room.clan_room_name(clan.tag)
-          SpringOut.do_join_room(new_state, room_name)
-        end
-
         new_state
 
       {:error, "Banned" <> _} ->

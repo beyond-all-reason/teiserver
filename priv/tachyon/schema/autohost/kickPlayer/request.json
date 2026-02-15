@@ -1,0 +1,26 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/autohost/kickPlayer/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AutohostKickPlayerRequest",
+    "tachyon": {
+        "source": "server",
+        "target": "autohost",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "autohost/kickPlayer" },
+        "data": {
+            "title": "AutohostKickPlayerRequestData",
+            "type": "object",
+            "properties": {
+                "battleId": { "type": "string", "format": "uuid" },
+                "userId": { "$ref": "../../definitions/userId.json" }
+            },
+            "required": ["battleId", "userId"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

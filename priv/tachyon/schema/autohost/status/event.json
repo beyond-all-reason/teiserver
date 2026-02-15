@@ -1,4 +1,6 @@
 {
+    "$id": "https://schema.beyondallreason.dev/tachyon/autohost/status/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "AutohostStatusEvent",
     "tachyon": {
         "source": "autohost",
@@ -14,10 +16,26 @@
             "title": "AutohostStatusEventData",
             "type": "object",
             "properties": {
-                "maxBattles": { "type": "integer", "minimum": 0 },
-                "currentBattles": { "type": "integer", "minimum": 0 }
+                "maxBattles": {
+                    "description": "The maxBattles might be reported lower (e.g. 0) then currentBattles. Example: autohost is shutting down and doesn't want to accept any new battles.",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "currentBattles": { "type": "integer", "minimum": 0 },
+                "availableEngines": {
+                    "description": "List of available engine versions on autohost",
+                    "type": "array",
+                    "items": { "type": "string" }
+                }
             },
-            "required": ["maxBattles", "currentBattles"]
+            "required": ["maxBattles", "currentBattles", "availableEngines"],
+            "examples": [
+                {
+                    "maxBattles": 10,
+                    "currentBattles": 5,
+                    "availableEngines": ["2025.01.5"]
+                }
+            ]
         }
     },
     "required": ["type", "messageId", "commandId", "data"]

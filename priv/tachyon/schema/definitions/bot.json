@@ -16,7 +16,7 @@
         "aiOptions": {
             "description": "AI-specific options",
             "type": "object",
-            "patternProperties": { "^(.*)$": { "type": "string" } }
+            "patternProperties": { "^.*$": { "type": "string" } }
         },
         "customProperties": {
             "$ref": "../definitions/customStartScriptProperties.json"

@@ -19,7 +19,7 @@
                 "lobbies": {
                     "type": "object",
                     "patternProperties": {
-                        "^(.*)$": {
+                        "^.*$": {
                             "anyOf": [
                                 {
                                     "type": "object",

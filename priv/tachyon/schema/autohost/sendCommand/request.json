@@ -1,0 +1,27 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/autohost/sendCommand/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AutohostSendCommandRequest",
+    "tachyon": {
+        "source": "server",
+        "target": "autohost",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "autohost/sendCommand" },
+        "data": {
+            "title": "AutohostSendCommandRequestData",
+            "type": "object",
+            "properties": {
+                "battleId": { "type": "string", "format": "uuid" },
+                "command": { "type": "string" },
+                "arguments": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["battleId", "command"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

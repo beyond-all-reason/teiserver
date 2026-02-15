@@ -53,7 +53,7 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
       {"welcome-message", ["message"],
        "Sets the welcome message sent to anybody joining the lobby. Run this command without a message to clear the existing message. Requires boss privileges. Use $$ to add a line return.",
        :everybody},
-      {"gatekeeper", ["(default | friends | friendsplay | clan)"],
+      {"gatekeeper", ["(default | friends | friendsplay)"],
        "sets the gatekeeper for this battle. Requires boss privileges.
 > default: no limitations
 > friends allows only friends of existing members to join the lobby

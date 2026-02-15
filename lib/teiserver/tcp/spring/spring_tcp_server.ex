@@ -5,7 +5,7 @@ defmodule Teiserver.SpringTcpServer do
 
   alias Phoenix.PubSub
   alias Teiserver.Config
-  alias Teiserver.{CacheUser, Client, Account, Room}
+  alias Teiserver.{CacheUser, Client, Account}
   alias Teiserver.Protocols.{SpringIn, SpringOut}
   alias Teiserver.Data.Types, as: T
 
@@ -338,14 +338,6 @@ defmodule Teiserver.SpringTcpServer do
   def handle_info({:login_accepted, userid}, state) do
     user = Account.get_user_by_id(userid)
     new_state = SpringOut.do_login_accepted(state, user, state.lobby)
-
-    # Do we have a clan?
-    if user.clan_id do
-      :timer.sleep(200)
-      clan = Teiserver.Clan.get_clan!(user.clan_id)
-      room_name = Room.clan_room_name(clan.tag)
-      SpringOut.do_join_room(new_state, room_name)
-    end
 
     if state.lobby_hash == nil do
       send(self(), :terminate)

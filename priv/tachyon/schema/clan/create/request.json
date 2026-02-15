@@ -13,14 +13,8 @@
         "messageId": { "type": "string" },
         "commandId": { "const": "clan/create" },
         "data": {
-            "title": "ClanCreateRequestData",
-            "type": "object",
-            "properties": {
-                "clanBaseData": {
-                    "$ref": "../../definitions/clanBaseData.json"
-                }
-            },
-            "required": ["clanBaseData"]
+            "$ref": "../../definitions/clanUpdateableData.json",
+            "title": "ClanCreateRequestData"
         }
     },
     "required": ["type", "messageId", "commandId", "data"]

@@ -11,15 +11,7 @@
     "properties": {
         "type": { "const": "request" },
         "messageId": { "type": "string" },
-        "commandId": { "const": "clan/leave" },
-        "data": {
-            "title": "ClanLeaveRequestData",
-            "type": "object",
-            "properties": {
-                "userId": { "$ref": "../../definitions/userId.json" }
-            },
-            "required": ["userId"]
-        }
+        "commandId": { "const": "clan/leave" }
     },
-    "required": ["type", "messageId", "commandId", "data"]
+    "required": ["type", "messageId", "commandId"]
 }

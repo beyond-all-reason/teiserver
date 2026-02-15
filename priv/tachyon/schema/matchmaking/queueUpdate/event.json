@@ -1,0 +1,23 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/matchmaking/queueUpdate/event.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MatchmakingQueueUpdateEvent",
+    "tachyon": {
+        "source": "server",
+        "target": "user",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "event" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "matchmaking/queueUpdate" },
+        "data": {
+            "title": "MatchmakingQueueUpdateEventData",
+            "type": "object",
+            "properties": { "playersQueued": { "type": "integer" } },
+            "required": ["playersQueued"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

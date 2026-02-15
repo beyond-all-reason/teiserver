@@ -9,7 +9,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Teiserver.{
     Account,
     CacheUser,
-    Clan,
     Room,
     Coordinator,
     Client,
@@ -74,15 +73,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     ~w(main coordinator moderators)
     |> Enum.each(fn room_name ->
       Room.get_or_make_room(room_name, user.id)
-      Room.add_user_to_room(user.id, room_name)
-      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
-    end)
-
-    # Now join the clan channels
-    Clan.list_clans()
-    |> Enum.each(fn clan ->
-      room_name = Room.clan_room_name(clan.tag)
-      Room.get_or_make_room(room_name, user.id, clan.id)
       Room.add_user_to_room(user.id, room_name)
       :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
     end)

@@ -1,0 +1,10 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/clanUpdateableBaseData.json",
+    "title": "ClanUpdateableBaseData",
+    "type": "object",
+    "properties": {
+        "name": { "type": "string", "maxLength": 30 },
+        "tag": { "type": "string", "minLength": 3, "maxLength": 6 }
+    },
+    "required": ["name", "tag"]
+}

@@ -9,7 +9,12 @@ defmodule Teiserver.Clan do
   alias Teiserver.Repo
 
   alias Teiserver.Clan.ClanSchema
+  alias Teiserver.Clan.ClanInviteSchema
+  alias Teiserver.Clan.ClanMemberSchema
+
   alias Teiserver.Clan.ClanLib
+  alias Teiserver.Clan.ClanInviteLib
+  alias Teiserver.Clan.ClanMemberLib
 
   @spec clan_query(nil | maybe_improper_list() | map()) :: Ecto.Query.t()
   defp clan_query(args) do
@@ -27,12 +32,13 @@ defmodule Teiserver.Clan do
   end
 
   @doc """
-  Returns the list of clans.
+  Returns the list of clans. (Default limit 50.)
 
   ## Examples
-
-      iex> list_clans()
-      [%ClanSchema{}, ...]
+    iex> list_clans()
+    [%ClanSchema{}, ...]
+    iex> list_clans(%{limit: 10})
+    [%ClanSchema{}, ...]
   """
   @spec list_clans(nil | maybe_improper_list() | map()) :: any()
   def list_clans(args \\ []) do
@@ -57,10 +63,8 @@ defmodule Teiserver.Clan do
   """
   @spec get_clan!(any()) :: any()
   def get_clan!(id) when not is_list(id) do
-    Teiserver.cache_get_or_store(:teiserver_clan_cache_bang, id, fn ->
-      clan_query(id, [])
-      |> Repo.one!()
-    end)
+    clan_query(id, [])
+    |> Repo.one!()
   end
 
   @spec get_clan!(nil | maybe_improper_list() | map()) :: any()
@@ -96,7 +100,7 @@ defmodule Teiserver.Clan do
 
   ## Examples
 
-      iex> create_clan(%{name: "Warriors", description: "A clan of warriors"})
+      iex> create_clan(%{tag: "WR1", name: "Warriors", description: "A clan of warriors"})
       {:ok, %Clan{}}
 
       iex> create_clan(%{name: nil})
@@ -131,8 +135,6 @@ defmodule Teiserver.Clan do
       {:error, %Ecto.Changeset{}}
   """
   def update_clan(%ClanSchema{} = clan, attrs) do
-    Teiserver.cache_delete(:teiserver_clan_cache_bang, clan.id)
-
     clan
     |> ClanSchema.changeset(attrs)
     |> Repo.update()
@@ -174,9 +176,6 @@ defmodule Teiserver.Clan do
   def change_clan(%ClanSchema{} = clan) do
     ClanSchema.changeset(clan, %{})
   end
-
-  alias Teiserver.Clan.ClanInvite
-  alias Teiserver.Clan.ClanInviteLib
 
   @doc """
   Returns the list of clan_invites.
@@ -246,14 +245,14 @@ defmodule Teiserver.Clan do
 
   """
   def create_clan_invite(attrs) do
-    %ClanInvite{}
-    |> ClanInvite.changeset(attrs)
+    %ClanInviteSchema{}
+    |> ClanInviteSchema.changeset(attrs)
     |> Repo.insert()
   end
 
   def create_clan_invite(clan_id, user_id) do
-    %ClanInvite{}
-    |> ClanInvite.changeset(%{
+    %ClanInviteSchema{}
+    |> ClanInviteSchema.changeset(%{
       clan_id: clan_id,
       user_id: user_id
     })
@@ -272,9 +271,9 @@ defmodule Teiserver.Clan do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_clan_invite(%ClanInvite{} = clan_invite, attrs) do
+  def update_clan_invite(%ClanInviteSchema{} = clan_invite, attrs) do
     clan_invite
-    |> ClanInvite.changeset(attrs)
+    |> ClanInviteSchema.changeset(attrs)
     |> Repo.update()
   end
 
@@ -290,7 +289,7 @@ defmodule Teiserver.Clan do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_clan_invite(%ClanInvite{} = clan_invite) do
+  def delete_clan_invite(%ClanInviteSchema{} = clan_invite) do
     Repo.delete(clan_invite)
   end
 
@@ -303,12 +302,9 @@ defmodule Teiserver.Clan do
       %Ecto.Changeset{source: %ClanInvite{}}
 
   """
-  def change_clan_invite(%ClanInvite{} = clan_invite) do
-    ClanInvite.changeset(clan_invite, %{})
+  def change_clan_invite(%ClanInviteSchema{} = clan_invite) do
+    ClanInviteSchema.changeset(clan_invite, %{})
   end
-
-  alias Teiserver.Clan.ClanMembership
-  alias Teiserver.Clan.ClanMembershipLib
 
   @doc """
   Returns the list of clan_memberships.
@@ -320,21 +316,21 @@ defmodule Teiserver.Clan do
 
   """
   def list_clan_memberships_by_clan(clan_id, args \\ []) do
-    ClanMembershipLib.get_clan_memberships()
-    |> ClanMembershipLib.search(clan_id: clan_id)
-    |> ClanMembershipLib.search(args[:search])
-    |> ClanMembershipLib.preload(args[:joins])
-    # |> ClanMembershipLib.order_by(args[:order_by])
+    ClanMemberLib.get_clan_member()
+    |> ClanMemberLib.search(clan_id: clan_id)
+    |> ClanMemberLib.search(args[:search])
+    |> ClanMemberLib.preload(args[:joins])
+    # |> ClanMemberLib.order_by(args[:order_by])
     |> QueryHelpers.query_select(args[:select])
     |> Repo.all()
   end
 
   def list_clan_memberships_by_user(user_id, args \\ []) do
-    ClanMembershipLib.get_clan_memberships()
-    |> ClanMembershipLib.search(user_id: user_id)
-    |> ClanMembershipLib.search(args[:search])
-    |> ClanMembershipLib.preload(args[:joins])
-    # |> ClanMembershipLib.order_by(args[:order_by])
+    ClanMemberLib.get_clan_member()
+    |> ClanMemberLib.search(user_id: user_id)
+    |> ClanMemberLib.search(args[:search])
+    |> ClanMemberLib.preload(args[:joins])
+    # |> ClanMemberLib.order_by(args[:order_by])
     |> QueryHelpers.query_select(args[:select])
     |> Repo.all()
   end
@@ -347,22 +343,22 @@ defmodule Teiserver.Clan do
   ## Examples
 
       iex> get_clan_membership!(123)
-      %ClanMembership{}
+      %ClanMemberLib{}
 
       iex> get_clan_membership!(456)
       ** (Ecto.NoResultsError)
 
   """
   def get_clan_membership!(clan_id, user_id) do
-    ClanMembershipLib.get_clan_memberships()
-    |> ClanMembershipLib.search(%{clan_id: clan_id, user_id: user_id})
+    ClanMemberLib.get_clan_member()
+    |> ClanMemberLib.search(%{clan_id: clan_id, user_id: user_id})
     |> Repo.one!()
   end
 
-  @spec get_clan_membership(Integer.t(), Integer.t()) :: ClanMembership.t() | nil
+  @spec get_clan_membership(Integer.t(), Integer.t()) :: ClanMemberLib.t() | nil
   def get_clan_membership(clan_id, user_id) do
-    ClanMembershipLib.get_clan_memberships()
-    |> ClanMembershipLib.search(%{clan_id: clan_id, user_id: user_id})
+    ClanMemberLib.get_clan_member()
+    |> ClanMemberLib.search(%{clan_id: clan_id, user_id: user_id})
     |> Repo.one()
   end
 
@@ -379,14 +375,14 @@ defmodule Teiserver.Clan do
 
   """
   def create_clan_membership(attrs) do
-    %ClanMembership{}
-    |> ClanMembership.changeset(attrs)
+    %ClanMemberSchema{}
+    |> ClanMemberSchema.changeset(attrs)
     |> Repo.insert()
   end
 
   def create_clan_membership(clan_id, user_id) do
-    %ClanMembership{}
-    |> ClanMembership.changeset(%{
+    %ClanMemberSchema{}
+    |> ClanMemberSchema.changeset(%{
       clan_id: clan_id,
       user_id: user_id
     })
@@ -405,9 +401,9 @@ defmodule Teiserver.Clan do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_clan_membership(%ClanMembership{} = clan_membership, attrs) do
+  def update_clan_membership(%ClanMemberSchema{} = clan_membership, attrs) do
     clan_membership
-    |> ClanMembership.changeset(attrs)
+    |> ClanMemberSchema.changeset(attrs)
     |> Repo.update()
   end
 
@@ -423,7 +419,7 @@ defmodule Teiserver.Clan do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_clan_membership(%ClanMembership{} = clan_membership) do
+  def delete_clan_membership(%ClanMemberSchema{} = clan_membership) do
     Repo.delete(clan_membership)
   end
 
@@ -436,7 +432,19 @@ defmodule Teiserver.Clan do
       %Ecto.Changeset{source: %ClanMembership{}}
 
   """
-  def change_clan_membership(%ClanMembership{} = clan_membership) do
-    ClanMembership.changeset(clan_membership, %{})
+  def change_clan_membership(%ClanMemberSchema{} = clan_membership) do
+    ClanMemberSchema.changeset(clan_membership, %{})
+  end
+
+  def count_clan_members(clan_id) do
+    ClanMemberLib.get_clan_member()
+    |> ClanMemberLib.search(clan_id: clan_id)
+    |> Repo.aggregate(:count, :id)
+  end
+
+  def list_clan_members(clan_id) do
+    ClanMemberLib.get_clan_member()
+    |> ClanMemberLib.search(clan_id: clan_id)
+    |> Repo.all()
   end
 end

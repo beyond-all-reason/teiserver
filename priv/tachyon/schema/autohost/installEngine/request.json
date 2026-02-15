@@ -1,0 +1,29 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/autohost/installEngine/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AutohostInstallEngineRequest",
+    "tachyon": {
+        "source": "server",
+        "target": "autohost",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "autohost/installEngine" },
+        "data": {
+            "title": "AutohostInstallEngineRequestData",
+            "type": "object",
+            "properties": {
+                "version": {
+                    "description": "Version of the engine to install",
+                    "type": "string"
+                }
+            },
+            "required": ["version"],
+            "examples": [{ "version": "2025.01.5" }]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

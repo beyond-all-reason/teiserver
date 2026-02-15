@@ -1,0 +1,11 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/clanMember.json",
+    "title": "ClanMember",
+    "type": "object",
+    "properties": {
+        "userId": { "$ref": "../definitions/userId.json" },
+        "role": { "$ref": "../definitions/clanRole.json" },
+        "joinedAt": { "$ref": "../definitions/unixTime.json" }
+    },
+    "required": ["userId", "role", "joinedAt"]
+}

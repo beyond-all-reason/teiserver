@@ -1,0 +1,8 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/clanBaseData.json",
+    "title": "ClanBaseData",
+    "allOf": [
+        { "$ref": "../definitions/clanId.json" },
+        { "$ref": "../definitions/clanUpdateableBaseData.json" }
+    ]
+}

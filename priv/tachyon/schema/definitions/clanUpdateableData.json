@@ -1,0 +1,13 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/clanUpdateableData.json",
+    "title": "ClanUpdateableData",
+    "allOf": [
+        { "$ref": "../definitions/clanUpdateableBaseData.json" },
+        {
+            "type": "object",
+            "properties": {
+                "description": { "type": "string", "maxLength": 500 }
+            }
+        }
+    ]
+}

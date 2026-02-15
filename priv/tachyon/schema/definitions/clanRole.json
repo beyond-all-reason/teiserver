@@ -1,0 +1,5 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/clanRole.json",
+    "title": "ClanRole",
+    "enum": ["member", "coLeader", "leader"]
+}

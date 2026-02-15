@@ -3,39 +3,47 @@ defmodule Teiserver.Clan.ClanLib do
   alias Teiserver.Clan.ClanSchema
 
   @moduledoc """
-  Clan library functions
+  This module provides functions to create sql queries and
+  type definitions for clans.
   """
 
-  # Functions
-  @spec icon :: String.t()
-  def icon, do: "fa-solid fa-globe"
+  # Defintion of available clan roles as type
+  @spec clan_roles :: [String.t()]
+  def clan_roles, do: ~w(member coLeader leader)
 
-  @spec colours :: atom
-  def colours, do: :info2
+  @doc """
+  Creates an Ecto-Query to get all entries of the table ClanSchema.
+  Return value needed for search/2, order_by/2 and preload/2
 
-  @spec make_favourite(ClanSchema.t()) :: map()
-  def make_favourite(clan) do
-    %{
-      type_colour: StylingHelper.colours(colours()) |> elem(0),
-      type_icon: icon(),
-      item_id: clan.id,
-      item_type: "teiserver_clans_clan",
-      item_colour: clan.colour,
-      item_icon: clan.icon,
-      item_label: "#{clan.name}",
-      url: "/clans/#{clan.id}"
-    }
-  end
+  ## Return
+    Ecto.Query
 
-  @spec ranks :: [String.t()]
-  def ranks, do: ~w(Admin Moderator Member)
-
-  # Queries
+  ## Example
+    query = query_clans()
+    query = search(query, %{name: "ClanName"})
+    Repo.all(query)
+  """
   @spec query_clans() :: Ecto.Query.t()
   def query_clans do
     from(clans in ClanSchema)
   end
 
+  @doc """
+  Expand an Ecto-Query with a search.
+
+  ## Parameter
+    - query: Ecto.Query
+    - params: :id|:name|:id_list|:basic_search
+
+  ## Return
+    Ecto.Query
+
+  ## Examples
+    iex> search(query, %{id: 123})
+    iex> search(query, %{name: "ClanName"})
+    iex> search(query, %{id_list: [1, 2, 3]})
+    iex> search(query, %{basic_search: "foo*bar"})
+  """
   @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
@@ -71,6 +79,16 @@ defmodule Teiserver.Clan.ClanLib do
       where: ilike(clans.name, ^ref_like)
   end
 
+  @doc """
+  Expand a query with a sort order.
+
+  ## Parameter
+    - query: Ecto.Query
+    - parameter: "Name (A-Z)"|"Name (Z-A)"|"Newest first"|"Oldest first"
+
+  ## Return
+    Ecto.Query
+  """
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 
@@ -94,6 +112,25 @@ defmodule Teiserver.Clan.ClanLib do
       order_by: [asc: clans.inserted_at]
   end
 
+  @doc """
+  Expand a query with preloads.
+
+  ## Parameter:
+    - query: Ecto.Query
+    - preloads: list[]
+      - Supported entries:
+        :members = Load 50 members sorted alphabetical
+        :members_and_memberships = Load 50 members and their user profil
+        :invites_and_invitees = Load 50 invited user and their user profil
+
+  ## Return
+    Ecto.Query
+
+  ## Example:
+    query = query_clans()
+    query = preload(query, [:members, :invites_and_invitees])
+    Repo.all(query)
+  """
   @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
@@ -136,10 +173,4 @@ defmodule Teiserver.Clan.ClanLib do
       limit: 50,
       preload: [invites: {invites, user: users}]
   end
-
-  # def _preload_things(query) do
-  #   from clans in query,
-  #     left_join: things in assoc(clans, :things),
-  #     preload: [things: things]
-  # end
 end
