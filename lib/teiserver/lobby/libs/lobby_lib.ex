@@ -9,6 +9,9 @@ defmodule Teiserver.Lobby.LobbyLib do
   alias Teiserver.Data.Types, as: T
   require Logger
 
+  @max_lobby_name_length 70
+  def max_lobby_name_length, do: @max_lobby_name_length
+
   @spec get_lobby(T.lobby_id()) :: T.lobby() | nil
   def get_lobby(id) do
     call_lobby(int_parse(id), :get_lobby_state)
@@ -175,6 +178,9 @@ defmodule Teiserver.Lobby.LobbyLib do
     cond do
       String.trim(data.name || "") == "" ->
         {:error, "No lobby name supplied"}
+
+      String.length(data.name) > @max_lobby_name_length ->
+        {:error, "Lobby name too long"}
 
       not Enum.member?(["normal", "replay"], data.type) ->
         {:error, "Invalid type '#{data.type}'"}

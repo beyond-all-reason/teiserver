@@ -1591,13 +1591,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         state
 
-      # String.length(new_name) > 20 ->
-      #   Lobby.sayex(
-      #     state.coordinator_id,
-      #     "That name (#{new_name}) is too long",
-      #     state.lobby_id
-      #   )
-      #   state
+      String.length(new_name) > Teiserver.Lobby.LobbyLib.max_lobby_name_length() ->
+        Lobby.sayex(
+          state.coordinator_id,
+          "That name is too long",
+          state.lobby_id
+        )
+
+        state
 
       lobby.lobby_policy_id && starts_with_lobby_policy ->
         Lobby.sayex(

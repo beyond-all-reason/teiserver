@@ -124,4 +124,32 @@ defmodule Teiserver.Battle.LobbyServerTest do
     LobbyLib.stop_lobby_server(lobby_id)
     assert LobbyLib.lobby_exists?(lobby_id) == false
   end
+
+  describe "validate_new_lobby name length" do
+    defp valid_lobby_data do
+      %{
+        name: "valid name",
+        type: "normal",
+        nattype: "none",
+        locked: false
+      }
+    end
+
+    test "accepts name within limit" do
+      max = Teiserver.Lobby.LobbyLib.max_lobby_name_length()
+      data = %{valid_lobby_data() | name: String.duplicate("a", max)}
+      assert true == LobbyLib.validate_new_lobby(data)
+    end
+
+    test "rejects name exceeding limit" do
+      max = Teiserver.Lobby.LobbyLib.max_lobby_name_length()
+      data = %{valid_lobby_data() | name: String.duplicate("a", max + 1)}
+      assert {:error, "Lobby name too long"} == LobbyLib.validate_new_lobby(data)
+    end
+
+    test "rejects empty name" do
+      data = %{valid_lobby_data() | name: ""}
+      assert {:error, "No lobby name supplied"} == LobbyLib.validate_new_lobby(data)
+    end
+  end
 end

@@ -1461,14 +1461,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
   end
 
+  @max_lobby_name_length Teiserver.Lobby.LobbyLib.max_lobby_name_length()
+
   @spec update_property(atom(), term(), state()) :: {:ok, [event()]} | {:error, String.t()}
   defp update_property(:name, new_name, _state) do
-    # we can expand lobby name validation later
-    if new_name == "" do
-      {:error, "name must not be empty"}
-    end
+    cond do
+      new_name == "" ->
+        {:error, "name must not be empty"}
 
-    {:ok, [{:update_lobby_name, new_name}]}
+      String.length(new_name) > @max_lobby_name_length ->
+        {:error, "Lobby name too long"}
+
+      true ->
+        {:ok, [{:update_lobby_name, new_name}]}
+    end
   end
 
   defp update_property(:map_name, new_name, _state),

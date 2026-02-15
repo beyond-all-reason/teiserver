@@ -5,13 +5,20 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 
+  @max_lobby_name_length Teiserver.Lobby.LobbyLib.max_lobby_name_length()
+
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("update_lobby_title", new_name, msg_id, state) do
-    if Lobby.allow?(state.userid, :update_lobby_title, state.lobby_id) do
-      Battle.rename_lobby(state.lobby_id, new_name, nil)
-      reply(:spring, :okay, "c.battle.update_lobby_title", msg_id, state)
-    else
-      state
+    cond do
+      not Lobby.allow?(state.userid, :update_lobby_title, state.lobby_id) ->
+        state
+
+      String.length(new_name) > @max_lobby_name_length ->
+        reply(:spring, :no, {"c.battle.update_lobby_title", "Lobby name too long"}, msg_id, state)
+
+      true ->
+        Battle.rename_lobby(state.lobby_id, new_name, nil)
+        reply(:spring, :okay, "c.battle.update_lobby_title", msg_id, state)
     end
   end
 

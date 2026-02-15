@@ -44,10 +44,22 @@ defmodule Teiserver.TachyonLobby do
     end
   end
 
+  @max_lobby_name_length Teiserver.Lobby.LobbyLib.max_lobby_name_length()
+
   def create(start_params) do
-    with {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
-         {:ok, details} <- Lobby.get_details(id) do
-      {:ok, pid, details}
+    cond do
+      not is_map_key(start_params, :name) or not is_binary(start_params.name) or
+          String.trim(start_params.name) == "" ->
+        {:error, :empty_lobby_name}
+
+      String.length(start_params.name) > @max_lobby_name_length ->
+        {:error, :lobby_name_too_long}
+
+      true ->
+        with {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
+             {:ok, details} <- Lobby.get_details(id) do
+          {:ok, pid, details}
+        end
     end
   end
 

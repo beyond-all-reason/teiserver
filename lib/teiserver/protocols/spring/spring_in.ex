@@ -820,6 +820,9 @@ defmodule Teiserver.Protocols.SpringIn do
             not CacheUser.is_bot?(state.userid) ->
               {:failure, "Not a bot"}
 
+            String.length(name) > Teiserver.Lobby.LobbyLib.max_lobby_name_length() ->
+              {:failure, "Lobby name too long"}
+
             true ->
               password = if Enum.member?(["empty", "*"], password), do: nil, else: password
 

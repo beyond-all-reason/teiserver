@@ -55,6 +55,24 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     assert details.engine_version == engine.name
   end
 
+  test "create lobby with name at max length" do
+    max = Teiserver.Lobby.LobbyLib.max_lobby_name_length()
+    params = mk_start_params([1, 1]) |> Map.put(:name, String.duplicate("a", max))
+    {:ok, _pid, details} = Lobby.create(params)
+    assert String.length(details.name) == max
+  end
+
+  test "create lobby with name exceeding max length" do
+    max = Teiserver.Lobby.LobbyLib.max_lobby_name_length()
+    params = mk_start_params([1, 1]) |> Map.put(:name, String.duplicate("a", max + 1))
+    assert {:error, :lobby_name_too_long} = Lobby.create(params)
+  end
+
+  test "create lobby with empty name" do
+    params = mk_start_params([1, 1]) |> Map.put(:name, "")
+    assert {:error, :empty_lobby_name} = Lobby.create(params)
+  end
+
   test "exit when no more players" do
     test_pid = self()
 
@@ -785,6 +803,22 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
       assert details.name == "new name"
       assert_receive {:lobby, ^id, {:updated, %{name: "new name"}}}
+    end
+
+    test "name too long rejected" do
+      max = Teiserver.Lobby.LobbyLib.max_lobby_name_length()
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      long_name = String.duplicate("x", max + 1)
+      {:error, _} = Lobby.update_properties(id, @default_user_id, %{name: long_name})
+    end
+
+    test "name at max length accepted" do
+      max = Teiserver.Lobby.LobbyLib.max_lobby_name_length()
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+      valid_name = String.duplicate("x", max)
+      :ok = Lobby.update_properties(id, @default_user_id, %{name: valid_name})
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert details.name == valid_name
     end
 
     test "map name" do
