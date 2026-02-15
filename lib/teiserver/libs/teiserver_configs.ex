@@ -296,7 +296,8 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["Admin"],
       description: "The cap for number of concurrent users",
       default: 1000,
-      value_label: ""
+      value_label: "",
+      update_callback: fn rate -> Teiserver.Account.set_login_limit(rate) end
     })
 
     add_site_config_type(%{
