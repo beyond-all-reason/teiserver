@@ -5,6 +5,7 @@ defmodule Teiserver.Chat.RoomMessage do
     field :content, :string
     field :chat_room, :string
     field :inserted_at, :utc_datetime
+    field :discord_message_id, :integer
     belongs_to :user, Teiserver.Account.User
   end
 
@@ -18,7 +19,7 @@ defmodule Teiserver.Chat.RoomMessage do
       |> trim_strings([:content, :chat_room])
 
     struct
-    |> cast(params, [:content, :chat_room, :inserted_at, :user_id])
+    |> cast(params, [:content, :chat_room, :inserted_at, :user_id, :discord_message_id])
     |> validate_required([:content, :chat_room, :inserted_at, :user_id])
   end
 

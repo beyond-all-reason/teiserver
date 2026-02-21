@@ -392,7 +392,33 @@ defmodule Teiserver.Bridge.BridgeServer do
       message
       |> convert_emoticons()
 
-    Api.Message.create(channel, "**#{author}**: #{new_message}")
+    case Api.Message.create(channel, "**#{author}**: #{new_message}") do
+      {:ok, %{id: discord_message_id}} ->
+        Task.start(fn ->
+          save_discord_message_id(from_id, channel, discord_message_id)
+        end)
+
+      _ ->
+        nil
+    end
+  end
+
+  defp save_discord_message_id(user_id, _channel_id, discord_message_id) do
+    # Find the most recent room message from this user that doesn't already have a discord_message_id
+    case Teiserver.Chat.list_room_messages(
+           search: [
+             user_id: user_id,
+             has_discord_message_id: false
+           ],
+           order_by: "Newest first",
+           limit: 1
+         ) do
+      [msg] ->
+        Teiserver.Chat.update_room_message(msg, %{discord_message_id: discord_message_id})
+
+      _ ->
+        nil
+    end
   end
 
   defp convert_emoticons(message) do

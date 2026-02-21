@@ -88,6 +88,16 @@ defmodule Teiserver.Chat.RoomMessageLib do
       where: room_messages.inserted_at < ^timestamp
   end
 
+  def _search(query, :has_discord_message_id, true) do
+    from room_messages in query,
+      where: not is_nil(room_messages.discord_message_id)
+  end
+
+  def _search(query, :has_discord_message_id, false) do
+    from room_messages in query,
+      where: is_nil(room_messages.discord_message_id)
+  end
+
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 
