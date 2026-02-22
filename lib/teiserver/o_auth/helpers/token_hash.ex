@@ -14,6 +14,16 @@ defmodule Teiserver.OAuth.TokenHash do
   end
 
   @doc """
+  Perform a dummy hash to prevent timing attacks when no record is found.
+  Equivalent in purpose to Argon2.no_user_verify/0 but for SHA-256.
+  """
+  @spec no_user_verify() :: false
+  def no_user_verify do
+    hash_verifier("dummy")
+    false
+  end
+
+  @doc """
   Returns {selector, hashed_verifier, full_token}.
   """
   @spec generate_token() :: {String.t(), String.t(), String.t()}

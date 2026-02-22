@@ -50,7 +50,7 @@ defmodule Teiserver.OAuth.CodeTest do
 
   test "can exchange valid code for token", %{user: user, app: app} do
     assert {:ok, code, attrs} = create_code(user, app)
-    assert {:ok, token} = OAuth.exchange_code(code, attrs._verifier, attrs.redirect_uri)
+    assert {:ok, token} = OAuth.exchange_code(code, attrs.verifier, attrs.redirect_uri)
     assert token.scopes == code.scopes
     assert token.owner_id == user.id
     # the code is now consumed and not available anymore
@@ -60,7 +60,7 @@ defmodule Teiserver.OAuth.CodeTest do
   test "cannot exchange expired code for token", %{user: user, app: app} do
     yesterday = Timex.shift(Timex.now(), days: -1)
     assert {:ok, code, attrs} = create_code(user, app, expires_at: yesterday)
-    assert {:error, :expired} = OAuth.exchange_code(code, attrs._verifier)
+    assert {:error, :expired} = OAuth.exchange_code(code, attrs.verifier)
   end
 
   test "must use valid verifier", %{user: user, app: app} do

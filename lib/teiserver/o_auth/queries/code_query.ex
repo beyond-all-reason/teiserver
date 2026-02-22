@@ -20,7 +20,7 @@ defmodule Teiserver.OAuth.CodeQueries do
 
     case code do
       nil ->
-        TokenHash.hash_verifier(verifier)
+        TokenHash.no_user_verify()
         nil
 
       code ->

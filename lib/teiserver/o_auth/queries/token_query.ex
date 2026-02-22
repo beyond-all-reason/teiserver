@@ -25,7 +25,7 @@ defmodule Teiserver.OAuth.TokenQueries do
 
     case token do
       nil ->
-        TokenHash.hash_verifier(verifier)
+        TokenHash.no_user_verify()
         nil
 
       token ->

@@ -36,14 +36,14 @@ defmodule Teiserver.OAuthFixtures do
       redirect_uri: List.first(app.redirect_uris),
       challenge: challenge,
       challenge_method: method,
-      _verifier: verifier,
-      _full_code: full_code
+      verifier: verifier,
+      full_code: full_code
     }
   end
 
   def create_code(attrs) do
     code = %Code{} |> Code.changeset(attrs) |> Repo.insert!()
-    %{code | value: attrs[:_full_code]}
+    %{code | value: attrs[:full_code]}
   end
 
   def token_attrs(user_id, application) do
@@ -59,13 +59,13 @@ defmodule Teiserver.OAuthFixtures do
       expires_at: Timex.add(now, Timex.Duration.from_days(60)),
       type: :access,
       refresh_token: nil,
-      _full_token: full_token
+      full_token: full_token
     }
   end
 
   def create_token(attrs) do
     token = %Token{} |> Token.changeset(attrs) |> Repo.insert!()
-    %{token | value: attrs[:_full_token]}
+    %{token | value: attrs[:full_token]}
   end
 
   def credential_attrs(bot, app_id) do

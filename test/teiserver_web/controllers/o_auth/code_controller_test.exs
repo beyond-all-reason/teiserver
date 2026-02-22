@@ -10,7 +10,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       code: code.value,
       redirect_uri: code.redirect_uri,
       client_id: app.uid,
-      code_verifier: code_attrs._verifier
+      code_verifier: code_attrs.verifier
     }
   end
 
