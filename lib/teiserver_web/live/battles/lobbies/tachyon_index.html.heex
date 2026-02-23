@@ -1,0 +1,46 @@
+
+
+{render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+  active: "tachyon_lobbies",
+  conn: Map.put(@socket, :permissions, @current_user.permissions)
+})}
+
+<div class="row mt-3">
+  <div class="col-md-12">
+    <h4>
+      Tachyon Lobbies: {Enum.count(@lobbies)}
+    </h4>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Map</th>
+            <th>Engine</th>
+            <th>Game</th>
+            <th>Status</th>
+            <th>Members / Max</th>
+          </tr>
+        </thead>
+        <tbody id="lobbies">
+          <%= for lobby <- @lobbies do %>
+            <tr>
+              <td>{lobby.name}</td>
+              <td>{lobby.map_name}</td>
+              <td>{lobby.engine_version}</td>
+              <td>{lobby.game_version}</td>
+              <td>
+                <%= if lobby.current_battle != nil do %>
+                  <i class="fa-fw fa-solid fa-play"></i> In Progress
+                <% else %>
+                  Waiting
+                <% end %>
+              </td>
+              <td>{lobby.player_count} / {lobby.max_player_count}</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
