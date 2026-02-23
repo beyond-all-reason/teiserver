@@ -5,6 +5,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   use Mix.Task
 
+  @requirements ["app.config"]
+
   alias Teiserver.{Account, Logging, Battle, Moderation}
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Battle.MatchLib
@@ -25,6 +27,26 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   @spec run(list()) :: :ok
   def run(_args) do
+    Application.ensure_all_started([:ecto, :ecto_sql, :tzdata])
+
+    already_has_data =
+      try do
+        case Ecto.Migrator.with_repo(Teiserver.Repo, fn repo ->
+               repo.aggregate(Teiserver.Account.User, :count, :id) > 3
+             end) do
+          {:ok, result, _} -> result
+          _ -> false
+        end
+      rescue
+        # DB doesn't exist or account_users table missing – treat as no data.
+        _ -> false
+      end
+
+    if already_has_data do
+      IO.puts("Demo data already present, skipping generation")
+      exit(:normal)
+    end
+
     # Start by rebuilding the database
     Mix.Task.run("ecto.reset")
 
@@ -38,7 +60,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     make_moderation()
     make_one_time_code()
 
-    # Add fake playtime data to all our non-bot users
+    # Add fake playtime data to all our non-bot users.
     Mix.Task.run("teiserver.fake_playtime")
 
     :timer.sleep(50)

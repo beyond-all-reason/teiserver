@@ -1,14 +1,14 @@
 name: teiserver-dev
 services:
   db:
-    image: postgres:15
+    image: postgres:18
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: 123456789
     ports:
       - "5432:5432"
     volumes:
-      - teiserver_postgres_data:/var/lib/postgresql/data
+      - teiserver_postgres_data:/var/lib/postgresql
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -24,7 +24,7 @@ services:
       - "8025:8025" # Web UI
 
   victoriametrics:
-    image: victoriametrics/victoria-metrics:v1.97.1
+    image: victoriametrics/victoria-metrics:v1.136.0
     restart: unless-stopped
     ports:
       - "8428:8428"
@@ -37,7 +37,7 @@ services:
       - "-promscrape.config=/etc/prometheus/prometheus.yml"
 
   grafana:
-    image: grafana/grafana:10.4.3
+    image: grafana/grafana:main
     container_name: teiserver-grafana
     restart: unless-stopped
     depends_on:
@@ -101,11 +101,11 @@ services:
     volumes:
       # Mount source code for live reload, might cause issues on Windows.
       # If you run into performance issues, remove these mounts.
-      # - ./lib:/build/lib
-      # - ./config:/build/config
-      # - ./priv:/build/priv
+      - ./lib:/build/lib
+      - ./config:/build/config
+      - ./priv:/build/priv
       - ./assets:/build/assets
-      # - ./test:/build/test
+      - ./test:/build/test
     stdin_open: true
     tty: true
 
