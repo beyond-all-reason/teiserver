@@ -23,15 +23,6 @@ defmodule Teiserver.Tachyon.Config do
       default: 10_000
     })
 
-    Config.add_site_config_type(%{
-      key: "enable_tachyon_lobbies_page",
-      section: "Tachyon",
-      type: "boolean",
-      permissions: ["Admin"],
-      description: "Enable the tachyon lobbies page",
-      default: Application.get_env(:teiserver, Teiserver)[:enable_tachyon_lobbies_page]
-    })
-
     :ok
   end
 

@@ -5,24 +5,26 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
 
   @impl true
   def mount(_params, session, socket) do
-    socket =
-      socket
-      |> AuthPlug.live_call(session)
+    case allow?(socket.assigns[:current_user], "Contributor") do
+      true ->
+        socket =
+          socket
+          |> AuthPlug.live_call(session)
 
-    if not Teiserver.Config.get_site_config_cache("enable_tachyon_lobbies_page") do
-      {:ok, socket |> redirect(to: ~p"/")}
-    else
-      {counter, lobbies} = TachyonLobby.subscribe_updates()
-      lobby_list = lobbies |> Map.values() |> Enum.sort_by(& &1.name)
+        {counter, lobbies} = TachyonLobby.subscribe_updates()
+        lobby_list = lobbies |> Map.values() |> Enum.sort_by(& &1.name)
 
-      socket =
-        socket
-        |> assign(:site_menu_active, "tachyon_lobbies")
-        |> assign(:view_colour, Teiserver.Lobby.colours())
-        |> assign(:lobbies, lobby_list)
-        |> assign(:counter, counter)
+        socket =
+          socket
+          |> assign(:site_menu_active, "tachyon_lobbies")
+          |> assign(:view_colour, Teiserver.Lobby.colours())
+          |> assign(:lobbies, lobby_list)
+          |> assign(:counter, counter)
 
-      {:ok, socket}
+        {:ok, socket}
+
+      false ->
+        {:ok, socket |> redirect(to: ~p"/")}
     end
   end
 

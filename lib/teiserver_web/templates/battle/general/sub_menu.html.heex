@@ -1,5 +1,5 @@
 <% {fg, _bg, _bsname} = view_colour(@active) |> colours() %>
-
+<% contributor = allow?(@current_user, "Contributor") %>
 <style>
   .sub-menu-icon a:hover {
     border-bottom: 5px solid <%= fg %>;
@@ -28,7 +28,7 @@
             icon: Teiserver.Lobby.icon()
           )}
 
-          <%= if Teiserver.Config.get_site_config_cache("enable_tachyon_lobbies_page") do %>
+          <%= if contributor do %>
             {central_component("sub_menu_icon",
               name: "tachyon_lobbies",
               label: "Tachyon Lobbies",
