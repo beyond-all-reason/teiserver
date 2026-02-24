@@ -416,6 +416,60 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       assert data == expected
     end
+
+    test "vote to change map", %{client: client, lobby_id: lobby_id} = ctx do
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+      Tachyon.lobby_join_queue!(ctx2[:client])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(client)
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(client)
+      %{"status" => "success"} = Tachyon.lobby_update!(client, %{mapName: "new map name"})
+
+      %{"commandId" => "lobby/updated", "data" => %{"currentVote" => vote}} =
+        Tachyon.recv_message!(client)
+
+      user_id = to_string(ctx[:user].id)
+      user2_id = to_string(ctx2[:user].id)
+
+      assert vote["action"] == %{
+               "type" => "changeMap",
+               "newMapName" => "new map name"
+             }
+
+      assert vote["initiator"] == user_id
+
+      assert vote["voters"] == %{
+               user_id => %{"vote" => "yes"},
+               user2_id => %{"vote" => "pending"}
+             }
+
+      # check joining a lobby also holds the vote details
+      {:ok, ctx3} = Tachyon.setup_client()
+
+      %{"status" => "success", "data" => %{"currentVote" => ^vote}} =
+        Tachyon.join_lobby!(ctx3[:client], lobby_id)
+
+      # not a voter
+      %{"status" => "failed", "reason" => "invalid_request"} =
+        Tachyon.lobby_vote_submit(ctx3[:client], vote["id"], "yes")
+
+      Tachyon.drain(ctx2[:client])
+      %{"status" => "success"} = Tachyon.lobby_vote_submit(ctx2[:client], vote["id"], "yes")
+      msg1 = Tachyon.recv_message!(ctx2[:client])
+      msg2 = Tachyon.recv_message!(ctx2[:client])
+
+      {updated, vote_ended} =
+        if msg1["commandId"] == "lobby/updated",
+          do: {msg1, msg2},
+          else: {msg2, msg1}
+
+      assert %{"commandId" => "lobby/voteEnded", "data" => %{"outcome" => "passed"}} = vote_ended
+
+      assert %{
+               "commandId" => "lobby/updated",
+               "data" => %{"currentVote" => nil, "mapName" => "new map name"}
+             } = updated
+    end
   end
 
   describe "update client status" do

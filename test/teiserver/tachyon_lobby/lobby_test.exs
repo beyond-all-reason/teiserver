@@ -817,6 +817,142 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert details.map_name == "new map"
       assert_receive {:lobby, ^id, {:updated, %{map_name: "new map"}}}
     end
+
+    test "only players can change the map" do
+      %{id: id} = setup_full_lobby([1, 1])
+      {:error, _} = Lobby.update_properties(id, "2", %{map_name: "new map"})
+    end
+
+    test "changing map with 2 players requires a vote" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      {:ok, original_details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      assert details.map_name == original_details.map_name
+      vote = details.current_vote
+      assert vote != nil
+      assert vote.voters[@default_user_id] == :yes, "initiator is always yes"
+      assert vote.voters["2"] == :pending, "other voters are pending"
+      assert vote.action == {:change_map, "new map"}
+
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote_update}}}
+      assert vote_update.id == vote.id
+    end
+
+    test "vote timeout triggers event" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      Teiserver.TachyonLobby.Lobby.trigger_vote_timeout(id, vote.id)
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
+      vote_id = vote.id
+      assert_receive {:lobby, ^id, {:vote_ended, ^vote_id, :timeout}}
+    end
+
+    test "vote timeout is bound to a current vote" do
+      {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
+
+      Teiserver.TachyonLobby.Lobby.trigger_vote_timeout(id, "definitely-not-a-vote-id")
+      refute_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}, 30
+    end
+
+    test "must specify correct lobby id to vote" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+
+      {:error, :invalid_lobby} = Lobby.vote_submit("not-a-lobby-id", "2", {vote.id, :yes})
+    end
+
+    test "must specify correct vote_id to vote" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: _vote}}}
+
+      {:error, :invalid_vote} = Lobby.vote_submit(id, "2", {"invalid-vote-id", :yes})
+    end
+
+    test "must be one of the allowed voters" do
+      %{id: id} = setup_full_lobby([1, 2])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+
+      {:error, :invalid_vote} = Lobby.vote_submit(id, "3", {vote.id, :yes})
+    end
+
+    test "members get updates when vote is cast" do
+      %{id: id} = setup_full_lobby([2, 2])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.join_queue(id, "3")
+      :ok = Lobby.join_queue(id, "4")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+
+      :ok = Lobby.vote_submit(id, @default_user_id, {vote.id, :no})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: updated_vote}}}
+      assert updated_vote.voters[@default_user_id] == :no
+    end
+
+    test "can change map when vote passes" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+
+      :ok = Lobby.vote_submit(id, "2", {vote.id, :yes})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: nil, map_name: "new map"}}}
+      assert_receive {:lobby, ^id, {:vote_ended, vote_id, result}}
+      assert vote_id == vote.id
+      assert result == :passed
+    end
+
+    test "map stays when vote fails" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+
+      :ok = Lobby.vote_submit(id, "2", {vote.id, :no})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
+      assert_receive {:lobby, ^id, {:vote_ended, vote_id, result}}
+      assert vote_id == vote.id
+      assert result == :failed
+    end
+
+    test "yes + abstain mean vote fails" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+
+      :ok = Lobby.vote_submit(id, "2", {vote.id, :abstain})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
+      assert_receive {:lobby, ^id, {:vote_ended, vote_id, result}}
+      assert vote_id == vote.id
+      assert result == :failed
+    end
+
+    test "voter disconnect is the same as leaving (abstain)" do
+      %{id: id, users: users} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+
+      Process.unlink(users["2"].pid)
+      Process.exit(users["2"].pid, :kill)
+
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
+      assert_receive {:lobby, ^id, {:vote_ended, vote_id, result}}
+      assert vote_id == vote.id
+      assert result == :failed
+    end
   end
 
   describe "update ally team" do

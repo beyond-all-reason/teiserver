@@ -528,6 +528,12 @@ defmodule Teiserver.Player.Session do
     GenServer.call(via_tuple(user_id), {:lobby, :update_properties, data})
   end
 
+  @spec lobby_vote_submit(T.userid(), String.t(), TachyonLobby.vote_ballot()) ::
+          :ok | {:error, :invalid_lobby | term()}
+  def lobby_vote_submit(user_id, vote_id, ballot) do
+    GenServer.call(via_tuple(user_id), {:lobby, :vote_submit, vote_id, ballot})
+  end
+
   @spec lobby_update_client_status(T.userid(), TachyonLobby.client_status_update_data()) ::
           :ok | {:error, :invalid_lobby | term()}
   def lobby_update_client_status(user_id, data) do
@@ -1150,6 +1156,13 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:lobby, :update_properties, data}, _from, state) do
     {:reply, TachyonLobby.update_properties(state.lobby.id, state.user.id, data), state}
+  end
+
+  def handle_call({:lobby, :vote_submit, _, _}, _from, state) when is_nil(state.lobby),
+    do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :vote_submit, vote_id, ballot}, _from, state) do
+    {:reply, TachyonLobby.vote_submit(state.lobby.id, state.user.id, {vote_id, ballot}), state}
   end
 
   def handle_call({:lobby, :update_client_status, _data}, _from, state) when is_nil(state.lobby),

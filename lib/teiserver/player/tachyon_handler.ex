@@ -187,6 +187,11 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "lobby/updated", data, state}
   end
 
+  def handle_info({:lobby, _lobby_id, {:vote_ended, vote_id, outcome}}, state) do
+    data = %{id: vote_id, outcome: outcome}
+    {:event, "lobby/voteEnded", data, state}
+  end
+
   def handle_info({:lobby, lobby_id, {:left, reason}}, state) do
     {:event, "lobby/left", %{id: lobby_id, reason: reason}, state}
   end
@@ -236,7 +241,8 @@ defmodule Teiserver.Player.TachyonHandler do
     {:stop, :normal, state}
   end
 
-  def handle_info(_msg, state) do
+  def handle_info(msg, state) do
+    Logger.warning("unhandled info message: #{inspect(msg)}")
     {:ok, state}
   end
 
@@ -826,6 +832,23 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/voteSubmit", "request", _msg_id, %{"data" => data}, state) do
+    result =
+      Player.Session.lobby_vote_submit(
+        state.user.id,
+        data["id"],
+        String.to_existing_atom(data["vote"])
+      )
+
+    case result do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command("lobby/updateClientStatus", "request", _msg_id, %{"data" => data}, state) do
     mappings = %{"isReady" => :ready?, "assetStatus" => {:asset_status, &parse_asset_status/1}}
     change_status = Collections.transform_map(data, mappings)
@@ -1111,7 +1134,8 @@ defmodule Teiserver.Player.TachyonHandler do
       map_name: :mapName,
       ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
       engine_version: :engineVersion,
-      game_version: :gameVersion
+      game_version: :gameVersion,
+      current_vote: {:currentVote, &vote_to_tachyon/1}
     }
 
     Collections.transform_map(details, mappings)
@@ -1128,7 +1152,8 @@ defmodule Teiserver.Player.TachyonHandler do
          %{id: :id, started_at: {:startedAt, &DateTime.to_unix(&1, :microsecond)}}},
       name: :name,
       map_name: :mapName,
-      ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1}
+      ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
+      current_vote: {:currentVote, &vote_to_tachyon/1}
     }
 
     Map.merge(%{id: lobby_id}, Collections.transform_map(update_map, mappings))
@@ -1214,6 +1239,31 @@ defmodule Teiserver.Player.TachyonHandler do
         end
 
       {to_string(i), val}
+    end
+  end
+
+  defp vote_to_tachyon(nil), do: nil
+
+  defp vote_to_tachyon(vote) do
+    mapping = %{
+      id: :id,
+      action: {:action, &vote_action_to_tachyon/1},
+      initiator: {:initiator, &to_string/1},
+      voters: :voters,
+      until: {:until, &DateTime.to_unix(&1, :microsecond)}
+    }
+
+    Map.update!(vote, :voters, fn vs ->
+      for {v_id, v} <- vs, into: %{} do
+        {to_string(v_id), %{vote: v}}
+      end
+    end)
+    |> Collections.transform_map(mapping)
+  end
+
+  defp vote_action_to_tachyon(action) do
+    case action do
+      {:change_map, name} -> %{type: :changeMap, newMapName: name}
     end
   end
 

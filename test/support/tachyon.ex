@@ -624,6 +624,13 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
+  def lobby_vote_submit(client, vote_id, ballot) do
+    data = %{"id" => vote_id, "vote" => ballot}
+    :ok = send_request(client, "lobby/voteSubmit", data)
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
   def subscribe_lobby_list!(client) do
     :ok = send_request(client, "lobby/subscribeList")
     {:ok, resp} = recv_message(client)
