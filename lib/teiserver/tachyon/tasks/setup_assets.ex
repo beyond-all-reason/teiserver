@@ -16,7 +16,7 @@ defmodule Teiserver.Tachyon.Tasks.SetupAssets do
 
   defp create_engine() do
     # the engine version can be found by running `spring -version`
-    case Asset.create_engine(%{name: "2025.01.6", in_matchmaking: true}) do
+    case Asset.create_engine(%{name: "2025.06.19", in_matchmaking: true}) do
       {:ok, engine} -> {:ok, {:created, engine}}
       {:error, changeset} -> {:error, {:create, changeset}}
     end

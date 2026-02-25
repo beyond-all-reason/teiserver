@@ -195,11 +195,10 @@ if Teiserver.ConfigHelpers.get_env("TEI_ENABLE_EMAIL_INTEGRATION", false, :bool)
     hostname: Teiserver.ConfigHelpers.get_env("TEI_SMTP_HOSTNAME"),
     # port: 1025,
     port: Teiserver.ConfigHelpers.get_env("TEI_SMTP_PORT", "587", :int),
-    username: Teiserver.ConfigHelpers.get_env("TEI_SMTP_USERNAME"),
-    password: Teiserver.ConfigHelpers.get_env("TEI_SMTP_PASSWORD"),
-    # tls: :if_available, # can be `:always` or `:never`
-    # can be `:always` or `:never`
-    tls: :always,
+    username: Teiserver.ConfigHelpers.get_env("TEI_SMTP_USERNAME", ""),
+    password: Teiserver.ConfigHelpers.get_env("TEI_SMTP_PASSWORD", ""),
+    # can be `:always`, `:never`, or `:if_available`
+    tls: Teiserver.ConfigHelpers.get_env("TEI_SMTP_TLS", "always") |> String.to_existing_atom(),
     tls_verify:
       if(Teiserver.ConfigHelpers.get_env("TEI_SMTP_TLS_VERIFY", true, :bool),
         do: :verify_peer,
@@ -209,8 +208,8 @@ if Teiserver.ConfigHelpers.get_env("TEI_ENABLE_EMAIL_INTEGRATION", false, :bool)
     allowed_tls_versions: [:"tlsv1.2"],
     # can be `true`
     no_mx_lookups: false,
-    # auth: :if_available # can be `always`. If your smtp relay requires authentication set it to `always`.
-    auth: :always
+    # can be `:always`, `:if_available`, or `:never`
+    auth: Teiserver.ConfigHelpers.get_env("TEI_SMTP_AUTH", "always") |> String.to_existing_atom()
 end
 
 log_root_path = Teiserver.ConfigHelpers.get_env("TEI_LOG_ROOT_PATH", "/tmp/teiserver")
