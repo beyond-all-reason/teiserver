@@ -67,7 +67,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @type asset_status :: :missing | :downloading | :ready
 
-  @type vote_action :: {:change_map, String.t()} | :start
+  @type vote_action ::
+          {:change_map, String.t()}
+          | {:add_bot, T.userid(), map(), non_neg_integer()}
+          | :start
   @type vote_ballot :: :yes | :no | :abstain
   @type vote_state :: %{
           id: String.t(),
@@ -164,6 +167,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @typep state :: %{
            id: id(),
            monitors: MC.t(),
+           creator_id: T.userid(),
            name: String.t(),
            map_name: String.t(),
            game_version: String.t(),
@@ -424,6 +428,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     state = %{
       id: id,
       monitors: monitors,
+      creator_id: start_params.creator_data.id,
       name: start_params.name,
       map_name: start_params.map_name,
       game_version: start_params.game_version,
@@ -466,8 +471,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     ids_to_rejoin = MapSet.new(Enum.concat(player_ids, Map.keys(snapshot.spectators)))
 
+    # Backfill creator_id for snapshots created before this field existed
+    default_creator =
+      case player_ids do
+        [first | _] -> first
+        [] -> nil
+      end
+
     data =
       snapshot
+      |> Map.put_new(:creator_id, default_creator)
       |> Map.put(:monitors, MC.new())
       |> Map.put(:ids_to_rejoin, ids_to_rejoin)
 
@@ -711,28 +724,51 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     in_team_count = team_count(ally_team, data.players)
 
-    if in_team_count >= ally_team_capacity do
-      {:keep_state, data, [{:reply, from, {:error, :ally_team_full}}]}
-    else
-      bot_id = "bot-#{data.bot_idx_counter}"
+    cond do
+      in_team_count >= ally_team_capacity ->
+        {:keep_state, data, [{:reply, from, {:error, :ally_team_full}}]}
 
-      bot = %{
-        id: bot_id,
-        team: {ally_team, in_team_count, 0},
-        host_user_id: user_id,
-        short_name: add_data.short_name,
-        name: add_data.name,
-        version: add_data.version,
-        options: add_data.options
-      }
+      # Creator can always add bots directly
+      user_id == data.creator_id ->
+        data = do_add_bot(data, user_id, add_data, ally_team, in_team_count)
+        {:keep_state, data, [{:reply, from, {:ok, "bot-#{data.bot_idx_counter - 1}"}}]}
 
-      data =
-        put_in(data.players[bot.id], bot)
-        |> Map.update!(:bot_idx_counter, &(&1 + 1))
+      # Non-creator: if multiple human players, start a vote
+      Enum.count(data.players, fn {_, p} -> not bot_id?(p.id) end) > 1 ->
+        if data.current_vote != nil do
+          {:keep_state, data, [{:reply, from, {:error, :vote_already_in_progress}}]}
+        else
+          vote_duration_s = 60
 
-      broadcast_update({:update, nil, %{players: %{bot.id => bot}}}, data)
+          voters =
+            for {_, p} <- data.players, !bot_id?(p.id), into: %{} do
+              if p.id == user_id, do: {p.id, :yes}, else: {p.id, :pending}
+            end
 
-      {:keep_state, data, [{:reply, from, {:ok, bot.id}}]}
+          quorum = (map_size(voters) * 0.501) |> :math.ceil() |> trunc()
+
+          vote = %{
+            id: UUID.uuid4(),
+            action: {:add_bot, user_id, add_data, ally_team},
+            initiator: user_id,
+            voters: voters,
+            until: DateTime.utc_now() |> DateTime.shift(Duration.new!(second: vote_duration_s)),
+            quorum: quorum,
+            majority: quorum
+          }
+
+          :timer.send_after(vote_duration_s * 1000, {:vote_timeout, vote.id})
+
+          events = [{:start_vote, vote}]
+          aggregate = process_events(events, data) |> broadcast_updates()
+          process_event_actions(aggregate)
+          {:keep_state, aggregate.data, [{:reply, from, {:ok, :vote_started}}]}
+        end
+
+      # Non-creator but only human player, allow directly
+      true ->
+        data = do_add_bot(data, user_id, add_data, ally_team, in_team_count)
+        {:keep_state, data, [{:reply, from, {:ok, "bot-#{data.bot_idx_counter - 1}"}}]}
     end
   end
 
@@ -1002,6 +1038,27 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   def terminate(_reason, _state, _data), do: nil
+
+  defp do_add_bot(data, user_id, add_data, ally_team, in_team_count) do
+    bot_id = "bot-#{data.bot_idx_counter}"
+
+    bot = %{
+      id: bot_id,
+      team: {ally_team, in_team_count, 0},
+      host_user_id: user_id,
+      short_name: add_data.short_name,
+      name: add_data.name,
+      version: add_data.version,
+      options: add_data.options
+    }
+
+    data =
+      put_in(data.players[bot.id], bot)
+      |> Map.update!(:bot_idx_counter, &(&1 + 1))
+
+    broadcast_update({:update, nil, %{players: %{bot.id => bot}}}, data)
+    data
+  end
 
   @spec via_tuple(id()) :: GenServer.name()
   defp via_tuple(lobby_id) do
@@ -1287,8 +1344,21 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
             {:passed, {:change_map, new_map}} ->
               process_event({:update_map_name, new_map}, new_aggregate)
-              # just let the thing crash if a new vote action shows up. It'll be easy
-              # to spot and fix/add support. :start isn't yet supported
+
+            {:passed, {:add_bot, user_id, add_data, ally_team}} ->
+              in_team_count = team_count(ally_team, new_aggregate.data.players)
+
+              ally_team_capacity =
+                Enum.at(new_aggregate.data.ally_team_config, ally_team).max_teams
+
+              if in_team_count < ally_team_capacity do
+                new_data =
+                  do_add_bot(new_aggregate.data, user_id, add_data, ally_team, in_team_count)
+
+                %{new_aggregate | data: new_data}
+              else
+                new_aggregate
+              end
           end
 
         Map.update!(new_aggregate, :updates, &[:vote_ended | &1])

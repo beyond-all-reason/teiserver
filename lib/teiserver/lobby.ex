@@ -755,7 +755,7 @@ defmodule Teiserver.Lobby do
         cmd
       )
 
-    player_command =
+    boss_command =
       Enum.member?(
         [
           :add_bot
@@ -780,7 +780,8 @@ defmodule Teiserver.Lobby do
       mod_command == true ->
         false
 
-      player_command == true and changer.player == false ->
+      # Boss commands require host boss status
+      boss_command == true and not is_host_boss?(changer.userid, battle.id) ->
         false
 
       # If they're not a member they can't do anything either
@@ -790,6 +791,14 @@ defmodule Teiserver.Lobby do
       # Default to true
       true ->
         true
+    end
+  end
+
+  @spec is_host_boss?(T.userid(), T.lobby_id()) :: boolean()
+  defp is_host_boss?(userid, lobby_id) do
+    case Coordinator.call_consul(lobby_id, {:get, :host_bosses}) do
+      nil -> false
+      bosses -> Enum.member?(bosses, userid)
     end
   end
 
