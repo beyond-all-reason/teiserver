@@ -1,5 +1,4 @@
 <% {fg, _bg, _bsname} = view_colour(@active) |> colours() %>
-<% contributor = allow?(@current_user, "Contributor") %>
 <style>
   .sub-menu-icon a:hover {
     border-bottom: 5px solid <%= fg %>;
@@ -27,16 +26,15 @@
             url: ~p"/battle/lobbies",
             icon: Teiserver.Lobby.icon()
           )}
-
-          <%= if contributor do %>
-            {central_component("sub_menu_icon",
-              name: "tachyon_lobbies",
-              label: "Tachyon Lobbies",
-              active: @active,
-              url: ~p"/battle/tachyon_lobbies",
-              icon: "fa-solid fa-server"
-            )}
-          <% end %>
+          
+<!-- TODO gate this behind contributor -->
+          {central_component("sub_menu_icon",
+            name: "tachyon_lobbies",
+            label: "Tachyon Lobbies",
+            active: @active,
+            url: ~p"/battle/tachyon_lobbies",
+            icon: "fa-solid fa-server"
+          )}
 
           {central_component("sub_menu_icon",
             name: "parties",
