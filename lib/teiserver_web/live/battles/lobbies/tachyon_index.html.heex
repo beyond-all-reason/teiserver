@@ -6,9 +6,7 @@
 <div class="row mt-3">
   <div class="col-md-12">
     <h4>
-      <% member_count = @lobbies |> Enum.reduce(0, fn b, acc -> acc + b.member_count end)
-      
-       %>
+      <% member_count = @lobbies |> Enum.reduce(0, fn b, acc -> acc + b.member_count end) %>
       <%= cond do %>
         <% @disabled? -> %>
           Feature temporarily disabled, sorry for the inconvenience
@@ -17,12 +15,11 @@
         <% true -> %>
           Lobbies: {Enum.count(@lobbies)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           Total members: {member_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-       
       <% end %>
     </h4>
     <div :if={!@disabled?} class="table-responsive">
       <table class="table table-sm table-hover">
-                <thead>
+        <thead>
           <tr>
             <th>Name</th>
             <th>Map</th>
@@ -36,19 +33,19 @@
               <td>{lobby.name}</td>
               <td>{lobby.map_name}</td>
               <td>
-                  <%= if lobby.in_progress do %>
-                    <i class="fa-fw fa-solid fa-play"></i>
-                    &nbsp; {Teiserver.Helper.TimexHelper.duration_to_str_short(
-                      System.system_time(:second) - (lobby.started_at || 1_652_282_031)
-                    )}
-                  <% end %>
-                </td>
+                <%= if lobby.in_progress do %>
+                  <i class="fa-fw fa-solid fa-play"></i>
+                  &nbsp; {Teiserver.Helper.TimexHelper.duration_to_str_short(
+                    System.system_time(:second) - (lobby.started_at || 1_652_282_031)
+                  )}
+                <% end %>
+              </td>
               <td>
-                  <%= if lobby.locked do %>
-                    <i class="fa-fw fa-solid fa-lock"></i>
-                  <% end %>
-                </td>
-               <td>{lobby.player_count} / {lobby.max_player_count}</td>
+                <%= if lobby.locked do %>
+                  <i class="fa-fw fa-solid fa-lock"></i>
+                <% end %>
+              </td>
+              <td>{lobby.player_count} / {lobby.max_player_count}</td>
             </tr>
           <% end %>
         </tbody>
