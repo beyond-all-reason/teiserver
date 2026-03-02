@@ -14,8 +14,8 @@ defmodule Teiserver.Clan.ClanInviteSchema do
 
   @primary_key false
   typed_schema "teiserver_clan_invites" do
-    belongs_to :user, User, foreign_key: :user_id, primary_key: true
-    belongs_to :clan, ClanSchema, foreign_key: :clan_id, primary_key: true
+    belongs_to :user, User, primary_key: true
+    belongs_to :clan, ClanSchema, primary_key: true
     timestamps()
   end
 

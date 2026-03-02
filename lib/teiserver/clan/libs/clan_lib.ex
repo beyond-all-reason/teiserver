@@ -20,7 +20,7 @@ defmodule Teiserver.Clan.ClanLib do
 
   ## Example
     query = query_clans()
-    query = search(query, %{name: "ClanName"})
+    query = search(query, name: "ClanName")
     Repo.all(query)
   """
   @spec query_clans() :: Ecto.Query.t()
@@ -39,10 +39,10 @@ defmodule Teiserver.Clan.ClanLib do
     Ecto.Query
 
   ## Examples
-    iex> search(query, %{id: 123})
-    iex> search(query, %{name: "ClanName"})
-    iex> search(query, %{id_list: [1, 2, 3]})
-    iex> search(query, %{basic_search: "foo*bar"})
+    iex> search(query, id: 123)
+    iex> search(query, name: "ClanName")
+    iex> search(query, id_list: [1, 2, 3]})
+    iex> search(query, basic_search: "foo*bar")
   """
   @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
@@ -128,22 +128,22 @@ defmodule Teiserver.Clan.ClanLib do
 
   ## Example:
     query = query_clans()
-    query = preload(query, [:members, :invites_and_invitees])
+    query = preload(query, [:members, :invites])
     Repo.all(query)
   """
   @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, preloads) do
-    query = if :members in preloads, do: _preload_members(query), else: query
-
     query =
-      if :members_and_memberships in preloads,
-        do: _preload_members_and_memberships(query),
+      if :members in preloads,
+        do: _preload_members(query),
         else: query
 
     query =
-      if :invites_and_invitees in preloads, do: _preload_invites_and_invitees(query), else: query
+      if :invites in preloads,
+        do: _preload_invites(query),
+        else: query
 
     query
   end
@@ -151,21 +151,13 @@ defmodule Teiserver.Clan.ClanLib do
   def _preload_members(query) do
     from clans in query,
       left_join: members in assoc(clans, :members),
-      order_by: [asc: members.name],
-      limit: 50,
-      preload: [members: members]
-  end
-
-  def _preload_members_and_memberships(query) do
-    from clans in query,
-      left_join: memberships in assoc(clans, :memberships),
-      left_join: users in assoc(memberships, :user),
+      left_join: users in assoc(members, :user),
       order_by: [asc: users.name],
       limit: 50,
-      preload: [memberships: {memberships, user: users}]
+      preload: [members: {members, user: users}]
   end
 
-  def _preload_invites_and_invitees(query) do
+  def _preload_invites(query) do
     from clans in query,
       left_join: invites in assoc(clans, :invites),
       left_join: users in assoc(invites, :user),

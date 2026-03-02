@@ -845,22 +845,23 @@ defmodule Teiserver.Player.TachyonHandler do
     {:response, state}
   end
 
-  # Clan commands: clan/viewList including conversion to tachyon schema
+  # RALA Clan commands: clan/viewList including conversion to tachyon schema
   def handle_command("clan/viewList", "request", _message_id, _message, state) do
     Logger.debug("Handling clan/viewList command")
     clans = Teiserver.Clan.list_clans()
 
     converted_clans = Enum.map(clans, &convert_clan_base_data_to_tachyon_schema/1)
-
-    {:response, %{clansBaseData: converted_clans}, state}
+    Logger.debug("Handling clan/viewList command. Response=" <> inspect(converted_clans))
+    {:response, %{clanList: converted_clans}, state}
   end
 
   def handle_command("clan/view", "request", _message_id, %{"data" => data}, state) do
     Logger.debug("Handling clan/view command for clanId #{data["clanId"]}")
-    clan = Teiserver.Clan.get_clan(data["clanId"])
+    clan = Teiserver.Clan.get_clan(data["clanId"], preload: [:members, :invites])
+    Logger.debug("Handling clan/view command. clan=" <> inspect(clan))
     converted_clan = convert_clan_data_to_tachyon_schema(clan)
-
-    {:response, %{data: converted_clan}, state}
+    Logger.debug("Handling clan/view command. Response=" <> inspect(converted_clan))
+    {:response, converted_clan, state}
   end
 
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
@@ -1233,8 +1234,8 @@ defmodule Teiserver.Player.TachyonHandler do
   defp convert_clan_base_data_to_tachyon_schema(clan) do
     %{
       clanId: clan.id,
-      tag: clan.tag,
-      name: clan.name
+      name: clan.name,
+      tag: clan.tag
     }
   end
 
@@ -1245,12 +1246,12 @@ defmodule Teiserver.Player.TachyonHandler do
       name: clan.name,
       tag: clan.tag,
       description: clan.description,
-      membersCount: Teiserver.Clan.count_clan_members(clan.id),
       members:
         Enum.map(Teiserver.Clan.list_clan_members(clan.id), fn member ->
           %{
             userId: member.user_id,
-            role: member.role
+            role: member.role,
+            joinedAt: member.inserted_at
           }
         end)
     }

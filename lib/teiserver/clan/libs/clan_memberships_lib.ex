@@ -1,13 +1,14 @@
 defmodule Teiserver.Clan.ClanMemberLib do
   use TeiserverWeb, :library
-  Teiserver.Clan.ClanMemberSchema
+  alias Teiserver.Clan.ClanMembershipsSchema
 
   @moduledoc """
-  This module provides functions to create sql queries for clan members.
+  This module provides functions to create sql queries for clan memberships.
+  Clan memberships includes clan-specific user-data. E.g. the clan role.
   """
 
   @doc """
-  Creates an Ecto-Query to get all members of the table ClanMemberSchema.
+  Creates an Ecto-Query to get all members of the table ClanMembershipsSchema.
   Return value needed for preload/2.
 
   ## Return
@@ -20,7 +21,7 @@ defmodule Teiserver.Clan.ClanMemberLib do
   """
   @spec get_clan_member() :: Ecto.Query.t()
   def get_clan_member do
-    from(clan_member in ClanMemberSchema)
+    from(clan_member in ClanMembershipsSchema)
   end
 
   @doc """
@@ -34,8 +35,8 @@ defmodule Teiserver.Clan.ClanMemberLib do
     Ecto.Query
 
   ## Examples
-    iex> search(query, %{clan_id: 123})
-    iex> search(query, %{user_id: 123})
+    iex> search(query, clan_id: 123)
+    iex> search(query, user_id: 123)
   """
   @spec search(Ecto.Query.t(), map() | keyword() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
@@ -74,7 +75,7 @@ defmodule Teiserver.Clan.ClanMemberLib do
 
   ## Example:
     query = query_clans()
-    query = preload(query, [:members, :invites_and_invitees])
+    query = preload(query, [:clan])
     Repo.all(query)
   """
   @spec preload(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
@@ -90,6 +91,4 @@ defmodule Teiserver.Clan.ClanMemberLib do
       left_join: clan in assoc(clan_member, :clan),
       preload: [clan: clan]
   end
-
-  # RALA TODO: Write...
 end

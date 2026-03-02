@@ -1,22 +1,22 @@
 defmodule Teiserver.Clan.ClanSchema do
   use TeiserverWeb, :schema
-  alias Teiserver.Clan.ClanMemberSchema
+  alias Teiserver.Clan.ClanMembershipsSchema
   alias Teiserver.Clan.ClanInviteSchema
-  alias Teiserver.Account.User
+  # alias Teiserver.Account.User
 
   @moduledoc """
   Database schema for clans
 
   clanBaseData
-  - ClanId: string
+  - clanId: string
   - clanUpdateableData
-  --- name: string (max 30)
-  --- tag: string (min 3 max 6)
-  --- description: string (max 500)
+    - name: string (max 30)
+    - tag: string (min 3 max 6)
+    - description: string (max 500)
   - Array of clanMember:
-  --- userId: string
-  --- role: clanRole [member, coLeader, leader]
-  --- joinedAt: unixTime
+    - userId: string
+    - role: clanRole [member, coLeader, leader]
+    - joinedAt: unixTime
 
   DB table:
   teiserver_clans
@@ -37,16 +37,17 @@ defmodule Teiserver.Clan.ClanSchema do
     field :tag, :string
     field :description, :string
 
-    has_many :member, ClanMemberSchema, foreign_key: :clan_id
+    has_many :members, ClanMembershipsSchema, foreign_key: :clan_id
+
+    # many_to_many :memberships, User,
+    #  join_through: "teiserver_clan_memberships",
+    #  join_keys: [clan_id: :id, user_id: :id]
+
     has_many :invites, ClanInviteSchema, foreign_key: :clan_id
 
-    many_to_many :memberships, User,
-      join_through: "teiserver_clan_memberships",
-      join_keys: [clan_id: :id, user_id: :id]
-
-    many_to_many :invitees, User,
-      join_through: "teiserver_clan_invites",
-      join_keys: [clan_id: :id, user_id: :id]
+    # many_to_many :invitees, User,
+    #  join_through: "teiserver_clan_invites",
+    #   join_keys: [clan_id: :id, user_id: :id]
 
     timestamps()
   end

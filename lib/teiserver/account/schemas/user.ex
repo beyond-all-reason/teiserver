@@ -34,7 +34,7 @@ defmodule Teiserver.Account.User do
 
     has_many :user_configs, Teiserver.Config.UserConfig
 
-    belongs_to :clan, Teiserver.Clan.ClanSchema
+    field :clan_id, :string
     belongs_to :smurf_of, Teiserver.Account.User
 
     has_one :user_stat, Teiserver.Account.UserStat
@@ -64,7 +64,8 @@ defmodule Teiserver.Account.User do
       discord_id: nil,
       discord_dm_channel: nil,
       discord_dm_channel_id: nil,
-      steam_id: nil
+      steam_id: nil,
+      clan: nil
     }
   end
 

@@ -1,15 +1,18 @@
-defmodule Teiserver.Clan.ClanMemberSchema do
+defmodule Teiserver.Clan.ClanMembershipsSchema do
   use TeiserverWeb, :schema
   alias Teiserver.Account.User
   alias Teiserver.Clan.ClanSchema
 
   @moduledoc """
-  Database schema for clan member
+  Database schema for clan memberships.
+  A clan membership includes clan specific data of users.
 
   clanMember:
-  --- userId: string
-  --- role: clanRole [member, coLeader, leader]
-  --- joinedAt: unixTime
+  - userId: integer
+  - clanId: integer
+  - role: clanRole [member, coLeader, leader]
+  - inserted_at: unixTime (joinedAt)
+  - updated_at: unixTime
 
   DB table:
   teiserver_clan_memberships

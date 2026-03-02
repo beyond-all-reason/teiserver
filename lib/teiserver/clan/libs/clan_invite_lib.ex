@@ -1,4 +1,5 @@
 defmodule Teiserver.Clan.ClanInviteLib do
+  require Logger
   use TeiserverWeb, :library
   alias Teiserver.Clan.ClanInviteSchema
 
@@ -34,8 +35,8 @@ defmodule Teiserver.Clan.ClanInviteLib do
     Ecto.Query
 
   ## Examples
-    iex> search(query, %{clan_id: 123})
-    iex> search(query, %{user_id: 123})
+    iex> search(query, clan_id: 123)
+    iex> search(query, user_id: 123)
   """
   @spec search(Ecto.Query.t(), map() | keyword() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
@@ -98,6 +99,4 @@ defmodule Teiserver.Clan.ClanInviteLib do
       left_join: user in assoc(clan_invites, :user),
       preload: [user: user]
   end
-
-  # RALA TODO: Write...
 end
