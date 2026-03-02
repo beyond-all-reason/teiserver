@@ -47,9 +47,20 @@
                         "id": { "$ref": "../definitions/userId.json" },
                         "allyTeam": { "type": "string" },
                         "team": { "type": "string" },
-                        "player": { "type": "string" }
+                        "player": { "type": "string" },
+                        "isReady": { "type": "boolean" },
+                        "assetStatus": {
+                            "enum": ["missing", "downloading", "complete"]
+                        }
                     },
-                    "required": ["id", "allyTeam", "team", "player"]
+                    "required": [
+                        "id",
+                        "allyTeam",
+                        "team",
+                        "player",
+                        "isReady",
+                        "assetStatus"
+                    ]
                 }
             }
         },

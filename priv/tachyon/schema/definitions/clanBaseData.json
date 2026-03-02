@@ -2,7 +2,13 @@
     "$id": "https://schema.beyondallreason.dev/tachyon/definitions/clanBaseData.json",
     "title": "ClanBaseData",
     "allOf": [
-        { "$ref": "../definitions/clanId.json" },
+        {
+            "type": "object",
+            "properties": {
+                "clanId": { "$ref": "../definitions/clanId.json" }
+            },
+            "required": ["clanId"]
+        },
         { "$ref": "../definitions/clanUpdateableBaseData.json" }
     ]
 }

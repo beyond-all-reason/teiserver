@@ -75,7 +75,13 @@
         },
         "clan": {
             "allOf": [
-                { "$ref": "#/definitions/clanId" },
+                {
+                    "type": "object",
+                    "properties": {
+                        "clanId": { "$ref": "#/definitions/clanId" }
+                    },
+                    "required": ["clanId"]
+                },
                 { "$ref": "#/definitions/clanUpdateableData" },
                 {
                     "type": "object",
@@ -91,7 +97,13 @@
         },
         "clanBaseData": {
             "allOf": [
-                { "$ref": "#/definitions/clanId" },
+                {
+                    "type": "object",
+                    "properties": {
+                        "clanId": { "$ref": "#/definitions/clanId" }
+                    },
+                    "required": ["clanId"]
+                },
                 { "$ref": "#/definitions/clanUpdateableBaseData" }
             ]
         },
@@ -110,9 +122,10 @@
             "type": "object",
             "properties": {
                 "name": { "type": "string", "maxLength": 30 },
-                "tag": { "type": "string", "minLength": 3, "maxLength": 6 }
+                "tag": { "type": "string", "minLength": 3, "maxLength": 10 },
+                "language": { "type": "string" }
             },
-            "required": ["name", "tag"]
+            "required": ["name", "tag", "language"]
         },
         "clanUpdateableData": {
             "allOf": [
@@ -184,9 +197,24 @@
                                 "id": { "$ref": "#/definitions/userId" },
                                 "allyTeam": { "type": "string" },
                                 "team": { "type": "string" },
-                                "player": { "type": "string" }
+                                "player": { "type": "string" },
+                                "isReady": { "type": "boolean" },
+                                "assetStatus": {
+                                    "enum": [
+                                        "missing",
+                                        "downloading",
+                                        "complete"
+                                    ]
+                                }
                             },
-                            "required": ["id", "allyTeam", "team", "player"]
+                            "required": [
+                                "id",
+                                "allyTeam",
+                                "team",
+                                "player",
+                                "isReady",
+                                "assetStatus"
+                            ]
                         }
                     }
                 },
@@ -4428,7 +4456,7 @@
                     "properties": {
                         "isReady": { "type": "boolean" },
                         "assetStatus": {
-                            "enum": ["missing", "downloading", "ready"]
+                            "enum": ["missing", "downloading", "complete"]
                         }
                     }
                 }
@@ -4573,7 +4601,7 @@
                                                     "enum": [
                                                         "missing",
                                                         "downloading",
-                                                        "ready"
+                                                        "complete"
                                                     ]
                                                 }
                                             },

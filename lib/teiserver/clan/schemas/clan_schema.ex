@@ -29,13 +29,15 @@ defmodule Teiserver.Clan.ClanSchema do
   @type t :: %__MODULE__{
           name: String.t(),
           tag: String.t(),
-          description: String.t()
+          description: String.t(),
+          language: String.t()
         }
 
   schema "teiserver_clans" do
     field :name, :string
     field :tag, :string
     field :description, :string
+    field :language, :string
 
     has_many :members, ClanMembershipsSchema, foreign_key: :clan_id
 
@@ -58,11 +60,11 @@ defmodule Teiserver.Clan.ClanSchema do
   def changeset(struct, params \\ %{}) do
     params =
       params
-      |> trim_strings(~w(name tag description)a)
+      |> trim_strings(~w(name tag description language)a)
 
     struct
-    |> cast(params, ~w(name tag description)a)
-    |> validate_required(~w(name tag description)a)
+    |> cast(params, ~w(name tag description language)a)
+    |> validate_required(~w(name tag description language)a)
   end
 
   # RALA ???
