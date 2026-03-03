@@ -1,5 +1,4 @@
 <% {fg, _bg, _bsname} = view_colour(@active) |> colours() %>
-
 <style>
   .sub-menu-icon a:hover {
     border-bottom: 5px solid <%= fg %>;
@@ -26,6 +25,15 @@
             active: @active,
             url: ~p"/battle/lobbies",
             icon: Teiserver.Lobby.icon()
+          )}
+          
+<!-- TODO gate this behind contributor -->
+          {central_component("sub_menu_icon",
+            name: "tachyon_lobbies",
+            label: "Tachyon Lobbies",
+            active: @active,
+            url: ~p"/battle/tachyon_lobbies",
+            icon: "fa-solid fa-server"
           )}
 
           {central_component("sub_menu_icon",
