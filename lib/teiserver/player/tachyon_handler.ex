@@ -1235,7 +1235,8 @@ defmodule Teiserver.Player.TachyonHandler do
     %{
       clanId: clan.id,
       name: clan.name,
-      tag: clan.tag
+      tag: clan.tag,
+      language: clan.language
     }
   end
 
