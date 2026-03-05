@@ -16,8 +16,9 @@
           <td>Discord</td>
           <td>
             <ul class="list-unstyled">
-              <li :for={link <- @report_links}><a href={link}>
-                {link}
+              <li :for={link <- @report_links}>
+                <a href={link}>
+                  {link}
                 </a>
               </li>
             </ul>
