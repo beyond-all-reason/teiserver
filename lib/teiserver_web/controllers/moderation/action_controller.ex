@@ -90,7 +90,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     reports =
       Moderation.list_reports(
         search: [
-          result: action
+          result_id: action.id
         ],
         order_by: "Oldest first"
       )
