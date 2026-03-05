@@ -154,11 +154,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "works" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
       {:ok, _pid, %{id: id} = create_details} = Lobby.create(mk_start_params([1, 1]))
-      assert %{ready?: false, asset_status: :ready} = create_details.players[@default_user_id]
+      assert %{ready?: false, asset_status: :complete} = create_details.players[@default_user_id]
       {:ok, _, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
       {:ok, details} = Lobby.join_ally_team(id, "user2", 1)
       assert %{team: {1, _, _}} = details.players["user2"]
-      assert %{ready?: false, asset_status: :ready} = details.players["user2"]
+      assert %{ready?: false, asset_status: :complete} = details.players["user2"]
 
       # is idempotent
       {:ok, details2} = Lobby.join_ally_team(id, "user2", 1)
@@ -175,7 +175,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
 
       expected = %{
-        players: %{"user2" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready}},
+        players: %{"user2" => %{team: {1, 0, 0}, ready?: false, asset_status: :complete}},
         spectators: %{"user2" => nil}
       }
 
@@ -217,7 +217,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, details} = Lobby.join_ally_team(id, "user2", 0)
 
       expected_update = %{
-        players: %{"user2" => %{team: {0, 1, 0}, ready?: false, asset_status: :ready}},
+        players: %{"user2" => %{team: {0, 1, 0}, ready?: false, asset_status: :complete}},
         spectators: %{"user2" => nil}
       }
 
@@ -306,7 +306,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       expected = %{
         players: %{
           "user2" => nil,
-          "user3" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready}
+          "user3" => %{team: {1, 0, 0}, ready?: false, asset_status: :complete}
         }
       }
 
@@ -500,7 +500,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       assert %{
                spectators: %{"3" => nil},
-               players: %{"3" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready}}
+               players: %{"3" => %{team: {1, 0, 0}, ready?: false, asset_status: :complete}}
              } = updates
     end
 
@@ -519,7 +519,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert %{
                players: %{
                  "2" => nil,
-                 "3" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready}
+                 "3" => %{team: {1, 0, 0}, ready?: false, asset_status: :complete}
                }
              } = updates
     end
@@ -539,7 +539,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       assert %{
                players: %{
-                 "3" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready},
+                 "3" => %{team: {1, 0, 0}, ready?: false, asset_status: :complete},
                  "2" => nil
                }
              } = updates
@@ -1019,7 +1019,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
                       {:updated,
                        %{
                          players: %{
-                           "2" => %{team: {1, 0, 0}, ready?: false, asset_status: :ready}
+                           "2" => %{team: {1, 0, 0}, ready?: false, asset_status: :complete}
                          }
                        }}}
     end

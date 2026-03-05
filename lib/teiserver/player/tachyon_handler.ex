@@ -1003,7 +1003,7 @@ defmodule Teiserver.Player.TachyonHandler do
     case status do
       "missing" -> :missing
       "downloading" -> :downloading
-      "ready" -> :ready
+      "complete" -> :complete
     end
   end
 

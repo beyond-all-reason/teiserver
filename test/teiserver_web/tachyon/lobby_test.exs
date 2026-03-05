@@ -91,7 +91,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"status" => "success"} = Tachyon.join_ally_team!(ctx2[:client], "001")
       %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(ctx2[:client])
       player_data = data["players"][to_string(ctx2[:user].id)]
-      assert %{"isReady" => false, "assetStatus" => "ready"} = player_data
+      assert %{"isReady" => false, "assetStatus" => "complete"} = player_data
     end
 
     test "members get updated events on join", %{client: client, lobby_id: lobby_id} do
