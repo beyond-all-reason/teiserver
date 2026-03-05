@@ -7,15 +7,12 @@ defmodule TeiserverWeb.Live.BattleTest do
   alias Teiserver.TachyonLobby
   alias Teiserver.Support.Polling
 
-  @moduletag :needs_attention
-
   setup do
     GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())
     |> TeiserverTestLib.conn_setup()
   end
 
   describe "tachyon battle live" do
-    @tag :needs_attention
     test "index with no battles shows no lobbies found ", %{conn: conn, user: _user} do
       {:ok, view, html} = live(conn, "/battle/tachyon_lobbies")
 
