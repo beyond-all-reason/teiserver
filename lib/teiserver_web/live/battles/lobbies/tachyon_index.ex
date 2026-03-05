@@ -18,9 +18,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
 
     # TODO fix this correctly
     _contributor = allow?(socket.assigns[:current_user], "Contributor")
-    _moderator = allow?(socket.assigns[:current_user], "Moderator")
     contributor = true
-    moderator = false
 
     # TODO move this to the top of the mount section
     disabled? = Teiserver.Config.get_site_config_cache("lobby.Disable lobby live view on website")
@@ -36,7 +34,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
       |> assign(:view_colour, Lobby.colours())
       |> assign(:disabled?, disabled?)
       |> assign(:contributor, contributor)
-      |> assign(:moderator, moderator)
       |> assign(:lobbies, lobby_list)
       |> assign(:counter, counter)
 
