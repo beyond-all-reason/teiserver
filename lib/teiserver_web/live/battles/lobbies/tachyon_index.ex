@@ -71,8 +71,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
       ) do
     lobbies =
       [lobby | socket.assigns[:lobbies]]
-
-    # |> sort_lobbies()
+      |> sort_lobbies()
 
     {:noreply, assign(socket, :lobbies, lobbies)}
   end
@@ -88,8 +87,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
     lobbies =
       socket.assigns[:lobbies]
       |> Enum.filter(fn b -> b.id != lobby_id end)
-
-    # |> sort_lobbies()
+      |> sort_lobbies()
 
     {:noreply, assign(socket, :lobbies, lobbies)}
   end
@@ -112,8 +110,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
           l
         end
       end)
-
-    # |> sort_lobbies()
+      |> sort_lobbies()
 
     {:noreply, assign(socket, :lobbies, lobbies)}
   end
@@ -170,13 +167,13 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
     {:noreply, socket}
   end
 
-  # defp sort_lobbies(lobbies) do
-  #   lobbies
-  #   |> Enum.sort_by(
-  #     fn v -> {v.locked, v.passworded, -v.member_count, v.name} end,
-  #     &<=/2
-  #   )
-  # end
+  defp sort_lobbies(lobbies) do
+    lobbies
+    |> Enum.sort_by(
+      fn {_, v} -> {-v.player_count, v.name} end,
+      &<=/2
+    )
+  end
 
   defp apply_action(socket, :index, _params) do
     subscribe_topics(socket.assigns[:current_user].id)
@@ -212,9 +209,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
 
     # TODO determine how to use these _counter
-    lobbies = Teiserver.TachyonLobby.List.list()
-
-    # |> sort_lobbies()
+    lobbies =
+      Teiserver.TachyonLobby.List.list()
+      |> sort_lobbies()
 
     socket
     |> assign(:lobbies, lobbies)
