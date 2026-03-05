@@ -65,7 +65,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @type team ::
           {allyTeam :: non_neg_integer(), team :: non_neg_integer(), player :: non_neg_integer()}
 
-  @type asset_status :: :missing | :downloading | :ready
+  @type asset_status :: :missing | :downloading | :complete
 
   @type vote_action :: {:change_map, String.t()} | :start
   @type vote_ballot :: :yes | :no | :abstain
@@ -437,7 +437,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           pid: start_params.creator_pid,
           team: {0, 0, 0},
           ready?: false,
-          asset_status: :ready
+          asset_status: :complete
         }
       },
       spectators: %{},
@@ -1073,7 +1073,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp process_event({:move_player, p_id, team} = ev, aggregate) do
     aggregate
     |> update_in([:data, :players, p_id], fn p ->
-      Map.merge(p, %{team: team, ready?: false, asset_status: :ready})
+      Map.merge(p, %{team: team, ready?: false, asset_status: :complete})
     end)
     |> update_in([:updates], &[ev | &1])
   end
@@ -1099,7 +1099,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   defp process_event({:move_spec_to_player, p_id, player_data} = ev, aggregate) do
-    player_data = Map.merge(%{ready?: false, asset_status: :ready}, player_data)
+    player_data = Map.merge(%{ready?: false, asset_status: :complete}, player_data)
 
     player =
       Map.merge(aggregate.data.spectators[p_id], player_data)
@@ -1329,7 +1329,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       players
       |> Map.put_new(p_id, %{})
       |> update_in([p_id], fn p ->
-        Map.merge(%{team: team, ready?: false, asset_status: :ready}, p)
+        Map.merge(%{team: team, ready?: false, asset_status: :complete}, p)
       end)
     end)
   end
@@ -1347,7 +1347,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   defp update_change_from_event({:move_spec_to_player, p_id, player_data}, change_map) do
-    player_data = Map.merge(%{ready?: false, asset_status: :ready}, player_data)
+    player_data = Map.merge(%{ready?: false, asset_status: :complete}, player_data)
 
     change_map
     |> Map.put_new(:players, %{})
@@ -1631,7 +1631,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
               nil
 
             team ->
-              {id, %{team: team, ready?: false, asset_status: :ready}}
+              {id, %{team: team, ready?: false, asset_status: :complete}}
           end
       end
 

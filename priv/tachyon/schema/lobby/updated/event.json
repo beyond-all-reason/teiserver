@@ -83,7 +83,7 @@
                                             "enum": [
                                                 "missing",
                                                 "downloading",
-                                                "ready"
+                                                "complete"
                                             ]
                                         }
                                     },
