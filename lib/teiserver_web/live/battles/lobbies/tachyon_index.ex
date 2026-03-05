@@ -72,7 +72,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
     lobbies =
       [lobby | socket.assigns[:lobbies]]
 
-    # |> filter_lobbies(socket)
     # |> sort_lobbies()
 
     {:noreply, assign(socket, :lobbies, lobbies)}
@@ -90,7 +89,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
       socket.assigns[:lobbies]
       |> Enum.filter(fn b -> b.id != lobby_id end)
 
-    # |> filter_lobbies(socket)
     # |> sort_lobbies()
 
     {:noreply, assign(socket, :lobbies, lobbies)}
@@ -115,7 +113,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
         end
       end)
 
-    # |> filter_lobbies(socket)
     # |> sort_lobbies()
 
     {:noreply, assign(socket, :lobbies, lobbies)}
@@ -173,22 +170,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
     {:noreply, socket}
   end
 
-  # defp filter_lobbies(lobbies, %{assigns: %{moderator: moderator}} = _socket) do
-  #   if moderator do
-  #     lobbies
-  #     |> Enum.reject(fn lobby ->
-  #       lobby.tournament
-  #     end)
-  #   else
-  #     lobbies
-  #     |> Enum.reject(fn lobby ->
-  #       lobby.locked or
-  #         lobby.passworded or
-  #         lobby.tournament
-  #     end)
-  #   end
-  # end
-
   # defp sort_lobbies(lobbies) do
   #   lobbies
   #   |> Enum.sort_by(
@@ -233,7 +214,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
     # TODO determine how to use these _counter
     lobbies = Teiserver.TachyonLobby.List.list()
 
-    # |> filter_lobbies(socket)
     # |> sort_lobbies()
 
     socket
