@@ -95,7 +95,9 @@ defmodule TeiserverWeb.Moderation.ActionController do
         order_by: "Oldest first"
       )
 
-    report_links = Enum.map_join(reports, "\n", &format_discord_link/1)
+    report_links = Enum.map(reports, &format_discord_link/1)
+
+    IO.inspect(report_links)
 
     logs =
       Logging.list_audit_logs(

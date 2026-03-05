@@ -14,7 +14,13 @@
 
         <tr>
           <td>Discord</td>
-          <td>{@report_links}</td>
+          <td>
+            <ul class="list-unstyled">
+              <li :for={link <- @report_links}>
+                {link}
+              </li>
+            </ul>
+          </td>
         </tr>
 
         <tr>
