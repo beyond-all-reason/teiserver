@@ -1109,8 +1109,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp fix_ids(state) do
     players = list_players(state)
 
-    # Never do this for more than 16 players
-    if Enum.count(players) <= 16 do
+    # Never do this for more than 256 players
+    # This is limited by Spring lobby protocol assigning 8 bits for battle status team and player nubmers
+    if Enum.count(players) <= 256 do
       player_numbers =
         players
         |> Enum.map(fn %{player_number: player_number} -> player_number end)
