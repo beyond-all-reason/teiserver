@@ -13,6 +13,19 @@
         </tr>
 
         <tr>
+          <td>Discord</td>
+          <td>
+            <ul class="list-unstyled">
+              <li :for={link <- @report_links}>
+                <a href={link}>
+                  {link}
+                </a>
+              </li>
+            </ul>
+          </td>
+        </tr>
+
+        <tr>
           <td>Started:</td>
           <td>{date_to_str(@action.inserted_at, format: :hms_or_ymd)}</td>
         </tr>

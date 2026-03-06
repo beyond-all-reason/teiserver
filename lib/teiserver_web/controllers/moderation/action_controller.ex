@@ -87,6 +87,16 @@ defmodule TeiserverWeb.Moderation.ActionController do
         preload: [:target]
       )
 
+    reports =
+      Moderation.list_reports(
+        search: [
+          result_id: action.id
+        ],
+        order_by: "Oldest first"
+      )
+
+    report_links = Enum.map(reports, &format_discord_link/1)
+
     logs =
       Logging.list_audit_logs(
         search: [
@@ -114,11 +124,26 @@ defmodule TeiserverWeb.Moderation.ActionController do
     )
     |> assign(:action, action)
     |> assign(:logs, logs)
+    |> assign(:report_links, report_links)
     |> add_breadcrumb(
       name: "Show: #{action.target.name} - #{Enum.join(action.restrictions, ", ")}",
       url: conn.request_path
     )
     |> render("show.html")
+  end
+
+  @spec format_discord_link(Moderation.Report.t()) :: String.t()
+  def format_discord_link(report) do
+    channel =
+      cond do
+        report.type == "actions" ->
+          Teiserver.Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
+
+        true ->
+          Teiserver.Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
+      end
+
+    "https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{report.discord_message_id}"
   end
 
   @spec new_with_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
