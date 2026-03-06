@@ -20,7 +20,8 @@ defmodule Teiserver.OAuth.CodeTest do
 
   test "can get valid code", %{user: user, app: app} do
     assert {:ok, code, _} = create_code(user, app)
-    assert {:ok, ^code} = OAuth.get_valid_code(code.value)
+    assert {:ok, fetched} = OAuth.get_valid_code(code.value)
+    assert fetched.id == code.id
     assert {:error, :no_code} = OAuth.get_valid_code(nil)
   end
 
@@ -49,7 +50,7 @@ defmodule Teiserver.OAuth.CodeTest do
 
   test "can exchange valid code for token", %{user: user, app: app} do
     assert {:ok, code, attrs} = create_code(user, app)
-    assert {:ok, token} = OAuth.exchange_code(code, attrs._verifier, attrs.redirect_uri)
+    assert {:ok, token} = OAuth.exchange_code(code, attrs.verifier, attrs.redirect_uri)
     assert token.scopes == code.scopes
     assert token.owner_id == user.id
     # the code is now consumed and not available anymore
@@ -59,7 +60,7 @@ defmodule Teiserver.OAuth.CodeTest do
   test "cannot exchange expired code for token", %{user: user, app: app} do
     yesterday = Timex.shift(Timex.now(), days: -1)
     assert {:ok, code, attrs} = create_code(user, app, expires_at: yesterday)
-    assert {:error, :expired} = OAuth.exchange_code(code, attrs._verifier)
+    assert {:error, :expired} = OAuth.exchange_code(code, attrs.verifier)
   end
 
   test "must use valid verifier", %{user: user, app: app} do
@@ -101,7 +102,8 @@ defmodule Teiserver.OAuth.CodeTest do
     count = OAuth.delete_expired_codes()
     assert count == 1
     assert {:error, :no_code} = OAuth.get_valid_code(expired_code.value)
-    assert {:ok, ^valid_code} = OAuth.get_valid_code(valid_code.value)
+    assert {:ok, fetched} = OAuth.get_valid_code(valid_code.value)
+    assert fetched.id == valid_code.id
   end
 
   test "can pass custom time when deleting codes", %{user: user, app: app} do
