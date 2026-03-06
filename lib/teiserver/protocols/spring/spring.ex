@@ -44,11 +44,14 @@ defmodule Teiserver.Protocols.Spring do
   # b11..b17 = handicap (7-bit number. Must be in range 0..100).
   # Note: Only host can change handicap values of the players in the battle (with HANDICAP command). These 7 bits are
   #       always ignored in this command. They can only be changed using HANDICAP command.
-  # b18..b21 = reserved for future use (with pre 0.71 versions these bits were used for team colour index)
-  #            Experimental: Use these for team no. extension (16->256)
+  # b18..b21 = Used for team no. extension (16->256)
+  #            Currently supported by LP_LargeTeamNb SPADS plugin
+  #            alternatively battleStatus:teams-8bit shoould be sent as protocol extension message
   # b22..b23 = sync status (0 = unknown, 1 = synced, 2 = unsynced)
   # b24..b27 = side (e.g.: arm, core, tll, ... Side index can be between 0 and 15, inclusive)
-  # b28..b31 = undefined (reserved for future use) Experimental: Use these for ally team no. extension (16->256)
+  # b28..b31 = Used for ally team no. extension (16->256)
+  #            Currently supported by LP_LargeTeamNb SPADS plugin
+  #            alternatively battleStatus:teams-8bit shoould be sent as protocol extension message
   @spec parse_battle_status(String.t()) :: map()
   def parse_battle_status(status) do
     status_bits =
@@ -78,7 +81,7 @@ defmodule Teiserver.Protocols.Spring do
       h5,
       h6,
       h7,
-      # Experimental extension for team no. > 16
+      # Extension for team no. > 16
       t5,
       t6,
       t7,
@@ -89,7 +92,7 @@ defmodule Teiserver.Protocols.Spring do
       side2,
       side3,
       side4,
-      # Experimental extension for ally team no. > 16
+      # Extension for ally team no. > 16
       a5,
       a6,
       a7,
