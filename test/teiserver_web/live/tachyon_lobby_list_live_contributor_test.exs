@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Live.BattleTest do
   alias Teiserver.Support.Polling
 
   setup do
-    GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())
+    GeneralTestLib.conn_setup(TeiserverTestLib.contributor_permissions())
     |> TeiserverTestLib.conn_setup()
   end
 

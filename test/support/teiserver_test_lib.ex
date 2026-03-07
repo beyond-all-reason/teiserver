@@ -333,6 +333,11 @@ defmodule Teiserver.TeiserverTestLib do
     ["Core", "Contributor"] ++ player_permissions()
   end
 
+  @spec contributor_permissions() :: [String.t()]
+  def contributor_permissions do
+    ["Contributor"] ++ player_permissions()
+  end
+
   @spec player_permissions() :: [String.t()]
   def player_permissions do
     ["Verified"]
