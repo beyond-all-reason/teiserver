@@ -11,10 +11,9 @@ defmodule TeiserverWeb.Live.TachyonLobbyPlayerTest do
   end
 
   describe "tachyon battle live" do
-    # TODO correctly redirect to home
-    test "index with no battles shows no lobbies found ", %{conn: conn, user: _user} do
-      {:ok, _view, html} = live(conn, "/battle/tachyon_lobbies")
-      refute html =~ "No lobbies found"
+    test "players are not yet permitted to see tachyon lobbies", %{conn: conn, user: _user} do
+      {:error, {:redirect, resp}} = live(conn, "/battle/tachyon_lobbies")
+      assert resp.to == ~p"/"
     end
 
     # TODO correctly verify that tachyon lobby sub_menu option does not appear for a regular player

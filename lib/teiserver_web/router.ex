@@ -303,9 +303,17 @@ defmodule TeiserverWeb.Router do
     pipe_through([:browser, :app_layout, :protected])
 
     live("/lobbies", Index, :index)
-    live("/tachyon_lobbies", TachyonIndex, :index)
     live("/lobbies/show/:id", Show, :show)
     live("/lobbies/chat/:id", Chat, :chat)
+
+    live_session :tachyon_access,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :ensure_authenticated},
+        # Gates it here
+        {Teiserver.Account.AuthPlug, {:authorise, "Contributor"}}
+      ] do
+      live("/tachyon_lobbies", TachyonIndex, :index)
+    end
   end
 
   scope "/battle", TeiserverWeb.Battle, as: :ts_battle do
