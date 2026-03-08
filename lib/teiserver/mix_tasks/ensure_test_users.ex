@@ -12,7 +12,7 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
   #{@usage_str}
   """
 
-  @shortdoc "blah"
+  @shortdoc "create random users for load testing"
 
   use Mix.Task
 
