@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Live.BattleTest do
+defmodule TeiserverWeb.Live.TachyonLobbyContributorTest do
   use TeiserverWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
 
@@ -132,5 +132,13 @@ defmodule TeiserverWeb.Live.BattleTest do
     {:ok, view, html} = live(conn, "/battle/tachyon_lobbies")
     assert view != nil
     assert html =~ "updated lobby name"
+  end
+
+  test "index does show option to switch to Tachyon Lobbies for players", %{
+    conn: conn,
+    user: _user
+  } do
+    {:ok, _view, html} = live(conn, "/battle/lobbies")
+    assert html =~ "Tachyon Lobbies"
   end
 end
