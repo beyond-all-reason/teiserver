@@ -656,8 +656,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
             # Adding a spec into an ally team. The way we construct the team
             # means it doesn't require any reshuffling of existing players
             events = [{:move_spec_to_player, user_id, %{team: team}}]
-            data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
-            broadcast_player_count_change(data)
+            aggregate = process_events(events, data) |> broadcast_updates()
+            process_event_actions(aggregate)
+            data = aggregate.data
 
             {:keep_state, data, [{:reply, from, {:ok, get_details_from_state(data)}}]}
         end
@@ -688,9 +689,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
       :fill_from_join_queue
     ]
 
-    data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
+    aggregate = process_events(events, data) |> broadcast_updates()
+    process_event_actions(aggregate)
 
-    {:keep_state, data, [{:reply, from, :ok}]}
+    {:keep_state, aggregate.data, [{:reply, from, :ok}]}
   end
 
   def handle_event({:call, from}, {:update_client_status, user_id, _}, _state, data)
@@ -756,6 +758,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def handle_event({:call, from}, {:remove_bot, bot_id}, _state, data) do
     events = [{:remove_player_from_lobby, bot_id}, :repack_players, :fill_from_join_queue]
     aggregate = process_events(events, data) |> broadcast_updates()
+    process_event_actions(aggregate)
 
     {:keep_state, aggregate.data, [{:reply, from, :ok}]}
   end
@@ -789,7 +792,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     if Enum.empty?(errors) do
       final_data = process_events(events, fsm_data) |> broadcast_updates() |> Map.get(:data)
-      broadcast_list_updates(events, fsm_data, final_data)
+      # broadcast_list_updates(events, fsm_data, final_data)
       {:keep_state, final_data, [{:reply, from, :ok}]}
     else
       message = Enum.join(errors, ", ")
@@ -861,10 +864,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
               broadcast_update({:update, nil, update}, data)
 
             team ->
-              initial_state = data
               events = [{:move_spec_to_player, user_id, %{team: team}}]
-              data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
-              broadcast_list_updates(events, initial_state, data)
+              process_events(events, data) |> broadcast_updates() |> Map.get(:data)
           end
 
         {:keep_state, data, [{:reply, from, :ok}]}
@@ -1073,11 +1074,21 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # Given a list of events to process (in the event sourcing way) and the initial
   # state to apply these events to, returns the final state alongside any
   # potential update events that should also be broadcasted to members
-  @typep aggregate :: %{data: state(), updates: [event()], actions: [event_actions()]}
+  @typep aggregate :: %{
+           initial_data: state(),
+           data: state(),
+           updates: [event()],
+           actions: [event_actions()]
+         }
   @typep event_actions :: {:vote_ended, final_vote :: vote_state(), outcome :: term()}
   @spec process_events([event()], state()) :: aggregate()
   defp process_events(events, state),
-    do: Enum.reduce(events, %{data: state, updates: [], actions: []}, &process_event/2)
+    do:
+      Enum.reduce(
+        events,
+        %{initial_data: state, data: state, updates: [], actions: []},
+        &process_event/2
+      )
 
   @spec process_event(event(), %{data: state(), updates: [event()]}) :: %{
           data: state(),
@@ -1338,6 +1349,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp broadcast_updates(aggregate, sender_id \\ nil) do
     change_map = Enum.reduce(aggregate.updates, %{}, &update_change_from_event/2)
     broadcast_update({:update, sender_id, change_map}, aggregate.data)
+    broadcast_list_updates(aggregate)
     aggregate
   end
 
@@ -1439,11 +1451,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp update_change_from_event(:vote_ended, change_map),
     do: Map.put(change_map, :current_vote, nil)
 
-  defp broadcast_list_updates(_events, _starting_state, final_state)
+  defp broadcast_list_updates(%{data: final_state})
        when map_size(final_state.players) == 0 and map_size(final_state.spectators) == 0,
        do: final_state
 
-  defp broadcast_list_updates(events, starting_state, final_state) do
+  # events, starting_state, final_state) do
+  defp broadcast_list_updates(%{updates: events, data: data} = aggregate) do
+    initial_player_count =
+      Enum.count(aggregate.initial_data.players, fn {_, p} -> not bot_id?(p.id) end)
+
+    final_player_count = Enum.count(aggregate.data.players, fn {_, p} -> not bot_id?(p.id) end)
+
     change_map =
       Enum.reduce(events, %{}, fn ev, change_map ->
         case ev do
@@ -1465,7 +1483,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
             )
             # although the player count may not have changed, for simplicity sake
             # just include it. We're already sending a message anyway
-            |> Map.put(:player_count, map_size(final_state.players))
+            |> Map.put(:player_count, final_player_count)
 
           _ ->
             change_map
@@ -1473,14 +1491,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
       end)
 
     change_map =
-      if map_size(starting_state.players) != map_size(final_state.players) do
-        Map.put(change_map, :player_count, map_size(final_state.players))
+      if final_player_count != initial_player_count do
+        Map.put(change_map, :player_count, final_player_count)
       else
         change_map
       end
 
-    if change_map != %{}, do: TachyonLobby.List.update_lobby(final_state.id, change_map)
-    final_state
+    if change_map != %{}, do: TachyonLobby.List.update_lobby(data.id, change_map)
+    aggregate
   end
 
   # find an empty slot for a player/bot to play
@@ -1553,15 +1571,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
     broadcast_to_members(state, user_id, {:lobby, state.id, {:updated, updates}})
   end
 
-  defp broadcast_player_count_change(state) do
-    if not Enum.empty?(state.players) or not Enum.empty?(state.spectators) do
-      count = Enum.count(state.players, fn {_, p} -> Map.get(p, :pid) != nil end)
-      TachyonLobby.List.update_lobby(state.id, %{player_count: count})
-    end
-
-    state
-  end
-
   defp broadcast_to_members(state, sender_id, message) do
     for {p_id, p} <- state.players, p_id != sender_id, is_map_key(p, :pid) do
       send(p.pid, message)
@@ -1622,7 +1631,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     aggregate = process_events(events, state) |> broadcast_updates()
     process_event_actions(aggregate)
-    broadcast_player_count_change(aggregate.data)
+    aggregate.data
   end
 
   @spec remove_spectator_from_lobby(T.userid(), state()) :: state()
@@ -1637,7 +1646,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     aggregate = process_events(events, state) |> broadcast_updates()
     process_event_actions(aggregate)
-    broadcast_player_count_change(aggregate.data)
+    aggregate.data
   end
 
   # Add the first player from the join queue to the player list and returns the

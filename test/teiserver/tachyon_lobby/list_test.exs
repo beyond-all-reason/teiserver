@@ -71,6 +71,15 @@ defmodule Teiserver.TachyonLobby.ListTest do
     assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 1}}}
   end
 
+  test "player count update when becoming spectator" do
+    {_sink_pid, id, _} = mk_lobby()
+
+    assert {_initial_counter, %{^id => _}} = Lobby.subscribe_updates()
+    :ok = Lobby.spectate(id, "1234")
+    Lobby.List.broadcast_updates()
+    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 0}}}
+  end
+
   test "batch updates" do
     {sink_pid, id, _} = mk_lobby([3, 3])
 
