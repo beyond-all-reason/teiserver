@@ -188,6 +188,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # for more info on specific events, check how they are handled by `process_event/2`
   @typep event ::
            {:move_player, player_id(), team()}
+           | {:add_spectator, spectator()}
            | {:remove_player_from_lobby, player_id()}
            | {:remove_spec_from_lobby, T.userid()}
            | {:move_spec_to_player, T.userid(), player_data :: map()}
@@ -570,19 +571,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def handle_event({:call, from}, {:join, join_data, pid}, _state, data) do
     user_id = join_data.id
 
-    data =
-      put_in(data, [:spectators, user_id], %{
-        id: user_id,
-        name: join_data.name,
-        password: gen_password(),
-        pid: pid,
-        join_queue_position: nil
-      })
-      |> Map.update!(:monitors, &MC.monitor(&1, pid, {:user, user_id}))
+    spec_data = %{
+      id: user_id,
+      name: join_data.name,
+      password: gen_password(),
+      pid: pid,
+      join_queue_position: nil
+    }
 
-    update = %{join_queue_position: nil}
-    broadcast_update({:update, user_id, %{spectators: %{user_id => update}}}, data)
-
+    events = [{:add_spectator, spec_data}]
+    data = process_events(events, data) |> broadcast_updates(user_id) |> Map.get(:data)
     {:keep_state, data, [{:reply, from, {:ok, self(), get_details_from_state(data)}}]}
   end
 
@@ -1093,6 +1091,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> update_in([:updates], &[ev | &1])
   end
 
+  defp process_event({:add_spectator, spec_data} = ev, aggregate) do
+    aggregate
+    |> put_in([:data, :spectators, spec_data.id], spec_data)
+    |> update_in([:data, :monitors], &MC.monitor(&1, spec_data.pid, {:user, spec_data.id}))
+    |> update_in([:updates], &[ev | &1])
+  end
+
   defp process_event({:remove_player_from_lobby, p_id} = ev, aggregate) do
     aggregate =
       aggregate
@@ -1330,10 +1335,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
        when map_size(data.players) == 0 and map_size(data.spectators) == 0,
        do: aggregate
 
-  defp broadcast_updates(aggregate) do
+  defp broadcast_updates(aggregate, sender_id \\ nil) do
     change_map = Enum.reduce(aggregate.updates, %{}, &update_change_from_event/2)
-
-    broadcast_update({:update, nil, change_map}, aggregate.data)
+    broadcast_update({:update, sender_id, change_map}, aggregate.data)
     aggregate
   end
 
@@ -1347,6 +1351,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
         Map.merge(%{team: team, ready?: false, asset_status: :complete}, p)
       end)
     end)
+  end
+
+  defp update_change_from_event({:add_spectator, spec_data}, change_map) do
+    change_map
+    |> Map.put_new(:spectators, %{})
+    |> put_in([:spectators, spec_data.id], Map.take(spec_data, [:join_queue_position]))
   end
 
   defp update_change_from_event({:remove_player_from_lobby, p_id}, change_map) do
