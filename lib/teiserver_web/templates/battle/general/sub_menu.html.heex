@@ -26,15 +26,16 @@
             url: ~p"/battle/lobbies",
             icon: Teiserver.Lobby.icon()
           )}
-          
-<!-- TODO gate this behind contributor -->
-          {central_component("sub_menu_icon",
-            name: "tachyon_lobbies",
-            label: "Tachyon Lobbies",
-            active: @active,
-            url: ~p"/battle/tachyon_lobbies",
-            icon: "fa-solid fa-server"
-          )}
+
+          <%= if allow?(@current_user, "Contributor") do %>
+            {central_component("sub_menu_icon",
+              name: "tachyon_lobbies",
+              label: "Tachyon Lobbies",
+              active: @active,
+              url: ~p"/battle/tachyon_lobbies",
+              icon: "fa-solid fa-server"
+            )}
+          <% end %>
 
           {central_component("sub_menu_icon",
             name: "parties",

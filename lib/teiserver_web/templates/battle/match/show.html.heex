@@ -11,7 +11,7 @@
 {render(
   TeiserverWeb.Battle.GeneralView,
   "sub_menu.html",
-  Map.merge(assigns, %{active: "matches"})
+  Map.merge(assigns, %{conn: @socket, active: "matches"})
 )}
 
 <div class="row section-menu">
