@@ -15,9 +15,10 @@ defmodule TeiserverWeb.Live.PartyTest do
 
   describe "party live" do
     test "index", %{conn: conn, user: user} do
-      {:ok, view, html} = live(conn, "/account/parties")
+      {:ok, view, html} = live(conn, "/teiserver/account/parties")
       assert view != nil
-      assert html =~ "No lobbies found"
+      assert html =~ "Connect with client to enable"
+      assert html =~ "Parties"
     end
   end
 end
