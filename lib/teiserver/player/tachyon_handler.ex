@@ -846,6 +846,19 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   # RALA Clan commands: clan/viewList including conversion to tachyon schema
+  def handle_command("clan/create", "request", _message_id, %{"data" => data}, state) do
+    Logger.debug("Handling clan/create command")
+
+    Teiserver.Clan.create_clan(
+      name: data["name"],
+      tag: data["tag"],
+      description: data["description"],
+      language: data["language"]
+    )
+
+    {:response, state}
+  end
+
   def handle_command("clan/viewList", "request", _message_id, _message, state) do
     Logger.debug("Handling clan/viewList command")
     clans = Teiserver.Clan.list_clans()
