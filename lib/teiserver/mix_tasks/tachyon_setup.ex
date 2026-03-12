@@ -11,6 +11,9 @@ defmodule Mix.Tasks.Teiserver.TachyonSetup do
   @shortdoc "setup oauth apps for tachyon"
 
   use Mix.Task
+
+  @requirements ["app.config"]
+
   alias Teiserver.Tachyon.Tasks.{SetupApps, SetupAssets}
 
   @impl Mix.Task
