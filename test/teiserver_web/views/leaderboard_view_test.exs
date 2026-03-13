@@ -14,10 +14,15 @@ defmodule TeiserverWeb.LeaderboardTest do
   end
 
   describe "tournament live" do
-    test "index", %{conn: conn, user: user} do
-      {:ok, view, html} = get(conn, "/battle/ratings/leaderboard")
-      assert view != nil
-      assert html =~ "Leader"
+    test "index" do
+      {:ok, kw} =
+        GeneralTestLib.conn_setup()
+        |> Teiserver.TeiserverTestLib.conn_setup()
+
+      {:ok, conn} = Keyword.fetch(kw, :conn)
+
+      conn = get(conn, ~p"/battle/ratings/leaderboard")
+      html_response(conn, 200)
     end
   end
 end

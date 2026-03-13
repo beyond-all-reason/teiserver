@@ -36,6 +36,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
       end
 
     my_rating = Account.get_rating(conn.assigns.current_user.id, type_id)
+    my_permissions = conn.assigns.current_user.permissions
 
     ratings =
       Account.list_ratings(
@@ -55,6 +56,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
     |> assign(:type_id, type_id)
     |> assign(:ratings, ratings)
     |> assign(:my_rating, my_rating)
+    |> assign(:permissions, my_permissions)
     |> render("leaderboard.html")
   end
 end
