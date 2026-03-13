@@ -16,11 +16,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
       socket
       |> AuthPlug.live_call(session)
 
-    # TODO fix this correctly
-    _contributor = allow?(socket.assigns[:current_user], "Contributor")
-    contributor = true
-
-    # TODO move this to the top of the mount section
     disabled? = Teiserver.Config.get_site_config_cache("lobby.Disable lobby live view on website")
 
     {counter, lobbies} = TachyonLobby.subscribe_updates()
@@ -33,7 +28,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
       |> assign(:site_menu_active, "lobbies")
       |> assign(:view_colour, Lobby.colours())
       |> assign(:disabled?, disabled?)
-      |> assign(:contributor, contributor)
       |> assign(:lobbies, lobby_list)
       |> assign(:counter, counter)
 
@@ -178,6 +172,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
     PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_web")
 
     socket
+    |> populate_initial_assigns()
     |> assign(:page_title, "Listing Tachyon Battles")
     |> assign(:battle, nil)
   end
@@ -204,8 +199,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
 
   defp populate_initial_assigns(socket) do
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
+    contributor = allow?(socket.assigns[:current_user], "Contributor") || false
 
-    # TODO determine how to use these _counter
     lobbies =
       Teiserver.TachyonLobby.List.list()
       |> sort_lobbies()
@@ -213,5 +208,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.TachyonIndex do
     socket
     |> assign(:lobbies, lobbies)
     |> assign(:client, client)
+    |> assign(:contributor, contributor)
   end
 end

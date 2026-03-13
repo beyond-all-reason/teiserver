@@ -134,7 +134,7 @@ defmodule TeiserverWeb.Live.TachyonLobbyContributorTest do
     assert html =~ "updated lobby name"
   end
 
-  test "index does show option to switch to Tachyon Lobbies for players", %{
+  test "index does show option to switch to Tachyon Lobbies for contributors", %{
     conn: conn,
     user: _user
   } do

@@ -14,10 +14,12 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> AuthPlug.live_call(session)
 
     moderator = allow?(socket.assigns[:current_user], "Moderator")
+    contributor = allow?(socket.assigns[:current_user], "Contributor")
 
     socket =
       socket
       |> assign(:moderator, moderator)
+      |> assign(:contributor, contributor)
 
     disabled? = Teiserver.Config.get_site_config_cache("lobby.Disable lobby live view on website")
 

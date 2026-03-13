@@ -9,6 +9,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     game_types = Battle.MatchLib.list_rated_game_types()
     active_season = MatchRatingLib.active_season()
     seasons = Enum.to_list(1..active_season)
+    contributor = allow?(socket.assigns.current_user.permissions, "Contributor")
 
     user_ratings =
       Account.list_ratings(
@@ -32,6 +33,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
       |> assign(:rating_type, Map.get(params, "rating_type", "Large Team"))
       |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
       |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
+      |> assign(:contributor, contributor)
       |> add_breadcrumb(name: "Matches", url: "/battle")
       |> add_breadcrumb(name: "Ratings", url: "/battle/ratings")
       |> default_filters()
