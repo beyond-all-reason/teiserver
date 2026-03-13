@@ -24,11 +24,10 @@ spectators =
   |> Enum.map(fn p -> @clients[p] end)
   |> Enum.sort_by(& &1[:name]) %>
 
-{render(
-  TeiserverWeb.Battle.GeneralView,
-  "sub_menu.html",
-  Map.merge(assigns, %{conn: @socket, active: "tournaments"})
-)}
+{render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+  active: "tournaments",
+  conn: Map.put(@socket, :permissions, @current_user.permissions)
+})}
 
 <div class="row mt-3" id="main-content">
   <div class="col-md-12">

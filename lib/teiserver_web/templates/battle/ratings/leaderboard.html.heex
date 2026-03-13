@@ -3,7 +3,7 @@
 {render(
   TeiserverWeb.Battle.GeneralView,
   "sub_menu.html",
-  Map.merge(assigns, %{conn: @socket, socket: @socket, active: "ratings"})
+  Map.merge(assigns, %{active: "ratings"})
 )}
 
 <div class="row section-menu">
@@ -13,7 +13,10 @@
         {render(
           TeiserverWeb.Battle.RatingsView,
           "section_menu.html",
-          Map.merge(assigns, %{conn: @socket, socket: @socket, show_search: false, active: @type_name})
+          Map.merge(assigns, %{
+            show_search: false,
+            active: @type_name
+          })
         )}
         <br /><br />
         The leaderboard weighs uncertainty a lot more than lobby balance. As a result the number you see here will not be the same as the value you see ingame.
