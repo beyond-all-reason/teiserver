@@ -27,7 +27,7 @@
             icon: Teiserver.Lobby.icon()
           )}
 
-          <%= if @contributor or  Map.get(assigns, :contributor, false) do %>
+          <%= if Map.get(assigns, :contributor, false) do %>
             {central_component("sub_menu_icon",
               name: "tachyon_lobbies",
               label: "Tachyon Lobbies",

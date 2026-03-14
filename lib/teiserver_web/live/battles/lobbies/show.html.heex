@@ -26,7 +26,7 @@ spectators =
 
 {render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "battle_lobbies",
-  contributor: @contributor,
+  contributor: Map.get(assigns, :contributor, false),
   conn: Map.put(@socket, :permissions, @current_user.permissions)
 })}
 

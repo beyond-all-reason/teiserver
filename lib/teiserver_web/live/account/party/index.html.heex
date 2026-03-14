@@ -3,7 +3,7 @@ moderator = allow?(@current_user, "Moderator") %>
 
 {render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "parties",
-  contributor: @contributor,
+  contributor: Map.get(assigns, :contributor, false),
   conn: Map.put(@socket, :permissions, @current_user.permissions)
 })}
 
