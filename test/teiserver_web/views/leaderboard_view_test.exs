@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.LeaderboardTest do
   alias Teiserver.CacheUser
-  use TeiserverWeb.ConnCase, async: false
+  use TeiserverWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
