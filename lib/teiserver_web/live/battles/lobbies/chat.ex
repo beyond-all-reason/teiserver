@@ -18,12 +18,15 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       socket
       |> AuthPlug.live_call(session)
 
+    contributor = allow?(socket.assigns[:current_user], "Contributor") || false
+
     socket =
       socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/battle/lobbies")
       |> assign(:site_menu_active, "teiserver_lobbies")
       |> assign(:view_colour, Lobby.colours())
+      |> assign(:contributor, contributor)
 
     {:ok, socket}
   end

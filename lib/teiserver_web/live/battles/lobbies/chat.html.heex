@@ -4,7 +4,7 @@ moderator = allow?(@current_user, "Moderator") %>
 {render(
   TeiserverWeb.Battle.GeneralView,
   "sub_menu.html",
-  Map.merge(assigns, %{active: "battle_lobbies", conn: @socket})
+  Map.merge(assigns, %{active: "battle_lobbies", contributor: @contributor, conn: @socket})
 )}
 
 <style type="text/css">

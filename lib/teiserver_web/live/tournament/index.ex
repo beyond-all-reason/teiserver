@@ -15,6 +15,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
       |> AuthPlug.live_call(session)
 
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
+    contributor = allow?(socket, "Contributor") || false
 
     can_join =
       Teiserver.CacheUser.has_any_role?(socket.assigns[:current_user].id, [
@@ -31,6 +32,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
       |> assign(:can_join, can_join)
       |> assign(:site_menu_active, "tournaments")
       |> assign(:view_colour, Lobby.colours())
+      |> assign(:contributor, contributor)
       |> get_lobbies()
 
     {:ok, socket}

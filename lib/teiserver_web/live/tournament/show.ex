@@ -23,6 +23,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
       |> AuthPlug.live_call(session)
 
     moderator = allow?(socket, "Moderator")
+    contributor = allow?(socket, "Contributor") || false
     admin_dev = allow?(socket, "admin.dev.developer")
 
     extra_content =
@@ -52,6 +53,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
       |> assign(:consul_command, "")
       |> assign(:subbed, true)
       |> assign(:moderator, moderator)
+      |> assign(:contributor, contributor)
       |> assign(:admin_dev, admin_dev)
 
     {:ok, socket}

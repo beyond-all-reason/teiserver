@@ -3,6 +3,7 @@ moderator = allow?(@current_user, "Moderator") %>
 
 {render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
   active: "tournaments",
+  contributor: @contributor,
   conn: Map.put(@socket, :permissions, @current_user.permissions)
 })}
 
