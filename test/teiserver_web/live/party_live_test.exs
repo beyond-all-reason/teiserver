@@ -1,12 +1,9 @@
 defmodule TeiserverWeb.Live.PartyTest do
-  alias Teiserver.CacheUser
   use TeiserverWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{TeiserverTestLib, Lobby}
-  import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1]
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.TeiserverTestLib
 
   setup do
     GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
@@ -14,7 +11,7 @@ defmodule TeiserverWeb.Live.PartyTest do
   end
 
   describe "party live" do
-    test "index", %{conn: conn, user: user} do
+    test "index", %{conn: conn, user: _user} do
       {:ok, view, html} = live(conn, "/teiserver/account/parties")
       assert view != nil
       assert html =~ "Connect with client to enable"

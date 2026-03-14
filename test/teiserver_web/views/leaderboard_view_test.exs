@@ -1,12 +1,8 @@
 defmodule TeiserverWeb.LeaderboardTest do
-  alias Teiserver.CacheUser
   use TeiserverWeb.ConnCase, async: true
-  import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{TeiserverTestLib, Lobby}
-  import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1]
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.TeiserverTestLib
 
   setup do
     GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
