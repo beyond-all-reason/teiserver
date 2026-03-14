@@ -16,7 +16,6 @@ defmodule TeiserverWeb.Live.TachyonLobbyPlayerTest do
       assert resp.to == ~p"/"
     end
 
-    # TODO correctly verify that tachyon lobby sub_menu option does not appear for a regular player
     test "index does not show option to switch to Tachyon Lobbies ", %{conn: conn, user: _user} do
       {:ok, _view, html} = live(conn, "/battle/lobbies")
       refute html =~ "Tachyon Lobbies"
