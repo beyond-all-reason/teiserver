@@ -7,13 +7,13 @@
 <div class="row mt-3">
   <div class="col-md-12">
     <h4>
-      <% member_count = @lobbies |> Enum.reduce(0, fn b, acc -> acc + b.member_count end) %>
       <%= cond do %>
         <% @disabled? -> %>
           Feature temporarily disabled, sorry for the inconvenience
         <% Enum.empty?(@lobbies) -> %>
           No lobbies found
         <% true -> %>
+          <% member_count = @lobbies |> Enum.reduce(0, fn {_id, b}, acc -> acc + b.member_count end) %>
           Lobbies: {Enum.count(@lobbies)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           Total members: {member_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <% end %>
@@ -29,7 +29,7 @@
           </tr>
         </thead>
         <tbody id="lobbies">
-          <%= for lobby <- @lobbies do %>
+          <%= for {_id, lobby} <- @lobbies do %>
             <tr>
               <td>{lobby.name}</td>
               <td>{lobby.map_name}</td>

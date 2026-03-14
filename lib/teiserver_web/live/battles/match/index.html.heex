@@ -1,7 +1,7 @@
 {render(
   TeiserverWeb.Battle.GeneralView,
   "sub_menu.html",
-  Map.merge(assigns, %{active: "matches"})
+  Map.merge(assigns, %{active: "matches", contributor: @contributor,})
 )}
 
 <div class="row section-menu">
