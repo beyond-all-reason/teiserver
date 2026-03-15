@@ -13,11 +13,11 @@
         <% Enum.empty?(@lobbies) -> %>
           No lobbies found
         <% true -> %>
-          <% member_count =
-            @lobbies |> Enum.reduce(0, fn {_id, b}, acc -> acc + b.member_count end) %> Lobbies: {Enum.count(
+          <% player_count =
+            @lobbies |> Enum.reduce(0, fn {_id, b}, acc -> acc + b.player_count end) %> Lobbies: {Enum.count(
             @lobbies
           )} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          Total members: {member_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          Total members: {player_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <% end %>
     </h4>
     <div :if={!@disabled?} class="table-responsive">
