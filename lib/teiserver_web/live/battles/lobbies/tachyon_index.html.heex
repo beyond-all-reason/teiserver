@@ -36,15 +36,15 @@
               <td>{lobby.name}</td>
               <td>{lobby.map_name}</td>
               <td>
-                <%= if lobby.in_progress do %>
+                <%= if Map.get(lobby, :in_progress, false) do %>
                   <i class="fa-fw fa-solid fa-play"></i>
                   &nbsp; {Teiserver.Helper.TimexHelper.duration_to_str_short(
-                    System.system_time(:second) - (lobby.started_at || 1_652_282_031)
+                    System.system_time(:second) - (Map.get(lobby, :started_at, 1_652_282_031))
                   )}
                 <% end %>
               </td>
               <td>
-                <%= if lobby.locked do %>
+                <%= if Map.get(lobby, :locked, false) do %>
                   <i class="fa-fw fa-solid fa-lock"></i>
                 <% end %>
               </td>
