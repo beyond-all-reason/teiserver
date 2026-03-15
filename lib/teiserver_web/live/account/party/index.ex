@@ -13,6 +13,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
       |> AuthPlug.live_call(session)
 
     client = Account.get_client_by_id(socket.assigns.current_user.id)
+    contributor = allow?(socket.assigns[:current_user], "Contributor") || false
 
     :ok =
       PubSub.subscribe(
@@ -35,6 +36,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
       |> add_breadcrumb(name: "Parties", url: "/teiserver/account/parties")
       |> assign(:mode, mode)
       |> assign(:client, client)
+      |> assign(:contributor, contributor)
       |> assign(:site_menu_active, "parties")
       |> assign(:view_colour, PartyLib.colours())
       |> assign(:user_lookup, %{})

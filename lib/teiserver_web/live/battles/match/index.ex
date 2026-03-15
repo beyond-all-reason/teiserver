@@ -7,6 +7,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
   def mount(_params, _session, socket) do
     game_types = ["Any type" | Teiserver.Battle.MatchLib.list_game_types()]
 
+    contributor = allow?(socket.assigns[:current_user], "Contributor") || false
+
     socket =
       socket
       |> assign(:site_menu_active, "match")
@@ -19,6 +21,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
       |> assign(:total_count, 0)
       |> assign(:total_pages, 1)
       |> assign(:current_count, 0)
+      |> assign(:contributor, contributor)
 
     {:ok, socket}
   end

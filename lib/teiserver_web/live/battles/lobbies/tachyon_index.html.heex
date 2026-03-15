@@ -1,0 +1,58 @@
+{render(TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{
+  active: "tachyon_lobbies",
+  contributor: Map.get(assigns, :contributor, false),
+  conn: Map.put(@socket, :permissions, @current_user.permissions)
+})}
+
+<div class="row mt-3">
+  <div class="col-md-12">
+    <h4>
+      <%= cond do %>
+        <% @disabled? -> %>
+          Feature temporarily disabled, sorry for the inconvenience
+        <% Enum.empty?(@lobbies) -> %>
+          No lobbies found
+        <% true -> %>
+          <% player_count =
+            @lobbies |> Enum.reduce(0, fn {_id, b}, acc -> acc + b.player_count end) %> Lobbies: {Enum.count(
+            @lobbies
+          )} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          Total members: {player_count} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <% end %>
+    </h4>
+    <div :if={!@disabled?} class="table-responsive">
+      <table class="table table-sm table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Map</th>
+            <th>Status</th>
+            <th>Members / Max</th>
+          </tr>
+        </thead>
+        <tbody id="lobbies">
+          <%= for {_id, lobby} <- @lobbies do %>
+            <tr>
+              <td>{lobby.name}</td>
+              <td>{lobby.map_name}</td>
+              <td>
+                <%= if Map.get(lobby, :in_progress, false) do %>
+                  <i class="fa-fw fa-solid fa-play"></i>
+                  &nbsp; {Teiserver.Helper.TimexHelper.duration_to_str_short(
+                    System.system_time(:second) - Map.get(lobby, :started_at, 1_652_282_031)
+                  )}
+                <% end %>
+              </td>
+              <td>
+                <%= if Map.get(lobby, :locked, false) do %>
+                  <i class="fa-fw fa-solid fa-lock"></i>
+                <% end %>
+              </td>
+              <td>{lobby.player_count} / {lobby.max_player_count}</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

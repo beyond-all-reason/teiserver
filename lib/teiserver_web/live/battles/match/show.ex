@@ -11,6 +11,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
   @impl true
   def mount(_params, _session, socket) do
+    contributor = allow?(socket.assigns[:current_user], "Contributor") || false
+
     socket =
       socket
       |> assign(:site_menu_active, "match")
@@ -22,6 +24,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       )
       |> assign(:algorithm, BalanceLib.get_default_algorithm())
       |> assign(:give_accolade, nil)
+      |> assign(:contributor, contributor)
 
     {:ok, socket}
   end
