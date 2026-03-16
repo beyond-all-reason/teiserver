@@ -28,7 +28,7 @@ defmodule Teiserver.Account.NewSmurfReport do
           last_played_after: Timex.now() |> Timex.shift(days: -max_play_age),
           inserted_after: Timex.now() |> Timex.shift(days: -max_account_age),
           smurf_of: false,
-          verified: true
+          has_role: "Verified"
         ],
         limit: 1000,
         order_by: "Last played"

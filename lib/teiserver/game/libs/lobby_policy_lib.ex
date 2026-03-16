@@ -149,6 +149,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
               icon: "fa-solid fa-solar-system",
               colour: "#0000AA",
               password: Account.make_bot_password(),
+              roles: ["Bot", "Verified", "Moderator"],
               data: %{
                 bot: true,
                 moderator: true,

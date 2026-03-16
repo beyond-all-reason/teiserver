@@ -102,8 +102,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             roles: ["Verified"],
             data: %{
               lobby_client: "FakeData",
-              bot: false,
-              roles: ["Verified"]
+              bot: false
             },
             inserted_at:
               Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert(),

@@ -16,7 +16,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
     }
 
   setup _context do
-    user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    user = Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     id = UUID.uuid4()
 
     map = AssetFixtures.create_map(stg_attr(id))
@@ -73,7 +73,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
       queue_pid: queue_pid,
       version: version
     } do
-      user2 = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+      user2 = Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user2.id)
       send(queue_pid, :tick)

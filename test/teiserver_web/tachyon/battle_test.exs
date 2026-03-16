@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
   alias Teiserver.TachyonBattle
 
   defp setup_app(_context) do
-    owner = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    owner = Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
     app =
       OAuthFixtures.app_attrs(owner.id)

@@ -7,7 +7,7 @@ defmodule Teiserver.Tachyon.Tasks.SetupAppsTest do
     user =
       Central.Helpers.GeneralTestLib.make_user(%{
         "email" => "root@localhost",
-        "data" => %{"roles" => ["Verified"]}
+        "roles" => ["Verified"]
       })
 
     # because all the f*ing queries are using caches, without a way to disable that
