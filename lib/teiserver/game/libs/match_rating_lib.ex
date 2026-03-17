@@ -236,58 +236,19 @@ defmodule Teiserver.Game.MatchRatingLib do
     :ok
   end
 
-  defp do_rate_match(%{team_count: team_count} = match, opts) do
-    # When there are more than 2 teams we update the rating as if it was a 2 team game
-    # where if you won, the opponent was the best losing team
-    # and if you lost the opponent was whoever won
+  defp do_rate_match(match, opts) do
     rating_type_id = Game.get_or_add_rating_type(match.game_type)
-    partied_rating_type_id = Game.get_or_add_rating_type("Partied Team")
 
-    # opponent_ratio = 1
-    opponent_ratio = 1 / ((team_count - 1) * match.team_size)
-    # opponent_ratio = 2/team_count
-    # opponent_ratio = 3/(team_count+1)
-    # opponent_ratio = 0.5
-
-    # This allows us to handle partied players slightly differently
-    # we looked at doing this but there was not enough data. I've
-    # left the code commented out because it was such a pain to get
-    # working in the first place
-    party_ids = []
-    # party_ids = match.members
-    #   |> Enum.map(fn m -> m.party_id end)
-    #   |> Enum.group_by(fn party_id -> party_id end)
-    #   |> Map.drop([nil])
-    #   |> Enum.map(fn {k, ids} -> {k, Enum.count(ids)} end)
-    #   |> Enum.filter(fn {_k, count} -> count >= 2 end)
-    #   |> Enum.map(fn {k, _} -> k end)
-
-    winners =
-      match.members
-      |> Enum.filter(fn membership -> membership.win end)
-
-    losers =
-      match.members
-      |> Enum.reject(fn membership -> membership.win end)
-
-    partied_user_ids =
-      match.members
-      |> Enum.filter(fn m -> Enum.member?(party_ids, m.party_id) end)
-      |> Enum.map(fn m -> m.user_id end)
-
-    solo_user_ids =
-      match.members
-      |> Enum.reject(fn m -> Enum.member?(party_ids, m.party_id) end)
-      |> Enum.map(fn m -> m.user_id end)
+    members = match.members |> Enum.map(fn m -> m.user_id end)
 
     # We will want to update these so we keep the whole object
     # additionally by using a list_ratings call we avoid the concern
     # of hitting a cache
-    solo_rating_lookup =
+    rating_lookup =
       Account.list_ratings(
         search: [
           rating_type_id: rating_type_id,
-          user_id_in: solo_user_ids,
+          user_id_in: members,
           season: active_season()
         ]
       )
@@ -295,125 +256,56 @@ defmodule Teiserver.Game.MatchRatingLib do
         {rating.user_id, rating}
       end)
 
-    # Now apply a default rating for where there isn't already one
-    solo_rating_lookup =
-      solo_user_ids
-      |> Map.new(fn userid ->
-        {userid, solo_rating_lookup[userid] || BalanceLib.default_rating(rating_type_id)}
-      end)
-
-    partied_rating_lookup =
-      Account.list_ratings(
-        search: [
-          rating_type_id: partied_rating_type_id,
-          user_id_in: partied_user_ids,
-          season: active_season()
-        ]
-      )
-      |> Map.new(fn rating ->
-        {rating.user_id, rating}
-      end)
-
-    # Partied defaults too
-    partied_rating_lookup =
-      partied_user_ids
-      |> Map.new(fn userid ->
-        {userid,
-         partied_rating_lookup[userid] || BalanceLib.default_rating(partied_rating_type_id)}
-      end)
-
-    rating_lookup = Map.merge(solo_rating_lookup, partied_rating_lookup)
-
-    # Build ratings into lists of tuples for the OpenSkill module to handle
     winner_ratings =
-      winners
+      Enum.filter(match.members, fn m -> m.win end)
       |> Enum.map(fn membership ->
         rating = rating_lookup[membership.user_id] || BalanceLib.default_rating(rating_type_id)
         {membership.user_id, {rating.skill, rating.uncertainty}}
       end)
 
-    # Now we want to get the best loser to use for the winner's win
-    loser_ratings =
-      losers
-      |> Enum.group_by(
-        fn %{team_id: team_id} -> team_id end,
-        fn %{user_id: user_id} ->
+    # Losing team order matters as well, some might even gain rating
+    # Losing teams are ordered by left_after from highest to lowest
+    # If a team has multiple members the one with the highest left_after value is used
+    loser_teams =
+      match.members
+      |> Enum.reject(fn m -> m.win end)
+      |> Enum.group_by(& &1.team_id)
+      |> Map.values()
+      |> Enum.sort_by(
+        fn team_members ->
+          team_members
+          |> Enum.map(& &1.left_after)
+          |> Enum.max()
+        end,
+        :desc
+      )
+
+    loser_team_ratings =
+      loser_teams
+      |> Enum.map(fn team_members ->
+        Enum.map(team_members, fn %{user_id: user_id} ->
           rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
           {user_id, {rating.skill, rating.uncertainty}}
-        end
-      )
-      |> Map.values()
-
-    # Run the winner calculation
-    [win_result | _lose_result] = rate_with_ids([winner_ratings | loser_ratings])
-    win_result = Map.new(win_result)
-
-    # Save the results
-    win_ratings =
-      winners
-      |> Enum.map(fn %{user_id: user_id} ->
-        rating_update = win_result[user_id]
-        user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
-        win? = true
-        do_update_rating(user_id, match, user_rating, rating_update, win?, opts)
-      end)
-
-    # If you lose you just count as losing against the winner
-    loss_ratings =
-      loser_ratings
-      |> Enum.map(fn team_ratings ->
-        lose_results = rate_with_ids([winner_ratings, team_ratings], as_map: true)
-
-        team_ratings
-        |> Enum.map(fn {user_id, _old_rating} ->
-          rating_update = lose_results[user_id]
-          win? = false
-          user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
-          ratiod_rating_update = apply_change_ratio(user_rating, rating_update, opponent_ratio)
-          do_update_rating(user_id, match, user_rating, ratiod_rating_update, win?, opts)
         end)
       end)
-      |> List.flatten()
 
-    # # If you lose we calculate it as last place, there's no such thing as 2nd place
-    # loss_ratings = loser_ratings
-    #   |> Enum.map(fn team_ratings ->
-    #     temp_loser_ratings = loser_ratings
-    #       |> List.delete(team_ratings)
+    # Teams are ordered by outcome positions, winning team first, second team second...
+    updated_ratings =
+      rate_with_ids([winner_ratings | loser_team_ratings]) |> List.flatten() |> Map.new()
 
-    #     lose_results = rate_with_ids([winner_ratings | temp_loser_ratings] ++ [team_ratings], as_map: true)
+    all_updates =
+      match.members
+      |> Enum.map(fn membership ->
+        rating_update = updated_ratings[membership.user_id]
 
-    #     team_ratings
-    #       |> Enum.map(fn {user_id, _old_rating} ->
-    #         rating_update = lose_results[user_id]
+        user_rating =
+          rating_lookup[membership.user_id] || BalanceLib.default_rating(rating_type_id)
 
-    #         user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
-    #         ratiod_rating_update = apply_change_ratio(user_rating, rating_update, opponent_ratio)
-    #         do_update_rating(user_id, match, user_rating, ratiod_rating_update)
-    #       end)
-    #   end)
-    #   |> List.flatten
+        win? = membership.win
+        do_update_rating(membership.user_id, match, user_rating, rating_update, win?, opts)
+      end)
 
-    # # If you lose we calculate you are 2nd place
-    # loss_ratings = loser_ratings
-    #   |> Enum.map(fn team_ratings ->
-    #     temp_loser_ratings = loser_ratings
-    #       |> List.delete(team_ratings)
-
-    #     lose_results = rate_with_ids([winner_ratings, team_ratings] ++ temp_loser_ratings, as_map: true)
-
-    #     team_ratings
-    #       |> Enum.map(fn {user_id, _old_rating} ->
-    #         rating_update = lose_results[user_id]
-
-    #         user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
-    #         ratiod_rating_update = apply_change_ratio(user_rating, rating_update, opponent_ratio)
-    #         do_update_rating(user_id, match, user_rating, ratiod_rating_update)
-    #       end)
-    #   end)
-    #   |> List.flatten
-
-    save_rating_logs(match.id, win_ratings, loss_ratings, opts)
+    save_rating_logs(match.id, all_updates, opts)
 
     # Update the match to track rating type
     {:ok, _} = Battle.update_match(match, %{rating_type_id: rating_type_id})
@@ -426,19 +318,6 @@ defmodule Teiserver.Game.MatchRatingLib do
     end
 
     :ok
-  end
-
-  # Used to ratio the skill lost when there are more than 2 teams
-  @spec apply_change_ratio(map(), {number(), number()}, number()) :: {number(), number()}
-  defp apply_change_ratio(_user_rating, rating_update, 1.0), do: rating_update
-
-  defp apply_change_ratio(user_rating, rating_update, ratio) do
-    {s, u} = rating_update
-
-    skill_change = (user_rating.skill - s) * ratio
-    new_skill = user_rating.skill - skill_change
-
-    {new_skill, u}
   end
 
   @spec do_update_rating(T.userid(), map(), map(), {number(), number()}, boolean(), any()) :: any
@@ -753,6 +632,10 @@ defmodule Teiserver.Game.MatchRatingLib do
   # Saves ratings logs to database
   # If rerate? then delete existing logs of that match before we insert
   defp save_rating_logs(match_id, win_ratings, loss_ratings, opts) do
+    save_rating_logs(match_id, win_ratings ++ loss_ratings, opts)
+  end
+
+  defp save_rating_logs(match_id, all_ratings, opts) do
     rerate? = Keyword.get(opts, :rerate?, false)
 
     if rerate? do
@@ -765,11 +648,11 @@ defmodule Teiserver.Game.MatchRatingLib do
 
         Ecto.Adapters.SQL.query(repo, query, [match_id])
       end)
-      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
+      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, all_ratings)
       |> Teiserver.Repo.transaction()
     else
       Ecto.Multi.new()
-      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
+      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, all_ratings)
       |> Teiserver.Repo.transaction()
     end
   end
