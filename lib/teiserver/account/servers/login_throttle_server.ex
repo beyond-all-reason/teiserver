@@ -228,9 +228,10 @@ defmodule Teiserver.Account.LoginThrottleServer do
     user = Account.get_user_by_id(userid)
     bypass_roles = ["Bot", "Contributor", "VIP", "BAR+"]
 
-    cond do
-      CacheUser.has_any_role?(user, bypass_roles) -> :instant
-      true -> :standard
+    if CacheUser.has_any_role?(user, bypass_roles) do
+      :instant
+    else
+      :standard
     end
   end
 

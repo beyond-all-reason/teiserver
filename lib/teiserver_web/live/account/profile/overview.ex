@@ -14,28 +14,26 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     user = Account.get_user_by_id(userid)
 
     socket =
-      cond do
-        user == nil ->
-          socket
-          |> put_flash(:info, "Unable to find that user")
-          |> redirect(to: ~p"/")
+      if is_nil(user) do
+        socket
+        |> put_flash(:info, "Unable to find that user")
+        |> redirect(to: ~p"/")
+      else
+        :ok =
+          PubSub.subscribe(
+            Teiserver.PubSub,
+            "teiserver_client_messages:#{userid}"
+          )
 
-        true ->
-          :ok =
-            PubSub.subscribe(
-              Teiserver.PubSub,
-              "teiserver_client_messages:#{userid}"
-            )
-
-          socket
-          |> assign(:tab, nil)
-          |> assign(:site_menu_active, "teiserver_account")
-          |> assign(:view_colour, Teiserver.Account.UserLib.colours())
-          |> assign(:user, user)
-          |> assign(:role_data, Account.RoleLib.role_data())
-          |> assign(:client, Account.get_client_by_id(userid))
-          |> get_relationships_and_permissions()
-          |> assign_accolade_notification()
+        socket
+        |> assign(:tab, nil)
+        |> assign(:site_menu_active, "teiserver_account")
+        |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+        |> assign(:user, user)
+        |> assign(:role_data, Account.RoleLib.role_data())
+        |> assign(:client, Account.get_client_by_id(userid))
+        |> get_relationships_and_permissions()
+        |> assign_accolade_notification()
       end
 
     {:ok, socket}

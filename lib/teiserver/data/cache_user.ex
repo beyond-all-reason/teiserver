@@ -433,17 +433,15 @@ defmodule Teiserver.CacheUser do
       if is_bot?(to_id) do
         message_parts
         |> Enum.each(fn line ->
-          cond do
-            String.starts_with?(line, "!clan ") ->
-              clan =
-                line
-                |> String.replace("!clan ", "")
-                |> String.trim()
+          if String.starts_with?(line, "!clan ") do
+            clan =
+              line
+              |> String.replace("!clan ", "")
+              |> String.trim()
 
-              Account.update_user_stat(sender_id, %{"clan" => clan})
-
-            true ->
-              :ok
+            Account.update_user_stat(sender_id, %{"clan" => clan})
+          else
+            :ok
           end
         end)
       end
@@ -938,12 +936,10 @@ defmodule Teiserver.CacheUser do
 
     # Rank
     rank =
-      cond do
-        stats["rank_override"] != nil ->
-          stats["rank_override"] |> int_parse()
-
-        true ->
-          calculate_rank(user.id)
+      if is_nil(stats["rank_override"]) do
+        calculate_rank(user.id)
+      else
+        stats["rank_override"] |> int_parse()
       end
 
     # We don't care about the lobby version so much as we do about the lobby itself

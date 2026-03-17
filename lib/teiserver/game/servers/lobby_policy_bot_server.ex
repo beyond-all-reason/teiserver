@@ -320,17 +320,15 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
         team_count = new_status["nbTeams"] |> int_parse()
 
-        cond do
-          team_count > state.lobby_policy.max_teamcount ->
-            send_chat(
-              state,
-              "Max team count in this lobby is #{state.lobby_policy.max_teamcount}, re-setting it"
-            )
+        if team_count > state.lobby_policy.max_teamcount do
+          send_chat(
+            state,
+            "Max team count in this lobby is #{state.lobby_policy.max_teamcount}, re-setting it"
+          )
 
-            send_to_founder(state, "!set teamcount #{state.lobby_policy.max_teamcount}")
-
-          true ->
-            :ok
+          send_to_founder(state, "!set teamcount #{state.lobby_policy.max_teamcount}")
+        else
+          :ok
         end
 
         team_size = new_status["teamSize"] |> int_parse()

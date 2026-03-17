@@ -100,13 +100,11 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   def should_use_algo(team_count) do
     # If team count not two, then call loser_picks
     # Otherwise return :ok
-    cond do
-      team_count != 2 ->
-        {:error, "Team count not equal to 2. Will use loser_picks algorithm instead.",
-         Teiserver.Battle.Balance.LoserPicks}
-
-      true ->
-        :ok
+    if team_count != 2 do
+      {:error, "Team count not equal to 2. Will use loser_picks algorithm instead.",
+       Teiserver.Battle.Balance.LoserPicks}
+    else
+      :ok
     end
   end
 
@@ -126,21 +124,19 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
     }
 
     noob_log =
-      cond do
-        length(state.noobs) > 0 ->
-          noobs_string =
-            Enum.map(state.noobs, fn x ->
-              chev = Map.get(x, :rank, 0) + 1
-              "#{x.name} (chev: #{chev}, σ: #{format(x.uncertainty)})"
-            end)
+      if Enum.empty?(state.noobs) do
+        "Solo new players: None"
+      else
+        noobs_string =
+          Enum.map(state.noobs, fn x ->
+            chev = Map.get(x, :rank, 0) + 1
+            "#{x.name} (chev: #{chev}, σ: #{format(x.uncertainty)})"
+          end)
 
-          [
-            "High uncertainty players (avoid immune):",
-            noobs_string
-          ]
-
-        true ->
-          "Solo new players: None"
+        [
+          "High uncertainty players (avoid immune):",
+          noobs_string
+        ]
       end
 
     logs =
@@ -168,9 +164,10 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
     max_avoids = state.lobby_max_avoids
 
     max_avoid_text =
-      cond do
-        max_avoids != nil && max_avoids <= 20 -> " (Max: #{max_avoids})"
-        true -> ""
+      if max_avoids != nil && max_avoids <= 20 do
+        " (Max: #{max_avoids})"
+      else
+        ""
       end
 
     avoid_text = "Avoids considered: #{Enum.count(state.avoids)}" <> max_avoid_text
@@ -247,17 +244,11 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   # For high player counts, we need a limit for performance reasons
   # For lower player counts, we have no limit
   def get_max_avoids(player_count, players_in_parties_count) do
-    cond do
-      # 7v7 and above
-      player_count >= 14 ->
-        # For 7v7 and above, if there are no parties, we pull at most 7 avoids from the database
-        # For every two players in parties, we reduce the number of avoids by 1 to a minimum of 1
-        # This is for performance reasons as processing parties and avoids takes time
-        max(1, ((14 - players_in_parties_count) / 2) |> trunc())
-
-      # Anything else
-      true ->
-        nil
+    if player_count >= 14 do
+      # For 7v7 and above, if there are no parties, we pull at most 7 avoids from the database
+      # For every two players in parties, we reduce the number of avoids by 1 to a minimum of 1
+      # This is for performance reasons as processing parties and avoids takes time
+      max(1, ((14 - players_in_parties_count) / 2) |> trunc())
     end
   end
 
@@ -424,11 +415,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
           id: id,
           uncertainty: uncertainty,
           rank: rank,
-          in_party?:
-            cond do
-              count <= 1 -> false
-              true -> true
-            end
+          in_party?: count > 1
         }
   end
 
@@ -456,19 +443,17 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
 
   @spec get_avoids([any()], number(), boolean()) :: [String.t()]
   def get_avoids(player_ids, lobby_max_avoids, debug_mode? \\ false) do
-    cond do
-      debug_mode? ->
-        RelationshipLib.get_lobby_avoids(player_ids, lobby_max_avoids, @per_player_avoid_limit)
+    if debug_mode? do
+      RelationshipLib.get_lobby_avoids(player_ids, lobby_max_avoids, @per_player_avoid_limit)
+    else
+      avoid_min_hours = get_avoid_delay()
 
-      true ->
-        avoid_min_hours = get_avoid_delay()
-
-        RelationshipLib.get_lobby_avoids(
-          player_ids,
-          lobby_max_avoids,
-          @per_player_avoid_limit,
-          avoid_min_hours
-        )
+      RelationshipLib.get_lobby_avoids(
+        player_ids,
+        lobby_max_avoids,
+        @per_player_avoid_limit,
+        avoid_min_hours
+      )
     end
   end
 

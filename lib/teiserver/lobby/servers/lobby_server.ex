@@ -537,12 +537,10 @@ defmodule Teiserver.Battle.LobbyServer do
     consul_state = Coordinator.call_consul(state.id, :get_consul_state)
 
     teaser =
-      cond do
-        state.lobby.teaser == "" ->
-          ""
-
-        true ->
-          " " <> state.lobby.teaser
+      if state.lobby.teaser == "" do
+        ""
+      else
+        " " <> state.lobby.teaser
       end
 
     parts =

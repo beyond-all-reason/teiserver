@@ -9,21 +9,19 @@ defmodule TeiserverWeb.Account.ProfileLive.Relationships do
     user = Account.get_user_by_id(userid)
 
     socket =
-      cond do
-        user == nil ->
-          socket
-          |> put_flash(:info, "Unable to find that user")
-          |> redirect(to: ~p"/")
-
-        true ->
-          socket
-          |> assign(:tab, nil)
-          |> assign(:site_menu_active, "teiserver_account")
-          |> assign(:view_colour, Teiserver.Account.UserLib.colours())
-          |> assign(:user, user)
-          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
-          |> get_mutuals()
-          |> check_page_permissions()
+      if is_nil(user) do
+        socket
+        |> put_flash(:info, "Unable to find that user")
+        |> redirect(to: ~p"/")
+      else
+        socket
+        |> assign(:tab, nil)
+        |> assign(:site_menu_active, "teiserver_account")
+        |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+        |> assign(:user, user)
+        |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
+        |> get_mutuals()
+        |> check_page_permissions()
       end
 
     {:ok, socket}

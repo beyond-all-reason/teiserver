@@ -78,29 +78,27 @@ defmodule Teiserver.Account.PartyServer do
 
   def handle_cast({:cancel_invite, userid}, %{party: party} = state) do
     new_party =
-      cond do
-        Enum.member?(party.pending_invites, userid) ->
-          Logger.debug("Cancelled invite for #{userid}")
+      if Enum.member?(party.pending_invites, userid) do
+        Logger.debug("Cancelled invite for #{userid}")
 
-          new_invites = List.delete(party.pending_invites, userid)
+        new_invites = List.delete(party.pending_invites, userid)
 
-          PubSub.broadcast(
-            Teiserver.PubSub,
-            "teiserver_party:#{party.id}",
-            %{
-              channel: "teiserver_party:#{party.id}",
-              event: :updated_values,
-              party_id: party.id,
-              new_values: %{pending_invites: new_invites},
-              operation: {:invite_cancelled, [userid]}
-            }
-          )
+        PubSub.broadcast(
+          Teiserver.PubSub,
+          "teiserver_party:#{party.id}",
+          %{
+            channel: "teiserver_party:#{party.id}",
+            event: :updated_values,
+            party_id: party.id,
+            new_values: %{pending_invites: new_invites},
+            operation: {:invite_cancelled, [userid]}
+          }
+        )
 
-          %{party | pending_invites: new_invites}
-
-        true ->
-          Logger.debug("Failed cancel invite for #{userid}, not a member")
-          party
+        %{party | pending_invites: new_invites}
+      else
+        Logger.debug("Failed cancel invite for #{userid}, not a member")
+        party
       end
 
     {:noreply, %{state | party: new_party}}
@@ -154,14 +152,12 @@ defmodule Teiserver.Account.PartyServer do
 
   def handle_cast({:kick_member, userid}, %{party: party} = state) do
     new_party =
-      cond do
-        Enum.member?(party.members, userid) ->
-          Logger.debug("Kicking member #{userid}")
-          remove_member(userid, state)
-
-        true ->
-          Logger.debug("Failed to kicking member #{userid}, not a member")
-          party
+      if Enum.member?(party.members, userid) do
+        Logger.debug("Kicking member #{userid}")
+        remove_member(userid, state)
+      else
+        Logger.debug("Failed to kicking member #{userid}, not a member")
+        party
       end
 
     {:noreply, %{state | party: new_party}}

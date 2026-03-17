@@ -18,13 +18,11 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     play_level_bounds = get_rating_bounds_for_title(state)
     play_rank_bounds = get_rank_bounds_for_title(state)
 
-    cond do
-      play_level_bounds == nil && play_rank_bounds == nil ->
-        []
-
-      true ->
-        ["This lobby has the following play restrictions:", play_level_bounds, play_rank_bounds]
-        |> Enum.filter(fn x -> x != nil end)
+    if is_nil(play_level_bounds) && is_nil(play_rank_bounds) do
+      []
+    else
+      ["This lobby has the following play restrictions:", play_level_bounds, play_rank_bounds]
+      |> Enum.filter(fn x -> x != nil end)
     end
   end
 
@@ -212,13 +210,10 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @spec check_lobby_name(String.t(), any()) ::
           {:error, String.t()} | {:ok, String.t()} | {:ok, nil}
   def check_lobby_name(name, consul_state) do
-    cond do
-      has_restrictions?(consul_state) and allwelcome_name?(name) ->
-        {:error,
-         "* You cannot declare a lobby to be all welcome if there are player restrictions"}
-
-      true ->
-        {:ok, get_tips(name)}
+    if has_restrictions?(consul_state) and allwelcome_name?(name) do
+      {:error, "* You cannot declare a lobby to be all welcome if there are player restrictions"}
+    else
+      {:ok, get_tips(name)}
     end
   end
 
@@ -302,15 +297,10 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   defp allwelcome_name?(nil), do: false
 
   defp allwelcome_name?(name) do
-    name =
-      name
-      |> String.downcase()
-      |> String.replace(" ", "")
-
-    cond do
-      String.contains?(name, "allwelcome") -> true
-      true -> false
-    end
+    name
+    |> String.downcase()
+    |> String.replace(" ", "")
+    |> String.contains?("allwelcome")
   end
 
   @doc """

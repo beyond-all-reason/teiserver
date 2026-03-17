@@ -90,10 +90,7 @@ defmodule Teiserver.Account.BanEvasionReport do
       |> Enum.filter(fn u ->
         stats = user_stats[u.id]
 
-        cond do
-          (stats["smurf_count"] || 0) > 0 -> false
-          true -> true
-        end
+        (stats["smurf_count"] || 0) <= 0
       end)
 
     %{

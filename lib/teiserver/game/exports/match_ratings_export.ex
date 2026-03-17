@@ -164,11 +164,8 @@ defmodule Teiserver.Game.MatchRatingsExport do
       select:
         ~w(id map uuid server_uuid team_count team_size winning_team game_duration game_type started)a
     )
-    |> Stream.filter(fn match ->
-      cond do
-        Enum.empty?(match.ratings) -> false
-        true -> true
-      end
+    |> Stream.reject(fn match ->
+      Enum.empty?(match.ratings)
     end)
     |> Stream.map(fn match ->
       members_lookup =

@@ -649,12 +649,10 @@ defmodule Teiserver.Battle do
 
   @spec start_match_monitor() :: :ok | {:failure, String.t()}
   def start_match_monitor() do
-    cond do
-      MatchMonitorServer.get_match_monitor_userid() != nil ->
-        {:failure, "Already started"}
-
-      true ->
-        MatchMonitorServer.do_start()
+    if is_nil(MatchMonitorServer.get_match_monitor_userid()) do
+      MatchMonitorServer.do_start()
+    else
+      {:failure, "Already started"}
     end
   end
 

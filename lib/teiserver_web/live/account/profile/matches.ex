@@ -10,21 +10,19 @@ defmodule TeiserverWeb.Account.ProfileLive.Matches do
     user = Account.get_user_by_id(userid)
 
     socket =
-      cond do
-        user == nil ->
-          socket
-          |> put_flash(:info, "Unable to find that user")
-          |> redirect(to: ~p"/")
-
-        true ->
-          socket
-          |> Teiserver.Plugs.CachePlug.live_call()
-          |> assign(:tab, nil)
-          |> assign(:site_menu_active, "teiserver_account")
-          |> assign(:view_colour, Teiserver.Account.UserLib.colours())
-          |> assign(:user, user)
-          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
-          |> assign_pagination_defaults()
+      if is_nil(user) do
+        socket
+        |> put_flash(:info, "Unable to find that user")
+        |> redirect(to: ~p"/")
+      else
+        socket
+        |> Teiserver.Plugs.CachePlug.live_call()
+        |> assign(:tab, nil)
+        |> assign(:site_menu_active, "teiserver_account")
+        |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+        |> assign(:user, user)
+        |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
+        |> assign_pagination_defaults()
       end
 
     {:ok, socket}

@@ -862,9 +862,10 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:user, :get_info}, _from, state) do
     status =
-      cond do
-        state.battle != nil -> :playing
-        true -> :menu
+      if is_nil(state.battle) do
+        :menu
+      else
+        :playing
       end
 
     {:reply, %{status: status}, state}

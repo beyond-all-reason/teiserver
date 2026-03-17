@@ -93,20 +93,18 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
     }
 
     noob_log =
-      cond do
-        length(state.noobs) > 0 ->
-          noobs_string =
-            Enum.map(state.noobs, fn x ->
-              log_noob(x)
-            end)
+      if Enum.empty?(state.noobs) do
+        "Solo Noobs: None"
+      else
+        noobs_string =
+          Enum.map(state.noobs, fn x ->
+            log_noob(x)
+          end)
 
-          [
-            "Solo noobs:",
-            noobs_string
-          ]
-
-        true ->
-          "Solo Noobs: None"
+        [
+          "Solo noobs:",
+          noobs_string
+        ]
       end
 
     logs =

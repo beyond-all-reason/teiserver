@@ -74,9 +74,10 @@ defmodule Teiserver.Helper.StringHelper do
   def possessive(s) do
     last_1digit = String.slice(s, -1, 1)
 
-    cond do
-      last_1digit == "s" -> "#{s}'"
-      true -> "#{s}'s"
+    if last_1digit == "s" do
+      "#{s}'"
+    else
+      "#{s}'s"
     end
   end
 

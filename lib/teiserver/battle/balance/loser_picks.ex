@@ -195,15 +195,13 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
 
   @spec get_group_names(BT.expanded_group()) :: String.t()
   defp get_group_names(group) do
-    cond do
-      Map.has_key?(group, :names) ->
-        group.names
-        |> Enum.map_join(", ", fn x -> x end)
-
+    if Map.has_key?(group, :names) do
+      group.names
+      |> Enum.map_join(", ", fn x -> x end)
+    else
       # It shouldn't go here unless we made a mistake elsewhere
-      true ->
-        group.members
-        |> Enum.map_join(", ", fn x -> "#{x}" end)
+      group.members
+      |> Enum.map_join(", ", fn x -> "#{x}" end)
     end
   end
 end

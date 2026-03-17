@@ -38,9 +38,10 @@ defmodule Teiserver.Game.BalancerServer do
 
   def handle_call(:get_balance_mode, _from, %{last_balance_hash: hash} = state) do
     result =
-      cond do
-        state.last_balance_hash == hash -> state.last_balance_result
-        true -> nil
+      if state.last_balance_hash == hash do
+        state.last_balance_result
+      else
+        nil
       end
 
     {:reply, result.balance_mode, state}
@@ -48,9 +49,10 @@ defmodule Teiserver.Game.BalancerServer do
 
   def handle_call(:get_current_balance, _from, %{last_balance_hash: hash} = state) do
     result =
-      cond do
-        state.last_balance_hash == hash -> state.last_balance_result
-        true -> nil
+      if state.last_balance_hash == hash do
+        state.last_balance_result
+      else
+        nil
       end
 
     {:reply, result, state}
