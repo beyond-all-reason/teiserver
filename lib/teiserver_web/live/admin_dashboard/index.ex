@@ -115,6 +115,11 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     {:noreply, socket}
   end
 
+  def handle_event("reinit-discord-bridge", _event, socket) do
+    Teiserver.Bridge.DiscordSystem.restart()
+    {:noreply, socket}
+  end
+
   @spec update_policies(Socket.t()) :: Socket.t()
   defp update_policies(socket) do
     policies =
