@@ -24,4 +24,18 @@ defmodule Teiserver.Bridge.DiscordSystem do
 
     {:ok, sup_flags}
   end
+
+  def restart() do
+    # check if there is already a running process
+    case Process.whereis(Teiserver.Bridge.DiscordSupervisor) do
+      pid when is_pid(pid) ->
+        Supervisor.stop(pid, :normal)
+
+      nil ->
+        :already_down
+    end
+
+    # and then start the task that starts it back up again (if Discord was enabled)
+    init(nil)
+  end
 end
