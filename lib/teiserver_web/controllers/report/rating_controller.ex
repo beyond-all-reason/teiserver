@@ -53,11 +53,12 @@ defmodule TeiserverWeb.Report.RatingController do
       |> Enum.reject(fn userid -> userid == nil end)
 
     rating_type =
-      cond do
-        Enum.count(player_ids) == 2 -> "Duel"
+      if Enum.count(player_ids) == 2 do
+        "Duel"
         # credo:disable-for-next-line Credo.Check.Design.TagTODO
-        # TODO Should probably get rating based on team size instad
-        true -> "Large Team"
+        # TODO Should probably get rating based on team size instead
+      else
+        "Large Team"
       end
 
     rating_lookup =

@@ -295,12 +295,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   @spec new_report(Moderation.Report.t()) :: any
   def new_report(report) do
     channel =
-      cond do
-        report.type == "actions" ->
-          Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
-
-        true ->
-          Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
+      if report.type == "actions" do
+        Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
+      else
+        Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
       end
 
     if channel do
@@ -310,9 +308,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       url = "https://#{host}/moderation/report?target_id=#{report.target_id}"
 
       match_icon =
-        cond do
-          report.match_id == nil -> ""
-          true -> ":crossed_swords:"
+        if is_nil(report.match_id) do
+          ""
+        else
+          ":crossed_swords:"
         end
 
       outstanding_count =
@@ -383,12 +382,10 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
   def update_report(report) do
     channel =
-      cond do
-        report.type == "actions" ->
-          Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
-
-        true ->
-          Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
+      if report.type == "actions" do
+        Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
+      else
+        Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
       end
 
     if channel do
@@ -417,20 +414,18 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
               end
             else
               new_content =
-                cond do
-                  report.closed ->
-                    String.replace(
-                      msg.content,
-                      "**Status:** Closed :file_folder:",
-                      "**Status:** Actioned :hammer:"
-                    )
-
-                  true ->
-                    String.replace(
-                      msg.content,
-                      "**Status:** Open",
-                      "**Status:** Actioned :hammer:"
-                    )
+                if report.closed do
+                  String.replace(
+                    msg.content,
+                    "**Status:** Closed :file_folder:",
+                    "**Status:** Actioned :hammer:"
+                  )
+                else
+                  String.replace(
+                    msg.content,
+                    "**Status:** Open",
+                    "**Status:** Actioned :hammer:"
+                  )
                 end
 
               {new_content, [delete: "📁", create: "🔨"]}

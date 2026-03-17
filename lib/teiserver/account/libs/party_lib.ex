@@ -187,11 +187,7 @@ defmodule Teiserver.Account.PartyLib do
     msg = trim_message(msg)
     user = Account.get_user_by_id(userid)
 
-    allowed =
-      cond do
-        CacheUser.is_restricted?(user, ["All chat"]) -> false
-        true -> true
-      end
+    allowed = not CacheUser.is_restricted?(user, ["All chat"])
 
     if allowed do
       persist_message(userid, msg, party_id)

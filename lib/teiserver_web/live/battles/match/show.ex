@@ -214,18 +214,16 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         |> Enum.sort_by(fn v -> v end, &<=/2)
 
       balanced_members =
-        cond do
+        if rating_logs == %{} do
           # It will go here if the match is unprocessed or if there are no rating logs e.g. unrated match
-          rating_logs == %{} ->
-            []
-
-          true ->
-            Enum.map(members, fn x ->
-              team_id = get_team_id(x.user_id, past_balance.team_players)
-              Map.put(x, :team_id, team_id)
-            end)
-            |> Enum.sort_by(fn m -> rating_logs[m.user.id].value["old_rating_value"] end, &>=/2)
-            |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
+          []
+        else
+          Enum.map(members, fn x ->
+            team_id = get_team_id(x.user_id, past_balance.team_players)
+            Map.put(x, :team_id, team_id)
+          end)
+          |> Enum.sort_by(fn m -> rating_logs[m.user.id].value["old_rating_value"] end, &>=/2)
+          |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
         end
 
       game_id =

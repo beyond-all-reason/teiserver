@@ -135,12 +135,10 @@ defmodule TeiserverWeb.Moderation.ActionController do
   @spec format_discord_link(Moderation.Report.t()) :: String.t()
   def format_discord_link(report) do
     channel =
-      cond do
-        report.type == "actions" ->
-          Teiserver.Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
-
-        true ->
-          Teiserver.Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
+      if report.type == "actions" do
+        Teiserver.Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
+      else
+        Teiserver.Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
       end
 
     "https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{report.discord_message_id}"

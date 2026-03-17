@@ -2,31 +2,30 @@
   configs: [
     %{
       name: "default",
-      checks: [
-        {Credo.Check.Warning.MissedMetadataKeyInLoggerConfig,
-         [
-           metadata_keys: [:request_id, :user_id, :pid, :actor_type, :actor_id]
-         ]},
-        # TODO: Enable this check and fix the issues
-        {Credo.Check.Design.AliasUsage, false},
-        # {Credo.Check.Design.AliasUsage, [if_nested_deeper_than: 2, if_called_more_often_than: 1]}
-        # TODO: Enable this check by deleting the line below, then fix the issues
-        {Credo.Check.Refactor.Nesting, false},
-        # TODO: Enable this check by deleting the line below, then fix the issues
-        {Credo.Check.Refactor.CyclomaticComplexity, false},
-        # TODO: Enable this check by deleting the line below, then fix the issues
-        {Credo.Check.Refactor.CondStatements, false},
-        # TODO: Enable this check by deleting the line below, then fix the issues
-        {Credo.Check.Readability.ParenthesesOnZeroArityDefs, false},
-        # TODO: Enable this check by deleting the line below, then fix the issues
-        {Credo.Check.Readability.AliasOrder, false},
-        # TODO: Enable this check by deleting the line below, then fix the issues
-        {Credo.Check.Readability.ModuleDoc, false},
-        # TODO: Enable this check by deleting the line below, then fix the issues
-        {Credo.Check.Readability.UnnecessaryAliasExpansion, false},
-        # TODO: Enable this check by deleting the line below, then fix the issues
-        {Credo.Check.Readability.PredicateFunctionNames, false}
-      ]
+      checks: %{
+        enabled: [
+          {Credo.Check.Warning.MissedMetadataKeyInLoggerConfig,
+           [
+             metadata_keys: [:request_id, :user_id, :pid, :actor_type, :actor_id]
+           ]},
+          {Credo.Check.Refactor.CondStatements, []}
+        ],
+        disabled: [
+          # These are all checks we would like to enable
+          # move them into enabled, address the issues and
+          # create aa PR with the fixes
+          {Credo.Check.Design.AliasUsage, false},
+          {Credo.Check.Design.AliasUsage,
+           [if_nested_deeper_than: 2, if_called_more_often_than: 1]},
+          {Credo.Check.Refactor.Nesting, false},
+          {Credo.Check.Refactor.CyclomaticComplexity, false},
+          {Credo.Check.Readability.ParenthesesOnZeroArityDefs, false},
+          {Credo.Check.Readability.AliasOrder, false},
+          {Credo.Check.Readability.ModuleDoc, false},
+          {Credo.Check.Readability.UnnecessaryAliasExpansion, false},
+          {Credo.Check.Readability.PredicateFunctionNames, false}
+        ]
+      }
     }
   ]
 }

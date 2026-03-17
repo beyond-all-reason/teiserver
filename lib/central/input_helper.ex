@@ -93,9 +93,10 @@ defmodule Central.Helpers.InputHelper do
 
   def textarea_array(form, field, _opts \\ []) do
     raw_value =
-      cond do
-        is_list(input_value(form, field)) -> input_value(form, field)
-        true -> [input_value(form, field)]
+      if is_list(input_value(form, field)) do
+        input_value(form, field)
+      else
+        [input_value(form, field)]
       end
 
     value = raw_value |> Enum.join("\n")

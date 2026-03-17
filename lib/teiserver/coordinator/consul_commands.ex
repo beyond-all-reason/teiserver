@@ -1843,28 +1843,26 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     balancer_key = balancer_variables[variable]
 
-    cond do
-      balancer_key != nil ->
-        parse_value =
-          value_parts
-          |> Enum.join(" ")
-          |> Integer.parse()
+    if is_nil(balancer_key) do
+      ConsulServer.say_command(%{cmd | error: "no variable by that name"}, state)
+    else
+      parse_value =
+        value_parts
+        |> Enum.join(" ")
+        |> Integer.parse()
 
-        case parse_value do
-          {value, _} ->
-            if value >= 0 do
-              Coordinator.cast_balancer(state.lobby_id, {:set, balancer_key, value})
-              ConsulServer.say_command(cmd, state)
-            else
-              ConsulServer.say_command(%{cmd | error: "invalid value"}, state)
-            end
-
-          _ ->
+      case parse_value do
+        {value, _} ->
+          if value >= 0 do
+            Coordinator.cast_balancer(state.lobby_id, {:set, balancer_key, value})
+            ConsulServer.say_command(cmd, state)
+          else
             ConsulServer.say_command(%{cmd | error: "invalid value"}, state)
-        end
+          end
 
-      true ->
-        ConsulServer.say_command(%{cmd | error: "no variable by that name"}, state)
+        _ ->
+          ConsulServer.say_command(%{cmd | error: "invalid value"}, state)
+      end
     end
   end
 

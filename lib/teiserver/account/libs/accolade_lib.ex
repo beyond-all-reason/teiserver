@@ -211,12 +211,10 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec start_accolade_server() :: :ok | {:failure, String.t()}
   def start_accolade_server() do
-    cond do
-      get_accolade_bot_userid() != nil ->
-        {:failure, "Already started"}
-
-      true ->
-        do_start()
+    if is_nil(get_accolade_bot_userid()) do
+      do_start()
+    else
+      {:failure, "Already started"}
     end
   end
 
@@ -246,7 +244,7 @@ defmodule Teiserver.Account.AccoladeLib do
     end
   end
 
-  @spec get_accolade_bot_userid() :: T.userid()
+  @spec get_accolade_bot_userid() :: T.userid() | nil
   def get_accolade_bot_userid() do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_accolade_userid")
   end

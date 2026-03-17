@@ -28,7 +28,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @spec get_match_monitor_userid() :: T.userid()
+  @spec get_match_monitor_userid() :: T.userid() | nil
   def get_match_monitor_userid() do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end

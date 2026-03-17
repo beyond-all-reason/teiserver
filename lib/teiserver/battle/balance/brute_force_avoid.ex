@@ -89,12 +89,10 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
     num_teams = 2
 
     max_team_diff_penalty =
-      cond do
-        rating_diff_penalty > get_max_team_diff(both_team_rating, num_teams) ->
-          @max_team_diff_importance
-
-        true ->
-          0
+      if rating_diff_penalty > get_max_team_diff(both_team_rating, num_teams) do
+        @max_team_diff_importance
+      else
+        0
       end
 
     # If max_team_diff_penalty is non zero don't even bother calculating avoid and party penalty
@@ -170,12 +168,8 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
         end)
       end)
 
-    cond do
-      # One person from avoid on this team. The other must be on other team. Avoid is respected.
-      count == 1 -> false
-      # Otherwise avoid is broken
-      true -> true
-    end
+    # One person from avoid on this team. The other must be on other team. Avoid is respected.
+    count != 1
   end
 
   defp get_team_rating(players) do

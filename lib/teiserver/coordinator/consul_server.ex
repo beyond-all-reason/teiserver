@@ -450,17 +450,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     if ranked == "0" do
       new_state =
-        cond do
-          Config.get_site_config_cache("lobby.Unranked lobby restrictions") == false ->
-            Map.merge(state, %{
-              minimum_rating_to_play: 0,
-              maximum_rating_to_play: LobbyRestrictions.rating_upper_bound(),
-              minimum_rank_to_play: 0,
-              maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()
-            })
-
-          true ->
-            state
+        if Config.get_site_config_cache("lobby.Unranked lobby restrictions") == false do
+          Map.merge(state, %{
+            minimum_rating_to_play: 0,
+            maximum_rating_to_play: LobbyRestrictions.rating_upper_bound(),
+            minimum_rank_to_play: 0,
+            maximum_rank_to_play: LobbyRestrictions.rank_upper_bound()
+          })
+        else
+          state
         end
         |> Map.merge(%{ranked: false})
 
@@ -804,12 +802,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # Take into account if they are waiting to join
     # if they are not waiting to join and someone else is then
     {change, new_client} =
-      cond do
-        Enum.empty?(get_queue(state)) ->
-          {change, new_client}
-
-        true ->
-          {change, new_client}
+      if Enum.empty?(get_queue(state)) do
+        {change, new_client}
+      else
+        {change, new_client}
       end
 
     # If they are moving from player to spectator, queue up a tick

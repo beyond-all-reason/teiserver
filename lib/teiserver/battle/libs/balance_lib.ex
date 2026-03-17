@@ -130,27 +130,30 @@ defmodule Teiserver.Battle.BalanceLib do
         ranks =
           Map.values(members)
           |> Enum.map(fn x ->
-            cond do
-              Map.has_key?(x, :rank) -> x.rank
-              true -> 0
+            if Map.has_key?(x, :rank) do
+              x.rank
+            else
+              0
             end
           end)
 
         uncertainties =
           Map.values(members)
           |> Enum.map(fn x ->
-            cond do
-              Map.has_key?(x, :uncertainty) -> x.uncertainty
-              true -> 0
+            if Map.has_key?(x, :uncertainty) do
+              x.uncertainty
+            else
+              0
             end
           end)
 
         names =
           members
           |> Enum.map(fn {id, details} ->
-            cond do
-              Map.has_key?(details, :name) -> details.name
-              true -> "#{id}"
+            if Map.has_key?(details, :name) do
+              details.name
+            else
+              "#{id}"
             end
           end)
 
@@ -261,32 +264,28 @@ defmodule Teiserver.Battle.BalanceLib do
   # Take the balance result and add some extra fields to make using it easier
   defp expand_balance_result(balance_result) do
     team_groups =
-      cond do
-        Map.has_key?(balance_result, :team_groups) ->
-          balance_result.team_groups
-
-        true ->
-          balance_result.teams
-          |> Map.new(fn {team_id, groups} ->
-            {team_id, Enum.reverse(clean_groups(groups))}
-          end)
+      if Map.has_key?(balance_result, :team_groups) do
+        balance_result.team_groups
+      else
+        balance_result.teams
+        |> Map.new(fn {team_id, groups} ->
+          {team_id, Enum.reverse(clean_groups(groups))}
+        end)
       end
 
     team_players =
-      cond do
-        Map.has_key?(balance_result, :team_players) ->
-          balance_result.team_players
+      if Map.has_key?(balance_result, :team_players) do
+        balance_result.team_players
+      else
+        team_groups
+        |> Map.new(fn {team, groups} ->
+          players =
+            groups
+            |> Enum.map(fn %{members: members} -> members end)
+            |> List.flatten()
 
-        true ->
-          team_groups
-          |> Map.new(fn {team, groups} ->
-            players =
-              groups
-              |> Enum.map(fn %{members: members} -> members end)
-              |> List.flatten()
-
-            {team, players}
-          end)
+          {team, players}
+        end)
       end
 
     Map.merge(balance_result, %{
@@ -844,10 +843,7 @@ defmodule Teiserver.Battle.BalanceLib do
           |> Enum.map(fn g -> g.count end)
           |> Enum.sum()
 
-        cond do
-          total_count > group.count -> false
-          true -> true
-        end
+        total_count <= group.count
       end)
 
       # This part we are getting the relevant stat info to filter on
