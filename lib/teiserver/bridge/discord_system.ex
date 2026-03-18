@@ -31,12 +31,8 @@ defmodule Teiserver.Bridge.DiscordSystem do
   end
 
   def restart() do
-    case Process.whereis(Teiserver.Bridge.DiscordSupervisor) do
-      pid when is_pid(pid) ->
-        Supervisor.stop(pid, :normal)
-
-      nil ->
-        :already_down
+    if pid = Process.whereis(Teiserver.Bridge.DiscordSupervisor) do
+      DynamicSupervisor.terminate_child(__MODULE__, pid)
     end
 
     start()
