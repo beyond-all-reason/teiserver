@@ -22,11 +22,13 @@ defmodule Teiserver.Lobby.ChatLib do
     # Allow voting for joinas if there are AIs in the lobby, otherwise alias to spec
     msg =
       if String.starts_with?(msg, "!") and !String.starts_with?(msg, "!#") do
-        msg
-        |> String.trim()
-        |> String.downcase()
-        |> String.split()
-        |> case do
+        command_parts =
+          msg
+          |> String.trim()
+          |> String.downcase()
+          |> String.split()
+
+        case command_parts do
           ["!cv", "joinas" | _] ->
             has_ai = Battle.get_bots(lobby_id) |> Enum.any?()
             if has_ai, do: msg, else: "!cv joinas spec"

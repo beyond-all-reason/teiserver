@@ -2009,15 +2009,17 @@ defmodule Teiserver.Account do
   end
 
   defp create_new_friend_request(from_user_id, to_user_id) do
-    Repo.transaction(fn ->
-      case %FriendRequest{from_user_id: from_user_id, to_user_id: to_user_id}
-           |> FriendRequest.changeset(%{})
-           |> Repo.insert() do
-        {:ok, struct} -> struct
-        {:error, changeset} -> Repo.rollback(changeset)
-      end
-    end)
-    |> case do
+    result =
+      Repo.transaction(fn ->
+        case %FriendRequest{from_user_id: from_user_id, to_user_id: to_user_id}
+             |> FriendRequest.changeset(%{})
+             |> Repo.insert() do
+          {:ok, struct} -> struct
+          {:error, changeset} -> Repo.rollback(changeset)
+        end
+      end)
+
+    case result do
       {:ok, friend_request} ->
         PubSub.broadcast(
           Teiserver.PubSub,

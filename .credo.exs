@@ -62,6 +62,17 @@
           {Credo.Check.Consistency.SpaceAroundOperators, []},
           {Credo.Check.Consistency.SpaceInParentheses, []},
           {Credo.Check.Consistency.TabsOrSpaces, []},
+
+          # We would like to enable this but it would be far too noisy
+          # {Credo.Check.Consistency.UnusedVariableNames, [force: :meaningful]},
+          #
+          {Credo.Check.Design.AliasUsage, []},
+          {Credo.Check.Design.TagFIXME, []},
+          {Credo.Check.Readability.AliasOrder, []},
+          {Credo.Check.Readability.BlockPipe, []},
+          {Credo.Check.Readability.FunctionNames, []},
+          # {Credo.Check.Readability.ImplTrue, []},
+
           {Credo.Check.Readability.MultiAlias, []},
           {Credo.Check.Readability.SeparateAliasRequire, []},
           {Credo.Check.Design.AliasUsage, []},
