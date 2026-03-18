@@ -2,8 +2,10 @@ defmodule TeiserverWeb.Account.SessionController do
   use TeiserverWeb, :controller
   alias Teiserver.Account
   alias Teiserver.Config
+  alias Teiserver.Account.Guardian
+  alias Teiserver.Account.User
+  alias Teiserver.Account.UserLib
   alias Teiserver.Logging.LoggingPlug
-  alias Account.{Guardian, User, UserLib}
   require Logger
 
   @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()

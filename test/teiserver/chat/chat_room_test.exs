@@ -2,8 +2,8 @@ defmodule Teiserver.Chat.ChatRoomTest do
   use Teiserver.DataCase
 
   alias Phoenix.PubSub
-  alias Teiserver.Room
   alias Teiserver.Chat
+  alias Teiserver.Room
 
   setup do
     :ok = Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.Chat.RoomSystem)

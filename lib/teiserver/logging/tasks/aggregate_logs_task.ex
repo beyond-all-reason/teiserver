@@ -4,10 +4,9 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
   use Oban.Worker, queue: :logging
 
   alias Teiserver.Logging
+  alias Teiserver.Repo
   alias Teiserver.Logging.AggregateViewLog
   alias Teiserver.Logging.PageViewLogLib
-
-  alias Teiserver.Repo
   import Ecto.Query, warn: false
   import Teiserver.Helper.QueryHelpers
   import Teiserver.Helper.NumberHelper, only: [c_round: 1]

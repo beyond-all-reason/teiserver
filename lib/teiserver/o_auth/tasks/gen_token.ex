@@ -4,7 +4,8 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
   the development of anything requiring OAuth tokens like tachyon protocol.
   """
 
-  alias Teiserver.OAuth.{ApplicationQueries, Token}
+  alias Teiserver.OAuth.ApplicationQueries
+  alias Teiserver.OAuth.Token
 
   @spec create_token(String.t(), String.t() | nil) :: {:ok, Token.t()} | {:error, term()}
   def create_token(username_or_email, app_uid \\ nil) do

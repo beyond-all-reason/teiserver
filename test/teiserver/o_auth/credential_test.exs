@@ -1,6 +1,7 @@
 defmodule Teiserver.OAuth.CredentialTest do
   use Teiserver.DataCase, async: true
-  alias Teiserver.{OAuth, Bot}
+  alias Teiserver.OAuth
+  alias Teiserver.Bot
   alias Teiserver.OAuthFixtures
 
   defp setup_bot(_context) do

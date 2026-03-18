@@ -9,7 +9,11 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.{CacheUser, Account, Telemetry, Clans, Coordinator}
+  alias Teiserver.CacheUser
+  alias Teiserver.Account
+  alias Teiserver.Telemetry
+  alias Teiserver.Clans
+  alias Teiserver.Coordinator
   alias Teiserver.Lobby
   alias Teiserver.Account.ClientLib
   # alias Teiserver.Helper.TimexHelper

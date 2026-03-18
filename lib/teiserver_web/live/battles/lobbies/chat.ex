@@ -3,7 +3,13 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Account, Battle, CacheUser, Chat, Coordinator, Lobby, Client}
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Chat
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
+  alias Teiserver.Client
   alias Teiserver.Chat.LobbyMessage
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 

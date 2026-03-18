@@ -1,7 +1,7 @@
 defmodule Teiserver.Telemetry.AnonPropertyTest do
   @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Telemetry}
+  alias Teiserver.Telemetry
 
   test "anon properties" do
     r = :rand.uniform(999_999_999)

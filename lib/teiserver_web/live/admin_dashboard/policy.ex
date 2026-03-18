@@ -5,7 +5,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   alias Teiserver
-  alias Teiserver.{Game}
+  alias Teiserver.Game
   # alias Teiserver.Account.AccoladeLib
   # alias Teiserver.Data.Matchmaking
 

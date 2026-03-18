@@ -2,7 +2,8 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{ComplexMatchEvent, ComplexMatchEventQueries}
+  alias Teiserver.Telemetry.ComplexMatchEvent
+  alias Teiserver.Telemetry.ComplexMatchEventQueries
   alias Phoenix.PubSub
 
   @broadcast_event_types ~w()

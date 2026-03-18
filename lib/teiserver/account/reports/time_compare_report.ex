@@ -1,5 +1,6 @@
 defmodule Teiserver.Account.TimeCompareReport do
-  alias Teiserver.{Logging, Account}
+  alias Teiserver.Logging
+  alias Teiserver.Account
   alias Teiserver.Helper.TimexHelper
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 

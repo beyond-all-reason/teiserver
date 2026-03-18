@@ -11,13 +11,14 @@ defmodule Teiserver.Matchmaking.QueueServer do
   use GenServer
   require Logger
   alias Teiserver.Battle.MatchLib
-  alias Teiserver.Matchmaking.{QueueRegistry, PairingRoom}
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.MonitorCollection, as: MC
+  alias Teiserver.Matchmaking.Algo
+  alias Teiserver.Matchmaking.Member
+  alias Teiserver.Matchmaking.PairingRoom
+  alias Teiserver.Matchmaking.QueueRegistry
   alias Teiserver.Party
   alias Teiserver.Player
-  alias Teiserver.Helpers.MonitorCollection, as: MC
-  alias Teiserver.Matchmaking.Member
-  alias Teiserver.Matchmaking.Algo
 
   @type id :: String.t()
 

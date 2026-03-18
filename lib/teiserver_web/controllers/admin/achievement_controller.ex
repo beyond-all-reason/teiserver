@@ -2,7 +2,8 @@ defmodule TeiserverWeb.Admin.AchievementController do
   use TeiserverWeb, :controller
 
   alias Teiserver.Game
-  alias Teiserver.Game.{AchievementType, AchievementTypeLib}
+  alias Teiserver.Game.AchievementType
+  alias Teiserver.Game.AchievementTypeLib
   alias Teiserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,

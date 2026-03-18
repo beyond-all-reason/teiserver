@@ -1,6 +1,7 @@
 defmodule Teiserver.Telemetry.TelemetryServer do
   use GenServer
-  alias Teiserver.{Lobby, Client}
+  alias Teiserver.Lobby
+  alias Teiserver.Client
   alias Teiserver.Account.LoginThrottleServer
   require Logger
   alias Phoenix.PubSub

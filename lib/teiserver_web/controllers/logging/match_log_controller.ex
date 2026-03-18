@@ -1,9 +1,10 @@
 defmodule TeiserverWeb.Logging.MatchLogController do
   use TeiserverWeb, :controller
   alias Teiserver.Logging
-  alias Teiserver.Helper.{TimexHelper, DatePresets}
-  alias Teiserver.Battle.{ExportRawMatchMetricsTask}
-  alias Teiserver.Logging.{MatchGraphLogsTask}
+  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DatePresets
+  alias Teiserver.Battle.ExportRawMatchMetricsTask
+  alias Teiserver.Logging.MatchGraphLogsTask
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,

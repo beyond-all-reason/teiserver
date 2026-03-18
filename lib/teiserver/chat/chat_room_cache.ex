@@ -1,7 +1,11 @@
 defmodule Teiserver.Room do
   @moduledoc false
   require Logger
-  alias Teiserver.{Account, CacheUser, Chat, Coordinator, Moderation}
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Chat
+  alias Teiserver.Coordinator
+  alias Teiserver.Moderation
   alias Teiserver.Chat.WordLib
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T

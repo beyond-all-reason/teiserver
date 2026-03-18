@@ -3,7 +3,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.{Game}
+  alias Teiserver.Game
   # alias Teiserver.Account.AccoladeLib
   # alias Teiserver.Data.Matchmaking
 

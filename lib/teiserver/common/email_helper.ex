@@ -1,8 +1,8 @@
 defmodule Teiserver.EmailHelper do
   @moduledoc false
-  alias Teiserver.Mailer
-  alias Teiserver.Config
   alias Bamboo.Email
+  alias Teiserver.Config
+  alias Teiserver.Mailer
   alias Teiserver.Helper.TimexHelper
   require Logger
 

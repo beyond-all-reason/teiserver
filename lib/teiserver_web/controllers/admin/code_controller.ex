@@ -2,7 +2,8 @@ defmodule TeiserverWeb.Admin.CodeController do
   use TeiserverWeb, :controller
 
   alias Teiserver.Account
-  alias Teiserver.Account.{Code, CodeLib}
+  alias Teiserver.Account.Code
+  alias Teiserver.Account.CodeLib
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Account.Code,

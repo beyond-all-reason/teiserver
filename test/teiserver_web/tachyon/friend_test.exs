@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Tachyon.FriendTest do
   use TeiserverWeb.ConnCase
-  alias Teiserver.Support.Tachyon
   alias Teiserver.Account
   alias Teiserver.Config
+  alias Teiserver.Support.Tachyon
 
   describe "friends" do
     setup [{Tachyon, :setup_client}]

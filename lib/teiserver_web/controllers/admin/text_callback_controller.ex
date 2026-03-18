@@ -1,7 +1,9 @@
 defmodule TeiserverWeb.Admin.TextCallbackController do
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Communication, Logging, Account}
+  alias Teiserver.Communication
+  alias Teiserver.Logging
+  alias Teiserver.Account
   alias Teiserver.Communication.TextCallbackLib
   import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
   alias Teiserver.Helper.StylingHelper

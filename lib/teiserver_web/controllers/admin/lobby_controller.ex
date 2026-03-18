@@ -2,7 +2,8 @@ defmodule TeiserverWeb.Admin.LobbyController do
   use TeiserverWeb, :controller
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  alias Teiserver.{Chat, Battle}
+  alias Teiserver.Chat
+  alias Teiserver.Battle
   alias Teiserver.Battle.MatchLib
 
   plug(AssignPlug,

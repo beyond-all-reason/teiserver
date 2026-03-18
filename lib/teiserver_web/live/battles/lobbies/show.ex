@@ -3,8 +3,13 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   alias Phoenix.PubSub
   require Logger
 
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
+  alias Teiserver.Telemetry
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.{Account, Battle, Coordinator, Lobby, CacheUser, Telemetry}
   alias Teiserver.Battle.MatchLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 

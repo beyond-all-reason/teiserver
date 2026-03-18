@@ -1,7 +1,7 @@
 defmodule Teiserver.Telemetry.UserPropertyTest do
   @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Telemetry}
+  alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
 
   test "user properties" do

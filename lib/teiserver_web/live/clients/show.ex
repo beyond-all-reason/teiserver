@@ -3,7 +3,10 @@ defmodule TeiserverWeb.ClientLive.Show do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Account, Client, CacheUser, Battle}
+  alias Teiserver.Account
+  alias Teiserver.Client
+  alias Teiserver.CacheUser
+  alias Teiserver.Battle
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Account.UserLib
 

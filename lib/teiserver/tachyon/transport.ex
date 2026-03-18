@@ -8,7 +8,8 @@ defmodule Teiserver.Tachyon.Transport do
   @behaviour WebSock
   require Logger
   alias Teiserver.Helpers.BurstyRateLimiter
-  alias Teiserver.Tachyon.{Schema, Handler}
+  alias Teiserver.Tachyon.Schema
+  alias Teiserver.Tachyon.Handler
 
   @type connection_state() :: %{
           handler: term(),

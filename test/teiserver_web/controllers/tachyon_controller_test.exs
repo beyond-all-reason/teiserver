@@ -2,7 +2,8 @@ defmodule TeiserverWeb.TachyonControllerTest do
   use TeiserverWeb.ConnCase
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
-  alias Teiserver.Support.{Tachyon, Polling}
+  alias Teiserver.Support.Tachyon
+  alias Teiserver.Support.Polling
 
   alias WebsocketSyncClient, as: WSC
 

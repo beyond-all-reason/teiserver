@@ -1,7 +1,9 @@
 defmodule TeiserverWeb.Telemetry.PropertyController do
   use TeiserverWeb, :controller
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{AnonPropertyQueries, UserPropertyQueries, ExportPropertiesTask}
+  alias Teiserver.Telemetry.AnonPropertyQueries
+  alias Teiserver.Telemetry.UserPropertyQueries
+  alias Teiserver.Telemetry.ExportPropertiesTask
   require Logger
 
   plug(AssignPlug,

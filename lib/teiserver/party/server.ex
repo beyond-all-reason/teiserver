@@ -7,15 +7,13 @@ defmodule Teiserver.Party.Server do
 
   require Logger
 
-  alias Teiserver.Party
-  alias Teiserver.Player
   alias Teiserver.Matchmaking
   alias Teiserver.Messaging
+  alias Teiserver.Party
+  alias Teiserver.Player
   alias Teiserver.Tachyon
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
-
-  alias Teiserver.Data.Types, as: T
 
   @type id :: String.t()
   @type state :: %{

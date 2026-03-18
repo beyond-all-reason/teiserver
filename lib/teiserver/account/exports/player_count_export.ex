@@ -9,8 +9,8 @@ defmodule Teiserver.Account.PlayerCountExport do
   })
   """
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.Logging
   alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Logging
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-users"

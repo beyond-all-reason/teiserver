@@ -1,7 +1,9 @@
 defmodule TeiserverWeb.Battle.MatchLive.Chat do
   @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle, Chat}
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Chat
   alias Teiserver.Battle.MatchLib
 
   @impl true

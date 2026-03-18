@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Moderation}
+  alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportGroupLib
 
   @impl true

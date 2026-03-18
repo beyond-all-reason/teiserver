@@ -1,9 +1,9 @@
 defmodule Teiserver.TachyonLobby.LobbyTest do
   use Teiserver.DataCase
   import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until_nil: 1]
-  alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.AssetFixtures
   alias Teiserver.Tachyon
+  alias Teiserver.TachyonLobby, as: Lobby
 
   @moduletag :tachyon
 

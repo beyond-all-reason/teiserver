@@ -4,7 +4,9 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.{Battle, Coordinator, Game}
+  alias Teiserver.Battle
+  alias Teiserver.Coordinator
+  alias Teiserver.Game
   alias Teiserver.Account.AccoladeLib
 
   @empty_telemetry_data %{

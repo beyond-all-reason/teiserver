@@ -8,8 +8,11 @@ defmodule Teiserver.Autohost.TachyonHandler do
   alias Teiserver.Autohost.Session
   alias Teiserver.Bot.Bot
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helpers.{TachyonParser, Collections}
-  alias Teiserver.Tachyon.{Handler, Schema, Transport}
+  alias Teiserver.Helpers.TachyonParser
+  alias Teiserver.Helpers.Collections
+  alias Teiserver.Tachyon.Handler
+  alias Teiserver.Tachyon.Schema
+  alias Teiserver.Tachyon.Transport
   alias Teiserver.TachyonBattle
 
   require Logger

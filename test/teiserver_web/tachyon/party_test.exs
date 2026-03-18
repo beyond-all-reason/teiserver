@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Tachyon.PartyTest do
   use TeiserverWeb.ConnCase, async: false
-  alias Teiserver.Support.Tachyon
   alias Teiserver.Support.Polling
+  alias Teiserver.Support.Tachyon
 
   describe "create" do
     setup [{Tachyon, :setup_client}]

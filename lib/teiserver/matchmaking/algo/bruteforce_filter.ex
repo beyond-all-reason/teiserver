@@ -7,7 +7,8 @@ defmodule Teiserver.Matchmaking.Algo.BruteforceFilter do
   each member of the team.
   """
 
-  alias Teiserver.Matchmaking.{Algos, Member}
+  alias Teiserver.Matchmaking.Algos
+  alias Teiserver.Matchmaking.Member
   @behaviour Algos
 
   @impl true

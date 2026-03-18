@@ -4,7 +4,11 @@ defmodule Teiserver.Account.AccoladeBotServer do
   """
   use GenServer
   alias Teiserver.Config
-  alias Teiserver.{Account, CacheUser, Room, Battle, Coordinator}
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Room
+  alias Teiserver.Battle
+  alias Teiserver.Coordinator
   alias Teiserver.Coordinator.CoordinatorCommands
   alias Teiserver.Account.AccoladeLib
   alias Phoenix.PubSub

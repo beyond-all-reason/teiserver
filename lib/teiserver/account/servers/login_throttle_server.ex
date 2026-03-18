@@ -6,7 +6,9 @@ defmodule Teiserver.Account.LoginThrottleServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Account, CacheUser, Config}
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
 

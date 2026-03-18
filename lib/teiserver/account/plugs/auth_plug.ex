@@ -3,7 +3,8 @@ defmodule Teiserver.Account.AuthPlug do
   import Plug.Conn
 
   alias Teiserver.Account
-  alias Teiserver.Account.{Guardian, AuthLib}
+  alias Teiserver.Account.Guardian
+  alias Teiserver.Account.AuthLib
   require Logger
   use TeiserverWeb, :verified_routes
 

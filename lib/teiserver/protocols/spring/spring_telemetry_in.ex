@@ -1,6 +1,7 @@
 defmodule Teiserver.Protocols.Spring.TelemetryIn do
   alias Teiserver.Telemetry
-  alias Teiserver.Protocols.{Spring, SpringIn}
+  alias Teiserver.Protocols.Spring
+  alias Teiserver.Protocols.SpringIn
   require Logger
   alias Teiserver.Bridge.DiscordBridgeBot
   import Teiserver.Protocols.SpringOut, only: [reply: 5]

@@ -10,7 +10,10 @@ defmodule Teiserver.Player do
   """
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Player, Matchmaking, Party, TachyonBattle}
+  alias Teiserver.Player
+  alias Teiserver.Matchmaking
+  alias Teiserver.Party
+  alias Teiserver.TachyonBattle
 
   @doc """
   Returns the pid of the session registered with a given user id

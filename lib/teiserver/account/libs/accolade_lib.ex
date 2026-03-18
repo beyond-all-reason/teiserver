@@ -3,8 +3,11 @@ defmodule Teiserver.Account.AccoladeLib do
 
   """
   use TeiserverWeb, :library
-  alias Teiserver.{Account, CacheUser}
-  alias Teiserver.Account.{Accolade, AccoladeBotServer, AccoladeChatServer}
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Account.Accolade
+  alias Teiserver.Account.AccoladeBotServer
+  alias Teiserver.Account.AccoladeChatServer
   alias Teiserver.Data.Types, as: T
   require Logger
 

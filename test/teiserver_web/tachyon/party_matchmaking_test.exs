@@ -6,7 +6,8 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
   use Teiserver.DataCase
   alias Teiserver.Support.Tachyon
   alias Teiserver.AssetFixtures
-  alias Teiserver.Matchmaking.{QueueSupervisor, QueueServer}
+  alias Teiserver.Matchmaking.QueueSupervisor
+  alias Teiserver.Matchmaking.QueueServer
 
   @moduletag :wip
 

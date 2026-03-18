@@ -1,6 +1,8 @@
 defmodule TeiserverWeb.Admin.ChatLive.Index do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Coordinator, Chat}
+  alias Teiserver.Account
+  alias Teiserver.Coordinator
+  alias Teiserver.Chat
 
   @impl true
   def mount(_params, _session, socket) do

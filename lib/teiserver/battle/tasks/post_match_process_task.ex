@@ -4,11 +4,13 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   """
   use Oban.Worker, queue: :teiserver
 
-  alias Teiserver.{Account, Battle, Coordinator}
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Repo
   alias Teiserver.Battle.MatchMembershipLib
   alias Teiserver.Helper.NumberHelper
-  alias Teiserver.Config
-  alias Teiserver.Repo
   # alias Teiserver.Data.Types, as: T
 
   @impl Oban.Worker

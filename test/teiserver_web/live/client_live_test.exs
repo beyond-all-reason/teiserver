@@ -3,8 +3,8 @@ defmodule TeiserverWeb.Live.ClientTest do
   use TeiserverWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
 
-  alias Teiserver.Client
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Client
   alias Teiserver.TeiserverTestLib
   import Teiserver.TeiserverTestLib, only: [_send_raw: 2]
 

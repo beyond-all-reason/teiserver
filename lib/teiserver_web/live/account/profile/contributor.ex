@@ -1,7 +1,8 @@
 defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Config}
+  alias Teiserver.Account
+  alias Teiserver.Config
 
   @impl true
   def mount(%{"userid" => userid_str}, _session, socket) do

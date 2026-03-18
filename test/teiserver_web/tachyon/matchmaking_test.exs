@@ -1,12 +1,14 @@
 defmodule Teiserver.Tachyon.MatchmakingTest do
   use TeiserverWeb.ConnCase
-  alias Teiserver.Support.Tachyon
-  alias Teiserver.Support.Polling
+  alias Teiserver.Asset
+  alias Teiserver.AssetFixtures
   alias Teiserver.OAuthFixtures
   alias Teiserver.Player
-  alias Teiserver.AssetFixtures
-  alias Teiserver.Asset
-  alias Teiserver.Matchmaking.{QueueSupervisor, QueueServer, PairingRoom}
+  alias Teiserver.Matchmaking.PairingRoom
+  alias Teiserver.Matchmaking.QueueServer
+  alias Teiserver.Matchmaking.QueueSupervisor
+  alias Teiserver.Support.Polling
+  alias Teiserver.Support.Tachyon
 
   defp altair_attr(id),
     do: %{

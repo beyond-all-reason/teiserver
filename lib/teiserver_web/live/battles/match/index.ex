@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Battle.MatchLive.Index do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle}
+  alias Teiserver.Account
+  alias Teiserver.Battle
   import TeiserverWeb.PaginationComponents, only: [pagination: 1, build_pagination_url: 4]
 
   @impl true

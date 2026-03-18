@@ -4,9 +4,9 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   """
 
   use Horde.DynamicSupervisor
+  alias Teiserver.Asset
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueServer
-  alias Teiserver.Asset
 
   def default_queues() do
     engines =

@@ -1,7 +1,8 @@
 defmodule Teiserver.Account.UserCacheLib do
   @moduledoc false
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.{Account, CacheUser}
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Account.Guardian
   require Logger

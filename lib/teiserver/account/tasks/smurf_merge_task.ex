@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.SmurfMergeTask do
   @moduledoc false
-  alias Teiserver.{Account, Game}
+  alias Teiserver.Account
+  alias Teiserver.Game
   alias Teiserver.Battle.BalanceLib
   require Logger
   alias Teiserver.Data.Types, as: T

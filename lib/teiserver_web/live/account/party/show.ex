@@ -3,7 +3,8 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Account, Battle}
+  alias Teiserver.Account
+  alias Teiserver.Battle
   alias Teiserver.Account.PartyLib
   import Teiserver.Helper.StringHelper, only: [possessive: 1]
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]

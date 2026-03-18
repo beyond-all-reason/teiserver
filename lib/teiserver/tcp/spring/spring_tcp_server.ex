@@ -5,8 +5,12 @@ defmodule Teiserver.SpringTcpServer do
 
   alias Phoenix.PubSub
   alias Teiserver.Config
-  alias Teiserver.{CacheUser, Client, Account, Room}
-  alias Teiserver.Protocols.{SpringIn, SpringOut}
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
+  alias Teiserver.Account
+  alias Teiserver.Room
+  alias Teiserver.Protocols.SpringIn
+  alias Teiserver.Protocols.SpringOut
   alias Teiserver.Data.Types, as: T
 
   @init_timeout 60_000

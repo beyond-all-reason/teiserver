@@ -1,6 +1,6 @@
 defmodule Teiserver.Game.AchievementCleanupTask do
   use Oban.Worker, queue: :cleanup
-  alias Teiserver.{Game}
+  alias Teiserver.Game
   require Logger
 
   @impl Oban.Worker

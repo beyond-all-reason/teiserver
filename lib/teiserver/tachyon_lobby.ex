@@ -3,10 +3,10 @@ defmodule Teiserver.TachyonLobby do
   Everything related to lobbies using tachyon
   """
 
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.TachyonLobby
-  alias Teiserver.TachyonLobby.Lobby
   alias Teiserver.Asset
+  alias Teiserver.TachyonLobby
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.TachyonLobby.Lobby
 
   @type id :: Lobby.id()
   @type details :: Lobby.details()

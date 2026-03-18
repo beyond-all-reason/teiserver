@@ -7,10 +7,20 @@ defmodule Teiserver.Protocols.SpringOut do
   """
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.{Account, CacheUser, Client, Room, Battle, Coordinator, Config}
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
+  alias Teiserver.Room
+  alias Teiserver.Battle
+  alias Teiserver.Coordinator
+  alias Teiserver.Config
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
-  alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut, UserOut, SystemOut, PartyOut}
+  alias Teiserver.Protocols.Spring.BattleOut
+  alias Teiserver.Protocols.Spring.LobbyPolicyOut
+  alias Teiserver.Protocols.Spring.UserOut
+  alias Teiserver.Protocols.Spring.SystemOut
+  alias Teiserver.Protocols.Spring.PartyOut
   alias Teiserver.Data.Types, as: T
 
   @motd """

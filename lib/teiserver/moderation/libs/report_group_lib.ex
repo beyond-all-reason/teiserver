@@ -2,7 +2,8 @@ defmodule Teiserver.Moderation.ReportGroupLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
   # alias Teiserver.Moderation
-  alias Teiserver.Moderation.{ReportGroup, ReportGroupQueries}
+  alias Teiserver.Moderation.ReportGroup
+  alias Teiserver.Moderation.ReportGroupQueries
   # alias Phoenix.PubSub
 
   @spec colour :: atom

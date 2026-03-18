@@ -20,7 +20,6 @@ defmodule Teiserver.ServerCase do
     quote do
       alias Teiserver.Repo
 
-      import Ecto
       import Ecto.Changeset
       import Ecto.Query
       import Teiserver.DataCase

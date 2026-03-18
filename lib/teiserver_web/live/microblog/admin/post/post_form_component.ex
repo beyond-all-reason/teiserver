@@ -3,7 +3,9 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   use TeiserverWeb, :live_component
   import Teiserver.Helper.ColourHelper, only: [rgba_css: 2]
 
-  alias Teiserver.{Communication, Microblog, Account}
+  alias Teiserver.Communication
+  alias Teiserver.Microblog
+  alias Teiserver.Account
   alias Teiserver.Account.AuthLib
 
   @default_channel_name "Dev updates"

@@ -1,9 +1,9 @@
 defmodule Teiserver.TachyonBattle.BattleTest do
   use Teiserver.DataCase
   import Teiserver.Support.Polling, only: [poll_until_some: 1]
-  alias Teiserver.TachyonBattle, as: Battle
   alias Teiserver.Autohost
   alias Teiserver.BotFixtures
+  alias Teiserver.TachyonBattle, as: Battle
 
   @moduletag :tachyon
 

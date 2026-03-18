@@ -5,7 +5,9 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
   """
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Account, Battle, Coordinator}
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Coordinator
   import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   @splitter "------------------------------------------------------"

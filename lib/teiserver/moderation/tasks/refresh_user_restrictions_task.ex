@@ -6,7 +6,9 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
   require Logger
   alias Teiserver.Data.Types, as: T
 
-  alias Teiserver.{Account, Coordinator, Moderation}
+  alias Teiserver.Account
+  alias Teiserver.Coordinator
+  alias Teiserver.Moderation
 
   @impl Oban.Worker
   @spec perform(any) :: :ok

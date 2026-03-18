@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.ReviewReport do
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Logging}
+  alias Teiserver.Logging
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-champagne-glasses"

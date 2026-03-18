@@ -4,6 +4,16 @@
       name: "default",
       checks: %{
         enabled: [
+          {Credo.Check.Consistency.ExceptionNames, []},
+          {Credo.Check.Consistency.LineEndings, []},
+          {Credo.Check.Consistency.MultiAliasImportRequireUse, []},
+          {Credo.Check.Consistency.ParameterPatternMatching, []},
+          {Credo.Check.Consistency.SpaceAroundOperators, []},
+          {Credo.Check.Consistency.SpaceInParentheses, []},
+          {Credo.Check.Consistency.TabsOrSpaces, []},
+          {Credo.Check.Readability.MultiAlias, []},
+          {Credo.Check.Readability.SeparateAliasRequire, []},
+          {Credo.Check.Design.AliasUsage, []},
           {Credo.Check.Warning.MissedMetadataKeyInLoggerConfig,
            [
              metadata_keys: [:request_id, :user_id, :pid, :actor_type, :actor_id]

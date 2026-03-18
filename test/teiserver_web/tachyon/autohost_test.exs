@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Tachyon.Autohost do
   use TeiserverWeb.ConnCase, async: false
 
+  alias Teiserver.Autohost
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Tachyon
-  alias Teiserver.Autohost
   alias WebsocketSyncClient, as: WSC
   import Teiserver.Support.Polling, only: [poll_until: 2, poll_until: 3]
 

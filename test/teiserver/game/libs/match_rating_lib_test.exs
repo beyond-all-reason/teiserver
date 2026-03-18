@@ -1,13 +1,13 @@
 defmodule Teiserver.Game.MatchRatingLibTest do
   @moduledoc false
   use Teiserver.DataCase, async: true
-  alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Account.AccountTestLib
-  alias Teiserver.Battle.MatchLib
   alias Teiserver.Account
   alias Teiserver.Battle
-  alias Teiserver.Game
   alias Teiserver.Config
+  alias Teiserver.Game
+  alias Teiserver.Account.AccountTestLib
+  alias Teiserver.Battle.MatchLib
+  alias Teiserver.Game.MatchRatingLib
 
   test "num_matches and num_wins is updated after rating a match" do
     # Create two user

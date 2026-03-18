@@ -1,6 +1,7 @@
 defmodule Teiserver.Data.UserTest do
   use Teiserver.ServerCase
-  alias Teiserver.{CacheUser, Account}
+  alias Teiserver.CacheUser
+  alias Teiserver.Account
   alias Teiserver.TeiserverTestLib
 
   test "adding two bots with the same email" do

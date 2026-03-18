@@ -1,18 +1,17 @@
 defmodule Central.Helpers.GeneralTestLib do
   @moduledoc false
-  import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
-
   import Ecto.Query
-  alias Teiserver.Repo
   import Phoenix.ChannelTest
+  import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
   # use Phoenix.ConnTest
 
-  @endpoint TeiserverWeb.Endpoint
-
-  alias Teiserver.Account.AuthLib
-
   alias Teiserver.Account
-  alias Teiserver.Account.{User, Guardian}
+  alias Teiserver.Repo
+  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Guardian
+  alias Teiserver.Account.User
+
+  @endpoint TeiserverWeb.Endpoint
 
   # alias TeiserverWeb.General.CombinatorLib
 

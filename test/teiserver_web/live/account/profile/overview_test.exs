@@ -3,7 +3,9 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{Battle, TeiserverTestLib, Client}
+  alias Teiserver.Battle
+  alias Teiserver.TeiserverTestLib
+  alias Teiserver.Client
   alias Teiserver.Lobby
   alias TeiserverWeb.Account.ProfileLive.Overview
 

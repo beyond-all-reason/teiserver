@@ -3,7 +3,8 @@ defmodule TeiserverWeb.ClientLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.{Client, CacheUser}
+  alias Teiserver.Client
+  alias Teiserver.CacheUser
   alias Teiserver.Account.UserLib
 
   @extra_menu_content """

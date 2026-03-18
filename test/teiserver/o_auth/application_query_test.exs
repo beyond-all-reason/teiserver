@@ -1,9 +1,9 @@
 defmodule Teiserver.OAuth.ApplicationQueryTest do
   use Teiserver.DataCase
-  alias Teiserver.Repo
-
+  alias Teiserver.Bot.Bot
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.OAuthFixtures
+  alias Teiserver.Repo
 
   defp setup_app(_context) do
     user = Teiserver.TeiserverTestLib.new_user()
@@ -14,8 +14,6 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
   end
 
   defp setup_bot(_context) do
-    alias Teiserver.Bot.Bot
-
     bot =
       %Bot{}
       |> Bot.changeset(%{name: "fixture bot"})

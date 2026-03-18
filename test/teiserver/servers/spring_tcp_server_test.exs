@@ -17,7 +17,10 @@ defmodule Teiserver.SpringTcpServerTest do
     ]
 
   alias Teiserver.Account.UserCacheLib
-  alias Teiserver.{Account, Client, Room, TeiserverTestLib}
+  alias Teiserver.Account
+  alias Teiserver.Client
+  alias Teiserver.Room
+  alias Teiserver.TeiserverTestLib
 
   setup :start_spring_server
 

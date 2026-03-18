@@ -1,16 +1,14 @@
 defmodule Teiserver.Logging.PageViewLogLib do
   @moduledoc false
   use TeiserverWeb, :library
+  alias Teiserver.Logging.PageViewLog
+  import Plug.Conn, only: [assign: 3]
 
   @spec colours() :: atom
   def colours(), do: :info
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-chart-line"
-
-  alias Teiserver.Logging.PageViewLog
-
-  import Plug.Conn, only: [assign: 3]
 
   def do_not_log(conn) do
     assign(conn, :do_not_log, true)

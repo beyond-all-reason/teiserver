@@ -5,7 +5,12 @@ defmodule TeiserverWeb.TournamentLive.Show do
   require Logger
 
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.{Account, Battle, Coordinator, Lobby, CacheUser, Telemetry}
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
+  alias Teiserver.CacheUser
+  alias Teiserver.Telemetry
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """

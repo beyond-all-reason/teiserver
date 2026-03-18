@@ -2,8 +2,16 @@ defmodule Teiserver.CacheUser do
   @moduledoc """
   Users here are a combination of Teiserver.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
-  alias Teiserver.{Account, Config, Client, Coordinator, Telemetry, Chat, EmailHelper}
-  alias Teiserver.Account.{LoginThrottleServer, UserCacheLib, Guardian}
+  alias Teiserver.Account
+  alias Teiserver.Config
+  alias Teiserver.Client
+  alias Teiserver.Coordinator
+  alias Teiserver.Telemetry
+  alias Teiserver.Chat
+  alias Teiserver.EmailHelper
+  alias Teiserver.Account.LoginThrottleServer
+  alias Teiserver.Account.UserCacheLib
+  alias Teiserver.Account.Guardian
   alias Teiserver.Chat.WordLib
   alias Argon2
   alias Teiserver.Data.Types, as: T

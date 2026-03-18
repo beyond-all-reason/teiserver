@@ -1,7 +1,8 @@
 defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
-  alias Teiserver.Telemetry.{ComplexMatchEventType, ComplexMatchEventTypeQueries}
+  alias Teiserver.Telemetry.ComplexMatchEventType
+  alias Teiserver.Telemetry.ComplexMatchEventTypeQueries
 
   # Helper function
   @spec get_or_add_complex_match_event_type(String.t()) :: non_neg_integer()

@@ -10,7 +10,9 @@ end
 
 defmodule Teiserver.Account.PartyLib do
   # alias Phoenix.PubSub
-  alias Teiserver.{Account, Chat, CacheUser}
+  alias Teiserver.Account
+  alias Teiserver.Chat
+  alias Teiserver.CacheUser
   alias Teiserver.Account.Party
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub

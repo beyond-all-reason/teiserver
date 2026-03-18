@@ -4,12 +4,16 @@ defmodule Teiserver.Player.TachyonHandler do
   """
 
   require Logger
-  alias Teiserver.Helpers.{BurstyRateLimiter, Collections}
-  alias Teiserver.Tachyon.Schema
-  alias Teiserver.Tachyon.Handler
+  alias Teiserver.Account
+  alias Teiserver.Matchmaking
+  alias Teiserver.Messaging
+  alias Teiserver.Player
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Account, Player, Matchmaking, Messaging}
+  alias Teiserver.Helpers.BurstyRateLimiter
+  alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.TachyonParser
+  alias Teiserver.Tachyon.Handler
+  alias Teiserver.Tachyon.Schema
 
   @behaviour Handler
 

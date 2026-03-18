@@ -4,7 +4,9 @@ defmodule Teiserver.Lobby.LobbyLib do
   """
 
   alias Phoenix.PubSub
-  alias Teiserver.{Coordinator, Account, Lobby}
+  alias Teiserver.Coordinator
+  alias Teiserver.Account
+  alias Teiserver.Lobby
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Data.Types, as: T
   require Logger

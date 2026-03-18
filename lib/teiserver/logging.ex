@@ -8,9 +8,30 @@ defmodule Teiserver.Logging do
 
   import Ecto.Query, warn: false
   alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Logging.AggregateViewLogLib
+  alias Teiserver.Logging.AuditLog
+  alias Teiserver.Logging.AuditLogLib
+  alias Teiserver.Logging.MatchDayLog
+  alias Teiserver.Logging.MatchDayLogLib
+  alias Teiserver.Logging.MatchMonthLog
+  alias Teiserver.Logging.MatchMonthLogLib
+  alias Teiserver.Logging.PageViewLog
+  alias Teiserver.Logging.PageViewLogLib
+  alias Teiserver.Logging.ServerDayLog
+  alias Teiserver.Logging.ServerDayLogLib
+  alias Teiserver.Logging.ServerMinuteLog
+  alias Teiserver.Logging.ServerMinuteLogLib
+  alias Teiserver.Logging.ServerMonthLog
+  alias Teiserver.Logging.ServerMonthLogLib
+  alias Teiserver.Logging.ServerQuarterLog
+  alias Teiserver.Logging.ServerQuarterLogLib
+  alias Teiserver.Logging.ServerWeekLog
+  alias Teiserver.Logging.ServerWeekLogLib
+  alias Teiserver.Logging.ServerYearLog
+  alias Teiserver.Logging.ServerYearLogLib
+  alias Teiserver.Logging.UserActivityDayLog
+  alias Teiserver.Logging.UserActivityDayLogLib
   alias Teiserver.Repo
-
-  alias Teiserver.Logging.{ServerMinuteLog, ServerMinuteLogLib}
 
   defp server_minute_log_query(args) do
     server_minute_log_query(nil, args)
@@ -135,8 +156,6 @@ defmodule Teiserver.Logging do
   end
 
   # Day logs
-  alias Teiserver.Logging.{ServerDayLog, ServerDayLogLib}
-
   defp server_day_log_query(args) do
     server_day_log_query(nil, args)
   end
@@ -318,8 +337,6 @@ defmodule Teiserver.Logging do
   end
 
   # Month logs
-  alias Teiserver.Logging.{ServerMonthLog, ServerMonthLogLib}
-
   defp server_month_log_query(args) do
     server_month_log_query(nil, args)
   end
@@ -494,8 +511,6 @@ defmodule Teiserver.Logging do
   end
 
   # Quarter logs
-  alias Teiserver.Logging.{ServerQuarterLog, ServerQuarterLogLib}
-
   defp server_quarter_log_query(args) do
     server_quarter_log_query(nil, args)
   end
@@ -673,8 +688,6 @@ defmodule Teiserver.Logging do
   end
 
   # Year logs
-  alias Teiserver.Logging.{ServerYearLog, ServerYearLogLib}
-
   defp server_year_log_query(args) do
     server_year_log_query(nil, args)
   end
@@ -844,8 +857,6 @@ defmodule Teiserver.Logging do
   end
 
   # Week logs
-  alias Teiserver.Logging.{ServerWeekLog, ServerWeekLogLib}
-
   defp server_week_log_query(args) do
     server_week_log_query(nil, args)
   end
@@ -1016,8 +1027,6 @@ defmodule Teiserver.Logging do
 
   # Match logs
   # Day logs
-  alias Teiserver.Logging.{MatchDayLog, MatchDayLogLib}
-
   defp match_day_log_query(args) do
     match_day_log_query(nil, args)
   end
@@ -1221,8 +1230,6 @@ defmodule Teiserver.Logging do
   end
 
   # Month logs
-  alias Teiserver.Logging.{MatchMonthLog, MatchMonthLogLib}
-
   defp match_month_log_query(args) do
     match_month_log_query(nil, args)
   end
@@ -1361,8 +1368,6 @@ defmodule Teiserver.Logging do
     end
   end
 
-  alias Teiserver.Logging.{AuditLog, AuditLogLib}
-
   defp audit_log_query(args) do
     audit_log_query(nil, args)
   end
@@ -1500,8 +1505,6 @@ defmodule Teiserver.Logging do
     AuditLog.changeset(log, %{})
   end
 
-  alias Teiserver.Logging.{PageViewLog, PageViewLogLib}
-
   @doc """
   Returns the list of page_view_logs.
 
@@ -1609,9 +1612,6 @@ defmodule Teiserver.Logging do
     PageViewLog.changeset(page_view_log, %{})
   end
 
-  # alias Teiserver.Logging.AggregateViewLog
-  alias Teiserver.Logging.AggregateViewLogLib
-
   @doc """
   Returns the list of logging_logs.
 
@@ -1649,8 +1649,6 @@ defmodule Teiserver.Logging do
   end
 
   # User activity
-  alias Teiserver.Logging.{UserActivityDayLog, UserActivityDayLogLib}
-
   defp user_activity_day_log_query(args) do
     user_activity_day_log_query(nil, args)
   end

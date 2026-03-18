@@ -2,8 +2,14 @@ defmodule Teiserver.Battle.LobbyServer do
   @moduledoc false
   use GenServer
   require Logger
-  alias Teiserver.{Account, Battle, Config, Telemetry, Coordinator, Communication}
-  alias Teiserver.Lobby.{CommandLib, LobbyRestrictions}
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Config
+  alias Teiserver.Telemetry
+  alias Teiserver.Coordinator
+  alias Teiserver.Communication
+  alias Teiserver.Lobby.CommandLib
+  alias Teiserver.Lobby.LobbyRestrictions
   alias Phoenix.PubSub
 
   @player_list_cache_age_max 200

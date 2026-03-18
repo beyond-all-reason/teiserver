@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.AccoladeReport do
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Account, CacheUser}
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
   alias Teiserver.Account.BadgeTypeLib
 
   @spec icon() :: String.t()

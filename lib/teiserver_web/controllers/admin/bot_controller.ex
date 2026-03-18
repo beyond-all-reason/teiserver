@@ -5,8 +5,11 @@ defmodule TeiserverWeb.Admin.BotController do
 
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Bot, BotQueries, OAuth}
-  alias Teiserver.OAuth.{ApplicationQueries, CredentialQueries}
+  alias Teiserver.Bot
+  alias Teiserver.BotQueries
+  alias Teiserver.OAuth
+  alias Teiserver.OAuth.ApplicationQueries
+  alias Teiserver.OAuth.CredentialQueries
 
   plug Bodyguard.Plug.Authorize,
     # The policy should be Admin or something fairly high. But while we're

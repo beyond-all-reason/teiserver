@@ -1,6 +1,7 @@
 defmodule Teiserver.Bridge.MessageCommands do
   @moduledoc false
-  alias Teiserver.{CacheUser, Account}
+  alias Teiserver.CacheUser
+  alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Helper.NumberHelper
   alias Teiserver.Bridge.UnitNames

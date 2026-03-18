@@ -2,9 +2,18 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   @moduledoc false
   require Logger
   alias Teiserver.Config
-  alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
-  alias Teiserver.{Account, Battle, Lobby, Coordinator, CacheUser, Client, Telemetry}
-  alias Teiserver.Lobby.{ChatLib, LobbyLib, LobbyRestrictions}
+  alias Teiserver.Coordinator.ConsulServer
+  alias Teiserver.Coordinator.RikerssMemes
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Lobby
+  alias Teiserver.Coordinator
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
+  alias Teiserver.Telemetry
+  alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Lobby.LobbyLib
+  alias Teiserver.Lobby.LobbyRestrictions
   alias Teiserver.Chat.WordLib
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Data.Types, as: T

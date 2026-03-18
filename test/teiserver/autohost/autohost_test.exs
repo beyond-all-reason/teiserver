@@ -2,8 +2,8 @@ defmodule Teiserver.Autohost.AutohostTest do
   use Teiserver.DataCase, async: false
   import Teiserver.Support.Polling, only: [poll_until: 2, poll_until_nil: 1]
 
-  alias Teiserver.BotFixtures
   alias Teiserver.Autohost
+  alias Teiserver.BotFixtures
 
   @moduletag :tachyon
 

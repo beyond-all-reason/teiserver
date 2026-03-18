@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Moderation}
+  alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportLib
   import TeiserverWeb.PaginationComponents, only: [pagination: 1, build_pagination_url: 4]
 

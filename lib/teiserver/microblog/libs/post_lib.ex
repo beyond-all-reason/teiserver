@@ -1,7 +1,9 @@
 defmodule Teiserver.Microblog.PostLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
-  alias Teiserver.Microblog.{Post, PostQueries, UserPreference}
+  alias Teiserver.Microblog.Post
+  alias Teiserver.Microblog.PostQueries
+  alias Teiserver.Microblog.UserPreference
   alias Phoenix.PubSub
 
   # Functions

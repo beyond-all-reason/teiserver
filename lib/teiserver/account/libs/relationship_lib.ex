@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.RelationshipLib do
   @moduledoc false
-  alias Teiserver.{Account, Config}
+  alias Teiserver.Account
+  alias Teiserver.Config
   alias Teiserver.Account.AuthLib
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub

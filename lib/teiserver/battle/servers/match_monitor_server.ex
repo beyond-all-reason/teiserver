@@ -3,7 +3,12 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   The server used to monitor the autohosts and get data from them
   """
   use GenServer
-  alias Teiserver.{Account, Room, Client, CacheUser, Battle, Telemetry}
+  alias Teiserver.Account
+  alias Teiserver.Room
+  alias Teiserver.Client
+  alias Teiserver.CacheUser
+  alias Teiserver.Battle
+  alias Teiserver.Telemetry
   alias Teiserver.Lobby.ChatLib
   alias Phoenix.PubSub
   alias Teiserver.Account.CalculateSmurfKeyTask
