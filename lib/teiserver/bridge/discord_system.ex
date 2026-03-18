@@ -9,8 +9,13 @@ defmodule Teiserver.Bridge.DiscordSystem do
     DynamicSupervisor.start_link(__MODULE__, [], name: __MODULE__)
   end
 
+
   @impl DynamicSupervisor
   def init(_init_arg) do
+    start()
+  end
+
+  def start() do
     {:ok, sup_flags} = DynamicSupervisor.init(strategy: :one_for_one)
 
     if Communication.use_discord?() do
@@ -26,7 +31,6 @@ defmodule Teiserver.Bridge.DiscordSystem do
   end
 
   def restart() do
-    # check if there is already a running process
     case Process.whereis(Teiserver.Bridge.DiscordSupervisor) do
       pid when is_pid(pid) ->
         Supervisor.stop(pid, :normal)
@@ -35,7 +39,6 @@ defmodule Teiserver.Bridge.DiscordSystem do
         :already_down
     end
 
-    # and then start the task that starts it back up again (if Discord was enabled)
-    init(nil)
+    start()
   end
 end
