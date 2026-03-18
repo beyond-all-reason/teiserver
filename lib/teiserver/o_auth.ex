@@ -534,15 +534,17 @@ defmodule Teiserver.OAuth do
   @spec revoke_application_access(T.userid(), Application.id()) ::
           :ok | {:error, term()}
   def revoke_application_access(user_id, application_id) do
-    Repo.transaction(fn ->
-      _token_count =
-        ApplicationQueries.delete_user_application_tokens(user_id, application_id)
+    result =
+      Repo.transaction(fn ->
+        _token_count =
+          ApplicationQueries.delete_user_application_tokens(user_id, application_id)
 
-      _code_count = ApplicationQueries.delete_user_application_codes(user_id, application_id)
+        _code_count = ApplicationQueries.delete_user_application_codes(user_id, application_id)
 
-      :ok
-    end)
-    |> case do
+        :ok
+      end)
+
+    case result do
       {:ok, result} -> result
       {:error, reason} -> {:error, reason}
     end

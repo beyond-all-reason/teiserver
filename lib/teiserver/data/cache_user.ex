@@ -487,11 +487,13 @@ defmodule Teiserver.CacheUser do
     # Allow voting for joinas if there are AIs in the recipient's lobby, otherwise alias to spec
     message =
       if String.starts_with?(message, "!") and !String.starts_with?(message, "!#") do
-        message
-        |> String.trim()
-        |> String.downcase()
-        |> String.split()
-        |> case do
+        command_parts =
+          message
+          |> String.trim()
+          |> String.downcase()
+          |> String.split()
+
+        case command_parts do
           ["!cv", "joinas" | _] ->
             has_ai =
               case Teiserver.Client.get_client_by_id(to_id) do
