@@ -15,7 +15,7 @@ defmodule Teiserver.Game.BalancerServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @impl true
+  @impl GenServer
   # http://planetspads.free.fr/spads/doc/spadsPluginApiDoc.html#balanceBattle-self-players-bots-clanMode-nbTeams-teamSize
   def handle_call({:make_balance, team_count, call_opts}, _from, state) do
     opts =
@@ -26,7 +26,7 @@ defmodule Teiserver.Game.BalancerServer do
     {:reply, balance, new_state}
   end
 
-  @impl true
+  @impl GenServer
   # http://planetspads.free.fr/spads/doc/spadsPluginApiDoc.html#balanceBattle-self-players-bots-clanMode-nbTeams-teamSize
   def handle_call({:make_balance, team_count, call_opts, players}, _from, state) do
     opts =
@@ -78,7 +78,7 @@ defmodule Teiserver.Game.BalancerServer do
     {:reply, result, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast(:reset_hashes, state) do
     {:noreply, %{state | last_balance_hash: nil, last_balance_result: nil}}
   end
@@ -118,7 +118,7 @@ defmodule Teiserver.Game.BalancerServer do
     {:noreply, new_state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:tick, state) do
     {:noreply, state}
   end
@@ -325,7 +325,7 @@ defmodule Teiserver.Game.BalancerServer do
     })
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, T.balance_server_state()}
   def init(opts) do
     lobby_id = opts[:lobby_id]

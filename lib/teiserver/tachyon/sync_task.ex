@@ -10,7 +10,7 @@ defmodule Teiserver.Tachyon.SyncTask do
     GenServer.start_link(__MODULE__, opts)
   end
 
-  @impl true
+  @impl GenServer
   def init(opts) do
     [m, f, a] = opts.mfa
     apply(m, f, a)

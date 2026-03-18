@@ -14,7 +14,7 @@ defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
     end
   end
 
-  @impl true
+  @impl Supervisor
   def init(:ok) do
     children = [
       {ConCache, [name: :config_user_type_store, ttl_check_interval: false]}

@@ -7,7 +7,7 @@ defmodule Teiserver.HookServer do
     GenServer.start_link(__MODULE__, nil, opts)
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(%{channel: "global_moderation"} = data, state) do
     case data.event do
       :new_report ->
@@ -109,7 +109,7 @@ defmodule Teiserver.HookServer do
     {:noreply, state}
   end
 
-  @impl true
+  @impl GenServer
   @spec init(any) :: {:ok, %{}}
   def init(_) do
     if Application.get_env(:teiserver, Teiserver)[:enable_hooks] do

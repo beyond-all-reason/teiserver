@@ -38,12 +38,12 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:update_client, new_client}, state) do
     {:noreply, %{state | client: new_client}}
   end
@@ -53,7 +53,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   # Direct/Room messaging
-  @impl true
+  @impl GenServer
   def handle_info(:begin, _state) do
     state =
       if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
@@ -485,7 +485,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     end
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     send(self(), :begin)

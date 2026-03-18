@@ -55,7 +55,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
   end
@@ -64,7 +64,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:reply, state.room_lookup[channel_id], state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:update_client, new_client}, state) do
     {:noreply, %{state | client: new_client}}
   end
@@ -78,7 +78,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:noreply, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:begin, _state) do
     state =
       if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
@@ -475,7 +475,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   defp message_starts_with?(message, text), do: String.starts_with?(message, text)
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     if Teiserver.Communication.use_discord?() do

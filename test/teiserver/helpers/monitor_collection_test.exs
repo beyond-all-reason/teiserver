@@ -8,10 +8,10 @@ defmodule Teiserver.Helper.MonitorCollectionTest do
 
     def start_link(arg), do: GenServer.start_link(__MODULE__, arg)
 
-    @impl true
+    @impl GenServer
     def init(_args), do: {:ok, nil}
 
-    @impl true
+    @impl GenServer
     def handle_call(:stop, _from, state), do: {:stop, :normal, :stopped, state}
   end
 

@@ -15,7 +15,7 @@ defmodule Teiserver.Account.PermissionCache do
     end
   end
 
-  @impl true
+  @impl Supervisor
   def init(:ok) do
     children = [
       CacheHelper.concache_perm_sup(:auth_group_store),

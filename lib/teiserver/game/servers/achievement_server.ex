@@ -31,7 +31,7 @@ defmodule Teiserver.Game.AchievementServer do
     GenServer.start_link(__MODULE__, nil, opts)
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(
         %{
           channel: "telemetry_complex_client_events",
@@ -151,7 +151,7 @@ defmodule Teiserver.Game.AchievementServer do
     %{state | normal_scenario_map: normal_scenario_map, brutal_scenario_map: brutal_scenario_map}
   end
 
-  @impl true
+  @impl GenServer
   def init(_) do
     Logger.metadata(request_id: "AchievementServer")
 

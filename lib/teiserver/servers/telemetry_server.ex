@@ -41,7 +41,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     login_queue_length: 0
   }
 
-  @impl true
+  @impl GenServer
   def handle_info(:tick, state) do
     totals = get_totals(state)
     report_telemetry(totals)
@@ -55,7 +55,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     {:noreply, %{state | counters: new_counters}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast(
         {:spring_messages_sent, _userid, server_count, _batch_count, client_count},
         state
@@ -73,7 +73,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     {:noreply, %{state | matchmaking: new_matchmaking}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:get_totals_and_reset, _from, state) do
     {:reply, get_totals(state), @default_state}
   end
@@ -272,7 +272,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     GenServer.start_link(__MODULE__, opts[:data], opts)
   end
 
-  @impl true
+  @impl GenServer
   def init(_opts) do
     :timer.send_interval(@tick_period, self(), :tick)
 

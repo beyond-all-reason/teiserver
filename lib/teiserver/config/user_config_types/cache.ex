@@ -14,7 +14,7 @@ defmodule Teiserver.Config.UserConfigTypes.Cache do
     end
   end
 
-  @impl true
+  @impl Supervisor
   def init(:ok) do
     children = [
       CacheHelper.concache_perm_sup(:config_user_type_store)

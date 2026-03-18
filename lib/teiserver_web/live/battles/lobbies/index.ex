@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, session, socket) do
     socket =
       socket
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket |> redirect(to: ~p"/")}
   end
@@ -43,7 +43,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(%{channel: "teiserver_global_lobby_updates"}, socket)
       when socket.assigns.disabled?,
       do: {:noreply, socket}
@@ -146,7 +146,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("join", _, %{assigns: %{client: nil}} = socket) do
     {:noreply, socket}
   end

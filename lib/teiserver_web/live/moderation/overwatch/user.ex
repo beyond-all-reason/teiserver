@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.User do
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportLib
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(params, _session, socket) do
     socket =
       socket
@@ -28,7 +28,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.User do
     {:ok, socket}
   end
 
-  # @impl true
+  # @impl Phoenix.LiveView
   # def handle_params(params, _url, socket) do
   #   {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   # end
@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.User do
   #   socket
   # end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]

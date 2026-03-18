@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Admin.MatchmakingLive.Index do
   use TeiserverWeb, :live_view
   alias Teiserver.Matchmaking
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     case allow?(socket.assigns[:current_user], "Admin") do
       true ->
@@ -25,12 +25,12 @@ defmodule TeiserverWeb.Admin.MatchmakingLive.Index do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(_params, _url, socket) do
     {:noreply, get_queues(socket)}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(
         %{
           channel: "matchmaking_queues",

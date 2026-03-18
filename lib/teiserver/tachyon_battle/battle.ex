@@ -56,7 +56,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     :exit, {:noproc, _} -> {:error, :invalid_battle}
   end
 
-  @impl true
+  @impl GenServer
   def init(
         %{
           battle_id: battle_id,
@@ -100,7 +100,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_call({:send_message, msg}, _from, state) do
     case state.autohost_id do
       nil ->
@@ -133,7 +133,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     {:reply, state.match_id, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:update_event, ev}, state) do
     if state.autohost_pid != nil,
       do: Autohost.ack_update_event(state.autohost_pid, state.id, ev.time)
@@ -169,7 +169,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
     timeout = state.autohost_timeout
     if timeout != :infinity, do: :timer.send_after(timeout, :autohost_timeout)

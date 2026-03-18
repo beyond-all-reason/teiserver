@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
   alias Teiserver.Moderation.ReportLib
   alias Teiserver.Helper.TimexHelper
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       socket
@@ -22,7 +22,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(%{"id" => id}, _url, socket) do
     user = Account.get_user_by_id(id)
 
@@ -49,7 +49,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event(
         "submit-extra-text",
         _event,

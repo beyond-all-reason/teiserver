@@ -72,7 +72,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     GenServer.start(__MODULE__, init_arg)
   end
 
-  @impl true
+  @impl GenServer
   def init({queue_id, queue, teams, timeout}) do
     Logger.metadata(actor_type: :pairing_room)
 
@@ -100,7 +100,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     {:ok, initial_state, {:continue, {:notify_players, timeout}}}
   end
 
-  @impl true
+  @impl GenServer
   # Let all the player know that they are now ready to start a match and should
   # ready up asap
   def handle_continue({:notify_players, timeout}, state) do
@@ -176,7 +176,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_call({:ready, ready_data}, _from, state) do
     user_id = ready_data.user_id
 
@@ -212,7 +212,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:cancel, user_id}, state) do
     # Assuming that the call is legit, so don't check that user_id is indeed
     # in the room and directly cancel everyone
@@ -235,7 +235,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     {:stop, :normal, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:timeout, state) when state.awaiting == [], do: {:noreply, state}
 
   def handle_info(:timeout, state) do

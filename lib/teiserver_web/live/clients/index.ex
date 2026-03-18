@@ -15,7 +15,7 @@ defmodule TeiserverWeb.ClientLive.Index do
     </a>
   """
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, session, socket) do
     clients =
       list_clients()
@@ -48,7 +48,7 @@ defmodule TeiserverWeb.ClientLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     case allow?(socket.assigns[:current_user], "Moderator") do
       true ->
@@ -61,7 +61,7 @@ defmodule TeiserverWeb.ClientLive.Index do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(
         {:client_index_throttle, new_clients, removed_clients},
         %{assigns: assigns} = socket
@@ -97,7 +97,7 @@ defmodule TeiserverWeb.ClientLive.Index do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("add-filter:" <> filter, _event, socket) do
     new_filters =
       [filter | socket.assigns.filters]

@@ -24,12 +24,12 @@ defmodule Teiserver.Account.AccoladeBotServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:update_client, new_client}, state) do
     {:noreply, %{state | client: new_client}}
   end
@@ -38,7 +38,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Accolade server")
     account = get_accolade_account()
@@ -230,7 +230,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     end)
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     Horde.Registry.register(

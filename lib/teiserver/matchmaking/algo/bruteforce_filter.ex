@@ -11,7 +11,7 @@ defmodule Teiserver.Matchmaking.Algo.BruteforceFilter do
   alias Teiserver.Matchmaking.Member
   @behaviour Algos
 
-  @impl true
+  @impl Teiserver.Matchmaking.Algos
   def init(team_size, team_count) do
     %{
       team_size: team_size,
@@ -19,7 +19,7 @@ defmodule Teiserver.Matchmaking.Algo.BruteforceFilter do
     }
   end
 
-  @impl true
+  @impl Teiserver.Matchmaking.Algos
   def get_matches(members, st) do
     case Algos.match_members(members, st.team_size, st.team_count, &filter_within_bounds/1) do
       [] -> :no_match

@@ -93,7 +93,7 @@ defmodule Teiserver.Player.Session do
     GenServer.start_link(__MODULE__, arg, name: via_tuple(user_id))
   end
 
-  @impl true
+  @impl GenServer
   @spec init({:manual, pid(), T.user()} | {:snapshot, term()}) ::
           {:ok, state()} | {:continue, term()}
   def init({:manual, conn_pid, user}) do
@@ -575,7 +575,7 @@ defmodule Teiserver.Player.Session do
   #                                                                              #
   ################################################################################
 
-  @impl true
+  @impl GenServer
   def handle_continue({:snapshot, snapshot}, _state) do
     user = Account.get_user!(snapshot.user_id)
 
@@ -672,7 +672,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_call({:replace, new_conn_pid}, _from, state) do
     original_conn_pid = state.conn_pid
 
@@ -1229,7 +1229,7 @@ defmodule Teiserver.Player.Session do
     {:reply, :ok, %{state | lobby_list_subscription: nil}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast(
         {:matchmaking, {:notify_found, queue_id, room_pid, timeout_ms}},
         %{matchmaking: {:searching, %{joined_queues: joined}}} = state
@@ -1552,7 +1552,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_info({:DOWN, ref, :process, _, reason}, state) do
     val = MC.get_val(state.monitors, ref)
     state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))

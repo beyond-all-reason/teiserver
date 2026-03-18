@@ -27,7 +27,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  @impl true
+  @impl GenServer
   @spec init(term()) :: {:ok, state()}
   def init(_args) do
     Logger.metadata(actor_id: "LoginThrottleServer")
@@ -107,7 +107,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     Supervisor.restart_child(Teiserver.Supervisor, __MODULE__)
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:queue_size, _from, state) do
     result = :queue.len(state.queue)
     {:reply, result, state}
@@ -143,7 +143,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     {:reply, :ok, %{state | total_limit: limit}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:tick, state) do
     capacity = get_capacity(state.total_limit)
 
@@ -164,7 +164,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     {:noreply, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:set_tick_period, new_period}, state) do
     if state.tick_timer_ref do
       :timer.cancel(state.tick_timer_ref)

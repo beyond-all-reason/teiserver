@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportGroupLib
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(%{"id" => id_str}, _session, socket) when is_connected?(socket) do
     id = String.to_integer(id_str)
     socket = default_mount(socket)
@@ -41,7 +41,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
     |> add_breadcrumb(name: "Overwatch", url: ~p"/moderation/overwatch")
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]

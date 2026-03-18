@@ -13,7 +13,7 @@ defmodule Teiserver.Lobby.Cache do
     end
   end
 
-  @impl true
+  @impl Supervisor
   def init(:ok) do
     children = [
       CacheHelper.concache_perm_sup(:lobby_command_cache)

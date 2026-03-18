@@ -1,7 +1,7 @@
 defmodule Teiserver.Monitoring.Spring do
   use PromEx.Plugin
 
-  @impl true
+  @impl PromEx.Plugin
   def event_metrics(_opts) do
     Event.build(
       :spring_metrics,
@@ -9,7 +9,7 @@ defmodule Teiserver.Monitoring.Spring do
     )
   end
 
-  @impl true
+  @impl PromEx.Plugin
   def polling_metrics(opts) do
     poll_rate = Keyword.get(opts, :poll_rate, 5_000)
     [spring_polling_metrics(poll_rate)]

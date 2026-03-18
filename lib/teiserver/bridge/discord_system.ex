@@ -6,7 +6,7 @@ defmodule Teiserver.Bridge.DiscordSystem do
     DynamicSupervisor.start_link(__MODULE__, [], name: __MODULE__)
   end
 
-  @impl true
+  @impl DynamicSupervisor
   def init(_) do
     {:ok, sup_flags} = DynamicSupervisor.init(strategy: :one_for_one)
 

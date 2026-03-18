@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   alias Teiserver.Account
   alias Teiserver.Account.RelationshipLib
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       socket
@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     |> get_inactive_relationship_count()
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("show-help", _, socket) do
     {:noreply, socket |> assign(:show_help, true)}
   end
@@ -320,7 +320,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   @doc """
   Handles the dropdown for purge cutoff time
   """
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("update-purge-cutoff", event, socket) do
     [key] = event["_target"]
     value = event[key]

@@ -11,12 +11,12 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
   @tick_interval 10_000
   @check_delay 5_000
 
-  @impl true
+  @impl GenServer
   def handle_call(:get_agent_status, _from, state) do
     {:reply, state.agent_status, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast(:disconnect_all_bots, state) do
     new_state = disconnect_all_bots(state)
     {:noreply, new_state}
@@ -57,7 +57,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     {:noreply, %{new_state | db_policy: new_lobby_policy}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(%{channel: "lobby_policy_internal:" <> _}, state) do
     {:noreply, state}
   end
@@ -170,7 +170,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(data) do
     id = data.lobby_policy.id

@@ -3,12 +3,12 @@ defmodule TeiserverWeb.Microblog.Admin.PostLive.Index do
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     case allow?(socket.assigns[:current_user], "Blog helper") do
       true ->
@@ -29,7 +29,7 @@ defmodule TeiserverWeb.Microblog.Admin.PostLive.Index do
     |> assign(:view_colour, Microblog.colours())
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info({TeiserverWeb.Microblog.PostFormComponent, {:saved, _post}}, socket) do
     {:noreply,
      socket

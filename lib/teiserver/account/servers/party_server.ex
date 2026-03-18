@@ -5,7 +5,7 @@ defmodule Teiserver.Account.PartyServer do
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
-  @impl true
+  @impl GenServer
   def handle_call(:get_party, _from, state) do
     {:reply, state.party, state}
   end
@@ -30,7 +30,7 @@ defmodule Teiserver.Account.PartyServer do
     {:reply, result, %{state | party: new_party}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:create_invite, userid}, %{party: party} = state) do
     new_party =
       cond do
@@ -195,7 +195,7 @@ defmodule Teiserver.Account.PartyServer do
     {:noreply, %{state | party: new_party}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(%{channel: "teiserver_client_messages:" <> userid, event: :disconnected}, state) do
     Logger.debug("Member disconnected: #{userid}")
     {:noreply, %{state | party: remove_member(String.to_integer(userid), state)}}
@@ -279,7 +279,7 @@ defmodule Teiserver.Account.PartyServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(%{party: %{id: id} = party}) do
     Horde.Registry.register(

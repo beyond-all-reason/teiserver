@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
   alias Teiserver.Game.MatchRatingLib
   import TeiserverWeb.PaginationComponents, only: [pagination: 1]
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(params, _ession, socket) do
     game_types = Battle.MatchLib.list_rated_game_types()
     active_season = MatchRatingLib.active_season()
@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     parsed = TeiserverWeb.Parsers.PaginationParams.parse_params(params)
 
@@ -63,7 +63,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Ratings do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]

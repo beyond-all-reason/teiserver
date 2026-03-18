@@ -22,7 +22,7 @@ defmodule Teiserver.Battle.LobbyServer do
     map_name map_hash tags in_progress started_at
   )a
 
-  @impl true
+  @impl GenServer
   def handle_call(:get_lobby_state, _from, state) do
     result =
       Map.merge(state.lobby, %{
@@ -97,7 +97,7 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, Enum.count(player_list), new_state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast(:start_match, state) do
     player_list =
       state.member_list
@@ -457,7 +457,7 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state | bots: new_bots}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:tick, state) do
     state = check_lobby_values(state)
     {:noreply, state}
@@ -648,7 +648,7 @@ defmodule Teiserver.Battle.LobbyServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(%{lobby: %{id: id}} = data) do
     # Update the queue pids cache to point to this process

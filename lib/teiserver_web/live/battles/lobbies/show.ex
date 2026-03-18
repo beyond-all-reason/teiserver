@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     </a>
   """
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, session, socket) do
     socket =
       socket
@@ -63,7 +63,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket |> redirect(to: ~p"/")}
   end
@@ -159,7 +159,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     {users, clients, ratings, parties, stats}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(:tick, socket) do
     socket =
       if socket.assigns.lobby.in_progress do
@@ -253,7 +253,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("join", _, %{assigns: %{client: nil}} = socket) do
     {:noreply, socket}
   end

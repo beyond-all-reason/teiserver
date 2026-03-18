@@ -22,7 +22,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     total_clients_connected: 0
   }
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, session, socket) do
     telemetry_data =
       Teiserver.cache_get(:application_temp_cache, :telemetry_data) || @empty_telemetry_data
@@ -46,7 +46,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     case allow?(socket.assigns[:current_user], "Moderator") do
       true ->
@@ -59,7 +59,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(:tick, socket) do
     {:noreply,
      socket
@@ -77,7 +77,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
      |> assign(:total_connected_clients, data.total_clients_connected)}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("check-consuls", _event, socket) do
     Coordinator.start_all_consuls()
     {:noreply, socket}

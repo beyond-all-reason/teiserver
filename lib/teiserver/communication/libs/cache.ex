@@ -13,7 +13,7 @@ defmodule Teiserver.Communication.Cache do
     end
   end
 
-  @impl true
+  @impl Supervisor
   def init(:ok) do
     children = [
       CacheHelper.concache_perm_sup(:text_callback_trigger_lookup),

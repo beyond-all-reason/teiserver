@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do
     userid = String.to_integer(userid_str)
     user = Account.get_user_by_id(userid)
@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -50,7 +50,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
     |> assign(:page_title, "Accolades")
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event(_string, _event, socket) do
     {:noreply, socket}
   end

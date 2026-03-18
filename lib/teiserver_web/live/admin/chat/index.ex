@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
   alias Teiserver.Coordinator
   alias Teiserver.Chat
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     case allow?(socket.assigns[:current_user], "Reviewer") do
       true ->
@@ -30,7 +30,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, %{assigns: %{filters: filters}} = socket) do
     filters =
       if params["userid"] do
@@ -51,13 +51,13 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
      |> get_messages()}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(:do_get_messages, socket) do
     socket = get_messages(socket)
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]

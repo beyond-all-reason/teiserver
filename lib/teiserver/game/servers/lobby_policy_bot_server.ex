@@ -20,7 +20,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
   @tick_interval 10_000
 
-  @impl true
+  @impl GenServer
   def handle_info(
         %{channel: "lobby_policy_internal:" <> _, event: :request_status_update},
         %{lobby_id: nil} = state
@@ -537,7 +537,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(data) do
     id = data.lobby_policy.id
