@@ -1,0 +1,115 @@
+name: teiserver-dev
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: 123456789
+    ports:
+      - "5432:5432"
+    volumes:
+      - teiserver_postgres_data:/var/lib/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.136.0
+    restart: unless-stopped
+    ports:
+      - "8428:8428"
+    volumes:
+      - teiserver_victoriametrics_data:/victoria-metrics-data
+      - ./docker/victoriametrics/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "-retentionPeriod=14d"
+      - "-httpListenAddr=:8428"
+      - "-promscrape.config=/etc/prometheus/prometheus.yml"
+
+  grafana:
+    image: grafana/grafana:main
+    container_name: teiserver-grafana
+    restart: unless-stopped
+    depends_on:
+      - victoriametrics
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_INSTALL_PLUGINS: ""
+    ports:
+      - "3000:3000"
+    volumes:
+      - teiserver_grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+
+  teiserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: teiserver
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Database
+      TEI_DB_HOSTNAME: "db"
+      TEI_DB_USERNAME: "teiserver_dev"
+      TEI_DB_PASSWORD: "123456789"
+      TEI_DB_NAME: "teiserver_dev"
+
+      # Application
+      SECRET_KEY_BASE: "dev_secret_key_base_change_in_production_min_64_chars_long_string"
+      TEI_OAUTH_ISSUER: ${TEI_OAUTH_ISSUER:-http://localhost:4000}
+      TEI_DOMAIN_NAME: ${TEI_DOMAIN_NAME:-localhost}
+
+      # Email integration (MailHog)
+      TEI_ENABLE_EMAIL_INTEGRATION: "true"
+      TEI_SMTP_SERVER: "mailhog"
+      TEI_SMTP_HOSTNAME: "localhost"
+      TEI_SMTP_PORT: "1025"
+      TEI_SMTP_TLS: "never"
+      TEI_SMTP_TLS_VERIFY: "false"
+      TEI_SMTP_AUTH: "never"
+
+      # Dev settings
+      GENERATE_FAKE_DATA: "true"
+      IN_DOCKER: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4000 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+    ports:
+      - "4000:4000" # HTTP
+      - "4001:4001" # HTTP Metrics
+      - "8200:8200" # Spring protocol
+      - "8201:8201" # Spring protocol
+      - "8202:8202" # Spring protocol
+    volumes:
+      # Mount source code for live reload, might cause issues on Windows.
+      # If you run into performance issues, remove these mounts.
+      - ./lib:/build/lib
+      - ./config:/build/config
+      - ./priv:/build/priv
+      - ./assets:/build/assets
+      - ./test:/build/test
+    stdin_open: true
+    tty: true
+
+volumes:
+  teiserver_postgres_data:
+  teiserver_victoriametrics_data:
+  teiserver_grafana_data:

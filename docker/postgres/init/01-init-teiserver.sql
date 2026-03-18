@@ -1,0 +1,5 @@
+CREATE ROLE teiserver_dev LOGIN PASSWORD '123456789' SUPERUSER;
+CREATE ROLE teiserver_test LOGIN PASSWORD '123456789' SUPERUSER;
+
+CREATE DATABASE teiserver_dev OWNER teiserver_dev;
+CREATE DATABASE teiserver_test OWNER teiserver_test;

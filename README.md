@@ -9,6 +9,24 @@ There are two ways to set up Teiserver locally for development or testing:
 1. The [Local setup](/documents/guides/local_setup.md) guides you through the process of setting up everything yourself
 2. The [Local testing](https://github.com/beyond-all-reason/ansible-teiserver?tab=readme-ov-file#local-testing) instructions use the Ansible playbook, which automates most of the setup and configuration.
 
+## Compose dev setup
+For a quick local stack (including teiserver with hot-reload) use the compose setup in this repo:
+
+```sh
+docker compose -f docker-compose.dev.yml up --build
+```
+
+To start only Postgres for local Teiserver development:
+
+```sh
+docker compose -f docker-compose.dev.yml up -d db
+```
+
+### Windows performance note
+On Windows, bind mounts can make Teiserver startup and runtime noticeably slower (file watcher and filesystem overhead).
+
+If this bothers you, comment out the source-code mount block for `teiserver` in `docker-compose.dev.yml` (the `volumes` entries under the `teiserver` service), then rebuild/restart the stack.
+
 ## Prod setup
 Production instance is set up using [Ansible playbook](https://github.com/beyond-all-reason/ansible-teiserver/tree/main), follow the setup instructions there.
 
