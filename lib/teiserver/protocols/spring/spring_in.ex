@@ -6,29 +6,28 @@ defmodule Teiserver.Protocols.SpringIn do
   https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
   """
   require Logger
-  alias Teiserver.Account
-  alias Teiserver.Lobby
-  alias Teiserver.Coordinator
-  alias Teiserver.Battle
-  alias Teiserver.Room
-  alias Teiserver.CacheUser
-  alias Teiserver.Client
-  alias Teiserver.Config
-  alias Teiserver.Account.FriendRequestLib
-  alias Phoenix.PubSub
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.FriendRequestLib
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
-  alias Teiserver.Protocols.SpringOut
-
   alias Teiserver.Protocols.Spring.AuthIn
-  alias Teiserver.Protocols.Spring.TelemetryIn
   alias Teiserver.Protocols.Spring.BattleIn
   alias Teiserver.Protocols.Spring.LobbyPolicyIn
-  alias Teiserver.Protocols.Spring.UserIn
-  alias Teiserver.Protocols.Spring.SystemIn
   alias Teiserver.Protocols.Spring.PartyIn
+  alias Teiserver.Protocols.Spring.SystemIn
+  alias Teiserver.Protocols.Spring.TelemetryIn
+  alias Teiserver.Protocols.Spring.UserIn
+  alias Teiserver.Protocols.SpringOut
+  alias Teiserver.Room
 
   @optimisation_level %{
     "LuaLobby Chobby" => :partial,

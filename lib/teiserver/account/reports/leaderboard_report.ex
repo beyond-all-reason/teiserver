@@ -1,8 +1,8 @@
 defmodule Teiserver.Account.LeaderboardReport do
-  alias Teiserver.Account
-  alias Teiserver.Game.MatchRatingLib
   # alias Teiserver.Battle.BalanceLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.Account
+  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Repo
 
   @spec icon() :: String.t()

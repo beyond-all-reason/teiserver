@@ -8,11 +8,11 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   Parties will have signficantly higher importance than avoids. To limit the amount of computation, the amount of
   avoids is limited for higher player counts.
   """
-  alias Teiserver.Battle.Balance.BalanceTypes, as: BT
-  alias Teiserver.Battle.Balance.RespectAvoidsTypes, as: RA
-  alias Teiserver.Battle.Balance.BruteForceAvoid
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   alias Teiserver.Account.RelationshipLib
+  alias Teiserver.Battle.Balance.BalanceTypes, as: BT
+  alias Teiserver.Battle.Balance.BruteForceAvoid
+  alias Teiserver.Battle.Balance.RespectAvoidsTypes, as: RA
   alias Teiserver.Config
   # If player uncertainty is greater than equal to this, that player is considered a noob
   # The lowest uncertainty rank 0 player at the time of writing this is 6.65

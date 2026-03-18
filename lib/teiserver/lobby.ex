@@ -3,19 +3,19 @@ defmodule Teiserver.Lobby do
   For handling the in-memory instances of lobbies
   """
 
-  alias Phoenix.PubSub
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Client
-  alias Teiserver.Battle
   alias Teiserver.Coordinator
-  alias Teiserver.LobbyIdServer
-  alias Teiserver.Telemetry
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.Lobby.LobbyLib
+  alias Teiserver.LobbyIdServer
+  alias Teiserver.Telemetry
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-dungeon"

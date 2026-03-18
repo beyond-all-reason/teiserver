@@ -1,9 +1,8 @@
 defmodule TeiserverWeb.AdminDashLive.Policy do
   use TeiserverWeb, :live_view
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.LiveView.Socket
   alias Phoenix.PubSub
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-
   alias Teiserver
   alias Teiserver.Game
   # alias Teiserver.Account.AccoladeLib

@@ -2,15 +2,14 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
   @moduledoc false
 
   use Oban.Worker, queue: :logging
-
+  import Ecto.Query, warn: false
+  import Teiserver.Helper.NumberHelper, only: [c_round: 1]
+  import Teiserver.Helper.QueryHelpers
+  alias Decimal
   alias Teiserver.Logging
-  alias Teiserver.Repo
   alias Teiserver.Logging.AggregateViewLog
   alias Teiserver.Logging.PageViewLogLib
-  import Ecto.Query, warn: false
-  import Teiserver.Helper.QueryHelpers
-  import Teiserver.Helper.NumberHelper, only: [c_round: 1]
-  alias Decimal
+  alias Teiserver.Repo
 
   @log_keep_period 180
   # Oban.insert(Teiserver.Logging.AggregateViewLogsTask.new(%{}))

@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Microblog.BlogLive.Preferences do
   @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.Microblog
   import TeiserverWeb.MicroblogComponents
+  alias Teiserver.Microblog
   alias Teiserver.Microblog.UserPreferenceLib
 
   @default_preferences %{

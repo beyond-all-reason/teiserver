@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Account.ProfileLive.Accolades do
   @moduledoc false
-  alias Teiserver.Account.AccoladeLib
   use TeiserverWeb, :live_view
-  alias Teiserver.Account
   import Central.Helpers.ComponentHelper
+  alias Teiserver.Account
+  alias Teiserver.Account.AccoladeLib
 
   @impl true
   def mount(%{"userid" => userid_str}, _session, socket) do

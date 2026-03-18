@@ -3,18 +3,18 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   The server used to monitor the autohosts and get data from them
   """
   use GenServer
-  alias Teiserver.Account
-  alias Teiserver.Room
-  alias Teiserver.Client
-  alias Teiserver.CacheUser
-  alias Teiserver.Battle
-  alias Teiserver.Telemetry
-  alias Teiserver.Lobby.ChatLib
-  alias Phoenix.PubSub
-  alias Teiserver.Account.CalculateSmurfKeyTask
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.CalculateSmurfKeyTask
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Room
+  alias Teiserver.Telemetry
 
   @spec do_start() :: :ok
   def do_start() do

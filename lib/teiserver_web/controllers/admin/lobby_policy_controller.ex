@@ -1,9 +1,8 @@
 defmodule TeiserverWeb.Admin.LobbyPolicyController do
   use TeiserverWeb, :controller
-
+  import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
   alias Teiserver.Game
   alias Teiserver.Game.LobbyPolicyLib
-  import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
   alias Teiserver.Helper.StylingHelper
 
   plug Bodyguard.Plug.Authorize,

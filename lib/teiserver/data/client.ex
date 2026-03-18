@@ -8,18 +8,17 @@
 
 defmodule Teiserver.Client do
   @moduledoc false
+  require Logger
+  # alias Teiserver.Helper.TimexHelper
   alias Phoenix.PubSub
-  alias Teiserver.CacheUser
   alias Teiserver.Account
-  alias Teiserver.Telemetry
+  alias Teiserver.Account.ClientLib
+  alias Teiserver.CacheUser
   alias Teiserver.Clans
   alias Teiserver.Coordinator
-  alias Teiserver.Lobby
-  alias Teiserver.Account.ClientLib
-  # alias Teiserver.Helper.TimexHelper
-  require Logger
-
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Lobby
+  alias Teiserver.Telemetry
 
   @spec create(map()) :: map()
   def create(client) do

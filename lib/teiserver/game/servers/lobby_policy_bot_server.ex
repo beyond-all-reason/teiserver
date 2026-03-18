@@ -3,20 +3,20 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   The LobbyPolicyBots are the accounts present in each managed lobby and involved in managing that lobby specifically
   """
 
-  alias Phoenix.PubSub
-  alias Teiserver.Game
-  alias Teiserver.CacheUser
-  alias Teiserver.Client
-  alias Teiserver.Battle
-  alias Teiserver.Account
-  alias Teiserver.Lobby
-  alias Teiserver.Coordinator
-  alias Teiserver.Telemetry
-  alias Teiserver.Lobby.ChatLib
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Data.Types, as: T
   use GenServer
   require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
+  alias Teiserver.Coordinator
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Game
+  alias Teiserver.Lobby
+  alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Telemetry
 
   @tick_interval 10_000
 

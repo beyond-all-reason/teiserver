@@ -1,10 +1,10 @@
 defmodule Teiserver.Protocols.Spring.TelemetryIn do
-  alias Teiserver.Telemetry
+  require Logger
+  import Teiserver.Protocols.SpringOut, only: [reply: 5]
+  alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.SpringIn
-  require Logger
-  alias Teiserver.Bridge.DiscordBridgeBot
-  import Teiserver.Protocols.SpringOut, only: [reply: 5]
+  alias Teiserver.Telemetry
   # import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   # credo:disable-for-next-line Credo.Check.Design.TagTODO

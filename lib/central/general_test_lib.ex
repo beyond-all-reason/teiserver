@@ -3,19 +3,14 @@ defmodule Central.Helpers.GeneralTestLib do
   import Ecto.Query
   import Phoenix.ChannelTest
   import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
-  # use Phoenix.ConnTest
-
   alias Teiserver.Account
-  alias Teiserver.Repo
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.User
+  alias Teiserver.Repo
+  alias TeiserverWeb.UserSocket
 
   @endpoint TeiserverWeb.Endpoint
-
-  # alias TeiserverWeb.General.CombinatorLib
-
-  alias TeiserverWeb.UserSocket
 
   # def make_combos(data), do: CombinatorLib.make_combos(data)
 

@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Tachyon.SessionTest do
   use TeiserverWeb.ConnCase
-  alias WebsocketSyncClient, as: WSC
-  alias Teiserver.Support.Tachyon
   import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until: 2]
   alias Teiserver.Player
+  alias Teiserver.Support.Tachyon
+  alias WebsocketSyncClient, as: WSC
 
   setup _context do
     Tachyon.setup_client()
