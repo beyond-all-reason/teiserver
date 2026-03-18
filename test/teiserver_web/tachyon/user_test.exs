@@ -31,7 +31,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     test "returns translated roles" do
       user =
         Central.Helpers.GeneralTestLib.make_user(%{
-          "data" => %{"roles" => ["Verified", "Admin", "Contributor"]}
+          "roles" => ["Verified", "Admin", "Contributor"]
         })
 
       %{client: client} = Tachyon.connect(user)
@@ -43,7 +43,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
   describe "self event" do
     test "sent after login" do
-      user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+      user = Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
       %{client: client} = Tachyon.connect(user, swallow_first_event: false)
 
       {:ok,
@@ -61,7 +61,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     test "filters out unmappable roles in tachyon messages" do
       user =
         Central.Helpers.GeneralTestLib.make_user(%{
-          "data" => %{"roles" => ["Verified", "Contributor"]}
+          "roles" => ["Verified", "Contributor"]
         })
 
       %{client: client} = Tachyon.connect(user, swallow_first_event: false)
@@ -89,7 +89,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
     test "for offline user", %{client: client} do
       other_user =
-        Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+        Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
       assert %{"status" => "success"} =
                Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
@@ -131,7 +131,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
     test "when target connects", %{client: client} do
       other_user =
-        Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+        Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
       assert %{"status" => "success"} =
                Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
@@ -229,7 +229,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     test "broadcasts translated roles" do
       user =
         Central.Helpers.GeneralTestLib.make_user(%{
-          "data" => %{"roles" => ["Verified", "Moderator"]}
+          "roles" => ["Verified", "Moderator"]
         })
 
       %{client: client} = Tachyon.connect(user)

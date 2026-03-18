@@ -425,7 +425,6 @@ defmodule Teiserver.Bridge.BridgeServer do
             data: %{
               bot: true,
               moderator: false,
-              verified: true,
               lobby_client: "Teiserver Internal Process"
             }
           })

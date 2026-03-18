@@ -17,7 +17,7 @@ defmodule Teiserver.Support.Tachyon do
   end
 
   def create_user() do
-    user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    user = Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     set_ratings(user, 17)
     user
   end
@@ -81,7 +81,7 @@ defmodule Teiserver.Support.Tachyon do
 
   # for when you only need an oauth app
   def setup_app(_context) do
-    owner = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    owner = Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
     app =
       OAuthFixtures.app_attrs(owner.id)

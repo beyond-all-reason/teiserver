@@ -40,7 +40,6 @@ defmodule Teiserver.CacheUser do
     :rank,
     :country,
     :bot,
-    :verified,
     :email_change_code,
     :last_login,
     :last_login_mins,
@@ -51,7 +50,6 @@ defmodule Teiserver.CacheUser do
     :hw_hash,
     :chobby_hash,
     :lobby_client,
-    :roles,
     :print_client_messages,
     :print_server_messages,
     :discord_id,
@@ -94,9 +92,6 @@ defmodule Teiserver.CacheUser do
       permissions: ["Verified"],
       data:
         data
-        |> Map.merge(%{
-          "verified" => false
-        })
         |> Map.merge(extra_data)
     }
   end
@@ -192,7 +187,6 @@ defmodule Teiserver.CacheUser do
         params =
           user_register_params_with_md5(bot_name, host.email, host.password, %{
             "bot" => true,
-            "verified" => true,
             "roles" => ["Bot", "Verified"]
           })
           |> Map.merge(%{
@@ -593,7 +587,7 @@ defmodule Teiserver.CacheUser do
   def verify_user(user) do
     Account.delete_user_stat_keys(user.id, ~w(verification_code))
 
-    %{user | verified: true, roles: ["Verified" | user.roles]}
+    %{user | roles: ["Verified" | user.roles]}
     |> update_user(persist: true)
   end
 
@@ -1131,7 +1125,7 @@ defmodule Teiserver.CacheUser do
 
   @spec is_verified?(T.userid() | T.user()) :: boolean()
   def is_verified?(nil), do: false
-  def is_verified?(userid) when is_integer(userid), do: is_verified?(get_user_by_id(userid))
+  def is_verified?(userid) when is_integer(userid), do: is_verified?(Account.get_user(userid))
   def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
   def is_verified?(_), do: false
 

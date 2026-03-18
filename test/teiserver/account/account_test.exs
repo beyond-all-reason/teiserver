@@ -56,7 +56,6 @@ defmodule Teiserver.AccountTest do
         search: [
           bot: "Robot",
           moderator: "Moderator",
-          verified: "Verified",
           tester: "Tester",
           streamer: "Streamer",
           donor: "Donor",
@@ -70,7 +69,6 @@ defmodule Teiserver.AccountTest do
         search: [
           bot: "Person",
           moderator: "User",
-          verified: "Unverified",
           tester: "Normal",
           streamer: "Normal",
           donor: "Normal",

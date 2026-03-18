@@ -6,7 +6,7 @@ defmodule Teiserver.Player.SessionTest do
   @moduletag :tachyon
 
   def setup_session(_) do
-    user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    user = Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     {:ok, sess_pid} = Player.SessionSupervisor.start_session(user)
     {:ok, user: user, sess_pid: sess_pid}
   end

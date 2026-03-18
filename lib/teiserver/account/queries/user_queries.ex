@@ -210,9 +210,6 @@ defmodule Teiserver.Account.UserQueries do
       where: is_nil(users.smurf_of_id)
   end
 
-  def _where(query, :verified, "Verified"), do: _where(query, :verified, true)
-  def _where(query, :verified, "Unverified"), do: _where(query, :verified, false)
-
   def _where(query, :verified, true) do
     from users in query,
       where: fragment("? -> ? @> ?", users.data, "roles", "\"Verified\"")

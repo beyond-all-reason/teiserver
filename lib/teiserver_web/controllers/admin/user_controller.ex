@@ -328,7 +328,6 @@ defmodule TeiserverWeb.Admin.UserController do
       Map.merge(user.data || %{}, %{
         "bot" => Enum.member?(permissions, "Bot"),
         "moderator" => Enum.member?(permissions, "Moderator"),
-        "verified" => user_params["verified"] == "true",
         "roles" => new_roles
       })
 

@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Tachyon.SystemTest do
 
   describe "server stats" do
     defp setup_app(_context) do
-      owner = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+      owner = Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
       app =
         OAuthFixtures.app_attrs(owner.id)
@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Tachyon.SystemTest do
     end
 
     defp setup_user(app) do
-      user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+      user = Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
       token = OAuthFixtures.token_attrs(user.id, app) |> OAuthFixtures.create_token()
       client = Tachyon.connect(token)
       {:ok, %{user: user, token: token, client: client}}

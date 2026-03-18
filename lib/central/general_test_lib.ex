@@ -28,6 +28,7 @@ defmodule Central.Helpers.GeneralTestLib do
         "colour" => params["colour"] || "#00AA00",
         "icon" => params["icon"] || "fa-solid fa-user",
         "permissions" => permissions,
+        "roles" => params["roles"] || [],
         "password" =>
           params["password"] ||
             Account.spring_md5_password("password"),

@@ -6,7 +6,7 @@ defmodule Teiserver.Matchmaking.MemberTest do
 
   describe "get_member_rating" do
     test "no rating for user" do
-      user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+      user = Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
       assert Member.get_member_rating([user.id], "Duel") == %{
                skill: 16.666666666666664,
