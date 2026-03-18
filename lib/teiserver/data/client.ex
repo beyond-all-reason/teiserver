@@ -12,6 +12,7 @@ defmodule Teiserver.Client do
   # alias Teiserver.Helper.TimexHelper
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.ClientLib
   alias Teiserver.CacheUser
   alias Teiserver.Clans
@@ -108,8 +109,8 @@ defmodule Teiserver.Client do
         name: user.name,
         tcp_pid: self(),
         rank: user.rank,
-        moderator: CacheUser.is_moderator?(user) or CacheUser.is_event_organizer?(user),
-        bot: CacheUser.is_bot?(user),
+        moderator: Auth.is_moderator?(user) or Auth.is_event_organizer?(user),
+        bot: Auth.is_bot?(user),
         away: false,
         in_game: false,
         ip: ip || stats["last_ip"],

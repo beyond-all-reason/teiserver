@@ -193,7 +193,9 @@ defmodule Teiserver.Bridge.ChatCommands do
 
   @spec allow?(String.t(), map()) :: boolean
   defp allow?("discord", _), do: true
-  defp allow?("gdt", user), do: CacheUser.has_any_role?(user, ["Admin", "Moderator", "GDT"])
+
+  defp allow?("gdt", user),
+    do: Teiserver.Account.Auth.has_any_role?(user, ["Admin", "Moderator", "GDT"])
 
   defp allow?(cmd, user) do
     if Enum.member?(@always_allow, cmd) do

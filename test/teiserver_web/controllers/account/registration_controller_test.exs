@@ -102,7 +102,7 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
       user =
         Teiserver.Account.query_user(search: [email_lower: attrs.email])
 
-      assert Teiserver.CacheUser.is_verified?(user)
+      assert Teiserver.Account.Auth.is_verified?(user)
     end
   end
 

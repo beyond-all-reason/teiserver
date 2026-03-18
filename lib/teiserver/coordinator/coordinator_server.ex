@@ -170,7 +170,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         user = CacheUser.get_user_by_id(userid)
         Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
 
-        if not CacheUser.is_bot?(user) do
+        if not Teiserver.Account.Auth.is_bot?(user) do
           CacheUser.send_direct_message(
             state.userid,
             userid,

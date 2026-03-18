@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         index_redirect(socket)
 
       lobby.tournament and
-          not CacheUser.has_any_role?(current_user.id, [
+          not Teiserver.Account.Auth.has_any_role?(current_user.id, [
             "Moderator",
             "Caster",
             "TourneyPlayer",

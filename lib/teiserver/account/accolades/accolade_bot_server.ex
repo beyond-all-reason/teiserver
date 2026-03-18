@@ -129,7 +129,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   def handle_info({:direct_message, userid, message}, state) do
-    if not CacheUser.is_bot?(userid) do
+    if not Teiserver.Account.Auth.is_bot?(userid) do
       case AccoladeLib.cast_accolade_chat(userid, {:user_message, message}) do
         nil ->
           CacheUser.send_direct_message(

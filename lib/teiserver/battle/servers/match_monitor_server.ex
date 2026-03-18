@@ -7,6 +7,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.Battle
   alias Teiserver.CacheUser
@@ -159,7 +160,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   def handle_info({:direct_message, from_id, "broken_connection " <> username}, state) do
-    if CacheUser.is_bot?(from_id) or CacheUser.is_moderator?(from_id) do
+    if Auth.is_bot?(from_id) or Auth.is_moderator?(from_id) do
       user = Account.get_user_by_name(username)
 
       if user do
@@ -185,7 +186,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       [_all, username, event_type_name, game_time] ->
         userid = Account.get_userid_from_name(username)
 
-        if userid && CacheUser.is_bot?(from_id) do
+        if userid && Auth.is_bot?(from_id) do
           match_id = Battle.get_match_id_from_userid(from_id)
 
           if match_id do
@@ -219,7 +220,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           {:ok, json_data} ->
             userid = Account.get_userid_from_name(username)
 
-            if userid && CacheUser.is_bot?(from_id) do
+            if userid && Auth.is_bot?(from_id) do
               match_id = Battle.get_match_id_from_userid(from_id)
 
               if match_id do
@@ -387,7 +388,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         :ok
 
       user ->
-        if CacheUser.is_bot?(from_id) do
+        if Auth.is_bot?(from_id) do
           stats = %{
             "hardware:cpuinfo" => contents["CPU"] || "Null CPU",
             "hardware:gpuinfo" => contents["GPU"] || "Null GPU",

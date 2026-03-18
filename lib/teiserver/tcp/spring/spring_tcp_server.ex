@@ -8,6 +8,7 @@ defmodule Teiserver.SpringTcpServer do
   alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Room
   alias Teiserver.Protocols.SpringIn
   alias Teiserver.Protocols.SpringOut
@@ -81,7 +82,7 @@ defmodule Teiserver.SpringTcpServer do
     if state.app_status != :accepted do
       user = Account.get_user_by_id(state.userid)
 
-      if not CacheUser.is_bot?(user) do
+      if not Auth.is_bot?(user) do
         Logger.error("post_auth_check :partial - user is not accepted: #{user.id}/#{user.name}")
       end
     end
@@ -93,7 +94,7 @@ defmodule Teiserver.SpringTcpServer do
   def handle_info(:post_auth_check, %{protocol_optimisation: :none} = state) do
     user = Account.get_user_by_id(state.userid)
 
-    if not CacheUser.is_bot?(user) do
+    if not Auth.is_bot?(user) do
       Logger.error("post_auth_check :full - user is not bot: #{user.id}/#{user.name}")
     end
 
@@ -1054,8 +1055,8 @@ defmodule Teiserver.SpringTcpServer do
             userid: user.id,
             name: user.name,
             rank: 0,
-            moderator: CacheUser.is_moderator?(user),
-            bot: CacheUser.is_bot?(user)
+            moderator: Auth.is_moderator?(user),
+            bot: Auth.is_bot?(user)
           })
 
         c ->

@@ -2,6 +2,8 @@ defmodule Teiserver.Account.Auth do
   @moduledoc false
   @behaviour Bodyguard.Policy
   import Teiserver.Account.AuthLib, only: [allow?: 2]
+  alias Teiserver.Account
+  alias Teiserver.Data.Types, as: T
 
   def authorize(:index, conn, _), do: allow?(conn, "Moderator")
   def authorize(:search, conn, _), do: allow?(conn, "Moderator")
@@ -32,6 +34,97 @@ defmodule Teiserver.Account.Auth do
   def authorize(:relationships, conn, _), do: allow?(conn, "Moderator")
   def authorize(:gdpr_clean, conn, _), do: allow?(conn, "Moderator")
   def authorize(_, conn, _), do: allow?(conn, "admin.dev")
+
+  # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
+  @spec is_bot?(T.userid() | T.user()) :: boolean()
+  def is_bot?(nil), do: false
+  def is_bot?(userid) when is_integer(userid), do: is_bot?(Account.get_user_by_id(userid))
+  def is_bot?(%{roles: roles}), do: Enum.member?(roles, "Bot")
+  def is_bot?(_), do: false
+
+  # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
+  @spec is_moderator?(T.userid() | T.user()) :: boolean()
+  def is_moderator?(nil), do: false
+
+  def is_moderator?(userid) when is_integer(userid),
+    do: is_moderator?(Account.get_user_by_id(userid))
+
+  def is_moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
+  def is_moderator?(_), do: false
+
+  # credo:disable-for-lines:8 Credo.Check.Readability.PredicateFunctionNames
+  @spec is_event_organizer?(T.userid() | T.user()) :: boolean()
+  def is_event_organizer?(nil), do: false
+
+  def is_event_organizer?(userid) when is_integer(userid),
+    do: is_event_organizer?(Account.get_user_by_id(userid))
+
+  def is_event_organizer?(%{roles: roles}), do: Enum.member?(roles, "Event Organizer")
+  def is_event_organizer?(_), do: false
+
+  @spec is_contributor?(T.userid() | T.user()) :: boolean()
+  def is_contributor?(nil), do: false
+
+  def is_contributor?(userid) when is_integer(userid),
+    do: is_contributor?(Account.get_user_by_id(userid))
+
+  def is_contributor?(%{roles: roles}), do: Enum.member?(roles, "Contributor")
+  def is_contributor?(_), do: false
+
+  @spec is_verified?(T.userid() | T.user()) :: boolean()
+  def is_verified?(nil), do: false
+
+  def is_verified?(userid) when is_integer(userid),
+    do: is_verified?(Account.get_user_by_id(userid))
+
+  def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
+  def is_verified?(_), do: false
+
+  @spec is_admin?(T.userid() | T.user()) :: boolean()
+  def is_admin?(nil), do: false
+  def is_admin?(userid) when is_integer(userid), do: is_admin?(Account.get_user_by_id(userid))
+  def is_admin?(%{roles: roles}), do: Enum.member?(roles, "Admin")
+  def is_admin?(_), do: false
+
+  @spec is_vip?(T.userid() | T.user()) :: boolean()
+  def is_vip?(nil), do: false
+  def is_vip?(userid) when is_integer(userid), do: is_vip?(Account.get_user_by_id(userid))
+  def is_vip?(%{roles: roles}), do: Enum.member?(roles, "VIP")
+  def is_vip?(_), do: false
+
+  @doc """
+  If a user possesses any of these roles it returns true
+  """
+  @spec has_any_role?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
+  def has_any_role?(nil, _), do: false
+
+  def has_any_role?(userid, roles) when is_integer(userid),
+    do: has_any_role?(Account.get_user_by_id(userid), roles)
+
+  def has_any_role?(user, roles) when is_list(roles) do
+    roles
+    |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
+    |> Enum.any?()
+  end
+
+  def has_any_role?(user, role), do: has_any_role?(user, [role])
+
+  @doc """
+  If a user possesses all of these roles it returns true, if any are lacking it returns false
+  """
+  @spec has_all_roles?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
+  def has_all_roles?(nil, _), do: false
+
+  def has_all_roles?(userid, roles) when is_integer(userid),
+    do: has_all_roles?(Account.get_user_by_id(userid), roles)
+
+  def has_all_roles?(user, roles) when is_list(roles) do
+    roles
+    |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
+    |> Enum.all?()
+  end
+
+  def has_all_roles?(user, role), do: has_all_roles?(user, [role])
 end
 
 defmodule Teiserver.Auth.Server do

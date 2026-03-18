@@ -8,6 +8,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.CacheUser
@@ -579,7 +580,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     user = CacheUser.get_user_by_id(userid)
 
     cond do
-      CacheUser.is_moderator?(user) ->
+      Auth.is_moderator?(user) ->
         :ok
 
       Enum.count(new_user_times) >= state.ring_limit_count ->
@@ -644,7 +645,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> String.downcase()
 
     is_boss = Enum.member?(state.host_bosses, userid)
-    is_moderator = CacheUser.is_moderator?(userid)
+    is_moderator = Auth.is_moderator?(userid)
 
     # If it's CV then strip that out!
     [cmd | args] = String.split(trimmed_msg, " ")
@@ -871,7 +872,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       not Enum.empty?(client.queues) ->
         false
 
-      Account.is_moderator?(user) ->
+      Auth.is_moderator?(user) ->
         true
 
       state.ranked == false and
@@ -986,7 +987,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {false, "Err"}
 
       state.tournament_lobby == true and
-          not CacheUser.has_any_role?(userid, ["Caster", "TourneyPlayer", "Tournament player"]) ->
+          not Auth.has_any_role?(userid, ["Caster", "TourneyPlayer", "Tournament player"]) ->
         {false, "Tournament game"}
 
       block_status == :blocking ->
@@ -1038,7 +1039,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     is_host = senderid == state.host_id
     is_boss = Enum.member?(state.host_bosses, senderid)
-    is_admin = Enum.member?(user.roles, "Admin")
+    is_admin = Auth.is_admin?(senderid)
 
     cond do
       client == nil ->
@@ -1055,7 +1056,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         true
 
       # Allow all except Admin only commands for moderators
-      CacheUser.is_moderator?(user) and not Enum.member?(@admin_commands, cmd.command) ->
+      Auth.is_moderator?(user) and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       Enum.member?(@host_commands, cmd.command) and is_host ->
