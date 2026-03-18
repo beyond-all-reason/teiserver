@@ -9,12 +9,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   alias Teiserver.Asset
   alias Teiserver.Autohost
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Player
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.MonitorCollection, as: MC
 
   @type id :: String.t()
 

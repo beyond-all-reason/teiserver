@@ -15,7 +15,7 @@ defmodule Teiserver.Game.RatingLogsExport do
     "start_date" => ""
   })
   """
-  alias Teiserver.Helper.{DatePresets}
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
   require Logger

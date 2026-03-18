@@ -2,7 +2,10 @@ defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
   import ExUnit.Assertions
   import ExUnit.Callbacks
-  alias Teiserver.{Client, CacheUser, Account, SpringTcpServer}
+  alias Teiserver.Client
+  alias Teiserver.CacheUser
+  alias Teiserver.Account
+  alias Teiserver.SpringTcpServer
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Coordinator.CoordinatorServer
   alias Teiserver.Data.Types, as: T

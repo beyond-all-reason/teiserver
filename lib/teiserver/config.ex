@@ -5,7 +5,7 @@ defmodule Teiserver.Config do
 
   import Ecto.Query, warn: false
   alias Teiserver.Repo
-
+  alias Teiserver.Config.SiteConfig
   alias Teiserver.Config.UserConfig
   alias Teiserver.Data.Types, as: T
 
@@ -286,8 +286,6 @@ defmodule Teiserver.Config do
       "string" -> value
     end
   end
-
-  alias Teiserver.Config.SiteConfig
 
   @spec get_site_config_cache(String.t()) :: any
   def get_site_config_cache(key) do

@@ -4,18 +4,22 @@ defmodule Teiserver.Battle do
   """
 
   import Ecto.Query, warn: false
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Repo
-  alias Teiserver.{Account, Telemetry, Coordinator}
-  alias Teiserver.Lobby
-  alias Teiserver.Battle.{MatchMembership, MatchMembershipLib}
   alias Phoenix.PubSub
-
+  alias Teiserver.Account
   alias Teiserver.Battle.Match
   alias Teiserver.Battle.MatchLib
+  alias Teiserver.Battle.MatchMembership
+  alias Teiserver.Battle.MatchMembershipLib
+  alias Teiserver.Battle.MatchMonitorServer
+  alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
-
+  alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Lobby
+  alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Protocols.Spring
+  alias Teiserver.Repo
+  alias Teiserver.Telemetry
   require Logger
 
   @spec match_query(keyword()) :: Ecto.Query.t()
@@ -322,9 +326,6 @@ defmodule Teiserver.Battle do
   #       end
   #   end
   # end
-
-  alias Teiserver.Battle.{MatchMonitorServer, MatchLib}
-  alias Teiserver.Lobby.{ChatLib, LobbyLib}
 
   @spec start_match(nil | T.lobby_id()) :: :ok
   def start_match(nil), do: :ok

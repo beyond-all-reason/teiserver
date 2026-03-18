@@ -4,11 +4,20 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   performing their actions in the name of the coordinator
   """
   use GenServer
-  alias Teiserver.Config
-  alias Teiserver.{Account, CacheUser, Clans, Room, Coordinator, Client, Moderation, Telemetry}
-  alias Teiserver.Lobby
-  alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
+
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Clans
+  alias Teiserver.Client
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
+  alias Teiserver.Moderation
+  alias Teiserver.Room
+  alias Teiserver.Telemetry
+
+  alias Teiserver.Coordinator.CoordinatorCommands
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
   require Logger
 

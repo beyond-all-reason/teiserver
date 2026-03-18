@@ -4,7 +4,11 @@ defmodule Teiserver.Game.MatchRatingLib do
   to balance matches. For that use Teiserver.Battle.BalanceLib.
   """
 
-  alias Teiserver.{Account, Coordinator, Config, Game, Battle}
+  alias Teiserver.Account
+  alias Teiserver.Coordinator
+  alias Teiserver.Config
+  alias Teiserver.Game
+  alias Teiserver.Battle
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Repo
   alias Teiserver.Battle.BalanceLib

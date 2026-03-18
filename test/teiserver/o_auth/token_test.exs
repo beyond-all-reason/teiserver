@@ -1,7 +1,7 @@
 defmodule Teiserver.OAuth.TokenTest do
   use Teiserver.DataCase, async: true
-  alias Teiserver.OAuthFixtures
   alias Teiserver.OAuth
+  alias Teiserver.OAuthFixtures
 
   setup do
     user = Teiserver.TeiserverTestLib.new_user()

@@ -1,7 +1,10 @@
 defmodule TeiserverWeb.Account.ProfileLive.Matches do
   @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle, Config, Game}
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Config
+  alias Teiserver.Game
   import TeiserverWeb.PaginationComponents, only: [pagination: 1]
 
   @impl true

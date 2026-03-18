@@ -5,25 +5,26 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   use GenServer
   require Logger
-
-  alias Teiserver.{
-    Account,
-    Coordinator,
-    Client,
-    CacheUser,
-    Lobby,
-    Battle,
-    Telemetry,
-    Config,
-    Communication
-  }
-
-  alias Teiserver.Lobby.{ChatLib, LobbyRestrictions, LobbyLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
+  alias Teiserver.Communication
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Coordinator.ConsulCommands
+  alias Teiserver.Coordinator.CoordinatorCommands
+  alias Teiserver.Coordinator.CoordinatorLib
+  alias Teiserver.Coordinator.SpadsParser
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser, CoordinatorCommands}
+  alias Teiserver.Lobby
+  alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Lobby.LobbyLib
+  alias Teiserver.Lobby.LobbyRestrictions
+  alias Teiserver.Telemetry
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password? tournament)
   @boss_commands ~w(balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)

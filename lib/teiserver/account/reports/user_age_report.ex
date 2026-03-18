@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.UserAgeReport do
   @moduledoc false
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Account}
+  alias Teiserver.Account
   alias Teiserver.Repo
 
   @spec icon() :: String.t()

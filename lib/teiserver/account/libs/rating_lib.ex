@@ -5,7 +5,7 @@ defmodule Teiserver.Account.RatingLib do
   """
 
   use TeiserverWeb, :library
-  alias Teiserver.Account.{Rating}
+  alias Teiserver.Account.Rating
   require Logger
 
   # Functions

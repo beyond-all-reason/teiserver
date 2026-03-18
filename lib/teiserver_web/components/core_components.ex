@@ -4,9 +4,9 @@ defmodule TeiserverWeb.CoreComponents do
   """
 
   use Phoenix.Component
-  alias Phoenix.LiveView.JS
   use Gettext, backend: TeiserverWeb.Gettext
   alias Fontawesome
+  alias Phoenix.LiveView.JS
 
   @doc """
   Renders a modal.

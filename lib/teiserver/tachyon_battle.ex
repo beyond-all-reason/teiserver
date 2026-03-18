@@ -11,7 +11,9 @@ defmodule Teiserver.TachyonBattle do
   require Logger
   alias Teiserver.Bot
   alias Teiserver.TachyonBattle.Types, as: T
-  alias Teiserver.{TachyonBattle, Autohost, Battle}
+  alias Teiserver.TachyonBattle
+  alias Teiserver.Autohost
+  alias Teiserver.Battle
 
   @type id :: T.id()
 

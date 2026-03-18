@@ -1,7 +1,9 @@
 defmodule TeiserverWeb.Battle.MatchController do
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Battle, Game, Account}
+  alias Teiserver.Battle
+  alias Teiserver.Game
+  alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Helper.TimexHelper

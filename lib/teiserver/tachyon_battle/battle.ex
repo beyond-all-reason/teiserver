@@ -2,9 +2,9 @@ defmodule Teiserver.TachyonBattle.Battle do
   require Logger
 
   alias Teiserver.Autohost
-  alias Teiserver.TachyonBattle.Types, as: T
-  alias Teiserver.TachyonBattle.Registry
   alias Teiserver.Battle
+  alias Teiserver.TachyonBattle.Registry
+  alias Teiserver.TachyonBattle.Types, as: T
 
   # For now, don't do any restart. The genserver is only used to hold some
   # transient state. Later, we can attempt to reconstruct some state after

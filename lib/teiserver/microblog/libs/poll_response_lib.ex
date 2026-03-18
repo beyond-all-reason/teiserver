@@ -1,7 +1,8 @@
 defmodule Teiserver.Microblog.PollResponseLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
-  alias Teiserver.Microblog.{PollResponse, PollResponseQueries}
+  alias Teiserver.Microblog.PollResponse
+  alias Teiserver.Microblog.PollResponseQueries
   alias Teiserver.Helpers.PubSubHelper
 
   @doc """

@@ -4,11 +4,14 @@ defmodule Teiserver.Clans do
   """
 
   import Ecto.Query, warn: false
+  alias Teiserver.Clans.Clan
+  alias Teiserver.Clans.ClanInvite
+  alias Teiserver.Clans.ClanInviteLib
+  alias Teiserver.Clans.ClanLib
+  alias Teiserver.Clans.ClanMembership
+  alias Teiserver.Clans.ClanMembershipLib
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
-
-  alias Teiserver.Clans.Clan
-  alias Teiserver.Clans.ClanLib
 
   def clan_query(args) do
     clan_query(nil, args)
@@ -160,9 +163,6 @@ defmodule Teiserver.Clans do
     Clan.changeset(clan, %{})
   end
 
-  alias Teiserver.Clans.ClanInvite
-  alias Teiserver.Clans.ClanInviteLib
-
   @doc """
   Returns the list of clan_invites.
 
@@ -291,9 +291,6 @@ defmodule Teiserver.Clans do
   def change_clan_invite(%ClanInvite{} = clan_invite) do
     ClanInvite.changeset(clan_invite, %{})
   end
-
-  alias Teiserver.Clans.ClanMembership
-  alias Teiserver.Clans.ClanMembershipLib
 
   @doc """
   Returns the list of clan_memberships.

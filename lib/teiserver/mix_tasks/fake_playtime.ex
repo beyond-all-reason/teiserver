@@ -9,7 +9,8 @@ defmodule Mix.Tasks.Teiserver.FakePlaytime do
 
   use Mix.Task
   require Logger
-  alias Teiserver.{Account, CacheUser}
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
 
   def run(_args) do
     Application.ensure_all_started(:teiserver)

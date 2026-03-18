@@ -1,7 +1,7 @@
 defmodule Teiserver.Telemetry.ComplexClientEventTest do
   @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Telemetry}
+  alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
 
   test "complex client events" do

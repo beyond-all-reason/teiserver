@@ -4,9 +4,14 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   """
 
   use Nostrum.Consumer
-  alias Teiserver.{Room, Moderation, Communication}
-  alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands, CommandLib}
-  alias Teiserver.{Config}
+  alias Teiserver.Room
+  alias Teiserver.Moderation
+  alias Teiserver.Communication
+  alias Teiserver.Bridge.BridgeServer
+  alias Teiserver.Bridge.MessageCommands
+  alias Teiserver.Bridge.ChatCommands
+  alias Teiserver.Bridge.CommandLib
+  alias Teiserver.Config
   alias Nostrum.Api
   require Logger
 

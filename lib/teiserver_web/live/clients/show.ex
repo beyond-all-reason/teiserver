@@ -1,11 +1,13 @@
 defmodule TeiserverWeb.ClientLive.Show do
   use TeiserverWeb, :live_view
-  alias Phoenix.PubSub
   require Logger
-
-  alias Teiserver.{Account, Client, CacheUser, Battle}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
   alias Teiserver.Account.UserLib
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
 
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;

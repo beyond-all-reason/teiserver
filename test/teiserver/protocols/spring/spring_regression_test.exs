@@ -1,9 +1,7 @@
 defmodule Teiserver.SpringRegressionTest do
   use Teiserver.ServerCase, async: false
   require Logger
-  alias Teiserver.Lobby
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Common.PubsubListener
 
   import Teiserver.TeiserverTestLib,
     only: [
@@ -12,6 +10,9 @@ defmodule Teiserver.SpringRegressionTest do
       _recv_until: 1,
       start_spring_server: 1
     ]
+
+  alias Teiserver.Common.PubsubListener
+  alias Teiserver.Lobby
 
   setup :start_spring_server
 

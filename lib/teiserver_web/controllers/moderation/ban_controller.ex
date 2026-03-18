@@ -3,8 +3,11 @@ defmodule TeiserverWeb.Moderation.BanController do
   use TeiserverWeb, :controller
 
   alias Teiserver.Logging
-  alias Teiserver.{Account, Moderation}
-  alias Teiserver.Moderation.{Ban, BanLib, ActionLib}
+  alias Teiserver.Account
+  alias Teiserver.Moderation
+  alias Teiserver.Moderation.Ban
+  alias Teiserver.Moderation.BanLib
+  alias Teiserver.Moderation.ActionLib
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,

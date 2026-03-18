@@ -1,7 +1,8 @@
 defmodule TeiserverWeb.Admin.MatchController do
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Battle, Account}
+  alias Teiserver.Battle
+  alias Teiserver.Account
 
   require Logger
 

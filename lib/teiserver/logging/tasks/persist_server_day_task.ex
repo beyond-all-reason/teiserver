@@ -1,7 +1,9 @@
 defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
   @moduledoc false
   use Oban.Worker, queue: :teiserver
-  alias Teiserver.{Account, Logging, Battle}
+  alias Teiserver.Account
+  alias Teiserver.Logging
+  alias Teiserver.Battle
 
   alias Teiserver.Repo
   import Ecto.Query, warn: false

@@ -1,7 +1,8 @@
 defmodule Teiserver.Telemetry.ComplexMatchEventTest do
   @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Battle, Telemetry}
+  alias Teiserver.Battle
+  alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
 
   test "complex match events" do

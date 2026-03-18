@@ -1,7 +1,7 @@
 defmodule Teiserver.Telemetry.SimpleServerEventTest do
   @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Telemetry}
+  alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
 
   # https://github.com/beyond-all-reason/teiserver/actions/runs/20708759718/job/59444391469

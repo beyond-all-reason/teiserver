@@ -1,13 +1,47 @@
 defmodule Teiserver.Account do
   @moduledoc false
   import Ecto.Query, warn: false
-  alias Teiserver.Repo
+
   require Logger
-  alias Teiserver.Data.Types, as: T
+
   alias Phoenix.PubSub
-  alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Account.Accolade
+  alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.BadgeType
+  alias Teiserver.Account.BadgeTypeLib
+  alias Teiserver.Account.ClientLib
+  alias Teiserver.Account.Code
+  alias Teiserver.Account.CodeLib
+  alias Teiserver.Account.Friend
+  alias Teiserver.Account.FriendLib
+  alias Teiserver.Account.FriendQueries
+  alias Teiserver.Account.FriendRequest
+  alias Teiserver.Account.FriendRequestLib
+  alias Teiserver.Account.FriendRequestQueries
+  alias Teiserver.Account.LoginThrottleServer
+  alias Teiserver.Account.PartyLib
+  alias Teiserver.Account.Rating
+  alias Teiserver.Account.RatingLib
+  alias Teiserver.Account.Relationship
+  alias Teiserver.Account.RelationshipLib
+  alias Teiserver.Account.RelationshipQueries
+  alias Teiserver.Account.SmurfKey
+  alias Teiserver.Account.SmurfKeyLib
+  alias Teiserver.Account.SmurfKeyType
+  alias Teiserver.Account.SmurfKeyTypeLib
+  alias Teiserver.Account.TOTP
+  alias Teiserver.Account.TOTPLib
+  alias Teiserver.Account.User
+  alias Teiserver.Account.UserCacheLib
+  alias Teiserver.Account.UserLib
+  alias Teiserver.Account.UserStat
+  alias Teiserver.Account.UserStatLib
+  alias Teiserver.Account.UserToken
+  alias Teiserver.Account.UserTokenLib
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Account.{User, UserLib, TOTP, TOTPLib, LoginThrottleServer}
+  alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Repo
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-user-alt"
@@ -121,9 +155,6 @@ defmodule Teiserver.Account do
   defdelegate generate_otpauth_uri(name, secret), to: TOTPLib
 
   # User stat table
-  alias Teiserver.Account.UserStat
-  alias Teiserver.Account.UserStatLib
-
   @spec user_stat_query(nil | maybe_improper_list | map) :: Ecto.Query.t()
   def user_stat_query(args) do
     user_stat_query(nil, args)
@@ -244,8 +275,6 @@ defmodule Teiserver.Account do
     Teiserver.cache_delete(:teiserver_user_stat_cache, user_stat.user_id)
     Repo.delete(user_stat)
   end
-
-  alias Teiserver.Account.{BadgeType, BadgeTypeLib}
 
   @spec badge_type_query(keyword()) :: Ecto.Query.t()
   def badge_type_query(args) do
@@ -407,9 +436,6 @@ defmodule Teiserver.Account do
     BadgeType.changeset(badge_type, %{})
   end
 
-  alias Teiserver.Account.Accolade
-  alias Teiserver.Account.AccoladeLib
-
   @spec accolade_query(keyword()) :: Ecto.Query.t()
   def accolade_query(args) do
     accolade_query(nil, args)
@@ -561,9 +587,6 @@ defmodule Teiserver.Account do
   def change_accolade(%Accolade{} = accolade) do
     Accolade.changeset(accolade, %{})
   end
-
-  alias Teiserver.Account.SmurfKey
-  alias Teiserver.Account.SmurfKeyLib
 
   @spec smurf_key_query(keyword()) :: Ecto.Query.t()
   def smurf_key_query(args) do
@@ -786,9 +809,6 @@ defmodule Teiserver.Account do
     |> Enum.sort_by(fn {key, _value} -> key end, &<=/2)
   end
 
-  alias Teiserver.Account.SmurfKeyType
-  alias Teiserver.Account.SmurfKeyTypeLib
-
   @spec smurf_key_type_query(keyword()) :: Ecto.Query.t()
   def smurf_key_type_query(args) do
     smurf_key_type_query(nil, args)
@@ -910,8 +930,6 @@ defmodule Teiserver.Account do
       end
     end)
   end
-
-  alias Teiserver.Account.{Rating, RatingLib}
 
   @spec rating_query(keyword()) :: Ecto.Query.t()
   def rating_query(args) do
@@ -1098,8 +1116,6 @@ defmodule Teiserver.Account do
   end
 
   # Codes
-  alias Teiserver.Account.{Code, CodeLib}
-
   def code_query(args) do
     code_query(nil, args)
   end
@@ -1239,8 +1255,6 @@ defmodule Teiserver.Account do
   def change_code(%Code{} = code) do
     Code.changeset(code, %{})
   end
-
-  alias Teiserver.Account.{UserToken, UserTokenLib}
 
   def user_token_query(args) do
     user_token_query(nil, args)
@@ -1400,8 +1414,6 @@ defmodule Teiserver.Account do
     |> Base.encode64(padding: false)
     |> binary_part(0, length)
   end
-
-  alias Teiserver.Account.{Relationship, RelationshipLib, RelationshipQueries}
 
   @doc """
   Returns the list of relationships.
@@ -1647,8 +1659,6 @@ defmodule Teiserver.Account do
   defdelegate profile_view_permissions(u1, u2, relationship, friend, friendship_request),
     to: RelationshipLib
 
-  alias Teiserver.Account.{Friend, FriendLib, FriendQueries}
-
   @doc """
   Returns the list of friends.
 
@@ -1847,8 +1857,6 @@ defmodule Teiserver.Account do
 
   @spec list_friend_ids_of_user(T.userid()) :: [T.userid()]
   defdelegate list_friend_ids_of_user(userid), to: FriendLib
-
-  alias Teiserver.Account.{FriendRequest, FriendRequestLib, FriendRequestQueries}
 
   @doc """
   Returns the list of friend_requests.
@@ -2123,7 +2131,6 @@ defmodule Teiserver.Account do
   defdelegate rescind_friend_request(req), to: FriendRequestLib
 
   # User functions
-  alias Teiserver.Account.UserCacheLib
 
   @spec get_username(T.userid()) :: String.t() | nil
   defdelegate get_username(userid), to: UserCacheLib
@@ -2198,8 +2205,6 @@ defmodule Teiserver.Account do
   defdelegate is_restricted?(user, restriction), to: Teiserver.CacheUser
 
   # Client stuff
-  alias Teiserver.Account.ClientLib
-
   @spec get_client_by_name(String.t()) :: nil | T.client()
   defdelegate get_client_by_name(name), to: ClientLib
 
@@ -2257,7 +2262,6 @@ defmodule Teiserver.Account do
   defdelegate count_non_bot_clients(), to: ClientLib
 
   # Party stuff
-  alias Teiserver.Account.PartyLib
 
   @spec list_party_ids() :: [T.party_id()]
   defdelegate list_party_ids(), to: PartyLib

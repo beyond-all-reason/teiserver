@@ -1,11 +1,16 @@
 defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   use TeiserverWeb, :live_view
-  alias Phoenix.PubSub
   require Logger
-
-  alias Teiserver.{Account, Battle, CacheUser, Chat, Coordinator, Lobby, Client}
-  alias Teiserver.Chat.LobbyMessage
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Chat
+  alias Teiserver.Chat.LobbyMessage
+  alias Teiserver.Client
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
 
   @message_count 25
 

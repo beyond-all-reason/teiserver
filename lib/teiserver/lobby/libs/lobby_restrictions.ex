@@ -2,10 +2,12 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @moduledoc """
   Helper methods for lobby policies
   """
-  alias Teiserver.{CacheUser, Config}
   require Logger
-  alias Teiserver.Battle.{BalanceLib, MatchLib}
   alias Teiserver.Battle
+  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.MatchLib
+  alias Teiserver.CacheUser
+  alias Teiserver.Config
 
   @rank_upper_bound 7
   @rating_upper_bound 1000

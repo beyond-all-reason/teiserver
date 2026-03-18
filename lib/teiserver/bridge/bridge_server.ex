@@ -3,13 +3,15 @@ defmodule Teiserver.Bridge.BridgeServer do
   The server used to read events from Teiserver and then use the DiscordBridgeBot to send onwards
   """
   use GenServer
-  alias Teiserver.{Account, Room, CacheUser}
-  alias Teiserver.Chat.WordLib
-  alias Phoenix.PubSub
-  alias Teiserver.Config
   require Logger
-  alias Teiserver.Data.Types, as: T
   alias Nostrum.Api
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Chat.WordLib
+  alias Teiserver.Config
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Room
 
   def bot_name(), do: "DiscordBridgeBot"
 

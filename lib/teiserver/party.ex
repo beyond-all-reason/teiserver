@@ -11,9 +11,9 @@ defmodule Teiserver.Party do
   require Logger
 
   alias Teiserver.Config
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Matchmaking
   alias Teiserver.Party
+  alias Teiserver.Data.Types, as: T
 
   @type id :: Party.Server.id()
   @type state :: Party.Server.state()

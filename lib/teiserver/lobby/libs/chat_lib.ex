@@ -1,6 +1,12 @@
 defmodule Teiserver.Lobby.ChatLib do
   @moduledoc false
-  alias Teiserver.{Account, CacheUser, Chat, Battle, Coordinator, Moderation, Lobby}
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Chat
+  alias Teiserver.Battle
+  alias Teiserver.Coordinator
+  alias Teiserver.Moderation
+  alias Teiserver.Lobby
   alias Phoenix.PubSub
   alias Teiserver.Chat.WordLib
 

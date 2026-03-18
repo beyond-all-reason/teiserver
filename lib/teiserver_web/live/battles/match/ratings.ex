@@ -1,6 +1,8 @@
 defmodule TeiserverWeb.Battle.MatchLive.Ratings do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle, Game}
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
   import TeiserverWeb.PaginationComponents, only: [pagination: 1]
 

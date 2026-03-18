@@ -9,8 +9,19 @@ defmodule Teiserver.Microblog do
   @spec icon :: String.t()
   def icon(), do: "fa-blog"
 
-  alias Teiserver.Microblog.{Tag, TagLib}
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Microblog.PollResponse
+  alias Teiserver.Microblog.PollResponseLib
+  alias Teiserver.Microblog.Post
+  alias Teiserver.Microblog.PostLib
+  alias Teiserver.Microblog.PostTag
+  alias Teiserver.Microblog.PostTagLib
+  alias Teiserver.Microblog.Tag
+  alias Teiserver.Microblog.TagLib
+  alias Teiserver.Microblog.Upload
+  alias Teiserver.Microblog.UploadLib
+  alias Teiserver.Microblog.UserPreference
+  alias Teiserver.Microblog.UserPreferenceLib
 
   @spec list_tags() :: [Tag]
   defdelegate list_tags(), to: TagLib
@@ -41,8 +52,6 @@ defmodule Teiserver.Microblog do
 
   @spec change_tag(Tag, map) :: Ecto.Changeset
   defdelegate change_tag(tag, attrs), to: TagLib
-
-  alias Teiserver.Microblog.{Post, PostLib, UserPreference}
 
   @spec list_posts() :: [Post]
   defdelegate list_posts(), to: PostLib
@@ -89,8 +98,6 @@ defmodule Teiserver.Microblog do
   @spec increment_post_view_count(non_neg_integer()) :: Ecto.Changeset
   defdelegate increment_post_view_count(post_id), to: PostLib
 
-  alias Teiserver.Microblog.{PostTag, PostTagLib}
-
   @spec list_post_tags() :: [PostTag]
   defdelegate list_post_tags(), to: PostTagLib
 
@@ -124,8 +131,6 @@ defmodule Teiserver.Microblog do
   @spec delete_post_tags(non_neg_integer(), [non_neg_integer()]) ::
           {:ok, PostTag} | {:error, Ecto.Changeset}
   defdelegate delete_post_tags(post_id, tag_ids), to: PostTagLib
-
-  alias Teiserver.Microblog.{UserPreference, UserPreferenceLib}
 
   @spec list_user_preferences() :: [UserPreference]
   defdelegate list_user_preferences(), to: UserPreferenceLib
@@ -164,8 +169,6 @@ defmodule Teiserver.Microblog do
   @spec change_user_preference(UserPreference, map) :: Ecto.Changeset
   defdelegate change_user_preference(user_preference, attrs), to: UserPreferenceLib
 
-  alias Teiserver.Microblog.{PollResponse, PollResponseLib, Post}
-
   @spec list_poll_responses() :: [PollResponse]
   defdelegate list_poll_responses(), to: PollResponseLib
 
@@ -192,8 +195,6 @@ defmodule Teiserver.Microblog do
 
   @spec change_poll_response(PollResponse, map) :: Ecto.Changeset
   defdelegate change_poll_response(poll_response, attrs), to: PollResponseLib
-
-  alias Teiserver.Microblog.{Upload, UploadLib}
 
   @spec list_uploads() :: [Upload.t()]
   defdelegate list_uploads(), to: UploadLib

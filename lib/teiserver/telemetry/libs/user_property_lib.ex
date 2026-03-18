@@ -2,7 +2,8 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
   @moduledoc false
   use TeiserverWeb, :library
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{UserProperty, UserPropertyQueries}
+  alias Teiserver.Telemetry.UserProperty
+  alias Teiserver.Telemetry.UserPropertyQueries
   alias Phoenix.PubSub
 
   @broadcast_property_types ~w(hardware:cpuinfo hardware:macAddrHash hardware:sysInfoHash)

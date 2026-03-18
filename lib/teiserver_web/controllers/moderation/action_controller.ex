@@ -3,8 +3,12 @@ defmodule TeiserverWeb.Moderation.ActionController do
   use TeiserverWeb, :controller
 
   alias Teiserver.Logging
-  alias Teiserver.{Account, Moderation, Communication}
-  alias Teiserver.Moderation.{Action, ActionLib, ReportLib}
+  alias Teiserver.Account
+  alias Teiserver.Moderation
+  alias Teiserver.Communication
+  alias Teiserver.Moderation.Action
+  alias Teiserver.Moderation.ActionLib
+  alias Teiserver.Moderation.ReportLib
   import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 

@@ -2,7 +2,8 @@ defmodule Teiserver.Battle.BalanceLib do
   @moduledoc """
   A set of functions related to balance, if you are looking to see how balance is implemented this is the place. Ratings are calculated via Teiserver.Game.MatchRatingLib and are used here. Please note ratings and balance are two very different things and complaints about imbalanced games need to be correct in addressing balance vs ratings.
   """
-  alias Teiserver.{Account, Config}
+  alias Teiserver.Account
+  alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Game.MatchRatingLib

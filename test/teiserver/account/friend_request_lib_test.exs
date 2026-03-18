@@ -1,7 +1,9 @@
 defmodule Teiserver.Account.FriendRequestLibTest do
   use Teiserver.DataCase, async: true
   alias Teiserver.Account.AccountTestLib
-  alias Teiserver.Account.{FriendRequest, FriendRequestLib, RelationshipLib}
+  alias Teiserver.Account.FriendRequest
+  alias Teiserver.Account.FriendRequestLib
+  alias Teiserver.Account.RelationshipLib
   alias Teiserver.Account, as: Account
   alias Teiserver.Config
 

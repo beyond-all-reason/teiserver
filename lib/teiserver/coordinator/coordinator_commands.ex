@@ -1,10 +1,15 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
-  alias Teiserver.{CacheUser, Account, Client, Coordinator, Moderation}
-  alias Teiserver.Lobby
-  alias Teiserver.Helper.NumberHelper
-  alias Teiserver.Account.{AccoladeLib, CodeOfConductData}
-  alias Teiserver.Coordinator.CoordinatorLib
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
   alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
+  alias Teiserver.Moderation
+  alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.CodeOfConductData
+  alias Teiserver.Coordinator.CoordinatorLib
+  alias Teiserver.Helper.NumberHelper
 
   @splitter "---------------------------"
   @always_allow ~w(help whoami whois discord coc mute unmute ignore unignore website party)

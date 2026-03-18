@@ -10,11 +10,11 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   # from a crash, the important transient state would be lost.
   use GenServer, restart: :temporary
 
-  alias Teiserver.Matchmaking.QueueSupervisor
-  alias Teiserver.Matchmaking.QueueServer
-  alias Teiserver.Matchmaking.Member
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Asset
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Matchmaking.Member
+  alias Teiserver.Matchmaking.QueueServer
+  alias Teiserver.Matchmaking.QueueSupervisor
 
   require Logger
 

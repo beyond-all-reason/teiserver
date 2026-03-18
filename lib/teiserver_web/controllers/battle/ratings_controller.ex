@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Battle.RatingsController do
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Account}
+  alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib
 
   plug Bodyguard.Plug.Authorize,

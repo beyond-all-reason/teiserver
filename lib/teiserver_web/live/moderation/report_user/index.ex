@@ -1,6 +1,8 @@
 defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle, Moderation}
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportLib
   alias Teiserver.Helper.TimexHelper
 

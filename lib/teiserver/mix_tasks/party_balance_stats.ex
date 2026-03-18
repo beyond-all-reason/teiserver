@@ -9,11 +9,12 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
 
   use Mix.Task
   require Logger
-  alias Teiserver.Repo
-  alias Teiserver.{Battle, Game}
-  alias Teiserver.Battle.{BalanceLib}
   alias Mix.Tasks.Teiserver.PartyBalanceStatsTypes, as: PB
+  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle
   alias Teiserver.Config
+  alias Teiserver.Game
+  alias Teiserver.Repo
 
   def run(args) do
     Logger.info("Args: #{args}")

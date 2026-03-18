@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator do
   @moduledoc false
-  alias Teiserver.{Battle, CacheUser}
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   require Logger
 

@@ -4,7 +4,9 @@ defmodule TeiserverWeb.TournamentLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.{Battle, Account, Lobby}
+  alias Teiserver.Battle
+  alias Teiserver.Account
+  alias Teiserver.Lobby
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 

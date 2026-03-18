@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.API.SpadsControllerTest do
   use TeiserverWeb.ConnCase, async: false
   alias Teiserver.Account
-  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Client
+  alias Teiserver.Game.MatchRatingLib
   alias TeiserverWeb.API.SpadsController
 
   import Teiserver.TeiserverTestLib,

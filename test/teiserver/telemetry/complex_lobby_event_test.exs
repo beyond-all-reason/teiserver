@@ -1,7 +1,8 @@
 defmodule Teiserver.Telemetry.ComplexLobbyEventTest do
   @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Battle, Telemetry}
+  alias Teiserver.Battle
+  alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
 
   test "complex lobby events" do

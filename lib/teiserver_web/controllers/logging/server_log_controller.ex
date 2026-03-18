@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Logging.ServerLogController do
   use TeiserverWeb, :controller
   alias Teiserver.Logging
-  alias Teiserver.Helper.{TimexHelper, ChartHelper}
-  alias Teiserver.Logging.{GraphMinuteLogsTask}
+  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.ChartHelper
+  alias Teiserver.Logging.GraphMinuteLogsTask
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,

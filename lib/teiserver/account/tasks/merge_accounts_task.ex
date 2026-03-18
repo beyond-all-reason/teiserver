@@ -1,7 +1,8 @@
 defmodule Teiserver.Account.MergeAccountsTask do
+  require Logger
+
   alias Teiserver.Account
   alias Teiserver.Repo
-  require Logger
   alias Teiserver.Data.Types, as: T
 
   @spec perform(T.userid(), T.userid()) :: :no_user | :ok

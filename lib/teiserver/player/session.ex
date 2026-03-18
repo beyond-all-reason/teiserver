@@ -13,12 +13,16 @@ defmodule Teiserver.Player.Session do
   use GenServer, restart: :temporary
   require Logger
 
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Account, Matchmaking, Messaging, Party, Player}
-  alias Teiserver.TachyonLobby
-  alias Teiserver.TachyonBattle
-  alias Teiserver.Helpers.BoundedQueue, as: BQ
   alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Matchmaking
+  alias Teiserver.Messaging
+  alias Teiserver.Party
+  alias Teiserver.Player
+  alias Teiserver.TachyonBattle
+  alias Teiserver.TachyonLobby
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.BoundedQueue, as: BQ
   alias Teiserver.Helpers.MonitorCollection, as: MC
 
   @type conn_state :: :connected | :reconnecting | :disconnected

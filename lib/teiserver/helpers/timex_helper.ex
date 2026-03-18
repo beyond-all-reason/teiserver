@@ -1,7 +1,8 @@
 defmodule Teiserver.Helper.TimexHelper do
   @moduledoc false
 
-  alias Timex.{Timezone, Timezone.Local}
+  alias Timex.Timezone
+  alias Timex.Timezone.Local
 
   # Was finding that in April it moved the time up an hour
   # every time I saved, turns out the issue was it was stored

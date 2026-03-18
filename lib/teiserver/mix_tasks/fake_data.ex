@@ -5,7 +5,10 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   use Mix.Task
 
-  alias Teiserver.{Account, Logging, Battle, Moderation}
+  alias Teiserver.Account
+  alias Teiserver.Logging
+  alias Teiserver.Battle
+  alias Teiserver.Moderation
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Game.MatchRatingLib

@@ -1,8 +1,8 @@
 defmodule Teiserver.Communication.TextCallbackLib do
   @moduledoc false
   use TeiserverWeb, :library
-  alias Teiserver.{Communication}
-  alias Teiserver.Communication.{TextCallback}
+  alias Teiserver.Communication
+  alias Teiserver.Communication.TextCallback
 
   # Functions
   @spec icon :: String.t()

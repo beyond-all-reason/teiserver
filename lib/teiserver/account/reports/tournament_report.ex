@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.TournamentReport do
   @moduledoc false
-  alias Teiserver.{Account}
+  alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.TimexHelper
   import Teiserver.Helper.NumberHelper, only: [round: 2]

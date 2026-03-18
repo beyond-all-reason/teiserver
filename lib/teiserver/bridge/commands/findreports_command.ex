@@ -2,7 +2,8 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
   @moduledoc """
   Calls the bot to link all connected reports discord messages
   """
-  alias Teiserver.{Communication, Config}
+  alias Teiserver.Communication
+  alias Teiserver.Config
   alias Teiserver.Moderation
   require Logger
 

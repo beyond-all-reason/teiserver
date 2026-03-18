@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Moderation.Overwatch.IndexLiveTest do
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{TeiserverTestLib}
+  alias Teiserver.TeiserverTestLib
 
   defp auth_setup(_) do
     GeneralTestLib.conn_setup(TeiserverTestLib.overwatch_permissions())

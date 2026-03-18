@@ -1,8 +1,8 @@
 defmodule Teiserver.Matchmaking.QueueTest do
   use Teiserver.DataCase
+  alias Teiserver.AssetFixtures
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueServer
-  alias Teiserver.AssetFixtures
   alias Teiserver.Support.Polling
 
   @moduletag :tachyon

@@ -7,10 +7,11 @@ defmodule Teiserver.Autohost.Session do
 
   @behaviour :gen_statem
 
-  alias Teiserver.Bot.Bot
   alias Teiserver.Autohost
-  alias Teiserver.Autohost.{TachyonHandler, SessionRegistry}
   alias Teiserver.TachyonBattle
+  alias Teiserver.Autohost.SessionRegistry
+  alias Teiserver.Autohost.TachyonHandler
+  alias Teiserver.Bot.Bot
   alias Teiserver.Helpers.MonitorCollection, as: MC
 
   require Logger

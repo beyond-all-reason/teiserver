@@ -1,12 +1,16 @@
 defmodule TeiserverWeb.Battle.LobbyLive.Show do
   use TeiserverWeb, :live_view
-  alias Phoenix.PubSub
   require Logger
-
-  alias Teiserver.Battle.BalanceLib
-  alias Teiserver.{Account, Battle, Coordinator, Lobby, CacheUser, Telemetry}
-  alias Teiserver.Battle.MatchLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.MatchLib
+  alias Teiserver.CacheUser
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
+  alias Teiserver.Telemetry
 
   @extra_menu_content """
     &nbsp;&nbsp;&nbsp;

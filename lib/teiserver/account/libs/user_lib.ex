@@ -3,8 +3,11 @@ defmodule Teiserver.Account.UserLib do
   use TeiserverWeb, :library_newform
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.{Account, Logging}
-  alias Teiserver.Account.{User, RoleLib, UserQueries}
+  alias Teiserver.Account
+  alias Teiserver.Logging
+  alias Teiserver.Account.User
+  alias Teiserver.Account.RoleLib
+  alias Teiserver.Account.UserQueries
 
   # Functions
   @spec icon :: String.t()

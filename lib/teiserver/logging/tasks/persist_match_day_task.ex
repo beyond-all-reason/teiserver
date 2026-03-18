@@ -1,6 +1,7 @@
 defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
   use Oban.Worker, queue: :teiserver
-  alias Teiserver.{Logging, Battle}
+  alias Teiserver.Logging
+  alias Teiserver.Battle
   alias Teiserver.Battle.Tasks.BreakdownMatchDataTask
 
   alias Teiserver.Repo

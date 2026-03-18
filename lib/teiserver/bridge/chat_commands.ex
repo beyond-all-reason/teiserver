@@ -1,6 +1,10 @@
 defmodule Teiserver.Bridge.ChatCommands do
   @moduledoc false
-  alias Teiserver.{Account, CacheUser, Communication, Config, Logging}
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Communication
+  alias Teiserver.Config
+  alias Teiserver.Logging
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Bridge.UnitNames
   alias Nostrum.Api

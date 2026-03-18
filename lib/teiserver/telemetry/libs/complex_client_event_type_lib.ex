@@ -1,7 +1,8 @@
 defmodule Teiserver.Telemetry.ComplexClientEventTypeLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
-  alias Teiserver.Telemetry.{ComplexClientEventType, ComplexClientEventTypeQueries}
+  alias Teiserver.Telemetry.ComplexClientEventType
+  alias Teiserver.Telemetry.ComplexClientEventTypeQueries
 
   # Helper function
   @spec get_or_add_complex_client_event_type(String.t()) :: non_neg_integer()

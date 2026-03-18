@@ -2,7 +2,8 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
   alias Teiserver.Account
-  alias Teiserver.Communication.{DiscordChannel, DiscordChannelQueries}
+  alias Teiserver.Communication.DiscordChannel
+  alias Teiserver.Communication.DiscordChannelQueries
   alias Teiserver.Data.Types, as: T
 
   @spec special_channels() :: [String.t()]

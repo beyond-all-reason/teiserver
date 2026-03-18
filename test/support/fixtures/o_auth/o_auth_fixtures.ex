@@ -1,5 +1,8 @@
 defmodule Teiserver.OAuthFixtures do
-  alias Teiserver.OAuth.{Application, Code, Token, Credential}
+  alias Teiserver.OAuth.Application
+  alias Teiserver.OAuth.Code
+  alias Teiserver.OAuth.Token
+  alias Teiserver.OAuth.Credential
   alias Teiserver.Repo
 
   def app_attrs(owner_id) do

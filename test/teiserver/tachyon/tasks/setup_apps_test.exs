@@ -1,6 +1,7 @@
 defmodule Teiserver.Tachyon.Tasks.SetupAppsTest do
   use Teiserver.DataCase
-  alias Teiserver.OAuth.{Application, ApplicationQueries}
+  alias Teiserver.OAuth.Application
+  alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.Tachyon.Tasks.SetupApps
 
   setup _context do

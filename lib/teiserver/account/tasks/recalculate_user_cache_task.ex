@@ -4,7 +4,8 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
   """
   # alias Teiserver.Repo
   # import Ecto.Query, warn: false
-  alias Teiserver.{Account, Game}
+  alias Teiserver.Account
+  alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Data.Types, as: T

@@ -1,8 +1,10 @@
 defmodule TeiserverWeb.Admin.OAuthApplicationController do
   use TeiserverWeb, :controller
 
-  alias Teiserver.OAuth.{Application, ApplicationQueries}
-  alias Teiserver.{OAuth, Account}
+  alias Teiserver.OAuth.Application
+  alias Teiserver.OAuth.ApplicationQueries
+  alias Teiserver.OAuth
+  alias Teiserver.Account
 
   plug Bodyguard.Plug.Authorize,
     # The policy should be Admin or something fairly high. But while we're

@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.Live.BattleTest do
-  alias Teiserver.CacheUser
   use TeiserverWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
-
-  alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{TeiserverTestLib, Lobby}
-  import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1]
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1]
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.CacheUser
+  alias Teiserver.Lobby
+  alias Teiserver.TeiserverTestLib
 
   @throttle_wait 500 + 100
 

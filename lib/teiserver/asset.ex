@@ -1,9 +1,12 @@
 defmodule Teiserver.Asset do
+  import Ecto.Query
+
   alias Teiserver.Asset
-  alias Teiserver.Asset.{MapLib, MapQueries}
+  alias Teiserver.Repo
   alias Teiserver.Asset.EngineQueries
   alias Teiserver.Asset.GameQueries
-  alias Teiserver.Repo
+  alias Teiserver.Asset.MapLib
+  alias Teiserver.Asset.MapQueries
 
   @spec create_maps([map()]) ::
           {:ok, [Asset.Map.t()]} | {:error, String.t(), Ecto.Changeset.t(), map()}
@@ -67,8 +70,6 @@ defmodule Teiserver.Asset do
 
   @spec delete_engine(id :: integer()) :: :ok | :error
   def delete_engine(id) do
-    import Ecto.Query
-
     result =
       from(e in Asset.Engine, where: e.id == ^id)
       |> Repo.delete_all()
@@ -128,8 +129,6 @@ defmodule Teiserver.Asset do
 
   @spec delete_game(id :: integer()) :: :ok | :error
   def delete_game(id) do
-    import Ecto.Query
-
     result =
       from(e in Asset.Game, where: e.id == ^id)
       |> Repo.delete_all()

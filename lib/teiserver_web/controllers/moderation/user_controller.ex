@@ -1,7 +1,8 @@
 defmodule TeiserverWeb.Moderation.UserController do
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Account, Moderation}
+  alias Teiserver.Account
+  alias Teiserver.Moderation
   alias Teiserver.Account.UserLib
 
   plug(AssignPlug,

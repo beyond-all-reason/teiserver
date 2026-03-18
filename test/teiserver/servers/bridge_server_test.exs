@@ -1,7 +1,8 @@
 defmodule Teiserver.BridgeServerTest do
   @moduledoc false
   use Teiserver.ServerCase, async: false
-  alias Teiserver.{CacheUser, Room}
+  alias Teiserver.CacheUser
+  alias Teiserver.Room
   alias Teiserver.Bridge.BridgeServer
 
   test "bridge server" do

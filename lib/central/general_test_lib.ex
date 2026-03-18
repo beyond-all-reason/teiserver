@@ -1,22 +1,16 @@
 defmodule Central.Helpers.GeneralTestLib do
   @moduledoc false
-  import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
-
   import Ecto.Query
-  alias Teiserver.Repo
   import Phoenix.ChannelTest
-  # use Phoenix.ConnTest
+  import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
+  alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Guardian
+  alias Teiserver.Account.User
+  alias Teiserver.Repo
+  alias TeiserverWeb.UserSocket
 
   @endpoint TeiserverWeb.Endpoint
-
-  alias Teiserver.Account.AuthLib
-
-  alias Teiserver.Account
-  alias Teiserver.Account.{User, Guardian}
-
-  # alias TeiserverWeb.General.CombinatorLib
-
-  alias TeiserverWeb.UserSocket
 
   # def make_combos(data), do: CombinatorLib.make_combos(data)
 

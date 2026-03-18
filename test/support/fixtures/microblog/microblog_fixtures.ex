@@ -3,7 +3,8 @@ defmodule Teiserver.MicroblogFixtures do
   This module defines test helpers for creating
   entities via the `Teiserver.Microblog` context.
   """
-  alias Teiserver.{Microblog, AccountFixtures}
+  alias Teiserver.Microblog
+  alias Teiserver.AccountFixtures
 
   @doc """
   Generate a tag.

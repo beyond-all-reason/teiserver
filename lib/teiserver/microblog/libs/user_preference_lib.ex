@@ -1,7 +1,8 @@
 defmodule Teiserver.Microblog.UserPreferenceLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
-  alias Teiserver.Microblog.{UserPreference, UserPreferenceQueries}
+  alias Teiserver.Microblog.UserPreference
+  alias Teiserver.Microblog.UserPreferenceQueries
 
   # Functions
   @spec icon :: String.t()

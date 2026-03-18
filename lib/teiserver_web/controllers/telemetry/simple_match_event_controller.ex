@@ -1,7 +1,9 @@
 defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
   use TeiserverWeb, :controller
-  alias Teiserver.{Account, Telemetry}
-  alias Teiserver.Telemetry.{ExportSimpleMatchEventsTask, SimpleMatchEventQueries}
+  alias Teiserver.Account
+  alias Teiserver.Telemetry
+  alias Teiserver.Telemetry.ExportSimpleMatchEventsTask
+  alias Teiserver.Telemetry.SimpleMatchEventQueries
   require Logger
 
   plug(AssignPlug,

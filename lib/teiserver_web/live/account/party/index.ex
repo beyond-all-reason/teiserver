@@ -1,8 +1,7 @@
 defmodule TeiserverWeb.Account.PartyLive.Index do
   use TeiserverWeb, :live_view
-  alias Phoenix.PubSub
   require Logger
-
+  alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.PartyLib
 
