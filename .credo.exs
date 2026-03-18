@@ -71,8 +71,7 @@
           {Credo.Check.Readability.AliasOrder, []},
           {Credo.Check.Readability.BlockPipe, []},
           {Credo.Check.Readability.FunctionNames, []},
-          # {Credo.Check.Readability.ImplTrue, []},
-
+          {Credo.Check.Readability.ImplTrue, []},
           {Credo.Check.Readability.MultiAlias, []},
           {Credo.Check.Readability.SeparateAliasRequire, []},
           {Credo.Check.Design.AliasUsage, []},

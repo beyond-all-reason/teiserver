@@ -10,11 +10,11 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
   @behaviour Teiserver.Bridge.BridgeCommandBehaviour
   @ephemeral 64
 
-  @impl true
+  @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec name() :: String.t()
   def name(), do: "findreports"
 
-  @impl true
+  @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec cmd_definition() :: map()
   def cmd_definition() do
     %{
@@ -45,7 +45,7 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
     }
   end
 
-  @impl true
+  @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec execute(interaction :: Nostrum.Struct.Interaction.t(), options_map :: map()) :: map()
   def execute(_interaction, options_map) do
     # Default to message_id

@@ -2,7 +2,7 @@ defmodule TeiserverWeb.General.HomeLive.Index do
   use TeiserverWeb, :live_view
   # alias Teiserver.{Account, Battle}
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       socket
@@ -13,7 +13,7 @@ defmodule TeiserverWeb.General.HomeLive.Index do
     {:ok, socket}
   end
 
-  # @impl true
+  # @impl Phoenix.LiveView
   # def handle_event(_cmd, _event, %{assigns: _assigns} = socket) do
   #   {:noreply, socket}
   # end

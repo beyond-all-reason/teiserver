@@ -41,7 +41,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:get_all, _from, state) do
     {:reply, state, state}
   end
@@ -88,7 +88,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   # Infos
-  @impl true
+  @impl GenServer
   def handle_info(:tick, state) do
     if Battle.lobby_exists?(state.lobby_id) do
       new_state = check_queue_status(state)
@@ -1447,7 +1447,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state.join_queue ++ state.low_priority_join_queue
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(opts) do
     lobby_id = opts[:lobby_id]

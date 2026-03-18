@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
   alias Teiserver.Logging
   alias Teiserver.Microblog
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(%{"post_id" => post_id_str}, _session, socket) when is_connected?(socket) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "microblog_posts")
     post = Microblog.get_post!(post_id_str, preload: [:poster, :tags])
@@ -32,7 +32,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
     |> ok()
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(%{channel: "microblog_posts", event: :post_created}, socket) do
     {:noreply, socket}
   end
@@ -73,7 +73,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("delete-post", _, %{assigns: %{post: post} = assigns} = socket) do
     if assigns.current_user.id == post.poster_id || allow?(assigns.current_user, "Moderator") do
       Microblog.delete_post(post)

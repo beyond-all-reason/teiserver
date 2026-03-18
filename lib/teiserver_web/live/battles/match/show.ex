@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   import Central.Helpers.ComponentHelper
   import Teiserver.Helper.ColourHelper
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       socket
@@ -30,7 +30,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(%{"id" => id} = params, _url, socket) do
     socket =
       socket
@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     |> assign(:page_title, "#{match_name} - Balance")
   end
 
-  # @impl true
+  # @impl Phoenix.LiveView
   # def handle_event("tab-select", %{"tab" => tab}, socket) do
   #   {:noreply, assign(socket, :tab, tab)}
   # end
@@ -457,7 +457,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   @doc """
   Handles the dropdown for algorithm changing
   """
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("update-algorithm", event, socket) do
     [key] = event["_target"]
     value = event[key]

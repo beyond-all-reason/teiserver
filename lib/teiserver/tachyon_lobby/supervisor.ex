@@ -27,7 +27,7 @@ defmodule Teiserver.TachyonLobby.Supervisor do
     Horde.DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
-  @impl true
+  @impl Horde.DynamicSupervisor
   def init(_) do
     Horde.DynamicSupervisor.init(strategy: :one_for_one, members: :auto)
   end

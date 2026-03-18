@@ -247,7 +247,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     )
   end
 
-  @impl true
+  @impl GenServer
   def init(state) do
     Logger.metadata(actor_type: :mm_queue, actor_id: state.id)
 
@@ -258,7 +258,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     {:ok, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:get_game_type, _from, state) do
     game_type = MatchLib.game_type(state.queue.team_size, state.queue.team_count)
     {:reply, game_type, state}
@@ -333,7 +333,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:get_stats, _from, state) do
     player_count = calculate_player_count(state)
     private_stats = Map.put(state.stats, :player_count, player_count)
@@ -349,7 +349,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     {:reply, {:ok, public_stats}, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_call({:leave_queue, player_id}, _from, state) do
     case remove_player(player_id, state) do
       :not_queued ->
@@ -412,7 +412,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_info({:DOWN, ref, :process, _object, _reason}, state) do
     val = MC.get_val(state.monitors, ref)
     state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
@@ -446,7 +446,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:tick, state), do: handle_info({:tick, DateTime.utc_now()}, state)
 
   def handle_info({:tick, now}, state) do

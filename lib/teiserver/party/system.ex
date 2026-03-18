@@ -5,7 +5,7 @@ defmodule Teiserver.Party.System do
     Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
-  @impl true
+  @impl Supervisor
   def init(_) do
     children = [
       Teiserver.Party.Registry,

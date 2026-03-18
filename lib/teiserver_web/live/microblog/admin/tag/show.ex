@@ -3,12 +3,12 @@ defmodule TeiserverWeb.Microblog.Admin.TagLive.Show do
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(%{"id" => id}, _url, socket) do
     case allow?(socket.assigns[:current_user], "Server") do
       true ->

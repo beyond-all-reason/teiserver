@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
   @flood_protect_window_size 5
   @flood_protect_message_count 5
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       socket
@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(%{"room_name" => room_name}, _url, socket) do
     socket =
       socket
@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(%{channel: "room_chat"} = event, socket) do
     user = Account.get_user_by_id(event.user_id)
 
@@ -67,7 +67,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
      |> assign(:message_changeset, new_message_changeset())}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("load_more", _params, socket) do
     messages =
       Chat.list_room_messages(

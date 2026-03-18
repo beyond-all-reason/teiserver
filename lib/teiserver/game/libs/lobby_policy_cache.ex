@@ -14,7 +14,7 @@ defmodule Teiserver.Data.LobbyPolicyCache do
     end
   end
 
-  @impl true
+  @impl Supervisor
   def init(:ok) do
     children = [
       CacheHelper.concache_perm_sup(:lobby_policies_cache)

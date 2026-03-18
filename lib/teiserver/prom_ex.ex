@@ -56,7 +56,7 @@ defmodule Teiserver.PromEx do
 
   alias PromEx.Plugins
 
-  @impl true
+  @impl PromEx
   def plugins do
     [
       # PromEx built in plugins
@@ -75,7 +75,7 @@ defmodule Teiserver.PromEx do
     ]
   end
 
-  @impl true
+  @impl PromEx
   def dashboard_assigns do
     [
       datasource_id: "VictoriaMetrics",
@@ -83,7 +83,7 @@ defmodule Teiserver.PromEx do
     ]
   end
 
-  @impl true
+  @impl PromEx
   def dashboards do
     [
       # PromEx built in Grafana dashboards

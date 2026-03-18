@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Admin.TestPageLive.Index do
   @limited_bsnames ~w(primary success info warning danger)
   @full_bsnames ~w(primary primary2 secondary success success2 info info2 warning warning2 danger danger2)
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       socket
@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Admin.TestPageLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(%{"tab" => tab} = params, _url, socket) do
     socket =
       socket
@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Admin.TestPageLive.Index do
     socket
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("create-flash", %{"name" => name}, socket) do
     socket =
       case name do

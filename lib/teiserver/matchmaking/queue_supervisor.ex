@@ -79,7 +79,7 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
     {:ok, sup}
   end
 
-  @impl true
+  @impl Horde.DynamicSupervisor
   def init(_) do
     Horde.DynamicSupervisor.init(strategy: :one_for_one, members: :auto)
   end

@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   alias Teiserver.Account
   alias Teiserver.Config
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do
     userid = String.to_integer(userid_str)
     user = Account.get_user_by_id(userid)
@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
     |> assign(:page_title, "Contributor")
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("set-temp_country_code", %{"value" => ""}, socket) do
     {:noreply,
      socket
@@ -100,7 +100,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   @doc """
   Handles checkbox to disable contributor rank icon
   """
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("toggle-hide-contributor-rank", event, %{assigns: assigns} = socket) do
     [key] = event["_target"]
     value = event[key]

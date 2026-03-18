@@ -10,7 +10,7 @@ defmodule Teiserver.Application do
   import Teiserver.Helpers.CacheHelper,
     only: [concache_sup: 1, concache_sup: 2, concache_perm_sup: 1]
 
-  @impl true
+  @impl Application
   def start(_type, _args) do
     LoggerBackends.add(LoggerBackends.Console)
     LoggerBackends.add({LoggerFileBackend, :error_log})
@@ -213,13 +213,13 @@ defmodule Teiserver.Application do
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
-  @impl true
+  @impl Application
   def config_change(changed, _new, removed) do
     TeiserverWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 
-  @impl true
+  @impl Application
   @spec prep_stop(map()) :: map()
   def prep_stop(state) do
     PubSub.broadcast(

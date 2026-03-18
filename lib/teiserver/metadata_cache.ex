@@ -14,7 +14,7 @@ defmodule Teiserver.MetadataCache do
     end
   end
 
-  @impl true
+  @impl Supervisor
   def init(:ok) do
     children = [
       CacheHelper.concache_perm_sup(:application_metadata_cache)

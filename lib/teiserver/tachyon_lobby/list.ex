@@ -95,7 +95,7 @@ defmodule Teiserver.TachyonLobby.List do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
-  @impl true
+  @impl GenServer
   @spec init(term()) :: {:ok, state(), {:continue, term()}}
   def init(_) do
     :timer.send_interval(5_000, :broadcast_updates)
@@ -108,7 +108,7 @@ defmodule Teiserver.TachyonLobby.List do
   """
   def broadcast_updates(), do: Process.whereis(__MODULE__) |> send(:broadcast_updates)
 
-  @impl true
+  @impl GenServer
   def handle_continue(:bootstrap_state, state) do
     {monitors, lobbies} =
       Teiserver.TachyonLobby.Registry.list_lobbies()
@@ -143,12 +143,12 @@ defmodule Teiserver.TachyonLobby.List do
     {:noreply, %{state | monitors: monitors, counter: counter, lobbies: lobbies}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:list, _from, state) do
     {:reply, {state.counter, state.lobbies}, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:register, {lobby_pid, lobby_id, overview}}, state) do
     state =
       put_in(state, [:lobbies, lobby_id], overview)
@@ -177,7 +177,7 @@ defmodule Teiserver.TachyonLobby.List do
     {:noreply, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info({:DOWN, ref, :process, _obj, _reason}, state) do
     lobby_id = MC.get_val(state.monitors, ref)
 

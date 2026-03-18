@@ -8,7 +8,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
   # alias Teiserver.Account.AccoladeLib
   # alias Teiserver.Data.Matchmaking
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(%{"id" => id}, session, socket) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "lobby_policy_updates:#{id}")
 
@@ -28,7 +28,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     case allow?(socket.assigns[:current_user], "Server") do
       true ->
@@ -41,7 +41,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(:tick, socket) do
     {
       :noreply,
@@ -66,7 +66,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
   #   {:noreply, state}
   # end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("disconnect-all-bots", _event, socket) do
     Game.cast_lobby_organiser(socket.assigns.id, :disconnect_all_bots)
 

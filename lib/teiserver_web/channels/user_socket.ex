@@ -22,13 +22,13 @@ defmodule TeiserverWeb.UserSocket do
   # end
 
   # Guests would fire this function
-  @impl true
+  @impl Phoenix.Socket
   def connect(%{"token" => ""}, socket) do
     {:ok, socket}
   end
 
   # Accounts seeking to say they are someone use this
-  @impl true
+  @impl Phoenix.Socket
   def connect(%{"token" => token}, socket) do
     case Guardian.resource_from_token(token) do
       {:error, _error} ->
@@ -41,7 +41,7 @@ defmodule TeiserverWeb.UserSocket do
     end
   end
 
-  @impl true
+  @impl Phoenix.Socket
   def connect(_params, _socket) do
     :error
   end
@@ -56,6 +56,6 @@ defmodule TeiserverWeb.UserSocket do
   #     TeiserverWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
-  @impl true
+  @impl Phoenix.Socket
   def id(_socket), do: nil
 end

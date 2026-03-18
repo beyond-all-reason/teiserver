@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
   alias Teiserver.Coordinator
   alias Teiserver.Chat
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       socket
@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
     {:ok, socket}
   end
 
-  # @impl true
+  # @impl Phoenix.LiveView
   # def handle_params(%{"tab" => tab} = params, _url, socket) do
   #   socket = socket
   #     |> assign(:tab, tab)
@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
   #   socket
   # end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]

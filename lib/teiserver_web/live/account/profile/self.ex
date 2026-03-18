@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Self do
   @moduledoc false
   use TeiserverWeb, :live_view
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     if socket.assigns.current_user do
       {:ok,
@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Self do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event(_string, _event, socket) do
     {:noreply, socket}
   end

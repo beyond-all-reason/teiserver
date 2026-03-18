@@ -88,7 +88,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
     end
   end
 
-  @impl true
+  @impl Handler
   def handle_info({:start_battle, battle_id, start_script}, state) do
     mappings = %{
       engine_version: :engineVersion,
@@ -194,7 +194,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:error_response, :command_unimplemented, state}
   end
 
-  @impl true
+  @impl Handler
   def handle_response("autohost/start", _battle_id, _resp, state) when state.session_pid == nil,
     do: {:ok, state}
 

@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
   alias Teiserver.Chat
   alias Teiserver.Battle.MatchLib
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(params, _session, socket) do
     socket =
       socket
@@ -22,7 +22,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(%{"id" => id}, _url, socket) do
     socket =
       socket
@@ -34,12 +34,12 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
     {:noreply, socket}
   end
 
-  # @impl true
+  # @impl Phoenix.LiveView
   # def handle_info({TeiserverWeb.CategoryLive.FormComponent, {:saved, category}}, socket) do
   #   {:noreply, stream_insert(socket, :categories, category)}
   # end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]

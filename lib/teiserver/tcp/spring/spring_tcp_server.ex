@@ -20,7 +20,7 @@ defmodule Teiserver.SpringTcpServer do
   # Called on new connection
   # NOTE: socket arg is deprecated since ranch 1.6 and was removed on 2.0
   # we use :ranch.handshake to retrieve it instead
-  @impl true
+  @impl :ranch_protocol
   def start_link(ref, _socket, transport, opts) do
     pid = :proc_lib.spawn_link(__MODULE__, :init, [ref, transport, opts])
     {:ok, pid}
@@ -51,17 +51,17 @@ defmodule Teiserver.SpringTcpServer do
     end
   end
 
-  @impl true
+  @impl GenServer
   def init(init_arg) do
     {:ok, init_arg}
   end
 
-  @impl true
+  @impl GenServer
   def handle_call({:get, key}, _from, state) do
     {:reply, Map.get(state, key), state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:init_timeout, %{userid: nil} = state) do
     send(self(), :terminate)
     {:noreply, state}
@@ -646,7 +646,7 @@ defmodule Teiserver.SpringTcpServer do
     {:stop, :normal, %{new_state | userid: nil}}
   end
 
-  @impl true
+  @impl GenServer
   def terminate(_reason, state) do
     Client.disconnect(state.userid, "tcp_server terminate")
   end

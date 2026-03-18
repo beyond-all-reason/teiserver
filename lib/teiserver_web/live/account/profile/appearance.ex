@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
   alias Teiserver.Account
   alias Teiserver.Account.RoleLib
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do
     userid = String.to_integer(userid_str)
     user = Account.get_user_by_id(userid)
@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
     |> assign(:page_title, "Appearance")
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("select-style", %{"role" => role_name}, %{assigns: assigns} = socket) do
     available =
       assigns.options

@@ -10,11 +10,11 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
 
   @behaviour Teiserver.Bridge.BridgeCommandBehaviour
 
-  @impl true
+  @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec name() :: String.t()
   def name(), do: "textcb"
 
-  @impl true
+  @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec cmd_definition() :: map()
   def cmd_definition() do
     choices =
@@ -43,7 +43,7 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
     }
   end
 
-  @impl true
+  @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec execute(interaction :: Nostrum.Struct.Interaction.t(), options_map :: map) :: map()
   def execute(interaction, options_map) do
     case Communication.lookup_text_callback_from_trigger(options_map["reference"]) do

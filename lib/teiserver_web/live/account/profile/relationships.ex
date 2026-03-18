@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Relationships do
   use TeiserverWeb, :live_view
   alias Teiserver.Account
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do
     userid = String.to_integer(userid_str)
     user = Account.get_user_by_id(userid)
@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Relationships do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Relationships do
     |> assign(:page_title, "Relationships")
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event(_string, _event, socket) do
     {:noreply, socket}
   end

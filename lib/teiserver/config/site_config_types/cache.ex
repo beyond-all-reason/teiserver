@@ -14,7 +14,7 @@ defmodule Teiserver.Config.SiteConfigTypes.Cache do
     end
   end
 
-  @impl true
+  @impl Supervisor
   def init(:ok) do
     children = [
       CacheHelper.concache_perm_sup(:config_site_type_store),

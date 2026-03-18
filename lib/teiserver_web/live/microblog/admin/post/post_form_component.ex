@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
   @default_channel_name "Dev updates"
 
-  @impl true
+  @impl Phoenix.LiveComponent
   def render(assigns) do
     show_upload_form = Map.get(assigns, :show_upload_form, false)
 
@@ -242,7 +242,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
     """
   end
 
-  @impl true
+  @impl Phoenix.LiveComponent
   def update(%{post: post} = assigns, socket) do
     tags =
       Microblog.list_tags(
@@ -308,7 +308,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   defp error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
   defp error_to_string(:too_many_files), do: "You have selected too many files"
 
-  @impl true
+  @impl Phoenix.LiveComponent
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :blog_file, ref)}
   end

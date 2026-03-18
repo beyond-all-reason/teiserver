@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   @flood_protect_window_size 5
   @flood_protect_message_count 5
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, session, socket) do
     socket =
       socket
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket |> redirect(to: ~p"/")}
   end
@@ -109,7 +109,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event(
         "send-message",
         %{
@@ -160,7 +160,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
      |> assign(:message_timestamps, message_timestamps)}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info({:liveview_lobby_chat, :say, userid, message}, socket) do
     send(self(), %{
       channel: "teiserver_lobby_chat:#{socket.assigns.id}",

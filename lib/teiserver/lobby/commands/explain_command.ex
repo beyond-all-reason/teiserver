@@ -12,11 +12,11 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
 
   @splitter "------------------------------------------------------"
 
-  @impl true
+  @impl Teiserver.Lobby.LobbyCommandBehaviour
   @spec name() :: String.t()
   def name(), do: "explain"
 
-  @impl true
+  @impl Teiserver.Lobby.LobbyCommandBehaviour
   @spec execute(T.lobby_server_state(), map) :: T.lobby_server_state()
   def execute(state, %{userid: userid} = _cmd) do
     balance =
