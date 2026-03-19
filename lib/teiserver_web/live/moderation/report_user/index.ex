@@ -249,7 +249,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
         current_user.id == target_user.id ->
           {false, "You cannot report yourself"}
 
-        Account.is_restricted?(current_user.id, "Reporting") ->
+        Account.restricted?(current_user.id, "Reporting") ->
           {false, "You are currently restricted from submitting new reports"}
 
         true ->

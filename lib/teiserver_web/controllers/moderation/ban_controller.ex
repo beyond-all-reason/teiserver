@@ -138,7 +138,7 @@ defmodule TeiserverWeb.Moderation.BanController do
           |> Enum.uniq()
           |> Enum.map(fn userid -> Account.get_user_by_id(userid) end)
           |> Enum.reject(fn user ->
-            CacheUser.is_restricted?(user, ["Login", "All lobbies", "All chat"])
+            CacheUser.restricted?(user, ["Login", "All lobbies", "All chat"])
           end)
 
         all_user_keys =
@@ -234,7 +234,7 @@ defmodule TeiserverWeb.Moderation.BanController do
           |> Enum.uniq()
           |> Enum.map(fn userid -> Account.get_user_by_id(userid) end)
           |> Enum.reject(fn user ->
-            CacheUser.is_restricted?(user, ["Login"])
+            CacheUser.restricted?(user, ["Login"])
           end)
 
         all_user_keys =

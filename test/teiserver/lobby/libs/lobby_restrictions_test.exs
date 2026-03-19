@@ -4,15 +4,15 @@ defmodule Teiserver.Lobby.Libs.LobbyRestrictionsTest do
   alias Teiserver.Lobby.LobbyRestrictions
 
   test "check for noob title" do
-    assert LobbyRestrictions.is_noob_title?("Noobs 1v1")
+    assert LobbyRestrictions.noob_title?("Noobs 1v1")
 
-    refute LobbyRestrictions.is_noob_title?("No Noobs 1v1")
+    refute LobbyRestrictions.noob_title?("No Noobs 1v1")
 
-    refute LobbyRestrictions.is_noob_title?("All Welcome 1v1")
+    refute LobbyRestrictions.noob_title?("All Welcome 1v1")
 
-    assert LobbyRestrictions.is_noob_title?("Newbies 1v1")
+    assert LobbyRestrictions.noob_title?("Newbies 1v1")
 
-    assert LobbyRestrictions.is_noob_title?("Nubs 1v1")
+    assert LobbyRestrictions.noob_title?("Nubs 1v1")
   end
 
   test "get title based on consul state rank filters" do

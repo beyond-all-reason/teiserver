@@ -451,7 +451,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     if balance do
       moderator_messages =
-        if Auth.is_moderator?(senderid) do
+        if Auth.moderator?(senderid) do
           time_taken =
             cond do
               balance.time_taken < 1000 ->
@@ -519,7 +519,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       client == nil ->
         state
 
-      CacheUser.is_restricted?(senderid, ["Game queue"]) ->
+      CacheUser.restricted?(senderid, ["Game queue"]) ->
         ChatLib.sayprivateex(
           state.coordinator_id,
           senderid,
@@ -555,7 +555,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         send(self(), :queue_check)
 
         new_state =
-          if CacheUser.is_restricted?(senderid, ["Low priority"]) do
+          if CacheUser.restricted?(senderid, ["Low priority"]) do
             %{state | low_priority_join_queue: state.low_priority_join_queue ++ [senderid]}
           else
             %{state | join_queue: state.join_queue ++ [senderid]}
@@ -566,7 +566,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         new_queue = get_queue(new_state)
         pos = get_queue_position(new_queue, senderid) + 1
 
-        if CacheUser.is_restricted?(senderid, ["Low priority"]) do
+        if CacheUser.restricted?(senderid, ["Low priority"]) do
           ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,
@@ -650,7 +650,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> String.downcase()
       |> String.trim()
 
-    is_moderator = Auth.is_moderator?(senderid)
+    is_moderator = Auth.moderator?(senderid)
 
     allowed_choices = BalanceLib.get_allowed_algorithms(is_moderator)
 
@@ -1416,7 +1416,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           all_possible_clients
           |> Enum.group_by(
             fn %{userid: userid} ->
-              Auth.is_contributor?(userid)
+              Auth.contributor?(userid)
             end,
             fn %{userid: userid} ->
               userid
@@ -1438,7 +1438,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           all_possible_clients
           |> Enum.group_by(
             fn %{userid: userid} ->
-              Auth.is_admin?(userid)
+              Auth.admin?(userid)
             end,
             fn %{userid: userid} ->
               userid

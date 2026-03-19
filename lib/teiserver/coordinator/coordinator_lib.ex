@@ -246,8 +246,8 @@ Multiple locks can be engaged at the same time
   defp can_use?(user, host, group) do
     case group do
       :everybody -> true
-      :host -> Auth.is_moderator?(user) or host
-      :moderator -> Auth.is_moderator?(user)
+      :host -> Auth.moderator?(user) or host
+      :moderator -> Auth.moderator?(user)
       _ -> false
     end
   end

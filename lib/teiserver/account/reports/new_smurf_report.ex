@@ -77,7 +77,7 @@ defmodule Teiserver.Account.NewSmurfReport do
         limit: :infinity
       )
       |> Enum.filter(fn %{user_id: userid} ->
-        Auth.is_verified?(userid)
+        Auth.verified?(userid)
       end)
 
     # Extract the found values

@@ -161,7 +161,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       message_starts_with?(message, "/") ->
         nil
 
-      CacheUser.is_restricted?(user, ["Bridging"]) ->
+      CacheUser.restricted?(user, ["Bridging"]) ->
         # Non-bridged user, ignore it
         nil
 
@@ -178,7 +178,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         message = clean_message(message)
 
         room_name =
-          if is_promo?(message) do
+          if promo?(message) do
             "promote"
           else
             room_name
@@ -289,7 +289,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:noreply, state}
   end
 
-  defp is_promo?(message) do
+  defp promo?(message) do
     regexes =
       [
         Regex.run(~r/\+\d+( more|needed)?$/, message),

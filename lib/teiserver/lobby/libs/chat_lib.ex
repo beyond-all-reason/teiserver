@@ -82,10 +82,10 @@ defmodule Teiserver.Lobby.ChatLib do
 
     allowed =
       cond do
-        CacheUser.is_restricted?(user, ["All chat", "Lobby chat"]) ->
+        CacheUser.restricted?(user, ["All chat", "Lobby chat"]) ->
           msg_allowed_when_muted?(msg)
 
-        String.starts_with?(msg, "!") and CacheUser.is_restricted?(user, ["Host commands"]) ->
+        String.starts_with?(msg, "!") and CacheUser.restricted?(user, ["Host commands"]) ->
           false
 
         blacklisted ->
@@ -103,7 +103,7 @@ defmodule Teiserver.Lobby.ChatLib do
             "!vote no"
           ],
           String.downcase(msg)
-        ) and CacheUser.is_restricted?(user, ["Voting"]) ->
+        ) and CacheUser.restricted?(user, ["Voting"]) ->
           false
 
         true ->
@@ -148,10 +148,10 @@ defmodule Teiserver.Lobby.ChatLib do
 
     allowed =
       cond do
-        CacheUser.is_restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) ->
+        CacheUser.restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) ->
           msg_allowed_when_muted?(msg)
 
-        String.starts_with?(msg, "!") and CacheUser.is_restricted?(user, ["Host commands"]) ->
+        String.starts_with?(msg, "!") and CacheUser.restricted?(user, ["Host commands"]) ->
           false
 
         blacklisted ->
@@ -169,7 +169,7 @@ defmodule Teiserver.Lobby.ChatLib do
             "!vote no"
           ],
           String.downcase(msg)
-        ) and CacheUser.is_restricted?(user, ["Voting"]) ->
+        ) and CacheUser.restricted?(user, ["Voting"]) ->
           false
 
         true ->
@@ -211,10 +211,10 @@ defmodule Teiserver.Lobby.ChatLib do
 
     allowed =
       cond do
-        CacheUser.is_restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) ->
+        CacheUser.restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) ->
           false
 
-        String.starts_with?(msg, "!") and CacheUser.is_restricted?(sender, ["Host commands"]) ->
+        String.starts_with?(msg, "!") and CacheUser.restricted?(sender, ["Host commands"]) ->
           false
 
         blacklisted ->
@@ -232,7 +232,7 @@ defmodule Teiserver.Lobby.ChatLib do
             "!vote no"
           ],
           String.downcase(msg)
-        ) and CacheUser.is_restricted?(sender, ["Voting"]) ->
+        ) and CacheUser.restricted?(sender, ["Voting"]) ->
           false
 
         true ->

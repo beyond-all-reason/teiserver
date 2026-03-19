@@ -309,7 +309,7 @@ defmodule Teiserver.Account.AccoladeLib do
   end
 
   defp allow_accolades_for_user?(userid) do
-    if CacheUser.is_restricted?(userid, ["Accolades", "Community"]) do
+    if CacheUser.restricted?(userid, ["Accolades", "Community"]) do
       false
     else
       stats = Account.get_user_stat_data(userid)

@@ -475,7 +475,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   # Adds a party id or nil
   defp get_party_id(num_players) do
-    case is_in_party?() do
+    case in_party?() do
       true ->
         num_parties = trunc(num_players / 4)
         # party id is a string
@@ -486,7 +486,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     end
   end
 
-  defp is_in_party? do
+  defp in_party? do
     chance_in_party = 40
     # Number from 0 to 100
     random = Enum.random(0..100)

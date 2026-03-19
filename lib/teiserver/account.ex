@@ -2192,8 +2192,8 @@ defmodule Teiserver.Account do
   @spec system_change_user_name(T.userid(), String.t()) :: :ok
   defdelegate system_change_user_name(userid, new_name), to: Teiserver.CacheUser
 
-  @spec is_restricted?(T.userid() | T.user(), String.t()) :: boolean()
-  defdelegate is_restricted?(user, restriction), to: Teiserver.CacheUser
+  @spec restricted?(T.userid() | T.user(), String.t()) :: boolean()
+  defdelegate restricted?(user, restriction), to: Teiserver.CacheUser
 
   # Client stuff
   @spec get_client_by_name(String.t()) :: nil | T.client()

@@ -172,7 +172,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         unready_at: System.system_time(:millisecond)
       })
 
-      if CacheUser.is_restricted?(userid, ["All chat", "Battle chat"]) do
+      if CacheUser.restricted?(userid, ["All chat", "Battle chat"]) do
         name = Account.get_username_by_id(userid)
         Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{name}")
       end
@@ -353,7 +353,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info(%{command: command} = cmd, state) do
     cond do
-      CoordinatorCommands.is_coordinator_command?(command) ->
+      CoordinatorCommands.coordinator_command?(command) ->
         Coordinator.cast_coordinator(
           {:consul_command, Map.merge(cmd, %{lobby_id: state.lobby_id, host_id: state.host_id})}
         )
@@ -430,7 +430,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     # If the client is muted, we need to tell the host
-    if CacheUser.is_restricted?(client.userid, ["All chat", "Battle chat"]) do
+    if CacheUser.restricted?(client.userid, ["All chat", "Battle chat"]) do
       spawn(fn ->
         :timer.sleep(500)
         Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{client.name}")
@@ -502,7 +502,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       # If they're not allowed to be a boss, unboss them?
       (host_data[:host_bosses] || [])
       |> Enum.filter(fn userid ->
-        CacheUser.is_restricted?(userid, ["Boss"])
+        CacheUser.restricted?(userid, ["Boss"])
       end)
       |> Enum.each(fn userid ->
         username = Account.get_username_by_id(userid)
@@ -580,7 +580,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     user = CacheUser.get_user_by_id(userid)
 
     cond do
-      Auth.is_moderator?(user) ->
+      Auth.moderator?(user) ->
         :ok
 
       Enum.count(new_user_times) >= state.ring_limit_count ->
@@ -645,7 +645,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> String.downcase()
 
     is_boss = Enum.member?(state.host_bosses, userid)
-    is_moderator = Auth.is_moderator?(userid)
+    is_moderator = Auth.moderator?(userid)
 
     # If it's CV then strip that out!
     [cmd | args] = String.split(trimmed_msg, " ")
@@ -842,7 +842,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         :player
 
       :friendsplay ->
-        if is_on_friendlist?(userid, state, :players) do
+        if on_friendlist?(userid, state, :players) do
           :player
         else
           :spectator
@@ -872,7 +872,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       not Enum.empty?(client.queues) ->
         false
 
-      Auth.is_moderator?(user) ->
+      Auth.moderator?(user) ->
         true
 
       state.ranked == false and
@@ -900,7 +900,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  def is_on_friendlist?(userid, state, :players) do
+  def on_friendlist?(userid, state, :players) do
     player_ids =
       list_players(state)
       |> Enum.map(fn %{userid: player_id} -> player_id end)
@@ -921,7 +921,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  def is_on_friendlist?(userid, state, :all) do
+  def on_friendlist?(userid, state, :all) do
     member_ids =
       (Battle.get_lobby(state.lobby_id) || %{})
       |> Map.get(:players, [])
@@ -1002,7 +1002,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {true, :override_approve}
 
       state.gatekeeper == :friends ->
-        if is_on_friendlist?(userid, state, :all) do
+        if on_friendlist?(userid, state, :all) do
           {true, :allow_friends}
         else
           {false, "Friends only gatekeeper"}
@@ -1039,7 +1039,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     is_host = senderid == state.host_id
     is_boss = Enum.member?(state.host_bosses, senderid)
-    is_admin = Auth.is_admin?(senderid)
+    is_admin = Auth.admin?(senderid)
 
     cond do
       client == nil ->
@@ -1056,7 +1056,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         true
 
       # Allow all except Admin only commands for moderators
-      Auth.is_moderator?(user) and not Enum.member?(@admin_commands, cmd.command) ->
+      Auth.moderator?(user) and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       Enum.member?(@host_commands, cmd.command) and is_host ->

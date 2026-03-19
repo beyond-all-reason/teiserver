@@ -165,7 +165,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   def do_check(user) do
-    if CacheUser.is_restricted?(user, ["Login"]) do
+    if CacheUser.restricted?(user, ["Login"]) do
       "Already banned"
     else
       smurf_keys =

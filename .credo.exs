@@ -95,7 +95,7 @@
           {Credo.Check.Readability.ParenthesesInCondition, []},
           # {Credo.Check.Readability.ParenthesesOnZeroArityDefs, []}, 547 issues
           {Credo.Check.Readability.PipeIntoAnonymousFunctions, []},
-          # {Credo.Check.Readability.PredicateFunctionNames, []}, 32 issues
+          {Credo.Check.Readability.PredicateFunctionNames, []},
           {Credo.Check.Readability.PreferImplicitTry, []},
           {Credo.Check.Readability.RedundantBlankLines, []},
           {Credo.Check.Readability.Semicolons, []},

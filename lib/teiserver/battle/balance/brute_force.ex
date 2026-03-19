@@ -193,12 +193,12 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   def count_broken_parties(first_team, parties) do
     Enum.count(parties, fn party ->
-      is_party_broken?(first_team, party)
+      party_broken?(first_team, party)
     end)
   end
 
-  @spec is_party_broken?([BF.player()], [String.t()]) :: any()
-  def is_party_broken?(team, party) do
+  @spec party_broken?([BF.player()], [String.t()]) :: any()
+  def party_broken?(team, party) do
     count =
       Enum.count(party, fn x ->
         Enum.any?(team, fn y ->

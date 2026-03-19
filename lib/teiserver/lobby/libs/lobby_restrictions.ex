@@ -135,7 +135,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     method = Config.get_site_config_cache("profile.Rank method")
     # When using Role method for ranks,
     # contributors auto pass since their ranks are not defined on playtime. To be fixed seperately.
-    method == "Role" && Auth.is_contributor?(user)
+    method == "Role" && Auth.contributor?(user)
   end
 
   @spec check_rank_to_play(any(), any()) :: :ok | {:error, iodata()}
@@ -229,7 +229,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   end
 
   defp get_noob_looby_tips(lobby_title) do
-    case is_noob_title?(lobby_title) do
+    case noob_title?(lobby_title) do
       true ->
         [
           @splitter,
@@ -247,7 +247,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   end
 
   defp get_rotato_tips(lobby_title) do
-    case is_rotato_title?(lobby_title) do
+    case rotato_title?(lobby_title) do
       true ->
         [
           # Temporary tips until this is part of Chobby UI
@@ -308,16 +308,16 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @doc """
   Checks if the lobby title indicates a noob lobby
   """
-  @spec is_noob_title?(String.t()) :: boolean()
-  def is_noob_title?(title) do
+  @spec noob_title?(String.t()) :: boolean()
+  def noob_title?(title) do
     anti_noob_regex = ~r/no (noob|newb|nub)/i
     noob_regex = ~r/\b(noob|newb|nub(s|\b))/i
 
     Regex.match?(noob_regex, title) && !Regex.match?(anti_noob_regex, title)
   end
 
-  @spec is_rotato_title?(String.t()) :: boolean()
-  def is_rotato_title?(title) do
+  @spec rotato_title?(String.t()) :: boolean()
+  def rotato_title?(title) do
     regex = ~r/\b(rotat)/i
 
     Regex.match?(regex, title)
