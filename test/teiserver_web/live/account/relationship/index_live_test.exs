@@ -28,7 +28,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.IndexLiveTest do
 
   test "purge cutoff options are valid" do
     options = Index.get_purge_cutoff_options()
-    assert length(options) > 0
+    assert not Enum.empty?(options)
 
     default_option = Index.get_default_purge_cutoff_option()
     assert Enum.member?(options, default_option)

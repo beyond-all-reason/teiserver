@@ -67,11 +67,11 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
 
   @spec get_captain_rating([BF.player()]) :: any()
   def get_captain_rating(team) do
-    if length(team) > 0 do
+    if Enum.empty?(team) do
+      0
+    else
       captain = Enum.max_by(team, fn player -> player.rating end, &>=/2)
       captain.rating
-    else
-      0
     end
   end
 

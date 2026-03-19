@@ -190,7 +190,9 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   end
 
   defp get_party_logs(state) do
-    if Enum.count(state.parties) > 0 do
+    if Enum.empty?(state.parties) do
+      "None"
+    else
       state.parties
       # credo:disable-for-lines:9 Credo.Check.Refactor.MapJoin
       |> Enum.map(fn party ->
@@ -202,8 +204,6 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
         "(#{Enum.join(player_names, ", ")})"
       end)
       |> Enum.join(", ")
-    else
-      "None"
     end
   end
 
@@ -357,15 +357,15 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   end
 
   defp get_captain_rating(team) do
-    if Enum.count(team) > 0 do
+    if Enum.empty?(team) do
+      0
+    else
       captain =
         Enum.max_by(team, fn x ->
           x.rating
         end)
 
       captain[:rating]
-    else
-      0
     end
   end
 
