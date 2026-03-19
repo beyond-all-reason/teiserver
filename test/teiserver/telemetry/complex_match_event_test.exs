@@ -4,6 +4,8 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTest do
   alias Teiserver.Battle
   alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
+  alias Ecto.Adapters.SQL
+  alias ExULID.ULID
 
   test "complex match events" do
     r = :rand.uniform(999_999_999)
@@ -12,7 +14,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTest do
 
     {:ok, match} =
       Battle.create_match(%{
-        uuid: ExULID.ULID.generate(),
+        uuid: ULID.generate(),
         map: "red desert",
         data: %{},
         tags: %{},
@@ -30,7 +32,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTest do
 
     # Start by removing all match events
     query = "DELETE FROM telemetry_complex_match_events;"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    SQL.query(Repo, query, [])
     assert Telemetry.list_complex_match_events() |> Enum.count() == 0
 
     # Log the event

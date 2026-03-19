@@ -1,6 +1,8 @@
 defmodule TeiserverWeb.Admin.ToolView do
   use TeiserverWeb, :view
 
-  def view_colour, do: Teiserver.Admin.ToolLib.colours()
-  def icon, do: Teiserver.Admin.ToolLib.icon()
+  alias Teiserver.Admin.ToolLib
+
+  def view_colour, do: ToolLib.colours()
+  def icon, do: ToolLib.icon()
 end

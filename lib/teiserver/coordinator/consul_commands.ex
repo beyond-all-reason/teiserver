@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   @moduledoc false
   require Logger
+  alias ExULID.ULID
   alias Teiserver.Account.Auth
   alias Teiserver.Config
   alias Teiserver.Coordinator.ConsulServer
@@ -15,8 +16,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Lobby.LobbyRestrictions
-  alias Teiserver.Chat.WordLib
   alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Chat.WordLib
   alias Teiserver.Data.Types, as: T
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
 
@@ -372,7 +373,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       @splitter
     ])
 
-    split_uuid = ExULID.ULID.generate()
+    split_uuid = ULID.generate()
 
     new_split = %{
       split_uuid: split_uuid,
@@ -651,7 +652,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     is_moderator = Auth.is_moderator?(senderid)
 
-    allowed_choices = Teiserver.Battle.BalanceLib.get_allowed_algorithms(is_moderator)
+    allowed_choices = BalanceLib.get_allowed_algorithms(is_moderator)
 
     if Enum.member?(allowed_choices, remaining) do
       ChatLib.say(

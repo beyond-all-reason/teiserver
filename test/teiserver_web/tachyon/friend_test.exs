@@ -173,7 +173,7 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
       %{"commandId" => "friend/requestAccepted"} = Tachyon.recv_message!(ctx[:client])
       %{"commandId" => "friend/requestAccepted"} = Tachyon.recv_message!(ctx[:client2])
 
-      [f1] = Teiserver.Account.list_friends_for_user(%{id: ctx[:user].id})
+      [f1] = Account.list_friends_for_user(%{id: ctx[:user].id})
       assert f1.user1_id == ctx[:user].id || f1.user2_id == ctx[:user2].id
     end
 

@@ -4,12 +4,14 @@ defmodule Teiserver.Config.UserConfigTypes.Cache do
   """
 
   use Supervisor
+  alias Teiserver.Config.UserConfigTypes.PrivacyConfigs
+  alias Teiserver.Config.UserConfigTypes.ProfileConfigs
   alias Teiserver.Helpers.CacheHelper
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),
-         :ok <- Teiserver.Config.UserConfigTypes.ProfileConfigs.create(),
-         :ok <- Teiserver.Config.UserConfigTypes.PrivacyConfigs.create() do
+         :ok <- ProfileConfigs.create(),
+         :ok <- PrivacyConfigs.create() do
       {:ok, sup}
     end
   end

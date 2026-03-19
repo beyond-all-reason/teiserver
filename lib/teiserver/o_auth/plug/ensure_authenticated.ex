@@ -3,6 +3,8 @@ defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
 
   import Plug.Conn
 
+  alias Teiserver.OAuth
+
   def init(opts), do: opts
 
   def call(conn, opts) when is_map_key(conn.assigns, :token) do
@@ -16,7 +18,7 @@ defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
 
   def call(conn, opts) do
     with {:ok, raw_token} <- get_token(conn),
-         {:ok, token} <- Teiserver.OAuth.get_valid_token(raw_token) do
+         {:ok, token} <- OAuth.get_valid_token(raw_token) do
       if token.type == :access do
         assign(conn, :token, token) |> call(opts)
       else

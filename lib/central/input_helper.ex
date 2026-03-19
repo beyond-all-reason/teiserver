@@ -4,6 +4,8 @@ defmodule Central.Helpers.InputHelper do
   import Phoenix.HTML.Form
   use PhoenixHTMLHelpers
 
+  alias TeiserverWeb.ErrorHelpers
+
   # http://blog.plataformatec.com.br/2016/09/dynamic-forms-with-phoenix/
   def input_with_type(form, field, type) do
     input_with_type(form, field, type, [])
@@ -77,7 +79,7 @@ defmodule Central.Helpers.InputHelper do
 
       label = label(form, field, humanize(field), label_opts)
       description = opts[:description] || ""
-      error = TeiserverWeb.ErrorHelpers.error_tag(form, field)
+      error = ErrorHelpers.error_tag(form, field)
       [label, description, input, error]
     end
   end

@@ -4,15 +4,20 @@ defmodule Teiserver.SpringTcpServer do
   require Logger
 
   alias Phoenix.PubSub
-  alias Teiserver.Config
-  alias Teiserver.CacheUser
-  alias Teiserver.Client
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.Room
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Clans
+  alias Teiserver.Client
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Protocols.Spring.PartyIn
   alias Teiserver.Protocols.SpringIn
   alias Teiserver.Protocols.SpringOut
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Room
+  alias Teiserver.Telemetry
 
   @init_timeout 60_000
 
@@ -35,7 +40,7 @@ defmodule Teiserver.SpringTcpServer do
 
     case init_state(ref, transport) do
       {:ok, state} ->
-        case Teiserver.Config.get_site_config_cache("system.Redirect url") do
+        case Config.get_site_config_cache("system.Redirect url") do
           nil ->
             loop(state)
 
@@ -102,7 +107,7 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def handle_info(:message_count, state) do
-    Teiserver.Telemetry.cast_to_server({
+    Telemetry.cast_to_server({
       :spring_messages_sent,
       state.userid,
       state.server_messages,
@@ -187,7 +192,7 @@ defmodule Teiserver.SpringTcpServer do
 
   # Server messages
   def handle_info(%{channel: "teiserver_server", event: "stop"}, state) do
-    coordinator_id = Teiserver.Coordinator.get_coordinator_userid()
+    coordinator_id = Coordinator.get_coordinator_userid()
 
     state = SpringOut.reply(:server_restart, nil, nil, state)
 
@@ -229,7 +234,7 @@ defmodule Teiserver.SpringTcpServer do
     # I am taking a shortcut here. There may already be something in place to
     # react to random events and delegating that to a handler.
     # This is bypassing SpringIn entirely
-    state = Teiserver.Protocols.Spring.PartyIn.handle_event(event, state)
+    state = PartyIn.handle_event(event, state)
     {:noreply, state}
   end
 
@@ -237,7 +242,7 @@ defmodule Teiserver.SpringTcpServer do
     # I am taking a shortcut here. There may already be something in place to
     # react to random events and delegating that to a handler.
     # This is bypassing SpringIn entirely
-    state = Teiserver.Protocols.Spring.PartyIn.handle_event(event, state)
+    state = PartyIn.handle_event(event, state)
     {:noreply, state}
   end
 
@@ -278,7 +283,7 @@ defmodule Teiserver.SpringTcpServer do
     new_state =
       if Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") and
            (Map.has_key?(new_values, :host_teamsize) or Map.has_key?(new_values, :host_teamcount)) do
-        teams_data = Teiserver.Battle.get_team_config(lobby_id)
+        teams_data = Battle.get_team_config(lobby_id)
         SpringOut.reply(:battle, :battle_teams, teams_data, nil, new_state)
       else
         new_state
@@ -352,7 +357,7 @@ defmodule Teiserver.SpringTcpServer do
     # Do we have a clan?
     if user.clan_id do
       :timer.sleep(200)
-      clan = Teiserver.Clans.get_clan!(user.clan_id)
+      clan = Clans.get_clan!(user.clan_id)
       room_name = Room.clan_room_name(clan.tag)
       SpringOut.do_join_room(new_state, room_name)
     end

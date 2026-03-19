@@ -2,6 +2,7 @@ defmodule Teiserver.Telemetry.EventCleanupTask do
   @moduledoc false
   use Oban.Worker, queue: :cleanup
 
+  alias Ecto.Adapters.SQL
   alias Teiserver.Repo
 
   @impl Oban.Worker
@@ -22,7 +23,7 @@ defmodule Teiserver.Telemetry.EventCleanupTask do
       "DELETE FROM telemetry_simple_anon_events WHERE timestamp < $1"
     ]
     |> Enum.each(fn query ->
-      Ecto.Adapters.SQL.query!(Repo, query, [before_timestamp])
+      SQL.query!(Repo, query, [before_timestamp])
     end)
 
     :ok

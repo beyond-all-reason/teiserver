@@ -3,17 +3,19 @@ defmodule Teiserver.Tachyon.Tasks.SetupAppsTest do
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.Tachyon.Tasks.SetupApps
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   setup _context do
     user =
-      Central.Helpers.GeneralTestLib.make_user(%{
+      GeneralTestLib.make_user(%{
         "email" => "root@localhost",
         "roles" => ["Verified"]
       })
 
     # because all the f*ing queries are using caches, without a way to disable that
     on_exit(fn ->
-      Teiserver.TeiserverTestLib.clear_cache(:users_lookup_id_with_email)
+      TeiserverTestLib.clear_cache(:users_lookup_id_with_email)
     end)
 
     {:ok, user: user}

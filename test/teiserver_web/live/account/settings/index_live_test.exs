@@ -2,11 +2,12 @@ defmodule TeiserverWeb.Account.SettingsLive.IndexLiveTest do
   use TeiserverWeb.ConnCase, async: true
 
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   test "account settings endpoints requires authentication" do
     {:ok, kw} =
       GeneralTestLib.conn_setup([], [:no_login])
-      |> Teiserver.TeiserverTestLib.conn_setup()
+      |> TeiserverTestLib.conn_setup()
 
     {:ok, conn} = Keyword.fetch(kw, :conn)
 
@@ -17,7 +18,7 @@ defmodule TeiserverWeb.Account.SettingsLive.IndexLiveTest do
   test "can access account settings when authenticated" do
     {:ok, kw} =
       GeneralTestLib.conn_setup()
-      |> Teiserver.TeiserverTestLib.conn_setup()
+      |> TeiserverTestLib.conn_setup()
 
     {:ok, conn} = Keyword.fetch(kw, :conn)
 

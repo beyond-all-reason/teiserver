@@ -6,6 +6,8 @@ defmodule TeiserverWeb.CoreComponents do
   use Phoenix.Component
   use Gettext, backend: TeiserverWeb.Gettext
   alias Fontawesome
+  alias Phoenix.HTML.Form, as: HTMLForm
+  alias Phoenix.HTML.FormField
   alias Phoenix.LiveView.JS
 
   @doc """
@@ -293,7 +295,7 @@ defmodule TeiserverWeb.CoreComponents do
   attr :errors, :list, default: []
   attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
   attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
-  attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
+  attr :options, :list, doc: "the options to pass to HTMLForm.options_for_select/2"
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
   attr :text, :string, doc: "regular text to follow a label"
   attr :description, :string, doc: "optional description to display if component allows"
@@ -301,8 +303,8 @@ defmodule TeiserverWeb.CoreComponents do
                                    pattern placeholder readonly required rows size step)
   slot :inner_block
 
-  def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
-    errors = if Phoenix.Component.used_input?(field), do: field.errors, else: []
+  def input(%{field: %FormField{} = field} = assigns) do
+    errors = if used_input?(field), do: field.errors, else: []
 
     assigns
     |> assign(field: nil, id: assigns.id || field.id)
@@ -314,7 +316,7 @@ defmodule TeiserverWeb.CoreComponents do
 
   def input(%{type: "checkbox", value: value} = assigns) do
     assigns =
-      assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", value) end)
+      assign_new(assigns, :checked, fn -> HTMLForm.normalize_value("checkbox", value) end)
 
     ~H"""
     <div class="form-check">
@@ -343,7 +345,7 @@ defmodule TeiserverWeb.CoreComponents do
       <.label :if={@label} for={@id}>{@label}</.label>
       <select id={@id} name={@name} class="form-control" multiple={@multiple} {@rest}>
         <option :if={@prompt} value="">{@prompt}</option>
-        {Phoenix.HTML.Form.options_for_select(@options, @value)}
+        {HTMLForm.options_for_select(@options, @value)}
       </select>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
@@ -363,7 +365,7 @@ defmodule TeiserverWeb.CoreComponents do
           @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
         ]}
         {@rest}
-      ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
+      ><%= HTMLForm.normalize_value("textarea", @value) %></textarea>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
@@ -383,7 +385,7 @@ defmodule TeiserverWeb.CoreComponents do
           @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
         ]}
         {@rest}
-      ><%= Phoenix.HTML.Form.normalize_value("textarea", (@value || []) |> Enum.join("\n")) %></textarea>
+      ><%= HTMLForm.normalize_value("textarea", (@value || []) |> Enum.join("\n")) %></textarea>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
@@ -397,7 +399,7 @@ defmodule TeiserverWeb.CoreComponents do
         type={@type}
         name={@name}
         id={@id || @name}
-        value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+        value={HTMLForm.normalize_value(@type, @value)}
         class={[
           "form-control",
           @errors != [] && "border-danger"

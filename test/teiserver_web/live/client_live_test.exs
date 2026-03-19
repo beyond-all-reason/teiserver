@@ -6,10 +6,10 @@ defmodule TeiserverWeb.Live.ClientTest do
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Client
   alias Teiserver.TeiserverTestLib
-  import Teiserver.TeiserverTestLib, only: [_send_raw: 2]
+  import TeiserverTestLib, only: [_send_raw: 2]
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
+    GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())
     |> TeiserverTestLib.conn_setup()
   end
 
@@ -25,7 +25,7 @@ defmodule TeiserverWeb.Live.ClientTest do
 
       # Sleeps are to allow for the throttle server to update us
 
-      {:ok, server_context} = Teiserver.TeiserverTestLib.start_spring_server()
+      {:ok, server_context} = TeiserverTestLib.start_spring_server()
 
       # Time to add a client
       %{socket: socket1, user: user1} = TeiserverTestLib.auth_setup(server_context)
@@ -62,7 +62,7 @@ defmodule TeiserverWeb.Live.ClientTest do
 
     @tag :needs_attention
     test "show - valid client", %{conn: conn} do
-      {:ok, server_context} = Teiserver.TeiserverTestLib.start_spring_server()
+      {:ok, server_context} = TeiserverTestLib.start_spring_server()
       %{socket: socket, user: user} = TeiserverTestLib.auth_setup(server_context)
       # client = Client.get_client_by_id(user.id)
 
@@ -88,7 +88,7 @@ defmodule TeiserverWeb.Live.ClientTest do
     end
 
     test "force disconnect client", %{conn: conn} do
-      {:ok, server_context} = Teiserver.TeiserverTestLib.start_spring_server()
+      {:ok, server_context} = TeiserverTestLib.start_spring_server()
       %{user: user} = TeiserverTestLib.auth_setup(server_context)
 
       {:ok, view, _html} = live(conn, "/teiserver/admin/client/#{user.id}")

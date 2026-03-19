@@ -188,7 +188,7 @@ defmodule Teiserver.Autohost.Session do
         _state,
         data
       ) do
-    Teiserver.Autohost.TachyonHandler.start_battle(data.conn_pid, battle_id, start_script)
+    TachyonHandler.start_battle(data.conn_pid, battle_id, start_script)
 
     data =
       data

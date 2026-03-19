@@ -9,12 +9,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   alias Teiserver.Asset
   alias Teiserver.Autohost
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.KvStore
+  alias Teiserver.Helpers.Collections
+  alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Player
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helpers.MonitorCollection, as: MC
 
   @type id :: String.t()
 
@@ -109,7 +111,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           current_battle:
             nil
             | %{
-                id: Teiserver.TachyonBattle.id(),
+                id: TachyonBattle.id(),
                 started_at: DateTime.t()
               },
           current_vote: nil | vote_state()
@@ -1011,7 +1013,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         end)
         |> :erlang.term_to_binary()
 
-      Teiserver.KvStore.put("lobby", data.id, to_save)
+      KvStore.put("lobby", data.id, to_save)
     end
   end
 
@@ -1417,7 +1419,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp update_change_from_event({:update_ally_team_config, old_config, new_config}, change_map) do
     changes =
-      Teiserver.Helpers.Collections.zip_with_padding(old_config, new_config, nil)
+      Collections.zip_with_padding(old_config, new_config, nil)
       |> Enum.map(fn
         {_old_at, nil} ->
           nil
@@ -1427,7 +1429,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
         {old_at, new_at} ->
           Map.update!(new_at, :teams, fn new_teams ->
-            Teiserver.Helpers.Collections.zip_with_padding(old_at.teams, new_teams, nil)
+            Collections.zip_with_padding(old_at.teams, new_teams, nil)
             |> Enum.map(fn {_old_team, new_team} -> new_team end)
           end)
       end)

@@ -6,6 +6,9 @@ defmodule Teiserver.Tachyon.Tasks.SetupApps do
   """
   require Logger
 
+  alias Teiserver.Account
+  alias Teiserver.OAuth
+  alias Teiserver.OAuth.Application, as: OAuthApplication
   alias Teiserver.OAuth.ApplicationQueries
 
   def ensure_lobby_app() do
@@ -49,13 +52,13 @@ defmodule Teiserver.Tachyon.Tasks.SetupApps do
 
   defp ensure_app(app_attrs) do
     case ApplicationQueries.get_application_by_uid(app_attrs.uid) do
-      %Teiserver.OAuth.Application{} = app ->
+      %OAuthApplication{} = app ->
         Logger.info("#{app_attrs.name} app already setup")
         app
 
       nil ->
         res =
-          Teiserver.OAuth.create_application(app_attrs)
+          OAuth.create_application(app_attrs)
 
         case res do
           {:error, changeset} ->
@@ -69,7 +72,7 @@ defmodule Teiserver.Tachyon.Tasks.SetupApps do
   end
 
   defp find_root_user!() do
-    case Teiserver.Account.get_user_by_email("root@localhost") do
+    case Account.get_user_by_email("root@localhost") do
       nil -> raise "Cannot find root user root@localhost, set it up first"
       root -> root
     end

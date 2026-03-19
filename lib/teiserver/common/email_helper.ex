@@ -1,9 +1,11 @@
 defmodule Teiserver.EmailHelper do
   @moduledoc false
   alias Bamboo.Email
+  alias Teiserver.Account
   alias Teiserver.Config
-  alias Teiserver.Mailer
   alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Mailer
+  alias Teiserver.Telemetry
   require Logger
 
   def new_user(user) do
@@ -11,14 +13,14 @@ defmodule Teiserver.EmailHelper do
       true ->
         case do_new_user(user) do
           {:ok, _email, _response} ->
-            Teiserver.Telemetry.log_complex_server_event(user.id, "email.verification", %{
+            Telemetry.log_complex_server_event(user.id, "email.verification", %{
               result: "success"
             })
 
             :ok
 
           {:error, error} ->
-            Teiserver.Telemetry.log_complex_server_event(user.id, "email.verification", %{
+            Telemetry.log_complex_server_event(user.id, "email.verification", %{
               result: "failure",
               error: error
             })
@@ -33,23 +35,23 @@ defmodule Teiserver.EmailHelper do
 
   def send_password_reset(user, code \\ nil) do
     {code, email} = password_reset(user, code)
-    response = Teiserver.Mailer.deliver_now(email, response: true)
+    response = Mailer.deliver_now(email, response: true)
 
     case response do
       {:ok, _email, _response} ->
-        Teiserver.Telemetry.log_complex_server_event(user.id, "email.password_reset", %{
+        Telemetry.log_complex_server_event(user.id, "email.password_reset", %{
           result: "success"
         })
 
         :ok
 
       {:error, error} ->
-        Teiserver.Telemetry.log_complex_server_event(user.id, "email.password_reset", %{
+        Telemetry.log_complex_server_event(user.id, "email.password_reset", %{
           result: "failure",
           error: error
         })
 
-        case Teiserver.Account.delete_code(code) do
+        case Account.delete_code(code) do
           # the cursed path
           {:error, err} ->
             Logger.error(
@@ -76,7 +78,7 @@ defmodule Teiserver.EmailHelper do
         code
       else
         {:ok, code} =
-          Teiserver.Account.create_code(%{
+          Account.create_code(%{
             value: UUID.uuid1(),
             purpose: "reset_password",
             expires: Timex.now() |> Timex.shift(hours: 24),
@@ -114,7 +116,7 @@ defmodule Teiserver.EmailHelper do
       |> Email.to({user.name, user.email})
       |> Email.from(
         {Application.get_env(:teiserver, Teiserver.Mailer)[:noreply_name],
-         Teiserver.Mailer.noreply_address()}
+         Mailer.noreply_address()}
       )
       |> Email.subject(subject)
       |> Email.put_header("Date", date)
@@ -126,7 +128,7 @@ defmodule Teiserver.EmailHelper do
   end
 
   defp do_new_user(user) do
-    stats = Teiserver.Account.get_user_stat_data(user.id)
+    stats = Account.get_user_stat_data(user.id)
     host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     website_url = "https://#{host}"
     verification_code = stats["verification_code"]
@@ -170,6 +172,6 @@ defmodule Teiserver.EmailHelper do
     |> Email.put_header("Message-Id", message_id)
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
-    |> Teiserver.Mailer.deliver_now(response: true)
+    |> Mailer.deliver_now(response: true)
   end
 end

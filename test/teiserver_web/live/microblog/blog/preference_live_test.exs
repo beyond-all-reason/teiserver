@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
   test "microblog preferences requires authentication" do
     {:ok, kw} =
       GeneralTestLib.conn_setup([], [:no_login])
-      |> Teiserver.TeiserverTestLib.conn_setup()
+      |> TeiserverTestLib.conn_setup()
 
     {:ok, conn} = Keyword.fetch(kw, :conn)
 

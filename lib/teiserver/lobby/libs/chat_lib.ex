@@ -1,11 +1,13 @@
 defmodule Teiserver.Lobby.ChatLib do
   @moduledoc false
+  alias ExULID.ULID
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Battle
   alias Teiserver.Coordinator
+  alias Teiserver.Coordinator.Parser
   alias Teiserver.Moderation
   alias Teiserver.Lobby
   alias Phoenix.PubSub
@@ -55,7 +57,7 @@ defmodule Teiserver.Lobby.ChatLib do
         msg
       end
 
-    case Teiserver.Coordinator.Parser.handle_in(userid, msg, lobby_id) do
+    case Parser.handle_in(userid, msg, lobby_id) do
       :say -> do_say(userid, msg, lobby_id)
       :handled -> :ok
     end
@@ -336,7 +338,7 @@ defmodule Teiserver.Lobby.ChatLib do
 
     {:ok, code} =
       Account.create_code(%{
-        value: ExULID.ULID.generate(),
+        value: ULID.generate(),
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(minutes: 5),
         user_id: user_id,

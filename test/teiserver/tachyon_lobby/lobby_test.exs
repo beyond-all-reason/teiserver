@@ -4,6 +4,9 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   alias Teiserver.AssetFixtures
   alias Teiserver.Tachyon
   alias Teiserver.TachyonLobby, as: Lobby
+  alias Teiserver.TachyonLobby.Lobby, as: LobbyProcess
+  alias ExUnit.Callbacks
+  alias Teiserver.KvStore
 
   @moduletag :tachyon
 
@@ -417,7 +420,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       %{id: id} = setup_full_lobby()
       :ok = Lobby.join_queue(id, "2")
       assert_receive {:lobby, ^id, {:updated, updates}}
-      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      {:ok, details} = LobbyProcess.get_details(id)
       assert is_map_key(details.players, "2")
       assert %{players: %{"2" => %{team: {1, 0, 0}}}} = updates
       :ok = Lobby.join_queue(id, "2")
@@ -482,7 +485,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       # joining the queue again should not change anything
       :ok = Lobby.join_queue(id, "3")
       refute_receive _, 30
-      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      {:ok, details} = LobbyProcess.get_details(id)
       assert details.spectators["3"].join_queue_position == 1
     end
 
@@ -620,7 +623,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
           }
         )
 
-      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      {:ok, details} = LobbyProcess.get_details(id)
 
       refute is_map_key(details.players, bot_id)
 
@@ -784,7 +787,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       %{bots: %{^bot_id => %{name: "botv2", short_name: "short v2"}}} = update
 
       # and the details are also correct
-      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      {:ok, details} = LobbyProcess.get_details(id)
       %{name: "botv2", short_name: "short v2"} = details.bots[bot_id]
     end
   end
@@ -805,7 +808,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "name work" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       :ok = Lobby.update_properties(id, @default_user_id, %{name: "new name"})
-      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      {:ok, details} = LobbyProcess.get_details(id)
       assert details.name == "new name"
       assert_receive {:lobby, ^id, {:updated, %{name: "new name"}}}
     end
@@ -813,7 +816,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "map name" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
-      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      {:ok, details} = LobbyProcess.get_details(id)
       assert details.map_name == "new map"
       assert_receive {:lobby, ^id, {:updated, %{map_name: "new map"}}}
     end
@@ -826,10 +829,10 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "changing map with 2 players requires a vote" do
       %{id: id} = setup_full_lobby([1, 1])
       :ok = Lobby.join_queue(id, "2")
-      {:ok, original_details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      {:ok, original_details} = LobbyProcess.get_details(id)
 
       :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
-      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      {:ok, details} = LobbyProcess.get_details(id)
       assert details.map_name == original_details.map_name
       vote = details.current_vote
       assert vote != nil
@@ -847,7 +850,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
 
       assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
-      Teiserver.TachyonLobby.Lobby.trigger_vote_timeout(id, vote.id)
+      LobbyProcess.trigger_vote_timeout(id, vote.id)
       assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
       vote_id = vote.id
       assert_receive {:lobby, ^id, {:vote_ended, ^vote_id, :timeout}}
@@ -856,7 +859,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "vote timeout is bound to a current vote" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
 
-      Teiserver.TachyonLobby.Lobby.trigger_vote_timeout(id, "definitely-not-a-vote-id")
+      LobbyProcess.trigger_vote_timeout(id, "definitely-not-a-vote-id")
       refute_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}, 30
     end
 
@@ -963,7 +966,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok =
         Lobby.update_properties(id, @default_user_id, %{ally_team_config: new_ally_team_config})
 
-      {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+      {:ok, details} = LobbyProcess.get_details(id)
       assert details.ally_team_config == new_ally_team_config
       assert_receive {:lobby, ^id, {:updated, %{ally_team_config: patch_config}}}
 
@@ -1126,7 +1129,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   describe "state restoration" do
     def setup_restore_config(_) do
       Tachyon.enable_state_restoration()
-      ExUnit.Callbacks.on_exit(fn -> Tachyon.disable_state_restoration() end)
+      Callbacks.on_exit(fn -> Tachyon.disable_state_restoration() end)
     end
 
     setup [:setup_restore_config]
@@ -1138,7 +1141,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
 
       Tachyon.restart_system()
-      assert Teiserver.KvStore.get("lobby", id) == nil
+      assert KvStore.get("lobby", id) == nil
     end
 
     test "can rejoin lobby from snapshot" do
@@ -1276,7 +1279,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   describe "start script" do
     test "with 1 player" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
-      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      start_script = LobbyProcess.get_start_script(id)
       %{ally_teams: [%{teams: [%{players: [%{user_id: @default_user_id}]}]}]} = start_script
     end
 
@@ -1284,7 +1287,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
 
-      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      start_script = LobbyProcess.get_start_script(id)
       %{spectators: [%{user_id: "other-user-id"}]} = start_script
     end
 
@@ -1293,7 +1296,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
       {:ok, _} = Lobby.join_ally_team(id, "other-user-id", 0)
 
-      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      start_script = LobbyProcess.get_start_script(id)
       %{ally_teams: [%{teams: [t1, t2]}]} = start_script
       %{players: [%{user_id: @default_user_id}]} = t1
       %{players: [%{user_id: "other-user-id"}]} = t2
@@ -1306,7 +1309,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.spectate(id, @default_user_id)
       {:ok, _} = Lobby.join_ally_team(id, @default_user_id, 0)
 
-      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      start_script = LobbyProcess.get_start_script(id)
       %{ally_teams: [%{teams: [t1, t2]}]} = start_script
       %{players: [%{user_id: "other-user-id"}]} = t1
       %{players: [%{user_id: @default_user_id}]} = t2
@@ -1317,7 +1320,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _, _details} = Lobby.join(id, mk_player("other-user-id"))
       {:ok, _} = Lobby.join_ally_team(id, "other-user-id", 1)
 
-      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      start_script = LobbyProcess.get_start_script(id)
       %{ally_teams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
       %{players: [%{user_id: @default_user_id}]} = t1
       %{players: [%{user_id: "other-user-id"}]} = t2
@@ -1326,7 +1329,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "with a bot" do
       {:ok, _pid, %{id: id}} = Lobby.create(mk_start_params([2, 2]))
       {:ok, _bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
-      start_script = Teiserver.TachyonLobby.Lobby.get_start_script(id)
+      start_script = LobbyProcess.get_start_script(id)
       %{ally_teams: [%{teams: [t1]}, %{teams: [t2]}]} = start_script
       %{players: [%{user_id: @default_user_id}]} = t1
       %{bots: [%{host_user_id: @default_user_id, ai_short_name: "bot short name"}]} = t2
@@ -1337,7 +1340,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   # again, this should probably be exatracted in a more general module
   describe "patch merge" do
-    import Teiserver.TachyonLobby.Lobby, only: [patch_merge: 2]
+    import LobbyProcess, only: [patch_merge: 2]
 
     test "update a simple (non map) value" do
       assert patch_merge(%{key: "s1"}, %{key: "s2"}) == %{key: "s2"}
@@ -1411,7 +1414,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       end)
       |> Map.new()
 
-    {:ok, details} = Teiserver.TachyonLobby.Lobby.get_details(id)
+    {:ok, details} = LobbyProcess.get_details(id)
     assert map_size(details.players) == 1
     assert map_size(details.spectators) == 4
 
@@ -1432,6 +1435,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   defp mk_sink(name \\ :sink) do
     Supervisor.child_spec({Task, fn -> :timer.sleep(:infinity) end}, id: name)
-    |> ExUnit.Callbacks.start_supervised!()
+    |> Callbacks.start_supervised!()
   end
 end

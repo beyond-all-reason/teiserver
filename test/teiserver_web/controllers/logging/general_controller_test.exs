@@ -2,9 +2,10 @@ defmodule TeiserverWeb.Logging.LoggingControllerTest do
   use TeiserverWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   test "lists admin links" do
-    {:ok, data} = GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
+    {:ok, data} = GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())
     conn = get(data[:conn], ~p"/logging")
     assert html_response(conn, 200) =~ ~p"/logging/server", "logs available to admins"
 
@@ -13,7 +14,7 @@ defmodule TeiserverWeb.Logging.LoggingControllerTest do
   end
 
   test "lists server links" do
-    {:ok, data} = GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.server_permissions())
+    {:ok, data} = GeneralTestLib.conn_setup(TeiserverTestLib.server_permissions())
     conn = get(data[:conn], ~p"/logging")
     assert html_response(conn, 200) =~ ~p"/logging/server", "logs available to servers admins"
 

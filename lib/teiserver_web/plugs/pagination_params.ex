@@ -4,11 +4,13 @@ defmodule TeiserverWeb.Plugs.PaginationParams do
   This prevents abuse and ensures consistent pagination behavior across all controllers.
   """
 
+  alias TeiserverWeb.Parsers.PaginationParams, as: ParsersPaginationParams
+
   def init(opts), do: opts
 
   def call(conn, _opts) do
     # Use centralized parsing logic
-    parsed_params = TeiserverWeb.Parsers.PaginationParams.parse_params(conn.params)
+    parsed_params = ParsersPaginationParams.parse_params(conn.params)
 
     # Update the params with parsed values
     updated_params =

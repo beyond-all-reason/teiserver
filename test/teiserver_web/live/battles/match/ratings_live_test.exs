@@ -2,11 +2,12 @@ defmodule TeiserverWeb.Battle.MatchLive.RatingsLiveTest do
   use TeiserverWeb.ConnCase, async: true
 
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   test "battle ratings endpoints requires authentication" do
     {:ok, kw} =
       GeneralTestLib.conn_setup([], [:no_login])
-      |> Teiserver.TeiserverTestLib.conn_setup()
+      |> TeiserverTestLib.conn_setup()
 
     {:ok, conn} = Keyword.fetch(kw, :conn)
 
@@ -17,7 +18,7 @@ defmodule TeiserverWeb.Battle.MatchLive.RatingsLiveTest do
   test "can access battle ratings when authenticated" do
     {:ok, kw} =
       GeneralTestLib.conn_setup()
-      |> Teiserver.TeiserverTestLib.conn_setup()
+      |> TeiserverTestLib.conn_setup()
 
     {:ok, conn} = Keyword.fetch(kw, :conn)
 

@@ -1,11 +1,14 @@
 defmodule Teiserver.Monitoring.Spring do
   use PromEx.Plugin
 
+  alias Teiserver.Account.LoginThrottleServer
+  alias Teiserver.Telemetry
+
   @impl PromEx.Plugin
   def event_metrics(_opts) do
     Event.build(
       :spring_metrics,
-      Teiserver.Telemetry.metrics()
+      Telemetry.metrics()
     )
   end
 
@@ -32,7 +35,7 @@ defmodule Teiserver.Monitoring.Spring do
   end
 
   def execute_spring_polling_metrics() do
-    login_queue_length = Teiserver.Account.LoginThrottleServer.get_queue_length()
+    login_queue_length = LoginThrottleServer.get_queue_length()
     :telemetry.execute([:spring, :login_queue_length], %{value: login_queue_length}, %{})
   end
 end

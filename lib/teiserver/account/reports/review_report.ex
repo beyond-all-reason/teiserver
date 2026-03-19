@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.ReviewReport do
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Logging
+  alias Teiserver.Logging.ServerDayLogLib
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-champagne-glasses"
@@ -28,7 +29,7 @@ defmodule Teiserver.Account.ReviewReport do
         ],
         limit: :infinity
       )
-      |> Teiserver.Logging.ServerDayLogLib.aggregate_day_logs()
+      |> ServerDayLogLib.aggregate_day_logs()
       |> Jason.encode!()
       |> Jason.decode!()
 
@@ -44,7 +45,7 @@ defmodule Teiserver.Account.ReviewReport do
         ],
         limit: :infinity
       )
-      |> Teiserver.Logging.ServerDayLogLib.aggregate_day_logs()
+      |> ServerDayLogLib.aggregate_day_logs()
       |> Jason.encode!()
       |> Jason.decode!()
 

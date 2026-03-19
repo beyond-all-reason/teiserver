@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       socket
       |> mount_require_all(["Overwatch"])
       |> assign(:site_menu_active, "match")
-      |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
+      |> assign(:view_colour, MatchLib.colours())
       |> assign(:tab, "details")
       |> assign(:highlight_map, %{})
       |> assign(:extra_url_parts, "")

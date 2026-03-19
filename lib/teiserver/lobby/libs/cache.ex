@@ -5,10 +5,11 @@ defmodule Teiserver.Lobby.Cache do
 
   use Supervisor
   alias Teiserver.Helpers.CacheHelper
+  alias Teiserver.Lobby.CommandLib
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),
-         :ok <- Teiserver.Lobby.CommandLib.cache_lobby_commands() do
+         :ok <- CommandLib.cache_lobby_commands() do
       {:ok, sup}
     end
   end

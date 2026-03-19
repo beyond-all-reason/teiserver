@@ -4,12 +4,14 @@ defmodule Teiserver.Config.SiteConfigTypes.Cache do
   """
 
   use Supervisor
+  alias Teiserver.Config.SiteConfigTypes.SystemConfigs
   alias Teiserver.Helpers.CacheHelper
+  alias Teiserver.TeiserverConfigs
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),
-         :ok <- Teiserver.Config.SiteConfigTypes.SystemConfigs.create(),
-         :ok <- Teiserver.TeiserverConfigs.teiserver_configs() do
+         :ok <- SystemConfigs.create(),
+         :ok <- TeiserverConfigs.teiserver_configs() do
       {:ok, sup}
     end
   end

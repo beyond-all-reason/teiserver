@@ -12,8 +12,10 @@ defmodule Teiserver.OAuth do
   alias Teiserver.OAuth.TokenQueries
   alias Teiserver.OAuth.CredentialQueries
 
+  alias Plug.Conn
   alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
+  alias Timex.Duration
 
   # @spec change_application(Application.t(), map() | nil) :: Ecto.Changeset
   def change_application(%Application{} = app, attrs \\ %{}) do
@@ -144,7 +146,7 @@ defmodule Teiserver.OAuth do
         owner_id: user_id,
         application_id: app_id,
         scopes: attrs.scopes,
-        expires_at: Timex.add(now, Timex.Duration.from_minutes(5)),
+        expires_at: Timex.add(now, Duration.from_minutes(5)),
         redirect_uri: Map.get(attrs, :redirect_uri),
         challenge: Map.get(attrs, :challenge),
         challenge_method: Map.get(attrs, :challenge_method)
@@ -215,7 +217,7 @@ defmodule Teiserver.OAuth do
           application_id: application.id,
           scopes: scopes,
           original_scopes: Map.get(application, :original_scopes, application.scopes),
-          expires_at: Timex.add(now, Timex.Duration.from_minutes(30)),
+          expires_at: Timex.add(now, Duration.from_minutes(30)),
           type: :access
         }
         |> Map.merge(owner_attr)
@@ -229,7 +231,7 @@ defmodule Teiserver.OAuth do
             original_scopes: application.scopes,
             # there's no real recourse when the refresh token expires and it's
             # quite annoying, so make it "never" expire.
-            expires_at: Timex.add(now, Timex.Duration.from_days(365 * 100)),
+            expires_at: Timex.add(now, Duration.from_days(365 * 100)),
             type: :refresh,
             refresh_token: nil
           }
@@ -500,10 +502,10 @@ defmodule Teiserver.OAuth do
   @doc """
   Similar to Plug.BasicAuth.parse_basic_auth but compliant with OAuth special handling
   """
-  @spec parse_basic_auth(Plug.Conn.t()) ::
+  @spec parse_basic_auth(Conn.t()) ::
           {client_id :: String.t(), client_secret :: String.t()} | :error
-  def parse_basic_auth(%Plug.Conn{} = conn) do
-    with ["Basic " <> encoded_parts] <- Plug.Conn.get_req_header(conn, "authorization"),
+  def parse_basic_auth(%Conn{} = conn) do
+    with ["Basic " <> encoded_parts] <- Conn.get_req_header(conn, "authorization"),
          {:ok, decoded} <- Base.decode64(encoded_parts),
          [client_id, client_secret] <- :binary.split(decoded, ":") do
       {URI.decode_www_form(client_id), URI.decode_www_form(client_secret)}

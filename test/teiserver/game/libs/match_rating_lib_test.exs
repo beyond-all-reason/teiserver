@@ -8,6 +8,8 @@ defmodule Teiserver.Game.MatchRatingLibTest do
   alias Teiserver.Account.AccountTestLib
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Game.MatchRatingLib
+  alias Ecto.Multi
+  alias Teiserver.Repo
 
   test "num_matches and num_wins is updated after rating a match" do
     # Create two user
@@ -201,13 +203,13 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       }
     ]
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.insert_all(
+    Multi.new()
+    |> Multi.insert_all(
       :insert_all,
       Battle.MatchMembership,
       memberships1 ++ memberships2
     )
-    |> Teiserver.Repo.transaction()
+    |> Repo.transaction()
 
     match
   end

@@ -5,13 +5,22 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   use Mix.Task
 
+  alias Ecto.Multi
   alias Teiserver.Account
-  alias Teiserver.Logging
+  alias Teiserver.Account.User
   alias Teiserver.Battle
-  alias Teiserver.Moderation
-  alias Teiserver.Helper.StylingHelper
   alias Teiserver.Battle.MatchLib
+  alias Teiserver.Battle.MatchMembership
+  alias Teiserver.Config
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.StylingHelper
+  alias Teiserver.Logging.ServerMinuteLog
+  alias Teiserver.Logging.Tasks.PersistMatchDayTask
+  alias Teiserver.Logging.Tasks.PersistMatchMonthTask
+  alias Teiserver.Logging.Tasks.PersistServerDayTask
+  alias Teiserver.Logging.Tasks.PersistServerMonthTask
+  alias Teiserver.Moderation.Report
+  alias Teiserver.Repo
   require Logger
 
   @settings %{
@@ -117,9 +126,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       |> Enum.to_list()
       |> List.flatten()
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.insert_all(:insert_all, Teiserver.Account.User, new_users)
-    |> Teiserver.Repo.transaction()
+    Multi.new()
+    |> Multi.insert_all(:insert_all, User, new_users)
+    |> Repo.transaction()
   end
 
   defp make_telemetry() do
@@ -209,16 +218,16 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
           }
         end)
 
-      Ecto.Multi.new()
-      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Logging.ServerMinuteLog, logs)
-      |> Teiserver.Repo.transaction()
+      Multi.new()
+      |> Multi.insert_all(:insert_all, ServerMinuteLog, logs)
+      |> Repo.transaction()
     end)
 
     # Now persist day values
     Range.new(0, @settings.days)
     |> Enum.each(fn _day ->
-      Logging.Tasks.PersistServerDayTask.perform(%{})
-      Logging.Tasks.PersistMatchDayTask.perform(%{})
+      PersistServerDayTask.perform(%{})
+      PersistMatchDayTask.perform(%{})
     end)
 
     # And monthly
@@ -226,8 +235,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
     Range.new(0, months)
     |> Enum.each(fn _day ->
-      Logging.Tasks.PersistServerMonthTask.perform(%{})
-      Logging.Tasks.PersistMatchMonthTask.perform(%{})
+      PersistServerMonthTask.perform(%{})
+      PersistMatchMonthTask.perform(%{})
     end)
   end
 
@@ -304,9 +313,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
           }
         end)
 
-      Ecto.Multi.new()
-      |> Ecto.Multi.insert_all(:insert_all, Moderation.Report, basic_reports ++ match_reports)
-      |> Teiserver.Repo.transaction()
+      Multi.new()
+      |> Multi.insert_all(:insert_all, Report, basic_reports ++ match_reports)
+      |> Repo.transaction()
     end)
   end
 
@@ -416,29 +425,29 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
               }
             end)
 
-          Ecto.Multi.new()
-          |> Ecto.Multi.insert_all(
+          Multi.new()
+          |> Multi.insert_all(
             :insert_all,
-            Battle.MatchMembership,
+            MatchMembership,
             memberships1 ++ memberships2
           )
-          |> Teiserver.Repo.transaction()
+          |> Repo.transaction()
 
           match.id
         end)
       end)
 
-    Teiserver.Game.MatchRatingLib.re_rate_specific_matches(match_ids)
+    MatchRatingLib.re_rate_specific_matches(match_ids)
   end
 
   defp set_active_season(season) do
-    Teiserver.Config.update_site_config("rating.Season", season)
+    Config.update_site_config("rating.Season", season)
   end
 
   defp make_one_time_code() do
     root_user = Account.get_user_by_email("root@localhost")
 
-    Teiserver.Config.update_site_config("user.Enable one time links", "true")
+    Config.update_site_config("user.Enable one time links", "true")
 
     {:ok, _code} =
       Account.create_code(%{

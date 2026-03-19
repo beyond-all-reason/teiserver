@@ -2,7 +2,9 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Account
+  alias Teiserver.Account.UserLib
   alias Teiserver.Config
+  alias TeiserverWeb.Account.ProfileLive.Overview
 
   @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -26,11 +28,11 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
           socket
           |> assign(:tab, nil)
           |> assign(:site_menu_active, "teiserver_account")
-          |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+          |> assign(:view_colour, UserLib.colours())
           |> assign(:user, user)
           |> assign(:error_message, nil)
           |> assign(:hide_contributor_rank, hide_contributor_rank)
-          |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
+          |> Overview.get_relationships_and_permissions()
           |> user_assigns()
       end
 

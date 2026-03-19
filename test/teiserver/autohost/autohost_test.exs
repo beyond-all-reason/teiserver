@@ -2,7 +2,10 @@ defmodule Teiserver.Autohost.AutohostTest do
   use Teiserver.DataCase, async: false
   import Teiserver.Support.Polling, only: [poll_until: 2, poll_until_nil: 1]
 
+  alias ExUnit.Callbacks
   alias Teiserver.Autohost
+  alias Teiserver.Autohost.Session
+  alias Teiserver.Autohost.SessionRegistry
   alias Teiserver.BotFixtures
 
   @moduletag :tachyon
@@ -30,7 +33,7 @@ defmodule Teiserver.Autohost.AutohostTest do
   end
 
   defp register_autohost(id, max, current) do
-    Autohost.SessionRegistry.register(%{id: id, max_battles: max, current_battles: current})
+    SessionRegistry.register(%{id: id, max_battles: max, current_battles: current})
   end
 
   describe "autohost state" do
@@ -38,8 +41,8 @@ defmodule Teiserver.Autohost.AutohostTest do
       autohost = BotFixtures.create_bot()
 
       sess_pid =
-        Autohost.Session.child_spec({autohost, self()})
-        |> ExUnit.Callbacks.start_link_supervised!()
+        Session.child_spec({autohost, self()})
+        |> Callbacks.start_link_supervised!()
 
       assert_receive({:call_client, "autohost/subscribeUpdates", _, ref})
       send(ref, {ref, %{"status" => "success"}})
@@ -50,7 +53,7 @@ defmodule Teiserver.Autohost.AutohostTest do
 
       refute_receive {:start_battle, "battle_id", _}
       # need to update capacity first, only then the autohost is considered fully online
-      Autohost.Session.update_capacity(sess_pid, 10, 0)
+      Session.update_capacity(sess_pid, 10, 0)
 
       assert_receive {:start_battle, "battle_id", _}
     end
@@ -58,7 +61,7 @@ defmodule Teiserver.Autohost.AutohostTest do
     test "default subscribe messages from now" do
       ctx = setup_autohost()
       ctx = Map.merge(ctx, setup_battle(ctx.autohost, ctx.pid))
-      sub_start = Autohost.Session.inspect_subscription_start(ctx.autohost.id)
+      sub_start = Session.inspect_subscription_start(ctx.autohost.id)
 
       assert_in_delta DateTime.to_unix(sub_start, :millisecond),
                       DateTime.to_unix(DateTime.utc_now(), :millisecond),
@@ -70,9 +73,9 @@ defmodule Teiserver.Autohost.AutohostTest do
       ctx = Map.merge(ctx, setup_battle(ctx.autohost, ctx.pid))
       t0 = ~U[2026-01-23 12:34:56.00Z]
       event = %{message_id: "123", battle_id: ctx.battle_id, time: t0}
-      Autohost.Session.handle_update_event(ctx.pid, event)
+      Session.handle_update_event(ctx.pid, event)
 
-      sub_start = Autohost.Session.inspect_subscription_start(ctx.autohost.id)
+      sub_start = Session.inspect_subscription_start(ctx.autohost.id)
       assert sub_start == DateTime.shift(t0, microsecond: {-1, 6})
     end
 
@@ -81,10 +84,10 @@ defmodule Teiserver.Autohost.AutohostTest do
       ctx = Map.merge(ctx, setup_battle(ctx.autohost, ctx.pid))
       t0 = ~U[2026-01-23 12:34:56.00Z]
       event = %{message_id: "123", battle_id: ctx.battle_id, time: t0}
-      Autohost.Session.handle_update_event(ctx.pid, event)
-      Autohost.Session.ack_update_event(ctx.pid, ctx.battle_id, t0)
+      Session.handle_update_event(ctx.pid, event)
+      Session.ack_update_event(ctx.pid, ctx.battle_id, t0)
 
-      sub_start = Autohost.Session.inspect_subscription_start(ctx.autohost.id)
+      sub_start = Session.inspect_subscription_start(ctx.autohost.id)
       assert sub_start == t0
     end
 
@@ -98,10 +101,10 @@ defmodule Teiserver.Autohost.AutohostTest do
       t1 = ~U[2026-01-23 12:34:56.00Z]
       event1 = %{message_id: "123", battle_id: battle_id, time: t1}
 
-      Autohost.Session.handle_update_event(ctx.pid, event0)
-      Autohost.Session.handle_update_event(ctx.pid, event1)
+      Session.handle_update_event(ctx.pid, event0)
+      Session.handle_update_event(ctx.pid, event1)
 
-      sub_start = Autohost.Session.inspect_subscription_start(ctx.autohost.id)
+      sub_start = Session.inspect_subscription_start(ctx.autohost.id)
       assert sub_start == DateTime.shift(t0, microsecond: {-1, 6})
     end
 
@@ -116,10 +119,10 @@ defmodule Teiserver.Autohost.AutohostTest do
       t1 = ~U[2026-01-23 12:34:56.00Z]
       event1 = %{message_id: "123", battle_id: bid2, time: t1}
 
-      Autohost.Session.handle_update_event(ctx.pid, event0)
-      Autohost.Session.handle_update_event(ctx.pid, event1)
+      Session.handle_update_event(ctx.pid, event0)
+      Session.handle_update_event(ctx.pid, event1)
 
-      sub_start = Autohost.Session.inspect_subscription_start(ctx.autohost.id)
+      sub_start = Session.inspect_subscription_start(ctx.autohost.id)
       assert sub_start == DateTime.shift(t0, microsecond: {-1, 6})
     end
   end
@@ -128,12 +131,12 @@ defmodule Teiserver.Autohost.AutohostTest do
     autohost = BotFixtures.create_bot()
 
     sess_pid =
-      Autohost.Session.child_spec({autohost, self()})
-      |> ExUnit.Callbacks.start_link_supervised!()
+      Session.child_spec({autohost, self()})
+      |> Callbacks.start_link_supervised!()
 
     assert_receive({:call_client, "autohost/subscribeUpdates", _, ref})
     send(ref, {ref, %{"status" => "success"}})
-    Autohost.Session.update_capacity(sess_pid, 10, 0)
+    Session.update_capacity(sess_pid, 10, 0)
     %{autohost: autohost, pid: sess_pid}
   end
 
@@ -146,7 +149,7 @@ defmodule Teiserver.Autohost.AutohostTest do
     end)
 
     assert_receive {:start_battle, ^battle_id, _}
-    Autohost.Session.reply_start_battle(pid, battle_id, {:ok, %{ips: ["1.2.3.4"], port: 1234}})
+    Session.reply_start_battle(pid, battle_id, {:ok, %{ips: ["1.2.3.4"], port: 1234}})
     %{battle_id: battle_id}
   end
 

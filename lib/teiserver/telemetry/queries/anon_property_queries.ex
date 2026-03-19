@@ -1,6 +1,7 @@
 defmodule Teiserver.Telemetry.AnonPropertyQueries do
   @moduledoc false
   use TeiserverWeb, :queries
+  alias Ecto.Adapters.SQL
   alias Teiserver.Telemetry.AnonProperty
 
   # Queries
@@ -117,7 +118,7 @@ defmodule Teiserver.Telemetry.AnonPropertyQueries do
       GROUP BY value
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, [property_type_id, start_datetime, end_datetime]) do
+    case SQL.query(Repo, query, [property_type_id, start_datetime, end_datetime]) do
       {:ok, results} ->
         results.rows
         |> Map.new(fn [key, value] ->

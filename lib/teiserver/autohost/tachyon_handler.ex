@@ -6,6 +6,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   very different roles, have very different behaviour and states.
   """
   alias Teiserver.Autohost.Session
+  alias Teiserver.Autohost.SessionSupervisor
   alias Teiserver.Bot.Bot
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.TachyonParser
@@ -77,7 +78,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   def init(state) do
     Logger.metadata(actor_type: :autohost_conn, actor_id: state.autohost.id)
 
-    case Teiserver.Autohost.SessionSupervisor.start_session(state.autohost, self()) do
+    case SessionSupervisor.start_session(state.autohost, self()) do
       {:ok, session_pid} ->
         state = Map.put(state, :session_pid, session_pid)
         {:ok, state}

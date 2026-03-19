@@ -1,6 +1,9 @@
 defmodule TeiserverWeb.OAuth.CodeView do
   use TeiserverWeb, :view
 
+  alias Teiserver.OAuth
+  alias TeiserverWeb.Endpoint
+
   def token(%{token: token}) do
     expires_in = DateTime.diff(token.expires_at, DateTime.utc_now(), :second)
 
@@ -24,8 +27,8 @@ defmodule TeiserverWeb.OAuth.CodeView do
 
   def metadata(_) do
     base =
-      Application.get_env(:teiserver, Teiserver.OAuth)[:issuer] ||
-        TeiserverWeb.Endpoint.static_url()
+      Application.get_env(:teiserver, OAuth)[:issuer] ||
+        Endpoint.static_url()
 
     %{
       issuer: base,

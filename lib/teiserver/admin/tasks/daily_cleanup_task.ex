@@ -2,6 +2,7 @@ defmodule Teiserver.Admin.DailyCleanupTask do
   @moduledoc false
   use Oban.Worker, queue: :cleanup
 
+  alias Ecto.Adapters.SQL
   alias Teiserver.Config
   alias Teiserver.Repo
 
@@ -9,7 +10,7 @@ defmodule Teiserver.Admin.DailyCleanupTask do
   @spec perform(any) :: :ok
   def perform(_) do
     if Config.get_site_config_cache("system.Use geoip") do
-      Ecto.Adapters.SQL.query!(Repo, "VACUUM ANALYZE;", [])
+      SQL.query!(Repo, "VACUUM ANALYZE;", [])
     end
 
     :ok

@@ -3,6 +3,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
   use Oban.Worker, queue: :teiserver
   alias Teiserver.Logging
   alias Teiserver.Logging.ServerDayLogLib
+  alias Teiserver.Logging.Tasks.PersistServerYearTask
   import Ecto.Query, warn: false
 
   @impl Oban.Worker
@@ -19,7 +20,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
 
     if log != nil do
       %{}
-      |> Teiserver.Logging.Tasks.PersistServerYearTask.new()
+      |> PersistServerYearTask.new()
       |> Oban.insert()
     end
 

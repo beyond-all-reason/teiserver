@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Battle.MatchLive.ChatLiveTest do
   use TeiserverWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   # https://github.com/beyond-all-reason/teiserver/actions/runs/12946468298/job/36111060092?pr=560
   # at a glance there's a problem with throttling in some cases?
@@ -13,7 +14,7 @@ defmodule TeiserverWeb.Battle.MatchLive.ChatLiveTest do
     {:ok, user} = Keyword.fetch(kw, :user)
 
     battle =
-      Teiserver.TeiserverTestLib.make_battle(%{
+      TeiserverTestLib.make_battle(%{
         name: "LiveBattle",
         founder_id: user.id,
         founder_name: user.name

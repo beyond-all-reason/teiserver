@@ -2,6 +2,7 @@ defmodule Teiserver.Tachyon.Schema do
   @moduledoc """
   utilities to parse tachyon schemas
   """
+  alias Teiserver.Helpers.CacheHelper
   require Logger
 
   @type command_id :: String.t()
@@ -11,7 +12,7 @@ defmodule Teiserver.Tachyon.Schema do
   @cache_name :tachyon_schema_cache
 
   def cache_spec() do
-    Teiserver.Helpers.CacheHelper.concache_perm_sup(@cache_name)
+    CacheHelper.concache_perm_sup(@cache_name)
   end
 
   @doc """

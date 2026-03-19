@@ -3,14 +3,15 @@ defmodule Teiserver.Account.AccoladeBotServer do
   The accolade server is the interface point for the Accolade system.
   """
   use GenServer
-  alias Teiserver.Config
   alias Teiserver.Account
-  alias Teiserver.CacheUser
-  alias Teiserver.Room
-  alias Teiserver.Battle
-  alias Teiserver.Coordinator
-  alias Teiserver.Coordinator.CoordinatorCommands
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.Auth
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Config
+  alias Teiserver.Coordinator.CoordinatorCommands
+  alias Teiserver.Coordinator.Parser
+  alias Teiserver.Room
   alias Phoenix.PubSub
   require Logger
 
@@ -122,14 +123,14 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   def handle_info({:direct_message, sender_id, "$" <> command}, state) do
-    cmd = Coordinator.Parser.parse_command(sender_id, "$#{command}")
+    cmd = Parser.parse_command(sender_id, "$#{command}")
     new_state = CoordinatorCommands.handle_command(cmd, state)
 
     {:noreply, new_state}
   end
 
   def handle_info({:direct_message, userid, message}, state) do
-    if not Teiserver.Account.Auth.is_bot?(userid) do
+    if not Auth.is_bot?(userid) do
       case AccoladeLib.cast_accolade_chat(userid, {:user_message, message}) do
         nil ->
           CacheUser.send_direct_message(
@@ -187,8 +188,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
           Account.script_create_user(%{
             name: "AccoladesBot",
             email: "accolades_bot@teiserver.local",
-            icon:
-              "fa-solid #{Teiserver.Account.AccoladeLib.icon()}" |> String.replace(" far ", " "),
+            icon: "fa-solid #{AccoladeLib.icon()}" |> String.replace(" far ", " "),
             colour: "#0066AA",
             password: Account.make_bot_password(),
             roles: ["Bot", "Verified"],

@@ -9,7 +9,10 @@ defmodule TeiserverWeb.TournamentLive.Show do
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.CacheUser
   alias Teiserver.Coordinator
+  alias Teiserver.Coordinator.Parser
+  alias Teiserver.Helper.StylingHelper
   alias Teiserver.Lobby
+  alias Teiserver.ServerUserPlug
   alias Teiserver.Telemetry
 
   @extra_menu_content """
@@ -42,7 +45,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
 
     socket =
       socket
-      |> Teiserver.ServerUserPlug.live_call()
+      |> ServerUserPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/battle/lobbies")
       |> assign(:friends, friends)
@@ -130,7 +133,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
       |> Map.drop([nil])
       |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
       |> Map.keys()
-      |> Enum.zip(Teiserver.Helper.StylingHelper.bright_hex_colour_list())
+      |> Enum.zip(StylingHelper.bright_hex_colour_list())
       |> Map.new()
 
     stats =
@@ -255,7 +258,7 @@ defmodule TeiserverWeb.TournamentLive.Show do
 
   def handle_event("send-to-host", %{"msg" => msg}, %{assigns: assigns} = socket) do
     from_id = Coordinator.get_coordinator_userid()
-    Teiserver.Coordinator.Parser.handle_in(from_id, msg, assigns.id)
+    Parser.handle_in(from_id, msg, assigns.id)
 
     {:noreply, socket}
   end

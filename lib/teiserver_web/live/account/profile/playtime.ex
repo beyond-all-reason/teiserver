@@ -2,6 +2,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Playtime do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Account
+  alias Teiserver.Account.UserLib
+  alias TeiserverWeb.Account.ProfileLive.Overview
 
   @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -17,9 +19,9 @@ defmodule TeiserverWeb.Account.ProfileLive.Playtime do
         socket
         |> assign(:tab, nil)
         |> assign(:site_menu_active, "teiserver_account")
-        |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+        |> assign(:view_colour, UserLib.colours())
         |> assign(:user, user)
-        |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
+        |> Overview.get_relationships_and_permissions()
         |> get_times()
       end
 

@@ -1,5 +1,6 @@
 defmodule Teiserver.Admin.DeleteUserTask do
   @moduledoc false
+  alias Ecto.Adapters.SQL
   alias Teiserver.Repo
   alias Teiserver.Account
   alias Teiserver.CacheUser
@@ -66,12 +67,12 @@ defmodule Teiserver.Admin.DeleteUserTask do
       "DELETE FROM moderation_actions WHERE target_id = ANY($1)"
     ]
     |> Enum.each(fn query ->
-      Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+      SQL.query!(Repo, query, [id_list])
     end)
 
     # And now the users
     query = "DELETE FROM account_users WHERE id = ANY($1)"
-    Ecto.Adapters.SQL.query!(Repo, query, [id_list])
+    SQL.query!(Repo, query, [id_list])
 
     # Delete our cache of them
     id_list

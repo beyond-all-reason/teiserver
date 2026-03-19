@@ -10,6 +10,7 @@ defmodule Teiserver.Player.Registry do
   """
 
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Player.TachyonHandler
 
   def start_link() do
     Horde.Registry.start_link(keys: :unique, name: __MODULE__)
@@ -36,7 +37,7 @@ defmodule Teiserver.Player.Registry do
 
       {:error, {:already_registered, existing_conn_pid}} ->
         Horde.Registry.unregister(__MODULE__, via_tuple(user_id))
-        Teiserver.Player.TachyonHandler.force_disconnect(existing_conn_pid)
+        TachyonHandler.force_disconnect(existing_conn_pid)
         :timer.sleep(1)
         register_and_kill_existing(user_id)
     end

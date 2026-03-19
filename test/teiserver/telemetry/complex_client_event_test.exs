@@ -3,13 +3,14 @@ defmodule Teiserver.Telemetry.ComplexClientEventTest do
   use Teiserver.DataCase
   alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
+  alias Ecto.Adapters.SQL
 
   test "complex client events" do
     r = :rand.uniform(999_999_999)
 
     # Start by removing all client events
     query = "DELETE FROM telemetry_complex_client_events;"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    SQL.query(Repo, query, [])
 
     user = TeiserverTestLib.new_user("complex_client_event_user")
     assert Telemetry.list_complex_client_events() |> Enum.count() == 0

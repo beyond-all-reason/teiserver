@@ -6,6 +6,7 @@ defmodule Teiserver.Account.FriendRequestLibTest do
   alias Teiserver.Account.RelationshipLib
   alias Teiserver.Account, as: Account
   alias Teiserver.Config
+  alias Teiserver.Repo
 
   defp friend_request_fixture(%{id: id}, to), do: friend_request_fixture(id, to)
   defp friend_request_fixture(from, %{id: id}), do: friend_request_fixture(from, id)
@@ -13,7 +14,7 @@ defmodule Teiserver.Account.FriendRequestLibTest do
   defp friend_request_fixture(from, to) do
     %FriendRequest{}
     |> FriendRequest.changeset(%{from_user_id: from, to_user_id: to})
-    |> Teiserver.Repo.insert!()
+    |> Repo.insert!()
   end
 
   test "list requests" do

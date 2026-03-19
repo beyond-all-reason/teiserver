@@ -5,6 +5,10 @@ defmodule Teiserver.Application do
 
   use Application
   alias Phoenix.PubSub
+  alias Teiserver.Helper.ObanLogger
+  alias Teiserver.Startup
+  alias TeiserverWeb.Endpoint
+  alias TeiserverWeb.Monitoring.Router, as: MonitoringRouter
   require Logger
 
   import Teiserver.Helpers.CacheHelper,
@@ -166,7 +170,7 @@ defmodule Teiserver.Application do
         {Plug.Cowboy,
          scheme: :http,
          plug: TeiserverWeb.Monitoring.Router,
-         options: [port: TeiserverWeb.Monitoring.Router.port()]},
+         options: [port: MonitoringRouter.port()]},
         Teiserver.Communication.Cache,
 
         # Start the endpoint after the rest of the systems are up
@@ -206,16 +210,16 @@ defmodule Teiserver.Application do
       [:oban, :circuit, :trip]
     ]
 
-    :telemetry.attach_many("oban-logger", events, &Teiserver.Helper.ObanLogger.handle_event/4, [])
+    :telemetry.attach_many("oban-logger", events, &ObanLogger.handle_event/4, [])
 
-    Teiserver.Startup.startup()
+    Startup.startup()
   end
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
   @impl Application
   def config_change(changed, _new, removed) do
-    TeiserverWeb.Endpoint.config_change(changed, removed)
+    Endpoint.config_change(changed, removed)
     :ok
   end
 

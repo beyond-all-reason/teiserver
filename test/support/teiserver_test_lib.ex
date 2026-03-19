@@ -9,6 +9,16 @@ defmodule Teiserver.TeiserverTestLib do
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Coordinator.CoordinatorServer
   alias Teiserver.Data.Types, as: T
+  alias ExUnit.Callbacks
+  alias Teiserver.Account.AccoladeBotServer
+  alias Teiserver.Clans
+  alias Teiserver.Coordinator
+  alias Teiserver.Game
+  alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Lobby
+  alias Teiserver.Moderation
+  alias Teiserver.Telemetry
+
   @host ~c"127.0.0.1"
 
   @spec raw_setup(map()) :: %{socket: port()}
@@ -107,7 +117,7 @@ defmodule Teiserver.TeiserverTestLib do
     # This is because upon disconnecting, the server does a bunch of DB call for logging
     # and telemetry. The disconnection happen when the tcp socket is closed, and by
     # that time, the test has ended and the SQL sandbox closed.
-    ExUnit.Callbacks.on_exit(fn -> Teiserver.Client.disconnect(user.id) end)
+    Callbacks.on_exit(fn -> Client.disconnect(user.id) end)
     %{socket: socket, user: user, pid: pid}
   end
 
@@ -340,10 +350,10 @@ defmodule Teiserver.TeiserverTestLib do
     ["Verified"]
   end
 
-  @spec make_clan(String.t(), map()) :: Teiserver.Clans.Clan.t()
+  @spec make_clan(String.t(), map()) :: Clans.Clan.t()
   def make_clan(name, params \\ %{}) do
     {:ok, c} =
-      Teiserver.Clans.create_clan(
+      Clans.create_clan(
         Map.merge(
           %{
             "name" => name,
@@ -385,17 +395,17 @@ defmodule Teiserver.TeiserverTestLib do
         }
       }
       |> Map.merge(params)
-      |> Teiserver.Lobby.create_lobby()
-      |> Teiserver.Lobby.add_lobby()
+      |> Lobby.create_lobby()
+      |> Lobby.add_lobby()
 
     lobby.id
   end
 
   @spec make_clan_membership(integer(), integer(), map()) ::
-          Teiserver.Clans.ClanMembership.t()
+          Clans.ClanMembership.t()
   def make_clan_membership(clan_id, user_id, data \\ %{}) do
     {:ok, gm} =
-      Teiserver.Clans.create_clan_membership(%{
+      Clans.create_clan_membership(%{
         "clan_id" => clan_id,
         "user_id" => user_id,
         "role" => data["role"] || "Member"
@@ -428,12 +438,12 @@ defmodule Teiserver.TeiserverTestLib do
       ip: "127.0.0.1"
     }
     |> Map.merge(params)
-    |> Teiserver.Lobby.create_lobby()
-    |> Teiserver.Lobby.add_lobby()
+    |> Lobby.create_lobby()
+    |> Lobby.add_lobby()
   end
 
   def create_moderation_user_report(target_id, reporter_id, params \\ %{}) do
-    Teiserver.Moderation.create_report_group_and_report(
+    Moderation.create_report_group_and_report(
       Map.merge(
         %{
           reporter_id: reporter_id,
@@ -450,25 +460,25 @@ defmodule Teiserver.TeiserverTestLib do
 
   def seed() do
     CoordinatorServer.get_coordinator_account()
-    Teiserver.Account.AccoladeBotServer.get_accolade_account()
+    AccoladeBotServer.get_accolade_account()
 
-    Teiserver.Account.get_or_add_smurf_key_type("client_app_hash")
-    Teiserver.Account.get_or_add_smurf_key_type("chobby_hash")
-    Teiserver.Account.get_or_add_smurf_key_type("hw1")
-    Teiserver.Account.get_or_add_smurf_key_type("hw2")
-    Teiserver.Account.get_or_add_smurf_key_type("hw3")
+    Account.get_or_add_smurf_key_type("client_app_hash")
+    Account.get_or_add_smurf_key_type("chobby_hash")
+    Account.get_or_add_smurf_key_type("hw1")
+    Account.get_or_add_smurf_key_type("hw2")
+    Account.get_or_add_smurf_key_type("hw3")
 
-    Enum.each(Teiserver.Game.MatchRatingLib.rating_type_list(), fn rating_type ->
-      Teiserver.Game.get_or_add_rating_type(rating_type)
+    Enum.each(MatchRatingLib.rating_type_list(), fn rating_type ->
+      Game.get_or_add_rating_type(rating_type)
     end)
 
-    Teiserver.Telemetry.get_or_add_complex_server_event_type("Server startup")
-    Teiserver.Telemetry.get_or_add_simple_server_event_type("account.user_login")
-    Teiserver.Telemetry.get_or_add_simple_server_event_type("lobby.force_add_user_to_lobby")
-    Teiserver.Telemetry.get_or_add_complex_client_event_type("client.user_event")
-    Teiserver.Telemetry.get_or_add_complex_client_event_type("client.user_event")
+    Telemetry.get_or_add_complex_server_event_type("Server startup")
+    Telemetry.get_or_add_simple_server_event_type("account.user_login")
+    Telemetry.get_or_add_simple_server_event_type("lobby.force_add_user_to_lobby")
+    Telemetry.get_or_add_complex_client_event_type("client.user_event")
+    Telemetry.get_or_add_complex_client_event_type("client.user_event")
 
-    Teiserver.Telemetry.get_or_add_simple_lobby_event_type("remove_user_from_lobby")
+    Telemetry.get_or_add_simple_lobby_event_type("remove_user_from_lobby")
 
     seed_badge_types()
   end
@@ -535,11 +545,11 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   def start_coordinator!() do
-    assert {:ok, pid} = Teiserver.Coordinator.start_coordinator()
+    assert {:ok, pid} = Coordinator.start_coordinator()
 
     on_exit(fn ->
       assert :ok =
-               DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, pid)
+               DynamicSupervisor.terminate_child(Coordinator.DynamicSupervisor, pid)
     end)
   end
 

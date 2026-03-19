@@ -3,9 +3,12 @@ defmodule TeiserverWeb.Microblog.RssControllerTest do
   use TeiserverWeb.ConnCase
   import Teiserver.MicroblogFixtures
 
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
+
   defp auth_setup(_) do
-    Central.Helpers.GeneralTestLib.conn_setup()
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup()
+    |> TeiserverTestLib.conn_setup()
   end
 
   defp filler_posts(_) do

@@ -2,6 +2,7 @@ defmodule Teiserver.Telemetry.InfologCleanupTask do
   @moduledoc false
   use Oban.Worker, queue: :cleanup
 
+  alias Ecto.Adapters.SQL
   alias Teiserver.Repo
 
   @impl Oban.Worker
@@ -16,7 +17,7 @@ defmodule Teiserver.Telemetry.InfologCleanupTask do
           WHERE timestamp < $1
     """
 
-    Ecto.Adapters.SQL.query!(Repo, query, [before_timestamp])
+    SQL.query!(Repo, query, [before_timestamp])
 
     :ok
   end

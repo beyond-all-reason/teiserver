@@ -1,5 +1,6 @@
 defmodule Teiserver.Account.AuthLib do
   @moduledoc false
+  alias Phoenix.LiveView
   require Logger
 
   @spec icon :: String.t()
@@ -138,8 +139,8 @@ defmodule Teiserver.Account.AuthLib do
       obj
     else
       obj
-      |> Phoenix.LiveView.put_flash(:warning, "You do not have permission to view this page.")
-      |> Phoenix.LiveView.redirect(to: "/")
+      |> LiveView.put_flash(:warning, "You do not have permission to view this page.")
+      |> LiveView.redirect(to: "/")
     end
   end
 
@@ -152,8 +153,8 @@ defmodule Teiserver.Account.AuthLib do
       obj
     else
       obj
-      |> Phoenix.LiveView.put_flash(:warning, "You do not have permission to view this page.")
-      |> Phoenix.LiveView.redirect(to: "/")
+      |> LiveView.put_flash(:warning, "You do not have permission to view this page.")
+      |> LiveView.redirect(to: "/")
     end
   end
 

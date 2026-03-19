@@ -1,6 +1,7 @@
 defmodule Teiserver.Telemetry.ComplexServerEventQueries do
   @moduledoc false
   use TeiserverWeb, :queries
+  alias Ecto.Adapters.SQL
   alias Teiserver.Telemetry.ComplexServerEvent
 
   # Queries
@@ -126,7 +127,7 @@ defmodule Teiserver.Telemetry.ComplexServerEventQueries do
     LIMIT $5
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, [
+    case SQL.query(Repo, query, [
            key,
            event_type_id,
            start_datetime,

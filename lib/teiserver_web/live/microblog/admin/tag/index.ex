@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Microblog.Admin.TagLive.Index do
     |> assign(:tags, Microblog.list_tags(order_by: ["Name (A-Z)"]))
     |> assign(:tag, nil)
     |> assign(:site_menu_active, "microblog")
-    |> assign(:view_colour, Teiserver.Microblog.colours())
+    |> assign(:view_colour, Microblog.colours())
   end
 
   @impl Phoenix.LiveView

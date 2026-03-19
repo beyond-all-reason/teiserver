@@ -5,6 +5,9 @@ defmodule TeiserverWeb.Tachyon.Autohost do
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Tachyon
   alias WebsocketSyncClient, as: WSC
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.BotFixtures
+
   import Teiserver.Support.Polling, only: [poll_until: 2, poll_until: 3]
 
   def create_autohost() do
@@ -12,12 +15,12 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     create_autohost(name)
   end
 
-  def create_autohost(name), do: Teiserver.BotFixtures.create_bot(name)
+  def create_autohost(name), do: BotFixtures.create_bot(name)
 
-  def setup_autohost(_context), do: {:ok, autohost: Teiserver.BotFixtures.create_bot()}
+  def setup_autohost(_context), do: {:ok, autohost: BotFixtures.create_bot()}
 
   def setup_app(_context) do
-    user = Central.Helpers.GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+    user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     uid = UUID.uuid4()
 
     app =
@@ -62,7 +65,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
   test "can lookup after status message", %{token: token} do
     Tachyon.connect_autohost!(token, 10, 0)
 
-    poll_until(fn -> Teiserver.Autohost.lookup_autohost(token.bot_id) end, fn {p, details} ->
+    poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {p, details} ->
       details.max_battles == 10 && details.current_battles == 0 && is_pid(p)
     end)
   end
@@ -70,7 +73,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
   test "can update status attributes", %{token: token} do
     client = Tachyon.connect_autohost!(token, 10, 0)
 
-    poll_until(fn -> Teiserver.Autohost.lookup_autohost(token.bot_id) end, fn {_, details} ->
+    poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {_, details} ->
       details.max_battles == 10 && details.current_battles == 0
     end)
 
@@ -78,7 +81,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
 
     {_, %{max_battles: 15, current_battles: 3}} =
       poll_until(
-        fn -> Teiserver.Autohost.lookup_autohost(token.bot_id) end,
+        fn -> Autohost.lookup_autohost(token.bot_id) end,
         fn {_, details} ->
           details != nil && details.max_battles == 15 && details.current_battles == 3
         end,
@@ -91,7 +94,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     {:ok, creds: _, token: other_token} = setup_token(%{app: app, autohost: other_autohost})
 
     # make sure the other tests aren't interfering
-    poll_until(&Teiserver.Autohost.list/0, fn l -> Enum.empty?(l) end)
+    poll_until(&Autohost.list/0, fn l -> Enum.empty?(l) end)
 
     Tachyon.connect_autohost!(token, 10, 0)
     Tachyon.connect_autohost!(other_token, 15, 1)
@@ -102,7 +105,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
         %{id: other_autohost.id, max_battles: 15, current_battles: 1}
       ])
 
-    poll_until(&Teiserver.Autohost.list/0, fn l ->
+    poll_until(&Autohost.list/0, fn l ->
       expected == MapSet.new(l)
     end)
   end
@@ -110,7 +113,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
   test "can send message and get response", %{token: token} do
     client = Tachyon.connect_autohost!(token, 10, 0)
 
-    poll_until(fn -> Teiserver.Autohost.lookup_autohost(token.bot_id) end, fn {_, details} ->
+    poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {_, details} ->
       details.max_battles == 10 && details.current_battles == 0
     end)
 
@@ -132,7 +135,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
 
     start_task =
       Task.async(fn ->
-        Teiserver.Autohost.start_battle(token.bot_id, battle_id, pid, start_script)
+        Autohost.start_battle(token.bot_id, battle_id, pid, start_script)
       end)
 
     %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(client)

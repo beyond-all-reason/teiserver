@@ -2,6 +2,8 @@ defmodule TeiserverWeb.Telemetry do
   @moduledoc false
   import Telemetry.Metrics
 
+  alias Teiserver.Telemetry, as: TeiserverTelemetry
+
   def metrics do
     [
       # Phoenix Metrics
@@ -47,7 +49,7 @@ defmodule TeiserverWeb.Telemetry do
       summary("vm.total_run_queue_lengths.cpu"),
       summary("vm.total_run_queue_lengths.io")
     ] ++
-      Teiserver.Telemetry.metrics()
+      TeiserverTelemetry.metrics()
 
     # Metrics end
   end

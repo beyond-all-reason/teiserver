@@ -20,6 +20,7 @@ defmodule Teiserver.Battle do
   alias Teiserver.Protocols.Spring
   alias Teiserver.Repo
   alias Teiserver.Telemetry
+  alias ExULID.ULID
   require Logger
 
   @spec match_query(keyword()) :: Ecto.Query.t()
@@ -580,7 +581,7 @@ defmodule Teiserver.Battle do
   @spec generate_lobby_uuid :: String.t()
   @spec generate_lobby_uuid([T.lobby_id()]) :: String.t()
   def generate_lobby_uuid(skip_ids \\ []) do
-    uuid = ExULID.ULID.generate()
+    uuid = ULID.generate()
 
     # Check if this uuid is present in the current set of lobbies
     existing_uuid =

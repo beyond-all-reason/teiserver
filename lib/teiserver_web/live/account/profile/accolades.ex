@@ -4,6 +4,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
   import Central.Helpers.ComponentHelper
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.UserLib
+  alias TeiserverWeb.Account.ProfileLive.Overview
 
   @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -30,11 +32,11 @@ defmodule TeiserverWeb.Account.ProfileLive.Accolades do
         socket
         |> assign(:tab, nil)
         |> assign(:site_menu_active, "teiserver_account")
-        |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+        |> assign(:view_colour, UserLib.colours())
         |> assign(:user, user)
         |> assign(:accolades, accolades)
         |> assign_summary()
-        |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
+        |> Overview.get_relationships_and_permissions()
       end
 
     {:ok, socket}

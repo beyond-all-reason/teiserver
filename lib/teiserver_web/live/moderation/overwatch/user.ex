@@ -3,12 +3,14 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.User do
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportLib
 
+  import Teiserver.Moderation, only: [colour: 0]
+
   @impl Phoenix.LiveView
   def mount(params, _session, socket) do
     socket =
       socket
       |> assign(:site_menu_active, "moderation")
-      |> assign(:view_colour, Teiserver.Moderation.colour())
+      |> assign(:view_colour, colour())
       |> assign(:outstanding_report_groups, 0)
       |> assign(:report_groups, nil)
       |> assign(:actions, nil)

@@ -3,10 +3,12 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
 
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Application
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   defp setup_user(_context) do
-    Central.Helpers.GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())
+    |> TeiserverTestLib.conn_setup()
   end
 
   defp setup_app(context) do

@@ -17,14 +17,25 @@ defmodule TeiserverWeb.ConnCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL.Sandbox
+  alias Phoenix.ConnTest
+  alias Teiserver.Config
+  alias Teiserver.Support.Tachyon
+  alias Teiserver.TeiserverTestLib
+
   using do
     quote do
+      alias Ecto.Adapters.SQL.Sandbox
+      alias Phoenix.ConnTest
+      alias Teiserver.Config
+      alias Teiserver.Support.Tachyon
+      alias Teiserver.TeiserverTestLib
+      alias TeiserverWeb.Router.Helpers, as: Routes
+
       # Import conveniences for testing with connections
       import Plug.Conn
-      import Phoenix.ConnTest
+      import ConnTest
       import TeiserverWeb.ConnCase
-
-      alias TeiserverWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
       unquote(TeiserverWeb.verified_routes())
@@ -33,22 +44,22 @@ defmodule TeiserverWeb.ConnCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Teiserver.Repo)
-    Teiserver.TeiserverTestLib.clear_all_con_caches()
-    Teiserver.Config.update_site_config("system.Use geoip", false)
-    on_exit(&Teiserver.TeiserverTestLib.clear_all_con_caches/0)
+    :ok = Sandbox.checkout(Teiserver.Repo)
+    TeiserverTestLib.clear_all_con_caches()
+    Config.update_site_config("system.Use geoip", false)
+    on_exit(&TeiserverTestLib.clear_all_con_caches/0)
 
     if !tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, {:shared, self()})
+      Sandbox.mode(Teiserver.Repo, {:shared, self()})
 
       :ok =
-        Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.Config.SiteConfigTypes.Cache)
+        Supervisor.terminate_child(Teiserver.Supervisor, Config.SiteConfigTypes.Cache)
 
       {:ok, _pid} =
-        Supervisor.restart_child(Teiserver.Supervisor, Teiserver.Config.SiteConfigTypes.Cache)
+        Supervisor.restart_child(Teiserver.Supervisor, Config.SiteConfigTypes.Cache)
     end
 
-    Teiserver.Support.Tachyon.tachyon_case_setup(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    Tachyon.tachyon_case_setup(tags)
+    {:ok, conn: ConnTest.build_conn()}
   end
 end

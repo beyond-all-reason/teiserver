@@ -19,8 +19,10 @@ defmodule Teiserver.Moderation do
   alias Teiserver.Moderation.Report
   alias Teiserver.Moderation.ReportGroupLib
   alias Teiserver.Moderation.ReportLib
+  alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Moderation.Response
   alias Teiserver.Moderation.ResponseLib
+  alias Teiserver.CacheUser
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
 
   @spec icon :: String.t()
@@ -262,7 +264,7 @@ defmodule Teiserver.Moderation do
     case create_report(report_params) do
       {:ok, report} ->
         {:ok, report_group} =
-          Teiserver.Moderation.update_report_group(report_group, %{
+          update_report_group(report_group, %{
             report_count: report_group.report_count + 1
           })
 
@@ -1161,7 +1163,7 @@ defmodule Teiserver.Moderation do
   def unbridge_user(nil, _, _, _), do: :no_user
 
   def unbridge_user(user, message, flagged_word_count, location) do
-    if not Teiserver.CacheUser.is_restricted?(user, ["Bridging"]) do
+    if not CacheUser.is_restricted?(user, ["Bridging"]) do
       {:ok, _action} =
         create_action(%{
           target_id: user.id,
@@ -1172,7 +1174,7 @@ defmodule Teiserver.Moderation do
           expires: Timex.now() |> Timex.shift(years: 1200)
         })
 
-      Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
+      RefreshUserRestrictionsTask.refresh_user(user.id)
 
       client = Account.get_client_by_id(user.id) || %{ip: "no client"}
 

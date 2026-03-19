@@ -2,9 +2,13 @@ defmodule Teiserver.OAuth.CodeTest do
   use Teiserver.DataCase, async: true
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
+  alias Plug.Conn
+  alias Plug.Test
+  alias Teiserver.TeiserverTestLib
+  alias Timex.Duration
 
   setup do
-    user = Teiserver.TeiserverTestLib.new_user()
+    user = TeiserverTestLib.new_user()
 
     {:ok, app} =
       OAuth.create_application(%{
@@ -119,23 +123,23 @@ defmodule Teiserver.OAuth.CodeTest do
 
   test "correct parsing of basic auth" do
     conn =
-      Plug.Test.conn(:post, "/irrelevant")
-      |> Plug.Conn.put_req_header("authorization", "Basic dXNlcjE6cGFzczElM0QlM0Q=")
+      Test.conn(:post, "/irrelevant")
+      |> Conn.put_req_header("authorization", "Basic dXNlcjE6cGFzczElM0QlM0Q=")
 
     assert {"user1", "pass1=="} == OAuth.parse_basic_auth(conn)
   end
 
   test "correct error for garbage basic auth header" do
     conn =
-      Plug.Test.conn(:post, "/irrelevant")
-      |> Plug.Conn.put_req_header("authorization", "Basic dXNlcjE6cGFzczElM0QlM0")
+      Test.conn(:post, "/irrelevant")
+      |> Conn.put_req_header("authorization", "Basic dXNlcjE6cGFzczElM0QlM0")
 
     assert :error = OAuth.parse_basic_auth(conn)
   end
 
   defp create_code_attrs(user, app, opts \\ []) do
     expires_at =
-      Keyword.get(opts, :expires_at, Timex.add(DateTime.utc_now(), Timex.Duration.from_days(1)))
+      Keyword.get(opts, :expires_at, Timex.add(DateTime.utc_now(), Duration.from_days(1)))
 
     OAuthFixtures.code_attrs(user.id, app)
     |> Map.put(:expires_at, expires_at)

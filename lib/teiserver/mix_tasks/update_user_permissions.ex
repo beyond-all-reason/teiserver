@@ -6,6 +6,7 @@ defmodule Mix.Tasks.Teiserver.UpdateUserPermissions do
 
   use Mix.Task
   require Logger
+  alias Ecto.Adapters.SQL
   alias Teiserver.Account
   alias Teiserver.Repo
   alias Teiserver.Account.RoleLib
@@ -40,7 +41,7 @@ defmodule Mix.Tasks.Teiserver.UpdateUserPermissions do
       select id from account_users
     """
 
-    results = Ecto.Adapters.SQL.query!(Repo, query, [])
+    results = SQL.query!(Repo, query, [])
 
     results.rows
     |> Enum.map(fn [userid] ->

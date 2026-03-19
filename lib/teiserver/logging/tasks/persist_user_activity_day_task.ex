@@ -2,6 +2,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
   @moduledoc false
   use Oban.Worker, queue: :teiserver
   alias Teiserver.Logging
+  alias Teiserver.Logging.Tasks.PersistUserActivityDayTask
 
   alias Teiserver.Repo
   import Ecto.Query, warn: false
@@ -29,7 +30,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
 
       if Timex.compare(new_date, Timex.today()) == -1 do
         %{}
-        |> Teiserver.Logging.Tasks.PersistUserActivityDayTask.new()
+        |> PersistUserActivityDayTask.new()
         |> Oban.insert()
       end
     end

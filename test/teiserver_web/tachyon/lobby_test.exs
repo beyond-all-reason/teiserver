@@ -2,6 +2,11 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
   use TeiserverWeb.ConnCase
 
   alias Teiserver.Support.Tachyon
+  alias ExUnit.Callbacks
+  alias Teiserver.AssetFixtures
+  alias Teiserver.TachyonBattle
+  alias Teiserver.TachyonLobby
+  alias Teiserver.TachyonLobby.Lobby
 
   setup [:setup_assets, {Tachyon, :setup_client}]
 
@@ -237,7 +242,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"currentBattle" => %{"startedAt" => _start_ts}} = data
 
       # when battle terminates members should get notified
-      Teiserver.TachyonBattle.lookup(battle_id) |> Process.exit(:kill)
+      TachyonBattle.lookup(battle_id) |> Process.exit(:kill)
       %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
       %{"currentBattle" => nil} = updated
     end
@@ -499,7 +504,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "subscribe list updates", %{client: client} do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-      ExUnit.Callbacks.start_link_supervised!({Task, &continuously_send_list_update/0})
+      Callbacks.start_link_supervised!({Task, &continuously_send_list_update/0})
 
       %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => %{}}} =
         Tachyon.recv_message!(client)
@@ -582,7 +587,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "start battle", %{client: client} = ctx do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-      ExUnit.Callbacks.start_link_supervised!({Task, &continuously_send_list_update/0})
+      Callbacks.start_link_supervised!({Task, &continuously_send_list_update/0})
       %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
 
       # create lobby with another client so that only list updates are sent to
@@ -617,10 +622,10 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       # bit of a hack to get the battle id :/
       {:ok, %{current_battle: %{id: battle_id}}} =
-        Teiserver.TachyonLobby.Lobby.get_details(lobby_id)
+        Lobby.get_details(lobby_id)
 
       # get update when battle terminates
-      Teiserver.TachyonBattle.lookup(battle_id) |> Process.exit(:kill)
+      TachyonBattle.lookup(battle_id) |> Process.exit(:kill)
 
       %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => update}} =
         Tachyon.recv_message!(client)
@@ -645,7 +650,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       assert is_map_key(lobbies, lobby_id)
 
-      Process.whereis(Teiserver.TachyonLobby.List)
+      Process.whereis(TachyonLobby.List)
       |> Process.exit(:kill)
 
       %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => lobbies2}} =
@@ -700,14 +705,14 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       assert data["user"]["currentLobby"] == lobby_id
 
       # make sure the session correctly monitors the lobby
-      Teiserver.TachyonLobby.lookup(lobby_id) |> Process.exit(:kill)
+      TachyonLobby.lookup(lobby_id) |> Process.exit(:kill)
       %{"commandId" => "lobby/left"} = Tachyon.recv_message!(client)
     end
   end
 
   test "get lobby/left event when lobby dies", ctx do
     {:ok, lobby_id: lobby_id} = setup_lobby(ctx)
-    lobby_pid = Teiserver.TachyonLobby.lookup(lobby_id)
+    lobby_pid = TachyonLobby.lookup(lobby_id)
     assert is_pid(lobby_pid)
     Process.exit(lobby_pid, :kill)
 
@@ -733,17 +738,17 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
   end
 
   defp setup_assets(_ctx) do
-    game = Teiserver.AssetFixtures.create_game(%{name: "test-lobby-game", in_matchmaking: true})
+    game = AssetFixtures.create_game(%{name: "test-lobby-game", in_matchmaking: true})
 
     engine =
-      Teiserver.AssetFixtures.create_engine(%{name: "test-lobby-engine", in_matchmaking: true})
+      AssetFixtures.create_engine(%{name: "test-lobby-engine", in_matchmaking: true})
 
     {:ok, game: game, engine: engine}
   end
 
   # to force the list update without having to rely on a slow update timer
   defp continuously_send_list_update() do
-    Teiserver.TachyonLobby.List.broadcast_updates()
+    TachyonLobby.List.broadcast_updates()
     :timer.sleep(10)
     continuously_send_list_update()
   end

@@ -2,6 +2,8 @@ defmodule Teiserver.Matchmaking do
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Matchmaking
+  alias Teiserver.Matchmaking.QueueRegistry
+  alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Party
   alias Teiserver.Matchmaking.Member
   require Logger
@@ -17,9 +19,9 @@ defmodule Teiserver.Matchmaking do
   @type ready_data :: Matchmaking.PairingRoom.ready_data()
   @type stats :: Matchmaking.QueueServer.stats()
 
-  @spec lookup_queue(Matchmaking.QueueServer.id()) :: pid() | nil
+  @spec lookup_queue(QueueServer.id()) :: pid() | nil
   def lookup_queue(queue_id) do
-    Matchmaking.QueueRegistry.lookup(queue_id)
+    QueueRegistry.lookup(queue_id)
   end
 
   @doc """
@@ -27,7 +29,7 @@ defmodule Teiserver.Matchmaking do
   """
   @spec list_queues() :: [{queue_id(), queue()}]
   def list_queues() do
-    Matchmaking.QueueRegistry.list()
+    QueueRegistry.list()
   end
 
   @doc """
@@ -52,7 +54,7 @@ defmodule Teiserver.Matchmaking do
   @spec join_queue(queue_id(), version :: String.t(), T.userid(), Party.id() | nil) ::
           join_result()
   def join_queue(queue_id, version, member, party_id \\ nil) do
-    Matchmaking.QueueServer.join_queue(queue_id, version, member, party_id)
+    QueueServer.join_queue(queue_id, version, member, party_id)
   end
 
   @spec party_join_queue(queue_id(), version :: String.t(), Party.id(), [%{id: T.userid()}]) ::
@@ -61,7 +63,7 @@ defmodule Teiserver.Matchmaking do
 
   @spec leave_queue(queue_id(), T.userid()) :: leave_result()
   def leave_queue(queue_id, user_id) do
-    Matchmaking.QueueServer.leave_queue(queue_id, user_id)
+    QueueServer.leave_queue(queue_id, user_id)
   end
 
   @spec cancel(pid(), T.userid()) :: :ok

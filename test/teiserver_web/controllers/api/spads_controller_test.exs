@@ -4,8 +4,10 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
   alias Teiserver.Client
   alias Teiserver.Game.MatchRatingLib
   alias TeiserverWeb.API.SpadsController
+  alias Teiserver.CacheUser
+  alias Teiserver.TeiserverTestLib
 
-  import Teiserver.TeiserverTestLib,
+  import TeiserverTestLib,
     only: [
       new_user: 0,
       make_lobby: 1
@@ -33,7 +35,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
     test "existing user", %{conn: conn} do
       user = new_bot_user()
-      Teiserver.TeiserverTestLib.clear_cache(:teiserver_game_rating_types)
+      TeiserverTestLib.clear_cache(:teiserver_game_rating_types)
       rating_type_id = MatchRatingLib.rating_type_name_lookup()["Large Team"]
 
       {:ok, _} =
@@ -168,7 +170,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
   def new_bot_user() do
     new_user()
-    |> Teiserver.CacheUser.add_roles(["Bot"])
+    |> CacheUser.add_roles(["Bot"])
   end
 
   def put_authorization_header(conn, user) do

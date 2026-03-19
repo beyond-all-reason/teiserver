@@ -13,6 +13,7 @@ defmodule Teiserver.SpringRawTest do
 
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account
+  alias Teiserver.CacheUser
 
   setup :start_spring_server
 

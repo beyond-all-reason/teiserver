@@ -8,9 +8,10 @@ defmodule Teiserver.MicroblogTest do
   alias Teiserver.Microblog.Tag
   alias Teiserver.Microblog.Upload
   alias Teiserver.Microblog.UserPreference
+  alias Teiserver.AccountFixtures
   alias Teiserver.Microblog.Post
 
-  import Teiserver.AccountFixtures
+  import AccountFixtures
   import Teiserver.MicroblogFixtures
 
   describe "tags" do
@@ -304,7 +305,7 @@ defmodule Teiserver.MicroblogTest do
 
     test "create_poll_response/1 with valid data creates a poll_response" do
       post = post_fixture()
-      user = Teiserver.AccountFixtures.user_fixture()
+      user = AccountFixtures.user_fixture()
       valid_attrs = %{post_id: post.id, user_id: user.id, response: "A"}
 
       assert {:ok, %PollResponse{} = _poll_response} = Microblog.create_poll_response(valid_attrs)

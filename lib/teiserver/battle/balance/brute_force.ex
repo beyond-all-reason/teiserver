@@ -13,6 +13,8 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   """
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Battle.Balance.BruteForceTypes, as: BF
+  alias Teiserver.Battle.Balance.LoserPicks
+  alias Teiserver.Helpers.Combi
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   require Integer
 
@@ -40,7 +42,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
       {:error, message} ->
         # Call another balancer
-        result = Teiserver.Battle.Balance.LoserPicks.perform(expanded_group, team_count, opts)
+        result = LoserPicks.perform(expanded_group, team_count, opts)
 
         new_logs =
           ["#{message} Will use another balance algorithm instead.", @splitter, result.logs]
@@ -100,7 +102,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec potential_teams(integer()) :: [integer()]
   def potential_teams(num_players) do
-    Teiserver.Helpers.Combi.get_single_teams(num_players)
+    Combi.get_single_teams(num_players)
   end
 
   def get_best_combo(players, parties) do

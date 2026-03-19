@@ -5,12 +5,14 @@ defmodule Teiserver.CacheUser do
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Argon2
+  alias ExULID.ULID
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Account.UserCacheLib
+  alias Teiserver.Battle
   alias Teiserver.Chat
   alias Teiserver.Chat.WordLib
   alias Teiserver.Client
@@ -18,6 +20,7 @@ defmodule Teiserver.CacheUser do
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.EmailHelper
+  alias Teiserver.Geoip
   alias Teiserver.Telemetry
 
   @type t :: T.user()
@@ -80,7 +83,7 @@ defmodule Teiserver.CacheUser do
 
   def user_register_params_with_md5(name, email, md5_password, extra_data \\ %{}) do
     data =
-      Teiserver.Account.default_data()
+      Account.default_data()
       |> Map.new(fn {k, v} -> {to_string(k), v} end)
 
     %{
@@ -146,7 +149,7 @@ defmodule Teiserver.CacheUser do
   def post_user_creation_actions(user, ip \\ nil) do
     Account.update_user_stat(user.id, %{
       "first_ip" => ip,
-      "country" => Teiserver.Geoip.get_flag(ip),
+      "country" => Geoip.get_flag(ip),
       "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string()
     })
 
@@ -259,7 +262,7 @@ defmodule Teiserver.CacheUser do
         # credo:disable-for-next-line Credo.Check.Design.TagTODO
         # TODO: create a unique index on lower(name) so that this check is fast
         # (and also redundant)
-        users = Teiserver.Account.query_users(search: [name_lower: name], select: [:name])
+        users = Account.query_users(search: [name_lower: name], select: [:name])
 
         case users do
           [] -> :ok
@@ -497,9 +500,9 @@ defmodule Teiserver.CacheUser do
         case command_parts do
           ["!cv", "joinas" | _] ->
             has_ai =
-              case Teiserver.Client.get_client_by_id(to_id) do
+              case Client.get_client_by_id(to_id) do
                 %{lobby_id: lobby_id} when not is_nil(lobby_id) ->
-                  Teiserver.Battle.get_bots(lobby_id) |> Enum.any?()
+                  Battle.get_bots(lobby_id) |> Enum.any?()
 
                 _ ->
                   false
@@ -509,9 +512,9 @@ defmodule Teiserver.CacheUser do
 
           ["!callvote", "joinas" | _] ->
             has_ai =
-              case Teiserver.Client.get_client_by_id(to_id) do
+              case Client.get_client_by_id(to_id) do
                 %{lobby_id: lobby_id} when not is_nil(lobby_id) ->
-                  Teiserver.Battle.get_bots(lobby_id) |> Enum.any?()
+                  Battle.get_bots(lobby_id) |> Enum.any?()
 
                 _ ->
                   false
@@ -545,7 +548,7 @@ defmodule Teiserver.CacheUser do
       "SPADS clans have been replaced by parties. You can access them via #{website_url}/teiserver/parties."
     )
 
-    uuid = ExULID.ULID.generate()
+    uuid = ULID.generate()
     client = Account.get_client_by_id(from_id)
 
     {:ok, _code} =
@@ -614,7 +617,7 @@ defmodule Teiserver.CacheUser do
     update_user(%{user | roles: new_roles}, persist: true)
   end
 
-  @spec create_token(Teiserver.Account.User.t()) :: String.t()
+  @spec create_token(Account.User.t()) :: String.t()
   def create_token(user) do
     {:ok, jwt, _} = Guardian.encode_and_sign(user)
     jwt
@@ -1001,7 +1004,7 @@ defmodule Teiserver.CacheUser do
           last_ip = Account.get_user_stat_data(user.id) |> Map.get("last_ip")
 
           if last_ip != ip or (user.country || "??") == "??" do
-            Teiserver.Geoip.get_flag(ip, user.country)
+            Geoip.get_flag(ip, user.country)
           else
             user.country || "??"
           end
@@ -1202,7 +1205,7 @@ defmodule Teiserver.CacheUser do
       # credo:disable-for-next-line Credo.Check.Design.TagTODO
       # TODO: create a unique index on lower(email) so that this check is fast
       # (and also redundant)
-      Teiserver.Account.query_users(search: [email_lower: email], select: [:email]) != [] ->
+      Account.query_users(search: [email_lower: email], select: [:email]) != [] ->
         {:error, "Email already attached to a user"}
 
       true ->

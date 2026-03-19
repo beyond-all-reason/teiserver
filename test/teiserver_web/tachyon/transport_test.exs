@@ -2,6 +2,8 @@ defmodule TeiserverWeb.Tachyon.TransportTest do
   use TeiserverWeb.ConnCase
   alias WebsocketSyncClient, as: WSC
   alias Teiserver.Support.Tachyon
+  alias Teiserver.Player
+  alias Teiserver.Tachyon.Transport
 
   setup _context do
     Tachyon.setup_client()
@@ -78,10 +80,10 @@ defmodule TeiserverWeb.Tachyon.TransportTest do
     test "rate limit", %{client: client, user: user} do
       %{"status" => "success"} = Tachyon.server_stats!(client)
 
-      conn_pid = Teiserver.Player.lookup_connection(user.id)
+      conn_pid = Player.lookup_connection(user.id)
       assert is_pid(conn_pid)
 
-      {:ok, rl} = Teiserver.Tachyon.Transport._test_rate_limiter_acquire(conn_pid, 20)
+      {:ok, rl} = Transport._test_rate_limiter_acquire(conn_pid, 20)
 
       assert rl.stored_permits < 0
       Tachyon.send_request(client, "system/serverStats")

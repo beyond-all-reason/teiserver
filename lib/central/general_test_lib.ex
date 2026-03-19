@@ -7,6 +7,8 @@ defmodule Central.Helpers.GeneralTestLib do
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.User
+  alias Teiserver.Config.SiteConfig
+  alias Teiserver.Logging.LoggingTestLib
   alias Teiserver.Repo
   alias TeiserverWeb.UserSocket
 
@@ -40,13 +42,13 @@ defmodule Central.Helpers.GeneralTestLib do
   end
 
   def seeded?() do
-    r = Repo.one(from c in Teiserver.Config.SiteConfig, where: c.key == "test.seeded")
+    r = Repo.one(from c in SiteConfig, where: c.key == "test.seeded")
     r != nil
   end
 
   def seed() do
-    %Teiserver.Config.SiteConfig{}
-    |> Teiserver.Config.SiteConfig.changeset(%{
+    %SiteConfig{}
+    |> SiteConfig.changeset(%{
       key: "test.seeded",
       value: "true"
     })
@@ -68,7 +70,7 @@ defmodule Central.Helpers.GeneralTestLib do
     [
       users: users
     ]
-    |> Teiserver.Logging.LoggingTestLib.seed()
+    |> LoggingTestLib.seed()
   end
 
   def login(conn, email) do
