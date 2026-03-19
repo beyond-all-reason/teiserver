@@ -52,7 +52,6 @@ defmodule Teiserver.TeiserverTestLib do
         user
         |> CacheUser.convert_user()
         |> CacheUser.add_user()
-        |> CacheUser.verify_user()
 
       _ ->
         new_user()
