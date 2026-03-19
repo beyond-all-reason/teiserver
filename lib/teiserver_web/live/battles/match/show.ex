@@ -1,20 +1,20 @@
 defmodule TeiserverWeb.Battle.MatchLive.Show do
   @moduledoc false
   use TeiserverWeb, :live_view
+  alias Openskill.Util
   alias Teiserver.Account
+  alias Teiserver.Account.AccoladeLib
   alias Teiserver.Battle
+  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.MatchLib
+  alias Teiserver.Config
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Telemetry
-  alias Teiserver.Battle.MatchLib
-  alias Teiserver.Battle.BalanceLib
   alias Teiserver.Helper.NumberHelper
   alias Teiserver.Helper.StylingHelper
-  alias Teiserver.Config
-  alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Telemetry
   import Central.Helpers.ComponentHelper
   import Teiserver.Helper.ColourHelper
-  alias Openskill.Util
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do

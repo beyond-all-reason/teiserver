@@ -94,11 +94,11 @@ defmodule Teiserver.Account.NewSmurfReport do
 
     relevant_new_users =
       new_users
-      |> Enum.filter(fn user -> Enum.member?(relevant_new_user_ids, user.id) end)
-      |> Enum.reject(fn user ->
-        if params["ignore_banned"] == "true" do
-          Enum.member?(user.data["restrictions"], "Login")
-        end
+      |> Enum.filter(fn user ->
+        # A member of new user ids and either not_ignore_banned or not login restricted
+        Enum.member?(relevant_new_user_ids, user.id) and
+          (params["ignore_banned"] != "true" or
+             "Login" not in (user.data["restrictions"] || []))
       end)
 
     user_stats =

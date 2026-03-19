@@ -64,7 +64,7 @@
           {Credo.Check.Consistency.TabsOrSpaces, []},
 
           # We would like to enable this but it would be far too noisy
-          # {Credo.Check.Consistency.UnusedVariableNames, [force: :meaningful]},
+          # {Credo.Check.Consistency.UnusedVariableNames, [force: :meaningful]}, 2178 issues
           #
           {Credo.Check.Design.AliasUsage, []},
           {Credo.Check.Design.TagFIXME, []},
@@ -72,9 +72,9 @@
           #
           ## Readability Checks
           #
-          # {Credo.Check.Readability.AliasOrder, []},
-          # {Credo.Check.Readability.BlockPipe, []},
-          # {Credo.Check.Readability.FunctionNames, []},
+          # {Credo.Check.Readability.AliasOrder, []}, 201 issues
+          {Credo.Check.Readability.BlockPipe, []},
+          {Credo.Check.Readability.FunctionNames, []},
           {Credo.Check.Readability.ImplTrue, []},
           # {Credo.Check.Readability.MaxLineLength,
           #  [
@@ -86,82 +86,82 @@
           #    ignore_urls: true,
           #    max_length: 98,
           #    priority: :low
-          #  ]},
-          # {Credo.Check.Readability.ModuleAttributeNames, []},
-          # {Credo.Check.Readability.ModuleNames, []},
-          # {Credo.Check.Readability.MultiAlias, []},
-          # {Credo.Check.Readability.NestedFunctionCalls, []},
-          # {Credo.Check.Readability.OneArityFunctionInPipe, []},
-          # {Credo.Check.Readability.ParenthesesInCondition, []},
-          # {Credo.Check.Readability.ParenthesesOnZeroArityDefs, []},
-          # {Credo.Check.Readability.PipeIntoAnonymousFunctions, []},
-          # {Credo.Check.Readability.PredicateFunctionNames, []},
-          # {Credo.Check.Readability.PreferImplicitTry, []},
-          # {Credo.Check.Readability.RedundantBlankLines, []},
-          # {Credo.Check.Readability.Semicolons, []},
-          # {Credo.Check.Readability.SeparateAliasRequire, []},
-          # {Credo.Check.Readability.SpaceAfterCommas, []},
+          #  ]}, 81 issues
+          {Credo.Check.Readability.ModuleAttributeNames, []},
+          {Credo.Check.Readability.ModuleNames, []},
+          {Credo.Check.Readability.MultiAlias, []},
+          # {Credo.Check.Readability.NestedFunctionCalls, []}, 310 issues
+          {Credo.Check.Readability.OneArityFunctionInPipe, []},
+          {Credo.Check.Readability.ParenthesesInCondition, []},
+          # {Credo.Check.Readability.ParenthesesOnZeroArityDefs, []}, 547 issues
+          {Credo.Check.Readability.PipeIntoAnonymousFunctions, []},
+          # {Credo.Check.Readability.PredicateFunctionNames, []}, 32 issues
+          {Credo.Check.Readability.PreferImplicitTry, []},
+          {Credo.Check.Readability.RedundantBlankLines, []},
+          {Credo.Check.Readability.Semicolons, []},
+          {Credo.Check.Readability.SeparateAliasRequire, []},
+          {Credo.Check.Readability.SpaceAfterCommas, []},
           # {Credo.Check.Readability.StrictModuleLayout,
-          #  [order: ~w/moduledoc alias use require import/a, ignore: ~w/shortdoc/a]},
-          # {Credo.Check.Readability.StringSigils, []},
-          # {Credo.Check.Readability.TrailingBlankLine, []},
-          # {Credo.Check.Readability.TrailingWhiteSpace, []},
-          # {Credo.Check.Readability.UnnecessaryAliasExpansion, []},
-          # {Credo.Check.Readability.VariableNames, []},
-          # {Credo.Check.Readability.WithCustomTaggedTuple, []},
-          # {Credo.Check.Readability.WithSingleClause, []},
+          #  [order: ~w/moduledoc alias use require import/a, ignore: ~w/shortdoc/a]}, 638 issues
+          {Credo.Check.Readability.StringSigils, []},
+          {Credo.Check.Readability.TrailingBlankLine, []},
+          {Credo.Check.Readability.TrailingWhiteSpace, []},
+          {Credo.Check.Readability.UnnecessaryAliasExpansion, []},
+          {Credo.Check.Readability.VariableNames, []},
+          {Credo.Check.Readability.WithCustomTaggedTuple, []},
+          {Credo.Check.Readability.WithSingleClause, []},
 
           #
           ## Refactoring Opportunities
           #
-          # {Credo.Check.Refactor.CondStatements, []},
-          # {Credo.Check.Refactor.FilterCount, []},
-          # {Credo.Check.Refactor.FilterFilter, []},
-          # {Credo.Check.Refactor.FunctionArity, []},
-          # {Credo.Check.Refactor.LongQuoteBlocks, []},
-          # {Credo.Check.Refactor.MatchInCondition, []},
-          # {Credo.Check.Refactor.NegatedConditionsInUnless, []},
-          # {Credo.Check.Refactor.NegatedConditionsWithElse, []},
-          # {Credo.Check.Refactor.RedundantWithClauseResult, []},
-          # {Credo.Check.Refactor.RejectReject, []},
-          # {Credo.Check.Refactor.UnlessWithElse, []},
-          # {Credo.Check.Refactor.UtcNowTruncate, []},
-          # {Credo.Check.Refactor.WithClauses, []},
+          {Credo.Check.Refactor.CondStatements, []},
+          {Credo.Check.Refactor.FilterCount, []},
+          {Credo.Check.Refactor.FilterFilter, []},
+          {Credo.Check.Refactor.FunctionArity, []},
+          {Credo.Check.Refactor.LongQuoteBlocks, []},
+          {Credo.Check.Refactor.MatchInCondition, []},
+          {Credo.Check.Refactor.NegatedConditionsInUnless, []},
+          {Credo.Check.Refactor.NegatedConditionsWithElse, []},
+          {Credo.Check.Refactor.RedundantWithClauseResult, []},
+          {Credo.Check.Refactor.RejectReject, []},
+          {Credo.Check.Refactor.UnlessWithElse, []},
+          {Credo.Check.Refactor.UtcNowTruncate, []},
+          {Credo.Check.Refactor.WithClauses, []},
 
           #
           ## Warnings
           #
-          # {Credo.Check.Warning.ApplicationConfigInModuleAttribute, []},
-          # {Credo.Check.Warning.BoolOperationOnSameValues, []},
-          # {Credo.Check.Warning.Dbg, []},
-          # {Credo.Check.Warning.ExpensiveEmptyEnumCheck, []},
-          # {Credo.Check.Warning.IExPry, []},
+          {Credo.Check.Warning.ApplicationConfigInModuleAttribute, []},
+          {Credo.Check.Warning.BoolOperationOnSameValues, []},
+          {Credo.Check.Warning.Dbg, []},
+          # {Credo.Check.Warning.ExpensiveEmptyEnumCheck, []}, 7 issues
+          {Credo.Check.Warning.IExPry, []},
           {Credo.Check.Warning.MissedMetadataKeyInLoggerConfig,
            [
              metadata_keys: [:request_id, :user_id, :pid, :actor_type, :actor_id]
-           ]}
-          # {Credo.Check.Warning.OperationOnSameValues, []},
-          # {Credo.Check.Warning.OperationWithConstantResult, []},
-          # {Credo.Check.Warning.RaiseInsideRescue, []},
-          # {Credo.Check.Warning.SpecWithStruct, []},
-          # {Credo.Check.Warning.UnsafeExec, []},
-          # {Credo.Check.Warning.UnusedEnumOperation, []},
-          # {Credo.Check.Warning.UnusedFileOperation, []},
-          # {Credo.Check.Warning.UnusedKeywordOperation, []},
-          # {Credo.Check.Warning.UnusedListOperation, []},
-          # {Credo.Check.Warning.UnusedPathOperation, []},
-          # {Credo.Check.Warning.UnusedRegexOperation, []},
-          # {Credo.Check.Warning.UnusedStringOperation, []},
-          # {Credo.Check.Warning.UnusedTupleOperation, []},
-          # {Credo.Check.Warning.WrongTestFileExtension, []},
+           ]},
+          {Credo.Check.Warning.OperationOnSameValues, []},
+          {Credo.Check.Warning.OperationWithConstantResult, []},
+          {Credo.Check.Warning.RaiseInsideRescue, []},
+          {Credo.Check.Warning.SpecWithStruct, []},
+          {Credo.Check.Warning.UnsafeExec, []},
+          {Credo.Check.Warning.UnusedEnumOperation, []},
+          {Credo.Check.Warning.UnusedFileOperation, []},
+          {Credo.Check.Warning.UnusedKeywordOperation, []},
+          {Credo.Check.Warning.UnusedListOperation, []},
+          {Credo.Check.Warning.UnusedPathOperation, []},
+          {Credo.Check.Warning.UnusedRegexOperation, []},
+          {Credo.Check.Warning.UnusedStringOperation, []},
+          {Credo.Check.Warning.UnusedTupleOperation, []},
+          {Credo.Check.Warning.WrongTestFileExtension, []},
 
           #
           ## Controversial and experimental checks
           #
-          # {Credo.Check.Refactor.MapJoin, []},
-          # {Credo.Check.Refactor.MapMap, []},
-          # {Credo.Check.Refactor.FilterReject, []},
-          # {Credo.Check.Readability.ModuleDoc, []}
+          {Credo.Check.Refactor.MapJoin, []},
+          # {Credo.Check.Refactor.MapMap, []}, 3 issues
+          {Credo.Check.Refactor.FilterReject, []}
+          # {Credo.Check.Readability.ModuleDoc, []} 154 issues
         ],
         disabled: [
           #
