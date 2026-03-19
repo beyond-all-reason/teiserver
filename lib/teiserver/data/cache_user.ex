@@ -164,7 +164,7 @@ defmodule Teiserver.CacheUser do
           Logger.error("Error sending new user email - #{user.email} - #{Kernel.inspect(error)}")
 
         :no_verify ->
-          verify_user(get_user_by_id(user.id))
+          Account.verify_user(user)
           :ok
 
         :ok ->
@@ -191,7 +191,7 @@ defmodule Teiserver.CacheUser do
         params =
           user_register_params_with_md5(bot_name, host.email, host.password, %{
             "bot" => true,
-            "roles" => ["Bot", "Verified"]
+            "roles" => ["Bot"]
           })
           |> Map.merge(%{
             email: String.replace(host.email, "@", ".bot#{bot_name}@")
@@ -587,16 +587,6 @@ defmodule Teiserver.CacheUser do
     )
 
     :ok
-  end
-
-  @spec verify_user(T.user()) :: T.user()
-  def verify_user(user) do
-    Account.delete_user_stat_keys(user.id, ~w(verification_code))
-
-    db_user = Account.get_user(user.id)
-    Account.script_update_user(db_user, %{roles: ["Verified" | db_user.roles]})
-
-    user
   end
 
   @spec add_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
