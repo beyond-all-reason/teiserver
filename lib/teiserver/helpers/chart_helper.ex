@@ -166,8 +166,11 @@ defmodule Teiserver.Helper.ChartHelper do
   # Take our path(s) of data and turn them into a single combined path of data
   defp aggregate_data(data, %{aggregator: aggregator}) do
     data
-    |> Enum.map(&Tuple.to_list/1)
-    |> Enum.map(aggregator)
+    |> Enum.map(fn row ->
+      row
+      |> Tuple.to_list()
+      |> aggregator.()
+    end)
   end
 
   defp aggregate_data(data, _no_aggregator) do
