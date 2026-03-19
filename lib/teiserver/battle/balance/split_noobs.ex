@@ -288,15 +288,15 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   end
 
   defp get_captain_rating(team) do
-    if Enum.count(team) > 0 do
+    if Enum.empty?(team) do
+      0
+    else
       captain =
         Enum.max_by(team, fn x ->
           x.rating
         end)
 
       captain[:rating]
-    else
-      0
     end
   end
 
