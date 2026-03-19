@@ -291,7 +291,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   defp handle_user_chat(senderid, "Lobby policy bot claiming the room", state) do
     sender = Account.get_user_by_id(senderid)
 
-    if Auth.is_bot?(sender) and Auth.is_moderator?(sender) do
+    if Auth.is_bot?(sender) and Auth.moderator?(sender) do
       if state.userid > senderid do
         send_dm(state, senderid, "I am senior, leave the lobby")
       else
@@ -381,7 +381,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
     current_map = Enum.join(map_parts, " ")
 
-    if not is_map_allowed?(current_map, state) do
+    if not map_allowed?(current_map, state) do
       send_chat(
         state,
         "Sorry but that map isn't allowed in this lobby, picking a random one from the approved list"
@@ -403,7 +403,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
       |> String.replace("\"", "")
       |> String.trim()
 
-    if not is_map_allowed?(current_map, state) do
+    if not map_allowed?(current_map, state) do
       pick_random_map(state)
     end
 
@@ -425,7 +425,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     # making sure there's no issue we just leave the lobby anyway
     sender = Account.get_user_by_id(senderid)
 
-    if Auth.is_bot?(sender) and Auth.is_moderator?(sender) do
+    if Auth.is_bot?(sender) and Auth.moderator?(sender) do
       send(self(), :leave_lobby)
     end
 
@@ -433,7 +433,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp handle_direct_message(senderid, "$leave", state) do
-    if Auth.is_moderator?(senderid) do
+    if Auth.moderator?(senderid) do
       send(self(), :leave_lobby)
     end
 
@@ -441,7 +441,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp handle_direct_message(senderid, "$quit", state) do
-    if Auth.is_moderator?(senderid) do
+    if Auth.moderator?(senderid) do
       Client.disconnect(state.userid, "Bot disconnect")
     end
 
@@ -488,9 +488,9 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   # Returns true if the name of the map sent to it is allowed
-  defp is_map_allowed?(_, %{lobby_policy: %{map_list: []}}), do: true
+  defp map_allowed?(_, %{lobby_policy: %{map_list: []}}), do: true
 
-  defp is_map_allowed?(current_map, state) do
+  defp map_allowed?(current_map, state) do
     if Enum.empty?(state.lobby_policy.map_list) do
       Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line} - This shouldn't fire")
       true

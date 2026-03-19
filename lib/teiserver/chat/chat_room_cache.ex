@@ -55,7 +55,7 @@ defmodule Teiserver.Room do
       user == nil ->
         {false, "No user"}
 
-      Auth.is_moderator?(user) == true ->
+      Auth.moderator?(user) == true ->
         true
 
       true ->
@@ -180,7 +180,7 @@ defmodule Teiserver.Room do
       CacheUser.is_shadowbanned?(userid) ->
         false
 
-      CacheUser.is_restricted?(userid, ["All chat", "Room chat"]) ->
+      CacheUser.restricted?(userid, ["All chat", "Room chat"]) ->
         false
 
       true ->

@@ -387,7 +387,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
     do_ring =
       cond do
-        Auth.is_moderator?(ringer_user) == true -> true
+        Auth.moderator?(ringer_user) == true -> true
         Auth.is_bot?(ringer_user) == true -> true
         Account.does_a_ignore_b?(state_userid, ringer_id) -> false
         true -> true
@@ -483,7 +483,7 @@ defmodule Teiserver.Protocols.SpringOut do
     from_user = Account.get_user_by_id(from_id)
 
     if not Account.does_a_ignore_b?(state_user.id, from_id) or
-         Auth.is_moderator?(from_user) == true do
+         Auth.moderator?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 
       messages
@@ -502,7 +502,7 @@ defmodule Teiserver.Protocols.SpringOut do
     from_user = Account.get_user_by_id(from_id)
 
     if not Account.does_a_ignore_b?(state_user.id, from_id) or
-         Auth.is_moderator?(from_user) == true or
+         Auth.moderator?(from_user) == true or
          Auth.is_bot?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 
@@ -522,7 +522,7 @@ defmodule Teiserver.Protocols.SpringOut do
     from_user = Account.get_user_by_id(from_id)
 
     if not Account.does_a_ignore_b?(state_user.id, from_id) or
-         Auth.is_moderator?(from_user) == true or
+         Auth.moderator?(from_user) == true or
          Auth.is_bot?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 
@@ -796,7 +796,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
     Logger.metadata(request_id: "SpringTcpServer##{user.id}")
 
-    exempt_from_cmd_throttle = Auth.is_moderator?(user) or Auth.is_bot?(user) == true
+    exempt_from_cmd_throttle = Auth.moderator?(user) or Auth.is_bot?(user) == true
 
     %{
       state

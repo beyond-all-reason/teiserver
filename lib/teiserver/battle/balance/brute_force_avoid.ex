@@ -131,12 +131,12 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
 
   def count_broken_parties(first_team, parties) do
     Enum.count(parties, fn party ->
-      is_party_broken?(first_team, party)
+      party_broken?(first_team, party)
     end)
   end
 
-  @spec is_party_broken?([BF.player()], [String.t()]) :: any()
-  def is_party_broken?(team, party) do
+  @spec party_broken?([BF.player()], [String.t()]) :: any()
+  def party_broken?(team, party) do
     count =
       Enum.count(party, fn x ->
         Enum.any?(team, fn y ->
@@ -156,12 +156,12 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
 
   def count_broken_avoids(first_team, avoids) do
     Enum.count(avoids, fn avoid ->
-      is_avoid_broken?(first_team, avoid)
+      avoid_broken?(first_team, avoid)
     end)
   end
 
-  @spec is_avoid_broken?([BF.player()], [[any()]]) :: any()
-  def is_avoid_broken?(team, avoids) do
+  @spec avoid_broken?([BF.player()], [[any()]]) :: any()
+  def avoid_broken?(team, avoids) do
     count =
       Enum.count(avoids, fn x ->
         Enum.any?(team, fn y ->

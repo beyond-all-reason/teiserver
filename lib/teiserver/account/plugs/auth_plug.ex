@@ -94,7 +94,7 @@ defmodule Teiserver.Account.AuthPlug do
 
   defp banned_user?(%{assigns: %{current_user: current_user}} = _conn_or_socket) do
     cond do
-      CacheUser.is_restricted?(current_user.id, ["Login"]) ->
+      CacheUser.restricted?(current_user.id, ["Login"]) ->
         true
 
       current_user.smurf_of_id != nil ->

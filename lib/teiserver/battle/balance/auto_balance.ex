@@ -82,7 +82,7 @@ defmodule Teiserver.Battle.Balance.AutoBalance do
   @spec has_noobs?([DB.player()]) :: any()
   def has_noobs?(players) do
     Enum.any?(players, fn x ->
-      SplitNoobs.is_newish_player?(x.rank, x.uncertainty)
+      SplitNoobs.newish_player?(x.rank, x.uncertainty)
     end)
   end
 

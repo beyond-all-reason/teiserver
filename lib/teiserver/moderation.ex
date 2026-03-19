@@ -1163,7 +1163,7 @@ defmodule Teiserver.Moderation do
   def unbridge_user(nil, _, _, _), do: :no_user
 
   def unbridge_user(user, message, flagged_word_count, location) do
-    if not CacheUser.is_restricted?(user, ["Bridging"]) do
+    if not CacheUser.restricted?(user, ["Bridging"]) do
       {:ok, _action} =
         create_action(%{
           target_id: user.id,

@@ -217,13 +217,13 @@ defmodule Teiserver.CacheUser do
     new_name = String.trim(new_name)
 
     cond do
-      is_restricted?(userid, ["Community", "Renaming"]) ->
+      restricted?(userid, ["Community", "Renaming"]) ->
         {:error, "Your account is restricted from renaming"}
 
       admin_action == false and renamed_recently(userid) ->
         {:error, "Rename limit reached (2 times in 5 days or 3 times in 30 days)"}
 
-      admin_action == false and is_restricted?(userid, ["All chat", "Renaming"]) ->
+      admin_action == false and restricted?(userid, ["All chat", "Renaming"]) ->
         {:error, "Muted"}
 
       true ->
@@ -283,7 +283,7 @@ defmodule Teiserver.CacheUser do
 
     cond do
       # VIPs ignore time based rename restrictions
-      Auth.is_vip?(user_id) -> false
+      Auth.vip?(user_id) -> false
       # Can't rename more than 2 times in 5 days
       since_rename_two < 60 * 60 * 24 * 5 -> true
       # Can't rename more than 3 times in 30 days
@@ -426,7 +426,7 @@ defmodule Teiserver.CacheUser do
     allowed =
       cond do
         blacklisted -> false
-        is_restricted?(sender, ["All chat", "Direct chat"]) -> false
+        restricted?(sender, ["All chat", "Direct chat"]) -> false
         true -> true
       end
 
@@ -710,21 +710,21 @@ defmodule Teiserver.CacheUser do
           Enum.member?(["", "0", nil], lobby_hash) == true and not Auth.is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
-          is_restricted?(user, ["Permanently banned"]) ->
+          restricted?(user, ["Permanently banned"]) ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Permanently banned"
             })
 
             {:error, "Banned account"}
 
-          is_restricted?(user, ["Login"]) ->
+          restricted?(user, ["Login"]) ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Suspended"
             })
 
             {:error, @suspended_string}
 
-          not Auth.is_verified?(user) ->
+          not Auth.verified?(user) ->
             Account.update_user_stat(user.id, %{
               lobby_client: lobby,
               lobby_hash: lobby_hash,
@@ -807,21 +807,21 @@ defmodule Teiserver.CacheUser do
               {:error, "Invalid password"}
             end
 
-          is_restricted?(user, ["Permanently banned"]) ->
+          restricted?(user, ["Permanently banned"]) ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Permanently banned"
             })
 
             {:error, "Banned account"}
 
-          is_restricted?(user, ["Login"]) ->
+          restricted?(user, ["Login"]) ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Suspended"
             })
 
             {:error, @suspended_string}
 
-          not Auth.is_verified?(user) ->
+          not Auth.verified?(user) ->
             # Log them in to save some details we'd not otherwise get
             do_login(user, ip, lobby, lobby_hash)
 
@@ -883,7 +883,7 @@ defmodule Teiserver.CacheUser do
         :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{reason: :rate_limited})
         {:error, :rate_limited, "Flood protection - Please wait 20 seconds and try again"}
 
-      is_restricted?(user, ["Permanently banned"]) ->
+      restricted?(user, ["Permanently banned"]) ->
         Telemetry.log_complex_server_event(user.id, "Banned login", %{
           error: "Permanently banned"
         })
@@ -892,7 +892,7 @@ defmodule Teiserver.CacheUser do
 
         {:error, "Banned account"}
 
-      is_restricted?(user, ["Login"]) ->
+      restricted?(user, ["Login"]) ->
         Telemetry.log_complex_server_event(user.id, "Banned login", %{
           error: "Suspended"
         })
@@ -901,7 +901,7 @@ defmodule Teiserver.CacheUser do
 
         {:error, @suspended_string}
 
-      not Auth.is_verified?(user) ->
+      not Auth.verified?(user) ->
         # Log them in to save some details we'd not otherwise get
         do_login(user, ip, lobby_client, lobby_hash)
 
@@ -1036,29 +1036,29 @@ defmodule Teiserver.CacheUser do
     update_user(%{user | restrictions: new_restrictions}, persist: true)
   end
 
-  @spec is_restricted?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
-  def is_restricted?(nil, _), do: true
+  @spec restricted?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
+  def restricted?(nil, _), do: true
 
-  def is_restricted?(userid, restriction) when is_integer(userid),
-    do: is_restricted?(get_user_by_id(userid), restriction)
+  def restricted?(userid, restriction) when is_integer(userid),
+    do: restricted?(get_user_by_id(userid), restriction)
 
-  def is_restricted?(user_restrictions, restriction) when is_list(user_restrictions),
-    do: is_restricted?(%{restrictions: user_restrictions}, restriction)
+  def restricted?(user_restrictions, restriction) when is_list(user_restrictions),
+    do: restricted?(%{restrictions: user_restrictions}, restriction)
 
-  def is_restricted?(%{restrictions: restrictions}, restriction_list)
+  def restricted?(%{restrictions: restrictions}, restriction_list)
       when is_list(restriction_list) do
     restriction_list
     |> Enum.map(fn r -> Enum.member?(restrictions, r) end)
     |> Enum.any?()
   end
 
-  def is_restricted?(%{restrictions: restrictions}, the_restriction) do
+  def restricted?(%{restrictions: restrictions}, the_restriction) do
     Enum.member?(restrictions, the_restriction)
   end
 
   @spec has_mute?(T.userid() | T.user()) :: boolean()
   def has_mute?(user) do
-    is_restricted?(user, [
+    restricted?(user, [
       "All chat",
       "Room chat",
       "Direct chat",
@@ -1069,7 +1069,7 @@ defmodule Teiserver.CacheUser do
 
   @spec has_warning?(T.userid() | T.user()) :: boolean()
   def has_warning?(user) do
-    is_restricted?(user, [
+    restricted?(user, [
       "Warning reminder"
     ])
   end
@@ -1180,10 +1180,10 @@ defmodule Teiserver.CacheUser do
   def allow?(user, required) do
     case required do
       :moderator ->
-        Auth.is_moderator?(user)
+        Auth.moderator?(user)
 
       :bot ->
-        Auth.is_moderator?(user) or Auth.is_bot?(user)
+        Auth.moderator?(user) or Auth.is_bot?(user)
 
       required ->
         Enum.member?(user.permissions, required)

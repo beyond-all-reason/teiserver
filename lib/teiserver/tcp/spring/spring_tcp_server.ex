@@ -1060,7 +1060,7 @@ defmodule Teiserver.SpringTcpServer do
             userid: user.id,
             name: user.name,
             rank: 0,
-            moderator: Auth.is_moderator?(user),
+            moderator: Auth.moderator?(user),
             bot: Auth.is_bot?(user)
           })
 

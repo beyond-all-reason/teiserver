@@ -43,14 +43,14 @@ defmodule Teiserver.Account.Auth do
   def is_bot?(_), do: false
 
   # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
-  @spec is_moderator?(T.userid() | T.user()) :: boolean()
-  def is_moderator?(nil), do: false
+  @spec moderator?(T.userid() | T.user()) :: boolean()
+  def moderator?(nil), do: false
 
-  def is_moderator?(userid) when is_integer(userid),
-    do: is_moderator?(Account.get_user_by_id(userid))
+  def moderator?(userid) when is_integer(userid),
+    do: moderator?(Account.get_user_by_id(userid))
 
-  def is_moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
-  def is_moderator?(_), do: false
+  def moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
+  def moderator?(_), do: false
 
   # credo:disable-for-lines:8 Credo.Check.Readability.PredicateFunctionNames
   @spec is_event_organizer?(T.userid() | T.user()) :: boolean()
@@ -62,35 +62,35 @@ defmodule Teiserver.Account.Auth do
   def is_event_organizer?(%{roles: roles}), do: Enum.member?(roles, "Event Organizer")
   def is_event_organizer?(_), do: false
 
-  @spec is_contributor?(T.userid() | T.user()) :: boolean()
-  def is_contributor?(nil), do: false
+  @spec contributor?(T.userid() | T.user()) :: boolean()
+  def contributor?(nil), do: false
 
-  def is_contributor?(userid) when is_integer(userid),
-    do: is_contributor?(Account.get_user_by_id(userid))
+  def contributor?(userid) when is_integer(userid),
+    do: contributor?(Account.get_user_by_id(userid))
 
-  def is_contributor?(%{roles: roles}), do: Enum.member?(roles, "Contributor")
-  def is_contributor?(_), do: false
+  def contributor?(%{roles: roles}), do: Enum.member?(roles, "Contributor")
+  def contributor?(_), do: false
 
-  @spec is_verified?(T.userid() | T.user()) :: boolean()
-  def is_verified?(nil), do: false
+  @spec verified?(T.userid() | T.user()) :: boolean()
+  def verified?(nil), do: false
 
-  def is_verified?(userid) when is_integer(userid),
-    do: is_verified?(Account.get_user_by_id(userid))
+  def verified?(userid) when is_integer(userid),
+    do: verified?(Account.get_user_by_id(userid))
 
-  def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
-  def is_verified?(_), do: false
+  def verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
+  def verified?(_), do: false
 
-  @spec is_admin?(T.userid() | T.user()) :: boolean()
-  def is_admin?(nil), do: false
-  def is_admin?(userid) when is_integer(userid), do: is_admin?(Account.get_user_by_id(userid))
-  def is_admin?(%{roles: roles}), do: Enum.member?(roles, "Admin")
-  def is_admin?(_), do: false
+  @spec admin?(T.userid() | T.user()) :: boolean()
+  def admin?(nil), do: false
+  def admin?(userid) when is_integer(userid), do: admin?(Account.get_user_by_id(userid))
+  def admin?(%{roles: roles}), do: Enum.member?(roles, "Admin")
+  def admin?(_), do: false
 
-  @spec is_vip?(T.userid() | T.user()) :: boolean()
-  def is_vip?(nil), do: false
-  def is_vip?(userid) when is_integer(userid), do: is_vip?(Account.get_user_by_id(userid))
-  def is_vip?(%{roles: roles}), do: Enum.member?(roles, "VIP")
-  def is_vip?(_), do: false
+  @spec vip?(T.userid() | T.user()) :: boolean()
+  def vip?(nil), do: false
+  def vip?(userid) when is_integer(userid), do: vip?(Account.get_user_by_id(userid))
+  def vip?(%{roles: roles}), do: Enum.member?(roles, "VIP")
+  def vip?(_), do: false
 
   @doc """
   If a user possesses any of these roles it returns true

@@ -25,7 +25,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
 
     if balance do
       moderator_messages =
-        if Auth.is_moderator?(userid) do
+        if Auth.moderator?(userid) do
           time_taken =
             cond do
               balance.time_taken < 1000 ->

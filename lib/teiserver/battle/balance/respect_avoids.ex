@@ -423,7 +423,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   # This will not be displayed in chobby ui or player list; it's only used for balance
   # It will be used when calculating team deviation
   defp adjusted_rating(rating, uncertainty, rank) do
-    if is_newish_player?(rank, uncertainty) do
+    if newish_player?(rank, uncertainty) do
       # For newish players we assume they are the worst in the lobby e.g. 0 match rating and
       # then they converge to their true rating over time
       # Once their uncertainty is low enough, we fully trust their rating
@@ -506,11 +506,11 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   @spec get_solo_noobs([RA.player()]) :: any()
   def get_solo_noobs(players) do
     Enum.filter(players, fn player ->
-      is_newish_player?(player.rank, player.uncertainty) && !player.in_party?
+      newish_player?(player.rank, player.uncertainty) && !player.in_party?
     end)
   end
 
-  def is_newish_player?(rank, uncertainty) do
+  def newish_player?(rank, uncertainty) do
     # It is possible that someone has high uncertainty due to
     # playing unranked, playing PvE, or playing a different game mode e.g. 1v1
     # If they have many hours i.e. chev 4 = 100 hours, we will not consider them newish

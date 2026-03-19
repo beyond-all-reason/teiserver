@@ -109,7 +109,7 @@ defmodule Teiserver.Client do
         name: user.name,
         tcp_pid: self(),
         rank: user.rank,
-        moderator: Auth.is_moderator?(user) or Auth.is_event_organizer?(user),
+        moderator: Auth.moderator?(user) or Auth.is_event_organizer?(user),
         bot: Auth.is_bot?(user),
         away: false,
         in_game: false,

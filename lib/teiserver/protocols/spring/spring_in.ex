@@ -648,7 +648,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
             reply(:no, {"c.moderation.report_user", "reporting friend"}, msg_id, state)
 
-          CacheUser.is_restricted?(state.userid, ["Community", "Reporting"]) ->
+          CacheUser.restricted?(state.userid, ["Community", "Reporting"]) ->
             reply(:no, {"c.moderation.report_user", "permission denied"}, msg_id, state)
 
           true ->

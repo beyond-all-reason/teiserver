@@ -41,8 +41,8 @@ defmodule Teiserver.Helpers.BoundedQueue do
     }
   end
 
-  @spec is_empty(t()) :: boolean()
-  def is_empty(bq), do: bq.len == 0
+  @spec empty?(t()) :: boolean()
+  def empty?(bq), do: bq.len == 0
 
   @spec len(t()) :: non_neg_integer()
   def len(bq), do: bq.len

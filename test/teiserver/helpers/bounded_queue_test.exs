@@ -11,8 +11,8 @@ defmodule Teiserver.Helpers.BoundedQueueTest do
 
   test "is_empty" do
     q = BQ.new(1)
-    assert BQ.is_empty(q)
-    assert not BQ.is_empty(BQ.put(q, :coucou))
+    assert BQ.empty?(q)
+    assert not BQ.empty?(BQ.put(q, :coucou))
   end
 
   test "from and to list" do
@@ -38,7 +38,7 @@ defmodule Teiserver.Helpers.BoundedQueueTest do
   test "out" do
     q = BQ.new(1) |> BQ.put(:item)
     assert {{:value, :item}, q2} = BQ.out(q)
-    assert BQ.is_empty(q2)
+    assert BQ.empty?(q2)
   end
 
   test "max len" do

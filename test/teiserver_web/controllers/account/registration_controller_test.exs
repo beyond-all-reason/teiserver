@@ -106,7 +106,7 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
       user =
         Account.query_user(search: [email_lower: attrs.email])
 
-      assert Auth.is_verified?(user)
+      assert Auth.verified?(user)
     end
   end
 
