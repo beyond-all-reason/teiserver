@@ -658,7 +658,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       |> Multi.insert_all(:insert_all, RatingLog, all_ratings)
       |> Repo.transaction()
     else
-      Ecto.Multi.new()
+      Multi.new()
       |> Multi.insert_all(:insert_all, RatingLog, all_ratings)
       |> Repo.transaction()
     end
