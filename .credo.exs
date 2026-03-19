@@ -159,7 +159,7 @@
           ## Controversial and experimental checks
           #
           {Credo.Check.Refactor.MapJoin, []},
-          # {Credo.Check.Refactor.MapMap, []}, 3 issues
+          {Credo.Check.Refactor.MapMap, []},
           {Credo.Check.Refactor.FilterReject, []}
           # {Credo.Check.Readability.ModuleDoc, []} 154 issues
         ],

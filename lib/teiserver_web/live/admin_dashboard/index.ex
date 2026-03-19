@@ -143,9 +143,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
             _ -> nil
           end
 
-        {lobby_id, consul_pid, balancer_pid, throttle_pid}
-      end)
-      |> Enum.map(fn {lobby_id, consul_pid, balancer_pid, throttle_pid} ->
         {Battle.get_lobby(lobby_id), consul_pid, balancer_pid, throttle_pid}
       end)
       |> Enum.sort_by(fn t -> elem(t, 0).name end, &<=/2)
