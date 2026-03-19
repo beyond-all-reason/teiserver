@@ -590,8 +590,10 @@ defmodule Teiserver.CacheUser do
   def verify_user(user) do
     Account.delete_user_stat_keys(user.id, ~w(verification_code))
 
-    %{user | roles: ["Verified" | user.roles]}
-    |> update_user(persist: true)
+    db_user = Account.get_user(user.id)
+    Account.script_update_user(db_user, %{roles: ["Verified" | db_user.roles]})
+
+    user
   end
 
   @spec add_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
