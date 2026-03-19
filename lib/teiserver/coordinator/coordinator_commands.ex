@@ -1,13 +1,14 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.CodeOfConductData
   alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
   alias Teiserver.Lobby
   alias Teiserver.Moderation
-  alias Teiserver.Account.AccoladeLib
-  alias Teiserver.Account.CodeOfConductData
   alias Teiserver.Coordinator.CoordinatorLib
   alias Teiserver.Helper.NumberHelper
 
@@ -29,7 +30,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     client = Client.get_client_by_id(senderid)
     user = Account.get_user_by_id(senderid)
 
-    is_admin = Enum.member?(user.roles, "Admin")
+    is_admin = Auth.is_admin?(user)
 
     cond do
       client == nil ->
@@ -46,7 +47,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         true
 
       # Allow all except Admin only commands for moderators
-      CacheUser.is_moderator?(user) and not Enum.member?(@admin_commands, cmd.command) ->
+      Auth.is_moderator?(user) and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       not Enum.member?(@always_allow ++ @forward_to_consul, cmd.command) ->
@@ -281,7 +282,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         ]
 
         mod_parts =
-          if CacheUser.is_moderator?(sender) do
+          if Auth.is_moderator?(sender) do
             # player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
             # spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
             # rank_time = CacheUser.rank_time(user.id)
@@ -406,7 +407,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         )
 
       user ->
-        if CacheUser.is_moderator?(user) do
+        if Auth.is_moderator?(user) do
           Coordinator.send_to_user(senderid, "You cannot block moderators.")
         else
           case Account.ignore_user(senderid, user.id) do

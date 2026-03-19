@@ -7,7 +7,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
   use GenServer
   require Logger
   alias Teiserver.Account
-  alias Teiserver.CacheUser
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
@@ -230,7 +229,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     user = Account.get_user_by_id(userid)
     bypass_roles = ["Bot", "Contributor", "VIP", "BAR+"]
 
-    if CacheUser.has_any_role?(user, bypass_roles) do
+    if Teiserver.Account.Auth.has_any_role?(user, bypass_roles) do
       :instant
     else
       :standard

@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   @moduledoc false
   require Logger
+  alias Teiserver.Account.Auth
   alias Teiserver.Config
   alias Teiserver.Coordinator.ConsulServer
   alias Teiserver.Coordinator.RikerssMemes
@@ -237,7 +238,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "tournament", senderid: senderid, remaining: rem} = cmd, state) do
     if Config.get_site_config_cache("teiserver.Allow tournament command") do
-      if CacheUser.has_any_role?(senderid, [
+      if Auth.has_any_role?(senderid, [
            "Moderator",
            "Caster",
            "Tournament player",
@@ -449,7 +450,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     if balance do
       moderator_messages =
-        if CacheUser.is_moderator?(senderid) do
+        if Auth.is_moderator?(senderid) do
           time_taken =
             cond do
               balance.time_taken < 1000 ->
@@ -648,7 +649,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> String.downcase()
       |> String.trim()
 
-    is_moderator = CacheUser.is_moderator?(senderid)
+    is_moderator = Auth.is_moderator?(senderid)
 
     allowed_choices = Teiserver.Battle.BalanceLib.get_allowed_algorithms(is_moderator)
 
@@ -1414,7 +1415,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           all_possible_clients
           |> Enum.group_by(
             fn %{userid: userid} ->
-              CacheUser.has_any_role?(userid, "Contributor")
+              Auth.is_contributor?(userid)
             end,
             fn %{userid: userid} ->
               userid
@@ -1425,7 +1426,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           all_possible_clients
           |> Enum.group_by(
             fn %{userid: userid} ->
-              CacheUser.has_any_role?(userid, "Core")
+              Auth.has_any_role?(userid, "Core")
             end,
             fn %{userid: userid} ->
               userid
@@ -1436,7 +1437,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           all_possible_clients
           |> Enum.group_by(
             fn %{userid: userid} ->
-              CacheUser.has_any_role?(userid, "Admin")
+              Auth.is_admin?(userid)
             end,
             fn %{userid: userid} ->
               userid

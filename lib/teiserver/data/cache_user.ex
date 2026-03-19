@@ -7,6 +7,7 @@ defmodule Teiserver.CacheUser do
   alias Argon2
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Account.UserCacheLib
@@ -279,7 +280,7 @@ defmodule Teiserver.CacheUser do
 
     cond do
       # VIPs ignore time based rename restrictions
-      is_vip?(user_id) -> false
+      Auth.is_vip?(user_id) -> false
       # Can't rename more than 2 times in 5 days
       since_rename_two < 60 * 60 * 24 * 5 -> true
       # Can't rename more than 3 times in 30 days
@@ -417,7 +418,7 @@ defmodule Teiserver.CacheUser do
     sender = get_user_by_id(sender_id)
     msg_str = Enum.join(message_parts, "\n")
 
-    blacklisted = is_bot?(sender) == false and WordLib.blacklisted_phrase?(msg_str)
+    blacklisted = Auth.is_bot?(sender) == false and WordLib.blacklisted_phrase?(msg_str)
 
     allowed =
       cond do
@@ -431,7 +432,7 @@ defmodule Teiserver.CacheUser do
     end
 
     if allowed do
-      if is_bot?(to_id) do
+      if Auth.is_bot?(to_id) do
         message_parts
         |> Enum.each(fn line ->
           if String.starts_with?(line, "!clan ") do
@@ -448,7 +449,7 @@ defmodule Teiserver.CacheUser do
       end
 
       # Persist but only if no bots are involved
-      if not is_bot?(to_id) and not is_bot?(sender_id) do
+      if not Auth.is_bot?(to_id) and not Auth.is_bot?(sender_id) do
         Chat.create_direct_message(%{
           to_id: to_id,
           from_id: sender_id,
@@ -589,8 +590,10 @@ defmodule Teiserver.CacheUser do
   def verify_user(user) do
     Account.delete_user_stat_keys(user.id, ~w(verification_code))
 
-    %{user | roles: ["Verified" | user.roles]}
-    |> update_user(persist: true)
+    db_user = Account.get_user(user.id)
+    Account.script_update_user(db_user, %{roles: ["Verified" | db_user.roles]})
+
+    user
   end
 
   @spec add_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
@@ -708,10 +711,10 @@ defmodule Teiserver.CacheUser do
 
             {:error, @smurf_string}
 
-          not is_bot?(user) and login_flood_check(user.id) == :block ->
+          not Auth.is_bot?(user.id) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.member?(["", "0", nil], lobby_hash) == true and not is_bot?(user) ->
+          Enum.member?(["", "0", nil], lobby_hash) == true and not Auth.is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
           is_restricted?(user, ["Permanently banned"]) ->
@@ -728,7 +731,7 @@ defmodule Teiserver.CacheUser do
 
             {:error, @suspended_string}
 
-          not is_verified?(user) ->
+          not Auth.is_verified?(user) ->
             Account.update_user_stat(user.id, %{
               lobby_client: lobby,
               lobby_hash: lobby_hash,
@@ -745,7 +748,7 @@ defmodule Teiserver.CacheUser do
 
             # Okay, we're good, what's capacity looking like?
             cond do
-              is_bot?(user) ->
+              Auth.is_bot?(user) ->
                 do_login(user, ip, lobby, lobby_hash)
 
               Config.get_site_config_cache("system.Use login throttle") ->
@@ -755,7 +758,8 @@ defmodule Teiserver.CacheUser do
                   {:error, "Queued", user.id, lobby, lobby_hash}
                 end
 
-              not has_any_role?(user, ["VIP", "Contributor"]) and server_capacity() <= 0 ->
+              not Auth.has_any_role?(user, ["VIP", "Contributor"]) and
+                  server_capacity() <= 0 ->
                 {:error, "The server is currently full, please try again in a minute or two."}
 
               true ->
@@ -796,10 +800,10 @@ defmodule Teiserver.CacheUser do
           user.name != username ->
             {:error, "Username is case sensitive, try '#{user.name}'"}
 
-          not is_bot?(user) and login_flood_check(user.id) == :block ->
+          not Auth.is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.member?(["", "0", nil], lobby_hash) == true and not is_bot?(user) ->
+          Enum.member?(["", "0", nil], lobby_hash) == true and not Auth.is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
           Account.verify_md5_password(md5_password, user.password) == false ->
@@ -824,7 +828,7 @@ defmodule Teiserver.CacheUser do
 
             {:error, @suspended_string}
 
-          not is_verified?(user) ->
+          not Auth.is_verified?(user) ->
             # Log them in to save some details we'd not otherwise get
             do_login(user, ip, lobby, lobby_hash)
 
@@ -844,7 +848,7 @@ defmodule Teiserver.CacheUser do
 
             # Okay, we're good, what's capacity looking like?
             cond do
-              is_bot?(user) ->
+              Auth.is_bot?(user) ->
                 do_login(user, ip, lobby, lobby_hash)
 
               Config.get_site_config_cache("system.Use login throttle") ->
@@ -854,7 +858,8 @@ defmodule Teiserver.CacheUser do
                   {:error, "Queued", user.id, lobby, lobby_hash}
                 end
 
-              not has_any_role?(user, ["VIP", "Contributor"]) and server_capacity() <= 0 ->
+              not Auth.has_any_role?(user, ["VIP", "Contributor"]) and
+                  server_capacity() <= 0 ->
                 {:error, "The server is currently full, please try again in a minute or two."}
 
               true ->
@@ -903,7 +908,7 @@ defmodule Teiserver.CacheUser do
 
         {:error, @suspended_string}
 
-      not is_verified?(user) ->
+      not Auth.is_verified?(user) ->
         # Log them in to save some details we'd not otherwise get
         do_login(user, ip, lobby_client, lobby_hash)
 
@@ -969,7 +974,7 @@ defmodule Teiserver.CacheUser do
 
     # User stats
     Account.update_user_stat(user.id, %{
-      bot: is_bot?(user),
+      bot: Auth.is_bot?(user),
       country: country,
       rank: rank,
       lobby_client: lobby_client,
@@ -979,7 +984,7 @@ defmodule Teiserver.CacheUser do
 
     Telemetry.log_simple_server_event(user.id, "account.user_login")
 
-    if not is_bot?(user) do
+    if not Auth.is_bot?(user) do
       Account.create_smurf_key(user.id, "client_app_hash", lobby_hash)
     end
 
@@ -1095,54 +1100,6 @@ defmodule Teiserver.CacheUser do
     :ok
   end
 
-  # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
-  @spec is_bot?(T.userid() | T.user()) :: boolean()
-  def is_bot?(nil), do: false
-  def is_bot?(userid) when is_integer(userid), do: is_bot?(get_user_by_id(userid))
-  def is_bot?(%{roles: roles}), do: Enum.member?(roles, "Bot")
-  def is_bot?(_), do: false
-
-  # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
-  @spec is_moderator?(T.userid() | T.user()) :: boolean()
-  def is_moderator?(nil), do: false
-  def is_moderator?(userid) when is_integer(userid), do: is_moderator?(get_user_by_id(userid))
-  def is_moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
-  def is_moderator?(_), do: false
-
-  # credo:disable-for-lines:8 Credo.Check.Readability.PredicateFunctionNames
-  @spec is_event_organizer?(T.userid() | T.user()) :: boolean()
-  def is_event_organizer?(nil), do: false
-
-  def is_event_organizer?(userid) when is_integer(userid),
-    do: is_event_organizer?(get_user_by_id(userid))
-
-  def is_event_organizer?(%{roles: roles}), do: Enum.member?(roles, "Event Organizer")
-  def is_event_organizer?(_), do: false
-
-  @spec is_contributor?(T.userid() | T.user()) :: boolean()
-  def is_contributor?(nil), do: false
-  def is_contributor?(userid) when is_integer(userid), do: is_contributor?(get_user_by_id(userid))
-  def is_contributor?(%{roles: roles}), do: Enum.member?(roles, "Contributor")
-  def is_contributor?(_), do: false
-
-  @spec is_verified?(T.userid() | T.user()) :: boolean()
-  def is_verified?(nil), do: false
-  def is_verified?(userid) when is_integer(userid), do: is_verified?(Account.get_user(userid))
-  def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
-  def is_verified?(_), do: false
-
-  @spec is_admin?(T.userid() | T.user()) :: boolean()
-  def is_admin?(nil), do: false
-  def is_admin?(userid) when is_integer(userid), do: is_admin?(get_user_by_id(userid))
-  def is_admin?(%{roles: roles}), do: Enum.member?(roles, "Admin")
-  def is_admin?(_), do: false
-
-  @spec is_vip?(T.userid() | T.user()) :: boolean()
-  def is_vip?(nil), do: false
-  def is_vip?(userid) when is_integer(userid), do: is_vip?(get_user_by_id(userid))
-  def is_vip?(%{roles: roles}), do: Enum.member?(roles, "VIP")
-  def is_vip?(_), do: false
-
   @spec rank_time(T.userid()) :: non_neg_integer()
   def rank_time(userid) do
     stats = Account.get_user_stat(userid) || %{data: %{}}
@@ -1188,14 +1145,30 @@ defmodule Teiserver.CacheUser do
     # Thresholds should match what is on the website:
     # https://www.beyondallreason.info/guide/rating-and-lobby-balance#rank-icons
     cond do
-      has_any_role?(userid, ["Tournament winner"]) -> 7
-      has_any_role?(userid, ~w(Core Contributor)) and !Account.hide_contributor_rank?(userid) -> 6
-      ingame_hours >= 1000 -> 5
-      ingame_hours >= 250 -> 4
-      ingame_hours >= 100 -> 3
-      ingame_hours >= 15 -> 2
-      ingame_hours >= 5 -> 1
-      true -> 0
+      Auth.has_any_role?(userid, ["Tournament winner"]) ->
+        7
+
+      Auth.has_any_role?(userid, ~w(Core Contributor)) and
+          !Account.hide_contributor_rank?(userid) ->
+        6
+
+      ingame_hours >= 1000 ->
+        5
+
+      ingame_hours >= 250 ->
+        4
+
+      ingame_hours >= 100 ->
+        3
+
+      ingame_hours >= 15 ->
+        2
+
+      ingame_hours >= 5 ->
+        1
+
+      true ->
+        0
     end
   end
 
@@ -1214,49 +1187,15 @@ defmodule Teiserver.CacheUser do
   def allow?(user, required) do
     case required do
       :moderator ->
-        is_moderator?(user)
+        Auth.is_moderator?(user)
 
       :bot ->
-        is_moderator?(user) or is_bot?(user)
+        Auth.is_moderator?(user) or Auth.is_bot?(user)
 
       required ->
         Enum.member?(user.permissions, required)
     end
   end
-
-  @doc """
-  If a user possesses any of these roles it returns true
-  """
-  @spec has_any_role?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
-  def has_any_role?(nil, _), do: false
-
-  def has_any_role?(userid, roles) when is_integer(userid),
-    do: has_any_role?(get_user_by_id(userid), roles)
-
-  def has_any_role?(user, roles) when is_list(roles) do
-    roles
-    |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
-    |> Enum.any?()
-  end
-
-  def has_any_role?(user, role), do: has_any_role?(user, [role])
-
-  @doc """
-  If a user possesses all of these roles it returns true, if any are lacking it returns false
-  """
-  @spec has_all_roles?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
-  def has_all_roles?(nil, _), do: false
-
-  def has_all_roles?(userid, roles) when is_integer(userid),
-    do: has_all_roles?(get_user_by_id(userid), roles)
-
-  def has_all_roles?(user, roles) when is_list(roles) do
-    roles
-    |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
-    |> Enum.all?()
-  end
-
-  def has_all_roles?(user, role), do: has_all_roles?(user, [role])
 
   @spec valid_email?(String.t()) :: :ok | {:error, reason :: String.t()}
   def valid_email?(email) do

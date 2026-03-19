@@ -2,6 +2,7 @@ defmodule Teiserver.Room do
   @moduledoc false
   require Logger
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Coordinator
@@ -51,7 +52,7 @@ defmodule Teiserver.Room do
       user == nil ->
         {false, "No user"}
 
-      CacheUser.is_moderator?(user) == true ->
+      Auth.is_moderator?(user) == true ->
         true
 
       true ->
@@ -134,11 +135,11 @@ defmodule Teiserver.Room do
   end
 
   def send_message(user, room_name, msg) do
-    if CacheUser.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
+    if Auth.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
-    blacklisted = CacheUser.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       CacheUser.shadowban_user(user.id)
@@ -153,11 +154,11 @@ defmodule Teiserver.Room do
   def send_message_ex(from_id, room_name, msg) do
     user = Account.get_user_by_id(from_id)
 
-    if CacheUser.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
+    if Auth.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
-    blacklisted = CacheUser.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       CacheUser.shadowban_user(user.id)

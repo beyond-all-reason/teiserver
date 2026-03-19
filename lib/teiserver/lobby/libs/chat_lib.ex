@@ -1,6 +1,7 @@
 defmodule Teiserver.Lobby.ChatLib do
   @moduledoc false
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Battle
@@ -67,11 +68,11 @@ defmodule Teiserver.Lobby.ChatLib do
     msg = trim_message(msg)
     user = Account.get_user_by_id(userid)
 
-    if CacheUser.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
+    if Auth.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = CacheUser.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       CacheUser.shadowban_user(user.id)
@@ -133,11 +134,11 @@ defmodule Teiserver.Lobby.ChatLib do
     msg = trim_message(msg)
     user = CacheUser.get_user_by_id(userid)
 
-    if CacheUser.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
+    if Auth.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = CacheUser.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       CacheUser.shadowban_user(user.id)
@@ -200,7 +201,7 @@ defmodule Teiserver.Lobby.ChatLib do
     msg = trim_message(msg)
     sender = CacheUser.get_user_by_id(from_id)
 
-    blacklisted = CacheUser.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = Auth.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       CacheUser.shadowban_user(from_id)
@@ -262,12 +263,12 @@ defmodule Teiserver.Lobby.ChatLib do
     persist =
       cond do
         lobby == nil -> false
-        CacheUser.is_bot?(user) == true and String.slice(msg, 0..1) == "* " -> false
+        Auth.is_bot?(user) == true and String.slice(msg, 0..1) == "* " -> false
         true -> true
       end
 
     {userid, content} =
-      if CacheUser.is_bot?(user) do
+      if Auth.is_bot?(user) do
         case Regex.run(~r/^<(.*?)> (.+)$/u, msg) do
           [_, username, remainder] ->
             userid = CacheUser.get_userid(username) || user.id

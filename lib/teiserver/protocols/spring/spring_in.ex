@@ -11,6 +11,7 @@ defmodule Teiserver.Protocols.SpringIn do
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.FriendRequestLib
   alias Teiserver.Battle
   alias Teiserver.CacheUser
@@ -822,7 +823,7 @@ defmodule Teiserver.Protocols.SpringIn do
             client == nil ->
               {:failure, "No client"}
 
-            not CacheUser.is_bot?(state.userid) ->
+            not Auth.is_bot?(state.userid) ->
               {:failure, "Not a bot"}
 
             true ->
@@ -1201,7 +1202,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
       msg_sliced =
         cond do
-          CacheUser.is_bot?(state.userid) ->
+          Auth.is_bot?(state.userid) ->
             msg
 
           String.starts_with?(lowercase_msg, "!bset tweakdefs") ||
@@ -1227,7 +1228,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
       msg_sliced =
         cond do
-          CacheUser.is_bot?(state.userid) ->
+          Auth.is_bot?(state.userid) ->
             msg
 
           String.starts_with?(lowercase_msg, "!bset tweakdefs") ||
@@ -1255,7 +1256,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
         if Lobby.allow?(state.userid, :saybattleprivateex, state.lobby_id) do
           msg_sliced =
-            if CacheUser.is_bot?(state.userid) do
+            if Auth.is_bot?(state.userid) do
               msg
             else
               msg
@@ -1379,7 +1380,7 @@ defmodule Teiserver.Protocols.SpringIn do
         userid = CacheUser.get_userid(sender)
         client = Client.get_client_by_id(state.userid)
 
-        if client != nil and CacheUser.is_bot?(state.userid) do
+        if client != nil and Auth.is_bot?(state.userid) do
           originator_id = CacheUser.get_userid(originator)
           CacheUser.ring(userid, originator_id)
         end

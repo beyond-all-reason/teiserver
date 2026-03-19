@@ -5,7 +5,6 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
   """
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Account
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   import Teiserver.Helper.NumberHelper, only: [round: 2]
@@ -25,7 +24,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
 
     if balance do
       moderator_messages =
-        if Account.is_moderator?(userid) do
+        if Teiserver.Account.Auth.is_moderator?(userid) do
           time_taken =
             cond do
               balance.time_taken < 1000 ->

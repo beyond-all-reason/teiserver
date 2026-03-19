@@ -8,6 +8,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Client
@@ -290,7 +291,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   defp handle_user_chat(senderid, "Lobby policy bot claiming the room", state) do
     sender = Account.get_user_by_id(senderid)
 
-    if CacheUser.is_bot?(sender) and CacheUser.is_moderator?(sender) do
+    if Auth.is_bot?(sender) and Auth.is_moderator?(sender) do
       if state.userid > senderid do
         send_dm(state, senderid, "I am senior, leave the lobby")
       else
@@ -424,7 +425,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     # making sure there's no issue we just leave the lobby anyway
     sender = Account.get_user_by_id(senderid)
 
-    if CacheUser.is_bot?(sender) and CacheUser.is_moderator?(sender) do
+    if Auth.is_bot?(sender) and Auth.is_moderator?(sender) do
       send(self(), :leave_lobby)
     end
 
@@ -432,7 +433,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp handle_direct_message(senderid, "$leave", state) do
-    if CacheUser.is_moderator?(senderid) do
+    if Auth.is_moderator?(senderid) do
       send(self(), :leave_lobby)
     end
 
@@ -440,7 +441,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp handle_direct_message(senderid, "$quit", state) do
-    if CacheUser.is_moderator?(senderid) do
+    if Auth.is_moderator?(senderid) do
       Client.disconnect(state.userid, "Bot disconnect")
     end
 
