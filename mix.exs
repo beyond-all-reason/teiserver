@@ -21,6 +21,7 @@ defmodule Teiserver.MixProject do
   def cli do
     [
       preferred_envs: [
+        precommit: :test,
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
