@@ -360,7 +360,13 @@ defmodule TeiserverWeb.PaginationComponents do
   * **Empty Values**: Automatically filters out empty strings and nil values
   * **URL Encoding**: Properly encodes parameter values for safe URLs
   """
-  def build_pagination_url(base_url, params, include_params, overrides \\ %{}, exclusions \\ []) do
+  def build_pagination_url(
+        base_url,
+        params,
+        include_params,
+        overrides \\ %{},
+        exclusions \\ []
+      ) do
     # Use centralized parameter preparation with exclusions
     search_params = prepare_params(params, include_params, overrides, exclusions)
 

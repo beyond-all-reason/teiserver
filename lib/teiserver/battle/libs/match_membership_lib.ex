@@ -53,21 +53,6 @@ defmodule Teiserver.Battle.MatchMembershipLib do
   def preload(query, nil), do: query
 
   def preload(query, _preloads) do
-    # query = if :super_match_membership in preloads, do: _preload_super_match_membership(query), else: query
-    # query = if :memberships in preloads, do: _preload_memberships(query), else: query
-
     query
   end
-
-  # def _preload_super_match_membership(query) do
-  #   from match_memberships in query,
-  #     left_join: super_match_memberships in assoc(match_memberships, :super_match_membership),
-  #     preload: [super_match_membership: super_match_memberships]
-  # end
-
-  # def _preload_memberships(query) do
-  #   from match_memberships in query,
-  #     left_join: memberships in assoc(match_memberships, :memberships),
-  #     preload: [memberships: memberships]
-  # end
 end

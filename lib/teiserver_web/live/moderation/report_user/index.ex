@@ -240,7 +240,10 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
     |> assign(:matches, matches)
   end
 
-  defp allowed_to_use_form(%{assigns: %{current_user: current_user, user: target_user}} = socket) do
+  defp allowed_to_use_form(
+         %{assigns: %{current_user: current_user, user: target_user}} =
+           socket
+       ) do
     {allowed, failure_reason} =
       cond do
         current_user == nil ->

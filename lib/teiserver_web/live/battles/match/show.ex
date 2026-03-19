@@ -79,7 +79,10 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   #   {:noreply, assign(socket, :tab, tab)}
   # end
 
-  defp get_match(%{assigns: %{id: id, algorithm: algorithm, current_user: current_user}} = socket) do
+  defp get_match(
+         %{assigns: %{id: id, algorithm: algorithm, current_user: current_user}} =
+           socket
+       ) do
     if connected?(socket) do
       match =
         Battle.get_match!(id,
@@ -222,7 +225,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
       balanced_members =
         if rating_logs == %{} do
-          # It will go here if the match is unprocessed or if there are no rating logs e.g. unrated match
+          # It will go here if the match is unprocessed or if
+          # there are no rating logs e.g. unrated match
           []
         else
           Enum.map(members, fn x ->

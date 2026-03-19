@@ -20,9 +20,11 @@ defmodule Teiserver.Lobby.ChatLib do
   def say(_userid, "!specafk" <> _, _lobby_id), do: :ok
 
   def say(userid, msg, lobby_id) do
-    # Replace SPADS command (starting with !) with lowercase version to prevent bypassing with capitalised command names
+    # Replace SPADS command (starting with !) with lowercase
+    # version to prevent bypassing with capitalised command names
     # Ignore !# bot commands like !#JSONRPC
-    # Allow voting for joinas if there are AIs in the lobby, otherwise alias to spec
+    # Allow voting for joinas if there are AIs in the lobby,
+    # otherwise alias to spec
     msg =
       if String.starts_with?(msg, "!") and !String.starts_with?(msg, "!#") do
         command_parts =

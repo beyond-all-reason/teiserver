@@ -215,7 +215,8 @@ defmodule Teiserver.Battle.BalanceLib do
           is_number(value) ->
             {user_id, get_user_rating_rank_old(user_id, value)}
 
-          # match_controller will use this condition when balancing using old data from game_rating_logs table
+          # match_controller will use this condition when
+          # balancing using old data from game_rating_logs
           match?(%{"rating_value" => _}, value) ->
             pre_match_stats = get_prematch_stats(value)
 
@@ -308,7 +309,8 @@ defmodule Teiserver.Battle.BalanceLib do
 
   def matchup_groups(groups, solo_players, opts) do
     # First we want to re-sort these groups, we want to have the ones with the highest standard
-    # deviation looked at first, they are the least likely to be able to be matched but most likely to
+    # deviation looked at first, they are the least likely
+    # to be able to be matched but most likely to
     # help match others
     groups =
       groups
@@ -886,16 +888,18 @@ defmodule Teiserver.Battle.BalanceLib do
 
         # Now turn a list of groups into one group
         selected_group
-        |> Enum.reduce(%{members: [], ratings: [], count: 0, group_rating: 0, names: []}, fn solo,
-                                                                                             acc ->
-          %{
-            members: acc.members ++ solo.members,
-            ratings: acc.ratings ++ solo.ratings,
-            count: acc.count + solo.count,
-            group_rating: acc.group_rating + solo.group_rating,
-            names: acc.names ++ solo.names
-          }
-        end)
+        |> Enum.reduce(
+          %{members: [], ratings: [], count: 0, group_rating: 0, names: []},
+          fn solo, acc ->
+            %{
+              members: acc.members ++ solo.members,
+              ratings: acc.ratings ++ solo.ratings,
+              count: acc.count + solo.count,
+              group_rating: acc.group_rating + solo.group_rating,
+              names: acc.names ++ solo.names
+            }
+          end
+        )
     end
   end
 

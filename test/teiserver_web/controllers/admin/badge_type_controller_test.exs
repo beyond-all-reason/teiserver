@@ -29,7 +29,10 @@
 
 #   describe "create badge_type" do
 #     test "redirects to show when data is valid", %{conn: conn} do
-#       conn = post(conn, Routes.account_badge_type_path(conn, :create), badge_type: @create_attrs)
+#       conn = post(
+#         conn, Routes.account_badge_type_path(conn, :create),
+#         badge_type: @create_attrs
+#       )
 #       assert redirected_to(conn) == Routes.account_badge_type_path(conn, :index)
 
 #       new_badge_type = Account.list_badge_types(search: [name: @create_attrs.name])
@@ -37,7 +40,10 @@
 #     end
 
 #     test "renders errors when data is invalid", %{conn: conn} do
-#       conn = post(conn, Routes.account_badge_type_path(conn, :create), badge_type: @invalid_attrs)
+#       conn = post(
+#         conn, Routes.account_badge_type_path(conn, :create),
+#         badge_type: @invalid_attrs
+#       )
 #       assert html_response(conn, 200) =~ "Oops, something went wrong!"
 #     end
 #   end
@@ -73,7 +79,10 @@
 #   describe "update badge_type" do
 #     test "redirects when data is valid", %{conn: conn} do
 #       badge_type = AccountTestLib.badge_type_fixture()
-#       conn = put(conn, Routes.account_badge_type_path(conn, :update, badge_type), badge_type: @update_attrs)
+#       conn = put(
+#         conn, Routes.account_badge_type_path(conn, :update, badge_type),
+#         badge_type: @update_attrs
+#       )
 #       assert redirected_to(conn) == Routes.account_badge_type_path(conn, :index)
 
 #       conn = get(conn, Routes.account_badge_type_path(conn, :show, badge_type))
@@ -82,7 +91,10 @@
 
 #     test "renders errors when data is invalid", %{conn: conn} do
 #       badge_type = AccountTestLib.badge_type_fixture()
-#       conn = put(conn, Routes.account_badge_type_path(conn, :update, badge_type), badge_type: @invalid_attrs)
+#       conn = put(
+#         conn, Routes.account_badge_type_path(conn, :update, badge_type),
+#         badge_type: @invalid_attrs
+#       )
 #       assert html_response(conn, 200) =~ "Oops, something went wrong!"
 #     end
 

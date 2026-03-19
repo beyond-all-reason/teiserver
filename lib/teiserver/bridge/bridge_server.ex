@@ -264,15 +264,18 @@ defmodule Teiserver.Bridge.BridgeServer do
     # When a thread in 👇｜game-design-team has gone 48 hours without any new messages:
     # 1. Lock the thread
     # 2. Create a thread in ☝｜game-design-voting with the same name and (Vote) appended to the end
-    # 3. In the first message of the thread, ping the Admins and Game Design Team roles, and if possible, copy the
-    #    content of the first post in the original thread
+    # 3. In the first message of the thread, ping the Admins and
+    #    Game Design Team roles, and if possible, copy the content
+    #    of the first post in the original thread
 
     # When a thread in ☝｜game-design-voting has gone 48 hours without any new messages:
-    # 1. Create a poll for the members of the GDC to vote on, with the options being Accept and Reject, since making
+    # 1. Create a poll for the members of the GDC to vote on,
+    #    with the options being Accept and Reject, since making
     #    context aware voting options is probably too complicated
     # 2. Ping the Game Design Team role to vote
-    # For threads in 💡｜suggestions , we haven't agreed on a process yet, which we'll need to do before we can get a bot
-    # to do what we want
+    # For threads in suggestions, we haven't agreed on a process
+    # yet, which we'll need to do before we can get a bot to do
+    # what we want
 
     # # Currently having an issue where I can't get the ID for the emoji
     # # luckily we can just put the emjoi character in and it should work

@@ -772,7 +772,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         assert is_pid(SessionRegistry.lookup(user_id))
       end
 
-      # Map will be randomly selected so we first check if the first client's map is in the map pool
+      # Map will be randomly selected so we first check if the
+      # first client's map is in the map pool
       first_message = Tachyon.recv_message!(usr1.client)
 
       assert %{

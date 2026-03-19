@@ -486,9 +486,11 @@ defmodule Teiserver.CacheUser do
   def send_direct_message(_, _, nil), do: :ok
 
   def send_direct_message(from_id, to_id, message) do
-    # Replace SPADS command (starting with !) with lowercase version to prevent bypassing with capitalised command names
+    # Replace SPADS command (starting with !) with lowercase
+    # version to prevent bypassing with capitalised command names
     # Ignore !# bot commands like !#JSONRPC
-    # Allow voting for joinas if there are AIs in the recipient's lobby, otherwise alias to spec
+    # Allow voting for joinas if there are AIs in the
+    # recipient's lobby, otherwise alias to spec
     message =
       if String.starts_with?(message, "!") and !String.starts_with?(message, "!#") do
         command_parts =
@@ -932,7 +934,8 @@ defmodule Teiserver.CacheUser do
     stats = Account.get_user_stat_data(user.id)
     ip = Map.get(stats, "ip_override", ip)
 
-    # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
+    # If they don't want a flag shown, don't show it, otherwise
+    # check for an override before trying geoip
     country = get_country(user, ip)
 
     # Rank

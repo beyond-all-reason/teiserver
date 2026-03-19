@@ -135,8 +135,6 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
         )
 
       assert html_response(conn, 200) =~ "New user name:"
-
-      # assert conn.private[:phoenix_flash]["danger"] == "Error with rename: Max length 20 characters"
     end
   end
 end

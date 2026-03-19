@@ -134,7 +134,8 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   defp allow_bypass_rank_check?(user) do
     method = Config.get_site_config_cache("profile.Rank method")
     # When using Role method for ranks,
-    # contributors auto pass since their ranks are not defined on playtime. To be fixed seperately.
+    # contributors auto pass since their ranks are not defined
+    # on playtime. To be fixed separately.
     method == "Role" && Auth.contributor?(user)
   end
 

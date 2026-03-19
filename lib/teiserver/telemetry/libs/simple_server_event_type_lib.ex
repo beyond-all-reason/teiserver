@@ -111,7 +111,10 @@ defmodule Teiserver.Telemetry.SimpleServerEventTypeLib do
   """
   @spec update_simple_server_event_type(SimpleServerEventType, map) ::
           {:ok, SimpleServerEventType} | {:error, Ecto.Changeset}
-  def update_simple_server_event_type(%SimpleServerEventType{} = simple_server_event_type, attrs) do
+  def update_simple_server_event_type(
+        %SimpleServerEventType{} = simple_server_event_type,
+        attrs
+      ) do
     simple_server_event_type
     |> SimpleServerEventType.changeset(attrs)
     |> Repo.update()

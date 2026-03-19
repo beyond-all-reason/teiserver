@@ -46,7 +46,8 @@ defmodule TeiserverWeb.Blog.Blog.ShowLiveTest do
       # Now click a poll button, should have no effect because we're not logged in
       render_click(show_live, "poll-choice", %{"choice" => "PollOpt 1"})
 
-      # Due to the delays in various pub-sub parts this won't update right away so we'll just call the page again
+      # Due to the delays in various pub-sub parts this won't
+      # update right away so we'll just call the page again
       {:ok, _show_live, html} = live(conn, ~p"/microblog/show/#{post.id}")
 
       refute html =~ "Vote in the poll"

@@ -73,7 +73,10 @@
 #   describe "update accolade" do
 #     test "redirects when data is valid", %{conn: conn} do
 #       accolade = AccountTestLib.accolade_fixture()
-#       conn = put(conn, Routes.account_accolade_path(conn, :update, accolade), accolade: @update_attrs)
+#       conn = put(
+#         conn, Routes.account_accolade_path(conn, :update, accolade),
+#         accolade: @update_attrs
+#       )
 #       assert redirected_to(conn) == Routes.account_accolade_path(conn, :index)
 
 #       conn = get(conn, Routes.account_accolade_path(conn, :show, accolade))
@@ -82,7 +85,10 @@
 
 #     test "renders errors when data is invalid", %{conn: conn} do
 #       accolade = AccountTestLib.accolade_fixture()
-#       conn = put(conn, Routes.account_accolade_path(conn, :update, accolade), accolade: @invalid_attrs)
+#       conn = put(
+#         conn, Routes.account_accolade_path(conn, :update, accolade),
+#         accolade: @invalid_attrs
+#       )
 #       assert html_response(conn, 200) =~ "Oops, something went wrong!"
 #     end
 

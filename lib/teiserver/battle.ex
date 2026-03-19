@@ -471,7 +471,8 @@ defmodule Teiserver.Battle do
     winning_ally_team = List.first(winning_ally_teams)
 
     # credo:disable-for-next-line Credo.Check.Design.TagTODO
-    # TODO Currently trusting the first received event, should be reworked to accept what the majority agrees on
+    # TODO Currently trusting the first received event,
+    # should be reworked to accept what the majority agrees on
     if winning_ally_team != nil && match.winning_team != nil &&
          winning_ally_team != match.winning_team do
       Logger.warning("Match #{match_id} winning team conflict!")

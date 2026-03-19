@@ -2028,7 +2028,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  # This is here to make tests easier to run, it's not expected you'll use this and it's not in the docs
+  # This is here to make tests easier to run, it's not expected
+  # you'll use this and it's not in the docs
   def handle_command(%{command: "forcespec", remaining: target} = cmd, state) do
     case ConsulServer.get_user(target, state) do
       nil ->
