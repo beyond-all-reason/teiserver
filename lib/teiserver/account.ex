@@ -38,6 +38,7 @@ defmodule Teiserver.Account do
   alias Teiserver.Account.UserStatLib
   alias Teiserver.Account.UserToken
   alias Teiserver.Account.UserTokenLib
+  alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.QueryHelpers
@@ -2328,12 +2329,12 @@ defmodule Teiserver.Account do
 
   @spec can_register?() :: boolean()
   def can_register?(),
-    do: Teiserver.Config.get_site_config_cache("teiserver.Enable registrations")
+    do: Config.get_site_config_cache("teiserver.Enable registrations")
 
   @spec can_register_with_web?() :: boolean()
   def can_register_with_web?() do
     can_register?() &&
-      not Teiserver.Config.get_site_config_cache("teiserver.Require Chobby registration")
+      not Config.get_site_config_cache("teiserver.Require Chobby registration")
   end
 
   defdelegate set_login_limit(limit), to: LoginThrottleServer

@@ -1,5 +1,6 @@
 defmodule Teiserver.Account.RecordsReport do
   @moduledoc false
+  alias Ecto.Adapters.SQL
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Logging
   alias Teiserver.Repo
@@ -73,7 +74,7 @@ defmodule Teiserver.Account.RecordsReport do
       LIMIT $1
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, [@top_count, start_date]) do
+    case SQL.query(Repo, query, [@top_count, start_date]) do
       {:ok, results} ->
         results.rows
 

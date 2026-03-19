@@ -28,14 +28,14 @@ defmodule Teiserver.TachyonBattle do
   def start_battle(autohost_id, start_script, is_matchmaking) do
     with {:ok, match} <- Battle.create_match_from_start_script(start_script, is_matchmaking),
          {:ok, battle_id, pid} <- start_battle_process(autohost_id, match.id, start_script) do
-      case Teiserver.Autohost.start_battle(autohost_id, battle_id, pid, start_script) do
+      case Autohost.start_battle(autohost_id, battle_id, pid, start_script) do
         {:ok, data} -> {:ok, {battle_id, pid}, data}
         x -> x
       end
     end
   end
 
-  @spec start_battle_process(Teiserver.Autohost.id(), T.match_id(), Autohost.start_script()) ::
+  @spec start_battle_process(Autohost.id(), T.match_id(), Autohost.start_script()) ::
           {:ok, T.id(), pid()} | {:error, term()}
   def start_battle_process(autohost_id, match_id, start_script) do
     battle_id = gen_id()

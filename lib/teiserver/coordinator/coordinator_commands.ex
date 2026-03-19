@@ -1,4 +1,5 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
+  alias ExULID.ULID
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.AccoladeLib
@@ -7,10 +8,11 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
+  alias Teiserver.Coordinator.CoordinatorLib
+  alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.NumberHelper
   alias Teiserver.Lobby
   alias Teiserver.Moderation
-  alias Teiserver.Coordinator.CoordinatorLib
-  alias Teiserver.Helper.NumberHelper
 
   @splitter "---------------------------"
   @always_allow ~w(help whoami whois discord coc mute unmute ignore unignore website party)
@@ -104,7 +106,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
     {:ok, code} =
       Account.create_code(%{
-        value: ExULID.ULID.generate(),
+        value: ULID.generate(),
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(minutes: 5),
         user_id: senderid,
@@ -165,7 +167,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       Account.list_ratings(
         search: [
           user_id: sender.id,
-          season: Teiserver.Game.MatchRatingLib.active_season()
+          season: MatchRatingLib.active_season()
         ],
         preload: [:rating_type]
       )
@@ -251,7 +253,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           Account.list_ratings(
             search: [
               user_id: user.id,
-              season: Teiserver.Game.MatchRatingLib.active_season()
+              season: MatchRatingLib.active_season()
             ],
             preload: [:rating_type]
           )
@@ -522,7 +524,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
     {:ok, code} =
       Account.create_code(%{
-        value: ExULID.ULID.generate(),
+        value: ULID.generate(),
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(minutes: 5),
         user_id: senderid,

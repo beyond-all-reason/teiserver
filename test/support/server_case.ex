@@ -16,13 +16,24 @@ defmodule Teiserver.ServerCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Changeset
+  alias Teiserver.Config
+  alias Teiserver.DataCase
+  alias Teiserver.Support.Tachyon
+  alias Teiserver.TeiserverTestLib
+
   using do
     quote do
+      alias Ecto.Changeset
+      alias Teiserver.Config
+      alias Teiserver.DataCase
       alias Teiserver.Repo
+      alias Teiserver.Support.Tachyon
+      alias Teiserver.TeiserverTestLib
 
-      import Ecto.Changeset
+      import Changeset
       import Ecto.Query
-      import Teiserver.DataCase
+      import DataCase
     end
   end
 
@@ -30,12 +41,12 @@ defmodule Teiserver.ServerCase do
     # clearing the caches *before* shouldn't be needed, but until we clean
     # all the tests that have side effects, this is a stopgap measure to avoid
     # more false failures.
-    Teiserver.TeiserverTestLib.clear_all_con_caches()
-    Teiserver.Support.Tachyon.tachyon_case_setup(tags)
-    Teiserver.DataCase.setup_sandbox(tags)
-    Teiserver.Config.update_site_config("system.Use geoip", false)
+    TeiserverTestLib.clear_all_con_caches()
+    Tachyon.tachyon_case_setup(tags)
+    DataCase.setup_sandbox(tags)
+    Config.update_site_config("system.Use geoip", false)
 
-    on_exit(&Teiserver.TeiserverTestLib.clear_all_con_caches/0)
+    on_exit(&TeiserverTestLib.clear_all_con_caches/0)
     :ok
   end
 
@@ -48,7 +59,7 @@ defmodule Teiserver.ServerCase do
 
   """
   def errors_on(changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
+    Changeset.traverse_errors(changeset, fn {message, opts} ->
       Regex.replace(~r"%{(\w+)}", message, fn _, key ->
         opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
       end)

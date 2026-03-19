@@ -3,6 +3,8 @@ defmodule TeiserverWeb.Microblog.Admin.TagLive.Show do
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
 
+  import Teiserver.Microblog, only: [colours: 0]
+
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -16,7 +18,7 @@ defmodule TeiserverWeb.Microblog.Admin.TagLive.Show do
          socket
          |> assign(:tag, Microblog.get_tag!(id))
          |> assign(:site_menu_active, "microblog")
-         |> assign(:view_colour, Teiserver.Microblog.colours())}
+         |> assign(:view_colour, colours())}
 
       false ->
         {:noreply,

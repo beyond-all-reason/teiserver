@@ -3,6 +3,7 @@ defmodule Teiserver.OAuth.CredentialTest do
   alias Teiserver.OAuth
   alias Teiserver.Bot
   alias Teiserver.OAuthFixtures
+  alias Teiserver.TeiserverTestLib
 
   defp setup_bot(_context) do
     {:ok, bot} = Bot.create_bot(%{name: "testing_bot"})
@@ -10,7 +11,7 @@ defmodule Teiserver.OAuth.CredentialTest do
   end
 
   defp setup_app(_context) do
-    user = Teiserver.TeiserverTestLib.new_user()
+    user = TeiserverTestLib.new_user()
 
     {:ok, app} =
       OAuth.create_application(%{

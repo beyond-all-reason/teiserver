@@ -179,7 +179,7 @@ defmodule Teiserver.Battle.MatchLib do
       # credo:disable-for-next-line Credo.Check.Design.TagTODO
       # TODO: Make this colour/icon based on type of match
       item_colour: StylingHelper.colours(colours()) |> elem(0),
-      item_icon: Teiserver.Battle.MatchLib.icon(),
+      item_icon: icon(),
       item_label: make_match_name(match),
       url: "/battle/#{match.id}"
     }

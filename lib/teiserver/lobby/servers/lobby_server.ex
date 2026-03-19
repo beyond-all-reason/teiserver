@@ -2,15 +2,16 @@ defmodule Teiserver.Battle.LobbyServer do
   @moduledoc false
   use GenServer
   require Logger
+  alias ExULID.ULID
+  alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Battle
-  alias Teiserver.Config
-  alias Teiserver.Telemetry
-  alias Teiserver.Coordinator
   alias Teiserver.Communication
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
   alias Teiserver.Lobby.CommandLib
   alias Teiserver.Lobby.LobbyRestrictions
-  alias Phoenix.PubSub
+  alias Teiserver.Telemetry
 
   @player_list_cache_age_max 200
 
@@ -667,7 +668,7 @@ defmodule Teiserver.Battle.LobbyServer do
     {:ok, match} = Battle.create_match_from_founder_id(data.lobby.founder_id)
     match_uuid = Battle.generate_lobby_uuid([match.id])
 
-    server_uuid = ExULID.ULID.generate()
+    server_uuid = ULID.generate()
 
     options = %{
       "game/modoptions/ranked_game" => "1",

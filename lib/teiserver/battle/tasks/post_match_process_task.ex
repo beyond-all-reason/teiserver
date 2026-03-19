@@ -5,12 +5,14 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   use Oban.Worker, queue: :teiserver
 
   alias Teiserver.Account
+  alias Teiserver.Account.RecacheUserStatsTask
   alias Teiserver.Battle
+  alias Teiserver.Battle.MatchMembershipLib
   alias Teiserver.Config
   alias Teiserver.Coordinator
-  alias Teiserver.Repo
-  alias Teiserver.Battle.MatchMembershipLib
+  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.NumberHelper
+  alias Teiserver.Repo
   # alias Teiserver.Data.Types, as: T
 
   @impl Oban.Worker
@@ -81,7 +83,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       })
 
     # We pass match.id to ensure we re-query the match correctly
-    Teiserver.Game.MatchRatingLib.rate_match(match.id)
+    MatchRatingLib.rate_match(match.id)
 
     # Tell the host to re-rate some players
     usernames =
@@ -162,7 +164,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
 
     memberships
     |> Enum.map(fn m ->
-      Teiserver.Account.RecacheUserStatsTask.match_processed(match, m.user_id)
+      RecacheUserStatsTask.match_processed(match, m.user_id)
     end)
   end
 

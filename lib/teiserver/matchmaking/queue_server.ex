@@ -13,6 +13,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
+  alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.Algo
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.PairingRoom
@@ -670,6 +671,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
   defp broadcast_update(state) do
     player_count = calculate_player_count(state)
     stats = Map.put(state.stats, :player_count, player_count)
-    Teiserver.Matchmaking.broadcast_queue_update(state.id, stats)
+    Matchmaking.broadcast_queue_update(state.id, stats)
   end
 end

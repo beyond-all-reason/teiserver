@@ -4,6 +4,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Chat
@@ -53,7 +54,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         index_redirect(socket)
 
       lobby.tournament and
-          not Teiserver.Account.Auth.has_any_role?(current_user.id, [
+          not Auth.has_any_role?(current_user.id, [
             "Moderator",
             "Caster",
             "TourneyPlayer",
@@ -104,7 +105,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
          |> assign(:messages, messages)
          |> assign(:user_map, %{})
          |> assign(:clients, clients)
-         |> assign(:view_colour, Teiserver.Lobby.colours())
+         |> assign(:view_colour, Lobby.colours())
          |> update_user_map()}
     end
   end

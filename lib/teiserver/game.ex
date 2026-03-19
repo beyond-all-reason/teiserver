@@ -4,6 +4,7 @@ defmodule Teiserver.Game do
   """
 
   import Ecto.Query, warn: false
+  alias Teiserver.Account
   alias Teiserver.Game.AchievementType
   alias Teiserver.Game.AchievementTypeLib
   alias Teiserver.Game.LobbyPolicy
@@ -392,7 +393,7 @@ defmodule Teiserver.Game do
 
   @spec get_ratings_for_users(user_ids :: [integer()], season :: integer()) :: [RatingType.t()]
   def get_ratings_for_users(user_ids, season) do
-    query = Teiserver.Account.rating_query(search: [user_id_in: user_ids, season: season])
+    query = Account.rating_query(search: [user_id_in: user_ids, season: season])
 
     rating_type_query(preload: [ratings: query])
     |> Repo.all()

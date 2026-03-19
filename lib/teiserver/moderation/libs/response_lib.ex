@@ -1,6 +1,7 @@
 defmodule Teiserver.Moderation.ResponseLib do
   @moduledoc false
   use TeiserverWeb, :library
+  alias Teiserver.Moderation.ActionLib
   alias Teiserver.Moderation.Response
 
   # Functions
@@ -14,10 +15,10 @@ defmodule Teiserver.Moderation.ResponseLib do
   def list_actions() do
     [
       {"Ignore", "fa-solid fa-clock"},
-      {"Warn", Teiserver.Moderation.ActionLib.action_icon("Warn")},
-      {"Mute", Teiserver.Moderation.ActionLib.action_icon("Mute")},
-      {"Suspend", Teiserver.Moderation.ActionLib.action_icon("Suspend")},
-      {"Ban", Teiserver.Moderation.ActionLib.action_icon("Ban")}
+      {"Warn", ActionLib.action_icon("Warn")},
+      {"Mute", ActionLib.action_icon("Mute")},
+      {"Suspend", ActionLib.action_icon("Suspend")},
+      {"Ban", ActionLib.action_icon("Ban")}
     ]
   end
 

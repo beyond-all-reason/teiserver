@@ -4,11 +4,12 @@ defmodule Teiserver.Communication.Cache do
   """
 
   use Supervisor
+  alias Teiserver.Communication
   alias Teiserver.Helpers.CacheHelper
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),
-         :ok <- Teiserver.Communication.build_text_callback_cache() do
+         :ok <- Communication.build_text_callback_cache() do
       {:ok, sup}
     end
   end

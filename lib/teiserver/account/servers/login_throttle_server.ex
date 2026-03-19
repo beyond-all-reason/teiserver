@@ -7,6 +7,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   use GenServer
   require Logger
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
@@ -31,7 +32,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   def init(_args) do
     Logger.metadata(actor_id: "LoginThrottleServer")
     {:ok, timer_ref} = :timer.send_interval(@default_tick_period, :tick)
-    default_rate = Teiserver.Config.get_site_config_cache("system.Login rate")
+    default_rate = Config.get_site_config_cache("system.Login rate")
     rate_limiter = BurstyRateLimiter.per_second(default_rate) |> BurstyRateLimiter.set_empty()
 
     state = %{
@@ -229,7 +230,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     user = Account.get_user_by_id(userid)
     bypass_roles = ["Bot", "Contributor", "VIP", "BAR+"]
 
-    if Teiserver.Account.Auth.has_any_role?(user, bypass_roles) do
+    if Auth.has_any_role?(user, bypass_roles) do
       :instant
     else
       :standard

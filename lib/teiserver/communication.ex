@@ -201,10 +201,10 @@ defmodule Teiserver.Communication do
   @spec list_discord_channels(list) :: [DiscordChannel]
   defdelegate list_discord_channels(args), to: DiscordChannelLib
 
-  @spec get_discord_channel!(non_neg_integer()) :: DiscordChannel.t()
+  @spec get_discord_channel!(non_neg_integer() | String.t()) :: DiscordChannel.t()
   defdelegate get_discord_channel!(discord_channel_id), to: DiscordChannelLib
 
-  @spec get_discord_channel(non_neg_integer()) :: DiscordChannel.t() | nil
+  @spec get_discord_channel(non_neg_integer() | String.t()) :: DiscordChannel.t() | nil
   defdelegate get_discord_channel(discord_channel_id), to: DiscordChannelLib
 
   @spec create_discord_channel() :: {:ok, DiscordChannel} | {:error, Ecto.Changeset}

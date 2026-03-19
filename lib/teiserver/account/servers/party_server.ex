@@ -2,6 +2,7 @@ defmodule Teiserver.Account.PartyServer do
   use GenServer
   require Logger
   alias Teiserver.Account
+  alias Teiserver.Account.PartyLib
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
@@ -139,7 +140,7 @@ defmodule Teiserver.Account.PartyServer do
             }
           )
 
-          Teiserver.Account.PartyLib.stop_party_server(party.id)
+          PartyLib.stop_party_server(party.id)
           party
 
         true ->
@@ -268,7 +269,7 @@ defmodule Teiserver.Account.PartyServer do
     Account.move_client_to_party(userid, nil)
 
     if Enum.empty?(new_members) do
-      Teiserver.Account.PartyLib.stop_party_server(party.id)
+      PartyLib.stop_party_server(party.id)
     end
 
     %{party | members: new_members, leader: new_leader}

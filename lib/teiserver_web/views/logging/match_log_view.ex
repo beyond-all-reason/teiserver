@@ -1,14 +1,17 @@
 defmodule TeiserverWeb.Logging.MatchLogView do
   use TeiserverWeb, :view
 
+  alias Teiserver.Battle.MatchLib
+  alias TeiserverWeb.Logging.AggregateViewLogView
+
   @spec view_colour :: atom
-  def view_colour(), do: Teiserver.Battle.MatchLib.colours()
+  def view_colour(), do: MatchLib.colours()
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Battle.MatchLib.icon()
+  def icon(), do: MatchLib.icon()
 
   # For the detail view in day metrics
   def heatmap(value, maximum, colour) do
-    TeiserverWeb.Logging.AggregateViewLogView.heatmap(value, maximum, colour)
+    AggregateViewLogView.heatmap(value, maximum, colour)
   end
 end

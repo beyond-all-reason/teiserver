@@ -2,11 +2,14 @@ defmodule Teiserver.Asset do
   import Ecto.Query
 
   alias Teiserver.Asset
-  alias Teiserver.Repo
+  alias Teiserver.Asset.Engine
   alias Teiserver.Asset.EngineQueries
+  alias Teiserver.Asset.Game
   alias Teiserver.Asset.GameQueries
   alias Teiserver.Asset.MapLib
   alias Teiserver.Asset.MapQueries
+  alias Teiserver.Matchmaking
+  alias Teiserver.Repo
 
   @spec create_maps([map()]) ::
           {:ok, [Asset.Map.t()]} | {:error, String.t(), Ecto.Changeset.t(), map()}
@@ -29,7 +32,7 @@ defmodule Teiserver.Asset do
           | {:error, :bad_request}
           | {:error, {String.t(), Ecto.Changeset.t()}}
   def update_maps(map_attrs) do
-    Teiserver.Repo.transaction(fn ->
+    Repo.transaction(fn ->
       n = delete_all_maps()
 
       case create_maps(map_attrs) do
@@ -40,7 +43,7 @@ defmodule Teiserver.Asset do
           }
 
         {:error, opname, changeset, _changes_so_far} ->
-          Teiserver.Repo.rollback({opname, changeset})
+          Repo.rollback({opname, changeset})
       end
     end)
   end
@@ -49,29 +52,29 @@ defmodule Teiserver.Asset do
   @spec get_startboxes(Asset.Map.t(), number_of_teams :: non_neg_integer()) :: [startbox()] | nil
   defdelegate get_startboxes(map, number_of_teams), to: MapLib
 
-  @spec get_engines() :: [Asset.Engine.t()]
+  @spec get_engines() :: [Engine.t()]
   defdelegate get_engines(), to: EngineQueries
 
-  @spec get_engine(EngineQueries.where_opts()) :: Asset.Engine.t() | nil
+  @spec get_engine(EngineQueries.where_opts()) :: Engine.t() | nil
   defdelegate get_engine(attr), to: EngineQueries
 
-  @spec get_default_lobby_engine() :: Asset.Engine.t() | nil
+  @spec get_default_lobby_engine() :: Engine.t() | nil
   defdelegate get_default_lobby_engine(), to: EngineQueries
 
-  def change_engine(%Asset.Engine{} = engine \\ %Asset.Engine{}, attrs \\ %{}) do
-    Asset.Engine.changeset(engine, attrs)
+  def change_engine(%Engine{} = engine \\ %Engine{}, attrs \\ %{}) do
+    Engine.changeset(engine, attrs)
   end
 
   def create_engine(attrs \\ %{}) do
-    %Asset.Engine{}
-    |> Asset.Engine.changeset(attrs)
+    %Engine{}
+    |> Engine.changeset(attrs)
     |> Repo.insert()
   end
 
   @spec delete_engine(id :: integer()) :: :ok | :error
   def delete_engine(id) do
     result =
-      from(e in Asset.Engine, where: e.id == ^id)
+      from(e in Engine, where: e.id == ^id)
       |> Repo.delete_all()
 
     case result do
@@ -81,7 +84,7 @@ defmodule Teiserver.Asset do
   end
 
   @spec set_engine_matchmaking(id :: integer() | String.t()) ::
-          {:ok, Asset.Engine.t()} | {:error, :not_found}
+          {:ok, Engine.t()} | {:error, :not_found}
   def set_engine_matchmaking(id) do
     res =
       Repo.transaction(fn ->
@@ -101,36 +104,36 @@ defmodule Teiserver.Asset do
       end)
 
     case res do
-      {:ok, _} -> Teiserver.Matchmaking.restart_queues()
+      {:ok, _} -> Matchmaking.restart_queues()
       _ -> nil
     end
 
     res
   end
 
-  @spec get_games() :: [Asset.Game.t()]
+  @spec get_games() :: [Game.t()]
   defdelegate get_games(), to: GameQueries
 
-  @spec get_game(GameQueries.where_opts()) :: Asset.Game.t() | nil
+  @spec get_game(GameQueries.where_opts()) :: Game.t() | nil
   defdelegate get_game(attr), to: GameQueries
 
-  @spec get_default_lobby_game() :: Asset.Game.t() | nil
+  @spec get_default_lobby_game() :: Game.t() | nil
   defdelegate get_default_lobby_game(), to: GameQueries
 
-  def change_game(%Asset.Game{} = game \\ %Asset.Game{}, attrs \\ %{}) do
-    Asset.Game.changeset(game, attrs)
+  def change_game(%Game{} = game \\ %Game{}, attrs \\ %{}) do
+    Game.changeset(game, attrs)
   end
 
   def create_game(attrs \\ %{}) do
-    %Asset.Game{}
-    |> Asset.Game.changeset(attrs)
+    %Game{}
+    |> Game.changeset(attrs)
     |> Repo.insert()
   end
 
   @spec delete_game(id :: integer()) :: :ok | :error
   def delete_game(id) do
     result =
-      from(e in Asset.Game, where: e.id == ^id)
+      from(e in Game, where: e.id == ^id)
       |> Repo.delete_all()
 
     case result do
@@ -140,7 +143,7 @@ defmodule Teiserver.Asset do
   end
 
   @spec set_game_matchmaking(id :: integer() | String.t()) ::
-          {:ok, Asset.Game.t()} | {:error, :not_found}
+          {:ok, Game.t()} | {:error, :not_found}
   def set_game_matchmaking(id) do
     res =
       Repo.transaction(fn ->
@@ -160,7 +163,7 @@ defmodule Teiserver.Asset do
       end)
 
     case res do
-      {:ok, _} -> Teiserver.Matchmaking.restart_queues()
+      {:ok, _} -> Matchmaking.restart_queues()
       _ -> nil
     end
 

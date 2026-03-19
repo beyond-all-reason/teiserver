@@ -4,6 +4,8 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
   alias Teiserver.Account.PartyLib
 
   alias Teiserver.Support.Polling
+  alias Teiserver.Account
+  alias Teiserver.Client
 
   import Teiserver.TeiserverTestLib,
     only: [auth_setup: 1, _send_raw: 2, _recv_until: 1, start_spring_server: 1]
@@ -29,7 +31,7 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     end
 
     test "create from web", %{socket: socket, user: user} do
-      party = Teiserver.Account.create_party(user.id)
+      party = Account.create_party(user.id)
 
       assert {"s.party.joined_party", [party_id, username], _} =
                _recv_until(socket) |> parse_in_message()
@@ -66,7 +68,7 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     end
 
     test "offline player", %{socket1: sock1, user2: user2} do
-      Teiserver.Client.disconnect(user2.id)
+      Client.disconnect(user2.id)
       assert "REMOVEUSER " <> _ = _recv_until(sock1)
       create_party!(sock1)
       invite_to_party(sock1, user2.name)
@@ -148,7 +150,7 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
 
     test "cancel invite via web", ctx do
       username2 = ctx.user2.name
-      Teiserver.Account.cancel_party_invite(ctx.party_id, ctx.user2.id)
+      Account.cancel_party_invite(ctx.party_id, ctx.user2.id)
 
       party_id = ctx.party_id
 
@@ -196,7 +198,7 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     end
 
     test "leave party via web", ctx do
-      Teiserver.Account.leave_party(ctx.party_id, ctx.user2.id)
+      Account.leave_party(ctx.party_id, ctx.user2.id)
       party_id = ctx.party_id
       user1 = ctx.user1.name
       user2 = ctx.user2.name
@@ -207,7 +209,7 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
       assert {"s.party.left_party", [^party_id, ^user2], _} =
                _recv_until(ctx.socket2) |> parse_in_message()
 
-      Teiserver.Account.leave_party(ctx.party_id, ctx.user1.id)
+      Account.leave_party(ctx.party_id, ctx.user1.id)
 
       assert {"s.party.left_party", [^party_id, ^user1], _} =
                _recv_until(ctx.socket1) |> parse_in_message()
@@ -293,7 +295,7 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
              _recv_until(socket3) |> parse_in_messages()
 
     # check disconnection triggers "left party" to all members
-    Teiserver.Client.disconnect(user1.id)
+    Client.disconnect(user1.id)
 
     assert [{"s.party.left_party", [_, ^username1], _}, {"REMOVEUSER", [^username1], _}] =
              _recv_until(socket2) |> parse_in_messages()

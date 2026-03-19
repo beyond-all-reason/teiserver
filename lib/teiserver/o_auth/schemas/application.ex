@@ -2,6 +2,8 @@ defmodule Teiserver.OAuth.Application do
   @moduledoc false
   use TeiserverWeb, :schema
 
+  alias Ecto.Changeset
+
   @type id() :: non_neg_integer()
   @type app_id() :: String.t()
   @type scopes() :: nonempty_list(String.t())
@@ -27,7 +29,7 @@ defmodule Teiserver.OAuth.Application do
     application
     |> cast(attrs, [:name, :owner_id, :uid, :scopes, :redirect_uris, :description])
     |> validate_required([:name, :owner_id, :uid, :scopes])
-    |> Ecto.Changeset.validate_change(:redirect_uris, fn :redirect_uris, uris ->
+    |> Changeset.validate_change(:redirect_uris, fn :redirect_uris, uris ->
       invalid_uris = Enum.filter(uris, fn uri -> is_nil(URI.parse(uri).host) end)
 
       if Enum.empty?(invalid_uris) do
@@ -36,10 +38,10 @@ defmodule Teiserver.OAuth.Application do
         [redirect_uris: "invalid uri found: #{Enum.join(invalid_uris, ", ")}"]
       end
     end)
-    |> Ecto.Changeset.unique_constraint(:uid)
-    |> Ecto.Changeset.validate_subset(:scopes, allowed_scopes(),
+    |> Changeset.unique_constraint(:uid)
+    |> Changeset.validate_subset(:scopes, allowed_scopes(),
       message: "Must a subset of #{Enum.join(allowed_scopes(), ", ")}"
     )
-    |> Ecto.Changeset.validate_length(:scopes, min: 1)
+    |> Changeset.validate_length(:scopes, min: 1)
   end
 end

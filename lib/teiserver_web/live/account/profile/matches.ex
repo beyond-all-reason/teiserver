@@ -2,9 +2,13 @@ defmodule TeiserverWeb.Account.ProfileLive.Matches do
   @moduledoc false
   use TeiserverWeb, :live_view
   alias Teiserver.Account
+  alias Teiserver.Account.UserLib
   alias Teiserver.Battle
   alias Teiserver.Config
   alias Teiserver.Game
+  alias Teiserver.Plugs.CachePlug
+  alias TeiserverWeb.Account.ProfileLive.Overview
+  alias TeiserverWeb.Parsers.PaginationParams
   import TeiserverWeb.PaginationComponents, only: [pagination: 1]
 
   @impl Phoenix.LiveView
@@ -19,12 +23,12 @@ defmodule TeiserverWeb.Account.ProfileLive.Matches do
         |> redirect(to: ~p"/")
       else
         socket
-        |> Teiserver.Plugs.CachePlug.live_call()
+        |> CachePlug.live_call()
         |> assign(:tab, nil)
         |> assign(:site_menu_active, "teiserver_account")
-        |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+        |> assign(:view_colour, UserLib.colours())
         |> assign(:user, user)
-        |> TeiserverWeb.Account.ProfileLive.Overview.get_relationships_and_permissions()
+        |> Overview.get_relationships_and_permissions()
         |> assign_pagination_defaults()
       end
 
@@ -33,7 +37,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Matches do
 
   @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
-    parsed = TeiserverWeb.Parsers.PaginationParams.parse_params(params)
+    parsed = PaginationParams.parse_params(params)
 
     socket =
       socket

@@ -2,8 +2,9 @@ defmodule TeiserverWeb.Moderation.UserController do
   use TeiserverWeb, :controller
 
   alias Teiserver.Account
-  alias Teiserver.Moderation
+  alias Teiserver.Account.CodeOfConductData
   alias Teiserver.Account.UserLib
+  alias Teiserver.Moderation
 
   plug(AssignPlug,
     site_menu_active: "moderation",
@@ -23,7 +24,7 @@ defmodule TeiserverWeb.Moderation.UserController do
   def show(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
-    case Teiserver.Account.UserLib.has_access(user, conn) do
+    case UserLib.has_access(user, conn) do
       {true, _} ->
         reports_made =
           Moderation.list_reports(
@@ -67,8 +68,8 @@ defmodule TeiserverWeb.Moderation.UserController do
         |> insert_recently(conn)
 
         conn
-        |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
-        |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
+        |> assign(:restrictions_lists, UserLib.list_restrictions())
+        |> assign(:coc_lookup, CodeOfConductData.flat_data())
         |> assign(:user, user)
         |> assign(:reports_made, reports_made)
         |> assign(:reports_against, reports_against)

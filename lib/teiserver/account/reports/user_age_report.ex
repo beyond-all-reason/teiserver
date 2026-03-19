@@ -1,7 +1,8 @@
 defmodule Teiserver.Account.UserAgeReport do
   @moduledoc false
-  alias Teiserver.Helper.DatePresets
+  alias Ecto.Adapters.SQL
   alias Teiserver.Account
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
 
   @spec icon() :: String.t()
@@ -71,7 +72,7 @@ defmodule Teiserver.Account.UserAgeReport do
     """
 
     user_ids =
-      case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+      case SQL.query(Repo, query, [start_date, end_date]) do
         {:ok, results} ->
           results.rows |> List.flatten()
 

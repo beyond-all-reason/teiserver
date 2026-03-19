@@ -4,10 +4,11 @@ defmodule Teiserver.Battle.LobbyServerTest do
   use Teiserver.DataCase, async: false
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Coordinator
+  alias Teiserver.TeiserverTestLib
 
   @tag :needs_attention
   test "server test" do
-    host = Teiserver.TeiserverTestLib.new_user()
+    host = TeiserverTestLib.new_user()
 
     lobby = %{
       id: 123,
@@ -61,7 +62,7 @@ defmodule Teiserver.Battle.LobbyServerTest do
   end
 
   test "rename test" do
-    host = Teiserver.TeiserverTestLib.new_user()
+    host = TeiserverTestLib.new_user()
 
     lobby = %{
       id: 123,

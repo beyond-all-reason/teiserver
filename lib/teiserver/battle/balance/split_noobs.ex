@@ -16,8 +16,9 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   the noobs preferring higher rank and lower uncertainty.
   """
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
-  alias Teiserver.Battle.Balance.SplitNoobsTypes, as: SN
   alias Teiserver.Battle.Balance.BruteForce
+  alias Teiserver.Battle.Balance.LoserPicks
+  alias Teiserver.Battle.Balance.SplitNoobsTypes, as: SN
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   # If player uncertainty is greater than equal to this, that player is considered a noob
   # The lowest uncertainty rank 0 player in integration server at the time of writing this is 6.65
@@ -42,7 +43,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
 
       {:error, message} ->
         # Call another balancer
-        result = Teiserver.Battle.Balance.LoserPicks.perform(expanded_group, team_count, opts)
+        result = LoserPicks.perform(expanded_group, team_count, opts)
 
         new_logs =
           ["#{message} Will use loser_picks algorithm instead.", @splitter, result.logs]

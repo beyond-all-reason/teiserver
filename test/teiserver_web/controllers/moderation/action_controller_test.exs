@@ -6,10 +6,11 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   alias Teiserver.Moderation.ModerationTestLib
 
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   setup do
     GeneralTestLib.conn_setup(["Reviewer", "Moderator"])
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    |> TeiserverTestLib.conn_setup()
   end
 
   @create_attrs %{

@@ -5,11 +5,13 @@ defmodule Teiserver.Monitoring.StripedPeep do
 
   @behaviour PromEx.Storage
 
+  alias Peep.Prometheus
+
   @impl PromEx.Storage
   def scrape(name) do
     name
     |> Peep.get_all_metrics()
-    |> Peep.Prometheus.export()
+    |> Prometheus.export()
     |> IO.iodata_to_binary()
   end
 

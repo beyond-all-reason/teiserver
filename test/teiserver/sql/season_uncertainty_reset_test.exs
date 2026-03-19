@@ -2,6 +2,8 @@ defmodule Teiserver.Sql.SeasonUncertaintyResetTest do
   @moduledoc false
   use Teiserver.DataCase
 
+  alias Ecto.Adapters.SQL
+
   test "it can calculate seasonal uncertainty reset target" do
     # Start by removing all anon properties
     {:ok, now} = DateTime.now("Etc/UTC")
@@ -65,7 +67,7 @@ defmodule Teiserver.Sql.SeasonUncertaintyResetTest do
     query = "SELECT calculate_season_uncertainty($1, $2, $3);"
 
     results =
-      Ecto.Adapters.SQL.query!(Repo, query, [current_uncertainty, last_updated, min_uncertainty])
+      SQL.query!(Repo, query, [current_uncertainty, last_updated, min_uncertainty])
 
     [new_uncertainty] =
       results.rows

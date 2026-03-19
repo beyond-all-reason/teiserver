@@ -35,7 +35,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
 
       if Timex.compare(new_date, Timex.today()) == -1 do
         %{}
-        |> Teiserver.Logging.AggregateViewLogsTask.new()
+        |> __MODULE__.new()
         |> Oban.insert()
       end
     end

@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
   use TeiserverWeb, :live_view
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportLib
+  alias TeiserverWeb.Parsers.PaginationParams
   import TeiserverWeb.PaginationComponents, only: [pagination: 1, build_pagination_url: 4]
 
   @impl Phoenix.LiveView
@@ -9,7 +10,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
     socket =
       socket
       |> assign(:site_menu_active, "moderation")
-      |> assign(:view_colour, Teiserver.Moderation.colour())
+      |> assign(:view_colour, Moderation.colour())
       |> assign(:outstanding_report_groups, 0)
       |> assign(:report_groups, nil)
       |> assign(:page, 0)
@@ -26,7 +27,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
 
   @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
-    parsed = TeiserverWeb.Parsers.PaginationParams.parse_params(params)
+    parsed = PaginationParams.parse_params(params)
 
     params =
       Map.merge(params, %{
@@ -162,7 +163,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.Index do
         "Chat" -> "chat"
       end
 
-    parsed = TeiserverWeb.Parsers.PaginationParams.parse_params(filters)
+    parsed = PaginationParams.parse_params(filters)
     page = parsed.page - 1
     limit = parsed.limit
 

@@ -4,6 +4,8 @@ defmodule Teiserver.Tachyon.SchemaLoader do
   to resolve the references for tachyon json schemas
   """
 
+  alias Teiserver.Tachyon.Schema
+
   @behaviour Xema.Loader
 
   @impl Xema.Loader
@@ -14,7 +16,7 @@ defmodule Teiserver.Tachyon.SchemaLoader do
   def fetch(%URI{} = uri) do
     with def_id when not is_nil(def_id) <- String.split(uri.path, "/") |> List.last(),
          name <- Path.basename(def_id, ".json"),
-         {:ok, json} <- Teiserver.Tachyon.Schema.parse_schema("definitions", name) do
+         {:ok, json} <- Schema.parse_schema("definitions", name) do
       # For some obscure reason, if the ref has an $id, it'll mess up the way
       # it is resolved by json_xema and basically won't work.
       # so drop it

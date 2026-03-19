@@ -15,6 +15,7 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Account.FriendRequestLib
   alias Teiserver.Battle
   alias Teiserver.CacheUser
+  alias Teiserver.Clans
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
@@ -29,6 +30,8 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Protocols.Spring.UserIn
   alias Teiserver.Protocols.SpringOut
   alias Teiserver.Room
+  alias Teiserver.SpringTcpServer
+  alias ExULID.ULID
 
   @optimisation_level %{
     "LuaLobby Chobby" => :partial,
@@ -184,7 +187,7 @@ defmodule Teiserver.Protocols.SpringIn do
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("STLS", _, msg_id, state) do
     reply(:okay, "STLS", msg_id, state)
-    new_state = Teiserver.SpringTcpServer.upgrade_connection(state)
+    new_state = SpringTcpServer.upgrade_connection(state)
     reply(:welcome, nil, msg_id, new_state)
   end
 
@@ -279,7 +282,7 @@ defmodule Teiserver.Protocols.SpringIn do
         # Do we have a clan?
         if user.clan_id do
           :timer.sleep(200)
-          clan = Teiserver.Clans.get_clan!(user.clan_id)
+          clan = Clans.get_clan!(user.clan_id)
           room_name = Room.clan_room_name(clan.tag)
           SpringOut.do_join_room(new_state, room_name)
         end
@@ -653,7 +656,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
             {:ok, code} =
               Account.create_code(%{
-                value: ExULID.ULID.generate(),
+                value: ULID.generate(),
                 purpose: "one_time_login",
                 expires: Timex.now() |> Timex.shift(minutes: 30),
                 user_id: state.userid,

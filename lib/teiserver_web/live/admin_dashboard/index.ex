@@ -4,8 +4,12 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
+  alias Teiserver.Admin.AdminLib
   alias Teiserver.Battle
+  alias Teiserver.Battle.MatchMonitorServer
+  alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Coordinator
+  alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Game
   alias Teiserver.Account.AccoladeLib
 
@@ -33,7 +37,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> assign(:site_menu_active, "admin")
-      |> assign(:view_colour, Teiserver.Admin.AdminLib.colours())
+      |> assign(:view_colour, AdminLib.colours())
       |> assign(:telemetry_client, telemetry_data.client)
       |> assign(:telemetry_battle, telemetry_data.battle)
       |> assign(:total_connected_clients, telemetry_data.total_clients_connected)
@@ -162,9 +166,9 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       {"Lobby ID server", lobby_id_server_pid},
       {"Coordinator", Coordinator.get_coordinator_pid()},
       {"Accolades", AccoladeLib.get_accolade_bot_pid()},
-      {"Match Monitor", Teiserver.Battle.MatchMonitorServer.get_match_monitor_pid()},
-      {"Automod", Teiserver.Coordinator.AutomodServer.get_automod_pid()},
-      {"Discord Bridge Bot", Teiserver.Bridge.BridgeServer.get_bridge_pid()}
+      {"Match Monitor", MatchMonitorServer.get_match_monitor_pid()},
+      {"Automod", AutomodServer.get_automod_pid()},
+      {"Discord Bridge Bot", BridgeServer.get_bridge_pid()}
     ]
 
     socket

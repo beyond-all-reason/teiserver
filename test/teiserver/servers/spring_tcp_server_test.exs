@@ -5,7 +5,7 @@ defmodule Teiserver.SpringTcpServerTest do
 
   import Mock
 
-  import Teiserver.TeiserverTestLib,
+  import TeiserverTestLib,
     only: [
       raw_setup: 1,
       _send_raw: 2,
@@ -21,11 +21,14 @@ defmodule Teiserver.SpringTcpServerTest do
   alias Teiserver.Client
   alias Teiserver.Room
   alias Teiserver.TeiserverTestLib
+  alias Ecto.Adapters.SQL
+  alias Teiserver.Coordinator
+  alias Teiserver.Protocols.SpringOut
 
   setup :start_spring_server
 
   setup(context) do
-    Teiserver.TeiserverTestLib.start_coordinator!()
+    TeiserverTestLib.start_coordinator!()
 
     %{socket: socket} = raw_setup(context)
     {:ok, socket: socket}
@@ -59,8 +62,8 @@ defmodule Teiserver.SpringTcpServerTest do
 
     user = UserCacheLib.get_user_by_name(username)
     query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
-    Teiserver.Account.UserCacheLib.recache_user(user.id)
+    SQL.query(Repo, query, [])
+    UserCacheLib.recache_user(user.id)
 
     _send_raw(
       socket,
@@ -149,7 +152,7 @@ defmodule Teiserver.SpringTcpServerTest do
     %{socket: socket, user: user} = auth_setup(context)
     client = Client.get_client_by_name(user.name)
     tcp_pid = client.tcp_pid
-    coordinator_userid = Teiserver.Coordinator.get_coordinator_userid()
+    coordinator_userid = Coordinator.get_coordinator_userid()
 
     # Should be no users but ourselves
     :timer.sleep(300)
@@ -502,7 +505,7 @@ defmodule Teiserver.SpringTcpServerTest do
     _recv_until(socket)
 
     # Join a room when we don't know about dud_user
-    Teiserver.Protocols.SpringOut.do_join_room(state, "dud_room")
+    SpringOut.do_join_room(state, "dud_room")
     r = _recv_until(socket)
 
     assert r ==

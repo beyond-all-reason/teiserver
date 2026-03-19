@@ -6,6 +6,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
   alias Teiserver.Communication
   alias Teiserver.Logging
   alias Teiserver.Microblog
+  alias Teiserver.Microblog.PostLib
 
   @impl Phoenix.LiveView
   def mount(%{"post_id" => post_id_str}, _session, socket) when is_connected?(socket) do
@@ -118,7 +119,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
         response
       end
 
-    Teiserver.Microblog.PostLib.update_post_response_cache(assigns.post)
+    PostLib.update_post_response_cache(assigns.post)
 
     socket
     |> assign(:response, response)

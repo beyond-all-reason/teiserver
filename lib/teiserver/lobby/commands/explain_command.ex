@@ -4,6 +4,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
   Documentation for explain command here
   """
 
+  alias Teiserver.Account.Auth
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle
   alias Teiserver.Coordinator
@@ -24,7 +25,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
 
     if balance do
       moderator_messages =
-        if Teiserver.Account.Auth.is_moderator?(userid) do
+        if Auth.is_moderator?(userid) do
           time_taken =
             cond do
               balance.time_taken < 1000 ->

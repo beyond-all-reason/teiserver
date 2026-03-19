@@ -3,6 +3,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
   use Oban.Worker, queue: :teiserver
   alias Teiserver.Logging
   alias Teiserver.Logging.ServerDayLogLib
+  alias Teiserver.Logging.Tasks.PersistServerWeekTask
   import Ecto.Query, warn: false
 
   @impl Oban.Worker
@@ -19,7 +20,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
 
     if log != nil do
       %{}
-      |> Teiserver.Logging.Tasks.PersistServerWeekTask.new()
+      |> PersistServerWeekTask.new()
       |> Oban.insert()
     end
 

@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
   use TeiserverWeb, :controller
 
   alias Teiserver.Config
+  alias Teiserver.Helper.StringHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Auth.Server,
@@ -46,7 +47,7 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
     tab =
       Config.get_site_config_type(key)
       |> Map.get(:section)
-      |> Teiserver.Helper.StringHelper.remove_spaces()
+      |> StringHelper.remove_spaces()
 
     add_audit_log(conn, "Site config:Update value", %{key: key, value: value})
 

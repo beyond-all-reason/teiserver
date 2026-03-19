@@ -2,6 +2,8 @@ defmodule Teiserver.Bridge.DiscordSystem do
   use DynamicSupervisor
   use Task
 
+  alias Teiserver.Communication
+
   def start_link(_) do
     DynamicSupervisor.start_link(__MODULE__, [], name: __MODULE__)
   end
@@ -10,7 +12,7 @@ defmodule Teiserver.Bridge.DiscordSystem do
   def init(_) do
     {:ok, sup_flags} = DynamicSupervisor.init(strategy: :one_for_one)
 
-    if Teiserver.Communication.use_discord?() do
+    if Communication.use_discord?() do
       Task.async(fn ->
         DynamicSupervisor.start_child(
           __MODULE__,

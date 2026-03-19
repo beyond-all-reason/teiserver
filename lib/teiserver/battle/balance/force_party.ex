@@ -7,6 +7,7 @@ defmodule Teiserver.Battle.Balance.ForceParty do
   # alias Teiserver.Account
   # alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
+  alias Teiserver.Battle.Balance.LoserPicks
   # import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   # @type algorithm_state :: %{
@@ -21,6 +22,6 @@ defmodule Teiserver.Battle.Balance.ForceParty do
   """
   @spec perform([BT.expanded_group_or_pair()], non_neg_integer(), list()) :: BT.algorithm_result()
   def perform(raw_groups, team_count, opts) do
-    Teiserver.Battle.Balance.LoserPicks.perform(raw_groups, team_count, opts)
+    LoserPicks.perform(raw_groups, team_count, opts)
   end
 end

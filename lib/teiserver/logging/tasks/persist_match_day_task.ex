@@ -1,9 +1,9 @@
 defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
   use Oban.Worker, queue: :teiserver
-  alias Teiserver.Logging
   alias Teiserver.Battle
   alias Teiserver.Battle.Tasks.BreakdownMatchDataTask
-
+  alias Teiserver.Logging
+  alias Teiserver.Logging.MatchDayLog
   alias Teiserver.Repo
   import Ecto.Query, warn: false
 
@@ -37,7 +37,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
 
         if Timex.compare(new_date, Timex.today()) == -1 do
           %{}
-          |> Teiserver.Logging.Tasks.PersistMatchDayTask.new()
+          |> __MODULE__.new()
           |> Oban.insert()
         end
 
@@ -71,7 +71,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
 
     # Delete old log if it exists
     delete_query =
-      from logs in Teiserver.Logging.MatchDayLog,
+      from logs in MatchDayLog,
         where: logs.date == ^(date |> Timex.to_date())
 
     Repo.delete_all(delete_query)

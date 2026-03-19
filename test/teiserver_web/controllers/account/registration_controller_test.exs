@@ -1,10 +1,14 @@
 defmodule TeiserverWeb.Account.RegistrationControllerTest do
   use TeiserverWeb.ConnCase
 
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Config
+
   describe "web registration of users" do
     setup do
-      Teiserver.Config.update_site_config("teiserver.Enable registrations", true)
-      Teiserver.Config.update_site_config("teiserver.Require Chobby registration", false)
+      Config.update_site_config("teiserver.Enable registrations", true)
+      Config.update_site_config("teiserver.Require Chobby registration", false)
       :ok
     end
 
@@ -13,8 +17,8 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
       resp = post(conn, ~p"/register", user: attrs)
       assert redirected_to(resp) =~ "/"
 
-      assert %Teiserver.Account.User{} =
-               user = Teiserver.Account.get_user(nil, where: [email: attrs.email])
+      assert %Account.User{} =
+               user = Account.get_user(nil, where: [email: attrs.email])
 
       assert user.name == attrs.name
     end
@@ -69,8 +73,8 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
       resp = post(conn, ~p"/register", user: attrs)
       assert redirected_to(resp) =~ "/"
 
-      assert %Teiserver.Account.User{} =
-               user = Teiserver.Account.get_user(nil, where: [email: attrs.email])
+      assert %Account.User{} =
+               user = Account.get_user(nil, where: [email: attrs.email])
 
       assert user.name == attrs.name
 
@@ -80,29 +84,29 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
     end
 
     test "cannot register if registration disabled", %{conn: conn} do
-      Teiserver.Config.update_site_config("teiserver.Enable registrations", false)
+      Config.update_site_config("teiserver.Enable registrations", false)
       attrs = valid_attrs()
       resp = post(conn, ~p"/register", user: attrs)
       assert html_response(resp, 403) =~ "Account creation disabled"
     end
 
     test "cannot register if web registration disabled", %{conn: conn} do
-      Teiserver.Config.update_site_config("teiserver.Require Chobby registration", true)
+      Config.update_site_config("teiserver.Require Chobby registration", true)
       attrs = valid_attrs()
       resp = post(conn, ~p"/register", user: attrs)
       assert html_response(resp, 403) =~ "Account creation disabled"
     end
 
     test "account marked as verify when registration isn't required", %{conn: conn} do
-      Teiserver.Config.update_site_config("teiserver.Require email verification", false)
+      Config.update_site_config("teiserver.Require email verification", false)
       attrs = valid_attrs()
       resp = post(conn, ~p"/register", user: attrs)
       assert redirected_to(resp) =~ "/"
 
       user =
-        Teiserver.Account.query_user(search: [email_lower: attrs.email])
+        Account.query_user(search: [email_lower: attrs.email])
 
-      assert Teiserver.Account.Auth.is_verified?(user)
+      assert Auth.is_verified?(user)
     end
   end
 

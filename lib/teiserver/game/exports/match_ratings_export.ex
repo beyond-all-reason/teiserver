@@ -15,6 +15,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
     "start_date" => "2023-06-02"
   })
   """
+  alias Ecto.Adapters.SQL
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.TimexHelper
   alias Teiserver.Battle
@@ -107,7 +108,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
     """
 
     match_count =
-      case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date, rating_type_id]) do
+      case SQL.query(Repo, query, [start_date, end_date, rating_type_id]) do
         {:ok, results} ->
           results.rows |> List.flatten() |> hd()
 
@@ -141,7 +142,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
       LIMIT $5
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, [
+    case SQL.query(Repo, query, [
            start_date,
            end_date,
            rating_type_id,

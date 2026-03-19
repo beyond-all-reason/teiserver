@@ -1,6 +1,8 @@
 defmodule TeiserverWeb.Battle.MatchView do
   use TeiserverWeb, :view
 
-  def view_colour(), do: Teiserver.Battle.MatchLib.colours()
-  def icon(), do: Teiserver.Battle.MatchLib.icon()
+  alias Teiserver.Battle.MatchLib
+
+  def view_colour(), do: MatchLib.colours()
+  def icon(), do: MatchLib.icon()
 end

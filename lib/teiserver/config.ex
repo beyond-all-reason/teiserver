@@ -4,10 +4,11 @@ defmodule Teiserver.Config do
   """
 
   import Ecto.Query, warn: false
-  alias Teiserver.Repo
   alias Teiserver.Config.SiteConfig
   alias Teiserver.Config.UserConfig
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helper.NumberHelper
+  alias Teiserver.Repo
 
   def get_user_config_cache(%{assigns: %{current_user: nil}}, key) do
     get_user_config_default(key)
@@ -280,7 +281,7 @@ defmodule Teiserver.Config do
     type = get_user_config_type(type_key)
 
     case type.type do
-      "integer" -> Teiserver.Helper.NumberHelper.int_parse(value)
+      "integer" -> NumberHelper.int_parse(value)
       "boolean" -> if value == "true", do: true, else: false
       "select" -> value
       "string" -> value
@@ -460,8 +461,8 @@ defmodule Teiserver.Config do
     type = get_site_config_type(type_key)
 
     case type.type do
-      "integer" -> Teiserver.Helper.NumberHelper.int_parse(value)
-      "float" -> Teiserver.Helper.NumberHelper.float_parse(value)
+      "integer" -> NumberHelper.int_parse(value)
+      "float" -> NumberHelper.float_parse(value)
       "boolean" -> if value == "true" or value == true, do: true, else: false
       "select" -> value
       "string" -> value

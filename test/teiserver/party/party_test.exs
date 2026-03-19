@@ -6,6 +6,7 @@ defmodule Teiserver.Party.PartyTest do
   alias Teiserver.Party
   alias Teiserver.Tachyon
   alias Teiserver.Support.Polling
+  alias ExUnit.Callbacks
 
   test "create party" do
     assert {:ok, party_id, _pid} = Party.create_party(123)
@@ -22,7 +23,7 @@ defmodule Teiserver.Party.PartyTest do
 
       Tachyon.restart_system()
       Polling.poll_until(fn -> Process.alive?(party_pid) end, &(&1 == false))
-      Polling.poll_until_some(fn -> Teiserver.Party.lookup(party_id) end)
+      Polling.poll_until_some(fn -> Party.lookup(party_id) end)
     end
 
     test "user leave after restoration tears down party" do
@@ -71,7 +72,7 @@ defmodule Teiserver.Party.PartyTest do
 
       Tachyon.restart_system()
       Polling.poll_until(fn -> Process.alive?(party_pid) end, &(&1 == false))
-      Polling.poll_until_some(fn -> Teiserver.Party.lookup(party_id) end)
+      Polling.poll_until_some(fn -> Party.lookup(party_id) end)
 
       {:ok, _} = Party.rejoin(party_id, 456)
     end
@@ -82,24 +83,24 @@ defmodule Teiserver.Party.PartyTest do
       Process.exit(sink_pid, :shutdown)
 
       Tachyon.set_restoration_timeout(0)
-      ExUnit.Callbacks.on_exit(fn -> Tachyon.reset_restoration_timeout() end)
+      Callbacks.on_exit(fn -> Tachyon.reset_restoration_timeout() end)
 
       Tachyon.restart_system()
       # we are going to assume that 2ms is enough time for the party to be restored
       # and then timeout. The actual restoration logic is already tested earlier in
       # this file so assume it works
       :timer.sleep(2)
-      Polling.poll_until_nil(fn -> Teiserver.Party.lookup(party_id) end)
+      Polling.poll_until_nil(fn -> Party.lookup(party_id) end)
     end
   end
 
   def setup_config(_) do
     Tachyon.enable_state_restoration()
-    ExUnit.Callbacks.on_exit(fn -> Tachyon.disable_state_restoration() end)
+    Callbacks.on_exit(fn -> Tachyon.disable_state_restoration() end)
   end
 
   defp mk_sink(name \\ :sink) do
     Supervisor.child_spec({Task, fn -> :timer.sleep(:infinity) end}, id: name)
-    |> ExUnit.Callbacks.start_supervised!()
+    |> Callbacks.start_supervised!()
   end
 end

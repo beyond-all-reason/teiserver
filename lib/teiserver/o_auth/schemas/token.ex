@@ -2,6 +2,7 @@ defmodule Teiserver.OAuth.Token do
   @moduledoc false
   use TeiserverWeb, :schema
 
+  alias Ecto.Changeset
   alias Teiserver.OAuth
 
   typed_schema "oauth_tokens" do
@@ -37,6 +38,6 @@ defmodule Teiserver.OAuth.Token do
     ])
     |> cast_assoc(:refresh_token)
     |> validate_required([:value, :application_id, :scopes, :expires_at, :type])
-    |> Ecto.Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
+    |> Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
   end
 end

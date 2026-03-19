@@ -2,6 +2,7 @@ defmodule Teiserver.Plugs.BasicAuthBotPlug do
   @moduledoc false
   import Plug.Conn
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
 
   def init(opts), do: opts
 
@@ -11,7 +12,7 @@ defmodule Teiserver.Plugs.BasicAuthBotPlug do
         [username, password] = Base.decode64!(encoded) |> String.split(":")
 
         with user <- Account.get_user_by_name(username),
-             true <- Teiserver.Account.Auth.is_bot?(user),
+             true <- Auth.is_bot?(user),
              true <- Account.verify_plain_password(password, user.password) do
           conn
         else

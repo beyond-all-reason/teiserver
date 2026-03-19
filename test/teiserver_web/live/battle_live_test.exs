@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Live.BattleTest do
   use TeiserverWeb.ConnCase, async: false
   import Phoenix.LiveViewTest
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1]
+  import TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1]
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.CacheUser
   alias Teiserver.Lobby
@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Live.BattleTest do
   @moduletag :needs_attention
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
+    GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())
     |> TeiserverTestLib.conn_setup()
   end
 
@@ -85,7 +85,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
     @tag :needs_attention
     test "show - valid battle", %{conn: conn} do
-      {:ok, server_context} = Teiserver.TeiserverTestLib.start_spring_server()
+      {:ok, server_context} = TeiserverTestLib.start_spring_server()
       # Lets create a battle
       %{socket: host_socket, user: host_user} = TeiserverTestLib.auth_setup(server_context)
       CacheUser.add_roles(host_user, ["Bot"])

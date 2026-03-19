@@ -4,6 +4,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
 
   alias Teiserver
   alias Teiserver.Battle
+  alias Teiserver.Config
   alias Teiserver.Lobby
   alias Teiserver.Account
 
@@ -21,7 +22,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       socket
       |> assign(:moderator, moderator)
 
-    disabled? = Teiserver.Config.get_site_config_cache("lobby.Disable lobby live view on website")
+    disabled? = Config.get_site_config_cache("lobby.Disable lobby live view on website")
 
     socket =
       socket

@@ -5,6 +5,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Game
+  alias Teiserver.Game.MatchRatingLib
   # alias Teiserver.Repo
 
   @spec perform(T.userid(), T.userid(), map()) :: :ok
@@ -21,7 +22,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
   defp merge_ratings(_from_id, _to_id, "false"), do: :ok
 
   defp merge_ratings(from_id, to_id, "true") do
-    season = Teiserver.Game.MatchRatingLib.active_season()
+    season = MatchRatingLib.active_season()
 
     to_ratings =
       Account.list_ratings(search: [user_id: to_id, season: season])

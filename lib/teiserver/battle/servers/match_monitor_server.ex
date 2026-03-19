@@ -12,8 +12,10 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Client
+  alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Protocols.Spring
   alias Teiserver.Room
   alias Teiserver.Telemetry
 
@@ -348,7 +350,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
     case Base.url_decode64(message) do
       {:ok, compressed_contents} ->
-        case Teiserver.Protocols.Spring.unzip(compressed_contents) do
+        case Spring.unzip(compressed_contents) do
           {:ok, contents_string} ->
             case Jason.decode(contents_string) do
               {:ok, data} ->
@@ -407,7 +409,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           Account.create_smurf_key(user.id, "hw1", hw1)
           Account.create_smurf_key(user.id, "hw2", hw2)
           Account.create_smurf_key(user.id, "hw3", hw3)
-          Teiserver.Coordinator.AutomodServer.check_user(user.id)
+          AutomodServer.check_user(user.id)
         end
     end
   end

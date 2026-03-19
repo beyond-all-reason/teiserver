@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Account.SettingsLive.Index do
   @moduledoc false
   use TeiserverWeb, :live_view
 
+  alias Teiserver.Account.UserLib
   alias Teiserver.Config
 
   @impl Phoenix.LiveView
@@ -10,7 +11,7 @@ defmodule TeiserverWeb.Account.SettingsLive.Index do
       socket
       |> assign(:tab, nil)
       |> assign(:site_menu_active, "teiserver_account")
-      |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+      |> assign(:view_colour, UserLib.colours())
       |> assign(:show_descriptions, false)
       |> assign(:temp_value, nil)
       |> assign(:selected_key, nil)

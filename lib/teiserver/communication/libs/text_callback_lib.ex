@@ -1,6 +1,7 @@
 defmodule Teiserver.Communication.TextCallbackLib do
   @moduledoc false
   use TeiserverWeb, :library
+  alias Teiserver.Bridge.CommandLib
   alias Teiserver.Communication
   alias Teiserver.Communication.TextCallback
 
@@ -121,7 +122,7 @@ defmodule Teiserver.Communication.TextCallbackLib do
           {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
   def update_text_callback_cache({:ok, text_callback} = args) do
     Teiserver.store_put(:text_callback_store, text_callback.id, text_callback)
-    Teiserver.Bridge.CommandLib.re_cache_discord_command("textcb")
+    CommandLib.re_cache_discord_command("textcb")
 
     text_callback.triggers
     |> Enum.each(fn trigger_text ->

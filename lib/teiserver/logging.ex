@@ -29,6 +29,12 @@ defmodule Teiserver.Logging do
   alias Teiserver.Logging.ServerWeekLogLib
   alias Teiserver.Logging.ServerYearLog
   alias Teiserver.Logging.ServerYearLogLib
+  alias Teiserver.Logging.Tasks.PersistMatchMonthTask
+  alias Teiserver.Logging.Tasks.PersistServerDayTask
+  alias Teiserver.Logging.Tasks.PersistServerMonthTask
+  alias Teiserver.Logging.Tasks.PersistServerQuarterTask
+  alias Teiserver.Logging.Tasks.PersistServerWeekTask
+  alias Teiserver.Logging.Tasks.PersistServerYearTask
   alias Teiserver.Logging.UserActivityDayLog
   alias Teiserver.Logging.UserActivityDayLogLib
   alias Teiserver.Repo
@@ -316,7 +322,7 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistServerDayTask.today_so_far()
+      data = PersistServerDayTask.today_so_far()
 
       Teiserver.cache_put(
         :application_metadata_cache,
@@ -490,7 +496,7 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistServerMonthTask.month_so_far()
+      data = PersistServerMonthTask.month_so_far()
 
       Teiserver.cache_put(
         :application_metadata_cache,
@@ -667,7 +673,7 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistServerQuarterTask.quarter_so_far()
+      data = PersistServerQuarterTask.quarter_so_far()
 
       Teiserver.cache_put(
         :application_metadata_cache,
@@ -841,7 +847,7 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistServerYearTask.year_so_far()
+      data = PersistServerYearTask.year_so_far()
       Teiserver.cache_put(:application_metadata_cache, "teiserver_year_year_metrics_cache", data)
 
       Teiserver.cache_put(
@@ -1010,7 +1016,7 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistServerWeekTask.week_so_far()
+      data = PersistServerWeekTask.week_so_far()
       Teiserver.cache_put(:application_metadata_cache, "teiserver_week_week_metrics_cache", data)
 
       Teiserver.cache_put(
@@ -1175,7 +1181,7 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistMatchMonthTask.month_so_far()
+      data = PersistMatchMonthTask.month_so_far()
 
       Teiserver.cache_put(
         :application_metadata_cache,
@@ -1209,7 +1215,7 @@ defmodule Teiserver.Logging do
       end
 
     if recache do
-      data = Teiserver.Logging.Tasks.PersistMatchMonthTask.month_so_far()
+      data = PersistMatchMonthTask.month_so_far()
 
       Teiserver.cache_put(
         :application_metadata_cache,

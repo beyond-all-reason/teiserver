@@ -2,9 +2,12 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   require Logger
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   alias Teiserver.Bridge.DiscordBridgeBot
+  alias Teiserver.Communication
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.SpringIn
   alias Teiserver.Telemetry
+
+  import SpringIn, only: [_no_match: 4]
   # import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   # credo:disable-for-next-line Credo.Check.Design.TagTODO
@@ -32,7 +35,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
 
                       case Telemetry.create_infolog(params) do
                         {:ok, infolog} ->
-                          if Teiserver.Communication.use_discord?() do
+                          if Communication.use_discord?() do
                             DiscordBridgeBot.new_infolog(infolog)
                           end
 
@@ -118,7 +121,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   end
 
   def do_handle(cmd, data, msg_id, state) do
-    SpringIn._no_match(state, "c.telemetry." <> cmd, msg_id, data)
+    _no_match(state, "c.telemetry." <> cmd, msg_id, data)
   end
 
   defp do_simple_client_event(data, state) do

@@ -4,13 +4,14 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
   alias Teiserver.Player
   alias Teiserver.Support.Tachyon
   alias WebsocketSyncClient, as: WSC
+  alias Player.SessionRegistry
 
   setup _context do
     Tachyon.setup_client()
   end
 
   test "session is spawned when player connects", %{user: user} do
-    registered_pid = poll_until_some(fn -> Player.SessionRegistry.lookup(user.id) end)
+    registered_pid = poll_until_some(fn -> SessionRegistry.lookup(user.id) end)
     assert is_pid(registered_pid)
     assert :connected == Player.conn_state(user.id)
   end
@@ -21,12 +22,12 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
     Process.monitor(conn_pid)
     :ok = WSC.disconnect(client)
     assert_receive({:DOWN, _, :process, _, :normal})
-    assert is_pid(Player.SessionRegistry.lookup(user.id))
+    assert is_pid(SessionRegistry.lookup(user.id))
     poll_until(fn -> Player.conn_state(user.id) end, &(&1 == :reconnecting))
   end
 
   test "player gets kicked out if session dies", %{user: user, client: client} do
-    sess_pid = poll_until_some(fn -> Player.SessionRegistry.lookup(user.id) end)
+    sess_pid = poll_until_some(fn -> SessionRegistry.lookup(user.id) end)
     Player.monitor_session(user.id)
     Process.exit(sess_pid, :please_die)
     assert_receive({:DOWN, _, :process, _, _})
@@ -51,7 +52,7 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
   test "session dies after too long", %{client: client, user: user} do
     Tachyon.abrupt_disconnect!(client)
     assert {:error, :disconnected} = WSC.send_message(client, {:text, "test_ping"})
-    sess_pid = Player.SessionRegistry.lookup(user.id)
+    sess_pid = SessionRegistry.lookup(user.id)
     assert sess_pid != nil
     ref = Process.monitor(sess_pid)
     poll_until(fn -> Player.lookup_connection(user.id) end, &is_nil/1)

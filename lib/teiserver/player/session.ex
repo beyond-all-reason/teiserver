@@ -15,10 +15,14 @@ defmodule Teiserver.Player.Session do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.KvStore
   alias Teiserver.Matchmaking
+  alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Messaging
   alias Teiserver.Party
-  alias Teiserver.Player
+  alias Teiserver.Player.SessionRegistry
+  alias Teiserver.Player.SessionSupervisor
+  alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
   alias Teiserver.Data.Types, as: T
@@ -143,7 +147,7 @@ defmodule Teiserver.Player.Session do
 
   @impl GenServer
   def terminate(:shutdown, state) do
-    if Teiserver.Tachyon.should_restore_state?() do
+    if Tachyon.should_restore_state?() do
       # store more stuff as we enable the restoration of
       # more state at startup
       to_save =
@@ -154,7 +158,7 @@ defmodule Teiserver.Player.Session do
         }
         |> :erlang.term_to_binary()
 
-      Teiserver.KvStore.put("session", to_string(state.user.id), to_save)
+      KvStore.put("session", to_string(state.user.id), to_save)
     end
   end
 
@@ -185,7 +189,7 @@ defmodule Teiserver.Player.Session do
     # the registry will automatically unregister when the process terminates
     # but that can lead to race conditions when a player disconnect and
     # reconnect immediately
-    Player.SessionRegistry.unregister(user_id)
+    SessionRegistry.unregister(user_id)
     GenServer.call(via_tuple(user_id), :disconnect)
   end
 
@@ -566,7 +570,7 @@ defmodule Teiserver.Player.Session do
   def restore_session(_blob_key, blob_value) do
     snapshot = :erlang.binary_to_term(blob_value)
 
-    Player.SessionSupervisor.start_session_from_snapshot(snapshot.user_id, snapshot)
+    SessionSupervisor.start_session_from_snapshot(snapshot.user_id, snapshot)
   end
 
   ################################################################################
@@ -714,7 +718,7 @@ defmodule Teiserver.Player.Session do
     case state.matchmaking do
       {:searching, %{joined_queues: joined_queues}} ->
         Enum.each(joined_queues, fn queue_id ->
-          Matchmaking.QueueServer.leave_queue(queue_id, user_id)
+          QueueServer.leave_queue(queue_id, user_id)
         end)
 
       _ ->
@@ -906,7 +910,7 @@ defmodule Teiserver.Player.Session do
       do: {:reply, {:error, :not_in_party}, state}
 
   def handle_call({:party, :leave}, _from, state) do
-    case Teiserver.Party.leave_party(state.party.current_party, state.user.id) do
+    case Party.leave_party(state.party.current_party, state.user.id) do
       :ok ->
         state =
           state
@@ -1746,7 +1750,7 @@ defmodule Teiserver.Player.Session do
   end
 
   defp via_tuple(user_id) do
-    Player.SessionRegistry.via_tuple(user_id)
+    SessionRegistry.via_tuple(user_id)
   end
 
   # assume all checks have been done, and make the current player join
@@ -1866,7 +1870,7 @@ defmodule Teiserver.Player.Session do
       :ok = PubSub.subscribe(Teiserver.PubSub, topic)
     end
 
-    case Player.SessionRegistry.lookup(user.id) do
+    case SessionRegistry.lookup(user.id) do
       # player is offline, simulate the broadcast ourselves
       nil ->
         broadcast_user_update!(user, :offline)

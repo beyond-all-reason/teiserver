@@ -4,6 +4,9 @@ defmodule Teiserver.Account.User do
   @behaviour Bodyguard.Policy
 
   alias Argon2
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Helper.StylingHelper
 
   typed_schema "account_users" do
     field :name, :string
@@ -98,7 +101,7 @@ defmodule Teiserver.Account.User do
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
     |> validate_change(:email, fn :email, email ->
-      case Teiserver.CacheUser.valid_email?(email) do
+      case CacheUser.valid_email?(email) do
         :ok -> []
         {:error, reason} -> [{:email, reason}]
       end
@@ -153,7 +156,7 @@ defmodule Teiserver.Account.User do
           "Please enter your password to change your account details."
         )
 
-      Teiserver.Account.verify_plain_password(attrs["password"], user.password) == false ->
+      Account.verify_plain_password(attrs["password"], user.password) == false ->
         user
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
@@ -165,7 +168,7 @@ defmodule Teiserver.Account.User do
         |> validate_required([:name, :email])
         |> unique_constraint(:email)
         |> validate_change(:email, fn :email, email ->
-          case Teiserver.CacheUser.valid_email?(email) do
+          case CacheUser.valid_email?(email) do
             :ok -> []
             {:error, reason} -> [{:email, reason}]
           end
@@ -186,7 +189,7 @@ defmodule Teiserver.Account.User do
           "Please enter your existing password to change your password."
         )
 
-      Teiserver.Account.verify_plain_password(attrs["existing"], user.password) == false ->
+      Account.verify_plain_password(attrs["existing"], user.password) == false ->
         user
         |> change_plain_password(attrs)
         |> add_error(:existing, "Incorrect password")
@@ -219,8 +222,8 @@ defmodule Teiserver.Account.User do
     attrs =
       Map.merge(
         %{
-          "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
-          "colour" => Teiserver.Helper.StylingHelper.random_colour()
+          "icon" => "fa-solid fa-" <> StylingHelper.random_icon(),
+          "colour" => StylingHelper.random_colour()
         },
         attrs
       )
@@ -236,7 +239,7 @@ defmodule Teiserver.Account.User do
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
     |> validate_change(:email, fn :email, email ->
-      case Teiserver.CacheUser.valid_email?(email) do
+      case CacheUser.valid_email?(email) do
         :ok -> []
         {:error, reason} -> [{:email, reason}]
       end
@@ -259,8 +262,8 @@ defmodule Teiserver.Account.User do
     attrs =
       Map.merge(
         %{
-          "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
-          "colour" => Teiserver.Helper.StylingHelper.random_colour()
+          "icon" => "fa-solid fa-" <> StylingHelper.random_icon(),
+          "colour" => StylingHelper.random_colour()
         },
         attrs
       )
@@ -272,14 +275,14 @@ defmodule Teiserver.Account.User do
     |> validate_required([:name, :email, :password])
     |> validate_confirmation(:password, required: true, message: "Passwords do not match")
     |> validate_change(:name, fn :name, name ->
-      case Teiserver.Account.valid_name?(name, false) do
+      case Account.valid_name?(name, false) do
         :ok -> []
         {:error, reason} -> [{:name, reason}]
       end
     end)
     |> validate_password()
     |> validate_change(:email, fn :email, email ->
-      case Teiserver.CacheUser.valid_email?(email) do
+      case CacheUser.valid_email?(email) do
         :ok -> []
         {:error, reason} -> [{:email, reason}]
       end
@@ -312,8 +315,7 @@ defmodule Teiserver.Account.User do
          %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
        ) do
     change(changeset,
-      password:
-        Teiserver.Account.spring_md5_password(password) |> Teiserver.Account.hash_password()
+      password: Account.spring_md5_password(password) |> Account.hash_password()
     )
   end
 
@@ -322,7 +324,7 @@ defmodule Teiserver.Account.User do
   defp put_md5_password_hash(
          %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
        ) do
-    change(changeset, password: Teiserver.Account.hash_password(password))
+    change(changeset, password: Account.hash_password(password))
   end
 
   defp put_md5_password_hash(changeset), do: changeset

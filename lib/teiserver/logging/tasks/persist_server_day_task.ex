@@ -1,8 +1,11 @@
 defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
   @moduledoc false
   use Oban.Worker, queue: :teiserver
+  alias Ecto.Adapters.SQL
   alias Teiserver.Account
   alias Teiserver.Logging
+  alias Teiserver.Logging.ServerDayLog
+  alias Teiserver.Logging.Tasks.PersistServerDayTask
   alias Teiserver.Battle
 
   alias Teiserver.Repo
@@ -159,7 +162,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
 
       if Timex.compare(new_date, Timex.today()) == -1 do
         %{}
-        |> Teiserver.Logging.Tasks.PersistServerDayTask.new()
+        |> PersistServerDayTask.new()
         |> Oban.insert()
       end
     end
@@ -185,7 +188,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
 
     # Delete old log if it exists
     delete_query =
-      from logs in Teiserver.Logging.ServerDayLog,
+      from logs in ServerDayLog,
         where: logs.date == ^(date |> Timex.to_date())
 
     Repo.delete_all(delete_query)
@@ -446,7 +449,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
           DELETE FROM teiserver_server_minute_logs WHERE timestamp < $1
     """
 
-    Ecto.Adapters.SQL.query!(Repo, query, [before_timestamp])
+    SQL.query!(Repo, query, [before_timestamp])
   end
 
   defp concatenate_lists(items, path) do
@@ -661,7 +664,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         "#{complexity}_#{section}"
       )
 
-    case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+    case SQL.query(Repo, query, [start_date, end_date]) do
       {:ok, results} ->
         results.rows
         |> Map.new(fn [key, value] -> {key, value} end)
@@ -691,7 +694,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         complexity
       )
 
-    case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+    case SQL.query(Repo, query, [start_date, end_date]) do
       {:ok, results} ->
         results.rows
         |> Map.new(fn [key, value] -> {key, value} end)
@@ -723,7 +726,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         complexity
       )
 
-    case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+    case SQL.query(Repo, query, [start_date, end_date]) do
       {:ok, results} ->
         results.rows
         |> Map.new(fn [key, value] -> {key, value} end)
@@ -746,7 +749,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     """
 
     count_map =
-      case Ecto.Adapters.SQL.query(Repo, query, [start_date, end_date]) do
+      case SQL.query(Repo, query, [start_date, end_date]) do
         {:ok, results} ->
           results.rows
           |> Map.new(fn [key, value] -> {key, value} end)

@@ -14,10 +14,10 @@ defmodule Teiserver.TachyonBattle.Battle do
   @type state :: %{
           id: T.id(),
           match_id: T.match_id(),
-          autohost_id: Teiserver.Autohost.id(),
+          autohost_id: Autohost.id(),
           autohost_pid: pid(),
           autohost_timeout: timeout(),
-          start_script: Teiserver.Autohost.start_script(),
+          start_script: Autohost.start_script(),
           # initialised: the battle is waiting for players to join and start the match
           # finished: the battle is over, but there are still some player in the match,
           # maybe looking at stats or whatever
@@ -37,7 +37,7 @@ defmodule Teiserver.TachyonBattle.Battle do
   # TODO! handle the case where the battle isn't there somehow. This
   # will become important when we start tracking event history for autohosts
   # and doing state recovery
-  @spec send_update_event(Teiserver.Autohost.update_event()) :: :ok
+  @spec send_update_event(Autohost.update_event()) :: :ok
   def send_update_event(event) do
     GenServer.cast(via_tuple(event.battle_id), {:update_event, event})
   end
@@ -89,7 +89,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     # 8h is more than enough time for any online game
     :timer.send_after(8 * 60 * 60_000, :battle_timeout)
 
-    case Teiserver.Autohost.lookup_autohost(autohost_id) do
+    case Autohost.lookup_autohost(autohost_id) do
       {pid, _} ->
         Logger.info("init battle for autohost #{autohost_id}")
         Process.monitor(pid)

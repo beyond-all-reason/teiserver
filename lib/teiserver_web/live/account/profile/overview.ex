@@ -5,8 +5,11 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Lobby
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.FriendRequestLib
+  alias Teiserver.Account.RoleLib
+  alias Teiserver.Account.UserLib
+  alias Teiserver.Lobby
 
   @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do
@@ -28,9 +31,9 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         socket
         |> assign(:tab, nil)
         |> assign(:site_menu_active, "teiserver_account")
-        |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+        |> assign(:view_colour, UserLib.colours())
         |> assign(:user, user)
-        |> assign(:role_data, Account.RoleLib.role_data())
+        |> assign(:role_data, RoleLib.role_data())
         |> assign(:client, Account.get_client_by_id(userid))
         |> get_relationships_and_permissions()
         |> assign_accolade_notification()
@@ -322,7 +325,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
       {:error, reason} ->
         user_friendly_message =
-          Teiserver.Account.FriendRequestLib.error_atom_to_user_friendly_string(reason)
+          FriendRequestLib.error_atom_to_user_friendly_string(reason)
 
         socket =
           socket

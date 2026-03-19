@@ -2,11 +2,13 @@ defmodule Teiserver.OAuth.Code do
   @moduledoc false
   use TeiserverWeb, :schema
 
+  alias Ecto.Changeset
+  alias Teiserver.Account.User
   alias Teiserver.OAuth
 
   typed_schema "oauth_codes" do
     field :value, :string, redact: true
-    belongs_to :owner, Teiserver.Account.User, primary_key: true
+    belongs_to :owner, User, primary_key: true
     belongs_to :application, OAuth.Application, primary_key: true
     field :scopes, {:array, :string}
     field :expires_at, :utc_datetime
@@ -40,6 +42,6 @@ defmodule Teiserver.OAuth.Code do
       :challenge,
       :challenge_method
     ])
-    |> Ecto.Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
+    |> Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
   end
 end

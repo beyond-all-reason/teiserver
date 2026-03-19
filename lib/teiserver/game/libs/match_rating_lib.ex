@@ -4,14 +4,17 @@ defmodule Teiserver.Game.MatchRatingLib do
   to balance matches. For that use Teiserver.Battle.BalanceLib.
   """
 
+  alias Ecto.Adapters.SQL
+  alias Ecto.Multi
   alias Teiserver.Account
-  alias Teiserver.Coordinator
-  alias Teiserver.Config
-  alias Teiserver.Game
   alias Teiserver.Battle
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Repo
   alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Game
+  alias Teiserver.Game.RatingLog
+  alias Teiserver.Repo
   require Logger
 
   @rated_match_types [
@@ -518,8 +521,8 @@ defmodule Teiserver.Game.MatchRatingLib do
   @spec reset_player_ratings() :: :ok
   def reset_player_ratings do
     # Delete all ratings and rating logs
-    Ecto.Adapters.SQL.query!(Repo, "DELETE FROM teiserver_game_rating_logs", [])
-    Ecto.Adapters.SQL.query!(Repo, "DELETE FROM teiserver_account_ratings", [])
+    SQL.query!(Repo, "DELETE FROM teiserver_game_rating_logs", [])
+    SQL.query!(Repo, "DELETE FROM teiserver_account_ratings", [])
 
     :ok
   end
@@ -527,13 +530,13 @@ defmodule Teiserver.Game.MatchRatingLib do
   @spec reset_player_ratings(Integer.t()) :: :ok
   def reset_player_ratings(rating_type_id) when is_integer(rating_type_id) do
     # Delete all ratings and rating logs
-    Ecto.Adapters.SQL.query!(
+    SQL.query!(
       Repo,
       "DELETE FROM teiserver_game_rating_logs WHERE rating_type_id = $1",
       [rating_type_id]
     )
 
-    Ecto.Adapters.SQL.query!(
+    SQL.query!(
       Repo,
       "DELETE FROM teiserver_account_ratings WHERE rating_type_id = $1",
       [rating_type_id]
@@ -760,21 +763,21 @@ defmodule Teiserver.Game.MatchRatingLib do
     rerate? = Keyword.get(opts, :rerate?, false)
 
     if rerate? do
-      Ecto.Multi.new()
-      |> Ecto.Multi.run(:delete_existing, fn repo, _ ->
+      Multi.new()
+      |> Multi.run(:delete_existing, fn repo, _ ->
         query = """
         delete from teiserver_game_rating_logs l where
         l.match_id = $1
         """
 
-        Ecto.Adapters.SQL.query(repo, query, [match_id])
+        SQL.query(repo, query, [match_id])
       end)
-      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
-      |> Teiserver.Repo.transaction()
+      |> Multi.insert_all(:insert_all, RatingLog, win_ratings ++ loss_ratings)
+      |> Repo.transaction()
     else
-      Ecto.Multi.new()
-      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
-      |> Teiserver.Repo.transaction()
+      Multi.new()
+      |> Multi.insert_all(:insert_all, RatingLog, win_ratings ++ loss_ratings)
+      |> Repo.transaction()
     end
   end
 

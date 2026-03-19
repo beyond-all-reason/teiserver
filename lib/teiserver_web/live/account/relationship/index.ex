@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   use TeiserverWeb, :live_view
   alias Teiserver.Account
   alias Teiserver.Account.RelationshipLib
+  alias Teiserver.Account.RoleLib
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
@@ -52,7 +53,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
     socket
     |> assign(:page_title, "Relationships - Player search")
     |> assign(:tab, :search)
-    |> assign(:role_data, Account.RoleLib.role_data())
+    |> assign(:role_data, RoleLib.role_data())
     |> put_empty_relationships()
     |> update_user_search()
   end

@@ -23,7 +23,7 @@ defmodule TeiserverWeb.Microblog.Admin.PostLive.Show do
          |> assign(:post, post)
          |> assign(:selected_tags, selected_tags)
          |> assign(:site_menu_active, "microblog")
-         |> assign(:view_colour, Teiserver.Microblog.colours())}
+         |> assign(:view_colour, Microblog.colours())}
       else
         {:noreply, socket |> redirect(to: ~p"/microblog/admin/posts")}
       end

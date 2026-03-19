@@ -3,6 +3,7 @@ defmodule Teiserver.Chat.RoomServer do
 
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Chat
+  alias Teiserver.Chat.RoomRegistry
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Phoenix.PubSub
   require Logger
@@ -233,10 +234,10 @@ defmodule Teiserver.Chat.RoomServer do
   end
 
   defp update_member_count(state) do
-    Chat.RoomRegistry.update_room(state.name, Enum.count(state.members))
+    RoomRegistry.update_room(state.name, Enum.count(state.members))
   end
 
   def via_tuple(name) do
-    Chat.RoomRegistry.via_tuple(name)
+    RoomRegistry.via_tuple(name)
   end
 end

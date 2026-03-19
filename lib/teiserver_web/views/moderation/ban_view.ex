@@ -3,9 +3,11 @@ defmodule TeiserverWeb.Moderation.BanView do
   use TeiserverWeb, :view
   import TeiserverWeb.PaginationComponents, only: [pagination: 1]
 
+  alias Teiserver.Moderation.BanLib
+
   @spec view_colour() :: atom
-  def view_colour, do: Teiserver.Moderation.BanLib.colour()
+  def view_colour, do: BanLib.colour()
 
   @spec icon() :: String.t()
-  def icon, do: Teiserver.Moderation.BanLib.icon()
+  def icon, do: BanLib.icon()
 end

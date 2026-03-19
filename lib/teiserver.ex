@@ -1,5 +1,7 @@
 defmodule Teiserver do
   @moduledoc false
+  alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Admin.DeleteUserTask
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.CacheHelper
 
@@ -29,13 +31,13 @@ defmodule Teiserver do
   @spec accolade_status :: nil | :ok
   def accolade_status() do
     Application.put_env(:elixir, :ansi_enabled, true)
-    Teiserver.Account.AccoladeLib.live_debug()
+    AccoladeLib.live_debug()
   end
 
   @spec manually_delete_user(T.userid()) :: :ok
   def manually_delete_user(id) do
     Application.put_env(:elixir, :ansi_enabled, true)
-    Teiserver.Admin.DeleteUserTask.delete_users([id])
+    DeleteUserTask.delete_users([id])
   end
 
   @spec node_name() :: String.t()

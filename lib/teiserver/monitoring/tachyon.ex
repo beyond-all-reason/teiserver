@@ -5,6 +5,10 @@ defmodule Teiserver.Monitoring.Tachyon do
 
   use PromEx.Plugin
 
+  alias Teiserver.Party
+  alias Teiserver.Player
+  alias Teiserver.TachyonLobby
+
   @tachyon_player_metrics_event_name [:prom_ex, :plugin, :tachyon, :player]
   @tachyon_party_metrics_event_name [:prom_ex, :plugin, :tachyon, :party]
   @tachyon_lobby_metrics_event_name [:prom_ex, :plugin, :tachyon, :lobby]
@@ -112,16 +116,16 @@ defmodule Teiserver.Monitoring.Tachyon do
 
   @doc false
   def execute_tachyon_player_metrics() do
-    player_count = Teiserver.Player.connected_count()
+    player_count = Player.connected_count()
     :telemetry.execute(@tachyon_player_metrics_event_name, %{count: player_count}, %{})
 
-    party_count = Teiserver.Party.count()
+    party_count = Party.count()
     :telemetry.execute(@tachyon_party_metrics_event_name, %{count: party_count}, %{})
   end
 
   @doc false
   def execute_tachyon_lobby_metrics() do
-    lobby_count = Teiserver.TachyonLobby.count()
+    lobby_count = TachyonLobby.count()
     :telemetry.execute(@tachyon_lobby_metrics_event_name, %{count: lobby_count}, %{})
   end
 end

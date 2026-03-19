@@ -5,6 +5,7 @@ defmodule Teiserver.MetadataCache do
 
   use Supervisor
   alias Teiserver.Helpers.CacheHelper
+  alias Teiserver.Logging.AuditLogLib
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),
@@ -50,7 +51,7 @@ defmodule Teiserver.MetadataCache do
   end
 
   defp audit() do
-    Teiserver.Logging.AuditLogLib.add_audit_types([
+    AuditLogLib.add_audit_types([
       "Account:User password reset",
       "Account:Failed login",
       "Account:Created user",

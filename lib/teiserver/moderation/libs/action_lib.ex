@@ -218,7 +218,7 @@ defmodule Teiserver.Moderation.ActionLib do
       if Ecto.assoc_loaded?(action.target) do
         action
       else
-        Teiserver.Moderation.get_action(action.id,
+        Moderation.get_action(action.id,
           preload: [:target]
         )
       end

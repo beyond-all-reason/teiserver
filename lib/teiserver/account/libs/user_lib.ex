@@ -4,10 +4,12 @@ defmodule Teiserver.Account.UserLib do
   require Logger
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Logging
-  alias Teiserver.Account.User
   alias Teiserver.Account.RoleLib
+  alias Teiserver.Account.User
   alias Teiserver.Account.UserQueries
+  alias Teiserver.CacheUser
+  alias Teiserver.Helper.StylingHelper
+  alias Teiserver.Logging
 
   # Functions
   @spec icon :: String.t()
@@ -153,7 +155,7 @@ defmodule Teiserver.Account.UserLib do
       |> broadcast_create_user()
 
     case res do
-      {:ok, user} -> {:ok, Teiserver.CacheUser.post_user_creation_actions(user, ip)}
+      {:ok, user} -> {:ok, CacheUser.post_user_creation_actions(user, ip)}
       err -> err
     end
   end
@@ -293,8 +295,8 @@ defmodule Teiserver.Account.UserLib do
   def merge_default_params(user_params) do
     Map.merge(
       %{
-        "icon" => "fa-solid fa-" <> Teiserver.Helper.StylingHelper.random_icon(),
-        "colour" => Teiserver.Helper.StylingHelper.random_colour()
+        "icon" => "fa-solid fa-" <> StylingHelper.random_icon(),
+        "colour" => StylingHelper.random_colour()
       },
       user_params
     )
@@ -409,7 +411,7 @@ defmodule Teiserver.Account.UserLib do
 
   defp can_login(user) do
     cond do
-      Teiserver.CacheUser.is_restricted?(user, ["Login"]) ->
+      CacheUser.is_restricted?(user, ["Login"]) ->
         {:error,
          "Your account is currently suspended. Check the suspension's status at https://discord.gg/beyond-all-reason -> #moderation-bot"}
 

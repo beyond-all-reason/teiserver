@@ -13,6 +13,9 @@ defmodule Mix.Tasks.Teiserver.GenToken do
 
   use Mix.Task
 
+  alias Teiserver.OAuth.Tasks.GenToken
+  alias Teiserver.Repo
+
   @impl Mix.Task
   def run(args) do
     shell = Mix.shell()
@@ -21,7 +24,7 @@ defmodule Mix.Tasks.Teiserver.GenToken do
     shell.info("parsed args: #{inspect(parsed)}")
 
     Application.ensure_all_started([:ecto, :ecto_sql, :tzdata])
-    Teiserver.Repo.start_link()
+    Repo.start_link()
 
     case parsed[:user] do
       nil ->
@@ -29,7 +32,7 @@ defmodule Mix.Tasks.Teiserver.GenToken do
         exit({:shutdown, 1})
 
       user ->
-        case Teiserver.OAuth.Tasks.GenToken.create_token(user, parsed[:app]) do
+        case GenToken.create_token(user, parsed[:app]) do
           {:ok, token} ->
             shell.info("Generated token (id=#{token.id}) - #{token.value}")
             :ok

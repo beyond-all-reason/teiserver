@@ -22,6 +22,7 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.Protocols.Spring.SystemOut
   alias Teiserver.Protocols.Spring.PartyOut
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.SpringTcpServer
 
   @motd """
   Message of the day
@@ -764,7 +765,7 @@ defmodule Teiserver.Protocols.SpringOut do
     current_process = self()
 
     Task.Supervisor.start_child(Teiserver.TaskSupervisor, fn ->
-      teams_data = Teiserver.Battle.get_team_config(:all)
+      teams_data = Battle.get_team_config(:all)
 
       if teams_data do
         send(current_process, {:battle_teams, teams_data})
@@ -837,7 +838,7 @@ defmodule Teiserver.Protocols.SpringOut do
                     Map.put(
                       state_acc.known_users,
                       member_id,
-                      Teiserver.SpringTcpServer._blank_user(member_id)
+                      SpringTcpServer._blank_user(member_id)
                     )
               }
 

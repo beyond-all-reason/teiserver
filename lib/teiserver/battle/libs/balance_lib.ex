@@ -64,10 +64,10 @@ defmodule Teiserver.Battle.BalanceLib do
   def get_allowed_algorithms(is_moderator) do
     result =
       if(is_moderator) do
-        Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.keys()
+        algorithm_modules() |> Map.keys()
       else
         mod_only = ["force_party", "brute_force"]
-        Teiserver.Battle.BalanceLib.algorithm_modules() |> Map.drop(mod_only) |> Map.keys()
+        algorithm_modules() |> Map.drop(mod_only) |> Map.keys()
       end
 
     ["default" | result]

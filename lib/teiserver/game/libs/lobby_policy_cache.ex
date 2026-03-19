@@ -4,12 +4,13 @@ defmodule Teiserver.Data.LobbyPolicyCache do
   """
 
   use Supervisor
+  alias Teiserver.Game
   alias Teiserver.Helpers.CacheHelper
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts) do
       Teiserver.cache_put(:lists, :lobby_policies, [])
-      Teiserver.Game.pre_cache_policies()
+      Game.pre_cache_policies()
       {:ok, sup}
     end
   end

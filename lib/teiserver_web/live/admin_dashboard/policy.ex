@@ -4,6 +4,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
   alias Phoenix.LiveView.Socket
   alias Phoenix.PubSub
   alias Teiserver
+  alias Teiserver.Admin.AdminLib
   alias Teiserver.Game
   # alias Teiserver.Account.AccoladeLib
   # alias Teiserver.Data.Matchmaking
@@ -20,7 +21,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> add_breadcrumb(name: "Policy #{id}", url: "/admin/dashboard/policy/#{id}")
       |> assign(:site_menu_active, "admin")
-      |> assign(:view_colour, Teiserver.Admin.AdminLib.colours())
+      |> assign(:view_colour, AdminLib.colours())
       |> get_policy_bots()
 
     :timer.send_interval(5_000, :tick)

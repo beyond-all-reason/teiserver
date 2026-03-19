@@ -1,6 +1,8 @@
 defmodule TeiserverWeb.Admin.ChatView do
   use TeiserverWeb, :view
 
-  def view_colour, do: Teiserver.Chat.LobbyMessageLib.colours()
-  def icon, do: Teiserver.Chat.LobbyMessageLib.icon()
+  alias Teiserver.Chat.LobbyMessageLib
+
+  def view_colour, do: LobbyMessageLib.colours()
+  def icon, do: LobbyMessageLib.icon()
 end

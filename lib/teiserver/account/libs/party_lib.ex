@@ -9,13 +9,13 @@ defmodule Teiserver.Account.Party do
 end
 
 defmodule Teiserver.Account.PartyLib do
-  # alias Phoenix.PubSub
-  alias Teiserver.Account
-  alias Teiserver.Chat
-  alias Teiserver.CacheUser
-  alias Teiserver.Account.Party
-  alias Teiserver.Data.Types, as: T
+  alias ExULID.ULID
   alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.Party
+  alias Teiserver.CacheUser
+  alias Teiserver.Chat
+  alias Teiserver.Data.Types, as: T
 
   @spec colours() :: atom
   def colours, do: :primary2
@@ -74,7 +74,7 @@ defmodule Teiserver.Account.PartyLib do
 
   def create_party(leader_id) do
     party = %Party{
-      id: ExULID.ULID.generate(),
+      id: ULID.generate(),
       leader: leader_id,
       members: [leader_id],
       pending_invites: []

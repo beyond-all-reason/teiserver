@@ -1,10 +1,12 @@
 defmodule TeiserverWeb.Communication.ChatLive.Room do
   @moduledoc false
   use TeiserverWeb, :live_view
+  alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Chat
   alias Teiserver.Chat.RoomMessage
-  alias Phoenix.PubSub
+  alias Teiserver.Chat.RoomMessageLib
+  alias Teiserver.Room
 
   @message_count 25
 
@@ -16,7 +18,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
     socket =
       socket
       |> assign(:site_menu_active, "communication")
-      |> assign(:view_colour, Chat.RoomMessageLib.colours())
+      |> assign(:view_colour, RoomMessageLib.colours())
       |> assign(:usernames, %{})
       |> assign(:last_poster_id, nil)
       |> assign(:message_changeset, nil)
@@ -116,7 +118,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
         })
 
       true ->
-        Teiserver.Room.send_message(current_user.id, room_name, content)
+        Room.send_message(current_user.id, room_name, content)
         :ok
     end
 

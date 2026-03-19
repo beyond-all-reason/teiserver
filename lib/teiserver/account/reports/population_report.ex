@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.PopulationReport do
+  alias Ecto.Adapters.SQL
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
 
@@ -126,7 +127,7 @@ defmodule Teiserver.Account.PopulationReport do
     ORDER BY count DESC;
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, []) do
+    case SQL.query(Repo, query, []) do
       {:ok, results} ->
         results.rows
 

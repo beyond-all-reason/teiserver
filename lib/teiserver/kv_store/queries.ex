@@ -1,6 +1,7 @@
 defmodule Teiserver.KvStore.Queries do
   use TeiserverWeb, :queries
 
+  alias Ecto.Changeset
   alias Teiserver.KvStore.Blob
 
   @spec put(store :: String.t(), key :: String.t(), value :: binary()) ::
@@ -36,7 +37,7 @@ defmodule Teiserver.KvStore.Queries do
       vals
       |> Enum.reduce({[], []}, fn attrs, {oks, errs} ->
         attrs = attrs |> Map.put(:inserted_at, now) |> Map.put(:updated_at, now)
-        cs = Blob.changeset(%Blob{}, attrs) |> Ecto.Changeset.apply_action(:insert)
+        cs = Blob.changeset(%Blob{}, attrs) |> Changeset.apply_action(:insert)
 
         case cs do
           {:ok, struct} -> {[Map.from_struct(struct) |> Map.delete(:__meta__) | oks], errs}

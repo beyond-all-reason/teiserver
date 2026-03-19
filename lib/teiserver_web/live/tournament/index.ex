@@ -4,8 +4,9 @@ defmodule TeiserverWeb.TournamentLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.Battle
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Battle
   alias Teiserver.Lobby
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
@@ -19,7 +20,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
 
     can_join =
-      Teiserver.Account.Auth.has_any_role?(socket.assigns[:current_user].id, [
+      Auth.has_any_role?(socket.assigns[:current_user].id, [
         "Moderator",
         "Caster",
         "TourneyPlayer",

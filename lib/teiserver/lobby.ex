@@ -5,10 +5,12 @@ defmodule Teiserver.Lobby do
 
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias ExULID.ULID
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Battle
+  alias Teiserver.Battle.LobbyThrottle
   alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Coordinator
@@ -17,6 +19,7 @@ defmodule Teiserver.Lobby do
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.LobbyIdServer
   alias Teiserver.Telemetry
+  alias Teiserver.Throttles
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-dungeon"
@@ -132,9 +135,9 @@ defmodule Teiserver.Lobby do
 
   @spec start_battle_lobby_throttle(T.lobby_id()) :: pid()
   def start_battle_lobby_throttle(battle_lobby_id) do
-    Teiserver.Throttles.start_throttle(
+    Throttles.start_throttle(
       battle_lobby_id,
-      Teiserver.Battle.LobbyThrottle,
+      LobbyThrottle,
       "battle_lobby_throttle_#{battle_lobby_id}"
     )
   end
@@ -149,7 +152,7 @@ defmodule Teiserver.Lobby do
         {:battle_lobby_throttle, :closed}
       )
 
-    Teiserver.Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
+    Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
     :ok
   end
 
@@ -828,7 +831,7 @@ defmodule Teiserver.Lobby do
 
   @spec new_script_password() :: String.t()
   def new_script_password() do
-    ExULID.ULID.generate()
+    ULID.generate()
     |> Base.encode32(padding: false)
   end
 end
