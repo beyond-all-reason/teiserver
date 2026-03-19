@@ -1,21 +1,24 @@
 defmodule TeiserverWeb.Communication.ChatLive.Room do
   @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Chat}
-  alias Teiserver.Chat.RoomMessage
   alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Chat
+  alias Teiserver.Chat.RoomMessage
+  alias Teiserver.Chat.RoomMessageLib
+  alias Teiserver.Room
 
   @message_count 25
 
   @flood_protect_window_size 5
   @flood_protect_message_count 5
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       socket
       |> assign(:site_menu_active, "communication")
-      |> assign(:view_colour, Chat.RoomMessageLib.colours())
+      |> assign(:view_colour, RoomMessageLib.colours())
       |> assign(:usernames, %{})
       |> assign(:last_poster_id, nil)
       |> assign(:message_changeset, nil)
@@ -26,7 +29,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(%{"room_name" => room_name}, _url, socket) do
     socket =
       socket
@@ -45,7 +48,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(%{channel: "room_chat"} = event, socket) do
     user = Account.get_user_by_id(event.user_id)
 
@@ -66,7 +69,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
      |> assign(:message_changeset, new_message_changeset())}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("load_more", _params, socket) do
     messages =
       Chat.list_room_messages(
@@ -115,7 +118,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
         })
 
       true ->
-        Teiserver.Room.send_message(current_user.id, room_name, content)
+        Room.send_message(current_user.id, room_name, content)
         :ok
     end
 

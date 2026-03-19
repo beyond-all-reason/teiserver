@@ -1,14 +1,16 @@
 defmodule TeiserverWeb.Moderation.OverwatchLive.User do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Moderation}
+  alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportLib
 
-  @impl true
+  import Teiserver.Moderation, only: [colour: 0]
+
+  @impl Phoenix.LiveView
   def mount(params, _session, socket) do
     socket =
       socket
       |> assign(:site_menu_active, "moderation")
-      |> assign(:view_colour, Teiserver.Moderation.colour())
+      |> assign(:view_colour, colour())
       |> assign(:outstanding_report_groups, 0)
       |> assign(:report_groups, nil)
       |> assign(:actions, nil)
@@ -28,7 +30,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.User do
     {:ok, socket}
   end
 
-  # @impl true
+  # @impl Phoenix.LiveView
   # def handle_params(params, _url, socket) do
   #   {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   # end
@@ -37,7 +39,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.User do
   #   socket
   # end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]

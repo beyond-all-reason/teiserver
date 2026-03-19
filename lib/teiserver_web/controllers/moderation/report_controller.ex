@@ -2,14 +2,19 @@ defmodule TeiserverWeb.Moderation.ReportController do
   @moduledoc false
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Moderation, Account}
+  alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.CodeOfConductData
   alias Teiserver.Account.UserLib
-  alias Teiserver.Moderation.{Report, ReportLib, Response}
+  alias Teiserver.Moderation
+  alias Teiserver.Moderation.Report
+  alias Teiserver.Moderation.ReportLib
+  alias Teiserver.Moderation.Response
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Moderation.Report,
+    policy: Report,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {AuthLib, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "moderation",
@@ -192,8 +197,8 @@ defmodule TeiserverWeb.Moderation.ReportController do
     stats = Account.get_user_stat_data(user.id)
 
     conn
-    |> assign(:restrictions_lists, Teiserver.Account.UserLib.list_restrictions())
-    |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
+    |> assign(:restrictions_lists, UserLib.list_restrictions())
+    |> assign(:coc_lookup, CodeOfConductData.flat_data())
     |> assign(:user, user)
     |> assign(:reports_made, reports_made)
     |> assign(:reports_against, reports_against)

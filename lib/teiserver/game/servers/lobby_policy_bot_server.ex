@@ -3,17 +3,25 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   The LobbyPolicyBots are the accounts present in each managed lobby and involved in managing that lobby specifically
   """
 
-  alias Phoenix.PubSub
-  alias Teiserver.{Game, CacheUser, Client, Battle, Account, Lobby, Coordinator, Telemetry}
-  alias Teiserver.Lobby.{ChatLib}
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Data.Types, as: T
   use GenServer
   require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
+  alias Teiserver.Coordinator
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Game
+  alias Teiserver.Lobby
+  alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Telemetry
 
   @tick_interval 10_000
 
-  @impl true
+  @impl GenServer
   def handle_info(
         %{channel: "lobby_policy_internal:" <> _, event: :request_status_update},
         %{lobby_id: nil} = state
@@ -283,7 +291,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   defp handle_user_chat(senderid, "Lobby policy bot claiming the room", state) do
     sender = Account.get_user_by_id(senderid)
 
-    if CacheUser.is_bot?(sender) and CacheUser.is_moderator?(sender) do
+    if Auth.is_bot?(sender) and Auth.is_moderator?(sender) do
       if state.userid > senderid do
         send_dm(state, senderid, "I am senior, leave the lobby")
       else
@@ -417,7 +425,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     # making sure there's no issue we just leave the lobby anyway
     sender = Account.get_user_by_id(senderid)
 
-    if CacheUser.is_bot?(sender) and CacheUser.is_moderator?(sender) do
+    if Auth.is_bot?(sender) and Auth.is_moderator?(sender) do
       send(self(), :leave_lobby)
     end
 
@@ -425,7 +433,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp handle_direct_message(senderid, "$leave", state) do
-    if CacheUser.is_moderator?(senderid) do
+    if Auth.is_moderator?(senderid) do
       send(self(), :leave_lobby)
     end
 
@@ -433,7 +441,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   defp handle_direct_message(senderid, "$quit", state) do
-    if CacheUser.is_moderator?(senderid) do
+    if Auth.is_moderator?(senderid) do
       Client.disconnect(state.userid, "Bot disconnect")
     end
 
@@ -530,7 +538,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(data) do
     id = data.lobby_policy.id

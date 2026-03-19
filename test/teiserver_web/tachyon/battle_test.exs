@@ -1,12 +1,16 @@
 defmodule TeiserverWeb.Tachyon.BattleTest do
-  alias Teiserver.BotFixtures
   use TeiserverWeb.ConnCase
-  alias Teiserver.Support.{Polling, Tachyon}
+  alias Teiserver.BotFixtures
   alias Teiserver.OAuthFixtures
   alias Teiserver.TachyonBattle
+  alias Teiserver.Support.Polling
+  alias Teiserver.Support.Tachyon
+  alias Central.Helpers.GeneralTestLib
+  alias TachyonBattle.Battle
+  alias Teiserver.Autohost
 
   defp setup_app(_context) do
-    owner = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    owner = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
     app =
       OAuthFixtures.app_attrs(owner.id)
@@ -22,10 +26,10 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
   # but tests some internals of the Battle process
   # Not sure about a better way though
   test "battle timeout", %{autohost: autohost, autohost_client: autohost_client} do
-    Polling.poll_until_some(&Teiserver.Autohost.find_autohost/0)
+    Polling.poll_until_some(&Autohost.find_autohost/0)
 
     assert {:ok, pid} =
-             TachyonBattle.Battle.start(%{
+             Battle.start(%{
                battle_id: "whatever",
                match_id: 123,
                autohost_id: autohost.id,
@@ -34,17 +38,17 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
              })
 
     Tachyon.disconnect!(autohost_client)
-    Polling.poll_until(&Teiserver.Autohost.find_autohost/0, &is_nil/1)
+    Polling.poll_until(&Autohost.find_autohost/0, &is_nil/1)
     Polling.poll_until(fn -> Process.alive?(pid) end, &(&1 == false))
   end
 
   test "stop battle", %{autohost: autohost, autohost_client: autohost_client} do
-    Polling.poll_until_some(&Teiserver.Autohost.find_autohost/0)
+    Polling.poll_until_some(&Autohost.find_autohost/0)
     battle_id = "whatever"
     start_script = BotFixtures.start_script()
 
     assert {:ok, _pid} =
-             TachyonBattle.Battle.start(%{
+             Battle.start(%{
                battle_id: battle_id,
                match_id: 123,
                autohost_id: autohost.id,
@@ -56,7 +60,7 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
 
     start_task =
       Task.async(fn ->
-        Teiserver.Autohost.start_battle(autohost.id, battle_id, pid, start_script)
+        Autohost.start_battle(autohost.id, battle_id, pid, start_script)
       end)
 
     %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(autohost_client)

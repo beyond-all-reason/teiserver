@@ -2,10 +2,11 @@ defmodule TeiserverWeb.Account.GeneralControllerTest do
   use TeiserverWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())
+    |> TeiserverTestLib.conn_setup()
   end
 
   @tag :needs_attention

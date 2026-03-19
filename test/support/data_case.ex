@@ -16,12 +16,20 @@ defmodule Teiserver.DataCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL.Sandbox
+  alias Ecto.Changeset
+  alias Teiserver.Account.LoginThrottleServer
+  alias Teiserver.Support.Tachyon
+
   using do
     quote do
+      alias Ecto.Adapters.SQL.Sandbox
+      alias Ecto.Changeset
+      alias Teiserver.Account.LoginThrottleServer
       alias Teiserver.Repo
+      alias Teiserver.Support.Tachyon
 
-      import Ecto
-      import Ecto.Changeset
+      import Changeset
       import Ecto.Query
       import Teiserver.DataCase
     end
@@ -31,16 +39,16 @@ defmodule Teiserver.DataCase do
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
-    Teiserver.Account.LoginThrottleServer.set_tick_period(:infinity)
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Teiserver.Repo, shared: not tags[:async])
-    allow = Process.whereis(Teiserver.Account.LoginThrottleServer)
-    Ecto.Adapters.SQL.Sandbox.allow(Teiserver.Repo, self(), allow)
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    LoginThrottleServer.set_tick_period(:infinity)
+    pid = Sandbox.start_owner!(Teiserver.Repo, shared: not tags[:async])
+    allow = Process.whereis(LoginThrottleServer)
+    Sandbox.allow(Teiserver.Repo, self(), allow)
+    on_exit(fn -> Sandbox.stop_owner(pid) end)
   end
 
   setup tags do
     setup_sandbox(tags)
-    Teiserver.Support.Tachyon.tachyon_case_setup(tags)
+    Tachyon.tachyon_case_setup(tags)
     :ok
   end
 
@@ -53,7 +61,7 @@ defmodule Teiserver.DataCase do
 
   """
   def errors_on(changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
+    Changeset.traverse_errors(changeset, fn {message, opts} ->
       Regex.replace(~r"%{(\w+)}", message, fn _, key ->
         opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
       end)

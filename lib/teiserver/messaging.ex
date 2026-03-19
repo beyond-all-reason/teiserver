@@ -1,5 +1,7 @@
 defmodule Teiserver.Messaging do
   alias Teiserver.Messaging.Message
+  alias Teiserver.Party
+  alias Teiserver.Player.Session
 
   @type message :: Message.t()
   @type entity :: Message.entity()
@@ -9,10 +11,10 @@ defmodule Teiserver.Messaging do
 
   @spec send(message(), entity()) :: :ok | {:error, :invalid_recipient}
   def send(message, {:player, player_id}),
-    do: Teiserver.Player.Session.send_dm(player_id, message)
+    do: Session.send_dm(player_id, message)
 
   def send(message, {:party, party_id, player_id}),
-    do: Teiserver.Party.send_message(party_id, player_id, message)
+    do: Party.send_message(party_id, player_id, message)
 
   def send(_, _), do: {:error, :invalid_recipient}
 end

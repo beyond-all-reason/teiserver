@@ -1,7 +1,9 @@
 defmodule Teiserver.Helper.TimexHelper do
   @moduledoc false
 
-  alias Timex.{Timezone, Timezone.Local}
+  alias Timex.Duration
+  alias Timex.Timezone
+  alias Timex.Timezone.Local
 
   # Was finding that in April it moved the time up an hour
   # every time I saved, turns out the issue was it was stored
@@ -140,15 +142,15 @@ defmodule Teiserver.Helper.TimexHelper do
   def time_until(the_time, now) do
     the_duration = Timex.diff(now, the_time, :duration)
     is_past = Timex.compare(now, the_time) == 1
-    days = Timex.Duration.to_days(the_duration)
+    days = Duration.to_days(the_duration)
 
     # We need to do this as we need days rounded off in the correct
     # direction to get the number of hours left
     hours =
       if is_past do
-        Timex.Duration.to_hours(the_duration) - Float.floor(days) * 24
+        Duration.to_hours(the_duration) - Float.floor(days) * 24
       else
-        Timex.Duration.to_hours(the_duration) - Float.ceil(days) * 24
+        Duration.to_hours(the_duration) - Float.ceil(days) * 24
       end
 
     days = abs(days)

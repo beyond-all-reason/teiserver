@@ -1,9 +1,11 @@
 defmodule Teiserver.Matchmaking.QueueTest do
   use Teiserver.DataCase
+  alias Teiserver.AssetFixtures
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueServer
-  alias Teiserver.AssetFixtures
   alias Teiserver.Support.Polling
+  alias Central.Helpers.GeneralTestLib
+  alias Matchmaking.QueueRegistry
 
   @moduletag :tachyon
 
@@ -16,7 +18,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
     }
 
   setup _context do
-    user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     id = UUID.uuid4()
 
     map = AssetFixtures.create_map(stg_attr(id))
@@ -73,7 +75,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
       queue_pid: queue_pid,
       version: version
     } do
-      user2 = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+      user2 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user2.id)
       send(queue_pid, :tick)
@@ -145,7 +147,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
     end
 
     test "tracks party joins", %{queue_id: queue_id, version: version} do
-      user1 = Central.Helpers.GeneralTestLib.make_user()
+      user1 = GeneralTestLib.make_user()
       party_id = UUID.uuid4()
 
       # Create a party with 1 player (valid for team_size: 1 queue)
@@ -174,8 +176,8 @@ defmodule Teiserver.Matchmaking.QueueTest do
     end
 
     test "tracks wait time when matches are created", %{queue_id: queue_id, version: version} do
-      user1 = Central.Helpers.GeneralTestLib.make_user()
-      user2 = Central.Helpers.GeneralTestLib.make_user()
+      user1 = GeneralTestLib.make_user()
+      user2 = GeneralTestLib.make_user()
 
       # Join first user
       {:ok, _pid} = Matchmaking.join_queue(queue_id, version, user1.id)
@@ -194,7 +196,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
 
       # Trigger the tick with a specific time for testing
       now = DateTime.utc_now()
-      queue_pid = Matchmaking.QueueRegistry.lookup(queue_id)
+      queue_pid = QueueRegistry.lookup(queue_id)
       send(queue_pid, {:tick, now})
 
       # Check that wait time was recorded

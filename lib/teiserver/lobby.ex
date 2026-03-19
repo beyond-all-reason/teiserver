@@ -3,12 +3,23 @@ defmodule Teiserver.Lobby do
   For handling the in-memory instances of lobbies
   """
 
-  alias Phoenix.PubSub
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.{Account, CacheUser, Client, Battle, Coordinator, LobbyIdServer, Telemetry}
+  alias ExULID.ULID
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Battle
+  alias Teiserver.Battle.LobbyThrottle
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
+  alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Lobby.{ChatLib, LobbyLib}
+  alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Lobby.LobbyLib
+  alias Teiserver.LobbyIdServer
+  alias Teiserver.Telemetry
+  alias Teiserver.Throttles
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-dungeon"
@@ -124,9 +135,9 @@ defmodule Teiserver.Lobby do
 
   @spec start_battle_lobby_throttle(T.lobby_id()) :: pid()
   def start_battle_lobby_throttle(battle_lobby_id) do
-    Teiserver.Throttles.start_throttle(
+    Throttles.start_throttle(
       battle_lobby_id,
-      Teiserver.Battle.LobbyThrottle,
+      LobbyThrottle,
       "battle_lobby_throttle_#{battle_lobby_id}"
     )
   end
@@ -141,7 +152,7 @@ defmodule Teiserver.Lobby do
         {:battle_lobby_throttle, :closed}
       )
 
-    Teiserver.Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
+    Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
     :ok
   end
 
@@ -319,7 +330,7 @@ defmodule Teiserver.Lobby do
   def kick_user_from_battle(userid, lobby_id) do
     user = Account.get_user_by_id(userid)
 
-    if CacheUser.is_moderator?(user) do
+    if Auth.is_moderator?(user) do
       :ok
     else
       case do_remove_user_from_lobby(userid, lobby_id) do
@@ -565,14 +576,14 @@ defmodule Teiserver.Lobby do
 
     ignore_password =
       Enum.any?([
-        CacheUser.is_moderator?(user),
+        Auth.is_moderator?(user),
         Enum.member?(user.roles, "Caster"),
         consul_reason in [:override_approve, :allow_friends]
       ])
 
     ignore_locked =
       Enum.any?([
-        CacheUser.is_moderator?(user),
+        Auth.is_moderator?(user),
         Enum.member?(user.roles, "Caster"),
         consul_reason == :override_approve
       ])
@@ -719,7 +730,7 @@ defmodule Teiserver.Lobby do
       bot == nil ->
         false
 
-      CacheUser.is_moderator?(changer.userid) == true ->
+      Auth.is_moderator?(changer.userid) == true ->
         true
 
       lobby.founder_id == changer.userid ->
@@ -764,7 +775,7 @@ defmodule Teiserver.Lobby do
       )
 
     cond do
-      CacheUser.is_moderator?(changer.userid) == true ->
+      Auth.is_moderator?(changer.userid) == true ->
         true
 
       # Basic stuff
@@ -807,7 +818,7 @@ defmodule Teiserver.Lobby do
       lobby.founder_id == userid ->
         true
 
-      CacheUser.is_moderator?(userid) ->
+      Auth.is_moderator?(userid) ->
         true
 
       lobby.silence ->
@@ -820,7 +831,7 @@ defmodule Teiserver.Lobby do
 
   @spec new_script_password() :: String.t()
   def new_script_password() do
-    ExULID.ULID.generate()
+    ULID.generate()
     |> Base.encode32(padding: false)
   end
 end

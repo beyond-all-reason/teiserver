@@ -19,7 +19,7 @@ defmodule Teiserver.Autohost.SessionSupervisor do
     DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
-  @impl true
+  @impl DynamicSupervisor
   def init(_) do
     DynamicSupervisor.init(strategy: :one_for_one)
   end

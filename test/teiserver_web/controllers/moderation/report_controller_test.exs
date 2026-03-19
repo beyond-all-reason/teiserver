@@ -5,12 +5,13 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
   alias Teiserver.Moderation.ModerationTestLib
 
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   @moduletag :needs_attention
 
   setup do
     GeneralTestLib.conn_setup(["Reviewer", "Moderator"])
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    |> TeiserverTestLib.conn_setup()
   end
 
   describe "index" do

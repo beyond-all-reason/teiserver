@@ -1,12 +1,11 @@
 defmodule TeiserverWeb.Account.PartyLive.Index do
   use TeiserverWeb, :live_view
-  alias Phoenix.PubSub
   require Logger
-
+  alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.PartyLib
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(params, session, socket) do
     socket =
       socket
@@ -44,7 +43,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket |> redirect(to: ~p"/")}
   end
@@ -53,7 +52,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(%{channel: "teiserver_party:" <> party_id, event: :closed}, socket) do
     :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 
@@ -128,7 +127,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("invite:accept", %{"party_id" => party_id}, socket) do
     PartyLib.call_party(party_id, {:accept_invite, socket.assigns.current_user.id})
     :timer.sleep(100)

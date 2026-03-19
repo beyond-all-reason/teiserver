@@ -4,10 +4,17 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   """
 
   use Nostrum.Consumer
-  alias Teiserver.{Room, Moderation, Communication}
-  alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands, CommandLib}
-  alias Teiserver.{Config}
+  alias Teiserver.Room
+  alias Teiserver.Moderation
+  alias Teiserver.Communication
+  alias Teiserver.Bridge.BridgeServer
+  alias Teiserver.Bridge.MessageCommands
+  alias Teiserver.Bridge.ChatCommands
+  alias Teiserver.Bridge.CommandLib
+  alias Teiserver.Config
   alias Nostrum.Api
+  alias Nostrum.Api.ApplicationCommand
+  alias Nostrum.Api.Thread
   require Logger
 
   @emoticon_map %{
@@ -193,7 +200,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       nsfw: false
     }
 
-    Api.ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
+    ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
   end
 
   # Teiserver.Bridge.DiscordBridgeBot.add_command(:textcb)
@@ -228,7 +235,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       nsfw: false
     }
 
-    Api.ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
+    ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
   end
 
   # Meant to be used manually
@@ -241,8 +248,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       description: "About to be deleted"
     }
 
-    {:ok, %{id: cmd_id}} = Api.ApplicationCommand.create_guild_command(guild_id, command)
-    Api.ApplicationCommand.delete_guild_command(guild_id, cmd_id)
+    {:ok, %{id: cmd_id}} = ApplicationCommand.create_guild_command(guild_id, command)
+    ApplicationCommand.delete_guild_command(guild_id, cmd_id)
   end
 
   @spec get_text_to_emoticon_map() :: map()
@@ -453,7 +460,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     name = ""
     content = ""
 
-    Nostrum.Api.Thread.create(channel_id, %{
+    Thread.create(channel_id, %{
       name: name,
       message: %{
         content: content

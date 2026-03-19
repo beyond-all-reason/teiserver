@@ -7,15 +7,15 @@ defmodule Teiserver.Party.Server do
 
   require Logger
 
-  alias Teiserver.Party
-  alias Teiserver.Player
+  alias Teiserver.Config
+  alias Teiserver.KvStore
   alias Teiserver.Matchmaking
   alias Teiserver.Messaging
+  alias Teiserver.Party
+  alias Teiserver.Player
   alias Teiserver.Tachyon
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
-
-  alias Teiserver.Data.Types, as: T
 
   @type id :: String.t()
   @type state :: %{
@@ -299,7 +299,7 @@ defmodule Teiserver.Party.Server do
     invited = Map.get(data.invited, user_id)
     member = Map.get(data.members, user_id)
 
-    max_size = Teiserver.Config.get_site_config_cache(max_size_key())
+    max_size = Config.get_site_config_cache(max_size_key())
 
     cond do
       invited != nil || member != nil ->
@@ -309,7 +309,7 @@ defmodule Teiserver.Party.Server do
         {:keep_state, data, [{:reply, from, {:error, :party_at_capacity}}]}
 
       true ->
-        valid_duration = Teiserver.Config.get_site_config_cache(invite_valid_duration_key())
+        valid_duration = Config.get_site_config_cache(invite_valid_duration_key())
         valid_until = DateTime.add(DateTime.utc_now(), valid_duration, :second)
         tref = :timer.send_after(valid_duration * 1000, {:invite_timeout, user_id})
 
@@ -626,7 +626,7 @@ defmodule Teiserver.Party.Server do
           end)
           |> :erlang.term_to_binary()
 
-        Teiserver.KvStore.put("party", data.id, to_save)
+        KvStore.put("party", data.id, to_save)
 
       true ->
         nil

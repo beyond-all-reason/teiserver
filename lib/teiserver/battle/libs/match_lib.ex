@@ -1,8 +1,11 @@
 defmodule Teiserver.Battle.MatchLib do
   @moduledoc false
   use TeiserverWeb, :library
-  alias Teiserver.{Config, Battle, Account}
-  alias Teiserver.Battle.{Match, MatchMembership}
+  alias Teiserver.Config
+  alias Teiserver.Battle
+  alias Teiserver.Account
+  alias Teiserver.Battle.Match
+  alias Teiserver.Battle.MatchMembership
   alias Teiserver.Data.Types, as: T
   require Logger
 
@@ -176,7 +179,7 @@ defmodule Teiserver.Battle.MatchLib do
       # credo:disable-for-next-line Credo.Check.Design.TagTODO
       # TODO: Make this colour/icon based on type of match
       item_colour: StylingHelper.colours(colours()) |> elem(0),
-      item_icon: Teiserver.Battle.MatchLib.icon(),
+      item_icon: icon(),
       item_label: make_match_name(match),
       url: "/battle/#{match.id}"
     }

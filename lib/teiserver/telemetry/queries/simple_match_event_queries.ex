@@ -1,6 +1,7 @@
 defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
   @moduledoc false
   use TeiserverWeb, :queries
+  alias Ecto.Adapters.SQL
   alias Teiserver.Telemetry.SimpleMatchEvent
 
   # Queries
@@ -130,7 +131,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
       GROUP BY match_id
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, [event_type_id, start_datetime, end_datetime]) do
+    case SQL.query(Repo, query, [event_type_id, start_datetime, end_datetime]) do
       {:ok, results} ->
         results.rows
         |> Map.new(fn [key, value] ->
@@ -153,7 +154,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
       GROUP BY user_id
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, [event_type_id, start_datetime, end_datetime]) do
+    case SQL.query(Repo, query, [event_type_id, start_datetime, end_datetime]) do
       {:ok, results} ->
         results.rows
         |> Map.new(fn [key, value] ->

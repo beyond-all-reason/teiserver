@@ -4,9 +4,12 @@ defmodule TeiserverWeb.General.Home.IndexLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
+
   defp auth_setup(_) do
-    Central.Helpers.GeneralTestLib.conn_setup()
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup()
+    |> TeiserverTestLib.conn_setup()
   end
 
   describe "Visit index without authentication" do

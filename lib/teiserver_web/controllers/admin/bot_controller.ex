@@ -5,8 +5,14 @@ defmodule TeiserverWeb.Admin.BotController do
 
   use TeiserverWeb, :controller
 
-  alias Teiserver.{Bot, BotQueries, OAuth}
-  alias Teiserver.OAuth.{ApplicationQueries, CredentialQueries}
+  alias Plug.Conn
+  alias Teiserver.Account.AuthLib
+  alias Teiserver.Bot
+  alias Teiserver.Bot.Bot, as: BotSchema
+  alias Teiserver.BotQueries
+  alias Teiserver.OAuth
+  alias Teiserver.OAuth.ApplicationQueries
+  alias Teiserver.OAuth.CredentialQueries
 
   plug Bodyguard.Plug.Authorize,
     # The policy should be Admin or something fairly high. But while we're
@@ -14,12 +20,12 @@ defmodule TeiserverWeb.Admin.BotController do
     # contributors
     policy: Teiserver.Staff,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {AuthLib, :current_user}
 
   plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
   plug :add_breadcrumb, name: "Bots", url: "/teiserver/admin/bot"
 
-  @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  @spec index(Conn.t(), map()) :: Conn.t()
   def index(conn, _params) do
     bots = BotQueries.list_bots()
     cred_counts = CredentialQueries.count_per_bots(Enum.map(bots, fn a -> a.id end))
@@ -28,19 +34,19 @@ defmodule TeiserverWeb.Admin.BotController do
     |> render("index.html", bots: bots, cred_counts: cred_counts)
   end
 
-  @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  @spec new(Conn.t(), map()) :: Conn.t()
   def new(conn, _params) do
-    changeset = Bot.change_bot(%Bot.Bot{})
+    changeset = Bot.change_bot(%BotSchema{})
 
     conn
     |> assign(:page_title, "")
     |> render("new.html", changeset: changeset)
   end
 
-  @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  @spec create(Conn.t(), map()) :: Conn.t()
   def create(conn, %{"bot" => attrs}) do
     case Bot.create_bot(attrs) do
-      {:ok, %Bot.Bot{} = bot} ->
+      {:ok, %BotSchema{} = bot} ->
         conn
         |> put_flash(:info, "Bot created")
         |> redirect(to: ~p"/teiserver/admin/bot/#{bot.id}")
@@ -58,12 +64,12 @@ defmodule TeiserverWeb.Admin.BotController do
       conn
       |> put_status(400)
       |> assign(:page_title, "BAR - new bot")
-      |> render("new.html", changeset: Bot.Bot.changeset(%Bot.Bot{}, %{}))
+      |> render("new.html", changeset: BotSchema.changeset(%BotSchema{}, %{}))
 
-  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  @spec show(Conn.t(), map()) :: Conn.t()
   def show(conn, assigns) do
     case Bot.get_by_id(Map.get(assigns, "id")) do
-      %Bot.Bot{} = bot ->
+      %BotSchema{} = bot ->
         render_show(conn, bot)
 
       nil ->
@@ -73,10 +79,10 @@ defmodule TeiserverWeb.Admin.BotController do
     end
   end
 
-  @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  @spec edit(Conn.t(), map()) :: Conn.t()
   def edit(conn, assigns) do
     case Bot.get_by_id(Map.get(assigns, "id")) do
-      %Bot.Bot{} = bot ->
+      %BotSchema{} = bot ->
         changeset = Bot.change_bot(bot)
 
         conn
@@ -90,10 +96,10 @@ defmodule TeiserverWeb.Admin.BotController do
     end
   end
 
-  @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  @spec update(Conn.t(), map()) :: Conn.t()
   def update(conn, %{"bot" => params} = assigns) do
     case Bot.get_by_id(Map.get(assigns, "id")) do
-      %Bot.Bot{} = bot ->
+      %BotSchema{} = bot ->
         case Bot.update_bot(bot, params) do
           {:ok, bot} ->
             conn
@@ -119,10 +125,10 @@ defmodule TeiserverWeb.Admin.BotController do
     |> render("not_found.html")
   end
 
-  @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  @spec delete(Conn.t(), map()) :: Conn.t()
   def delete(conn, assigns) do
     case Bot.get_by_id(Map.get(assigns, "id")) do
-      %Bot.Bot{} = bot ->
+      %BotSchema{} = bot ->
         case Bot.delete(bot) do
           :ok ->
             conn
@@ -142,7 +148,7 @@ defmodule TeiserverWeb.Admin.BotController do
     end
   end
 
-  @spec create_credential(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  @spec create_credential(Conn.t(), map()) :: Conn.t()
   def create_credential(conn, assigns) do
     with bot when not is_nil(bot) <- Bot.get_by_id(Map.get(assigns, "id")),
          app when not is_nil(app) <-
@@ -154,7 +160,7 @@ defmodule TeiserverWeb.Admin.BotController do
         {:ok, _cred} ->
           conn
           |> put_flash(:info, "credential created")
-          |> Plug.Conn.put_resp_cookie("client_secret", secret, sign: true, max_age: 60)
+          |> Conn.put_resp_cookie("client_secret", secret, sign: true, max_age: 60)
           |> redirect(to: ~p"/teiserver/admin/bot/#{bot.id}")
 
         {:error, err} ->
@@ -170,7 +176,7 @@ defmodule TeiserverWeb.Admin.BotController do
     end
   end
 
-  @spec delete_credential(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  @spec delete_credential(Conn.t(), map()) :: Conn.t()
   def delete_credential(conn, assigns) do
     with bot when not is_nil(bot) <- Bot.get_by_id(Map.get(assigns, "id")),
          cred when not is_nil(cred) <-
@@ -204,12 +210,12 @@ defmodule TeiserverWeb.Admin.BotController do
   defp render_show(conn, bot) do
     applications = ApplicationQueries.list_applications()
     credentials = CredentialQueries.for_bot(bot)
-    cookies = Plug.Conn.fetch_cookies(conn, signed: ["client_secret"]).cookies
+    cookies = Conn.fetch_cookies(conn, signed: ["client_secret"]).cookies
     client_secret = Map.get(cookies, "client_secret")
 
     conn
     |> assign(:page_title, "BAR - bot #{bot.name}")
-    |> Plug.Conn.delete_resp_cookie("client_secret", sign: true)
+    |> Conn.delete_resp_cookie("client_secret", sign: true)
     |> render("show.html",
       bot: bot,
       applications: applications,

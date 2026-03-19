@@ -8,7 +8,8 @@ defmodule Teiserver.Tachyon.Transport do
   @behaviour WebSock
   require Logger
   alias Teiserver.Helpers.BurstyRateLimiter
-  alias Teiserver.Tachyon.{Schema, Handler}
+  alias Teiserver.Tachyon.Schema
+  alias Teiserver.Tachyon.Handler
 
   @type connection_state() :: %{
           handler: term(),
@@ -17,7 +18,7 @@ defmodule Teiserver.Tachyon.Transport do
           pending_responses: Handler.pending_responses()
         }
 
-  @impl true
+  @impl WebSock
   def init(state) do
     # this is inside the process that maintain the connection
     schedule_ping()
@@ -81,7 +82,7 @@ defmodule Teiserver.Tachyon.Transport do
   end
 
   # dummy handle_in for now
-  @impl true
+  @impl WebSock
   def handle_in({"test_ping\n", opcode: :text}, state) do
     # this is handy during manual test to ensure the connection is still alive
     {:reply, :ok, {:text, "test_pong"}, state}
@@ -114,7 +115,7 @@ defmodule Teiserver.Tachyon.Transport do
     {:stop, :normal, 1003, state}
   end
 
-  @impl true
+  @impl WebSock
   def handle_info(:send_ping, state) do
     schedule_ping()
     {:push, {:ping, <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>}, state}
@@ -166,7 +167,7 @@ defmodule Teiserver.Tachyon.Transport do
     handle_result(state.handler.handle_info(msg, state.handler_state), state)
   end
 
-  @impl true
+  @impl WebSock
   def terminate(reason, state) do
     case reason do
       :normal ->

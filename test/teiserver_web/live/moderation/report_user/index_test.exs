@@ -4,7 +4,8 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{Moderation, TeiserverTestLib}
+  alias Teiserver.Moderation
+  alias Teiserver.TeiserverTestLib
 
   defp auth_setup(_) do
     GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())

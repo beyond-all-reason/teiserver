@@ -1,30 +1,34 @@
 defmodule Teiserver.HookServer do
   use GenServer
   alias Phoenix.PubSub
+  alias Teiserver.Bridge.DiscordBridgeBot
+  alias Teiserver.CacheUser
+  alias Teiserver.Communication
+  alias Teiserver.Moderation.RefreshUserRestrictionsTask
   require Logger
 
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, nil, opts)
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(%{channel: "global_moderation"} = data, state) do
     case data.event do
       :new_report ->
-        if Teiserver.Communication.use_discord?() do
-          Teiserver.Bridge.DiscordBridgeBot.new_report(data.report)
+        if Communication.use_discord?() do
+          DiscordBridgeBot.new_report(data.report)
         end
 
       :updated_report ->
-        if Teiserver.Communication.use_discord?() do
-          Teiserver.Bridge.DiscordBridgeBot.update_report(data.report)
+        if Communication.use_discord?() do
+          DiscordBridgeBot.update_report(data.report)
         end
 
       :new_action ->
-        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
+        RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
 
       :updated_action ->
-        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
+        RefreshUserRestrictionsTask.refresh_user(data.action.target_id)
 
       :new_response ->
         :ok
@@ -63,10 +67,10 @@ defmodule Teiserver.HookServer do
         nil
 
       :create_user ->
-        Teiserver.CacheUser.recache_user(payload.id)
+        CacheUser.recache_user(payload.id)
 
       :update_user ->
-        Teiserver.CacheUser.recache_user(payload.id)
+        CacheUser.recache_user(payload.id)
 
       :create_report ->
         :ok
@@ -109,7 +113,7 @@ defmodule Teiserver.HookServer do
     {:noreply, state}
   end
 
-  @impl true
+  @impl GenServer
   @spec init(any) :: {:ok, %{}}
   def init(_) do
     if Application.get_env(:teiserver, Teiserver)[:enable_hooks] do

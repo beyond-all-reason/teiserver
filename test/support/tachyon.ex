@@ -2,44 +2,53 @@ defmodule Teiserver.Support.Tachyon do
   alias WebsocketSyncClient, as: WSC
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Polling
+  alias Central.Helpers.GeneralTestLib
+  alias ExUnit.Callbacks
+  alias Teiserver.Account
+  alias Teiserver.Autohost
+  alias Teiserver.BotFixtures
+  alias Teiserver.Game
+  alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Tachyon
+  alias Teiserver.Tachyon.Schema
 
   def tachyon_case_setup(tags) do
     if String.contains?(to_string(tags[:module]), "Tachyon") || tags[:tachyon] do
-      Teiserver.Tachyon.disable_state_restoration()
-      Teiserver.Tachyon.restart_system()
+      Tachyon.disable_state_restoration()
+      Tachyon.restart_system()
 
       # this reduces the noise when processes attempt to do sql when the test
       # and the sandbox with it are already wound down
-      ExUnit.Callbacks.on_exit(fn ->
-        Supervisor.terminate_child(Teiserver.Supervisor, Teiserver.Tachyon.System)
+      Callbacks.on_exit(fn ->
+        Supervisor.terminate_child(Teiserver.Supervisor, Tachyon.System)
       end)
     end
   end
 
   def create_user() do
-    user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     set_ratings(user, 17)
     user
   end
 
-  @spec set_rating(Teiserver.Account.User.t(), rating_type :: String.t(), number() | map()) ::
-          Teiserver.Account.Rating.t()
+  @spec set_rating(Account.User.t(), rating_type :: String.t(), number() | map()) ::
+          Account.Rating.t()
   def set_rating(user, rating_type, r) do
-    rating = Teiserver.Game.get_rating_type_by_name!(rating_type)
+    rating = Game.get_rating_type_by_name!(rating_type)
     [r] = set_ratings(user, [{rating, r}])
     r
   end
 
   @spec set_ratings(
-          Teiserver.Account.User.t(),
-          rating :: number() | [{Teiserver.Game.RatingType.t(), number() | map()}]
-        ) :: [Teiserver.Account.Rating.t()]
+          Account.User.t(),
+          rating :: number() | [{Game.RatingType.t(), number() | map()}]
+        ) :: [Account.Rating.t()]
   @doc """
   Set rating for all game type for this user
   """
   def set_ratings(user, r) when is_number(r) do
     ratings =
-      Teiserver.Game.list_rating_types()
+      Game.list_rating_types()
       |> Enum.map(fn rating -> {rating, r} end)
 
     set_ratings(user, ratings)
@@ -61,12 +70,12 @@ defmodule Teiserver.Support.Tachyon do
             uncertainty: 1.0,
             leaderboard_rating: 10,
             last_updated: DateTime.utc_now(),
-            season: Teiserver.Game.MatchRatingLib.active_season()
+            season: MatchRatingLib.active_season()
           },
           attrs
         )
 
-      {:ok, r} = Teiserver.Account.create_or_update_rating(attrs)
+      {:ok, r} = Account.create_or_update_rating(attrs)
       r
     end
   end
@@ -81,7 +90,7 @@ defmodule Teiserver.Support.Tachyon do
 
   # for when you only need an oauth app
   def setup_app(_context) do
-    owner = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+    owner = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
     app =
       OAuthFixtures.app_attrs(owner.id)
@@ -92,7 +101,7 @@ defmodule Teiserver.Support.Tachyon do
   end
 
   def setup_autohost(context) do
-    autohost = Teiserver.BotFixtures.create_bot()
+    autohost = BotFixtures.create_bot()
 
     token =
       OAuthFixtures.token_attrs(nil, context.app)
@@ -101,7 +110,7 @@ defmodule Teiserver.Support.Tachyon do
       |> OAuthFixtures.create_token()
 
     client = connect_autohost!(token, 10, 0)
-    ExUnit.Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
+    Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
     {:ok, autohost: autohost, autohost_client: client}
   end
 
@@ -124,7 +133,7 @@ defmodule Teiserver.Support.Tachyon do
       {:ok, _user_updated} = recv_message(client)
     end
 
-    ExUnit.Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
+    Callbacks.on_exit(fn -> cleanup_connection(client, token) end)
     client
   end
 
@@ -158,7 +167,7 @@ defmodule Teiserver.Support.Tachyon do
     :ok = send_response(client, request, data: %{})
 
     Polling.poll_until_true(fn ->
-      case Teiserver.Autohost.lookup_autohost(token.bot_id) do
+      case Autohost.lookup_autohost(token.bot_id) do
         nil -> false
         {_, val} -> val.max_battles == max_battles && val.current_battles == current
       end
@@ -258,8 +267,8 @@ defmodule Teiserver.Support.Tachyon do
       {:ok, {:text, resp}} ->
         with decoded <- Jason.decode!(resp),
              {:ok, cmd_id, message_type, _msg_id} <-
-               Teiserver.Tachyon.Schema.parse_envelope(decoded),
-             :ok <- Teiserver.Tachyon.Schema.parse_message(cmd_id, message_type, decoded) do
+               Schema.parse_envelope(decoded),
+             :ok <- Schema.parse_message(cmd_id, message_type, decoded) do
           {:ok, decoded}
         else
           {:error, %JsonXema.ValidationError{} = err} ->

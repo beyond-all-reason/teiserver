@@ -1,11 +1,13 @@
 defmodule TeiserverWeb.ClientLive.Show do
   use TeiserverWeb, :live_view
-  alias Phoenix.PubSub
   require Logger
-
-  alias Teiserver.{Account, Client, CacheUser, Battle}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
   alias Teiserver.Account.UserLib
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
 
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;
@@ -15,7 +17,7 @@ defmodule TeiserverWeb.ClientLive.Show do
     </a>
   """
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, session, socket) do
     socket =
       socket
@@ -42,7 +44,7 @@ defmodule TeiserverWeb.ClientLive.Show do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(%{"id" => id}, _opts, socket) do
     case allow?(socket.assigns[:current_user], "Moderator") do
       true ->
@@ -85,7 +87,7 @@ defmodule TeiserverWeb.ClientLive.Show do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info({:updated_client, new_client, _reason}, socket) do
     if new_client.userid == socket.assigns.id do
       new_client = Account.get_client_by_id(new_client.userid)
@@ -147,7 +149,7 @@ defmodule TeiserverWeb.ClientLive.Show do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("enable-server-message-logging", _event, socket) do
     Client.enable_server_message_print(socket.assigns.id)
 

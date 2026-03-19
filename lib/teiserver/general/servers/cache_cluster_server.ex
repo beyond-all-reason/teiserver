@@ -11,7 +11,7 @@ defmodule Teiserver.General.CacheClusterServer do
     GenServer.start_link(__MODULE__, nil, opts)
   end
 
-  @impl true
+  @impl GenServer
   def handle_info({:cluster_hooks, :insert_new, from_node, table, key, value}, state) do
     if from_node != Node.self() do
       ConCache.insert_new(table, key, value)
@@ -47,7 +47,7 @@ defmodule Teiserver.General.CacheClusterServer do
     {:noreply, state}
   end
 
-  @impl true
+  @impl GenServer
   @spec init(any) :: {:ok, %{}}
   def init(_) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "cluster_hooks")

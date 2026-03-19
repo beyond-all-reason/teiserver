@@ -1,13 +1,16 @@
 defmodule TeiserverWeb.Communication.ChatLive.Index do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Coordinator, Chat}
+  alias Teiserver.Account
+  alias Teiserver.Chat
+  alias Teiserver.Chat.LobbyMessageLib
+  alias Teiserver.Coordinator
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       socket
       |> assign(:site_menu_active, "chat")
-      |> assign(:view_colour, Teiserver.Chat.LobbyMessageLib.colours())
+      |> assign(:view_colour, LobbyMessageLib.colours())
       |> assign(:messages, [])
       |> assign(:usernames, %{})
       |> add_breadcrumb(name: "Chat", url: "/chat")
@@ -17,7 +20,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
     {:ok, socket}
   end
 
-  # @impl true
+  # @impl Phoenix.LiveView
   # def handle_params(%{"tab" => tab} = params, _url, socket) do
   #   socket = socket
   #     |> assign(:tab, tab)
@@ -37,7 +40,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
   #   socket
   # end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]

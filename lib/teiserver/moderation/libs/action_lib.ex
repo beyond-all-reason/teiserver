@@ -1,7 +1,8 @@
 defmodule Teiserver.Moderation.ActionLib do
   @moduledoc false
   use TeiserverWeb, :library
-  alias Teiserver.{Communication, Moderation}
+  alias Teiserver.Communication
+  alias Teiserver.Moderation
   alias Teiserver.Moderation.Action
   alias Teiserver.Helper.TimexHelper
 
@@ -217,7 +218,7 @@ defmodule Teiserver.Moderation.ActionLib do
       if Ecto.assoc_loaded?(action.target) do
         action
       else
-        Teiserver.Moderation.get_action(action.id,
+        Moderation.get_action(action.id,
           preload: [:target]
         )
       end

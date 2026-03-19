@@ -2,8 +2,11 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   @moduledoc false
   use TeiserverWeb, :library
   alias Teiserver.Config
-  alias Teiserver.{Game, Account}
-  alias Teiserver.Game.{LobbyPolicy, LobbyPolicyOrganiserServer, LobbyPolicyBotServer}
+  alias Teiserver.Game
+  alias Teiserver.Account
+  alias Teiserver.Game.LobbyPolicy
+  alias Teiserver.Game.LobbyPolicyOrganiserServer
+  alias Teiserver.Game.LobbyPolicyBotServer
   alias Teiserver.Data.Types, as: T
   require Logger
 
@@ -149,6 +152,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
               icon: "fa-solid fa-solar-system",
               colour: "#0000AA",
               password: Account.make_bot_password(),
+              roles: ["Bot", "Verified", "Moderator"],
               data: %{
                 bot: true,
                 moderator: true,

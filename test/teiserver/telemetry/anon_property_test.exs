@@ -1,15 +1,17 @@
 defmodule Teiserver.Telemetry.AnonPropertyTest do
   @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Telemetry}
+  alias Teiserver.Telemetry
+  alias Ecto.Adapters.SQL
+  alias ExULID.ULID
 
   test "anon properties" do
     r = :rand.uniform(999_999_999)
-    hash = ExULID.ULID.generate()
+    hash = ULID.generate()
 
     # Start by removing all anon properties
     query = "DELETE FROM telemetry_anon_properties;"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    SQL.query(Repo, query, [])
 
     assert Telemetry.list_anon_properties() |> Enum.count() == 0
 

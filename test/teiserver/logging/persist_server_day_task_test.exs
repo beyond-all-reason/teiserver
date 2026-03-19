@@ -1,7 +1,9 @@
 defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
   @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Logging, Account, CacheUser}
+  alias Teiserver.Logging
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
   alias Teiserver.Logging.Tasks.PersistServerDayTask
 
   test "perform task" do

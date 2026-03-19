@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Account.SetupController do
         |> redirect(to: "/")
 
       true ->
-        users = Teiserver.Account.list_users(search: [email: "root@localhost"])
+        users = Account.list_users(search: [email: "root@localhost"])
 
         if users == [] do
           {:ok, _user} =

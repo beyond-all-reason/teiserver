@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Blog.Blog.ShowLiveTest do
   import Phoenix.LiveViewTest
   import Teiserver.MicroblogFixtures
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{TeiserverTestLib}
+  alias Teiserver.TeiserverTestLib
 
   defp auth(_) do
     GeneralTestLib.conn_setup()

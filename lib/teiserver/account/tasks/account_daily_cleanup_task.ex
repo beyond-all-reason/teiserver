@@ -11,7 +11,7 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
     _id_list =
       Account.list_users(
         search: [
-          verified: false,
+          not_has_role: "Verified",
           inserted_before: Timex.shift(Timex.now(), days: -days)
         ],
         select: [:id],

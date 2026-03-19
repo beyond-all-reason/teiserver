@@ -1,8 +1,9 @@
 defmodule Teiserver.Account.RelationshipReport do
   @moduledoc false
-  alias Teiserver.Repo
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Ecto.Adapters.SQL
   alias Teiserver.Account.RelationshipLib
+  alias Teiserver.Repo
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-arrow-down-up-across-line"
@@ -67,7 +68,7 @@ defmodule Teiserver.Account.RelationshipReport do
     """
 
     results =
-      case Ecto.Adapters.SQL.query(Repo, query, [start_date, limit]) do
+      case SQL.query(Repo, query, [start_date, limit]) do
         {:ok, results} ->
           results.rows
 

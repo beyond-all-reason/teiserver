@@ -1,20 +1,27 @@
 defmodule TeiserverWeb.Battle.MatchLive.Show do
   @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle, Game, Telemetry}
-  alias Teiserver.Battle.{MatchLib, BalanceLib}
-  alias Teiserver.Helper.NumberHelper
-  alias Teiserver.Config
+  alias Openskill.Util
+  alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Battle
+  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.MatchLib
+  alias Teiserver.Config
+  alias Teiserver.Game
+  alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.NumberHelper
+  alias Teiserver.Helper.StylingHelper
+  alias Teiserver.Telemetry
   import Central.Helpers.ComponentHelper
   import Teiserver.Helper.ColourHelper
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       socket
       |> assign(:site_menu_active, "match")
-      |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
+      |> assign(:view_colour, MatchLib.colours())
       |> assign(:tab, "details")
       |> assign(
         :algorithm_options,
@@ -26,7 +33,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(%{"id" => id} = params, _url, socket) do
     socket =
       socket
@@ -67,7 +74,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     |> assign(:page_title, "#{match_name} - Balance")
   end
 
-  # @impl true
+  # @impl Phoenix.LiveView
   # def handle_event("tab-select", %{"tab" => tab}, socket) do
   #   {:noreply, assign(socket, :tab, tab)}
   # end
@@ -131,7 +138,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         |> Map.drop([nil])
         |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
         |> Map.keys()
-        |> Enum.zip(Teiserver.Helper.StylingHelper.bright_hex_colour_list())
+        |> Enum.zip(StylingHelper.bright_hex_colour_list())
         |> Enum.zip(~w(dice-one dice-two dice-three dice-four dice-five dice-six))
         |> Enum.map(fn {{party_id, colour}, idx} ->
           {party_id, {colour, idx}}
@@ -307,7 +314,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           end)
 
         team_ratings =
-          Openskill.Util.team_rating(simple_rating_logs)
+          Util.team_rating(simple_rating_logs)
 
         skill_text_values =
           Enum.map(team_ratings, fn {skill, _sigma_sq, _extra1, _extra2} ->
@@ -415,7 +422,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   defp get_match_rating_status(match) do
     # Expecting to return an error explaining current match rating status
     # Unprocessed matches and matches with existing rating logs won't be rated again
-    {_, rating_status} = Teiserver.Game.MatchRatingLib.rate_match(match)
+    {_, rating_status} = MatchRatingLib.rate_match(match)
 
     case rating_status do
       :invalid_game_type ->
@@ -453,7 +460,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   @doc """
   Handles the dropdown for algorithm changing
   """
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("update-algorithm", event, socket) do
     [key] = event["_target"]
     value = event[key]

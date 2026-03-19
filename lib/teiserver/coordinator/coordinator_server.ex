@@ -4,11 +4,23 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   performing their actions in the name of the coordinator
   """
   use GenServer
-  alias Teiserver.Config
-  alias Teiserver.{Account, CacheUser, Clans, Room, Coordinator, Client, Moderation, Telemetry}
-  alias Teiserver.Lobby
-  alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
+
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Clans
+  alias Teiserver.Client
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
+  alias Teiserver.Moderation
+  alias Teiserver.Room
+  alias Teiserver.Telemetry
+
+  alias Teiserver.Account.Auth
+  alias Teiserver.Account.RecacheUserStatsTask
+  alias Teiserver.Coordinator.CoordinatorCommands
+  alias Teiserver.Coordinator.Parser
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
   require Logger
 
@@ -22,12 +34,12 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:update_client, new_client}, state) do
     {:noreply, %{state | client: new_client}}
   end
@@ -36,7 +48,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Coordinator main server")
     account = get_coordinator_account()
@@ -116,7 +128,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   def handle_info({:direct_message, sender_id, "$" <> command}, state) do
-    cmd = Coordinator.Parser.parse_command(sender_id, "$#{command}")
+    cmd = Parser.parse_command(sender_id, "$#{command}")
     new_state = CoordinatorCommands.handle_command(cmd, state)
 
     {:noreply, new_state}
@@ -161,7 +173,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         user = CacheUser.get_user_by_id(userid)
         Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
 
-        if not CacheUser.is_bot?(user) do
+        if not Auth.is_bot?(user) do
           CacheUser.send_direct_message(
             state.userid,
             userid,
@@ -197,7 +209,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   def handle_info(%{channel: "client_inout", event: :disconnect, userid: userid}, state) do
-    Teiserver.Account.RecacheUserStatsTask.disconnected(userid)
+    RecacheUserStatsTask.disconnected(userid)
 
     {:noreply, state}
   end
@@ -354,7 +366,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     end
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     Horde.Registry.register(

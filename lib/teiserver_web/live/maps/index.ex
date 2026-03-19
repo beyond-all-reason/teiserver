@@ -2,7 +2,7 @@ defmodule TeiserverWeb.MapsLive.Index do
   use TeiserverWeb, :live_view
   alias Teiserver.Asset
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       socket
@@ -18,7 +18,7 @@ defmodule TeiserverWeb.MapsLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     queue = params["queue"] || "all"
 
@@ -30,7 +30,7 @@ defmodule TeiserverWeb.MapsLive.Index do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-by-queue", %{"queue" => queue}, socket) do
     {:noreply, push_patch(socket, to: ~p"/maps?queue=#{queue}")}
   end

@@ -1,8 +1,10 @@
 defmodule TeiserverWeb.Logging.PageViewLogView do
   use TeiserverWeb, :view
 
-  def view_colour(), do: Teiserver.Logging.PageViewLogLib.colours()
-  def icon(), do: Teiserver.Logging.PageViewLogLib.icon()
+  alias Teiserver.Logging.PageViewLogLib
+
+  def view_colour(), do: PageViewLogLib.colours()
+  def icon(), do: PageViewLogLib.icon()
 
   def convert_load_time(load_time) do
     round(load_time / 10) / 100

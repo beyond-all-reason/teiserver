@@ -1,9 +1,11 @@
 defmodule TeiserverWeb.Telemetry.SimpleLobbyEventView do
   use TeiserverWeb, :view
 
+  alias Teiserver.Telemetry.SimpleLobbyEventLib
+
   @spec view_colour :: atom
-  def view_colour(), do: Teiserver.Telemetry.SimpleLobbyEventLib.colour()
+  def view_colour(), do: SimpleLobbyEventLib.colour()
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Telemetry.SimpleLobbyEventLib.icon()
+  def icon(), do: SimpleLobbyEventLib.icon()
 end

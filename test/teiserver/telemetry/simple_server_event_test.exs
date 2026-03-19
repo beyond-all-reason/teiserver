@@ -1,8 +1,9 @@
 defmodule Teiserver.Telemetry.SimpleServerEventTest do
   @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Telemetry}
+  alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
+  alias Ecto.Adapters.SQL
 
   # https://github.com/beyond-all-reason/teiserver/actions/runs/20708759718/job/59444391469
   @tag :needs_attention
@@ -11,7 +12,7 @@ defmodule Teiserver.Telemetry.SimpleServerEventTest do
 
     # Start by removing all server events
     query = "DELETE FROM telemetry_simple_server_events;"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    SQL.query(Repo, query, [])
 
     user = TeiserverTestLib.new_user("simple_server_event_user")
     assert Telemetry.list_simple_server_events() |> Enum.count() == 0

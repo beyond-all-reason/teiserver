@@ -1,8 +1,10 @@
 defmodule Teiserver.Communication.DiscordChannelLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
+  alias Nostrum.Api.User, as: NostrumUser
   alias Teiserver.Account
-  alias Teiserver.Communication.{DiscordChannel, DiscordChannelQueries}
+  alias Teiserver.Communication.DiscordChannel
+  alias Teiserver.Communication.DiscordChannelQueries
   alias Teiserver.Data.Types, as: T
 
   @spec special_channels() :: [String.t()]
@@ -262,7 +264,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
           new_discord_message(user.discord_dm_channel_id, message)
 
         user.discord_id != nil ->
-          case Nostrum.Api.User.create_dm(user.discord_id) do
+          case NostrumUser.create_dm(user.discord_id) do
             {:ok, %{id: channel_id}} ->
               Account.update_cache_user(user.id, %{discord_dm_channel_id: channel_id})
               new_discord_message(channel_id, message)

@@ -4,11 +4,14 @@ defmodule TeiserverWeb.TournamentLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.{Battle, Account, Lobby}
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Battle
+  alias Teiserver.Lobby
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, session, socket) do
     socket =
       socket
@@ -17,7 +20,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
     client = Account.get_client_by_id(socket.assigns[:current_user].id)
 
     can_join =
-      Teiserver.CacheUser.has_any_role?(socket.assigns[:current_user].id, [
+      Auth.has_any_role?(socket.assigns[:current_user].id, [
         "Moderator",
         "Caster",
         "TourneyPlayer",
@@ -36,7 +39,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket |> redirect(to: ~p"/")}
   end
@@ -45,7 +48,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(
         %{
           channel: "teiserver_liveview_lobby_index_updates",
@@ -73,7 +76,7 @@ defmodule TeiserverWeb.TournamentLive.Index do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("join", _, %{assigns: %{client: nil}} = socket) do
     {:noreply, socket}
   end

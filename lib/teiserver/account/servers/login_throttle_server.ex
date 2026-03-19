@@ -6,7 +6,9 @@ defmodule Teiserver.Account.LoginThrottleServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Account, CacheUser, Config}
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
 
@@ -25,12 +27,12 @@ defmodule Teiserver.Account.LoginThrottleServer do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  @impl true
+  @impl GenServer
   @spec init(term()) :: {:ok, state()}
   def init(_args) do
     Logger.metadata(actor_id: "LoginThrottleServer")
     {:ok, timer_ref} = :timer.send_interval(@default_tick_period, :tick)
-    default_rate = Teiserver.Config.get_site_config_cache("system.Login rate")
+    default_rate = Config.get_site_config_cache("system.Login rate")
     rate_limiter = BurstyRateLimiter.per_second(default_rate) |> BurstyRateLimiter.set_empty()
 
     state = %{
@@ -105,7 +107,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     Supervisor.restart_child(Teiserver.Supervisor, __MODULE__)
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:queue_size, _from, state) do
     result = :queue.len(state.queue)
     {:reply, result, state}
@@ -141,7 +143,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     {:reply, :ok, %{state | total_limit: limit}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:tick, state) do
     capacity = get_capacity(state.total_limit)
 
@@ -162,7 +164,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     {:noreply, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:set_tick_period, new_period}, state) do
     if state.tick_timer_ref do
       :timer.cancel(state.tick_timer_ref)
@@ -228,7 +230,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     user = Account.get_user_by_id(userid)
     bypass_roles = ["Bot", "Contributor", "VIP", "BAR+"]
 
-    if CacheUser.has_any_role?(user, bypass_roles) do
+    if Auth.has_any_role?(user, bypass_roles) do
       :instant
     else
       :standard

@@ -83,7 +83,7 @@ defmodule TeiserverWeb.API.PublicController do
   end
 
   defp leaderboard_ratings(season, activity_time) do
-    rating_type_lookup = Teiserver.Game.MatchRatingLib.rating_type_name_lookup()
+    rating_type_lookup = MatchRatingLib.rating_type_name_lookup()
 
     @rating_types
     |> Enum.map(fn rating_type ->

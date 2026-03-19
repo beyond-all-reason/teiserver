@@ -1,16 +1,19 @@
 defmodule TeiserverWeb.Battle.MatchLive.Index do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Battle}
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Battle.MatchLib
+  alias TeiserverWeb.Parsers.PaginationParams
   import TeiserverWeb.PaginationComponents, only: [pagination: 1, build_pagination_url: 4]
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
-    game_types = ["Any type" | Teiserver.Battle.MatchLib.list_game_types()]
+    game_types = ["Any type" | MatchLib.list_game_types()]
 
     socket =
       socket
       |> assign(:site_menu_active, "match")
-      |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
+      |> assign(:view_colour, MatchLib.colours())
       |> assign(:game_types, game_types)
       |> add_breadcrumb(name: "Matches", url: "/battle")
       |> default_filters()
@@ -23,9 +26,9 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
-    parsed = TeiserverWeb.Parsers.PaginationParams.parse_params(params)
+    parsed = PaginationParams.parse_params(params)
 
     # Update filters from URL params
     updated_filters =
@@ -44,7 +47,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]

@@ -3,13 +3,20 @@ defmodule Teiserver.Bridge.BridgeServer do
   The server used to read events from Teiserver and then use the DiscordBridgeBot to send onwards
   """
   use GenServer
-  alias Teiserver.{Account, Room, CacheUser}
-  alias Teiserver.Chat.WordLib
-  alias Phoenix.PubSub
-  alias Teiserver.Config
   require Logger
+  alias Nostrum.Api.Channel
+  alias Nostrum.Api.Message
+  alias Nostrum.Api.Thread
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Bridge.DiscordBridgeBot
+  alias Teiserver.CacheUser
+  alias Teiserver.Chat.WordLib
+  alias Teiserver.Communication
+  alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
-  alias Nostrum.Api
+  alias Teiserver.Room
 
   def bot_name(), do: "DiscordBridgeBot"
 
@@ -49,11 +56,11 @@ defmodule Teiserver.Bridge.BridgeServer do
       nil
     else
       channel_id = user.discord_dm_channel_id || user.discord_dm_channel
-      Api.Message.create(channel_id, message)
+      Message.create(channel_id, message)
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
   end
@@ -62,7 +69,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:reply, state.room_lookup[channel_id], state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:update_client, new_client}, state) do
     {:noreply, %{state | client: new_client}}
   end
@@ -76,7 +83,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:noreply, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:begin, _state) do
     state =
       if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
@@ -178,7 +185,7 @@ defmodule Teiserver.Bridge.BridgeServer do
           end
 
         # If they are a bot they're only allowed to post to the promotion channel
-        if CacheUser.is_bot?(user) do
+        if Auth.is_bot?(user) do
           if room_name == "promote" do
             forward_to_discord(from_id, state.channel_lookup[room_name], message, state)
           end
@@ -220,14 +227,14 @@ defmodule Teiserver.Bridge.BridgeServer do
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #main")
 
       if channel_id do
-        Api.Message.create(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
+        Message.create(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
       end
 
       # Server
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
 
       if channel_id do
-        Api.Message.create(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
+        Message.create(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
       end
     end
 
@@ -239,7 +246,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
 
       if channel_id do
-        Api.Message.create(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
+        Message.create(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
       end
     end
 
@@ -251,7 +258,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   # pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
   # send(pid, :gdt_check)
   def handle_info(:gdt_check, state) do
-    Api.Thread.list(Application.get_env(:teiserver, DiscordBridgeBot)[:guild_id])
+    Thread.list(Application.get_env(:teiserver, DiscordBridgeBot)[:guild_id])
 
     # Api.list_joined_private_archived_threads(channel_id)
     # When a thread in 👇｜game-design-team has gone 48 hours without any new messages:
@@ -390,11 +397,11 @@ defmodule Teiserver.Bridge.BridgeServer do
       message
       |> convert_emoticons()
 
-    Api.Message.create(channel, "**#{author}**: #{new_message}")
+    Message.create(channel, "**#{author}**: #{new_message}")
   end
 
   defp convert_emoticons(message) do
-    emoticon_map = Teiserver.Bridge.DiscordBridgeBot.get_text_to_emoticon_map()
+    emoticon_map = DiscordBridgeBot.get_text_to_emoticon_map()
 
     message
     |> String.replace(Map.keys(emoticon_map), fn text -> emoticon_map[text] end)
@@ -423,7 +430,6 @@ defmodule Teiserver.Bridge.BridgeServer do
             data: %{
               bot: true,
               moderator: false,
-              verified: true,
               lobby_client: "Teiserver Internal Process"
             }
           })
@@ -446,7 +452,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   def change_channel_name(0, _), do: false
 
   def change_channel_name(channel_id, new_name) do
-    Api.Channel.modify(channel_id, %{
+    Channel.modify(channel_id, %{
       name: new_name
     })
 
@@ -474,10 +480,10 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   defp message_starts_with?(message, text), do: String.starts_with?(message, text)
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
-    if Teiserver.Communication.use_discord?() do
+    if Communication.use_discord?() do
       send(self(), :begin)
     end
 

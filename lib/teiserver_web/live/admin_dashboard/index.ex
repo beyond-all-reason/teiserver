@@ -4,7 +4,13 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.{Battle, Coordinator, Game}
+  alias Teiserver.Admin.AdminLib
+  alias Teiserver.Battle
+  alias Teiserver.Battle.MatchMonitorServer
+  alias Teiserver.Bridge.BridgeServer
+  alias Teiserver.Coordinator
+  alias Teiserver.Coordinator.AutomodServer
+  alias Teiserver.Game
   alias Teiserver.Account.AccoladeLib
 
   @empty_telemetry_data %{
@@ -20,7 +26,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     total_clients_connected: 0
   }
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, session, socket) do
     telemetry_data =
       Teiserver.cache_get(:application_temp_cache, :telemetry_data) || @empty_telemetry_data
@@ -31,7 +37,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> assign(:site_menu_active, "admin")
-      |> assign(:view_colour, Teiserver.Admin.AdminLib.colours())
+      |> assign(:view_colour, AdminLib.colours())
       |> assign(:telemetry_client, telemetry_data.client)
       |> assign(:telemetry_battle, telemetry_data.battle)
       |> assign(:total_connected_clients, telemetry_data.total_clients_connected)
@@ -44,7 +50,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     case allow?(socket.assigns[:current_user], "Moderator") do
       true ->
@@ -57,7 +63,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(:tick, socket) do
     {:noreply,
      socket
@@ -75,7 +81,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
      |> assign(:total_connected_clients, data.total_clients_connected)}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("check-consuls", _event, socket) do
     Coordinator.start_all_consuls()
     {:noreply, socket}
@@ -160,9 +166,9 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       {"Lobby ID server", lobby_id_server_pid},
       {"Coordinator", Coordinator.get_coordinator_pid()},
       {"Accolades", AccoladeLib.get_accolade_bot_pid()},
-      {"Match Monitor", Teiserver.Battle.MatchMonitorServer.get_match_monitor_pid()},
-      {"Automod", Teiserver.Coordinator.AutomodServer.get_automod_pid()},
-      {"Discord Bridge Bot", Teiserver.Bridge.BridgeServer.get_bridge_pid()}
+      {"Match Monitor", MatchMonitorServer.get_match_monitor_pid()},
+      {"Automod", AutomodServer.get_automod_pid()},
+      {"Discord Bridge Bot", BridgeServer.get_bridge_pid()}
     ]
 
     socket

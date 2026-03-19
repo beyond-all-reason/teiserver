@@ -1,6 +1,7 @@
 defmodule Teiserver.Logging.GraphMinuteLogsTask do
   @moduledoc false
-  alias Teiserver.Helper.{NumberHelper, TimexHelper}
+  alias Teiserver.Helper.NumberHelper
+  alias Teiserver.Helper.TimexHelper
 
   @spec perform_players(list, non_neg_integer()) :: list()
   def perform_players(logs, chunk_size) do

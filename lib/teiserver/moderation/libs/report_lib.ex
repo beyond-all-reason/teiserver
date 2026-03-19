@@ -1,6 +1,8 @@
 defmodule Teiserver.Moderation.ReportLib do
   @moduledoc false
   use TeiserverWeb, :library
+  alias Teiserver.Battle.MatchLib
+  alias Teiserver.Chat.LobbyMessageLib
   alias Teiserver.Moderation.Report
 
   # Functions
@@ -28,8 +30,8 @@ defmodule Teiserver.Moderation.ReportLib do
 
   def types() do
     [
-      {"Chat / Communication", "chat", Teiserver.Chat.LobbyMessageLib.icon()},
-      {"In game actions", "actions", Teiserver.Battle.MatchLib.icon()}
+      {"Chat / Communication", "chat", LobbyMessageLib.icon()},
+      {"In game actions", "actions", MatchLib.icon()}
     ]
   end
 
@@ -52,8 +54,8 @@ defmodule Teiserver.Moderation.ReportLib do
 
   def sections() do
     [
-      {"Chat / Communication", "chat", Teiserver.Chat.LobbyMessageLib.icon()},
-      {"In game actions", "actions", Teiserver.Battle.MatchLib.icon()}
+      {"Chat / Communication", "chat", LobbyMessageLib.icon()},
+      {"In game actions", "actions", MatchLib.icon()}
     ]
   end
 

@@ -13,6 +13,8 @@ defmodule Teiserver.Battle.Balance.BruteForce do
   """
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Battle.Balance.BruteForceTypes, as: BF
+  alias Teiserver.Battle.Balance.LoserPicks
+  alias Teiserver.Helpers.Combi
   import Teiserver.Helper.NumberHelper, only: [format: 1]
   require Integer
 
@@ -40,7 +42,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
       {:error, message} ->
         # Call another balancer
-        result = Teiserver.Battle.Balance.LoserPicks.perform(expanded_group, team_count, opts)
+        result = LoserPicks.perform(expanded_group, team_count, opts)
 
         new_logs =
           ["#{message} Will use another balance algorithm instead.", @splitter, result.logs]
@@ -100,7 +102,7 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec potential_teams(integer()) :: [integer()]
   def potential_teams(num_players) do
-    Teiserver.Helpers.Combi.get_single_teams(num_players)
+    Combi.get_single_teams(num_players)
   end
 
   def get_best_combo(players, parties) do
@@ -132,21 +134,21 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   @spec get_st_dev([BF.player()]) :: any()
   def get_st_dev(team) do
-    if length(team) > 0 do
+    if Enum.empty?(team) do
+      0
+    else
       ratings = Enum.map(team, fn player -> player.rating end)
       Statistics.stdev(ratings)
-    else
-      0
     end
   end
 
   @spec get_captain_rating([BF.player()]) :: any()
   def get_captain_rating(team) do
-    if length(team) > 0 do
+    if Enum.empty?(team) do
+      0
+    else
       captain = Enum.max_by(team, fn player -> player.rating end, &>=/2)
       captain.rating
-    else
-      0
     end
   end
 

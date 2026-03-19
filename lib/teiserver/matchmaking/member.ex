@@ -14,6 +14,7 @@ defmodule Teiserver.Matchmaking.Member do
 
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Game
 
   @typedoc """
   Aggregated player ratings for this member.
@@ -58,7 +59,7 @@ defmodule Teiserver.Matchmaking.Member do
     default = BalanceLib.default_rating()
     default = %{skill: default.rating_value, uncertainty: default.uncertainty}
 
-    case Enum.find(Teiserver.Game.get_ratings_for_users(player_ids), &(&1.name == game_type)) do
+    case Enum.find(Game.get_ratings_for_users(player_ids), &(&1.name == game_type)) do
       nil ->
         default
 

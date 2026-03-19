@@ -1,15 +1,17 @@
 defmodule Teiserver.Telemetry.SimpleAnonEventTest do
   @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Telemetry}
+  alias Teiserver.Telemetry
+  alias Ecto.Adapters.SQL
+  alias ExULID.ULID
 
   test "simple anon events" do
     r = :rand.uniform(999_999_999)
-    hash = ExULID.ULID.generate()
+    hash = ULID.generate()
 
     # Start by removing all anon events
     query = "DELETE FROM telemetry_simple_anon_events;"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    SQL.query(Repo, query, [])
 
     assert Telemetry.list_simple_anon_events() |> Enum.count() == 0
 

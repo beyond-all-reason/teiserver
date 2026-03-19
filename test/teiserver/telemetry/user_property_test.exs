@@ -1,15 +1,16 @@
 defmodule Teiserver.Telemetry.UserPropertyTest do
   @moduledoc false
   use Teiserver.DataCase
-  alias Teiserver.{Telemetry}
+  alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
+  alias Ecto.Adapters.SQL
 
   test "user properties" do
     r = :rand.uniform(999_999_999)
 
     # Start by removing all user properties
     query = "DELETE FROM telemetry_user_properties;"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    SQL.query(Repo, query, [])
 
     user = TeiserverTestLib.new_user("user_property_user")
     assert Telemetry.list_user_properties() |> Enum.count() == 0

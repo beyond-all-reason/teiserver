@@ -6,6 +6,8 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
   use Teiserver.DataCase, async: true
   @moduletag :balance_test
   alias Teiserver.Battle.BalanceLib
+  alias Teiserver.TeiserverTestLib
+
   require Logger
 
   test "Able to standardise groups with incomplete data" do
@@ -166,7 +168,7 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
 
   defp create_test_users do
     Enum.map(1..5, fn k ->
-      Teiserver.TeiserverTestLib.new_user("User_#{k}")
+      TeiserverTestLib.new_user("User_#{k}")
     end)
   end
 end

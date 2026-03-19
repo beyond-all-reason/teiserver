@@ -1,6 +1,15 @@
 defmodule Teiserver.Lobby.ChatLib do
   @moduledoc false
-  alias Teiserver.{Account, CacheUser, Chat, Battle, Coordinator, Moderation, Lobby}
+  alias ExULID.ULID
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.CacheUser
+  alias Teiserver.Chat
+  alias Teiserver.Battle
+  alias Teiserver.Coordinator
+  alias Teiserver.Coordinator.Parser
+  alias Teiserver.Moderation
+  alias Teiserver.Lobby
   alias Phoenix.PubSub
   alias Teiserver.Chat.WordLib
 
@@ -16,11 +25,13 @@ defmodule Teiserver.Lobby.ChatLib do
     # Allow voting for joinas if there are AIs in the lobby, otherwise alias to spec
     msg =
       if String.starts_with?(msg, "!") and !String.starts_with?(msg, "!#") do
-        msg
-        |> String.trim()
-        |> String.downcase()
-        |> String.split()
-        |> case do
+        command_parts =
+          msg
+          |> String.trim()
+          |> String.downcase()
+          |> String.split()
+
+        case command_parts do
           ["!cv", "joinas" | _] ->
             has_ai = Battle.get_bots(lobby_id) |> Enum.any?()
             if has_ai, do: msg, else: "!cv joinas spec"
@@ -46,7 +57,7 @@ defmodule Teiserver.Lobby.ChatLib do
         msg
       end
 
-    case Teiserver.Coordinator.Parser.handle_in(userid, msg, lobby_id) do
+    case Parser.handle_in(userid, msg, lobby_id) do
       :say -> do_say(userid, msg, lobby_id)
       :handled -> :ok
     end
@@ -59,11 +70,11 @@ defmodule Teiserver.Lobby.ChatLib do
     msg = trim_message(msg)
     user = Account.get_user_by_id(userid)
 
-    if CacheUser.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
+    if Auth.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = CacheUser.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       CacheUser.shadowban_user(user.id)
@@ -125,11 +136,11 @@ defmodule Teiserver.Lobby.ChatLib do
     msg = trim_message(msg)
     user = CacheUser.get_user_by_id(userid)
 
-    if CacheUser.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
+    if Auth.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = CacheUser.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       CacheUser.shadowban_user(user.id)
@@ -192,7 +203,7 @@ defmodule Teiserver.Lobby.ChatLib do
     msg = trim_message(msg)
     sender = CacheUser.get_user_by_id(from_id)
 
-    blacklisted = CacheUser.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = Auth.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       CacheUser.shadowban_user(from_id)
@@ -254,12 +265,12 @@ defmodule Teiserver.Lobby.ChatLib do
     persist =
       cond do
         lobby == nil -> false
-        CacheUser.is_bot?(user) == true and String.slice(msg, 0..1) == "* " -> false
+        Auth.is_bot?(user) == true and String.slice(msg, 0..1) == "* " -> false
         true -> true
       end
 
     {userid, content} =
-      if CacheUser.is_bot?(user) do
+      if Auth.is_bot?(user) do
         case Regex.run(~r/^<(.*?)> (.+)$/u, msg) do
           [_, username, remainder] ->
             userid = CacheUser.get_userid(username) || user.id
@@ -327,7 +338,7 @@ defmodule Teiserver.Lobby.ChatLib do
 
     {:ok, code} =
       Account.create_code(%{
-        value: ExULID.ULID.generate(),
+        value: ULID.generate(),
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(minutes: 5),
         user_id: user_id,

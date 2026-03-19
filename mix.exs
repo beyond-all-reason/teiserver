@@ -21,6 +21,7 @@ defmodule Teiserver.MixProject do
   def cli do
     [
       preferred_envs: [
+        precommit: :test,
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
@@ -183,6 +184,14 @@ defmodule Teiserver.MixProject do
         "sass dark --no-source-map --style=compressed",
         "sass light --no-source-map --style=compressed",
         "phx.digest"
+      ],
+      precommit: [
+        "deps.unlock --check-unused",
+        "compile --force --warning-as-errors",
+        "format",
+        "credo",
+        "test --raise --warnings-as-errors --exclude needs_attention",
+        "cmd --shell MIX_ENV=dev mix dialyzer --list-unused-filters"
       ]
     ]
   end

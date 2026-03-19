@@ -4,18 +4,23 @@ defmodule Teiserver.Battle do
   """
 
   import Ecto.Query, warn: false
-  alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Repo
-  alias Teiserver.{Account, Telemetry, Coordinator}
-  alias Teiserver.Lobby
-  alias Teiserver.Battle.{MatchMembership, MatchMembershipLib}
   alias Phoenix.PubSub
-
+  alias Teiserver.Account
   alias Teiserver.Battle.Match
   alias Teiserver.Battle.MatchLib
+  alias Teiserver.Battle.MatchMembership
+  alias Teiserver.Battle.MatchMembershipLib
+  alias Teiserver.Battle.MatchMonitorServer
+  alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
-
+  alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Lobby
+  alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Protocols.Spring
+  alias Teiserver.Repo
+  alias Teiserver.Telemetry
+  alias ExULID.ULID
   require Logger
 
   @spec match_query(keyword()) :: Ecto.Query.t()
@@ -323,9 +328,6 @@ defmodule Teiserver.Battle do
   #   end
   # end
 
-  alias Teiserver.Battle.{MatchMonitorServer, MatchLib}
-  alias Teiserver.Lobby.{ChatLib, LobbyLib}
-
   @spec start_match(nil | T.lobby_id()) :: :ok
   def start_match(nil), do: :ok
 
@@ -579,7 +581,7 @@ defmodule Teiserver.Battle do
   @spec generate_lobby_uuid :: String.t()
   @spec generate_lobby_uuid([T.lobby_id()]) :: String.t()
   def generate_lobby_uuid(skip_ids \\ []) do
-    uuid = ExULID.ULID.generate()
+    uuid = ULID.generate()
 
     # Check if this uuid is present in the current set of lobbies
     existing_uuid =

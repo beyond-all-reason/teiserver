@@ -6,23 +6,32 @@ defmodule Teiserver.Protocols.SpringIn do
   https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
   """
   require Logger
-  alias Teiserver.{Account, Lobby, Coordinator, Battle, Room, CacheUser, Client, Config}
-  alias Teiserver.Account.FriendRequestLib
-  alias Phoenix.PubSub
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
-  alias Teiserver.Protocols.{Spring, SpringOut}
-
-  alias Teiserver.Protocols.Spring.{
-    AuthIn,
-    TelemetryIn,
-    BattleIn,
-    LobbyPolicyIn,
-    UserIn,
-    SystemIn,
-    PartyIn
-  }
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Account.FriendRequestLib
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Clans
+  alias Teiserver.Client
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
+  alias Teiserver.Protocols.Spring
+  alias Teiserver.Protocols.Spring.AuthIn
+  alias Teiserver.Protocols.Spring.BattleIn
+  alias Teiserver.Protocols.Spring.LobbyPolicyIn
+  alias Teiserver.Protocols.Spring.PartyIn
+  alias Teiserver.Protocols.Spring.SystemIn
+  alias Teiserver.Protocols.Spring.TelemetryIn
+  alias Teiserver.Protocols.Spring.UserIn
+  alias Teiserver.Protocols.SpringOut
+  alias Teiserver.Room
+  alias Teiserver.SpringTcpServer
+  alias ExULID.ULID
 
   @optimisation_level %{
     "LuaLobby Chobby" => :partial,
@@ -178,7 +187,7 @@ defmodule Teiserver.Protocols.SpringIn do
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("STLS", _, msg_id, state) do
     reply(:okay, "STLS", msg_id, state)
-    new_state = Teiserver.SpringTcpServer.upgrade_connection(state)
+    new_state = SpringTcpServer.upgrade_connection(state)
     reply(:welcome, nil, msg_id, new_state)
   end
 
@@ -273,7 +282,7 @@ defmodule Teiserver.Protocols.SpringIn do
         # Do we have a clan?
         if user.clan_id do
           :timer.sleep(200)
-          clan = Teiserver.Clans.get_clan!(user.clan_id)
+          clan = Clans.get_clan!(user.clan_id)
           room_name = Room.clan_room_name(clan.tag)
           SpringOut.do_join_room(new_state, room_name)
         end
@@ -326,7 +335,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
         case code == to_string(correct_code) do
           true ->
-            CacheUser.verify_user(user)
+            Account.verify_user(user.id)
 
             optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
             SpringOut.do_login_accepted(state, user, optimisation_level)
@@ -647,7 +656,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
             {:ok, code} =
               Account.create_code(%{
-                value: ExULID.ULID.generate(),
+                value: ULID.generate(),
                 purpose: "one_time_login",
                 expires: Timex.now() |> Timex.shift(minutes: 30),
                 user_id: state.userid,
@@ -817,7 +826,7 @@ defmodule Teiserver.Protocols.SpringIn do
             client == nil ->
               {:failure, "No client"}
 
-            not CacheUser.is_bot?(state.userid) ->
+            not Auth.is_bot?(state.userid) ->
               {:failure, "Not a bot"}
 
             true ->
@@ -1196,7 +1205,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
       msg_sliced =
         cond do
-          CacheUser.is_bot?(state.userid) ->
+          Auth.is_bot?(state.userid) ->
             msg
 
           String.starts_with?(lowercase_msg, "!bset tweakdefs") ||
@@ -1222,7 +1231,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
       msg_sliced =
         cond do
-          CacheUser.is_bot?(state.userid) ->
+          Auth.is_bot?(state.userid) ->
             msg
 
           String.starts_with?(lowercase_msg, "!bset tweakdefs") ||
@@ -1250,7 +1259,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
         if Lobby.allow?(state.userid, :saybattleprivateex, state.lobby_id) do
           msg_sliced =
-            if CacheUser.is_bot?(state.userid) do
+            if Auth.is_bot?(state.userid) do
               msg
             else
               msg
@@ -1374,7 +1383,7 @@ defmodule Teiserver.Protocols.SpringIn do
         userid = CacheUser.get_userid(sender)
         client = Client.get_client_by_id(state.userid)
 
-        if client != nil and CacheUser.is_bot?(state.userid) do
+        if client != nil and Auth.is_bot?(state.userid) do
           originator_id = CacheUser.get_userid(originator)
           CacheUser.ring(userid, originator_id)
         end

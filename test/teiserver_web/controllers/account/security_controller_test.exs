@@ -4,6 +4,10 @@ defmodule TeiserverWeb.Account.SecurityControllerTest do
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
+  alias Phoenix.Flash
+  alias Teiserver.OAuth.CodeQueries
+  alias Teiserver.OAuth.TokenQueries
+  alias Teiserver.TeiserverTestLib
 
   test "redirected to edit password once logged in" do
     {:ok, kw} = GeneralTestLib.conn_setup([], [:no_login])
@@ -19,8 +23,8 @@ defmodule TeiserverWeb.Account.SecurityControllerTest do
   describe "OAuth application revocation" do
     setup do
       {:ok, kw} =
-        GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
-        |> Teiserver.TeiserverTestLib.conn_setup()
+        GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())
+        |> TeiserverTestLib.conn_setup()
 
       conn = kw[:conn]
       user = kw[:user]
@@ -49,10 +53,10 @@ defmodule TeiserverWeb.Account.SecurityControllerTest do
       conn = delete(conn, ~p"/teiserver/account/security/revoke_oauth/#{app.id}")
       assert redirected_to(conn) == ~p"/teiserver/account/security"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :info)
+      assert Flash.get(conn.assigns.flash, :info)
 
-      refute Teiserver.OAuth.TokenQueries.get_token(token.value)
-      refute Teiserver.OAuth.CodeQueries.get_code(code.value)
+      refute TokenQueries.get_token(token.value)
+      refute CodeQueries.get_code(code.value)
     end
 
     test "handles revocation when no tokens or codes exist", %{conn: conn, user: user} do
@@ -67,7 +71,7 @@ defmodule TeiserverWeb.Account.SecurityControllerTest do
 
       conn = delete(conn, ~p"/teiserver/account/security/revoke_oauth/#{app.id}")
       assert redirected_to(conn) == ~p"/teiserver/account/security"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info)
+      assert Flash.get(conn.assigns.flash, :info)
     end
   end
 end

@@ -3,8 +3,12 @@ defmodule Teiserver.Account.AccoladeLib do
 
   """
   use TeiserverWeb, :library
-  alias Teiserver.{Account, CacheUser}
-  alias Teiserver.Account.{Accolade, AccoladeBotServer, AccoladeChatServer}
+  alias Ecto.Adapters.SQL
+  alias Teiserver.Account
+  alias Teiserver.Account.Accolade
+  alias Teiserver.Account.AccoladeBotServer
+  alias Teiserver.Account.AccoladeChatServer
+  alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   require Logger
 
@@ -25,7 +29,7 @@ defmodule Teiserver.Account.AccoladeLib do
       item_id: accolade.id,
       item_type: "teiserver_account_accolade",
       item_colour: StylingHelper.colours(colours()) |> elem(0),
-      item_icon: Teiserver.Account.AccoladeLib.icon(),
+      item_icon: icon(),
       item_label: "#{accolade.name}",
       url: "/account/accolades/#{accolade.id}"
     }
@@ -369,7 +373,7 @@ defmodule Teiserver.Account.AccoladeLib do
       where (restriction in ($1) or restriction is null) and purpose = 'Accolade'
 order by name;"
 
-    results = Ecto.Adapters.SQL.query!(Repo, query, [restriction])
+    results = SQL.query!(Repo, query, [restriction])
 
     results.rows
     |> Enum.map(fn [id, name, icon, colour] ->
@@ -438,7 +442,7 @@ order by name;"
     """
 
     results =
-      Ecto.Adapters.SQL.query!(Repo, query, [user_id])
+      SQL.query!(Repo, query, [user_id])
 
     [[count]] = results.rows
     count
@@ -453,7 +457,7 @@ order by name;"
     """
 
     results =
-      Ecto.Adapters.SQL.query!(Repo, query, [giver_id, recipient_id, match_id])
+      SQL.query!(Repo, query, [giver_id, recipient_id, match_id])
 
     [[count]] = results.rows
     count > 0
@@ -468,7 +472,7 @@ order by name;"
     """
 
     result =
-      Ecto.Adapters.SQL.query!(Repo, query, [recipient_id])
+      SQL.query!(Repo, query, [recipient_id])
 
     [[unique_giver_count, total_accolades]] = result.rows
 
@@ -490,7 +494,7 @@ order by name;"
     """
 
     result =
-      Ecto.Adapters.SQL.query!(Repo, query, [recipient_id])
+      SQL.query!(Repo, query, [recipient_id])
 
     case result.num_rows do
       1 ->

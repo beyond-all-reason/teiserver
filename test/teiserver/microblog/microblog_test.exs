@@ -3,12 +3,18 @@ defmodule Teiserver.MicroblogTest do
   use Teiserver.DataCase
 
   alias Teiserver.Microblog
+  alias Teiserver.Microblog.PollResponse
+  alias Teiserver.Microblog.PostTag
+  alias Teiserver.Microblog.Tag
+  alias Teiserver.Microblog.Upload
+  alias Teiserver.Microblog.UserPreference
+  alias Teiserver.AccountFixtures
+  alias Teiserver.Microblog.Post
+
+  import AccountFixtures
+  import Teiserver.MicroblogFixtures
 
   describe "tags" do
-    alias Teiserver.Microblog.Tag
-
-    import Teiserver.MicroblogFixtures
-
     @invalid_attrs %{colour: nil, icon: nil, name: nil}
 
     test "list_tags/0 returns all tags" do
@@ -63,10 +69,6 @@ defmodule Teiserver.MicroblogTest do
   end
 
   describe "posts" do
-    alias Teiserver.Microblog.Post
-
-    import Teiserver.{AccountFixtures, MicroblogFixtures}
-
     @invalid_attrs %{
       contents: nil,
       discord_post_id: nil,
@@ -143,10 +145,6 @@ defmodule Teiserver.MicroblogTest do
   end
 
   describe "post_tags" do
-    alias Teiserver.Microblog.PostTag
-
-    import Teiserver.MicroblogFixtures
-
     @invalid_attrs %{post_id: nil, tag_id: nil}
 
     test "list_post_tags/0 returns all post_tags" do
@@ -200,10 +198,6 @@ defmodule Teiserver.MicroblogTest do
   end
 
   describe "user_preferences" do
-    alias Teiserver.Microblog.UserPreference
-
-    import Teiserver.{AccountFixtures, MicroblogFixtures}
-
     @invalid_attrs %{
       disabled_posters: nil,
       disabled_tags: nil,
@@ -295,10 +289,6 @@ defmodule Teiserver.MicroblogTest do
   end
 
   describe "poll_responses" do
-    alias Teiserver.Microblog.PollResponse
-
-    import Teiserver.MicroblogFixtures
-
     @invalid_attrs %{post_id: nil, tag_id: nil}
 
     test "list_poll_responses/0 returns all poll_responses" do
@@ -315,7 +305,7 @@ defmodule Teiserver.MicroblogTest do
 
     test "create_poll_response/1 with valid data creates a poll_response" do
       post = post_fixture()
-      user = Teiserver.AccountFixtures.user_fixture()
+      user = AccountFixtures.user_fixture()
       valid_attrs = %{post_id: post.id, user_id: user.id, response: "A"}
 
       assert {:ok, %PollResponse{} = _poll_response} = Microblog.create_poll_response(valid_attrs)
@@ -357,10 +347,6 @@ defmodule Teiserver.MicroblogTest do
   end
 
   describe "uploads" do
-    alias Teiserver.Microblog.Upload
-
-    import Teiserver.{AccountFixtures, MicroblogFixtures}
-
     @invalid_attrs %{
       filename: nil,
       type: nil,

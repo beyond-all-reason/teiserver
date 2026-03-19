@@ -5,7 +5,9 @@ defmodule Teiserver.Account.PermissionCache do
 
   use Supervisor
   import Teiserver.Account.AuthLib, only: [add_permission_set: 3]
+  alias Teiserver.Account.UserLib
   alias Teiserver.Helpers.CacheHelper
+  alias Teiserver.Logging.Startup
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),
@@ -15,7 +17,7 @@ defmodule Teiserver.Account.PermissionCache do
     end
   end
 
-  @impl true
+  @impl Supervisor
   def init(:ok) do
     children = [
       CacheHelper.concache_perm_sup(:auth_group_store),
@@ -50,14 +52,14 @@ defmodule Teiserver.Account.PermissionCache do
       ~w(account tester contributor dev streamer donor verified bot moderator)
     )
 
-    :ok = Teiserver.Logging.Startup.startup()
+    :ok = Startup.startup()
 
     :ok
   end
 
   defp warm_restriction_cache() do
     # Chat stuff
-    Teiserver.Account.UserLib.add_report_restriction_types("Chat", [
+    UserLib.add_report_restriction_types("Chat", [
       "Bridging",
       "Game chat",
       "Room chat",
@@ -65,14 +67,14 @@ defmodule Teiserver.Account.PermissionCache do
     ])
 
     # Lobby interaction
-    Teiserver.Account.UserLib.add_report_restriction_types("Game", [
+    UserLib.add_report_restriction_types("Game", [
       "Low priority",
       "All lobbies",
       "Login",
       "Permanently banned"
     ])
 
-    Teiserver.Account.UserLib.add_report_restriction_types("Other", [
+    UserLib.add_report_restriction_types("Other", [
       "Accolades",
       "Boss",
       "Reporting",
@@ -80,11 +82,11 @@ defmodule Teiserver.Account.PermissionCache do
       "Matchmaking"
     ])
 
-    Teiserver.Account.UserLib.add_report_restriction_types("Warnings", [
+    UserLib.add_report_restriction_types("Warnings", [
       "Warning reminder"
     ])
 
-    Teiserver.Account.UserLib.add_report_restriction_types("Internal", [
+    UserLib.add_report_restriction_types("Internal", [
       "Note"
     ])
   end

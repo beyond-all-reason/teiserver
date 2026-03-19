@@ -2,6 +2,8 @@ defmodule Teiserver.Bot.Bot do
   @moduledoc false
   use TeiserverWeb, :schema
 
+  alias Ecto.Changeset
+
   @type id :: integer()
 
   typed_schema "teiserver_bots" do
@@ -13,7 +15,7 @@ defmodule Teiserver.Bot.Bot do
   def changeset(bot, attrs) do
     bot
     |> cast(attrs, [:name])
-    |> Ecto.Changeset.validate_required([:name])
-    |> Ecto.Changeset.validate_length(:name, min: 3, max: 30)
+    |> Changeset.validate_required([:name])
+    |> Changeset.validate_length(:name, min: 3, max: 30)
   end
 end

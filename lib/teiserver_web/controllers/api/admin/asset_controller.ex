@@ -1,8 +1,10 @@
 defmodule TeiserverWeb.API.Admin.AssetController do
   use TeiserverWeb, :controller
   alias Teiserver.Asset
+  alias Teiserver.OAuth.Plug.EnsureAuthenticated
+  alias JsonXema.ValidationError
 
-  plug Teiserver.OAuth.Plug.EnsureAuthenticated, scopes: ["admin.map"]
+  plug EnsureAuthenticated, scopes: ["admin.map"]
 
   def update_maps(conn, params) do
     with :ok <- validate_input(params),
@@ -17,8 +19,8 @@ defmodule TeiserverWeb.API.Admin.AssetController do
         |> put_status(:bad_request)
         |> render(:map_updated_error)
 
-      {:error, %JsonXema.ValidationError{} = err} ->
-        reason = JsonXema.ValidationError.format_error(err.reason)
+      {:error, %ValidationError{} = err} ->
+        reason = ValidationError.format_error(err.reason)
         conn |> put_status(:bad_request) |> assign(:reason, reason) |> render(:error)
     end
   end

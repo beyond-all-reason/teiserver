@@ -5,10 +5,13 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Lobby
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.FriendRequestLib
+  alias Teiserver.Account.RoleLib
+  alias Teiserver.Account.UserLib
+  alias Teiserver.Lobby
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do
     userid = String.to_integer(userid_str)
     user = Account.get_user_by_id(userid)
@@ -28,9 +31,9 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         socket
         |> assign(:tab, nil)
         |> assign(:site_menu_active, "teiserver_account")
-        |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+        |> assign(:view_colour, UserLib.colours())
         |> assign(:user, user)
-        |> assign(:role_data, Account.RoleLib.role_data())
+        |> assign(:role_data, RoleLib.role_data())
         |> assign(:client, Account.get_client_by_id(userid))
         |> get_relationships_and_permissions()
         |> assign_accolade_notification()
@@ -39,7 +42,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -59,7 +62,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     |> assign(:page_title, "#{user.name} - Achievements")
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
     user_id = socket.assigns.user.id
 
@@ -84,7 +87,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("join", _params, %{assigns: assigns} = socket) do
     current_user_id = assigns.current_user.id
     lobby_id = assigns.client.lobby_id
@@ -322,7 +325,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
 
       {:error, reason} ->
         user_friendly_message =
-          Teiserver.Account.FriendRequestLib.error_atom_to_user_friendly_string(reason)
+          FriendRequestLib.error_atom_to_user_friendly_string(reason)
 
         socket =
           socket

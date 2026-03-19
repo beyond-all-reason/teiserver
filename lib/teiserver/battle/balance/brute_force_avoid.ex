@@ -14,6 +14,7 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
   """
   alias Teiserver.Config
   alias Teiserver.Battle.Balance.BruteForceAvoidTypes, as: BF
+  alias Teiserver.Helpers.Combi
   require Integer
 
   # Parties will be split if team diff is too large. It either uses absolute value or percentage
@@ -46,7 +47,7 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
 
   @spec potential_teams(integer()) :: [integer()]
   def potential_teams(num_players) do
-    Teiserver.Helpers.Combi.get_single_teams(num_players)
+    Combi.get_single_teams(num_players)
   end
 
   # Parties/avoids will be ignored if the team rating diff is too large
@@ -66,11 +67,11 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
 
   @spec get_captain_rating([BF.player()]) :: any()
   def get_captain_rating(team) do
-    if length(team) > 0 do
+    if Enum.empty?(team) do
+      0
+    else
       captain = Enum.max_by(team, fn player -> player.rating end, &>=/2)
       captain.rating
-    else
-      0
     end
   end
 

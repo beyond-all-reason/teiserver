@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.CoordinatorLib do
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.CacheUser
+  alias Teiserver.Account.Auth
 
   @spec help(T.user(), boolean(), String.t()) :: String.t()
   def help(user, host, command) do
@@ -246,8 +246,8 @@ Multiple locks can be engaged at the same time
   defp can_use?(user, host, group) do
     case group do
       :everybody -> true
-      :host -> CacheUser.is_moderator?(user) or host
-      :moderator -> CacheUser.is_moderator?(user)
+      :host -> Auth.is_moderator?(user) or host
+      :moderator -> Auth.is_moderator?(user)
       _ -> false
     end
   end

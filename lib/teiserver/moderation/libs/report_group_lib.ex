@@ -1,9 +1,9 @@
 defmodule Teiserver.Moderation.ReportGroupLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
-  # alias Teiserver.Moderation
-  alias Teiserver.Moderation.{ReportGroup, ReportGroupQueries}
-  # alias Phoenix.PubSub
+  alias Teiserver.Moderation
+  alias Teiserver.Moderation.ReportGroup
+  alias Teiserver.Moderation.ReportGroupQueries
 
   @spec colour :: atom
   def colour(), do: :warning
@@ -14,8 +14,8 @@ defmodule Teiserver.Moderation.ReportGroupLib do
   @spec make_favourite(ReportGroup.t()) :: map()
   def make_favourite(report_group) do
     %{
-      type_colour: Teiserver.Moderation.colour(),
-      type_icon: Teiserver.Moderation.icon(),
+      type_colour: Moderation.colour(),
+      type_icon: Moderation.icon(),
       item_id: report_group.id,
       item_type: "moderation_report_group",
       item_colour: colour(),

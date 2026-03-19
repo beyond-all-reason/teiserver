@@ -1,16 +1,21 @@
 defmodule TeiserverWeb.Admin.OAuthApplicationController do
   use TeiserverWeb, :controller
 
-  alias Teiserver.OAuth.{Application, ApplicationQueries}
-  alias Teiserver.{OAuth, Account}
+  alias Ecto.Changeset
+  alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
+  alias Teiserver.OAuth
+  alias Teiserver.OAuth.Application
+  alias Teiserver.OAuth.ApplicationQueries
+  alias Teiserver.Staff
 
   plug Bodyguard.Plug.Authorize,
     # The policy should be Admin or something fairly high. But while we're
     # developping the new lobby, it's easier if this is allowed for any
     # contributors
-    policy: Teiserver.Staff,
+    policy: Staff,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {AuthLib, :current_user}
 
   plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
   plug :add_breadcrumb, name: "OAuth Applications", url: "/teiserver/admin/oauth_application"
@@ -199,7 +204,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
 
   defp fill_email_error(changeset) do
     if Map.has_key?(changeset.data, "owner_id") and is_nil(Map.get(changeset.data, "owner_id")) do
-      Ecto.Changeset.add_error(
+      Changeset.add_error(
         changeset,
         :owner_email,
         "No user found for email #{Map.get(changeset.data, "owner_email")}"

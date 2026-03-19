@@ -10,11 +10,14 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   # from a crash, the important transient state would be lost.
   use GenServer, restart: :temporary
 
-  alias Teiserver.Matchmaking.QueueSupervisor
-  alias Teiserver.Matchmaking.QueueServer
-  alias Teiserver.Matchmaking.Member
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Asset
+  alias Teiserver.Autohost
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Matchmaking.Member
+  alias Teiserver.Matchmaking.QueueServer
+  alias Teiserver.Matchmaking.QueueSupervisor
+  alias Teiserver.Player
+  alias Teiserver.TachyonBattle
 
   require Logger
 
@@ -72,7 +75,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     GenServer.start(__MODULE__, init_arg)
   end
 
-  @impl true
+  @impl GenServer
   def init({queue_id, queue, teams, timeout}) do
     Logger.metadata(actor_type: :pairing_room)
 
@@ -100,12 +103,12 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     {:ok, initial_state, {:continue, {:notify_players, timeout}}}
   end
 
-  @impl true
+  @impl GenServer
   # Let all the player know that they are now ready to start a match and should
   # ready up asap
   def handle_continue({:notify_players, timeout}, state) do
     Enum.each(state.awaiting, fn player_id ->
-      Teiserver.Player.matchmaking_notify_found(player_id, state.queue_id, self(), timeout)
+      Player.matchmaking_notify_found(player_id, state.queue_id, self(), timeout)
     end)
 
     :timer.send_after(timeout, :timeout)
@@ -116,14 +119,14 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   # It's go time! Find an autohost, send it the start script and let all the players
   # know about the autohost waiting for them.
   def handle_continue(:start_match, state) do
-    case Teiserver.Autohost.find_autohost() do
+    case Autohost.find_autohost() do
       nil ->
         Logger.warning("No autohost available to start a paired matchmaking")
 
         QueueServer.disband_pairing(state.queue_id, self())
 
         for team <- state.teams, member <- team, p_id <- member.player_ids do
-          Teiserver.Player.matchmaking_notify_lost(p_id, {:server_error, :no_host_available})
+          Player.matchmaking_notify_lost(p_id, {:server_error, :no_host_available})
         end
 
         {:stop, :normal, state}
@@ -140,12 +143,12 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   defp start_battle(state, host_id, engine, game, map) do
     start_script = start_script(state, engine, game, map)
 
-    case Teiserver.TachyonBattle.start_battle(host_id, start_script, true) do
+    case TachyonBattle.start_battle(host_id, start_script, true) do
       {:error, reason} ->
         QueueServer.disband_pairing(state.queue_id, self())
 
         for team <- state.teams, member <- team, p_id <- member.player_ids do
-          Teiserver.Player.matchmaking_notify_lost(p_id, {:server_error, reason})
+          Player.matchmaking_notify_lost(p_id, {:server_error, reason})
         end
 
         Logger.warning("Could not start battle because #{inspect(reason)}")
@@ -167,7 +170,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           |> Map.put(:map, %{springName: map.spring_name})
 
         for team <- state.teams, member <- team, p_id <- member.player_ids do
-          Teiserver.Player.battle_start(p_id, battle_data, battle_start_data)
+          Player.battle_start(p_id, battle_data, battle_start_data)
         end
 
         QueueServer.disband_pairing(state.queue_id, self())
@@ -176,7 +179,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_call({:ready, ready_data}, _from, state) do
     user_id = ready_data.user_id
 
@@ -189,7 +192,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
         current = max - Enum.count(rest)
 
         for team <- state.teams, member <- team, p_id <- member.player_ids do
-          Teiserver.Player.matchmaking_found_update(p_id, current, self())
+          Player.matchmaking_found_update(p_id, current, self())
         end
 
         readied =
@@ -212,7 +215,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:cancel, user_id}, state) do
     # Assuming that the call is legit, so don't check that user_id is indeed
     # in the room and directly cancel everyone
@@ -224,10 +227,10 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           # when a user in a party leaves while in a pairing room, need to let know
           # the other member of this party that this happened
           for p_id <- member.player_ids, p_id != user_id do
-            Teiserver.Player.matchmaking_notify_cancelled(p_id, :party_user_left)
+            Player.matchmaking_notify_cancelled(p_id, :party_user_left)
           end
         else
-          Teiserver.Player.matchmaking_notify_lost(p_id, :cancel)
+          Player.matchmaking_notify_lost(p_id, :cancel)
         end
       end
     end
@@ -235,21 +238,21 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     {:stop, :normal, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:timeout, state) when state.awaiting == [], do: {:noreply, state}
 
   def handle_info(:timeout, state) do
     QueueServer.disband_pairing(state.queue_id, self())
 
     for team <- state.teams, member <- team, player_id <- member.player_ids do
-      Teiserver.Player.matchmaking_notify_lost(player_id, :timeout)
+      Player.matchmaking_notify_lost(player_id, :timeout)
     end
 
     {:stop, :normal, state}
   end
 
   @spec start_script(state(), %{version: String.t()}, String.t(), Asset.Map.t()) ::
-          Teiserver.Autohost.start_script()
+          Autohost.start_script()
   defp start_script(state, engine, game, map) do
     %{
       engine_version: engine.version,
@@ -260,7 +263,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     }
   end
 
-  @spec get_ally_teams(state(), Asset.Map.t()) :: [Teiserver.Autohost.ally_team(), ...]
+  @spec get_ally_teams(state(), Asset.Map.t()) :: [Autohost.ally_team(), ...]
   defp get_ally_teams(state, map) do
     startboxes = Asset.get_startboxes(map, Enum.count(state.readied))
 

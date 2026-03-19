@@ -1,11 +1,11 @@
 defmodule TeiserverWeb.Microblog.BlogLive.Index do
   @moduledoc false
   use TeiserverWeb, :live_view
-  alias Teiserver.Microblog
   import TeiserverWeb.MicroblogComponents
   alias Phoenix.PubSub
+  alias Teiserver.Microblog
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
       if is_connected?(socket) do
@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Index do
      |> assign(:site_menu_active, "microblog")}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(%{channel: "microblog_posts", event: :post_created, post: post}, socket) do
     db_post = Microblog.get_post!(post.id, preload: [:tags, :poster])
 

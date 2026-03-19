@@ -2,7 +2,8 @@ defmodule Teiserver.Telemetry.SimpleMatchEventLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.{SimpleMatchEvent, SimpleMatchEventQueries}
+  alias Teiserver.Telemetry.SimpleMatchEvent
+  alias Teiserver.Telemetry.SimpleMatchEventQueries
   alias Phoenix.PubSub
 
   @broadcast_event_types ~w()

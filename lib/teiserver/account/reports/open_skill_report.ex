@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.OpenSkillReport do
   require Logger
 
+  alias Ecto.Adapters.SQL
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Repo
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
@@ -57,7 +58,7 @@ defmodule Teiserver.Account.OpenSkillReport do
       #{metric_column_name}_rounded
     """
 
-    case Ecto.Adapters.SQL.query(Repo, query, [rating_type_id, last_active, uncertainty]) do
+    case SQL.query(Repo, query, [rating_type_id, last_active, uncertainty]) do
       {:ok, results} ->
         [results.columns | results.rows]
 

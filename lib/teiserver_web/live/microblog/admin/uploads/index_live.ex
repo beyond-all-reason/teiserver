@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Microblog.Admin.UploadLive.Index do
   use TeiserverWeb, :live_view
   alias Teiserver.Microblog
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) when is_connected?(socket) do
     user_uploads =
       Microblog.list_uploads(
@@ -12,19 +12,19 @@ defmodule TeiserverWeb.Microblog.Admin.UploadLive.Index do
       )
 
     socket
-    |> assign(:view_colour, Teiserver.Microblog.colours())
+    |> assign(:view_colour, Microblog.colours())
     |> stream(:user_uploads, user_uploads)
     |> ok()
   end
 
   def mount(_params, _session, socket) do
     socket
-    |> assign(:view_colour, Teiserver.Microblog.colours())
+    |> assign(:view_colour, Microblog.colours())
     |> stream(:user_uploads, [])
     |> ok()
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("delete", %{"id" => id}, socket) do
     upload = Microblog.get_upload!(id)
 
@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Microblog.Admin.UploadLive.Index do
     |> noreply()
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     socket
     |> apply_action(socket.assigns.live_action, params)

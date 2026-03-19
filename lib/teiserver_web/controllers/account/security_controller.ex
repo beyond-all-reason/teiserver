@@ -3,8 +3,8 @@ defmodule TeiserverWeb.Account.SecurityController do
   require Logger
 
   alias Teiserver.Account
-  alias Teiserver.Account.TOTP
   alias Teiserver.OAuth
+  alias Teiserver.Account.TOTP
 
   plug(:add_breadcrumb, name: "Account", url: "/teiserver/account")
   plug(:add_breadcrumb, name: "Security", url: "/teiserver/account/security")

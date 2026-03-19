@@ -4,12 +4,20 @@ defmodule Teiserver.Player.TachyonHandler do
   """
 
   require Logger
-  alias Teiserver.Helpers.{BurstyRateLimiter, Collections}
-  alias Teiserver.Tachyon.Schema
-  alias Teiserver.Tachyon.Handler
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.Matchmaking
+  alias Teiserver.Messaging
+  alias Teiserver.Player.Registry
+  alias Teiserver.Player.Session
+  alias Teiserver.Player.SessionRegistry
+  alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Account, Player, Matchmaking, Messaging}
+  alias Teiserver.Helpers.BurstyRateLimiter
+  alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.TachyonParser
+  alias Teiserver.Tachyon.Handler
+  alias Teiserver.Tachyon.Schema
 
   @behaviour Handler
 
@@ -25,7 +33,7 @@ defmodule Teiserver.Player.TachyonHandler do
     user = conn.assigns[:token].owner
 
     with addr when is_list(addr) <- :inet.ntoa(conn.remote_ip),
-         {:ok, user} <- Teiserver.CacheUser.tachyon_login(user, to_string(addr), lobby_client) do
+         {:ok, user} <- CacheUser.tachyon_login(user, to_string(addr), lobby_client) do
       {:ok, %{user: user}}
     else
       {:error, :einval} ->
@@ -255,13 +263,13 @@ defmodule Teiserver.Player.TachyonHandler do
           state()
         ) :: WebSock.handle_result()
   def handle_command("system/disconnect", "request", _message_id, _message, state) do
-    Player.Session.disconnect(state.user.id)
+    Session.disconnect(state.user.id)
 
     {:stop, :normal, state}
   end
 
   def handle_command("system/serverStats", "request", _message_id, _message, state) do
-    user_count = Teiserver.Player.SessionRegistry.count()
+    user_count = SessionRegistry.count()
 
     {:response, %{userCount: user_count}, state}
   end
@@ -293,7 +301,7 @@ defmodule Teiserver.Player.TachyonHandler do
     queues =
       Enum.map(message["data"]["queues"], fn x -> {x["id"], x["version"]} end)
 
-    case Player.Session.join_queues(state.user.id, queues) do
+    case Session.join_queues(state.user.id, queues) do
       :ok ->
         {:response, state}
 
@@ -327,7 +335,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("matchmaking/cancel", "request", _message_id, _message, state) do
-    case Player.Session.leave_queues(state.user.id) do
+    case Session.leave_queues(state.user.id) do
       :ok ->
         {:response, {nil, [Schema.event("matchmaking/cancelled", %{reason: :intentional})]},
          state}
@@ -338,7 +346,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("matchmaking/ready", "request", _message_id, _message, state) do
-    case Player.Session.matchmaking_ready(state.user.id) do
+    case Session.matchmaking_ready(state.user.id) do
       :ok -> {:response, state}
       {:error, :no_match} -> {:error_response, :no_match, state}
     end
@@ -362,7 +370,7 @@ defmodule Teiserver.Player.TachyonHandler do
           end
 
         :party ->
-          case Player.Session.send_party_message(state.user.id, msg["data"]["message"]) do
+          case Session.send_party_message(state.user.id, msg["data"]["message"]) do
             :ok -> {:response, state}
             {:error, reason} -> {:error_response, :invalid_request, inspect(reason), state}
           end
@@ -377,7 +385,7 @@ defmodule Teiserver.Player.TachyonHandler do
     since = parse_since(msg["data"]["since"])
 
     {:ok, has_missed_messages, msg_to_send} =
-      Player.Session.subscribe_received(state.user.id, since)
+      Session.subscribe_received(state.user.id, since)
 
     response = %{hasMissedMessages: has_missed_messages}
 
@@ -394,7 +402,7 @@ defmodule Teiserver.Player.TachyonHandler do
     user = Account.get_user_by_id(user_id)
 
     if user != nil do
-      %{status: status} = Player.Session.get_user_info(user.id)
+      %{status: status} = Session.get_user_info(user.id)
 
       resp =
         %{
@@ -430,11 +438,11 @@ defmodule Teiserver.Player.TachyonHandler do
          {:ok, data} <- Account.create_friend_request(state.user.id, target.id) do
       case data do
         %Account.FriendRequest{} ->
-          Player.Session.friend_request_received(target.id, state.user.id)
+          Session.friend_request_received(target.id, state.user.id)
 
         :auto_accepted ->
-          Player.Session.friend_request_accepted(target.id, state.user.id)
-          Player.Session.friend_request_accepted(state.user.id, target.id)
+          Session.friend_request_accepted(target.id, state.user.id)
+          Session.friend_request_accepted(state.user.id, target.id)
       end
 
       {:response, state}
@@ -460,7 +468,7 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("friend/acceptRequest", "request", _message_id, msg, state) do
     with {:ok, originator_id} <- TachyonParser.parse_user_id(msg["data"]["from"]),
          :ok <- Account.accept_friend_request(originator_id, state.user.id) do
-      Player.Session.friend_request_accepted(originator_id, state.user.id)
+      Session.friend_request_accepted(originator_id, state.user.id)
       {:response, state}
     else
       {:error, :invalid_id} ->
@@ -474,7 +482,7 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("friend/rejectRequest", "request", _message_id, msg, state) do
     with {:ok, originator_id} <- TachyonParser.parse_user_id(msg["data"]["from"]),
          :ok <- Account.decline_friend_request(originator_id, state.user.id) do
-      Player.Session.friend_request_rejected(originator_id, state.user.id)
+      Session.friend_request_rejected(originator_id, state.user.id)
       {:response, state}
     else
       {:error, :invalid_id} ->
@@ -493,7 +501,7 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("friend/cancelRequest", "request", _message_id, msg, state) do
     with {:ok, target_id} <- TachyonParser.parse_user_id(msg["data"]["to"]),
          :ok <- Account.rescind_friend_request(state.user.id, target_id) do
-      Player.Session.friend_request_cancelled(target_id, state.user.id)
+      Session.friend_request_cancelled(target_id, state.user.id)
       {:response, state}
     else
       {:error, "no request"} ->
@@ -508,7 +516,7 @@ defmodule Teiserver.Player.TachyonHandler do
     with {:ok, target_id} <- TachyonParser.parse_user_id(msg["data"]["userId"]),
          %Account.Friend{} = friend <- Account.get_friend(state.user.id, target_id),
          {:ok, _changeset} <- Account.delete_friend(friend) do
-      Player.Session.friend_removed(target_id, state.user.id)
+      Session.friend_removed(target_id, state.user.id)
       {:response, state}
     else
       nil ->
@@ -527,7 +535,7 @@ defmodule Teiserver.Player.TachyonHandler do
     {ok_ids, invalid_ids} = TachyonParser.parse_user_ids(msg["data"]["userIds"])
 
     if Enum.empty?(invalid_ids) do
-      case Player.Session.subscribe_updates(state.user.id, ok_ids) do
+      case Session.subscribe_updates(state.user.id, ok_ids) do
         :ok ->
           {:response, state}
 
@@ -545,7 +553,7 @@ defmodule Teiserver.Player.TachyonHandler do
     {ok_ids, invalid_ids} = TachyonParser.parse_user_ids(msg["data"]["userIds"])
 
     if Enum.empty?(invalid_ids) do
-      case Player.Session.unsubscribe_updates(state.user.id, ok_ids) do
+      case Session.unsubscribe_updates(state.user.id, ok_ids) do
         :ok ->
           {:response, state}
 
@@ -560,7 +568,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("party/create", "request", _message_id, _msg, state) do
-    case Player.Session.create_party(state.user.id) do
+    case Session.create_party(state.user.id) do
       {:ok, party_id} ->
         data = %{partyId: party_id}
         {:response, data, state}
@@ -574,7 +582,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("party/leave", "request", _message_id, _msg, state) do
-    case Player.Session.leave_party(state.user.id) do
+    case Session.leave_party(state.user.id) do
       :ok ->
         {:response, state}
 
@@ -593,7 +601,7 @@ defmodule Teiserver.Player.TachyonHandler do
     raw_user_id = msg["data"]["userId"]
 
     with {:ok, id} <- TachyonParser.parse_user_id(raw_user_id),
-         :ok <- Player.Session.invite_to_party(state.user.id, id) do
+         :ok <- Session.invite_to_party(state.user.id, id) do
       {:response, state}
     else
       {:error, reason} when reason in [:invalid_player, :invalid_user] ->
@@ -608,7 +616,7 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("party/acceptInvite", "request", _message_id, msg, state) do
     party_id = msg["data"]["partyId"]
 
-    case Player.Session.accept_invite_to_party(state.user.id, party_id) do
+    case Session.accept_invite_to_party(state.user.id, party_id) do
       :ok ->
         {:response, state}
 
@@ -620,7 +628,7 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("party/declineInvite", "request", _message_id, msg, state) do
     party_id = msg["data"]["partyId"]
 
-    case Player.Session.decline_invite_to_party(state.user.id, party_id) do
+    case Session.decline_invite_to_party(state.user.id, party_id) do
       :ok ->
         {:response, state}
 
@@ -631,7 +639,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("party/cancelInvite", "request", _message_id, msg, state) do
     with {:ok, user_id} <- TachyonParser.parse_user_id(msg["data"]["userId"]),
-         :ok <- Player.Session.cancel_invite_to_party(state.user.id, user_id) do
+         :ok <- Session.cancel_invite_to_party(state.user.id, user_id) do
       {:response, state}
     else
       {:error, reason} ->
@@ -641,7 +649,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("party/kickMember", "request", _message_id, msg, state) do
     with {:ok, target_id} <- TachyonParser.parse_user_id(msg["data"]["userId"]),
-         :ok <- Player.Session.kick_party_member(state.user.id, target_id) do
+         :ok <- Session.kick_party_member(state.user.id, target_id) do
       {:response, state}
     else
       {:error, reason} ->
@@ -674,7 +682,7 @@ defmodule Teiserver.Player.TachyonHandler do
         end
     }
 
-    case Player.Session.create_lobby(state.user.id, create_data) do
+    case Session.create_lobby(state.user.id, create_data) do
       {:ok, details} ->
         data = lobby_details_to_tachyon(details)
 
@@ -686,7 +694,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/join", "request", _msg_id, msg, state) do
-    case Player.Session.lobby_join(state.user.id, msg["data"]["id"]) do
+    case Session.lobby_join(state.user.id, msg["data"]["id"]) do
       {:ok, details} ->
         data = lobby_details_to_tachyon(details)
         {:response, data, state}
@@ -700,7 +708,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/leave", "request", _msg_id, _msg, state) do
-    case Player.Session.lobby_leave(state.user.id) do
+    case Session.lobby_leave(state.user.id) do
       :ok ->
         {:response, state}
 
@@ -711,7 +719,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("lobby/joinAllyTeam", "request", _msg_id, msg, state) do
     with {:ok, ally_team} <- TachyonParser.parse_int(msg["data"]["allyTeam"]),
-         :ok <- Player.Session.lobby_join_ally_team(state.user.id, ally_team) do
+         :ok <- Session.lobby_join_ally_team(state.user.id, ally_team) do
       {:response, state}
     else
       {:error, :invalid_int} ->
@@ -726,7 +734,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/spectate", "request", _msg_id, _msg, state) do
-    case Player.Session.lobby_spectate(state.user.id) do
+    case Session.lobby_spectate(state.user.id) do
       :ok ->
         {:response, state}
 
@@ -739,7 +747,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/joinQueue", "request", _msg_id, _msg, state) do
-    case Player.Session.lobby_join_queue(state.user.id) do
+    case Session.lobby_join_queue(state.user.id) do
       :ok ->
         {:response, state}
 
@@ -758,7 +766,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
     with {:ok, ally_team} <- TachyonParser.parse_int(data["allyTeam"]),
          {:ok, bot_id} <-
-           Player.Session.lobby_add_bot(state.user.id, ally_team, data["shortName"], opts) do
+           Session.lobby_add_bot(state.user.id, ally_team, data["shortName"], opts) do
       {:response, %{id: bot_id}, state}
     else
       {:error, :invalid_int} ->
@@ -773,7 +781,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/removeBot", "request", _msg_id, msg, state) do
-    case Player.Session.lobby_remove_bot(state.user.id, msg["data"]["id"]) do
+    case Session.lobby_remove_bot(state.user.id, msg["data"]["id"]) do
       :ok ->
         {:response, state}
 
@@ -802,7 +810,7 @@ defmodule Teiserver.Player.TachyonHandler do
         end
       end)
 
-    case Player.Session.lobby_update_bot(state.user.id, update_data) do
+    case Session.lobby_update_bot(state.user.id, update_data) do
       :ok ->
         {:response, state}
 
@@ -823,7 +831,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
     update_data = Enum.reduce(keys, %{}, &convert_key(&1, data, &2))
 
-    case Player.Session.lobby_update_properties(state.user.id, update_data) do
+    case Session.lobby_update_properties(state.user.id, update_data) do
       :ok ->
         {:response, state}
 
@@ -834,7 +842,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("lobby/voteSubmit", "request", _msg_id, %{"data" => data}, state) do
     result =
-      Player.Session.lobby_vote_submit(
+      Session.lobby_vote_submit(
         state.user.id,
         data["id"],
         String.to_existing_atom(data["vote"])
@@ -853,7 +861,7 @@ defmodule Teiserver.Player.TachyonHandler do
     mappings = %{"isReady" => :ready?, "assetStatus" => {:asset_status, &parse_asset_status/1}}
     change_status = Collections.transform_map(data, mappings)
 
-    case Player.Session.lobby_update_client_status(state.user.id, change_status) do
+    case Session.lobby_update_client_status(state.user.id, change_status) do
       :ok ->
         {:response, state}
 
@@ -863,7 +871,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/startBattle", "request", _msg_id, _msg, state) do
-    case Player.Session.lobby_start_battle(state.user.id) do
+    case Session.lobby_start_battle(state.user.id) do
       :ok ->
         {:response, state}
 
@@ -873,7 +881,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/subscribeList", "request", _msg_id, _msg, state) do
-    case Player.Session.subscribe_lobby_list(state.user.id) do
+    case Session.subscribe_lobby_list(state.user.id) do
       {:ok, list} ->
         ev =
           Schema.event("lobby/listReset", %{
@@ -889,7 +897,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/unsubscribeList", "request", _msg_id, _msg, state) do
-    :ok = Player.Session.unsubscribe_lobby_list(state.user.id)
+    :ok = Session.unsubscribe_lobby_list(state.user.id)
     {:response, state}
   end
 
@@ -929,13 +937,13 @@ defmodule Teiserver.Player.TachyonHandler do
   # The state associated with the connected player will not match
   # the brand new session.
   defp setup_session(user) do
-    case Player.SessionSupervisor.start_session(user) do
+    case SessionSupervisor.start_session(user) do
       {:ok, session_pid} ->
-        {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
+        {:ok, _} = Registry.register_and_kill_existing(user.id)
         {:ok, session_pid, %{party: nil, invited_to_parties: []}}
 
       {:error, {:already_started, pid}} ->
-        case Player.Session.replace_connection(pid, self()) do
+        case Session.replace_connection(pid, self()) do
           # This can happen when the session dies/terminate between the
           # start_session and the replace_connection. In which case, try again.
           # When a user disconnect and immediately reconnect it can happen
@@ -945,7 +953,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
           {:ok, old_conn_pid, sess_state} ->
             force_disconnect(old_conn_pid)
-            {:ok, _} = Player.Registry.register_and_kill_existing(user.id)
+            {:ok, _} = Registry.register_and_kill_existing(user.id)
             {:ok, pid, sess_state}
         end
     end

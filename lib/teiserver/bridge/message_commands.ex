@@ -1,12 +1,13 @@
 defmodule Teiserver.Bridge.MessageCommands do
   @moduledoc false
-  alias Teiserver.{CacheUser, Account}
-  alias Teiserver.Account.AccoladeLib
-  alias Teiserver.Helper.NumberHelper
-  alias Teiserver.Bridge.UnitNames
-  alias Nostrum.Api
   require Logger
+  alias Nostrum.Api
+  alias Teiserver.Account
+  alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Bridge.UnitNames
+  alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helper.NumberHelper
 
   @unauth ~w(discord)
   @always_allow ~w(whoami help whatwas unit)

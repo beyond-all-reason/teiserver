@@ -4,8 +4,8 @@ defmodule Teiserver.KvStore do
   state across restart
   """
 
-  alias Teiserver.KvStore.Queries
   alias Teiserver.KvStore.Blob
+  alias Teiserver.KvStore.Queries
 
   @spec put(store :: String.t(), key :: String.t(), value :: binary()) ::
           :ok | {:error, Ecto.Changeset.t()}

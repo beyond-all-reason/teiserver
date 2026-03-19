@@ -13,16 +13,19 @@ defmodule Teiserver.Party do
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Matchmaking
-  alias Teiserver.Party
+  alias Teiserver.Party.Registry
+  alias Teiserver.Party.Server
+  alias Teiserver.Party.Supervisor
+  alias Teiserver.Tachyon.System
 
-  @type id :: Party.Server.id()
-  @type state :: Party.Server.state()
+  @type id :: Server.id()
+  @type state :: Server.state()
 
   @spec create_party(T.userid(), pid() | nil) :: {:ok, id(), pid()} | {:error, reason :: term()}
   def create_party(user_id, pid \\ self()) do
-    party_id = Party.Server.gen_party_id()
+    party_id = Server.gen_party_id()
 
-    case Party.Supervisor.start_party(party_id, user_id, pid) do
+    case Supervisor.start_party(party_id, user_id, pid) do
       {:ok, pid} -> {:ok, party_id, pid}
       {:ok, pid, _info} -> {:ok, party_id, pid}
       :ignore -> {:error, :ignore}
@@ -31,11 +34,11 @@ defmodule Teiserver.Party do
   end
 
   def restore_parties() do
-    Teiserver.Tachyon.System.restore_state("party", __MODULE__, :restore_party)
+    System.restore_state("party", __MODULE__, :restore_party)
   end
 
   def restore_party(id, serialized_state) do
-    Party.Supervisor.start_party_from_snapshot(id, serialized_state)
+    Supervisor.start_party_from_snapshot(id, serialized_state)
   end
 
   @spec rejoin(id(), T.userid()) ::
@@ -44,19 +47,19 @@ defmodule Teiserver.Party do
 
   @spec rejoin(id(), T.userid(), pid() | nil) ::
           {:ok, state()} | {:error, :invalid_party | :not_a_member}
-  defdelegate rejoin(party_id, user_id, pid), to: Party.Server
+  defdelegate rejoin(party_id, user_id, pid), to: Server
 
   @spec lookup(id()) :: pid() | nil
-  defdelegate lookup(party_id), to: Party.Registry
+  defdelegate lookup(party_id), to: Registry
 
   @spec count() :: non_neg_integer()
-  defdelegate count(), to: Party.Registry
+  defdelegate count(), to: Registry
 
   @spec get_state(id()) :: state() | nil
-  defdelegate get_state(party_id), to: Party.Server
+  defdelegate get_state(party_id), to: Server
 
   @spec leave_party(id(), T.userid()) :: :ok | {:error, :invalid_party | :not_a_member}
-  defdelegate leave_party(party_id, user_id), to: Party.Server
+  defdelegate leave_party(party_id, user_id), to: Server
 
   @spec create_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
@@ -64,37 +67,37 @@ defmodule Teiserver.Party do
 
   @spec create_invite(id(), T.userid(), pid()) ::
           {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
-  defdelegate create_invite(party_id, user_id, pid), to: Party.Server
+  defdelegate create_invite(party_id, user_id, pid), to: Server
 
   @spec accept_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :not_invited}
-  defdelegate accept_invite(party_id, user_id), to: Party.Server
+  defdelegate accept_invite(party_id, user_id), to: Server
 
   @spec decline_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :not_invited}
-  defdelegate decline_invite(party_id, user_id), to: Party.Server
+  defdelegate decline_invite(party_id, user_id), to: Server
 
   @spec cancel_invite(id(), T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :not_in_party | :not_invited}
-  defdelegate cancel_invite(party_id, user_id), to: Party.Server
+  defdelegate cancel_invite(party_id, user_id), to: Server
 
   @spec kick_user(id(), user_kicking :: T.userid(), kicked_user :: T.userid()) ::
           {:ok, state()} | {:error, :invalid_party | :invalid_target | :not_a_member}
-  defdelegate kick_user(party_id, actor_id, target_id), to: Party.Server
+  defdelegate kick_user(party_id, actor_id, target_id), to: Server
 
   @spec join_queues(id(), [Matchmaking.queue_id()]) :: :ok | {:error, reason :: term()}
-  defdelegate join_queues(party_id, queues), to: Party.Server
+  defdelegate join_queues(party_id, queues), to: Server
 
   @spec matchmaking_notify_cancel(id()) :: :ok
-  defdelegate matchmaking_notify_cancel(party_id), to: Party.Server
+  defdelegate matchmaking_notify_cancel(party_id), to: Server
 
   @spec send_message(id(), T.userid(), String.t()) ::
           :ok | {:error, :invalid_request, reason :: term()}
-  defdelegate send_message(party_id, from_id, msg_content), to: Party.Server
+  defdelegate send_message(party_id, from_id, msg_content), to: Server
 
   def setup_site_configs() do
     Config.add_site_config_type(%{
-      key: Party.Server.max_size_key(),
+      key: Server.max_size_key(),
       section: "Tachyon",
       type: "integer",
       permissions: ["Admin"],
@@ -103,7 +106,7 @@ defmodule Teiserver.Party do
     })
 
     Config.add_site_config_type(%{
-      key: Party.Server.invite_valid_duration_key(),
+      key: Server.invite_valid_duration_key(),
       section: "Tachyon",
       type: "integer",
       permissions: ["Admin"],
@@ -114,7 +117,7 @@ defmodule Teiserver.Party do
 
   @spec update_max_size(integer()) :: :ok
   def update_max_size(new_max_size) do
-    Config.update_site_config(Party.Server.max_size_key(), new_max_size)
+    Config.update_site_config(Server.max_size_key(), new_max_size)
     :ok
   end
 end

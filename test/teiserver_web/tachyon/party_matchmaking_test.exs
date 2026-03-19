@@ -6,7 +6,9 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
   use Teiserver.DataCase
   alias Teiserver.Support.Tachyon
   alias Teiserver.AssetFixtures
-  alias Teiserver.Matchmaking.{QueueSupervisor, QueueServer}
+  alias Teiserver.Matchmaking.QueueSupervisor
+  alias Teiserver.Matchmaking.QueueServer
+  alias Teiserver.Asset
 
   @moduletag :wip
 
@@ -246,7 +248,7 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
       settings: %{tick_interval_ms: :manual, max_distance: 15},
       engines: [%{version: "2025.04.01"}],
       games: [%{spring_game: "BAR-27948-17aa95a"}],
-      maps: Teiserver.Asset.get_maps_for_queue(queue_id)
+      maps: Asset.get_maps_for_queue(queue_id)
     }
 
     state = QueueServer.init_state(map_attrs)

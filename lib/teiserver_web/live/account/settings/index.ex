@@ -2,15 +2,16 @@ defmodule TeiserverWeb.Account.SettingsLive.Index do
   @moduledoc false
   use TeiserverWeb, :live_view
 
+  alias Teiserver.Account.UserLib
   alias Teiserver.Config
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_, _session, socket) do
     socket =
       socket
       |> assign(:tab, nil)
       |> assign(:site_menu_active, "teiserver_account")
-      |> assign(:view_colour, Teiserver.Account.UserLib.colours())
+      |> assign(:view_colour, UserLib.colours())
       |> assign(:show_descriptions, false)
       |> assign(:temp_value, nil)
       |> assign(:selected_key, nil)
@@ -20,7 +21,7 @@ defmodule TeiserverWeb.Account.SettingsLive.Index do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -30,7 +31,7 @@ defmodule TeiserverWeb.Account.SettingsLive.Index do
     |> assign(:page_title, "Settings")
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("open-form", %{"key" => key}, %{assigns: assigns} = socket) do
     new_key =
       if assigns.selected_key == key do

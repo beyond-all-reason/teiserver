@@ -1,7 +1,9 @@
 defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
   @moduledoc false
   use Teiserver.ServerCase, async: false
-  alias Teiserver.{Battle, Coordinator, TeiserverTestLib}
+  alias Teiserver.Battle
+  alias Teiserver.Coordinator
+  alias Teiserver.TeiserverTestLib
   alias Teiserver.Lobby
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.Common.PubsubListener

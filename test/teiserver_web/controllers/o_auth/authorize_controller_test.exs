@@ -2,11 +2,12 @@ defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
   use TeiserverWeb.ConnCase
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuth
+  alias Teiserver.TeiserverTestLib
 
   setup do
     {:ok, data} =
-      GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
-      |> Teiserver.TeiserverTestLib.conn_setup()
+      GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())
+      |> TeiserverTestLib.conn_setup()
 
     {:ok, app} =
       OAuth.create_application(%{

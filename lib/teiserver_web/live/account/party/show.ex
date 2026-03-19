@@ -1,14 +1,14 @@
 defmodule TeiserverWeb.Account.PartyLive.Show do
   use TeiserverWeb, :live_view
-  alias Phoenix.PubSub
   require Logger
-
-  alias Teiserver.{Account, Battle}
-  alias Teiserver.Account.PartyLib
-  import Teiserver.Helper.StringHelper, only: [possessive: 1]
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.StringHelper, only: [possessive: 1]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.PartyLib
+  alias Teiserver.Battle
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, session, socket) do
     socket =
       socket
@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket |> redirect(to: ~p"/")}
   end
@@ -87,7 +87,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(%{channel: "teiserver_party:" <> _, event: :closed}, socket) do
     {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
   end
@@ -176,7 +176,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("create_invite", %{"userid" => userid_str}, socket) do
     userid = int_parse(userid_str)
     Account.create_party_invite(socket.assigns.party_id, userid)

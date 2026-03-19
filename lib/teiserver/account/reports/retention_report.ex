@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.RetentionReport do
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.{Account, Logging}
+  alias Teiserver.Account
+  alias Teiserver.Logging
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-campground"
@@ -46,7 +47,7 @@ defmodule Teiserver.Account.RetentionReport do
         search: [
           inserted_after: start_datetime,
           data_greater_than: {"last_login_mins", "0"},
-          verified: true
+          has_role: "Verified"
         ],
         limit: :infinity
       )

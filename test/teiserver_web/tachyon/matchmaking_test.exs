@@ -1,12 +1,19 @@
 defmodule Teiserver.Tachyon.MatchmakingTest do
   use TeiserverWeb.ConnCase
-  alias Teiserver.Support.Tachyon
-  alias Teiserver.Support.Polling
+  alias Teiserver.Asset
+  alias Teiserver.AssetFixtures
   alias Teiserver.OAuthFixtures
   alias Teiserver.Player
-  alias Teiserver.AssetFixtures
-  alias Teiserver.Asset
-  alias Teiserver.Matchmaking.{QueueSupervisor, QueueServer, PairingRoom}
+  alias Teiserver.Matchmaking.PairingRoom
+  alias Teiserver.Matchmaking.QueueServer
+  alias Teiserver.Matchmaking.QueueSupervisor
+  alias Teiserver.Support.Polling
+  alias Teiserver.Support.Tachyon
+  alias Central.Helpers.GeneralTestLib
+  alias Player.SessionRegistry
+  alias Teiserver.Battle
+  alias Teiserver.Game
+  alias Teiserver.TachyonBattle
 
   defp altair_attr(id),
     do: %{
@@ -155,7 +162,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
     test "empty map list", %{client: client} do
       :ok =
-        Teiserver.Matchmaking.QueueServer.init_state(%{
+        QueueServer.init_state(%{
           id: "mapless",
           name: "mapless",
           team_size: 1,
@@ -243,7 +250,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       id = "emptyengines"
 
       state =
-        Teiserver.Matchmaking.QueueServer.init_state(%{
+        QueueServer.init_state(%{
           id: id,
           name: id,
           team_size: 1,
@@ -264,7 +271,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       id = "emptygames"
 
       state =
-        Teiserver.Matchmaking.QueueServer.init_state(%{
+        QueueServer.init_state(%{
           id: id,
           name: id,
           team_size: 1,
@@ -286,7 +293,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       id = "emptymaps"
 
       state =
-        Teiserver.Matchmaking.QueueServer.init_state(%{
+        QueueServer.init_state(%{
           id: id,
           name: id,
           team_size: 1,
@@ -335,7 +342,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
                Tachyon.join_queues!(ctx.client, [%{id: ctx.queue_id, version: ctx.queue_version}])
 
       g2 = AssetFixtures.create_engine(%{name: "game1"})
-      Teiserver.Asset.set_engine_matchmaking(g2.id)
+      Asset.set_engine_matchmaking(g2.id)
       # when running many tests, or with --repeat-until-failure sometimes the
       # supervisors get restarted too many times without the sleep
       # I have no idea why a small sleep fixes it though :(
@@ -350,7 +357,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
                Tachyon.join_queues!(ctx.client, [%{id: ctx.queue_id, version: ctx.queue_version}])
 
       g2 = AssetFixtures.create_game(%{name: "game1"})
-      Teiserver.Asset.set_game_matchmaking(g2.id)
+      Asset.set_game_matchmaking(g2.id)
       assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(ctx.client)
     end
   end
@@ -385,7 +392,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
       # also forcefully terminate the session, this simulates a player
       # crash without reconnection
-      session_pid = Player.SessionRegistry.lookup(user.id)
+      session_pid = SessionRegistry.lookup(user.id)
       assert is_pid(session_pid)
       ref = Player.monitor_session(user.id)
       Process.exit(session_pid, :kill)
@@ -402,7 +409,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
   describe "pairing" do
     defp setup_app(_context) do
-      owner = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+      owner = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
       app =
         OAuthFixtures.app_attrs(owner.id)
@@ -413,7 +420,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
 
     defp setup_user(app) do
-      user = Central.Helpers.GeneralTestLib.make_user(%{"data" => %{"roles" => ["Verified"]}})
+      user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
       token = OAuthFixtures.token_attrs(user.id, app) |> OAuthFixtures.create_token()
       client = Tachyon.connect(token)
       {:ok, %{user: user, token: token, client: client}}
@@ -762,7 +769,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
       for user_id <- user_ids do
         {user_id, _} = Integer.parse(user_id)
-        assert is_pid(Player.SessionRegistry.lookup(user_id))
+        assert is_pid(SessionRegistry.lookup(user_id))
       end
 
       # Map will be randomly selected so we first check if the first client's map is in the map pool
@@ -809,10 +816,10 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         assert info["status"] == "playing"
       end
 
-      battle = Teiserver.TachyonBattle.lookup(battle_id)
+      battle = TachyonBattle.lookup(battle_id)
       match_id = GenServer.call(battle, :get_match_id)
-      match = Teiserver.Battle.get_match!(match_id)
-      memberships = Teiserver.Battle.get_match_memberships(match_id)
+      match = Battle.get_match!(match_id)
+      memberships = Battle.get_match_memberships(match_id)
 
       assert match.map == spring_name
       assert match.game_version in (game_versions() |> Enum.map(fn game -> game.spring_game end))
@@ -840,8 +847,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         )
       end
 
-      assert Polling.poll_until_some(fn -> Teiserver.Battle.get_match!(match_id).finished end)
-      memberships = Teiserver.Battle.get_match_memberships(match_id)
+      assert Polling.poll_until_some(fn -> Battle.get_match!(match_id).finished end)
+      memberships = Battle.get_match_memberships(match_id)
 
       for member <- memberships do
         if member.team_id == winning_team_id do
@@ -854,7 +861,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       Tachyon.autohost_send_update_event(autohost_client, Tachyon.autohost_engine_quit(battle_id))
 
       assert Polling.poll_until_true(fn ->
-               Teiserver.Game.count_rating_logs(search: [match_id: match_id]) == 2
+               Game.count_rating_logs(search: [match_id: match_id]) == 2
              end)
 
       for usr <- clients do

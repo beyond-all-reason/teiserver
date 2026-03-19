@@ -1,6 +1,6 @@
 defmodule Teiserver.Asset.MapLib do
-  alias Teiserver.Asset
   alias Ecto.Multi
+  alias Teiserver.Asset
   alias Teiserver.Repo
 
   @spec icon :: String.t()

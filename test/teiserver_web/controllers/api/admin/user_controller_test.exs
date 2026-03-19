@@ -1,14 +1,16 @@
 defmodule TeiserverWeb.API.Admin.UserControllerTest do
   use TeiserverWeb.ConnCase, async: false
   alias Teiserver.OAuthFixtures
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Account
 
   defp setup_user(_context) do
-    user = Central.Helpers.GeneralTestLib.make_user()
+    user = GeneralTestLib.make_user()
     {:ok, user: user}
   end
 
   defp setup_generic_lobby_app(_context) do
-    user = Central.Helpers.GeneralTestLib.make_user()
+    user = GeneralTestLib.make_user()
 
     # Create the generic_lobby app that our controller expects
     app =
@@ -80,8 +82,8 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       assert resp["credentials"]["access_token"]
 
       # Verify the created user has the correct stats
-      user = Teiserver.Account.get_user_by_email("testuser2@example.com")
-      user_stats = Teiserver.Account.get_user_stat_data(user.id)
+      user = Account.get_user_by_email("testuser2@example.com")
+      user_stats = Account.get_user_stat_data(user.id)
       assert user_stats["mu"] == 1500
       assert user_stats["sigma"] == 100
       assert user_stats["play_time"] == 3600
@@ -137,7 +139,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
         "icon" => "fa-solid fa-user",
         "colour" => "#FF0000",
         "roles" => ["Verified"],
-        "permissions" => ["User"],
+        "permissions" => ["Verified"],
         "restrictions" => [],
         "shadowbanned" => false,
         "mu" => 1500,
@@ -154,7 +156,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       assert resp["user"]["icon"] == "fa-solid fa-user"
       assert resp["user"]["colour"] == "#FF0000"
       assert resp["user"]["roles"] == ["Verified"]
-      assert resp["user"]["permissions"] == ["User"]
+      assert resp["user"]["permissions"] == ["Verified"]
       assert resp["user"]["restrictions"] == []
       assert resp["user"]["shadowbanned"] == false
       assert resp["credentials"]["access_token"]
@@ -240,7 +242,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
 
     test "requires valid scopes", %{conn: conn} do
       # Create a user and token without the required scope
-      user = Central.Helpers.GeneralTestLib.make_user()
+      user = GeneralTestLib.make_user()
 
       app =
         OAuthFixtures.app_attrs(user.id)

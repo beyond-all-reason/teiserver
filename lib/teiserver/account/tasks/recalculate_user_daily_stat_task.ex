@@ -5,9 +5,10 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
   """
   use Oban.Worker, queue: :cleanup
 
-  alias Teiserver.Repo
   import Ecto.Query, warn: false
+
   alias Teiserver.Account
+  alias Teiserver.Repo
   alias Teiserver.Logging.UserActivityDayLog
 
   # Teiserver.Account.RecalculateUserDailyStatTask.perform(nil)

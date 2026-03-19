@@ -1,20 +1,19 @@
 defmodule Teiserver.Helper.MonitorCollectionTest do
   use ExUnit.Case, async: true
+  alias Teiserver.Helpers.MonitorCollection, as: MC
+  import ExUnit.Callbacks, only: [start_supervised!: 1]
 
   defmodule GenServerTest do
     use GenServer
 
     def start_link(arg), do: GenServer.start_link(__MODULE__, arg)
 
-    @impl true
+    @impl GenServer
     def init(_args), do: {:ok, nil}
 
-    @impl true
+    @impl GenServer
     def handle_call(:stop, _from, state), do: {:stop, :normal, :stopped, state}
   end
-
-  alias Teiserver.Helpers.MonitorCollection, as: MC
-  import ExUnit.Callbacks, only: [start_supervised!: 1]
 
   test "can monitor a single process" do
     pid = start_supervised!(GenServerTest)

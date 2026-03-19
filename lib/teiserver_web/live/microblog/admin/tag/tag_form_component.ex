@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
 
   alias Teiserver.Microblog
 
-  @impl true
+  @impl Phoenix.LiveComponent
   def render(assigns) do
     ~H"""
     <div>
@@ -52,7 +52,7 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
     """
   end
 
-  @impl true
+  @impl Phoenix.LiveComponent
   def update(%{tag: tag} = assigns, socket) do
     changeset = Microblog.change_tag(tag)
 
@@ -62,7 +62,7 @@ defmodule TeiserverWeb.Microblog.TagFormComponent do
      |> assign_form(changeset)}
   end
 
-  @impl true
+  @impl Phoenix.LiveComponent
   def handle_event("validate", %{"tag" => tag_params}, socket) do
     changeset =
       socket.assigns.tag

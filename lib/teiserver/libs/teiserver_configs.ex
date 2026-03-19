@@ -2,6 +2,11 @@ defmodule Teiserver.TeiserverConfigs do
   @moduledoc false
   import Teiserver.Config, only: [add_site_config_type: 1]
 
+  alias Teiserver.Account
+  alias Teiserver.Lobby
+  alias Teiserver.Party
+  alias Teiserver.Tachyon
+
   @spec teiserver_configs :: any
   def teiserver_configs do
     # Site based configs
@@ -297,7 +302,7 @@ defmodule Teiserver.TeiserverConfigs do
       description: "The cap for number of concurrent users",
       default: 1000,
       value_label: "",
-      update_callback: fn rate -> Teiserver.Account.set_login_limit(rate) end
+      update_callback: fn rate -> Account.set_login_limit(rate) end
     })
 
     add_site_config_type(%{
@@ -308,7 +313,7 @@ defmodule Teiserver.TeiserverConfigs do
       description: "How many user per seconds should be able to log in",
       default: 2,
       value_label: "",
-      update_callback: fn rate -> Teiserver.Account.reset_login_rate_limiter(rate) end
+      update_callback: fn rate -> Account.reset_login_rate_limiter(rate) end
     })
 
     add_site_config_type(%{
@@ -463,7 +468,7 @@ defmodule Teiserver.TeiserverConfigs do
       description:
         "It seems that the lobby views are very cpu hungry when lobby count is high. This is an attempt to troubleshoot and live disabling it.",
       default: false,
-      update_callback: &Teiserver.Lobby.disable_live_lobby_feature(&1)
+      update_callback: &Lobby.disable_live_lobby_feature(&1)
     })
 
     add_site_config_type(%{
@@ -737,8 +742,8 @@ defmodule Teiserver.TeiserverConfigs do
   end
 
   defp tachyon_configs do
-    Teiserver.Tachyon.setup_site_configs()
-    Teiserver.Party.setup_site_configs()
+    Tachyon.setup_site_configs()
+    Party.setup_site_configs()
     :ok
   end
 end

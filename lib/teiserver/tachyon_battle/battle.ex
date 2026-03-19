@@ -2,9 +2,9 @@ defmodule Teiserver.TachyonBattle.Battle do
   require Logger
 
   alias Teiserver.Autohost
-  alias Teiserver.TachyonBattle.Types, as: T
-  alias Teiserver.TachyonBattle.Registry
   alias Teiserver.Battle
+  alias Teiserver.TachyonBattle.Registry
+  alias Teiserver.TachyonBattle.Types, as: T
 
   # For now, don't do any restart. The genserver is only used to hold some
   # transient state. Later, we can attempt to reconstruct some state after
@@ -14,10 +14,10 @@ defmodule Teiserver.TachyonBattle.Battle do
   @type state :: %{
           id: T.id(),
           match_id: T.match_id(),
-          autohost_id: Teiserver.Autohost.id(),
+          autohost_id: Autohost.id(),
           autohost_pid: pid(),
           autohost_timeout: timeout(),
-          start_script: Teiserver.Autohost.start_script(),
+          start_script: Autohost.start_script(),
           # initialised: the battle is waiting for players to join and start the match
           # finished: the battle is over, but there are still some player in the match,
           # maybe looking at stats or whatever
@@ -37,7 +37,7 @@ defmodule Teiserver.TachyonBattle.Battle do
   # TODO! handle the case where the battle isn't there somehow. This
   # will become important when we start tracking event history for autohosts
   # and doing state recovery
-  @spec send_update_event(Teiserver.Autohost.update_event()) :: :ok
+  @spec send_update_event(Autohost.update_event()) :: :ok
   def send_update_event(event) do
     GenServer.cast(via_tuple(event.battle_id), {:update_event, event})
   end
@@ -56,7 +56,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     :exit, {:noproc, _} -> {:error, :invalid_battle}
   end
 
-  @impl true
+  @impl GenServer
   def init(
         %{
           battle_id: battle_id,
@@ -89,7 +89,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     # 8h is more than enough time for any online game
     :timer.send_after(8 * 60 * 60_000, :battle_timeout)
 
-    case Teiserver.Autohost.lookup_autohost(autohost_id) do
+    case Autohost.lookup_autohost(autohost_id) do
       {pid, _} ->
         Logger.info("init battle for autohost #{autohost_id}")
         Process.monitor(pid)
@@ -100,7 +100,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_call({:send_message, msg}, _from, state) do
     case state.autohost_id do
       nil ->
@@ -133,7 +133,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     {:reply, state.match_id, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:update_event, ev}, state) do
     if state.autohost_pid != nil,
       do: Autohost.ack_update_event(state.autohost_pid, state.id, ev.time)
@@ -169,7 +169,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
     timeout = state.autohost_timeout
     if timeout != :infinity, do: :timer.send_after(timeout, :autohost_timeout)

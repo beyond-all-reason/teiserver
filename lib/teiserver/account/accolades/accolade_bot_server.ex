@@ -3,10 +3,15 @@ defmodule Teiserver.Account.AccoladeBotServer do
   The accolade server is the interface point for the Accolade system.
   """
   use GenServer
-  alias Teiserver.Config
-  alias Teiserver.{Account, CacheUser, Room, Battle, Coordinator}
-  alias Teiserver.Coordinator.CoordinatorCommands
+  alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.Auth
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Config
+  alias Teiserver.Coordinator.CoordinatorCommands
+  alias Teiserver.Coordinator.Parser
+  alias Teiserver.Room
   alias Phoenix.PubSub
   require Logger
 
@@ -20,12 +25,12 @@ defmodule Teiserver.Account.AccoladeBotServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:update_client, new_client}, state) do
     {:noreply, %{state | client: new_client}}
   end
@@ -34,7 +39,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Accolade server")
     account = get_accolade_account()
@@ -118,14 +123,14 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   def handle_info({:direct_message, sender_id, "$" <> command}, state) do
-    cmd = Coordinator.Parser.parse_command(sender_id, "$#{command}")
+    cmd = Parser.parse_command(sender_id, "$#{command}")
     new_state = CoordinatorCommands.handle_command(cmd, state)
 
     {:noreply, new_state}
   end
 
   def handle_info({:direct_message, userid, message}, state) do
-    if not CacheUser.is_bot?(userid) do
+    if not Auth.is_bot?(userid) do
       case AccoladeLib.cast_accolade_chat(userid, {:user_message, message}) do
         nil ->
           CacheUser.send_direct_message(
@@ -183,8 +188,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
           Account.script_create_user(%{
             name: "AccoladesBot",
             email: "accolades_bot@teiserver.local",
-            icon:
-              "fa-solid #{Teiserver.Account.AccoladeLib.icon()}" |> String.replace(" far ", " "),
+            icon: "fa-solid #{AccoladeLib.icon()}" |> String.replace(" far ", " "),
             colour: "#0066AA",
             password: Account.make_bot_password(),
             roles: ["Bot", "Verified"],
@@ -226,7 +230,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     end)
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     Horde.Registry.register(

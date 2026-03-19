@@ -13,7 +13,7 @@ defmodule Teiserver.BitParse do
     if int == 0 do
       List.duplicate(0, bit_length)
     else
-      min_len = :math.log2(int) |> :math.ceil() |> trunc
+      min_len = :math.log2(int) |> :math.ceil() |> trunc()
       for <<(bit::1 <- <<int::size(max(bit_length, min_len))>>)>>, do: bit
     end
   end

@@ -9,10 +9,10 @@ defmodule Teiserver.Matchmaking.Algo.IgnoreOs do
   alias Teiserver.Matchmaking.Algos
   @behaviour Algos
 
-  @impl true
+  @impl Teiserver.Matchmaking.Algos
   def init(team_size, team_count), do: {team_size, team_count}
 
-  @impl true
+  @impl Teiserver.Matchmaking.Algos
   def get_matches(members, {team_size, team_count}) do
     case Algos.match_members(members, team_size, team_count, fn _ -> true end) do
       [] -> :no_match

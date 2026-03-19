@@ -2,8 +2,18 @@ defmodule Teiserver.Account.AuthPlug do
   @moduledoc false
   import Plug.Conn
 
+  alias ExULID.ULID
+  alias Phoenix.Component
+  alias Phoenix.Controller
+  alias Phoenix.LiveView
+  alias Phoenix.LiveView.Utils
   alias Teiserver.Account
-  alias Teiserver.Account.{Guardian, AuthLib}
+  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Guardian
+  alias Teiserver.Account.Guardian.Plug, as: GuardianPlug
+  alias Teiserver.Account.TOTPLib
+  alias Teiserver.CacheUser
+  alias Teiserver.Plugs.CachePlug
   require Logger
   use TeiserverWeb, :verified_routes
 
@@ -20,7 +30,7 @@ defmodule Teiserver.Account.AuthPlug do
 
     user_token =
       if user do
-        Guardian.Plug.current_token(conn)
+        GuardianPlug.current_token(conn)
       else
         ""
       end
@@ -32,7 +42,7 @@ defmodule Teiserver.Account.AuthPlug do
     totp_status =
       case user do
         nil -> nil
-        _ -> Teiserver.Account.TOTPLib.get_user_totp_status(user.id)
+        _ -> TOTPLib.get_user_totp_status(user.id)
       end
 
     conn =
@@ -46,9 +56,9 @@ defmodule Teiserver.Account.AuthPlug do
       |> assign(:current_user, nil)
       |> assign(:user_token, nil)
       |> assign(:totp_status, nil)
-      |> Phoenix.Controller.put_flash(:danger, "You are banned")
-      |> Guardian.Plug.sign_out(clear_remember_me: true)
-      |> Phoenix.Controller.redirect(to: ~p"/logout")
+      |> Controller.put_flash(:danger, "You are banned")
+      |> GuardianPlug.sign_out(clear_remember_me: true)
+      |> Controller.redirect(to: ~p"/logout")
     else
       conn
     end
@@ -62,19 +72,19 @@ defmodule Teiserver.Account.AuthPlug do
       end
 
     if user != nil do
-      request_id = ExULID.ULID.generate()
+      request_id = ULID.generate()
       Logger.metadata([request_id: request_id, user_id: user.id] ++ Logger.metadata())
     end
 
     socket =
       socket
-      |> Phoenix.LiveView.Utils.assign(:current_user, user)
+      |> Utils.assign(:current_user, user)
 
     if banned_user?(socket) do
       socket
-      |> Phoenix.LiveView.Utils.assign(:current_user, nil)
-      |> Phoenix.LiveView.Utils.assign(:user_token, nil)
-      |> Phoenix.LiveView.redirect(to: ~p"/logout")
+      |> Utils.assign(:current_user, nil)
+      |> Utils.assign(:user_token, nil)
+      |> LiveView.redirect(to: ~p"/logout")
     else
       socket
     end
@@ -84,7 +94,7 @@ defmodule Teiserver.Account.AuthPlug do
 
   defp banned_user?(%{assigns: %{current_user: current_user}} = _conn_or_socket) do
     cond do
-      Teiserver.CacheUser.is_restricted?(current_user.id, ["Login"]) ->
+      CacheUser.is_restricted?(current_user.id, ["Login"]) ->
         true
 
       current_user.smurf_of_id != nil ->
@@ -142,8 +152,8 @@ defmodule Teiserver.Account.AuthPlug do
     else
       socket =
         socket
-        |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-        |> Phoenix.LiveView.redirect(to: ~p"/login")
+        |> LiveView.put_flash(:error, "You must log in to access this page.")
+        |> LiveView.redirect(to: ~p"/login")
 
       {:halt, socket}
     end
@@ -153,7 +163,7 @@ defmodule Teiserver.Account.AuthPlug do
     socket = mount_current_user(socket, session)
 
     if socket.assigns.current_user do
-      {:halt, Phoenix.LiveView.redirect(socket, to: signed_in_path(socket))}
+      {:halt, LiveView.redirect(socket, to: signed_in_path(socket))}
     else
       {:cont, socket}
     end
@@ -165,21 +175,21 @@ defmodule Teiserver.Account.AuthPlug do
     else
       socket =
         socket
-        |> Phoenix.LiveView.put_flash(:error, "You do not have permission to view that page.")
-        |> Phoenix.LiveView.redirect(to: ~p"/")
+        |> LiveView.put_flash(:error, "You do not have permission to view that page.")
+        |> LiveView.redirect(to: ~p"/")
 
       {:halt, socket}
     end
   end
 
   defp mount_current_user(socket, session) do
-    Phoenix.Component.assign_new(socket, :current_user, fn ->
+    Component.assign_new(socket, :current_user, fn ->
       case Guardian.resource_from_token(session["guardian_default_token"]) do
         {:ok, user, _claims} -> Account.get_user!(user.id)
         _ -> nil
       end
     end)
-    |> Teiserver.Plugs.CachePlug.live_call()
+    |> CachePlug.live_call()
   end
 
   defp signed_in_path(_conn), do: ~p"/"

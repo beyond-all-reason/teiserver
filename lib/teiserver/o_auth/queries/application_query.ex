@@ -1,7 +1,10 @@
 defmodule Teiserver.OAuth.ApplicationQueries do
   use TeiserverWeb, :queries
 
-  alias Teiserver.OAuth.{Application, TokenQueries, CodeQueries, CredentialQueries}
+  alias Teiserver.OAuth.Application
+  alias Teiserver.OAuth.TokenQueries
+  alias Teiserver.OAuth.CodeQueries
+  alias Teiserver.OAuth.CredentialQueries
   alias Teiserver.Data.Types, as: T
 
   @doc """

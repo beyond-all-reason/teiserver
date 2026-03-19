@@ -1,7 +1,9 @@
 defmodule Teiserver.Coordinator do
   @moduledoc false
-  alias Teiserver.{Battle, CacheUser}
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Throttles
   require Logger
 
   @spec start_coordinator() ::
@@ -226,7 +228,7 @@ defmodule Teiserver.Coordinator do
         DynamicSupervisor.terminate_child(Teiserver.Coordinator.BalancerDynamicSupervisor, p)
     end
 
-    Teiserver.Throttles.stop_throttle("LobbyThrottle:#{lobby_id}")
+    Throttles.stop_throttle("LobbyThrottle:#{lobby_id}")
     :ok
   end
 

@@ -3,7 +3,8 @@ defmodule Teiserver.Lobby.CommandLib do
 
   """
 
-  alias Teiserver.{Account, Battle}
+  alias Teiserver.Account
+  alias Teiserver.Battle
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.Data.Types, as: T
   require Logger

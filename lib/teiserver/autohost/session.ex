@@ -7,10 +7,11 @@ defmodule Teiserver.Autohost.Session do
 
   @behaviour :gen_statem
 
-  alias Teiserver.Bot.Bot
   alias Teiserver.Autohost
-  alias Teiserver.Autohost.{TachyonHandler, SessionRegistry}
   alias Teiserver.TachyonBattle
+  alias Teiserver.Autohost.SessionRegistry
+  alias Teiserver.Autohost.TachyonHandler
+  alias Teiserver.Bot.Bot
   alias Teiserver.Helpers.MonitorCollection, as: MC
 
   require Logger
@@ -187,7 +188,7 @@ defmodule Teiserver.Autohost.Session do
         _state,
         data
       ) do
-    Teiserver.Autohost.TachyonHandler.start_battle(data.conn_pid, battle_id, start_script)
+    TachyonHandler.start_battle(data.conn_pid, battle_id, start_script)
 
     data =
       data

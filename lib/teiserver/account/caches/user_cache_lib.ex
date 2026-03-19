@@ -1,9 +1,10 @@
 defmodule Teiserver.Account.UserCacheLib do
   @moduledoc false
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.{Account, CacheUser}
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account
   alias Teiserver.Account.Guardian
+  alias Teiserver.CacheUser
+  alias Teiserver.Data.Types, as: T
   require Logger
 
   @spec get_username(T.userid() | nil) :: String.t() | nil
@@ -169,7 +170,7 @@ defmodule Teiserver.Account.UserCacheLib do
     Teiserver.cache_delete(:config_user_cache, id)
 
     # decache_user(id)
-    Teiserver.Account.decache_relationships(id)
+    Account.decache_relationships(id)
 
     Account.get_user(id)
     |> convert_user()
@@ -179,7 +180,7 @@ defmodule Teiserver.Account.UserCacheLib do
   end
 
   def recache_user(user) do
-    Teiserver.Account.recache_user(user.id)
+    Account.recache_user(user.id)
 
     user
     |> convert_user()

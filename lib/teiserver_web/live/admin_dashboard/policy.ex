@@ -1,15 +1,15 @@
 defmodule TeiserverWeb.AdminDashLive.Policy do
   use TeiserverWeb, :live_view
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.LiveView.Socket
   alias Phoenix.PubSub
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-
   alias Teiserver
-  alias Teiserver.{Game}
+  alias Teiserver.Admin.AdminLib
+  alias Teiserver.Game
   # alias Teiserver.Account.AccoladeLib
   # alias Teiserver.Data.Matchmaking
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(%{"id" => id}, session, socket) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "lobby_policy_updates:#{id}")
 
@@ -21,7 +21,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> add_breadcrumb(name: "Policy #{id}", url: "/admin/dashboard/policy/#{id}")
       |> assign(:site_menu_active, "admin")
-      |> assign(:view_colour, Teiserver.Admin.AdminLib.colours())
+      |> assign(:view_colour, AdminLib.colours())
       |> get_policy_bots()
 
     :timer.send_interval(5_000, :tick)
@@ -29,7 +29,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
     case allow?(socket.assigns[:current_user], "Server") do
       true ->
@@ -42,7 +42,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(:tick, socket) do
     {
       :noreply,
@@ -67,7 +67,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
   #   {:noreply, state}
   # end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("disconnect-all-bots", _event, socket) do
     Game.cast_lobby_organiser(socket.assigns.id, :disconnect_all_bots)
 

@@ -5,13 +5,25 @@ defmodule Teiserver.Moderation do
   # require Logger
 
   alias Phoenix.PubSub
+  alias Teiserver.Account
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.QueryHelpers
-
-  alias Teiserver.{Account}
+  alias Teiserver.Moderation.Action
+  alias Teiserver.Moderation.ActionLib
+  alias Teiserver.Moderation.Ban
+  alias Teiserver.Moderation.BanLib
+  alias Teiserver.Moderation.Proposal
+  alias Teiserver.Moderation.ProposalLib
+  alias Teiserver.Moderation.ProposalVote
+  alias Teiserver.Moderation.ProposalVoteLib
+  alias Teiserver.Moderation.Report
+  alias Teiserver.Moderation.ReportGroupLib
+  alias Teiserver.Moderation.ReportLib
+  alias Teiserver.Moderation.RefreshUserRestrictionsTask
+  alias Teiserver.Moderation.Response
+  alias Teiserver.Moderation.ResponseLib
+  alias Teiserver.CacheUser
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
-
-  alias Teiserver.Moderation.{Report, ReportLib}
 
   @spec icon :: String.t()
   defdelegate icon(), to: ReportLib
@@ -252,7 +264,7 @@ defmodule Teiserver.Moderation do
     case create_report(report_params) do
       {:ok, report} ->
         {:ok, report_group} =
-          Teiserver.Moderation.update_report_group(report_group, %{
+          update_report_group(report_group, %{
             report_count: report_group.report_count + 1
           })
 
@@ -262,8 +274,6 @@ defmodule Teiserver.Moderation do
         result
     end
   end
-
-  alias Teiserver.Moderation.ReportGroupLib
 
   @spec list_report_groups() :: [ComplexServerEventType.t()]
   defdelegate list_report_groups(), to: ReportGroupLib
@@ -302,8 +312,6 @@ defmodule Teiserver.Moderation do
 
   @spec get_or_make_report_group(T.userid(), T.match_id() | nil) :: ReportGroup.t()
   defdelegate get_or_make_report_group(target_id, match_id), to: ReportGroupLib
-
-  alias Teiserver.Moderation.{Response, ResponseLib}
 
   @spec response_query(List.t()) :: Ecto.Query.t()
   def response_query(args) do
@@ -489,8 +497,6 @@ defmodule Teiserver.Moderation do
   def change_response(%Response{} = response) do
     Response.changeset(response, %{})
   end
-
-  alias Teiserver.Moderation.{Action, ActionLib}
 
   @spec action_query(List.t()) :: Ecto.Query.t()
   def action_query(args) do
@@ -704,8 +710,6 @@ defmodule Teiserver.Moderation do
     Action.changeset(action, %{})
   end
 
-  alias Teiserver.Moderation.{Proposal, ProposalLib}
-
   @spec proposal_query(List.t()) :: Ecto.Query.t()
   def proposal_query(args) do
     proposal_query(nil, args)
@@ -892,8 +896,6 @@ defmodule Teiserver.Moderation do
     Proposal.changeset(proposal, %{})
   end
 
-  alias Teiserver.Moderation.{ProposalVote, ProposalVoteLib}
-
   @doc """
   Gets a single proposal_vote.
 
@@ -967,8 +969,6 @@ defmodule Teiserver.Moderation do
   def change_proposal_vote(%ProposalVote{} = proposal_vote) do
     ProposalVote.changeset(proposal_vote, %{})
   end
-
-  alias Teiserver.Moderation.{Ban, BanLib}
 
   @spec ban_query(List.t()) :: Ecto.Query.t()
   def ban_query(args) do
@@ -1163,7 +1163,7 @@ defmodule Teiserver.Moderation do
   def unbridge_user(nil, _, _, _), do: :no_user
 
   def unbridge_user(user, message, flagged_word_count, location) do
-    if not Teiserver.CacheUser.is_restricted?(user, ["Bridging"]) do
+    if not CacheUser.is_restricted?(user, ["Bridging"]) do
       {:ok, _action} =
         create_action(%{
           target_id: user.id,
@@ -1174,7 +1174,7 @@ defmodule Teiserver.Moderation do
           expires: Timex.now() |> Timex.shift(years: 1200)
         })
 
-      Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
+      RefreshUserRestrictionsTask.refresh_user(user.id)
 
       client = Account.get_client_by_id(user.id) || %{ip: "no client"}
 

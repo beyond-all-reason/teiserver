@@ -1,6 +1,8 @@
 defmodule TeiserverWeb.ErrorView do
   use TeiserverWeb, :view
 
+  alias Phoenix.Controller
+
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-exclamation-triangle"
 
@@ -17,7 +19,7 @@ defmodule TeiserverWeb.ErrorView do
   # the template name. For example, "404.html" becomes
   # "Not Found".
   def template_not_found(template, _assigns) do
-    Phoenix.Controller.status_message_from_template(template)
+    Controller.status_message_from_template(template)
   end
 
   def render("403.html", assigns) do

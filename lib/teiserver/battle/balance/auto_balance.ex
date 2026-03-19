@@ -2,11 +2,11 @@ defmodule Teiserver.Battle.Balance.AutoBalance do
   @moduledoc """
   This will call other balancers depending on circumstances
   """
-  alias Teiserver.Battle.Balance.SplitNoobs
   alias Teiserver.Battle.Balance.LoserPicks
   alias Teiserver.Battle.Balance.RespectAvoids
-  alias Teiserver.Battle.Balance.BalanceTypes, as: BT
+  alias Teiserver.Battle.Balance.SplitNoobs
   alias Teiserver.Battle.Balance.AutoBalanceTypes, as: DB
+  alias Teiserver.Battle.Balance.BalanceTypes, as: BT
 
   @doc """
   Main entry point used by balance_lib

@@ -3,11 +3,12 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.{Game}
+  alias Teiserver.Admin.AdminLib
+  alias Teiserver.Game
   # alias Teiserver.Account.AccoladeLib
   # alias Teiserver.Data.Matchmaking
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, session, socket) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_liveview_login_throttle")
 
@@ -18,7 +19,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
       |> add_breadcrumb(name: "Dashboard", url: ~p"/admin/dashboard")
       |> add_breadcrumb(name: "Login throttle", url: ~p"/admin/dashboard/login_throttle")
       |> assign(:site_menu_active, "admin")
-      |> assign(:view_colour, Teiserver.Admin.AdminLib.colours())
+      |> assign(:view_colour, AdminLib.colours())
       |> assign(:heartbeats, %{})
       |> assign(:queues, nil)
       |> assign(:recent_logins, [])
@@ -31,7 +32,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(_params, _url, socket) do
     case allow?(socket.assigns[:current_user], "teiserver.staff.server") do
       true ->
@@ -44,7 +45,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(:tick, socket) do
     {
       :noreply,
@@ -101,7 +102,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
      |> assign(:recent_logins, msg.recent_logins)}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("disconnect-all-bots", _event, socket) do
     Game.cast_lobby_organiser(socket.assigns.id, :disconnect_all_bots)
 

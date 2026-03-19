@@ -3,13 +3,21 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   The server used to monitor the autohosts and get data from them
   """
   use GenServer
-  alias Teiserver.{Account, Room, Client, CacheUser, Battle, Telemetry}
-  alias Teiserver.Lobby.ChatLib
-  alias Phoenix.PubSub
-  alias Teiserver.Account.CalculateSmurfKeyTask
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Account.CalculateSmurfKeyTask
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
+  alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Protocols.Spring
+  alias Teiserver.Room
+  alias Teiserver.Telemetry
 
   @spec do_start() :: :ok
   def do_start() do
@@ -33,12 +41,12 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:update_client, new_client}, state) do
     {:noreply, %{state | client: new_client}}
   end
@@ -48,7 +56,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   # Direct/Room messaging
-  @impl true
+  @impl GenServer
   def handle_info(:begin, _state) do
     state =
       if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
@@ -154,7 +162,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   def handle_info({:direct_message, from_id, "broken_connection " <> username}, state) do
-    if CacheUser.is_bot?(from_id) or CacheUser.is_moderator?(from_id) do
+    if Auth.is_bot?(from_id) or Auth.is_moderator?(from_id) do
       user = Account.get_user_by_name(username)
 
       if user do
@@ -180,7 +188,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       [_all, username, event_type_name, game_time] ->
         userid = Account.get_userid_from_name(username)
 
-        if userid && CacheUser.is_bot?(from_id) do
+        if userid && Auth.is_bot?(from_id) do
           match_id = Battle.get_match_id_from_userid(from_id)
 
           if match_id do
@@ -214,7 +222,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           {:ok, json_data} ->
             userid = Account.get_userid_from_name(username)
 
-            if userid && CacheUser.is_bot?(from_id) do
+            if userid && Auth.is_bot?(from_id) do
               match_id = Battle.get_match_id_from_userid(from_id)
 
               if match_id do
@@ -342,7 +350,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
     case Base.url_decode64(message) do
       {:ok, compressed_contents} ->
-        case Teiserver.Protocols.Spring.unzip(compressed_contents) do
+        case Spring.unzip(compressed_contents) do
           {:ok, contents_string} ->
             case Jason.decode(contents_string) do
               {:ok, data} ->
@@ -382,7 +390,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         :ok
 
       user ->
-        if CacheUser.is_bot?(from_id) do
+        if Auth.is_bot?(from_id) do
           stats = %{
             "hardware:cpuinfo" => contents["CPU"] || "Null CPU",
             "hardware:gpuinfo" => contents["GPU"] || "Null GPU",
@@ -401,7 +409,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           Account.create_smurf_key(user.id, "hw1", hw1)
           Account.create_smurf_key(user.id, "hw2", hw2)
           Account.create_smurf_key(user.id, "hw3", hw3)
-          Teiserver.Coordinator.AutomodServer.check_user(user.id)
+          AutomodServer.check_user(user.id)
         end
     end
   end
@@ -480,7 +488,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     end
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     send(self(), :begin)

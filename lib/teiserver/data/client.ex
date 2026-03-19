@@ -8,14 +8,18 @@
 
 defmodule Teiserver.Client do
   @moduledoc false
-  alias Phoenix.PubSub
-  alias Teiserver.{CacheUser, Account, Telemetry, Clans, Coordinator}
-  alias Teiserver.Lobby
-  alias Teiserver.Account.ClientLib
-  # alias Teiserver.Helper.TimexHelper
   require Logger
-
+  # alias Teiserver.Helper.TimexHelper
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Account.ClientLib
+  alias Teiserver.CacheUser
+  alias Teiserver.Clans
+  alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Lobby
+  alias Teiserver.Telemetry
 
   @spec create(map()) :: map()
   def create(client) do
@@ -105,8 +109,8 @@ defmodule Teiserver.Client do
         name: user.name,
         tcp_pid: self(),
         rank: user.rank,
-        moderator: CacheUser.is_moderator?(user) or CacheUser.is_event_organizer?(user),
-        bot: CacheUser.is_bot?(user),
+        moderator: Auth.is_moderator?(user) or Auth.is_event_organizer?(user),
+        bot: Auth.is_bot?(user),
         away: false,
         in_game: false,
         ip: ip || stats["last_ip"],

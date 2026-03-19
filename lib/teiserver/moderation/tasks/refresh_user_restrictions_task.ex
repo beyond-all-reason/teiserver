@@ -6,7 +6,10 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
   require Logger
   alias Teiserver.Data.Types, as: T
 
-  alias Teiserver.{Account, Coordinator, Moderation}
+  alias Teiserver.Account
+  alias Teiserver.Client
+  alias Teiserver.Coordinator
+  alias Teiserver.Moderation
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
@@ -99,7 +102,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
     cond do
       Enum.member?(new_restrictions, "Login") ->
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
-        Teiserver.Client.disconnect(client.userid, "Banned")
+        Client.disconnect(client.userid, "Banned")
 
       Enum.member?(new_restrictions, "All lobbies") ->
         Coordinator.send_to_host(client.lobby_id, "!bkick #{client.name}")

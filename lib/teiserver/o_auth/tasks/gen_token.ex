@@ -4,7 +4,11 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
   the development of anything requiring OAuth tokens like tachyon protocol.
   """
 
-  alias Teiserver.OAuth.{ApplicationQueries, Token}
+  alias Teiserver.Account.UserCacheLib
+  alias Teiserver.OAuth.ApplicationQueries
+  alias Teiserver.OAuth.Token
+  alias Teiserver.Repo
+  alias Timex.Duration
 
   @spec create_token(String.t(), String.t() | nil) :: {:ok, Token.t()} | {:error, term()}
   def create_token(username_or_email, app_uid \\ nil) do
@@ -15,14 +19,14 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
         owner_id: user.id,
         application_id: app.id,
         scopes: app.scopes,
-        expires_at: Timex.add(DateTime.utc_now(), Timex.Duration.from_days(1)),
+        expires_at: Timex.add(DateTime.utc_now(), Duration.from_days(1)),
         type: :access,
         refresh_token: nil
       }
 
       %Token{}
       |> Token.changeset(token_attr)
-      |> Teiserver.Repo.insert()
+      |> Repo.insert()
     else
       {:error, msg} -> {:error, msg}
     end
@@ -31,9 +35,9 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
   defp get_user(username_or_email) do
     user =
       if String.contains?(username_or_email, "@") do
-        Teiserver.Account.UserCacheLib.get_user_by_email(username_or_email)
+        UserCacheLib.get_user_by_email(username_or_email)
       else
-        Teiserver.Account.UserCacheLib.get_user_by_name(username_or_email)
+        UserCacheLib.get_user_by_name(username_or_email)
       end
 
     if is_nil(user) do

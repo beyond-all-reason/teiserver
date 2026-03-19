@@ -1,9 +1,11 @@
 defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Moderation}
+  alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportGroupLib
 
-  @impl true
+  import Teiserver.Moderation, only: [colour: 0]
+
+  @impl Phoenix.LiveView
   def mount(%{"id" => id_str}, _session, socket) when is_connected?(socket) do
     id = String.to_integer(id_str)
     socket = default_mount(socket)
@@ -35,13 +37,13 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   defp default_mount(socket) do
     socket
     |> assign(:site_menu_active, "moderation")
-    |> assign(:view_colour, Teiserver.Moderation.colour())
+    |> assign(:view_colour, colour())
     |> assign(:report_group, nil)
     |> add_breadcrumb(name: "Moderation", url: ~p"/moderation")
     |> add_breadcrumb(name: "Overwatch", url: ~p"/moderation/overwatch")
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]

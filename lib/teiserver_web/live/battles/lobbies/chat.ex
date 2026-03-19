@@ -1,18 +1,24 @@
 defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   use TeiserverWeb, :live_view
-  alias Phoenix.PubSub
   require Logger
-
-  alias Teiserver.{Account, Battle, CacheUser, Chat, Coordinator, Lobby, Client}
-  alias Teiserver.Chat.LobbyMessage
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Chat
+  alias Teiserver.Chat.LobbyMessage
+  alias Teiserver.Client
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
 
   @message_count 25
 
   @flood_protect_window_size 5
   @flood_protect_message_count 5
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, session, socket) do
     socket =
       socket
@@ -28,7 +34,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     {:ok, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket |> redirect(to: ~p"/")}
   end
@@ -48,7 +54,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         index_redirect(socket)
 
       lobby.tournament and
-          not CacheUser.has_any_role?(current_user.id, [
+          not Auth.has_any_role?(current_user.id, [
             "Moderator",
             "Caster",
             "TourneyPlayer",
@@ -99,12 +105,12 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
          |> assign(:messages, messages)
          |> assign(:user_map, %{})
          |> assign(:clients, clients)
-         |> assign(:view_colour, Teiserver.Lobby.colours())
+         |> assign(:view_colour, Lobby.colours())
          |> update_user_map()}
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event(
         "send-message",
         %{
@@ -155,7 +161,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
      |> assign(:message_timestamps, message_timestamps)}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info({:liveview_lobby_chat, :say, userid, message}, socket) do
     send(self(), %{
       channel: "teiserver_lobby_chat:#{socket.assigns.id}",

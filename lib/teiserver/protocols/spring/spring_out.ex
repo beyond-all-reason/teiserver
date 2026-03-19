@@ -7,11 +7,22 @@ defmodule Teiserver.Protocols.SpringOut do
   """
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.{Account, CacheUser, Client, Room, Battle, Coordinator, Config}
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Client
+  alias Teiserver.Room
+  alias Teiserver.Battle
+  alias Teiserver.Coordinator
+  alias Teiserver.Config
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
-  alias Teiserver.Protocols.Spring.{BattleOut, LobbyPolicyOut, UserOut, SystemOut, PartyOut}
+  alias Teiserver.Protocols.Spring.BattleOut
+  alias Teiserver.Protocols.Spring.LobbyPolicyOut
+  alias Teiserver.Protocols.Spring.UserOut
+  alias Teiserver.Protocols.Spring.SystemOut
+  alias Teiserver.Protocols.Spring.PartyOut
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.SpringTcpServer
 
   @motd """
   Message of the day
@@ -376,8 +387,8 @@ defmodule Teiserver.Protocols.SpringOut do
 
     do_ring =
       cond do
-        CacheUser.is_moderator?(ringer_user) == true -> true
-        CacheUser.is_bot?(ringer_user) == true -> true
+        Auth.is_moderator?(ringer_user) == true -> true
+        Auth.is_bot?(ringer_user) == true -> true
         Account.does_a_ignore_b?(state_userid, ringer_id) -> false
         true -> true
       end
@@ -472,7 +483,7 @@ defmodule Teiserver.Protocols.SpringOut do
     from_user = Account.get_user_by_id(from_id)
 
     if not Account.does_a_ignore_b?(state_user.id, from_id) or
-         CacheUser.is_moderator?(from_user) == true do
+         Auth.is_moderator?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 
       messages
@@ -491,8 +502,8 @@ defmodule Teiserver.Protocols.SpringOut do
     from_user = Account.get_user_by_id(from_id)
 
     if not Account.does_a_ignore_b?(state_user.id, from_id) or
-         CacheUser.is_moderator?(from_user) == true or
-         CacheUser.is_bot?(from_user) == true do
+         Auth.is_moderator?(from_user) == true or
+         Auth.is_bot?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 
       messages
@@ -511,8 +522,8 @@ defmodule Teiserver.Protocols.SpringOut do
     from_user = Account.get_user_by_id(from_id)
 
     if not Account.does_a_ignore_b?(state_user.id, from_id) or
-         CacheUser.is_moderator?(from_user) == true or
-         CacheUser.is_bot?(from_user) == true do
+         Auth.is_moderator?(from_user) == true or
+         Auth.is_bot?(from_user) == true do
       from_name = Account.get_username_by_id(from_id)
 
       messages
@@ -754,7 +765,7 @@ defmodule Teiserver.Protocols.SpringOut do
     current_process = self()
 
     Task.Supervisor.start_child(Teiserver.TaskSupervisor, fn ->
-      teams_data = Teiserver.Battle.get_team_config(:all)
+      teams_data = Battle.get_team_config(:all)
 
       if teams_data do
         send(current_process, {:battle_teams, teams_data})
@@ -785,7 +796,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
     Logger.metadata(request_id: "SpringTcpServer##{user.id}")
 
-    exempt_from_cmd_throttle = CacheUser.is_moderator?(user) or CacheUser.is_bot?(user) == true
+    exempt_from_cmd_throttle = Auth.is_moderator?(user) or Auth.is_bot?(user) == true
 
     %{
       state
@@ -827,7 +838,7 @@ defmodule Teiserver.Protocols.SpringOut do
                     Map.put(
                       state_acc.known_users,
                       member_id,
-                      Teiserver.SpringTcpServer._blank_user(member_id)
+                      SpringTcpServer._blank_user(member_id)
                     )
               }
 

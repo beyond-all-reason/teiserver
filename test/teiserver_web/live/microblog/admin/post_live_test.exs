@@ -5,20 +5,22 @@ defmodule TeiserverWeb.PostLiveTest do
   import Phoenix.LiveViewTest
   import Teiserver.MicroblogFixtures
   alias Teiserver.Microblog
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   @create_attrs %{contents: "some contents", title: "some title"}
   @update_attrs %{contents: "some updated contents", title: "some updated title"}
   @invalid_attrs %{contents: nil, title: nil}
 
   defp auth_setup(_) do
-    Teiserver.TeiserverTestLib.server_permissions()
-    |> Central.Helpers.GeneralTestLib.conn_setup()
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    TeiserverTestLib.server_permissions()
+    |> GeneralTestLib.conn_setup()
+    |> TeiserverTestLib.conn_setup()
   end
 
   defp unauth_setup(_) do
-    Central.Helpers.GeneralTestLib.conn_setup()
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup()
+    |> TeiserverTestLib.conn_setup()
   end
 
   defp create_post(_) do

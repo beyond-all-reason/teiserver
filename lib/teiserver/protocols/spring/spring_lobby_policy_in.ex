@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Spring.LobbyPolicyIn do
-  alias Teiserver.{Game}
+  alias Teiserver.Game
   alias Teiserver.Protocols.SpringIn
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   require Logger

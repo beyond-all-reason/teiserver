@@ -2,11 +2,15 @@ defmodule Teiserver.SpringAuthTest do
   use Teiserver.ServerCase, async: false
   require Logger
   alias Teiserver.BitParse
-  alias Teiserver.{CacheUser, Account, Client}
+  alias Teiserver.CacheUser
+  alias Teiserver.Account
+  alias Teiserver.Client
   alias Teiserver.Account.UserCacheLib
+  alias Teiserver.TeiserverTestLib
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  import Teiserver.TeiserverTestLib,
+  import TeiserverTestLib,
     only: [
       auth_setup: 1,
       auth_setup: 2,
@@ -471,7 +475,7 @@ CLIENTS test_room #{user.name}\n"
 
     # No need to send an exit, it's already sorted out!
     # we should try to login though, it should be rejected as rename in progress
-    %{socket: socket} = Teiserver.TeiserverTestLib.raw_setup(context)
+    %{socket: socket} = TeiserverTestLib.raw_setup(context)
     _ = _recv_raw(socket)
 
     # Now we get flood protection after the rename
@@ -496,7 +500,7 @@ CLIENTS test_room #{user.name}\n"
     # Un-flood them
     CacheUser.set_flood_level(userid, 0)
     # And re-verify them
-    user.id |> Teiserver.CacheUser.get_user_by_id() |> Teiserver.CacheUser.verify_user()
+    Account.verify_user(userid)
 
     # Now they can log in again
     _send_raw(
@@ -551,7 +555,7 @@ CLIENTS test_room #{user.name}\n"
   end
 
   test "CHANGEEMAIL to email already taken", %{socket: socket} do
-    other_user = Teiserver.TeiserverTestLib.new_user()
+    other_user = TeiserverTestLib.new_user()
 
     # Make the request
     _send_raw(socket, "CHANGEEMAILREQUEST #{other_user.email}\n")
@@ -644,12 +648,13 @@ CLIENTS test_room #{user.name}\n"
         "test_user_bad_id@email.com",
         Account.spring_md5_password("password")
       )
-      |> Teiserver.Account.create_user()
+      |> Account.create_user()
 
     bad_user
     |> UserCacheLib.convert_user()
     |> UserCacheLib.add_user()
-    |> CacheUser.verify_user()
+
+    Account.verify_user(bad_user.id)
 
     # Need to add it as a client for the :add_user command to work
     Client.login(CacheUser.get_user_by_id(bad_user.id), :spring, "127.0.0.1")

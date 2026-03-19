@@ -6,10 +6,14 @@ defmodule Teiserver.Autohost.TachyonHandler do
   very different roles, have very different behaviour and states.
   """
   alias Teiserver.Autohost.Session
+  alias Teiserver.Autohost.SessionSupervisor
   alias Teiserver.Bot.Bot
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helpers.{TachyonParser, Collections}
-  alias Teiserver.Tachyon.{Handler, Schema, Transport}
+  alias Teiserver.Helpers.TachyonParser
+  alias Teiserver.Helpers.Collections
+  alias Teiserver.Tachyon.Handler
+  alias Teiserver.Tachyon.Schema
+  alias Teiserver.Tachyon.Transport
   alias Teiserver.TachyonBattle
 
   require Logger
@@ -74,7 +78,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   def init(state) do
     Logger.metadata(actor_type: :autohost_conn, actor_id: state.autohost.id)
 
-    case Teiserver.Autohost.SessionSupervisor.start_session(state.autohost, self()) do
+    case SessionSupervisor.start_session(state.autohost, self()) do
       {:ok, session_pid} ->
         state = Map.put(state, :session_pid, session_pid)
         {:ok, state}
@@ -85,7 +89,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
     end
   end
 
-  @impl true
+  @impl Handler
   def handle_info({:start_battle, battle_id, start_script}, state) do
     mappings = %{
       engine_version: :engineVersion,
@@ -191,7 +195,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:error_response, :command_unimplemented, state}
   end
 
-  @impl true
+  @impl Handler
   def handle_response("autohost/start", _battle_id, _resp, state) when state.session_pid == nil,
     do: {:ok, state}
 

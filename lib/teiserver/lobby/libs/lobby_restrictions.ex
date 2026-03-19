@@ -2,10 +2,12 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @moduledoc """
   Helper methods for lobby policies
   """
-  alias Teiserver.{CacheUser, Config}
   require Logger
-  alias Teiserver.Battle.{BalanceLib, MatchLib}
+  alias Teiserver.Account.Auth
   alias Teiserver.Battle
+  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.MatchLib
+  alias Teiserver.Config
 
   @rank_upper_bound 7
   @rating_upper_bound 1000
@@ -133,7 +135,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     method = Config.get_site_config_cache("profile.Rank method")
     # When using Role method for ranks,
     # contributors auto pass since their ranks are not defined on playtime. To be fixed seperately.
-    method == "Role" && CacheUser.is_contributor?(user)
+    method == "Role" && Auth.is_contributor?(user)
   end
 
   @spec check_rank_to_play(any(), any()) :: :ok | {:error, iodata()}

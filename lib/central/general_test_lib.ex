@@ -1,22 +1,18 @@
 defmodule Central.Helpers.GeneralTestLib do
   @moduledoc false
-  import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
-
   import Ecto.Query
-  alias Teiserver.Repo
   import Phoenix.ChannelTest
-  # use Phoenix.ConnTest
+  import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
+  alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Guardian
+  alias Teiserver.Account.User
+  alias Teiserver.Config.SiteConfig
+  alias Teiserver.Logging.LoggingTestLib
+  alias Teiserver.Repo
+  alias TeiserverWeb.UserSocket
 
   @endpoint TeiserverWeb.Endpoint
-
-  alias Teiserver.Account.AuthLib
-
-  alias Teiserver.Account
-  alias Teiserver.Account.{User, Guardian}
-
-  # alias TeiserverWeb.General.CombinatorLib
-
-  alias TeiserverWeb.UserSocket
 
   # def make_combos(data), do: CombinatorLib.make_combos(data)
 
@@ -34,6 +30,7 @@ defmodule Central.Helpers.GeneralTestLib do
         "colour" => params["colour"] || "#00AA00",
         "icon" => params["icon"] || "fa-solid fa-user",
         "permissions" => permissions,
+        "roles" => params["roles"] || [],
         "password" =>
           params["password"] ||
             Account.spring_md5_password("password"),
@@ -45,13 +42,13 @@ defmodule Central.Helpers.GeneralTestLib do
   end
 
   def seeded?() do
-    r = Repo.one(from c in Teiserver.Config.SiteConfig, where: c.key == "test.seeded")
+    r = Repo.one(from c in SiteConfig, where: c.key == "test.seeded")
     r != nil
   end
 
   def seed() do
-    %Teiserver.Config.SiteConfig{}
-    |> Teiserver.Config.SiteConfig.changeset(%{
+    %SiteConfig{}
+    |> SiteConfig.changeset(%{
       key: "test.seeded",
       value: "true"
     })
@@ -73,7 +70,7 @@ defmodule Central.Helpers.GeneralTestLib do
     [
       users: users
     ]
-    |> Teiserver.Logging.LoggingTestLib.seed()
+    |> LoggingTestLib.seed()
   end
 
   def login(conn, email) do

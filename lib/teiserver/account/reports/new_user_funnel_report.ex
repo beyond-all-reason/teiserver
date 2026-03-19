@@ -1,6 +1,9 @@
 defmodule Teiserver.Account.NewUserFunnelReport do
   @moduledoc false
-  alias Teiserver.{Account, Telemetry, Battle}
+  alias Teiserver.Account
+  alias Teiserver.Battle
+  alias Teiserver.Telemetry
+  alias Teiserver.Telemetry.ComplexClientEventTypeLib
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-filter"
@@ -37,10 +40,10 @@ defmodule Teiserver.Account.NewUserFunnelReport do
 
     # Singleplayer
     event_type_ids = [
-      Telemetry.ComplexClientEventTypeLib.get_or_add_complex_client_event_type(
+      ComplexClientEventTypeLib.get_or_add_complex_client_event_type(
         "game_start:singleplayer:lone_other_skirmish"
       ),
-      Telemetry.ComplexClientEventTypeLib.get_or_add_complex_client_event_type(
+      ComplexClientEventTypeLib.get_or_add_complex_client_event_type(
         "game_start:singleplayer:scenario_start"
       )
     ]
@@ -61,12 +64,10 @@ defmodule Teiserver.Account.NewUserFunnelReport do
 
     # Online
     event_type_ids = [
-      Telemetry.ComplexClientEventTypeLib.get_or_add_complex_client_event_type(
+      ComplexClientEventTypeLib.get_or_add_complex_client_event_type(
         "game_start:multiplayer:connecting"
       ),
-      Telemetry.ComplexClientEventTypeLib.get_or_add_complex_client_event_type(
-        "lobby:multiplayer:hostgame"
-      )
+      ComplexClientEventTypeLib.get_or_add_complex_client_event_type("lobby:multiplayer:hostgame")
     ]
 
     events =

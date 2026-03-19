@@ -3,6 +3,7 @@ defmodule Teiserver.Chat.RoomServer do
 
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Chat
+  alias Teiserver.Chat.RoomRegistry
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Phoenix.PubSub
   require Logger
@@ -75,7 +76,7 @@ defmodule Teiserver.Chat.RoomServer do
     GenServer.start_link(__MODULE__, args, name: via_tuple(args.name))
   end
 
-  @impl true
+  @impl GenServer
   @spec init(term()) :: {:ok, state()}
   def init(args) do
     Logger.metadata(actor_type: :chat_room, actor_id: args.name)
@@ -96,7 +97,7 @@ defmodule Teiserver.Chat.RoomServer do
     {:ok, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:get_room, _from, state) do
     {:reply, state, state}
   end
@@ -216,7 +217,7 @@ defmodule Teiserver.Chat.RoomServer do
     {:reply, :ok, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_info({:DOWN, ref, :process, _pid, _reason}, state) do
     val = MC.get_val(state.monitors, ref)
     state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
@@ -233,10 +234,10 @@ defmodule Teiserver.Chat.RoomServer do
   end
 
   defp update_member_count(state) do
-    Chat.RoomRegistry.update_room(state.name, Enum.count(state.members))
+    RoomRegistry.update_room(state.name, Enum.count(state.members))
   end
 
   def via_tuple(name) do
-    Chat.RoomRegistry.via_tuple(name)
+    RoomRegistry.via_tuple(name)
   end
 end

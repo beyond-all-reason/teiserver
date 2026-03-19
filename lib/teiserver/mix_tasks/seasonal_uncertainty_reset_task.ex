@@ -11,6 +11,10 @@ defmodule Mix.Tasks.Teiserver.SeasonalUncertaintyResetTask do
 
   require Logger
 
+  alias Ecto.Adapters.SQL
+  alias Ecto.Multi
+  alias Teiserver.Repo
+
   @spec run(list()) :: :ok
   def run(args) do
     Logger.info("Args: #{args}")
@@ -22,8 +26,8 @@ defmodule Mix.Tasks.Teiserver.SeasonalUncertaintyResetTask do
     start_time = System.system_time(:millisecond)
 
     sql_transaction_result =
-      Ecto.Multi.new()
-      |> Ecto.Multi.run(:create_temp_table, fn repo, _ ->
+      Multi.new()
+      |> Multi.run(:create_temp_table, fn repo, _ ->
         query = """
         CREATE temp table temp_table as
         SELECT
@@ -47,9 +51,9 @@ defmodule Mix.Tasks.Teiserver.SeasonalUncertaintyResetTask do
         ) as a;
         """
 
-        Ecto.Adapters.SQL.query(repo, query, [uncertainty_target])
+        SQL.query(repo, query, [uncertainty_target])
       end)
-      |> Ecto.Multi.run(:add_logs, fn repo, _ ->
+      |> Multi.run(:add_logs, fn repo, _ ->
         query = """
         INSERT INTO teiserver_game_rating_logs (inserted_at, rating_type_id, user_id, value)
         SELECT
@@ -69,9 +73,9 @@ defmodule Mix.Tasks.Teiserver.SeasonalUncertaintyResetTask do
         FROM temp_table;
         """
 
-        Ecto.Adapters.SQL.query(repo, query, [])
+        SQL.query(repo, query, [])
       end)
-      |> Ecto.Multi.run(:update_ratings, fn repo, _ ->
+      |> Multi.run(:update_ratings, fn repo, _ ->
         query = """
         UPDATE teiserver_account_ratings tar
         SET
@@ -83,9 +87,9 @@ defmodule Mix.Tasks.Teiserver.SeasonalUncertaintyResetTask do
           and t.rating_type_id = tar.rating_type_id;
         """
 
-        Ecto.Adapters.SQL.query(repo, query, [])
+        SQL.query(repo, query, [])
       end)
-      |> Teiserver.Repo.transaction()
+      |> Repo.transaction()
 
     # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
     with {:ok, result} <- sql_transaction_result do

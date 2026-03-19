@@ -9,11 +9,13 @@ defmodule Central.Helpers.ComponentHelper do
   # <% end %>
   """
 
+  alias TeiserverWeb.ComponentView
+
   def central_component(template, assigns \\ %{}) do
-    TeiserverWeb.ComponentView.render(template <> ".html", assigns)
+    ComponentView.render(template <> ".html", assigns)
   end
 
   def central_component(template, assigns, do: block) do
-    TeiserverWeb.ComponentView.render(template <> ".html", Keyword.merge(assigns, do: block))
+    ComponentView.render(template <> ".html", Keyword.merge(assigns, do: block))
   end
 end

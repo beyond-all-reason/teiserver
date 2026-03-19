@@ -1,6 +1,10 @@
 defmodule Teiserver.Battle.MatchMonitorTest do
   use Teiserver.ServerCase, async: false
 
+  alias Teiserver.Battle
+  alias Teiserver.Battle.MatchMonitorServer
+  alias Teiserver.Support.Polling
+
   import Teiserver.TeiserverTestLib,
     only: [
       auth_setup: 1,
@@ -11,7 +15,7 @@ defmodule Teiserver.Battle.MatchMonitorTest do
     ]
 
   setup do
-    Teiserver.Battle.start_match_monitor()
+    Battle.start_match_monitor()
     {:ok, %{}}
   end
 
@@ -69,14 +73,14 @@ defmodule Teiserver.Battle.MatchMonitorTest do
     # trying to start a match for a non-existent lobby
 
     # Get the MatchMonitorServer PID
-    monitor_pid = Teiserver.Battle.MatchMonitorServer.get_match_monitor_pid()
+    monitor_pid = MatchMonitorServer.get_match_monitor_pid()
     assert monitor_pid != nil
 
     # Send a launch message for a non-existent lobby
     send(monitor_pid, {:new_message, 99_999, "autohosts", "* Launching game..."})
 
     # Verify the server is still running (hasn't crashed)
-    Teiserver.Support.Polling.poll_until(
+    Polling.poll_until(
       fn ->
         Process.alive?(monitor_pid)
       end,
@@ -84,6 +88,6 @@ defmodule Teiserver.Battle.MatchMonitorTest do
     )
 
     # Verify the server is still registered
-    assert Teiserver.Battle.MatchMonitorServer.get_match_monitor_pid() == monitor_pid
+    assert MatchMonitorServer.get_match_monitor_pid() == monitor_pid
   end
 end

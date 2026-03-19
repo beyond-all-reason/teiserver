@@ -3,10 +3,12 @@ defmodule TeiserverWeb.Admin.AssetControllerTest do
   alias Teiserver.AssetFixtures
   alias Teiserver.Asset.EngineQueries
   alias Teiserver.Asset.GameQueries
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   defp setup_user(_context) do
-    Central.Helpers.GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())
+    |> TeiserverTestLib.conn_setup()
   end
 
   describe "index" do

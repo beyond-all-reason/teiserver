@@ -1,6 +1,8 @@
 defmodule Teiserver.Moderation.Action do
   @moduledoc false
   use TeiserverWeb, :schema
+
+  alias Ecto.Changeset
   alias Teiserver.Helper.TimexHelper
 
   typed_schema "moderation_actions" do
@@ -22,7 +24,7 @@ defmodule Teiserver.Moderation.Action do
     timestamps()
   end
 
-  @spec changeset(map(), map()) :: Ecto.Changeset.t()
+  @spec changeset(map(), map()) :: Changeset.t()
   def changeset(struct, params \\ %{}) do
     params =
       params
@@ -41,8 +43,8 @@ defmodule Teiserver.Moderation.Action do
 
   defp adjust_restrictions(%Ecto.Changeset{} = struct) do
     years = Timex.now() |> Timex.shift(years: 10)
-    expires = Ecto.Changeset.get_field(struct, :expires, [])
-    inbound_restrictions = Ecto.Changeset.get_field(struct, :restrictions, [])
+    expires = Changeset.get_field(struct, :expires, [])
+    inbound_restrictions = Changeset.get_field(struct, :restrictions, [])
 
     new_restrictions =
       if TimexHelper.greater_than(expires, years) and Enum.member?(inbound_restrictions, "Login") do
@@ -51,7 +53,7 @@ defmodule Teiserver.Moderation.Action do
         (inbound_restrictions || []) |> List.delete("Permanently banned")
       end
 
-    Ecto.Changeset.put_change(struct, :restrictions, new_restrictions)
+    Changeset.put_change(struct, :restrictions, new_restrictions)
   end
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()

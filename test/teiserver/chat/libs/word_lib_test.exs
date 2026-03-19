@@ -1,10 +1,12 @@
 defmodule Teiserver.Chat.WordLibTest do
   use Teiserver.DataCase
   alias Teiserver.Chat.WordLib
-  alias Teiserver.{Room, CacheUser}
+  alias Teiserver.Room
+  alias Teiserver.CacheUser
   alias Teiserver.Lobby.ChatLib
+  alias Teiserver.TeiserverTestLib
 
-  import Teiserver.TeiserverTestLib,
+  import TeiserverTestLib,
     only: [new_user: 0]
 
   # this module is flakey but only because of other tests not correctly isolated.
@@ -17,7 +19,7 @@ defmodule Teiserver.Chat.WordLibTest do
   @moduletag :needs_attention
 
   setup do
-    Teiserver.TeiserverTestLib.start_coordinator!()
+    TeiserverTestLib.start_coordinator!()
     :ok
   end
 

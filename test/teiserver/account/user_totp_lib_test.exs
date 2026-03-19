@@ -1,7 +1,8 @@
 defmodule Teiserver.Account.TOTPLibTest do
   use Teiserver.DataCase, async: false
 
-  alias Teiserver.Account.{TOTPLib, TOTP}
+  alias Teiserver.Account.TOTPLib
+  alias Teiserver.Account.TOTP
   alias Central.Helpers.GeneralTestLib
   alias NimbleTOTP
 

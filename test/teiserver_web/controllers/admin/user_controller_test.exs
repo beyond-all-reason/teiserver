@@ -2,11 +2,15 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   use TeiserverWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
-  # alias Teiserver.TeiserverTestLib
+  alias Teiserver.Account
+  alias Teiserver.CacheUser
+  alias Teiserver.TeiserverTestLib
+
+  # alias TeiserverTestLib
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.server_permissions())
-    |> Teiserver.TeiserverTestLib.conn_setup()
+    GeneralTestLib.conn_setup(TeiserverTestLib.server_permissions())
+    |> TeiserverTestLib.conn_setup()
   end
 
   # @create_attrs %{
@@ -34,7 +38,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     end
 
     test "lists all users - redirect", %{conn: conn} do
-      main_user = Teiserver.Account.get_user_by_name("dud user")
+      main_user = Account.get_user_by_name("dud user")
       conn = get(conn, ~p"/teiserver/admin/user" <> "?s=dud user")
       assert redirected_to(conn) == ~p"/teiserver/admin/user/#{main_user.id}"
     end
@@ -105,7 +109,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
           "data" => %{}
         })
 
-      Teiserver.CacheUser.recache_user(user.id)
+      CacheUser.recache_user(user.id)
 
       conn =
         put(conn, Routes.ts_admin_user_path(conn, :rename_post, user), new_name: "new_test_name")
@@ -123,7 +127,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
           "data" => %{}
         })
 
-      Teiserver.CacheUser.recache_user(user.id)
+      CacheUser.recache_user(user.id)
 
       conn =
         put(conn, Routes.ts_admin_user_path(conn, :rename_post, user),

@@ -2,6 +2,9 @@ defmodule Teiserver.Account.ErrorHandler do
   @moduledoc false
   import Plug.Conn
 
+  alias Phoenix.Controller
+  alias TeiserverWeb.Router.Helpers, as: Routes
+
   @behaviour Guardian.Plug.ErrorHandler
   @impl Guardian.Plug.ErrorHandler
 
@@ -15,17 +18,13 @@ defmodule Teiserver.Account.ErrorHandler do
 
     conn
     |> put_resp_cookie("_redirect_to", redirect_to, sign: true, max_age: 60 * 5)
-    |> Phoenix.Controller.redirect(
-      to: TeiserverWeb.Router.Helpers.account_session_path(conn, :login)
-    )
+    |> Controller.redirect(to: Routes.account_session_path(conn, :login))
   end
 
   def auth_error(conn, {:invalid_token, _message}, _opts) do
     conn
     |> put_resp_cookie("_teiserver_key", "", max_age: 0)
-    |> Phoenix.Controller.redirect(
-      to: TeiserverWeb.Router.Helpers.account_session_path(conn, :login)
-    )
+    |> Controller.redirect(to: Routes.account_session_path(conn, :login))
   end
 
   def auth_error(conn, {type, _reason}, _opts) do

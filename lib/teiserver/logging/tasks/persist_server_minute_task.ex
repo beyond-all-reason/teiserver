@@ -2,7 +2,9 @@ defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
   use Oban.Worker, queue: :teiserver
 
   alias Teiserver.Bridge.BridgeServer
-  alias Teiserver.{Telemetry, Logging}
+  alias Teiserver.Communication
+  alias Teiserver.Telemetry
+  alias Teiserver.Logging
   alias Teiserver.Config
 
   @impl Oban.Worker
@@ -28,7 +30,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
       Telemetry.get_totals_and_reset()
       |> Map.drop([:cycle])
 
-    if Teiserver.Communication.use_discord?() do
+    if Communication.use_discord?() do
       if rem(Timex.now().minute, 10) == 0 do
         if Config.get_site_config_cache("teiserver.Bridge player numbers") do
           [

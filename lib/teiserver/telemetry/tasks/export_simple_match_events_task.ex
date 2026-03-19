@@ -1,7 +1,7 @@
 defmodule Teiserver.Telemetry.ExportSimpleMatchEventsTask do
   @moduledoc false
   alias Teiserver.Telemetry.SimpleMatchEvent
-  alias Teiserver.Helper.{DatePresets}
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
   import Ecto.Query, warn: false
   import Teiserver.Helper.QueryHelpers

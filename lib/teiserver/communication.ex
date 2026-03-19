@@ -3,11 +3,13 @@ defmodule Teiserver.Communication do
 
   """
   import Ecto.Query, warn: false
+  alias Teiserver.Communication.DiscordChannel
+  alias Teiserver.Communication.DiscordChannelLib
+  alias Teiserver.Communication.TextCallback
+  alias Teiserver.Communication.TextCallbackLib
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
-  alias Teiserver.Data.Types, as: T
-
-  alias Teiserver.Communication.{TextCallback, TextCallbackLib}
 
   @spec lobby_text_callback(List.t()) :: Ecto.Query.t()
   def lobby_text_callback(args) do
@@ -193,18 +195,16 @@ defmodule Teiserver.Communication do
   defdelegate set_last_triggered_time(text_callback, channel_id), to: TextCallbackLib
 
   # Discord channels
-  alias Teiserver.Communication.{DiscordChannel, DiscordChannelLib}
-
   @spec list_discord_channels() :: [DiscordChannel]
   defdelegate list_discord_channels(), to: DiscordChannelLib
 
   @spec list_discord_channels(list) :: [DiscordChannel]
   defdelegate list_discord_channels(args), to: DiscordChannelLib
 
-  @spec get_discord_channel!(non_neg_integer()) :: DiscordChannel.t()
+  @spec get_discord_channel!(non_neg_integer() | String.t()) :: DiscordChannel.t()
   defdelegate get_discord_channel!(discord_channel_id), to: DiscordChannelLib
 
-  @spec get_discord_channel(non_neg_integer()) :: DiscordChannel.t() | nil
+  @spec get_discord_channel(non_neg_integer() | String.t()) :: DiscordChannel.t() | nil
   defdelegate get_discord_channel(discord_channel_id), to: DiscordChannelLib
 
   @spec create_discord_channel() :: {:ok, DiscordChannel} | {:error, Ecto.Changeset}

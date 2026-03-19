@@ -1,9 +1,16 @@
 defmodule Teiserver.Bridge.ChatCommands do
   @moduledoc false
-  alias Teiserver.{Account, CacheUser, Communication, Config, Logging}
-  alias Teiserver.Data.Types, as: T
+  alias Nostrum.Api.Channel
+  alias Nostrum.Api.Message
+  alias Nostrum.Api.Thread
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Bridge.UnitNames
-  alias Nostrum.Api
+  alias Teiserver.CacheUser
+  alias Teiserver.Communication
+  alias Teiserver.Config
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Logging
   require Logger
 
   @always_allow ~w(whatwas unit define text)
@@ -40,20 +47,20 @@ defmodule Teiserver.Bridge.ChatCommands do
 
     if gdt_discussion_channel_id do
       # Post message to channel
-      Api.Message.create(
+      Message.create(
         channel_id,
         "Thank you for your suggestion, the game design team will be discussing it. Once they have finished discussing it they will vote on it and post an update to this thread."
       )
 
       # Delete the message that was posted
-      Api.Message.delete(channel_id, message_id)
+      Message.delete(channel_id, message_id)
 
       # channel_id = 1071140326644920353
-      {:ok, channel} = Api.Channel.get(channel_id)
+      {:ok, channel} = Channel.get(channel_id)
 
       # Create new thread in gdt-discussion
       {:ok, thread} =
-        Api.Thread.create_in_forum(gdt_discussion_channel_id, %{
+        Thread.create_in_forum(gdt_discussion_channel_id, %{
           name: "Discussion for #{channel.name}",
           message: %{
             content: "Thread to discuss #{channel.name} - <##{channel_id}>"
@@ -62,12 +69,12 @@ defmodule Teiserver.Bridge.ChatCommands do
         })
 
       {:ok, message} =
-        Api.Message.create(thread.id, %{
+        Message.create(thread.id, %{
           content: "Thread to discuss #{channel.name} - <##{channel_id}>"
         })
 
       # Pin message
-      Api.Channel.pin_message(thread.id, message.id)
+      Channel.pin_message(thread.id, message.id)
 
       # Add GDTs to thread
       Account.list_users(
@@ -79,7 +86,7 @@ defmodule Teiserver.Bridge.ChatCommands do
       |> Enum.map(fn %{data: data} -> data["discord_id"] end)
       |> Enum.reject(&(&1 == nil))
       |> Enum.each(fn user_discord_id ->
-        Api.Thread.add_member(thread.id, user_discord_id)
+        Thread.add_member(thread.id, user_discord_id)
       end)
     end
 
@@ -171,7 +178,7 @@ defmodule Teiserver.Bridge.ChatCommands do
           })
 
           if text_callback.rules["delete_trigger"] == "true" do
-            Api.Message.delete(channel_id, message_id)
+            Message.delete(channel_id, message_id)
           end
 
           Communication.set_last_triggered_time(text_callback, channel_id)
@@ -189,7 +196,9 @@ defmodule Teiserver.Bridge.ChatCommands do
 
   @spec allow?(String.t(), map()) :: boolean
   defp allow?("discord", _), do: true
-  defp allow?("gdt", user), do: CacheUser.has_any_role?(user, ["Admin", "Moderator", "GDT"])
+
+  defp allow?("gdt", user),
+    do: Auth.has_any_role?(user, ["Admin", "Moderator", "GDT"])
 
   defp allow?(cmd, user) do
     if Enum.member?(@always_allow, cmd) do
@@ -199,8 +208,8 @@ defmodule Teiserver.Bridge.ChatCommands do
     end
   end
 
-  defp reply(channel, message) do
-    Api.Message.create(channel, message)
+  defp reply(channel, msg) do
+    Message.create(channel, msg)
     :ignore
   end
 end

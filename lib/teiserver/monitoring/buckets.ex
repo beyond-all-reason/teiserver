@@ -7,7 +7,7 @@ defmodule Teiserver.Monitoring.Buckets do
 
   @behaviour Peep.Buckets
 
-  @impl true
+  @impl Peep.Buckets
   def config(%Telemetry.Metrics.Distribution{reporter_options: reporter_options}) do
     # PromEx configures buckets with `:reporter_options`
     buckets = Keyword.fetch!(reporter_options, :buckets)
@@ -48,12 +48,12 @@ defmodule Teiserver.Monitoring.Buckets do
     }
   end
 
-  @impl true
+  @impl Peep.Buckets
   def number_of_buckets(config) do
     config.number_of_buckets
   end
 
-  @impl true
+  @impl Peep.Buckets
   def bucket_for(number, config) when is_integer(number) do
     case larger(number, config.int_tree) do
       {_, bucket_idx} -> bucket_idx
@@ -68,7 +68,7 @@ defmodule Teiserver.Monitoring.Buckets do
     end
   end
 
-  @impl true
+  @impl Peep.Buckets
   def upper_bound(bucket_idx, config) do
     Map.get(config.upper_bound, bucket_idx, "+Inf")
   end

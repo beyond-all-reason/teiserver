@@ -3,6 +3,9 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
+  alias Phoenix.ConnTest
+  alias Teiserver.Bot
+  alias TeiserverWeb.Endpoint
 
   defp get_valid_data(%{app: app, code: code, code_attrs: code_attrs}) do
     %{
@@ -15,7 +18,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   end
 
   defp setup_conn(_context) do
-    conn = Phoenix.ConnTest.build_conn()
+    conn = ConnTest.build_conn()
     user = GeneralTestLib.make_user()
     {:ok, conn: conn, user: user}
   end
@@ -41,7 +44,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   end
 
   defp setup_bot(_context) do
-    {:ok, bot} = Teiserver.Bot.create_bot(%{name: "testing_bot"})
+    {:ok, bot} = Bot.create_bot(%{name: "testing_bot"})
     %{bot: bot}
   end
 
@@ -343,7 +346,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
     test "can query oauth metadata", %{conn: conn} do
       resp = json_response(get(conn, ~p"/.well-known/oauth-authorization-server"), 200)
-      endpoint = TeiserverWeb.Endpoint.static_url()
+      endpoint = Endpoint.static_url()
 
       assert resp == %{
                "issuer" => "#{endpoint}",

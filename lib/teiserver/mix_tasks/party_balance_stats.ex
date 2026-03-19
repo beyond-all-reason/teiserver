@@ -9,11 +9,13 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
 
   use Mix.Task
   require Logger
-  alias Teiserver.Repo
-  alias Teiserver.{Battle, Game}
-  alias Teiserver.Battle.{BalanceLib}
+  alias Ecto.Adapters.SQL
   alias Mix.Tasks.Teiserver.PartyBalanceStatsTypes, as: PB
+  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle
   alias Teiserver.Config
+  alias Teiserver.Game
+  alias Teiserver.Repo
 
   def run(args) do
     Logger.info("Args: #{args}")
@@ -252,7 +254,7 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     limit 100;
     """
 
-    results = Ecto.Adapters.SQL.query!(Repo, query, [team_size, team_count])
+    results = SQL.query!(Repo, query, [team_size, team_count])
 
     results.rows
     |> Enum.map(fn [id, _insert_date] ->

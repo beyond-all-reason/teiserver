@@ -3,6 +3,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
   use Oban.Worker, queue: :teiserver
   alias Teiserver.Logging
   alias Teiserver.Logging.ServerDayLogLib
+  alias Teiserver.Logging.Tasks.PersistServerQuarterTask
   import Ecto.Query, warn: false
 
   @impl Oban.Worker
@@ -19,7 +20,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
 
     if log != nil do
       %{}
-      |> Teiserver.Logging.Tasks.PersistServerQuarterTask.new()
+      |> PersistServerQuarterTask.new()
       |> Oban.insert()
     end
 

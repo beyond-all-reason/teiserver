@@ -1,9 +1,10 @@
 defmodule TeiserverWeb.API.Admin.AssetControllerTest do
   use TeiserverWeb.ConnCase, async: false
   alias Teiserver.OAuthFixtures
+  alias Central.Helpers.GeneralTestLib
 
   defp setup_user(_context) do
-    user = Central.Helpers.GeneralTestLib.make_user()
+    user = GeneralTestLib.make_user()
     {:ok, user: user}
   end
 

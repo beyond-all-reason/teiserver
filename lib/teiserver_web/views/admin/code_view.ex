@@ -1,9 +1,11 @@
 defmodule TeiserverWeb.Admin.CodeView do
   use TeiserverWeb, :view
 
+  alias Teiserver.Account.CodeLib
+
   @spec view_colour() :: atom()
-  def view_colour(), do: Teiserver.Account.CodeLib.colours()
+  def view_colour(), do: CodeLib.colours()
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Account.CodeLib.icon()
+  def icon(), do: CodeLib.icon()
 end

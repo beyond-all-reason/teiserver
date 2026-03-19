@@ -11,13 +11,15 @@ defmodule Teiserver.Matchmaking.QueueServer do
   use GenServer
   require Logger
   alias Teiserver.Battle.MatchLib
-  alias Teiserver.Matchmaking.{QueueRegistry, PairingRoom}
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.MonitorCollection, as: MC
+  alias Teiserver.Matchmaking
+  alias Teiserver.Matchmaking.Algo
+  alias Teiserver.Matchmaking.Member
+  alias Teiserver.Matchmaking.PairingRoom
+  alias Teiserver.Matchmaking.QueueRegistry
   alias Teiserver.Party
   alias Teiserver.Player
-  alias Teiserver.Helpers.MonitorCollection, as: MC
-  alias Teiserver.Matchmaking.Member
-  alias Teiserver.Matchmaking.Algo
 
   @type id :: String.t()
 
@@ -246,7 +248,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     )
   end
 
-  @impl true
+  @impl GenServer
   def init(state) do
     Logger.metadata(actor_type: :mm_queue, actor_id: state.id)
 
@@ -257,7 +259,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     {:ok, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:get_game_type, _from, state) do
     game_type = MatchLib.game_type(state.queue.team_size, state.queue.team_count)
     {:reply, game_type, state}
@@ -332,7 +334,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:get_stats, _from, state) do
     player_count = calculate_player_count(state)
     private_stats = Map.put(state.stats, :player_count, player_count)
@@ -348,7 +350,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     {:reply, {:ok, public_stats}, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_call({:leave_queue, player_id}, _from, state) do
     case remove_player(player_id, state) do
       :not_queued ->
@@ -411,7 +413,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_info({:DOWN, ref, :process, _object, _reason}, state) do
     val = MC.get_val(state.monitors, ref)
     state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
@@ -445,7 +447,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:tick, state), do: handle_info({:tick, DateTime.utc_now()}, state)
 
   def handle_info({:tick, now}, state) do
@@ -669,6 +671,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
   defp broadcast_update(state) do
     player_count = calculate_player_count(state)
     stats = Map.put(state.stats, :player_count, player_count)
-    Teiserver.Matchmaking.broadcast_queue_update(state.id, stats)
+    Matchmaking.broadcast_queue_update(state.id, stats)
   end
 end

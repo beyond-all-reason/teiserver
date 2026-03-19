@@ -6,8 +6,6 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
   alias Teiserver.Logging.AggregateViewLogsTask
   alias Teiserver.Helper.TimexHelper
 
-  alias Teiserver.Helper.TimexHelper
-
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Logging.AggregateViewLog,
     action: {Phoenix.Controller, :action_name},

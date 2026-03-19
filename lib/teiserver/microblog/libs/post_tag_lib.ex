@@ -1,7 +1,9 @@
 defmodule Teiserver.Microblog.PostTagLib do
   @moduledoc false
   use TeiserverWeb, :library_newform
-  alias Teiserver.Microblog.{PostTag, PostTagQueries}
+  alias Ecto.Adapters.SQL
+  alias Teiserver.Microblog.PostTag
+  alias Teiserver.Microblog.PostTagQueries
 
   @doc """
   Returns the list of post_tags.
@@ -103,7 +105,7 @@ defmodule Teiserver.Microblog.PostTagLib do
           {:ok, PostTag} | {:error, Ecto.Changeset}
   def delete_post_tags(post_id, tag_ids) do
     query = "DELETE FROM microblog_post_tags WHERE post_id = $1 AND tag_id = ANY($2);"
-    {:ok, _} = Ecto.Adapters.SQL.query(Repo, query, [post_id, tag_ids])
+    {:ok, _} = SQL.query(Repo, query, [post_id, tag_ids])
   end
 
   @doc """

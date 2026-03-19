@@ -1,12 +1,17 @@
 defmodule Teiserver.OAuth.ApplicationQueryTest do
   use Teiserver.DataCase
-  alias Teiserver.Repo
-
+  alias Teiserver.Bot.Bot
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.OAuthFixtures
+  alias Teiserver.Repo
+  alias Teiserver.OAuth
+  alias Teiserver.OAuth.CodeQueries
+  alias Teiserver.OAuth.TokenQueries
+  alias Teiserver.TeiserverTestLib
+  alias Timex.Duration
 
   defp setup_app(_context) do
-    user = Teiserver.TeiserverTestLib.new_user()
+    user = TeiserverTestLib.new_user()
 
     app = OAuthFixtures.app_attrs(user.id) |> OAuthFixtures.create_app()
 
@@ -14,8 +19,6 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
   end
 
   defp setup_bot(_context) do
-    alias Teiserver.Bot.Bot
-
     bot =
       %Bot{}
       |> Bot.changeset(%{name: "fixture bot"})
@@ -72,7 +75,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
     end
 
     test "ignore expired code and tokens", %{user: user, app: app} do
-      yesterday = DateTime.utc_now() |> Timex.subtract(Timex.Duration.from_days(1))
+      yesterday = DateTime.utc_now() |> Timex.subtract(Duration.from_days(1))
 
       OAuthFixtures.code_attrs(user.id, app)
       |> Map.put(:expires_at, yesterday)
@@ -122,7 +125,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
     end
 
     test "list_authorized_applications shows apps with expired tokens", %{user: user, app: app} do
-      yesterday = DateTime.utc_now() |> Timex.subtract(Timex.Duration.from_days(1))
+      yesterday = DateTime.utc_now() |> Timex.subtract(Duration.from_days(1))
 
       OAuthFixtures.token_attrs(user.id, app)
       |> Map.put(:expires_at, yesterday)
@@ -150,7 +153,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
       user_code = OAuthFixtures.code_attrs(user.id, app) |> OAuthFixtures.create_code()
 
       # Create tokens for different user, same app
-      other_user = Teiserver.TeiserverTestLib.new_user()
+      other_user = TeiserverTestLib.new_user()
 
       other_user_token =
         OAuthFixtures.token_attrs(other_user.id, app) |> OAuthFixtures.create_token()
@@ -165,15 +168,15 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
         OAuthFixtures.token_attrs(user.id, other_app) |> OAuthFixtures.create_token()
 
       # Revoke access for user and app
-      assert :ok = Teiserver.OAuth.revoke_application_access(user.id, app.id)
+      assert :ok = OAuth.revoke_application_access(user.id, app.id)
 
       # Verify only user's tokens/codes for this app are deleted
-      refute Teiserver.OAuth.TokenQueries.get_token(user_token.value)
-      refute Teiserver.OAuth.CodeQueries.get_code(user_code.value)
+      refute TokenQueries.get_token(user_token.value)
+      refute CodeQueries.get_code(user_code.value)
 
       # Verify other tokens remain
-      assert Teiserver.OAuth.TokenQueries.get_token(other_user_token.value)
-      assert Teiserver.OAuth.TokenQueries.get_token(other_app_token.value)
+      assert TokenQueries.get_token(other_user_token.value)
+      assert TokenQueries.get_token(other_app_token.value)
     end
 
     test "revoke_application_access returns :ok even when no tokens or codes exist", %{
@@ -181,7 +184,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
       app: app
     } do
       # No tokens or codes created
-      assert :ok = Teiserver.OAuth.revoke_application_access(user.id, app.id)
+      assert :ok = OAuth.revoke_application_access(user.id, app.id)
     end
   end
 end

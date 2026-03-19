@@ -1,5 +1,7 @@
 defmodule Teiserver.Protocols.Spring.BattleIn do
-  alias Teiserver.{Coordinator, Battle, Lobby}
+  alias Teiserver.Coordinator
+  alias Teiserver.Battle
+  alias Teiserver.Lobby
   alias Teiserver.Protocols.SpringIn
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]

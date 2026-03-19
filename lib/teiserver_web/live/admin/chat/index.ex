@@ -1,15 +1,18 @@
 defmodule TeiserverWeb.Admin.ChatLive.Index do
   use TeiserverWeb, :live_view
-  alias Teiserver.{Account, Coordinator, Chat}
+  alias Teiserver.Account
+  alias Teiserver.Chat
+  alias Teiserver.Chat.LobbyMessageLib
+  alias Teiserver.Coordinator
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     case allow?(socket.assigns[:current_user], "Reviewer") do
       true ->
         socket =
           socket
           |> assign(:site_menu_active, "chat")
-          |> assign(:view_colour, Teiserver.Chat.LobbyMessageLib.colours())
+          |> assign(:view_colour, LobbyMessageLib.colours())
           |> assign(:messages, [])
           |> assign(:usernames, %{})
           |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
@@ -28,7 +31,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(params, _url, %{assigns: %{filters: filters}} = socket) do
     filters =
       if params["userid"] do
@@ -49,13 +52,13 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
      |> get_messages()}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(:do_get_messages, socket) do
     socket = get_messages(socket)
     {:noreply, socket}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_event("filter-update", event, %{assigns: %{filters: filters}} = socket) do
     [key] = event["_target"]
     value = event[key]

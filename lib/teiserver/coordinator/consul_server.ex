@@ -5,25 +5,27 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   use GenServer
   require Logger
-
-  alias Teiserver.{
-    Account,
-    Coordinator,
-    Client,
-    CacheUser,
-    Lobby,
-    Battle,
-    Telemetry,
-    Config,
-    Communication
-  }
-
-  alias Teiserver.Lobby.{ChatLib, LobbyRestrictions, LobbyLib}
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
+  alias Teiserver.Communication
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Coordinator.ConsulCommands
+  alias Teiserver.Coordinator.CoordinatorCommands
+  alias Teiserver.Coordinator.CoordinatorLib
+  alias Teiserver.Coordinator.SpadsParser
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser, CoordinatorCommands}
+  alias Teiserver.Lobby
+  alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Lobby.LobbyLib
+  alias Teiserver.Lobby.LobbyRestrictions
+  alias Teiserver.Telemetry
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password? tournament)
   @boss_commands ~w(balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
@@ -40,7 +42,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @impl true
+  @impl GenServer
   def handle_call(:get_all, _from, state) do
     {:reply, state, state}
   end
@@ -87,7 +89,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   # Infos
-  @impl true
+  @impl GenServer
   def handle_info(:tick, state) do
     if Battle.lobby_exists?(state.lobby_id) do
       new_state = check_queue_status(state)
@@ -578,7 +580,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     user = CacheUser.get_user_by_id(userid)
 
     cond do
-      CacheUser.is_moderator?(user) ->
+      Auth.is_moderator?(user) ->
         :ok
 
       Enum.count(new_user_times) >= state.ring_limit_count ->
@@ -643,7 +645,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> String.downcase()
 
     is_boss = Enum.member?(state.host_bosses, userid)
-    is_moderator = CacheUser.is_moderator?(userid)
+    is_moderator = Auth.is_moderator?(userid)
 
     # If it's CV then strip that out!
     [cmd | args] = String.split(trimmed_msg, " ")
@@ -870,7 +872,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       not Enum.empty?(client.queues) ->
         false
 
-      Account.is_moderator?(user) ->
+      Auth.is_moderator?(user) ->
         true
 
       state.ranked == false and
@@ -985,7 +987,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {false, "Err"}
 
       state.tournament_lobby == true and
-          not CacheUser.has_any_role?(userid, ["Caster", "TourneyPlayer", "Tournament player"]) ->
+          not Auth.has_any_role?(userid, ["Caster", "TourneyPlayer", "Tournament player"]) ->
         {false, "Tournament game"}
 
       block_status == :blocking ->
@@ -1037,7 +1039,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     is_host = senderid == state.host_id
     is_boss = Enum.member?(state.host_bosses, senderid)
-    is_admin = Enum.member?(user.roles, "Admin")
+    is_admin = Auth.is_admin?(senderid)
 
     cond do
       client == nil ->
@@ -1054,7 +1056,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         true
 
       # Allow all except Admin only commands for moderators
-      CacheUser.is_moderator?(user) and not Enum.member?(@admin_commands, cmd.command) ->
+      Auth.is_moderator?(user) and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       Enum.member?(@host_commands, cmd.command) and is_host ->
@@ -1446,7 +1448,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state.join_queue ++ state.low_priority_join_queue
   end
 
-  @impl true
+  @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(opts) do
     lobby_id = opts[:lobby_id]

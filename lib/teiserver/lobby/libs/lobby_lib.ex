@@ -3,11 +3,15 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   """
 
-  alias Phoenix.PubSub
-  alias Teiserver.{Coordinator, Account, Lobby}
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Data.Types, as: T
   require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Battle.LobbyServer
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Lobby
 
   @spec get_lobby(T.lobby_id()) :: T.lobby() | nil
   def get_lobby(id) do
@@ -193,7 +197,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   @spec do_create_new_lobby(map) :: T.lobby()
   defp do_create_new_lobby(data) do
     data
-    |> Teiserver.Lobby.create_lobby()
+    |> Lobby.create_lobby()
     |> add_lobby()
   end
 
@@ -397,7 +401,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   def start_lobby_server(lobby) do
     {:ok, server_pid} =
       DynamicSupervisor.start_child(Teiserver.LobbySupervisor, {
-        Teiserver.Battle.LobbyServer,
+        LobbyServer,
         name: "lobby_#{lobby.id}",
         data: %{
           lobby: lobby
@@ -530,7 +534,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec get_team_config(:all | integer()) :: map() | nil
   def get_team_config(:all) do
-    if Teiserver.Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") do
+    if Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") do
       ttl_ms = 1_000
       now = System.monotonic_time(:millisecond)
 
@@ -545,7 +549,7 @@ defmodule Teiserver.Lobby.LobbyLib do
             Enum.map(lobby_ids, fn lobby_id ->
               Task.async(fn ->
                 try do
-                  case Teiserver.Coordinator.get_team_config(lobby_id, 4_000) do
+                  case Coordinator.get_team_config(lobby_id, 4_000) do
                     %{host_teamsize: team_size, host_teamcount: team_count} ->
                       {lobby_id, %{teamSize: team_size, nbTeams: team_count}}
 
@@ -576,9 +580,9 @@ defmodule Teiserver.Lobby.LobbyLib do
   end
 
   def get_team_config(lobby_id) when is_integer(lobby_id) do
-    if Teiserver.Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") do
+    if Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") do
       try do
-        case Teiserver.Coordinator.get_team_config(lobby_id) do
+        case Coordinator.get_team_config(lobby_id) do
           %{host_teamsize: team_size, host_teamcount: team_count} ->
             %{lobby_id => %{teamSize: team_size, nbTeams: team_count}}
 

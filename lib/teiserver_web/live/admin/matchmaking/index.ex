@@ -1,15 +1,16 @@
 defmodule TeiserverWeb.Admin.MatchmakingLive.Index do
   use TeiserverWeb, :live_view
+  alias Teiserver.Battle.MatchLib
   alias Teiserver.Matchmaking
 
-  @impl true
+  @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     case allow?(socket.assigns[:current_user], "Admin") do
       true ->
         socket =
           socket
           |> assign(:site_menu_active, "matchmaking")
-          |> assign(:view_colour, Teiserver.Battle.MatchLib.colours())
+          |> assign(:view_colour, MatchLib.colours())
           |> assign(:queues, [])
           |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
           |> add_breadcrumb(name: "Matchmaking", url: "/admin/matchmaking")
@@ -25,12 +26,12 @@ defmodule TeiserverWeb.Admin.MatchmakingLive.Index do
     end
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_params(_params, _url, socket) do
     {:noreply, get_queues(socket)}
   end
 
-  @impl true
+  @impl Phoenix.LiveView
   def handle_info(
         %{
           channel: "matchmaking_queues",

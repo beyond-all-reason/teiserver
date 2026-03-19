@@ -5,7 +5,8 @@ defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
   import Phoenix.LiveViewTest
   import Teiserver.MicroblogFixtures
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.{Microblog, TeiserverTestLib}
+  alias Teiserver.Microblog
+  alias Teiserver.TeiserverTestLib
 
   defp auth_setup(_) do
     GeneralTestLib.conn_setup()
@@ -15,7 +16,7 @@ defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
   test "microblog preferences requires authentication" do
     {:ok, kw} =
       GeneralTestLib.conn_setup([], [:no_login])
-      |> Teiserver.TeiserverTestLib.conn_setup()
+      |> TeiserverTestLib.conn_setup()
 
     {:ok, conn} = Keyword.fetch(kw, :conn)
 

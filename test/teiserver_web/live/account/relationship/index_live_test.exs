@@ -2,11 +2,12 @@ defmodule TeiserverWeb.Account.RelationshipLive.IndexLiveTest do
   use TeiserverWeb.ConnCase, async: true
   alias TeiserverWeb.Account.RelationshipLive.Index
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
 
   test "account relationship endpoints requires authentication" do
     {:ok, kw} =
       GeneralTestLib.conn_setup([], [:no_login])
-      |> Teiserver.TeiserverTestLib.conn_setup()
+      |> TeiserverTestLib.conn_setup()
 
     {:ok, conn} = Keyword.fetch(kw, :conn)
 
@@ -17,7 +18,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.IndexLiveTest do
   test "can access account relationship when authenticated" do
     {:ok, kw} =
       GeneralTestLib.conn_setup()
-      |> Teiserver.TeiserverTestLib.conn_setup()
+      |> TeiserverTestLib.conn_setup()
 
     {:ok, conn} = Keyword.fetch(kw, :conn)
 
@@ -27,7 +28,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.IndexLiveTest do
 
   test "purge cutoff options are valid" do
     options = Index.get_purge_cutoff_options()
-    assert length(options) > 0
+    assert not Enum.empty?(options)
 
     default_option = Index.get_default_purge_cutoff_option()
     assert Enum.member?(options, default_option)

@@ -1,9 +1,10 @@
 defmodule Teiserver.Account.FriendRequestLib do
   @moduledoc false
-  alias Teiserver.Account
-  alias Account.FriendRequest
-  alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.FriendRequest
+  alias Teiserver.Account.RelationshipLib
+  alias Teiserver.Data.Types, as: T
 
   @spec colours :: atom
   def colours(), do: :success
@@ -67,10 +68,10 @@ defmodule Teiserver.Account.FriendRequestLib do
       Account.does_a_avoid_b?(to_id, from_id) ->
         {false, :invalid_user}
 
-      Teiserver.Account.RelationshipLib.check_relationship_limit(from_id, :friend) != :ok ->
+      RelationshipLib.check_relationship_limit(from_id, :friend) != :ok ->
         {false, :outgoing_capacity_reached}
 
-      Teiserver.Account.RelationshipLib.check_relationship_limit(to_id, :friend) != :ok ->
+      RelationshipLib.check_relationship_limit(to_id, :friend) != :ok ->
         {false, :incoming_capacity_reached}
 
       true ->

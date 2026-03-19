@@ -1,8 +1,11 @@
 defmodule TeiserverWeb.API.SpadsController do
   use TeiserverWeb, :controller
   alias Teiserver.Config
-  alias Teiserver.{Account, Coordinator, Battle}
-  alias Teiserver.Battle.{BalanceLib, MatchLib}
+  alias Teiserver.Account
+  alias Teiserver.Coordinator
+  alias Teiserver.Battle
+  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.MatchLib
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
 

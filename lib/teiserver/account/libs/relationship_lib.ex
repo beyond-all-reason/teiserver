@@ -1,9 +1,11 @@
 defmodule Teiserver.Account.RelationshipLib do
   @moduledoc false
-  alias Teiserver.{Account, Config}
-  alias Teiserver.Account.AuthLib
-  alias Teiserver.Data.Types, as: T
+  alias Ecto.Adapters.SQL
   alias Phoenix.PubSub
+  alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
+  alias Teiserver.Config
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.Repo
 
   @spec colour :: atom
@@ -407,7 +409,7 @@ defmodule Teiserver.Account.RelationshipLib do
     limit $3
     """
 
-    results = Ecto.Adapters.SQL.query!(Repo, query, [player_ids, player_ids, limit, player_limit])
+    results = SQL.query!(Repo, query, [player_ids, player_ids, limit, player_limit])
 
     results.rows
   end
@@ -432,7 +434,7 @@ defmodule Teiserver.Account.RelationshipLib do
     # Not able to use mimimum_time_hours as parameter so have to add into the sql string
 
     results =
-      Ecto.Adapters.SQL.query!(Repo, query, [
+      SQL.query!(Repo, query, [
         player_ids,
         player_ids,
         limit,
@@ -455,7 +457,7 @@ defmodule Teiserver.Account.RelationshipLib do
     """
 
     results =
-      Ecto.Adapters.SQL.query!(Repo, query, [
+      SQL.query!(Repo, query, [
         user_id,
         days_not_logged_in
       ])
@@ -477,7 +479,7 @@ defmodule Teiserver.Account.RelationshipLib do
       """
 
     result =
-      Ecto.Adapters.SQL.query!(Repo, query, [
+      SQL.query!(Repo, query, [
         user_id,
         days_not_logged_in
       ])
