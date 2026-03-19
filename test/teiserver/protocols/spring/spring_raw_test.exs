@@ -85,7 +85,7 @@ defmodule Teiserver.SpringRawTest do
     _ = _recv_raw(socket)
     user = UserCacheLib.get_user_by_name(username)
     assert user != nil
-    Teiserver.CacheUser.verify_user(user)
+    Account.verify_user(user.id)
 
     # First try to login with a bad-case username
     _send_raw(

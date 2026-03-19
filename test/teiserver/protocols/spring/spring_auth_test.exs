@@ -498,7 +498,7 @@ CLIENTS test_room #{user.name}\n"
     # Un-flood them
     CacheUser.set_flood_level(userid, 0)
     # And re-verify them
-    user.id |> Teiserver.CacheUser.get_user_by_id() |> Teiserver.CacheUser.verify_user()
+    Account.verify_user(userid)
 
     # Now they can log in again
     _send_raw(
@@ -646,12 +646,13 @@ CLIENTS test_room #{user.name}\n"
         "test_user_bad_id@email.com",
         Account.spring_md5_password("password")
       )
-      |> Teiserver.Account.create_user()
+      |> Account.create_user()
 
     bad_user
     |> UserCacheLib.convert_user()
     |> UserCacheLib.add_user()
-    |> CacheUser.verify_user()
+
+    Account.verify_user(bad_user.id)
 
     # Need to add it as a client for the :add_user command to work
     Client.login(CacheUser.get_user_by_id(bad_user.id), :spring, "127.0.0.1")

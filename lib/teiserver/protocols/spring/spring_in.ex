@@ -332,7 +332,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
         case code == to_string(correct_code) do
           true ->
-            CacheUser.verify_user(user)
+            Account.verify_user(user.id)
 
             optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
             SpringOut.do_login_accepted(state, user, optimisation_level)
