@@ -191,7 +191,7 @@ defmodule Teiserver.MixProject do
         "format",
         "credo",
         "test --raise --warnings-as-errors --exclude needs_attention",
-        "cmd --shell MIX_ENV=dev mix dialyzer"
+        "cmd --shell MIX_ENV=dev mix dialyzer --list-unused-filters"
       ]
     ]
   end
