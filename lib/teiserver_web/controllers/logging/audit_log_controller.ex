@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Logging.AuditLogController do
-  use TeiserverWeb, :controller
-
   # alias Teiserver.Logging.AuditLog
   alias Teiserver.Logging
   alias Teiserver.Logging.AuditLogLib
+
+  use TeiserverWeb, :controller
 
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 

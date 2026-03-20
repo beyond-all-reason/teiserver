@@ -1,12 +1,13 @@
 defmodule Teiserver.Protocols.Spring.TelemetryIn do
-  require Logger
-  import Teiserver.Protocols.SpringOut, only: [reply: 5]
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Communication
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.SpringIn
   alias Teiserver.Telemetry
 
+  require Logger
+
+  import Teiserver.Protocols.SpringOut, only: [reply: 5]
   import SpringIn, only: [_no_match: 4]
   # import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 

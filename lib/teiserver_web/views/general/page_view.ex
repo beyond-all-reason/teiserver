@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.General.PageView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Config.UserConfigLib
   alias Teiserver.Helper.StylingHelper
+
+  use TeiserverWeb, :view
 
   def view_colour(), do: StylingHelper.colours(:default)
 

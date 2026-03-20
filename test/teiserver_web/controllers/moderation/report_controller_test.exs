@@ -1,11 +1,11 @@
 defmodule TeiserverWeb.Moderation.ReportControllerTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
 
   alias Teiserver.Moderation.ModerationTestLib
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
 
   @moduletag :needs_attention
 

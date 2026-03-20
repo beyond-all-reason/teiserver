@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Logging.PageViewLogView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Logging.PageViewLogLib
+
+  use TeiserverWeb, :view
 
   def view_colour(), do: PageViewLogLib.colours()
   def icon(), do: PageViewLogLib.icon()

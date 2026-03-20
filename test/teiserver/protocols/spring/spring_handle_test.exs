@@ -3,9 +3,10 @@ defmodule Teiserver.SpringHandleTest do
   These are tests just to ensure no errors are thrown. If you want to
   check the results coming back ensure you look at the auth and raw tests.
   """
-  use Teiserver.DataCase, async: false
+
   alias Teiserver.TeiserverTestLib
   alias Teiserver.Protocols.SpringIn
+  use Teiserver.DataCase, async: false
 
   test "LOGIN and EXIT" do
     state = TeiserverTestLib.mock_state_raw()

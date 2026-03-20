@@ -1,8 +1,9 @@
 defmodule Teiserver.Telemetry.SimpleMatchEventTypeLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
+
   alias Teiserver.Telemetry.SimpleMatchEventType
   alias Teiserver.Telemetry.SimpleMatchEventTypeQueries
+  use TeiserverWeb, :library_newform
 
   # Helper function
   @spec get_or_add_simple_match_event_type(String.t()) :: non_neg_integer()

@@ -1,8 +1,8 @@
 defmodule Teiserver.TachyonLobby.Supervisor do
-  use Horde.DynamicSupervisor
-
   alias Horde.DynamicSupervisor, as: HordeSupervisor
   alias Teiserver.TachyonLobby.Lobby
+
+  use Horde.DynamicSupervisor
 
   @spec start_lobby(Lobby.start_params()) ::
           {:ok, %{pid: pid(), id: Lobby.id()}}

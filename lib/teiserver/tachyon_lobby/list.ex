@@ -12,11 +12,11 @@ defmodule Teiserver.TachyonLobby.List do
   distribute the load across the partitions.
   """
 
-  use GenServer
-
   alias Teiserver.Helpers.PubSubHelper
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.TachyonLobby.Lobby
+
+  use GenServer
 
   @update_topic "teiserver_tachyonlobby_list"
 

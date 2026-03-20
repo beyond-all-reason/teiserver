@@ -1,7 +1,5 @@
 defmodule Teiserver.SpringTcpServer do
   @moduledoc false
-  use GenServer
-  require Logger
 
   alias Phoenix.PubSub
   alias Teiserver.Account
@@ -18,6 +16,10 @@ defmodule Teiserver.SpringTcpServer do
   alias Teiserver.Protocols.SpringOut
   alias Teiserver.Room
   alias Teiserver.Telemetry
+
+  use GenServer
+
+  require Logger
 
   @init_timeout 60_000
 

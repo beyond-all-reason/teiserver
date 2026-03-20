@@ -1,7 +1,7 @@
 defmodule Teiserver.ServerUserPlug do
-  import Plug.Conn
   alias Phoenix.LiveView.Utils, as: LiveViewUtils
   alias Teiserver.CacheUser
+  import Plug.Conn
 
   def init(_opts) do
     # Keyword.fetch!(opts, :repo)

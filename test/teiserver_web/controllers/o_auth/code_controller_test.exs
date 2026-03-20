@@ -1,11 +1,11 @@
 defmodule TeiserverWeb.OAuth.CodeControllerTest do
-  use TeiserverWeb.ConnCase
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
   alias Phoenix.ConnTest
   alias Teiserver.Bot
   alias TeiserverWeb.Endpoint
+  use TeiserverWeb.ConnCase
 
   defp get_valid_data(%{app: app, code: code, code_attrs: code_attrs}) do
     %{

@@ -1,8 +1,9 @@
 defmodule Teiserver.Telemetry.ComplexLobbyEventQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Ecto.Adapters.SQL
   alias Teiserver.Telemetry.ComplexLobbyEvent
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_complex_lobby_events(list) :: Ecto.Query.t()

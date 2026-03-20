@@ -1,11 +1,12 @@
 defmodule Teiserver.TeiserverConfigs do
   @moduledoc false
-  import Teiserver.Config, only: [add_site_config_type: 1]
 
   alias Teiserver.Account
   alias Teiserver.Lobby
   alias Teiserver.Party
   alias Teiserver.Tachyon
+
+  import Teiserver.Config, only: [add_site_config_type: 1]
 
   @spec teiserver_configs :: any
   def teiserver_configs do

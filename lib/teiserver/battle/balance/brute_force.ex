@@ -11,12 +11,13 @@ defmodule Teiserver.Battle.Balance.BruteForce do
 
   Only use for games with two teams and <=16 players
   """
+
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Battle.Balance.BruteForceTypes, as: BF
   alias Teiserver.Battle.Balance.LoserPicks
   alias Teiserver.Helpers.Combi
-  import Teiserver.Helper.NumberHelper, only: [format: 1]
   require Integer
+  import Teiserver.Helper.NumberHelper, only: [format: 1]
 
   @captain_diff_importance 1
   @rating_diff_importance 1

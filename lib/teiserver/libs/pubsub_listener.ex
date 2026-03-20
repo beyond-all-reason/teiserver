@@ -12,8 +12,9 @@ defmodule Teiserver.Common.PubsubListener do
   ```
   """
 
-  use GenServer
   alias Phoenix.PubSub
+
+  use GenServer
 
   def new_listener(rooms) do
     {:ok, pid} = start_link(rooms)

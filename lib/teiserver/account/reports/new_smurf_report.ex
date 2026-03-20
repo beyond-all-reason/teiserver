@@ -1,8 +1,8 @@
 defmodule Teiserver.Account.NewSmurfReport do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-face-angry"

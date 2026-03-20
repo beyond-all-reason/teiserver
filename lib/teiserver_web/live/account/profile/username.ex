@@ -1,7 +1,8 @@
 defmodule TeiserverWeb.Account.ProfileLive.Username do
   @moduledoc false
-  use TeiserverWeb, :live_view
+
   alias Teiserver.Account
+  use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
   def mount(%{"username" => username}, _session, socket) do

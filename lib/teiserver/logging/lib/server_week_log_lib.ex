@@ -1,7 +1,7 @@
 defmodule Teiserver.Logging.ServerWeekLogLib do
-  use TeiserverWeb, :library
-
   alias Teiserver.Logging.ServerWeekLog
+
+  use TeiserverWeb, :library
 
   @spec colours :: atom
   def colours(), do: :warning2

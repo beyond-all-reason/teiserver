@@ -3,9 +3,12 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
   Can run all balance tests via
   mix test --only balance_test
   """
-  use Teiserver.DataCase, async: true
-  @moduletag :balance_test
+
   alias Teiserver.Battle.Balance.BruteForce
+
+  use Teiserver.DataCase, async: true
+
+  @moduletag :balance_test
 
   test "check for broken party" do
     party = ["kyutoryu", "fbots1998"]

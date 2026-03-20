@@ -1,7 +1,7 @@
 defmodule Teiserver.Logging.MatchMonthLogLib do
-  use TeiserverWeb, :library
-
   alias Teiserver.Logging.MatchMonthLog
+
+  use TeiserverWeb, :library
 
   @spec colours :: atom
   def colours(), do: :warning2

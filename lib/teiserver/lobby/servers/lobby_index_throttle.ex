@@ -2,9 +2,10 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
   @moduledoc """
 
   """
-  use GenServer
+
   alias Phoenix.PubSub
   alias Teiserver.Battle
+  use GenServer
   require Logger
 
   @update_interval 1_000

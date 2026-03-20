@@ -3,9 +3,9 @@ defmodule TeiserverWeb.Admin.AssetController do
   management engine and game version for tachyon
   """
 
-  use TeiserverWeb, :controller
-
   alias Teiserver.Asset
+
+  use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff.Admin,

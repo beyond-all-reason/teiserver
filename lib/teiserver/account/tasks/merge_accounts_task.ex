@@ -1,11 +1,11 @@
 defmodule Teiserver.Account.MergeAccountsTask do
-  require Logger
-
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
   alias Teiserver.Admin.DeleteUserTask
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Repo
+
+  require Logger
 
   @spec perform(T.userid(), T.userid()) :: :no_user | :ok
   def perform(deleting_id, keeping_id) do

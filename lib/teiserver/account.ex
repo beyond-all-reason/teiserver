@@ -1,8 +1,5 @@
 defmodule Teiserver.Account do
   @moduledoc false
-  import Ecto.Query, warn: false
-
-  require Logger
 
   alias Phoenix.PubSub
   alias Teiserver.Account.Accolade
@@ -43,6 +40,10 @@ defmodule Teiserver.Account do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
+
+  require Logger
+
+  import Ecto.Query, warn: false
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-user-alt"

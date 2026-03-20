@@ -1,7 +1,8 @@
 defmodule Teiserver.Chat.LobbyMessageLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Chat.LobbyMessage
+  use TeiserverWeb, :library
 
   # Functions
   @spec icon :: String.t()

@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Battle.MatchLive.Show do
   @moduledoc false
-  use TeiserverWeb, :live_view
+
   alias Openskill.Util
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
@@ -13,6 +13,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   alias Teiserver.Helper.NumberHelper
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Telemetry
+  use TeiserverWeb, :live_view
   import Central.Helpers.ComponentHelper
   import Teiserver.Helper.ColourHelper
 

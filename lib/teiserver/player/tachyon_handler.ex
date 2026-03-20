@@ -3,7 +3,6 @@ defmodule Teiserver.Player.TachyonHandler do
   Player specific code to handle tachyon logins and actions
   """
 
-  require Logger
   alias Teiserver.Account
   alias Teiserver.CacheUser
   alias Teiserver.Matchmaking
@@ -18,6 +17,8 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Helpers.TachyonParser
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Tachyon.Schema
+
+  require Logger
 
   @behaviour Handler
 

@@ -1,7 +1,7 @@
 defmodule Teiserver.Repo.Migrations.AddObanJobsTable do
-  use Ecto.Migration
-
   alias Oban.Migrations
+
+  use Ecto.Migration
 
   def up do
     Migrations.up()

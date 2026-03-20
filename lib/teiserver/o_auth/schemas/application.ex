@@ -1,8 +1,9 @@
 defmodule Teiserver.OAuth.Application do
   @moduledoc false
-  use TeiserverWeb, :schema
 
   alias Ecto.Changeset
+
+  use TeiserverWeb, :schema
 
   @type id() :: non_neg_integer()
   @type app_id() :: String.t()

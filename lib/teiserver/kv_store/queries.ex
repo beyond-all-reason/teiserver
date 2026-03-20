@@ -1,8 +1,8 @@
 defmodule Teiserver.KvStore.Queries do
-  use TeiserverWeb, :queries
-
   alias Ecto.Changeset
   alias Teiserver.KvStore.Blob
+
+  use TeiserverWeb, :queries
 
   @spec put(store :: String.t(), key :: String.t(), value :: binary()) ::
           :ok | {:error, Ecto.Changeset.t()}

@@ -1,8 +1,8 @@
 defmodule Teiserver.Bridge.DiscordSystem do
+  alias Teiserver.Communication
+
   use DynamicSupervisor
   use Task
-
-  alias Teiserver.Communication
 
   def start_link(_) do
     DynamicSupervisor.start_link(__MODULE__, [], name: __MODULE__)

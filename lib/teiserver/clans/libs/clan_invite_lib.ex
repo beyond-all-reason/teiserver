@@ -1,6 +1,6 @@
 defmodule Teiserver.Clans.ClanInviteLib do
-  use TeiserverWeb, :library
   alias Teiserver.Clans.ClanInvite
+  use TeiserverWeb, :library
 
   # Queries
   @spec get_clan_invites() :: Ecto.Query.t()

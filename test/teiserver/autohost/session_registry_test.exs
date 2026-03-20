@@ -1,9 +1,9 @@
 defmodule Teiserver.Autohost.SessionRegistryTest do
+  alias Teiserver.Autohost.SessionRegistry
+
   use Teiserver.DataCase, async: false
 
   @moduletag :tachyon
-
-  alias Teiserver.Autohost.SessionRegistry
 
   test "set value also register" do
     SessionRegistry.set_value(1, 20, 10)

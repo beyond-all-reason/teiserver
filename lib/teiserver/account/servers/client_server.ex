@@ -1,9 +1,10 @@
 defmodule Teiserver.Account.ClientServer do
   @moduledoc false
-  use GenServer
-  require Logger
+
   alias Teiserver.Lobby.ChatLib
   alias Phoenix.PubSub
+  use GenServer
+  require Logger
 
   @impl GenServer
   def handle_call(:get_client_state, _from, state) do

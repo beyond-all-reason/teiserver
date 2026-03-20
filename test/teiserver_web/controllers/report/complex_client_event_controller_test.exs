@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Report.ComplexClientEventControllerTest do
-  use TeiserverWeb.ConnCase
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
 
   @moduletag :needs_attention
 

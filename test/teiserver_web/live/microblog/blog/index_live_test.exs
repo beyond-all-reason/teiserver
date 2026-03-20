@@ -1,11 +1,13 @@
 defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
   @moduledoc false
+
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
+
   use TeiserverWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Teiserver.MicroblogFixtures
-  alias Central.Helpers.GeneralTestLib
-  alias Teiserver.TeiserverTestLib
 
   defp auth_setup(_) do
     GeneralTestLib.conn_setup()

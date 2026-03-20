@@ -1,8 +1,9 @@
 defmodule Teiserver.Telemetry.UserPropertyQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Ecto.Adapters.SQL
   alias Teiserver.Telemetry.UserProperty
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_user_properties(list) :: Ecto.Query.t()

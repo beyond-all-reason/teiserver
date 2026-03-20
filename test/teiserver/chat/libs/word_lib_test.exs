@@ -1,10 +1,10 @@
 defmodule Teiserver.Chat.WordLibTest do
-  use Teiserver.DataCase
   alias Teiserver.Chat.WordLib
   alias Teiserver.Room
   alias Teiserver.CacheUser
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.TeiserverTestLib
+  use Teiserver.DataCase
 
   import TeiserverTestLib,
     only: [new_user: 0]

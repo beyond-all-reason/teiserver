@@ -3,8 +3,9 @@ defmodule Teiserver.General.CacheClusterServer do
   This allows us to propogate data between nodes in the cluster to ensure the ETS
   tables are kept in sync.
   """
-  use GenServer
+
   alias Phoenix.PubSub
+  use GenServer
 
   @spec start_link(list) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts \\ []) do

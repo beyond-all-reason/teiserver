@@ -1,5 +1,4 @@
 defmodule Teiserver.Tachyon.MatchmakingTest do
-  use TeiserverWeb.ConnCase
   alias Teiserver.Asset
   alias Teiserver.AssetFixtures
   alias Teiserver.OAuthFixtures
@@ -14,6 +13,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   alias Teiserver.Battle
   alias Teiserver.Game
   alias Teiserver.TachyonBattle
+  use TeiserverWeb.ConnCase
 
   defp altair_attr(id),
     do: %{

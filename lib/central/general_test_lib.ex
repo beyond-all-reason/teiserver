@@ -1,8 +1,6 @@
 defmodule Central.Helpers.GeneralTestLib do
   @moduledoc false
-  import Ecto.Query
-  import Phoenix.ChannelTest
-  import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
+
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Guardian
@@ -11,6 +9,9 @@ defmodule Central.Helpers.GeneralTestLib do
   alias Teiserver.Logging.LoggingTestLib
   alias Teiserver.Repo
   alias TeiserverWeb.UserSocket
+  import Ecto.Query
+  import Phoenix.ChannelTest
+  import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
 
   @endpoint TeiserverWeb.Endpoint
 

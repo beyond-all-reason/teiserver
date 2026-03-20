@@ -1,7 +1,8 @@
 defmodule Teiserver.Logging.LoggingLib do
   @moduledoc false
-  import Plug.Conn, only: [assign: 3]
+
   alias Teiserver.Account.AuthLib
+  import Plug.Conn, only: [assign: 3]
 
   @spec colours() :: atom
   def colours(), do: :default

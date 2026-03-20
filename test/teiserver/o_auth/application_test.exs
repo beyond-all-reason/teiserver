@@ -1,7 +1,7 @@
 defmodule Teiserver.OAuth.ApplicationTest do
-  use Teiserver.DataCase, async: true
   alias Teiserver.OAuth
   alias Teiserver.TeiserverTestLib
+  use Teiserver.DataCase, async: true
 
   test "reject unknown scopes at creation" do
     user = TeiserverTestLib.new_user()

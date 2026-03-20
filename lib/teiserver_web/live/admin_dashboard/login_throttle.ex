@@ -1,12 +1,10 @@
 defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
-  use TeiserverWeb, :live_view
   alias Phoenix.PubSub
-
   alias Teiserver
   alias Teiserver.Admin.AdminLib
   alias Teiserver.Game
-  # alias Teiserver.Account.AccoladeLib
-  # alias Teiserver.Data.Matchmaking
+
+  use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
   def mount(_params, session, socket) do

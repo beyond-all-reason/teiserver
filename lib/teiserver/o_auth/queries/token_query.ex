@@ -1,7 +1,7 @@
 defmodule Teiserver.OAuth.TokenQueries do
-  use TeiserverWeb, :queries
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.Token
+  use TeiserverWeb, :queries
 
   @doc """
   Return the db object corresponding to the given token.

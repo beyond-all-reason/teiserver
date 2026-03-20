@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Telemetry.SimpleServerEventView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Telemetry.SimpleServerEventLib
+
+  use TeiserverWeb, :view
 
   @spec view_colour :: atom
   def view_colour(), do: SimpleServerEventLib.colour()

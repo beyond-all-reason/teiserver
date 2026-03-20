@@ -1,12 +1,10 @@
 defmodule TeiserverWeb.UserComponents do
   @moduledoc false
-  use Phoenix.Component
-  # alias Phoenix.LiveView.JS
-  # import TeiserverWeb.Gettext
-
   alias Teiserver.Account
   alias Teiserver.Account.RecentlyUsedCache
   alias Teiserver.Moderation.ActionLib
+
+  use Phoenix.Component
 
   use Phoenix.VerifiedRoutes,
     endpoint: TeiserverWeb.Endpoint,

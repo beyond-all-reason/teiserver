@@ -1,12 +1,12 @@
 defmodule Teiserver.SpringAuthTest do
-  use Teiserver.ServerCase, async: false
-  require Logger
   alias Teiserver.BitParse
   alias Teiserver.CacheUser
   alias Teiserver.Account
   alias Teiserver.Client
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.TeiserverTestLib
+  use Teiserver.ServerCase, async: false
+  require Logger
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 

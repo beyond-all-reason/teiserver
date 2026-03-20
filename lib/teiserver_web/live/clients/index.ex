@@ -1,11 +1,11 @@
 defmodule TeiserverWeb.ClientLive.Index do
-  use TeiserverWeb, :live_view
   alias Phoenix.PubSub
-
   alias Teiserver
   alias Teiserver.Client
   alias Teiserver.CacheUser
   alias Teiserver.Account.UserLib
+
+  use TeiserverWeb, :live_view
 
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;

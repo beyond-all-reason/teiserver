@@ -1,11 +1,12 @@
 defmodule Teiserver.Telemetry.ComplexMatchEventTest do
   @moduledoc false
-  use Teiserver.DataCase
+
   alias Teiserver.Battle
   alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
   alias Ecto.Adapters.SQL
   alias ExULID.ULID
+  use Teiserver.DataCase
 
   test "complex match events" do
     r = :rand.uniform(999_999_999)

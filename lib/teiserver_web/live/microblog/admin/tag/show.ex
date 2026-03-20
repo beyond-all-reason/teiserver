@@ -1,7 +1,9 @@
 defmodule TeiserverWeb.Microblog.Admin.TagLive.Show do
   @moduledoc false
-  use TeiserverWeb, :live_view
+
   alias Teiserver.Microblog
+
+  use TeiserverWeb, :live_view
 
   import Teiserver.Microblog, only: [colours: 0]
 

@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Admin.MatchView do
-  use TeiserverWeb, :view
-  import TeiserverWeb.PaginationComponents, only: [pagination: 1]
-
   alias Teiserver.Battle.MatchLib
+
+  use TeiserverWeb, :view
+
+  import TeiserverWeb.PaginationComponents, only: [pagination: 1]
 
   def view_colour(), do: MatchLib.colours()
   def icon(), do: MatchLib.icon()

@@ -1,8 +1,8 @@
 defmodule Teiserver.Protocols.Spring.LobbyPolicyIn do
   alias Teiserver.Game
   alias Teiserver.Protocols.SpringIn
-  import Teiserver.Protocols.SpringOut, only: [reply: 5]
   require Logger
+  import Teiserver.Protocols.SpringOut, only: [reply: 5]
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle(_, _, _, %{userid: nil} = state), do: state

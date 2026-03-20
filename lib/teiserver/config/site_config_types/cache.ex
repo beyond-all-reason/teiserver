@@ -3,10 +3,11 @@ defmodule Teiserver.Config.SiteConfigTypes.Cache do
   Cache and setup for site configuration
   """
 
-  use Supervisor
   alias Teiserver.Config.SiteConfigTypes.SystemConfigs
   alias Teiserver.Helpers.CacheHelper
   alias Teiserver.TeiserverConfigs
+
+  use Supervisor
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),

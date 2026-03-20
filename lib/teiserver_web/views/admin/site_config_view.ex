@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.SiteConfigView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Config.SiteConfigLib
+
+  use TeiserverWeb, :view
 
   def config_name(config_key) do
     config_key

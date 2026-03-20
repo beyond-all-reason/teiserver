@@ -1,11 +1,12 @@
 defmodule Teiserver.Telemetry.SimpleLobbyEventTest do
   @moduledoc false
-  use Teiserver.DataCase
+
   alias Teiserver.Battle
   alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
   alias Ecto.Adapters.SQL
   alias ExULID.ULID
+  use Teiserver.DataCase
 
   test "simple lobby events" do
     r = :rand.uniform(999_999_999)

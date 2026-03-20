@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Account.ProfileLive.Matches do
   @moduledoc false
-  use TeiserverWeb, :live_view
+
   alias Teiserver.Account
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle
@@ -9,6 +9,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Matches do
   alias Teiserver.Plugs.CachePlug
   alias TeiserverWeb.Account.ProfileLive.Overview
   alias TeiserverWeb.Parsers.PaginationParams
+  use TeiserverWeb, :live_view
   import TeiserverWeb.PaginationComponents, only: [pagination: 1]
 
   @impl Phoenix.LiveView

@@ -1,7 +1,7 @@
 defmodule Teiserver.Chat.RoomSupervisor do
-  use DynamicSupervisor
-
   alias Teiserver.Data.Types, as: T
+
+  use DynamicSupervisor
 
   @spec start_room(String.t(), T.userid(), String.t(), String.t(), T.clan_id()) ::
           DynamicSupervisor.on_start_child()

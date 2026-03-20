@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Account.GeneralView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Clans.ClanLib
   alias Teiserver.Config.UserConfigLib
   alias Teiserver.Game.AchievementTypeLib
+
+  use TeiserverWeb, :view
 
   @spec view_colour :: atom
   def view_colour(), do: :success

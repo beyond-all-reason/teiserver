@@ -1,8 +1,9 @@
 defmodule Teiserver.Telemetry.SimpleMatchEventQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Ecto.Adapters.SQL
   alias Teiserver.Telemetry.SimpleMatchEvent
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_simple_match_events(list) :: Ecto.Query.t()

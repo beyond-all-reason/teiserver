@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Account.RegistrationController do
-  use TeiserverWeb, :controller
   alias Ecto.Changeset
   alias Teiserver.Account
   alias Teiserver.Account.User
+  use TeiserverWeb, :controller
 
   plug :registration_enabled?
 

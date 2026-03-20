@@ -3,9 +3,10 @@ defmodule Teiserver.MetadataCache do
   Cache and setup for miscellaneous metadata
   """
 
-  use Supervisor
   alias Teiserver.Helpers.CacheHelper
   alias Teiserver.Logging.AuditLogLib
+
+  use Supervisor
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),

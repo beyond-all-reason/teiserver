@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Telemetry do
   @moduledoc false
-  import Telemetry.Metrics
 
   alias Teiserver.Telemetry, as: TeiserverTelemetry
+
+  import Telemetry.Metrics
 
   def metrics do
     [

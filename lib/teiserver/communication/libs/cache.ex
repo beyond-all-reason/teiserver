@@ -3,9 +3,10 @@ defmodule Teiserver.Communication.Cache do
   Cache and setup for communication stuff
   """
 
-  use Supervisor
   alias Teiserver.Communication
   alias Teiserver.Helpers.CacheHelper
+
+  use Supervisor
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),

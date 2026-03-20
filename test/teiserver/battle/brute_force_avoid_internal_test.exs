@@ -3,9 +3,12 @@ defmodule Teiserver.Battle.BruteForceAvoidInternalTest do
   Can run all balance tests via
   mix test --only balance_test
   """
-  use ExUnit.Case
-  @moduletag :balance_test
+
   alias Teiserver.Battle.Balance.BruteForceAvoid
+
+  use ExUnit.Case
+
+  @moduletag :balance_test
 
   test "can get second team" do
     players = [

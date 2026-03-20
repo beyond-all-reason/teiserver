@@ -1,8 +1,9 @@
 defmodule Teiserver.OAuth.Tasks.Cleanup do
-  use Oban.Worker, queue: :cleanup
-  require Logger
-
   alias Teiserver.OAuth
+
+  use Oban.Worker, queue: :cleanup
+
+  require Logger
 
   @impl Oban.Worker
   def perform(_) do

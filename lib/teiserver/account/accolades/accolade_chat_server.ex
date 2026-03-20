@@ -3,14 +3,14 @@ defmodule Teiserver.Account.AccoladeChatServer do
   Each chat server is for a specific user, when the chat server has done it's job it self-terminates.
   """
 
-  use GenServer
-
   alias Teiserver.Account
   alias Teiserver.CacheUser
   alias Teiserver.Config
   alias Teiserver.Account.AccoladeBotServer
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Data.Types, as: T
+
+  use GenServer
 
   @line_break "-------------------------------------------------"
   @chat_timeout 600_000

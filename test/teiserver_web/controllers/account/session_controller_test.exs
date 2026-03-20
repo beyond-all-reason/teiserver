@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.Account.SessionControllerTest do
-  use TeiserverWeb.ConnCase
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
   alias Teiserver.Config
   alias Teiserver.Account.Guardian
   alias Guardian.Plug
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
 
   describe "login" do
     setup do

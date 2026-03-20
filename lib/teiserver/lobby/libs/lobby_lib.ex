@@ -3,8 +3,6 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   """
 
-  require Logger
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Battle.LobbyServer
@@ -12,6 +10,10 @@ defmodule Teiserver.Lobby.LobbyLib do
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
+
+  require Logger
+
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec get_lobby(T.lobby_id()) :: T.lobby() | nil
   def get_lobby(id) do

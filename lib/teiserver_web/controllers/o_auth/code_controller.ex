@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.OAuth.CodeController do
-  use TeiserverWeb, :controller
   alias Teiserver.OAuth
+  use TeiserverWeb, :controller
 
   # https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.3
   @spec token(Plug.Conn.t(), %{}) :: Plug.Conn.t()

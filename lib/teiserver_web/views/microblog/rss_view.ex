@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Microblog.RssView do
-  use TeiserverWeb, :view
-
   alias Timex.Timezone
+
+  use TeiserverWeb, :view
 
   def format_date(date) do
     date

@@ -1,11 +1,12 @@
 defmodule Teiserver.Chat.RoomServer do
-  use GenServer, restart: :temporary
-
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Chat
   alias Teiserver.Chat.RoomRegistry
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Phoenix.PubSub
+
+  use GenServer, restart: :temporary
+
   require Logger
 
   @type room :: %{

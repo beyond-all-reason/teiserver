@@ -1,7 +1,6 @@
 defmodule Teiserver.Account.UserLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
-  require Logger
+
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.RoleLib
@@ -10,6 +9,8 @@ defmodule Teiserver.Account.UserLib do
   alias Teiserver.CacheUser
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging
+  use TeiserverWeb, :library_newform
+  require Logger
 
   # Functions
   @spec icon :: String.t()

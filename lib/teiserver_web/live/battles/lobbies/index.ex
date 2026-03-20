@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.Battle.LobbyLive.Index do
-  use TeiserverWeb, :live_view
   alias Phoenix.PubSub
-
   alias Teiserver
   alias Teiserver.Battle
   alias Teiserver.Config
   alias Teiserver.Lobby
   alias Teiserver.Account
+
+  use TeiserverWeb, :live_view
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 

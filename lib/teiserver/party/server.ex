@@ -3,10 +3,6 @@ defmodule Teiserver.Party.Server do
   transient state machine to hold a party state and mediate player interactions
   """
 
-  @behaviour :gen_statem
-
-  require Logger
-
   alias Teiserver.Config
   alias Teiserver.KvStore
   alias Teiserver.Matchmaking
@@ -16,6 +12,10 @@ defmodule Teiserver.Party.Server do
   alias Teiserver.Tachyon
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
+
+  require Logger
+
+  @behaviour :gen_statem
 
   @type id :: String.t()
   @type state :: %{

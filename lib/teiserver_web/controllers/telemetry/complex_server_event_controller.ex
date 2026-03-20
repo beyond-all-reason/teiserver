@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Telemetry.ComplexServerEventController do
-  use TeiserverWeb, :controller
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ComplexServerEventQueries
   alias Teiserver.Telemetry.ExportComplexServerEventsTask
+  use TeiserverWeb, :controller
   require Logger
 
   plug(AssignPlug,

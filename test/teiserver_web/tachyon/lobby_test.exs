@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.Tachyon.LobbyTest do
-  use TeiserverWeb.ConnCase
-
   alias Teiserver.Support.Tachyon
   alias ExUnit.Callbacks
   alias Teiserver.AssetFixtures
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
+
+  use TeiserverWeb.ConnCase
 
   setup [:setup_assets, {Tachyon, :setup_client}]
 

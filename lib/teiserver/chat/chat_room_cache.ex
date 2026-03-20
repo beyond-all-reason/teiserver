@@ -1,6 +1,6 @@
 defmodule Teiserver.Room do
   @moduledoc false
-  require Logger
+
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
@@ -13,6 +13,7 @@ defmodule Teiserver.Room do
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Moderation
+  require Logger
 
   @type room :: Chat.RoomServer.room()
 

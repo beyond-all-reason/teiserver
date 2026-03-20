@@ -1,7 +1,6 @@
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
-  import ExUnit.Assertions
-  import ExUnit.Callbacks
+
   alias Teiserver.Client
   alias Teiserver.CacheUser
   alias Teiserver.Account
@@ -18,6 +17,8 @@ defmodule Teiserver.TeiserverTestLib do
   alias Teiserver.Lobby
   alias Teiserver.Moderation
   alias Teiserver.Telemetry
+  import ExUnit.Assertions
+  import ExUnit.Callbacks
 
   @host ~c"127.0.0.1"
 

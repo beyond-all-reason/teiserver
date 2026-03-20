@@ -1,9 +1,10 @@
 defmodule Teiserver.Moderation.Action do
   @moduledoc false
-  use TeiserverWeb, :schema
 
   alias Ecto.Changeset
   alias Teiserver.Helper.TimexHelper
+
+  use TeiserverWeb, :schema
 
   typed_schema "moderation_actions" do
     belongs_to :target, Teiserver.Account.User

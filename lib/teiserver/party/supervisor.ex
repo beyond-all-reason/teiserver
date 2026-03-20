@@ -3,10 +3,10 @@ defmodule Teiserver.Party.Supervisor do
   Supervise player's parties
   """
 
-  use DynamicSupervisor
-
   alias Teiserver.Party
   alias Teiserver.Data.Types, as: T
+
+  use DynamicSupervisor
 
   @doc """
   Create a new party

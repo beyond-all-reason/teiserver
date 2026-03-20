@@ -1,9 +1,10 @@
 defmodule Teiserver.Telemetry.InfologCleanupTask do
   @moduledoc false
-  use Oban.Worker, queue: :cleanup
 
   alias Ecto.Adapters.SQL
   alias Teiserver.Repo
+
+  use Oban.Worker, queue: :cleanup
 
   @impl Oban.Worker
   @spec perform(any) :: :ok

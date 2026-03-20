@@ -1,12 +1,13 @@
 defmodule Teiserver.Autohost.AutohostTest do
-  use Teiserver.DataCase, async: false
-  import Teiserver.Support.Polling, only: [poll_until: 2, poll_until_nil: 1]
-
   alias ExUnit.Callbacks
   alias Teiserver.Autohost
   alias Teiserver.Autohost.Session
   alias Teiserver.Autohost.SessionRegistry
   alias Teiserver.BotFixtures
+
+  use Teiserver.DataCase, async: false
+
+  import Teiserver.Support.Polling, only: [poll_until: 2, poll_until_nil: 1]
 
   @moduletag :tachyon
 

@@ -2,7 +2,6 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   @moduledoc """
   Used to process data about a match after it has ended.
   """
-  use Oban.Worker, queue: :teiserver
 
   alias Teiserver.Account
   alias Teiserver.Account.RecacheUserStatsTask
@@ -13,6 +12,8 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.NumberHelper
   alias Teiserver.Repo
+
+  use Oban.Worker, queue: :teiserver
   # alias Teiserver.Data.Types, as: T
 
   @impl Oban.Worker

@@ -1,7 +1,7 @@
 defmodule Teiserver.Asset.GameQueries do
-  use TeiserverWeb, :queries
-
   alias Teiserver.Asset
+
+  use TeiserverWeb, :queries
 
   @spec get_games() :: [Asset.Game.t()]
   def get_games() do

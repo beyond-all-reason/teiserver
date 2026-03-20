@@ -1,12 +1,12 @@
 defmodule Teiserver.Matchmaking.MemberTest do
-  use Teiserver.DataCase
-
   alias Teiserver.Support.Tachyon
   alias Teiserver.Matchmaking.Member
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
+
+  use Teiserver.DataCase
 
   describe "get_member_rating" do
     test "no rating for user" do

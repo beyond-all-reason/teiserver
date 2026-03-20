@@ -7,8 +7,6 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
   mix teiserver.party_balance_stats /var/log/teiserver/results.txt
   """
 
-  use Mix.Task
-  require Logger
   alias Ecto.Adapters.SQL
   alias Mix.Tasks.Teiserver.PartyBalanceStatsTypes, as: PB
   alias Teiserver.Battle.BalanceLib
@@ -16,6 +14,10 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
   alias Teiserver.Config
   alias Teiserver.Game
   alias Teiserver.Repo
+
+  use Mix.Task
+
+  require Logger
 
   def run(args) do
     Logger.info("Args: #{args}")

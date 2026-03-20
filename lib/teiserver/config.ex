@@ -3,12 +3,13 @@ defmodule Teiserver.Config do
   The Config context.
   """
 
-  import Ecto.Query, warn: false
   alias Teiserver.Config.SiteConfig
   alias Teiserver.Config.UserConfig
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.NumberHelper
   alias Teiserver.Repo
+
+  import Ecto.Query, warn: false
 
   def get_user_config_cache(%{assigns: %{current_user: nil}}, key) do
     get_user_config_default(key)

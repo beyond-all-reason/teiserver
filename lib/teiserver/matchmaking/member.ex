@@ -3,6 +3,10 @@ defmodule Teiserver.Matchmaking.Member do
   member of a queue. Holds of the information required to match members together.
   A member can be a party of players. Parties must not be broken.
   """
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Game
+
   @enforce_keys [:id, :player_ids, :joined_at]
   defstruct [
     :id,
@@ -11,10 +15,6 @@ defmodule Teiserver.Matchmaking.Member do
     :rating,
     avoid: []
   ]
-
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle.BalanceLib
-  alias Teiserver.Game
 
   @typedoc """
   Aggregated player ratings for this member.

@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.Moderation.ActionController do
   @moduledoc false
-  use TeiserverWeb, :controller
 
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.UserLib
@@ -13,6 +12,9 @@ defmodule TeiserverWeb.Moderation.ActionController do
   alias Teiserver.Moderation.ActionLib
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Moderation.ReportLib
+
+  use TeiserverWeb, :controller
+
   import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 

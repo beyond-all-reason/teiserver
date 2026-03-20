@@ -1,6 +1,6 @@
 defmodule Teiserver.Matchmaking.QueueSyncTest do
-  use Teiserver.DataCase
   alias Teiserver.Matchmaking
+  use Teiserver.DataCase
 
   @moduletag :tachyon
 

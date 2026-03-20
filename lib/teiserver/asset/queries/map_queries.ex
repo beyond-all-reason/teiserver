@@ -1,7 +1,7 @@
 defmodule Teiserver.Asset.MapQueries do
-  use TeiserverWeb, :queries
-
   alias Teiserver.Asset
+
+  use TeiserverWeb, :queries
 
   @spec get_map(String.t()) :: Asset.Map.t() | nil
   def get_map(spring_name) do

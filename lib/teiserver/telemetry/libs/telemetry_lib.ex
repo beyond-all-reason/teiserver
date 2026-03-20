@@ -1,7 +1,8 @@
 defmodule Teiserver.Telemetry.TelemetryLib do
   @moduledoc false
-  import Telemetry.Metrics
+
   alias Teiserver.Telemetry.TelemetryServer
+  import Telemetry.Metrics
 
   @spec colours :: atom
   def colours(), do: :warning2

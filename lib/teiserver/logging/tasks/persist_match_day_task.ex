@@ -1,10 +1,10 @@
 defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
-  use Oban.Worker, queue: :teiserver
   alias Teiserver.Battle
   alias Teiserver.Battle.Tasks.BreakdownMatchDataTask
   alias Teiserver.Logging
   alias Teiserver.Logging.MatchDayLog
   alias Teiserver.Repo
+  use Oban.Worker, queue: :teiserver
   import Ecto.Query, warn: false
 
   @impl Oban.Worker

@@ -5,7 +5,7 @@ defmodule Teiserver.Protocols.SpringOut do
   Protocol definition:
   https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
   """
-  require Logger
+
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
@@ -23,6 +23,7 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.Protocols.Spring.PartyOut
   alias Teiserver.Data.Types, as: T
   alias Teiserver.SpringTcpServer
+  require Logger
 
   @motd """
   Message of the day

@@ -1,8 +1,9 @@
 defmodule Teiserver.Microblog.UploadQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Teiserver.Microblog.Upload
   alias Teiserver.Helper.QueryHelpers
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_uploads(list) :: Ecto.Query.t()

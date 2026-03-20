@@ -1,6 +1,6 @@
 defmodule Teiserver.Game.LobbyPolicyLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Config
   alias Teiserver.Game
   alias Teiserver.Account
@@ -8,6 +8,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   alias Teiserver.Game.LobbyPolicyOrganiserServer
   alias Teiserver.Game.LobbyPolicyBotServer
   alias Teiserver.Data.Types, as: T
+  use TeiserverWeb, :library
   require Logger
 
   # Functions

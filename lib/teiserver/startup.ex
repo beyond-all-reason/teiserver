@@ -1,7 +1,6 @@
 defmodule Teiserver.Startup do
   @moduledoc false
-  use TeiserverWeb, :startup
-  require Logger
+
   alias Phoenix.PubSub
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Battle
@@ -12,6 +11,8 @@ defmodule Teiserver.Startup do
   alias Teiserver.Game.GenerateAchievementTypes
   alias Teiserver.LobbyIdServer
   alias Teiserver.Telemetry
+  use TeiserverWeb, :startup
+  require Logger
 
   @spec startup :: :ok
   def startup do

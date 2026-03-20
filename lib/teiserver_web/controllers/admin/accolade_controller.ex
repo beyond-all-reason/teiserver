@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Admin.AccoladeController do
-  use TeiserverWeb, :controller
-
   alias Teiserver.Account
   alias Teiserver.Account.Accolade
   alias Teiserver.Account.AccoladeLib
+
+  use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff.Moderator,

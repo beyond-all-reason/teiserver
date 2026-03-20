@@ -3,13 +3,16 @@ defmodule Teiserver.Battle.RespectAvoidsTest do
   Can run all balance tests via
   mix test --only balance_test
   """
+
+  alias Teiserver.Account.RelationshipLib
+  alias Teiserver.Battle.Balance.RespectAvoids
+  alias Teiserver.Config
+
   use ExUnit.Case
+
   import Mock
 
   @moduletag :balance_test
-  alias Teiserver.Battle.Balance.RespectAvoids
-  alias Teiserver.Account.RelationshipLib
-  alias Teiserver.Config
 
   setup_with_mocks([
     # Set avoid min hours to 2

@@ -1,8 +1,9 @@
 defmodule Teiserver.Telemetry.ComplexLobbyEventTypeLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
+
   alias Teiserver.Telemetry.ComplexLobbyEventType
   alias Teiserver.Telemetry.ComplexLobbyEventTypeQueries
+  use TeiserverWeb, :library_newform
 
   # Helper function
   @spec get_or_add_complex_lobby_event_type(String.t()) :: non_neg_integer()

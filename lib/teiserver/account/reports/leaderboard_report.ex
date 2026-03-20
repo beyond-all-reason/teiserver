@@ -1,11 +1,10 @@
 defmodule Teiserver.Account.LeaderboardReport do
-  # alias Teiserver.Battle.BalanceLib
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
   alias Teiserver.Account.RatingLib
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Repo
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()
   def icon(), do: RatingLib.icon()

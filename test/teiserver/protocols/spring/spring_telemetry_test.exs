@@ -1,6 +1,6 @@
 defmodule Teiserver.SpringTelemetryTest do
-  use Teiserver.ServerCase, async: false
   alias Teiserver.Telemetry
+  use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,
     only: [auth_setup: 1, _send_raw: 2, _recv_raw: 1, raw_setup: 1, start_spring_server: 1]

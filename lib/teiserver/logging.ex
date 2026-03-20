@@ -3,10 +3,6 @@ defmodule Teiserver.Logging do
   The Logging context.
   """
 
-  @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-bars"
-
-  import Ecto.Query, warn: false
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Logging.AggregateViewLogLib
   alias Teiserver.Logging.AuditLog
@@ -38,6 +34,10 @@ defmodule Teiserver.Logging do
   alias Teiserver.Logging.UserActivityDayLog
   alias Teiserver.Logging.UserActivityDayLogLib
   alias Teiserver.Repo
+  import Ecto.Query, warn: false
+
+  @spec icon() :: String.t()
+  def icon(), do: "fa-solid fa-bars"
 
   defp server_minute_log_query(args) do
     server_minute_log_query(nil, args)

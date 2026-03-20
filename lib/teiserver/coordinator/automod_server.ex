@@ -1,8 +1,6 @@
 defmodule Teiserver.Coordinator.AutomodServer do
   @moduledoc false
-  use GenServer
-  require Logger
-  import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
+
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.CacheUser
@@ -11,6 +9,9 @@ defmodule Teiserver.Coordinator.AutomodServer do
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Moderation
+  use GenServer
+  require Logger
+  import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
 
   @tick_interval 60_000
 

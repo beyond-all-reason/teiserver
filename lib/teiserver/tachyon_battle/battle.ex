@@ -1,6 +1,4 @@
 defmodule Teiserver.TachyonBattle.Battle do
-  require Logger
-
   alias Teiserver.Autohost
   alias Teiserver.Battle
   alias Teiserver.TachyonBattle.Registry
@@ -10,6 +8,8 @@ defmodule Teiserver.TachyonBattle.Battle do
   # transient state. Later, we can attempt to reconstruct some state after
   # a restart based on the message we get.
   use GenServer, restart: :temporary
+
+  require Logger
 
   @type state :: %{
           id: T.id(),

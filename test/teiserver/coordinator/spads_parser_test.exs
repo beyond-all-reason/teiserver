@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.SpadsParserTest do
-  use Teiserver.DataCase, async: true
   alias Teiserver.Coordinator.SpadsParser
+  use Teiserver.DataCase, async: true
   import Teiserver.TeiserverTestLib, only: [new_user: 0]
 
   test "parsing teamSize information" do

@@ -5,8 +5,6 @@ defmodule Teiserver.Autohost.Session do
   cleanly shutdown when required.
   """
 
-  @behaviour :gen_statem
-
   alias Teiserver.Autohost
   alias Teiserver.TachyonBattle
   alias Teiserver.Autohost.SessionRegistry
@@ -15,6 +13,8 @@ defmodule Teiserver.Autohost.Session do
   alias Teiserver.Helpers.MonitorCollection, as: MC
 
   require Logger
+
+  @behaviour :gen_statem
 
   @default_call_timeout 5000
 

@@ -1,6 +1,4 @@
 defmodule TeiserverWeb.Account.SecurityControllerTest do
-  use TeiserverWeb.ConnCase
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
@@ -8,6 +6,8 @@ defmodule TeiserverWeb.Account.SecurityControllerTest do
   alias Teiserver.OAuth.CodeQueries
   alias Teiserver.OAuth.TokenQueries
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
 
   test "redirected to edit password once logged in" do
     {:ok, kw} = GeneralTestLib.conn_setup([], [:no_login])

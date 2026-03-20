@@ -1,7 +1,7 @@
 defmodule Teiserver.Helpers.BoundedQueueTest do
-  use ExUnit.Case, async: true
-
   alias Teiserver.Helpers.BoundedQueue, as: BQ
+
+  use ExUnit.Case, async: true
 
   test "must provide correct arg" do
     assert_raise ArgumentError, fn ->

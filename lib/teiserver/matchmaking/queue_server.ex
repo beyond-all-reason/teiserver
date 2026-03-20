@@ -8,8 +8,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
   It also has some associated state for telemetry.
   """
 
-  use GenServer
-  require Logger
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
@@ -20,6 +18,10 @@ defmodule Teiserver.Matchmaking.QueueServer do
   alias Teiserver.Matchmaking.QueueRegistry
   alias Teiserver.Party
   alias Teiserver.Player
+
+  use GenServer
+
+  require Logger
 
   @type id :: String.t()
 

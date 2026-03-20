@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Microblog.TagFormComponent do
   @moduledoc false
-  use TeiserverWeb, :live_component
 
   alias Teiserver.Microblog
+
+  use TeiserverWeb, :live_component
 
   @impl Phoenix.LiveComponent
   def render(assigns) do

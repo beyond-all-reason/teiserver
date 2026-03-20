@@ -1,13 +1,14 @@
 defmodule TeiserverWeb.TournamentLive.Index do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  alias Phoenix.PubSub
 
+  alias Phoenix.PubSub
   alias Teiserver
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.Lobby
+
+  use TeiserverWeb, :live_view
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 

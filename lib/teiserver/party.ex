@@ -8,8 +8,6 @@ defmodule Teiserver.Party do
   with regard to invites.
   """
 
-  require Logger
-
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Matchmaking
@@ -17,6 +15,8 @@ defmodule Teiserver.Party do
   alias Teiserver.Party.Server
   alias Teiserver.Party.Supervisor
   alias Teiserver.Tachyon.System
+
+  require Logger
 
   @type id :: Server.id()
   @type state :: Server.state()

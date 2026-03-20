@@ -1,5 +1,4 @@
 defmodule Teiserver.Lobby.Commands.ExplainCommand do
-  @behaviour Teiserver.Lobby.LobbyCommandBehaviour
   @moduledoc """
   Documentation for explain command here
   """
@@ -9,6 +8,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   import Teiserver.Helper.NumberHelper, only: [round: 2]
+  @behaviour Teiserver.Lobby.LobbyCommandBehaviour
 
   @splitter "------------------------------------------------------"
 

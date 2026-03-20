@@ -1,12 +1,14 @@
 defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
   @moduledoc false
+
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Microblog
+  alias Teiserver.TeiserverTestLib
+
   use TeiserverWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Teiserver.MicroblogFixtures
-  alias Central.Helpers.GeneralTestLib
-  alias Teiserver.Microblog
-  alias Teiserver.TeiserverTestLib
 
   defp auth_setup(_) do
     GeneralTestLib.conn_setup()

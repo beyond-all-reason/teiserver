@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.Tachyon.Autohost do
-  use TeiserverWeb.ConnCase, async: false
-
   alias Teiserver.Autohost
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Tachyon
   alias WebsocketSyncClient, as: WSC
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.BotFixtures
+
+  use TeiserverWeb.ConnCase, async: false
 
   import Teiserver.Support.Polling, only: [poll_until: 2, poll_until: 3]
 

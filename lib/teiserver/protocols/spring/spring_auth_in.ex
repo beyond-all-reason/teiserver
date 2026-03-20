@@ -2,8 +2,10 @@ defmodule Teiserver.Protocols.Spring.AuthIn do
   @moduledoc false
 
   alias Teiserver.Protocols.SpringIn
-  import Teiserver.Protocols.SpringOut, only: [reply: 5]
+
   require Logger
+
+  import Teiserver.Protocols.SpringOut, only: [reply: 5]
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("login_queue_heartbeat", _, _msg_id, %{queued_userid: nil} = state) do

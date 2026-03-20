@@ -1,6 +1,6 @@
 defmodule Teiserver.Bridge.MessageCommands do
   @moduledoc false
-  require Logger
+
   alias Nostrum.Api
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
@@ -8,6 +8,7 @@ defmodule Teiserver.Bridge.MessageCommands do
   alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.NumberHelper
+  require Logger
 
   @unauth ~w(discord)
   @always_allow ~w(whoami help whatwas unit)

@@ -1,9 +1,10 @@
 defmodule TeiserverWeb.Microblog.PostFormComponentTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
 
   alias TeiserverWeb.Microblog.PostFormComponent
   alias Teiserver.Microblog
+
+  use TeiserverWeb.ConnCase
 
   test "create_post works with or without poster_alias" do
     post_params = %{

@@ -1,7 +1,7 @@
 defmodule Teiserver.Asset.GameTest do
-  use Teiserver.DataCase
   alias Teiserver.Asset
   alias Teiserver.AssetFixtures
+  use Teiserver.DataCase
 
   @moduletag :tachyon
   describe "game queries" do

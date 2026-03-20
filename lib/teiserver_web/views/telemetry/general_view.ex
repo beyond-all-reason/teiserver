@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.Telemetry.GeneralView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Telemetry.ComplexClientEventLib
   alias Teiserver.Telemetry.ComplexMatchEventLib
   alias Teiserver.Telemetry.ComplexServerEventLib
   alias Teiserver.Telemetry.InfologLib
   alias Teiserver.Telemetry.PropertyTypeLib
   alias Teiserver.Telemetry.SimpleMatchEventLib
+
+  use TeiserverWeb, :view
 
   @spec view_colour :: atom
   def view_colour(), do: :primary

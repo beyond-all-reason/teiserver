@@ -1,7 +1,8 @@
 defmodule Teiserver.Moderation.BanLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Moderation.Ban
+  use TeiserverWeb, :library
 
   # Functions
   @spec icon :: String.t()

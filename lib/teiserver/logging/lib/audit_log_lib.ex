@@ -1,8 +1,9 @@
 defmodule Teiserver.Logging.AuditLogLib do
   @moduledoc false
-  use TeiserverWeb, :library
 
   alias Teiserver.Logging.AuditLog
+
+  use TeiserverWeb, :library
 
   @spec colours() :: atom
   def colours(), do: :danger2

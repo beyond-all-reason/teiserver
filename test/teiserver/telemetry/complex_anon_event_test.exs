@@ -1,9 +1,10 @@
 defmodule Teiserver.Telemetry.ComplexAnonEventTest do
   @moduledoc false
-  use Teiserver.DataCase
+
   alias Teiserver.Telemetry
   alias Ecto.Adapters.SQL
   alias ExULID.ULID
+  use Teiserver.DataCase
 
   test "complex anon events" do
     r = :rand.uniform(999_999_999)

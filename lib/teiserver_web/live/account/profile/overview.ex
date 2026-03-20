@@ -1,8 +1,6 @@
 defmodule TeiserverWeb.Account.ProfileLive.Overview do
   @moduledoc false
 
-  use TeiserverWeb, :live_view
-
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
@@ -10,6 +8,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.UserLib
   alias Teiserver.Lobby
+
+  use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do

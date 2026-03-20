@@ -3,14 +3,14 @@ defmodule Teiserver.Benchmark.StatsClient do
   A client that tracks various statistics
   """
 
+  use GenServer
   require Logger
+
   @report_interval 15_000
   @registration_interval 10_000
   @user_action_interval 30_000
 
   @users_per_tick 20
-
-  use GenServer
 
   # GenServer callbacks
   def handle_info({:ping, p}, state) do

@@ -1,8 +1,9 @@
 defmodule Teiserver.Plugs.BasicAuthBotPlug do
   @moduledoc false
-  import Plug.Conn
+
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  import Plug.Conn
 
   def init(opts), do: opts
 

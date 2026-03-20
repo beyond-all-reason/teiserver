@@ -7,12 +7,6 @@ defmodule Teiserver.Player.Session do
   It holds very minimal state regarding the connection.
   """
 
-  # For now, never restart a session. Until some form of state persistence is
-  # implemented it's better to just remove the process completely than
-  # restarting with an invalid state
-  use GenServer, restart: :temporary
-  require Logger
-
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.KvStore
@@ -28,6 +22,13 @@ defmodule Teiserver.Player.Session do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BoundedQueue, as: BQ
   alias Teiserver.Helpers.MonitorCollection, as: MC
+
+  # For now, never restart a session. Until some form of state persistence is
+  # implemented it's better to just remove the process completely than
+  # restarting with an invalid state
+  use GenServer, restart: :temporary
+
+  require Logger
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 

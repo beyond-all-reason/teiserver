@@ -1,6 +1,6 @@
 defmodule Teiserver.Chat do
   @moduledoc false
-  import Ecto.Query, warn: false
+
   alias Teiserver.Chat.DirectMessage
   alias Teiserver.Chat.DirectMessageLib
   alias Teiserver.Chat.LobbyMessage
@@ -11,6 +11,7 @@ defmodule Teiserver.Chat do
   alias Teiserver.Chat.RoomMessageLib
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
+  import Ecto.Query, warn: false
 
   @spec room_message_query(List.t()) :: Ecto.Query.t()
   def room_message_query(args) do

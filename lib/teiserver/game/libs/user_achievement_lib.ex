@@ -1,6 +1,6 @@
 defmodule Teiserver.Game.UserAchievementLib do
-  use TeiserverWeb, :library
   alias Teiserver.Game.UserAchievement
+  use TeiserverWeb, :library
 
   # Functions
   @spec icon :: String.t()

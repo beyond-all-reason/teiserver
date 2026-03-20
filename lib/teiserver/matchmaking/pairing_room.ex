@@ -6,10 +6,6 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   ready.
   """
 
-  # Use a temporary restart strategy. Because there is no real way to recover
-  # from a crash, the important transient state would be lost.
-  use GenServer, restart: :temporary
-
   alias Teiserver.Asset
   alias Teiserver.Autohost
   alias Teiserver.Data.Types, as: T
@@ -18,6 +14,10 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   alias Teiserver.Matchmaking.QueueSupervisor
   alias Teiserver.Player
   alias Teiserver.TachyonBattle
+
+  # Use a temporary restart strategy. Because there is no real way to recover
+  # from a crash, the important transient state would be lost.
+  use GenServer, restart: :temporary
 
   require Logger
 

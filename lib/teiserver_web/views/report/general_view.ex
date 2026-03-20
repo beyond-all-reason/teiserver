@@ -1,11 +1,11 @@
 defmodule TeiserverWeb.Report.GeneralView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Account.RatingLib
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Logging.ServerDayLogLib
   alias Teiserver.Telemetry.ComplexClientEventLib
   alias Teiserver.Telemetry.InfologLib
+
+  use TeiserverWeb, :view
 
   @spec view_colour :: atom
   def view_colour(), do: :primary

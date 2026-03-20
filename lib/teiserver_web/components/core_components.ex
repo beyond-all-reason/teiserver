@@ -3,12 +3,13 @@ defmodule TeiserverWeb.CoreComponents do
   Provides core UI components.
   """
 
-  use Phoenix.Component
-  use Gettext, backend: TeiserverWeb.Gettext
   alias Fontawesome
   alias Phoenix.HTML.Form, as: HTMLForm
   alias Phoenix.HTML.FormField
   alias Phoenix.LiveView.JS
+
+  use Phoenix.Component
+  use Gettext, backend: TeiserverWeb.Gettext
 
   @doc """
   Renders a modal.

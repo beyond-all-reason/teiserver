@@ -3,10 +3,13 @@ defmodule Teiserver.Battle.SplitNoobsDeviationTest do
   Can run all balance tests via
   mix test --only balance_test
   """
-  use ExUnit.Case
-  @moduletag :balance_test
+
   alias Teiserver.Battle.Balance.SplitNoobs
   alias Teiserver.Battle.BalanceLib
+
+  use ExUnit.Case
+
+  @moduletag :balance_test
 
   test "can get reasonable deviation" do
     # https://openskill-test.web.app/single?replay=64eceb66601a3dad2be3c0784beb2c1e

@@ -3,12 +3,13 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
   Special tests for party and matchmaking interactions.
   Assumes the basics of parties and matchmaking are working already
   """
-  use Teiserver.DataCase
+
   alias Teiserver.Support.Tachyon
   alias Teiserver.AssetFixtures
   alias Teiserver.Matchmaking.QueueSupervisor
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Asset
+  use Teiserver.DataCase
 
   @moduletag :wip
 

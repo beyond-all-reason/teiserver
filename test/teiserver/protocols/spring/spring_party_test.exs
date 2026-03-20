@@ -1,11 +1,10 @@
 defmodule Teiserver.Protocols.Spring.SpringPartyTest do
-  use Teiserver.ServerCase, async: false
   alias Teiserver.Protocols.SpringIn
   alias Teiserver.Account.PartyLib
-
   alias Teiserver.Support.Polling
   alias Teiserver.Account
   alias Teiserver.Client
+  use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,
     only: [auth_setup: 1, _send_raw: 2, _recv_until: 1, start_spring_server: 1]

@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.ErrorViewTest do
+  alias Central.Helpers.GeneralTestLib
+
   use TeiserverWeb.ConnCase, async: true
 
   # Bring render/3 and render_to_string/3 for testing custom views
   import Phoenix.View
-
-  alias Central.Helpers.GeneralTestLib
 
   setup do
     GeneralTestLib.conn_setup()

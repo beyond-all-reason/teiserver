@@ -3,11 +3,13 @@ defmodule Teiserver.Account.PermissionCache do
   Define caches and set them up for permission related things
   """
 
-  use Supervisor
-  import Teiserver.Account.AuthLib, only: [add_permission_set: 3]
   alias Teiserver.Account.UserLib
   alias Teiserver.Helpers.CacheHelper
   alias Teiserver.Logging.Startup
+
+  use Supervisor
+
+  import Teiserver.Account.AuthLib, only: [add_permission_set: 3]
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),

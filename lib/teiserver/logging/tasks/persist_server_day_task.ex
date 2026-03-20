@@ -1,14 +1,16 @@
 defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
   @moduledoc false
-  use Oban.Worker, queue: :teiserver
+
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
   alias Teiserver.Logging
   alias Teiserver.Logging.ServerDayLog
   alias Teiserver.Logging.Tasks.PersistServerDayTask
   alias Teiserver.Battle
-
   alias Teiserver.Repo
+
+  use Oban.Worker, queue: :teiserver
+
   import Ecto.Query, warn: false
 
   @log_keep_days 30

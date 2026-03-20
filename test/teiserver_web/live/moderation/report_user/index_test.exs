@@ -1,11 +1,13 @@
 defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase, async: false
-  import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Moderation
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase, async: false
+
+  import Phoenix.LiveViewTest
 
   defp auth_setup(_) do
     GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())

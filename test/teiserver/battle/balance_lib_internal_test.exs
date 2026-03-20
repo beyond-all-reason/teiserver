@@ -3,12 +3,15 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
   Can run all balance tests via
   mix test --only balance_test
   """
-  use Teiserver.DataCase, async: true
-  @moduletag :balance_test
+
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.TeiserverTestLib
 
+  use Teiserver.DataCase, async: true
+
   require Logger
+
+  @moduletag :balance_test
 
   test "Able to standardise groups with incomplete data" do
     [user1, user2, user3, user4, user5] = create_test_users()

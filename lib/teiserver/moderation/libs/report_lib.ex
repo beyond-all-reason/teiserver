@@ -1,9 +1,10 @@
 defmodule Teiserver.Moderation.ReportLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Chat.LobbyMessageLib
   alias Teiserver.Moderation.Report
+  use TeiserverWeb, :library
 
   # Functions
   @spec icon :: String.t()

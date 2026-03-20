@@ -5,10 +5,7 @@ defmodule Teiserver.Protocols.SpringIn do
   Protocol definition:
   https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
   """
-  require Logger
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
-  import Teiserver.Protocols.SpringOut, only: [reply: 4]
+
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
@@ -32,6 +29,10 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Room
   alias Teiserver.SpringTcpServer
   alias ExULID.ULID
+  require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
+  import Teiserver.Protocols.SpringOut, only: [reply: 4]
 
   @optimisation_level %{
     "LuaLobby Chobby" => :partial,

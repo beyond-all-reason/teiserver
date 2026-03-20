@@ -1,8 +1,9 @@
 defmodule Teiserver.Telemetry.PropertyTypeLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
+
   alias Teiserver.Telemetry.PropertyType
   alias Teiserver.Telemetry.PropertyTypeQueries
+  use TeiserverWeb, :library_newform
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-tags"

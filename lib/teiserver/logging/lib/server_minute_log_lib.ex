@@ -1,7 +1,7 @@
 defmodule Teiserver.Logging.ServerMinuteLogLib do
-  use TeiserverWeb, :library
-
   alias Teiserver.Logging.ServerMinuteLog
+
+  use TeiserverWeb, :library
 
   @spec colours :: atom
   def colours(), do: :warning2

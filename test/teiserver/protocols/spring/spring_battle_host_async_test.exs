@@ -1,9 +1,8 @@
 defmodule Teiserver.Protocols.Spring.SpringBattleHostAsyncTest do
-  use Teiserver.ServerCase, async: true
+  alias Teiserver.Client
+  alias Teiserver.Protocols.SpringIn
 
-  # Seems flaky on CI, but can't reproduce locally
-  # https://github.com/beyond-all-reason/teiserver/actions/runs/10629702218/job/29467089868
-  @moduletag :needs_attention
+  use Teiserver.ServerCase, async: true
 
   import Teiserver.TeiserverTestLib,
     only: [
@@ -11,8 +10,9 @@ defmodule Teiserver.Protocols.Spring.SpringBattleHostAsyncTest do
       _recv_lines: 0
     ]
 
-  alias Teiserver.Client
-  alias Teiserver.Protocols.SpringIn
+  # Seems flaky on CI, but can't reproduce locally
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/10629702218/job/29467089868
+  @moduletag :needs_attention
 
   setup do
     %{user: user, state: state} = async_auth_setup()

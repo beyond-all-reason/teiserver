@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Moderation.GeneralView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Moderation.ActionLib
   alias Teiserver.Moderation.BanLib
   alias Teiserver.Moderation.ProposalLib
   alias Teiserver.Moderation.ReportLib
+
+  use TeiserverWeb, :view
 
   @spec view_colour :: atom
   def view_colour(), do: :default

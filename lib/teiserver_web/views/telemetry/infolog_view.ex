@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Telemetry.InfologView do
-  use TeiserverWeb, :view
-  import TeiserverWeb.PaginationComponents, only: [pagination: 1]
-
   alias Teiserver.Telemetry.InfologLib
+
+  use TeiserverWeb, :view
+
+  import TeiserverWeb.PaginationComponents, only: [pagination: 1]
 
   @spec view_colour :: atom
   def view_colour(), do: InfologLib.colours()

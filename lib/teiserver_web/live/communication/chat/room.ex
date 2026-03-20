@@ -1,12 +1,13 @@
 defmodule TeiserverWeb.Communication.ChatLive.Room do
   @moduledoc false
-  use TeiserverWeb, :live_view
+
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Chat
   alias Teiserver.Chat.RoomMessage
   alias Teiserver.Chat.RoomMessageLib
   alias Teiserver.Room
+  use TeiserverWeb, :live_view
 
   @message_count 25
 

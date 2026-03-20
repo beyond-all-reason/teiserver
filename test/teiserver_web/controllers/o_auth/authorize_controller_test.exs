@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
-  use TeiserverWeb.ConnCase
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.TeiserverTestLib
+  use TeiserverWeb.ConnCase
 
   setup do
     {:ok, data} =

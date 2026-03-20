@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Account.SettingsLive.IndexLiveTest do
-  use TeiserverWeb.ConnCase, async: true
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase, async: true
 
   test "account settings endpoints requires authentication" do
     {:ok, kw} =

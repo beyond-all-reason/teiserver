@@ -1,10 +1,11 @@
 defmodule Central.Helpers.InputHelper do
   @moduledoc false
 
-  import Phoenix.HTML.Form
+  alias TeiserverWeb.ErrorHelpers
+
   use PhoenixHTMLHelpers
 
-  alias TeiserverWeb.ErrorHelpers
+  import Phoenix.HTML.Form
 
   # http://blog.plataformatec.com.br/2016/09/dynamic-forms-with-phoenix/
   def input_with_type(form, field, type) do

@@ -1,5 +1,4 @@
 defmodule TeiserverWeb.Account.SessionController do
-  use TeiserverWeb, :controller
   alias Plug.Conn
   alias Teiserver.Account
   alias Teiserver.Account.Guardian.Plug, as: GuardianPlug
@@ -9,6 +8,7 @@ defmodule TeiserverWeb.Account.SessionController do
   alias Teiserver.EmailHelper
   alias Teiserver.Logging.Helpers, as: LoggingHelpers
   alias Teiserver.Logging.LoggingPlug
+  use TeiserverWeb, :controller
   require Logger
 
   @spec new(Conn.t(), map()) :: Conn.t()

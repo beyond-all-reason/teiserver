@@ -4,12 +4,13 @@ defmodule Teiserver.Tachyon.Tasks.SetupApps do
   and asset managements
   This tasks requires the root user to be setup (root@localhost)
   """
-  require Logger
 
   alias Teiserver.Account
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Application, as: OAuthApplication
   alias Teiserver.OAuth.ApplicationQueries
+
+  require Logger
 
   def ensure_lobby_app() do
     root = find_root_user!()

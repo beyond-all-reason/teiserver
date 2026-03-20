@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Logging.AggregateViewLogView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Logging.AggregateViewLogLib
+
+  use TeiserverWeb, :view
 
   def view_colour(), do: AggregateViewLogLib.colours()
   # def gradient(), do: {"#112266", "#6688CC"}

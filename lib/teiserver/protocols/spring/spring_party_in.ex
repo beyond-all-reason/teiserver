@@ -1,10 +1,10 @@
 defmodule Teiserver.Protocols.Spring.PartyIn do
-  require Logger
-
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Protocols.SpringOut
+
+  require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("create_new_party", _, msg_id, state) when not is_nil(state.party_id) do

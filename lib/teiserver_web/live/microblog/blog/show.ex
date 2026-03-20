@@ -1,12 +1,13 @@
 defmodule TeiserverWeb.Microblog.BlogLive.Show do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  import TeiserverWeb.MicroblogComponents
+
   alias Phoenix.PubSub
   alias Teiserver.Communication
   alias Teiserver.Logging
   alias Teiserver.Microblog
   alias Teiserver.Microblog.PostLib
+  use TeiserverWeb, :live_view
+  import TeiserverWeb.MicroblogComponents
 
   @impl Phoenix.LiveView
   def mount(%{"post_id" => post_id_str}, _session, socket) when is_connected?(socket) do

@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Logging.PageViewLogController do
-  use TeiserverWeb, :controller
-
   alias Teiserver.Logging
   alias Teiserver.Helper.TimexHelper
+
+  use TeiserverWeb, :controller
+
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug :add_breadcrumb, name: "Logging", url: "/logging"

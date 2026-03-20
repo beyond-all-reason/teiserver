@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.MatchmakingLive.Index do
-  use TeiserverWeb, :live_view
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Matchmaking
+  use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do

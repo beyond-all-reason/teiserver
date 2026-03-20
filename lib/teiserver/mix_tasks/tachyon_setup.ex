@@ -1,19 +1,18 @@
 defmodule Mix.Tasks.Teiserver.TachyonSetup do
-  @usage_str "Usage: `mix teiserver.tachyon_setup`"
-
   @moduledoc """
   Ensure there is an OAuth app for tachyon lobby and another one to control
   assets like maps and engines with bots.
 
-  #{@usage_str}
+  Usage: `mix teiserver.tachyon_setup`
   """
 
   @shortdoc "setup oauth apps for tachyon"
 
-  use Mix.Task
   alias Teiserver.Repo
   alias Teiserver.Tachyon.Tasks.SetupApps
   alias Teiserver.Tachyon.Tasks.SetupAssets
+
+  use Mix.Task
 
   @impl Mix.Task
   def run(_args) do

@@ -1,10 +1,11 @@
 defmodule Teiserver.Telemetry.SimpleAnonEventLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
+
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.SimpleAnonEvent
   alias Teiserver.Telemetry.SimpleAnonEventQueries
   alias Phoenix.PubSub
+  use TeiserverWeb, :library_newform
 
   @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
 

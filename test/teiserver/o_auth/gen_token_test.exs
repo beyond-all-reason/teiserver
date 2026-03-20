@@ -1,10 +1,10 @@
 defmodule Teiserver.OAuth.GenTokenTest do
-  use Teiserver.DataCase, async: true
   alias Teiserver.OAuthFixtures
   alias Teiserver.OAuth.Tasks.GenToken
   alias Teiserver.OAuth.Token
   alias Teiserver.OAuth.TokenQueries
   alias Teiserver.TeiserverTestLib
+  use Teiserver.DataCase, async: true
 
   test "no user fails" do
     assert {:error, _} = GenToken.create_token("oops", nil)

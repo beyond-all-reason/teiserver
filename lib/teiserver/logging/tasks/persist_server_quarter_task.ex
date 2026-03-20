@@ -1,9 +1,10 @@
 defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
   @moduledoc false
-  use Oban.Worker, queue: :teiserver
+
   alias Teiserver.Logging
   alias Teiserver.Logging.ServerDayLogLib
   alias Teiserver.Logging.Tasks.PersistServerQuarterTask
+  use Oban.Worker, queue: :teiserver
   import Ecto.Query, warn: false
 
   @impl Oban.Worker

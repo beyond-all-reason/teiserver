@@ -1,9 +1,6 @@
 defmodule Teiserver.Tachyon.System do
   @moduledoc false
 
-  use Supervisor
-  require Logger
-
   alias Teiserver.Autohost
   alias Teiserver.KvStore
   alias Teiserver.Matchmaking
@@ -13,6 +10,10 @@ defmodule Teiserver.Tachyon.System do
   alias Teiserver.Tachyon.Schema
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
+
+  use Supervisor
+
+  require Logger
 
   def start_link(init_arg) do
     Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)

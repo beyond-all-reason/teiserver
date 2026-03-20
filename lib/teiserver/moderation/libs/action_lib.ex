@@ -1,10 +1,11 @@
 defmodule Teiserver.Moderation.ActionLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Communication
   alias Teiserver.Moderation
   alias Teiserver.Moderation.Action
   alias Teiserver.Helper.TimexHelper
+  use TeiserverWeb, :library
 
   # Functions
   @spec icon :: String.t()

@@ -4,13 +4,14 @@ defmodule Teiserver.Account.LoginThrottleServer do
   Otherwise it is put in a queue and will later receive a {:login_accepted, userid} message
   when it is allowed to do so
   """
-  use GenServer
-  require Logger
+
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
+  use GenServer
+  require Logger
 
   @typep member :: %{pid: pid(), mon_ref: reference(), user_id: T.userid()}
   @typep state :: %{

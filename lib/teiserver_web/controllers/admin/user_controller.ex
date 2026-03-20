@@ -1,7 +1,5 @@
 defmodule TeiserverWeb.Admin.UserController do
   @moduledoc false
-  require Logger
-  use TeiserverWeb, :controller
 
   alias Ecto.UUID
   alias Teiserver.Account
@@ -20,6 +18,11 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Player
+
+  use TeiserverWeb, :controller
+
+  require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, float_parse: 1]
 
   plug(AssignPlug,

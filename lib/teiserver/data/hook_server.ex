@@ -1,10 +1,10 @@
 defmodule Teiserver.HookServer do
-  use GenServer
   alias Phoenix.PubSub
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.CacheUser
   alias Teiserver.Communication
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
+  use GenServer
   require Logger
 
   def start_link(opts \\ []) do

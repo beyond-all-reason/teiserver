@@ -3,7 +3,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   This is the module that receives discord events and passes them to the rest of Teiserver.
   """
 
-  use Nostrum.Consumer
   alias Teiserver.Room
   alias Teiserver.Moderation
   alias Teiserver.Communication
@@ -15,6 +14,9 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   alias Nostrum.Api
   alias Nostrum.Api.ApplicationCommand
   alias Nostrum.Api.Thread
+
+  use Nostrum.Consumer
+
   require Logger
 
   @emoticon_map %{

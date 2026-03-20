@@ -1,9 +1,9 @@
 defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
-  @behaviour Plug
+  alias Teiserver.OAuth
 
   import Plug.Conn
 
-  alias Teiserver.OAuth
+  @behaviour Plug
 
   def init(opts), do: opts
 

@@ -1,9 +1,9 @@
 defmodule Teiserver.Account.LoginThrottleServerTest do
   @moduledoc false
 
-  use Teiserver.DataCase, async: false
   alias Teiserver.Account
   alias Teiserver.Account.LoginThrottleServer
+  use Teiserver.DataCase, async: false
 
   import Teiserver.TeiserverTestLib,
     only: [

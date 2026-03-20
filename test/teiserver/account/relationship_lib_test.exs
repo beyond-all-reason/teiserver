@@ -1,9 +1,9 @@
 defmodule Teiserver.Account.RelationshipLibTest do
-  use Teiserver.DataCase, async: true
-
   alias Teiserver.Account.AccountTestLib
   alias Teiserver.Account.RelationshipLib
   alias Teiserver.Config
+
+  use Teiserver.DataCase, async: true
 
   test "purging inactive relationships" do
     # Create two accounts

@@ -1,16 +1,16 @@
 defmodule TeiserverWeb.TachyonControllerTest do
-  use TeiserverWeb.ConnCase
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Tachyon
   alias Teiserver.Support.Polling
-
   alias WebsocketSyncClient, as: WSC
   alias ExUnit.Callbacks
   alias Phoenix.ConnTest
   alias Teiserver.Client
   alias Teiserver.Player
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
 
   defp setup_conn(_context) do
     conn = ConnTest.build_conn()

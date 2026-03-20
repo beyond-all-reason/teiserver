@@ -1,8 +1,9 @@
 defmodule Teiserver.Telemetry.SimpleClientEventTypeLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
+
   alias Teiserver.Telemetry.SimpleClientEventType
   alias Teiserver.Telemetry.SimpleClientEventTypeQueries
+  use TeiserverWeb, :library_newform
 
   # Helper function
   @spec get_or_add_simple_client_event_type(String.t()) :: non_neg_integer()

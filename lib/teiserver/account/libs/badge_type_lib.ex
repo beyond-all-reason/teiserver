@@ -2,8 +2,9 @@ defmodule Teiserver.Account.BadgeTypeLib do
   @moduledoc """
 
   """
-  use TeiserverWeb, :library
+
   alias Teiserver.Account.BadgeType
+  use TeiserverWeb, :library
 
   # Functions
   @spec icon :: String.t()

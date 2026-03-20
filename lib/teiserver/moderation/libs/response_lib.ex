@@ -1,8 +1,9 @@
 defmodule Teiserver.Moderation.ResponseLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Moderation.ActionLib
   alias Teiserver.Moderation.Response
+  use TeiserverWeb, :library
 
   # Functions
   @spec icon :: String.t()

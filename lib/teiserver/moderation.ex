@@ -1,9 +1,8 @@
 defmodule Teiserver.Moderation do
   @moduledoc false
-  import Ecto.Query, warn: false
+
   alias Teiserver.Repo
   # require Logger
-
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Data.Types, as: T
@@ -23,6 +22,8 @@ defmodule Teiserver.Moderation do
   alias Teiserver.Moderation.Response
   alias Teiserver.Moderation.ResponseLib
   alias Teiserver.CacheUser
+
+  import Ecto.Query, warn: false
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
 
   @spec icon :: String.t()

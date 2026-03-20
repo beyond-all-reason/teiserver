@@ -1,5 +1,4 @@
 defmodule Teiserver.Account.FriendRequestLibTest do
-  use Teiserver.DataCase, async: true
   alias Teiserver.Account.AccountTestLib
   alias Teiserver.Account.FriendRequest
   alias Teiserver.Account.FriendRequestLib
@@ -7,6 +6,7 @@ defmodule Teiserver.Account.FriendRequestLibTest do
   alias Teiserver.Account, as: Account
   alias Teiserver.Config
   alias Teiserver.Repo
+  use Teiserver.DataCase, async: true
 
   defp friend_request_fixture(%{id: id}, to), do: friend_request_fixture(id, to)
   defp friend_request_fixture(from, %{id: id}), do: friend_request_fixture(from, id)

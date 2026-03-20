@@ -1,9 +1,11 @@
 defmodule Teiserver.Game.BalancerServerAsyncTest do
   @moduledoc false
+
+  alias Teiserver.Game.BalancerServer
+
   use ExUnit.Case, async: true
 
   @moduletag :balance_test
-  alias Teiserver.Game.BalancerServer
 
   defp create_fake_players(count) do
     1..count |> Enum.map(fn _ -> %{} end)
@@ -44,13 +46,16 @@ end
 
 defmodule Teiserver.Game.BalancerServerTest do
   @moduledoc false
-  use Teiserver.DataCase, async: false
-  import Teiserver.Support.Polling, only: [poll_until_nil: 1]
 
-  @moduletag :balance_test
   alias Teiserver.Game.BalancerServer
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
+
+  use Teiserver.DataCase, async: false
+
+  import Teiserver.Support.Polling, only: [poll_until_nil: 1]
+
+  @moduletag :balance_test
 
   @spec make_users_with_ranks([non_neg_integer()]) ::
           list()

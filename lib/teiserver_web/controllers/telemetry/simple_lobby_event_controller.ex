@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Telemetry.SimpleLobbyEventController do
-  use TeiserverWeb, :controller
   alias Teiserver.Account
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ExportSimpleLobbyEventsTask
   alias Teiserver.Telemetry.SimpleLobbyEventQueries
+  use TeiserverWeb, :controller
   require Logger
 
   plug(AssignPlug,

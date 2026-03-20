@@ -2,7 +2,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   @moduledoc """
   The accolade server is the interface point for the Accolade system.
   """
-  use GenServer
+
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Account.Auth
@@ -13,6 +13,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   alias Teiserver.Coordinator.Parser
   alias Teiserver.Room
   alias Phoenix.PubSub
+  use GenServer
   require Logger
 
   @spec max_miss_count :: float

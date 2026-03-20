@@ -1,7 +1,8 @@
 defmodule Teiserver.Account.RelationshipQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Teiserver.Account.Relationship
+  use TeiserverWeb, :queries
 
   @spec query_relationships(list) :: Ecto.Query.t()
   def query_relationships(args) do

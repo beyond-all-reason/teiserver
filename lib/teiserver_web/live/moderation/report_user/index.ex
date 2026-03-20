@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
-  use TeiserverWeb, :live_view
   alias Teiserver.Account
   alias Teiserver.Battle
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportLib
   alias Teiserver.Helper.TimexHelper
+  use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do

@@ -5,11 +5,13 @@ defmodule Teiserver.Tachyon.Transport do
   It handle parsing and validating commands before delegating it to a handler
   """
 
-  @behaviour WebSock
-  require Logger
   alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Tachyon.Schema
   alias Teiserver.Tachyon.Handler
+
+  require Logger
+
+  @behaviour WebSock
 
   @type connection_state() :: %{
           handler: term(),

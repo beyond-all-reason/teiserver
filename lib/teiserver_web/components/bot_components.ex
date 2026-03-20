@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Components.BotComponent do
-  use Phoenix.Component
   alias TeiserverWeb.CoreComponents, as: CC
+  use Phoenix.Component
 
   attr :changeset, Ecto.Changeset, required: true
   attr :action, :string, required: true

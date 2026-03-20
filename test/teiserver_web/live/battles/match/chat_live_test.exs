@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Battle.MatchLive.ChatLiveTest do
-  use TeiserverWeb.ConnCase
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
 
   # https://github.com/beyond-all-reason/teiserver/actions/runs/12946468298/job/36111060092?pr=560
   # at a glance there's a problem with throttling in some cases?

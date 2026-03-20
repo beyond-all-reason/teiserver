@@ -1,11 +1,11 @@
 defmodule Teiserver.Game.BalancerServer do
-  use GenServer
-  require Logger
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle
   alias Teiserver.Coordinator
+  use GenServer
+  require Logger
 
   @tick_interval 2_000
   # Balance algos that allow fuzz; randomness will be added to match rating before processing

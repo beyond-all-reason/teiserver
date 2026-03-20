@@ -1,8 +1,9 @@
 defmodule Teiserver.Telemetry.ComplexAnonEventQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Ecto.Adapters.SQL
   alias Teiserver.Telemetry.ComplexAnonEvent
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_complex_anon_events(list) :: Ecto.Query.t()

@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.Moderation.BanController do
   @moduledoc false
-  use TeiserverWeb, :controller
 
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
@@ -12,6 +11,9 @@ defmodule TeiserverWeb.Moderation.BanController do
   alias Teiserver.Moderation.Ban
   alias Teiserver.Moderation.BanLib
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
+
+  use TeiserverWeb, :controller
+
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,

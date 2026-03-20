@@ -1,13 +1,14 @@
 defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
-  use TeiserverWeb.ConnCase, async: false
-  import Phoenix.LiveViewTest
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Battle
   alias Teiserver.TeiserverTestLib
   alias Teiserver.Client
   alias Teiserver.Lobby
   alias TeiserverWeb.Account.ProfileLive.Overview
+
+  use TeiserverWeb.ConnCase, async: false
+
+  import Phoenix.LiveViewTest
 
   setup do
     {:ok, data} =

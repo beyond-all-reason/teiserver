@@ -1,6 +1,6 @@
 defmodule Teiserver.Game.RatingLogLib do
-  use TeiserverWeb, :library
   alias Teiserver.Game.RatingLog
+  use TeiserverWeb, :library
 
   # Functions
   @spec icon :: String.t()

@@ -3,9 +3,12 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
   Can run all balance tests via
   mix test --only balance_test
   """
-  use Teiserver.DataCase, async: true
-  @moduletag :balance_test
+
   alias Teiserver.Battle.BalanceLib
+
+  use Teiserver.DataCase, async: true
+
+  @moduletag :balance_test
 
   @algorithm "loser_picks"
 

@@ -1,8 +1,6 @@
 defmodule TeiserverWeb.TournamentLive.Show do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  require Logger
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Battle
@@ -14,6 +12,9 @@ defmodule TeiserverWeb.TournamentLive.Show do
   alias Teiserver.Lobby
   alias Teiserver.ServerUserPlug
   alias Teiserver.Telemetry
+  use TeiserverWeb, :live_view
+  require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
     &nbsp;&nbsp;&nbsp;

@@ -1,7 +1,8 @@
 defmodule Teiserver.Telemetry.PropertyTypeQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Teiserver.Telemetry.PropertyType
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_property_types(list) :: Ecto.Query.t()

@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   @moduledoc false
-  require Logger
+
   alias ExULID.ULID
   alias Teiserver.Account.Auth
   alias Teiserver.Config
@@ -19,6 +19,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Chat.WordLib
   alias Teiserver.Data.Types, as: T
+  require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
 
   @doc """

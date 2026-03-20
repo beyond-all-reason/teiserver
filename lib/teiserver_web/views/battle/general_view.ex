@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Battle.GeneralView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Account.PartyLib
   alias Teiserver.Account.RatingLib
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Lobby
+
+  use TeiserverWeb, :view
 
   def view_colour(), do: :default
   def icon(), do: StylingHelper.icon(:default)

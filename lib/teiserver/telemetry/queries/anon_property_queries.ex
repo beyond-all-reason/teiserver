@@ -1,8 +1,9 @@
 defmodule Teiserver.Telemetry.AnonPropertyQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Ecto.Adapters.SQL
   alias Teiserver.Telemetry.AnonProperty
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_anon_properties(list) :: Ecto.Query.t()

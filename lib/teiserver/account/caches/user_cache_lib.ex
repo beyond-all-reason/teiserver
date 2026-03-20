@@ -1,11 +1,12 @@
 defmodule Teiserver.Account.UserCacheLib do
   @moduledoc false
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+
   alias Teiserver.Account
   alias Teiserver.Account.Guardian
   alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec get_username(T.userid() | nil) :: String.t() | nil
   def get_username(userid), do: get_username_by_id(userid)

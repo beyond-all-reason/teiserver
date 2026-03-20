@@ -1,5 +1,4 @@
 defmodule Teiserver.OAuth.TokenTest do
-  use Teiserver.DataCase, async: true
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
   alias Ecto.Changeset
@@ -7,6 +6,7 @@ defmodule Teiserver.OAuth.TokenTest do
   alias Teiserver.Repo
   alias Teiserver.TeiserverTestLib
   alias Timex.Duration
+  use Teiserver.DataCase, async: true
 
   setup do
     user = TeiserverTestLib.new_user()

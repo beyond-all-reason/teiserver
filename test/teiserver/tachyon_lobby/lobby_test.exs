@@ -1,12 +1,12 @@
 defmodule Teiserver.TachyonLobby.LobbyTest do
-  use Teiserver.DataCase
-  import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until_nil: 1]
   alias Teiserver.AssetFixtures
-  alias Teiserver.Tachyon
+  alias Teiserver.Tachyon, as: TachyonLib
   alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.TachyonLobby.Lobby, as: LobbyProcess
   alias ExUnit.Callbacks
   alias Teiserver.KvStore
+  use Teiserver.DataCase
+  import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until_nil: 1]
 
   @moduletag :tachyon
 
@@ -1128,8 +1128,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   describe "state restoration" do
     def setup_restore_config(_) do
-      Tachyon.enable_state_restoration()
-      Callbacks.on_exit(fn -> Tachyon.disable_state_restoration() end)
+      TachyonLib.enable_state_restoration()
+      Callbacks.on_exit(fn -> TachyonLib.disable_state_restoration() end)
     end
 
     setup [:setup_restore_config]
@@ -1140,7 +1140,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, %{id: id}} =
         mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
 
-      Tachyon.restart_system()
+      TachyonLib.restart_system()
       assert KvStore.get("lobby", id) == nil
     end
 
@@ -1151,7 +1151,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
 
       Process.exit(sink_pid, :shutdown)
-      Tachyon.restart_system()
+      TachyonLib.restart_system()
 
       sink_pid = mk_sink()
       {:ok, _, details} = Lobby.rejoin(id, @default_user_id, sink_pid)
@@ -1165,7 +1165,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
 
       Process.exit(sink_pid, :shutdown)
-      Tachyon.restart_system()
+      TachyonLib.restart_system()
 
       # another player is attempting to join before the lobby is fully up
       join_task =
@@ -1195,7 +1195,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       drain_msg_queue()
 
       Process.exit(sink_pid, :shutdown)
-      Tachyon.restart_system()
+      TachyonLib.restart_system()
 
       sink_pid = mk_sink()
       {:ok, _, _details} = Lobby.rejoin(id, @default_user_id, sink_pid)

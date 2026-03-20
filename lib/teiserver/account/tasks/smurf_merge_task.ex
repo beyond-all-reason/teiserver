@@ -1,12 +1,12 @@
 defmodule Teiserver.Account.SmurfMergeTask do
   @moduledoc false
-  require Logger
+
   alias Teiserver.Account
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
-  # alias Teiserver.Repo
+  require Logger
 
   @spec perform(T.userid(), T.userid(), map()) :: :ok
   def perform(from_id, to_id, settings) do

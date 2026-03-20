@@ -1,5 +1,4 @@
 defmodule Teiserver.OAuth.ApplicationQueryTest do
-  use Teiserver.DataCase
   alias Teiserver.Bot.Bot
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.OAuthFixtures
@@ -9,6 +8,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
   alias Teiserver.OAuth.TokenQueries
   alias Teiserver.TeiserverTestLib
   alias Timex.Duration
+  use Teiserver.DataCase
 
   defp setup_app(_context) do
     user = TeiserverTestLib.new_user()

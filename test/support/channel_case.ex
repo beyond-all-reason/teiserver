@@ -15,9 +15,9 @@ defmodule TeiserverWeb.ChannelCase do
   this option is not recommended for other databases.
   """
 
-  use ExUnit.CaseTemplate
-
   alias Ecto.Adapters.SQL.Sandbox
+
+  use ExUnit.CaseTemplate
 
   using do
     quote do

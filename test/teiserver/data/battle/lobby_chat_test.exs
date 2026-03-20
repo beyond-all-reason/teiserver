@@ -1,10 +1,10 @@
 defmodule Teiserver.Data.Battle.ChatLibTest do
-  use Teiserver.DataCase, async: false
-  import Teiserver.TeiserverTestLib, only: [new_user: 0]
   alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Lobby
   alias Teiserver.Lobby.ChatLib
+  use Teiserver.DataCase, async: false
+  import Teiserver.TeiserverTestLib, only: [new_user: 0]
 
   # https://github.com/beyond-all-reason/teiserver/actions/runs/12845418717/job/35819461341?pr=556
   @tag :needs_attention

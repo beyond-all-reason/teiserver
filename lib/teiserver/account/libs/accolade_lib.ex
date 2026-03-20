@@ -2,7 +2,7 @@ defmodule Teiserver.Account.AccoladeLib do
   @moduledoc """
 
   """
-  use TeiserverWeb, :library
+
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
   alias Teiserver.Account.Accolade
@@ -10,6 +10,7 @@ defmodule Teiserver.Account.AccoladeLib do
   alias Teiserver.Account.AccoladeChatServer
   alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
+  use TeiserverWeb, :library
   require Logger
 
   def miss_count_limit(), do: 20

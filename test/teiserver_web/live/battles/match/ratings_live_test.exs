@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Battle.MatchLive.RatingsLiveTest do
-  use TeiserverWeb.ConnCase, async: true
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase, async: true
 
   test "battle ratings endpoints requires authentication" do
     {:ok, kw} =

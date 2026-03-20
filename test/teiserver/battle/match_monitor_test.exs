@@ -1,9 +1,8 @@
 defmodule Teiserver.Battle.MatchMonitorTest do
-  use Teiserver.ServerCase, async: false
-
   alias Teiserver.Battle
   alias Teiserver.Battle.MatchMonitorServer
   alias Teiserver.Support.Polling
+  use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,
     only: [

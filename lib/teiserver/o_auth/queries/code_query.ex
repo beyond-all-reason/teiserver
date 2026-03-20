@@ -1,7 +1,7 @@
 defmodule Teiserver.OAuth.CodeQueries do
-  use TeiserverWeb, :queries
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.Code
+  use TeiserverWeb, :queries
 
   @doc """
   Return the db object corresponding to the given code.

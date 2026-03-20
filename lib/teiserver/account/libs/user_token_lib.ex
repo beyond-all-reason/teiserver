@@ -1,7 +1,8 @@
 defmodule Teiserver.Account.UserTokenLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Account.UserToken
+  use TeiserverWeb, :library
 
   @spec colours :: atom
   def colours(), do: :info

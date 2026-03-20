@@ -1,12 +1,13 @@
 defmodule Teiserver.Logging.LoggingTestLib do
   @moduledoc false
-  use TeiserverWeb, :library
 
   alias Teiserver.Logging.AggregateViewLog
   alias Teiserver.Logging.AggregateViewLogLib
   alias Teiserver.Logging.AuditLog
   alias Teiserver.Logging.PageViewLog
   alias Teiserver.Logging.PageViewLogLib
+
+  use TeiserverWeb, :library
 
   # def get_audit_log(conn, action) do
   #   Logging.list_audit_logs(search: [

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.API.Admin.UserController do
-  use TeiserverWeb, :controller
   alias Teiserver.Account
   alias Teiserver.OAuth
+  use TeiserverWeb, :controller
 
   plug Teiserver.OAuth.Plug.EnsureAuthenticated, scopes: ["admin.user"]
 
