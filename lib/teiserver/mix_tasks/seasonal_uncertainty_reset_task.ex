@@ -7,13 +7,13 @@ defmodule Mix.Tasks.Teiserver.SeasonalUncertaintyResetTask do
   where 5 is the uncertainty target
   """
 
-  use Mix.Task
-
-  require Logger
-
   alias Ecto.Adapters.SQL
   alias Ecto.Multi
   alias Teiserver.Repo
+
+  use Mix.Task
+
+  require Logger
 
   @spec run(list()) :: :ok
   def run(args) do

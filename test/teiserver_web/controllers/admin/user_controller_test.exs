@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Admin.UserControllerTest do
-  use TeiserverWeb.ConnCase
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
   alias Teiserver.CacheUser
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
 
   # alias TeiserverTestLib
 

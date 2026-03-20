@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Logging.ServerLogView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Logging.ServerDayLogLib
   alias TeiserverWeb.Logging.AggregateViewLogView
+
+  use TeiserverWeb, :view
 
   @spec view_colour :: atom
   def view_colour(), do: ServerDayLogLib.colours()

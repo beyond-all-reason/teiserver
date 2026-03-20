@@ -1,9 +1,10 @@
 defmodule TeiserverWeb.Account.GeneralController do
   @moduledoc false
-  use TeiserverWeb, :controller
 
   alias Teiserver.Account
   alias Teiserver.Config
+
+  use TeiserverWeb, :controller
 
   plug(:add_breadcrumb, name: "Account", url: "/teiserver/account")
 

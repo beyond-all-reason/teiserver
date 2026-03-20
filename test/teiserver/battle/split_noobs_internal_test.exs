@@ -3,9 +3,12 @@ defmodule Teiserver.Battle.SplitNoobsInternalTest do
   Can run all balance tests via
   mix test --only balance_test
   """
-  use ExUnit.Case
-  @moduletag :balance_test
+
   alias Teiserver.Battle.Balance.SplitNoobs
+
+  use ExUnit.Case
+
+  @moduletag :balance_test
 
   test "sort noobs" do
     noobs = [

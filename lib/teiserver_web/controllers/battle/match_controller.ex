@@ -1,6 +1,4 @@
 defmodule TeiserverWeb.Battle.MatchController do
-  use TeiserverWeb, :controller
-
   alias Teiserver.Account
   alias Teiserver.Battle
   alias Teiserver.Battle.MatchLib
@@ -8,6 +6,8 @@ defmodule TeiserverWeb.Battle.MatchController do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Helper.TimexHelper
+
+  use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Battle.Match,

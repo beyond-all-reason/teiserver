@@ -3,9 +3,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   One consul server is created for each battle. It acts as a battle supervisor in addition to any
   host.
   """
-  use GenServer
-  require Logger
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
@@ -26,6 +24,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Lobby.LobbyRestrictions
   alias Teiserver.Telemetry
+  use GenServer
+  require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password? tournament)
   @boss_commands ~w(balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)

@@ -1,6 +1,5 @@
 defmodule Teiserver.Account.AuthPlug do
   @moduledoc false
-  import Plug.Conn
 
   alias ExULID.ULID
   alias Phoenix.Component
@@ -14,8 +13,12 @@ defmodule Teiserver.Account.AuthPlug do
   alias Teiserver.Account.TOTPLib
   alias Teiserver.CacheUser
   alias Teiserver.Plugs.CachePlug
-  require Logger
+
   use TeiserverWeb, :verified_routes
+
+  require Logger
+
+  import Plug.Conn
 
   def init(_opts) do
     # Keyword.fetch!(opts, :repo)
@@ -128,6 +131,7 @@ defmodule Teiserver.Account.AuthPlug do
   the current_user:
 
       defmodule ApolloWeb.PageLive do
+
         use ApolloWeb, :live_view
 
         on_mount {ApolloWeb.UserAuth, :mount_current_user}

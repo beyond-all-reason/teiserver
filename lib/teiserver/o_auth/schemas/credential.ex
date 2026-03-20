@@ -1,8 +1,9 @@
 defmodule Teiserver.OAuth.Credential do
   @moduledoc false
-  use TeiserverWeb, :schema
 
   alias Teiserver.OAuth
+
+  use TeiserverWeb, :schema
 
   @type id :: non_neg_integer()
 

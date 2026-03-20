@@ -1,8 +1,8 @@
 defmodule Teiserver.Data.UserTest do
-  use Teiserver.ServerCase
   alias Teiserver.CacheUser
   alias Teiserver.Account
   alias Teiserver.TeiserverTestLib
+  use Teiserver.ServerCase
 
   test "adding two bots with the same email" do
     # Spring protocol runs on usernames while this runs on emails as the unique

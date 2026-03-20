@@ -2,13 +2,14 @@ defmodule Teiserver.Battle.BalanceLib do
   @moduledoc """
   A set of functions related to balance, if you are looking to see how balance is implemented this is the place. Ratings are calculated via Teiserver.Game.MatchRatingLib and are used here. Please note ratings and balance are two very different things and complaints about imbalanced games need to be correct in addressing balance vs ratings.
   """
+
   alias Teiserver.Account
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Game.MatchRatingLib
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
   require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
   # These are default values and can be overridden as part of the call to create_balance()
 
   # Upper boundary is how far above the group value the members can be, lower is how far below it

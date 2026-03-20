@@ -1,12 +1,14 @@
 defmodule TeiserverWeb.PostLiveTest do
   @moduledoc false
+
+  alias Teiserver.Microblog
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
+
   use TeiserverWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Teiserver.MicroblogFixtures
-  alias Teiserver.Microblog
-  alias Central.Helpers.GeneralTestLib
-  alias Teiserver.TeiserverTestLib
 
   @create_attrs %{contents: "some contents", title: "some title"}
   @update_attrs %{contents: "some updated contents", title: "some updated title"}

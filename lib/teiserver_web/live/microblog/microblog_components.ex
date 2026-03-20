@@ -1,7 +1,8 @@
 defmodule TeiserverWeb.MicroblogComponents do
   @moduledoc false
-  use TeiserverWeb, :component
+
   alias Teiserver.Helper.TimexHelper
+  use TeiserverWeb, :component
   import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """

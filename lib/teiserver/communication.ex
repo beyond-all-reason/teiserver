@@ -2,7 +2,7 @@ defmodule Teiserver.Communication do
   @moduledoc """
 
   """
-  import Ecto.Query, warn: false
+
   alias Teiserver.Communication.DiscordChannel
   alias Teiserver.Communication.DiscordChannelLib
   alias Teiserver.Communication.TextCallback
@@ -10,6 +10,7 @@ defmodule Teiserver.Communication do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
+  import Ecto.Query, warn: false
 
   @spec lobby_text_callback(List.t()) :: Ecto.Query.t()
   def lobby_text_callback(args) do

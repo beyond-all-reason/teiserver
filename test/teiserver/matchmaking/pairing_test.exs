@@ -1,6 +1,6 @@
 defmodule Teiserver.Matchmaking.PairingTest do
-  use Teiserver.DataCase, async: true
   alias Teiserver.Matchmaking.PairingRoom
+  use Teiserver.DataCase, async: true
 
   defp queue_attrs() do
     %{

@@ -1,11 +1,11 @@
 defmodule Teiserver.OAuth.CodeTest do
-  use Teiserver.DataCase, async: true
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
   alias Plug.Conn
   alias Plug.Test
   alias Teiserver.TeiserverTestLib
   alias Timex.Duration
+  use Teiserver.DataCase, async: true
 
   setup do
     user = TeiserverTestLib.new_user()

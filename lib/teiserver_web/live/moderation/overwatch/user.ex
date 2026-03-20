@@ -1,7 +1,8 @@
 defmodule TeiserverWeb.Moderation.OverwatchLive.User do
-  use TeiserverWeb, :live_view
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportLib
+
+  use TeiserverWeb, :live_view
 
   import Teiserver.Moderation, only: [colour: 0]
 

@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Battle.MatchLive.Ratings do
-  use TeiserverWeb, :live_view
   alias Teiserver.Account
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
   alias TeiserverWeb.Parsers.PaginationParams
+  use TeiserverWeb, :live_view
   import TeiserverWeb.PaginationComponents, only: [pagination: 1]
 
   @impl Phoenix.LiveView

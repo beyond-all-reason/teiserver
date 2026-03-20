@@ -1,6 +1,4 @@
 defmodule Teiserver.Asset do
-  import Ecto.Query
-
   alias Teiserver.Asset
   alias Teiserver.Asset.Engine
   alias Teiserver.Asset.EngineQueries
@@ -10,6 +8,8 @@ defmodule Teiserver.Asset do
   alias Teiserver.Asset.MapQueries
   alias Teiserver.Matchmaking
   alias Teiserver.Repo
+
+  import Ecto.Query
 
   @spec create_maps([map()]) ::
           {:ok, [Asset.Map.t()]} | {:error, String.t(), Ecto.Changeset.t(), map()}

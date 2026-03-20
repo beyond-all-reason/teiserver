@@ -1,7 +1,8 @@
 defmodule Teiserver.Moderation.ProposalLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Moderation.Proposal
+  use TeiserverWeb, :library
 
   # Functions
   @spec icon :: String.t()

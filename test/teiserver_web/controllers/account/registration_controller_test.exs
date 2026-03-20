@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Account.RegistrationControllerTest do
-  use TeiserverWeb.ConnCase
-
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Config
+
+  use TeiserverWeb.ConnCase
 
   describe "web registration of users" do
     setup do

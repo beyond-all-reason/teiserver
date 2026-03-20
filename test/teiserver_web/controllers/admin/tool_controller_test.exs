@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.ToolControllerTest do
-  use TeiserverWeb.ConnCase
-
   alias Central.Helpers.GeneralTestLib
+
+  use TeiserverWeb.ConnCase
 
   setup do
     GeneralTestLib.conn_setup(~w(admin.dev.developer))

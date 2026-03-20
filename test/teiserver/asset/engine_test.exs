@@ -1,7 +1,7 @@
 defmodule Teiserver.Asset.EngineTest do
-  use Teiserver.DataCase
   alias Teiserver.Asset
   alias Teiserver.AssetFixtures
+  use Teiserver.DataCase
 
   @moduletag :tachyon
   describe "engine queries" do

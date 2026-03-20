@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Admin.GeneralControllerTest do
-  use TeiserverWeb.ConnCase
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
 
   setup do
     GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())

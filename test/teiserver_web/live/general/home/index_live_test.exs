@@ -1,11 +1,12 @@
 defmodule TeiserverWeb.General.Home.IndexLiveTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
-
-  import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
+
+  import Phoenix.LiveViewTest
 
   defp auth_setup(_) do
     GeneralTestLib.conn_setup()

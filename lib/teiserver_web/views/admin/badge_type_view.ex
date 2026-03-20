@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.BadgeTypeView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Account.BadgeTypeLib
+
+  use TeiserverWeb, :view
 
   @spec view_colour() :: atom
   def view_colour(), do: BadgeTypeLib.colours()

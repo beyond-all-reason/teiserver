@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.Logging.GeneralView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Logging.AggregateViewLogLib
   alias Teiserver.Logging.AuditLogLib
   alias Teiserver.Logging.LoggingLib
   alias Teiserver.Logging.PageViewLogLib
   alias Teiserver.Logging.ServerDayLogLib
+
+  use TeiserverWeb, :view
 
   @spec view_colour() :: atom
   def view_colour(), do: LoggingLib.colours()

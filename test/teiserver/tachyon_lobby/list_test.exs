@@ -1,7 +1,7 @@
 defmodule Teiserver.TachyonLobby.ListTest do
+  alias Teiserver.TachyonLobby, as: Lobby
   use Teiserver.DataCase
   import Teiserver.Support.Polling, only: [poll_until: 2]
-  alias Teiserver.TachyonLobby, as: Lobby
 
   @moduletag :tachyon
 

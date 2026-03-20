@@ -3,10 +3,12 @@ defmodule Teiserver.Battle.RespectAvoidsInternalTest do
   Can run all balance tests via
   mix test --only balance_test
   """
+
+  alias Teiserver.Battle.Balance.RespectAvoids
+
   use ExUnit.Case, async: false
 
   @moduletag :balance_test
-  alias Teiserver.Battle.Balance.RespectAvoids
 
   test "can get lobby max avoids" do
     player_count = 14

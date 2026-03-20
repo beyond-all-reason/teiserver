@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.UserSocket do
-  use Phoenix.Socket
-
   alias Teiserver.Account.Guardian
+
+  use Phoenix.Socket
 
   ## Channels
   # channel "room:*", TeiserverWeb.RoomChannel

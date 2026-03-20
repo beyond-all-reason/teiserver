@@ -2,8 +2,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   @moduledoc """
   The server used to read events from Teiserver and then use the DiscordBridgeBot to send onwards
   """
-  use GenServer
-  require Logger
+
   alias Nostrum.Api.Channel
   alias Nostrum.Api.Message
   alias Nostrum.Api.Thread
@@ -17,6 +16,8 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Room
+  use GenServer
+  require Logger
 
   def bot_name(), do: "DiscordBridgeBot"
 

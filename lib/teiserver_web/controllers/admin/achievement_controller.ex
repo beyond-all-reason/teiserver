@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Admin.AchievementController do
-  use TeiserverWeb, :controller
-
   alias Teiserver.Game
   alias Teiserver.Game.AchievementType
   alias Teiserver.Game.AchievementTypeLib
   alias Teiserver.Helper.StylingHelper
+
+  use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Staff.Moderator,

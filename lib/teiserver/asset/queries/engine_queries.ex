@@ -1,7 +1,7 @@
 defmodule Teiserver.Asset.EngineQueries do
-  use TeiserverWeb, :queries
-
   alias Teiserver.Asset
+
+  use TeiserverWeb, :queries
 
   @spec get_engines() :: [Asset.Engine.t()]
   def get_engines() do

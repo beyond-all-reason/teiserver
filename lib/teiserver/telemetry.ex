@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry do
   @moduledoc false
-  import Ecto.Query, warn: false
+
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
@@ -43,6 +43,7 @@ defmodule Teiserver.Telemetry do
   alias Teiserver.Telemetry.TelemetryLib
   alias Teiserver.Telemetry.UserProperty
   alias Teiserver.Telemetry.UserPropertyLib
+  import Ecto.Query, warn: false
 
   @spec get_totals_and_reset() :: map()
   defdelegate get_totals_and_reset(), to: TelemetryLib

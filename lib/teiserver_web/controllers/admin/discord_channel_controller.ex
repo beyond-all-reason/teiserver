@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Admin.DiscordChannelController do
-  use TeiserverWeb, :controller
-  import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
   alias Teiserver.Communication
   alias Teiserver.Communication.DiscordChannelLib
   alias Teiserver.Helper.StylingHelper
+  use TeiserverWeb, :controller
+  import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Communication.DiscordChannel,

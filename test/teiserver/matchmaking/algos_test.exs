@@ -1,9 +1,9 @@
 defmodule Teiserver.Matchmaking.AlgosTest do
-  use ExUnit.Case
   alias Teiserver.Matchmaking.Algo
   alias Teiserver.Matchmaking.Member
   alias Algo.BruteforceFilter
   alias Algo.IgnoreOs
+  use ExUnit.Case
 
   def ignore_os(members, team_size, team_count) do
     st = IgnoreOs.init(team_size, team_count)

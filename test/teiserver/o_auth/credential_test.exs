@@ -1,9 +1,9 @@
 defmodule Teiserver.OAuth.CredentialTest do
-  use Teiserver.DataCase, async: true
   alias Teiserver.OAuth
   alias Teiserver.Bot
   alias Teiserver.OAuthFixtures
   alias Teiserver.TeiserverTestLib
+  use Teiserver.DataCase, async: true
 
   defp setup_bot(_context) do
     {:ok, bot} = Bot.create_bot(%{name: "testing_bot"})

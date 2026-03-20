@@ -1,11 +1,11 @@
 defmodule TeiserverWeb.Live.Account.Profile.MatchesTest do
-  use TeiserverWeb.ConnCase, async: false
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
   alias Teiserver.Config
   alias Teiserver.TeiserverTestLib
   alias TeiserverWeb.Account.ProfileLive.Matches
+
+  use TeiserverWeb.ConnCase, async: false
 
   setup do
     {:ok, data} =

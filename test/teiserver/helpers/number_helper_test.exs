@@ -1,8 +1,8 @@
 defmodule Teiserver.General.NumberHelperTest do
-  use Teiserver.DataCase, async: true
-
   alias Teiserver.Helper.NumberHelper
   alias Decimal
+
+  use Teiserver.DataCase, async: true
 
   test "int_parse" do
     params = [

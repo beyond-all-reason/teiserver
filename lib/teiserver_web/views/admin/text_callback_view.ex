@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.TextCallbackView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Communication.TextCallbackLib
+
+  use TeiserverWeb, :view
 
   @spec view_colour() :: atom
   def view_colour, do: TextCallbackLib.colours()

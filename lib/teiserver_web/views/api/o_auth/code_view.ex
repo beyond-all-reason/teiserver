@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.OAuth.CodeView do
-  use TeiserverWeb, :view
-
   alias Teiserver.OAuth
   alias TeiserverWeb.Endpoint
+
+  use TeiserverWeb, :view
 
   def token(%{token: token}) do
     expires_in = DateTime.diff(token.expires_at, DateTime.utc_now(), :second)

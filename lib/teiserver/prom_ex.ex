@@ -52,9 +52,9 @@ defmodule Teiserver.PromEx do
      to Grafana in the `dashboards/0` function.
   """
 
-  use PromEx, otp_app: :teiserver
-
   alias PromEx.Plugins
+
+  use PromEx, otp_app: :teiserver
 
   @impl PromEx
   def plugins do

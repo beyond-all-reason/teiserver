@@ -1,8 +1,9 @@
 defmodule Teiserver.Bot.Bot do
   @moduledoc false
-  use TeiserverWeb, :schema
 
   alias Ecto.Changeset
+
+  use TeiserverWeb, :schema
 
   @type id :: integer()
 

@@ -1,7 +1,8 @@
 defmodule Teiserver.Microblog.PostTagQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Teiserver.Microblog.PostTag
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_post_tags(list) :: Ecto.Query.t()

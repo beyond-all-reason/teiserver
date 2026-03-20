@@ -3,7 +3,6 @@ defmodule Teiserver.Game do
   The Game context.
   """
 
-  import Ecto.Query, warn: false
   alias Teiserver.Account
   alias Teiserver.Game.AchievementType
   alias Teiserver.Game.AchievementTypeLib
@@ -18,6 +17,8 @@ defmodule Teiserver.Game do
   alias Teiserver.Game.UserAchievementLib
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
+
+  import Ecto.Query, warn: false
 
   @spec achievement_type_query(List.t()) :: Ecto.Query.t()
   def achievement_type_query(args) do

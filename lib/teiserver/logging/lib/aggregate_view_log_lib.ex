@@ -1,9 +1,10 @@
 defmodule Teiserver.Logging.AggregateViewLogLib do
   @moduledoc false
-  use TeiserverWeb, :library
 
   alias Teiserver.Logging.AggregateViewLog
   alias Teiserver.Logging.PageViewLog
+
+  use TeiserverWeb, :library
 
   @spec colours() :: atom
   def colours(), do: :info2

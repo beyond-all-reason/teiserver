@@ -1,7 +1,7 @@
 defmodule Teiserver.Helpers.BurstyRateLimiterTest do
-  use ExUnit.Case, async: true
-
   alias Teiserver.Helpers.BurstyRateLimiter, as: BRL
+
+  use ExUnit.Case, async: true
 
   test "must provide positive max_permits" do
     assert_raise ArgumentError, fn ->

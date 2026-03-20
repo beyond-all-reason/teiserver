@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.Moderation.ProposalController do
   @moduledoc false
-  use TeiserverWeb, :controller
 
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
@@ -9,6 +8,9 @@ defmodule TeiserverWeb.Moderation.ProposalController do
   alias Teiserver.Moderation
   alias Teiserver.Moderation.Proposal
   alias Teiserver.Moderation.ProposalLib
+
+  use TeiserverWeb, :controller
+
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,

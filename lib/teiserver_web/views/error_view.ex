@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.ErrorView do
-  use TeiserverWeb, :view
-
   alias Phoenix.Controller
+
+  use TeiserverWeb, :view
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-exclamation-triangle"

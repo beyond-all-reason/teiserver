@@ -1,7 +1,5 @@
 defmodule TeiserverWeb.Microblog.PostFormComponent do
   @moduledoc false
-  use TeiserverWeb, :live_component
-  import Teiserver.Helper.ColourHelper, only: [rgba_css: 2]
 
   alias Ecto.Multi
   alias Teiserver.Account
@@ -10,6 +8,10 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   alias Teiserver.Microblog
   alias Teiserver.Microblog.PostTag
   alias Teiserver.Repo
+
+  use TeiserverWeb, :live_component
+
+  import Teiserver.Helper.ColourHelper, only: [rgba_css: 2]
 
   @default_channel_name "Dev updates"
 

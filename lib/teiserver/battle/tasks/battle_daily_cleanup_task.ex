@@ -1,11 +1,13 @@
 defmodule Teiserver.Battle.Tasks.CleanupTask do
   @moduledoc false
-  use Oban.Worker, queue: :cleanup
 
   alias Ecto.Adapters.SQL
   alias Teiserver.Battle
   alias Teiserver.Helper.StringHelper
   alias Teiserver.Repo
+
+  use Oban.Worker, queue: :cleanup
+
   require Logger
 
   @strip_data_days 35

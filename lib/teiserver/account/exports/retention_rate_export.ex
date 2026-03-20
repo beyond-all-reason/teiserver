@@ -15,12 +15,13 @@ defmodule Teiserver.Account.RetentionRateExport do
     "start_date" => "2023-01-01"
   })
   """
-  require Logger
 
   alias Teiserver.Account
   alias Teiserver.Logging
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.TimexHelper
+
+  require Logger
 
   @activity_types ~w(total player)
 

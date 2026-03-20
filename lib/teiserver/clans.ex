@@ -3,7 +3,6 @@ defmodule Teiserver.Clans do
   The Clans context.
   """
 
-  import Ecto.Query, warn: false
   alias Teiserver.Clans.Clan
   alias Teiserver.Clans.ClanInvite
   alias Teiserver.Clans.ClanInviteLib
@@ -12,6 +11,8 @@ defmodule Teiserver.Clans do
   alias Teiserver.Clans.ClanMembershipLib
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
+
+  import Ecto.Query, warn: false
 
   def clan_query(args) do
     clan_query(nil, args)

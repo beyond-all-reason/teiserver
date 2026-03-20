@@ -2,8 +2,7 @@ defmodule Teiserver.CacheUser do
   @moduledoc """
   Users here are a combination of Teiserver.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
-  require Logger
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+
   alias Argon2
   alias ExULID.ULID
   alias Phoenix.PubSub
@@ -22,6 +21,8 @@ defmodule Teiserver.CacheUser do
   alias Teiserver.EmailHelper
   alias Teiserver.Geoip
   alias Teiserver.Telemetry
+  require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @type t :: T.user()
 

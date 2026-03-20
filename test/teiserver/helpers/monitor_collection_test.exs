@@ -1,6 +1,6 @@
 defmodule Teiserver.Helper.MonitorCollectionTest do
-  use ExUnit.Case, async: true
   alias Teiserver.Helpers.MonitorCollection, as: MC
+  use ExUnit.Case, async: true
   import ExUnit.Callbacks, only: [start_supervised!: 1]
 
   defmodule GenServerTest do

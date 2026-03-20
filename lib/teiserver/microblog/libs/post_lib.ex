@@ -1,6 +1,5 @@
 defmodule Teiserver.Microblog.PostLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
 
   alias Ecto.Adapters.SQL
   alias Phoenix.PubSub
@@ -9,6 +8,8 @@ defmodule Teiserver.Microblog.PostLib do
   alias Teiserver.Microblog.PostQueries
   alias Teiserver.Microblog.UserPreference
   alias Teiserver.PubSub, as: TsPubSub
+
+  use TeiserverWeb, :library_newform
 
   # Functions
   @spec icon :: String.t()

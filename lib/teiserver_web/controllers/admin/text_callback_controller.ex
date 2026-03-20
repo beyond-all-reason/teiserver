@@ -1,11 +1,11 @@
 defmodule TeiserverWeb.Admin.TextCallbackController do
-  use TeiserverWeb, :controller
-  import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
   alias Teiserver.Account
   alias Teiserver.Communication
   alias Teiserver.Communication.TextCallbackLib
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging
+  use TeiserverWeb, :controller
+  import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Communication.TextCallback,

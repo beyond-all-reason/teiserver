@@ -1,9 +1,10 @@
 defmodule Teiserver.Telemetry.UserPropertyTest do
   @moduledoc false
-  use Teiserver.DataCase
+
   alias Teiserver.Telemetry
   alias Teiserver.TeiserverTestLib
   alias Ecto.Adapters.SQL
+  use Teiserver.DataCase
 
   test "user properties" do
     r = :rand.uniform(999_999_999)

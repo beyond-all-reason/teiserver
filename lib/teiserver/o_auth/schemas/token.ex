@@ -1,9 +1,10 @@
 defmodule Teiserver.OAuth.Token do
   @moduledoc false
-  use TeiserverWeb, :schema
 
   alias Ecto.Changeset
   alias Teiserver.OAuth
+
+  use TeiserverWeb, :schema
 
   typed_schema "oauth_tokens" do
     field :value, :string, redact: true

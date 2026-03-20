@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Report.RatingController do
-  use TeiserverWeb, :controller
   alias Teiserver.Account
   alias Teiserver.Battle.BalanceLib
+  use TeiserverWeb, :controller
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",

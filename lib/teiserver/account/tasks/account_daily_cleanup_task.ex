@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.Tasks.DailyCleanupTask do
-  use Oban.Worker, queue: :cleanup
   alias Teiserver.Account
+  use Oban.Worker, queue: :cleanup
 
   @impl Oban.Worker
   @spec perform(any) :: :ok

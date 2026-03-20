@@ -1,12 +1,14 @@
 defmodule Teiserver.Account.User do
   @moduledoc false
-  use TeiserverWeb, :schema
-  @behaviour Bodyguard.Policy
 
   alias Argon2
   alias Teiserver.Account
   alias Teiserver.CacheUser
   alias Teiserver.Helper.StylingHelper
+
+  use TeiserverWeb, :schema
+
+  @behaviour Bodyguard.Policy
 
   typed_schema "account_users" do
     field :name, :string

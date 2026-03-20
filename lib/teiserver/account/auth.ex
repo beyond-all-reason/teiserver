@@ -1,9 +1,10 @@
 defmodule Teiserver.Account.Auth do
   @moduledoc false
-  @behaviour Bodyguard.Policy
-  import Teiserver.Account.AuthLib, only: [allow?: 2]
+
   alias Teiserver.Account
   alias Teiserver.Data.Types, as: T
+  import Teiserver.Account.AuthLib, only: [allow?: 2]
+  @behaviour Bodyguard.Policy
 
   def authorize(:index, conn, _), do: allow?(conn, "Moderator")
   def authorize(:search, conn, _), do: allow?(conn, "Moderator")
@@ -129,64 +130,73 @@ end
 
 defmodule Teiserver.Auth.Server do
   @moduledoc false
-  @behaviour Bodyguard.Policy
+
   import Teiserver.Account.AuthLib, only: [allow?: 2]
+  @behaviour Bodyguard.Policy
   def authorize(_, conn, _), do: allow?(conn, "Server")
 end
 
 defmodule Teiserver.Staff.Admin do
   @moduledoc false
-  @behaviour Bodyguard.Policy
+
   import Teiserver.Account.AuthLib, only: [allow?: 2]
+  @behaviour Bodyguard.Policy
   def authorize(_, conn, _), do: allow?(conn, "Admin")
 end
 
 defmodule Teiserver.Staff.Moderator do
   @moduledoc false
-  @behaviour Bodyguard.Policy
+
   import Teiserver.Account.AuthLib, only: [allow?: 2]
+  @behaviour Bodyguard.Policy
   def authorize(_, conn, _), do: allow?(conn, "Moderator")
 end
 
 defmodule Teiserver.Staff.Reviewer do
   @moduledoc false
-  @behaviour Bodyguard.Policy
+
   import Teiserver.Account.AuthLib, only: [allow?: 2]
+  @behaviour Bodyguard.Policy
   def authorize(_, conn, _), do: allow?(conn, "Reviewer")
 end
 
 defmodule Teiserver.Staff.Overwatch do
   @moduledoc false
-  @behaviour Bodyguard.Policy
+
   import Teiserver.Account.AuthLib, only: [allow?: 2]
+  @behaviour Bodyguard.Policy
   def authorize(_, conn, _), do: allow?(conn, "Overwatch")
 end
 
 defmodule Teiserver.Staff.MatchAdmin do
   @moduledoc false
-  @behaviour Bodyguard.Policy
+
   import Teiserver.Account.AuthLib, only: [allow?: 2]
+  @behaviour Bodyguard.Policy
   def authorize(:show, conn, _), do: allow?(conn, "Overwatch")
   def authorize(_, conn, _), do: allow?(conn, "Moderator")
 end
 
 defmodule Teiserver.Auth.Telemetry do
   @moduledoc false
-  @behaviour Bodyguard.Policy
+
   import Teiserver.Account.AuthLib, only: [allow_any?: 2]
+  @behaviour Bodyguard.Policy
   def authorize(_, conn, _), do: allow_any?(conn, ~w(Server Engine))
 end
 
 defmodule Teiserver.Staff do
   @moduledoc false
-  @behaviour Bodyguard.Policy
+
   import Teiserver.Account.AuthLib, only: [allow?: 2]
+  @behaviour Bodyguard.Policy
   def authorize(_, conn, _), do: allow?(conn, "Contributor")
 end
 
 defmodule Teiserver.Auth do
   @moduledoc false
-  @behaviour Bodyguard.Policy
+
   import Teiserver.Account.AuthLib, only: [allow?: 2]
+  @behaviour Bodyguard.Policy
   def authorize(_, conn, _), do: allow?(conn, "account")
 end

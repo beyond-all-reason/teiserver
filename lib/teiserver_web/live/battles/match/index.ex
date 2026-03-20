@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Battle.MatchLive.Index do
-  use TeiserverWeb, :live_view
   alias Teiserver.Account
   alias Teiserver.Battle
   alias Teiserver.Battle.MatchLib
   alias TeiserverWeb.Parsers.PaginationParams
+  use TeiserverWeb, :live_view
   import TeiserverWeb.PaginationComponents, only: [pagination: 1, build_pagination_url: 4]
 
   @impl Phoenix.LiveView

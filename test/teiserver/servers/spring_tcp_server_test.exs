@@ -1,4 +1,13 @@
 defmodule Teiserver.SpringTcpServerTest do
+  alias Ecto.Adapters.SQL
+  alias Teiserver.Account
+  alias Teiserver.Account.UserCacheLib
+  alias Teiserver.Client
+  alias Teiserver.Coordinator
+  alias Teiserver.Protocols.SpringOut
+  alias Teiserver.Room
+  alias Teiserver.TeiserverTestLib
+
   use Teiserver.ServerCase, async: false
 
   require Logger
@@ -15,15 +24,6 @@ defmodule Teiserver.SpringTcpServerTest do
       new_user: 0,
       start_spring_server: 1
     ]
-
-  alias Teiserver.Account.UserCacheLib
-  alias Teiserver.Account
-  alias Teiserver.Client
-  alias Teiserver.Room
-  alias Teiserver.TeiserverTestLib
-  alias Ecto.Adapters.SQL
-  alias Teiserver.Coordinator
-  alias Teiserver.Protocols.SpringOut
 
   setup :start_spring_server
 

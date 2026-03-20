@@ -1,11 +1,13 @@
 defmodule TeiserverWeb.Live.ClientTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase, async: false
-  import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Client
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase, async: false
+
+  import Phoenix.LiveViewTest
   import TeiserverTestLib, only: [_send_raw: 2]
 
   setup do

@@ -1,11 +1,12 @@
 defmodule TeiserverWeb.Account.ProfileLive.Accolades do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  import Central.Helpers.ComponentHelper
+
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Account.UserLib
   alias TeiserverWeb.Account.ProfileLive.Overview
+  use TeiserverWeb, :live_view
+  import Central.Helpers.ComponentHelper
 
   @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do

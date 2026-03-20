@@ -1,10 +1,11 @@
 defmodule Teiserver.BridgeServerTest do
   @moduledoc false
-  use Teiserver.ServerCase, async: false
+
   alias Teiserver.CacheUser
   alias Teiserver.Room
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.TeiserverTestLib
+  use Teiserver.ServerCase, async: false
 
   test "bridge server" do
     {:ok, server_context} = TeiserverTestLib.start_spring_server()

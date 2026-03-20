@@ -1,9 +1,10 @@
 defmodule Teiserver.TachyonBattle.Supervisor do
   @moduledoc false
 
-  use DynamicSupervisor
   alias Teiserver.TachyonBattle.Types, as: T
   alias Teiserver.TachyonBattle.Battle
+
+  use DynamicSupervisor
 
   def start_link(init_arg) do
     DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)

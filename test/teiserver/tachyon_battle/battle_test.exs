@@ -1,6 +1,4 @@
 defmodule Teiserver.TachyonBattle.BattleTest do
-  use Teiserver.DataCase
-  import Teiserver.Support.Polling, only: [poll_until_some: 1]
   alias Teiserver.Autohost
   alias Teiserver.BotFixtures
   alias Teiserver.TachyonBattle, as: Battle
@@ -8,6 +6,8 @@ defmodule Teiserver.TachyonBattle.BattleTest do
   alias Autohost.SessionRegistry
   alias Battle.Battle, as: BattleProcess
   alias ExUnit.Callbacks
+  use Teiserver.DataCase
+  import Teiserver.Support.Polling, only: [poll_until_some: 1]
 
   @moduletag :tachyon
 

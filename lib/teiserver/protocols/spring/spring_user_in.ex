@@ -1,11 +1,12 @@
 defmodule Teiserver.Protocols.Spring.UserIn do
   @moduledoc false
+
   alias Teiserver.Account
   alias Teiserver.Account.FriendRequestLib
   alias Teiserver.Protocols.SpringIn
+  require Logger
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("add_friend", userids_str, msg_id, state) do

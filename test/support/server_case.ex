@@ -14,13 +14,13 @@ defmodule Teiserver.ServerCase do
   this option is not recommended for other databases.
   """
 
-  use ExUnit.CaseTemplate
-
   alias Ecto.Changeset
   alias Teiserver.Config
   alias Teiserver.DataCase
   alias Teiserver.Support.Tachyon
   alias Teiserver.TeiserverTestLib
+
+  use ExUnit.CaseTemplate
 
   using do
     quote do

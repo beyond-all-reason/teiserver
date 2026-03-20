@@ -1,7 +1,8 @@
 defmodule Teiserver.Account.CodeLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Account.Code
+  use TeiserverWeb, :library
 
   @spec colours :: atom
   def colours(), do: :info

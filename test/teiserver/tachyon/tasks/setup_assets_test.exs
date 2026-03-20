@@ -1,10 +1,10 @@
 defmodule Teiserver.Tachyon.Tasks.SetupAssetsTest do
-  use Teiserver.DataCase
   alias Teiserver.Asset
   alias Teiserver.AssetFixtures
   alias Teiserver.Asset.EngineQueries
   alias Teiserver.Asset.GameQueries
   alias Teiserver.Tachyon.Tasks.SetupAssets
+  use Teiserver.DataCase
 
   describe "setup engine" do
     test "nothing in db" do

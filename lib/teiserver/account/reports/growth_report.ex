@@ -1,10 +1,11 @@
 defmodule Teiserver.Account.GrowthReport do
   @moduledoc false
-  @behaviour Teiserver.Common.WebReportBehaviour
+
   alias Teiserver.Logging
   alias Teiserver.Helper.ChartHelper
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  @behaviour Teiserver.Common.WebReportBehaviour
 
   @spec name() :: String.t()
   def name(), do: "Growth"

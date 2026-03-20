@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.AccoladeView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Account.AccoladeLib
+
+  use TeiserverWeb, :view
 
   @spec view_colour() :: atom
   def view_colour, do: AccoladeLib.colours()

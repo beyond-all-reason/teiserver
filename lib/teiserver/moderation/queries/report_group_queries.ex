@@ -1,7 +1,8 @@
 defmodule Teiserver.Moderation.ReportGroupQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Teiserver.Moderation.ReportGroup
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_report_groups(list) :: Ecto.Query.t()

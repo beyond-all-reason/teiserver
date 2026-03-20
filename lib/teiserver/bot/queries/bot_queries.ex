@@ -1,6 +1,6 @@
 defmodule Teiserver.BotQueries do
-  use TeiserverWeb, :queries
   alias Teiserver.Bot.Bot
+  use TeiserverWeb, :queries
 
   @doc """
   Returns all bots.

@@ -1,6 +1,4 @@
 defmodule TeiserverWeb.Admin.BotControllerTest do
-  use TeiserverWeb.ConnCase
-
   alias Teiserver.Bot
   alias Teiserver.OAuth
   alias Teiserver.OAuth.CredentialQueries
@@ -8,6 +6,8 @@ defmodule TeiserverWeb.Admin.BotControllerTest do
   alias Teiserver.BotFixtures
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
 
   defp setup_user(_context) do
     GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())

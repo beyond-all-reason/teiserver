@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.Moderation.ReportController do
   @moduledoc false
-  use TeiserverWeb, :controller
 
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
@@ -10,6 +9,8 @@ defmodule TeiserverWeb.Moderation.ReportController do
   alias Teiserver.Moderation.Report
   alias Teiserver.Moderation.ReportLib
   alias Teiserver.Moderation.Response
+
+  use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
     policy: Report,

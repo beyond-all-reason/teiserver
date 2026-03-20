@@ -3,9 +3,12 @@ defmodule Teiserver.Battle.ForcePartyBalanceTest do
   Can run tests in this file only by
   mix test test/teiserver/battle/force_party_balance_test.exs
   """
-  use Teiserver.DataCase, async: true
-  @moduletag :balance_test
+
   alias Teiserver.Battle.BalanceLib
+
+  use Teiserver.DataCase, async: true
+
+  @moduletag :balance_test
 
   @algorithm "force_party"
 

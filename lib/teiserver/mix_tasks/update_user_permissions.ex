@@ -4,12 +4,14 @@ defmodule Mix.Tasks.Teiserver.UpdateUserPermissions do
   mix teiserver.update_user_permissions
   """
 
-  use Mix.Task
-  require Logger
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
   alias Teiserver.Repo
   alias Teiserver.Account.RoleLib
+
+  use Mix.Task
+
+  require Logger
 
   def run(_args) do
     Application.ensure_all_started(:teiserver)

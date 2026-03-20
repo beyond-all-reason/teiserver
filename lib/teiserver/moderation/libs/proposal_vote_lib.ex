@@ -1,7 +1,8 @@
 defmodule Teiserver.Moderation.ProposalVoteLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Moderation.ProposalVote
+  use TeiserverWeb, :library
 
   # Queries
   @spec query_proposal_votes() :: Ecto.Query.t()

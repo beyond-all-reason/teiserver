@@ -2,14 +2,16 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
   @moduledoc """
   Refreshes the restrictions applied to a user based on the outstanding actions.
   """
-  use Oban.Worker, queue: :teiserver
-  require Logger
-  alias Teiserver.Data.Types, as: T
 
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.Account
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Moderation
+
+  use Oban.Worker, queue: :teiserver
+
+  require Logger
 
   @impl Oban.Worker
   @spec perform(any) :: :ok

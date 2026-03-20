@@ -1,9 +1,10 @@
 defmodule Teiserver.Account.ErrorHandler do
   @moduledoc false
-  import Plug.Conn
 
   alias Phoenix.Controller
   alias TeiserverWeb.Router.Helpers, as: Routes
+
+  import Plug.Conn
 
   @behaviour Guardian.Plug.ErrorHandler
   @impl Guardian.Plug.ErrorHandler

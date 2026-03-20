@@ -1,8 +1,9 @@
 defmodule Teiserver.Sql.SeasonUncertaintyResetTest do
   @moduledoc false
-  use Teiserver.DataCase
 
   alias Ecto.Adapters.SQL
+
+  use Teiserver.DataCase
 
   test "it can calculate seasonal uncertainty reset target" do
     # Start by removing all anon properties

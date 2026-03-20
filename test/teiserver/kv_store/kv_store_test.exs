@@ -1,7 +1,7 @@
 defmodule Teiserver.KvStore.KvStoreTest do
-  use Teiserver.DataCase, aync: false
-
   alias Teiserver.KvStore, as: KV
+
+  use Teiserver.DataCase, aync: false
 
   test "can write and read single blob" do
     :ok = KV.put("test_store", "key1", "foo_val")

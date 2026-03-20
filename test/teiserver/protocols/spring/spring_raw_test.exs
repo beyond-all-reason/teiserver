@@ -1,4 +1,6 @@
 defmodule Teiserver.SpringRawTest do
+  alias Teiserver.Account.UserCacheLib
+  alias Teiserver.Account
   use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,
@@ -10,9 +12,6 @@ defmodule Teiserver.SpringRawTest do
       new_user: 0,
       start_spring_server: 1
     ]
-
-  alias Teiserver.Account.UserCacheLib
-  alias Teiserver.Account
 
   setup :start_spring_server
 

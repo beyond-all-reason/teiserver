@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Tachyon.UserTest do
-  use TeiserverWeb.ConnCase, async: false
   alias Teiserver.Support.Tachyon
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
+  use TeiserverWeb.ConnCase, async: false
 
   setup [{Tachyon, :setup_client}]
 

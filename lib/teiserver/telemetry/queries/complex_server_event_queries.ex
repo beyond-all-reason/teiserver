@@ -1,8 +1,9 @@
 defmodule Teiserver.Telemetry.ComplexServerEventQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Ecto.Adapters.SQL
   alias Teiserver.Telemetry.ComplexServerEvent
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_complex_server_events(list) :: Ecto.Query.t()

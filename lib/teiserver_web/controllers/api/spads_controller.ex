@@ -1,13 +1,13 @@
 defmodule TeiserverWeb.API.SpadsController do
-  use TeiserverWeb, :controller
   alias Teiserver.Config
   alias Teiserver.Account
   alias Teiserver.Coordinator
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.MatchLib
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  use TeiserverWeb, :controller
   require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec get_rating(Plug.Conn.t(), map) :: Plug.Conn.t()
   def get_rating(conn, %{

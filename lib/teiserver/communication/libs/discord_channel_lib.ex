@@ -1,11 +1,12 @@
 defmodule Teiserver.Communication.DiscordChannelLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
+
   alias Nostrum.Api.User, as: NostrumUser
   alias Teiserver.Account
   alias Teiserver.Communication.DiscordChannel
   alias Teiserver.Communication.DiscordChannelQueries
   alias Teiserver.Data.Types, as: T
+  use TeiserverWeb, :library_newform
 
   @spec special_channels() :: [String.t()]
   def special_channels do

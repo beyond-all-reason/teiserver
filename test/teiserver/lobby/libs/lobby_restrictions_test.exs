@@ -1,7 +1,8 @@
 defmodule Teiserver.Lobby.Libs.LobbyRestrictionsTest do
   @moduledoc false
-  use ExUnit.Case
+
   alias Teiserver.Lobby.LobbyRestrictions
+  use ExUnit.Case
 
   test "check for noob title" do
     assert LobbyRestrictions.noob_title?("Noobs 1v1")

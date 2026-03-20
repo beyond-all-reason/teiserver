@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.ClientServerTest do
-  use Teiserver.DataCase, async: true
   alias Teiserver.Client
   alias Teiserver.Account.ClientLib
+  use Teiserver.DataCase, async: true
 
   @tag :needs_attention
   test "server test" do

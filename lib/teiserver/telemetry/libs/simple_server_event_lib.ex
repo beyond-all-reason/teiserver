@@ -1,10 +1,11 @@
 defmodule Teiserver.Telemetry.SimpleServerEventLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
+
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.SimpleServerEvent
   alias Teiserver.Telemetry.SimpleServerEventQueries
   alias Phoenix.PubSub
+  use TeiserverWeb, :library_newform
 
   @broadcast_event_types ~w()
 

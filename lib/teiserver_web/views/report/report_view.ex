@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Report.ReportView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Helper.StylingHelper
+
+  use TeiserverWeb, :view
 
   @spec view_colour :: atom
   def view_colour(), do: :danger

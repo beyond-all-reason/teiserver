@@ -1,9 +1,10 @@
 defmodule TeiserverWeb.Account.SettingsLive.Index do
   @moduledoc false
-  use TeiserverWeb, :live_view
 
   alias Teiserver.Account.UserLib
   alias Teiserver.Config
+
+  use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
   def mount(_, _session, socket) do

@@ -15,13 +15,13 @@ defmodule TeiserverWeb.ConnCase do
   this option is not recommended for other databases.
   """
 
-  use ExUnit.CaseTemplate
-
   alias Ecto.Adapters.SQL.Sandbox
   alias Phoenix.ConnTest
   alias Teiserver.Config
   alias Teiserver.Support.Tachyon
   alias Teiserver.TeiserverTestLib
+
+  use ExUnit.CaseTemplate
 
   using do
     quote do

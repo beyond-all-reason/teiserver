@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.OAuth.AuthorizeController do
-  use TeiserverWeb, :controller
-
   alias Teiserver.OAuth
+
+  use TeiserverWeb, :controller
 
   def authorize(conn, params) when not is_map_key(params, "client_id") do
     bad_request(conn, "missing client_id")

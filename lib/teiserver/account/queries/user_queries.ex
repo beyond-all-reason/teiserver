@@ -1,7 +1,8 @@
 defmodule Teiserver.Account.UserQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Teiserver.Account.User
+  use TeiserverWeb, :queries
   require Logger
 
   @spec query_users(list) :: Ecto.Query.t()

@@ -1,10 +1,12 @@
 defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
   @moduledoc false
-  use Oban.Worker, queue: :teiserver
+
   alias Teiserver.Logging
   alias Teiserver.Logging.Tasks.PersistUserActivityDayTask
-
   alias Teiserver.Repo
+
+  use Oban.Worker, queue: :teiserver
+
   import Ecto.Query, warn: false
 
   @client_states ~w(lobby menu player spectator total)a

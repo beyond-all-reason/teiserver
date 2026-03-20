@@ -1,10 +1,12 @@
 defmodule TeiserverWeb.Moderation.Overwatch.IndexLiveTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase, async: false
-  import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase, async: false
+
+  import Phoenix.LiveViewTest
 
   defp auth_setup(_) do
     GeneralTestLib.conn_setup(TeiserverTestLib.overwatch_permissions())

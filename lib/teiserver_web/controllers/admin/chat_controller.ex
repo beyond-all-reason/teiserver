@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Admin.ChatController do
-  use TeiserverWeb, :controller
-
   alias Teiserver.Coordinator
   alias Teiserver.Chat
+
+  use TeiserverWeb, :controller
+
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,

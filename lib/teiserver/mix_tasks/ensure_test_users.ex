@@ -1,15 +1,13 @@
 defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
-  @usage_str "Usage: `mix teiserver.ensure_test_users --host <host> <tok> <n>`\nExample: mix teiserver.ensure_test_users --host http://localhost:4000 <TOK> 10
-
-  The token must have `admin.user` permission.
-  "
-
   @moduledoc """
   Generate `n` random users based on predictible names.
   The goal is to end up with `n` users and access token ready to be used
   for load testing.
 
-  #{@usage_str}
+  Usage: `mix teiserver.ensure_test_users --host <host> <tok> <n>`
+  Example: mix teiserver.ensure_test_users --host http://localhost:4000 <TOK> 10
+
+  The token must have `admin.user` permission.
   """
 
   @shortdoc "create random users for load testing"

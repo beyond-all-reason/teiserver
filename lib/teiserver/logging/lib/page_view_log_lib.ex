@@ -1,7 +1,8 @@
 defmodule Teiserver.Logging.PageViewLogLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Logging.PageViewLog
+  use TeiserverWeb, :library
   import Plug.Conn, only: [assign: 3]
 
   @spec colours() :: atom

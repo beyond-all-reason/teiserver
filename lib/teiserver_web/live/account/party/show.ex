@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.Account.PartyLive.Show do
-  use TeiserverWeb, :live_view
-  require Logger
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  import Teiserver.Helper.StringHelper, only: [possessive: 1]
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.PartyLib
   alias Teiserver.Battle
+  use TeiserverWeb, :live_view
+  require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+  import Teiserver.Helper.StringHelper, only: [possessive: 1]
 
   @impl Phoenix.LiveView
   def mount(_params, session, socket) do

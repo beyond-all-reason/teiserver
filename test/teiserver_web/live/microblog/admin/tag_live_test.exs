@@ -1,12 +1,14 @@
 defmodule TeiserverWeb.TagLiveTest do
   @moduledoc false
+
+  alias Teiserver.Microblog
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.TeiserverTestLib
+
   use TeiserverWeb.ConnCase
 
   import Phoenix.LiveViewTest
   import Teiserver.MicroblogFixtures
-  alias Teiserver.Microblog
-  alias Central.Helpers.GeneralTestLib
-  alias Teiserver.TeiserverTestLib
 
   @create_attrs %{colour: "#AA0000", icon: "some icon", name: "some name"}
   @update_attrs %{colour: "#0000AA", icon: "some updated icon", name: "some updated name"}

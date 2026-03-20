@@ -1,9 +1,10 @@
 defmodule TeiserverWeb.Microblog.BlogLive.Preferences do
   @moduledoc false
-  use TeiserverWeb, :live_view
-  import TeiserverWeb.MicroblogComponents
+
   alias Teiserver.Microblog
   alias Teiserver.Microblog.UserPreferenceLib
+  use TeiserverWeb, :live_view
+  import TeiserverWeb.MicroblogComponents
 
   @default_preferences %{
     tag_mode: "Block",

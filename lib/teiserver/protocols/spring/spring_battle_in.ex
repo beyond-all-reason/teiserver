@@ -3,9 +3,9 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
   alias Teiserver.Battle
   alias Teiserver.Lobby
   alias Teiserver.Protocols.SpringIn
+  require Logger
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("update_lobby_title", new_name, msg_id, state) do

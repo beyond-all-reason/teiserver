@@ -1,7 +1,7 @@
 defmodule Teiserver.Helper.SchemaHelperTest do
-  use Teiserver.DataCase, async: true
-
   alias Teiserver.Helper.SchemaHelper
+
+  use Teiserver.DataCase, async: true
 
   # test "test currency" do
   #   params = %{"a" => "132.34"}

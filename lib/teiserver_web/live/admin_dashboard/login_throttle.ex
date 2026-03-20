@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
-  use TeiserverWeb, :live_view
   alias Phoenix.PubSub
-
   alias Teiserver
   alias Teiserver.Admin.AdminLib
   alias Teiserver.Game
+
+  use TeiserverWeb, :live_view
   # alias Teiserver.Account.AccoladeLib
   # alias Teiserver.Data.Matchmaking
 

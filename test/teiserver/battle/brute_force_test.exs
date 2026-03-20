@@ -3,9 +3,12 @@ defmodule Teiserver.Battle.BruteForceTest do
   Can run all balance tests via
   mix test --only balance_test
   """
-  use Teiserver.DataCase, async: true
-  @moduletag :balance_test
+
   alias Teiserver.Battle.Balance.BruteForce
+
+  use Teiserver.DataCase, async: true
+
+  @moduletag :balance_test
 
   test "can process expanded_group" do
     # https://server5.beyondallreason.info/battle/2092529/players

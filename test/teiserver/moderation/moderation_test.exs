@@ -1,12 +1,12 @@
 defmodule Teiserver.ModerationTest do
-  use Teiserver.DataCase, async: true
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Moderation
   alias Teiserver.Moderation.Action
   alias Teiserver.Moderation.Ban
   alias Teiserver.Moderation.ModerationTestLib
   alias Teiserver.Moderation.Report
+
+  use Teiserver.DataCase, async: true
 
   describe "reports" do
     @valid_attrs %{

@@ -3,7 +3,6 @@ defmodule Teiserver.Battle do
   The Battle context.
   """
 
-  import Ecto.Query, warn: false
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Battle.Match
@@ -21,7 +20,10 @@ defmodule Teiserver.Battle do
   alias Teiserver.Repo
   alias Teiserver.Telemetry
   alias ExULID.ULID
+
   require Logger
+
+  import Ecto.Query, warn: false
 
   @spec match_query(keyword()) :: Ecto.Query.t()
   def match_query(args) do

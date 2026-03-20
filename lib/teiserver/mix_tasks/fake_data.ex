@@ -3,8 +3,6 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   Run with mix teiserver.fakedata
   """
 
-  use Mix.Task
-
   alias Ecto.Multi
   alias Teiserver.Account
   alias Teiserver.Account.User
@@ -21,6 +19,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   alias Teiserver.Logging.Tasks.PersistServerMonthTask
   alias Teiserver.Moderation.Report
   alias Teiserver.Repo
+
+  use Mix.Task
+
   require Logger
 
   @settings %{

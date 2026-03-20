@@ -1,6 +1,6 @@
 defmodule Teiserver.Bot.BotTest do
-  use Teiserver.DataCase, async: true
   alias Teiserver.Bot
+  use Teiserver.DataCase, async: true
 
   test "can create bot" do
     {:ok, bot} = Bot.create_bot(%{name: "bot_test"})

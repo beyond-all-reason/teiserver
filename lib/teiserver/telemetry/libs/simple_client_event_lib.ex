@@ -1,10 +1,11 @@
 defmodule Teiserver.Telemetry.SimpleClientEventLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
+
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.SimpleClientEvent
   alias Teiserver.Telemetry.SimpleClientEventQueries
   alias Phoenix.PubSub
+  use TeiserverWeb, :library_newform
 
   @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
 

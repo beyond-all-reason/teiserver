@@ -1,8 +1,9 @@
 defmodule Teiserver.Microblog.PollResponseQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Teiserver.Microblog.PollResponse
   alias Teiserver.Helper.QueryHelpers
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_poll_responses(list) :: Ecto.Query.t()

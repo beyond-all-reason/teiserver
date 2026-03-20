@@ -1,16 +1,17 @@
 defmodule TeiserverWeb.NavComponents do
   @moduledoc false
-  use Phoenix.Component
   # alias Phoenix.LiveView.JS
-  # import TeiserverWeb.Gettext
 
-  import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
-  import Phoenix.HTML, only: [raw: 1]
+  use Phoenix.Component
 
   use Phoenix.VerifiedRoutes,
     endpoint: TeiserverWeb.Endpoint,
     router: TeiserverWeb.Router,
     statics: TeiserverWeb.static_paths()
+
+  # import TeiserverWeb.Gettext
+  import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+  import Phoenix.HTML, only: [raw: 1]
 
   @doc """
   <TeiserverWeb.NavComponents.top_nav_item active={active} route={route} icon={icon} />

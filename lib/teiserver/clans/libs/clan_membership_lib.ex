@@ -1,6 +1,6 @@
 defmodule Teiserver.Clans.ClanMembershipLib do
-  use TeiserverWeb, :library
   alias Teiserver.Clans.ClanMembership
+  use TeiserverWeb, :library
 
   # Queries
   @spec get_clan_memberships() :: Ecto.Query.t()

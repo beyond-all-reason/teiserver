@@ -1,9 +1,10 @@
 defmodule Teiserver.Account.RelationshipReport do
   @moduledoc false
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+
   alias Ecto.Adapters.SQL
   alias Teiserver.Account.RelationshipLib
   alias Teiserver.Repo
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()
   def icon(), do: "fa-solid fa-arrow-down-up-across-line"

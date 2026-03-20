@@ -1,8 +1,8 @@
 defmodule Teiserver.Monitoring.BucketsTest do
-  use Teiserver.DataCase, async: true
-
   alias Teiserver.Monitoring.Buckets
   alias Telemetry.Metrics.Distribution
+
+  use Teiserver.DataCase, async: true
 
   test "return correct bucket for ints" do
     config = Buckets.config(%Distribution{reporter_options: [buckets: [1, 2, 3]]})

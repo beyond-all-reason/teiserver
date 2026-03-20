@@ -1,10 +1,10 @@
 defmodule Teiserver.Telemetry.TelemetryServer do
-  use GenServer
-  require Logger
   alias Phoenix.PubSub
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Client
   alias Teiserver.Lobby
+  use GenServer
+  require Logger
 
   @client_states ~w(lobby menu player spectator total)a
   @tick_period 9_000

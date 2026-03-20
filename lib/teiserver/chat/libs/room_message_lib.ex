@@ -1,6 +1,6 @@
 defmodule Teiserver.Chat.RoomMessageLib do
-  use TeiserverWeb, :library
   alias Teiserver.Chat.RoomMessage
+  use TeiserverWeb, :library
 
   # Functions
   @spec icon :: String.t()

@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Admin.AssetControllerTest do
-  use TeiserverWeb.ConnCase
   alias Teiserver.AssetFixtures
   alias Teiserver.Asset.EngineQueries
   alias Teiserver.Asset.GameQueries
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+  use TeiserverWeb.ConnCase
 
   defp setup_user(_context) do
     GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())

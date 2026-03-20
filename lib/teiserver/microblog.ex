@@ -3,12 +3,6 @@ defmodule Teiserver.Microblog do
   Main point of usage for the microblog system
   """
 
-  @spec colours :: atom
-  def colours(), do: :primary
-
-  @spec icon :: String.t()
-  def icon(), do: "fa-blog"
-
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Microblog.PollResponse
   alias Teiserver.Microblog.PollResponseLib
@@ -22,6 +16,12 @@ defmodule Teiserver.Microblog do
   alias Teiserver.Microblog.UploadLib
   alias Teiserver.Microblog.UserPreference
   alias Teiserver.Microblog.UserPreferenceLib
+
+  @spec colours :: atom
+  def colours(), do: :primary
+
+  @spec icon :: String.t()
+  def icon(), do: "fa-blog"
 
   @spec list_tags() :: [Tag]
   defdelegate list_tags(), to: TagLib

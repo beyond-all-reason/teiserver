@@ -2,9 +2,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   @moduledoc """
   The server used to monitor the autohosts and get data from them
   """
-  use GenServer
-  require Logger
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
@@ -18,6 +16,9 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.Protocols.Spring
   alias Teiserver.Room
   alias Teiserver.Telemetry
+  use GenServer
+  require Logger
+  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec do_start() :: :ok
   def do_start() do

@@ -1,8 +1,6 @@
 defmodule TeiserverWeb.AdminDashLive.Index do
-  use TeiserverWeb, :live_view
   alias Phoenix.LiveView.Socket
   alias Phoenix.PubSub
-
   alias Teiserver
   alias Teiserver.Admin.AdminLib
   alias Teiserver.Battle
@@ -12,6 +10,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Game
   alias Teiserver.Account.AccoladeLib
+
+  use TeiserverWeb, :live_view
 
   @empty_telemetry_data %{
     client: %{

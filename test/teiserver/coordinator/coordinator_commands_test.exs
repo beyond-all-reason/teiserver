@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
-  use ExUnit.Case, async: true
-
   alias Teiserver.Coordinator.CoordinatorCommands
+
+  use ExUnit.Case, async: true
 
   test "is_coordinator_command/1 returns true for help and whoami" do
     assert true == CoordinatorCommands.coordinator_command?("help")

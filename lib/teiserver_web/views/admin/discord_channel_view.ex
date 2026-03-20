@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.DiscordChannelView do
-  use TeiserverWeb, :view
-
   alias Teiserver.Communication.DiscordChannelLib
+
+  use TeiserverWeb, :view
 
   @spec view_colour() :: atom
   def view_colour, do: DiscordChannelLib.colours()

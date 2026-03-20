@@ -1,9 +1,10 @@
 defmodule Teiserver.Moderation.ReportGroupLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
+
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportGroup
   alias Teiserver.Moderation.ReportGroupQueries
+  use TeiserverWeb, :library_newform
 
   @spec colour :: atom
   def colour(), do: :warning

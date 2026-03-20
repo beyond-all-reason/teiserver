@@ -1,7 +1,8 @@
 defmodule Teiserver.Microblog.UserPreferenceQueries do
   @moduledoc false
-  use TeiserverWeb, :queries
+
   alias Teiserver.Microblog.UserPreference
+  use TeiserverWeb, :queries
 
   # Queries
   @spec query_user_preferences(list) :: Ecto.Query.t()

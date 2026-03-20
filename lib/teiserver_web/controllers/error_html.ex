@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.ErrorHTML do
-  use TeiserverWeb, :html
   alias Phoenix.Controller
+  use TeiserverWeb, :html
   # If you want to customize your error pages,
   # uncomment the embed_templates/1 call below
   # and add pages to the error directory:

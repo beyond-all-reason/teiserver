@@ -1,10 +1,10 @@
 defmodule Teiserver.Account.PartyServer do
-  use GenServer
-  require Logger
   alias Teiserver.Account
   alias Teiserver.Account.PartyLib
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
+  use GenServer
+  require Logger
 
   @impl GenServer
   def handle_call(:get_party, _from, state) do

@@ -1,7 +1,7 @@
 defmodule Teiserver.General.StylingHelpersTest do
-  use Teiserver.DataCase, async: true
-
   alias Teiserver.Helper.StylingHelper
+
+  use Teiserver.DataCase, async: true
 
   test "colours" do
     params = [

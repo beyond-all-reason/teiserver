@@ -1,6 +1,5 @@
 defmodule Teiserver.MicroblogTest do
   @moduledoc false
-  use Teiserver.DataCase
 
   alias Teiserver.Microblog
   alias Teiserver.Microblog.PollResponse
@@ -10,6 +9,8 @@ defmodule Teiserver.MicroblogTest do
   alias Teiserver.Microblog.UserPreference
   alias Teiserver.AccountFixtures
   alias Teiserver.Microblog.Post
+
+  use Teiserver.DataCase
 
   import AccountFixtures
   import Teiserver.MicroblogFixtures

@@ -1,7 +1,7 @@
 defmodule Teiserver.Helper.TimexHelperTest do
-  use Teiserver.DataCase, async: true
-
   alias Teiserver.Helper.TimexHelper
+
+  use Teiserver.DataCase, async: true
 
   @from Timex.to_datetime({{2013, 12, 4}, {06, 20, 5}}, "Europe/London")
   @today Timex.beginning_of_day(@from)

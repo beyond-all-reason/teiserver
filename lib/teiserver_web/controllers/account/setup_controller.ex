@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Account.SetupController do
-  use TeiserverWeb, :controller
   alias Teiserver.Account
+  use TeiserverWeb, :controller
 
   def setup(conn, %{"key" => key}) do
     true_key = Application.get_env(:teiserver, Teiserver.Setup)[:key]

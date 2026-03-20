@@ -1,9 +1,10 @@
 defmodule Teiserver.Communication.TextCallbackLib do
   @moduledoc false
-  use TeiserverWeb, :library
+
   alias Teiserver.Bridge.CommandLib
   alias Teiserver.Communication
   alias Teiserver.Communication.TextCallback
+  use TeiserverWeb, :library
 
   # Functions
   @spec icon :: String.t()

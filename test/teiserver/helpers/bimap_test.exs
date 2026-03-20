@@ -1,7 +1,7 @@
 defmodule Teiserver.Helper.BimapTest do
-  use ExUnit.Case, async: true
-
   alias Teiserver.Helpers.Bimap
+
+  use ExUnit.Case, async: true
 
   test "store a value with 2 keys" do
     m = Bimap.new() |> Bimap.put(1, :key, :value)

@@ -1,6 +1,6 @@
 defmodule Teiserver.TachyonBattle.System do
-  use Supervisor
   alias Teiserver.TachyonBattle
+  use Supervisor
 
   def start_link(init_arg) do
     Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)

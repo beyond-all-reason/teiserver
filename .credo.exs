@@ -101,8 +101,8 @@
           {Credo.Check.Readability.Semicolons, []},
           {Credo.Check.Readability.SeparateAliasRequire, []},
           {Credo.Check.Readability.SpaceAfterCommas, []},
-          # {Credo.Check.Readability.StrictModuleLayout,
-          #  [order: ~w/moduledoc alias use require import/a, ignore: ~w/shortdoc/a]}, 638 issues
+          {Credo.Check.Readability.StrictModuleLayout,
+           [order: ~w/moduledoc alias use require import/a, ignore: ~w/shortdoc/a]},
           {Credo.Check.Readability.StringSigils, []},
           {Credo.Check.Readability.TrailingBlankLine, []},
           {Credo.Check.Readability.TrailingWhiteSpace, []},

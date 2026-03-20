@@ -3,13 +3,13 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   cluster wide supervisor for all matchmaking queues
   """
 
-  use Horde.DynamicSupervisor
-
   alias Horde.DynamicSupervisor, as: HordeSupervisor
   alias Teiserver.Asset
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueRegistry
   alias Teiserver.Matchmaking.QueueServer
+
+  use Horde.DynamicSupervisor
 
   def default_queues() do
     engines =

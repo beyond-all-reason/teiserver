@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Admin.SiteConfigController do
-  use TeiserverWeb, :controller
-
   alias Teiserver.Config
   alias Teiserver.Helper.StringHelper
+
+  use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Auth.Server,

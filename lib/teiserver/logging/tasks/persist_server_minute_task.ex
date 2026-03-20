@@ -1,11 +1,11 @@
 defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
-  use Oban.Worker, queue: :teiserver
-
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Communication
   alias Teiserver.Telemetry
   alias Teiserver.Logging
   alias Teiserver.Config
+
+  use Oban.Worker, queue: :teiserver
 
   @impl Oban.Worker
   def perform(_) do

@@ -1,8 +1,8 @@
 defmodule Teiserver.Monitoring.Spring do
-  use PromEx.Plugin
-
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Telemetry
+
+  use PromEx.Plugin
 
   @impl PromEx.Plugin
   def event_metrics(_opts) do

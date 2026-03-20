@@ -1,10 +1,11 @@
 defmodule Teiserver.OAuth.Code do
   @moduledoc false
-  use TeiserverWeb, :schema
 
   alias Ecto.Changeset
   alias Teiserver.Account.User
   alias Teiserver.OAuth
+
+  use TeiserverWeb, :schema
 
   typed_schema "oauth_codes" do
     field :value, :string, redact: true

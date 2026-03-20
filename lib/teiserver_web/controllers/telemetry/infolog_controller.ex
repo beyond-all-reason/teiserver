@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Telemetry.InfologController do
-  use TeiserverWeb, :controller
   alias Teiserver.Telemetry
+  use TeiserverWeb, :controller
 
   plug(AssignPlug,
     site_menu_active: "telemetry",

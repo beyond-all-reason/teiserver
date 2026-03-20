@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Microblog.UploadController do
-  use TeiserverWeb, :controller
   alias Teiserver.Microblog
+  use TeiserverWeb, :controller
 
   def get_upload(conn, %{"upload_id" => upload_id}) do
     upload = Microblog.get_upload!(upload_id)

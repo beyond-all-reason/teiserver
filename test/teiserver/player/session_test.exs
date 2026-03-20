@@ -1,11 +1,12 @@
 defmodule Teiserver.Player.SessionTest do
-  use Teiserver.DataCase, async: false
   alias Teiserver.Player
   alias Teiserver.Support.Polling
+  alias Teiserver.Tachyon, as: TachyonLib
   alias Central.Helpers.GeneralTestLib
   alias ExUnit.Callbacks
   alias Player.SessionSupervisor
-  alias Teiserver.Tachyon
+
+  use Teiserver.DataCase, async: false
 
   @moduletag :tachyon
 
@@ -16,8 +17,8 @@ defmodule Teiserver.Player.SessionTest do
   end
 
   def setup_config(_) do
-    Tachyon.enable_state_restoration()
-    Callbacks.on_exit(fn -> Tachyon.disable_state_restoration() end)
+    TachyonLib.enable_state_restoration()
+    Callbacks.on_exit(fn -> TachyonLib.disable_state_restoration() end)
   end
 
   describe "user updates" do
@@ -39,7 +40,7 @@ defmodule Teiserver.Player.SessionTest do
     setup [:setup_session, :setup_config]
 
     test "can restart a session after shutdown", %{user: user, sess_pid: sess_pid} do
-      Tachyon.restart_system()
+      TachyonLib.restart_system()
       Polling.poll_until(fn -> nil end, fn _ -> not Process.alive?(sess_pid) end)
 
       Polling.poll_until_some(fn -> Player.lookup_session(user.id) end)

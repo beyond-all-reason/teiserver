@@ -3,11 +3,11 @@ defmodule Teiserver.Monitoring.Tachyon do
   Anything related to tachyon metrics goes there
   """
 
-  use PromEx.Plugin
-
   alias Teiserver.Party
   alias Teiserver.Player
   alias Teiserver.TachyonLobby
+
+  use PromEx.Plugin
 
   @tachyon_player_metrics_event_name [:prom_ex, :plugin, :tachyon, :player]
   @tachyon_party_metrics_event_name [:prom_ex, :plugin, :tachyon, :party]

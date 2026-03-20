@@ -3,9 +3,10 @@ defmodule Teiserver.Data.LobbyPolicyCache do
   Define cache for lobby policies and set it up
   """
 
-  use Supervisor
   alias Teiserver.Game
   alias Teiserver.Helpers.CacheHelper
+
+  use Supervisor
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts) do

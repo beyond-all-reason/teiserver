@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.Admin do
+  import Teiserver.Account.AuthLib, only: [allow?: 2]
   # Used to provide permissions for tools controller until a better solution is created
   @behaviour Bodyguard.Policy
-  import Teiserver.Account.AuthLib, only: [allow?: 2]
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
   def authorize(:convert_form, conn, _), do: allow?(conn, "admin.dev")

@@ -1,20 +1,20 @@
 defmodule Mix.Tasks.Teiserver.GenToken do
-  @usage_str "Usage: `mix teiserver.gen_token --user <username/email> [--app <app_uid>]`"
-
   @moduledoc """
   Creates an oauth token for the given username or email.
   This is a convenience task to help developping anything requiring an
   oauth token like tachyon.
 
-  #{@usage_str}
+  Usage: `mix teiserver.gen_token --user <username/email> [--app <app_uid>]`
   """
 
   @shortdoc "generate an oauth token for testing"
 
-  use Mix.Task
-
   alias Teiserver.OAuth.Tasks.GenToken
   alias Teiserver.Repo
+
+  use Mix.Task
+
+  @usage_str "Usage: `mix teiserver.gen_token --user <username/email> [--app <app_uid>]`"
 
   @impl Mix.Task
   def run(args) do

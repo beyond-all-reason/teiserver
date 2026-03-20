@@ -1,9 +1,10 @@
 defmodule Teiserver.Microblog.PostTagLib do
   @moduledoc false
-  use TeiserverWeb, :library_newform
+
   alias Ecto.Adapters.SQL
   alias Teiserver.Microblog.PostTag
   alias Teiserver.Microblog.PostTagQueries
+  use TeiserverWeb, :library_newform
 
   @doc """
   Returns the list of post_tags.

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.API.PublicController do
-  use TeiserverWeb, :controller
   alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib
+  use TeiserverWeb, :controller
 
   @rating_types [
     "Small Team",

@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Tachyon.MessagingTest do
-  use TeiserverWeb.ConnCase, async: false
   alias Teiserver.Support.Tachyon
+  use TeiserverWeb.ConnCase, async: false
 
   defp setup_clients(_context) do
     {:ok, sender} = Tachyon.setup_client()

@@ -1,7 +1,7 @@
 defmodule Teiserver.Game.AchievementServer do
-  use GenServer
   alias Phoenix.PubSub
   alias Teiserver.Game
+  use GenServer
   require Logger
 
   @scenario_lookup %{

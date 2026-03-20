@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Logging.AuditLogControllerTest do
-  use TeiserverWeb.ConnCase
-
   alias Central.Helpers.GeneralTestLib
   # alias TeiserverWeb.Logging.AuditLog
   alias Teiserver.Logging.Helpers
   alias Teiserver.Logging.LoggingTestLib
+
+  use TeiserverWeb.ConnCase
   # @valid_attrs %{action: "some content", details: "{}", ip: "some content"}
   # @invalid_attrs %{}
 

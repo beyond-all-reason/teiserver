@@ -1,10 +1,11 @@
 defmodule Teiserver.Battle.LobbyServerTest do
   @moduledoc false
-  # Cannot be async because some other tests will call for a list of all lobbies
-  use Teiserver.DataCase, async: false
+
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Coordinator
   alias Teiserver.TeiserverTestLib
+  # Cannot be async because some other tests will call for a list of all lobbies
+  use Teiserver.DataCase, async: false
 
   @tag :needs_attention
   test "server test" do

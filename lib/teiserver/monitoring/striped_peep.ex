@@ -3,9 +3,9 @@ defmodule Teiserver.Monitoring.StripedPeep do
   "Striped" storage based on `PromEx.Storage.Peep`.
   """
 
-  @behaviour PromEx.Storage
-
   alias Peep.Prometheus
+
+  @behaviour PromEx.Storage
 
   @impl PromEx.Storage
   def scrape(name) do

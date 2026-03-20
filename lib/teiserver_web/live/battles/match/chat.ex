@@ -1,10 +1,11 @@
 defmodule TeiserverWeb.Battle.MatchLive.Chat do
   @moduledoc false
-  use TeiserverWeb, :live_view
+
   alias Teiserver.Account
   alias Teiserver.Battle
   alias Teiserver.Chat
   alias Teiserver.Battle.MatchLib
+  use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
   def mount(params, _session, socket) do

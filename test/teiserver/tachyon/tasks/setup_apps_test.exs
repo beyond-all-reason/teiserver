@@ -1,10 +1,10 @@
 defmodule Teiserver.Tachyon.Tasks.SetupAppsTest do
-  use Teiserver.DataCase
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.Tachyon.Tasks.SetupApps
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+  use Teiserver.DataCase
 
   setup _context do
     user =

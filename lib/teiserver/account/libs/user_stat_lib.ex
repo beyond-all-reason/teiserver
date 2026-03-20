@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.UserStatLib do
-  use TeiserverWeb, :library
   alias Teiserver.Account.UserStat
+  use TeiserverWeb, :library
 
   # Queries
   @spec query_user_stats() :: Ecto.Query.t()

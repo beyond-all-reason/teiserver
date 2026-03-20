@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Moderation.UserController do
-  use TeiserverWeb, :controller
-
   alias Teiserver.Account
   alias Teiserver.Account.CodeOfConductData
   alias Teiserver.Account.UserLib
   alias Teiserver.Moderation
+
+  use TeiserverWeb, :controller
 
   plug(AssignPlug,
     site_menu_active: "moderation",

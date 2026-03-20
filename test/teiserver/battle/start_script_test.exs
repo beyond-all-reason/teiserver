@@ -1,8 +1,8 @@
 defmodule Teiserver.Battle.StartScriptTest do
-  use Teiserver.DataCase, async: false
-
   alias Teiserver.Battle
   alias Central.Helpers.GeneralTestLib
+
+  use Teiserver.DataCase, async: false
 
   test "test start script duel" do
     user1 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})

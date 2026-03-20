@@ -1,7 +1,7 @@
 defmodule Teiserver.Helpers.CombiTest do
-  use ExUnit.Case, async: true
-
   alias Teiserver.Helpers.Combi
+
+  use ExUnit.Case, async: true
 
   describe "combinations" do
     test "works for numbers" do

@@ -1,5 +1,4 @@
 defmodule TeiserverWeb.Tachyon.BattleTest do
-  use TeiserverWeb.ConnCase
   alias Teiserver.BotFixtures
   alias Teiserver.OAuthFixtures
   alias Teiserver.TachyonBattle
@@ -8,6 +7,7 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
   alias Central.Helpers.GeneralTestLib
   alias TachyonBattle.Battle
   alias Teiserver.Autohost
+  use TeiserverWeb.ConnCase
 
   defp setup_app(_context) do
     owner = GeneralTestLib.make_user(%{"roles" => ["Verified"]})

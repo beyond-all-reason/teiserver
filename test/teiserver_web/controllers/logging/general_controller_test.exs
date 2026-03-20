@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Logging.LoggingControllerTest do
-  use TeiserverWeb.ConnCase
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
 
   test "lists admin links" do
     {:ok, data} = GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())

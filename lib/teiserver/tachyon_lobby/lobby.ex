@@ -3,10 +3,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
   Represent a single lobby
   """
 
-  require Logger
-
-  @behaviour :gen_statem
-
   alias Teiserver.Asset
   alias Teiserver.Autohost
   alias Teiserver.Data.Types, as: T
@@ -17,6 +13,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
+
+  require Logger
+
+  @behaviour :gen_statem
 
   @type id :: String.t()
 

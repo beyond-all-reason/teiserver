@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Admin.BadgeTypeController do
-  use TeiserverWeb, :controller
-
   alias Teiserver.Account
   alias Teiserver.Account.BadgeType
   alias Teiserver.Account.BadgeTypeLib
   alias Teiserver.Helper.StylingHelper
+
+  use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Account.BadgeType,

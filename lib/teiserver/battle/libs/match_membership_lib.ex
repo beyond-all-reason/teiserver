@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.MatchMembershipLib do
-  use TeiserverWeb, :library
-
   alias Teiserver.Battle.MatchMembership
+
+  use TeiserverWeb, :library
 
   def colours(), do: :primary2
   def icon(), do: "fa-solid fa-users"

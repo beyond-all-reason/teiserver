@@ -1,9 +1,10 @@
 defmodule Teiserver.Account.OpenSkillReport do
-  require Logger
-
   alias Ecto.Adapters.SQL
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Repo
+
+  require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()

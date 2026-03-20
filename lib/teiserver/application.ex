@@ -3,12 +3,12 @@ defmodule Teiserver.Application do
   # for more information on OTP Applications
   @moduledoc false
 
-  use Application
   alias Phoenix.PubSub
   alias Teiserver.Helper.ObanLogger
   alias Teiserver.Startup
   alias TeiserverWeb.Endpoint
   alias TeiserverWeb.Monitoring.Router, as: MonitoringRouter
+  use Application
   require Logger
 
   import Teiserver.Helpers.CacheHelper,

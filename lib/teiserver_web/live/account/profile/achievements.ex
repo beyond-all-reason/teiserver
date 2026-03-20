@@ -1,9 +1,10 @@
 defmodule TeiserverWeb.Account.ProfileLive.Achievements do
   @moduledoc false
-  use TeiserverWeb, :live_view
+
   alias Teiserver.Account
   alias Teiserver.Account.UserLib
   alias TeiserverWeb.Account.ProfileLive.Overview
+  use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do

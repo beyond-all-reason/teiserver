@@ -1,8 +1,8 @@
 defmodule Teiserver.Account.TOTPLib do
-  use TeiserverWeb, :library
   alias Teiserver.Account.User
   alias Teiserver.Account.TOTP
   alias Teiserver.Data.Types, as: T
+  use TeiserverWeb, :library
 
   @allowed_invalid_attempts 5
 

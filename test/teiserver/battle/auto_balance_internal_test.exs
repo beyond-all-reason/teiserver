@@ -3,10 +3,14 @@ defmodule Teiserver.Battle.AutoBalanceInternalTest do
   Can run all balance tests via
   mix test --only balance_test
   """
-  use Teiserver.DataCase, async: true
-  @moduletag :balance_test
+
   alias Teiserver.Battle.Balance.AutoBalance
+
+  use Teiserver.DataCase, async: true
+
   require Logger
+
+  @moduletag :balance_test
 
   test "Able to get parties count" do
     expanded_group = [

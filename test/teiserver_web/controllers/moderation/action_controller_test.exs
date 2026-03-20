@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.Moderation.ActionControllerTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
 
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ModerationTestLib
-
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+
+  use TeiserverWeb.ConnCase
 
   setup do
     GeneralTestLib.conn_setup(["Reviewer", "Moderator"])
