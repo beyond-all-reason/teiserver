@@ -12,8 +12,8 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
 
   This is not a balance algorithm that is callable players. It's a lib that can be used by another balance algorithm.
   """
-  alias Teiserver.Config
   alias Teiserver.Battle.Balance.BruteForceAvoidTypes, as: BF
+  alias Teiserver.Config
   alias Teiserver.Helpers.Combi
   require Integer
 

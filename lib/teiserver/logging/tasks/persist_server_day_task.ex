@@ -3,10 +3,10 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
 
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
+  alias Teiserver.Battle
   alias Teiserver.Logging
   alias Teiserver.Logging.ServerDayLog
   alias Teiserver.Logging.Tasks.PersistServerDayTask
-  alias Teiserver.Battle
   alias Teiserver.Repo
 
   use Oban.Worker, queue: :teiserver

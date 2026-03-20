@@ -182,8 +182,8 @@ defmodule TeiserverWeb do
 
       import Teiserver.Helper.QueryHelpers
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
-      alias Teiserver.Helper.StylingHelper
       alias Teiserver.Data.Types, as: T
+      alias Teiserver.Helper.StylingHelper
     end
   end
 

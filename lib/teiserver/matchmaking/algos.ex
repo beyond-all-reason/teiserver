@@ -3,8 +3,8 @@ defmodule Teiserver.Matchmaking.Algos do
   Interface for matchmaking algorithms
   """
 
-  alias Teiserver.Matchmaking.Member
   alias Teiserver.Helpers.Combi
+  alias Teiserver.Matchmaking.Member
 
   @type state :: term()
 

@@ -1,12 +1,11 @@
 defmodule TeiserverWeb.Tachyon.BattleTest do
+  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Autohost
   alias Teiserver.BotFixtures
   alias Teiserver.OAuthFixtures
-  alias Teiserver.TachyonBattle
   alias Teiserver.Support.Polling
   alias Teiserver.Support.Tachyon
-  alias Central.Helpers.GeneralTestLib
-  alias TachyonBattle.Battle
-  alias Teiserver.Autohost
+  alias Teiserver.TachyonBattle.Battle
   use TeiserverWeb.ConnCase
 
   defp setup_app(_context) do

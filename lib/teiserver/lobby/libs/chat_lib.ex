@@ -1,17 +1,17 @@
 defmodule Teiserver.Lobby.ChatLib do
   @moduledoc false
   alias ExULID.ULID
+  alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Chat
-  alias Teiserver.Battle
+  alias Teiserver.Chat.WordLib
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.Parser
-  alias Teiserver.Moderation
   alias Teiserver.Lobby
-  alias Phoenix.PubSub
-  alias Teiserver.Chat.WordLib
+  alias Teiserver.Moderation
 
   @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def say(nil, _, _), do: {:error, "No userid"}

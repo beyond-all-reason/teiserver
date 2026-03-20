@@ -6,8 +6,8 @@ defmodule Mix.Tasks.Teiserver.UpdateUserPermissions do
 
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
-  alias Teiserver.Repo
   alias Teiserver.Account.RoleLib
+  alias Teiserver.Repo
 
   use Mix.Task
 

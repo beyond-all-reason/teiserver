@@ -1,21 +1,21 @@
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
 
-  alias Teiserver.Client
-  alias Teiserver.CacheUser
+  alias ExUnit.Callbacks
   alias Teiserver.Account
-  alias Teiserver.SpringTcpServer
+  alias Teiserver.Account.AccoladeBotServer
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.CacheUser
+  alias Teiserver.Clans
+  alias Teiserver.Client
+  alias Teiserver.Coordinator
   alias Teiserver.Coordinator.CoordinatorServer
   alias Teiserver.Data.Types, as: T
-  alias ExUnit.Callbacks
-  alias Teiserver.Account.AccoladeBotServer
-  alias Teiserver.Clans
-  alias Teiserver.Coordinator
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Lobby
   alias Teiserver.Moderation
+  alias Teiserver.SpringTcpServer
   alias Teiserver.Telemetry
   import ExUnit.Assertions
   import ExUnit.Callbacks

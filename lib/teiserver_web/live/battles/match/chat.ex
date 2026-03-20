@@ -3,8 +3,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
 
   alias Teiserver.Account
   alias Teiserver.Battle
-  alias Teiserver.Chat
   alias Teiserver.Battle.MatchLib
+  alias Teiserver.Chat
   use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView

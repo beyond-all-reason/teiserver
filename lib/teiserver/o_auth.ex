@@ -4,13 +4,13 @@ defmodule Teiserver.OAuth do
   alias Teiserver.Bot.Bot
 
   alias Teiserver.OAuth.Application
-  alias Teiserver.OAuth.Code
-  alias Teiserver.OAuth.Token
-  alias Teiserver.OAuth.Credential
   alias Teiserver.OAuth.ApplicationQueries
+  alias Teiserver.OAuth.Code
   alias Teiserver.OAuth.CodeQueries
-  alias Teiserver.OAuth.TokenQueries
+  alias Teiserver.OAuth.Credential
   alias Teiserver.OAuth.CredentialQueries
+  alias Teiserver.OAuth.Token
+  alias Teiserver.OAuth.TokenQueries
 
   alias Plug.Conn
   alias Teiserver.Account.User

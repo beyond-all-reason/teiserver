@@ -1,10 +1,10 @@
 defmodule Teiserver.TachyonLobby.LobbyTest do
+  alias ExUnit.Callbacks
   alias Teiserver.AssetFixtures
+  alias Teiserver.KvStore
   alias Teiserver.Tachyon, as: TachyonLib
   alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.TachyonLobby.Lobby, as: LobbyProcess
-  alias ExUnit.Callbacks
-  alias Teiserver.KvStore
   use Teiserver.DataCase
   import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until_nil: 1]
 

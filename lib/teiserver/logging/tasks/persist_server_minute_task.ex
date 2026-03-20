@@ -1,9 +1,9 @@
 defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Communication
-  alias Teiserver.Telemetry
-  alias Teiserver.Logging
   alias Teiserver.Config
+  alias Teiserver.Logging
+  alias Teiserver.Telemetry
 
   use Oban.Worker, queue: :teiserver
 

@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Account.SecurityControllerTest do
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.OAuth
-  alias Teiserver.OAuthFixtures
   alias Phoenix.Flash
+  alias Teiserver.OAuth
   alias Teiserver.OAuth.CodeQueries
   alias Teiserver.OAuth.TokenQueries
+  alias Teiserver.OAuthFixtures
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase

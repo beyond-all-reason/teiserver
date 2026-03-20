@@ -3,10 +3,10 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
   Refreshes the restrictions applied to a user based on the outstanding actions.
   """
 
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Account
   alias Teiserver.Client
   alias Teiserver.Coordinator
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.Moderation
 
   use Oban.Worker, queue: :teiserver

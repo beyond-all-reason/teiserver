@@ -1,8 +1,8 @@
 defmodule Teiserver.OAuth.CodeTest do
-  alias Teiserver.OAuth
-  alias Teiserver.OAuthFixtures
   alias Plug.Conn
   alias Plug.Test
+  alias Teiserver.OAuth
+  alias Teiserver.OAuthFixtures
   alias Teiserver.TeiserverTestLib
   alias Timex.Duration
   use Teiserver.DataCase, async: true

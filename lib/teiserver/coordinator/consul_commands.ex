@@ -2,23 +2,23 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   @moduledoc false
 
   alias ExULID.ULID
+  alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Battle
+  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.CacheUser
+  alias Teiserver.Chat.WordLib
+  alias Teiserver.Client
   alias Teiserver.Config
+  alias Teiserver.Coordinator
   alias Teiserver.Coordinator.ConsulServer
   alias Teiserver.Coordinator.RikerssMemes
-  alias Teiserver.Account
-  alias Teiserver.Battle
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
-  alias Teiserver.Coordinator
-  alias Teiserver.CacheUser
-  alias Teiserver.Client
-  alias Teiserver.Telemetry
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Lobby.LobbyRestrictions
-  alias Teiserver.Battle.BalanceLib
-  alias Teiserver.Chat.WordLib
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Telemetry
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
 

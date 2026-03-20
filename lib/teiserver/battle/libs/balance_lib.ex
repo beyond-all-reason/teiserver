@@ -4,9 +4,9 @@ defmodule Teiserver.Battle.BalanceLib do
   """
 
   alias Teiserver.Account
+  alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Game.MatchRatingLib
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]

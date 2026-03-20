@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.CoordinatorLib do
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Account.Auth
+  alias Teiserver.Data.Types, as: T
 
   @spec help(T.user(), boolean(), String.t()) :: String.t()
   def help(user, host, command) do

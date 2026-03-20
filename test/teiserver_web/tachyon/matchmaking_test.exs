@@ -1,17 +1,17 @@
 defmodule Teiserver.Tachyon.MatchmakingTest do
+  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Asset
   alias Teiserver.AssetFixtures
-  alias Teiserver.OAuthFixtures
-  alias Teiserver.Player
+  alias Teiserver.Battle
+  alias Teiserver.Game
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Matchmaking.QueueSupervisor
+  alias Teiserver.OAuthFixtures
+  alias Teiserver.Player
+  alias Teiserver.Player.SessionRegistry
   alias Teiserver.Support.Polling
   alias Teiserver.Support.Tachyon
-  alias Central.Helpers.GeneralTestLib
-  alias Player.SessionRegistry
-  alias Teiserver.Battle
-  alias Teiserver.Game
   alias Teiserver.TachyonBattle
   use TeiserverWeb.ConnCase
 

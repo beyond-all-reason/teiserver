@@ -1,9 +1,9 @@
 defmodule Teiserver.Telemetry.SimpleServerEventTest do
   @moduledoc false
 
-  alias Teiserver.Telemetry
-  alias Teiserver.TeiserverTestLib
   alias Ecto.Adapters.SQL
+  alias Teiserver.TeiserverTestLib
+  alias Teiserver.Telemetry
   use Teiserver.DataCase
 
   # https://github.com/beyond-all-reason/teiserver/actions/runs/20708759718/job/59444391469

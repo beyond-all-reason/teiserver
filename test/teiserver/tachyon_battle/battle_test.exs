@@ -1,11 +1,11 @@
 defmodule Teiserver.TachyonBattle.BattleTest do
+  alias ExUnit.Callbacks
   alias Teiserver.Autohost
+  alias Teiserver.Autohost.Session
+  alias Teiserver.Autohost.SessionRegistry
   alias Teiserver.BotFixtures
   alias Teiserver.TachyonBattle, as: Battle
-  alias Autohost.Session
-  alias Autohost.SessionRegistry
-  alias Battle.Battle, as: BattleProcess
-  alias ExUnit.Callbacks
+  alias Teiserver.TachyonBattle.Battle, as: BattleProcess
   use Teiserver.DataCase
   import Teiserver.Support.Polling, only: [poll_until_some: 1]
 

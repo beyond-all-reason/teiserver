@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.TOTPLib do
-  alias Teiserver.Account.User
   alias Teiserver.Account.TOTP
+  alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
   use TeiserverWeb, :library
 

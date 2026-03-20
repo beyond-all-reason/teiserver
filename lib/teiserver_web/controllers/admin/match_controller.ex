@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Admin.MatchController do
-  alias Teiserver.Battle
   alias Teiserver.Account
+  alias Teiserver.Battle
 
   use TeiserverWeb, :controller
 

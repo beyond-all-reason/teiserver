@@ -1,8 +1,8 @@
 defmodule Teiserver.Chat.ChatRoomTest do
+  alias Central.Helpers.GeneralTestLib
   alias Phoenix.PubSub
   alias Teiserver.Chat
   alias Teiserver.Room
-  alias Central.Helpers.GeneralTestLib
 
   use Teiserver.DataCase
 

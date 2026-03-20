@@ -1,9 +1,9 @@
 defmodule Teiserver.BridgeServerTest do
   @moduledoc false
 
+  alias Teiserver.Bridge.BridgeServer
   alias Teiserver.CacheUser
   alias Teiserver.Room
-  alias Teiserver.Bridge.BridgeServer
   alias Teiserver.TeiserverTestLib
   use Teiserver.ServerCase, async: false
 

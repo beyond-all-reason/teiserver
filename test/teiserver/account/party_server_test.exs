@@ -1,9 +1,9 @@
 defmodule Teiserver.Account.PartyServerTest do
   @moduledoc false
 
+  alias ExULID.ULID
   alias Teiserver.Account.Party
   alias Teiserver.Account.PartyLib
-  alias ExULID.ULID
   use Teiserver.DataCase, async: true
 
   test "server test" do

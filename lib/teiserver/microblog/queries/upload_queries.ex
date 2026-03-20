@@ -1,8 +1,8 @@
 defmodule Teiserver.Microblog.UploadQueries do
   @moduledoc false
 
-  alias Teiserver.Microblog.Upload
   alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Microblog.Upload
   use TeiserverWeb, :queries
 
   # Queries

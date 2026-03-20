@@ -9,8 +9,8 @@ defmodule Teiserver.Autohost.TachyonHandler do
   alias Teiserver.Autohost.SessionSupervisor
   alias Teiserver.Bot.Bot
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helpers.TachyonParser
   alias Teiserver.Helpers.Collections
+  alias Teiserver.Helpers.TachyonParser
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Tachyon.Schema
   alias Teiserver.Tachyon.Transport

@@ -1,8 +1,8 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias ExULID.ULID
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.CodeOfConductData
   alias Teiserver.CacheUser
   alias Teiserver.Client

@@ -1,8 +1,8 @@
 defmodule Teiserver.Tachyon.Tasks.SetupAppsTest do
+  alias Central.Helpers.GeneralTestLib
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.Tachyon.Tasks.SetupApps
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
   use Teiserver.DataCase
 

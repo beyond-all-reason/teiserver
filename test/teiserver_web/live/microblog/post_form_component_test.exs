@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Microblog.PostFormComponentTest do
   @moduledoc false
 
-  alias TeiserverWeb.Microblog.PostFormComponent
   alias Teiserver.Microblog
+  alias TeiserverWeb.Microblog.PostFormComponent
 
   use TeiserverWeb.ConnCase
 

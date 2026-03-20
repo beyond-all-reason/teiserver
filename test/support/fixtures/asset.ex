@@ -1,8 +1,8 @@
 defmodule Teiserver.AssetFixtures do
   alias Teiserver.Asset
+  alias Teiserver.Asset.Engine
+  alias Teiserver.Asset.Game
   alias Teiserver.Repo
-  alias Asset.Engine
-  alias Asset.Game
   require Logger
 
   def create_map(attrs) do

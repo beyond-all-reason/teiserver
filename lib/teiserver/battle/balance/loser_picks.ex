@@ -16,8 +16,8 @@ defmodule Teiserver.Battle.Balance.LoserPicks do
   """
 
   # Alias the types
-  alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
+  alias Teiserver.Battle.BalanceLib
   import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   @splitter "------------------------------------------------------"

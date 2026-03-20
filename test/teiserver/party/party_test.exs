@@ -1,8 +1,8 @@
 defmodule Teiserver.Party.PartyTest do
+  alias ExUnit.Callbacks
   alias Teiserver.Party
   alias Teiserver.Support.Polling
   alias Teiserver.Tachyon, as: TachyonLib
-  alias ExUnit.Callbacks
 
   use Teiserver.DataCase
 

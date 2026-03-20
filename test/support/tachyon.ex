@@ -1,7 +1,4 @@
 defmodule Teiserver.Support.Tachyon do
-  alias WebsocketSyncClient, as: WSC
-  alias Teiserver.OAuthFixtures
-  alias Teiserver.Support.Polling
   alias Central.Helpers.GeneralTestLib
   alias ExUnit.Callbacks
   alias Teiserver.Account
@@ -9,8 +6,11 @@ defmodule Teiserver.Support.Tachyon do
   alias Teiserver.BotFixtures
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.OAuthFixtures
+  alias Teiserver.Support.Polling
   alias Teiserver.Tachyon
   alias Teiserver.Tachyon.Schema
+  alias WebsocketSyncClient, as: WSC
 
   def tachyon_case_setup(tags) do
     if tags[:module] |> to_string() |> String.contains?("Tachyon") || tags[:tachyon] do

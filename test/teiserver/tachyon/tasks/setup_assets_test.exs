@@ -1,8 +1,8 @@
 defmodule Teiserver.Tachyon.Tasks.SetupAssetsTest do
   alias Teiserver.Asset
-  alias Teiserver.AssetFixtures
   alias Teiserver.Asset.EngineQueries
   alias Teiserver.Asset.GameQueries
+  alias Teiserver.AssetFixtures
   alias Teiserver.Tachyon.Tasks.SetupAssets
   use Teiserver.DataCase
 

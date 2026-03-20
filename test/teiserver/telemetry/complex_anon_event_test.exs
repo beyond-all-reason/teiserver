@@ -1,9 +1,9 @@
 defmodule Teiserver.Telemetry.ComplexAnonEventTest do
   @moduledoc false
 
-  alias Teiserver.Telemetry
   alias Ecto.Adapters.SQL
   alias ExULID.ULID
+  alias Teiserver.Telemetry
   use Teiserver.DataCase
 
   test "complex anon events" do

@@ -1,6 +1,6 @@
 defmodule Teiserver.General.NumberHelperTest do
-  alias Teiserver.Helper.NumberHelper
   alias Decimal
+  alias Teiserver.Helper.NumberHelper
 
   use Teiserver.DataCase, async: true
 

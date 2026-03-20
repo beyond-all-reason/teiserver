@@ -5,10 +5,10 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
   # alias Teiserver.Repo
   # import Ecto.Query, warn: false
   alias Teiserver.Account
-  alias Teiserver.Game
-  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Game
+  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.TimexHelper
   import Teiserver.Helper.NumberHelper, only: [percent: 2]
 

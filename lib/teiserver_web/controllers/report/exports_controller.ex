@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Report.ExportsController do
-  alias Teiserver.Game
   alias Teiserver.Account
+  alias Teiserver.Game
   use TeiserverWeb, :controller
   import Teiserver.Account.AuthLib, only: [allow?: 2]
 

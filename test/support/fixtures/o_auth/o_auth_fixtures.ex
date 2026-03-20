@@ -1,8 +1,8 @@
 defmodule Teiserver.OAuthFixtures do
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.Code
-  alias Teiserver.OAuth.Token
   alias Teiserver.OAuth.Credential
+  alias Teiserver.OAuth.Token
   alias Teiserver.Repo
   alias Timex.Duration
 

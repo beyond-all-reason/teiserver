@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.Spring.BattleIn do
-  alias Teiserver.Coordinator
   alias Teiserver.Battle
+  alias Teiserver.Coordinator
   alias Teiserver.Lobby
   alias Teiserver.Protocols.SpringIn
   require Logger

@@ -16,11 +16,11 @@ defmodule Teiserver.Game.MatchRatingsExport do
   })
   """
   alias Ecto.Adapters.SQL
+  alias Teiserver.Battle
+  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.TimexHelper
-  alias Teiserver.Battle
   alias Teiserver.Repo
-  alias Teiserver.Game.MatchRatingLib
   require Logger
 
   @id_chunk_size 10_000

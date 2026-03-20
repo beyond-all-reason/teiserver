@@ -1,11 +1,11 @@
 defmodule Teiserver.Telemetry.SimpleMatchEventTest do
   @moduledoc false
 
-  alias Teiserver.Battle
-  alias Teiserver.Telemetry
-  alias Teiserver.TeiserverTestLib
   alias Ecto.Adapters.SQL
   alias ExULID.ULID
+  alias Teiserver.Battle
+  alias Teiserver.TeiserverTestLib
+  alias Teiserver.Telemetry
   use Teiserver.DataCase
 
   test "simple match events" do

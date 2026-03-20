@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.ClientLive.Index do
   alias Phoenix.PubSub
   alias Teiserver
-  alias Teiserver.Client
-  alias Teiserver.CacheUser
   alias Teiserver.Account.UserLib
+  alias Teiserver.CacheUser
+  alias Teiserver.Client
 
   use TeiserverWeb, :live_view
 

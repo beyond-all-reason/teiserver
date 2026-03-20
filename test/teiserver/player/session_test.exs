@@ -1,10 +1,10 @@
 defmodule Teiserver.Player.SessionTest do
-  alias Teiserver.Player
-  alias Teiserver.Support.Polling
-  alias Teiserver.Tachyon, as: TachyonLib
   alias Central.Helpers.GeneralTestLib
   alias ExUnit.Callbacks
-  alias Player.SessionSupervisor
+  alias Teiserver.Player
+  alias Teiserver.Player.SessionSupervisor
+  alias Teiserver.Support.Polling
+  alias Teiserver.Tachyon, as: TachyonLib
 
   use Teiserver.DataCase, async: false
 

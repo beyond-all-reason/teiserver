@@ -47,9 +47,9 @@ end
 defmodule Teiserver.Game.BalancerServerTest do
   @moduledoc false
 
-  alias Teiserver.Game.BalancerServer
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
+  alias Teiserver.Game.BalancerServer
 
   use Teiserver.DataCase, async: false
 

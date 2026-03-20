@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Admin.BotControllerTest do
+  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Bot
+  alias Teiserver.BotFixtures
   alias Teiserver.OAuth
   alias Teiserver.OAuth.CredentialQueries
   alias Teiserver.OAuthFixtures
-  alias Teiserver.BotFixtures
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase

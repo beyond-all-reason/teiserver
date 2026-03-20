@@ -1,14 +1,14 @@
 defmodule Teiserver.Game.MatchRatingLibTest do
   @moduledoc false
 
+  alias Ecto.Multi
   alias Teiserver.Account
+  alias Teiserver.Account.AccountTestLib
   alias Teiserver.Battle
+  alias Teiserver.Battle.MatchLib
   alias Teiserver.Config
   alias Teiserver.Game
-  alias Teiserver.Account.AccountTestLib
-  alias Teiserver.Battle.MatchLib
   alias Teiserver.Game.MatchRatingLib
-  alias Ecto.Multi
   alias Teiserver.Repo
   use Teiserver.DataCase, async: true
 

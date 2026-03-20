@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.PostLiveTest do
   @moduledoc false
 
-  alias Teiserver.Microblog
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Microblog
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase

@@ -1,8 +1,8 @@
 defmodule Teiserver.Chat.WordLibTest do
-  alias Teiserver.Chat.WordLib
-  alias Teiserver.Room
   alias Teiserver.CacheUser
+  alias Teiserver.Chat.WordLib
   alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Room
   alias Teiserver.TeiserverTestLib
   use Teiserver.DataCase
 

@@ -5,6 +5,7 @@ defmodule Teiserver.Moderation do
   # require Logger
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Moderation.Action
@@ -15,13 +16,12 @@ defmodule Teiserver.Moderation do
   alias Teiserver.Moderation.ProposalLib
   alias Teiserver.Moderation.ProposalVote
   alias Teiserver.Moderation.ProposalVoteLib
+  alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Moderation.Report
   alias Teiserver.Moderation.ReportGroupLib
   alias Teiserver.Moderation.ReportLib
-  alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Moderation.Response
   alias Teiserver.Moderation.ResponseLib
-  alias Teiserver.CacheUser
 
   import Ecto.Query, warn: false
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]

@@ -1,14 +1,14 @@
 defmodule TeiserverWeb.TachyonControllerTest do
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.OAuthFixtures
-  alias Teiserver.Support.Tachyon
-  alias Teiserver.Support.Polling
-  alias WebsocketSyncClient, as: WSC
   alias ExUnit.Callbacks
   alias Phoenix.ConnTest
   alias Teiserver.Client
+  alias Teiserver.OAuthFixtures
   alias Teiserver.Player
+  alias Teiserver.Support.Polling
+  alias Teiserver.Support.Tachyon
   alias Teiserver.TeiserverTestLib
+  alias WebsocketSyncClient, as: WSC
 
   use TeiserverWeb.ConnCase
 

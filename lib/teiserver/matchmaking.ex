@@ -2,10 +2,10 @@ defmodule Teiserver.Matchmaking do
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Matchmaking
+  alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.QueueRegistry
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Party
-  alias Teiserver.Matchmaking.Member
   require Logger
 
   @type queue :: Matchmaking.QueueServer.queue()

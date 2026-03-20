@@ -10,9 +10,9 @@ defmodule Teiserver.Player do
   """
 
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Player
   alias Teiserver.Matchmaking
   alias Teiserver.Party
+  alias Teiserver.Player
   alias Teiserver.TachyonBattle
 
   @doc """

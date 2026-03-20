@@ -1,8 +1,8 @@
 defmodule Teiserver.Plugs.CachePlug do
   @moduledoc false
 
-  alias Teiserver.Config
   alias Phoenix.LiveView.Utils
+  alias Teiserver.Config
   import Plug.Conn
 
   def init(_) do

@@ -1,7 +1,7 @@
 defmodule Teiserver.Bot do
+  alias Teiserver.Bot.Bot
   alias Teiserver.BotQueries
   alias Teiserver.Repo
-  alias Teiserver.Bot.Bot
 
   @type id :: Teiserver.Bot.Bot.id()
 

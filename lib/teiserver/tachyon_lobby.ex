@@ -4,8 +4,8 @@ defmodule Teiserver.TachyonLobby do
   """
 
   alias Teiserver.Asset
-  alias Teiserver.TachyonLobby
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
 
   @type id :: Lobby.id()

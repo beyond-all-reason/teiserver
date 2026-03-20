@@ -6,19 +6,19 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Account.RecacheUserStatsTask
   alias Teiserver.CacheUser
   alias Teiserver.Clans
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
+  alias Teiserver.Coordinator.CoordinatorCommands
+  alias Teiserver.Coordinator.Parser
   alias Teiserver.Lobby
   alias Teiserver.Moderation
   alias Teiserver.Room
   alias Teiserver.Telemetry
-  alias Teiserver.Account.Auth
-  alias Teiserver.Account.RecacheUserStatsTask
-  alias Teiserver.Coordinator.CoordinatorCommands
-  alias Teiserver.Coordinator.Parser
 
   use GenServer
 

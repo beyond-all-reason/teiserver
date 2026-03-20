@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.Battle.LobbyLive.Index do
   alias Phoenix.PubSub
   alias Teiserver
+  alias Teiserver.Account
   alias Teiserver.Battle
   alias Teiserver.Config
   alias Teiserver.Lobby
-  alias Teiserver.Account
 
   use TeiserverWeb, :live_view
 

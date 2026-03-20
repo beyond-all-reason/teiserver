@@ -1,7 +1,7 @@
 defmodule Teiserver.OAuth.CredentialQueries do
-  alias Teiserver.OAuth.Credential
-  alias Teiserver.OAuth.Application
   alias Teiserver.Bot.Bot
+  alias Teiserver.OAuth.Application
+  alias Teiserver.OAuth.Credential
   use TeiserverWeb, :queries
 
   def get_credential(nil), do: nil
