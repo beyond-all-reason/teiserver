@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
   @moduledoc false
 
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Microblog
   alias Teiserver.TeiserverTestLib
 

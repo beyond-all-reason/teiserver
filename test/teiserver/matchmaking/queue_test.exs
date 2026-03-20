@@ -1,6 +1,6 @@
 defmodule Teiserver.Matchmaking.QueueTest do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.AssetFixtures
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueRegistry
   alias Teiserver.Matchmaking.QueueServer

@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Account.SettingsLive.IndexLiveTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase, async: true

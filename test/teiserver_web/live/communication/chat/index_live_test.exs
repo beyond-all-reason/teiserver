@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Communication.ChatLive.IndexLiveTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
 
   use TeiserverWeb.ConnCase, async: true
 

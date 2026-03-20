@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.LoggingControllerTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase

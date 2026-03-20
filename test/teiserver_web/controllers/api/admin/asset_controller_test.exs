@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.API.Admin.AssetControllerTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
   use TeiserverWeb.ConnCase, async: false
 

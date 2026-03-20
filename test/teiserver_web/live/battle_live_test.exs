@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Live.BattleTest do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.CacheUser
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Lobby
   alias Teiserver.TeiserverTestLib
   use TeiserverWeb.ConnCase, async: false

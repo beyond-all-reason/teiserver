@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Live.Account.Profile.MatchesTest do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
   alias Teiserver.Config
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
   alias TeiserverWeb.Account.ProfileLive.Matches
 

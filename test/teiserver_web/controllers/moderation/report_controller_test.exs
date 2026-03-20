@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Moderation.ReportControllerTest do
   @moduledoc false
 
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Moderation.ModerationTestLib
   alias Teiserver.TeiserverTestLib
 

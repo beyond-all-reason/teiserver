@@ -1,15 +1,16 @@
 defmodule Teiserver.Support.Tachyon do
-  alias Central.Helpers.GeneralTestLib
   alias ExUnit.Callbacks
   alias Teiserver.Account
   alias Teiserver.Autohost
   alias Teiserver.BotFixtures
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Polling
   alias Teiserver.Tachyon
   alias Teiserver.Tachyon.Schema
+  alias WebsocketSyncClient, as: WSC
   alias WebsocketSyncClient, as: WSC
 
   def tachyon_case_setup(tags) do

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.OAuth.CodeControllerTest do
-  alias Central.Helpers.GeneralTestLib
   alias Phoenix.ConnTest
   alias Teiserver.Bot
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
   alias TeiserverWeb.Endpoint

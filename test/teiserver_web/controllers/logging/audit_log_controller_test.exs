@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.AuditLogControllerTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Logging.Helpers
   alias Teiserver.Logging.LoggingTestLib
 

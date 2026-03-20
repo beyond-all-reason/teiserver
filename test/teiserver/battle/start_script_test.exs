@@ -1,6 +1,6 @@
 defmodule Teiserver.Battle.StartScriptTest do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Battle
+  alias Teiserver.Helpers.GeneralTestLib
 
   use Teiserver.DataCase, async: false
 

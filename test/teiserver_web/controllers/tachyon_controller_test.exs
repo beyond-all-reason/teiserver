@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.TachyonControllerTest do
-  alias Central.Helpers.GeneralTestLib
   alias ExUnit.Callbacks
   alias Phoenix.ConnTest
   alias Teiserver.Client
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
   alias Teiserver.Player
   alias Teiserver.Support.Polling

@@ -1,4 +1,4 @@
-defmodule Central.Helpers.ComponentHelper do
+defmodule Teiserver.Helpers.ComponentHelper do
   @moduledoc """
   # http://blog.danielberkompas.com/2017/01/17/reusable-templates-in-phoenix.html
   #
@@ -7,6 +7,9 @@ defmodule Central.Helpers.ComponentHelper do
   #   <%= central_component "tab", name: "All Products" %>
   #   <%= central_component "tab", name: "Featured" %>
   # <% end %>
+
+  Ideally we will remove this out-dated way of doing things and replace them
+  with live components.
   """
 
   alias TeiserverWeb.ComponentView

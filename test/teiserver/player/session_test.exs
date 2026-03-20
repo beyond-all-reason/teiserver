@@ -1,6 +1,6 @@
 defmodule Teiserver.Player.SessionTest do
-  alias Central.Helpers.GeneralTestLib
   alias ExUnit.Callbacks
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Player
   alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Support.Polling
