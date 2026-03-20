@@ -272,7 +272,7 @@ defmodule Teiserver.Battle.BalanceLib do
       else
         balance_result.teams
         |> Map.new(fn {team_id, groups} ->
-          {team_id, Enum.reverse(clean_groups(groups))}
+          {team_id, groups |> clean_groups() |> Enum.reverse()}
         end)
       end
 

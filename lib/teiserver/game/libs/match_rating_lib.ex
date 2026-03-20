@@ -336,14 +336,13 @@ defmodule Teiserver.Game.MatchRatingLib do
         user_rating
       else
         {:ok, rating} =
-          Account.create_rating(
-            Map.merge(user_rating, %{
-              user_id: user_id,
-              last_updated: match.finished,
-              num_matches: 0,
-              season: active_season()
-            })
-          )
+          Map.merge(user_rating, %{
+            user_id: user_id,
+            last_updated: match.finished,
+            num_matches: 0,
+            season: active_season()
+          })
+          |> Account.create_rating()
 
         rating
       end

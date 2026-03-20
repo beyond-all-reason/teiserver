@@ -55,7 +55,7 @@ defmodule Teiserver.Account.ClientServerTest do
     assert r == nil
 
     # Update client
-    ClientLib.replace_update_client(Map.put(client, :side, 1), :client_updated_battlestatus)
+    client |> Map.put(:side, 1) |> ClientLib.replace_update_client(:client_updated_battlestatus)
 
     # No server
     # r = ClientLib.update_client(Map.merge(client, %{side: 1, userid: -1}), :client_updated_battlestatus)

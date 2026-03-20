@@ -28,7 +28,7 @@ defmodule TeiserverWeb.Admin.BotController do
   @spec index(Conn.t(), map()) :: Conn.t()
   def index(conn, _params) do
     bots = BotQueries.list_bots()
-    cred_counts = CredentialQueries.count_per_bots(Enum.map(bots, fn a -> a.id end))
+    cred_counts = bots |> Enum.map(fn a -> a.id end) |> CredentialQueries.count_per_bots()
 
     conn
     |> render("index.html", bots: bots, cred_counts: cred_counts)
@@ -68,7 +68,7 @@ defmodule TeiserverWeb.Admin.BotController do
 
   @spec show(Conn.t(), map()) :: Conn.t()
   def show(conn, assigns) do
-    case Bot.get_by_id(Map.get(assigns, "id")) do
+    case assigns |> Map.get("id") |> Bot.get_by_id() do
       %BotSchema{} = bot ->
         render_show(conn, bot)
 
@@ -81,7 +81,7 @@ defmodule TeiserverWeb.Admin.BotController do
 
   @spec edit(Conn.t(), map()) :: Conn.t()
   def edit(conn, assigns) do
-    case Bot.get_by_id(Map.get(assigns, "id")) do
+    case assigns |> Map.get("id") |> Bot.get_by_id() do
       %BotSchema{} = bot ->
         changeset = Bot.change_bot(bot)
 
@@ -98,7 +98,7 @@ defmodule TeiserverWeb.Admin.BotController do
 
   @spec update(Conn.t(), map()) :: Conn.t()
   def update(conn, %{"bot" => params} = assigns) do
-    case Bot.get_by_id(Map.get(assigns, "id")) do
+    case assigns |> Map.get("id") |> Bot.get_by_id() do
       %BotSchema{} = bot ->
         case Bot.update_bot(bot, params) do
           {:ok, bot} ->
@@ -127,7 +127,7 @@ defmodule TeiserverWeb.Admin.BotController do
 
   @spec delete(Conn.t(), map()) :: Conn.t()
   def delete(conn, assigns) do
-    case Bot.get_by_id(Map.get(assigns, "id")) do
+    case assigns |> Map.get("id") |> Bot.get_by_id() do
       %BotSchema{} = bot ->
         case Bot.delete(bot) do
           :ok ->
@@ -150,11 +150,11 @@ defmodule TeiserverWeb.Admin.BotController do
 
   @spec create_credential(Conn.t(), map()) :: Conn.t()
   def create_credential(conn, assigns) do
-    with bot when not is_nil(bot) <- Bot.get_by_id(Map.get(assigns, "id")),
+    with bot when not is_nil(bot) <- assigns |> Map.get("id") |> Bot.get_by_id(),
          app when not is_nil(app) <-
-           ApplicationQueries.get_application_by_id(Map.get(assigns, "application")) do
+           assigns |> Map.get("application") |> ApplicationQueries.get_application_by_id() do
       client_id = UUID.uuid4()
-      secret = Base.hex_encode32(:crypto.strong_rand_bytes(32))
+      secret = 32 |> :crypto.strong_rand_bytes() |> Base.hex_encode32()
 
       case OAuth.create_credentials(app, bot, client_id, secret) do
         {:ok, _cred} ->
@@ -178,9 +178,9 @@ defmodule TeiserverWeb.Admin.BotController do
 
   @spec delete_credential(Conn.t(), map()) :: Conn.t()
   def delete_credential(conn, assigns) do
-    with bot when not is_nil(bot) <- Bot.get_by_id(Map.get(assigns, "id")),
+    with bot when not is_nil(bot) <- assigns |> Map.get("id") |> Bot.get_by_id(),
          cred when not is_nil(cred) <-
-           CredentialQueries.get_credential_by_id(Map.get(assigns, "cred_id")) do
+           assigns |> Map.get("cred_id") |> CredentialQueries.get_credential_by_id() do
       if cred.bot_id != bot.id do
         conn
         |> put_status(:bad_request)

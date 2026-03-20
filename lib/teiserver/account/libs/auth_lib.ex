@@ -54,10 +54,9 @@ defmodule Teiserver.Account.AuthLib do
   end
 
   def allow_any?(conn, perms) do
-    Enum.any?(
-      perms
-      |> Enum.map(fn p -> allow?(conn, p) end)
-    )
+    perms
+    |> Enum.map(fn p -> allow?(conn, p) end)
+    |> Enum.any?()
   end
 
   # If you don't need permissions then lets not bother checking

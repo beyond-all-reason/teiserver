@@ -30,7 +30,7 @@ defmodule Teiserver.OAuthFixtures do
     {verifier, challenge, method} = generate_challenge()
 
     %{
-      value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
+      value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(),
       owner_id: user_id,
       application_id: app.id,
       scopes: app.scopes,
@@ -50,7 +50,7 @@ defmodule Teiserver.OAuthFixtures do
     now = DateTime.utc_now()
 
     %{
-      value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
+      value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
       owner_id: user_id,
       application_id: application.id,
       scopes: application.scopes,
@@ -113,5 +113,5 @@ defmodule Teiserver.OAuthFixtures do
   end
 
   def hash_verifier(verifier),
-    do: Base.url_encode64(:crypto.hash(:sha256, verifier), padding: false)
+    do: verifier |> then(&:crypto.hash(:sha256, &1)) |> Base.url_encode64(padding: false)
 end

@@ -25,7 +25,7 @@ defmodule Teiserver.Chat.RoomServer do
 
   @spec get_room(String.t()) :: room() | nil
   def get_room(name) do
-    GenServer.call(via_tuple(name), :get_room)
+    name |> via_tuple() |> GenServer.call(:get_room)
   catch
     :exit, {:noproc, _} -> nil
   end
@@ -33,42 +33,42 @@ defmodule Teiserver.Chat.RoomServer do
   @spec join_room(String.t(), T.userid(), pid() | nil) ::
           {:ok, :joined | :already_present} | {:error, :invalid_room}
   def join_room(name, user_id, pid \\ self()) do
-    GenServer.call(via_tuple(name), {:join_room, user_id, pid})
+    name |> via_tuple() |> GenServer.call({:join_room, user_id, pid})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_room}
   end
 
   @spec leave_room(String.t(), T.userid()) :: :ok
   def leave_room(name, user_id) do
-    GenServer.call(via_tuple(name), {:leave_room, user_id})
+    name |> via_tuple() |> GenServer.call({:leave_room, user_id})
   catch
     :exit, {:noproc, _} -> :ok
   end
 
   @spec can_join_room?(String.t(), T.user()) :: true | :invalid_room | {false, String.t()}
   def can_join_room?(name, user) do
-    GenServer.call(via_tuple(name), {:can_join_room?, user})
+    name |> via_tuple() |> GenServer.call({:can_join_room?, user})
   catch
     :exit, {:noproc, _} -> :invalid_room
   end
 
   @spec stop_room(String.t()) :: :ok
   def stop_room(name) do
-    GenServer.call(via_tuple(name), :stop)
+    name |> via_tuple() |> GenServer.call(:stop)
   catch
     :exit, {:noproc, _} -> :ok
   end
 
   @spec send_message(String.t(), T.userid(), String.t()) :: :ok
   def send_message(name, user_id, message) do
-    GenServer.call(via_tuple(name), {:send_message, user_id, message})
+    name |> via_tuple() |> GenServer.call({:send_message, user_id, message})
   catch
     :exit, {:noproc, _} -> :ok
   end
 
   @spec send_message_ex(String.t(), T.userid(), String.t()) :: :ok
   def send_message_ex(name, user_id, message) do
-    GenServer.call(via_tuple(name), {:send_message_ex, user_id, message})
+    name |> via_tuple() |> GenServer.call({:send_message_ex, user_id, message})
   catch
     :exit, {:noproc, _} -> :ok
   end

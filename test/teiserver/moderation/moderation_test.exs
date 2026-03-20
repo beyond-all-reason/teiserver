@@ -33,12 +33,12 @@ defmodule Teiserver.ModerationTest do
 
     test "create_report/1 with valid data creates a report" do
       assert {:ok, %Report{} = report} =
-               Moderation.create_report(
-                 Map.merge(@valid_attrs, %{
-                   "reporter_id" => GeneralTestLib.make_user().id,
-                   "target_id" => GeneralTestLib.make_user().id
-                 })
-               )
+               @valid_attrs
+               |> Map.merge(%{
+                 "reporter_id" => GeneralTestLib.make_user().id,
+                 "target_id" => GeneralTestLib.make_user().id
+               })
+               |> Moderation.create_report()
 
       assert report.type == "some type"
     end
@@ -98,11 +98,11 @@ defmodule Teiserver.ModerationTest do
 
     test "create_action/1 with valid data creates a action" do
       assert {:ok, %Action{} = action} =
-               Moderation.create_action(
-                 Map.merge(@valid_attrs, %{
-                   "target_id" => GeneralTestLib.make_user().id
-                 })
-               )
+               @valid_attrs
+               |> Map.merge(%{
+                 "target_id" => GeneralTestLib.make_user().id
+               })
+               |> Moderation.create_action()
 
       assert action.reason == "some reason"
     end
@@ -156,12 +156,12 @@ defmodule Teiserver.ModerationTest do
 
     test "create_ban/1 with valid data creates a ban" do
       assert {:ok, %Ban{} = ban} =
-               Moderation.create_ban(
-                 Map.merge(@valid_attrs, %{
-                   "source_id" => GeneralTestLib.make_user().id,
-                   "added_by_id" => GeneralTestLib.make_user().id
-                 })
-               )
+               @valid_attrs
+               |> Map.merge(%{
+                 "source_id" => GeneralTestLib.make_user().id,
+                 "added_by_id" => GeneralTestLib.make_user().id
+               })
+               |> Moderation.create_ban()
 
       assert ban.reason == "some reason"
     end
@@ -228,12 +228,12 @@ defmodule Teiserver.ModerationTest do
 
     test "create_proposal/1 with valid data creates a proposal" do
       assert {:ok, %Proposal{} = proposal} =
-               Moderation.create_proposal(
-                 Map.merge(@valid_attrs, %{
-                   "proposer_id" => GeneralTestLib.make_user().id,
-                   "target_id" => GeneralTestLib.make_user().id
-                 })
-               )
+               @valid_attrs
+               |> Map.merge(%{
+                 "proposer_id" => GeneralTestLib.make_user().id,
+                 "target_id" => GeneralTestLib.make_user().id
+               })
+               |> Moderation.create_proposal()
 
       assert proposal.reason == "some reason"
     end

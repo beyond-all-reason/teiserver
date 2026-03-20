@@ -49,7 +49,7 @@ defmodule Teiserver.Autohost.Session do
   end
 
   def start_link({autohost, _conn_pid} = arg) do
-    :gen_statem.start_link(via_tuple(autohost.id), __MODULE__, arg, [])
+    autohost.id |> via_tuple() |> :gen_statem.start_link(__MODULE__, arg, [])
   end
 
   @impl :gen_statem
@@ -61,8 +61,9 @@ defmodule Teiserver.Autohost.Session do
   @spec start_battle(Bot.id(), TachyonBattle.id(), pid(), Autohost.start_script()) ::
           {:ok, start_response()} | {:error, term()}
   def start_battle(autohost_id, battle_id, battle_pid, start_script) do
-    :gen_statem.call(
-      via_tuple(autohost_id),
+    autohost_id
+    |> via_tuple()
+    |> :gen_statem.call(
       {:start_battle, battle_id, battle_pid, start_script},
       @default_call_timeout
     )
@@ -91,7 +92,9 @@ defmodule Teiserver.Autohost.Session do
   @spec send_message(Bot.id(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
           :ok | {:error, reason :: term()}
   def send_message(autohost_id, payload) do
-    :gen_statem.call(via_tuple(autohost_id), {:send_message, payload}, @default_call_timeout)
+    autohost_id
+    |> via_tuple()
+    |> :gen_statem.call({:send_message, payload}, @default_call_timeout)
   catch
     :exit, {:noproc, _} -> {:error, :no_autohost}
   end
@@ -138,7 +141,9 @@ defmodule Teiserver.Autohost.Session do
   should only be used for testing, get the `since` for subscribeUpdates
   """
   def inspect_subscription_start(autohost_id) do
-    :gen_statem.call(via_tuple(autohost_id), :inspect_subscription_start, @default_call_timeout)
+    autohost_id
+    |> via_tuple()
+    |> :gen_statem.call(:inspect_subscription_start, @default_call_timeout)
   end
 
   @impl :gen_statem

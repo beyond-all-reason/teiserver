@@ -354,19 +354,18 @@ defmodule Teiserver.TeiserverTestLib do
   @spec make_clan(String.t(), map()) :: Clans.Clan.t()
   def make_clan(name, params \\ %{}) do
     {:ok, c} =
-      Clans.create_clan(
-        Map.merge(
-          %{
-            "name" => name,
-            "tag" => "[#{name}]",
-            "icon" => "fa far-house",
-            "colour" => "#001122",
-            "description" => "Description goes here",
-            "data" => %{}
-          },
-          params
-        )
+      Map.merge(
+        %{
+          "name" => name,
+          "tag" => "[#{name}]",
+          "icon" => "fa far-house",
+          "colour" => "#001122",
+          "description" => "Description goes here",
+          "data" => %{}
+        },
+        params
       )
+      |> Clans.create_clan()
 
     c
   end
@@ -444,19 +443,18 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   def create_moderation_user_report(target_id, reporter_id, params \\ %{}) do
-    Moderation.create_report_group_and_report(
-      Map.merge(
-        %{
-          reporter_id: reporter_id,
-          target_id: target_id,
-          type: "chat",
-          sub_type: "hate",
-          extra_text: "default extra text",
-          match_id: nil
-        },
-        params
-      )
+    Map.merge(
+      %{
+        reporter_id: reporter_id,
+        target_id: target_id,
+        type: "chat",
+        sub_type: "hate",
+        extra_text: "default extra text",
+        match_id: nil
+      },
+      params
     )
+    |> Moderation.create_report_group_and_report()
   end
 
   def seed do

@@ -227,7 +227,7 @@ defmodule TeiserverWeb.Admin.UserController do
           cache_user
           |> Map.keys()
           |> Enum.reject(fn cache_user_key ->
-            Enum.member?(Map.keys(json_user), cache_user_key)
+            json_user |> Map.keys() |> Enum.member?(cache_user_key)
           end)
 
         conn
@@ -1048,7 +1048,7 @@ defmodule TeiserverWeb.Admin.UserController do
     user = Account.get_user!(userid)
 
     if value == "" do
-      Account.delete_user_stat_keys(int_parse(userid), [key])
+      userid |> int_parse() |> Account.delete_user_stat_keys([key])
     else
       Account.update_user_stat(user.id, %{key => value})
     end

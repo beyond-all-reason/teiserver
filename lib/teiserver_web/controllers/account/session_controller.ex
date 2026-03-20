@@ -127,10 +127,8 @@ defmodule TeiserverWeb.Account.SessionController do
                ]
              ) do
           diff =
-            Timex.format_duration(
-              Timex.diff(expired_code.expires, Timex.now(), :duration),
-              :humanized
-            )
+            Timex.diff(expired_code.expires, Timex.now(), :duration)
+            |> Timex.format_duration(:humanized)
 
           Logger.debug(
             "SessionController.one_time_login User tried to use expired code (expired for #{diff})"

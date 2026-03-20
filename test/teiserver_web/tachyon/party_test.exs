@@ -394,7 +394,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
     assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(ctx2.client)
     assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx1.client)
 
-    Process.exit(Party.lookup(party_id), :kill)
+    party_id |> Party.lookup() |> Process.exit(:kill)
 
     assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(ctx1.client)
     assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(ctx2.client)
@@ -406,7 +406,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
     ctx2 = setup_client()
     invite_and_accept([ctx.client], ctx2.client, ctx2.user.id)
 
-    Process.exit(SessionRegistry.lookup(ctx2.user.id), :kill)
+    ctx2.user.id |> SessionRegistry.lookup() |> Process.exit(:kill)
     assert %{"commandId" => "party/updated", "data" => data} = Tachyon.recv_message!(ctx.client)
     assert length(data["members"]) == 1
     assert hd(data["members"])["userId"] == to_string(ctx.user.id)

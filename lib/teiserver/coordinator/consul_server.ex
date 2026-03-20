@@ -156,7 +156,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(:reinit, state) do
-    new_state = Map.merge(empty_state(state.lobby_id), state)
+    new_state = state.lobby_id |> empty_state() |> Map.merge(state)
 
     {:noreply, new_state}
   end
@@ -805,7 +805,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # Take into account if they are waiting to join
     # if they are not waiting to join and someone else is then
     {change, new_client} =
-      if Enum.empty?(get_queue(state)) do
+      if get_queue(state) |> Enum.empty?() do
         {change, new_client}
       else
         {change, new_client}
@@ -814,7 +814,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # If they are moving from player to spectator, queue up a tick
     if change do
       if existing.player == true and new_client.player == false do
-        if Enum.member?(get_queue(state), existing.userid) do
+        if get_queue(state) |> Enum.member?(existing.userid) do
           ChatLib.say(userid, "$leaveq", state.lobby_id)
         end
 
@@ -1311,7 +1311,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         found =
           Client.list_clients(battle.players)
           |> Enum.filter(fn client ->
-            String.contains?(String.downcase(client.name), name)
+            client.name |> String.downcase() |> String.contains?(name)
           end)
 
         case found do

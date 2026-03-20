@@ -63,11 +63,11 @@ defmodule Teiserver.Helper.TimexHelperTest do
   end
 
   test "time_until" do
-    assert TimexHelper.time_until(Timex.shift(Timex.now(), hours: 12)) == "12 hours"
-    assert TimexHelper.time_until(Timex.shift(Timex.now(), hours: 40)) == "1 day, 16 hours"
+    assert Timex.now() |> Timex.shift(hours: 12) |> TimexHelper.time_until() == "12 hours"
+    assert Timex.now() |> Timex.shift(hours: 40) |> TimexHelper.time_until() == "1 day, 16 hours"
     assert TimexHelper.time_until(Timex.now()) == ""
-    assert TimexHelper.time_until(Timex.shift(Timex.now(), hours: -12)) == "12 hours"
-    assert TimexHelper.time_until(Timex.shift(Timex.now(), hours: -40)) == "1 day, 16 hours"
+    assert Timex.now() |> Timex.shift(hours: -12) |> TimexHelper.time_until() == "12 hours"
+    assert Timex.now() |> Timex.shift(hours: -40) |> TimexHelper.time_until() == "1 day, 16 hours"
   end
 
   test "parse dmy" do

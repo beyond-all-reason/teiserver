@@ -142,7 +142,7 @@ defmodule Teiserver.OAuth do
       # don't do any validation on the challenge yet, this is done when exchanging
       # the code for a token
       attrs = %{
-        value: Base.hex_encode32(:crypto.strong_rand_bytes(32)),
+        value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(),
         owner_id: user_id,
         application_id: app_id,
         scopes: attrs.scopes,
@@ -208,12 +208,12 @@ defmodule Teiserver.OAuth do
     scopes = opts[:scopes]
 
     if Enum.empty?(scopes) ||
-         not MapSet.subset?(MapSet.new(scopes), MapSet.new(application.scopes)) do
+         not (MapSet.new(scopes) |> MapSet.subset?(MapSet.new(application.scopes))) do
       {:error, :invalid_scope}
     else
       token_attrs =
         %{
-          value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
+          value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
           application_id: application.id,
           scopes: scopes,
           original_scopes: Map.get(application, :original_scopes, application.scopes),
@@ -225,7 +225,7 @@ defmodule Teiserver.OAuth do
       refresh_attrs =
         if Keyword.get(opts, :create_refresh, true) do
           %{
-            value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
+            value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
             application_id: application.id,
             scopes: scopes,
             original_scopes: application.scopes,

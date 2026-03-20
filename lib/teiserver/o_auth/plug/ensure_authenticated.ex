@@ -61,7 +61,7 @@ defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
   defp has_all_scopes?(_token, nil), do: :ok
 
   defp has_all_scopes?(token, requested_scopes) do
-    diff = MapSet.difference(MapSet.new(requested_scopes), MapSet.new(token.scopes))
+    diff = requested_scopes |> MapSet.new() |> MapSet.difference(MapSet.new(token.scopes))
 
     if Enum.empty?(diff) do
       :ok

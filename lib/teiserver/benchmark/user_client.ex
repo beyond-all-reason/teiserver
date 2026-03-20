@@ -91,8 +91,10 @@ defmodule Teiserver.Benchmark.UserClient do
     # Random start so we don't get them all at the same time
     :timer.sleep(state.initial_delay)
 
+    port = int_parse(state.port)
+
     {:ok, socket} =
-      :gen_tcp.connect(to_charlist(state.server), int_parse(state.port), active: false)
+      state.server |> to_charlist() |> :gen_tcp.connect(port, active: false)
 
     _send(socket, "TMPLI TEST_#{state.id}\n")
 

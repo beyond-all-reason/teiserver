@@ -15,7 +15,7 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
     with {:ok, user} <- get_user(username_or_email),
          {:ok, app} <- get_app(app_uid) do
       token_attr = %{
-        value: Base.hex_encode32(:crypto.strong_rand_bytes(32), padding: false),
+        value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
         owner_id: user.id,
         application_id: app.id,
         scopes: app.scopes,

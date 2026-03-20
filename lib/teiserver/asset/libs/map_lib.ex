@@ -17,7 +17,9 @@ defmodule Teiserver.Asset.MapLib do
       end)
 
     tx =
-      Enum.reduce(Enum.zip(map_attrs, names), Multi.new(), fn {attr, name}, multi ->
+      map_attrs
+      |> Enum.zip(names)
+      |> Enum.reduce(Multi.new(), fn {attr, name}, multi ->
         Multi.insert(multi, name, Asset.Map.changeset(%Asset.Map{}, attr))
       end)
       |> Repo.transaction()

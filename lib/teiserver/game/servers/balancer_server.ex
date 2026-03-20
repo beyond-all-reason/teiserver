@@ -114,7 +114,7 @@ defmodule Teiserver.Game.BalancerServer do
   end
 
   def handle_cast(:reinit, state) do
-    new_state = Map.merge(empty_state(state.lobby_id), state)
+    new_state = state.lobby_id |> empty_state() |> Map.merge(state)
     {:noreply, new_state}
   end
 

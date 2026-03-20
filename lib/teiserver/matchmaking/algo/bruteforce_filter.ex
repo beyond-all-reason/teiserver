@@ -38,7 +38,9 @@ defmodule Teiserver.Matchmaking.Algo.BruteforceFilter do
 
     predictions = Openskill.predict_win(team_skills)
 
-    Enum.all?(Enum.zip(match, predictions), fn {team, win_pred} ->
+    match
+    |> Enum.zip(predictions)
+    |> Enum.all?(fn {team, win_pred} ->
       Enum.all?(team, fn member ->
         {lo, hi} = acceptable_win_proba(member)
         win_pred >= lo && win_pred <= hi

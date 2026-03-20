@@ -72,7 +72,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
         :timer.send_interval(10_000, :tick)
 
-        players = Lobby.list_lobby_players!(int_parse(id))
+        players = id |> int_parse() |> Lobby.list_lobby_players!()
         clients = get_clients(players)
 
         bar_user = Account.get_user_by_id(socket.assigns.current_user.id)

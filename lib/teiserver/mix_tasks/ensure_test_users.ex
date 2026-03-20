@@ -24,7 +24,7 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
           parsed
 
         {:error, err} ->
-          shell.error(inspect(err))
+          err |> inspect() |> shell.error()
           exit({:shutdown, 1})
       end
 
@@ -40,7 +40,7 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
       timeout: :infinity
     )
     |> Enum.each(fn {:ok, res} ->
-      IO.puts(Jason.encode!(res))
+      res |> Jason.encode!() |> IO.puts()
     end)
   end
 

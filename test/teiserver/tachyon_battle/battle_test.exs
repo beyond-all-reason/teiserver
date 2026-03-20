@@ -31,7 +31,9 @@ defmodule Teiserver.TachyonBattle.BattleTest do
       autohost_id = :rand.uniform(10_000_000)
 
       autohost_sess_pid =
-        Callbacks.start_link_supervised!(Session.child_spec({%{id: autohost_id}, self()}))
+        {%{id: autohost_id}, self()}
+        |> Session.child_spec()
+        |> Callbacks.start_link_supervised!()
 
       Session.update_capacity(autohost_sess_pid, 10, 0)
 
