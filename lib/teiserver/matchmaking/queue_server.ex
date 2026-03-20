@@ -188,11 +188,13 @@ defmodule Teiserver.Matchmaking.QueueServer do
     sess_pid = self()
 
     if party_id == nil do
-      game_type = GenServer.call(via_tuple(queue_id), :get_game_type)
+      game_type = queue_id |> via_tuple() |> GenServer.call(:get_game_type)
       member = Member.new([user_id], game_type)
-      GenServer.call(via_tuple(queue_id), {:join_queue, version, {member, sess_pid}})
+      queue_id |> via_tuple() |> GenServer.call({:join_queue, version, {member, sess_pid}})
     else
-      GenServer.call(via_tuple(queue_id), {:join_queue, version, {user_id, sess_pid}, party_id})
+      queue_id
+      |> via_tuple()
+      |> GenServer.call({:join_queue, version, {user_id, sess_pid}, party_id})
     end
   catch
     :exit, {:noproc, _} -> {:error, :invalid_queue}
@@ -209,9 +211,9 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @spec party_join_queue(id(), version :: String.t(), Party.id(), [T.userid()]) ::
           {:ok, queue_pid :: pid()} | {:error, reason :: term()}
   def party_join_queue(queue_id, version, party_id, player_ids) do
-    game_type = GenServer.call(via_tuple(queue_id), :get_game_type)
+    game_type = queue_id |> via_tuple() |> GenServer.call(:get_game_type)
     member = Member.new(player_ids, game_type)
-    GenServer.call(via_tuple(queue_id), {:party_join_queue, version, party_id, member})
+    queue_id |> via_tuple() |> GenServer.call({:party_join_queue, version, party_id, member})
   catch
     :exit, {:noproc, _} -> {:no, :invalid_queue}
   end
@@ -224,7 +226,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
   @spec leave_queue(id(), T.userid()) :: leave_result()
   def leave_queue(queue_id, player_id) do
-    GenServer.call(via_tuple(queue_id), {:leave_queue, player_id})
+    queue_id |> via_tuple() |> GenServer.call({:leave_queue, player_id})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_queue}
   end
@@ -236,7 +238,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
   @spec disband_pairing(id(), pid()) :: :ok
   def disband_pairing(queue_id, room_pid) do
-    GenServer.call(via_tuple(queue_id), {:disband_pairing, room_pid})
+    queue_id |> via_tuple() |> GenServer.call({:disband_pairing, room_pid})
   catch
     # if the queue is gone for whatever reason, the pairing room should be
     # killed as well, and nothing will happen

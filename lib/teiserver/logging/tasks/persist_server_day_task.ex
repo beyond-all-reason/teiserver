@@ -429,10 +429,10 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
   @spec get_logs(Date.t(), integer()) :: list()
   defp get_logs(date, segment_number) do
     start_time =
-      Timex.shift(date |> Timex.to_datetime(), minutes: segment_number * @segment_length)
+      date |> Timex.to_datetime() |> Timex.shift(minutes: segment_number * @segment_length)
 
     end_time =
-      Timex.shift(date |> Timex.to_datetime(), minutes: (segment_number + 1) * @segment_length)
+      date |> Timex.to_datetime() |> Timex.shift(minutes: (segment_number + 1) * @segment_length)
 
     Logging.list_server_minute_logs(
       search: [

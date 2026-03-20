@@ -13,7 +13,7 @@ defmodule Teiserver.Support.Tachyon do
   alias Teiserver.Tachyon.Schema
 
   def tachyon_case_setup(tags) do
-    if String.contains?(to_string(tags[:module]), "Tachyon") || tags[:tachyon] do
+    if tags[:module] |> to_string() |> String.contains?("Tachyon") || tags[:tachyon] do
       Tachyon.disable_state_restoration()
       Tachyon.restart_system()
 
@@ -273,12 +273,12 @@ defmodule Teiserver.Support.Tachyon do
         else
           {:error, %JsonXema.ValidationError{} = err} ->
             # credo:disable-for-next-line Credo.Check.Warning.IoInspect
-            IO.inspect(Jason.decode!(resp), label: "schema validation failed on")
+            resp |> Jason.decode!() |> IO.inspect(label: "schema validation failed on")
             {:error, err}
 
           err ->
             # credo:disable-for-next-line Credo.Check.Warning.IoInspect
-            IO.inspect(Jason.decode!(resp), label: "schema validation failed on")
+            resp |> Jason.decode!() |> IO.inspect(label: "schema validation failed on")
             # credo:disable-for-next-line Credo.Check.Warning.IoInspect
             IO.inspect(err, label: "unknown error")
             err

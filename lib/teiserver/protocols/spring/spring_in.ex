@@ -1131,18 +1131,17 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, name, battlestatus, team_colour, ai_dll] ->
         if Lobby.allow?(state.userid, :add_bot, state.lobby_id) do
           bot_data =
-            Lobby.new_bot(
-              Map.merge(
-                %{
-                  name: name,
-                  owner_name: state.username,
-                  owner_id: state.userid,
-                  team_colour: team_colour |> to_string(),
-                  ai_dll: ai_dll
-                },
-                Spring.parse_battle_status(battlestatus)
-              )
+            Map.merge(
+              %{
+                name: name,
+                owner_name: state.username,
+                owner_id: state.userid,
+                team_colour: team_colour |> to_string(),
+                ai_dll: ai_dll
+              },
+              Spring.parse_battle_status(battlestatus)
             )
+            |> Lobby.new_bot()
 
           Battle.add_bot_to_lobby(state.lobby_id, bot_data)
         end

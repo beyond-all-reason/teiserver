@@ -21,7 +21,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
     user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     id = UUID.uuid4()
 
-    map = AssetFixtures.create_map(stg_attr(id))
+    map = id |> stg_attr() |> AssetFixtures.create_map()
 
     initial_state =
       QueueServer.init_state(%{

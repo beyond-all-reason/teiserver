@@ -39,19 +39,19 @@ defmodule Teiserver.TachyonBattle.Battle do
   # and doing state recovery
   @spec send_update_event(Autohost.update_event()) :: :ok
   def send_update_event(event) do
-    GenServer.cast(via_tuple(event.battle_id), {:update_event, event})
+    event.battle_id |> via_tuple() |> GenServer.cast({:update_event, event})
   end
 
   @spec send_message(T.id(), String.t()) :: :ok | {:error, reason :: term()}
   def send_message(battle_id, message) do
-    GenServer.call(via_tuple(battle_id), {:send_message, message})
+    battle_id |> via_tuple() |> GenServer.call({:send_message, message})
   catch
     :exit, {:noproc, _} -> {:error, :invalid_battle}
   end
 
   @spec kill(T.id()) :: :ok | {:error, reason :: term()}
   def kill(battle_id) do
-    GenServer.call(via_tuple(battle_id), :kill)
+    battle_id |> via_tuple() |> GenServer.call(:kill)
   catch
     :exit, {:noproc, _} -> {:error, :invalid_battle}
   end

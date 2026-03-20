@@ -357,7 +357,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     messages =
       CodeOfConductData.flat_data()
       |> Enum.filter(fn {_key, value} ->
-        String.contains?(value |> String.downcase(), search_term)
+        value |> String.downcase() |> String.contains?(search_term)
       end)
       |> Enum.map(fn {key, value} ->
         "#{key} - #{value}"

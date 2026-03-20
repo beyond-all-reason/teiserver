@@ -15,7 +15,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
     assert :ok == PersistServerDayTask.perform(%{})
 
     # Now ensure it ran
-    log = Logging.get_server_day_log(Timex.to_date({2021, 1, 1}))
+    log = {2021, 1, 1} |> Timex.to_date() |> Logging.get_server_day_log()
 
     assert log.date == Timex.to_date({2021, 1, 1})
     assert is_integer(log.data["aggregates"]["minutes"]["lobby"])

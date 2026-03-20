@@ -361,7 +361,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             |> Enum.map(fn {_, name} -> String.length(name) end)
             |> Enum.sum()
 
-          start_time = Timex.shift(date |> Timex.to_datetime(), minutes: 10 + :rand.uniform(1000))
+          start_time =
+            date |> Timex.to_datetime() |> Timex.shift(minutes: 10 + :rand.uniform(1000))
+
           end_time = Timex.shift(start_time, minutes: 10 + :rand.uniform(120))
 
           {:ok, match} =

@@ -42,8 +42,8 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
       user = TeiserverTestLib.new_user()
 
       # Ensure no existing groups
-      assert Enum.empty?(Moderation.list_report_groups(where: [target_id: user.id]))
-      assert Enum.empty?(Moderation.list_reports(where: [target_id: user.id]))
+      assert Moderation.list_report_groups(where: [target_id: user.id]) |> Enum.empty?()
+      assert Moderation.list_reports(where: [target_id: user.id]) |> Enum.empty?()
 
       {:ok, index_live, html} = live(conn, ~p"/moderation/report_user/#{user.id}")
 

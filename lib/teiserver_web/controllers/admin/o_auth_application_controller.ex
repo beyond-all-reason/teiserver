@@ -23,7 +23,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, _params) do
     applications = ApplicationQueries.list_applications()
-    stats = ApplicationQueries.get_stats(Enum.map(applications, fn app -> app.id end))
+    stats = applications |> Enum.map(fn app -> app.id end) |> ApplicationQueries.get_stats()
 
     conn
     |> assign(:page_title, "BAR - oauth apps")
@@ -93,7 +93,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
 
   @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, assigns) do
-    case ApplicationQueries.get_application_by_id(Map.get(assigns, "id")) do
+    case assigns |> Map.get("id") |> ApplicationQueries.get_application_by_id() do
       %Application{} = app ->
         render_show(conn, app)
 
@@ -106,9 +106,9 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
 
   @spec edit(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit(conn, assigns) do
-    case ApplicationQueries.get_application_by_id(Map.get(assigns, "id")) do
+    case assigns |> Map.get("id") |> ApplicationQueries.get_application_by_id() do
       %Application{} = app ->
-        changeset = OAuth.change_application(Map.put(app, :owner_email, app.owner.email))
+        changeset = app |> Map.put(:owner_email, app.owner.email) |> OAuth.change_application()
 
         conn
         |> assign(:page_title, "BAR - edit oauth app #{app.name}")
@@ -127,7 +127,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
 
   @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, assigns) do
-    case ApplicationQueries.get_application_by_id(Map.get(assigns, "id")) do
+    case assigns |> Map.get("id") |> ApplicationQueries.get_application_by_id() do
       %Application{} = app ->
         attrs = form_to_app(Map.get(assigns, "application", %{}), Map.get(assigns, "scopes", %{}))
 
@@ -158,7 +158,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
 
   @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete(conn, assigns) do
-    case ApplicationQueries.get_application_by_id(Map.get(assigns, "id")) do
+    case assigns |> Map.get("id") |> ApplicationQueries.get_application_by_id() do
       %Application{} = app ->
         case OAuth.delete_application(app) do
           :ok ->

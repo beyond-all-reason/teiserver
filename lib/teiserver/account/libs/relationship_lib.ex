@@ -313,23 +313,23 @@ defmodule Teiserver.Account.RelationshipLib do
 
   @spec does_a_follow_b?(T.userid(), T.userid()) :: boolean
   def does_a_follow_b?(u1, u2) do
-    Enum.member?(list_userids_followed_by_userid(u1), u2)
+    u1 |> list_userids_followed_by_userid() |> Enum.member?(u2)
   end
 
   @spec does_a_ignore_b?(T.userid(), T.userid()) :: boolean
   def does_a_ignore_b?(u1, u2) do
-    Enum.member?(list_userids_ignored_by_userid(u1), u2)
+    u1 |> list_userids_ignored_by_userid() |> Enum.member?(u2)
   end
 
   @spec does_a_avoid_b?(T.userid(), T.userid()) :: boolean
   def does_a_avoid_b?(u1, u2) do
-    Enum.member?(list_userids_avoided_by_userid(u1), u2) or
+    u1 |> list_userids_avoided_by_userid() |> Enum.member?(u2) or
       does_a_block_b?(u1, u2)
   end
 
   @spec does_a_block_b?(T.userid(), T.userid()) :: boolean
   def does_a_block_b?(u1, u2) do
-    Enum.member?(list_userids_blocked_by_userid(u1), u2)
+    u1 |> list_userids_blocked_by_userid() |> Enum.member?(u2)
   end
 
   @spec profile_view_permissions(

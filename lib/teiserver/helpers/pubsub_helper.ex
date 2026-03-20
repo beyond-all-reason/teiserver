@@ -40,7 +40,7 @@ defmodule Teiserver.Helpers.PubSubHelper do
     topic_string =
       case topic do
         {topic_function, topic_key} ->
-          topic_function.(Map.get(result, topic_key))
+          result |> Map.get(topic_key) |> topic_function.()
 
         _ ->
           if is_function(topic) do

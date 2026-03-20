@@ -327,8 +327,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
         _event,
         %{assigns: %{id: id, bar_user: _bar_user}} = socket
       ) do
-    Lobby.kick_user_from_battle(int_parse(target_id), id)
-    Telemetry.log_simple_server_event(int_parse(target_id), "lobby.kicked_from_web_interface")
+    parsed_id = int_parse(target_id)
+    Lobby.kick_user_from_battle(parsed_id, id)
+    Telemetry.log_simple_server_event(parsed_id, "lobby.kicked_from_web_interface")
     {:noreply, socket}
   end
 

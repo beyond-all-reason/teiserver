@@ -71,13 +71,13 @@ defmodule Teiserver.SpringAuthTest do
     [1, 1, 0, 0, 1, 0, 0] = reply_bits
 
     # Lets check we can correctly in-game
-    new_status = Integer.undigits(Enum.reverse([0, 1, 0, 0, 0, 0, 0]), 2)
+    new_status = [0, 1, 0, 0, 0, 0, 0] |> Enum.reverse() |> Integer.undigits(2)
     _send_raw(socket, "MYSTATUS #{new_status}\n")
     reply = _recv_raw(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
 
     # And now the away flag
-    new_status = Integer.undigits(Enum.reverse([0, 0, 0, 0, 0, 0, 0]), 2)
+    new_status = [0, 0, 0, 0, 0, 0, 0] |> Enum.reverse() |> Integer.undigits(2)
     _send_raw(socket, "MYSTATUS #{new_status}\n")
     reply = _recv_raw(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
@@ -643,7 +643,7 @@ CLIENTS test_room #{user.name}\n"
     %{socket: socket} = auth_setup(context, user)
 
     # [in_game, away, r3, r2, r1, mod, bot]
-    new_status = Integer.undigits(Enum.reverse([0, 1, 0, 0, 0, 0, 0]), 2)
+    new_status = [0, 1, 0, 0, 0, 0, 0] |> Enum.reverse() |> Integer.undigits(2)
     _send_raw(socket, "MYSTATUS #{new_status}\n")
     reply = _recv_raw(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
@@ -665,7 +665,7 @@ CLIENTS test_room #{user.name}\n"
     Account.verify_user(bad_user.id)
 
     # Need to add it as a client for the :add_user command to work
-    Client.login(CacheUser.get_user_by_id(bad_user.id), :spring, "127.0.0.1")
+    bad_user.id |> CacheUser.get_user_by_id() |> Client.login(:spring, "127.0.0.1")
 
     # Now see what happens when we add user
     pid = Client.get_client_by_id(user.id).tcp_pid

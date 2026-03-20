@@ -12,7 +12,7 @@ defmodule Teiserver.Helpers.BoundedQueueTest do
   test "is_empty" do
     q = BQ.new(1)
     assert BQ.empty?(q)
-    assert not BQ.empty?(BQ.put(q, :coucou))
+    assert not (q |> BQ.put(:coucou) |> BQ.empty?())
   end
 
   test "from and to list" do

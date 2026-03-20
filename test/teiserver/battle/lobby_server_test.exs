@@ -54,7 +54,7 @@ defmodule Teiserver.Battle.LobbyServerTest do
     assert r == nil
 
     # Update lobby
-    LobbyLib.update_lobby(Map.put(lobby, :engine_name, "new engie"), nil, :reason)
+    lobby |> Map.put(:engine_name, "new engie") |> LobbyLib.update_lobby(nil, :reason)
 
     # No server
     # r = LobbyLib.update_lobby(Map.merge(lobby, %{engine_name: "new engie", id: -1}), nil, :reason)

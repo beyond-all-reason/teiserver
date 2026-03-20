@@ -21,13 +21,13 @@ defmodule Teiserver.Monitoring.Buckets do
             "expected buckets list to contain only numbers, got #{inspect(buckets)}"
     end
 
-    if buckets != Enum.uniq(Enum.sort(buckets)) do
+    if buckets != buckets |> Enum.sort() |> Enum.uniq() do
       raise ArgumentError, "expected buckets to be ordered ascending, got #{inspect(buckets)}"
     end
 
     number_of_buckets = length(buckets)
 
-    int_tree = :gb_trees.from_orddict(int_buckets(buckets, nil, 0))
+    int_tree = int_buckets(buckets, nil, 0) |> :gb_trees.from_orddict()
 
     float_tree =
       buckets

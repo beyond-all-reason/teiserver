@@ -59,7 +59,7 @@ defmodule Teiserver.Matchmaking.Member do
     default = BalanceLib.default_rating()
     default = %{skill: default.rating_value, uncertainty: default.uncertainty}
 
-    case Enum.find(Game.get_ratings_for_users(player_ids), &(&1.name == game_type)) do
+    case player_ids |> Game.get_ratings_for_users() |> Enum.find(&(&1.name == game_type)) do
       nil ->
         default
 

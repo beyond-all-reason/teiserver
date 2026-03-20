@@ -206,7 +206,9 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
       :ok = Tachyon.send_request(m.client, "party/acceptInvite", %{partyId: party_id})
     end
 
-    Task.await_many(Enum.map(members, fn m -> Task.async(fn -> Tachyon.drain(m.client) end) end))
+    members
+    |> Enum.map(fn m -> Task.async(fn -> Tachyon.drain(m.client) end) end)
+    |> Task.await_many()
 
     invited =
       if n_invited == 0 do
@@ -222,9 +224,9 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
         end)
       end
 
-    Task.await_many(
-      Enum.map(members ++ invited, fn m -> Task.async(fn -> Tachyon.drain(m.client) end) end)
-    )
+    (members ++ invited)
+    |> Enum.map(fn m -> Task.async(fn -> Tachyon.drain(m.client) end) end)
+    |> Task.await_many()
 
     {party_id, members, invited}
   end

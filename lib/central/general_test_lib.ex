@@ -43,7 +43,8 @@ defmodule Central.Helpers.GeneralTestLib do
   end
 
   def seeded?() do
-    r = Repo.one(from c in SiteConfig, where: c.key == "test.seeded")
+    query = from c in SiteConfig, where: c.key == "test.seeded"
+    r = Repo.one(query)
     r != nil
   end
 
@@ -145,7 +146,8 @@ defmodule Central.Helpers.GeneralTestLib do
 
     dud_user =
       if flags[:dud_user] do
-        Repo.one(from u in User, where: u.name == "dud user")
+        query = from u in User, where: u.name == "dud user"
+        Repo.one(query)
       end
 
     socket =

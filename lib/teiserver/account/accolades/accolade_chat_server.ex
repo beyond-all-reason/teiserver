@@ -49,7 +49,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
   # Handling user messages
   def handle_info({:user_message, message}, %{stage: :awaiting_choice} = state) do
     integer_choice =
-      case Integer.parse(String.trim(message)) do
+      case message |> String.trim() |> Integer.parse() do
         :error -> :error
         {v, _} -> v
       end

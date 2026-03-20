@@ -69,7 +69,7 @@ defmodule Teiserver.OAuth.CodeTest do
   test "must use valid verifier", %{user: user, app: app} do
     assert {:ok, code, attrs} = create_code(user, app)
     attrs = Map.put(attrs, :id, app.id)
-    no_match = Base.hex_encode32(:crypto.strong_rand_bytes(38), padding: false)
+    no_match = :crypto.strong_rand_bytes(38) |> Base.hex_encode32(padding: false)
     assert {:error, _} = OAuth.exchange_code(code, no_match)
 
     no_match =

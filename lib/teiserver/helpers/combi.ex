@@ -39,7 +39,8 @@ defmodule Teiserver.Helpers.Combi do
 
           [h | t] ->
             st1 =
-              Stream.map(lazy(__MODULE__, :combinations, [t, k - GroupLength.length(h)]), fn x ->
+              lazy(__MODULE__, :combinations, [t, k - GroupLength.length(h)])
+              |> Stream.map(fn x ->
                 [h] ++ x
               end)
 

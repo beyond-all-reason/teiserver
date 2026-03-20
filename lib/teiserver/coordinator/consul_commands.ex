@@ -540,8 +540,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         state
 
-      Enum.member?(get_queue(state), senderid) ->
-        pos = get_queue_position(get_queue(state), senderid) + 1
+      get_queue(state) |> Enum.member?(senderid) ->
+        pos = get_queue(state) |> get_queue_position(senderid) |> Kernel.+(1)
 
         ChatLib.sayprivateex(
           state.coordinator_id,
@@ -588,7 +588,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "leaveq", senderid: senderid}, state) do
-    if Enum.member?(get_queue(state), senderid) do
+    if get_queue(state) |> Enum.member?(senderid) do
       ChatLib.sayprivateex(
         state.coordinator_id,
         senderid,
@@ -769,7 +769,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     case result do
       :ok ->
         # Allowed to set restrictions
-        case Integer.parse(remaining |> String.trim()) do
+        case remaining |> String.trim() |> Integer.parse() do
           :error ->
             Lobby.sayprivateex(
               state.coordinator_id,
@@ -837,7 +837,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     case result do
       :ok ->
-        case Integer.parse(remaining |> String.trim()) do
+        case remaining |> String.trim() |> Integer.parse() do
           :error ->
             Lobby.sayprivateex(
               state.coordinator_id,
@@ -902,7 +902,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     case result do
       :ok ->
-        case Integer.parse(remaining |> String.trim()) do
+        case remaining |> String.trim() |> Integer.parse() do
           :error ->
             Lobby.sayprivateex(
               state.coordinator_id,
@@ -950,7 +950,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     case result do
       :ok ->
-        case Integer.parse(remaining |> String.trim()) do
+        case remaining |> String.trim() |> Integer.parse() do
           :error ->
             Lobby.sayprivateex(
               state.coordinator_id,
@@ -992,7 +992,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       ) do
     case String.split(remaining, " ") do
       [smin, smax] ->
-        case {Integer.parse(smin |> String.trim()), Integer.parse(smax |> String.trim())} do
+        case {smin |> String.trim() |> Integer.parse(), smax |> String.trim() |> Integer.parse()} do
           {:error, _} ->
             Lobby.sayprivateex(
               state.coordinator_id,
@@ -1076,7 +1076,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{command: "minranklevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    case Integer.parse(remaining |> String.trim()) do
+    case remaining |> String.trim() |> Integer.parse() do
       :error ->
         Lobby.sayprivateex(
           state.coordinator_id,
@@ -1106,7 +1106,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{command: "maxranklevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    case Integer.parse(remaining |> String.trim()) do
+    case remaining |> String.trim() |> Integer.parse() do
       :error ->
         Lobby.sayprivateex(
           state.coordinator_id,
@@ -1139,7 +1139,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       ) do
     case String.split(remaining, " ") do
       [smin, smax] ->
-        case {Integer.parse(smin |> String.trim()), Integer.parse(smax |> String.trim())} do
+        case {smin |> String.trim() |> Integer.parse(), smax |> String.trim() |> Integer.parse()} do
           {:error, _} ->
             Lobby.sayprivateex(
               state.coordinator_id,
@@ -1208,7 +1208,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{command: "minuncertaintylevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    case Integer.parse(remaining |> String.trim()) do
+    case remaining |> String.trim() |> Integer.parse() do
       :error ->
         Lobby.sayprivateex(
           state.coordinator_id,
@@ -1243,7 +1243,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{command: "maxuncertaintylevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    case Integer.parse(remaining |> String.trim()) do
+    case remaining |> String.trim() |> Integer.parse() do
       :error ->
         Lobby.sayprivateex(
           state.coordinator_id,
@@ -1274,7 +1274,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       ) do
     case String.split(remaining, " ") do
       [smin, smax] ->
-        case {Integer.parse(smin |> String.trim()), Integer.parse(smax |> String.trim())} do
+        case {smin |> String.trim() |> Integer.parse(), smax |> String.trim() |> Integer.parse()} do
           {:error, _} ->
             Lobby.sayprivateex(
               state.coordinator_id,

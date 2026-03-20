@@ -92,7 +92,7 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
       ]
     }
 
-    combos = BruteForce.potential_teams(length(input.players))
+    combos = input.players |> length() |> BruteForce.potential_teams()
     assert length(combos) == 462
     first_combo = combos |> Enum.at(0)
     assert first_combo == [0, 1, 2, 3, 4, 5]
