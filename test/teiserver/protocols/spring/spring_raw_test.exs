@@ -1,6 +1,6 @@
 defmodule Teiserver.SpringRawTest do
-  alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account
+  alias Teiserver.Account.UserCacheLib
   use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,

@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Telemetry.PropertyController do
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.AnonPropertyQueries
-  alias Teiserver.Telemetry.UserPropertyQueries
   alias Teiserver.Telemetry.ExportPropertiesTask
+  alias Teiserver.Telemetry.UserPropertyQueries
   use TeiserverWeb, :controller
   require Logger
 

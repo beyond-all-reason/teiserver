@@ -9,19 +9,19 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.Client
-  alias Teiserver.Room
   alias Teiserver.Battle
-  alias Teiserver.Coordinator
+  alias Teiserver.Client
   alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.BattleOut
   alias Teiserver.Protocols.Spring.LobbyPolicyOut
-  alias Teiserver.Protocols.Spring.UserOut
-  alias Teiserver.Protocols.Spring.SystemOut
   alias Teiserver.Protocols.Spring.PartyOut
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Protocols.Spring.SystemOut
+  alias Teiserver.Protocols.Spring.UserOut
+  alias Teiserver.Room
   alias Teiserver.SpringTcpServer
   require Logger
 

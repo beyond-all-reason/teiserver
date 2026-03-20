@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Account.SecurityController do
   alias Teiserver.Account
-  alias Teiserver.OAuth
   alias Teiserver.Account.TOTP
+  alias Teiserver.OAuth
 
   use TeiserverWeb, :controller
 

@@ -1,14 +1,14 @@
 defmodule Teiserver.MicroblogTest do
   @moduledoc false
 
+  alias Teiserver.AccountFixtures
   alias Teiserver.Microblog
   alias Teiserver.Microblog.PollResponse
+  alias Teiserver.Microblog.Post
   alias Teiserver.Microblog.PostTag
   alias Teiserver.Microblog.Tag
   alias Teiserver.Microblog.Upload
   alias Teiserver.Microblog.UserPreference
-  alias Teiserver.AccountFixtures
-  alias Teiserver.Microblog.Post
 
   use Teiserver.DataCase
 

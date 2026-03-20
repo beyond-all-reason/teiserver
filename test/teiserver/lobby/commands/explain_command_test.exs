@@ -2,11 +2,11 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
   @moduledoc false
 
   alias Teiserver.Battle
+  alias Teiserver.Common.PubsubListener
   alias Teiserver.Coordinator
-  alias Teiserver.TeiserverTestLib
   alias Teiserver.Lobby
   alias Teiserver.Lobby.ChatLib
-  alias Teiserver.Common.PubsubListener
+  alias Teiserver.TeiserverTestLib
   use Teiserver.ServerCase, async: false
 
   test "text based test" do

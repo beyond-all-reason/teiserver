@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
-  alias Teiserver.Telemetry
   alias Teiserver.Account
+  alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ComplexLobbyEventQueries
   alias Teiserver.Telemetry.ExportComplexLobbyEventsTask
   use TeiserverWeb, :controller

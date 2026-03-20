@@ -72,7 +72,7 @@
           #
           ## Readability Checks
           #
-          # {Credo.Check.Readability.AliasOrder, []}, 201 issues
+          {Credo.Check.Readability.AliasOrder, []},
           {Credo.Check.Readability.BlockPipe, []},
           {Credo.Check.Readability.FunctionNames, []},
           {Credo.Check.Readability.ImplTrue, []},

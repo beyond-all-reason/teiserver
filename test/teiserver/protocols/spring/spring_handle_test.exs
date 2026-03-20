@@ -4,8 +4,8 @@ defmodule Teiserver.SpringHandleTest do
   check the results coming back ensure you look at the auth and raw tests.
   """
 
-  alias Teiserver.TeiserverTestLib
   alias Teiserver.Protocols.SpringIn
+  alias Teiserver.TeiserverTestLib
   use Teiserver.DataCase, async: false
 
   test "LOGIN and EXIT" do

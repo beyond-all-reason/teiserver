@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Tachyon.LobbyTest do
-  alias Teiserver.Support.Tachyon
   alias ExUnit.Callbacks
   alias Teiserver.AssetFixtures
+  alias Teiserver.Support.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby

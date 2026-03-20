@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Microblog.RssController do
-  alias Teiserver.Microblog
   alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Microblog
   use TeiserverWeb, :controller
 
   plug :put_layout, false

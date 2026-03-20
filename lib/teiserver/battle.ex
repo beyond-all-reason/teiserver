@@ -3,6 +3,7 @@ defmodule Teiserver.Battle do
   The Battle context.
   """
 
+  alias ExULID.ULID
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Battle.Match
@@ -19,7 +20,6 @@ defmodule Teiserver.Battle do
   alias Teiserver.Protocols.Spring
   alias Teiserver.Repo
   alias Teiserver.Telemetry
-  alias ExULID.ULID
 
   require Logger
 

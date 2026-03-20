@@ -1,8 +1,8 @@
 defmodule Teiserver.Account.ClientServer do
   @moduledoc false
 
-  alias Teiserver.Lobby.ChatLib
   alias Phoenix.PubSub
+  alias Teiserver.Lobby.ChatLib
   use GenServer
   require Logger
 

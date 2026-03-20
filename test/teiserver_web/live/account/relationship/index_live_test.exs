@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Account.RelationshipLive.IndexLiveTest do
-  alias TeiserverWeb.Account.RelationshipLive.Index
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
+  alias TeiserverWeb.Account.RelationshipLive.Index
   use TeiserverWeb.ConnCase, async: true
 
   test "account relationship endpoints requires authentication" do

@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Tachyon.TransportTest do
-  alias WebsocketSyncClient, as: WSC
-  alias Teiserver.Support.Tachyon
   alias Teiserver.Player
+  alias Teiserver.Support.Tachyon
   alias Teiserver.Tachyon.Transport
+  alias WebsocketSyncClient, as: WSC
   use TeiserverWeb.ConnCase
 
   setup _context do

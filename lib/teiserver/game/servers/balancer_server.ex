@@ -1,9 +1,9 @@
 defmodule Teiserver.Game.BalancerServer do
+  alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.MatchLib
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle
   alias Teiserver.Coordinator
+  alias Teiserver.Data.Types, as: T
   use GenServer
   require Logger
 

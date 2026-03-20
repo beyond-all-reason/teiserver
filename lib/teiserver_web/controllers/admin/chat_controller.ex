@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Admin.ChatController do
-  alias Teiserver.Coordinator
   alias Teiserver.Chat
+  alias Teiserver.Coordinator
 
   use TeiserverWeb, :controller
 

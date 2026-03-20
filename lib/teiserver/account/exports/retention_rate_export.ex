@@ -17,9 +17,9 @@ defmodule Teiserver.Account.RetentionRateExport do
   """
 
   alias Teiserver.Account
-  alias Teiserver.Logging
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Logging
 
   require Logger
 

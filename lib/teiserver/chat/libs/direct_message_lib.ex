@@ -1,8 +1,8 @@
 defmodule Teiserver.Chat.DirectMessageLib do
   @moduledoc false
 
-  alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Chat.DirectMessage
+  alias Teiserver.Helper.QueryHelpers
   use TeiserverWeb, :library
 
   # Queries

@@ -1,10 +1,10 @@
 defmodule Teiserver.Matchmaking.QueueTest do
+  alias Central.Helpers.GeneralTestLib
   alias Teiserver.AssetFixtures
   alias Teiserver.Matchmaking
+  alias Teiserver.Matchmaking.QueueRegistry
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Support.Polling
-  alias Central.Helpers.GeneralTestLib
-  alias Matchmaking.QueueRegistry
   use Teiserver.DataCase
 
   @moduletag :tachyon

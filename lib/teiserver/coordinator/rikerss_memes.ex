@@ -2,8 +2,8 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Battle
-  alias Teiserver.Lobby.ChatLib
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Lobby.ChatLib
 
   @meme_list ~w(ticks poor rich crazy undo deathmatch)
 

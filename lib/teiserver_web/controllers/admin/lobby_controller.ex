@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.LobbyController do
-  alias Teiserver.Chat
   alias Teiserver.Battle
   alias Teiserver.Battle.MatchLib
+  alias Teiserver.Chat
 
   use TeiserverWeb, :controller
 

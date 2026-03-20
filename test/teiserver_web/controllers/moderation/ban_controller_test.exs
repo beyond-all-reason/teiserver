@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Moderation.BanControllerTest do
   @moduledoc false
 
+  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ModerationTestLib
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase

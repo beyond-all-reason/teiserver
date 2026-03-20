@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
   alias Teiserver.Account
   alias Teiserver.Battle
+  alias Teiserver.Helper.TimexHelper
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportLib
-  alias Teiserver.Helper.TimexHelper
   use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView

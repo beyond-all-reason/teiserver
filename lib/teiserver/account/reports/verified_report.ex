@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.VerifiedReport do
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Account
+  alias Teiserver.Helper.DatePresets
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-check"

@@ -1,11 +1,11 @@
 defmodule Teiserver.OAuth.ApplicationQueryTest do
   alias Teiserver.Bot.Bot
-  alias Teiserver.OAuth.ApplicationQueries
-  alias Teiserver.OAuthFixtures
-  alias Teiserver.Repo
   alias Teiserver.OAuth
+  alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.OAuth.CodeQueries
   alias Teiserver.OAuth.TokenQueries
+  alias Teiserver.OAuthFixtures
+  alias Teiserver.Repo
   alias Teiserver.TeiserverTestLib
   alias Timex.Duration
   use Teiserver.DataCase

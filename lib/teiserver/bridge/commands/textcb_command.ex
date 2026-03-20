@@ -4,9 +4,9 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
   """
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Communication
-  alias Teiserver.Room
-  alias Teiserver.Logging
   alias Teiserver.Config
+  alias Teiserver.Logging
+  alias Teiserver.Room
 
   @behaviour Teiserver.Bridge.BridgeCommandBehaviour
 

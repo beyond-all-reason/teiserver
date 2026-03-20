@@ -1,6 +1,6 @@
 defmodule Teiserver.Data.UserTest do
-  alias Teiserver.CacheUser
   alias Teiserver.Account
+  alias Teiserver.CacheUser
   alias Teiserver.TeiserverTestLib
   use Teiserver.ServerCase
 

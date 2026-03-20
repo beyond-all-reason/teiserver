@@ -9,8 +9,8 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
 
   alias Ecto.Adapters.SQL
   alias Mix.Tasks.Teiserver.PartyBalanceStatsTypes, as: PB
-  alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle
+  alias Teiserver.Battle.BalanceLib
   alias Teiserver.Config
   alias Teiserver.Game
   alias Teiserver.Repo

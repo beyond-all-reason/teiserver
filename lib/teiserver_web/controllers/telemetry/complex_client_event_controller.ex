@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.ComplexClientEventQueries
   alias Teiserver.Telemetry.ComplexAnonEventQueries
+  alias Teiserver.Telemetry.ComplexClientEventQueries
   alias Teiserver.Telemetry.ExportComplexClientEventsTask
 
   use TeiserverWeb, :controller

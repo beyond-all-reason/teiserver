@@ -3,17 +3,17 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   This is the module that receives discord events and passes them to the rest of Teiserver.
   """
 
-  alias Teiserver.Room
-  alias Teiserver.Moderation
-  alias Teiserver.Communication
-  alias Teiserver.Bridge.BridgeServer
-  alias Teiserver.Bridge.MessageCommands
-  alias Teiserver.Bridge.ChatCommands
-  alias Teiserver.Bridge.CommandLib
-  alias Teiserver.Config
   alias Nostrum.Api
   alias Nostrum.Api.ApplicationCommand
   alias Nostrum.Api.Thread
+  alias Teiserver.Bridge.BridgeServer
+  alias Teiserver.Bridge.ChatCommands
+  alias Teiserver.Bridge.CommandLib
+  alias Teiserver.Bridge.MessageCommands
+  alias Teiserver.Communication
+  alias Teiserver.Config
+  alias Teiserver.Moderation
+  alias Teiserver.Room
 
   use Nostrum.Consumer
 

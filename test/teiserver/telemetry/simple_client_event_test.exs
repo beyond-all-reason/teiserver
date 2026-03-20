@@ -1,9 +1,9 @@
 defmodule Teiserver.Telemetry.SimpleClientEventTest do
   @moduledoc false
 
-  alias Teiserver.Telemetry
-  alias Teiserver.TeiserverTestLib
   alias Ecto.Adapters.SQL
+  alias Teiserver.TeiserverTestLib
+  alias Teiserver.Telemetry
   use Teiserver.DataCase
 
   test "simple client events" do

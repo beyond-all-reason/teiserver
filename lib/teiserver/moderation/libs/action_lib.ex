@@ -2,9 +2,9 @@ defmodule Teiserver.Moderation.ActionLib do
   @moduledoc false
 
   alias Teiserver.Communication
+  alias Teiserver.Helper.TimexHelper
   alias Teiserver.Moderation
   alias Teiserver.Moderation.Action
-  alias Teiserver.Helper.TimexHelper
   use TeiserverWeb, :library
 
   # Functions

@@ -1,9 +1,9 @@
 defmodule Teiserver.Chat.RoomServer do
-  alias Teiserver.Data.Types, as: T
+  alias Phoenix.PubSub
   alias Teiserver.Chat
   alias Teiserver.Chat.RoomRegistry
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
-  alias Phoenix.PubSub
 
   use GenServer, restart: :temporary
 

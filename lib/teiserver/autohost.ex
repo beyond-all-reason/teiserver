@@ -4,8 +4,8 @@ defmodule Teiserver.Autohost do
   alias Teiserver.Autohost.TachyonHandler
   alias Teiserver.Bot.Bot
   alias Teiserver.BotQueries
-  alias Teiserver.TachyonBattle
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.TachyonBattle
 
   @type id :: Teiserver.Bot.Bot.id()
   @type reg_value :: SessionRegistry.reg_value()

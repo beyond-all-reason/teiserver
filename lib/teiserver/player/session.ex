@@ -9,6 +9,9 @@ defmodule Teiserver.Player.Session do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.BoundedQueue, as: BQ
+  alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.KvStore
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueServer
@@ -19,9 +22,6 @@ defmodule Teiserver.Player.Session do
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helpers.BoundedQueue, as: BQ
-  alias Teiserver.Helpers.MonitorCollection, as: MC
 
   # For now, never restart a session. Until some form of state persistence is
   # implemented it's better to just remove the process completely than

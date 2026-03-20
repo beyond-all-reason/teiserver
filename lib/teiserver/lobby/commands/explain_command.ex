@@ -4,9 +4,9 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
   """
 
   alias Teiserver.Account.Auth
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle
   alias Teiserver.Coordinator
+  alias Teiserver.Data.Types, as: T
   import Teiserver.Helper.NumberHelper, only: [round: 2]
   @behaviour Teiserver.Lobby.LobbyCommandBehaviour
 

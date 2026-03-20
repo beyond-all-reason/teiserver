@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.API.Admin.AssetController do
+  alias JsonXema.ValidationError
   alias Teiserver.Asset
   alias Teiserver.OAuth.Plug.EnsureAuthenticated
-  alias JsonXema.ValidationError
   use TeiserverWeb, :controller
 
   plug EnsureAuthenticated, scopes: ["admin.map"]

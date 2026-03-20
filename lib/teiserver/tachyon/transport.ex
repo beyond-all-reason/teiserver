@@ -6,8 +6,8 @@ defmodule Teiserver.Tachyon.Transport do
   """
 
   alias Teiserver.Helpers.BurstyRateLimiter
-  alias Teiserver.Tachyon.Schema
   alias Teiserver.Tachyon.Handler
+  alias Teiserver.Tachyon.Schema
 
   require Logger
 

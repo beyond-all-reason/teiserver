@@ -1,9 +1,9 @@
 defmodule Teiserver.Admin.DeleteUserTask do
   @moduledoc false
   alias Ecto.Adapters.SQL
-  alias Teiserver.Repo
   alias Teiserver.Account
   alias Teiserver.CacheUser
+  alias Teiserver.Repo
 
   @doc """
   Expects a list of user ids, returns the results of the query

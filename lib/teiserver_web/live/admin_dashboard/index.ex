@@ -2,6 +2,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Phoenix.LiveView.Socket
   alias Phoenix.PubSub
   alias Teiserver
+  alias Teiserver.Account.AccoladeLib
   alias Teiserver.Admin.AdminLib
   alias Teiserver.Battle
   alias Teiserver.Battle.MatchMonitorServer
@@ -9,7 +10,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Game
-  alias Teiserver.Account.AccoladeLib
 
   use TeiserverWeb, :live_view
 

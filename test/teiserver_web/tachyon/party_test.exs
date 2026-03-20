@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Tachyon.PartyTest do
-  alias Teiserver.Support.Polling
-  alias Teiserver.Support.Tachyon
   alias Teiserver.Party
   alias Teiserver.Player.SessionRegistry
+  alias Teiserver.Support.Polling
+  alias Teiserver.Support.Tachyon
   use TeiserverWeb.ConnCase, async: false
 
   describe "create" do

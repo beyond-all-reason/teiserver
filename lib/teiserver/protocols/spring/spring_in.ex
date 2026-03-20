@@ -6,6 +6,7 @@ defmodule Teiserver.Protocols.SpringIn do
   https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
   """
 
+  alias ExULID.ULID
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
@@ -28,7 +29,6 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Protocols.SpringOut
   alias Teiserver.Room
   alias Teiserver.SpringTcpServer
-  alias ExULID.ULID
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
   import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]

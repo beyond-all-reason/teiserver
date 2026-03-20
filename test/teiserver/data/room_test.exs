@@ -1,8 +1,8 @@
 defmodule Teiserver.Data.RoomTest do
   @moduledoc false
 
-  alias Teiserver.Room
   alias Teiserver.Account.UserCacheLib
+  alias Teiserver.Room
   use Teiserver.DataCase, async: true
   import Teiserver.TeiserverTestLib, only: [new_user: 1]
 

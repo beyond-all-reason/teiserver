@@ -1,13 +1,13 @@
 defmodule Teiserver.Game.LobbyPolicyLib do
   @moduledoc false
 
-  alias Teiserver.Config
-  alias Teiserver.Game
   alias Teiserver.Account
-  alias Teiserver.Game.LobbyPolicy
-  alias Teiserver.Game.LobbyPolicyOrganiserServer
-  alias Teiserver.Game.LobbyPolicyBotServer
+  alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Game
+  alias Teiserver.Game.LobbyPolicy
+  alias Teiserver.Game.LobbyPolicyBotServer
+  alias Teiserver.Game.LobbyPolicyOrganiserServer
   use TeiserverWeb, :library
   require Logger
 

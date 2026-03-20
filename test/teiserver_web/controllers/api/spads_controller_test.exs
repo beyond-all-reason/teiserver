@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.API.SpadsControllerTest do
   alias Teiserver.Account
+  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Game.MatchRatingLib
-  alias TeiserverWeb.API.SpadsController
-  alias Teiserver.CacheUser
   alias Teiserver.TeiserverTestLib
+  alias TeiserverWeb.API.SpadsController
   use TeiserverWeb.ConnCase, async: false
 
   import TeiserverTestLib,

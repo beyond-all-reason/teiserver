@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.API.Admin.AssetControllerTest do
-  alias Teiserver.OAuthFixtures
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.OAuthFixtures
   use TeiserverWeb.ConnCase, async: false
 
   defp setup_user(_context) do

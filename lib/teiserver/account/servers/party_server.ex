@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.PartyServer do
+  alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.PartyLib
-  alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
   use GenServer
   require Logger

@@ -1,13 +1,13 @@
 defmodule TeiserverWeb.Moderation.ActionController do
   @moduledoc false
 
+  alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.UserLib
+  alias Teiserver.Communication
   alias Teiserver.Config
   alias Teiserver.Logging
-  alias Teiserver.Account
   alias Teiserver.Moderation
-  alias Teiserver.Communication
   alias Teiserver.Moderation.Action
   alias Teiserver.Moderation.ActionLib
   alias Teiserver.Moderation.RefreshUserRestrictionsTask

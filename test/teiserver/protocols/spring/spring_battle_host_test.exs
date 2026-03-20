@@ -1,6 +1,6 @@
 defmodule Teiserver.SpringBattleHostTest do
-  alias Teiserver.Coordinator
   alias Teiserver.Battle
+  alias Teiserver.Coordinator
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
   use Teiserver.ServerCase, async: false

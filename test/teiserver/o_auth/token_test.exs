@@ -1,8 +1,8 @@
 defmodule Teiserver.OAuth.TokenTest do
-  alias Teiserver.OAuth
-  alias Teiserver.OAuthFixtures
   alias Ecto.Changeset
+  alias Teiserver.OAuth
   alias Teiserver.OAuth.Token
+  alias Teiserver.OAuthFixtures
   alias Teiserver.Repo
   alias Teiserver.TeiserverTestLib
   alias Timex.Duration

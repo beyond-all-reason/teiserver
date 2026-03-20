@@ -1,9 +1,9 @@
 defmodule Teiserver.Coordinator.SpadsParser do
   @moduledoc false
-  alias Teiserver.CacheUser
   alias Teiserver.Account
-  alias Teiserver.Telemetry
   alias Teiserver.Battle
+  alias Teiserver.CacheUser
+  alias Teiserver.Telemetry
 
   @spec handle_in(String.t(), map()) :: {:host_update, map()} | nil
   def handle_in(msg, state) do

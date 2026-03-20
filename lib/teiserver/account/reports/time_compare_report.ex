@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.TimeCompareReport do
-  alias Teiserver.Logging
   alias Teiserver.Account
   alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Logging
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   @spec icon() :: String.t()

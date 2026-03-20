@@ -5,16 +5,16 @@ defmodule Teiserver.Player.TachyonHandler do
 
   alias Teiserver.Account
   alias Teiserver.CacheUser
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.BurstyRateLimiter
+  alias Teiserver.Helpers.Collections
+  alias Teiserver.Helpers.TachyonParser
   alias Teiserver.Matchmaking
   alias Teiserver.Messaging
   alias Teiserver.Player.Registry
   alias Teiserver.Player.Session
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Player.SessionSupervisor
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helpers.BurstyRateLimiter
-  alias Teiserver.Helpers.Collections
-  alias Teiserver.Helpers.TachyonParser
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Tachyon.Schema
 

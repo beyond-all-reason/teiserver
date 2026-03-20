@@ -4,11 +4,11 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
   Assumes the basics of parties and matchmaking are working already
   """
 
-  alias Teiserver.Support.Tachyon
-  alias Teiserver.AssetFixtures
-  alias Teiserver.Matchmaking.QueueSupervisor
-  alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Asset
+  alias Teiserver.AssetFixtures
+  alias Teiserver.Matchmaking.QueueServer
+  alias Teiserver.Matchmaking.QueueSupervisor
+  alias Teiserver.Support.Tachyon
   use Teiserver.DataCase
 
   @moduletag :wip

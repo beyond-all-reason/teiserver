@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.RetentionReport do
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Account
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.Logging
 
   @spec icon() :: String.t()

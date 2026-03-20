@@ -1,8 +1,8 @@
 defmodule Teiserver.TachyonBattle.Supervisor do
   @moduledoc false
 
-  alias Teiserver.TachyonBattle.Types, as: T
   alias Teiserver.TachyonBattle.Battle
+  alias Teiserver.TachyonBattle.Types, as: T
 
   use DynamicSupervisor
 

@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Battle
-  alias Teiserver.TeiserverTestLib
   alias Teiserver.Client
   alias Teiserver.Lobby
+  alias Teiserver.TeiserverTestLib
   alias TeiserverWeb.Account.ProfileLive.Overview
 
   use TeiserverWeb.ConnCase, async: false

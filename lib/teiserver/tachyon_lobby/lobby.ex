@@ -6,9 +6,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Asset
   alias Teiserver.Autohost
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.KvStore
   alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.MonitorCollection, as: MC
+  alias Teiserver.KvStore
   alias Teiserver.Player
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle

@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Moderation.ReportControllerTest do
   @moduledoc false
 
-  alias Teiserver.Moderation.ModerationTestLib
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Moderation.ModerationTestLib
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase

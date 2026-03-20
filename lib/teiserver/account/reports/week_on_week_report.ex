@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.WeekOnWeekReport do
-  alias Teiserver.Logging
-  alias Teiserver.Helper.TimexHelper
   alias Teiserver.Helper.NumberHelper
+  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Logging
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-calendar"

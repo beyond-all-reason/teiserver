@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Tachyon.SystemTest do
-  alias Teiserver.Support.Tachyon
-  alias Teiserver.Support.Polling
-  alias Teiserver.OAuthFixtures
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.OAuthFixtures
+  alias Teiserver.Support.Polling
+  alias Teiserver.Support.Tachyon
   use TeiserverWeb.ConnCase
 
   describe "server stats" do

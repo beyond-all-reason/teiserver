@@ -1,11 +1,11 @@
 defmodule Teiserver.Battle.MatchLib do
   @moduledoc false
 
-  alias Teiserver.Config
-  alias Teiserver.Battle
   alias Teiserver.Account
+  alias Teiserver.Battle
   alias Teiserver.Battle.Match
   alias Teiserver.Battle.MatchMembership
+  alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   use TeiserverWeb, :library
   require Logger

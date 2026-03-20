@@ -1,8 +1,8 @@
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Teiserver.Repo, :manual)
 
-alias Teiserver.Repo
 alias Central.Helpers.GeneralTestLib
+alias Teiserver.Repo
 
 :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo, sandbox: false)
 

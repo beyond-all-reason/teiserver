@@ -4,14 +4,14 @@ defmodule Teiserver.Party.Server do
   """
 
   alias Teiserver.Config
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.KvStore
   alias Teiserver.Matchmaking
   alias Teiserver.Messaging
   alias Teiserver.Party
   alias Teiserver.Player
   alias Teiserver.Tachyon
-  alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helpers.MonitorCollection, as: MC
 
   require Logger
 

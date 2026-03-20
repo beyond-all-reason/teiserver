@@ -1,8 +1,8 @@
 defmodule Teiserver.Microblog.PollResponseQueries do
   @moduledoc false
 
-  alias Teiserver.Microblog.PollResponse
   alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Microblog.PollResponse
   use TeiserverWeb, :queries
 
   # Queries

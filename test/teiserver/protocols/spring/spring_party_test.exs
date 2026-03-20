@@ -1,9 +1,9 @@
 defmodule Teiserver.Protocols.Spring.SpringPartyTest do
-  alias Teiserver.Protocols.SpringIn
-  alias Teiserver.Account.PartyLib
-  alias Teiserver.Support.Polling
   alias Teiserver.Account
+  alias Teiserver.Account.PartyLib
   alias Teiserver.Client
+  alias Teiserver.Protocols.SpringIn
+  alias Teiserver.Support.Polling
   use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,

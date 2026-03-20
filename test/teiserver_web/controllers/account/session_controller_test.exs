@@ -1,9 +1,8 @@
 defmodule TeiserverWeb.Account.SessionControllerTest do
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
+  alias Teiserver.Account.Guardian.Plug
   alias Teiserver.Config
-  alias Teiserver.Account.Guardian
-  alias Guardian.Plug
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase

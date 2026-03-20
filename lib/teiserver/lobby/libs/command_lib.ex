@@ -5,8 +5,8 @@ defmodule Teiserver.Lobby.CommandLib do
 
   alias Teiserver.Account
   alias Teiserver.Battle
-  alias Teiserver.Lobby.ChatLib
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Lobby.ChatLib
   require Logger
 
   @spec handle_command(T.lobby_server_state(), T.userid(), String.t()) :: T.lobby_server_state()

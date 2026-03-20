@@ -1,9 +1,9 @@
 defmodule Teiserver.OAuth.ApplicationQueries do
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.OAuth.Application
-  alias Teiserver.OAuth.TokenQueries
   alias Teiserver.OAuth.CodeQueries
   alias Teiserver.OAuth.CredentialQueries
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.OAuth.TokenQueries
 
   use TeiserverWeb, :queries
 

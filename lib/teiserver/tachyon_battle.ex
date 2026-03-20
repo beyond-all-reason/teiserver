@@ -8,11 +8,11 @@ defmodule Teiserver.TachyonBattle do
   suggest, is meant to be used with tachyon and autohosts.
   """
 
-  alias Teiserver.Bot
-  alias Teiserver.TachyonBattle.Types, as: T
-  alias Teiserver.TachyonBattle
   alias Teiserver.Autohost
   alias Teiserver.Battle
+  alias Teiserver.Bot
+  alias Teiserver.TachyonBattle
+  alias Teiserver.TachyonBattle.Types, as: T
 
   require Logger
 

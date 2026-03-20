@@ -5,8 +5,8 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
   """
 
   alias Teiserver.Account
-  alias Teiserver.Repo
   alias Teiserver.Logging.UserActivityDayLog
+  alias Teiserver.Repo
 
   use Oban.Worker, queue: :cleanup
 
