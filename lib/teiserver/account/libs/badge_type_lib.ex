@@ -129,12 +129,6 @@ defmodule Teiserver.Account.BadgeTypeLib do
     query
   end
 
-  # def _preload_things(query) do
-  #   from badge_types in query,
-  #     left_join: things in assoc(badge_types, :things),
-  #     preload: [things: things]
-  # end
-
   def nil_badge_type do
     %{
       name: "No badge",

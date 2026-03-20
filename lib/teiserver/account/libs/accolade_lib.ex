@@ -209,11 +209,6 @@ defmodule Teiserver.Account.AccoladeLib do
     :ok
   end
 
-  # @spec get_accolade_bot_pid() :: pid()
-  # defp get_accolade_bot_pid do
-  #   Teiserver.cache_get(:teiserver_accolade_server, :accolade_server)
-  # end
-
   @spec start_accolade_server() :: :ok | {:failure, String.t()}
   def start_accolade_server do
     if is_nil(get_accolade_bot_userid()) do

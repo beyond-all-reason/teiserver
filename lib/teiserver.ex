@@ -5,7 +5,6 @@ defmodule Teiserver do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.CacheHelper
 
-  # def icon, do: "fa-solid fa-robot"
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-server"
 
