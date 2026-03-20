@@ -19,7 +19,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   use GenServer
   require Logger
 
-  def bot_name(), do: "DiscordBridgeBot"
+  def bot_name, do: "DiscordBridgeBot"
 
   @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -27,7 +27,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   @spec get_bridge_userid() :: T.userid()
-  def get_bridge_userid() do
+  def get_bridge_userid do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_bridge_userid")
   end
 
@@ -311,7 +311,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     end
   end
 
-  defp do_begin() do
+  defp do_begin do
     Logger.debug("Starting up Bridge server")
     account = get_bridge_account()
     Teiserver.cache_put(:application_metadata_cache, "teiserver_bridge_userid", account.id)
@@ -412,7 +412,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   @spec get_bridge_account() :: Teiserver.CacheUser.t()
-  def get_bridge_account() do
+  def get_bridge_account do
     user =
       Account.get_user(nil,
         search: [
@@ -504,7 +504,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   @spec get_bridge_pid() :: pid
-  def get_bridge_pid() do
+  def get_bridge_pid do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
   end
 end

@@ -4,13 +4,13 @@ defmodule Teiserver.Logging.ServerYearLogLib do
   use TeiserverWeb, :library
 
   @spec colours :: atom
-  def colours(), do: :warning2
+  def colours, do: :warning2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-bar-chart"
+  def icon, do: "fa-solid fa-bar-chart"
 
   @spec get_server_year_logs :: Ecto.Query.t()
-  def get_server_year_logs() do
+  def get_server_year_logs do
     from(logs in ServerYearLog)
   end
 

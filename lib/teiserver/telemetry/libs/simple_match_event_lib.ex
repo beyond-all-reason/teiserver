@@ -10,10 +10,10 @@ defmodule Teiserver.Telemetry.SimpleMatchEventLib do
   @broadcast_event_types ~w()
 
   @spec colour :: atom
-  def colour(), do: :info2
+  def colour, do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-chess-pawn"
+  def icon, do: "fa-chess-pawn"
 
   @spec log_simple_match_event(T.userid(), T.match_id(), String.t(), non_neg_integer) ::
           {:error, Ecto.Changeset} | {:ok, SimpleMatchEvent}

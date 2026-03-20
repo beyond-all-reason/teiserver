@@ -10,10 +10,10 @@ defmodule Teiserver.Telemetry.SimpleServerEventLib do
   @broadcast_event_types ~w()
 
   @spec colour :: atom
-  def colour(), do: :info2
+  def colour, do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-server"
+  def icon, do: "fa-server"
 
   @spec log_simple_server_event(integer, String.t()) ::
           {:error, Ecto.Changeset} | {:ok, SimpleServerEvent}

@@ -33,7 +33,7 @@ defmodule Teiserver.Party do
     end
   end
 
-  def restore_parties() do
+  def restore_parties do
     System.restore_state("party", __MODULE__, :restore_party)
   end
 
@@ -95,7 +95,7 @@ defmodule Teiserver.Party do
           :ok | {:error, :invalid_request, reason :: term()}
   defdelegate send_message(party_id, from_id, msg_content), to: Server
 
-  def setup_site_configs() do
+  def setup_site_configs do
     Config.add_site_config_type(%{
       key: Server.max_size_key(),
       section: "Tachyon",

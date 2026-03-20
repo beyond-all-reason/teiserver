@@ -457,7 +457,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     end
   end
 
-  def gdt_check() do
+  def gdt_check do
     channel_id = 0
     name = ""
     content = ""

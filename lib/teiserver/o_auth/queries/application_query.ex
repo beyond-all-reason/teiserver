@@ -38,7 +38,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   need to add some pagination to that query
   """
   @spec list_applications() :: [Application.t()]
-  def list_applications() do
+  def list_applications do
     base_query() |> preload(:owner) |> Repo.all()
   end
 
@@ -80,7 +80,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
     end)
   end
 
-  def base_query() do
+  def base_query do
     from app in Application, as: :app
   end
 

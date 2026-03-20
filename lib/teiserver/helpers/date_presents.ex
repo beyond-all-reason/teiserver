@@ -65,22 +65,22 @@ defmodule Teiserver.Helper.DatePresets do
 
   # We use ++ here since the order matters
   @spec presets() :: list(String.t())
-  def presets(), do: @presets
+  def presets, do: @presets
 
   @spec long_presets() :: list(String.t())
-  def long_presets(), do: @long_presets
+  def long_presets, do: @long_presets
 
   @spec short_ranges() :: list(String.t())
-  def short_ranges(), do: @short_ranges ++ ["All time"]
+  def short_ranges, do: @short_ranges ++ ["All time"]
 
   @spec long_ranges() :: list(String.t())
-  def long_ranges(), do: @long_ranges ++ ["All time"]
+  def long_ranges, do: @long_ranges ++ ["All time"]
 
   @spec past_dates() :: list(String.t())
-  def past_dates(), do: @past_dates
+  def past_dates, do: @past_dates
 
   @spec future_dates() :: list(String.t())
-  def future_dates(), do: @future_dates
+  def future_dates, do: @future_dates
 
   @spec parse(String.t()) :: Date.t()
   def parse("Today"), do: Timex.today()

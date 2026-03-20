@@ -5,10 +5,10 @@ defmodule Teiserver.Logging.LoggingLib do
   import Plug.Conn, only: [assign: 3]
 
   @spec colours() :: atom
-  def colours(), do: :default
+  def colours, do: :default
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-bars"
+  def icon, do: "fa-solid fa-bars"
 
   @spec do_not_log(Plug.Conn.t()) :: Plug.Conn.t()
   def do_not_log(conn) do

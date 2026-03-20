@@ -7,14 +7,14 @@ defmodule Teiserver.Tachyon.Tasks.SetupAssets do
   alias Teiserver.Asset
   alias Teiserver.Repo
 
-  def ensure_engine() do
+  def ensure_engine do
     case Asset.get_engines() do
       [] -> create_engine()
       engines -> update_engine(engines)
     end
   end
 
-  defp create_engine() do
+  defp create_engine do
     # the engine version can be found by running `spring -version`
     case Asset.create_engine(%{name: "2025.01.6", in_matchmaking: true}) do
       {:ok, engine} -> {:ok, {:created, engine}}
@@ -39,14 +39,14 @@ defmodule Teiserver.Tachyon.Tasks.SetupAssets do
     end
   end
 
-  def ensure_game() do
+  def ensure_game do
     case Asset.get_games() do
       [] -> create_game()
       games -> update_game(games)
     end
   end
 
-  defp create_game() do
+  defp create_game do
     # the latest version can be found with
     # curl -Ls https://repos-cdn.beyondallreason.dev/byar/versions.gz | zcat | grep byar:test | cut -d, -f 4
     case Asset.create_game(%{name: "Beyond All Reason test-26929-d709d32", in_matchmaking: true}) do

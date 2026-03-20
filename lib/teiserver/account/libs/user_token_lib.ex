@@ -5,10 +5,10 @@ defmodule Teiserver.Account.UserTokenLib do
   use TeiserverWeb, :library
 
   @spec colours :: atom
-  def colours(), do: :info
+  def colours, do: :info
 
   @spec icon :: String.t()
-  def icon(), do: "fa-solid fa-hexagon-check"
+  def icon, do: "fa-solid fa-hexagon-check"
 
   # Queries
   @spec query_user_tokens() :: Ecto.Query.t()

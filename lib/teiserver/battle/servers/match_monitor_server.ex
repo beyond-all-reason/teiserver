@@ -21,7 +21,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec do_start() :: :ok
-  def do_start() do
+  def do_start do
     # Start the supervisor server
     {:ok, _monitor_pid} =
       DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
@@ -38,7 +38,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   @spec get_match_monitor_userid() :: T.userid() | nil
-  def get_match_monitor_userid() do
+  def get_match_monitor_userid do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end
 
@@ -421,7 +421,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     :ok
   end
 
-  defp do_begin() do
+  defp do_begin do
     Logger.debug("Starting up Match monitor server")
     account = get_match_monitor_account()
     Teiserver.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
@@ -452,7 +452,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   @spec get_match_monitor_account() :: Teiserver.CacheUser.t()
-  def get_match_monitor_account() do
+  def get_match_monitor_account do
     user =
       Account.get_user(nil,
         search: [
@@ -506,7 +506,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   @spec get_match_monitor_pid() :: pid() | nil
-  def get_match_monitor_pid() do
+  def get_match_monitor_pid do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "MatchMonitorServer") do
       [{pid, _}] ->
         pid

@@ -21,7 +21,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   @spec start_automod_server() :: :ok | {:failure, String.t()}
-  def start_automod_server() do
+  def start_automod_server do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
       [{_pid, _}] ->
         {:failure, "Already started"}
@@ -32,7 +32,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   @spec do_start() :: :ok
-  defp do_start() do
+  defp do_start do
     {:ok, _automod_pid} =
       DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
         Teiserver.Coordinator.AutomodServer,
@@ -213,7 +213,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   @spec get_automod_pid() :: pid() | nil
-  def get_automod_pid() do
+  def get_automod_pid do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
       [{pid, _}] ->
         pid

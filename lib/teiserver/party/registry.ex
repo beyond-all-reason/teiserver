@@ -14,7 +14,7 @@ defmodule Teiserver.Party.Registry do
   end
 
   @spec count() :: non_neg_integer()
-  def count() do
+  def count do
     Registry.count(__MODULE__)
   rescue
     # when the registry isn't up (yet), can happen with telemetry polling
@@ -22,7 +22,7 @@ defmodule Teiserver.Party.Registry do
     _e in ArgumentError -> 0
   end
 
-  def start_link() do
+  def start_link do
     Registry.start_link(keys: :unique, name: __MODULE__)
   end
 

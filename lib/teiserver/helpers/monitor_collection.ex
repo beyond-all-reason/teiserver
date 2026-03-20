@@ -8,7 +8,7 @@ defmodule Teiserver.Helpers.MonitorCollection do
   @opaque t :: Bimap.t()
 
   @spec new() :: t()
-  def new(), do: Bimap.new()
+  def new, do: Bimap.new()
 
   @doc """
   Start monitoring the given pid from the calling process. Same as

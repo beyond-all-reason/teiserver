@@ -13,7 +13,7 @@ defmodule Teiserver.Account.AccoladeLib do
   use TeiserverWeb, :library
   require Logger
 
-  def miss_count_limit(), do: 20
+  def miss_count_limit, do: 20
 
   # Functions
   @spec icon :: String.t()
@@ -198,7 +198,7 @@ defmodule Teiserver.Account.AccoladeLib do
   end
 
   @spec do_start() :: :ok
-  defp do_start() do
+  defp do_start do
     # Start the supervisor server
     {:ok, _accolade_server_pid} =
       DynamicSupervisor.start_child(Teiserver.Account.AccoladeSupervisor, {
@@ -210,12 +210,12 @@ defmodule Teiserver.Account.AccoladeLib do
   end
 
   # @spec get_accolade_bot_pid() :: pid()
-  # defp get_accolade_bot_pid() do
+  # defp get_accolade_bot_pid do
   #   Teiserver.cache_get(:teiserver_accolade_server, :accolade_server)
   # end
 
   @spec start_accolade_server() :: :ok | {:failure, String.t()}
-  def start_accolade_server() do
+  def start_accolade_server do
     if is_nil(get_accolade_bot_userid()) do
       do_start()
     else
@@ -250,12 +250,12 @@ defmodule Teiserver.Account.AccoladeLib do
   end
 
   @spec get_accolade_bot_userid() :: T.userid() | nil
-  def get_accolade_bot_userid() do
+  def get_accolade_bot_userid do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_accolade_userid")
   end
 
   @spec get_accolade_bot_pid() :: pid() | nil
-  def get_accolade_bot_pid() do
+  def get_accolade_bot_pid do
     case Horde.Registry.lookup(Teiserver.AccoladesRegistry, "AccoladeBotServer") do
       [{pid, _}] ->
         pid
@@ -352,7 +352,7 @@ defmodule Teiserver.Account.AccoladeLib do
   end
 
   @spec get_badge_types() :: [{non_neg_integer(), map()}]
-  def get_badge_types() do
+  def get_badge_types do
     Teiserver.cache_get_or_store(:application_temp_cache, "accolade_badges", fn ->
       Account.list_badge_types(search: [purpose: "Accolade"], order_by: "Name (A-Z)")
       |> Enum.with_index()

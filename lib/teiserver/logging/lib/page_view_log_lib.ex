@@ -6,16 +6,16 @@ defmodule Teiserver.Logging.PageViewLogLib do
   import Plug.Conn, only: [assign: 3]
 
   @spec colours() :: atom
-  def colours(), do: :info
+  def colours, do: :info
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-chart-line"
+  def icon, do: "fa-solid fa-chart-line"
 
   def do_not_log(conn) do
     assign(conn, :do_not_log, true)
   end
 
-  def get_page_view_logs() do
+  def get_page_view_logs do
     from(logs in PageViewLog)
   end
 

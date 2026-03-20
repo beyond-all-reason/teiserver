@@ -13,7 +13,7 @@ defmodule Teiserver.Moderation.ResponseLib do
   def colour, do: :info2
 
   @spec list_actions() :: [{String.t(), String.t()}]
-  def list_actions() do
+  def list_actions do
     [
       {"Ignore", "fa-solid fa-clock"},
       {"Warn", ActionLib.action_icon("Warn")},

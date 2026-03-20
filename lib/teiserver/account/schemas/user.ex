@@ -48,7 +48,7 @@ defmodule Teiserver.Account.User do
     timestamps()
   end
 
-  def default_data() do
+  def default_data do
     %{
       rank: 0,
       country: "??",

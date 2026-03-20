@@ -54,7 +54,7 @@ defmodule Teiserver.TachyonLobby.List do
   # one potential optimisation would be to store the list of lobbies in an
   # ets table that can be directly read from other processes
   @spec list() :: %{Lobby.id() => overview()}
-  def list() do
+  def list do
     {_, list} = GenServer.call(__MODULE__, :list)
     list
   end
@@ -74,14 +74,14 @@ defmodule Teiserver.TachyonLobby.List do
   """
   # similar comment regarding potential perf issue sending large messages
   @spec subscribe_updates() :: {non_neg_integer(), %{Lobby.id() => overview()}}
-  def subscribe_updates() do
+  def subscribe_updates do
     PubSubHelper.subscribe(@update_topic)
     GenServer.call(__MODULE__, :list)
   catch
     :exit, {:noproc, _} -> {0, %{}}
   end
 
-  def unsubscribe_updates() do
+  def unsubscribe_updates do
     PubSubHelper.unsubscribe(@update_topic)
   end
 
@@ -106,7 +106,7 @@ defmodule Teiserver.TachyonLobby.List do
   @doc """
   used in tests to force the update instead of waiting for the timer
   """
-  def broadcast_updates(), do: Process.whereis(__MODULE__) |> send(:broadcast_updates)
+  def broadcast_updates, do: Process.whereis(__MODULE__) |> send(:broadcast_updates)
 
   @impl GenServer
   def handle_continue(:bootstrap_state, state) do

@@ -168,7 +168,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
     end
   end
 
-  def new_bot_user() do
+  def new_bot_user do
     new_user()
     |> CacheUser.add_roles(["Bot"])
   end

@@ -20,10 +20,10 @@ defmodule Teiserver.Game.MatchDataTableExport do
   alias Teiserver.Helper.TimexHelper
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-table"
+  def icon, do: "fa-solid fa-table"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @spec show_form(Plug.Conn.t()) :: map()
   def show_form(_conn) do

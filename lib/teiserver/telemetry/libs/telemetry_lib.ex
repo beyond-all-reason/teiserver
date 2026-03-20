@@ -5,13 +5,13 @@ defmodule Teiserver.Telemetry.TelemetryLib do
   import Telemetry.Metrics
 
   @spec colours :: atom
-  def colours(), do: :warning2
+  def colours, do: :warning2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-heart-pulse"
+  def icon, do: "fa-solid fa-heart-pulse"
 
   @spec get_totals_and_reset :: map()
-  def get_totals_and_reset() do
+  def get_totals_and_reset do
     # credo:disable-for-next-line Credo.Check.Readability.PreferImplicitTry
     try do
       GenServer.call(TelemetryServer, :get_totals_and_reset)
@@ -36,7 +36,7 @@ defmodule Teiserver.Telemetry.TelemetryLib do
   end
 
   @spec metrics() :: list()
-  def metrics() do
+  def metrics do
     [
       last_value("teiserver.client.total"),
       last_value("teiserver.client.menu"),

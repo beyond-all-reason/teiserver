@@ -30,7 +30,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
 
   # For when there are no existing logs
   # we need to ensure the earliest log is from last year, not this year
-  defp perform_first_time() do
+  defp perform_first_time do
     first_logs =
       Logging.list_server_day_logs(
         order: "Oldest first",
@@ -120,7 +120,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
   end
 
   @spec year_so_far() :: map()
-  def year_so_far() do
+  def year_so_far do
     now = Timex.now()
 
     user_activity_logs =

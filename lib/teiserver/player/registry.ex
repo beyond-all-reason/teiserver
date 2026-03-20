@@ -12,7 +12,7 @@ defmodule Teiserver.Player.Registry do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Player.TachyonHandler
 
-  def start_link() do
+  def start_link do
     Horde.Registry.start_link(keys: :unique, name: __MODULE__)
   end
 
@@ -59,7 +59,7 @@ defmodule Teiserver.Player.Registry do
   end
 
   @spec connected_count() :: non_neg_integer()
-  def connected_count() do
+  def connected_count do
     case Horde.Registry.count(__MODULE__) do
       :undefined -> 0
       x -> x

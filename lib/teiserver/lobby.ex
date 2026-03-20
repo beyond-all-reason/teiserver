@@ -832,7 +832,7 @@ defmodule Teiserver.Lobby do
   end
 
   @spec new_script_password() :: String.t()
-  def new_script_password() do
+  def new_script_password do
     ULID.generate()
     |> Base.encode32(padding: false)
   end

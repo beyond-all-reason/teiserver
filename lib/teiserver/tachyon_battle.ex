@@ -68,5 +68,5 @@ defmodule Teiserver.TachyonBattle do
   # Generating a battle id is meaningless unless the corresponding
   # Battle genserver is also started and connected to an autohost
   @spec gen_id() :: T.id()
-  defp gen_id(), do: UUID.uuid4()
+  defp gen_id, do: UUID.uuid4()
 end

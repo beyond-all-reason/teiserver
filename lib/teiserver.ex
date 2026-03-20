@@ -5,9 +5,9 @@ defmodule Teiserver do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.CacheHelper
 
-  # def icon(), do: "fa-solid fa-robot"
+  # def icon, do: "fa-solid fa-robot"
   @spec icon :: String.t()
-  def icon(), do: "fa-solid fa-server"
+  def icon, do: "fa-solid fa-server"
 
   @spec icon(:friend | :friend_request | :ignore | :relationship) :: String.t()
   def icon(:relationship), do: "fa-solid fa-users"
@@ -29,7 +29,7 @@ defmodule Teiserver do
   end
 
   @spec accolade_status :: nil | :ok
-  def accolade_status() do
+  def accolade_status do
     Application.put_env(:elixir, :ansi_enabled, true)
     AccoladeLib.live_debug()
   end
@@ -41,7 +41,7 @@ defmodule Teiserver do
   end
 
   @spec node_name() :: String.t()
-  def node_name() do
+  def node_name do
     Application.get_env(:teiserver, Teiserver)[:node_name] || to_string(Node.self())
   end
 

@@ -43,7 +43,7 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
     {:noreply, state}
   end
 
-  defp update_lobby_list() do
+  defp update_lobby_list do
     complete_list =
       Battle.list_lobbies()
       |> Enum.map(fn lobby ->

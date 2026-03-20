@@ -136,7 +136,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     |> redirect(to: ~p"/admin/discord_channels")
   end
 
-  defp get_special_names() do
+  defp get_special_names do
     existing_names =
       Communication.list_discord_channels(select: [:name], limit: :infinity)
       |> Enum.map(fn %{name: name} -> name end)

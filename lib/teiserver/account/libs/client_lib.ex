@@ -39,12 +39,12 @@ defmodule Teiserver.Account.ClientLib do
   end
 
   @spec list_client_ids() :: [T.userid()]
-  def list_client_ids() do
+  def list_client_ids do
     Horde.Registry.select(Teiserver.ClientRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_clients() :: [T.client()]
-  def list_clients() do
+  def list_clients do
     list_client_ids()
     |> list_clients()
   end
@@ -214,7 +214,7 @@ defmodule Teiserver.Account.ClientLib do
   end
 
   @spec count_client() :: non_neg_integer()
-  def count_client() do
+  def count_client do
     case Horde.Registry.count(Teiserver.ClientRegistry) do
       :undefined -> 0
       n -> n
@@ -225,7 +225,7 @@ defmodule Teiserver.Account.ClientLib do
   # else one can get the number of connected *players*
   # also, horde doesn't have `count_select` so we have to
   # materialise the list and send it across process
-  def count_non_bot_clients() do
+  def count_non_bot_clients do
     guards =
       ["SPADS v", "SpringLobbyMonitor", "Teiserver Internal Client", "SLTS Client d"]
       |> Enum.map(fn client_name -> {:"=/=", :"$3", client_name} end)

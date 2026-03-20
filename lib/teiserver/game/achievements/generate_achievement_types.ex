@@ -2,7 +2,7 @@ defmodule Teiserver.Game.GenerateAchievementTypes do
   alias Teiserver.Game
 
   @spec perform() :: :ok
-  def perform() do
+  def perform do
     existing_types =
       Game.list_achievement_types(limit: :infinity, select: [:name])
       |> Enum.map(fn %{name: name} -> name end)
@@ -24,7 +24,7 @@ defmodule Teiserver.Game.GenerateAchievementTypes do
     :ok
   end
 
-  defp scenarios() do
+  defp scenarios do
     scenarios = [
       %{base_name: "001 - A helping hand"},
       %{base_name: "002 - A head start"},

@@ -14,7 +14,7 @@ defmodule Teiserver.Account.UserLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon(), do: "fa-solid fa-user"
+  def icon, do: "fa-solid fa-user"
 
   @spec colours :: atom
   def colours, do: :success
@@ -50,7 +50,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   @spec make_bot_password() :: String.t()
-  def make_bot_password() do
+  def make_bot_password do
     :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
   end
 
@@ -71,7 +71,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   @spec count_users() :: integer
-  def count_users() do
+  def count_users do
     count_users([])
   end
 
@@ -403,7 +403,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   @spec list_restrictions :: list
-  def list_restrictions() do
+  def list_restrictions do
     Teiserver.store_get(:restriction_lookup_store, :categories)
     |> Enum.map(fn key ->
       {key, Teiserver.store_get(:restriction_lookup_store, key)}

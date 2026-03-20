@@ -141,7 +141,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     LoginThrottleServer.set_login_limit(current_count + n)
   end
 
-  defp oneshot_pid() do
+  defp oneshot_pid do
     parent = self()
 
     Task.async(fn ->

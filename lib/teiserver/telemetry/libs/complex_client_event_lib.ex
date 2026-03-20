@@ -10,10 +10,10 @@ defmodule Teiserver.Telemetry.ComplexClientEventLib do
   @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
 
   @spec colour :: atom
-  def colour(), do: :info2
+  def colour, do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-sliders"
+  def icon, do: "fa-solid fa-sliders"
 
   @spec log_complex_client_event(integer, String.t(), map) ::
           {:error, Ecto.Changeset} | {:ok, ComplexClientEvent}

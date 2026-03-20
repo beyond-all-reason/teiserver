@@ -5,7 +5,7 @@ defmodule Teiserver.Player.SessionRegistry do
 
   alias Teiserver.Data.Types, as: T
 
-  def start_link() do
+  def start_link do
     Horde.Registry.start_link(keys: :unique, name: __MODULE__)
   end
 
@@ -43,7 +43,7 @@ defmodule Teiserver.Player.SessionRegistry do
     )
   end
 
-  def count() do
+  def count do
     Horde.Registry.count(__MODULE__)
   end
 end

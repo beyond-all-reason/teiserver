@@ -4,7 +4,7 @@ defmodule Teiserver.Asset.MapTest do
   use Teiserver.DataCase, async: true
 
   # define some valid map attr for convenience
-  def qs_attr(),
+  def qs_attr,
     do: %{
       spring_name: "Quicksilver Remake 1.24",
       display_name: "Quicksilver",

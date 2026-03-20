@@ -8,7 +8,7 @@ defmodule Teiserver.Coordinator do
 
   @spec start_coordinator() ::
           {:error, {:already_started, pid()}} | DynamicSupervisor.on_start_child()
-  def start_coordinator() do
+  def start_coordinator do
     case get_coordinator_pid() do
       nil ->
         # Start the supervisor server
@@ -23,12 +23,12 @@ defmodule Teiserver.Coordinator do
   end
 
   @spec get_coordinator_userid() :: T.userid()
-  def get_coordinator_userid() do
+  def get_coordinator_userid do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_coordinator_userid")
   end
 
   @spec get_coordinator_pid() :: pid() | nil
-  def get_coordinator_pid() do
+  def get_coordinator_pid do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
       [{pid, _}] ->
         pid
@@ -67,7 +67,7 @@ defmodule Teiserver.Coordinator do
   end
 
   @spec start_all_consuls() :: :ok
-  def start_all_consuls() do
+  def start_all_consuls do
     Battle.list_lobby_ids()
     |> Enum.each(fn id ->
       case get_consul_pid(id) do
@@ -142,7 +142,7 @@ defmodule Teiserver.Coordinator do
   end
 
   @spec start_all_balancers() :: :ok
-  def start_all_balancers() do
+  def start_all_balancers do
     Battle.list_lobby_ids()
     |> Enum.each(fn id ->
       case get_balancer_pid(id) do
@@ -290,7 +290,7 @@ defmodule Teiserver.Coordinator do
 
   # Debug stuff
   @spec list_all_internal_servers :: [T.lobby_id()]
-  def list_all_internal_servers() do
+  def list_all_internal_servers do
     Horde.Registry.select(Teiserver.ServerRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 end

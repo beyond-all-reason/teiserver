@@ -202,7 +202,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
     |> put_req_header("sec-websocket-protocol", "v0.tachyon")
   end
 
-  defp tachyon_url() do
+  defp tachyon_url do
     conf = Application.get_env(:teiserver, TeiserverWeb.Endpoint)
     "ws://#{conf[:url][:host]}:#{conf[:http][:port]}" <> ~p"/tachyon"
   end

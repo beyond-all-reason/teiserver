@@ -6,8 +6,8 @@ defmodule TeiserverWeb.Telemetry.InfologView do
   import TeiserverWeb.PaginationComponents, only: [pagination: 1]
 
   @spec view_colour :: atom
-  def view_colour(), do: InfologLib.colours()
+  def view_colour, do: InfologLib.colours()
 
   @spec icon() :: String.t()
-  def icon(), do: InfologLib.icon()
+  def icon, do: InfologLib.icon()
 end

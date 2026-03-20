@@ -133,7 +133,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     reset_to_default_tau()
   end
 
-  defp reset_to_default_tau() do
+  defp reset_to_default_tau do
     Config.delete_site_config("rating.Tau")
   end
 

@@ -45,7 +45,7 @@ defmodule Mix.Tasks.Teiserver.FakePlaytime do
     })
   end
 
-  defp random_playtime() do
+  defp random_playtime do
     hours =
       case get_player_experience() do
         :just_installed -> Enum.random(0..4)

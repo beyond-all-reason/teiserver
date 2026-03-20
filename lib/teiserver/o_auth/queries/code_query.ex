@@ -14,7 +14,7 @@ defmodule Teiserver.OAuth.CodeQueries do
     base_query() |> where_code(code) |> Repo.one()
   end
 
-  def base_query() do
+  def base_query do
     from code in Code, as: :code
   end
 

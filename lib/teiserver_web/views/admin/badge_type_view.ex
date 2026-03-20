@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeView do
   use TeiserverWeb, :view
 
   @spec view_colour() :: atom
-  def view_colour(), do: BadgeTypeLib.colours()
+  def view_colour, do: BadgeTypeLib.colours()
 
   @spec icon() :: String.t()
   defdelegate icon(), to: BadgeTypeLib

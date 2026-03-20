@@ -8,10 +8,10 @@ defmodule Teiserver.Account.OpenSkillReport do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-chart-line"
+  def icon, do: "fa-solid fa-chart-line"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @spec run(Plug.Conn.t(), map()) :: {nil, map()}
   def run(_conn, params) do

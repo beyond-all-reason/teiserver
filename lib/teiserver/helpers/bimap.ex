@@ -18,7 +18,7 @@ defmodule Teiserver.Helpers.Bimap do
 
   @opaque t :: map()
 
-  def new(), do: Map.new()
+  def new, do: Map.new()
 
   def put(map, key1, key2, value) do
     case {Map.has_key?(map, key1), Map.has_key?(map, key2)} do

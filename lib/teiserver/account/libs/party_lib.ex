@@ -52,12 +52,12 @@ defmodule Teiserver.Account.PartyLib do
   end
 
   @spec list_party_ids() :: [T.party_id()]
-  def list_party_ids() do
+  def list_party_ids do
     Horde.Registry.select(Teiserver.PartyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_parties() :: [T.party()]
-  def list_parties() do
+  def list_parties do
     list_party_ids()
     |> list_parties()
   end

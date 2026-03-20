@@ -16,17 +16,17 @@ defmodule Teiserver.Asset.MapQueries do
   end
 
   @spec get_all_maps() :: [Asset.Map.t()]
-  def get_all_maps() do
+  def get_all_maps do
     base_query() |> Repo.all()
   end
 
   @spec delete_all_maps() :: non_neg_integer()
-  def delete_all_maps() do
+  def delete_all_maps do
     {n, _} = base_query() |> Repo.delete_all()
     n
   end
 
-  defp base_query() do
+  defp base_query do
     from map in Asset.Map, as: :map
   end
 

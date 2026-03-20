@@ -7,10 +7,10 @@ defmodule Teiserver.Account.RelationshipReport do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-arrow-down-up-across-line"
+  def icon, do: "fa-solid fa-arrow-down-up-across-line"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Reviewer"
+  def permissions, do: "Reviewer"
 
   @spec run(Plug.Conn.t(), map()) :: map()
   def run(_conn, params) do

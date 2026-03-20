@@ -411,7 +411,7 @@ defmodule Teiserver.Tachyon.Transport do
     BurstyRateLimiter.try_acquire(rl, cost, :erlang.monotonic_time(:millisecond))
   end
 
-  defp schedule_ping() do
+  defp schedule_ping do
     # we want a ping/pong every 10s and avoid thundering herd
     wait = 1_000 + :rand.uniform(8500)
     :timer.send_after(wait, :send_ping)

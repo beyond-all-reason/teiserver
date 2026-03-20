@@ -20,10 +20,10 @@ defmodule Teiserver.Game.PlayerRatingsExport do
   require Logger
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-user-shield"
+  def icon, do: "fa-solid fa-user-shield"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions, do: "teiserver.admin"
 
   @spec show_form(Plug.Conn.t()) :: map()
   def show_form(_conn) do

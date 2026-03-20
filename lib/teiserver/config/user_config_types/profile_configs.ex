@@ -24,7 +24,7 @@ defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
   end
 
   @spec create() :: :ok
-  def create() do
+  def create do
     add_user_config_type(%{
       key: "general.Colour scheme",
       section: "Interface",

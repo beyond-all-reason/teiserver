@@ -214,12 +214,12 @@ defmodule Teiserver.Account.RoleLib do
              |> Map.new()
 
   @spec all_role_names() :: list()
-  def all_role_names() do
+  def all_role_names do
     Map.keys(@role_data)
   end
 
   @spec role_data() :: map()
-  def role_data() do
+  def role_data do
     @role_data
   end
 
@@ -235,22 +235,22 @@ defmodule Teiserver.Account.RoleLib do
   end
 
   @spec global_roles :: [String.t()]
-  def global_roles() do
+  def global_roles do
     ~w(Default Armada Cortex Raptor Scavenger)
   end
 
   @spec management_roles :: [String.t()]
-  def management_roles() do
+  def management_roles do
     ~w(Server Admin)
   end
 
   @spec moderation_roles :: [String.t()]
-  def moderation_roles() do
+  def moderation_roles do
     ~w(Moderator Reviewer Overwatch)
   end
 
   @spec staff_roles :: [String.t()]
-  def staff_roles() do
+  def staff_roles do
     [
       "Core",
       "Engine",
@@ -264,7 +264,7 @@ defmodule Teiserver.Account.RoleLib do
   end
 
   @spec community_roles :: [String.t()]
-  def community_roles() do
+  def community_roles do
     [
       "Mentor",
       "Academy manager",
@@ -276,12 +276,12 @@ defmodule Teiserver.Account.RoleLib do
   end
 
   @spec privileged_roles :: [String.t()]
-  def privileged_roles() do
+  def privileged_roles do
     ~w(Bot VIP Caster Donor Tournament)
   end
 
   @spec property_roles :: [String.t()]
-  def property_roles() do
+  def property_roles do
     ["Trusted", "BAR+", "Verified", "Streamer", "Tournament winner"]
   end
 

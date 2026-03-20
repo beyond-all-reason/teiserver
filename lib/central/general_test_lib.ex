@@ -17,7 +17,7 @@ defmodule Central.Helpers.GeneralTestLib do
 
   # def make_combos(data), do: CombinatorLib.make_combos(data)
 
-  def user_fixture(), do: make_user(%{"permissions" => []})
+  def user_fixture, do: make_user(%{"permissions" => []})
 
   def make_user(params \\ %{}) do
     permissions =
@@ -42,12 +42,12 @@ defmodule Central.Helpers.GeneralTestLib do
     u
   end
 
-  def seeded?() do
+  def seeded? do
     r = Repo.one(from c in SiteConfig, where: c.key == "test.seeded")
     r != nil
   end
 
-  def seed() do
+  def seed do
     %SiteConfig{}
     |> SiteConfig.changeset(%{
       key: "test.seeded",

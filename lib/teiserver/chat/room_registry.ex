@@ -3,7 +3,7 @@ defmodule Teiserver.Chat.RoomRegistry do
   A registry for the various chat rooms
   """
 
-  def start_link() do
+  def start_link do
     Registry.start_link(name: __MODULE__, keys: :unique)
   end
 
@@ -31,7 +31,7 @@ defmodule Teiserver.Chat.RoomRegistry do
   end
 
   @spec list_rooms() :: [{String.t(), member_count :: non_neg_integer()}]
-  def list_rooms() do
+  def list_rooms do
     Registry.select(__MODULE__, [{{:"$1", :_, :"$2"}, [], [{{:"$1", :"$2"}}]}])
   end
 end
