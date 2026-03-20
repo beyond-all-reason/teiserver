@@ -43,7 +43,8 @@ defmodule Central.Helpers.GeneralTestLib do
   end
 
   def seeded? do
-    r = Repo.one(from c in SiteConfig, where: c.key == "test.seeded")
+    query = from c in SiteConfig, where: c.key == "test.seeded"
+    r = Repo.one(query)
     r != nil
   end
 
