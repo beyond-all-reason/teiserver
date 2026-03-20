@@ -20,7 +20,8 @@ defmodule TeiserverWeb.Live.ClientTest do
     test "index", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/teiserver/admin/client")
 
-      # Sadly because other clients can still be logged in after their tests we can't actually test this bit...
+      # Sadly because other clients can still be logged in after
+      # their tests we can't actually test this bit...
       # assert html =~ "No clients found"
 
       # Sleeps are to allow for the throttle server to update us

@@ -67,7 +67,8 @@ defmodule Teiserver.Account.AccoladeBotServer do
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
 
-    # We only subscribe to this if we're not in test, if we are it'll generate a bunch of SQL errors
+    # We only subscribe to this if we're not in test, if
+    # we are it'll generate a bunch of SQL errors
     # without actually breaking anything
     if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
       :ok = PubSub.subscribe(Teiserver.PubSub, "global_match_updates")

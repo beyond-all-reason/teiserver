@@ -55,12 +55,6 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
 
   def do_handle("extra_data", _, _msg_id, state), do: state
 
-  # def do_handle("refresh_lobby", _, _msg_id, %{lobby_id: nil} = state), do: state
-  # def do_handle("refresh_lobby", _, _msg_id, %{lobby_id: lobby_id, app_status: :accepted} = state) do
-
-  # end
-  # def do_handle("refresh_lobby", _, _msg_id, state), do: state
-
   def do_handle(cmd, data, msg_id, state) do
     SpringIn._no_match(state, "c.battle." <> cmd, msg_id, data)
   end

@@ -63,7 +63,8 @@ defmodule Teiserver.Logging.ServerDayLogLib do
   # %{} Dict means total for the block of that key
   # 0 Integer means sum or average
   @empty_log %{
-    # Used to make calculating the end of month stats easier, this will not appear in the final result
+    # Used to make calculating the end of month stats easier,
+    # this will not appear in the final result
     tmp_reduction: %{
       unique_users: [],
       unique_players: [],
@@ -112,7 +113,8 @@ defmodule Teiserver.Logging.ServerDayLogLib do
   # Given an existing segment and a batch of logs, calculate the segment and add them together
   defp extend_segment(existing, %{data: data} = _server_log) do
     %{
-      # Used to make calculating the end of day stats easier, this will not appear in the final result
+      # Used to make calculating the end of day stats easier,
+      # this will not appear in the final result
       tmp_reduction: %{
         battles: existing.tmp_reduction.battles + get_in(data, ~w(aggregates stats battles)),
         unique_users:

@@ -111,7 +111,10 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventTypeLib do
   """
   @spec update_complex_lobby_event_type(ComplexLobbyEventType, map) ::
           {:ok, ComplexLobbyEventType} | {:error, Ecto.Changeset}
-  def update_complex_lobby_event_type(%ComplexLobbyEventType{} = complex_lobby_event_type, attrs) do
+  def update_complex_lobby_event_type(
+        %ComplexLobbyEventType{} = complex_lobby_event_type,
+        attrs
+      ) do
     complex_lobby_event_type
     |> ComplexLobbyEventType.changeset(attrs)
     |> Repo.update()

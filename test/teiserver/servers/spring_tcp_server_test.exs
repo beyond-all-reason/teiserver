@@ -146,7 +146,8 @@ defmodule Teiserver.SpringTcpServerTest do
     end
   end
 
-  # NOTE: All needs_attention tests in this module fail because of the coordinator state being shared between tests
+  # NOTE: All needs_attention tests in this module fail because of
+  # the coordinator state being shared between tests
   @tag :needs_attention
   test "bad sequences", context do
     %{socket: socket, user: user} = auth_setup(context)
@@ -478,7 +479,8 @@ defmodule Teiserver.SpringTcpServerTest do
     assert r ==
              "ADDUSER #{dud.name} ?? #{dud.id} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAIDEX roomname #{dud.name} msgmsg\n"
 
-    # Now the non-user, should get a whole new adding of a user, even though that user isn't logged in
+    # Now the non-user, should get a whole new adding of a user,
+    # even though that user isn't logged in
     send(tcp_pid, {:direct_message, non_user.id, "msgmsg"})
     r = _recv_until(socket)
 

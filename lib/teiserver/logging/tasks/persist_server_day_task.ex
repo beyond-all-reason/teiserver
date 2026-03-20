@@ -29,7 +29,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       total: []
     },
 
-    # Used to make calculating the end of day stats easier, this will not appear in the final result
+    # Used to make calculating the end of day stats easier,
+    # this will not appear in the final result
     tmp_reduction: %{
       unique_users: [],
       unique_players: []
@@ -89,7 +90,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       total: 0
     },
 
-    # Used to make calculating the end of day stats easier, this will not appear in the final result
+    # Used to make calculating the end of day stats easier,
+    # this will not appear in the final result
     tmp_reduction: %{
       unique_users: [],
       unique_players: []
@@ -229,7 +231,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         total: segment.battles.total ++ [extend.battles.total]
       },
 
-      # Used to make calculating the end of day stats easier, this will not appear in the final result
+      # Used to make calculating the end of day stats easier,
+      # this will not appear in the final result
       tmp_reduction: %{
         unique_users: segment.tmp_reduction.unique_users ++ extend.tmp_reduction.unique_users,
         unique_players:
@@ -335,7 +338,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         total: sum_keys(logs, ~w(battle total)) / count
       },
 
-      # Used to make calculating the end of day stats easier, this will not appear in the final result
+      # Used to make calculating the end of day stats easier,
+      # this will not appear in the final result
       tmp_reduction: %{
         unique_users: concatenate_lists(logs, ~w(client total)),
         unique_players: concatenate_lists(logs, ~w(client player))

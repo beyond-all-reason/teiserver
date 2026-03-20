@@ -563,7 +563,8 @@ defmodule Teiserver.Game.MatchRatingLib do
     }
   end
 
-  # The following is used purely for testing the rating algorithm, it is not intended to be used elsewhere
+  # The following is used purely for testing the rating
+  # algorithm, it is not intended to be used elsewhere
   defp predict_match(match_id) when is_integer(match_id) do
     Battle.get_match!(match_id, preload: [:members])
     |> predict_match()

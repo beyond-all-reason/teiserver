@@ -76,17 +76,17 @@
           {Credo.Check.Readability.BlockPipe, []},
           {Credo.Check.Readability.FunctionNames, []},
           {Credo.Check.Readability.ImplTrue, []},
-          # {Credo.Check.Readability.MaxLineLength,
-          #  [
-          #    ignore_definitions: false,
-          #    ignore_heredocs: false,
-          #    ignore_specs: true,
-          #    ignore_sigils: true,
-          #    ignore_strings: true,
-          #    ignore_urls: true,
-          #    max_length: 98,
-          #    priority: :low
-          #  ]}, 81 issues
+          {Credo.Check.Readability.MaxLineLength,
+           [
+             ignore_definitions: false,
+             ignore_heredocs: false,
+             ignore_specs: true,
+             ignore_sigils: true,
+             ignore_strings: true,
+             ignore_urls: true,
+             max_length: 98,
+             priority: :low
+           ]},
           {Credo.Check.Readability.ModuleAttributeNames, []},
           {Credo.Check.Readability.ModuleNames, []},
           {Credo.Check.Readability.MultiAlias, []},

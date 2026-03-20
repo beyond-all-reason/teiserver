@@ -111,7 +111,10 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTypeLib do
   """
   @spec update_complex_match_event_type(ComplexMatchEventType, map) ::
           {:ok, ComplexMatchEventType} | {:error, Ecto.Changeset}
-  def update_complex_match_event_type(%ComplexMatchEventType{} = complex_match_event_type, attrs) do
+  def update_complex_match_event_type(
+        %ComplexMatchEventType{} = complex_match_event_type,
+        attrs
+      ) do
     complex_match_event_type
     |> ComplexMatchEventType.changeset(attrs)
     |> Repo.update()

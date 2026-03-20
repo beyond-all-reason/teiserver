@@ -161,7 +161,8 @@ defmodule Teiserver.SpringTcpServer do
     # {:noreply, new_state}
   end
 
-  # Email, when an email is sent we get a message, we don't care about that for the most part (yet)
+  # Email, when an email is sent we get a message, we don't
+  # care about that for the most part (yet)
   def handle_info({:delivered_email, _email}, state) do
     {:noreply, state}
   end
@@ -282,7 +283,8 @@ defmodule Teiserver.SpringTcpServer do
     # Check for team size/count changes
     new_state =
       if Config.get_site_config_cache("lobby.Broadcast Battle Teams Information") and
-           (Map.has_key?(new_values, :host_teamsize) or Map.has_key?(new_values, :host_teamcount)) do
+           (Map.has_key?(new_values, :host_teamsize) or
+              Map.has_key?(new_values, :host_teamcount)) do
         teams_data = Battle.get_team_config(lobby_id)
         SpringOut.reply(:battle, :battle_teams, teams_data, nil, new_state)
       else

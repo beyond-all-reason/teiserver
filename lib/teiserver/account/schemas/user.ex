@@ -248,7 +248,8 @@ defmodule Teiserver.Account.User do
       case password_type do
         :plain_password -> put_plain_password_hash(changeset)
         :md5_password -> put_md5_password_hash(changeset)
-        # Used when registering bots, the bot owner's password hash is passed and should be stored directly
+        # Used when registering bots, the bot owner's password
+        # hash is passed and should be stored directly
         :hash -> changeset
       end
     end)

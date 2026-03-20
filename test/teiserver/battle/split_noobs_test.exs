@@ -322,7 +322,8 @@ defmodule Teiserver.Battle.SplitNoobsTest do
 
   test "Very strong captain will usually have noobiest noob" do
     # After brute force result is calculated there will be some remaining weak players to draft
-    # The team that gets pick priority will be determined by a combination of team rating and captain rating
+    # The team that gets pick priority will be determined by a
+    # combination of team rating and captain rating
     # preferring lower for both
     expanded_group = [
       %{

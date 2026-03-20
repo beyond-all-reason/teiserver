@@ -294,7 +294,8 @@ CLIENTS test_room #{user.name}\n"
     reply = _recv_raw(socket2)
     assert reply == "JOINBATTLEFAILED Because I said so\n"
 
-    # Rejoin, this time accept, also this time use the SpringLobby method of an actually empty password
+    # Rejoin, this time accept, also this time use the
+    # SpringLobby method of an actually empty password
     _send_raw(socket2, "JOINBATTLE #{lobby_id}  sPassword\n")
     _send_raw(socket1, "JOINBATTLEACCEPT #{user2.name}\n")
     _ = _recv_raw(socket1)
@@ -587,7 +588,10 @@ CLIENTS test_room #{user.name}\n"
   end
 
   # test "c.moderation.report", %{socket: socket, user: user} do
-  #   _send_raw(socket, "c.moderation.report_user bad_name_here location_type nil reason with spaces\n")
+  #   _send_raw(
+  #     socket,
+  #     "c.moderation.report_user bad_name_here location_type nil reason with spaces\n"
+  #   )
   #   reply = _recv_raw(socket)
   #   assert reply =~ "NO cmd=c.moderation.report_user\tbad command format\n"
 
@@ -595,10 +599,14 @@ CLIENTS test_room #{user.name}\n"
   #   reply = _recv_raw(socket)
   #   assert reply =~ "NO cmd=c.moderation.report_user\tbad command format\n"
 
-  #   _send_raw(socket, "c.moderation.report_user bad_name_here\tlocation_type\tnil\treason with spaces\n")
+  #   _send_raw(
+  #     socket,
+  #     "c.moderation.report_user bad_name_here\tlocation_type\tnil\treason with spaces\n"
+  #   )
   #   reply = _recv_raw(socket)
   #   assert reply =~ "NO cmd=c.moderation.report_user\tno target user\n"
-  #   assert reply =~ "OK\nSAIDPRIVATE Coordinator To complete your report, please use the form on this link:"
+  #   assert reply =~
+  #     "OK\nSAIDPRIVATE Coordinator To complete your report, please use the form on this link:"
 
   #   # Now we do it correctly, first without a location id
   #   target_user = new_user()

@@ -42,8 +42,10 @@ defmodule Teiserver.Protocols.Spring do
   # b6..b9 = ally team no. (from 0 to 15. b6 is LSB, b9 is MSB)
   # b10 = mode (0 = spectator, 1 = normal player)
   # b11..b17 = handicap (7-bit number. Must be in range 0..100).
-  # Note: Only host can change handicap values of the players in the battle (with HANDICAP command). These 7 bits are
-  #       always ignored in this command. They can only be changed using HANDICAP command.
+  # Note: Only host can change handicap values of the players
+  # in the battle (with HANDICAP command). These 7 bits are
+  # always ignored in this command. They can only be changed
+  # using HANDICAP command.
   # b18..b21 = Used for team no. extension (16->256)
   #            Currently supported by LP_LargeTeamNb SPADS plugin
   #            alternatively battleStatus:teams-8bit shoould be sent as protocol extension message

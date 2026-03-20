@@ -563,7 +563,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
         {:ok, %{state | members: new_members, monitors: monitors}}
 
-      # there is no case with multiple member to remove since this is prevented when adding to a queue
+      # there is no case with multiple member to remove since
+      # this is prevented when adding to a queue
       {_, [{room_pid, canceled_members}]} ->
         monitors = demonitor_players(canceled_members, state.monitors)
         PairingRoom.cancel(room_pid, player_id)

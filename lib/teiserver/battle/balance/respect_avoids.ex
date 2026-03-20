@@ -471,7 +471,8 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
     end)
   end
 
-  ## Players that are in parties or avoids (in either direction) are at the front, then sort by rating
+  ## Players that are in parties or avoids (in either
+  ## direction) are at the front, then sort by rating
   @spec sort_experienced_players([RA.player()], [[number()]]) :: [RA.player()]
   def sort_experienced_players(experienced_players, avoids) do
     flat_avoids = avoids |> List.flatten()

@@ -94,8 +94,6 @@ defmodule Teiserver.Account.ClientLib do
     # Update the process with it
     cast_client(userid, {:update_client, client})
 
-    # PubSub.broadcast(Teiserver.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
-
     if client.lobby_id do
       PubSub.broadcast(
         Teiserver.PubSub,
@@ -223,8 +221,10 @@ defmodule Teiserver.Account.ClientLib do
     end
   end
 
-  # this isn't terribly efficient, but I'm not sure how else one can get the number of connected *players*
-  # also, horde doesn't have `count_select` so we have to materialise the list and send it across process
+  # this isn't terribly efficient, but I'm not sure how
+  # else one can get the number of connected *players*
+  # also, horde doesn't have `count_select` so we have to
+  # materialise the list and send it across process
   def count_non_bot_clients() do
     guards =
       ["SPADS v", "SpringLobbyMonitor", "Teiserver Internal Client", "SLTS Client d"]

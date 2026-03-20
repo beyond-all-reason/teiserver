@@ -1716,7 +1716,8 @@ defmodule Teiserver.Player.Session do
         state
       )
       when event != :reset_list and
-             (state.lobby_list_subscription == nil or state.lobby_list_subscription.counter >= c) do
+             (state.lobby_list_subscription == nil or
+                state.lobby_list_subscription.counter >= c) do
     {:noreply, state}
   end
 
