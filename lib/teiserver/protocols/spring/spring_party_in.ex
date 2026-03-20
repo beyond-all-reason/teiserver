@@ -282,7 +282,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     state
   end
 
-  defp message_id() do
+  defp message_id do
     "##{:rand.uniform(1_000_000)}"
   end
 end

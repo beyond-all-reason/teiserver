@@ -93,12 +93,12 @@ defmodule Teiserver.Lobby.LobbyLib do
   end
 
   @spec list_lobby_ids :: [T.lobby_id()]
-  def list_lobby_ids() do
+  def list_lobby_ids do
     Horde.Registry.select(Teiserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_lobbies() :: [T.lobby()]
-  def list_lobbies() do
+  def list_lobbies do
     list_lobby_ids()
     |> Enum.map(fn lobby_id -> get_lobby(lobby_id) end)
     |> Enum.filter(fn lobby -> lobby != nil end)
@@ -129,7 +129,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   end
 
   @spec stream_lobbies() :: Stream.t()
-  def stream_lobbies() do
+  def stream_lobbies do
     list_lobby_ids()
     |> Enum.shuffle()
     |> Stream.map(fn lobby_id -> get_lobby(lobby_id) end)

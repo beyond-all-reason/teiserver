@@ -112,7 +112,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   # end
 
   @spec pre_cache_policies :: :ok
-  def pre_cache_policies() do
+  def pre_cache_policies do
     policy_count =
       Game.list_lobby_policies()
       |> ParallelStream.map(&add_policy_from_db/1)
@@ -267,7 +267,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   end
 
   @spec list_cached_lobby_policies() :: list()
-  def list_cached_lobby_policies() do
+  def list_cached_lobby_policies do
     (Teiserver.cache_get(:lists, :lobby_policies) || [])
     |> Enum.map(fn id ->
       get_cached_lobby_policy(id)

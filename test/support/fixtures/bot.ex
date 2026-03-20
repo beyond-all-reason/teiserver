@@ -1,7 +1,7 @@
 defmodule Teiserver.BotFixtures do
   alias Teiserver.Bot
 
-  def create_bot() do
+  def create_bot do
     name = for _ <- 1..20, into: "", do: <<Enum.random(?a..?z)>>
     create_bot(name)
   end
@@ -11,7 +11,7 @@ defmodule Teiserver.BotFixtures do
     bot
   end
 
-  def start_script() do
+  def start_script do
     %{
       engine_version: "engineversion",
       game_name: "game name",

@@ -11,7 +11,7 @@ defmodule Teiserver.Autohost.SessionRegistry do
           current_battles: non_neg_integer()
         }
 
-  def start_link() do
+  def start_link do
     Registry.start_link(keys: :unique, name: __MODULE__)
   end
 
@@ -73,7 +73,7 @@ defmodule Teiserver.Autohost.SessionRegistry do
     )
   end
 
-  def count() do
+  def count do
     Registry.count(__MODULE__)
   end
 
@@ -81,7 +81,7 @@ defmodule Teiserver.Autohost.SessionRegistry do
   Returns all the currently registered autohosts sessions
   """
   @spec list() :: [reg_value()]
-  def list() do
+  def list do
     Registry.select(__MODULE__, [{{:_, :_, :"$1"}, [], [:"$1"]}])
   end
 end

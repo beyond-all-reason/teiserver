@@ -17,7 +17,7 @@ defmodule TeiserverWeb.API.Admin.AssetControllerTest do
     {:ok, authed_conn: auth_conn(conn, token), token: token}
   end
 
-  defp update_map_path(), do: ~p"/teiserver/api/admin/assets/update_maps"
+  defp update_map_path, do: ~p"/teiserver/api/admin/assets/update_maps"
 
   describe "auth" do
     setup [:setup_user, :setup_token]

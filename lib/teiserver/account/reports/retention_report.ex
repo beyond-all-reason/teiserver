@@ -4,10 +4,10 @@ defmodule Teiserver.Account.RetentionReport do
   alias Teiserver.Logging
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-campground"
+  def icon, do: "fa-solid fa-campground"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @max_key 30
 

@@ -188,7 +188,7 @@ defmodule Teiserver.Config do
 
   # User Config Types
   @spec get_user_config_types :: list()
-  def get_user_config_types() do
+  def get_user_config_types do
     Teiserver.store_get(:config_user_type_store, "all-config-types")
   end
 
@@ -198,7 +198,7 @@ defmodule Teiserver.Config do
   end
 
   @spec get_grouped_user_configs :: map()
-  def get_grouped_user_configs() do
+  def get_grouped_user_configs do
     Teiserver.store_get(:config_user_type_store, "all-config-types")
     |> Map.values()
     |> Enum.filter(fn c ->
@@ -374,7 +374,7 @@ defmodule Teiserver.Config do
 
   # Site Config Types
   @spec get_site_config_types :: list()
-  def get_site_config_types() do
+  def get_site_config_types do
     Teiserver.store_get(:config_site_type_store, "all-config-types")
   end
 
@@ -384,7 +384,7 @@ defmodule Teiserver.Config do
   end
 
   @spec get_grouped_site_configs :: map
-  def get_grouped_site_configs() do
+  def get_grouped_site_configs do
     (Teiserver.store_get(:config_site_type_store, "all-config-types") || %{})
     |> Map.values()
     |> Enum.sort(fn c1, c2 ->

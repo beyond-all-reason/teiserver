@@ -4,10 +4,10 @@ defmodule Teiserver.Account.PopulationReport do
   alias Teiserver.Repo
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-people-group"
+  def icon, do: "fa-solid fa-people-group"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @doc """
 

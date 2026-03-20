@@ -208,7 +208,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | :vote_ended
 
   @spec gen_id() :: id()
-  def gen_id(), do: UUID.uuid4()
+  def gen_id, do: UUID.uuid4()
 
   @default_call_timeout 5000
 
@@ -428,7 +428,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   @impl :gen_statem
-  def callback_mode(), do: :handle_event_function
+  def callback_mode, do: :handle_event_function
 
   @impl :gen_statem
   @spec init({id(), {:user, start_params()} | {:snapshot, binary()}}) :: {:ok, term(), state()}
@@ -1680,7 +1680,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
-  defp gen_password(), do: :crypto.strong_rand_bytes(16) |> Base.encode16()
+  defp gen_password, do: :crypto.strong_rand_bytes(16) |> Base.encode16()
 
   # in tests, some user ids are string
   defp bot_id?(id) when is_integer(id), do: false

@@ -18,7 +18,7 @@ defmodule Teiserver.OAuth.TokenQueries do
     |> Repo.one()
   end
 
-  def base_query() do
+  def base_query do
     from token in Token,
       as: :token
   end

@@ -39,21 +39,21 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     |> Enum.map(fn map -> %{"springName" => map.spring_name} end)
   end
 
-  defp engine_versions(),
+  defp engine_versions,
     do: [%{version: "105.1.1-2590-gb9462a0 bar"}, %{version: "100.2.1-2143-test bar"}]
 
-  defp game_versions(),
+  defp game_versions,
     do: [
       %{spring_game: "Beyond All Reason test-26929-d709d32"},
       %{spring_game: "BAR test version"}
     ]
 
-  defp engine_names() do
+  defp engine_names do
     engine_versions()
     |> Enum.map(fn engine -> %{"version" => engine.version} end)
   end
 
-  defp game_names() do
+  defp game_names do
     game_versions()
     |> Enum.map(fn game -> %{"springName" => game.spring_game} end)
   end

@@ -30,7 +30,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
 
   # For when there are no existing logs
   # we need to ensure the earliest log is from last quarter, not this quarter
-  defp perform_first_time() do
+  defp perform_first_time do
     first_logs =
       Logging.list_server_day_logs(
         order: "Oldest first",
@@ -124,7 +124,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
   end
 
   @spec quarter_so_far() :: map()
-  def quarter_so_far() do
+  def quarter_so_far do
     now = Timex.now()
 
     user_activity_logs =

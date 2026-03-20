@@ -64,7 +64,7 @@ defmodule Teiserver.TachyonLobby do
           :ok | {:error, :invalid_lobby | :not_in_lobby}
   defdelegate update_client_status(lobby_id, user_id, update_data), to: Lobby
 
-  def restore_lobbies() do
+  def restore_lobbies do
     Teiserver.Tachyon.System.restore_state("lobby", __MODULE__, :restore_lobby)
   end
 

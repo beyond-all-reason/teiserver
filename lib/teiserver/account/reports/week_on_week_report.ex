@@ -4,10 +4,10 @@ defmodule Teiserver.Account.WeekOnWeekReport do
   alias Teiserver.Helper.NumberHelper
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-calendar"
+  def icon, do: "fa-solid fa-calendar"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @spec run(Plug.Conn.t(), map()) :: map()
   def run(_conn, params) do

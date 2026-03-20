@@ -98,7 +98,7 @@ defmodule Teiserver.OAuthFixtures do
     %{app: app, token: token}
   end
 
-  defp generate_challenge() do
+  defp generate_challenge do
     # A-Z,a-z,0-9 and -._~ are authorized, but can't be bothered to cover all
     # of that. hex encoding will fit
     # hardcoded random bytes generated with :crypto.strong_rand_bytes(32)

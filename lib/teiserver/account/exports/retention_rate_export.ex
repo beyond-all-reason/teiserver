@@ -26,10 +26,10 @@ defmodule Teiserver.Account.RetentionRateExport do
   @activity_types ~w(total player)
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-campground"
+  def icon, do: "fa-solid fa-campground"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @spec show_form(Plug.Conn.t()) :: map()
   def show_form(_conn) do

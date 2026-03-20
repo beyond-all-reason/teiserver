@@ -3,6 +3,6 @@ defmodule TeiserverWeb.Logging.LoggingView do
 
   use TeiserverWeb, :view
 
-  def view_colour(), do: StylingHelper.colours(:info)
-  def icon(), do: "fa-solid fa-chart-line"
+  def view_colour, do: StylingHelper.colours(:info)
+  def icon, do: "fa-solid fa-chart-line"
 end

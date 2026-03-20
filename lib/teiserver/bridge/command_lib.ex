@@ -17,7 +17,7 @@ defmodule Teiserver.Bridge.CommandLib do
   end
 
   @spec cache_discord_commands() :: :ok
-  def cache_discord_commands() do
+  def cache_discord_commands do
     {:ok, module_list} = :application.get_key(:teiserver, :modules)
 
     lookup =

@@ -6,10 +6,10 @@ defmodule Teiserver.Account.RecordsReport do
   alias Teiserver.Repo
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-trophy"
+  def icon, do: "fa-solid fa-trophy"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @top_count 3
 

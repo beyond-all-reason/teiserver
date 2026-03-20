@@ -14,7 +14,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommand do
 
   @impl Teiserver.Lobby.LobbyCommandBehaviour
   @spec name() :: String.t()
-  def name(), do: "explain"
+  def name, do: "explain"
 
   @impl Teiserver.Lobby.LobbyCommandBehaviour
   @spec execute(T.lobby_server_state(), map) :: T.lobby_server_state()

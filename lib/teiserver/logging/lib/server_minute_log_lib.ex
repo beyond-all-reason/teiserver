@@ -4,13 +4,13 @@ defmodule Teiserver.Logging.ServerMinuteLogLib do
   use TeiserverWeb, :library
 
   @spec colours :: atom
-  def colours(), do: :warning2
+  def colours, do: :warning2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-monitor-heart-rate"
+  def icon, do: "fa-solid fa-monitor-heart-rate"
 
   @spec get_server_minute_logs :: Ecto.Query.t()
-  def get_server_minute_logs() do
+  def get_server_minute_logs do
     from(logs in ServerMinuteLog)
   end
 

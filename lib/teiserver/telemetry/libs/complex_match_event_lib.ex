@@ -10,10 +10,10 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
   @broadcast_event_types ~w()
 
   @spec colour :: atom
-  def colour(), do: :info2
+  def colour, do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-chess-queen"
+  def icon, do: "fa-chess-queen"
 
   @spec log_complex_match_event(T.userid(), T.match_id(), String, non_neg_integer, map()) ::
           {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}

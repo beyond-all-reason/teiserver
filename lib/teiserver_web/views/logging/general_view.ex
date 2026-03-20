@@ -9,10 +9,10 @@ defmodule TeiserverWeb.Logging.GeneralView do
   use TeiserverWeb, :view
 
   @spec view_colour() :: atom
-  def view_colour(), do: LoggingLib.colours()
+  def view_colour, do: LoggingLib.colours()
 
   @spec icon() :: String.t()
-  def icon(), do: LoggingLib.icon()
+  def icon, do: LoggingLib.icon()
 
   @spec view_colour(String.t()) :: atom
   def view_colour("page_view"), do: PageViewLogLib.colours()

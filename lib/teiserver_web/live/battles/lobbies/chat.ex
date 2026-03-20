@@ -318,7 +318,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     end
   end
 
-  defp new_message_changeset() do
+  defp new_message_changeset do
     %LobbyMessage{}
     |> LobbyMessage.changeset(%{
       "match_id" => 1,

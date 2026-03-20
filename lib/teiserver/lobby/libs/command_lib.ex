@@ -34,7 +34,7 @@ defmodule Teiserver.Lobby.CommandLib do
   end
 
   @spec cache_lobby_commands() :: :ok
-  def cache_lobby_commands() do
+  def cache_lobby_commands do
     {:ok, module_list} = :application.get_key(:teiserver, :modules)
 
     lookup =

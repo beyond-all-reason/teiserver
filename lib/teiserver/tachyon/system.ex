@@ -37,7 +37,7 @@ defmodule Teiserver.Tachyon.System do
   @doc """
   restart the entire tachyon system
   """
-  def restart() do
+  def restart do
     :ok = Supervisor.terminate_child(Teiserver.Supervisor, __MODULE__)
     {:ok, _pid} = Supervisor.restart_child(Teiserver.Supervisor, __MODULE__)
   end

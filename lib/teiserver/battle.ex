@@ -653,7 +653,7 @@ defmodule Teiserver.Battle do
   end
 
   @spec start_match_monitor() :: :ok | {:failure, String.t()}
-  def start_match_monitor() do
+  def start_match_monitor do
     if is_nil(MatchMonitorServer.get_match_monitor_userid()) do
       MatchMonitorServer.do_start()
     else

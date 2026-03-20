@@ -93,7 +93,7 @@
           # {Credo.Check.Readability.NestedFunctionCalls, []}, 310 issues
           {Credo.Check.Readability.OneArityFunctionInPipe, []},
           {Credo.Check.Readability.ParenthesesInCondition, []},
-          # {Credo.Check.Readability.ParenthesesOnZeroArityDefs, []}, 547 issues
+          {Credo.Check.Readability.ParenthesesOnZeroArityDefs, []},
           {Credo.Check.Readability.PipeIntoAnonymousFunctions, []},
           {Credo.Check.Readability.PredicateFunctionNames, []},
           {Credo.Check.Readability.PreferImplicitTry, []},

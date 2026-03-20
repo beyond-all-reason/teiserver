@@ -37,7 +37,7 @@ defmodule Teiserver.CacheUser do
 
   # Keys kept from the raw user and merged into the memory user
   @spec keys() :: [atom]
-  def keys(),
+  def keys,
     do:
       ~w(id name password email inserted_at clan_id permissions colour icon smurf_of_id last_login last_played last_logout roles discord_id)a
 
@@ -62,7 +62,7 @@ defmodule Teiserver.CacheUser do
     :discord_dm_channel_id,
     :steam_id
   ]
-  def data_keys(), do: @data_keys
+  def data_keys, do: @data_keys
 
   @spec clean_name(String.t()) :: String.t()
   def clean_name(name) do
@@ -627,7 +627,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec wait_for_startup() :: :ok
-  def wait_for_startup() do
+  def wait_for_startup do
     if Teiserver.cache_get(:application_metadata_cache, "teiserver_partial_startup_completed") !=
          true do
       :timer.sleep(@timer_sleep)
@@ -670,7 +670,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec server_capacity() :: non_neg_integer()
-  def server_capacity() do
+  def server_capacity do
     client_count =
       (Teiserver.cache_get(:application_temp_cache, :telemetry_data) || %{})
       |> Map.get(:client, %{})

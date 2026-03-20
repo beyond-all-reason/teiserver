@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Monitoring.Router do
     send_resp(conn, 404, "Not Found")
   end
 
-  def port() do
+  def port do
     Application.get_env(:teiserver, TeiserverWeb.Monitoring)[:port]
   end
 end

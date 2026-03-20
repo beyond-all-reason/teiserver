@@ -28,7 +28,7 @@ defmodule Teiserver.Matchmaking do
   Return the list of currently available queues
   """
   @spec list_queues() :: [{queue_id(), queue()}]
-  def list_queues() do
+  def list_queues do
     QueueRegistry.list()
   end
 
@@ -36,7 +36,7 @@ defmodule Teiserver.Matchmaking do
   Return the list of queues with their stats and player counts
   """
   @spec list_queues_with_stats() :: [{queue_id(), map()}]
-  def list_queues_with_stats() do
+  def list_queues_with_stats do
     list_queues()
     |> Enum.map(fn {queue_id, queue} ->
       {:ok, stats} = get_stats(queue_id)
@@ -93,7 +93,7 @@ defmodule Teiserver.Matchmaking do
   Where stats includes player_count, total_joined, total_left, total_matched, and total_wait_time_s.
   """
   @spec subscribe_to_queue_updates() :: :ok
-  def subscribe_to_queue_updates() do
+  def subscribe_to_queue_updates do
     PubSub.subscribe(Teiserver.PubSub, "matchmaking_queues")
   end
 
@@ -119,7 +119,7 @@ defmodule Teiserver.Matchmaking do
   matchmaking state, for example when a new asset (game/engine) is set
   It is a bit brutal but simple
   """
-  def restart_queues() do
+  def restart_queues do
     Logger.info("Restarting all matchmaking queues")
 
     :ok =

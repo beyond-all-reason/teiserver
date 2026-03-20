@@ -175,7 +175,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   @spec get_accolade_account() :: Teiserver.Account.User.t()
-  def get_accolade_account() do
+  def get_accolade_account do
     user =
       Account.get_user(nil,
         search: [

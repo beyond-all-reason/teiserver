@@ -27,8 +27,8 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
     {:ok, authed_conn: auth_conn(conn, token), token: token}
   end
 
-  defp create_user_path(), do: ~p"/teiserver/api/admin/users"
-  defp refresh_token_path(), do: ~p"/teiserver/api/admin/users/refresh_token"
+  defp create_user_path, do: ~p"/teiserver/api/admin/users"
+  defp refresh_token_path, do: ~p"/teiserver/api/admin/users/refresh_token"
 
   describe "auth" do
     setup [:setup_user]

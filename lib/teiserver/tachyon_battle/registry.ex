@@ -11,7 +11,7 @@ defmodule Teiserver.TachyonBattle.Registry do
     )
   end
 
-  def start_link() do
+  def start_link do
     Horde.Registry.start_link(keys: :unique, name: __MODULE__)
   end
 

@@ -4,10 +4,10 @@ defmodule Teiserver.Account.ReviewReport do
   alias Teiserver.Logging.ServerDayLogLib
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-champagne-glasses"
+  def icon, do: "fa-solid fa-champagne-glasses"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do

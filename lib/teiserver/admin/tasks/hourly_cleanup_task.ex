@@ -16,7 +16,7 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
     :ok
   end
 
-  defp chat_log_cleanup() do
+  defp chat_log_cleanup do
     days = Application.get_env(:teiserver, Teiserver)[:retention][:room_chat]
 
     before_timestamp = Timex.shift(Timex.now(), days: -days)

@@ -3,8 +3,8 @@ defmodule Teiserver.Admin.ToolLib do
   use TeiserverWeb, :library
 
   @spec colours :: atom
-  def colours(), do: :info
+  def colours, do: :info
 
   @spec icon :: String.t()
-  def icon(), do: "fa-solid fa-tools"
+  def icon, do: "fa-solid fa-tools"
 end

@@ -34,7 +34,7 @@ defmodule Teiserver.Monitoring.Spring do
     )
   end
 
-  def execute_spring_polling_metrics() do
+  def execute_spring_polling_metrics do
     login_queue_length = LoginThrottleServer.get_queue_length()
     :telemetry.execute([:spring, :login_queue_length], %{value: login_queue_length}, %{})
   end

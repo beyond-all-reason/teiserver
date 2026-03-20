@@ -159,7 +159,7 @@ defmodule Teiserver.TeiserverConfigs do
     })
   end
 
-  defp moderation_configs() do
+  defp moderation_configs do
     add_site_config_type(%{
       key: "teiserver.Warning acknowledge prompt",
       section: "Moderation",
@@ -206,7 +206,7 @@ defmodule Teiserver.TeiserverConfigs do
     })
   end
 
-  defp legacy_protocol_configs() do
+  defp legacy_protocol_configs do
     add_site_config_type(%{
       key: "teiserver.Spring flood rate limit count",
       section: "Legacy protocol",
@@ -264,7 +264,7 @@ defmodule Teiserver.TeiserverConfigs do
     })
   end
 
-  defp login_configs() do
+  defp login_configs do
     add_site_config_type(%{
       key: "system.Login limit count",
       section: "Login",
@@ -328,7 +328,7 @@ defmodule Teiserver.TeiserverConfigs do
     })
   end
 
-  defp lobby_configs() do
+  defp lobby_configs do
     add_site_config_type(%{
       key: "teiserver.Uncertainty required to show rating",
       section: "Lobbies",
@@ -482,7 +482,7 @@ defmodule Teiserver.TeiserverConfigs do
     })
   end
 
-  defp discord_configs() do
+  defp discord_configs do
     add_site_config_type(%{
       key: "teiserver.Bridge from discord",
       section: "Discord",
@@ -625,7 +625,7 @@ defmodule Teiserver.TeiserverConfigs do
   end
 
   @spec debugging_configs :: :ok
-  def debugging_configs() do
+  def debugging_configs do
     add_site_config_type(%{
       key: "debug.Print outgoing messages",
       section: "Debug",
@@ -646,7 +646,7 @@ defmodule Teiserver.TeiserverConfigs do
   end
 
   @spec profile_configs() :: :ok
-  def profile_configs() do
+  def profile_configs do
     add_site_config_type(%{
       key: "profile.Rank method",
       section: "Profiles",

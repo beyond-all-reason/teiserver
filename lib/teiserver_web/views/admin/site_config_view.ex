@@ -10,8 +10,8 @@ defmodule TeiserverWeb.Admin.SiteConfigView do
   end
 
   @spec view_colour :: atom()
-  def view_colour(), do: SiteConfigLib.colours()
+  def view_colour, do: SiteConfigLib.colours()
 
   @spec icon :: String.t()
-  def icon(), do: SiteConfigLib.icon()
+  def icon, do: SiteConfigLib.icon()
 end

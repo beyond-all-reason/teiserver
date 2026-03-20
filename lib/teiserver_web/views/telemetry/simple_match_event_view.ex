@@ -4,8 +4,8 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventView do
   use TeiserverWeb, :view
 
   @spec view_colour :: atom
-  def view_colour(), do: SimpleMatchEventLib.colour()
+  def view_colour, do: SimpleMatchEventLib.colour()
 
   @spec icon() :: String.t()
-  def icon(), do: SimpleMatchEventLib.icon()
+  def icon, do: SimpleMatchEventLib.icon()
 end

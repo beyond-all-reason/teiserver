@@ -280,7 +280,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
     end
   end
 
-  defp overview_fixture() do
+  defp overview_fixture do
     %{
       name: "lobby name",
       player_count: 1,

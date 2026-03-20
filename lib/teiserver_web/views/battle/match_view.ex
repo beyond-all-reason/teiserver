@@ -3,6 +3,6 @@ defmodule TeiserverWeb.Battle.MatchView do
 
   use TeiserverWeb, :view
 
-  def view_colour(), do: MatchLib.colours()
-  def icon(), do: MatchLib.icon()
+  def view_colour, do: MatchLib.colours()
+  def icon, do: MatchLib.icon()
 end

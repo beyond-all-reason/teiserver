@@ -7,6 +7,6 @@ defmodule TeiserverWeb.Admin.OAuthApplicationView do
 
   import TeiserverWeb.Components.OAuthApplicationComponent
 
-  def view_colour(), do: ApplicationLib.colours()
-  def icon(), do: ApplicationLib.icon()
+  def view_colour, do: ApplicationLib.colours()
+  def icon, do: ApplicationLib.icon()
 end

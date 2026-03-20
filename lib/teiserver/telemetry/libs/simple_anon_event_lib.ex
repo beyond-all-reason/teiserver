@@ -10,10 +10,10 @@ defmodule Teiserver.Telemetry.SimpleAnonEventLib do
   @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
 
   @spec colour :: atom
-  def colour(), do: :info2
+  def colour, do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-sliders-up"
+  def icon, do: "fa-sliders-up"
 
   @spec log_simple_anon_event(String.t(), String.t()) ::
           {:error, Ecto.Changeset} | {:ok, SimpleAnonEvent}

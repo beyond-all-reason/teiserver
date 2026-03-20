@@ -41,7 +41,7 @@ defmodule Teiserver.Battle.MatchLib do
     end
   end
 
-  def list_game_types() do
+  def list_game_types do
     [
       "Duel",
       "Small Team",
@@ -54,7 +54,7 @@ defmodule Teiserver.Battle.MatchLib do
     ]
   end
 
-  def list_rated_game_types() do
+  def list_rated_game_types do
     [
       "Duel",
       "Small Team",

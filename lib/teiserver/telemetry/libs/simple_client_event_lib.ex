@@ -10,10 +10,10 @@ defmodule Teiserver.Telemetry.SimpleClientEventLib do
   @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
 
   @spec colour :: atom
-  def colour(), do: :info2
+  def colour, do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-grip-lines"
+  def icon, do: "fa-grip-lines"
 
   @spec log_simple_client_event(T.userid(), String.t()) ::
           {:error, Ecto.Changeset} | {:ok, SimpleClientEvent}

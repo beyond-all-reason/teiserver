@@ -3,7 +3,7 @@ defmodule Teiserver.Config.UserConfigTypes.PrivacyConfigs do
   import Teiserver.Config, only: [add_user_config_type: 1]
 
   @spec create() :: :ok
-  def create() do
+  def create do
     privacy_levels = ["Only myself", "Friends", "Any player", "Completely public"]
 
     add_user_config_type(%{

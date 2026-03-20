@@ -6,6 +6,6 @@ defmodule TeiserverWeb.Admin.AssetView do
 
   import TeiserverWeb.Components.AssetComponents
 
-  def view_colour(), do: AssetLib.colours()
-  def icon(), do: AssetLib.icon()
+  def view_colour, do: AssetLib.colours()
+  def icon, do: AssetLib.icon()
 end

@@ -6,10 +6,10 @@ defmodule Teiserver.Account.NewUserFunnelReport do
   alias Teiserver.Telemetry.ComplexClientEventTypeLib
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-filter"
+  def icon, do: "fa-solid fa-filter"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, _params) do

@@ -310,7 +310,7 @@ defmodule Teiserver.Account do
   end
 
   @spec list_accolade_types() :: list()
-  def list_accolade_types() do
+  def list_accolade_types do
     args = [search: [purpose: "Accolade"], order_by: "Name (A-Z)"]
 
     badge_type_query(args)
@@ -2329,11 +2329,11 @@ defmodule Teiserver.Account do
   end
 
   @spec can_register?() :: boolean()
-  def can_register?(),
+  def can_register?,
     do: Config.get_site_config_cache("teiserver.Enable registrations")
 
   @spec can_register_with_web?() :: boolean()
-  def can_register_with_web?() do
+  def can_register_with_web? do
     can_register?() &&
       not Config.get_site_config_cache("teiserver.Require Chobby registration")
   end

@@ -7,10 +7,10 @@ defmodule Teiserver.Moderation.ReportGroupLib do
   use TeiserverWeb, :library_newform
 
   @spec colour :: atom
-  def colour(), do: :warning
+  def colour, do: :warning
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-house-flag"
+  def icon, do: "fa-house-flag"
 
   @spec make_favourite(ReportGroup.t()) :: map()
   def make_favourite(report_group) do

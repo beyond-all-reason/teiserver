@@ -37,7 +37,7 @@ defmodule Teiserver.Logging do
   import Ecto.Query, warn: false
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-bars"
+  def icon, do: "fa-solid fa-bars"
 
   defp server_minute_log_query(args) do
     server_minute_log_query(nil, args)
@@ -285,7 +285,7 @@ defmodule Teiserver.Logging do
   end
 
   @spec get_first_telemetry_minute_datetime() :: DateTime.t() | nil
-  def get_first_telemetry_minute_datetime() do
+  def get_first_telemetry_minute_datetime do
     query =
       from telemetry_logs in ServerMinuteLog,
         order_by: [asc: telemetry_logs.timestamp],
@@ -296,7 +296,7 @@ defmodule Teiserver.Logging do
   end
 
   @spec get_last_server_day_log() :: Date.t() | nil
-  def get_last_server_day_log() do
+  def get_last_server_day_log do
     query =
       from telemetry_logs in ServerDayLog,
         order_by: [desc: telemetry_logs.date],
@@ -466,7 +466,7 @@ defmodule Teiserver.Logging do
   end
 
   @spec get_last_server_month_log() :: {integer(), integer()} | nil
-  def get_last_server_month_log() do
+  def get_last_server_month_log do
     query =
       from telemetry_logs in ServerMonthLog,
         order_by: [desc: telemetry_logs.year, desc: telemetry_logs.month],
@@ -640,7 +640,7 @@ defmodule Teiserver.Logging do
   end
 
   @spec get_last_server_quarter_log() :: Date.t() | nil
-  def get_last_server_quarter_log() do
+  def get_last_server_quarter_log do
     query =
       from telemetry_logs in ServerQuarterLog,
         order_by: [desc: telemetry_logs.year, desc: telemetry_logs.quarter],
@@ -817,7 +817,7 @@ defmodule Teiserver.Logging do
   end
 
   @spec get_last_server_year_log() :: Date.t() | nil
-  def get_last_server_year_log() do
+  def get_last_server_year_log do
     query =
       from telemetry_logs in ServerYearLog,
         order_by: [desc: telemetry_logs.year, desc: telemetry_logs.year],
@@ -986,7 +986,7 @@ defmodule Teiserver.Logging do
   end
 
   @spec get_last_server_week_log() :: Date.t() | nil
-  def get_last_server_week_log() do
+  def get_last_server_week_log do
     query =
       from telemetry_logs in ServerWeekLog,
         order_by: [desc: telemetry_logs.year, desc: telemetry_logs.week],
@@ -1155,7 +1155,7 @@ defmodule Teiserver.Logging do
   end
 
   @spec get_last_match_day_log() :: Date.t() | nil
-  def get_last_match_day_log() do
+  def get_last_match_day_log do
     query =
       from telemetry_logs in MatchDayLog,
         order_by: [desc: telemetry_logs.date],
@@ -1166,7 +1166,7 @@ defmodule Teiserver.Logging do
   end
 
   @spec get_todays_match_log :: map()
-  def get_todays_match_log() do
+  def get_todays_match_log do
     last_time =
       Teiserver.cache_get(
         :application_metadata_cache,
@@ -1358,7 +1358,7 @@ defmodule Teiserver.Logging do
   end
 
   @spec get_last_match_month_log() :: {integer(), integer()} | nil
-  def get_last_match_month_log() do
+  def get_last_match_month_log do
     query =
       from telemetry_logs in MatchMonthLog,
         order_by: [desc: telemetry_logs.year, desc: telemetry_logs.month],
@@ -1636,11 +1636,11 @@ defmodule Teiserver.Logging do
     |> Repo.all()
   end
 
-  def get_last_aggregate_date() do
+  def get_last_aggregate_date do
     AggregateViewLogLib.get_last_aggregate_date()
   end
 
-  def get_first_page_view_log_date() do
+  def get_first_page_view_log_date do
     AggregateViewLogLib.get_first_page_view_log_date()
   end
 
@@ -1778,7 +1778,7 @@ defmodule Teiserver.Logging do
   end
 
   @spec get_last_user_activity_day_log() :: Date.t() | nil
-  def get_last_user_activity_day_log() do
+  def get_last_user_activity_day_log do
     query =
       from user_activity_logs in UserActivityDayLog,
         order_by: [desc: user_activity_logs.date],

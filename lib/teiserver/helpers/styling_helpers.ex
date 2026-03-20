@@ -155,17 +155,17 @@ defmodule Teiserver.Helper.StylingHelper do
       cloud moon snowflake umbrella volcano sun-haze)
 
   @spec random_icon() :: String.t()
-  def random_icon() do
+  def random_icon do
     Enum.random(@random_icons)
   end
 
   # If you are using a dark theme it's probably best to call the light list
   @spec hex_colour_list() :: [String.t()]
-  def hex_colour_list(), do: light_hex_colour_list()
+  def hex_colour_list, do: light_hex_colour_list()
 
   # For light mode, darker colours
   @spec dark_hex_colour_list() :: [String.t()]
-  def dark_hex_colour_list() do
+  def dark_hex_colour_list do
     [
       "#AA3333",
       "#990505",
@@ -187,7 +187,7 @@ defmodule Teiserver.Helper.StylingHelper do
 
   # For dark mode, lighter colours
   @spec light_hex_colour_list() :: [String.t()]
-  def light_hex_colour_list() do
+  def light_hex_colour_list do
     [
       "#FF7777",
       "#CC4433",
@@ -209,7 +209,7 @@ defmodule Teiserver.Helper.StylingHelper do
 
   # Stand out colours
   @spec bright_hex_colour_list() :: [String.t()]
-  def bright_hex_colour_list() do
+  def bright_hex_colour_list do
     [
       "#CC0000",
       "#00CC00",
@@ -221,12 +221,12 @@ defmodule Teiserver.Helper.StylingHelper do
   end
 
   @spec random_colour() :: String.t()
-  def random_colour() do
+  def random_colour do
     Enum.random(hex_colour_list())
   end
 
   @spec random_styling() :: map()
-  def random_styling() do
+  def random_styling do
     %{
       "icon" => "fa-solid fa-" <> random_icon(),
       "colour" => random_colour()
