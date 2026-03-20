@@ -4,7 +4,7 @@ defmodule Teiserver.Asset.GameQueries do
   use TeiserverWeb, :queries
 
   @spec get_games() :: [Asset.Game.t()]
-  def get_games() do
+  def get_games do
     base_query() |> order_by() |> Repo.all()
   end
 
@@ -28,12 +28,12 @@ defmodule Teiserver.Asset.GameQueries do
   When creating a lobby, use this game version.
   """
   @spec get_default_lobby_game() :: Asset.Game.t() | nil
-  def get_default_lobby_game() do
+  def get_default_lobby_game do
     # for now, just return the same game as for matchmaking
     get_game(in_matchmaking: true)
   end
 
-  defp base_query() do
+  defp base_query do
     from game in Asset.Game, as: :game
   end
 

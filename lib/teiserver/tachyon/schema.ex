@@ -11,7 +11,7 @@ defmodule Teiserver.Tachyon.Schema do
 
   @cache_name :tachyon_schema_cache
 
-  def cache_spec() do
+  def cache_spec do
     CacheHelper.concache_perm_sup(@cache_name)
   end
 

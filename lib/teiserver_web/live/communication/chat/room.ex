@@ -189,7 +189,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
     end)
   end
 
-  defp new_message_changeset() do
+  defp new_message_changeset do
     %RoomMessage{}
     |> RoomMessage.changeset(%{
       "room" => "",

@@ -61,7 +61,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     )
   end
 
-  defp add_root_user() do
+  defp add_root_user do
     {:ok, user} =
       Account.create_user(%{
         name: "root",
@@ -95,7 +95,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     |> Enum.map_join(" ", fn l -> Enum.random(l) |> String.capitalize() end)
   end
 
-  defp make_accounts() do
+  defp make_accounts do
     root_user = add_root_user()
 
     new_users =
@@ -132,7 +132,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     |> Repo.transaction()
   end
 
-  defp make_telemetry() do
+  defp make_telemetry do
     # First we need to make by the minute telemetry data
     Range.new(0, @settings.days)
     |> Enum.each(fn day ->
@@ -241,7 +241,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     end)
   end
 
-  defp make_moderation() do
+  defp make_moderation do
     Range.new(0, @settings.days)
     |> Enum.each(fn day ->
       date = Timex.today() |> Timex.shift(days: -day)
@@ -320,7 +320,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     end)
   end
 
-  defp make_matches() do
+  defp make_matches do
     match_ids =
       Range.new(0, @settings.days)
       |> Enum.flat_map(fn day ->
@@ -447,7 +447,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     Config.update_site_config("rating.Season", season)
   end
 
-  defp make_one_time_code() do
+  defp make_one_time_code do
     root_user = Account.get_user_by_email("root@localhost")
 
     Config.update_site_config("user.Enable one time links", "true")

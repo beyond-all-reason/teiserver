@@ -13,7 +13,7 @@ defmodule Teiserver.Microblog.UserPreferenceLib do
   def colours, do: :primary2
 
   @spec tag_mode_list() :: [String.t()]
-  def tag_mode_list() do
+  def tag_mode_list do
     [
       "Block",
       "Filter",

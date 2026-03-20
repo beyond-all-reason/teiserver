@@ -261,7 +261,7 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
     %{id: queue_id, pid: pid, version: version}
   end
 
-  defp setup_client() do
+  defp setup_client do
     {:ok, args} = Tachyon.setup_client()
     Map.new(args)
   end

@@ -8,13 +8,13 @@ defmodule Teiserver.Account.GrowthReport do
   @behaviour Teiserver.Common.WebReportBehaviour
 
   @spec name() :: String.t()
-  def name(), do: "Growth"
+  def name, do: "Growth"
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-seedling"
+  def icon, do: "fa-solid fa-seedling"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @spec run(Plug.Conn.t(), map()) :: map()
   def run(_conn, params) do

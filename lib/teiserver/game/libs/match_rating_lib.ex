@@ -31,18 +31,18 @@ defmodule Teiserver.Game.MatchRatingLib do
   # TODO Remove "Team" from here once the split is done
 
   @spec rating_type_list() :: [String.t()]
-  def rating_type_list() do
+  def rating_type_list do
     @rated_match_types
   end
 
   @spec rating_type_id_lookup() :: %{Integer.t() => String.t()}
-  def rating_type_id_lookup() do
+  def rating_type_id_lookup do
     rating_type_list()
     |> Map.new(fn name -> {Game.get_or_add_rating_type(name), name} end)
   end
 
   @spec rating_type_name_lookup() :: %{String.t() => Integer.t()}
-  def rating_type_name_lookup() do
+  def rating_type_name_lookup do
     rating_type_list()
     |> Map.new(fn name -> {name, Game.get_or_add_rating_type(name)} end)
   end
@@ -438,7 +438,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
 
   @spec re_rate_all_matches :: non_neg_integer()
-  def re_rate_all_matches() do
+  def re_rate_all_matches do
     match_ids =
       Battle.list_matches(
         search: [
@@ -574,7 +574,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     predict_winning_team(match.members, rating_type_id) |> Map.get(:winning_team)
   end
 
-  def test_predictions() do
+  def test_predictions do
     results =
       Battle.list_matches(
         search: [
@@ -664,11 +664,11 @@ defmodule Teiserver.Game.MatchRatingLib do
     end
   end
 
-  defp get_tau() do
+  defp get_tau do
     Config.get_site_config_cache("rating.Tau")
   end
 
-  def active_season() do
+  def active_season do
     Config.get_site_config_cache("rating.Season")
   end
 end

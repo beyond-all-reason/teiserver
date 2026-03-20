@@ -7,10 +7,10 @@ defmodule Teiserver.Account.TournamentReport do
   import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   @spec icon() :: String.t()
-  def icon(), do: RatingLib.icon()
+  def icon, do: RatingLib.icon()
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Moderator"
+  def permissions, do: "Moderator"
 
   defp get_player_id("#" <> id_str), do: String.to_integer(id_str)
 

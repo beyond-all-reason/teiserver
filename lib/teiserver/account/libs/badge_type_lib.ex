@@ -14,7 +14,7 @@ defmodule Teiserver.Account.BadgeTypeLib do
   def colours, do: :warning2
 
   @spec purpose_list() :: [String.t()]
-  def purpose_list(),
+  def purpose_list,
     do: [
       # Always positive, limited in how often they can be given out
       "Accolade",
@@ -30,7 +30,7 @@ defmodule Teiserver.Account.BadgeTypeLib do
     ]
 
   @spec restriction_list() :: [String.t()]
-  def restriction_list(),
+  def restriction_list,
     do: [
       nil,
       "Ally",
@@ -129,13 +129,7 @@ defmodule Teiserver.Account.BadgeTypeLib do
     query
   end
 
-  # def _preload_things(query) do
-  #   from badge_types in query,
-  #     left_join: things in assoc(badge_types, :things),
-  #     preload: [things: things]
-  # end
-
-  def nil_badge_type() do
+  def nil_badge_type do
     %{
       name: "No badge",
       icon: "fa-solid fa-square",

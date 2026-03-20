@@ -6,13 +6,13 @@ defmodule Teiserver.Logging.ServerDayLogLib do
   use TeiserverWeb, :library
 
   @spec colours :: atom
-  def colours(), do: :warning
+  def colours, do: :warning
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-heart-pulse"
+  def icon, do: "fa-solid fa-heart-pulse"
 
   @spec get_server_day_logs :: Ecto.Query.t()
-  def get_server_day_logs() do
+  def get_server_day_logs do
     from(logs in ServerDayLog)
   end
 

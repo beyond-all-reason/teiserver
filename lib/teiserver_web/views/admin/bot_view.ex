@@ -7,6 +7,6 @@ defmodule TeiserverWeb.Admin.BotView do
 
   import TeiserverWeb.Components.BotComponent
 
-  def view_colour(), do: BotLib.colours()
-  def icon(), do: BotLib.icon()
+  def view_colour, do: BotLib.colours()
+  def icon, do: BotLib.icon()
 end

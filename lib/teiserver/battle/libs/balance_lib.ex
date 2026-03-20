@@ -30,7 +30,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @shuffle_first_pick true
 
   @spec defaults() :: map()
-  def defaults() do
+  def defaults do
     %{
       max_deviation: Config.get_site_config_cache("teiserver.Max deviation"),
       rating_lower_boundary: @rating_lower_boundary,
@@ -42,12 +42,12 @@ defmodule Teiserver.Battle.BalanceLib do
     }
   end
 
-  def get_default_algorithm() do
+  def get_default_algorithm do
     Config.get_site_config_cache("teiserver.Default balance algorithm")
   end
 
   @spec algorithm_modules() :: %{String.t() => module}
-  def algorithm_modules() do
+  def algorithm_modules do
     %{
       "loser_picks" => Teiserver.Battle.Balance.LoserPicks,
       "force_party" => Teiserver.Battle.Balance.ForceParty,

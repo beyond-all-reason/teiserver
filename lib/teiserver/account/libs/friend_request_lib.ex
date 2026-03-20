@@ -7,10 +7,10 @@ defmodule Teiserver.Account.FriendRequestLib do
   alias Teiserver.Data.Types, as: T
 
   @spec colours :: atom
-  def colours(), do: :success
+  def colours, do: :success
 
   @spec icon :: String.t()
-  def icon(), do: "fa-user-plus"
+  def icon, do: "fa-user-plus"
 
   @spec error_atom_to_user_friendly_string(atom() | String.t()) :: String.t()
   def error_atom_to_user_friendly_string(reason) do

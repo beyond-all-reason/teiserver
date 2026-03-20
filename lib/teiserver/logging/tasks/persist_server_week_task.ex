@@ -30,7 +30,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
 
   # For when there are no existing logs
   # we need to ensure the earliest log is from last week, not this week
-  defp perform_first_time() do
+  defp perform_first_time do
     first_logs =
       Logging.list_server_day_logs(
         order: "Oldest first",
@@ -120,7 +120,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
   end
 
   @spec week_so_far() :: map()
-  def week_so_far() do
+  def week_so_far do
     now = Timex.now()
 
     user_activity_logs =

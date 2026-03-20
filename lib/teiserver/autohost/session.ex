@@ -53,7 +53,7 @@ defmodule Teiserver.Autohost.Session do
   end
 
   @impl :gen_statem
-  def callback_mode(), do: :handle_event_function
+  def callback_mode, do: :handle_event_function
 
   @type start_response :: %{ips: [String.t()], port: integer()}
   # credo:disable-for-next-line Credo.Check.Design.TagTODO

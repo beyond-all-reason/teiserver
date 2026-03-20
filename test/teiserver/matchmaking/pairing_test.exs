@@ -2,7 +2,7 @@ defmodule Teiserver.Matchmaking.PairingTest do
   alias Teiserver.Matchmaking.PairingRoom
   use Teiserver.DataCase, async: true
 
-  defp queue_attrs() do
+  defp queue_attrs do
     %{
       name: UUID.uuid4(),
       team_size: 1,
@@ -11,7 +11,7 @@ defmodule Teiserver.Matchmaking.PairingTest do
     }
   end
 
-  defp make_member() do
+  defp make_member do
     %{
       id: UUID.uuid4(),
       player_ids: [:rand.uniform(999_999_999)],

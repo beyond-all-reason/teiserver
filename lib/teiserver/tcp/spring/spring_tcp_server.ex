@@ -1413,7 +1413,7 @@ defmodule Teiserver.SpringTcpServer do
   defp get_transport_type_port(port) when is_port(port),
     do: {:tcp, port}
 
-  defp upgrade_handshake_opts() do
+  defp upgrade_handshake_opts do
     [
       # See: https://www.erlang.org/doc/apps/kernel/inet.html#setopts/2
       # > These packet types only have effect on receiving.

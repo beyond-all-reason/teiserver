@@ -7,7 +7,7 @@ defmodule Teiserver.Matchmaking.QueueRegistry do
 
   alias Teiserver.Matchmaking.QueueServer
 
-  def start_link() do
+  def start_link do
     Horde.Registry.start_link(keys: :unique, members: :auto, name: __MODULE__)
   end
 
@@ -40,7 +40,7 @@ defmodule Teiserver.Matchmaking.QueueRegistry do
   end
 
   @spec list() :: [{QueueServer.id(), QueueServer.queue()}]
-  def list() do
+  def list do
     Horde.Registry.select(__MODULE__, [{{:"$1", :_, :"$2"}, [], [{{:"$1", :"$2"}}]}])
   end
 

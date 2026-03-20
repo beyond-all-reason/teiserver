@@ -218,7 +218,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   end
 
   @spec get_os_mon_data :: map()
-  def get_os_mon_data() do
+  def get_os_mon_data do
     # cpu_per_core =
     #   case :cpu_sup.util([:detailed, :per_cpu]) do
     #     {:all, 0, 0, []} -> []

@@ -32,7 +32,7 @@ defmodule Teiserver.Moderation do
   @spec colour :: atom
   defdelegate colour(), to: ReportLib
 
-  def overwatch_icon(), do: "eye"
+  def overwatch_icon, do: "eye"
 
   @spec report_query(List.t()) :: Ecto.Query.t()
   def report_query(args) do

@@ -4,7 +4,7 @@ defmodule Teiserver.Asset.EngineQueries do
   use TeiserverWeb, :queries
 
   @spec get_engines() :: [Asset.Engine.t()]
-  def get_engines() do
+  def get_engines do
     base_query() |> order_by() |> Repo.all()
   end
 
@@ -28,12 +28,12 @@ defmodule Teiserver.Asset.EngineQueries do
   When creating a lobby, use this engine version.
   """
   @spec get_default_lobby_engine() :: Asset.Engine.t() | nil
-  def get_default_lobby_engine() do
+  def get_default_lobby_engine do
     # for now, just return the same game as for matchmaking
     get_engine(in_matchmaking: true)
   end
 
-  defp base_query() do
+  defp base_query do
     from engine in Asset.Engine, as: :engine
   end
 

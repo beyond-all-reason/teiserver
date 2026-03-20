@@ -40,17 +40,17 @@ defmodule Teiserver.Party.Server do
   @default_call_timeout 5000
 
   @spec gen_party_id() :: id()
-  def gen_party_id(), do: UUID.uuid4()
+  def gen_party_id, do: UUID.uuid4()
 
   @doc """
   What is the site config key holding the max size of a party
   """
-  def max_size_key(), do: "party.max-size"
+  def max_size_key, do: "party.max-size"
 
   @doc """
   What is the site config key holding how long an invite is valid for (in seconds)
   """
-  def invite_valid_duration_key(), do: "party.invite-valid-duration-s"
+  def invite_valid_duration_key, do: "party.invite-valid-duration-s"
 
   @spec leave_party(id(), T.userid()) :: :ok | {:error, :invalid_party | :not_a_member}
   def leave_party(party_id, user_id) do
@@ -203,7 +203,7 @@ defmodule Teiserver.Party.Server do
   ################################################################################
 
   @impl :gen_statem
-  def callback_mode(), do: :handle_event_function
+  def callback_mode, do: :handle_event_function
 
   @impl :gen_statem
   def init({party_id, {:user, user_id, creator_pid}}) do

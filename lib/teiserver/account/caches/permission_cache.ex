@@ -29,7 +29,7 @@ defmodule Teiserver.Account.PermissionCache do
     Supervisor.init(children, strategy: :one_for_all)
   end
 
-  defp warm_permission_cache() do
+  defp warm_permission_cache do
     add_permission_set("admin", "debug", ~w(debug))
     add_permission_set("admin", "dev", ~w(developer structure))
     add_permission_set("admin", "admin", ~w(limited full))
@@ -59,7 +59,7 @@ defmodule Teiserver.Account.PermissionCache do
     :ok
   end
 
-  defp warm_restriction_cache() do
+  defp warm_restriction_cache do
     # Chat stuff
     UserLib.add_report_restriction_types("Chat", [
       "Bridging",

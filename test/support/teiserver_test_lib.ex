@@ -36,7 +36,7 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   @spec new_user_name :: String.t()
-  def new_user_name() do
+  def new_user_name do
     "test_user_#{:rand.uniform(99_999_999) + 1_000_000}"
   end
 
@@ -132,7 +132,7 @@ defmodule Teiserver.TeiserverTestLib do
     :timer.sleep(100)
   end
 
-  def _recv_lines(), do: _recv_lines(1)
+  def _recv_lines, do: _recv_lines(1)
   def _recv_lines(:until_timeout), do: _recv_lines(99_999)
 
   def _recv_lines(lines) do
@@ -206,14 +206,14 @@ defmodule Teiserver.TeiserverTestLib do
     end
   end
 
-  def mock_socket() do
+  def mock_socket do
     %{
       mock: true,
       transport: Teiserver.FakeTransport
     }
   end
 
-  def mock_state_raw() do
+  def mock_state_raw do
     socket = mock_socket()
 
     %{
@@ -457,7 +457,7 @@ defmodule Teiserver.TeiserverTestLib do
     |> Moderation.create_report_group_and_report()
   end
 
-  def seed() do
+  def seed do
     CoordinatorServer.get_coordinator_account()
     AccoladeBotServer.get_accolade_account()
 
@@ -496,7 +496,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   returns :ok
   """
-  def clear_all_con_caches() do
+  def clear_all_con_caches do
     cache_list = [
       :telemetry_complex_client_event_types_cache,
       :telemetry_complex_lobby_event_types_cache,
@@ -543,7 +543,7 @@ defmodule Teiserver.TeiserverTestLib do
     {:ok, %{spring_server: Map.new(listeners)}}
   end
 
-  def start_coordinator!() do
+  def start_coordinator! do
     assert {:ok, pid} = Coordinator.start_coordinator()
 
     on_exit(fn ->
@@ -586,11 +586,11 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket}
   end
 
-  defp make_async_transport() do
+  defp make_async_transport do
     %{send: fn _x, _y -> nil end}
   end
 
-  defp seed_badge_types() do
+  defp seed_badge_types do
     # Create the badge types
     if Enum.empty?(AccoladeLib.get_badge_types()) do
       {:ok, _badge_type1} =

@@ -505,7 +505,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
     {:ok, party_id: party_id}
   end
 
-  defp setup_client() do
+  defp setup_client do
     {:ok, args} = Tachyon.setup_client()
     Map.new(args)
   end

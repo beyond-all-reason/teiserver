@@ -123,7 +123,7 @@ defmodule Teiserver.Player.Session do
     {:ok, %{}, {:continue, {:snapshot, snapshot}}}
   end
 
-  defp initial_matchmaking_state() do
+  defp initial_matchmaking_state do
     :no_matchmaking
   end
 
@@ -564,7 +564,7 @@ defmodule Teiserver.Player.Session do
     user_id |> via_tuple() |> GenServer.call({:lobby, :unsubscribe_list})
   end
 
-  def restore_sessions() do
+  def restore_sessions do
     Teiserver.Tachyon.System.restore_state("session", __MODULE__, :restore_session)
   end
 
@@ -1925,7 +1925,7 @@ defmodule Teiserver.Player.Session do
   end
 
   @spec initial_party_state() :: party_state()
-  defp initial_party_state(), do: %{version: 0, current_party: nil, invited_to: []}
+  defp initial_party_state, do: %{version: 0, current_party: nil, invited_to: []}
 
   # Gather the state of all relevant parties for the given session
   defp get_party_states(party_state) do

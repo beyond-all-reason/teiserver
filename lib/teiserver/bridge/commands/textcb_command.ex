@@ -12,11 +12,11 @@ defmodule Teiserver.Bridge.Commands.TextcbCommand do
 
   @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec name() :: String.t()
-  def name(), do: "textcb"
+  def name, do: "textcb"
 
   @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec cmd_definition() :: map()
-  def cmd_definition() do
+  def cmd_definition do
     choices =
       Communication.list_text_callbacks()
       |> Enum.map(fn cb ->

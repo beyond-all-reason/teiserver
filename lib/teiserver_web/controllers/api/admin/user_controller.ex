@@ -69,7 +69,7 @@ defmodule TeiserverWeb.API.Admin.UserController do
     end
   end
 
-  defp get_generic_lobby_app() do
+  defp get_generic_lobby_app do
     # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
     with app when not is_nil(app) <- OAuth.get_application_by_uid("generic_lobby") do
       {:ok, app}

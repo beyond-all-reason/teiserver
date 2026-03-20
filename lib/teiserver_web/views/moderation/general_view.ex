@@ -7,10 +7,10 @@ defmodule TeiserverWeb.Moderation.GeneralView do
   use TeiserverWeb, :view
 
   @spec view_colour :: atom
-  def view_colour(), do: :default
+  def view_colour, do: :default
 
   @spec icon() :: String.t()
-  def icon(), do: ReportLib.icon()
+  def icon, do: ReportLib.icon()
 
   @spec view_colour(String.t()) :: atom
   def view_colour("actions"), do: ActionLib.colour()

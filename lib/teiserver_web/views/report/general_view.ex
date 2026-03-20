@@ -8,10 +8,10 @@ defmodule TeiserverWeb.Report.GeneralView do
   use TeiserverWeb, :view
 
   @spec view_colour :: atom
-  def view_colour(), do: :primary
+  def view_colour, do: :primary
 
   @spec icon() :: String.t()
-  def icon(), do: StylingHelper.icon(:primary)
+  def icon, do: StylingHelper.icon(:primary)
 
   @spec view_colour(String.t()) :: atom
   def view_colour("client_events"), do: ComplexClientEventLib.colour()

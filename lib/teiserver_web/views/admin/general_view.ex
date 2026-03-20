@@ -18,10 +18,10 @@ defmodule TeiserverWeb.Admin.GeneralView do
   use TeiserverWeb, :view
 
   @spec view_colour() :: atom
-  def view_colour(), do: :info
+  def view_colour, do: :info
 
   @spec icon() :: String.t()
-  def icon(), do: StylingHelper.icon(:info)
+  def icon, do: StylingHelper.icon(:info)
 
   @spec view_colour(String.t()) :: atom()
   def view_colour("clans"), do: ClanLib.colours()

@@ -5,10 +5,10 @@ defmodule Teiserver.Account.NewSmurfReport do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-face-angry"
+  def icon, do: "fa-solid fa-face-angry"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Moderator"
+  def permissions, do: "Moderator"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do

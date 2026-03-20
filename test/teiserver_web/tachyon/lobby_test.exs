@@ -747,7 +747,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
   end
 
   # to force the list update without having to rely on a slow update timer
-  defp continuously_send_list_update() do
+  defp continuously_send_list_update do
     TachyonLobby.List.broadcast_updates()
     :timer.sleep(10)
     continuously_send_list_update()

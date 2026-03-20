@@ -21,10 +21,10 @@ defmodule Teiserver.Game.RatingLogsExport do
   require Logger
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-layer-group"
+  def icon, do: "fa-solid fa-layer-group"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.admin"
+  def permissions, do: "teiserver.admin"
 
   @spec show_form(Plug.Conn.t()) :: map()
   def show_form(_conn) do

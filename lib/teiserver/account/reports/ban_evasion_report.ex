@@ -8,10 +8,10 @@ defmodule Teiserver.Account.BanEvasionReport do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-user-ninja"
+  def icon, do: "fa-solid fa-user-ninja"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Moderator"
+  def permissions, do: "Moderator"
 
   @spec run(Plug.Conn.t(), map()) :: map()
   def run(_conn, params) do
@@ -101,7 +101,7 @@ defmodule Teiserver.Account.BanEvasionReport do
     }
   end
 
-  defp get_valid_key_types() do
+  defp get_valid_key_types do
     Account.list_smurf_key_types(
       search: [
         name_in: ["chobby_mac_hash"]

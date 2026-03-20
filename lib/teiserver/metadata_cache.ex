@@ -25,7 +25,7 @@ defmodule Teiserver.MetadataCache do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  defp random_names() do
+  defp random_names do
     # Brought over from Central
     Teiserver.store_put(
       :application_metadata_cache,
@@ -51,7 +51,7 @@ defmodule Teiserver.MetadataCache do
     )
   end
 
-  defp audit() do
+  defp audit do
     AuditLogLib.add_audit_types([
       "Account:User password reset",
       "Account:Failed login",

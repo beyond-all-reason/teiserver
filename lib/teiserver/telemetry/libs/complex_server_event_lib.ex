@@ -10,10 +10,10 @@ defmodule Teiserver.Telemetry.ComplexServerEventLib do
   @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
 
   @spec colour :: atom
-  def colour(), do: :info2
+  def colour, do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-database"
+  def icon, do: "fa-database"
 
   @spec log_complex_server_event(T.userid() | nil, String, map()) ::
           {:error, Ecto.Changeset} | {:ok, ComplexServerEvent}

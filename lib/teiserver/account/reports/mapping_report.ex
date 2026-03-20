@@ -3,10 +3,10 @@ defmodule Teiserver.Game.MappingReport do
   alias Teiserver.Battle
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-map"
+  def icon, do: "fa-solid fa-map"
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @threshold 10
 

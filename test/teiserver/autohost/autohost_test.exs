@@ -128,7 +128,7 @@ defmodule Teiserver.Autohost.AutohostTest do
     end
   end
 
-  defp setup_autohost() do
+  defp setup_autohost do
     autohost = BotFixtures.create_bot()
 
     sess_pid =

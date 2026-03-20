@@ -330,7 +330,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   @spec get_coordinator_account() :: Teiserver.CacheUser.t()
-  def get_coordinator_account() do
+  def get_coordinator_account do
     user =
       Account.get_user(nil,
         search: [

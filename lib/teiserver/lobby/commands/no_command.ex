@@ -13,7 +13,7 @@ defmodule Teiserver.Lobby.Commands.NoCommand do
 
   @impl Teiserver.Lobby.LobbyCommandBehaviour
   @spec name() :: String.t()
-  def name(), do: "no-command"
+  def name, do: "no-command"
 
   @impl Teiserver.Lobby.LobbyCommandBehaviour
   @spec execute(T.lobby_server_state(), map) :: T.lobby_server_state()

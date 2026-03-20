@@ -459,7 +459,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
   end
 
   @spec get_avoid_delay() :: number()
-  defp get_avoid_delay() do
+  defp get_avoid_delay do
     Config.get_site_config_cache("lobby.Avoid min hours required")
   end
 

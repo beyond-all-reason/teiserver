@@ -6,8 +6,8 @@ defmodule Teiserver.Config.UserConfigLib do
   # alias Teiserver.Config
 
   @spec colours() :: atom
-  def colours(), do: :success
+  def colours, do: :success
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-cog"
+  def icon, do: "fa-solid fa-cog"
 end

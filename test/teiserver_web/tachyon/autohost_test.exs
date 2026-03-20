@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
 
   import Teiserver.Support.Polling, only: [poll_until: 2, poll_until: 3]
 
-  def create_autohost() do
+  def create_autohost do
     name = for _ <- 1..20, into: "", do: <<Enum.random(?a..?z)>>
     create_autohost(name)
   end

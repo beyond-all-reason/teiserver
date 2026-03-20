@@ -25,7 +25,7 @@ defmodule Teiserver.Support.Tachyon do
     end
   end
 
-  def create_user() do
+  def create_user do
     user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     set_ratings(user, 17)
     user
@@ -82,7 +82,7 @@ defmodule Teiserver.Support.Tachyon do
 
   def setup_client(_context), do: setup_client()
 
-  def setup_client() do
+  def setup_client do
     user = create_user()
     %{client: client, token: token} = connect(user)
     {:ok, user: user, client: client, token: token}
@@ -187,7 +187,7 @@ defmodule Teiserver.Support.Tachyon do
     ]
   end
 
-  def tachyon_url() do
+  def tachyon_url do
     conf = Application.get_env(:teiserver, TeiserverWeb.Endpoint)
     "ws://#{conf[:url][:host]}:#{conf[:http][:port]}/tachyon"
   end

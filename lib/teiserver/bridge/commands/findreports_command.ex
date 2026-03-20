@@ -12,11 +12,11 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
 
   @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec name() :: String.t()
-  def name(), do: "findreports"
+  def name, do: "findreports"
 
   @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec cmd_definition() :: map()
-  def cmd_definition() do
+  def cmd_definition do
     %{
       name: "findreports",
       description: "Find reports by the action message id",

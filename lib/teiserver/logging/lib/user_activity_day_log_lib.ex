@@ -6,13 +6,13 @@ defmodule Teiserver.Logging.UserActivityDayLogLib do
   use TeiserverWeb, :library
 
   @spec colours :: atom
-  def colours(), do: :warning
+  def colours, do: :warning
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-solid fa-wave-pulse"
+  def icon, do: "fa-solid fa-wave-pulse"
 
   @spec get_user_activity_day_logs :: Ecto.Query.t()
-  def get_user_activity_day_logs() do
+  def get_user_activity_day_logs do
     from(logs in UserActivityDayLog)
   end
 

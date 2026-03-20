@@ -4,10 +4,10 @@ defmodule Teiserver.Account.FriendLib do
   alias Teiserver.Data.Types, as: T
 
   @spec colours :: atom
-  def colours(), do: :success
+  def colours, do: :success
 
   @spec icon :: String.t()
-  def icon(), do: "fa-user-group"
+  def icon, do: "fa-user-group"
 
   @spec list_friend_ids_of_user(T.userid()) :: [T.userid()]
   def list_friend_ids_of_user(userid) do

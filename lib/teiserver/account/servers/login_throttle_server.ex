@@ -48,7 +48,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   end
 
   @spec get_queue_length :: non_neg_integer()
-  def get_queue_length() do
+  def get_queue_length do
     GenServer.call(__MODULE__, :queue_size)
   catch
     :exit, {:noproc, _} -> 0
@@ -96,14 +96,14 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @doc """
   used for test, to trigger the login
   """
-  def tick() do
+  def tick do
     Process.whereis(__MODULE__) |> send(:tick)
   end
 
   @doc """
   Used for tests, terminate and restart the genserver
   """
-  def restart() do
+  def restart do
     :ok = Supervisor.terminate_child(Teiserver.Supervisor, __MODULE__)
     Supervisor.restart_child(Teiserver.Supervisor, __MODULE__)
   end

@@ -29,14 +29,14 @@ defmodule Teiserver.Moderation.ReportLib do
     }
   end
 
-  def types() do
+  def types do
     [
       {"Chat / Communication", "chat", LobbyMessageLib.icon()},
       {"In game actions", "actions", MatchLib.icon()}
     ]
   end
 
-  def sub_types() do
+  def sub_types do
     %{
       "chat" => [
         {"Spam", "spam", "fa-envelopes-bulk"},
@@ -53,14 +53,14 @@ defmodule Teiserver.Moderation.ReportLib do
     }
   end
 
-  def sections() do
+  def sections do
     [
       {"Chat / Communication", "chat", LobbyMessageLib.icon()},
       {"In game actions", "actions", MatchLib.icon()}
     ]
   end
 
-  def sub_sections() do
+  def sub_sections do
     %{
       "chat" => [
         {"Spam", "spam", "fa-envelopes-bulk"},

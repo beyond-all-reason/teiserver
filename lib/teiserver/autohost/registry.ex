@@ -14,7 +14,7 @@ defmodule Teiserver.Autohost.Registry do
           current_battles: non_neg_integer()
         }
 
-  def start_link() do
+  def start_link do
     Horde.Registry.start_link(keys: :unique, name: __MODULE__)
   end
 
@@ -54,7 +54,7 @@ defmodule Teiserver.Autohost.Registry do
   Returns all the currently registered autohosts
   """
   @spec list() :: [reg_value()]
-  def list() do
+  def list do
     Horde.Registry.select(__MODULE__, [{{:_, :_, :"$1"}, [], [:"$1"]}])
   end
 

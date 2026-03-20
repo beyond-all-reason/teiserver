@@ -176,7 +176,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   defp cache_channel(channel), do: channel
 
   @spec pre_cache_discord_channels() :: :ok
-  def pre_cache_discord_channels() do
+  def pre_cache_discord_channels do
     list_discord_channels()
     |> Enum.each(&cache_channel/1)
   end
@@ -328,12 +328,12 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   end
 
   @spec use_discord?() :: boolean
-  def use_discord?() do
+  def use_discord? do
     Application.get_env(:teiserver, Teiserver)[:enable_discord_bridge]
   end
 
   @spec get_guild_id() :: integer | nil
-  def get_guild_id() do
+  def get_guild_id do
     Application.get_env(:teiserver, Teiserver.Bridge.DiscordBridgeBot)[:guild_id]
   end
 end

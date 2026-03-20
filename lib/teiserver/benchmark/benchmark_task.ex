@@ -38,7 +38,7 @@ defmodule Mix.Tasks.Benchmark do
     start_result
   end
 
-  defp startup() do
+  defp startup do
     receive do
       :begin -> nil
     end

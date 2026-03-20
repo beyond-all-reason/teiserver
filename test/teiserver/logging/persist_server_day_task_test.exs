@@ -21,7 +21,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
     assert is_integer(log.data["aggregates"]["minutes"]["lobby"])
   end
 
-  defp create_minute_data() do
+  defp create_minute_data do
     all_ids =
       Account.list_users()
       |> Enum.map(fn u -> u.id end)

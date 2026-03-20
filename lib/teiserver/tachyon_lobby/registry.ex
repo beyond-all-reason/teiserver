@@ -8,7 +8,7 @@ defmodule Teiserver.TachyonLobby.Registry do
     )
   end
 
-  def start_link() do
+  def start_link do
     Registry.start_link(keys: :unique, name: __MODULE__)
   end
 
@@ -29,7 +29,7 @@ defmodule Teiserver.TachyonLobby.Registry do
   end
 
   @spec count() :: non_neg_integer()
-  def count() do
+  def count do
     Registry.count(__MODULE__)
   rescue
     # when the registry isn't up (yet), can happen with telemetry polling
@@ -37,7 +37,7 @@ defmodule Teiserver.TachyonLobby.Registry do
   end
 
   @spec list_lobbies() :: [{Lobby.id(), pid()}]
-  def list_lobbies() do
+  def list_lobbies do
     Registry.select(__MODULE__, [{{:"$1", :"$2", :_}, [], [{{:"$1", :"$2"}}]}])
   end
 end

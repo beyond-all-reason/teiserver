@@ -31,11 +31,11 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     :ok
   end
 
-  defp get_days() do
+  defp get_days do
     Application.get_env(:teiserver, Teiserver)[:retention][:lobby_chat] + 1
   end
 
-  def delete_unstarted_matches() do
+  def delete_unstarted_matches do
     # If a match is never marked as finished after X days, we delete it
     Battle.list_matches(
       search: [
@@ -50,7 +50,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     |> delete_matches("unstarted")
   end
 
-  def delete_unfinished_matches() do
+  def delete_unfinished_matches do
     # If a match is never marked as finished after X days, we delete it
     Battle.list_matches(
       search: [
@@ -66,7 +66,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     |> delete_matches("unfinished")
   end
 
-  def delete_old_matches() do
+  def delete_old_matches do
     # Rated matches - We don't delete them, they have rating logs attached to them
     # battle_match_rated_days =
     #   Application.get_env(:teiserver, Teiserver)[:retention][:battle_match_rated]
@@ -172,7 +172,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     delete_matches(remaining, nil)
   end
 
-  defp strip_data_from_older_matches() do
+  defp strip_data_from_older_matches do
     finished_before =
       Timex.now()
       |> Timex.shift(days: -@strip_data_days)

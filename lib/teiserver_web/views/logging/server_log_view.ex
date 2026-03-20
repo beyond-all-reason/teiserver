@@ -5,10 +5,10 @@ defmodule TeiserverWeb.Logging.ServerLogView do
   use TeiserverWeb, :view
 
   @spec view_colour :: atom
-  def view_colour(), do: ServerDayLogLib.colours()
+  def view_colour, do: ServerDayLogLib.colours()
 
   @spec icon() :: String.t()
-  def icon(), do: ServerDayLogLib.icon()
+  def icon, do: ServerDayLogLib.icon()
 
   # For the detail view in day metrics
   def heatmap(value, maximum, colour) do

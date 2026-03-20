@@ -6,10 +6,10 @@ defmodule Teiserver.Account.AccoladeReport do
   alias Teiserver.Helper.DatePresets
 
   @spec icon() :: String.t()
-  def icon(), do: AccoladeLib.icon()
+  def icon, do: AccoladeLib.icon()
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Admin"
+  def permissions, do: "Admin"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do

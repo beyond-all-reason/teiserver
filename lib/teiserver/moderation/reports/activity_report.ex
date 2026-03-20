@@ -5,10 +5,10 @@ defmodule Teiserver.Moderation.ActivityReport do
   alias Teiserver.Moderation.BanLib
 
   @spec icon() :: String.t()
-  def icon(), do: BanLib.icon()
+  def icon, do: BanLib.icon()
 
   @spec permissions() :: String.t()
-  def permissions(), do: "Overwatch"
+  def permissions, do: "Overwatch"
 
   @spec run(Plug.Conn.t(), map()) :: map()
   def run(_conn, params) do

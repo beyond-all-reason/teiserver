@@ -4,8 +4,8 @@ defmodule TeiserverWeb.Admin.CodeView do
   use TeiserverWeb, :view
 
   @spec view_colour() :: atom()
-  def view_colour(), do: CodeLib.colours()
+  def view_colour, do: CodeLib.colours()
 
   @spec icon() :: String.t()
-  def icon(), do: CodeLib.icon()
+  def icon, do: CodeLib.icon()
 end

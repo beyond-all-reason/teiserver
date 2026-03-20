@@ -115,7 +115,7 @@ defmodule Teiserver.Monitoring.Tachyon do
   end
 
   @doc false
-  def execute_tachyon_player_metrics() do
+  def execute_tachyon_player_metrics do
     player_count = Player.connected_count()
     :telemetry.execute(@tachyon_player_metrics_event_name, %{count: player_count}, %{})
 
@@ -124,7 +124,7 @@ defmodule Teiserver.Monitoring.Tachyon do
   end
 
   @doc false
-  def execute_tachyon_lobby_metrics() do
+  def execute_tachyon_lobby_metrics do
     lobby_count = TachyonLobby.count()
     :telemetry.execute(@tachyon_lobby_metrics_event_name, %{count: lobby_count}, %{})
   end

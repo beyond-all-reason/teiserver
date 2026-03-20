@@ -3,7 +3,7 @@ defmodule Teiserver.Config.SiteConfigTypes.SystemConfigs do
   import Teiserver.Config, only: [add_site_config_type: 1]
 
   @spec create() :: :ok
-  def create() do
+  def create do
     add_site_config_type(%{
       key: "system.Redirect url",
       section: "System",

@@ -38,7 +38,7 @@ defmodule Mix.Tasks.Teiserver.UpdateUserPermissions do
     end)
   end
 
-  defp get_user_ids() do
+  defp get_user_ids do
     query = """
       select id from account_users
     """

@@ -4,7 +4,7 @@ defmodule Teiserver.Tachyon.Config do
   @restore_state_key "tachyon.should-restore-state"
   @restore_timeout_key "tachyon.restore-timeout-ms"
 
-  def setup_site_configs() do
+  def setup_site_configs do
     Config.add_site_config_type(%{
       key: @restore_state_key,
       section: "Tachyon",
@@ -26,18 +26,18 @@ defmodule Teiserver.Tachyon.Config do
     :ok
   end
 
-  def enable_state_restoration(), do: Config.update_site_config(@restore_state_key, true)
+  def enable_state_restoration, do: Config.update_site_config(@restore_state_key, true)
 
-  def disable_state_restoration(), do: Config.update_site_config(@restore_state_key, false)
+  def disable_state_restoration, do: Config.update_site_config(@restore_state_key, false)
 
-  def should_restore_state?(), do: Config.get_site_config_cache(@restore_state_key)
+  def should_restore_state?, do: Config.get_site_config_cache(@restore_state_key)
 
   @spec get_restoration_timeout() :: non_neg_integer()
-  def get_restoration_timeout(), do: Config.get_site_config_cache(@restore_timeout_key)
+  def get_restoration_timeout, do: Config.get_site_config_cache(@restore_timeout_key)
 
   @spec set_restoration_timeout(non_neg_integer()) :: :ok
   def set_restoration_timeout(t), do: Config.update_site_config(@restore_timeout_key, t)
 
   @spec reset_restoration_timeout() :: :ok
-  def reset_restoration_timeout(), do: Config.update_site_config(@restore_timeout_key, 10_000)
+  def reset_restoration_timeout, do: Config.update_site_config(@restore_timeout_key, 10_000)
 end

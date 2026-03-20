@@ -110,7 +110,7 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
     end
   end
 
-  defp valid_attrs(),
+  defp valid_attrs,
     do: %{
       email: "blah@test.com",
       name: "aname",

@@ -9,22 +9,22 @@ defmodule Teiserver.Account.RelationshipLib do
   alias Teiserver.Repo
 
   @spec colour :: atom
-  def colour(), do: :success
+  def colour, do: :success
 
   @spec icon :: String.t()
-  def icon(), do: "fa-solid fa-users"
+  def icon, do: "fa-solid fa-users"
 
   @spec icon_follow :: String.t()
-  def icon_follow(), do: "fa-heart"
+  def icon_follow, do: "fa-heart"
 
   @spec icon_ignore :: String.t()
-  def icon_ignore(), do: "fa-microphone-slash"
+  def icon_ignore, do: "fa-microphone-slash"
 
   @spec icon_avoid :: String.t()
-  def icon_avoid(), do: "fa-ban"
+  def icon_avoid, do: "fa-ban"
 
   @spec icon_block :: String.t()
-  def icon_block(), do: "fa-hand"
+  def icon_block, do: "fa-hand"
 
   @spec verb_of_state(String.t() | map) :: String.t()
   def verb_of_state("follow"), do: "following"

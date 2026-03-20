@@ -11,7 +11,7 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
 
   use Horde.DynamicSupervisor
 
-  def default_queues() do
+  def default_queues do
     engines =
       case Asset.get_engine(in_matchmaking: true) do
         nil -> []

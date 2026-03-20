@@ -54,7 +54,7 @@ defmodule Teiserver.OAuth.CredentialQueries do
     |> Enum.into(%{})
   end
 
-  def base_query() do
+  def base_query do
     from credential in Credential,
       as: :credential
   end

@@ -104,7 +104,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           :intentional | {:server_error, term()} | :party_user_left | :ready_timeout
 
   @spec default_settings() :: settings()
-  def default_settings() do
+  def default_settings do
     %{tick_interval_ms: 5_000, max_distance: 15, pairing_timeout: 20_000}
   end
 

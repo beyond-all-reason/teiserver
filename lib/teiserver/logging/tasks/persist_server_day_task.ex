@@ -205,7 +205,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     :ok
   end
 
-  def today_so_far() do
+  def today_so_far do
     date = Timex.today()
 
     0..@segment_count
