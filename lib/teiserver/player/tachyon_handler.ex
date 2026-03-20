@@ -847,15 +847,42 @@ defmodule Teiserver.Player.TachyonHandler do
 
   # RALA Clan commands: clan/viewList including conversion to tachyon schema
   def handle_command("clan/create", "request", _message_id, %{"data" => data}, state) do
-    Logger.debug("Handling clan/create command")
+    Logger.debug("Handling clan/create command. UserId=" <> inspect(state.user.id))
 
-    Teiserver.Clan.create_clan(
-      name: data["name"],
-      tag: data["tag"],
-      description: data["description"],
-      language: data["language"]
-    )
+    # Create clan
+    case Teiserver.Clan.create_clan(%{
+           name: data["name"],
+           tag: data["tag"],
+           description: data["description"],
+           language: data["language"]
+         }) do
+      {:ok, clan} ->
+        # Add user automatically as clan leader
+        Logger.debug(
+          "Set UserId=" <>
+            inspect(state.user.id) <> " as leader for clan with id=" <> inspect(clan.id)
+        )
 
+        Teiserver.Clan.create_clan_membership(%{
+          clan_id: clan.id,
+          user_id: state.user.id,
+          role: "leader"
+        })
+
+        {:response, state}
+
+      {:error, changeset} ->
+        Logger.error("Failed to create clan: #{inspect(changeset)}")
+        {:error_response, :invalid_request, "Failed to create clan", state}
+    end
+  end
+
+  # RALA
+  def handle_command("clan/leave", "request", _message_id, _message, state) do
+    # Logger.debug("Handling clan/leave command ClanId=", state.user.clan_id)
+    Logger.debug("Handling clan/leave command UserId=", state.user.id)
+    # clanMembership = Teiserver.Clan.get_clan_membership(state.user.clan_id, state.user.id)
+    # Teiserver.Clan.delete_clan_membership(clanMembership)
     {:response, state}
   end
 
