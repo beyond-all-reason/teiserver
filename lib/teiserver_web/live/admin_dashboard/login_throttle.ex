@@ -5,8 +5,6 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
   alias Teiserver.Game
 
   use TeiserverWeb, :live_view
-  # alias Teiserver.Account.AccoladeLib
-  # alias Teiserver.Data.Matchmaking
 
   @impl Phoenix.LiveView
   def mount(_params, session, socket) do

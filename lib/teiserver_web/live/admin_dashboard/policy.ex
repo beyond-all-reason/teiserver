@@ -6,8 +6,6 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
   alias Teiserver.Game
   use TeiserverWeb, :live_view
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  # alias Teiserver.Account.AccoladeLib
-  # alias Teiserver.Data.Matchmaking
 
   @impl Phoenix.LiveView
   def mount(%{"id" => id}, session, socket) do

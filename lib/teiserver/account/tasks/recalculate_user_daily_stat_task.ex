@@ -12,8 +12,6 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
 
   import Ecto.Query, warn: false
 
-  # Teiserver.Account.RecalculateUserDailyStatTask.perform(nil)
-
   @empty_row %{
     menu: 0,
     lobby: 0,

@@ -7,7 +7,6 @@ defmodule Teiserver.Account.SmurfMergeTask do
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
   require Logger
-  # alias Teiserver.Repo
 
   @spec perform(T.userid(), T.userid(), map()) :: :ok
   def perform(from_id, to_id, settings) do

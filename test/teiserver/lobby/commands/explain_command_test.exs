@@ -9,10 +9,6 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
   alias Teiserver.Common.PubsubListener
   use Teiserver.ServerCase, async: false
 
-  # test "raw call tests" do
-
-  # end
-
   test "text based test" do
     TeiserverTestLib.start_coordinator!()
 
@@ -60,14 +56,3 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
     assert Lobby.get_lobby(lobby_id) == nil
   end
 end
-
-# PubSub.broadcast(
-#   Teiserver.PubSub,
-#   "teiserver_client_messages:#{to_id}",
-#   %{
-#     channel: "teiserver_client_messages:#{to_id}",
-#     event: :received_direct_message,
-#     sender_id: sender_id,
-#     message_content: message_parts
-#   }
-# )

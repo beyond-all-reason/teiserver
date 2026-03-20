@@ -1,7 +1,5 @@
 defmodule TeiserverWeb.UserComponents do
   @moduledoc false
-  # alias Phoenix.LiveView.JS
-
   alias Teiserver.Account
   alias Teiserver.Account.RecentlyUsedCache
   alias Teiserver.Moderation.ActionLib
@@ -12,8 +10,6 @@ defmodule TeiserverWeb.UserComponents do
     endpoint: TeiserverWeb.Endpoint,
     router: TeiserverWeb.Router,
     statics: TeiserverWeb.static_paths()
-
-  # import TeiserverWeb.Gettext
 
   @doc """
   <TeiserverWeb.UserComponents.status_icon user={user} />

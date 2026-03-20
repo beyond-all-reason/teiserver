@@ -6,23 +6,11 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
 
   use TeiserverWeb.ConnCase
 
-  # alias TeiserverTestLib
-
   setup do
     GeneralTestLib.conn_setup(TeiserverTestLib.server_permissions())
     |> TeiserverTestLib.conn_setup()
   end
 
-  # @create_attrs %{
-  #   colour: "#AA0000",
-  #   email: "some email",
-  #   icon: "fa-solid fa-home",
-  #   name: "some name",
-  #   permissions: [],
-  #   username: "some username",
-  #   password: "some password",
-  #   data: "{}"
-  # }
   @update_attrs %{
     colour: "#0000AA",
     icon: "fa-solid fa-wrench",
