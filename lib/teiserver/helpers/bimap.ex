@@ -30,7 +30,7 @@ defmodule Teiserver.Helpers.Bimap do
 
       {false, true} ->
         case Map.get(map, key2) do
-          {:val, k2, _} ->
+          {:val, k2, _old_value} ->
             map
             |> Map.delete(k2)
             |> Map.put(key2, {:key2, key1})
@@ -45,7 +45,7 @@ defmodule Teiserver.Helpers.Bimap do
 
       {true, false} ->
         case Map.get(map, key1) do
-          {:val, k2, _} ->
+          {:val, k2, _old_value} ->
             map
             |> Map.delete(k2)
             |> Map.put(key2, {:key2, key1})
@@ -63,7 +63,7 @@ defmodule Teiserver.Helpers.Bimap do
   def get(map, key) do
     case Map.get(map, key) do
       nil -> nil
-      {:val, _, val} -> val
+      {:val, _key2, val} -> val
       {:key2, k} -> get(map, k)
     end
   end

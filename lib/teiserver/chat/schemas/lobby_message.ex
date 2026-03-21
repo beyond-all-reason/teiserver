@@ -24,6 +24,6 @@ defmodule Teiserver.Chat.LobbyMessage do
   end
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(:index, conn, _), do: allow?(conn, "Reviewer")
-  def authorize(_, conn, _), do: allow?(conn, "Moderator")
+  def authorize(:index, conn, _params), do: allow?(conn, "Reviewer")
+  def authorize(_action, conn, _params), do: allow?(conn, "Moderator")
 end

@@ -45,7 +45,7 @@ defmodule Teiserver.Telemetry.ComplexAnonEventLib do
 
         result
 
-      _ ->
+      _error ->
         result
     end
   end

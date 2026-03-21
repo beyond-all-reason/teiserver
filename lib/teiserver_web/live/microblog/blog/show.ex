@@ -76,7 +76,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("delete-post", _, %{assigns: %{post: post} = assigns} = socket) do
+  def handle_event("delete-post", _params, %{assigns: %{post: post} = assigns} = socket) do
     if assigns.current_user.id == post.poster_id || allow?(assigns.current_user, "Moderator") do
       Microblog.delete_post(post)
 
@@ -97,7 +97,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Show do
     end
   end
 
-  def handle_event("poll-choice", _, %{assigns: %{current_user: nil}} = socket) do
+  def handle_event("poll-choice", _params, %{assigns: %{current_user: nil}} = socket) do
     socket
     |> noreply()
   end

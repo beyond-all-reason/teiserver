@@ -75,7 +75,7 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
       "chat" ->
         Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
 
-      _ ->
+      _other ->
         Logger.error("Unknown report type #{type}")
         raise "Unknown report type #{type}"
     end

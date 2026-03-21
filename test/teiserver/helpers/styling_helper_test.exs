@@ -19,7 +19,7 @@ defmodule Teiserver.General.StylingHelpersTest do
     ]
 
     for p <- params do
-      {_, _, _} = StylingHelper.colours(p)
+      {_bg, _fg, _border} = StylingHelper.colours(p)
     end
   end
 
@@ -27,7 +27,7 @@ defmodule Teiserver.General.StylingHelpersTest do
     params = [:report, :up, :back]
 
     for p <- params do
-      "" <> _ = StylingHelper.icon(p)
+      "" <> _icon = StylingHelper.icon(p)
     end
   end
 end

@@ -46,7 +46,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventLib do
 
         result
 
-      _ ->
+      _error ->
         result
     end
   end

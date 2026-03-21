@@ -91,7 +91,7 @@ defmodule Teiserver.Chat.WordLib do
   def blacklisted_phrase?(text) do
     @blacklisted_regexs
     |> Enum.reduce(false, fn
-      _, true ->
+      _regex, true ->
         true
 
       r, false ->

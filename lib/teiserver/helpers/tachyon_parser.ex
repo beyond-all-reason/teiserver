@@ -9,7 +9,7 @@ defmodule Teiserver.Helpers.TachyonParser do
   def parse_int(raw) do
     case Integer.parse(raw) do
       {n, ""} -> {:ok, n}
-      _ -> :error
+      _other -> :error
     end
   end
 
@@ -18,7 +18,7 @@ defmodule Teiserver.Helpers.TachyonParser do
     Enum.reduce(raw_ids, {[], []}, fn raw_id, {ok, invalid} ->
       case Integer.parse(raw_id) do
         {id, ""} -> {[id | ok], invalid}
-        _ -> {ok, [raw_id | invalid]}
+        _other -> {ok, [raw_id | invalid]}
       end
     end)
   end
@@ -27,7 +27,7 @@ defmodule Teiserver.Helpers.TachyonParser do
   def parse_user_id(raw) do
     case Integer.parse(raw) do
       {id, ""} -> {:ok, id}
-      _ -> {:error, :invalid_id}
+      _other -> {:error, :invalid_id}
     end
   end
 end

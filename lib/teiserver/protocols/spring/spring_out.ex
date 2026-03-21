@@ -85,7 +85,7 @@ defmodule Teiserver.Protocols.SpringOut do
     "ACCEPTED #{user}\n"
   end
 
-  defp do_reply(:login_queued, _) do
+  defp do_reply(:login_queued, _data) do
     "QUEUED\n"
   end
 
@@ -234,7 +234,7 @@ defmodule Teiserver.Protocols.SpringOut do
         "none" -> 0
         "holepunch" -> 1
         "fixed" -> 2
-        _ -> 0
+        _other -> 0
       end
 
     passworded = if battle.password == nil, do: 0, else: 1
@@ -280,7 +280,7 @@ defmodule Teiserver.Protocols.SpringOut do
     do_reply(:update_battle, Battle.get_lobby(lobby_id))
   end
 
-  defp do_reply(:update_battle, _), do: ""
+  defp do_reply(:update_battle, _lobby), do: ""
 
   defp do_reply(:join_battle_success, battle) do
     "JOINBATTLE #{battle.id} #{battle.game_hash}\n"
@@ -623,11 +623,11 @@ defmodule Teiserver.Protocols.SpringOut do
     "s.system.disconnect #{reason}\n"
   end
 
-  defp do_reply(:server_restart, _) do
+  defp do_reply(:server_restart, _data) do
     "s.system.shutdown\n"
   end
 
-  defp do_reply(:error_log, _) do
+  defp do_reply(:error_log, _data) do
     "s.client.errorlog\n"
   end
 
@@ -881,8 +881,8 @@ defmodule Teiserver.Protocols.SpringOut do
   #   _send(msg, state.socket, state.transport, msg_id)
   # end
 
-  defp _send("", _, _), do: nil
-  defp _send(nil, _, _), do: nil
+  defp _send("", _msg_id, _state), do: nil
+  defp _send(nil, _msg_id, _state), do: nil
 
   defp _send(msg, msg_id, state) when is_list(msg) do
     _send(Enum.join(msg, ""), msg_id, state)

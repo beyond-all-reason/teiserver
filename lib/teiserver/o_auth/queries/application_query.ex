@@ -135,7 +135,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   @spec delete_user_application_tokens(T.userid(), Application.id()) ::
           non_neg_integer()
   def delete_user_application_tokens(user_id, application_id) do
-    {count, _} =
+    {count, _deleted} =
       from(token in Teiserver.OAuth.Token,
         where: token.owner_id == ^user_id,
         where: token.application_id == ^application_id
@@ -152,7 +152,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   @spec delete_user_application_codes(T.userid(), Application.id()) ::
           non_neg_integer()
   def delete_user_application_codes(user_id, application_id) do
-    {count, _} =
+    {count, _deleted} =
       from(code in Teiserver.OAuth.Code,
         where: code.owner_id == ^user_id,
         where: code.application_id == ^application_id

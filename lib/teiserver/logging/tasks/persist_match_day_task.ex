@@ -10,7 +10,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     last_date = Logging.get_last_match_day_log()
 
     date =

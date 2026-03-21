@@ -30,8 +30,8 @@ defmodule Teiserver.Telemetry.UserPropertyQueries do
   end
 
   @spec _where(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
-  defp _where(query, _, ""), do: query
-  defp _where(query, _, nil), do: query
+  defp _where(query, _key, ""), do: query
+  defp _where(query, _key, nil), do: query
 
   defp _where(query, :user_id, user_id) do
     from user_properties in query,

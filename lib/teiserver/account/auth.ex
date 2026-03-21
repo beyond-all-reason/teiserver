@@ -6,42 +6,42 @@ defmodule Teiserver.Account.Auth do
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
 
-  def authorize(:index, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:search, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:show, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:new, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:perform_action, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:rename_form, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:rename_post, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:reset_password, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:respond_form, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:respond_post, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:smurf_search, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:smurf_merge_form, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:smurf_merge_post, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:cancel_smurf_mark, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:mark_as_smurf_of, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:delete_smurf_key, conn, _), do: allow?(conn, "admin.dev")
-  def authorize(:automod_form, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:ratings, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:ratings_form, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:ratings_post, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:set_stat, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:edit, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:full_chat, conn, _), do: allow?(conn, "Reviewer")
-  def authorize(:update, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:applying, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:data_search, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:relationships, conn, _), do: allow?(conn, "Moderator")
-  def authorize(:gdpr_clean, conn, _), do: allow?(conn, "Moderator")
-  def authorize(_, conn, _), do: allow?(conn, "admin.dev")
+  def authorize(:index, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:search, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:show, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:new, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:perform_action, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:rename_form, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:rename_post, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:reset_password, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:respond_form, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:respond_post, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:smurf_search, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:smurf_merge_form, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:smurf_merge_post, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:cancel_smurf_mark, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:mark_as_smurf_of, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:delete_smurf_key, conn, _data), do: allow?(conn, "admin.dev")
+  def authorize(:automod_form, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:ratings, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:ratings_form, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:ratings_post, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:set_stat, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:edit, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:full_chat, conn, _data), do: allow?(conn, "Reviewer")
+  def authorize(:update, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:applying, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:data_search, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:relationships, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:gdpr_clean, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(_action, conn, _data), do: allow?(conn, "admin.dev")
 
   # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
   @spec is_bot?(T.userid() | T.user()) :: boolean()
   def is_bot?(nil), do: false
   def is_bot?(userid) when is_integer(userid), do: is_bot?(Account.get_user_by_id(userid))
   def is_bot?(%{roles: roles}), do: Enum.member?(roles, "Bot")
-  def is_bot?(_), do: false
+  def is_bot?(_user), do: false
 
   # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
   @spec moderator?(T.userid() | T.user()) :: boolean()
@@ -51,7 +51,7 @@ defmodule Teiserver.Account.Auth do
     do: moderator?(Account.get_user_by_id(userid))
 
   def moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
-  def moderator?(_), do: false
+  def moderator?(_user), do: false
 
   # credo:disable-for-lines:8 Credo.Check.Readability.PredicateFunctionNames
   @spec is_event_organizer?(T.userid() | T.user()) :: boolean()
@@ -61,7 +61,7 @@ defmodule Teiserver.Account.Auth do
     do: is_event_organizer?(Account.get_user_by_id(userid))
 
   def is_event_organizer?(%{roles: roles}), do: Enum.member?(roles, "Event Organizer")
-  def is_event_organizer?(_), do: false
+  def is_event_organizer?(_user), do: false
 
   @spec contributor?(T.userid() | T.user()) :: boolean()
   def contributor?(nil), do: false
@@ -70,7 +70,7 @@ defmodule Teiserver.Account.Auth do
     do: contributor?(Account.get_user_by_id(userid))
 
   def contributor?(%{roles: roles}), do: Enum.member?(roles, "Contributor")
-  def contributor?(_), do: false
+  def contributor?(_user), do: false
 
   @spec verified?(T.userid() | T.user()) :: boolean()
   def verified?(nil), do: false
@@ -79,25 +79,25 @@ defmodule Teiserver.Account.Auth do
     do: verified?(Account.get_user_by_id(userid))
 
   def verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
-  def verified?(_), do: false
+  def verified?(_user), do: false
 
   @spec admin?(T.userid() | T.user()) :: boolean()
   def admin?(nil), do: false
   def admin?(userid) when is_integer(userid), do: admin?(Account.get_user_by_id(userid))
   def admin?(%{roles: roles}), do: Enum.member?(roles, "Admin")
-  def admin?(_), do: false
+  def admin?(_user), do: false
 
   @spec vip?(T.userid() | T.user()) :: boolean()
   def vip?(nil), do: false
   def vip?(userid) when is_integer(userid), do: vip?(Account.get_user_by_id(userid))
   def vip?(%{roles: roles}), do: Enum.member?(roles, "VIP")
-  def vip?(_), do: false
+  def vip?(_user), do: false
 
   @doc """
   If a user possesses any of these roles it returns true
   """
   @spec has_any_role?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
-  def has_any_role?(nil, _), do: false
+  def has_any_role?(nil, _roles), do: false
 
   def has_any_role?(userid, roles) when is_integer(userid),
     do: has_any_role?(Account.get_user_by_id(userid), roles)
@@ -114,7 +114,7 @@ defmodule Teiserver.Account.Auth do
   If a user possesses all of these roles it returns true, if any are lacking it returns false
   """
   @spec has_all_roles?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
-  def has_all_roles?(nil, _), do: false
+  def has_all_roles?(nil, _roles), do: false
 
   def has_all_roles?(userid, roles) when is_integer(userid),
     do: has_all_roles?(Account.get_user_by_id(userid), roles)
@@ -133,7 +133,7 @@ defmodule Teiserver.Auth.Server do
 
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
-  def authorize(_, conn, _), do: allow?(conn, "Server")
+  def authorize(_action, conn, _data), do: allow?(conn, "Server")
 end
 
 defmodule Teiserver.Staff.Admin do
@@ -141,7 +141,7 @@ defmodule Teiserver.Staff.Admin do
 
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
-  def authorize(_, conn, _), do: allow?(conn, "Admin")
+  def authorize(_action, conn, _data), do: allow?(conn, "Admin")
 end
 
 defmodule Teiserver.Staff.Moderator do
@@ -149,7 +149,7 @@ defmodule Teiserver.Staff.Moderator do
 
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
-  def authorize(_, conn, _), do: allow?(conn, "Moderator")
+  def authorize(_action, conn, _data), do: allow?(conn, "Moderator")
 end
 
 defmodule Teiserver.Staff.Reviewer do
@@ -157,7 +157,7 @@ defmodule Teiserver.Staff.Reviewer do
 
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
-  def authorize(_, conn, _), do: allow?(conn, "Reviewer")
+  def authorize(_action, conn, _data), do: allow?(conn, "Reviewer")
 end
 
 defmodule Teiserver.Staff.Overwatch do
@@ -165,7 +165,7 @@ defmodule Teiserver.Staff.Overwatch do
 
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
-  def authorize(_, conn, _), do: allow?(conn, "Overwatch")
+  def authorize(_action, conn, _data), do: allow?(conn, "Overwatch")
 end
 
 defmodule Teiserver.Staff.MatchAdmin do
@@ -173,8 +173,8 @@ defmodule Teiserver.Staff.MatchAdmin do
 
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
-  def authorize(:show, conn, _), do: allow?(conn, "Overwatch")
-  def authorize(_, conn, _), do: allow?(conn, "Moderator")
+  def authorize(:show, conn, _data), do: allow?(conn, "Overwatch")
+  def authorize(_action, conn, _data), do: allow?(conn, "Moderator")
 end
 
 defmodule Teiserver.Auth.Telemetry do
@@ -182,7 +182,7 @@ defmodule Teiserver.Auth.Telemetry do
 
   import Teiserver.Account.AuthLib, only: [allow_any?: 2]
   @behaviour Bodyguard.Policy
-  def authorize(_, conn, _), do: allow_any?(conn, ~w(Server Engine))
+  def authorize(_action, conn, _data), do: allow_any?(conn, ~w(Server Engine))
 end
 
 defmodule Teiserver.Staff do
@@ -190,7 +190,7 @@ defmodule Teiserver.Staff do
 
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
-  def authorize(_, conn, _), do: allow?(conn, "Contributor")
+  def authorize(_action, conn, _data), do: allow?(conn, "Contributor")
 end
 
 defmodule Teiserver.Auth do
@@ -198,5 +198,5 @@ defmodule Teiserver.Auth do
 
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
-  def authorize(_, conn, _), do: allow?(conn, "account")
+  def authorize(_action, conn, _data), do: allow?(conn, "account")
 end

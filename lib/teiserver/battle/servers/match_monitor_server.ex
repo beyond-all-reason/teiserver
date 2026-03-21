@@ -92,7 +92,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   def handle_info(
-        {:new_message, from_id, "autohosts", "* Server stopped (running time" <> _},
+        {:new_message, from_id, "autohosts", "* Server stopped (running time" <> _rest},
         state
       ) do
     case Client.get_client_by_id(from_id) do
@@ -155,7 +155,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     new_state =
       parts
       |> Enum.reduce(state, fn part, acc_state ->
-        {_, new_state} = handle_info({:direct_message, from_id, part}, acc_state)
+        {_reply, new_state} = handle_info({:direct_message, from_id, part}, acc_state)
         new_state
       end)
 
@@ -206,7 +206,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
         end
 
-      _ ->
+      _other ->
         Logger.error("match-event bad_match error on '#{data}'")
     end
 
@@ -243,7 +243,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             Logger.error("complex_match_event bad_decode error '#{error_message}' on '#{data}'")
         end
 
-      _ ->
+      _other ->
         Logger.error("complex_match_event bad_match error on '#{data}'")
     end
 
@@ -286,7 +286,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             )
         end
 
-      _ ->
+      _other ->
         Logger.warning("match-chat nomatch from: #{from_id}: match-chat #{data}")
     end
 
@@ -335,7 +335,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           {:noreply, state}
         end
 
-      _ ->
+      _other ->
         Logger.warning("match-chat-name nomatch from: #{from_id}: match-chat [[#{data}]]")
     end
 
@@ -358,15 +358,15 @@ defmodule Teiserver.Battle.MatchMonitorServer do
               {:ok, data} ->
                 handle_json_msg(data, from_id)
 
-              _ ->
+              _error ->
                 Logger.warning("AHM DM no catch, no json-decode - '#{contents_string}'")
             end
 
-          _ ->
+          _error ->
             Logger.warning("AHM DM no catch, no decompress - '#{compressed_contents}'")
         end
 
-      _ ->
+      _error ->
         Logger.warning("AHM DM no catch, no base64 - '#{message}'")
     end
 
@@ -382,7 +382,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
-  defp handle_json_msg(%{"username" => username, "GPU" => _} = contents, from_id) do
+  defp handle_json_msg(%{"username" => username, "GPU" => _gpu} = contents, from_id) do
     case CacheUser.get_user_by_name(username) do
       nil ->
         Logger.warning(
@@ -508,10 +508,10 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   @spec get_match_monitor_pid() :: pid() | nil
   def get_match_monitor_pid do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "MatchMonitorServer") do
-      [{pid, _}] ->
+      [{pid, _value}] ->
         pid
 
-      _ ->
+      _other ->
         nil
     end
   end
@@ -523,11 +523,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           {:ok, contents} ->
             {:ok, contents}
 
-          {:error, _} ->
+          {:error, _reason} ->
             {:error, "json decode error"}
         end
 
-      _ ->
+      _error ->
         {:error, "base64 decode error"}
     end
   end

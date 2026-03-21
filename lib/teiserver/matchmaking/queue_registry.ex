@@ -34,8 +34,8 @@ defmodule Teiserver.Matchmaking.QueueRegistry do
   @spec lookup(QueueServer.id()) :: pid() | nil
   def lookup(queue_id) do
     case Horde.Registry.lookup(__MODULE__, queue_id) do
-      [{pid, _}] -> pid
-      _ -> nil
+      [{pid, _value}] -> pid
+      _other -> nil
     end
   end
 

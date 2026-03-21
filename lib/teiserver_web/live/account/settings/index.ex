@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Account.SettingsLive.Index do
   use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
-  def mount(_, _session, socket) do
+  def mount(_params, _session, socket) do
     socket =
       socket
       |> assign(:tab, nil)
@@ -51,7 +51,7 @@ defmodule TeiserverWeb.Account.SettingsLive.Index do
 
   def handle_event(
         "reset-value",
-        _,
+        _params,
         %{assigns: %{selected_key: key, current_user: user}} = socket
       ) do
     case Config.get_user_config(user.id, key) do
@@ -71,11 +71,15 @@ defmodule TeiserverWeb.Account.SettingsLive.Index do
      |> assign(:temp_value, nil)}
   end
 
-  def handle_event("set-" <> _, _, %{assigns: %{selected_key: nil}} = socket) do
+  def handle_event("set-" <> _value, _params, %{assigns: %{selected_key: nil}} = socket) do
     {:noreply, socket}
   end
 
-  def handle_event("set-true", _, %{assigns: %{selected_key: key, current_user: user}} = socket) do
+  def handle_event(
+        "set-true",
+        _params,
+        %{assigns: %{selected_key: key, current_user: user}} = socket
+      ) do
     new_value = "true"
     insert_or_update_config(user.id, key, new_value)
 
@@ -88,7 +92,11 @@ defmodule TeiserverWeb.Account.SettingsLive.Index do
      |> assign(:temp_value, nil)}
   end
 
-  def handle_event("set-false", _, %{assigns: %{selected_key: key, current_user: user}} = socket) do
+  def handle_event(
+        "set-false",
+        _params,
+        %{assigns: %{selected_key: key, current_user: user}} = socket
+      ) do
     new_value = "false"
     insert_or_update_config(user.id, key, new_value)
 

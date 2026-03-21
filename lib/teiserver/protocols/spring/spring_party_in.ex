@@ -8,7 +8,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
   require Logger
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
-  def do_handle("create_new_party", _, msg_id, state) when not is_nil(state.party_id) do
+  def do_handle("create_new_party", _data, msg_id, state) when not is_nil(state.party_id) do
     # bit meh to do that in the protocol layer, but there isn't really another
     # place, and the whole thing is EOL
     SpringOut.reply(
@@ -19,7 +19,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     )
   end
 
-  def do_handle("create_new_party", _, msg_id, state) do
+  def do_handle("create_new_party", _data, msg_id, state) do
     party = Account.create_party(state.user.id)
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_party:#{party.id}")
@@ -57,7 +57,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
       :no_client ->
         SpringOut.reply(:no, {cmd_id, "msg=user not connected"}, msg_id, state)
 
-      _ ->
+      _other ->
         SpringOut.reply(
           :no,
           {cmd_id, "msg=expected party_id username but could not parse"},
@@ -77,7 +77,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
       {false, reason} ->
         SpringOut.reply(:no, {cmd_id, "msg=#{reason}"}, msg_id, state)
 
-      _ ->
+      _other ->
         SpringOut.reply(
           :no,
           {cmd_id, "msg=expected party_id in argument but could not parse"},
@@ -97,7 +97,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
       Account.cancel_party_invite(party_id, state.user.id)
       SpringOut.reply(:okay, cmd_id, msg_id, state)
     else
-      _ ->
+      _other ->
         SpringOut.reply(
           :no,
           {cmd_id, "msg=expected party_id in argument but could not parse"},
@@ -148,7 +148,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
       :no_client ->
         SpringOut.reply(:no, {cmd_id, "msg=user not connected"}, msg_id, state)
 
-      _ ->
+      _other ->
         SpringOut.reply(
           :no,
           {cmd_id, "msg=expected username in argument but could not parse"},
@@ -158,7 +158,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     end
   end
 
-  def do_handle(msg, _, _msg_id, state) do
+  def do_handle(msg, _data, _msg_id, state) do
     Logger.debug("Unhandled party message: #{msg}")
     state
   end

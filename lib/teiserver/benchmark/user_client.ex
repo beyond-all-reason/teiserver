@@ -30,7 +30,7 @@ defmodule Teiserver.Benchmark.UserClient do
 
     # Now we get a list of those battles and randomly join one or none at all
     case Regex.run(~r/BATTLEIDS ([\d ]+)\n/, reply) do
-      [_, ids] ->
+      [_full_match, ids] ->
         ids =
           ids
           |> String.split(" ")
@@ -38,7 +38,7 @@ defmodule Teiserver.Benchmark.UserClient do
 
         join_battle(Enum.random(ids), state)
 
-      _ ->
+      _other ->
         state
     end
 
@@ -98,7 +98,7 @@ defmodule Teiserver.Benchmark.UserClient do
 
     _send(socket, "TMPLI TEST_#{state.id}\n")
 
-    _ = _recv(socket)
+    _reply = _recv(socket)
 
     _send(socket, "JOIN main\n")
     _send(socket, "JOIN tick_#{state.tick}\n")

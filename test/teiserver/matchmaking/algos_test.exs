@@ -67,7 +67,7 @@ defmodule Teiserver.Matchmaking.AlgosTest do
 
     test "ordering doesn't matter" do
       members = [mk_member(0), mk_member(1), mk_member([2, 3]), mk_member([4, 5])]
-      assert {:match, _} = ignore_os(members, 3, 2)
+      assert {:match, _teams} = ignore_os(members, 3, 2)
     end
   end
 

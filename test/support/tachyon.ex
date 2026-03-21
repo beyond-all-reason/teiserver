@@ -171,7 +171,7 @@ defmodule Teiserver.Support.Tachyon do
     Polling.poll_until_true(fn ->
       case Autohost.lookup_autohost(token.bot_id) do
         nil -> false
-        {_, val} -> val.max_battles == max_battles && val.current_battles == current
+        {_pid, val} -> val.max_battles == max_battles && val.current_battles == current
       end
     end)
 
@@ -533,8 +533,8 @@ defmodule Teiserver.Support.Tachyon do
   For example: mk_ally_team_config(2, 1) for a duel setting
   """
   def mk_ally_team_config(n_ally_team, n_team) do
-    for _ <- 1..n_ally_team do
-      teams = for _ <- 1..n_team, do: %{maxPlayers: 1}
+    for _i <- 1..n_ally_team do
+      teams = for _j <- 1..n_team, do: %{maxPlayers: 1}
 
       %{
         maxTeams: n_team,

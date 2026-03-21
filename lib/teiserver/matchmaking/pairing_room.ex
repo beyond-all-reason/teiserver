@@ -48,7 +48,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     GenServer.cast(room_pid, {:cancel, user_id})
   catch
     # If the pairing room is gone, there's no need to cancel anymore
-    :exit, _ -> :ok
+    :exit, _reason -> :ok
   end
 
   @doc """
@@ -184,10 +184,10 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     user_id = ready_data.user_id
 
     case Enum.split_with(state.awaiting, fn waiting_id -> waiting_id == user_id end) do
-      {[], _} ->
+      {[], _rest} ->
         {:reply, {:error, :no_match}, state}
 
-      {[_], rest} ->
+      {[_user_id], rest} ->
         max = state.queue.team_count * state.queue.team_size
         current = max - Enum.count(rest)
 
@@ -210,7 +210,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
 
         case rest do
           [] -> {:reply, :ok, new_state, {:continue, :start_match}}
-          _ -> {:reply, :ok, new_state}
+          _rest -> {:reply, :ok, new_state}
         end
     end
   end

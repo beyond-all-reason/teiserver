@@ -71,7 +71,7 @@ defmodule Teiserver.SpringTcpServerTest do
     )
 
     reply = _recv_until(socket)
-    [agreement_full, agreement_empty, agreement_end | _] = String.split(reply, "\n")
+    [agreement_full, agreement_empty, agreement_end | _rest] = String.split(reply, "\n")
 
     assert agreement_full ==
              "AGREEMENT A verification code has been sent to your email address. Please read our terms of service at https://beyondallreason.info/privacy_policy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
@@ -115,7 +115,7 @@ defmodule Teiserver.SpringTcpServerTest do
     # And send something very long
     msg =
       1..1800
-      |> Enum.map_join("", fn _ -> "x" end)
+      |> Enum.map_join("", fn _i -> "x" end)
 
     # This is long enough it should trigger a splitting
     _send_raw(socket, "SAY mpchan #{msg}\n")
@@ -123,7 +123,7 @@ defmodule Teiserver.SpringTcpServerTest do
     assert reply =~ "SAID mpchan #{username} xxxxxxx"
 
     _send_raw(socket, "EXIT\n")
-    _ = _recv_raw(socket)
+    _reply = _recv_raw(socket)
     {:error, :closed} = :gen_tcp.recv(socket, 0, 1000)
   end
 
@@ -189,8 +189,8 @@ defmodule Teiserver.SpringTcpServerTest do
            }
 
     # Flush the message queues
-    _ = _recv_raw(socket)
-    _ = _recv_raw(s1)
+    _reply1 = _recv_raw(socket)
+    _reply2 = _recv_raw(s1)
     # _ = _recv_raw(s2)
     # _ = _recv_raw(s3)
 
@@ -370,8 +370,8 @@ defmodule Teiserver.SpringTcpServerTest do
     _send_raw(s1, "EXIT\n")
     # _send_raw(s2, "EXIT\n")
     # _send_raw(s3, "EXIT\n")
-    _ = _recv_raw(socket)
-    _ = _recv_raw(s1)
+    _reply1 = _recv_raw(socket)
+    _reply2 = _recv_raw(s1)
     # _ = _recv_raw(s2)
     # _ = _recv_raw(s3)
   end

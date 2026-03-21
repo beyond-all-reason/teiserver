@@ -29,7 +29,7 @@ defmodule Mix.Tasks.Teiserver.TachyonSetup do
       {:ok, {:updated, engine}} ->
         Mix.shell().info("Engine with name #{engine.name} set up for matchmaking")
 
-      {:ok, {:noop, _}} ->
+      {:ok, {:noop, _engine}} ->
         Mix.shell().info("Engine already setup for matchmaking")
     end
 
@@ -40,7 +40,7 @@ defmodule Mix.Tasks.Teiserver.TachyonSetup do
       {:ok, {:updated, game}} ->
         Mix.shell().info("game with name #{game.name} set up for matchmaking")
 
-      {:ok, {:noop, _}} ->
+      {:ok, {:noop, _game}} ->
         Mix.shell().info("game already setup for matchmaking")
     end
 

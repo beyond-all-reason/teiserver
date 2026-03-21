@@ -15,7 +15,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     start_time = System.system_time(:millisecond)
 
     delete_unstarted_matches()
@@ -98,7 +98,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     |> delete_matches("old unrated")
   end
 
-  def delete_matches([], _), do: :ok
+  def delete_matches([], _logger_set), do: :ok
 
   def delete_matches(ids, _logger_set) do
     ids = Enum.take(ids, @chunk_size * 100)

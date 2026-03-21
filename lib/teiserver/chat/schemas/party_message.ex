@@ -24,5 +24,5 @@ defmodule Teiserver.Chat.PartyMessage do
   end
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(_, conn, _), do: allow?(conn, "chat")
+  def authorize(_action, conn, _params), do: allow?(conn, "chat")
 end

@@ -55,7 +55,7 @@ defmodule Teiserver.TachyonLobby.List do
   # ets table that can be directly read from other processes
   @spec list() :: %{Lobby.id() => overview()}
   def list do
-    {_, list} = GenServer.call(__MODULE__, :list)
+    {_counter, list} = GenServer.call(__MODULE__, :list)
     list
   end
 
@@ -78,7 +78,7 @@ defmodule Teiserver.TachyonLobby.List do
     PubSubHelper.subscribe(@update_topic)
     GenServer.call(__MODULE__, :list)
   catch
-    :exit, {:noproc, _} -> {0, %{}}
+    :exit, {:noproc, _details} -> {0, %{}}
   end
 
   def unsubscribe_updates do
@@ -91,13 +91,13 @@ defmodule Teiserver.TachyonLobby.List do
   end
 
   @spec start_link(term()) :: GenServer.on_start()
-  def start_link(_) do
+  def start_link(_arg) do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
   @impl GenServer
   @spec init(term()) :: {:ok, state(), {:continue, term()}}
-  def init(_) do
+  def init(_arg) do
     :timer.send_interval(5_000, :broadcast_updates)
     state = %{monitors: MC.new(), counter: 0, lobbies: %{}, changes: %{}}
     {:ok, state, {:continue, :bootstrap_state}}
@@ -123,7 +123,7 @@ defmodule Teiserver.TachyonLobby.List do
       )
       |> Stream.filter(fn
         {:ok, x} when not is_nil(x) -> true
-        _ -> false
+        _other -> false
       end)
       |> Enum.reduce(
         {state.monitors, state.lobbies},

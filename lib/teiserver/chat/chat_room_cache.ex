@@ -18,7 +18,7 @@ defmodule Teiserver.Room do
   @type room :: Chat.RoomServer.room()
 
   @spec create_room(map()) :: map()
-  def create_room(%{name: _} = room) do
+  def create_room(%{name: _name} = room) do
     Map.merge(
       %{
         members: [],

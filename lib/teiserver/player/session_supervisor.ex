@@ -30,7 +30,7 @@ defmodule Teiserver.Player.SessionSupervisor do
   end
 
   @impl DynamicSupervisor
-  def init(_) do
+  def init(_init_arg) do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 end

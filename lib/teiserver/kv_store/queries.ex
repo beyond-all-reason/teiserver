@@ -17,7 +17,7 @@ defmodule Teiserver.KvStore.Queries do
       )
 
     case res do
-      {:ok, _} -> :ok
+      {:ok, _blob} -> :ok
       x -> x
     end
   end
@@ -82,7 +82,7 @@ defmodule Teiserver.KvStore.Queries do
   @spec delete(store :: String.t(), key :: String.t()) :: :ok | {:error, Ecto.Changeset.t()}
   def delete(store, key) do
     case Repo.delete(%Blob{store: store, key: key}, allow_stale: true) do
-      {:ok, _} -> :ok
+      {:ok, _blob} -> :ok
       x -> x
     end
   end

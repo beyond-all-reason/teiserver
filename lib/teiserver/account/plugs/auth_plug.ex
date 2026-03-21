@@ -28,7 +28,7 @@ defmodule Teiserver.Account.AuthPlug do
     user =
       case Guardian.resource_from_token(conn.cookies["guardian_default_token"]) do
         {:ok, user, _claims} -> Account.get_user!(user.id)
-        _ -> nil
+        _error -> nil
       end
 
     user_token =
@@ -45,7 +45,7 @@ defmodule Teiserver.Account.AuthPlug do
     totp_status =
       case user do
         nil -> nil
-        _ -> TOTPLib.get_user_totp_status(user.id)
+        _user -> TOTPLib.get_user_totp_status(user.id)
       end
 
     conn =
@@ -71,7 +71,7 @@ defmodule Teiserver.Account.AuthPlug do
     user =
       case Guardian.resource_from_token(session["guardian_default_token"]) do
         {:ok, user, _claims} -> Account.get_user!(user.id)
-        _ -> nil
+        _error -> nil
       end
 
     if user != nil do
@@ -190,7 +190,7 @@ defmodule Teiserver.Account.AuthPlug do
     Component.assign_new(socket, :current_user, fn ->
       case Guardian.resource_from_token(session["guardian_default_token"]) do
         {:ok, user, _claims} -> Account.get_user!(user.id)
-        _ -> nil
+        _error -> nil
       end
     end)
     |> CachePlug.live_call()

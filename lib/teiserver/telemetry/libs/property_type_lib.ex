@@ -33,7 +33,7 @@ defmodule Teiserver.Telemetry.PropertyTypeLib do
 
           event_type.id
 
-        [%{id: id} | _] ->
+        [%{id: id} | _rest] ->
           id
       end
     end)

@@ -83,7 +83,7 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   end
 
   @impl HordeSupervisor
-  def init(_) do
+  def init(_init_arg) do
     HordeSupervisor.init(strategy: :one_for_one, members: :auto)
   end
 end

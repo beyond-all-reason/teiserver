@@ -20,8 +20,8 @@ defmodule Teiserver.Player.SessionRegistry do
   @spec lookup(T.userid()) :: pid() | nil
   def lookup(user_id) do
     case Horde.Registry.lookup(__MODULE__, user_id) do
-      [{pid, _}] -> pid
-      _ -> nil
+      [{pid, _value}] -> pid
+      _other -> nil
     end
   end
 
@@ -36,7 +36,7 @@ defmodule Teiserver.Player.SessionRegistry do
     Horde.Registry.unregister(__MODULE__, via_tuple(user_id))
   end
 
-  def child_spec(_) do
+  def child_spec(_opts) do
     Supervisor.child_spec(Horde.Registry,
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}

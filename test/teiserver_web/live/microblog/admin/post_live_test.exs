@@ -14,18 +14,18 @@ defmodule TeiserverWeb.PostLiveTest do
   @update_attrs %{contents: "some updated contents", title: "some updated title"}
   @invalid_attrs %{contents: nil, title: nil}
 
-  defp auth_setup(_) do
+  defp auth_setup(_context) do
     TeiserverTestLib.server_permissions()
     |> GeneralTestLib.conn_setup()
     |> TeiserverTestLib.conn_setup()
   end
 
-  defp unauth_setup(_) do
+  defp unauth_setup(_context) do
     GeneralTestLib.conn_setup()
     |> TeiserverTestLib.conn_setup()
   end
 
-  defp create_post(_) do
+  defp create_post(_context) do
     {post, tag, post_tag} = post_with_tag_fixture()
     %{post: post, tag: tag, post_tag: post_tag}
   end

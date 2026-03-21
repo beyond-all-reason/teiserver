@@ -19,7 +19,7 @@ defmodule Teiserver.Telemetry.TelemetryLib do
       # the process hasn't started up so we need to handle that
       # without dying
     catch
-      :exit, _ ->
+      :exit, _reason ->
         nil
     end
   end

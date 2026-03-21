@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Components.PlayerListComponent do
     list_of_assigns
     |> Enum.map(fn
       {assigns, socket} ->
-        {_, updated_socket} = update(assigns, socket)
+        {_ok, updated_socket} = update(assigns, socket)
         updated_socket
 
       assigns when is_map(assigns) ->

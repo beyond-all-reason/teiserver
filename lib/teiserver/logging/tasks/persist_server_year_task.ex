@@ -9,7 +9,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     log =
       case Logging.get_last_server_year_log() do
         nil ->
@@ -65,7 +65,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
             |> Enum.zip(user_activity_logs)
             |> ServerDayLogLib.aggregate_day_logs()
 
-          {:ok, _} =
+          {:ok, _log} =
             Logging.create_server_year_log(%{
               year: log_year,
               date: Timex.beginning_of_year(log.date),
@@ -73,7 +73,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
             })
         end
 
-      _ ->
+      _empty ->
         nil
     end
   end
@@ -108,7 +108,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
         |> Enum.zip(user_activity_logs)
         |> ServerDayLogLib.aggregate_day_logs()
 
-      {:ok, _} =
+      {:ok, _log} =
         Logging.create_server_year_log(%{
           year: new_date.year,
           date: new_date,

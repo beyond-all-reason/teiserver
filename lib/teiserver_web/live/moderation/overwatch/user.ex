@@ -79,21 +79,21 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.User do
       case filters["closed-filter"] do
         "Open" -> false
         "Closed" -> true
-        _ -> nil
+        _other -> nil
       end
 
     actioned_filter =
       case filters["actioned-filter"] do
         "Actioned" -> true
         "Un-actioned" -> false
-        _ -> nil
+        _other -> nil
       end
 
     timeframe =
       case filters["timeframe-filter"] do
         "standard" -> Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
         "all" -> nil
-        _ -> nil
+        _other -> nil
       end
 
     report_groups =

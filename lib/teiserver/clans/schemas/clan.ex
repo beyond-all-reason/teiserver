@@ -42,5 +42,5 @@ defmodule Teiserver.Clans.Clan do
     |> validate_required(~w(name tag icon colour description rating homepage)a)
   end
 
-  def authorize(_, conn, _), do: allow?(conn, "clan")
+  def authorize(_action, conn, _params), do: allow?(conn, "clan")
 end

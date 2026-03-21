@@ -23,5 +23,5 @@ defmodule Teiserver.Account.Friend do
   end
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(:index, conn, _), do: allow?(conn, "Moderator")
+  def authorize(:index, conn, _data), do: allow?(conn, "Moderator")
 end

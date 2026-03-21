@@ -87,14 +87,18 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
      |> assign(:extra_text, value)}
   end
 
-  def handle_event("select-match-" <> match_id_str, _, %{assigns: %{stage: :match}} = socket) do
+  def handle_event(
+        "select-match-" <> match_id_str,
+        _params,
+        %{assigns: %{stage: :match}} = socket
+      ) do
     {:noreply,
      socket
      |> assign(:match_id, String.to_integer(match_id_str))
      |> assign(:stage, :extra_text)}
   end
 
-  def handle_event("select-no-match", _, %{assigns: %{stage: :match}} = socket) do
+  def handle_event("select-no-match", _params, %{assigns: %{stage: :match}} = socket) do
     {:noreply,
      socket
      |> assign(:match_id, nil)
@@ -126,7 +130,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       ) do
     socket =
       case Account.ignore_user(current_user.id, user.id) do
-        {:ok, _} ->
+        {:ok, _result} ->
           socket
           |> put_flash(:success, "You are now ignoring #{user.name}")
           |> get_relationship()
@@ -147,7 +151,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       ) do
     socket =
       case Account.avoid_user(current_user.id, user.id) do
-        {:ok, _} ->
+        {:ok, _result} ->
           socket
           |> put_flash(:success, "You are now avoiding #{user.name}")
           |> get_relationship()
@@ -168,7 +172,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       ) do
     socket =
       case Account.block_user(current_user.id, user.id) do
-        {:ok, _} ->
+        {:ok, _result} ->
           socket
           |> put_flash(:success, "You are now blocking #{user.name}")
           |> get_relationship()

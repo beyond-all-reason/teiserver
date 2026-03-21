@@ -153,7 +153,7 @@ defmodule Teiserver.Game.AchievementServer do
   end
 
   @impl GenServer
-  def init(_) do
+  def init(_opts) do
     Logger.metadata(request_id: "AchievementServer")
 
     # If it's a test server this will break as the SQL connection will bork

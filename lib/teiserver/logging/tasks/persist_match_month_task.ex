@@ -28,7 +28,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     log =
       case Logging.get_last_match_month_log() do
         nil ->
@@ -79,7 +79,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
           })
         end
 
-      _ ->
+      _empty ->
         nil
     end
   end

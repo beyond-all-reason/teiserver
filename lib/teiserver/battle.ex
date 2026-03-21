@@ -531,7 +531,7 @@ defmodule Teiserver.Battle do
         [match] ->
           do_stop_match(match, lobby_id)
 
-        _ ->
+        _other ->
           :ok
       end
     end
@@ -576,7 +576,7 @@ defmodule Teiserver.Battle do
       [m] ->
         m
 
-      _ ->
+      _other ->
         nil
     end
   end
@@ -605,7 +605,7 @@ defmodule Teiserver.Battle do
           [] ->
             uuid
 
-          _ ->
+          _existing ->
             generate_lobby_uuid()
         end
     end
@@ -645,7 +645,7 @@ defmodule Teiserver.Battle do
                 update_match(match, %{data: new_data})
             end
 
-          _ ->
+          _error ->
             Logger.error("Error with json decode of save_match_stats")
             {:error, "JSON decode"}
         end

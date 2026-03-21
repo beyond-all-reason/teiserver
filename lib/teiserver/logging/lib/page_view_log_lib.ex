@@ -29,8 +29,8 @@ defmodule Teiserver.Logging.PageViewLogLib do
     end)
   end
 
-  def _search(query, _, nil), do: query
-  def _search(query, _, ""), do: query
+  def _search(query, _key, nil), do: query
+  def _search(query, _key, ""), do: query
 
   def _search(query, :id, id) do
     from logs in query,
@@ -80,7 +80,7 @@ defmodule Teiserver.Logging.PageViewLogLib do
       where: logs.inserted_at < ^naive_date
   end
 
-  def _search(query, :no_root, _) do
+  def _search(query, :no_root, _value) do
     from logs in query,
       left_join: users in assoc(logs, :user),
       where: users.name not in ["root", "root2"]

@@ -38,23 +38,33 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
     state
   end
 
-  def do_handle("queue_status", _, _msg_id, %{lobby_id: nil} = state), do: state
+  def do_handle("queue_status", _data, _msg_id, %{lobby_id: nil} = state), do: state
 
-  def do_handle("queue_status", _, _msg_id, %{lobby_id: lobby_id, app_status: :accepted} = state) do
+  def do_handle(
+        "queue_status",
+        _data,
+        _msg_id,
+        %{lobby_id: lobby_id, app_status: :accepted} = state
+      ) do
     id_list = Coordinator.call_consul(lobby_id, :queue_state)
     reply(:battle, :queue_status, {lobby_id, id_list}, nil, state)
   end
 
-  def do_handle("queue_status", _, _msg_id, state), do: state
+  def do_handle("queue_status", _data, _msg_id, state), do: state
 
-  def do_handle("extra_data", _, _msg_id, %{lobby_id: nil} = state), do: state
+  def do_handle("extra_data", _data, _msg_id, %{lobby_id: nil} = state), do: state
 
-  def do_handle("extra_data", _, _msg_id, %{lobby_id: lobby_id, app_status: :accepted} = state) do
+  def do_handle(
+        "extra_data",
+        _data,
+        _msg_id,
+        %{lobby_id: lobby_id, app_status: :accepted} = state
+      ) do
     data = Coordinator.call_consul(lobby_id, :get_chobby_extra_data)
     reply(:battle, :extra_data, {lobby_id, data}, nil, state)
   end
 
-  def do_handle("extra_data", _, _msg_id, state), do: state
+  def do_handle("extra_data", _data, _msg_id, state), do: state
 
   def do_handle(cmd, data, msg_id, state) do
     SpringIn._no_match(state, "c.battle." <> cmd, msg_id, data)

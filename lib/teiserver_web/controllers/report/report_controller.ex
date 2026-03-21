@@ -87,7 +87,7 @@ defmodule TeiserverWeb.Report.ReportController do
         "moderation_activity" ->
           Teiserver.Moderation.ActivityReport
 
-        _ ->
+        _other ->
           raise "No handler for name of '#{name}'"
       end
 

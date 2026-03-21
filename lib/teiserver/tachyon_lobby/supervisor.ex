@@ -30,7 +30,7 @@ defmodule Teiserver.TachyonLobby.Supervisor do
   end
 
   @impl HordeSupervisor
-  def init(_) do
+  def init(_arg) do
     HordeSupervisor.init(strategy: :one_for_one, members: :auto)
   end
 end

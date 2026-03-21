@@ -22,7 +22,7 @@ defmodule Teiserver.Tachyon.Tasks.SetupAssets do
     end
   end
 
-  defp update_engine([first_engine | _] = engines) do
+  defp update_engine([first_engine | _rest] = engines) do
     case Enum.find(engines, fn g -> g.in_matchmaking end) do
       nil ->
         result =
@@ -55,7 +55,7 @@ defmodule Teiserver.Tachyon.Tasks.SetupAssets do
     end
   end
 
-  defp update_game([first_game | _] = games) do
+  defp update_game([first_game | _rest] = games) do
     case Enum.find(games, fn g -> g.in_matchmaking end) do
       nil ->
         result =

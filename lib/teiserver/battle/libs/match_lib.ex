@@ -94,7 +94,7 @@ defmodule Teiserver.Battle.MatchLib do
 
           team_size =
             teams
-            |> Enum.map(fn {_, t} -> t |> Enum.count() end)
+            |> Enum.map(fn {_team_number, t} -> t |> Enum.count() end)
             |> Enum.max(fn -> 0 end)
 
           game_type = game_type(team_size, team_count, bots)
@@ -203,8 +203,8 @@ defmodule Teiserver.Battle.MatchLib do
   end
 
   @spec _search(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  def _search(query, _key, ""), do: query
+  def _search(query, _key, nil), do: query
 
   def _search(query, :id, id) do
     from matches in query,
@@ -241,7 +241,7 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.server_uuid == ^server_uuid
   end
 
-  def _search(query, :server_uuid_not_nil, _) do
+  def _search(query, :server_uuid_not_nil, _value) do
     from matches in query,
       where: not is_nil(matches.server_uuid)
   end
@@ -340,7 +340,7 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.rating_type_id not in ^rating_type_ids
   end
 
-  def _search(query, :ready_for_post_process, _) do
+  def _search(query, :ready_for_post_process, _value) do
     from matches in query,
       where: matches.processed == false,
       where: not is_nil(matches.finished),
@@ -556,8 +556,8 @@ defmodule Teiserver.Battle.MatchLib do
   end
 
   @spec calculate_exit_status(integer(), integer()) :: :stayed | :early | :abandoned | :noshow
-  def calculate_exit_status(nil, _), do: :stayed
-  def calculate_exit_status(_, nil), do: :stayed
+  def calculate_exit_status(nil, _game_duration), do: :stayed
+  def calculate_exit_status(_left_after, nil), do: :stayed
 
   def calculate_exit_status(left_after, game_duration) do
     diff = game_duration - left_after

@@ -36,7 +36,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
+  def handle_params(_params, _url, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket |> redirect(to: ~p"/")}
   end
 
@@ -49,7 +49,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       when socket.assigns.disabled?,
       do: {:noreply, socket}
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket)
+  def handle_info(%{channel: "teiserver_client_messages:" <> _rest}, socket)
       when socket.assigns.disabled?,
       do: {:noreply, socket}
 
@@ -111,19 +111,22 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   # Client action
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _user_id, event: :connected}, socket) do
     {:noreply,
      socket
      |> assign(:client, Account.get_client_by_id(socket.assigns[:current_user].id))}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _user_id, event: :disconnected},
+        socket
+      ) do
     {:noreply,
      socket
      |> assign(:client, nil)}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _rest}, socket) do
     {:noreply, socket}
   end
 
@@ -148,7 +151,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("join", _, %{assigns: %{client: nil}} = socket) do
+  def handle_event("join", _params, %{assigns: %{client: nil}} = socket) do
     {:noreply, socket}
   end
 

@@ -333,6 +333,5 @@ defmodule Teiserver.Account.User do
   defp put_md5_password_hash(changeset), do: changeset
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
-  def authorize(_, conn, _), do: allow?(conn, "admin.user")
-  # def authorize(_, _, _), do: false
+  def authorize(_action, conn, _data), do: allow?(conn, "admin.user")
 end

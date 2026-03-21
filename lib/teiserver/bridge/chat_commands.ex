@@ -32,7 +32,7 @@ defmodule Teiserver.Bridge.ChatCommands do
     end
   end
 
-  def handle(_) do
+  def handle(_message) do
     :ok
   end
 
@@ -112,7 +112,7 @@ defmodule Teiserver.Bridge.ChatCommands do
           "#{name |> String.capitalize()} was renamed to #{new_name |> String.capitalize()} and #{old_name |> String.capitalize()} was renamed to #{name |> String.capitalize()}"
         )
 
-      {:unchanged, _} ->
+      {:unchanged, _details} ->
         reply(channel, "#{name |> String.capitalize()} did not have a name change")
 
       {:found_old, {_code, new_name}} ->
@@ -190,12 +190,12 @@ defmodule Teiserver.Bridge.ChatCommands do
     end
   end
 
-  def handle_command(_, _, _, _) do
+  def handle_command(_sender, _cmd, _remaining, _channel_id) do
     :ignore
   end
 
   @spec allow?(String.t(), map()) :: boolean
-  defp allow?("discord", _), do: true
+  defp allow?("discord", _user), do: true
 
   defp allow?("gdt", user),
     do: Auth.has_any_role?(user, ["Admin", "Moderator", "GDT"])

@@ -124,7 +124,7 @@ defmodule Teiserver.Account.ClientLib do
                 new_lobby = %{lobby | in_progress: true, started_at: System.system_time(:second)}
                 Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
 
-              _ ->
+              _other ->
                 :ok
             end
         end
@@ -173,7 +173,7 @@ defmodule Teiserver.Account.ClientLib do
                 new_lobby = %{lobby | in_progress: true, started_at: System.system_time(:second)}
                 Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
 
-              _ ->
+              _other ->
                 :ok
             end
         end
@@ -201,16 +201,16 @@ defmodule Teiserver.Account.ClientLib do
   @spec client_exists?(T.userid()) :: pid() | boolean
   def client_exists?(userid) do
     case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
-      [{_pid, _}] -> true
-      _ -> false
+      [{_pid, _value}] -> true
+      _other -> false
     end
   end
 
   @spec get_client_pid(T.userid()) :: pid() | nil
   def get_client_pid(userid) do
     case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
-      [{pid, _}] -> pid
-      _ -> nil
+      [{pid, _value}] -> pid
+      _other -> nil
     end
   end
 
@@ -259,7 +259,7 @@ defmodule Teiserver.Account.ClientLib do
 
           # If the process has somehow died, we just return nil
         catch
-          :exit, _ ->
+          :exit, _reason ->
             nil
         end
     end

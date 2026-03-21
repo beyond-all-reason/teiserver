@@ -28,7 +28,7 @@ defmodule Teiserver.Chat.RoomServer do
   def get_room(name) do
     name |> via_tuple() |> GenServer.call(:get_room)
   catch
-    :exit, {:noproc, _} -> nil
+    :exit, {:noproc, _details} -> nil
   end
 
   @spec join_room(String.t(), T.userid(), pid() | nil) ::
@@ -36,42 +36,42 @@ defmodule Teiserver.Chat.RoomServer do
   def join_room(name, user_id, pid \\ self()) do
     name |> via_tuple() |> GenServer.call({:join_room, user_id, pid})
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_room}
+    :exit, {:noproc, _details} -> {:error, :invalid_room}
   end
 
   @spec leave_room(String.t(), T.userid()) :: :ok
   def leave_room(name, user_id) do
     name |> via_tuple() |> GenServer.call({:leave_room, user_id})
   catch
-    :exit, {:noproc, _} -> :ok
+    :exit, {:noproc, _details} -> :ok
   end
 
   @spec can_join_room?(String.t(), T.user()) :: true | :invalid_room | {false, String.t()}
   def can_join_room?(name, user) do
     name |> via_tuple() |> GenServer.call({:can_join_room?, user})
   catch
-    :exit, {:noproc, _} -> :invalid_room
+    :exit, {:noproc, _details} -> :invalid_room
   end
 
   @spec stop_room(String.t()) :: :ok
   def stop_room(name) do
     name |> via_tuple() |> GenServer.call(:stop)
   catch
-    :exit, {:noproc, _} -> :ok
+    :exit, {:noproc, _details} -> :ok
   end
 
   @spec send_message(String.t(), T.userid(), String.t()) :: :ok
   def send_message(name, user_id, message) do
     name |> via_tuple() |> GenServer.call({:send_message, user_id, message})
   catch
-    :exit, {:noproc, _} -> :ok
+    :exit, {:noproc, _details} -> :ok
   end
 
   @spec send_message_ex(String.t(), T.userid(), String.t()) :: :ok
   def send_message_ex(name, user_id, message) do
     name |> via_tuple() |> GenServer.call({:send_message_ex, user_id, message})
   catch
-    :exit, {:noproc, _} -> :ok
+    :exit, {:noproc, _details} -> :ok
   end
 
   def start_link(args) do
@@ -169,7 +169,7 @@ defmodule Teiserver.Chat.RoomServer do
 
           case msg do
             {:ok, msg_obj} -> msg_obj
-            _ -> nil
+            _error -> nil
           end
         end
 

@@ -58,7 +58,7 @@ defmodule Teiserver.EmailHelper do
               "Failed to delete code #{inspect(code)} for user at #{user.email}: #{inspect(err)}"
             )
 
-          _ ->
+          _result ->
             Logger.info(
               "Deleted password reset token for user at #{user.email} because email failed"
             )

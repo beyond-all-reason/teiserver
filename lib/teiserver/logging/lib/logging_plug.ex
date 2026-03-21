@@ -58,7 +58,7 @@ defmodule Teiserver.Logging.LoggingPlug do
   defp log_view(conn, start_tick, ip) do
     user_id = get_user_id(conn)
 
-    [_, section | path] = String.split(conn.request_path, "/")
+    [_empty, section | path] = String.split(conn.request_path, "/")
 
     # Log as seconds
     # load_time = (:os.system_time(:micro_seconds) - start_tick)/1000000
@@ -87,9 +87,9 @@ defmodule Teiserver.Logging.LoggingPlug do
 
   def get_ip_from_conn(conn) do
     case List.keyfind(conn.req_headers, "x-real-ip", 0) do
-      {_, ip} -> convert_from_x_real_ip(ip)
+      {_key, ip} -> convert_from_x_real_ip(ip)
       nil -> conn.remote_ip
-      _ -> nil
+      _other -> nil
     end
   end
 end

@@ -47,7 +47,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventLib do
 
         result
 
-      _ ->
+      _error ->
         result
     end
   end

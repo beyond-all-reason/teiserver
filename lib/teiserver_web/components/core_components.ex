@@ -141,7 +141,7 @@ defmodule TeiserverWeb.CoreComponents do
         :success -> "success"
         :warning -> "warning"
         :error -> "danger"
-        _ -> ""
+        _other -> ""
       end
 
     assigns =

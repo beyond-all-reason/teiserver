@@ -64,8 +64,8 @@ defmodule Teiserver.SpringTelemetryTest do
     _send_raw(socket, "c.telemetry.upload_infolog log_type user_hash #{metadata} #{contents}\n")
     reply = _recv_raw(socket)
     assert reply =~ "OK cmd=upload_infolog - id:"
-    [_, _, _, s] = reply |> String.trim() |> String.split(" ")
-    [_, id] = String.split(s, ":")
+    [_ok, _cmd, _separator, s] = reply |> String.trim() |> String.split(" ")
+    [_label, id] = String.split(s, ":")
 
     infolog = Telemetry.get_infolog(id)
     assert infolog.log_type == "log_type"
@@ -83,8 +83,8 @@ defmodule Teiserver.SpringTelemetryTest do
 
     reply = _recv_raw(socket_raw)
     assert reply =~ "OK cmd=upload_infolog - id:"
-    [_, _, _, s] = reply |> String.trim() |> String.split(" ")
-    [_, id] = String.split(s, ":")
+    [_ok, _cmd, _separator, s] = reply |> String.trim() |> String.split(" ")
+    [_label, id] = String.split(s, ":")
 
     infolog = Telemetry.get_infolog(id)
     assert infolog.log_type == "log_type"

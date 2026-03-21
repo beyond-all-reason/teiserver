@@ -116,7 +116,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         :player_count -> "teiserver.Discord counter players"
         :match_count -> "teiserver.Discord counter matches"
         :lobby_count -> "teiserver.Discord counter lobbies"
-        _ -> ""
+        _other -> ""
       end
 
     channel_id = Config.get_site_config_cache(config_key)
@@ -127,7 +127,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         :player_count -> "Players in game: #{value}"
         :match_count -> "Ongoing battles: #{value}"
         :lobby_count -> "Open lobbies: #{value}"
-        _ -> ""
+        _other -> ""
       end
 
     change_channel_name(channel_id, new_name)
@@ -206,7 +206,8 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   def handle_info(
-        %{channel: "teiserver_client_messages:" <> _, event: :received_direct_message} = data,
+        %{channel: "teiserver_client_messages:" <> _userid, event: :received_direct_message} =
+          data,
         state
       ) do
     username = CacheUser.get_username(data.sender_id)
@@ -220,7 +221,8 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _}, state), do: {:noreply, state}
+  def handle_info(%{channel: "teiserver_client_messages:" <> _userid}, state),
+    do: {:noreply, state}
 
   def handle_info(%{channel: "teiserver_server", event: :started}, state) do
     if Config.get_site_config_cache("teiserver.Bridge from server") do
@@ -350,7 +352,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         channel_id = Config.get_site_config_cache(key)
 
         if channel_id do
-          [_, room] = String.split(key, "#")
+          [_prefix, room] = String.split(key, "#")
 
           {room, channel_id}
         end
@@ -368,7 +370,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         channel_id = Config.get_site_config_cache(key)
 
         if channel_id do
-          [_, room] = String.split(key, "#")
+          [_prefix, room] = String.split(key, "#")
 
           {channel_id, room}
         end
@@ -451,9 +453,9 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   @spec change_channel_name(String.t(), String.t()) :: boolean()
-  def change_channel_name(_, ""), do: false
-  def change_channel_name(nil, _), do: false
-  def change_channel_name(0, _), do: false
+  def change_channel_name(_channel_id, ""), do: false
+  def change_channel_name(nil, _new_name), do: false
+  def change_channel_name(0, _new_name), do: false
 
   def change_channel_name(channel_id, new_name) do
     Channel.modify(channel_id, %{

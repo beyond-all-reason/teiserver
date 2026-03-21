@@ -78,7 +78,7 @@ defmodule Teiserver.Helper.SchemaHelper do
           d =
             case String.length(v) do
               8 -> Timex.parse!(v, "{0D}/{0M}/{YY}")
-              _ -> Timex.parse!(v, "{0D}/{0M}/{YYYY}")
+              _other -> Timex.parse!(v, "{0D}/{0M}/{YYYY}")
             end
 
           {k, make_date(d)}
@@ -139,7 +139,7 @@ defmodule Teiserver.Helper.SchemaHelper do
             nil ->
               {k, nil}
 
-            _ ->
+            _value ->
               {k, String.trim(v)}
           end
 
@@ -179,7 +179,7 @@ defmodule Teiserver.Helper.SchemaHelper do
             nil ->
               {k, nil}
 
-            _ ->
+            _value ->
               {k, Enum.uniq(v)}
           end
 
@@ -201,7 +201,7 @@ defmodule Teiserver.Helper.SchemaHelper do
             nil ->
               {k, nil}
 
-            _ ->
+            _value ->
               {
                 k,
                 v
@@ -233,7 +233,7 @@ defmodule Teiserver.Helper.SchemaHelper do
             nil ->
               {k, nil}
 
-            _ ->
+            _value ->
               new_value =
                 patterns
                 |> Enum.reduce(v, fn pattern, acc ->
@@ -264,7 +264,7 @@ defmodule Teiserver.Helper.SchemaHelper do
             nil ->
               {k, nil}
 
-            _ ->
+            _value ->
               {
                 k,
                 v
@@ -308,12 +308,12 @@ defmodule Teiserver.Helper.SchemaHelper do
             %DateTime{} = d ->
               {k, d}
 
-            _ ->
+            _value ->
               case HumanTime.relative(v) do
                 {:ok, ht_v} ->
                   {k, ht_v}
 
-                {:error, _} ->
+                {:error, _reason} ->
                   # We need to do this replace to stop "invalid string" appearing multiple times
                   {k, String.replace(v, " - Invalid format", "") <> " - Invalid format"}
               end
@@ -342,7 +342,7 @@ defmodule Teiserver.Helper.SchemaHelper do
       [] ->
         %{changeset | required: fields ++ required}
 
-      _ ->
+      _fields ->
         new_errors = Enum.map(fields_with_errors, &{&1, {message, [human_time: :invalid]}})
         changes = Map.drop(changes, fields_with_errors)
 
@@ -371,8 +371,8 @@ defmodule Teiserver.Helper.SchemaHelper do
 
       v ->
         case HumanTime.relative(v) do
-          {:error, _} -> true
-          {:ok, _} -> false
+          {:error, _reason} -> true
+          {:ok, _result} -> false
         end
     end
   end

@@ -37,7 +37,7 @@ defmodule Teiserver.Account.FriendRequestLib do
 
   @spec can_send_friend_request?(T.userid(), T.userid()) :: boolean
   def can_send_friend_request?(from_id, to_id) do
-    {result, _} = can_send_friend_request_with_reason?(from_id, to_id)
+    {result, _reason} = can_send_friend_request_with_reason?(from_id, to_id)
     result
   end
 
@@ -116,7 +116,7 @@ defmodule Teiserver.Account.FriendRequestLib do
             {:error, "Failed to create friendship: #{inspect(changeset.errors)}"}
         end
 
-      _ ->
+      _other ->
         Account.delete_friend_request(req)
         :ok
     end
@@ -201,13 +201,13 @@ defmodule Teiserver.Account.FriendRequestLib do
 
   @spec list_incoming_friend_requests_of_userid(T.userid()) :: [T.userid()]
   def list_incoming_friend_requests_of_userid(userid) do
-    {_, incoming} = list_requests_for_user(userid)
+    {_outgoing, incoming} = list_requests_for_user(userid)
     Enum.map(incoming, fn incoming -> incoming.from_user_id end)
   end
 
   @spec list_outgoing_friend_requests_of_userid(T.userid()) :: [T.userid()]
   def list_outgoing_friend_requests_of_userid(userid) do
-    {outgoing, _} = list_requests_for_user(userid)
+    {outgoing, _incoming} = list_requests_for_user(userid)
     Enum.map(outgoing, fn outgoing -> outgoing.to_user_id end)
   end
 end

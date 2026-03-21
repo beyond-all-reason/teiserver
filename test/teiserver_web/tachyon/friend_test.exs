@@ -11,14 +11,14 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
       {:ok, ctx2} = Tachyon.setup_client()
       {:ok, ctx3} = Tachyon.setup_client()
       {:ok, ctx4} = Tachyon.setup_client()
-      {:ok, _} = Account.create_friend(ctx1[:user].id, ctx2[:user].id)
+      {:ok, _friend} = Account.create_friend(ctx1[:user].id, ctx2[:user].id)
       # outgoing
-      {:ok, _} = Account.create_friend_request(ctx1[:user].id, ctx3[:user].id)
+      {:ok, _outgoing_request} = Account.create_friend_request(ctx1[:user].id, ctx3[:user].id)
       # incoming
-      {:ok, _} = Account.create_friend_request(ctx4[:user].id, ctx1[:user].id)
+      {:ok, _incoming_request} = Account.create_friend_request(ctx4[:user].id, ctx1[:user].id)
 
       # should not be included
-      {:ok, _} = Account.create_friend(ctx3[:user].id, ctx4[:user].id)
+      {:ok, _other_friend} = Account.create_friend(ctx3[:user].id, ctx4[:user].id)
 
       assert %{"status" => "success", "data" => data} = Tachyon.friend_list!(ctx1[:client])
 
@@ -44,12 +44,12 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
   end
 
   test "self event contains friend info" do
-    [user1, user2, user3, user4] = Enum.map(1..4, fn _ -> Tachyon.create_user() end)
-    {:ok, _} = Account.create_friend(user1.id, user2.id)
+    [user1, user2, user3, user4] = Enum.map(1..4, fn _i -> Tachyon.create_user() end)
+    {:ok, _friend} = Account.create_friend(user1.id, user2.id)
     # outgoing
-    {:ok, _} = Account.create_friend_request(user1.id, user3.id)
+    {:ok, _outgoing_request} = Account.create_friend_request(user1.id, user3.id)
     # incoming
-    {:ok, _} = Account.create_friend_request(user4.id, user1.id)
+    {:ok, _incoming_request} = Account.create_friend_request(user4.id, user1.id)
 
     %{client: client} = Tachyon.connect(user1, swallow_first_event: false)
     %{"commandId" => "user/self", "data" => %{"user" => data}} = Tachyon.recv_message!(client)
@@ -61,7 +61,7 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
     assert [%{"to" => ^id3}] = data["outgoingFriendRequest"]
   end
 
-  defp setup_friend_requests(_) do
+  defp setup_friend_requests(_context) do
     {:ok, ctx1} = Tachyon.setup_client()
     {:ok, ctx2} = Tachyon.setup_client()
     {:ok, user: ctx1[:user], client: ctx1[:client], user2: ctx2[:user], client2: ctx2[:client]}
@@ -98,7 +98,7 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
     end
 
     test "request when already friends", ctx do
-      {:ok, _} = Account.create_friend(ctx[:user].id, ctx[:user2].id)
+      {:ok, _friend} = Account.create_friend(ctx[:user].id, ctx[:user2].id)
 
       assert %{"status" => "failed", "reason" => "already_in_friendlist"} =
                Tachyon.send_friend_request!(ctx[:client], ctx[:user2].id)
@@ -117,8 +117,8 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
       {:ok, ctx4} = Tachyon.setup_client()
 
       # Add 2 friends (reaching the limit)
-      {:ok, _} = Account.create_friend(ctx[:user].id, ctx3[:user].id)
-      {:ok, _} = Account.create_friend(ctx[:user].id, ctx4[:user].id)
+      {:ok, _friend1} = Account.create_friend(ctx[:user].id, ctx3[:user].id)
+      {:ok, _friend2} = Account.create_friend(ctx[:user].id, ctx4[:user].id)
 
       # Try to send a friend request - should fail due to limit
       assert %{"status" => "failed", "reason" => "outgoing_capacity_reached"} =
@@ -138,8 +138,8 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
       {:ok, ctx4} = Tachyon.setup_client()
 
       # Add 2 friends to target user (reaching the limit)
-      {:ok, _} = Account.create_friend(ctx[:user2].id, ctx3[:user].id)
-      {:ok, _} = Account.create_friend(ctx[:user2].id, ctx4[:user].id)
+      {:ok, _friend1} = Account.create_friend(ctx[:user2].id, ctx3[:user].id)
+      {:ok, _friend2} = Account.create_friend(ctx[:user2].id, ctx4[:user].id)
 
       # Try to send a friend request - should fail due to target's limit
       assert %{"status" => "failed", "reason" => "incoming_capacity_reached"} =
@@ -188,7 +188,7 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
     end
 
     test "can accept friend request", ctx do
-      {:ok, _} = Account.create_friend_request(ctx[:user].id, ctx[:user2].id)
+      {:ok, _request} = Account.create_friend_request(ctx[:user].id, ctx[:user2].id)
 
       assert %{"status" => "success"} =
                Tachyon.accept_friend_request!(ctx[:client2], ctx[:user].id)
@@ -212,7 +212,7 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
     end
 
     test "can cancel request", ctx do
-      {:ok, _} = Account.create_friend_request(ctx[:user].id, ctx[:user2].id)
+      {:ok, _request} = Account.create_friend_request(ctx[:user].id, ctx[:user2].id)
 
       assert %{"status" => "success"} =
                Tachyon.cancel_friend_request!(ctx[:client], ctx[:user2].id)
@@ -229,7 +229,7 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
     end
 
     test "reject request", ctx do
-      {:ok, _} = Account.create_friend_request(ctx[:user].id, ctx[:user2].id)
+      {:ok, _request} = Account.create_friend_request(ctx[:user].id, ctx[:user2].id)
 
       assert %{"status" => "success"} =
                Tachyon.reject_friend_request!(ctx[:client2], ctx[:user].id)
@@ -244,7 +244,7 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
     end
   end
 
-  defp setup_friends(_) do
+  defp setup_friends(_context) do
     {:ok, ctx1} = Tachyon.setup_client()
     {:ok, ctx2} = Tachyon.setup_client()
     {:ok, friend} = Account.create_friend(ctx1[:user].id, ctx2[:user].id)

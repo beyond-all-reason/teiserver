@@ -14,7 +14,7 @@ defmodule Teiserver.Helper.TimexHelper do
     case new_timestamp do
       %Timex.AmbiguousDateTime{} -> timestamp
       {:error, _reason} -> timestamp
-      _ -> new_timestamp
+      _converted -> new_timestamp
     end
   end
 
@@ -26,7 +26,7 @@ defmodule Teiserver.Helper.TimexHelper do
   @spec date_to_str(DateTime.t()) :: String.t()
   @spec date_to_str(DateTime.t(), list) :: String.t()
   def date_to_str(the_time), do: date_to_str(the_time, [])
-  def date_to_str(nil, _), do: ""
+  def date_to_str(nil, _format), do: ""
 
   def date_to_str(the_time, format) when is_atom(format) do
     date_to_str(the_time, format: format)
@@ -137,7 +137,7 @@ defmodule Teiserver.Helper.TimexHelper do
   @spec time_until(DateTime.t()) :: String.t()
   @spec time_until(DateTime.t(), DateTime.t()) :: String.t()
   def time_until(the_time), do: time_until(the_time, Timex.now())
-  def time_until(nil, _), do: nil
+  def time_until(nil, _now), do: nil
 
   def time_until(the_time, now) do
     the_duration = Timex.diff(now, the_time, :duration)
@@ -251,7 +251,7 @@ defmodule Teiserver.Helper.TimexHelper do
   #   end
   # end
 
-  defp dmy_text(nil, _), do: nil
+  defp dmy_text(nil, _tz), do: nil
 
   defp dmy_text(the_time, tz) do
     suffix =
@@ -273,7 +273,7 @@ defmodule Teiserver.Helper.TimexHelper do
   defp suffix(3), do: "nd"
   defp suffix(23), do: "nd"
   defp suffix(33), do: "rd"
-  defp suffix(_), do: "th"
+  defp suffix(_day), do: "th"
 
   def parse_dmy(nil), do: nil
   def parse_dmy(""), do: nil
@@ -328,8 +328,8 @@ defmodule Teiserver.Helper.TimexHelper do
   #   end
   # end
 
-  def duration_to_str(nil, _), do: ""
-  def duration_to_str(_, nil), do: ""
+  def duration_to_str(nil, _t2), do: ""
+  def duration_to_str(_t1, nil), do: ""
 
   def duration_to_str(t1, t2) do
     Timex.diff(t1, t2, :second)
@@ -422,8 +422,8 @@ defmodule Teiserver.Helper.TimexHelper do
   @doc """
   Wraps Timex.compare, returns true if a > b
   """
-  def greater_than(nil, _), do: false
-  def greater_than(_, nil), do: true
+  def greater_than(nil, _b), do: false
+  def greater_than(_a, nil), do: true
 
   def greater_than(a, b) do
     Timex.compare(a, b) == 1
@@ -432,8 +432,8 @@ defmodule Teiserver.Helper.TimexHelper do
   @doc """
   Wraps Timex.compare, returns true if a < b
   """
-  def less_than(nil, _), do: true
-  def less_than(_, nil), do: false
+  def less_than(nil, _b), do: true
+  def less_than(_a, nil), do: false
 
   def less_than(a, b) do
     Timex.compare(a, b) == -1

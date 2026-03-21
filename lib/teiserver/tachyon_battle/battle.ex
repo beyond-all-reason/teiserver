@@ -47,14 +47,14 @@ defmodule Teiserver.TachyonBattle.Battle do
   def send_message(battle_id, message) do
     battle_id |> via_tuple() |> GenServer.call({:send_message, message})
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_battle}
+    :exit, {:noproc, _details} -> {:error, :invalid_battle}
   end
 
   @spec kill(T.id()) :: :ok | {:error, reason :: term()}
   def kill(battle_id) do
     battle_id |> via_tuple() |> GenServer.call(:kill)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_battle}
+    :exit, {:noproc, _details} -> {:error, :invalid_battle}
   end
 
   @impl GenServer
@@ -91,7 +91,7 @@ defmodule Teiserver.TachyonBattle.Battle do
     :timer.send_after(8 * 60 * 60_000, :battle_timeout)
 
     case Autohost.lookup_autohost(autohost_id) do
-      {pid, _} ->
+      {pid, _value} ->
         Logger.info("init battle for autohost #{autohost_id}")
         Process.monitor(pid)
         {:ok, %{state | autohost_pid: pid}}
@@ -148,7 +148,7 @@ defmodule Teiserver.TachyonBattle.Battle do
         Battle.end_tachyon_match(state.match_id, ev.time, user_id, winning_ally_teams)
         {:noreply, %{state | battle_state: :finished}}
 
-      {:engine_crash, _} ->
+      {:engine_crash, _details} ->
         Battle.end_tachyon_match(state.match_id, ev.time)
         {:stop, :shutdown, %{state | battle_state: :shutting_down}}
 
@@ -165,7 +165,7 @@ defmodule Teiserver.TachyonBattle.Battle do
           {:noreply, state}
         end
 
-      _ ->
+      _other ->
         {:noreply, state}
     end
   end

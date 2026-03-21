@@ -30,7 +30,7 @@ defmodule TeiserverWeb.ErrorView do
     render("404_not_found.html", assigns)
   end
 
-  def render("500.html", %{reason: _} = error) do
+  def render("500.html", %{reason: _reason} = error) do
     case error.reason do
       %Timex.Parse.ParseError{message: "Expected" <> _v} ->
         render(
@@ -42,7 +42,7 @@ defmodule TeiserverWeb.ErrorView do
           })
         )
 
-      _ ->
+      _other ->
         render("500_internal.html", Map.merge(error, %{error: error}))
     end
   end

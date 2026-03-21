@@ -221,7 +221,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       # and also an update message
       %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
-      %{"currentBattle" => %{"startedAt" => _, "id" => battle_id}} = updated
+      %{"currentBattle" => %{"startedAt" => _started_at, "id" => battle_id}} = updated
 
       # can't start a battle when one is ongoing
       %{
@@ -289,7 +289,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"status" => "success"} =
         Tachyon.lobby_add_bot!(client, "001", "short name", version: "botv0")
 
-      %{"commandId" => "lobby/updated", "data" => _} = Tachyon.recv_message!(client)
+      %{"commandId" => "lobby/updated", "data" => _data} = Tachyon.recv_message!(client)
 
       %{"status" => "failed", "reason" => "invalid_request", "details" => "invalid_bot_id"} =
         Tachyon.lobby_remove_bot!(client, "definitely-not-a-bot-id")
@@ -299,7 +299,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"status" => "success", "data" => %{"id" => bot_id}} =
         Tachyon.lobby_add_bot!(client, "001", "short name", version: "botv0")
 
-      %{"commandId" => "lobby/updated", "data" => _} = Tachyon.recv_message!(client)
+      %{"commandId" => "lobby/updated", "data" => _data} = Tachyon.recv_message!(client)
 
       %{"status" => "success"} = Tachyon.lobby_remove_bot!(client, bot_id)
       %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
@@ -311,7 +311,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"status" => "success", "data" => %{"id" => bot_id}} =
         Tachyon.lobby_add_bot!(client, "001", "short name", version: "botv0")
 
-      %{"commandId" => "lobby/updated", "data" => _} = Tachyon.recv_message!(client)
+      %{"commandId" => "lobby/updated", "data" => _data} = Tachyon.recv_message!(client)
 
       update_data = [
         name: "new name",
@@ -345,7 +345,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
           options: %{opt1: "one"}
         )
 
-      %{"commandId" => "lobby/updated", "data" => _} = Tachyon.recv_message!(client)
+      %{"commandId" => "lobby/updated", "data" => _data} = Tachyon.recv_message!(client)
 
       update_data = [
         short_name: "new short name",
@@ -673,7 +673,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       # still get the full list on subsequent subscribes
       %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
 
-      {:ok, _} =
+      {:ok, _lobby} =
         setup_lobby(%{client: ctx2[:client]}, %{
           ally_team_config: Tachyon.mk_ally_team_config(2, 2)
         })
@@ -719,7 +719,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     %{"commandId" => "lobby/left"} = Tachyon.recv_message!(ctx[:client])
 
     # can create another lobby afterwards (session state is cleaned)
-    {:ok, _} = setup_lobby(ctx)
+    {:ok, _lobby} = setup_lobby(ctx)
   end
 
   defp setup_lobby(%{client: client}, overrides \\ %{}) do

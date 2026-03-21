@@ -105,7 +105,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
     )
     |> Enum.each(fn %{id: ignorer_id} ->
       case Account.ignore_user(ignorer_id, to_id) do
-        {:ok, _} ->
+        {:ok, _relationship} ->
           :ok
 
         {:error, reason} ->

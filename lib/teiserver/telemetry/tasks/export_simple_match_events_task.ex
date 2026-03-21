@@ -19,7 +19,7 @@ defmodule Teiserver.Telemetry.ExportSimpleMatchEventsTask do
     |> Enum.to_list()
   end
 
-  def perform(_) do
+  def perform(_args) do
     %{}
   end
 

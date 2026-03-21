@@ -46,9 +46,9 @@ defmodule Teiserver.Account.UserQueries do
   end
 
   @spec _where(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
-  def _where(query, _, ""), do: query
-  def _where(query, _, nil), do: query
-  def _where(query, _, "Any"), do: query
+  def _where(query, _key, ""), do: query
+  def _where(query, _key, nil), do: query
+  def _where(query, _key, "Any"), do: query
 
   def _where(query, :id, id) do
     from users in query,

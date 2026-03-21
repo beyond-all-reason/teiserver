@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
     %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(autohost_client)
     Tachyon.send_response(autohost_client, req, data: %{ips: ["1.2.3.4"], port: 1234})
 
-    {:ok, _} = Task.await(start_task)
+    {:ok, _result} = Task.await(start_task)
 
     ev = %{
       battleId: battle_id,

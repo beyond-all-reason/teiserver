@@ -44,12 +44,12 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
       OAuthFixtures.code_attrs(app.owner_id, app)
       |> OAuthFixtures.create_code()
 
-      Enum.each(1..2, fn _ ->
+      Enum.each(1..2, fn _i ->
         OAuthFixtures.token_attrs(app.owner_id, app)
         |> OAuthFixtures.create_token()
       end)
 
-      Enum.each(1..3, fn _ ->
+      Enum.each(1..3, fn _i ->
         OAuthFixtures.credential_attrs(bot, app.id)
         |> OAuthFixtures.create_credential()
       end)
@@ -139,7 +139,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
 
     test "get_application_token_counts returns correct token counts", %{user: user, app: app} do
       # Create multiple tokens
-      Enum.each(1..2, fn _ ->
+      Enum.each(1..2, fn _i ->
         OAuthFixtures.token_attrs(user.id, app) |> OAuthFixtures.create_token()
       end)
 

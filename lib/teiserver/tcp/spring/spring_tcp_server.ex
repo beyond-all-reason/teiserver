@@ -126,7 +126,7 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # If Ctrl + C is sent through it kills the connection, makes telnet debugging easier
-  def handle_info({_, _socket, <<255, 244, 255, 253, 6>>}, state) do
+  def handle_info({_transport, _socket, <<255, 244, 255, 253, 6>>}, state) do
     SpringOut.reply(:disconnect, "Ctrl + C", nil, state)
     Client.disconnect(state.userid, "Terminal exit command")
     send(self(), :terminate)
@@ -217,7 +217,7 @@ defmodule Teiserver.SpringTcpServer do
 
   # Client channel messages
   def handle_info(
-        %{channel: "teiserver_client_messages:" <> _, event: :lobby_direct_announce} = msg,
+        %{channel: "teiserver_client_messages:" <> _user_id, event: :lobby_direct_announce} = msg,
         state
       ) do
     SpringOut.reply(
@@ -480,13 +480,13 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Lobby chat
-  def handle_info(%{channel: "teiserver_lobby_chat:" <> _, event: :say} = msg, state) do
+  def handle_info(%{channel: "teiserver_lobby_chat:" <> _lobby_id, event: :say} = msg, state) do
     new_data = {msg.userid, msg.message, msg.lobby_id, state.userid}
     new_state = SpringOut.reply(:battle_message, new_data, nil, state)
     {:noreply, new_state}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_chat:" <> _, event: :announce} = msg, state) do
+  def handle_info(%{channel: "teiserver_lobby_chat:" <> _lobby_id, event: :announce} = msg, state) do
     new_data = {msg.userid, msg.message, msg.lobby_id, state.userid}
     new_state = SpringOut.reply(:battle_message_ex, new_data, nil, state)
     {:noreply, new_state}
@@ -672,7 +672,7 @@ defmodule Teiserver.SpringTcpServer do
           SpringOut.reply(:user_logged_in, client, nil, state)
           Map.put(state.known_users, client.userid, _blank_user(client.userid))
 
-        _ ->
+        _existing ->
           state.known_users
       end
 
@@ -686,7 +686,7 @@ defmodule Teiserver.SpringTcpServer do
           SpringOut.reply(:add_user, client, nil, state)
           Map.put(state.known_users, client.userid, _blank_user(client.userid))
 
-        _ ->
+        _existing ->
           state.known_users
       end
 
@@ -699,7 +699,7 @@ defmodule Teiserver.SpringTcpServer do
         nil ->
           {state.known_users, state.room_member_cache}
 
-        _ ->
+        _existing ->
           # Remove from rooms
           new_room_member_cache =
             state.room_member_cache
@@ -736,7 +736,7 @@ defmodule Teiserver.SpringTcpServer do
         :ignored ->
           SpringOut.reply(:ignorelist, state.userid, nil, state)
 
-        _ ->
+        _other ->
           Logger.error("No handler in tcp_server:user_updated with field #{field}")
       end
     end)
@@ -780,7 +780,7 @@ defmodule Teiserver.SpringTcpServer do
     end
   end
 
-  defp client_battlestatus_update(%{lobby_id: _} = new_client, state) do
+  defp client_battlestatus_update(%{lobby_id: _lobby_id} = new_client, state) do
     if state.lobby_id != nil and state.lobby_id == new_client.lobby_id do
       SpringOut.reply(:client_battlestatus, new_client, nil, state)
     else
@@ -788,7 +788,7 @@ defmodule Teiserver.SpringTcpServer do
     end
   end
 
-  defp client_battlestatus_update(_, state) do
+  defp client_battlestatus_update(_client, state) do
     state
   end
 
@@ -863,7 +863,7 @@ defmodule Teiserver.SpringTcpServer do
         SpringOut.reply(:update_battle, msg.lobby_id, nil, state)
         state
 
-      _ ->
+      _other ->
         raise "No handler in tcp_server:battle_update with reason #{msg.event}"
         Logger.error("No handler in tcp_server:battle_update with reason #{msg.event}")
         state
@@ -878,7 +878,7 @@ defmodule Teiserver.SpringTcpServer do
 
   # This is the result of the host responding to the server asking if the client
   # can join the battle
-  defp join_battle_request_response(nil, _, _, state) do
+  defp join_battle_request_response(nil, _response, _reason, state) do
     SpringOut.reply(:join_battle_failure, "No battle", nil, state)
   end
 
@@ -904,7 +904,7 @@ defmodule Teiserver.SpringTcpServer do
   # genserver is incorrect and needs to alter its state accordingly
   @spec user_join_battle(nil, T.lobby_id(), String.t(), T.spring_tcp_state()) ::
           T.spring_tcp_state()
-  defp user_join_battle(nil, _, _, state) do
+  defp user_join_battle(nil, _lobby_id, _script_password, state) do
     state
   end
 
@@ -981,7 +981,7 @@ defmodule Teiserver.SpringTcpServer do
     %{state | known_users: new_knowns}
   end
 
-  defp user_leave_battle(nil, _, state) do
+  defp user_leave_battle(nil, _lobby_id, state) do
     state
   end
 
@@ -1166,7 +1166,7 @@ defmodule Teiserver.SpringTcpServer do
       :login_end ->
         SpringOut.reply(:login_end, nil, nil, state)
 
-      _ ->
+      _other ->
         Logger.error("No handler in tcp_server:do_action with action #{action_type}")
     end
 
@@ -1174,9 +1174,9 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   @spec flood_protect?(String.t(), map()) :: {boolean, map()}
-  defp flood_protect?(_, %{exempt_from_cmd_throttle: true} = state), do: {false, state}
+  defp flood_protect?(_data, %{exempt_from_cmd_throttle: true} = state), do: {false, state}
 
-  defp flood_protect?("c.auth.login_queue_heartbeat" <> _, state), do: {false, state}
+  defp flood_protect?("c.auth.login_queue_heartbeat" <> _rest, state), do: {false, state}
 
   defp flood_protect?(data, state) do
     cmd_timestamps =
@@ -1407,7 +1407,7 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # NOTE: This is the elixir intrinsic *port* type, not the socket port
-  defp get_transport_type_port({:sslsocket, {:gen_tcp, port, _, _}, _} = _socket),
+  defp get_transport_type_port({:sslsocket, {:gen_tcp, port, _state, _opts}, _data} = _socket),
     do: {:tls, port}
 
   defp get_transport_type_port(port) when is_port(port),

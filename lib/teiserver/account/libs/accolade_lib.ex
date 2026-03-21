@@ -51,8 +51,8 @@ defmodule Teiserver.Account.AccoladeLib do
   end
 
   @spec _search(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  def _search(query, _key, ""), do: query
+  def _search(query, _key, nil), do: query
 
   def _search(query, :id, id) do
     from accolades in query,
@@ -77,7 +77,7 @@ defmodule Teiserver.Account.AccoladeLib do
   end
 
   def _search(query, :filter, "all"), do: query
-  def _search(query, :filter, {"all", _}), do: query
+  def _search(query, :filter, {"all", _value}), do: query
 
   def _search(query, :filter, {"recipient", user_id}) do
     from accolades in query,
@@ -236,7 +236,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
           # If the process has somehow died, we just return nil
         catch
-          :exit, _ ->
+          :exit, _reason ->
             nil
         end
     end
@@ -250,10 +250,10 @@ defmodule Teiserver.Account.AccoladeLib do
   @spec get_accolade_bot_pid() :: pid() | nil
   def get_accolade_bot_pid do
     case Horde.Registry.lookup(Teiserver.AccoladesRegistry, "AccoladeBotServer") do
-      [{pid, _}] ->
+      [{pid, _value}] ->
         pid
 
-      _ ->
+      _other ->
         nil
     end
   end
@@ -261,10 +261,10 @@ defmodule Teiserver.Account.AccoladeLib do
   @spec get_accolade_chat_pid(T.userid()) :: pid() | nil
   def get_accolade_chat_pid(userid) do
     case Horde.Registry.lookup(Teiserver.AccoladesRegistry, "AccoladeChatServer:#{userid}") do
-      [{pid, _}] ->
+      [{pid, _value}] ->
         pid
 
-      _ ->
+      _other ->
         nil
     end
   end
@@ -408,13 +408,13 @@ order by name;"
 
           pings =
             children
-            |> ParallelStream.filter(fn {_, _, _, [module]} ->
+            |> ParallelStream.filter(fn {_id, _child, _type, [module]} ->
               module == Teiserver.Account.AccoladeChatServer
             end)
-            |> ParallelStream.map(fn {_, pid, _, _} ->
+            |> ParallelStream.map(fn {_id, pid, _type, _modules} ->
               case GenServer.call(pid, :ping, 5000) do
                 :ok -> :ok
-                _ -> :not_okay
+                _other -> :not_okay
               end
             end)
             |> Enum.filter(fn p -> p == :ok end)
@@ -499,7 +499,7 @@ order by name;"
           giver_name: giver_name
         }
 
-      _ ->
+      _other ->
         nil
     end
   end

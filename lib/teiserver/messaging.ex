@@ -17,5 +17,5 @@ defmodule Teiserver.Messaging do
   def send(message, {:party, party_id, player_id}),
     do: Party.send_message(party_id, player_id, message)
 
-  def send(_, _), do: {:error, :invalid_recipient}
+  def send(_message, _entity), do: {:error, :invalid_recipient}
 end

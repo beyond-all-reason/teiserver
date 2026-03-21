@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
     end
 
     test "OTP check when secret set", %{conn: conn, user: user} do
-      {_, secret} = Account.get_or_generate_secret(user.id)
+      {_status, secret} = Account.get_or_generate_secret(user.id)
       Account.set_secret(user.id, secret)
       conn = GeneralTestLib.login(conn, user.email)
 
@@ -29,7 +29,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
     end
 
     test "OTP check for user", %{conn: conn, user: user} do
-      {_, secret} = Account.get_or_generate_secret(user.id)
+      {_status, secret} = Account.get_or_generate_secret(user.id)
       Account.set_secret(user.id, secret)
       otp = NimbleTOTP.verification_code(secret)
       conn = GeneralTestLib.login_opt(conn, user, otp)
@@ -49,7 +49,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
     test "Valid code", %{conn: conn, user: user} do
       rdr = ~p"/profile/" <> Integer.to_string(user.id)
 
-      {:ok, _} =
+      {:ok, _code} =
         Account.create_code(%{
           value: "test_code_valid_value",
           purpose: "one_time_login",
@@ -68,7 +68,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
     test "Valid code without IP", %{conn: conn, user: user} do
       rdr = ~p"/profile/" <> Integer.to_string(user.id)
 
-      {:ok, _} =
+      {:ok, _code} =
         Account.create_code(%{
           value: "test_code_valid_value",
           purpose: "one_time_login",
@@ -89,7 +89,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
     end
 
     test "bad ip", %{conn: conn, user: user} do
-      {:ok, _} =
+      {:ok, _code} =
         Account.create_code(%{
           value: "test_code_valid_value",
           purpose: "one_time_login",
@@ -106,7 +106,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
     end
 
     test "expired code", %{conn: conn, user: user} do
-      {:ok, _} =
+      {:ok, _code} =
         Account.create_code(%{
           value: "test_code_valid_value",
           purpose: "one_time_login",
@@ -124,7 +124,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
     test "disabled via site config", %{conn: conn, user: user} do
       Config.update_site_config("user.Enable one time links", false)
 
-      {:ok, _} =
+      {:ok, _code} =
         Account.create_code(%{
           value: "test_code_valid_value",
           purpose: "one_time_login",

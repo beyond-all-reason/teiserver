@@ -30,7 +30,7 @@ defmodule TeiserverWeb.Admin.ToolController do
         "nomenu_live" -> "nomenu_live.html"
         "admin_live" -> "admin_live.html"
         "admin" -> "admin.html"
-        _ -> "standard.html"
+        _other -> "standard.html"
       end
 
     conn =

@@ -3,5 +3,5 @@ defmodule Teiserver.Logging.LiveLib do
   alias Teiserver.Account.AuthLib
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
-  def authorize(_, conn, _), do: AuthLib.allow?(conn, "logging.live")
+  def authorize(_data, conn, _action), do: AuthLib.allow?(conn, "logging.live")
 end

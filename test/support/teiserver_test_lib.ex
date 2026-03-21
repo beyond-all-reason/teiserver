@@ -64,7 +64,7 @@ defmodule Teiserver.TeiserverTestLib do
         |> CacheUser.convert_user()
         |> CacheUser.add_user()
 
-      _ ->
+      _existing ->
         new_user()
     end
   end
@@ -91,7 +91,7 @@ defmodule Teiserver.TeiserverTestLib do
 
     %{socket: socket} = raw_setup(context)
     # Ignore the TASSERVER
-    _ = _recv_raw(socket)
+    _reply = _recv_raw(socket)
 
     # Now do our login
     # X03MO1qnZdYdgyfeuILPmQ== = Account.spring_md5_password("password")
@@ -100,7 +100,7 @@ defmodule Teiserver.TeiserverTestLib do
       "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
-    _ = _recv_until(socket)
+    _reply = _recv_until(socket)
 
     pid =
       case Client.get_client_by_id(user.id) do
@@ -122,7 +122,7 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket, user: user, pid: pid}
   end
 
-  def _send_raw({:sslsocket, _, _} = socket, msg) do
+  def _send_raw({:sslsocket, _tcp, _tls} = socket, msg) do
     :ok = :ssl.send(socket, msg)
     :timer.sleep(100)
   end
@@ -150,7 +150,7 @@ defmodule Teiserver.TeiserverTestLib do
               1 ->
                 value
 
-              _ ->
+              _other ->
                 value <> _recv_lines(lines - 1)
             end
         end
@@ -160,7 +160,7 @@ defmodule Teiserver.TeiserverTestLib do
     end
   end
 
-  def _recv_raw({:sslsocket, _, _} = socket) do
+  def _recv_raw({:sslsocket, _tcp, _tls} = socket) do
     case :ssl.recv(socket, 0, 500) do
       {:ok, reply} -> reply |> to_string()
       {:error, :timeout} -> :timeout
@@ -186,7 +186,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_until(socket), do: _recv_until(socket, "")
 
-  def _recv_until({:sslsocket, _, _} = socket, acc) do
+  def _recv_until({:sslsocket, _tcp, _tls} = socket, acc) do
     case :ssl.recv(socket, 0, 1000) do
       {:ok, reply} ->
         _recv_until(socket, acc <> to_string(reply))
@@ -518,7 +518,7 @@ defmodule Teiserver.TeiserverTestLib do
     cache
     |> ConCache.ets()
     |> :ets.tab2list()
-    |> Enum.each(fn {key, _} -> ConCache.delete(cache, key) end)
+    |> Enum.each(fn {key, _value} -> ConCache.delete(cache, key) end)
   end
 
   def start_spring_server(context \\ %{}) do

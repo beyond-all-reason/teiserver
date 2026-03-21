@@ -17,7 +17,7 @@ defmodule Teiserver.LobbyIdServer do
 
         :ok
 
-      _ ->
+      _pid ->
         {:failure, "Already started"}
     end
   end
@@ -41,16 +41,16 @@ defmodule Teiserver.LobbyIdServer do
   @spec get_server_pid() :: pid() | nil
   defp get_server_pid do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
-      [{pid, _}] ->
+      [{pid, _data}] ->
         pid
 
-      _ ->
+      _not_found ->
         nil
     end
   end
 
   @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
-  def start_link(_) do
+  def start_link(_opts) do
     GenServer.start_link(__MODULE__, [], [])
   end
 

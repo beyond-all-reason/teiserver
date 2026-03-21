@@ -24,8 +24,8 @@ defmodule Teiserver.Account.RelationshipLibTest do
     assert user2.id != nil
     assert user3.id != nil
 
-    {:ok, _} = RelationshipLib.avoid_user(user1.id, user2.id)
-    {:ok, _} = RelationshipLib.avoid_user(user1.id, user3.id)
+    {:ok, _relationship1} = RelationshipLib.avoid_user(user1.id, user2.id)
+    {:ok, _relationship2} = RelationshipLib.avoid_user(user1.id, user3.id)
 
     avoid_list = RelationshipLib.list_userids_avoided_by_userid(user1.id)
     assert Enum.member?(avoid_list, user2.id)
@@ -43,8 +43,8 @@ defmodule Teiserver.Account.RelationshipLibTest do
     refute Enum.member?(avoid_list, user3.id)
 
     # Add users to ignore list
-    {:ok, _} = RelationshipLib.ignore_user(user1.id, user2.id)
-    {:ok, _} = RelationshipLib.ignore_user(user1.id, user3.id)
+    {:ok, _relationship3} = RelationshipLib.ignore_user(user1.id, user2.id)
+    {:ok, _relationship4} = RelationshipLib.ignore_user(user1.id, user3.id)
 
     # Check ignores
     ignore_list = RelationshipLib.list_userids_ignored_by_userid(user1.id)
@@ -74,14 +74,14 @@ defmodule Teiserver.Account.RelationshipLibTest do
     user4 = AccountTestLib.user_fixture()
 
     # Add users up to the limit
-    {:ok, _} = RelationshipLib.ignore_user(user1.id, user2.id)
-    {:ok, _} = RelationshipLib.ignore_user(user1.id, user3.id)
+    {:ok, _relationship1} = RelationshipLib.ignore_user(user1.id, user2.id)
+    {:ok, _relationship2} = RelationshipLib.ignore_user(user1.id, user3.id)
 
     # Verify we're at the limit using check_relationship_limit
-    assert {:error, _} = RelationshipLib.check_relationship_limit(user1.id, :ignore, limit)
+    assert {:error, _reason} = RelationshipLib.check_relationship_limit(user1.id, :ignore, limit)
 
     # Try to add another ignore - should fail due to limit
-    assert {:error, _} = RelationshipLib.ignore_user(user1.id, user4.id)
+    assert {:error, _error} = RelationshipLib.ignore_user(user1.id, user4.id)
   end
 
   test "avoid_user respects limits" do
@@ -98,14 +98,14 @@ defmodule Teiserver.Account.RelationshipLibTest do
     user4 = AccountTestLib.user_fixture()
 
     # Add users up to the limit
-    {:ok, _} = RelationshipLib.avoid_user(user1.id, user2.id)
-    {:ok, _} = RelationshipLib.avoid_user(user1.id, user3.id)
+    {:ok, _relationship1} = RelationshipLib.avoid_user(user1.id, user2.id)
+    {:ok, _relationship2} = RelationshipLib.avoid_user(user1.id, user3.id)
 
     # Verify we're at the limit using check_relationship_limit
-    assert {:error, _} = RelationshipLib.check_relationship_limit(user1.id, :avoid, limit)
+    assert {:error, _reason} = RelationshipLib.check_relationship_limit(user1.id, :avoid, limit)
 
     # Try to add another avoid - should fail due to limit
-    assert {:error, _} = RelationshipLib.avoid_user(user1.id, user4.id)
+    assert {:error, _error} = RelationshipLib.avoid_user(user1.id, user4.id)
   end
 
   test "block_user respects limits" do
@@ -122,14 +122,14 @@ defmodule Teiserver.Account.RelationshipLibTest do
     user4 = AccountTestLib.user_fixture()
 
     # Add users up to the limit
-    {:ok, _} = RelationshipLib.block_user(user1.id, user2.id)
-    {:ok, _} = RelationshipLib.block_user(user1.id, user3.id)
+    {:ok, _relationship1} = RelationshipLib.block_user(user1.id, user2.id)
+    {:ok, _relationship2} = RelationshipLib.block_user(user1.id, user3.id)
 
     # Verify we're at the limit using check_relationship_limit
-    assert {:error, _} = RelationshipLib.check_relationship_limit(user1.id, :block, limit)
+    assert {:error, _reason} = RelationshipLib.check_relationship_limit(user1.id, :block, limit)
 
     # Try to add another block - should fail due to limit
-    assert {:error, _} = RelationshipLib.block_user(user1.id, user4.id)
+    assert {:error, _error} = RelationshipLib.block_user(user1.id, user4.id)
   end
 
   test "check_relationship_limit function works correctly" do
@@ -147,7 +147,7 @@ defmodule Teiserver.Account.RelationshipLibTest do
     assert :ok = RelationshipLib.check_relationship_limit(user1.id, :ignore, limit)
 
     # Test over limit (after adding some relationships)
-    {:ok, _} = RelationshipLib.ignore_user(user1.id, user2.id)
-    assert {:error, _} = RelationshipLib.check_relationship_limit(user1.id, :ignore, limit)
+    {:ok, _relationship} = RelationshipLib.ignore_user(user1.id, user2.id)
+    assert {:error, _reason} = RelationshipLib.check_relationship_limit(user1.id, :ignore, limit)
   end
 end

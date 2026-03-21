@@ -164,7 +164,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         %{"teiserver_user" => userid_str} ->
           cond do
             Integer.parse(userid_str) != :error ->
-              {user_id, _} = Integer.parse(userid_str)
+              {user_id, _rest} = Integer.parse(userid_str)
               Account.get_user(user_id)
 
             get_hash_id(userid_str) != nil ->
@@ -175,7 +175,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
               nil
           end
 
-        _ ->
+        _other ->
           nil
       end
 
@@ -377,7 +377,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
     case update_result do
-      {:error, _} ->
+      {:error, _changeset} ->
         ActionLib.maybe_create_discord_post(action)
         add_audit_log(conn, "Moderation:Action re_posted", %{action_id: action.id})
 
@@ -385,7 +385,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         |> put_flash(:info, "Action re-posted.")
         |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
 
-      {:ok, _} ->
+      {:ok, _action} ->
         conn
         |> put_flash(:info, "Action updated.")
         |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))

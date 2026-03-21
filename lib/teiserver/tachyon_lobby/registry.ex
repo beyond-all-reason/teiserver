@@ -2,7 +2,7 @@ defmodule Teiserver.TachyonLobby.Registry do
   @moduledoc false
   alias Teiserver.TachyonLobby.Lobby
 
-  def child_spec(_) do
+  def child_spec(_arg) do
     Supervisor.child_spec(Registry,
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}
@@ -24,8 +24,8 @@ defmodule Teiserver.TachyonLobby.Registry do
   @spec lookup(Lobby.id()) :: pid() | nil
   def lookup(lobby_id) do
     case Registry.lookup(__MODULE__, lobby_id) do
-      [{pid, _}] -> pid
-      _ -> nil
+      [{pid, _value}] -> pid
+      _other -> nil
     end
   end
 

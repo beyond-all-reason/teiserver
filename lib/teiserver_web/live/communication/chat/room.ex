@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
     {:noreply, socket}
   end
 
-  def handle_params(_, _url, socket) do
+  def handle_params(_params, _url, socket) do
     socket
     |> redirect(to: ~p"/chat/room/main")
 
@@ -164,7 +164,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
   end
 
   defp add_message_metadata(messages, last_poster_id) do
-    {messages, _} =
+    {messages, _last_poster_id} =
       messages
       |> Enum.map_reduce(last_poster_id, fn message, lp_id ->
         same_poster = message.user_id == lp_id

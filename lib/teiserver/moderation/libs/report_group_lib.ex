@@ -183,7 +183,7 @@ defmodule Teiserver.Moderation.ReportGroupLib do
         {:ok, rg} = create_report_group(%{target_id: target_id})
         rg
 
-      _ ->
+      _existing ->
         report_group
     end
   end

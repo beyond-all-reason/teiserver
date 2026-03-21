@@ -78,7 +78,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   @impl Handler
-  def handle_info({:DOWN, _, :process, _, reason}, state) do
+  def handle_info({:DOWN, _ref, :process, _pid, reason}, state) do
     Logger.warning(
       "Session for player went down because #{inspect(reason)}, terminating connection"
     )
@@ -357,7 +357,7 @@ defmodule Teiserver.Player.TachyonHandler do
     # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
     with {:ok, target} <- message_target_from_tachyon(msg["data"]["target"]) do
       case target do
-        {:player, _} ->
+        {:player, _user_id} ->
           msg =
             Messaging.new(
               msg["data"]["message"],
@@ -508,7 +508,7 @@ defmodule Teiserver.Player.TachyonHandler do
       {:error, "no request"} ->
         {:response, state}
 
-      _ ->
+      _other ->
         {:error_response, :invalid_user, state}
     end
   end
@@ -940,7 +940,7 @@ defmodule Teiserver.Player.TachyonHandler do
   defp setup_session(user) do
     case SessionSupervisor.start_session(user) do
       {:ok, session_pid} ->
-        {:ok, _} = Registry.register_and_kill_existing(user.id)
+        {:ok, _pid} = Registry.register_and_kill_existing(user.id)
         {:ok, session_pid, %{party: nil, invited_to_parties: []}}
 
       {:error, {:already_started, pid}} ->
@@ -954,7 +954,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
           {:ok, old_conn_pid, sess_state} ->
             force_disconnect(old_conn_pid)
-            {:ok, _} = Registry.register_and_kill_existing(user.id)
+            {:ok, _pid} = Registry.register_and_kill_existing(user.id)
             {:ok, pid, sess_state}
         end
     end
@@ -975,13 +975,13 @@ defmodule Teiserver.Player.TachyonHandler do
       "player" ->
         case Integer.parse(target["userId"]) do
           {user_id, ""} -> {:ok, {:player, user_id}}
-          _ -> {:error, :invalid_recipient}
+          _other -> {:error, :invalid_recipient}
         end
 
       "party" ->
         {:ok, :party}
 
-      _ ->
+      _other ->
         {:error, :invalid_recipient}
     end
   end
@@ -1003,7 +1003,7 @@ defmodule Teiserver.Player.TachyonHandler do
     case Integer.parse(marker) do
       {m, ""} -> {:marker, m}
       # invalid markers won't be found in the queue
-      _ -> {:marker, :invalid}
+      _other -> {:marker, :invalid}
     end
   end
 
@@ -1022,7 +1022,7 @@ defmodule Teiserver.Player.TachyonHandler do
          user when not is_nil(user) <- Account.get_user(user_id) do
       {:ok, user}
     else
-      _ -> {:error, :invalid_user}
+      _other -> {:error, :invalid_user}
     end
   end
 
@@ -1086,7 +1086,7 @@ defmodule Teiserver.Player.TachyonHandler do
         "Moderator" -> "moderator"
         "Caster" -> "tournament_caster"
         "Tournament winner" -> "tournament_winner"
-        _ -> nil
+        _other -> nil
       end
     end)
     |> Enum.reject(&is_nil/1)

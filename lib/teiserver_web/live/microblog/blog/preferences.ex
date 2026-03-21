@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Microblog.BlogLive.Preferences do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("toggle-help", _, %{assigns: assigns} = socket) do
+  def handle_event("toggle-help", _params, %{assigns: assigns} = socket) do
     {:noreply,
      socket
      |> assign(:show_help_box, not assigns.show_help_box)}

@@ -85,7 +85,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
          {:ok, new_token} <- OAuth.refresh_token(token, scopes: scopes) do
       conn |> put_status(200) |> render(:token, token: new_token)
     else
-      _ -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
+      _other -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
     end
   end
 
@@ -97,13 +97,13 @@ defmodule TeiserverWeb.OAuth.CodeController do
       {:error, nil} ->
         {:error, "missing client_id"}
 
-      {{user, _}, client_id} when client_id != nil and user != nil and user != "" ->
+      {{user, _pass}, client_id} when client_id != nil and user != nil and user != "" ->
         {:error, "cannot provide client_id through both basic auth header and query parameters"}
 
-      {{user, _}, nil} ->
+      {{user, _pass}, nil} ->
         {:ok, user}
 
-      {_, client_id} ->
+      {_basic, client_id} ->
         {:ok, client_id}
     end
   end
@@ -116,22 +116,22 @@ defmodule TeiserverWeb.OAuth.CodeController do
       {:error, {nil, nil}} ->
         {:error, "Invalid basic auth header"}
 
-      {{user, _}, {client_id, _}} when user != nil and client_id != nil ->
+      {{user, _pass}, {client_id, _secret}} when user != nil and client_id != nil ->
         {:error, "Must not provide client_id both in basic auth header and query parameter"}
 
-      {{_, pass}, {_, secret}} when pass != nil and secret != nil ->
+      {{_user, pass}, {_client_id, secret}} when pass != nil and secret != nil ->
         {:error, "Must not provide client_secret both in basic auth header and query parameter"}
 
-      {{user, pass}, _} ->
+      {{user, pass}, _post_params} ->
         {:ok, user, pass}
 
-      {_, {nil, _}} ->
+      {_basic, {nil, _secret}} ->
         {:error, "missing client_id"}
 
-      {_, {_, nil}} ->
+      {_basic, {_client_id, nil}} ->
         {:error, "missing client_secret"}
 
-      {_, {client_id, client_secret}} ->
+      {_basic, {client_id, client_secret}} ->
         {:ok, client_id, client_secret}
     end
   end
@@ -153,7 +153,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
         |> put_status(400)
         |> render(:error, error: "invalid_scope", error_description: desc)
 
-      _ ->
+      _other ->
         conn |> put_status(400) |> render(:error, error_description: "invalid request")
     end
   end
@@ -191,7 +191,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
   defp get_app_by_uid(uid) do
     case OAuth.get_application_by_uid(uid) do
       app when not is_nil(app) -> {:ok, app}
-      _ -> {:error, "no application found for uid #{inspect(uid)}"}
+      _nil -> {:error, "no application found for uid #{inspect(uid)}"}
     end
   end
 
@@ -204,11 +204,11 @@ defmodule TeiserverWeb.OAuth.CodeController do
       :expired ->
         "authorization code has expired"
 
-      _ ->
+      _other ->
         try do
           to_string(err)
         rescue
-          _ -> inspect(err)
+          _exception -> inspect(err)
         end
     end
   end

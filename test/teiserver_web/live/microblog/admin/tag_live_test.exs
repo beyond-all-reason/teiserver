@@ -14,18 +14,18 @@ defmodule TeiserverWeb.TagLiveTest do
   @update_attrs %{colour: "#0000AA", icon: "some updated icon", name: "some updated name"}
   @invalid_attrs %{colour: nil, icon: nil, name: nil}
 
-  defp auth_setup(_) do
+  defp auth_setup(_context) do
     TeiserverTestLib.server_permissions()
     |> GeneralTestLib.conn_setup()
     |> TeiserverTestLib.conn_setup()
   end
 
-  defp unauth_setup(_) do
+  defp unauth_setup(_context) do
     GeneralTestLib.conn_setup()
     |> TeiserverTestLib.conn_setup()
   end
 
-  defp create_tag(_) do
+  defp create_tag(_context) do
     tag = tag_fixture()
     %{tag: tag}
   end

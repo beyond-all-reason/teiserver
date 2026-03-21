@@ -24,5 +24,5 @@ defmodule Teiserver.Account.SmurfKey do
   end
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(_, conn, _), do: allow?(conn, "Moderator")
+  def authorize(_action, conn, _data), do: allow?(conn, "Moderator")
 end

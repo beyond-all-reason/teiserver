@@ -46,7 +46,7 @@ defmodule Teiserver.Account.VerifiedReport do
 
     total =
       data
-      |> Enum.reduce(0, fn {_, count}, acc ->
+      |> Enum.reduce(0, fn {_status, count}, acc ->
         acc + count
       end)
 

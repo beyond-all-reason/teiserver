@@ -117,7 +117,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     new_state =
       parts
       |> Enum.reduce(state, fn part, acc_state ->
-        {_, new_state} = handle_info({:direct_message, from_id, part}, acc_state)
+        {_reply, new_state} = handle_info({:direct_message, from_id, part}, acc_state)
         new_state
       end)
 
@@ -141,7 +141,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
             "I'm not currently awaiting feedback for a player"
           )
 
-        _ ->
+        _result ->
           :ok
       end
     end

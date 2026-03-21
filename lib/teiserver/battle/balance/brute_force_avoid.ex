@@ -104,7 +104,7 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
           {count_broken_avoids(first_team, avoids) * @avoid_importance,
            count_broken_parties(first_team, parties) * @party_importance}
 
-        _ ->
+        _nonzero ->
           {0, 0}
       end
 

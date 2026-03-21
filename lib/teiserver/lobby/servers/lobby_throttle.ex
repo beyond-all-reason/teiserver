@@ -99,7 +99,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
   end
 
   # Doesn't do anything at this stage
-  def handle_info({:lobby_update, _, _lobby_id, _data}, state) do
+  def handle_info({:lobby_update, _event, _lobby_id, _data}, state) do
     {:noreply, state}
   end
 

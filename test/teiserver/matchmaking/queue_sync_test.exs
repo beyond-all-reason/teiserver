@@ -9,7 +9,7 @@ defmodule Teiserver.Matchmaking.QueueSyncTest do
   end
 
   test "list default queues" do
-    queues = Matchmaking.list_queues() |> Enum.map(fn {id, _} -> id end) |> MapSet.new()
+    queues = Matchmaking.list_queues() |> Enum.map(fn {id, _pid} -> id end) |> MapSet.new()
     assert queues == MapSet.new(["1v1", "2v2"])
   end
 end

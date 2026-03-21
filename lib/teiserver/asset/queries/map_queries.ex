@@ -23,7 +23,7 @@ defmodule Teiserver.Asset.MapQueries do
 
   @spec delete_all_maps() :: non_neg_integer()
   def delete_all_maps do
-    {n, _} = base_query() |> Repo.delete_all()
+    {n, _deleted} = base_query() |> Repo.delete_all()
     n
   end
 

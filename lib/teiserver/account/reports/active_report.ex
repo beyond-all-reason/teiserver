@@ -38,10 +38,10 @@ defmodule Teiserver.Account.ActiveReport do
         end)
       end)
       |> Enum.group_by(
-        fn {_, v} ->
+        fn {_player_id, v} ->
           get_grouping(v)
         end,
-        fn {k, _} ->
+        fn {k, _minutes} ->
           k
         end
       )
@@ -56,8 +56,8 @@ defmodule Teiserver.Account.ActiveReport do
       |> Enum.map(fn key ->
         v =
           player_counts
-          |> Enum.filter(fn {k, _} -> k >= key end)
-          |> Enum.map(fn {_, v} -> v end)
+          |> Enum.filter(fn {k, _count} -> k >= key end)
+          |> Enum.map(fn {_key, v} -> v end)
           |> Enum.sum()
 
         {key, v}

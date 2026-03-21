@@ -79,8 +79,8 @@ defmodule Teiserver.Asset do
       |> Repo.delete_all()
 
     case result do
-      {1, _} -> :ok
-      {0, _} -> :error
+      {1, _deleted} -> :ok
+      {0, _deleted} -> :error
     end
   end
 
@@ -105,8 +105,8 @@ defmodule Teiserver.Asset do
       end)
 
     case res do
-      {:ok, _} -> Matchmaking.restart_queues()
-      _ -> nil
+      {:ok, _engine} -> Matchmaking.restart_queues()
+      _other -> nil
     end
 
     res
@@ -138,8 +138,8 @@ defmodule Teiserver.Asset do
       |> Repo.delete_all()
 
     case result do
-      {1, _} -> :ok
-      {0, _} -> :error
+      {1, _deleted} -> :ok
+      {0, _deleted} -> :error
     end
   end
 
@@ -164,8 +164,8 @@ defmodule Teiserver.Asset do
       end)
 
     case res do
-      {:ok, _} -> Matchmaking.restart_queues()
-      _ -> nil
+      {:ok, _game} -> Matchmaking.restart_queues()
+      _other -> nil
     end
 
     res

@@ -284,7 +284,7 @@ defmodule Teiserver.Autohost.AutohostTest do
         "type" => "event"
       }
 
-      assert {:error, _} = TH.parse_update_event(msg_id, msg["data"])
+      assert {:error, _reason} = TH.parse_update_event(msg_id, msg["data"])
     end
   end
 end

@@ -18,7 +18,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
   # Teiserver.Logging.AggregateViewLogsTask.run(Timex.today() |> Timex.shift(days: -1))
 
   @impl Oban.Worker
-  def perform(_) do
+  def perform(_job) do
     last_date = Logging.get_last_aggregate_date()
 
     date =

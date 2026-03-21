@@ -62,7 +62,7 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
 
       app ->
         case OAuth.get_redirect_uri(app, redirect_uri) do
-          {:error, _} -> bad_request(conn, "invalid redirection url")
+          {:error, _reason} -> bad_request(conn, "invalid redirection url")
           {:ok, redir_url} -> do_generate_code(conn, app, redir_url, params)
         end
     end
@@ -89,7 +89,7 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
         }
 
         case OAuth.create_code(conn.assigns.current_user, code_params) do
-          {:error, _} ->
+          {:error, _reason} ->
             error_redirect(conn, redir_url, "server_error", "something went wrong")
 
           {:ok, code} ->

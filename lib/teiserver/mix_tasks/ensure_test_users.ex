@@ -93,8 +93,8 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
   end
 
   defp parse_args(args) do
-    with {parsed, _, []} <- OptionParser.parse(args, strict: [host: :string]),
-         [raw_count, tok | _] <- Enum.reverse(args),
+    with {parsed, _remaining, []} <- OptionParser.parse(args, strict: [host: :string]),
+         [raw_count, tok | _rest] <- Enum.reverse(args),
          {n, ""} <- Integer.parse(raw_count) do
       res = %{
         count: n,
@@ -104,8 +104,8 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
 
       {:ok, res}
     else
-      {_, _, errs} -> {:error, errs}
-      _ -> {:error, "Cannot parse arguments"}
+      {_parsed, _remaining, errs} -> {:error, errs}
+      _other -> {:error, "Cannot parse arguments"}
     end
   end
 end

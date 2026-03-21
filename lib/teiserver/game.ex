@@ -418,7 +418,7 @@ defmodule Teiserver.Game do
 
           rating_type.id
 
-        [%{id: id} | _] ->
+        [%{id: id} | _rest] ->
           id
       end
     end)

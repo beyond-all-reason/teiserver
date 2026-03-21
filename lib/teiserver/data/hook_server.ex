@@ -79,7 +79,7 @@ defmodule Teiserver.HookServer do
       :update_report ->
         :ok
 
-      _ ->
+      _unhandled_event ->
         throw("No HookServer account_hooks handler for event '#{event}'")
     end
 
@@ -107,7 +107,7 @@ defmodule Teiserver.HookServer do
 
         :ok
 
-      _ ->
+      _unhandled_app_event ->
         throw("No HookServer application handler for event '#{app_event}'")
     end
 
@@ -116,7 +116,7 @@ defmodule Teiserver.HookServer do
 
   @impl GenServer
   @spec init(any) :: {:ok, %{}}
-  def init(_) do
+  def init(_opts) do
     if Application.get_env(:teiserver, Teiserver)[:enable_hooks] do
       :ok = PubSub.subscribe(Teiserver.PubSub, "account_hooks")
       :ok = PubSub.subscribe(Teiserver.PubSub, "global_moderation")

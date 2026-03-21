@@ -17,7 +17,7 @@ defmodule Teiserver.Telemetry.SimpleClientEventTest do
     assert Telemetry.list_simple_client_events() |> Enum.count() == 0
 
     # Log the event
-    {result, _} = Telemetry.log_simple_client_event(user.id, "client.simple_user_event-#{r}")
+    {result, _event} = Telemetry.log_simple_client_event(user.id, "client.simple_user_event-#{r}")
 
     assert result == :ok
 

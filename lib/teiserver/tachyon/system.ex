@@ -20,7 +20,7 @@ defmodule Teiserver.Tachyon.System do
   end
 
   @impl Supervisor
-  def init(_) do
+  def init(_arg) do
     children = [
       Schema.cache_spec(),
       Autohost.System,

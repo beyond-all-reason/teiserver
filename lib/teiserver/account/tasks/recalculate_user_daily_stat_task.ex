@@ -21,7 +21,7 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     start_date =
       Timex.now()
       |> Timex.shift(hours: -26)
@@ -51,14 +51,14 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
         |> Enum.map(&convert_to_user_log/1)
         |> List.flatten()
         |> Enum.group_by(
-          fn {userid, _} ->
+          fn {userid, _user_data} ->
             userid
           end,
-          fn {_, user_data} ->
+          fn {_userid, user_data} ->
             user_data
           end
         )
-        |> Enum.filter(fn {userid, _} ->
+        |> Enum.filter(fn {userid, _data_rows} ->
           if Enum.member?(user_ids, userid) do
             Account.get_username(userid) != nil
           end

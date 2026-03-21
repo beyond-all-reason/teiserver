@@ -63,7 +63,7 @@ defmodule Mix.Tasks.Teiserver.FakePlaytime do
       0 -> :just_installed
       1 -> :beginner
       2 -> :average
-      _ -> :pro
+      _other -> :pro
     end
   end
 end

@@ -50,7 +50,7 @@ defmodule TeiserverWeb.Admin.AssetController do
     end
   end
 
-  def create_engine(conn, _) do
+  def create_engine(conn, _params) do
     conn
     |> put_status(:bad_request)
     |> assign(:page_title, "BAR - new engine version")
@@ -86,7 +86,7 @@ defmodule TeiserverWeb.Admin.AssetController do
     end
   end
 
-  def new_game(conn, _) do
+  def new_game(conn, _params) do
     changeset = Asset.change_game()
 
     conn
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.Admin.AssetController do
     end
   end
 
-  def create_game(conn, _) do
+  def create_game(conn, _params) do
     conn
     |> put_status(:bad_request)
     |> assign(:page_title, "BAR - new game version")

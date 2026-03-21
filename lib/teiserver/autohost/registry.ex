@@ -42,7 +42,7 @@ defmodule Teiserver.Autohost.Registry do
   def lookup(autohost_id) do
     case Horde.Registry.lookup(__MODULE__, via_tuple(autohost_id)) do
       [x] -> x
-      _ -> nil
+      _other -> nil
     end
   end
 
@@ -58,7 +58,7 @@ defmodule Teiserver.Autohost.Registry do
     Horde.Registry.select(__MODULE__, [{{:_, :_, :"$1"}, [], [:"$1"]}])
   end
 
-  def child_spec(_) do
+  def child_spec(_opts) do
     Supervisor.child_spec(Horde.Registry,
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}

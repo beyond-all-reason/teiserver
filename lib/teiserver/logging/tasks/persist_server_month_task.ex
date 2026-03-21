@@ -9,7 +9,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     log =
       case Logging.get_last_server_month_log() do
         nil ->
@@ -64,7 +64,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
             |> Enum.zip(user_activity_logs)
             |> ServerDayLogLib.aggregate_day_logs()
 
-          {:ok, _} =
+          {:ok, _log} =
             Logging.create_server_month_log(%{
               year: log.date.year,
               month: log.date.month,
@@ -73,7 +73,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
             })
         end
 
-      _ ->
+      _empty ->
         nil
     end
   end
@@ -106,7 +106,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
         |> Enum.zip(user_activity_logs)
         |> ServerDayLogLib.aggregate_day_logs()
 
-      {:ok, _} =
+      {:ok, _log} =
         Logging.create_server_month_log(%{
           year: year,
           month: month,

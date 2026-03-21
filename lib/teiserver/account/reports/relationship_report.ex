@@ -43,7 +43,7 @@ defmodule Teiserver.Account.RelationshipReport do
         "follow" -> "AND rels.state = 'follow'"
         "avoid" -> "AND rels.state IN ('block', 'avoid')"
         "block" -> "AND rels.state = 'avoid'"
-        _ -> raise "No handler for state_type of `#{state_type}`"
+        _other -> raise "No handler for state_type of `#{state_type}`"
       end
 
     query = """

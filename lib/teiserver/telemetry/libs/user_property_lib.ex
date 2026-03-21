@@ -48,7 +48,7 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
 
         result
 
-      _ ->
+      _error ->
         result
     end
   end

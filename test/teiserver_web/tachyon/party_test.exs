@@ -512,7 +512,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
 
   # convenient function to have a player invited to a party, it assumes
   # everything works fine.
-  defp invite_and_accept([client | _] = in_party, client_to_invite, user_id) do
+  defp invite_and_accept([client | _rest] = in_party, client_to_invite, user_id) do
     assert %{"status" => "success"} = Tachyon.invite_to_party!(client, user_id)
 
     assert %{"commandId" => "party/invited", "data" => %{"party" => %{"id" => party_id}}} =

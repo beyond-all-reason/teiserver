@@ -31,7 +31,7 @@ defmodule Teiserver.Account.TimeCompareReport do
 
           {start_date, end_date}
 
-        _ ->
+        _error ->
           {nil, nil}
       end
 
@@ -45,7 +45,7 @@ defmodule Teiserver.Account.TimeCompareReport do
     })
   end
 
-  defp get_data(_, {nil, _}) do
+  defp get_data(_params, {nil, _end_date}) do
     %{}
   end
 
@@ -71,7 +71,7 @@ defmodule Teiserver.Account.TimeCompareReport do
 
     keys =
       logs
-      |> Enum.map(fn {ts, _} -> TimexHelper.date_to_str(ts, format: :hms) end)
+      |> Enum.map(fn {ts, _data} -> TimexHelper.date_to_str(ts, format: :hms) end)
 
     usernames =
       params
@@ -85,7 +85,7 @@ defmodule Teiserver.Account.TimeCompareReport do
 
     line_names =
       lines
-      |> Enum.map(fn [name | _] -> name end)
+      |> Enum.map(fn [name | _rest] -> name end)
 
     stats = get_stats(params, logs)
 
@@ -150,7 +150,7 @@ defmodule Teiserver.Account.TimeCompareReport do
     logs =
       if params["overlap"] == "true" or params["skip_nil"] == "true" do
         logs
-        |> Enum.filter(fn {_, data} ->
+        |> Enum.filter(fn {_timestamp, data} ->
           data
           |> Map.values()
           |> Enum.reject(&(&1 == @offline))
@@ -163,7 +163,7 @@ defmodule Teiserver.Account.TimeCompareReport do
     # Require overlaps?
     if params["overlap"] == "true" do
       logs
-      |> Enum.filter(fn {_, data} ->
+      |> Enum.filter(fn {_timestamp, data} ->
         d =
           data
           |> Map.values()
@@ -192,14 +192,14 @@ defmodule Teiserver.Account.TimeCompareReport do
   defp stats_for_combo({u1, u2}, logs) do
     pairs =
       logs
-      |> Enum.map(fn {_, data} -> {round(data[u1]), round(data[u2])} end)
+      |> Enum.map(fn {_timestamp, data} -> {round(data[u1]), round(data[u2])} end)
 
     online_at_same_time =
       pairs
       |> Enum.count(fn
-        {@offline, _} -> false
-        {_, @offline} -> false
-        _ -> true
+        {@offline, _status2} -> false
+        {_status1, @offline} -> false
+        _other -> true
       end)
 
     lobby_spec_at_same_time =
@@ -218,14 +218,14 @@ defmodule Teiserver.Account.TimeCompareReport do
   @spec build_line(list, integer()) :: list()
   defp build_line(logs, userid) do
     logs
-    |> Enum.map(fn {_, statuses} -> statuses[userid] end)
+    |> Enum.map(fn {_timestamp, statuses} -> statuses[userid] end)
   end
 
   # First argument is the size of each combination
   # Second is the list of items to make a combination from
   @spec make_combinations(integer(), list) :: [list]
-  defp make_combinations(0, _), do: [[]]
-  defp make_combinations(_, []), do: []
+  defp make_combinations(0, _list), do: [[]]
+  defp make_combinations(_n, []), do: []
 
   defp make_combinations(n, [x | xs]) do
     if n < 0 do

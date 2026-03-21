@@ -10,7 +10,7 @@ defmodule Teiserver.Matchmaking.System do
   end
 
   @impl Supervisor
-  def init(_) do
+  def init(_init_arg) do
     children = [
       Teiserver.Matchmaking.QueueRegistry,
       Teiserver.Matchmaking.QueueSupervisor

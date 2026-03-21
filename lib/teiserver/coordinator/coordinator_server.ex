@@ -122,7 +122,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     new_state =
       parts
       |> Enum.reduce(state, fn part, acc_state ->
-        {_, new_state} = handle_info({:direct_message, from_id, part}, acc_state)
+        {_reply, new_state} = handle_info({:direct_message, from_id, part}, acc_state)
         new_state
       end)
 
@@ -148,7 +148,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         Coordinator.cast_consul(lobby_id, {:hello_message, userid})
         Coordinator.send_to_user(userid, "Thank you, you've been marked as present.")
 
-      _ ->
+      _other ->
         :ok
     end
 
@@ -171,7 +171,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         Client.clear_awaiting_warn_ack(userid)
         CacheUser.send_direct_message(state.userid, userid, "Thank you")
 
-      _ ->
+      _other_message ->
         user = CacheUser.get_user_by_id(userid)
         Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
 

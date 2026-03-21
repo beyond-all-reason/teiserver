@@ -142,8 +142,8 @@ defmodule TeiserverWeb.Battle.MatchController do
 
     first_log =
       case Enum.reverse(logs) do
-        [l | _] -> l
-        _ -> nil
+        [l | _rest] -> l
+        _empty -> nil
       end
 
     stats = %{

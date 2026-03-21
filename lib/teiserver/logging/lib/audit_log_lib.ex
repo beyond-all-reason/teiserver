@@ -39,8 +39,8 @@ defmodule Teiserver.Logging.AuditLogLib do
   end
 
   @spec _search(Ecto.Query.t(), any, any) :: Ecto.Query.t()
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  def _search(query, _key, ""), do: query
+  def _search(query, _key, nil), do: query
 
   def _search(query, :id, id) do
     from logs in query,

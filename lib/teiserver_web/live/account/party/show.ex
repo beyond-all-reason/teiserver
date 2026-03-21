@@ -54,11 +54,11 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   end
 
   @impl Phoenix.LiveView
-  def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
+  def handle_params(_params, _url, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket |> redirect(to: ~p"/")}
   end
 
-  def handle_params(%{"id" => party_id}, _, socket) do
+  def handle_params(%{"id" => party_id}, _url, socket) do
     party = Account.get_party(party_id)
 
     if party do
@@ -88,11 +88,14 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   end
 
   @impl Phoenix.LiveView
-  def handle_info(%{channel: "teiserver_party:" <> _, event: :closed}, socket) do
+  def handle_info(%{channel: "teiserver_party:" <> _party_id, event: :closed}, socket) do
     {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
   end
 
-  def handle_info(%{channel: "teiserver_party:" <> _, event: :updated_values} = data, socket) do
+  def handle_info(
+        %{channel: "teiserver_party:" <> _party_id, event: :updated_values} = data,
+        socket
+      ) do
     new_party =
       socket.assigns.party
       |> Map.merge(data.new_values)
@@ -103,7 +106,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
      |> build_user_lookup()}
   end
 
-  def handle_info(%{channel: "teiserver_liveview_client:" <> _} = data, socket) do
+  def handle_info(%{channel: "teiserver_liveview_client:" <> _user_id} = data, socket) do
     socket =
       case data.event do
         :joined_lobby ->
@@ -120,30 +123,33 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
           socket
           |> assign(:lobby_user_ids, [])
 
-        _ ->
+        _other ->
           socket
       end
 
     {:noreply, socket}
   end
 
-  def handle_info(%{channel: "teiserver_party:" <> _}, socket) do
+  def handle_info(%{channel: "teiserver_party:" <> _rest}, socket) do
     {:noreply, socket}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _user_id, event: :connected}, socket) do
     {:noreply,
      socket
      |> assign(:client, Account.get_client_by_id(socket.assigns.current_user.id))}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _user_id, event: :disconnected},
+        socket
+      ) do
     {:noreply,
      socket
      |> assign(:client, nil)}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _rest}, socket) do
     {:noreply, socket}
   end
 
@@ -204,7 +210,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
   # We kick the user to ensure any connected clients will also update, leaving is normally done
   # by the connected tachyon client
-  def handle_event("leave", _, socket) do
+  def handle_event("leave", _params, socket) do
     Account.move_client_to_party(socket.assigns.current_user.id, nil)
     Account.leave_party(socket.assigns.party_id, socket.assigns.current_user.id)
     {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
@@ -252,5 +258,5 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     moderator or leader_id == user_id
   end
 
-  defp leader?(_), do: false
+  defp leader?(_socket), do: false
 end

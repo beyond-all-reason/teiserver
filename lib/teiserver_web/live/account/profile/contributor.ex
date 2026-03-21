@@ -63,14 +63,14 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
      |> assign(:temp_country_code, country_code)}
   end
 
-  def handle_event("revert-country_code", _, %{assigns: assigns} = socket) do
+  def handle_event("revert-country_code", _params, %{assigns: assigns} = socket) do
     {:noreply,
      socket
      |> assign(:temp_country_code, assigns.stats["bar_plus.flag"])
      |> assign(:error_message, nil)}
   end
 
-  def handle_event("clear-country_code", _, %{assigns: assigns} = socket) do
+  def handle_event("clear-country_code", _params, %{assigns: assigns} = socket) do
     Account.update_user_stat(assigns.user.id, %{
       "bar_plus.flag" => nil
     })
@@ -81,7 +81,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
      |> assign(:error_message, nil)}
   end
 
-  def handle_event("save-country_code", _, %{assigns: assigns} = socket) do
+  def handle_event("save-country_code", _params, %{assigns: assigns} = socket) do
     if String.match?(assigns.temp_country_code, ~r/^[a-zA-Z0-9-]{2,16}$/) do
       Account.update_user_stat(assigns.user.id, %{
         "bar_plus.flag" => assigns.temp_country_code

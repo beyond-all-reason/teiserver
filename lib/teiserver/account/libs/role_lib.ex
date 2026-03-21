@@ -300,7 +300,7 @@ defmodule Teiserver.Account.RoleLib do
     global_roles() ++ property_roles()
   end
 
-  def allowed_role_management(_) do
+  def allowed_role_management(_role) do
     []
   end
 

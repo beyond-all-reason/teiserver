@@ -107,7 +107,7 @@ defmodule TeiserverWeb.Moderation.BanController do
     user =
       cond do
         Integer.parse(user_str) != :error ->
-          {user_id, _} = Integer.parse(user_str)
+          {user_id, _rest} = Integer.parse(user_str)
           Account.get_user(user_id)
 
         get_hash_id(user_str) != nil ->

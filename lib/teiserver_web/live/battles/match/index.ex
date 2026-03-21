@@ -86,7 +86,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Index do
           |> assign(:total_pages, max(1, div(total_count - 1, limit) + 1))
           |> assign(:current_count, Enum.count(matches))
 
-        _ ->
+        _other ->
           # Fallback if query fails
           socket
           |> assign(:matches, [])

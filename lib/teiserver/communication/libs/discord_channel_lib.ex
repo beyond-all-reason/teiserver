@@ -270,7 +270,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
               Account.update_cache_user(user.id, %{discord_dm_channel_id: channel_id})
               new_discord_message(channel_id, message)
 
-            _ ->
+            _error ->
               {:error, "Unable to created DM channel"}
           end
 

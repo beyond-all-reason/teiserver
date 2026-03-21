@@ -54,7 +54,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
         [match] ->
           match
 
-        _ ->
+        _no_match ->
           nil
       end
 

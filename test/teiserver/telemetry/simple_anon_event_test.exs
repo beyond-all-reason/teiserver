@@ -17,7 +17,7 @@ defmodule Teiserver.Telemetry.SimpleAnonEventTest do
     assert Telemetry.list_simple_anon_events() |> Enum.count() == 0
 
     # Log the event
-    {result, _} = Telemetry.log_simple_anon_event(hash, "anon.simple_user_event-#{r}")
+    {result, _event} = Telemetry.log_simple_anon_event(hash, "anon.simple_user_event-#{r}")
 
     assert result == :ok
 

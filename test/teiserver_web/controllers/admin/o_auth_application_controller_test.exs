@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
 
     test "with some applications", %{conn: conn, user: user} do
       Enum.each(1..5, fn i ->
-        {:ok, _} =
+        {:ok, _app} =
           OAuth.create_application(%{
             name: "generic name #{i}",
             uid: "generic_name_#{i}",

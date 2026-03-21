@@ -9,7 +9,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     log =
       case Logging.get_last_server_quarter_log() do
         nil ->
@@ -66,7 +66,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
             |> Enum.zip(user_activity_logs)
             |> ServerDayLogLib.aggregate_day_logs()
 
-          {:ok, _} =
+          {:ok, _log} =
             Logging.create_server_quarter_log(%{
               year: log.date.year,
               quarter: log_quarter,
@@ -75,7 +75,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
             })
         end
 
-      _ ->
+      _empty ->
         nil
     end
   end
@@ -111,7 +111,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
         |> Enum.zip(user_activity_logs)
         |> ServerDayLogLib.aggregate_day_logs()
 
-      {:ok, _} =
+      {:ok, _log} =
         Logging.create_server_quarter_log(%{
           year: new_date.year,
           quarter: new_quarter,

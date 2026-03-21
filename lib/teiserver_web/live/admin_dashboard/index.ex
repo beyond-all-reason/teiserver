@@ -139,8 +139,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
         throttle_pid =
           case Horde.Registry.lookup(Teiserver.ThrottleRegistry, "LobbyThrottle:#{lobby_id}") do
-            [{pid, _}] -> pid
-            _ -> nil
+            [{pid, _value}] -> pid
+            _other -> nil
           end
 
         {Battle.get_lobby(lobby_id), consul_pid, balancer_pid, throttle_pid}
@@ -155,8 +155,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   defp update_server_pids(socket) do
     lobby_id_server_pid =
       case Horde.Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
-        [{pid, _}] -> pid
-        _ -> nil
+        [{pid, _value}] -> pid
+        _other -> nil
       end
 
     server_pids = [

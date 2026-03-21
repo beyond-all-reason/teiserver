@@ -17,7 +17,7 @@ defmodule Teiserver.Telemetry.ComplexServerEventTest do
     assert Telemetry.list_complex_server_events() |> Enum.count() == 0
 
     # Log the event
-    {result, _} =
+    {result, _event} =
       Telemetry.log_complex_server_event(user.id, "server.complex_user_event-#{r}", %{
         "key1" => "value1",
         "key2" => "value2"

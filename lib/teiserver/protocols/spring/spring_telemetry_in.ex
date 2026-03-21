@@ -17,7 +17,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("upload_infolog", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+) (\S+) (\S+)/u, data) do
-      [_, log_type, user_hash, metadata64, contents64] ->
+      [_full_match, log_type, user_hash, metadata64, contents64] ->
         case Spring.decode_value(metadata64) do
           {:ok, metadata} ->
             case Base.url_decode64(contents64) do
@@ -66,11 +66,11 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
                       )
                     end
 
-                  {:error, _} ->
+                  {:error, _reason} ->
                     reply(:spring, :no, "upload_infolog - infolog gzip error", msg_id, state)
                 end
 
-              _ ->
+              _error ->
                 reply(
                   :spring,
                   :no,
@@ -129,7 +129,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   defp do_simple_client_event(data, state) do
     if String.length(data) < 1024 do
       case Regex.run(~r/(\S+) (\S+)/u, data) do
-        [_, event_name, hash] ->
+        [_full_match, event_name, hash] ->
           if state.userid do
             Telemetry.log_simple_client_event(state.userid, event_name)
           else
@@ -149,7 +149,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   defp do_complex_client_event(data, state) do
     if String.length(data) < 1024 do
       case Regex.run(~r/(\S+) (\S+) (\S+)/u, data) do
-        [_, event_name, value64, hash] ->
+        [_full_match, event_name, value64, hash] ->
           case Spring.decode_value(value64) do
             {:ok, value} ->
               if state.userid do
@@ -177,7 +177,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   defp do_live_client_event(data, state) do
     if String.length(data) < 1024 do
       case Regex.run(~r/(\S+) (\S+)/u, data) do
-        [_, _event_name, value64] ->
+        [_full_match, _event_name, value64] ->
           case Spring.decode_value(value64) do
             {:ok, _value} ->
               if state.userid do
@@ -205,7 +205,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   defp client_property(data, state) do
     if String.length(data) < 1024 do
       case Regex.run(~r/(\S+) (\S+) (\S+)/u, data) do
-        [_, event, value64, hash] ->
+        [_full_match, event, value64, hash] ->
           value = Base.url_decode64(value64)
 
           if value != :error do

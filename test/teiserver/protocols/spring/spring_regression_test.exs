@@ -41,7 +41,7 @@ defmodule Teiserver.SpringRegressionTest do
       _tags,
       battle_status,
       _battle_opened
-      | _
+      | _rest
     ] = reply
 
     assert opened =~ "BATTLEOPENED "

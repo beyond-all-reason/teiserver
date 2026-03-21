@@ -5,7 +5,7 @@ defprotocol GroupLength do
 end
 
 defimpl GroupLength, for: Integer do
-  def length(_), do: 1
+  def length(_integer), do: 1
 end
 
 defimpl GroupLength, for: List do
@@ -58,7 +58,7 @@ defmodule Teiserver.Helpers.Combi do
           {{m, f, a}, true} -> {apply(m, f, a), false}
           false -> {:halt, nil}
         end,
-        fn _ -> nil end
+        fn _acc -> nil end
       )
 
   # Returns a list of possible combinations of a single team using indexes starting at zero

@@ -62,7 +62,7 @@ defmodule Teiserver.Protocols.Spring do
 
     [
       # Undefined
-      _,
+      _reserved,
       ready,
       # team number
       t1,
@@ -219,11 +219,11 @@ defmodule Teiserver.Protocols.Spring do
           {:ok, contents} ->
             {:ok, contents}
 
-          {:error, _} ->
+          {:error, _reason} ->
             {:error, "unzip decode error"}
         end
 
-      _ ->
+      _error ->
         {:error, "base64 decode error"}
     end
   end
@@ -234,7 +234,7 @@ defmodule Teiserver.Protocols.Spring do
       result = :zlib.uncompress(data)
       {:ok, result}
     rescue
-      _ ->
+      _error ->
         {:error, :unzip_decompress}
     end
   end
@@ -251,7 +251,7 @@ defmodule Teiserver.Protocols.Spring do
             {:error, "Json decode error at position #{position}"}
         end
 
-      _ ->
+      _error ->
         {:error, "Base64 decode error"}
     end
   end

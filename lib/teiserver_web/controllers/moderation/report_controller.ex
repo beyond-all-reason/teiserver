@@ -125,7 +125,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
         fn r ->
           r.action
         end,
-        fn _ ->
+        fn _report ->
           1
         end
       )

@@ -60,6 +60,6 @@ defmodule Teiserver.Logging.AggregateViewLog do
   end
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
-  def authorize(_, conn, :delete), do: allow?(conn, "logging.aggregate.delete")
-  def authorize(_, conn, _), do: allow?(conn, "logging.aggregate")
+  def authorize(_data, conn, :delete), do: allow?(conn, "logging.aggregate.delete")
+  def authorize(_data, conn, _action), do: allow?(conn, "logging.aggregate")
 end

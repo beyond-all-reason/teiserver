@@ -12,7 +12,7 @@ defmodule Teiserver.TachyonLobby.System do
   end
 
   @impl Supervisor
-  def init(_) do
+  def init(_arg) do
     children = [
       TachyonLobby.Registry,
       TachyonLobby.Supervisor,

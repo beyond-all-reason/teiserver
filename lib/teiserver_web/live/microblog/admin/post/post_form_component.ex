@@ -398,13 +398,13 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
      |> assign(:selected_tags, new_selected_tags)}
   end
 
-  def handle_event("show-upload-form", _, socket) do
+  def handle_event("show-upload-form", _params, socket) do
     socket
     |> assign(:show_upload_form, true)
     |> noreply()
   end
 
-  def handle_event("hide-upload-form", _, socket) do
+  def handle_event("hide-upload-form", _params, socket) do
     socket
     |> assign(:show_upload_form, false)
     |> noreply()
@@ -501,7 +501,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
       {:ok, %{id: message_id}} ->
         Microblog.update_post(post, %{"discord_post_id" => message_id}, :discord_post_id)
 
-      _ ->
+      _other ->
         :ok
     end
   end

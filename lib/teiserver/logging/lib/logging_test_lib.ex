@@ -66,7 +66,7 @@ defmodule Teiserver.Logging.LoggingTestLib do
       users
       |> Enum.map(fn u ->
         1..6
-        |> Enum.map(fn _ ->
+        |> Enum.map(fn _index ->
           new_page_view_log(u)
         end)
       end)
@@ -75,7 +75,7 @@ defmodule Teiserver.Logging.LoggingTestLib do
       users
       |> Enum.map(fn u ->
         1..6
-        |> Enum.map(fn _ ->
+        |> Enum.map(fn _index ->
           fake_audit_log(u)
         end)
       end)
