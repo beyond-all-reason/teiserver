@@ -56,7 +56,7 @@ defmodule Teiserver.Autohost.Session do
   def callback_mode, do: :handle_event_function
 
   @type start_response :: %{ips: [String.t()], port: integer()}
-  # credo:disable-for-next-line Credo.Check.Design.TagTODO
+
   # TODO: there should be some kind of retry here
   @spec start_battle(Bot.id(), TachyonBattle.id(), pid(), Autohost.start_script()) ::
           {:ok, start_response()} | {:error, term()}
@@ -329,7 +329,6 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data}
   end
 
-  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: will need to "resurrect" a battle if we ever get into this situation.
   # Because the autohost is the ultimate source of truth when it comes to running
   # battle, so if it tells teiserver that something is running, we need to

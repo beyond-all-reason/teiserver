@@ -90,13 +90,13 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
   def do_handle("decline_invite_to_party", data, msg_id, state) do
     cmd_id = "c.party.decline_invite_to_party"
 
-    # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
-    with [party_id] <- String.split(data) |> Enum.map(&String.trim/1) do
-      # no need to unsubscribe here because it'll be done when handling the
-      # :invite_cancelled event
-      Account.cancel_party_invite(party_id, state.user.id)
-      SpringOut.reply(:okay, cmd_id, msg_id, state)
-    else
+    case String.split(data) |> Enum.map(&String.trim/1) do
+      [party_id] ->
+        # no need to unsubscribe here because it'll be done when handling the
+        # :invite_cancelled event
+        Account.cancel_party_invite(party_id, state.user.id)
+        SpringOut.reply(:okay, cmd_id, msg_id, state)
+
       _other ->
         SpringOut.reply(
           :no,

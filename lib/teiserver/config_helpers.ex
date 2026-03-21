@@ -18,10 +18,8 @@ defmodule Teiserver.ConfigHelpers do
   end
 
   def get_env(var, default, type) do
-    # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
-    with {:ok, val} <- System.fetch_env(var) do
-      get_with_type(val, type)
-    else
+    case System.fetch_env(var) do
+      {:ok, val} -> get_with_type(val, type)
       :error -> default
     end
   end

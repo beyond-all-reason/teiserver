@@ -55,7 +55,7 @@ defmodule TeiserverWeb.Report.RatingController do
     rating_type =
       if Enum.count(player_ids) == 2 do
         "Duel"
-        # credo:disable-for-next-line Credo.Check.Design.TagTODO
+
         # TODO Should probably get rating based on team size instead
       else
         "Large Team"

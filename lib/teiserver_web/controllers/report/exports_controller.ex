@@ -28,7 +28,6 @@ defmodule TeiserverWeb.Report.ExportsController do
   def show(conn, %{"id" => id}) do
     module = get_module(id)
 
-    # credo:disable-for-next-line Credo.Check.Refactor.Apply
     if allow?(conn.assigns.current_user, apply(module, :permissions, [])) do
       assigns = module.show_form(conn)
 
@@ -51,7 +50,6 @@ defmodule TeiserverWeb.Report.ExportsController do
   def download(conn, %{"id" => id, "report" => report_params}) do
     module = get_module(id)
 
-    # credo:disable-for-next-line Credo.Check.Refactor.Apply
     if allow?(conn.assigns.current_user, apply(module, :permissions, [])) do
       {:file, file_path, file_name, content_type} = module.show_form(conn, report_params)
 

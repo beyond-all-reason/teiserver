@@ -70,20 +70,16 @@ defmodule TeiserverWeb.API.Admin.UserController do
   end
 
   defp get_generic_lobby_app do
-    # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
-    with app when not is_nil(app) <- OAuth.get_application_by_uid("generic_lobby") do
-      {:ok, app}
-    else
+    case OAuth.get_application_by_uid("generic_lobby") do
       nil -> {:error, :app_not_found}
+      app -> {:ok, app}
     end
   end
 
   defp get_user_by_email(email) do
-    # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
-    with user when not is_nil(user) <- Account.get_user_by_email(email) do
-      {:ok, user}
-    else
+    case Account.get_user_by_email(email) do
       nil -> {:error, :user_not_found}
+      user -> {:ok, user}
     end
   end
 

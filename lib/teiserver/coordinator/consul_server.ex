@@ -853,7 +853,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
         end
 
       :clan ->
-        # credo:disable-for-next-line Credo.Check.Design.TagTODO
         # TODO: Implement
         :player
     end

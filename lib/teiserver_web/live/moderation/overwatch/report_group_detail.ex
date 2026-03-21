@@ -17,7 +17,6 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
     |> ReportGroupLib.make_favourite()
     |> insert_recently(socket)
 
-    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO also assign reporter info here, it's needed for report authors and chat link
 
     socket =

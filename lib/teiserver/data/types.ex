@@ -19,7 +19,7 @@ defmodule Teiserver.Data.Types do
 
   @type lobby() :: map()
   @type client() :: map()
-  # credo:disable-for-next-line Credo.Check.Design.TagTODO
+
   # TODO: We should drop the next line and replace all calls with `Teiserver.Account.User.t()`.
   @type user() :: map()
 

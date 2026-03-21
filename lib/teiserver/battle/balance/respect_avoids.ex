@@ -284,8 +284,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
 
     logs = [
       "Perform brute force with the following players to get the best score.",
-      # credo:disable-for-next-line Credo.Check.Refactor.MapJoin
-      "Players: #{Enum.join(Enum.map(state.top_experienced, fn x -> x.name end), ", ")}",
+      "Players: #{Enum.map_join(state.top_experienced, ", ", fn x -> x.name end)}",
       @splitter,
       "Brute force result:",
       "Team rating diff penalty: #{format(combo_result.rating_diff_penalty)}",
@@ -295,8 +294,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
       "Score: #{format(combo_result.score)} (lower is better)",
       @splitter,
       "Draft remaining players (ordered from best to worst).",
-      # credo:disable-for-next-line Credo.Check.Refactor.MapJoin
-      "Remaining: #{Enum.join(Enum.map(remaining, fn x -> x.name end), ", ")}"
+      "Remaining: #{Enum.map_join(remaining, ", ", fn x -> x.name end)}"
     ]
 
     default_acc = combo_result

@@ -91,14 +91,14 @@ defmodule Mix.Tasks.Teiserver.SeasonalUncertaintyResetTask do
       end)
       |> Repo.transaction()
 
-    # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
-    with {:ok, result} <- sql_transaction_result do
-      time_taken = System.system_time(:millisecond) - start_time
+    case sql_transaction_result do
+      {:ok, result} ->
+        time_taken = System.system_time(:millisecond) - start_time
 
-      Logger.info(
-        "SeasonalUncertaintyResetTask complete, took #{time_taken}ms. Updated #{result.update_ratings.num_rows} ratings."
-      )
-    else
+        Logger.info(
+          "SeasonalUncertaintyResetTask complete, took #{time_taken}ms. Updated #{result.update_ratings.num_rows} ratings."
+        )
+
       _error ->
         Logger.error("SeasonalUncertaintyResetTask failed.")
     end

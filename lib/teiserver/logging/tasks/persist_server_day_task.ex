@@ -402,7 +402,6 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       )
       |> Enum.count()
 
-    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: Calculate number of battles that took place
     battles = 0
 

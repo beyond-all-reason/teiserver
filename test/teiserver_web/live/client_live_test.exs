@@ -64,6 +64,7 @@ defmodule TeiserverWeb.Live.ClientTest do
     end
 
     @tag :needs_attention
+    # this part is failing because the liveview subscribes to old pubsubs
     test "show - valid client", %{conn: conn} do
       {:ok, server_context} = TeiserverTestLib.start_spring_server()
       %{socket: socket, user: user} = TeiserverTestLib.auth_setup(server_context)
@@ -78,8 +79,7 @@ defmodule TeiserverWeb.Live.ClientTest do
       assert html =~ "Battle:"
 
       # Log out the user
-      # credo:disable-for-next-line Credo.Check.Design.TagFIXME
-      # FIXME: this part is failing because the liveview subscribes to old pubsubs
+      # this part is failing because the liveview subscribes to old pubsubs
       _send_raw(socket, "EXIT\n")
       assert_redirect(view, "/teiserver/admin/client", 250)
     end
