@@ -56,6 +56,14 @@ defmodule Teiserver.TachyonBattle.Battle do
     :exit, {:noproc, _details} -> {:error, :invalid_battle}
   end
 
+  @doc """
+  This should only be used for test purpose (for now). If required outside of
+  test, consider if a battle should indeed expose (db) match details
+  """
+  def get_match_id(battle_id) do
+    via_tuple(battle_id) |> GenServer.call(:get_match_id)
+  end
+
   @impl GenServer
   def init(
         %{

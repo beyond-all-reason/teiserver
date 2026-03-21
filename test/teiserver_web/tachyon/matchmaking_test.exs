@@ -819,8 +819,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         assert info["status"] == "playing"
       end
 
-      battle = TachyonBattle.lookup(battle_id)
-      match_id = GenServer.call(battle, :get_match_id)
+      match_id = TachyonBattle.get_match_id(battle_id)
       match = Battle.get_match!(match_id)
       memberships = Battle.get_match_memberships(match_id)
 

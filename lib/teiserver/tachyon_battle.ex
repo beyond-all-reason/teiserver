@@ -64,6 +64,9 @@ defmodule Teiserver.TachyonBattle do
   @spec kill(T.id()) :: :ok | {:error, reason :: term()}
   defdelegate kill(battle_id), to: TachyonBattle.Battle
 
+  @spec get_match_id(T.id()) :: term() | nil
+  defdelegate get_match_id(battle_id), to: TachyonBattle.Battle
+
   # keep this function private to dissuade caller to misuse the API.
   # Generating a battle id is meaningless unless the corresponding
   # Battle genserver is also started and connected to an autohost
