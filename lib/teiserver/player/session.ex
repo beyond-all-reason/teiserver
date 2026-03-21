@@ -553,6 +553,11 @@ defmodule Teiserver.Player.Session do
     user_id |> via_tuple() |> GenServer.call({:lobby, :start_battle})
   end
 
+  @spec lobby_join_battle(T.userid()) :: :ok | {:error, reason :: term}
+  def lobby_join_battle(user_id) do
+    user_id |> via_tuple() |> GenServer.call({:lobby, :join_battle})
+  end
+
   @spec subscribe_lobby_list(T.userid()) :: {:ok, %{TachyonLobby.id() => TachyonLobby.overview()}}
   def subscribe_lobby_list(user_id) do
     user_id |> via_tuple() |> GenServer.call({:lobby, :subscribe_list})
@@ -1217,6 +1222,21 @@ defmodule Teiserver.Player.Session do
       # this simplify the request/response cycle by avoiding any interleaving
       # where the client that starts the battle would receive the server's battle/start
       # request while waiting for the response to lobby/startBattle response
+      :ok ->
+        {:reply, :ok, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:lobby, :join_battle}, _from, state)
+      when state.lobby == nil,
+      do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :join_battle}, _from, state) do
+    case TachyonLobby.join_battle(state.lobby.id, state.user.id) do
+      # same note as start_battle
       :ok ->
         {:reply, :ok, state}
 

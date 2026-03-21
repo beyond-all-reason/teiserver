@@ -179,6 +179,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
              nil
              | %{
                  id: Teiserver.TachyonBattle.id(),
+                 pid: pid(),
                  started_at: DateTime.t()
                },
            ids_to_rejoin: MapSet.t(T.userid()),
@@ -268,6 +269,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec spectate(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   def spectate(lobby_id, user_id) do
     call_lobby(lobby_id, {:spectate, user_id})
+  end
+
+  @doc """
+  request to be added as a spectator to the battle being played
+  """
+  @spec join_battle(id(), T.userid()) ::
+          :ok | {:error, :invalid_lobby | :not_in_lobby | :invalid_battle | term()}
+  def join_battle(lobby_id, user_id) do
+    call_lobby(lobby_id, {:join_battle, user_id})
   end
 
   @spec rejoin(id(), T.userid(), pid()) ::
@@ -646,6 +656,51 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:keep_state, aggregate.data, [{:reply, from, :ok}]}
   end
 
+  def handle_event({:call, from}, {:join_battle, user_id}, _state, data)
+      when not is_map_key(data.players, user_id) and not is_map_key(data.spectators, user_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
+
+  def handle_event({:call, from}, {:join_battle, _user_id}, _state, data)
+      when is_nil(data.current_battle),
+      do: {:keep_state, data, [{:reply, from, {:error, :invalid_battle}}]}
+
+  def handle_event({:call, from}, {:join_battle, user_id}, _state, data) do
+    %{name: name, password: password} =
+      get_in(data.spectators[user_id]) || get_in(data.players[user_id])
+
+    # For simplicity sake, make it a synchronous call. This is not the greatest
+    # solution since it implies a roundtrip to the autohost (through the battle
+    # process) and will effectively block all other operations on the lobby
+    # during that time. We can refactor that later to make it truly async
+    # Also, we could cache this data against each player, but similarly, this
+    # is a small optimisation. It's simpler to leave all battle membership decision
+    # in the hand of the corresponding battle process.
+    resp = TachyonBattle.add_player(data.current_battle.id, user_id, name, password)
+
+    case resp do
+      {:ok, %{ips: ips, port: port}} ->
+        join_data = %{
+          ips: ips,
+          port: port,
+          engine: %{version: data.engine_version},
+          game: %{springName: data.game_version},
+          map: %{springName: data.map_name}
+        }
+
+        Player.lobby_join_battle(
+          user_id,
+          {data.current_battle.id, data.current_battle.pid},
+          join_data,
+          password
+        )
+
+        {:keep_state, data, [{:reply, from, :ok}]}
+
+      {:error, err} ->
+        {:keep_state, data, [{:reply, from, {:error, err}}]}
+    end
+  end
+
   def handle_event({:call, from}, {:update_client_status, user_id, _update_data}, _state, data)
       when not is_map_key(data.players, user_id) and not is_map_key(data.spectators, user_id),
       do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
@@ -854,7 +909,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       now = DateTime.utc_now()
 
       data =
-        %{data | current_battle: %{id: battle_id, started_at: now}}
+        %{data | current_battle: %{id: battle_id, pid: battle_pid, started_at: now}}
         |> Map.update!(:monitors, &MC.monitor(&1, battle_pid, :current_battle))
 
       broadcast_update({:update, nil, %{current_battle: data.current_battle}}, data)

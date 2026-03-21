@@ -879,6 +879,16 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/joinBattle", "request", _msg_id, _msg, state) do
+    case Session.lobby_join_battle(state.user.id) do
+      :ok ->
+        {:response, state}
+
+      {:error, reason} ->
+        {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
   def handle_command("lobby/subscribeList", "request", _msg_id, _msg, state) do
     case Session.subscribe_lobby_list(state.user.id) do
       {:ok, list} ->

@@ -241,6 +241,19 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       %{"currentBattle" => %{"startedAt" => _start_ts}} = data
 
+      # and can join the battle as a spectator
+      :ok = Tachyon.send_request(ctx3[:client], "lobby/joinBattle")
+
+      %{"commandId" => "autohost/addPlayer", "data" => add_data} =
+        add_request =
+        Tachyon.recv_message!(ctx[:autohost_client])
+
+      assert add_data["userId"] == to_string(ctx3[:user].id)
+      :ok = Tachyon.send_response(ctx[:autohost_client], add_request)
+
+      %{"commandId" => "lobby/joinBattle", "status" => "success"} =
+        Tachyon.recv_message!(ctx3[:client])
+
       # when battle terminates members should get notified
       TachyonBattle.lookup(battle_id) |> Process.exit(:kill)
       %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
