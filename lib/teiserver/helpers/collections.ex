@@ -1,4 +1,5 @@
 defmodule Teiserver.Helpers.Collections do
+  @moduledoc false
   @doc """
   Helper to recursively transform maps. Useful to parse incoming tachyon data
   into internal structure and vice versa

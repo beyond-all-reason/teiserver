@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.TimeSpentReport do
+  @moduledoc false
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.TimexHelper
   alias Teiserver.Logging

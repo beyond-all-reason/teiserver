@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.ActiveReport do
+  @moduledoc false
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Logging
 

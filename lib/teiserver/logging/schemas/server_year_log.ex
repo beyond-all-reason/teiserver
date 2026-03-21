@@ -1,4 +1,5 @@
 defmodule Teiserver.Logging.ServerYearLog do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   @primary_key false

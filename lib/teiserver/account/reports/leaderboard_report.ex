@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.LeaderboardReport do
+  @moduledoc false
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
   alias Teiserver.Account.RatingLib

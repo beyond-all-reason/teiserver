@@ -1,4 +1,5 @@
 defmodule Teiserver.Logging.ServerWeekLog do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   @primary_key false

@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.SmurfKey do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   typed_schema "teiserver_account_smurf_keys" do

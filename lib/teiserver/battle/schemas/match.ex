@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle.Match do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   typed_schema "teiserver_battle_matches" do

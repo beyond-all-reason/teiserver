@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.UserStatLib do
+  @moduledoc false
   alias Teiserver.Account.UserStat
   use TeiserverWeb, :library
 

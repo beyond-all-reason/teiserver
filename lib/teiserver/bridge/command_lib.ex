@@ -1,7 +1,5 @@
 defmodule Teiserver.Bridge.CommandLib do
-  @moduledoc """
-
-  """
+  @moduledoc false
   require Logger
 
   @spec handle_command(Nostrum.Struct.Interaction.t(), map()) :: map()

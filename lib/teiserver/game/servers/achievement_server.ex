@@ -1,4 +1,5 @@
 defmodule Teiserver.Game.AchievementServer do
+  @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Game
   use GenServer

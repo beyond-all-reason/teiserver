@@ -1,4 +1,5 @@
 defmodule Teiserver.OAuth.CredentialQueries do
+  @moduledoc false
   alias Teiserver.Bot.Bot
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.Credential

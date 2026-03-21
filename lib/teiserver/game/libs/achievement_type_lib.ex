@@ -1,4 +1,5 @@
 defmodule Teiserver.Game.AchievementTypeLib do
+  @moduledoc false
   alias Teiserver.Game.AchievementType
   use TeiserverWeb, :library
 

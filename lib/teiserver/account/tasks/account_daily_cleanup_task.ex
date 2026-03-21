@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.Tasks.DailyCleanupTask do
+  @moduledoc false
   alias Teiserver.Account
   use Oban.Worker, queue: :cleanup
 

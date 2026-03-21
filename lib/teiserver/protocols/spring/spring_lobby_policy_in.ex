@@ -1,4 +1,5 @@
 defmodule Teiserver.Protocols.Spring.LobbyPolicyIn do
+  @moduledoc false
   alias Teiserver.Game
   alias Teiserver.Protocols.SpringIn
   require Logger

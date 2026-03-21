@@ -1,4 +1,5 @@
 defmodule Teiserver.Chat.RoomSupervisor do
+  @moduledoc false
   alias Teiserver.Data.Types, as: T
 
   use DynamicSupervisor

@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle.MatchMembershipLib do
+  @moduledoc false
   alias Teiserver.Battle.MatchMembership
 
   use TeiserverWeb, :library

@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Components.AssetComponents do
+  @moduledoc false
   alias TeiserverWeb.CoreComponents, as: CC
   use Phoenix.Component
 

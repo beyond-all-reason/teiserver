@@ -1,4 +1,5 @@
 defmodule Teiserver.OAuth.ApplicationQueries do
+  @moduledoc false
   alias Teiserver.Data.Types, as: T
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.CodeQueries

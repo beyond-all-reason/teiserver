@@ -1,4 +1,5 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
+  @moduledoc false
   alias ExULID.ULID
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib

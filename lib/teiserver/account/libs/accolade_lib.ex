@@ -1,7 +1,5 @@
 defmodule Teiserver.Account.AccoladeLib do
-  @moduledoc """
-
-  """
+  @moduledoc false
 
   alias Ecto.Adapters.SQL
   alias Teiserver.Account

@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.ClientLib do
+  @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth

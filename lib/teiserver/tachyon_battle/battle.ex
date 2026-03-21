@@ -1,4 +1,5 @@
 defmodule Teiserver.TachyonBattle.Battle do
+  @moduledoc false
   alias Teiserver.Autohost
   alias Teiserver.Battle
   alias Teiserver.TachyonBattle.Registry

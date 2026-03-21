@@ -1,4 +1,5 @@
 defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
+  @moduledoc false
   alias Teiserver.Battle
   alias Teiserver.Battle.Tasks.BreakdownMatchDataTask
   alias Teiserver.Logging

@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.AccoladeReport do
+  @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Account.BadgeTypeLib

@@ -1,4 +1,5 @@
 defmodule Teiserver.TachyonBattle.System do
+  @moduledoc false
   alias Teiserver.TachyonBattle
   use Supervisor
 

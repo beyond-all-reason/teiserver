@@ -1,4 +1,5 @@
 defmodule Teiserver.KvStore.Queries do
+  @moduledoc false
   alias Ecto.Changeset
   alias Teiserver.KvStore.Blob
 

@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.WeekOnWeekReport do
+  @moduledoc false
   alias Teiserver.Helper.NumberHelper
   alias Teiserver.Helper.TimexHelper
   alias Teiserver.Logging

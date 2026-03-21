@@ -1,4 +1,5 @@
 defmodule Teiserver.Protocols.Spring.PartyIn do
+  @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.UserCacheLib

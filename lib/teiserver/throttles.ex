@@ -1,4 +1,5 @@
 defmodule Teiserver.Throttles do
+  @moduledoc false
   @spec start_throttle(integer(), module(), String.t()) :: pid()
   def start_throttle(id, module, name) do
     {:ok, throttle_pid} =

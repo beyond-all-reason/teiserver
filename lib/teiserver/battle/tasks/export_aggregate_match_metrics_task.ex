@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle.ExportAggregateMatchMetricsTask do
+  @moduledoc false
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Logging
 

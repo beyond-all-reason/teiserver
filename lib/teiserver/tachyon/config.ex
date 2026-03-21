@@ -1,4 +1,5 @@
 defmodule Teiserver.Tachyon.Config do
+  @moduledoc false
   alias Teiserver.Config
 
   @restore_state_key "tachyon.should-restore-state"

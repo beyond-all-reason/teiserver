@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.TOTP do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   @primary_key {:user_id, :id, autogenerate: false}

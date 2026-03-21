@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.TimeCompareReport do
+  @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Helper.TimexHelper
   alias Teiserver.Logging

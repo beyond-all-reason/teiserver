@@ -1,7 +1,5 @@
 defmodule Teiserver.Battle.LobbyIndexThrottle do
-  @moduledoc """
-
-  """
+  @moduledoc false
 
   alias Phoenix.PubSub
   alias Teiserver.Battle

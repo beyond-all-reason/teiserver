@@ -1,4 +1,5 @@
 defmodule Teiserver.Chat.PartyMessage do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   typed_schema "teiserver_party_messages" do

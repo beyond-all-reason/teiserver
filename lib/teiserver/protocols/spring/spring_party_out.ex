@@ -1,4 +1,5 @@
 defmodule Teiserver.Protocols.Spring.PartyOut do
+  @moduledoc false
   require Logger
 
   @spec do_reply(atom(), nil | String.t() | tuple() | list(), map()) :: String.t()

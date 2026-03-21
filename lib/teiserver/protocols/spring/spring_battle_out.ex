@@ -1,4 +1,5 @@
 defmodule Teiserver.Protocols.Spring.BattleOut do
+  @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Lobby
 

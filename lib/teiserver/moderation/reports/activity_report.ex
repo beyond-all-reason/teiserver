@@ -1,4 +1,5 @@
 defmodule Teiserver.Moderation.ActivityReport do
+  @moduledoc false
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.TimexHelper
   alias Teiserver.Moderation

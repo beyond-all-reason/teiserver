@@ -1,4 +1,5 @@
 defmodule Teiserver.BotFixtures do
+  @moduledoc false
   alias Teiserver.Bot
 
   def create_bot do

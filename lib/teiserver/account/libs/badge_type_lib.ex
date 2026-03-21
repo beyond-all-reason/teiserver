@@ -1,7 +1,5 @@
 defmodule Teiserver.Account.BadgeTypeLib do
-  @moduledoc """
-
-  """
+  @moduledoc false
 
   alias Teiserver.Account.BadgeType
   use TeiserverWeb, :library

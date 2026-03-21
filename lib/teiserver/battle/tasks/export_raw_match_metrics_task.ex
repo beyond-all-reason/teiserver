@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle.ExportRawMatchMetricsTask do
+  @moduledoc false
   alias Teiserver.Battle
   alias Teiserver.Helper.DatePresets
 

@@ -1,4 +1,5 @@
 defmodule Teiserver.Clans.Clan do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   typed_schema "teiserver_clans" do

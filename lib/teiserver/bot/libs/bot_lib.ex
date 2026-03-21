@@ -1,4 +1,5 @@
 defmodule Teiserver.BotLib do
+  @moduledoc false
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-robot"
 

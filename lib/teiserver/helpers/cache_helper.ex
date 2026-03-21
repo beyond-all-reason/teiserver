@@ -1,7 +1,5 @@
 defmodule Teiserver.Helpers.CacheHelper do
-  @moduledoc """
-
-  """
+  @moduledoc false
 
   require Logger
 

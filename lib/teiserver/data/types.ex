@@ -1,4 +1,5 @@
 defmodule Teiserver.Data.Types do
+  @moduledoc false
   @doc """
   A list of types in one place to make it easier to reference them
 

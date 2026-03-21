@@ -1,4 +1,5 @@
 defmodule Teiserver.Moderation.ModerationTestLib do
+  @moduledoc false
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Moderation
 

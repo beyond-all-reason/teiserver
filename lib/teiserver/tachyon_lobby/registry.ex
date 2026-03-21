@@ -1,4 +1,5 @@
 defmodule Teiserver.TachyonLobby.Registry do
+  @moduledoc false
   alias Teiserver.TachyonLobby.Lobby
 
   def child_spec(_) do

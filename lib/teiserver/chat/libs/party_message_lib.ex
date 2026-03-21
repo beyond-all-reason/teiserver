@@ -1,4 +1,5 @@
 defmodule Teiserver.Chat.PartyMessageLib do
+  @moduledoc false
   alias Teiserver.Chat.PartyMessage
   use TeiserverWeb, :library
 

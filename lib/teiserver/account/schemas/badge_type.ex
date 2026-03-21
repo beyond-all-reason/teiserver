@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.BadgeType do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   typed_schema "teiserver_account_badge_types" do

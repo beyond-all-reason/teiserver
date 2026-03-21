@@ -1,4 +1,5 @@
 defmodule Teiserver.Bot do
+  @moduledoc false
   alias Teiserver.Bot.Bot
   alias Teiserver.BotQueries
   alias Teiserver.Repo

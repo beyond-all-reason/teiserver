@@ -1,4 +1,5 @@
 defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
+  @moduledoc false
   alias Teiserver.Logging
   alias Teiserver.Logging.Tasks.PersistMatchMonthTask
   use Oban.Worker, queue: :teiserver

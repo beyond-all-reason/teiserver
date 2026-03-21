@@ -1,4 +1,5 @@
 defmodule Teiserver.OAuth.ApplicationLib do
+  @moduledoc false
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-passport"
 

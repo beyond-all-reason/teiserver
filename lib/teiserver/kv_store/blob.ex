@@ -1,4 +1,5 @@
 defmodule Teiserver.KvStore.Blob do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   @primary_key false
