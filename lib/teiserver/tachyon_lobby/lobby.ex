@@ -226,10 +226,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec get_details(id()) :: {:ok, details()} | {:error, reason :: term()}
   def get_details(id) do
-    via_tuple(id) |> :gen_statem.call(:get_details, @default_call_timeout)
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(id, :get_details)
   end
 
   def child_spec({lobby_id, _} = args) do
@@ -248,10 +245,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec join(id(), player_join_data(), pid()) ::
           {:ok, lobby_pid :: pid(), details()} | {:error, reason :: term()}
   def join(lobby_id, join_data, pid \\ self()) do
-    via_tuple(lobby_id) |> :gen_statem.call({:join, join_data, pid}, @default_call_timeout)
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(lobby_id, {:join, join_data, pid})
   end
 
   @spec leave(id(), T.userid()) :: :ok | {:error, reason :: :lobby_full | term()}
@@ -268,31 +262,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
           | {:error,
              reason :: :invalid_lobby | :not_in_lobby | :invalid_ally_team | :ally_team_full}
   def join_ally_team(lobby_id, user_id, ally_team) do
-    via_tuple(lobby_id)
-    |> :gen_statem.call(
-      {:join_ally_team, user_id, ally_team},
-      @default_call_timeout
-    )
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(lobby_id, {:join_ally_team, user_id, ally_team})
   end
 
   @spec spectate(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   def spectate(lobby_id, user_id) do
-    via_tuple(lobby_id) |> :gen_statem.call({:spectate, user_id}, @default_call_timeout)
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(lobby_id, {:spectate, user_id})
   end
 
   @spec rejoin(id(), T.userid(), pid()) ::
           {:ok, lobby_pid :: pid(), details()} | {:error, :invalid_lobby}
   def rejoin(lobby_id, user_id, pid) do
-    via_tuple(lobby_id) |> :gen_statem.call({:rejoin, user_id, pid}, @default_call_timeout)
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(lobby_id, {:rejoin, user_id, pid})
   end
 
   @type client_status_update_data :: %{
@@ -302,10 +283,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec update_client_status(id(), T.userid(), client_status_update_data()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :not_a_player}
   def update_client_status(lobby_id, user_id, update_data) do
-    via_tuple(lobby_id) |> :gen_statem.call({:update_client_status, user_id, update_data})
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(lobby_id, {:update_client_status, user_id, update_data})
   end
 
   @type add_bot_opt ::
@@ -326,8 +304,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
         short_name,
         opts \\ []
       ) do
-    via_tuple(lobby_id)
-    |> :gen_statem.call(
+    call_lobby(
+      lobby_id,
       {:add_bot, user_id,
        %{
          ally_team: ally_team,
@@ -335,28 +313,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
          name: opts[:name],
          version: opts[:version],
          options: Keyword.get(opts, :options, %{})
-       }},
-      @default_call_timeout
+       }}
     )
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
   end
 
   @spec remove_bot(id(), bot_id :: String.t()) :: :ok | {:error, :invalid_bot_id | term()}
   def remove_bot(lobby_id, bot_id) do
-    via_tuple(lobby_id) |> :gen_statem.call({:remove_bot, bot_id}, @default_call_timeout)
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(lobby_id, {:remove_bot, bot_id})
   end
 
   @spec update_bot(id(), bot_update_data()) :: :ok | {:error, reason :: :invalid_bot_id | term()}
   def update_bot(lobby_id, update_data) do
-    via_tuple(lobby_id) |> :gen_statem.call({:update_bot, update_data}, @default_call_timeout)
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(lobby_id, {:update_bot, update_data})
   end
 
   @type lobby_update_data :: %{
@@ -371,27 +339,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec update_properties(id(), T.userid(), lobby_update_data()) ::
           :ok | {:error, :invalid_lobby | term()}
   def update_properties(lobby_id, user_id, update_data) do
-    via_tuple(lobby_id)
-    |> :gen_statem.call(
-      {:update_properties, user_id, update_data},
-      @default_call_timeout
-    )
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(lobby_id, {:update_properties, user_id, update_data})
   end
 
   @spec vote_submit(id(), T.userid(), {String.t(), vote_ballot()}) ::
           :ok | {:error, :invalid_lobby | :invalid_vote}
   def vote_submit(lobby_id, user_id, ballot) do
-    via_tuple(lobby_id)
-    |> :gen_statem.call(
-      {:vote_submit, user_id, ballot},
-      @default_call_timeout
-    )
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(lobby_id, {:vote_submit, user_id, ballot})
   end
 
   @doc """
@@ -405,19 +359,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec join_queue(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   def join_queue(lobby_id, user_id) do
-    via_tuple(lobby_id) |> :gen_statem.call({:join_queue, user_id}, @default_call_timeout)
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(lobby_id, {:join_queue, user_id})
   end
 
   @spec start_battle(id(), T.userid()) ::
           :ok | {:error, reason :: :not_in_lobby | :battle_already_started | term()}
   def start_battle(lobby_id, user_id) do
-    via_tuple(lobby_id) |> :gen_statem.call({:start_battle, user_id}, @default_call_timeout)
-  catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    call_lobby(lobby_id, {:start_battle, user_id})
   end
 
   @doc """
@@ -1023,6 +971,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec via_tuple(id()) :: GenServer.name()
   defp via_tuple(lobby_id) do
     TachyonLobby.Registry.via_tuple(lobby_id)
+  end
+
+  defp call_lobby(lobby_id, message, timeout \\ @default_call_timeout) do
+    via_tuple(lobby_id) |> :gen_statem.call(message, timeout)
+  catch
+    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
   end
 
   @spec get_overview_from_state(state :: state()) :: TachyonLobby.List.overview()
