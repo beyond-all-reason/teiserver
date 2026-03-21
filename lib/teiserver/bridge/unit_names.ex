@@ -1,4 +1,5 @@
 defmodule Teiserver.Bridge.UnitNames do
+  @moduledoc false
   @unit_list [
     {"armaap", "advanced aircraft plant", "advanced aircraft plant"},
     {"armalab", "advanced bot lab", "advanced bot lab"},

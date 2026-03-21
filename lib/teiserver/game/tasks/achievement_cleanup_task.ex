@@ -1,4 +1,5 @@
 defmodule Teiserver.Game.AchievementCleanupTask do
+  @moduledoc false
   alias Ecto.Multi
   alias Teiserver.Game
   alias Teiserver.Game.UserAchievement

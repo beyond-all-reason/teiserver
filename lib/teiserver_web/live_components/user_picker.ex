@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Account.LiveComponents.UserPicker do
+  @moduledoc false
   # In Phoenix apps, the line is typically: use MyAppWeb, :live_component
   use TeiserverWeb, :live_component
 

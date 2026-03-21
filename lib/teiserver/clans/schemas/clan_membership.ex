@@ -1,4 +1,5 @@
 defmodule Teiserver.Clans.ClanMembership do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   @primary_key false

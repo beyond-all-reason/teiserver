@@ -1,4 +1,5 @@
 defmodule Teiserver.Autohost.System do
+  @moduledoc false
   alias Teiserver.Autohost
   use Supervisor
 

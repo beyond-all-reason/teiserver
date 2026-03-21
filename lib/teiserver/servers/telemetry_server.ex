@@ -1,4 +1,5 @@
 defmodule Teiserver.Telemetry.TelemetryServer do
+  @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Client

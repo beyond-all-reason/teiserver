@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
+  @moduledoc false
   @doc """
   Provides aggregate data about matches which took place within a given timeframe
   """

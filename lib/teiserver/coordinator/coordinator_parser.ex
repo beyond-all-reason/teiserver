@@ -1,4 +1,5 @@
 defmodule Teiserver.Coordinator.Parser do
+  @moduledoc false
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T

@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.SmurfKeyLib do
+  @moduledoc false
   alias Teiserver.Account.SmurfKey
   use TeiserverWeb, :library
 

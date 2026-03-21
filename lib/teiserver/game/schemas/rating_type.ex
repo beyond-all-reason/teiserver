@@ -1,4 +1,5 @@
 defmodule Teiserver.Game.RatingType do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   typed_schema "teiserver_game_rating_types" do

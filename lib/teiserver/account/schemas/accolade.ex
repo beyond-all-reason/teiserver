@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.Accolade do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   typed_schema "teiserver_account_accolades" do

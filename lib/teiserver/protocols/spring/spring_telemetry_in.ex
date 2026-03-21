@@ -1,4 +1,5 @@
 defmodule Teiserver.Protocols.Spring.TelemetryIn do
+  @moduledoc false
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Communication
   alias Teiserver.Protocols.Spring

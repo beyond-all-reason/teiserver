@@ -1,7 +1,5 @@
 defmodule Teiserver.Lobby.CommandLib do
-  @moduledoc """
-
-  """
+  @moduledoc false
 
   alias Teiserver.Account
   alias Teiserver.Battle

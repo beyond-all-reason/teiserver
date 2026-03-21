@@ -1,4 +1,5 @@
 defmodule Teiserver.BotQueries do
+  @moduledoc false
   alias Teiserver.Bot.Bot
   use TeiserverWeb, :queries
 

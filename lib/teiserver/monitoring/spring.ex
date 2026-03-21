@@ -1,4 +1,5 @@
 defmodule Teiserver.Monitoring.Spring do
+  @moduledoc false
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Telemetry
 

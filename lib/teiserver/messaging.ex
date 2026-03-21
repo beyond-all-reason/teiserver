@@ -1,4 +1,5 @@
 defmodule Teiserver.Messaging do
+  @moduledoc false
   alias Teiserver.Messaging.Message
   alias Teiserver.Party
   alias Teiserver.Player.Session

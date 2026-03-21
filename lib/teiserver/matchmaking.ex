@@ -1,4 +1,5 @@
 defmodule Teiserver.Matchmaking do
+  @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Matchmaking

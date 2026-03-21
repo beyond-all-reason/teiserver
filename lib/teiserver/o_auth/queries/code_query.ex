@@ -1,4 +1,5 @@
 defmodule Teiserver.OAuth.CodeQueries do
+  @moduledoc false
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.Code
   use TeiserverWeb, :queries

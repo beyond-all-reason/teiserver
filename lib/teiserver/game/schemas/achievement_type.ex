@@ -1,4 +1,5 @@
 defmodule Teiserver.Game.AchievementType do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   typed_schema "teiserver_achievement_types" do

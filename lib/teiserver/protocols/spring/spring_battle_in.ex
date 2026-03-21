@@ -1,4 +1,5 @@
 defmodule Teiserver.Protocols.Spring.BattleIn do
+  @moduledoc false
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   alias Teiserver.Lobby

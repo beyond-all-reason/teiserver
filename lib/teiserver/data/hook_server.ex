@@ -1,4 +1,5 @@
 defmodule Teiserver.HookServer do
+  @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.CacheUser

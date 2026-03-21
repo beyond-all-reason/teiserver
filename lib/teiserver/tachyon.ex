@@ -1,4 +1,5 @@
 defmodule Teiserver.Tachyon do
+  @moduledoc false
   alias Teiserver.Tachyon.Config
 
   defdelegate restart_system(), to: Teiserver.Tachyon.System, as: :restart

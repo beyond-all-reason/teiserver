@@ -1,4 +1,5 @@
 defmodule Teiserver.Bridge.DiscordSystem do
+  @moduledoc false
   alias Teiserver.Communication
 
   use DynamicSupervisor

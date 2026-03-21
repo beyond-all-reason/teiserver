@@ -1,4 +1,5 @@
 defmodule Teiserver.Game.MappingReport do
+  @moduledoc false
   alias Teiserver.Battle
   alias Teiserver.Helper.DatePresets
 

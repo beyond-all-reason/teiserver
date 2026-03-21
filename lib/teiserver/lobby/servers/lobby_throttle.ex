@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle.LobbyThrottle do
+  @moduledoc false
   @doc """
   lobby_changes lists things that have changed about the battle lobby
   player_changes lists players that have changed (added, updated or removed!)

@@ -1,4 +1,5 @@
 defmodule Teiserver.OAuth.Tasks.Cleanup do
+  @moduledoc false
   alias Teiserver.OAuth
 
   use Oban.Worker, queue: :cleanup

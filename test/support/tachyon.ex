@@ -1,4 +1,5 @@
 defmodule Teiserver.Support.Tachyon do
+  @moduledoc false
   alias ExUnit.Callbacks
   alias Teiserver.Account
   alias Teiserver.Autohost

@@ -1,4 +1,5 @@
 defmodule Teiserver.Game.BalancerServer do
+  @moduledoc false
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.MatchLib

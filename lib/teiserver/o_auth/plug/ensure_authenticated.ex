@@ -1,4 +1,5 @@
 defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
+  @moduledoc false
   alias Teiserver.OAuth
 
   import Plug.Conn

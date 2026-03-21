@@ -1,4 +1,5 @@
 defmodule Teiserver.Asset.Map do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   @primary_key {:spring_name, :string, autogenerate: false}

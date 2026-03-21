@@ -1,4 +1,5 @@
 defmodule Teiserver.OAuthFixtures do
+  @moduledoc false
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.Code
   alias Teiserver.OAuth.Credential

@@ -1,4 +1,5 @@
 defmodule Teiserver.Logging.ServerWeekLogLib do
+  @moduledoc false
   alias Teiserver.Logging.ServerWeekLog
 
   use TeiserverWeb, :library

@@ -1,4 +1,5 @@
 defmodule Teiserver.TachyonLobby.Supervisor do
+  @moduledoc false
   alias Horde.DynamicSupervisor, as: HordeSupervisor
   alias Teiserver.TachyonLobby.Lobby
 

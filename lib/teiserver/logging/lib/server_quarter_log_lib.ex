@@ -1,4 +1,5 @@
 defmodule Teiserver.Logging.ServerQuarterLogLib do
+  @moduledoc false
   alias Teiserver.Logging.ServerQuarterLog
 
   use TeiserverWeb, :library

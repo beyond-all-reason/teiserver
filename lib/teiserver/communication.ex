@@ -1,7 +1,5 @@
 defmodule Teiserver.Communication do
-  @moduledoc """
-
-  """
+  @moduledoc false
 
   alias Teiserver.Communication.DiscordChannel
   alias Teiserver.Communication.DiscordChannelLib

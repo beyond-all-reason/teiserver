@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle.ApiAuth do
+  @moduledoc false
   import Teiserver.Account.AuthLib, only: [allow?: 2]
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()

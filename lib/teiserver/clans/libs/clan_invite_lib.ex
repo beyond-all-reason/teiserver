@@ -1,4 +1,5 @@
 defmodule Teiserver.Clans.ClanInviteLib do
+  @moduledoc false
   alias Teiserver.Clans.ClanInvite
   use TeiserverWeb, :library
 

@@ -1,4 +1,5 @@
 defmodule Teiserver.Protocols.Spring.LobbyPolicyOut do
+  @moduledoc false
   # alias Teiserver.Account
   # alias Teiserver.Lobby
 

@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.Party do
+  @moduledoc false
   @enforce_keys [:id, :leader, :members, :pending_invites]
   defstruct [
     :id,
@@ -9,6 +10,7 @@ defmodule Teiserver.Account.Party do
 end
 
 defmodule Teiserver.Account.PartyLib do
+  @moduledoc false
   alias ExULID.ULID
   alias Phoenix.PubSub
   alias Teiserver.Account

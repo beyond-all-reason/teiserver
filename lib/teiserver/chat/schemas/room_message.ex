@@ -1,4 +1,5 @@
 defmodule Teiserver.Chat.RoomMessage do
+  @moduledoc false
   use TeiserverWeb, :schema
 
   typed_schema "teiserver_room_messages" do

@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.VerifiedReport do
+  @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Helper.DatePresets
 

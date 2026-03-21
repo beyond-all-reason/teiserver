@@ -1,4 +1,5 @@
 defmodule Teiserver.Logging.ServerYearLogLib do
+  @moduledoc false
   alias Teiserver.Logging.ServerYearLog
 
   use TeiserverWeb, :library

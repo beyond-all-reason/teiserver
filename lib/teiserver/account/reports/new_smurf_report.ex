@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.NewSmurfReport do
+  @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   require Logger

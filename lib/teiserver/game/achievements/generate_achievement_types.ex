@@ -1,4 +1,5 @@
 defmodule Teiserver.Game.GenerateAchievementTypes do
+  @moduledoc false
   alias Teiserver.Game
 
   @spec perform() :: :ok

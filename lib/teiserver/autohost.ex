@@ -1,4 +1,5 @@
 defmodule Teiserver.Autohost do
+  @moduledoc false
   alias Teiserver.Autohost.Session
   alias Teiserver.Autohost.SessionRegistry
   alias Teiserver.Autohost.TachyonHandler

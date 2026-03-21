@@ -1,4 +1,5 @@
 defmodule Teiserver.Asset.MapLib do
+  @moduledoc false
   alias Ecto.Multi
   alias Teiserver.Asset
   alias Teiserver.Repo

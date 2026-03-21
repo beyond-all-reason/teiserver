@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.Admin do
+  @moduledoc false
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   # Used to provide permissions for tools controller until a better solution is created
   @behaviour Bodyguard.Policy

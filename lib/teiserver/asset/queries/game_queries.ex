@@ -1,4 +1,5 @@
 defmodule Teiserver.Asset.GameQueries do
+  @moduledoc false
   alias Teiserver.Asset
 
   use TeiserverWeb, :queries

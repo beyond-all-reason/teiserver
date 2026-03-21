@@ -1,7 +1,5 @@
 defmodule Teiserver.Account.BanEvasionReport do
-  @moduledoc """
-
-  """
+  @moduledoc false
 
   alias Teiserver.Account
   require Logger

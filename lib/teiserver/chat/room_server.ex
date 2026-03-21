@@ -1,4 +1,5 @@
 defmodule Teiserver.Chat.RoomServer do
+  @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Chat
   alias Teiserver.Chat.RoomRegistry

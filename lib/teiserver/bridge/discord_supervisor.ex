@@ -1,4 +1,5 @@
 defmodule Teiserver.Bridge.DiscordSupervisor do
+  @moduledoc false
   use Supervisor
 
   def start_link(init_arg) do

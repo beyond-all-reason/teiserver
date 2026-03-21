@@ -1,4 +1,5 @@
 defmodule Teiserver.AssetFixtures do
+  @moduledoc false
   alias Teiserver.Asset
   alias Teiserver.Asset.Engine
   alias Teiserver.Asset.Game

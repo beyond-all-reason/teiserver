@@ -1,4 +1,5 @@
 defmodule Teiserver.Messaging.Message do
+  @moduledoc false
   @enforce_keys [:content, :source, :timestamp, :marker]
   defstruct [:content, :source, :timestamp, :marker]
 

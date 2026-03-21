@@ -1,4 +1,5 @@
 defmodule Teiserver.ServerUserPlug do
+  @moduledoc false
   alias Phoenix.LiveView.Utils, as: LiveViewUtils
   alias Teiserver.CacheUser
   import Plug.Conn

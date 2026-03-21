@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.OpenSkillReport do
+  @moduledoc false
   alias Ecto.Adapters.SQL
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Repo

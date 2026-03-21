@@ -1,4 +1,5 @@
 defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
+  @moduledoc false
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Communication
   alias Teiserver.Config

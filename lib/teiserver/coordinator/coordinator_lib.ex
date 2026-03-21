@@ -1,4 +1,5 @@
 defmodule Teiserver.Coordinator.CoordinatorLib do
+  @moduledoc false
   alias Teiserver.Account.Auth
   alias Teiserver.Data.Types, as: T
 

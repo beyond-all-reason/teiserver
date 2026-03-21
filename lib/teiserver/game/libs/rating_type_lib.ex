@@ -1,4 +1,5 @@
 defmodule Teiserver.Game.RatingTypeLib do
+  @moduledoc false
   alias Teiserver.Game.RatingType
   use TeiserverWeb, :library
 

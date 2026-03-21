@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.PopulationReport do
+  @moduledoc false
   alias Ecto.Adapters.SQL
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo

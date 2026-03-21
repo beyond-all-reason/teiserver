@@ -1,7 +1,5 @@
 defmodule Teiserver.Lobby.LobbyLib do
-  @moduledoc """
-
-  """
+  @moduledoc false
 
   alias Phoenix.PubSub
   alias Teiserver.Account
