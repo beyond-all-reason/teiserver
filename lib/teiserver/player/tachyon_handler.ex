@@ -245,7 +245,6 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_info(:force_disconnect, state) do
-    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: send a proper tachyon message to inform the client it is getting disconnected
     {:stop, :normal, state}
   end
@@ -354,29 +353,29 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("messaging/send", "request", _message_id, msg, state) do
-    # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
-    with {:ok, target} <- message_target_from_tachyon(msg["data"]["target"]) do
-      case target do
-        {:player, _user_id} ->
-          msg =
-            Messaging.new(
-              msg["data"]["message"],
-              {:player, state.user.id},
-              :erlang.monotonic_time(:micro_seconds)
-            )
+    case message_target_from_tachyon(msg["data"]["target"]) do
+      {:ok, target} ->
+        case target do
+          {:player, _user_id} ->
+            msg =
+              Messaging.new(
+                msg["data"]["message"],
+                {:player, state.user.id},
+                :erlang.monotonic_time(:micro_seconds)
+              )
 
-          case Messaging.send(msg, target) do
-            :ok -> {:response, state}
-            {:error, :invalid_recipient} -> {:error_response, :invalid_target, state}
-          end
+            case Messaging.send(msg, target) do
+              :ok -> {:response, state}
+              {:error, :invalid_recipient} -> {:error_response, :invalid_target, state}
+            end
 
-        :party ->
-          case Session.send_party_message(state.user.id, msg["data"]["message"]) do
-            :ok -> {:response, state}
-            {:error, reason} -> {:error_response, :invalid_request, inspect(reason), state}
-          end
-      end
-    else
+          :party ->
+            case Session.send_party_message(state.user.id, msg["data"]["message"]) do
+              :ok -> {:response, state}
+              {:error, reason} -> {:error_response, :invalid_request, inspect(reason), state}
+            end
+        end
+
       {:error, :invalid_recipient} ->
         {:error_response, :invalid_target, state}
     end
@@ -659,7 +658,6 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/create", "request", _msg_id, msg, state) do
-    # credo:disable-for-next-line Credo.Check.Design.TagTODO
     # TODO: the `lobby/update` has very similar logic. There should be a way
     # to combine the parsing
     create_data = %{

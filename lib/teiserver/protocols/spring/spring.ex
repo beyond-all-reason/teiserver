@@ -229,14 +229,11 @@ defmodule Teiserver.Protocols.Spring do
   end
 
   def unzip(data) do
-    # credo:disable-for-next-line Credo.Check.Readability.PreferImplicitTry
-    try do
-      result = :zlib.uncompress(data)
-      {:ok, result}
-    rescue
-      _error ->
-        {:error, :unzip_decompress}
-    end
+    result = :zlib.uncompress(data)
+    {:ok, result}
+  rescue
+    _error ->
+      {:error, :unzip_decompress}
   end
 
   @spec decode_value(String.t()) :: {:ok, any} | {:error, String.t()}

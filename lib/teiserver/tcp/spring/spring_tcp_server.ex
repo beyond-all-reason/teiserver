@@ -1434,15 +1434,11 @@ defmodule Teiserver.SpringTcpServer do
       # > Received `Packet`s are delivered as lists of bytes,
       mode: :list,
 
-      # credo:disable-for-next-line Credo.Check.Design.TagFIXME
-      # FIXME: This looks sketchy!
       # Why don't we verify the certificate when we do a TLS upgrade?
+      # Reason: Because when we did stuff broke, I can't recall what it broke
+      # if we were going to stick with Spring then I would suggest addressing
+      # this
       verify: :verify_none
-
-      # NOTE: Deprecated since OTP-17, has no effect.
-      # For newest version mentioning this option see:
-      # https://www.erlang.org/docs/22/apps/ssl/ssl.pdf
-      # ssl_imp: :new
     ]
   end
 end

@@ -194,7 +194,6 @@ defmodule Teiserver.Support.Tachyon do
     "ws://#{conf[:url][:host]}:#{conf[:http][:port]}/tachyon"
   end
 
-  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO tachyon_mvp: add a json validation here to make sure the request
   # sent there is conforming
   def request(command_id, data \\ nil) do
@@ -259,7 +258,6 @@ defmodule Teiserver.Support.Tachyon do
     WSC.send_message(client, {:text, event(command_id, data) |> Jason.encode!()})
   end
 
-  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO tachyon_mvp: create a version of this function that also check the
   # the response against the expected json schema
   def recv_message(client, opts \\ []) do
@@ -274,14 +272,12 @@ defmodule Teiserver.Support.Tachyon do
           {:ok, decoded}
         else
           {:error, %JsonXema.ValidationError{} = err} ->
-            # credo:disable-for-next-line Credo.Check.Warning.IoInspect
             resp |> Jason.decode!() |> IO.inspect(label: "schema validation failed on")
             {:error, err}
 
           err ->
-            # credo:disable-for-next-line Credo.Check.Warning.IoInspect
             resp |> Jason.decode!() |> IO.inspect(label: "schema validation failed on")
-            # credo:disable-for-next-line Credo.Check.Warning.IoInspect
+
             IO.inspect(err, label: "unknown error")
             err
         end

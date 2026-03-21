@@ -753,7 +753,6 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
       host_data = %{
         ips: ["127.0.0.1"],
-        # credo:disable-for-next-line Credo.Check.Readability.LargeNumbers
         port: 48912
       }
 

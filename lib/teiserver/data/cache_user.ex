@@ -258,7 +258,6 @@ defmodule Teiserver.CacheUser do
         {:error, "Too many repeated symbols in name"}
 
       true ->
-        # credo:disable-for-next-line Credo.Check.Design.TagTODO
         # TODO: create a unique index on lower(name) so that this check is fast
         # (and also redundant)
         users = Account.query_users(search: [name_lower: name], select: [:name])
@@ -917,14 +916,12 @@ defmodule Teiserver.CacheUser do
         {:error, "Account is not verified"}
 
       true ->
-        # credo:disable-for-next-line Credo.Check.Design.TagTODO
         # TODO: copy/paste the capacity restriction and queuing from try_md5_login later
         :telemetry.execute([:tachyon, :login, :ok], %{count: 1})
         do_login(user, ip, lobby_client, lobby_hash)
     end
   end
 
-  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: once we got rid of spring, do_login should not accept the IP as a string
   # but as a :inet.ip_address which is what we get from the conn object
   # And then we need to stringify it as usual when storing in DB
@@ -1204,7 +1201,6 @@ defmodule Teiserver.CacheUser do
       not String.contains?(email, ".") ->
         {:error, "invalid email"}
 
-      # credo:disable-for-next-line Credo.Check.Design.TagTODO
       # TODO: create a unique index on lower(email) so that this check is fast
       # (and also redundant)
       Account.query_users(search: [email_lower: email], select: [:email]) != [] ->

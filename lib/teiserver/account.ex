@@ -1953,54 +1953,55 @@ defmodule Teiserver.Account do
 
         existing_request ->
           # Auto-accept the existing request
-          # credo:disable-for-next-line Credo.Check.Readability.WithSingleClause
-          with :ok <- FriendRequestLib.accept_friend_request(existing_request) do
-            # Send pubsub broadcasts for both users to update UI
-            PubSub.broadcast(
-              Teiserver.PubSub,
-              "account_user_relationships:#{existing_request.from_user_id}",
-              %{
-                channel: "account_user_relationships:#{existing_request.from_user_id}",
-                event: :friend_request_accepted,
-                userid: existing_request.from_user_id,
-                accepter_id: existing_request.to_user_id
-              }
-            )
 
-            PubSub.broadcast(
-              Teiserver.PubSub,
-              "account_user_relationships:#{existing_request.to_user_id}",
-              %{
-                channel: "account_user_relationships:#{existing_request.to_user_id}",
-                event: :friend_request_accepted,
-                userid: existing_request.to_user_id,
-                accepter_id: existing_request.from_user_id
-              }
-            )
+          case FriendRequestLib.accept_friend_request(existing_request) do
+            :ok ->
+              # Send pubsub broadcasts for both users to update UI
+              PubSub.broadcast(
+                Teiserver.PubSub,
+                "account_user_relationships:#{existing_request.from_user_id}",
+                %{
+                  channel: "account_user_relationships:#{existing_request.from_user_id}",
+                  event: :friend_request_accepted,
+                  userid: existing_request.from_user_id,
+                  accepter_id: existing_request.to_user_id
+                }
+              )
 
-            # Clear caches for both users
-            Teiserver.cache_delete(
-              :account_incoming_friend_request_cache,
-              existing_request.from_user_id
-            )
+              PubSub.broadcast(
+                Teiserver.PubSub,
+                "account_user_relationships:#{existing_request.to_user_id}",
+                %{
+                  channel: "account_user_relationships:#{existing_request.to_user_id}",
+                  event: :friend_request_accepted,
+                  userid: existing_request.to_user_id,
+                  accepter_id: existing_request.from_user_id
+                }
+              )
 
-            Teiserver.cache_delete(
-              :account_outgoing_friend_request_cache,
-              existing_request.from_user_id
-            )
+              # Clear caches for both users
+              Teiserver.cache_delete(
+                :account_incoming_friend_request_cache,
+                existing_request.from_user_id
+              )
 
-            Teiserver.cache_delete(
-              :account_incoming_friend_request_cache,
-              existing_request.to_user_id
-            )
+              Teiserver.cache_delete(
+                :account_outgoing_friend_request_cache,
+                existing_request.from_user_id
+              )
 
-            Teiserver.cache_delete(
-              :account_outgoing_friend_request_cache,
-              existing_request.to_user_id
-            )
+              Teiserver.cache_delete(
+                :account_incoming_friend_request_cache,
+                existing_request.to_user_id
+              )
 
-            {:ok, :auto_accepted}
-          else
+              Teiserver.cache_delete(
+                :account_outgoing_friend_request_cache,
+                existing_request.to_user_id
+              )
+
+              {:ok, :auto_accepted}
+
             {:error, reason} ->
               {:error, reason}
           end
@@ -2221,7 +2222,6 @@ defmodule Teiserver.Account do
   @spec update_client(T.userid(), map()) :: nil | :ok
   defdelegate update_client(userid, partial_client), to: ClientLib
 
-  # credo:disable-for-next-line Credo.Check.Design.TagTODO
   # TODO: Remove these in favour of update_client
   @spec merge_update_client(map()) :: nil | :ok
   defdelegate merge_update_client(client), to: ClientLib
