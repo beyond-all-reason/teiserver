@@ -4,7 +4,6 @@ defmodule Teiserver.Bridge.BridgeServer do
   """
 
   alias Nostrum.Api.Channel
-  alias Nostrum.Api.Message
   alias Nostrum.Api.Thread
   alias Phoenix.PubSub
   alias Teiserver.Account
@@ -57,7 +56,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       nil
     else
       channel_id = user.discord_dm_channel_id || user.discord_dm_channel
-      Message.create(channel_id, message)
+      Communication.new_discord_message(channel_id, message)
     end
   end
 
@@ -228,14 +227,20 @@ defmodule Teiserver.Bridge.BridgeServer do
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #main")
 
       if channel_id do
-        Message.create(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
+        Communication.new_discord_message(
+          channel_id,
+          "Teiserver startup for node #{Teiserver.node_name()}"
+        )
       end
 
       # Server
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
 
       if channel_id do
-        Message.create(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
+        Communication.new_discord_message(
+          channel_id,
+          "Teiserver startup for node #{Teiserver.node_name()}"
+        )
       end
     end
 
@@ -247,7 +252,10 @@ defmodule Teiserver.Bridge.BridgeServer do
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
 
       if channel_id do
-        Message.create(channel_id, "Teiserver shutdown for node #{Teiserver.node_name()}")
+        Communication.new_discord_message(
+          channel_id,
+          "Teiserver shutdown for node #{Teiserver.node_name()}"
+        )
       end
     end
 
@@ -401,7 +409,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       message
       |> convert_emoticons()
 
-    Message.create(channel, "**#{author}**: #{new_message}")
+    Communication.new_discord_message(channel, "**#{author}**: #{new_message}")
   end
 
   defp convert_emoticons(message) do
