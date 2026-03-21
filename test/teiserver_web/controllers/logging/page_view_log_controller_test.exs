@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
+  alias Teiserver.AccountFixtures
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Logging
   alias Teiserver.Logging.LoggingTestLib
-  alias Teiserver.AccountFixtures
 
   use TeiserverWeb.ConnCase, async: false
 
