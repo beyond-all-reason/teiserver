@@ -939,6 +939,17 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert vote_update.id == vote.id
     end
 
+    test "changing a second time does nothing" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      assert vote != nil
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+    end
+
     test "vote timeout triggers event" do
       %{id: id} = setup_full_lobby([1, 1])
       :ok = Lobby.join_queue(id, "2")
@@ -1051,6 +1062,17 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:vote_ended, vote_id, result}}
       assert vote_id == vote.id
       assert result == :failed
+    end
+
+    test "cannot change map when vote already pending" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{players: %{}}}}
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      assert vote != nil
+
+      {:error, _} = Lobby.update_properties(id, @default_user_id, %{map_name: "different map"})
     end
   end
 

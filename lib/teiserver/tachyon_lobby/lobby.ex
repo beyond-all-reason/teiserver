@@ -1764,6 +1764,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
       not is_map_key(state.players, user_id) ->
         {:error, "Only players can change the map"}
 
+      state.current_vote ->
+        case state.current_vote.action do
+          # make changing map idempotent, it's just a nicer API this way
+          {:change_map, ^new_name} -> {:ok, []}
+          _ -> {:error, :vote_in_progress}
+        end
+
       Enum.count(state.players, fn {_, p} -> not bot_id?(p.id) end) > 1 ->
         vote_duration_s = 60
 
