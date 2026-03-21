@@ -15,7 +15,7 @@ defmodule Teiserver.AccountFixtures do
       |> Map.get(:permissions, [])
       |> AuthLib.split_permissions()
 
-    {:ok, tag} =
+    {:ok, user} =
       attrs
       |> Enum.into(%{
         name: "Test",
@@ -28,7 +28,7 @@ defmodule Teiserver.AccountFixtures do
       })
       |> Account.create_user()
 
-    tag
+    user
   end
 
   @doc """

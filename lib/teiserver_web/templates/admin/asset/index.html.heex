@@ -27,6 +27,9 @@
                   <tr style="vertical-align: middle;">
                     <td>{engine.name}</td>
                     <td>
+                      {Calendar.strftime(engine.inserted_at, "%Y-%m-%d %H:%M:%S %Z")}
+                    </td>
+                    <td :if={false}>
                       {Timex.format!(
                         engine.inserted_at,
                         "{YYYY}-{0M}-{0D} {0h24}:{0m}:{0s} {Zabbr}"
@@ -98,6 +101,9 @@
                   <tr style="vertical-align: middle;">
                     <td>{game.name}</td>
                     <td>
+                      {Calendar.strftime(game.inserted_at, "%Y-%m-%d %H:%M:%S %Z")}
+                    </td>
+                    <td :if={false}>
                       {Timex.format!(
                         game.inserted_at,
                         "{YYYY}-{0M}-{0D} {0h24}:{0m}:{0s} {Zabbr}"

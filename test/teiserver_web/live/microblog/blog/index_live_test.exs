@@ -55,7 +55,6 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
   describe "Anon Index" do
     setup [:filler_posts]
 
-    @tag :needs_attention
     test "viewing the blog", %{conn: conn, post1: post1} do
       {:ok, index_live, html} = live(conn, ~p"/microblog")
 
@@ -95,7 +94,6 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
   describe "Index" do
     setup [:filler_posts, :auth_setup]
 
-    @tag :needs_attention
     test "User without preferences", %{conn: conn, user: _user, post1: post1} do
       {:ok, index_live, html} = live(conn, ~p"/microblog")
 
@@ -131,7 +129,6 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
       refute html =~ "Post 3 fold line"
     end
 
-    @tag :needs_attention
     test "Including preferences", %{conn: conn, user: user, post3: post3, tag1: tag1} do
       user_preference_fixture(%{
         user_id: user.id,

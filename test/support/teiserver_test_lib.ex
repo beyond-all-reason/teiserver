@@ -3,7 +3,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   alias ExUnit.Callbacks
   alias Teiserver.Account
-  alias Teiserver.Account.AccoladeBotServer
+  # alias Teiserver.Account.AccoladeBotServer
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.CacheUser
   alias Teiserver.Clans
@@ -457,9 +457,8 @@ defmodule Teiserver.TeiserverTestLib do
     |> Moderation.create_report_group_and_report()
   end
 
-  def seed do
+  def teiserver_seed do
     CoordinatorServer.get_coordinator_account()
-    AccoladeBotServer.get_accolade_account()
 
     Account.get_or_add_smurf_key_type("client_app_hash")
     Account.get_or_add_smurf_key_type("chobby_hash")
@@ -474,6 +473,9 @@ defmodule Teiserver.TeiserverTestLib do
     Telemetry.get_or_add_complex_server_event_type("Server startup")
     Telemetry.get_or_add_simple_server_event_type("account.user_login")
     Telemetry.get_or_add_simple_server_event_type("lobby.force_add_user_to_lobby")
+    Telemetry.get_or_add_simple_server_event_type("disconnect")
+    Telemetry.get_or_add_simple_server_event_type("disconnect::tcp_closed with socket")
+    Telemetry.get_or_add_simple_server_event_type("disconnect:tcp_server terminate")
     Telemetry.get_or_add_complex_client_event_type("client.user_event")
     Telemetry.get_or_add_complex_client_event_type("client.user_event")
 

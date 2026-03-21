@@ -4,12 +4,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Guardian
-  alias Teiserver.Account.User
-  alias Teiserver.Config.SiteConfig
-  alias Teiserver.Logging.LoggingTestLib
-  alias Teiserver.Repo
   alias TeiserverWeb.UserSocket
-  import Ecto.Query
   import Phoenix.ChannelTest
   import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
 
@@ -42,38 +37,32 @@ defmodule Teiserver.Helpers.GeneralTestLib do
     u
   end
 
-  def seeded? do
-    query = from c in SiteConfig, where: c.key == "test.seeded"
-    r = Repo.one(query)
-    r != nil
-  end
+  # def seed do
+  #   %SiteConfig{}
+  #   |> SiteConfig.changeset(%{
+  #     key: "test.seeded",
+  #     value: "true"
+  #   })
+  #   |> Repo.insert()
 
-  def seed do
-    %SiteConfig{}
-    |> SiteConfig.changeset(%{
-      key: "test.seeded",
-      value: "true"
-    })
-    |> Repo.insert()
+  #   users = [
+  #     make_user(%{
+  #       "name" => "dud user",
+  #       "email" => "dud_user@dud_user.com",
+  #       "permissions" => []
+  #     }),
+  #     make_user(%{
+  #       "name" => "other user",
+  #       "email" => "other_user@other_user.com",
+  #       "permissions" => []
+  #     })
+  #   ]
 
-    users = [
-      make_user(%{
-        "name" => "dud user",
-        "email" => "dud_user@dud_user.com",
-        "permissions" => []
-      }),
-      make_user(%{
-        "name" => "other user",
-        "email" => "other_user@other_user.com",
-        "permissions" => []
-      })
-    ]
-
-    [
-      users: users
-    ]
-    |> LoggingTestLib.seed()
-  end
+  #   [
+  #     users: users
+  #   ]
+  #   |> LoggingTestLib.seed()
+  # end
 
   def login(conn, email) do
     conn
@@ -144,12 +133,6 @@ defmodule Teiserver.Helpers.GeneralTestLib do
         login(build_conn(), user.email)
       end
 
-    dud_user =
-      if flags[:dud_user] do
-        query = from u in User, where: u.name == "dud user"
-        Repo.one(query)
-      end
-
     socket =
       if flags[:socket] do
         case connect(UserSocket, %{"token" => jwt}) do
@@ -161,7 +144,6 @@ defmodule Teiserver.Helpers.GeneralTestLib do
         end
       end
 
-    {:ok,
-     r: r, user: user, jwt: jwt, conn: conn, dud_user: dud_user, user_token: jwt, socket: socket}
+    {:ok, r: r, user: user, jwt: jwt, conn: conn, user_token: jwt, socket: socket}
   end
 end

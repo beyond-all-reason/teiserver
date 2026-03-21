@@ -522,7 +522,8 @@ defmodule TeiserverWeb.Router do
     put("/report/:id/close", ReportController, :close)
     put("/report/:id/open", ReportController, :open)
 
-    get("/action/search", ActionController, :search)
+    get("/action/search", ActionController, :index)
+    post("/action/search", ActionController, :index)
     get("/action/new_with_user", ActionController, :new_with_user)
     put("/action/halt/:id", ActionController, :halt)
     put("/action/re-post/:id", ActionController, :re_post)

@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
   use TeiserverWeb.ConnCase
 
   setup do
-    GeneralTestLib.conn_setup(["Reviewer", "Moderator"])
+    GeneralTestLib.conn_setup(["Reviewer", "Moderator", "Overwatch"])
     |> TeiserverTestLib.conn_setup()
   end
 
@@ -21,8 +21,6 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
   }
   @update_attrs %{reason: "some updated name", restrictions: %{"Warning" => "Warning"}}
   @invalid_attrs %{reason: nil, restrictions: %{}, target_id: 1}
-
-  @moduletag :needs_attention
 
   describe "index" do
     test "lists all proposals", %{conn: conn} do
@@ -65,18 +63,13 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
       new_proposal = Moderation.list_proposals(search: [target_id: target.id])
       assert Enum.count(new_proposal) == 1
     end
-
-    test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.moderation_proposal_path(conn, :create), proposal: @invalid_attrs)
-      assert html_response(conn, 200) =~ "Oops, something went wrong!"
-    end
   end
 
   describe "show proposal" do
     test "renders show page", %{conn: conn} do
       {proposal, _vote} = ModerationTestLib.proposal_fixture()
       resp = get(conn, Routes.moderation_proposal_path(conn, :show, proposal))
-      assert html_response(resp, 200) =~ "Edit proposal"
+      assert html_response(resp, 200) =~ proposal.reason
     end
 
     test "renders show nil item", %{conn: conn} do

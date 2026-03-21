@@ -7,10 +7,8 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
 
   use TeiserverWeb.ConnCase
 
-  @moduletag :needs_attention
-
   setup do
-    GeneralTestLib.conn_setup(["Reviewer", "Moderator"])
+    GeneralTestLib.conn_setup(["Reviewer", "Moderator", "Overwatch"])
     |> TeiserverTestLib.conn_setup()
   end
 

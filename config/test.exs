@@ -62,10 +62,11 @@ config :teiserver, Teiserver.OAuth, issuer: "http://localhost:4002"
 # Print only warnings and errors during test
 config :logger, level: :warning
 
-config :teiserver, Oban, testing: :manual
-# queues: false,
-# plugins: false,
-# crontab: false
+config :teiserver, Oban,
+  testing: :manual,
+  queues: false,
+  plugins: false,
+  crontab: false
 
 config :teiserver, Teiserver.Mailer,
   adapter: Bamboo.TestAdapter,
