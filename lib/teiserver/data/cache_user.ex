@@ -77,7 +77,7 @@ defmodule Teiserver.CacheUser do
     |> String.graphemes()
     |> Enum.frequencies()
     |> Enum.count(fn {_char, val} -> val > 2 end)
-    z|> Kernel.>(0)
+    |> Kernel.>(0)
   end
 
   def user_register_params_with_md5(name, email, md5_password, extra_data \\ %{}) do

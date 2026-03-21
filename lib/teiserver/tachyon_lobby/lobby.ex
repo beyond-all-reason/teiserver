@@ -976,8 +976,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp call_lobby(lobby_id, message, timeout \\ @default_call_timeout) do
     via_tuple(lobby_id) |> :gen_statem.call(message, timeout)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _reason} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @spec get_overview_from_state(state :: state()) :: TachyonLobby.List.overview()
