@@ -76,10 +76,8 @@ defmodule Teiserver.CacheUser do
     |> String.replace(~r/[[:alnum:]]/, "")
     |> String.graphemes()
     |> Enum.frequencies()
-    # credo:disable-for-lines:2 Credo.Check.Refactor.FilterCount
-    |> Enum.filter(fn {_char, val} -> val > 2 end)
-    |> Enum.count()
-    |> Kernel.>(0)
+    |> Enum.count(fn {_char, val} -> val > 2 end)
+    z|> Kernel.>(0)
   end
 
   def user_register_params_with_md5(name, email, md5_password, extra_data \\ %{}) do

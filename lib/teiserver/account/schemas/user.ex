@@ -334,5 +334,4 @@ defmodule Teiserver.Account.User do
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
   def authorize(_action, conn, _data), do: allow?(conn, "admin.user")
-  # def authorize(_, _, _), do: false
 end
