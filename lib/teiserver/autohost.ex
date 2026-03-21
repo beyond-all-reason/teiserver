@@ -90,8 +90,8 @@ defmodule Teiserver.Autohost do
     if autohost_val == nil, do: nil, else: autohost_val[:id]
   end
 
-  @spec start_battle(Bot.id(), Teiserver.TachyonBattle.id(), pid(), start_script()) ::
-          {:ok, start_response()} | {:error, term()}
+  @spec start_battle(Bot.id(), TachyonBattle.id(), pid(), start_script()) ::
+          {:ok, autohost_pid :: pid(), start_response()} | {:error, term()}
   defdelegate start_battle(bot_id, battle_id, battle_pid, start_script),
     to: Session
 

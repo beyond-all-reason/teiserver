@@ -12,6 +12,8 @@ defmodule Teiserver.TachyonBattle.Battle do
 
   require Logger
 
+  @type connection_info :: %{ips: [String.t()], port: integer()}
+
   @type state :: %{
           id: T.id(),
           match_id: T.match_id(),
@@ -23,7 +25,12 @@ defmodule Teiserver.TachyonBattle.Battle do
           # finished: the battle is over, but there are still some player in the match,
           # maybe looking at stats or whatever
           # shutting_down: only used when the engine is terminating
-          battle_state: :initialised | :in_progress | :finished | :shutting_down
+          battle_state: :initialised | :in_progress | :finished | :shutting_down,
+
+          # store the connection info for the actual battle so that player can
+          # join/rejoin
+          ips: [String.t()],
+          port: integer()
         }
 
   def start(%{battle_id: battle_id} = arg) do
@@ -52,6 +59,16 @@ defmodule Teiserver.TachyonBattle.Battle do
   @spec kill(T.id()) :: :ok | {:error, reason :: term()}
   def kill(battle_id) do
     battle_id |> via_tuple() |> GenServer.call(:kill)
+  catch
+    :exit, {:noproc, _details} -> {:error, :invalid_battle}
+  end
+
+  @doc """
+  the bits required for a client to connect to an ongoing battle
+  """
+  @spec get_connection_info(T.id()) :: {:ok, connection_info()} | {:error, :invalid_battle}
+  def get_connection_info(battle_id) do
+    via_tuple(battle_id) |> GenServer.call(:get_connection_info)
   catch
     :exit, {:noproc, _details} -> {:error, :invalid_battle}
   end
@@ -97,18 +114,30 @@ defmodule Teiserver.TachyonBattle.Battle do
     # 8h is more than enough time for any online game
     :timer.send_after(8 * 60 * 60_000, :battle_timeout)
 
-    case Autohost.lookup_autohost(autohost_id) do
-      {pid, _value} ->
-        Logger.info("init battle for autohost #{autohost_id}")
-        Process.monitor(pid)
-        {:ok, %{state | autohost_pid: pid}}
+    case Autohost.start_battle(autohost_id, battle_id, self(), start_script) do
+      {:ok, autohost_pid, data} ->
+        Logger.info("battle initialised with autohost #{autohost_id}")
+        Process.monitor(autohost_pid)
 
-      nil ->
-        {:stop, :no_autohost}
+        new_state =
+          state
+          |> Map.put(:autohost_pid, autohost_pid)
+          |> Map.put(:ips, data.ips)
+          |> Map.put(:port, data.port)
+
+        {:ok, new_state}
+
+      {:error, err} ->
+        Logger.error("Cannot start battle with autohost #{autohost_id}")
+        {:stop, err}
     end
   end
 
   @impl GenServer
+  def handle_call(:get_connection_info, _from, state) do
+    {:reply, {:ok, Map.take(state, [:ips, :port])}, state}
+  end
+
   def handle_call({:send_message, msg}, _from, state) do
     case state.autohost_id do
       nil ->

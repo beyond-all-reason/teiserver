@@ -27,6 +27,14 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
   test "battle timeout", %{autohost: autohost, autohost_client: autohost_client} do
     Polling.poll_until_some(&Autohost.find_autohost/0)
 
+    Task.async(fn ->
+      %{"commandId" => "autohost/start"} = start_req = Tachyon.recv_message!(autohost_client)
+
+      Tachyon.send_response(autohost_client, start_req, %{
+        data: %{"ips" => ["1.2.3.4"], "port" => 12345}
+      })
+    end)
+
     assert {:ok, pid} =
              Battle.start(%{
                battle_id: "whatever",
@@ -46,6 +54,14 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
     battle_id = "whatever"
     start_script = BotFixtures.start_script()
 
+    Task.async(fn ->
+      %{"commandId" => "autohost/start"} = start_req = Tachyon.recv_message!(autohost_client)
+
+      Tachyon.send_response(autohost_client, start_req, %{
+        data: %{"ips" => ["1.2.3.4"], "port" => 12345}
+      })
+    end)
+
     assert {:ok, _pid} =
              Battle.start(%{
                battle_id: battle_id,
@@ -54,18 +70,6 @@ defmodule TeiserverWeb.Tachyon.BattleTest do
                autohost_timeout: 1,
                start_script: start_script
              })
-
-    pid = self()
-
-    start_task =
-      Task.async(fn ->
-        Autohost.start_battle(autohost.id, battle_id, pid, start_script)
-      end)
-
-    %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(autohost_client)
-    Tachyon.send_response(autohost_client, req, data: %{ips: ["1.2.3.4"], port: 1234})
-
-    {:ok, _autohost_pid, _result} = Task.await(start_task)
 
     ev = %{
       battleId: battle_id,

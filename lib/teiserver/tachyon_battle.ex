@@ -21,16 +21,18 @@ defmodule Teiserver.TachyonBattle do
   @spec lookup(T.id()) :: pid() | nil
   defdelegate lookup(battle_id), to: TachyonBattle.Registry
 
+  @type connection_info :: TachyonBattle.Battle.connection_info()
+
   @doc """
   Start a battle process and connects it to the given autohost
   """
   @spec start_battle(Bot.id(), Autohost.start_script(), boolean()) ::
-          {:ok, {id(), pid()}, Autohost.start_response()} | {:error, term()}
+          {:ok, {id(), pid()}, connection_info()} | {:error, term()}
   def start_battle(autohost_id, start_script, is_matchmaking) do
     with {:ok, match} <- Battle.create_match_from_start_script(start_script, is_matchmaking),
          {:ok, battle_id, pid} <- start_battle_process(autohost_id, match.id, start_script) do
-      case Autohost.start_battle(autohost_id, battle_id, pid, start_script) do
-        {:ok, _autohost_pid, data} -> {:ok, {battle_id, pid}, data}
+      case TachyonBattle.Battle.get_connection_info(battle_id) do
+        {:ok, conn_info} -> {:ok, {battle_id, pid}, conn_info}
         x -> x
       end
     end
@@ -49,9 +51,9 @@ defmodule Teiserver.TachyonBattle do
       {:ok, pid, _info} ->
         {:ok, battle_id, pid}
 
-      err ->
+      {:error, err} ->
         Logger.warning("Cannot start battle: #{inspect(err)}")
-        {:error, "cannot start battle: #{inspect(err)}"}
+        {:error, err}
     end
   end
 
