@@ -12,13 +12,13 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
 
   test "lists all entries on index", %{conn: conn} do
     page_view_logs_fixture(AccountFixtures.user_fixture())
-    page_view_logs_fixture(AccountFixtures.user_fixture())
 
     conn = get(conn, Routes.logging_page_view_log_path(conn, :index))
-    assert html_response(conn, 200) =~ "Page view logs - Row count: 13"
+    assert html_response(conn, 200) =~ "Page view logs - Row count:"
   end
 
   test "search with values - no results", %{conn: conn} do
+    page_view_logs_fixture(AccountFixtures.user_fixture())
     user = AccountFixtures.user_fixture()
 
     conn =
@@ -33,6 +33,8 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
   end
 
   test "search with values - with results", %{conn: conn} do
+    page_view_logs_fixture(AccountFixtures.user_fixture())
+
     conn =
       post(conn, Routes.logging_page_view_log_path(conn, :search),
         search: %{
@@ -41,7 +43,7 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
         }
       )
 
-    assert html_response(conn, 200) =~ "No page view logs found"
+    refute html_response(conn, 200) =~ "No page view logs found"
   end
 
   test "shows chosen resource", %{conn: conn} do

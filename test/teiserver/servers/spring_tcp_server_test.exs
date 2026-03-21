@@ -382,7 +382,7 @@ defmodule Teiserver.SpringTcpServerTest do
   @tag :needs_attention
   test "dud users mode", context do
     # Here we're testing if the user isn't even known
-    user1 = new_user()
+    # user1 = new_user()
     non_user = new_user()
     %{user: dud} = auth_setup(context)
     %{socket: socket, user: user} = auth_setup(context)
