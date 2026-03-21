@@ -11,6 +11,8 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
   use TeiserverWeb, :live_component
 
+  require Logger
+
   import Teiserver.Helper.ColourHelper, only: [rgba_css: 2]
 
   @default_channel_name "Dev updates"
@@ -525,6 +527,10 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
       {:error, :discord_disabled} ->
         :ok
+
+      {:error, reason} ->
+        Logger.warning("Updating post #{post.discord_post_id} failed #{inspect(reason)}")
+        :error
     end
   end
 

@@ -223,7 +223,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   end
 
   @spec edit_discord_message(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
-          map | nil | {:error, String.t()}
+          map | nil | {:error, any()}
   def edit_discord_message(maybe_channel_id, message_id, new_message)
       when is_integer(message_id) do
     if use_discord?() do
@@ -240,7 +240,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   end
 
   @spec delete_discord_message(non_neg_integer | String.t(), non_neg_integer) ::
-          map | nil | {:error, String.t()}
+          map | nil | {:error, any()}
   def delete_discord_message(maybe_channel_id, message_id) do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
@@ -252,7 +252,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
-  @spec send_discord_dm(T.userid(), String.t()) :: map | nil | {:error, String.t()}
+  @spec send_discord_dm(T.userid(), String.t()) :: map | nil | {:error, any()}
   def send_discord_dm(userid, message) do
     if use_discord?() do
       user = Account.get_user_by_id(userid)
@@ -281,7 +281,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   end
 
   @spec create_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
-          map | nil | {:error, String.t()}
+          map | nil | {:error, any()}
   def create_discord_reaction(maybe_channel_id, message_id, emoji) do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
@@ -294,7 +294,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   end
 
   @spec delete_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
-          map | nil | {:error, String.t()}
+          map | nil | {:error, any()}
   def delete_discord_reaction(maybe_channel_id, message_id, emoji) do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
