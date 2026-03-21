@@ -14,6 +14,12 @@ defmodule Teiserver.Game.MatchRatingLibTest do
 
   use Teiserver.DataCase, async: true
 
+  setup do
+    # Ensure the active season is set for the tests
+    TeiserverTestLib.teiserver_seed()
+    :ok
+  end
+
   test "num_matches and num_wins is updated after rating a match" do
     # Create two user
     user1 = AccountTestLib.user_fixture()
