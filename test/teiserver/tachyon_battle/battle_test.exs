@@ -36,8 +36,24 @@ defmodule Teiserver.TachyonBattle.BattleTest do
     assert Task.await(task) == :ok
   end
 
+  test "add player" do
+    %{battle_id: battle_id, autohost_pid: autohost_pid} = setup_autohost_and_battle()
+    task = Task.async(fn -> Battle.add_player(battle_id, 12345, "playername", "hunter2") end)
+
+    assert_receive {:add_player, ref,
+                    %{
+                      name: "playername",
+                      user_id: 12345,
+                      password: "hunter2",
+                      battle_id: ^battle_id
+                    }}
+
+    Session.reply_add_player(autohost_pid, ref, :ok)
+    {:ok, %{port: _port, ips: _ips}} = Task.await(task)
+  end
+
   # setup a handshaked autohost with some defaults
-  defp setup_autohost_and_battle() do
+  defp setup_autohost_and_battle do
     match_id = :rand.uniform(10_000_000)
     autohost_id = :rand.uniform(10_000_000)
 

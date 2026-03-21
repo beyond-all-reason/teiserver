@@ -63,6 +63,18 @@ defmodule Teiserver.TachyonBattle.Battle do
     :exit, {:noproc, _details} -> {:error, :invalid_battle}
   end
 
+  @spec add_player(
+          T.id(),
+          Teiserver.Data.Types.userid(),
+          name :: String.t(),
+          password :: String.t()
+        ) :: {:ok, connection_info()} | {:error, term()}
+  def add_player(battle_id, user_id, name, password) do
+    via_tuple(battle_id) |> GenServer.call({:add_player, user_id, name, password})
+  catch
+    :exit, {:noproc, _details} -> {:error, :invalid_battle}
+  end
+
   @doc """
   the bits required for a client to connect to an ongoing battle
   """
@@ -164,6 +176,27 @@ defmodule Teiserver.TachyonBattle.Battle do
     # I believe it should happen when, after closing the engine, autohost
     # should send :engine_quit message (or something similar)
     # if that's not the case, we should terminate here
+  end
+
+  def handle_call({:add_player, user_id, name, password}, _from, state) do
+    case state.autohost_pid do
+      nil ->
+        {:reply, {:error, :no_autohost}, state}
+
+      pid ->
+        data = %{battle_id: state.id, user_id: user_id, name: name, password: password}
+
+        resp =
+          case Autohost.add_player(pid, data) do
+            :ok ->
+              {:ok, Map.take(state, [:ips, :port])}
+
+            {:error, err} ->
+              {:error, err}
+          end
+
+        {:reply, resp, state}
+    end
   end
 
   def handle_call(:get_match_id, _from, state) do

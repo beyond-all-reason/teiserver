@@ -66,6 +66,14 @@ defmodule Teiserver.TachyonBattle do
   @spec kill(T.id()) :: :ok | {:error, reason :: term()}
   defdelegate kill(battle_id), to: TachyonBattle.Battle
 
+  @spec add_player(
+          T.id(),
+          Teiserver.Data.Types.userid(),
+          name :: String.t(),
+          password :: String.t()
+        ) :: {:ok, connection_info()} | {:error, term()}
+  defdelegate add_player(battle_id, user_id, name, password), to: TachyonBattle.Battle
+
   @spec get_match_id(T.id()) :: term() | nil
   defdelegate get_match_id(battle_id), to: TachyonBattle.Battle
 

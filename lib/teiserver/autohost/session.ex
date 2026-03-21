@@ -137,6 +137,18 @@ defmodule Teiserver.Autohost.Session do
     send(session_pid, {:reply_kill_battle, ref, resp})
   end
 
+  @spec add_player(pid(), TachyonBattle.Types.add_player_data()) :: :ok | {:error, term()}
+  def add_player(session_pid, add_data) do
+    :gen_statem.call(session_pid, {:add_player, add_data}, @default_call_timeout)
+  catch
+    :exit, {:noproc, _details} -> {:error, :no_autohost}
+  end
+
+  @spec reply_add_player(pid(), reference(), :ok | {:error, reason :: term()}) :: :ok
+  def reply_add_player(session_pid, ref, resp) do
+    send(session_pid, {:reply_add_player, ref, resp})
+  end
+
   @doc """
   should only be used for testing, get the `since` for subscribeUpdates
   """
@@ -238,6 +250,21 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data}
   end
 
+  def handle_event({:call, from}, {:add_player, _add_data}, _state, data)
+      when data.conn_pid == nil,
+      do: {:keep_state, data, [{:reply, from, {:error, :no_autohost}}]}
+
+  def handle_event({:call, from}, {:add_player, add_data}, _state, data)
+      when not is_map_key(data.active_battles, add_data.battle_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :invalid_battle}}]}
+
+  def handle_event({:call, from}, {:add_player, add_data}, _state, data) do
+    ref = make_ref()
+    TachyonHandler.add_player(data.conn_pid, ref, add_data)
+    data = Map.update!(data, :pending_replies, &Map.put(&1, ref, from))
+    {:keep_state, data}
+  end
+
   def handle_event({:call, from}, :inspect_subscription_start, _state, data) do
     {:keep_state, data, [{:reply, from, get_subscription_start(data)}]}
   end
@@ -247,6 +274,17 @@ defmodule Teiserver.Autohost.Session do
       do: {:keep_state, data}
 
   def handle_event(:info, {:reply_kill_battle, ref, resp}, _state, data) do
+    {from, pending_replies} = Map.pop!(data.pending_replies, ref)
+    data = %{data | pending_replies: pending_replies}
+    GenServer.reply(from, resp)
+    {:keep_state, data}
+  end
+
+  def handle_event(:info, {:reply_add_player, ref, _resp}, _state, data)
+      when not is_map_key(data.pending_replies, ref),
+      do: {:keep_state, data}
+
+  def handle_event(:info, {:reply_add_player, ref, resp}, _state, data) do
     {from, pending_replies} = Map.pop!(data.pending_replies, ref)
     data = %{data | pending_replies: pending_replies}
     GenServer.reply(from, resp)

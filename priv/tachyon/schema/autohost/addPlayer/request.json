@@ -1,0 +1,28 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/autohost/addPlayer/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AutohostAddPlayerRequest",
+    "tachyon": {
+        "source": "server",
+        "target": "autohost",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "autohost/addPlayer" },
+        "data": {
+            "title": "AutohostAddPlayerRequestData",
+            "type": "object",
+            "properties": {
+                "battleId": { "type": "string", "format": "uuid" },
+                "userId": { "$ref": "../../definitions/userId.json" },
+                "name": { "type": "string" },
+                "password": { "type": "string" }
+            },
+            "required": ["battleId", "userId", "name", "password"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

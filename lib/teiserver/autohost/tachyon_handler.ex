@@ -67,6 +67,12 @@ defmodule Teiserver.Autohost.TachyonHandler do
     send(conn_pid, {:kill_battle, ref, battle_id})
   end
 
+  @spec add_player(pid(), reference(), TachyonBattle.Types.add_player_data()) ::
+          :ok | {:error, reason :: term()}
+  def add_player(conn_pid, ref, add_data) do
+    send(conn_pid, {:add_player, ref, add_data})
+  end
+
   @impl Handler
   def connect(conn) do
     autohost = conn.assigns[:token].bot
@@ -123,6 +129,19 @@ defmodule Teiserver.Autohost.TachyonHandler do
   def handle_info({:kill_battle, ref, battle_id}, state) do
     opts = [cb_state: ref]
     {:request, "autohost/kill", %{battleId: battle_id}, opts, state}
+  end
+
+  def handle_info({:add_player, ref, data}, state) do
+    mappings = %{
+      battle_id: "battleId",
+      user_id: {"userId", &to_string/1},
+      name: "name",
+      password: "password"
+    }
+
+    tachyon_data = Collections.transform_map(data, mappings)
+    opts = [cb_state: ref]
+    {:request, "autohost/addPlayer", tachyon_data, opts, state}
   end
 
   def handle_info(_msg, state) do
@@ -255,6 +274,25 @@ defmodule Teiserver.Autohost.TachyonHandler do
       end
 
     Session.reply_kill_battle(state.session_pid, ref, resp)
+    {:ok, state}
+  end
+
+  def handle_response("autohost/addPlayer", ref, response, state) do
+    resp =
+      case response["status"] do
+        "success" ->
+          :ok
+
+        "failed" ->
+          err = response["reason"]
+
+          case Map.get(response, "details") do
+            nil -> {:error, err}
+            details -> {:error, "#{err} - #{details}"}
+          end
+      end
+
+    Session.reply_add_player(state.session_pid, ref, resp)
     {:ok, state}
   end
 
