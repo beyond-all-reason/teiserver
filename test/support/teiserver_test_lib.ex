@@ -3,7 +3,6 @@ defmodule Teiserver.TeiserverTestLib do
 
   alias ExUnit.Callbacks
   alias Teiserver.Account
-  alias Teiserver.Account.AccoladeBotServer
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.CacheUser
   alias Teiserver.Clans
@@ -459,7 +458,6 @@ defmodule Teiserver.TeiserverTestLib do
 
   def seed do
     CoordinatorServer.get_coordinator_account()
-    AccoladeBotServer.get_accolade_account()
 
     Account.get_or_add_smurf_key_type("client_app_hash")
     Account.get_or_add_smurf_key_type("chobby_hash")

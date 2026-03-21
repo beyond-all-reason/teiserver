@@ -2,7 +2,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Phoenix.LiveView.Socket
   alias Phoenix.PubSub
   alias Teiserver
-  alias Teiserver.Account.AccoladeLib
   alias Teiserver.Admin.AdminLib
   alias Teiserver.Battle
   alias Teiserver.Battle.MatchMonitorServer
@@ -162,7 +161,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     server_pids = [
       {"Lobby ID server", lobby_id_server_pid},
       {"Coordinator", Coordinator.get_coordinator_pid()},
-      {"Accolades", AccoladeLib.get_accolade_bot_pid()},
       {"Match Monitor", MatchMonitorServer.get_match_monitor_pid()},
       {"Automod", AutomodServer.get_automod_pid()},
       {"Discord Bridge Bot", BridgeServer.get_bridge_pid()}

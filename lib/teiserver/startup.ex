@@ -2,7 +2,6 @@ defmodule Teiserver.Startup do
   @moduledoc false
 
   alias Phoenix.PubSub
-  alias Teiserver.Account.AccoladeLib
   alias Teiserver.Battle
   alias Teiserver.Bridge.CommandLib
   alias Teiserver.Communication
@@ -38,13 +37,6 @@ defmodule Teiserver.Startup do
         :timer.sleep(200)
         Coordinator.start_coordinator()
         AutomodServer.start_automod_server()
-      end)
-    end
-
-    if Application.get_env(:teiserver, Teiserver)[:enable_accolade_mode] do
-      spawn(fn ->
-        :timer.sleep(200)
-        AccoladeLib.start_accolade_server()
       end)
     end
 

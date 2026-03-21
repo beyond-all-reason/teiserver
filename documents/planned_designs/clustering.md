@@ -93,7 +93,6 @@ Note: This ties in with the "Per node process" item.
   - List of per ID processes (1 per id in entire cluster):
     - ConsulServer
     - LobbyThrottleServer
-    - AccoladeChatServer
     - QueueServer
   - Per cluster processes that might need to be changed to use pooled resources (e.g. worker pool):
     - CoordinatorServer

@@ -4,8 +4,6 @@ defmodule Teiserver.Account.AccoladeLib do
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
   alias Teiserver.Account.Accolade
-  alias Teiserver.Account.AccoladeBotServer
-  alias Teiserver.Account.AccoladeChatServer
   alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   use TeiserverWeb, :library
@@ -195,88 +193,6 @@ defmodule Teiserver.Account.AccoladeLib do
       preload: [giver: givers]
   end
 
-  @spec do_start() :: :ok
-  defp do_start do
-    # Start the supervisor server
-    {:ok, _accolade_server_pid} =
-      DynamicSupervisor.start_child(Teiserver.Account.AccoladeSupervisor, {
-        AccoladeBotServer,
-        name: Teiserver.Account.AccoladeBotServer, data: %{}
-      })
-
-    :ok
-  end
-
-  @spec start_accolade_server() :: :ok | {:failure, String.t()}
-  def start_accolade_server do
-    if is_nil(get_accolade_bot_userid()) do
-      do_start()
-    else
-      {:failure, "Already started"}
-    end
-  end
-
-  @spec cast_accolade_bot(any) :: any
-  def cast_accolade_bot(msg) do
-    case get_accolade_bot_pid() do
-      nil -> nil
-      pid -> send(pid, msg)
-    end
-  end
-
-  @spec call_accolade_bot(any) :: any
-  def call_accolade_bot(msg) do
-    case get_accolade_bot_pid() do
-      nil ->
-        nil
-
-      pid ->
-        try do
-          GenServer.call(pid, msg)
-
-          # If the process has somehow died, we just return nil
-        catch
-          :exit, _reason ->
-            nil
-        end
-    end
-  end
-
-  @spec get_accolade_bot_userid() :: T.userid() | nil
-  def get_accolade_bot_userid do
-    Teiserver.cache_get(:application_metadata_cache, "teiserver_accolade_userid")
-  end
-
-  @spec get_accolade_bot_pid() :: pid() | nil
-  def get_accolade_bot_pid do
-    case Horde.Registry.lookup(Teiserver.AccoladesRegistry, "AccoladeBotServer") do
-      [{pid, _value}] ->
-        pid
-
-      _other ->
-        nil
-    end
-  end
-
-  @spec get_accolade_chat_pid(T.userid()) :: pid() | nil
-  def get_accolade_chat_pid(userid) do
-    case Horde.Registry.lookup(Teiserver.AccoladesRegistry, "AccoladeChatServer:#{userid}") do
-      [{pid, _value}] ->
-        pid
-
-      _other ->
-        nil
-    end
-  end
-
-  @spec cast_accolade_chat(T.userid(), any) :: any
-  def cast_accolade_chat(userid, msg) do
-    case get_accolade_chat_pid(userid) do
-      nil -> nil
-      pid -> send(pid, msg)
-    end
-  end
-
   @spec get_possible_ratings(T.userid(), [map()]) :: any
   def get_possible_ratings(userid, memberships) do
     their_membership = Enum.filter(memberships, fn m -> m.user_id == userid end) |> hd()
@@ -314,33 +230,6 @@ defmodule Teiserver.Account.AccoladeLib do
       else
         true
       end
-    end
-  end
-
-  @spec start_chat_server(T.userid(), T.userid(), T.lobby_id()) :: pid()
-  def start_chat_server(userid, recipient_id, match_id) do
-    {:ok, chat_server_pid} =
-      DynamicSupervisor.start_child(Teiserver.Account.AccoladeSupervisor, {
-        AccoladeChatServer,
-        name: "accolade_chat_#{userid}",
-        data: %{
-          userid: userid,
-          recipient_id: recipient_id,
-          match_id: match_id
-        }
-      })
-
-    chat_server_pid
-  end
-
-  @spec start_accolade_process(T.userid(), T.userid(), T.lobby_id()) :: :ok | :existing
-  def start_accolade_process(userid, recipient_id, match_id) do
-    case get_accolade_chat_pid(userid) do
-      nil ->
-        start_chat_server(userid, recipient_id, match_id)
-
-      _pid ->
-        :existing
     end
   end
 
@@ -386,46 +275,6 @@ order by name;"
     |> Enum.map(fn a -> a.badge_type_id end)
     |> Enum.group_by(fn bt -> bt end)
     |> Map.new(fn {k, v} -> {k, Enum.count(v)} end)
-  end
-
-  @spec live_debug :: nil | :ok
-  def live_debug do
-    case get_accolade_bot_pid() do
-      nil ->
-        Logger.error("Error, no accolade bot pid")
-
-      pid ->
-        state = :sys.get_state(pid)
-        children = DynamicSupervisor.which_children(Teiserver.Account.AccoladeSupervisor)
-        child_count = Enum.count(children) - 1
-
-        Logger.info("Accolade bot found, state is:")
-        Logger.info("#{Kernel.inspect(state)}")
-        Logger.info("Accolade chat count: #{child_count}")
-
-        if Enum.count(children) > 1 do
-          Logger.info("Pinging all chat servers...")
-
-          pings =
-            children
-            |> ParallelStream.filter(fn {_id, _child, _type, [module]} ->
-              module == Teiserver.Account.AccoladeChatServer
-            end)
-            |> ParallelStream.map(fn {_id, pid, _type, _modules} ->
-              case GenServer.call(pid, :ping, 5000) do
-                :ok -> :ok
-                _other -> :not_okay
-              end
-            end)
-            |> Enum.filter(fn p -> p == :ok end)
-
-          rate = (Enum.count(pings) / child_count * 100) |> round()
-
-          Logger.info(
-            "Out of #{child_count} children, #{Enum.count(pings)} respond to ping (#{rate}%)"
-          )
-        end
-    end
   end
 
   def get_number_of_gifted_accolades(user_id, window_days) do
