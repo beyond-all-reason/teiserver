@@ -1,6 +1,19 @@
 defmodule Teiserver.Account.Accolade do
-  @moduledoc false
+  @moduledoc """
+  Accolade struct
+  """
+  alias Teiserver.Account.Accolade
+
   use TeiserverWeb, :schema
+
+  @type t :: %Accolade{
+          id: non_neg_integer(),
+          recipient_id: non_neg_integer(),
+          giver_id: non_neg_integer(),
+          badge_type_id: non_neg_integer() | nil,
+          match_id: non_neg_integer() | nil,
+          inserted_at: DateTime.t()
+        }
 
   typed_schema "teiserver_account_accolades" do
     belongs_to :recipient, Teiserver.Account.User
