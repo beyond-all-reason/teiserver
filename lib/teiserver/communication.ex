@@ -243,22 +243,22 @@ defmodule Teiserver.Communication do
   defdelegate get_discord_message(channel_id, message_id), to: DiscordChannelLib
 
   @spec edit_discord_message(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
-          map | nil | {:error, String.t()}
+          map | nil | {:error, any()}
   defdelegate edit_discord_message(channel_id, message_id, new_message), to: DiscordChannelLib
 
   @spec delete_discord_message(non_neg_integer | String.t(), non_neg_integer) ::
-          map | nil | {:error, String.t()}
+          map | nil | {:error, any()}
   defdelegate delete_discord_message(channel_id, message_id), to: DiscordChannelLib
 
-  @spec send_discord_dm(T.userid(), String.t()) :: map | nil | {:error, String.t()}
+  @spec send_discord_dm(T.userid(), String.t()) :: map | nil | {:error, any()}
   defdelegate send_discord_dm(userid, message), to: DiscordChannelLib
 
   @spec create_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
-          map | nil | {:error, String.t()}
+          map | nil | {:error, any()}
   defdelegate create_discord_reaction(channel_id, message_id, emoji), to: DiscordChannelLib
 
   @spec delete_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::
-          map | nil | {:error, String.t()}
+          map | nil | {:error, any()}
   defdelegate delete_discord_reaction(channel_id, message_id, emoji), to: DiscordChannelLib
 
   @doc """

@@ -450,8 +450,15 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
           if msg.content != new_content,
             do: Communication.edit_discord_message(channel, msg.id, new_content)
 
+        {:error, %{status_code: 404}} ->
+          Logger.warning("Report message #{report.discord_message_id} was not found")
+          :error
+
         {:error, reason} ->
-          Logger.warning("Report message #{report.discord_message_id} was not found: #{reason}")
+          Logger.warning(
+            "Error getting report message #{report.discord_message_id} #{inspect(reason)}"
+          )
+
           :error
       end
     end
