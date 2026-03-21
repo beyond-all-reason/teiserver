@@ -19,8 +19,8 @@ defmodule Teiserver.Clans.ClanMembershipLib do
     end)
   end
 
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  def _search(query, _key, ""), do: query
+  def _search(query, _key, nil), do: query
 
   def _search(query, :clan_id, clan_id) do
     from clan_memberships in query,

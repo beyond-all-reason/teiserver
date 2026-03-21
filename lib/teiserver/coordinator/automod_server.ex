@@ -23,10 +23,10 @@ defmodule Teiserver.Coordinator.AutomodServer do
   @spec start_automod_server() :: :ok | {:failure, String.t()}
   def start_automod_server do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
-      [{_pid, _}] ->
+      [{_pid, _val}] ->
         {:failure, "Already started"}
 
-      _ ->
+      _other ->
         do_start()
     end
   end
@@ -101,7 +101,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
         Account.create_smurf_key(msg.userid, "chobby_sysinfo_hash", msg.value)
         Account.update_cache_user(msg.userid, %{chobby_sysinfo_hash: msg.value})
 
-      _ ->
+      _property_type_name ->
         :ok
     end
 
@@ -191,11 +191,11 @@ defmodule Teiserver.Coordinator.AutomodServer do
     end
   end
 
-  def enact_ban([], _), do: "No action"
+  def enact_ban([], _userid), do: "No action"
 
-  def enact_ban([ban | _], userid) do
+  def enact_ban([ban | _rest], userid) do
     user = Account.get_user!(userid)
-    {:ok, _} = Account.server_update_user(user, %{"smurf_of_id" => ban.source_id})
+    {:ok, _update_result} = Account.server_update_user(user, %{"smurf_of_id" => ban.source_id})
 
     add_audit_log(
       Coordinator.get_coordinator_userid(),
@@ -215,10 +215,10 @@ defmodule Teiserver.Coordinator.AutomodServer do
   @spec get_automod_pid() :: pid() | nil
   def get_automod_pid do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
-      [{pid, _}] ->
+      [{pid, _val}] ->
         pid
 
-      _ ->
+      _other ->
         nil
     end
   end

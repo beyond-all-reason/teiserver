@@ -66,7 +66,7 @@ defmodule Teiserver.Account.RetentionReport do
                   nil
                 end
 
-              _ ->
+              _date ->
                 acc
             end
           end)
@@ -87,7 +87,7 @@ defmodule Teiserver.Account.RetentionReport do
         fn %{last_login: value} ->
           value
         end,
-        fn _ -> 1 end
+        fn _account -> 1 end
       )
       |> Map.new(fn {days, userlist} -> {days, Enum.count(userlist)} end)
 
@@ -98,7 +98,7 @@ defmodule Teiserver.Account.RetentionReport do
         fn %{last_played: value} ->
           value
         end,
-        fn _ -> 1 end
+        fn _account -> 1 end
       )
       |> Map.new(fn {days, userlist} -> {days, Enum.count(userlist)} end)
 

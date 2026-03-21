@@ -17,10 +17,10 @@ defmodule Teiserver.Plugs.BasicAuthBotPlug do
              true <- Account.verify_plain_password(password, user.password) do
           conn
         else
-          _ -> unauthorized(conn)
+          _error -> unauthorized(conn)
         end
 
-      _ ->
+      _other ->
         unauthorized(conn)
     end
   end

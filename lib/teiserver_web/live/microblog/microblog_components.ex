@@ -167,7 +167,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       if assigns[:post].poll_result_cache do
         assigns[:post].poll_result_cache
         |> Enum.to_list()
-        |> Enum.sort_by(fn {_, v} -> v end, &>=/2)
+        |> Enum.sort_by(fn {_choice, v} -> v end, &>=/2)
       else
         assigns[:post].poll_choices
         |> Enum.map(fn v -> {v, 0} end)

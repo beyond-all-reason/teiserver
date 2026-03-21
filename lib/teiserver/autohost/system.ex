@@ -8,7 +8,7 @@ defmodule Teiserver.Autohost.System do
   end
 
   @impl Supervisor
-  def init(_) do
+  def init(_init_arg) do
     children = [Autohost.Registry, Autohost.SessionRegistry, Autohost.SessionSupervisor]
     Supervisor.init(children, strategy: :one_for_one)
   end

@@ -4,7 +4,7 @@ defmodule Teiserver.Helpers.PubSubHelper do
 
   @doc false
   @spec broadcast(String.t(), map()) :: :ok
-  def broadcast(topic, %{event: _} = message) do
+  def broadcast(topic, %{event: _event} = message) do
     PubSub.broadcast(
       Teiserver.PubSub,
       topic,
@@ -42,7 +42,7 @@ defmodule Teiserver.Helpers.PubSubHelper do
         {topic_function, topic_key} ->
           result |> Map.get(topic_key) |> topic_function.()
 
-        _ ->
+        _other ->
           if is_function(topic) do
             topic.(result.id)
           else

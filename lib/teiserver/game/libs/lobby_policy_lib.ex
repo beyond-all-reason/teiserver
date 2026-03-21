@@ -49,8 +49,8 @@ defmodule Teiserver.Game.LobbyPolicyLib do
   end
 
   @spec _search(Ecto.Query.t(), atom, any()) :: Ecto.Query.t()
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  def _search(query, _key, ""), do: query
+  def _search(query, _key, nil), do: query
 
   def _search(query, :id, id) do
     from lobby_policies in query,
@@ -165,7 +165,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
           Account.recache_user(user.id)
           user
 
-        _ ->
+        _user ->
           # Ensure the username is correct (for if we changed the name format around)
           if db_user.name != formatted_name do
             Account.system_change_user_name(db_user.id, formatted_name)
@@ -261,8 +261,8 @@ defmodule Teiserver.Game.LobbyPolicyLib do
            Teiserver.LobbyPolicyRegistry,
            "LobbyPolicyOrganiserServer:#{lobby_policy_id}"
          ) do
-      [{pid, _}] -> pid
-      _ -> nil
+      [{pid, _data}] -> pid
+      _not_found -> nil
     end
   end
 
@@ -309,7 +309,7 @@ defmodule Teiserver.Game.LobbyPolicyLib do
 
           # If the process has somehow died, we just return nil
         catch
-          :exit, _ ->
+          :exit, _reason ->
             nil
         end
     end

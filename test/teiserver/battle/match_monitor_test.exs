@@ -49,7 +49,7 @@ defmodule Teiserver.Battle.MatchMonitorTest do
 
     long_data =
       0..60
-      |> Enum.reduce(long_start, fn _, acc ->
+      |> Enum.reduce(long_start, fn _index, acc ->
         Map.put(acc, :sub, acc)
       end)
       |> Jason.encode!()

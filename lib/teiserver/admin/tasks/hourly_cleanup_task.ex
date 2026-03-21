@@ -8,7 +8,7 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     SQL.query!(Repo, "DELETE FROM account_codes WHERE expires < $1", [Timex.now()])
 
     chat_log_cleanup()

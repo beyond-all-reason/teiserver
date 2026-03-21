@@ -67,7 +67,7 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
         "7 days" -> Timex.now() |> Timex.shift(days: -7)
         "14 days" -> Timex.now() |> Timex.shift(days: -14)
         "31 days" -> Timex.now() |> Timex.shift(days: -31)
-        _ -> Timex.now() |> Timex.shift(days: -7)
+        _other -> Timex.now() |> Timex.shift(days: -7)
       end
 
     one_client_event =
@@ -87,7 +87,7 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
           |> Map.get(:value)
           |> Map.keys()
 
-        _ ->
+        _no_event ->
           Telemetry.list_complex_anon_events(
             order_by: ["Newest first"],
             where: [

@@ -38,7 +38,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       TeiserverTestLib.clear_cache(:teiserver_game_rating_types)
       rating_type_id = MatchRatingLib.rating_type_name_lookup()["Large Team"]
 
-      {:ok, _} =
+      {:ok, _rating} =
         Account.create_rating(%{
           user_id: user.id,
           rating_type_id: rating_type_id,

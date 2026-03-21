@@ -49,7 +49,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
 
         result
 
-      _ ->
+      _error ->
         result
     end
   end

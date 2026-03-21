@@ -257,7 +257,7 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state | lobby: new_lobby}}
   end
 
-  def handle_cast({:enable_units, _}, %{lobby: %{disabled_units: []}} = state),
+  def handle_cast({:enable_units, _units}, %{lobby: %{disabled_units: []}} = state),
     do: {:noreply, state}
 
   def handle_cast({:enable_units, []}, state), do: {:noreply, state}
@@ -466,19 +466,22 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_info(
-        %{channel: "teiserver_lobby_chat" <> _, userid: userid, message: "$" <> message},
+        %{channel: "teiserver_lobby_chat" <> _rest, userid: userid, message: "$" <> message},
         state
       ) do
     new_state = CommandLib.handle_command(state, userid, message)
     {:noreply, new_state}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_chat" <> _, userid: userid, message: msg}, state) do
+  def handle_info(
+        %{channel: "teiserver_lobby_chat" <> _rest, userid: userid, message: msg},
+        state
+      ) do
     new_state =
       case msg do
-        "!spec " <> _ ->
+        "!spec " <> _args ->
           case Regex.run(~r/!spec (\S+)/, msg) do
-            [_, spectated_username] ->
+            [_full_match, spectated_username] ->
               spectated_id = Account.get_userid_from_name(spectated_username)
 
               Telemetry.log_complex_lobby_event(userid, state.match_id, "Spec command", %{
@@ -487,13 +490,13 @@ defmodule Teiserver.Battle.LobbyServer do
                 given_name: spectated_username
               })
 
-            _ ->
+            _no_match ->
               :ok
           end
 
           state
 
-        _ ->
+        _other ->
           state
       end
 
@@ -576,7 +579,7 @@ defmodule Teiserver.Battle.LobbyServer do
 
     broadcast_values =
       new_values
-      |> Map.filter(fn {k, _} ->
+      |> Map.filter(fn {k, _v} ->
         Enum.member?(@broadcast_update_keys, k)
       end)
 

@@ -94,7 +94,7 @@ defmodule Teiserver.Bridge.MessageCommands do
           reply(channel, "This code is incorrect.")
         end
 
-      _ ->
+      _other ->
         reply(channel, "Invalid code")
     end
   end
@@ -118,7 +118,7 @@ defmodule Teiserver.Bridge.MessageCommands do
           "#{name |> String.capitalize()} was renamed to #{new_name |> String.capitalize()} and #{old_name |> String.capitalize()} was renamed to #{name |> String.capitalize()}"
         )
 
-      {:unchanged, _} ->
+      {:unchanged, _details} ->
         reply(channel, "#{name |> String.capitalize()} did not have a name change")
 
       {:found_old, {_code, new_name}} ->
@@ -165,17 +165,17 @@ defmodule Teiserver.Bridge.MessageCommands do
     end
   end
 
-  def handle_command({nil, _}, cmd, _remaining, channel) do
+  def handle_command({nil, _discord_id}, cmd, _remaining, channel) do
     case cmd do
       "help" ->
         no_user_command(channel)
 
-      _ ->
+      _other ->
         reply(channel, "Unfortunately I don't understand that command")
     end
   end
 
-  def handle_command({user, _}, "whoami", _remaining, channel) do
+  def handle_command({user, _discord_id}, "whoami", _remaining, channel) do
     stats = Account.get_user_stat_data(user.id)
 
     total_hours = (Map.get(stats, "total_minutes", 0) / 60) |> round()
@@ -192,7 +192,7 @@ defmodule Teiserver.Bridge.MessageCommands do
         [] ->
           "You currently have no accolades"
 
-        _ ->
+        _keys ->
           badge_types =
             Account.list_badge_types(search: [id_list: Map.keys(accolades)])
             |> Map.new(fn bt -> {bt.id, bt} end)
@@ -216,18 +216,18 @@ defmodule Teiserver.Bridge.MessageCommands do
     reply(channel, msg)
   end
 
-  def handle_command({_sender, _}, "help", _remaining, channel) do
+  def handle_command({_sender, _discord_id}, "help", _remaining, channel) do
     reply(
       channel,
       "Currently we don't have a list of commands, please feel free to suggest them to the devs though!."
     )
   end
 
-  def handle_command({_sender, _}, "discord", _remaining, channel) do
+  def handle_command({_sender, _discord_id}, "discord", _remaining, channel) do
     reply(channel, "Your account is already linked.")
   end
 
-  def handle_command({_sender, _}, _, _remaining, channel) do
+  def handle_command({_sender, _discord_id}, _cmd, _remaining, channel) do
     reply(channel, "Your account is linked but at the moment there's nothing else I can do.")
   end
 

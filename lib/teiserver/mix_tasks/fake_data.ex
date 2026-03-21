@@ -102,7 +102,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       Range.new(0, @settings.days)
       |> ParallelStream.map(fn day ->
         Range.new(0, users_per_day())
-        |> ParallelStream.map(fn _ ->
+        |> ParallelStream.map(fn _index ->
           minutes = :rand.uniform(24 * 60)
 
           %{
@@ -260,9 +260,10 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
       basic_reports =
         Range.new(0, report_count)
-        |> Enum.map(fn _ ->
+        |> Enum.map(fn _index ->
           if Enum.count(users) > 1 do
-            [{reporter_id, _}, {target_id, _} | _] = Enum.shuffle(users) |> Enum.take(2)
+            [{reporter_id, _name1}, {target_id, _name2} | _rest] =
+              Enum.shuffle(users) |> Enum.take(2)
 
             report_time =
               date
@@ -293,7 +294,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         |> Enum.shuffle()
         |> Enum.take(report_count)
         |> Enum.map(fn match ->
-          [reporter, target | _] = Enum.shuffle(match.members) |> Enum.take(2)
+          [reporter, target | _rest] = Enum.shuffle(match.members) |> Enum.take(2)
           report_time = match.started |> Timex.shift(minutes: 20) |> time_convert()
 
           relationship =
@@ -341,7 +342,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         server_uuid = UUID.uuid1()
 
         Range.new(0, matches_per_day())
-        |> Enum.map(fn _ ->
+        |> Enum.map(fn _index ->
           max_size = Enum.count(users) |> Kernel.div(2) |> :math.floor() |> round()
           team_size = min(:rand.uniform(8), max_size)
           shuffled_users = Enum.shuffle(users)
@@ -353,12 +354,12 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
           team1_score =
             team1
-            |> Enum.map(fn {_, name} -> String.length(name) end)
+            |> Enum.map(fn {_userid, name} -> String.length(name) end)
             |> Enum.sum()
 
           team2_score =
             team2
-            |> Enum.map(fn {_, name} -> String.length(name) end)
+            |> Enum.map(fn {_userid, name} -> String.length(name) end)
             |> Enum.sum()
 
           start_time =
@@ -390,7 +391,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
           memberships1 =
             team1
-            |> Enum.map(fn {userid, _} ->
+            |> Enum.map(fn {userid, _name} ->
               %{
                 team_id: 0,
                 win: match.winning_team == 0,
@@ -410,7 +411,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
           memberships2 =
             team2
-            |> Enum.map(fn {userid, _} ->
+            |> Enum.map(fn {userid, _name} ->
               %{
                 team_id: 1,
                 win: match.winning_team == 1,
@@ -471,7 +472,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   defp random_pick_from(list, chance \\ 0.5) do
     list
-    |> Enum.filter(fn _ ->
+    |> Enum.filter(fn _element ->
       :rand.uniform() < chance
     end)
   end

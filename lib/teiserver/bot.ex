@@ -23,7 +23,7 @@ defmodule Teiserver.Bot do
   @spec delete(Bot.t()) :: :ok | {:error, term()}
   def delete(%Bot{} = bot) do
     case Repo.delete(bot) do
-      {:ok, _} -> :ok
+      {:ok, _bot} -> :ok
       {:error, err} -> {:error, err}
     end
   end

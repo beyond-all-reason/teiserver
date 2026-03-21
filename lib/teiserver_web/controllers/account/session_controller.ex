@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Account.SessionController do
   require Logger
 
   @spec new(Conn.t(), map()) :: Conn.t()
-  def new(conn, _) do
+  def new(conn, _params) do
     changeset = Account.change_user(%User{})
     maybe_user = GuardianPlug.current_resource(conn)
 
@@ -86,7 +86,7 @@ defmodule TeiserverWeb.Account.SessionController do
                 conn
               )
 
-            _ ->
+            _other ->
               "There was a problem verifying the code."
           end
 
@@ -163,7 +163,7 @@ defmodule TeiserverWeb.Account.SessionController do
   end
 
   @spec logout(Conn.t(), map()) :: Conn.t()
-  def logout(conn, _) do
+  def logout(conn, _params) do
     conn
     |> GuardianPlug.sign_out(clear_remember_me: true)
     |> redirect(to: "/login")

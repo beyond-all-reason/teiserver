@@ -10,7 +10,7 @@ defmodule TeiserverWeb.API.Admin.AssetView do
 
   def render("map_updated_error.json", conn) do
     errors =
-      for {name, {err_msg, _}} <- conn.changeset.errors do
+      for {name, {err_msg, _opts}} <- conn.changeset.errors do
         "#{name}: #{err_msg}"
       end
 

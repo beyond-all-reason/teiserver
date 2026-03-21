@@ -51,7 +51,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
     integer_choice =
       case message |> String.trim() |> Integer.parse() do
         :error -> :error
-        {v, _} -> v
+        {v, _rest} -> v
       end
 
     new_state =
@@ -90,7 +90,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
         integer_choice != :error ->
           badge_type =
             state.badge_types
-            |> Enum.filter(fn {i, _} -> i == integer_choice end)
+            |> Enum.filter(fn {i, _badge_type} -> i == integer_choice end)
 
           case badge_type do
             [] ->
@@ -102,7 +102,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
 
               state
 
-            [{_, selected_type}] ->
+            [{_index, selected_type}] ->
               Account.create_accolade(%{
                 recipient_id: state.recipient_id,
                 giver_id: state.userid,

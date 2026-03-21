@@ -8,12 +8,12 @@ defmodule TeiserverWeb.Microblog.RssControllerTest do
 
   import Teiserver.MicroblogFixtures
 
-  defp auth_setup(_) do
+  defp auth_setup(_context) do
     GeneralTestLib.conn_setup()
     |> TeiserverTestLib.conn_setup()
   end
 
-  defp filler_posts(_) do
+  defp filler_posts(_context) do
     tag1 = tag_fixture()
     tag2 = tag_fixture()
     tag3 = tag_fixture()

@@ -33,7 +33,7 @@ defmodule Teiserver.Autohost.SessionRegistry do
   def lookup(autohost_id) do
     case Registry.lookup(__MODULE__, autohost_id) do
       [x] -> x
-      _ -> nil
+      _other -> nil
     end
   end
 
@@ -49,7 +49,7 @@ defmodule Teiserver.Autohost.SessionRegistry do
       current_battles: current_battles
     }
 
-    result = Registry.update_value(__MODULE__, autohost_id, fn _ -> value end)
+    result = Registry.update_value(__MODULE__, autohost_id, fn _old -> value end)
 
     if result == :error do
       Registry.register(__MODULE__, autohost_id, value)
@@ -61,12 +61,12 @@ defmodule Teiserver.Autohost.SessionRegistry do
   @spec get_value(Bot.id()) :: reg_value() | nil
   def get_value(autohost_id) do
     case Registry.lookup(__MODULE__, autohost_id) do
-      [{_, val}] -> val
-      _ -> nil
+      [{_pid, val}] -> val
+      _other -> nil
     end
   end
 
-  def child_spec(_) do
+  def child_spec(_opts) do
     Supervisor.child_spec(Registry,
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}

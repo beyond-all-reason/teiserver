@@ -147,7 +147,7 @@ defmodule TeiserverWeb.Admin.BotControllerTest do
       conn = delete(conn, ~p"/teiserver/admin/bot/#{bot.id}/credential/#{cred.id}")
       assert conn.status == 302
 
-      assert {:error, _} = OAuth.get_valid_credentials("client_id", "verysecret")
+      assert {:error, _reason} = OAuth.get_valid_credentials("client_id", "verysecret")
     end
 
     test "delete invalid id", %{conn: conn, bot: bot, app: app} do

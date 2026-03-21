@@ -13,7 +13,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     last_date = Logging.get_last_user_activity_day_log()
 
     date =
@@ -54,7 +54,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
 
     Repo.delete_all(delete_query)
 
-    {:ok, _} =
+    {:ok, _log} =
       Logging.create_user_activity_day_log(%{
         date: date,
         data: data
@@ -102,7 +102,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
             fn key ->
               key
             end,
-            fn _ ->
+            fn _value ->
               1
             end
           )

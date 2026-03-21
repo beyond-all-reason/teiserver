@@ -95,7 +95,7 @@ defmodule Teiserver.Account.RetentionRateExport do
         end
       )
       |> Enum.map(fn {key, userids} -> {key, userids} end)
-      |> Enum.sort_by(fn {key, _} -> TimexHelper.date_to_str(key, format: :ymd) end, &<=/2)
+      |> Enum.sort_by(fn {key, _userids} -> TimexHelper.date_to_str(key, format: :ymd) end, &<=/2)
 
     data = build_table(day_logs, accounts_by_insert_date)
 

@@ -26,10 +26,10 @@ defmodule Teiserver.Moderation.ReportGroupMessage do
   end
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(:index, conn, _), do: allow?(conn, "Overwatch")
-  def authorize(:search, conn, _), do: allow?(conn, "Overwatch")
-  def authorize(:show, conn, _), do: allow?(conn, "Overwatch")
-  def authorize(:user, conn, _), do: allow?(conn, "Overwatch")
-  def authorize(:respond, conn, _), do: allow?(conn, "Overwatch")
-  def authorize(_, conn, _), do: allow?(conn, "Moderator")
+  def authorize(:index, conn, _params), do: allow?(conn, "Overwatch")
+  def authorize(:search, conn, _params), do: allow?(conn, "Overwatch")
+  def authorize(:show, conn, _params), do: allow?(conn, "Overwatch")
+  def authorize(:user, conn, _params), do: allow?(conn, "Overwatch")
+  def authorize(:respond, conn, _params), do: allow?(conn, "Overwatch")
+  def authorize(_action, conn, _params), do: allow?(conn, "Moderator")
 end

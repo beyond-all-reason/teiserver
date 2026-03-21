@@ -7,7 +7,7 @@ defmodule Teiserver.Party.System do
   end
 
   @impl Supervisor
-  def init(_) do
+  def init(_init_arg) do
     children = [
       Teiserver.Party.Registry,
       Teiserver.Party.Supervisor,

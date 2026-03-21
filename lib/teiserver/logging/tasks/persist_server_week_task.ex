@@ -9,7 +9,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     log =
       case Logging.get_last_server_week_log() do
         nil ->
@@ -64,7 +64,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
             |> Enum.zip(user_activity_logs)
             |> ServerDayLogLib.aggregate_day_logs()
 
-          {:ok, _} =
+          {:ok, _log} =
             Logging.create_server_week_log(%{
               year: log_year,
               week: log_week,
@@ -73,7 +73,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
             })
         end
 
-      _ ->
+      _empty ->
         nil
     end
   end
@@ -107,7 +107,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
         |> Enum.zip(user_activity_logs)
         |> ServerDayLogLib.aggregate_day_logs()
 
-      {:ok, _} =
+      {:ok, _log} =
         Logging.create_server_week_log(%{
           year: new_year,
           week: new_week,

@@ -174,7 +174,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         result =
           Range.new(1, n_dice)
-          |> Enum.map(fn _ -> :rand.uniform(s_dice) end)
+          |> Enum.map(fn _i -> :rand.uniform(s_dice) end)
           |> Enum.sum()
 
         ChatLib.say(
@@ -319,7 +319,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         [] ->
           Coordinator.send_to_user(senderid, "No afk users found")
 
-        _ ->
+        _lines ->
           Coordinator.send_to_user(
             senderid,
             [@splitter, "The following users may be afk"] ++ lines
@@ -343,7 +343,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         "" ->
           1
 
-        _ ->
+        _other ->
           rem
           |> String.trim()
           |> String.to_integer()
@@ -700,7 +700,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           ChatLib.say(state.coordinator_id, "Gatekeeper reset", state.lobby_id)
           %{state | gatekeeper: :default}
 
-        _ ->
+        _mode ->
           ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,
@@ -782,7 +782,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             state
 
-          {chev_level, _} ->
+          {chev_level, _rest} ->
             max_chev_level = LobbyRestrictions.rank_upper_bound() + 1
 
             if chev_level < 1 or chev_level > max_chev_level do
@@ -850,7 +850,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             state
 
-          {chev_level, _} ->
+          {chev_level, _rest} ->
             max_chev_level = LobbyRestrictions.rank_upper_bound() + 1
 
             if chev_level < 1 or chev_level > max_chev_level do
@@ -915,7 +915,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             state
 
-          {level, _} ->
+          {level, _rest} ->
             ConsulServer.say_command(cmd, state)
             LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
             Process.send_after(self(), :recheck_membership, 0)
@@ -963,7 +963,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             state
 
-          {level, _} ->
+          {level, _rest} ->
             ConsulServer.say_command(cmd, state)
             LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
             Process.send_after(self(), :recheck_membership, 0)
@@ -993,7 +993,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     case String.split(remaining, " ") do
       [smin, smax] ->
         case {smin |> String.trim() |> Integer.parse(), smax |> String.trim() |> Integer.parse()} do
-          {:error, _} ->
+          {:error, _max_parse} ->
             Lobby.sayprivateex(
               state.coordinator_id,
               senderid,
@@ -1005,7 +1005,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             state
 
-          {_, :error} ->
+          {_min_parse, :error} ->
             Lobby.sayprivateex(
               state.coordinator_id,
               senderid,
@@ -1017,7 +1017,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             state
 
-          {{min_level_o, _}, {max_level_o, _}} ->
+          {{min_level_o, _rest1}, {max_level_o, _rest2}} ->
             result = LobbyRestrictions.allowed_to_set_restrictions(state)
 
             case result do
@@ -1046,7 +1046,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             end
         end
 
-      _ ->
+      _other ->
         Lobby.sayprivateex(
           state.coordinator_id,
           senderid,
@@ -1089,7 +1089,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         state
 
-      {level, _} ->
+      {level, _rest} ->
         ConsulServer.say_command(cmd, state)
         LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
         %{state | minimum_rank_to_play: level |> max(0) |> min(state.maximum_rank_to_play - 1)}
@@ -1119,7 +1119,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         state
 
-      {level, _} ->
+      {level, _rest} ->
         ConsulServer.say_command(cmd, state)
         LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
 
@@ -1140,7 +1140,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     case String.split(remaining, " ") do
       [smin, smax] ->
         case {smin |> String.trim() |> Integer.parse(), smax |> String.trim() |> Integer.parse()} do
-          {:error, _} ->
+          {:error, _max_parse} ->
             Lobby.sayprivateex(
               state.coordinator_id,
               senderid,
@@ -1152,7 +1152,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             state
 
-          {_, :error} ->
+          {_min_parse, :error} ->
             Lobby.sayprivateex(
               state.coordinator_id,
               senderid,
@@ -1164,7 +1164,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             state
 
-          {{min_level_o, _}, {max_level_o, _}} ->
+          {{min_level_o, _rest1}, {max_level_o, _rest2}} ->
             min_level = min(min_level_o, max_level_o)
             max_level = max(min_level_o, max_level_o)
 
@@ -1178,7 +1178,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             }
         end
 
-      _ ->
+      _other ->
         Lobby.sayprivateex(
           state.coordinator_id,
           senderid,
@@ -1221,7 +1221,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         state
 
-      {level, _} ->
+      {level, _rest} ->
         ConsulServer.say_command(cmd, state)
         LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
 
@@ -1256,7 +1256,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         state
 
-      {level, _} ->
+      {level, _rest} ->
         ConsulServer.say_command(cmd, state)
         LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
 
@@ -1275,7 +1275,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     case String.split(remaining, " ") do
       [smin, smax] ->
         case {smin |> String.trim() |> Integer.parse(), smax |> String.trim() |> Integer.parse()} do
-          {:error, _} ->
+          {:error, _max_parse} ->
             Lobby.sayprivateex(
               state.coordinator_id,
               senderid,
@@ -1287,7 +1287,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             state
 
-          {_, :error} ->
+          {_min_parse, :error} ->
             Lobby.sayprivateex(
               state.coordinator_id,
               senderid,
@@ -1299,7 +1299,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             state
 
-          {{min_level_o, _}, {max_level_o, _}} ->
+          {{min_level_o, _rest1}, {max_level_o, _rest2}} ->
             min_level = min(min_level_o, max_level_o)
             max_level = max(min_level_o, max_level_o)
 
@@ -1313,7 +1313,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             }
         end
 
-      _ ->
+      _other ->
         Lobby.sayprivateex(
           state.coordinator_id,
           senderid,
@@ -1352,7 +1352,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         "default" ->
           "default"
 
-        _ ->
+        _other ->
           ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,
@@ -1554,7 +1554,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     new_teaser =
       case chars_valid_for_lobby_name?(new_teaser) do
         true -> new_teaser
-        _ -> ""
+        _invalid -> ""
       end
 
     Battle.update_lobby_values(state.lobby_id, %{teaser: new_teaser})
@@ -1568,7 +1568,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     stripped_name =
       case chars_valid_for_lobby_name?(new_name) do
         true -> new_name
-        _ -> ""
+        _invalid -> ""
       end
 
     lobby = Lobby.get_lobby(state.lobby_id)
@@ -1810,11 +1810,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "settag", remaining: remaining} = cmd, state) do
     case String.split(remaining, " ") do
-      [key, value | _] ->
+      [key, value | _rest] ->
         Battle.set_modoption(state.lobby_id, String.downcase(key), value)
         ConsulServer.say_command(cmd, state)
 
-      _ ->
+      _other ->
         ConsulServer.say_command(%{cmd | error: "no regex match"}, state)
     end
   end
@@ -1864,7 +1864,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         |> Integer.parse()
 
       case parse_value do
-        {value, _} ->
+        {value, _rest} ->
           if value >= 0 do
             Coordinator.cast_balancer(state.lobby_id, {:set, balancer_key, value})
             ConsulServer.say_command(cmd, state)
@@ -1872,7 +1872,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             ConsulServer.say_command(%{cmd | error: "invalid value"}, state)
           end
 
-        _ ->
+        _parse_error ->
           ConsulServer.say_command(%{cmd | error: "invalid value"}, state)
       end
     end
@@ -1991,7 +1991,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     {targets, reason} =
       case String.split(targets, "!!") do
         [t] -> {t, @default_ban_reason}
-        [t, r | _] -> {t, String.trim(r)}
+        [t, r | _rest] -> {t, String.trim(r)}
       end
 
     ConsulServer.say_command(cmd, state)
@@ -2074,11 +2074,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         state
       ) do
     case Integer.parse(value_str) do
-      {new_limit, _} ->
+      {new_limit, _rest} ->
         ConsulServer.say_command(cmd, state)
         %{state | player_limit: abs(new_limit)}
 
-      _ ->
+      _parse_error ->
         ChatLib.sayprivateex(
           state.coordinator_id,
           senderid,
@@ -2148,7 +2148,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       "player" -> :player
       "spectator" -> :spectator
       "boss" -> :boss
-      _ -> nil
+      _other -> nil
     end
   end
 
@@ -2167,8 +2167,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   @spec chars_valid_for_lobby_name?(String.t()) :: boolean()
   defp chars_valid_for_lobby_name?(string) do
     case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, string) do
-      [_] -> true
-      _ -> false
+      [_match] -> true
+      _no_match -> false
     end
   end
 

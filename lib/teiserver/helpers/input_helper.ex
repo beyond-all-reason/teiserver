@@ -25,11 +25,11 @@ defmodule Teiserver.Helpers.InputHelper do
         "color" -> :color_input
         "colour" -> :color_input
         "select" -> :select
-        _ -> :text_input
+        _other -> :text_input
       end
 
     case ptype do
-      _ -> input(form, field, opts ++ [using: ptype])
+      _any -> input(form, field, opts ++ [using: ptype])
     end
   end
 
@@ -44,7 +44,7 @@ defmodule Teiserver.Helpers.InputHelper do
       input_opts ++
         case opts[:using] do
           :checkbox -> [class: "form-check-input"]
-          _ -> []
+          _other -> []
         end
 
     # A bit messy but the best way I can think of doing it

@@ -24,5 +24,5 @@ defmodule Teiserver.Game.UserAchievement do
   end
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(_, conn, _), do: allow?(conn, "account")
+  def authorize(_action, conn, _params), do: allow?(conn, "account")
 end

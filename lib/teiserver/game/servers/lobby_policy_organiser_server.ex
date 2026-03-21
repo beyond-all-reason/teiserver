@@ -40,7 +40,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
         {true, false} ->
           disconnect_all_bots(state)
 
-        _ ->
+        _other ->
           PubSub.broadcast(
             Teiserver.PubSub,
             "lobby_policy_internal:#{state.id}",
@@ -58,7 +58,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
   end
 
   @impl GenServer
-  def handle_info(%{channel: "lobby_policy_internal:" <> _}, state) do
+  def handle_info(%{channel: "lobby_policy_internal:" <> _id}, state) do
     {:noreply, state}
   end
 
@@ -69,7 +69,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
       if time_since_last_spawn > @minimum_spawn_interval_seconds do
         lobby_agents =
           (state.agent_status || %{})
-          |> Enum.reject(fn {_, %{status: status}} ->
+          |> Enum.reject(fn {_name, %{status: status}} ->
             Map.get(status, :in_progress, false)
           end)
 
@@ -116,7 +116,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
     {:noreply, %{state | agent_status: %{}}}
   end
 
-  def handle_info(_, state) do
+  def handle_info(_message, state) do
     {:noreply, state}
   end
 
@@ -133,7 +133,7 @@ defmodule Teiserver.Game.LobbyPolicyOrganiserServer do
       [] ->
         state
 
-      _ ->
+      _names ->
         selected_name = Enum.random(remaining_names)
         user = LobbyPolicyLib.get_or_make_agent_user(selected_name, state.db_policy)
         LobbyPolicyLib.start_lobby_policy_bot(state.db_policy, selected_name, user)

@@ -77,7 +77,7 @@ defmodule Teiserver.CacheUser do
     |> String.graphemes()
     |> Enum.frequencies()
     # credo:disable-for-lines:2 Credo.Check.Refactor.FilterCount
-    |> Enum.filter(fn {_, val} -> val > 2 end)
+    |> Enum.filter(fn {_char, val} -> val > 2 end)
     |> Enum.count()
     |> Kernel.>(0)
   end
@@ -129,7 +129,7 @@ defmodule Teiserver.CacheUser do
       {:error, %Ecto.Changeset{} = changeset} ->
         case changeset.errors[:email] do
           nil -> {:error, "User creation failed"}
-          _ -> {:error, "Email already attached to a user"}
+          _email_error -> {:error, "Email already attached to a user"}
         end
 
       {:error, reason} when is_binary(reason) ->
@@ -267,7 +267,7 @@ defmodule Teiserver.CacheUser do
 
         case users do
           [] -> :ok
-          _ -> {:error, "Username already taken"}
+          _users -> {:error, "Username already taken"}
         end
     end
   end
@@ -351,7 +351,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec request_email_change(T.user() | nil, String.t()) :: {:ok, T.user()} | {:error, String.t()}
-  def request_email_change(nil, _), do: {:error, "no user"}
+  def request_email_change(nil, _new_email), do: {:error, "no user"}
 
   def request_email_change(user, new_email) do
     case get_user_by_email(new_email) do
@@ -359,7 +359,7 @@ defmodule Teiserver.CacheUser do
         code = :rand.uniform(899_999) + 100_000
         {:ok, update_user(%{user | email_change_code: ["#{code}", new_email]})}
 
-      _ ->
+      _existing_user ->
         {:error, "Email already in use"}
     end
   end
@@ -484,7 +484,7 @@ defmodule Teiserver.CacheUser do
     :ok
   end
 
-  def send_direct_message(_, _, nil), do: :ok
+  def send_direct_message(_from_id, _to_id, nil), do: :ok
 
   def send_direct_message(from_id, to_id, message) do
     # Replace SPADS command (starting with !) with lowercase
@@ -501,38 +501,38 @@ defmodule Teiserver.CacheUser do
           |> String.split()
 
         case command_parts do
-          ["!cv", "joinas" | _] ->
+          ["!cv", "joinas" | _rest] ->
             has_ai =
               case Client.get_client_by_id(to_id) do
                 %{lobby_id: lobby_id} when not is_nil(lobby_id) ->
                   Battle.get_bots(lobby_id) |> Enum.any?()
 
-                _ ->
+                _client ->
                   false
               end
 
             if has_ai, do: message, else: "!cv joinas spec"
 
-          ["!callvote", "joinas" | _] ->
+          ["!callvote", "joinas" | _rest] ->
             has_ai =
               case Client.get_client_by_id(to_id) do
                 %{lobby_id: lobby_id} when not is_nil(lobby_id) ->
                   Battle.get_bots(lobby_id) |> Enum.any?()
 
-                _ ->
+                _client ->
                   false
               end
 
             if has_ai, do: message, else: "!callvote joinas spec"
 
-          ["!joinas" | _] ->
+          ["!joinas" | _rest] ->
             "!joinas spec"
 
           ["!clan"] ->
             clan_command(from_id)
             "!clan"
 
-          _ ->
+          _other ->
             message
         end
       else
@@ -593,9 +593,9 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec add_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
-  def add_roles(nil, _), do: nil
-  def add_roles(_, []), do: nil
-  def add_roles(_, nil), do: nil
+  def add_roles(nil, _roles), do: nil
+  def add_roles(_user, []), do: nil
+  def add_roles(_user, nil), do: nil
 
   def add_roles(userid, roles) when is_integer(userid),
     do: add_roles(get_user_by_id(userid), roles)
@@ -606,8 +606,8 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec remove_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
-  def remove_roles(nil, _), do: nil
-  def remove_roles(_, []), do: nil
+  def remove_roles(nil, _roles), do: nil
+  def remove_roles(_user, []), do: nil
 
   def remove_roles(userid, roles) when is_integer(userid),
     do: remove_roles(get_user_by_id(userid), roles)
@@ -622,7 +622,7 @@ defmodule Teiserver.CacheUser do
 
   @spec create_token(Account.User.t()) :: String.t()
   def create_token(user) do
-    {:ok, jwt, _} = Guardian.encode_and_sign(user)
+    {:ok, jwt, _claims} = Guardian.encode_and_sign(user)
     jwt
   end
 
@@ -950,10 +950,10 @@ defmodule Teiserver.CacheUser do
     # We don't care about the lobby version so much as we do about the lobby itself
     lobby_client =
       case Regex.run(~r/^[a-zA-Z\ ]+/, lobby_client) do
-        [match | _] ->
+        [match | _rest] ->
           match
 
-        _ ->
+        _no_match ->
           lobby_client
       end
 
@@ -1041,7 +1041,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec restricted?(T.userid() | T.user() | nil, String.t() | [String.t()]) :: boolean()
-  def restricted?(nil, _), do: true
+  def restricted?(nil, _restriction), do: true
 
   def restricted?(userid, restriction) when is_integer(userid),
     do: restricted?(get_user_by_id(userid), restriction)
@@ -1086,7 +1086,7 @@ defmodule Teiserver.CacheUser do
     do: is_shadowbanned?(get_user_by_id(userid))
 
   def is_shadowbanned?(%{shadowbanned: true}), do: true
-  def is_shadowbanned?(_), do: false
+  def is_shadowbanned?(_user), do: false
 
   @spec shadowban_user(T.userid()) :: :ok
   def shadowban_user(nil), do: :ok
@@ -1176,7 +1176,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec allow?(T.userid() | T.user() | nil, String.t() | atom | [String.t()]) :: boolean()
-  def allow?(nil, _), do: false
+  def allow?(nil, _required), do: false
 
   def allow?(userid, required) when is_integer(userid),
     do: allow?(get_user_by_id(userid), required)

@@ -25,5 +25,5 @@ defmodule Teiserver.Chat.DirectMessage do
   end
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(:index, conn, _), do: allow?(conn, "Moderator")
+  def authorize(:index, conn, _params), do: allow?(conn, "Moderator")
 end

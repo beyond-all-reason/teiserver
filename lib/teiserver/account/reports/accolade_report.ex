@@ -44,7 +44,7 @@ defmodule Teiserver.Account.AccoladeReport do
         fn a ->
           a.badge_type_id
         end,
-        fn _ ->
+        fn _accolade ->
           1
         end
       )
@@ -60,17 +60,17 @@ defmodule Teiserver.Account.AccoladeReport do
 
     giver_ids =
       giver_leaderboard
-      |> Enum.map(fn {_, leaders} ->
+      |> Enum.map(fn {_badge_type_id, leaders} ->
         leaders
-        |> Enum.map(fn {userid, _} -> userid end)
+        |> Enum.map(fn {userid, _count} -> userid end)
       end)
       |> List.flatten()
 
     recipient_ids =
       recipient_leaderboard
-      |> Enum.map(fn {_, leaders} ->
+      |> Enum.map(fn {_badge_type_id, leaders} ->
         leaders
-        |> Enum.map(fn {userid, _} -> userid end)
+        |> Enum.map(fn {userid, _count} -> userid end)
       end)
       |> List.flatten()
 
@@ -78,16 +78,16 @@ defmodule Teiserver.Account.AccoladeReport do
 
     top_takers =
       give_take_ratios
-      |> Enum.sort_by(fn {_, _, got, ratio} -> {ratio, got} end, &>=/2)
+      |> Enum.sort_by(fn {_userid, _gave, got, ratio} -> {ratio, got} end, &>=/2)
       |> Enum.take(10)
 
     top_givers =
       give_take_ratios
-      |> Enum.sort_by(fn {_, gave, _, ratio} -> {-ratio, gave} end, &>=/2)
+      |> Enum.sort_by(fn {_userid, gave, _got, ratio} -> {-ratio, gave} end, &>=/2)
       |> Enum.take(10)
 
-    taker_userids = top_takers |> Enum.map(fn {userid, _, _, _} -> userid end)
-    giver_userids = top_givers |> Enum.map(fn {userid, _, _, _} -> userid end)
+    taker_userids = top_takers |> Enum.map(fn {userid, _gave, _got, _ratio} -> userid end)
+    giver_userids = top_givers |> Enum.map(fn {userid, _gave, _got, _ratio} -> userid end)
 
     users =
       (giver_ids ++ recipient_ids ++ taker_userids ++ giver_userids)
@@ -134,7 +134,7 @@ defmodule Teiserver.Account.AccoladeReport do
     accolades
     |> Enum.group_by(fn a -> a.giver_id end)
     |> Enum.map(fn {giver, accs} -> {giver, Enum.count(accs)} end)
-    |> Enum.sort_by(fn {_, acc_count} -> acc_count end, &>=/2)
+    |> Enum.sort_by(fn {_giver, acc_count} -> acc_count end, &>=/2)
     |> Enum.take(positions)
   end
 
@@ -150,19 +150,19 @@ defmodule Teiserver.Account.AccoladeReport do
     accolades
     |> Enum.group_by(fn a -> a.recipient_id end)
     |> Enum.map(fn {recipient, accs} -> {recipient, Enum.count(accs)} end)
-    |> Enum.sort_by(fn {_, acc_count} -> acc_count end, &>=/2)
+    |> Enum.sort_by(fn {_recipient, acc_count} -> acc_count end, &>=/2)
     |> Enum.take(positions)
   end
 
   defp get_give_take_ratios(accolades) do
     given =
       accolades
-      |> Enum.group_by(fn a -> a.giver_id end, fn _ -> :ok end)
+      |> Enum.group_by(fn a -> a.giver_id end, fn _accolade -> :ok end)
       |> Map.new(fn {userid, accs} -> {userid, Enum.count(accs)} end)
 
     received =
       accolades
-      |> Enum.group_by(fn a -> a.recipient_id end, fn _ -> :ok end)
+      |> Enum.group_by(fn a -> a.recipient_id end, fn _accolade -> :ok end)
       |> Map.new(fn {userid, accs} -> {userid, Enum.count(accs)} end)
 
     Enum.uniq(Map.keys(given) ++ Map.keys(received))

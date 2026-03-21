@@ -275,15 +275,15 @@ CLIENTS test_room #{user.name}\n"
     assert reply =~ "BATTLEOPENED "
     assert reply =~ "OPENBATTLE "
 
-    [_, lobby_id] = Regex.run(~r/OPENBATTLE ([0-9]+)\n/, reply)
+    [_full_match, lobby_id] = Regex.run(~r/OPENBATTLE ([0-9]+)\n/, reply)
     lobby_id = int_parse(lobby_id)
 
     user2 = new_user()
     %{socket: socket2} = auth_setup(context, user2)
-    _ = _recv_raw(socket1)
+    _adduser_reply = _recv_raw(socket1)
 
     _send_raw(socket2, "JOINBATTLE #{lobby_id} empty sPassword\n")
-    _ = _recv_raw(socket2)
+    _join_reply = _recv_raw(socket2)
 
     # User1 (host) should now get a message
     reply = _recv_raw(socket1)
@@ -298,7 +298,7 @@ CLIENTS test_room #{user.name}\n"
     # SpringLobby method of an actually empty password
     _send_raw(socket2, "JOINBATTLE #{lobby_id}  sPassword\n")
     _send_raw(socket1, "JOINBATTLEACCEPT #{user2.name}\n")
-    _ = _recv_raw(socket1)
+    _accept_reply = _recv_raw(socket1)
 
     reply =
       _recv_until(socket2)
@@ -351,7 +351,10 @@ CLIENTS test_room #{user.name}\n"
     # Actually add it this time
     _send_raw(socket2, "ADDBOT STAI(1) 4195458 0 STAI\n")
     reply = _recv_raw(socket2)
-    [_, botid] = Regex.run(~r/ADDBOT (\d+) STAI\(1\) #{user2.name} 4195458 0 STAI/, reply)
+
+    [_full_match, botid] =
+      Regex.run(~r/ADDBOT (\d+) STAI\(1\) #{user2.name} 4195458 0 STAI/, reply)
+
     botid = int_parse(botid)
     assert reply == "ADDBOT #{botid} STAI(1) #{user2.name} 4195458 0 STAI\n"
 
@@ -359,7 +362,7 @@ CLIENTS test_room #{user.name}\n"
     _send_raw(socket2, "ADDBOT Raptor:Normal(1) 4195458 0 Raptor: Normal\n")
     reply = _recv_raw(socket2)
 
-    [_, botid] =
+    [_full_match, botid] =
       Regex.run(~r/ADDBOT (\d+) Raptor:Normal\(1\) #{user2.name} 4195458 0 Raptor: Normal/, reply)
 
     botid = int_parse(botid)
@@ -402,7 +405,7 @@ CLIENTS test_room #{user.name}\n"
     assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
 
     _send_raw(socket2, "RING #{user1.name}\n")
-    _ = _recv_raw(socket2)
+    _ring_reply = _recv_raw(socket2)
 
     reply = _recv_raw(socket1)
     assert reply == "RING #{user2.name}\n"
@@ -477,7 +480,7 @@ CLIENTS test_room #{user.name}\n"
     # No need to send an exit, it's already sorted out!
     # we should try to login though, it should be rejected as rename in progress
     %{socket: socket} = TeiserverTestLib.raw_setup(context)
-    _ = _recv_raw(socket)
+    _welcome = _recv_raw(socket)
 
     # Now we get flood protection after the rename
     expected_server_response = "DENIED Flood protection - Please wait 20 seconds and try again"

@@ -77,7 +77,7 @@ defmodule Teiserver.Account.CodeOfConductData do
       [p1, p2] ->
         get_in(data(), [p1, p2])
 
-      _ ->
+      _other ->
         nil
     end
   end

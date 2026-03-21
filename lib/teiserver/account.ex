@@ -239,7 +239,7 @@ defmodule Teiserver.Account do
     data =
       data
       |> Enum.map(fn {k, v} -> {to_string(k), v} end)
-      |> Enum.filter(fn {_, v} -> v != nil end)
+      |> Enum.filter(fn {_key, v} -> v != nil end)
       |> Map.new()
 
     case get_user_stat(userid) do
@@ -727,7 +727,7 @@ defmodule Teiserver.Account do
         update_smurf_key(existing, %{last_updated: Timex.now()})
         {:ok, existing}
 
-      [existing | _] ->
+      [existing | _rest] ->
         Logger.error(
           "#{__MODULE__}.create_smurf_key found user with two identical keys: #{user_id}, #{type_id}, #{value}"
         )
@@ -927,7 +927,7 @@ defmodule Teiserver.Account do
 
           key_type.id
 
-        [%{id: id} | _] ->
+        [%{id: id} | _rest] ->
           id
       end
     end)
@@ -1069,7 +1069,7 @@ defmodule Teiserver.Account do
       {:ok, r} ->
         Teiserver.cache_put(:teiserver_user_ratings, {r.user_id, r.rating_type_id, r.season}, r)
 
-      _ ->
+      _error ->
         nil
     end
 
@@ -1759,7 +1759,7 @@ defmodule Teiserver.Account do
         Teiserver.cache_delete(:account_friend_cache, friend.user1_id)
         Teiserver.cache_delete(:account_friend_cache, friend.user2_id)
 
-      _ ->
+      _error ->
         :ok
     end
 

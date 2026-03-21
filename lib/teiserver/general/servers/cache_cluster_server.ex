@@ -50,7 +50,7 @@ defmodule Teiserver.General.CacheClusterServer do
 
   @impl GenServer
   @spec init(any) :: {:ok, %{}}
-  def init(_) do
+  def init(_opts) do
     :ok = PubSub.subscribe(Teiserver.PubSub, "cluster_hooks")
     {:ok, %{}}
   end

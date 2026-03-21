@@ -106,7 +106,7 @@ defmodule TeiserverWeb.Live.BattleTest do
         _tags,
         _battle_status,
         _battle_opened
-        | _
+        | _rest
       ] = reply
 
       lobby_id =

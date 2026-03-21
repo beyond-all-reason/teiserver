@@ -23,14 +23,14 @@ defmodule Teiserver.OAuth.CodeTest do
   end
 
   test "can get valid code", %{user: user, app: app} do
-    assert {:ok, code, _} = create_code(user, app)
+    assert {:ok, code, _attrs} = create_code(user, app)
     assert {:ok, ^code} = OAuth.get_valid_code(code.value)
     assert {:error, :no_code} = OAuth.get_valid_code(nil)
   end
 
   test "cannot retrieve expired code", %{user: user, app: app} do
     yesterday = Timex.shift(Timex.now(), days: -1)
-    assert {:ok, code, _} = create_code(user, app, expires_at: yesterday)
+    assert {:ok, code, _attrs} = create_code(user, app, expires_at: yesterday)
     assert {:error, :expired} = OAuth.get_valid_code(code.value)
   end
 
@@ -70,7 +70,7 @@ defmodule Teiserver.OAuth.CodeTest do
     assert {:ok, code, attrs} = create_code(user, app)
     attrs = Map.put(attrs, :id, app.id)
     no_match = :crypto.strong_rand_bytes(38) |> Base.hex_encode32(padding: false)
-    assert {:error, _} = OAuth.exchange_code(code, no_match)
+    assert {:error, _reason} = OAuth.exchange_code(code, no_match)
 
     no_match =
       "lollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollol"
@@ -100,8 +100,12 @@ defmodule Teiserver.OAuth.CodeTest do
   end
 
   test "can delete expired codes", %{user: user, app: app} do
-    assert {:ok, expired_code, _} = create_code(user, app, expires_at: ~U[1980-01-01 12:23:34Z])
-    assert {:ok, valid_code, _} = create_code(user, app, expires_at: ~U[2500-01-01 12:23:34Z])
+    assert {:ok, expired_code, _expired_attrs} =
+             create_code(user, app, expires_at: ~U[1980-01-01 12:23:34Z])
+
+    assert {:ok, valid_code, _valid_attrs} =
+             create_code(user, app, expires_at: ~U[2500-01-01 12:23:34Z])
+
     count = OAuth.delete_expired_codes()
     assert count == 1
     assert {:error, :no_code} = OAuth.get_valid_code(expired_code.value)
@@ -109,7 +113,7 @@ defmodule Teiserver.OAuth.CodeTest do
   end
 
   test "can pass custom time when deleting codes", %{user: user, app: app} do
-    assert {:ok, code, _} = create_code(user, app, expires_at: ~U[2500-01-01 12:23:34Z])
+    assert {:ok, code, _attrs} = create_code(user, app, expires_at: ~U[2500-01-01 12:23:34Z])
     now = DateTime.add(code.expires_at, 1, :day)
     count = OAuth.delete_expired_codes(now)
     assert count == 1

@@ -9,7 +9,7 @@ defmodule Teiserver.Game.AchievementCleanupTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     recent_from = Timex.now() |> Timex.shift(hours: -48)
 
     brutal_to_normal_scenarios(recent_from)
@@ -59,14 +59,14 @@ defmodule Teiserver.Game.AchievementCleanupTask do
     # Now get the users from that and then get their normals
     user_ids =
       brutal_achievements
-      |> Enum.map(fn {{user_id, _}, _} -> user_id end)
+      |> Enum.map(fn {{user_id, _type_id}, _achievement} -> user_id end)
       |> Enum.uniq()
 
     # Next up we want to limit the normal_ids based on
     # the brutals we actually found
     normal_ids =
       brutal_achievements
-      |> Enum.map(fn {{_, type_id}, _} -> id_map[type_id] end)
+      |> Enum.map(fn {{_user_id, type_id}, _achievement} -> id_map[type_id] end)
       |> Enum.uniq()
 
     # Normals
@@ -86,11 +86,11 @@ defmodule Teiserver.Game.AchievementCleanupTask do
     # Now anywhere there's not a normal for a brutal we add the normal
     normals_to_add =
       brutal_achievements
-      |> Enum.filter(fn {{user_id, achievement_type_id}, _} ->
+      |> Enum.filter(fn {{user_id, achievement_type_id}, _achievement} ->
         key = {user_id, id_map[achievement_type_id]}
         not Enum.member?(normal_achievements, key)
       end)
-      |> Enum.map(fn {_, a} ->
+      |> Enum.map(fn {_key, a} ->
         %{
           user_id: a.user_id,
           achievement_type_id: id_map[a.achievement_type_id],

@@ -45,7 +45,7 @@ defmodule Teiserver.Lobby.LobbyLib do
       %{lobby_id: lobby_id} ->
         get_lobby_match_id(lobby_id)
 
-      _ ->
+      _client ->
         nil
     end
   end
@@ -71,7 +71,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
     case lobby_list do
       [] -> nil
-      [lobby | _] -> lobby
+      [lobby | _rest] -> lobby
     end
   end
 
@@ -86,7 +86,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
     case lobby_list do
       [] -> nil
-      [lobby | _] -> lobby
+      [lobby | _rest] -> lobby
     end
   end
 
@@ -106,8 +106,8 @@ defmodule Teiserver.Lobby.LobbyLib do
   def list_throttled_lobbies(type) do
     throttle_pid =
       case Horde.Registry.lookup(Teiserver.ThrottleRegistry, "LobbyIndexThrottle") do
-        [{pid, _}] -> pid
-        _ -> nil
+        [{pid, _value}] -> pid
+        _no_match -> nil
       end
 
     case throttle_pid do
@@ -120,7 +120,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
           # If the process has somehow died, we just return an empty list
         catch
-          :exit, _ ->
+          :exit, _reason ->
             []
         end
     end
@@ -376,7 +376,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   end
 
   @spec add_lobby(T.lobby()) :: T.lobby()
-  def add_lobby(%{founder_id: _} = lobby) do
+  def add_lobby(%{founder_id: _founder_id} = lobby) do
     Lobby.start_battle_lobby_throttle(lobby.id)
     start_lobby_server(lobby)
 
@@ -415,15 +415,15 @@ defmodule Teiserver.Lobby.LobbyLib do
   def lobby_exists?(lobby_id) when is_integer(lobby_id) do
     case get_lobby_pid(lobby_id) do
       nil -> false
-      _ -> true
+      _pid -> true
     end
   end
 
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   def get_lobby_pid(lobby_id) when is_integer(lobby_id) do
     case Horde.Registry.lookup(Teiserver.LobbyRegistry, lobby_id) do
-      [{pid, _}] -> pid
-      _ -> nil
+      [{pid, _value}] -> pid
+      _no_match -> nil
     end
   end
 
@@ -457,7 +457,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
           # If the process has somehow died, we just return nil
         catch
-          :exit, _ ->
+          :exit, _reason ->
             nil
         end
     end
@@ -542,7 +542,7 @@ defmodule Teiserver.Lobby.LobbyLib do
         {cached, ts} when now - ts < ttl_ms ->
           cached
 
-        _ ->
+        _expired ->
           lobby_ids = Lobby.list_lobby_ids()
 
           tasks =
@@ -553,11 +553,11 @@ defmodule Teiserver.Lobby.LobbyLib do
                     %{host_teamsize: team_size, host_teamcount: team_count} ->
                       {lobby_id, %{teamSize: team_size, nbTeams: team_count}}
 
-                    _ ->
+                    _other ->
                       nil
                   end
                 catch
-                  _, _ -> nil
+                  _kind, _reason -> nil
                 end
               end)
             end)
@@ -586,11 +586,11 @@ defmodule Teiserver.Lobby.LobbyLib do
           %{host_teamsize: team_size, host_teamcount: team_count} ->
             %{lobby_id => %{teamSize: team_size, nbTeams: team_count}}
 
-          _ ->
+          _other ->
             nil
         end
       catch
-        _, _ -> nil
+        _kind, _reason -> nil
       end
     else
       nil

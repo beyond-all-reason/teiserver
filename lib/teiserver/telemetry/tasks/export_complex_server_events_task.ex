@@ -16,7 +16,7 @@ defmodule Teiserver.Telemetry.ExportComplexServerEventsTask do
     query_client(event_types, start_date, end_date)
   end
 
-  def perform(_) do
+  def perform(_args) do
     %{}
   end
 

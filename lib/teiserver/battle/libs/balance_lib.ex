@@ -218,7 +218,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
           # match_controller will use this condition when
           # balancing using old data from game_rating_logs
-          match?(%{"rating_value" => _}, value) ->
+          match?(%{"rating_value" => _rating}, value) ->
             pre_match_stats = get_prematch_stats(value)
 
             {user_id,
@@ -347,7 +347,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
   # This matches when the next group is a size 1, we no longer need to pair up
   defp do_matchup_groups(
-         [%{count: 1} | _] = remaining_players,
+         [%{count: 1} | _rest] = remaining_players,
          logs,
          previous_paired_groups,
          _opts
@@ -362,7 +362,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
     {_remaining_solo, found_groups} =
       1..(opts[:team_count] - 1)
-      |> Enum.reduce({remaining_groups, []}, fn _, {groups_to_search, results} ->
+      |> Enum.reduce({remaining_groups, []}, fn _index, {groups_to_search, results} ->
         result = find_comparable_group(group, groups_to_search, opts)
 
         new_groups_to_search =
@@ -441,7 +441,7 @@ defmodule Teiserver.Battle.BalanceLib do
           opts
         )
 
-      _ ->
+      _found ->
         # Calculate remaining solo players
         combined_member_ids =
           found_groups
@@ -725,16 +725,16 @@ defmodule Teiserver.Battle.BalanceLib do
       [] ->
         0
 
-      [_] ->
+      [_single] ->
         0
 
-      _ ->
+      _multiple ->
         raw_scores =
           scores
-          |> Enum.map(fn {_, s} -> s end)
+          |> Enum.map(fn {_team, s} -> s end)
 
         [max_score | remaining] = raw_scores
-        [min_score | _] = remaining
+        [min_score | _rest] = remaining
 
         # Max score skill needs always be at least one for this to not bork
         max_score = max(max_score, 1)
@@ -884,8 +884,8 @@ defmodule Teiserver.Battle.BalanceLib do
       [] ->
         :no_possible_combinations
 
-      _ ->
-        {selected_group, _, _} = hd(all_combinations)
+      _combinations ->
+        {selected_group, _diff, _score} = hd(all_combinations)
 
         # Now turn a list of groups into one group
         selected_group
@@ -907,8 +907,8 @@ defmodule Teiserver.Battle.BalanceLib do
   # First argument is the size of each combination
   # Second is the list of items to make a combination from
   @spec make_combinations(integer(), list) :: [list]
-  defp make_combinations(0, _), do: [[]]
-  defp make_combinations(_, []), do: []
+  defp make_combinations(0, _list), do: [[]]
+  defp make_combinations(_n, []), do: []
 
   defp make_combinations(n, [x | xs]) do
     if n < 0 do

@@ -9,12 +9,12 @@ defmodule TeiserverWeb.Blog.Blog.ShowLiveTest do
   import Phoenix.LiveViewTest
   import Teiserver.MicroblogFixtures
 
-  defp auth(_) do
+  defp auth(_context) do
     GeneralTestLib.conn_setup()
     |> TeiserverTestLib.conn_setup()
   end
 
-  defp filler_post(_) do
+  defp filler_post(_context) do
     tag1 = tag_fixture()
     tag2 = tag_fixture()
 

@@ -92,7 +92,7 @@ defmodule Teiserver.Helpers.BoundedQueueTest do
     test "match last element" do
       q = BQ.from_list([1, 2, 3], 5)
       {a, b} = BQ.split_when(q, &(&1 == 3))
-      assert {{:value, 1}, _} = BQ.out(a)
+      assert {{:value, 1}, _queue} = BQ.out(a)
       assert BQ.to_list(a) == [1, 2, 3]
       assert BQ.to_list(b) == []
     end

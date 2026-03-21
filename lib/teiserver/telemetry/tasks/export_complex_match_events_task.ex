@@ -18,7 +18,7 @@ defmodule Teiserver.Telemetry.ExportComplexMatchEventsTask do
     }
   end
 
-  def perform(_) do
+  def perform(_args) do
     %{}
   end
 

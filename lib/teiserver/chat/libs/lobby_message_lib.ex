@@ -28,8 +28,8 @@ defmodule Teiserver.Chat.LobbyMessageLib do
   end
 
   @spec _search(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  def _search(query, _key, ""), do: query
+  def _search(query, _key, nil), do: query
 
   def _search(query, :id, id) do
     from lobby_messages in query,

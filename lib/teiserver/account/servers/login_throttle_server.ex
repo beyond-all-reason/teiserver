@@ -51,7 +51,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   def get_queue_length do
     GenServer.call(__MODULE__, :queue_size)
   catch
-    :exit, {:noproc, _} -> 0
+    :exit, {:noproc, _call} -> 0
   end
 
   @doc """
@@ -126,7 +126,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
         capacity > 0 && :queue.is_empty(state.queue) ->
           case BurstyRateLimiter.try_acquire(state.rate_limiter) do
             {:ok, updated_rl} -> {%{state | rate_limiter: updated_rl}, true}
-            _ -> {add_user_to_queue(state, pid, userid), false}
+            _error -> {add_user_to_queue(state, pid, userid), false}
           end
 
         true ->
@@ -156,7 +156,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     end
   end
 
-  def handle_info({:DOWN, _, :process, pid, _reason}, state) do
+  def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
     # don't traverse the queue to remove the member since it's a relatively
     # expensive operation.
     # This means the queue length doesn't reflect live clients, but it's
@@ -194,7 +194,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   defp dequeue_users(n, state) do
     case :queue.out(state.queue) do
-      {:empty, _} ->
+      {:empty, _queue} ->
         state
 
       {{:value, member}, rest} ->
@@ -213,7 +213,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
               send(member.pid, {:login_accepted, member.user_id})
               dequeue_users(n - 1, new_state)
 
-            _ ->
+            _error ->
               state
           end
         else

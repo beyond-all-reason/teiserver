@@ -136,7 +136,7 @@ defmodule Teiserver.Helper.StringHelper do
   def breakup_long_words(s), do: breakup_long_words(s, 100)
 
   @spec breakup_long_words(nil | String.t(), non_neg_integer()) :: nil | String.t()
-  def breakup_long_words(nil, _), do: nil
+  def breakup_long_words(nil, _max_length), do: nil
 
   def breakup_long_words(string, max_length) do
     string

@@ -23,7 +23,7 @@ defmodule Teiserver.OAuth.TokenTest do
   end
 
   test "token must have an owner", %{app: app} do
-    assert {:error, _} =
+    assert {:error, _changeset} =
              Token.changeset(%Token{}, %{
                value: "coucou",
                application_id: app.id,
@@ -71,7 +71,7 @@ defmodule Teiserver.OAuth.TokenTest do
 
   test "can refresh a token", %{user: user, app: app} do
     assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
-    assert {:ok, _} = OAuth.get_valid_token(token.refresh_token.value)
+    assert {:ok, _token} = OAuth.get_valid_token(token.refresh_token.value)
     assert {:ok, new_token} = OAuth.refresh_token(token.refresh_token)
 
     # the previous token and its refresh token should have been invalidated
@@ -85,7 +85,7 @@ defmodule Teiserver.OAuth.TokenTest do
 
   test "can change scopes at refresh", %{user: user, app: app} do
     assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
-    assert {:ok, _} = OAuth.get_valid_token(token.refresh_token.value)
+    assert {:ok, _token} = OAuth.get_valid_token(token.refresh_token.value)
     assert {:ok, new_token} = OAuth.refresh_token(token.refresh_token, scopes: ["tachyon.lobby"])
     assert MapSet.new(new_token.scopes) == MapSet.new(["tachyon.lobby"])
     assert MapSet.new(token.scopes) == MapSet.new(new_token.original_scopes)
@@ -93,7 +93,7 @@ defmodule Teiserver.OAuth.TokenTest do
 
   test "cannot get more scopes than originally", %{user: user, app: app} do
     assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
-    assert {:ok, _} = OAuth.get_valid_token(token.refresh_token.value)
+    assert {:ok, _token} = OAuth.get_valid_token(token.refresh_token.value)
 
     {:error, changeset} =
       OAuth.refresh_token(token.refresh_token, scopes: ["tachyon.lobby", "lolscope"])

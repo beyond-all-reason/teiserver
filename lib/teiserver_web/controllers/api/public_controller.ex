@@ -57,7 +57,7 @@ defmodule TeiserverWeb.API.PublicController do
             |> json(%{error: "Invalid season parameter"})
         end
 
-      _ ->
+      _invalid ->
         conn
         |> put_status(400)
         |> json(%{error: "Invalid season parameter"})
@@ -89,7 +89,7 @@ defmodule TeiserverWeb.API.PublicController do
     |> Enum.map(fn rating_type ->
       {rating_type, rating_type_lookup[rating_type]}
     end)
-    |> Enum.filter(fn {_, type_id} -> not is_nil(type_id) end)
+    |> Enum.filter(fn {_rating_type, type_id} -> not is_nil(type_id) end)
     |> Enum.map(fn {rating_type, type_id} ->
       players =
         Account.list_ratings(

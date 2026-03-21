@@ -46,7 +46,7 @@ defmodule Teiserver.Telemetry.ComplexClientEventLib do
 
         result
 
-      _ ->
+      _error ->
         result
     end
   end

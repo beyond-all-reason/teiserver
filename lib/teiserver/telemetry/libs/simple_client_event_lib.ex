@@ -43,7 +43,7 @@ defmodule Teiserver.Telemetry.SimpleClientEventLib do
 
         result
 
-      _ ->
+      _error ->
         result
     end
   end

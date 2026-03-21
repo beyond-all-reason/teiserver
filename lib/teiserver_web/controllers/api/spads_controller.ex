@@ -12,7 +12,7 @@ defmodule TeiserverWeb.API.SpadsController do
   @spec get_rating(Plug.Conn.t(), map) :: Plug.Conn.t()
   def get_rating(conn, %{
         "target_id" => "None",
-        "type" => _
+        "type" => _type
       }) do
     conn
     |> put_status(200)
@@ -70,13 +70,13 @@ defmodule TeiserverWeb.API.SpadsController do
     player_data =
       case raw_player_data do
         {:ok, data} -> data
-        _ -> :error
+        _error -> :error
       end
 
     bot_data =
       case bot_data do
         {:ok, data} -> data
-        _ -> :error
+        _error -> :error
       end
 
     # first_player_id = player_data
@@ -164,7 +164,7 @@ defmodule TeiserverWeb.API.SpadsController do
               |> List.flatten()
               |> Enum.sort(&>=/2)
               |> Enum.with_index()
-              |> Map.new(fn {{team_id, _, _, username}, idx} ->
+              |> Map.new(fn {{team_id, _rating, _uncertainty, username}, idx} ->
                 {username,
                  %{
                    "team" => team_id - 1,
@@ -213,7 +213,7 @@ defmodule TeiserverWeb.API.SpadsController do
          true <- is_integer(team_size) and team_size > 0 do
       {:ok, {map_size(team_sizes), team_size}}
     else
-      _ -> :error
+      _other -> :error
     end
   end
 end

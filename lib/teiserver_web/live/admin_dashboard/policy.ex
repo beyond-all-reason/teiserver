@@ -52,7 +52,7 @@ defmodule TeiserverWeb.AdminDashLive.Policy do
     }
   end
 
-  def handle_info(%{channel: "lobby_policy_updates:" <> _, event: :agent_status} = msg, state) do
+  def handle_info(%{channel: "lobby_policy_updates:" <> _id, event: :agent_status} = msg, state) do
     {:noreply,
      state
      |> assign(:bots, msg.agent_status)}

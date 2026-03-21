@@ -17,7 +17,7 @@ defmodule Teiserver.Telemetry.AnonPropertyTest do
     assert Telemetry.list_anon_properties() |> Enum.count() == 0
 
     # Log the property
-    {result, _} = Telemetry.log_anon_property(hash, "anon.anon_property-#{r}", "value")
+    {result, _property} = Telemetry.log_anon_property(hash, "anon.anon_property-#{r}", "value")
 
     assert result == :ok
 
@@ -35,7 +35,8 @@ defmodule Teiserver.Telemetry.AnonPropertyTest do
     assert Enum.member?(type_list, "anon.anon_property-#{r}")
 
     # Now try updating it
-    {result, _} = Telemetry.log_anon_property(hash, "anon.anon_property-#{r}", "value-updated")
+    {result, _property} =
+      Telemetry.log_anon_property(hash, "anon.anon_property-#{r}", "value-updated")
 
     assert result == :ok
 

@@ -26,7 +26,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
   @impl GenServer
   def handle_info(
-        %{channel: "lobby_policy_internal:" <> _, event: :request_status_update},
+        %{channel: "lobby_policy_internal:" <> _id, event: :request_status_update},
         %{lobby_id: nil} = state
       ) do
     :ok =
@@ -43,7 +43,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   def handle_info(
-        %{channel: "lobby_policy_internal:" <> _, event: :request_status_update},
+        %{channel: "lobby_policy_internal:" <> _id, event: :request_status_update},
         %{lobby_id: lobby_id} = state
       ) do
     lobby = Battle.get_lobby(lobby_id)
@@ -76,28 +76,32 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "lobby_policy_internal:" <> _, event: :disconnect}, state) do
+  def handle_info(%{channel: "lobby_policy_internal:" <> _id, event: :disconnect}, state) do
     Client.disconnect(state.userid, "Bot disconnect")
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "lobby_policy_internal:" <> _, event: :updated_policy} = m, state) do
+  def handle_info(%{channel: "lobby_policy_internal:" <> _id, event: :updated_policy} = m, state) do
     {:noreply, %{state | lobby_policy: m.new_lobby_policy}}
   end
 
-  def handle_info(%{channel: "lobby_policy_internal:" <> _}, state) do
+  def handle_info(%{channel: "lobby_policy_internal:" <> _id}, state) do
     {:noreply, state}
   end
 
   # teiserver_client_messages
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, state) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _id, event: :disconnected}, state) do
     # We've disconnected, time to kill this process
     DynamicSupervisor.terminate_child(Teiserver.LobbyPolicySupervisor, self())
     {:noreply, state}
   end
 
   def handle_info(
-        %{channel: "teiserver_client_messages:" <> _, event: :added_to_lobby, lobby_id: lobby_id},
+        %{
+          channel: "teiserver_client_messages:" <> _id,
+          event: :added_to_lobby,
+          lobby_id: lobby_id
+        },
         state
       ) do
     PubSub.unsubscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{lobby_id}")
@@ -123,16 +127,19 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, new_state}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :client_updated}, state) do
-    {:noreply, state}
-  end
-
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :force_join_lobby}, state) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _id, event: :client_updated}, state) do
     {:noreply, state}
   end
 
   def handle_info(
-        %{channel: "teiserver_client_messages:" <> _, event: :received_direct_message} = e,
+        %{channel: "teiserver_client_messages:" <> _id, event: :force_join_lobby},
+        state
+      ) do
+    {:noreply, state}
+  end
+
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _id, event: :received_direct_message} = e,
         state
       ) do
     content = e.message_content |> Enum.join("") |> String.trim()
@@ -141,7 +148,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, new_state}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _} = _m, state) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _id} = _m, state) do
     # Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\n#{inspect m.event}")
     {:noreply, state}
   end
@@ -167,7 +174,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
         Logger.info("LobbyPolicyBotServer find_empty_lobby was unable to find an empty lobby")
         {:noreply, state}
 
-      _ ->
+      _lobby ->
         Lobby.force_add_user_to_lobby(state.userid, empty_lobby.id)
 
         Logger.info("LobbyPolicyBotServer found an empty lobby")
@@ -227,7 +234,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
 
   # Lobby chat
   def handle_info(
-        %{channel: "teiserver_lobby_chat:" <> _, userid: userid, message: message},
+        %{channel: "teiserver_lobby_chat:" <> _id, userid: userid, message: message},
         state
       ) do
     new_state =
@@ -245,7 +252,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:force_join_battle, _, _}, state) do
+  def handle_info({:force_join_battle, _userid, _lobby_id}, state) do
     {:noreply, state}
   end
 
@@ -418,7 +425,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
     state
   end
 
-  defp handle_founder_chat(_, _userid, state) do
+  defp handle_founder_chat(_message, _userid, state) do
     state
   end
 
@@ -491,7 +498,7 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
   end
 
   # Returns true if the name of the map sent to it is allowed
-  defp map_allowed?(_, %{lobby_policy: %{map_list: []}}), do: true
+  defp map_allowed?(_current_map, %{lobby_policy: %{map_list: []}}), do: true
 
   defp map_allowed?(current_map, state) do
     if Enum.empty?(state.lobby_policy.map_list) do

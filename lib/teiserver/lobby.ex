@@ -53,7 +53,13 @@ defmodule Teiserver.Lobby do
   end
 
   @spec create_lobby(map()) :: T.lobby()
-  def create_lobby(%{founder_id: _, founder_name: _, name: _} = lobby) do
+  def create_lobby(
+        %{
+          founder_id: _founder_id,
+          founder_name: _founder_name,
+          name: _name
+        } = lobby
+      ) do
     passworded = Map.get(lobby, :password) != nil
 
     # Needs to be supplied a map with:
@@ -169,7 +175,7 @@ defmodule Teiserver.Lobby do
 
   # Used to send the user PID a join battle command
   @spec do_force_add_user_to_lobby(T.client(), T.lobby_id()) :: :ok | nil
-  defp do_force_add_user_to_lobby(nil, _), do: nil
+  defp do_force_add_user_to_lobby(nil, _lobby_id), do: nil
 
   defp do_force_add_user_to_lobby(client, lobby_id) do
     Telemetry.log_simple_server_event(client.userid, "lobby.force_add_user_to_lobby")
@@ -413,7 +419,7 @@ defmodule Teiserver.Lobby do
   end
 
   @spec find_empty_lobby(function()) :: map() | nil
-  def find_empty_lobby(filter_func \\ fn _ -> true end) do
+  def find_empty_lobby(filter_func \\ fn _lobby -> true end) do
     empties =
       stream_lobbies()
       |> Stream.filter(fn lobby -> lobby.in_progress == false and Enum.empty?(lobby.players) end)
@@ -668,7 +674,7 @@ defmodule Teiserver.Lobby do
   end
 
   @spec force_change_client(T.userid(), T.userid(), map()) :: :ok
-  def force_change_client(_, nil, _), do: nil
+  def force_change_client(_changer_id, nil, _new_values), do: nil
 
   def force_change_client(changer_id, client_id, new_values) do
     case Client.get_client_by_id(client_id) do
@@ -694,8 +700,8 @@ defmodule Teiserver.Lobby do
   end
 
   @spec change_client_battle_status(map(), map()) :: map()
-  def change_client_battle_status(nil, _), do: nil
-  def change_client_battle_status(_, values) when values == %{}, do: nil
+  def change_client_battle_status(nil, _new_values), do: nil
+  def change_client_battle_status(_client, values) when values == %{}, do: nil
 
   def change_client_battle_status(client, new_values) do
     new_client = Map.merge(client, new_values)
@@ -703,14 +709,14 @@ defmodule Teiserver.Lobby do
   end
 
   @spec allow?(T.userid(), atom, T.lobby_id()) :: boolean()
-  def allow?(nil, _, _), do: false
-  def allow?(_, nil, _), do: false
-  def allow?(_, _, nil), do: false
+  def allow?(nil, _field, _lobby_id), do: false
+  def allow?(_userid, nil, _lobby_id), do: false
+  def allow?(_userid, _field, nil), do: false
 
   def allow?(userid, :saybattle, lobby_id), do: allow_say?(userid, lobby_id)
   def allow?(userid, :saybattleex, lobby_id), do: allow_say?(userid, lobby_id)
 
-  def allow?(_userid, :host, _), do: true
+  def allow?(_userid, :host, _lobby), do: true
 
   def allow?(changer, field, lobby_id) when is_integer(lobby_id),
     do: allow?(changer, field, get_lobby(lobby_id))

@@ -57,7 +57,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     |> rate_match(rerate?)
   end
 
-  def rate_match(nil, _), do: {:error, :no_match}
+  def rate_match(nil, _rerate?), do: {:error, :no_match}
 
   def rate_match(match, rerate?) do
     logs = Game.list_rating_logs(search: [match_id: match.id], limit: 1, select: [:id])
@@ -65,7 +65,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     sizes =
       match.members
       |> Enum.group_by(fn m -> m.team_id end)
-      |> Enum.map(fn {_, members} -> Enum.count(members) end)
+      |> Enum.map(fn {_team_id, members} -> Enum.count(members) end)
       |> Enum.uniq()
 
     cheating = get_in(match.data || %{}, ["export_data", "cheating"]) || 0
@@ -231,7 +231,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     save_rating_logs(match.id, win_ratings, loss_ratings, opts)
 
     # Update the match to track rating type
-    {:ok, _} = Battle.update_match(match, %{rating_type_id: rating_type_id})
+    {:ok, _match} = Battle.update_match(match, %{rating_type_id: rating_type_id})
 
     # If there is a balancer for this match we need to tell it to reset the hashes
     # because there are new values
@@ -315,7 +315,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     save_rating_logs(match.id, all_updates, opts)
 
     # Update the match to track rating type
-    {:ok, _} = Battle.update_match(match, %{rating_type_id: rating_type_id})
+    {:ok, _match} = Battle.update_match(match, %{rating_type_id: rating_type_id})
 
     # If there is a balancer for this match we need to tell it to reset the hashes
     # because there are new values
@@ -507,7 +507,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       nil ->
         Logger.error("No rating type of #{rating_type}")
 
-      _ ->
+      _id ->
         reset_player_ratings(rating_type_id)
         match_count = re_rate_all_matches_of_type(rating_type)
 
@@ -531,7 +531,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
 
   @spec predict_winning_team([map()], non_neg_integer()) :: map()
-  def predict_winning_team([], _), do: %{winning_team: nil}
+  def predict_winning_team([], _rating_type_id), do: %{winning_team: nil}
 
   def predict_winning_team(players, rating_type_id) do
     team_scores =
@@ -608,7 +608,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       rating_groups
       |> Enum.map(fn ratings_with_ids ->
         ratings_with_ids
-        |> Enum.map(fn {_, rating} ->
+        |> Enum.map(fn {_id, rating} ->
           rating
         end)
       end)
@@ -622,7 +622,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       |> Enum.map(fn {updated_values, original_values} ->
         original_values
         |> Enum.zip(updated_values)
-        |> Enum.map(fn {{id, _}, updated_value} ->
+        |> Enum.map(fn {{id, _original_rating}, updated_value} ->
           {id, updated_value}
         end)
       end)
@@ -647,7 +647,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
     if rerate? do
       Multi.new()
-      |> Multi.run(:delete_existing, fn repo, _ ->
+      |> Multi.run(:delete_existing, fn repo, _changes ->
         query = """
         delete from teiserver_game_rating_logs l where
         l.match_id = $1

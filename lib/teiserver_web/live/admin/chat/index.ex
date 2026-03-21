@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
 
           Map.put(new_filters, "userids", userids)
 
-        _ ->
+        _other ->
           new_filters
       end
 
@@ -127,7 +127,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
         "24 hours" -> Timex.now() |> Timex.shift(hours: -24)
         "2 days" -> Timex.now() |> Timex.shift(days: -2)
         "7 days" -> Timex.now() |> Timex.shift(days: -7)
-        _ -> nil
+        _other -> nil
       end
 
     excluded_ids =

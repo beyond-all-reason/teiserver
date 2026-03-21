@@ -2,7 +2,7 @@ defmodule Teiserver.Helper.ObanLogger do
   @moduledoc false
   require Logger
 
-  def handle_event([:oban, :job, :start], _measure, _meta, _) do
+  def handle_event([:oban, :job, :start], _measure, _meta, _config) do
     # Logger.warning("[Oban] :started #{meta.worker} at #{measure.system_time}")
   end
 
@@ -26,7 +26,7 @@ defmodule Teiserver.Helper.ObanLogger do
     )
   end
 
-  def handle_event([:oban, :circuit, :trip], _measure, _meta, _) do
+  def handle_event([:oban, :circuit, :trip], _measure, _meta, _config) do
     # data = %{
     #   conn: %{
     #     request_path: "Oban:#{meta.worker}",
@@ -42,7 +42,7 @@ defmodule Teiserver.Helper.ObanLogger do
     Logger.error("[Oban] [failure]")
   end
 
-  def handle_event([:oban, :job, :stop], %{duration: duration}, meta, _) do
+  def handle_event([:oban, :job, :stop], %{duration: duration}, meta, _config) do
     Logger.info(
       "[Oban] stop #{meta.worker} ran in #{System.convert_time_unit(duration, :native, :millisecond)}ms"
     )

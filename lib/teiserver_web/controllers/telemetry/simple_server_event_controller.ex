@@ -62,7 +62,7 @@ defmodule TeiserverWeb.Telemetry.SimpleServerEventController do
         "7 days" -> Timex.now() |> Timex.shift(days: -7)
         "14 days" -> Timex.now() |> Timex.shift(days: -14)
         "31 days" -> Timex.now() |> Timex.shift(days: -31)
-        _ -> Timex.now() |> Timex.shift(days: -7)
+        _other -> Timex.now() |> Timex.shift(days: -7)
       end
 
     server_events =

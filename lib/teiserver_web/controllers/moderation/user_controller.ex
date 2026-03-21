@@ -25,7 +25,7 @@ defmodule TeiserverWeb.Moderation.UserController do
     user = Account.get_user(id)
 
     case UserLib.has_access(user, conn) do
-      {true, _} ->
+      {true, _role} ->
         reports_made =
           Moderation.list_reports(
             search: [
@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Moderation.UserController do
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
 
-      _ ->
+      _no_access ->
         conn
         |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: ~p"/teiserver/admin/user")

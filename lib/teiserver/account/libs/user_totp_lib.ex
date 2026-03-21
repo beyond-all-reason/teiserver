@@ -107,7 +107,7 @@ defmodule Teiserver.Account.TOTPLib do
   def set_last_used(user_id, last_used) do
     if get_user_totp_status(user_id) == :active do
       case set_totp(user_id, %{user_id: user_id, last_used: last_used}) do
-        {:ok, _} ->
+        {:ok, _totp} ->
           :ok
 
         {:error, changeset} ->
@@ -123,14 +123,14 @@ defmodule Teiserver.Account.TOTPLib do
     case get_user_totp(user_id) do
       {:active, totp} ->
         case Repo.delete(totp) do
-          {:ok, _} ->
+          {:ok, _totp} ->
             :ok
 
           {:error, changeset} ->
             {:error, changeset}
         end
 
-      {:inactive, _} ->
+      {:inactive, _user} ->
         :ok
     end
   end

@@ -76,7 +76,7 @@ defmodule Teiserver.Asset.MapTest do
       AssetFixtures.create_map(qs_attr())
       AssetFixtures.create_map(altore_attr())
 
-      assert {:error, _} =
+      assert {:error, _changeset} =
                Asset.update_maps([
                  %{
                    display_name: "Quicksilver",

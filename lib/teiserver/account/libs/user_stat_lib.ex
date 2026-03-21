@@ -19,8 +19,8 @@ defmodule Teiserver.Account.UserStatLib do
     end)
   end
 
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  def _search(query, _key, ""), do: query
+  def _search(query, _key, nil), do: query
 
   def _search(query, :user_id, id) do
     from user_stats in query,
@@ -32,8 +32,8 @@ defmodule Teiserver.Account.UserStatLib do
       where: user_stats.user_id in ^id_list
   end
 
-  def _search(query, :data_equal, {"", _}), do: query
-  def _search(query, :data_equal, {_, ""}), do: query
+  def _search(query, :data_equal, {"", _value}), do: query
+  def _search(query, :data_equal, {_field, ""}), do: query
 
   def _search(query, :data_equal, {field, value}) do
     from user_stats in query,
@@ -50,8 +50,8 @@ defmodule Teiserver.Account.UserStatLib do
       where: fragment("? ->> ? < ?", user_stats.data, ^field, ^value)
   end
 
-  def _search(query, :data_contains, {"", _}), do: query
-  def _search(query, :data_contains, {_, ""}), do: query
+  def _search(query, :data_contains, {"", _value}), do: query
+  def _search(query, :data_contains, {_field, ""}), do: query
 
   def _search(query, :data_contains, {field, value}) do
     from user_stats in query,

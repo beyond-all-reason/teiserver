@@ -187,7 +187,7 @@ defmodule Teiserver.Microblog.PostLib do
     {:ok, post}
   end
 
-  defp broadcast_update_post(value, _), do: value
+  defp broadcast_update_post(value, _event), do: value
 
   def update_post_response_cache(post) do
     counts =
@@ -201,7 +201,7 @@ defmodule Teiserver.Microblog.PostLib do
         {c, Map.get(counts, c, 0)}
       end)
 
-    {:ok, _} = update_post(post, %{poll_result_cache: new_response_cache}, :new_response)
+    {:ok, _post} = update_post(post, %{poll_result_cache: new_response_cache}, :new_response)
   end
 
   @doc """
@@ -219,10 +219,10 @@ defmodule Teiserver.Microblog.PostLib do
   def delete_post(%Post{} = post) do
     Repo.transaction(fn ->
       query = "DELETE FROM microblog_post_tags WHERE post_id = $1;"
-      {:ok, _} = SQL.query(Repo, query, [post.id])
+      {:ok, _result} = SQL.query(Repo, query, [post.id])
 
       query = "DELETE FROM microblog_poll_responses WHERE post_id = $1;"
-      {:ok, _} = SQL.query(Repo, query, [post.id])
+      {:ok, _result} = SQL.query(Repo, query, [post.id])
 
       Repo.delete(post)
       |> broadcast_delete_post()
@@ -264,6 +264,6 @@ defmodule Teiserver.Microblog.PostLib do
           {:ok, %{:num_rows => non_neg_integer(), optional(any) => any}}
   def increment_post_view_count(post_id) when is_integer(post_id) do
     query = "UPDATE microblog_posts SET view_count = view_count + 1 WHERE id = $1;"
-    {:ok, _} = SQL.query(Repo, query, [post_id])
+    {:ok, _result} = SQL.query(Repo, query, [post_id])
   end
 end

@@ -23,6 +23,6 @@ defmodule Teiserver.Logging.PageViewLog do
   end
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
-  def authorize(_, conn, :delete), do: allow?(conn, "logging.page_view.delete")
-  def authorize(_, conn, _), do: allow?(conn, "logging.page_view")
+  def authorize(_data, conn, :delete), do: allow?(conn, "logging.page_view.delete")
+  def authorize(_data, conn, _action), do: allow?(conn, "logging.page_view")
 end

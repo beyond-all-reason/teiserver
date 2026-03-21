@@ -102,7 +102,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   def new_conn(nil), do: login(build_conn(), "")
 
   def new_conn(user) do
-    {:ok, jwt, _} = Guardian.encode_and_sign(user)
+    {:ok, jwt, _full_claims} = Guardian.encode_and_sign(user)
     {:ok, user, _claims} = Guardian.resource_from_token(jwt)
 
     login(build_conn(), user.email)
@@ -126,7 +126,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
           })
 
         # Tokens
-        {:ok, jwt, _} = Guardian.encode_and_sign(user)
+        {:ok, jwt, _full_claims} = Guardian.encode_and_sign(user)
         {:ok, user, _claims} = Guardian.resource_from_token(jwt)
         {user, jwt}
       end

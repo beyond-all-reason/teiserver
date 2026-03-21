@@ -52,7 +52,7 @@ defmodule Teiserver.Helper.NumberHelper do
   def c_round(v), do: round(v)
 
   @spec c_round(nil | number | Decimal.t(), non_neg_integer()) :: integer | float()
-  def c_round(nil, _), do: 0
+  def c_round(nil, _decimal_places), do: 0
 
   def c_round(v, decimal_places) when Decimal.is_decimal(v) do
     round(Decimal.to_float(v), decimal_places)

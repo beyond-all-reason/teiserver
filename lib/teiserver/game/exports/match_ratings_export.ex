@@ -206,10 +206,10 @@ defmodule Teiserver.Game.MatchRatingsExport do
   defp expand_members(rating_list) do
     rating_list
     |> Enum.map(fn
-      {nil, _} ->
+      {nil, _member} ->
         nil
 
-      {_, nil} ->
+      {_rating_log, nil} ->
         nil
 
       {rating_log, member} ->

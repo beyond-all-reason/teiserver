@@ -68,11 +68,11 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("show-help", _, socket) do
+  def handle_event("show-help", _params, socket) do
     {:noreply, socket |> assign(:show_help, true)}
   end
 
-  def handle_event("hide-help", _, socket) do
+  def handle_event("hide-help", _params, socket) do
     {:noreply, socket |> assign(:show_help, false)}
   end
 
@@ -213,7 +213,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
 
     socket =
       case Account.ignore_user(socket.assigns.current_user.id, userid) do
-        {:ok, _} ->
+        {:ok, _result} ->
           username = Account.get_username_by_id(userid)
 
           socket
@@ -249,7 +249,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
 
     socket =
       case Account.avoid_user(socket.assigns.current_user.id, userid) do
-        {:ok, _} ->
+        {:ok, _result} ->
           username = Account.get_username_by_id(userid)
 
           socket
@@ -270,7 +270,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
 
     socket =
       case Account.block_user(socket.assigns.current_user.id, userid) do
-        {:ok, _} ->
+        {:ok, _result} ->
           username = Account.get_username_by_id(userid)
 
           socket
@@ -520,7 +520,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
 
   @spec get_purge_days_cutoff(String.t()) :: float()
   def get_purge_days_cutoff(duration) do
-    with [_, raw_number, type] <- Regex.run(~r/(\d)+ (month|year)/, duration),
+    with [_full_match, raw_number, type] <- Regex.run(~r/(\d)+ (month|year)/, duration),
          {number, ""} <- Integer.parse(raw_number) do
       cond do
         type == "year" ->
@@ -531,7 +531,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.Index do
       end
     else
       nil -> {:error, "invalid duration passed: #{duration}"}
-      {_, _rest} -> {:error, "invalid number in duration #{duration}"}
+      {_number, _rest} -> {:error, "invalid number in duration #{duration}"}
     end
   end
 

@@ -87,7 +87,7 @@ defmodule Teiserver.OAuthFixtures do
   def setup_token(%{id: id}, opts), do: setup_token(id, opts)
 
   def setup_token(user_id, opts) do
-    uid = for _ <- 1..10, into: "", do: <<Enum.random(~c"abcdefghijklmnopqrstuvwxyz")>>
+    uid = for _i <- 1..10, into: "", do: <<Enum.random(~c"abcdefghijklmnopqrstuvwxyz")>>
 
     app =
       app_attrs(user_id)

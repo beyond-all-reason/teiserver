@@ -10,17 +10,17 @@ defmodule Teiserver.Coordinator.SpadsParser do
     cond do
       # Team Size
       match = Regex.run(~r/teamSize=(\d)+/, msg) ->
-        [_, size] = match
+        [_full, size] = match
         {:host_update, %{host_teamsize: String.to_integer(size)}}
 
       # Team count
       match = Regex.run(~r/nbTeams=(\d)+/, msg) ->
-        [_, count] = match
+        [_full, count] = match
         {:host_update, %{host_teamcount: String.to_integer(count)}}
 
       # Kick or ban a player
       match = Regex.run(~r/Battle ban added for user "(\S+)" \(duration: .*? by (\S+)\)/, msg) ->
-        [_, _kicked_name, kicker_name] = match
+        [_full, _kicked_name, kicker_name] = match
         kicker_id = Account.get_userid_from_name(kicker_name)
         match_id = Battle.get_lobby_match_id(state.lobby_id)
 
@@ -32,7 +32,7 @@ defmodule Teiserver.Coordinator.SpadsParser do
 
       # Add a boss
       match = Regex.run(~r/Boss mode enabled for (\S+)/, msg) ->
-        [_, player_name] = match
+        [_full, player_name] = match
         player_id = CacheUser.get_userid(player_name)
 
         if player_id do
@@ -48,7 +48,7 @@ defmodule Teiserver.Coordinator.SpadsParser do
 
       # Remove an individual boss
       match = Regex.run(~r/Boss mode disabled for (\S+) \(by \S+\)/, msg) ->
-        [_, player_name] = match
+        [_full, player_name] = match
         player_id = CacheUser.get_userid(player_name)
 
         {:host_update, %{host_bosses: List.delete(state.host_bosses, player_id)}}

@@ -102,7 +102,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         "maxPlayersPerStartbox" => 8,
         "startboxes" =>
           for(
-            _ <- 1..n_teams,
+            _i <- 1..n_teams,
             into: [],
             do: %{"poly" => [%{"x" => 0, "y" => 0}, %{"x" => 200, "y" => 200}]}
           )
@@ -125,7 +125,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     setup [{Tachyon, :setup_client}, :setup_queue]
 
     test "works", %{client: client, queue_id: q1v1_id, queue_version: version1} do
-      {:ok, queue_id: q2v2_id, queue_pid: _, queue_version: version2} = setup_queue(2)
+      {:ok, queue_id: q2v2_id, queue_pid: _queue_pid, queue_version: version2} = setup_queue(2)
 
       resp = Tachyon.list_queues!(client)
 
@@ -202,7 +202,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
 
     test "multiple", %{client: client, queue_id: queue_id, queue_version: version} do
-      {:ok, queue_id: other_queue_id, queue_pid: _, queue_version: other_version} = setup_queue(2)
+      {:ok, queue_id: other_queue_id, queue_pid: _pid, queue_version: other_version} =
+        setup_queue(2)
 
       resp =
         Tachyon.join_queues!(client, [
@@ -494,7 +495,9 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       queue_pid: queue_pid,
       queue_version: version
     } do
-      [%{client: client}, _] = join_and_pair(app, %{id: queue_id, version: version}, queue_pid, 2)
+      [%{client: client}, _other] =
+        join_and_pair(app, %{id: queue_id, version: version}, queue_pid, 2)
+
       resp = Tachyon.join_queues!(client, [%{id: queue_id, version: version}])
       assert %{"status" => "failed", "reason" => "already_queued"} = resp
     end
@@ -560,7 +563,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       {:ok, queue_id: q2v2_id, queue_pid: q2v2_pid, queue_version: version2v2} = setup_queue(2)
 
       clients =
-        Enum.map(1..5, fn _ ->
+        Enum.map(1..5, fn _i ->
           {:ok, %{client: client}} = setup_user(app)
           client
         end)
@@ -609,7 +612,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       {:ok, queue_id: q_id, queue_pid: q_pid, queue_version: version} = setup_queue(2)
 
       clients =
-        Enum.map(1..4, fn _ ->
+        Enum.map(1..4, fn _i ->
           {:ok, %{client: client}} = setup_user(app)
           client
         end)
@@ -643,7 +646,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         |> mk_queue()
 
       clients =
-        Enum.map(1..2, fn _ ->
+        Enum.map(1..2, fn _i ->
           {:ok, %{client: client}} = setup_user(app)
           client
         end)
@@ -664,7 +667,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       # the cpu.
       pairing_room_pid =
         DynamicSupervisor.which_children(Teiserver.Matchmaking.QueueSupervisor)
-        |> Enum.find(fn {_, _pid, _, m} ->
+        |> Enum.find(fn {_id, _pid, _type, m} ->
           m == [PairingRoom]
         end)
         |> elem(1)
@@ -768,7 +771,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       assert Enum.count(user_ids) == 2
 
       for user_id <- user_ids do
-        {user_id, _} = Integer.parse(user_id)
+        {user_id, _remainder} = Integer.parse(user_id)
         assert is_pid(SessionRegistry.lookup(user_id))
       end
 
@@ -906,7 +909,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
   defp join_and_pair(app, queue, queue_pid, number_of_player) do
     data =
-      Enum.map(1..number_of_player, fn _ ->
+      Enum.map(1..number_of_player, fn _i ->
         {:ok, %{client: client} = data} = setup_user(app)
         assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue])
         data

@@ -27,7 +27,7 @@ defmodule Teiserver.Telemetry.ComplexClientEventTypeLib do
 
           event_type.id
 
-        [%{id: id} | _] ->
+        [%{id: id} | _rest] ->
           id
       end
     end)

@@ -8,17 +8,17 @@ defmodule Teiserver.Geoip do
   def get_flag(ip), do: get_flag(ip, nil)
 
   @spec get_flag(String.t(), String.t() | nil) :: String.t()
-  def get_flag("127." <> _, _), do: "??"
-  def get_flag("::ffff:127.0.0.1", _), do: "??"
-  def get_flag("::1", _), do: "??"
+  def get_flag("127." <> _rest, _default), do: "??"
+  def get_flag("::ffff:127.0.0.1", _default), do: "??"
+  def get_flag("::1", _default), do: "??"
 
   def get_flag(ip, default) do
     if Config.get_site_config_cache("system.Use geoip") do
       {result, 0} = System.cmd("geoiplookup", [ip])
 
       case Regex.run(~r/: ([A-Z][A-Z]),/, result) do
-        [_, code] -> code
-        _ -> default || "??"
+        [_match, code] -> code
+        _other -> default || "??"
       end
     else
       default || "??"

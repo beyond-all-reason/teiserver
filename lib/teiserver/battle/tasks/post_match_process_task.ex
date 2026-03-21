@@ -18,7 +18,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
-  def perform(_) do
+  def perform(_job) do
     if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
          true do
       if Config.get_site_config_cache("system.Process matches") do
@@ -144,7 +144,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
               stats: stats
             })
 
-          _ ->
+          _other ->
             Battle.update_match_membership(m, %{
               win: win,
               stats: stats
@@ -169,14 +169,14 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     end)
   end
 
-  defp use_export_data(_), do: []
+  defp use_export_data(_match), do: []
 
   defp extract_export_data(%{data: %{"export_data" => _export_data}} = _match) do
     %{}
   end
 
-  defp extract_export_data(_), do: %{}
+  defp extract_export_data(_match), do: %{}
 
   defp hd_or_x([], x), do: x
-  defp hd_or_x([x | _], _x), do: x
+  defp hd_or_x([x | _rest], _x), do: x
 end

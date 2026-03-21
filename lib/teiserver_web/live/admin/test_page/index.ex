@@ -31,7 +31,7 @@ defmodule TeiserverWeb.Admin.TestPageLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(%{assigns: %{tab: "alerts"}} = socket, _, _params) do
+  defp apply_action(%{assigns: %{tab: "alerts"}} = socket, _live_action, _params) do
     socket
     |> put_flash(:success, "Success flash - #{:rand.uniform(1000)}")
     |> put_flash(:info, "Info flash - #{:rand.uniform(1000)}")
@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Admin.TestPageLive.Index do
     |> put_flash(:error, "Danger/Error flash - #{:rand.uniform(1000)}")
   end
 
-  defp apply_action(socket, _, _params) do
+  defp apply_action(socket, _live_action, _params) do
     socket
   end
 

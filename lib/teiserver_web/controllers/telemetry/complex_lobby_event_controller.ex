@@ -62,7 +62,7 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
         "7 days" -> Timex.now() |> Timex.shift(days: -7)
         "14 days" -> Timex.now() |> Timex.shift(days: -14)
         "31 days" -> Timex.now() |> Timex.shift(days: -31)
-        _ -> Timex.now() |> Timex.shift(days: -7)
+        _other -> Timex.now() |> Timex.shift(days: -7)
       end
 
     schema_keys =
@@ -90,11 +90,11 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
     usernames =
       if String.ends_with?(key, "id") do
         lobby_data
-        |> Enum.map(fn {userid, _} ->
+        |> Enum.map(fn {userid, _count} ->
           if userid != nil do
             case Integer.parse(userid) do
-              {n, _} -> n
-              _ -> nil
+              {n, _rest} -> n
+              _error -> nil
             end
           end
         end)

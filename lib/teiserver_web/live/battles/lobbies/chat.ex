@@ -35,11 +35,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   end
 
   @impl Phoenix.LiveView
-  def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
+  def handle_params(_params, _url, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket |> redirect(to: ~p"/")}
   end
 
-  def handle_params(%{"id" => id}, _, socket) do
+  def handle_params(%{"id" => id}, _url, socket) do
     id = int_parse(id)
     current_user = socket.assigns[:current_user]
     lobby = Battle.get_lobby(id)
@@ -87,7 +87,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
             order_by: "Newest first"
           )
           |> Enum.map(fn m -> {m.user_id, m.content} end)
-          |> Enum.filter(fn {_, msg} ->
+          |> Enum.filter(fn {_user_id, msg} ->
             allow_read_message?(msg, socket)
           end)
           |> Enum.take(@message_count)
@@ -174,21 +174,21 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     {:noreply, socket}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_chat:" <> _, event: :announce}, socket) do
+  def handle_info(%{channel: "teiserver_lobby_chat:" <> _lobby_id, event: :announce}, socket) do
     {:noreply, socket}
   end
 
   def handle_info(
-        %{channel: "teiserver_lobby_chat:" <> _, userid: userid, message: message},
+        %{channel: "teiserver_lobby_chat:" <> _lobby_id, userid: userid, message: message},
         socket
       ) do
     {userid, message} =
       case Regex.run(~r/^<(.*?)> (.+)$/u, message) do
-        [_, username, remainder] ->
+        [_full_match, username, remainder] ->
           userid = CacheUser.get_userid(username) || userid
           {userid, "g: #{remainder}"}
 
-        _ ->
+        _other ->
           {userid, message}
       end
 
@@ -225,7 +225,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         [] ->
           socket
 
-        _ ->
+        _changes ->
           players = Lobby.list_lobby_players!(assigns.id)
           clients = get_clients(players)
 
@@ -240,17 +240,20 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     index_redirect(socket)
   end
 
-  def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do
+  def handle_info({:liveview_lobby_update, :consul_server_updated, _lobby_id, _data}, socket) do
     socket = socket
 
     {:noreply, socket}
   end
 
-  def handle_info({:liveview_lobby_update, _lobby_changes, _, _}, socket) do
+  def handle_info({:liveview_lobby_update, _lobby_changes, _lobby_id, _data}, socket) do
     {:noreply, socket}
   end
 
-  def handle_info(%{channel: "teiserver_user_updates:" <> _}, %{assigns: %{id: id}} = socket) do
+  def handle_info(
+        %{channel: "teiserver_user_updates:" <> _user_id},
+        %{assigns: %{id: id}} = socket
+      ) do
     {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_chat_path(socket, :chat, id))}
   end
 
@@ -266,7 +269,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   defp update_user_map(%{assigns: %{user_map: user_map, messages: messages}} = socket) do
     extra_users =
       messages
-      |> Enum.map(fn {id, _} -> id end)
+      |> Enum.map(fn {id, _message} -> id end)
       |> Enum.uniq()
       |> Enum.filter(fn userid -> not Map.has_key?(user_map, userid) end)
       |> Map.new(fn userid -> {userid, Account.get_user_by_id(userid)} end)

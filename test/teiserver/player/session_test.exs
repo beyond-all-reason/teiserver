@@ -10,13 +10,13 @@ defmodule Teiserver.Player.SessionTest do
 
   @moduletag :tachyon
 
-  def setup_session(_) do
+  def setup_session(_context) do
     user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     {:ok, sess_pid} = SessionSupervisor.start_session(user)
     {:ok, user: user, sess_pid: sess_pid}
   end
 
-  def setup_config(_) do
+  def setup_config(_context) do
     TachyonLib.enable_state_restoration()
     Callbacks.on_exit(fn -> TachyonLib.disable_state_restoration() end)
   end
@@ -32,7 +32,7 @@ defmodule Teiserver.Player.SessionTest do
         state: :irrelevant
       })
 
-      refute_receive _
+      refute_receive _message
     end
   end
 
@@ -41,7 +41,7 @@ defmodule Teiserver.Player.SessionTest do
 
     test "can restart a session after shutdown", %{user: user, sess_pid: sess_pid} do
       TachyonLib.restart_system()
-      Polling.poll_until(fn -> nil end, fn _ -> not Process.alive?(sess_pid) end)
+      Polling.poll_until(fn -> nil end, fn _result -> not Process.alive?(sess_pid) end)
 
       Polling.poll_until_some(fn -> Player.lookup_session(user.id) end)
     end

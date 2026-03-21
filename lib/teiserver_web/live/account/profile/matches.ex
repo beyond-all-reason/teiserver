@@ -92,7 +92,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Matches do
       "Friends" -> :self in profile_permissions or :friend in profile_permissions
       "Any player" -> not Enum.any?(profile_permissions, &(&1 in [:block, :avoid, :ignore]))
       "Completely public" -> true
-      _ -> false
+      _other -> false
     end
   end
 
@@ -104,7 +104,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Matches do
       "Friends" -> :self in profile_permissions or :friend in profile_permissions
       "Any player" -> not Enum.any?(profile_permissions, &(&1 in [:block, :avoid, :ignore]))
       "Completely public" -> true
-      _ -> false
+      _other -> false
     end
   end
 

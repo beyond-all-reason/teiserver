@@ -28,5 +28,5 @@ defmodule Teiserver.Account.BadgeType do
   end
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(_, conn, _), do: allow?(conn, "Admin")
+  def authorize(_action, conn, _data), do: allow?(conn, "Admin")
 end

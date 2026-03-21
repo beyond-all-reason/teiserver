@@ -37,7 +37,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTest do
     assert Telemetry.list_simple_match_events() |> Enum.count() == 0
 
     # Log the event
-    {result, _} =
+    {result, _event} =
       Telemetry.log_simple_match_event(user.id, match.id, "match.simple_user_event-#{r}", 100)
 
     assert result == :ok

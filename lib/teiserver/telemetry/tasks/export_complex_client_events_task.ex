@@ -33,7 +33,7 @@ defmodule Teiserver.Telemetry.ExportComplexClientEventsTask do
     end
   end
 
-  def perform(_) do
+  def perform(_args) do
     %{}
   end
 

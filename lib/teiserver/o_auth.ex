@@ -36,7 +36,7 @@ defmodule Teiserver.OAuth do
   @spec delete_application(Application.t()) :: :ok | {:error, term()}
   def delete_application(app) do
     case Repo.delete(app) do
-      {:ok, _} -> :ok
+      {:ok, _app} -> :ok
       {:error, err} -> {:error, err}
     end
   end
@@ -98,7 +98,7 @@ defmodule Teiserver.OAuth do
   defp localhost?("127.0.0.1"), do: true
   defp localhost?("::1"), do: true
   defp localhost?("0:0:0:0:0:0:0:1"), do: true
-  defp localhost?(_), do: false
+  defp localhost?(_host), do: false
 
   @doc """
   Some applications are not meant to allow authorization code grants
@@ -309,7 +309,7 @@ defmodule Teiserver.OAuth do
     end
   end
 
-  defp check_verifier(_, _), do: {:error, :invalid_verifier}
+  defp check_verifier(_code, _verifier), do: {:error, :invalid_verifier}
 
   # A-Z, a-z, 0-9, and the punctuation characters -._~
   defp valid_verifier(verifier) do
@@ -358,7 +358,7 @@ defmodule Teiserver.OAuth do
       {:error, :expired} ->
         {:error, :expired}
 
-      _ ->
+      _result ->
         token =
           if Ecto.assoc_loaded?(token.application) do
             token
@@ -428,7 +428,7 @@ defmodule Teiserver.OAuth do
   @spec delete_credential(Credential.t() | Credential.id()) :: :ok | {:error, term()}
   def delete_credential(%Credential{} = cred) do
     case Repo.delete(cred) do
-      {:ok, _} -> :ok
+      {:ok, _credential} -> :ok
       {:error, err} -> {:error, err}
     end
   end
@@ -470,7 +470,7 @@ defmodule Teiserver.OAuth do
   @spec delete_expired_codes(DateTime.t() | nil) :: non_neg_integer()
   def delete_expired_codes(now \\ nil) do
     now = now || DateTime.utc_now()
-    {count, _} = CodeQueries.base_query() |> CodeQueries.expired(now) |> Repo.delete_all()
+    {count, _deleted} = CodeQueries.base_query() |> CodeQueries.expired(now) |> Repo.delete_all()
     count
   end
 
@@ -480,7 +480,10 @@ defmodule Teiserver.OAuth do
   @spec delete_expired_tokens(DateTime.t() | nil) :: non_neg_integer()
   def delete_expired_tokens(now \\ nil) do
     now = now || DateTime.utc_now()
-    {count, _} = TokenQueries.base_query() |> TokenQueries.expired(now) |> Repo.delete_all()
+
+    {count, _deleted} =
+      TokenQueries.base_query() |> TokenQueries.expired(now) |> Repo.delete_all()
+
     count
   end
 
@@ -511,7 +514,7 @@ defmodule Teiserver.OAuth do
          [client_id, client_secret] <- :binary.split(decoded, ":") do
       {URI.decode_www_form(client_id), URI.decode_www_form(client_secret)}
     else
-      _ -> :error
+      _other -> :error
     end
   end
 

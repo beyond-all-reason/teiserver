@@ -221,18 +221,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def get_overview(lobby_pid) do
     :gen_statem.call(lobby_pid, :get_overview, @default_call_timeout)
   catch
-    :exit, {:noproc, _} -> nil
+    :exit, {:noproc, _details} -> nil
   end
 
   @spec get_details(id()) :: {:ok, details()} | {:error, reason :: term()}
   def get_details(id) do
     via_tuple(id) |> :gen_statem.call(:get_details, @default_call_timeout)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
-  def child_spec({lobby_id, _} = args) do
+  def child_spec({lobby_id, _init_type} = args) do
     %{
       id: via_tuple(lobby_id),
       start: {__MODULE__, :start_link, [args]},
@@ -250,17 +250,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def join(lobby_id, join_data, pid \\ self()) do
     via_tuple(lobby_id) |> :gen_statem.call({:join, join_data, pid}, @default_call_timeout)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @spec leave(id(), T.userid()) :: :ok | {:error, reason :: :lobby_full | term()}
   def leave(lobby_id, user_id) do
     via_tuple(lobby_id) |> :gen_statem.call({:leave, user_id}, @default_call_timeout)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
     # lobby shutting down would result in the player leaving anyway
-    :exit, {:shutdown, _} -> :ok
+    :exit, {:shutdown, _reason} -> :ok
   end
 
   @spec join_ally_team(id(), T.userid(), allyTeam :: non_neg_integer()) ::
@@ -274,16 +274,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
       @default_call_timeout
     )
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @spec spectate(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   def spectate(lobby_id, user_id) do
     via_tuple(lobby_id) |> :gen_statem.call({:spectate, user_id}, @default_call_timeout)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @spec rejoin(id(), T.userid(), pid()) ::
@@ -291,8 +291,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def rejoin(lobby_id, user_id, pid) do
     via_tuple(lobby_id) |> :gen_statem.call({:rejoin, user_id, pid}, @default_call_timeout)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @type client_status_update_data :: %{
@@ -304,8 +304,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def update_client_status(lobby_id, user_id, update_data) do
     via_tuple(lobby_id) |> :gen_statem.call({:update_client_status, user_id, update_data})
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @type add_bot_opt ::
@@ -339,24 +339,24 @@ defmodule Teiserver.TachyonLobby.Lobby do
       @default_call_timeout
     )
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @spec remove_bot(id(), bot_id :: String.t()) :: :ok | {:error, :invalid_bot_id | term()}
   def remove_bot(lobby_id, bot_id) do
     via_tuple(lobby_id) |> :gen_statem.call({:remove_bot, bot_id}, @default_call_timeout)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @spec update_bot(id(), bot_update_data()) :: :ok | {:error, reason :: :invalid_bot_id | term()}
   def update_bot(lobby_id, update_data) do
     via_tuple(lobby_id) |> :gen_statem.call({:update_bot, update_data}, @default_call_timeout)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @type lobby_update_data :: %{
@@ -377,8 +377,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       @default_call_timeout
     )
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @spec vote_submit(id(), T.userid(), {String.t(), vote_ballot()}) ::
@@ -390,8 +390,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       @default_call_timeout
     )
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @doc """
@@ -407,8 +407,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def join_queue(lobby_id, user_id) do
     via_tuple(lobby_id) |> :gen_statem.call({:join_queue, user_id}, @default_call_timeout)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @spec start_battle(id(), T.userid()) ::
@@ -416,8 +416,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def start_battle(lobby_id, user_id) do
     via_tuple(lobby_id) |> :gen_statem.call({:start_battle, user_id}, @default_call_timeout)
   catch
-    :exit, {:noproc, _} -> {:error, :invalid_lobby}
-    :exit, {:shutdown, _} -> {:error, :invalid_lobby}
+    :exit, {:noproc, _details} -> {:error, :invalid_lobby}
+    :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
   @doc """
@@ -547,11 +547,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
-  def handle_event({:call, _from}, _, :starting_up, data) do
+  def handle_event({:call, _from}, _request, :starting_up, data) do
     {:keep_state, data, [{:postpone, true}]}
   end
 
-  def handle_event({:call, from}, _, :shutting_down, data) do
+  def handle_event({:call, from}, _request, :shutting_down, data) do
     {:keep_state, data, [{:reply, from, {:error, :shutting_down}}]}
   end
 
@@ -632,7 +632,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     already_there? =
       case data.players[user_id] do
         nil -> false
-        %{team: {at, _, _}} -> at == ally_team
+        %{team: {at, _team, _player}} -> at == ally_team
       end
 
     cond do
@@ -698,13 +698,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:keep_state, aggregate.data, [{:reply, from, :ok}]}
   end
 
-  def handle_event({:call, from}, {:update_client_status, user_id, _}, _state, data)
+  def handle_event({:call, from}, {:update_client_status, user_id, _update_data}, _state, data)
       when not is_map_key(data.players, user_id) and not is_map_key(data.spectators, user_id),
       do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
 
   # maybe we'll want to keep track of client status when they move from player
   # to spec, but for now, just reject the request for non players.
-  def handle_event({:call, from}, {:update_client_status, user_id, _}, _state, data)
+  def handle_event({:call, from}, {:update_client_status, user_id, _update_data}, _state, data)
       when is_map_key(data.spectators, user_id),
       do: {:keep_state, data, [{:reply, from, {:error, :not_a_player}}]}
 
@@ -777,7 +777,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:keep_state, data, [{:reply, from, :ok}]}
   end
 
-  def handle_event({:call, from}, {:update_properties, _, data}, _state, fsm_data)
+  def handle_event({:call, from}, {:update_properties, _user_id, data}, _state, fsm_data)
       when map_size(data) == 0,
       do: {:keep_state, fsm_data, [{:reply, from, :ok}]}
 
@@ -803,7 +803,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
-  def handle_event({:call, from}, {:vote_submit, _user_id, {vote_id, _}}, _state, data)
+  def handle_event({:call, from}, {:vote_submit, _user_id, {vote_id, _ballot}}, _state, data)
       when data.current_vote.id != vote_id,
       do: {:keep_state, data, [{:reply, from, {:error, :invalid_vote}}]}
 
@@ -833,7 +833,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       # the player back into an ally team. Although they may end up in a different ally team
       # it is largely useless, so for simplicity sake, ignore the join_queue command
       is_map_key(data.players, user_id) and
-          Enum.all?(data.spectators, fn {_, s} -> s.join_queue_position == nil end) ->
+          Enum.all?(data.spectators, fn {_id, s} -> s.join_queue_position == nil end) ->
         {:keep_state, data, [{:reply, from, :ok}]}
 
       # swap the player with the first in the join queue
@@ -933,12 +933,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     case state do
       :shutting_down -> {:keep_state, data}
-      _ -> {:next_state, :shutting_down, data}
+      _other -> {:next_state, :shutting_down, data}
     end
   end
 
   # only DOWN events matter when shutting down the lobby, everything else should be ignored
-  def handle_event(:info, _, :shutting_down, data) do
+  def handle_event(:info, _msg, :shutting_down, data) do
     {:keep_state, data}
   end
 
@@ -1045,7 +1045,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec get_details_from_state(state()) :: details()
   defp get_details_from_state(state) do
-    {players, bots} = Enum.split_with(state.players, fn {_, p} -> is_map_key(p, :pid) end)
+    {players, bots} = Enum.split_with(state.players, fn {_id, p} -> is_map_key(p, :pid) end)
 
     players =
       Enum.map(players, fn {p_id, p} ->
@@ -1165,8 +1165,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     repacked_players =
       for {_at, at_idx} <- Enum.with_index(data.ally_team_config) do
-        Enum.filter(data.players, fn {_, %{team: {p_at, _, _}}} -> at_idx == p_at end)
-        |> Enum.map(fn {_, p} -> p end)
+        Enum.filter(data.players, fn {_id, %{team: {p_at, _team, _player}}} -> at_idx == p_at end)
+        |> Enum.map(fn {_id, p} -> p end)
         |> Enum.sort_by(& &1.team)
         |> Enum.with_index()
         |> Enum.map(fn {p, idx} -> {p.id, Map.update!(p, :team, &put_elem(&1, 1, idx))} end)
@@ -1216,7 +1216,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> update_in([:updates], &[ev | &1])
   end
 
-  defp process_event({:update_ally_team_config, _, new_config} = ev, aggregate) do
+  defp process_event({:update_ally_team_config, _old_config, new_config} = ev, aggregate) do
     state = aggregate.data
 
     spec_ids =
@@ -1259,8 +1259,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
     # event instead.
     added_ids =
       Enum.map(new_aggregate.updates, fn
-        {:move_spec_to_player, id, _} -> id
-        _ -> nil
+        {:move_spec_to_player, id, _data} -> id
+        _other -> nil
       end)
       |> Enum.reject(&is_nil/1)
 
@@ -1269,7 +1269,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     final_events =
       Enum.map(new_aggregate.updates, fn ev ->
         case ev do
-          {:move_player_to_spec, x, _} ->
+          {:move_player_to_spec, x, _spec_data} ->
             if MapSet.member?(ids_to_fix, x),
               do: nil,
               else: ev
@@ -1279,7 +1279,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
               do: {:move_player, x, data.team},
               else: ev
 
-          _ ->
+          _other ->
             ev
         end
       end)
@@ -1316,7 +1316,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
         new_aggregate =
           case {result, vote.action} do
-            {:failed, _} ->
+            {:failed, _action} ->
               new_aggregate
 
             {:passed, {:change_map, new_map}} ->
@@ -1461,9 +1461,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # events, starting_state, final_state) do
   defp broadcast_list_updates(%{updates: events, data: data} = aggregate) do
     initial_player_count =
-      Enum.count(aggregate.initial_data.players, fn {_, p} -> not bot_id?(p.id) end)
+      Enum.count(aggregate.initial_data.players, fn {_id, p} -> not bot_id?(p.id) end)
 
-    final_player_count = Enum.count(aggregate.data.players, fn {_, p} -> not bot_id?(p.id) end)
+    final_player_count = Enum.count(aggregate.data.players, fn {_id, p} -> not bot_id?(p.id) end)
 
     change_map =
       Enum.reduce(events, %{}, fn ev, change_map ->
@@ -1474,7 +1474,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           {:update_map_name, new_name} ->
             Map.put(change_map, :map_name, new_name)
 
-          {:update_ally_team_config, _, new_config} ->
+          {:update_ally_team_config, _old_config, new_config} ->
             change_map
             |> Map.put(
               :max_player_count,
@@ -1488,7 +1488,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
             # just include it. We're already sending a message anyway
             |> Map.put(:player_count, final_player_count)
 
-          _ ->
+          _other ->
             change_map
         end
       end)
@@ -1517,10 +1517,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
         capacity = total_capacity - team_count(at_idx, players)
         {capacity, at_idx, at.teams}
       end
-      |> Enum.filter(fn {c, _, _} -> c > 0 end)
+      |> Enum.filter(fn {c, _idx, _teams} -> c > 0 end)
       # select the biggest capacity with the lowest index
       |> Enum.min(
-        fn {c1, idx1, _}, {c2, idx2, _} ->
+        fn {c1, idx1, _teams1}, {c2, idx2, _teams2} ->
           c1 >= c2 && idx1 <= idx2
         end,
         fn -> nil end
@@ -1530,18 +1530,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
       nil ->
         nil
 
-      {_, at_idx, teams} ->
-        {_, t_idx, p_idx} =
+      {_capacity, at_idx, teams} ->
+        {_capacity, t_idx, p_idx} =
           for {t, t_idx} <- Enum.with_index(teams) do
             player_count =
-              Enum.count(players, fn {_, %{team: {x, y, _}}} ->
+              Enum.count(players, fn {_id, %{team: {x, y, _player}}} ->
                 x == at_idx && y == t_idx
               end)
 
             capacity = t.max_players - player_count
             {capacity, t_idx, player_count}
           end
-          |> Enum.filter(fn {c, _, _} -> c > 0 end)
+          |> Enum.filter(fn {c, _idx, _count} -> c > 0 end)
           # guarantee not to raise an exception
           |> Enum.min()
 
@@ -1551,7 +1551,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   # return the number of players + bots in the given ally team
   defp team_count(ally_team, players) do
-    Enum.count(players, fn {_, %{team: {at, _, _}}} -> at == ally_team end)
+    Enum.count(players, fn {_id, %{team: {at, _team, _player}}} -> at == ally_team end)
   end
 
   defp broadcast_update({:update, user_id, updates}, state) do
@@ -1589,7 +1589,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # what's the next index to use for join queue spec?
   defp find_spec_queue_pos(spectators) do
     max =
-      Enum.reduce(spectators, nil, fn {_, s}, max_so_far ->
+      Enum.reduce(spectators, nil, fn {_id, s}, max_so_far ->
         cond do
           s.join_queue_position == nil -> max_so_far
           max_so_far == nil -> s.join_queue_position
@@ -1602,7 +1602,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   # which player is next in the join queue?
   defp get_first_player_in_join_queue(spectators) do
-    Enum.reduce(spectators, {nil, nil}, fn {id, s}, {min_so_far, _} = acc ->
+    Enum.reduce(spectators, {nil, nil}, fn {id, s}, {min_so_far, _prev_id} = acc ->
       cond do
         s.join_queue_position == nil ->
           acc
@@ -1723,12 +1723,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
                   ai_version: Map.get(bot, :version),
                   ai_options: bot.options
                 }
-                |> Enum.reject(fn {_, v} -> v == nil || v == %{} end)
+                |> Enum.reject(fn {_key, v} -> v == nil || v == %{} end)
                 |> Map.new()
               end
 
             %{players: players, bots: bots}
-            |> Enum.reject(fn {_, v} -> v |> Enum.empty?() end)
+            |> Enum.reject(fn {_key, v} -> v |> Enum.empty?() end)
             |> Map.new()
           end
 
@@ -1768,14 +1768,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
         case state.current_vote.action do
           # make changing map idempotent, it's just a nicer API this way
           {:change_map, ^new_name} -> {:ok, []}
-          _ -> {:error, :vote_in_progress}
+          _other_action -> {:error, :vote_in_progress}
         end
 
-      Enum.count(state.players, fn {_, p} -> not bot_id?(p.id) end) > 1 ->
+      Enum.count(state.players, fn {_id, p} -> not bot_id?(p.id) end) > 1 ->
         vote_duration_s = 60
 
         voters =
-          for {_, p} <- state.players, !bot_id?(p.id), into: %{} do
+          for {_id, p} <- state.players, !bot_id?(p.id), into: %{} do
             if p.id == user_id, do: {p.id, :yes}, else: {p.id, :pending}
           end
 
@@ -1807,7 +1807,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:ok, [{:update_ally_team_config, state.ally_team_config, new_config}]}
   end
 
-  defp update_property(prop, _, _, _), do: {:error, "update #{prop} is not supported"}
+  defp update_property(prop, _value, _state, _user_id),
+    do: {:error, "update #{prop} is not supported"}
 
   defp process_event_actions(aggregate),
     do: Enum.each(aggregate.actions, &process_event_action(&1, aggregate.data))
@@ -1818,7 +1819,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec vote_result(vote_state()) :: :undecided | {:ended, :passed | :failed}
   defp vote_result(vote) do
-    votes = for {_, v} <- vote.voters, do: v
+    votes = for {_user_id, v} <- vote.voters, do: v
 
     cond do
       Enum.count(votes, &(&1 != :pending)) < vote.quorum -> :undecided

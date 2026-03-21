@@ -44,11 +44,11 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
+  def handle_params(_params, _url, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket |> redirect(to: ~p"/")}
   end
 
-  def handle_params(_, _, socket) do
+  def handle_params(_params, _url, socket) do
     {:noreply, socket}
   end
 
@@ -66,7 +66,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
      |> build_user_lookup()}
   end
 
-  def handle_info(%{channel: "teiserver_party:" <> _, event: :message}, socket) do
+  def handle_info(%{channel: "teiserver_party:" <> _party_id, event: :message}, socket) do
     {:noreply, socket}
   end
 
@@ -90,20 +90,23 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
      |> build_user_lookup()}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _user_id, event: :connected}, socket) do
     {:noreply,
      socket
      |> assign(:client, Account.get_client_by_id(socket.assigns.current_user.id))}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _user_id, event: :disconnected},
+        socket
+      ) do
     {:noreply,
      socket
      |> assign(:client, nil)}
   end
 
   def handle_info(
-        data = %{channel: "teiserver_client_messages:" <> _, event: ev},
+        data = %{channel: "teiserver_client_messages:" <> _user_id, event: ev},
         socket
       )
       when ev in [:added_to_party, :party_invite] do
@@ -123,7 +126,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
      |> build_user_lookup()}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _rest}, socket) do
     {:noreply, socket}
   end
 
@@ -139,7 +142,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     {:noreply, socket}
   end
 
-  def handle_event("create_party", _, socket) do
+  def handle_event("create_party", _params, socket) do
     party = Account.create_party(socket.assigns.current_user.id)
     :timer.sleep(100)
     {:noreply, socket |> redirect(to: Routes.ts_game_party_show_path(socket, :show, party.id))}

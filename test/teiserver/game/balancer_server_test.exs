@@ -8,7 +8,7 @@ defmodule Teiserver.Game.BalancerServerAsyncTest do
   @moduletag :balance_test
 
   defp create_fake_players(count) do
-    1..count |> Enum.map(fn _ -> %{} end)
+    1..count |> Enum.map(fn _i -> %{} end)
   end
 
   test "get fuzz multiplier" do

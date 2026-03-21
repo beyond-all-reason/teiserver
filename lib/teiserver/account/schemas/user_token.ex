@@ -22,5 +22,5 @@ defmodule Teiserver.Account.UserToken do
   end
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
-  def authorize(_, conn, _), do: allow?(conn, "admin.dev")
+  def authorize(_action, conn, _data), do: allow?(conn, "admin.dev")
 end

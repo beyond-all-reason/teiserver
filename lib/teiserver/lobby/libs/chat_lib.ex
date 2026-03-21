@@ -14,10 +14,10 @@ defmodule Teiserver.Lobby.ChatLib do
   alias Teiserver.Moderation
 
   @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  def say(nil, _, _), do: {:error, "No userid"}
-  def say(_, _, nil), do: {:error, "No lobby"}
+  def say(nil, _msg, _lobby_id), do: {:error, "No userid"}
+  def say(_userid, _msg, nil), do: {:error, "No lobby"}
 
-  def say(_userid, "!specafk" <> _, _lobby_id), do: :ok
+  def say(_userid, "!specafk" <> _rest, _lobby_id), do: :ok
 
   def say(userid, msg, lobby_id) do
     # Replace SPADS command (starting with !) with lowercase
@@ -34,15 +34,15 @@ defmodule Teiserver.Lobby.ChatLib do
           |> String.split()
 
         case command_parts do
-          ["!cv", "joinas" | _] ->
+          ["!cv", "joinas" | _rest] ->
             has_ai = Battle.get_bots(lobby_id) |> Enum.any?()
             if has_ai, do: msg, else: "!cv joinas spec"
 
-          ["!callvote", "joinas" | _] ->
+          ["!callvote", "joinas" | _rest] ->
             has_ai = Battle.get_bots(lobby_id) |> Enum.any?()
             if has_ai, do: msg, else: "!callvote joinas spec"
 
-          ["!joinas" | _] ->
+          ["!joinas" | _rest] ->
             "!joinas spec"
 
           ["!clan"] ->
@@ -52,7 +52,7 @@ defmodule Teiserver.Lobby.ChatLib do
           ["!joinq"] ->
             "$joinq"
 
-          _ ->
+          _other ->
             msg
         end
       else
@@ -274,11 +274,11 @@ defmodule Teiserver.Lobby.ChatLib do
     {userid, content} =
       if Auth.is_bot?(user) do
         case Regex.run(~r/^<(.*?)> (.+)$/u, msg) do
-          [_, username, remainder] ->
+          [_full_match, username, remainder] ->
             userid = CacheUser.get_userid(username) || user.id
             {userid, "g: #{remainder}"}
 
-          _ ->
+          _no_match ->
             {user.id, msg}
         end
       else
@@ -289,7 +289,7 @@ defmodule Teiserver.Lobby.ChatLib do
       content =
         case type do
           :sayex -> "sayex: #{content}"
-          _ -> content
+          _other_type -> content
         end
 
       Chat.create_lobby_message(%{

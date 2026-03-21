@@ -59,7 +59,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   end
 
   def handle_event("close-group", _event, %{assigns: %{report_group: report_group}} = socket) do
-    {:ok, _} = Moderation.update_report_group(report_group, %{"closed" => "true"})
+    {:ok, _report_group} = Moderation.update_report_group(report_group, %{"closed" => "true"})
 
     {:noreply,
      socket
@@ -67,7 +67,7 @@ defmodule TeiserverWeb.Moderation.OverwatchLive.ReportGroupDetail do
   end
 
   def handle_event("open-group", _event, %{assigns: %{report_group: report_group}} = socket) do
-    {:ok, _} = Moderation.update_report_group(report_group, %{"closed" => "false"})
+    {:ok, _report_group} = Moderation.update_report_group(report_group, %{"closed" => "false"})
 
     {:noreply,
      socket

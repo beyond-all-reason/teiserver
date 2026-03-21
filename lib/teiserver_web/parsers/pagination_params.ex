@@ -22,7 +22,7 @@ defmodule TeiserverWeb.Parsers.PaginationParams do
     case Integer.parse(limit) do
       {int_limit, ""} -> parse_limit(int_limit)
       # Default if parsing fails
-      _ -> 50
+      _other -> 50
     end
   end
 
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Parsers.PaginationParams do
     end
   end
 
-  def parse_limit(_), do: 50
+  def parse_limit(_limit), do: 50
 
   def parse_page(nil), do: 1
   def parse_page(""), do: 1
@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Parsers.PaginationParams do
 
   def parse_page(raw) when is_binary(raw) do
     case Integer.parse(raw) do
-      {i, _} -> max(1, i)
+      {i, _rest} -> max(1, i)
       :error -> 1
     end
   end

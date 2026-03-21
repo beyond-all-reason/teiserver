@@ -44,8 +44,8 @@ defmodule Teiserver.Communication.TextCallbackLib do
   end
 
   @spec _search(Ecto.Query.t(), atom, any()) :: Ecto.Query.t()
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  def _search(query, _key, ""), do: query
+  def _search(query, _key, nil), do: query
 
   def _search(query, :id, id) do
     from text_callbacks in query,
@@ -156,8 +156,8 @@ defmodule Teiserver.Communication.TextCallbackLib do
 
   @spec can_trigger_callback?(non_neg_integer() | TextCallback.t(), non_neg_integer()) ::
           TextCallback.t() | nil
-  def can_trigger_callback?(nil, _), do: false
-  def can_trigger_callback?(_, nil), do: false
+  def can_trigger_callback?(nil, _channel_id), do: false
+  def can_trigger_callback?(_tc_id, nil), do: false
 
   def can_trigger_callback?(tc_id, channel_id) when is_integer(tc_id) do
     text_callback = Communication.get_text_callback(tc_id)

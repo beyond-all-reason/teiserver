@@ -4,7 +4,7 @@ defmodule Teiserver.TachyonBattle.Registry do
   """
   alias Teiserver.TachyonBattle.Types, as: T
 
-  def child_spec(_) do
+  def child_spec(_arg) do
     Supervisor.child_spec(Horde.Registry,
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}
@@ -23,8 +23,8 @@ defmodule Teiserver.TachyonBattle.Registry do
   @spec lookup(T.id()) :: pid() | nil
   def lookup(battle_id) do
     case Horde.Registry.lookup(__MODULE__, battle_id) do
-      [{pid, _}] -> pid
-      _ -> nil
+      [{pid, _value}] -> pid
+      _other -> nil
     end
   end
 end

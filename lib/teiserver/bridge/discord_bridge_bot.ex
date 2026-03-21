@@ -39,12 +39,12 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   @max_message_length 100
 
   # GuildId of nil = DM
-  def handle_event({:MESSAGE_CREATE, %{content: "$" <> _, guild_id: nil} = message, _ws}) do
+  def handle_event({:MESSAGE_CREATE, %{content: "$" <> _cmd, guild_id: nil} = message, _ws}) do
     MessageCommands.handle(message)
   end
 
   # So this is a public message
-  def handle_event({:MESSAGE_CREATE, %{content: "$" <> _} = message, _ws}) do
+  def handle_event({:MESSAGE_CREATE, %{content: "$" <> _cmd} = message, _ws}) do
     ChatCommands.handle(message)
   end
 
@@ -92,38 +92,38 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   end
 
   # Stuff we might want to use
-  def handle_event({:MESSAGE_CREATE, _, _ws}) do
+  def handle_event({:MESSAGE_CREATE, _message, _ws}) do
     # Has an attachment
     :ignore
   end
 
-  def handle_event({:MESSAGE_UPDATE, _, _ws}) do
+  def handle_event({:MESSAGE_UPDATE, _message, _ws}) do
     :ignore
   end
 
   # Events we know we will always want to ignore, kept here so if
   # we do want to test for other events we don't start seeing these
-  def handle_event({:TYPING_START, _, _ws}) do
+  def handle_event({:TYPING_START, _data, _ws}) do
     :ignore
   end
 
-  def handle_event({:GUILD_AVAILABLE, _, _ws}) do
+  def handle_event({:GUILD_AVAILABLE, _guild, _ws}) do
     :ignore
   end
 
-  def handle_event({:GUILD_UNAVAILABLE, _, _ws}) do
+  def handle_event({:GUILD_UNAVAILABLE, _guild, _ws}) do
     :ignore
   end
 
-  def handle_event({:THREAD_CREATE, _, _ws}) do
+  def handle_event({:THREAD_CREATE, _thread, _ws}) do
     :ignore
   end
 
-  def handle_event({:MESSAGE_REACTION_ADD, _, _ws}) do
+  def handle_event({:MESSAGE_REACTION_ADD, _reaction, _ws}) do
     :ignore
   end
 
-  def handle_event({:CHANNEL_UPDATE, _, _ws}) do
+  def handle_event({:CHANNEL_UPDATE, _channel, _ws}) do
     :ignore
   end
 
@@ -265,7 +265,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         Logger.info("Discord DM Channel #{dm_channel.id} set to #{recipient["id"]}")
         nil
 
-      _ ->
+      _other ->
         nil
     end
 
@@ -367,7 +367,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
           msg ++ ["**First report:** #{first_report_link}"]
         else
-          _ -> msg
+          _other -> msg
         end
 
       msg =

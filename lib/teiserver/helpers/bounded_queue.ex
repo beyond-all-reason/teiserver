@@ -81,7 +81,7 @@ defmodule Teiserver.Helpers.BoundedQueue do
     q2 = :queue.in(item, bq.q)
 
     if bq.len == bq.max_len do
-      {{:value, _}, q3} = :queue.out(q2)
+      {{:value, _dropped_item}, q3} = :queue.out(q2)
       %{bq | q: q3, dropped?: true}
     else
       %{bq | q: q2, len: bq.len + 1}

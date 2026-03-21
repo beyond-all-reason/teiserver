@@ -203,7 +203,7 @@ defmodule Teiserver.Account.PartyServer do
     {:noreply, %{state | party: remove_member(String.to_integer(userid), state)}}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _}, state) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _userid}, state) do
     {:noreply, state}
   end
 

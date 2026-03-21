@@ -151,7 +151,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           [] ->
             "You currently have no accolades"
 
-          _ ->
+          _keys ->
             badge_types =
               Account.list_badge_types(search: [id_list: Map.keys(accolades)])
               |> Map.new(fn bt -> {bt.id, bt} end)
@@ -302,7 +302,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
             smurf_string =
               case smurfs do
                 [] -> "No smurfs found"
-                _ -> "Found smurfs named: #{Enum.join(smurfs, ", ")}"
+                _list -> "Found smurfs named: #{Enum.join(smurfs, ", ")}"
               end
 
             accolades_string =
@@ -313,7 +313,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
                   [] ->
                     "They currently have no accolades"
 
-                  _ ->
+                  _keys ->
                     badge_types =
                       Account.list_badge_types(search: [id_list: Map.keys(accolades)])
                       |> Map.new(fn bt -> {bt.id, bt} end)
@@ -414,7 +414,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           Coordinator.send_to_user(senderid, "You cannot block moderators.")
         else
           case Account.ignore_user(senderid, user.id) do
-            {:ok, _} ->
+            {:ok, _result} ->
               Coordinator.send_to_user(
                 senderid,
                 "#{user.name} is now ignored, you can unmute them with the $unignore command or via the account section of the server website."
@@ -583,5 +583,5 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     Lobby.say(senderid, message, lobby_id)
   end
 
-  defp say_command(_), do: :ok
+  defp say_command(_cmd), do: :ok
 end

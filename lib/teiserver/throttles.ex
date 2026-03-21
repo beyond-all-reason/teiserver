@@ -14,10 +14,10 @@ defmodule Teiserver.Throttles do
   @spec get_throttle_pid({atom(), integer()}) :: pid() | nil
   def get_throttle_pid(key) do
     case Horde.Registry.lookup(Teiserver.ThrottleRegistry, key) do
-      [{pid, _}] ->
+      [{pid, _value}] ->
         pid
 
-      _ ->
+      _other ->
         nil
     end
   end

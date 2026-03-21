@@ -37,7 +37,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTest do
     assert Telemetry.list_complex_match_events() |> Enum.count() == 0
 
     # Log the event
-    {result, _} =
+    {result, _event} =
       Telemetry.log_complex_match_event(
         user.id,
         match.id,

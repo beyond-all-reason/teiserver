@@ -28,8 +28,8 @@ defmodule Teiserver.Telemetry.ComplexMatchEventTypeQueries do
   end
 
   @spec _where(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
-  defp _where(query, _, ""), do: query
-  defp _where(query, _, nil), do: query
+  defp _where(query, _key, ""), do: query
+  defp _where(query, _key, nil), do: query
 
   defp _where(query, :id, id) do
     from complex_match_event_types in query,

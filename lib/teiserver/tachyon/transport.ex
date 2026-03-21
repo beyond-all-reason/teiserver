@@ -51,11 +51,11 @@ defmodule Teiserver.Tachyon.Transport do
         Process.demonitor(req_id, [:flush])
         reply
 
-      {:DOWN, ^req_id, _, _, :noconnection} ->
+      {:DOWN, ^req_id, _type, _object, :noconnection} ->
         node = node(pid)
         exit({{:nodedown, node}, {__MODULE__, :call_client, [pid, cmd_id, payload, timeout]}})
 
-      {:DOWN, ^req_id, _, _, reason} ->
+      {:DOWN, ^req_id, _type, _object, reason} ->
         exit({reason, {__MODULE__, :call_client, [pid, cmd_id, payload, timeout]}})
     after
       timeout ->
@@ -130,7 +130,7 @@ defmodule Teiserver.Tachyon.Transport do
   end
 
   def handle_info({:timeout, message_id}, state) do
-    {_, pendings} = Map.pop(state.pending_responses, message_id)
+    {_popped, pendings} = Map.pop(state.pending_responses, message_id)
 
     {:stop, :timeout,
      {1008, "Response to request with message id #{message_id} not received in time."},
@@ -155,7 +155,7 @@ defmodule Teiserver.Tachyon.Transport do
           state =
             case BurstyRateLimiter.try_acquire(rl, n, :erlang.monotonic_time(:millisecond)) do
               {:ok, rl} -> %{state | rate_limiter: rl}
-              _ -> state
+              _other -> state
             end
 
           send(from, {:reply, r, result})
@@ -184,7 +184,7 @@ defmodule Teiserver.Tachyon.Transport do
       {:crash, :error, err} ->
         Logger.error("ws connection crashed: #{inspect(err)}")
 
-      _ ->
+      _other ->
         Logger.info(
           "Terminating ws connection #{inspect(self())} with reason #{inspect(reason)} and state #{inspect(state)}"
         )
@@ -232,7 +232,7 @@ defmodule Teiserver.Tachyon.Transport do
   def do_handle_command(command_id, "response", message_id, message, state) do
     case Map.pop(state.pending_responses, message_id) do
       # We got a response but nothing registered, which is invalid
-      {nil, _} ->
+      {nil, _pendings} ->
         {:stop, :normal,
          {1008, "Received response to message id #{message_id} but no request pending."}, state}
 
@@ -274,11 +274,11 @@ defmodule Teiserver.Tachyon.Transport do
 
     response_details =
       case result do
-        {:response, _} -> {:resp, :ok}
-        {:response, _, _} -> {:resp, :ok}
-        {:error_response, code, _} -> {:resp, code}
-        {:error_response, code, _, _} -> {:resp, code}
-        _ -> false
+        {:response, _state} -> {:resp, :ok}
+        {:response, _payload, _state} -> {:resp, :ok}
+        {:error_response, code, _state} -> {:resp, code}
+        {:error_response, code, _details, _state} -> {:resp, code}
+        _other -> false
       end
 
     case response_details do
@@ -288,7 +288,7 @@ defmodule Teiserver.Tachyon.Transport do
           code: code
         })
 
-      _ ->
+      _other ->
         nil
     end
 
@@ -319,10 +319,17 @@ defmodule Teiserver.Tachyon.Transport do
           WebSock.handle_result()
   defp handle_result(result, command_id, message_id, conn_state) do
     case result do
-      {:event, evs, _} when is_list(evs) -> Enum.map(evs, fn {cmd_id, _} -> cmd_id end)
-      {:event, cmd_id, _} -> [cmd_id]
-      {:event, cmd_id, _payload, _} -> [cmd_id]
-      _ -> []
+      {:event, evs, _state} when is_list(evs) ->
+        Enum.map(evs, fn {cmd_id, _payload} -> cmd_id end)
+
+      {:event, cmd_id, _state} ->
+        [cmd_id]
+
+      {:event, cmd_id, _payload, _state} ->
+        [cmd_id]
+
+      _other ->
+        []
     end
     |> Enum.each(fn cmd_id ->
       :telemetry.execute([:tachyon, :event], %{count: 1}, %{command_id: cmd_id})

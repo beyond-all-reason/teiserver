@@ -10,7 +10,7 @@ defmodule Teiserver.Player.System do
   end
 
   @impl Supervisor
-  def init(_) do
+  def init(_init_arg) do
     children = [
       Teiserver.Player.SessionRegistry,
       Teiserver.Player.SessionSupervisor,

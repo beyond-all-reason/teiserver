@@ -42,6 +42,6 @@ defmodule Teiserver.Moderation.Proposal do
   end
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(:conclude, conn, _), do: allow?(conn, "Moderator")
-  def authorize(_, conn, _), do: allow?(conn, "Overwatch")
+  def authorize(:conclude, conn, _params), do: allow?(conn, "Moderator")
+  def authorize(_action, conn, _params), do: allow?(conn, "Overwatch")
 end

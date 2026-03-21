@@ -63,7 +63,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   end
 
   @impl Phoenix.LiveView
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _user_id, event: :connected}, socket) do
     user_id = socket.assigns.user.id
 
     socket = assign(socket, :client, Account.get_client_by_id(user_id))
@@ -71,11 +71,17 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     {:noreply, socket}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _user_id, event: :disconnected},
+        socket
+      ) do
     {:noreply, assign(socket, :client, nil)}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :client_updated}, socket) do
+  def handle_info(
+        %{channel: "teiserver_client_messages:" <> _user_id, event: :client_updated},
+        socket
+      ) do
     user_id = socket.assigns.user.id
 
     socket = assign(socket, :client, Account.get_client_by_id(user_id))
@@ -83,7 +89,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     {:noreply, socket}
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _rest}, socket) do
     {:noreply, socket}
   end
 
@@ -154,7 +160,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
       ) do
     socket =
       case Account.ignore_user(current_user.id, user.id) do
-        {:ok, _} ->
+        {:ok, _result} ->
           socket
           |> put_flash(:success, "You are now ignoring #{user.name}")
           |> get_relationships_and_permissions()
@@ -190,7 +196,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
       ) do
     socket =
       case Account.avoid_user(current_user.id, user.id) do
-        {:ok, _} ->
+        {:ok, _result} ->
           socket
           |> put_flash(:success, "You are now avoiding #{user.name}")
           |> get_relationships_and_permissions()
@@ -211,7 +217,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
       ) do
     socket =
       case Account.block_user(current_user.id, user.id) do
-        {:ok, _} ->
+        {:ok, _result} ->
           socket
           |> put_flash(:success, "You are now blocking #{user.name}")
           |> get_relationships_and_permissions()
@@ -315,7 +321,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
     case Account.create_friend_request(current_user.id, user.id) do
-      {:ok, _} ->
+      {:ok, _result} ->
         socket =
           socket
           |> put_flash(:success, "Friend request sent")
@@ -428,7 +434,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     else
       # Goes here if the viewed user is not the same as the logged in user
       # Or if there are no recent accolades
-      _ -> nil
+      _other -> nil
     end
   end
 end

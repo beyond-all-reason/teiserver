@@ -89,7 +89,7 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
     avg_time_taken =
       case num_matches do
         0 -> 0
-        _ -> time_taken / num_matches / 1000
+        _num_matches -> time_taken / num_matches / 1000
       end
 
     %{
@@ -297,7 +297,7 @@ defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
 
     case result do
       {:error, message} -> Logger.error("Cannot write to #{filepath} #{message}")
-      _ -> Logger.info("Successfully output logs to #{filepath}")
+      _ok -> Logger.info("Successfully output logs to #{filepath}")
     end
   end
 end

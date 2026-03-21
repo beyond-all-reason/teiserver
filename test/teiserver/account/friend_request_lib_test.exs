@@ -45,14 +45,14 @@ defmodule Teiserver.Account.FriendRequestLibTest do
     user4 = AccountTestLib.user_fixture()
 
     # Add 2 friends (reaching the limit)
-    {:ok, _} = Account.create_friend(user1.id, user2.id)
-    {:ok, _} = Account.create_friend(user1.id, user3.id)
+    {:ok, _friend1} = Account.create_friend(user1.id, user2.id)
+    {:ok, _friend2} = Account.create_friend(user1.id, user3.id)
 
     # Verify we're at the limit using check_relationship_limit
-    assert {:error, _} = RelationshipLib.check_relationship_limit(user1.id, :friend, limit)
+    assert {:error, _reason} = RelationshipLib.check_relationship_limit(user1.id, :friend, limit)
 
     # Try to send a friend request - should fail due to limit
-    assert {:error, _} = Account.create_friend_request(user1.id, user4.id)
+    assert {:error, _error} = Account.create_friend_request(user1.id, user4.id)
   end
 
   test "friend counting includes pending requests" do
@@ -69,14 +69,14 @@ defmodule Teiserver.Account.FriendRequestLibTest do
     user4 = AccountTestLib.user_fixture()
 
     # Add one friend and one pending request (should reach limit of 2)
-    {:ok, _} = Account.create_friend(user1.id, user2.id)
-    {:ok, _} = Account.create_friend_request(user1.id, user3.id)
+    {:ok, _friend} = Account.create_friend(user1.id, user2.id)
+    {:ok, _request} = Account.create_friend_request(user1.id, user3.id)
 
     # Verify we're at the limit using check_relationship_limit
-    assert {:error, _} = RelationshipLib.check_relationship_limit(user1.id, :friend, limit)
+    assert {:error, _reason} = RelationshipLib.check_relationship_limit(user1.id, :friend, limit)
 
     # Try to send another friend request - should fail due to limit
-    assert {:error, _} = Account.create_friend_request(user1.id, user4.id)
+    assert {:error, _error} = Account.create_friend_request(user1.id, user4.id)
   end
 
   test "friend limits work through create_friend" do
@@ -92,12 +92,12 @@ defmodule Teiserver.Account.FriendRequestLibTest do
     user3 = AccountTestLib.user_fixture()
 
     # Add one friend (reaching limit of 1)
-    {:ok, _} = Account.create_friend(user1.id, user2.id)
+    {:ok, _friend} = Account.create_friend(user1.id, user2.id)
 
     # Verify we're at the limit using check_relationship_limit
-    assert {:error, _} = RelationshipLib.check_relationship_limit(user1.id, :friend, limit)
+    assert {:error, _reason} = RelationshipLib.check_relationship_limit(user1.id, :friend, limit)
 
     # Try to create a friend request - should fail due to limit
-    assert {:error, _} = Account.create_friend_request(user1.id, user3.id)
+    assert {:error, _error} = Account.create_friend_request(user1.id, user3.id)
   end
 end

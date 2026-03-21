@@ -25,7 +25,7 @@ defmodule TeiserverWeb.OAuth.CodeView do
     Map.take(conn, [:error_description]) |> Map.put("error", error_code)
   end
 
-  def metadata(_) do
+  def metadata(_conn) do
     base =
       Application.get_env(:teiserver, OAuth)[:issuer] ||
         Endpoint.static_url()

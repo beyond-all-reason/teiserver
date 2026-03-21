@@ -30,8 +30,8 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
   end
 
   @spec _where(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
-  defp _where(query, _, ""), do: query
-  defp _where(query, _, nil), do: query
+  defp _where(query, _key, ""), do: query
+  defp _where(query, _key, nil), do: query
 
   defp _where(query, :id, id) do
     from report_groups in query,
@@ -73,7 +73,7 @@ defmodule Teiserver.Moderation.ReportGroupQueries do
       where: report_groups.action_count == 0
   end
 
-  defp _where(query, :actioned, _), do: query
+  defp _where(query, :actioned, _value), do: query
 
   defp _where(query, :inserted_after, datetime) do
     from report_groups in query,

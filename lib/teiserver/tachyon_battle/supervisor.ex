@@ -11,7 +11,7 @@ defmodule Teiserver.TachyonBattle.Supervisor do
   end
 
   @impl DynamicSupervisor
-  def init(_) do
+  def init(_arg) do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
 

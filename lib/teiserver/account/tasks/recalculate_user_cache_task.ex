@@ -22,7 +22,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
       "FFA" -> do_match_processed_duel(userid)
       "Small Team" -> do_match_processed_team_small(userid)
       "Large Team" -> do_match_processed_team_large(userid)
-      _ -> :ok
+      _other -> :ok
     end
 
     # And now update the last_played timestamp
@@ -144,7 +144,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         fn log ->
           MatchLib.calculate_exit_status(log.match_membership.left_after, log.match.game_duration)
         end,
-        fn _ ->
+        fn _log ->
           1
         end
       )
@@ -207,7 +207,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         fn log ->
           MatchLib.calculate_exit_status(log.match_membership.left_after, log.match.game_duration)
         end,
-        fn _ ->
+        fn _log ->
           1
         end
       )

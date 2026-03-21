@@ -248,7 +248,9 @@ defmodule Teiserver.Logging.GraphMinuteLogsTask do
   def perform_axis_key(logs, chunk_size) do
     logs
     |> Enum.chunk_every(chunk_size)
-    |> Enum.map(fn [log | _] -> log.timestamp |> TimexHelper.date_to_str(format: :ymd_hms) end)
+    |> Enum.map(fn [log | _rest] ->
+      log.timestamp |> TimexHelper.date_to_str(format: :ymd_hms)
+    end)
   end
 
   def get_raw_player_count(logs, chunk_size) do

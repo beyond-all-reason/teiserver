@@ -20,7 +20,7 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
         :tournament ->
           state.tournament_lobby_list
 
-        _ ->
+        _unknown ->
           Logger.error("No get_cache handler for #{cache}")
           []
       end
@@ -80,7 +80,7 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
     }
   end
 
-  defp broadcast(_) do
+  defp broadcast(_state) do
     :ok =
       PubSub.broadcast(
         Teiserver.PubSub,

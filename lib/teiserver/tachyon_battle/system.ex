@@ -8,7 +8,7 @@ defmodule Teiserver.TachyonBattle.System do
   end
 
   @impl Supervisor
-  def init(_) do
+  def init(_arg) do
     children = [TachyonBattle.Supervisor, TachyonBattle.Registry]
     Supervisor.init(children, strategy: :one_for_one)
   end

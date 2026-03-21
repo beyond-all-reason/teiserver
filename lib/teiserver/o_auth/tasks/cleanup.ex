@@ -7,7 +7,7 @@ defmodule Teiserver.OAuth.Tasks.Cleanup do
   require Logger
 
   @impl Oban.Worker
-  def perform(_) do
+  def perform(_job) do
     code_count = OAuth.delete_expired_codes()
     Logger.info("Deleted #{code_count} expired oauth codes")
 

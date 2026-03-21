@@ -61,7 +61,7 @@ defmodule Teiserver.Account.PopulationReport do
     "NOT users.data -> 'roles' @> '\"Bot\"'"
   end
 
-  defp exclude_bots_where(_), do: nil
+  defp exclude_bots_where(_value), do: nil
 
   # Get the ids of the users we want to query stuff about
   @spec get_userids(map()) :: String.t()
@@ -164,7 +164,7 @@ defmodule Teiserver.Account.PopulationReport do
   @spec stat_data(map()) :: map()
   defp stat_data(data) do
     %{
-      total: data |> Enum.map(fn [_, v] -> v end) |> Enum.sum()
+      total: data |> Enum.map(fn [_key, v] -> v end) |> Enum.sum()
     }
   end
 

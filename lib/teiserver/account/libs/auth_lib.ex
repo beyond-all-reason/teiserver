@@ -62,9 +62,9 @@ defmodule Teiserver.Account.AuthLib do
   # If you don't need permissions then lets not bother checking
   @spec allow?(map() | Plug.Conn.t() | [String.t()], String.t() | [String.t()]) :: boolean
   def allow?(nil, []), do: false
-  def allow?(_, nil), do: true
-  def allow?(_, ""), do: true
-  def allow?(_, []), do: true
+  def allow?(_permissions, nil), do: true
+  def allow?(_permissions, ""), do: true
+  def allow?(_permissions, []), do: true
 
   # Handle conn
   def allow?(%Plug.Conn{} = conn, permission_required) do
@@ -95,7 +95,7 @@ defmodule Teiserver.Account.AuthLib do
     )
   end
 
-  def allow?(_, "account") do
+  def allow?(_permissions, "account") do
     true
   end
 

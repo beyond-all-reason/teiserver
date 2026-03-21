@@ -50,7 +50,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
     end
   catch
     # in case the connection is terminating midway
-    :exit, {:normal, _} -> :ok
+    :exit, {:normal, _details} -> :ok
   end
 
   @doc """
@@ -149,7 +149,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
     {:ok, state}
   end
 
-  def handle_command("autohost/status", "event", _, msg, state) do
+  def handle_command("autohost/status", "event", _msg_id, msg, state) do
     %{"data" => %{"maxBattles" => max_battles, "currentBattles" => current}} = msg
     Session.update_capacity(state.session_pid, max_battles, current)
     state = %{state | state: :connected}

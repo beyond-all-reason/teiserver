@@ -80,7 +80,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     result =
       state
-      |> Map.filter(fn {k, _} -> Enum.member?(keys, k) end)
+      |> Map.filter(fn {k, _v} -> Enum.member?(keys, k) end)
 
     {:reply, result, state}
   end
@@ -250,12 +250,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, %{state | split: nil}}
   end
 
-  def handle_info({:do_split, _}, %{split: nil} = state) do
+  def handle_info({:do_split, _split_uuid}, %{split: nil} = state) do
     Logger.info("dosplit with no split to do")
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "teiserver_lobby_chat:" <> _, userid: userid, message: msg}, state) do
+  def handle_info(
+        %{channel: "teiserver_lobby_chat:" <> _lobby_id_str, userid: userid, message: msg},
+        state
+      ) do
     if state.host_id == userid do
       case SpadsParser.handle_in(msg, state) do
         {:host_update, host_data} -> handle_info({:host_update, userid, host_data}, state)
@@ -607,7 +610,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     %{state | ring_timestamps: new_ring_timestamps}
   end
 
-  defp handle_lobby_chat(userid, "!bset tweakdefs" <> _, state) do
+  defp handle_lobby_chat(userid, "!bset tweakdefs" <> _rest, state) do
     is_boss = Enum.member?(state.host_bosses, userid)
 
     if not is_boss do
@@ -623,7 +626,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
-  defp handle_lobby_chat(userid, "!bset tweakunits" <> _, state) do
+  defp handle_lobby_chat(userid, "!bset tweakunits" <> _rest, state) do
     is_boss = Enum.member?(state.host_bosses, userid)
 
     if not is_boss do
@@ -656,15 +659,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
         "cv" ->
           case args do
             [cmd2 | args2] -> {cmd2, args2}
-            _ -> {cmd, args}
+            _no_args -> {cmd, args}
           end
 
-        _ ->
+        _other_cmd ->
           {cmd, args}
       end
 
     case {cmd, args} do
-      {"boss", _} ->
+      {"boss", _boss_args} ->
         if Enum.member?(state.locks, :boss) do
           if not is_boss and not is_moderator do
             spawn(fn ->
@@ -674,7 +677,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           end
         end
 
-      _ ->
+      _other ->
         :ok
     end
 
@@ -682,7 +685,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   # Any other messages
-  defp handle_lobby_chat(_, _, state) do
+  defp handle_lobby_chat(_userid, _msg, state) do
     state
   end
 
@@ -886,12 +889,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
         cond do
           rating_check_result != :ok ->
-            {_, msg} = rating_check_result
+            {_status, msg} = rating_check_result
             CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
             false
 
           rank_check_result != :ok ->
-            {_, msg} = rank_check_result
+            {_status, msg} = rank_check_result
             CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
             false
 
@@ -911,7 +914,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       [] ->
         true
 
-      _ ->
+      _player_ids ->
         friend_ids = Account.list_friend_ids_of_user(userid)
 
         player_ids
@@ -932,7 +935,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       [] ->
         true
 
-      _ ->
+      _member_ids ->
         friend_ids = Account.list_friend_ids_of_user(userid)
 
         member_ids
@@ -958,7 +961,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
               "JOINBATTLE with empty hash - name: #{user.name}, client: #{user.lobby_client}"
             )
 
-          _ ->
+          _hash ->
             :ok
         end
       end
@@ -1125,7 +1128,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         end)
         |> Enum.sort()
         |> Enum.reverse()
-        |> Enum.map(fn {_, _, c} -> c end)
+        |> Enum.map(fn {_team, _rating, c} -> c end)
         |> Enum.reduce(0, fn player, acc ->
           Client.update(%{player | player_number: acc}, :client_updated_battlestatus)
           acc + 1
@@ -1170,7 +1173,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
           %{state | afk_check_list: [], afk_check_at: nil}
 
-        _ ->
+        _remaining ->
           state
       end
     end
@@ -1180,7 +1183,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   defp player_count_changed(state) do
     if get_player_count(state) < get_max_player_count(state) do
-      [userid | _] = get_queue(state)
+      [userid | _rest] = get_queue(state)
 
       existing = Client.get_client_by_id(userid)
 
@@ -1215,7 +1218,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           send(self(), {:dequeue_user, userid})
           Client.update(allowed_client, :client_updated_battlestatus)
 
-        {false, _} ->
+        {false, _client} ->
           :ok
       end
     end
@@ -1280,7 +1283,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       nil ->
         []
 
-      _ ->
+      _list ->
         member_list
         |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
         # credo:disable-for-lines:2 Credo.Check.Refactor.FilterFilter
@@ -1296,9 +1299,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   @spec get_user(String.t() | integer(), map()) :: integer() | nil
-  def get_user(id, _) when is_integer(id), do: id
-  def get_user("", _), do: nil
-  def get_user("#" <> id, _), do: int_parse(id)
+  def get_user(id, _state) when is_integer(id), do: id
+  def get_user("", _state), do: nil
+  def get_user("#" <> id, _state), do: int_parse(id)
 
   def get_user(name, state) do
     name = String.downcase(name)
@@ -1315,10 +1318,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
           end)
 
         case found do
-          [first | _] ->
+          [first | _rest] ->
             first.userid
 
-          _ ->
+          _empty ->
             nil
         end
 

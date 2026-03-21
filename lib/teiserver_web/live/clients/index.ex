@@ -23,7 +23,7 @@ defmodule TeiserverWeb.ClientLive.Index do
 
     users =
       clients
-      |> Map.new(fn {userid, _} ->
+      |> Map.new(fn {userid, _client} ->
         {
           userid,
           CacheUser.get_user_by_id(userid) |> limited_user()
@@ -68,7 +68,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       ) do
     clients =
       assigns.clients
-      |> Enum.filter(fn {userid, _} ->
+      |> Enum.filter(fn {userid, _client} ->
         not Enum.member?(removed_clients, userid)
       end)
       |> Map.new()
@@ -144,8 +144,8 @@ defmodule TeiserverWeb.ClientLive.Index do
             true
         end
       end)
-      |> Enum.sort_by(fn {_, client} -> String.downcase(client.name) end, &<=/2)
-      |> Enum.map(fn {key, _} -> key end)
+      |> Enum.sort_by(fn {_userid, client} -> String.downcase(client.name) end, &<=/2)
+      |> Enum.map(fn {key, _client} -> key end)
 
     socket
     |> assign(:client_ids, client_ids)

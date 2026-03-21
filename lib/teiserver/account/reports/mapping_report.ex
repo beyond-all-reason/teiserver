@@ -35,7 +35,7 @@ defmodule Teiserver.Game.MappingReport do
         limit: :infinity
       )
       |> Enum.group_by(fn %{map: map} -> map end)
-      |> Enum.reject(fn {_, matches} -> Enum.count(matches) < @threshold end)
+      |> Enum.reject(fn {_map, matches} -> Enum.count(matches) < @threshold end)
       |> Enum.map(fn {map, matches} ->
         count = Enum.count(matches)
 
@@ -62,11 +62,11 @@ defmodule Teiserver.Game.MappingReport do
            avg_duration: avg_duration
          }}
       end)
-      |> Enum.sort_by(fn {_, stats} -> stats.count end, &>=/2)
+      |> Enum.sort_by(fn {_map, stats} -> stats.count end, &>=/2)
 
     total_total =
       data
-      |> Enum.map(fn {_, stats} -> stats.count end)
+      |> Enum.map(fn {_map, stats} -> stats.count end)
       |> Enum.sum()
 
     %{

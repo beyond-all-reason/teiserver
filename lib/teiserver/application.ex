@@ -197,9 +197,9 @@ defmodule Teiserver.Application do
     start_result
   end
 
-  def startup_sub_functions({:error, _}), do: :error
+  def startup_sub_functions({:error, _reason}), do: :error
 
-  def startup_sub_functions(_) do
+  def startup_sub_functions(_result) do
     :timer.sleep(100)
 
     # Oban logging

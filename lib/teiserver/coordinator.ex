@@ -30,10 +30,10 @@ defmodule Teiserver.Coordinator do
   @spec get_coordinator_pid() :: pid() | nil
   def get_coordinator_pid do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
-      [{pid, _}] ->
+      [{pid, _val}] ->
         pid
 
-      _ ->
+      _other ->
         nil
     end
   end
@@ -58,10 +58,10 @@ defmodule Teiserver.Coordinator do
   @spec get_consul_pid(T.lobby_id()) :: pid() | nil
   def get_consul_pid(lobby_id) do
     case Horde.Registry.lookup(Teiserver.ConsulRegistry, lobby_id) do
-      [{pid, _}] ->
+      [{pid, _val}] ->
         pid
 
-      _ ->
+      _other ->
         nil
     end
   end
@@ -72,7 +72,7 @@ defmodule Teiserver.Coordinator do
     |> Enum.each(fn id ->
       case get_consul_pid(id) do
         nil -> start_consul(id)
-        _ -> :ok
+        _pid -> :ok
       end
     end)
   end
@@ -92,7 +92,7 @@ defmodule Teiserver.Coordinator do
   end
 
   @spec cast_consul(T.lobby_id(), any) :: any
-  def cast_consul(nil, _), do: :ok
+  def cast_consul(nil, _msg), do: :ok
 
   def cast_consul(lobby_id, msg) when is_integer(lobby_id) do
     case get_consul_pid(lobby_id) do
@@ -102,7 +102,7 @@ defmodule Teiserver.Coordinator do
   end
 
   @spec send_consul(T.lobby_id(), any) :: any
-  def send_consul(nil, _), do: :ok
+  def send_consul(nil, _msg), do: :ok
 
   def send_consul(lobby_id, msg) when is_integer(lobby_id) do
     case get_consul_pid(lobby_id) do
@@ -123,7 +123,7 @@ defmodule Teiserver.Coordinator do
 
           # If the process has somehow died, we just return nil
         catch
-          :exit, _ ->
+          :exit, _reason ->
             nil
         end
     end
@@ -133,10 +133,10 @@ defmodule Teiserver.Coordinator do
   @spec get_balancer_pid(T.lobby_id()) :: pid() | nil
   def get_balancer_pid(lobby_id) do
     case Horde.Registry.lookup(Teiserver.BalancerRegistry, lobby_id) do
-      [{pid, _}] ->
+      [{pid, _val}] ->
         pid
 
-      _ ->
+      _other ->
         nil
     end
   end
@@ -147,7 +147,7 @@ defmodule Teiserver.Coordinator do
     |> Enum.each(fn id ->
       case get_balancer_pid(id) do
         nil -> start_balancer(id)
-        _ -> :ok
+        _pid -> :ok
       end
     end)
   end
@@ -167,7 +167,7 @@ defmodule Teiserver.Coordinator do
   end
 
   @spec cast_balancer(T.lobby_id(), any) :: any
-  def cast_balancer(nil, _), do: :ok
+  def cast_balancer(nil, _msg), do: :ok
 
   def cast_balancer(lobby_id, msg) when is_integer(lobby_id) do
     case get_balancer_pid(lobby_id) do
@@ -177,7 +177,7 @@ defmodule Teiserver.Coordinator do
   end
 
   @spec send_balancer(T.lobby_id(), any) :: any
-  def send_balancer(nil, _), do: :ok
+  def send_balancer(nil, _msg), do: :ok
 
   def send_balancer(lobby_id, msg) when is_integer(lobby_id) do
     case get_balancer_pid(lobby_id) do
@@ -198,7 +198,7 @@ defmodule Teiserver.Coordinator do
 
           # If the process has somehow died, we just return nil
         catch
-          :exit, _ ->
+          :exit, _reason ->
             nil
         end
     end
@@ -246,7 +246,7 @@ defmodule Teiserver.Coordinator do
           "You have just received a formal warning, reason: #{report.response_text}."
         )
 
-      _ ->
+      _action ->
         nil
     end
 
@@ -259,14 +259,14 @@ defmodule Teiserver.Coordinator do
 
   # Commands for the coordinator account to perform
   @spec send_to_host(T.userid(), String.t()) :: :ok
-  def send_to_host(nil, _), do: :ok
+  def send_to_host(nil, _msg), do: :ok
 
   def send_to_host(lobby_id, msg) do
     send_to_host(get_coordinator_userid(), lobby_id, msg)
   end
 
   @spec send_to_host(T.userid(), T.userid(), String.t()) :: :ok
-  def send_to_host(nil, _, _), do: :ok
+  def send_to_host(nil, _lobby_id, _msg), do: :ok
 
   def send_to_host(from_id, lobby_id, msg) do
     lobby = Battle.get_lobby(lobby_id)

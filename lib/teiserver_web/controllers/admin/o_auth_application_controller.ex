@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
     end
   end
 
-  def create(conn, _),
+  def create(conn, _params),
     do:
       conn
       |> put_status(400)
@@ -89,7 +89,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   defp scope_description("tachyon.lobby"), do: "for autohost"
   defp scope_description("admin.map"), do: "for CI, to setup maps data in teiserver"
   defp scope_description("admin.engine"), do: "for CI, to setup engine data in teiserver"
-  defp scope_description(_), do: nil
+  defp scope_description(_scope), do: nil
 
   @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, assigns) do
@@ -220,7 +220,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
       %{^key => value} when is_binary(value) ->
         Map.put(m, key, String.split(value, ",", trim: true) |> Enum.map(&String.trim/1))
 
-      _ ->
+      _other ->
         m
     end
   end

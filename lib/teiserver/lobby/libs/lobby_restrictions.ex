@@ -226,7 +226,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
 
     case length(tips) do
       0 -> nil
-      _ -> tips
+      _count -> tips
     end
   end
 

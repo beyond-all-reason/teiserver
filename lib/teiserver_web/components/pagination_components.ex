@@ -401,7 +401,7 @@ defmodule TeiserverWeb.PaginationComponents do
 
   # Helper function to build the page range for pagination
   # Returns a list like [0, 1, :ellipsis, 5, 6, 7] for smart pagination
-  defp build_page_range(_, 0, _), do: [0]
+  defp build_page_range(_current_page, 0, _max_pages), do: [0]
 
   defp build_page_range(_current_page, total_pages, max_pages) when total_pages <= max_pages do
     # If total pages is small, show all pages

@@ -8,8 +8,8 @@ defmodule Teiserver.Party.Registry do
   @spec lookup(Party.Server.id()) :: pid() | nil
   def lookup(party_id) do
     case Registry.lookup(__MODULE__, party_id) do
-      [{pid, _}] -> pid
-      _ -> nil
+      [{pid, _value}] -> pid
+      _other -> nil
     end
   end
 
@@ -26,7 +26,7 @@ defmodule Teiserver.Party.Registry do
     Registry.start_link(keys: :unique, name: __MODULE__)
   end
 
-  def child_spec(_) do
+  def child_spec(_opts) do
     Supervisor.child_spec(Registry,
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}

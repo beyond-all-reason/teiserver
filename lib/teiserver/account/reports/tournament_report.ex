@@ -31,12 +31,12 @@ defmodule Teiserver.Account.TournamentReport do
         |> Enum.map(&String.trim/1)
         |> Enum.filter(fn
           "" -> false
-          _ -> true
+          _name -> true
         end)
         |> Enum.map(fn name ->
           {String.trim(name), get_player_id(name)}
         end)
-        |> Enum.reject(fn {_, n} -> n == nil end)
+        |> Enum.reject(fn {_name, n} -> n == nil end)
 
       {team_idx, id_map}
     end)
@@ -120,7 +120,7 @@ defmodule Teiserver.Account.TournamentReport do
 
     no_ratings =
       name_to_id_map
-      |> Enum.reject(fn {_, id} -> id == nil or Enum.member?(found_ids, id) end)
+      |> Enum.reject(fn {_name, id} -> id == nil or Enum.member?(found_ids, id) end)
       |> Map.new()
       |> Map.keys()
 
@@ -164,16 +164,16 @@ defmodule Teiserver.Account.TournamentReport do
       name_rating_pairs =
         members
         |> Enum.map(fn {name, userid} -> {name, rating_values[userid]} end)
-        |> Enum.reject(fn {_, rating} -> rating == nil end)
+        |> Enum.reject(fn {_name, rating} -> rating == nil end)
 
       aggregate_data =
         name_rating_pairs
-        |> Enum.map(fn {_, rating} -> rating end)
+        |> Enum.map(fn {_name, rating} -> rating end)
         |> aggregate_team_ratings()
 
       captain =
         name_rating_pairs
-        |> Enum.sort_by(fn {_, rating} -> rating end, &>=/2)
+        |> Enum.sort_by(fn {_name, rating} -> rating end, &>=/2)
         |> Enum.take(1)
 
       aggregate_data =
@@ -184,7 +184,7 @@ defmodule Teiserver.Account.TournamentReport do
               captain_rating: rating |> round(2)
             })
 
-          _ ->
+          _other ->
             aggregate_data
         end
 

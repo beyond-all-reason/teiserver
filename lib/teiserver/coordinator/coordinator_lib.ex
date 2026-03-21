@@ -154,7 +154,7 @@ Multiple locks can be engaged at the same time
         arg_str = args |> Enum.map(fn a -> " <#{a}>" end)
         "$#{cmd}#{arg_str}\n#{desc}"
 
-      _ ->
+      _multiple ->
         if command != "" do
           "No commands matching that filter."
         else
@@ -225,7 +225,7 @@ Multiple locks can be engaged at the same time
     case result do
       {false, true, split} -> {:complete, split}
       {false, false, split} -> {:complete, remove_circular(split)}
-      {true, _, split} -> {:incomplete, split}
+      {true, _complete, split} -> {:incomplete, split}
     end
   end
 
@@ -236,7 +236,7 @@ Multiple locks can be engaged at the same time
       new_v =
         case v do
           true -> true
-          _ -> nil
+          _other -> nil
         end
 
       {k, new_v}
@@ -249,7 +249,7 @@ Multiple locks can be engaged at the same time
       :everybody -> true
       :host -> Auth.moderator?(user) or host
       :moderator -> Auth.moderator?(user)
-      _ -> false
+      _other -> false
     end
   end
 end

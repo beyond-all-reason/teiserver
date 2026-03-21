@@ -9,12 +9,12 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
 
   import Phoenix.LiveViewTest
 
-  defp auth_setup(_) do
+  defp auth_setup(_context) do
     GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())
     |> TeiserverTestLib.conn_setup()
   end
 
-  defp anon_setup(_) do
+  defp anon_setup(_context) do
     GeneralTestLib.conn_setup([], [:no_login])
   end
 

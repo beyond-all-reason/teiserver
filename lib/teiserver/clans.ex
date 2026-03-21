@@ -90,7 +90,7 @@ defmodule Teiserver.Clans do
   def get_clan(nil), do: nil
   def get_clan(id), do: get_clan(id, [])
 
-  def get_clan(nil, _), do: nil
+  def get_clan(nil, _args), do: nil
 
   def get_clan(id, args) when not is_list(id) do
     clan_query(id, args)

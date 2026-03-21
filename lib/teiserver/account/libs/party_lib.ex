@@ -48,8 +48,8 @@ defmodule Teiserver.Account.PartyLib do
   @spec party_exists?(T.party_id()) :: boolean()
   def party_exists?(party_id) do
     case Horde.Registry.lookup(Teiserver.PartyRegistry, party_id) do
-      [{_pid, _}] -> true
-      _ -> false
+      [{_pid, _value}] -> true
+      _other -> false
     end
   end
 
@@ -147,8 +147,8 @@ defmodule Teiserver.Account.PartyLib do
   @spec get_party_pid(T.party_id()) :: pid() | nil
   def get_party_pid(party_id) do
     case Horde.Registry.lookup(Teiserver.PartyRegistry, party_id) do
-      [{pid, _}] -> pid
-      _ -> nil
+      [{pid, _value}] -> pid
+      _other -> nil
     end
   end
 
@@ -172,7 +172,7 @@ defmodule Teiserver.Account.PartyLib do
 
           # If the process has somehow died, we just return nil
         catch
-          :exit, _ ->
+          :exit, _reason ->
             nil
         end
     end

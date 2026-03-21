@@ -62,10 +62,7 @@
           {Credo.Check.Consistency.SpaceAroundOperators, []},
           {Credo.Check.Consistency.SpaceInParentheses, []},
           {Credo.Check.Consistency.TabsOrSpaces, []},
-
-          # We would like to enable this but it would be far too noisy
-          # {Credo.Check.Consistency.UnusedVariableNames, [force: :meaningful]}, 2178 issues
-          #
+          {Credo.Check.Consistency.UnusedVariableNames, [force: :meaningful]},
           {Credo.Check.Design.AliasUsage, []},
           {Credo.Check.Design.TagFIXME, []},
 

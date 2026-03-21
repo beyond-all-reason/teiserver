@@ -20,7 +20,10 @@ defmodule Mix.Tasks.Teiserver.GenToken do
   def run(args) do
     shell = Mix.shell()
     shell.info("raw args: #{inspect(args)}")
-    {parsed, _, _errors} = OptionParser.parse(args, strict: [user: :string, app: :string])
+
+    {parsed, _remaining, _errors} =
+      OptionParser.parse(args, strict: [user: :string, app: :string])
+
     shell.info("parsed args: #{inspect(parsed)}")
 
     Application.ensure_all_started([:ecto, :ecto_sql, :tzdata])

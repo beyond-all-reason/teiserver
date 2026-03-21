@@ -28,8 +28,8 @@ defmodule Teiserver.Account.FriendRequestQueries do
   end
 
   @spec _where(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
-  defp _where(query, _, ""), do: query
-  defp _where(query, _, nil), do: query
+  defp _where(query, _key, ""), do: query
+  defp _where(query, _key, nil), do: query
 
   defp _where(query, :from_user_id, from_id) do
     from friend_requests in query,

@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
   import Teiserver.Support.Polling, only: [poll_until: 2, poll_until: 3]
 
   def create_autohost do
-    name = for _ <- 1..20, into: "", do: <<Enum.random(?a..?z)>>
+    name = for _i <- 1..20, into: "", do: <<Enum.random(?a..?z)>>
     create_autohost(name)
   end
 
@@ -73,16 +73,16 @@ defmodule TeiserverWeb.Tachyon.Autohost do
   test "can update status attributes", %{token: token} do
     client = Tachyon.connect_autohost!(token, 10, 0)
 
-    poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {_, details} ->
+    poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {_bot_id, details} ->
       details.max_battles == 10 && details.current_battles == 0
     end)
 
     :ok = Tachyon.send_event(client, "autohost/status", %{maxBattles: 15, currentBattles: 3})
 
-    {_, %{max_battles: 15, current_battles: 3}} =
+    {_bot_id, %{max_battles: 15, current_battles: 3}} =
       poll_until(
         fn -> Autohost.lookup_autohost(token.bot_id) end,
-        fn {_, details} ->
+        fn {_bot_id, details} ->
           details != nil && details.max_battles == 15 && details.current_battles == 3
         end,
         wait: 5
@@ -91,7 +91,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
 
   test "can list connected autohosts", %{app: app, autohost: autohost, token: token} do
     other_autohost = create_autohost()
-    {:ok, creds: _, token: other_token} = setup_token(%{app: app, autohost: other_autohost})
+    {:ok, creds: _creds, token: other_token} = setup_token(%{app: app, autohost: other_autohost})
 
     # make sure the other tests aren't interfering
     poll_until(&Autohost.list/0, fn l -> Enum.empty?(l) end)
@@ -113,7 +113,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
   test "can send message and get response", %{token: token} do
     client = Tachyon.connect_autohost!(token, 10, 0)
 
-    poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {_, details} ->
+    poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {_bot_id, details} ->
       details.max_battles == 10 && details.current_battles == 0
     end)
 
@@ -141,7 +141,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(client)
     Tachyon.send_response(client, req, data: %{ips: ["1.2.3.4"], port: 1234})
 
-    {:ok, _} = Task.await(start_task)
+    {:ok, _result} = Task.await(start_task)
 
     task =
       Task.async(fn ->

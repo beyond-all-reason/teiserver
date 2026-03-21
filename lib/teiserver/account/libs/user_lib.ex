@@ -277,7 +277,7 @@ defmodule Teiserver.Account.UserLib do
     {:ok, user}
   end
 
-  def broadcast_create_user(v, _), do: v
+  def broadcast_create_user(v, _reason), do: v
 
   def broadcast_update_user(u), do: broadcast_update_user(u, :update)
 
@@ -291,7 +291,7 @@ defmodule Teiserver.Account.UserLib do
     {:ok, user}
   end
 
-  def broadcast_update_user(v, _), do: v
+  def broadcast_update_user(v, _reason), do: v
 
   def merge_default_params(user_params) do
     Map.merge(
@@ -324,7 +324,7 @@ defmodule Teiserver.Account.UserLib do
     {:error, "Invalid credentials"}
   end
 
-  def authenticate_user(_conn, _, "") do
+  def authenticate_user(_conn, _email, "") do
     Argon2.no_user_verify()
     Argon2.no_user_verify()
     {:error, "Invalid credentials"}
@@ -388,7 +388,7 @@ defmodule Teiserver.Account.UserLib do
 
   @spec has_access!(integer() | map(), Plug.Conn.t()) :: boolean
   def has_access!(target_user, conn) do
-    {result, _} = has_access(target_user, conn)
+    {result, _msg} = has_access(target_user, conn)
     result
   end
 

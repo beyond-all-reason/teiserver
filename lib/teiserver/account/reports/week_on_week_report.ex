@@ -30,7 +30,7 @@ defmodule Teiserver.Account.WeekOnWeekReport do
     data_map =
       logs
       |> Map.new(fn log ->
-        {_, week} = Timex.iso_week(log.date)
+        {_year, week} = Timex.iso_week(log.date)
         weekday = Timex.weekday(log.date)
 
         key = {week, weekday}
@@ -95,7 +95,7 @@ defmodule Teiserver.Account.WeekOnWeekReport do
       case params["metric"] do
         "Total time" -> &TimexHelper.represent_minutes/1
         "Play time" -> &TimexHelper.represent_minutes/1
-        _ -> fn x -> x end
+        _other -> fn x -> x end
       end
 
     data_map =

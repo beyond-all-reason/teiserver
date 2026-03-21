@@ -55,7 +55,7 @@ defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
   defp get_token(conn) do
     case get_req_header(conn, "authorization") do
       ["Bearer " <> raw_token] -> {:ok, raw_token}
-      _ -> {:error, "invalid bearer token"}
+      _other -> {:error, "invalid bearer token"}
     end
   end
 

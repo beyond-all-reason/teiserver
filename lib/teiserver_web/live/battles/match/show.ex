@@ -194,7 +194,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           fn e ->
             e.event_type.name
           end,
-          fn _ ->
+          fn _event ->
             1
           end
         )
@@ -215,7 +215,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           fn e ->
             {team_lookup[e.user_id] || -1, e.event_type.name}
           end,
-          fn _ ->
+          fn _event ->
             1
           end
         )
@@ -427,7 +427,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   defp get_match_rating_status(match) do
     # Expecting to return an error explaining current match rating status
     # Unprocessed matches and matches with existing rating logs won't be rated again
-    {_, rating_status} = MatchRatingLib.rate_match(match)
+    {_result, rating_status} = MatchRatingLib.rate_match(match)
 
     case rating_status do
       :invalid_game_type ->
@@ -495,7 +495,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
     gift_window = Config.get_site_config_cache("teiserver.Accolade gift window")
     user_id = socket.assigns.current_user.id
     match_id = socket.assigns.id
-    {recipient_id, _} = Integer.parse(recipient_id)
+    {recipient_id, _rest} = Integer.parse(recipient_id)
 
     with {:ok, gift_count} <-
            check_gift_count(socket.assigns.current_user.id, gift_limit, gift_window),
@@ -552,7 +552,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
   def handle_event(
         "return-to-match",
-        _,
+        _params,
         socket
       ) do
     {:noreply,

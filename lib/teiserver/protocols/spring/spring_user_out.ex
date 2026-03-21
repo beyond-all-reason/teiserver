@@ -3,7 +3,7 @@ defmodule Teiserver.Protocols.Spring.UserOut do
   require Logger
 
   @spec do_reply(atom(), nil | String.t() | tuple() | list(), map()) :: String.t()
-  def do_reply(_, _, %{userid: nil}), do: ""
+  def do_reply(_reply_cmd, _data, %{userid: nil}), do: ""
 
   def do_reply(:list_relationships, data, _state) do
     encoded_data =

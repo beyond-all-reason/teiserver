@@ -94,7 +94,7 @@ defmodule Teiserver.Account.UserAgeReport do
       |> Enum.group_by(&get_registration_age/1)
       |> Map.new(fn {rank, users} -> {rank, Enum.count(users)} end)
 
-    {bucketed_cumulative_registration_age, _} =
+    {bucketed_cumulative_registration_age, _total} =
       @keys
       |> Enum.reverse()
       |> Enum.map_reduce(0, fn key, acc ->
@@ -112,7 +112,7 @@ defmodule Teiserver.Account.UserAgeReport do
         fn %{inserted_at: inserted_at} ->
           Timex.diff(Timex.now(), inserted_at, :days)
         end,
-        fn _ ->
+        fn _user ->
           1
         end
       )

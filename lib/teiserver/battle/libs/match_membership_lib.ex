@@ -22,8 +22,8 @@ defmodule Teiserver.Battle.MatchMembershipLib do
     end)
   end
 
-  def _search(query, _, ""), do: query
-  def _search(query, _, nil), do: query
+  def _search(query, _key, ""), do: query
+  def _search(query, _key, nil), do: query
 
   def _search(query, :user_id, user_id) do
     from match_memberships in query,

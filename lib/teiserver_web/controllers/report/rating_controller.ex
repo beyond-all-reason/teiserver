@@ -39,13 +39,13 @@ defmodule TeiserverWeb.Report.RatingController do
 
     found_players =
       lookup_result
-      |> Enum.filter(fn {_, r} -> r != nil end)
-      |> Enum.map(fn {n, _} -> n end)
+      |> Enum.filter(fn {_name, r} -> r != nil end)
+      |> Enum.map(fn {n, _id} -> n end)
 
     missing_names =
       lookup_result
-      |> Enum.filter(fn {_, r} -> r == nil end)
-      |> Enum.map(fn {n, _} -> n end)
+      |> Enum.filter(fn {_name, r} -> r == nil end)
+      |> Enum.map(fn {n, _id} -> n end)
 
     player_ids =
       lookup_result
@@ -79,7 +79,7 @@ defmodule TeiserverWeb.Report.RatingController do
 
     user_lookup =
       lookup_result
-      |> Enum.reject(fn {_, id} -> id == nil end)
+      |> Enum.reject(fn {_name, id} -> id == nil end)
       |> Map.new(fn {name, id} -> {id, name} end)
 
     conn

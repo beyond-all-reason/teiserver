@@ -44,7 +44,7 @@ defmodule Teiserver.Moderation.ActivityReport do
     report_data = {
       date_strs,
       [
-        ["Total reports" | build_line(dates, reports, fn _ -> true end)],
+        ["Total reports" | build_line(dates, reports, fn _report -> true end)],
         ["Actioned reports" | build_line(dates, reports, fn r -> r.result_id != nil end)]
       ]
     }

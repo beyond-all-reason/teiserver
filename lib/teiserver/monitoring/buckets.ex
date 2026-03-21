@@ -56,14 +56,14 @@ defmodule Teiserver.Monitoring.Buckets do
   @impl Peep.Buckets
   def bucket_for(number, config) when is_integer(number) do
     case larger(number, config.int_tree) do
-      {_, bucket_idx} -> bucket_idx
+      {_key, bucket_idx} -> bucket_idx
       :none -> config.number_of_buckets
     end
   end
 
   def bucket_for(number, config) when is_float(number) do
     case larger(number, config.float_tree) do
-      {_, bucket_idx} -> bucket_idx
+      {_key, bucket_idx} -> bucket_idx
       :none -> config.number_of_buckets
     end
   end

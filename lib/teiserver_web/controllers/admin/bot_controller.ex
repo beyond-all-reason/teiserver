@@ -59,7 +59,7 @@ defmodule TeiserverWeb.Admin.BotController do
     end
   end
 
-  def create(conn, _),
+  def create(conn, _params),
     do:
       conn
       |> put_status(400)
@@ -119,7 +119,7 @@ defmodule TeiserverWeb.Admin.BotController do
     end
   end
 
-  def update(conn, _) do
+  def update(conn, _params) do
     conn
     |> put_status(:not_found)
     |> render("not_found.html")

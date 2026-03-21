@@ -56,7 +56,7 @@ defmodule TeiserverWeb.API.Admin.UserController do
   defp update_user_stats(user_id, params) do
     stat_fields = Map.take(params, @stat_fields)
 
-    with {:ok, _} <- update_stats_if_needed(user_id, stat_fields) do
+    with {:ok, _stats} <- update_stats_if_needed(user_id, stat_fields) do
       :ok
     end
   end
@@ -132,7 +132,7 @@ defmodule TeiserverWeb.API.Admin.UserController do
   defp format_changeset_errors(changeset) do
     changeset.errors
     # credo:disable-for-lines:2 Credo.Check.Refactor.MapJoin
-    |> Enum.map(fn {field, {message, _}} -> "#{field}: #{message}" end)
+    |> Enum.map(fn {field, {message, _opts}} -> "#{field}: #{message}" end)
     |> Enum.join(", ")
   end
 end
