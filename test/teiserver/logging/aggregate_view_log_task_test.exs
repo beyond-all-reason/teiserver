@@ -1,5 +1,5 @@
 defmodule Teiserver.Logging.AggregateViewLogsTaskTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Logging.AggregateViewLogsTask
   alias Teiserver.Logging.LoggingTestLib
 

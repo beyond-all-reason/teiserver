@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Tachyon.UserTest do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Support.Tachyon
   use TeiserverWeb.ConnCase, async: false
 

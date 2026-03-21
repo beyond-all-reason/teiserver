@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Battle.MatchLive.RatingsLiveTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase, async: true

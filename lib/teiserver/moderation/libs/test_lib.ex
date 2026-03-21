@@ -1,5 +1,5 @@
 defmodule Teiserver.Moderation.ModerationTestLib do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Moderation
 
   @spec report_fixture(map) :: Moderation.Report.t()

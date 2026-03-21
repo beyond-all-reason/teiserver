@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
   @moduledoc false
 
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Moderation
   alias Teiserver.TeiserverTestLib
 

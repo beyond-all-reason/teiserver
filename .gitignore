@@ -24,7 +24,6 @@ priv/plts
 
 # Ignore package tarball (built via "mix hex.build").
 teiserver-*.tar
-central-*.tar
 
 *.sublime-project
 *.sublime-workspace
@@ -63,7 +62,6 @@ runtime/
 /hot_reload
 /source_deploy
 /source_deploy.tar.gz
-central.tar.gz
 /bin
 .vscode/launch.json
 

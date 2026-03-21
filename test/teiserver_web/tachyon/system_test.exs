@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Tachyon.SystemTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Polling
   alias Teiserver.Support.Tachyon

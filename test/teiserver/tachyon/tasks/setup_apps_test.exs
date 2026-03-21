@@ -1,5 +1,5 @@
 defmodule Teiserver.Tachyon.Tasks.SetupAppsTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.Tachyon.Tasks.SetupApps

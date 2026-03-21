@@ -3,7 +3,7 @@
 
 #   alias TeiserverWeb.General.TimexHelpers
 
-#   alias Central.Helpers.GeneralTestLib
+#   alias Teiserver.Helpers.GeneralTestLib
 #   alias Teiserver.Logging.LoggingTestLib
 #   setup do
 #     GeneralTestLib.conn_setup()

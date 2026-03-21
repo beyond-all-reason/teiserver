@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Application
   alias Teiserver.TeiserverTestLib

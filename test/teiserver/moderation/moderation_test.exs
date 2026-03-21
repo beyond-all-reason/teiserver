@@ -1,5 +1,5 @@
 defmodule Teiserver.ModerationTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Moderation
   alias Teiserver.Moderation.Action
   alias Teiserver.Moderation.Ban

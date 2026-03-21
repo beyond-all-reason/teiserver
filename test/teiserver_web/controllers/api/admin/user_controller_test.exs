@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.API.Admin.UserControllerTest do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
   use TeiserverWeb.ConnCase, async: false
 

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
   @moduledoc false
 
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase

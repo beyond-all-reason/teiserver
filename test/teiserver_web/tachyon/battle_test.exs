@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Tachyon.BattleTest do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Autohost
   alias Teiserver.BotFixtures
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Polling
   alias Teiserver.Support.Tachyon

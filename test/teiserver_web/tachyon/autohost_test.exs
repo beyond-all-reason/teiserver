@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Tachyon.Autohost do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Autohost
   alias Teiserver.BotFixtures
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Tachyon
   alias WebsocketSyncClient, as: WSC

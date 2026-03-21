@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Battle
   alias Teiserver.Client
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Lobby
   alias Teiserver.TeiserverTestLib
   alias TeiserverWeb.Account.ProfileLive.Overview

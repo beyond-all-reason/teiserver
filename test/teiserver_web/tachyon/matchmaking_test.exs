@@ -1,9 +1,9 @@
 defmodule Teiserver.Tachyon.MatchmakingTest do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Asset
   alias Teiserver.AssetFixtures
   alias Teiserver.Battle
   alias Teiserver.Game
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Matchmaking.QueueSupervisor

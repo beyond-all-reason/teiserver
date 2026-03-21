@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.MatchmakingLive.IndexTest do
-  alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.GeneralTestLib
 
   use TeiserverWeb.ConnCase, async: true
 

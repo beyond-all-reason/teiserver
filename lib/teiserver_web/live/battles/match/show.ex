@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Telemetry
   use TeiserverWeb, :live_view
-  import Central.Helpers.ComponentHelper
+  import Teiserver.Helpers.ComponentHelper
   import Teiserver.Helper.ColourHelper
 
   @impl Phoenix.LiveView

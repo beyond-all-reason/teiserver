@@ -1,4 +1,4 @@
-defmodule Central.Helpers.InputHelper do
+defmodule Teiserver.Helpers.InputHelper do
   @moduledoc false
 
   alias TeiserverWeb.ErrorHelpers

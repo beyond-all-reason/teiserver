@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Admin.AssetControllerTest do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Asset.EngineQueries
   alias Teiserver.Asset.GameQueries
   alias Teiserver.AssetFixtures
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
   use TeiserverWeb.ConnCase
 

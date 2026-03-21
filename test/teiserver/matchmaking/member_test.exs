@@ -1,8 +1,8 @@
 defmodule Teiserver.Matchmaking.MemberTest do
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Account
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Support.Tachyon
 

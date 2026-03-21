@@ -26,7 +26,6 @@ defmodule Teiserver.MetadataCache do
   end
 
   defp random_names do
-    # Brought over from Central
     Teiserver.store_put(
       :application_metadata_cache,
       "random_names_1",

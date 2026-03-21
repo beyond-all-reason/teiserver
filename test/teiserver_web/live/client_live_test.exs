@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Live.ClientTest do
   @moduledoc false
 
-  alias Central.Helpers.GeneralTestLib
   alias Teiserver.Client
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase, async: false

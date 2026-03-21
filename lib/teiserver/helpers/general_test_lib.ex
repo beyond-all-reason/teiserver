@@ -1,4 +1,4 @@
-defmodule Central.Helpers.GeneralTestLib do
+defmodule Teiserver.Helpers.GeneralTestLib do
   @moduledoc false
 
   alias Teiserver.Account
