@@ -59,7 +59,7 @@ defmodule Teiserver.Autohost.Session do
 
   # TODO: there should be some kind of retry here
   @spec start_battle(Bot.id(), TachyonBattle.id(), pid(), Autohost.start_script()) ::
-          {:ok, start_response()} | {:error, term()}
+          {:ok, autohost_pid :: pid(), start_response()} | {:error, term()}
   def start_battle(autohost_id, battle_id, battle_pid, start_script) do
     autohost_id
     |> via_tuple()
@@ -311,7 +311,7 @@ defmodule Teiserver.Autohost.Session do
           |> Map.replace!(:pending_battles, pending_battles)
           |> Map.update!(:active_battles, &Map.put(&1, battle_id, battle_data))
 
-        GenServer.reply(from, {:ok, start_response})
+        GenServer.reply(from, {:ok, self(), start_response})
 
         {:keep_state, data}
     end

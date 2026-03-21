@@ -141,7 +141,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(client)
     Tachyon.send_response(client, req, data: %{ips: ["1.2.3.4"], port: 1234})
 
-    {:ok, _result} = Task.await(start_task)
+    {:ok, _autohost_pid, _result} = Task.await(start_task)
 
     task =
       Task.async(fn ->
