@@ -508,7 +508,8 @@ defmodule Teiserver.TeiserverTestLib do
       :telemetry_simple_client_event_types_cache,
       :telemetry_simple_lobby_event_types_cache,
       :telemetry_simple_match_event_types_cache,
-      :telemetry_simple_server_event_types_cache
+      :telemetry_simple_server_event_types_cache,
+      :teiserver_game_rating_types
     ]
 
     Enum.each(cache_list, &clear_cache/1)
