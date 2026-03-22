@@ -11,11 +11,6 @@ defmodule Teiserver.Bridge.DiscordSystem do
 
   @impl DynamicSupervisor
   def init(_init_arg) do
-    start()
-  end
-
-  @spec start :: {:ok, any()}
-  def start do
     {:ok, sup_flags} = DynamicSupervisor.init(strategy: :one_for_one)
 
     if Communication.use_discord?() do
@@ -30,22 +25,42 @@ defmodule Teiserver.Bridge.DiscordSystem do
     {:ok, sup_flags}
   end
 
-  @spec async_nolink_restart(pid()) :: :ok
-  def async_nolink_restart(notify_pid) do
-    Task.start(fn -> restart(notify_pid) end)
+  @spec restart(pid()) :: :ok
+  def restart(notify_pid) do
+    Task.start(fn ->
+      if Communication.use_discord?() do
+        perform_restart(notify_pid)
+      else
+        Process.send(notify_pid, {:discord_bridge_restart_result, :disabled_by_configuration}, [])
+      end
+    end)
 
     :ok
   end
 
-  @spec restart(pid()) :: :ok
-  def restart(notify_pid) do
-    if pid = Process.whereis(Teiserver.Bridge.DiscordSupervisor) do
-      DynamicSupervisor.terminate_child(__MODULE__, pid)
+  @spec perform_restart(pid()) :: :ok
+  defp perform_restart(notify_pid) do
+    _termination_result =
+      DynamicSupervisor.terminate_child(
+        __MODULE__,
+        Process.whereis(Teiserver.Bridge.DiscordSupervisor)
+      )
+
+    spec = Supervisor.child_spec(Teiserver.Bridge.DiscordSupervisor, restart: :temporary)
+
+    case DynamicSupervisor.start_child(
+           __MODULE__,
+           spec
+         ) do
+      {:ok, _pid} ->
+        Process.send(notify_pid, {:discord_bridge_restart_result, :restarted}, [])
+
+      {:ok, _pid, _info} ->
+        Process.send(notify_pid, {:discord_bridge_restart_result, :restarted}, [])
+
+      _error ->
+        Process.send(notify_pid, {:discord_bridge_restart_result, :failed_to_restart}, [])
     end
-
-    start()
-
-    Process.send(notify_pid, :discord_bridge_restarted, [])
 
     :ok
   end
