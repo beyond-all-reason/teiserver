@@ -657,11 +657,22 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  @max_lobby_name_length 100
+
   def handle_command("lobby/create", "request", _msg_id, msg, state) do
     # TODO: the `lobby/update` has very similar logic. There should be a way
     # to combine the parsing
+    name = msg["data"]["name"]
+
+    if String.length(name) > @max_lobby_name_length do
+      return(
+        {:error_response, :invalid_request,
+         "lobby name must not exceed #{@max_lobby_name_length} characters", state}
+      )
+    end
+
     create_data = %{
-      name: msg["data"]["name"],
+      name: name,
       map_name: msg["data"]["mapName"],
       ally_team_config:
         for at <- msg["data"]["allyTeamConfig"] do

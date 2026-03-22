@@ -18,6 +18,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @behaviour :gen_statem
 
+  # Maximum length for lobby names to prevent UI overflow and abuse
+  @max_lobby_name_length 100
+
   @type id :: String.t()
 
   @type ally_team_config :: [
@@ -1706,12 +1709,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec update_property(atom(), term(), state(), T.userid()) ::
           {:ok, [event()]} | {:error, String.t()}
   defp update_property(:name, new_name, _state, _user_id) do
-    # we can expand lobby name validation later
-    if new_name == "" do
-      {:error, "name must not be empty"}
-    end
+    cond do
+      new_name == "" ->
+        {:error, "name must not be empty"}
 
-    {:ok, [{:update_lobby_name, new_name}]}
+      String.length(new_name) > @max_lobby_name_length ->
+        {:error, "name must not exceed #{@max_lobby_name_length} characters"}
+
+      true ->
+        {:ok, [{:update_lobby_name, new_name}]}
+    end
   end
 
   defp update_property(:map_name, new_name, state, user_id) do
