@@ -16,7 +16,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
 
   setup do
     # Ensure the active season is set for the tests
-    TeiserverTestLib.clear_all_con_caches()
+    TeiserverTestLib.clear_cache(:teiserver_game_rating_types)
     TeiserverTestLib.teiserver_seed()
     :ok
   end

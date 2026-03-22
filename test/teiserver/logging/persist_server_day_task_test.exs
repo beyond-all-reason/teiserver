@@ -2,6 +2,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
   @moduledoc false
 
   alias Teiserver.Account
+  alias Teiserver.AccountFixtures
   alias Teiserver.CacheUser
   alias Teiserver.Logging
   alias Teiserver.Logging.Tasks.PersistServerDayTask
@@ -22,6 +23,9 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
   end
 
   defp create_minute_data do
+    AccountFixtures.user_fixture()
+    AccountFixtures.user_fixture()
+
     all_ids =
       Account.list_users()
       |> Enum.map(fn u -> u.id end)
