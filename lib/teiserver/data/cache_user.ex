@@ -781,6 +781,7 @@ defmodule Teiserver.CacheUser do
         #   else
         #     {user, user.name}
         #   end
+        db_user = Account.get_user(user.id)
 
         cond do
           user.smurf_of_id != nil ->
@@ -799,7 +800,7 @@ defmodule Teiserver.CacheUser do
           Enum.member?(["", "0", nil], lobby_hash) == true and not Auth.is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
-          Account.verify_md5_password(md5_password, user.password) == false ->
+          Account.verify_md5_password(md5_password, db_user.password) == false ->
             if String.contains?(username, "@") do
               {:error,
                "Invalid password for username, check you are not using your email address as the name"}
@@ -821,7 +822,7 @@ defmodule Teiserver.CacheUser do
 
             {:error, @suspended_string}
 
-          not Auth.verified?(user) ->
+          not Auth.verified?(db_user) ->
             # Log them in to save some details we'd not otherwise get
             do_login(user, ip, lobby, lobby_hash)
 
