@@ -7,6 +7,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Teiserver.Battle
   alias Teiserver.Battle.MatchMonitorServer
   alias Teiserver.Bridge.BridgeServer
+  alias Teiserver.Bridge.DiscordSystem
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Game
@@ -85,7 +86,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   def handle_info(:discord_bridge_restarted, socket) do
     socket =
       socket
-      |> Phoenix.LiveView.put_flash(:success, "Discord Bridge restarted")
+      |> put_flash(:success, "Discord Bridge restarted")
 
     {:noreply, socket}
   end
@@ -126,7 +127,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
   @spec handle_event(String.t(), map(), Socket.t()) :: {:noreply, Socket.t()}
   def handle_event("restart-discord-bridge", _event, socket) do
-    Teiserver.Bridge.DiscordSystem.async_nolink_restart(self())
+    DiscordSystem.async_nolink_restart(self())
     {:noreply, socket}
   end
 
