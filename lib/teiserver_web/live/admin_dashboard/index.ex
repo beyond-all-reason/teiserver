@@ -81,6 +81,15 @@ defmodule TeiserverWeb.AdminDashLive.Index do
      |> assign(:total_connected_clients, data.total_clients_connected)}
   end
 
+  @spec handle_info(atom(), Socket.t()) :: {:noreply, Socket.t()}
+  def handle_info(:discord_bridge_restarted, socket) do
+    socket =
+      socket
+      |> Phoenix.LiveView.put_flash(:success, "Discord Bridge restarted")
+
+    {:noreply, socket}
+  end
+
   @impl Phoenix.LiveView
   def handle_event("check-consuls", _event, socket) do
     Coordinator.start_all_consuls()
@@ -115,8 +124,9 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     {:noreply, socket}
   end
 
+  @spec handle_event(String.t(), map(), Socket.t()) :: {:noreply, Socket.t()}
   def handle_event("restart-discord-bridge", _event, socket) do
-    Teiserver.Bridge.DiscordSystem.restart()
+    Teiserver.Bridge.DiscordSystem.async_nolink_restart(self())
     {:noreply, socket}
   end
 
