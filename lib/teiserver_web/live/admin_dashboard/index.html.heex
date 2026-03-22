@@ -1,6 +1,6 @@
 <% lobby_bsname = Teiserver.Lobby.colours()
 policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
-
+<.flash_group flash={@flash} />
 <div class="row my-2">
   <div class="col-md-12">
     <h4>Links</h4>
@@ -40,6 +40,14 @@ policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
   </div>
 
   <div class="col-md-4">
+    <div
+      class="btn btn-info2 mx-2"
+      style="background-color: #7289DA;"
+      phx-click="restart-discord-bridge"
+    >
+      Restart Discord Bridge
+    </div>
+    &nbsp;
     <div class="btn btn-danger mx-2" phx-click="restart-policies">Restart policies</div>
   </div>
 </div>
