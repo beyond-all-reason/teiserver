@@ -54,32 +54,20 @@ defmodule Teiserver.Helper.TimexHelper do
         :dmy ->
           Calendar.strftime(the_time, "%d/%m/%Y")
 
-        # Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
-
         :ymd ->
           Calendar.strftime(the_time, "%Y-%m-%d")
-
-        # Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
 
         :hms_dmy ->
           Calendar.strftime(the_time, "%I:%M:%S %d/%m/%Y")
 
-        # Timex.format!(the_time, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
-
         :ymd_hms ->
           Calendar.strftime(the_time, "%Y-%m-%d %I:%M:%S")
-
-        # Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
 
         :hms ->
           Calendar.strftime(the_time, "%I:%M:%S")
 
-        # Timex.format!(the_time, "{h24}:{m}:{s}")
-
         :email_date ->
           Calendar.strftime(the_time, "%a, %d %b %Y %H:%M:%S %z")
-
-        # Timex.format!(the_time, "{WDshort}, {0D} {Mshort} {YYYY} {h24}:{m}:{s} {Z}")
 
         :hms_or_hmsymd ->
           _hms_or_hmsymd(the_time, now)
@@ -259,26 +247,6 @@ defmodule Teiserver.Helper.TimexHelper do
       true -> parse_dmy(s)
     end
   end
-
-  # def duration(start_tick, end_tick) do
-  #   s = Timex.diff(end_tick, start_tick, :duration)
-  #   |> Timex.Duration.to_seconds()
-
-  #   days = :math.floor(s/86400) |> round
-  #   s = s - days * 86400
-  #   hours = :math.floor(s/3600) |> round
-  #   s = s - hours * 3600
-  #   mins = :math.floor(s/60) |> round
-  #   s = s - mins * 60
-  #   s = round(s)
-
-  #   cond do
-  #     days > 0 -> "#{days} days"
-  #     hours > 0 -> "#{hours} hours"
-  #     mins > 0 -> "#{mins}:#{s}"
-  #     true -> "#{s}s"
-  #   end
-  # end
 
   def duration_to_str(nil, _t2), do: ""
   def duration_to_str(_t1, nil), do: ""

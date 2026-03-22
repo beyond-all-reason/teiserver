@@ -37,33 +37,6 @@ defmodule Teiserver.Helpers.GeneralTestLib do
     u
   end
 
-  # def seed do
-  #   %SiteConfig{}
-  #   |> SiteConfig.changeset(%{
-  #     key: "test.seeded",
-  #     value: "true"
-  #   })
-  #   |> Repo.insert()
-
-  #   users = [
-  #     make_user(%{
-  #       "name" => "dud user",
-  #       "email" => "dud_user@dud_user.com",
-  #       "permissions" => []
-  #     }),
-  #     make_user(%{
-  #       "name" => "other user",
-  #       "email" => "other_user@other_user.com",
-  #       "permissions" => []
-  #     })
-  #   ]
-
-  #   [
-  #     users: users
-  #   ]
-  #   |> LoggingTestLib.seed()
-  # end
-
   def login(conn, email) do
     conn
     |> post("/login", %{"user" => %{email: email, password: "password"}})

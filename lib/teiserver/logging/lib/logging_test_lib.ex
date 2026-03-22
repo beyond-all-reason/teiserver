@@ -53,43 +53,6 @@ defmodule Teiserver.Logging.LoggingTestLib do
     |> Repo.insert!()
   end
 
-  # def seed(existing) do
-  #   users = existing[:users]
-
-  #   page_view_logs =
-  #     users
-  #     |> Enum.map(fn u ->
-  #       1..6
-  #       |> Enum.map(fn _index ->
-  #         new_page_view_log(u)
-  #       end)
-  #     end)
-
-  #   audit_logs =
-  #     users
-  #     |> Enum.map(fn u ->
-  #       1..6
-  #       |> Enum.map(fn _index ->
-  #         fake_audit_log(u)
-  #       end)
-  #     end)
-
-  #   aggregate_logs =
-  #     4..14
-  #     |> Enum.map(fn i ->
-  #       Timex.beginning_of_day(Timex.now())
-  #       |> Timex.shift(days: -i)
-  #       |> fake_aggregate_log()
-  #     end)
-
-  #   existing ++
-  #     [
-  #       page_view_logs: page_view_logs,
-  #       audit_logs: audit_logs,
-  #       aggregate_logs: aggregate_logs
-  #     ]
-  # end
-
   @spec logging_setup(List.t()) :: {:ok, List.t()}
   @spec logging_setup(List.t(), List.t()) :: {:ok, List.t()}
   def logging_setup(existing, flags \\ []) do

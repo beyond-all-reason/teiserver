@@ -3,7 +3,6 @@ defmodule Teiserver.TeiserverTestLib do
 
   alias ExUnit.Callbacks
   alias Teiserver.Account
-  # alias Teiserver.Account.AccoladeBotServer
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.CacheUser
   alias Teiserver.Clans
