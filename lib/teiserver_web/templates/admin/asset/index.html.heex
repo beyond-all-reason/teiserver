@@ -29,12 +29,6 @@
                     <td>
                       {Calendar.strftime(engine.inserted_at, "%Y-%m-%d %H:%M:%S %Z")}
                     </td>
-                    <td :if={false}>
-                      {Timex.format!(
-                        engine.inserted_at,
-                        "{YYYY}-{0M}-{0D} {0h24}:{0m}:{0s} {Zabbr}"
-                      )}
-                    </td>
                     <td>
                       <Fontawesome.icon :if={engine.in_matchmaking} icon="check" style="solid" />
                     </td>
@@ -102,12 +96,6 @@
                     <td>{game.name}</td>
                     <td>
                       {Calendar.strftime(game.inserted_at, "%Y-%m-%d %H:%M:%S %Z")}
-                    </td>
-                    <td :if={false}>
-                      {Timex.format!(
-                        game.inserted_at,
-                        "{YYYY}-{0M}-{0D} {0h24}:{0m}:{0s} {Zabbr}"
-                      )}
                     </td>
                     <td>
                       <Fontawesome.icon :if={game.in_matchmaking} icon="check" style="solid" />
