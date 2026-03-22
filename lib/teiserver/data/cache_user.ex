@@ -964,18 +964,18 @@ defmodule Teiserver.CacheUser do
 
     update_user(user, persist: true)
 
+    Account.update_user_stat(user.id, %{
+      bot: Auth.is_bot?(user),
+      country: country,
+      rank: rank,
+      lobby_client: lobby_client,
+      lobby_hash: lobby_hash,
+      last_ip: ip
+    })
+
     # These steps are not needed for most tests so we can skip them as they
     # can cause flakiness
     if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
-      Account.update_user_stat(user.id, %{
-        bot: Auth.is_bot?(user),
-        country: country,
-        rank: rank,
-        lobby_client: lobby_client,
-        lobby_hash: lobby_hash,
-        last_ip: ip
-      })
-
       Telemetry.log_simple_server_event(user.id, "account.user_login")
 
       if not Auth.is_bot?(user) do
