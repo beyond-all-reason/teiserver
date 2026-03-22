@@ -4,13 +4,22 @@ defmodule Teiserver.Game.MatchRatingLibTest do
   alias Ecto.Multi
   alias Teiserver.Account
   alias Teiserver.Account.AccountTestLib
+  alias Teiserver.AccountFixtures
   alias Teiserver.Battle
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Config
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Repo
+
   use Teiserver.DataCase, async: true
+
+  setup do
+    # Ensure the active season is set for the tests
+    TeiserverTestLib.clear_cache(:teiserver_game_rating_types)
+    TeiserverTestLib.teiserver_seed()
+    :ok
+  end
 
   test "num_matches and num_wins is updated after rating a match" do
     # Create two user
@@ -174,7 +183,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
         processed: true,
         game_type: game_type,
         # All rooms are hosted by the same user for now
-        founder_id: 1,
+        founder_id: AccountFixtures.user_fixture().id,
         bots: %{},
         queue_id: nil,
         started: start_time,

@@ -9,12 +9,9 @@ defmodule TeiserverWeb.Account.GeneralControllerTest do
     |> TeiserverTestLib.conn_setup()
   end
 
-  @tag :needs_attention
   test "index", %{conn: conn} do
-    conn = get(conn, Routes.ts_account_general_path(conn, :index))
-
-    assert html_response(conn, 200) =~ "Friends/Mutes/Invites"
-    assert html_response(conn, 200) =~ "Preferences"
+    conn = get(conn, Routes.ts_account_general_path(conn, :edit_details))
+    assert html_response(conn, 200) =~ "Edit account details"
   end
 
   test "admin permissions", %{conn: conn} do

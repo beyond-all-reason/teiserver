@@ -189,7 +189,7 @@ defmodule TeiserverWeb.CoreComponents do
 
   def flash_group(assigns) do
     ~H"""
-    <div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div aria-live="polite" aria-atomic="true" class="position-relative" id="flash-group">
       <div class="toast-container top-0 end-0 p-3">
         <.flash kind={:info} title="Information" role="alert" flash={@flash} />
         <.flash kind={:success} title="Success!" role="alert" flash={@flash} />

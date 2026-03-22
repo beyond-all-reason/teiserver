@@ -1,17 +1,20 @@
 defmodule TeiserverWeb.Microblog.PostFormComponentTest do
   @moduledoc false
 
+  alias Teiserver.AccountFixtures
   alias Teiserver.Microblog
   alias TeiserverWeb.Microblog.PostFormComponent
 
   use TeiserverWeb.ConnCase
 
   test "create_post works with or without poster_alias" do
+    user = AccountFixtures.user_fixture()
+
     post_params = %{
       "contents" => "test",
       "discord_channel_id" => "",
       "poster_alias" => "",
-      "poster_id" => 4,
+      "poster_id" => user.id,
       "summary" => "test",
       "title" => "test"
     }
@@ -23,7 +26,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponentTest do
       "contents" => "test",
       "discord_channel_id" => "",
       "poster_alias" => "Jenny",
-      "poster_id" => 4,
+      "poster_id" => user.id,
       "summary" => "test",
       "title" => "test"
     }
@@ -33,11 +36,13 @@ defmodule TeiserverWeb.Microblog.PostFormComponentTest do
   end
 
   test "Get discord text when discord id present" do
+    user = AccountFixtures.user_fixture()
+
     post_params = %{
       "contents" => "test",
       "discord_channel_id" => "",
       "poster_alias" => "contributor alias",
-      "poster_id" => 4,
+      "poster_id" => user.id,
       "summary" => "test",
       "title" => "test"
     }
@@ -57,11 +62,13 @@ defmodule TeiserverWeb.Microblog.PostFormComponentTest do
   end
 
   test "Get discord text when discord id not present and alias is present" do
+    user = AccountFixtures.user_fixture()
+
     post_params = %{
       "contents" => "test",
       "discord_channel_id" => "",
       "poster_alias" => "contributoralias",
-      "poster_id" => 4,
+      "poster_id" => user.id,
       "summary" => "test",
       "title" => "test"
     }
@@ -81,11 +88,13 @@ defmodule TeiserverWeb.Microblog.PostFormComponentTest do
   end
 
   test "Get discord text when discord id not present and alias not present" do
+    user = AccountFixtures.user_fixture()
+
     post_params = %{
       "contents" => "test",
       "discord_channel_id" => "",
       "poster_alias" => "",
-      "poster_id" => 4,
+      "poster_id" => user.id,
       "summary" => "test",
       "title" => "test"
     }

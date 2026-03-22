@@ -1,6 +1,7 @@
 defmodule Teiserver.Logging.LoggingTestLib do
   @moduledoc false
 
+  alias Teiserver.AccountFixtures
   alias Teiserver.Logging.AggregateViewLog
   alias Teiserver.Logging.AggregateViewLogLib
   alias Teiserver.Logging.AuditLog
@@ -8,13 +9,6 @@ defmodule Teiserver.Logging.LoggingTestLib do
   alias Teiserver.Logging.PageViewLogLib
 
   use TeiserverWeb, :library
-
-  # def get_audit_log(conn, action) do
-  #   Logging.list_audit_logs(search: [
-  #     user_id: conn.assigns[:current_user].id,
-  #     action: action
-  #   ])
-  # end
 
   def new_page_view_log(user, data \\ %{}) do
     PageViewLog.changeset(%PageViewLog{}, %{
@@ -59,49 +53,12 @@ defmodule Teiserver.Logging.LoggingTestLib do
     |> Repo.insert!()
   end
 
-  def seed(existing) do
-    users = existing[:users]
-
-    page_view_logs =
-      users
-      |> Enum.map(fn u ->
-        1..6
-        |> Enum.map(fn _index ->
-          new_page_view_log(u)
-        end)
-      end)
-
-    audit_logs =
-      users
-      |> Enum.map(fn u ->
-        1..6
-        |> Enum.map(fn _index ->
-          fake_audit_log(u)
-        end)
-      end)
-
-    aggregate_logs =
-      4..14
-      |> Enum.map(fn i ->
-        Timex.beginning_of_day(Timex.now())
-        |> Timex.shift(days: -i)
-        |> fake_aggregate_log()
-      end)
-
-    existing ++
-      [
-        page_view_logs: page_view_logs,
-        audit_logs: audit_logs,
-        aggregate_logs: aggregate_logs
-      ]
-  end
-
   @spec logging_setup(List.t()) :: {:ok, List.t()}
   @spec logging_setup(List.t(), List.t()) :: {:ok, List.t()}
   def logging_setup(existing, flags \\ []) do
     {:ok, existing} = existing
 
-    dud_user = existing[:dud_user]
+    user = AccountFixtures.user_fixture()
 
     aggregate_logs =
       if flags[:aggregate_logs] do
@@ -113,7 +70,7 @@ defmodule Teiserver.Logging.LoggingTestLib do
     page_view_logs =
       if flags[:page_view_logs] do
         PageViewLogLib.get_page_view_logs()
-        |> PageViewLogLib.search(user_id: dud_user.id)
+        |> PageViewLogLib.search(user_id: user.id)
         |> Repo.all()
       end
 

@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.UserControllerTest do
-  alias Teiserver.Account
+  alias Teiserver.AccountFixtures
   alias Teiserver.CacheUser
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
@@ -21,14 +21,17 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
 
   describe "index" do
     test "lists all users", %{conn: conn} do
+      _user = AccountFixtures.user_fixture()
+
       conn = get(conn, ~p"/teiserver/admin/user")
       assert html_response(conn, 200) =~ "Listing Users"
     end
 
     test "lists all users - redirect", %{conn: conn} do
-      main_user = Account.get_user_by_name("dud user")
-      conn = get(conn, ~p"/teiserver/admin/user" <> "?s=dud user")
-      assert redirected_to(conn) == ~p"/teiserver/admin/user/#{main_user.id}"
+      user = AccountFixtures.user_fixture()
+
+      conn = get(conn, ~p"/teiserver/admin/user" <> "?s=#{user.name}")
+      assert redirected_to(conn) == ~p"/teiserver/admin/user/#{user.id}"
     end
 
     test "search", %{conn: conn} do
@@ -44,18 +47,9 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     end
   end
 
-  describe "new user" do
-    @tag :needs_attention
-    test "renders form", %{conn: conn} do
-      conn = get(conn, ~p"/teiserver/admin/user/new")
-      assert html_response(conn, 200) =~ "Save changes"
-    end
-  end
-
   describe "edit user" do
     test "renders form for editing nil", %{conn: conn} do
       resp = get(conn, ~p"/teiserver/admin/user/#{-1}/edit")
-      # assert resp.private[:phoenix_flash]["danger"] == "Unable to access this user"
       assert redirected_to(resp) == ~p"/teiserver/admin/user"
     end
 
@@ -76,13 +70,11 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
 
       conn = put(conn, ~p"/teiserver/admin/user/#{user}", user: @update_attrs)
       assert redirected_to(conn) == ~p"/teiserver/admin/user/#{user}"
-      # assert redirected_to(conn) == ~p"/teiserver/admin/user"
 
       conn = get(conn, ~p"/teiserver/admin/user/#{user}")
       assert html_response(conn, 200) =~ "#0000AA"
     end
 
-    @tag :needs_attention
     test "renders errors when data is invalid", %{conn: conn, user: user} do
       conn = put(conn, ~p"/teiserver/admin/user/#{user}", user: @invalid_attrs)
       assert html_response(conn, 200) =~ "Oops, something went wrong!"

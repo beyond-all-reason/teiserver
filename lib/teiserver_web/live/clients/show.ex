@@ -70,15 +70,21 @@ defmodule TeiserverWeb.ClientLive.Show do
         server_debug_messages = Map.get(connection_state, :print_server_messages, false)
         client_debug_messages = Map.get(connection_state, :print_client_messages, false)
 
-        {:noreply,
-         socket
-         |> assign(:page_title, page_title(socket.assigns.live_action))
-         |> add_breadcrumb(name: user.name, url: "/teiserver/admin/clients/#{id}")
-         |> assign(:id, id)
-         |> assign(:client, client)
-         |> assign(:user, user)
-         |> assign(:client_debug_messages, client_debug_messages)
-         |> assign(:server_debug_messages, server_debug_messages)}
+        if client && user do
+          {:noreply,
+           socket
+           |> assign(:page_title, page_title(socket.assigns.live_action))
+           |> add_breadcrumb(name: user.name, url: ~p"/teiserver/admin/client/#{id}")
+           |> assign(:id, id)
+           |> assign(:client, client)
+           |> assign(:user, user)
+           |> assign(:client_debug_messages, client_debug_messages)
+           |> assign(:server_debug_messages, server_debug_messages)}
+        else
+          {:noreply,
+           socket
+           |> redirect(to: ~p"/teiserver/admin/client")}
+        end
 
       false ->
         {:noreply,

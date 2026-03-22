@@ -28,6 +28,7 @@ defmodule Teiserver.DataCase do
       alias Teiserver.Account.LoginThrottleServer
       alias Teiserver.Repo
       alias Teiserver.Support.Tachyon
+      alias Teiserver.TeiserverTestLib
 
       import Changeset
       import Ecto.Query

@@ -51,47 +51,23 @@ defmodule Teiserver.Helper.TimexHelper do
 
     time_str =
       case format do
-        :day_name ->
-          Timex.format!(the_time, "{WDfull}")
-
         :dmy ->
-          Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
+          Calendar.strftime(the_time, "%d/%m/%Y")
 
         :ymd ->
-          Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
+          Calendar.strftime(the_time, "%Y-%m-%d")
 
         :hms_dmy ->
-          Timex.format!(the_time, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
-
-        :hms_ymd ->
-          Timex.format!(the_time, "{h24}:{m}:{s} {YYYY}-{0M}-{0D}")
+          Calendar.strftime(the_time, "%I:%M:%S %d/%m/%Y")
 
         :ymd_hms ->
-          Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
-
-        :ymd_t_hms ->
-          Timex.format!(the_time, "{YYYY}-{M}-{D}T{h24}:{m}:{s}")
+          Calendar.strftime(the_time, "%Y-%m-%d %I:%M:%S")
 
         :hms ->
-          Timex.format!(the_time, "{h24}:{m}:{s}")
-
-        :hm_dmy ->
-          Timex.format!(the_time, "{h24}:{m} {0D}/{0M}/{YYYY}")
-
-        :hm ->
-          Timex.format!(the_time, "{h24}:{m}")
-
-        :clock24 ->
-          Timex.format!(the_time, "{h24}{m}")
-
-        :html_input ->
-          Timex.format!(the_time, "{YYYY}-{0M}-{0D}T{h24}:{m}")
+          Calendar.strftime(the_time, "%I:%M:%S")
 
         :email_date ->
-          Timex.format!(the_time, "{WDshort}, {0D} {Mshort} {YYYY} {h24}:{m}:{s} {Z}")
-
-        :hms_or_hmsdmy ->
-          _hms_or_hmsdmy(the_time, now)
+          Calendar.strftime(the_time, "%a, %d %b %Y %H:%M:%S %z")
 
         :hms_or_hmsymd ->
           _hms_or_hmsymd(the_time, now)
@@ -104,12 +80,6 @@ defmodule Teiserver.Helper.TimexHelper do
 
         :hms_or_hms_ymd ->
           _hms_or_hms_ymd(the_time, now)
-
-        :hm_or_dmy ->
-          _hm_or_dmy(the_time, now)
-
-        :everything ->
-          Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}, {WDfull}")
       end
 
     until_str =
@@ -185,15 +155,6 @@ defmodule Teiserver.Helper.TimexHelper do
     end
   end
 
-  @spec _hms_or_hmsdmy(DateTime.t(), DateTime.t()) :: String.t()
-  defp _hms_or_hmsdmy(the_time, today) do
-    if the_time |> Timex.to_date() |> Timex.compare(today) == 0 do
-      Timex.format!(the_time, "Today at {h24}:{m}:{s}")
-    else
-      Timex.format!(the_time, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
-    end
-  end
-
   @spec _hms_or_hmsymd(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_hmsymd(the_time, today) do
     if the_time |> Timex.to_date() |> Timex.compare(today) == 0 do
@@ -206,9 +167,11 @@ defmodule Teiserver.Helper.TimexHelper do
   @spec _hms_or_ymd(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_ymd(the_time, today) do
     if the_time |> Timex.to_date() |> Timex.compare(today) == 0 do
-      Timex.format!(the_time, "Today at {h24}:{m}:{s}")
+      # Timex.format!(the_time, "Today at {h24}:{m}:{s}")
+      Calendar.strftime(the_time, "Today at %I:%M:%S")
     else
-      Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
+      # Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
+      Calendar.strftime(the_time, "%Y-%m-%d")
     end
   end
 
@@ -224,32 +187,13 @@ defmodule Teiserver.Helper.TimexHelper do
   @spec _hms_or_dmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_dmy(the_time, today) do
     if the_time |> Timex.to_date() |> Timex.compare(today) == 0 do
-      Timex.format!(the_time, "Today at {h24}:{m}:{s}")
+      # Timex.format!(the_time, "Today at {h24}:{m}:{s}")
+      Calendar.strftime(the_time, "Today at %I:%M:%S")
     else
-      Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
+      # Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
+      Calendar.strftime(the_time, "%d/%m/%Y")
     end
   end
-
-  @spec _hm_or_dmy(DateTime.t(), DateTime.t()) :: String.t()
-  defp _hm_or_dmy(the_time, today) do
-    if the_time |> Timex.to_date() |> Timex.compare(today) == 0 do
-      Timex.format!(the_time, "Today at {h24}:{m}")
-    else
-      Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
-    end
-  end
-
-  # def dmy(nil), do: ""
-  # def dmy(the_time) do
-  #   if Map.has_key?(the_time, "day") do
-  #     Timex.format!(
-  #       (for {key, val} <- the_time, into: %{}, do: {String.to_atom(key), val}),
-  #       "{0D}/{0M}/{YYYY}"
-  #     )
-  #   else
-  #     Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
-  #   end
-  # end
 
   defp dmy_text(nil, _tz), do: nil
 
@@ -296,10 +240,6 @@ defmodule Teiserver.Helper.TimexHelper do
     Timex.parse!(s, "{YYYY}-{M}-{D} {h24}:{m}:{s}")
   end
 
-  def parse_ymd_t_hms(s) do
-    Timex.parse!(s, "{YYYY}-{M}-{D}T{h24}:{m}:{s}")
-  end
-
   def parse_time_input(s) do
     cond do
       String.contains?(s, ":") -> parse_ymd_hms(s)
@@ -307,26 +247,6 @@ defmodule Teiserver.Helper.TimexHelper do
       true -> parse_dmy(s)
     end
   end
-
-  # def duration(start_tick, end_tick) do
-  #   s = Timex.diff(end_tick, start_tick, :duration)
-  #   |> Timex.Duration.to_seconds()
-
-  #   days = :math.floor(s/86400) |> round
-  #   s = s - days * 86400
-  #   hours = :math.floor(s/3600) |> round
-  #   s = s - hours * 3600
-  #   mins = :math.floor(s/60) |> round
-  #   s = s - mins * 60
-  #   s = round(s)
-
-  #   cond do
-  #     days > 0 -> "#{days} days"
-  #     hours > 0 -> "#{hours} hours"
-  #     mins > 0 -> "#{mins}:#{s}"
-  #     true -> "#{s}s"
-  #   end
-  # end
 
   def duration_to_str(nil, _t2), do: ""
   def duration_to_str(_t1, nil), do: ""
