@@ -849,7 +849,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       for {p_id, p} <- Enum.concat(data.players, data.spectators),
           is_map_key(p, :password),
-          do: Player.lobby_battle_start(p_id, battle_data, start_data, p.password)
+          do: Player.lobby_join_battle(p_id, battle_data, start_data, p.password)
 
       now = DateTime.utc_now()
 

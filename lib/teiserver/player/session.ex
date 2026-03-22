@@ -262,17 +262,17 @@ defmodule Teiserver.Player.Session do
   @doc """
   Let the player know that the lobby they are in as just started a battle
   """
-  @spec lobby_battle_start(
+  @spec lobby_join_battle(
           T.userid(),
           {TachyonBattle.id(), pid()},
           start_data(),
           password :: String.t()
         ) ::
           :ok
-  def lobby_battle_start(user_id, battle_data, battle_start_data, password) do
+  def lobby_join_battle(user_id, battle_data, battle_start_data, password) do
     user_id
     |> via_tuple()
-    |> GenServer.cast({:battle, {:lobby_start, battle_data, battle_start_data, password}})
+    |> GenServer.cast({:battle, {:lobby_join, battle_data, battle_start_data, password}})
   end
 
   @doc """
@@ -1402,10 +1402,10 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_cast(
-        {:battle, {:lobby_start, {battle_id, battle_pid}, battle_start_data, password}},
+        {:battle, {:lobby_join, {battle_id, battle_pid}, battle_start_data, password}},
         state
       ) do
-    Logger.info("entering lobby battle #{battle_id}")
+    Logger.info("joining lobby battle #{battle_id}")
 
     case state.lobby do
       nil ->
