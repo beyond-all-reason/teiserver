@@ -4,10 +4,8 @@ defmodule TeiserverWeb.Report.ComplexClientEventControllerTest do
 
   use TeiserverWeb.ConnCase
 
-  @moduletag :needs_attention
-
   setup do
-    GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())
+    GeneralTestLib.conn_setup(TeiserverTestLib.server_permissions())
     |> TeiserverTestLib.conn_setup()
   end
 

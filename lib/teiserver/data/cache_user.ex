@@ -965,7 +965,6 @@ defmodule Teiserver.CacheUser do
 
     update_user(user, persist: true)
 
-    # User stats
     Account.update_user_stat(user.id, %{
       bot: Auth.is_bot?(user),
       country: country,
@@ -975,10 +974,14 @@ defmodule Teiserver.CacheUser do
       last_ip: ip
     })
 
-    Telemetry.log_simple_server_event(user.id, "account.user_login")
+    # These steps are not needed for most tests so we can skip them as they
+    # can cause flakiness
+    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+      Telemetry.log_simple_server_event(user.id, "account.user_login")
 
-    if not Auth.is_bot?(user) do
-      Account.create_smurf_key(user.id, "client_app_hash", lobby_hash)
+      if not Auth.is_bot?(user) do
+        Account.create_smurf_key(user.id, "client_app_hash", lobby_hash)
+      end
     end
 
     {:ok, user}

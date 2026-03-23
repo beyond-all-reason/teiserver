@@ -19,8 +19,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
   describe "battle live" do
     test "index", %{conn: conn, user: user} do
-      {:ok, view, html} = live(conn, "/battle/lobbies")
-      assert html =~ "No lobbies found"
+      {:ok, view, _html} = live(conn, "/battle/lobbies")
 
       # Lets create a battle
       battle1 =

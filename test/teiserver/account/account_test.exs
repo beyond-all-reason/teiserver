@@ -33,6 +33,7 @@ defmodule Teiserver.AccountTest do
     }
 
     test "list_users/0 returns users" do
+      AccountTestLib.user_fixture()
       assert Account.list_users() != []
     end
 

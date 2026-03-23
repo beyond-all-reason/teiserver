@@ -378,7 +378,15 @@ defmodule TeiserverWeb.Admin.UserController do
             |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
 
           {:error, %Ecto.Changeset{} = changeset} ->
-            render(conn, "edit.html", user: user, changeset: changeset)
+            conn
+            |> assign(:management_roles, RoleLib.management_roles())
+            |> assign(:moderation_roles, RoleLib.moderation_roles())
+            |> assign(:staff_roles, RoleLib.staff_roles())
+            |> assign(:community_roles, RoleLib.community_roles())
+            |> assign(:privileged_roles, RoleLib.privileged_roles())
+            |> assign(:property_roles, RoleLib.property_roles())
+            |> assign(:role_styling_map, RoleLib.role_data())
+            |> render("edit.html", user: user, changeset: changeset)
         end
 
       _no_access ->

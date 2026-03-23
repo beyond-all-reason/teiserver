@@ -8,6 +8,13 @@ defmodule Teiserver.Matchmaking.MemberTest do
 
   use Teiserver.DataCase
 
+  setup do
+    # Ensure the active season is set for the tests
+    TeiserverTestLib.clear_cache(:teiserver_game_rating_types)
+    TeiserverTestLib.teiserver_seed()
+    :ok
+  end
+
   describe "get_member_rating" do
     test "no rating for user" do
       user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})

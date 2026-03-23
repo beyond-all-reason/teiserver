@@ -9,6 +9,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
   use GenServer
 
   @update_interval 2000
+  def update_interval, do: @update_interval
 
   # Client
   def handle_info(%{channel: "client_inout", event: :login} = msg, state) do
@@ -92,5 +93,9 @@ defmodule Teiserver.Account.ClientIndexThrottle do
        removed_clients: [],
        last_update: System.system_time(:second)
      }}
+  end
+
+  def tick do
+    Process.whereis(__MODULE__) |> send(:tick)
   end
 end
