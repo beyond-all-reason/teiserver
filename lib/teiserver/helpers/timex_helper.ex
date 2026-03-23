@@ -167,10 +167,8 @@ defmodule Teiserver.Helper.TimexHelper do
   @spec _hms_or_ymd(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_ymd(the_time, today) do
     if the_time |> Timex.to_date() |> Timex.compare(today) == 0 do
-      # Timex.format!(the_time, "Today at {h24}:{m}:{s}")
       Calendar.strftime(the_time, "Today at %I:%M:%S")
     else
-      # Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
       Calendar.strftime(the_time, "%Y-%m-%d")
     end
   end
@@ -187,10 +185,8 @@ defmodule Teiserver.Helper.TimexHelper do
   @spec _hms_or_dmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_dmy(the_time, today) do
     if the_time |> Timex.to_date() |> Timex.compare(today) == 0 do
-      # Timex.format!(the_time, "Today at {h24}:{m}:{s}")
       Calendar.strftime(the_time, "Today at %I:%M:%S")
     else
-      # Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
       Calendar.strftime(the_time, "%d/%m/%Y")
     end
   end

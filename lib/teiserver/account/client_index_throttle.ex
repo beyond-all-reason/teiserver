@@ -94,4 +94,8 @@ defmodule Teiserver.Account.ClientIndexThrottle do
        last_update: System.system_time(:second)
      }}
   end
+
+  def tick do
+    Process.whereis(__MODULE__) |> send(:tick)
+  end
 end

@@ -16,8 +16,6 @@ defmodule TeiserverWeb.Live.ClientTest do
     |> TeiserverTestLib.conn_setup()
   end
 
-  @sleep_time ClientIndexThrottle.update_interval() + 100
-
   describe "client live" do
     # Clint login of user2 is not detected
     @tag :needs_attention
@@ -35,14 +33,14 @@ defmodule TeiserverWeb.Live.ClientTest do
       # Time to add a client
       %{socket: socket1, user: user1} = TeiserverTestLib.auth_setup(server_context)
 
-      :timer.sleep(@sleep_time)
+      tick_and_wait()
       html = render(view)
       assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
 
       # Another
       %{socket: socket2, user: user2} = TeiserverTestLib.auth_setup(server_context)
-      :timer.sleep(@sleep_time)
+      tick_and_wait()
       html = render(view)
       assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
@@ -50,7 +48,7 @@ defmodule TeiserverWeb.Live.ClientTest do
 
       # User 2 logs out
       _send_raw(socket2, "EXIT\n")
-      :timer.sleep(@sleep_time)
+      tick_and_wait()
       html = render(view)
       assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
@@ -58,7 +56,7 @@ defmodule TeiserverWeb.Live.ClientTest do
 
       # And now user 1 too
       _send_raw(socket1, "EXIT\n")
-      :timer.sleep(@sleep_time)
+      tick_and_wait()
       html = render(view)
       # assert html =~ "No clients found"
       refute html =~ "#{user1.name}"
@@ -107,5 +105,13 @@ defmodule TeiserverWeb.Live.ClientTest do
 
       assert Client.get_client_by_id(user.id) == nil
     end
+  end
+
+  # We send a tick to the throttle server and wait 50ms to allow
+  # a PubSub broadcast to be sent to the liveview at which stage
+  # we can proceed
+  defp tick_and_wait do
+    ClientIndexThrottle.tick()
+    :timer.sleep(50)
   end
 end
