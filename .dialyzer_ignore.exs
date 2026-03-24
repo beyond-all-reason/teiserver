@@ -97,7 +97,6 @@
   {"lib/teiserver/mix_tasks/fake_data.ex", :no_return},
   {"lib/teiserver/mix_tasks/fake_data.ex", :unused_fun},
   {"lib/teiserver/moderation.ex", :unknown_type},
-  {"lib/teiserver/moderation.ex", :invalid_contract},
   {"lib/teiserver/moderation/libs/test_lib.ex", :invalid_contract},
   {"lib/teiserver/protocols/spring/spring.ex", :unknown_type},
   {"lib/teiserver/protocols/spring/spring_battle_in.ex", :call},
