@@ -10,9 +10,7 @@ defmodule Teiserver.Repo.Migrations.RemoveReportGroups do
       remove :report_group_id
     end
 
-    drop table(:moderation_report_groups)
-    drop table(:moderation_report_group_votes)
-    drop table(:moderation_report_group_messages)
+    drop table(:moderation_report_groups), mode: :cascade
 
   end
 
