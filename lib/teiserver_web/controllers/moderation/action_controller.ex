@@ -412,12 +412,6 @@ defmodule TeiserverWeb.Moderation.ActionController do
   def delete(conn, %{"id" => id}) do
     action = Moderation.get_action!(id)
 
-    # Update any reports which were assigned to this
-    # action.report_groups
-    # |> Enum.each(fn report ->
-    #   Moderation.update_report(report, %{result_id: nil})
-    # end)
-
     Moderation.delete_action(action)
 
     if action.discord_message_id do

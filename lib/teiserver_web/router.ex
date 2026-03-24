@@ -485,20 +485,6 @@ defmodule TeiserverWeb.Router do
   end
 
   scope "/moderation", TeiserverWeb.Moderation do
-    pipe_through([:browser, :app_layout, :protected])
-
-    live_session :overwatch,
-      on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Account.AuthPlug, {:authorise, "Overwatch"}}
-      ] do
-      live "/overwatch", OverwatchLive.Index, :index
-      live "/overwatch/target/:target_id", OverwatchLive.User, :user
-      live "/overwatch/report_group/:id", OverwatchLive.ReportGroupDetail, :index
-    end
-  end
-
-  scope "/moderation", TeiserverWeb.Moderation do
     pipe_through([:browser, :app_layout])
 
     live_session :report_user,

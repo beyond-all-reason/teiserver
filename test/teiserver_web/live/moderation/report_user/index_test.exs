@@ -42,7 +42,6 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
       user = TeiserverTestLib.new_user()
 
       # Ensure no existing groups
-      assert Moderation.list_report_groups(where: [target_id: user.id]) |> Enum.empty?()
       assert Moderation.list_reports(where: [target_id: user.id]) |> Enum.empty?()
 
       {:ok, index_live, html} = live(conn, ~p"/moderation/report_user/#{user.id}")
@@ -97,9 +96,6 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
       assert html =~ "Your report has been submitted"
 
       # Lets see if the report has come through!
-      [report_group] = Moderation.list_report_groups(where: [target_id: user.id])
-      assert report_group.report_count == 1
-
       [report] = Moderation.list_reports(where: [target_id: user.id])
       assert report.extra_text == "The extra text in my report"
       assert report.target_id == user.id

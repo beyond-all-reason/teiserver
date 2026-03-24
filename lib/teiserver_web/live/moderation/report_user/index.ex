@@ -64,8 +64,8 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
       match_id: assigns.match_id
     }
 
-    case Moderation.create_report_group_and_report(report_params) do
-      {:ok, _report_group, _report} ->
+    case Moderation.create_report(report_params) do
+      {:ok, _report} ->
         {:noreply,
          socket
          |> assign(:result, :success)

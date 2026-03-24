@@ -16,15 +16,6 @@ defmodule TeiserverWeb.Moderation.ModerationComponents do
     <div class="row sub-menu">
       <.sub_menu_button
         bsname={@view_colour}
-        icon={Teiserver.Moderation.overwatch_icon()}
-        active={@active == "overwatch"}
-        url={~p"/moderation/overwatch"}
-      >
-        Overwatch
-      </.sub_menu_button>
-
-      <.sub_menu_button
-        bsname={@view_colour}
         icon={Teiserver.Moderation.ReportLib.icon()}
         active={@active == "reports"}
         url={~p"/moderation/report"}

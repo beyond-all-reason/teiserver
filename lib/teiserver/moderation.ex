@@ -18,7 +18,6 @@ defmodule Teiserver.Moderation do
   alias Teiserver.Moderation.ProposalVoteLib
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Moderation.Report
-  alias Teiserver.Moderation.ReportGroupLib
   alias Teiserver.Moderation.ReportLib
   alias Teiserver.Moderation.Response
   alias Teiserver.Moderation.ResponseLib
@@ -253,66 +252,6 @@ defmodule Teiserver.Moderation do
   def change_report(%Report{} = report) do
     Report.changeset(report, %{})
   end
-
-  def create_report_group_and_report(report_params) do
-    report_group = get_or_make_report_group(report_params.target_id, report_params.match_id)
-
-    report_params =
-      Map.merge(report_params, %{
-        report_group_id: report_group.id
-      })
-
-    case create_report(report_params) do
-      {:ok, report} ->
-        {:ok, report_group} =
-          update_report_group(report_group, %{
-            report_count: report_group.report_count + 1
-          })
-
-        {:ok, report_group, report}
-
-      result ->
-        result
-    end
-  end
-
-  @spec list_report_groups() :: [ComplexServerEventType.t()]
-  defdelegate list_report_groups(), to: ReportGroupLib
-
-  @spec list_report_groups(list) :: [ComplexServerEventType.t()]
-  defdelegate list_report_groups(args), to: ReportGroupLib
-
-  @spec count_report_groups(list) :: integer()
-  defdelegate count_report_groups(args), to: ReportGroupLib
-
-  @spec get_report_group!(non_neg_integer) :: ComplexServerEventType.t()
-  defdelegate get_report_group!(id), to: ReportGroupLib
-
-  @spec get_report_group!(non_neg_integer, list) :: ComplexServerEventType.t()
-  defdelegate get_report_group!(id, args), to: ReportGroupLib
-
-  @spec create_report_group() :: {:ok, ComplexServerEventType.t()} | {:error, Ecto.Changeset}
-  defdelegate create_report_group(), to: ReportGroupLib
-
-  @spec create_report_group(map) :: {:ok, ComplexServerEventType.t()} | {:error, Ecto.Changeset}
-  defdelegate create_report_group(attrs), to: ReportGroupLib
-
-  @spec update_report_group(ComplexServerEventType.t(), map) ::
-          {:ok, ComplexServerEventType.t()} | {:error, Ecto.Changeset}
-  defdelegate update_report_group(report_group, attrs), to: ReportGroupLib
-
-  @spec delete_report_group(ComplexServerEventType) ::
-          {:ok, ComplexServerEventType} | {:error, Ecto.Changeset}
-  defdelegate delete_report_group(report_group), to: ReportGroupLib
-
-  @spec change_report_group(ComplexServerEventType) :: Ecto.Changeset
-  defdelegate change_report_group(report_group), to: ReportGroupLib
-
-  @spec change_report_group(ComplexServerEventType, map) :: Ecto.Changeset
-  defdelegate change_report_group(report_group, attrs), to: ReportGroupLib
-
-  @spec get_or_make_report_group(T.userid(), T.match_id() | nil) :: ReportGroup.t()
-  defdelegate get_or_make_report_group(target_id, match_id), to: ReportGroupLib
 
   @spec response_query(List.t()) :: Ecto.Query.t()
   def response_query(args) do
