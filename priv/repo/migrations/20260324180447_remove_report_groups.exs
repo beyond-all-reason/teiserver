@@ -13,7 +13,6 @@ defmodule Teiserver.Repo.Migrations.RemoveReportGroups do
     drop table(:moderation_report_groups), mode: :cascade
     drop table(:moderation_report_group_votes)
     drop table(:moderation_report_group_messages)
-
   end
 
   def down do
