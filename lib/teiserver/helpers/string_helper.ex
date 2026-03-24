@@ -151,4 +151,14 @@ defmodule Teiserver.Helper.StringHelper do
     |> String.split("\n")
     |> Enum.map(&String.trim/1)
   end
+
+  @doc """
+  Gets the domain from an email address. For example, "user@example.com"
+  would return "example.com".
+  """
+  @spec get_email_domain(String.t()) :: String.t()
+  def get_email_domain(email) do
+    [_first | rest] = String.split(email, "@")
+    Enum.join(rest, "")
+  end
 end
