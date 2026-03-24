@@ -81,27 +81,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
      |> assign(:total_connected_clients, data.total_clients_connected)}
   end
 
-  @spec handle_info({:discord_bridge_restart_result, atom()}, Socket.t()) ::
-          {:noreply, Socket.t()}
-  def handle_info({:discord_bridge_restart_result, status}, socket) do
-    {flash_type, message} =
-      case status do
-        :restarted ->
-          {:info, "Discord Bridge restarted. Manual chat test recommended."}
-
-        :disabled_by_configuration ->
-          {:error, "Discord Bridge is disabled in your configuration."}
-
-        :failed_to_restart ->
-          {:error, "Failed to restart the Discord Bridge. Check logs."}
-
-        _unknown ->
-          {:error, "An unexpected status was received. Check logs"}
-      end
-
-    {:noreply, put_flash(socket, flash_type, message)}
-  end
-
   @impl Phoenix.LiveView
   def handle_event("check-consuls", _event, socket) do
     Coordinator.start_all_consuls()
@@ -138,8 +117,21 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
   @spec handle_event(String.t(), map(), Socket.t()) :: {:noreply, Socket.t()}
   def handle_event("restart-discord-bridge", _event, socket) do
-    DiscordSystem.restart(self())
-    {:noreply, socket}
+    restart_status = DiscordSystem.restart() |> Task.await()
+
+    {flash_type, message} =
+      case restart_status do
+        :disabled_by_configuration ->
+          {:error, "Discord Bridge is disabled in your configuration."}
+
+        {:ok, pid} when is_pid(pid) ->
+          {:info, "Discord Bridge restarted. Manual chat test recommended."}
+
+        _other ->
+          {:error, "An unexpected status was received. Check logs"}
+      end
+
+    {:noreply, put_flash(socket, flash_type, message)}
   end
 
   @spec update_policies(Socket.t()) :: Socket.t()
