@@ -56,14 +56,9 @@ is_moderator = allow?(@conn, "Moderator") %>
             <thead>
               <tr>
                 <th colspan="2">Name</th>
-                <%= if is_moderator do %>
-                  <th>Email</th>
-                <% end %>
+                <th>Email</th>
                 <th>Client</th>
                 <th>Status</th>
-                <%= if is_moderator do %>
-                  <th>HW</th>
-                <% end %>
                 <th>Roles</th>
                 <th>Registered</th>
 
@@ -81,26 +76,12 @@ is_moderator = allow?(@conn, "Moderator") %>
                     {central_component("icon", icon: user.icon)}
                   </td>
                   <td>{user.name}</td>
-                  <%= if is_moderator do %>
-                    <td>{user.email}</td>
-                  <% end %>
+                  <td>{get_email_domain(user.email)}</td>
                   <td>{user_stats["lobby_client"]}</td>
 
                   <td>
                     <TeiserverWeb.UserComponents.status_icon user={user} />
                   </td>
-
-                  <%= if is_moderator do %>
-                    <td>
-                      <%= if user_stats["hardware:cpuinfo"] != "" and user_stats["hardware:cpuinfo"] != nil do %>
-                        {user_stats["hardware:cpuinfo"]}
-                        <br />
-                        {user_stats["hardware:gpuinfo"]}
-                      <% else %>
-                        &nbsp;
-                      <% end %>
-                    </td>
-                  <% end %>
 
                   <td>
                     {if Enum.member?(user.roles || [], "Trusted"), do: "Trusted "}
