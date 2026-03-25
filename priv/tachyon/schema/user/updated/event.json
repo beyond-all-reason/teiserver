@@ -52,9 +52,7 @@
                                     "enum": [
                                         "contributor",
                                         "admin",
-                                        "moderator",
-                                        "tournament_winner",
-                                        "tournament_caster"
+                                        "moderator"
                                     ]
                                 },
                                 "uniqueItems": true

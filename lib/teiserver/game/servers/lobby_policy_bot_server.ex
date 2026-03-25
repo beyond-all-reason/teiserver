@@ -164,7 +164,6 @@ defmodule Teiserver.Game.LobbyPolicyBotServer do
         String.contains?(l.name, "ENGINE TEST") == false and
           l.passworded == false and
           l.locked == false and
-          l.tournament == false and
           l.in_progress == false and
           not String.contains?(l.name, "ENGINE TEST")
       end)

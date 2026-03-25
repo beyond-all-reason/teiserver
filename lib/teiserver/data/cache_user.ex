@@ -1141,9 +1141,6 @@ defmodule Teiserver.CacheUser do
     # Thresholds should match what is on the website:
     # https://www.beyondallreason.info/guide/rating-and-lobby-balance#rank-icons
     cond do
-      Auth.has_any_role?(userid, ["Tournament winner"]) ->
-        7
-
       Auth.has_any_role?(userid, ~w(Core Contributor)) and
           !Account.hide_contributor_rank?(userid) ->
         6

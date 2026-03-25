@@ -168,15 +168,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   defp filter_lobbies(lobbies, %{assigns: %{moderator: moderator}} = _socket) do
     if moderator do
       lobbies
-      |> Enum.reject(fn lobby ->
-        lobby.tournament
-      end)
     else
       lobbies
       |> Enum.reject(fn lobby ->
         lobby.locked or
-          lobby.passworded or
-          lobby.tournament
+          lobby.passworded
       end)
     end
   end

@@ -335,13 +335,6 @@ defmodule TeiserverWeb.Router do
     end
   end
 
-  scope "/tournament", TeiserverWeb.TournamentLive, as: :tournament do
-    pipe_through([:browser, :app_layout, :protected])
-
-    live("/lobbies", Index, :index)
-    live("/lobbies/show/:id", Show, :show)
-  end
-
   scope "/teiserver/account", TeiserverWeb.Account.PartyLive, as: :ts_game do
     pipe_through([:browser, :app_layout, :protected])
 

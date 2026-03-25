@@ -77,9 +77,6 @@ defmodule TeiserverWeb.Report.ReportController do
         "open_skill" ->
           Teiserver.Account.OpenSkillReport
 
-        "tournament" ->
-          Teiserver.Account.TournamentReport
-
         "microblog" ->
           Teiserver.Communication.MicroblogReport
 
