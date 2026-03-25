@@ -453,7 +453,7 @@ defmodule Teiserver.TeiserverTestLib do
       },
       params
     )
-    |> Moderation.create_report_group_and_report()
+    |> Moderation.create_report()
   end
 
   def teiserver_seed do

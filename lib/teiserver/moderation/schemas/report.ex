@@ -15,7 +15,6 @@ defmodule Teiserver.Moderation.Report do
     belongs_to :match, Teiserver.Battle.Match
     field :relationship, :string
     belongs_to :result, Teiserver.Moderation.Action
-    belongs_to :report_group, Teiserver.Moderation.ReportGroup
 
     has_many :responses, Teiserver.Moderation.Response
 
@@ -31,7 +30,7 @@ defmodule Teiserver.Moderation.Report do
     struct
     |> cast(
       params,
-      ~w(reporter_id target_id type sub_type extra_text match_id discord_message_id relationship result_id closed report_group_id)a
+      ~w(reporter_id target_id type sub_type extra_text match_id discord_message_id relationship result_id closed)a
     )
     |> validate_required(~w(reporter_id target_id type sub_type closed)a)
   end

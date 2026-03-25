@@ -141,13 +141,6 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
       [ids]
     )
 
-    # Update report groups
-    SQL.query!(
-      Repo,
-      "UPDATE moderation_report_groups SET match_id = NULL WHERE match_id = ANY($1)",
-      [ids]
-    )
-
     # Match specific things we want to delete
     SQL.query!(
       Repo,

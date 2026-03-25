@@ -179,12 +179,6 @@ defmodule Teiserver.Moderation.ActionLib do
 
   def preload(query, preloads) do
     query = if :target in preloads, do: _preload_target(query), else: query
-    query = if :report_groups in preloads, do: _preload_report_groups(query), else: query
-
-    query =
-      if :report_group_reports_and_reporters in preloads,
-        do: _preload_report_group_reports_and_reporters(query),
-        else: query
 
     query
   end
@@ -194,22 +188,6 @@ defmodule Teiserver.Moderation.ActionLib do
     from actions in query,
       left_join: targets in assoc(actions, :target),
       preload: [target: targets]
-  end
-
-  @spec _preload_report_groups(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_report_groups(query) do
-    from actions in query,
-      left_join: report_groups in assoc(actions, :report_groups),
-      preload: [report_groups: report_groups]
-  end
-
-  @spec _preload_report_group_reports_and_reporters(Ecto.Query.t()) :: Ecto.Query.t()
-  def _preload_report_group_reports_and_reporters(query) do
-    from actions in query,
-      left_join: report_groups in assoc(actions, :report_group),
-      left_join: reports in assoc(report_groups, :reports),
-      left_join: reporters in assoc(reports, :reporter),
-      preload: [report_group: {report_groups, reports: {reports, reporter: reporters}}]
   end
 
   def generate_discord_message_text(nil), do: nil
