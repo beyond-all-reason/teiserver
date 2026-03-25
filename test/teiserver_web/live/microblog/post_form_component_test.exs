@@ -7,9 +7,12 @@ defmodule TeiserverWeb.Microblog.PostFormComponentTest do
 
   use TeiserverWeb.ConnCase
 
-  test "create_post works with or without poster_alias" do
+  setup do
     user = AccountFixtures.user_fixture()
+    %{user: user}
+  end
 
+  test "create_post works with or without poster_alias", %{user: user} do
     post_params = %{
       "contents" => "test",
       "discord_channel_id" => "",
@@ -35,9 +38,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponentTest do
     assert result.poster_alias == "Jenny"
   end
 
-  test "Get discord text when discord id present" do
-    user = AccountFixtures.user_fixture()
-
+  test "Get discord text when discord id present", %{user: user} do
     post_params = %{
       "contents" => "test",
       "discord_channel_id" => "",
@@ -61,9 +62,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponentTest do
     assert String.contains?(result, "Posted by <@mydiscordname>")
   end
 
-  test "Get discord text when discord id not present and alias is present" do
-    user = AccountFixtures.user_fixture()
-
+  test "Get discord text when discord id not present and alias is present", %{user: user} do
     post_params = %{
       "contents" => "test",
       "discord_channel_id" => "",
@@ -87,9 +86,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponentTest do
     assert String.contains?(result, "Posted by contributoralias")
   end
 
-  test "Get discord text when discord id not present and alias not present" do
-    user = AccountFixtures.user_fixture()
-
+  test "Get discord text when discord id not present and alias not present", %{user: user} do
     post_params = %{
       "contents" => "test",
       "discord_channel_id" => "",
