@@ -1,7 +1,7 @@
 defmodule Teiserver.Repo.Migrations.RemoveReportGroups do
   use Ecto.Migration
 
-  def up do
+  def change do
     alter table(:moderation_actions) do
       remove :report_group_id
     end
@@ -13,9 +13,5 @@ defmodule Teiserver.Repo.Migrations.RemoveReportGroups do
     drop table(:moderation_report_groups), mode: :cascade
     drop table(:moderation_report_group_votes)
     drop table(:moderation_report_group_messages)
-  end
-
-  def down do
-    raise "Irreversible migration: cannot un-delete moderation_report_groups"
   end
 end

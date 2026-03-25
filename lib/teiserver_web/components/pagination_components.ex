@@ -31,6 +31,20 @@ defmodule TeiserverWeb.PaginationComponents do
         class="mt-3"
       />
 
+      # Full pagination with search parameter preservation (LiveView)
+      <.pagination
+        page={@page}
+        total_pages={@total_pages}
+        base_url="/moderation/overwatch"
+        limit={@limit}
+        total_count={@total_count}
+        current_count={@current_count}
+        include_params={["actioned-filter", "closed-filter", "kind-filter", "timeframe-filter", "target_id", "limit"]}
+        current_params={@filters}
+        show_go_to={@total_pages > 5}
+        class="mt-3"
+      />
+
   ## Options
 
   * `:page` - Current page number (0-based)
@@ -332,6 +346,11 @@ defmodule TeiserverWeb.PaginationComponents do
 
       # Build URL with no overrides or exclusions
       build_pagination_url("/admin/users", params, ["limit", "kind"])
+
+      # Build URL for LiveView push_patch (preserving all search parameters)
+      build_pagination_url("/moderation/overwatch", filters,
+        ["actioned-filter", "closed-filter", "kind-filter", "timeframe-filter", "target_id", "limit"],
+        %{"page" => "1"})
 
   ## Behavior
 
