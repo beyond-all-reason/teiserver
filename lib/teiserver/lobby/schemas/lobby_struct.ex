@@ -49,7 +49,6 @@ defmodule Teiserver.Lobby.LobbyStruct do
     # External references
     lobby_policy_id: nil,
     queue_id: nil,
-    tournament_id: nil,
 
     # Consul server stuff
     gatekeeper: "default",

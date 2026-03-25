@@ -28,7 +28,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password? tournament)
+  @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password?)
   @boss_commands ~w(balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec lock unlock makebalance set-config-teaser)
   @admin_commands ~w(shuffle)
@@ -76,7 +76,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_call(:get_chobby_extra_data, _from, state) do
     keys =
-      ~w(lobby_policy_id tournament_lobby gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_uncertainty_to_play maximum_uncertainty_to_play minimum_skill_to_play maximum_skill_to_play welcome_message player_limit)a
+      ~w(lobby_policy_id gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_uncertainty_to_play maximum_uncertainty_to_play minimum_skill_to_play maximum_skill_to_play welcome_message player_limit)a
 
     result =
       state
@@ -989,10 +989,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client.shadowbanned ->
         {false, "Err"}
 
-      state.tournament_lobby == true and
-          not Auth.has_any_role?(userid, ["Caster", "TourneyPlayer", "Tournament player"]) ->
-        {false, "Tournament game"}
-
       block_status == :blocking ->
         Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocking")
         {false, "You are blocking too many players in this lobby"}
@@ -1379,7 +1375,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       lobby_id: lobby_id,
       host_id: founder_id,
       lobby_policy_id: nil,
-      tournament_lobby: false,
       gatekeeper: "default",
       minimum_rating_to_play: 0,
       maximum_rating_to_play: 1000,

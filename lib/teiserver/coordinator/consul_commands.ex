@@ -9,7 +9,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.CacheUser
   alias Teiserver.Chat.WordLib
   alias Teiserver.Client
-  alias Teiserver.Config
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.ConsulServer
   alias Teiserver.Coordinator.RikerssMemes
@@ -86,11 +85,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "Host bosses are: #{boss_names}"
       end
 
-    tourney_mode =
-      if state.tournament_lobby do
-        "Tournament mode is enabled"
-      end
-
     # Party info
     parties =
       Battle.list_lobby_players(state.lobby_id)
@@ -131,7 +125,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         "Team size and count are: #{state.host_teamsize} and #{state.host_teamcount}",
         "Balance algorithm is: #{state.balance_algorithm}",
         boss_string,
-        tourney_mode,
         "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
         play_level_bounds,
         play_rank_bounds
@@ -236,49 +229,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
 
     state
-  end
-
-  def handle_command(%{command: "tournament", senderid: senderid, remaining: rem} = cmd, state) do
-    if Config.get_site_config_cache("teiserver.Allow tournament command") do
-      if Auth.has_any_role?(senderid, [
-           "Moderator",
-           "Caster",
-           "Tournament player",
-           "TourneyPlayer"
-         ]) do
-        if rem |> String.trim() |> String.downcase() == "off" do
-          Battle.update_lobby_values(state.lobby_id, %{tournament: false})
-          state = %{state | tournament_lobby: false}
-          ConsulServer.say_command(cmd, state)
-        else
-          Battle.update_lobby_values(state.lobby_id, %{tournament: true})
-          # ChatLib.say(senderid, "!preset tourney", state.lobby_id)
-          send(self(), :recheck_membership)
-          state = %{state | tournament_lobby: true}
-          ConsulServer.say_command(cmd, state)
-        end
-      else
-        ChatLib.sayprivateex(
-          state.coordinator_id,
-          senderid,
-          "Only casters, tournament players and moderators can set tournament mode.",
-          state.lobby_id
-        )
-
-        state
-      end
-    else
-      Battle.update_lobby_values(state.lobby_id, %{tournament: false})
-
-      ChatLib.sayprivateex(
-        state.coordinator_id,
-        senderid,
-        "Tournament mode has been removed from this lobby.",
-        state.lobby_id
-      )
-
-      %{state | tournament_lobby: false}
-    end
   end
 
   def handle_command(%{command: "afks", senderid: senderid} = cmd, state) do

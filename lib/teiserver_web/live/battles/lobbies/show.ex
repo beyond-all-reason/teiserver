@@ -89,9 +89,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       lobby == nil ->
         index_redirect(socket)
 
-      lobby.tournament ->
-        index_redirect(socket)
-
       (lobby.locked or lobby.passworded) and not allow?(socket, "Moderator") ->
         index_redirect(socket)
 

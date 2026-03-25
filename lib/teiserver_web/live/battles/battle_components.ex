@@ -48,15 +48,6 @@ defmodule TeiserverWeb.Battle.BattleComponents do
       >
         Leaderboard
       </.sub_menu_button>
-
-      <.sub_menu_button
-        bsname={@view_colour}
-        icon="fa-trophy"
-        active={@active == "tournaments"}
-        url={~p"/tournament/lobbies"}
-      >
-        Tournaments
-      </.sub_menu_button>
     </div>
     """
   end

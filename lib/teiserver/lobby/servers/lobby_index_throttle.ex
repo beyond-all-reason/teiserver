@@ -17,9 +17,6 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
         :public ->
           state.public_lobby_list
 
-        :tournament ->
-          state.tournament_lobby_list
-
         _unknown ->
           Logger.error("No get_cache handler for #{cache}")
           []
@@ -48,7 +45,7 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
         lobby =
           Map.take(
             lobby,
-            ~w(id name map_name passworded locked public tournament in_progress member_count player_count)a
+            ~w(id name map_name passworded locked public in_progress member_count player_count)a
           )
 
         Map.merge(lobby, %{
@@ -63,20 +60,12 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
       complete_list
       |> Enum.reject(fn lobby ->
         lobby.passworded or
-          lobby.locked or
-          lobby.tournament
-      end)
-
-    tournament_list =
-      complete_list
-      |> Enum.filter(fn lobby ->
-        lobby.tournament
+          lobby.locked
       end)
 
     %{
       complete_lobby_list: complete_list,
-      public_lobby_list: public_list,
-      tournament_lobby_list: tournament_list
+      public_lobby_list: public_list
     }
   end
 
@@ -110,7 +99,6 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
      %{
        complete_lobby_list: [],
        public_lobby_list: [],
-       tournament_lobby_list: [],
        last_update: System.system_time(:second)
      }}
   end

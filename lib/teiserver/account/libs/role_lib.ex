@@ -97,12 +97,11 @@ defmodule Teiserver.Account.RoleLib do
     # Privileged
     %{name: "VIP", colour: "#AA8833", icon: "fa-solid fa-sparkles", contains: ~w()},
     %{name: "Streamer", colour: "#660066", icon: "fa-brands fa-twitch", contains: ~w()},
-    %{name: "Tournament", colour: "#0000AA", icon: "fa-solid fa-trophy", contains: ~w()},
     %{
       name: "Caster",
       colour: "#660066",
       icon: "fa-solid fa-microphone-lines",
-      contains: ~w(Streamer Tournament),
+      contains: ~w(Streamer),
       badge: true
     },
     %{name: "Donor", colour: "#0066AA", icon: "fa-solid fa-euro", contains: ~w(), badge: true},
@@ -277,7 +276,7 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec privileged_roles :: [String.t()]
   def privileged_roles do
-    ~w(Bot VIP Caster Donor Tournament)
+    ~w(Bot VIP Caster Donor)
   end
 
   @spec property_roles :: [String.t()]

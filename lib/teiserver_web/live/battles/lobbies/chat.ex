@@ -1,7 +1,6 @@
 defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Chat
@@ -51,15 +50,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
     cond do
       lobby == nil ->
-        index_redirect(socket)
-
-      lobby.tournament and
-          not Auth.has_any_role?(current_user.id, [
-            "Moderator",
-            "Caster",
-            "TourneyPlayer",
-            "Tournament player"
-          ]) ->
         index_redirect(socket)
 
       (lobby.locked or lobby.passworded) and not allow?(socket, "Moderator") ->

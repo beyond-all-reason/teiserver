@@ -330,16 +330,6 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "teiserver.Allow tournament command",
-      section: "Lobbies",
-      type: "boolean",
-      permissions: ["Admin"],
-      description:
-        "When set to true, the $tournament command will be able to be used. When disabled it can still be used but only to turn off tournament mode.",
-      default: false
-    })
-
-    add_site_config_type(%{
       key: "teiserver.Default player limit",
       section: "Lobbies",
       type: "integer",

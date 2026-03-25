@@ -11,7 +11,6 @@
   {"lib/teiserver/account/reports/population_report.ex", :unused_fun},
   {"lib/teiserver/account/reports/time_compare_report.ex", :invalid_contract},
   {"lib/teiserver/account/reports/time_compare_report.ex", :call},
-  {"lib/teiserver/account/reports/tournament_report.ex", :invalid_contract},
   {"lib/teiserver/account/servers/party_server.ex", :no_return},
   {"lib/teiserver/account/servers/party_server.ex", :call},
   {"lib/teiserver/battle.ex", :call},
