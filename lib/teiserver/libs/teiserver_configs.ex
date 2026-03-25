@@ -76,15 +76,6 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "teiserver.Inform of new accolades",
-      section: "Accolades",
-      type: "boolean",
-      permissions: ["Server"],
-      description: "When set to true, players will be informed when they get a new accolade",
-      default: false
-    })
-
-    add_site_config_type(%{
       key: "teiserver.Accolade gift limit",
       section: "Accolades",
       type: "integer",
