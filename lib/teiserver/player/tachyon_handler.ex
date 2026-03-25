@@ -1082,6 +1082,8 @@ defmodule Teiserver.Player.TachyonHandler do
         "Contributor" -> "contributor"
         "Admin" -> "admin"
         "Moderator" -> "moderator"
+        "Caster" -> "tournament_caster"
+        "Tournament winner" -> "tournament_winner"
         _other -> nil
       end
     end)
