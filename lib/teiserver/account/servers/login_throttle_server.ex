@@ -228,10 +228,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   # there aren't many of these users, so allowing them doesn't have a big impact
   @spec categorise_user(T.userid()) :: atom
   defp categorise_user(userid) do
-    user = Account.get_user_by_id(userid)
-    bypass_roles = ["Bot", "Contributor", "VIP", "BAR+"]
-
-    if Auth.has_any_role?(user, bypass_roles) do
+    if Auth.has_any_role?(userid, ["Bot", "Contributor", "VIP", "BAR+"]) do
       :instant
     else
       :standard

@@ -559,6 +559,7 @@ defmodule Teiserver.Lobby do
           {:failure, String.t()} | true
   def server_allows_join?(userid, lobby_id, password \\ nil) do
     lobby = get_lobby(lobby_id)
+    db_user = Account.get_user(userid)
     user = Account.get_user_by_id(userid)
 
     # In theory this would never happen but it's possible to see this at startup when
@@ -578,15 +579,17 @@ defmodule Teiserver.Lobby do
 
     ignore_password =
       Enum.any?([
-        Auth.admin?(user) or Auth.moderator?(user),
-        Enum.member?(user.roles, "Caster"),
+        Auth.admin?(db_user),
+        Auth.moderator?(db_user),
+        Enum.member?(db_user.roles, "Caster"),
         consul_reason in [:override_approve, :allow_friends]
       ])
 
     ignore_locked =
       Enum.any?([
-        Auth.admin?(user) or Auth.moderator?(user),
-        Enum.member?(user.roles, "Caster"),
+        Auth.admin?(db_user),
+        Auth.moderator?(db_user),
+        Enum.member?(db_user.roles, "Caster"),
         consul_reason == :override_approve
       ])
 
@@ -606,7 +609,7 @@ defmodule Teiserver.Lobby do
       consul_response == false ->
         {:failure, consul_reason}
 
-      CacheUser.restricted?(user, ["All lobbies", "Joining existing lobbies"]) ->
+      CacheUser.restricted?(db_user, ["All lobbies", "Joining existing lobbies"]) ->
         {:failure, "You are currently banned from joining lobbies"}
 
       true ->

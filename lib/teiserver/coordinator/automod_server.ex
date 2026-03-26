@@ -3,6 +3,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Config
@@ -136,27 +137,26 @@ defmodule Teiserver.Coordinator.AutomodServer do
   # Internal functions
   @spec check_wrapper(T.userid()) :: String.t()
   defp check_wrapper(userid) do
-    case Account.get_user_by_id(userid) do
-      nil ->
+    user = Account.get_user(userid)
+
+    cond do
+      user == nil ->
         "No user"
 
-      %{bot: true} ->
+      Auth.is_bot?(user) ->
         "Bot account"
 
-      %{moderator: true} ->
+      Auth.moderator?(user) ->
         "Moderator account"
 
-      user ->
-        cond do
-          Enum.member?(user.roles, "Developer") ->
-            "Developer account"
+      Auth.contributor?(user) ->
+        "Developer account"
 
-          Enum.member?(user.roles, "Trusted") ->
-            "Trusted account"
+      Enum.member?(user.roles, "Trusted") ->
+        "Trusted account"
 
-          true ->
-            do_check(user)
-        end
+      true ->
+        do_check(user)
     end
   end
 

@@ -1,5 +1,6 @@
 defmodule Teiserver.SpringAuthTest do
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.BitParse
   alias Teiserver.CacheUser
@@ -261,7 +262,7 @@ CLIENTS test_room #{user.name}\n"
     hash = "-1540855590"
 
     # Give user Bot role so they can manage battle
-    UserCacheLib.update_user(%{user1 | roles: ["Bot" | user1.roles]}, persist: false)
+    Auth.add_roles(user1.id, ["Bot"])
 
     _send_raw(
       socket1,

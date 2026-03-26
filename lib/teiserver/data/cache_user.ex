@@ -168,7 +168,7 @@ defmodule Teiserver.CacheUser do
           Logger.error("Error sending new user email - #{user.email} - #{Kernel.inspect(error)}")
 
         :no_verify ->
-          Account.verify_user(user)
+          Account.verify_user(user.id)
           :ok
 
         :ok ->
@@ -194,10 +194,10 @@ defmodule Teiserver.CacheUser do
 
         params =
           user_register_params_with_md5(bot_name, host.email, host.password, %{
-            "bot" => true,
-            "roles" => ["Bot"]
+            "bot" => true
           })
           |> Map.merge(%{
+            roles: ["Verified", "Bot"],
             email: String.replace(host.email, "@", ".bot#{bot_name}@")
           })
 
@@ -421,24 +421,25 @@ defmodule Teiserver.CacheUser do
 
   @spec send_direct_message(T.userid(), T.userid(), list) :: :ok
   def send_direct_message(sender_id, to_id, message_parts) when is_list(message_parts) do
-    sender = get_user_by_id(sender_id)
     msg_str = Enum.join(message_parts, "\n")
 
-    blacklisted = Auth.is_bot?(sender) == false and WordLib.blacklisted_phrase?(msg_str)
+    sender_bot? = Auth.is_bot?(sender_id)
+    receiver_bot? = Auth.is_bot?(to_id)
+    blacklisted? = sender_bot? == false and WordLib.blacklisted_phrase?(msg_str)
 
     allowed =
       cond do
-        blacklisted -> false
-        restricted?(sender, ["All chat", "Direct chat"]) -> false
+        blacklisted? -> false
+        get_user_by_id(sender_id) |> restricted?(["All chat", "Direct chat"]) -> false
         true -> true
       end
 
-    if blacklisted do
+    if blacklisted? do
       shadowban_user(sender_id)
     end
 
     if allowed do
-      if Auth.is_bot?(to_id) do
+      if receiver_bot? do
         message_parts
         |> Enum.each(fn line ->
           if String.starts_with?(line, "!clan ") do
@@ -455,7 +456,7 @@ defmodule Teiserver.CacheUser do
       end
 
       # Persist but only if no bots are involved
-      if not Auth.is_bot?(to_id) and not Auth.is_bot?(sender_id) do
+      if not receiver_bot? and not sender_bot? do
         Chat.create_direct_message(%{
           to_id: to_id,
           from_id: sender_id,
@@ -592,34 +593,6 @@ defmodule Teiserver.CacheUser do
     )
 
     :ok
-  end
-
-  @spec add_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
-  def add_roles(nil, _roles), do: nil
-  def add_roles(_user, []), do: nil
-  def add_roles(_user, nil), do: nil
-
-  def add_roles(userid, roles) when is_integer(userid),
-    do: add_roles(get_user_by_id(userid), roles)
-
-  def add_roles(user, roles) do
-    new_roles = Enum.uniq(roles ++ user.roles)
-    update_user(%{user | roles: new_roles}, persist: true)
-  end
-
-  @spec remove_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
-  def remove_roles(nil, _roles), do: nil
-  def remove_roles(_user, []), do: nil
-
-  def remove_roles(userid, roles) when is_integer(userid),
-    do: remove_roles(get_user_by_id(userid), roles)
-
-  def remove_roles(user, removed_roles) do
-    new_roles =
-      user.roles
-      |> Enum.reject(fn r -> Enum.member?(removed_roles, r) end)
-
-    update_user(%{user | roles: new_roles}, persist: true)
   end
 
   @spec create_token(Account.User.t()) :: String.t()
@@ -799,7 +772,7 @@ defmodule Teiserver.CacheUser do
           user.name != username ->
             {:error, "Username is case sensitive, try '#{user.name}'"}
 
-          not Auth.is_bot?(user) and login_flood_check(user.id) == :block ->
+          not Auth.is_bot?(db_user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
           Enum.member?(["", "0", nil], lobby_hash) == true and not Auth.is_bot?(user) ->
@@ -847,7 +820,7 @@ defmodule Teiserver.CacheUser do
 
             # Okay, we're good, what's capacity looking like?
             cond do
-              Auth.is_bot?(user) ->
+              Auth.is_bot?(db_user) ->
                 do_login(user, ip, lobby, lobby_hash)
 
               Config.get_site_config_cache("system.Use login throttle") ->
@@ -857,7 +830,7 @@ defmodule Teiserver.CacheUser do
                   {:error, "Queued", user.id, lobby, lobby_hash}
                 end
 
-              not Auth.has_any_role?(user, ["VIP", "Contributor"]) and
+              not Auth.has_any_role?(db_user, ["VIP", "Contributor"]) and
                   server_capacity() <= 0 ->
                 {:error, "The server is currently full, please try again in a minute or two."}
 
@@ -907,7 +880,7 @@ defmodule Teiserver.CacheUser do
 
         {:error, @suspended_string}
 
-      not Auth.verified?(user) ->
+      not Auth.verified?(user.id) ->
         # Log them in to save some details we'd not otherwise get
         do_login(user, ip, lobby_client, lobby_hash)
 

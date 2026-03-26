@@ -67,7 +67,6 @@
   {"lib/teiserver/lobby.ex", :unknown_type},
   {"lib/teiserver/lobby.ex", :call},
   {"lib/teiserver/lobby.ex", :pattern_match},
-  {"lib/teiserver/lobby.ex", :exact_eq},
   {"lib/teiserver/lobby.ex", :invalid_contract},
   {"lib/teiserver/lobby/commands/explain_command.ex", :no_return},
   {"lib/teiserver/lobby/commands/explain_command.ex", :call},

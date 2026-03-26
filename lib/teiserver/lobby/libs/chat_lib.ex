@@ -72,11 +72,11 @@ defmodule Teiserver.Lobby.ChatLib do
     msg = trim_message(msg)
     user = Account.get_user_by_id(userid)
 
-    if Auth.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
+    if Auth.is_bot?(userid) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = Auth.is_bot?(userid) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       CacheUser.shadowban_user(user.id)
@@ -138,11 +138,11 @@ defmodule Teiserver.Lobby.ChatLib do
     msg = trim_message(msg)
     user = CacheUser.get_user_by_id(userid)
 
-    if Auth.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
+    if Auth.is_bot?(userid) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = Auth.is_bot?(userid) == false and WordLib.blacklisted_phrase?(msg)
 
     if blacklisted do
       CacheUser.shadowban_user(user.id)

@@ -51,7 +51,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         true
 
       # Allow all except Admin only commands for moderators
-      Auth.moderator?(user) and not Enum.member?(@admin_commands, cmd.command) ->
+      Auth.moderator?(senderid) and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       not Enum.member?(@always_allow ++ @forward_to_consul, cmd.command) ->
