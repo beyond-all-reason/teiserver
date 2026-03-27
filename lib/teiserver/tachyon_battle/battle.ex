@@ -210,6 +210,11 @@ defmodule Teiserver.TachyonBattle.Battle do
       {_pid, participant} when not is_nil(participant) ->
         {:reply, {:ok, Map.take(state, [:ips, :port])}, state}
 
+      # The engine cannot deal with a total of more than 254 players
+      # https://github.com/beyond-all-reason/RecoilEngine/issues/2850
+      _irrelevant when map_size(state.participants) >= 254 ->
+        {:reply, {:error, :capacity_reached}, state}
+
       {pid, nil} ->
         data = %{battle_id: state.id, user_id: user_id, name: name, password: password}
 
