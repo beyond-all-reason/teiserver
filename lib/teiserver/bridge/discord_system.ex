@@ -34,11 +34,15 @@ defmodule Teiserver.Bridge.DiscordSystem do
 
   @spec restart :: Task.t()
   def restart do
-    if Process.whereis(Teiserver.Bridge.DiscordSupervisor) do
-      DynamicSupervisor.terminate_child(
-        __MODULE__,
-        Process.whereis(Teiserver.Bridge.DiscordSupervisor)
-      )
+    case Process.whereis(Teiserver.Bridge.DiscordSupervisor) do
+      x when is_pid(x) ->
+        DynamicSupervisor.terminate_child(
+          __MODULE__,
+          x
+        )
+
+      _other ->
+        :ok
     end
 
     start()
