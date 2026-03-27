@@ -20,7 +20,7 @@ defmodule Teiserver.Bridge.DiscordSystem do
 
   @spec start :: Task.t()
   def start do
-    Task.async(fn ->
+    Task.Supervisor.async(Teiserver.TaskSupervisor, fn ->
       if Communication.use_discord?() do
         DynamicSupervisor.start_child(
           __MODULE__,
