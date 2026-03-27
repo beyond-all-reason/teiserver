@@ -123,9 +123,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
     {flash_type, message} =
       case restart_status do
-        :disabled_by_configuration ->
-          {:error, "Discord Bridge is disabled in your configuration."}
-
         {:ok, pid} when is_pid(pid) ->
           {:info, "Discord Bridge restarted. Manual chat test recommended."}
 
