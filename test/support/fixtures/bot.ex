@@ -20,7 +20,7 @@ defmodule Teiserver.BotFixtures do
       start_pos_type: :fixed,
       ally_teams: [
         %{
-          teams: [%{user_id: 123, name: "player name", password: "123"}]
+          teams: [%{players: [%{user_id: 123, name: "player name", password: "123"}]}]
         }
       ]
     }

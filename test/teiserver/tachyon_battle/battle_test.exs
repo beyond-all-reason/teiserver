@@ -50,6 +50,31 @@ defmodule Teiserver.TachyonBattle.BattleTest do
 
     Session.reply_add_player(autohost_pid, ref, :ok)
     {:ok, %{port: _port, ips: _ips}} = Task.await(task)
+
+    re_add = Task.async(fn -> Battle.add_player(battle_id, 12345, "playername", "hunter2") end)
+    # battle should remember players added after the start as well
+    {:ok, %{port: _port, ips: _ips}} = Task.await(re_add, 100)
+  end
+
+  test "remember players from start script" do
+    %{battle_id: battle_id, start_script: start_script} = setup_autohost_and_battle()
+
+    player =
+      start_script
+      |> Map.get(:ally_teams)
+      |> hd()
+      |> Map.get(:teams)
+      |> hd()
+      |> Map.get(:players)
+      |> hd()
+
+    task =
+      Task.async(fn ->
+        Battle.add_player(battle_id, player.user_id, player.name, player.password)
+      end)
+
+    # no message to autohost should be required
+    {:ok, %{port: _port, ips: _ips}} = Task.await(task, 100)
   end
 
   # setup a handshaked autohost with some defaults
