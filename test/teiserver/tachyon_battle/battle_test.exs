@@ -1,11 +1,8 @@
 defmodule Teiserver.TachyonBattle.BattleTest do
-  alias ExUnit.Callbacks
-  alias Teiserver.Autohost
   alias Teiserver.Autohost.Session
-  alias Teiserver.Autohost.SessionRegistry
+  alias Teiserver.Autohost.SessionSupervisor
   alias Teiserver.BotFixtures
   alias Teiserver.TachyonBattle, as: Battle
-  alias Teiserver.TachyonBattle.Battle, as: BattleProcess
   use Teiserver.DataCase
   import Teiserver.Support.Polling, only: [poll_until_some: 1]
 
@@ -13,12 +10,7 @@ defmodule Teiserver.TachyonBattle.BattleTest do
 
   describe "start battle" do
     test "happy path" do
-      autohost_id = :rand.uniform(10_000_000)
-      match_id = :rand.uniform(10_000_000)
-      SessionRegistry.register(%{id: autohost_id})
-
-      {:ok, battle_id, _pid} =
-        Battle.start_battle_process(autohost_id, match_id, BotFixtures.start_script())
+      %{battle_id: battle_id} = setup_autohost_and_battle()
 
       poll_until_some(fn -> Battle.lookup(battle_id) end)
     end
@@ -26,75 +18,71 @@ defmodule Teiserver.TachyonBattle.BattleTest do
 
   describe "send message" do
     test "autohost is there" do
-      battle_id = to_string(UUID.uuid4())
-      match_id = :rand.uniform(10_000_000)
-      autohost_id = :rand.uniform(10_000_000)
-
-      autohost_sess_pid =
-        {%{id: autohost_id}, self()}
-        |> Session.child_spec()
-        |> Callbacks.start_link_supervised!()
-
-      Session.update_capacity(autohost_sess_pid, 10, 0)
-
-      assert_receive {:call_client, "autohost/subscribeUpdates", _, ref}
-      send(ref, {ref, %{"status" => "success"}})
-
-      start_script = BotFixtures.start_script()
-
-      {:ok, _battle_pid} =
-        BattleProcess.start_link(%{
-          battle_id: battle_id,
-          match_id: match_id,
-          autohost_id: autohost_id,
-          start_script: start_script
-        })
-
-      pid = self()
-
-      start_task =
-        Task.async(fn ->
-          Autohost.start_battle(autohost_id, battle_id, pid, start_script)
-        end)
-
-      assert_receive {:start_battle, ^battle_id, _start_script}
-
-      Session.reply_start_battle(
-        autohost_sess_pid,
-        battle_id,
-        {:ok, %{ips: ["1.2.3.4"], port: 1234}}
-      )
-
-      task = Task.async(fn -> Battle.send_message(battle_id, "hello") end)
+      %{battle_id: battle_id, autohost_pid: autohost_pid} = setup_autohost_and_battle()
+      msg_task = Task.async(fn -> Battle.send_message(battle_id, "hello") end)
 
       assert_receive {:send_message, ref, %{battle_id: ^battle_id, message: "hello"}}
-
-      Task.await(start_task)
-
-      Session.reply_send_message(autohost_sess_pid, ref, :ok)
-      assert Task.await(task) == :ok
+      Session.reply_send_message(autohost_pid, ref, :ok)
+      Task.await(msg_task)
     end
   end
 
   test "kill battle" do
-    battle_id = to_string(UUID.uuid4())
-    match_id = :rand.uniform(10_000_000)
-    autohost_id = :rand.uniform(10_000_000)
-    SessionRegistry.register(%{id: autohost_id})
-
-    {:ok, _battle_pid} =
-      BattleProcess.start_link(%{
-        battle_id: battle_id,
-        match_id: match_id,
-        autohost_id: autohost_id,
-        start_script: BotFixtures.start_script()
-      })
+    %{battle_id: battle_id, autohost_pid: autohost_pid} = setup_autohost_and_battle()
 
     task = Task.async(fn -> Battle.kill(battle_id) end)
-    assert_receive {:"$gen_call", reply_to, {:kill_battle, ^battle_id}}
-    resp = %{ips: ["1.2.3.4"], port: 1234}
-    GenServer.reply(reply_to, {:ok, resp})
+    assert_receive {:kill_battle, ref, ^battle_id}
+    Session.reply_kill_battle(autohost_pid, ref, :ok)
+    assert Task.await(task) == :ok
+  end
 
-    assert Task.await(task) == {:ok, resp}
+  test "add player" do
+    %{battle_id: battle_id, autohost_pid: autohost_pid} = setup_autohost_and_battle()
+    task = Task.async(fn -> Battle.add_player(battle_id, 12345, "playername", "hunter2") end)
+
+    assert_receive {:add_player, ref,
+                    %{
+                      name: "playername",
+                      user_id: 12345,
+                      password: "hunter2",
+                      battle_id: ^battle_id
+                    }}
+
+    Session.reply_add_player(autohost_pid, ref, :ok)
+    {:ok, %{port: _port, ips: _ips}} = Task.await(task)
+  end
+
+  # setup a handshaked autohost with some defaults
+  defp setup_autohost_and_battle do
+    match_id = :rand.uniform(10_000_000)
+    autohost_id = :rand.uniform(10_000_000)
+
+    {:ok, autohost_pid} = SessionSupervisor.start_session(%{id: autohost_id}, self())
+
+    receive do
+      {:call_client, "autohost/subscribeUpdates", _payload, ref} ->
+        send(ref, {ref, %{"status" => "success"}})
+    end
+
+    send(autohost_pid, {:update_capacity, 10, 0})
+
+    start_task =
+      Task.async(fn ->
+        {:ok, _battle_id, _pid} =
+          Battle.start_battle_process(autohost_id, match_id, BotFixtures.start_script())
+      end)
+
+    assert_receive {:start_battle, battle_id, start_script}
+    resp = %{ips: ["1.2.3.4"], port: 12345}
+    Session.reply_start_battle(autohost_pid, battle_id, {:ok, resp})
+    Task.await(start_task)
+
+    %{
+      match_id: match_id,
+      autohost_id: autohost_id,
+      autohost_pid: autohost_pid,
+      battle_id: battle_id,
+      start_script: start_script
+    }
   end
 end

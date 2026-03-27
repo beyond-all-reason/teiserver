@@ -86,6 +86,10 @@ defmodule Teiserver.TachyonLobby do
   @spec spectate(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   defdelegate spectate(lobby_id, user_id), to: Lobby
 
+  @spec join_battle(id(), T.userid()) ::
+          :ok | {:error, :invalid_lobby | :not_in_lobby | :invalid_battle | term()}
+  defdelegate join_battle(lobby_id, user_id), to: Lobby
+
   @type add_bot_opt ::
           {:name, String.t()} | {:version, String.t()} | {:options, %{String.t() => String.t()}}
   @type add_bot_opts :: [add_bot_opt]

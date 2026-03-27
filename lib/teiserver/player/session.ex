@@ -262,17 +262,17 @@ defmodule Teiserver.Player.Session do
   @doc """
   Let the player know that the lobby they are in as just started a battle
   """
-  @spec lobby_battle_start(
+  @spec lobby_join_battle(
           T.userid(),
           {TachyonBattle.id(), pid()},
           start_data(),
           password :: String.t()
         ) ::
           :ok
-  def lobby_battle_start(user_id, battle_data, battle_start_data, password) do
+  def lobby_join_battle(user_id, battle_data, battle_start_data, password) do
     user_id
     |> via_tuple()
-    |> GenServer.cast({:battle, {:lobby_start, battle_data, battle_start_data, password}})
+    |> GenServer.cast({:battle, {:lobby_join, battle_data, battle_start_data, password}})
   end
 
   @doc """
@@ -551,6 +551,11 @@ defmodule Teiserver.Player.Session do
   @spec lobby_start_battle(T.userid()) :: :ok | {:error, reason :: term}
   def lobby_start_battle(user_id) do
     user_id |> via_tuple() |> GenServer.call({:lobby, :start_battle})
+  end
+
+  @spec lobby_join_battle(T.userid()) :: :ok | {:error, reason :: term}
+  def lobby_join_battle(user_id) do
+    user_id |> via_tuple() |> GenServer.call({:lobby, :join_battle})
   end
 
   @spec subscribe_lobby_list(T.userid()) :: {:ok, %{TachyonLobby.id() => TachyonLobby.overview()}}
@@ -1225,6 +1230,21 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_call({:lobby, :join_battle}, _from, state)
+      when state.lobby == nil,
+      do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :join_battle}, _from, state) do
+    case TachyonLobby.join_battle(state.lobby.id, state.user.id) do
+      # same note as start_battle
+      :ok ->
+        {:reply, :ok, state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+
   def handle_call({:lobby, :subscribe_list}, _from, state) do
     if state.lobby_list_subscription == nil do
       {counter, list} = TachyonLobby.subscribe_updates()
@@ -1402,10 +1422,10 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_cast(
-        {:battle, {:lobby_start, {battle_id, battle_pid}, battle_start_data, password}},
+        {:battle, {:lobby_join, {battle_id, battle_pid}, battle_start_data, password}},
         state
       ) do
-    Logger.info("entering lobby battle #{battle_id}")
+    Logger.info("joining lobby battle #{battle_id}")
 
     case state.lobby do
       nil ->

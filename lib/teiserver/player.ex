@@ -88,16 +88,16 @@ defmodule Teiserver.Player do
   defdelegate battle_start(user_id, battle_id, battle_start_data), to: Player.Session
 
   @doc """
-  Let the player know that the lobby they are in as just started a battle
+  Let the player know that they can join a battle associated with a lobby
   """
-  @spec lobby_battle_start(
+  @spec lobby_join_battle(
           T.userid(),
           {TachyonBattle.id(), pid()},
           start_data(),
           password :: String.t()
         ) ::
           :ok
-  defdelegate lobby_battle_start(user_id, battle_data, battle_start_data, password),
+  defdelegate lobby_join_battle(user_id, battle_data, battle_start_data, password),
     to: Player.Session
 
   @doc """

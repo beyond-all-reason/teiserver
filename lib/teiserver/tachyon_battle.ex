@@ -21,16 +21,18 @@ defmodule Teiserver.TachyonBattle do
   @spec lookup(T.id()) :: pid() | nil
   defdelegate lookup(battle_id), to: TachyonBattle.Registry
 
+  @type connection_info :: TachyonBattle.Battle.connection_info()
+
   @doc """
   Start a battle process and connects it to the given autohost
   """
   @spec start_battle(Bot.id(), Autohost.start_script(), boolean()) ::
-          {:ok, {id(), pid()}, Autohost.start_response()} | {:error, term()}
+          {:ok, {id(), pid()}, connection_info()} | {:error, term()}
   def start_battle(autohost_id, start_script, is_matchmaking) do
     with {:ok, match} <- Battle.create_match_from_start_script(start_script, is_matchmaking),
          {:ok, battle_id, pid} <- start_battle_process(autohost_id, match.id, start_script) do
-      case Autohost.start_battle(autohost_id, battle_id, pid, start_script) do
-        {:ok, data} -> {:ok, {battle_id, pid}, data}
+      case TachyonBattle.Battle.get_connection_info(battle_id) do
+        {:ok, conn_info} -> {:ok, {battle_id, pid}, conn_info}
         x -> x
       end
     end
@@ -49,9 +51,9 @@ defmodule Teiserver.TachyonBattle do
       {:ok, pid, _info} ->
         {:ok, battle_id, pid}
 
-      err ->
+      {:error, err} ->
         Logger.warning("Cannot start battle: #{inspect(err)}")
-        {:error, "cannot start battle: #{inspect(err)}"}
+        {:error, err}
     end
   end
 
@@ -63,6 +65,17 @@ defmodule Teiserver.TachyonBattle do
 
   @spec kill(T.id()) :: :ok | {:error, reason :: term()}
   defdelegate kill(battle_id), to: TachyonBattle.Battle
+
+  @spec add_player(
+          T.id(),
+          Teiserver.Data.Types.userid(),
+          name :: String.t(),
+          password :: String.t()
+        ) :: {:ok, connection_info()} | {:error, term()}
+  defdelegate add_player(battle_id, user_id, name, password), to: TachyonBattle.Battle
+
+  @spec get_match_id(T.id()) :: term() | nil
+  defdelegate get_match_id(battle_id), to: TachyonBattle.Battle
 
   # keep this function private to dissuade caller to misuse the API.
   # Generating a battle id is meaningless unless the corresponding

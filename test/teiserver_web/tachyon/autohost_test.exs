@@ -141,7 +141,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(client)
     Tachyon.send_response(client, req, data: %{ips: ["1.2.3.4"], port: 1234})
 
-    {:ok, _result} = Task.await(start_task)
+    {:ok, _autohost_pid, _result} = Task.await(start_task)
 
     task =
       Task.async(fn ->
@@ -154,5 +154,47 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     assert req["data"] == %{"battleId" => "battle_id", "message" => "hello"}
     Tachyon.send_response(client, req)
     assert Task.await(task, 150) == :ok
+  end
+
+  test "can add a player to a battle", %{token: token} do
+    battle_id = "battle_id"
+    client = Tachyon.connect_autohost!(token, 10, 0)
+
+    start_script = %{
+      engine_version: "engineversion",
+      game_name: "game name",
+      map_name: "very map",
+      start_pos_type: :fixed,
+      ally_teams: [
+        %{
+          teams: [%{user_id: 123, name: "player name", password: "123"}]
+        }
+      ]
+    }
+
+    pid = self()
+
+    start_task =
+      Task.async(fn ->
+        Autohost.start_battle(token.bot_id, battle_id, pid, start_script)
+      end)
+
+    %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(client)
+    Tachyon.send_response(client, req, data: %{ips: ["1.2.3.4"], port: 1234})
+    {:ok, autohost_pid, _data} = Task.await(start_task, 150)
+
+    add_data = %{battle_id: battle_id, user_id: 1234, name: "playername", password: "hunter2"}
+    add_task = Task.async(fn -> Autohost.add_player(autohost_pid, add_data) end)
+    %{"commandId" => "autohost/addPlayer", "data" => data} = req = Tachyon.recv_message!(client)
+
+    assert data == %{
+             "userId" => "1234",
+             "battleId" => battle_id,
+             "name" => "playername",
+             "password" => "hunter2"
+           }
+
+    Tachyon.send_response(client, req)
+    :ok = Task.await(add_task)
   end
 end
