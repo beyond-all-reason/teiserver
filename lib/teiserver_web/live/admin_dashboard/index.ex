@@ -7,6 +7,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Teiserver.Battle.MatchMonitorServer
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Bridge.DiscordSystem
+  alias Teiserver.Communication
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Game
@@ -41,6 +42,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> assign(:telemetry_client, telemetry_data.client)
       |> assign(:telemetry_battle, telemetry_data.battle)
       |> assign(:total_connected_clients, telemetry_data.total_clients_connected)
+      |> assign(:use_discord, Communication.use_discord?())
       |> update_policies()
       |> update_lobbies()
       |> update_server_pids()
