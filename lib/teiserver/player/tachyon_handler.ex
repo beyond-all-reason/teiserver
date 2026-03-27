@@ -1257,7 +1257,9 @@ defmodule Teiserver.Player.TachyonHandler do
       action: {:action, &vote_action_to_tachyon/1},
       initiator: {:initiator, &to_string/1},
       voters: :voters,
-      until: {:until, &DateTime.to_unix(&1, :microsecond)}
+      until: {:until, &DateTime.to_unix(&1, :microsecond)},
+      quorum: :quorum,
+      majority: :majority
     }
 
     Map.update!(vote, :voters, fn vs ->

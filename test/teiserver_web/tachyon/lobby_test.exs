@@ -448,6 +448,9 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
                user2_id => %{"vote" => "pending"}
              }
 
+      assert vote["quorum"] == 2
+      assert vote["majority"] == 2
+
       # check joining a lobby also holds the vote details
       {:ok, ctx3} = Tachyon.setup_client()
 

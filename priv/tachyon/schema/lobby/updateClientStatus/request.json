@@ -17,7 +17,9 @@
             "type": "object",
             "properties": {
                 "isReady": { "type": "boolean" },
-                "assetStatus": { "enum": ["missing", "downloading", "complete"] }
+                "assetStatus": {
+                    "enum": ["missing", "downloading", "complete"]
+                }
             }
         }
     },

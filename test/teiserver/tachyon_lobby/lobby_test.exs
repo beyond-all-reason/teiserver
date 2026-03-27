@@ -938,6 +938,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       assert_receive {:lobby, ^id, {:updated, %{current_vote: vote_update}}}
       assert vote_update.id == vote.id
+      assert %{majority: 2, quorum: 2} = vote_update
     end
 
     test "changing a second time does nothing" do
