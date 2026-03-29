@@ -105,7 +105,10 @@ defmodule Teiserver.Autohost.TachyonHandler do
       ally_teams:
         {:allyTeams,
          %{
-           teams: {:teams, %{players: {:players, &player_to_tachyon/1}}}
+           teams:
+             {:teams,
+              %{players: {:players, &player_to_tachyon/1}, bots: {:bots, &bot_to_tachyon/1}}},
+           start_box: {:startBox, %{top: :top, left: :left, bottom: :bottom, right: :right}}
          }},
       spectators: {:spectators, &player_to_tachyon/1}
     }
@@ -447,6 +450,16 @@ defmodule Teiserver.Autohost.TachyonHandler do
       userId: to_string(p.user_id),
       name: p.name,
       password: p.password
+    }
+  end
+
+  def bot_to_tachyon(b) when is_list(b), do: Enum.map(b, &bot_to_tachyon/1)
+
+  def bot_to_tachyon(b) do
+    %{
+      hostUserId: to_string(b.host_user_id),
+      aiShortName: b.ai_short_name,
+      name: b.name
     }
   end
 end
