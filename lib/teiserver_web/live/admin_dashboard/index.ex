@@ -6,6 +6,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Teiserver.Battle
   alias Teiserver.Battle.MatchMonitorServer
   alias Teiserver.Bridge.BridgeServer
+  alias Teiserver.Bridge.DiscordSystem
+  alias Teiserver.Communication
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Game
@@ -40,6 +42,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> assign(:telemetry_client, telemetry_data.client)
       |> assign(:telemetry_battle, telemetry_data.battle)
       |> assign(:total_connected_clients, telemetry_data.total_clients_connected)
+      |> assign(:use_discord, Communication.use_discord?())
       |> update_policies()
       |> update_lobbies()
       |> update_server_pids()
@@ -112,6 +115,22 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   def handle_event("restart-policies", _event, socket) do
     Game.pre_cache_policies()
     {:noreply, socket}
+  end
+
+  @spec handle_event(String.t(), map(), Socket.t()) :: {:noreply, Socket.t()}
+  def handle_event("restart-discord-bridge", _event, socket) do
+    restart_status = DiscordSystem.restart() |> Task.await()
+
+    {flash_type, message} =
+      case restart_status do
+        {:ok, pid} when is_pid(pid) ->
+          {:info, "Discord Bridge restarted. Manual chat test recommended."}
+
+        _other ->
+          {:error, "An unexpected status was received. Check logs"}
+      end
+
+    {:noreply, put_flash(socket, flash_type, message)}
   end
 
   @spec update_policies(Socket.t()) :: Socket.t()

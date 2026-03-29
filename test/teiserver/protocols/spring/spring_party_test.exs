@@ -191,6 +191,8 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
       assert username == user2.name
     end
 
+    # https://github.com/beyond-all-reason/teiserver/actions/runs/23672656398/job/68969199329?pr=1024
+    @tag :needs_attention
     test "can create party after leaving", %{socket1: sock1} do
       leave_party!(sock1)
       create_party!(sock1)
