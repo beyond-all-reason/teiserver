@@ -107,7 +107,8 @@ defmodule Teiserver.Autohost.TachyonHandler do
          %{
            teams:
              {:teams,
-              %{players: {:players, &player_to_tachyon/1}, bots: {:bots, &bot_to_tachyon/1}}}
+              %{players: {:players, &player_to_tachyon/1}, bots: {:bots, &bot_to_tachyon/1}}},
+           start_box: {:startBox, %{top: :top, left: :left, bottom: :bottom, right: :right}}
          }},
       spectators: {:spectators, &player_to_tachyon/1}
     }

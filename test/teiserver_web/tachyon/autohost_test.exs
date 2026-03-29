@@ -127,10 +127,12 @@ defmodule TeiserverWeb.Tachyon.Autohost do
       start_pos_type: :fixed,
       ally_teams: [
         %{
-          teams: [%{players: [%{user_id: 123, name: "player name", password: "123"}]}]
+          teams: [%{players: [%{user_id: 123, name: "player name", password: "123"}]}],
+          start_box: %{left: 0, right: 0.4, top: 0, bottom: 0.4}
         },
         %{
-          teams: [%{bots: [%{host_user_id: 123, ai_short_name: "testAI", name: "test AI"}]}]
+          teams: [%{bots: [%{host_user_id: 123, ai_short_name: "testAI", name: "test AI"}]}],
+          start_box: %{left: 0.6, right: 1, top: 0.6, bottom: 1}
         }
       ]
     }
@@ -151,7 +153,13 @@ defmodule TeiserverWeb.Tachyon.Autohost do
                          %{"name" => "player name", "password" => "123", "userId" => "123"}
                        ]
                      }
-                   ]
+                   ],
+                   "startBox" => %{
+                     "left" => 0,
+                     "right" => 0.4,
+                     "top" => 0,
+                     "bottom" => 0.4
+                   }
                  },
                  %{
                    "teams" => [
@@ -160,7 +168,13 @@ defmodule TeiserverWeb.Tachyon.Autohost do
                          %{"aiShortName" => "testAI", "hostUserId" => "123", "name" => "test AI"}
                        ]
                      }
-                   ]
+                   ],
+                   "startBox" => %{
+                     "left" => 0.6,
+                     "right" => 1,
+                     "top" => 0.6,
+                     "bottom" => 1
+                   }
                  }
                ],
                "battleId" => "battle_id",
