@@ -120,7 +120,10 @@ defmodule Teiserver.TachyonBattle.Battle do
     )
 
     players =
-      for at <- start_script.ally_teams, team <- at.teams, p <- team.players, into: %{} do
+      for at <- start_script.ally_teams,
+          team <- at.teams,
+          p <- Map.get(team, :players, []),
+          into: %{} do
         {p.user_id, %{name: p.name, password: p.password}}
       end
 

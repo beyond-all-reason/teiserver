@@ -128,6 +128,9 @@ defmodule TeiserverWeb.Tachyon.Autohost do
       ally_teams: [
         %{
           teams: [%{players: [%{user_id: 123, name: "player name", password: "123"}]}]
+        },
+        %{
+          teams: [%{bots: [%{host_user_id: 123, ai_short_name: "testAI", name: "test AI"}]}]
         }
       ]
     }
@@ -146,6 +149,15 @@ defmodule TeiserverWeb.Tachyon.Autohost do
                      %{
                        "players" => [
                          %{"name" => "player name", "password" => "123", "userId" => "123"}
+                       ]
+                     }
+                   ]
+                 },
+                 %{
+                   "teams" => [
+                     %{
+                       "bots" => [
+                         %{"aiShortName" => "testAI", "hostUserId" => "123", "name" => "test AI"}
                        ]
                      }
                    ]
