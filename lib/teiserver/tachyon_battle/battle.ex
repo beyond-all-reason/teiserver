@@ -27,6 +27,17 @@ defmodule Teiserver.TachyonBattle.Battle do
           # shutting_down: only used when the engine is terminating
           battle_state: :initialised | :in_progress | :finished | :shutting_down,
 
+          # keep track of everyone who was ever added to the battle. This is useful to limit the
+          # number of players allowed, and may also be used later to limit
+          # or do some actions.
+          # This is not limited only to players *currently* in the battle
+          participants: %{
+            Teiserver.Data.Types.userid() => %{
+              name: String.t(),
+              password: String.t()
+            }
+          },
+
           # store the connection info for the actual battle so that player can
           # join/rejoin
           ips: [String.t()],
@@ -108,6 +119,18 @@ defmodule Teiserver.TachyonBattle.Battle do
       "Starting battle with id #{battle_id} and match id #{match_id} on autohost #{autohost_id}"
     )
 
+    players =
+      for at <- start_script.ally_teams, team <- at.teams, p <- team.players, into: %{} do
+        {p.user_id, %{name: p.name, password: p.password}}
+      end
+
+    # currently, the lobby will automatically add specs to the game at start.
+    # if this changes, we should also update this bit
+    specs =
+      for spec <- Map.get(start_script, :spectators, []), into: %{} do
+        {spec.user_id, %{name: spec.name, password: spec.password}}
+      end
+
     state = %{
       id: battle_id,
       match_id: match_id,
@@ -119,7 +142,8 @@ defmodule Teiserver.TachyonBattle.Battle do
       # should be increased to a more reasonable value (1 min?)
       # Need to also fix the autohost_pid when it comes back
       autohost_timeout: Map.get(args, :autohost_timeout, 100),
-      battle_state: :initialised
+      battle_state: :initialised,
+      participants: Map.merge(players, specs)
     }
 
     # we need an overall timeout to avoid any potential zombie process
@@ -179,23 +203,30 @@ defmodule Teiserver.TachyonBattle.Battle do
   end
 
   def handle_call({:add_player, user_id, name, password}, _from, state) do
-    case state.autohost_pid do
-      nil ->
+    case {state.autohost_pid, Map.get(state.participants, user_id)} do
+      {nil, _participant} ->
         {:reply, {:error, :no_autohost}, state}
 
-      pid ->
+      {_pid, participant} when not is_nil(participant) ->
+        {:reply, {:ok, Map.take(state, [:ips, :port])}, state}
+
+      # The engine cannot deal with a total of more than 254 players
+      # https://github.com/beyond-all-reason/RecoilEngine/issues/2850
+      _irrelevant when map_size(state.participants) >= 254 ->
+        {:reply, {:error, :capacity_reached}, state}
+
+      {pid, nil} ->
         data = %{battle_id: state.id, user_id: user_id, name: name, password: password}
 
-        resp =
-          case Autohost.add_player(pid, data) do
-            :ok ->
-              {:ok, Map.take(state, [:ips, :port])}
+        case Autohost.add_player(pid, data) do
+          :ok ->
+            resp = {:ok, Map.take(state, [:ips, :port])}
+            state = put_in(state, [:participants, user_id], %{name: name, password: password})
+            {:reply, resp, state}
 
-            {:error, err} ->
-              {:error, err}
-          end
-
-        {:reply, resp, state}
+          {:error, err} ->
+            {:reply, {:error, err}, state}
+        end
     end
   end
 

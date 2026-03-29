@@ -50,6 +50,55 @@ defmodule Teiserver.TachyonBattle.BattleTest do
 
     Session.reply_add_player(autohost_pid, ref, :ok)
     {:ok, %{port: _port, ips: _ips}} = Task.await(task)
+
+    re_add = Task.async(fn -> Battle.add_player(battle_id, 12345, "playername", "hunter2") end)
+    # battle should remember players added after the start as well
+    {:ok, %{port: _port, ips: _ips}} = Task.await(re_add, 100)
+  end
+
+  test "remember players from start script" do
+    %{battle_id: battle_id, start_script: start_script} = setup_autohost_and_battle()
+
+    player =
+      start_script
+      |> Map.get(:ally_teams)
+      |> hd()
+      |> Map.get(:teams)
+      |> hd()
+      |> Map.get(:players)
+      |> hd()
+
+    task =
+      Task.async(fn ->
+        Battle.add_player(battle_id, player.user_id, player.name, player.password)
+      end)
+
+    # no message to autohost should be required
+    {:ok, %{port: _port, ips: _ips}} = Task.await(task, 100)
+  end
+
+  test "has maximum capacity" do
+    # SETUP
+    %{battle_id: battle_id, autohost_pid: autohost_pid} = setup_autohost_and_battle()
+    players_to_add = 253
+
+    add_tasks =
+      Enum.map(1..players_to_add, fn i ->
+        Task.async(fn ->
+          Battle.add_player(battle_id, 10000 + i, "playername#{i}", "hunted#{i}")
+        end)
+      end)
+
+    Enum.each(1..players_to_add, fn _i ->
+      assert_receive {:add_player, ref, _}
+      Session.reply_add_player(autohost_pid, ref, :ok)
+    end)
+
+    Task.await_many(add_tasks)
+
+    # now we're at capacity
+    {:error, :capacity_reached} =
+      Battle.add_player(battle_id, 99999, "too_many_ticks", "ticktick")
   end
 
   # setup a handshaked autohost with some defaults
