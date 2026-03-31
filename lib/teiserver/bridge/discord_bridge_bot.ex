@@ -38,6 +38,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
   @max_message_length 100
 
+  @ticket_category_id 1_185_744_592_893_640_704
+
   # GuildId of nil = DM
   def handle_event({:MESSAGE_CREATE, %{content: "$" <> _cmd, guild_id: nil} = message, _ws}) do
     MessageCommands.handle(message)
@@ -92,8 +94,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   end
 
   # Stuff we might want to use
-  def handle_event({:MESSAGE_CREATE, _message, _ws}) do
-    # Has an attachment
+  def handle_event({:MESSAGE_CREATE, message, _ws}) do
+    IO.inspect(message)
     :ignore
   end
 
@@ -120,6 +122,19 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   end
 
   def handle_event({:MESSAGE_REACTION_ADD, _reaction, _ws}) do
+    :ignore
+  end
+
+  def handle_event({:CHANNEL_CREATE, %{parent_id: @ticket_category_id} = channel, _ws}) do
+    IO.inspect(channel)
+
+    if channel.topic == "Appeal a moderation action" do
+      :ignore
+    end
+  end
+
+  def handle_event({:CHANNEL_UPDATE, %{parent_id: @ticket_category_id} = channel, _ws}) do
+    IO.inspect(channel)
     :ignore
   end
 
@@ -158,6 +173,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     BridgeServer.cast_bridge(:READY)
     add_command(:textcb)
     add_command(:findreport)
+    add_command(:post)
     :ignore
   end
 
@@ -197,6 +213,38 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
             %{name: "Report ID", value: "report_id"}
           ],
           default_value: "message_id"
+        }
+      ],
+      nsfw: false
+    }
+
+    ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
+  end
+
+  # Teiserver.Bridge.DiscordBridgeBot.add_command(:post)
+  @spec add_command(atom) :: any
+  def add_command(:post) do
+    command = %{
+      name: "post",
+      description: "Post report or action into the current channel",
+      options: [
+        %{
+          # type3 = String
+          type: 3,
+          name: "type",
+          description: "Report or Action",
+          required: true,
+          choices: [
+            %{name: "Report", value: "report"},
+            %{name: "Action", value: "action"}
+          ]
+        },
+        %{
+          # type3 = String
+          type: 3,
+          name: "id",
+          description: "ID",
+          required: true
         }
       ],
       nsfw: false
@@ -300,28 +348,56 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     end
   end
 
+  def get_report_message(report) do
+    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+    url = "https://#{host}/moderation/report?target_id=#{report.target_id}"
+
+    match_icon =
+      if is_nil(report.match_id) do
+        ""
+      else
+        ":crossed_swords:"
+      end
+
+    [
+      "# [Moderation report #{report.type}/#{report.sub_type}](#{url})#{match_icon}",
+      "**Target:** [#{report.target.name}](https://#{host}/moderation/report/user/#{report.target.id})",
+      "**Reporter:** [#{report.reporter.name}](https://#{host}/moderation/report/user/#{report.reporter.id})",
+      "**Reason:** #{format_link(report.extra_text)}"
+    ] ++
+      cond do
+        not is_nil(report.result_id) ->
+          ["**Status:** Actioned :hammer:"]
+
+        report.closed == true ->
+          ["**Status:** Closed :file_folder:"]
+
+        true ->
+          ["**Status:** Open"]
+      end
+  end
+
+  def get_channel(type) do
+    case type do
+      "actions" ->
+        Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
+
+      "chat" ->
+        Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
+
+      _other ->
+        Logger.error("Unknown report type #{type}")
+        raise "Unknown report type #{type}"
+    end
+  end
+
   # Teiserver.Moderation.get_report!(123) |> Teiserver.Bridge.DiscordBridgeBot.new_report()
   @spec new_report(Moderation.Report.t()) :: any
   def new_report(report) do
-    channel =
-      if report.type == "actions" do
-        Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
-      else
-        Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
-      end
+    channel = get_channel(report.type)
 
     if channel do
       report = Moderation.get_report!(report.id, preload: [:reporter, :target])
-
-      host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-      url = "https://#{host}/moderation/report?target_id=#{report.target_id}"
-
-      match_icon =
-        if is_nil(report.match_id) do
-          ""
-        else
-          ":crossed_swords:"
-        end
 
       outstanding_count =
         Moderation.list_outstanding_reports_against_user(report.target_id)
@@ -339,14 +415,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
             ""
         end
 
-      msg =
-        [
-          "# [Moderation report #{report.type}/#{report.sub_type}](#{url})#{match_icon}",
-          "**Target:** [#{report.target.name}](https://#{host}/moderation/report/user/#{report.target.id})",
-          "**Reporter:** [#{report.reporter.name}](https://#{host}/moderation/report/user/#{report.reporter.id})",
-          "**Reason:** #{format_link(report.extra_text)}",
-          "**Status:** Open"
-        ]
+      msg = get_report_message(report)
 
       reports =
         if is_nil(report.match_id) do
