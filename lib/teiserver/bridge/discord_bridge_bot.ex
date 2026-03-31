@@ -38,8 +38,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
   @max_message_length 100
 
-  @ticket_category_id 1_185_744_592_893_640_704
-
   # GuildId of nil = DM
   def handle_event({:MESSAGE_CREATE, %{content: "$" <> _cmd, guild_id: nil} = message, _ws}) do
     MessageCommands.handle(message)
@@ -94,8 +92,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   end
 
   # Stuff we might want to use
-  def handle_event({:MESSAGE_CREATE, message, _ws}) do
-    IO.inspect(message)
+  def handle_event({:MESSAGE_CREATE, _message, _ws}) do
     :ignore
   end
 
@@ -125,16 +122,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     :ignore
   end
 
-  def handle_event({:CHANNEL_CREATE, %{parent_id: @ticket_category_id} = channel, _ws}) do
-    IO.inspect(channel)
-
-    if channel.topic == "Appeal a moderation action" do
-      :ignore
-    end
-  end
-
-  def handle_event({:CHANNEL_UPDATE, %{parent_id: @ticket_category_id} = channel, _ws}) do
-    IO.inspect(channel)
+  def handle_event({:CHANNEL_CREATE, _channel, _ws}) do
     :ignore
   end
 
@@ -236,14 +224,15 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
           required: true,
           choices: [
             %{name: "Report", value: "report"},
-            %{name: "Action", value: "action"}
+            %{name: "Action", value: "action"},
+            %{name: "Profile", value: "profile"}
           ]
         },
         %{
           # type3 = String
           type: 3,
-          name: "id",
-          description: "ID",
+          name: "args",
+          description: "Additional arguments",
           required: true
         }
       ],
