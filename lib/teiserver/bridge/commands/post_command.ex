@@ -4,7 +4,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   """
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.{Account, Communication, Moderation}
-  Teiserver.Moderation.ActionLib
+  alias Teiserver.Moderation.ActionLib
   require Logger
 
   @behaviour Teiserver.Bridge.BridgeCommandBehaviour
