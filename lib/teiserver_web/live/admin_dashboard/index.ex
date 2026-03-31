@@ -119,7 +119,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
   @spec handle_event(String.t(), map(), Socket.t()) :: {:noreply, Socket.t()}
   def handle_event("restart-discord-bridge", _event, socket) do
-    restart_status = DiscordSystem.restart() |> Task.await()
+    restart_status = DiscordSystem.restart()
 
     {flash_type, message} =
       case restart_status do
