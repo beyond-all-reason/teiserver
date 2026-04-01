@@ -30,7 +30,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
             %{
               name: "id",
               description: "ID of the report",
-              type: 3,
+              type: 4,
               required: true
             }
           ]
@@ -44,7 +44,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
             %{
               name: "id",
               description: "ID of the action",
-              type: 3,
+              type: 4,
               required: true
             }
           ]
@@ -70,7 +70,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
 
   @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec execute(interaction :: Nostrum.Struct.Interaction.t(), options_map :: map()) :: map()
-  def execute(interaction, options_map) do
+  def execute(interaction, _options_map) do
     # Default to message_id
     [subcommand | _] = interaction.data.options
 
@@ -81,26 +81,34 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
     content =
       case subcommand.name do
         "action" ->
-          action = Moderation.get_action!(args.value)
+          case Moderation.get_action(args.value) do
+            nil ->
+              "No action with ID \"#{args.value}\" found"
 
-          channel_id =
-            Teiserver.Config.get_site_config_cache(
-              "teiserver.Discord channel #moderation-actions"
-            )
+            action ->
+              channel_id =
+                Teiserver.Config.get_site_config_cache(
+                  "teiserver.Discord channel #moderation-actions"
+                )
 
-          ActionLib.generate_discord_message_text(action) <>
-            "\n**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{channel_id}/#{action.discord_message_id}"
+              ActionLib.generate_discord_message_text(action) <>
+                "\n**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{channel_id}/#{action.discord_message_id}"
+          end
 
         "report" ->
-          report = Moderation.get_report!(args.value, preload: [:reporter, :target])
+          case Moderation.get_report(args.value, preload: [:reporter, :target]) do
+            nil ->
+              "No report with ID \"#{args.value}\" found"
 
-          DiscordBridgeBot.get_report_message(report)
-          |> List.delete_at(-1)
-          |> List.insert_at(
-            -1,
-            "**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{DiscordBridgeBot.get_channel(report.type)}/#{report.discord_message_id}"
-          )
-          |> Enum.join("\n")
+            report ->
+              DiscordBridgeBot.get_report_message(report)
+              |> List.delete_at(-1)
+              |> List.insert_at(
+                -1,
+                "**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{DiscordBridgeBot.get_channel(report.type)}/#{report.discord_message_id}"
+              )
+              |> Enum.join("\n")
+          end
 
         "profile" ->
           name = args.value

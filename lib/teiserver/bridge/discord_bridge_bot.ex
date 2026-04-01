@@ -225,7 +225,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
             %{
               name: "id",
               description: "ID of the report",
-              type: 3,
+              type: 4,
               required: true
             }
           ]
@@ -238,7 +238,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
             %{
               name: "id",
               description: "ID of the action",
-              type: 3,
+              type: 4,
               required: true
             }
           ]
