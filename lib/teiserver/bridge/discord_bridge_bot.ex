@@ -214,26 +214,47 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   def add_command(:post) do
     command = %{
       name: "post",
-      description: "Post report or action into the current channel",
+      description: "Post something into the current channel",
       options: [
         %{
-          # type3 = String
-          type: 3,
-          name: "type",
-          description: "Report or Action",
-          required: true,
-          choices: [
-            %{name: "Report", value: "report"},
-            %{name: "Action", value: "action"},
-            %{name: "Profile", value: "profile"}
+          # type  = sub_command
+          type: 1,
+          name: "report",
+          description: "Post a report",
+          options: [
+            %{
+              name: "id",
+              description: "ID of the report",
+              type: 3,
+              required: true
+            }
           ]
         },
         %{
-          # type3 = String
-          type: 3,
-          name: "args",
-          description: "Additional arguments",
-          required: true
+          type: 1,
+          name: "action",
+          description: "Post an Action",
+          options: [
+            %{
+              name: "id",
+              description: "ID of the action",
+              type: 3,
+              required: true
+            }
+          ]
+        },
+        %{
+          type: 1,
+          name: "profile",
+          description: "Post the link of a moderation profile",
+          options: [
+            %{
+              name: "name",
+              description: "Name of the Account",
+              type: 3,
+              required: true
+            }
+          ]
         }
       ],
       nsfw: false
