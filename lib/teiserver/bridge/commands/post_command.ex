@@ -2,8 +2,10 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   @moduledoc """
   Calls the bot to post report or action in current channel
   """
+  alias Teiserver.Account
   alias Teiserver.Bridge.DiscordBridgeBot
-  alias Teiserver.{Account, Communication, Moderation}
+  alias Teiserver.Communication
+  alias Teiserver.Moderation
   alias Teiserver.Moderation.ActionLib
   require Logger
 
@@ -73,9 +75,6 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   def execute(interaction, _options_map) do
     # Default to message_id
     [subcommand | _] = interaction.data.options
-
-    IO.inspect(subcommand)
-
     [args | _] = subcommand.options
 
     content =
@@ -105,7 +104,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
               |> List.delete_at(-1)
               |> List.insert_at(
                 -1,
-                "**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{DiscordBridgeBot.get_channel(report.type)}/#{report.discord_message_id}"
+                "**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{DiscordBridgeBot.get_channel_for_report_type(report.type)}/#{report.discord_message_id}"
               )
               |> Enum.join("\n")
           end
@@ -121,44 +120,6 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
               "https://#{Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]}/moderation/report/user/#{user.id}"
           end
       end
-
-    #    content =
-    #      if is_nil(args) do
-    #        "Please provide an id corresponding to the selected type"
-    #      else
-    #        case type do
-    #          "action" ->
-    #            action = Moderation.get_action!(args)
-    #
-    #            channel_id =
-    #              Teiserver.Config.get_site_config_cache(
-    #                "teiserver.Discord channel #moderation-actions"
-    #              )
-    #
-    #            ActionLib.generate_discord_message_text(action) <>
-    #              "\n**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{channel_id}/#{action.discord_message_id}"
-    #
-    #          "report" ->
-    #            report = Moderation.get_report!(args, preload: [:reporter, :target])
-    #
-    #            DiscordBridgeBot.get_report_message(report)
-    #            |> List.delete_at(-1)
-    #            |> List.insert_at(
-    #              -1,
-    #              "**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{DiscordBridgeBot.get_channel(report.type)}/#{report.discord_message_id}"
-    #            )
-    #            |> Enum.join("\n")
-    #
-    #          "profile" ->
-    #            case Account.get_user_by_name(args) do
-    #              nil ->
-    #                "User \"#{args}\" not found"
-    #
-    #              user ->
-    #                "https://#{Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]}/moderation/report/user/#{user.id}"
-    #            end
-    #        end
-    #      end
 
     Communication.new_interaction_response(content)
   end

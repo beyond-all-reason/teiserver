@@ -387,7 +387,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
       end
   end
 
-  def get_channel(type) do
+  def get_channel_for_report_type(type) do
     case type do
       "actions" ->
         Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
@@ -404,7 +404,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   # Teiserver.Moderation.get_report!(123) |> Teiserver.Bridge.DiscordBridgeBot.new_report()
   @spec new_report(Moderation.Report.t()) :: any
   def new_report(report) do
-    channel = get_channel(report.type)
+    channel = get_channel_for_report_type(report.type)
 
     if channel do
       report = Moderation.get_report!(report.id, preload: [:reporter, :target])
