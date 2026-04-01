@@ -5,6 +5,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   alias Teiserver.Account
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Communication
+  alias Teiserver.Config
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ActionLib
   require Logger
@@ -73,9 +74,8 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec execute(interaction :: Nostrum.Struct.Interaction.t(), options_map :: map()) :: map()
   def execute(interaction, _options_map) do
-    # Default to message_id
-    [subcommand | _] = interaction.data.options
-    [args | _] = subcommand.options
+    subcommand = Enum.at(interaction.data.options, 0)
+    args = Enum.at(subcommand.options, 0)
 
     content =
       case subcommand.name do
@@ -86,9 +86,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
 
             action ->
               channel_id =
-                Teiserver.Config.get_site_config_cache(
-                  "teiserver.Discord channel #moderation-actions"
-                )
+                Config.get_site_config_cache("teiserver.Discord channel #moderation-actions")
 
               ActionLib.generate_discord_message_text(action) <>
                 "\n**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{channel_id}/#{action.discord_message_id}"
