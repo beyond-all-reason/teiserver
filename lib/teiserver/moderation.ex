@@ -530,8 +530,8 @@ defmodule Teiserver.Moderation do
       nil
 
   """
-  @spec get_action(Integer.t() | List.t()) :: Action.t()
-  @spec get_action(Integer.t(), List.t()) :: Action.t()
+  @spec get_action(Integer.t() | List.t()) :: Action.t() | nil
+  @spec get_action(Integer.t(), List.t()) :: Action.t() | nil
   def get_action(id) when not is_list(id) do
     action_query(id, [])
     |> Repo.one()
