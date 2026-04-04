@@ -844,7 +844,7 @@ defmodule TeiserverWeb.Admin.UserController do
           |> Enum.count()
 
         # And give the origin the smurfer role
-        CacheUser.add_roles(origin_user.id, ["Smurfer"])
+        Auth.add_roles(origin_user.id, ["Smurfer"])
         Account.update_user_stat(origin_user.id, %{"smurf_count" => smurf_count})
 
         Client.disconnect(smurf_user.id, "Marked as smurf")
@@ -886,7 +886,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
             # And give the origin the smurfer role
             if smurf_count == 0 do
-              CacheUser.remove_roles(origin_user_id, ["Smurfer"])
+              Auth.remove_roles(origin_user_id, ["Smurfer"])
             end
 
             Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})

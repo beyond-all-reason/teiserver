@@ -2,6 +2,7 @@ defmodule Teiserver.Account do
   @moduledoc false
 
   alias Phoenix.PubSub
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.Accolade
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Account.BadgeType
@@ -2345,13 +2346,11 @@ defmodule Teiserver.Account do
   def verify_user(%User{} = user) do
     delete_user_stat_keys(user.id, ~w(verification_code))
 
-    script_update_user(user, %{roles: ["Verified" | user.roles]})
-
-    user
+    Auth.add_roles(user, ["Verified"])
   end
 
   @spec verify_user(T.userid()) :: T.user()
-  def verify_user(userid) do
+  def verify_user(userid) when is_integer(userid) do
     get_user(userid) |> verify_user()
   end
 end
