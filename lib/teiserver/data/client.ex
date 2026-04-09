@@ -261,13 +261,14 @@ defmodule Teiserver.Client do
     end
   end
 
-  # If it's a test user, don't worry about actually disconnecting it
+  # If it's a test user, don't worry about actually disconnecting it or
+  # logging it properly, we test simple server events and updating cache users
+  # elsewhere
   defp do_disconnect(client, reason, kick) do
     if kick do
       Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
     end
 
-    Telemetry.log_simple_server_event(client.userid, "disconnect:#{reason}")
     Lobby.remove_user_from_any_lobby(client.userid)
 
     # If they are part of a party, lets leave it
@@ -277,6 +278,7 @@ defmodule Teiserver.Client do
     # identify what actually went wrong
     if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
       Account.update_cache_user(client.userid, %{last_logout: Timex.now()})
+      Telemetry.log_simple_server_event(client.userid, "disconnect:#{reason}")
     end
 
     if client.bot do
