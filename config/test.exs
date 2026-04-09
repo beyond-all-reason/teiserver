@@ -68,6 +68,8 @@ config :teiserver, Oban,
   plugins: false,
   crontab: false
 
+config :teiserver, Teiserver.PromEx, disabled: true
+
 config :teiserver, Teiserver.Mailer,
   adapter: Bamboo.TestAdapter,
   noreply_address: "noreply@testsite.co.uk",

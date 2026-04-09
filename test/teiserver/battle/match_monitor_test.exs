@@ -15,6 +15,15 @@ defmodule Teiserver.Battle.MatchMonitorTest do
 
   setup do
     Battle.start_match_monitor()
+
+    on_exit(fn ->
+      pid = MatchMonitorServer.get_match_monitor_pid()
+
+      if pid do
+        DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, pid)
+      end
+    end)
+
     {:ok, %{}}
   end
 
