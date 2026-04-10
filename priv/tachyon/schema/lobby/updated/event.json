@@ -246,6 +246,35 @@
                         },
                         { "type": "null" }
                     ]
+                },
+                "voteHistory": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^.*$": {
+                            "anyOf": [
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "vote": {
+                                            "$ref": "../../definitions/voteActions.json"
+                                        },
+                                        "outcome": {
+                                            "$ref": "../../definitions/voteOutcomes.json"
+                                        },
+                                        "finishedAt": {
+                                            "$ref": "../../definitions/unixTime.json"
+                                        }
+                                    },
+                                    "required": [
+                                        "vote",
+                                        "outcome",
+                                        "finishedAt"
+                                    ]
+                                },
+                                { "type": "null" }
+                            ]
+                        }
+                    }
                 }
             },
             "required": ["id"]

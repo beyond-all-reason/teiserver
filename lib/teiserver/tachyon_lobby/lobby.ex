@@ -100,6 +100,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           quorum: non_neg_integer(),
           majority: non_neg_integer()
         }
+  @type vote_outcome :: :passed | :failed | :cancelled | :timeout
 
   @typedoc """
   The public state of the lobby. Anything that clients need to know about
@@ -134,7 +135,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
                 id: TachyonBattle.id(),
                 started_at: DateTime.t()
               },
-          current_vote: nil | vote_state()
+          current_vote: nil | vote_state(),
+          vote_history: %{
+            String.t() => %{
+              vote: vote_state(),
+              finished_at: DateTime.t(),
+              outcome: vote_outcome()
+            }
+          }
         }
 
   @typedoc """
@@ -204,7 +212,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
                },
            ids_to_rejoin: MapSet.t(T.userid()),
            vote_idx: integer(),
-           current_vote: nil | vote_state()
+           current_vote: nil | vote_state(),
+           vote_history: %{
+             String.t() => %{
+               vote: vote_state(),
+               finished_at: DateTime.t(),
+               outcome: vote_outcome()
+             }
+           }
          }
 
   # the list of internal events used to manipulate the lobby data, but also
@@ -226,8 +241,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
               new_config :: ally_team_config()}
            | {:start_vote, vote_state()}
            | {:cast_vote, T.userid(), vote_ballot()}
-           | :vote_timeout
-           | :vote_ended
+           | {:vote_ended, DateTime.t(), vote_outcome()}
 
   @spec gen_id() :: id()
   def gen_id, do: UUID.uuid4()
@@ -442,7 +456,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       current_battle: nil,
       ids_to_rejoin: MapSet.new(),
       vote_idx: 1,
-      current_vote: nil
+      current_vote: nil,
+      vote_history: %{}
     }
 
     TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
@@ -1003,7 +1018,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(:info, {:vote_timeout, vote_id}, _state, data)
       when data.current_vote.id == vote_id do
-    event = :vote_timeout
+    event = {:vote_ended, DateTime.utc_now(), :timeout}
     aggregate = process_events([event], data) |> broadcast_updates()
     process_event_actions(aggregate)
     {:keep_state, aggregate.data}
@@ -1091,6 +1106,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
       end)
       |> Enum.into(%{})
 
+    vote_history =
+      Enum.map(state.vote_history, fn {id, record} ->
+        {id,
+         %{finished_at: record.finished_at, vote: record.vote.action, outcome: record.outcome}}
+      end)
+      |> Enum.into(%{})
+
     Map.take(state, [
       :id,
       :name,
@@ -1104,6 +1126,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> Map.put(:players, players)
     |> Map.put(:spectators, spectators)
     |> Map.put(:bots, Map.new(bots))
+    |> Map.put(:vote_history, vote_history)
   end
 
   # Given a list of events to process (in the event sourcing way) and the initial
@@ -1341,35 +1364,32 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       {:ended, result} ->
         vote = new_aggregate.data.current_vote
+        new_aggregate = process_event({:vote_ended, DateTime.utc_now(), result}, new_aggregate)
 
-        new_aggregate =
-          new_aggregate
-          |> put_in([:data, :current_vote], nil)
-          |> Map.update!(:actions, &[{:vote_ended, vote, result} | &1])
+        case {result, vote.action} do
+          {:failed, _action} ->
+            new_aggregate
 
-        new_aggregate =
-          case {result, vote.action} do
-            {:failed, _action} ->
-              new_aggregate
-
-            {:passed, {:change_map, new_map}} ->
-              process_event({:update_map_name, new_map}, new_aggregate)
-              # just let the thing crash if a new vote action shows up. It'll be easy
-              # to spot and fix/add support. :start isn't yet supported
-          end
-
-        Map.update!(new_aggregate, :updates, &[:vote_ended | &1])
+          {:passed, {:change_map, new_map}} ->
+            process_event({:update_map_name, new_map}, new_aggregate)
+            # just let the thing crash if a new vote action shows up. It'll be easy
+            # to spot and fix/add support. :start isn't yet supported
+        end
     end
   end
 
-  # don't bother cancelling the timer. The event handler checks the vote id
+  # don't bother cancelling the vote timeout timer. The event handler checks the vote id
   # and it allows us not to worry about storing the tref
-  defp process_event(:vote_timeout = ev, aggregate) do
-    vote_ev = {:vote_ended, aggregate.data.current_vote, :timeout}
+  defp process_event({:vote_ended, ts, outcome}, aggregate) do
+    vote_ev = {:vote_ended, aggregate.data.current_vote, outcome}
+    vote_record = %{vote: aggregate.data.current_vote, finished_at: ts, outcome: outcome}
+    # TODO: trim the history if size too big
+    history = Map.put(aggregate.data.vote_history, aggregate.data.current_vote.id, vote_record)
 
     aggregate
     |> put_in([:data, :current_vote], nil)
-    |> Map.update!(:updates, &[ev | &1])
+    |> put_in([:data, :vote_history], history)
+    |> Map.update!(:updates, &[{:vote_ended, vote_record} | &1])
     |> Map.update!(:actions, &[vote_ev | &1])
   end
 
@@ -1481,11 +1501,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> put_in([:current_vote, :voters, user_id], ballot)
   end
 
-  defp update_change_from_event(:vote_timeout, change_map),
-    do: Map.put(change_map, :current_vote, nil)
-
-  defp update_change_from_event(:vote_ended, change_map),
-    do: Map.put(change_map, :current_vote, nil)
+  defp update_change_from_event({:vote_ended, record}, change_map) do
+    change_map
+    |> Map.put(:current_vote, nil)
+    |> Map.put_new(:vote_history, %{})
+    |> put_in([:vote_history, record.vote.id], %{
+      vote: record.vote.action,
+      finished_at: record.finished_at,
+      outcome: record.outcome
+    })
+  end
 
   defp broadcast_list_updates(%{data: final_state})
        when map_size(final_state.players) == 0 and map_size(final_state.spectators) == 0,
