@@ -511,15 +511,6 @@ defmodule TeiserverWeb.Router do
       only: [:index, :show, :new, :create, :edit, :update, :delete]
     )
 
-    get("/proposal/new_with_user", ProposalController, :new_with_user)
-    put("/proposal/vote/:proposal_id/:direction", ProposalController, :vote)
-
-    resources("/proposal", ProposalController,
-      only: [:index, :show, :new, :create, :edit, :update]
-    )
-
-    post("/proposal/:id/conclude", ProposalController, :conclude)
-
     put("/ban/:id/disable", BanController, :disable)
     put("/ban/:id/enable", BanController, :enable)
     get("/ban/new_with_user", BanController, :new_with_user)

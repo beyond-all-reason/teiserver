@@ -37,12 +37,6 @@ defmodule Teiserver.HookServer do
       :updated_response ->
         :ok
 
-      :new_proposal ->
-        :ok
-
-      :updated_proposal ->
-        :ok
-
       :new_ban ->
         :ok
 
