@@ -16,16 +16,6 @@
 }
 
 %{
-  event: :new_proposal,
-  proposal: Proposal
-}
-
-%{
-  event: :updated_proposal,
-  proposal: Proposal
-}
-
-%{
   event: :new_ban,
   ban: Ban
 }
