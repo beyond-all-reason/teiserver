@@ -3,6 +3,26 @@ defmodule Teiserver.TachyonLobby.Lobby do
   Represent a single lobby
   """
 
+  # This module has essentially 3 parts:
+  # 1: the external API as usual. A set of exported function that delegate to
+  # gen_statem.cast/call and so on
+  # 2: the internal handlers: the callbacks for gen_statem
+  # 3: an event sourcing system for the handlers.
+  #
+  # The handlers are responsible to check if the operation is valid, and then
+  # translate the operation into an event. See `@typep event` for the list.
+  # These events are then reduced/folded into an aggregate. This aggregate
+  # is used to
+  # 1: compute the end state after applying the original operation/event See process_events/2
+  # 2: the update events to send to lobby members. See broadcast_updates/1
+  # 3: update the lobby list process when relevant. Also handled in broadcast_updates/1
+  #
+  # The event sourcing approach is used so we can have some "atomic" operations, and more
+  # complex operations can be represented through them. It is mostly useful when dealing
+  # with player movements, to/from spectators or within ally teams.
+  # It also handles update events without having to dispatch them manually on a case by
+  # case basis.
+
   alias Teiserver.Asset
   alias Teiserver.Autohost
   alias Teiserver.Data.Types, as: T
