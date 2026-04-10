@@ -13,6 +13,8 @@ defmodule Teiserver.Room do
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Moderation
+  alias Teiserver.Plugins
+
   require Logger
 
   @type room :: Chat.RoomServer.room()
@@ -143,14 +145,20 @@ defmodule Teiserver.Room do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
-    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    cond do
+      allow?(user.id) == false ->
+        nil
 
-    if blacklisted do
-      CacheUser.shadowban_user(user.id)
-    end
+      Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg) ->
+        CacheUser.shadowban_user(user.id)
+        nil
 
-    if allow?(user.id) do
-      RoomServer.send_message(room_name, user.id, msg)
+      true ->
+        args = %{user: user, room_name: room_name, msg: msg}
+
+        Plugins.call_plugin(:send_chat_message, args, fn ->
+          RoomServer.send_message(room_name, user.id, msg)
+        end)
     end
   end
 
@@ -162,17 +170,21 @@ defmodule Teiserver.Room do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
-    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    cond do
+      allow?(user.id) == false ->
+        nil
 
-    if blacklisted do
-      CacheUser.shadowban_user(user.id)
+      Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg) ->
+        CacheUser.shadowban_user(user.id)
+        nil
+
+      true ->
+        args = %{user: user, room_name: room_name, msg: msg}
+
+        Plugins.call_plugin(:send_chat_message_ex, args, fn ->
+          RoomServer.send_message_ex(room_name, user.id, msg)
+        end)
     end
-
-    if allow?(from_id) do
-      RoomServer.send_message_ex(room_name, from_id, msg)
-    end
-
-    :ok
   end
 
   @spec allow?(T.userid()) :: boolean()
