@@ -110,6 +110,81 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     end)
   end
 
+  test "autohost start script", %{token: token} do
+    client = Tachyon.connect_autohost!(token, 10, 0)
+
+    poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {_bot_id, details} ->
+      details.max_battles == 10 && details.current_battles == 0
+    end)
+
+    battle_id = "battle_id"
+    pid = self()
+
+    start_script = %{
+      engine_version: "engineversion",
+      game_name: "game name",
+      map_name: "very map",
+      start_pos_type: :fixed,
+      ally_teams: [
+        %{
+          teams: [%{players: [%{user_id: 123, name: "player name", password: "123"}]}],
+          start_box: %{left: 0, right: 0.4, top: 0, bottom: 0.4}
+        },
+        %{
+          teams: [%{bots: [%{host_user_id: 123, ai_short_name: "testAI", name: "test AI"}]}],
+          start_box: %{left: 0.6, right: 1, top: 0.6, bottom: 1}
+        }
+      ]
+    }
+
+    Task.async(fn ->
+      Autohost.start_battle(token.bot_id, battle_id, pid, start_script)
+    end)
+
+    %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(client)
+
+    assert req["data"] ==
+             %{
+               "allyTeams" => [
+                 %{
+                   "teams" => [
+                     %{
+                       "players" => [
+                         %{"name" => "player name", "password" => "123", "userId" => "123"}
+                       ]
+                     }
+                   ],
+                   "startBox" => %{
+                     "left" => 0,
+                     "right" => 0.4,
+                     "top" => 0,
+                     "bottom" => 0.4
+                   }
+                 },
+                 %{
+                   "teams" => [
+                     %{
+                       "bots" => [
+                         %{"aiShortName" => "testAI", "hostUserId" => "123", "name" => "test AI"}
+                       ]
+                     }
+                   ],
+                   "startBox" => %{
+                     "left" => 0.6,
+                     "right" => 1,
+                     "top" => 0.6,
+                     "bottom" => 1
+                   }
+                 }
+               ],
+               "battleId" => "battle_id",
+               "engineVersion" => "engineversion",
+               "gameName" => "game name",
+               "mapName" => "very map",
+               "startPosType" => "fixed"
+             }
+  end
+
   test "can send message and get response", %{token: token} do
     client = Tachyon.connect_autohost!(token, 10, 0)
 
@@ -119,23 +194,11 @@ defmodule TeiserverWeb.Tachyon.Autohost do
 
     battle_id = "battle_id"
 
-    start_script = %{
-      engine_version: "engineversion",
-      game_name: "game name",
-      map_name: "very map",
-      start_pos_type: :fixed,
-      ally_teams: [
-        %{
-          teams: [%{user_id: 123, name: "player name", password: "123"}]
-        }
-      ]
-    }
-
     pid = self()
 
     start_task =
       Task.async(fn ->
-        Autohost.start_battle(token.bot_id, battle_id, pid, start_script)
+        Autohost.start_battle(token.bot_id, battle_id, pid, default_start_script())
       end)
 
     %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(client)
@@ -160,23 +223,11 @@ defmodule TeiserverWeb.Tachyon.Autohost do
     battle_id = "battle_id"
     client = Tachyon.connect_autohost!(token, 10, 0)
 
-    start_script = %{
-      engine_version: "engineversion",
-      game_name: "game name",
-      map_name: "very map",
-      start_pos_type: :fixed,
-      ally_teams: [
-        %{
-          teams: [%{user_id: 123, name: "player name", password: "123"}]
-        }
-      ]
-    }
-
     pid = self()
 
     start_task =
       Task.async(fn ->
-        Autohost.start_battle(token.bot_id, battle_id, pid, start_script)
+        Autohost.start_battle(token.bot_id, battle_id, pid, default_start_script())
       end)
 
     %{"commandId" => "autohost/start"} = req = Tachyon.recv_message!(client)
@@ -196,5 +247,19 @@ defmodule TeiserverWeb.Tachyon.Autohost do
 
     Tachyon.send_response(client, req)
     :ok = Task.await(add_task)
+  end
+
+  defp default_start_script do
+    %{
+      engine_version: "engineversion",
+      game_name: "game name",
+      map_name: "very map",
+      start_pos_type: :fixed,
+      ally_teams: [
+        %{
+          teams: [%{players: [%{user_id: 123, name: "player name", password: "123"}]}]
+        }
+      ]
+    }
   end
 end
