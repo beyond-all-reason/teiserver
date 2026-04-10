@@ -12,10 +12,16 @@ and [running Teiserver](#running-teiserver).
 
 ## Testing
 
-Run `mix test --exclude needs_attention`.
+To run all relevant tests use
+```bash
+mix test --exclude needs_attention
+```
+some tests can be flaky or stopped working before CI checks were added, they have been tagged with `needs_attention` and will be excluded.
 
-If you set up your environment appropriately this should never fail, if it does
-review your local environment or submit a bug.
+If you set up your environment appropriately this should never fail, if it does review your local environment or submit a bug.
+
+> [!NOTE]
+> Check [`mix test` documentation](https://hexdocs.pm/mix/Mix.Tasks.Test.html) for other useful options
 
 ## Running Teiserver
 
