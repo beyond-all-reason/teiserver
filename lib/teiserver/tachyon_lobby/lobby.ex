@@ -247,6 +247,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def gen_id, do: UUID.uuid4()
 
   @default_call_timeout 5000
+  @max_vote_history_size 10
 
   # note: this uses a pid and not a lobby id because it's (currently) only
   # used by the lobby list process to bootstrap its state, and at that time
@@ -1383,8 +1384,21 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp process_event({:vote_ended, ts, outcome}, aggregate) do
     vote_ev = {:vote_ended, aggregate.data.current_vote, outcome}
     vote_record = %{vote: aggregate.data.current_vote, finished_at: ts, outcome: outcome}
-    # TODO: trim the history if size too big
     history = Map.put(aggregate.data.vote_history, aggregate.data.current_vote.id, vote_record)
+
+    history =
+      if map_size(history) > @max_vote_history_size do
+        dates =
+          Enum.map(history, fn {_id, record} -> record.finished_at end)
+          |> Enum.sort()
+
+        cutoff = Enum.at(dates, 4)
+
+        Enum.filter(history, fn {_id, record} -> record.finished_at >= cutoff end)
+        |> Enum.into(%{})
+      else
+        history
+      end
 
     aggregate
     |> put_in([:data, :current_vote], nil)
