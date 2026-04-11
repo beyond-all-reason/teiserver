@@ -27,12 +27,6 @@ end
 # used for mailing, checking origins, finding tls certs…
 domain_name = Teiserver.ConfigHelpers.get_env("TEI_DOMAIN_NAME", "beyondallreason.info")
 
-max_lobby_name_size_default = 100
-max_lobby_name_size = Teiserver.ConfigHelpers.get_env("TEI_MAX_LOBBY_NAME_SIZE", max_lobby_name_size_default, :int)
-if max_lobby_name_size <= 0 do
- max_lobby_name_size = max_lobby_name_size_default
-end
-
 # this is used in lib/teiserver_web/controllers/account/setup_controller.ex
 # as a special endpoint to create the root user. Setting it to empty or nil
 # will disable the functionality completely.
@@ -59,7 +53,6 @@ config :teiserver, Teiserver,
   enable_managed_lobbies: true,
   user_agreement:
     "A verification code has been sent to your email address. Please read our terms of service at https://#{domain_name}/privacy_policy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms.",
-  max_lobby_name_size: max_lobby_name_size
 
 repo_env = Application.get_env(:teiserver, Teiserver.Repo)
 

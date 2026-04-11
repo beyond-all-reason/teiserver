@@ -1769,15 +1769,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
     name_is_empty = (new_name == "")
     name_is_too_long = (String.length(new_name) > max_name_size)
 
-    if name_is_empty do
-      {:error, "name must not be empty"}
+    cond do
+      name_is_empty -> {:error, "name must not be empty"}
+      name_is_too_long -> {:error, "name must not be greater then #{max_name_size} characters"}
+      true -> {:ok, [{:update_lobby_name, new_name}]}
     end
 
-    if name_is_too_long do
-      {:error, "name must not be greater then #{max_name_size} characters"}
-    end
-
-    {:ok, [{:update_lobby_name, new_name}]}
   end
 
   defp update_property(:map_name, new_name, state, user_id) do
