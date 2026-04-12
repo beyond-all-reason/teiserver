@@ -1,20 +1,32 @@
 defmodule Teiserver.Plugins do
   @moduledoc false
 
+  alias Decorator.Decorate.Context
+
+  use Decorator.Define, plugin: 1
+
   @doc """
   Looks for a plugin implementation for the given key and calls it with the
-  provided options. If no plugin is found, it calls the fallback function.
+  provided options. If no plugin is found, it calls the existing function.
   """
-  @spec call_plugin(atom, map(), function()) :: any()
-  def call_plugin(key, opts, fallback) do
-    plugins = Application.get_env(:teiserver, Teiserver.Plugins, [])
+  def plugin(key, body, context) do
+    %Context{args: args} = context
 
-    case Keyword.get(plugins, key) do
-      nil ->
-        fallback.()
+    quote do
+      f =
+        :teiserver
+        |> Application.get_env(Teiserver.Plugins, [])
+        |> Keyword.get(unquote(key))
 
-      plugin_function ->
-        plugin_function.(opts)
+      case f do
+        nil ->
+          unquote(body)
+
+        plugin_function ->
+          # Normally Credo has an issue with this but it's intentional to do it this way
+          # credo:disable-for-next-line
+          plugin_function.(unquote_splicing(args))
+      end
     end
   end
 end

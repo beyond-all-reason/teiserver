@@ -15,6 +15,8 @@ defmodule Teiserver.Room do
   alias Teiserver.Moderation
   alias Teiserver.Plugins
 
+  use Plugins
+
   require Logger
 
   @type room :: Chat.RoomServer.room()
@@ -154,12 +156,13 @@ defmodule Teiserver.Room do
         nil
 
       true ->
-        args = %{user: user, room_name: room_name, msg: msg}
-
-        Plugins.call_plugin(:send_chat_message, args, fn ->
-          RoomServer.send_message(room_name, user.id, msg)
-        end)
+        do_send_message(room_name, user, msg)
     end
+  end
+
+  @decorate Plugins.plugin(:send_chat_message)
+  defp do_send_message(room_name, %{id: user_id}, msg) do
+    RoomServer.send_message(room_name, user_id, msg)
   end
 
   @spec send_message_ex(T.userid(), String.t(), String.t()) :: nil | :ok
@@ -179,12 +182,13 @@ defmodule Teiserver.Room do
         nil
 
       true ->
-        args = %{user: user, room_name: room_name, msg: msg}
-
-        Plugins.call_plugin(:send_chat_message_ex, args, fn ->
-          RoomServer.send_message_ex(room_name, user.id, msg)
-        end)
+        do_send_message_ex(room_name, user, msg)
     end
+  end
+
+  @decorate Plugins.plugin(:send_chat_message_ex)
+  defp do_send_message_ex(room_name, %{id: user_id}, msg) do
+    RoomServer.send_message_ex(room_name, user_id, msg)
   end
 
   @spec allow?(T.userid()) :: boolean()

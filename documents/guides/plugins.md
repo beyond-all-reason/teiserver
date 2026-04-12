@@ -5,9 +5,9 @@ Teiserver is written for the game Beyond All Reason but we appreciate there may 
 ## Plugin structure
 
 Plugins have three components:
-- A hook point in the Teiserver code
-- A configuration key
+- A hook point in the Teiserver code with `@decorate Plugins.plugin(:function_key)`
 - Implementation by a 3rd party
+- A function key listed in the configuration pointing to said implementation
 
 ## Writing a plugin
 
@@ -27,8 +27,10 @@ defmodule Teiserver.ExternalPlugins.ChatPlugins do
   Prefixes every message with an (odd) or (even) depending on if the
   user in question has an odd or even number of characters in their name.
   """
-  def send_message(%{room_name: room_name, user: user, msg: msg}) do
-    even? = String.length(user.name) |> rem(2) == 0
+  def send_message(room_name, user, msg) do
+    even? = user.name
+      |> String.length()
+      |> rem(2) == 0
 
     msg = if even? do
       "(even) " <> msg
@@ -41,7 +43,7 @@ defmodule Teiserver.ExternalPlugins.ChatPlugins do
 end
 ```
 
-After this we just need to update our config to point towards this function:
+After this we just need to update our config (*not* the runtime config, this uses macros so must be compile time) to point towards this function:
 
 ```elixir
 config :teiserver, Teiserver.Plugins,
@@ -52,7 +54,7 @@ And we are all set! Do note that at this stage of development implementing plugi
 
 ## Plugin hook list
 
-Every plugin hook is triggered with a call to `Plugins.call_plugin`. At the present we are not sure how we wish to document the plugins so will only list the presence of them.
+Every plugin is decorated with `@decorate Plugins.plugin`. At the present we are not sure how we wish to document the plugins so will only list the presence of them.
 
 - `:send_chat_message` in `Teiserver.Room.send_message/3`
 - `:send_chat_message_ex` in `Teiserver.Room.send_message_ex/3`
@@ -60,5 +62,6 @@ Every plugin hook is triggered with a call to `Plugins.call_plugin`. At the pres
 ## Development of new plugin hooks
 
 To add a new plugin hook you will need to:
-- Add the `Plugins.call_plugin` hook wrapper or call in the appropriate place
+- Add `alias Teiserver.Plugins` and `use Plugins` to the top of the module
+- Add `@decorate Plugins.plugin(:function_key)` before the function, replace `:function_key` with a relevant atom key
 - Extend the list/documentation around above to incorporate it
