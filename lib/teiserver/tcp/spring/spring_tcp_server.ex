@@ -1333,9 +1333,7 @@ defmodule Teiserver.SpringTcpServer do
             # Rate limiting for unauthenticated telemetry commands
             telemetry_rate_limiter:
               Teiserver.Helpers.BurstyRateLimiter.per_minute(
-                Config.get_site_config_cache(
-                  "teiserver.Spring telemetry rate limit per minute"
-                )
+                Config.get_site_config_cache("teiserver.Spring telemetry rate limit per minute")
               ),
 
             # Caching app configs
