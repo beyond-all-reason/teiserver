@@ -1296,7 +1296,11 @@ defmodule Teiserver.Player.TachyonHandler do
       engine_version: :engineVersion,
       game_version: :gameVersion,
       current_battle:
-        {:currentBattle, %{started_at: {:startedAt, &DateTime.to_unix(&1, :microsecond)}}}
+        {:currentBattle,
+         %{
+           id: :id,
+           started_at: {:startedAt, &DateTime.to_unix(&1, :microsecond)}
+         }}
     }
 
     base =

@@ -127,9 +127,10 @@
             "description": "If a battle is currently happening, here are the info",
             "type": "object",
             "properties": {
+                "id": { "type": "string" },
                 "startedAt": { "$ref": "../definitions/unixTime.json" }
             },
-            "required": ["startedAt"]
+            "required": ["id", "startedAt"]
         },
         "currentVote": {
             "type": "object",
