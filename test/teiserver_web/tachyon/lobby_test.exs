@@ -15,7 +15,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       lobby_data = %{
         name: "test lobby",
         map_name: "test-map",
-        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1),
+        game_options: %{"foo" => "bar"}
       }
 
       %{"status" => "success", "data" => data} = Tachyon.create_lobby!(client, lobby_data)
@@ -28,6 +29,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
                data["allyTeamConfig"][player_data["allyTeam"]]["teams"],
                player_data["team"]
              )
+
+      assert data["gameOptions"] == %{"foo" => %{"value" => "bar"}}
     end
 
     test "cannot create lobby when already in lobby", %{client: client} do

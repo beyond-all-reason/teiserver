@@ -678,7 +678,11 @@ defmodule Teiserver.Player.TachyonHandler do
             },
             teams: teams
           }
-        end
+        end,
+      game_options:
+        Map.get(msg["data"], "gameOptions", %{})
+        |> Enum.map(fn {k, v} -> {k, v["value"]} end)
+        |> Enum.into(%{})
     }
 
     case Session.create_lobby(state.user.id, create_data) do
@@ -1150,6 +1154,7 @@ defmodule Teiserver.Player.TachyonHandler do
       name: :name,
       map_name: :mapName,
       ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
+      game_options: {:gameOptions, &game_options_to_tachyon/1},
       engine_version: :engineVersion,
       game_version: :gameVersion,
       current_vote: {:currentVote, &vote_to_tachyon/1},
@@ -1259,6 +1264,11 @@ defmodule Teiserver.Player.TachyonHandler do
 
       {to_string(i), val}
     end
+  end
+
+  defp game_options_to_tachyon(options) do
+    Enum.map(options, fn {k, v} -> {k, %{value: v}} end)
+    |> Enum.into(%{})
   end
 
   defp vote_to_tachyon(nil), do: nil

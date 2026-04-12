@@ -73,7 +73,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
           required(:map_name) => String.t(),
           required(:ally_team_config) => ally_team_config(),
           optional(:game_version) => String.t(),
-          optional(:engine_version) => String.t()
+          optional(:engine_version) => String.t(),
+          optional(:game_options) => %{String.t() => String.t()}
         }
 
   @typedoc """
@@ -113,6 +114,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           game_version: String.t(),
           engine_version: String.t(),
           ally_team_config: ally_team_config(),
+          game_options: %{String.t() => String.t()},
           players: %{
             T.userid() => %{team: team(), ready?: boolean(), asset_status: asset_status()}
           },
@@ -199,6 +201,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            game_version: String.t(),
            engine_version: String.t(),
            ally_team_config: ally_team_config(),
+           game_options: %{String.t() => String.t()},
            # used to track the players in the lobby.
            players: %{player_id() => player() | bot()},
            spectators: %{T.userid() => spectator()},
@@ -376,7 +379,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @type lobby_update_data :: %{
           optional(:name) => String.t(),
           optional(:map_name) => String.t(),
-          optional(:ally_team_config) => ally_team_config()
+          optional(:ally_team_config) => ally_team_config(),
+          optional(:game_options) => %{String.t() => String.t() | nil}
         }
 
   @doc """
@@ -441,6 +445,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       game_version: start_params.game_version,
       engine_version: start_params.engine_version,
       ally_team_config: start_params.ally_team_config,
+      game_options: Map.get(start_params, :game_options, %{}),
       players: %{
         start_params.creator_data.id => %{
           id: start_params.creator_data.id,
@@ -1122,7 +1127,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       :engine_version,
       :ally_team_config,
       :current_battle,
-      :current_vote
+      :current_vote,
+      :game_options
     ])
     |> Map.put(:players, players)
     |> Map.put(:spectators, spectators)

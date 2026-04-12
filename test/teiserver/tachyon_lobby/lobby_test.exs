@@ -60,6 +60,17 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     assert details.engine_version == engine.name
   end
 
+  test "create lobby with game options" do
+    {:ok, _pid, details} =
+      mk_start_params([1, 1])
+      |> Map.put(:game_options, %{"foo" => "bar"})
+      |> Lobby.create()
+
+    assert details.game_options == %{"foo" => "bar"}
+    {:ok, details2} = LobbyProcess.get_details(details.id)
+    assert details2.game_options == %{"foo" => "bar"}
+  end
+
   test "exit when no more players" do
     test_pid = self()
 

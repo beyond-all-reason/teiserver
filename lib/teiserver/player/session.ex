@@ -473,7 +473,8 @@ defmodule Teiserver.Player.Session do
   @type lobby_start_params :: %{
           name: String.t(),
           map_name: String.t(),
-          ally_team_config: TachyonLobby.ally_team_config()
+          ally_team_config: TachyonLobby.ally_team_config(),
+          game_options: %{String.t() => String.t()}
         }
   @spec create_lobby(T.userid(), lobby_start_params()) ::
           {:ok, TachyonLobby.details()} | {:error, reason :: term()}
