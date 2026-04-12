@@ -826,17 +826,26 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/update", "request", _msg_id, %{"data" => data}, state) do
-    keys = [
-      {"name", :name},
-      {"mapName", :map_name},
-      {"allyTeamConfig", :ally_team_config, &ally_team_config_from_tachyon/1},
-      {"gameOptions", :game_options,
-       fn opts ->
-         Enum.map(opts, fn {k, v} -> {k, v["value"]} end) |> Enum.into(%{})
-       end}
-    ]
+    mappings = %{
+      "name" => :name,
+      "mapName" => :map_name,
+      "allyTeamConfig" =>
+        {:ally_team_config,
+         %{
+           "maxTeams" => :max_teams,
+           "startBox" =>
+             {:start_box,
+              %{"top" => :top, "bottom" => :bottom, "left" => :left, "right" => :right}},
+           "teams" => {:teams, %{"maxPlayers" => :max_players}}
+         }},
+      "gameOptions" =>
+        {:game_options,
+         fn opts ->
+           Enum.map(opts, fn {k, v} -> {k, v["value"]} end) |> Enum.into(%{})
+         end}
+    }
 
-    update_data = Enum.reduce(keys, %{}, &convert_key(&1, data, &2))
+    update_data = Collections.transform_map(data, mappings)
 
     case Session.lobby_update_properties(state.user.id, update_data) do
       :ok ->
@@ -1106,44 +1115,6 @@ defmodule Teiserver.Player.TachyonHandler do
       end
     end)
     |> Enum.reject(&is_nil/1)
-  end
-
-  defp ally_team_config_from_tachyon(data) do
-    keys = [
-      {"maxTeams", :max_teams},
-      {"startBox", :start_box, &start_box_from_tachyon/1},
-      {"teams", :teams, &teams_from_tachyon/1}
-    ]
-
-    Enum.map(data, fn d -> Enum.reduce(keys, %{}, &convert_key(&1, d, &2)) end)
-  end
-
-  defp start_box_from_tachyon(data) do
-    keys = [{"top", :top}, {"bottom", :bottom}, {"left", :left}, {"right", :right}]
-    Enum.reduce(keys, %{}, &convert_key(&1, data, &2))
-  end
-
-  # util function to convert keys in a map, with a possible transformation for the val
-  defp convert_key(key_spec, data, map) do
-    case key_spec do
-      {from_k, to_k} ->
-        if is_map_key(data, from_k) do
-          Map.put(map, to_k, Map.get(data, from_k))
-        else
-          map
-        end
-
-      {from_k, to_k, f} ->
-        if is_map_key(data, from_k) do
-          Map.put(map, to_k, f.(Map.get(data, from_k)))
-        else
-          map
-        end
-    end
-  end
-
-  defp teams_from_tachyon(data) do
-    Enum.map(data, fn d -> %{max_players: d["maxPlayers"]} end)
   end
 
   defp lobby_details_to_tachyon(details) do
