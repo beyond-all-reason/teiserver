@@ -63,9 +63,6 @@ defmodule Teiserver.Protocols.SpringIn do
       end
     end
 
-    max_buffer_size =
-      Config.get_site_config_cache("teiserver.Spring max message buffer size")
-
     new_state =
       if String.ends_with?(data, "\n") do
         data = state.message_part <> data
@@ -78,6 +75,9 @@ defmodule Teiserver.Protocols.SpringIn do
         |> Map.put(:message_part, "")
       else
         new_buffer = state.message_part <> data
+
+        max_buffer_size =
+          Config.get_site_config_cache("teiserver.Spring max message buffer size")
 
         if byte_size(new_buffer) > max_buffer_size do
           Logger.warning(
