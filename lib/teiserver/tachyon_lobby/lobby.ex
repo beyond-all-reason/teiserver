@@ -203,6 +203,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
                  started_at: DateTime.t()
                },
            ids_to_rejoin: MapSet.t(T.userid()),
+           vote_idx: integer(),
            current_vote: nil | vote_state()
          }
 
@@ -440,6 +441,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       bot_idx_counter: 0,
       current_battle: nil,
       ids_to_rejoin: MapSet.new(),
+      vote_idx: 1,
       current_vote: nil
     }
 
@@ -1321,6 +1323,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp process_event({:start_vote, vote_state} = ev, aggregate) do
     aggregate
     |> put_in([:data, :current_vote], vote_state)
+    |> update_in([:data, :vote_idx], &(&1 + 1))
     |> Map.update!(:updates, &[ev | &1])
   end
 
@@ -1815,7 +1818,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         quorum = (map_size(voters) * 0.501) |> :math.ceil() |> trunc()
 
         vote = %{
-          id: UUID.uuid4(),
+          id: "vote-#{state.vote_idx}",
           action: {:change_map, new_name},
           initiator: user_id,
           voters: voters,
