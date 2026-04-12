@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.API.SpadsControllerTest do
   alias Teiserver.Account
-  alias Teiserver.CacheUser
+  alias Teiserver.Account.Auth
   alias Teiserver.Client
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.TeiserverTestLib
@@ -169,8 +169,9 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
   end
 
   def new_bot_user do
-    new_user()
-    |> CacheUser.add_roles(["Bot"])
+    user = new_user()
+    Auth.add_roles(user.id, ["Bot"])
+    user
   end
 
   def put_authorization_header(conn, user) do

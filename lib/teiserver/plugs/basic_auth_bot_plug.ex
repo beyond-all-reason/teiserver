@@ -13,8 +13,9 @@ defmodule Teiserver.Plugs.BasicAuthBotPlug do
         [username, password] = Base.decode64!(encoded) |> String.split(":")
 
         with user <- Account.get_user_by_name(username),
-             true <- Auth.is_bot?(user),
-             true <- Account.verify_plain_password(password, user.password) do
+             db_user <- Account.get_user(user.id),
+             true <- Auth.is_bot?(db_user),
+             true <- Account.verify_plain_password(password, db_user.password) do
           conn
         else
           _error -> unauthorized(conn)

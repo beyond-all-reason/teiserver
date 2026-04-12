@@ -2,6 +2,7 @@ defmodule Teiserver.Account.Auth do
   @moduledoc false
 
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
@@ -126,6 +127,34 @@ defmodule Teiserver.Account.Auth do
   end
 
   def has_all_roles?(user, role), do: has_all_roles?(user, [role])
+
+  @spec add_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
+  def add_roles(nil, _roles), do: nil
+  def add_roles(_user, []), do: nil
+  def add_roles(_user, nil), do: nil
+
+  def add_roles(userid, roles) when is_integer(userid),
+    do: add_roles(Account.get_user(userid), roles)
+
+  def add_roles(%User{} = user, roles) do
+    new_roles = Enum.uniq(roles ++ user.roles)
+    Account.script_update_user(user, %{roles: new_roles})
+  end
+
+  @spec remove_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
+  def remove_roles(nil, _roles), do: nil
+  def remove_roles(_user, []), do: nil
+
+  def remove_roles(userid, roles) when is_integer(userid),
+    do: remove_roles(Account.get_user(userid), roles)
+
+  def remove_roles(%User{} = user, removed_roles) do
+    new_roles =
+      user.roles
+      |> Enum.reject(fn r -> Enum.member?(removed_roles, r) end)
+
+    Account.script_update_user(user, %{roles: new_roles})
+  end
 end
 
 defmodule Teiserver.Auth.Server do
