@@ -17,6 +17,7 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
+  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.AuthIn
@@ -27,7 +28,6 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Protocols.Spring.TelemetryIn
   alias Teiserver.Protocols.Spring.UserIn
   alias Teiserver.Protocols.SpringOut
-  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Room
   alias Teiserver.SpringTcpServer
   require Logger
