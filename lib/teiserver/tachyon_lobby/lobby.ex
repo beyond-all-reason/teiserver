@@ -242,6 +242,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:update_map_name, new_name :: String.t()}
            | {:update_ally_team_config, old_config :: ally_team_config(),
               new_config :: ally_team_config()}
+           | {:update_game_options, changes :: %{String.t() => String.t() | nil}}
            | {:start_vote, vote_state()}
            | {:cast_vote, T.userid(), vote_ballot()}
            | {:vote_ended, DateTime.t(), vote_outcome()}
@@ -1350,6 +1351,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
     new_aggregate |> put_in([:updates], [ev | final_events] ++ aggregate.updates)
   end
 
+  defp process_event({:update_game_options, changes} = ev, aggregate) do
+    aggregate
+    |> update_in([:data, :game_options], &patch_merge(&1, changes))
+    |> Map.update!(:updates, &[ev | &1])
+  end
+
   defp process_event({:start_vote, vote_state} = ev, aggregate) do
     aggregate
     |> put_in([:data, :current_vote], vote_state)
@@ -1510,6 +1517,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     Map.put(change_map, :ally_team_config, changes)
   end
+
+  defp update_change_from_event({:update_game_options, changes}, change_map),
+    do: Map.put(change_map, :game_options, changes)
 
   defp update_change_from_event({:start_vote, vote}, change_map),
     do: Map.put(change_map, :current_vote, vote)
@@ -1883,6 +1893,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp update_property(:ally_team_config, new_config, state, _user_id) do
     {:ok, [{:update_ally_team_config, state.ally_team_config, new_config}]}
+  end
+
+  defp update_property(:game_options, changes, _state, _user_id) do
+    # TODO: set a size limit on that thing to avoid a DOS
+    {:ok, [{:update_game_options, changes}]}
   end
 
   defp update_property(prop, _value, _state, _user_id),

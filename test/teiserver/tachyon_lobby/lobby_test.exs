@@ -1440,6 +1440,63 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "update game options" do
+    test "can add an option" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2]) |> Lobby.create()
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{game_options: %{"foo" => "bar"}})
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.game_options == %{"foo" => "bar"}
+      assert_receive {:lobby, ^id, {:updated, %{game_options: %{"foo" => "bar"}}}}
+    end
+
+    test "can update option" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:game_options, %{"foo" => "bar"})
+        |> Lobby.create()
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{game_options: %{"foo" => "another bar"}})
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.game_options == %{"foo" => "another bar"}
+      assert_receive {:lobby, ^id, {:updated, %{game_options: %{"foo" => "another bar"}}}}
+    end
+
+    test "can remove an option" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:game_options, %{"foo" => "bar"})
+        |> Lobby.create()
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{game_options: %{"foo" => nil}})
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.game_options == %{}
+      assert_receive {:lobby, ^id, {:updated, %{game_options: %{"foo" => nil}}}}
+    end
+
+    test "can add remove and update in one request" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:game_options, %{"foo" => "bar", "ranked" => "true"})
+        |> Lobby.create()
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{
+          game_options: %{"foo" => nil, "ranked" => "false", "blah" => "qux"}
+        })
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.game_options == %{"ranked" => "false", "blah" => "qux"}
+
+      assert_receive {:lobby, ^id,
+                      {:updated,
+                       %{game_options: %{"foo" => nil, "ranked" => "false", "blah" => "qux"}}}}
+    end
+  end
+
   # note: [test lobby battle]
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the
