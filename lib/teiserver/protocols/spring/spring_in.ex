@@ -52,6 +52,12 @@ defmodule Teiserver.Protocols.SpringIn do
     c.auth.login_queue_heartbeat
   )
 
+  # Maximum size of the partial message buffer per connection. If a client sends
+  # more than this many bytes without a newline, the connection is terminated.
+  # Without this limit, an attacker can grow message_part without bound by
+  # sending data without newlines, exhausting server memory.
+  @max_message_part_size 64 * 1024
+
   @spec data_in(String.t(), map()) :: map()
   def data_in(data, state) do
     if Config.get_site_config_cache("debug.Print incoming messages") or
@@ -74,7 +80,19 @@ defmodule Teiserver.Protocols.SpringIn do
         end)
         |> Map.put(:message_part, "")
       else
-        %{state | message_part: state.message_part <> data}
+        new_buffer = state.message_part <> data
+
+        if byte_size(new_buffer) > @max_message_part_size do
+          Logger.warning(
+            "Disconnecting client #{state.ip}: message buffer exceeded #{@max_message_part_size} bytes"
+          )
+
+          SpringOut.reply(:disconnect, "Message too large", nil, state)
+          send(self(), :terminate)
+          %{state | message_part: ""}
+        else
+          %{state | message_part: new_buffer}
+        end
       end
 
     new_state
