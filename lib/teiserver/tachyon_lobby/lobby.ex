@@ -433,7 +433,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     Logger.metadata(actor_type: :lobby, actor_id: id)
     Logger.debug("Restoring lobby from snapshot")
 
-    snapshot = :erlang.binary_to_term(serialized_data)
+    snapshot = :erlang.binary_to_term(serialized_data, [:safe])
 
     player_ids =
       for {id, x} <- snapshot.players, !is_map_key(x, :host_user_id) do
