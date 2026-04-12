@@ -47,9 +47,20 @@
                         "id": { "$ref": "../definitions/userId.json" },
                         "allyTeam": { "type": "string" },
                         "team": { "type": "string" },
-                        "player": { "type": "string" }
+                        "player": { "type": "string" },
+                        "isReady": { "type": "boolean" },
+                        "assetStatus": {
+                            "enum": ["missing", "downloading", "complete"]
+                        }
                     },
-                    "required": ["id", "allyTeam", "team", "player"]
+                    "required": [
+                        "id",
+                        "allyTeam",
+                        "team",
+                        "player",
+                        "isReady",
+                        "assetStatus"
+                    ]
                 }
             }
         },
@@ -119,6 +130,31 @@
                 "startedAt": { "$ref": "../definitions/unixTime.json" }
             },
             "required": ["startedAt"]
+        },
+        "currentVote": {
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "action": { "$ref": "../definitions/voteActions.json" },
+                "initiator": { "$ref": "../definitions/userId.json" },
+                "voters": {
+                    "description": "indexed by the userId. The initiator is also included in this object",
+                    "type": "object",
+                    "patternProperties": {
+                        "^.*$": {
+                            "type": "object",
+                            "properties": {
+                                "vote": {
+                                    "enum": ["pending", "yes", "no", "abstain"]
+                                }
+                            },
+                            "required": ["vote"]
+                        }
+                    }
+                },
+                "until": { "$ref": "../definitions/unixTime.json" }
+            },
+            "required": ["id", "action", "initiator", "voters", "until"]
         }
     },
     "required": [
