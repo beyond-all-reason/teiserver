@@ -829,7 +829,11 @@ defmodule Teiserver.Player.TachyonHandler do
     keys = [
       {"name", :name},
       {"mapName", :map_name},
-      {"allyTeamConfig", :ally_team_config, &ally_team_config_from_tachyon/1}
+      {"allyTeamConfig", :ally_team_config, &ally_team_config_from_tachyon/1},
+      {"gameOptions", :game_options,
+       fn opts ->
+         Enum.map(opts, fn {k, v} -> {k, v["value"]} end) |> Enum.into(%{})
+       end}
     ]
 
     update_data = Enum.reduce(keys, %{}, &convert_key(&1, data, &2))
@@ -1177,7 +1181,8 @@ defmodule Teiserver.Player.TachyonHandler do
       map_name: :mapName,
       ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
       current_vote: {:currentVote, &vote_to_tachyon/1},
-      vote_history: {:voteHistory, &vote_history_to_tachyon/1}
+      vote_history: {:voteHistory, &vote_history_to_tachyon/1},
+      game_options: {:gameOptions, &game_options_to_tachyon/1}
     }
 
     Map.merge(%{id: lobby_id}, Collections.transform_map(update_map, mappings))
@@ -1267,7 +1272,10 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   defp game_options_to_tachyon(options) do
-    Enum.map(options, fn {k, v} -> {k, %{value: v}} end)
+    Enum.map(options, fn
+      {k, nil} -> {k, nil}
+      {k, v} -> {k, %{value: v}}
+    end)
     |> Enum.into(%{})
   end
 
