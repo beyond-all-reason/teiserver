@@ -1330,6 +1330,14 @@ defmodule Teiserver.SpringTcpServer do
             protocol_optimisation: :full,
             pending_messages: [],
 
+            # Rate limiting for unauthenticated telemetry commands
+            telemetry_rate_limiter:
+              Teiserver.Helpers.BurstyRateLimiter.per_minute(
+                Config.get_site_config_cache(
+                  "teiserver.Spring telemetry rate limit per minute"
+                )
+              ),
+
             # Caching app configs
             flood_rate_limit_count:
               Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
