@@ -45,9 +45,23 @@ defmodule Teiserver.TachyonLobby do
   end
 
   def create(start_params) do
-    with {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
-         {:ok, details} <- Lobby.get_details(id) do
-      {:ok, pid, details}
+    max_name_size = Teiserver.store_get(:lobby, "Name max length")
+
+    name_is_empty = (not is_map_key(start_params, :name) or not is_binary(start_params.name) or String.trim(start_params.name) == "")
+    name_is_too_long = (String.length(start_params.name) > max_name_size)
+
+    cond do
+        name_is_empty ->
+                {:error, "name must not be empty"}
+
+        name_is_too_long ->
+                {:error, "name must not be greater then #{max_name_size} characters"}
+
+        true ->
+                with {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
+                {:ok, details} <- Lobby.get_details(id) do
+                        {:ok, pid, details}
+                end
     end
   end
 

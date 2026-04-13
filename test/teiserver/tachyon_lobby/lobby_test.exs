@@ -898,6 +898,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "name work" do
+      max_name_size = Teiserver.store_get(:lobby, "Name max length")
+
       {:ok, _pid, %{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
@@ -905,6 +907,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, details} = LobbyProcess.get_details(id)
       assert details.name == "new name"
       assert_receive {:lobby, ^id, {:updated, %{name: "new name"}}}
+
+      {:error, reason} = Lobby.update_properties(id, @default_user_id, %{name: String.duplicate("a", max_name_size + 1)})
+      assert_receive {:error, "name must not be greater then #{max_name_size} characters"}
+
+      {:error, reason} = Lobby.update_properties(id, @default_user_id, %{name: ""})
+      assert_receive {:error, "name must not be empty"}
     end
 
     test "map name" do
