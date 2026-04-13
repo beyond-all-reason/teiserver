@@ -1834,6 +1834,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           %{user_id: s.id, name: s.name, password: s.password}
         end)
     }
+    |> Map.merge(Map.take(state, [:game_options]))
   end
 
   @spec update_property(atom(), term(), state(), T.userid()) ::
