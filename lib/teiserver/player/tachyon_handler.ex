@@ -159,6 +159,7 @@ defmodule Teiserver.Player.TachyonHandler do
         %{
           userId: to_string(user_state.user_id),
           username: user_state.username,
+          displayName: user_state.username,
           clanId: user_state.clan_id,
           country: user_state.country,
           status: user_state.status,
