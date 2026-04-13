@@ -127,6 +127,7 @@ defmodule Teiserver.MixProject do
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},
       {:nostrum, "~> 0.10.4"},
+      {:decorator, "~> 1.2"},
 
       # gun is a transitive dependency of nostrum. The version 2.1.0 works,
       # while the next one, 2.2.0 produces the following error when starting
