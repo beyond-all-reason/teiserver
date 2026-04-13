@@ -17,6 +17,7 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
+  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.AuthIn
@@ -153,7 +154,21 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("c.telemetry." <> cmd, data, msg_id, state) do
-    TelemetryIn.do_handle(cmd, data, msg_id, state)
+    if state.userid != nil do
+      # Authenticated users are not rate limited on telemetry
+      TelemetryIn.do_handle(cmd, data, msg_id, state)
+    else
+      case BurstyRateLimiter.try_acquire(state.telemetry_rate_limiter) do
+        {:ok, updated_rl} ->
+          new_state = %{state | telemetry_rate_limiter: updated_rl}
+          TelemetryIn.do_handle(cmd, data, msg_id, new_state)
+
+        {:error, _wait_ms} ->
+          Logger.info("Telemetry rate limited for unauthenticated client #{state.ip}")
+          reply(:no, "Rate limited", msg_id, state)
+          state
+      end
+    end
   end
 
   defp do_handle("c.battle." <> cmd, data, msg_id, state) do

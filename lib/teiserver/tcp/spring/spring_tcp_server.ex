@@ -11,6 +11,7 @@ defmodule Teiserver.SpringTcpServer do
   alias Teiserver.Config
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Protocols.Spring.PartyIn
   alias Teiserver.Protocols.SpringIn
   alias Teiserver.Protocols.SpringOut
@@ -1328,6 +1329,12 @@ defmodule Teiserver.SpringTcpServer do
             app_status: nil,
             protocol_optimisation: :full,
             pending_messages: [],
+
+            # Rate limiting for unauthenticated telemetry commands
+            telemetry_rate_limiter:
+              "teiserver.Spring telemetry rate limit per minute"
+              |> Config.get_site_config_cache()
+              |> BurstyRateLimiter.per_minute(),
 
             # Caching app configs
             flood_rate_limit_count:
