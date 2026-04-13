@@ -5,10 +5,14 @@ defmodule Teiserver.Application do
 
   alias Phoenix.PubSub
   alias Teiserver.Helper.ObanLogger
+  alias Teiserver.Plugins
   alias Teiserver.Startup
   alias TeiserverWeb.Endpoint
   alias TeiserverWeb.Monitoring.Router, as: MonitoringRouter
+
+  use Plugins
   use Application
+
   require Logger
 
   import Teiserver.Helpers.CacheHelper,
@@ -178,6 +182,7 @@ defmodule Teiserver.Application do
         spring_server_child(Teiserver.SSLSpringTcpServer, :tls)
       ]
       |> Enum.reject(&is_nil/1)
+      |> Kernel.++(additional_application_children())
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -209,6 +214,11 @@ defmodule Teiserver.Application do
     :telemetry.attach_many("oban-logger", events, &ObanLogger.handle_event/4, [])
 
     Startup.startup()
+  end
+
+  @decorate Plugins.plugin(:additional_application_children)
+  defp additional_application_children do
+    []
   end
 
   # Tell Phoenix to update the endpoint configuration
