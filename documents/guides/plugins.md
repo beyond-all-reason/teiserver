@@ -61,6 +61,7 @@ Every plugin is decorated with `@decorate Plugins.plugin`. At the present we are
 - `:handle_match_complex_event` in `Teiserver.Battle.MatchMonitorServer.handle_match_complex_event`
 - `:send_chat_message` in `Teiserver.Room.send_message/3`
 - `:send_chat_message_ex` in `Teiserver.Room.send_message_ex/3`
+- `:acceptable_name?`, `:reserved_name?` and `:blacklisted_phrase?` in `Teiserver.Chat.WordLib`
 
 ## Development of new plugin hooks
 
