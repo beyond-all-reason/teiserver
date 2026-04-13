@@ -57,6 +57,8 @@ And we are all set! Do note that at this stage of development implementing plugi
 Every plugin is decorated with `@decorate Plugins.plugin`. At the present we are not sure how we wish to document the plugins so will only list the presence of them.
 
 - `:additional_application_children` in `Teiserver.Application`, will allow adding of additional items for the application supervisor tree
+- `:handle_match_simple_event` in `Teiserver.Battle.MatchMonitorServer.handle_match_simple_event`
+- `:handle_match_complex_event` in `Teiserver.Battle.MatchMonitorServer.handle_match_complex_event`
 - `:send_chat_message` in `Teiserver.Room.send_message/3`
 - `:send_chat_message_ex` in `Teiserver.Room.send_message_ex/3`
 
