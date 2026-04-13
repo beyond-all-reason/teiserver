@@ -1025,6 +1025,38 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert result == :passed
     end
 
+    test "history to track votes" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      :ok = Lobby.vote_submit(id, "2", {vote.id, :yes})
+      vote_id = vote.id
+
+      assert_receive {:lobby, ^id, {:updated, %{vote_history: %{^vote_id => vote1}}}}
+
+      assert %{vote: {:change_map, "new map"}, outcome: :passed} = vote1
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map2"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      :ok = Lobby.vote_submit(id, "2", {vote.id, :no})
+      vote_id2 = vote.id
+
+      assert_receive {:lobby, ^id, {:updated, %{vote_history: %{^vote_id2 => vote2}}}}
+
+      %{vote: {:change_map, "new map2"}, outcome: :failed} = vote2
+
+      # and lobby details hold the entire history
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert map_size(details.vote_history) == 2
+      assert vote_id < vote_id2
+      assert details.vote_history[vote_id].outcome == :passed
+      assert details.vote_history[vote_id].vote == {:change_map, "new map"}
+      assert details.vote_history[vote_id2].outcome == :failed
+      assert details.vote_history[vote_id2].vote == {:change_map, "new map2"}
+    end
+
     test "map stays when vote fails" do
       %{id: id} = setup_full_lobby([1, 1])
       :ok = Lobby.join_queue(id, "2")

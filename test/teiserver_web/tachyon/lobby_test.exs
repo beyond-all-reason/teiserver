@@ -490,6 +490,16 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
                "commandId" => "lobby/updated",
                "data" => %{"currentVote" => nil, "mapName" => "new map name"}
              } = updated
+
+      # a new client joining the lobby gets the vote history
+      {:ok, ctx3} = Tachyon.setup_client()
+
+      %{"status" => "success", "data" => data} =
+        Tachyon.join_lobby!(ctx3[:client], lobby_id)
+
+      last_vote = data["voteHistory"][vote["id"]]
+      assert last_vote["outcome"] == "passed"
+      assert last_vote["vote"] == %{"type" => "changeMap", "newMapName" => "new map name"}
     end
   end
 
