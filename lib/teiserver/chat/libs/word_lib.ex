@@ -2,6 +2,10 @@ defmodule Teiserver.Chat.WordLib do
   @moduledoc false
   alias Teiserver.Config
   alias Teiserver.Helper.StringHelper
+  alias Teiserver.Plugins
+
+  use Plugins
+
   require Logger
 
   @flagged_regex ~r/(n[i1l]gg(:?[e3]r|a)|cun[t7][s5]?|\b(r[e3])?[t7]ards?\b|卐)/iu
@@ -59,6 +63,7 @@ defmodule Teiserver.Chat.WordLib do
   end
 
   @spec acceptable_name?(String.t()) :: boolean()
+  @decorate Plugins.plugin(:acceptable_name?)
   def acceptable_name?(name) do
     if flagged_words(name) > 0 do
       false
@@ -75,6 +80,7 @@ defmodule Teiserver.Chat.WordLib do
   end
 
   @spec reserved_name?(String.t()) :: boolean()
+  @decorate Plugins.plugin(:reserved_name?)
   def reserved_name?(name) do
     name = String.downcase(name)
 
@@ -88,6 +94,7 @@ defmodule Teiserver.Chat.WordLib do
   end
 
   @spec blacklisted_phrase?(String.t()) :: boolean()
+  @decorate Plugins.plugin(:blacklisted_phrase?)
   def blacklisted_phrase?(text) do
     @blacklisted_regexs
     |> Enum.reduce(false, fn
