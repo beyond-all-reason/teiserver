@@ -519,6 +519,16 @@ defmodule Teiserver.Support.Tachyon do
       allyTeamConfig: lobby_data.ally_team_config
     }
 
+    data =
+      if is_map_key(lobby_data, :game_options) do
+        opts =
+          Enum.map(lobby_data.game_options, fn {k, v} -> {k, %{value: v}} end) |> Enum.into(%{})
+
+        Map.put(data, :gameOptions, opts)
+      else
+        data
+      end
+
     :ok = send_request(client, "lobby/create", data)
     {:ok, resp} = recv_message(client)
     resp
