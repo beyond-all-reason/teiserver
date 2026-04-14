@@ -75,7 +75,22 @@ defmodule Teiserver.Protocols.SpringIn do
         end)
         |> Map.put(:message_part, "")
       else
-        %{state | message_part: state.message_part <> data}
+        new_buffer = state.message_part <> data
+
+        max_buffer_size =
+          Config.get_site_config_cache("teiserver.Spring max message buffer size")
+
+        if byte_size(new_buffer) > max_buffer_size do
+          Logger.warning(
+            "Clearing oversized message buffer from #{state.ip}: " <>
+              "message exceeds max length of #{max_buffer_size} " <>
+              "(message was #{byte_size(new_buffer)} bytes)"
+          )
+
+          %{state | message_part: ""}
+        else
+          %{state | message_part: new_buffer}
+        end
       end
 
     new_state

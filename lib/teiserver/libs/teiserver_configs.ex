@@ -228,6 +228,18 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Spring max message buffer size",
+      section: "Legacy protocol",
+      type: "integer",
+      permissions: ["Admin"],
+      description:
+        "Maximum size in bytes for the per-connection partial message buffer. " <>
+          "Data exceeding this limit is dropped. Prevents memory exhaustion from " <>
+          "clients sending data without newlines.",
+      default: 64 * 1024
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Ring flood rate limit count",
       section: "Legacy protocol",
       type: "integer",
