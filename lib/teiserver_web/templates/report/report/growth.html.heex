@@ -39,10 +39,6 @@
     });
   }
 
-  <% IO.puts "\n"
-    IO.inspect @unique_counts
-    IO.puts "" %>
-
   $(function() {
     generate_chart("#unique-counts", <%= raw Jason.encode!(@unique_counts) %>);
     generate_chart("#peak-counts", <%= raw Jason.encode!(@peak_counts) %>);
