@@ -226,7 +226,7 @@ defmodule Teiserver.TeiserverConfigs do
           "Authenticated users are not affected by this limit.",
       default: 30
     })
-    
+
     add_site_config_type(%{
       key: "teiserver.Spring max message buffer size",
       section: "Legacy protocol",
