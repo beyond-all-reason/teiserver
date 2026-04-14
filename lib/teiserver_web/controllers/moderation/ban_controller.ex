@@ -3,7 +3,6 @@ defmodule TeiserverWeb.Moderation.BanController do
 
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
-  alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.CacheUser
   alias Teiserver.Logging
   alias Teiserver.Moderation
@@ -155,16 +154,6 @@ defmodule TeiserverWeb.Moderation.BanController do
 
         key_types = Account.list_smurf_key_types(limit: :infinity)
 
-        # Update their hw_key
-        hw_fingerprint =
-          user.id
-          |> Account.get_user_stat_data()
-          |> CalculateSmurfKeyTask.calculate_hw1_fingerprint()
-
-        Account.update_user_stat(user.id, %{
-          hw_fingerprint: hw_fingerprint
-        })
-
         user_stats =
           case Account.get_user_stat(user.id) do
             nil -> %{}
@@ -250,16 +239,6 @@ defmodule TeiserverWeb.Moderation.BanController do
           )
 
         key_types = Account.list_smurf_key_types(limit: :infinity)
-
-        # Update their hw_key
-        hw_fingerprint =
-          user.id
-          |> Account.get_user_stat_data()
-          |> CalculateSmurfKeyTask.calculate_hw1_fingerprint()
-
-        Account.update_user_stat(user.id, %{
-          hw_fingerprint: hw_fingerprint
-        })
 
         user_stats =
           case Account.get_user_stat(user.id) do
