@@ -900,7 +900,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     test "name work" do
       max_name_size = Config.get_site_config_cache("lobby.Name max length")
-      error_message = "name must not be greater then #{max_name_size} characters"
+      error_message = "Cannot update lobby: name must not be greater then #{max_name_size} characters"
 
       {:ok, _pid, %{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
@@ -910,11 +910,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert details.name == "new name"
       assert_receive {:lobby, ^id, {:updated, %{name: "new name"}}}
 
-      :error = Lobby.update_properties(id, @default_user_id, %{name: String.duplicate("a", max_name_size + 1)})
-      assert_receive {:error, ^error_message}
+      update_result = Lobby.update_properties(id, @default_user_id, %{name: String.duplicate("a", max_name_size + 1)})
+      assert {:error, ^error_message} = update_result
 
-      :error = Lobby.update_properties(id, @default_user_id, %{name: ""})
-      assert_receive {:error, "name must not be empty"}
+      update_result = Lobby.update_properties(id, @default_user_id, %{name: ""})
+      assert {:error, "Cannot update lobby: name must not be empty"} = update_result
     end
 
     test "map name" do
