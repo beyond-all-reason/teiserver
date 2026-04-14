@@ -13,6 +13,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
+  alias Teiserver.Config
 
   require Logger
 
@@ -1761,7 +1762,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec update_property(atom(), term(), state(), T.userid()) ::
           {:ok, [event()]} | {:error, String.t()}
   defp update_property(:name, new_name, _state, _user_id) do
-    max_name_size = Teiserver.store_get(:lobby, "Name max length")
+    max_name_size = Config.get_site_config_cache("lobby.Name max length")
 
     name_is_empty = (new_name == "")
     name_is_too_long = (String.length(new_name) > max_name_size)

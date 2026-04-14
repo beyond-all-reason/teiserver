@@ -3,6 +3,7 @@ defmodule Teiserver.SpringBattleHostTest do
   alias Teiserver.Coordinator
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
+  alias Teiserver.Config
   use Teiserver.ServerCase, async: false
   require Logger
 
@@ -90,6 +91,50 @@ defmodule Teiserver.SpringBattleHostTest do
 
     reply = _recv_until(watcher_socket)
     assert reply == "BATTLECLOSED #{lobby_id}\n"
+  end
+
+  test "host battle with name too big test", %{socket: socket, user: user} = context do
+    max_name_size = Config.get_site_config_cache("lobby.Name max length")
+    error_message = "name must not be greater then #{max_name_size} characters"
+
+    _send_raw(
+      socket,
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\tgameTitle\t#{String.duplicate("a", max_name_size + 1)}\n"
+    )
+
+    # mix test ./test/teiserver/protocols/spring/spring_battle_host_test.exs:96
+    reply =
+      _recv_until(socket)
+      |> String.split("\n")
+
+    assert reply =~ "hehehehe"
+
+    [
+      opened,
+      reason
+    ] = reply
+
+    assert opened =~ "OPENBATTLEFAILED "
+    assert reason =~ error_message
+  end
+
+  test "host battle with empty name test", %{socket: socket, user: user} = context do
+    _send_raw(
+      socket,
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\tgameTitle\t\n"
+    )
+
+    reply =
+      _recv_until(socket)
+      |> String.split("\n")
+
+    [
+      opened,
+      reason
+    ] = reply
+
+    assert opened =~ "OPENBATTLEFAILED "
+    assert reason =~ "name must not be empty"
   end
 
   @tag :needs_attention

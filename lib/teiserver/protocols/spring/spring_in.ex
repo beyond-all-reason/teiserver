@@ -823,7 +823,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
           client = Client.get_client_by_id(state.userid)
 
-          max_name_size = Teiserver.store_get(:lobby, "Name max length")
+          max_name_size = Config.get_site_config_cache("lobby.Name max length")
 
           name_is_empty = (name == "")
           name_is_too_long = (String.length(name) > max_name_size)

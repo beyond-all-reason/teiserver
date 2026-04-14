@@ -18,6 +18,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Lobby.LobbyRestrictions
   alias Teiserver.Telemetry
+  alias Teiserver.Config
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
 
@@ -1530,7 +1531,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> String.downcase()
       |> String.starts_with?("preset")
 
-    max_name_size = Teiserver.store_get(:lobby, "Name max length")
+    max_name_size = Config.get_site_config_cache("lobby.Name max length")
 
     name_is_too_long = (String.length(new_name) > max_name_size)
 

@@ -8,6 +8,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
+  alias Teiserver.Config
 
   require Logger
 
@@ -176,7 +177,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec validate_new_lobby(map) :: true | {:error, String.t()}
   def validate_new_lobby(data) do
-    max_name_size = Teiserver.store_get(:lobby, "Name max length")
+    max_name_size = Config.get_site_config_cache("lobby.Name max length")
 
     name_is_too_long = (String.length(data.name) > max_name_size)
 

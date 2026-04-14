@@ -5,6 +5,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   alias Teiserver.Tachyon, as: TachyonLib
   alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.TachyonLobby.Lobby, as: LobbyProcess
+  alias Teiserver.Config
   use Teiserver.DataCase
   import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until_nil: 1]
 
@@ -898,7 +899,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "name work" do
-      max_name_size = Teiserver.store_get(:lobby, "Name max length")
+      max_name_size = Config.get_site_config_cache("lobby.Name max length")
+      error_message = "name must not be greater then #{max_name_size} characters"
 
       {:ok, _pid, %{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
@@ -908,10 +910,10 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert details.name == "new name"
       assert_receive {:lobby, ^id, {:updated, %{name: "new name"}}}
 
-      {:error, reason} = Lobby.update_properties(id, @default_user_id, %{name: String.duplicate("a", max_name_size + 1)})
-      assert_receive {:error, "name must not be greater then #{max_name_size} characters"}
+      :error = Lobby.update_properties(id, @default_user_id, %{name: String.duplicate("a", max_name_size + 1)})
+      assert_receive {:error, ^error_message}
 
-      {:error, reason} = Lobby.update_properties(id, @default_user_id, %{name: ""})
+      :error = Lobby.update_properties(id, @default_user_id, %{name: ""})
       assert_receive {:error, "name must not be empty"}
     end
 
