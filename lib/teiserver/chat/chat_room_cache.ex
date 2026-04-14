@@ -13,6 +13,10 @@ defmodule Teiserver.Room do
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Moderation
+  alias Teiserver.Plugins
+
+  use Plugins
+
   require Logger
 
   @type room :: Chat.RoomServer.room()
@@ -143,15 +147,22 @@ defmodule Teiserver.Room do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
-    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    cond do
+      allow?(user.id) == false ->
+        nil
 
-    if blacklisted do
-      CacheUser.shadowban_user(user.id)
-    end
+      Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg) ->
+        CacheUser.shadowban_user(user.id)
+        nil
 
-    if allow?(user.id) do
-      RoomServer.send_message(room_name, user.id, msg)
+      true ->
+        do_send_message(room_name, user, msg)
     end
+  end
+
+  @decorate Plugins.plugin(:send_chat_message)
+  defp do_send_message(room_name, %{id: user_id}, msg) do
+    RoomServer.send_message(room_name, user_id, msg)
   end
 
   @spec send_message_ex(T.userid(), String.t(), String.t()) :: nil | :ok
@@ -162,17 +173,22 @@ defmodule Teiserver.Room do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
-    blacklisted = Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg)
+    cond do
+      allow?(user.id) == false ->
+        nil
 
-    if blacklisted do
-      CacheUser.shadowban_user(user.id)
+      Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg) ->
+        CacheUser.shadowban_user(user.id)
+        nil
+
+      true ->
+        do_send_message_ex(room_name, user, msg)
     end
+  end
 
-    if allow?(from_id) do
-      RoomServer.send_message_ex(room_name, from_id, msg)
-    end
-
-    :ok
+  @decorate Plugins.plugin(:send_chat_message_ex)
+  defp do_send_message_ex(room_name, %{id: user_id}, msg) do
+    RoomServer.send_message_ex(room_name, user_id, msg)
   end
 
   @spec allow?(T.userid()) :: boolean()

@@ -11,6 +11,7 @@ defmodule Teiserver.SpringTcpServer do
   alias Teiserver.Config
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Protocols.Spring.PartyIn
   alias Teiserver.Protocols.SpringIn
   alias Teiserver.Protocols.SpringOut
@@ -1176,19 +1177,18 @@ defmodule Teiserver.SpringTcpServer do
   @spec flood_protect?(String.t(), map()) :: {boolean, map()}
   defp flood_protect?(_data, %{exempt_from_cmd_throttle: true} = state), do: {false, state}
 
-  defp flood_protect?("c.auth.login_queue_heartbeat" <> _rest, state), do: {false, state}
+  # Only exempt heartbeat for authenticated connections
+  defp flood_protect?("c.auth.login_queue_heartbeat" <> _rest, %{userid: userid} = state)
+       when not is_nil(userid),
+       do: {false, state}
 
-  defp flood_protect?(data, state) do
+  defp flood_protect?(_data, state) do
+    now = System.system_time(:second)
+    limiter = now - state.flood_rate_window_size
+
     cmd_timestamps =
-      if String.contains?(data, "\n") do
-        now = System.system_time(:second)
-        limiter = now - state.flood_rate_window_size
-
-        [now | state.cmd_timestamps]
-        |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
-      else
-        state.cmd_timestamps
-      end
+      [now | state.cmd_timestamps]
+      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
 
     if Enum.count(cmd_timestamps) > state.flood_rate_limit_count do
       {true, %{state | cmd_timestamps: cmd_timestamps}}
@@ -1329,6 +1329,12 @@ defmodule Teiserver.SpringTcpServer do
             app_status: nil,
             protocol_optimisation: :full,
             pending_messages: [],
+
+            # Rate limiting for unauthenticated telemetry commands
+            telemetry_rate_limiter:
+              "teiserver.Spring telemetry rate limit per minute"
+              |> Config.get_site_config_cache()
+              |> BurstyRateLimiter.per_minute(),
 
             # Caching app configs
             flood_rate_limit_count:

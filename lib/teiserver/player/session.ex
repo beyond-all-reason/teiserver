@@ -573,7 +573,7 @@ defmodule Teiserver.Player.Session do
   end
 
   def restore_session(_blob_key, blob_value) do
-    snapshot = :erlang.binary_to_term(blob_value)
+    snapshot = :erlang.binary_to_term(blob_value, [:safe])
 
     SessionSupervisor.start_session_from_snapshot(snapshot.user_id, snapshot)
   end

@@ -10,7 +10,7 @@ defmodule Teiserver.Plugs.BasicAuthBotPlug do
   def call(conn, _opts) do
     case get_req_header(conn, "authorization") do
       ["Basic " <> encoded] ->
-        [username, password] = Base.decode64!(encoded) |> String.split(":")
+        [username, password] = Base.decode64!(encoded) |> String.split(":", parts: 2)
 
         with user <- Account.get_user_by_name(username),
              true <- Auth.is_bot?(user),

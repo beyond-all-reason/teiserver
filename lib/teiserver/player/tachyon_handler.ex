@@ -159,6 +159,7 @@ defmodule Teiserver.Player.TachyonHandler do
         %{
           userId: to_string(user_state.user_id),
           username: user_state.username,
+          displayName: user_state.username,
           clanId: user_state.clan_id,
           country: user_state.country,
           status: user_state.status,
@@ -1152,7 +1153,8 @@ defmodule Teiserver.Player.TachyonHandler do
       ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
       engine_version: :engineVersion,
       game_version: :gameVersion,
-      current_vote: {:currentVote, &vote_to_tachyon/1}
+      current_vote: {:currentVote, &vote_to_tachyon/1},
+      vote_history: {:voteHistory, &vote_history_to_tachyon/1}
     }
 
     Collections.transform_map(details, mappings)
@@ -1170,7 +1172,8 @@ defmodule Teiserver.Player.TachyonHandler do
       name: :name,
       map_name: :mapName,
       ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
-      current_vote: {:currentVote, &vote_to_tachyon/1}
+      current_vote: {:currentVote, &vote_to_tachyon/1},
+      vote_history: {:voteHistory, &vote_history_to_tachyon/1}
     }
 
     Map.merge(%{id: lobby_id}, Collections.transform_map(update_map, mappings))
@@ -1280,6 +1283,18 @@ defmodule Teiserver.Player.TachyonHandler do
     |> Collections.transform_map(mapping)
   end
 
+  defp vote_history_to_tachyon(history) do
+    mapping = %{
+      outcome: :outcome,
+      finished_at: {:finishedAt, &DateTime.to_unix(&1, :microsecond)},
+      vote: {:vote, &vote_action_to_tachyon/1}
+    }
+
+    for {id, record} <- history, into: %{} do
+      {id, Collections.transform_map(record, mapping)}
+    end
+  end
+
   defp vote_action_to_tachyon(action) do
     case action do
       {:change_map, name} -> %{type: :changeMap, newMapName: name}
@@ -1296,7 +1311,11 @@ defmodule Teiserver.Player.TachyonHandler do
       engine_version: :engineVersion,
       game_version: :gameVersion,
       current_battle:
-        {:currentBattle, %{started_at: {:startedAt, &DateTime.to_unix(&1, :microsecond)}}}
+        {:currentBattle,
+         %{
+           id: :id,
+           started_at: {:startedAt, &DateTime.to_unix(&1, :microsecond)}
+         }}
     }
 
     base =
