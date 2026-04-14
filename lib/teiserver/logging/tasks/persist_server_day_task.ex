@@ -72,15 +72,6 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       lobby: [],
       menu: [],
       total: []
-    },
-
-    # Per user minute counts for the day as a whole
-    old_minutes_per_user: %{
-      total: %{},
-      player: %{},
-      spectator: %{},
-      lobby: %{},
-      menu: %{}
     }
   }
 
@@ -133,15 +124,6 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       lobby: 0,
       menu: 0,
       total: 0
-    },
-
-    # Per user minute counts for the day as a whole
-    old_minutes_per_user: %{
-      total: %{},
-      player: %{},
-      spectator: %{},
-      lobby: %{},
-      menu: %{}
     }
   }
 
@@ -275,16 +257,6 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         lobby: segment.peak_user_counts.lobby ++ [extend.peak_user_counts.lobby],
         menu: segment.peak_user_counts.menu ++ [extend.peak_user_counts.menu],
         total: segment.peak_user_counts.total ++ [extend.peak_user_counts.total]
-      },
-
-      # Per user minute counts for the day as a whole
-      old_minutes_per_user: %{
-        total: add_maps(segment.old_minutes_per_user.total, extend.old_minutes_per_user.total),
-        player: add_maps(segment.old_minutes_per_user.player, extend.old_minutes_per_user.player),
-        spectator:
-          add_maps(segment.old_minutes_per_user.spectator, extend.old_minutes_per_user.spectator),
-        lobby: add_maps(segment.old_minutes_per_user.lobby, extend.old_minutes_per_user.lobby),
-        menu: add_maps(segment.old_minutes_per_user.menu, extend.old_minutes_per_user.menu)
       }
     }
   end
@@ -294,43 +266,6 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
 
   defp calculate_segment_parts(logs) do
     count = Enum.count(logs)
-
-    empty_user_maps = %{
-      total: %{},
-      player: %{},
-      spectator: %{},
-      lobby: %{},
-      menu: %{}
-    }
-
-    user_maps =
-      logs
-      |> Enum.reduce(empty_user_maps, fn log, acc ->
-        %{
-          total:
-            add_maps(
-              acc.total,
-              Map.new(log["client"]["total"] || [], fn userid -> {userid, 1} end)
-            ),
-          player:
-            add_maps(
-              acc.player,
-              Map.new(log["client"]["player"] || [], fn userid -> {userid, 1} end)
-            ),
-          spectator:
-            add_maps(
-              acc.spectator,
-              Map.new(log["client"]["spectator"] || [], fn userid -> {userid, 1} end)
-            ),
-          lobby:
-            add_maps(
-              acc.lobby,
-              Map.new(log["client"]["lobby"] || [], fn userid -> {userid, 1} end)
-            ),
-          menu:
-            add_maps(acc.menu, Map.new(log["client"]["menu"] || [], fn userid -> {userid, 1} end))
-        }
-      end)
 
     %{
       # Average battle counts per segment
@@ -380,10 +315,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
         lobby: max_counts(logs, ~w(client lobby)),
         menu: max_counts(logs, ~w(client menu)),
         total: max_counts(logs, ~w(client total))
-      },
-
-      # Per user minute counts for the day as a whole
-      old_minutes_per_user: user_maps
+      }
     }
   end
 
@@ -483,12 +415,6 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     |> Enum.reduce(0, fn row, acc ->
       acc + (get_in(row, path) || 0)
     end)
-  end
-
-  defp add_maps(m1, nil), do: m1
-
-  defp add_maps(m1, m2) do
-    Map.merge(m1, m2, fn _k, v1, v2 -> v1 + v2 end)
   end
 
   @match_blank_acc %{

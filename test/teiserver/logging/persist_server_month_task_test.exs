@@ -2,15 +2,18 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
   @moduledoc false
 
   alias Teiserver.Account
+  alias Teiserver.AccountFixtures
   alias Teiserver.CacheUser
   alias Teiserver.Logging
   alias Teiserver.Logging.Tasks.PersistServerDayTask
   alias Teiserver.Logging.Tasks.PersistServerMonthTask
+
   use Teiserver.DataCase
 
-  @tag :needs_attention
   test "perform task" do
-    flunk("We do not create the user_activity_log data so this always fails")
+    AccountFixtures.user_fixture()
+    AccountFixtures.user_fixture()
+    AccountFixtures.user_fixture()
 
     # Make some data
     create_day_data(1)
@@ -25,7 +28,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
 
     assert log.year == 2021
     assert log.month == 1
-    assert log.data["aggregates"]["minutes"]["lobby"] == 42
+    assert Map.keys(log.data) == ["aggregates", "events"]
+    assert Map.keys(log.data["aggregates"]) == ["minutes", "stats"]
   end
 
   defp create_day_data(day) do
@@ -100,7 +104,32 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
       Logging.create_server_minute_log(params)
     end)
 
+    create_activity_data(day)
+
     # Now create the day data
     assert :ok == PersistServerDayTask.perform(%{})
+  end
+
+  defp create_activity_data(day) do
+    user_ids =
+      Account.list_users()
+      |> Enum.map(fn u -> u.id end)
+      |> CacheUser.list_users()
+      |> Enum.filter(fn u -> u.bot == false end)
+      |> Enum.map(fn u -> u.id end)
+
+    activity_data = %{
+      total: Map.new(user_ids, fn id -> {id, :rand.uniform(100)} end),
+      player: Map.new(user_ids, fn id -> {id, :rand.uniform(100)} end),
+      spectator: Map.new(user_ids, fn id -> {id, :rand.uniform(100)} end),
+      lobby: Map.new(user_ids, fn id -> {id, :rand.uniform(100)} end),
+      menu: Map.new(user_ids, fn id -> {id, :rand.uniform(100)} end)
+    }
+
+    # Next, user activity data
+    Logging.create_user_activity_day_log(%{
+      "date" => Date.new(2021, 1, day),
+      "data" => activity_data
+    })
   end
 end
