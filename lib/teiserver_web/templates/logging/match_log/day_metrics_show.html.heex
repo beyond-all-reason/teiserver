@@ -64,9 +64,21 @@
                 </a>
               </li>
 
-              <li class="nav-item">
+              <li :if={Map.has_key?(@data, "team")} class="nav-item">
                 <a href="#team_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                   <i class="fa-solid fa-fw fa-dice-d20"></i> Team
+                </a>
+              </li>
+
+              <li :if={Map.has_key?(@data, "small_team")} class="nav-item">
+                <a href="#small_team_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-solid fa-fw fa-dice-d6"></i> Small Team
+                </a>
+              </li>
+
+              <li :if={Map.has_key?(@data, "large_team")} class="nav-item">
+                <a href="#large_team_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                  <i class="fa-solid fa-fw fa-dice-d20"></i> Large Team
                 </a>
               </li>
 
@@ -110,8 +122,31 @@
                 {render("tab_duel.html", %{data: @data["duel"]})}
               </div>
 
-              <div class="tab-pane" id="team_tab" style="padding:5px;">
+              <div
+                :if={Map.has_key?(@data, "team")}
+                class="tab-pane"
+                id="team_tab"
+                style="padding:5px;"
+              >
                 {render("tab_team.html", %{data: @data["team"]})}
+              </div>
+
+              <div
+                :if={Map.has_key?(@data, "small_team")}
+                class="tab-pane"
+                id="small_team_tab"
+                style="padding:5px;"
+              >
+                {render("tab_team.html", %{data: @data["small_team"]})}
+              </div>
+
+              <div
+                :if={Map.has_key?(@data, "large_team")}
+                class="tab-pane"
+                id="large_team_tab"
+                style="padding:5px;"
+              >
+                {render("tab_team.html", %{data: @data["large_team"]})}
               </div>
 
               <div class="tab-pane" id="ffa_tab" style="padding:5px;">
