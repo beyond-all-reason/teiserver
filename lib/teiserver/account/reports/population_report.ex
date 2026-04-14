@@ -58,7 +58,7 @@ defmodule Teiserver.Account.PopulationReport do
   end
 
   defp exclude_bots_where("true") do
-    "NOT users.data -> 'roles' @> '\"Bot\"'"
+    "NOT ('Bot' = ANY(users.roles))"
   end
 
   defp exclude_bots_where(_value), do: nil

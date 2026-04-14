@@ -134,7 +134,8 @@ defmodule TeiserverWeb.Tachyon.Autohost do
           teams: [%{bots: [%{host_user_id: 123, ai_short_name: "testAI", name: "test AI"}]}],
           start_box: %{left: 0.6, right: 1, top: 0.6, bottom: 1}
         }
-      ]
+      ],
+      game_options: %{"foo" => "bar"}
     }
 
     Task.async(fn ->
@@ -181,7 +182,8 @@ defmodule TeiserverWeb.Tachyon.Autohost do
                "engineVersion" => "engineversion",
                "gameName" => "game name",
                "mapName" => "very map",
-               "startPosType" => "fixed"
+               "startPosType" => "fixed",
+               "gameOptions" => %{"foo" => "bar"}
              }
   end
 

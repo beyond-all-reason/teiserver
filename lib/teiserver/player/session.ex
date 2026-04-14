@@ -473,7 +473,8 @@ defmodule Teiserver.Player.Session do
   @type lobby_start_params :: %{
           name: String.t(),
           map_name: String.t(),
-          ally_team_config: TachyonLobby.ally_team_config()
+          ally_team_config: TachyonLobby.ally_team_config(),
+          game_options: %{String.t() => String.t()}
         }
   @spec create_lobby(T.userid(), lobby_start_params()) ::
           {:ok, TachyonLobby.details()} | {:error, reason :: term()}
@@ -573,7 +574,7 @@ defmodule Teiserver.Player.Session do
   end
 
   def restore_session(_blob_key, blob_value) do
-    snapshot = :erlang.binary_to_term(blob_value)
+    snapshot = :erlang.binary_to_term(blob_value, [:safe])
 
     SessionSupervisor.start_session_from_snapshot(snapshot.user_id, snapshot)
   end

@@ -13,11 +13,16 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Plugins
   alias Teiserver.Protocols.Spring
   alias Teiserver.Room
   alias Teiserver.Telemetry
+
+  use Plugins
   use GenServer
+
   require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec do_start() :: :ok
@@ -185,29 +190,25 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   # match-event <playerName> <eventType> <gameTime>
   # match-event <Beherith> <commands:FirstLineMove> <67>
   def handle_info({:direct_message, from_id, "match-event " <> data}, state) do
-    case Regex.run(~r/<(.*?)> <(.*?)> <(.*?)>$/, String.trim(data)) do
-      [_all, username, event_type_name, game_time] ->
-        userid = Account.get_userid_from_name(username)
+    regex_result = Regex.run(~r/<(.*?)> <(.*?)> <(.*?)>$/, String.trim(data))
 
-        if userid && Auth.is_bot?(from_id) do
-          match_id = Battle.get_match_id_from_userid(from_id)
+    with [_all, username, event_type_name, game_time] <- regex_result,
+         userid <- Account.get_userid_from_name(username) do
+      if userid && Auth.is_bot?(from_id) do
+        match_id = Battle.get_match_id_from_userid(userid)
 
-          if match_id do
-            game_time = int_parse(game_time)
-            Telemetry.log_simple_match_event(userid, match_id, event_type_name, game_time)
-
-            Logger.info(
-              "match-event: Stored <#{username}> <#{event_type_name}> <#{game_time}> userid #{userid} match_id #{match_id}"
-            )
-          else
-            Logger.warning("match-event: Cannot get match_id of userid of #{username}")
-          end
+        if match_id do
+          game_time = int_parse(game_time)
+          handle_match_simple_event(username, userid, match_id, event_type_name, game_time)
         else
-          Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
+          Logger.warning("match-event: Cannot get match_id of userid of #{username}")
         end
-
+      else
+        Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
+      end
+    else
       _other ->
-        Logger.error("match-event bad_match error on '#{data}'")
+        Logger.error("complex_match_event error on '#{data}'")
     end
 
     {:noreply, state}
@@ -217,34 +218,37 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   # complex-match-event <playerName> <eventType> <gameTime> <base64data>
   # complex-match-event <Beherith> <commands:FirstLineMove> <67> <eyJrZXkiOiJ2YWx1ZSJ9>
   def handle_info({:direct_message, from_id, "complex-match-event " <> data}, state) do
-    case Regex.run(~r/<(.*?)> <(.*?)> <(.*?)> <(.*?)>$/, String.trim(data)) do
-      [_all, username, event_type_name, game_time, base64data] ->
-        case base64_and_json(base64data) do
-          {:ok, json_data} ->
-            userid = Account.get_userid_from_name(username)
+    regex_result = Regex.run(~r/<(.*?)> <(.*?)> <(.*?)> <(.*?)>$/, String.trim(data))
 
-            if userid && Auth.is_bot?(from_id) do
-              match_id = Battle.get_match_id_from_userid(from_id)
+    with [_all, username, event_type_name, game_time, base64data] <- regex_result,
+         {:ok, json_data} <- base64_and_json(base64data),
+         userid <- Account.get_userid_from_name(username) do
+      if userid && Auth.is_bot?(from_id) do
+        match_id = Battle.get_match_id_from_userid(userid)
 
-              if match_id do
-                game_time = int_parse(game_time)
+        if match_id do
+          game_time = int_parse(game_time)
 
-                Telemetry.log_complex_match_event(
-                  userid,
-                  match_id,
-                  event_type_name,
-                  game_time,
-                  json_data
-                )
-              end
-            end
-
-          {:error, error_message} ->
-            Logger.error("complex_match_event bad_decode error '#{error_message}' on '#{data}'")
+          handle_match_complex_event(
+            username,
+            userid,
+            match_id,
+            event_type_name,
+            game_time,
+            json_data
+          )
+        else
+          Logger.warning("match-event: Cannot get match_id of userid of #{username}")
         end
+      else
+        Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
+      end
+    else
+      {:error, error_message} ->
+        Logger.error("complex_match_event error on '#{data}': #{error_message}")
 
       _other ->
-        Logger.error("complex_match_event bad_match error on '#{data}'")
+        Logger.error("complex_match_event error on '#{data}'")
     end
 
     {:noreply, state}
@@ -419,6 +423,37 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   defp handle_json_msg(contents, _from_id) do
     Logger.warning("No catch on handle_json_msg: #{Kernel.inspect(contents)}")
     :ok
+  end
+
+  @decorate Plugins.plugin(:handle_match_simple_event)
+  def handle_match_simple_event(username, userid, match_id, event_type_name, game_time) do
+    Telemetry.log_simple_match_event(userid, match_id, event_type_name, game_time)
+
+    Logger.info(
+      "match-event: Stored <#{username}> <#{event_type_name}> <#{game_time}> userid #{userid} match_id #{match_id}"
+    )
+  end
+
+  @decorate Plugins.plugin(:handle_match_complex_event)
+  def handle_match_complex_event(
+        username,
+        userid,
+        match_id,
+        event_type_name,
+        game_time,
+        json_data
+      ) do
+    Telemetry.log_complex_match_event(
+      userid,
+      match_id,
+      event_type_name,
+      game_time,
+      json_data
+    )
+
+    Logger.info(
+      "match-event: Stored <#{username}> <#{event_type_name}> <#{game_time}> userid #{userid} match_id #{match_id}"
+    )
   end
 
   defp do_begin do

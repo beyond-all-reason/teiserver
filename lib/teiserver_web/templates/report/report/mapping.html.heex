@@ -29,7 +29,7 @@
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 mt-2">
               <label for="report_date_preset" class="control-label">Date range:</label>
               {select(:report, :date_preset, @presets,
                 class: "form-control",
@@ -37,7 +37,7 @@
               )}
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 mt-2">
               <label for="report_start_date" class="control-label">Start date:</label>
               <input
                 type="text"
@@ -48,7 +48,7 @@
               />
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 mt-2">
               <label for="report_end_date" class="control-label">End date:</label>
               <input
                 type="text"
@@ -57,6 +57,82 @@
                 value={@params["end_date"]}
                 class="form-control datepicker"
               />
+            </div>
+
+            <div class="col-md-4 col-xl-2 mt-2">
+              <label for="report_rated" class="control-label">Rated:</label>
+              {select(:report, :rated, ["All", "Rated", "Unrated"],
+                class: "form-control",
+                selected: @params["rated"]
+              )}
+            </div>
+
+            <div class="col-md-4 col-xl-2 mt-2">
+              <label for="report_min_duration" class="control-label">
+                Minimum duration (seconds):
+              </label>
+              <input
+                type="text"
+                id="report_min_duration"
+                name="report[min_duration]"
+                value={@params["min_duration"]}
+                class="form-control"
+              />
+            </div>
+
+            <div class="col-md-4 col-xl-2 mt-2">
+              <label for="report_max_duration" class="control-label">
+                Maximum duration (seconds):
+              </label>
+              <input
+                type="text"
+                id="report_max_duration"
+                name="report[max_duration]"
+                value={@params["max_duration"]}
+                class="form-control"
+              />
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-md-3 col-xl-2">
+              {central_component("checkbox",
+                name: "report[types][]",
+                id: "report_types_duel",
+                value: "Duel",
+                label: "Duels",
+                checked: Enum.member?(@params["types"], "Duel")
+              )}
+            </div>
+
+            <div class="col-md-3 col-xl-2">
+              {central_component("checkbox",
+                name: "report[types][]",
+                id: "report_types_team",
+                value: "Team",
+                label: "Teams",
+                checked: Enum.member?(@params["types"], "Team")
+              )}
+            </div>
+
+            <div class="col-md-3 col-xl-2">
+              {central_component("checkbox",
+                name: "report[types][]",
+                id: "report_types_small_team",
+                value: "Small Team",
+                label: "Small Teams",
+                checked: Enum.member?(@params["types"], "Small Team")
+              )}
+            </div>
+
+            <div class="col-md-3 col-xl-2">
+              {central_component("checkbox",
+                name: "report[types][]",
+                id: "report_types_large_team",
+                value: "Large Team",
+                label: "Large Teams",
+                checked: Enum.member?(@params["types"], "Large Team")
+              )}
             </div>
           </div>
 

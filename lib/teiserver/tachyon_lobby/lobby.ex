@@ -3,6 +3,26 @@ defmodule Teiserver.TachyonLobby.Lobby do
   Represent a single lobby
   """
 
+  # This module has essentially 3 parts:
+  # 1: the external API as usual. A set of exported function that delegate to
+  # gen_statem.cast/call and so on
+  # 2: the internal handlers: the callbacks for gen_statem
+  # 3: an event sourcing system for the handlers.
+  #
+  # The handlers are responsible to check if the operation is valid, and then
+  # translate the operation into an event. See `@typep event` for the list.
+  # These events are then reduced/folded into an aggregate. This aggregate
+  # is used to
+  # 1: compute the end state after applying the original operation/event See process_events/2
+  # 2: the update events to send to lobby members. See broadcast_updates/1
+  # 3: update the lobby list process when relevant. Also handled in broadcast_updates/1
+  #
+  # The event sourcing approach is used so we can have some "atomic" operations, and more
+  # complex operations can be represented through them. It is mostly useful when dealing
+  # with player movements, to/from spectators or within ally teams.
+  # It also handles update events without having to dispatch them manually on a case by
+  # case basis.
+
   alias Teiserver.Asset
   alias Teiserver.Autohost
   alias Teiserver.Data.Types, as: T
@@ -53,7 +73,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
           required(:map_name) => String.t(),
           required(:ally_team_config) => ally_team_config(),
           optional(:game_version) => String.t(),
-          optional(:engine_version) => String.t()
+          optional(:engine_version) => String.t(),
+          optional(:game_options) => %{String.t() => String.t()}
         }
 
   @typedoc """
@@ -80,6 +101,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           quorum: non_neg_integer(),
           majority: non_neg_integer()
         }
+  @type vote_outcome :: :passed | :failed | :cancelled | :timeout
 
   @typedoc """
   The public state of the lobby. Anything that clients need to know about
@@ -92,6 +114,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           game_version: String.t(),
           engine_version: String.t(),
           ally_team_config: ally_team_config(),
+          game_options: %{String.t() => String.t()},
           players: %{
             T.userid() => %{team: team(), ready?: boolean(), asset_status: asset_status()}
           },
@@ -114,7 +137,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
                 id: TachyonBattle.id(),
                 started_at: DateTime.t()
               },
-          current_vote: nil | vote_state()
+          current_vote: nil | vote_state(),
+          vote_history: %{
+            String.t() => %{
+              vote: vote_state(),
+              finished_at: DateTime.t(),
+              outcome: vote_outcome()
+            }
+          }
         }
 
   @typedoc """
@@ -171,6 +201,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            game_version: String.t(),
            engine_version: String.t(),
            ally_team_config: ally_team_config(),
+           game_options: %{String.t() => String.t()},
            # used to track the players in the lobby.
            players: %{player_id() => player() | bot()},
            spectators: %{T.userid() => spectator()},
@@ -183,7 +214,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
                  started_at: DateTime.t()
                },
            ids_to_rejoin: MapSet.t(T.userid()),
-           current_vote: nil | vote_state()
+           vote_idx: integer(),
+           current_vote: nil | vote_state(),
+           vote_history: %{
+             String.t() => %{
+               vote: vote_state(),
+               finished_at: DateTime.t(),
+               outcome: vote_outcome()
+             }
+           }
          }
 
   # the list of internal events used to manipulate the lobby data, but also
@@ -203,15 +242,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:update_map_name, new_name :: String.t()}
            | {:update_ally_team_config, old_config :: ally_team_config(),
               new_config :: ally_team_config()}
+           | {:update_game_options, changes :: %{String.t() => String.t() | nil}}
            | {:start_vote, vote_state()}
            | {:cast_vote, T.userid(), vote_ballot()}
-           | :vote_timeout
-           | :vote_ended
+           | {:vote_ended, DateTime.t(), vote_outcome()}
 
   @spec gen_id() :: id()
   def gen_id, do: UUID.uuid4()
 
   @default_call_timeout 5000
+  @max_vote_history_size 10
 
   # note: this uses a pid and not a lobby id because it's (currently) only
   # used by the lobby list process to bootstrap its state, and at that time
@@ -340,7 +380,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @type lobby_update_data :: %{
           optional(:name) => String.t(),
           optional(:map_name) => String.t(),
-          optional(:ally_team_config) => ally_team_config()
+          optional(:ally_team_config) => ally_team_config(),
+          optional(:game_options) => %{String.t() => String.t() | nil}
         }
 
   @doc """
@@ -405,6 +446,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       game_version: start_params.game_version,
       engine_version: start_params.engine_version,
       ally_team_config: start_params.ally_team_config,
+      game_options: Map.get(start_params, :game_options, %{}),
       players: %{
         start_params.creator_data.id => %{
           id: start_params.creator_data.id,
@@ -420,7 +462,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
       bot_idx_counter: 0,
       current_battle: nil,
       ids_to_rejoin: MapSet.new(),
-      current_vote: nil
+      vote_idx: 1,
+      current_vote: nil,
+      vote_history: %{}
     }
 
     TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
@@ -433,7 +477,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     Logger.metadata(actor_type: :lobby, actor_id: id)
     Logger.debug("Restoring lobby from snapshot")
 
-    snapshot = :erlang.binary_to_term(serialized_data)
+    snapshot = :erlang.binary_to_term(serialized_data, [:safe])
 
     player_ids =
       for {id, x} <- snapshot.players, !is_map_key(x, :host_user_id) do
@@ -981,7 +1025,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(:info, {:vote_timeout, vote_id}, _state, data)
       when data.current_vote.id == vote_id do
-    event = :vote_timeout
+    event = {:vote_ended, DateTime.utc_now(), :timeout}
     aggregate = process_events([event], data) |> broadcast_updates()
     process_event_actions(aggregate)
     {:keep_state, aggregate.data}
@@ -1069,6 +1113,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
       end)
       |> Enum.into(%{})
 
+    vote_history =
+      Enum.map(state.vote_history, fn {id, record} ->
+        {id,
+         %{finished_at: record.finished_at, vote: record.vote.action, outcome: record.outcome}}
+      end)
+      |> Enum.into(%{})
+
     Map.take(state, [
       :id,
       :name,
@@ -1077,11 +1128,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
       :engine_version,
       :ally_team_config,
       :current_battle,
-      :current_vote
+      :current_vote,
+      :game_options
     ])
     |> Map.put(:players, players)
     |> Map.put(:spectators, spectators)
     |> Map.put(:bots, Map.new(bots))
+    |> Map.put(:vote_history, vote_history)
   end
 
   # Given a list of events to process (in the event sourcing way) and the initial
@@ -1298,9 +1351,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
     new_aggregate |> put_in([:updates], [ev | final_events] ++ aggregate.updates)
   end
 
+  defp process_event({:update_game_options, changes} = ev, aggregate) do
+    aggregate
+    |> update_in([:data, :game_options], &patch_merge(&1, changes))
+    |> Map.update!(:updates, &[ev | &1])
+  end
+
   defp process_event({:start_vote, vote_state} = ev, aggregate) do
     aggregate
     |> put_in([:data, :current_vote], vote_state)
+    |> update_in([:data, :vote_idx], &(&1 + 1))
     |> Map.update!(:updates, &[ev | &1])
   end
 
@@ -1318,35 +1378,45 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       {:ended, result} ->
         vote = new_aggregate.data.current_vote
+        new_aggregate = process_event({:vote_ended, DateTime.utc_now(), result}, new_aggregate)
 
-        new_aggregate =
-          new_aggregate
-          |> put_in([:data, :current_vote], nil)
-          |> Map.update!(:actions, &[{:vote_ended, vote, result} | &1])
+        case {result, vote.action} do
+          {:failed, _action} ->
+            new_aggregate
 
-        new_aggregate =
-          case {result, vote.action} do
-            {:failed, _action} ->
-              new_aggregate
-
-            {:passed, {:change_map, new_map}} ->
-              process_event({:update_map_name, new_map}, new_aggregate)
-              # just let the thing crash if a new vote action shows up. It'll be easy
-              # to spot and fix/add support. :start isn't yet supported
-          end
-
-        Map.update!(new_aggregate, :updates, &[:vote_ended | &1])
+          {:passed, {:change_map, new_map}} ->
+            process_event({:update_map_name, new_map}, new_aggregate)
+            # just let the thing crash if a new vote action shows up. It'll be easy
+            # to spot and fix/add support. :start isn't yet supported
+        end
     end
   end
 
-  # don't bother cancelling the timer. The event handler checks the vote id
+  # don't bother cancelling the vote timeout timer. The event handler checks the vote id
   # and it allows us not to worry about storing the tref
-  defp process_event(:vote_timeout = ev, aggregate) do
-    vote_ev = {:vote_ended, aggregate.data.current_vote, :timeout}
+  defp process_event({:vote_ended, ts, outcome}, aggregate) do
+    vote_ev = {:vote_ended, aggregate.data.current_vote, outcome}
+    vote_record = %{vote: aggregate.data.current_vote, finished_at: ts, outcome: outcome}
+    history = Map.put(aggregate.data.vote_history, aggregate.data.current_vote.id, vote_record)
+
+    history =
+      if map_size(history) > @max_vote_history_size do
+        dates =
+          Enum.map(history, fn {_id, record} -> record.finished_at end)
+          |> Enum.sort()
+
+        cutoff = Enum.at(dates, 4)
+
+        Enum.filter(history, fn {_id, record} -> record.finished_at >= cutoff end)
+        |> Enum.into(%{})
+      else
+        history
+      end
 
     aggregate
     |> put_in([:data, :current_vote], nil)
-    |> Map.update!(:updates, &[ev | &1])
+    |> put_in([:data, :vote_history], history)
+    |> Map.update!(:updates, &[{:vote_ended, vote_record} | &1])
     |> Map.update!(:actions, &[vote_ev | &1])
   end
 
@@ -1448,6 +1518,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
     Map.put(change_map, :ally_team_config, changes)
   end
 
+  defp update_change_from_event({:update_game_options, changes}, change_map),
+    do: Map.put(change_map, :game_options, changes)
+
   defp update_change_from_event({:start_vote, vote}, change_map),
     do: Map.put(change_map, :current_vote, vote)
 
@@ -1458,11 +1531,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> put_in([:current_vote, :voters, user_id], ballot)
   end
 
-  defp update_change_from_event(:vote_timeout, change_map),
-    do: Map.put(change_map, :current_vote, nil)
-
-  defp update_change_from_event(:vote_ended, change_map),
-    do: Map.put(change_map, :current_vote, nil)
+  defp update_change_from_event({:vote_ended, record}, change_map) do
+    change_map
+    |> Map.put(:current_vote, nil)
+    |> Map.put_new(:vote_history, %{})
+    |> put_in([:vote_history, record.vote.id], %{
+      vote: record.vote.action,
+      finished_at: record.finished_at,
+      outcome: record.outcome
+    })
+  end
 
   defp broadcast_list_updates(%{data: final_state})
        when map_size(final_state.players) == 0 and map_size(final_state.spectators) == 0,
@@ -1756,6 +1834,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           %{user_id: s.id, name: s.name, password: s.password}
         end)
     }
+    |> Map.merge(Map.take(state, [:game_options]))
   end
 
   @spec update_property(atom(), term(), state(), T.userid()) ::
@@ -1795,7 +1874,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         quorum = (map_size(voters) * 0.501) |> :math.ceil() |> trunc()
 
         vote = %{
-          id: UUID.uuid4(),
+          id: "vote-#{state.vote_idx}",
           action: {:change_map, new_name},
           initiator: user_id,
           voters: voters,
@@ -1815,6 +1894,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp update_property(:ally_team_config, new_config, state, _user_id) do
     {:ok, [{:update_ally_team_config, state.ally_team_config, new_config}]}
+  end
+
+  defp update_property(:game_options, changes, _state, _user_id) do
+    # TODO: set a size limit on that thing to avoid a DOS
+    {:ok, [{:update_game_options, changes}]}
   end
 
   defp update_property(prop, _value, _state, _user_id),

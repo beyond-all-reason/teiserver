@@ -162,7 +162,10 @@ defmodule TeiserverWeb.Logging.MatchLogController do
         {Timex.today().year, Timex.today().month - 1}
       end
 
-    last_month = Logging.get_match_month_log({lyear, lmonth}).data
+    last_month_data =
+      {lyear, lmonth}
+      |> Logging.get_match_month_log()
+      |> Map.get(:data)
 
     days_in_month = Timex.days_in_month(Timex.now())
     progress = round(Timex.today().day / days_in_month * 100)
@@ -171,7 +174,7 @@ defmodule TeiserverWeb.Logging.MatchLogController do
     |> assign(:year, Timex.today().year)
     |> assign(:month, Timex.today().month)
     |> assign(:data, data)
-    |> assign(:last_month, last_month)
+    |> assign(:last_month, last_month_data)
     |> assign(:progress, progress)
     |> add_breadcrumb(name: "Monthly - This month (partial)", url: conn.request_path)
     |> render("month_metrics_today_show.html")

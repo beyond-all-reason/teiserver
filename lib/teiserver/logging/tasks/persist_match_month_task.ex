@@ -157,10 +157,10 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
         weighted_count:
           existing.aggregate.weighted_count + (data["aggregate"]["weighted_count"] || 0)
       },
-      duration: sum_maps(existing.duration, data["duration"] || 0),
-      maps: sum_maps(existing.maps, data["maps"] || 0),
-      matches_per_hour: sum_maps(existing.matches_per_hour, data["matches_per_hour"] || 0),
-      team_sizes: sum_maps(existing.team_sizes, data["team_sizes"] || 0)
+      duration: sum_maps(existing.duration, data["duration"] || %{}),
+      maps: sum_maps(existing.maps, data["maps"] || %{}),
+      matches_per_hour: sum_maps(existing.matches_per_hour, data["matches_per_hour"] || %{}),
+      team_sizes: sum_maps(existing.team_sizes, data["team_sizes"] || %{})
     }
   end
 

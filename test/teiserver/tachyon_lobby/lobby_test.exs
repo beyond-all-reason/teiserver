@@ -60,6 +60,17 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     assert details.engine_version == engine.name
   end
 
+  test "create lobby with game options" do
+    {:ok, _pid, details} =
+      mk_start_params([1, 1])
+      |> Map.put(:game_options, %{"foo" => "bar"})
+      |> Lobby.create()
+
+    assert details.game_options == %{"foo" => "bar"}
+    {:ok, details2} = LobbyProcess.get_details(details.id)
+    assert details2.game_options == %{"foo" => "bar"}
+  end
+
   test "exit when no more players" do
     test_pid = self()
 
@@ -1025,6 +1036,38 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert result == :passed
     end
 
+    test "history to track votes" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      :ok = Lobby.vote_submit(id, "2", {vote.id, :yes})
+      vote_id = vote.id
+
+      assert_receive {:lobby, ^id, {:updated, %{vote_history: %{^vote_id => vote1}}}}
+
+      assert %{vote: {:change_map, "new map"}, outcome: :passed} = vote1
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map2"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      :ok = Lobby.vote_submit(id, "2", {vote.id, :no})
+      vote_id2 = vote.id
+
+      assert_receive {:lobby, ^id, {:updated, %{vote_history: %{^vote_id2 => vote2}}}}
+
+      %{vote: {:change_map, "new map2"}, outcome: :failed} = vote2
+
+      # and lobby details hold the entire history
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert map_size(details.vote_history) == 2
+      assert vote_id < vote_id2
+      assert details.vote_history[vote_id].outcome == :passed
+      assert details.vote_history[vote_id].vote == {:change_map, "new map"}
+      assert details.vote_history[vote_id2].outcome == :failed
+      assert details.vote_history[vote_id2].vote == {:change_map, "new map2"}
+    end
+
     test "map stays when vote fails" do
       %{id: id} = setup_full_lobby([1, 1])
       :ok = Lobby.join_queue(id, "2")
@@ -1394,6 +1437,63 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("other-user-id"), sink_pid)
 
       {:error, :not_a_player} = Lobby.update_client_status(id, "other-user-id", %{ready?: true})
+    end
+  end
+
+  describe "update game options" do
+    test "can add an option" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2]) |> Lobby.create()
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{game_options: %{"foo" => "bar"}})
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.game_options == %{"foo" => "bar"}
+      assert_receive {:lobby, ^id, {:updated, %{game_options: %{"foo" => "bar"}}}}
+    end
+
+    test "can update option" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:game_options, %{"foo" => "bar"})
+        |> Lobby.create()
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{game_options: %{"foo" => "another bar"}})
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.game_options == %{"foo" => "another bar"}
+      assert_receive {:lobby, ^id, {:updated, %{game_options: %{"foo" => "another bar"}}}}
+    end
+
+    test "can remove an option" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:game_options, %{"foo" => "bar"})
+        |> Lobby.create()
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{game_options: %{"foo" => nil}})
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.game_options == %{}
+      assert_receive {:lobby, ^id, {:updated, %{game_options: %{"foo" => nil}}}}
+    end
+
+    test "can add remove and update in one request" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:game_options, %{"foo" => "bar", "ranked" => "true"})
+        |> Lobby.create()
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{
+          game_options: %{"foo" => nil, "ranked" => "false", "blah" => "qux"}
+        })
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.game_options == %{"ranked" => "false", "blah" => "qux"}
+
+      assert_receive {:lobby, ^id,
+                      {:updated,
+                       %{game_options: %{"foo" => nil, "ranked" => "false", "blah" => "qux"}}}}
     end
   end
 

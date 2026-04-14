@@ -159,6 +159,7 @@ defmodule Teiserver.Player.TachyonHandler do
         %{
           userId: to_string(user_state.user_id),
           username: user_state.username,
+          displayName: user_state.username,
           clanId: user_state.clan_id,
           country: user_state.country,
           status: user_state.status,
@@ -678,7 +679,11 @@ defmodule Teiserver.Player.TachyonHandler do
             },
             teams: teams
           }
-        end
+        end,
+      game_options:
+        Map.get(msg["data"], "gameOptions", %{})
+        |> Enum.map(fn {k, v} -> {k, v["value"]} end)
+        |> Enum.into(%{})
     }
 
     case Session.create_lobby(state.user.id, create_data) do
@@ -822,13 +827,26 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/update", "request", _msg_id, %{"data" => data}, state) do
-    keys = [
-      {"name", :name},
-      {"mapName", :map_name},
-      {"allyTeamConfig", :ally_team_config, &ally_team_config_from_tachyon/1}
-    ]
+    mappings = %{
+      "name" => :name,
+      "mapName" => :map_name,
+      "allyTeamConfig" =>
+        {:ally_team_config,
+         %{
+           "maxTeams" => :max_teams,
+           "startBox" =>
+             {:start_box,
+              %{"top" => :top, "bottom" => :bottom, "left" => :left, "right" => :right}},
+           "teams" => {:teams, %{"maxPlayers" => :max_players}}
+         }},
+      "gameOptions" =>
+        {:game_options,
+         fn opts ->
+           Enum.map(opts, fn {k, v} -> {k, v["value"]} end) |> Enum.into(%{})
+         end}
+    }
 
-    update_data = Enum.reduce(keys, %{}, &convert_key(&1, data, &2))
+    update_data = Collections.transform_map(data, mappings)
 
     case Session.lobby_update_properties(state.user.id, update_data) do
       :ok ->
@@ -1100,44 +1118,6 @@ defmodule Teiserver.Player.TachyonHandler do
     |> Enum.reject(&is_nil/1)
   end
 
-  defp ally_team_config_from_tachyon(data) do
-    keys = [
-      {"maxTeams", :max_teams},
-      {"startBox", :start_box, &start_box_from_tachyon/1},
-      {"teams", :teams, &teams_from_tachyon/1}
-    ]
-
-    Enum.map(data, fn d -> Enum.reduce(keys, %{}, &convert_key(&1, d, &2)) end)
-  end
-
-  defp start_box_from_tachyon(data) do
-    keys = [{"top", :top}, {"bottom", :bottom}, {"left", :left}, {"right", :right}]
-    Enum.reduce(keys, %{}, &convert_key(&1, data, &2))
-  end
-
-  # util function to convert keys in a map, with a possible transformation for the val
-  defp convert_key(key_spec, data, map) do
-    case key_spec do
-      {from_k, to_k} ->
-        if is_map_key(data, from_k) do
-          Map.put(map, to_k, Map.get(data, from_k))
-        else
-          map
-        end
-
-      {from_k, to_k, f} ->
-        if is_map_key(data, from_k) do
-          Map.put(map, to_k, f.(Map.get(data, from_k)))
-        else
-          map
-        end
-    end
-  end
-
-  defp teams_from_tachyon(data) do
-    Enum.map(data, fn d -> %{max_players: d["maxPlayers"]} end)
-  end
-
   defp lobby_details_to_tachyon(details) do
     mappings = %{
       id: :id,
@@ -1150,9 +1130,11 @@ defmodule Teiserver.Player.TachyonHandler do
       name: :name,
       map_name: :mapName,
       ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
+      game_options: {:gameOptions, &game_options_to_tachyon/1},
       engine_version: :engineVersion,
       game_version: :gameVersion,
-      current_vote: {:currentVote, &vote_to_tachyon/1}
+      current_vote: {:currentVote, &vote_to_tachyon/1},
+      vote_history: {:voteHistory, &vote_history_to_tachyon/1}
     }
 
     Collections.transform_map(details, mappings)
@@ -1170,7 +1152,9 @@ defmodule Teiserver.Player.TachyonHandler do
       name: :name,
       map_name: :mapName,
       ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
-      current_vote: {:currentVote, &vote_to_tachyon/1}
+      current_vote: {:currentVote, &vote_to_tachyon/1},
+      vote_history: {:voteHistory, &vote_history_to_tachyon/1},
+      game_options: {:gameOptions, &game_options_to_tachyon/1}
     }
 
     Map.merge(%{id: lobby_id}, Collections.transform_map(update_map, mappings))
@@ -1259,6 +1243,14 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  defp game_options_to_tachyon(options) do
+    Enum.map(options, fn
+      {k, nil} -> {k, nil}
+      {k, v} -> {k, %{value: v}}
+    end)
+    |> Enum.into(%{})
+  end
+
   defp vote_to_tachyon(nil), do: nil
 
   defp vote_to_tachyon(vote) do
@@ -1280,6 +1272,18 @@ defmodule Teiserver.Player.TachyonHandler do
     |> Collections.transform_map(mapping)
   end
 
+  defp vote_history_to_tachyon(history) do
+    mapping = %{
+      outcome: :outcome,
+      finished_at: {:finishedAt, &DateTime.to_unix(&1, :microsecond)},
+      vote: {:vote, &vote_action_to_tachyon/1}
+    }
+
+    for {id, record} <- history, into: %{} do
+      {id, Collections.transform_map(record, mapping)}
+    end
+  end
+
   defp vote_action_to_tachyon(action) do
     case action do
       {:change_map, name} -> %{type: :changeMap, newMapName: name}
@@ -1296,7 +1300,11 @@ defmodule Teiserver.Player.TachyonHandler do
       engine_version: :engineVersion,
       game_version: :gameVersion,
       current_battle:
-        {:currentBattle, %{started_at: {:startedAt, &DateTime.to_unix(&1, :microsecond)}}}
+        {:currentBattle,
+         %{
+           id: :id,
+           started_at: {:startedAt, &DateTime.to_unix(&1, :microsecond)}
+         }}
     }
 
     base =

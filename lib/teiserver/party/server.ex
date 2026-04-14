@@ -231,7 +231,7 @@ defmodule Teiserver.Party.Server do
     Logger.metadata(actor_type: :party, actor_id: party_id)
     Logger.debug("Restoring party from snapshot")
 
-    snapshot = :erlang.binary_to_term(serialized_state)
+    snapshot = :erlang.binary_to_term(serialized_state, [:safe])
     now = DateTime.utc_now()
 
     expired_invite_ids =

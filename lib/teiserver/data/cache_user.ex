@@ -20,8 +20,13 @@ defmodule Teiserver.CacheUser do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.EmailHelper
   alias Teiserver.Geoip
+  alias Teiserver.Plugins
   alias Teiserver.Telemetry
+
+  use Plugins
+
   require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @type t :: T.user()
@@ -988,6 +993,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec get_country(T.user(), String.t()) :: String.t()
+  @decorate Plugins.plugin(:get_country)
   def get_country(user, ip) do
     stats = Account.get_user_stat_data(user.id)
 
@@ -1060,6 +1066,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec has_mute?(T.userid() | T.user()) :: boolean()
+  @decorate Plugins.plugin(:has_mute?)
   def has_mute?(user) do
     restricted?(user, [
       "All chat",
@@ -1071,6 +1078,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec has_warning?(T.userid() | T.user()) :: boolean()
+  @decorate Plugins.plugin(:has_warning?)
   def has_warning?(user) do
     restricted?(user, [
       "Warning reminder"
@@ -1097,6 +1105,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec rank_time(T.userid()) :: non_neg_integer()
+  @decorate Plugins.plugin(:rank_time)
   def rank_time(userid) do
     stats = Account.get_user_stat(userid) || %{data: %{}}
 
@@ -1194,6 +1203,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec valid_email?(String.t()) :: :ok | {:error, reason :: String.t()}
+  @decorate Plugins.plugin(:valid_email?)
   def valid_email?(email) do
     cond do
       Application.get_env(:teiserver, Teiserver)[:accept_all_emails] ->

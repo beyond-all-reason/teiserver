@@ -23,12 +23,39 @@ defmodule Teiserver.Game.MappingReport do
         params["end_date"]
       )
 
+    types =
+      params
+      |> Map.get("types", ["Duel", "Team", "Small Team", "Large Team"])
+      |> Enum.reject(&(&1 == "false"))
+
+    rated_filter =
+      case params["rated"] do
+        "Rated" -> true
+        "Unrated" -> false
+        _other -> nil
+      end
+
+    min_duration =
+      case params["min_duration"] do
+        "" -> nil
+        val -> String.to_integer(val)
+      end
+
+    max_duration =
+      case params["max_duration"] do
+        "" -> nil
+        val -> String.to_integer(val)
+      end
+
     data =
       Battle.list_matches(
         search: [
           started_after: start_date |> Timex.to_datetime(),
           started_before: end_date |> Timex.to_datetime(),
-          game_type_in: ["Duel", "Small Team", "Large Team"],
+          game_type_in: types,
+          rated: rated_filter,
+          duration_greater_than: min_duration,
+          duration_less_than: max_duration,
           of_interest: true,
           has_winning_team: true
         ],
@@ -83,7 +110,11 @@ defmodule Teiserver.Game.MappingReport do
         "date_preset" => "This month",
         "start_date" => "",
         "end_date" => "",
-        "mode" => ""
+        "mode" => "",
+        "types" => ["Duel", "Team", "Small Team", "Large Team"],
+        "min_duration" => "",
+        "max_duration" => "",
+        "rated" => "all"
       },
       Map.get(params, "report", %{})
     )
