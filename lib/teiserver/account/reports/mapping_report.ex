@@ -7,7 +7,7 @@ defmodule Teiserver.Game.MappingReport do
   def icon, do: "fa-solid fa-map"
 
   @spec permissions() :: String.t()
-  def permissions, do: "Admin"
+  def permissions, do: "Moderator"
 
   @threshold 10
 

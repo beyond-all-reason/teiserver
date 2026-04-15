@@ -4,7 +4,7 @@
       <h4>Metrics</h4>
     </div>
 
-    <%= if allow?(@current_user, "Admin") do %>
+    <%= if allow?(@current_user, "Moderator") do %>
       {central_component("menu_card",
         size: :small,
         icon: Teiserver.Account.RatingLib.icon(),
