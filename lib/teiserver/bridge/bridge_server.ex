@@ -11,6 +11,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.CacheUser
   alias Teiserver.Chat.WordLib
+  alias Teiserver.Client
   alias Teiserver.Communication
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
@@ -498,6 +499,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     if Communication.use_discord?() do
+      Process.flag(:trap_exit, true)
       send(self(), :begin)
     end
 
@@ -511,6 +513,11 @@ defmodule Teiserver.Bridge.BridgeServer do
     )
 
     {:ok, %{}}
+  end
+
+  @impl GenServer
+  def terminate(_reason, state) do
+    Client.disconnect(state.userid, "bridge terminate")
   end
 
   @spec get_bridge_pid() :: pid

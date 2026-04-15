@@ -528,6 +528,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
+    Process.flag(:trap_exit, true)
     send(self(), :begin)
     Logger.metadata(request_id: "MatchMonitorServer")
 
@@ -538,6 +539,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     )
 
     {:ok, %{}}
+  end
+
+  @impl GenServer
+  def terminate(_reason, state) do
+    Client.disconnect(state.userid, "match monitor terminate")
   end
 
   @spec get_match_monitor_pid() :: pid() | nil
