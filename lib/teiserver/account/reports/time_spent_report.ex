@@ -10,7 +10,7 @@ defmodule Teiserver.Account.TimeSpentReport do
   def icon, do: "fa-solid fa-stopwatch"
 
   @spec permissions() :: String.t()
-  def permissions, do: "Admin"
+  def permissions, do: "Moderator"
 
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, params) do

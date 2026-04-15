@@ -8,7 +8,7 @@ defmodule Teiserver.Account.WeekOnWeekReport do
   def icon, do: "fa-solid fa-calendar"
 
   @spec permissions() :: String.t()
-  def permissions, do: "Admin"
+  def permissions, do: "Moderator"
 
   @spec run(Plug.Conn.t(), map()) :: map()
   def run(_conn, params) do
