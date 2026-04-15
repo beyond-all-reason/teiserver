@@ -145,8 +145,10 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
     end
   end
 
+  @complex_client_event_max_length 4096
+
   defp do_complex_client_event(data, state) do
-    if String.length(data) < 1024 do
+    if String.length(data) < @complex_client_event_max_length do
       case Regex.run(~r/(\S+) (\S+) (\S+)/u, data) do
         [_full_match, event_name, value64, hash] ->
           case Spring.decode_value(value64) do
@@ -169,6 +171,11 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           "no match"
       end
     else
+      Logger.warning(
+        "log_client_event exceeds max_length: length=#{String.length(data)} " <>
+          "max=#{@complex_client_event_max_length}"
+      )
+
       "exceeds max_length"
     end
   end
