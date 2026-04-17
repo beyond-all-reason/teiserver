@@ -158,7 +158,58 @@
           {Credo.Check.Refactor.MapJoin, []},
           {Credo.Check.Refactor.MapMap, []},
           {Credo.Check.Refactor.FilterReject, []},
-          {Credo.Check.Readability.ModuleDoc, []}
+          {Credo.Check.Readability.ModuleDoc, []},
+
+          #
+          ## Custom jump checks
+          #
+          {Jump.CredoChecks.AssertElementSelectorCanNeverFail, []},
+          {Jump.CredoChecks.AvoidFunctionLevelElse, []},
+          {Jump.CredoChecks.AvoidLoggerConfigureInTest, []},
+          # Default exclusion list is empty
+          {Jump.CredoChecks.AvoidSocketAssignsInTest, excluded: ["test/app_web/plugs/"]},
+          {Jump.CredoChecks.DoctestIExExamples,
+           [
+             # Tells Credo where to look for the `doctest` call.
+             # If you colocate your test files with your implementation, this would just
+             # be `&String.replace_trailing(&1, ".ex", "_test.exs")`
+             derive_test_path: fn filename ->
+               filename
+               |> String.replace_leading("lib/", "test/")
+               |> String.replace_trailing(".ex", "_test.exs")
+             end
+           ]},
+          {Jump.CredoChecks.ForbiddenFunction,
+           functions: [
+             {:erlang, :binary_to_term,
+              "Use Plug.Crypto.non_executable_binary_to_term/2 instead."}
+           ]},
+          {Jump.CredoChecks.LiveViewFormCanBeRehydrated, excluded: ["lib/my_app/"]},
+          # Default start_after is "0"
+          {Jump.CredoChecks.PreferTextColumns, start_after: "20240101000000"},
+          {Jump.CredoChecks.TestHasNoAssertions,
+           custom_assertion_functions: [:await_has, :await_with_timeout]},
+          # Default max_assertions is 20
+          {Jump.CredoChecks.TooManyAssertions, [max_assertions: 20]},
+          {Jump.CredoChecks.TopLevelAliasImportRequire, []},
+          {Jump.CredoChecks.UseObanProWorker, []},
+          {Jump.CredoChecks.VacuousTest,
+           [
+             # When true (default), tests that destructure setup context
+             # (3-arity test blocks) are considered not vacuous.
+             # Set to false to check them too.
+             ignore_setup_only_tests?: false,
+             # Additional library namespaces whose calls should not count
+             # as production code. Defaults to []
+             library_modules: [
+               Ecto,
+               Jason,
+               Oban,
+               Phoenix,
+               Plug
+             ]
+           ]},
+          {Jump.CredoChecks.WeakAssertion, []}
         ],
         disabled: [
           #
