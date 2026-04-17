@@ -143,6 +143,10 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           "no match"
       end
     else
+      Logger.warning(
+        "simple_client_event exceeds max_length: length=#{String.length(data)} max=1024"
+      )
+
       "exceeds max_length"
     end
   end
@@ -202,6 +206,10 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           "no match"
       end
     else
+      Logger.warning(
+        "live_client_event exceeds max_length: length=#{String.length(data)} max=1024"
+      )
+
       "exceeds max_length"
     end
   end
@@ -246,6 +254,8 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           "no match"
       end
     else
+      Logger.warning("client_property exceeds max_length: length=#{String.length(data)} max=1024")
+
       "exceeds max_length"
     end
   end
