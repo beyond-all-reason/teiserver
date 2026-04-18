@@ -5,8 +5,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   alias Teiserver.Tachyon, as: TachyonLib
   alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.TachyonLobby.Lobby, as: LobbyProcess
+
   use Teiserver.DataCase
+
   import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until_nil: 1]
+  import LobbyProcess, only: [patch_merge: 2]
 
   @moduletag :tachyon
 
@@ -790,8 +793,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       %{bots: %{^bot_id1 => nil, ^bot_id2 => nil, ^bot_id3 => nil}} = update
 
       # players in join queue should be in team now
-      assert update.players["3"].team != nil
-      assert update.players["4"].team != nil
+      assert update.players["3"].team == {1, 0, 0}
+      assert update.players["4"].team == {0, 1, 0}
       %{spectators: %{"2" => nil, "3" => nil, "4" => nil}} = update
     end
 
@@ -942,7 +945,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, details} = LobbyProcess.get_details(id)
       assert details.map_name == original_details.map_name
       vote = details.current_vote
-      assert vote != nil
+      assert vote != assert(match?(%{action: _, id: "vote-1"}, vote))
       assert vote.voters[@default_user_id] == :yes, "initiator is always yes"
       assert vote.voters["2"] == :pending, "other voters are pending"
       assert vote.action == {:change_map, "new map"}
@@ -958,7 +961,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
 
       assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
-      assert vote != nil
+      assert vote != assert(match?(%{action: _, id: "vote-1"}, vote))
 
       :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
     end
@@ -1115,7 +1118,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
       assert_receive {:lobby, ^id, {:updated, %{players: %{}}}}
       assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
-      assert vote != nil
+      assert match?(%{action: _, id: "vote-1"}, vote)
 
       {:error, _reason} =
         Lobby.update_properties(id, @default_user_id, %{map_name: "different map"})
@@ -1605,8 +1608,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   # again, this should probably be exatracted in a more general module
   describe "patch merge" do
-    import LobbyProcess, only: [patch_merge: 2]
-
     test "update a simple (non map) value" do
       assert patch_merge(%{key: "s1"}, %{key: "s2"}) == %{key: "s2"}
 

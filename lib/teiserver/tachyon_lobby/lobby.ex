@@ -23,6 +23,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # It also handles update events without having to dispatch them manually on a case by
   # case basis.
 
+  alias Plug.Crypto
   alias Teiserver.Asset
   alias Teiserver.Autohost
   alias Teiserver.Data.Types, as: T
@@ -477,7 +478,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     Logger.metadata(actor_type: :lobby, actor_id: id)
     Logger.debug("Restoring lobby from snapshot")
 
-    snapshot = :erlang.binary_to_term(serialized_data, [:safe])
+    snapshot = Crypto.non_executable_binary_to_term(serialized_data, [:safe])
 
     player_ids =
       for {id, x} <- snapshot.players, !is_map_key(x, :host_user_id) do

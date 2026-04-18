@@ -3,6 +3,7 @@ defmodule Teiserver.Party.Server do
   transient state machine to hold a party state and mediate player interactions
   """
 
+  alias Plug.Crypto
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
@@ -231,7 +232,7 @@ defmodule Teiserver.Party.Server do
     Logger.metadata(actor_type: :party, actor_id: party_id)
     Logger.debug("Restoring party from snapshot")
 
-    snapshot = :erlang.binary_to_term(serialized_state, [:safe])
+    snapshot = Crypto.non_executable_binary_to_term(serialized_state, [:safe])
     now = DateTime.utc_now()
 
     expired_invite_ids =

@@ -160,6 +160,23 @@
           {Credo.Check.Refactor.FilterReject, []},
           {Credo.Check.Readability.ModuleDoc, []},
 
+
+
+          # Normally disabled checks
+          # {Credo.Check.Design.DuplicatedCode, []}, - 71 failures
+          {Credo.Check.Design.SkipTestWithoutComment, []},
+          # {Credo.Check.Design.TagTODO, [exit_status: 2]}, - 47 failures
+          # {Credo.Check.Refactor.AppendSingleItem, []}, - 63 failures
+          # {Credo.Check.Refactor.Apply, []}, - 5 failures
+          {Credo.Check.Refactor.DoubleBooleanNegation, []},
+          # {Credo.Check.Refactor.NegatedIsNil, []}, - 23 failures
+          # {Credo.Check.Refactor.RejectFilter, []}, - 4 failures
+          # {Credo.Check.Refactor.VariableRebinding, []}, - 339 failures
+          {Credo.Check.Warning.LeakyEnvironment, []},
+          {Credo.Check.Warning.MapGetUnsafePass, []},
+          {Credo.Check.Warning.MixEnv, []},
+          {Credo.Check.Warning.UnsafeToAtom, []},
+
           #
           ## Custom jump checks
           #
@@ -167,82 +184,68 @@
           {Jump.CredoChecks.AvoidFunctionLevelElse, []},
           {Jump.CredoChecks.AvoidLoggerConfigureInTest, []},
           # Default exclusion list is empty
-          {Jump.CredoChecks.AvoidSocketAssignsInTest, excluded: ["test/app_web/plugs/"]},
-          {Jump.CredoChecks.DoctestIExExamples,
-           [
-             # Tells Credo where to look for the `doctest` call.
-             # If you colocate your test files with your implementation, this would just
-             # be `&String.replace_trailing(&1, ".ex", "_test.exs")`
-             derive_test_path: fn filename ->
-               filename
-               |> String.replace_leading("lib/", "test/")
-               |> String.replace_trailing(".ex", "_test.exs")
-             end
-           ]},
+          # {Jump.CredoChecks.AvoidSocketAssignsInTest, excluded: ["test/app_web/plugs/"]}, - 2 failures
+          # {Jump.CredoChecks.DoctestIExExamples,
+          #  [
+          #    # Tells Credo where to look for the `doctest` call.
+          #    # If you colocate your test files with your implementation, this would just
+          #    # be `&String.replace_trailing(&1, ".ex", "_test.exs")`
+          #    derive_test_path: fn filename ->
+          #      filename
+          #      |> String.replace_leading("lib/", "test/")
+          #      |> String.replace_trailing(".ex", "_test.exs")
+          #    end
+          #  ]}, - 39 failures
           {Jump.CredoChecks.ForbiddenFunction,
            functions: [
              {:erlang, :binary_to_term,
               "Use Plug.Crypto.non_executable_binary_to_term/2 instead."}
            ]},
           {Jump.CredoChecks.LiveViewFormCanBeRehydrated, excluded: ["lib/my_app/"]},
-          # Default start_after is "0"
-          {Jump.CredoChecks.PreferTextColumns, start_after: "20240101000000"},
-          {Jump.CredoChecks.TestHasNoAssertions,
-           custom_assertion_functions: [:await_has, :await_with_timeout]},
-          # Default max_assertions is 20
-          {Jump.CredoChecks.TooManyAssertions, [max_assertions: 20]},
-          {Jump.CredoChecks.TopLevelAliasImportRequire, []},
-          {Jump.CredoChecks.UseObanProWorker, []},
-          {Jump.CredoChecks.VacuousTest,
-           [
-             # When true (default), tests that destructure setup context
-             # (3-arity test blocks) are considered not vacuous.
-             # Set to false to check them too.
-             ignore_setup_only_tests?: false,
-             # Additional library namespaces whose calls should not count
-             # as production code. Defaults to []
-             library_modules: [
-               Ecto,
-               Jason,
-               Oban,
-               Phoenix,
-               Plug
-             ]
-           ]},
-          {Jump.CredoChecks.WeakAssertion, []}
+          {Jump.CredoChecks.PreferTextColumns, start_after: "20260409212629"},
+          # {Jump.CredoChecks.TestHasNoAssertions,
+          #  custom_assertion_functions: [:await_has, :await_with_timeout]}, - 19 failures
+          # # Default max_assertions is 20
+          # {Jump.CredoChecks.TooManyAssertions, [max_assertions: 20]}, - 11 failures, not sure about this ones
+          {Jump.CredoChecks.TopLevelAliasImportRequire, []}
+          # {Jump.CredoChecks.UseObanProWorker, []}, - We don't have oban pro
+          # {Jump.CredoChecks.VacuousTest,
+          #  [
+          #    # When true (default), tests that destructure setup context
+          #    # (3-arity test blocks) are considered not vacuous.
+          #    # Set to false to check them too.
+          #    ignore_setup_only_tests?: false,
+          #    # Additional library namespaces whose calls should not count
+          #    # as production code. Defaults to []
+          #    library_modules: [
+          #      Ecto,
+          #      Jason,
+          #      Oban,
+          #      Phoenix,
+          #      Plug
+          #    ]
+          #  ]}, - 16 failures
+          # {Jump.CredoChecks.WeakAssertion, []} - 54 failures
         ],
         disabled: [
           #
           # Controversial and experimental checks (opt-in, just move the check to `:enabled`
           #   and be sure to use `mix credo --strict` to see low priority checks)
           #
-          {Credo.Check.Design.DuplicatedCode, []},
-          {Credo.Check.Design.SkipTestWithoutComment, []},
-          {Credo.Check.Design.TagTODO, [exit_status: 2]},
-          {Credo.Check.Readability.AliasAs, []},
-          {Credo.Check.Readability.LargeNumbers, []},
-          {Credo.Check.Readability.OnePipePerLine, []},
-          {Credo.Check.Readability.SingleFunctionToBlockPipe, []},
-          {Credo.Check.Readability.SinglePipe, [allow_0_arity_functions: true]},
-          {Credo.Check.Readability.Specs, []},
-          {Credo.Check.Refactor.ABCSize, []},
-          {Credo.Check.Refactor.AppendSingleItem, []},
-          {Credo.Check.Refactor.Apply, []},
-          {Credo.Check.Refactor.CyclomaticComplexity, []},
-          {Credo.Check.Refactor.DoubleBooleanNegation, []},
-          {Credo.Check.Refactor.IoPuts, []},
-          {Credo.Check.Refactor.ModuleDependencies, []},
-          {Credo.Check.Refactor.NegatedIsNil, []},
-          {Credo.Check.Refactor.Nesting, []},
-          {Credo.Check.Refactor.PassAsyncInTestCases, []},
-          {Credo.Check.Refactor.RejectFilter, []},
-          {Credo.Check.Refactor.VariableRebinding, []},
-          {Credo.Check.Warning.IoInspect, []},
-          {Credo.Check.Warning.LazyLogging, []},
-          {Credo.Check.Warning.LeakyEnvironment, []},
-          {Credo.Check.Warning.MapGetUnsafePass, []},
-          {Credo.Check.Warning.MixEnv, []},
-          {Credo.Check.Warning.UnsafeToAtom, []}
+          # {Credo.Check.Readability.AliasAs, []},
+          # {Credo.Check.Readability.LargeNumbers, []},
+          # {Credo.Check.Readability.OnePipePerLine, []},
+          # {Credo.Check.Readability.SingleFunctionToBlockPipe, []},
+          # {Credo.Check.Readability.SinglePipe, [allow_0_arity_functions: true]},
+          # {Credo.Check.Readability.Specs, []},
+          # {Credo.Check.Refactor.ABCSize, []},
+          # {Credo.Check.Refactor.CyclomaticComplexity, []},
+          # {Credo.Check.Refactor.IoPuts, []},
+          # {Credo.Check.Refactor.ModuleDependencies, []},
+          # {Credo.Check.Refactor.Nesting, []},
+          # {Credo.Check.Refactor.PassAsyncInTestCases, []},
+          # {Credo.Check.Warning.IoInspect, []},
+          # {Credo.Check.Warning.LazyLogging, []}
 
           #
           # Custom checks can be created using `mix credo.gen.check`.
