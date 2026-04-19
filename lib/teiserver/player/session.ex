@@ -550,6 +550,12 @@ defmodule Teiserver.Player.Session do
     user_id |> via_tuple() |> GenServer.call({:lobby, :vote_submit, vote_id, ballot})
   end
 
+  @spec lobby_appoint_boss(T.userid(), T.userid()) ::
+          :ok | {:error, :invalid_lobby | term()}
+  def lobby_appoint_boss(user_id, appointee_id) do
+    user_id |> via_tuple() |> GenServer.call({:lobby, :appoint_boss, appointee_id})
+  end
+
   @spec lobby_update_client_status(T.userid(), TachyonLobby.client_status_update_data()) ::
           :ok | {:error, :invalid_lobby | term()}
   def lobby_update_client_status(user_id, data) do
@@ -1203,6 +1209,14 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:lobby, :vote_submit, vote_id, ballot}, _from, state) do
     {:reply, TachyonLobby.vote_submit(state.lobby.id, state.user.id, {vote_id, ballot}), state}
+  end
+
+  def handle_call({:lobby, :appoint_boss, _appointee_id}, _from, state)
+      when is_nil(state.lobby),
+      do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :appoint_boss, appointee_id}, _from, state) do
+    {:reply, TachyonLobby.appoint_boss(state.lobby.id, state.user.id, appointee_id), state}
   end
 
   def handle_call({:lobby, :update_client_status, _data}, _from, state) when is_nil(state.lobby),

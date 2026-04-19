@@ -194,7 +194,9 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_info({:lobby, lobby_id, {:updated, update}}, state) do
     data = lobby_update_to_tachyon(lobby_id, update)
 
-    {:event, "lobby/updated", data, state}
+    if data != %{},
+      do: {:event, "lobby/updated", data, state},
+      else: {:ok, state}
   end
 
   def handle_info({:lobby, _lobby_id, {:vote_ended, vote_id, outcome}}, state) do
@@ -881,6 +883,15 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/appointBoss", "request", _msg_id, %{"data" => data}, state) do
+    with {:ok, target_id} <- TachyonParser.parse_user_id(data["userId"]),
+         :ok <- Session.lobby_appoint_boss(state.user.id, target_id) do
+      {:response, state}
+    else
+      {:error, err} -> {:error_response, :invalid_request, to_string(err), state}
+    end
+  end
+
   def handle_command("lobby/updateClientStatus", "request", _msg_id, %{"data" => data}, state) do
     mappings = %{"isReady" => :ready?, "assetStatus" => {:asset_status, &parse_asset_status/1}}
     change_status = Collections.transform_map(data, mappings)
@@ -1171,12 +1182,17 @@ defmodule Teiserver.Player.TachyonHandler do
       name: :name,
       map_name: :mapName,
       ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
+      bosses: :bosses,
       current_vote: {:currentVote, &vote_to_tachyon/1},
       vote_history: {:voteHistory, &vote_history_to_tachyon/1},
       game_options: {:gameOptions, &game_options_to_tachyon/1}
     }
 
-    Map.merge(%{id: lobby_id}, Collections.transform_map(update_map, mappings))
+    data = Collections.transform_map(update_map, mappings)
+
+    if data == %{},
+      do: %{},
+      else: Map.put(data, :id, lobby_id)
   end
 
   defp player_updates_to_tachyon(nil), do: nil

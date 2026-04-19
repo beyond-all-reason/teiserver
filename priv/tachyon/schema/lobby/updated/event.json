@@ -81,6 +81,17 @@
                         }
                     }
                 },
+                "bosses": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^.*$": {
+                            "anyOf": [
+                                { "type": "object", "properties": {} },
+                                { "type": "null" }
+                            ]
+                        }
+                    }
+                },
                 "players": {
                     "type": "object",
                     "patternProperties": {

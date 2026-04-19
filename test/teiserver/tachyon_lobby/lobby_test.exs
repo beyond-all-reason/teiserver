@@ -1152,6 +1152,47 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "boss manipulation" do
+    test "must be in lobby" do
+      {:error, :invalid_lobby} = Lobby.appoint_boss("not-a-lobby-id", @default_user_id, "2")
+    end
+
+    test "appointee must be in lobby" do
+      %{id: id} = setup_full_lobby([1, 1])
+      {:error, :not_in_lobby} = Lobby.appoint_boss(id, @default_user_id, "invalid-id")
+    end
+
+    test "bosses must be enabled" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: false)
+      {:error, :no_boss_allowed} = Lobby.appoint_boss(id, @default_user_id, "2")
+    end
+
+    test "user must be a boss" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
+      {:error, :not_a_boss} = Lobby.appoint_boss(id, "2", "3")
+    end
+
+    test "can appoint boss" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
+      :ok = Lobby.appoint_boss(id, @default_user_id, "2")
+      assert_receive {:lobby, ^id, {:updated, data}}
+      assert data == %{bosses: %{"2" => %{}}}
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.bosses == MapSet.new([@default_user_id, "2"])
+    end
+
+    test "appointing existing boss in no-op" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
+      :ok = Lobby.appoint_boss(id, @default_user_id, "2")
+      assert_receive {:lobby, ^id, {:updated, data}}
+      assert data == %{bosses: %{"2" => %{}}}
+
+      :ok = Lobby.appoint_boss(id, @default_user_id, "2")
+      refute_receive _, 30
+    end
+  end
+
   describe "update ally team" do
     test "work" do
       {:ok, _pid, %{id: id}} =

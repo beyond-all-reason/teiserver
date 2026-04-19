@@ -145,4 +145,11 @@ defmodule Teiserver.TachyonLobby do
   @spec send_message(id(), T.userid(), String.t()) ::
           :ok | {:error, :invalid_request, reason :: term()}
   defdelegate send_message(lobby_id, from_id, msg_content), to: Lobby
+
+  @doc """
+  make the given player a boss. Only a boss can do that
+  """
+  @spec appoint_boss(id(), T.userid(), appointee_id :: T.userid()) ::
+          :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
+  defdelegate appoint_boss(lobby_id, user_id, appointee_id), to: Lobby
 end

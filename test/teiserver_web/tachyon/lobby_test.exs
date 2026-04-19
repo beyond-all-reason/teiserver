@@ -512,6 +512,22 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "boss" do
+    test "can appoint boss" do
+      {:ok, ctx} = Tachyon.setup_client()
+      {:ok, lobby_data} = setup_lobby(%{client: ctx[:client]}, %{boss_enabled?: true})
+
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_data[:lobby_id])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
+
+      %{"status" => "success"} = Tachyon.lobby_appoint_boss(ctx[:client], ctx2[:user].id)
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(ctx[:client])
+
+      assert data["bosses"] == %{to_string(ctx2[:user].id) => %{}}
+    end
+  end
+
   describe "update client status" do
     setup [:setup_lobby]
 

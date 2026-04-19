@@ -633,6 +633,12 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
+  def lobby_appoint_boss(client, user_id) do
+    :ok = send_request(client, "lobby/appointBoss", %{userId: to_string(user_id)})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
   def lobby_update_client_status(client, update_data) do
     :ok = send_request(client, "lobby/updateClientStatus", update_data)
     {:ok, resp} = recv_message(client)
