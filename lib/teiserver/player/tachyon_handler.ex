@@ -375,6 +375,12 @@ defmodule Teiserver.Player.TachyonHandler do
               :ok -> {:response, state}
               {:error, reason} -> {:error_response, :invalid_request, inspect(reason), state}
             end
+
+          :lobby ->
+            case Session.send_lobby_message(state.user.id, msg["data"]["message"]) do
+              :ok -> {:response, state}
+              {:error, reason} -> {:error_response, :invalid_request, inspect(reason), state}
+            end
         end
 
       {:error, :invalid_recipient} ->
@@ -993,6 +999,9 @@ defmodule Teiserver.Player.TachyonHandler do
 
       {:party, party_id, sender_id} ->
         %{type: :party, partyId: party_id, userId: to_string(sender_id)}
+
+      {:lobby, lobby_id, sender_id} ->
+        %{type: :lobby, lobbyId: lobby_id, userId: to_string(sender_id)}
     end
   end
 
@@ -1006,6 +1015,9 @@ defmodule Teiserver.Player.TachyonHandler do
 
       "party" ->
         {:ok, :party}
+
+      "lobby" ->
+        {:ok, :lobby}
 
       _other ->
         {:error, :invalid_recipient}

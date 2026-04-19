@@ -309,6 +309,11 @@ defmodule Teiserver.Player.Session do
     user_id |> via_tuple() |> GenServer.call({:messaging, {:send_party_message, message_content}})
   end
 
+  @spec send_lobby_message(T.userid(), String.t()) :: :ok | {:error, reason :: term()}
+  def send_lobby_message(user_id, message_content) do
+    user_id |> via_tuple() |> GenServer.call({:messaging, {:send_lobby_message, message_content}})
+  end
+
   @doc """
   notify the connected player that they received a new friend request.
   If the player isn't connected it's a no-op. They'll get the friend request
@@ -841,6 +846,17 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:messaging, {:send_party_message, message_content}}, _from, state) do
     case Party.send_message(state.party.current_party, state.user.id, message_content) do
+      :ok -> {:reply, :ok, state}
+      {:error, :invalid_request, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:messaging, {:send_lobby_message, _content}}, _from, state)
+      when state.lobby == nil,
+      do: {:reply, {:error, "not in lobby"}, state}
+
+  def handle_call({:messaging, {:send_lobby_message, message_content}}, _from, state) do
+    case TachyonLobby.send_message(state.lobby.id, state.user.id, message_content) do
       :ok -> {:reply, :ok, state}
       {:error, :invalid_request, reason} -> {:reply, {:error, reason}, state}
     end

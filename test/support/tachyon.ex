@@ -396,6 +396,10 @@ defmodule Teiserver.Support.Tachyon do
     send_message!(client, message, %{type: :party})
   end
 
+  def send_lobby_message(client, message) do
+    send_message!(client, message, %{type: :lobby})
+  end
+
   def subscribe_messaging!(client, opts \\ []) do
     since = Keyword.get(opts, :since, %{type: "latest"})
     :ok = send_request(client, "messaging/subscribeReceived", %{since: since})

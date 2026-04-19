@@ -29,6 +29,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.KvStore
+  alias Teiserver.Messaging
   alias Teiserver.Player
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
@@ -397,6 +398,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
           :ok | {:error, :invalid_lobby | :invalid_vote}
   def vote_submit(lobby_id, user_id, ballot) do
     call_lobby(lobby_id, {:vote_submit, user_id, ballot})
+  end
+
+  @spec send_message(id(), T.userid(), String.t()) ::
+          :ok | {:error, :invalid_request, reason :: term()}
+  def send_message(lobby_id, from_id, msg_content) do
+    call_lobby(lobby_id, {:send_message, from_id, msg_content})
   end
 
   @doc """
@@ -863,6 +870,26 @@ defmodule Teiserver.TachyonLobby.Lobby do
     else
       {:keep_state, data, [{:reply, from, {:error, :invalid_vote}}]}
     end
+  end
+
+  def handle_event({:call, from}, {:send_message, from_id, _msg_content}, _state, data)
+      when not is_map_key(data.players, from_id) and not is_map_key(data.spectators, from_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :invalid_request, :not_in_lobby}}]}
+
+  def handle_event({:call, from}, {:send_message, from_id, msg_content}, _state, data) do
+    msg =
+      Messaging.new(
+        msg_content,
+        {:lobby, data.id, from_id},
+        :erlang.monotonic_time(:micro_seconds)
+      )
+
+    Enum.concat(data.players, data.spectators)
+    |> Enum.each(fn {id, _data} ->
+      if id != from_id, do: Messaging.send(msg, {:player, id})
+    end)
+
+    {:keep_state, data, [{:reply, from, :ok}]}
   end
 
   def handle_event({:call, from}, {:join_queue, user_id}, _state, data)
