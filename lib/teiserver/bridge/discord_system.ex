@@ -1,5 +1,6 @@
 defmodule Teiserver.Bridge.DiscordSystem do
   @moduledoc false
+  alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Communication
 
   use DynamicSupervisor
@@ -43,6 +44,20 @@ defmodule Teiserver.Bridge.DiscordSystem do
         :ok
     end
 
-    start()
+    result = start()
+    channel_id = BridgeServer.server_update_channel()
+
+    if channel_id do
+      message =
+        case result do
+          {:ok, _pid} -> "Discord bridge restarted"
+          {:ok, _pid, _info} -> "Discord bridge restarted"
+          other -> "Error restarting discord bridge: #{inspect(other)}"
+        end
+
+      Communication.new_discord_message(channel_id, message)
+    end
+
+    result
   end
 end

@@ -61,6 +61,10 @@ defmodule Teiserver.Bridge.BridgeServer do
     end
   end
 
+  @spec server_update_channel() :: integer() | nil
+  def server_update_channel,
+    do: Config.get_site_config_cache("teiserver.Discord channel #server-updates")
+
   @impl GenServer
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
@@ -237,7 +241,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       end
 
       # Server
-      channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
+      channel_id = server_update_channel()
 
       if channel_id do
         Communication.new_discord_message(
