@@ -1,12 +1,11 @@
 defmodule Teiserver.AccountTest do
   alias Teiserver.Account
   alias Teiserver.Account.AccountTestLib
+  alias Teiserver.Account.User
 
   use Teiserver.DataCase, async: true
 
   describe "users" do
-    alias Teiserver.Account.User
-
     @valid_attrs %{
       colour: "#AA0000",
       icon: "fa-solid fa-home",

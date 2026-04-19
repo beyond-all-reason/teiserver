@@ -14,7 +14,7 @@ defmodule Teiserver.Geoip do
 
   def get_flag(ip, default) do
     if Config.get_site_config_cache("system.Use geoip") do
-      {result, 0} = System.cmd("geoiplookup", [ip])
+      {result, 0} = System.cmd("geoiplookup", [ip], env: %{})
 
       case Regex.run(~r/: ([A-Z][A-Z]),/, result) do
         [_match, code] -> code

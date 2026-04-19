@@ -65,9 +65,13 @@ defmodule TeiserverWeb.Tachyon.Autohost do
   test "can lookup after status message", %{token: token} do
     Tachyon.connect_autohost!(token, 10, 0)
 
-    poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {p, details} ->
-      details.max_battles == 10 && details.current_battles == 0 && is_pid(p)
-    end)
+    {_pid, result} =
+      poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {p, details} ->
+        details.max_battles == 10 && details.current_battles == 0 && is_pid(p)
+      end)
+
+    assert result.max_battles == 10
+    assert result.current_battles == 0
   end
 
   test "can update status attributes", %{token: token} do
