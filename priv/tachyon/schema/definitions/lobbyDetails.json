@@ -9,6 +9,17 @@
         "mapName": { "type": "string" },
         "engineVersion": { "type": "string" },
         "gameVersion": { "type": "string" },
+        "gameOptions": {
+            "description": "object indexed by the game option key",
+            "type": "object",
+            "patternProperties": {
+                "^.*$": {
+                    "type": "object",
+                    "properties": { "value": { "type": "string" } },
+                    "required": ["value"]
+                }
+            }
+        },
         "allyTeamConfig": {
             "type": "object",
             "patternProperties": {
