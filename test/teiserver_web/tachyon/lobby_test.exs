@@ -561,6 +561,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       } = Tachyon.recv_message!(client)
 
       assert lobbies[lobby_id]["maxPlayerCount"] == 4
+      assert lobbies[lobby_id]["areBossesEnabled"] == false
 
       {:ok, ctx3} = Tachyon.setup_client()
       %{"status" => "success", "data" => data} = Tachyon.join_lobby!(ctx3[:client], lobby_id)

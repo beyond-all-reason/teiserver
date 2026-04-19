@@ -1318,6 +1318,7 @@ defmodule Teiserver.Player.TachyonHandler do
       map_name: :mapName,
       engine_version: :engineVersion,
       game_version: :gameVersion,
+      boss_enabled?: :areBossesEnabled,
       current_battle:
         {:currentBattle,
          %{
