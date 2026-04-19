@@ -853,12 +853,23 @@ defmodule Teiserver.Protocols.SpringIn do
 
           client = Client.get_client_by_id(state.userid)
 
+          max_name_size = Config.get_site_config_cache("lobby.Name max length")
+
+          name_is_empty = (name == "")
+          name_is_too_long = (String.length(name) > max_name_size)
+
           cond do
             client == nil ->
               {:failure, "No client"}
 
             not Auth.is_bot?(state.userid) ->
               {:failure, "Not a bot"}
+
+            name_is_empty ->
+              {:failure, "name must not be empty"}
+
+            name_is_too_long ->
+              {:failure, "name must not be greater then #{max_name_size} characters"}
 
             true ->
               password = if Enum.member?(["empty", "*"], password), do: nil, else: password

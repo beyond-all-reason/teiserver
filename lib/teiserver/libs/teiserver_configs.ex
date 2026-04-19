@@ -484,6 +484,15 @@ defmodule Teiserver.TeiserverConfigs do
       description: "If enabled unranked lobbies can have rating and rank restrictions set.",
       default: true
     })
+
+    add_site_config_type(%{
+      key: "lobby.Name max length",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "The maximum number of characters allowed in a lobby name.",
+      default: 100
+    })
   end
 
   defp discord_configs do

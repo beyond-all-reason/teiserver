@@ -8,6 +8,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
+  alias Teiserver.Config
 
   require Logger
 
@@ -176,9 +177,16 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec validate_new_lobby(map) :: true | {:error, String.t()}
   def validate_new_lobby(data) do
+    max_name_size = Config.get_site_config_cache("lobby.Name max length")
+
+    name_is_too_long = (String.length(data.name) > max_name_size)
+
     cond do
       String.trim(data.name || "") == "" ->
         {:error, "No lobby name supplied"}
+
+      name_is_too_long ->
+        {:error, "name must not be greater then #{max_name_size} characters"}
 
       not Enum.member?(["normal", "replay"], data.type) ->
         {:error, "Invalid type '#{data.type}'"}

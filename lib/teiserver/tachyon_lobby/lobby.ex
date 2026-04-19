@@ -33,6 +33,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
+  alias Teiserver.Config
 
   require Logger
 
@@ -1840,12 +1841,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec update_property(atom(), term(), state(), T.userid()) ::
           {:ok, [event()]} | {:error, String.t()}
   defp update_property(:name, new_name, _state, _user_id) do
-    # we can expand lobby name validation later
-    if new_name == "" do
-      {:error, "name must not be empty"}
+    max_name_size = Config.get_site_config_cache("lobby.Name max length")
+
+    name_is_empty = (new_name == "")
+    name_is_too_long = (String.length(new_name) > max_name_size)
+
+    cond do
+      name_is_empty -> {:error, "name must not be empty"}
+      name_is_too_long -> {:error, "name must not be greater then #{max_name_size} characters"}
+      true -> {:ok, [{:update_lobby_name, new_name}]}
     end
 
-    {:ok, [{:update_lobby_name, new_name}]}
   end
 
   defp update_property(:map_name, new_name, state, user_id) do
