@@ -1,0 +1,6 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/lobbyId.json",
+    "title": "LobbyId",
+    "type": "string",
+    "examples": ["1882f6b2e3a4d14f24acb7aa"]
+}
