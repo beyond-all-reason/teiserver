@@ -16,6 +16,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         name: "test lobby",
         map_name: "test-map",
         ally_team_config: Tachyon.mk_ally_team_config(2, 1),
+        boss_enabled?: true,
         game_options: %{"foo" => "bar"}
       }
 
@@ -30,6 +31,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
                player_data["team"]
              )
 
+      assert data["areBossesEnabled"] == true
+      assert data["bosses"] == %{to_string(user.id) => %{}}
       assert data["gameOptions"] == %{"foo" => %{"value" => "bar"}}
     end
 

@@ -480,6 +480,7 @@ defmodule Teiserver.Player.Session do
           name: String.t(),
           map_name: String.t(),
           ally_team_config: TachyonLobby.ally_team_config(),
+          boss_enabled?: boolean(),
           game_options: %{String.t() => String.t()}
         }
   @spec create_lobby(T.userid(), lobby_start_params()) ::

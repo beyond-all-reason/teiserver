@@ -49,6 +49,13 @@
                 }
             }
         },
+        "areBossesEnabled": { "type": "boolean" },
+        "bosses": {
+            "type": "object",
+            "patternProperties": {
+                "^.*$": { "type": "object", "properties": {} }
+            }
+        },
         "players": {
             "type": "object",
             "patternProperties": {
@@ -167,6 +174,22 @@
                 "until": { "$ref": "../definitions/unixTime.json" }
             },
             "required": ["id", "action", "initiator", "voters", "until"]
+        },
+        "voteHistory": {
+            "type": "object",
+            "patternProperties": {
+                "^.*$": {
+                    "type": "object",
+                    "properties": {
+                        "vote": { "$ref": "../definitions/voteActions.json" },
+                        "outcome": {
+                            "$ref": "../definitions/voteOutcomes.json"
+                        },
+                        "finishedAt": { "$ref": "../definitions/unixTime.json" }
+                    },
+                    "required": ["vote", "outcome", "finishedAt"]
+                }
+            }
         }
     },
     "required": [
@@ -175,7 +198,10 @@
         "mapName",
         "engineVersion",
         "gameVersion",
+        "gameOptions",
         "allyTeamConfig",
+        "areBossesEnabled",
+        "bosses",
         "players",
         "spectators",
         "bots"

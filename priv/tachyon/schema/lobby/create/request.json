@@ -21,6 +21,7 @@
                 "allyTeamConfig": {
                     "$ref": "../../definitions/allyTeamConfig.json"
                 },
+                "areBossesEnabled": { "type": "boolean"},
                 "gameOptions": {
                     "type": "object",
                     "patternProperties": {
@@ -32,11 +33,7 @@
                     }
                 }
             },
-            "required": [
-                "name",
-                "mapName",
-                "allyTeamConfig"
-            ]
+            "required": ["name", "mapName", "allyTeamConfig"]
         }
     },
     "required": ["type", "messageId", "commandId", "data"]

@@ -76,6 +76,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           required(:ally_team_config) => ally_team_config(),
           optional(:game_version) => String.t(),
           optional(:engine_version) => String.t(),
+          optional(:boss_enabled?) => boolean(),
           optional(:game_options) => %{String.t() => String.t()}
         }
 
@@ -115,6 +116,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
           map_name: String.t(),
           game_version: String.t(),
           engine_version: String.t(),
+          boss_enabled?: boolean(),
+          bosses: MapSet.t(T.userid()),
           ally_team_config: ally_team_config(),
           game_options: %{String.t() => String.t()},
           players: %{
@@ -202,6 +205,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
            map_name: String.t(),
            game_version: String.t(),
            engine_version: String.t(),
+           boss_enabled?: boolean(),
+           bosses: MapSet.t(T.userid()),
            ally_team_config: ally_team_config(),
            game_options: %{String.t() => String.t()},
            # used to track the players in the lobby.
@@ -446,6 +451,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
     monitors =
       MC.new() |> MC.monitor(start_params.creator_pid, {:user, start_params.creator_data.id})
 
+    boss_enabled? = Map.get(start_params, :boss_enabled?) || false
+
+    bosses =
+      if boss_enabled?,
+        do: MapSet.new([start_params.creator_data.id]),
+        else: MapSet.new()
+
     state = %{
       id: id,
       monitors: monitors,
@@ -453,6 +465,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       map_name: start_params.map_name,
       game_version: start_params.game_version,
       engine_version: start_params.engine_version,
+      boss_enabled?: boss_enabled?,
+      bosses: bosses,
       ally_team_config: start_params.ally_team_config,
       game_options: Map.get(start_params, :game_options, %{}),
       players: %{
@@ -1154,6 +1168,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       :map_name,
       :game_version,
       :engine_version,
+      :boss_enabled?,
+      :bosses,
       :ally_team_config,
       :current_battle,
       :current_vote,

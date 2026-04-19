@@ -686,6 +686,7 @@ defmodule Teiserver.Player.TachyonHandler do
             teams: teams
           }
         end,
+      boss_enabled?: msg["data"]["areBossesEnabled"],
       game_options:
         Map.get(msg["data"], "gameOptions", %{})
         |> Enum.map(fn {k, v} -> {k, v["value"]} end)
@@ -1142,6 +1143,12 @@ defmodule Teiserver.Player.TachyonHandler do
       name: :name,
       map_name: :mapName,
       ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
+      boss_enabled?: :areBossesEnabled,
+      bosses:
+        {:bosses,
+         fn bs ->
+           Enum.reduce(bs, %{}, fn id, acc -> Map.put(acc, to_string(id), %{}) end)
+         end},
       game_options: {:gameOptions, &game_options_to_tachyon/1},
       engine_version: :engineVersion,
       game_version: :gameVersion,

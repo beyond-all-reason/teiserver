@@ -63,6 +63,16 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     assert details.engine_version == engine.name
   end
 
+  test "create with defaults" do
+    {:ok, _pid, details} =
+      mk_start_params([1, 1])
+      |> Lobby.create()
+
+    assert details.boss_enabled? == false
+    assert details.bosses == MapSet.new()
+    assert details.game_options == %{}
+  end
+
   test "create lobby with game options" do
     {:ok, _pid, details} =
       mk_start_params([1, 1])
@@ -72,6 +82,16 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     assert details.game_options == %{"foo" => "bar"}
     {:ok, details2} = LobbyProcess.get_details(details.id)
     assert details2.game_options == %{"foo" => "bar"}
+  end
+
+  test "creator is boss when enabled" do
+    {:ok, _pid, details} =
+      mk_start_params([1, 1])
+      |> Map.put(:boss_enabled?, true)
+      |> Lobby.create()
+
+    assert details.boss_enabled? == true
+    assert details.bosses == MapSet.new([@default_user_id])
   end
 
   test "exit when no more players" do
