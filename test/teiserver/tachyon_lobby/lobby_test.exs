@@ -1143,6 +1143,13 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:error, _reason} =
         Lobby.update_properties(id, @default_user_id, %{map_name: "different map"})
     end
+
+    test "only bosses can change map" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
+      :ok = Lobby.join_queue(id, "2")
+      {:error, err} = Lobby.update_properties(id, "2", %{map_name: "new map"})
+      assert err =~ "boss"
+    end
   end
 
   describe "update ally team" do
@@ -1687,8 +1694,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   # create a lobby with a few specs already in. Simplify the logic when
   # it comes to testing in-lobby interaction
-  defp setup_full_lobby(teams \\ [2, 2]) do
-    {:ok, lobby_pid, %{id: id}} = mk_start_params(teams) |> Lobby.create()
+  defp setup_full_lobby(teams \\ [2, 2], opts \\ []) do
+    {:ok, lobby_pid, %{id: id}} =
+      mk_start_params(teams)
+      |> Map.put(:boss_enabled?, Keyword.get(opts, :boss_enabled?, false))
+      |> Lobby.create()
 
     users =
       Enum.map([2, 3, 4, 5], fn i ->

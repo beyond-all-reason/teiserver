@@ -851,24 +851,32 @@ defmodule Teiserver.TachyonLobby.Lobby do
       do: {:keep_state, fsm_data, [{:reply, from, :ok}]}
 
   def handle_event({:call, from}, {:update_properties, user_id, data}, _state, fsm_data) do
-    {events, errors} =
-      Enum.reduce(data, {[], []}, fn {k, v}, {events, errors} ->
-        case update_property(k, v, fsm_data, user_id) do
-          {:error, msg} ->
-            {events, [msg | errors]}
+    # for now, all properties can only be updated by bosses, so shortcut the reduce
+    is_allowed? = not fsm_data.boss_enabled? or MapSet.member?(fsm_data.bosses, user_id)
 
-          {:ok, new_events} ->
-            {events ++ new_events, errors}
-        end
-      end)
+    if is_allowed? do
+      {events, errors} =
+        Enum.reduce(data, {[], []}, fn {k, v}, {events, errors} ->
+          case update_property(k, v, fsm_data, user_id) do
+            {:error, msg} ->
+              {events, [msg | errors]}
 
-    if Enum.empty?(errors) do
-      final_data = process_events(events, fsm_data) |> broadcast_updates() |> Map.get(:data)
-      # broadcast_list_updates(events, fsm_data, final_data)
-      {:keep_state, final_data, [{:reply, from, :ok}]}
+            {:ok, new_events} ->
+              {events ++ new_events, errors}
+          end
+        end)
+
+      if Enum.empty?(errors) do
+        final_data = process_events(events, fsm_data) |> broadcast_updates() |> Map.get(:data)
+        # broadcast_list_updates(events, fsm_data, final_data)
+        {:keep_state, final_data, [{:reply, from, :ok}]}
+      else
+        message = Enum.join(errors, ", ")
+        {:keep_state, fsm_data, [{:reply, from, {:error, "Cannot update lobby: #{message}"}}]}
+      end
     else
-      message = Enum.join(errors, ", ")
-      {:keep_state, fsm_data, [{:reply, from, {:error, "Cannot update lobby: #{message}"}}]}
+      {:keep_state, fsm_data,
+       [{:reply, from, {:error, "Cannot update lobby: you are not a boss"}}]}
     end
   end
 
