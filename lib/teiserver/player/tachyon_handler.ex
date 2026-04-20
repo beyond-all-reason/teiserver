@@ -1337,6 +1337,7 @@ defmodule Teiserver.Player.TachyonHandler do
   defp vote_action_to_tachyon(action) do
     case action do
       {:change_map, name} -> %{type: :changeMap, newMapName: name}
+      {:appoint_boss, boss_id} -> %{type: :appointBoss, bossId: to_string(boss_id)}
     end
   end
 

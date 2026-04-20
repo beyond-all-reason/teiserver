@@ -93,7 +93,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @type asset_status :: :missing | :downloading | :complete
 
-  @type vote_action :: {:change_map, String.t()} | :start
+  @type vote_action :: {:change_map, String.t()} | {:appoint_boss, T.userid()} | :start
   @type vote_ballot :: :yes | :no | :abstain
   @type vote_state :: %{
           id: String.t(),
@@ -1000,8 +1000,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
       not data.boss_enabled? ->
         {:keep_state, data, [{:reply, from, {:error, :no_boss_allowed}}]}
 
-      not MapSet.member?(data.bosses, user_id) ->
+      not Enum.empty?(data.bosses) and not MapSet.member?(data.bosses, user_id) ->
         {:keep_state, data, [{:reply, from, {:error, :not_a_boss}}]}
+
+      Enum.empty?(data.bosses) and Enum.count(data.players, &(!bot_id?(elem(&1, 0)))) > 1 ->
+        vote = new_vote(data, user_id, {:appoint_boss, appointee_id})
+
+        :timer.seconds(vote.duration_s)
+        |> :timer.send_after({:vote_timeout, vote.id})
+
+        events = [{:start_vote, vote}]
+        data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
+        {:keep_state, data, [{:reply, from, :ok}]}
 
       true ->
         events = [{:update_boss, :add, appointee_id}]
@@ -1500,6 +1510,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
           {:passed, {:change_map, new_map}} ->
             process_event({:update_map_name, new_map}, new_aggregate)
+
+          {:passed, {:appoint_boss, boss_id}} ->
+            process_event({:update_boss, :add, boss_id}, new_aggregate)
             # just let the thing crash if a new vote action shows up. It'll be easy
             # to spot and fix/add support. :start isn't yet supported
         end

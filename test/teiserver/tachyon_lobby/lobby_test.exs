@@ -1213,6 +1213,35 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, data}}
       assert data == %{bosses: %{@default_user_id => nil}}
     end
+
+    test "can appoint boss when no boss" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
+      :ok = Lobby.unboss(id, @default_user_id, @default_user_id)
+      assert_receive {:lobby, ^id, {:updated, data}}
+      assert data == %{bosses: %{@default_user_id => nil}}
+
+      :ok = Lobby.appoint_boss(id, @default_user_id, "2")
+      assert_receive {:lobby, ^id, {:updated, data}}
+      assert data == %{bosses: %{"2" => %{}}}
+    end
+
+    test "appoint boss triggers vote for players" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
+      :ok = Lobby.unboss(id, @default_user_id, @default_user_id)
+      assert_receive {:lobby, ^id, {:updated, _}}
+      :ok = Lobby.join_queue(id, "2")
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.appoint_boss(id, @default_user_id, "2")
+      assert_receive {:lobby, ^id, {:updated, data}}
+
+      %{action: {:appoint_boss, "2"}, voters: %{@default_user_id => :yes, "2" => :pending}} =
+        data.current_vote
+
+      :ok = Lobby.vote_submit(id, "2", {data.current_vote.id, :yes})
+      assert_receive {:lobby, ^id, {:updated, data}}
+      assert data.bosses == %{"2" => %{}}
+    end
   end
 
   describe "update ally team" do

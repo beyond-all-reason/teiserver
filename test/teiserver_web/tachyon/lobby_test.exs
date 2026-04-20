@@ -536,6 +536,28 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       assert data["bosses"] == %{to_string(ctx[:user].id) => nil}
     end
+
+    test "trigger vote for new boss" do
+      {:ok, ctx} = Tachyon.setup_client()
+      {:ok, lobby_id: lobby_id} = setup_lobby(%{client: ctx[:client]}, %{boss_enabled?: true})
+
+      %{"status" => "success"} = Tachyon.lobby_unboss(ctx[:client], ctx[:user].id)
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(ctx[:client])
+      assert data["bosses"] == %{to_string(ctx[:user].id) => nil}
+
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
+      Tachyon.lobby_join_queue!(ctx2[:client])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
+
+      %{"status" => "success"} = Tachyon.lobby_appoint_boss(ctx[:client], ctx[:user].id)
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(ctx[:client])
+      user_id = to_string(ctx[:user].id)
+
+      %{"currentVote" => %{"action" => %{"type" => "appointBoss", "bossId" => ^user_id}}} =
+        data
+    end
   end
 
   describe "update client status" do
