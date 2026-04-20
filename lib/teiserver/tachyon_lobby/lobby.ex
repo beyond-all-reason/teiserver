@@ -100,6 +100,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           action: vote_action,
           initiator: T.userid(),
           voters: %{T.userid() => :pending | vote_ballot()},
+          duration_s: non_neg_integer(),
           until: DateTime.t(),
           quorum: non_neg_integer(),
           majority: non_neg_integer()
@@ -2010,29 +2011,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
         end
 
       Enum.count(state.players, fn {_id, p} -> not bot_id?(p.id) end) > 1 ->
-        vote_duration_s = 60
+        vote = new_vote(state, user_id, {:change_map, new_name})
 
-        voters =
-          for {_id, p} <- state.players, !bot_id?(p.id), into: %{} do
-            if p.id == user_id, do: {p.id, :yes}, else: {p.id, :pending}
-          end
-
-        # ensure we need absolute majority.
-        # 0.501 works until 254 players, which is the hard limit of players
-        # in a game
-        quorum = (map_size(voters) * 0.501) |> :math.ceil() |> trunc()
-
-        vote = %{
-          id: "vote-#{state.vote_idx}",
-          action: {:change_map, new_name},
-          initiator: user_id,
-          voters: voters,
-          until: DateTime.utc_now() |> DateTime.shift(Duration.new!(second: vote_duration_s)),
-          quorum: quorum,
-          majority: quorum
-        }
-
-        :timer.send_after(vote_duration_s * 1000, {:vote_timeout, vote.id})
+        :timer.seconds(vote.duration_s)
+        |> :timer.send_after({:vote_timeout, vote.id})
 
         {:ok, [{:start_vote, vote}]}
 
@@ -2058,6 +2040,32 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp process_event_action({:vote_ended, vote, outcome}, fsm_data) do
     broadcast_to_members(fsm_data, nil, {:lobby, fsm_data.id, {:vote_ended, vote.id, outcome}})
+  end
+
+  # create a default vote object
+  defp new_vote(state, initiator_id, action) do
+    vote_duration_s = 60
+
+    voters =
+      for {_id, p} <- state.players, !bot_id?(p.id), into: %{} do
+        if p.id == initiator_id, do: {p.id, :yes}, else: {p.id, :pending}
+      end
+
+    # ensure we need absolute majority.
+    # 0.501 works until 254 players, which is the hard limit of players
+    # in a game
+    quorum = (map_size(voters) * 0.501) |> :math.ceil() |> trunc()
+
+    %{
+      id: "vote-#{state.vote_idx}",
+      action: action,
+      initiator: initiator_id,
+      voters: voters,
+      duration_s: vote_duration_s,
+      until: DateTime.utc_now() |> DateTime.shift(Duration.new!(second: vote_duration_s)),
+      quorum: quorum,
+      majority: quorum
+    }
   end
 
   @spec vote_result(vote_state()) :: :undecided | {:ended, :passed | :failed}
