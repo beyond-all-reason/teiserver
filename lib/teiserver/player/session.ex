@@ -556,6 +556,12 @@ defmodule Teiserver.Player.Session do
     user_id |> via_tuple() |> GenServer.call({:lobby, :appoint_boss, appointee_id})
   end
 
+  @spec lobby_unboss(T.userid(), T.userid()) ::
+          :ok | {:error, :invalid_lobby | term()}
+  def lobby_unboss(user_id, boss_id) do
+    user_id |> via_tuple() |> GenServer.call({:lobby, :unboss, boss_id})
+  end
+
   @spec lobby_update_client_status(T.userid(), TachyonLobby.client_status_update_data()) ::
           :ok | {:error, :invalid_lobby | term()}
   def lobby_update_client_status(user_id, data) do
@@ -1217,6 +1223,14 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:lobby, :appoint_boss, appointee_id}, _from, state) do
     {:reply, TachyonLobby.appoint_boss(state.lobby.id, state.user.id, appointee_id), state}
+  end
+
+  def handle_call({:lobby, :unboss, _boss_id}, _from, state)
+      when is_nil(state.lobby),
+      do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, :unboss, boss_id}, _from, state) do
+    {:reply, TachyonLobby.unboss(state.lobby.id, state.user.id, boss_id), state}
   end
 
   def handle_call({:lobby, :update_client_status, _data}, _from, state) when is_nil(state.lobby),

@@ -1191,6 +1191,28 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.appoint_boss(id, @default_user_id, "2")
       refute_receive _, 30
     end
+
+    test "unboss - invalid lobby" do
+      {:error, :invalid_lobby} = Lobby.unboss("not-a-lobby-id", @default_user_id, "2")
+    end
+
+    test "unboss - must be in lobby" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
+      {:error, :not_in_lobby} = Lobby.unboss(id, "not-in-lobby", @default_user_id)
+    end
+
+    test "unboss - no op if target not boss" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
+      :ok = Lobby.unboss(id, @default_user_id, "2")
+      refute_receive _, 30
+    end
+
+    test "unboss works" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
+      :ok = Lobby.unboss(id, @default_user_id, @default_user_id)
+      assert_receive {:lobby, ^id, {:updated, data}}
+      assert data == %{bosses: %{@default_user_id => nil}}
+    end
   end
 
   describe "update ally team" do

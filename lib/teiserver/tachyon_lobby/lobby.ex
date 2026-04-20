@@ -433,6 +433,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
     call_lobby(lobby_id, {:appoint_boss, user_id, appointee_id})
   end
 
+  @spec unboss(id(), T.userid(), boss_id :: T.userid()) ::
+          :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
+  def unboss(lobby_id, user_id, boss_id) do
+    call_lobby(lobby_id, {:unboss, user_id, boss_id})
+  end
+
   @spec start_battle(id(), T.userid()) ::
           :ok | {:error, reason :: :not_in_lobby | :battle_already_started | term()}
   def start_battle(lobby_id, user_id) do
@@ -1003,6 +1009,29 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  def handle_event({:call, from}, {:unboss, user_id, _boss_id}, _state, data)
+      when not is_map_key(data.players, user_id) and not is_map_key(data.spectators, user_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
+
+  def handle_event({:call, from}, {:unboss, _user_id, boss_id}, _state, data)
+      when not is_map_key(data.players, boss_id) and not is_map_key(data.spectators, boss_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
+
+  def handle_event({:call, from}, {:unboss, user_id, boss_id}, _state, data) do
+    cond do
+      not MapSet.member?(data.bosses, user_id) ->
+        {:keep_state, data, [{:reply, from, {:error, :not_a_boss}}]}
+
+      not MapSet.member?(data.bosses, boss_id) ->
+        {:keep_state, data, [{:reply, from, :ok}]}
+
+      true ->
+        events = [{:update_boss, :remove, boss_id}]
+        data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
+        {:keep_state, data, [{:reply, from, :ok}]}
+    end
+  end
+
   def handle_event({:call, from}, {:start_battle, user_id}, _state, data)
       when not is_map_key(data.players, user_id) and not is_map_key(data.spectators, user_id),
       do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
@@ -1514,6 +1543,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  defp process_event({:update_boss, :remove, boss_id} = ev, aggregate) do
+    if MapSet.member?(aggregate.data.bosses, boss_id) do
+      aggregate
+      |> update_in([:data, :bosses], &MapSet.delete(&1, boss_id))
+      |> Map.update!(:updates, &[ev | &1])
+    else
+      aggregate
+    end
+  end
+
   # avoid sending a useless lobby list update when the last member of the lobby
   # just left. The caller of this function will detect the lobby is empty and
   # terminate the process, which will trigger the final lobby list update for
@@ -1644,6 +1683,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
     change_map
     |> Map.put_new(:bosses, %{})
     |> put_in([:bosses, appointee_id], %{})
+  end
+
+  defp update_change_from_event({:update_boss, :remove, boss_id}, change_map) do
+    change_map
+    |> Map.put_new(:bosses, %{})
+    |> put_in([:bosses, boss_id], nil)
   end
 
   defp broadcast_list_updates(%{data: final_state})

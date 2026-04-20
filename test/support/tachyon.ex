@@ -639,6 +639,13 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
+  def lobby_unboss(client, user_id \\ nil) do
+    uid = if user_id, do: to_string(user_id), else: nil
+    :ok = send_request(client, "lobby/unboss", %{userId: uid})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
   def lobby_update_client_status(client, update_data) do
     :ok = send_request(client, "lobby/updateClientStatus", update_data)
     {:ok, resp} = recv_message(client)

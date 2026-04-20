@@ -152,4 +152,8 @@ defmodule Teiserver.TachyonLobby do
   @spec appoint_boss(id(), T.userid(), appointee_id :: T.userid()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
   defdelegate appoint_boss(lobby_id, user_id, appointee_id), to: Lobby
+
+  @spec unboss(id(), T.userid(), boss_id :: T.userid()) ::
+          :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
+  defdelegate unboss(lobby_id, user_id, boss_id), to: Lobby
 end

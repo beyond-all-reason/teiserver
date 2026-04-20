@@ -892,6 +892,21 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
+  def handle_command("lobby/unboss", "request", _msg_id, %{"data" => data}, state) do
+    user_id =
+      case data["userId"] do
+        nil -> {:ok, state.user.id}
+        raw -> TachyonParser.parse_user_id(raw)
+      end
+
+    with {:ok, boss_id} <- user_id,
+         :ok <- Session.lobby_unboss(state.user.id, boss_id) do
+      {:response, state}
+    else
+      {:error, err} -> {:error_response, :invalid_request, to_string(err), state}
+    end
+  end
+
   def handle_command("lobby/updateClientStatus", "request", _msg_id, %{"data" => data}, state) do
     mappings = %{"isReady" => :ready?, "assetStatus" => {:asset_status, &parse_asset_status/1}}
     change_status = Collections.transform_map(data, mappings)

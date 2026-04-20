@@ -526,6 +526,16 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       assert data["bosses"] == %{to_string(ctx2[:user].id) => %{}}
     end
+
+    test "can unboss" do
+      {:ok, ctx} = Tachyon.setup_client()
+      {:ok, _lobby_data} = setup_lobby(%{client: ctx[:client]}, %{boss_enabled?: true})
+
+      %{"status" => "success"} = Tachyon.lobby_unboss(ctx[:client], ctx[:user].id)
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(ctx[:client])
+
+      assert data["bosses"] == %{to_string(ctx[:user].id) => nil}
+    end
   end
 
   describe "update client status" do
