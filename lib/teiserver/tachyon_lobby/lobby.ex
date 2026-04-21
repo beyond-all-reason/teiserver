@@ -1306,7 +1306,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> update_in([:data, :monitors], &MC.demonitor_by_val(&1, {:user, p_id}))
       |> update_in([:updates], &[ev | &1])
 
-    process_event({:cast_vote, p_id, :abstain}, aggregate)
+    aggregate = process_event({:cast_vote, p_id, :abstain}, aggregate)
+    process_event({:update_boss, :remove, p_id}, aggregate)
   end
 
   defp process_event({:remove_spec_from_lobby, s_id} = ev, aggregate) do
@@ -1316,7 +1317,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> update_in([:data, :monitors], &MC.demonitor_by_val(&1, {:user, s_id}))
       |> update_in([:updates], &[ev | &1])
 
-    process_event({:cast_vote, s_id, :abstain}, aggregate)
+    aggregate = process_event({:cast_vote, s_id, :abstain}, aggregate)
+    process_event({:update_boss, :remove, s_id}, aggregate)
   end
 
   defp process_event({:move_spec_to_player, p_id, player_data} = ev, aggregate) do

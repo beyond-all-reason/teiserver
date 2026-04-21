@@ -1242,6 +1242,17 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, data}}
       assert data.bosses == %{"2" => %{}}
     end
+
+    test "leaving lobby unboss" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
+      :ok = Lobby.appoint_boss(id, @default_user_id, "2")
+      assert_receive {:lobby, ^id, {:updated, _data}}
+      :ok = Lobby.leave(id, "2")
+      assert_receive {:lobby, ^id, {:updated, data}}
+      assert data.bosses == %{"2" => nil}
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.bosses == MapSet.new([@default_user_id])
+    end
   end
 
   describe "update ally team" do
