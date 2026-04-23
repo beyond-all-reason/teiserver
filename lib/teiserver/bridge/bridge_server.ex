@@ -33,14 +33,12 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec call_bridge(any()) :: any()
   def call_bridge(message) do
-    bridge_pid = get_bridge_pid()
-    GenServer.call(bridge_pid, message)
+    GenServer.call(via_tuple(), message)
   end
 
   @spec cast_bridge(any()) :: :ok
   def cast_bridge(message) do
-    bridge_pid = get_bridge_pid()
-    GenServer.cast(bridge_pid, message)
+    GenServer.cast(via_tuple(), message)
   end
 
   @spec send_bridge(any()) :: :ok
@@ -271,8 +269,6 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_info(%{channel: "teiserver_server"}, state), do: {:noreply, state}
 
-  # pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
-  # send(pid, :gdt_check)
   def handle_info(:gdt_check, state) do
     Thread.list(Application.get_env(:teiserver, DiscordBridgeBot)[:guild_id])
 
@@ -508,7 +504,6 @@ defmodule Teiserver.Bridge.BridgeServer do
     end
 
     Logger.metadata(request_id: "BridgeServer")
-    Teiserver.cache_put(:application_metadata_cache, "teiserver_bridge_pid", self())
 
     Horde.Registry.register(
       Teiserver.ServerRegistry,
@@ -524,8 +519,13 @@ defmodule Teiserver.Bridge.BridgeServer do
     Client.disconnect(state.userid, "bridge terminate")
   end
 
-  @spec get_bridge_pid() :: pid
+  @spec get_bridge_pid() :: pid | nil
   def get_bridge_pid do
-    Teiserver.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "BridgeServer") do
+      [{pid, _data}] -> pid
+      _x -> nil
+    end
   end
+
+  defp via_tuple, do: {:via, Horde.Registry, {Teiserver.ServerRegistry, "BridgeServer"}}
 end
