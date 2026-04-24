@@ -23,7 +23,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts[:data], [])
+    GenServer.start_link(__MODULE__, opts[:data], name: via_tuple())
   end
 
   @spec get_bridge_userid() :: T.userid()
@@ -504,12 +504,6 @@ defmodule Teiserver.Bridge.BridgeServer do
     end
 
     Logger.metadata(request_id: "BridgeServer")
-
-    Horde.Registry.register(
-      Teiserver.ServerRegistry,
-      "BridgeServer",
-      :bridge_server
-    )
 
     {:ok, %{}}
   end
