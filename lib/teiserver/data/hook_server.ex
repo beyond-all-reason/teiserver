@@ -2,6 +2,7 @@ defmodule Teiserver.HookServer do
   @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Bridge.DiscordBridgeBot
+  alias Teiserver.Bridge.DiscordSystem
   alias Teiserver.CacheUser
   alias Teiserver.Communication
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
@@ -19,6 +20,11 @@ defmodule Teiserver.HookServer do
   catch
     :exit, {:timeout, _details} ->
       Logger.error("Timeout while processing hook for event #{inspect(ev)}")
+
+      if Map.get(ev, :event) in [:new_report, :updated_report] do
+        DiscordSystem.restart("Automatic restart because #{ev.event} timed out")
+      end
+
       {:noreply, state}
   end
 
