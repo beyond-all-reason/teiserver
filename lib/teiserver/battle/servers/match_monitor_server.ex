@@ -87,7 +87,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   def handle_info({:new_message, from_id, "autohosts", "* Launching game..."}, state) do
     case Client.get_client_by_id(from_id) do
       nil ->
-        Logger.warning("Cannot start match: client #{from_id} not found")
         {:noreply, state}
 
       client ->
@@ -168,7 +167,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   def handle_info({:direct_message, from_id, "broken_connection " <> username}, state) do
-    if Auth.is_bot?(from_id) or Auth.moderator?(from_id) do
+    if Auth.is_bot?(from_id) or Auth.admin?(from_id) or Auth.moderator?(from_id) do
       user = Account.get_user_by_name(username)
 
       if user do

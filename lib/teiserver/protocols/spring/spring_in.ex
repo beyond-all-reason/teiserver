@@ -1464,11 +1464,9 @@ defmodule Teiserver.Protocols.SpringIn do
 
     cond do
       Enum.count(status_timestamps) > 10 ->
-        Logger.warning("status_flood_protection:10 - #{state.username}/#{state.userid}")
         {true, %{state | status_timestamps: status_timestamps}}
 
       Enum.count(recent_timestamps) > 3 ->
-        Logger.warning("status_flood_protection:3 - #{state.username}/#{state.userid}")
         {true, %{state | status_timestamps: status_timestamps}}
 
       true ->

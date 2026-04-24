@@ -43,7 +43,6 @@ defmodule Teiserver.Account.Auth do
   def is_bot?(%{roles: roles}), do: Enum.member?(roles, "Bot")
   def is_bot?(_user), do: false
 
-  # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
   @spec moderator?(T.userid() | T.user()) :: boolean()
   def moderator?(nil), do: false
 

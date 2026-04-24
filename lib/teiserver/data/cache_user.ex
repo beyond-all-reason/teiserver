@@ -1192,10 +1192,10 @@ defmodule Teiserver.CacheUser do
   def allow?(user, required) do
     case required do
       :moderator ->
-        Auth.moderator?(user)
+        Auth.admin?(user) or Auth.moderator?(user)
 
       :bot ->
-        Auth.moderator?(user) or Auth.is_bot?(user)
+        Auth.admin?(user) or Auth.moderator?(user) or Auth.is_bot?(user)
 
       required ->
         Enum.member?(user.permissions, required)

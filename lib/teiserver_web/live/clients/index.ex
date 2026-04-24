@@ -29,6 +29,7 @@ defmodule TeiserverWeb.ClientLive.Index do
           CacheUser.get_user_by_id(userid) |> limited_user()
         }
       end)
+      |> Map.filter(fn {_key, value} -> not is_nil(value) end)
 
     socket =
       socket
@@ -86,6 +87,7 @@ defmodule TeiserverWeb.ClientLive.Index do
           |> limited_user()
         end
       end)
+      |> Enum.reject(&is_nil(&1))
       |> Map.new(fn user -> {user.id, user} end)
 
     socket =
@@ -150,6 +152,8 @@ defmodule TeiserverWeb.ClientLive.Index do
     socket
     |> assign(:client_ids, client_ids)
   end
+
+  defp limited_user(nil), do: nil
 
   defp limited_user(user) do
     Map.take(user, ~w(id bot moderator hw_hash chobby_hash)a)

@@ -401,8 +401,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> Battle.get_lobby_current_balance()
 
     if balance do
-      moderator_messages =
-        if Auth.moderator?(senderid) do
+      admin_or_moderator_messages =
+        if Auth.admin?(senderid) or Auth.moderator?(senderid) do
           time_taken =
             cond do
               balance.time_taken < 1000 ->
@@ -445,7 +445,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           balance.logs,
           "Deviation of: #{balance.deviation}",
           team_stats,
-          moderator_messages,
+          admin_or_moderator_messages,
           @splitter
         ]
         |> List.flatten()
@@ -601,9 +601,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> String.downcase()
       |> String.trim()
 
-    is_moderator = Auth.moderator?(senderid)
+    is_admin_or_moderator = Auth.admin?(senderid) or Auth.moderator?(senderid)
 
-    allowed_choices = BalanceLib.get_allowed_algorithms(is_moderator)
+    allowed_choices = BalanceLib.get_allowed_algorithms(is_admin_or_moderator)
 
     if Enum.member?(allowed_choices, remaining) do
       ChatLib.say(

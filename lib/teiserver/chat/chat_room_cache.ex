@@ -60,7 +60,7 @@ defmodule Teiserver.Room do
       user == nil ->
         {false, "No user"}
 
-      Auth.moderator?(user) == true ->
+      Auth.admin?(user) or Auth.moderator?(user) == true ->
         true
 
       true ->

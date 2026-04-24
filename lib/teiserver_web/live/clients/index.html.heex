@@ -59,7 +59,7 @@
               <%= if Enum.member?(@client_ids, userid) do %>
                 <% user = @users[userid]
                 client = @clients[userid] %>
-                <%= if client != nil do %>
+                <%= if client != nil and user != nil do %>
                   <tr>
                     <td>{client.name}</td>
                     <td>{client.party_id}</td>

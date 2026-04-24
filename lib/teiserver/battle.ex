@@ -378,7 +378,6 @@ defmodule Teiserver.Battle do
         end
 
       {:error, :unavailable} ->
-        Logger.warning("Cannot start match for lobby #{lobby_id}: lobby unavailable")
         :ok
     end
 
