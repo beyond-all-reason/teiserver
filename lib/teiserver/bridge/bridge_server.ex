@@ -8,6 +8,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Bridge.CommandLib
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.CacheUser
   alias Teiserver.Chat.WordLib
@@ -23,7 +24,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts[:data], [])
+    GenServer.start_link(__MODULE__, opts[:data], name: via_tuple())
   end
 
   @spec get_bridge_userid() :: T.userid()
@@ -33,14 +34,12 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec call_bridge(any()) :: any()
   def call_bridge(message) do
-    bridge_pid = get_bridge_pid()
-    GenServer.call(bridge_pid, message)
+    GenServer.call(via_tuple(), message)
   end
 
   @spec cast_bridge(any()) :: :ok
   def cast_bridge(message) do
-    bridge_pid = get_bridge_pid()
-    GenServer.cast(bridge_pid, message)
+    GenServer.cast(via_tuple(), message)
   end
 
   @spec send_bridge(any()) :: :ok
@@ -89,24 +88,12 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   @impl GenServer
-  def handle_info(:begin, _state) do
-    state =
-      if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
-           true do
-        pid = self()
-
-        spawn(fn ->
-          :timer.sleep(250)
-          send(pid, :begin)
-        end)
-      else
-        do_begin()
-      end
-
+  def handle_continue(:begin, _state) do
+    state = do_begin()
     {:noreply, state}
   end
 
-  # Teiserver.Bridge.BridgeServer.send_bridge(bridge_pid, :recache)
+  @impl GenServer
   def handle_info(:recache, state) do
     Logger.info("Recaching")
     {:noreply, build_local_caches(state)}
@@ -271,8 +258,6 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_info(%{channel: "teiserver_server"}, state), do: {:noreply, state}
 
-  # pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
-  # send(pid, :gdt_check)
   def handle_info(:gdt_check, state) do
     Thread.list(Application.get_env(:teiserver, DiscordBridgeBot)[:guild_id])
 
@@ -327,7 +312,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   defp do_begin do
-    Logger.debug("Starting up Bridge server")
+    Logger.info("Starting up Bridge server")
     account = get_bridge_account()
     Teiserver.cache_put(:application_metadata_cache, "teiserver_bridge_userid", account.id)
     {:ok, user, client} = CacheUser.internal_client_login(account.id)
@@ -402,6 +387,9 @@ defmodule Teiserver.Bridge.BridgeServer do
 
     Teiserver.store_put(:application_metadata_cache, :discord_room_lookup, room_lookup)
     Teiserver.store_put(:application_metadata_cache, :discord_channel_lookup, channel_lookup)
+
+    CommandLib.cache_discord_commands()
+    Communication.pre_cache_discord_channels()
 
     Map.merge(state, %{
       channel_lookup: channel_lookup,
@@ -500,23 +488,12 @@ defmodule Teiserver.Bridge.BridgeServer do
   defp message_starts_with?(message, text), do: String.starts_with?(message, text)
 
   @impl GenServer
-  @spec init(map()) :: {:ok, map()}
+  @spec init(map()) :: {:ok, term(), {:continue, term()}}
   def init(_opts) do
-    if Communication.use_discord?() do
-      Process.flag(:trap_exit, true)
-      send(self(), :begin)
-    end
-
+    Process.flag(:trap_exit, true)
     Logger.metadata(request_id: "BridgeServer")
-    Teiserver.cache_put(:application_metadata_cache, "teiserver_bridge_pid", self())
 
-    Horde.Registry.register(
-      Teiserver.ServerRegistry,
-      "BridgeServer",
-      :bridge_server
-    )
-
-    {:ok, %{}}
+    {:ok, %{}, {:continue, :begin}}
   end
 
   @impl GenServer
@@ -524,8 +501,13 @@ defmodule Teiserver.Bridge.BridgeServer do
     Client.disconnect(state.userid, "bridge terminate")
   end
 
-  @spec get_bridge_pid() :: pid
+  @spec get_bridge_pid() :: pid | nil
   def get_bridge_pid do
-    Teiserver.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "BridgeServer") do
+      [{pid, _data}] -> pid
+      _x -> nil
+    end
   end
+
+  defp via_tuple, do: {:via, Horde.Registry, {Teiserver.ServerRegistry, "BridgeServer"}}
 end

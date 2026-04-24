@@ -3,8 +3,6 @@ defmodule Teiserver.Startup do
 
   alias Phoenix.PubSub
   alias Teiserver.Battle
-  alias Teiserver.Bridge.CommandLib
-  alias Teiserver.Communication
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Game.GenerateAchievementTypes
@@ -18,9 +16,6 @@ defmodule Teiserver.Startup do
     start_time = System.system_time(:millisecond)
 
     LobbyIdServer.start_lobby_id_server()
-
-    CommandLib.cache_discord_commands()
-    Communication.pre_cache_discord_channels()
 
     # Add in achievements
     GenerateAchievementTypes.perform()
