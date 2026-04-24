@@ -502,8 +502,8 @@ defmodule Teiserver.Bridge.BridgeServer do
   @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
+    Process.flag(:trap_exit, true)
     if Communication.use_discord?() do
-      Process.flag(:trap_exit, true)
       send(self(), :begin)
     end
 
