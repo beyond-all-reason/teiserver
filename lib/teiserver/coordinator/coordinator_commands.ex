@@ -7,6 +7,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Account.CodeOfConductData
   alias Teiserver.CacheUser
   alias Teiserver.Client
+  alias Teiserver.Communication
   alias Teiserver.Config
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.CoordinatorLib
@@ -376,23 +377,28 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   defp do_handle(%{command: "discord", senderid: senderid} = _cmd, state) do
     sender = CacheUser.get_user_by_id(senderid)
 
-    if sender.discord_id != nil do
-      CacheUser.send_direct_message(
-        state.userid,
-        senderid,
-        "You already have a discord account linked; the discord link is: #{Application.get_env(:teiserver, Teiserver)[:discord]}"
-      )
-    else
-      code = (:rand.uniform(899_999) + 100_000) |> to_string()
-      Teiserver.cache_put(:discord_bridge_account_codes, senderid, code)
+    cond do
+      sender.discord_id != nil ->
+        CacheUser.send_direct_message(
+          state.userid,
+          senderid,
+          "You already have a discord account linked; the discord link is: #{Application.get_env(:teiserver, Teiserver)[:discord]}"
+        )
 
-      CacheUser.send_direct_message(state.userid, senderid, [
-        @splitter,
-        "To link your discord account, send a private message to Teiserver Bot on the BAR discord with the message:",
-        "$discord #{senderid}-#{code}",
-        "This code will expire after 5 minutes",
-        "The discord link is: #{Application.get_env(:teiserver, Teiserver)[:discord]}"
-      ])
+      Communication.use_discord?() ->
+        code = (:rand.uniform(899_999) + 100_000) |> to_string()
+        Teiserver.cache_put(:discord_bridge_account_codes, senderid, code)
+
+        CacheUser.send_direct_message(state.userid, senderid, [
+          @splitter,
+          "To link your discord account, send a private message to Teiserver Bot on the BAR discord with the message:",
+          "$discord #{senderid}-#{code}",
+          "This code will expire after 5 minutes",
+          "The discord link is: #{Application.get_env(:teiserver, Teiserver)[:discord]}"
+        ])
+
+      true ->
+        nil
     end
 
     state

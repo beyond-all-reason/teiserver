@@ -8,6 +8,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Bridge.CommandLib
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.CacheUser
   alias Teiserver.Chat.WordLib
@@ -398,6 +399,9 @@ defmodule Teiserver.Bridge.BridgeServer do
 
     Teiserver.store_put(:application_metadata_cache, :discord_room_lookup, room_lookup)
     Teiserver.store_put(:application_metadata_cache, :discord_channel_lookup, channel_lookup)
+
+    CommandLib.cache_discord_commands()
+    Communication.pre_cache_discord_channels()
 
     Map.merge(state, %{
       channel_lookup: channel_lookup,
