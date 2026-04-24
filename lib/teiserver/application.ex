@@ -133,9 +133,6 @@ defmodule Teiserver.Application do
         Teiserver.Battle.LobbyIndexThrottle,
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Throttles.Supervisor},
 
-        # Bridge
-        Teiserver.Bridge.DiscordSystem,
-
         # Lobbies
         Teiserver.Lobby.Cache,
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbySupervisor},
@@ -175,7 +172,11 @@ defmodule Teiserver.Application do
         # Start the ranch TCP listener process for the Spring protocol
         spring_server_child(Teiserver.RawSpringTcpServer, :tcp),
         # Start the ranch TLS listener process for the Spring protocol
-        spring_server_child(Teiserver.SSLSpringTcpServer, :tls)
+        spring_server_child(Teiserver.SSLSpringTcpServer, :tls),
+
+        # the discord system has a bot that connects to the tcp/tls server as a bot client
+        # so it needs to be started after the servers
+        Teiserver.Bridge.DiscordSystem
       ]
       |> Enum.reject(&is_nil/1)
       |> Kernel.++(additional_application_children())

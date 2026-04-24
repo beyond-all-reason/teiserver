@@ -88,24 +88,12 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   @impl GenServer
-  def handle_info(:begin, _state) do
-    state =
-      if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
-           true do
-        pid = self()
-
-        spawn(fn ->
-          :timer.sleep(250)
-          send(pid, :begin)
-        end)
-      else
-        do_begin()
-      end
-
+  def handle_continue(:begin, _state) do
+    state = do_begin()
     {:noreply, state}
   end
 
-  # Teiserver.Bridge.BridgeServer.send_bridge(bridge_pid, :recache)
+  @impl GenServer
   def handle_info(:recache, state) do
     Logger.info("Recaching")
     {:noreply, build_local_caches(state)}
@@ -324,7 +312,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   defp do_begin do
-    Logger.debug("Starting up Bridge server")
+    Logger.info("Starting up Bridge server")
     account = get_bridge_account()
     Teiserver.cache_put(:application_metadata_cache, "teiserver_bridge_userid", account.id)
     {:ok, user, client} = CacheUser.internal_client_login(account.id)
@@ -500,16 +488,12 @@ defmodule Teiserver.Bridge.BridgeServer do
   defp message_starts_with?(message, text), do: String.starts_with?(message, text)
 
   @impl GenServer
-  @spec init(map()) :: {:ok, map()}
+  @spec init(map()) :: {:ok, term(), {:continue, term()}}
   def init(_opts) do
     Process.flag(:trap_exit, true)
-    if Communication.use_discord?() do
-      send(self(), :begin)
-    end
-
     Logger.metadata(request_id: "BridgeServer")
 
-    {:ok, %{}}
+    {:ok, %{}, {:continue, :begin}}
   end
 
   @impl GenServer
