@@ -112,7 +112,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
   @spec handle_event(String.t(), map(), Socket.t()) :: {:noreply, Socket.t()}
   def handle_event("restart-discord-bridge", _event, socket) do
-    restart_status = DiscordSystem.restart()
+    username = socket.assigns[:current_user].name
+    restart_status = DiscordSystem.restart("manual restart from #{username}")
 
     {flash_type, message} =
       case restart_status do

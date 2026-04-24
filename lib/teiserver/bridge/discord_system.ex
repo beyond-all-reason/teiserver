@@ -5,6 +5,7 @@ defmodule Teiserver.Bridge.DiscordSystem do
 
   use DynamicSupervisor
   use Task
+  require Logger
 
   def start_link(_init_arg) do
     DynamicSupervisor.start_link(__MODULE__, [], name: __MODULE__)
@@ -31,8 +32,8 @@ defmodule Teiserver.Bridge.DiscordSystem do
     end
   end
 
-  @spec restart :: Supervisor.on_start_child() | :disabled
-  def restart do
+  @spec restart(String.t()) :: Supervisor.on_start_child() | :disabled
+  def restart(reason) do
     case Process.whereis(Teiserver.Bridge.DiscordSupervisor) do
       x when is_pid(x) ->
         DynamicSupervisor.terminate_child(
@@ -45,14 +46,15 @@ defmodule Teiserver.Bridge.DiscordSystem do
     end
 
     result = start()
+    Logger.info("Discord system restarted: #{reason}, result: #{inspect(result)}")
     channel_id = BridgeServer.server_update_channel()
 
     if channel_id do
       message =
         case result do
-          {:ok, _pid} -> "Discord bridge restarted"
-          {:ok, _pid, _info} -> "Discord bridge restarted"
-          other -> "Error restarting discord bridge: #{inspect(other)}"
+          {:ok, _pid} -> "Discord bridge restarted: #{reason}"
+          {:ok, _pid, _info} -> "Discord bridge restarted: #{reason}"
+          other -> "Error restarting discord bridge #{reason}: #{inspect(other)}"
         end
 
       Communication.new_discord_message(channel_id, message)
