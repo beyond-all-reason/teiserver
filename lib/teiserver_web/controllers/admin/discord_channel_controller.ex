@@ -54,7 +54,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     conn
     |> assign(:special_names, get_special_names())
     |> assign(:changeset, changeset)
-    |> add_breadcrumb(name: "New lobby policy", url: conn.request_path)
+    |> add_breadcrumb(name: "New channel ref", url: conn.request_path)
     |> render("new.html")
   end
 
@@ -72,7 +72,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     case Communication.create_discord_channel(discord_channel_params) do
       {:ok, _discord_channel} ->
         conn
-        |> put_flash(:info, "Lobby policy created successfully.")
+        |> put_flash(:info, "Channel ref created successfully.")
         |> redirect(to: ~p"/admin/discord_channels/")
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -113,7 +113,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     case Communication.update_discord_channel(discord_channel, discord_channel_params) do
       {:ok, _discord_channel} ->
         conn
-        |> put_flash(:info, "Lobby policy updated successfully.")
+        |> put_flash(:info, "Channel ref updated successfully.")
         |> redirect(to: ~p"/admin/discord_channels")
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -132,7 +132,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
     {:ok, _discord_channel} = Communication.delete_discord_channel(discord_channel)
 
     conn
-    |> put_flash(:info, "Lobby policy deleted successfully.")
+    |> put_flash(:info, "Channel ref deleted successfully.")
     |> redirect(to: ~p"/admin/discord_channels")
   end
 

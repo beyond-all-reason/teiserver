@@ -20,9 +20,23 @@
                 "mapName": { "type": "string" },
                 "allyTeamConfig": {
                     "$ref": "../../definitions/allyTeamConfig.json"
+                },
+                "gameOptions": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^.*$": {
+                            "type": "object",
+                            "properties": { "value": { "type": "string" } },
+                            "required": ["value"]
+                        }
+                    }
                 }
             },
-            "required": ["name", "mapName", "allyTeamConfig"]
+            "required": [
+                "name",
+                "mapName",
+                "allyTeamConfig"
+            ]
         }
     },
     "required": ["type", "messageId", "commandId", "data"]

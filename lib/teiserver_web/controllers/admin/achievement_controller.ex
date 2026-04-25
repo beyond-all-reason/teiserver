@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
       {:ok, _achievement_type} ->
         conn
         |> put_flash(:info, "AchievementType created successfully.")
-        |> redirect(to: Routes.ts_admin_achievement_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/achievements")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -101,7 +101,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
       {:ok, _achievement_type} ->
         conn
         |> put_flash(:info, "AchievementType updated successfully.")
-        |> redirect(to: Routes.ts_admin_achievement_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/achievements")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -123,6 +123,6 @@ defmodule TeiserverWeb.Admin.AchievementController do
 
     conn
     |> put_flash(:info, "AchievementType deleted successfully.")
-    |> redirect(to: Routes.ts_admin_achievement_path(conn, :index))
+    |> redirect(to: ~p"/teiserver/admin/achievements")
   end
 end

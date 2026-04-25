@@ -65,9 +65,13 @@ defmodule TeiserverWeb.Tachyon.Autohost do
   test "can lookup after status message", %{token: token} do
     Tachyon.connect_autohost!(token, 10, 0)
 
-    poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {p, details} ->
-      details.max_battles == 10 && details.current_battles == 0 && is_pid(p)
-    end)
+    {_pid, result} =
+      poll_until(fn -> Autohost.lookup_autohost(token.bot_id) end, fn {p, details} ->
+        details.max_battles == 10 && details.current_battles == 0 && is_pid(p)
+      end)
+
+    assert result.max_battles == 10
+    assert result.current_battles == 0
   end
 
   test "can update status attributes", %{token: token} do
@@ -134,7 +138,8 @@ defmodule TeiserverWeb.Tachyon.Autohost do
           teams: [%{bots: [%{host_user_id: 123, ai_short_name: "testAI", name: "test AI"}]}],
           start_box: %{left: 0.6, right: 1, top: 0.6, bottom: 1}
         }
-      ]
+      ],
+      game_options: %{"foo" => "bar"}
     }
 
     Task.async(fn ->
@@ -181,7 +186,8 @@ defmodule TeiserverWeb.Tachyon.Autohost do
                "engineVersion" => "engineversion",
                "gameName" => "game name",
                "mapName" => "very map",
-               "startPosType" => "fixed"
+               "startPosType" => "fixed",
+               "gameOptions" => %{"foo" => "bar"}
              }
   end
 

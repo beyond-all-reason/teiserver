@@ -134,7 +134,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
   def handle_event("invite:accept", %{"party_id" => party_id}, socket) do
     PartyLib.call_party(party_id, {:accept_invite, socket.assigns.current_user.id})
     :timer.sleep(100)
-    {:noreply, socket |> redirect(to: Routes.ts_game_party_show_path(socket, :show, party_id))}
+    {:noreply, socket |> redirect(to: ~p"/teiserver/account/parties/show/#{party_id}")}
   end
 
   def handle_event("invite:decline", %{"party_id" => party_id}, socket) do
@@ -145,7 +145,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
   def handle_event("create_party", _params, socket) do
     party = Account.create_party(socket.assigns.current_user.id)
     :timer.sleep(100)
-    {:noreply, socket |> redirect(to: Routes.ts_game_party_show_path(socket, :show, party.id))}
+    {:noreply, socket |> redirect(to: ~p"/teiserver/account/parties/show/#{party.id}")}
   end
 
   @spec list_parties(map) :: map

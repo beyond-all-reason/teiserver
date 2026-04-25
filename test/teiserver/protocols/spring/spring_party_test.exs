@@ -20,7 +20,8 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     setup [:setup_user]
 
     test "create", %{socket: socket} do
-      assert create_party!(socket) != nil
+      result = create_party!(socket)
+      assert is_bitstring(result)
     end
 
     test "cannot create when in a party", %{socket: socket} do

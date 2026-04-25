@@ -477,7 +477,6 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec close_lobby(integer() | nil, atom) :: :ok
   def close_lobby(lobby_id, reason \\ :closed) when is_integer(lobby_id) do
-    lobby = get_lobby(lobby_id)
     Coordinator.close_lobby(lobby_id)
 
     # Kill lobby server process
@@ -497,7 +496,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     :ok =
       PubSub.broadcast(
         Teiserver.PubSub,
-        "teiserver_lobby_updates:#{lobby.id}",
+        "teiserver_lobby_updates:#{lobby_id}",
         %{
           channel: "teiserver_lobby_updates",
           event: :closed,

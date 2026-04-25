@@ -396,6 +396,10 @@ defmodule Teiserver.Support.Tachyon do
     send_message!(client, message, %{type: :party})
   end
 
+  def send_lobby_message(client, message) do
+    send_message!(client, message, %{type: :lobby})
+  end
+
   def subscribe_messaging!(client, opts \\ []) do
     since = Keyword.get(opts, :since, %{type: "latest"})
     :ok = send_request(client, "messaging/subscribeReceived", %{since: since})
@@ -518,6 +522,16 @@ defmodule Teiserver.Support.Tachyon do
       mapName: lobby_data.map_name,
       allyTeamConfig: lobby_data.ally_team_config
     }
+
+    data =
+      if is_map_key(lobby_data, :game_options) do
+        opts =
+          Enum.map(lobby_data.game_options, fn {k, v} -> {k, %{value: v}} end) |> Enum.into(%{})
+
+        Map.put(data, :gameOptions, opts)
+      else
+        data
+      end
 
     :ok = send_request(client, "lobby/create", data)
     {:ok, resp} = recv_message(client)

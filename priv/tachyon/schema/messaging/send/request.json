@@ -32,6 +32,11 @@
                             "type": "object",
                             "properties": { "type": { "const": "party" } },
                             "required": ["type"]
+                        },
+                        {
+                            "type": "object",
+                            "properties": { "type": { "const": "lobby" } },
+                            "required": ["type"]
                         }
                     ]
                 },

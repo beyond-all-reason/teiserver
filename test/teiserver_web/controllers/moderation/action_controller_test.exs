@@ -82,7 +82,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
           action: Map.put(@create_attrs, "target_id", user.id)
         )
 
-      assert redirected_to(conn) == Routes.moderation_action_path(conn, :index)
+      assert redirected_to(conn) == ~p"/moderation/action"
 
       new_action = Moderation.list_actions(search: [target_id: user.id])
       assert Enum.count(new_action) == 1

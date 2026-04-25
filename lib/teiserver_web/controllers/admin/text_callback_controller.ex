@@ -86,7 +86,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
 
     conn
     |> assign(:changeset, changeset)
-    |> add_breadcrumb(name: "New lobby policy", url: conn.request_path)
+    |> add_breadcrumb(name: "New lobby text callback", url: conn.request_path)
     |> render("new.html")
   end
 
@@ -104,7 +104,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
     case Communication.create_text_callback(text_callback_params) do
       {:ok, _text_callback} ->
         conn
-        |> put_flash(:info, "Lobby policy created successfully.")
+        |> put_flash(:info, "Text callback created successfully.")
         |> redirect(to: ~p"/admin/text_callbacks/")
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -143,7 +143,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
     case Communication.update_text_callback(text_callback, text_callback_params) do
       {:ok, _text_callback} ->
         conn
-        |> put_flash(:info, "Lobby policy updated successfully.")
+        |> put_flash(:info, "Text callback updated successfully.")
         |> redirect(to: ~p"/admin/text_callbacks")
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -165,7 +165,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
     {:ok, _text_callback} = Communication.delete_text_callback(text_callback)
 
     conn
-    |> put_flash(:info, "Lobby policy deleted successfully.")
+    |> put_flash(:info, "Text callback deleted successfully.")
     |> redirect(to: ~p"/admin/text_callbacks")
   end
 end

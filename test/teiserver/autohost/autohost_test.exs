@@ -3,6 +3,7 @@ defmodule Teiserver.Autohost.AutohostTest do
   alias Teiserver.Autohost
   alias Teiserver.Autohost.Session
   alias Teiserver.Autohost.SessionRegistry
+  alias Teiserver.Autohost.TachyonHandler, as: TH
   alias Teiserver.BotFixtures
 
   use Teiserver.DataCase, async: false
@@ -155,8 +156,6 @@ defmodule Teiserver.Autohost.AutohostTest do
   end
 
   describe "message parser" do
-    alias Teiserver.Autohost.TachyonHandler, as: TH
-
     test "start" do
       msg_id = "bb732bd7-c549-4f26-b29b-e1b8d2c99c96"
 

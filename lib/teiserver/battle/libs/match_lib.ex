@@ -402,6 +402,11 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.inserted_at < ^timestamp
   end
 
+  def _search(query, :duration_greater_than, value) do
+    from matches in query,
+      where: matches.game_duration > ^value
+  end
+
   def _search(query, :duration_less_than, value) do
     from matches in query,
       where: matches.game_duration < ^value

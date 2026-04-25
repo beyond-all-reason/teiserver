@@ -2,6 +2,7 @@ defmodule Teiserver.Logging.ServerDayLogLib do
   @moduledoc false
 
   alias Teiserver.Logging.ServerDayLog
+  alias Teiserver.Logging.UserActivityDayLog
 
   use TeiserverWeb, :library
 
@@ -112,28 +113,40 @@ defmodule Teiserver.Logging.ServerDayLogLib do
   end
 
   # Given an existing segment and a batch of logs, calculate the segment and add them together
-  defp extend_segment(existing, %{data: data} = _server_log) do
+  defp extend_segment(
+         existing,
+         {%ServerDayLog{} = server_log, %UserActivityDayLog{} = user_activity_log}
+       ) do
+    %ServerDayLog{data: log_data} = server_log
+    %UserActivityDayLog{data: user_data} = user_activity_log
+
+    unique_user_ids =
+      user_data
+      |> Map.get("total", [])
+      |> Map.keys()
+
+    unique_player_ids =
+      user_data
+      |> Map.get("player", [])
+      |> Map.keys()
+
     %{
       # Used to make calculating the end of day stats easier,
       # this will not appear in the final result
       tmp_reduction: %{
-        battles: existing.tmp_reduction.battles + get_in(data, ~w(aggregates stats battles)),
-        unique_users:
-          existing.tmp_reduction.unique_users ||
-            0 + get_in(data, ~w(aggregates stats unique_users)),
-        unique_players:
-          existing.tmp_reduction.unique_players ||
-            0 + get_in(data, ~w(aggregates stats unique_players)),
+        battles: existing.tmp_reduction.battles + get_in(log_data, ~w(aggregates stats battles)),
+        unique_users: unique_user_ids ++ existing.tmp_reduction.unique_users,
+        unique_players: unique_player_ids ++ existing.tmp_reduction.unique_players,
         accounts_created:
           existing.tmp_reduction.accounts_created +
-            get_in(data, ~w(aggregates stats accounts_created)),
+            get_in(log_data, ~w(aggregates stats accounts_created)),
         peak_user_counts:
           @user_types
           |> Map.new(fn type ->
             {type,
              max(
                get_in(existing, [:tmp_reduction, :peak_user_counts, type]),
-               get_in(data, ["aggregates", "stats", "peak_user_counts", to_string(type)])
+               get_in(log_data, ["aggregates", "stats", "peak_user_counts", to_string(type)])
              )}
           end)
       },
@@ -141,24 +154,25 @@ defmodule Teiserver.Logging.ServerDayLogLib do
       # Telemetry events
       events: %{
         complex_client:
-          add_maps(existing.events.complex_client, get_in(data, ~w(events complex_client))),
+          add_maps(existing.events.complex_client, get_in(log_data, ~w(events complex_client))),
         simple_client:
-          add_maps(existing.events.simple_client, get_in(data, ~w(events simple_client))),
+          add_maps(existing.events.simple_client, get_in(log_data, ~w(events simple_client))),
         complex_anon:
-          add_maps(existing.events.complex_anon, get_in(data, ~w(events complex_anon))),
-        simple_anon: add_maps(existing.events.simple_anon, get_in(data, ~w(events simple_anon))),
+          add_maps(existing.events.complex_anon, get_in(log_data, ~w(events complex_anon))),
+        simple_anon:
+          add_maps(existing.events.simple_anon, get_in(log_data, ~w(events simple_anon))),
         complex_server:
-          add_maps(existing.events.complex_server, get_in(data, ~w(events complex_server))),
+          add_maps(existing.events.complex_server, get_in(log_data, ~w(events complex_server))),
         simple_server:
-          add_maps(existing.events.simple_server, get_in(data, ~w(events simple_server))),
+          add_maps(existing.events.simple_server, get_in(log_data, ~w(events simple_server))),
         complex_lobby:
-          add_maps(existing.events.complex_lobby, get_in(data, ~w(events complex_lobby))),
+          add_maps(existing.events.complex_lobby, get_in(log_data, ~w(events complex_lobby))),
         simple_lobby:
-          add_maps(existing.events.simple_lobby, get_in(data, ~w(events simple_lobby))),
+          add_maps(existing.events.simple_lobby, get_in(log_data, ~w(events simple_lobby))),
         complex_match:
-          add_maps(existing.events.complex_match, get_in(data, ~w(events complex_match))),
+          add_maps(existing.events.complex_match, get_in(log_data, ~w(events complex_match))),
         simple_match:
-          add_maps(existing.events.simple_match, get_in(data, ~w(events simple_match)))
+          add_maps(existing.events.simple_match, get_in(log_data, ~w(events simple_match)))
       },
 
       # Monthly totals
@@ -168,12 +182,15 @@ defmodule Teiserver.Logging.ServerDayLogLib do
         # Total number of minutes spent doing that across all players that month
         minutes: %{
           player:
-            existing.aggregates.minutes.player + get_in(data, ~w(aggregates minutes player)),
+            existing.aggregates.minutes.player + get_in(log_data, ~w(aggregates minutes player)),
           spectator:
-            existing.aggregates.minutes.spectator + get_in(data, ~w(aggregates minutes spectator)),
-          lobby: existing.aggregates.minutes.lobby + get_in(data, ~w(aggregates minutes lobby)),
-          menu: existing.aggregates.minutes.menu + get_in(data, ~w(aggregates minutes menu)),
-          total: existing.aggregates.minutes.total + get_in(data, ~w(aggregates minutes total))
+            existing.aggregates.minutes.spectator +
+              get_in(log_data, ~w(aggregates minutes spectator)),
+          lobby:
+            existing.aggregates.minutes.lobby + get_in(log_data, ~w(aggregates minutes lobby)),
+          menu: existing.aggregates.minutes.menu + get_in(log_data, ~w(aggregates minutes menu)),
+          total:
+            existing.aggregates.minutes.total + get_in(log_data, ~w(aggregates minutes total))
         }
       }
     }

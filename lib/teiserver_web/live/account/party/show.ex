@@ -80,16 +80,16 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
          |> assign(:party, party)
          |> build_user_lookup()}
       else
-        {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
+        {:noreply, socket |> redirect(to: ~p"/teiserver/account/parties")}
       end
     else
-      {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
+      {:noreply, socket |> redirect(to: ~p"/teiserver/account/parties")}
     end
   end
 
   @impl Phoenix.LiveView
   def handle_info(%{channel: "teiserver_party:" <> _party_id, event: :closed}, socket) do
-    {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
+    {:noreply, socket |> redirect(to: ~p"/teiserver/account/parties")}
   end
 
   def handle_info(
@@ -213,7 +213,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   def handle_event("leave", _params, socket) do
     Account.move_client_to_party(socket.assigns.current_user.id, nil)
     Account.leave_party(socket.assigns.party_id, socket.assigns.current_user.id)
-    {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
+    {:noreply, socket |> redirect(to: ~p"/teiserver/account/parties")}
   end
 
   @spec build_user_lookup(map) :: map

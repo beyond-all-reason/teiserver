@@ -6,6 +6,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
   """
   alias Phoenix.PubSub
   alias Teiserver.Client
+
   use GenServer
 
   @update_interval 2000
@@ -17,7 +18,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
   end
 
   def handle_info(%{channel: "client_inout", event: :disconnect} = msg, state) do
-    {:noreply, %{state | new_clients: [msg.userid | state.new_clients]}}
+    {:noreply, %{state | removed_clients: [msg.userid | state.new_clients]}}
   end
 
   def handle_info(%{channel: "client_inout"}, state) do
@@ -83,7 +84,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
 
     Horde.Registry.register(
       Teiserver.ThrottleRegistry,
-      "ClientIndexThrottle",
+      "__MODULE__",
       :index
     )
 

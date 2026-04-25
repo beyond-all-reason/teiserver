@@ -29,7 +29,7 @@
           <li>
             Battle:
             <%= if @client != nil and @client.lobby_id != nil do %>
-              <.link navigate={Routes.ts_battle_lobby_show_path(@socket, :show, @client.lobby_id)}>
+              <.link navigate={~p"/battle/lobbies/show/#{@client.lobby_id}"}>
                 Battle #{@client.lobby_id}
               </.link>
               <%= if @current_client do %>

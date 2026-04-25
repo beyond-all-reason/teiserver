@@ -13,16 +13,13 @@
       <div class="card-body">
         <div class="float-end">
           <%= if @lobby do %>
-            <a
-              href={Routes.ts_battle_lobby_chat_path(@conn, :chat, @lobby.id)}
-              class="btn btn-outline-secondary"
-            >
+            <a href={~p"/battle/lobbies/chat/#{@lobby.id}"} class="btn btn-outline-secondary">
               Live chat
             </a>
           <% end %>
 
           <a
-            href={Routes.ts_admin_match_path(@conn, :server_index, @server_uuid)}
+            href={~p"/teiserver/admin/matches/by_server/#{@server_uuid}"}
             class="btn btn-outline-secondary"
           >
             <i class="fa-fw fa-solid fa-server"></i> Server grouping

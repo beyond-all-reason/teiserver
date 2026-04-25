@@ -8,7 +8,7 @@ defmodule Teiserver.Account.ReviewReport do
   def icon, do: "fa-solid fa-champagne-glasses"
 
   @spec permissions() :: String.t()
-  def permissions, do: "Admin"
+  def permissions, do: "Moderator"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do

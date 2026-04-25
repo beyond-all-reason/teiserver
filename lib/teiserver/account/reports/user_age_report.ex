@@ -9,7 +9,7 @@ defmodule Teiserver.Account.UserAgeReport do
   def icon, do: "fa-solid fa-chevron-up"
 
   @spec permissions() :: String.t()
-  def permissions, do: "Admin"
+  def permissions, do: "Moderator"
 
   @keys [
     "0 days",

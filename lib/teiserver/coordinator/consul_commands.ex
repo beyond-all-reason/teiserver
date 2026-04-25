@@ -401,8 +401,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> Battle.get_lobby_current_balance()
 
     if balance do
-      moderator_messages =
-        if Auth.moderator?(senderid) do
+      admin_or_moderator_messages =
+        if Auth.admin?(senderid) or Auth.moderator?(senderid) do
           time_taken =
             cond do
               balance.time_taken < 1000 ->
@@ -445,7 +445,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           balance.logs,
           "Deviation of: #{balance.deviation}",
           team_stats,
-          moderator_messages,
+          admin_or_moderator_messages,
           @splitter
         ]
         |> List.flatten()
@@ -601,9 +601,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> String.downcase()
       |> String.trim()
 
-    is_moderator = Auth.moderator?(senderid)
+    is_admin_or_moderator = Auth.admin?(senderid) or Auth.moderator?(senderid)
 
-    allowed_choices = BalanceLib.get_allowed_algorithms(is_moderator)
+    allowed_choices = BalanceLib.get_allowed_algorithms(is_admin_or_moderator)
 
     if Enum.member?(allowed_choices, remaining) do
       ChatLib.say(
@@ -1525,11 +1525,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     {check_name_result, check_name_msg} = LobbyRestrictions.check_lobby_name(stripped_name, state)
 
-    starts_with_lobby_policy =
-      new_name
-      |> String.downcase()
-      |> String.starts_with?("preset")
-
     cond do
       new_name == "" ->
         Battle.rename_lobby(state.lobby_id, lobby.base_name, nil)
@@ -1539,32 +1534,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         Lobby.sayex(
           state.coordinator_id,
           "That lobby name been rejected. Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked.",
-          state.lobby_id
-        )
-
-        state
-
-      state.lobby_policy_id != nil ->
-        Lobby.sayex(
-          state.coordinator_id,
-          "This is a server managed lobby, you cannot rename it",
-          state.lobby_id
-        )
-
-        state
-
-      # String.length(new_name) > 20 ->
-      #   Lobby.sayex(
-      #     state.coordinator_id,
-      #     "That name (#{new_name}) is too long",
-      #     state.lobby_id
-      #   )
-      #   state
-
-      lobby.lobby_policy_id && starts_with_lobby_policy ->
-        Lobby.sayex(
-          state.coordinator_id,
-          "This is not a server managed lobby, you cannot use that name",
           state.lobby_id
         )
 

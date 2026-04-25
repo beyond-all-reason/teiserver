@@ -88,7 +88,11 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   end
 
   def get_discord_channel(discord_channel_name) do
-    Teiserver.cache_get(:discord_channel_cache, discord_channel_name)
+    if use_discord?() do
+      Teiserver.cache_get(:discord_channel_cache, discord_channel_name)
+    else
+      nil
+    end
   end
 
   @doc """

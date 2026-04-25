@@ -188,19 +188,6 @@ defmodule Teiserver.Battle.BalanceLib do
     |> calculate_balance_stats()
     |> cleanup_result()
     |> Map.put(:time_taken, System.system_time(:microsecond) - start_time)
-    |> validate_result(groups, team_count, opts)
-  end
-
-  def validate_result(result, groups, team_count, opts) do
-    if(Enum.empty?(result.team_sizes)) do
-      Logger.error("Invalid balance result.")
-      Logger.error(result)
-      Logger.error("groups: #{Kernel.inspect(groups)}")
-      Logger.error("team_count: #{team_count}")
-      Logger.error("opts: #{Kernel.inspect(opts)}")
-    end
-
-    result
   end
 
   @doc """

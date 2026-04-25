@@ -226,7 +226,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
       {:ok, _report} ->
         conn
         |> put_flash(:info, "Report created successfully.")
-        |> redirect(to: Routes.moderation_report_path(conn, :index))
+        |> redirect(to: ~p"/moderation/report")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -252,12 +252,12 @@ defmodule TeiserverWeb.Moderation.ReportController do
           {:ok, _response} ->
             conn
             |> put_flash(:info, "Response created successfully.")
-            |> redirect(to: Routes.moderation_report_path(conn, :show, id))
+            |> redirect(to: ~p"/moderation/report/#{id}")
 
           {:error, %Ecto.Changeset{} = _changeset} ->
             conn
             |> put_flash(:danger, "Error creating response.")
-            |> redirect(to: Routes.moderation_report_path(conn, :show, id))
+            |> redirect(to: ~p"/moderation/report/#{id}")
         end
 
       response ->
@@ -265,12 +265,12 @@ defmodule TeiserverWeb.Moderation.ReportController do
           {:ok, _response} ->
             conn
             |> put_flash(:info, "Response updated successfully.")
-            |> redirect(to: Routes.moderation_report_path(conn, :show, id))
+            |> redirect(to: ~p"/moderation/report/#{id}")
 
           {:error, %Ecto.Changeset{} = _changeset} ->
             conn
             |> put_flash(:danger, "Error updating response.")
-            |> redirect(to: Routes.moderation_report_path(conn, :show, id))
+            |> redirect(to: ~p"/moderation/report/#{id}")
         end
     end
   end
@@ -296,7 +296,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
       {:ok, _report} ->
         conn
         |> put_flash(:info, "Report updated successfully.")
-        |> redirect(to: Routes.moderation_report_path(conn, :index))
+        |> redirect(to: ~p"/moderation/report")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -314,7 +314,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
       {:ok, _report} ->
         conn
         |> put_flash(:info, "Report closed successfully.")
-        |> redirect(to: Routes.moderation_report_path(conn, :index))
+        |> redirect(to: ~p"/moderation/report")
 
       {:error, %Ecto.Changeset{}} ->
         conn
@@ -331,7 +331,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
       {:ok, _report} ->
         conn
         |> put_flash(:info, "Report re-opened successfully.")
-        |> redirect(to: Routes.moderation_report_path(conn, :index))
+        |> redirect(to: ~p"/moderation/report")
 
       {:error, %Ecto.Changeset{}} ->
         conn
@@ -352,6 +352,6 @@ defmodule TeiserverWeb.Moderation.ReportController do
 
     conn
     |> put_flash(:info, "Report deleted successfully.")
-    |> redirect(to: Routes.moderation_report_path(conn, :index))
+    |> redirect(to: ~p"/moderation/report")
   end
 end

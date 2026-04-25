@@ -12,6 +12,8 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   import SpringIn, only: [_no_match: 4]
   # import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
+  @complex_client_event_max_length 4096
+
   # TODO: Less nested hackyness
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("upload_infolog", data, msg_id, state) do
@@ -141,12 +143,16 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           "no match"
       end
     else
+      Logger.warning(
+        "simple_client_event exceeds max_length: length=#{String.length(data)} max=1024"
+      )
+
       "exceeds max_length"
     end
   end
 
   defp do_complex_client_event(data, state) do
-    if String.length(data) < 1024 do
+    if String.length(data) < @complex_client_event_max_length do
       case Regex.run(~r/(\S+) (\S+) (\S+)/u, data) do
         [_full_match, event_name, value64, hash] ->
           case Spring.decode_value(value64) do
@@ -169,6 +175,10 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           "no match"
       end
     else
+      Logger.warning(
+        "log_client_event exceeds max_length: length=#{String.length(data)} max=#{@complex_client_event_max_length}"
+      )
+
       "exceeds max_length"
     end
   end
@@ -196,6 +206,10 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           "no match"
       end
     else
+      Logger.warning(
+        "live_client_event exceeds max_length: length=#{String.length(data)} max=1024"
+      )
+
       "exceeds max_length"
     end
   end
@@ -240,6 +254,8 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           "no match"
       end
     else
+      Logger.warning("client_property exceeds max_length: length=#{String.length(data)} max=1024")
+
       "exceeds max_length"
     end
   end

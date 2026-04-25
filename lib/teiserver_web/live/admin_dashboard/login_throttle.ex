@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
+  @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver
   alias Teiserver.Admin.AdminLib
-  alias Teiserver.Game
 
   use TeiserverWeb, :live_view
 
@@ -102,8 +102,6 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
 
   @impl Phoenix.LiveView
   def handle_event("disconnect-all-bots", _event, socket) do
-    Game.cast_lobby_organiser(socket.assigns.id, :disconnect_all_bots)
-
     {:noreply, socket}
   end
 end

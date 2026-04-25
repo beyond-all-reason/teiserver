@@ -8,7 +8,7 @@ defmodule Teiserver.Account.RetentionReport do
   def icon, do: "fa-solid fa-campground"
 
   @spec permissions() :: String.t()
-  def permissions, do: "Admin"
+  def permissions, do: "Moderator"
 
   @max_key 30
 

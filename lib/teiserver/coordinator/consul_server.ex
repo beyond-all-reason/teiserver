@@ -76,7 +76,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_call(:get_chobby_extra_data, _from, state) do
     keys =
-      ~w(lobby_policy_id gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_uncertainty_to_play maximum_uncertainty_to_play minimum_skill_to_play maximum_skill_to_play welcome_message player_limit)a
+      ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_uncertainty_to_play maximum_uncertainty_to_play minimum_skill_to_play maximum_skill_to_play welcome_message player_limit)a
 
     result =
       state
@@ -127,10 +127,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # Doesn't do anything at this stage
   def handle_info(:startup, state) do
     {:noreply, state}
-  end
-
-  def handle_info({:set_lobby_policy_id, new_id}, state) do
-    {:noreply, %{state | lobby_policy_id: new_id}}
   end
 
   def handle_info(:recheck_membership, state) do
@@ -203,7 +199,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_approved = [userid | state.approved_users] |> Enum.uniq()
 
     username = Account.get_username(userid)
-    ChatLib.persist_system_message("#{username} joined the lobby", state.lobby_id)
+    maybe_persist_system_message("#{username} joined the lobby", state.lobby_id)
 
     {:noreply,
      %{
@@ -215,7 +211,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:user_left, userid}, state) do
     username = Account.get_username(userid)
-    ChatLib.persist_system_message("#{username} left the lobby", state.lobby_id)
+    maybe_persist_system_message("#{username} left the lobby", state.lobby_id)
 
     player_count_changed(state)
 
@@ -584,7 +580,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     user = CacheUser.get_user_by_id(userid)
 
     cond do
-      Auth.moderator?(user) ->
+      Auth.admin?(user) or Auth.moderator?(user) ->
         :ok
 
       Enum.count(new_user_times) >= state.ring_limit_count ->
@@ -649,7 +645,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> String.downcase()
 
     is_boss = Enum.member?(state.host_bosses, userid)
-    is_moderator = Auth.moderator?(userid)
+    is_admin_or_moderator = Auth.admin?(userid) or Auth.moderator?(userid)
 
     # If it's CV then strip that out!
     [cmd | args] = String.split(trimmed_msg, " ")
@@ -669,7 +665,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     case {cmd, args} do
       {"boss", _boss_args} ->
         if Enum.member?(state.locks, :boss) do
-          if not is_boss and not is_moderator do
+          if not is_boss and not is_admin_or_moderator do
             spawn(fn ->
               :timer.sleep(300)
               ChatLib.say(userid, "!ev", state.lobby_id)
@@ -875,7 +871,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       not Enum.empty?(client.queues) ->
         false
 
-      Auth.moderator?(user) ->
+      Auth.admin?(user) or Auth.moderator?(user) ->
         true
 
       state.ranked == false and
@@ -979,7 +975,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {false,
          "Awaiting acknowledgement of your warning - check chat from @Coordinator and follow instructions there. Pay attention to spelling."}
 
-      client.moderator ->
+      Auth.admin?(userid) or Auth.moderator?(userid) ->
         {true, :override_approve}
 
       ban_state == :banned ->
@@ -1374,7 +1370,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       coordinator_id: Coordinator.get_coordinator_userid(),
       lobby_id: lobby_id,
       host_id: founder_id,
-      lobby_policy_id: nil,
       gatekeeper: "default",
       minimum_rating_to_play: 0,
       maximum_rating_to_play: 1000,
@@ -1440,6 +1435,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     %{state | join_queue: join_queue, low_priority_join_queue: low_priority_join_queue}
     |> queue_size_changed()
+  end
+
+  # In tests this can lead to generating foreign key issues so we don't do this in tests
+  # but the function we are wrapping is tested elsewhere.
+  # The error happens because when a test is closed down the relevant match
+  # entry from the database is removed and we still try to insert this generating:
+  # ** (Ecto.ConstraintError) constraint error when attempting to insert struct:
+  #
+  #   * "teiserver_lobby_messages_user_id_fkey" (foreign_key_constraint)
+  defp maybe_persist_system_message(message, lobby_id) do
+    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+      ChatLib.persist_system_message(message, lobby_id)
+    end
   end
 
   @spec get_queue(map()) :: [T.userid()]

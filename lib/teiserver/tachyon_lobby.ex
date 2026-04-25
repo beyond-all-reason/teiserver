@@ -141,4 +141,8 @@ defmodule Teiserver.TachyonLobby do
   @spec vote_submit(id(), T.userid(), {String.t(), vote_ballot()}) ::
           :ok | {:error, :invalid_lobby | :invalid_vote}
   defdelegate vote_submit(lobby_id, user_id, ballot), to: Lobby
+
+  @spec send_message(id(), T.userid(), String.t()) ::
+          :ok | {:error, :invalid_request, reason :: term()}
+  defdelegate send_message(lobby_id, from_id, msg_content), to: Lobby
 end

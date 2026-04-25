@@ -14,8 +14,8 @@
 
 {central_component("icon_dropdown_js", [])}
 
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
-<script src={Routes.static_path(@conn, "/js/select2.js")}>
+<link rel="stylesheet" href={~p"/css/select2.css"} />
+<script src={~p"/js/select2.js"}>
 </script>
 
 <div class="row">
@@ -27,7 +27,7 @@
         </div>
 
         <form
-          action={Routes.ts_admin_match_path(@conn, :index)}
+          action={~p"/teiserver/admin/matches"}
           method="get"
           class="form-horizontal"
           id="search-box"

@@ -7,7 +7,6 @@ defmodule Teiserver.Battle.LobbyServerTest do
   # Cannot be async because some other tests will call for a list of all lobbies
   use Teiserver.DataCase, async: false
 
-  @tag :needs_attention
   test "server test" do
     host = TeiserverTestLib.new_user()
 

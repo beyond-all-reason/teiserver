@@ -59,16 +59,14 @@
               <%= if Enum.member?(@client_ids, userid) do %>
                 <% user = @users[userid]
                 client = @clients[userid] %>
-                <%= if client != nil do %>
+                <%= if client != nil and user != nil do %>
                   <tr>
                     <td>{client.name}</td>
                     <td>{client.party_id}</td>
                     <td>
                       <%= if client.lobby_id do %>
                         <.link
-                          navigate={
-                            Routes.ts_battle_lobby_show_path(@socket, :show, client.lobby_id)
-                          }
+                          navigate={~p"/battle/lobbies/show/#{client.lobby_id}"}
                           class={"btn btn-sm btn-#{Teiserver.Lobby.colours()}"}
                         >
                           Show {client.lobby_id}
@@ -109,9 +107,7 @@
                     <td>
                       <span>
                         <.link
-                          navigate={
-                            Routes.ts_admin_client_show_path(@socket, :show, client.userid)
-                          }
+                          navigate={~p"/teiserver/admin/client/#{client.userid}"}
                           class={"btn btn-sm btn-#{bsname}"}
                         >
                           Show

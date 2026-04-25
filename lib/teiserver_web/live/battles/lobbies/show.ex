@@ -180,7 +180,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   def handle_info({:battle_lobby_throttle, :closed}, socket) do
     {:noreply,
      socket
-     |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
+     |> redirect(to: ~p"/battle/lobbies")}
   end
 
   def handle_info({:liveview_lobby_update, :consul_server_updated, _lobby_id, _data}, socket) do
@@ -237,7 +237,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
         %{channel: "teiserver_user_updates:" <> _user_id},
         %{assigns: %{id: id}} = socket
       ) do
-    {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_show_path(socket, :show, id))}
+    {:noreply, socket |> redirect(to: ~p"/battle/lobbies/show/#{id}")}
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _user_id, event: :connected}, socket) do
@@ -363,6 +363,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   defp page_title(:show), do: "Show Battle"
 
   defp index_redirect(socket) do
-    {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
+    {:noreply, socket |> redirect(to: ~p"/battle/lobbies")}
   end
 end

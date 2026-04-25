@@ -80,7 +80,7 @@ defmodule TeiserverWeb.Account.SecurityController do
 
         conn
         |> put_flash(:info, "2FA set successfully.")
-        |> redirect(to: Routes.ts_account_security_path(conn, :totp))
+        |> redirect(to: ~p"/teiserver/account/security/totp")
 
       {:error, _reason} ->
         changeset = TOTP.changeset(%TOTP{user_id: user.id, secret: totp_params["secret"]})
@@ -178,7 +178,7 @@ defmodule TeiserverWeb.Account.SecurityController do
 
     conn
     |> put_flash(:info, "Token deleted successfully.")
-    |> redirect(to: Routes.ts_account_security_path(conn, :index))
+    |> redirect(to: ~p"/teiserver/account/security")
   end
 
   @spec revoke_oauth_application(Plug.Conn.t(), map()) :: Plug.Conn.t()

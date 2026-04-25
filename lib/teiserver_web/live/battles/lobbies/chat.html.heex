@@ -40,10 +40,7 @@ moderator = allow?(@current_user, "Moderator") %>
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
         <div class="float-end">
-          <.link
-            navigate={Routes.ts_battle_lobby_show_path(@socket, :show, @lobby.id)}
-            class={"btn btn-#{bsname}"}
-          >
+          <.link navigate={~p"/battle/lobbies/show/#{@lobby.id}"} class={"btn btn-#{bsname}"}>
             Show
           </.link>
 

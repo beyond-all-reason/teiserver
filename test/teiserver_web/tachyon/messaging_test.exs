@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Tachyon.MessagingTest do
+  alias Teiserver.AssetFixtures
   alias Teiserver.Support.Tachyon
   use TeiserverWeb.ConnCase, async: false
 
@@ -183,6 +184,44 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
              }
 
       assert {:error, :timeout} = Tachyon.recv_message(invited[:client])
+    end
+
+    test "messaging in lobby must be in lobby", ctx do
+      %{"status" => "failed", "reason" => "invalid_request"} =
+        Tachyon.send_lobby_message(ctx.sender_client, "hello lobby")
+    end
+
+    test "messaging in lobby", ctx do
+      AssetFixtures.create_game(%{name: "test-lobby-game", in_matchmaking: true})
+      AssetFixtures.create_engine(%{name: "test-lobby-engine", in_matchmaking: true})
+
+      lobby_data = %{
+        name: "test lobby",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1),
+        game_options: %{"foo" => "bar"}
+      }
+
+      %{"status" => "success", "data" => data} =
+        Tachyon.create_lobby!(ctx.sender_client, lobby_data)
+
+      lobby_id = data["id"]
+      Tachyon.join_lobby!(ctx.receiver_client, lobby_id)
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx.sender_client)
+
+      assert %{"status" => "success"} = Tachyon.subscribe_messaging!(ctx.receiver_client)
+      %{"status" => "success"} = Tachyon.send_lobby_message(ctx.sender_client, "hello lobby")
+
+      %{"commandId" => "messaging/received", "data" => data} =
+        Tachyon.recv_message!(ctx.receiver_client)
+
+      assert data["message"] == "hello lobby"
+
+      assert data["source"] == %{
+               "lobbyId" => lobby_id,
+               "type" => "lobby",
+               "userId" => to_string(ctx.sender.id)
+             }
     end
   end
 end

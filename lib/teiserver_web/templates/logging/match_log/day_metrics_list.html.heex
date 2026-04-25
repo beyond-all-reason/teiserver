@@ -73,11 +73,7 @@
                 <td>
                   {link("Show",
                     to:
-                      Routes.logging_match_log_path(
-                        @conn,
-                        :day_metrics_show,
-                        date_to_str(log.date, format: :ymd)
-                      ),
+                      ~p"/logging/match/day_metrics/show/#{date_to_str(log.date, format: :ymd)}",
                     class: "btn btn-secondary btn-sm"
                   )}
                 </td>

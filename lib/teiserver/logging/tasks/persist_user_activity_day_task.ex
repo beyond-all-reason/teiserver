@@ -83,36 +83,33 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
       @client_states
       |> Map.new(fn key -> {key, []} end)
 
-    result =
-      logs
-      |> Enum.reduce(start_data, fn log, acc ->
-        %{
-          total: log["client"]["total"] ++ acc.total,
-          player: log["client"]["player"] ++ acc.player,
-          spectator: log["client"]["spectator"] ++ acc.spectator,
-          lobby: log["client"]["lobby"] ++ acc.lobby,
-          menu: log["client"]["menu"] ++ acc.menu
-        }
-      end)
-      |> Map.new(fn {key, userids} ->
-        result =
-          userids
-          |> List.flatten()
-          |> Enum.group_by(
-            fn key ->
-              key
-            end,
-            fn _value ->
-              1
-            end
-          )
-          |> Map.new(fn {key, ones} ->
-            {key, Enum.count(ones)}
-          end)
+    logs
+    |> Enum.reduce(start_data, fn log, acc ->
+      %{
+        total: log["client"]["total"] ++ acc.total,
+        player: log["client"]["player"] ++ acc.player,
+        spectator: log["client"]["spectator"] ++ acc.spectator,
+        lobby: log["client"]["lobby"] ++ acc.lobby,
+        menu: log["client"]["menu"] ++ acc.menu
+      }
+    end)
+    |> Map.new(fn {key, userids} ->
+      result =
+        userids
+        |> List.flatten()
+        |> Enum.group_by(
+          fn key ->
+            key
+          end,
+          fn _value ->
+            1
+          end
+        )
+        |> Map.new(fn {key, ones} ->
+          {key, Enum.count(ones)}
+        end)
 
-        {key, result}
-      end)
-
-    result
+      {key, result}
+    end)
   end
 end

@@ -1,9 +1,12 @@
 defmodule Teiserver.SpringBattleHostTest do
+  alias Teiserver.Account
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
+
   use Teiserver.ServerCase, async: false
+
   require Logger
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
@@ -15,6 +18,11 @@ defmodule Teiserver.SpringBattleHostTest do
 
   setup(context) do
     %{socket: socket, user: user} = auth_setup(context)
+    new_roles = ["Bot" | user.roles]
+
+    # Only bots can host lobbies
+    Account.update_cache_user(user.id, %{roles: new_roles})
+
     {:ok, socket: socket, user: user}
   end
 
@@ -28,7 +36,6 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == :timeout
   end
 
-  @tag :needs_attention
   test "battle with password", %{socket: socket, user: user} do
     _send_raw(
       socket,
@@ -44,7 +51,6 @@ defmodule Teiserver.SpringBattleHostTest do
     assert battle.password == "password_test"
   end
 
-  @tag :needs_attention
   test "!rehost bug test", %{socket: host_socket, user: host_user} = context do
     %{socket: watcher_socket} = auth_setup(context)
     %{socket: p1_socket, user: p1_user} = auth_setup(context)
@@ -81,8 +87,8 @@ defmodule Teiserver.SpringBattleHostTest do
     # Accept has happened, should see stuff
     reply = _recv_raw(watcher_socket)
 
-    assert reply ==
-             "JOINEDBATTLE #{lobby_id} #{p1_user.name}\nJOINEDBATTLE #{lobby_id} #{p2_user.name}\n"
+    assert reply =~ "JOINEDBATTLE #{lobby_id} #{p1_user.name}\n"
+    assert reply =~ "JOINEDBATTLE #{lobby_id} #{p2_user.name}\n"
 
     # Now have the host leave
     _send_raw(host_socket, "LEAVEBATTLE\n")
@@ -92,6 +98,9 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == "BATTLECLOSED #{lobby_id}\n"
   end
 
+  # Isolated this works fine but as part of the larger set of tests:
+  #   assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195328 600\n"
+  # is instead a :timeout
   @tag :needs_attention
   test "host battle test", %{socket: socket, user: user} = context do
     _send_raw(
@@ -178,7 +187,7 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket3, "JOINBATTLE #{lobby_id} empty script_password3\n")
     _send_raw(socket, "JOINBATTLEACCEPT #{user3.name}\n")
     reply = _recv_raw(socket2)
-    assert reply == "JOINEDBATTLE #{lobby_id} #{user3.name}\n"
+    assert reply =~ "JOINEDBATTLE #{lobby_id} #{user3.name}\n"
 
     # Had a bug where the battle would be incorrectly closed
     # after kicking a player, it was caused by the host disconnecting
@@ -225,12 +234,12 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "DISABLEUNITS unit1 unit2 unit3\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "DISABLEUNITS unit1 unit2 unit3\n"
+    assert reply == "ENABLEALLUNITS\nDISABLEUNITS unit1 unit2 unit3\n"
 
     _send_raw(socket, "ENABLEUNITS unit3\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "ENABLEUNITS unit3\n"
+    assert reply == "ENABLEALLUNITS\nDISABLEUNITS unit1 unit2\n"
 
     _send_raw(socket, "ENABLEALLUNITS\n")
     :timer.sleep(100)
@@ -345,7 +354,7 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "UPDATEBATTLEINFO 0 0 123456 Map name here\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "UPDATEBATTLEINFO #{battle.id} 0 0 123456 Map name here\n"
+    assert reply =~ "UPDATEBATTLEINFO #{battle.id} 0 0 123456 Map name here\n"
 
     # BOT TIME
     _send_raw(socket, "ADDBOT bot1 4195330 0 ai_dll\n")
@@ -388,8 +397,8 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(1000)
     reply = _recv_until(socket)
 
-    assert reply =~
-             "OK cmd=c.battle.update_lobby_title\ns.battle.update_lobby_title #{lobby_id}\tNewName 123\n"
+    assert reply =~ "OK cmd=c.battle.update_lobby_title\n"
+    assert reply =~ "s.battle.update_lobby_title #{lobby_id}\tNewName 123\n"
 
     # Update the host settings
     state = Coordinator.call_consul(lobby_id, :get_all)

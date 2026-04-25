@@ -105,6 +105,7 @@ defmodule Teiserver.MixProject do
       {:elixir_uuid, "~> 1.2"},
       {:excoveralls, "~> 0.15.3", only: :test, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:jump_credo_checks, "~> 0.1.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4.7", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:dart_sass, "~> 0.7", only: [:dev]},
@@ -127,6 +128,7 @@ defmodule Teiserver.MixProject do
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},
       {:nostrum, "~> 0.10.4"},
+      {:decorator, "~> 1.2"},
 
       # gun is a transitive dependency of nostrum. The version 2.1.0 works,
       # while the next one, 2.2.0 produces the following error when starting

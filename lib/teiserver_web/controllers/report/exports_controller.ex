@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Report.ExportsController do
       |> render("#{id}.html")
     else
       conn
-      |> redirect(to: Routes.ts_reports_exports_path(conn, :index))
+      |> redirect(to: ~p"/teiserver/reports/exports")
     end
   end
 
@@ -62,7 +62,7 @@ defmodule TeiserverWeb.Report.ExportsController do
       |> send_file(200, file_path)
     else
       conn
-      |> redirect(to: Routes.ts_reports_exports_path(conn, :index))
+      |> redirect(to: ~p"/teiserver/reports/exports")
     end
   end
 

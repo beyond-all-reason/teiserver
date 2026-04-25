@@ -6,7 +6,7 @@
   active: @active,
   icon: "fa-solid fa-bars",
   bsname: bsname,
-  url: Routes.logging_match_log_path(@conn, :day_metrics_list)
+  url: ~p"/logging/match/day_metrics"
 )}
 
 {central_component("section_menu_button",
@@ -15,7 +15,7 @@
   active: @active,
   icon: "fa-solid fa-waveform",
   bsname: bsname,
-  url: Routes.logging_match_log_path(@conn, :day_metrics_today)
+  url: ~p"/logging/match/day_metrics/today"
 )}
 
 {central_component("section_menu_button",
@@ -24,7 +24,7 @@
   active: @active,
   icon: "fa-solid fa-chart-line-up",
   bsname: bsname,
-  url: Routes.logging_match_log_path(@conn, :day_metrics_graph)
+  url: ~p"/logging/match/day_metrics/graph"
 )}
 
 {central_component("section_menu_button",
@@ -33,7 +33,7 @@
   active: @active,
   icon: "fa-solid fa-download",
   bsname: bsname,
-  url: Routes.logging_match_log_path(@conn, :export_form)
+  url: ~p"/logging/match/day_metrics/export"
 )} &nbsp;&nbsp;&nbsp;&nbsp;
 {central_component("section_menu_button",
   name: "month_metrics",
@@ -41,7 +41,7 @@
   active: @active,
   icon: "fa-solid fa-bars",
   bsname: bsname,
-  url: Routes.logging_match_log_path(@conn, :month_metrics_list)
+  url: ~p"/logging/match/month_metrics"
 )}
 
 {central_component("section_menu_button",
@@ -50,7 +50,7 @@
   active: @active,
   icon: "fa-solid fa-waveform",
   bsname: bsname,
-  url: Routes.logging_match_log_path(@conn, :month_metrics_today)
+  url: ~p"/logging/match/month_metrics/today"
 )}
 
 {central_component("section_menu_button",
@@ -59,5 +59,5 @@
   active: @active,
   icon: "fa-solid fa-chart-line-up",
   bsname: bsname,
-  url: Routes.logging_match_log_path(@conn, :month_metrics_graph)
+  url: ~p"/logging/match/month_metrics/graph"
 )}

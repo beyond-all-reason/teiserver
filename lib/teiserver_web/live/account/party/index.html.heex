@@ -26,17 +26,11 @@ moderator = allow?(@current_user, "Moderator") %>
           <%= if moderator do %>
             &nbsp;&nbsp;&nbsp;
             <%= if @mode == "admin" do %>
-              <a
-                href={Routes.ts_game_party_index_path(@socket, :index, "player")}
-                class={"btn btn-outline-#{bsname}"}
-              >
+              <a href={~p"/teiserver/account/parties/player"} class={"btn btn-outline-#{bsname}"}>
                 Player view
               </a>
             <% else %>
-              <a
-                href={Routes.ts_game_party_index_path(@socket, :index, "admin")}
-                class={"btn btn-outline-#{bsname}"}
-              >
+              <a href={~p"/teiserver/account/parties/admin"} class={"btn btn-outline-#{bsname}"}>
                 Admin view
               </a>
             <% end %>
@@ -88,7 +82,7 @@ moderator = allow?(@current_user, "Moderator") %>
                   <% "member" -> %>
                     <td>
                       <a
-                        href={Routes.ts_game_party_show_path(@socket, :show, party.id)}
+                        href={~p"/teiserver/account/parties/#{party.id}"}
                         class={"btn btn-sm btn-outline-#{bsname} btn-block"}
                       >
                         Details
@@ -124,7 +118,7 @@ moderator = allow?(@current_user, "Moderator") %>
                 <%= if @mode == "admin" do %>
                   <td>
                     <a
-                      href={Routes.ts_game_party_show_path(@socket, :show, party.id)}
+                      href={~p"/teiserver/account/parties/#{party.id}"}
                       class="btn btn-sm btn-secondary"
                     >
                       <i class="fa-fw fa-solid fa-power-off"></i> &nbsp;

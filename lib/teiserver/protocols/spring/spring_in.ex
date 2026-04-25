@@ -17,11 +17,11 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
+  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Lobby
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.AuthIn
   alias Teiserver.Protocols.Spring.BattleIn
-  alias Teiserver.Protocols.Spring.LobbyPolicyIn
   alias Teiserver.Protocols.Spring.PartyIn
   alias Teiserver.Protocols.Spring.SystemIn
   alias Teiserver.Protocols.Spring.TelemetryIn
@@ -74,7 +74,22 @@ defmodule Teiserver.Protocols.SpringIn do
         end)
         |> Map.put(:message_part, "")
       else
-        %{state | message_part: state.message_part <> data}
+        new_buffer = state.message_part <> data
+
+        max_buffer_size =
+          Config.get_site_config_cache("teiserver.Spring max message buffer size")
+
+        if byte_size(new_buffer) > max_buffer_size do
+          Logger.warning(
+            "Clearing oversized message buffer from #{state.ip}: " <>
+              "message exceeds max length of #{max_buffer_size} " <>
+              "(message was #{byte_size(new_buffer)} bytes)"
+          )
+
+          %{state | message_part: ""}
+        else
+          %{state | message_part: new_buffer}
+        end
       end
 
     new_state
@@ -153,15 +168,25 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("c.telemetry." <> cmd, data, msg_id, state) do
-    TelemetryIn.do_handle(cmd, data, msg_id, state)
+    if state.userid != nil do
+      # Authenticated users are not rate limited on telemetry
+      TelemetryIn.do_handle(cmd, data, msg_id, state)
+    else
+      case BurstyRateLimiter.try_acquire(state.telemetry_rate_limiter) do
+        {:ok, updated_rl} ->
+          new_state = %{state | telemetry_rate_limiter: updated_rl}
+          TelemetryIn.do_handle(cmd, data, msg_id, new_state)
+
+        {:error, _wait_ms} ->
+          Logger.info("Telemetry rate limited for unauthenticated client #{state.ip}")
+          reply(:no, "Rate limited", msg_id, state)
+          state
+      end
+    end
   end
 
   defp do_handle("c.battle." <> cmd, data, msg_id, state) do
     BattleIn.do_handle(cmd, data, msg_id, state)
-  end
-
-  defp do_handle("c.lobby_policy." <> cmd, data, msg_id, state) do
-    LobbyPolicyIn.do_handle(cmd, data, msg_id, state)
   end
 
   defp do_handle("c.user." <> cmd, data, msg_id, state) do
@@ -1439,11 +1464,9 @@ defmodule Teiserver.Protocols.SpringIn do
 
     cond do
       Enum.count(status_timestamps) > 10 ->
-        Logger.warning("status_flood_protection:10 - #{state.username}/#{state.userid}")
         {true, %{state | status_timestamps: status_timestamps}}
 
       Enum.count(recent_timestamps) > 3 ->
-        Logger.warning("status_flood_protection:3 - #{state.username}/#{state.userid}")
         {true, %{state | status_timestamps: status_timestamps}}
 
       true ->

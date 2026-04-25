@@ -1,0 +1,5 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/voteOutcomes.json",
+    "title": "VoteOutcomes",
+    "enum": ["passed", "failed", "cancelled", "timeout"]
+}

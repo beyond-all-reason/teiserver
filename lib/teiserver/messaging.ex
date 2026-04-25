@@ -3,6 +3,7 @@ defmodule Teiserver.Messaging do
   alias Teiserver.Messaging.Message
   alias Teiserver.Party
   alias Teiserver.Player.Session
+  alias Teiserver.TachyonLobby
 
   @type message :: Message.t()
   @type entity :: Message.entity()
@@ -16,6 +17,9 @@ defmodule Teiserver.Messaging do
 
   def send(message, {:party, party_id, player_id}),
     do: Party.send_message(party_id, player_id, message)
+
+  def send(message, {:lobby, lobby_id, player_id}),
+    do: TachyonLobby.send_message(lobby_id, player_id, message)
 
   def send(_message, _entity), do: {:error, :invalid_recipient}
 end

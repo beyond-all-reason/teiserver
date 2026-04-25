@@ -275,7 +275,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
         conn
         |> put_flash(:info, "Action created successfully.")
-        |> redirect(to: Routes.moderation_action_path(conn, :index))
+        |> redirect(to: ~p"/moderation/action")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         reports =
@@ -351,7 +351,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
         conn
         |> put_flash(:info, "Action updated successfully.")
-        |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
+        |> redirect(to: ~p"/moderation/action/#{action.id}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -383,12 +383,12 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
         conn
         |> put_flash(:info, "Action re-posted.")
-        |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
+        |> redirect(to: ~p"/moderation/action/#{action.id}")
 
       {:ok, _action} ->
         conn
         |> put_flash(:info, "Action updated.")
-        |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
+        |> redirect(to: ~p"/moderation/action/#{action.id}")
     end
   end
 
@@ -404,7 +404,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
         conn
         |> put_flash(:info, "Action halted.")
-        |> redirect(to: Routes.moderation_action_path(conn, :show, action.id))
+        |> redirect(to: ~p"/moderation/action/#{action.id}")
     end
   end
 
@@ -426,6 +426,6 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
     conn
     |> put_flash(:info, "Action deleted.")
-    |> redirect(to: Routes.moderation_action_path(conn, :index))
+    |> redirect(to: ~p"/moderation/action")
   end
 end

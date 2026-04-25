@@ -111,7 +111,7 @@
           <.pagination
             page={@page}
             total_pages={@total_pages}
-            base_url={Routes.ts_admin_match_path(@conn, :user_show, @user.id)}
+            base_url={~p"/teiserver/admin/matches/user/#{@user.id}"}
             limit={@limit}
             total_count={@total_count}
             current_count={@current_count}

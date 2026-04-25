@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.AdminDashLive.Index do
+  @moduledoc false
   alias Phoenix.LiveView.Socket
   alias Phoenix.PubSub
   alias Teiserver
@@ -10,7 +11,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Teiserver.Communication
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
-  alias Teiserver.Game
 
   use TeiserverWeb, :live_view
 
@@ -43,7 +43,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> assign(:telemetry_battle, telemetry_data.battle)
       |> assign(:total_connected_clients, telemetry_data.total_clients_connected)
       |> assign(:use_discord, Communication.use_discord?())
-      |> update_policies()
       |> update_lobbies()
       |> update_server_pids()
 
@@ -69,7 +68,6 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   def handle_info(:tick, socket) do
     {:noreply,
      socket
-     |> update_policies()
      |> update_lobbies()
      |> update_server_pids()}
   end
@@ -112,39 +110,24 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     {:noreply, socket}
   end
 
-  def handle_event("restart-policies", _event, socket) do
-    Game.pre_cache_policies()
-    {:noreply, socket}
-  end
-
   @spec handle_event(String.t(), map(), Socket.t()) :: {:noreply, Socket.t()}
   def handle_event("restart-discord-bridge", _event, socket) do
-    restart_status = DiscordSystem.restart() |> Task.await()
+    username = socket.assigns[:current_user].name
+    restart_status = DiscordSystem.restart("manual restart from #{username}")
 
     {flash_type, message} =
       case restart_status do
         {:ok, pid} when is_pid(pid) ->
           {:info, "Discord Bridge restarted. Manual chat test recommended."}
 
+        :disabled ->
+          {:info, "Discord bridge is disabled"}
+
         _other ->
           {:error, "An unexpected status was received. Check logs"}
       end
 
     {:noreply, put_flash(socket, flash_type, message)}
-  end
-
-  @spec update_policies(Socket.t()) :: Socket.t()
-  defp update_policies(socket) do
-    policies =
-      Game.list_lobby_policies()
-      |> Enum.map(fn lobby_policy ->
-        organiser_pid = Game.get_lobby_organiser_pid(lobby_policy.id)
-        {lobby_policy, organiser_pid}
-      end)
-      |> Enum.sort_by(fn t -> elem(t, 0).name end, &<=/2)
-
-    socket
-    |> assign(:policies, policies)
   end
 
   @spec update_lobbies(Socket.t()) :: Socket.t()

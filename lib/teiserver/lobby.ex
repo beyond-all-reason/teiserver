@@ -104,9 +104,6 @@ defmodule Teiserver.Lobby do
         display_name: lobby.name,
         teaser: "",
 
-        # Used to indicate the lobby is subject to a lobby policy
-        lobby_policy_id: nil,
-
         # Meta data
         silence: false,
         in_progress: false,
@@ -336,7 +333,7 @@ defmodule Teiserver.Lobby do
   def kick_user_from_battle(userid, lobby_id) do
     user = Account.get_user_by_id(userid)
 
-    if Auth.moderator?(user) do
+    if Auth.admin?(user) or Auth.moderator?(user) do
       :ok
     else
       case do_remove_user_from_lobby(userid, lobby_id) do
@@ -581,14 +578,14 @@ defmodule Teiserver.Lobby do
 
     ignore_password =
       Enum.any?([
-        Auth.moderator?(user),
+        Auth.admin?(user) or Auth.moderator?(user),
         Enum.member?(user.roles, "Caster"),
         consul_reason in [:override_approve, :allow_friends]
       ])
 
     ignore_locked =
       Enum.any?([
-        Auth.moderator?(user),
+        Auth.admin?(user) or Auth.moderator?(user),
         Enum.member?(user.roles, "Caster"),
         consul_reason == :override_approve
       ])
@@ -733,7 +730,7 @@ defmodule Teiserver.Lobby do
       bot == nil ->
         false
 
-      Auth.moderator?(changer.userid) == true ->
+      Auth.admin?(changer.userid) or Auth.moderator?(changer.userid) == true ->
         true
 
       lobby.founder_id == changer.userid ->
@@ -778,7 +775,7 @@ defmodule Teiserver.Lobby do
       )
 
     cond do
-      Auth.moderator?(changer.userid) == true ->
+      Auth.admin?(changer.userid) or Auth.moderator?(changer.userid) == true ->
         true
 
       # Basic stuff
@@ -821,7 +818,7 @@ defmodule Teiserver.Lobby do
       lobby.founder_id == userid ->
         true
 
-      Auth.moderator?(userid) ->
+      Auth.admin?(userid) or Auth.moderator?(userid) ->
         true
 
       lobby.silence ->

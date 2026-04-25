@@ -53,6 +53,6 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
 
     conn
     |> put_flash(:info, "Your preferences have been updated.")
-    |> redirect(to: Routes.admin_site_config_path(conn, :index) <> "##{tab}")
+    |> redirect(to: ~p"/teiserver/admin/site##{tab}")
   end
 end

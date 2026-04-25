@@ -1,5 +1,4 @@
-<% lobby_bsname = Teiserver.Lobby.colours()
-policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
+<% lobby_bsname = Teiserver.Lobby.colours() %>
 <.flash_group flash={@flash} />
 <div class="row my-2">
   <div class="col-md-12">
@@ -39,18 +38,14 @@ policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
     <div class="btn btn-info2 mx-2" phx-click="check-balances">Check balances</div>
   </div>
 
-  <div class="col-md-4">
-    <div class="btn btn-danger mx-2" phx-click="restart-policies">Restart policies</div>
-    <%= if @use_discord do %>
-      &nbsp;
-      <div
-        class="btn btn-info2 mx-2"
-        style="background-color: #7289DA;"
-        phx-click="restart-discord-bridge"
-      >
-        Restart Discord Bridge
-      </div>
-    <% end %>
+  <div :if={@use_discord} class="col-md-4">
+    <div
+      class="btn btn-info2 mx-2"
+      style="background-color: #7289DA;"
+      phx-click="restart-discord-bridge"
+    >
+      Restart Discord Bridge
+    </div>
   </div>
 </div>
 
@@ -85,43 +80,6 @@ policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
               <td>Matches</td>
               <td>{@telemetry_battle.in_progress}</td>
             </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="col-md-12 mb-4 col-xl-6 col-xxl-4">
-        <h4>Policies ({Enum.count(@policies)})</h4>
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Organiser</th>
-              <th>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <%= for {policy, organiser} <- @policies do %>
-              <tr>
-                <td>{policy.id}</td>
-                <td>{policy.name}</td>
-                <td>
-                  <%= if organiser == nil do %>
-                    <i class="fa-fw fa-solid fa-times text-danger"></i>
-                  <% else %>
-                    <i class="fa-fw fa-solid fa-check text-success"></i>
-                  <% end %>
-                </td>
-                <td>
-                  <.link
-                    navigate={~p"/admin/dashboard/policy/#{policy.id}"}
-                    class={"btn btn-sm btn-outline-#{policy_bsname}"}
-                  >
-                    Show
-                  </.link>
-                </td>
-              </tr>
-            <% end %>
           </tbody>
         </table>
       </div>
@@ -195,7 +153,7 @@ policy_bsname = Teiserver.Game.LobbyPolicyLib.colours() %>
             </td>
             <td>
               <.link
-                navigate={Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id)}
+                navigate={~p"/battle/lobbies/show/#{lobby.id}"}
                 class={"btn btn-sm btn-outline-#{lobby_bsname}"}
               >
                 Show

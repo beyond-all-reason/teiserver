@@ -158,16 +158,48 @@
           {Credo.Check.Refactor.MapJoin, []},
           {Credo.Check.Refactor.MapMap, []},
           {Credo.Check.Refactor.FilterReject, []},
-          {Credo.Check.Readability.ModuleDoc, []}
+          {Credo.Check.Readability.ModuleDoc, []},
+
+          # Normally disabled checks
+          # {Credo.Check.Design.DuplicatedCode, []}, - 71 failures
+          {Credo.Check.Design.SkipTestWithoutComment, []},
+          # {Credo.Check.Design.TagTODO, [exit_status: 2]}, - 47 failures
+          # {Credo.Check.Refactor.AppendSingleItem, []}, - 63 failures
+          # {Credo.Check.Refactor.Apply, []}, - 5 failures
+          {Credo.Check.Refactor.DoubleBooleanNegation, []},
+          # {Credo.Check.Refactor.NegatedIsNil, []}, - 23 failures
+          # {Credo.Check.Refactor.RejectFilter, []}, - 4 failures
+          # {Credo.Check.Refactor.VariableRebinding, []}, - 339 failures
+          {Credo.Check.Warning.LeakyEnvironment, []},
+          {Credo.Check.Warning.MapGetUnsafePass, []},
+          {Credo.Check.Warning.MixEnv, []},
+          {Credo.Check.Warning.UnsafeToAtom, []},
+
+          #
+          ## Custom jump checks
+          #
+          {Jump.CredoChecks.AssertElementSelectorCanNeverFail, []},
+          {Jump.CredoChecks.AvoidFunctionLevelElse, []},
+          {Jump.CredoChecks.AvoidLoggerConfigureInTest, []},
+          # Default exclusion list is empty
+          # {Jump.CredoChecks.AvoidSocketAssignsInTest, excluded: ["test/app_web/plugs/"]}, - 2 failures
+          {Jump.CredoChecks.ForbiddenFunction,
+           functions: [
+             {:erlang, :binary_to_term,
+              "Use Plug.Crypto.non_executable_binary_to_term/2 instead."}
+           ]},
+          {Jump.CredoChecks.LiveViewFormCanBeRehydrated, excluded: ["lib/my_app/"]},
+          {Jump.CredoChecks.PreferTextColumns, start_after: "20260409212629"},
+          # {Jump.CredoChecks.TestHasNoAssertions,
+          #  custom_assertion_functions: [:await_has, :await_with_timeout]}, - 19 failures
+          {Jump.CredoChecks.TopLevelAliasImportRequire, []}
+          # {Jump.CredoChecks.WeakAssertion, []} - 54 failures
         ],
         disabled: [
           #
           # Controversial and experimental checks (opt-in, just move the check to `:enabled`
           #   and be sure to use `mix credo --strict` to see low priority checks)
           #
-          {Credo.Check.Design.DuplicatedCode, []},
-          {Credo.Check.Design.SkipTestWithoutComment, []},
-          {Credo.Check.Design.TagTODO, [exit_status: 2]},
           {Credo.Check.Readability.AliasAs, []},
           {Credo.Check.Readability.LargeNumbers, []},
           {Credo.Check.Readability.OnePipePerLine, []},
@@ -175,23 +207,13 @@
           {Credo.Check.Readability.SinglePipe, [allow_0_arity_functions: true]},
           {Credo.Check.Readability.Specs, []},
           {Credo.Check.Refactor.ABCSize, []},
-          {Credo.Check.Refactor.AppendSingleItem, []},
-          {Credo.Check.Refactor.Apply, []},
           {Credo.Check.Refactor.CyclomaticComplexity, []},
-          {Credo.Check.Refactor.DoubleBooleanNegation, []},
           {Credo.Check.Refactor.IoPuts, []},
           {Credo.Check.Refactor.ModuleDependencies, []},
-          {Credo.Check.Refactor.NegatedIsNil, []},
           {Credo.Check.Refactor.Nesting, []},
           {Credo.Check.Refactor.PassAsyncInTestCases, []},
-          {Credo.Check.Refactor.RejectFilter, []},
-          {Credo.Check.Refactor.VariableRebinding, []},
           {Credo.Check.Warning.IoInspect, []},
-          {Credo.Check.Warning.LazyLogging, []},
-          {Credo.Check.Warning.LeakyEnvironment, []},
-          {Credo.Check.Warning.MapGetUnsafePass, []},
-          {Credo.Check.Warning.MixEnv, []},
-          {Credo.Check.Warning.UnsafeToAtom, []}
+          {Credo.Check.Warning.LazyLogging, []}
 
           #
           # Custom checks can be created using `mix credo.gen.check`.

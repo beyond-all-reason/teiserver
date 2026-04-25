@@ -7,7 +7,7 @@
     active: @active,
     icon: "fa-solid fa-bars",
     bsname: bsname,
-    url: Routes.ts_admin_match_path(@conn, :index)
+    url: ~p"/teiserver/admin/matches"
   )}
 
   {central_component("section_menu_button",
@@ -16,7 +16,7 @@
     active: @active,
     icon: Teiserver.Helper.StylingHelper.icon(:search),
     bsname: bsname,
-    url: Routes.ts_admin_match_path(@conn, :index) <> "?search=true"
+    url: ~p"/teiserver/admin/matches?search=true"
   )}
 <% end %>
 

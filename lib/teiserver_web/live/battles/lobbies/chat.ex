@@ -244,7 +244,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         %{channel: "teiserver_user_updates:" <> _user_id},
         %{assigns: %{id: id}} = socket
       ) do
-    {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_chat_path(socket, :chat, id))}
+    {:noreply, socket |> redirect(to: ~p"/battle/lobbies/chat/#{id}")}
   end
 
   def handle_info(:tick, socket) do
@@ -292,7 +292,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   end
 
   defp index_redirect(socket) do
-    {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
+    {:noreply, socket |> redirect(to: ~p"/battle/lobbies")}
   end
 
   # Takes the message and strips off assignment stuff plus commands

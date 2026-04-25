@@ -1,8 +1,8 @@
 <% bsname = view_colour() %>
 
-<script src={Routes.static_path(@conn, "/js/d3.js")}>
+<script src={~p"/js/d3.js"}>
 </script>
-<script src={Routes.static_path(@conn, "/js/c3.min.js")}>
+<script src={~p"/js/c3.min.js"}>
 </script>
 
 <link href="/css/c3.min.css" rel="stylesheet" />
@@ -58,11 +58,7 @@
 
         <div class="row">
           <div class="col-md-12">
-            <form
-              action={Routes.logging_match_log_path(@conn, :month_metrics_graph)}
-              method="post"
-              class=""
-            >
+            <form action={~p"/logging/match/month_metrics/graph"} method="post" class="">
               <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
               <div class="row">
                 <div class="col-xl-3 col-lg-4 col-md-12 my-3">

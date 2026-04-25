@@ -17,6 +17,7 @@ defmodule Teiserver.Autohost do
           required(:map_name) => String.t(),
           required(:start_pos_type) => :fixed | :random | :ingame | :beforegame,
           required(:ally_teams) => [ally_team(), ...],
+          optional(:game_options) => %{String.t() => String.t()},
           optional(:spectators) => [player()],
           optional(:bots) => [bot()]
         }

@@ -45,7 +45,7 @@ defmodule TeiserverWeb.Admin.CodeController do
 
     conn
     |> put_flash(:info, "Code deleted successfully.")
-    |> redirect(to: Routes.admin_code_path(conn, :index))
+    |> redirect(to: ~p"/teiserver/admin/codes")
   end
 
   @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
@@ -70,7 +70,7 @@ defmodule TeiserverWeb.Admin.CodeController do
       {:ok, _code} ->
         conn
         |> put_flash(:info, "Code created successfully.")
-        |> redirect(to: Routes.admin_code_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/codes")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -96,7 +96,7 @@ defmodule TeiserverWeb.Admin.CodeController do
       {:ok, _code} ->
         conn
         |> put_flash(:success, "Code expiry extended.")
-        |> redirect(to: Routes.admin_code_path(conn, :index))
+        |> redirect(to: ~p"/teiserver/admin/codes")
     end
   end
 end

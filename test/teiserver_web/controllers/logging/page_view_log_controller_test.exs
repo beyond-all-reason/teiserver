@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
     page_view_log = page_view_logs_fixture(user) |> List.flatten() |> List.first()
 
     conn = delete(conn, Routes.logging_page_view_log_path(conn, :delete, page_view_log))
-    assert redirected_to(conn) == Routes.logging_page_view_log_path(conn, :index)
+    assert redirected_to(conn) == ~p"/logging/page_views"
 
     assert_raise Ecto.NoResultsError,
                  fn -> Logging.get_page_view_log!(page_view_log.id) end

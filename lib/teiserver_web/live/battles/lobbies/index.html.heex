@@ -86,7 +86,7 @@
                 <td>
                   <span>
                     <.link
-                      navigate={Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id)}
+                      navigate={~p"/battle/lobbies/show/#{lobby.id}"}
                       class={"btn btn-sm btn-outline-#{bsname}"}
                     >
                       Show
@@ -96,7 +96,7 @@
                 <td>
                   <span>
                     <.link
-                      navigate={Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id)}
+                      navigate={~p"/battle/lobbies/chat/#{lobby.id}"}
                       class={"btn btn-sm btn-outline-#{bsname}"}
                     >
                       Chat

@@ -8,6 +8,7 @@ defmodule Teiserver.Player.Session do
   """
 
   alias Phoenix.PubSub
+  alias Plug.Crypto
   alias Teiserver.Account
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BoundedQueue, as: BQ
@@ -309,6 +310,11 @@ defmodule Teiserver.Player.Session do
     user_id |> via_tuple() |> GenServer.call({:messaging, {:send_party_message, message_content}})
   end
 
+  @spec send_lobby_message(T.userid(), String.t()) :: :ok | {:error, reason :: term()}
+  def send_lobby_message(user_id, message_content) do
+    user_id |> via_tuple() |> GenServer.call({:messaging, {:send_lobby_message, message_content}})
+  end
+
   @doc """
   notify the connected player that they received a new friend request.
   If the player isn't connected it's a no-op. They'll get the friend request
@@ -473,7 +479,8 @@ defmodule Teiserver.Player.Session do
   @type lobby_start_params :: %{
           name: String.t(),
           map_name: String.t(),
-          ally_team_config: TachyonLobby.ally_team_config()
+          ally_team_config: TachyonLobby.ally_team_config(),
+          game_options: %{String.t() => String.t()}
         }
   @spec create_lobby(T.userid(), lobby_start_params()) ::
           {:ok, TachyonLobby.details()} | {:error, reason :: term()}
@@ -573,7 +580,7 @@ defmodule Teiserver.Player.Session do
   end
 
   def restore_session(_blob_key, blob_value) do
-    snapshot = :erlang.binary_to_term(blob_value)
+    snapshot = Crypto.non_executable_binary_to_term(blob_value, [:safe])
 
     SessionSupervisor.start_session_from_snapshot(snapshot.user_id, snapshot)
   end
@@ -840,6 +847,17 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:messaging, {:send_party_message, message_content}}, _from, state) do
     case Party.send_message(state.party.current_party, state.user.id, message_content) do
+      :ok -> {:reply, :ok, state}
+      {:error, :invalid_request, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
+  def handle_call({:messaging, {:send_lobby_message, _content}}, _from, state)
+      when state.lobby == nil,
+      do: {:reply, {:error, "not in lobby"}, state}
+
+  def handle_call({:messaging, {:send_lobby_message, message_content}}, _from, state) do
+    case TachyonLobby.send_message(state.lobby.id, state.user.id, message_content) do
       :ok -> {:reply, :ok, state}
       {:error, :invalid_request, reason} -> {:reply, {:error, reason}, state}
     end

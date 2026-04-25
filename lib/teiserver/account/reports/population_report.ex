@@ -8,7 +8,7 @@ defmodule Teiserver.Account.PopulationReport do
   def icon, do: "fa-solid fa-people-group"
 
   @spec permissions() :: String.t()
-  def permissions, do: "Admin"
+  def permissions, do: "Moderator"
 
   @doc """
 
@@ -58,7 +58,7 @@ defmodule Teiserver.Account.PopulationReport do
   end
 
   defp exclude_bots_where("true") do
-    "NOT users.data -> 'roles' @> '\"Bot\"'"
+    "NOT ('Bot' = ANY(users.roles))"
   end
 
   defp exclude_bots_where(_value), do: nil

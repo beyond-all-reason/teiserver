@@ -2,6 +2,7 @@ defmodule Teiserver.HookServer do
   @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Bridge.DiscordBridgeBot
+  alias Teiserver.Bridge.DiscordSystem
   alias Teiserver.CacheUser
   alias Teiserver.Communication
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
@@ -13,7 +14,21 @@ defmodule Teiserver.HookServer do
   end
 
   @impl GenServer
-  def handle_info(%{channel: "global_moderation"} = data, state) do
+  def handle_info(ev, state) do
+    Task.async(fn -> do_handle_info(ev, state) end)
+    |> Task.await()
+  catch
+    :exit, {:timeout, _details} ->
+      Logger.error("Timeout while processing hook for event #{inspect(ev)}")
+
+      if Map.get(ev, :event) in [:new_report, :updated_report] do
+        DiscordSystem.restart("Automatic restart because #{ev.event} timed out")
+      end
+
+      {:noreply, state}
+  end
+
+  defp do_handle_info(%{channel: "global_moderation"} = data, state) do
     case data.event do
       :new_report ->
         if Communication.use_discord?() do
@@ -51,7 +66,7 @@ defmodule Teiserver.HookServer do
     {:noreply, state}
   end
 
-  def handle_info({:account_hooks, event, payload, _reason}, state) do
+  defp do_handle_info({:account_hooks, event, payload, _reason}, state) do
     start_completed =
       Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") == true
 
@@ -80,7 +95,7 @@ defmodule Teiserver.HookServer do
     {:noreply, state}
   end
 
-  def handle_info(%{channel: "application", event: app_event}, state) do
+  defp do_handle_info(%{channel: "application", event: app_event}, state) do
     case app_event do
       :started ->
         :ok
@@ -111,6 +126,8 @@ defmodule Teiserver.HookServer do
   @impl GenServer
   @spec init(any) :: {:ok, %{}}
   def init(_opts) do
+    Logger.metadata(actor_type: :hook_server)
+
     if Application.get_env(:teiserver, Teiserver)[:enable_hooks] do
       :ok = PubSub.subscribe(Teiserver.PubSub, "account_hooks")
       :ok = PubSub.subscribe(Teiserver.PubSub, "global_moderation")

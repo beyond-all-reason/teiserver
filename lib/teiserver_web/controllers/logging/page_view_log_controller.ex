@@ -83,7 +83,7 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
 
     conn
     |> put_flash(:info, "Page view log deleted successfully.")
-    |> redirect(to: Routes.logging_page_view_log_path(conn, :index))
+    |> redirect(to: ~p"/logging/page_views")
   end
 
   @spec form_params(map()) :: map()

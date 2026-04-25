@@ -23,6 +23,24 @@
                 "mapName": { "type": "string" },
                 "allyTeamConfig": {
                     "$ref": "../../definitions/allyTeamConfig.json"
+                },
+                "gameOptions": {
+                    "description": "Set to null to remove a game option",
+                    "type": "object",
+                    "patternProperties": {
+                        "^.*$": {
+                            "anyOf": [
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": { "type": "string" }
+                                    },
+                                    "required": ["value"]
+                                },
+                                { "type": "null" }
+                            ]
+                        }
+                    }
                 }
             }
         }

@@ -72,13 +72,7 @@
 
                 <td>
                   {link("Show",
-                    to:
-                      Routes.logging_match_log_path(
-                        @conn,
-                        :month_metrics_show,
-                        log.year,
-                        log.month
-                      ),
+                    to: ~p"/logging/match/month_metrics/show/#{log.year}/#{log.month}",
                     class: "btn btn-secondary btn-sm"
                   )}
                 </td>

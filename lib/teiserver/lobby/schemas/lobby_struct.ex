@@ -47,7 +47,6 @@ defmodule Teiserver.Lobby.LobbyStruct do
     match_id: nil,
 
     # External references
-    lobby_policy_id: nil,
     queue_id: nil,
 
     # Consul server stuff

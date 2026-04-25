@@ -16,8 +16,8 @@
 
 {central_component("icon_dropdown_js", [])}
 
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")} />
-<script src={Routes.static_path(@conn, "/js/select2.js")}>
+<link rel="stylesheet" href={~p"/css/select2.css"} />
+<script src={~p"/js/select2.js"}>
 </script>
 
 <form action={~p"/admin/chat"} method="post" class="form-horizontal" id="search-box">

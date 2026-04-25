@@ -79,7 +79,8 @@ defmodule TeiserverWeb.Admin.UserController do
     total_pages = div(total_users - 1, limit) + 1
 
     if Enum.count(users) == 1 do
-      conn |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
+      found_id = users |> hd() |> Map.get(:id)
+      conn |> redirect(to: ~p"/teiserver/admin/user/#{found_id}")
     else
       conn
       |> add_breadcrumb(name: "List users", url: conn.request_path)
@@ -643,7 +644,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
         conn
         |> put_flash(:success, "Ratings updated")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :ratings_form, user))
+        |> redirect(to: ~p"/teiserver/admin/users/ratings_form/#{user.id}")
 
       _no_access ->
         conn
@@ -674,7 +675,7 @@ defmodule TeiserverWeb.Admin.UserController do
           {:ok, tab} ->
             conn
             |> put_flash(:info, "Action performed.")
-            |> redirect(to: Routes.ts_admin_user_path(conn, :applying, user) <> "?tab=#{tab}")
+            |> redirect(to: ~p"/teiserver/admin/users/applying/#{user.id}?tab=#{tab}")
         end
 
       _no_access ->
@@ -800,7 +801,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
       conn
       |> put_flash(:success, "Key deleted")
-      |> redirect(to: Routes.ts_admin_user_path(conn, :smurf_search, key.user_id))
+      |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{key.user_id}")
     else
       conn
       |> put_flash(:info, "Unable to find that key")

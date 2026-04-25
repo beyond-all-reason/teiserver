@@ -1,9 +1,8 @@
 defmodule Teiserver.Account.UserQueries do
   @moduledoc false
-
   alias Teiserver.Account.User
+
   use TeiserverWeb, :queries
-  require Logger
 
   @spec query_users(list) :: Ecto.Query.t()
   def query_users(args) do
@@ -162,35 +161,19 @@ defmodule Teiserver.Account.UserQueries do
   end
 
   def _where(query, :bot, "Person") do
-    Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
-
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, "bot", "false")
+    _where(query, :not_has_role, "Bot")
   end
 
   def _where(query, :bot, "Robot") do
-    Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
-
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, "bot", "true")
+    _where(query, :has_role, "Bot")
   end
 
   def _where(query, :moderator, "User") do
-    Logger.error(
-      "user.data['moderator'] is being queried, this property is due to be depreciated"
-    )
-
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, "moderator", "false")
+    _where(query, :not_has_role, "Moderator")
   end
 
   def _where(query, :moderator, "Moderator") do
-    Logger.error(
-      "user.data['moderator'] is being queried, this property is due to be depreciated"
-    )
-
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, "moderator", "true")
+    _where(query, :has_role, "Moderator")
   end
 
   def _where(query, :smurf_of, userid) when is_integer(userid) do

@@ -74,15 +74,6 @@
   </.menu_card>
 
   <.menu_card
-    :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
-    icon={Teiserver.Game.LobbyPolicyLib.icon()}
-    url={~p"/admin/lobby_policies"}
-    size={:small}
-  >
-    Lobby policies
-  </.menu_card>
-
-  <.menu_card
     :if={allow_any?(@current_user, ~w(Moderator))}
     icon={Teiserver.Game.AchievementTypeLib.icon()}
     url={~p"/teiserver/admin/achievements"}

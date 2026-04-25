@@ -92,7 +92,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       CacheUser.recache_user(user.id)
 
       conn =
-        put(conn, Routes.ts_admin_user_path(conn, :rename_post, user), new_name: "new_test_name")
+        put(conn, ~p"/teiserver/admin/users/rename_post/#{user.id}", new_name: "new_test_name")
 
       assert redirected_to(conn) == ~p"/teiserver/admin/user/#{user}"
 
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       CacheUser.recache_user(user.id)
 
       conn =
-        put(conn, Routes.ts_admin_user_path(conn, :rename_post, user),
+        put(conn, ~p"/teiserver/admin/users/rename_post/#{user.id}",
           new_name: "this_name_is_too_long_and_has_invalid_characters!"
         )
 

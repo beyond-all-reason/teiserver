@@ -69,10 +69,7 @@ spectators =
             </span>
           <% end %>
 
-          <.link
-            navigate={Routes.ts_battle_lobby_chat_path(@socket, :chat, @lobby.id)}
-            class={"btn btn-#{bsname}"}
-          >
+          <.link navigate={~p"/battle/lobbies/chat/#{@lobby.id}"} class={"btn btn-#{bsname}"}>
             Live chat
           </.link>
 
@@ -218,7 +215,7 @@ spectators =
                     <td>{client.player_number}</td>
                     <td>
                       <.link
-                        navigate={Routes.ts_admin_client_show_path(@socket, :show, client.userid)}
+                        navigate={~p"/teiserver/admin/client/#{client.userid}"}
                         class={"btn btn-sm btn-#{bsname}"}
                       >
                         Show
@@ -289,7 +286,7 @@ spectators =
                   <%= if @moderator do %>
                     <td>
                       <.link
-                        navigate={Routes.ts_admin_client_show_path(@socket, :show, client.userid)}
+                        navigate={~p"/teiserver/admin/client/#{client.userid}"}
                         class={"btn btn-sm btn-#{bsname}"}
                       >
                         Show

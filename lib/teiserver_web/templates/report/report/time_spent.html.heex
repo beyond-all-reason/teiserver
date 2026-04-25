@@ -1,8 +1,8 @@
 <% {_fg, _bg, bsname} = view_colour() |> colours() %>
 
-<script src={Routes.static_path(@conn, "/js/d3.js")}>
+<script src={~p"/js/d3.js"}>
 </script>
-<script src={Routes.static_path(@conn, "/js/c3.min.js")}>
+<script src={~p"/js/c3.min.js"}>
 </script>
 
 <link href="/css/c3.min.css" rel="stylesheet" />

@@ -11,7 +11,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   alias Teiserver.Communication.TextCallbackLib
   alias Teiserver.Config.SiteConfigLib
   alias Teiserver.Game.AchievementTypeLib
-  alias Teiserver.Game.LobbyPolicyLib
   alias Teiserver.OAuth.ApplicationLib
   alias Teiserver.Telemetry.TelemetryLib
 
@@ -30,7 +29,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def view_colour("tools"), do: ToolLib.colours()
   def view_colour("chat"), do: LobbyMessageLib.colours()
   def view_colour("accolades"), do: AccoladeLib.colours()
-  def view_colour("lobby_policies"), do: LobbyPolicyLib.colours()
   def view_colour("matches"), do: MatchLib.colours()
   def view_colour("badge_types"), do: BadgeTypeLib.colours()
   def view_colour("text_callbacks"), do: TextCallbackLib.colours()

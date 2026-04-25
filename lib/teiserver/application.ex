@@ -5,10 +5,14 @@ defmodule Teiserver.Application do
 
   alias Phoenix.PubSub
   alias Teiserver.Helper.ObanLogger
+  alias Teiserver.Plugins
   alias Teiserver.Startup
   alias TeiserverWeb.Endpoint
   alias TeiserverWeb.Monitoring.Router, as: MonitoringRouter
+
+  use Plugins
   use Application
+
   require Logger
 
   import Teiserver.Helpers.CacheHelper,
@@ -76,15 +80,10 @@ defmodule Teiserver.Application do
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueWaitRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueMatchRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyPolicyRegistry]},
 
         # These are for tracking the number of servers on the local node
         {Registry, keys: :duplicate, name: Teiserver.LocalPoolRegistry},
         {Registry, keys: :duplicate, name: Teiserver.LocalServerRegistry},
-
-        # Stores - Tables where changes are not propagated across the cluster
-        # Possible stores
-        Teiserver.Data.LobbyPolicyCache,
 
         # Telemetry
         concache_perm_sup(:telemetry_property_types_cache),
@@ -129,19 +128,11 @@ defmodule Teiserver.Application do
         Teiserver.Battle.LobbyIndexThrottle,
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Throttles.Supervisor},
 
-        # Bridge
-        Teiserver.Bridge.DiscordSystem,
-        concache_sup(:discord_bridge_dm_cache),
-        concache_perm_sup(:discord_channel_cache),
-        concache_sup(:discord_bridge_account_codes, global_ttl: 300_000),
-        concache_perm_sup(:discord_command_cache),
-
         # Lobbies
         Teiserver.Lobby.Cache,
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbySupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.ClientSupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.PartySupervisor},
-        {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbyPolicySupervisor},
 
         # Coordinator mode
         {DynamicSupervisor,
@@ -175,18 +166,26 @@ defmodule Teiserver.Application do
         # Start the ranch TCP listener process for the Spring protocol
         spring_server_child(Teiserver.RawSpringTcpServer, :tcp),
         # Start the ranch TLS listener process for the Spring protocol
-        spring_server_child(Teiserver.SSLSpringTcpServer, :tls)
+        spring_server_child(Teiserver.SSLSpringTcpServer, :tls),
+
+        # the discord system has a bot that connects to the tcp/tls server as a bot client
+        # so it needs to be started after the servers
+        Teiserver.Bridge.DiscordSystem
       ]
       |> Enum.reject(&is_nil/1)
+      |> Kernel.++(additional_application_children())
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Teiserver.Supervisor]
     start_result = Supervisor.start_link(children, opts)
 
-    # We use a logger.error to ensure something appears even on the error logs
-    # and we can be sure they're being written to
-    Logger.error("Teiserver.Supervisor start result: #{Kernel.inspect(start_result)}")
+    # If the server seems to not start up we can check the info log to see
+    # if this is present, we don't want it appearing in our tests though
+    # TODO: Replace this with something having less of a code-smell
+    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+      Logger.error("Teiserver.Supervisor start result: #{Kernel.inspect(start_result)}")
+    end
 
     startup_sub_functions(start_result)
 
@@ -209,6 +208,11 @@ defmodule Teiserver.Application do
     :telemetry.attach_many("oban-logger", events, &ObanLogger.handle_event/4, [])
 
     Startup.startup()
+  end
+
+  @decorate Plugins.plugin(:additional_application_children)
+  defp additional_application_children do
+    []
   end
 
   # Tell Phoenix to update the endpoint configuration

@@ -205,13 +205,13 @@ defmodule TeiserverWeb.ClientLive.Show do
 
   def handle_event("force-reconnect", _event, socket) do
     Client.disconnect(socket.assigns[:id], "reconnect")
-    {:noreply, socket |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
+    {:noreply, socket |> redirect(to: ~p"/teiserver/admin/client")}
   end
 
   def handle_event("force-flood", _event, socket) do
     CacheUser.set_flood_level(socket.assigns[:id], 100)
     Client.disconnect(socket.assigns[:id], "flood protection")
-    {:noreply, socket |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
+    {:noreply, socket |> redirect(to: ~p"/teiserver/admin/client")}
   end
 
   # Join battle stuff

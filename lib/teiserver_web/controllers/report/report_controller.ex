@@ -106,7 +106,7 @@ defmodule TeiserverWeb.Report.ReportController do
       |> render("#{name}.html")
     else
       conn
-      |> redirect(to: Routes.ts_reports_general_path(conn, :index))
+      |> redirect(to: ~p"/teiserver/reports")
     end
   end
 end

@@ -75,7 +75,7 @@
     name: "matches",
     text: "Matches",
     icon_class: "fa-solid",
-    link: Routes.ts_admin_match_path(@conn, :user_show, @user.id)
+    link: ~p"/teiserver/admin/matches/user/#{@user.id}"
   )}
 
   {central_component("menu_card",

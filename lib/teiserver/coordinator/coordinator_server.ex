@@ -53,8 +53,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   @impl GenServer
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Coordinator main server")
-    account = get_coordinator_account()
-    Teiserver.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
+    account = make_and_cache_coordinator_account()
 
     {user, client} =
       case CacheUser.internal_client_login(account.id) do
@@ -329,6 +328,12 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
 
+  def make_and_cache_coordinator_account do
+    account = get_coordinator_account()
+    Teiserver.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
+    account
+  end
+
   @spec get_coordinator_account() :: Teiserver.CacheUser.t()
   def get_coordinator_account do
     user =
@@ -371,6 +376,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
+    Process.flag(:trap_exit, true)
+
     Horde.Registry.register(
       Teiserver.ServerRegistry,
       "CoordinatorServer",
@@ -379,5 +386,10 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
     send(self(), :begin)
     {:ok, %{client: %{}}}
+  end
+
+  @impl GenServer
+  def terminate(_reason, state) do
+    Client.disconnect(state.userid, "coordinator terminate")
   end
 end

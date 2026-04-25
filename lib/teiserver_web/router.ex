@@ -460,7 +460,6 @@ defmodule TeiserverWeb.Router do
 
     live("/dashboard", Index, :index)
     live("/dashboard/login_throttle", LoginThrottle, :index)
-    live("/dashboard/policy/:id", Policy, :policy)
   end
 
   scope "/teiserver/admin", TeiserverWeb.ClientLive, as: :ts_admin do
@@ -519,10 +518,6 @@ defmodule TeiserverWeb.Router do
 
   scope "/admin", TeiserverWeb.Admin, as: :admin do
     pipe_through([:browser, :app_layout, :protected])
-
-    resources("/lobby_policies", LobbyPolicyController,
-      only: [:index, :new, :create, :show, :edit, :update, :delete]
-    )
 
     resources("/text_callbacks", TextCallbackController,
       only: [:index, :new, :create, :show, :edit, :update, :delete]

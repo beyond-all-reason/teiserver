@@ -1,9 +1,9 @@
 defmodule Teiserver.Helpers.CollectionsTest do
   use ExUnit.Case
 
-  describe "transform map" do
-    import Teiserver.Helpers.Collections, only: [transform_map: 2]
+  import Teiserver.Helpers.Collections, only: [transform_map: 2]
 
+  describe "transform map" do
     test "converts keys" do
       spec = %{foo: :foo, camelBar: :snake_bar}
       data = %{foo: "fooval", camelBar: 1}
