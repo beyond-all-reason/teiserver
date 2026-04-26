@@ -27,6 +27,7 @@ defmodule Teiserver.TachyonLobby.List do
           map_name: String.t(),
           engine_version: String.t(),
           game_version: String.t(),
+          boss_enabled?: boolean(),
           current_battle: nil | %{started_at: DateTime.t()}
         }
 

@@ -252,6 +252,13 @@ defmodule Teiserver.TachyonLobby.ListTest do
       assert_receive %{event: :update_lobbies, changes: %{^id => %{map_name: "new map"}}}
     end
 
+    test "boss enabled?" do
+      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
+      {_sink_pid, _id, _pid} = mk_lobby()
+      Lobby.List.broadcast_updates()
+      assert_receive %{event: :add_lobby, overview: %{boss_enabled?: false}}
+    end
+
     test "expand ally team config" do
       {_sink_pid, id, _pid} = mk_lobby([1, 1])
       assert {_initial_counter, %{}} = Lobby.subscribe_updates()
@@ -287,7 +294,8 @@ defmodule Teiserver.TachyonLobby.ListTest do
       max_player_count: 2,
       map_name: "new map",
       engine_version: "engine123",
-      game_version: "game123"
+      game_version: "game123",
+      boss_enabled?: false
     }
   end
 

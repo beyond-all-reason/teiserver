@@ -76,6 +76,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           required(:ally_team_config) => ally_team_config(),
           optional(:game_version) => String.t(),
           optional(:engine_version) => String.t(),
+          optional(:boss_enabled?) => boolean(),
           optional(:game_options) => %{String.t() => String.t()}
         }
 
@@ -92,13 +93,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @type asset_status :: :missing | :downloading | :complete
 
-  @type vote_action :: {:change_map, String.t()} | :start
+  @type vote_action :: {:change_map, String.t()} | {:appoint_boss, T.userid()} | :start
   @type vote_ballot :: :yes | :no | :abstain
   @type vote_state :: %{
           id: String.t(),
           action: vote_action,
           initiator: T.userid(),
           voters: %{T.userid() => :pending | vote_ballot()},
+          duration_s: non_neg_integer(),
           until: DateTime.t(),
           quorum: non_neg_integer(),
           majority: non_neg_integer()
@@ -115,6 +117,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
           map_name: String.t(),
           game_version: String.t(),
           engine_version: String.t(),
+          boss_enabled?: boolean(),
+          bosses: MapSet.t(T.userid()),
           ally_team_config: ally_team_config(),
           game_options: %{String.t() => String.t()},
           players: %{
@@ -202,6 +206,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
            map_name: String.t(),
            game_version: String.t(),
            engine_version: String.t(),
+           boss_enabled?: boolean(),
+           bosses: MapSet.t(T.userid()),
            ally_team_config: ally_team_config(),
            game_options: %{String.t() => String.t()},
            # used to track the players in the lobby.
@@ -248,6 +254,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:start_vote, vote_state()}
            | {:cast_vote, T.userid(), vote_ballot()}
            | {:vote_ended, DateTime.t(), vote_outcome()}
+           | {:update_boss, :add | :remove, T.userid()}
 
   @spec gen_id() :: id()
   def gen_id, do: UUID.uuid4()
@@ -421,6 +428,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
     call_lobby(lobby_id, {:join_queue, user_id})
   end
 
+  @spec appoint_boss(id(), T.userid(), appointee_id :: T.userid()) ::
+          :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
+  def appoint_boss(lobby_id, user_id, appointee_id) do
+    call_lobby(lobby_id, {:appoint_boss, user_id, appointee_id})
+  end
+
+  @spec unboss(id(), T.userid(), boss_id :: T.userid()) ::
+          :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
+  def unboss(lobby_id, user_id, boss_id) do
+    call_lobby(lobby_id, {:unboss, user_id, boss_id})
+  end
+
   @spec start_battle(id(), T.userid()) ::
           :ok | {:error, reason :: :not_in_lobby | :battle_already_started | term()}
   def start_battle(lobby_id, user_id) do
@@ -446,6 +465,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
     monitors =
       MC.new() |> MC.monitor(start_params.creator_pid, {:user, start_params.creator_data.id})
 
+    boss_enabled? = Map.get(start_params, :boss_enabled?) || false
+
+    bosses =
+      if boss_enabled?,
+        do: MapSet.new([start_params.creator_data.id]),
+        else: MapSet.new()
+
     state = %{
       id: id,
       monitors: monitors,
@@ -453,6 +479,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       map_name: start_params.map_name,
       game_version: start_params.game_version,
       engine_version: start_params.engine_version,
+      boss_enabled?: boss_enabled?,
+      bosses: bosses,
       ally_team_config: start_params.ally_team_config,
       game_options: Map.get(start_params, :game_options, %{}),
       players: %{
@@ -837,24 +865,32 @@ defmodule Teiserver.TachyonLobby.Lobby do
       do: {:keep_state, fsm_data, [{:reply, from, :ok}]}
 
   def handle_event({:call, from}, {:update_properties, user_id, data}, _state, fsm_data) do
-    {events, errors} =
-      Enum.reduce(data, {[], []}, fn {k, v}, {events, errors} ->
-        case update_property(k, v, fsm_data, user_id) do
-          {:error, msg} ->
-            {events, [msg | errors]}
+    # for now, all properties can only be updated by bosses, so shortcut the reduce
+    is_allowed? = not fsm_data.boss_enabled? or MapSet.member?(fsm_data.bosses, user_id)
 
-          {:ok, new_events} ->
-            {events ++ new_events, errors}
-        end
-      end)
+    if is_allowed? do
+      {events, errors} =
+        Enum.reduce(data, {[], []}, fn {k, v}, {events, errors} ->
+          case update_property(k, v, fsm_data, user_id) do
+            {:error, msg} ->
+              {events, [msg | errors]}
 
-    if Enum.empty?(errors) do
-      final_data = process_events(events, fsm_data) |> broadcast_updates() |> Map.get(:data)
-      # broadcast_list_updates(events, fsm_data, final_data)
-      {:keep_state, final_data, [{:reply, from, :ok}]}
+            {:ok, new_events} ->
+              {events ++ new_events, errors}
+          end
+        end)
+
+      if Enum.empty?(errors) do
+        final_data = process_events(events, fsm_data) |> broadcast_updates() |> Map.get(:data)
+        # broadcast_list_updates(events, fsm_data, final_data)
+        {:keep_state, final_data, [{:reply, from, :ok}]}
+      else
+        message = Enum.join(errors, ", ")
+        {:keep_state, fsm_data, [{:reply, from, {:error, "Cannot update lobby: #{message}"}}]}
+      end
     else
-      message = Enum.join(errors, ", ")
-      {:keep_state, fsm_data, [{:reply, from, {:error, "Cannot update lobby: #{message}"}}]}
+      {:keep_state, fsm_data,
+       [{:reply, from, {:error, "Cannot update lobby: you are not a boss"}}]}
     end
   end
 
@@ -946,6 +982,63 @@ defmodule Teiserver.TachyonLobby.Lobby do
               process_events(events, data) |> broadcast_updates() |> Map.get(:data)
           end
 
+        {:keep_state, data, [{:reply, from, :ok}]}
+    end
+  end
+
+  def handle_event({:call, from}, {:appoint_boss, user_id, _appointee_id}, _state, data)
+      when not is_map_key(data.players, user_id) and not is_map_key(data.spectators, user_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
+
+  def handle_event({:call, from}, {:appoint_boss, _user_id, appointee_id}, _state, data)
+      when not is_map_key(data.players, appointee_id) and
+             not is_map_key(data.spectators, appointee_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
+
+  def handle_event({:call, from}, {:appoint_boss, user_id, appointee_id}, _state, data) do
+    cond do
+      not data.boss_enabled? ->
+        {:keep_state, data, [{:reply, from, {:error, :no_boss_allowed}}]}
+
+      not Enum.empty?(data.bosses) and not MapSet.member?(data.bosses, user_id) ->
+        {:keep_state, data, [{:reply, from, {:error, :not_a_boss}}]}
+
+      Enum.empty?(data.bosses) and Enum.count(data.players, &(!bot_id?(elem(&1, 0)))) > 1 ->
+        vote = new_vote(data, user_id, {:appoint_boss, appointee_id})
+
+        :timer.seconds(vote.duration_s)
+        |> :timer.send_after({:vote_timeout, vote.id})
+
+        events = [{:start_vote, vote}]
+        data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
+        {:keep_state, data, [{:reply, from, :ok}]}
+
+      true ->
+        events = [{:update_boss, :add, appointee_id}]
+        data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
+        {:keep_state, data, [{:reply, from, :ok}]}
+    end
+  end
+
+  def handle_event({:call, from}, {:unboss, user_id, _boss_id}, _state, data)
+      when not is_map_key(data.players, user_id) and not is_map_key(data.spectators, user_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
+
+  def handle_event({:call, from}, {:unboss, _user_id, boss_id}, _state, data)
+      when not is_map_key(data.players, boss_id) and not is_map_key(data.spectators, boss_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
+
+  def handle_event({:call, from}, {:unboss, user_id, boss_id}, _state, data) do
+    cond do
+      not MapSet.member?(data.bosses, user_id) ->
+        {:keep_state, data, [{:reply, from, {:error, :not_a_boss}}]}
+
+      not MapSet.member?(data.bosses, boss_id) ->
+        {:keep_state, data, [{:reply, from, :ok}]}
+
+      true ->
+        events = [{:update_boss, :remove, boss_id}]
+        data = process_events(events, data) |> broadcast_updates() |> Map.get(:data)
         {:keep_state, data, [{:reply, from, :ok}]}
     end
   end
@@ -1121,6 +1214,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       map_name: state.map_name,
       engine_version: state.engine_version,
       game_version: state.game_version,
+      boss_enabled?: state.boss_enabled?,
       current_battle: nil
     }
   end
@@ -1154,6 +1248,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       :map_name,
       :game_version,
       :engine_version,
+      :boss_enabled?,
+      :bosses,
       :ally_team_config,
       :current_battle,
       :current_vote,
@@ -1210,7 +1306,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> update_in([:data, :monitors], &MC.demonitor_by_val(&1, {:user, p_id}))
       |> update_in([:updates], &[ev | &1])
 
-    process_event({:cast_vote, p_id, :abstain}, aggregate)
+    aggregate = process_event({:cast_vote, p_id, :abstain}, aggregate)
+    process_event({:update_boss, :remove, p_id}, aggregate)
   end
 
   defp process_event({:remove_spec_from_lobby, s_id} = ev, aggregate) do
@@ -1220,7 +1317,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> update_in([:data, :monitors], &MC.demonitor_by_val(&1, {:user, s_id}))
       |> update_in([:updates], &[ev | &1])
 
-    process_event({:cast_vote, s_id, :abstain}, aggregate)
+    aggregate = process_event({:cast_vote, s_id, :abstain}, aggregate)
+    process_event({:update_boss, :remove, s_id}, aggregate)
   end
 
   defp process_event({:move_spec_to_player, p_id, player_data} = ev, aggregate) do
@@ -1414,6 +1512,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
           {:passed, {:change_map, new_map}} ->
             process_event({:update_map_name, new_map}, new_aggregate)
+
+          {:passed, {:appoint_boss, boss_id}} ->
+            process_event({:update_boss, :add, boss_id}, new_aggregate)
             # just let the thing crash if a new vote action shows up. It'll be easy
             # to spot and fix/add support. :start isn't yet supported
         end
@@ -1448,6 +1549,26 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> Map.update!(:actions, &[vote_ev | &1])
   end
 
+  defp process_event({:update_boss, :add, appointee_id} = ev, aggregate) do
+    if MapSet.member?(aggregate.data.bosses, appointee_id) do
+      aggregate
+    else
+      aggregate
+      |> update_in([:data, :bosses], &MapSet.put(&1, appointee_id))
+      |> Map.update!(:updates, &[ev | &1])
+    end
+  end
+
+  defp process_event({:update_boss, :remove, boss_id} = ev, aggregate) do
+    if MapSet.member?(aggregate.data.bosses, boss_id) do
+      aggregate
+      |> update_in([:data, :bosses], &MapSet.delete(&1, boss_id))
+      |> Map.update!(:updates, &[ev | &1])
+    else
+      aggregate
+    end
+  end
+
   # avoid sending a useless lobby list update when the last member of the lobby
   # just left. The caller of this function will detect the lobby is empty and
   # terminate the process, which will trigger the final lobby list update for
@@ -1459,8 +1580,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp broadcast_updates(aggregate, sender_id \\ nil) do
     change_map = Enum.reduce(aggregate.updates, %{}, &update_change_from_event/2)
-    broadcast_update({:update, sender_id, change_map}, aggregate.data)
-    broadcast_list_updates(aggregate)
+
+    if change_map != %{} do
+      broadcast_update({:update, sender_id, change_map}, aggregate.data)
+      broadcast_list_updates(aggregate)
+    end
+
     aggregate
   end
 
@@ -1568,6 +1693,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
       finished_at: record.finished_at,
       outcome: record.outcome
     })
+  end
+
+  defp update_change_from_event({:update_boss, :add, appointee_id}, change_map) do
+    change_map
+    |> Map.put_new(:bosses, %{})
+    |> put_in([:bosses, appointee_id], %{})
+  end
+
+  defp update_change_from_event({:update_boss, :remove, boss_id}, change_map) do
+    change_map
+    |> Map.put_new(:bosses, %{})
+    |> put_in([:bosses, boss_id], nil)
   end
 
   defp broadcast_list_updates(%{data: final_state})
@@ -1889,29 +2026,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
         end
 
       Enum.count(state.players, fn {_id, p} -> not bot_id?(p.id) end) > 1 ->
-        vote_duration_s = 60
+        vote = new_vote(state, user_id, {:change_map, new_name})
 
-        voters =
-          for {_id, p} <- state.players, !bot_id?(p.id), into: %{} do
-            if p.id == user_id, do: {p.id, :yes}, else: {p.id, :pending}
-          end
-
-        # ensure we need absolute majority.
-        # 0.501 works until 254 players, which is the hard limit of players
-        # in a game
-        quorum = (map_size(voters) * 0.501) |> :math.ceil() |> trunc()
-
-        vote = %{
-          id: "vote-#{state.vote_idx}",
-          action: {:change_map, new_name},
-          initiator: user_id,
-          voters: voters,
-          until: DateTime.utc_now() |> DateTime.shift(Duration.new!(second: vote_duration_s)),
-          quorum: quorum,
-          majority: quorum
-        }
-
-        :timer.send_after(vote_duration_s * 1000, {:vote_timeout, vote.id})
+        :timer.seconds(vote.duration_s)
+        |> :timer.send_after({:vote_timeout, vote.id})
 
         {:ok, [{:start_vote, vote}]}
 
@@ -1937,6 +2055,32 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp process_event_action({:vote_ended, vote, outcome}, fsm_data) do
     broadcast_to_members(fsm_data, nil, {:lobby, fsm_data.id, {:vote_ended, vote.id, outcome}})
+  end
+
+  # create a default vote object
+  defp new_vote(state, initiator_id, action) do
+    vote_duration_s = 60
+
+    voters =
+      for {_id, p} <- state.players, !bot_id?(p.id), into: %{} do
+        if p.id == initiator_id, do: {p.id, :yes}, else: {p.id, :pending}
+      end
+
+    # ensure we need absolute majority.
+    # 0.501 works until 254 players, which is the hard limit of players
+    # in a game
+    quorum = (map_size(voters) * 0.501) |> :math.ceil() |> trunc()
+
+    %{
+      id: "vote-#{state.vote_idx}",
+      action: action,
+      initiator: initiator_id,
+      voters: voters,
+      duration_s: vote_duration_s,
+      until: DateTime.utc_now() |> DateTime.shift(Duration.new!(second: vote_duration_s)),
+      quorum: quorum,
+      majority: quorum
+    }
   end
 
   @spec vote_result(vote_state()) :: :undecided | {:ended, :passed | :failed}

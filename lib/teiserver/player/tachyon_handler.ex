@@ -194,7 +194,9 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_info({:lobby, lobby_id, {:updated, update}}, state) do
     data = lobby_update_to_tachyon(lobby_id, update)
 
-    {:event, "lobby/updated", data, state}
+    if data != %{},
+      do: {:event, "lobby/updated", data, state},
+      else: {:ok, state}
   end
 
   def handle_info({:lobby, _lobby_id, {:vote_ended, vote_id, outcome}}, state) do
@@ -686,6 +688,7 @@ defmodule Teiserver.Player.TachyonHandler do
             teams: teams
           }
         end,
+      boss_enabled?: msg["data"]["areBossesEnabled"],
       game_options:
         Map.get(msg["data"], "gameOptions", %{})
         |> Enum.map(fn {k, v} -> {k, v["value"]} end)
@@ -877,6 +880,30 @@ defmodule Teiserver.Player.TachyonHandler do
 
       {:error, reason} ->
         {:error_response, :invalid_request, to_string(reason), state}
+    end
+  end
+
+  def handle_command("lobby/appointBoss", "request", _msg_id, %{"data" => data}, state) do
+    with {:ok, target_id} <- TachyonParser.parse_user_id(data["userId"]),
+         :ok <- Session.lobby_appoint_boss(state.user.id, target_id) do
+      {:response, state}
+    else
+      {:error, err} -> {:error_response, :invalid_request, to_string(err), state}
+    end
+  end
+
+  def handle_command("lobby/unboss", "request", _msg_id, %{"data" => data}, state) do
+    user_id =
+      case data["userId"] do
+        nil -> {:ok, state.user.id}
+        raw -> TachyonParser.parse_user_id(raw)
+      end
+
+    with {:ok, boss_id} <- user_id,
+         :ok <- Session.lobby_unboss(state.user.id, boss_id) do
+      {:response, state}
+    else
+      {:error, err} -> {:error_response, :invalid_request, to_string(err), state}
     end
   end
 
@@ -1142,6 +1169,12 @@ defmodule Teiserver.Player.TachyonHandler do
       name: :name,
       map_name: :mapName,
       ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
+      boss_enabled?: :areBossesEnabled,
+      bosses:
+        {:bosses,
+         fn bs ->
+           Enum.reduce(bs, %{}, fn id, acc -> Map.put(acc, to_string(id), %{}) end)
+         end},
       game_options: {:gameOptions, &game_options_to_tachyon/1},
       engine_version: :engineVersion,
       game_version: :gameVersion,
@@ -1164,12 +1197,17 @@ defmodule Teiserver.Player.TachyonHandler do
       name: :name,
       map_name: :mapName,
       ally_team_config: {:allyTeamConfig, &ally_team_config_to_tachyon/1},
+      bosses: :bosses,
       current_vote: {:currentVote, &vote_to_tachyon/1},
       vote_history: {:voteHistory, &vote_history_to_tachyon/1},
       game_options: {:gameOptions, &game_options_to_tachyon/1}
     }
 
-    Map.merge(%{id: lobby_id}, Collections.transform_map(update_map, mappings))
+    data = Collections.transform_map(update_map, mappings)
+
+    if data == %{},
+      do: %{},
+      else: Map.put(data, :id, lobby_id)
   end
 
   defp player_updates_to_tachyon(nil), do: nil
@@ -1299,6 +1337,7 @@ defmodule Teiserver.Player.TachyonHandler do
   defp vote_action_to_tachyon(action) do
     case action do
       {:change_map, name} -> %{type: :changeMap, newMapName: name}
+      {:appoint_boss, boss_id} -> %{type: :appointBoss, bossId: to_string(boss_id)}
     end
   end
 
@@ -1311,6 +1350,7 @@ defmodule Teiserver.Player.TachyonHandler do
       map_name: :mapName,
       engine_version: :engineVersion,
       game_version: :gameVersion,
+      boss_enabled?: :areBossesEnabled,
       current_battle:
         {:currentBattle,
          %{

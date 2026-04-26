@@ -1,0 +1,25 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/unboss/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LobbyUnbossRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "lobby/unboss" },
+        "data": {
+            "title": "LobbyUnbossRequestData",
+            "description": "if userId isn't provided, defaults to the current user",
+            "type": "object",
+            "properties": {
+                "userId": { "$ref": "../../definitions/userId.json" }
+            }
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

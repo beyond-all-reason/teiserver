@@ -6,12 +6,12 @@ defmodule Teiserver.Support.Tachyon do
   alias Teiserver.BotFixtures
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
   alias Teiserver.Support.Polling
   alias Teiserver.Tachyon
   alias Teiserver.Tachyon.Schema
-  alias WebsocketSyncClient, as: WSC
   alias WebsocketSyncClient, as: WSC
 
   def tachyon_case_setup(tags) do
@@ -517,22 +517,16 @@ defmodule Teiserver.Support.Tachyon do
     }
 
   def create_lobby!(client, lobby_data) do
-    data = %{
-      name: lobby_data.name,
-      mapName: lobby_data.map_name,
-      allyTeamConfig: lobby_data.ally_team_config
+    mapping = %{
+      name: :name,
+      map_name: :mapName,
+      ally_team_config: :allyTeamConfig,
+      boss_enabled?: :areBossesEnabled,
+      game_options:
+        {:gameOptions, &(Enum.map(&1, fn {k, v} -> {k, %{value: v}} end) |> Enum.into(%{}))}
     }
 
-    data =
-      if is_map_key(lobby_data, :game_options) do
-        opts =
-          Enum.map(lobby_data.game_options, fn {k, v} -> {k, %{value: v}} end) |> Enum.into(%{})
-
-        Map.put(data, :gameOptions, opts)
-      else
-        data
-      end
-
+    data = Collections.transform_map(lobby_data, mapping)
     :ok = send_request(client, "lobby/create", data)
     {:ok, resp} = recv_message(client)
     resp
@@ -635,6 +629,19 @@ defmodule Teiserver.Support.Tachyon do
 
   def lobby_update!(client, update_data) do
     :ok = send_request(client, "lobby/update", update_data)
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def lobby_appoint_boss(client, user_id) do
+    :ok = send_request(client, "lobby/appointBoss", %{userId: to_string(user_id)})
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
+  def lobby_unboss(client, user_id \\ nil) do
+    uid = if user_id, do: to_string(user_id), else: nil
+    :ok = send_request(client, "lobby/unboss", %{userId: uid})
     {:ok, resp} = recv_message(client)
     resp
   end

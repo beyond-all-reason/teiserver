@@ -31,6 +31,9 @@
                                         "mapName": { "type": "string" },
                                         "engineVersion": { "type": "string" },
                                         "gameVersion": { "type": "string" },
+                                        "areBossesEnabled": {
+                                            "type": "boolean"
+                                        },
                                         "currentBattle": {
                                             "anyOf": [
                                                 {
