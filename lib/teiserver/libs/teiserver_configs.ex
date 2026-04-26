@@ -199,21 +199,12 @@ defmodule Teiserver.TeiserverConfigs do
 
   defp legacy_protocol_configs do
     add_site_config_type(%{
-      key: "teiserver.Spring flood rate limit count",
+      key: "teiserver.Spring rate limit per minute",
       section: "Legacy protocol",
       type: "integer",
       permissions: ["Admin"],
-      description: "The number of commands required to trip flood protection for Spring",
-      default: 20
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Spring flood rate window size",
-      section: "Legacy protocol",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The size of the window in seconds for flood protection to trip for Spring",
-      default: 6
+      description: "Maximum commands per minute per connection.",
+      default: 200
     })
 
     add_site_config_type(%{
