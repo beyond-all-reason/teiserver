@@ -4,6 +4,7 @@ defmodule Teiserver.Account do
   alias Phoenix.PubSub
   alias Teiserver.Account.Accolade
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.BadgeType
   alias Teiserver.Account.BadgeTypeLib
   alias Teiserver.Account.ClientLib
@@ -2341,17 +2342,14 @@ defmodule Teiserver.Account do
   defdelegate set_login_limit(limit), to: LoginThrottleServer
   defdelegate reset_login_rate_limiter(rate), to: LoginThrottleServer, as: :reset_rate_limiter
 
-  @spec verify_user(T.user()) :: T.user()
+  @spec verify_user(User.t() | T.userid()) :: map() | nil
   def verify_user(%User{} = user) do
     delete_user_stat_keys(user.id, ~w(verification_code))
 
-    script_update_user(user, %{roles: ["Verified" | user.roles]})
-
-    user
+    Auth.add_roles(user, ["Verified"])
   end
 
-  @spec verify_user(T.userid()) :: T.user()
-  def verify_user(userid) do
+  def verify_user(userid) when is_integer(userid) do
     get_user(userid) |> verify_user()
   end
 end

@@ -2,6 +2,7 @@ defmodule Teiserver.Account.Auth do
   @moduledoc false
 
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
@@ -39,7 +40,7 @@ defmodule Teiserver.Account.Auth do
   # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
   @spec is_bot?(T.userid() | T.user()) :: boolean()
   def is_bot?(nil), do: false
-  def is_bot?(userid) when is_integer(userid), do: is_bot?(Account.get_user_by_id(userid))
+  def is_bot?(userid) when is_integer(userid), do: is_bot?(Account.get_user(userid))
   def is_bot?(%{roles: roles}), do: Enum.member?(roles, "Bot")
   def is_bot?(_user), do: false
 
@@ -47,7 +48,7 @@ defmodule Teiserver.Account.Auth do
   def moderator?(nil), do: false
 
   def moderator?(userid) when is_integer(userid),
-    do: moderator?(Account.get_user_by_id(userid))
+    do: moderator?(Account.get_user(userid))
 
   def moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
   def moderator?(_user), do: false
@@ -57,7 +58,7 @@ defmodule Teiserver.Account.Auth do
   def is_event_organizer?(nil), do: false
 
   def is_event_organizer?(userid) when is_integer(userid),
-    do: is_event_organizer?(Account.get_user_by_id(userid))
+    do: is_event_organizer?(Account.get_user(userid))
 
   def is_event_organizer?(%{roles: roles}), do: Enum.member?(roles, "Event Organizer")
   def is_event_organizer?(_user), do: false
@@ -66,7 +67,7 @@ defmodule Teiserver.Account.Auth do
   def contributor?(nil), do: false
 
   def contributor?(userid) when is_integer(userid),
-    do: contributor?(Account.get_user_by_id(userid))
+    do: contributor?(Account.get_user(userid))
 
   def contributor?(%{roles: roles}), do: Enum.member?(roles, "Contributor")
   def contributor?(_user), do: false
@@ -75,20 +76,20 @@ defmodule Teiserver.Account.Auth do
   def verified?(nil), do: false
 
   def verified?(userid) when is_integer(userid),
-    do: verified?(Account.get_user_by_id(userid))
+    do: verified?(Account.get_user(userid))
 
   def verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
   def verified?(_user), do: false
 
   @spec admin?(T.userid() | T.user()) :: boolean()
   def admin?(nil), do: false
-  def admin?(userid) when is_integer(userid), do: admin?(Account.get_user_by_id(userid))
+  def admin?(userid) when is_integer(userid), do: admin?(Account.get_user(userid))
   def admin?(%{roles: roles}), do: Enum.member?(roles, "Admin")
   def admin?(_user), do: false
 
   @spec vip?(T.userid() | T.user()) :: boolean()
   def vip?(nil), do: false
-  def vip?(userid) when is_integer(userid), do: vip?(Account.get_user_by_id(userid))
+  def vip?(userid) when is_integer(userid), do: vip?(Account.get_user(userid))
   def vip?(%{roles: roles}), do: Enum.member?(roles, "VIP")
   def vip?(_user), do: false
 
@@ -99,7 +100,7 @@ defmodule Teiserver.Account.Auth do
   def has_any_role?(nil, _roles), do: false
 
   def has_any_role?(userid, roles) when is_integer(userid),
-    do: has_any_role?(Account.get_user_by_id(userid), roles)
+    do: has_any_role?(Account.get_user(userid), roles)
 
   def has_any_role?(user, roles) when is_list(roles) do
     roles
@@ -116,7 +117,7 @@ defmodule Teiserver.Account.Auth do
   def has_all_roles?(nil, _roles), do: false
 
   def has_all_roles?(userid, roles) when is_integer(userid),
-    do: has_all_roles?(Account.get_user_by_id(userid), roles)
+    do: has_all_roles?(Account.get_user(userid), roles)
 
   def has_all_roles?(user, roles) when is_list(roles) do
     roles
@@ -125,6 +126,34 @@ defmodule Teiserver.Account.Auth do
   end
 
   def has_all_roles?(user, role), do: has_all_roles?(user, [role])
+
+  @spec add_roles(T.user() | T.userid(), [String.t()]) :: nil | {:ok, T.user()}
+  def add_roles(nil, _roles), do: nil
+  def add_roles(_user, []), do: nil
+  def add_roles(_user, nil), do: nil
+
+  def add_roles(userid, roles) when is_integer(userid),
+    do: add_roles(Account.get_user(userid), roles)
+
+  def add_roles(%User{} = user, roles) do
+    new_roles = Enum.uniq(roles ++ user.roles)
+    Account.script_update_user(user, %{roles: new_roles})
+  end
+
+  @spec remove_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
+  def remove_roles(nil, _roles), do: nil
+  def remove_roles(_user, []), do: nil
+
+  def remove_roles(userid, roles) when is_integer(userid),
+    do: remove_roles(Account.get_user(userid), roles)
+
+  def remove_roles(%User{} = user, removed_roles) do
+    new_roles =
+      user.roles
+      |> Enum.reject(fn r -> Enum.member?(removed_roles, r) end)
+
+    Account.script_update_user(user, %{roles: new_roles})
+  end
 end
 
 defmodule Teiserver.Auth.Server do

@@ -382,7 +382,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   # Commands
   defp do_reply(:ring, {ringer_id, state_userid}) do
-    ringer_user = Account.get_user_by_id(ringer_id)
+    ringer_user = Account.get_user(ringer_id)
 
     do_ring =
       cond do
@@ -480,11 +480,9 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:direct_message, {from_id, messages, state_user}) when is_list(messages) do
-    from_user = Account.get_user_by_id(from_id)
-
     if not Account.does_a_ignore_b?(state_user.id, from_id) or
-         Auth.admin?(from_user) or
-         Auth.moderator?(from_user) do
+         Auth.admin?(from_id) or
+         Auth.moderator?(from_id) do
       from_name = Account.get_username_by_id(from_id)
 
       messages
@@ -521,7 +519,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:chat_message_ex, {from_id, room_name, messages, state_user})
        when is_list(messages) do
-    from_user = Account.get_user_by_id(from_id)
+    from_user = Account.get_user(from_id)
 
     if not Account.does_a_ignore_b?(state_user.id, from_id) or
          Auth.admin?(from_user) or

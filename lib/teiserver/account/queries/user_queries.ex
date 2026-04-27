@@ -196,12 +196,12 @@ defmodule Teiserver.Account.UserQueries do
 
   def _where(query, :verified, true) do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Verified\"")
+      where: "Verified" in users.roles
   end
 
   def _where(query, :verified, false) do
     from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Verified\"")
+      where: "Verified" not in users.roles
   end
 
   def _where(query, :mod_action, "Banned") do
@@ -254,97 +254,97 @@ defmodule Teiserver.Account.UserQueries do
 
   def _where(query, :tester, "Trusted") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Trusted\"")
+      where: "Trusted" in users.roles
   end
 
   def _where(query, :tester, "Tester") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Tester\"")
+      where: "Tester" in users.roles
   end
 
   def _where(query, :tester, "Normal") do
     from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Tester\"")
+      where: "Tester" not in users.roles
   end
 
   def _where(query, :streamer, "Streamer") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Streamer\"")
+      where: "Streamer" in users.roles
   end
 
   def _where(query, :streamer, "Normal") do
     from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Streamer\"")
+      where: "Streamer" not in users.roles
   end
 
   def _where(query, :donor, "Donor") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Donor\"")
+      where: "Donor" in users.roles
   end
 
   def _where(query, :donor, "Normal") do
     from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Donor\"")
+      where: "Donor" not in users.roles
   end
 
   def _where(query, :gdt_member, "GDT") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"GDT\"")
+      where: "GDT" in users.roles
   end
 
   def _where(query, :gdt_member, "Normal") do
     from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"GDT\"")
+      where: "GDT" not in users.roles
   end
 
   def _where(query, :contributor, "Contributor") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Contributor\"")
+      where: "Contributor" in users.roles
   end
 
   def _where(query, :contributor, "Normal") do
     from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Contributor\"")
+      where: "Contributor" not in users.roles
   end
 
   def _where(query, :developer, "Developer") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Developer\"")
+      where: "Developer" in users.roles
   end
 
   def _where(query, :developer, "Normal") do
     from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Developer\"")
+      where: "Developer" not in users.roles
   end
 
   def _where(query, :overwatch, "Overwatch") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Overwatch\"")
+      where: "Overwatch" in users.roles
   end
 
   def _where(query, :overwatch, "Normal") do
     from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Overwatch\"")
+      where: "Overwatch" not in users.roles
   end
 
   def _where(query, :caster, "Caster") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"Caster\"")
+      where: "Caster" in users.roles
   end
 
   def _where(query, :caster, "Normal") do
     from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Caster\"")
+      where: "Caster" not in users.roles
   end
 
   def _where(query, :vip, "VIP") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "roles", "\"VIP\"")
+      where: "VIP" in users.roles
   end
 
   def _where(query, :vip, "Normal") do
     from users in query,
-      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"VIP\"")
+      where: "VIP" not in users.roles
   end
 
   def _where(query, :lobby_client, lobby_client) do

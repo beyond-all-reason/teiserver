@@ -177,7 +177,7 @@ defmodule Teiserver.Bridge.BridgeServer do
           end
 
         # If they are a bot they're only allowed to post to the promotion channel
-        if Auth.is_bot?(user) do
+        if Auth.is_bot?(user.id) do
           if room_name == "promote" do
             forward_to_discord(from_id, state.channel_lookup[room_name], message, state)
           end

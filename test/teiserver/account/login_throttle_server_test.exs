@@ -2,6 +2,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   @moduledoc false
 
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.LoginThrottleServer
   use Teiserver.DataCase, async: false
 
@@ -30,7 +31,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   test "bots ignore limits" do
     bot = new_user()
     bot_id = bot.id
-    Account.update_cache_user(bot.id, %{roles: ["Bot"]})
+    Auth.add_roles(bot.id, ["Bot"])
     set_capacity(0)
     assert LoginThrottleServer.attempt_login(self(), bot_id) == true
   end
@@ -123,7 +124,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     {user2, t2} = {new_user(), oneshot_pid()}
 
     bot = new_user()
-    Account.update_cache_user(bot.id, %{roles: ["Bot"]})
+    Auth.add_roles(bot.id, ["Bot"])
 
     set_capacity(100)
     assert LoginThrottleServer.attempt_login(t1.pid, user1.id) == true

@@ -291,8 +291,8 @@ defmodule Teiserver.Account.ClientLib do
       | userid: user.id,
         name: user.name,
         rank: user.rank,
-        moderator: Auth.moderator?(user),
-        bot: Auth.is_bot?(user),
+        moderator: Auth.moderator?(user.id),
+        bot: Auth.is_bot?(user.id),
         ip: stats["last_ip"],
         country: stats["country"],
         lobby_client: stats["lobby_client"]

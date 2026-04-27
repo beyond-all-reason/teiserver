@@ -60,7 +60,7 @@ defmodule Teiserver.Room do
       user == nil ->
         {false, "No user"}
 
-      Auth.admin?(user) or Auth.moderator?(user) == true ->
+      Auth.admin?(userid) or Auth.moderator?(userid) == true ->
         true
 
       true ->
@@ -169,7 +169,7 @@ defmodule Teiserver.Room do
   def send_message_ex(from_id, room_name, msg) do
     user = Account.get_user_by_id(from_id)
 
-    if Auth.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
+    if Auth.is_bot?(from_id) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 

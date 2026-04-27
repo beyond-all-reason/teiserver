@@ -88,7 +88,7 @@ defmodule Teiserver.SpringTcpServer do
   # Only chobby is allowed to have partial optimisation
   def handle_info(:post_auth_check, %{protocol_optimisation: :partial} = state) do
     if state.app_status != :accepted do
-      user = Account.get_user_by_id(state.userid)
+      user = Account.get_user(state.userid)
 
       if not Auth.is_bot?(user) do
         Logger.error("post_auth_check :partial - user is not accepted: #{user.id}/#{user.name}")
@@ -100,7 +100,7 @@ defmodule Teiserver.SpringTcpServer do
 
   # Only bots are allowed to have no optimisation
   def handle_info(:post_auth_check, %{protocol_optimisation: :none} = state) do
-    user = Account.get_user_by_id(state.userid)
+    user = Account.get_user(state.userid)
 
     if not Auth.is_bot?(user) do
       Logger.error("post_auth_check :full - user is not bot: #{user.id}/#{user.name}")
@@ -1059,7 +1059,7 @@ defmodule Teiserver.SpringTcpServer do
     client =
       case Client.get_client_by_id(from) do
         nil ->
-          user = Account.get_user_by_id(from)
+          user = Account.get_user(from)
 
           Client.create(%{
             userid: user.id,

@@ -580,7 +580,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     user = CacheUser.get_user_by_id(userid)
 
     cond do
-      Auth.admin?(user) or Auth.moderator?(user) ->
+      Auth.admin?(user.id) or Auth.moderator?(user.id) ->
         :ok
 
       Enum.count(new_user_times) >= state.ring_limit_count ->
@@ -1030,7 +1030,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec allow_command?(map(), map()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, state) do
     client = Client.get_client_by_id(senderid)
-    user = Account.get_user_by_id(senderid)
 
     is_host = senderid == state.host_id
     is_boss = Enum.member?(state.host_bosses, senderid)
@@ -1051,7 +1050,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         true
 
       # Allow all except Admin only commands for moderators
-      Auth.moderator?(user) and not Enum.member?(@admin_commands, cmd.command) ->
+      Auth.moderator?(senderid) and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       Enum.member?(@host_commands, cmd.command) and is_host ->
