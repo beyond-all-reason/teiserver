@@ -279,19 +279,48 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     end
   end
 
-  # Teifion added code to prevent setting restrictions to All Welcome lobbies
-  @spec allowed_to_set_restrictions(map()) :: :ok | {:error, String.t()}
-  def allowed_to_set_restrictions(state) do
+  @spec allowed_to_set_restrictions(map(), :max | :min | :any) :: :ok | {:error, String.t()}
+  def allowed_to_set_restrictions(state, :any) do
+    case allowed_to_set_restrictions(state, :max) do
+      :ok -> allowed_to_set_restrictions(state, :min)
+      result -> result
+    end
+  end
+
+  def allowed_to_set_restrictions(state, :max) do
     name =
       (Battle.get_lobby(state.lobby_id) || %{})
       |> Map.get(:name)
 
     cond do
       not state.ranked and not Config.get_site_config_cache("lobby.Unranked lobby restrictions") ->
-        {:error, "You cannot set a limit if the lobby is unranked"}
+        {:error, "You cannot set a limit if the lobby is unranked."}
 
       allwelcome_name?(name) ->
-        {:error, "You cannot set a limit if all are welcome to the game"}
+        {:error, "You cannot set any rating limits if all are welcome to the game."}
+
+      pro_title?(name) ->
+        {:error, "You cannot set a maximum limit for lobby names referencing pros."}
+
+      true ->
+        :ok
+    end
+  end
+
+  def allowed_to_set_restrictions(state, :min) do
+    name =
+      (Battle.get_lobby(state.lobby_id) || %{})
+      |> Map.get(:name)
+
+    cond do
+      not state.ranked and not Config.get_site_config_cache("lobby.Unranked lobby restrictions") ->
+        {:error, "You cannot set a limit if the lobby is unranked."}
+
+      allwelcome_name?(name) ->
+        {:error, "You cannot set any rating limits if all are welcome to the game."}
+
+      noob_title?(name) ->
+        {:error, "You cannot set a maximum limit for lobby names referencing new players."}
 
       true ->
         :ok
@@ -305,6 +334,14 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     |> String.downcase()
     |> String.replace(" ", "")
     |> String.contains?("allwelcome")
+  end
+
+  @spec pro_title?(String.t()) :: boolean()
+  def pro_title?(name) do
+    name = String.replace(name, "0", "o")
+    pattern = ~r/\b(pro|professional)\b/i
+
+    Regex.match?(pattern, name)
   end
 
   @doc """

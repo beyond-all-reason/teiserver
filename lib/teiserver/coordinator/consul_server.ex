@@ -62,7 +62,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_call(:get_consul_state, _from, state) do
     result =
-      ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_uncertainty_to_play maximum_uncertainty_to_play level_to_spectate locks bans timeouts welcome_message join_queue low_priority_join_queue approved_users host_bosses host_preset host_teamsize host_teamcount player_limit ranked)a
+      ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play level_to_spectate locks bans timeouts welcome_message join_queue low_priority_join_queue approved_users host_bosses host_preset host_teamsize host_teamcount player_limit ranked)a
       |> Map.new(fn key ->
         {key, Map.get(state, key)}
       end)
@@ -76,7 +76,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_call(:get_chobby_extra_data, _from, state) do
     keys =
-      ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_uncertainty_to_play maximum_uncertainty_to_play minimum_skill_to_play maximum_skill_to_play welcome_message player_limit)a
+      ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play minimum_skill_to_play maximum_skill_to_play welcome_message player_limit)a
 
     result =
       state
@@ -1374,8 +1374,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       maximum_rating_to_play: 1000,
       minimum_rank_to_play: 0,
       maximum_rank_to_play: 1000,
-      minimum_uncertainty_to_play: 0,
-      maximum_uncertainty_to_play: 1000,
       minimum_skill_to_play: 0,
       maximum_skill_to_play: 1000,
       level_to_spectate: 0,
