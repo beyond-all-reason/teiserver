@@ -61,7 +61,7 @@
 
                   <% changeset = Teiserver.Account.change_user(%Teiserver.Account.User{}) %>
 
-                  <%= form_for changeset, Routes.account_session_path(@conn, :login), fn f -> %>
+                  <%= form_for changeset, ~p"/login", fn f -> %>
                     <div class="form-group">
                       {label(f, :username, class: "control-label")}
                       {text_input(f, :username, class: "form-control", autofocus: "autofocus")}

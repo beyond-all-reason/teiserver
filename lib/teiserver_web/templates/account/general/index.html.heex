@@ -27,14 +27,14 @@
     icon: Teiserver.Account.icon(),
     text: "Account details",
     icon_class: "fa-solid",
-    link: Routes.ts_account_general_path(@conn, :edit_details)
+    link: ~p"/teiserver/account/details"
   )}
 
   {central_component("menu_card",
     icon: "fa-lock",
     text: "Security",
     icon_class: "fa-solid",
-    link: Routes.ts_account_security_path(@conn, :index)
+    link: ~p"/teiserver/account/security"
   )}
 </div>
 

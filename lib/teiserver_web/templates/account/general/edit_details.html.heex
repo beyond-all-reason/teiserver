@@ -14,7 +14,7 @@
         </h3>
       </div>
       <div class="card-body">
-        <%= form_for @changeset, Routes.ts_account_general_path(@conn, :update_details), fn f -> %>
+        <%= form_for @changeset, ~p"/teiserver/account/update_details", fn f -> %>
           <h4>Update details</h4>
           <%= if @changeset.action do %>
             <div class="alert alert-danger">
