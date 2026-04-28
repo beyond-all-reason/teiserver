@@ -476,8 +476,13 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
       end
 
+    Logger.info("got channel for action #{inspect(report.type)}: #{channel}")
+
     if channel do
-      case Communication.get_discord_message(channel, report.discord_message_id) do
+      msg = Communication.get_discord_message(channel, report.discord_message_id)
+      Logger.info("Got discord message for report")
+
+      case msg do
         {:ok, msg} ->
           {new_content, reactions} =
             if is_nil(report.result_id) do
@@ -519,15 +524,23 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
               {new_content, [delete: "📁", create: "🔨"]}
             end
 
+          Logger.info("reactions to process: #{inspect(reactions)}")
+
           Enum.each(reactions, fn {action, emoji} ->
-            case action do
-              :create -> Communication.create_discord_reaction(channel, msg.id, emoji)
-              :delete -> Communication.delete_discord_reaction(channel, msg.id, emoji)
-            end
+            reaction =
+              case action do
+                :create -> Communication.create_discord_reaction(channel, msg.id, emoji)
+                :delete -> Communication.delete_discord_reaction(channel, msg.id, emoji)
+              end
+
+            Logger.info("reaction #{inspect(action)} - #{inspect(emoji)} : #{inspect(reaction)}")
           end)
 
-          if msg.content != new_content,
-            do: Communication.edit_discord_message(channel, msg.id, new_content)
+          if msg.content != new_content do
+            Logger.info("editing discord message")
+            edit_result = Communication.edit_discord_message(channel, msg.id, new_content)
+            Logger.info("edit result: #{inspect(edit_result)}")
+          end
 
         {:error, %{status_code: 404}} ->
           Logger.warning("Report message #{report.discord_message_id} was not found")

@@ -21,8 +21,12 @@ defmodule Teiserver.HookServer do
     :exit, {:timeout, _details} ->
       Logger.error("Timeout while processing hook for event #{inspect(ev)}")
 
-      if Map.get(ev, :event) in [:new_report, :updated_report] do
-        DiscordSystem.restart("Automatic restart because #{ev.event} timed out")
+      event = Map.get(ev, :event)
+      should_restart? = event in [:new_report, :updated_report]
+      Logger.error("Attempting to restart the bridge")
+
+      if should_restart? do
+        DiscordSystem.restart("Automatic restart because #{inspect(event)} timed out")
       end
 
       {:noreply, state}
