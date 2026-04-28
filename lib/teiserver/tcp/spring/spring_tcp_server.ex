@@ -1183,17 +1183,9 @@ defmodule Teiserver.SpringTcpServer do
        do: {false, state}
 
   defp flood_protect?(_data, state) do
-    now = System.system_time(:second)
-    limiter = now - state.flood_rate_window_size
-
-    cmd_timestamps =
-      [now | state.cmd_timestamps]
-      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
-
-    if Enum.count(cmd_timestamps) > state.flood_rate_limit_count do
-      {true, %{state | cmd_timestamps: cmd_timestamps}}
-    else
-      {false, %{state | cmd_timestamps: cmd_timestamps}}
+    case BurstyRateLimiter.try_acquire(state.rate_limiter) do
+      {:ok, updated_rl} -> {false, %{state | rate_limiter: updated_rl}}
+      _error -> {true, state}
     end
   end
 
@@ -1324,7 +1316,6 @@ defmodule Teiserver.SpringTcpServer do
             print_server_messages: false,
             script_password: nil,
             exempt_from_cmd_throttle: false,
-            cmd_timestamps: [],
             status_timestamps: [],
             app_status: nil,
             protocol_optimisation: :full,
@@ -1335,12 +1326,10 @@ defmodule Teiserver.SpringTcpServer do
               "teiserver.Spring telemetry rate limit per minute"
               |> Config.get_site_config_cache()
               |> BurstyRateLimiter.per_minute(),
-
-            # Caching app configs
-            flood_rate_limit_count:
-              Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
-            flood_rate_window_size:
-              Config.get_site_config_cache("teiserver.Spring flood rate window size"),
+            rate_limiter:
+              "teiserver.Spring rate limit per minute"
+              |> Config.get_site_config_cache()
+              |> BurstyRateLimiter.per_minute(),
             last_action_timestamp: nil,
             server_messages: 0,
             server_batches: 0,
