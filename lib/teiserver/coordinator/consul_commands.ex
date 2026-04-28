@@ -714,7 +714,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{command: "minchevlevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    result = LobbyRestrictions.allowed_to_set_restrictions(state)
+    result = LobbyRestrictions.allowed_to_set_restrictions(state, :min)
 
     case result do
       :ok ->
@@ -783,7 +783,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{command: "maxchevlevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    result = LobbyRestrictions.allowed_to_set_restrictions(state)
+    result = LobbyRestrictions.allowed_to_set_restrictions(state, :max)
 
     case result do
       :ok ->
@@ -848,7 +848,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{command: "minratinglevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    result = LobbyRestrictions.allowed_to_set_restrictions(state)
+    result = LobbyRestrictions.allowed_to_set_restrictions(state, :min)
 
     case result do
       :ok ->
@@ -896,7 +896,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{command: "maxratinglevel", remaining: remaining, senderid: senderid} = cmd,
         state
       ) do
-    result = LobbyRestrictions.allowed_to_set_restrictions(state)
+    result = LobbyRestrictions.allowed_to_set_restrictions(state, :max)
 
     case result do
       :ok ->
@@ -968,7 +968,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             state
 
           {{min_level_o, _rest1}, {max_level_o, _rest2}} ->
-            result = LobbyRestrictions.allowed_to_set_restrictions(state)
+            result = LobbyRestrictions.allowed_to_set_restrictions(state, :any)
 
             case result do
               :ok ->
@@ -1002,273 +1002,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           senderid,
           [
             "setplaylevels takes two numbers, no more no less"
-          ],
-          state.lobby_id
-        )
-
-        state
-    end
-  end
-
-  def handle_command(%{command: "resetranklevels", remaining: ""} = cmd, state) do
-    ConsulServer.say_command(cmd, state)
-    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-    %{state | minimum_rank_to_play: 0, maximum_rank_to_play: 1000}
-  end
-
-  def handle_command(%{command: "minranklevel", remaining: ""} = cmd, state) do
-    ConsulServer.say_command(cmd, state)
-    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-    %{state | minimum_rank_to_play: 0}
-  end
-
-  def handle_command(
-        %{command: "minranklevel", remaining: remaining, senderid: senderid} = cmd,
-        state
-      ) do
-    case remaining |> String.trim() |> Integer.parse() do
-      :error ->
-        Lobby.sayprivateex(
-          state.coordinator_id,
-          senderid,
-          [
-            "Unable to turn '#{remaining}' into an integer"
-          ],
-          state.lobby_id
-        )
-
-        state
-
-      {level, _rest} ->
-        ConsulServer.say_command(cmd, state)
-        LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-        %{state | minimum_rank_to_play: level |> max(0) |> min(state.maximum_rank_to_play - 1)}
-    end
-  end
-
-  def handle_command(%{command: "maxranklevel", remaining: ""} = cmd, state) do
-    ConsulServer.say_command(cmd, state)
-    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-    %{state | maximum_rank_to_play: 1000}
-  end
-
-  def handle_command(
-        %{command: "maxranklevel", remaining: remaining, senderid: senderid} = cmd,
-        state
-      ) do
-    case remaining |> String.trim() |> Integer.parse() do
-      :error ->
-        Lobby.sayprivateex(
-          state.coordinator_id,
-          senderid,
-          [
-            "Unable to turn '#{remaining}' into an integer"
-          ],
-          state.lobby_id
-        )
-
-        state
-
-      {level, _rest} ->
-        ConsulServer.say_command(cmd, state)
-        LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-
-        %{
-          state
-          | maximum_rank_to_play:
-              level
-              |> min(LobbyRestrictions.rating_upper_bound())
-              |> max(state.minimum_rank_to_play + 1)
-        }
-    end
-  end
-
-  def handle_command(
-        %{command: "setranklevels", remaining: remaining, senderid: senderid} = cmd,
-        state
-      ) do
-    case String.split(remaining, " ") do
-      [smin, smax] ->
-        case {smin |> String.trim() |> Integer.parse(), smax |> String.trim() |> Integer.parse()} do
-          {:error, _max_parse} ->
-            Lobby.sayprivateex(
-              state.coordinator_id,
-              senderid,
-              [
-                "Unable to turn '#{smin}' into an integer"
-              ],
-              state.lobby_id
-            )
-
-            state
-
-          {_min_parse, :error} ->
-            Lobby.sayprivateex(
-              state.coordinator_id,
-              senderid,
-              [
-                "Unable to turn '#{smax}' into an integer"
-              ],
-              state.lobby_id
-            )
-
-            state
-
-          {{min_level_o, _rest1}, {max_level_o, _rest2}} ->
-            min_level = min(min_level_o, max_level_o)
-            max_level = max(min_level_o, max_level_o)
-
-            ConsulServer.say_command(cmd, state)
-            LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-
-            %{
-              state
-              | minimum_rank_to_play: max(min_level, 0),
-                maximum_rank_to_play: min(max_level, LobbyRestrictions.rank_upper_bound())
-            }
-        end
-
-      _other ->
-        Lobby.sayprivateex(
-          state.coordinator_id,
-          senderid,
-          [
-            "setranklevels takes two numbers, no more no less"
-          ],
-          state.lobby_id
-        )
-
-        state
-    end
-  end
-
-  def handle_command(%{command: "resetuncertaintylevels", remaining: ""} = cmd, state) do
-    ConsulServer.say_command(cmd, state)
-    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-    %{state | minimum_uncertainty_to_play: 0, maximum_uncertainty_to_play: 1000}
-  end
-
-  def handle_command(%{command: "minuncertaintylevel", remaining: ""} = cmd, state) do
-    ConsulServer.say_command(cmd, state)
-    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-    %{state | minimum_uncertainty_to_play: 0}
-  end
-
-  def handle_command(
-        %{command: "minuncertaintylevel", remaining: remaining, senderid: senderid} = cmd,
-        state
-      ) do
-    case remaining |> String.trim() |> Integer.parse() do
-      :error ->
-        Lobby.sayprivateex(
-          state.coordinator_id,
-          senderid,
-          [
-            "Unable to turn '#{remaining}' into an integer"
-          ],
-          state.lobby_id
-        )
-
-        state
-
-      {level, _rest} ->
-        ConsulServer.say_command(cmd, state)
-        LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-
-        %{
-          state
-          | minimum_uncertainty_to_play:
-              level |> max(0) |> min(state.maximum_uncertainty_to_play - 1)
-        }
-    end
-  end
-
-  def handle_command(%{command: "maxuncertaintylevel", remaining: ""} = cmd, state) do
-    ConsulServer.say_command(cmd, state)
-    LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-    %{state | maximum_uncertainty_to_play: 1000}
-  end
-
-  def handle_command(
-        %{command: "maxuncertaintylevel", remaining: remaining, senderid: senderid} = cmd,
-        state
-      ) do
-    case remaining |> String.trim() |> Integer.parse() do
-      :error ->
-        Lobby.sayprivateex(
-          state.coordinator_id,
-          senderid,
-          [
-            "Unable to turn '#{remaining}' into an integer"
-          ],
-          state.lobby_id
-        )
-
-        state
-
-      {level, _rest} ->
-        ConsulServer.say_command(cmd, state)
-        LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-
-        %{
-          state
-          | maximum_uncertainty_to_play:
-              level |> min(1000) |> max(state.minimum_uncertainty_to_play + 1)
-        }
-    end
-  end
-
-  def handle_command(
-        %{command: "setuncertaintylevels", remaining: remaining, senderid: senderid} = cmd,
-        state
-      ) do
-    case String.split(remaining, " ") do
-      [smin, smax] ->
-        case {smin |> String.trim() |> Integer.parse(), smax |> String.trim() |> Integer.parse()} do
-          {:error, _max_parse} ->
-            Lobby.sayprivateex(
-              state.coordinator_id,
-              senderid,
-              [
-                "Unable to turn '#{smin}' into an integer"
-              ],
-              state.lobby_id
-            )
-
-            state
-
-          {_min_parse, :error} ->
-            Lobby.sayprivateex(
-              state.coordinator_id,
-              senderid,
-              [
-                "Unable to turn '#{smax}' into an integer"
-              ],
-              state.lobby_id
-            )
-
-            state
-
-          {{min_level_o, _rest1}, {max_level_o, _rest2}} ->
-            min_level = min(min_level_o, max_level_o)
-            max_level = max(min_level_o, max_level_o)
-
-            ConsulServer.say_command(cmd, state)
-            LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-
-            %{
-              state
-              | minimum_uncertainty_to_play: max(min_level, 0),
-                maximum_uncertainty_to_play: min(max_level, 1000)
-            }
-        end
-
-      _other ->
-        Lobby.sayprivateex(
-          state.coordinator_id,
-          senderid,
-          [
-            "setuncertaintylevels takes two numbers, no more no less"
           ],
           state.lobby_id
         )
