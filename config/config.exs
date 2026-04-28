@@ -157,6 +157,11 @@ config :teiserver, Teiserver,
     battle_minimum_seconds: 120
   }
 
+config :nostrum,
+  youtubedl: false,
+  streamlink: false,
+  ffmpeg: false
+
 # config :grpc,
 #   start_server: true
 

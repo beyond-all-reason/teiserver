@@ -18,8 +18,8 @@ defmodule Teiserver.HookServer do
     Task.async(fn -> do_handle_info(ev, state) end)
     |> Task.await()
   catch
-    :exit, {:timeout, _details} ->
-      Logger.error("Timeout while processing hook for event #{inspect(ev)}")
+    :exit, {:timeout, details} ->
+      Logger.error("Timeout while processing hook for event #{inspect(ev)}, #{inspect(details)}")
 
       event = Map.get(ev, :event)
       should_restart? = event in [:new_report, :updated_report]
