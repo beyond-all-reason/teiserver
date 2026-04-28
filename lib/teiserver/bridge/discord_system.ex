@@ -34,6 +34,8 @@ defmodule Teiserver.Bridge.DiscordSystem do
 
   @spec restart(String.t()) :: Supervisor.on_start_child() | :disabled
   def restart(reason) do
+    Logger.info("Restarting discord system")
+
     case Process.whereis(Teiserver.Bridge.DiscordSupervisor) do
       x when is_pid(x) ->
         DynamicSupervisor.terminate_child(
