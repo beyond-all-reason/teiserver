@@ -60,10 +60,7 @@
               <% end %>
 
               <div class="col-md-4">
-                <a
-                  href={Routes.account_session_path(@conn, :forgot_password)}
-                  class="btn btn-secondary btn-block"
-                >
+                <a href={~p"/forgot_password"} class="btn btn-secondary btn-block">
                   Forgotten password
                 </a>
               </div>

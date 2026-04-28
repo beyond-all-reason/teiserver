@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Account.GeneralControllerTest do
   end
 
   test "index", %{conn: conn} do
-    conn = get(conn, Routes.ts_account_general_path(conn, :edit_details))
+    conn = get(conn, ~p"/teiserver/account/details")
     assert html_response(conn, 200) =~ "Edit account details"
   end
 

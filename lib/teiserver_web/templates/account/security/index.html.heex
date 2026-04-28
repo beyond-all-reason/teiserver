@@ -40,7 +40,7 @@
                 <br />
 
                 {link(raw("Delete token"),
-                  to: Routes.ts_account_security_path(@conn, :delete_token, token),
+                  to: ~p"/teiserver/account/security/delete_token/#{token}",
                   method: :delete,
                   data: [confirm: "Are you sure?"],
                   class: "btn btn-danger2"
@@ -114,7 +114,7 @@
 
                 <div class="mt-auto">
                   {link(raw("<i class=\"fa-fw fa-solid fa-times\"></i> Revoke Access"),
-                    to: Routes.ts_account_security_path(@conn, :revoke_oauth_application, app),
+                    to: ~p"/teiserver/account/security/revoke_oauth/#{app}",
                     method: :delete,
                     data: [
                       confirm:
