@@ -112,6 +112,7 @@ defmodule TeiserverWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
+        log: :warning,
         layout: {TeiserverWeb.Layouts, :app}
 
       use Breadcrumble
