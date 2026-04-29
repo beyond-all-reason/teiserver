@@ -6,6 +6,8 @@ defmodule Teiserver.Data.Types do
   alias Teiserver.Data.Types, as: T
   """
 
+  alias Teiserver.CacheUser
+
   @type userid() :: non_neg_integer()
   @type party_id() :: String.t()
   @type lobby_id() :: non_neg_integer()
@@ -21,7 +23,7 @@ defmodule Teiserver.Data.Types do
   @type client() :: map()
 
   # TODO: We should drop the next line and replace all calls with `Teiserver.Account.User.t()`.
-  @type user() :: map()
+  @type user() :: map() | CacheUser.t()
 
   @type spring_tcp_state() :: map()
   @type error_pair() :: {:error, String.t()}

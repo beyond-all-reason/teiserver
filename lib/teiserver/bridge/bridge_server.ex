@@ -414,7 +414,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     |> String.replace(Map.keys(emoticon_map), fn text -> emoticon_map[text] end)
   end
 
-  @spec get_bridge_account() :: Teiserver.CacheUser.t()
+  @spec get_bridge_account() :: Teiserver.CacheUser.t() | map()
   def get_bridge_account do
     user =
       Account.get_user(nil,
