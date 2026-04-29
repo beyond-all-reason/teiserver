@@ -485,7 +485,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     state
   end
 
-  @spec get_match_monitor_account() :: Teiserver.CacheUser.t()
+  @spec get_match_monitor_account() :: Teiserver.CacheUser.t() | map()
   def get_match_monitor_account do
     user =
       Account.get_user(nil,

@@ -5,7 +5,7 @@
   </div>
   <div class="col">
     <h4>Cache object</h4>
-    <textarea name="" id="" rows="40" cols="40" class="form-control monospace"><%= Jason.encode! @cache_user, pretty: true %></textarea>
+    <textarea name="" id="" rows="40" cols="40" class="form-control monospace"><%= Jason.encode! Map.from_struct(@cache_user), pretty: true %></textarea>
   </div>
 </div>
 

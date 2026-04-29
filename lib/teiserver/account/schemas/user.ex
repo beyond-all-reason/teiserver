@@ -52,7 +52,6 @@ defmodule Teiserver.Account.User do
     %{
       rank: 0,
       country: "??",
-      moderator: false,
       bot: false,
       email_change_code: nil,
       last_login: nil,

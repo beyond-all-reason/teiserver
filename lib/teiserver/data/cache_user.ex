@@ -12,6 +12,7 @@ defmodule Teiserver.CacheUser do
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Battle
+  alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Chat.WordLib
   alias Teiserver.Client
@@ -29,8 +30,6 @@ defmodule Teiserver.CacheUser do
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  @type t :: T.user()
-
   @timer_sleep 500
 
   @default_colour "#666666"
@@ -45,6 +44,82 @@ defmodule Teiserver.CacheUser do
   def keys,
     do:
       ~w(id name password email inserted_at clan_id permissions colour icon smurf_of_id last_login last_played last_logout roles discord_id)a
+
+  defstruct [
+    # Fields from the User struct itself
+    :id,
+    :name,
+    :email,
+    :password,
+    :icon,
+    :colour,
+    :roles,
+    :permissions,
+    :restrictions,
+    :restricted_until,
+    :shadowbanned,
+    :last_login,
+    :last_played,
+    :last_logout,
+    :discord_id,
+    :discord_dm_channel_id,
+    :steam_id,
+    :clan_id,
+    :smurf_of_id,
+    :inserted_at,
+
+    # Fields from user data
+    :rank,
+    :country,
+    :bot,
+    :email_change_code,
+    :last_login_mins,
+    :lobby_hash,
+    :hw_hash,
+    :chobby_hash,
+    :lobby_client,
+    :print_client_messages,
+    :print_server_messages,
+    :discord_dm_channel
+  ]
+
+  @type t() :: %CacheUser{
+          # User struct attributes
+          id: User.id(),
+          name: String.t(),
+          email: String.t() | nil,
+          password: String.t() | nil,
+          icon: String.t() | nil,
+          colour: String.t() | nil,
+          permissions: [String.t()],
+          roles: [String.t()],
+          restrictions: [String.t()],
+          restricted_until: Timex.DateTime.t(),
+          shadowbanned: boolean(),
+          last_login: Timex.DateTime.t(),
+          last_played: Timex.DateTime.t(),
+          last_logout: Timex.DateTime.t(),
+          discord_id: String.t() | nil,
+          discord_dm_channel_id: String.t() | nil,
+          steam_id: String.t() | nil,
+          smurf_of_id: integer() | nil,
+          clan_id: pos_integer() | nil,
+          inserted_at: Timex.DateTime.t(),
+
+          # Data attributes
+          rank: non_neg_integer(),
+          country: String.t(),
+          bot: boolean(),
+          email_change_code: [String.t()],
+          last_login_mins: integer(),
+          lobby_hash: String.t() | nil,
+          hw_hash: String.t() | nil,
+          chobby_hash: String.t() | nil,
+          lobby_client: String.t(),
+          print_client_messages: boolean(),
+          print_server_messages: boolean(),
+          discord_dm_channel: String.t() | nil
+        }
 
   @data_keys [
     :rank,
