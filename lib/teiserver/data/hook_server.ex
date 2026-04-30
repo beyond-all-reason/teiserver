@@ -15,8 +15,10 @@ defmodule Teiserver.HookServer do
 
   @impl GenServer
   def handle_info(ev, state) do
+    # internally, nostrum rate limiter has some pretty high wait time (10s)
+    # so make sure we let it do its thing
     Task.async(fn -> do_handle_info(ev, state) end)
-    |> Task.await()
+    |> Task.await(:timer.seconds(15))
   catch
     :exit, {:timeout, details} ->
       Logger.error("Timeout while processing hook for event #{inspect(ev)}, #{inspect(details)}")
