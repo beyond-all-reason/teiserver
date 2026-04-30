@@ -109,6 +109,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
       "mode" => "Lobby",
       "term" => "",
       "username" => "",
+      "user-raw-filter" => "",
       "order" => "Newest first",
       "message-format" => "Table"
     })
@@ -179,11 +180,28 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
             limit: 100,
             order_by: filters["order"]
           )
+
+        "Direct" ->
+          Chat.list_direct_messages(
+            search: [
+              member_id_in: filters["userids"],
+              inserted_after: inserted_after,
+              term: filters["term"]
+            ],
+            limit: 100,
+            preload: [:users],
+            order_by: filters["order"]
+          )
       end
 
     extra_usernames =
       messages
-      |> Enum.map(fn m -> m.user_id end)
+      |> Enum.flat_map(fn m ->
+        case mode do
+          "Direct" -> [m.from_id, m.to_id]
+          _non_direct -> [m.user_id]
+        end
+      end)
       |> Enum.reject(fn userid ->
         Map.has_key?(socket.assigns.usernames, userid)
       end)
