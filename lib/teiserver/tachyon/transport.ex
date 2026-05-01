@@ -129,11 +129,17 @@ defmodule Teiserver.Tachyon.Transport do
   end
 
   def handle_info({:timeout, message_id}, state) do
-    {_popped, pendings} = Map.pop(state.pending_responses, message_id)
+    {popped, pendings} = Map.pop(state.pending_responses, message_id)
 
-    {:stop, :timeout,
-     {1008, "Response to request with message id #{message_id} not received in time."},
-     %{state | pending_responses: pendings}}
+    if popped == nil do
+      # this can happen if the response is handled while the timeout message is already
+      # in the inbox (and so the timer cancellation is done too late)
+      {:ok, state}
+    else
+      {:stop, :timeout,
+       {1008, "Response to request with message id #{message_id} not received in time."},
+       %{state | pending_responses: pendings}}
+    end
   end
 
   def handle_info({:call_client, cmd_id, payload, req_id}, state) do
