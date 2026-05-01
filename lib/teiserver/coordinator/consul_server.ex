@@ -169,9 +169,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
         unready_at: System.system_time(:millisecond)
       })
 
-      if CacheUser.restricted?(userid, ["All chat", "Battle chat"]) do
-        name = Account.get_username_by_id(userid)
-        Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{name}")
+      user = Account.get_user(userid)
+
+      if Account.restricted?(user, ["All chat", "Battle chat"]) do
+        Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
       end
 
       send(self(), :recheck_membership)
@@ -430,7 +431,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     # If the client is muted, we need to tell the host
-    if CacheUser.restricted?(client.userid, ["All chat", "Battle chat"]) do
+    if Account.restricted?(client.userid, ["All chat", "Battle chat"]) do
       spawn(fn ->
         :timer.sleep(500)
         Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{client.name}")
@@ -502,7 +503,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       # If they're not allowed to be a boss, unboss them?
       (host_data[:host_bosses] || [])
       |> Enum.filter(fn userid ->
-        CacheUser.restricted?(userid, ["Boss"])
+        Account.restricted?(userid, ["Boss"])
       end)
       |> Enum.each(fn userid ->
         username = Account.get_username_by_id(userid)

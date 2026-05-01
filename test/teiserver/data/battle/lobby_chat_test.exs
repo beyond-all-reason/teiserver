@@ -1,16 +1,14 @@
 defmodule Teiserver.Data.Battle.ChatLibTest do
+  alias Teiserver.Account.Auth
   alias Teiserver.Battle
-  alias Teiserver.CacheUser
   alias Teiserver.Lobby
   alias Teiserver.Lobby.ChatLib
   use Teiserver.DataCase, async: false
   import Teiserver.TeiserverTestLib, only: [new_user: 0]
 
-  # https://github.com/beyond-all-reason/teiserver/actions/runs/12845418717/job/35819461341?pr=556
-  @tag :needs_attention
   test "test lobby chat as bot" do
     bot_user = new_user()
-    bot_user = CacheUser.update_user(%{bot_user | bot: true, roles: ["Bot"]})
+    {:ok, bot_user} = Auth.add_roles(bot_user.id, ["Bot"])
     real_user = new_user()
 
     lobby =

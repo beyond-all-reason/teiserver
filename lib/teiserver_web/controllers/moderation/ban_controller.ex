@@ -3,7 +3,6 @@ defmodule TeiserverWeb.Moderation.BanController do
 
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
-  alias Teiserver.CacheUser
   alias Teiserver.Logging
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ActionLib
@@ -139,7 +138,7 @@ defmodule TeiserverWeb.Moderation.BanController do
           |> Enum.uniq()
           |> Enum.map(fn userid -> Account.get_user_by_id(userid) end)
           |> Enum.reject(fn user ->
-            CacheUser.restricted?(user, ["Login", "All lobbies", "All chat"])
+            Account.restricted?(user, ["Login", "All lobbies", "All chat"])
           end)
 
         all_user_keys =
@@ -225,7 +224,7 @@ defmodule TeiserverWeb.Moderation.BanController do
           |> Enum.uniq()
           |> Enum.map(fn userid -> Account.get_user_by_id(userid) end)
           |> Enum.reject(fn user ->
-            CacheUser.restricted?(user, ["Login"])
+            Account.restricted?(user, ["Login"])
           end)
 
         all_user_keys =

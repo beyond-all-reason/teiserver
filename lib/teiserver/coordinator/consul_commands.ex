@@ -470,7 +470,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       client == nil ->
         state
 
-      CacheUser.restricted?(senderid, ["Game queue"]) ->
+      Account.restricted?(senderid, ["Game queue"]) ->
         ChatLib.sayprivateex(
           state.coordinator_id,
           senderid,
@@ -504,9 +504,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       true ->
         send(self(), :queue_check)
+        user = Account.get_user(senderid)
 
         new_state =
-          if CacheUser.restricted?(senderid, ["Low priority"]) do
+          if Account.restricted?(user, ["Low priority"]) do
             %{state | low_priority_join_queue: state.low_priority_join_queue ++ [senderid]}
           else
             %{state | join_queue: state.join_queue ++ [senderid]}
@@ -517,7 +518,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         new_queue = get_queue(new_state)
         pos = get_queue_position(new_queue, senderid) + 1
 
-        if CacheUser.restricted?(senderid, ["Low priority"]) do
+        if Account.restricted?(user, ["Low priority"]) do
           ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,

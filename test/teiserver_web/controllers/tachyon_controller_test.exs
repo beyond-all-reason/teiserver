@@ -83,9 +83,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
       user =
         GeneralTestLib.make_user(%{
           "roles" => ["Verified"],
-          "data" => %{
-            "restrictions" => ["Permanently banned"]
-          }
+          "restrictions" => ["Permanently banned"]
         })
 
       conn =
@@ -111,9 +109,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
       user =
         GeneralTestLib.make_user(%{
           "roles" => ["Verified"],
-          "data" => %{
-            "restrictions" => ["Login"]
-          }
+          "restrictions" => ["Login"]
         })
 
       conn =

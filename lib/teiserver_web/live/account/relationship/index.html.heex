@@ -365,7 +365,7 @@
         <div class="col-md-12 col-lg-6">
           <div :if={false}>
             <%= cond do %>
-              <% Enum.member?(@found_user.data["restrictions"], "Permanently banned") -> %>
+              <% Enum.member?(@found_user.restrictions, "Permanently banned") -> %>
                 <div class="role-badge">
                   <Fontawesome.icon
                     icon={Teiserver.Moderation.ActionLib.action_icon("Ban")}
@@ -375,7 +375,7 @@
                   />
                   <br /> Banned
                 </div>
-              <% Enum.member?(@found_user.data["restrictions"], "Login") -> %>
+              <% Enum.member?(@found_user.restrictions, "Login") -> %>
                 <div class="role-badge">
                   <Fontawesome.icon
                     icon={Teiserver.Moderation.ActionLib.action_icon("Suspend")}
@@ -385,7 +385,7 @@
                   />
                   <br /> Suspended
                 </div>
-              <% Enum.member?(@found_user.data["restrictions"], "All chat") -> %>
+              <% Enum.member?(@found_user.restrictions, "All chat") -> %>
                 <div class="role-badge">
                   <Fontawesome.icon
                     icon={Teiserver.Moderation.ActionLib.action_icon("Mute")}

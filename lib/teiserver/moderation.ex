@@ -5,7 +5,6 @@ defmodule Teiserver.Moderation do
   # require Logger
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Moderation.Action
@@ -833,13 +832,13 @@ defmodule Teiserver.Moderation do
   @spec unbridge_user(nil | T.user() | T.userid(), String.t(), non_neg_integer(), String.t()) ::
           any
   def unbridge_user(userid, message, flagged_word_count, location) when is_integer(userid) do
-    unbridge_user(Account.get_user_by_id(userid), message, flagged_word_count, location)
+    unbridge_user(Account.get_user(userid), message, flagged_word_count, location)
   end
 
   def unbridge_user(nil, _message, _flagged_word_count, _location), do: :no_user
 
   def unbridge_user(user, message, flagged_word_count, location) do
-    if not CacheUser.restricted?(user, ["Bridging"]) do
+    if not Account.restricted?(user, ["Bridging"]) do
       {:ok, _action} =
         create_action(%{
           target_id: user.id,

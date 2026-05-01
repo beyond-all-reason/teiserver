@@ -14,8 +14,8 @@ defmodule TeiserverWeb.UserComponents do
   @doc """
   <TeiserverWeb.UserComponents.status_icon user={user} />
   """
-  def status_icon(%{user: %{data: user_data} = user} = assigns) do
-    restrictions = user_data["restrictions"] || []
+  def status_icon(%{user: user} = assigns) do
+    restrictions = user.restrictions || []
 
     ban_status =
       cond do

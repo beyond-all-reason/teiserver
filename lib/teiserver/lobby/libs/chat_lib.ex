@@ -70,24 +70,24 @@ defmodule Teiserver.Lobby.ChatLib do
 
   def do_say(userid, msg, lobby_id) do
     msg = trim_message(msg)
-    user = Account.get_user_by_id(userid)
+    user = Account.get_user(userid)
 
-    if Auth.is_bot?(userid) == false and WordLib.flagged_words(msg) > 0 do
+    bot? = Auth.is_bot?(user)
+
+    if not bot? and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = Auth.is_bot?(userid) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = not bot? and WordLib.blacklisted_phrase?(msg)
 
-    if blacklisted do
-      CacheUser.shadowban_user(user.id)
-    end
+    if blacklisted, do: CacheUser.shadowban_user(user.id)
 
     allowed =
       cond do
-        CacheUser.restricted?(user, ["All chat", "Lobby chat"]) ->
+        Account.restricted?(user, ["All chat", "Lobby chat"]) ->
           msg_allowed_when_muted?(msg)
 
-        String.starts_with?(msg, "!") and CacheUser.restricted?(user, ["Host commands"]) ->
+        String.starts_with?(msg, "!") and Account.restricted?(user, ["Host commands"]) ->
           false
 
         blacklisted ->
@@ -105,7 +105,7 @@ defmodule Teiserver.Lobby.ChatLib do
             "!vote no"
           ],
           String.downcase(msg)
-        ) and CacheUser.restricted?(user, ["Voting"]) ->
+        ) and Account.restricted?(user, ["Voting"]) ->
           false
 
         true ->
@@ -136,24 +136,23 @@ defmodule Teiserver.Lobby.ChatLib do
   @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def sayex(userid, msg, lobby_id) do
     msg = trim_message(msg)
-    user = CacheUser.get_user_by_id(userid)
+    user = Account.get_user(userid)
+    bot? = Auth.is_bot?(user)
 
-    if Auth.is_bot?(userid) == false and WordLib.flagged_words(msg) > 0 do
+    if not bot? and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = Auth.is_bot?(userid) == false and WordLib.blacklisted_phrase?(msg)
+    blacklisted = not bot? and WordLib.blacklisted_phrase?(msg)
 
-    if blacklisted do
-      CacheUser.shadowban_user(user.id)
-    end
+    if blacklisted, do: CacheUser.shadowban_user(user.id)
 
     allowed =
       cond do
-        CacheUser.restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) ->
+        Account.restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) ->
           msg_allowed_when_muted?(msg)
 
-        String.starts_with?(msg, "!") and CacheUser.restricted?(user, ["Host commands"]) ->
+        String.starts_with?(msg, "!") and Account.restricted?(user, ["Host commands"]) ->
           false
 
         blacklisted ->
@@ -171,7 +170,7 @@ defmodule Teiserver.Lobby.ChatLib do
             "!vote no"
           ],
           String.downcase(msg)
-        ) and CacheUser.restricted?(user, ["Voting"]) ->
+        ) and Account.restricted?(user, ["Voting"]) ->
           false
 
         true ->
@@ -203,7 +202,7 @@ defmodule Teiserver.Lobby.ChatLib do
           :ok | {:error, any}
   def sayprivateex(from_id, to_id, msg, lobby_id) do
     msg = trim_message(msg)
-    sender = CacheUser.get_user_by_id(from_id)
+    sender = Account.get_user(from_id)
 
     blacklisted = Auth.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg)
 
@@ -213,10 +212,10 @@ defmodule Teiserver.Lobby.ChatLib do
 
     allowed =
       cond do
-        CacheUser.restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) ->
+        Account.restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) ->
           false
 
-        String.starts_with?(msg, "!") and CacheUser.restricted?(sender, ["Host commands"]) ->
+        String.starts_with?(msg, "!") and Account.restricted?(sender, ["Host commands"]) ->
           false
 
         blacklisted ->
@@ -234,7 +233,7 @@ defmodule Teiserver.Lobby.ChatLib do
             "!vote no"
           ],
           String.downcase(msg)
-        ) and CacheUser.restricted?(sender, ["Voting"]) ->
+        ) and Account.restricted?(sender, ["Voting"]) ->
           false
 
         true ->
@@ -263,16 +262,17 @@ defmodule Teiserver.Lobby.ChatLib do
   @spec persist_message(T.user(), String.t(), T.lobby_id(), atom) :: any
   def persist_message(user, msg, lobby_id, type) do
     lobby = Lobby.get_lobby(lobby_id)
+    bot? = Auth.is_bot?(user)
 
     persist =
       cond do
         lobby == nil -> false
-        Auth.is_bot?(user) == true and String.slice(msg, 0..1) == "* " -> false
+        bot? and String.slice(msg, 0..1) == "* " -> false
         true -> true
       end
 
     {userid, content} =
-      if Auth.is_bot?(user) do
+      if bot? do
         case Regex.run(~r/^<(.*?)> (.+)$/u, msg) do
           [_full_match, username, remainder] ->
             userid = CacheUser.get_userid(username) || user.id

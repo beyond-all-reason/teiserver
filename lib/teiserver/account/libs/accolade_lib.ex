@@ -4,7 +4,6 @@ defmodule Teiserver.Account.AccoladeLib do
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
   alias Teiserver.Account.Accolade
-  alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   use TeiserverWeb, :library
   require Logger
@@ -219,7 +218,7 @@ defmodule Teiserver.Account.AccoladeLib do
   end
 
   defp allow_accolades_for_user?(userid) do
-    if CacheUser.restricted?(userid, ["Accolades", "Community"]) do
+    if Account.restricted?(userid, ["Accolades", "Community"]) do
       false
     else
       stats = Account.get_user_stat_data(userid)
