@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.CacheUser
+  alias Teiserver.Account.User
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
@@ -160,13 +160,13 @@ defmodule Teiserver.Coordinator.AutomodServer do
     end
   end
 
-  @spec do_check(T.user() | T.userid()) :: String.t()
+  @spec do_check(T.userid() | User.t()) :: String.t()
   def do_check(userid) when is_integer(userid) do
-    do_check(Account.get_user_by_id(userid))
+    do_check(Account.get_user(userid))
   end
 
-  def do_check(user) do
-    if CacheUser.restricted?(user, ["Login"]) do
+  def do_check(%User{} = user) do
+    if Account.restricted?(user, ["Login"]) do
       "Already banned"
     else
       smurf_keys =

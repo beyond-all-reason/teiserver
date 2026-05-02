@@ -219,6 +219,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   def handle_info({:do_client_inout, :login, userid}, state) do
     user = CacheUser.get_user_by_id(userid)
+    db_user = Account.get_user(userid)
 
     if user do
       # Do we have a system welcome message?
@@ -236,7 +237,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       end
 
       relevant_restrictions =
-        user.restrictions
+        db_user.restrictions
         |> Enum.filter(fn r -> not Enum.member?(["Bridging"], r) end)
 
       if not Enum.empty?(relevant_restrictions) do
@@ -284,7 +285,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           # Do we need an acknowledgement? If they are muted then no.
           msg =
             cond do
-              CacheUser.has_mute?(user) ->
+              Account.has_mute?(db_user) ->
                 msg ++ @dispute_string
 
               has_warning ->

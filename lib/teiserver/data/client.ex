@@ -96,6 +96,7 @@ defmodule Teiserver.Client do
   @spec login(T.user(), atom(), String.t() | nil) :: T.client()
   def login(user, protocol, ip \\ nil, token_id \\ nil) do
     stats = Account.get_user_stat_data(user.id)
+    db_user = Account.get_user(user.id)
 
     clan_tag =
       case Clans.get_clan(user.clan_id) do
@@ -110,15 +111,15 @@ defmodule Teiserver.Client do
         name: user.name,
         tcp_pid: self(),
         rank: user.rank,
-        moderator: Auth.moderator?(user) or Auth.is_event_organizer?(user),
-        bot: Auth.is_bot?(user),
+        moderator: Auth.moderator?(db_user) or Auth.is_event_organizer?(db_user),
+        bot: Auth.is_bot?(db_user),
         away: false,
         in_game: false,
         ip: ip || stats["last_ip"],
         country: stats["country"] || "??",
         lobby_client: stats["lobby_client"],
         shadowbanned: CacheUser.is_shadowbanned?(user),
-        muted: CacheUser.has_mute?(user),
+        muted: Account.has_mute?(db_user),
         awaiting_warn_ack: false,
         warned: false,
         token_id: token_id,

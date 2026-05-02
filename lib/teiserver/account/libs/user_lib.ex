@@ -410,9 +410,9 @@ defmodule Teiserver.Account.UserLib do
     end)
   end
 
-  defp can_login(user) do
+  defp can_login(%User{} = user) do
     cond do
-      CacheUser.restricted?(user, ["Login"]) ->
+      Account.restricted?(user, ["Login"]) ->
         {:error,
          "Your account is currently suspended. Check the suspension's status at https://discord.gg/beyond-all-reason -> #moderation-bot"}
 

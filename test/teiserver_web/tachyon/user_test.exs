@@ -12,8 +12,6 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       %{country: country} = Account.get_user_by_id(user_id)
       user_id = to_string(user_id)
 
-      user_id = to_string(user_id)
-
       assert %{
                "data" => %{
                  "userId" => ^user_id,

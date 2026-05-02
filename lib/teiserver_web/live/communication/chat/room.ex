@@ -205,13 +205,13 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
         current_user == nil ->
           "no user found, the website thinks you are not logged into it"
 
-        Account.restricted?(current_user, ["Login"]) ->
+        Account.restricted?(current_user.id, ["Login"]) ->
           "you are banned"
 
-        Account.restricted?(current_user, ["All chat", "Room chat", "Game chat"]) ->
+        Account.restricted?(current_user.id, ["All chat", "Room chat", "Game chat"]) ->
           "you are muted"
 
-        Account.restricted?(current_user, "Bridging") ->
+        Account.restricted?(current_user.id, "Bridging") ->
           "you are unbridged and thus cannot use the web-chat"
 
         current_user.smurf_of_id != nil ->

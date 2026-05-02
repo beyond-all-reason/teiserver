@@ -49,10 +49,12 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
         limit: :infinity
       )
 
+    user = Account.get_user(user_id)
+
     if Enum.empty?(actions) do
       Logger.info("Lifted remaining restrictions for user##{user_id}")
 
-      Account.update_cache_user(user_id, %{
+      Account.script_update_user(user, %{
         restrictions: [],
         restricted_until: nil
       })
@@ -77,7 +79,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
 
       expires_as_string = new_restricted_until |> Jason.encode!() |> Jason.decode!()
 
-      Account.update_cache_user(user_id, %{
+      Account.script_update_user(user, %{
         restrictions: new_restrictions,
         restricted_until: expires_as_string
       })

@@ -137,7 +137,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     do: {:noreply, state}
 
   def handle_info({:new_message, from_id, room_name, message}, state) do
-    user = Account.get_user_by_id(from_id)
+    user = Account.get_user(from_id)
 
     cond do
       from_id == state.userid ->
@@ -153,7 +153,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       message_starts_with?(message, "/") ->
         nil
 
-      CacheUser.restricted?(user, ["Bridging"]) ->
+      Account.restricted?(user, ["Bridging"]) ->
         # Non-bridged user, ignore it
         nil
 
@@ -177,7 +177,7 @@ defmodule Teiserver.Bridge.BridgeServer do
           end
 
         # If they are a bot they're only allowed to post to the promotion channel
-        if Auth.is_bot?(user.id) do
+        if Auth.is_bot?(user) do
           if room_name == "promote" do
             forward_to_discord(from_id, state.channel_lookup[room_name], message, state)
           end

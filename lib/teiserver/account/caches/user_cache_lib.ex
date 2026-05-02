@@ -220,10 +220,7 @@ defmodule Teiserver.Account.UserCacheLib do
       colour: user.colour,
       roles: user.roles,
       permissions: user.permissions,
-      # For some reason the restrictions in user_data are different
-      # and using the user restrictions breaks tests so we will be using
-      # the data restrictions initially
-      restrictions: user_data.restrictions,
+      restrictions: user.restrictions,
       restricted_until: user.restricted_until,
       shadowbanned: user.shadowbanned,
       last_login: user.last_login,

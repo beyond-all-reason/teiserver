@@ -40,7 +40,10 @@ defmodule Teiserver.Account do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Plugins
   alias Teiserver.Repo
+
+  use Plugins
 
   require Logger
 
@@ -2195,9 +2198,6 @@ defmodule Teiserver.Account do
   @spec system_change_user_name(T.userid(), String.t()) :: :ok
   defdelegate system_change_user_name(userid, new_name), to: Teiserver.CacheUser
 
-  @spec restricted?(T.userid() | T.user(), String.t()) :: boolean()
-  defdelegate restricted?(user, restriction), to: Teiserver.CacheUser
-
   # Client stuff
   @spec get_client_by_name(String.t()) :: nil | T.client()
   defdelegate get_client_by_name(name), to: ClientLib
@@ -2351,5 +2351,34 @@ defmodule Teiserver.Account do
 
   def verify_user(userid) when is_integer(userid) do
     get_user(userid) |> verify_user()
+  end
+
+  @spec restricted?(T.userid() | User.t() | nil, String.t() | [String.t()]) :: boolean()
+  def restricted?(nil, _restriction), do: true
+
+  def restricted?(userid, restriction) when is_integer(userid),
+    do: restricted?(get_user(userid), restriction)
+
+  def restricted?(%User{} = %{restrictions: restrictions}, restriction_list)
+      when is_list(restriction_list) do
+    restriction_list
+    |> Enum.map(fn r -> Enum.member?(restrictions, r) end)
+    |> Enum.any?()
+  end
+
+  def restricted?(%User{} = %{restrictions: restrictions}, the_restriction) do
+    Enum.member?(restrictions, the_restriction)
+  end
+
+  @spec has_mute?(User.t()) :: boolean()
+  @decorate Plugins.plugin(:has_mute?)
+  def has_mute?(%User{} = user) do
+    restricted?(user, [
+      "All chat",
+      "Room chat",
+      "Direct chat",
+      "Lobby chat",
+      "Battle chat"
+    ])
   end
 end

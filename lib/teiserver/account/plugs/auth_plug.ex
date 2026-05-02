@@ -11,7 +11,6 @@ defmodule Teiserver.Account.AuthPlug do
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.Guardian.Plug, as: GuardianPlug
   alias Teiserver.Account.TOTPLib
-  alias Teiserver.CacheUser
   alias Teiserver.Plugs.CachePlug
 
   use TeiserverWeb, :verified_routes
@@ -97,7 +96,7 @@ defmodule Teiserver.Account.AuthPlug do
 
   defp banned_user?(%{assigns: %{current_user: current_user}} = _conn_or_socket) do
     cond do
-      CacheUser.restricted?(current_user.id, ["Login"]) ->
+      Account.restricted?(current_user.id, ["Login"]) ->
         true
 
       current_user.smurf_of_id != nil ->

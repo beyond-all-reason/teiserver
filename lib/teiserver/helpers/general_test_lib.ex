@@ -31,6 +31,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
           params["password"] ||
             Account.spring_md5_password("password"),
         "password_confirmation" => params["password"] || "password",
+        "restrictions" => params["restrictions"] || [],
         "data" => params["data"] || %{}
       })
 

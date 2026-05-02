@@ -4,6 +4,7 @@ defmodule Teiserver.Room do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.User
   alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Chat.RoomRegistry
@@ -127,23 +128,25 @@ defmodule Teiserver.Room do
   @spec list_rooms() :: [{String.t(), member_count :: non_neg_integer()}]
   defdelegate list_rooms(), to: RoomRegistry
 
-  @spec send_message(T.userid() | T.user(), String.t(), String.t() | [String.t()]) :: nil | :ok
+  @spec send_message(T.userid() | User.t(), String.t(), String.t() | [String.t()]) :: nil | :ok
   def send_message(from_id, _room_name, "$" <> msg) do
     CacheUser.send_direct_message(from_id, Coordinator.get_coordinator_userid(), "$" <> msg)
   end
 
   def send_message(from_id, room_name, messages) when is_list(messages) do
-    user = Account.get_user_by_id(from_id)
+    user = Account.get_user(from_id)
     if user != nil, do: Enum.map(messages, fn msg -> send_message(user, room_name, msg) end)
   end
 
   def send_message(from_id, room_name, msg) when is_integer(from_id) do
-    user = Account.get_user_by_id(from_id)
+    user = Account.get_user(from_id)
     if user != nil, do: send_message(user, room_name, msg)
   end
 
-  def send_message(user, room_name, msg) do
-    if Auth.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
+  def send_message(%User{} = user, room_name, msg) do
+    bot? = Auth.is_bot?(user)
+
+    if not bot? and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
@@ -151,7 +154,7 @@ defmodule Teiserver.Room do
       allow?(user.id) == false ->
         nil
 
-      Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg) ->
+      not bot? and WordLib.blacklisted_phrase?(msg) ->
         CacheUser.shadowban_user(user.id)
         nil
 
@@ -167,9 +170,10 @@ defmodule Teiserver.Room do
 
   @spec send_message_ex(T.userid(), String.t(), String.t()) :: nil | :ok
   def send_message_ex(from_id, room_name, msg) do
-    user = Account.get_user_by_id(from_id)
+    user = Account.get_user(from_id)
+    bot? = Auth.is_bot?(user)
 
-    if Auth.is_bot?(from_id) == false and WordLib.flagged_words(msg) > 0 do
+    if not bot? and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
@@ -177,7 +181,7 @@ defmodule Teiserver.Room do
       allow?(user.id) == false ->
         nil
 
-      Auth.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg) ->
+      not bot? and WordLib.blacklisted_phrase?(msg) ->
         CacheUser.shadowban_user(user.id)
         nil
 
@@ -197,7 +201,7 @@ defmodule Teiserver.Room do
       CacheUser.is_shadowbanned?(userid) ->
         false
 
-      CacheUser.restricted?(userid, ["All chat", "Room chat"]) ->
+      Account.restricted?(userid, ["All chat", "Room chat"]) ->
         false
 
       true ->
