@@ -298,6 +298,7 @@ defmodule TeiserverWeb.Account.SessionController do
   @spec password_reset_form(Conn.t(), map()) :: Conn.t()
   def password_reset_form(conn, %{"value" => value}) do
     code = Account.get_code(value, preload: [:user])
+    changeset = Account.change_user(code.user)
 
     cond do
       code == nil ->
@@ -320,13 +321,16 @@ defmodule TeiserverWeb.Account.SessionController do
 
       true ->
         conn
+        |> add_breadcrumb(name: "Password", url: conn.request_path)
+        |> assign(:changeset, changeset)
+        |> assign(:user, code.user)
         |> assign(:value, value)
         |> render("password_reset_form.html")
     end
   end
 
-  @spec password_reset_post(Conn.t(), map()) :: Conn.t()
-  def password_reset_post(conn, %{"value" => value, "pass1" => pass1, "pass2" => pass2}) do
+  @spec update_password(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def update_password(conn, %{"value" => value, "user" => user_params}) do
     code = Account.get_code(value, preload: [:user])
 
     cond do
@@ -345,17 +349,7 @@ defmodule TeiserverWeb.Account.SessionController do
         |> put_flash(:danger, "Link has expired")
         |> redirect(to: "/")
 
-      pass1 != pass2 ->
-        conn
-        |> assign(:value, value)
-        |> put_flash(:danger, "Passwords need to match")
-        |> render("password_reset_form.html")
-
       true ->
-        user_params = %{
-          "password" => pass1
-        }
-
         case Account.password_reset_update_user(code.user, user_params) do
           {:ok, user} ->
             LoggingHelpers.add_anonymous_audit_log(
@@ -379,8 +373,12 @@ defmodule TeiserverWeb.Account.SessionController do
             |> GuardianPlug.sign_out(clear_remember_me: true)
             |> redirect(to: "/")
 
-          {:error, _changeset} ->
-            raise "Error updating user password from password reset form"
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, "password_reset_form.html",
+              user: code.user,
+              changeset: changeset,
+              value: value
+            )
         end
     end
   end
