@@ -2,77 +2,91 @@ defmodule Teiserver.Chat.DirectMessageLib do
   @moduledoc false
 
   alias Teiserver.Chat.DirectMessage
-  alias Teiserver.Helper.QueryHelpers
   use TeiserverWeb, :library
 
   # Queries
-  @spec query_direct_messages(list) :: Ecto.Query.t()
-  def query_direct_messages(args) do
-    query = from(direct_messages in DirectMessage)
-
-    query
-    |> do_where(id: args[:id])
-    |> do_where(args[:where])
-    |> do_preload(args[:preload])
-    |> do_order_by(args[:order_by])
-    |> QueryHelpers.query_select(args[:select])
+  @spec query_direct_messages() :: Ecto.Query.t()
+  def query_direct_messages do
+    from(direct_messages in DirectMessage)
   end
 
-  @spec do_where(Ecto.Query.t(), list | map | nil) :: Ecto.Query.t()
-  defp do_where(query, nil), do: query
+  @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
+  def search(query, nil), do: query
 
-  defp do_where(query, params) do
+  def search(query, params) do
     params
     |> Enum.reduce(query, fn {key, value}, query_acc ->
-      _where(query_acc, key, value)
+      _search(query_acc, key, value)
     end)
   end
 
-  @spec _where(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
-  defp _where(query, _key, ""), do: query
-  defp _where(query, _key, nil), do: query
+  @spec _search(Ecto.Query.t(), atom(), any()) :: Ecto.Query.t()
+  def _search(query, _key, ""), do: query
+  def _search(query, _key, nil), do: query
 
-  defp _where(query, :id, id) do
+  def _search(query, :id, id) do
     from direct_messages in query,
       where: direct_messages.id == ^id
   end
 
-  defp _where(query, :members, {u1, u2}) when is_integer(u1) and is_integer(u2) do
+  def _search(query, :member_id_in, []), do: query
+
+  def _search(query, :member_id_in, [id]) do
     from direct_messages in query,
-      where: direct_messages.to_id in [^u1, ^u2] or direct_messages.from_id in [^u1, ^u2]
+      where: direct_messages.from_id == ^id or direct_messages.to_id == ^id
   end
 
-  defp _where(query, :id_in, id_list) do
+  def _search(query, :member_id_in, [id1, id2]) do
+    from direct_messages in query,
+      where:
+        (direct_messages.from_id == ^id1 and direct_messages.to_id == ^id2) or
+          (direct_messages.from_id == ^id2 and direct_messages.to_id == ^id1)
+  end
+
+  def _search(query, :member_id_in, id_list) do
+    from direct_messages in query,
+      where: direct_messages.from_id in ^id_list and direct_messages.to_id in ^id_list
+  end
+
+  def _search(query, :id_list, id_list) do
     from direct_messages in query,
       where: direct_messages.id in ^id_list
   end
 
-  @spec do_order_by(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
-  defp do_order_by(query, nil), do: query
+  def _search(query, :term, ref) do
+    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
-  defp do_order_by(query, params) do
-    params
-    |> Enum.reduce(query, fn key, query_acc ->
-      _order_by(query_acc, key)
-    end)
-  end
-
-  defp _order_by(query, nil), do: query
-
-  defp _order_by(query, "Newest first") do
     from direct_messages in query,
-      order_by: [desc: direct_messages.updated_at]
+      where: ilike(direct_messages.content, ^ref_like)
   end
 
-  defp _order_by(query, "Oldest first") do
+  def _search(query, :inserted_after, timestamp) do
     from direct_messages in query,
-      order_by: [asc: direct_messages.updated_at]
+      where: direct_messages.inserted_at >= ^timestamp
   end
 
-  @spec do_preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
-  defp do_preload(query, nil), do: query
+  def _search(query, :inserted_before, timestamp) do
+    from direct_messages in query,
+      where: direct_messages.inserted_at < ^timestamp
+  end
 
-  defp do_preload(query, preloads) do
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
+  def order_by(query, nil), do: query
+
+  def order_by(query, "Newest first") do
+    from direct_messages in query,
+      order_by: [desc: direct_messages.inserted_at, desc: direct_messages.id]
+  end
+
+  def order_by(query, "Oldest first") do
+    from direct_messages in query,
+      order_by: [asc: direct_messages.inserted_at, asc: direct_messages.id]
+  end
+
+  @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
+  def preload(query, nil), do: query
+
+  def preload(query, preloads) do
     preloads
     |> Enum.reduce(query, fn key, query_acc ->
       _preload(query_acc, key)
@@ -81,9 +95,8 @@ defmodule Teiserver.Chat.DirectMessageLib do
 
   defp _preload(query, :users) do
     from direct_messages in query,
-      join: tos in assoc(direct_messages, :to),
-      preload: [to: tos],
-      join: froms in assoc(direct_messages, :from),
-      preload: [from: froms]
+      left_join: tos in assoc(direct_messages, :to),
+      left_join: froms in assoc(direct_messages, :from),
+      preload: [to: tos, from: froms]
   end
 end

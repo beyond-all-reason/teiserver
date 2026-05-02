@@ -475,6 +475,16 @@ defmodule Teiserver.Chat do
     PartyMessage.changeset(party_message, %{})
   end
 
+  def direct_message_query(args) do
+    DirectMessageLib.query_direct_messages()
+    |> DirectMessageLib.search(args[:search])
+    |> DirectMessageLib.preload(args[:preload])
+    |> DirectMessageLib.order_by(args[:order_by])
+    |> QueryHelpers.query_select(args[:select])
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> QueryHelpers.offset_query(args[:offset] || 0)
+  end
+
   @doc """
   Returns the list of direct_messages.
 
@@ -487,7 +497,7 @@ defmodule Teiserver.Chat do
   @spec list_direct_messages(list) :: list
   def list_direct_messages(args \\ []) do
     args
-    |> DirectMessageLib.query_direct_messages()
+    |> direct_message_query()
     |> Repo.all()
   end
 
@@ -511,7 +521,7 @@ defmodule Teiserver.Chat do
     args = args ++ [id: id]
 
     args
-    |> DirectMessageLib.query_direct_messages()
+    |> direct_message_query()
     |> Repo.one!()
   end
 

@@ -35,7 +35,7 @@
           <.input
             type="select"
             label="Mode"
-            options={["Lobby", "Room", "Party"]}
+            options={["Lobby", "Room", "Party", "Direct"]}
             name="mode"
             value={@filters["mode"]}
             phx-change="filter-update"
@@ -90,8 +90,10 @@
       >
         <thead>
           <tr>
-            <th>Location</th>
-            <th>Sender</th>
+            <th :if={@filters["mode"] != "Direct"}>Location</th>
+            <th :if={@filters["mode"] == "Direct"}>Sender</th>
+            <th :if={@filters["mode"] == "Direct"}>Receiver</th>
+            <th :if={@filters["mode"] != "Direct"}>Sender</th>
             <th>Message</th>
             <th>When</th>
           </tr>
@@ -107,7 +109,22 @@
               <td :if={@filters["mode"] == "Room"}>
                 {msg.chat_room}
               </td>
-              <td>
+              <td :if={@filters["mode"] == "Party"}>
+                Party
+              </td>
+
+              <td :if={@filters["mode"] == "Direct"}>
+                <a href={~p"/teiserver/admin/user/#{msg.from_id}"}>
+                  {@usernames[msg.from_id]}
+                </a>
+              </td>
+              <td :if={@filters["mode"] == "Direct"}>
+                <a href={~p"/teiserver/admin/user/#{msg.to_id}"}>
+                  {@usernames[msg.to_id]}
+                </a>
+              </td>
+
+              <td :if={@filters["mode"] != "Direct"}>
                 <a href={~p"/teiserver/admin/user/#{msg.user_id}"}>
                   {@usernames[msg.user_id]}
                 </a>
@@ -121,15 +138,17 @@
 
       <div :if={@filters["message-format"] == "Raw"} class="row" id="raw-text-block">
         <div class="col-md-12">
-          <textarea rows="30" cols="40" class="form-control"><%= for msg <- @messages do %>
-  <%= @usernames[msg.user_id] %>: <%= msg.content %><% end %></textarea>
+          <textarea rows="30" cols="40" class="form-control">
+            <%= for msg <- @messages do %><%= if @filters["mode"] == "Direct" do %><%= @usernames[msg.from_id] %> -> <%= @usernames[msg.to_id] %><% else %><%= @usernames[msg.user_id] %><% end %>: <%= msg.content %><% end %>
+          </textarea>
         </div>
       </div>
 
       <div :if={@filters["message-format"] == "Discord"} class="row" id="discord-text-block">
         <div class="col-md-12">
-          <textarea rows="30" cols="40" class="form-control"><%= for msg <- @messages do %>
-  **<%= @usernames[msg.user_id] %>**: <%= msg.content %><% end %></textarea>
+          <textarea rows="30" cols="40" class="form-control">
+            <%= for msg <- @messages do %>**<%= if @filters["mode"] == "Direct" do %><%= @usernames[msg.from_id] %> -> <%= @usernames[msg.to_id] %><% else %><%= @usernames[msg.user_id] %><% end %>**: <%= msg.content %><% end %>
+          </textarea>
         </div>
       </div>
     </div>
