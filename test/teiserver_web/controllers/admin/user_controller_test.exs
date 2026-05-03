@@ -117,4 +117,22 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       assert html_response(conn, 200) =~ "New user name:"
     end
   end
+
+  describe "authenticated non-admin access" do
+    setup do
+      GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())
+      |> TeiserverTestLib.conn_setup()
+    end
+
+    # Auth-boundary regression test for #1068. The noise log #1068 is about
+    # comes from cowboy/Ranch when the request process exits, which does not
+    # happen under Plug.Test, so the actual log-suppression behaviour is
+    # tested in TeiserverWeb.LoggerFilterTest. This test just guarantees
+    # that a non-admin Verified user still gets 403 on the admin endpoint.
+    test "is rejected with 403", %{conn: conn} do
+      assert_error_sent(403, fn ->
+        get(conn, ~p"/teiserver/admin/user/1")
+      end)
+    end
+  end
 end

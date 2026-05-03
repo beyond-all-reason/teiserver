@@ -8,6 +8,7 @@ defmodule Teiserver.Application do
   alias Teiserver.Plugins
   alias Teiserver.Startup
   alias TeiserverWeb.Endpoint
+  alias TeiserverWeb.LoggerFilter
   alias TeiserverWeb.Monitoring.Router, as: MonitoringRouter
 
   use Plugins
@@ -20,6 +21,8 @@ defmodule Teiserver.Application do
 
   @impl Application
   def start(_type, _args) do
+    LoggerFilter.install_primary!()
+
     LoggerBackends.add(LoggerBackends.Console)
     LoggerBackends.add({LoggerFileBackend, :error_log})
     LoggerBackends.add({LoggerFileBackend, :notice_log})
