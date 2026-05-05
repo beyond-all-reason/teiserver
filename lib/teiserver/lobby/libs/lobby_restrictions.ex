@@ -13,6 +13,12 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @rank_upper_bound 7
   @rating_upper_bound 1000
   @splitter "------------------------------------------------------"
+
+  @unranked_title_error "You cannot set a limit if the lobby is unranked."
+  @all_welcome_title_error "Games declaring all are welcome cannot have player restrictions."
+  @pro_title_error "You cannot set a maximum limit for lobby names referencing pros."
+  @noob_title_error "You cannot set a maximum limit for lobby names referencing new players."
+
   @spec rank_upper_bound() :: number
   def rank_upper_bound, do: @rank_upper_bound
   def rating_upper_bound, do: @rating_upper_bound
@@ -214,10 +220,20 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @spec check_lobby_name(String.t(), any()) ::
           {:error, String.t()} | {:ok, String.t()} | {:ok, nil}
   def check_lobby_name(name, consul_state) do
-    if has_restrictions?(consul_state) and allwelcome_name?(name) do
-      {:error, "* You cannot declare a lobby to be all welcome if there are player restrictions"}
-    else
-      {:ok, get_tips(name)}
+    restrictions = restriction_types(consul_state)
+
+    cond do
+      allwelcome_title?(name) and not Enum.empty?(restrictions) ->
+        {:error, @all_welcome_title_error}
+
+      pro_title?(name) and Enum.member?(restrictions, :max) ->
+        {:error, @pro_title_error}
+
+      noob_title?(name) and Enum.member?(restrictions, :min) ->
+        {:error, @noob_title_error}
+
+      true ->
+        {:ok, get_tips(name)}
     end
   end
 
@@ -266,17 +282,19 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     end
   end
 
-  # Check if lobby has restrictions for playing
-  defp has_restrictions?(consul_state) do
+  # Return a list of the restriction types (min, max) defining
+  # play boundaries for the lobby
+  defp restriction_types(consul_state) do
     state = consul_state
 
-    cond do
-      state.maximum_rating_to_play < @rating_upper_bound -> true
-      state.minimum_rating_to_play > 0 -> true
-      state.minimum_rank_to_play > 0 -> true
-      state.maximum_rank_to_play < @rank_upper_bound -> true
-      true -> false
-    end
+    [
+      if(state.maximum_rating_to_play < @rating_upper_bound, do: :max),
+      if(state.minimum_rating_to_play > 0, do: :min),
+      if(state.minimum_rank_to_play > 0, do: :min),
+      if(state.maximum_rank_to_play < @rank_upper_bound, do: :max)
+    ]
+    |> Enum.reject(&is_nil(&1))
+    |> Enum.uniq()
   end
 
   @spec allowed_to_set_restrictions(map(), :max | :min | :any) :: :ok | {:error, String.t()}
@@ -294,13 +312,13 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
 
     cond do
       not state.ranked and not Config.get_site_config_cache("lobby.Unranked lobby restrictions") ->
-        {:error, "You cannot set a limit if the lobby is unranked."}
+        {:error, @unranked_title_error}
 
-      allwelcome_name?(name) ->
-        {:error, "You cannot set any rating limits if all are welcome to the game."}
+      allwelcome_title?(name) ->
+        {:error, @all_welcome_title_error}
 
       pro_title?(name) ->
-        {:error, "You cannot set a maximum limit for lobby names referencing pros."}
+        {:error, @pro_title_error}
 
       true ->
         :ok
@@ -314,22 +332,22 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
 
     cond do
       not state.ranked and not Config.get_site_config_cache("lobby.Unranked lobby restrictions") ->
-        {:error, "You cannot set a limit if the lobby is unranked."}
+        {:error, @unranked_title_error}
 
-      allwelcome_name?(name) ->
-        {:error, "You cannot set any rating limits if all are welcome to the game."}
+      allwelcome_title?(name) ->
+        {:error, @all_welcome_title_error}
 
       noob_title?(name) ->
-        {:error, "You cannot set a maximum limit for lobby names referencing new players."}
+        {:error, @noob_title_error}
 
       true ->
         :ok
     end
   end
 
-  defp allwelcome_name?(nil), do: false
+  defp allwelcome_title?(nil), do: false
 
-  defp allwelcome_name?(name) do
+  defp allwelcome_title?(name) do
     name
     |> String.downcase()
     |> String.replace(" ", "")
@@ -345,14 +363,36 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   end
 
   @doc """
-  Checks if the lobby title indicates a noob lobby
+  Checks if the lobby title indicates a noob lobby, returns false if
+  no noob reference detected or a negation of a noob reference is
+  detected.
   """
   @spec noob_title?(String.t()) :: boolean()
   def noob_title?(title) do
-    anti_noob_regex = ~r/no (noob|newb|nub)/i
-    noob_regex = ~r/\b(noob|newb|nub(s|\b))/i
+    title =
+      title
+      |> String.replace("3", "e")
+      |> String.replace("0", "o")
 
-    Regex.match?(noob_regex, title) && !Regex.match?(anti_noob_regex, title)
+    # Attempts to match a negation and a reference to noobs
+    anti_noob_regex = ~r/(?:\b(no)\s)?(new\splayer|noobs?|newb|nub(?:z|s| ))/i
+
+    case Regex.scan(anti_noob_regex, title) do
+      [[_full, _no_noob, ""]] ->
+        # Not matching on the noob part at all
+        false
+
+      [[_full, "", _noob_in_title]] ->
+        # This matches on the noob part but not the negative
+        true
+
+      [[_full, _no_noob, _noob_in_title]] ->
+        # Matching the negative
+        false
+
+      _no_valid_match ->
+        false
+    end
   end
 
   @spec rotato_title?(String.t()) :: boolean()

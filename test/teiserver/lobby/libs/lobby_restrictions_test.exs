@@ -5,15 +5,21 @@ defmodule Teiserver.Lobby.Libs.LobbyRestrictionsTest do
   use ExUnit.Case
 
   test "check for noob title" do
+    # Noob titles
     assert LobbyRestrictions.noob_title?("Noobs 1v1")
-
-    refute LobbyRestrictions.noob_title?("No Noobs 1v1")
-
-    refute LobbyRestrictions.noob_title?("All Welcome 1v1")
-
     assert LobbyRestrictions.noob_title?("Newbies 1v1")
-
     assert LobbyRestrictions.noob_title?("Nubs 1v1")
+    assert LobbyRestrictions.noob_title?("N00bz")
+    assert LobbyRestrictions.noob_title?("Newbz")
+    assert LobbyRestrictions.noob_title?("Newbies")
+    assert LobbyRestrictions.noob_title?("New players")
+
+    # Not noob titles
+    refute LobbyRestrictions.noob_title?("No Noobs 1v1")
+    refute LobbyRestrictions.noob_title?("No N00bz")
+    refute LobbyRestrictions.noob_title?("No Newbz")
+    refute LobbyRestrictions.noob_title?("No Newbies")
+    refute LobbyRestrictions.noob_title?("No New players")
   end
 
   test "get title based on consul state rank filters" do
