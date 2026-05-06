@@ -263,7 +263,6 @@ defmodule TeiserverWeb.Router do
       live "/:userid/accolades", ProfileLive.Accolades, :accolades
       live "/:userid/matches", ProfileLive.Matches, :matches
       live "/:userid/playtime", ProfileLive.Playtime, :playtime
-      live "/:userid/achievements", ProfileLive.Achievements, :achievements
       live "/:userid/appearance", ProfileLive.Appearance, :appearance
       live "/:userid/relationships", ProfileLive.Relationships, :relationships
       live "/:userid/contributor", ProfileLive.Contributor, :contributor
@@ -650,11 +649,6 @@ defmodule TeiserverWeb.Router do
     get("/matches/by_server/:uuid", MatchController, :server_index)
     get("/matches/user/:user_id", MatchController, :user_show)
     resources("/matches", MatchController, only: [:index, :show, :delete])
-
-    # resources("/chat", ChatController, only: [:index])
-    # post("/chat", ChatController, :index)
-
-    resources("/achievements", AchievementController)
 
     get("/lobbies/:id/server_chat/download", LobbyController, :server_chat_download)
     get("/lobbies/:id/server_chat", LobbyController, :server_chat)

@@ -10,7 +10,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   alias Teiserver.Communication.DiscordChannelLib
   alias Teiserver.Communication.TextCallbackLib
   alias Teiserver.Config.SiteConfigLib
-  alias Teiserver.Game.AchievementTypeLib
   alias Teiserver.OAuth.ApplicationLib
   alias Teiserver.Telemetry.TelemetryLib
 
@@ -33,7 +32,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def view_colour("badge_types"), do: BadgeTypeLib.colours()
   def view_colour("text_callbacks"), do: TextCallbackLib.colours()
   def view_colour("discord_channels"), do: DiscordChannelLib.colours()
-  def view_colour("achievements"), do: AchievementTypeLib.colour()
   def view_colour("config"), do: SiteConfigLib.colours()
   def view_colour("tool"), do: ToolLib.colours()
   def view_colour("codes"), do: CodeLib.colours()

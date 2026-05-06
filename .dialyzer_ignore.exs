@@ -58,7 +58,6 @@
   {"lib/teiserver/game/libs/match_rating_lib.ex", :no_return},
   {"lib/teiserver/game/libs/match_rating_lib.ex", :unknown_type},
   {"lib/teiserver/game/libs/match_rating_lib.ex", :unused_fun},
-  {"lib/teiserver/game/servers/achievement_server.ex", :exact_eq},
   {"lib/teiserver/game/servers/balancer_server.ex", :unknown_type},
   {"lib/teiserver/helpers/number_helper.ex", :unknown_type},
   {"lib/teiserver/helpers/query_helper.ex", :unknown_type},

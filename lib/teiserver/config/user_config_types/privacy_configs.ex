@@ -34,15 +34,6 @@ defmodule Teiserver.Config.UserConfigTypes.PrivacyConfigs do
     })
 
     add_user_config_type(%{
-      key: "privacy.Achievement visibility",
-      section: "Privacy",
-      type: "select",
-      opts: [choices: privacy_levels],
-      default: "Any player",
-      description: "Controls who can see your achievements from your profile."
-    })
-
-    add_user_config_type(%{
       key: "privacy.Allow followers",
       section: "Privacy",
       type: "boolean",
