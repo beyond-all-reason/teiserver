@@ -32,9 +32,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   @spec allow_command?(map(), map()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, state) do
     client = Client.get_client_by_id(senderid)
-    user = Account.get_user_by_id(senderid)
-
-    is_admin = Auth.admin?(user)
 
     cond do
       client == nil ->
@@ -47,7 +44,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         true
 
       # Allow all commands for Admins
-      is_admin ->
+      Auth.admin?(senderid) ->
         true
 
       # Allow all except Admin only commands for moderators
