@@ -28,11 +28,6 @@ defmodule TeiserverWeb.Account.ProfileComponents do
             <Fontawesome.icon icon={Teiserver.Account.AccoladeLib.icon()} style="solid" /> Accolades
           </.tab_nav>
 
-          <.tab_nav url={~p"/profile/#{@userid}/achievements"} selected={@tab == "achievements"}>
-            <Fontawesome.icon icon={Teiserver.Game.AchievementTypeLib.icon()} style="solid" />
-            Achievements
-          </.tab_nav>
-
           <.tab_nav url={~p"/profile/#{@userid}/playtime"} selected={@tab == "playtime"}>
             <Fontawesome.icon icon="fa-stopwatch" style="solid" /> Playtime
           </.tab_nav>

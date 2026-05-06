@@ -74,15 +74,6 @@
   </.menu_card>
 
   <.menu_card
-    :if={allow_any?(@current_user, ~w(Moderator))}
-    icon={Teiserver.Game.AchievementTypeLib.icon()}
-    url={~p"/teiserver/admin/achievements"}
-    size={:small}
-  >
-    Achievements
-  </.menu_card>
-
-  <.menu_card
     :if={allow_any?(@current_user, ~w(Admin))}
     icon="fa-solid fa-users"
     url={~p"/admin/matchmaking"}

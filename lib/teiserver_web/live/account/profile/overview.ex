@@ -57,11 +57,6 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
     |> assign(:page_title, "#{user.name} - Accolades")
   end
 
-  defp apply_action(%{assigns: %{user: user}} = socket, :achievements, _params) do
-    socket
-    |> assign(:page_title, "#{user.name} - Achievements")
-  end
-
   @impl Phoenix.LiveView
   def handle_info(%{channel: "teiserver_client_messages:" <> _user_id, event: :connected}, socket) do
     user_id = socket.assigns.user.id

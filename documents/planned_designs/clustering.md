@@ -45,7 +45,7 @@ Any time an ETS is updated this needs to be propagated. `Teiserver.cache_put` an
 Various services place their PID into ETS, this should be changed to be a Registry. Long term we might want to swap to a pool system and things being in a Registry will make this easier.
 
 ##### PubSub.broadcast
-Currently we use `broadcast` but in some cases we might need to either include the node with the data or use `broadcast_local`. One example would be achievements, we don't want to double-count them.
+Currently we use `broadcast` but in some cases we might need to either include the node with the data or use `broadcast_local`.
 
 Additionally we should change anything that would normally be send(pid) to instead either be `GenServer.cast` or a `PubSub.broadcast` to make it more explicit.
 
@@ -100,7 +100,6 @@ Note: This ties in with the "Per node process" item.
     - AutomodServer
   - Per cluster processes
     - TelemetryServer
-    - AchievementServer
 - **Stage 2:** Convert these to use a Horde DynamicSupervisor
 - **Stage 3:** Have them all startup from Teiserver.Startup where they can check for existing PIDs
 - **Stage 4:** Discover how scheduled Oban jobs will work, some of them are long running and we don't want to duplicate them

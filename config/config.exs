@@ -258,9 +258,6 @@ config :teiserver, Oban,
        {"8 9 * * *", Teiserver.Telemetry.InfologCleanupTask},
        {"9 9 * * *", Teiserver.Logging.Tasks.PersistUserActivityDayTask},
 
-       # 9:43
-       {"43 9 * * *", Teiserver.Game.AchievementCleanupTask},
-
        # 0302 and 1202 every day, gives time for multiple telemetry day tasks to run if needed
        {"2 3 * * *", Teiserver.Account.RecalculateUserDailyStatTask},
        {"2 12 * * *", Teiserver.Account.RecalculateUserDailyStatTask}

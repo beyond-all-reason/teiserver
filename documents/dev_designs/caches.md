@@ -18,7 +18,6 @@
 - ConCache.put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
 - ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
 - ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)
-- GenerateAchievement types
 - Telemetry event/property types
 - User list precache (remaining)
 
@@ -34,7 +33,6 @@
 - Umbrella, Player and Internal groups (uses cache but it's built from a DB entry that won't change)
 - Quick items
 - User config types
-- GenerateAchievement types
 
 #### Keep - Changes needed to backend before clustering but otherwise can remain as they are
 - Permission sets (needs to become a Teiserver.store system)
