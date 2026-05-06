@@ -1,5 +1,4 @@
 defmodule TeiserverWeb.Account.GeneralView do
-  alias Teiserver.Clans.ClanLib
   alias Teiserver.Config.UserConfigLib
 
   use TeiserverWeb, :view
@@ -15,7 +14,6 @@ defmodule TeiserverWeb.Account.GeneralView do
   def view_colour("relationships"), do: :info
   def view_colour("customisation"), do: UserConfigLib.colours()
   def view_colour("preferences"), do: UserConfigLib.colours()
-  def view_colour("clans"), do: ClanLib.colours()
 
   def view_colour("details"), do: :primary
   def view_colour("security"), do: :danger

@@ -16,7 +16,6 @@ defmodule Teiserver.Chat.RoomServer do
           author_id: T.userid(),
           topic: String.t(),
           password: String.t(),
-          clan_id: T.clan_id(),
           monitors: MC.t()
         }
 
@@ -90,7 +89,6 @@ defmodule Teiserver.Chat.RoomServer do
       author_id: args.author_id,
       topic: args.topic,
       password: args.password,
-      clan_id: args.clan_id,
       monitors: MC.new()
     }
 
@@ -138,13 +136,11 @@ defmodule Teiserver.Chat.RoomServer do
     end
   end
 
-  def handle_call({:can_join_room?, user}, _from, state) do
-    result =
-      cond do
-        state.clan_id == nil -> true
-        state.clan_id == user.clan_id -> true
-        true -> {false, "Clan room"}
-      end
+  def handle_call({:can_join_room?, _user}, _from, state) do
+    # Previously this checked for clans, we will leave it in place for now
+    # as the ability to limit membership to rooms is likely useful in the
+    # future
+    result = true
 
     {:reply, result, state}
   end

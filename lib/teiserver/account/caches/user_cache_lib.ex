@@ -229,7 +229,6 @@ defmodule Teiserver.Account.UserCacheLib do
       discord_id: user.discord_id,
       discord_dm_channel_id: user.discord_dm_channel_id,
       steam_id: user.steam_id,
-      clan_id: user.clan_id,
       smurf_of_id: user.smurf_of_id,
       inserted_at: user.inserted_at,
 

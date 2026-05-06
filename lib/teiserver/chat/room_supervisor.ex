@@ -4,15 +4,14 @@ defmodule Teiserver.Chat.RoomSupervisor do
 
   use DynamicSupervisor
 
-  @spec start_room(String.t(), T.userid(), String.t(), String.t(), T.clan_id()) ::
+  @spec start_room(String.t(), T.userid(), String.t(), String.t()) ::
           DynamicSupervisor.on_start_child()
-  def start_room(room_name, author_id, topic, password, clan_id) do
+  def start_room(room_name, author_id, topic, password) do
     arg = %{
       name: room_name,
       author_id: author_id,
       topic: topic,
-      password: password,
-      clan_id: clan_id
+      password: password
     }
 
     DynamicSupervisor.start_child(

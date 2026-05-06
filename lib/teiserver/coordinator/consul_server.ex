@@ -848,10 +848,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
         else
           :spectator
         end
-
-      :clan ->
-        # TODO: Implement
-        :player
     end
   end
 

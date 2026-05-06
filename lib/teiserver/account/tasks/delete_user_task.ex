@@ -20,9 +20,6 @@ defmodule Teiserver.Admin.DeleteUserTask do
     |> Enum.each(&Account.decache_user/1)
 
     [
-      # Clan memberships
-      "DELETE FROM teiserver_clan_memberships WHERE user_id = ANY($1)",
-
       # Accolades
       "DELETE FROM teiserver_account_accolades WHERE recipient_id = ANY($1) OR giver_id = ANY($1)",
 

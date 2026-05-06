@@ -36,12 +36,12 @@ defmodule Teiserver.Account.PermissionCache do
     add_permission_set("admin", "report", ~w(show update delete report))
     add_permission_set("admin", "user", ~w(show create update delete report))
     add_permission_set("admin", "group", ~w(show create update delete report config))
-    add_permission_set("teiserver", "admin", ~w(account battle clan queue))
+    add_permission_set("teiserver", "admin", ~w(account battle queue))
 
     add_permission_set(
       "teiserver",
       "staff",
-      ~w(overwatch reviewer moderator admin communication clan telemetry server)
+      ~w(overwatch reviewer moderator admin communication telemetry server)
     )
 
     add_permission_set("teiserver", "dev", ~w(infolog))

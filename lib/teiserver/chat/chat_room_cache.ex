@@ -27,22 +27,20 @@ defmodule Teiserver.Room do
     Map.merge(
       %{
         members: [],
-        password: "",
-        clan_id: nil
+        password: ""
       },
       room
     )
   end
 
-  @spec create_room(String.t(), T.userid(), T.clan_id() | nil) :: map()
-  def create_room(room_name, author_id, clan_id \\ nil) do
+  @spec create_room(String.t(), T.userid()) :: map()
+  def create_room(room_name, author_id) do
     %{
       name: room_name,
       members: [],
       author_id: author_id,
       topic: "topic",
-      password: "",
-      clan_id: clan_id
+      password: ""
     }
   end
 
@@ -67,7 +65,7 @@ defmodule Teiserver.Room do
       true ->
         case RoomServer.can_join_room?(room_name, user) do
           :invalid_room ->
-            get_or_make_room(room_name, userid, user.clan_id)
+            get_or_make_room(room_name, userid)
             true
 
           x ->
@@ -76,14 +74,14 @@ defmodule Teiserver.Room do
     end
   end
 
-  @spec get_or_make_room(String.t(), T.userid(), T.clan_id() | nil) :: RoomServer.room()
-  def get_or_make_room(name, author_id, clan_id \\ nil) do
+  @spec get_or_make_room(String.t(), T.userid()) :: RoomServer.room()
+  def get_or_make_room(name, author_id) do
     case RoomServer.get_room(name) do
       nil ->
-        case RoomSupervisor.start_room(name, author_id, "", "", clan_id) do
-          {:ok, _pid} -> get_or_make_room(name, author_id, clan_id)
-          {:ok, _pid, _info} -> get_or_make_room(name, author_id, clan_id)
-          {:error, {:already_started, _pid}} -> get_or_make_room(name, author_id, clan_id)
+        case RoomSupervisor.start_room(name, author_id, "", "") do
+          {:ok, _pid} -> get_or_make_room(name, author_id)
+          {:ok, _pid, _info} -> get_or_make_room(name, author_id)
+          {:error, {:already_started, _pid}} -> get_or_make_room(name, author_id)
         end
 
       room ->
@@ -113,16 +111,6 @@ defmodule Teiserver.Room do
 
   def remove_user_from_room(userid, room_name) do
     RoomServer.leave_room(room_name, userid)
-  end
-
-  @spec clan_room_name(String.t()) :: String.t()
-  def clan_room_name(clan_name) do
-    safe_name =
-      clan_name
-      |> String.replace(" ", "")
-      |> String.replace("-", "")
-
-    "clan_#{safe_name}"
   end
 
   @spec list_rooms() :: [{String.t(), member_count :: non_neg_integer()}]

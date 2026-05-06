@@ -6,7 +6,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   alias Teiserver.Admin.ToolLib
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Chat.LobbyMessageLib
-  alias Teiserver.Clans.ClanLib
   alias Teiserver.Communication.DiscordChannelLib
   alias Teiserver.Communication.TextCallbackLib
   alias Teiserver.Config.SiteConfigLib
@@ -22,7 +21,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def icon, do: StylingHelper.icon(:info)
 
   @spec view_colour(String.t()) :: atom()
-  def view_colour("clans"), do: ClanLib.colours()
   def view_colour("users"), do: UserLib.colours()
   def view_colour("telemetry"), do: TelemetryLib.colours()
   def view_colour("tools"), do: ToolLib.colours()

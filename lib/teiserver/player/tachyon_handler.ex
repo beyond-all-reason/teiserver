@@ -160,7 +160,7 @@ defmodule Teiserver.Player.TachyonHandler do
           userId: to_string(user_state.user_id),
           username: user_state.username,
           displayName: user_state.username,
-          clanId: user_state.clan_id,
+          clanId: nil,
           country: user_state.country,
           status: user_state.status,
           roles: roles_to_tachyon(user_state.roles)
@@ -419,7 +419,7 @@ defmodule Teiserver.Player.TachyonHandler do
           userId: to_string(user.id),
           username: user.name,
           displayName: user.name,
-          clanId: user.clan_id,
+          clanId: nil,
           countryCode: user.country,
           status: status,
           roles: roles_to_tachyon(db_user.roles)
@@ -974,7 +974,7 @@ defmodule Teiserver.Player.TachyonHandler do
         userId: to_string(user.id),
         username: user.name,
         displayName: user.name,
-        clanId: user.clan_id,
+        clanId: nil,
         countryCode: user.country,
         status: :menu,
         party: party_state_to_tachyon(sess_state.party),

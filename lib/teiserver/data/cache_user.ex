@@ -4,7 +4,6 @@ defmodule Teiserver.CacheUser do
   """
 
   alias Argon2
-  alias ExULID.ULID
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
@@ -18,7 +17,6 @@ defmodule Teiserver.CacheUser do
   alias Teiserver.Chat.WordLib
   alias Teiserver.Client
   alias Teiserver.Config
-  alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.EmailHelper
   alias Teiserver.Geoip
@@ -44,7 +42,7 @@ defmodule Teiserver.CacheUser do
   @spec keys() :: [atom]
   def keys,
     do:
-      ~w(id name password email inserted_at clan_id permissions colour icon smurf_of_id last_login last_played last_logout roles discord_id)a
+      ~w(id name password email inserted_at permissions colour icon smurf_of_id last_login last_played last_logout roles discord_id)a
 
   defstruct [
     # Fields from the User struct itself
@@ -65,7 +63,6 @@ defmodule Teiserver.CacheUser do
     :discord_id,
     :discord_dm_channel_id,
     :steam_id,
-    :clan_id,
     :smurf_of_id,
     :inserted_at,
 
@@ -104,7 +101,6 @@ defmodule Teiserver.CacheUser do
           discord_dm_channel_id: String.t() | nil,
           steam_id: String.t() | nil,
           smurf_of_id: integer() | nil,
-          clan_id: pos_integer() | nil,
           inserted_at: Timex.DateTime.t(),
 
           # Data attributes
@@ -516,22 +512,6 @@ defmodule Teiserver.CacheUser do
     end
 
     if allowed do
-      if receiver_bot? do
-        message_parts
-        |> Enum.each(fn line ->
-          if String.starts_with?(line, "!clan ") do
-            clan =
-              line
-              |> String.replace("!clan ", "")
-              |> String.trim()
-
-            Account.update_user_stat(sender_id, %{"clan" => clan})
-          else
-            :ok
-          end
-        end)
-      end
-
       # Persist but only if no bots are involved
       if not receiver_bot? and not sender_bot? do
         Chat.create_direct_message(%{
@@ -608,10 +588,6 @@ defmodule Teiserver.CacheUser do
           ["!joinas" | _rest] ->
             "!joinas spec"
 
-          ["!clan"] ->
-            clan_command(from_id)
-            "!clan"
-
           _other ->
             message
         end
@@ -620,34 +596,6 @@ defmodule Teiserver.CacheUser do
       end
 
     send_direct_message(from_id, to_id, [message])
-  end
-
-  defp clan_command(from_id) do
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-    website_url = "https://#{host}"
-
-    Coordinator.send_to_user(
-      from_id,
-      "SPADS clans have been replaced by parties. You can access them via #{website_url}/teiserver/parties."
-    )
-
-    uuid = ULID.generate()
-    client = Account.get_client_by_id(from_id)
-
-    {:ok, _code} =
-      Account.create_code(%{
-        value: uuid <> "$#{client.ip}",
-        purpose: "one_time_login",
-        expires: Timex.now() |> Timex.shift(minutes: 5),
-        user_id: from_id
-      })
-
-    url = "https://#{host}/one_time_login/#{uuid}"
-
-    Coordinator.send_to_user(
-      from_id,
-      "If you have not already logged in, here is a one-time link to do so automatically - #{url}"
-    )
   end
 
   @spec ring(T.userid(), T.userid()) :: :ok
