@@ -5,7 +5,6 @@ defmodule Teiserver.Startup do
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
-  alias Teiserver.Game.GenerateAchievementTypes
   alias Teiserver.LobbyIdServer
   alias Teiserver.Telemetry
   use TeiserverWeb, :startup
@@ -16,9 +15,6 @@ defmodule Teiserver.Startup do
     start_time = System.system_time(:millisecond)
 
     LobbyIdServer.start_lobby_id_server()
-
-    # Add in achievements
-    GenerateAchievementTypes.perform()
 
     if Application.get_env(:teiserver, Teiserver)[:enable_match_monitor] do
       spawn(fn ->

@@ -48,16 +48,6 @@
             )}
           <% end %>
 
-          <%= if allow?(assigns[:current_user], "Moderator") do %>
-            {central_component("sub_menu_icon",
-              name: "achievements",
-              label: "Achievements",
-              active: @active,
-              url: Routes.ts_admin_achievement_path(@conn, :index),
-              icon: Teiserver.Game.AchievementTypeLib.icon()
-            )}
-          <% end %>
-
           <%= if allow?(assigns[:current_user], "Reviewer") do %>
             {central_component("sub_menu_icon",
               name: "moderation",

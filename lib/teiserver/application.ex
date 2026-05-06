@@ -140,9 +140,6 @@ defmodule Teiserver.Application do
         {DynamicSupervisor,
          strategy: :one_for_one, name: Teiserver.Coordinator.BalancerDynamicSupervisor},
 
-        # Achievements
-        {Teiserver.Game.AchievementServer, name: Teiserver.Game.AchievementServer},
-
         # System throttle
         Teiserver.Account.LoginThrottleServer,
 
