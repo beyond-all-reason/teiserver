@@ -7,6 +7,6 @@ defmodule Teiserver.Repo.Migrations.RemoveAchievements do
   end
 
   def down do
-    raise "Cannot revert removal of lobby policies"
+    raise "Cannot revert removal of achievements"
   end
 end
