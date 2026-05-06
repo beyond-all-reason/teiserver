@@ -5,7 +5,6 @@ defmodule Teiserver.TeiserverTestLib do
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.CacheUser
-  alias Teiserver.Clans
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.CoordinatorServer
@@ -350,25 +349,6 @@ defmodule Teiserver.TeiserverTestLib do
     ["Verified"]
   end
 
-  @spec make_clan(String.t(), map()) :: Clans.Clan.t()
-  def make_clan(name, params \\ %{}) do
-    {:ok, c} =
-      Map.merge(
-        %{
-          "name" => name,
-          "tag" => "[#{name}]",
-          "icon" => "fa far-house",
-          "colour" => "#001122",
-          "description" => "Description goes here",
-          "data" => %{}
-        },
-        params
-      )
-      |> Clans.create_clan()
-
-    c
-  end
-
   @spec make_lobby() :: {T.lobby_id(), pid}
   @spec make_lobby(map()) :: {T.lobby_id(), pid}
   def make_lobby(params \\ %{}) do
@@ -398,19 +378,6 @@ defmodule Teiserver.TeiserverTestLib do
       |> Lobby.add_lobby()
 
     lobby.id
-  end
-
-  @spec make_clan_membership(integer(), integer(), map()) ::
-          Clans.ClanMembership.t()
-  def make_clan_membership(clan_id, user_id, data \\ %{}) do
-    {:ok, gm} =
-      Clans.create_clan_membership(%{
-        "clan_id" => clan_id,
-        "user_id" => user_id,
-        "role" => data["role"] || "Member"
-      })
-
-    gm
   end
 
   @spec make_battle(map()) :: map()

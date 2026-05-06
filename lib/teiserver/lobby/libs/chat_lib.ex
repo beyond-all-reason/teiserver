@@ -1,6 +1,5 @@
 defmodule Teiserver.Lobby.ChatLib do
   @moduledoc false
-  alias ExULID.ULID
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
@@ -44,10 +43,6 @@ defmodule Teiserver.Lobby.ChatLib do
 
           ["!joinas" | _rest] ->
             "!joinas spec"
-
-          ["!clan"] ->
-            clan_command(userid)
-            "!clan"
 
           ["!joinq"] ->
             "$joinq"
@@ -333,30 +328,5 @@ defmodule Teiserver.Lobby.ChatLib do
     Enum.any?(@valid_mute_chat_regex, fn regex ->
       String.match?(msg, regex)
     end)
-  end
-
-  defp clan_command(user_id) do
-    client = Account.get_client_by_id(user_id)
-
-    {:ok, code} =
-      Account.create_code(%{
-        value: ULID.generate(),
-        purpose: "one_time_login",
-        expires: Timex.now() |> Timex.shift(minutes: 5),
-        user_id: user_id,
-        metadata: %{
-          ip: client.ip,
-          redirect: "/teiserver/account/parties"
-        }
-      })
-
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-    url = "https://#{host}/one_time_login/#{code.value}"
-
-    Coordinator.send_to_user(user_id, [
-      "To access parties please use this link - #{url}",
-      "You can use the $explain command to see how balance is being calculated and why you are/are not being teamed with your party",
-      "We are working on handling it within the new client and protocol, the website is only a temporary measure."
-    ])
   end
 end

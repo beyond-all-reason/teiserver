@@ -40,7 +40,6 @@ defmodule Teiserver.Account.User do
     has_many :user_configs, Teiserver.Config.UserConfig
 
     # Extra user.ex relations go here
-    belongs_to :clan, Teiserver.Clans.Clan
     belongs_to :smurf_of, Teiserver.Account.User
 
     has_one :user_stat, Teiserver.Account.UserStat
@@ -81,7 +80,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
@@ -97,7 +96,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
@@ -124,7 +123,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email icon colour clan_id data roles permissions)a
+      ~w(name email icon colour data roles permissions)a
     )
     |> validate_required(~w(name email)a)
     |> unique_constraint(:email)
@@ -136,7 +135,7 @@ defmodule Teiserver.Account.User do
       |> remove_whitespace([:email])
 
     user
-    |> cast(attrs, ~w(name email icon colour data clan_id)a)
+    |> cast(attrs, ~w(name email icon colour data)a)
     |> validate_required([:name, :email])
     |> unique_constraint(:email)
   end
@@ -235,7 +234,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id clan_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)

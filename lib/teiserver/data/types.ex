@@ -13,7 +13,6 @@ defmodule Teiserver.Data.Types do
   @type lobby_id() :: non_neg_integer()
   @type lobby_struct() :: Teiserver.Lobby.LobbyStruct.t()
 
-  @type clan_id() :: non_neg_integer
   @type match_id() :: non_neg_integer
   @type queue_id() :: non_neg_integer
 

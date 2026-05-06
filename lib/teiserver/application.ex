@@ -116,9 +116,6 @@ defmodule Teiserver.Application do
         concache_sup(:teiserver_login_count, global_ttl: 10_000),
         concache_sup(:teiserver_user_stat_cache),
 
-        # Caches - Battle/Queue/Clan
-        concache_sup(:teiserver_clan_cache_bang),
-
         # Caches - Chat
         Teiserver.Chat.RoomSystem,
         {Teiserver.HookServer, name: Teiserver.HookServer},

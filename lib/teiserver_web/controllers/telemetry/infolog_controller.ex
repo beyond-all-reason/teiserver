@@ -74,7 +74,7 @@ defmodule TeiserverWeb.Telemetry.InfologController do
   def delete(conn, %{"id" => id}) do
     infolog = Telemetry.get_infolog(id)
 
-    {:ok, _clan} = Telemetry.delete_infolog(infolog)
+    {:ok, _infolog} = Telemetry.delete_infolog(infolog)
 
     conn
     |> put_flash(:info, "Infolog deleted successfully.")

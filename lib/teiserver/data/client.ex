@@ -15,7 +15,6 @@ defmodule Teiserver.Client do
   alias Teiserver.Account.Auth
   alias Teiserver.Account.ClientLib
   alias Teiserver.CacheUser
-  alias Teiserver.Clans
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
@@ -67,7 +66,6 @@ defmodule Teiserver.Client do
         lobby_host: false,
         queues: [],
         party_id: nil,
-        clan_tag: nil,
         token_id: nil,
         protocol: nil
       },
@@ -98,12 +96,6 @@ defmodule Teiserver.Client do
     stats = Account.get_user_stat_data(user.id)
     db_user = Account.get_user(user.id)
 
-    clan_tag =
-      case Clans.get_clan(user.clan_id) do
-        nil -> nil
-        clan -> clan.tag
-      end
-
     client =
       create(%{
         connected: true,
@@ -123,7 +115,6 @@ defmodule Teiserver.Client do
         awaiting_warn_ack: false,
         warned: false,
         token_id: token_id,
-        clan_tag: clan_tag,
         protocol: protocol
       })
 

@@ -13,7 +13,6 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Account.FriendRequestLib
   alias Teiserver.Battle
   alias Teiserver.CacheUser
-  alias Teiserver.Clans
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
@@ -304,14 +303,6 @@ defmodule Teiserver.Protocols.SpringIn do
         new_state =
           SpringOut.do_login_accepted(state, user, optimisation_level)
           |> Map.put(:party_id, nil)
-
-        # Do we have a clan?
-        if user.clan_id do
-          :timer.sleep(200)
-          clan = Clans.get_clan!(user.clan_id)
-          room_name = Room.clan_room_name(clan.tag)
-          SpringOut.do_join_room(new_state, room_name)
-        end
 
         new_state
 

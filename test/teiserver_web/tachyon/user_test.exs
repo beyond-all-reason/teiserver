@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
   describe "info" do
     test "works", %{user: user, client: client} do
-      %{id: user_id, name: name, clan_id: clan_id} = user
+      %{id: user_id, name: name} = user
       %{country: country} = Account.get_user_by_id(user_id)
       user_id = to_string(user_id)
 
@@ -17,7 +17,6 @@ defmodule TeiserverWeb.Tachyon.UserTest do
                  "userId" => ^user_id,
                  "username" => ^name,
                  "displayName" => ^name,
-                 "clanId" => ^clan_id,
                  "countryCode" => ^country
                }
              } = Tachyon.user_info!(client, user_id)
@@ -55,7 +54,6 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       assert userdata["userId"] == to_string(user.id)
       assert userdata["username"] == user.name
       assert userdata["displayName"] == user.name
-      assert userdata["clanId"] == user.clan_id
       assert userdata["status"] == "menu"
     end
 
@@ -106,7 +104,6 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       assert user_data["userId"] == to_string(other_user.id)
       assert user_data["username"] == other_user.name
       assert user_data["displayName"] == other_user.name
-      assert user_data["clanId"] == other_user.clan_id
       assert user_data["status"] == "offline"
     end
 
@@ -127,7 +124,6 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
       assert user_data["userId"] == to_string(other_user.id)
       assert user_data["username"] == other_user.name
-      assert user_data["clanId"] == other_user.clan_id
       assert user_data["status"] == "menu"
     end
 

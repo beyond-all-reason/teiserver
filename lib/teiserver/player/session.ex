@@ -1962,7 +1962,6 @@ defmodule Teiserver.Player.Session do
     state = %{
       user_id: user.id,
       username: user.name,
-      clan_id: user.clan_id,
       # the user struct is a giant mess, where a bunch of stuff is added from
       # "user stats data" and whatnot. We should refactor user access so that
       # we get the same struct every time, possibly with nil values for some keys
