@@ -181,4 +181,38 @@ defmodule Teiserver.Game.BalancerServerTest do
     poll_until_nil(fn -> GenServer.call(pid, :get_current_balance) end)
     assert GenServer.call(pid, :report_state) |> Map.get(:last_balance_hash, :not_found) == nil
   end
+  test "swap_teams swaps all team-keyed maps between team 1 and team 2" do
+    result = %{
+      team_players: %{1 => [101], 2 => [202]},
+      team_groups: %{1 => [:group_a], 2 => [:group_b]},
+      ratings: %{1 => 10.0, 2 => 20.0},
+      captains: %{1 => 101, 2 => 202},
+      team_sizes: %{1 => 1, 2 => 1},
+      means: %{1 => 10.0, 2 => 20.0},
+      stdevs: %{1 => 0.0, 2 => 0.0},
+      logs: ["some log"],
+      deviation: 5
+    }
+
+    swapped = BalancerServer.swap_teams(result)
+
+    assert swapped.team_players == %{1 => [202], 2 => [101]}
+    assert swapped.team_groups == %{1 => [:group_b], 2 => [:group_a]}
+    assert swapped.ratings == %{1 => 20.0, 2 => 10.0}
+    assert swapped.captains == %{1 => 202, 2 => 101}
+    assert swapped.team_sizes == %{1 => 1, 2 => 1}
+    assert swapped.means == %{1 => 20.0, 2 => 10.0}
+    assert swapped.stdevs == %{1 => 0.0, 2 => 0.0}
+    assert swapped.logs == result.logs
+    assert swapped.deviation == result.deviation
+  end
+
+  test "swap_teams is its own inverse" do
+    result = %{
+      team_players: %{1 => [101, 102], 2 => [201, 202]},
+      ratings: %{1 => 15.0, 2 => 25.0}
+    }
+
+    assert BalancerServer.swap_teams(BalancerServer.swap_teams(result)) == result
+  end
 end
