@@ -181,6 +181,7 @@ defmodule Teiserver.Game.BalancerServerTest do
     poll_until_nil(fn -> GenServer.call(pid, :get_current_balance) end)
     assert GenServer.call(pid, :report_state) |> Map.get(:last_balance_hash, :not_found) == nil
   end
+
   test "swap_teams swaps all team-keyed maps between team 1 and team 2" do
     result = %{
       team_players: %{1 => [101], 2 => [202]},

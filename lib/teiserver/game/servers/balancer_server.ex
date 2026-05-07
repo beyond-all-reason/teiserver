@@ -232,6 +232,7 @@ defmodule Teiserver.Game.BalancerServer do
       else
         make_solo_balance(team_count, players, game_type, [], opts)
       end
+
     maybe_shuffle_teams(result, team_count)
   end
 
