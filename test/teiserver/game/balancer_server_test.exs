@@ -214,6 +214,8 @@ defmodule Teiserver.Game.BalancerServerTest do
       ratings: %{1 => 15.0, 2 => 25.0}
     }
 
-    assert BalancerServer.swap_teams(BalancerServer.swap_teams(result)) == result
+    assert result
+           |> BalancerServer.swap_teams()
+           |> BalancerServer.swap_teams() == result
   end
 end
