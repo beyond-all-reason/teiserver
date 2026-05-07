@@ -17,7 +17,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @unranked_title_error "You cannot set a limit if the lobby is unranked."
   @all_welcome_title_error "Games declaring all are welcome cannot have player restrictions."
   @pro_title_error "You cannot set a maximum limit for lobby names referencing pros."
-  @noob_title_error "You cannot set a maximum limit for lobby names referencing new players."
+  @noob_title_error "You cannot set a minimum limit for lobby names referencing new players."
 
   @spec rank_upper_bound() :: number
   def rank_upper_bound, do: @rank_upper_bound
