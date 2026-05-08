@@ -1744,11 +1744,17 @@ defmodule Teiserver.Player.Session do
   def handle_info({:EXIT, _from_pid, reason}, state), do: {:stop, reason, state}
 
   def handle_info(:connection_timeout, state) do
-    if is_nil(state.conn_pid) do
-      Logger.debug("Player timed out, stopping session")
-      {:stop, :normal, state}
-    else
-      {:noreply, state}
+    cond do
+      not is_nil(state.conn_pid) ->
+        {:noreply, state}
+
+      not is_nil(state.battle) ->
+        {:ok, _tref} = :timer.send_after(@connection_timeout, :connection_timeout)
+        {:noreply, state}
+
+      true ->
+        Logger.debug("Player timed out, stopping session")
+        {:stop, :normal, state}
     end
   end
 

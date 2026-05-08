@@ -36,6 +36,49 @@ defmodule Teiserver.Player.SessionTest do
     end
   end
 
+  describe "connection timeout" do
+    setup [:setup_session]
+
+    test "session stops when timed out and not in battle", %{sess_pid: sess_pid} do
+      :sys.replace_state(sess_pid, fn state -> %{state | conn_pid: nil} end)
+
+      send(sess_pid, :connection_timeout)
+
+      Polling.poll_until(fn -> Process.alive?(sess_pid) end, fn alive -> not alive end)
+    end
+
+    test "session survives timeout while player is in a battle", %{sess_pid: sess_pid} do
+      :sys.replace_state(sess_pid, fn state ->
+        %{state | conn_pid: nil, battle: %{id: "battle-id"}}
+      end)
+
+      send(sess_pid, :connection_timeout)
+
+      # synchronise — ensures the message above was processed
+      :sys.get_state(sess_pid)
+
+      assert Process.alive?(sess_pid)
+    end
+
+    test "session stops after battle ends and player is still disconnected", %{
+      sess_pid: sess_pid
+    } do
+      :sys.replace_state(sess_pid, fn state ->
+        %{state | conn_pid: nil, battle: %{id: "battle-id"}}
+      end)
+
+      send(sess_pid, :connection_timeout)
+      :sys.get_state(sess_pid)
+      assert Process.alive?(sess_pid)
+
+      :sys.replace_state(sess_pid, fn state -> %{state | battle: nil} end)
+
+      send(sess_pid, :connection_timeout)
+
+      Polling.poll_until(fn -> Process.alive?(sess_pid) end, fn alive -> not alive end)
+    end
+  end
+
   describe "restore from snapshots" do
     setup [:setup_session, :setup_config]
 
