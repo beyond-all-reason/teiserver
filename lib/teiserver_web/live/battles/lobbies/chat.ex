@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       true ->
         allowed_to_send =
           CacheUser.allow?(current_user.id, "Moderator") and
-            not Account.has_mute?(current_user.id)
+            not Account.has_mute?(current_user)
 
         :timer.send_interval(10_000, :tick)
 
