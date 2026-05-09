@@ -63,7 +63,7 @@ defmodule Teiserver.MixProject do
   defp deps do
     [
       # Default phoenix deps
-      {:phoenix, "~> 1.7"},
+      {:phoenix, "~> 1.7.22"},
       {:phoenix_ecto, "~> 4.6"},
       {:ecto_sql, "~> 3.12"},
       {:postgrex, ">= 0.0.0"},
