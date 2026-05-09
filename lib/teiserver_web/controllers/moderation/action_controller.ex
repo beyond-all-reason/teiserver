@@ -19,6 +19,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Action,
     action: {Phoenix.Controller, :action_name},
     user: {AuthLib, :current_user}

@@ -5,6 +5,7 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
   use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Auth.Server,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

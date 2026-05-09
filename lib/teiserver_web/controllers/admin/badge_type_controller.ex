@@ -7,6 +7,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
   use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Account.BadgeType,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

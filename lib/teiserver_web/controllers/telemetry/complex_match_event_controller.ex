@@ -11,6 +11,7 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
   )
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Auth.Telemetry,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

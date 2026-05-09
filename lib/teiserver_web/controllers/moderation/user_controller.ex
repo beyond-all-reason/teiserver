@@ -12,6 +12,7 @@ defmodule TeiserverWeb.Moderation.UserController do
   )
 
   plug(Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Account.Auth,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

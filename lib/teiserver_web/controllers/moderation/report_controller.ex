@@ -13,6 +13,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
   use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Report,
     action: {Phoenix.Controller, :action_name},
     user: {AuthLib, :current_user}

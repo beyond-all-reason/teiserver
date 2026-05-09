@@ -12,6 +12,7 @@ defmodule TeiserverWeb.Telemetry.SimpleServerEventController do
   )
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Auth.Server,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
