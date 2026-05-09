@@ -13,6 +13,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   )
 
   plug(Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff.Overwatch,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

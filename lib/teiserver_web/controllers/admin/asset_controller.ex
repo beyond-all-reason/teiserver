@@ -8,6 +8,7 @@ defmodule TeiserverWeb.Admin.AssetController do
   use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff.Admin,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

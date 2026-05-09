@@ -7,6 +7,7 @@ defmodule TeiserverWeb.Admin.MatchController do
   require Logger
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff.MatchAdmin,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

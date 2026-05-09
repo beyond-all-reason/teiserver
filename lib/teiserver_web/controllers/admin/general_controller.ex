@@ -7,6 +7,7 @@ defmodule TeiserverWeb.Admin.GeneralController do
   )
 
   plug(Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

@@ -6,6 +6,7 @@ defmodule TeiserverWeb.Admin.DiscordChannelController do
   import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Communication.DiscordChannel,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

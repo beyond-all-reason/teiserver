@@ -9,6 +9,7 @@ defmodule TeiserverWeb.Report.RatingController do
   )
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

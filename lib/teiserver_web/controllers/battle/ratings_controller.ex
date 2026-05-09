@@ -5,6 +5,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
   use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Battle.Match,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
