@@ -236,33 +236,43 @@ defmodule Teiserver.Game.BalancerServer do
     maybe_shuffle_teams(result, team_count)
   end
 
-  # Randomly swap team assignments to avoid lower-rated players always being
+  # Randomly shuffle team assignments to avoid lower-rated players always being
   # placed in team 1 due to deterministic ordering in balance algorithms.
-  # Applied to all 2-team games since starting positions depend on team order.
+  # Applied to all game modes: swaps teams 1 and 2 for 2-team games, randomly
+  # permutes all team assignments for Team FFA (N > 2 teams).
   @spec maybe_shuffle_teams(map(), non_neg_integer()) :: map()
   defp maybe_shuffle_teams(result, 2) do
     if :rand.uniform(2) == 1 do
-      swap_teams(result)
+      shuffle_teams(result, %{1 => 2, 2 => 1})
     else
       result
     end
   end
 
+  defp maybe_shuffle_teams(result, team_count) when team_count > 2 do
+    keys = Enum.to_list(1..team_count)
+    shuffled = Enum.shuffle(keys)
+
+    mapping =
+      Enum.zip(keys, shuffled)
+      |> Map.new()
+
+    shuffle_teams(result, mapping)
+  end
+
   defp maybe_shuffle_teams(result, _team_count), do: result
 
   # This function is public only for testing; it should not be called otherwise
-  @spec swap_teams(map()) :: map()
-  def swap_teams(result) do
+  @spec shuffle_teams(map(), map()) :: map()
+  def shuffle_teams(result, mapping) do
     team_map_keys = ~w(team_players team_groups ratings captains team_sizes means stdevs)a
 
     Enum.reduce(team_map_keys, result, fn key, acc ->
       if Map.has_key?(acc, key) do
         team_map = Map.fetch!(acc, key)
 
-        if map_size(team_map) == 2 and Map.has_key?(team_map, 1) and Map.has_key?(team_map, 2) do
-          Map.put(acc, key, %{team_map | 1 => team_map[2], 2 => team_map[1]})
-        else
-          acc
+        if Map.has_key?(team_map, 1) and Map.has_key?(team_map, 2) do
+          Map.put(acc, key, Map.new(team_map, fn {k, v} -> {Map.get(mapping, k, k), v} end))
         end
       else
         acc
