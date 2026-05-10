@@ -1,7 +1,9 @@
 defmodule Teiserver.Player.SessionTest do
   alias ExUnit.Callbacks
   alias Teiserver.Helpers.GeneralTestLib
+  alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Player
+  alias Teiserver.Player.Session
   alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Support.Polling
   alias Teiserver.Tachyon, as: TachyonLib
@@ -13,12 +15,47 @@ defmodule Teiserver.Player.SessionTest do
   def setup_session(_context) do
     user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     {:ok, sess_pid} = SessionSupervisor.start_session(user)
-    {:ok, user: user, sess_pid: sess_pid}
+    {:ok, fake_conn} = Task.start(:timer, :sleep, [:infinity])
+    Session.replace_connection(sess_pid, fake_conn)
+    {:ok, user: user, sess_pid: sess_pid, fake_conn: fake_conn}
   end
 
   def setup_config(_context) do
     TachyonLib.enable_state_restoration()
     Callbacks.on_exit(fn -> TachyonLib.disable_state_restoration() end)
+  end
+
+  defp disconnect(fake_conn, user_id) do
+    conn_ref = Process.monitor(fake_conn)
+    Process.exit(fake_conn, :kill)
+    assert_receive {:DOWN, ^conn_ref, :process, _, _}
+    Session.conn_state(user_id)
+  end
+
+  defp start_battle(sess_pid, user_id) do
+    {:ok, fake_battle} = Task.start(:timer, :sleep, [:infinity])
+    {:ok, fake_room} = Task.start(:timer, :sleep, [:infinity])
+
+    :sys.replace_state(sess_pid, fn state ->
+      monitors = MC.monitor(state.monitors, fake_room, :mm_room)
+
+      %{
+        state
+        | matchmaking: {:pairing, %{readied: true, battle_password: "pw", room: fake_room}},
+          monitors: monitors
+      }
+    end)
+
+    Session.battle_start(user_id, {"battle-id", fake_battle}, %{
+      ips: ["127.0.0.1"],
+      port: 1234,
+      engine: %{version: "v1"},
+      game: %{springName: "game"},
+      map: %{springName: "map"}
+    })
+
+    Session.conn_state(user_id)
+    fake_battle
   end
 
   describe "user updates" do
@@ -39,43 +76,46 @@ defmodule Teiserver.Player.SessionTest do
   describe "connection timeout" do
     setup [:setup_session]
 
-    test "session stops when timed out and not in battle", %{sess_pid: sess_pid} do
-      :sys.replace_state(sess_pid, fn state -> %{state | conn_pid: nil} end)
-
-      send(sess_pid, :connection_timeout)
-
-      Polling.poll_until(fn -> Process.alive?(sess_pid) end, fn alive -> not alive end)
+    test "session stops when timed out and not in battle",
+         %{sess_pid: sess_pid, user: user, fake_conn: fake_conn} do
+      ref = Process.monitor(sess_pid)
+      disconnect(fake_conn, user.id)
+      Session.trigger_connection_timeout(sess_pid)
+      assert_receive {:DOWN, ^ref, :process, _, _}
     end
 
-    test "session survives timeout while player is in a battle", %{sess_pid: sess_pid} do
-      :sys.replace_state(sess_pid, fn state ->
-        %{state | conn_pid: nil, battle: %{id: "battle-id"}}
-      end)
-
-      send(sess_pid, :connection_timeout)
-
-      # synchronise — ensures the message above was processed
-      :sys.get_state(sess_pid)
-
+    test "session survives when player disconnects during battle",
+         %{sess_pid: sess_pid, user: user, fake_conn: fake_conn} do
+      _fake_battle = start_battle(sess_pid, user.id)
+      disconnect(fake_conn, user.id)
       assert Process.alive?(sess_pid)
     end
 
-    test "session stops after battle ends and player is still disconnected", %{
-      sess_pid: sess_pid
-    } do
-      :sys.replace_state(sess_pid, fn state ->
-        %{state | conn_pid: nil, battle: %{id: "battle-id"}}
-      end)
+    test "session stops after battle ends and player is still disconnected",
+         %{sess_pid: sess_pid, user: user, fake_conn: fake_conn} do
+      fake_battle = start_battle(sess_pid, user.id)
+      disconnect(fake_conn, user.id)
 
-      send(sess_pid, :connection_timeout)
-      :sys.get_state(sess_pid)
+      sess_ref = Process.monitor(sess_pid)
+      battle_ref = Process.monitor(fake_battle)
+      Process.exit(fake_battle, :kill)
+      assert_receive {:DOWN, ^battle_ref, :process, _, _}
+      Session.conn_state(user.id)
+
+      Session.trigger_connection_timeout(sess_pid)
+      assert_receive {:DOWN, ^sess_ref, :process, _, _}
+    end
+
+    test "session survives when player reconnects before battle ends",
+         %{sess_pid: sess_pid, user: user, fake_conn: fake_conn} do
+      _fake_battle = start_battle(sess_pid, user.id)
+      disconnect(fake_conn, user.id)
+
+      {:ok, new_conn} = Task.start(:timer, :sleep, [:infinity])
+      Session.replace_connection(sess_pid, new_conn)
+
       assert Process.alive?(sess_pid)
-
-      :sys.replace_state(sess_pid, fn state -> %{state | battle: nil} end)
-
-      send(sess_pid, :connection_timeout)
-
-      Polling.poll_until(fn -> Process.alive?(sess_pid) end, fn alive -> not alive end)
+      assert :connected == Session.conn_state(user.id)
     end
   end
 
