@@ -208,6 +208,24 @@ defmodule Teiserver.Game.BalancerServerTest do
     assert swapped.deviation == result.deviation
   end
 
+  test "swap_teams do not break Team FFA (N teams)" do
+    result = %{
+      team_players: %{1 => [101], 2 => [202], 3 => [303], 4 => [404]},
+      team_groups: %{1 => [:group_a], 2 => [:group_b], 3 => [:group_c], 4 => [:group_d]},
+      ratings: %{1 => 10.0, 2 => 11.0, 3 => 12.0, 4 => 13.0},
+      captains: %{1 => 101, 2 => 202, 3 => 303, 4 => 404},
+      team_sizes: %{1 => 1, 2 => 1, 3 => 1, 4 => 1},
+      means: %{1 => 10.0, 2 => 11.0, 3 => 12.0, 4 => 13.0},
+      stdevs: %{1 => 0.0, 2 => 0.0, 3 => 0.0, 4 => 0.0},
+      logs: ["some log"],
+      deviation: 5
+    }
+
+    swapped = BalancerServer.swap_teams(result)
+
+    assert result == swapped
+  end
+
   test "swap_teams is its own inverse" do
     result = %{
       team_players: %{1 => [101, 102], 2 => [201, 202]},

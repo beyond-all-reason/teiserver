@@ -259,7 +259,7 @@ defmodule Teiserver.Game.BalancerServer do
       if Map.has_key?(acc, key) do
         team_map = Map.fetch!(acc, key)
 
-        if Map.has_key?(team_map, 1) and Map.has_key?(team_map, 2) do
+        if map_size(team_map) == 2 and Map.has_key?(team_map, 1) and Map.has_key?(team_map, 2) do
           Map.put(acc, key, %{team_map | 1 => team_map[2], 2 => team_map[1]})
         else
           acc
