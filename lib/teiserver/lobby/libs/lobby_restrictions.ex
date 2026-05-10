@@ -347,19 +347,19 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
 
   defp allwelcome_title?(nil), do: false
 
-  defp allwelcome_title?(name) do
-    name
-    |> String.downcase()
-    |> String.replace(" ", "")
-    |> String.contains?("allwelcome")
+  defp allwelcome_title?(title) do
+    title = leet_replace(title)
+
+    # Matches against all welcome and a couple of typo'd versions
+    Regex.match?(~r/all?\s?well?come/, title)
   end
 
   @spec pro_title?(String.t()) :: boolean()
-  def pro_title?(name) do
-    name = String.replace(name, "0", "o")
+  def pro_title?(title) do
+    title = leet_replace(title)
     pattern = ~r/\b(pro|professional)\b/i
 
-    Regex.match?(pattern, name)
+    Regex.match?(pattern, title)
   end
 
   @doc """
@@ -369,13 +369,10 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   """
   @spec noob_title?(String.t()) :: boolean()
   def noob_title?(title) do
-    title =
-      title
-      |> String.replace("3", "e")
-      |> String.replace("0", "o")
+    title = leet_replace(title)
 
     # Attempts to match a negation and a reference to noobs
-    anti_noob_regex = ~r/(?:\b(no)\s)?(new\splayer|noobs?|newb|nub(?:z|s| ))/i
+    anti_noob_regex = ~r/(?:\b(no)\s)?(new\splayer|noobs?|newb|nub(?:z|s| ))/
 
     case Regex.scan(anti_noob_regex, title) do
       [[_full, _no_noob, ""]] ->
@@ -400,5 +397,14 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     regex = ~r/\b(rotat)/i
 
     Regex.match?(regex, title)
+  end
+
+  defp leet_replace(title) do
+    title
+    |> String.downcase()
+    |> String.replace("3", "e")
+    |> String.replace("0", "o")
+    |> String.replace("-", "")
+    |> String.replace("_", "")
   end
 end
