@@ -211,26 +211,73 @@ defmodule Teiserver.Game.BalancerServer do
         v -> v
       end
 
-    if opts[:allow_groups] do
-      party_result = make_grouped_balance(team_count, players, game_type, opts)
-      has_parties? = Map.get(party_result, :has_parties?, true)
+    result =
+      if opts[:allow_groups] do
+        party_result = make_grouped_balance(team_count, players, game_type, opts)
+        has_parties? = Map.get(party_result, :has_parties?, true)
 
-      if has_parties? && party_result.deviation > opts[:max_deviation] do
-        make_solo_balance(
-          team_count,
-          players,
-          game_type,
-          [
-            "Tried grouped mode, got a deviation of #{party_result.deviation} and reverted to solo mode"
-          ],
-          opts
-        )
+        if has_parties? && party_result.deviation > opts[:max_deviation] do
+          make_solo_balance(
+            team_count,
+            players,
+            game_type,
+            [
+              "Tried grouped mode, got a deviation of #{party_result.deviation} and reverted to solo mode"
+            ],
+            opts
+          )
+        else
+          party_result
+        end
       else
-        party_result
+        make_solo_balance(team_count, players, game_type, [], opts)
       end
+
+    maybe_shuffle_teams(result, team_count)
+  end
+
+  # Randomly shuffle team assignments to avoid lower-rated players always being
+  # placed in team 1 due to deterministic ordering in balance algorithms.
+  # Applied to all game modes: swaps teams 1 and 2 for 2-team games, randomly
+  # permutes all team assignments for Team FFA (N > 2 teams).
+  @spec maybe_shuffle_teams(map(), non_neg_integer()) :: map()
+  defp maybe_shuffle_teams(result, 2) do
+    if :rand.uniform(2) == 1 do
+      shuffle_teams(result, %{1 => 2, 2 => 1})
     else
-      make_solo_balance(team_count, players, game_type, [], opts)
+      result
     end
+  end
+
+  defp maybe_shuffle_teams(result, team_count) when team_count > 2 do
+    keys = Enum.to_list(1..team_count)
+    shuffled = Enum.shuffle(keys)
+
+    mapping =
+      Enum.zip(keys, shuffled)
+      |> Map.new()
+
+    shuffle_teams(result, mapping)
+  end
+
+  defp maybe_shuffle_teams(result, _team_count), do: result
+
+  # This function is public only for testing; it should not be called otherwise
+  @spec shuffle_teams(map(), map()) :: map()
+  def shuffle_teams(result, mapping) do
+    team_map_keys = ~w(team_players team_groups ratings captains team_sizes means stdevs)a
+
+    Enum.reduce(team_map_keys, result, fn key, acc ->
+      if Map.has_key?(acc, key) do
+        team_map = Map.fetch!(acc, key)
+
+        if Map.has_key?(team_map, 1) and Map.has_key?(team_map, 2) do
+          Map.put(acc, key, Map.new(team_map, fn {k, v} -> {Map.get(mapping, k, k), v} end))
+        end
+      else
+        acc
+      end
+    end)
   end
 
   # This function is run before balancing but calculates the
