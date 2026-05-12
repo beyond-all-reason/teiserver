@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Router do
 
   pipeline :logging_live_auth do
     plug Bodyguard.Plug.Authorize,
+      fallback: TeiserverWeb.Controllers.BodyguardFallback,
       policy: Teiserver.Logging.LiveLib,
       action: :live,
       user: {Teiserver.Account.AuthLib, :current_user}

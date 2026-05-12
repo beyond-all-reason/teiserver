@@ -7,6 +7,7 @@ defmodule TeiserverWeb.Admin.ChatController do
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Chat.LobbyMessage,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

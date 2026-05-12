@@ -10,6 +10,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     # The policy should be Admin or something fairly high. But while we're
     # developping the new lobby, it's easier if this is allowed for any
     # contributors

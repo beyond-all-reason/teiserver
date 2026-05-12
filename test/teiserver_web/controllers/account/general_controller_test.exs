@@ -15,8 +15,7 @@ defmodule TeiserverWeb.Account.GeneralControllerTest do
   end
 
   test "admin permissions", %{conn: conn} do
-    assert_raise Bodyguard.NotAuthorizedError, fn ->
-      get(conn, Routes.ts_admin_general_path(conn, :index))
-    end
+    resp = get(conn, Routes.ts_admin_general_path(conn, :index))
+    assert redirected_to(resp) == ~p"/"
   end
 end

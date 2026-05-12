@@ -244,6 +244,8 @@ defmodule Teiserver.Protocols.Spring.SpringPartyTest do
     assert {"s.party.invite_cancelled", [^party1, ^username2], _msg_id3} = cancelled
   end
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/25608173431/job/75173545262?pr=1143
+  @tag :needs_attention
   test "with 3 players", context do
     # only test happy paths, but with more players to check broadcast mechanics
     {:ok, socket: socket1, user: user1} = setup_user(context)

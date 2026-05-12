@@ -8,6 +8,7 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
   import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
 
   plug Bodyguard.Plug.Authorize,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Communication.TextCallback,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

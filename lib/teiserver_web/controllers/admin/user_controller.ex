@@ -30,8 +30,11 @@ defmodule TeiserverWeb.Admin.UserController do
     sub_menu_active: "user"
   )
 
+  action_fallback TeiserverWeb.Controllers.BodyguardFallback
+
   plug(Bodyguard.Plug.Authorize,
     policy: Auth,
+    fallback: TeiserverWeb.Controllers.BodyguardFallback,
     action: {Phoenix.Controller, :action_name},
     user: {AuthLib, :current_user}
   )
