@@ -357,11 +357,14 @@ defmodule Teiserver.Account.RelationshipLib do
     |> Enum.reject(&(&1 == nil))
   end
 
-  @spec check_block_status(T.userid(), [T.userid()]) :: :ok | :blocking | :blocked
-  def check_block_status(userid, userid_list) do
+  @spec check_block_status(T.userid(), [T.userid()], nil | pos_integer()) ::
+          :ok | :blocking | :blocked
+  def check_block_status(userid, userid_list, count_needed \\ nil) do
     userid_count = Enum.count(userid_list) |> max(1)
 
-    block_count_needed = Config.get_site_config_cache("lobby.Block count to prevent join")
+    # If no count needed is sent in we grab it from the DB config
+    block_count_needed =
+      count_needed || Config.get_site_config_cache("lobby.Block count to prevent join")
 
     block_percentage_needed =
       Config.get_site_config_cache("lobby.Block percentage to prevent join")

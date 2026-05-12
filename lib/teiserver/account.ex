@@ -1652,8 +1652,9 @@ defmodule Teiserver.Account do
   @spec does_a_avoid_b?(T.userid(), T.userid()) :: boolean
   defdelegate does_a_avoid_b?(u1, u2), to: RelationshipLib
 
-  @spec check_block_status(T.userid(), [T.userid()]) :: :ok | :blocking | :blocked
-  defdelegate check_block_status(userid, userid_list), to: RelationshipLib
+  @spec check_block_status(T.userid(), [T.userid()], nil | pos_integer()) ::
+          :ok | :blocking | :blocked
+  defdelegate check_block_status(userid, userid_list, count \\ nil), to: RelationshipLib
 
   @spec profile_view_permissions(
           T.user(),

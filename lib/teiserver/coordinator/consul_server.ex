@@ -964,6 +964,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     match_id = Battle.get_lobby_match_id(state.lobby_id)
     block_status = Account.check_block_status(userid, player_ids)
 
+    # Get block status again but for the bosses, if any boss blocks the person they can't join
+    boss_block_status = Account.check_block_status(userid, state.host_bosses(), 1)
+
     cond do
       client == nil ->
         {false, "No client"}
@@ -989,6 +992,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
       block_status == :blocked ->
         Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocked")
         {false, "You are blocked by too many players in this lobby"}
+
+      boss_block_status == :blocking ->
+        Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.boss_blocked")
+        {false, "You are blocked by the lobby boss and cannot join"}
 
       Enum.member?(state.approved_users, userid) ->
         {true, :override_approve}

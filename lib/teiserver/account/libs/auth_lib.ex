@@ -100,13 +100,14 @@ defmodule Teiserver.Account.AuthLib do
   end
 
   def allow?(permissions_held, permission_required) do
+    permissions_held = List.wrap(permissions_held)
+
     Logger.debug(
       "Permission test, has: #{Kernel.inspect(permissions_held)}, needs: #{Kernel.inspect(permission_required)}"
     )
 
     cond do
-      # Enum.member?(Application.get_env(:teiserver, TeiserverWeb)[:universal_permissions], permission_required) -> true
-      permissions_held == nil ->
+      permissions_held == [nil] ->
         Logger.debug("AuthLib.allow?() -> No permissions held")
         false
 
