@@ -17,8 +17,8 @@ defmodule Teiserver.TachyonLobby.Registry do
   How to reach a given lobby from its ID
   """
   @spec via_tuple(Lobby.id()) :: GenServer.name()
-  def via_tuple(queue_id) do
-    {:via, Registry, {__MODULE__, queue_id}}
+  def via_tuple(lobby_id) do
+    {:via, Registry, {__MODULE__, lobby_id}}
   end
 
   @spec lookup(Lobby.id()) :: pid() | nil
