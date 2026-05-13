@@ -7,6 +7,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.MatchLib
+  alias Teiserver.CacheUser
   alias Teiserver.Config
   require Logger
 
@@ -149,24 +150,35 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   @spec check_rank_to_play(any(), any()) :: :ok | {:error, iodata()}
   def check_rank_to_play(user, consul_state) do
     state = consul_state
+    user_rank = get_user_rank(user)
 
     if allow_bypass_rank_check?(user) do
       :ok
     else
       cond do
-        state.minimum_rank_to_play != nil and user.rank < state.minimum_rank_to_play ->
+        state.minimum_rank_to_play != nil and user_rank < state.minimum_rank_to_play ->
           # Send message
-          msg = get_failed_rank_check_text(user.rank, state)
+          msg = get_failed_rank_check_text(user_rank, state)
           {:error, msg}
 
-        state.maximum_rank_to_play != nil and user.rank > state.maximum_rank_to_play ->
+        state.maximum_rank_to_play != nil and user_rank > state.maximum_rank_to_play ->
           # Send message
-          msg = get_failed_rank_check_text(user.rank, state)
+          msg = get_failed_rank_check_text(user_rank, state)
           {:error, msg}
 
         true ->
           :ok
       end
+    end
+  end
+
+  # We use this to return the real rank of the user given we overload
+  # the rank to display contributor or tourney winner icons instead
+  defp get_user_rank(%{id: user_id, rank: rank}) do
+    if rank >= 6 do
+      CacheUser.calculate_rank(user_id)
+    else
+      rank
     end
   end
 
