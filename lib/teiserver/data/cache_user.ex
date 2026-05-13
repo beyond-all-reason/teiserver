@@ -42,7 +42,7 @@ defmodule Teiserver.CacheUser do
   @spec keys() :: [atom]
   def keys,
     do:
-      ~w(id name password email inserted_at permissions colour icon smurf_of_id last_login last_played last_logout roles discord_id)a
+      ~w(id name password email inserted_at permissions colour icon smurf_of_id last_login last_played last_logout roles discord_id data)a
 
   defstruct [
     # Fields from the User struct itself
@@ -65,6 +65,11 @@ defmodule Teiserver.CacheUser do
     :steam_id,
     :smurf_of_id,
     :inserted_at,
+
+    # We get the data field itself as we transition away from
+    # the converted CacheUser fields, long term we want to
+    # be using `user.data["key"]` rather than `cache_user.key`
+    :data,
 
     # Fields from user data
     :rank,
@@ -102,6 +107,7 @@ defmodule Teiserver.CacheUser do
           steam_id: String.t() | nil,
           smurf_of_id: integer() | nil,
           inserted_at: Timex.DateTime.t(),
+          data: map(),
 
           # Data attributes
           rank: non_neg_integer(),

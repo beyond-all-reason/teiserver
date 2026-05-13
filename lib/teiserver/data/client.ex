@@ -150,11 +150,11 @@ defmodule Teiserver.Client do
     )
 
     # Message logging
-    if user.print_client_messages do
+    if user.data["print_client_messages"] do
       enable_client_message_print(user.id)
     end
 
-    if user.print_server_messages do
+    if user.data["print_server_messages"] do
       enable_server_message_print(user.id)
     end
 

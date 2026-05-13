@@ -231,6 +231,7 @@ defmodule Teiserver.Account.UserCacheLib do
       steam_id: user.steam_id,
       smurf_of_id: user.smurf_of_id,
       inserted_at: user.inserted_at,
+      data: user.data,
 
       # User data fields
       rank: user_data.rank,
