@@ -194,6 +194,10 @@ defmodule Teiserver.Player.Session do
     user_id |> via_tuple() |> GenServer.call(:disconnect)
   end
 
+  # Used only for tests
+  @doc false
+  def trigger_connection_timeout(pid), do: send(pid, :connection_timeout)
+
   @spec join_queues(T.userid(), [{Matchmaking.queue_id(), version :: String.t()}]) ::
           :ok | Matchmaking.join_error()
   def join_queues(user_id, queue_ids) do
@@ -1638,17 +1642,18 @@ defmodule Teiserver.Player.Session do
         {:noreply, state}
 
       :connection ->
-        # we don't care about cancelling the timer if the player reconnects since reconnection
-        # should be fairly low (and rate limited) so too many messages isn't an issue
-        {:ok, _tref} = :timer.send_after(@connection_timeout, :connection_timeout)
         Logger.info("Player disconnected abruptly because #{inspect(reason)}")
-        :telemetry.execute([:tachyon, :abrupt_disconnect], %{count: 1})
 
         state =
           state
           |> Map.put(:conn_pid, nil)
           |> put_in([:messaging_state, :subscribed?], false)
 
+        if is_nil(state.battle) do
+          {:ok, _tref} = :timer.send_after(@connection_timeout, :connection_timeout)
+        end
+
+        :telemetry.execute([:tachyon, :abrupt_disconnect], %{count: 1})
         {:noreply, state}
 
       {:mm_queue, queue_id} ->
@@ -1732,7 +1737,13 @@ defmodule Teiserver.Player.Session do
       {:battle, battle_id} ->
         Logger.info("battle #{battle_id} went down because #{inspect(reason)}")
         broadcast_user_update!(state.user, :menu)
-        {:noreply, %{state | battle: nil}}
+        new_state = %{state | battle: nil}
+
+        if is_nil(new_state.conn_pid) do
+          {:ok, _tref} = :timer.send_after(@connection_timeout, :connection_timeout)
+        end
+
+        {:noreply, new_state}
     end
   end
 
@@ -1744,7 +1755,7 @@ defmodule Teiserver.Player.Session do
   def handle_info({:EXIT, _from_pid, reason}, state), do: {:stop, reason, state}
 
   def handle_info(:connection_timeout, state) do
-    if is_nil(state.conn_pid) do
+    if is_nil(state.conn_pid) and is_nil(state.battle) do
       Logger.debug("Player timed out, stopping session")
       {:stop, :normal, state}
     else
