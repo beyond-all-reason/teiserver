@@ -8,9 +8,9 @@ defmodule Teiserver.Tachyon.LoginQueueTest do
 
   @moduletag :tachyon
 
-  setup _ctx do
+  setup _context do
     :ok = Supervisor.terminate_child(Teiserver.Tachyon.System, LoginQueue)
-    {:ok, _} = Supervisor.restart_child(Teiserver.Tachyon.System, LoginQueue)
+    {:ok, _pid} = Supervisor.restart_child(Teiserver.Tachyon.System, LoginQueue)
     :ok
   end
 

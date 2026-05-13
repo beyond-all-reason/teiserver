@@ -11,11 +11,11 @@ defmodule Teiserver.Tachyon.LoginQueue do
   disconnects or the limit is raised.
   """
 
-  use GenServer
-
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Player
+
+  use GenServer
 
   require Logger
 
@@ -39,7 +39,7 @@ defmodule Teiserver.Tachyon.LoginQueue do
   def get_queue_length do
     GenServer.call(__MODULE__, :queue_size)
   catch
-    :exit, {:noproc, _} -> 0
+    :exit, {:noproc, _reason} -> 0
   end
 
   @spec set_limit(non_neg_integer()) :: :ok
@@ -105,7 +105,7 @@ defmodule Teiserver.Tachyon.LoginQueue do
           # Dequeue at least 1 regardless.
           dequeue_members(max(1, available_capacity(new_state)), new_state)
 
-        _ ->
+        _kind ->
           new_state
       end
 
@@ -116,7 +116,7 @@ defmodule Teiserver.Tachyon.LoginQueue do
 
   defp dequeue_members(n, state) do
     case :queue.out(state.queue) do
-      {:empty, _} ->
+      {:empty, _queue} ->
         state
 
       {{:value, member}, rest} ->

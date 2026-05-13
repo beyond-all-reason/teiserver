@@ -5,6 +5,7 @@ defmodule Teiserver.TeiserverConfigs do
   alias Teiserver.Lobby
   alias Teiserver.Party
   alias Teiserver.Tachyon
+  alias Teiserver.Tachyon.LoginQueue
 
   import Teiserver.Config, only: [add_site_config_type: 1]
 
@@ -310,7 +311,7 @@ defmodule Teiserver.TeiserverConfigs do
       value_label: "",
       update_callback: fn rate ->
         Account.set_login_limit(rate)
-        Tachyon.LoginQueue.set_limit(rate)
+        LoginQueue.set_limit(rate)
       end
     })
 

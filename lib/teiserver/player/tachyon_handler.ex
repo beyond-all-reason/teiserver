@@ -286,7 +286,13 @@ defmodule Teiserver.Player.TachyonHandler do
           term(),
           state()
         ) :: WebSock.handle_result()
-  def handle_command(_command_id, _message_type, _message_id, _message, %{status: :waiting} = state) do
+  def handle_command(
+        _command_id,
+        _message_type,
+        _message_id,
+        _message,
+        %{status: :waiting} = state
+      ) do
     {:error_response, :invalid_request, state}
   end
 
