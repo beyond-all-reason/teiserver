@@ -41,4 +41,11 @@ defmodule Teiserver.TachyonLobby.Registry do
   def list_lobbies do
     Registry.select(__MODULE__, [{{:"$1", :"$2", :_}, [], [{{:"$1", :"$2"}}]}])
   end
+
+  @doc """
+  useful for tests, there shouldn't be a need for that outside testing
+  """
+  def register(lobby_id) do
+    Registry.register(__MODULE__, lobby_id, nil)
+  end
 end
