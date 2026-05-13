@@ -136,7 +136,7 @@ defmodule Teiserver.OAuth do
   end
 
   def create_code(user_id, attrs, opts) do
-    now = Keyword.get(opts, :now, Timex.now())
+    now = Keyword.get(opts, :now, DateTime.utc_now())
     app_id = attrs.id
 
     if ApplicationQueries.application_allows_code?(app_id) do
@@ -174,7 +174,7 @@ defmodule Teiserver.OAuth do
         {:error, :no_code}
 
       code ->
-        now = Keyword.get(opts, :now, Timex.now())
+        now = Keyword.get(opts, :now, DateTime.utc_now())
         check_expiry(code, now)
     end
   end
@@ -262,7 +262,7 @@ defmodule Teiserver.OAuth do
         {:error, :no_token}
 
       token ->
-        now = Keyword.get(opts, :now, Timex.now())
+        now = Keyword.get(opts, :now, DateTime.utc_now())
         check_expiry(token, now)
     end
   end
@@ -274,7 +274,7 @@ defmodule Teiserver.OAuth do
   @spec exchange_code(Code.t(), String.t(), String.t() | nil, options()) ::
           {:ok, Token.t()} | {:error, term()}
   def exchange_code(code, verifier, redirect_uri \\ nil, opts \\ []) do
-    now = Keyword.get(opts, :now, Timex.now())
+    now = Keyword.get(opts, :now, DateTime.utc_now())
 
     with {:ok, code} <- check_expiry(code, now),
          :ok <-
@@ -352,7 +352,7 @@ defmodule Teiserver.OAuth do
   end
 
   def refresh_token(token, opts) do
-    now = Keyword.get(opts, :now, Timex.now())
+    now = Keyword.get(opts, :now, DateTime.utc_now())
 
     case check_expiry(token, now) do
       {:error, :expired} ->

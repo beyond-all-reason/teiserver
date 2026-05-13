@@ -29,7 +29,7 @@ defmodule Teiserver.OAuth.CodeTest do
   end
 
   test "cannot retrieve expired code", %{user: user, app: app} do
-    yesterday = Timex.shift(Timex.now(), days: -1)
+    yesterday = Timex.shift(DateTime.utc_now(), days: -1)
     assert {:ok, code, _attrs} = create_code(user, app, expires_at: yesterday)
     assert {:error, :expired} = OAuth.get_valid_code(code.value)
   end
@@ -61,7 +61,7 @@ defmodule Teiserver.OAuth.CodeTest do
   end
 
   test "cannot exchange expired code for token", %{user: user, app: app} do
-    yesterday = Timex.shift(Timex.now(), days: -1)
+    yesterday = Timex.shift(DateTime.utc_now(), days: -1)
     assert {:ok, code, attrs} = create_code(user, app, expires_at: yesterday)
     assert {:error, :expired} = OAuth.exchange_code(code, attrs._verifier)
   end

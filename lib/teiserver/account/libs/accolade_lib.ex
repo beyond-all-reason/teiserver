@@ -203,7 +203,7 @@ defmodule Teiserver.Account.AccoladeLib do
       |> Enum.filter(fn m -> allow_accolades_for_user?(m.user_id) end)
       |> Enum.map(fn m -> m.user_id end)
 
-    timestamp = Timex.now() |> Timex.shift(days: -5)
+    timestamp = DateTime.utc_now() |> Timex.shift(days: -5)
 
     # Get a list of everybody they reviewed recently
     existing =

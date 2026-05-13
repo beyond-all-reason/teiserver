@@ -19,7 +19,7 @@ defmodule TeiserverWeb.API.PublicController do
         cond do
           season == active_season ->
             activity_time =
-              Timex.today()
+              Date.utc_today()
               |> Timex.shift(days: -35)
               |> Timex.to_datetime()
 

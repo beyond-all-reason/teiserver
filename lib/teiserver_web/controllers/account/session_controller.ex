@@ -127,7 +127,7 @@ defmodule TeiserverWeb.Account.SessionController do
                ]
              ) do
           diff =
-            Timex.diff(expired_code.expires, Timex.now(), :duration)
+            DateTime.diff(expired_code.expires, DateTime.utc_now(), :duration)
             |> Timex.format_duration(:humanized)
 
           Logger.debug(
@@ -313,7 +313,7 @@ defmodule TeiserverWeb.Account.SessionController do
         |> assign(:result, "Link cannot be found")
         |> render("result.html")
 
-      Timex.compare(Timex.now(), code.expires) == 1 ->
+      DateTime.compare($1) == :gt ->
         conn
         |> put_flash(:danger, "Link has expired")
         |> assign(:result, "Link has expired")
@@ -344,7 +344,7 @@ defmodule TeiserverWeb.Account.SessionController do
         |> put_flash(:danger, "Link cannot be found")
         |> redirect(to: "/")
 
-      Timex.compare(Timex.now(), code.expires) == 1 ->
+      DateTime.compare($1) == :gt ->
         conn
         |> put_flash(:danger, "Link has expired")
         |> redirect(to: "/")

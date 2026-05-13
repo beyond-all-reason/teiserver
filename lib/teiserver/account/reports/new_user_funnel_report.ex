@@ -14,7 +14,7 @@ defmodule Teiserver.Account.NewUserFunnelReport do
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, _params) do
     start_date =
-      Timex.today()
+      Date.utc_today()
       |> Timex.shift(days: -14)
       |> Timex.to_datetime()
 

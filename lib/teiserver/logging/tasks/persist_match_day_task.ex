@@ -20,7 +20,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
             nil
 
           [match] ->
-            Timex.to_date(match.inserted_at)
+            DateTime.to_date(match.inserted_at)
         end
       else
         last_date
@@ -31,12 +31,12 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
       date == nil ->
         :ok
 
-      Timex.compare(date, Timex.today()) == -1 ->
+      DateTime.compare($1) == :lt ->
         run(date)
 
         new_date = Timex.shift(date, days: 1)
 
-        if Timex.compare(new_date, Timex.today()) == -1 do
+        if DateTime.compare($1) == :lt do
           %{}
           |> __MODULE__.new()
           |> Oban.insert()
@@ -73,7 +73,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
     # Delete old log if it exists
     delete_query =
       from logs in MatchDayLog,
-        where: logs.date == ^(date |> Timex.to_date())
+        where: logs.date == ^(date |> DateTime.to_date())
 
     Repo.delete_all(delete_query)
 

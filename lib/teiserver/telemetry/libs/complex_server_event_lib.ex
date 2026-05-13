@@ -25,7 +25,7 @@ defmodule Teiserver.Telemetry.ComplexServerEventLib do
         user_id: userid,
         event_type_id: event_type_id,
         value: value,
-        timestamp: Timex.now()
+        timestamp: DateTime.utc_now()
       })
 
     case result do

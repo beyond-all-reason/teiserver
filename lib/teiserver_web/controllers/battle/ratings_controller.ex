@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
   @spec leaderboard(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def leaderboard(conn, params) do
     activity_time =
-      Timex.today()
+      Date.utc_today()
       |> Timex.shift(days: -35)
       |> Timex.to_datetime()
 

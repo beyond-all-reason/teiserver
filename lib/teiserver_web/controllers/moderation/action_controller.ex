@@ -200,7 +200,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
               no_result: true,
               closed: false,
               inserted_after:
-                Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
+                Timex.shift(DateTime.utc_now(), days: -ReportLib.get_outstanding_report_max_days())
             ],
             preload: [:reporter],
             order_by: "Newest first",
@@ -285,7 +285,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
               target_id: user.id,
               no_result: true,
               inserted_after:
-                Timex.shift(Timex.now(), days: -ReportLib.get_outstanding_report_max_days())
+                Timex.shift(DateTime.utc_now(), days: -ReportLib.get_outstanding_report_max_days())
             ],
             preload: [:reporter],
             order_by: "Newest first",
@@ -397,7 +397,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   def halt(conn, %{"id" => id}) do
     action = Moderation.get_action!(id)
 
-    case Moderation.update_action(action, %{"expires" => Timex.now()}) do
+    case Moderation.update_action(action, %{"expires" => DateTime.utc_now()}) do
       {:ok, _action} ->
         add_audit_log(conn, "Moderation:Action halted", %{action_id: action.id})
         ActionLib.maybe_update_discord_post(action)

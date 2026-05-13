@@ -37,7 +37,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         search: [
           user_id: userid,
           rating_type_id: filter_type_id,
-          inserted_after: Timex.now() |> Timex.shift(days: -@match_cache_max_days)
+          inserted_after: DateTime.utc_now() |> Timex.shift(days: -@match_cache_max_days)
         ],
         order_by: "Newest first",
         limit: 50,
@@ -76,7 +76,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         search: [
           user_id: userid,
           rating_type_id: filter_type_id,
-          inserted_after: Timex.now() |> Timex.shift(days: -@match_cache_max_days)
+          inserted_after: DateTime.utc_now() |> Timex.shift(days: -@match_cache_max_days)
         ],
         order_by: "Newest first",
         limit: 50,
@@ -123,7 +123,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         search: [
           user_id: userid,
           rating_type_id: filter_type_id,
-          inserted_after: Timex.now() |> Timex.shift(days: -@match_cache_max_days)
+          inserted_after: DateTime.utc_now() |> Timex.shift(days: -@match_cache_max_days)
         ],
         order_by: "Newest first",
         limit: 50,
@@ -184,7 +184,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
   def do_match_processed_team_recent(userid, logs, team_type) do
     # Filter down to just the recent ones rather than re-running the query
-    timestamp_after = Timex.now() |> Timex.shift(days: -@match_cache_recent_days)
+    timestamp_after = DateTime.utc_now() |> Timex.shift(days: -@match_cache_recent_days)
 
     logs =
       logs

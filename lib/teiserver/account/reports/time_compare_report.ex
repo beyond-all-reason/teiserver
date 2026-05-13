@@ -39,7 +39,7 @@ defmodule Teiserver.Account.TimeCompareReport do
 
     Map.merge(results, %{
       user_count_max: @user_count_max,
-      start_date: start_date || Timex.today(),
+      start_date: start_date || Date.utc_today(),
       end_date: end_date,
       params: params
     })

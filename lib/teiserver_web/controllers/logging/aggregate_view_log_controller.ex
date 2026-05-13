@@ -53,13 +53,13 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
     date =
       if last_date == nil do
         AggregateViewLogLib.get_first_page_view_log_date()
-        |> Timex.to_date()
+        |> DateTime.to_date()
       else
         last_date
         |> Timex.shift(days: 1)
       end
 
-    if Timex.compare(date, Timex.today()) == 1 do
+    if DateTime.compare($1) == :gt do
       conn
       |> assign(:date, date)
       |> put_flash(:danger, "That date is in the future")

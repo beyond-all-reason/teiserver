@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Account.RelationshipLive.IndexLiveTest do
   end
 
   test "get_days_diff works" do
-    now = Timex.now()
+    now = DateTime.utc_now()
     other_date = DateTime.add(now, -400, :day)
     result = Index.get_days_diff(now, other_date)
     assert result == 400

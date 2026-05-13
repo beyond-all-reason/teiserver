@@ -26,7 +26,7 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
         user_id: userid,
         property_type_id: property_type_id,
         value: value,
-        last_updated: Timex.now()
+        last_updated: DateTime.utc_now()
       })
 
     case result do

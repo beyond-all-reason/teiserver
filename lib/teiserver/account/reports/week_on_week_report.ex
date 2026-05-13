@@ -15,8 +15,8 @@ defmodule Teiserver.Account.WeekOnWeekReport do
     params = apply_defaults(params)
 
     start_date =
-      Timex.now()
-      |> Timex.beginning_of_week()
+      DateTime.utc_now()
+      |> Date.beginning_of_week()
       |> Timex.shift(weeks: -5)
 
     logs =
@@ -31,7 +31,7 @@ defmodule Teiserver.Account.WeekOnWeekReport do
       logs
       |> Map.new(fn log ->
         {_year, week} = Timex.iso_week(log.date)
-        weekday = Timex.weekday(log.date)
+        weekday = Date.day_of_week(log.date)
 
         key = {week, weekday}
         value = get_metric(log.data, params["metric"])

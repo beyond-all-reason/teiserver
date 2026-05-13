@@ -53,10 +53,10 @@ defmodule Teiserver.Account.RetentionRateExport do
 
     start_datetime = Timex.to_datetime(start_date)
     end_datetime = Timex.to_datetime(end_date)
-    today_datetime = Timex.today() |> Timex.to_datetime()
+    today_datetime = Date.utc_today() |> Timex.to_datetime()
 
     end_datetime =
-      if Timex.compare(today_datetime, end_datetime) == 1 do
+      if DateTime.compare($1) == :gt do
         end_datetime
       else
         today_datetime
@@ -88,7 +88,7 @@ defmodule Teiserver.Account.RetentionRateExport do
       )
       |> Enum.group_by(
         fn user ->
-          Timex.to_date(user.inserted_at)
+          DateTime.to_date(user.inserted_at)
         end,
         fn user ->
           to_string(user.id)

@@ -46,7 +46,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
             skill: from_rating.skill,
             uncertainty: from_rating.uncertainty,
             leaderboard_rating: from_rating.leaderboard_rating,
-            last_updated: Timex.now(),
+            last_updated: DateTime.utc_now(),
             season: season
           })
 
@@ -55,7 +55,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
             user_id: to_id,
             rating_type_id: rating_type_id,
             match_id: nil,
-            inserted_at: Timex.now(),
+            inserted_at: DateTime.utc_now(),
             season: season,
             value: %{
               reason: "Smurf adjustment",

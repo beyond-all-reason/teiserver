@@ -135,18 +135,18 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     date =
       if last_date == nil do
         Logging.get_first_telemetry_minute_datetime()
-        |> Timex.to_date()
+        |> DateTime.to_date()
       else
         last_date
         |> Timex.shift(days: 1)
       end
 
-    if Timex.compare(date, Timex.today()) == -1 do
+    if DateTime.compare($1) == :lt do
       run(date, cleanup: true)
 
       new_date = Timex.shift(date, days: 1)
 
-      if Timex.compare(new_date, Timex.today()) == -1 do
+      if DateTime.compare($1) == :lt do
         %{}
         |> PersistServerDayTask.new()
         |> Oban.insert()
@@ -175,7 +175,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     # Delete old log if it exists
     delete_query =
       from logs in ServerDayLog,
-        where: logs.date == ^(date |> Timex.to_date())
+        where: logs.date == ^(date |> DateTime.to_date())
 
     Repo.delete_all(delete_query)
 
@@ -188,7 +188,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
   end
 
   def today_so_far do
-    date = Timex.today()
+    date = Date.utc_today()
 
     0..@segment_count
     |> Enum.reduce(@empty_log, fn segment_number, segment ->
@@ -460,7 +460,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       limit: :infinity
     )
     |> Stream.filter(fn match ->
-      Timex.diff(match.finished, match.started, :second) >= battle_minimum_seconds
+      DateTime.diff(match.finished, match.started, :second) >= battle_minimum_seconds
     end)
     |> Enum.reduce(@match_blank_acc, &add_match/2)
     |> second_pass()
@@ -531,7 +531,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       )
 
     # Durations
-    duration = Timex.diff(match.finished, match.started, :second)
+    duration = DateTime.diff(match.finished, match.started, :second)
     acc = Map.put(acc, :match_durations, [duration | acc.match_durations])
 
     # Skill

@@ -598,7 +598,7 @@ defmodule TeiserverWeb.Admin.UserController do
                     skill: new_skill,
                     uncertainty: new_uncertainty,
                     leaderboard_rating: new_leaderboard_rating,
-                    last_updated: Timex.now(),
+                    last_updated: DateTime.utc_now(),
                     season: MatchRatingLib.active_season()
                   })
 
@@ -608,7 +608,7 @@ defmodule TeiserverWeb.Admin.UserController do
                     skill: new_skill,
                     uncertainty: new_uncertainty,
                     leaderboard_rating: new_leaderboard_rating,
-                    last_updated: Timex.now(),
+                    last_updated: DateTime.utc_now(),
                     season: MatchRatingLib.active_season()
                   })
               end
@@ -617,7 +617,7 @@ defmodule TeiserverWeb.Admin.UserController do
               user_id: user.id,
               rating_type_id: rating_type_id,
               match_id: nil,
-              inserted_at: Timex.now(),
+              inserted_at: DateTime.utc_now(),
               season: MatchRatingLib.active_season(),
               value: %{
                 reason: "Manual adjustment",

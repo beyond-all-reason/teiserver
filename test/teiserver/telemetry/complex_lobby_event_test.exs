@@ -27,8 +27,8 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventTest do
         founder_name: user.name,
         server_uuid: "#{r}",
         bots: %{},
-        started: Timex.now() |> Timex.shift(minutes: -30),
-        finished: Timex.now() |> Timex.shift(seconds: -30)
+        started: DateTime.utc_now() |> Timex.shift(minutes: -30),
+        finished: DateTime.utc_now() |> Timex.shift(seconds: -30)
       })
 
     # Start by removing all lobby events

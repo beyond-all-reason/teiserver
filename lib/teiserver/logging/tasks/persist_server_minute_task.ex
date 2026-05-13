@@ -12,7 +12,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
   def perform(_job) do
     if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
          true do
-      now = Timex.now() |> Timex.set(microsecond: 0)
+      now = DateTime.utc_now() |> Timex.set(microsecond: 0)
 
       case Logging.get_server_minute_log(now) do
         nil ->
@@ -32,7 +32,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
       |> Map.drop([:cycle])
 
     if Communication.use_discord?() do
-      if rem(Timex.now().minute, 10) == 0 do
+      if rem(DateTime.utc_now().minute, 10) == 0 do
         if Config.get_site_config_cache("teiserver.Bridge player numbers") do
           [
             {:update_stats, :client_count, Enum.count(data.client.total)},

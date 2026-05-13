@@ -518,7 +518,7 @@ defmodule Teiserver.CacheUser do
           to_id: to_id,
           from_id: sender_id,
           content: msg_str,
-          inserted_at: Timex.now(),
+          inserted_at: DateTime.utc_now(),
           delivered: true
         })
       end
@@ -960,7 +960,7 @@ defmodule Teiserver.CacheUser do
 
     user = %{
       user
-      | last_login: Timex.now(),
+      | last_login: DateTime.utc_now(),
         last_login_mins: round(System.system_time(:second) / 60),
         country: country,
         rank: rank,

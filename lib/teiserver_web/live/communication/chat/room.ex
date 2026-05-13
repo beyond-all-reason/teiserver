@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
       content: event.content,
       user_id: event.user_id,
       user: user,
-      inserted_at: Timex.now()
+      inserted_at: DateTime.utc_now()
     }
 
     [message] = add_message_metadata([message], socket.assigns.last_poster_id)
@@ -114,7 +114,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
           channel: "room_chat",
           id: -:rand.uniform(999_999_999_999),
           user_id: current_user.id,
-          inserted_at: Timex.now(),
+          inserted_at: DateTime.utc_now(),
           content: "--- FLOOD PROTECTION IN PLACE, PLEASE WAIT BEFORE SENDING ANOTHER MESSAGE ---"
         })
 
@@ -142,7 +142,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
       Chat.list_room_messages(
         search: [
           chat_room: socket.assigns.room_name,
-          inserted_after: Timex.now() |> Timex.shift(days: -15)
+          inserted_after: DateTime.utc_now() |> Timex.shift(days: -15)
         ],
         preload: [:user],
         limit: @message_count,
@@ -194,7 +194,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
     |> RoomMessage.changeset(%{
       "room" => "",
       "user_id" => 1,
-      "inserted_at" => Timex.now(),
+      "inserted_at" => DateTime.utc_now(),
       "content" => ""
     })
   end

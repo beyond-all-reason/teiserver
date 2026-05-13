@@ -51,7 +51,7 @@ defmodule Teiserver.Account.PopulationReport do
 
     start_date_mins =
       start_date
-      |> Timex.to_unix()
+      |> DateTime.to_unix()
       |> Kernel.div(60)
 
     "users.data ->> 'last_login_mins' >= '#{start_date_mins}'"

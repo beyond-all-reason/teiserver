@@ -19,18 +19,18 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
     date =
       if last_date == nil do
         Logging.get_first_telemetry_minute_datetime()
-        |> Timex.to_date()
+        |> DateTime.to_date()
       else
         last_date
         |> Timex.shift(days: 1)
       end
 
-    if Timex.compare(date, Timex.today()) == -1 do
+    if DateTime.compare($1) == :lt do
       run(date)
 
       new_date = Timex.shift(date, days: 1)
 
-      if Timex.compare(new_date, Timex.today()) == -1 do
+      if DateTime.compare($1) == :lt do
         %{}
         |> PersistUserActivityDayTask.new()
         |> Oban.insert()
@@ -50,7 +50,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
     # Delete old log if it exists
     delete_query =
       from logs in Teiserver.Logging.UserActivityDayLog,
-        where: logs.date == ^(date |> Timex.to_date())
+        where: logs.date == ^(date |> DateTime.to_date())
 
     Repo.delete_all(delete_query)
 

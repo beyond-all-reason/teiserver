@@ -81,7 +81,7 @@ defmodule Teiserver.EmailHelper do
           Account.create_code(%{
             value: UUID.uuid1(),
             purpose: "reset_password",
-            expires: Timex.now() |> Timex.shift(hours: 24),
+            expires: DateTime.utc_now() |> Timex.shift(hours: 24),
             user_id: user.id
           })
 
@@ -107,7 +107,7 @@ defmodule Teiserver.EmailHelper do
     If you did not request this password reset then please ignore it. The code will expire in 24 hours.
     """
 
-    date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
+    date = TimexHelper.date_to_str(DateTime.utc_now(), format: :email_date)
     message_id = "<#{UUID.uuid1()}@#{Application.get_env(:teiserver, Teiserver)[:host]}>"
     subject = Application.get_env(:teiserver, Teiserver)[:game_name] <> " - Password reset"
 
@@ -162,7 +162,7 @@ defmodule Teiserver.EmailHelper do
     If you experience any issues with registration or have other questions please get in touch through our  discord at #{discord}.
     """
 
-    date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
+    date = TimexHelper.date_to_str(DateTime.utc_now(), format: :email_date)
 
     Email.new_email()
     |> Email.to({user.name, user.email})

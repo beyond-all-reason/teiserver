@@ -317,7 +317,7 @@ defmodule Teiserver.Logging do
       cond do
         recache == true -> true
         last_time == nil -> true
-        Timex.now() |> Timex.shift(minutes: -15) |> Timex.compare(last_time) == 1 -> true
+        DateTime.utc_now() |> Timex.shift(minutes: -15) |> DateTime.compare($1) == :gt -> true
         true -> false
       end
 
@@ -333,7 +333,7 @@ defmodule Teiserver.Logging do
       Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_day_server_metrics_today_last_time",
-        Timex.now()
+        DateTime.utc_now()
       )
 
       data
@@ -491,7 +491,7 @@ defmodule Teiserver.Logging do
       cond do
         force_recache == true -> force_recache
         last_time == nil -> true
-        Timex.now() |> Timex.shift(days: -1) |> Timex.compare(last_time) == 1 -> true
+        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare($1) == :gt -> true
         true -> false
       end
 
@@ -507,7 +507,7 @@ defmodule Teiserver.Logging do
       Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_server_metrics_last_time",
-        Timex.now()
+        DateTime.utc_now()
       )
 
       data
@@ -668,7 +668,7 @@ defmodule Teiserver.Logging do
       cond do
         force_recache == true -> force_recache
         last_time == nil -> true
-        Timex.now() |> Timex.shift(days: -1) |> Timex.compare(last_time) == 1 -> true
+        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare($1) == :gt -> true
         true -> false
       end
 
@@ -684,7 +684,7 @@ defmodule Teiserver.Logging do
       Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_quarter_server_metrics_last_time",
-        Timex.now()
+        DateTime.utc_now()
       )
 
       data
@@ -842,7 +842,7 @@ defmodule Teiserver.Logging do
       cond do
         force_recache == true -> force_recache
         last_time == nil -> true
-        Timex.now() |> Timex.shift(days: -1) |> Timex.compare(last_time) == 1 -> true
+        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare($1) == :gt -> true
         true -> false
       end
 
@@ -853,7 +853,7 @@ defmodule Teiserver.Logging do
       Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_year_server_metrics_last_time",
-        Timex.now()
+        DateTime.utc_now()
       )
 
       data
@@ -1011,7 +1011,7 @@ defmodule Teiserver.Logging do
       cond do
         force_recache == true -> force_recache
         last_time == nil -> true
-        Timex.now() |> Timex.shift(days: -1) |> Timex.compare(last_time) == 1 -> true
+        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare($1) == :gt -> true
         true -> false
       end
 
@@ -1022,7 +1022,7 @@ defmodule Teiserver.Logging do
       Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_week_server_metrics_last_time",
-        Timex.now()
+        DateTime.utc_now()
       )
 
       data
@@ -1176,7 +1176,7 @@ defmodule Teiserver.Logging do
     recache =
       cond do
         last_time == nil -> true
-        Timex.now() |> Timex.shift(minutes: -15) |> Timex.compare(last_time) == 1 -> true
+        DateTime.utc_now() |> Timex.shift(minutes: -15) |> DateTime.compare($1) == :gt -> true
         true -> false
       end
 
@@ -1192,7 +1192,7 @@ defmodule Teiserver.Logging do
       Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_server_metrics_last_time",
-        Timex.now()
+        DateTime.utc_now()
       )
 
       data
@@ -1210,7 +1210,7 @@ defmodule Teiserver.Logging do
       cond do
         force_recache == true -> true
         last_time == nil -> true
-        Timex.now() |> Timex.shift(days: -1) |> Timex.compare(last_time) == 1 -> true
+        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare($1) == :gt -> true
         true -> false
       end
 
@@ -1226,7 +1226,7 @@ defmodule Teiserver.Logging do
       Teiserver.cache_put(
         :application_metadata_cache,
         "teiserver_month_match_metrics_last_time",
-        Timex.now()
+        DateTime.utc_now()
       )
 
       data

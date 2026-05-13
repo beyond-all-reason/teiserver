@@ -41,7 +41,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
       [log] ->
         log_year = log.date.year
 
-        if log_year < Timex.today().year do
+        if log_year < Date.utc_today().year do
           logs =
             Logging.list_server_day_logs(
               search: [
@@ -82,7 +82,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
   defp perform_standard(log_date) do
     new_date = Timex.shift(log_date, years: 1)
 
-    today_year = Timex.today().year
+    today_year = Date.utc_today().year
 
     if new_date.year < today_year do
       logs =
@@ -121,7 +121,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
 
   @spec year_so_far() :: map()
   def year_so_far do
-    now = Timex.now()
+    now = DateTime.utc_now()
 
     user_activity_logs =
       Logging.list_user_activity_day_logs(

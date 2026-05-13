@@ -39,7 +39,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     # If a match is never marked as finished after X days, we delete it
     Battle.list_matches(
       search: [
-        inserted_before: Timex.shift(Timex.now(), days: -get_days()),
+        inserted_before: Timex.shift(DateTime.utc_now(), days: -get_days()),
         has_started: false,
         rated: false
       ],
@@ -54,7 +54,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     # If a match is never marked as finished after X days, we delete it
     Battle.list_matches(
       search: [
-        inserted_before: Timex.shift(Timex.now(), days: -get_days()),
+        inserted_before: Timex.shift(DateTime.utc_now(), days: -get_days()),
         has_started: true,
         has_finished: false,
         rated: false
@@ -73,7 +73,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
 
     # Battle.list_matches(
     #   search: [
-    #     inserted_before: Timex.shift(Timex.now(), days: -battle_match_rated_days),
+    #     inserted_before: Timex.shift(DateTime.utc_now(), days: -battle_match_rated_days),
     #     game_type_in: ["Small Team", "Large Team", "Duel", "FFA", "Team FFA"]
     #   ],
     #   search: [:id],
@@ -88,7 +88,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
 
     Battle.list_matches(
       search: [
-        inserted_before: Timex.shift(Timex.now(), days: -battle_match_unrated_days),
+        inserted_before: Timex.shift(DateTime.utc_now(), days: -battle_match_unrated_days),
         rated: false
       ],
       search: [:id],
@@ -167,11 +167,11 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
 
   defp strip_data_from_older_matches do
     finished_before =
-      Timex.now()
+      DateTime.utc_now()
       |> Timex.shift(days: -@strip_data_days)
 
     finished_after =
-      Timex.now()
+      DateTime.utc_now()
       |> Timex.shift(days: -(@strip_data_days + 3))
 
     query = """

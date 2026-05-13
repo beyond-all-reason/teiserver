@@ -110,7 +110,7 @@ defmodule Teiserver.Account.UserAgeReport do
       users
       |> Enum.group_by(
         fn %{inserted_at: inserted_at} ->
-          Timex.diff(Timex.now(), inserted_at, :days)
+          DateTime.diff(DateTime.utc_now(), inserted_at, :days)
         end,
         fn _user ->
           1
@@ -159,7 +159,7 @@ defmodule Teiserver.Account.UserAgeReport do
   end
 
   defp get_registration_age(%{inserted_at: inserted_at}) do
-    diff = Timex.diff(Timex.now(), inserted_at, :days)
+    diff = DateTime.diff(DateTime.utc_now(), inserted_at, :days)
 
     cond do
       diff < 1 -> "0 days"

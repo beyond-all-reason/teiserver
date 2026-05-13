@@ -23,7 +23,7 @@ defmodule Teiserver.Moderation.ActivityReport do
         params["end_date"]
       )
 
-    permanent = Timex.now() |> Timex.shift(years: 100)
+    permanent = DateTime.utc_now() |> Timex.shift(years: 100)
 
     start_date = Timex.to_datetime(start_date)
     end_date = Timex.to_datetime(end_date)
@@ -65,13 +65,13 @@ defmodule Teiserver.Moderation.ActivityReport do
         [
           "Suspensions"
           | build_line(dates, actions, fn a ->
-              Enum.member?(a.restrictions, "Login") and Timex.compare(a.expires, permanent) == -1
+              Enum.member?(a.restrictions, "Login") and DateTime.compare($1) == :lt
             end)
         ],
         [
           "Bans"
           | build_line(dates, actions, fn a ->
-              Enum.member?(a.restrictions, "Login") and Timex.compare(a.expires, permanent) == 1
+              Enum.member?(a.restrictions, "Login") and DateTime.compare($1) == :gt
             end)
         ]
       ]
@@ -100,7 +100,7 @@ defmodule Teiserver.Moderation.ActivityReport do
       limit: :infinity
     )
     |> Enum.group_by(fn report ->
-      report.inserted_at |> Timex.to_date()
+      report.inserted_at |> DateTime.to_date()
     end)
   end
 
@@ -114,7 +114,7 @@ defmodule Teiserver.Moderation.ActivityReport do
       limit: :infinity
     )
     |> Enum.group_by(fn action ->
-      action.inserted_at |> Timex.to_date()
+      action.inserted_at |> DateTime.to_date()
     end)
   end
 

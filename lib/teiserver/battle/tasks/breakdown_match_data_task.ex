@@ -15,7 +15,7 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
     matches =
       get_matches(start_date, end_date)
       |> Stream.filter(fn match ->
-        Timex.diff(match.finished, match.started, :second) >= 300
+        DateTime.diff(match.finished, match.started, :second) >= 300
       end)
 
     %{
@@ -70,7 +70,7 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
     duration =
       matches
       |> Stream.map(fn match ->
-        d = Timex.diff(match.finished, match.started, :second)
+        d = DateTime.diff(match.finished, match.started, :second)
 
         (:math.floor(d / 300) * 5)
         |> round()
@@ -81,7 +81,7 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
     total_duration =
       matches
       |> Stream.map(fn match ->
-        Timex.diff(match.finished, match.started, :second)
+        DateTime.diff(match.finished, match.started, :second)
       end)
       |> Enum.sum()
 

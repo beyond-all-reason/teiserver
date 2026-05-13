@@ -118,8 +118,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
               bot: false
             },
             inserted_at:
-              Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert(),
-            updated_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert()
+              Timex.shift(DateTime.utc_now(), days: -day, minutes: -minutes) |> time_convert(),
+            updated_at: Timex.shift(DateTime.utc_now(), days: -day, minutes: -minutes) |> time_convert()
           }
         end)
         |> Enum.to_list()
@@ -136,7 +136,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     # First we need to make by the minute telemetry data
     Range.new(0, @settings.days)
     |> Enum.each(fn day ->
-      date = Timex.today() |> Timex.shift(days: -day)
+      date = Date.utc_today() |> Timex.shift(days: -day)
 
       user_ids =
         Account.list_users(
@@ -172,8 +172,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             date
             |> Timex.to_datetime()
             |> Timex.shift(minutes: m)
-            |> Timex.to_unix()
-            |> Timex.from_unix()
+            |> DateTime.to_unix()
+            |> DateTime.from_unix!()
 
           %{
             timestamp: timestamp,
@@ -244,7 +244,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   defp make_moderation do
     Range.new(0, @settings.days)
     |> Enum.each(fn day ->
-      date = Timex.today() |> Timex.shift(days: -day)
+      date = Date.utc_today() |> Timex.shift(days: -day)
 
       users =
         Account.list_users(
@@ -326,7 +326,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       Range.new(0, @settings.days)
       |> Enum.flat_map(fn day ->
         date =
-          Timex.today()
+          Date.utc_today()
           |> Timex.shift(days: -day, years: -(@latest_season - MatchRatingLib.active_season()))
 
         users =
@@ -457,7 +457,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       Account.create_code(%{
         value: "fakedata_code$127.0.0.1",
         purpose: "one_time_login",
-        expires: Timex.now() |> Timex.shift(hours: 24),
+        expires: DateTime.utc_now() |> Timex.shift(hours: 24),
         user_id: root_user.id
       })
   end
@@ -465,9 +465,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   # This allows us to round off microseconds and convert datetime to naive_datetime
   defp time_convert(t) do
     t
-    |> Timex.to_unix()
-    |> Timex.from_unix()
-    |> Timex.to_naive_datetime()
+    |> DateTime.to_unix()
+    |> DateTime.from_unix!()
+    |> DateTime.to_naive()
   end
 
   defp random_pick_from(list, chance \\ 0.5) do

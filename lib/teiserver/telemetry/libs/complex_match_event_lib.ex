@@ -27,7 +27,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
         match_id: match_id,
         game_time: game_time,
         value: value,
-        timestamp: Timex.now()
+        timestamp: DateTime.utc_now()
       })
 
     case result do

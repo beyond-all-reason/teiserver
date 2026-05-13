@@ -59,7 +59,7 @@ defmodule Teiserver.OAuth.TokenTest do
   end
 
   test "cannot get expired token", %{user: user, app: app} do
-    yesterday = Timex.shift(Timex.now(), days: -1)
+    yesterday = Timex.shift(DateTime.utc_now(), days: -1)
     assert {:ok, token} = OAuth.create_token(user, app, now: yesterday, scopes: app.scopes)
     assert {:error, :expired} = OAuth.get_valid_token(token.value)
   end

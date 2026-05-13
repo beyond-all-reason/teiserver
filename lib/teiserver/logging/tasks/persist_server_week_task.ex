@@ -39,23 +39,23 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
 
     case first_logs do
       [log] ->
-        {today_year, today_week} = Timex.today() |> Timex.iso_week()
+        {today_year, today_week} = Date.utc_today() |> Timex.iso_week()
         {log_year, log_week} = log.date |> Timex.iso_week()
 
         if log_year < today_year or log_week < today_week do
           logs =
             Logging.list_server_day_logs(
               search: [
-                start_date: Timex.beginning_of_week(log.date),
-                end_date: Timex.end_of_week(log.date)
+                start_date: Date.beginning_of_week(log.date),
+                end_date: Date.end_of_week(log.date)
               ]
             )
 
           user_activity_logs =
             Logging.list_user_activity_day_logs(
               search: [
-                start_date: Timex.beginning_of_week(log.date),
-                end_date: Timex.end_of_week(log.date)
+                start_date: Date.beginning_of_week(log.date),
+                end_date: Date.end_of_week(log.date)
               ]
             )
 
@@ -68,7 +68,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
             Logging.create_server_week_log(%{
               year: log_year,
               week: log_week,
-              date: Timex.beginning_of_week(log.date),
+              date: Date.beginning_of_week(log.date),
               data: data
             })
         end
@@ -83,22 +83,22 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
     new_date = Timex.shift(log_date, days: 7)
 
     {new_year, new_week} = new_date |> Timex.iso_week()
-    {today_year, today_week} = Timex.today() |> Timex.iso_week()
+    {today_year, today_week} = Date.utc_today() |> Timex.iso_week()
 
     if new_year < today_year or new_week < today_week do
       logs =
         Logging.list_server_day_logs(
           search: [
-            start_date: Timex.beginning_of_week(new_date),
-            end_date: Timex.end_of_week(new_date)
+            start_date: Date.beginning_of_week(new_date),
+            end_date: Date.end_of_week(new_date)
           ]
         )
 
       user_activity_logs =
         Logging.list_user_activity_day_logs(
           search: [
-            start_date: Timex.beginning_of_week(new_date),
-            end_date: Timex.end_of_week(new_date)
+            start_date: Date.beginning_of_week(new_date),
+            end_date: Date.end_of_week(new_date)
           ]
         )
 
@@ -121,18 +121,18 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
 
   @spec week_so_far() :: map()
   def week_so_far do
-    now = Timex.now()
+    now = DateTime.utc_now()
 
     user_activity_logs =
       Logging.list_user_activity_day_logs(
         search: [
-          start_date: Timex.beginning_of_week(now)
+          start_date: Date.beginning_of_week(now)
         ]
       )
 
     Logging.list_server_day_logs(
       search: [
-        start_date: Timex.beginning_of_week(now)
+        start_date: Date.beginning_of_week(now)
       ]
     )
     |> Enum.zip(user_activity_logs)

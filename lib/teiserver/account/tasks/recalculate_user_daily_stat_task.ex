@@ -23,9 +23,9 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
   @spec perform(any) :: :ok
   def perform(_job) do
     start_date =
-      Timex.now()
+      DateTime.utc_now()
       |> Timex.shift(hours: -26)
-      |> Timex.to_unix()
+      |> DateTime.to_unix()
 
     start_date = round(start_date / 60)
 

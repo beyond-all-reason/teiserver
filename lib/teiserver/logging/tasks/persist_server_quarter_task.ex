@@ -39,10 +39,10 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
 
     case first_logs do
       [log] ->
-        today_quarter = Timex.today() |> Timex.quarter()
+        today_quarter = Date.utc_today() |> Timex.quarter()
         log_quarter = log.date |> Timex.quarter()
 
-        if log.date.year < Timex.today().year or log_quarter < today_quarter do
+        if log.date.year < Date.utc_today().year or log_quarter < today_quarter do
           logs =
             Logging.list_server_day_logs(
               search: [
@@ -85,9 +85,9 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
     new_date = Timex.shift(log_date, months: 3)
 
     new_quarter = new_date |> Timex.quarter()
-    today_quarter = Timex.today() |> Timex.quarter()
+    today_quarter = Date.utc_today() |> Timex.quarter()
 
-    if new_date.year < Timex.today().year or new_quarter < today_quarter do
+    if new_date.year < Date.utc_today().year or new_quarter < today_quarter do
       logs =
         Logging.list_server_day_logs(
           search: [
@@ -125,7 +125,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
 
   @spec quarter_so_far() :: map()
   def quarter_so_far do
-    now = Timex.now()
+    now = DateTime.utc_now()
 
     user_activity_logs =
       Logging.list_user_activity_day_logs(

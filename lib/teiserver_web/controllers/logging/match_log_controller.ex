@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Logging.MatchLogController do
   def day_metrics_show(conn, %{"date" => date_str}) do
     date = TimexHelper.parse_ymd(date_str)
 
-    if date |> Timex.to_date() == Timex.today() do
+    if date |> DateTime.to_date() == Date.utc_today() do
       conn
       |> redirect(to: ~p"/logging/match/day_metrics/today")
     else
@@ -59,7 +59,7 @@ defmodule TeiserverWeb.Logging.MatchLogController do
     data = Logging.get_todays_match_log()
 
     conn
-    |> assign(:date, Timex.today())
+    |> assign(:date, Date.utc_today())
     |> assign(:data, data)
     |> add_breadcrumb(name: "Daily - Today (partial)", url: conn.request_path)
     |> render("day_metrics_show.html")
@@ -134,7 +134,7 @@ defmodule TeiserverWeb.Logging.MatchLogController do
 
   @spec month_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def month_metrics_show(conn, %{"year" => year, "month" => month}) do
-    today = "#{Timex.now().month}/#{Timex.now().year}"
+    today = "#{DateTime.utc_now().month}/#{DateTime.utc_now().year}"
 
     if today == "#{month}/#{year}" do
       conn
@@ -157,10 +157,10 @@ defmodule TeiserverWeb.Logging.MatchLogController do
     data = Logging.get_this_months_match_metrics_log(force_recache)
 
     {lyear, lmonth} =
-      if Timex.today().month == 1 do
-        {Timex.today().year - 1, 12}
+      if Date.utc_today().month == 1 do
+        {Date.utc_today().year - 1, 12}
       else
-        {Timex.today().year, Timex.today().month - 1}
+        {Date.utc_today().year, Date.utc_today().month - 1}
       end
 
     last_month_data =
@@ -168,12 +168,12 @@ defmodule TeiserverWeb.Logging.MatchLogController do
       |> Logging.get_match_month_log()
       |> Map.get(:data)
 
-    days_in_month = Timex.days_in_month(Timex.now())
-    progress = round(Timex.today().day / days_in_month * 100)
+    days_in_month = Date.days_in_month(DateTime.utc_now())
+    progress = round(Date.utc_today().day / days_in_month * 100)
 
     conn
-    |> assign(:year, Timex.today().year)
-    |> assign(:month, Timex.today().month)
+    |> assign(:year, Date.utc_today().year)
+    |> assign(:month, Date.utc_today().month)
     |> assign(:data, data)
     |> assign(:last_month, last_month_data)
     |> assign(:progress, progress)

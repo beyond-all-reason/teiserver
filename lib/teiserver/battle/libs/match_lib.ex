@@ -112,7 +112,7 @@ defmodule Teiserver.Battle.MatchLib do
             founder_id: lobby.founder_id,
             bots: bots,
             queue_id: queue_id,
-            started: Timex.now(),
+            started: DateTime.utc_now(),
             finished: nil
           }
 
@@ -148,7 +148,7 @@ defmodule Teiserver.Battle.MatchLib do
 
     {tag,
      %{
-       finished: Timex.now()
+       finished: DateTime.utc_now()
      }}
   end
 

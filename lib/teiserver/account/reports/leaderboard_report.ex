@@ -21,7 +21,7 @@ defmodule Teiserver.Account.LeaderboardReport do
     limit = params["limit"] |> int_parse()
 
     activity_time =
-      Timex.today()
+      Date.utc_today()
       |> Timex.shift(days: -days)
       |> Timex.to_datetime()
 
@@ -95,7 +95,7 @@ defmodule Teiserver.Account.LeaderboardReport do
     ratings
     |> Enum.with_index()
     |> Enum.map(fn {rating, index} ->
-      age = Timex.diff(Timex.now(), rating.last_updated, :days)
+      age = DateTime.diff(DateTime.utc_now(), rating.last_updated, :days)
 
       extra =
         extra_data[rating.user_id] ||

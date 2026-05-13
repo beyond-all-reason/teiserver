@@ -30,7 +30,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
                         user_hash: user_hash,
                         user_id: state.userid,
                         log_type: log_type,
-                        timestamp: Timex.now(),
+                        timestamp: DateTime.utc_now(),
                         metadata: metadata,
                         contents: contents,
                         size: String.length(contents)

@@ -349,7 +349,7 @@ defmodule TeiserverWeb.Logging.ServerLogController do
   def metric_show(conn, %{"unit" => unit, "date" => date_str}) do
     date = TimexHelper.parse_ymd(date_str)
 
-    if date |> Timex.to_date() == Timex.today() do
+    if date |> DateTime.to_date() == Date.utc_today() do
       conn
       |> redirect(to: ~p"/logging/server/show/#{unit}/today")
     else
@@ -386,7 +386,7 @@ defmodule TeiserverWeb.Logging.ServerLogController do
       end
 
     conn
-    |> assign(:date, Timex.today())
+    |> assign(:date, Date.utc_today())
     |> assign(:data, data)
     |> assign(:unit, unit)
     |> assign(:today, true)

@@ -83,29 +83,29 @@ defmodule Teiserver.Helper.DatePresets do
   def future_dates, do: @future_dates
 
   @spec parse(String.t()) :: Date.t()
-  def parse("Today"), do: Timex.today()
-  def parse("Yesterday"), do: Timex.today() |> Timex.shift(days: -1)
-  def parse("Start of the week"), do: Timex.today() |> Timex.beginning_of_week()
-  def parse("Start of the month"), do: Timex.today() |> Timex.beginning_of_month()
-  def parse("Start of the quarter"), do: Timex.today() |> Timex.beginning_of_quarter()
-  def parse("Start of the year"), do: Timex.today() |> Timex.beginning_of_year()
-  def parse("Start of time"), do: Timex.to_date({1, 1, 1})
+  def parse("Today"), do: Date.utc_today()
+  def parse("Yesterday"), do: Date.utc_today() |> Timex.shift(days: -1)
+  def parse("Start of the week"), do: Date.utc_today() |> Date.beginning_of_week()
+  def parse("Start of the month"), do: Date.utc_today() |> Timex.beginning_of_month()
+  def parse("Start of the quarter"), do: Date.utc_today() |> Timex.beginning_of_quarter()
+  def parse("Start of the year"), do: Date.utc_today() |> Timex.beginning_of_year()
+  def parse("Start of time"), do: DateTime.to_date({1, 1, 1})
 
-  def parse("Tomorrow"), do: Timex.today() |> Timex.shift(days: 1)
+  def parse("Tomorrow"), do: Date.utc_today() |> Timex.shift(days: 1)
 
   def parse("Start of next week"),
-    do: Timex.today() |> Timex.beginning_of_week() |> Timex.shift(weeks: 1)
+    do: Date.utc_today() |> Date.beginning_of_week() |> Timex.shift(weeks: 1)
 
   def parse("Start of next month"),
-    do: Timex.today() |> Timex.beginning_of_month() |> Timex.shift(months: 1)
+    do: Date.utc_today() |> Timex.beginning_of_month() |> Timex.shift(months: 1)
 
   def parse("Start of next quarter"),
-    do: Timex.today() |> Timex.beginning_of_quarter() |> Timex.shift(months: 3)
+    do: Date.utc_today() |> Timex.beginning_of_quarter() |> Timex.shift(months: 3)
 
   def parse("Start of next year"),
-    do: Timex.today() |> Timex.beginning_of_year() |> Timex.shift(years: 1)
+    do: Date.utc_today() |> Timex.beginning_of_year() |> Timex.shift(years: 1)
 
-  def parse("End of time"), do: Timex.to_date({9999, 1, 1})
+  def parse("End of time"), do: DateTime.to_date({9999, 1, 1})
 
   def parse(period), do: parse(period, "", "")
 
@@ -116,10 +116,10 @@ defmodule Teiserver.Helper.DatePresets do
         _parse_named_period(period_name)
 
       start_date == "" ->
-        {Timex.to_date({Timex.today().year, 1, 1}), parse_time_input(end_date)}
+        {DateTime.to_date({Date.utc_today().year, 1, 1}), parse_time_input(end_date)}
 
       end_date == "" ->
-        {parse_time_input(start_date), Timex.shift(Timex.today(), days: 1)}
+        {parse_time_input(start_date), Timex.shift(Date.utc_today(), days: 1)}
 
       true ->
         {
@@ -131,120 +131,120 @@ defmodule Teiserver.Helper.DatePresets do
 
   @spec _parse_named_period(String.t()) :: {Date.t() | DateTime.t(), Date.t() | DateTime.t()}
   def _parse_named_period("This week") do
-    today = Timex.today()
-    start = Timex.beginning_of_week(today)
+    today = Date.utc_today()
+    start = Date.beginning_of_week(today)
 
     {start, Timex.shift(today, weeks: 1)}
   end
 
   def _parse_named_period("Last week") do
-    today = Timex.today()
+    today = Date.utc_today()
 
     start =
-      Timex.beginning_of_week(today)
+      Date.beginning_of_week(today)
       |> Timex.shift(weeks: -1)
 
     {start, Timex.shift(start, weeks: 1)}
   end
 
   def _parse_named_period("Two weeks ago") do
-    today = Timex.today()
+    today = Date.utc_today()
 
     start =
-      Timex.beginning_of_week(today)
+      Date.beginning_of_week(today)
       |> Timex.shift(weeks: -2)
 
     {start, Timex.shift(start, weeks: 1)}
   end
 
   def _parse_named_period("This month") do
-    today = Timex.today()
-    start = Timex.to_date({today.year, today.month, 1})
+    today = Date.utc_today()
+    start = DateTime.to_date({today.year, today.month, 1})
 
     {start, Timex.shift(today, days: 1)}
   end
 
   def _parse_named_period("Last month") do
-    today = Timex.today()
+    today = Date.utc_today()
 
     start =
-      Timex.to_date({today.year, today.month, 1})
+      DateTime.to_date({today.year, today.month, 1})
       |> Timex.shift(months: -1)
 
     {start, Timex.shift(start, months: 1)}
   end
 
   def _parse_named_period("This quarter") do
-    {Timex.beginning_of_quarter(Timex.now()), Timex.end_of_quarter(Timex.now())}
+    {Timex.beginning_of_quarter(DateTime.utc_now()), Timex.end_of_quarter(DateTime.utc_now())}
   end
 
   def _parse_named_period("Last quarter") do
     start =
-      Timex.now()
+      DateTime.utc_now()
       |> Timex.shift(months: -3)
       |> Timex.beginning_of_quarter()
 
-    {start, Timex.beginning_of_quarter(Timex.now())}
+    {start, Timex.beginning_of_quarter(DateTime.utc_now())}
   end
 
   def _parse_named_period("Two months ago") do
-    today = Timex.today()
+    today = Date.utc_today()
 
     start =
-      Timex.to_date({today.year, today.month, 1})
+      DateTime.to_date({today.year, today.month, 1})
       |> Timex.shift(months: -2)
 
     {start, Timex.shift(start, months: 1)}
   end
 
   def _parse_named_period("This year") do
-    today = Timex.today()
-    start = Timex.to_date({today.year, 1, 1})
+    today = Date.utc_today()
+    start = DateTime.to_date({today.year, 1, 1})
 
     {start, Timex.shift(start, years: 1)}
   end
 
   def _parse_named_period("Last year") do
-    today = Timex.today()
+    today = Date.utc_today()
 
     start =
-      Timex.to_date({today.year, 1, 1})
+      DateTime.to_date({today.year, 1, 1})
       |> Timex.shift(years: -1)
 
     {start, Timex.shift(start, years: 1)}
   end
 
   def _parse_named_period("All time") do
-    start = Timex.to_date({1900, 1, 1})
+    start = DateTime.to_date({1900, 1, 1})
 
-    {start, Timex.shift(Timex.today(), years: 1000)}
+    {start, Timex.shift(Date.utc_today(), years: 1000)}
   end
 
   def _parse_named_period("Last 3 months") do
-    today = Timex.today()
+    today = Date.utc_today()
 
     start =
-      Timex.to_date({today.year, today.month, 1})
+      DateTime.to_date({today.year, today.month, 1})
       |> Timex.shift(months: -3)
 
     {start, Timex.shift(today, days: 1)}
   end
 
   def _parse_named_period("Last 6 months") do
-    today = Timex.today()
+    today = Date.utc_today()
 
     start =
-      Timex.to_date({today.year, today.month, 1})
+      DateTime.to_date({today.year, today.month, 1})
       |> Timex.shift(months: -6)
 
     {start, Timex.shift(today, days: 1)}
   end
 
   def _parse_named_period("Last 12 months") do
-    today = Timex.today()
+    today = Date.utc_today()
 
     start =
-      Timex.to_date({today.year, today.month, 1})
+      DateTime.to_date({today.year, today.month, 1})
       |> Timex.shift(months: -12)
 
     {start, Timex.shift(today, days: 1)}

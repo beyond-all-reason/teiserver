@@ -56,7 +56,7 @@
               <% end %>
             </div>
 
-            <%= if @date == Timex.today() do %>
+            <%= if @date == Date.utc_today() do %>
               <h3>Day to day metric: Today so far</h3>
             <% else %>
               <h3>

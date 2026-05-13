@@ -202,7 +202,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
 
   defp get_user_matches(%{assigns: %{user: user}} = socket) do
     # For testing, change the days to a large number to see more matches
-    cutoff = Timex.now() |> Timex.shift(days: -1, hours: -12)
+    cutoff = DateTime.utc_now() |> Timex.shift(days: -1, hours: -12)
     tz = socket.assigns[:tz]
 
     matches =

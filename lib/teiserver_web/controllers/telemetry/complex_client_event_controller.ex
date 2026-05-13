@@ -32,8 +32,8 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
 
     between =
       case timeframe do
-        "day" -> {Timex.now() |> Timex.shift(days: -1), Timex.now()}
-        "week" -> {Timex.now() |> Timex.shift(days: -7), Timex.now()}
+        "day" -> {DateTime.utc_now() |> Timex.shift(days: -1), DateTime.utc_now()}
+        "week" -> {DateTime.utc_now() |> Timex.shift(days: -7), DateTime.utc_now()}
       end
 
     args = [
@@ -63,12 +63,12 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
 
     start_date =
       case timeframe do
-        "Today" -> Timex.today() |> Timex.to_datetime()
-        "Yesterday" -> Timex.today() |> Timex.to_datetime() |> Timex.shift(days: -1)
-        "7 days" -> Timex.now() |> Timex.shift(days: -7)
-        "14 days" -> Timex.now() |> Timex.shift(days: -14)
-        "31 days" -> Timex.now() |> Timex.shift(days: -31)
-        _other -> Timex.now() |> Timex.shift(days: -7)
+        "Today" -> Date.utc_today() |> Timex.to_datetime()
+        "Yesterday" -> Date.utc_today() |> Timex.to_datetime() |> Timex.shift(days: -1)
+        "7 days" -> DateTime.utc_now() |> Timex.shift(days: -7)
+        "14 days" -> DateTime.utc_now() |> Timex.shift(days: -14)
+        "31 days" -> DateTime.utc_now() |> Timex.shift(days: -31)
+        _other -> DateTime.utc_now() |> Timex.shift(days: -7)
       end
 
     one_client_event =
@@ -107,10 +107,10 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
     key = Map.get(params, "key", default_key)
 
     client_data =
-      ComplexClientEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
+      ComplexClientEventQueries.get_aggregate_detail(event_type_id, key, start_date, DateTime.utc_now())
 
     anon_data =
-      ComplexAnonEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
+      ComplexAnonEventQueries.get_aggregate_detail(event_type_id, key, start_date, DateTime.utc_now())
 
     combined_values =
       (Map.keys(client_data) ++ Map.keys(anon_data))
