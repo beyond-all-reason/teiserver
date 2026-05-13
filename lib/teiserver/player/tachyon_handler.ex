@@ -16,6 +16,7 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Tachyon.Handler
+  alias Teiserver.Tachyon.LoginQueue
   alias Teiserver.Tachyon.Schema
 
   require Logger
@@ -24,7 +25,8 @@ defmodule Teiserver.Player.TachyonHandler do
 
   @type state :: %{
           user: T.user(),
-          sess_monitor: reference(),
+          status: :waiting | :admitted,
+          sess_monitor: reference() | nil,
           pending_responses: Handler.pending_responses()
         }
 
@@ -51,19 +53,34 @@ defmodule Teiserver.Player.TachyonHandler do
   @impl Handler
   @spec init(%{user: T.user()}) :: Handler.result()
   def init(initial_state) do
-    # this is inside the process that maintain the connection
-    {:ok, session_pid, sess_state} = setup_session(initial_state.user)
-
-    sess_monitor = Process.monitor(session_pid)
-
-    state =
-      initial_state |> Map.put(:sess_monitor, sess_monitor) |> Map.put(:pending_responses, %{})
-
     user = initial_state.user
     Logger.metadata(actor_type: :connection, actor_id: to_string(user.id))
 
-    event = build_user_self_event(user, sess_state)
-    {:event, "user/self", event, state}
+    if LoginQueue.attempt_login(self(), user.id) do
+      do_admit(initial_state)
+    else
+      state =
+        initial_state
+        |> Map.put(:status, :waiting)
+        |> Map.put(:sess_monitor, nil)
+        |> Map.put(:pending_responses, %{})
+
+      {:ok, state}
+    end
+  end
+
+  defp do_admit(state) do
+    {:ok, session_pid, sess_state} = setup_session(state.user)
+    sess_monitor = Process.monitor(session_pid)
+
+    new_state =
+      state
+      |> Map.put(:status, :admitted)
+      |> Map.put(:sess_monitor, sess_monitor)
+      |> Map.put(:pending_responses, Map.get(state, :pending_responses, %{}))
+
+    event = build_user_self_event(state.user, sess_state)
+    {:event, "user/self", event, new_state}
   end
 
   def force_disconnect(nil), do: :ok
@@ -78,6 +95,10 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   @impl Handler
+  def handle_info({:login_accepted, _user_id}, state) do
+    do_admit(state)
+  end
+
   def handle_info({:DOWN, _ref, :process, _pid, reason}, state) do
     Logger.warning(
       "Session for player went down because #{inspect(reason)}, terminating connection"
@@ -265,6 +286,10 @@ defmodule Teiserver.Player.TachyonHandler do
           term(),
           state()
         ) :: WebSock.handle_result()
+  def handle_command(_command_id, _message_type, _message_id, _message, %{status: :waiting} = state) do
+    {:error_response, :invalid_request, state}
+  end
+
   def handle_command("system/disconnect", "request", _message_id, _message, state) do
     Session.disconnect(state.user.id)
 

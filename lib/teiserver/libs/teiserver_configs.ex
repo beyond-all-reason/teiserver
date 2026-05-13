@@ -308,7 +308,10 @@ defmodule Teiserver.TeiserverConfigs do
       description: "The cap for number of concurrent users",
       default: 1000,
       value_label: "",
-      update_callback: fn rate -> Account.set_login_limit(rate) end
+      update_callback: fn rate ->
+        Account.set_login_limit(rate)
+        Tachyon.LoginQueue.set_limit(rate)
+      end
     })
 
     add_site_config_type(%{
