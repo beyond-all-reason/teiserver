@@ -217,14 +217,6 @@ defmodule TeiserverWeb.Router do
     )
   end
 
-  scope "/", TeiserverWeb.General, as: :ts_general do
-    pipe_through([:browser, :nomenu_layout])
-
-    get("/code_of_conduct", GeneralController, :code_of_conduct)
-    get("/privacy_policy", GeneralController, :gdpr)
-    get("/gdpr", GeneralController, :gdpr)
-  end
-
   scope "/account", TeiserverWeb.Account do
     pipe_through([:live_browser, :app_layout, :protected])
 

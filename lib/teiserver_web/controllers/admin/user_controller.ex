@@ -1170,6 +1170,9 @@ defmodule TeiserverWeb.Admin.UserController do
     page == 0 && Enum.count(users) > 20 && search_term != ""
   end
 
+  @doc """
+  Removes all PII from a user in accordance with GDPR.
+  """
   @spec gdpr_clean(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def gdpr_clean(conn, %{"id" => id}) do
     user = Account.get_user_by_id(id)
