@@ -243,6 +243,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:json_user, json_user)
         |> assign(:cache_user, cache_user)
         |> assign(:extra_cache_keys, extra_cache_keys)
+        |> assign(:has_active_mfa?, has_active_mfa?(user.id))
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
 
