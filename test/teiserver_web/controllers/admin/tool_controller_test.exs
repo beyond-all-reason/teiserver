@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Admin.ToolControllerTest do
   use TeiserverWeb.ConnCase
 
   setup do
-    GeneralTestLib.conn_setup(~w(admin.dev.developer))
+    GeneralTestLib.conn_setup(~w(Server))
   end
 
   test "index", %{conn: conn} do

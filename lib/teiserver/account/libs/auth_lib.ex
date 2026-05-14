@@ -1,6 +1,13 @@
 defmodule Teiserver.Account.AuthLib do
-  @moduledoc false
+  @moduledoc """
+
+  """
+
   alias Phoenix.LiveView
+  alias Phoenix.LiveView.Socket
+  alias Plug.Conn
+  alias Teiserver.Account
+
   require Logger
 
   @spec icon :: String.t()
@@ -60,46 +67,46 @@ defmodule Teiserver.Account.AuthLib do
   end
 
   # If you don't need permissions then lets not bother checking
-  @spec allow?(map() | Plug.Conn.t() | [String.t()], String.t() | [String.t()]) :: boolean
+  @spec allow?(map() | Conn.t() | Socket.t() | User.t(), String.t() | [String.t()]) :: boolean
   def allow?(nil, []), do: false
   def allow?(_permissions, nil), do: true
   def allow?(_permissions, ""), do: true
   def allow?(_permissions, []), do: true
 
   # Handle conn
-  def allow?(%Plug.Conn{} = conn, permission_required) do
-    allow?(conn.assigns[:current_user], permission_required)
+  def allow?(%Conn{} = conn, permissions_required) do
+    %{permissions: permissions_held} = conn.assigns[:current_user]
+
+    permission_test(permissions_held, permissions_required)
   end
 
   # Socket
-  def allow?(%Phoenix.LiveView.Socket{} = socket, permission_required) do
-    allow?(socket.assigns[:current_user], permission_required)
+  def allow?(%Socket{} = socket, permissions_required) do
+    %{permissions: permissions_held} = socket.assigns[:current_user]
+
+    permission_test(permissions_held, permissions_required)
   end
 
   # This allows us to use something with permissions in it
-  def allow?(%{permissions: permissions}, permission_required) do
-    allow?(permissions, permission_required)
+  def allow?(%{permissions: permissions_held}, permissions_required) do
+    permission_test(permissions_held, permissions_required)
   end
 
-  # Handle users
-  def allow?(%{} = user, permission_required) do
-    allow?(user.permissions, permission_required)
-  end
-
-  def allow?(permissions_held, permission_required) when is_list(permission_required) do
+  # The testing of permissions required against permissions held
+  defp permission_test(permissions_held, permission_required) when is_list(permission_required) do
     Enum.all?(
       permission_required,
       fn p ->
-        allow?(permissions_held, p)
+        permission_test(permissions_held, p)
       end
     )
   end
 
-  def allow?(_permissions, "account") do
+  defp permission_test(_permissions, "account") do
     true
   end
 
-  def allow?(permissions_held, permission_required) do
+  defp permission_test(permissions_held, permission_required) do
     Logger.debug(
       "Permission test, has: #{Kernel.inspect(permissions_held)}, needs: #{Kernel.inspect(permission_required)}"
     )
@@ -110,10 +117,7 @@ defmodule Teiserver.Account.AuthLib do
         Logger.debug("AuthLib.allow?() -> No permissions held")
         false
 
-      # Developers always have permission
-      Enum.member?(permissions_held, "admin.dev.developer") && permission_required != "debug" ->
-        true
-
+      # Server devs always have permission
       Enum.member?(permissions_held, "Server") && permission_required != "debug" ->
         true
 
@@ -182,6 +186,14 @@ defmodule Teiserver.Account.AuthLib do
         allow?(permissions_held, p)
       end
     )
+  end
+
+  @doc """
+  Returns true if the user_id in question has an active totp
+  """
+  @spec has_active_mfa?(User.id()) :: boolean()
+  def has_active_mfa?(userid) do
+    Account.get_user_totp_status(userid) == :active
   end
 
   # This is used as part of the permission system getting the current user

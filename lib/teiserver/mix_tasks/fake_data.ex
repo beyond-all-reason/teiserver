@@ -68,7 +68,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         email: "root@localhost",
         password: Account.spring_md5_password("password"),
         roles: ["Server", "Verified"],
-        permissions: ["admin.dev.developer", "Server"],
+        permissions: ["Server"],
         icon: "fa-solid fa-power-off",
         colour: "#00AA00",
         data: %{
