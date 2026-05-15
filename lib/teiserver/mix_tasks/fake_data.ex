@@ -395,14 +395,6 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
               %{
                 team_id: 0,
                 win: match.winning_team == 0,
-                stats: %{
-                  "damageDealt" => :rand.uniform(1000) * 10,
-                  "damageReceived" => :rand.uniform(1000) * 10,
-                  "metalProduced" => :rand.uniform(1000) * 100,
-                  "metalUsed" => :rand.uniform(1000) * 100,
-                  "energyProduced" => :rand.uniform(1000) * 1000,
-                  "energyUsed" => :rand.uniform(1000) * 1000
-                },
                 party_id: get_party_id(num_players),
                 user_id: userid,
                 match_id: match.id
@@ -415,14 +407,6 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
               %{
                 team_id: 1,
                 win: match.winning_team == 1,
-                stats: %{
-                  "damageDealt" => :rand.uniform(1000) * 10,
-                  "damageReceived" => :rand.uniform(1000) * 10,
-                  "metalProduced" => :rand.uniform(1000) * 100,
-                  "metalUsed" => :rand.uniform(1000) * 100,
-                  "energyProduced" => :rand.uniform(1000) * 1000,
-                  "energyUsed" => :rand.uniform(1000) * 1000
-                },
                 party_id: get_party_id(num_players),
                 user_id: userid,
                 match_id: match.id
