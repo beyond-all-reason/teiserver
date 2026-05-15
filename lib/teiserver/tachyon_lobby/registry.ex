@@ -17,8 +17,8 @@ defmodule Teiserver.TachyonLobby.Registry do
   How to reach a given lobby from its ID
   """
   @spec via_tuple(Lobby.id()) :: GenServer.name()
-  def via_tuple(queue_id) do
-    {:via, Registry, {__MODULE__, queue_id}}
+  def via_tuple(lobby_id) do
+    {:via, Registry, {__MODULE__, lobby_id}}
   end
 
   @spec lookup(Lobby.id()) :: pid() | nil
@@ -40,5 +40,12 @@ defmodule Teiserver.TachyonLobby.Registry do
   @spec list_lobbies() :: [{Lobby.id(), pid()}]
   def list_lobbies do
     Registry.select(__MODULE__, [{{:"$1", :"$2", :_}, [], [{{:"$1", :"$2"}}]}])
+  end
+
+  @doc """
+  useful for tests, there shouldn't be a need for that outside testing
+  """
+  def register(lobby_id) do
+    Registry.register(__MODULE__, lobby_id, nil)
   end
 end
