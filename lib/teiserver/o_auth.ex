@@ -114,7 +114,7 @@ defmodule Teiserver.OAuth do
   The token scopes are the same as the application
   """
   @spec create_code(
-          User.t() | T.userid(),
+          User.t(),
           %{
             id: integer(),
             scopes: Application.scopes(),
@@ -128,14 +128,6 @@ defmodule Teiserver.OAuth do
   def create_code(user, attrs, opts \\ [])
 
   def create_code(%User{} = user, attrs, opts) do
-    create_code(user.id, attrs, opts)
-  end
-
-  def create_code(user, attrs, opts) when is_map(user) do
-    create_code(user.id, attrs, opts)
-  end
-
-  def create_code(user_id, attrs, opts) do
     now = Keyword.get(opts, :now, Timex.now())
     app_id = attrs.id
 
@@ -144,7 +136,7 @@ defmodule Teiserver.OAuth do
       # the code for a token
       attrs = %{
         value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(),
-        owner_id: user_id,
+        owner_id: user.id,
         application_id: app_id,
         scopes: attrs.scopes,
         expires_at: Timex.add(now, Duration.from_minutes(5)),
