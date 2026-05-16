@@ -74,7 +74,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
             dt1
 
           dt1, dt2 ->
-            if DateTime.compare($1) == :lt, do: dt1, else: dt2
+            if DateTime.compare(dt1, dt2) == :lt, do: dt1, else: dt2
         end)
 
       expires_as_string = new_restricted_until |> Jason.encode!() |> Jason.decode!()

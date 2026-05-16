@@ -30,12 +30,12 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
         |> Timex.shift(days: 1)
       end
 
-    if DateTime.compare($1) == :lt do
+    if DateTime.compare(date, Date.utc_today()) == :lt do
       run(date, cleanup: true)
 
       new_date = Timex.shift(date, days: 1)
 
-      if DateTime.compare($1) == :lt do
+      if DateTime.compare(new_date, Date.utc_today()) == :lt do
         %{}
         |> __MODULE__.new()
         |> Oban.insert()

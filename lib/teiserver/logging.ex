@@ -315,10 +315,17 @@ defmodule Teiserver.Logging do
 
     recache =
       cond do
-        recache == true -> true
-        last_time == nil -> true
-        DateTime.utc_now() |> Timex.shift(minutes: -15) |> DateTime.compare($1) == :gt -> true
-        true -> false
+        recache == true ->
+          true
+
+        last_time == nil ->
+          true
+
+        DateTime.utc_now() |> Timex.shift(minutes: -15) |> DateTime.compare(last_time) == :gt ->
+          true
+
+        true ->
+          false
       end
 
     if recache do
@@ -491,7 +498,7 @@ defmodule Teiserver.Logging do
       cond do
         force_recache == true -> force_recache
         last_time == nil -> true
-        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare($1) == :gt -> true
+        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare(last_time) == :gt -> true
         true -> false
       end
 
@@ -668,7 +675,7 @@ defmodule Teiserver.Logging do
       cond do
         force_recache == true -> force_recache
         last_time == nil -> true
-        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare($1) == :gt -> true
+        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare(last_time) == :gt -> true
         true -> false
       end
 
@@ -842,7 +849,7 @@ defmodule Teiserver.Logging do
       cond do
         force_recache == true -> force_recache
         last_time == nil -> true
-        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare($1) == :gt -> true
+        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare(last_time) == :gt -> true
         true -> false
       end
 
@@ -1011,7 +1018,7 @@ defmodule Teiserver.Logging do
       cond do
         force_recache == true -> force_recache
         last_time == nil -> true
-        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare($1) == :gt -> true
+        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare(last_time) == :gt -> true
         true -> false
       end
 
@@ -1175,9 +1182,14 @@ defmodule Teiserver.Logging do
 
     recache =
       cond do
-        last_time == nil -> true
-        DateTime.utc_now() |> Timex.shift(minutes: -15) |> DateTime.compare($1) == :gt -> true
-        true -> false
+        last_time == nil ->
+          true
+
+        DateTime.utc_now() |> Timex.shift(minutes: -15) |> DateTime.compare(last_time) == :gt ->
+          true
+
+        true ->
+          false
       end
 
     if recache do
@@ -1210,7 +1222,7 @@ defmodule Teiserver.Logging do
       cond do
         force_recache == true -> true
         last_time == nil -> true
-        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare($1) == :gt -> true
+        DateTime.utc_now() |> Timex.shift(days: -1) |> DateTime.compare(last_time) == :gt -> true
         true -> false
       end
 

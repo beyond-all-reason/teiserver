@@ -31,12 +31,12 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
       date == nil ->
         :ok
 
-      DateTime.compare($1) == :lt ->
+      DateTime.compare(date, Date.utc_today()) == :lt ->
         run(date)
 
         new_date = Timex.shift(date, days: 1)
 
-        if DateTime.compare($1) == :lt do
+        if DateTime.compare(new_date, Date.utc_today()) == :lt do
           %{}
           |> __MODULE__.new()
           |> Oban.insert()

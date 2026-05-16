@@ -34,7 +34,7 @@
           <tr>
             <td>Expires:</td>
 
-            <%= if DateTime.compare($1) == :gt do %>
+            <%= if DateTime.compare(DateTime.utc_now(), @action.expires) == :gt do %>
               <td>Expired</td>
             <% else %>
               <td>{@action.expires |> date_to_str(format: :hms_or_ymd)}</td>

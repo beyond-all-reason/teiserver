@@ -59,7 +59,7 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
         |> Timex.shift(days: 1)
       end
 
-    if DateTime.compare($1) == :gt do
+    if DateTime.compare(date, Date.utc_today()) == :gt do
       conn
       |> assign(:date, date)
       |> put_flash(:danger, "That date is in the future")

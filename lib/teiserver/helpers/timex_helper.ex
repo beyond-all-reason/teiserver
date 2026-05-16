@@ -37,7 +37,7 @@ defmodule Teiserver.Helper.TimexHelper do
   def date_to_str(the_time, args) do
     format = args[:format] || :ymd
     now = args[:now] || DateTime.utc_now()
-    is_past = DateTime.compare($1) == :gt
+    is_past = DateTime.compare(now, the_time) == :gt
 
     until_id =
       case args[:until] do
@@ -111,7 +111,7 @@ defmodule Teiserver.Helper.TimexHelper do
 
   def time_until(the_time, now) do
     the_duration = DateTime.diff(now, the_time, :duration)
-    is_past = DateTime.compare($1) == :gt
+    is_past = DateTime.compare(now, the_time) == :gt
     days = Duration.to_days(the_duration)
 
     # We need to do this as we need days rounded off in the correct
@@ -138,7 +138,7 @@ defmodule Teiserver.Helper.TimexHelper do
   @spec datetime_min(DateTime.t(), DateTime.t()) :: DateTime.t()
   @spec datetime_min(Date.t(), Date.t()) :: Date.t()
   def datetime_min(dt1, dt2) do
-    if DateTime.compare($1) == :lt do
+    if DateTime.compare(dt1, dt2) == :lt do
       dt1
     else
       dt2
@@ -148,7 +148,7 @@ defmodule Teiserver.Helper.TimexHelper do
   @spec datetime_max(DateTime.t(), DateTime.t()) :: DateTime.t()
   @spec datetime_max(Date.t(), Date.t()) :: Date.t()
   def datetime_max(dt1, dt2) do
-    if DateTime.compare($1) == :gt do
+    if DateTime.compare(dt1, dt2) == :gt do
       dt1
     else
       dt2
@@ -157,7 +157,7 @@ defmodule Teiserver.Helper.TimexHelper do
 
   @spec _hms_or_hmsymd(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_hmsymd(the_time, today) do
-    if the_time |> DateTime.to_date() |> DateTime.compare($1) == :eq do
+    if the_time |> DateTime.to_date() |> DateTime.compare(today) == :eq do
       Timex.format!(the_time, "Today at {h24}:{m}:{s}")
     else
       Timex.format!(the_time, "{h24}:{m}:{s} {YYYY}-{0M}-{0D}")
@@ -166,7 +166,7 @@ defmodule Teiserver.Helper.TimexHelper do
 
   @spec _hms_or_ymd(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_ymd(the_time, today) do
-    if the_time |> DateTime.to_date() |> DateTime.compare($1) == :eq do
+    if the_time |> DateTime.to_date() |> DateTime.compare(today) == :eq do
       Calendar.strftime(the_time, "Today at %I:%M:%S")
     else
       Calendar.strftime(the_time, "%Y-%m-%d")
@@ -175,7 +175,7 @@ defmodule Teiserver.Helper.TimexHelper do
 
   @spec _hms_or_hms_ymd(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_hms_ymd(the_time, today) do
-    if the_time |> DateTime.to_date() |> DateTime.compare($1) == :eq do
+    if the_time |> DateTime.to_date() |> DateTime.compare(today) == :eq do
       Timex.format!(the_time, "Today at {h24}:{m}:{s}")
     else
       Timex.format!(the_time, "{h24}:{m}:{s} {YYYY}-{0M}-{0D}")
@@ -184,7 +184,7 @@ defmodule Teiserver.Helper.TimexHelper do
 
   @spec _hms_or_dmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_dmy(the_time, today) do
-    if the_time |> DateTime.to_date() |> DateTime.compare($1) == :eq do
+    if the_time |> DateTime.to_date() |> DateTime.compare(today) == :eq do
       Calendar.strftime(the_time, "Today at %I:%M:%S")
     else
       Calendar.strftime(the_time, "%d/%m/%Y")
@@ -332,7 +332,7 @@ defmodule Teiserver.Helper.TimexHelper do
 
     start
     |> Stream.iterate(&Timex.shift(&1, days: 1))
-    |> Stream.take_while(&(DateTime.compare($1) == :lt))
+    |> Stream.take_while(&(DateTime.compare(&1, last) == :lt))
   end
 
   @doc """
@@ -342,7 +342,7 @@ defmodule Teiserver.Helper.TimexHelper do
   def greater_than(_a, nil), do: true
 
   def greater_than(a, b) do
-    DateTime.compare($1) == :gt
+    DateTime.compare(a, b) == :gt
   end
 
   @doc """
@@ -352,7 +352,7 @@ defmodule Teiserver.Helper.TimexHelper do
   def less_than(_a, nil), do: false
 
   def less_than(a, b) do
-    DateTime.compare($1) == :lt
+    DateTime.compare(a, b) == :lt
   end
 
   def represent_minutes(nil), do: ""

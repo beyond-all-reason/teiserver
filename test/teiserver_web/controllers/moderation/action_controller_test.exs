@@ -160,13 +160,13 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   describe "halt action" do
     test "halts chosen action", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
-      assert DateTime.compare($1) == :gt
+      assert DateTime.compare(action_expires, DateTime.utc_now()) == :gt
 
       conn = put(conn, Routes.moderation_action_path(conn, :halt, action.id))
       assert redirected_to(conn) == Routes.moderation_action_path(conn, :show, action)
 
       action = Moderation.get_action!(action.id)
-      assert DateTime.compare($1) == :lt
+      assert DateTime.compare(action_expires, DateTime.utc_now()) == :lt
     end
 
     test "renders error for halting nil item", %{conn: conn} do

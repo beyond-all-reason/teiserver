@@ -313,7 +313,7 @@ defmodule TeiserverWeb.Account.SessionController do
         |> assign(:result, "Link cannot be found")
         |> render("result.html")
 
-      DateTime.compare($1) == :gt ->
+      DateTime.compare(DateTime.utc_now(), code.expires) == :gt ->
         conn
         |> put_flash(:danger, "Link has expired")
         |> assign(:result, "Link has expired")
@@ -344,7 +344,7 @@ defmodule TeiserverWeb.Account.SessionController do
         |> put_flash(:danger, "Link cannot be found")
         |> redirect(to: "/")
 
-      DateTime.compare($1) == :gt ->
+      DateTime.compare(DateTime.utc_now(), code.expires) == :gt ->
         conn
         |> put_flash(:danger, "Link has expired")
         |> redirect(to: "/")
