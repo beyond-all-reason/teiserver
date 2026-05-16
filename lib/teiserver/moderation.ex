@@ -85,7 +85,8 @@ defmodule Teiserver.Moderation do
       target_id: userid,
       no_result: true,
       closed: false,
-      inserted_after: DateTime.add(DateTime.utc_now(), -ReportLib.get_outstanding_report_max_days(), :day)
+      inserted_after:
+        DateTime.add(DateTime.utc_now(), -ReportLib.get_outstanding_report_max_days(), :day)
     ]
 
     args = Keyword.put(args, :search, search)

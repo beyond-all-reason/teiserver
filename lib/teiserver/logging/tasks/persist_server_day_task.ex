@@ -364,7 +364,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       DateHelper.to_datetime(date) |> DateTime.add(segment_number * @segment_length, :minute)
 
     end_time =
-      DateHelper.to_datetime(date) |> DateTime.add((segment_number + 1) * @segment_length, :minute)
+      DateHelper.to_datetime(date)
+      |> DateTime.add((segment_number + 1) * @segment_length, :minute)
 
     Logging.list_server_minute_logs(
       search: [

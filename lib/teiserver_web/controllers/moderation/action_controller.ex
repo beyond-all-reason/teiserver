@@ -200,7 +200,11 @@ defmodule TeiserverWeb.Moderation.ActionController do
               no_result: true,
               closed: false,
               inserted_after:
-                DateTime.add(DateTime.utc_now(), -ReportLib.get_outstanding_report_max_days(), :day)
+                DateTime.add(
+                  DateTime.utc_now(),
+                  -ReportLib.get_outstanding_report_max_days(),
+                  :day
+                )
             ],
             preload: [:reporter],
             order_by: "Newest first",
@@ -285,7 +289,11 @@ defmodule TeiserverWeb.Moderation.ActionController do
               target_id: user.id,
               no_result: true,
               inserted_after:
-                DateTime.add(DateTime.utc_now(), -ReportLib.get_outstanding_report_max_days(), :day)
+                DateTime.add(
+                  DateTime.utc_now(),
+                  -ReportLib.get_outstanding_report_max_days(),
+                  :day
+                )
             ],
             preload: [:reporter],
             order_by: "Newest first",

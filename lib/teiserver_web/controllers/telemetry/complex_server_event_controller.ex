@@ -84,7 +84,12 @@ defmodule TeiserverWeb.Telemetry.ComplexServerEventController do
     key = Map.get(params, "key", default_key)
 
     server_data =
-      ComplexServerEventQueries.get_aggregate_detail(event_type_id, key, start_date, DateTime.utc_now())
+      ComplexServerEventQueries.get_aggregate_detail(
+        event_type_id,
+        key,
+        start_date,
+        DateTime.utc_now()
+      )
 
     key = Map.get(params, "key", hd(schema_keys ++ [nil]))
 

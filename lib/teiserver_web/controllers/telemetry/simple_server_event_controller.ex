@@ -68,7 +68,11 @@ defmodule TeiserverWeb.Telemetry.SimpleServerEventController do
       end
 
     server_events =
-      SimpleServerEventQueries.get_aggregate_detail(event_type_id, start_datetime, DateTime.utc_now())
+      SimpleServerEventQueries.get_aggregate_detail(
+        event_type_id,
+        start_datetime,
+        DateTime.utc_now()
+      )
       |> Enum.sort_by(fn {_userid, value} -> value end, &>=/2)
       |> Enum.take(500)
       |> Enum.map(fn {userid, value} ->

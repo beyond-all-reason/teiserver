@@ -85,7 +85,12 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
     key = Map.get(params, "key", default_key)
 
     lobby_data =
-      ComplexLobbyEventQueries.get_aggregate_detail(event_type_id, key, start_date, DateTime.utc_now())
+      ComplexLobbyEventQueries.get_aggregate_detail(
+        event_type_id,
+        key,
+        start_date,
+        DateTime.utc_now()
+      )
 
     key = Map.get(params, "key", hd(schema_keys ++ [nil]))
 

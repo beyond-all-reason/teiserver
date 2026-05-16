@@ -119,8 +119,15 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
               bot: false
             },
             inserted_at:
-              DateTime.utc_now() |> DateTime.add(-day, :day) |> DateTime.add(-minutes, :minute) |> time_convert(),
-            updated_at: DateTime.utc_now() |> DateTime.add(-day, :day) |> DateTime.add(-minutes, :minute) |> time_convert()
+              DateTime.utc_now()
+              |> DateTime.add(-day, :day)
+              |> DateTime.add(-minutes, :minute)
+              |> time_convert(),
+            updated_at:
+              DateTime.utc_now()
+              |> DateTime.add(-day, :day)
+              |> DateTime.add(-minutes, :minute)
+              |> time_convert()
           }
         end)
         |> Enum.to_list()
@@ -327,7 +334,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         date =
           Date.utc_today()
           |> Date.add(-day)
-          |> Teiserver.Helper.DateHelper.shift_years(-(@latest_season - MatchRatingLib.active_season()))
+          |> Teiserver.Helper.DateHelper.shift_years(
+            -(@latest_season - MatchRatingLib.active_season())
+          )
 
         users =
           Account.list_users(

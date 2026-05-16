@@ -71,10 +71,18 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
       end
 
     user_data =
-      UserPropertyQueries.get_aggregate_detail(property_type_id, start_datetime, DateTime.utc_now())
+      UserPropertyQueries.get_aggregate_detail(
+        property_type_id,
+        start_datetime,
+        DateTime.utc_now()
+      )
 
     anon_data =
-      AnonPropertyQueries.get_aggregate_detail(property_type_id, start_datetime, DateTime.utc_now())
+      AnonPropertyQueries.get_aggregate_detail(
+        property_type_id,
+        start_datetime,
+        DateTime.utc_now()
+      )
 
     combined_values =
       (Map.keys(user_data) ++ Map.keys(anon_data))

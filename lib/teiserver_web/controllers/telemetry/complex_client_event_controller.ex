@@ -108,10 +108,20 @@ defmodule TeiserverWeb.Telemetry.ComplexClientEventController do
     key = Map.get(params, "key", default_key)
 
     client_data =
-      ComplexClientEventQueries.get_aggregate_detail(event_type_id, key, start_date, DateTime.utc_now())
+      ComplexClientEventQueries.get_aggregate_detail(
+        event_type_id,
+        key,
+        start_date,
+        DateTime.utc_now()
+      )
 
     anon_data =
-      ComplexAnonEventQueries.get_aggregate_detail(event_type_id, key, start_date, DateTime.utc_now())
+      ComplexAnonEventQueries.get_aggregate_detail(
+        event_type_id,
+        key,
+        start_date,
+        DateTime.utc_now()
+      )
 
     combined_values =
       (Map.keys(client_data) ++ Map.keys(anon_data))

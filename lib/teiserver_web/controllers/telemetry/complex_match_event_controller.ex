@@ -84,7 +84,12 @@ defmodule TeiserverWeb.Telemetry.ComplexMatchEventController do
     key = Map.get(params, "key", default_key)
 
     match_data =
-      ComplexMatchEventQueries.get_aggregate_detail(event_type_id, key, start_date, DateTime.utc_now())
+      ComplexMatchEventQueries.get_aggregate_detail(
+        event_type_id,
+        key,
+        start_date,
+        DateTime.utc_now()
+      )
 
     key = Map.get(params, "key", hd(schema_keys ++ [nil]))
 
