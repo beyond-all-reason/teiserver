@@ -9,8 +9,10 @@ defmodule TeiserverWeb.API.Admin.UserController do
   @stat_fields ["mu", "sigma", "play_time", "spec_time", "lobby_time"]
 
   # Roles that may be assigned to users created or refreshed through this API.
-  # `admin.user` is intedned for load-testing tooling, so callers must not be able to mint staff/moderation/management accounts.
-  # Any role outside this allowlist is silently dropped from create requests and blocksrefresh_token requests against pre-existing users.
+  # `admin.user` is intended for load-testing tooling, so callers must not be
+  # able to mint staff/moderation/management accounts. Any role outside this
+  # allowlist is silently dropped from create requests and blocks
+  # refresh_token requests against pre-existing users.
   @api_allowed_roles ~w(
     Default
     Verified
@@ -76,8 +78,9 @@ defmodule TeiserverWeb.API.Admin.UserController do
     end
   end
 
-  # Drop any caller-supplied role outside the allowlist and recompute permissions from the surviving roles.
-  # Caller-supplied permission strings are discarded entirely.
+  # Drop any caller-supplied role outside the allowlist and recompute
+  # permissions from the surviving roles. Caller-supplied permission
+  # strings are discarded entirely.
   defp sanitize_roles_and_permissions(params) do
     roles =
       params

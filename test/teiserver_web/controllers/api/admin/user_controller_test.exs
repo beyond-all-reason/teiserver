@@ -208,7 +208,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       user: user
     } do
       # Promote a target user to a privileged role outside the API allowlist.
-      {:ok, _} =
+      {:ok, _promoted_user} =
         Account.script_update_user(user, %{roles: ["Admin"], permissions: ["Admin"]})
 
       resp =
