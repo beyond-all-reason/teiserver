@@ -102,6 +102,7 @@
   </.menu_card>
 
   <.menu_card
+    :if={allow_any?(@conn, ~w(Admin))}
     icon={Teiserver.OAuth.ApplicationLib.icon()}
     url={~p"/teiserver/admin/oauth_application"}
     size={:small}
@@ -109,7 +110,12 @@
     OAuth applications
   </.menu_card>
 
-  <.menu_card icon={Teiserver.BotLib.icon()} url={~p"/teiserver/admin/bot"} size={:small}>
+  <.menu_card
+    :if={allow_any?(@conn, ~w(Admin))}
+    icon={Teiserver.BotLib.icon()}
+    url={~p"/teiserver/admin/bot"}
+    size={:small}
+  >
     Bots
   </.menu_card>
 

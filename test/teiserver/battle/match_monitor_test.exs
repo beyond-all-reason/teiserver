@@ -4,15 +4,6 @@ defmodule Teiserver.Battle.MatchMonitorTest do
   alias Teiserver.Support.Polling
   use Teiserver.ServerCase, async: false
 
-  import Teiserver.TeiserverTestLib,
-    only: [
-      auth_setup: 1,
-      _send_raw: 2,
-      _recv_raw: 1,
-      _recv_until: 1,
-      start_spring_server: 0
-    ]
-
   setup do
     Battle.start_match_monitor()
 
