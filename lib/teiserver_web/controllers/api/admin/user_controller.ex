@@ -14,15 +14,9 @@ defmodule TeiserverWeb.API.Admin.UserController do
   # allowlist is silently dropped from create requests and blocks
   # refresh_token requests against pre-existing users.
   @api_allowed_roles ~w(
-    Default
     Verified
     Trusted
     BAR+
-    Armada
-    Cortex
-    Legion
-    Raptor
-    Scavenger
     Bot
   )
 

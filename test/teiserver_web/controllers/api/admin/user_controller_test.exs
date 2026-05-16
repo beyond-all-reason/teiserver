@@ -193,14 +193,14 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
         "name" => "permsetter",
         "email" => "permsetter@example.com",
         "password" => "testpassword123",
-        "roles" => ["Default"],
+        "roles" => ["Verified"],
         "permissions" => ["admin.dev.developer", "Moderator", "anything"]
       }
 
       resp = conn |> post(create_user_path(), user_data) |> json_response(200)
 
       # Permissions are derived from the (filtered) roles, not the caller input.
-      assert resp["user"]["permissions"] == ["Default"]
+      assert resp["user"]["permissions"] == ["Verified"]
     end
 
     test "refresh_token refuses to mint tokens for staff accounts", %{
