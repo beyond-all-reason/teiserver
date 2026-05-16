@@ -4,8 +4,8 @@ defmodule Teiserver.Account.AccoladeReport do
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Account.BadgeTypeLib
   alias Teiserver.CacheUser
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.DatePresets
 
   @spec icon() :: String.t()
   def icon, do: AccoladeLib.icon()

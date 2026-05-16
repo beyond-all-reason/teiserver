@@ -11,6 +11,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   alias Teiserver.Battle.MatchMembership
   alias Teiserver.Config
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging.ServerMinuteLog
   alias Teiserver.Logging.Tasks.PersistMatchDayTask
@@ -19,7 +20,6 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   alias Teiserver.Logging.Tasks.PersistServerMonthTask
   alias Teiserver.Moderation.Report
   alias Teiserver.Repo
-  alias Teiserver.Helper.DateHelper
 
   use Mix.Task
 
@@ -334,7 +334,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         date =
           Date.utc_today()
           |> Date.add(-day)
-          |> Teiserver.Helper.DateHelper.shift_years(
+          |> DateHelper.shift_years(
             -(@latest_season - MatchRatingLib.active_season())
           )
 

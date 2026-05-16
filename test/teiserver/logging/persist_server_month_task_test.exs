@@ -45,9 +45,14 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
 
     [u1, u2 | remaining] = user_ids
 
+    ts1 = Date.new!(2021, 1, day) |> DateTime.new!(~T[01:01:00], "Etc/UTC")
+    ts2 = Date.new!(2021, 1, day) |> DateTime.new!(~T[01:02:00], "Etc/UTC")
+    ts3 = Date.new!(2021, 1, day) |> DateTime.new!(~T[01:03:00], "Etc/UTC")
+    ts4 = Date.new!(2021, 1, day) |> DateTime.new!(~T[10:23:00], "Etc/UTC")
+
     [
       %{
-        "timestamp" => DateTime.new!(Date.new!(2021, 1, day), ~T[01:01:00], "Etc/UTC"),
+        "timestamp" => ts1,
         "data" => %{
           "battle" => %{"in_progress" => 1, "lobby" => 2, "total" => 3},
           "client" => %{
@@ -60,7 +65,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
         }
       },
       %{
-        "timestamp" => DateTime.new!(Date.new!(2021, 1, day), ~T[01:02:00], "Etc/UTC"),
+        "timestamp" => ts2,
         "data" => %{
           "battle" => %{"in_progress" => 1, "lobby" => 2, "total" => 3},
           "client" => %{
@@ -73,7 +78,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
         }
       },
       %{
-        "timestamp" => DateTime.new!(Date.new!(2021, 1, day), ~T[01:03:00], "Etc/UTC"),
+        "timestamp" => ts3,
         "data" => %{
           "battle" => %{"in_progress" => 4, "lobby" => 4, "total" => 8},
           "client" => %{
@@ -87,7 +92,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
       },
       # Another segment
       %{
-        "timestamp" => DateTime.new!(Date.new!(2021, 1, day), ~T[10:23:00], "Etc/UTC"),
+        "timestamp" => ts4,
         "data" => %{
           "battle" => %{"in_progress" => 4, "lobby" => 4, "total" => 8},
           "client" => %{

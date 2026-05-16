@@ -1,9 +1,9 @@
 defmodule Teiserver.Telemetry.ExportComplexLobbyEventsTask do
   @moduledoc false
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
   alias Teiserver.Telemetry.ComplexLobbyEvent
-  alias Teiserver.Helper.DateHelper
   import Ecto.Query, warn: false
   import Teiserver.Helper.QueryHelpers
 

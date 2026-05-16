@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.TimeSpentReport do
   @moduledoc false
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.Logging
 
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]

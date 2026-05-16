@@ -1,7 +1,7 @@
 defmodule Teiserver.Telemetry.ExportPropertiesTask do
   @moduledoc false
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
   alias Teiserver.Telemetry.AnonProperty
   alias Teiserver.Telemetry.UserProperty

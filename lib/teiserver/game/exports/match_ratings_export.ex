@@ -18,8 +18,8 @@ defmodule Teiserver.Game.MatchRatingsExport do
   alias Ecto.Adapters.SQL
   alias Teiserver.Battle
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
   require Logger
 

@@ -381,7 +381,9 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
   defp clean_up_logs(date) do
     # Clean up all minute logs older than X days
     before_timestamp =
-      DateHelper.to_datetime(Date.add(date, -@log_keep_days))
+      date
+      |> Date.add(-@log_keep_days)
+      |> DateHelper.to_datetime()
 
     query = """
           DELETE FROM teiserver_server_minute_logs WHERE timestamp < $1

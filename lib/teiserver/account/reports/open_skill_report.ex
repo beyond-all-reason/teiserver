@@ -25,13 +25,13 @@ defmodule Teiserver.Account.OpenSkillReport do
           DateHelper.shift_years(Date.utc_today(), -1000) |> DateHelper.to_datetime()
 
         "7 days" ->
-          DateHelper.to_datetime(Date.add(Date.utc_today(), -7))
+          Date.utc_today() |> Date.add(-7) |> DateHelper.to_datetime()
 
         "31 days" ->
-          DateHelper.to_datetime(Date.add(Date.utc_today(), -31))
+          Date.utc_today() |> Date.add(-31) |> DateHelper.to_datetime()
 
         "180 days" ->
-          DateHelper.to_datetime(Date.add(Date.utc_today(), -180))
+          Date.utc_today() |> Date.add(-180) |> DateHelper.to_datetime()
       end
 
     uncertainty = params["uncertainty"] |> int_parse()

@@ -6,6 +6,7 @@ defmodule TeiserverWeb.Account.SessionController do
   alias Teiserver.Account.UserLib
   alias Teiserver.Config
   alias Teiserver.EmailHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging.Helpers, as: LoggingHelpers
   alias Teiserver.Logging.LoggingPlug
   use TeiserverWeb, :controller
@@ -128,7 +129,7 @@ defmodule TeiserverWeb.Account.SessionController do
              ) do
           diff =
             abs(DateTime.diff(expired_code.expires, DateTime.utc_now()))
-            |> Teiserver.Helper.DateHelper.duration_to_str()
+            |> DateHelper.duration_to_str()
 
           Logger.debug(
             "SessionController.one_time_login User tried to use expired code (expired for #{diff})"

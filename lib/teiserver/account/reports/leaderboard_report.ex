@@ -4,8 +4,8 @@ defmodule Teiserver.Account.LeaderboardReport do
   alias Teiserver.Account
   alias Teiserver.Account.RatingLib
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Repo
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Repo
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()
@@ -22,7 +22,7 @@ defmodule Teiserver.Account.LeaderboardReport do
     limit = params["limit"] |> int_parse()
 
     activity_time =
-      DateHelper.to_datetime(Date.add(Date.utc_today(), -days))
+      Date.utc_today() |> Date.add(-days) |> DateHelper.to_datetime()
 
     type_name = params["game_type"]
 

@@ -40,7 +40,7 @@ defmodule Teiserver.Moderation.Action do
   end
 
   defp adjust_restrictions(%Ecto.Changeset{} = struct) do
-    years = Teiserver.Helper.DateHelper.shift_years(DateTime.utc_now(), 10)
+    years = DateHelper.shift_years(DateTime.utc_now(), 10)
     expires = Changeset.get_field(struct, :expires, [])
     inbound_restrictions = Changeset.get_field(struct, :restrictions, [])
 

@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.WeekOnWeekReport do
   @moduledoc false
-  alias Teiserver.Helper.NumberHelper
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.NumberHelper
   alias Teiserver.Logging
 
   @spec icon() :: String.t()

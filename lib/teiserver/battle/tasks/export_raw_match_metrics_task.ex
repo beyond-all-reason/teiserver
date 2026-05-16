@@ -1,8 +1,8 @@
 defmodule Teiserver.Battle.ExportRawMatchMetricsTask do
   @moduledoc false
   alias Teiserver.Battle
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.DatePresets
 
   def perform(params) do
     {start_date, end_date} =

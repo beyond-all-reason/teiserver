@@ -2,9 +2,9 @@ defmodule Teiserver.Account.UserAgeReport do
   @moduledoc false
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
-  alias Teiserver.Helper.DateHelper
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-chevron-up"

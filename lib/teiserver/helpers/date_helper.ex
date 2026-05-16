@@ -4,7 +4,7 @@ defmodule Teiserver.Helper.DateHelper do
   defp convert(timestamp, tz) do
     case DateTime.shift_zone(timestamp, tz, Tzdata.TimeZoneDatabase) do
       {:ok, new_timestamp} -> new_timestamp
-      _ -> timestamp
+      _error -> timestamp
     end
   end
 
@@ -200,7 +200,10 @@ defmodule Teiserver.Helper.DateHelper do
 
   def parse_dmy(s) do
     [day, month, year] = String.split(s, "/")
-    Date.new!(String.to_integer(year), String.to_integer(month), String.to_integer(day))
+
+    year
+    |> String.to_integer()
+    |> Date.new!(String.to_integer(month), String.to_integer(day))
   end
 
   def parse_ymd(nil), do: nil
@@ -208,7 +211,10 @@ defmodule Teiserver.Helper.DateHelper do
 
   def parse_ymd(s) do
     [year, month, day] = String.split(s, "-")
-    Date.new!(String.to_integer(year), String.to_integer(month), String.to_integer(day))
+
+    year
+    |> String.to_integer()
+    |> Date.new!(String.to_integer(month), String.to_integer(day))
   end
 
   def parse_ymd_hms(nil), do: nil
@@ -219,8 +225,9 @@ defmodule Teiserver.Helper.DateHelper do
     [year, month, day] = String.split(date_str, "-")
     [hour, minute, second] = String.split(time_str, ":")
 
-    NaiveDateTime.new!(
-      String.to_integer(year),
+    year
+    |> String.to_integer()
+    |> NaiveDateTime.new!(
       String.to_integer(month),
       String.to_integer(day),
       String.to_integer(hour),
@@ -333,7 +340,7 @@ defmodule Teiserver.Helper.DateHelper do
   def greater_than(%Date{} = a, %Date{} = b), do: Date.compare(a, b) == :gt
 
   def greater_than(a, b) do
-    DateTime.compare(to_utc_datetime(a), to_utc_datetime(b)) == :gt
+    a |> to_utc_datetime() |> DateTime.compare(to_utc_datetime(b)) == :gt
   end
 
   @doc """
@@ -346,7 +353,7 @@ defmodule Teiserver.Helper.DateHelper do
   def less_than(%Date{} = a, %Date{} = b), do: Date.compare(a, b) == :lt
 
   def less_than(a, b) do
-    DateTime.compare(to_utc_datetime(a), to_utc_datetime(b)) == :lt
+    a |> to_utc_datetime() |> DateTime.compare(to_utc_datetime(b)) == :lt
   end
 
   def represent_minutes(nil), do: ""

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Logging.MatchLogController do
   alias Teiserver.Battle.ExportRawMatchMetricsTask
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.Logging
   alias Teiserver.Logging.MatchGraphLogsTask
   use TeiserverWeb, :controller

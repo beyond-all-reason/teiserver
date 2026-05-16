@@ -1,7 +1,7 @@
 defmodule Teiserver.Moderation.ActivityReport do
   @moduledoc false
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.Moderation
   alias Teiserver.Moderation.BanLib
 
@@ -23,7 +23,7 @@ defmodule Teiserver.Moderation.ActivityReport do
         params["end_date"]
       )
 
-    permanent = Teiserver.Helper.DateHelper.shift_years(DateTime.utc_now(), 100)
+    permanent = DateHelper.shift_years(DateTime.utc_now(), 100)
 
     start_date = DateHelper.to_datetime(start_date)
     end_date = DateHelper.to_datetime(end_date)

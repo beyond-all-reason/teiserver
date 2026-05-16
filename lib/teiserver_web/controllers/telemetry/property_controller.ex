@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Telemetry.PropertyController do
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.AnonPropertyQueries
   alias Teiserver.Telemetry.ExportPropertiesTask
   alias Teiserver.Telemetry.UserPropertyQueries
-  alias Teiserver.Helper.DateHelper
   use TeiserverWeb, :controller
   require Logger
 
@@ -63,7 +63,7 @@ defmodule TeiserverWeb.Telemetry.PropertyController do
     start_datetime =
       case timeframe do
         "Today" -> DateHelper.to_datetime(Date.utc_today())
-        "Yesterday" -> DateTime.add(DateHelper.to_datetime(Date.utc_today()), -1, :day)
+        "Yesterday" -> Date.utc_today() |> DateHelper.to_datetime() |> DateTime.add(-1, :day)
         "7 days" -> DateTime.add(DateTime.utc_now(), -7, :day)
         "14 days" -> DateTime.add(DateTime.utc_now(), -14, :day)
         "31 days" -> DateTime.add(DateTime.utc_now(), -31, :day)

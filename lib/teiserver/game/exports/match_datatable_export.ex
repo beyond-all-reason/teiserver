@@ -16,8 +16,8 @@ defmodule Teiserver.Game.MatchDataTableExport do
   })
   """
   alias Teiserver.Battle
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.DatePresets
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-table"

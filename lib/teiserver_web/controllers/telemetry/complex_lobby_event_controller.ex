@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
   alias Teiserver.Account
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ComplexLobbyEventQueries
   alias Teiserver.Telemetry.ExportComplexLobbyEventsTask
-  alias Teiserver.Helper.DateHelper
   use TeiserverWeb, :controller
   require Logger
 
@@ -60,7 +60,7 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
     start_date =
       case timeframe do
         "Today" -> DateHelper.to_datetime(Date.utc_today())
-        "Yesterday" -> DateTime.add(DateHelper.to_datetime(Date.utc_today()), -1, :day)
+        "Yesterday" -> Date.utc_today() |> DateHelper.to_datetime() |> DateTime.add(-1, :day)
         "7 days" -> DateTime.add(DateTime.utc_now(), -7, :day)
         "14 days" -> DateTime.add(DateTime.utc_now(), -14, :day)
         "31 days" -> DateTime.add(DateTime.utc_now(), -31, :day)

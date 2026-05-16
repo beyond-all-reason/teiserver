@@ -17,8 +17,8 @@ defmodule Teiserver.Game.RatingLogsExport do
   """
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.DatePresets
   require Logger
 
   @spec icon() :: String.t()

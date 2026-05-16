@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Moderation.BanController do
 
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ActionLib
@@ -203,7 +204,7 @@ defmodule TeiserverWeb.Moderation.BanController do
             reason: ban.reason,
             restrictions: ["Login"],
             score_modifier: 0,
-            expires: Teiserver.Helper.DateHelper.shift_years(DateTime.utc_now(), 1000)
+            expires: DateHelper.shift_years(DateTime.utc_now(), 1000)
           })
 
         ActionLib.maybe_create_discord_post(action)

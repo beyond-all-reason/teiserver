@@ -4,8 +4,8 @@ defmodule TeiserverWeb.Battle.MatchController do
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Helper.StylingHelper
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.StylingHelper
 
   use TeiserverWeb, :controller
 

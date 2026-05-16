@@ -1,10 +1,10 @@
 defmodule Teiserver.Telemetry.ExportComplexClientEventsTask do
   @moduledoc false
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
   alias Teiserver.Telemetry.ComplexAnonEvent
   alias Teiserver.Telemetry.ComplexClientEvent
-  alias Teiserver.Helper.DateHelper
   import Ecto.Query, warn: false
   import Teiserver.Helper.QueryHelpers
 
