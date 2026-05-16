@@ -5,16 +5,12 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.ApplicationQueries
-  alias Teiserver.Staff
 
   use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
-    # The policy should be Admin or something fairly high. But while we're
-    # developping the new lobby, it's easier if this is allowed for any
-    # contributors
-    policy: Staff,
+    policy: Teiserver.Staff.Admin,
     action: {Phoenix.Controller, :action_name},
     user: {AuthLib, :current_user}
 
@@ -90,6 +86,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   defp scope_description("tachyon.lobby"), do: "for autohost"
   defp scope_description("admin.map"), do: "for CI, to setup maps data in teiserver"
   defp scope_description("admin.engine"), do: "for CI, to setup engine data in teiserver"
+  defp scope_description("admin.user"), do: "create users programatically. for load testing"
   defp scope_description(_scope), do: nil
 
   @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
