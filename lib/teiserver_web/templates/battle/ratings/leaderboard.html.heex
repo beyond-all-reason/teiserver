@@ -34,7 +34,7 @@
             </thead>
             <tbody>
               <%= if @my_rating do %>
-                <% age = DateTime.diff(DateTime.utc_now(), @my_rating.last_updated, :days) %>
+                <% age = DateTime.diff(DateTime.utc_now(), @my_rating.last_updated, :day) %>
 
                 <tr style={"background-color: #{rgba_css @current_user.colour};"}>
                   <td style={"background-color: #{@current_user.colour}; color: #FFF;"} width="22">
@@ -55,7 +55,7 @@
               <% end %>
 
               <%= for {rating, pos} <- Enum.with_index(@ratings) do %>
-                <% age = DateTime.diff(DateTime.utc_now(), rating.last_updated, :days) %>
+                <% age = DateTime.diff(DateTime.utc_now(), rating.last_updated, :day) %>
 
                 <tr style={"background-color: #{rgba_css rating.user.colour};"}>
                   <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">

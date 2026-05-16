@@ -94,7 +94,7 @@ defmodule Teiserver.Account.LeaderboardReport do
     ratings
     |> Enum.with_index()
     |> Enum.map(fn {rating, index} ->
-      age = DateTime.diff(DateTime.utc_now(), rating.last_updated, :days)
+      age = DateTime.diff(DateTime.utc_now(), rating.last_updated, :day)
 
       extra =
         extra_data[rating.user_id] ||

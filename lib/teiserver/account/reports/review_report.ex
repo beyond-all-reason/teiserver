@@ -34,7 +34,7 @@ defmodule Teiserver.Account.ReviewReport do
       |> Jason.encode!()
       |> Jason.decode!()
 
-    days = DateTime.diff(end_date, start_date, :days)
+    days = Date.diff(end_date, start_date)
     past_end_date = start_date
     past_start_date = Date.add(past_end_date, -days)
 

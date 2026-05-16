@@ -84,7 +84,7 @@
           Uses daily player data to calculate the hours played for all players within the timeframe selected.
         </div>
 
-        <% day_count = DateTime.diff(@data.end_date, @data.start_date, :days) %>
+        <% day_count = Date.diff(@data.end_date, @data.start_date) %>
 
         <h4>
           Date range: {@data.start_date} to {@data.end_date}, {day_count} days
