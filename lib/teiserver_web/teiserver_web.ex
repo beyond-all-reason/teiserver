@@ -70,7 +70,7 @@ defmodule TeiserverWeb do
       import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
       import Teiserver.Helpers.InputHelper
       import Teiserver.Helpers.ComponentHelper
-      import Teiserver.Helper.TimexHelper
+      import Teiserver.Helper.DateHelper
 
       import Teiserver.Config, only: [get_user_config_cache: 2, get_site_config_cache: 1]
 
@@ -125,7 +125,7 @@ defmodule TeiserverWeb do
       import Teiserver.Helper.NumberHelper,
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
 
-      import Teiserver.Helper.TimexHelper
+      import Teiserver.Helper.DateHelper
       alias Teiserver.Helper.StylingHelper
 
       import Teiserver.Account.RecentlyUsedCache,
@@ -205,7 +205,7 @@ defmodule TeiserverWeb do
 
       import Teiserver.Helper.QueryHelpers
       alias Teiserver.Helper.DatePresets
-      import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
+      import Teiserver.Helper.DateHelper, only: [date_to_str: 2]
       import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
     end
   end

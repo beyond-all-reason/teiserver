@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Telemetry.SimpleLobbyEventController do
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ExportSimpleLobbyEventsTask
   alias Teiserver.Telemetry.SimpleLobbyEventQueries
+  alias Teiserver.Helper.DateHelper
   use TeiserverWeb, :controller
   require Logger
 
@@ -29,8 +30,8 @@ defmodule TeiserverWeb.Telemetry.SimpleLobbyEventController do
 
     between =
       case timeframe do
-        "day" -> {DateTime.utc_now() |> Timex.shift(days: -1), DateTime.utc_now()}
-        "week" -> {DateTime.utc_now() |> Timex.shift(days: -7), DateTime.utc_now()}
+        "day" -> {DateTime.add(DateTime.utc_now(), -1, :day), DateTime.utc_now()}
+        "week" -> {DateTime.add(DateTime.utc_now(), -7, :day), DateTime.utc_now()}
       end
 
     args = [
@@ -57,12 +58,12 @@ defmodule TeiserverWeb.Telemetry.SimpleLobbyEventController do
 
     start_datetime =
       case timeframe do
-        "Today" -> Date.utc_today() |> Timex.to_datetime()
-        "Yesterday" -> Date.utc_today() |> Timex.to_datetime() |> Timex.shift(days: -1)
-        "7 days" -> DateTime.utc_now() |> Timex.shift(days: -7)
-        "14 days" -> DateTime.utc_now() |> Timex.shift(days: -14)
-        "31 days" -> DateTime.utc_now() |> Timex.shift(days: -31)
-        _other -> DateTime.utc_now() |> Timex.shift(days: -7)
+        "Today" -> DateHelper.to_datetime(Date.utc_today())
+        "Yesterday" -> DateTime.add(DateHelper.to_datetime(Date.utc_today()), -1, :day)
+        "7 days" -> DateTime.add(DateTime.utc_now(), -7, :day)
+        "14 days" -> DateTime.add(DateTime.utc_now(), -14, :day)
+        "31 days" -> DateTime.add(DateTime.utc_now(), -31, :day)
+        _other -> DateTime.add(DateTime.utc_now(), -7, :day)
       end
 
     lobby_events =

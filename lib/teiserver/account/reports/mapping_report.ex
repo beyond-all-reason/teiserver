@@ -2,6 +2,7 @@ defmodule Teiserver.Game.MappingReport do
   @moduledoc false
   alias Teiserver.Battle
   alias Teiserver.Helper.DatePresets
+  alias Teiserver.Helper.DateHelper
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-map"
@@ -50,8 +51,8 @@ defmodule Teiserver.Game.MappingReport do
     data =
       Battle.list_matches(
         search: [
-          started_after: start_date |> Timex.to_datetime(),
-          started_before: end_date |> Timex.to_datetime(),
+          started_after: DateHelper.to_datetime(start_date),
+          started_before: DateHelper.to_datetime(end_date),
           game_type_in: types,
           rated: rated_filter,
           duration_greater_than: min_duration,

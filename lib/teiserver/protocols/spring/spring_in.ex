@@ -30,7 +30,7 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.SpringTcpServer
   require Logger
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-  import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
+  import Teiserver.Helper.DateHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
 
   @optimisation_level %{
@@ -674,7 +674,7 @@ defmodule Teiserver.Protocols.SpringIn do
               Account.create_code(%{
                 value: ULID.generate(),
                 purpose: "one_time_login",
-                expires: DateTime.utc_now() |> Timex.shift(minutes: 30),
+                expires: DateTime.add(DateTime.utc_now(), 30, :minute),
                 user_id: state.userid,
                 metadata: %{
                   ip: client.ip,

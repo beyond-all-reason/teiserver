@@ -39,7 +39,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     # If a match is never marked as finished after X days, we delete it
     Battle.list_matches(
       search: [
-        inserted_before: Timex.shift(DateTime.utc_now(), days: -get_days()),
+        inserted_before: DateTime.add(DateTime.utc_now(), -get_days(), :day),
         has_started: false,
         rated: false
       ],
@@ -54,7 +54,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     # If a match is never marked as finished after X days, we delete it
     Battle.list_matches(
       search: [
-        inserted_before: Timex.shift(DateTime.utc_now(), days: -get_days()),
+        inserted_before: DateTime.add(DateTime.utc_now(), -get_days(), :day),
         has_started: true,
         has_finished: false,
         rated: false
@@ -73,7 +73,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
 
     # Battle.list_matches(
     #   search: [
-    #     inserted_before: Timex.shift(DateTime.utc_now(), days: -battle_match_rated_days),
+    #     inserted_before: DateTime.add(DateTime.utc_now(), -battle_match_rated_days, :day),
     #     game_type_in: ["Small Team", "Large Team", "Duel", "FFA", "Team FFA"]
     #   ],
     #   search: [:id],
@@ -88,7 +88,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
 
     Battle.list_matches(
       search: [
-        inserted_before: Timex.shift(DateTime.utc_now(), days: -battle_match_unrated_days),
+        inserted_before: DateTime.add(DateTime.utc_now(), -battle_match_unrated_days, :day),
         rated: false
       ],
       search: [:id],
@@ -168,11 +168,11 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
   defp strip_data_from_older_matches do
     finished_before =
       DateTime.utc_now()
-      |> Timex.shift(days: -@strip_data_days)
+      |> DateTime.add(-@strip_data_days, :day)
 
     finished_after =
       DateTime.utc_now()
-      |> Timex.shift(days: -(@strip_data_days + 3))
+      |> DateTime.add(-(@strip_data_days + 3), :day)
 
     query = """
           UPDATE teiserver_battle_matches SET tags = '{}', data = '{}'

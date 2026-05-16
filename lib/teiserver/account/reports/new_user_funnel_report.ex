@@ -4,6 +4,7 @@ defmodule Teiserver.Account.NewUserFunnelReport do
   alias Teiserver.Battle
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ComplexClientEventTypeLib
+  alias Teiserver.Helper.DateHelper
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-filter"
@@ -13,10 +14,7 @@ defmodule Teiserver.Account.NewUserFunnelReport do
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, _params) do
-    start_date =
-      Date.utc_today()
-      |> Timex.shift(days: -14)
-      |> Timex.to_datetime()
+    start_date = DateHelper.to_datetime(Date.add(Date.utc_today(), -14))
 
     # Get accounts registered in this timeframe, they are our population for this report
     accounts =

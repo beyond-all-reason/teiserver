@@ -4,11 +4,12 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
   Provides aggregate data about matches which took place within a given timeframe
   """
   alias Teiserver.Battle
+  alias Teiserver.Helper.DateHelper
 
   @spec perform(Date.t()) :: map()
   @spec perform(Date.t(), Date.t()) :: map()
   def perform(start_date) do
-    perform(start_date, Timex.shift(start_date, days: 1))
+    perform(start_date, Date.add(start_date, 1))
   end
 
   def perform(start_date, end_date) do
@@ -33,8 +34,8 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
 
   @spec get_matches(Date.t(), Date.t()) :: [map()]
   defp get_matches(start_date, end_date) do
-    start_date = Timex.to_datetime(start_date)
-    end_date = Timex.to_datetime(end_date)
+    start_date = DateHelper.to_datetime(start_date)
+    end_date = DateHelper.to_datetime(end_date)
 
     Battle.list_matches(
       search: [

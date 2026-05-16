@@ -1,6 +1,7 @@
 defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
   @moduledoc false
 
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Logging.ServerDayLogLib
   alias Teiserver.Logging.Tasks.PersistServerYearTask
@@ -45,8 +46,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
           logs =
             Logging.list_server_day_logs(
               search: [
-                start_date: Timex.beginning_of_year(log.date),
-                end_date: Timex.end_of_year(log.date)
+                start_date: DateHelper.beginning_of_year(log.date),
+                end_date: DateHelper.end_of_year(log.date)
               ],
               limit: 366
             )
@@ -54,8 +55,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
           user_activity_logs =
             Logging.list_user_activity_day_logs(
               search: [
-                start_date: Timex.beginning_of_year(log.date),
-                end_date: Timex.end_of_year(log.date)
+                start_date: DateHelper.beginning_of_year(log.date),
+                end_date: DateHelper.end_of_year(log.date)
               ],
               limit: 366
             )
@@ -68,7 +69,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
           {:ok, _log} =
             Logging.create_server_year_log(%{
               year: log_year,
-              date: Timex.beginning_of_year(log.date),
+              date: DateHelper.beginning_of_year(log.date),
               data: data
             })
         end
@@ -80,7 +81,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
 
   # For when we have an existing log
   defp perform_standard(log_date) do
-    new_date = Timex.shift(log_date, years: 1)
+    new_date = DateHelper.shift_years(log_date, 1)
 
     today_year = Date.utc_today().year
 
@@ -88,8 +89,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
       logs =
         Logging.list_server_day_logs(
           search: [
-            start_date: Timex.beginning_of_year(new_date),
-            end_date: Timex.end_of_year(new_date)
+            start_date: DateHelper.beginning_of_year(new_date),
+            end_date: DateHelper.end_of_year(new_date)
           ],
           limit: 366
         )
@@ -97,8 +98,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
       user_activity_logs =
         Logging.list_user_activity_day_logs(
           search: [
-            start_date: Timex.beginning_of_year(new_date),
-            end_date: Timex.end_of_year(new_date)
+            start_date: DateHelper.beginning_of_year(new_date),
+            end_date: DateHelper.end_of_year(new_date)
           ],
           limit: 366
         )
@@ -126,14 +127,14 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
     user_activity_logs =
       Logging.list_user_activity_day_logs(
         search: [
-          start_date: Timex.beginning_of_year(now)
+          start_date: DateHelper.beginning_of_year(now)
         ],
         limit: 366
       )
 
     Logging.list_server_day_logs(
       search: [
-        start_date: Timex.beginning_of_year(now)
+        start_date: DateHelper.beginning_of_year(now)
       ],
       limit: 366
     )

@@ -5,7 +5,6 @@ defmodule Teiserver.OAuthFixtures do
   alias Teiserver.OAuth.Credential
   alias Teiserver.OAuth.Token
   alias Teiserver.Repo
-  alias Timex.Duration
 
   def app_attrs(owner_id) do
     %{
@@ -35,7 +34,7 @@ defmodule Teiserver.OAuthFixtures do
       owner_id: user_id,
       application_id: app.id,
       scopes: app.scopes,
-      expires_at: Timex.add(now, Duration.from_minutes(5)),
+      expires_at: DateTime.add(now, 5, :minute),
       redirect_uri: List.first(app.redirect_uris),
       challenge: challenge,
       challenge_method: method,
@@ -55,7 +54,7 @@ defmodule Teiserver.OAuthFixtures do
       owner_id: user_id,
       application_id: application.id,
       scopes: application.scopes,
-      expires_at: Timex.add(now, Duration.from_days(60)),
+      expires_at: DateTime.add(now, 60, :day),
       type: :access,
       refresh_token: nil
     }

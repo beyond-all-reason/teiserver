@@ -2,6 +2,7 @@ defmodule Teiserver.Account.VerifiedReport do
   @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Helper.DatePresets
+  alias Teiserver.Helper.DateHelper
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-check"
@@ -21,7 +22,7 @@ defmodule Teiserver.Account.VerifiedReport do
         params["end_date"]
       )
 
-    start_date = Timex.to_datetime(start_date)
+    start_date = DateHelper.to_datetime(start_date)
 
     data =
       Account.list_users(

@@ -1,6 +1,7 @@
 defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
   @moduledoc false
 
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Logging.Tasks.PersistUserActivityDayTask
   alias Teiserver.Repo
@@ -22,15 +23,15 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
         |> DateTime.to_date()
       else
         last_date
-        |> Timex.shift(days: 1)
+        |> Date.add(1)
       end
 
-    if DateTime.compare(date, Date.utc_today()) == :lt do
+    if Date.compare(date, Date.utc_today()) == :lt do
       run(date)
 
-      new_date = Timex.shift(date, days: 1)
+      new_date = Date.add(date, 1)
 
-      if DateTime.compare(new_date, Date.utc_today()) == :lt do
+      if Date.compare(new_date, Date.utc_today()) == :lt do
         %{}
         |> PersistUserActivityDayTask.new()
         |> Oban.insert()
@@ -50,7 +51,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
     # Delete old log if it exists
     delete_query =
       from logs in Teiserver.Logging.UserActivityDayLog,
-        where: logs.date == ^(date |> DateTime.to_date())
+        where: logs.date == ^date
 
     Repo.delete_all(delete_query)
 
@@ -65,8 +66,8 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
 
   @spec get_logs(Date.t()) :: list()
   defp get_logs(date) do
-    start_time = date |> Timex.to_datetime()
-    end_time = start_time |> Timex.shift(days: 1)
+    start_time = DateHelper.to_datetime(date)
+    end_time = DateTime.add(start_time, 1, :day)
 
     Logging.list_server_minute_logs(
       search: [

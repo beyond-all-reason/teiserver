@@ -4,7 +4,6 @@ defmodule Teiserver.OAuth.CodeTest do
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
   alias Teiserver.TeiserverTestLib
-  alias Timex.Duration
   use Teiserver.DataCase, async: true
 
   setup do
@@ -29,7 +28,7 @@ defmodule Teiserver.OAuth.CodeTest do
   end
 
   test "cannot retrieve expired code", %{user: user, app: app} do
-    yesterday = Timex.shift(DateTime.utc_now(), days: -1)
+    yesterday = DateTime.add(DateTime.utc_now(), -1, :day)
     assert {:ok, code, _attrs} = create_code(user, app, expires_at: yesterday)
     assert {:error, :expired} = OAuth.get_valid_code(code.value)
   end
@@ -61,7 +60,7 @@ defmodule Teiserver.OAuth.CodeTest do
   end
 
   test "cannot exchange expired code for token", %{user: user, app: app} do
-    yesterday = Timex.shift(DateTime.utc_now(), days: -1)
+    yesterday = DateTime.add(DateTime.utc_now(), -1, :day)
     assert {:ok, code, attrs} = create_code(user, app, expires_at: yesterday)
     assert {:error, :expired} = OAuth.exchange_code(code, attrs._verifier)
   end
@@ -143,7 +142,7 @@ defmodule Teiserver.OAuth.CodeTest do
 
   defp create_code_attrs(user, app, opts \\ []) do
     expires_at =
-      Keyword.get(opts, :expires_at, Timex.add(DateTime.utc_now(), Duration.from_days(1)))
+      Keyword.get(opts, :expires_at, DateTime.add(DateTime.utc_now(), 1, :day))
 
     OAuthFixtures.code_attrs(user.id, app)
     |> Map.put(:expires_at, expires_at)

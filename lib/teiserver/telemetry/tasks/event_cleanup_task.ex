@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.EventCleanupTask do
   def perform(_job) do
     days = Application.get_env(:teiserver, Teiserver)[:retention][:telemetry_events]
 
-    before_timestamp = Timex.shift(DateTime.utc_now(), days: -days)
+    before_timestamp = DateTime.add(DateTime.utc_now(), -days, :day)
 
     [
       "DELETE FROM telemetry_complex_client_events WHERE timestamp < $1",

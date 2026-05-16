@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.TimeCompareReport do
   @moduledoc false
   alias Teiserver.Account
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
 
@@ -26,8 +26,8 @@ defmodule Teiserver.Account.TimeCompareReport do
     {start_date, end_date} =
       case HumanTime.relative(params["the_date"]) do
         {:ok, datetime} ->
-          start_date = Timex.beginning_of_day(datetime)
-          end_date = Timex.shift(start_date, days: 1)
+          start_date = DateHelper.beginning_of_day(datetime)
+          end_date = DateTime.add(start_date, 1, :day)
 
           {start_date, end_date}
 
@@ -50,7 +50,7 @@ defmodule Teiserver.Account.TimeCompareReport do
   end
 
   defp get_data(%{"tabular" => "true"} = params, {start_date, end_date}) do
-    end_date = end_date |> Timex.shift(days: 7)
+    end_date = DateTime.add(end_date, 7, :day)
     logs = get_logs(params, {start_date, end_date})
 
     usernames =
@@ -71,7 +71,7 @@ defmodule Teiserver.Account.TimeCompareReport do
 
     keys =
       logs
-      |> Enum.map(fn {ts, _data} -> TimexHelper.date_to_str(ts, format: :hms) end)
+      |> Enum.map(fn {ts, _data} -> DateHelper.date_to_str(ts, format: :hms) end)
 
     usernames =
       params

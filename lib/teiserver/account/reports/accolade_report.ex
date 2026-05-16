@@ -5,6 +5,7 @@ defmodule Teiserver.Account.AccoladeReport do
   alias Teiserver.Account.BadgeTypeLib
   alias Teiserver.CacheUser
   alias Teiserver.Helper.DatePresets
+  alias Teiserver.Helper.DateHelper
 
   @spec icon() :: String.t()
   def icon, do: AccoladeLib.icon()
@@ -32,8 +33,8 @@ defmodule Teiserver.Account.AccoladeReport do
     accolades =
       Account.list_accolades(
         search: [
-          inserted_after: start_date |> Timex.to_datetime(),
-          inserted_before: end_date |> Timex.to_datetime()
+          inserted_after: DateHelper.to_datetime(start_date),
+          inserted_before: DateHelper.to_datetime(end_date)
         ],
         limit: :infinity
       )

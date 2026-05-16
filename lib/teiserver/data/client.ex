@@ -9,7 +9,7 @@
 defmodule Teiserver.Client do
   @moduledoc false
 
-  # alias Teiserver.Helper.TimexHelper
+  # alias Teiserver.Helper.DateHelper
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth

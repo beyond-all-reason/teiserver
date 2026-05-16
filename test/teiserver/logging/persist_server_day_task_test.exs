@@ -16,9 +16,9 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
     assert :ok == PersistServerDayTask.perform(%{})
 
     # Now ensure it ran
-    log = {2021, 1, 1} |> DateTime.to_date() |> Logging.get_server_day_log()
+    log = Date.new!(2021, 1, 1) |> Logging.get_server_day_log()
 
-    assert log.date == DateTime.to_date({2021, 1, 1})
+    assert log.date == Date.new!(2021, 1, 1)
     assert is_integer(log.data["aggregates"]["minutes"]["lobby"])
   end
 
@@ -40,7 +40,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
 
     [
       %{
-        "timestamp" => Timex.to_datetime({{2021, 1, 1}, {1, 1, 0}}, :local),
+        "timestamp" => DateTime.new!(~D[2021-01-01], ~T[01:01:00], "Etc/UTC"),
         "data" => %{
           "battle" => %{"in_progress" => 1, "lobby" => 2, "total" => 3},
           "client" => %{
@@ -53,7 +53,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
         }
       },
       %{
-        "timestamp" => Timex.to_datetime({{2021, 1, 1}, {1, 2, 0}}, :local),
+        "timestamp" => DateTime.new!(~D[2021-01-01], ~T[01:02:00], "Etc/UTC"),
         "data" => %{
           "battle" => %{"in_progress" => 1, "lobby" => 2, "total" => 3},
           "client" => %{
@@ -66,7 +66,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
         }
       },
       %{
-        "timestamp" => Timex.to_datetime({{2021, 1, 1}, {1, 3, 0}}, :local),
+        "timestamp" => DateTime.new!(~D[2021-01-01], ~T[01:03:00], "Etc/UTC"),
         "data" => %{
           "battle" => %{"in_progress" => 4, "lobby" => 4, "total" => 8},
           "client" => %{
@@ -80,7 +80,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
       },
       # Another segment
       %{
-        "timestamp" => Timex.to_datetime({{2021, 1, 1}, {10, 23, 0}}, :local),
+        "timestamp" => DateTime.new!(~D[2021-01-01], ~T[10:23:00], "Etc/UTC"),
         "data" => %{
           "battle" => %{"in_progress" => 4, "lobby" => 4, "total" => 8},
           "client" => %{

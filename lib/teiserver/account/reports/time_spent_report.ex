@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.TimeSpentReport do
   @moduledoc false
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
 
   import Teiserver.Helper.StringHelper, only: [get_hash_id: 1]
@@ -67,7 +67,7 @@ defmodule Teiserver.Account.TimeSpentReport do
 
     keys =
       columns
-      |> Enum.map(fn %{"key" => key} -> key |> TimexHelper.date_to_str(format: :ymd) end)
+      |> Enum.map(fn %{"key" => key} -> key |> DateHelper.date_to_str(format: :ymd) end)
 
     %{
       lines: lines,

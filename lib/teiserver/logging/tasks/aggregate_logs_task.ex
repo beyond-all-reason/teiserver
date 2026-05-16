@@ -15,7 +15,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
 
   @log_keep_period 180
   # Oban.insert(Teiserver.Logging.AggregateViewLogsTask.new(%{}))
-  # Teiserver.Logging.AggregateViewLogsTask.run(Date.utc_today() |> Timex.shift(days: -1))
+  # Teiserver.Logging.AggregateViewLogsTask.run(Date.add(Date.utc_today(), -1))
 
   @impl Oban.Worker
   def perform(_job) do
@@ -23,19 +23,21 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
 
     date =
       if last_date == nil do
-        Logging.get_first_page_view_log_date()
-        |> DateTime.to_date()
+        case Logging.get_first_page_view_log_date() do
+          nil -> nil
+          dt -> NaiveDateTime.to_date(dt)
+        end
       else
         last_date
-        |> Timex.shift(days: 1)
+        |> Date.add(1)
       end
 
-    if DateTime.compare(date, Date.utc_today()) == :lt do
+    if date != nil and Date.compare(date, Date.utc_today()) == :lt do
       run(date, cleanup: true)
 
-      new_date = Timex.shift(date, days: 1)
+      new_date = Date.add(date, 1)
 
-      if DateTime.compare(new_date, Date.utc_today()) == :lt do
+      if Date.compare(new_date, Date.utc_today()) == :lt do
         %{}
         |> __MODULE__.new()
         |> Oban.insert()
@@ -72,7 +74,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
     # Delete old log if it exists
     delete_query =
       from logs in AggregateViewLog,
-        where: logs.date == ^(date |> DateTime.to_date())
+        where: logs.date == ^date
 
     Repo.delete_all(delete_query)
 
@@ -85,7 +87,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
   defp get_logs(date) do
     PageViewLogLib.get_page_view_logs()
     |> PageViewLogLib.search(start_date: date)
-    |> PageViewLogLib.search(end_date: Timex.shift(date, days: 1))
+    |> PageViewLogLib.search(end_date: Date.add(date, 1))
   end
 
   defp get_total_views(logs) do
@@ -220,7 +222,7 @@ defmodule Teiserver.Logging.AggregateViewLogsTask do
 
   defp clean_up_logs(date) do
     PageViewLogLib.get_page_view_logs()
-    |> PageViewLogLib.search(end_date: Timex.shift(date, days: -@log_keep_period))
+    |> PageViewLogLib.search(end_date: Date.add(date, -@log_keep_period))
     |> Repo.delete_all()
   end
 end

@@ -4,6 +4,7 @@ defmodule Teiserver.Account.UserAgeReport do
   alias Teiserver.Account
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
+  alias Teiserver.Helper.DateHelper
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-chevron-up"
@@ -43,8 +44,8 @@ defmodule Teiserver.Account.UserAgeReport do
         params["end_date"]
       )
 
-    start_date = start_date |> Timex.to_datetime()
-    end_date = end_date |> Timex.to_datetime()
+    start_date = DateHelper.to_datetime(start_date)
+    end_date = DateHelper.to_datetime(end_date)
 
     type_where =
       case params["game_type"] do

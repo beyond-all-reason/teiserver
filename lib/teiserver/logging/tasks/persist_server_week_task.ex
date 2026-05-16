@@ -1,6 +1,7 @@
 defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
   @moduledoc false
 
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Logging.ServerDayLogLib
   alias Teiserver.Logging.Tasks.PersistServerWeekTask
@@ -39,8 +40,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
 
     case first_logs do
       [log] ->
-        {today_year, today_week} = Date.utc_today() |> Timex.iso_week()
-        {log_year, log_week} = log.date |> Timex.iso_week()
+        {today_year, today_week} = Date.utc_today() |> DateHelper.iso_week()
+        {log_year, log_week} = log.date |> DateHelper.iso_week()
 
         if log_year < today_year or log_week < today_week do
           logs =
@@ -80,10 +81,10 @@ defmodule Teiserver.Logging.Tasks.PersistServerWeekTask do
 
   # For when we have an existing log
   defp perform_standard(log_date) do
-    new_date = Timex.shift(log_date, days: 7)
+    new_date = Date.add(log_date, 7)
 
-    {new_year, new_week} = new_date |> Timex.iso_week()
-    {today_year, today_week} = Date.utc_today() |> Timex.iso_week()
+    {new_year, new_week} = new_date |> DateHelper.iso_week()
+    {today_year, today_week} = Date.utc_today() |> DateHelper.iso_week()
 
     if new_year < today_year or new_week < today_week do
       logs =

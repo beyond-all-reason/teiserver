@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Logging.MatchLogController do
   alias Teiserver.Battle.ExportRawMatchMetricsTask
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Logging.MatchGraphLogsTask
   use TeiserverWeb, :controller
@@ -38,9 +38,9 @@ defmodule TeiserverWeb.Logging.MatchLogController do
 
   @spec day_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_show(conn, %{"date" => date_str}) do
-    date = TimexHelper.parse_ymd(date_str)
+    date = DateHelper.parse_ymd(date_str)
 
-    if date |> DateTime.to_date() == Date.utc_today() do
+    if date == Date.utc_today() do
       conn
       |> redirect(to: ~p"/logging/match/day_metrics/today")
     else
@@ -105,7 +105,7 @@ defmodule TeiserverWeb.Logging.MatchLogController do
 
     key =
       logs
-      |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
+      |> Enum.map(fn log -> log.date |> DateHelper.date_to_str(format: :ymd) end)
 
     conn
     |> assign(:params, params)
@@ -201,7 +201,7 @@ defmodule TeiserverWeb.Logging.MatchLogController do
 
     key =
       logs
-      |> Enum.map(fn log -> {log.year, log.month, 1} |> TimexHelper.date_to_str(format: :ymd) end)
+      |> Enum.map(fn log -> {log.year, log.month, 1} |> DateHelper.date_to_str(format: :ymd) end)
 
     conn
     |> assign(:params, params)

@@ -18,7 +18,7 @@ defmodule Teiserver.Account.RetentionRateExport do
 
   alias Teiserver.Account
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
 
   require Logger
@@ -51,9 +51,9 @@ defmodule Teiserver.Account.RetentionRateExport do
         params["end_date"]
       )
 
-    start_datetime = Timex.to_datetime(start_date)
-    end_datetime = Timex.to_datetime(end_date)
-    today_datetime = Date.utc_today() |> Timex.to_datetime()
+    start_datetime = DateHelper.to_datetime(start_date)
+    end_datetime = DateHelper.to_datetime(end_date)
+    today_datetime = DateHelper.to_datetime(Date.utc_today())
 
     end_datetime =
       if DateTime.compare(today_datetime, end_datetime) == :gt do
@@ -88,14 +88,14 @@ defmodule Teiserver.Account.RetentionRateExport do
       )
       |> Enum.group_by(
         fn user ->
-          DateTime.to_date(user.inserted_at)
+          NaiveDateTime.to_date(user.inserted_at)
         end,
         fn user ->
           to_string(user.id)
         end
       )
       |> Enum.map(fn {key, userids} -> {key, userids} end)
-      |> Enum.sort_by(fn {key, _userids} -> TimexHelper.date_to_str(key, format: :ymd) end, &<=/2)
+      |> Enum.sort_by(fn {key, _userids} -> DateHelper.date_to_str(key, format: :ymd) end, &<=/2)
 
     data = build_table(day_logs, accounts_by_insert_date)
 
@@ -111,7 +111,7 @@ defmodule Teiserver.Account.RetentionRateExport do
       [
         "Date",
         "Registration count"
-      ] ++ for(d <- dates, do: TimexHelper.date_to_str(d, format: :ymd))
+      ] ++ for(d <- dates, do: DateHelper.date_to_str(d, format: :ymd))
     ]
 
     headings ++ output
@@ -140,7 +140,7 @@ defmodule Teiserver.Account.RetentionRateExport do
   defp return_content(data, %{"format" => "csv"} = params) do
     dates =
       Map.keys(data)
-      |> Enum.sort_by(fn key -> TimexHelper.date_to_str(key, format: :ymd) end, &<=/2)
+      |> Enum.sort_by(fn key -> DateHelper.date_to_str(key, format: :ymd) end, &<=/2)
 
     csv_output =
       dates
@@ -148,7 +148,7 @@ defmodule Teiserver.Account.RetentionRateExport do
         row = data[date]
 
         [
-          TimexHelper.date_to_str(date, format: :ymd),
+          DateHelper.date_to_str(date, format: :ymd),
           row.registration_count
         ] ++ for d <- dates, do: make_csv_cell(d, row, params)
       end)

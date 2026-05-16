@@ -3,6 +3,7 @@ defmodule Teiserver.Account.RetentionReport do
   alias Teiserver.Account
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Logging
+  alias Teiserver.Helper.DateHelper
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-campground"
@@ -33,7 +34,7 @@ defmodule Teiserver.Account.RetentionReport do
         params["end_date"]
       )
 
-    start_datetime = Timex.to_datetime(start_date)
+    start_datetime = DateHelper.to_datetime(start_date)
 
     day_logs =
       Logging.list_user_activity_day_logs(

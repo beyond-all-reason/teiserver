@@ -4,6 +4,7 @@ defmodule Teiserver.Telemetry.ExportComplexClientEventsTask do
   alias Teiserver.Repo
   alias Teiserver.Telemetry.ComplexAnonEvent
   alias Teiserver.Telemetry.ComplexClientEvent
+  alias Teiserver.Helper.DateHelper
   import Ecto.Query, warn: false
   import Teiserver.Helper.QueryHelpers
 
@@ -11,8 +12,8 @@ defmodule Teiserver.Telemetry.ExportComplexClientEventsTask do
   def perform(%{"event_types" => event_types, "timeframe" => timeframe, "auth" => auth}) do
     {start_date, end_date} = DatePresets.parse(timeframe, "", "")
 
-    start_date = Timex.to_datetime(start_date)
-    end_date = Timex.to_datetime(end_date)
+    start_date = DateHelper.to_datetime(start_date)
+    end_date = DateHelper.to_datetime(end_date)
 
     case auth do
       "auth" ->

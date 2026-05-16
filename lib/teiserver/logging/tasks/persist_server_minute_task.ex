@@ -12,7 +12,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
   def perform(_job) do
     if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
          true do
-      now = DateTime.utc_now() |> Timex.set(microsecond: 0)
+      now = %{DateTime.utc_now() | microsecond: {0, 0}}
 
       case Logging.get_server_minute_log(now) do
         nil ->

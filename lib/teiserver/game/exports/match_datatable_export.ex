@@ -17,7 +17,7 @@ defmodule Teiserver.Game.MatchDataTableExport do
   """
   alias Teiserver.Battle
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-table"
@@ -50,8 +50,8 @@ defmodule Teiserver.Game.MatchDataTableExport do
     csv_data =
       Battle.list_matches(
         search: [
-          started_after: start_date |> Timex.to_datetime(),
-          finished_before: end_date |> Timex.to_datetime(),
+          started_after: DateHelper.to_datetime(start_date),
+          finished_before: DateHelper.to_datetime(end_date),
           game_type: game_type,
           of_interest: true
         ],
@@ -82,7 +82,7 @@ defmodule Teiserver.Game.MatchDataTableExport do
       match.queue_id,
       match.rating_type_id,
       match.game_duration,
-      TimexHelper.date_to_str(match.started, format: :ymd_hms)
+      DateHelper.date_to_str(match.started, format: :ymd_hms)
     ]
   end
 

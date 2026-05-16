@@ -5,7 +5,6 @@ defmodule Teiserver.OAuth.TokenTest do
   alias Teiserver.OAuthFixtures
   alias Teiserver.Repo
   alias Teiserver.TeiserverTestLib
-  alias Timex.Duration
   use Teiserver.DataCase, async: true
 
   setup do
@@ -59,7 +58,7 @@ defmodule Teiserver.OAuth.TokenTest do
   end
 
   test "cannot get expired token", %{user: user, app: app} do
-    yesterday = Timex.shift(DateTime.utc_now(), days: -1)
+    yesterday = DateTime.add(DateTime.utc_now(), -1, :day)
     assert {:ok, token} = OAuth.create_token(user, app, now: yesterday, scopes: app.scopes)
     assert {:error, :expired} = OAuth.get_valid_token(token.value)
   end
@@ -116,7 +115,7 @@ defmodule Teiserver.OAuth.TokenTest do
 
   defp create_token(user, app, opts) do
     expires_at =
-      Keyword.get(opts, :expires_at, Timex.add(DateTime.utc_now(), Duration.from_days(1)))
+      Keyword.get(opts, :expires_at, DateTime.add(DateTime.utc_now(), 1, :day))
 
     attrs =
       Enum.into(opts, %{})

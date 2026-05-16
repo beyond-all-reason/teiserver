@@ -23,7 +23,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   require Logger
 
-  import Teiserver.Helper.TimexHelper, only: [date_to_str: 2]
+  import Teiserver.Helper.DateHelper, only: [date_to_str: 2]
 
   @dispute_string [
     "If you feel you have been the target of an erroneous or unjust moderation action please use the #open-ticket channel in our discord to appeal/dispute the action.",

@@ -75,9 +75,9 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
 
     inserted_after =
       case filters["timeframe"] do
-        "24 hours" -> DateTime.utc_now() |> Timex.shift(hours: -24)
-        "2 days" -> DateTime.utc_now() |> Timex.shift(days: -2)
-        "7 days" -> DateTime.utc_now() |> Timex.shift(days: -7)
+        "24 hours" -> DateTime.add(DateTime.utc_now(), -24, :hour)
+        "2 days" -> DateTime.add(DateTime.utc_now(), -2, :day)
+        "7 days" -> DateTime.add(DateTime.utc_now(), -7, :day)
         _other -> nil
       end
 

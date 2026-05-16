@@ -47,7 +47,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
 
     [
       %{
-        "timestamp" => Timex.to_datetime({{2021, 1, day}, {1, 1, 0}}, :local),
+        "timestamp" => DateTime.new!(Date.new!(2021, 1, day), ~T[01:01:00], "Etc/UTC"),
         "data" => %{
           "battle" => %{"in_progress" => 1, "lobby" => 2, "total" => 3},
           "client" => %{
@@ -60,7 +60,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
         }
       },
       %{
-        "timestamp" => Timex.to_datetime({{2021, 1, day}, {1, 2, 0}}, :local),
+        "timestamp" => DateTime.new!(Date.new!(2021, 1, day), ~T[01:02:00], "Etc/UTC"),
         "data" => %{
           "battle" => %{"in_progress" => 1, "lobby" => 2, "total" => 3},
           "client" => %{
@@ -73,7 +73,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
         }
       },
       %{
-        "timestamp" => Timex.to_datetime({{2021, 1, day}, {1, 3, 0}}, :local),
+        "timestamp" => DateTime.new!(Date.new!(2021, 1, day), ~T[01:03:00], "Etc/UTC"),
         "data" => %{
           "battle" => %{"in_progress" => 4, "lobby" => 4, "total" => 8},
           "client" => %{
@@ -87,7 +87,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
       },
       # Another segment
       %{
-        "timestamp" => Timex.to_datetime({{2021, 1, day}, {10, 23, 0}}, :local),
+        "timestamp" => DateTime.new!(Date.new!(2021, 1, day), ~T[10:23:00], "Etc/UTC"),
         "data" => %{
           "battle" => %{"in_progress" => 4, "lobby" => 4, "total" => 8},
           "client" => %{

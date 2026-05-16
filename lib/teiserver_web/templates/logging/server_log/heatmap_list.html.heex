@@ -38,7 +38,7 @@
     <%= for log <- @logs do %>
       <tr>
         <td class="hourly-view-date">
-          {Timex.format!(log.date, "{YYYY}-{0M}-{0D}")}
+          {Calendar.strftime(log.date, "%Y-%m-%d")}
         </td>
         <%= for i <- 0..23 do %>
           <% value = Enum.fetch!(get_in(log.data, @path), i) %>

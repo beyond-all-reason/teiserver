@@ -142,7 +142,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
       Chat.list_room_messages(
         search: [
           chat_room: socket.assigns.room_name,
-          inserted_after: DateTime.utc_now() |> Timex.shift(days: -15)
+          inserted_after: DateTime.add(DateTime.utc_now(), -15, :day)
         ],
         preload: [:user],
         limit: @message_count,

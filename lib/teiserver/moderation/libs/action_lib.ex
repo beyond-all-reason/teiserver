@@ -2,7 +2,7 @@ defmodule Teiserver.Moderation.ActionLib do
   @moduledoc false
 
   alias Teiserver.Communication
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Moderation
   alias Teiserver.Moderation.Action
   use TeiserverWeb, :library
@@ -108,14 +108,14 @@ defmodule Teiserver.Moderation.ActionLib do
   end
 
   def _search(query, :expiry, "Unexpired not permanent") do
-    years = DateTime.utc_now() |> Timex.shift(years: 100)
+    years = Teiserver.Helper.DateHelper.shift_years(DateTime.utc_now(), 100)
 
     from actions in query,
       where: actions.expires > ^DateTime.utc_now() and actions.expires < ^years
   end
 
   def _search(query, :expiry, "Permanent only") do
-    years = DateTime.utc_now() |> Timex.shift(years: 100)
+    years = Teiserver.Helper.DateHelper.shift_years(DateTime.utc_now(), 100)
 
     from actions in query,
       where: actions.expires > ^years
@@ -205,7 +205,7 @@ defmodule Teiserver.Moderation.ActionLib do
     if action do
       until =
         if action.expires do
-          "**Until:** " <> TimexHelper.date_to_discord_str(action.expires)
+          "**Until:** " <> DateHelper.date_to_discord_str(action.expires)
         else
           "**Permanent**"
         end

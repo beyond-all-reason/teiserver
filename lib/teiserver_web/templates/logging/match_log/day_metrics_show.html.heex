@@ -46,7 +46,7 @@
               <h3>Day to day metric: Today so far</h3>
             <% else %>
               <h3>
-                Day to day metric: {Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}")}
+                Day to day metric: {Calendar.strftime(@date, "%Y-%m-%d, %A")}
               </h3>
             <% end %>
             <br /><br />

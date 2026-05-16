@@ -88,9 +88,9 @@ defmodule TeiserverWeb.Admin.CodeController do
     new_expires =
       if DateTime.compare(DateTime.utc_now(), code.expires) == :gt do
         # If it's 1 then the code is currently expired
-        Timex.shift(DateTime.utc_now(), hours: hours |> String.to_integer())
+        DateTime.add(DateTime.utc_now(), String.to_integer(hours), :hour)
       else
-        Timex.shift(code.expires, hours: hours |> String.to_integer())
+        DateTime.add(code.expires, String.to_integer(hours), :hour)
       end
 
     case Account.update_code(code, %{"expires" => new_expires}) do

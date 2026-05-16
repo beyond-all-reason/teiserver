@@ -85,7 +85,7 @@ defmodule Teiserver.Moderation do
       target_id: userid,
       no_result: true,
       closed: false,
-      inserted_after: Timex.shift(DateTime.utc_now(), days: -ReportLib.get_outstanding_report_max_days())
+      inserted_after: DateTime.add(DateTime.utc_now(), -ReportLib.get_outstanding_report_max_days(), :day)
     ]
 
     args = Keyword.put(args, :search, search)
@@ -846,7 +846,7 @@ defmodule Teiserver.Moderation do
           restrictions: ["Bridging"],
           score_modifier: 100,
           hidden: true,
-          expires: DateTime.utc_now() |> Timex.shift(years: 1200)
+          expires: Teiserver.Helper.DateHelper.shift_years(DateTime.utc_now(), 1200)
         })
 
       RefreshUserRestrictionsTask.refresh_user(user.id)
