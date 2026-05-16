@@ -76,8 +76,9 @@ defmodule TeiserverWeb.API.Admin.UserController do
     end
   end
 
-  # Drop any caller-supplied role outside the allowlist and recompute permissions from the surviving roles 
+  # Drop any caller-supplied role outside the allowlist and recompute permissions from the surviving roles.
   # Caller-supplied permission strings are discarded entirely.
+  defp sanitize_roles_and_permissions(params) do
     roles =
       params
       |> Map.get("roles", [])
