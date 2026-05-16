@@ -12,7 +12,26 @@ defmodule TeiserverWeb.Battle.MatchComponents do
   attr :match_id, :integer, default: nil
   attr :replay, :string, default: nil
 
+  defp build_download_link(nil), do: nil
+
+  defp build_download_link(match_id) do
+    url = "https://api.bar-rts.com/replays/" <> match_id
+
+    json =
+      HTTPoison.get!(url).body
+      |> Jason.decode!()
+
+    filename =
+      json["fileName"]
+      |> String.replace(" ", "%20")
+
+    "https://storage.uk.cloud.ovh.net/v1/AUTH_10286efc0d334efd917d476d7183232e/BAR/demos/" <>
+      filename
+  end
+
   def section_menu(assigns) do
+    assigns = assign(assigns, :download_link, fn -> build_download_link(assigns.match_id) end)
+
     ~H"""
     <.section_menu_button
       bsname={@view_colour}
@@ -61,6 +80,18 @@ defmodule TeiserverWeb.Battle.MatchComponents do
         Chat
       </.section_menu_button>
     <% end %>
+
+    <div class="float-end">
+      <.section_menu_button
+        :if={@download_link != nil}
+        bsname={@view_colour}
+        icon={StylingHelper.icon(:replay)}
+        active={false}
+        url={@download_link}
+      >
+        Download Replay
+      </.section_menu_button>
+    </div>
 
     <div class="float-end">
       <.section_menu_button
