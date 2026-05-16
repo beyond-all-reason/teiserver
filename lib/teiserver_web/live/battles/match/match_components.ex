@@ -3,15 +3,6 @@ defmodule TeiserverWeb.Battle.MatchComponents do
   use TeiserverWeb, :component
   import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
 
-  @doc """
-  <TeiserverWeb.Battle.MatchComponents.section_menu active={active} bsname={} />
-  """
-  attr :view_colour, :string, required: true
-  attr :active, :string, required: true
-  attr :current_user, :map, required: true
-  attr :match_id, :integer, default: nil
-  attr :replay, :string, default: nil
-
   defp build_download_link(nil), do: nil
 
   defp build_download_link(match_id) do
@@ -28,6 +19,15 @@ defmodule TeiserverWeb.Battle.MatchComponents do
     "https://storage.uk.cloud.ovh.net/v1/AUTH_10286efc0d334efd917d476d7183232e/BAR/demos/" <>
       filename
   end
+
+  @doc """
+  <TeiserverWeb.Battle.MatchComponents.section_menu active={active} bsname={} />
+  """
+  attr :view_colour, :string, required: true
+  attr :active, :string, required: true
+  attr :current_user, :map, required: true
+  attr :match_id, :integer, default: nil
+  attr :replay, :string, default: nil
 
   def section_menu(assigns) do
     assigns = assign(assigns, :download_link, fn -> build_download_link(assigns.match_id) end)
