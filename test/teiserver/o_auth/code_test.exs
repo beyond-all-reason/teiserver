@@ -1,6 +1,8 @@
 defmodule Teiserver.OAuth.CodeTest do
   alias Plug.Conn
   alias Plug.Test
+  alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
   alias Teiserver.TeiserverTestLib
@@ -144,11 +146,28 @@ defmodule Teiserver.OAuth.CodeTest do
     assert :error = OAuth.parse_basic_auth(conn)
   end
 
+  test "check scopes against user permissions", %{user: user} do
+    {:ok, admin_user} = Auth.add_roles(TeiserverTestLib.new_user().id, ["Admin"])
+
+    {:ok, app} =
+      OAuth.create_application(%{
+        name: "Testing app with scopes",
+        uid: "test_app_scopes_uid",
+        owner_id: admin_user.id,
+        scopes: ["tachyon.lobby", "admin.map"],
+        redirect_uris: ["http://localhost/foo"]
+      })
+
+    attrs = OAuthFixtures.code_attrs(user, app) |> Map.merge(app)
+    {:error, err} = OAuth.create_code(user, attrs)
+    assert Keyword.has_key?(err.errors, :scopes)
+  end
+
   defp create_code_attrs(user, app, opts \\ []) do
     expires_at =
       Keyword.get(opts, :expires_at, Timex.add(DateTime.utc_now(), Duration.from_days(1)))
 
-    OAuthFixtures.code_attrs(user.id, app)
+    OAuthFixtures.code_attrs(user, app)
     |> Map.put(:expires_at, expires_at)
   end
 

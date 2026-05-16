@@ -1,11 +1,13 @@
 defmodule TeiserverWeb.API.Admin.UserControllerTest do
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
   use TeiserverWeb.ConnCase, async: false
 
   defp setup_user(_context) do
-    user = GeneralTestLib.make_user()
+    {:ok, user} = GeneralTestLib.make_user() |> Auth.add_roles(["Admin"])
+
     {:ok, user: user}
   end
 
@@ -300,7 +302,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
 
     test "requires valid scopes", %{conn: conn} do
       # Create a user and token without the required scope
-      user = GeneralTestLib.make_user()
+      {:ok, user} = GeneralTestLib.make_user() |> Auth.add_roles(["Admin"])
 
       app =
         OAuthFixtures.app_attrs(user.id)
@@ -309,7 +311,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
         |> OAuthFixtures.create_app()
 
       token =
-        OAuthFixtures.token_attrs(user.id, app)
+        OAuthFixtures.token_attrs(user, app)
         |> Map.put(:scopes, ["admin.map"])
         |> OAuthFixtures.create_token()
 

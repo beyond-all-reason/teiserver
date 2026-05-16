@@ -120,7 +120,7 @@ defmodule Teiserver.OAuth.TokenTest do
 
     attrs =
       Enum.into(opts, %{})
-      |> Map.merge(OAuthFixtures.token_attrs(user.id, app))
+      |> Map.merge(OAuthFixtures.token_attrs(user, app))
       |> Map.put(:expires_at, expires_at)
       |> Map.put(:scopes, Keyword.get(opts, :scopes, app.scopes))
 

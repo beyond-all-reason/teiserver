@@ -37,7 +37,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   end
 
   defp setup_code(context) do
-    attrs = OAuthFixtures.code_attrs(context[:user].id, context[:app])
+    attrs = OAuthFixtures.code_attrs(context[:user], context[:app])
     code = OAuthFixtures.create_code(attrs)
 
     %{code: code, code_attrs: attrs}

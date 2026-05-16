@@ -139,7 +139,7 @@ defmodule Teiserver.OAuth do
       # the code for a token
       attrs = %{
         value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(),
-        owner_id: user.id,
+        owner: user,
         application_id: app_id,
         scopes: attrs.scopes,
         expires_at: Timex.add(now, Duration.from_minutes(5)),
@@ -175,7 +175,7 @@ defmodule Teiserver.OAuth do
   end
 
   @spec create_token(
-          User.t() | T.userid(),
+          User.t() | Bot.t(),
           %{
             :id => integer(),
             :scopes => Application.scopes(),
@@ -185,23 +185,15 @@ defmodule Teiserver.OAuth do
           scopes: Application.scopes()
         ) ::
           {:ok, Token.t()} | {:error, :invalid_scope | Ecto.Changeset.t()}
-  def create_token(user_id, application, opts \\ [])
-
-  def create_token(%User{} = user, application, opts) do
-    create_token(user.id, application, opts)
-  end
-
-  def create_token(user, application, opts) when is_map(user) do
-    create_token(user.id, application, opts)
-  end
-
-  def create_token(user_id, application, opts) do
-    do_create_token(%{owner_id: user_id}, application, opts)
-  end
-
-  defp do_create_token(owner_attr, application, opts) do
+  def create_token(owner, application, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
     scopes = opts[:scopes]
+
+    owner_attrs =
+      case owner do
+        %User{} = user -> %{owner: user, owner_id: user.id}
+        %Bot{} = bot -> %{bot: bot, bot_id: bot.id}
+      end
 
     if Enum.empty?(scopes) ||
          not (MapSet.new(scopes) |> MapSet.subset?(MapSet.new(application.scopes))) do
@@ -216,7 +208,7 @@ defmodule Teiserver.OAuth do
           expires_at: Timex.add(now, Duration.from_minutes(30)),
           type: :access
         }
-        |> Map.merge(owner_attr)
+        |> Map.merge(owner_attrs)
 
       refresh_attrs =
         if Keyword.get(opts, :create_refresh, true) do
@@ -231,7 +223,7 @@ defmodule Teiserver.OAuth do
             type: :refresh,
             refresh_token: nil
           }
-          |> Map.merge(owner_attr)
+          |> Map.merge(owner_attrs)
         else
           nil
         end
@@ -280,7 +272,7 @@ defmodule Teiserver.OAuth do
 
         {:ok, token} =
           create_token(
-            code.owner_id,
+            code.owner,
             %{id: code.application_id, scopes: code.scopes},
             Keyword.put(opts, :scopes, code.scopes)
           )
@@ -355,7 +347,7 @@ defmodule Teiserver.OAuth do
 
       _result ->
         token =
-          if Ecto.assoc_loaded?(token.application) do
+          if Enum.all?([:application, :bot, :owner], &Ecto.assoc_loaded?(Map.get(token, &1))) do
             token
           else
             TokenQueries.get_token(token.value)
@@ -372,7 +364,7 @@ defmodule Teiserver.OAuth do
         tx_result =
           Repo.transaction(fn ->
             with {:ok, new_token} <-
-                   create_token(token.owner_id, refresh_attr, Keyword.put(opts, :scopes, scopes)) do
+                   create_token(token.owner, refresh_attr, Keyword.put(opts, :scopes, scopes)) do
               TokenQueries.delete_refresh_token(token)
               new_token
             end
@@ -453,10 +445,14 @@ defmodule Teiserver.OAuth do
   @spec get_token_from_credentials(Credential.t(), Application.scopes()) ::
           {:ok, Token.t()} | {:error, term()}
   def get_token_from_credentials(credential, scopes) do
-    do_create_token(%{bot_id: credential.bot_id}, credential.application,
-      create_refresh: false,
-      scopes: scopes
-    )
+    bot =
+      if Ecto.assoc_loaded?(credential.bot) do
+        credential.bot
+      else
+        Repo.preload(credential, [:bot]).bot
+      end
+
+    create_token(bot, credential.application, create_refresh: false, scopes: scopes)
   end
 
   @doc """

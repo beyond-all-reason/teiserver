@@ -38,8 +38,8 @@ defmodule TeiserverWeb.Account.SecurityControllerTest do
           redirect_uris: ["http://localhost/callback"]
         })
 
-      token = OAuthFixtures.token_attrs(user.id, app) |> OAuthFixtures.create_token()
-      code = OAuthFixtures.code_attrs(user.id, app) |> OAuthFixtures.create_code()
+      token = OAuthFixtures.token_attrs(user, app) |> OAuthFixtures.create_token()
+      code = OAuthFixtures.code_attrs(user, app) |> OAuthFixtures.create_code()
 
       {:ok, conn: conn, user: user, app: app, token: token, code: code}
     end
