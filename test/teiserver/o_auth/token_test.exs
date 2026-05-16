@@ -9,7 +9,7 @@ defmodule Teiserver.OAuth.TokenTest do
   use Teiserver.DataCase, async: true
 
   setup do
-    user = TeiserverTestLib.new_user()
+    {:ok, user} = Teiserver.Account.Auth.add_roles(TeiserverTestLib.new_user().id, ["Admin"])
 
     {:ok, app} =
       OAuth.create_application(%{

@@ -32,7 +32,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
     defaults = %{
       name: "Generic Lobby Client",
       uid: "generic_lobby",
-      scopes: Application.allowed_scopes(),
+      scopes: OAuth.allowed_scopes(),
       owner_email: Map.get(conn.assigns[:current_user], :email)
     }
 
@@ -79,7 +79,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
       )
 
   defp scopes_with_descriptions(enabled_scopes \\ []) do
-    Application.allowed_scopes()
+    OAuth.allowed_scopes()
     |> Enum.map(fn s -> {s, Enum.member?(enabled_scopes, s), scope_description(s)} end)
   end
 
@@ -190,7 +190,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
     user_id = Map.get(Account.get_user_by_email(app["owner_email"]) || %{}, :id)
 
     scopes =
-      Enum.filter(Application.allowed_scopes(), fn scope ->
+      Enum.filter(OAuth.allowed_scopes(), fn scope ->
         Map.get(raw_scopes, scope, "false") == "true"
       end)
 

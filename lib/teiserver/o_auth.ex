@@ -10,6 +10,7 @@ defmodule Teiserver.OAuth do
   alias Teiserver.OAuth.CodeQueries
   alias Teiserver.OAuth.Credential
   alias Teiserver.OAuth.CredentialQueries
+  alias Teiserver.OAuth.Libs.ScopeLib
   alias Teiserver.OAuth.Token
   alias Teiserver.OAuth.TokenQueries
 
@@ -17,6 +18,8 @@ defmodule Teiserver.OAuth do
   alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
   alias Timex.Duration
+
+  defdelegate allowed_scopes(), to: ScopeLib
 
   # @spec change_application(Application.t(), map() | nil) :: Ecto.Changeset
   def change_application(%Application{} = app, attrs \\ %{}) do
