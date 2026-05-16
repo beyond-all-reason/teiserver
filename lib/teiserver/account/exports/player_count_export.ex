@@ -8,8 +8,8 @@ defmodule Teiserver.Account.PlayerCountExport do
     "start_date" => ""
   })
   """
-  alias Teiserver.Helper.DatePresets
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Helper.DatePresets
   alias Teiserver.Logging
 
   @spec icon() :: String.t()
