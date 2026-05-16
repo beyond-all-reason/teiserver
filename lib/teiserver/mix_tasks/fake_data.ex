@@ -334,9 +334,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         date =
           Date.utc_today()
           |> Date.add(-day)
-          |> DateHelper.shift_years(
-            -(@latest_season - MatchRatingLib.active_season())
-          )
+          |> DateHelper.shift_years(-(@latest_season - MatchRatingLib.active_season()))
 
         users =
           Account.list_users(
