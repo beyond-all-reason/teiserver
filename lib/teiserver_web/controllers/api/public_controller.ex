@@ -42,7 +42,7 @@ defmodule TeiserverWeb.API.PublicController do
               )
               |> List.first()
               |> Map.get(:last_updated)
-              |> DateTime.add(-35, :day)
+              |> DateTime.shift(day: -35)
 
             ratings = leaderboard_ratings(season, activity_time)
 

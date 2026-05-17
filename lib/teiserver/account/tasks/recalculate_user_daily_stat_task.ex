@@ -24,7 +24,7 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
   def perform(_job) do
     start_date =
       DateTime.utc_now()
-      |> DateTime.add(-26, :hour)
+      |> DateTime.shift(hour: -26)
       |> DateTime.to_unix()
 
     start_date = round(start_date / 60)

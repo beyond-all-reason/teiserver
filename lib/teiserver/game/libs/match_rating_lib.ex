@@ -662,7 +662,7 @@ defmodule Teiserver.Game.MatchRatingLib do
         search: [
           game_type_in: @rated_match_types,
           processed: true,
-          started_after: DateTime.add(DateTime.utc_now(), -31, :day)
+          started_after: DateTime.shift(DateTime.utc_now(), day: -31)
         ],
         limit: :infinity,
         preload: [:members]

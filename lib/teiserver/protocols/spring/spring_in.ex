@@ -674,7 +674,7 @@ defmodule Teiserver.Protocols.SpringIn do
               Account.create_code(%{
                 value: ULID.generate(),
                 purpose: "one_time_login",
-                expires: DateTime.add(DateTime.utc_now(), 30, :minute),
+                expires: DateTime.shift(DateTime.utc_now(), minute: 30),
                 user_id: state.userid,
                 metadata: %{
                   ip: client.ip,

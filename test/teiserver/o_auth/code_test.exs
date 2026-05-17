@@ -28,7 +28,7 @@ defmodule Teiserver.OAuth.CodeTest do
   end
 
   test "cannot retrieve expired code", %{user: user, app: app} do
-    yesterday = DateTime.add(DateTime.utc_now(), -1, :day)
+    yesterday = DateTime.shift(DateTime.utc_now(), day: -1)
     assert {:ok, code, _attrs} = create_code(user, app, expires_at: yesterday)
     assert {:error, :expired} = OAuth.get_valid_code(code.value)
   end
@@ -60,7 +60,7 @@ defmodule Teiserver.OAuth.CodeTest do
   end
 
   test "cannot exchange expired code for token", %{user: user, app: app} do
-    yesterday = DateTime.add(DateTime.utc_now(), -1, :day)
+    yesterday = DateTime.shift(DateTime.utc_now(), day: -1)
     assert {:ok, code, attrs} = create_code(user, app, expires_at: yesterday)
     assert {:error, :expired} = OAuth.exchange_code(code, attrs._verifier)
   end
@@ -113,7 +113,7 @@ defmodule Teiserver.OAuth.CodeTest do
 
   test "can pass custom time when deleting codes", %{user: user, app: app} do
     assert {:ok, code, _attrs} = create_code(user, app, expires_at: ~U[2500-01-01 12:23:34Z])
-    now = DateTime.add(code.expires_at, 1, :day)
+    now = DateTime.shift(code.expires_at, day: 1)
     count = OAuth.delete_expired_codes(now)
     assert count == 1
     assert {:error, :no_code} = OAuth.get_valid_code(code.value)
@@ -142,7 +142,7 @@ defmodule Teiserver.OAuth.CodeTest do
 
   defp create_code_attrs(user, app, opts \\ []) do
     expires_at =
-      Keyword.get(opts, :expires_at, DateTime.add(DateTime.utc_now(), 1, :day))
+      Keyword.get(opts, :expires_at, DateTime.shift(DateTime.utc_now(), day: 1))
 
     OAuthFixtures.code_attrs(user.id, app)
     |> Map.put(:expires_at, expires_at)

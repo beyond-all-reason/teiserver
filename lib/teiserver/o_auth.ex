@@ -146,7 +146,7 @@ defmodule Teiserver.OAuth do
         owner_id: user_id,
         application_id: app_id,
         scopes: attrs.scopes,
-        expires_at: DateTime.add(now, 5, :minute),
+        expires_at: DateTime.shift(now, minute: 5),
         redirect_uri: Map.get(attrs, :redirect_uri),
         challenge: Map.get(attrs, :challenge),
         challenge_method: Map.get(attrs, :challenge_method)
@@ -217,7 +217,7 @@ defmodule Teiserver.OAuth do
           application_id: application.id,
           scopes: scopes,
           original_scopes: Map.get(application, :original_scopes, application.scopes),
-          expires_at: DateTime.add(now, 30, :minute),
+          expires_at: DateTime.shift(now, minute: 30),
           type: :access
         }
         |> Map.merge(owner_attr)
@@ -231,7 +231,7 @@ defmodule Teiserver.OAuth do
             original_scopes: application.scopes,
             # there's no real recourse when the refresh token expires and it's
             # quite annoying, so make it "never" expire.
-            expires_at: DateTime.add(now, 365 * 100, :day),
+            expires_at: DateTime.shift(now, day: 365 * 100),
             type: :refresh,
             refresh_token: nil
           }

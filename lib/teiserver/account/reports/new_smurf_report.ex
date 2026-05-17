@@ -27,8 +27,8 @@ defmodule Teiserver.Account.NewSmurfReport do
     new_users =
       Account.list_users(
         search: [
-          last_played_after: DateTime.add(DateTime.utc_now(), -max_play_age, :day),
-          inserted_after: DateTime.add(DateTime.utc_now(), -max_account_age, :day),
+          last_played_after: DateTime.shift(DateTime.utc_now(), day: -max_play_age),
+          inserted_after: DateTime.shift(DateTime.utc_now(), day: -max_account_age),
           smurf_of: false,
           has_role: "Verified"
         ],

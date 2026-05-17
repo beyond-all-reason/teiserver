@@ -361,11 +361,11 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
   @spec get_logs(Date.t(), integer()) :: list()
   defp get_logs(date, segment_number) do
     start_time =
-      DateHelper.to_datetime(date) |> DateTime.add(segment_number * @segment_length, :minute)
+      DateHelper.to_datetime(date) |> DateTime.shift(minute: segment_number * @segment_length)
 
     end_time =
       DateHelper.to_datetime(date)
-      |> DateTime.add((segment_number + 1) * @segment_length, :minute)
+      |> DateTime.shift(minute: (segment_number + 1) * @segment_length)
 
     Logging.list_server_minute_logs(
       search: [
@@ -457,7 +457,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
     Battle.list_matches(
       search: [
         inserted_after: the_date,
-        inserted_before: DateTime.add(the_date, 1, :day),
+        inserted_before: DateTime.shift(the_date, day: 1),
         of_interest: true
       ],
       limit: :infinity

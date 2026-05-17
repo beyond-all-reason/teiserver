@@ -58,7 +58,7 @@ defmodule Teiserver.OAuth.TokenTest do
   end
 
   test "cannot get expired token", %{user: user, app: app} do
-    yesterday = DateTime.add(DateTime.utc_now(), -1, :day)
+    yesterday = DateTime.shift(DateTime.utc_now(), day: -1)
     assert {:ok, token} = OAuth.create_token(user, app, now: yesterday, scopes: app.scopes)
     assert {:error, :expired} = OAuth.get_valid_token(token.value)
   end
@@ -107,7 +107,7 @@ defmodule Teiserver.OAuth.TokenTest do
                value: "far-future-token"
              )
 
-    now = DateTime.add(token.expires_at, 1, :day)
+    now = DateTime.shift(token.expires_at, day: 1)
     count = OAuth.delete_expired_tokens(now)
     assert count == 1
     assert {:error, :no_token} = OAuth.get_valid_token(token.value)
@@ -115,7 +115,7 @@ defmodule Teiserver.OAuth.TokenTest do
 
   defp create_token(user, app, opts) do
     expires_at =
-      Keyword.get(opts, :expires_at, DateTime.add(DateTime.utc_now(), 1, :day))
+      Keyword.get(opts, :expires_at, DateTime.shift(DateTime.utc_now(), day: 1))
 
     attrs =
       Enum.into(opts, %{})

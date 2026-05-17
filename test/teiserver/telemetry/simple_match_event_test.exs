@@ -27,8 +27,8 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTest do
         founder_name: user.name,
         server_uuid: "#{r}",
         bots: %{},
-        started: DateTime.add(DateTime.utc_now(), -30, :minute),
-        finished: DateTime.add(DateTime.utc_now(), -30, :second)
+        started: DateTime.shift(DateTime.utc_now(), minute: -30),
+        finished: DateTime.shift(DateTime.utc_now(), second: -30)
       })
 
     # Start by removing all match events

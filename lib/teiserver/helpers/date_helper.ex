@@ -326,7 +326,7 @@ defmodule Teiserver.Helper.DateHelper do
     last = %{end_date | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
 
     start
-    |> Stream.iterate(&DateTime.add(&1, 1, :day))
+    |> Stream.iterate(&DateTime.shift(&1, day: 1))
     |> Stream.take_while(&(DateTime.compare(&1, last) == :lt))
   end
 
@@ -360,7 +360,7 @@ defmodule Teiserver.Helper.DateHelper do
 
   def represent_minutes(s) do
     now = DateTime.utc_now()
-    until = DateTime.add(now, s, :minute)
+    until = DateTime.shift(now, minute: s)
     time_until(until, now)
   end
 
@@ -368,7 +368,7 @@ defmodule Teiserver.Helper.DateHelper do
 
   def represent_seconds(s) do
     now = DateTime.utc_now()
-    until = DateTime.add(now, s, :second)
+    until = DateTime.shift(now, second: s)
     time_until(until, now)
   end
 

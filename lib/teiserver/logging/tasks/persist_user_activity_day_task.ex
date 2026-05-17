@@ -67,7 +67,7 @@ defmodule Teiserver.Logging.Tasks.PersistUserActivityDayTask do
   @spec get_logs(Date.t()) :: list()
   defp get_logs(date) do
     start_time = DateHelper.to_datetime(date)
-    end_time = DateTime.add(start_time, 1, :day)
+    end_time = DateTime.shift(start_time, day: 1)
 
     Logging.list_server_minute_logs(
       search: [

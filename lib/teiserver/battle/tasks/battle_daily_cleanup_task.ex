@@ -39,7 +39,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     # If a match is never marked as finished after X days, we delete it
     Battle.list_matches(
       search: [
-        inserted_before: DateTime.add(DateTime.utc_now(), -get_days(), :day),
+        inserted_before: DateTime.shift(DateTime.utc_now(), day: -get_days()),
         has_started: false,
         rated: false
       ],
@@ -54,7 +54,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     # If a match is never marked as finished after X days, we delete it
     Battle.list_matches(
       search: [
-        inserted_before: DateTime.add(DateTime.utc_now(), -get_days(), :day),
+        inserted_before: DateTime.shift(DateTime.utc_now(), day: -get_days()),
         has_started: true,
         has_finished: false,
         rated: false
@@ -73,7 +73,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
 
     # Battle.list_matches(
     #   search: [
-    #     inserted_before: DateTime.add(DateTime.utc_now(), -battle_match_rated_days, :day),
+    #     inserted_before: DateTime.shift(DateTime.utc_now(), day: -battle_match_rated_days),
     #     game_type_in: ["Small Team", "Large Team", "Duel", "FFA", "Team FFA"]
     #   ],
     #   search: [:id],
@@ -88,7 +88,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
 
     Battle.list_matches(
       search: [
-        inserted_before: DateTime.add(DateTime.utc_now(), -battle_match_unrated_days, :day),
+        inserted_before: DateTime.shift(DateTime.utc_now(), day: -battle_match_unrated_days),
         rated: false
       ],
       search: [:id],
@@ -168,11 +168,11 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
   defp strip_data_from_older_matches do
     finished_before =
       DateTime.utc_now()
-      |> DateTime.add(-@strip_data_days, :day)
+      |> DateTime.shift(day: -@strip_data_days)
 
     finished_after =
       DateTime.utc_now()
-      |> DateTime.add(-(@strip_data_days + 3), :day)
+      |> DateTime.shift(day: -(@strip_data_days + 3))
 
     query = """
           UPDATE teiserver_battle_matches SET tags = '{}', data = '{}'

@@ -13,7 +13,7 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
       Account.list_users(
         search: [
           not_has_role: "Verified",
-          inserted_before: DateTime.add(DateTime.utc_now(), -days, :day)
+          inserted_before: DateTime.shift(DateTime.utc_now(), day: -days)
         ],
         select: [:id],
         limit: :infinity

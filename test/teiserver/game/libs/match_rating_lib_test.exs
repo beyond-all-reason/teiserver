@@ -166,7 +166,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     server_uuid = UUID.uuid1()
     end_time = DateTime.utc_now()
 
-    start_time = DateTime.add(end_time, 50, :minute)
+    start_time = DateTime.shift(end_time, minute: 50)
 
     # Create a match
     {:ok, match} =

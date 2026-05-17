@@ -24,9 +24,9 @@ defmodule TeiserverWeb.Admin.ChatController do
   def index(conn, %{"search" => params}) do
     inserted_after =
       case params["timeframe"] do
-        "24 hours" -> DateTime.add(DateTime.utc_now(), -24, :hour)
-        "2 days" -> DateTime.add(DateTime.utc_now(), -2, :day)
-        "7 days" -> DateTime.add(DateTime.utc_now(), -7, :day)
+        "24 hours" -> DateTime.shift(DateTime.utc_now(), hour: -24)
+        "2 days" -> DateTime.shift(DateTime.utc_now(), day: -2)
+        "7 days" -> DateTime.shift(DateTime.utc_now(), day: -7)
         _other -> nil
       end
 

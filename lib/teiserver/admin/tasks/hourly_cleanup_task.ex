@@ -19,7 +19,7 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
   defp chat_log_cleanup do
     days = Application.get_env(:teiserver, Teiserver)[:retention][:room_chat]
 
-    before_timestamp = DateTime.add(DateTime.utc_now(), -days, :day)
+    before_timestamp = DateTime.shift(DateTime.utc_now(), day: -days)
 
     query = """
           DELETE FROM teiserver_room_messages
@@ -30,7 +30,7 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
 
     days = Application.get_env(:teiserver, Teiserver)[:retention][:lobby_chat]
 
-    before_timestamp = DateTime.add(DateTime.utc_now(), -days, :day)
+    before_timestamp = DateTime.shift(DateTime.utc_now(), day: -days)
 
     query = """
           DELETE FROM teiserver_lobby_messages

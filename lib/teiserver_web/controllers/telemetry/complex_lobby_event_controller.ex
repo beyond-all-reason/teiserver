@@ -31,8 +31,8 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
 
     between =
       case timeframe do
-        "day" -> {DateTime.add(DateTime.utc_now(), -1, :day), DateTime.utc_now()}
-        "week" -> {DateTime.add(DateTime.utc_now(), -7, :day), DateTime.utc_now()}
+        "day" -> {DateTime.shift(DateTime.utc_now(), day: -1), DateTime.utc_now()}
+        "week" -> {DateTime.shift(DateTime.utc_now(), day: -7), DateTime.utc_now()}
       end
 
     args = [
@@ -60,11 +60,11 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
     start_date =
       case timeframe do
         "Today" -> DateHelper.to_datetime(Date.utc_today())
-        "Yesterday" -> Date.utc_today() |> DateHelper.to_datetime() |> DateTime.add(-1, :day)
-        "7 days" -> DateTime.add(DateTime.utc_now(), -7, :day)
-        "14 days" -> DateTime.add(DateTime.utc_now(), -14, :day)
-        "31 days" -> DateTime.add(DateTime.utc_now(), -31, :day)
-        _other -> DateTime.add(DateTime.utc_now(), -7, :day)
+        "Yesterday" -> Date.utc_today() |> DateHelper.to_datetime() |> DateTime.shift(day: -1)
+        "7 days" -> DateTime.shift(DateTime.utc_now(), day: -7)
+        "14 days" -> DateTime.shift(DateTime.utc_now(), day: -14)
+        "31 days" -> DateTime.shift(DateTime.utc_now(), day: -31)
+        _other -> DateTime.shift(DateTime.utc_now(), day: -7)
       end
 
     schema_keys =

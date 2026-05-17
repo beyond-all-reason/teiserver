@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         Account.create_code(%{
           value: "test_code_valid_value",
           purpose: "one_time_login",
-          expires: DateTime.add(DateTime.utc_now(), 5_000, :day),
+          expires: DateTime.shift(DateTime.utc_now(), day: 5_000),
           user_id: user.id,
           metadata: %{
             ip: "127.0.0.1",
@@ -72,7 +72,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         Account.create_code(%{
           value: "test_code_valid_value",
           purpose: "one_time_login",
-          expires: DateTime.add(DateTime.utc_now(), 5_000, :day),
+          expires: DateTime.shift(DateTime.utc_now(), day: 5_000),
           user_id: user.id,
           metadata: %{
             redirect: rdr
@@ -93,7 +93,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         Account.create_code(%{
           value: "test_code_valid_value",
           purpose: "one_time_login",
-          expires: DateTime.add(DateTime.utc_now(), 5_000, :day),
+          expires: DateTime.shift(DateTime.utc_now(), day: 5_000),
           user_id: user.id,
           metadata: %{
             ip: "1.1.1.1",
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         Account.create_code(%{
           value: "test_code_valid_value",
           purpose: "one_time_login",
-          expires: DateTime.add(DateTime.utc_now(), -5_000, :day),
+          expires: DateTime.shift(DateTime.utc_now(), day: -5_000),
           user_id: user.id,
           metadata: %{
             redirect: ~p"/profile/" <> Integer.to_string(user.id)
@@ -128,7 +128,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
         Account.create_code(%{
           value: "test_code_valid_value",
           purpose: "one_time_login",
-          expires: DateTime.add(DateTime.utc_now(), 5_000, :day),
+          expires: DateTime.shift(DateTime.utc_now(), day: 5_000),
           user_id: user.id,
           metadata: %{
             ip: "127.0.0.1",

@@ -18,7 +18,7 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
         owner_id: user.id,
         application_id: app.id,
         scopes: app.scopes,
-        expires_at: DateTime.add(DateTime.utc_now(), 1, :day),
+        expires_at: DateTime.shift(DateTime.utc_now(), day: 1),
         type: :access,
         refresh_token: nil
       }

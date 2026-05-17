@@ -81,7 +81,7 @@ defmodule Teiserver.EmailHelper do
           Account.create_code(%{
             value: UUID.uuid1(),
             purpose: "reset_password",
-            expires: DateTime.add(DateTime.utc_now(), 24, :hour),
+            expires: DateTime.shift(DateTime.utc_now(), hour: 24),
             user_id: user.id
           })
 

@@ -27,7 +27,7 @@ defmodule Teiserver.Account.TimeCompareReport do
       case HumanTime.relative(params["the_date"]) do
         {:ok, datetime} ->
           start_date = DateHelper.beginning_of_day(datetime)
-          end_date = DateTime.add(start_date, 1, :day)
+          end_date = DateTime.shift(start_date, day: 1)
 
           {start_date, end_date}
 
@@ -50,7 +50,7 @@ defmodule Teiserver.Account.TimeCompareReport do
   end
 
   defp get_data(%{"tabular" => "true"} = params, {start_date, end_date}) do
-    end_date = DateTime.add(end_date, 7, :day)
+    end_date = DateTime.shift(end_date, day: 7)
     logs = get_logs(params, {start_date, end_date})
 
     usernames =
