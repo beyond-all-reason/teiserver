@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.AuthLib do
   @moduledoc """
-
+  Module with functions for working with authorisation/permission checks
   """
 
   alias Phoenix.LiveView
@@ -12,6 +12,10 @@ defmodule Teiserver.Account.AuthLib do
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-address-card"
+
+  def mfa_roles do
+    ~w[Server Admin]s
+  end
 
   @spec get_all_permission_sets() :: list()
   def get_all_permission_sets do

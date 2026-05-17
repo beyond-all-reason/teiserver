@@ -257,6 +257,15 @@
   >
     Microblog
   </.menu_card>
+
+  <.menu_card
+    :if={allow?(@current_user, Teiserver.Account.MFAReport.permissions())}
+    icon={Teiserver.Account.MFAReport.icon()}
+    url={~p"/teiserver/reports/show/mfa"}
+    size={:small}
+  >
+    MFA Usage
+  </.menu_card>
 </div>
 
 <div class="row mt-2">
