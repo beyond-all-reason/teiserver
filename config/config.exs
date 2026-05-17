@@ -155,7 +155,8 @@ config :teiserver, Teiserver,
     lobby_chat: 90,
     room_chat: 90,
     battle_minimum_seconds: 120
-  }
+  },
+  require_mfa_for_privileged_roles: true
 
 config :nostrum,
   youtubedl: false,

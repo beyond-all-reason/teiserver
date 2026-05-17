@@ -75,7 +75,7 @@ defmodule Teiserver.Account.AuthLib do
           map() | Conn.t() | Socket.t() | Teiserver.Account.User.t(),
           String.t() | [String.t()]
         ) :: boolean
-  def allow?(nil, []), do: false
+  def allow?(nil, _any), do: false
   def allow?(_permissions, nil), do: true
   def allow?(_permissions, ""), do: true
   def allow?(_permissions, []), do: true
@@ -199,8 +199,8 @@ defmodule Teiserver.Account.AuthLib do
   Returns true if the user_id in question has an active totp
   """
   @spec has_active_mfa?(Teiserver.Account.User.id()) :: boolean()
-  def has_active_mfa?(userid) do
-    Account.get_user_totp_status(userid) == :active
+  def has_active_mfa?(user_id) do
+    user_id != nil and Account.get_user_totp_status(user_id) == :active
   end
 
   @doc """
@@ -208,16 +208,20 @@ defmodule Teiserver.Account.AuthLib do
   are possessed then also checks for MFA. If no MFA is present then the
   roles are removed.
   """
-  @spec maybe_remove_mfa_roles(Teiserver.Account.User.t()) :: Teiserver.Account.User.t()
-  def maybe_remove_mfa_roles(user) do
-    if contains_mfa_role?(user.roles) do
-      IO.puts("")
-      IO.inspect("CONTAINS", label: "#{__MODULE__}:#{__ENV__.line}")
-      IO.puts("")
+  @spec maybe_remove_mfa_roles(Teiserver.Account.User.id()) :: :removed | :nochange
+  def maybe_remove_mfa_roles(user_id) do
+    user = Account.get_user(user_id)
+    mfa_required = Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
 
+    if mfa_required and contains_mfa_role?(user.roles) do
+      # If the user has an MFA role then do an empty update
+      # and the update code will decide if how to alter the user
       user
+      |> Account.script_update_user(%{})
+
+      :removed
     else
-      user
+      :nochange
     end
   end
 

@@ -304,10 +304,14 @@ defmodule Teiserver.Account.User do
   end
 
   defp limit_mfa_roles(changeset) do
+    mfa_required = Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
     user_id = get_field(changeset, :id)
     roles = get_field(changeset, :roles)
 
-    if AuthLib.contains_mfa_role?(roles) and not AuthLib.has_active_mfa?(user_id) do
+    condition =
+      mfa_required and AuthLib.contains_mfa_role?(roles) and not AuthLib.has_active_mfa?(user_id)
+
+    if condition do
       new_roles = AuthLib.remove_mfa_roles_from_list(roles)
 
       put_change(changeset, :roles, new_roles)

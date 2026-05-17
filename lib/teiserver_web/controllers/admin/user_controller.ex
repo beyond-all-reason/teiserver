@@ -391,6 +391,7 @@ defmodule TeiserverWeb.Admin.UserController do
             |> assign(:privileged_roles, RoleLib.privileged_roles())
             |> assign(:property_roles, RoleLib.property_roles())
             |> assign(:role_styling_map, RoleLib.role_data())
+            |> assign(:has_active_mfa?, has_active_mfa?(user.id))
             |> render("edit.html", user: user, changeset: changeset)
         end
 

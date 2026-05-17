@@ -4,15 +4,27 @@
   <div class="col-md-12">
     <div class="card card-primary mb-4">
       <div class="card-body">
-        <a
-          href={~p"/teiserver/account/security/edit_password"}
-          class="btn float-end btn-danger m-2"
-        >
-          <i class="fa-fw fa-solid fa-lock"></i> Change password
-        </a>
-        <a href={~p"/teiserver/account/security/totp"} class="btn float-end btn-danger m-2">
-          <i class="fa-fw fa-solid fa-lock"></i> 2FA Settings
-        </a>
+        <div class="float-end m-2">
+          <a
+            :if={@has_active_mfa?}
+            href={~p"/teiserver/account/security/totp"}
+            class="btn btn-outline-danger"
+          >
+            <i class="fa-fw fa-solid fa-check"></i> MFA enabled
+          </a>
+
+          <a
+            :if={not @has_active_mfa?}
+            href={~p"/teiserver/account/security/totp"}
+            class="btn btn-danger"
+          >
+            <i class="fa-fw fa-solid fa-lock"></i> MFA Settings
+          </a>
+
+          <a href={~p"/teiserver/account/security/edit_password"} class="btn btn-danger">
+            <i class="fa-fw fa-solid fa-lock"></i> Change password
+          </a>
+        </div>
 
         <h4>User tokens</h4>
         <%= if Enum.empty?(@user_tokens) do %>

@@ -39,7 +39,8 @@ config :teiserver, Teiserver,
   post_login_delay: 0,
   spring_post_state_change_delay: 0,
   automod_delay: 1_000,
-  user_agreement: "User agreement goes here."
+  user_agreement: "User agreement goes here.",
+  require_mfa_for_privileged_roles: false
 
 config :teiserver, DiscordBridgeBot,
   token: nil,
