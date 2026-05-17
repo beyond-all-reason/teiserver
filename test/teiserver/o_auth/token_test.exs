@@ -1,5 +1,6 @@
 defmodule Teiserver.OAuth.TokenTest do
   alias Ecto.Changeset
+  alias Teiserver.Account.Auth
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Token
   alias Teiserver.OAuthFixtures
@@ -9,7 +10,7 @@ defmodule Teiserver.OAuth.TokenTest do
   use Teiserver.DataCase, async: true
 
   setup do
-    {:ok, user} = Teiserver.Account.Auth.add_roles(TeiserverTestLib.new_user().id, ["Admin"])
+    {:ok, user} = Auth.add_roles(TeiserverTestLib.new_user().id, ["Admin"])
 
     {:ok, app} =
       OAuth.create_application(%{
@@ -99,6 +100,20 @@ defmodule Teiserver.OAuth.TokenTest do
       OAuth.refresh_token(token.refresh_token, scopes: ["tachyon.lobby", "lolscope"])
 
     assert Keyword.get(changeset.errors, :scopes) != nil
+  end
+
+  test "cannot get scopes without correct roles", %{user: user, app: app} do
+    {:ok, user} = Auth.remove_roles(user, ["Admin"])
+    assert {:error, err} = OAuth.create_token(user, app, scopes: app.scopes)
+    assert Keyword.has_key?(err.errors, :scopes)
+  end
+
+  test "cannot get scopes at refresh without correct roles", %{user: user, app: app} do
+    {:ok, user} = Auth.remove_roles(user, ["Admin"])
+    assert {:ok, token} = OAuth.create_token(user, app, scopes: ["tachyon.lobby"])
+    assert {:ok, _token} = OAuth.get_valid_token(token.refresh_token.value)
+    assert {:error, err} = OAuth.refresh_token(token.refresh_token, scopes: ["admin.map"])
+    assert Keyword.has_key?(err.errors, :scopes)
   end
 
   test "can delete expired token", %{user: user, app: app} do
