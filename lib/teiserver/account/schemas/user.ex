@@ -3,12 +3,15 @@ defmodule Teiserver.Account.User do
 
   alias Argon2
   alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
   alias Teiserver.CacheUser
   alias Teiserver.Helper.StylingHelper
 
   use TeiserverWeb, :schema
 
   @behaviour Bodyguard.Policy
+
+  @type id :: pos_integer()
 
   typed_schema "account_users" do
     field :name, :string
@@ -84,6 +87,7 @@ defmodule Teiserver.Account.User do
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> limit_mfa_roles()
     |> put_md5_password_hash()
   end
 
@@ -100,6 +104,7 @@ defmodule Teiserver.Account.User do
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> limit_mfa_roles()
     |> validate_change(:email, fn :email, email ->
       case CacheUser.valid_email?(email) do
         :ok -> []
@@ -125,6 +130,7 @@ defmodule Teiserver.Account.User do
       attrs,
       ~w(name email icon colour data roles permissions)a
     )
+    |> limit_mfa_roles()
     |> validate_required(~w(name email)a)
     |> unique_constraint(:email)
   end
@@ -238,6 +244,7 @@ defmodule Teiserver.Account.User do
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> limit_mfa_roles()
     |> validate_change(:email, fn :email, email ->
       case CacheUser.valid_email?(email) do
         :ok -> []
@@ -294,6 +301,19 @@ defmodule Teiserver.Account.User do
         :md5_password -> put_md5_password_hash(changeset)
       end
     end)
+  end
+
+  defp limit_mfa_roles(changeset) do
+    user_id = get_field(changeset, :id)
+    roles = get_field(changeset, :roles)
+
+    if AuthLib.contains_mfa_role?(roles) and not AuthLib.has_active_mfa?(user_id) do
+      new_roles = AuthLib.remove_mfa_roles_from_list(roles)
+
+      put_change(changeset, :roles, new_roles)
+    else
+      changeset
+    end
   end
 
   defp change_plain_password(user, attrs) do

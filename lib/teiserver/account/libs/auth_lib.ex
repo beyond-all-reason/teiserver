@@ -71,7 +71,10 @@ defmodule Teiserver.Account.AuthLib do
   end
 
   # If you don't need permissions then lets not bother checking
-  @spec allow?(map() | Conn.t() | Socket.t() | User.t(), String.t() | [String.t()]) :: boolean
+  @spec allow?(
+          map() | Conn.t() | Socket.t() | Teiserver.Account.User.t(),
+          String.t() | [String.t()]
+        ) :: boolean
   def allow?(nil, []), do: false
   def allow?(_permissions, nil), do: true
   def allow?(_permissions, ""), do: true
@@ -195,9 +198,46 @@ defmodule Teiserver.Account.AuthLib do
   @doc """
   Returns true if the user_id in question has an active totp
   """
-  @spec has_active_mfa?(User.id()) :: boolean()
+  @spec has_active_mfa?(Teiserver.Account.User.id()) :: boolean()
   def has_active_mfa?(userid) do
     Account.get_user_totp_status(userid) == :active
+  end
+
+  @doc """
+  Given a user_id, checks for the presence of any MFA gated roles, if any
+  are possessed then also checks for MFA. If no MFA is present then the
+  roles are removed.
+  """
+  @spec maybe_remove_mfa_roles(Teiserver.Account.User.t()) :: Teiserver.Account.User.t()
+  def maybe_remove_mfa_roles(user) do
+    if contains_mfa_role?(user.roles) do
+      IO.puts("")
+      IO.inspect("CONTAINS", label: "#{__MODULE__}:#{__ENV__.line}")
+      IO.puts("")
+
+      user
+    else
+      user
+    end
+  end
+
+  @doc """
+  Given a list of roles, remove any MFA guarded roles from the list
+  """
+  @spec remove_mfa_roles_from_list([String.t()]) :: [String.t()]
+  def remove_mfa_roles_from_list(roles) do
+    Enum.reject(roles, fn role ->
+      Enum.member?(mfa_roles(), role)
+    end)
+  end
+
+  @spec contains_mfa_role?([String.t()]) :: boolean()
+  def contains_mfa_role?(role_list) do
+    role_set = MapSet.new(role_list)
+    mfa_role_set = MapSet.new(mfa_roles())
+    intersection = MapSet.intersection(role_set, mfa_role_set)
+
+    not Enum.empty?(intersection)
   end
 
   # This is used as part of the permission system getting the current user
