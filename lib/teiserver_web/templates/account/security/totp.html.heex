@@ -26,7 +26,7 @@
 
         <div class="flex-grow-1"></div>
 
-        <div :if={@totp_status == :active and @has_mfa_role?} class="alert alert-warning mb-4">
+        <div :if={@totp_status == :active and @show_mfa_warning} class="alert alert-warning mb-4">
           <strong>Warning:</strong>
           Disabling or resetting your MFA will remove any privilaged roles. You will need to have them re-added after your MFA is setup again.
         </div>
