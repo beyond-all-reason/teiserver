@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Battle.MatchComponents do
   defp build_download_link(nil), do: nil
 
   defp build_download_link(match_id) do
-    url = "https://api.bar-rts.com/replays/" <> match_id
+    url = Application.get_env(:teiserver, :replay)[:api_url] <> match_id
 
     json =
       HTTPoison.get!(url).body
@@ -16,8 +16,7 @@ defmodule TeiserverWeb.Battle.MatchComponents do
       json["fileName"]
       |> String.replace(" ", "%20")
 
-    "https://storage.uk.cloud.ovh.net/v1/AUTH_10286efc0d334efd917d476d7183232e/BAR/demos/" <>
-      filename
+    Application.get_env(:teiserver, :replay)[:storage_url] <> filename
   end
 
   @doc """
@@ -85,7 +84,7 @@ defmodule TeiserverWeb.Battle.MatchComponents do
       <.section_menu_button
         :if={@download_link != nil}
         bsname={@view_colour}
-        icon={StylingHelper.icon(:replay)}
+        icon={StylingHelper.icon(:export)}
         active={false}
         url={@download_link}
       >
