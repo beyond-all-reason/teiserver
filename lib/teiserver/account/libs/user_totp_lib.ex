@@ -1,6 +1,5 @@
 defmodule Teiserver.Account.TOTPLib do
   @moduledoc false
-  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.TOTP
   alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
@@ -126,7 +125,6 @@ defmodule Teiserver.Account.TOTPLib do
       {:active, totp} ->
         case Repo.delete(totp) do
           {:ok, _totp} ->
-            AuthLib.maybe_remove_mfa_roles(user_id)
             :ok
 
           {:error, changeset} ->

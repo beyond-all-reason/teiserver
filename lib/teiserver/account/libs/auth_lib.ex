@@ -82,21 +82,24 @@ defmodule Teiserver.Account.AuthLib do
 
   # Handle conn
   def allow?(%Conn{} = conn, permissions_required) do
-    %{permissions: permissions_held} = conn.assigns[:current_user]
+    %{id: id, permissions: permissions_held} = conn.assigns[:current_user]
 
-    permission_test(permissions_held, permissions_required)
+    mfa_test(id, permissions_required) and
+      permission_test(permissions_held, permissions_required)
   end
 
   # Socket
   def allow?(%Socket{} = socket, permissions_required) do
-    %{permissions: permissions_held} = socket.assigns[:current_user]
+    %{id: id, permissions: permissions_held} = socket.assigns[:current_user]
 
-    permission_test(permissions_held, permissions_required)
+    mfa_test(id, permissions_required) and
+      permission_test(permissions_held, permissions_required)
   end
 
-  # This allows us to use something with permissions in it
-  def allow?(%{permissions: permissions_held}, permissions_required) do
-    permission_test(permissions_held, permissions_required)
+  # User and CacheUser
+  def allow?(%{id: id, permissions: permissions_held}, permissions_required) do
+    mfa_test(id, permissions_required) and
+      permission_test(permissions_held, permissions_required)
   end
 
   # The testing of permissions required against permissions held
@@ -195,34 +198,30 @@ defmodule Teiserver.Account.AuthLib do
     )
   end
 
+  # If the permission requires MFA then check for it, otherwise return true
+  # as their MFA status doesn't matter
+  # if mfa_required? is not set then it will always return true
+  defp mfa_test(user, permissions_required) do
+    if mfa_required?() and contains_mfa_role?(permissions_required) do
+      has_active_mfa?(user)
+    else
+      true
+    end
+  end
+
   @doc """
   Returns true if the user_id in question has an active totp
   """
   @spec has_active_mfa?(Teiserver.Account.User.id()) :: boolean()
   def has_active_mfa?(user_id) do
-    user_id != nil and Account.get_user_totp_status(user_id) == :active
+    Teiserver.cache_get_or_store(:user_mfa_active, user_id, fn ->
+      user_id != nil and
+        Account.get_user_totp_status(user_id) == :active
+    end)
   end
 
-  @doc """
-  Given a user_id, checks for the presence of any MFA gated roles, if any
-  are possessed then also checks for MFA. If no MFA is present then the
-  roles are removed.
-  """
-  @spec maybe_remove_mfa_roles(Teiserver.Account.User.id()) :: :removed | :nochange
-  def maybe_remove_mfa_roles(user_id) do
-    user = Account.get_user(user_id)
-    mfa_required = Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
-
-    if mfa_required and contains_mfa_role?(user.roles) do
-      # If the user has an MFA role then do an empty update
-      # and the update code will decide if how to alter the user
-      user
-      |> Account.script_update_user(%{})
-
-      :removed
-    else
-      :nochange
-    end
+  defp mfa_required? do
+    Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
   end
 
   @doc """
@@ -237,7 +236,7 @@ defmodule Teiserver.Account.AuthLib do
 
   @spec contains_mfa_role?([String.t()]) :: boolean()
   def contains_mfa_role?(role_list) do
-    role_set = MapSet.new(role_list)
+    role_set = List.wrap(role_list) |> MapSet.new()
     mfa_role_set = MapSet.new(mfa_roles())
     intersection = MapSet.intersection(role_set, mfa_role_set)
 
