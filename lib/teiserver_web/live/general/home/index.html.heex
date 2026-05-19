@@ -1,5 +1,13 @@
 <div style="height: 15px;">&nbsp;</div>
 
+<div :if={@mfa_warning?} class="alert alert-warning">
+  <a href={~p"/teiserver/account/security/totp"} class="btn btn-sm btn-warning me-2">
+    <i class="fa-fw fa-solid fa-lock"></i> &nbsp;
+    Enable MFA
+  </a>
+  You have elevated privileges but do not have MFA enabled. The permissions are temporarily disabled until MFA is enabled.
+</div>
+
 <div class="row">
   <.menu_card
     :if={allow?(@current_user, "Contributor")}
