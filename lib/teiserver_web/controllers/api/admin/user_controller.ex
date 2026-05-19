@@ -79,7 +79,6 @@ defmodule TeiserverWeb.API.Admin.UserController do
     roles =
       params
       |> Map.get("roles", [])
-      |> List.wrap()
       |> Enum.filter(&(&1 in @api_allowed_roles))
       |> Enum.uniq()
 
