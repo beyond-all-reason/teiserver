@@ -145,57 +145,28 @@ defmodule Teiserver.Account.AuthLib do
   @doc """
   Allows us to perform an auth check and force a redirect
   """
-  @spec mount_require_all(Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) ::
-          Phoenix.LiveView.Socket
-  def mount_require_all(obj, requirements) do
-    if do_require(obj, List.flatten([requirements]), :all) do
-      obj
+  @spec mount_require_all(Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) ::
+          Phoenix.LiveView.Socket | map()
+  def mount_require_all(socket, requirements) do
+    if allow?(socket, List.flatten([requirements])) do
+      socket
     else
-      obj
+      socket
       |> LiveView.put_flash(:warning, "You do not have permission to view this page.")
       |> LiveView.redirect(to: "/")
     end
   end
 
-  @spec mount_require_any(
-          map() | Plug.Conn.t() | Phoenix.LiveView.Socket.t(),
-          String.t() | [String.t()]
-        ) :: Phoenix.LiveView.Socket
-  def mount_require_any(obj, requirements) do
-    if do_require(obj, List.flatten([requirements]), :any) do
-      obj
+  @spec mount_require_any(Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) ::
+          Phoenix.LiveView.Socket | map()
+  def mount_require_any(socket, requirements) do
+    if allow_any?(socket, List.flatten([requirements])) do
+      socket
     else
-      obj
+      socket
       |> LiveView.put_flash(:warning, "You do not have permission to view this page.")
       |> LiveView.redirect(to: "/")
     end
-  end
-
-  defp do_require(%Plug.Conn{} = conn, requirements, all_or_any) do
-    do_require(conn.assigns[:current_user].permissions, requirements, all_or_any)
-  end
-
-  # Socket
-  defp do_require(%Phoenix.LiveView.Socket{} = socket, requirements, all_or_any) do
-    do_require(socket.assigns[:current_user].permissions, requirements, all_or_any)
-  end
-
-  defp do_require(permissions_held, requirements, :all) do
-    Enum.all?(
-      requirements,
-      fn p ->
-        allow?(permissions_held, p)
-      end
-    )
-  end
-
-  defp do_require(permissions_held, requirements, :any) do
-    Enum.any?(
-      requirements,
-      fn p ->
-        allow?(permissions_held, p)
-      end
-    )
   end
 
   # If the permission requires MFA then check for it, otherwise return true
