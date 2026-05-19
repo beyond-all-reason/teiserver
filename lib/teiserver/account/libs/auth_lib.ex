@@ -148,7 +148,7 @@ defmodule Teiserver.Account.AuthLib do
   @spec mount_require_all(Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) ::
           Phoenix.LiveView.Socket
   def mount_require_all(obj, requirements) do
-    if do_require(obj, List.flatten([requirements]), :all) do
+    if allow?(obj, List.flatten([requirements])) do
       obj
     else
       obj
@@ -162,40 +162,13 @@ defmodule Teiserver.Account.AuthLib do
           String.t() | [String.t()]
         ) :: Phoenix.LiveView.Socket
   def mount_require_any(obj, requirements) do
-    if do_require(obj, List.flatten([requirements]), :any) do
+    if allow_any?(obj, List.flatten([requirements])) do
       obj
     else
       obj
       |> LiveView.put_flash(:warning, "You do not have permission to view this page.")
       |> LiveView.redirect(to: "/")
     end
-  end
-
-  defp do_require(%Plug.Conn{} = conn, requirements, all_or_any) do
-    do_require(conn.assigns[:current_user].permissions, requirements, all_or_any)
-  end
-
-  # Socket
-  defp do_require(%Phoenix.LiveView.Socket{} = socket, requirements, all_or_any) do
-    do_require(socket.assigns[:current_user].permissions, requirements, all_or_any)
-  end
-
-  defp do_require(permissions_held, requirements, :all) do
-    Enum.all?(
-      requirements,
-      fn p ->
-        allow?(permissions_held, p)
-      end
-    )
-  end
-
-  defp do_require(permissions_held, requirements, :any) do
-    Enum.any?(
-      requirements,
-      fn p ->
-        allow?(permissions_held, p)
-      end
-    )
   end
 
   # If the permission requires MFA then check for it, otherwise return true
