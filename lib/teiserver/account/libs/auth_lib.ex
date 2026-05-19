@@ -145,27 +145,25 @@ defmodule Teiserver.Account.AuthLib do
   @doc """
   Allows us to perform an auth check and force a redirect
   """
-  @spec mount_require_all(Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) ::
-          Phoenix.LiveView.Socket
-  def mount_require_all(obj, requirements) do
-    if allow?(obj, List.flatten([requirements])) do
-      obj
+  @spec mount_require_all(Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) ::
+          Phoenix.LiveView.Socket | map()
+  def mount_require_all(socket, requirements) do
+    if allow?(socket, List.flatten([requirements])) do
+      socket
     else
-      obj
+      socket
       |> LiveView.put_flash(:warning, "You do not have permission to view this page.")
       |> LiveView.redirect(to: "/")
     end
   end
 
-  @spec mount_require_any(
-          map() | Plug.Conn.t() | Phoenix.LiveView.Socket.t(),
-          String.t() | [String.t()]
-        ) :: Phoenix.LiveView.Socket
-  def mount_require_any(obj, requirements) do
-    if allow_any?(obj, List.flatten([requirements])) do
-      obj
+  @spec mount_require_any(Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) ::
+          Phoenix.LiveView.Socket | map()
+  def mount_require_any(socket, requirements) do
+    if allow_any?(socket, List.flatten([requirements])) do
+      socket
     else
-      obj
+      socket
       |> LiveView.put_flash(:warning, "You do not have permission to view this page.")
       |> LiveView.redirect(to: "/")
     end

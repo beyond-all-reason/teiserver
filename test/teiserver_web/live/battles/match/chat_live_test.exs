@@ -2,11 +2,7 @@ defmodule TeiserverWeb.Battle.MatchLive.ChatLiveTest do
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
-  use TeiserverWeb.ConnCase
-
-  # https://github.com/beyond-all-reason/teiserver/actions/runs/12946468298/job/36111060092?pr=560
-  # at a glance there's a problem with throttling in some cases?
-  @moduletag :needs_attention
+  use TeiserverWeb.ConnCase, async: false
 
   setup do
     {:ok, kw} = GeneralTestLib.conn_setup(["Overwatch"], [:no_login])
