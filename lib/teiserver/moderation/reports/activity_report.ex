@@ -23,7 +23,7 @@ defmodule Teiserver.Moderation.ActivityReport do
         params["end_date"]
       )
 
-    permanent = DateHelper.shift_years(DateTime.utc_now(), 100)
+    permanent = DateTime.shift(DateTime.utc_now(), year: 100)
 
     start_date = DateHelper.to_datetime(start_date)
     end_date = DateHelper.to_datetime(end_date)

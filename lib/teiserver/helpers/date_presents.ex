@@ -97,13 +97,13 @@ defmodule Teiserver.Helper.DatePresets do
     do: Date.utc_today() |> Date.beginning_of_week() |> Date.add(7)
 
   def parse("Start of next month"),
-    do: Date.utc_today() |> beginning_of_month() |> shift_months(1)
+    do: Date.utc_today() |> beginning_of_month() |> Date.shift(month: 1)
 
   def parse("Start of next quarter"),
-    do: Date.utc_today() |> beginning_of_quarter() |> shift_months(3)
+    do: Date.utc_today() |> beginning_of_quarter() |> Date.shift(month: 3)
 
   def parse("Start of next year"),
-    do: Date.utc_today() |> beginning_of_year() |> shift_years(1)
+    do: Date.utc_today() |> beginning_of_year() |> Date.shift(year: 1)
 
   def parse("End of time"), do: Date.new!(9999, 1, 1)
 
@@ -169,9 +169,9 @@ defmodule Teiserver.Helper.DatePresets do
 
     start =
       Date.new!(today.year, today.month, 1)
-      |> shift_months(-1)
+      |> Date.shift(month: -1)
 
-    {start, shift_months(start, 1)}
+    {start, Date.shift(start, month: 1)}
   end
 
   def _parse_named_period("This quarter") do
@@ -184,7 +184,7 @@ defmodule Teiserver.Helper.DatePresets do
 
     start =
       today
-      |> shift_months(-3)
+      |> Date.shift(month: -3)
       |> beginning_of_quarter()
 
     {start, beginning_of_quarter(today)}
@@ -195,16 +195,16 @@ defmodule Teiserver.Helper.DatePresets do
 
     start =
       Date.new!(today.year, today.month, 1)
-      |> shift_months(-2)
+      |> Date.shift(month: -2)
 
-    {start, shift_months(start, 1)}
+    {start, Date.shift(start, month: 1)}
   end
 
   def _parse_named_period("This year") do
     today = Date.utc_today()
     start = Date.new!(today.year, 1, 1)
 
-    {start, shift_years(start, 1)}
+    {start, Date.shift(start, year: 1)}
   end
 
   def _parse_named_period("Last year") do
@@ -212,15 +212,15 @@ defmodule Teiserver.Helper.DatePresets do
 
     start =
       Date.new!(today.year, 1, 1)
-      |> shift_years(-1)
+      |> Date.shift(year: -1)
 
-    {start, shift_years(start, 1)}
+    {start, Date.shift(start, year: 1)}
   end
 
   def _parse_named_period("All time") do
     start = Date.new!(1900, 1, 1)
 
-    {start, shift_years(Date.utc_today(), 1000)}
+    {start, Date.shift(Date.utc_today(), year: 1000)}
   end
 
   def _parse_named_period("Last 3 months") do
@@ -228,7 +228,7 @@ defmodule Teiserver.Helper.DatePresets do
 
     start =
       Date.new!(today.year, today.month, 1)
-      |> shift_months(-3)
+      |> Date.shift(month: -3)
 
     {start, Date.add(today, 1)}
   end
@@ -238,7 +238,7 @@ defmodule Teiserver.Helper.DatePresets do
 
     start =
       Date.new!(today.year, today.month, 1)
-      |> shift_months(-6)
+      |> Date.shift(month: -6)
 
     {start, Date.add(today, 1)}
   end
@@ -248,7 +248,7 @@ defmodule Teiserver.Helper.DatePresets do
 
     start =
       Date.new!(today.year, today.month, 1)
-      |> shift_months(-12)
+      |> Date.shift(month: -12)
 
     {start, Date.add(today, 1)}
   end

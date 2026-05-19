@@ -83,7 +83,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
 
   # For when we have an existing log
   defp perform_standard(log_date) do
-    new_date = DateHelper.shift_months(log_date, 3)
+    new_date = Date.shift(log_date, month: 3)
 
     new_quarter = new_date |> DateHelper.quarter()
     today_quarter = Date.utc_today() |> DateHelper.quarter()

@@ -195,6 +195,9 @@ defmodule Teiserver.Helper.DateHelper do
   defp suffix(33), do: "rd"
   defp suffix(_day), do: "th"
 
+  @doc """
+  Parses a date string in "DD/MM/YYYY" format into a `Date`.
+  """
   def parse_dmy(nil), do: nil
   def parse_dmy(""), do: nil
 
@@ -206,6 +209,9 @@ defmodule Teiserver.Helper.DateHelper do
     |> Date.new!(String.to_integer(month), String.to_integer(day))
   end
 
+  @doc """
+  Parses a date string in "YYYY-MM-DD" format into a `Date`.
+  """
   def parse_ymd(nil), do: nil
   def parse_ymd(""), do: nil
 
@@ -217,6 +223,9 @@ defmodule Teiserver.Helper.DateHelper do
     |> Date.new!(String.to_integer(month), String.to_integer(day))
   end
 
+  @doc """
+  Parses a datetime string in "YYYY-MM-DD HH:MM:SS" format into a `NaiveDateTime`.
+  """
   def parse_ymd_hms(nil), do: nil
   def parse_ymd_hms(""), do: nil
 
@@ -236,6 +245,10 @@ defmodule Teiserver.Helper.DateHelper do
     )
   end
 
+  @doc """
+  Parses a date/datetime string by detecting its format from separators:
+  contains ":" -> "YYYY-MM-DD HH:MM:SS", contains "-" -> "YYYY-MM-DD", otherwise -> "DD/MM/YYYY".
+  """
   def parse_time_input(s) do
     cond do
       String.contains?(s, ":") -> parse_ymd_hms(s)
@@ -389,7 +402,7 @@ defmodule Teiserver.Helper.DateHelper do
 
   @spec beginning_of_quarter(Date.t() | DateTime.t()) :: Date.t() | DateTime.t()
   def beginning_of_quarter(date) do
-    month = div(date.month - 1, 3) * 3 + 1
+    month = (quarter(date) - 1) * 3 + 1
     %{date | month: month, day: 1}
   end
 
@@ -398,7 +411,7 @@ defmodule Teiserver.Helper.DateHelper do
 
   @spec end_of_quarter(Date.t() | DateTime.t()) :: Date.t() | DateTime.t()
   def end_of_quarter(date) do
-    month = div(date.month - 1, 3) * 3 + 3
+    month = quarter(date) * 3
     day = Date.days_in_month(%{date | month: month})
     %{date | month: month, day: day}
   end
@@ -413,20 +426,4 @@ defmodule Teiserver.Helper.DateHelper do
 
   @spec quarter(Date.t() | DateTime.t()) :: integer()
   def quarter(date), do: div(date.month - 1, 3) + 1
-
-  @spec shift_months(Date.t() | DateTime.t(), integer()) :: Date.t() | DateTime.t()
-  def shift_months(date, n) do
-    total_months = date.year * 12 + date.month - 1 + n
-    year = div(total_months, 12)
-    month = rem(total_months, 12) + 1
-    day = min(date.day, Date.days_in_month(%{date | year: year, month: month}))
-    %{date | year: year, month: month, day: day}
-  end
-
-  @spec shift_years(Date.t() | DateTime.t(), integer()) :: Date.t() | DateTime.t()
-  def shift_years(date, n) do
-    year = date.year + n
-    day = min(date.day, Date.days_in_month(%{date | year: year}))
-    %{date | year: year, day: day}
-  end
 end

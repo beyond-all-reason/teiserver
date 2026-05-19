@@ -108,14 +108,14 @@ defmodule Teiserver.Moderation.ActionLib do
   end
 
   def _search(query, :expiry, "Unexpired not permanent") do
-    years = DateHelper.shift_years(DateTime.utc_now(), 100)
+    years = DateTime.shift(DateTime.utc_now(), year: 100)
 
     from actions in query,
       where: actions.expires > ^DateTime.utc_now() and actions.expires < ^years
   end
 
   def _search(query, :expiry, "Permanent only") do
-    years = DateHelper.shift_years(DateTime.utc_now(), 100)
+    years = DateTime.shift(DateTime.utc_now(), year: 100)
 
     from actions in query,
       where: actions.expires > ^years

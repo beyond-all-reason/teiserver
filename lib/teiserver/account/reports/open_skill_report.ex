@@ -22,7 +22,7 @@ defmodule Teiserver.Account.OpenSkillReport do
     last_active =
       case params["last_active"] do
         "Forever" ->
-          DateHelper.shift_years(Date.utc_today(), -1000) |> DateHelper.to_datetime()
+          Date.utc_today() |> Date.shift(year: -1000) |> DateHelper.to_datetime()
 
         "7 days" ->
           Date.utc_today() |> Date.add(-7) |> DateHelper.to_datetime()

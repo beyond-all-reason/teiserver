@@ -6,7 +6,6 @@ defmodule Teiserver.Moderation do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Moderation.Action
   alias Teiserver.Moderation.ActionLib
@@ -848,7 +847,7 @@ defmodule Teiserver.Moderation do
           restrictions: ["Bridging"],
           score_modifier: 100,
           hidden: true,
-          expires: DateHelper.shift_years(DateTime.utc_now(), 1200)
+          expires: DateTime.shift(DateTime.utc_now(), year: 1200)
         })
 
       RefreshUserRestrictionsTask.refresh_user(user.id)

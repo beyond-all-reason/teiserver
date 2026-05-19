@@ -81,7 +81,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerYearTask do
 
   # For when we have an existing log
   defp perform_standard(log_date) do
-    new_date = DateHelper.shift_years(log_date, 1)
+    new_date = Date.shift(log_date, year: 1)
 
     today_year = Date.utc_today().year
 
