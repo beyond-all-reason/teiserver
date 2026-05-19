@@ -5,7 +5,7 @@ defmodule Teiserver.Account.AuthTest do
 
   use Teiserver.DataCase, async: false
 
-  setup %{} do
+  setup do
     config = Application.get_env(:teiserver, Teiserver)
     new_config = Keyword.put(config, :require_mfa_for_privileged_roles, true)
     Application.put_env(:teiserver, Teiserver, new_config)
@@ -20,12 +20,12 @@ defmodule Teiserver.Account.AuthTest do
   end
 
   describe "MFA functions" do
-    test "allow when no MFA", %{user: user} do
+    test "allow?/2 - no MFA present", %{user: user} do
       refute AuthLib.has_active_mfa?(user.id)
       refute AuthLib.allow?(user, "Server")
     end
 
-    test "allow when MFA present", %{user: user} do
+    test "allow?/2 - MFA present", %{user: user} do
       Account.set_secret(user.id, "secret")
       assert AuthLib.has_active_mfa?(user.id)
       assert AuthLib.allow?(user, "Server")

@@ -224,16 +224,6 @@ defmodule Teiserver.Account.AuthLib do
     Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
   end
 
-  @doc """
-  Given a list of roles, remove any MFA guarded roles from the list
-  """
-  @spec remove_mfa_roles_from_list([String.t()]) :: [String.t()]
-  def remove_mfa_roles_from_list(roles) do
-    Enum.reject(roles, fn role ->
-      Enum.member?(mfa_roles(), role)
-    end)
-  end
-
   @spec contains_mfa_role?([String.t()]) :: boolean()
   def contains_mfa_role?(role_list) do
     role_set = List.wrap(role_list) |> MapSet.new()

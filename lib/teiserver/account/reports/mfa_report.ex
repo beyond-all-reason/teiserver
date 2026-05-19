@@ -43,10 +43,8 @@ defmodule Teiserver.Account.MFAReport do
       AND totps.user_id IS NULL -- Remove anybody with a TOTPS entry
     ORDER BY
       users.name ASC
-    LIMIT 50;
+    LIMIT 200;
     """
-
-    IO.puts(query)
 
     case SQL.query(Repo, query, [roles]) do
       {:ok, results} ->
