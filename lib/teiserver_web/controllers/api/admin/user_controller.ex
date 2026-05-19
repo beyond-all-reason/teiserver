@@ -4,7 +4,7 @@ defmodule TeiserverWeb.API.Admin.UserController do
   alias Teiserver.OAuth
   use TeiserverWeb, :controller
 
-  plug Teiserver.OAuth.Plug.EnsureAuthenticated, scopes: ["admin.user"]
+  plug TeiserverWeb.Plugs.OAuthAuthenticatedPlug, scopes: ["admin.user"]
 
   @stat_fields ["mu", "sigma", "play_time", "spec_time", "lobby_time"]
 

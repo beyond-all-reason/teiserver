@@ -72,7 +72,7 @@ defmodule TeiserverWeb.Router do
   pipeline :oauth_api do
     plug(:accepts, ["json"])
     plug(Teiserver.Logging.LoggingPlug)
-    plug(Teiserver.OAuth.Plug.EnsureAuthenticated)
+    plug(TeiserverWeb.Plugs.OAuthAuthenticatedPlug)
   end
 
   scope "/", TeiserverWeb.General do
