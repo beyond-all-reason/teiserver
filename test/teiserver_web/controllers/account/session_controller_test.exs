@@ -25,7 +25,7 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
       conn = GeneralTestLib.login(conn, user.email)
 
       assert is_nil(Plug.current_resource(conn))
-      assert get_session(conn, :pending_2fa_user_id) == user.id
+      assert get_session(conn, :pending_mfa_user_id) == user.id
     end
 
     test "OTP check for user", %{conn: conn, user: user} do

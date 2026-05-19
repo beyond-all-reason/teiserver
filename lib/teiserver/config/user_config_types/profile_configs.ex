@@ -41,7 +41,7 @@ defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
       section: "General",
       type: "integer",
       visible: false,
-      permissions: ["admin.dev.developer"],
+      permissions: ["Server"],
       description: "Page rate limit per minute",
       opts: [],
       default: nil
@@ -52,7 +52,7 @@ defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
       section: "General",
       type: "string",
       visible: false,
-      permissions: ["admin.dev.developer"],
+      permissions: ["Server"],
       description:
         "Last recorded screen size of the user, used for sizing certain windows accordingly",
       opts: [],
@@ -64,7 +64,7 @@ defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
       section: "General",
       type: "boolean",
       visible: false,
-      permissions: ["admin.dev.developer"],
+      permissions: ["Server"],
       description:
         "Changes the default behaviour of showing or hiding advanced options on the forms supporting them.",
       opts: [],

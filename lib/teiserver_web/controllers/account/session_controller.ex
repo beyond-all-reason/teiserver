@@ -43,9 +43,9 @@ defmodule TeiserverWeb.Account.SessionController do
       {:ok, user} ->
         login_reply({:ok, user}, conn)
 
-      {:requires_2fa, user} ->
+      {:requires_mfa, user} ->
         conn
-        |> put_session(:pending_2fa_user_id, user.id)
+        |> put_session(:pending_mfa_user_id, user.id)
         |> redirect(to: ~p"/otp")
 
       {:error, reason} ->
@@ -54,7 +54,7 @@ defmodule TeiserverWeb.Account.SessionController do
   end
 
   def otp(conn, _params) do
-    user_id = get_session(conn, :pending_2fa_user_id)
+    user_id = get_session(conn, :pending_mfa_user_id)
     user = Account.get_user!(user_id)
 
     conn
@@ -67,7 +67,7 @@ defmodule TeiserverWeb.Account.SessionController do
 
     case Account.validate_totp(user, otp) do
       :ok ->
-        delete_session(conn, :pending_2fa_user_id)
+        delete_session(conn, :pending_mfa_user_id)
         login_reply({:ok, user}, conn)
 
       {:error, reason} ->
@@ -82,7 +82,7 @@ defmodule TeiserverWeb.Account.SessionController do
             :locked ->
               login_reply(
                 {:error,
-                 "The 2FA one time password has been entered wrong too many times. Please reset your password to remove 2FA from your account."},
+                 "The MFA one time password has been entered wrong too many times. Please reset your password to remove MFA from your account."},
                 conn
               )
 
