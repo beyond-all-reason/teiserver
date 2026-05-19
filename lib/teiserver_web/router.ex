@@ -558,6 +558,7 @@ defmodule TeiserverWeb.Router do
   scope "/oauth/", TeiserverWeb.OAuth do
     pipe_through(:api)
     post("/token", CodeController, :token)
+    get("/userinfo", UserinfoController, :get)
   end
 
   scope "/", TeiserverWeb.OAuth do
