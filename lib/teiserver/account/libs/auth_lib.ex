@@ -1,10 +1,21 @@
 defmodule Teiserver.Account.AuthLib do
-  @moduledoc false
+  @moduledoc """
+  Module with functions for working with authorisation/permission checks
+  """
+
   alias Phoenix.LiveView
+  alias Phoenix.LiveView.Socket
+  alias Plug.Conn
+  alias Teiserver.Account
+
   require Logger
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-address-card"
+
+  def mfa_roles do
+    ~w[Server Admin]s
+  end
 
   @spec get_all_permission_sets() :: list()
   def get_all_permission_sets do
@@ -60,46 +71,52 @@ defmodule Teiserver.Account.AuthLib do
   end
 
   # If you don't need permissions then lets not bother checking
-  @spec allow?(map() | Plug.Conn.t() | [String.t()], String.t() | [String.t()]) :: boolean
-  def allow?(nil, []), do: false
+  @spec allow?(
+          map() | Conn.t() | Socket.t() | Teiserver.Account.User.t(),
+          String.t() | [String.t()]
+        ) :: boolean
+  def allow?(nil, _any), do: false
   def allow?(_permissions, nil), do: true
   def allow?(_permissions, ""), do: true
   def allow?(_permissions, []), do: true
 
   # Handle conn
-  def allow?(%Plug.Conn{} = conn, permission_required) do
-    allow?(conn.assigns[:current_user], permission_required)
+  def allow?(%Conn{} = conn, permissions_required) do
+    %{id: id, permissions: permissions_held} = conn.assigns[:current_user]
+
+    mfa_test(id, permissions_required) and
+      permission_test(permissions_held, permissions_required)
   end
 
   # Socket
-  def allow?(%Phoenix.LiveView.Socket{} = socket, permission_required) do
-    allow?(socket.assigns[:current_user], permission_required)
+  def allow?(%Socket{} = socket, permissions_required) do
+    %{id: id, permissions: permissions_held} = socket.assigns[:current_user]
+
+    mfa_test(id, permissions_required) and
+      permission_test(permissions_held, permissions_required)
   end
 
-  # This allows us to use something with permissions in it
-  def allow?(%{permissions: permissions}, permission_required) do
-    allow?(permissions, permission_required)
+  # User and CacheUser
+  def allow?(%{id: id, permissions: permissions_held}, permissions_required) do
+    mfa_test(id, permissions_required) and
+      permission_test(permissions_held, permissions_required)
   end
 
-  # Handle users
-  def allow?(%{} = user, permission_required) do
-    allow?(user.permissions, permission_required)
-  end
-
-  def allow?(permissions_held, permission_required) when is_list(permission_required) do
+  # The testing of permissions required against permissions held
+  defp permission_test(permissions_held, permission_required) when is_list(permission_required) do
     Enum.all?(
       permission_required,
       fn p ->
-        allow?(permissions_held, p)
+        permission_test(permissions_held, p)
       end
     )
   end
 
-  def allow?(_permissions, "account") do
+  defp permission_test(_permissions, "account") do
     true
   end
 
-  def allow?(permissions_held, permission_required) do
+  defp permission_test(permissions_held, permission_required) do
     Logger.debug(
       "Permission test, has: #{Kernel.inspect(permissions_held)}, needs: #{Kernel.inspect(permission_required)}"
     )
@@ -110,10 +127,7 @@ defmodule Teiserver.Account.AuthLib do
         Logger.debug("AuthLib.allow?() -> No permissions held")
         false
 
-      # Developers always have permission
-      Enum.member?(permissions_held, "admin.dev.developer") && permission_required != "debug" ->
-        true
-
+      # Server devs always have permission
       Enum.member?(permissions_held, "Server") && permission_required != "debug" ->
         true
 
@@ -131,57 +145,63 @@ defmodule Teiserver.Account.AuthLib do
   @doc """
   Allows us to perform an auth check and force a redirect
   """
-  @spec mount_require_all(Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) ::
-          Phoenix.LiveView.Socket
-  def mount_require_all(obj, requirements) do
-    if do_require(obj, List.flatten([requirements]), :all) do
-      obj
+  @spec mount_require_all(Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) ::
+          Phoenix.LiveView.Socket | map()
+  def mount_require_all(socket, requirements) do
+    if allow?(socket, List.flatten([requirements])) do
+      socket
     else
-      obj
+      socket
       |> LiveView.put_flash(:warning, "You do not have permission to view this page.")
       |> LiveView.redirect(to: "/")
     end
   end
 
-  @spec mount_require_any(
-          map() | Plug.Conn.t() | Phoenix.LiveView.Socket.t(),
-          String.t() | [String.t()]
-        ) :: Phoenix.LiveView.Socket
-  def mount_require_any(obj, requirements) do
-    if do_require(obj, List.flatten([requirements]), :any) do
-      obj
+  @spec mount_require_any(Phoenix.LiveView.Socket.t(), String.t() | [String.t()]) ::
+          Phoenix.LiveView.Socket | map()
+  def mount_require_any(socket, requirements) do
+    if allow_any?(socket, List.flatten([requirements])) do
+      socket
     else
-      obj
+      socket
       |> LiveView.put_flash(:warning, "You do not have permission to view this page.")
       |> LiveView.redirect(to: "/")
     end
   end
 
-  defp do_require(%Plug.Conn{} = conn, requirements, all_or_any) do
-    do_require(conn.assigns[:current_user].permissions, requirements, all_or_any)
+  # If the permission requires MFA then check for it, otherwise return true
+  # as their MFA status doesn't matter
+  # if mfa_required? is not set then it will always return true
+  defp mfa_test(user, permissions_required) do
+    if mfa_required?() and contains_mfa_role?(permissions_required) do
+      has_active_mfa?(user)
+    else
+      true
+    end
   end
 
-  # Socket
-  defp do_require(%Phoenix.LiveView.Socket{} = socket, requirements, all_or_any) do
-    do_require(socket.assigns[:current_user].permissions, requirements, all_or_any)
+  @doc """
+  Returns true if the user_id in question has an active totp
+  """
+  @spec has_active_mfa?(Teiserver.Account.User.id()) :: boolean()
+  def has_active_mfa?(user_id) do
+    Teiserver.cache_get_or_store(:user_mfa_active, user_id, fn ->
+      user_id != nil and
+        Account.get_user_totp_status(user_id) == :active
+    end)
   end
 
-  defp do_require(permissions_held, requirements, :all) do
-    Enum.all?(
-      requirements,
-      fn p ->
-        allow?(permissions_held, p)
-      end
-    )
+  defp mfa_required? do
+    Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
   end
 
-  defp do_require(permissions_held, requirements, :any) do
-    Enum.any?(
-      requirements,
-      fn p ->
-        allow?(permissions_held, p)
-      end
-    )
+  @spec contains_mfa_role?([String.t()]) :: boolean()
+  def contains_mfa_role?(role_list) do
+    role_set = List.wrap(role_list) |> MapSet.new()
+    mfa_role_set = MapSet.new(mfa_roles())
+    intersection = MapSet.intersection(role_set, mfa_role_set)
+
+    not Enum.empty?(intersection)
   end
 
   # This is used as part of the permission system getting the current user

@@ -1,30 +1,8 @@
 <table class="table table-sm">
   <thead>
     <tr>
-      <th colspan="5">&nbsp;</th>
-      <th colspan="2" style="text-align: center; bbackground-color: #FEE;">Damage</th>
-      <th colspan="2" style="text-align: center; bbackground-color: #EFE;">Units</th>
-      <th colspan="2" style="text-align: center; bbackground-color: #EEF;">Metal</th>
-      <th colspan="2" style="text-align: center; bbackground-color: #FFE;">Energy</th>
-
-      <th colspan="2">&nbsp;</th>
-    </tr>
-
-    <tr>
       <th colspan="4">Name & Party</th>
       <th>Team</th>
-
-      <th>Dealt</th>
-      <th>Received</th>
-
-      <th>Killed</th>
-      <th>Prod</th>
-
-      <th>Prod</th>
-      <th>Used</th>
-
-      <th>Prod</th>
-      <th>Used</th>
 
       <th>Post-match rating</th>
       <th>&nbsp;</th>
@@ -52,18 +30,6 @@
         <% end %>
 
         <td>{m.team_id + 1}</td>
-
-        <td>{normalize(m.stats["damageDealt"])}</td>
-        <td>{normalize(m.stats["damageReceived"])}</td>
-
-        <td>{normalize(m.stats["unitsKilled"])}</td>
-        <td>{normalize(m.stats["unitsProduced"])}</td>
-
-        <td>{normalize(m.stats["metalProduced"])}</td>
-        <td>{normalize(m.stats["metalUsed"])}</td>
-
-        <td>{normalize(m.stats["energyProduced"])}</td>
-        <td>{normalize(m.stats["energyUsed"])}</td>
 
         <td>{if rating, do: rating.value["rating_value"] |> round(2)}</td>
 

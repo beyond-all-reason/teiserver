@@ -422,10 +422,10 @@ defmodule Teiserver.Account.UserLib do
 
       Account.get_account_locked(user.id) ->
         {:error,
-         "The 2FA one time password has been entered wrong too many times. Please reset your password to remove 2FA from your account."}
+         "The MFA one time password has been entered wrong too many times. Please reset your password to remove MFA from your account."}
 
       Account.get_user_totp_status(user.id) == :active ->
-        {:requires_2fa, user}
+        {:requires_mfa, user}
 
       true ->
         :ok

@@ -2,6 +2,8 @@ defmodule Teiserver.OAuth.Application do
   @moduledoc false
 
   alias Ecto.Changeset
+  alias Teiserver.Account
+  alias Teiserver.OAuth.Libs.ScopeLib
 
   use TeiserverWeb, :schema
 
@@ -20,10 +22,6 @@ defmodule Teiserver.OAuth.Application do
     timestamps(type: :utc_datetime)
   end
 
-  def allowed_scopes do
-    ["tachyon.lobby", "admin.map", "admin.engine", "admin.user"]
-  end
-
   def changeset(application, attrs) do
     attrs = attrs |> uniq_lists(~w(scopes)a)
 
@@ -40,9 +38,31 @@ defmodule Teiserver.OAuth.Application do
       end
     end)
     |> Changeset.unique_constraint(:uid)
-    |> Changeset.validate_subset(:scopes, allowed_scopes(),
-      message: "Must a subset of #{Enum.join(allowed_scopes(), ", ")}"
+    |> Changeset.validate_subset(:scopes, ScopeLib.allowed_scopes(),
+      message: "Must a subset of #{Enum.join(ScopeLib.allowed_scopes(), ", ")}"
     )
+    |> Changeset.validate_change(:scopes, fn :scopes, scopes ->
+      with owner when not is_nil(owner) <- get_owner(application, attrs),
+           :ok <- ScopeLib.all_scopes_allowed?(owner, scopes) do
+        []
+      else
+        nil ->
+          # this is going to fail anyway because the owner foreign key is mandatory
+          []
+
+        {:error, invalid_scopes} ->
+          [scopes: "not authorized for scopes #{Enum.join(invalid_scopes, ", ")}"]
+      end
+    end)
     |> Changeset.validate_length(:scopes, min: 1)
   end
+
+  defp get_owner(_app, %{owner: %Account.User{} = owner}), do: owner
+  defp get_owner(_app, %{owner_id: nil}), do: nil
+  defp get_owner(_app, %{"owner_id" => nil}), do: nil
+  defp get_owner(_app, %{owner_id: owner_id}), do: Account.get_user(owner_id)
+  defp get_owner(_app, %{"owner_id" => owner_id}), do: Account.get_user(owner_id)
+  defp get_owner(%__MODULE__{owner_id: nil}, _attrs), do: nil
+  defp get_owner(%__MODULE__{owner_id: owner_id}, _attrs), do: Account.get_user(owner_id)
+  defp get_owner(%__MODULE__{owner: %Account.User{} = owner}, _attrs), do: owner
 end

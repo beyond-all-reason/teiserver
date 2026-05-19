@@ -106,9 +106,7 @@ defmodule Teiserver.Support.Tachyon do
     autohost = BotFixtures.create_bot()
 
     token =
-      OAuthFixtures.token_attrs(nil, context.app)
-      |> Map.drop([:owner_id])
-      |> Map.put(:bot_id, autohost.id)
+      OAuthFixtures.token_attrs(autohost, context.app)
       |> OAuthFixtures.create_token()
 
     client = connect_autohost!(token, 10, 0)

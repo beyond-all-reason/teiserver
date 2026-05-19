@@ -3,6 +3,7 @@ defmodule Teiserver.Account.TOTPLib do
   alias Teiserver.Account.TOTP
   alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
+
   use TeiserverWeb, :library
 
   @allowed_invalid_attempts 5
@@ -99,7 +100,9 @@ defmodule Teiserver.Account.TOTPLib do
 
   @spec set_secret(T.userid(), binary()) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
   def set_secret(user_id, secret) do
-    set_totp(user_id, %{user_id: user_id, secret: secret})
+    result = set_totp(user_id, %{user_id: user_id, secret: secret})
+    Teiserver.cache_delete(:user_mfa_active, user_id)
+    result
   end
 
   @spec set_last_used(T.userid(), DateTime.t()) ::
@@ -124,6 +127,7 @@ defmodule Teiserver.Account.TOTPLib do
       {:active, totp} ->
         case Repo.delete(totp) do
           {:ok, _totp} ->
+            Teiserver.cache_delete(:user_mfa_active, user_id)
             :ok
 
           {:error, changeset} ->

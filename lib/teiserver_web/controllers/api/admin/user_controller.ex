@@ -1,11 +1,25 @@
 defmodule TeiserverWeb.API.Admin.UserController do
   alias Teiserver.Account
+  alias Teiserver.Account.RoleLib
   alias Teiserver.OAuth
   use TeiserverWeb, :controller
 
   plug Teiserver.OAuth.Plug.EnsureAuthenticated, scopes: ["admin.user"]
 
   @stat_fields ["mu", "sigma", "play_time", "spec_time", "lobby_time"]
+
+  # Roles that may be assigned to users created or refreshed through this API.
+  # `admin.user` is intended for load-testing tooling, so callers must not be
+  # able to mint staff/moderation/management accounts. Any role outside this
+  # allowlist is silently dropped from create requests and blocks
+  # refresh_token requests against pre-existing users.
+  @api_allowed_roles ~w(
+    Verified
+    Trusted
+    BAR+
+    Bot
+  )
+
   @default_params %{
     "permissions" => [],
     "roles" => [],
@@ -19,17 +33,23 @@ defmodule TeiserverWeb.API.Admin.UserController do
     :user_not_found => 404,
     :app_not_found => 400,
     :invalid_scope => 400,
+    :privileged_target => 403,
     :default => 400
   }
 
   @error_messages %{
     :user_not_found => "User not found",
     :app_not_found => @app_not_found_error,
-    :invalid_scope => "Invalid scope for OAuth application"
+    :invalid_scope => "Invalid scope for OAuth application",
+    :privileged_target =>
+      "Target user has privileged roles; admin.user scope cannot mint tokens for staff accounts"
   }
 
   def create(conn, params) do
-    params = Map.merge(@default_params, params)
+    params =
+      @default_params
+      |> Map.merge(params)
+      |> sanitize_roles_and_permissions()
 
     with {:ok, user} <- Account.script_create_user(params),
          :ok <- update_user_stats(user.id, params),
@@ -43,6 +63,7 @@ defmodule TeiserverWeb.API.Admin.UserController do
 
   def refresh_token(conn, %{"email" => email}) do
     with {:ok, user} <- get_user_by_email(email),
+         :ok <- ensure_unprivileged(user),
          {:ok, app} <- get_generic_lobby_app(),
          {:ok, token} <- create_user_token(user, app) do
       json(conn, build_user_response(user, token))
@@ -50,6 +71,33 @@ defmodule TeiserverWeb.API.Admin.UserController do
       error -> handle_error(conn, error)
     end
   end
+
+  # Drop any caller-supplied role outside the allowlist and recompute
+  # permissions from the surviving roles. Caller-supplied permission
+  # strings are discarded entirely.
+  defp sanitize_roles_and_permissions(params) do
+    roles =
+      params
+      |> Map.get("roles", [])
+      |> Enum.filter(&(&1 in @api_allowed_roles))
+      |> Enum.uniq()
+
+    permissions = RoleLib.calculate_permissions(roles)
+
+    params
+    |> Map.put("roles", roles)
+    |> Map.put("permissions", permissions)
+  end
+
+  defp ensure_unprivileged(%{roles: roles}) when is_list(roles) do
+    if Enum.all?(roles, &(&1 in @api_allowed_roles)) do
+      :ok
+    else
+      {:error, :privileged_target}
+    end
+  end
+
+  defp ensure_unprivileged(_user), do: :ok
 
   # Private helpers
 
@@ -76,8 +124,11 @@ defmodule TeiserverWeb.API.Admin.UserController do
     end
   end
 
+  defp get_user_by_email(nil), do: {:error, :user_not_found}
+  defp get_user_by_email(""), do: {:error, :user_not_found}
+
   defp get_user_by_email(email) do
-    case Account.get_user_by_email(email) do
+    case Account.query_user(search: [email_lower: email]) do
       nil -> {:error, :user_not_found}
       user -> {:ok, user}
     end

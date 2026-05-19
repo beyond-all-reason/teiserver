@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
+  alias Teiserver.Account.Auth
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Application
@@ -7,8 +8,12 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
   use TeiserverWeb.ConnCase
 
   defp setup_user(_context) do
-    GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())
-    |> TeiserverTestLib.conn_setup()
+    {:ok, ctx} =
+      GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())
+      |> TeiserverTestLib.conn_setup()
+
+    Auth.add_roles(ctx[:user], ["Admin"])
+    {:ok, ctx}
   end
 
   defp setup_app(context) do

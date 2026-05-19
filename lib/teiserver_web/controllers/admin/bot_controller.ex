@@ -16,10 +16,7 @@ defmodule TeiserverWeb.Admin.BotController do
 
   plug Bodyguard.Plug.Authorize,
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
-    # The policy should be Admin or something fairly high. But while we're
-    # developping the new lobby, it's easier if this is allowed for any
-    # contributors
-    policy: Teiserver.Staff,
+    policy: Teiserver.Staff.Admin,
     action: {Phoenix.Controller, :action_name},
     user: {AuthLib, :current_user}
 

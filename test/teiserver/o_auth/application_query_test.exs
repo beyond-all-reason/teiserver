@@ -1,5 +1,6 @@
 defmodule Teiserver.OAuth.ApplicationQueryTest do
   alias Teiserver.Bot.Bot
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.OAuth.CodeQueries
@@ -10,7 +11,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
   use Teiserver.DataCase
 
   defp setup_app(_context) do
-    user = TeiserverTestLib.new_user()
+    user = GeneralTestLib.make_user(%{"roles" => ["Verified", "Admin"]})
 
     app = OAuthFixtures.app_attrs(user.id) |> OAuthFixtures.create_app()
 
@@ -40,11 +41,11 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
     end
 
     test "bit of everything", %{app: app, bot: bot} do
-      OAuthFixtures.code_attrs(app.owner_id, app)
+      OAuthFixtures.code_attrs(app.owner, app)
       |> OAuthFixtures.create_code()
 
       Enum.each(1..2, fn _i ->
-        OAuthFixtures.token_attrs(app.owner_id, app)
+        OAuthFixtures.token_attrs(app.owner, app)
         |> OAuthFixtures.create_token()
       end)
 
@@ -68,7 +69,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
         |> Map.merge(%{name: "other app", uid: "other_app"})
         |> OAuthFixtures.create_app()
 
-      OAuthFixtures.code_attrs(user.id, other_app) |> OAuthFixtures.create_code()
+      OAuthFixtures.code_attrs(user, other_app) |> OAuthFixtures.create_code()
 
       assert [%{code_count: 1}] = ApplicationQueries.get_stats(other_app.id)
     end
@@ -76,11 +77,11 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
     test "ignore expired code and tokens", %{user: user, app: app} do
       yesterday = DateTime.shift(DateTime.utc_now(), day: -1)
 
-      OAuthFixtures.code_attrs(user.id, app)
+      OAuthFixtures.code_attrs(user, app)
       |> Map.put(:expires_at, yesterday)
       |> OAuthFixtures.create_code()
 
-      OAuthFixtures.token_attrs(user.id, app)
+      OAuthFixtures.token_attrs(user, app)
       |> Map.put(:expires_at, yesterday)
       |> OAuthFixtures.create_token()
 
@@ -93,11 +94,11 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
         |> Map.merge(%{name: "other app", uid: "other_app"})
         |> OAuthFixtures.create_app()
 
-      OAuthFixtures.code_attrs(user.id, app)
+      OAuthFixtures.code_attrs(user, app)
       |> OAuthFixtures.create_code()
 
       Enum.each(1..2, fn i ->
-        OAuthFixtures.code_attrs(user.id, other_app)
+        OAuthFixtures.code_attrs(user, other_app)
         |> Map.put(:value, "value_#{i}")
         |> OAuthFixtures.create_code()
       end)
@@ -115,7 +116,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
     setup [:setup_app]
 
     test "list_authorized_applications returns correct apps", %{user: user, app: app} do
-      OAuthFixtures.token_attrs(user.id, app) |> OAuthFixtures.create_token()
+      OAuthFixtures.token_attrs(user, app) |> OAuthFixtures.create_token()
 
       apps = ApplicationQueries.list_authorized_applications(user.id)
 
@@ -126,7 +127,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
     test "list_authorized_applications shows apps with expired tokens", %{user: user, app: app} do
       yesterday = DateTime.shift(DateTime.utc_now(), day: -1)
 
-      OAuthFixtures.token_attrs(user.id, app)
+      OAuthFixtures.token_attrs(user, app)
       |> Map.put(:expires_at, yesterday)
       |> OAuthFixtures.create_token()
 
@@ -139,7 +140,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
     test "get_application_token_counts returns correct token counts", %{user: user, app: app} do
       # Create multiple tokens
       Enum.each(1..2, fn _i ->
-        OAuthFixtures.token_attrs(user.id, app) |> OAuthFixtures.create_token()
+        OAuthFixtures.token_attrs(user, app) |> OAuthFixtures.create_token()
       end)
 
       counts = ApplicationQueries.get_application_token_counts(user.id)
@@ -148,14 +149,14 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
 
     test "revoke_application_access deletes correct tokens and codes", %{user: user, app: app} do
       # Create tokens for this user and app
-      user_token = OAuthFixtures.token_attrs(user.id, app) |> OAuthFixtures.create_token()
-      user_code = OAuthFixtures.code_attrs(user.id, app) |> OAuthFixtures.create_code()
+      user_token = OAuthFixtures.token_attrs(user, app) |> OAuthFixtures.create_token()
+      user_code = OAuthFixtures.code_attrs(user, app) |> OAuthFixtures.create_code()
 
       # Create tokens for different user, same app
-      other_user = TeiserverTestLib.new_user()
+      other_user = GeneralTestLib.make_user(%{"roles" => ["Verified", "Admin"]})
 
       other_user_token =
-        OAuthFixtures.token_attrs(other_user.id, app) |> OAuthFixtures.create_token()
+        OAuthFixtures.token_attrs(other_user, app) |> OAuthFixtures.create_token()
 
       # Create tokens for same user, different app
       other_app =
@@ -164,7 +165,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
         |> OAuthFixtures.create_app()
 
       other_app_token =
-        OAuthFixtures.token_attrs(user.id, other_app) |> OAuthFixtures.create_token()
+        OAuthFixtures.token_attrs(user, other_app) |> OAuthFixtures.create_token()
 
       # Revoke access for user and app
       assert :ok = OAuth.revoke_application_access(user.id, app.id)

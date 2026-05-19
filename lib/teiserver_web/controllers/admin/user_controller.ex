@@ -243,6 +243,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:json_user, json_user)
         |> assign(:cache_user, cache_user)
         |> assign(:extra_cache_keys, extra_cache_keys)
+        |> assign(:has_active_mfa?, has_active_mfa?(user.id))
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
 
@@ -276,6 +277,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:privileged_roles, RoleLib.privileged_roles())
         |> assign(:property_roles, RoleLib.property_roles())
         |> assign(:role_styling_map, RoleLib.role_data())
+        |> assign(:has_active_mfa?, has_active_mfa?(user.id))
         |> add_breadcrumb(name: "Edit: #{user.name}", url: conn.request_path)
         |> render("edit.html")
 
@@ -389,6 +391,7 @@ defmodule TeiserverWeb.Admin.UserController do
             |> assign(:privileged_roles, RoleLib.privileged_roles())
             |> assign(:property_roles, RoleLib.property_roles())
             |> assign(:role_styling_map, RoleLib.role_data())
+            |> assign(:has_active_mfa?, has_active_mfa?(user.id))
             |> render("edit.html", user: user, changeset: changeset)
         end
 
@@ -439,7 +442,7 @@ defmodule TeiserverWeb.Admin.UserController do
     TOTPLib.disable_totp(user.id)
 
     conn
-    |> put_flash(:info, "Disabled 2FA for #{user.name}")
+    |> put_flash(:info, "Disabled MFA for #{user.name}")
     |> redirect(to: ~p"/teiserver/admin/user/#{user}")
   end
 
@@ -1170,6 +1173,9 @@ defmodule TeiserverWeb.Admin.UserController do
     page == 0 && Enum.count(users) > 20 && search_term != ""
   end
 
+  @doc """
+  Removes all PII from a user in accordance with GDPR.
+  """
   @spec gdpr_clean(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def gdpr_clean(conn, %{"id" => id}) do
     user = Account.get_user_by_id(id)

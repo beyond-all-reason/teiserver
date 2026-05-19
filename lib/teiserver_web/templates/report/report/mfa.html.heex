@@ -1,0 +1,39 @@
+<% bsname = view_colour() %>
+
+{render(
+  TeiserverWeb.Report.GeneralView,
+  "sub_menu.html",
+  Map.merge(assigns, %{active: "reports"})
+)}
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        {render(
+          TeiserverWeb.Report.ReportView,
+          "section_menu.html",
+          Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "mfa"
+          })
+        )}
+        <br /><br />
+
+        <.table id="users-table" rows={@users} table_class="table-sm table-hover">
+          <:col :let={user} label="Name">{user.name}</:col>
+          <:col :let={user} label="Last login">
+            {date_to_str(user.last_login, format: :hms_or_ymd)}
+          </:col>
+          <:col :let={user} label="Roles">{Enum.join(user.roles, ", ")}</:col>
+          <:col :let={user} label="">
+            <a href={~p"/teiserver/admin/user/#{user.id}"} class="btn btn-secondary btn-sm">
+              Show
+            </a>
+          </:col>
+        </.table>
+      </div>
+    </div>
+  </div>
+</div>

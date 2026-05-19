@@ -145,7 +145,7 @@ defmodule Teiserver.EmailHelper do
 
     <p>To find out more about #{game_name} visit our <a href="#{website_url}">website</a> .<p>
 
-    <p>Please also take time to read our <a href="#{website_url}/privacy_policy">privacy policy</a>.</p>
+    <p>Please also take time to read our <a href="#{website_url}/privacy">privacy policy</a>.</p>
 
     <p>If you experience any issues with registration or have other questions please get in touch through our <a href="#{discord}">discord</a>.</p>
     """
@@ -157,7 +157,7 @@ defmodule Teiserver.EmailHelper do
 
     To find out more about #{game_name} visit our website at #{website_url}.
 
-    Please also take time to read our privacy policy at #{website_url}/privacy_policy.
+    Please also take time to read our privacy policy at #{website_url}/privacy.
 
     If you experience any issues with registration or have other questions please get in touch through our  discord at #{discord}.
     """
