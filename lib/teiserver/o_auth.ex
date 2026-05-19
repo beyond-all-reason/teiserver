@@ -130,14 +130,6 @@ defmodule Teiserver.OAuth do
   def create_code(user, attrs, opts \\ [])
 
   def create_code(%User{} = user, attrs, opts) do
-    create_code(user.id, attrs, opts)
-  end
-
-  def create_code(user, attrs, opts) when is_map(user) do
-    create_code(user.id, attrs, opts)
-  end
-
-  def create_code(user_id, attrs, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
     app_id = attrs.id
 

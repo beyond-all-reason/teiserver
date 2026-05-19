@@ -63,7 +63,7 @@ defmodule Teiserver.OAuthFixtures do
       owner_id: user.id,
       application_id: application.id,
       scopes: application.scopes,
-      expires_at: Timex.add(now, Duration.from_days(60)),
+      expires_at: DateTime.shift(now, day: 60),
       type: :access,
       refresh_token: nil
     }
