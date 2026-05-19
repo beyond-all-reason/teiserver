@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Tachyon.SystemTest do
 
     defp setup_user(app) do
       user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
-      token = OAuthFixtures.token_attrs(user.id, app) |> OAuthFixtures.create_token()
+      token = OAuthFixtures.token_attrs(user, app) |> OAuthFixtures.create_token()
       client = Tachyon.connect(token)
       {:ok, %{user: user, token: token, client: client}}
     end

@@ -124,8 +124,11 @@ defmodule TeiserverWeb.API.Admin.UserController do
     end
   end
 
+  defp get_user_by_email(nil), do: {:error, :user_not_found}
+  defp get_user_by_email(""), do: {:error, :user_not_found}
+
   defp get_user_by_email(email) do
-    case Account.get_user_by_email(email) do
+    case Account.query_user(search: [email_lower: email]) do
       nil -> {:error, :user_not_found}
       user -> {:ok, user}
     end

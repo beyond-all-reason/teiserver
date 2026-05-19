@@ -37,9 +37,7 @@ defmodule TeiserverWeb.Tachyon.Autohost do
       |> OAuthFixtures.create_credential()
 
     token =
-      OAuthFixtures.token_attrs(nil, context.app)
-      |> Map.drop([:owner_id])
-      |> Map.put(:bot_id, context.autohost.id)
+      OAuthFixtures.token_attrs(context.autohost, context.app)
       |> OAuthFixtures.create_token()
 
     {:ok, creds: creds, token: token}

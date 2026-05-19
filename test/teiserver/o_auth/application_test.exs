@@ -137,4 +137,24 @@ defmodule Teiserver.OAuth.ApplicationTest do
     assert {:ok, _uri1} = OAuth.get_redirect_uri(app, "http://some.host/callback")
     assert {:ok, _uri2} = OAuth.get_redirect_uri(app, "http://another.host/another/callback")
   end
+
+  test "cannot create app with scopes if user doesn't have permissions" do
+    user = TeiserverTestLib.new_user()
+
+    {:error, err} =
+      valid_attrs(user)
+      |> Map.put(:scopes, ["admin.user"])
+      |> OAuth.create_application()
+
+    assert Keyword.has_key?(err.errors, :scopes)
+  end
+
+  test "cannot update app with scopes if user doesn't have permissions" do
+    user = TeiserverTestLib.new_user()
+
+    {:ok, app} = valid_attrs(user) |> OAuth.create_application()
+
+    {:error, err} = OAuth.update_application(app, %{scopes: ["admin.map"]})
+    assert Keyword.has_key?(err.errors, :scopes)
+  end
 end

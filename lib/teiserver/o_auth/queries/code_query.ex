@@ -12,7 +12,7 @@ defmodule Teiserver.OAuth.CodeQueries do
   def get_code(nil), do: nil
 
   def get_code(code) do
-    base_query() |> where_code(code) |> Repo.one()
+    base_query() |> where_code(code) |> preload(:owner) |> preload(:application) |> Repo.one()
   end
 
   def base_query do
