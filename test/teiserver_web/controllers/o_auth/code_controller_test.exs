@@ -363,7 +363,8 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
                  "client_credentials"
                ],
                "code_challenge_methods_supported" => ["S256"],
-               "response_types_supported" => ["code", "token"]
+               "response_types_supported" => ["code", "token"],
+               "scopes_supported" => ["tachyon.lobby", "admin.map", "admin.engine", "admin.user"]
              }
     end
   end
