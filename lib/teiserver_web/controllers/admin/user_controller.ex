@@ -442,7 +442,7 @@ defmodule TeiserverWeb.Admin.UserController do
     TOTPLib.disable_totp(user.id)
 
     conn
-    |> put_flash(:info, "Disabled 2FA for #{user.name}")
+    |> put_flash(:info, "Disabled MFA for #{user.name}")
     |> redirect(to: ~p"/teiserver/admin/user/#{user}")
   end
 

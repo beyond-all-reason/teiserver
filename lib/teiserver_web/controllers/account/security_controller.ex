@@ -88,7 +88,7 @@ defmodule TeiserverWeb.Account.SecurityController do
         Account.set_secret(user.id, decoded_secret)
 
         conn
-        |> put_flash(:info, "2FA set successfully.")
+        |> put_flash(:info, "MFA set successfully.")
         |> redirect(to: ~p"/teiserver/account/security/totp")
 
       {:error, _reason} ->
