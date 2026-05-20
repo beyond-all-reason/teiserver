@@ -118,7 +118,7 @@ defmodule Teiserver.MixProject do
       # Teiserver libs
       {:openskill,
        git: "https://github.com/beyond-all-reason/openskill.ex.git", branch: "master"},
-      {:cowboy, "~> 2.9"},
+      {:cowboy, "~> 2.15"},
       {:statistics, "~> 0.6.2"},
       {:csv, "~> 2.4"},
       {:mdex, "~> 0.2"},
