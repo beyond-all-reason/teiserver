@@ -101,6 +101,18 @@ defmodule Teiserver.Helpers.DateHelperTest do
       assert is_integer(week)
       assert week >= 1 and week <= 53
     end
+
+    test "leap year date thats falls in week 1 of following year" do
+      # Dec 30 is Monday → ISO week 1 of 2025, not week 52/53 of 2024
+      assert DateHelper.iso_week(~D[2024-12-30]) == {2025, 1}
+    end
+
+    test "leap year date after Feb 28 where wrong logic gives week-1" do
+      # 2024 is a leap year; Mar 11 is a Monday → ISO week 11
+      # wrong leap-year logic (treating Feb as 28 days) shifts day-of-week by 1,
+      # making Mar 11 appear as Sunday → week 10 instead of 11
+      assert DateHelper.iso_week(~D[2024-03-11]) == {2024, 11}
+    end
   end
 
   describe "to_datetime/1" do
@@ -136,6 +148,14 @@ defmodule Teiserver.Helpers.DateHelperTest do
     test "returns nil for empty string" do
       assert DateHelper.parse_ymd("") == nil
     end
+
+    test "raises for invalid date" do
+      assert_raise ArgumentError, fn -> DateHelper.parse_ymd("2026-05-40") end
+    end
+
+    test "raises for non-date string" do
+      assert_raise ArgumentError, fn -> DateHelper.parse_ymd("not-a-date") end
+    end
   end
 
   describe "parse_ymd_hms/1" do
@@ -149,6 +169,22 @@ defmodule Teiserver.Helpers.DateHelperTest do
 
     test "returns nil for empty string" do
       assert DateHelper.parse_ymd_hms("") == nil
+    end
+
+    test "raises for non-datetime string" do
+      assert_raise ArgumentError, fn -> DateHelper.parse_ymd_hms("not-a-date 12:30:45") end
+    end
+
+    test "raises for invalid date" do
+      assert_raise ArgumentError, fn -> DateHelper.parse_ymd_hms("2026-05-35 14:12:45") end
+    end
+
+    test "raises for invalid time" do
+      assert_raise ArgumentError, fn -> DateHelper.parse_ymd_hms("2026-05-20 24:62:99") end
+    end
+
+    test "raises for invalid date and time" do
+      assert_raise ArgumentError, fn -> DateHelper.parse_ymd_hms("2026-05-50 26:12:40") end
     end
   end
 
