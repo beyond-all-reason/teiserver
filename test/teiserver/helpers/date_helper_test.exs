@@ -134,6 +134,14 @@ defmodule Teiserver.Helpers.DateHelperTest do
     test "returns nil for empty string" do
       assert DateHelper.parse_dmy("") == nil
     end
+
+    test "raises for invalid date" do
+      assert_raise ArgumentError, fn -> DateHelper.parse_dmy("40/05/2026") end
+    end
+
+    test "raises for non-date string" do
+      assert_raise ArgumentError, fn -> DateHelper.parse_dmy("not/a/date") end
+    end
   end
 
   describe "parse_ymd/1" do
@@ -199,6 +207,50 @@ defmodule Teiserver.Helpers.DateHelperTest do
 
     test "routes to dmy otherwise" do
       assert DateHelper.parse_time_input("19/05/2026") == ~D[2026-05-19]
+    end
+  end
+
+  describe "duration_to_str/1" do
+    test "returns seconds for values under 1 hour" do
+      assert DateHelper.duration_to_str(45) == "45 seconds"
+    end
+
+    test "returns '1 hour' for exactly one hour" do
+      assert DateHelper.duration_to_str(3_600) == "1 hour"
+    end
+
+    test "returns plural hours for multiple hours" do
+      assert DateHelper.duration_to_str(7_200) == "2 hours"
+    end
+
+    test "returns '1 day' for exactly one day" do
+      assert DateHelper.duration_to_str(86_400) == "1 day"
+    end
+
+    test "returns plural days for multiple days" do
+      assert DateHelper.duration_to_str(172_800) == "2 days"
+    end
+  end
+
+  describe "duration_to_str_short/1" do
+    test "returns nil for nil" do
+      assert DateHelper.duration_to_str_short(nil) == nil
+    end
+
+    test "only seconds" do
+      assert DateHelper.duration_to_str_short(45) == "00:45"
+    end
+
+    test "minutes and seconds" do
+      assert DateHelper.duration_to_str_short(125) == "02:05"
+    end
+
+    test "hours, minutes and seconds" do
+      assert DateHelper.duration_to_str_short(3_661) == "1:01:01"
+    end
+
+    test "days, hours, minutes and seconds" do
+      assert DateHelper.duration_to_str_short(90_061) == "1d 1:01:01"
     end
   end
 
