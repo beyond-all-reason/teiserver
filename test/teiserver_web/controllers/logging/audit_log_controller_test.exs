@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Logging.AuditLogControllerTest do
   use TeiserverWeb.ConnCase
 
   setup do
-    GeneralTestLib.conn_setup(~w(logging.audit.show))
+    GeneralTestLib.conn_setup(["Server"])
     |> LoggingTestLib.logging_setup()
   end
 

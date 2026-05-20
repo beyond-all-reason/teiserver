@@ -2,7 +2,6 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   @moduledoc false
 
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Guardian
   alias TeiserverWeb.UserSocket
   import Phoenix.ChannelTest
@@ -15,17 +14,13 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   def user_fixture, do: make_user(%{"permissions" => []})
 
   def make_user(params \\ %{}) do
-    permissions =
-      (params["permissions"] || [])
-      |> AuthLib.split_permissions()
-
     {:ok, u} =
       Account.create_user(%{
         "name" => params["name"] || "Test",
         "email" => params["email"] || "email@email#{:rand.uniform(999_999_999_999)}",
         "colour" => params["colour"] || "#00AA00",
         "icon" => params["icon"] || "fa-solid fa-user",
-        "permissions" => permissions,
+        "permissions" => [],
         "roles" => params["roles"] || [],
         "password" =>
           params["password"] ||
@@ -72,7 +67,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   end
 
   # @spec general_setup(list, ) :: tuple
-  def conn_setup(permissions \\ [], flags \\ []) do
+  def conn_setup(roles \\ [], flags \\ []) do
     {:ok, _data} = data_setup(flags)
 
     r = :rand.uniform(999_999_999)
@@ -85,7 +80,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
           make_user(%{
             "name" => "Current user",
             "email" => "current_user#{r}@current_user#{r}.com",
-            "permissions" => permissions
+            "roles" => roles
           })
 
         # Tokens

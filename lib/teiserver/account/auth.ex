@@ -49,7 +49,7 @@ defmodule Teiserver.Account.Auth do
   def moderator?(userid) when is_integer(userid),
     do: moderator?(Account.get_user(userid))
 
-  def moderator?(%User{} = %{roles: roles}), do: Enum.member?(roles, "Moderator")
+  def moderator?(%User{} = user), do: allow?(user, "Moderator")
   def moderator?(_user), do: false
 
   # credo:disable-for-lines:8 Credo.Check.Readability.PredicateFunctionNames
@@ -59,7 +59,7 @@ defmodule Teiserver.Account.Auth do
   def is_event_organizer?(userid) when is_integer(userid),
     do: is_event_organizer?(Account.get_user(userid))
 
-  def is_event_organizer?(%User{} = %{roles: roles}), do: Enum.member?(roles, "Event Organizer")
+  def is_event_organizer?(%User{} = user), do: allow?(user, "Event Organizer")
   def is_event_organizer?(_user), do: false
 
   @spec contributor?(User.id() | User.t() | nil) :: boolean()
@@ -68,7 +68,7 @@ defmodule Teiserver.Account.Auth do
   def contributor?(userid) when is_integer(userid),
     do: contributor?(Account.get_user(userid))
 
-  def contributor?(%User{} = %{roles: roles}), do: Enum.member?(roles, "Contributor")
+  def contributor?(%User{} = user), do: allow?(user, "Contributor")
   def contributor?(_user), do: false
 
   @spec verified?(User.id() | User.t() | nil) :: boolean()
@@ -83,13 +83,13 @@ defmodule Teiserver.Account.Auth do
   @spec admin?(User.id() | User.t() | nil) :: boolean()
   def admin?(nil), do: false
   def admin?(userid) when is_integer(userid), do: admin?(Account.get_user(userid))
-  def admin?(%User{} = %{roles: roles}), do: Enum.member?(roles, "Admin")
+  def admin?(%User{} = user), do: allow?(user, "Admin")
   def admin?(_user), do: false
 
   @spec vip?(User.id() | User.t() | nil) :: boolean()
   def vip?(nil), do: false
   def vip?(userid) when is_integer(userid), do: vip?(Account.get_user(userid))
-  def vip?(%User{} = %{roles: roles}), do: Enum.member?(roles, "VIP")
+  def vip?(%User{} = user), do: allow?(user, "VIP")
   def vip?(_user), do: false
 
   @doc """
