@@ -6,17 +6,18 @@ defmodule TeiserverWeb.Battle.MatchComponents do
   defp build_download_link(nil), do: nil
 
   defp build_download_link(match_id) do
-    url = Application.get_env(:teiserver, :replay)[:api_url] <> match_id
+    url = Application.get_env(:teiserver, :replay)[:api_url] <> game_id
 
-    json =
-      HTTPoison.get!(url).body
-      |> Jason.decode!()
+    with {:ok, response} <- HTTPoison.get(url).body,
+         {:ok, json} <- Jason.decode() do
+      filename =
+        json["fileName"]
+        |> String.replace(" ", "%20")
 
-    filename =
-      json["fileName"]
-      |> String.replace(" ", "%20")
-
-    Application.get_env(:teiserver, :replay)[:storage_url] <> filename
+      Application.get_env(:teiserver, :replay)[:storage_url] <> filename
+    else
+      {:error, _} -> nil
+    end
   end
 
   @doc """
