@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
   use TeiserverWeb.ConnCase, async: false
 
   setup do
-    GeneralTestLib.conn_setup(~w(logging.page_view.show))
+    GeneralTestLib.conn_setup(["Server"])
   end
 
   test "lists all entries on index", %{conn: conn} do
