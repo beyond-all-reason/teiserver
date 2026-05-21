@@ -16,7 +16,7 @@ defmodule TeiserverWeb.OAuth.UserinfoController do
         true -> raise "token has no owner nor bot!"
       end
 
-    claims = %{sub: sub}
+    claims = %{sub: sub, id: sub}
     info_scopes = ["profile", "email", "groups"]
 
     claims =
