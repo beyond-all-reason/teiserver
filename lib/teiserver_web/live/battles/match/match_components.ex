@@ -31,8 +31,15 @@ defmodule TeiserverWeb.Battle.MatchComponents do
 
   def section_menu(assigns) do
     match = Teiserver.get_match(assigns.match_id)
-    download_link = build_download_link(match.game_id)
-    assigns = assign(assigns, :download_link, download_link)
+
+    case match.game_id do
+      nil ->
+        nil
+
+      game_id ->
+        download_link = build_download_link(match.game_id)
+        assign(assigns, :download_link, download_link)
+    end
 
     ~H"""
     <.section_menu_button
