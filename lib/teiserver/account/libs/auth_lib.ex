@@ -14,7 +14,7 @@ defmodule Teiserver.Account.AuthLib do
   def icon, do: "fa-solid fa-address-card"
 
   def mfa_roles do
-    ~w[Server Admin]s
+    ~w[Server Admin Moderator Overwatch Contributor]s
   end
 
   @spec get_all_permission_sets() :: list()
