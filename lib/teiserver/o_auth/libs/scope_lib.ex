@@ -60,13 +60,12 @@ defmodule Teiserver.OAuth.Libs.ScopeLib do
   simple english sentence is enough
   """
   @spec scope_description(String.t()) :: String.t() | nil
-  def scope_description("tachyon.lobby"), do: "connect to tachyon for lobby and games"
-  def scope_description("admin.map"), do: "for CI, to setup maps data in teiserver"
-  def scope_description("admin.engine"), do: "for CI, to setup engine data in teiserver"
-  def scope_description("admin.user"), do: "create users programatically. for load testing"
-  def scope_description("profile"), do: "can get in game username"
-  def scope_description("email"), do: "can get email address"
-  def scope_description("groups"), do: "can get the roles for this user"
+  def scope_description("tachyon.lobby"), do: "Use your account to play online"
+  def scope_description("admin.map"), do: "For CI, to setup maps data in teiserver"
+  def scope_description("admin.engine"), do: "For CI, to setup engine data in teiserver"
+  def scope_description("admin.user"), do: "Create users programatically. for load testing"
+  def scope_description("profile"), do: "Access your in-game username"
+  def scope_description("email"), do: "Access your email address"
+  def scope_description("groups"), do: "Access your roles"
   def scope_description(_scope), do: nil
-
 end
