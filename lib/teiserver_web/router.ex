@@ -72,7 +72,7 @@ defmodule TeiserverWeb.Router do
   pipeline :oauth_api do
     plug(:accepts, ["json"])
     plug(Teiserver.Logging.LoggingPlug)
-    plug(Teiserver.OAuth.Plug.EnsureAuthenticated)
+    plug(TeiserverWeb.Plugs.OAuthAuthenticatedPlug)
   end
 
   scope "/", TeiserverWeb.General do
@@ -558,6 +558,7 @@ defmodule TeiserverWeb.Router do
   scope "/oauth/", TeiserverWeb.OAuth do
     pipe_through(:api)
     post("/token", CodeController, :token)
+    get("/userinfo", UserinfoController, :get)
   end
 
   scope "/", TeiserverWeb.OAuth do

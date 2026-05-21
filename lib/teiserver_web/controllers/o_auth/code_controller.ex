@@ -2,6 +2,8 @@ defmodule TeiserverWeb.OAuth.CodeController do
   alias Teiserver.OAuth
   use TeiserverWeb, :controller
 
+  require Logger
+
   # https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.3
   @spec token(Plug.Conn.t(), %{}) :: Plug.Conn.t()
 
@@ -85,7 +87,9 @@ defmodule TeiserverWeb.OAuth.CodeController do
          {:ok, new_token} <- OAuth.refresh_token(token, scopes: scopes) do
       conn |> put_status(200) |> render(:token, token: new_token)
     else
-      _other -> conn |> put_status(400) |> render(:error, error_description: "invalid request")
+      error ->
+        Logger.debug("refresh token error #{inspect(error)}")
+        conn |> put_status(400) |> render(:error, error_description: "invalid request")
     end
   end
 

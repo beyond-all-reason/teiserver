@@ -1,4 +1,4 @@
-defmodule Teiserver.OAuth.Plug.EnsureAuthenticated do
+defmodule TeiserverWeb.Plugs.OAuthAuthenticatedPlug do
   @moduledoc false
   alias Teiserver.OAuth
 

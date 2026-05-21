@@ -83,10 +83,13 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
     |> Enum.map(fn s -> {s, Enum.member?(enabled_scopes, s), scope_description(s)} end)
   end
 
-  defp scope_description("tachyon.lobby"), do: "for autohost"
+  defp scope_description("tachyon.lobby"), do: "connect to tachyon for lobby and games"
   defp scope_description("admin.map"), do: "for CI, to setup maps data in teiserver"
   defp scope_description("admin.engine"), do: "for CI, to setup engine data in teiserver"
   defp scope_description("admin.user"), do: "create users programatically. for load testing"
+  defp scope_description("profile"), do: "can get in game username"
+  defp scope_description("email"), do: "can get email address"
+  defp scope_description("groups"), do: "can get the roles for this user"
   defp scope_description(_scope), do: nil
 
   @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
