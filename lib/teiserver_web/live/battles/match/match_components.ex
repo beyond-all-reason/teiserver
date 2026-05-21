@@ -5,11 +5,11 @@ defmodule TeiserverWeb.Battle.MatchComponents do
 
   defp build_download_link(nil), do: nil
 
-  defp build_download_link(match_id) do
+  defp build_download_link(game_id) do
     url = Application.get_env(:teiserver, :replay)[:api_url] <> game_id
 
     with {:ok, response} <- HTTPoison.get(url).body,
-         {:ok, json} <- Jason.decode() do
+         {:ok, json} <- Jason.decode(response) do
       filename =
         json["fileName"]
         |> String.replace(" ", "%20")
@@ -30,7 +30,9 @@ defmodule TeiserverWeb.Battle.MatchComponents do
   attr :replay, :string, default: nil
 
   def section_menu(assigns) do
-    assigns = assign(assigns, :download_link, fn -> build_download_link(assigns.match_id) end)
+    match = Teiserver.get_match(assigns.match_id)
+    download_link = build_download_link(match.game_id)
+    assigns = assign(assigns, :download_link, download_link)
 
     ~H"""
     <.section_menu_button
