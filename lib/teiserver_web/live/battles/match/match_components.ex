@@ -30,14 +30,12 @@ defmodule TeiserverWeb.Battle.MatchComponents do
   attr :replay, :string, default: nil
 
   def section_menu(assigns) do
-    match = Teiserver.get_match(assigns.match_id)
-
-    case match.game_id do
+    case Teiserver.Battle.get_match(assigns.match_id).game_id do
       nil ->
         nil
 
       game_id ->
-        download_link = build_download_link(match.game_id)
+        download_link = build_download_link(game_id)
         assign(assigns, :download_link, download_link)
     end
 
