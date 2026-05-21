@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Battle.MatchComponents do
   @moduledoc false
   use TeiserverWeb, :component
+  alias Teiserver.Battle
   import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
 
   defp build_download_link(nil), do: nil
@@ -30,14 +31,11 @@ defmodule TeiserverWeb.Battle.MatchComponents do
   attr :replay, :string, default: nil
 
   def section_menu(assigns) do
-    case Teiserver.Battle.get_match(assigns.match_id).game_id do
-      nil ->
-        nil
+    download_link =
+      Battle.get_match(assigns.match_id).game_id
+      |> build_download_link()
 
-      game_id ->
-        download_link = build_download_link(game_id)
-        assign(assigns, :download_link, download_link)
-    end
+    assign(assigns, :download_link, download_link)
 
     ~H"""
     <.section_menu_button
