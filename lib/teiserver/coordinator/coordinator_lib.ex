@@ -1,10 +1,10 @@
 defmodule Teiserver.Coordinator.CoordinatorLib do
   @moduledoc false
   alias Teiserver.Account.Auth
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
 
-  @spec help(T.user(), boolean(), String.t()) :: String.t()
-  def help(user, host, command) do
+  @spec help(User.t(), boolean(), String.t()) :: String.t()
+  def help(%User{} = user, host, command) do
     commands = [
       # ---- Globally useable ----
       {"help", [], "Displays this help text.", :everybody},
@@ -238,8 +238,8 @@ Multiple locks can be engaged at the same time
     end)
   end
 
-  @spec can_use?(T.user(), boolean(), atom) :: boolean()
-  defp can_use?(user, host, group) do
+  @spec can_use?(User.t(), boolean(), atom) :: boolean()
+  defp can_use?(%User{} = user, host, group) do
     case group do
       :everybody -> true
       :host -> Auth.admin?(user) or Auth.moderator?(user) or host
