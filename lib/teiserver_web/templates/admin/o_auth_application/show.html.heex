@@ -2,7 +2,7 @@
   <h1>{@app.name}</h1>
 
   <div :if={@client_secret} class="note note-danger">
-    client secret only show once on this screen! <pre><%= @client_secret %></pre>
+    client secret only show once on this screen! <pre id="plain_client_secret"><%= @client_secret %></pre>
   </div>
 
   <div class="row">

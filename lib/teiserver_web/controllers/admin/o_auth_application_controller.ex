@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
       {:ok, %Application{} = app} ->
         conn
         |> put_flash(:info, "Application created")
-        |> Conn.put_resp_cookie("client_secret", app.secret, sign: true, max_age: 60)
+        |> Conn.put_resp_cookie("client_secret", app.plain_text_secret, sign: true, max_age: 60)
         |> redirect(to: ~p"/teiserver/admin/oauth_application/#{app}")
 
       {:error, changeset} ->

@@ -76,9 +76,14 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
       conn = post(conn, ~p"/teiserver/admin/oauth_application", data)
       assert %{id: id} = redirected_params(conn)
       conn = get(conn, ~p"/teiserver/admin/oauth_application/#{id}")
-      assert html_response(conn, 200) =~ "generic name"
+      resp = assert html_response(conn, 200)
+      assert resp =~ "generic name"
       db_app = OAuth.get_application_by_uid(data["application"]["uid"])
       assert is_binary(db_app.secret)
+      {:ok, parsed} = Floki.parse_document(resp)
+      element = Floki.find(parsed, "#plain_client_secret")
+      secret = Floki.text(element)
+      assert Argon2.verify_pass(secret, db_app.secret)
     end
 
     test "must provide email of valid user", %{conn: conn, user: user} do

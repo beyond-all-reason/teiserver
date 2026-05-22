@@ -20,6 +20,7 @@ defmodule Teiserver.OAuth.Application do
     field :description, :string
     field :secret, :string
     field :confidential?, :boolean, virtual: true
+    field :plain_text_secret, :string, virtual: true
 
     timestamps(type: :utc_datetime)
   end
@@ -90,7 +91,10 @@ defmodule Teiserver.OAuth.Application do
           changeset
         else
           secret = :crypto.strong_rand_bytes(16) |> Base.hex_encode32(padding: false)
-          Changeset.put_change(changeset, :secret, secret)
+          hash = Argon2.hash_pwd_salt(secret)
+
+          Changeset.put_change(changeset, :secret, hash)
+          |> Changeset.put_change(:plain_text_secret, secret)
         end
     end
   end
