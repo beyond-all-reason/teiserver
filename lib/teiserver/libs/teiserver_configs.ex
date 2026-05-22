@@ -4,8 +4,8 @@ defmodule Teiserver.TeiserverConfigs do
   alias Teiserver.Account
   alias Teiserver.Lobby
   alias Teiserver.Party
+  alias Teiserver.Player.LoginQueue
   alias Teiserver.Tachyon
-  alias Teiserver.Tachyon.LoginQueue
 
   import Teiserver.Config, only: [add_site_config_type: 1]
 

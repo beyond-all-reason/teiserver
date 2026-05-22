@@ -11,24 +11,31 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Helpers.TachyonParser
   alias Teiserver.Matchmaking
   alias Teiserver.Messaging
+  alias Teiserver.Player
+  alias Teiserver.Player.LoginQueue
   alias Teiserver.Player.Registry
   alias Teiserver.Player.Session
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Tachyon.Handler
-  alias Teiserver.Tachyon.LoginQueue
   alias Teiserver.Tachyon.Schema
 
   require Logger
 
   @behaviour Handler
 
-  @type state :: %{
-          user: T.user(),
-          status: :waiting | :admitted,
-          sess_monitor: reference() | nil,
-          pending_responses: Handler.pending_responses()
-        }
+  @type state ::
+          %{
+            user: T.user(),
+            status: :waiting,
+            pending_responses: Handler.pending_responses()
+          }
+          | %{
+              user: T.user(),
+              status: :admitted,
+              sess_monitor: reference(),
+              pending_responses: Handler.pending_responses()
+            }
 
   @impl Handler
   def connect(conn) do
@@ -56,16 +63,20 @@ defmodule Teiserver.Player.TachyonHandler do
     user = initial_state.user
     Logger.metadata(actor_type: :connection, actor_id: to_string(user.id))
 
-    if LoginQueue.attempt_login(self(), user.id) do
-      do_admit(initial_state)
-    else
-      state =
-        initial_state
-        |> Map.put(:status, :waiting)
-        |> Map.put(:sess_monitor, nil)
-        |> Map.put(:pending_responses, %{})
+    cond do
+      Player.lookup_session(user.id) != nil ->
+        do_admit(initial_state)
 
-      {:ok, state}
+      LoginQueue.attempt_login(self(), user.id) ->
+        do_admit(initial_state)
+
+      true ->
+        state =
+          initial_state
+          |> Map.put(:status, :waiting)
+          |> Map.put(:pending_responses, %{})
+
+        {:ok, state}
     end
   end
 
@@ -81,6 +92,11 @@ defmodule Teiserver.Player.TachyonHandler do
 
     event = build_user_self_event(state.user, sess_state)
     {:event, "user/self", event, new_state}
+  end
+
+  @doc false
+  def notify_login_accepted(pid, user_id) when is_pid(pid) do
+    send(pid, {:login_accepted, user_id})
   end
 
   def force_disconnect(nil), do: :ok
