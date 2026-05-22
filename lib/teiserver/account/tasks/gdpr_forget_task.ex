@@ -117,6 +117,8 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
       {"account_relationships", :to_user_id},
       {"account_user_tokens", :user_id},
       {"config_user", :user_id},
+      {"direct_messages", :from_id},
+      {"direct_messages", :to_id},
       {"microblog_poll_responses", :user_id},
       {"microblog_user_preferences", :user_id},
       {"oauth_applications", :owner_id},
