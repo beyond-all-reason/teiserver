@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Battle.MatchComponents do
   @moduledoc false
-  use TeiserverWeb, :component
   alias Teiserver.Battle
+  use TeiserverWeb, :component
   import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
 
   defp build_download_link(nil), do: nil
@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Battle.MatchComponents do
 
       Application.get_env(:teiserver, :replay)[:storage_url] <> filename
     else
-      {:error, _} -> nil
+      {:error, _message} -> nil
     end
   end
 
