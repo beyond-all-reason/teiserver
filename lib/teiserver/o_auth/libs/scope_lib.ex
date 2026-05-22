@@ -53,4 +53,19 @@ defmodule Teiserver.OAuth.Libs.ScopeLib do
   def scope_allowed?("admin.engine", user), do: Auth.admin?(user)
   def scope_allowed?("admin.user", user), do: Auth.admin?(user)
   def scope_allowed?(_scope, _user), do: false
+
+  @doc """
+  User facing description of what a scope entails.
+  This will ultimately have to be translated somehow, but for now just a
+  simple english sentence is enough
+  """
+  @spec scope_description(String.t()) :: String.t() | nil
+  def scope_description("tachyon.lobby"), do: "Use your account to play online"
+  def scope_description("admin.map"), do: "For CI, to setup maps data in teiserver"
+  def scope_description("admin.engine"), do: "For CI, to setup engine data in teiserver"
+  def scope_description("admin.user"), do: "Create users programatically. for load testing"
+  def scope_description("profile"), do: "Access your in-game username"
+  def scope_description("email"), do: "Access your email address"
+  def scope_description("groups"), do: "Access your roles"
+  def scope_description(_scope), do: nil
 end
