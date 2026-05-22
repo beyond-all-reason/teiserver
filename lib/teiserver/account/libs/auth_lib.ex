@@ -206,7 +206,7 @@ defmodule Teiserver.Account.AuthLib do
     end)
   end
 
-  defp mfa_required? do
+  def mfa_required? do
     Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
   end
 

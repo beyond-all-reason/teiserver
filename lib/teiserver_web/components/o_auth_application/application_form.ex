@@ -51,6 +51,18 @@ defmodule TeiserverWeb.Components.OAuthApplicationComponent do
         type="text"
         label="comma separated redirect uris"
       />
+
+      <p>
+        <strong> Confidential client? </strong>
+        <CC.input
+          field={f[:confidential?]}
+          value="true"
+          type="checkbox"
+          checked={f[:confidential?][:value] || f[:secret] != nil}
+          description="When checked, a secret will be generated for the app"
+        />
+      </p>
+
       <CC.input field={f[:description]} type="text" label="short description" />
       <:actions>
         <CC.button type="submit" class="btn-primary">{@button_label}</CC.button>

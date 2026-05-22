@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Application
+  alias Teiserver.OAuthFixtures
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase
@@ -66,6 +67,18 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
       assert %{id: id} = redirected_params(conn)
       conn = get(conn, ~p"/teiserver/admin/oauth_application/#{id}")
       assert html_response(conn, 200) =~ "generic name"
+      db_app_id = OAuth.get_application_by_uid(data["application"]["uid"]).id
+      assert id == to_string(db_app_id)
+    end
+
+    test "confidential client has secret", %{conn: conn, user: user} do
+      data = valid_app_attr(user) |> put_in(["application", "confidential?"], true)
+      conn = post(conn, ~p"/teiserver/admin/oauth_application", data)
+      assert %{id: id} = redirected_params(conn)
+      conn = get(conn, ~p"/teiserver/admin/oauth_application/#{id}")
+      assert html_response(conn, 200) =~ "generic name"
+      db_app = OAuth.get_application_by_uid(data["application"]["uid"])
+      assert is_binary(db_app.secret)
     end
 
     test "must provide email of valid user", %{conn: conn, user: user} do
@@ -136,6 +149,48 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
       assert conn.status == 200
       assert %Application{} = updated_app = OAuth.get_application_by_uid(app.uid)
       assert updated_app.scopes == app.scopes
+    end
+
+    test "doesn't update secret when already set", %{conn: conn} = ctx do
+      app =
+        OAuthFixtures.app_attrs(ctx[:user].id)
+        |> Map.put(:confidential?, true)
+        |> OAuthFixtures.create_app()
+
+      data = %{"confidential?" => "true"}
+
+      conn = patch(conn, ~p"/teiserver/admin/oauth_application/#{app.id}", application: data)
+      assert conn.status == 200
+      assert %Application{} = updated_app = OAuth.get_application_by_uid(app.uid)
+      assert updated_app.secret == app.secret
+    end
+
+    test "doesn't update secret if `confidential?` isn't provided", %{conn: conn} = ctx do
+      app =
+        OAuthFixtures.app_attrs(ctx[:user].id)
+        |> Map.put(:confidential?, true)
+        |> OAuthFixtures.create_app()
+
+      data = %{}
+
+      conn = patch(conn, ~p"/teiserver/admin/oauth_application/#{app.id}", application: data)
+      assert conn.status == 200
+      assert %Application{} = updated_app = OAuth.get_application_by_uid(app.uid)
+      assert updated_app.secret == app.secret
+    end
+
+    test "delete secret when confidential? is unchecked", %{conn: conn} = ctx do
+      app =
+        OAuthFixtures.app_attrs(ctx[:user].id)
+        |> Map.put(:confidential?, true)
+        |> OAuthFixtures.create_app()
+
+      data = %{"confidential?" => "false"}
+
+      conn = patch(conn, ~p"/teiserver/admin/oauth_application/#{app.id}", application: data)
+      assert conn.status == 200
+      assert %Application{} = updated_app = OAuth.get_application_by_uid(app.uid)
+      assert updated_app.secret == nil
     end
   end
 

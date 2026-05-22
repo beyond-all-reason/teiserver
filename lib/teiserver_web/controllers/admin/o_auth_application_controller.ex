@@ -30,6 +30,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, _params) do
     defaults = %{
+      confidential?: true,
       name: "Generic Lobby Client",
       uid: "generic_lobby",
       scopes: OAuth.allowed_scopes(),

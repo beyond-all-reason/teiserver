@@ -18,6 +18,8 @@ defmodule Teiserver.OAuth.Application do
     field :scopes, {:array, :string}
     field :redirect_uris, {:array, :string}, default: []
     field :description, :string
+    field :secret, :string
+    field :confidential?, :boolean, virtual: true
 
     timestamps(type: :utc_datetime)
   end
@@ -26,7 +28,15 @@ defmodule Teiserver.OAuth.Application do
     attrs = attrs |> uniq_lists(~w(scopes)a)
 
     application
-    |> cast(attrs, [:name, :owner_id, :uid, :scopes, :redirect_uris, :description])
+    |> cast(attrs, [
+      :name,
+      :owner_id,
+      :uid,
+      :scopes,
+      :redirect_uris,
+      :description,
+      :confidential?
+    ])
     |> validate_required([:name, :owner_id, :uid, :scopes])
     |> Changeset.validate_change(:redirect_uris, fn :redirect_uris, uris ->
       invalid_uris = Enum.filter(uris, fn uri -> is_nil(URI.parse(uri).host) end)
@@ -55,6 +65,7 @@ defmodule Teiserver.OAuth.Application do
       end
     end)
     |> Changeset.validate_length(:scopes, min: 1)
+    |> set_secret()
   end
 
   defp get_owner(_app, %{owner: %Account.User{} = owner}), do: owner
@@ -65,4 +76,22 @@ defmodule Teiserver.OAuth.Application do
   defp get_owner(%__MODULE__{owner_id: nil}, _attrs), do: nil
   defp get_owner(%__MODULE__{owner_id: owner_id}, _attrs), do: Account.get_user(owner_id)
   defp get_owner(%__MODULE__{owner: %Account.User{} = owner}, _attrs), do: owner
+
+  defp set_secret(changeset) do
+    case Changeset.get_change(changeset, :confidential?) do
+      nil ->
+        changeset
+
+      false ->
+        Changeset.put_change(changeset, :secret, nil)
+
+      true ->
+        if Changeset.get_field(changeset, :secret) != nil do
+          changeset
+        else
+          secret = :crypto.strong_rand_bytes(16) |> Base.hex_encode32(padding: false)
+          Changeset.put_change(changeset, :secret, secret)
+        end
+    end
+  end
 end

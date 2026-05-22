@@ -7,14 +7,11 @@ defmodule TeiserverWeb.General.HomeLive.Index do
   def mount(_params, _session, socket) do
     %{current_user: user} = socket.assigns
 
-    socket =
-      if AuthLib.contains_mfa_role?(user.roles) and not has_active_mfa?(user.id) do
-        socket
-        |> assign(mfa_warning?: true)
-      else
-        socket
-        |> assign(mfa_warning?: false)
-      end
+    mfa_warning? =
+      AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(user.roles) and
+        not has_active_mfa?(user.id)
+
+    socket = assign(socket, :mfa_warning?, mfa_warning?)
 
     socket =
       socket
