@@ -65,7 +65,7 @@ defmodule Teiserver.MixProject do
       # Default phoenix deps
       {:phoenix, "~> 1.7.22"},
       {:phoenix_ecto, "~> 4.6"},
-      {:ecto_sql, "~> 3.12"},
+      {:ecto_sql, "~> 3.14"},
       {:postgrex, ">= 0.22.2"},
       {:phoenix_html, "~> 4.2"},
       {:phoenix_live_reload, "~> 1.5", only: :dev},
@@ -130,6 +130,9 @@ defmodule Teiserver.MixProject do
       {:json_xema, "~> 0.3"},
       {:nostrum, "~> 0.10.4"},
       {:decorator, "~> 1.2"},
+
+      # Transient libs we are pinning because of other requirements
+      {:decimal, "~> 3.0", override: true},
 
       # gun is a transitive dependency of nostrum. The version 2.1.0 works,
       # while the next one, 2.2.0 produces the following error when starting

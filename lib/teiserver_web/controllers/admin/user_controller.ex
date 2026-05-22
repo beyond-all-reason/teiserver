@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.Admin.UserController do
   @moduledoc false
 
-  alias Ecto.UUID
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.SmurfMergeTask
+  alias Teiserver.Account.Tasks.GdprForgetTask
   alias Teiserver.Account.TOTPLib
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle.BalanceLib
@@ -1176,36 +1176,19 @@ defmodule TeiserverWeb.Admin.UserController do
   @doc """
   Removes all PII from a user in accordance with GDPR.
   """
-  @spec gdpr_clean(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def gdpr_clean(conn, %{"id" => id}) do
-    user = Account.get_user_by_id(id)
+  @spec gdpr_forget(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def gdpr_forget(conn, %{"id" => id}) do
+    user = Account.get_user(id)
 
-    case UserLib.has_access(user, conn) do
-      {true, _role} ->
-        new_user =
-          Map.merge(user, %{
-            name: UUID.generate(),
-            email: "#{user.id}@#{user.id}.#{user.id}",
-            password: UserLib.make_bot_password(),
-            country: "??"
-          })
-
-        Account.update_cache_user(user.id, new_user)
-
-        Account.delete_user_stat_keys(user.id, [
-          "first_ip",
-          "country",
-          "last_ip",
-          "previous_names"
-        ])
-
+    case GdprForgetTask.forget_user(conn, user) do
+      :ok ->
         conn
-        |> put_flash(:success, "User GDPR cleaned")
+        |> put_flash(:success, "User GDPR forgotten")
         |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
 
-      _no_access ->
+      {:error, reason} ->
         conn
-        |> put_flash(:danger, "Unable to access this user")
+        |> put_flash(:danger, "Error: #{reason}")
         |> redirect(to: ~p"/teiserver/admin/user")
     end
   end

@@ -1,4 +1,6 @@
 defmodule TeiserverWeb.Admin.UserControllerTest do
+  alias Phoenix.Flash
+  alias Teiserver.Account
   alias Teiserver.AccountFixtures
   alias Teiserver.CacheUser
   alias Teiserver.Helpers.GeneralTestLib
@@ -7,7 +9,8 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   use TeiserverWeb.ConnCase
 
   setup do
-    GeneralTestLib.conn_setup(TeiserverTestLib.server_permissions())
+    TeiserverTestLib.server_permissions()
+    |> GeneralTestLib.conn_setup()
     |> TeiserverTestLib.conn_setup()
   end
 
@@ -115,6 +118,51 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
         )
 
       assert html_response(conn, 200) =~ "New user name:"
+    end
+  end
+
+  describe "gdpr forget" do
+    test "success", %{conn: conn} do
+      user =
+        GeneralTestLib.make_user(%{
+          "email" => "test_gdpr@test.local",
+          "data" => %{}
+        })
+
+      conn = put(conn, ~p"/admin/users/gdpr_forget/#{user.id}")
+
+      assert Flash.get(conn.assigns.flash, :success) == "User GDPR forgotten"
+      assert redirected_to(conn) == ~p"/teiserver/admin/user/#{user.id}"
+
+      # Now ensure the user has been forgotten
+      user = Account.get_user(user.id)
+      assert user.email != "test_gdpr@test.local"
+    end
+
+    test "no access" do
+      # Setup something specifically to not have access, currently only
+      # server maintainers have access to we set this
+      {:ok, setup_opts} =
+        TeiserverTestLib.admin_permissions()
+        |> GeneralTestLib.conn_setup()
+        |> TeiserverTestLib.conn_setup()
+
+      conn = Keyword.get(setup_opts, :conn)
+
+      user =
+        GeneralTestLib.make_user(%{
+          "email" => "test_gdpr_no_auth@test.local",
+          "data" => %{}
+        })
+
+      conn = put(conn, ~p"/admin/users/gdpr_forget/#{user.id}")
+
+      assert Flash.get(conn.assigns.flash, :error) == "Unauthorized"
+      assert redirected_to(conn) == ~p"/"
+
+      # Now ensure it didn't run
+      user = Account.get_user(user.id)
+      assert user.email == "test_gdpr_no_auth@test.local"
     end
   end
 end

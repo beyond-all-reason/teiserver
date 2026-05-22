@@ -520,7 +520,7 @@ defmodule TeiserverWeb.Router do
     )
 
     # User stuff
-    put("/users/gdpr_clean/:id", UserController, :gdpr_clean)
+    put("/users/gdpr_forget/:id", UserController, :gdpr_forget)
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do
