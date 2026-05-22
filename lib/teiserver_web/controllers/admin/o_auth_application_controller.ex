@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Admin.OAuthApplicationController do
   alias Ecto.Changeset
+  alias Plug.Conn
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.OAuth
@@ -52,6 +53,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
       {:ok, %Application{} = app} ->
         conn
         |> put_flash(:info, "Application created")
+        |> Conn.put_resp_cookie("client_secret", app.secret, sign: true, max_age: 60)
         |> redirect(to: ~p"/teiserver/admin/oauth_application/#{app}")
 
       {:error, changeset} ->
@@ -174,10 +176,13 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
 
   defp render_show(conn, app) do
     [stats] = ApplicationQueries.get_stats(app.id)
+    cookies = Conn.fetch_cookies(conn, signed: ["client_secret"]).cookies
+    client_secret = Map.get(cookies, "client_secret")
 
     conn
     |> assign(:page_title, "BAR - oauth app #{app.name}")
-    |> render("show.html", app: app, stats: stats)
+    |> Conn.delete_resp_cookie("client_secret", sign: true)
+    |> render("show.html", app: app, stats: stats, client_secret: client_secret)
   end
 
   # split the comma separated fields and map emails to users

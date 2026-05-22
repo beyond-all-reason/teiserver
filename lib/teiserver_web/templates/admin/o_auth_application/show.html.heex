@@ -1,5 +1,10 @@
 <div class="container">
   <h1>{@app.name}</h1>
+
+  <div :if={@client_secret} class="note note-danger">
+    client secret only show once on this screen! <pre><%= @client_secret %></pre>
+  </div>
+
   <div class="row">
     <div class="col-6">
       <table class="table">
@@ -28,6 +33,16 @@
             <td>scopes</td>
             <td>
               <span :for={scope <- @app.scopes} class="badge badge-success">{scope}</span>
+            </td>
+          </tr>
+          <tr>
+            <td>Client secret?</td>
+            <td>
+              <%= if @app.secret != nil do %>
+                Set ✓
+              <% else %>
+                Unset (public client)
+              <% end %>
             </td>
           </tr>
           <tr :if={length(@app.redirect_uris) > 0}>
