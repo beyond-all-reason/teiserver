@@ -96,10 +96,7 @@ defmodule Teiserver.Helpers.DateHelperTest do
 
   describe "iso_week/1" do
     test "returns {year, week_number}" do
-      {year, week} = DateHelper.iso_week(~D[2026-01-05])
-      assert is_integer(year)
-      assert is_integer(week)
-      assert week >= 1 and week <= 53
+      assert DateHelper.iso_week(~D[2026-01-02]) == {2026, 1}
     end
 
     test "leap year date thats falls in week 1 of following year" do
