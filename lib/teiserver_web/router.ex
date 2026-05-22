@@ -72,7 +72,7 @@ defmodule TeiserverWeb.Router do
   pipeline :oauth_api do
     plug(:accepts, ["json"])
     plug(Teiserver.Logging.LoggingPlug)
-    plug(Teiserver.OAuth.Plug.EnsureAuthenticated)
+    plug(TeiserverWeb.Plugs.OAuthAuthenticatedPlug)
   end
 
   scope "/", TeiserverWeb.General do
@@ -215,14 +215,6 @@ defmodule TeiserverWeb.Router do
         # live_dashboard_additional_pages
       ]
     )
-  end
-
-  scope "/", TeiserverWeb.General, as: :ts_general do
-    pipe_through([:browser, :nomenu_layout])
-
-    get("/code_of_conduct", GeneralController, :code_of_conduct)
-    get("/privacy_policy", GeneralController, :gdpr)
-    get("/gdpr", GeneralController, :gdpr)
   end
 
   scope "/account", TeiserverWeb.Account do
@@ -528,7 +520,7 @@ defmodule TeiserverWeb.Router do
     )
 
     # User stuff
-    put("/users/gdpr_clean/:id", UserController, :gdpr_clean)
+    put("/users/gdpr_forget/:id", UserController, :gdpr_forget)
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do
@@ -566,6 +558,7 @@ defmodule TeiserverWeb.Router do
   scope "/oauth/", TeiserverWeb.OAuth do
     pipe_through(:api)
     post("/token", CodeController, :token)
+    get("/userinfo", UserinfoController, :get)
   end
 
   scope "/", TeiserverWeb.OAuth do

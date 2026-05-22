@@ -1,5 +1,6 @@
 defmodule Teiserver.OAuthFixtures do
   @moduledoc false
+  alias Teiserver.Account
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.Code
   alias Teiserver.OAuth.Credential
@@ -19,20 +20,24 @@ defmodule Teiserver.OAuthFixtures do
   end
 
   def create_app(attrs) do
-    %Application{} |> Application.changeset(attrs) |> Repo.insert!()
+    %Application{}
+    |> Application.changeset(attrs)
+    |> Repo.insert!()
+    |> Repo.preload([:owner])
   end
 
   def update_app(app, changes) do
     app |> Application.changeset(changes) |> Repo.update!()
   end
 
-  def code_attrs(user_id, app) do
+  def code_attrs(%Account.User{} = user, app) do
     now = DateTime.utc_now()
     {verifier, challenge, method} = generate_challenge()
 
     %{
       value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(),
-      owner_id: user_id,
+      owner: user,
+      owner_id: user.id,
       application_id: app.id,
       scopes: app.scopes,
       expires_at: Timex.add(now, Duration.from_minutes(5)),
@@ -44,15 +49,34 @@ defmodule Teiserver.OAuthFixtures do
   end
 
   def create_code(attrs) do
-    %Code{} |> Code.changeset(attrs) |> Repo.insert!()
+    %Code{}
+    |> Code.changeset(attrs)
+    |> Repo.insert!()
+    |> Repo.preload([:owner, :application])
   end
 
-  def token_attrs(user_id, application) do
+  def token_attrs(%Account.User{} = user, application) do
     now = DateTime.utc_now()
 
     %{
       value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
-      owner_id: user_id,
+      owner: user,
+      owner_id: user.id,
+      application_id: application.id,
+      scopes: application.scopes,
+      expires_at: Timex.add(now, Duration.from_days(60)),
+      type: :access,
+      refresh_token: nil
+    }
+  end
+
+  def token_attrs(%Teiserver.Bot.Bot{} = bot, application) do
+    now = DateTime.utc_now()
+
+    %{
+      value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
+      bot: bot,
+      bot_id: bot.id,
       application_id: application.id,
       scopes: application.scopes,
       expires_at: Timex.add(now, Duration.from_days(60)),
@@ -79,23 +103,19 @@ defmodule Teiserver.OAuthFixtures do
   end
 
   @doc """
-  given a user id, will create a OAuth application and a valid token for that
+  given a user, will create a OAuth application and a valid token for that
   user, returning both
   """
-  def setup_token(user_or_id, opts \\ [])
-  def setup_token(%{user: user}, opts), do: setup_token(user.id, opts)
-  def setup_token(%{id: id}, opts), do: setup_token(id, opts)
-
-  def setup_token(user_id, opts) do
+  def setup_token(%Account.User{} = user, opts \\ []) do
     uid = for _i <- 1..10, into: "", do: <<Enum.random(~c"abcdefghijklmnopqrstuvwxyz")>>
 
     app =
-      app_attrs(user_id)
+      app_attrs(user.id)
       |> Map.put(:uid, uid)
       |> Map.update!(:scopes, fn s -> Keyword.get(opts, :scopes, s) end)
       |> create_app()
 
-    token = token_attrs(user_id, app) |> create_token()
+    token = token_attrs(user, app) |> create_token()
     %{app: app, token: token}
   end
 

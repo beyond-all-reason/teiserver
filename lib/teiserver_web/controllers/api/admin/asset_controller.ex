@@ -1,10 +1,10 @@
 defmodule TeiserverWeb.API.Admin.AssetController do
   alias JsonXema.ValidationError
   alias Teiserver.Asset
-  alias Teiserver.OAuth.Plug.EnsureAuthenticated
+  alias TeiserverWeb.Plugs.OAuthAuthenticatedPlug
   use TeiserverWeb, :controller
 
-  plug EnsureAuthenticated, scopes: ["admin.map"]
+  plug OAuthAuthenticatedPlug, scopes: ["admin.map"]
 
   def update_maps(conn, params) do
     with :ok <- validate_input(params),

@@ -5,16 +5,12 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.ApplicationQueries
-  alias Teiserver.Staff
 
   use TeiserverWeb, :controller
 
   plug Bodyguard.Plug.Authorize,
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
-    # The policy should be Admin or something fairly high. But while we're
-    # developping the new lobby, it's easier if this is allowed for any
-    # contributors
-    policy: Staff,
+    policy: Teiserver.Staff.Admin,
     action: {Phoenix.Controller, :action_name},
     user: {AuthLib, :current_user}
 
@@ -36,7 +32,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
     defaults = %{
       name: "Generic Lobby Client",
       uid: "generic_lobby",
-      scopes: Application.allowed_scopes(),
+      scopes: OAuth.allowed_scopes(),
       owner_email: Map.get(conn.assigns[:current_user], :email)
     }
 
@@ -83,14 +79,9 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
       )
 
   defp scopes_with_descriptions(enabled_scopes \\ []) do
-    Application.allowed_scopes()
-    |> Enum.map(fn s -> {s, Enum.member?(enabled_scopes, s), scope_description(s)} end)
+    OAuth.allowed_scopes()
+    |> Enum.map(fn s -> {s, Enum.member?(enabled_scopes, s), OAuth.scope_description(s)} end)
   end
-
-  defp scope_description("tachyon.lobby"), do: "for autohost"
-  defp scope_description("admin.map"), do: "for CI, to setup maps data in teiserver"
-  defp scope_description("admin.engine"), do: "for CI, to setup engine data in teiserver"
-  defp scope_description(_scope), do: nil
 
   @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, assigns) do
@@ -193,7 +184,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
     user_id = Map.get(Account.get_user_by_email(app["owner_email"]) || %{}, :id)
 
     scopes =
-      Enum.filter(Application.allowed_scopes(), fn scope ->
+      Enum.filter(OAuth.allowed_scopes(), fn scope ->
         Map.get(raw_scopes, scope, "false") == "true"
       end)
 

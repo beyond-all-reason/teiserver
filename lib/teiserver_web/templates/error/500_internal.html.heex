@@ -48,7 +48,7 @@
                 <br /><br />
 
                 <%= if assigns[:current_user] do %>
-                  <%= if allow?(assigns[:current_user], "debug") or allow?(assigns[:current_user], "admin.dev.developer") do %>
+                  <%= if allow?(assigns[:current_user], "debug") or allow?(assigns[:current_user], "Server") do %>
                     <h4>Debug traceback info</h4>
                     <textarea rows="40" class="form-control" style="font-family: monospace;">Reason: <%= @error.reason |> Kernel.inspect |> String.replace("\\n", "\n") %>
 ------

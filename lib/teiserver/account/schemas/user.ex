@@ -10,6 +10,8 @@ defmodule Teiserver.Account.User do
 
   @behaviour Bodyguard.Policy
 
+  @type id :: pos_integer()
+
   typed_schema "account_users" do
     field :name, :string
     field :email, :string

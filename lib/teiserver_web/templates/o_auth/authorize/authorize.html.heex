@@ -18,6 +18,10 @@
           your Beyond All Reason account.
         </p>
 
+        <ul :if={not Enum.empty?(@permissions)}>
+          <li :for={permission <- @permissions}>{permission}</li>
+        </ul>
+
         <% keys_to_copy =
           ~w(client_id response_type code_challenge code_challenge_method redirect_uri state) %>
         <form action={~p"/oauth/authorize"} method="post">

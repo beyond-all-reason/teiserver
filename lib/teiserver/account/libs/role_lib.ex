@@ -190,6 +190,15 @@ defmodule Teiserver.Account.RoleLib do
       icon: "fa-solid fa-user-gear",
       contains: ~w(Admin),
       badge: true
+    },
+
+    # Not manually used
+    %{
+      name: "GDPR forgotten",
+      colour: "#000000",
+      icon: "fa-solid fa-question-mark",
+      contains: ~w(),
+      badge: false
     }
   ]
 

@@ -371,8 +371,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
     [
       "# [Moderation report #{report.type}/#{report.sub_type}](#{url})#{match_icon}",
-      "**Target:** [#{report.target.name}](https://#{host}/moderation/report/user/#{report.target.id})",
-      "**Reporter:** [#{report.reporter.name}](https://#{host}/moderation/report/user/#{report.reporter.id})",
+      ":dart: [#{report.target.name}](https://#{host}/moderation/report/user/#{report.target.id})",
+      ":clipboard: [#{report.reporter.name}](https://#{host}/moderation/report/user/#{report.reporter.id})",
       "**Reason:** #{format_link(report.extra_text)}"
     ] ++
       cond do

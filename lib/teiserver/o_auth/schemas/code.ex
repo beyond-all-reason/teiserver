@@ -2,8 +2,10 @@ defmodule Teiserver.OAuth.Code do
   @moduledoc false
 
   alias Ecto.Changeset
+  alias Teiserver.Account
   alias Teiserver.Account.User
   alias Teiserver.OAuth
+  alias Teiserver.OAuth.Libs.ScopeLib
 
   use TeiserverWeb, :schema
 
@@ -21,7 +23,12 @@ defmodule Teiserver.OAuth.Code do
   end
 
   def changeset(code, attrs) do
-    attrs = attrs |> uniq_lists(~w(scopes)a)
+    owner = get_owner(code, attrs)
+
+    attrs =
+      attrs
+      |> uniq_lists(~w(scopes)a)
+      |> Map.put(:owner_id, owner.id)
 
     code
     |> cast(attrs, [
@@ -43,6 +50,18 @@ defmodule Teiserver.OAuth.Code do
       :challenge,
       :challenge_method
     ])
-    |> Changeset.validate_subset(:scopes, OAuth.Application.allowed_scopes())
+    |> Changeset.validate_subset(:scopes, OAuth.allowed_scopes())
+    |> Changeset.validate_change(:scopes, fn :scopes, scopes ->
+      case ScopeLib.all_scopes_allowed?(owner, scopes) do
+        :ok ->
+          []
+
+        {:error, invalid_scopes} ->
+          [scopes: "not authorized for scopes #{Enum.join(invalid_scopes, ", ")}"]
+      end
+    end)
   end
+
+  defp get_owner(_app, %{owner: %Account.User{} = owner}), do: owner
+  defp get_owner(%__MODULE__{owner: %Account.User{} = owner}, _attrs), do: owner
 end

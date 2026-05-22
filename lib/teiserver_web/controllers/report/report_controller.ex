@@ -81,6 +81,9 @@ defmodule TeiserverWeb.Report.ReportController do
         "microblog" ->
           Teiserver.Communication.MicroblogReport
 
+        "mfa" ->
+          Teiserver.Account.MFAReport
+
         # Moderation
         "moderation_activity" ->
           Teiserver.Moderation.ActivityReport

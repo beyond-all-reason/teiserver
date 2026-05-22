@@ -15,7 +15,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
   defp setup_conn(_context) do
     conn = ConnTest.build_conn()
 
-    user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+    user = GeneralTestLib.make_user(%{"roles" => ["Verified", "Admin"]})
 
     {:ok, conn: conn, user: user}
   end
@@ -43,7 +43,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
       app = OAuthFixtures.app_attrs(user.id) |> OAuthFixtures.create_app()
 
       token =
-        OAuthFixtures.token_attrs(user.id, app)
+        OAuthFixtures.token_attrs(user, app)
         |> Map.put(:type, :refresh)
         |> OAuthFixtures.create_token()
 

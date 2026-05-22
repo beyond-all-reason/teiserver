@@ -4,7 +4,7 @@ defmodule TeiserverWeb.API.Admin.AssetControllerTest do
   use TeiserverWeb.ConnCase, async: false
 
   defp setup_user(_context) do
-    user = GeneralTestLib.make_user()
+    user = GeneralTestLib.make_user(%{"roles" => ["Verified", "Admin"]})
     {:ok, user: user}
   end
 

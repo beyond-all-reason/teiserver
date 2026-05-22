@@ -37,7 +37,7 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   end
 
   defp setup_code(context) do
-    attrs = OAuthFixtures.code_attrs(context[:user].id, context[:app])
+    attrs = OAuthFixtures.code_attrs(context[:user], context[:app])
     code = OAuthFixtures.create_code(attrs)
 
     %{code: code, code_attrs: attrs}
@@ -357,13 +357,23 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
                  "client_secret_post",
                  "client_secret_basic"
                ],
+               "userinfo_endpoint" => "#{endpoint}/oauth/userinfo",
                "grant_types_supported" => [
                  "authorization_code",
                  "refresh_token",
                  "client_credentials"
                ],
                "code_challenge_methods_supported" => ["S256"],
-               "response_types_supported" => ["code", "token"]
+               "response_types_supported" => ["code", "token"],
+               "scopes_supported" => [
+                 "tachyon.lobby",
+                 "admin.map",
+                 "admin.engine",
+                 "admin.user",
+                 "profile",
+                 "email",
+                 "groups"
+               ]
              }
     end
   end

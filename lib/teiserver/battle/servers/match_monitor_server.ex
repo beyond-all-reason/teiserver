@@ -180,11 +180,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
-  def handle_info({:direct_message, _from_id, "endGameData " <> data}, state) do
-    Battle.save_match_stats(data)
-    {:noreply, state}
-  end
-
   # Examples of accepted format:
   # match-event <playerName> <eventType> <gameTime>
   # match-event <Beherith> <commands:FirstLineMove> <67>

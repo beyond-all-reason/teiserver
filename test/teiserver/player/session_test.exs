@@ -1,12 +1,13 @@
 defmodule Teiserver.Player.SessionTest do
   alias ExUnit.Callbacks
   alias Teiserver.Helpers.GeneralTestLib
-  alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Player
   alias Teiserver.Player.Session
   alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Support.Polling
   alias Teiserver.Tachyon, as: TachyonLib
+  alias Teiserver.TachyonLobby
+  alias Teiserver.TachyonLobby.Registry, as: LobbyRegistry
 
   use Teiserver.DataCase, async: false
 
@@ -31,29 +32,37 @@ defmodule Teiserver.Player.SessionTest do
     assert_receive {:DOWN, ^conn_ref, :process, _, _}
   end
 
-  defp start_battle(sess_pid, user_id) do
-    {:ok, fake_battle} = Task.start(:timer, :sleep, [:infinity])
-    {:ok, fake_room} = Task.start(:timer, :sleep, [:infinity])
+  defp start_battle(user_id) do
+    {:ok, fake_battle_pid} = Task.start(:timer, :sleep, [:infinity])
+    lobby_id = "lobby-id"
 
-    :sys.replace_state(sess_pid, fn state ->
-      monitors = MC.monitor(state.monitors, fake_room, :mm_room)
+    {:ok, _fake_lobby_pid} =
+      Task.start_link(fn ->
+        LobbyRegistry.register(lobby_id)
 
-      %{
-        state
-        | matchmaking: {:pairing, %{readied: true, battle_password: "pw", room: fake_room}},
-          monitors: monitors
-      }
-    end)
+        receive do
+          {_pid, from, _join_msg} ->
+            resp = {:ok, self(), %{id: lobby_id}}
+            :gen_statem.reply(from, resp)
+        end
 
-    Session.battle_start(user_id, {"battle-id", fake_battle}, %{
+        :timer.sleep(:infinity)
+      end)
+
+    Polling.poll_until_some(fn -> TachyonLobby.lookup(lobby_id) end)
+
+    {:ok, _details} = Session.lobby_join(user_id, lobby_id)
+
+    start_data = %{
       ips: ["127.0.0.1"],
       port: 1234,
       engine: %{version: "v1"},
       game: %{springName: "game"},
       map: %{springName: "map"}
-    })
+    }
 
-    fake_battle
+    Session.lobby_join_battle(user_id, {"battle-id", fake_battle_pid}, start_data, "password")
+    fake_battle_pid
   end
 
   describe "user updates" do
@@ -85,7 +94,7 @@ defmodule Teiserver.Player.SessionTest do
     test "session survives when player disconnects during battle",
          %{sess_pid: sess_pid, user: user, fake_conn: fake_conn} do
       ref = Process.monitor(sess_pid)
-      _fake_battle = start_battle(sess_pid, user.id)
+      _fake_battle = start_battle(user.id)
       disconnect(fake_conn)
       Session.trigger_connection_timeout(sess_pid)
       refute_receive {:DOWN, ^ref, :process, _, _}
@@ -93,7 +102,7 @@ defmodule Teiserver.Player.SessionTest do
 
     test "session stops after battle ends and player is still disconnected",
          %{sess_pid: sess_pid, user: user, fake_conn: fake_conn} do
-      fake_battle = start_battle(sess_pid, user.id)
+      fake_battle = start_battle(user.id)
       disconnect(fake_conn)
 
       sess_ref = Process.monitor(sess_pid)
@@ -113,7 +122,7 @@ defmodule Teiserver.Player.SessionTest do
     test "session survives when player reconnects before battle ends",
          %{sess_pid: sess_pid, user: user, fake_conn: fake_conn} do
       ref = Process.monitor(sess_pid)
-      _fake_battle = start_battle(sess_pid, user.id)
+      _fake_battle = start_battle(user.id)
       disconnect(fake_conn)
 
       {:ok, new_conn} = Task.start(:timer, :sleep, [:infinity])
@@ -132,7 +141,7 @@ defmodule Teiserver.Player.SessionTest do
       {:ok, new_conn} = Task.start(:timer, :sleep, [:infinity])
       Session.replace_connection(sess_pid, new_conn)
 
-      _fake_battle = start_battle(sess_pid, user.id)
+      _fake_battle = start_battle(user.id)
       disconnect(new_conn)
 
       Session.trigger_connection_timeout(sess_pid)

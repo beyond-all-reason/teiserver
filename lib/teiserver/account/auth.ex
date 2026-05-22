@@ -3,7 +3,6 @@ defmodule Teiserver.Account.Auth do
 
   alias Teiserver.Account
   alias Teiserver.Account.User
-  alias Teiserver.Data.Types, as: T
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
 
@@ -38,41 +37,41 @@ defmodule Teiserver.Account.Auth do
   def authorize(_action, conn, _data), do: allow?(conn, "admin.dev")
 
   # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
-  @spec is_bot?(T.userid() | User.t() | nil) :: boolean()
+  @spec is_bot?(User.id() | User.t() | nil) :: boolean()
   def is_bot?(nil), do: false
   def is_bot?(userid) when is_integer(userid), do: is_bot?(Account.get_user(userid))
   def is_bot?(%User{} = %{roles: roles}), do: Enum.member?(roles, "Bot")
   def is_bot?(_user), do: false
 
-  @spec moderator?(T.userid() | User.t() | nil) :: boolean()
+  @spec moderator?(User.id() | User.t() | nil) :: boolean()
   def moderator?(nil), do: false
 
   def moderator?(userid) when is_integer(userid),
     do: moderator?(Account.get_user(userid))
 
-  def moderator?(%User{} = %{roles: roles}), do: Enum.member?(roles, "Moderator")
+  def moderator?(%User{} = user), do: allow?(user, "Moderator")
   def moderator?(_user), do: false
 
   # credo:disable-for-lines:8 Credo.Check.Readability.PredicateFunctionNames
-  @spec is_event_organizer?(T.userid() | User.t() | nil) :: boolean()
+  @spec is_event_organizer?(User.id() | User.t() | nil) :: boolean()
   def is_event_organizer?(nil), do: false
 
   def is_event_organizer?(userid) when is_integer(userid),
     do: is_event_organizer?(Account.get_user(userid))
 
-  def is_event_organizer?(%User{} = %{roles: roles}), do: Enum.member?(roles, "Event Organizer")
+  def is_event_organizer?(%User{} = user), do: allow?(user, "Event Organizer")
   def is_event_organizer?(_user), do: false
 
-  @spec contributor?(T.userid() | User.t() | nil) :: boolean()
+  @spec contributor?(User.id() | User.t() | nil) :: boolean()
   def contributor?(nil), do: false
 
   def contributor?(userid) when is_integer(userid),
     do: contributor?(Account.get_user(userid))
 
-  def contributor?(%User{} = %{roles: roles}), do: Enum.member?(roles, "Contributor")
+  def contributor?(%User{} = user), do: allow?(user, "Contributor")
   def contributor?(_user), do: false
 
-  @spec verified?(T.userid() | User.t() | nil) :: boolean()
+  @spec verified?(User.id() | User.t() | nil) :: boolean()
   def verified?(nil), do: false
 
   def verified?(userid) when is_integer(userid),
@@ -81,22 +80,22 @@ defmodule Teiserver.Account.Auth do
   def verified?(%User{} = %{roles: roles}), do: Enum.member?(roles, "Verified")
   def verified?(_user), do: false
 
-  @spec admin?(T.userid() | User.t() | nil) :: boolean()
+  @spec admin?(User.id() | User.t() | nil) :: boolean()
   def admin?(nil), do: false
   def admin?(userid) when is_integer(userid), do: admin?(Account.get_user(userid))
-  def admin?(%User{} = %{roles: roles}), do: Enum.member?(roles, "Admin")
+  def admin?(%User{} = user), do: allow?(user, "Admin")
   def admin?(_user), do: false
 
-  @spec vip?(T.userid() | User.t() | nil) :: boolean()
+  @spec vip?(User.id() | User.t() | nil) :: boolean()
   def vip?(nil), do: false
   def vip?(userid) when is_integer(userid), do: vip?(Account.get_user(userid))
-  def vip?(%User{} = %{roles: roles}), do: Enum.member?(roles, "VIP")
+  def vip?(%User{} = user), do: allow?(user, "VIP")
   def vip?(_user), do: false
 
   @doc """
   If a user possesses any of these roles it returns true
   """
-  @spec has_any_role?(T.userid() | User.t() | nil, String.t() | [String.t()]) :: boolean()
+  @spec has_any_role?(User.id() | User.t() | nil, String.t() | [String.t()]) :: boolean()
   def has_any_role?(nil, _roles), do: false
 
   def has_any_role?(userid, roles) when is_integer(userid),
@@ -113,7 +112,7 @@ defmodule Teiserver.Account.Auth do
   @doc """
   If a user possesses all of these roles it returns true, if any are lacking it returns false
   """
-  @spec has_all_roles?(T.userid() | User.t() | nil, String.t() | [String.t()]) :: boolean()
+  @spec has_all_roles?(User.id() | User.t() | nil, String.t() | [String.t()]) :: boolean()
   def has_all_roles?(nil, _roles), do: false
 
   def has_all_roles?(userid, roles) when is_integer(userid),
@@ -127,7 +126,7 @@ defmodule Teiserver.Account.Auth do
 
   def has_all_roles?(user, role), do: has_all_roles?(user, [role])
 
-  @spec add_roles(T.userid() | User.t() | nil, [String.t()]) :: nil | {:ok, User.t()}
+  @spec add_roles(User.id() | User.t() | nil, [String.t()]) :: nil | {:ok, User.t()}
   def add_roles(nil, _roles), do: nil
   def add_roles(_user, []), do: nil
   def add_roles(_user, nil), do: nil
@@ -140,7 +139,7 @@ defmodule Teiserver.Account.Auth do
     Account.script_update_user(user, %{roles: new_roles})
   end
 
-  @spec remove_roles(T.userid() | User.t() | nil, [String.t()]) :: nil | User.t()
+  @spec remove_roles(User.id() | User.t() | nil, [String.t()]) :: nil | User.t()
   def remove_roles(nil, _roles), do: nil
   def remove_roles(_user, []), do: nil
 

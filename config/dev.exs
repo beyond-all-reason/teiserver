@@ -60,7 +60,8 @@ config :teiserver, Teiserver,
     cacertfile: "priv/certs/localhost.crt"
   ],
   enable_discord_bridge: false,
-  accept_all_emails: true
+  accept_all_emails: true,
+  require_mfa_for_privileged_roles: false
 
 # Watch static and templates for browser reloading.
 config :teiserver, TeiserverWeb.Endpoint,

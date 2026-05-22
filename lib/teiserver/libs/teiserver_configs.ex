@@ -98,7 +98,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Require email verification",
       section: "Registrations",
       type: "boolean",
-      permissions: ["admin.dev.developer"],
+      permissions: ["Server"],
       description: "When enabled, users must verify their account via email",
       default: true
     })
@@ -107,7 +107,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Enable registrations",
       section: "Registrations",
       type: "boolean",
-      permissions: ["admin.dev.developer"],
+      permissions: ["Server"],
       description: "Allows users to register",
       default: true
     })
@@ -116,7 +116,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Require Chobby registration",
       section: "Registrations",
       type: "boolean",
-      permissions: ["admin.dev.developer"],
+      permissions: ["Server"],
       description: "Prevents users registering with anything other than Chobby",
       default: false
     })
@@ -134,7 +134,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Require Chobby login",
       section: "Registrations",
       type: "boolean",
-      permissions: ["admin.dev.developer"],
+      permissions: ["Server"],
       description: "Prevents users logging in with anything other than Chobby",
       default: false
     })

@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.Admin.UserController do
   @moduledoc false
 
-  alias Ecto.UUID
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.SmurfMergeTask
+  alias Teiserver.Account.Tasks.GdprForgetTask
   alias Teiserver.Account.TOTPLib
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle.BalanceLib
@@ -243,6 +243,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:json_user, json_user)
         |> assign(:cache_user, cache_user)
         |> assign(:extra_cache_keys, extra_cache_keys)
+        |> assign(:has_active_mfa?, has_active_mfa?(user.id))
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
 
@@ -276,6 +277,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:privileged_roles, RoleLib.privileged_roles())
         |> assign(:property_roles, RoleLib.property_roles())
         |> assign(:role_styling_map, RoleLib.role_data())
+        |> assign(:has_active_mfa?, has_active_mfa?(user.id))
         |> add_breadcrumb(name: "Edit: #{user.name}", url: conn.request_path)
         |> render("edit.html")
 
@@ -389,6 +391,7 @@ defmodule TeiserverWeb.Admin.UserController do
             |> assign(:privileged_roles, RoleLib.privileged_roles())
             |> assign(:property_roles, RoleLib.property_roles())
             |> assign(:role_styling_map, RoleLib.role_data())
+            |> assign(:has_active_mfa?, has_active_mfa?(user.id))
             |> render("edit.html", user: user, changeset: changeset)
         end
 
@@ -439,7 +442,7 @@ defmodule TeiserverWeb.Admin.UserController do
     TOTPLib.disable_totp(user.id)
 
     conn
-    |> put_flash(:info, "Disabled 2FA for #{user.name}")
+    |> put_flash(:info, "Disabled MFA for #{user.name}")
     |> redirect(to: ~p"/teiserver/admin/user/#{user}")
   end
 
@@ -1170,36 +1173,22 @@ defmodule TeiserverWeb.Admin.UserController do
     page == 0 && Enum.count(users) > 20 && search_term != ""
   end
 
-  @spec gdpr_clean(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def gdpr_clean(conn, %{"id" => id}) do
-    user = Account.get_user_by_id(id)
+  @doc """
+  Removes all PII from a user in accordance with GDPR.
+  """
+  @spec gdpr_forget(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def gdpr_forget(conn, %{"id" => id}) do
+    user = Account.get_user(id)
 
-    case UserLib.has_access(user, conn) do
-      {true, _role} ->
-        new_user =
-          Map.merge(user, %{
-            name: UUID.generate(),
-            email: "#{user.id}@#{user.id}.#{user.id}",
-            password: UserLib.make_bot_password(),
-            country: "??"
-          })
-
-        Account.update_cache_user(user.id, new_user)
-
-        Account.delete_user_stat_keys(user.id, [
-          "first_ip",
-          "country",
-          "last_ip",
-          "previous_names"
-        ])
-
+    case GdprForgetTask.forget_user(conn, user) do
+      :ok ->
         conn
-        |> put_flash(:success, "User GDPR cleaned")
+        |> put_flash(:success, "User GDPR forgotten")
         |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
 
-      _no_access ->
+      {:error, reason} ->
         conn
-        |> put_flash(:danger, "Unable to access this user")
+        |> put_flash(:danger, "Error: #{reason}")
         |> redirect(to: ~p"/teiserver/admin/user")
     end
   end

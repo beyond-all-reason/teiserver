@@ -195,7 +195,6 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       %{
         team_id: 0,
         win: match.winning_team == 0,
-        stats: %{},
         party_id: nil,
         user_id: user1_id,
         match_id: match.id
@@ -206,7 +205,6 @@ defmodule Teiserver.Game.MatchRatingLibTest do
       %{
         team_id: 1,
         win: match.winning_team == 1,
-        stats: %{},
         party_id: nil,
         user_id: user2_id,
         match_id: match.id

@@ -34,6 +34,10 @@
   </div>
 
   <div class="form-group row px-3 py-2">
+    <div :if={not @has_active_mfa?} class="alert alert-warning">
+      No MFA, cannot give privileged roles.
+    </div>
+
     <div :if={allow?(@conn, "Server")} class="col">
       <h5>Management</h5>
       <%= for r <- @management_roles do %>

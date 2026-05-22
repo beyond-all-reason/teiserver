@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Account.SecurityController do
   alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.TOTP
   alias Teiserver.OAuth
 
@@ -32,6 +33,7 @@ defmodule TeiserverWeb.Account.SecurityController do
     |> assign(:user_tokens, user_tokens)
     |> assign(:oauth_applications, oauth_applications)
     |> assign(:oauth_token_counts, oauth_token_counts)
+    |> assign(:has_active_mfa?, has_active_mfa?(conn.assigns.current_user.id))
     |> render("index.html")
   end
 
@@ -39,9 +41,12 @@ defmodule TeiserverWeb.Account.SecurityController do
   def totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
+    show_mfa_warning = AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(user.roles)
+
     conn
     |> add_breadcrumb(name: "totp", url: conn.request_path)
     |> assign(:user, user)
+    |> assign(:show_mfa_warning, show_mfa_warning)
     |> render("totp.html")
   end
 
@@ -79,7 +84,7 @@ defmodule TeiserverWeb.Account.SecurityController do
         Account.set_secret(user.id, decoded_secret)
 
         conn
-        |> put_flash(:info, "2FA set successfully.")
+        |> put_flash(:info, "MFA set successfully.")
         |> redirect(to: ~p"/teiserver/account/security/totp")
 
       {:error, _reason} ->

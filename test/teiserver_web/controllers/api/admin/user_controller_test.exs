@@ -1,11 +1,13 @@
 defmodule TeiserverWeb.API.Admin.UserControllerTest do
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
   use TeiserverWeb.ConnCase, async: false
 
   defp setup_user(_context) do
-    user = GeneralTestLib.make_user()
+    {:ok, user} = GeneralTestLib.make_user() |> Auth.add_roles(["Admin"])
+
     {:ok, user: user}
   end
 
@@ -164,6 +166,64 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
     end
   end
 
+  describe "privilege escalation guard" do
+    setup [:setup_user, :setup_generic_lobby_app, :setup_authed_conn]
+
+    test "strips privileged roles from create payload", %{authed_conn: conn} do
+      user_data = %{
+        "name" => "escalator",
+        "email" => "escalator@example.com",
+        "password" => "testpassword123",
+        "roles" => ["Server", "Admin", "Contributor", "Verified"],
+        "permissions" => ["admin.dev.developer", "Server"]
+      }
+
+      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
+
+      assert resp["user"]["roles"] == ["Verified"]
+      refute "admin.dev.developer" in resp["user"]["permissions"]
+      refute "Server" in resp["user"]["permissions"]
+      refute "Admin" in resp["user"]["permissions"]
+
+      stored = Account.get_user_by_email("escalator@example.com")
+      assert stored.roles == ["Verified"]
+      refute "admin.dev.developer" in stored.permissions
+    end
+
+    test "ignores caller-supplied permission strings entirely", %{authed_conn: conn} do
+      user_data = %{
+        "name" => "permsetter",
+        "email" => "permsetter@example.com",
+        "password" => "testpassword123",
+        "roles" => ["Verified"],
+        "permissions" => ["admin.dev.developer", "Moderator", "anything"]
+      }
+
+      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
+
+      # Permissions are derived from the (filtered) roles, not the caller input.
+      assert resp["user"]["permissions"] == ["Verified"]
+    end
+
+    test "refresh_token refuses to mint tokens for staff accounts", %{
+      authed_conn: conn,
+      user: user
+    } do
+      # Promote a target user to a privileged role outside the API allowlist.
+      {:ok, _promoted_user} =
+        Account.script_update_user(user, %{roles: ["Admin"], permissions: ["Admin"]})
+
+      Account.recache_user(user.id)
+
+      resp =
+        conn
+        |> post(refresh_token_path(), %{"email" => user.email})
+        |> json_response(403)
+
+      assert resp["error"] =~ "privileged"
+    end
+  end
+
   describe "refresh token with valid auth" do
     setup [:setup_user, :setup_generic_lobby_app, :setup_authed_conn]
 
@@ -242,7 +302,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
 
     test "requires valid scopes", %{conn: conn} do
       # Create a user and token without the required scope
-      user = GeneralTestLib.make_user()
+      {:ok, user} = GeneralTestLib.make_user() |> Auth.add_roles(["Admin"])
 
       app =
         OAuthFixtures.app_attrs(user.id)
@@ -251,7 +311,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
         |> OAuthFixtures.create_app()
 
       token =
-        OAuthFixtures.token_attrs(user.id, app)
+        OAuthFixtures.token_attrs(user, app)
         |> Map.put(:scopes, ["admin.map"])
         |> OAuthFixtures.create_token()
 
