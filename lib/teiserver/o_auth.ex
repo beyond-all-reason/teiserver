@@ -19,6 +19,7 @@ defmodule Teiserver.OAuth do
   alias Teiserver.Data.Types, as: T
 
   defdelegate allowed_scopes(), to: ScopeLib
+  defdelegate scope_description(scope), to: ScopeLib
 
   # @spec change_application(Application.t(), map() | nil) :: Ecto.Changeset
   def change_application(%Application{} = app, attrs \\ %{}) do

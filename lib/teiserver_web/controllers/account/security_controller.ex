@@ -41,11 +41,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   def totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
-    mfa_required = Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
-
-    show_mfa_warning =
-      mfa_required == true and
-        AuthLib.contains_mfa_role?(user.roles)
+    show_mfa_warning = AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(user.roles)
 
     conn
     |> add_breadcrumb(name: "totp", url: conn.request_path)

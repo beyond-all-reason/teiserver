@@ -7,6 +7,7 @@ defmodule Teiserver.Account.AuthLib do
   alias Phoenix.LiveView.Socket
   alias Plug.Conn
   alias Teiserver.Account
+  alias Teiserver.Account.RoleLib
 
   require Logger
 
@@ -14,7 +15,7 @@ defmodule Teiserver.Account.AuthLib do
   def icon, do: "fa-solid fa-address-card"
 
   def mfa_roles do
-    ~w[Server Admin]s
+    ~w[Server Admin Moderator Overwatch Contributor]s
   end
 
   @spec get_all_permission_sets() :: list()
@@ -41,6 +42,17 @@ defmodule Teiserver.Account.AuthLib do
       |> Enum.uniq()
 
     permission_list ++ sections ++ modules
+  end
+
+  @spec get_permissions_from_roles([String.t()]) :: [String.t()]
+  def get_permissions_from_roles(roles) do
+    roles
+    |> Enum.map(fn role_name ->
+      role_def = RoleLib.role_data(role_name)
+      [role_name | role_def.contains]
+    end)
+    |> List.flatten()
+    |> Enum.uniq()
   end
 
   @spec get_permission_set({String.t(), String.t()}) :: [String.t()]
@@ -82,7 +94,8 @@ defmodule Teiserver.Account.AuthLib do
 
   # Handle conn
   def allow?(%Conn{} = conn, permissions_required) do
-    %{id: id, permissions: permissions_held} = conn.assigns[:current_user]
+    %{id: id, roles: roles} = conn.assigns[:current_user]
+    permissions_held = get_permissions_from_roles(roles)
 
     mfa_test(id, permissions_required) and
       permission_test(permissions_held, permissions_required)
@@ -90,14 +103,17 @@ defmodule Teiserver.Account.AuthLib do
 
   # Socket
   def allow?(%Socket{} = socket, permissions_required) do
-    %{id: id, permissions: permissions_held} = socket.assigns[:current_user]
+    %{id: id, roles: roles} = socket.assigns[:current_user]
+    permissions_held = get_permissions_from_roles(roles)
 
     mfa_test(id, permissions_required) and
       permission_test(permissions_held, permissions_required)
   end
 
   # User and CacheUser
-  def allow?(%{id: id, permissions: permissions_held}, permissions_required) do
+  def allow?(%{id: id, roles: roles}, permissions_required) do
+    permissions_held = get_permissions_from_roles(roles)
+
     mfa_test(id, permissions_required) and
       permission_test(permissions_held, permissions_required)
   end
@@ -122,8 +138,7 @@ defmodule Teiserver.Account.AuthLib do
     )
 
     cond do
-      # Enum.member?(Application.get_env(:teiserver, TeiserverWeb)[:universal_permissions], permission_required) -> true
-      permissions_held == nil ->
+      Enum.empty?(permissions_held) ->
         Logger.debug("AuthLib.allow?() -> No permissions held")
         false
 
@@ -191,7 +206,7 @@ defmodule Teiserver.Account.AuthLib do
     end)
   end
 
-  defp mfa_required? do
+  def mfa_required? do
     Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
   end
 
