@@ -18,8 +18,8 @@ defmodule Teiserver.Game.MatchRatingsExport do
   alias Ecto.Adapters.SQL
   alias Teiserver.Battle
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.Helper.TimexHelper
   alias Teiserver.Repo
   require Logger
 
@@ -54,8 +54,8 @@ defmodule Teiserver.Game.MatchRatingsExport do
 
     data =
       get_data(
-        start_date |> Timex.to_datetime(),
-        end_date |> Timex.to_datetime(),
+        DateHelper.to_datetime(start_date),
+        DateHelper.to_datetime(end_date),
         rating_type_id
       )
 
@@ -186,7 +186,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
       if valid_data?(members_data) do
         %{
           id: match.id,
-          date: match.started |> TimexHelper.date_to_str(format: :ymd_hms),
+          date: match.started |> DateHelper.date_to_str(format: :ymd_hms),
           map: match.map,
           match_uuid: match.uuid,
           server_uuid: match.server_uuid,

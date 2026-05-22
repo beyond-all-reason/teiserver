@@ -103,7 +103,7 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
                   {date_to_str(@params["Start date"], format: :ymd)} -> {date_to_str(
                     @params["End date"],
                     format: :ymd
-                  )} ({Timex.diff(@params["End date"], @params["Start date"], :days)} days)
+                  )} ({Date.diff(@params["End date"], @params["Start date"])} days)
                 </h4>
             <% end %>
           </div>

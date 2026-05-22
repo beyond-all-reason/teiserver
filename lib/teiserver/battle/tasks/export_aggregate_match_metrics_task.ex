@@ -1,5 +1,6 @@
 defmodule Teiserver.Battle.ExportAggregateMatchMetricsTask do
   @moduledoc false
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Logging
 
@@ -11,8 +12,8 @@ defmodule Teiserver.Battle.ExportAggregateMatchMetricsTask do
         params["end_date"]
       )
 
-    start_date = Timex.to_datetime(start_date)
-    end_date = Timex.to_datetime(end_date)
+    start_date = DateHelper.to_datetime(start_date)
+    end_date = DateHelper.to_datetime(end_date)
 
     Logging.list_server_day_logs(
       search: [

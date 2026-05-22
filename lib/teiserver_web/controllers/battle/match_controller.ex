@@ -4,8 +4,8 @@ defmodule TeiserverWeb.Battle.MatchController do
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.StylingHelper
-  alias Teiserver.Helper.TimexHelper
 
   use TeiserverWeb, :controller
 
@@ -208,7 +208,7 @@ defmodule TeiserverWeb.Battle.MatchController do
       |> List.foldl(%{}, fn rating, acc ->
         Map.update(
           acc,
-          TimexHelper.date_to_str(rating.inserted_at, format: :ymd),
+          DateHelper.date_to_str(rating.inserted_at, format: :ymd),
           {rating.value["skill"], rating.value["uncertainty"], rating.value["rating_value"], 1},
           fn {skill, uncertainty, rating_value, count} ->
             {skill + rating.value["skill"], uncertainty + rating.value["uncertainty"],

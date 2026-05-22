@@ -2,7 +2,6 @@ defmodule Teiserver.Logging.Helpers do
   @moduledoc false
 
   alias Teiserver.Logging
-  use Timex
 
   @spec add_anonymous_audit_log(String.t(), map()) :: Teiserver.Logging.AuditLog.t()
   def add_anonymous_audit_log(action, details) do

@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
   alias Teiserver.Account
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ComplexLobbyEventQueries
   alias Teiserver.Telemetry.ExportComplexLobbyEventsTask
@@ -30,8 +31,8 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
 
     between =
       case timeframe do
-        "day" -> {Timex.now() |> Timex.shift(days: -1), Timex.now()}
-        "week" -> {Timex.now() |> Timex.shift(days: -7), Timex.now()}
+        "day" -> {DateTime.shift(DateTime.utc_now(), day: -1), DateTime.utc_now()}
+        "week" -> {DateTime.shift(DateTime.utc_now(), day: -7), DateTime.utc_now()}
       end
 
     args = [
@@ -58,12 +59,12 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
 
     start_date =
       case timeframe do
-        "Today" -> Timex.today() |> Timex.to_datetime()
-        "Yesterday" -> Timex.today() |> Timex.to_datetime() |> Timex.shift(days: -1)
-        "7 days" -> Timex.now() |> Timex.shift(days: -7)
-        "14 days" -> Timex.now() |> Timex.shift(days: -14)
-        "31 days" -> Timex.now() |> Timex.shift(days: -31)
-        _other -> Timex.now() |> Timex.shift(days: -7)
+        "Today" -> DateHelper.to_datetime(Date.utc_today())
+        "Yesterday" -> Date.utc_today() |> DateHelper.to_datetime() |> DateTime.shift(day: -1)
+        "7 days" -> DateTime.shift(DateTime.utc_now(), day: -7)
+        "14 days" -> DateTime.shift(DateTime.utc_now(), day: -14)
+        "31 days" -> DateTime.shift(DateTime.utc_now(), day: -31)
+        _other -> DateTime.shift(DateTime.utc_now(), day: -7)
       end
 
     schema_keys =
@@ -84,7 +85,12 @@ defmodule TeiserverWeb.Telemetry.ComplexLobbyEventController do
     key = Map.get(params, "key", default_key)
 
     lobby_data =
-      ComplexLobbyEventQueries.get_aggregate_detail(event_type_id, key, start_date, Timex.now())
+      ComplexLobbyEventQueries.get_aggregate_detail(
+        event_type_id,
+        key,
+        start_date,
+        DateTime.utc_now()
+      )
 
     key = Map.get(params, "key", hd(schema_keys ++ [nil]))
 

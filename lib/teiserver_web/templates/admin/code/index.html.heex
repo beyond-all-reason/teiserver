@@ -56,7 +56,7 @@
                   <td>{code.user.name}</td>
                   <td>{code.purpose}</td>
                   <td>
-                    {if Timex.compare(code.expires, Timex.now()) != 1 do
+                    {if DateTime.compare(code.expires, DateTime.utc_now()) != :gt do
                       "Expired"
                     else
                       date_to_str(code.expires, format: :hms_or_dmy, tz: @tz)

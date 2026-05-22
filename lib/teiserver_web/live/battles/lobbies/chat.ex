@@ -316,7 +316,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     |> LobbyMessage.changeset(%{
       "match_id" => 1,
       "user_id" => 1,
-      "inserted_at" => Timex.now(),
+      "inserted_at" => DateTime.utc_now(),
       "content" => ""
     })
   end

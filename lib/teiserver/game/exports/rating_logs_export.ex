@@ -17,6 +17,7 @@ defmodule Teiserver.Game.RatingLogsExport do
   """
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
   require Logger
 
@@ -50,8 +51,8 @@ defmodule Teiserver.Game.RatingLogsExport do
       Game.list_rating_logs(
         search: [
           rating_type_id: rating_type_id,
-          inserted_after: Timex.to_datetime(start_date),
-          inserted_before: Timex.to_datetime(end_date)
+          inserted_after: DateHelper.to_datetime(start_date),
+          inserted_before: DateHelper.to_datetime(end_date)
         ],
         select: ~w(user_id rating_type_id match_id party_id value inserted_at)a,
         limit: :infinity

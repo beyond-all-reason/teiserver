@@ -24,7 +24,7 @@ defmodule Teiserver.Telemetry.SimpleAnonEventLib do
       create_simple_anon_event(%{
         hash: hash,
         event_type_id: event_type_id,
-        timestamp: Timex.now()
+        timestamp: DateTime.utc_now()
       })
 
     case result do

@@ -2,7 +2,7 @@ defmodule Teiserver.Moderation.Action do
   @moduledoc false
 
   alias Ecto.Changeset
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
 
   use TeiserverWeb, :schema
 
@@ -40,12 +40,12 @@ defmodule Teiserver.Moderation.Action do
   end
 
   defp adjust_restrictions(%Ecto.Changeset{} = struct) do
-    years = Timex.now() |> Timex.shift(years: 10)
+    years = DateTime.shift(DateTime.utc_now(), year: 10)
     expires = Changeset.get_field(struct, :expires, [])
     inbound_restrictions = Changeset.get_field(struct, :restrictions, [])
 
     new_restrictions =
-      if TimexHelper.greater_than(expires, years) and Enum.member?(inbound_restrictions, "Login") do
+      if DateHelper.greater_than(expires, years) and Enum.member?(inbound_restrictions, "Login") do
         ["Permanently banned" | inbound_restrictions] |> Enum.uniq()
       else
         (inbound_restrictions || []) |> List.delete("Permanently banned")

@@ -1,7 +1,7 @@
 defmodule Teiserver.Telemetry.ExportPropertiesTask do
   @moduledoc false
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.Helper.TimexHelper
   alias Teiserver.Repo
   alias Teiserver.Telemetry.AnonProperty
   alias Teiserver.Telemetry.UserProperty
@@ -31,8 +31,8 @@ defmodule Teiserver.Telemetry.ExportPropertiesTask do
   defp do_query(%{"property_types" => property_types, "timeframe" => timeframe, "auth" => auth}) do
     {start_date, end_date} = DatePresets.parse(timeframe, "", "")
 
-    start_date = Timex.to_datetime(start_date)
-    end_date = Timex.to_datetime(end_date)
+    start_date = DateHelper.to_datetime(start_date)
+    end_date = DateHelper.to_datetime(end_date)
 
     case auth do
       "auth" ->
@@ -70,7 +70,7 @@ defmodule Teiserver.Telemetry.ExportPropertiesTask do
           [
             name,
             property_type,
-            TimexHelper.date_to_str(last_updated, format: :ymd_hms),
+            DateHelper.date_to_str(last_updated, format: :ymd_hms),
             value
           ]
         end)
@@ -102,7 +102,7 @@ defmodule Teiserver.Telemetry.ExportPropertiesTask do
           [
             hash,
             property_type,
-            TimexHelper.date_to_str(last_updated, format: :ymd_hms),
+            DateHelper.date_to_str(last_updated, format: :ymd_hms),
             value
           ]
         end)

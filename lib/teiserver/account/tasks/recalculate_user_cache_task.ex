@@ -9,7 +9,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   import Teiserver.Helper.NumberHelper, only: [percent: 2]
 
   @match_cache_recent_days 7
@@ -37,7 +37,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         search: [
           user_id: userid,
           rating_type_id: filter_type_id,
-          inserted_after: Timex.now() |> Timex.shift(days: -@match_cache_max_days)
+          inserted_after: DateTime.shift(DateTime.utc_now(), day: -@match_cache_max_days)
         ],
         order_by: "Newest first",
         limit: 50,
@@ -76,7 +76,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         search: [
           user_id: userid,
           rating_type_id: filter_type_id,
-          inserted_after: Timex.now() |> Timex.shift(days: -@match_cache_max_days)
+          inserted_after: DateTime.shift(DateTime.utc_now(), day: -@match_cache_max_days)
         ],
         order_by: "Newest first",
         limit: 50,
@@ -123,7 +123,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         search: [
           user_id: userid,
           rating_type_id: filter_type_id,
-          inserted_after: Timex.now() |> Timex.shift(days: -@match_cache_max_days)
+          inserted_after: DateTime.shift(DateTime.utc_now(), day: -@match_cache_max_days)
         ],
         order_by: "Newest first",
         limit: 50,
@@ -184,12 +184,12 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
 
   def do_match_processed_team_recent(userid, logs, team_type) do
     # Filter down to just the recent ones rather than re-running the query
-    timestamp_after = Timex.now() |> Timex.shift(days: -@match_cache_recent_days)
+    timestamp_after = DateTime.shift(DateTime.utc_now(), day: -@match_cache_recent_days)
 
     logs =
       logs
       |> Enum.filter(fn log ->
-        TimexHelper.greater_than(log.inserted_at, timestamp_after)
+        DateHelper.greater_than(log.inserted_at, timestamp_after)
       end)
       |> Enum.take(15)
 

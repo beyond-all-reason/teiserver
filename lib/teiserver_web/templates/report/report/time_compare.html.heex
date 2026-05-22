@@ -96,7 +96,7 @@
           <input
             type="hidden"
             name="report[the_date]"
-            value={Timex.shift(@start_date, days: 1) |> date_to_str(format: :ymd)}
+            value={Date.to_string(Date.add(@start_date, 1))}
           />
 
           <input
@@ -127,7 +127,7 @@
           <input
             type="hidden"
             name="report[the_date]"
-            value={Timex.shift(@start_date, days: -1) |> date_to_str(format: :ymd)}
+            value={Date.to_string(Date.add(@start_date, -1))}
           />
 
           <input

@@ -11,6 +11,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   alias Teiserver.Battle.MatchMembership
   alias Teiserver.Config
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging.ServerMinuteLog
   alias Teiserver.Logging.Tasks.PersistMatchDayTask
@@ -118,8 +119,15 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
               bot: false
             },
             inserted_at:
-              Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert(),
-            updated_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert()
+              DateTime.utc_now()
+              |> DateTime.shift(day: -day)
+              |> DateTime.shift(minute: -minutes)
+              |> time_convert(),
+            updated_at:
+              DateTime.utc_now()
+              |> DateTime.shift(day: -day)
+              |> DateTime.shift(minute: -minutes)
+              |> time_convert()
           }
         end)
         |> Enum.to_list()
@@ -136,12 +144,12 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     # First we need to make by the minute telemetry data
     Range.new(0, @settings.days)
     |> Enum.each(fn day ->
-      date = Timex.today() |> Timex.shift(days: -day)
+      date = Date.add(Date.utc_today(), -day)
 
       user_ids =
         Account.list_users(
           search: [
-            inserted_after: Timex.to_datetime(date),
+            inserted_after: DateHelper.to_datetime(date),
             not_has_role: "Bot"
           ],
           select: [:id]
@@ -169,11 +177,10 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
           total = [menu, lobby, player, spectator] |> List.flatten()
 
           timestamp =
-            date
-            |> Timex.to_datetime()
-            |> Timex.shift(minutes: m)
-            |> Timex.to_unix()
-            |> Timex.from_unix()
+            DateHelper.to_datetime(date)
+            |> DateTime.shift(minute: m)
+            |> DateTime.to_unix()
+            |> DateTime.from_unix!()
 
           %{
             timestamp: timestamp,
@@ -244,12 +251,12 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   defp make_moderation do
     Range.new(0, @settings.days)
     |> Enum.each(fn day ->
-      date = Timex.today() |> Timex.shift(days: -day)
+      date = Date.add(Date.utc_today(), -day)
 
       users =
         Account.list_users(
           search: [
-            inserted_after: Timex.to_datetime(date),
+            inserted_after: DateHelper.to_datetime(date),
             not_has_role: "Bot"
           ],
           select: [:id, :name]
@@ -266,9 +273,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
               Enum.shuffle(users) |> Enum.take(2)
 
             report_time =
-              date
-              |> Timex.to_datetime()
-              |> Timex.shift(minutes: 10 + :rand.uniform(1000))
+              DateHelper.to_datetime(date)
+              |> DateTime.shift(minute: 10 + :rand.uniform(1000))
               |> time_convert()
 
             %{
@@ -286,8 +292,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       match_reports =
         Battle.list_matches(
           search: [
-            started_after: date |> Timex.to_datetime(),
-            started_before: date |> Timex.to_datetime() |> Timex.shift(days: 1)
+            started_after: DateHelper.to_datetime(date),
+            started_before: DateTime.shift(DateHelper.to_datetime(date), day: 1)
           ],
           preload: [:members]
         )
@@ -295,7 +301,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         |> Enum.take(report_count)
         |> Enum.map(fn match ->
           [reporter, target | _rest] = Enum.shuffle(match.members) |> Enum.take(2)
-          report_time = match.started |> Timex.shift(minutes: 20) |> time_convert()
+          report_time = DateTime.shift(match.started, minute: 20) |> time_convert()
 
           relationship =
             cond do
@@ -326,13 +332,14 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       Range.new(0, @settings.days)
       |> Enum.flat_map(fn day ->
         date =
-          Timex.today()
-          |> Timex.shift(days: -day, years: -(@latest_season - MatchRatingLib.active_season()))
+          Date.utc_today()
+          |> Date.add(-day)
+          |> Date.shift(year: -(@latest_season - MatchRatingLib.active_season()))
 
         users =
           Account.list_users(
             search: [
-              inserted_after: Timex.to_datetime(date),
+              inserted_after: DateHelper.to_datetime(date),
               not_has_role: "Bot"
             ],
             select: [:id, :name]
@@ -363,9 +370,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             |> Enum.sum()
 
           start_time =
-            date |> Timex.to_datetime() |> Timex.shift(minutes: 10 + :rand.uniform(1000))
+            DateHelper.to_datetime(date) |> DateTime.shift(minute: 10 + :rand.uniform(1000))
 
-          end_time = Timex.shift(start_time, minutes: 10 + :rand.uniform(120))
+          end_time = DateTime.shift(start_time, minute: 10 + :rand.uniform(120))
 
           {:ok, match} =
             Battle.create_match(%{
@@ -441,7 +448,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       Account.create_code(%{
         value: "fakedata_code$127.0.0.1",
         purpose: "one_time_login",
-        expires: Timex.now() |> Timex.shift(hours: 24),
+        expires: DateTime.shift(DateTime.utc_now(), hour: 24),
         user_id: root_user.id
       })
   end
@@ -449,9 +456,9 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   # This allows us to round off microseconds and convert datetime to naive_datetime
   defp time_convert(t) do
     t
-    |> Timex.to_unix()
-    |> Timex.from_unix()
-    |> Timex.to_naive_datetime()
+    |> DateTime.to_unix()
+    |> DateTime.from_unix!()
+    |> DateTime.to_naive()
   end
 
   defp random_pick_from(list, chance \\ 0.5) do

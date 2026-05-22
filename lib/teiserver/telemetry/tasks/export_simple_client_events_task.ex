@@ -1,5 +1,6 @@
 defmodule Teiserver.Telemetry.ExportSimpleClientEventsTask do
   @moduledoc false
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
   alias Teiserver.Telemetry.SimpleClientEvent
@@ -10,8 +11,8 @@ defmodule Teiserver.Telemetry.ExportSimpleClientEventsTask do
   def perform(%{"event_types" => event_types, "timeframe" => timeframe}) do
     {start_date, end_date} = DatePresets.parse(timeframe, "", "")
 
-    start_date = Timex.to_datetime(start_date)
-    end_date = Timex.to_datetime(end_date)
+    start_date = DateHelper.to_datetime(start_date)
+    end_date = DateHelper.to_datetime(end_date)
 
     query_client(event_types, start_date, end_date)
     |> add_csv_headings()

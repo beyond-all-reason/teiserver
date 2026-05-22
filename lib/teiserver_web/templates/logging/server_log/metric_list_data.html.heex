@@ -26,17 +26,17 @@
       <% date_string =
         case @unit do
           "day" ->
-            Timex.format!(log.date, "{YYYY}-{0M}-{0D} {WDshort}")
+            Calendar.strftime(log.date, "%Y-%m-%d %a")
 
           "week" ->
-            {_, week} = Timex.iso_week(log.date)
-            Timex.format!(log.date, "{YYYY}-{0M}-{0D}") <> " ##{week}"
+            {_, week} = :calendar.iso_week_number({log.date.year, log.date.month, log.date.day})
+            Calendar.strftime(log.date, "%Y-%m-%d") <> " ##{week}"
 
           "month" ->
-            Timex.format!(log.date, "{YYYY}-{0M}")
+            Calendar.strftime(log.date, "%Y-%m")
 
           "quarter" ->
-            Timex.format!(log.date, "{YYYY}-{0M}")
+            Calendar.strftime(log.date, "%Y-%m")
 
           "year" ->
             log.date.year

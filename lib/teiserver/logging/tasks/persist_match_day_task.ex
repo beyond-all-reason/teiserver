@@ -20,23 +20,23 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
             nil
 
           [match] ->
-            Timex.to_date(match.inserted_at)
+            NaiveDateTime.to_date(match.inserted_at)
         end
       else
         last_date
-        |> Timex.shift(days: 1)
+        |> Date.add(1)
       end
 
     cond do
       date == nil ->
         :ok
 
-      Timex.compare(date, Timex.today()) == -1 ->
+      Date.compare(date, Date.utc_today()) == :lt ->
         run(date)
 
-        new_date = Timex.shift(date, days: 1)
+        new_date = Date.add(date, 1)
 
-        if Timex.compare(new_date, Timex.today()) == -1 do
+        if Date.compare(new_date, Date.utc_today()) == :lt do
           %{}
           |> __MODULE__.new()
           |> Oban.insert()
@@ -50,7 +50,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
   end
 
   # To re-run yesterday's data
-  # Teiserver.Logging.Tasks.PersistMatchDayTask.run(Timex.today |> Timex.shift(days: -1))
+  # Teiserver.Logging.Tasks.PersistMatchDayTask.run(Date.add(Date.utc_today(), -1))
 
   @spec run(Date.t()) :: :ok
   def run(date) do
@@ -73,7 +73,7 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
     # Delete old log if it exists
     delete_query =
       from logs in MatchDayLog,
-        where: logs.date == ^(date |> Timex.to_date())
+        where: logs.date == ^date
 
     Repo.delete_all(delete_query)
 

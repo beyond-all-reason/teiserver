@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.PageViewLogController do
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
 
   use TeiserverWeb, :controller
@@ -49,8 +49,8 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
       Logging.list_page_view_logs(
         search: [
           user_id: params["user_id"],
-          start_date: TimexHelper.parse_time_input(params["start_date"]),
-          end_date: TimexHelper.parse_time_input(params["end_date"]),
+          start_date: DateHelper.parse_time_input(params["start_date"]),
+          end_date: DateHelper.parse_time_input(params["end_date"]),
           path: params["path"],
           section: params["section"]
         ],

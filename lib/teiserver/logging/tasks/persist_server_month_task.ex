@@ -1,6 +1,7 @@
 defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
   @moduledoc false
 
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Logging.ServerDayLogLib
   alias Teiserver.Logging.Tasks.PersistServerMonthTask
@@ -40,22 +41,22 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
 
     case first_logs do
       [log] ->
-        today = Timex.today()
+        today = Date.utc_today()
 
         if log.date.year < today.year or log.date.month < today.month do
           logs =
             Logging.list_server_day_logs(
               search: [
-                start_date: Timex.beginning_of_month(log.date),
-                end_date: Timex.end_of_month(log.date)
+                start_date: DateHelper.beginning_of_month(log.date),
+                end_date: Date.end_of_month(log.date)
               ]
             )
 
           user_activity_logs =
             Logging.list_user_activity_day_logs(
               search: [
-                start_date: Timex.beginning_of_month(log.date),
-                end_date: Timex.end_of_month(log.date)
+                start_date: DateHelper.beginning_of_month(log.date),
+                end_date: Date.end_of_month(log.date)
               ]
             )
 
@@ -68,7 +69,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
             Logging.create_server_month_log(%{
               year: log.date.year,
               month: log.date.month,
-              date: Timex.Date.new!(log.date.year, log.date.month, 1),
+              date: Date.new!(log.date.year, log.date.month, 1),
               data: data
             })
         end
@@ -80,24 +81,24 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
 
   # For when we have an existing log
   defp perform_standard(year, month) do
-    today = Timex.today()
+    today = Date.utc_today()
 
     if year < today.year or month < today.month do
-      now = Timex.Date.new!(year, month, 1)
+      now = Date.new!(year, month, 1)
 
       logs =
         Logging.list_server_day_logs(
           search: [
-            start_date: Timex.beginning_of_month(now),
-            end_date: Timex.end_of_month(now)
+            start_date: DateHelper.beginning_of_month(now),
+            end_date: Date.end_of_month(now)
           ]
         )
 
       user_activity_logs =
         Logging.list_user_activity_day_logs(
           search: [
-            start_date: Timex.beginning_of_month(now),
-            end_date: Timex.end_of_month(now)
+            start_date: DateHelper.beginning_of_month(now),
+            end_date: Date.end_of_month(now)
           ]
         )
 
@@ -120,18 +121,18 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTask do
 
   @spec month_so_far() :: map()
   def month_so_far do
-    now = Timex.now()
+    now = DateTime.utc_now()
 
     user_activity_logs =
       Logging.list_user_activity_day_logs(
         search: [
-          start_date: Timex.beginning_of_month(now)
+          start_date: DateHelper.beginning_of_month(now)
         ]
       )
 
     Logging.list_server_day_logs(
       search: [
-        start_date: Timex.beginning_of_month(now)
+        start_date: DateHelper.beginning_of_month(now)
       ]
     )
     |> Enum.zip(user_activity_logs)

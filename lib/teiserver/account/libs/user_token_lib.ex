@@ -52,12 +52,12 @@ defmodule Teiserver.Account.UserTokenLib do
 
   def _search(query, :expired, false) do
     from user_tokens in query,
-      where: user_tokens.expires > ^Timex.now()
+      where: user_tokens.expires > ^DateTime.utc_now()
   end
 
   def _search(query, :expired, true) do
     from user_tokens in query,
-      where: user_tokens.expires < ^Timex.now()
+      where: user_tokens.expires < ^DateTime.utc_now()
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()

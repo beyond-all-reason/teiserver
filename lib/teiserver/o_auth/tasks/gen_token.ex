@@ -8,7 +8,6 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.OAuth.Token
   alias Teiserver.Repo
-  alias Timex.Duration
 
   @spec create_token(String.t(), String.t() | nil) :: {:ok, Token.t()} | {:error, term()}
   def create_token(username_or_email, app_uid \\ nil) do
@@ -19,7 +18,7 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
         owner_id: user.id,
         application_id: app.id,
         scopes: app.scopes,
-        expires_at: Timex.add(DateTime.utc_now(), Duration.from_days(1)),
+        expires_at: DateTime.shift(DateTime.utc_now(), day: 1),
         type: :access,
         refresh_token: nil
       }

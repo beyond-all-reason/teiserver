@@ -474,7 +474,7 @@
           </div>
 
           <div class="tab-pane fade" id="calculations_tab">
-            <% now = Timex.now() %> Server time is {now |> Kernel.inspect()}<br /><br />
+            <% now = DateTime.utc_now() %> Server time is {now |> Kernel.inspect()}<br /><br />
 
             <pre>
 UTC conversion is <%= date_to_str(now, format: :ymd_hms, tz: "UTC") %>

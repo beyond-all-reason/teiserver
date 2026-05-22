@@ -21,7 +21,7 @@
 
         <td>{action.inserted_at |> date_to_str(format: :hms_or_ymd)}</td>
         <%= if action.expires do %>
-          <%= if Timex.compare(Timex.now(), action.expires) == 1 do %>
+          <%= if NaiveDateTime.compare(NaiveDateTime.utc_now(), action.expires) == :gt do %>
             <td>Expired</td>
           <% else %>
             <td>{action.expires |> date_to_str(format: :hms_or_ymd)}</td>

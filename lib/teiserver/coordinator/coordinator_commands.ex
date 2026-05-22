@@ -107,7 +107,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       Account.create_code(%{
         value: ULID.generate(),
         purpose: "one_time_login",
-        expires: Timex.now() |> Timex.shift(minutes: 5),
+        expires: DateTime.shift(DateTime.utc_now(), minute: 5),
         user_id: senderid,
         metadata: %{
           ip: client.ip,
@@ -530,7 +530,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       Account.create_code(%{
         value: ULID.generate(),
         purpose: "one_time_login",
-        expires: Timex.now() |> Timex.shift(minutes: 5),
+        expires: DateTime.shift(DateTime.utc_now(), minute: 5),
         user_id: senderid,
         metadata: %{ip: client.ip}
       })

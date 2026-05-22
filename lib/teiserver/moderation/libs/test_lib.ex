@@ -30,7 +30,7 @@ defmodule Teiserver.Moderation.ModerationTestLib do
         reason: "Reason",
         restrictions: ["Login"],
         score_modifier: 1000,
-        expires: Timex.shift(Timex.now(), days: 5)
+        expires: DateTime.shift(DateTime.utc_now(), day: 5)
       }
       |> Map.merge(attrs)
       |> Moderation.create_action()

@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
   alias Teiserver.Account
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ExportSimpleMatchEventsTask
   alias Teiserver.Telemetry.SimpleMatchEventQueries
@@ -30,8 +31,8 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
 
     between =
       case timeframe do
-        "day" -> {Timex.now() |> Timex.shift(days: -1), Timex.now()}
-        "week" -> {Timex.now() |> Timex.shift(days: -7), Timex.now()}
+        "day" -> {DateTime.shift(DateTime.utc_now(), day: -1), DateTime.utc_now()}
+        "week" -> {DateTime.shift(DateTime.utc_now(), day: -7), DateTime.utc_now()}
       end
 
     args = [
@@ -58,19 +59,19 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
 
     start_datetime =
       case timeframe do
-        "Today" -> Timex.today() |> Timex.to_datetime()
-        "Yesterday" -> Timex.today() |> Timex.to_datetime() |> Timex.shift(days: -1)
-        "7 days" -> Timex.now() |> Timex.shift(days: -7)
-        "14 days" -> Timex.now() |> Timex.shift(days: -14)
-        "31 days" -> Timex.now() |> Timex.shift(days: -31)
-        _other -> Timex.now() |> Timex.shift(days: -7)
+        "Today" -> DateHelper.to_datetime(Date.utc_today())
+        "Yesterday" -> Date.utc_today() |> DateHelper.to_datetime() |> DateTime.shift(day: -1)
+        "7 days" -> DateTime.shift(DateTime.utc_now(), day: -7)
+        "14 days" -> DateTime.shift(DateTime.utc_now(), day: -14)
+        "31 days" -> DateTime.shift(DateTime.utc_now(), day: -31)
+        _other -> DateTime.shift(DateTime.utc_now(), day: -7)
       end
 
     data_by_match_id =
       SimpleMatchEventQueries.get_aggregate_detail_by_match_id(
         event_type_id,
         start_datetime,
-        Timex.now()
+        DateTime.utc_now()
       )
       |> Enum.sort_by(fn {_match_id, value} -> value end, &>=/2)
       |> Enum.take(500)
@@ -79,7 +80,7 @@ defmodule TeiserverWeb.Telemetry.SimpleMatchEventController do
       SimpleMatchEventQueries.get_aggregate_detail_by_user_id(
         event_type_id,
         start_datetime,
-        Timex.now()
+        DateTime.utc_now()
       )
       |> Enum.sort_by(fn {_userid, value} -> value end, &>=/2)
       |> Enum.map(fn {userid, value} ->

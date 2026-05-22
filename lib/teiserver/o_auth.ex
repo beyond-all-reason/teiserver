@@ -17,7 +17,6 @@ defmodule Teiserver.OAuth do
   alias Plug.Conn
   alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
-  alias Timex.Duration
 
   defdelegate allowed_scopes(), to: ScopeLib
   defdelegate scope_description(scope), to: ScopeLib
@@ -132,7 +131,7 @@ defmodule Teiserver.OAuth do
   def create_code(user, attrs, opts \\ [])
 
   def create_code(%User{} = user, attrs, opts) do
-    now = Keyword.get(opts, :now, Timex.now())
+    now = Keyword.get(opts, :now, DateTime.utc_now())
     app_id = attrs.id
 
     if ApplicationQueries.application_allows_code?(app_id) do
@@ -143,7 +142,7 @@ defmodule Teiserver.OAuth do
         owner: user,
         application_id: app_id,
         scopes: attrs.scopes,
-        expires_at: Timex.add(now, Duration.from_minutes(5)),
+        expires_at: DateTime.shift(now, minute: 5),
         redirect_uri: Map.get(attrs, :redirect_uri),
         challenge: Map.get(attrs, :challenge),
         challenge_method: Map.get(attrs, :challenge_method)
@@ -170,7 +169,7 @@ defmodule Teiserver.OAuth do
         {:error, :no_code}
 
       code ->
-        now = Keyword.get(opts, :now, Timex.now())
+        now = Keyword.get(opts, :now, DateTime.utc_now())
         check_expiry(code, now)
     end
   end
@@ -206,7 +205,7 @@ defmodule Teiserver.OAuth do
           application_id: application.id,
           scopes: scopes,
           original_scopes: Map.get(application, :original_scopes, application.scopes),
-          expires_at: Timex.add(now, Duration.from_minutes(30)),
+          expires_at: DateTime.shift(now, minute: 30),
           type: :access
         }
         |> Map.merge(owner_attrs)
@@ -220,7 +219,7 @@ defmodule Teiserver.OAuth do
             original_scopes: application.scopes,
             # there's no real recourse when the refresh token expires and it's
             # quite annoying, so make it "never" expire.
-            expires_at: Timex.add(now, Duration.from_days(365 * 100)),
+            expires_at: DateTime.shift(now, day: 365 * 100),
             type: :refresh,
             refresh_token: nil
           }
@@ -250,7 +249,7 @@ defmodule Teiserver.OAuth do
         {:error, :no_token}
 
       token ->
-        now = Keyword.get(opts, :now, Timex.now())
+        now = Keyword.get(opts, :now, DateTime.utc_now())
         check_expiry(token, now)
     end
   end
@@ -262,7 +261,7 @@ defmodule Teiserver.OAuth do
   @spec exchange_code(Code.t(), String.t(), String.t() | nil, options()) ::
           {:ok, Token.t()} | {:error, term()}
   def exchange_code(code, verifier, redirect_uri \\ nil, opts \\ []) do
-    now = Keyword.get(opts, :now, Timex.now())
+    now = Keyword.get(opts, :now, DateTime.utc_now())
 
     with {:ok, code} <- check_expiry(code, now),
          :ok <-
@@ -340,7 +339,7 @@ defmodule Teiserver.OAuth do
   end
 
   def refresh_token(token, opts) do
-    now = Keyword.get(opts, :now, Timex.now())
+    now = Keyword.get(opts, :now, DateTime.utc_now())
 
     case check_expiry(token, now) do
       {:error, :expired} ->
@@ -549,7 +548,7 @@ defmodule Teiserver.OAuth do
   end
 
   defp check_expiry(obj, now) do
-    if Timex.after?(now, Map.fetch!(obj, :expires_at)) do
+    if DateTime.compare(now, Map.fetch!(obj, :expires_at)) == :gt do
       {:error, :expired}
     else
       {:ok, obj}

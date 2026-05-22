@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Microblog.RssController do
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Microblog
   use TeiserverWeb, :controller
 
@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Microblog.RssController do
     last_build_date =
       posts
       |> Enum.map(fn p -> p.updated_at end)
-      |> Enum.sort_by(fn v -> v end, &TimexHelper.greater_than/2)
+      |> Enum.sort_by(fn v -> v end, &DateHelper.greater_than/2)
       |> hd()
 
     conn
@@ -52,7 +52,7 @@ defmodule TeiserverWeb.Microblog.RssController do
     last_build_date =
       posts
       |> Enum.map(fn p -> p.updated_at end)
-      |> Enum.sort_by(fn v -> v end, &TimexHelper.greater_than/2)
+      |> Enum.sort_by(fn v -> v end, &DateHelper.greater_than/2)
       |> hd()
 
     conn

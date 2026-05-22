@@ -538,7 +538,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       recipient_id: recipient_id,
       giver_id: current_user.id,
       match_id: match_id,
-      inserted_at: Timex.now(),
+      inserted_at: DateTime.utc_now(),
       badge_type_id: badge_id
     })
 

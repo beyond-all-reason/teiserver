@@ -31,9 +31,7 @@ defmodule Teiserver.Account.RelationshipReport do
 
     days = int_parse(params["days"])
 
-    start_date =
-      Timex.now()
-      |> Timex.shift(days: -days)
+    start_date = DateTime.shift(DateTime.utc_now(), day: -days)
 
     limit = int_parse(params["limit"])
 

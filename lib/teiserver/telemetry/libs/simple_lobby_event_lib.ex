@@ -25,7 +25,7 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventLib do
         user_id: userid,
         event_type_id: event_type_id,
         match_id: match_id,
-        timestamp: Timex.now()
+        timestamp: DateTime.utc_now()
       })
 
     case result do
