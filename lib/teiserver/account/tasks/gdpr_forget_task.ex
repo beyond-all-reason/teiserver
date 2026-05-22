@@ -79,7 +79,7 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
         password: UserLib.make_bot_password(),
         icon: "",
         colour: "",
-        roles: ["gdpr-forgotten"],
+        roles: ["GDPR forgotten"],
         permissions: [],
         discord_id: nil,
         discord_dm_channel_id: nil,
