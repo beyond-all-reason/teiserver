@@ -119,11 +119,11 @@ defmodule Teiserver.OAuth do
   @spec create_code(
           User.t(),
           %{
-            application: Application.t(),
-            scopes: Application.scopes(),
-            redirect_uri: String.t(),
-            challenge: String.t(),
-            challenge_method: String.t()
+            required(:application) => Application.t(),
+            required(:scopes) => Application.scopes(),
+            required(:redirect_uri) => String.t(),
+            optional(:challenge) => String.t(),
+            optional(:challenge_method) => String.t()
           },
           options()
         ) ::

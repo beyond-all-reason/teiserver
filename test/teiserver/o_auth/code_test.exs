@@ -23,7 +23,41 @@ defmodule Teiserver.OAuth.CodeTest do
         redirect_uris: ["http://localhost/foo"]
       })
 
-    {:ok, user: user, app: app}
+    {:ok, confidential_app} =
+      OAuth.create_application(%{
+        name: "Testing app",
+        uid: "confidential_uid",
+        owner_id: user.id,
+        scopes: ["tachyon.lobby"],
+        redirect_uris: ["http://localhost/foo"],
+        confidential?: true
+      })
+
+    {:ok, user: user, app: app, confidential_app: confidential_app}
+  end
+
+  test "challenge_method required if challenge is set", %{user: user, app: app} do
+    code_attrs = %{
+      application: app,
+      scopes: app.scopes,
+      redirect_uri: List.first(app.redirect_uris),
+      challenge: "vqIld9nxOPe5uX_ndiRlwafYdt94ogYOZDlGIyj68jc"
+    }
+
+    {:error, err} = OAuth.create_code(user, code_attrs)
+    assert Keyword.has_key?(err.errors, :challenge_method)
+  end
+
+  test "challenge required if challenge_method is set", %{user: user, app: app} do
+    code_attrs = %{
+      application: app,
+      scopes: app.scopes,
+      redirect_uri: List.first(app.redirect_uris),
+      challenge_method: "S256"
+    }
+
+    {:error, err} = OAuth.create_code(user, code_attrs)
+    assert Keyword.has_key?(err.errors, :challenge)
   end
 
   test "can get valid code", %{user: user, app: app} do
@@ -68,6 +102,27 @@ defmodule Teiserver.OAuth.CodeTest do
     assert token.owner_id == user.id
     # the code is now consumed and not available anymore
     assert {:error, :no_code} = OAuth.get_valid_code(code.value)
+  end
+
+  test "pkce is required for public apps", %{user: user, app: app} do
+    code_attrs = %{
+      application: app,
+      scopes: app.scopes,
+      redirect_uri: List.first(app.redirect_uris)
+    }
+
+    {:error, err} = OAuth.create_code(user, code_attrs)
+    assert Keyword.has_key?(err.errors, :challenge)
+  end
+
+  test "pkce is optional for confidential apps", %{user: user, confidential_app: app} do
+    code_attrs = %{
+      application: app,
+      scopes: app.scopes,
+      redirect_uri: List.first(app.redirect_uris)
+    }
+
+    {:ok, _code} = OAuth.create_code(user, code_attrs)
   end
 
   test "cannot exchange expired code for token", %{user: user, app: app} do
