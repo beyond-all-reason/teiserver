@@ -45,7 +45,7 @@ defmodule Teiserver.OAuth.CodeTest do
     attrs = create_code_attrs(user, updated_app)
 
     code_attrs = %{
-      id: app.id,
+      application: updated_app,
       scopes: app.scopes,
       redirect_uri: nil,
       challenge: attrs.challenge,
@@ -119,7 +119,7 @@ defmodule Teiserver.OAuth.CodeTest do
 
   test "must pass valid challenge method", %{user: user, app: app} do
     code_attrs = %{
-      id: app.id,
+      application: app,
       redirect_uri: List.first(app.redirect_uris),
       scopes: app.scopes,
       challenge: OAuthFixtures.code_attrs(user, app).challenge,

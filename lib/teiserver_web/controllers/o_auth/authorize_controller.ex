@@ -82,7 +82,7 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
 
       true ->
         code_params = %{
-          id: app.id,
+          application: app,
           redirect_uri: URI.to_string(redir_url),
           scopes: app.scopes,
           challenge: Map.get(params, "code_challenge"),

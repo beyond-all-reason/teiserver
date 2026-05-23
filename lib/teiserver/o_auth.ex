@@ -119,7 +119,7 @@ defmodule Teiserver.OAuth do
   @spec create_code(
           User.t(),
           %{
-            id: integer(),
+            application: Application.t(),
             scopes: Application.scopes(),
             redirect_uri: String.t(),
             challenge: String.t(),
@@ -132,15 +132,15 @@ defmodule Teiserver.OAuth do
 
   def create_code(%User{} = user, attrs, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
-    app_id = attrs.id
+    %Application{} = app = attrs.application
 
-    if ApplicationQueries.application_allows_code?(app_id) do
+    if ApplicationQueries.application_allows_code?(app) do
       # don't do any validation on the challenge yet, this is done when exchanging
       # the code for a token
       attrs = %{
         value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(),
         owner: user,
-        application_id: app_id,
+        application: attrs.application,
         scopes: attrs.scopes,
         expires_at: DateTime.shift(now, minute: 5),
         redirect_uri: Map.get(attrs, :redirect_uri),

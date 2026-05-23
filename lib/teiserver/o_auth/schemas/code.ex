@@ -29,6 +29,12 @@ defmodule Teiserver.OAuth.Code do
       attrs
       |> uniq_lists(~w(scopes)a)
       |> Map.put(:owner_id, owner.id)
+      |> then(fn attrs ->
+        case Map.get(attrs, :application) do
+          nil -> attrs
+          app -> Map.put(attrs, :application_id, app.id)
+        end
+      end)
 
     code
     |> cast(attrs, [
@@ -50,6 +56,7 @@ defmodule Teiserver.OAuth.Code do
       :challenge,
       :challenge_method
     ])
+    |> Changeset.assoc_constraint(:application)
     |> Changeset.validate_subset(:scopes, OAuth.allowed_scopes())
     |> Changeset.validate_change(:scopes, fn :scopes, scopes ->
       case ScopeLib.all_scopes_allowed?(owner, scopes) do
