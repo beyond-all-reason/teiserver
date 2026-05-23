@@ -15,4 +15,7 @@ defmodule Teiserver.OAuth.ApplicationLib do
   """
   @spec confidential?(Application.t()) :: boolean()
   def confidential?(%Application{} = app), do: app.secret != nil
+
+  @spec verify_secret(String.t(), Application.t()) :: boolean()
+  def verify_secret(secret, %Application{} = app), do: Argon2.verify_pass(secret, app.secret)
 end

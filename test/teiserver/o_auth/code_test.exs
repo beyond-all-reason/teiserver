@@ -194,7 +194,7 @@ defmodule Teiserver.OAuth.CodeTest do
 
     assert {:ok, %Token{}} =
              OAuth.exchange_code(code,
-               client_secret: app.secret,
+               client_secret: app.plain_text_secret,
                redirect_uri: List.first(app.redirect_uris)
              )
   end
@@ -210,9 +210,46 @@ defmodule Teiserver.OAuth.CodeTest do
 
     assert {:error, _err} =
              OAuth.exchange_code(code,
-               client_secret: app.secret,
+               client_secret: app.plain_text_secret,
                verifier: "hello",
                redirect_uri: List.first(app.redirect_uris)
+             )
+  end
+
+  test "confidential client must provide client secret", %{user: user, confidential_app: app} do
+    code =
+      OAuthFixtures.code_attrs(user, app)
+      |> Map.drop([:challenge, :challenge_method, :_verifier])
+      |> OAuthFixtures.create_code()
+
+    assert {:error, _err} = OAuth.exchange_code(code, redirect_uri: List.first(app.redirect_uris))
+  end
+
+  test "confidential client must provide correct client secret", %{
+    user: user,
+    confidential_app: app
+  } do
+    code =
+      OAuthFixtures.code_attrs(user, app)
+      |> Map.drop([:challenge, :challenge_method, :_verifier])
+      |> OAuthFixtures.create_code()
+
+    assert {:error, _err} =
+             OAuth.exchange_code(code,
+               client_secret: "this is not it",
+               redirect_uri: List.first(app.redirect_uris)
+             )
+  end
+
+  test "public client must not provide a client secret", %{user: user, app: app} do
+    assert {:ok, code, attrs} = create_code(user, app)
+    attrs = Map.put(attrs, :id, app.id)
+
+    assert {:error, _reason} =
+             OAuth.exchange_code(code,
+               verifier: attrs._verifier,
+               redirect_uri: List.first(app.redirect_uris),
+               client_secret: "hello"
              )
   end
 

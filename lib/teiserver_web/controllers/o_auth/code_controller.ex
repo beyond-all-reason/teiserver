@@ -67,7 +67,8 @@ defmodule TeiserverWeb.OAuth.CodeController do
          {:ok, token} <-
            OAuth.exchange_code(code,
              verifier: params["code_verifier"],
-             redirect_uri: params["redirect_uri"]
+             redirect_uri: params["redirect_uri"],
+             client_secret: params["client_secret"]
            ) do
       conn |> put_status(200) |> render(:token, token: token)
     else

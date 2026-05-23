@@ -102,6 +102,52 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       assert is_binary(json_resp["access_token"]), "has access_token"
     end
 
+    test "can use a client secret instead of PKCE", ctx do
+      app =
+        OAuthFixtures.app_attrs(ctx[:user].id)
+        |> Map.put(:confidential?, true)
+        |> OAuthFixtures.create_app()
+
+      code =
+        OAuthFixtures.code_attrs(ctx[:user], app)
+        |> Map.drop([:challenge, :challenge_method])
+        |> OAuthFixtures.create_code()
+
+      data = %{
+        grant_type: "authorization_code",
+        code: code.value,
+        redirect_uri: code.redirect_uri,
+        client_id: app.uid,
+        client_secret: app.plain_text_secret
+      }
+
+      resp = post(ctx[:conn], ~p"/oauth/token", data) |> json_response(200)
+      assert resp["token_type"] == "Bearer", "bearer token type"
+    end
+
+    test "must use client secret for confidential clients", ctx do
+      app =
+        OAuthFixtures.app_attrs(ctx[:user].id)
+        |> Map.put(:confidential?, true)
+        |> OAuthFixtures.create_app()
+
+      code =
+        OAuthFixtures.code_attrs(ctx[:user], app)
+        |> Map.drop([:challenge, :challenge_method])
+        |> OAuthFixtures.create_code()
+
+      data = %{
+        grant_type: "authorization_code",
+        code: code.value,
+        redirect_uri: code.redirect_uri,
+        client_id: app.uid
+        # ! no client secret
+      }
+
+      resp = post(ctx[:conn], ~p"/oauth/token", data) |> json_response(400)
+      assert resp["error_description"] =~ "missing required client_secret"
+    end
+
     test "must not provide client_id twice", %{conn: conn} = setup_data do
       data = get_valid_data(setup_data)
 

@@ -5,6 +5,7 @@ defmodule Teiserver.OAuth do
   alias Teiserver.Bot.Bot
 
   alias Teiserver.OAuth.Application
+  alias Teiserver.OAuth.ApplicationLib
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.OAuth.Code
   alias Teiserver.OAuth.CodeQueries
@@ -258,7 +259,8 @@ defmodule Teiserver.OAuth do
   Given an authorization code, creates and return an authentication token
   (and its associated refresh token).
   """
-  @type exchange_arg :: {:verifier, String.t()} | {:redirect_uri, String.t()}
+  @type exchange_arg ::
+          {:verifier, String.t()} | {:redirect_uri, String.t() | {:client_secret, String.t()}}
   @type exchange_args :: [exchange_arg()]
   @spec exchange_code(Code.t(), args :: exchange_args(), options()) ::
           {:ok, Token.t()} | {:error, term()}
@@ -269,7 +271,8 @@ defmodule Teiserver.OAuth do
     with {:ok, code} <- check_expiry(code, now),
          :ok <-
            if(code.redirect_uri == redirect_uri, do: :ok, else: {:error, :redirect_uri_mismatch}),
-         :ok <- check_verifier(code, args[:verifier]) do
+         :ok <- check_verifier(code, args[:verifier]),
+         :ok <- check_client_secret(code.application, args[:client_secret]) do
       Repo.transaction(fn ->
         Repo.delete!(code)
 
@@ -351,7 +354,29 @@ defmodule Teiserver.OAuth do
     end
   end
 
-  @spec refresh_token(Token.t(), [option() | {:scopes, Application.scopes()}]) ::
+  defp check_client_secret(%Application{} = app, client_secret) do
+    case {ApplicationLib.confidential?(app), client_secret} do
+      {false, nil} ->
+        :ok
+
+      {false, _s} ->
+        {:error, "public client don't have client_secret"}
+
+      {true, nil} ->
+        {:error, "missing required client_secret"}
+
+      {true, s} ->
+        if ApplicationLib.verify_secret(s, app) do
+          :ok
+        else
+          {:error, "invalid client_secret"}
+        end
+    end
+  end
+
+  @spec refresh_token(Token.t(), [
+          option() | {:scopes, Application.scopes()} | {:client_secret, String.t()}
+        ]) ::
           {:ok, Token.t()} | {:error, term()}
   def refresh_token(token, opts \\ [])
 
