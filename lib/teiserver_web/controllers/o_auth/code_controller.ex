@@ -9,7 +9,7 @@ defmodule TeiserverWeb.OAuth.CodeController do
 
   def token(conn, %{"grant_type" => "authorization_code"} = params) do
     with :ok <-
-           check_required_keys(params, ["code", "redirect_uri", "code_verifier", "grant_type"]),
+           check_required_keys(params, ["code", "redirect_uri", "grant_type"]),
          {:ok, client_id} <- get_client_id(conn, params) do
       exchange_token(conn, client_id, params)
     else
@@ -65,7 +65,10 @@ defmodule TeiserverWeb.OAuth.CodeController do
              else: {:error, "code doesn't match application. Invalid code for this client_id"}
            ),
          {:ok, token} <-
-           OAuth.exchange_code(code, params["code_verifier"], params["redirect_uri"]) do
+           OAuth.exchange_code(code,
+             verifier: params["code_verifier"],
+             redirect_uri: params["redirect_uri"]
+           ) do
       conn |> put_status(200) |> render(:token, token: token)
     else
       {:error, err} ->

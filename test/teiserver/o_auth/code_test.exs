@@ -57,7 +57,13 @@ defmodule Teiserver.OAuth.CodeTest do
 
   test "can exchange valid code for token", %{user: user, app: app} do
     assert {:ok, code, attrs} = create_code(user, app)
-    assert {:ok, token} = OAuth.exchange_code(code, attrs._verifier, attrs.redirect_uri)
+
+    assert {:ok, token} =
+             OAuth.exchange_code(code,
+               verifier: attrs._verifier,
+               redirect_uri: attrs.redirect_uri
+             )
+
     assert token.scopes == code.scopes
     assert token.owner_id == user.id
     # the code is now consumed and not available anymore
@@ -67,19 +73,21 @@ defmodule Teiserver.OAuth.CodeTest do
   test "cannot exchange expired code for token", %{user: user, app: app} do
     yesterday = DateTime.shift(DateTime.utc_now(), day: -1)
     assert {:ok, code, attrs} = create_code(user, app, expires_at: yesterday)
-    assert {:error, :expired} = OAuth.exchange_code(code, attrs._verifier)
+    assert {:error, :expired} = OAuth.exchange_code(code, verifier: attrs._verifier)
   end
 
   test "must use valid verifier", %{user: user, app: app} do
     assert {:ok, code, attrs} = create_code(user, app)
     attrs = Map.put(attrs, :id, app.id)
     no_match = :crypto.strong_rand_bytes(38) |> Base.hex_encode32(padding: false)
-    assert {:error, _reason} = OAuth.exchange_code(code, no_match)
+    assert {:error, _reason} = OAuth.exchange_code(code, verifier: no_match)
 
     no_match =
       "lollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollol"
 
-    assert {:error, err} = OAuth.exchange_code(code, no_match, attrs.redirect_uri)
+    assert {:error, err} =
+             OAuth.exchange_code(code, verifier: no_match, redirect_uri: attrs.redirect_uri)
+
     assert err =~ "doesn't match"
   end
 
@@ -89,7 +97,10 @@ defmodule Teiserver.OAuth.CodeTest do
     verifier = "TOO_SHORT"
     challenge = OAuthFixtures.hash_verifier(verifier)
     {:ok, code} = OAuth.create_code(user, %{attrs | challenge: challenge})
-    assert {:error, err} = OAuth.exchange_code(code, verifier, attrs.redirect_uri)
+
+    assert {:error, err} =
+             OAuth.exchange_code(code, verifier: verifier, redirect_uri: attrs.redirect_uri)
+
     assert err =~ "cannot be less than"
   end
 
@@ -99,7 +110,10 @@ defmodule Teiserver.OAuth.CodeTest do
     verifier = String.duplicate("a", 129)
     challenge = OAuthFixtures.hash_verifier(verifier)
     {:ok, code} = OAuth.create_code(user, %{attrs | challenge: challenge})
-    assert {:error, err} = OAuth.exchange_code(code, verifier, attrs.redirect_uri)
+
+    assert {:error, err} =
+             OAuth.exchange_code(code, verifier: verifier, redirect_uri: attrs.redirect_uri)
+
     assert err =~ "cannot be more than"
   end
 

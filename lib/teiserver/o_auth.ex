@@ -258,15 +258,18 @@ defmodule Teiserver.OAuth do
   Given an authorization code, creates and return an authentication token
   (and its associated refresh token).
   """
-  @spec exchange_code(Code.t(), String.t(), String.t() | nil, options()) ::
+  @type exchange_arg :: {:verifier, String.t()} | {:redirect_uri, String.t()}
+  @type exchange_args :: [exchange_arg()]
+  @spec exchange_code(Code.t(), args :: exchange_args(), options()) ::
           {:ok, Token.t()} | {:error, term()}
-  def exchange_code(code, verifier, redirect_uri \\ nil, opts \\ []) do
+  def exchange_code(code, args, opts \\ []) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
+    redirect_uri = args[:redirect_uri]
 
     with {:ok, code} <- check_expiry(code, now),
          :ok <-
            if(code.redirect_uri == redirect_uri, do: :ok, else: {:error, :redirect_uri_mismatch}),
-         :ok <- check_verifier(code, verifier) do
+         :ok <- check_verifier(code, args[:verifier]) do
       Repo.transaction(fn ->
         Repo.delete!(code)
 
@@ -283,6 +286,8 @@ defmodule Teiserver.OAuth do
   end
 
   @spec check_verifier(Code.t(), String.t()) :: :ok | {:error, term()}
+  defp check_verifier(_code, nil), do: {:error, "missing code verifier, PKCE is required"}
+
   defp check_verifier(%Code{challenge_method: :plain, challenge: challenge}, verifier) do
     with :ok <- valid_verifier(verifier) do
       compare_hash(challenge, verifier)
