@@ -387,39 +387,36 @@ defmodule Teiserver.OAuth do
   def refresh_token(token, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
 
-    case check_expiry(token, now) do
-      {:error, :expired} ->
-        {:error, :expired}
-
-      _result ->
-        token =
-          if Enum.all?([:application, :bot, :owner], &Ecto.assoc_loaded?(Map.get(token, &1))) do
-            token
-          else
-            TokenQueries.get_token(token.value)
-          end
-
-        scopes = Keyword.get(opts, :scopes, token.scopes)
-
-        refresh_attr = %{
-          id: token.application.id,
-          scopes: scopes,
-          original_scopes: token.original_scopes
-        }
-
-        tx_result =
-          Repo.transaction(fn ->
-            with {:ok, new_token} <-
-                   create_token(token.owner, refresh_attr, Keyword.put(opts, :scopes, scopes)) do
-              TokenQueries.delete_refresh_token(token)
-              new_token
-            end
-          end)
-
-        case tx_result do
-          {:ok, {:error, err}} -> {:error, err}
-          other -> other
+    with {:ok, _tok} <- check_expiry(token, now),
+         :ok <- check_client_secret(token.application, opts[:client_secret]) do
+      token =
+        if Enum.all?([:application, :bot, :owner], &Ecto.assoc_loaded?(Map.get(token, &1))) do
+          token
+        else
+          TokenQueries.get_token(token.value)
         end
+
+      scopes = Keyword.get(opts, :scopes, token.scopes)
+
+      refresh_attr = %{
+        id: token.application.id,
+        scopes: scopes,
+        original_scopes: token.original_scopes
+      }
+
+      tx_result =
+        Repo.transaction(fn ->
+          with {:ok, new_token} <-
+                 create_token(token.owner, refresh_attr, Keyword.put(opts, :scopes, scopes)) do
+            TokenQueries.delete_refresh_token(token)
+            new_token
+          end
+        end)
+
+      case tx_result do
+        {:ok, {:error, err}} -> {:error, err}
+        other -> other
+      end
     end
   end
 

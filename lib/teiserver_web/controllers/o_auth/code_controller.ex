@@ -88,7 +88,8 @@ defmodule TeiserverWeb.OAuth.CodeController do
              do: :ok,
              else: {:error, "token doesn't match application. Invalid token for this client_id"}
            ),
-         {:ok, new_token} <- OAuth.refresh_token(token, scopes: scopes) do
+         {:ok, new_token} <-
+           OAuth.refresh_token(token, scopes: scopes, client_secret: params["client_secret"]) do
       conn |> put_status(200) |> render(:token, token: new_token)
     else
       error ->

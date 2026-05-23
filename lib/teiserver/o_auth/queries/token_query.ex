@@ -13,9 +13,7 @@ defmodule Teiserver.OAuth.TokenQueries do
   def get_token(value) do
     base_query()
     |> where_token(value)
-    |> preload(:application)
-    |> preload(:owner)
-    |> preload(:bot)
+    |> preload([:application, :owner, :bot, refresh_token: [:application, :owner, :bot]])
     |> Repo.one()
   end
 
