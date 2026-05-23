@@ -4,6 +4,7 @@ defmodule Teiserver.OAuth.CodeTest do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.OAuth
+  alias Teiserver.OAuth.Token
   alias Teiserver.OAuthFixtures
   alias Teiserver.TeiserverTestLib
   use Teiserver.DataCase, async: true
@@ -183,6 +184,36 @@ defmodule Teiserver.OAuth.CodeTest do
 
     {:error, err} = OAuth.create_code(user, code_attrs)
     assert Keyword.has_key?(err.errors, :challenge_method)
+  end
+
+  test "confidential clients don't need pkce for tokens", %{user: user, confidential_app: app} do
+    code =
+      OAuthFixtures.code_attrs(user, app)
+      |> Map.drop([:challenge, :challenge_method, :_verifier])
+      |> OAuthFixtures.create_code()
+
+    assert {:ok, %Token{}} =
+             OAuth.exchange_code(code,
+               client_secret: app.secret,
+               redirect_uri: List.first(app.redirect_uris)
+             )
+  end
+
+  test "confidential clients must not provide verifier when no challenge", %{
+    user: user,
+    confidential_app: app
+  } do
+    code =
+      OAuthFixtures.code_attrs(user, app)
+      |> Map.drop([:challenge, :challenge_method, :_verifier])
+      |> OAuthFixtures.create_code()
+
+    assert {:error, _err} =
+             OAuth.exchange_code(code,
+               client_secret: app.secret,
+               verifier: "hello",
+               redirect_uri: List.first(app.redirect_uris)
+             )
   end
 
   test "can delete expired codes", %{user: user, app: app} do

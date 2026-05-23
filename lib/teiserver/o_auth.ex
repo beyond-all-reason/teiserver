@@ -286,22 +286,38 @@ defmodule Teiserver.OAuth do
   end
 
   @spec check_verifier(Code.t(), String.t()) :: :ok | {:error, term()}
-  defp check_verifier(_code, nil), do: {:error, "missing code verifier, PKCE is required"}
+  defp check_verifier(%Code{} = code, verifier) do
+    case {code.challenge, verifier} do
+      # only confidential clients can create code without a challenge, not
+      # passing a verifier is thus OK
+      {nil, nil} ->
+        :ok
 
-  defp check_verifier(%Code{challenge_method: :plain, challenge: challenge}, verifier) do
+      {nil, _not_nil} ->
+        {:error, "unexpected code verifier"}
+
+      {_challenge, nil} ->
+        {:error, "missing code verifier, PKCE is required"}
+
+      _x ->
+        do_check_verifier(code, verifier)
+    end
+  end
+
+  defp do_check_verifier(%Code{challenge_method: :plain, challenge: challenge}, verifier) do
     with :ok <- valid_verifier(verifier) do
       compare_hash(challenge, verifier)
     end
   end
 
-  defp check_verifier(%Code{challenge_method: :S256, challenge: challenge}, verifier) do
+  defp do_check_verifier(%Code{challenge_method: :S256, challenge: challenge}, verifier) do
     with :ok <- valid_verifier(verifier),
          {:ok, challenge} <- Base.url_decode64(challenge, padding: false, ignore: :whitespace) do
       compare_hash(challenge, :crypto.hash(:sha256, verifier))
     end
   end
 
-  defp check_verifier(_code, _verifier), do: {:error, :invalid_verifier}
+  defp do_check_verifier(_code, _verifier), do: {:error, :invalid_verifier}
 
   # A-Z, a-z, 0-9, and the punctuation characters -._~
   defp valid_verifier(verifier) do
