@@ -1,0 +1,56 @@
+<.header>
+  Listing banned domains
+  <:actions>
+    <.link patch={~p"/moderation/banned_domains/new"}>
+      <.button>New banned domain</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="banned_domains"
+  rows={@streams.banned_domains}
+  row_click={
+    fn {_id, banned_domain} -> JS.navigate(~p"/moderation/banned_domains/#{banned_domain}") end
+  }
+>
+  <:col :let={{_id, banned_domain}} label="Domain">{banned_domain.domain}</:col>
+  <:action :let={{_id, banned_domain}}>
+    <div class="sr-only">
+      <.link navigate={~p"/moderation/banned_domains/#{banned_domain}"}>Show</.link>
+    </div>
+    <.link
+      patch={~p"/moderation/banned_domains/#{banned_domain}/edit"}
+      class="btn btn-secondary btn-sm me-2"
+    >
+      Edit
+    </.link>
+  </:action>
+  <:action :let={{id, banned_domain}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: banned_domain.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+      class="btn btn-danger btn-sm"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.back navigate={~p"/moderation"}>Back to moderation</.back>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="banned_domain-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/banned_domains")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@banned_domain.id || :new}
+    title={@page_title}
+    action={@live_action}
+    banned_domain={@banned_domain}
+    patch={~p"/moderation/banned_domains"}
+  />
+</.modal>

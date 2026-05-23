@@ -151,4 +151,19 @@ defmodule Teiserver.Helper.StringHelper do
     |> String.split("\n")
     |> Enum.map(&String.trim/1)
   end
+
+  @spec leet_replace(String.t()) :: String.t()
+  def leet_replace(title) do
+    title
+    |> String.downcase()
+    |> String.replace("1", "l")
+    |> String.replace("3", "e")
+    |> String.replace("4", "h")
+    |> String.replace("5", "s")
+    |> String.replace("7", "t")
+    |> String.replace("8", "b")
+    |> String.replace("0", "o")
+    |> String.replace("-", "")
+    |> String.replace("_", "")
+  end
 end

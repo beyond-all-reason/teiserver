@@ -1,0 +1,59 @@
+<.header>
+  Listing banned phrases
+  <:actions>
+    <.link patch={~p"/moderation/banned_phrases/new"}>
+      <.button>New banned phrase</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="banned_phrases"
+  rows={@streams.banned_phrases}
+  row_click={
+    fn {_id, banned_phrase} -> JS.navigate(~p"/moderation/banned_phrases/#{banned_phrase}") end
+  }
+>
+  <:col :let={{_id, banned_phrase}} label="Phrase">{banned_phrase.phrase}</:col>
+  <:col :let={{_id, banned_phrase}} label="Score threshold">{banned_phrase.score_threshold}</:col>
+  <:col :let={{_id, banned_phrase}} label="Type">{banned_phrase.type}</:col>
+  <:col :let={{_id, banned_phrase}} label="Severity">{banned_phrase.severity}</:col>
+  <:action :let={{_id, banned_phrase}}>
+    <div class="sr-only">
+      <.link navigate={~p"/moderation/banned_phrases/#{banned_phrase}"}>Show</.link>
+    </div>
+    <.link
+      patch={~p"/moderation/banned_phrases/#{banned_phrase}/edit"}
+      class="btn btn-secondary btn-sm me-2"
+    >
+      Edit
+    </.link>
+  </:action>
+  <:action :let={{id, banned_phrase}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: banned_phrase.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+      class="btn btn-danger btn-sm"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.back navigate={~p"/moderation"}>Back to moderation</.back>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="banned_phrase-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/banned_phrases")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@banned_phrase.id || :new}
+    title={@page_title}
+    action={@live_action}
+    banned_phrase={@banned_phrase}
+    patch={~p"/moderation/banned_phrases"}
+  />
+</.modal>
