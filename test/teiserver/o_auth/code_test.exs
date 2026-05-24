@@ -117,6 +117,19 @@ defmodule Teiserver.OAuth.CodeTest do
     assert err =~ "cannot be more than"
   end
 
+  test "must pass valid challenge method", %{user: user, app: app} do
+    code_attrs = %{
+      id: app.id,
+      redirect_uri: List.first(app.redirect_uris),
+      scopes: app.scopes,
+      challenge: OAuthFixtures.code_attrs(user, app).challenge,
+      challenge_method: "lolnope that's not supported"
+    }
+
+    {:error, err} = OAuth.create_code(user, code_attrs)
+    assert Keyword.has_key?(err.errors, :challenge_method)
+  end
+
   test "can delete expired codes", %{user: user, app: app} do
     assert {:ok, expired_code, _expired_attrs} =
              create_code(user, app, expires_at: ~U[1980-01-01 12:23:34Z])
