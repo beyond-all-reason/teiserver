@@ -68,12 +68,12 @@ defmodule Teiserver.Account.CodeLib do
 
   def _search(query, :expired, false) do
     from codes in query,
-      where: codes.expires > ^Timex.now()
+      where: codes.expires > ^DateTime.utc_now()
   end
 
   def _search(query, :expired, true) do
     from codes in query,
-      where: codes.expires < ^Timex.now()
+      where: codes.expires < ^DateTime.utc_now()
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()

@@ -61,7 +61,7 @@ defmodule Teiserver.Helper.ChartHelper do
   </script>
   """
 
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
 
   @doc """
   Takes a list of log-data and then outputs line-chart
@@ -189,7 +189,7 @@ defmodule Teiserver.Helper.ChartHelper do
   def extract_keys(logs, :date, prepend_value) do
     result =
       logs
-      |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
+      |> Enum.map(fn log -> log.date |> DateHelper.date_to_str(format: :ymd) end)
 
     if prepend_value do
       [prepend_value | result]

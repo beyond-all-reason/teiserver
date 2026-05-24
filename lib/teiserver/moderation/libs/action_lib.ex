@@ -2,7 +2,7 @@ defmodule Teiserver.Moderation.ActionLib do
   @moduledoc false
 
   alias Teiserver.Communication
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Moderation
   alias Teiserver.Moderation.Action
   use TeiserverWeb, :library
@@ -99,23 +99,23 @@ defmodule Teiserver.Moderation.ActionLib do
 
   def _search(query, :expiry, "Completed only") do
     from actions in query,
-      where: actions.expires < ^Timex.now()
+      where: actions.expires < ^DateTime.utc_now()
   end
 
   def _search(query, :expiry, "Unexpired only") do
     from actions in query,
-      where: actions.expires > ^Timex.now()
+      where: actions.expires > ^DateTime.utc_now()
   end
 
   def _search(query, :expiry, "Unexpired not permanent") do
-    years = Timex.now() |> Timex.shift(years: 100)
+    years = DateTime.shift(DateTime.utc_now(), year: 100)
 
     from actions in query,
-      where: actions.expires > ^Timex.now() and actions.expires < ^years
+      where: actions.expires > ^DateTime.utc_now() and actions.expires < ^years
   end
 
   def _search(query, :expiry, "Permanent only") do
-    years = Timex.now() |> Timex.shift(years: 100)
+    years = DateTime.shift(DateTime.utc_now(), year: 100)
 
     from actions in query,
       where: actions.expires > ^years
@@ -123,7 +123,7 @@ defmodule Teiserver.Moderation.ActionLib do
 
   def _search(query, :expiry, "All active") do
     from actions in query,
-      where: actions.expires > ^Timex.now() or is_nil(actions.expires)
+      where: actions.expires > ^DateTime.utc_now() or is_nil(actions.expires)
   end
 
   def _search(query, :inserted_after, datetime) do
@@ -205,7 +205,7 @@ defmodule Teiserver.Moderation.ActionLib do
     if action do
       until =
         if action.expires do
-          "**Until:** " <> TimexHelper.date_to_discord_str(action.expires)
+          "**Until:** " <> DateHelper.date_to_discord_str(action.expires)
         else
           "**Permanent**"
         end

@@ -69,8 +69,8 @@ defmodule Teiserver.Account.BanEvasionReport do
         search: [
           id_in: relevant_evader_ids,
           mod_action: "not muted or banned",
-          # last_played_after: Timex.now() |> Timex.shift(days: -max_play_age),
-          inserted_after: Timex.now() |> Timex.shift(days: -max_account_age),
+          # last_played_after: DateTime.shift(DateTime.utc_now(), day: -max_play_age),
+          inserted_after: DateTime.shift(DateTime.utc_now(), day: -max_account_age),
           smurf_of: "Non-smurf"
         ],
         order_by: ["Last played", "Last logged in"],

@@ -723,12 +723,12 @@ defmodule Teiserver.Account do
           user_id: user_id,
           value: value,
           type_id: type_id,
-          last_updated: Timex.now()
+          last_updated: DateTime.utc_now()
         })
         |> Repo.insert()
 
       [existing] ->
-        update_smurf_key(existing, %{last_updated: Timex.now()})
+        update_smurf_key(existing, %{last_updated: DateTime.utc_now()})
         {:ok, existing}
 
       [existing | _rest] ->

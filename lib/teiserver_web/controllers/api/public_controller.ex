@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.API.PublicController do
   alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.DateHelper
   use TeiserverWeb, :controller
 
   @rating_types [
@@ -19,9 +20,9 @@ defmodule TeiserverWeb.API.PublicController do
         cond do
           season == active_season ->
             activity_time =
-              Timex.today()
-              |> Timex.shift(days: -35)
-              |> Timex.to_datetime()
+              Date.utc_today()
+              |> Date.add(-35)
+              |> DateHelper.to_datetime()
 
             ratings = leaderboard_ratings(season, activity_time)
 
@@ -41,9 +42,7 @@ defmodule TeiserverWeb.API.PublicController do
               )
               |> List.first()
               |> Map.get(:last_updated)
-              |> Timex.to_datetime()
-              |> Timex.shift(days: -35)
-              |> Timex.to_datetime()
+              |> DateTime.shift(day: -35)
 
             ratings = leaderboard_ratings(season, activity_time)
 

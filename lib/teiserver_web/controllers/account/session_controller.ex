@@ -6,6 +6,7 @@ defmodule TeiserverWeb.Account.SessionController do
   alias Teiserver.Account.UserLib
   alias Teiserver.Config
   alias Teiserver.EmailHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging.Helpers, as: LoggingHelpers
   alias Teiserver.Logging.LoggingPlug
   use TeiserverWeb, :controller
@@ -127,8 +128,8 @@ defmodule TeiserverWeb.Account.SessionController do
                ]
              ) do
           diff =
-            Timex.diff(expired_code.expires, Timex.now(), :duration)
-            |> Timex.format_duration(:humanized)
+            abs(DateTime.diff(expired_code.expires, DateTime.utc_now()))
+            |> DateHelper.duration_to_str()
 
           Logger.debug(
             "SessionController.one_time_login User tried to use expired code (expired for #{diff})"
@@ -313,7 +314,7 @@ defmodule TeiserverWeb.Account.SessionController do
         |> assign(:result, "Link cannot be found")
         |> render("result.html")
 
-      Timex.compare(Timex.now(), code.expires) == 1 ->
+      DateTime.compare(DateTime.utc_now(), code.expires) == :gt ->
         conn
         |> put_flash(:danger, "Link has expired")
         |> assign(:result, "Link has expired")
@@ -344,7 +345,7 @@ defmodule TeiserverWeb.Account.SessionController do
         |> put_flash(:danger, "Link cannot be found")
         |> redirect(to: "/")
 
-      Timex.compare(Timex.now(), code.expires) == 1 ->
+      DateTime.compare(DateTime.utc_now(), code.expires) == :gt ->
         conn
         |> put_flash(:danger, "Link has expired")
         |> redirect(to: "/")

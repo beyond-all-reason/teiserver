@@ -1,5 +1,6 @@
 defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
   @moduledoc false
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Logging.Tasks.PersistMatchMonthTask
   use Oban.Worker, queue: :teiserver
@@ -59,14 +60,14 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
 
     case first_logs do
       [log] ->
-        today = Timex.today()
+        today = Date.utc_today()
 
         if log.date.year < today.year or log.date.month < today.month do
           logs =
             Logging.list_match_day_logs(
               search: [
-                start_date: Timex.beginning_of_month(log.date),
-                end_date: Timex.end_of_month(log.date)
+                start_date: DateHelper.beginning_of_month(log.date),
+                end_date: Date.end_of_month(log.date)
               ]
             )
 
@@ -86,16 +87,16 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
 
   # For when we have an existing log
   defp perform_standard(year, month) do
-    today = Timex.today()
+    today = Date.utc_today()
 
     if year < today.year or month < today.month do
-      now = Timex.Date.new!(year, month, 1)
+      now = Date.new!(year, month, 1)
 
       logs =
         Logging.list_match_day_logs(
           search: [
-            start_date: Timex.beginning_of_month(now),
-            end_date: Timex.end_of_month(now)
+            start_date: DateHelper.beginning_of_month(now),
+            end_date: Date.end_of_month(now)
           ]
         )
 
@@ -122,11 +123,11 @@ defmodule Teiserver.Logging.Tasks.PersistMatchMonthTask do
 
   @spec month_so_far() :: map()
   def month_so_far do
-    now = Timex.now()
+    now = DateTime.utc_now()
 
     Logging.list_match_day_logs(
       search: [
-        start_date: Timex.beginning_of_month(now)
+        start_date: DateHelper.beginning_of_month(now)
       ]
     )
     |> Enum.reduce(@empty_result, fn log, acc ->

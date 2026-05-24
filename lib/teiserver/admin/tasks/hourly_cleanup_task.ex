@@ -9,7 +9,7 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_job) do
-    SQL.query!(Repo, "DELETE FROM account_codes WHERE expires < $1", [Timex.now()])
+    SQL.query!(Repo, "DELETE FROM account_codes WHERE expires < $1", [DateTime.utc_now()])
 
     chat_log_cleanup()
 
@@ -19,7 +19,7 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
   defp chat_log_cleanup do
     days = Application.get_env(:teiserver, Teiserver)[:retention][:room_chat]
 
-    before_timestamp = Timex.shift(Timex.now(), days: -days)
+    before_timestamp = DateTime.shift(DateTime.utc_now(), day: -days)
 
     query = """
           DELETE FROM teiserver_room_messages
@@ -30,7 +30,7 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
 
     days = Application.get_env(:teiserver, Teiserver)[:retention][:lobby_chat]
 
-    before_timestamp = Timex.shift(Timex.now(), days: -days)
+    before_timestamp = DateTime.shift(DateTime.utc_now(), day: -days)
 
     query = """
           DELETE FROM teiserver_lobby_messages

@@ -44,7 +44,7 @@
             </:col>
             <:col :let={match} label="Duration">
               {if match.finished && match.started,
-                do: duration_to_str_short(Timex.diff(match.finished, match.started, :second)),
+                do: duration_to_str_short(DateTime.diff(match.finished, match.started, :second)),
                 else: "N/A"}
             </:col>
             <:col :let={match} label="Date">

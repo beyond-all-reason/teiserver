@@ -91,7 +91,7 @@
                       <% {_, nil} -> %>
                         Never started
                       <% _ -> %>
-                        {Timex.diff(match.finished, match.started, :minute)}
+                        {DateTime.diff(match.finished, match.started, :minute)}
                     <% end %>
                   </td>
                   <td>{date_to_str(match.finished, format: :ymd_hms)}</td>

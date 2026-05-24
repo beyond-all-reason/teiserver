@@ -1,6 +1,7 @@
 defmodule Teiserver.Battle.ExportRawMatchMetricsTask do
   @moduledoc false
   alias Teiserver.Battle
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
 
   def perform(params) do
@@ -11,8 +12,8 @@ defmodule Teiserver.Battle.ExportRawMatchMetricsTask do
         params["end_date"]
       )
 
-    start_date = Timex.to_datetime(start_date)
-    end_date = Timex.to_datetime(end_date)
+    start_date = DateHelper.to_datetime(start_date)
+    end_date = DateHelper.to_datetime(end_date)
 
     Battle.list_matches(
       search: [

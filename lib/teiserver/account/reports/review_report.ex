@@ -34,9 +34,9 @@ defmodule Teiserver.Account.ReviewReport do
       |> Jason.encode!()
       |> Jason.decode!()
 
-    days = Timex.diff(end_date, start_date, :days)
+    days = Date.diff(end_date, start_date)
     past_end_date = start_date
-    past_start_date = Timex.shift(past_end_date, days: -days)
+    past_start_date = Date.add(past_end_date, -days)
 
     past_server_data =
       Logging.list_server_day_logs(

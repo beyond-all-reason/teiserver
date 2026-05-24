@@ -32,7 +32,7 @@ defmodule TeiserverWeb.ErrorView do
 
   def render("500.html", %{reason: _reason} = error) do
     case error.reason do
-      %Timex.Parse.ParseError{message: "Expected" <> _v} ->
+      %ArgumentError{message: _message} ->
         render(
           "500_graceful.html",
           Map.merge(error, %{

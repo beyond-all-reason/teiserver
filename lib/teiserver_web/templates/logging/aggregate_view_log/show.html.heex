@@ -41,7 +41,7 @@
         <div class="row mt-3">
           <div class="col-md-12">
             <h3>
-              Aggregate log view: {Timex.format!(@log.date, "{0D}/{0M}/{YYYY}, {WDfull}")}
+              Aggregate log view: {Calendar.strftime(@log.date, "%d/%m/%Y, %A")}
             </h3>
             <br /><br />
 

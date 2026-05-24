@@ -538,7 +538,7 @@ defmodule Teiserver.Battle do
   end
 
   defp find_open_match_by_founder_id(founder_id) do
-    started_after = Timex.now() |> Timex.shift(hours: -2)
+    started_after = DateTime.shift(DateTime.utc_now(), hour: -2)
 
     matches =
       list_matches(
