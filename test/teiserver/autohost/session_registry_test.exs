@@ -24,6 +24,6 @@ defmodule Teiserver.Autohost.SessionRegistryTest do
       %{id: 2, max_battles: 1, current_battles: 1}
     ]
 
-    assert SessionRegistry.list() == expected
+    assert Enum.sort_by(SessionRegistry.list(), & &1.id) == expected
   end
 end
