@@ -1,6 +1,5 @@
 defmodule Teiserver.Player.LoginQueueTest do
   alias Teiserver.Player.LoginQueue
-  alias Teiserver.Player.SessionRegistry
 
   use Teiserver.DataCase, async: false
 
@@ -123,7 +122,7 @@ defmodule Teiserver.Player.LoginQueueTest do
   end
 
   defp set_capacity(n) do
-    LoginQueue.set_limit(SessionRegistry.count() + n)
+    LoginQueue.set_limit(n)
   end
 
   defp fake_conn(tag) do
