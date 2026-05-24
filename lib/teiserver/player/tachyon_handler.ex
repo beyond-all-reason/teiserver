@@ -27,8 +27,7 @@ defmodule Teiserver.Player.TachyonHandler do
   @type state ::
           %{
             user: T.user(),
-            status: :waiting,
-            pending_responses: Handler.pending_responses()
+            status: :waiting
           }
           | %{
               user: T.user(),
@@ -67,15 +66,11 @@ defmodule Teiserver.Player.TachyonHandler do
       Player.lookup_session(user.id) != nil ->
         do_admit(initial_state)
 
-      LoginQueue.attempt_login(self(), user.id) ->
+      LoginQueue.attempt_login(user.id) ->
         do_admit(initial_state)
 
       true ->
-        state =
-          initial_state
-          |> Map.put(:status, :waiting)
-          |> Map.put(:pending_responses, %{})
-
+        state = Map.put(initial_state, :status, :waiting)
         {:ok, state}
     end
   end
@@ -94,9 +89,12 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "user/self", event, new_state}
   end
 
-  @doc false
-  def notify_login_accepted(pid, user_id) when is_pid(pid) do
-    send(pid, {:login_accepted, user_id})
+  @doc """
+  Notify the connection handler that login has been accepted and admission can proceed.
+  Called by `LoginQueue` when a slot opens for a queued player.
+  """
+  def notify_login_accepted(pid) when is_pid(pid) do
+    send(pid, :login_accepted)
   end
 
   def force_disconnect(nil), do: :ok
@@ -111,7 +109,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   @impl Handler
-  def handle_info({:login_accepted, _user_id}, state) do
+  def handle_info(:login_accepted, state) do
     do_admit(state)
   end
 

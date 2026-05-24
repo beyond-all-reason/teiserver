@@ -5,29 +5,36 @@ defmodule Teiserver.Player.LoginQueue do
   Enforces a maximum number of concurrent connected players. Autohosts bypass
   this queue entirely and are handled at the handler level.
 
-  `attempt_login/2` returns `true` if the player is admitted immediately, or
+  `attempt_login/1` returns `true` if the player is admitted immediately, or
   `false` if queued. On each tick, available capacity is checked and queued
   players are admitted in FIFO order. Disconnected waiting players are skipped.
   """
 
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Player
+  alias Teiserver.Player.SessionRegistry
   alias Teiserver.Player.TachyonHandler
 
   use GenServer
 
   require Logger
 
-  @config_key "system.User limit"
+  @limit_config_key "tachyon.Login queue limit"
   @default_tick_period 1_000
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  @spec attempt_login(pid(), T.userid()) :: boolean()
-  def attempt_login(pid, user_id) do
+  @doc """
+  Called by a player connection process to request admission.
+  Returns `true` if admitted immediately, `false` if queued.
+
+  When queued, the caller will be notified via `TachyonHandler.notify_login_accepted/1`
+  once a slot opens up.
+  """
+  @spec attempt_login(T.userid(), pid()) :: boolean()
+  def attempt_login(user_id, pid \\ self()) do
     GenServer.call(__MODULE__, {:attempt_login, pid, user_id})
   end
 
@@ -48,10 +55,11 @@ defmodule Teiserver.Player.LoginQueue do
     GenServer.cast(__MODULE__, {:set_tick_period, new_period})
   end
 
-  @doc false
+  @doc """
+  Manually trigger a tick. Used in tests to control timing deterministically.
+  """
   def tick do
     send(__MODULE__, :tick)
-    :ok
   end
 
   @impl GenServer
@@ -61,7 +69,7 @@ defmodule Teiserver.Player.LoginQueue do
 
     state = %{
       tick_timer_ref: timer_ref,
-      total_limit: Config.get_site_config_cache(@config_key),
+      total_limit: Config.get_site_config_cache(@limit_config_key),
       queue: :queue.new(),
       monitors: MapSet.new()
     }
@@ -142,7 +150,7 @@ defmodule Teiserver.Player.LoginQueue do
           |> Map.replace!(:queue, rest)
 
         if still_connected? do
-          TachyonHandler.notify_login_accepted(member.pid, member.user_id)
+          TachyonHandler.notify_login_accepted(member.pid)
           dequeue_members(n - 1, new_state)
         else
           dequeue_members(n, new_state)
@@ -151,6 +159,17 @@ defmodule Teiserver.Player.LoginQueue do
   end
 
   defp available_capacity(%{total_limit: limit}) do
-    limit - Player.Registry.connected_count()
+    limit - SessionRegistry.count()
+  end
+
+  def setup_site_configs do
+    Config.add_site_config_type(%{
+      key: @limit_config_key,
+      section: "Tachyon",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "Maximum number of concurrent Tachyon player sessions",
+      default: 1000
+    })
   end
 end

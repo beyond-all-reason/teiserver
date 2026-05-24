@@ -311,7 +311,6 @@ defmodule Teiserver.TeiserverConfigs do
       value_label: "",
       update_callback: fn rate ->
         Account.set_login_limit(rate)
-        LoginQueue.set_limit(rate)
       end
     })
 
@@ -744,6 +743,7 @@ defmodule Teiserver.TeiserverConfigs do
   defp tachyon_configs do
     Tachyon.setup_site_configs()
     Party.setup_site_configs()
+    LoginQueue.setup_site_configs()
     :ok
   end
 end
