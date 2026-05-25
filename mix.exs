@@ -70,6 +70,7 @@ defmodule Teiserver.MixProject do
       {:phoenix_html, "~> 4.2"},
       {:phoenix_live_reload, "~> 1.5", only: :dev},
       {:phoenix_live_view, "~> 1.0"},
+      {:lazy_html, ">= 0.1.0", only: :test},
       # see https://hexdocs.pm/phoenix_html/changelog.html#v4-0-0-2023-12-19
       {:phoenix_html_helpers, "~> 1.0"},
       {:floki, ">= 0.37.0", only: :test},
@@ -132,6 +133,7 @@ defmodule Teiserver.MixProject do
 
       # Transient libs we are pinning because of other requirements
       {:decimal, "~> 3.0", override: true},
+      {:hackney, "~> 4.0", override: true},
 
       # gun is a transitive dependency of nostrum. The version 2.1.0 works,
       # while the next one, 2.2.0 produces the following error when starting

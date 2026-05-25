@@ -7,7 +7,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
   alias Teiserver.OAuth.TokenQueries
   alias Teiserver.OAuthFixtures
   alias Teiserver.Repo
-  alias Teiserver.TeiserverTestLib
+
   use Teiserver.DataCase
 
   defp setup_app(_context) do
