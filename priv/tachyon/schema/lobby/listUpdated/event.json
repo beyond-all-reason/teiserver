@@ -1,64 +1,117 @@
 {
-    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/listUpdated/event.json",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "LobbyListUpdatedEvent",
-    "tachyon": {
-        "source": "server",
-        "target": "user",
-        "scopes": ["tachyon.lobby"]
+  "$id": "https://schema.beyondallreason.dev/tachyon/lobby/listUpdated/event.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LobbyListUpdatedEvent",
+  "tachyon": {
+    "source": "server",
+    "target": "user",
+    "scopes": [
+      "tachyon.lobby"
+    ]
+  },
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "event"
     },
-    "type": "object",
-    "properties": {
-        "type": { "const": "event" },
-        "messageId": { "type": "string" },
-        "commandId": { "const": "lobby/listUpdated" },
-        "data": {
-            "title": "LobbyListUpdatedEventData",
-            "type": "object",
-            "properties": {
-                "lobbies": {
-                    "type": "object",
-                    "patternProperties": {
-                        "^.*$": {
-                            "anyOf": [
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "id": { "type": "string" },
-                                        "name": { "type": "string" },
-                                        "playerCount": { "type": "integer" },
-                                        "maxPlayerCount": { "type": "integer" },
-                                        "mapName": { "type": "string" },
-                                        "engineVersion": { "type": "string" },
-                                        "gameVersion": { "type": "string" },
-                                        "areBossesEnabled": {
-                                            "type": "boolean"
-                                        },
-                                        "currentBattle": {
-                                            "anyOf": [
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "startedAt": {
-                                                            "$ref": "../../definitions/unixTime.json"
-                                                        }
-                                                    },
-                                                    "required": ["startedAt"]
-                                                },
-                                                { "type": "null" }
-                                            ]
-                                        }
-                                    },
-                                    "required": ["id"]
-                                },
-                                { "type": "null" }
-                            ]
+    "messageId": {
+      "type": "string"
+    },
+    "commandId": {
+      "const": "lobby/listUpdated"
+    },
+    "data": {
+      "title": "LobbyListUpdatedEventData",
+      "type": "object",
+      "properties": {
+        "lobbies": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "playerCount": {
+                      "type": "integer"
+                    },
+                    "maxPlayerCount": {
+                      "type": "integer"
+                    },
+                    "mapName": {
+                      "type": "string"
+                    },
+                    "engineVersion": {
+                      "type": "string"
+                    },
+                    "gameVersion": {
+                      "type": "string"
+                    },
+                    "areBossesEnabled": {
+                      "type": "boolean"
+                    },
+                    "currentBattle": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "startedAt": {
+                              "$ref": "../../definitions/unixTime.json"
+                            }
+                          },
+                          "required": [
+                            "startedAt"
+                          ]
+                        },
+                        {
+                          "type": "null"
                         }
+                      ]
+                    },
+                    "tags": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^.*$": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {}
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      }
                     }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                },
+                {
+                  "type": "null"
                 }
-            },
-            "required": ["lobbies"]
+              ]
+            }
+          }
         }
-    },
-    "required": ["type", "messageId", "commandId", "data"]
+      },
+      "required": [
+        "lobbies"
+      ]
+    }
+  },
+  "required": [
+    "type",
+    "messageId",
+    "commandId",
+    "data"
+  ]
 }

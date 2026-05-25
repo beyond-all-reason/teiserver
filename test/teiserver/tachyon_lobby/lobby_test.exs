@@ -1630,6 +1630,73 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "update tags" do
+    test "create with initial tags" do
+      {:ok, _pid, details} =
+        mk_start_params([2, 2])
+        |> Map.put(:tags, %{"competitive" => %{}})
+        |> Lobby.create()
+
+      assert details.tags == %{"competitive" => %{}}
+      {:ok, details2} = LobbyProcess.get_details(details.id)
+      assert details2.tags == %{"competitive" => %{}}
+    end
+
+    test "defaults to empty tags" do
+      {:ok, _pid, details} = mk_start_params([2, 2]) |> Lobby.create()
+      assert details.tags == %{}
+    end
+
+    test "can add a tag" do
+      {:ok, _pid, %{id: id}} = mk_start_params([2, 2]) |> Lobby.create()
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{tags: %{"competitive" => %{}}})
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.tags == %{"competitive" => %{}}
+      assert_receive {:lobby, ^id, {:updated, %{tags: %{"competitive" => %{}}}}}
+    end
+
+    test "can remove a tag" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:tags, %{"competitive" => %{}, "no_rush" => %{}})
+        |> Lobby.create()
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{tags: %{"competitive" => nil}})
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.tags == %{"no_rush" => %{}}
+      assert_receive {:lobby, ^id, {:updated, %{tags: %{"competitive" => nil}}}}
+    end
+
+    test "existing tags survive partial update" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:tags, %{"competitive" => %{}, "no_rush" => %{}})
+        |> Lobby.create()
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{tags: %{"ranked" => %{}}})
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.tags == %{"competitive" => %{}, "no_rush" => %{}, "ranked" => %{}}
+    end
+
+    test "can add remove and update in one request" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:tags, %{"competitive" => %{}, "no_rush" => %{}})
+        |> Lobby.create()
+
+      :ok =
+        Lobby.update_properties(id, @default_user_id, %{
+          tags: %{"competitive" => nil, "ranked" => %{}}
+        })
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.tags == %{"no_rush" => %{}, "ranked" => %{}}
+
+      assert_receive {:lobby, ^id, {:updated, %{tags: %{"competitive" => nil, "ranked" => %{}}}}}
+    end
+  end
+
   # note: [test lobby battle]
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the

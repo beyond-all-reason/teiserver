@@ -793,6 +793,103 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "tags" do
+    test "create lobby with tags", %{client: client} do
+      lobby_data = %{
+        name: "test lobby",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1),
+        tags: %{"competitive" => %{}}
+      }
+
+      %{"status" => "success", "data" => data} = Tachyon.create_lobby!(client, lobby_data)
+      assert data["tags"] == %{"competitive" => %{}}
+    end
+
+    test "tags default to empty map", %{client: client} do
+      lobby_data = %{
+        name: "test lobby",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
+      }
+
+      %{"status" => "success", "data" => data} = Tachyon.create_lobby!(client, lobby_data)
+      assert data["tags"] == %{}
+    end
+
+    test "joining lobby includes tags", %{client: client} do
+      lobby_data = %{
+        name: "test lobby",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1),
+        tags: %{"competitive" => %{}}
+      }
+
+      %{"status" => "success", "data" => %{"id" => lobby_id}} =
+        Tachyon.create_lobby!(client, lobby_data)
+
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success", "data" => data} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+      assert data["tags"] == %{"competitive" => %{}}
+    end
+
+    test "can add tags via update", %{client: client} do
+      lobby_data = %{
+        name: "test lobby",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
+      }
+
+      %{"status" => "success", "data" => %{"id" => lobby_id}} =
+        Tachyon.create_lobby!(client, lobby_data)
+
+      %{"status" => "success"} =
+        Tachyon.lobby_update!(client, %{tags: %{"competitive" => %{}}})
+
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+      assert data["id"] == lobby_id
+      assert data["tags"] == %{"competitive" => %{}}
+    end
+
+    test "can remove a tag via update", %{client: client} do
+      lobby_data = %{
+        name: "test lobby",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1),
+        tags: %{"competitive" => %{}, "no_rush" => %{}}
+      }
+
+      %{"status" => "success"} = Tachyon.create_lobby!(client, lobby_data)
+
+      %{"status" => "success"} =
+        Tachyon.lobby_update!(client, %{tags: %{"competitive" => nil}})
+
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(client)
+      assert data["tags"] == %{"competitive" => nil}
+    end
+
+    test "lobby member receives tag updates", %{client: client} do
+      lobby_data = %{
+        name: "test lobby",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
+      }
+
+      %{"status" => "success", "data" => %{"id" => lobby_id}} =
+        Tachyon.create_lobby!(client, lobby_data)
+
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_id)
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(client)
+
+      %{"status" => "success"} =
+        Tachyon.lobby_update!(client, %{tags: %{"competitive" => %{}}})
+
+      %{"commandId" => "lobby/updated", "data" => data} = Tachyon.recv_message!(ctx2[:client])
+      assert data["tags"] == %{"competitive" => %{}}
+    end
+  end
+
   test "get lobby/left event when lobby dies", ctx do
     {:ok, lobby_id: lobby_id} = setup_lobby(ctx)
     lobby_pid = TachyonLobby.lookup(lobby_id)

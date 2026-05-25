@@ -693,7 +693,8 @@ defmodule Teiserver.Player.TachyonHandler do
       game_options:
         Map.get(msg["data"], "gameOptions", %{})
         |> Enum.map(fn {k, v} -> {k, v["value"]} end)
-        |> Enum.into(%{})
+        |> Enum.into(%{}),
+      tags: Map.get(msg["data"], "tags", %{})
     }
 
     case Session.create_lobby(state.user.id, create_data) do
@@ -853,7 +854,8 @@ defmodule Teiserver.Player.TachyonHandler do
         {:game_options,
          fn opts ->
            Enum.map(opts, fn {k, v} -> {k, v["value"]} end) |> Enum.into(%{})
-         end}
+         end},
+      "tags" => :tags
     }
 
     update_data = Collections.transform_map(data, mappings)
@@ -1177,6 +1179,7 @@ defmodule Teiserver.Player.TachyonHandler do
            Enum.reduce(bs, %{}, fn id, acc -> Map.put(acc, to_string(id), %{}) end)
          end},
       game_options: {:gameOptions, &game_options_to_tachyon/1},
+      tags: :tags,
       engine_version: :engineVersion,
       game_version: :gameVersion,
       current_vote: {:currentVote, &vote_to_tachyon/1},
@@ -1201,7 +1204,8 @@ defmodule Teiserver.Player.TachyonHandler do
       bosses: :bosses,
       current_vote: {:currentVote, &vote_to_tachyon/1},
       vote_history: {:voteHistory, &vote_history_to_tachyon/1},
-      game_options: {:gameOptions, &game_options_to_tachyon/1}
+      game_options: {:gameOptions, &game_options_to_tachyon/1},
+      tags: :tags
     }
 
     data = Collections.transform_map(update_map, mappings)
@@ -1352,6 +1356,7 @@ defmodule Teiserver.Player.TachyonHandler do
       engine_version: :engineVersion,
       game_version: :gameVersion,
       boss_enabled?: :areBossesEnabled,
+      tags: :tags,
       current_battle:
         {:currentBattle,
          %{
