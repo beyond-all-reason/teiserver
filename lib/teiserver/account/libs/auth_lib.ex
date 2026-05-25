@@ -48,8 +48,10 @@ defmodule Teiserver.Account.AuthLib do
   def get_permissions_from_roles(roles) do
     roles
     |> Enum.map(fn role_name ->
-      role_def = RoleLib.role_data(role_name)
-      [role_name | role_def.contains]
+      case RoleLib.role_data(role_name) do
+        nil -> [role_name]
+        %{contains: permissions} -> [role_name | permissions]
+      end
     end)
     |> List.flatten()
     |> Enum.uniq()
