@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Logging.AggregateViewLogController do
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Logging.AggregateViewLogLib
   alias Teiserver.Logging.AggregateViewLogsTask
@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
 
   @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"date" => date}) do
-    date = TimexHelper.parse_ymd(date)
+    date = DateHelper.parse_ymd(date)
 
     log = Logging.get_aggregate_view_log!(date)
 
@@ -53,13 +53,13 @@ defmodule TeiserverWeb.Logging.AggregateViewLogController do
     date =
       if last_date == nil do
         AggregateViewLogLib.get_first_page_view_log_date()
-        |> Timex.to_date()
+        |> NaiveDateTime.to_date()
       else
         last_date
-        |> Timex.shift(days: 1)
+        |> Date.add(1)
       end
 
-    if Timex.compare(date, Timex.today()) == 1 do
+    if Date.compare(date, Date.utc_today()) == :gt do
       conn
       |> assign(:date, date)
       |> put_flash(:danger, "That date is in the future")

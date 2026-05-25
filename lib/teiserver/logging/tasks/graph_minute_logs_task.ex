@@ -1,7 +1,7 @@
 defmodule Teiserver.Logging.GraphMinuteLogsTask do
   @moduledoc false
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.NumberHelper
-  alias Teiserver.Helper.TimexHelper
 
   @spec perform_players(list, non_neg_integer()) :: list()
   def perform_players(logs, chunk_size) do
@@ -249,7 +249,7 @@ defmodule Teiserver.Logging.GraphMinuteLogsTask do
     logs
     |> Enum.chunk_every(chunk_size)
     |> Enum.map(fn [log | _rest] ->
-      log.timestamp |> TimexHelper.date_to_str(format: :ymd_hms)
+      log.timestamp |> DateHelper.date_to_str(format: :ymd_hms)
     end)
   end
 

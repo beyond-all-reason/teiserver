@@ -9,7 +9,19 @@ defmodule Teiserver.OAuth.Libs.ScopeLib do
 
   @spec allowed_scopes() :: [String.t()]
   def allowed_scopes do
-    ["tachyon.lobby", "admin.map", "admin.engine", "admin.user"]
+    [
+      # this is for blobby/new lobby
+      "tachyon.lobby",
+      # some scopes for bar specific administration and testing
+      "admin.map",
+      "admin.engine",
+      "admin.user",
+      # OpenID connect standard scopes (https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims)
+      "profile",
+      "email",
+      # that one isn't truly standard but is widely used in practice
+      "groups"
+    ]
   end
 
   @spec all_scopes_allowed?(Account.User.t() | Bot.t(), [String.t()]) ::
@@ -34,9 +46,26 @@ defmodule Teiserver.OAuth.Libs.ScopeLib do
   end
 
   @spec scope_allowed?(scope :: String.t(), Account.User.t()) :: boolean()
-  def scope_allowed?("tachyon.lobby", _user), do: true
+  def scope_allowed?(scope, _user) when scope in ["tachyon.lobby", "profile", "email", "groups"],
+    do: true
+
   def scope_allowed?("admin.map", user), do: Auth.admin?(user)
   def scope_allowed?("admin.engine", user), do: Auth.admin?(user)
   def scope_allowed?("admin.user", user), do: Auth.admin?(user)
   def scope_allowed?(_scope, _user), do: false
+
+  @doc """
+  User facing description of what a scope entails.
+  This will ultimately have to be translated somehow, but for now just a
+  simple english sentence is enough
+  """
+  @spec scope_description(String.t()) :: String.t() | nil
+  def scope_description("tachyon.lobby"), do: "Use your account to play online"
+  def scope_description("admin.map"), do: "For CI, to setup maps data in teiserver"
+  def scope_description("admin.engine"), do: "For CI, to setup engine data in teiserver"
+  def scope_description("admin.user"), do: "Create users programatically. for load testing"
+  def scope_description("profile"), do: "Access your in-game username"
+  def scope_description("email"), do: "Access your email address"
+  def scope_description("groups"), do: "Access your roles"
+  def scope_description(_scope), do: nil
 end

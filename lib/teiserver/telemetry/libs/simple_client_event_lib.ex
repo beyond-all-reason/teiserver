@@ -24,7 +24,7 @@ defmodule Teiserver.Telemetry.SimpleClientEventLib do
       create_simple_client_event(%{
         user_id: userid,
         event_type_id: event_type_id,
-        timestamp: Timex.now()
+        timestamp: DateTime.utc_now()
       })
 
     case result do

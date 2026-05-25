@@ -92,16 +92,16 @@ defmodule Teiserver.CacheUser do
           permissions: [String.t()],
           roles: [String.t()],
           restrictions: [String.t()],
-          restricted_until: Timex.DateTime.t(),
+          restricted_until: DateTime.t(),
           shadowbanned: boolean(),
-          last_login: Timex.DateTime.t(),
-          last_played: Timex.DateTime.t(),
-          last_logout: Timex.DateTime.t(),
+          last_login: DateTime.t(),
+          last_played: DateTime.t(),
+          last_logout: DateTime.t(),
           discord_id: String.t() | nil,
           discord_dm_channel_id: String.t() | nil,
           steam_id: String.t() | nil,
           smurf_of_id: integer() | nil,
-          inserted_at: Timex.DateTime.t(),
+          inserted_at: DateTime.t(),
 
           # Data attributes
           rank: non_neg_integer(),
@@ -518,7 +518,7 @@ defmodule Teiserver.CacheUser do
           to_id: to_id,
           from_id: sender_id,
           content: msg_str,
-          inserted_at: Timex.now(),
+          inserted_at: DateTime.utc_now(),
           delivered: true
         })
       end
@@ -960,7 +960,7 @@ defmodule Teiserver.CacheUser do
 
     user = %{
       user
-      | last_login: Timex.now(),
+      | last_login: DateTime.utc_now(),
         last_login_mins: round(System.system_time(:second) / 60),
         country: country,
         rank: rank,

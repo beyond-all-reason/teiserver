@@ -88,11 +88,11 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   # Public commands
   @spec do_handle(map(), map()) :: map()
   defp do_handle(%{command: "help", senderid: senderid, remaining: remaining} = cmd, state) do
-    user = CacheUser.get_user_by_id(senderid)
     host_id = Map.get(cmd, :host_id, nil)
 
     messages =
-      CoordinatorLib.help(user, host_id == senderid, remaining)
+      Account.get_user(senderid)
+      |> CoordinatorLib.help(host_id == senderid, remaining)
       |> String.split("\n")
 
     say_command(cmd)
@@ -107,7 +107,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       Account.create_code(%{
         value: ULID.generate(),
         purpose: "one_time_login",
-        expires: Timex.now() |> Timex.shift(minutes: 5),
+        expires: DateTime.shift(DateTime.utc_now(), minute: 5),
         user_id: senderid,
         metadata: %{
           ip: client.ip,
@@ -530,7 +530,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       Account.create_code(%{
         value: ULID.generate(),
         purpose: "one_time_login",
-        expires: Timex.now() |> Timex.shift(minutes: 5),
+        expires: DateTime.shift(DateTime.utc_now(), minute: 5),
         user_id: senderid,
         metadata: %{ip: client.ip}
       })

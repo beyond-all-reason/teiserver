@@ -42,11 +42,11 @@
 
         <div class="row page-row">
           <div class="col-md-12">
-            <%= if @date == Timex.today() do %>
+            <%= if @date == Date.utc_today() do %>
               <h3>Day to day metric: Today so far</h3>
             <% else %>
               <h3>
-                Day to day metric: {Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}")}
+                Day to day metric: {Calendar.strftime(@date, "%Y-%m-%d, %A")}
               </h3>
             <% end %>
             <br /><br />

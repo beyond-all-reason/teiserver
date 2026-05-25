@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.RetentionReport do
   @moduledoc false
   alias Teiserver.Account
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Logging
 
@@ -33,7 +34,7 @@ defmodule Teiserver.Account.RetentionReport do
         params["end_date"]
       )
 
-    start_datetime = Timex.to_datetime(start_date)
+    start_datetime = DateHelper.to_datetime(start_date)
 
     day_logs =
       Logging.list_user_activity_day_logs(
@@ -73,8 +74,8 @@ defmodule Teiserver.Account.RetentionReport do
 
         if last_played != nil and last_login != nil do
           %{
-            last_login: Timex.diff(user.inserted_at, last_login, :days) |> abs(),
-            last_played: Timex.diff(user.inserted_at, last_played, :days) |> abs()
+            last_login: DateTime.diff(user.inserted_at, last_login, :day) |> abs(),
+            last_played: DateTime.diff(user.inserted_at, last_played, :day) |> abs()
           }
         end
       end)

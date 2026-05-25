@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Battle.RatingsController do
   alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.DateHelper
 
   use TeiserverWeb, :controller
 
@@ -20,9 +21,9 @@ defmodule TeiserverWeb.Battle.RatingsController do
   @spec leaderboard(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def leaderboard(conn, params) do
     activity_time =
-      Timex.today()
-      |> Timex.shift(days: -35)
-      |> Timex.to_datetime()
+      Date.utc_today()
+      |> Date.add(-35)
+      |> DateHelper.to_datetime()
 
     type_name = params["type"]
 

@@ -2,6 +2,7 @@ defmodule Teiserver.Account.OpenSkillReport do
   @moduledoc false
   alias Ecto.Adapters.SQL
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Repo
 
   require Logger
@@ -20,10 +21,17 @@ defmodule Teiserver.Account.OpenSkillReport do
 
     last_active =
       case params["last_active"] do
-        "Forever" -> Timex.today() |> Timex.shift(years: -1000) |> Timex.to_datetime()
-        "7 days" -> Timex.today() |> Timex.shift(days: -7) |> Timex.to_datetime()
-        "31 days" -> Timex.today() |> Timex.shift(days: -31) |> Timex.to_datetime()
-        "180 days" -> Timex.today() |> Timex.shift(days: -180) |> Timex.to_datetime()
+        "Forever" ->
+          Date.utc_today() |> Date.shift(year: -1000) |> DateHelper.to_datetime()
+
+        "7 days" ->
+          Date.utc_today() |> Date.add(-7) |> DateHelper.to_datetime()
+
+        "31 days" ->
+          Date.utc_today() |> Date.add(-31) |> DateHelper.to_datetime()
+
+        "180 days" ->
+          Date.utc_today() |> Date.add(-180) |> DateHelper.to_datetime()
       end
 
     uncertainty = params["uncertainty"] |> int_parse()

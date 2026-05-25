@@ -18,7 +18,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
   def perform(_job) do
     if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
          true do
-      now_as_string = Timex.now() |> Jason.encode!() |> Jason.decode!()
+      now_as_string = DateTime.utc_now() |> Jason.encode!() |> Jason.decode!()
 
       # Find all users who are muted or banned
       # we have these anti-nil things to handle if the job
@@ -74,7 +74,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
             dt1
 
           dt1, dt2 ->
-            if Timex.compare(dt1, dt2) == -1, do: dt1, else: dt2
+            if NaiveDateTime.compare(dt1, dt2) == :lt, do: dt1, else: dt2
         end)
 
       expires_as_string = new_restricted_until |> Jason.encode!() |> Jason.decode!()

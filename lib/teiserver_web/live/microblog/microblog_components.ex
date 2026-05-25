@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.MicroblogComponents do
   @moduledoc false
 
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   use TeiserverWeb, :component
   import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
 
@@ -88,7 +88,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       </div>
 
       <h4>
-        {Map.get(@post, :title, "")} - {TimexHelper.date_to_str(Timex.now(), :hms_or_ymd)}
+        {Map.get(@post, :title, "")} - {DateHelper.date_to_str(DateTime.utc_now(), :hms_or_ymd)}
       </h4>
       {Map.get(@post, :contents, "")
       |> String.split("\n\n")
@@ -115,7 +115,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       </div>
 
       <h4>
-        {Map.get(@post, :title, "")} - {TimexHelper.date_to_str(Timex.now(), :hms_or_ymd)}
+        {Map.get(@post, :title, "")} - {DateHelper.date_to_str(DateTime.utc_now(), :hms_or_ymd)}
       </h4>
       {Map.get(@post, :contents, "") |> MDEx.to_html!() |> Phoenix.HTML.raw()}
       <br />

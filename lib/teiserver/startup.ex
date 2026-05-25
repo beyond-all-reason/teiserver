@@ -55,7 +55,7 @@ defmodule Teiserver.Startup do
       time_taken_ms: time_taken
     })
 
-    Teiserver.cache_put(:application_metadata_cache, :node_startup_datetime, Timex.now())
+    Teiserver.cache_put(:application_metadata_cache, :node_startup_datetime, DateTime.utc_now())
 
     Logger.info("Teiserver startup complete, took #{time_taken}ms")
   end

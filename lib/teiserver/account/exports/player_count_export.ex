@@ -8,8 +8,8 @@ defmodule Teiserver.Account.PlayerCountExport do
     "start_date" => ""
   })
   """
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
-  alias Teiserver.Helper.TimexHelper
   alias Teiserver.Logging
 
   @spec icon() :: String.t()
@@ -46,8 +46,8 @@ defmodule Teiserver.Account.PlayerCountExport do
         params["end_date"]
       )
 
-    start_date = Timex.to_datetime(start_date)
-    end_date = Timex.to_datetime(end_date)
+    start_date = DateHelper.to_datetime(start_date)
+    end_date = DateHelper.to_datetime(end_date)
 
     {content_type, ext} =
       case params["format"] do
@@ -95,7 +95,7 @@ defmodule Teiserver.Account.PlayerCountExport do
     data
     |> Stream.map(fn log ->
       [
-        log.date |> TimexHelper.date_to_str(format: :ymd),
+        log.date |> DateHelper.date_to_str(format: :ymd),
         get_in(log.data, ~w(aggregates stats unique_users)),
         get_in(log.data, ~w(aggregates stats unique_players)),
         get_in(log.data, ~w(aggregates stats peak_user_counts total)),

@@ -6,7 +6,7 @@
     <atom:link href="<%= ~p"/microblog" %>" rel="self" type="application/rss+xml" />
     <description>Beyond all Reason developer blog </description>
     <language>en</language>
-    <copyright>Copyright <%= Timex.now().year %> Beyond all Reason</copyright>
+    <copyright>Copyright <%= DateTime.utc_now().year %> Beyond all Reason</copyright>
     <lastBuildDate><%= @last_build_date |> format_date %></lastBuildDate>
     <category>Computer gaming</category>
     <ttl>60</ttl>

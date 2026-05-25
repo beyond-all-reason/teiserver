@@ -27,9 +27,12 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
                   "user refused to authorize application"
                 )
 
+              permissions = Enum.map(app.scopes, &OAuth.scope_description/1)
+
               conn
               |> render("authorize.html",
                 app_name: app.name,
+                permissions: permissions,
                 params: params,
                 reject_uri: reject_uri
               )

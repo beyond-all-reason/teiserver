@@ -1,26 +1,16 @@
-defmodule Teiserver.Helper.TimexHelper do
+defmodule Teiserver.Helper.DateHelper do
   @moduledoc false
 
-  alias Timex.Duration
-  alias Timex.Timezone
-  alias Timex.Timezone.Local
-
-  # Was finding that in April it moved the time up an hour
-  # every time I saved, turns out the issue was it was stored
-  # as UTC but printed as +1 hour
   defp convert(timestamp, tz) do
-    new_timestamp = timestamp |> Timezone.convert(tz)
-
-    case new_timestamp do
-      %Timex.AmbiguousDateTime{} -> timestamp
-      {:error, _reason} -> timestamp
-      _converted -> new_timestamp
+    case DateTime.shift_zone(timestamp, tz, Tzdata.TimeZoneDatabase) do
+      {:ok, new_timestamp} -> new_timestamp
+      _error -> timestamp
     end
   end
 
-  @spec date_to_discord_str(DateTime.t()) :: String.t()
+  @spec date_to_discord_str(DateTime.t() | NaiveDateTime.t()) :: String.t()
   def date_to_discord_str(the_time) do
-    "<t:#{Timex.to_unix(the_time)}:f>"
+    "<t:#{the_time |> to_utc_datetime() |> DateTime.to_unix()}:f>"
   end
 
   @spec date_to_str(DateTime.t()) :: String.t()
@@ -34,10 +24,16 @@ defmodule Teiserver.Helper.TimexHelper do
 
   def date_to_str(the_time, format: :dmy_text, tz: tz), do: dmy_text(the_time, tz)
 
+  def date_to_str(%NaiveDateTime{} = the_time, args) do
+    the_time
+    |> DateTime.from_naive!("Etc/UTC")
+    |> date_to_str(args)
+  end
+
   def date_to_str(the_time, args) do
     format = args[:format] || :ymd
-    now = args[:now] || Timex.now()
-    is_past = Timex.compare(now, the_time) == 1
+    now = args[:now] || DateTime.utc_now()
+    is_past = DateTime.compare(now, the_time) == :gt
 
     until_id =
       case args[:until] do
@@ -47,7 +43,7 @@ defmodule Teiserver.Helper.TimexHelper do
         s -> s
       end
 
-    the_time = convert(the_time, args[:tz] || Local.lookup())
+    the_time = convert(the_time, args[:tz] || "UTC")
 
     time_str =
       case format do
@@ -106,39 +102,28 @@ defmodule Teiserver.Helper.TimexHelper do
 
   @spec time_until(DateTime.t()) :: String.t()
   @spec time_until(DateTime.t(), DateTime.t()) :: String.t()
-  def time_until(the_time), do: time_until(the_time, Timex.now())
+  def time_until(the_time), do: time_until(the_time, DateTime.utc_now())
   def time_until(nil, _now), do: nil
 
   def time_until(the_time, now) do
-    the_duration = Timex.diff(now, the_time, :duration)
-    is_past = Timex.compare(now, the_time) == 1
-    days = Duration.to_days(the_duration)
-
-    # We need to do this as we need days rounded off in the correct
-    # direction to get the number of hours left
-    hours =
-      if is_past do
-        Duration.to_hours(the_duration) - Float.floor(days) * 24
-      else
-        Duration.to_hours(the_duration) - Float.ceil(days) * 24
-      end
-
-    days = abs(days)
-    hours = abs(hours)
+    diff_seconds = DateTime.diff(now, the_time)
+    abs_seconds = abs(diff_seconds)
+    days = abs_seconds / 86400.0
+    hours = rem(abs_seconds, 86400) / 3600.0
 
     cond do
       2 > days and days > 1 -> "1 day, #{round(hours)} hours"
       round(days) > 1 -> "#{round(days)} days"
       round(hours) > 1 -> "#{round(hours)} hours"
-      days == 0 and hours == 0 -> ""
-      true -> "#{Timex.format_duration(the_duration, :humanized)}"
+      abs_seconds == 0 -> ""
+      true -> duration_to_str(abs_seconds)
     end
   end
 
   @spec datetime_min(DateTime.t(), DateTime.t()) :: DateTime.t()
   @spec datetime_min(Date.t(), Date.t()) :: Date.t()
   def datetime_min(dt1, dt2) do
-    if Timex.compare(dt1, dt2) == -1 do
+    if DateTime.compare(dt1, dt2) == :lt do
       dt1
     else
       dt2
@@ -148,7 +133,7 @@ defmodule Teiserver.Helper.TimexHelper do
   @spec datetime_max(DateTime.t(), DateTime.t()) :: DateTime.t()
   @spec datetime_max(Date.t(), Date.t()) :: Date.t()
   def datetime_max(dt1, dt2) do
-    if Timex.compare(dt1, dt2) == 1 do
+    if DateTime.compare(dt1, dt2) == :gt do
       dt1
     else
       dt2
@@ -157,16 +142,16 @@ defmodule Teiserver.Helper.TimexHelper do
 
   @spec _hms_or_hmsymd(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_hmsymd(the_time, today) do
-    if the_time |> Timex.to_date() |> Timex.compare(today) == 0 do
-      Timex.format!(the_time, "Today at {h24}:{m}:{s}")
+    if DateTime.to_date(the_time) == DateTime.to_date(today) do
+      Calendar.strftime(the_time, "Today at %H:%M:%S")
     else
-      Timex.format!(the_time, "{h24}:{m}:{s} {YYYY}-{0M}-{0D}")
+      Calendar.strftime(the_time, "%H:%M:%S %Y-%m-%d")
     end
   end
 
   @spec _hms_or_ymd(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_ymd(the_time, today) do
-    if the_time |> Timex.to_date() |> Timex.compare(today) == 0 do
+    if DateTime.to_date(the_time) == DateTime.to_date(today) do
       Calendar.strftime(the_time, "Today at %I:%M:%S")
     else
       Calendar.strftime(the_time, "%Y-%m-%d")
@@ -175,16 +160,16 @@ defmodule Teiserver.Helper.TimexHelper do
 
   @spec _hms_or_hms_ymd(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_hms_ymd(the_time, today) do
-    if the_time |> Timex.to_date() |> Timex.compare(today) == 0 do
-      Timex.format!(the_time, "Today at {h24}:{m}:{s}")
+    if DateTime.to_date(the_time) == DateTime.to_date(today) do
+      Calendar.strftime(the_time, "Today at %H:%M:%S")
     else
-      Timex.format!(the_time, "{h24}:{m}:{s} {YYYY}-{0M}-{0D}")
+      Calendar.strftime(the_time, "%H:%M:%S %Y-%m-%d")
     end
   end
 
   @spec _hms_or_dmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_dmy(the_time, today) do
-    if the_time |> Timex.to_date() |> Timex.compare(today) == 0 do
+    if DateTime.to_date(the_time) == DateTime.to_date(today) do
       Calendar.strftime(the_time, "Today at %I:%M:%S")
     else
       Calendar.strftime(the_time, "%d/%m/%Y")
@@ -194,14 +179,9 @@ defmodule Teiserver.Helper.TimexHelper do
   defp dmy_text(nil, _tz), do: nil
 
   defp dmy_text(the_time, tz) do
-    suffix =
-      the_time
-      |> convert(tz || Local.lookup())
-      |> Timex.format!("{D}")
-      |> String.to_integer()
-      |> suffix()
-
-    Timex.format!(the_time, "{D}#{suffix} {Mfull} {YYYY}")
+    converted = convert(the_time, tz || "UTC")
+    day = converted.day
+    "#{day}#{suffix(day)} #{Calendar.strftime(converted, "%B")} #{converted.year}"
   end
 
   defp suffix(1), do: "st"
@@ -215,27 +195,60 @@ defmodule Teiserver.Helper.TimexHelper do
   defp suffix(33), do: "rd"
   defp suffix(_day), do: "th"
 
+  @doc """
+  Parses a date string in "DD/MM/YYYY" format into a `Date`.
+  """
   def parse_dmy(nil), do: nil
   def parse_dmy(""), do: nil
 
   def parse_dmy(s) do
-    Timex.parse!(s, "{0D}/{0M}/{YYYY}")
+    [day, month, year] = String.split(s, "/")
+
+    year
+    |> String.to_integer()
+    |> Date.new!(String.to_integer(month), String.to_integer(day))
   end
 
+  @doc """
+  Parses a date string in "YYYY-MM-DD" format into a `Date`.
+  """
   def parse_ymd(nil), do: nil
   def parse_ymd(""), do: nil
 
   def parse_ymd(s) do
-    Timex.parse!(s, "{YYYY}-{M}-{D}")
+    [year, month, day] = String.split(s, "-")
+
+    year
+    |> String.to_integer()
+    |> Date.new!(String.to_integer(month), String.to_integer(day))
   end
 
+  @doc """
+  Parses a datetime string in "YYYY-MM-DD HH:MM:SS" format into a `NaiveDateTime`.
+  """
   def parse_ymd_hms(nil), do: nil
   def parse_ymd_hms(""), do: nil
 
   def parse_ymd_hms(s) do
-    Timex.parse!(s, "{YYYY}-{M}-{D} {h24}:{m}:{s}")
+    [date_str, time_str] = String.split(s, " ", parts: 2)
+    [year, month, day] = String.split(date_str, "-")
+    [hour, minute, second] = String.split(time_str, ":")
+
+    year
+    |> String.to_integer()
+    |> NaiveDateTime.new!(
+      String.to_integer(month),
+      String.to_integer(day),
+      String.to_integer(hour),
+      String.to_integer(minute),
+      String.to_integer(second)
+    )
   end
 
+  @doc """
+  Parses a date/datetime string by detecting its format from separators:
+  contains ":" -> "YYYY-MM-DD HH:MM:SS", contains "-" -> "YYYY-MM-DD", otherwise -> "DD/MM/YYYY".
+  """
   def parse_time_input(s) do
     cond do
       String.contains?(s, ":") -> parse_ymd_hms(s)
@@ -248,7 +261,7 @@ defmodule Teiserver.Helper.TimexHelper do
   def duration_to_str(_t1, nil), do: ""
 
   def duration_to_str(t1, t2) do
-    Timex.diff(t1, t2, :second)
+    NaiveDateTime.diff(t1, t2, :second)
     |> abs()
     |> duration_to_str()
   end
@@ -322,52 +335,95 @@ defmodule Teiserver.Helper.TimexHelper do
   end
 
   def make_date_series(:days, start_date, end_date) do
-    start =
-      start_date
-      |> Timex.beginning_of_day()
-
-    last =
-      end_date
-      |> Timex.beginning_of_day()
+    start = %{start_date | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
+    last = %{end_date | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
 
     start
-    |> Stream.iterate(&Timex.shift(&1, days: 1))
-    |> Stream.take_while(&(Timex.compare(&1, last) == -1))
+    |> Stream.iterate(&DateTime.shift(&1, day: 1))
+    |> Stream.take_while(&(DateTime.compare(&1, last) == :lt))
   end
 
   @doc """
-  Wraps Timex.compare, returns true if a > b
+  Returns true if a > b
   """
   def greater_than(nil, _b), do: false
   def greater_than(_a, nil), do: true
 
+  def greater_than(%DateTime{} = a, %DateTime{} = b), do: DateTime.compare(a, b) == :gt
+  def greater_than(%Date{} = a, %Date{} = b), do: Date.compare(a, b) == :gt
+
   def greater_than(a, b) do
-    Timex.compare(a, b) == 1
+    a |> to_utc_datetime() |> DateTime.compare(to_utc_datetime(b)) == :gt
   end
 
   @doc """
-  Wraps Timex.compare, returns true if a < b
+  Returns true if a < b
   """
   def less_than(nil, _b), do: true
   def less_than(_a, nil), do: false
 
+  def less_than(%DateTime{} = a, %DateTime{} = b), do: DateTime.compare(a, b) == :lt
+  def less_than(%Date{} = a, %Date{} = b), do: Date.compare(a, b) == :lt
+
   def less_than(a, b) do
-    Timex.compare(a, b) == -1
+    a |> to_utc_datetime() |> DateTime.compare(to_utc_datetime(b)) == :lt
   end
 
   def represent_minutes(nil), do: ""
 
   def represent_minutes(s) do
-    now = Timex.now()
-    until = Timex.shift(now, minutes: s)
+    now = DateTime.utc_now()
+    until = DateTime.shift(now, minute: s)
     time_until(until, now)
   end
 
   def represent_seconds(nil), do: ""
 
   def represent_seconds(s) do
-    now = Timex.now()
-    until = Timex.shift(now, seconds: s)
+    now = DateTime.utc_now()
+    until = DateTime.shift(now, second: s)
     time_until(until, now)
   end
+
+  # --- Date/DateTime helpers replacing Timex functions ---
+
+  @spec to_datetime(Date.t()) :: DateTime.t()
+  def to_datetime(date), do: DateTime.new!(date, ~T[00:00:00], "Etc/UTC")
+
+  defp to_utc_datetime(%DateTime{} = dt), do: dt
+  defp to_utc_datetime(%NaiveDateTime{} = ndt), do: DateTime.from_naive!(ndt, "Etc/UTC")
+  defp to_utc_datetime(%Date{} = d), do: DateTime.new!(d, ~T[00:00:00], "Etc/UTC")
+
+  @spec beginning_of_day(DateTime.t()) :: DateTime.t()
+  def beginning_of_day(dt), do: %{dt | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
+
+  @spec beginning_of_month(Date.t() | DateTime.t()) :: Date.t() | DateTime.t()
+  def beginning_of_month(date), do: %{date | day: 1}
+
+  @spec beginning_of_quarter(Date.t() | DateTime.t()) :: Date.t() | DateTime.t()
+  def beginning_of_quarter(date) do
+    month = (quarter(date) - 1) * 3 + 1
+    %{date | month: month, day: 1}
+  end
+
+  @spec beginning_of_year(Date.t() | DateTime.t()) :: Date.t() | DateTime.t()
+  def beginning_of_year(date), do: %{date | month: 1, day: 1}
+
+  @spec end_of_quarter(Date.t() | DateTime.t()) :: Date.t() | DateTime.t()
+  def end_of_quarter(date) do
+    month = quarter(date) * 3
+    day = Date.days_in_month(%{date | month: month})
+    %{date | month: month, day: day}
+  end
+
+  @spec end_of_year(Date.t() | DateTime.t()) :: Date.t() | DateTime.t()
+  def end_of_year(date), do: %{date | month: 12, day: 31}
+
+  @spec iso_week(Date.t() | DateTime.t()) :: {integer(), integer()}
+  def iso_week(date) do
+    :calendar.iso_week_number({date.year, date.month, date.day})
+  end
+
+  @spec quarter(Date.t() | DateTime.t()) :: integer()
+  def quarter(date), do: div(date.month - 1, 3) + 1
 end

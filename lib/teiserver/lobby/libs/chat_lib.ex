@@ -290,7 +290,7 @@ defmodule Teiserver.Lobby.ChatLib do
       Chat.create_lobby_message(%{
         content: content,
         match_id: Battle.get_lobby_match_id(lobby_id),
-        inserted_at: Timex.now(),
+        inserted_at: DateTime.utc_now(),
         user_id: userid
       })
     end
@@ -300,7 +300,7 @@ defmodule Teiserver.Lobby.ChatLib do
     Chat.create_lobby_message(%{
       content: "system: #{content}",
       match_id: Battle.get_lobby_match_id(lobby_id),
-      inserted_at: Timex.now(),
+      inserted_at: DateTime.utc_now(),
       user_id: Coordinator.get_coordinator_userid()
     })
   end

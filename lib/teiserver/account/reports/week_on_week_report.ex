@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.WeekOnWeekReport do
   @moduledoc false
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.NumberHelper
-  alias Teiserver.Helper.TimexHelper
   alias Teiserver.Logging
 
   @spec icon() :: String.t()
@@ -15,9 +15,9 @@ defmodule Teiserver.Account.WeekOnWeekReport do
     params = apply_defaults(params)
 
     start_date =
-      Timex.now()
-      |> Timex.beginning_of_week()
-      |> Timex.shift(weeks: -5)
+      DateTime.utc_now()
+      |> Date.beginning_of_week()
+      |> Date.add(-35)
 
     logs =
       Logging.list_server_day_logs(
@@ -30,8 +30,8 @@ defmodule Teiserver.Account.WeekOnWeekReport do
     data_map =
       logs
       |> Map.new(fn log ->
-        {_year, week} = Timex.iso_week(log.date)
-        weekday = Timex.weekday(log.date)
+        {_year, week} = DateHelper.iso_week(log.date)
+        weekday = Date.day_of_week(log.date)
 
         key = {week, weekday}
         value = get_metric(log.data, params["metric"])
@@ -66,7 +66,7 @@ defmodule Teiserver.Account.WeekOnWeekReport do
     week_data =
       Logging.list_server_week_logs(
         search: [
-          start_date: start_date |> Timex.shift(weeks: -2)
+          start_date: Date.add(start_date, -14)
         ]
       )
       |> Map.new(fn log ->
@@ -93,8 +93,8 @@ defmodule Teiserver.Account.WeekOnWeekReport do
 
     formatter =
       case params["metric"] do
-        "Total time" -> &TimexHelper.represent_minutes/1
-        "Play time" -> &TimexHelper.represent_minutes/1
+        "Total time" -> &DateHelper.represent_minutes/1
+        "Play time" -> &DateHelper.represent_minutes/1
         _other -> fn x -> x end
       end
 

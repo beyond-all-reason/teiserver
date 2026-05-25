@@ -65,7 +65,7 @@ defmodule Teiserver.MixProject do
       # Default phoenix deps
       {:phoenix, "~> 1.7.22"},
       {:phoenix_ecto, "~> 4.6"},
-      {:ecto_sql, "~> 3.12"},
+      {:ecto_sql, "~> 3.14"},
       {:postgrex, ">= 0.22.2"},
       {:phoenix_html, "~> 4.2"},
       {:phoenix_live_reload, "~> 1.5", only: :dev},
@@ -84,6 +84,7 @@ defmodule Teiserver.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.8"},
+      {:plug, "~> 1.19.2"},
 
       # Temporary deps while we transition away from views
       {:phoenix_view, "~> 2.0"},
@@ -92,7 +93,6 @@ defmodule Teiserver.MixProject do
       {:logger_file_backend, "~> 0.0.14"},
       {:logger_backends, "~> 1.0"},
       {:ecto_psql_extras, "~> 0.8"},
-      {:timex, "~> 3.7.11"},
       {:breadcrumble, "~> 1.0.0"},
       {:guardian, "~> 2.1"},
       {:argon2_elixir, "~> 4.1"},
@@ -118,7 +118,7 @@ defmodule Teiserver.MixProject do
       # Teiserver libs
       {:openskill,
        git: "https://github.com/beyond-all-reason/openskill.ex.git", branch: "master"},
-      {:cowboy, "~> 2.9"},
+      {:cowboy, "~> 2.15"},
       {:statistics, "~> 0.6.2"},
       {:csv, "~> 2.4"},
       {:mdex, "~> 0.2"},
@@ -129,6 +129,9 @@ defmodule Teiserver.MixProject do
       {:json_xema, "~> 0.3"},
       {:nostrum, "~> 0.10.4"},
       {:decorator, "~> 1.2"},
+
+      # Transient libs we are pinning because of other requirements
+      {:decimal, "~> 3.0", override: true},
 
       # gun is a transitive dependency of nostrum. The version 2.1.0 works,
       # while the next one, 2.2.0 produces the following error when starting

@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Logging.ServerLogController do
   alias Teiserver.Helper.ChartHelper
-  alias Teiserver.Helper.TimexHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Logging.GraphMinuteLogsTask
   use TeiserverWeb, :controller
@@ -347,9 +347,9 @@ defmodule TeiserverWeb.Logging.ServerLogController do
 
   @spec metric_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def metric_show(conn, %{"unit" => unit, "date" => date_str}) do
-    date = TimexHelper.parse_ymd(date_str)
+    date = DateHelper.parse_ymd(date_str)
 
-    if date |> Timex.to_date() == Timex.today() do
+    if date == Date.utc_today() do
       conn
       |> redirect(to: ~p"/logging/server/show/#{unit}/today")
     else
@@ -386,7 +386,7 @@ defmodule TeiserverWeb.Logging.ServerLogController do
       end
 
     conn
-    |> assign(:date, Timex.today())
+    |> assign(:date, Date.utc_today())
     |> assign(:data, data)
     |> assign(:unit, unit)
     |> assign(:today, true)

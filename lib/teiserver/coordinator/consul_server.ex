@@ -1381,7 +1381,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       welcome_message: nil,
       join_queue: [],
       low_priority_join_queue: [],
-      started_at: Timex.now(),
+      started_at: DateTime.utc_now(),
       approved_users: [],
       host_bosses: [],
       host_preset: nil,

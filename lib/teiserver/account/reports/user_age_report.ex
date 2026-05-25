@@ -2,6 +2,7 @@ defmodule Teiserver.Account.UserAgeReport do
   @moduledoc false
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
 
@@ -43,8 +44,8 @@ defmodule Teiserver.Account.UserAgeReport do
         params["end_date"]
       )
 
-    start_date = start_date |> Timex.to_datetime()
-    end_date = end_date |> Timex.to_datetime()
+    start_date = DateHelper.to_datetime(start_date)
+    end_date = DateHelper.to_datetime(end_date)
 
     type_where =
       case params["game_type"] do
@@ -110,7 +111,7 @@ defmodule Teiserver.Account.UserAgeReport do
       users
       |> Enum.group_by(
         fn %{inserted_at: inserted_at} ->
-          Timex.diff(Timex.now(), inserted_at, :days)
+          DateTime.diff(DateTime.utc_now(), inserted_at, :day)
         end,
         fn _user ->
           1
@@ -159,7 +160,7 @@ defmodule Teiserver.Account.UserAgeReport do
   end
 
   defp get_registration_age(%{inserted_at: inserted_at}) do
-    diff = Timex.diff(Timex.now(), inserted_at, :days)
+    diff = DateTime.diff(DateTime.utc_now(), inserted_at, :day)
 
     cond do
       diff < 1 -> "0 days"

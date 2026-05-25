@@ -4,6 +4,7 @@ defmodule Teiserver.Account.LeaderboardReport do
   alias Teiserver.Account
   alias Teiserver.Account.RatingLib
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Repo
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
@@ -21,9 +22,7 @@ defmodule Teiserver.Account.LeaderboardReport do
     limit = params["limit"] |> int_parse()
 
     activity_time =
-      Timex.today()
-      |> Timex.shift(days: -days)
-      |> Timex.to_datetime()
+      Date.utc_today() |> Date.add(-days) |> DateHelper.to_datetime()
 
     type_name = params["game_type"]
 
@@ -95,7 +94,7 @@ defmodule Teiserver.Account.LeaderboardReport do
     ratings
     |> Enum.with_index()
     |> Enum.map(fn {rating, index} ->
-      age = Timex.diff(Timex.now(), rating.last_updated, :days)
+      age = DateTime.diff(DateTime.utc_now(), rating.last_updated, :day)
 
       extra =
         extra_data[rating.user_id] ||

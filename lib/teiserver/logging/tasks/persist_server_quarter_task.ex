@@ -1,6 +1,7 @@
 defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
   @moduledoc false
 
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Logging.ServerDayLogLib
   alias Teiserver.Logging.Tasks.PersistServerQuarterTask
@@ -39,15 +40,15 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
 
     case first_logs do
       [log] ->
-        today_quarter = Timex.today() |> Timex.quarter()
-        log_quarter = log.date |> Timex.quarter()
+        today_quarter = Date.utc_today() |> DateHelper.quarter()
+        log_quarter = log.date |> DateHelper.quarter()
 
-        if log.date.year < Timex.today().year or log_quarter < today_quarter do
+        if log.date.year < Date.utc_today().year or log_quarter < today_quarter do
           logs =
             Logging.list_server_day_logs(
               search: [
-                start_date: Timex.beginning_of_quarter(log.date),
-                end_date: Timex.end_of_quarter(log.date)
+                start_date: DateHelper.beginning_of_quarter(log.date),
+                end_date: DateHelper.end_of_quarter(log.date)
               ],
               limit: 100
             )
@@ -55,8 +56,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
           user_activity_logs =
             Logging.list_user_activity_day_logs(
               search: [
-                start_date: Timex.beginning_of_quarter(log.date),
-                end_date: Timex.end_of_quarter(log.date)
+                start_date: DateHelper.beginning_of_quarter(log.date),
+                end_date: DateHelper.end_of_quarter(log.date)
               ],
               limit: 100
             )
@@ -70,7 +71,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
             Logging.create_server_quarter_log(%{
               year: log.date.year,
               quarter: log_quarter,
-              date: Timex.beginning_of_quarter(log.date),
+              date: DateHelper.beginning_of_quarter(log.date),
               data: data
             })
         end
@@ -82,17 +83,17 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
 
   # For when we have an existing log
   defp perform_standard(log_date) do
-    new_date = Timex.shift(log_date, months: 3)
+    new_date = Date.shift(log_date, month: 3)
 
-    new_quarter = new_date |> Timex.quarter()
-    today_quarter = Timex.today() |> Timex.quarter()
+    new_quarter = new_date |> DateHelper.quarter()
+    today_quarter = Date.utc_today() |> DateHelper.quarter()
 
-    if new_date.year < Timex.today().year or new_quarter < today_quarter do
+    if new_date.year < Date.utc_today().year or new_quarter < today_quarter do
       logs =
         Logging.list_server_day_logs(
           search: [
-            start_date: Timex.beginning_of_quarter(new_date),
-            end_date: Timex.end_of_quarter(new_date)
+            start_date: DateHelper.beginning_of_quarter(new_date),
+            end_date: DateHelper.end_of_quarter(new_date)
           ],
           limit: 100
         )
@@ -100,8 +101,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
       user_activity_logs =
         Logging.list_user_activity_day_logs(
           search: [
-            start_date: Timex.beginning_of_quarter(new_date),
-            end_date: Timex.end_of_quarter(new_date)
+            start_date: DateHelper.beginning_of_quarter(new_date),
+            end_date: DateHelper.end_of_quarter(new_date)
           ],
           limit: 100
         )
@@ -125,19 +126,19 @@ defmodule Teiserver.Logging.Tasks.PersistServerQuarterTask do
 
   @spec quarter_so_far() :: map()
   def quarter_so_far do
-    now = Timex.now()
+    now = DateTime.utc_now()
 
     user_activity_logs =
       Logging.list_user_activity_day_logs(
         search: [
-          start_date: Timex.beginning_of_quarter(now)
+          start_date: DateHelper.beginning_of_quarter(now)
         ],
         limit: 100
       )
 
     Logging.list_server_day_logs(
       search: [
-        start_date: Timex.beginning_of_quarter(now)
+        start_date: DateHelper.beginning_of_quarter(now)
       ],
       limit: 100
     )

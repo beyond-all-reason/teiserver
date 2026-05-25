@@ -215,7 +215,7 @@ defmodule Teiserver.Account.PartyLib do
     Chat.create_party_message(%{
       content: msg,
       party_id: party_id,
-      inserted_at: Timex.now(),
+      inserted_at: DateTime.utc_now(),
       user_id: userid
     })
   end

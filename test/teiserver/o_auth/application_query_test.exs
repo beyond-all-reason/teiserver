@@ -7,7 +7,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
   alias Teiserver.OAuth.TokenQueries
   alias Teiserver.OAuthFixtures
   alias Teiserver.Repo
-  alias Timex.Duration
+  alias Teiserver.TeiserverTestLib
   use Teiserver.DataCase
 
   defp setup_app(_context) do
@@ -75,7 +75,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
     end
 
     test "ignore expired code and tokens", %{user: user, app: app} do
-      yesterday = DateTime.utc_now() |> Timex.subtract(Duration.from_days(1))
+      yesterday = DateTime.shift(DateTime.utc_now(), day: -1)
 
       OAuthFixtures.code_attrs(user, app)
       |> Map.put(:expires_at, yesterday)
@@ -125,7 +125,7 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
     end
 
     test "list_authorized_applications shows apps with expired tokens", %{user: user, app: app} do
-      yesterday = DateTime.utc_now() |> Timex.subtract(Duration.from_days(1))
+      yesterday = DateTime.shift(DateTime.utc_now(), day: -1)
 
       OAuthFixtures.token_attrs(user, app)
       |> Map.put(:expires_at, yesterday)

@@ -164,9 +164,9 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     team_size = 1
     game_type = MatchLib.game_type(team_size, team_count)
     server_uuid = UUID.uuid1()
-    end_time = Timex.now()
+    end_time = DateTime.utc_now()
 
-    start_time = DateTime.add(end_time, 50, :minute)
+    start_time = DateTime.shift(end_time, minute: 50)
 
     # Create a match
     {:ok, match} =

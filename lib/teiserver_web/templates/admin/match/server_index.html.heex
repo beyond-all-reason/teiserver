@@ -82,7 +82,7 @@
                 <td>{match.team_size}</td>
 
                 <td>
-                  {if match.finished, do: Timex.diff(match.finished, match.started, :minute)}
+                  {if match.finished, do: DateTime.diff(match.finished, match.started, :minute)}
                 </td>
                 <td>{date_to_str(match.finished, format: :ymd_hms)}</td>
 
