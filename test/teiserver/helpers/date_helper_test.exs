@@ -2,6 +2,20 @@ defmodule Teiserver.Helpers.DateHelperTest do
   alias Teiserver.Helper.DateHelper
   use Teiserver.DataCase, async: true
 
+  describe "compare all the things" do
+    test "same types" do
+      assert DateHelper.compare(~D[2026-01-02], ~D[2026-01-03]) == :lt
+      assert DateHelper.compare(~N[2026-01-02 12:23:35], ~N[2026-01-03 12:23:35]) == :lt
+      assert DateHelper.compare(~U[2026-01-02 12:23:35Z], ~U[2026-01-03 12:23:35Z]) == :lt
+    end
+
+    test "mixed types" do
+      assert DateHelper.compare(~D[2026-01-02], ~N[2026-01-03 12:23:35]) == :lt
+      assert DateHelper.compare(~D[2026-01-02], ~U[2026-01-03 12:23:35Z]) == :lt
+      assert DateHelper.compare(~U[2026-01-02 12:23:35Z], ~N[2026-01-03 12:23:35]) == :lt
+    end
+  end
+
   describe "beginning_of_quarter/1" do
     test "Q1" do
       assert DateHelper.beginning_of_quarter(~D[2026-02-15]) == ~D[2026-01-01]

@@ -8,6 +8,15 @@ defmodule Teiserver.Helper.DateHelper do
     end
   end
 
+  @spec compare(
+          DateTime.t() | NaiveDateTime.t() | Date.t(),
+          DateTime.t() | NaiveDateTime.t() | Date.t()
+        ) :: :lt | :gt | :eq
+  def compare(%Date{} = d1, %Date{} = d2), do: Date.compare(d1, d2)
+  def compare(%DateTime{} = d1, %DateTime{} = d2), do: DateTime.compare(d1, d2)
+  def compare(%NaiveDateTime{} = d1, %NaiveDateTime{} = d2), do: NaiveDateTime.compare(d1, d2)
+  def compare(d1, d2), do: to_utc_datetime(d1) |> DateTime.compare(to_utc_datetime(d2))
+
   @spec date_to_discord_str(DateTime.t() | NaiveDateTime.t()) :: String.t()
   def date_to_discord_str(the_time) do
     "<t:#{the_time |> to_utc_datetime() |> DateTime.to_unix()}:f>"
@@ -33,7 +42,7 @@ defmodule Teiserver.Helper.DateHelper do
   def date_to_str(the_time, args) do
     format = args[:format] || :ymd
     now = args[:now] || DateTime.utc_now()
-    is_past = DateTime.compare(now, the_time) == :gt
+    is_past = compare(now, the_time) == :gt
 
     until_id =
       case args[:until] do
@@ -123,7 +132,7 @@ defmodule Teiserver.Helper.DateHelper do
   @spec datetime_min(DateTime.t(), DateTime.t()) :: DateTime.t()
   @spec datetime_min(Date.t(), Date.t()) :: Date.t()
   def datetime_min(dt1, dt2) do
-    if DateTime.compare(dt1, dt2) == :lt do
+    if compare(dt1, dt2) == :lt do
       dt1
     else
       dt2
@@ -133,7 +142,7 @@ defmodule Teiserver.Helper.DateHelper do
   @spec datetime_max(DateTime.t(), DateTime.t()) :: DateTime.t()
   @spec datetime_max(Date.t(), Date.t()) :: Date.t()
   def datetime_max(dt1, dt2) do
-    if DateTime.compare(dt1, dt2) == :gt do
+    if compare(dt1, dt2) == :gt do
       dt1
     else
       dt2
@@ -340,7 +349,7 @@ defmodule Teiserver.Helper.DateHelper do
 
     start
     |> Stream.iterate(&DateTime.shift(&1, day: 1))
-    |> Stream.take_while(&(DateTime.compare(&1, last) == :lt))
+    |> Stream.take_while(&(compare(&1, last) == :lt))
   end
 
   @doc """
@@ -349,12 +358,7 @@ defmodule Teiserver.Helper.DateHelper do
   def greater_than(nil, _b), do: false
   def greater_than(_a, nil), do: true
 
-  def greater_than(%DateTime{} = a, %DateTime{} = b), do: DateTime.compare(a, b) == :gt
-  def greater_than(%Date{} = a, %Date{} = b), do: Date.compare(a, b) == :gt
-
-  def greater_than(a, b) do
-    a |> to_utc_datetime() |> DateTime.compare(to_utc_datetime(b)) == :gt
-  end
+  def greater_than(d1, d2), do: compare(d1, d2) == :gt
 
   @doc """
   Returns true if a < b
@@ -362,12 +366,7 @@ defmodule Teiserver.Helper.DateHelper do
   def less_than(nil, _b), do: true
   def less_than(_a, nil), do: false
 
-  def less_than(%DateTime{} = a, %DateTime{} = b), do: DateTime.compare(a, b) == :lt
-  def less_than(%Date{} = a, %Date{} = b), do: Date.compare(a, b) == :lt
-
-  def less_than(a, b) do
-    a |> to_utc_datetime() |> DateTime.compare(to_utc_datetime(b)) == :lt
-  end
+  def less_than(d1, d2), do: compare(d1, d2) == :lt
 
   def represent_minutes(nil), do: ""
 
