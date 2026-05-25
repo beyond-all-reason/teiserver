@@ -33,7 +33,7 @@ defmodule Teiserver.Account.Auth do
   def authorize(:applying, conn, _data), do: allow?(conn, "Moderator")
   def authorize(:data_search, conn, _data), do: allow?(conn, "Moderator")
   def authorize(:relationships, conn, _data), do: allow?(conn, "Moderator")
-  def authorize(:gdpr_clean, conn, _data), do: allow?(conn, "Moderator")
+  def authorize(:gdpr_forget, conn, _data), do: allow?(conn, "Server")
   def authorize(_action, conn, _data), do: allow?(conn, "admin.dev")
 
   # credo:disable-for-lines:5 Credo.Check.Readability.PredicateFunctionNames
