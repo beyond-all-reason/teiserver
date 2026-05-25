@@ -1,31 +1,56 @@
 {
-    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/partyState.json",
-    "title": "PartyState",
-    "type": "object",
-    "properties": {
-        "id": { "$ref": "../definitions/partyId.json" },
-        "members": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "userId": { "$ref": "../definitions/userId.json" },
-                    "joinedAt": { "$ref": "../definitions/unixTime.json" }
-                },
-                "required": ["userId", "joinedAt"]
-            }
-        },
-        "invited": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "userId": { "$ref": "../definitions/userId.json" },
-                    "invitedAt": { "$ref": "../definitions/unixTime.json" }
-                },
-                "required": ["userId", "invitedAt"]
-            }
-        }
+  "$id": "https://schema.beyondallreason.dev/tachyon/definitions/partyState.json",
+  "title": "PartyState",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "../definitions/partyId.json"
     },
-    "required": ["id", "members", "invited"]
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "$ref": "../definitions/userId.json"
+          },
+          "joinedAt": {
+            "$ref": "../definitions/unixTime.json"
+          }
+        },
+        "required": [
+          "userId",
+          "joinedAt"
+        ]
+      }
+    },
+    "maxMembers": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "invited": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "$ref": "../definitions/userId.json"
+          },
+          "invitedAt": {
+            "$ref": "../definitions/unixTime.json"
+          }
+        },
+        "required": [
+          "userId",
+          "invitedAt"
+        ]
+      }
+    }
+  },
+  "required": [
+    "id",
+    "members",
+    "maxMembers",
+    "invited"
+  ]
 }

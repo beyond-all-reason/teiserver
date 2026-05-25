@@ -76,7 +76,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       assert %{"commandId" => "party/invited", "data" => %{"party" => data}} =
                Tachyon.recv_message!(ctx2.client)
 
-      assert %{"id" => ^party_id, "members" => [m1]} = data
+      assert %{"id" => ^party_id, "members" => [m1], "maxMembers" => 3} = data
       assert m1["userId"] == to_string(ctx.user.id)
 
       assert %{"commandId" => "party/updated", "data" => ^data} =
@@ -234,7 +234,9 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       Party.update_max_size(2)
       ok_client = setup_client()
       assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, ok_client.user.id)
-      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+
+      assert %{"commandId" => "party/updated", "data" => %{"maxMembers" => 2}} =
+               Tachyon.recv_message!(ctx.client)
 
       at_capacity_ctx = setup_client()
 
@@ -256,6 +258,30 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
 
       assert updated["invited"] == []
       assert %{"commandId" => "party/removed"} = Tachyon.recv_message!(ctx2.client)
+    end
+
+    test "maxMembers is included in party state", ctx do
+      ctx2 = setup_client()
+      assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, ctx2.user.id)
+
+      assert %{
+               "commandId" => "party/invited",
+               "data" => %{"party" => %{"maxMembers" => 3}}
+             } = Tachyon.recv_message!(ctx2.client)
+
+      assert %{
+               "commandId" => "party/updated",
+               "data" => %{"maxMembers" => 3}
+             } = Tachyon.recv_message!(ctx.client)
+
+      Party.update_max_size(5)
+      ctx3 = setup_client()
+      assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, ctx3.user.id)
+
+      assert %{
+               "commandId" => "party/updated",
+               "data" => %{"maxMembers" => 5}
+             } = Tachyon.recv_message!(ctx.client)
     end
   end
 
@@ -442,7 +468,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
         "data" => %{"user" => %{"invitedToParties" => [invited_to]} = event}
       } = Tachyon.recv_message!(client)
 
-      assert %{"party" => %{"id" => ^party_id}} = event
+      assert %{"party" => %{"id" => ^party_id, "maxMembers" => 3}} = event
       assert invited_to["id"] == party2_id
       assert hd(invited_to["invited"])["userId"] == to_string(user.id)
     end
