@@ -93,6 +93,7 @@ defmodule Teiserver.MixProject do
       # Extra deps
       {:logger_file_backend, "~> 0.0.14"},
       {:logger_backends, "~> 1.0"},
+      {:logger_json, "~> 7.0"},
       {:ecto_psql_extras, "~> 0.8"},
       {:breadcrumble, "~> 1.0.0"},
       {:guardian, "~> 2.1"},

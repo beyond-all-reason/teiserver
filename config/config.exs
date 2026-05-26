@@ -163,11 +163,6 @@ config :nostrum,
   streamlink: false,
   ffmpeg: false
 
-# config :grpc,
-#   start_server: true
-
-config :logger, :default_handler, false
-
 metadata = [:request_id, :user_id, :pid, :actor_type, :actor_id]
 
 config :logger, LoggerBackends.Console,
