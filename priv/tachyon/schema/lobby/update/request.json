@@ -1,49 +1,87 @@
 {
-    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/update/request.json",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "LobbyUpdateRequest",
-    "tachyon": {
-        "source": "user",
-        "target": "server",
-        "scopes": ["tachyon.lobby"]
+  "$id": "https://schema.beyondallreason.dev/tachyon/lobby/update/request.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LobbyUpdateRequest",
+  "tachyon": {
+    "source": "user",
+    "target": "server",
+    "scopes": [
+      "tachyon.lobby"
+    ]
+  },
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "request"
     },
-    "type": "object",
-    "properties": {
-        "type": { "const": "request" },
-        "messageId": { "type": "string" },
-        "commandId": { "const": "lobby/update" },
-        "data": {
-            "title": "LobbyUpdateRequestData",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "description": "to rename the lobby",
-                    "type": "string"
-                },
-                "mapName": { "type": "string" },
-                "allyTeamConfig": {
-                    "$ref": "../../definitions/allyTeamConfig.json"
-                },
-                "gameOptions": {
-                    "description": "Set to null to remove a game option",
-                    "type": "object",
-                    "patternProperties": {
-                        "^.*$": {
-                            "anyOf": [
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "value": { "type": "string" }
-                                    },
-                                    "required": ["value"]
-                                },
-                                { "type": "null" }
-                            ]
-                        }
+    "messageId": {
+      "type": "string"
+    },
+    "commandId": {
+      "const": "lobby/update"
+    },
+    "data": {
+      "title": "LobbyUpdateRequestData",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "to rename the lobby",
+          "type": "string"
+        },
+        "mapName": {
+          "type": "string"
+        },
+        "allyTeamConfig": {
+          "$ref": "../../definitions/allyTeamConfig.json"
+        },
+        "gameOptions": {
+          "description": "Set to null to remove a game option",
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "string"
                     }
+                  },
+                  "required": [
+                    "value"
+                  ]
+                },
+                {
+                  "type": "null"
                 }
+              ]
             }
+          }
+        },
+        "tags": {
+          "description": "Set to null to remove a tag",
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {}
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
         }
-    },
-    "required": ["type", "messageId", "commandId", "data"]
+      }
+    }
+  },
+  "required": [
+    "type",
+    "messageId",
+    "commandId",
+    "data"
+  ]
 }

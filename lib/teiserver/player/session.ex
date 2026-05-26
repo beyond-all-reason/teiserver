@@ -481,11 +481,12 @@ defmodule Teiserver.Player.Session do
   the same as Lobby.start_params, but without any creator data, these are filled by the session
   """
   @type lobby_start_params :: %{
-          name: String.t(),
-          map_name: String.t(),
-          ally_team_config: TachyonLobby.ally_team_config(),
-          boss_enabled?: boolean(),
-          game_options: %{String.t() => String.t()}
+          required(:name) => String.t(),
+          required(:map_name) => String.t(),
+          required(:ally_team_config) => TachyonLobby.ally_team_config(),
+          required(:boss_enabled?) => boolean(),
+          required(:game_options) => %{String.t() => String.t()},
+          optional(:tags) => %{String.t() => map()}
         }
   @spec create_lobby(T.userid(), lobby_start_params()) ::
           {:ok, TachyonLobby.details()} | {:error, reason :: term()}

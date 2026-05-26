@@ -521,7 +521,8 @@ defmodule Teiserver.Support.Tachyon do
       ally_team_config: :allyTeamConfig,
       boss_enabled?: :areBossesEnabled,
       game_options:
-        {:gameOptions, &(Enum.map(&1, fn {k, v} -> {k, %{value: v}} end) |> Enum.into(%{}))}
+        {:gameOptions, &(Enum.map(&1, fn {k, v} -> {k, %{value: v}} end) |> Enum.into(%{}))},
+      tags: :tags
     }
 
     data = Collections.transform_map(lobby_data, mapping)

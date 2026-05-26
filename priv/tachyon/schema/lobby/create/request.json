@@ -1,40 +1,78 @@
 {
-    "$id": "https://schema.beyondallreason.dev/tachyon/lobby/create/request.json",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "LobbyCreateRequest",
-    "tachyon": {
-        "source": "user",
-        "target": "server",
-        "scopes": ["tachyon.lobby"]
+  "$id": "https://schema.beyondallreason.dev/tachyon/lobby/create/request.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LobbyCreateRequest",
+  "tachyon": {
+    "source": "user",
+    "target": "server",
+    "scopes": [
+      "tachyon.lobby"
+    ]
+  },
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "request"
     },
-    "type": "object",
-    "properties": {
-        "type": { "const": "request" },
-        "messageId": { "type": "string" },
-        "commandId": { "const": "lobby/create" },
-        "data": {
-            "title": "LobbyCreateRequestData",
-            "type": "object",
-            "properties": {
-                "name": { "type": "string" },
-                "mapName": { "type": "string" },
-                "allyTeamConfig": {
-                    "$ref": "../../definitions/allyTeamConfig.json"
-                },
-                "areBossesEnabled": { "type": "boolean"},
-                "gameOptions": {
-                    "type": "object",
-                    "patternProperties": {
-                        "^.*$": {
-                            "type": "object",
-                            "properties": { "value": { "type": "string" } },
-                            "required": ["value"]
-                        }
-                    }
+    "messageId": {
+      "type": "string"
+    },
+    "commandId": {
+      "const": "lobby/create"
+    },
+    "data": {
+      "title": "LobbyCreateRequestData",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "mapName": {
+          "type": "string"
+        },
+        "allyTeamConfig": {
+          "$ref": "../../definitions/allyTeamConfig.json"
+        },
+        "areBossesEnabled": {
+          "type": "boolean"
+        },
+        "gameOptions": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string"
                 }
-            },
-            "required": ["name", "mapName", "allyTeamConfig"]
+              },
+              "required": [
+                "value"
+              ]
+            }
+          }
+        },
+        "tags": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "properties": {}
+            }
+          }
         }
-    },
-    "required": ["type", "messageId", "commandId", "data"]
+      },
+      "required": [
+        "name",
+        "mapName",
+        "allyTeamConfig"
+      ]
+    }
+  },
+  "required": [
+    "type",
+    "messageId",
+    "commandId",
+    "data"
+  ]
 }

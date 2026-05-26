@@ -28,7 +28,8 @@ defmodule Teiserver.TachyonLobby.List do
           engine_version: String.t(),
           game_version: String.t(),
           boss_enabled?: boolean(),
-          current_battle: nil | %{started_at: DateTime.t()}
+          current_battle: nil | %{started_at: DateTime.t()},
+          tags: %{String.t() => map()}
         }
 
   @typep state :: %{

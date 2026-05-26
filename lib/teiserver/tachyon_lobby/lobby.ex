@@ -77,7 +77,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
           optional(:game_version) => String.t(),
           optional(:engine_version) => String.t(),
           optional(:boss_enabled?) => boolean(),
-          optional(:game_options) => %{String.t() => String.t()}
+          optional(:game_options) => %{String.t() => String.t()},
+          optional(:tags) => %{String.t() => map()}
         }
 
   @typedoc """
@@ -121,6 +122,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           bosses: MapSet.t(T.userid()),
           ally_team_config: ally_team_config(),
           game_options: %{String.t() => String.t()},
+          tags: %{String.t() => map()},
           players: %{
             T.userid() => %{team: team(), ready?: boolean(), asset_status: asset_status()}
           },
@@ -210,6 +212,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            bosses: MapSet.t(T.userid()),
            ally_team_config: ally_team_config(),
            game_options: %{String.t() => String.t()},
+           tags: %{String.t() => map()},
            # used to track the players in the lobby.
            players: %{player_id() => player() | bot()},
            spectators: %{T.userid() => spectator()},
@@ -251,6 +254,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:update_ally_team_config, old_config :: ally_team_config(),
               new_config :: ally_team_config()}
            | {:update_game_options, changes :: %{String.t() => String.t() | nil}}
+           | {:update_tags, changes :: %{String.t() => map() | nil}}
            | {:start_vote, vote_state()}
            | {:cast_vote, T.userid(), vote_ballot()}
            | {:vote_ended, DateTime.t(), vote_outcome()}
@@ -390,7 +394,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
           optional(:name) => String.t(),
           optional(:map_name) => String.t(),
           optional(:ally_team_config) => ally_team_config(),
-          optional(:game_options) => %{String.t() => String.t() | nil}
+          optional(:game_options) => %{String.t() => String.t() | nil},
+          optional(:tags) => %{String.t() => map() | nil}
         }
 
   @doc """
@@ -483,6 +488,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       bosses: bosses,
       ally_team_config: start_params.ally_team_config,
       game_options: Map.get(start_params, :game_options, %{}),
+      tags: Map.get(start_params, :tags, %{}),
       players: %{
         start_params.creator_data.id => %{
           id: start_params.creator_data.id,
@@ -1215,7 +1221,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       engine_version: state.engine_version,
       game_version: state.game_version,
       boss_enabled?: state.boss_enabled?,
-      current_battle: nil
+      current_battle: nil,
+      tags: state.tags
     }
   end
 
@@ -1253,7 +1260,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       :ally_team_config,
       :current_battle,
       :current_vote,
-      :game_options
+      :game_options,
+      :tags
     ])
     |> Map.put(:players, players)
     |> Map.put(:spectators, spectators)
@@ -1483,6 +1491,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> Map.update!(:updates, &[ev | &1])
   end
 
+  defp process_event({:update_tags, changes} = ev, aggregate) do
+    aggregate
+    |> update_in([:data, :tags], &patch_merge(&1, changes))
+    |> Map.update!(:updates, &[ev | &1])
+  end
+
   defp process_event({:start_vote, vote_state} = ev, aggregate) do
     aggregate
     |> put_in([:data, :current_vote], vote_state)
@@ -1673,6 +1687,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp update_change_from_event({:update_game_options, changes}, change_map),
     do: Map.put(change_map, :game_options, changes)
+
+  defp update_change_from_event({:update_tags, changes}, change_map),
+    do: Map.put(change_map, :tags, changes)
 
   defp update_change_from_event({:start_vote, vote}, change_map),
     do: Map.put(change_map, :current_vote, vote)
@@ -2045,6 +2062,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp update_property(:game_options, changes, _state, _user_id) do
     # TODO: set a size limit on that thing to avoid a DOS
     {:ok, [{:update_game_options, changes}]}
+  end
+
+  defp update_property(:tags, changes, _state, _user_id) do
+    {:ok, [{:update_tags, changes}]}
   end
 
   defp update_property(prop, _value, _state, _user_id),
