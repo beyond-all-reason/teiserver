@@ -11,7 +11,7 @@ defmodule TeiserverWeb.BannedPhraseLiveTest do
   @update_attrs %{
     type: :fuzzy,
     severity: :medium,
-    phrase: "some updated phrase",
+    phrase: "some updated phrase *",
     score_threshold: 43
   }
   @invalid_attrs %{type: :raw, severity: :low, phrase: nil, score_threshold: nil}
