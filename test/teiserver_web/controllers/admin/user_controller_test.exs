@@ -141,9 +141,9 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
 
     test "no access" do
       # Setup something specifically to not have access, currently only
-      # server maintainers have access to we set this
+      # moderators have access this so we are testing with contributor
       {:ok, setup_opts} =
-        TeiserverTestLib.admin_permissions()
+        TeiserverTestLib.staff_permissions()
         |> GeneralTestLib.conn_setup()
         |> TeiserverTestLib.conn_setup()
 
