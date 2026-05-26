@@ -69,7 +69,7 @@ defmodule Teiserver.MixProject do
       {:postgrex, ">= 0.22.2"},
       {:phoenix_html, "~> 4.2"},
       {:phoenix_live_reload, "~> 1.5", only: :dev},
-      {:phoenix_live_view, "~> 1.0"},
+      {:phoenix_live_view, "~> 1.1"},
       {:lazy_html, ">= 0.1.0", only: :test},
       # see https://hexdocs.pm/phoenix_html/changelog.html#v4-0-0-2023-12-19
       {:phoenix_html_helpers, "~> 1.0"},

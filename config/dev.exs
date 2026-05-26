@@ -66,10 +66,15 @@ config :teiserver, Teiserver,
 # Watch static and templates for browser reloading.
 config :teiserver, TeiserverWeb.Endpoint,
   live_reload: [
+    notify: [
+      live_view: [
+        ~r"lib/teiserver_web/(live|live_components|components)/.*(ex|heex)$"
+      ]
+    ],
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/teiserver_web/(controllers|live|components|live_components|views|templates)/.*(ex|heex)$"
+      ~r"lib/teiserver_web/(controllers|views|templates)/.*(ex|heex)$"
     ]
   ]
 
