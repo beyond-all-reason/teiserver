@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.PopulationReport do
   @moduledoc false
   alias Ecto.Adapters.SQL
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
 
@@ -51,6 +52,7 @@ defmodule Teiserver.Account.PopulationReport do
 
     start_date_mins =
       start_date
+      |> DateHelper.to_datetime()
       |> DateTime.to_unix()
       |> Kernel.div(60)
 
