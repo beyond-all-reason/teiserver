@@ -18,8 +18,15 @@ defmodule Teiserver.Repo.Migrations.AutomatedModerationTooling do
 
     create unique_index(:banned_domains, [:domain])
 
-    execute "CREATE TYPE phrase_severity_level AS ENUM ('low', 'medium', 'high')"
-    execute "CREATE TYPE phrase_type AS ENUM ('raw', 'fuzzy', 'regex')"
+    execute(
+      "CREATE TYPE phrase_severity_level AS ENUM ('low', 'medium', 'high')",
+      "DROP TYPE phrase_severity_level"
+    )
+
+    execute(
+      "CREATE TYPE phrase_type AS ENUM ('raw', 'fuzzy', 'regex')",
+      "DROP TYPE phrase_type"
+    )
 
     create table(:banned_phrases) do
       add :phrase, :text, null: false
