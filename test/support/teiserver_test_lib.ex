@@ -311,6 +311,8 @@ defmodule Teiserver.TeiserverTestLib do
     }
   end
 
+  # TODO: Remove this, merging the functionality into the GeneralTestLib
+  # if needed
   @spec conn_setup({:ok, list()}) :: {:ok, list()}
   def conn_setup({:ok, data}) do
     user = data[:user]

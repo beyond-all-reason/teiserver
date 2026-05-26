@@ -1,0 +1,31 @@
+<.header>
+  Banned IP: #{@banned_ip.cidr}
+  <:subtitle>This is a Banned IP record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/moderation/banned_ips/#{@banned_ip}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit Banned IP</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Cidr">{@banned_ip.cidr}</:item>
+</.list>
+
+<.back navigate={~p"/moderation/banned_ips"}>Back to banned_ips</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="banned_ip-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/banned_ips/#{@banned_ip}")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@banned_ip.id}
+    title={@page_title}
+    action={@live_action}
+    banned_ip={@banned_ip}
+    patch={~p"/moderation/banned_ips/#{@banned_ip}"}
+  />
+</.modal>

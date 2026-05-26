@@ -1,4 +1,6 @@
 defmodule TeiserverWeb.Router do
+  alias TeiserverWeb.UserAuthentication
+
   use TeiserverWeb, :router
 
   pipeline :logging_live_auth do
@@ -506,6 +508,55 @@ defmodule TeiserverWeb.Router do
     put("/ban/:id/enable", BanController, :enable)
     get("/ban/new_with_user", BanController, :new_with_user)
     resources("/ban", BanController, only: [:index, :show, :new, :create, :edit, :update])
+  end
+
+  scope "/moderation", TeiserverWeb.Moderation, as: :moderation do
+    pipe_through([:browser, :app_layout, :protected])
+
+    live_session :banned_domains,
+      layout: {TeiserverWeb.Layouts, :moderation},
+      on_mount: [
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Moderator"}}
+      ] do
+      # Banned domains
+      live "/banned_domains", BannedDomainLive.Index, :index
+      live "/banned_domains/new", BannedDomainLive.Index, :new
+      live "/banned_domains/:id/edit", BannedDomainLive.Index, :edit
+
+      live "/banned_domains/:id", BannedDomainLive.Show, :show
+      live "/banned_domains/:id/show/edit", BannedDomainLive.Show, :edit
+    end
+
+    live_session :banned_ips,
+      layout: {TeiserverWeb.Layouts, :moderation},
+      on_mount: [
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Moderator"}}
+      ] do
+      # Banned ips
+      live "/banned_ips", BannedIPLive.Index, :index
+      live "/banned_ips/new", BannedIPLive.Index, :new
+      live "/banned_ips/:id/edit", BannedIPLive.Index, :edit
+
+      live "/banned_ips/:id", BannedIPLive.Show, :show
+      live "/banned_ips/:id/show/edit", BannedIPLive.Show, :edit
+    end
+
+    live_session :banned_phrases,
+      layout: {TeiserverWeb.Layouts, :moderation},
+      on_mount: [
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Moderator"}}
+      ] do
+      # Banned phrases
+      live "/banned_phrases", BannedPhraseLive.Index, :index
+      live "/banned_phrases/new", BannedPhraseLive.Index, :new
+      live "/banned_phrases/:id/edit", BannedPhraseLive.Index, :edit
+
+      live "/banned_phrases/:id", BannedPhraseLive.Show, :show
+      live "/banned_phrases/:id/show/edit", BannedPhraseLive.Show, :edit
+    end
   end
 
   scope "/admin", TeiserverWeb.Admin, as: :admin do

@@ -1,0 +1,34 @@
+<.header>
+  Banned domain
+  <:subtitle>This is a banned_domain record from your database.</:subtitle>
+  <:actions>
+    <.link
+      patch={~p"/moderation/banned_domains/#{@banned_domain}/show/edit"}
+      phx-click={JS.push_focus()}
+    >
+      <.button>Edit banned domain</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Domain">{@banned_domain.domain}</:item>
+</.list>
+
+<.back navigate={~p"/moderation/banned_domains"}>Back to banned domains</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="banned_domain-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/banned_domains/#{@banned_domain}")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@banned_domain.id}
+    title={@page_title}
+    action={@live_action}
+    banned_domain={@banned_domain}
+    patch={~p"/moderation/banned_domains/#{@banned_domain}"}
+  />
+</.modal>

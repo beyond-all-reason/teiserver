@@ -62,7 +62,7 @@ defmodule TeiserverWeb.CoreComponents do
               phx-window-keydown={hide_modal(@on_cancel, @id)}
               phx-key="escape"
               phx-click-away={hide_modal(@on_cancel, @id)}
-              class="hidden relative rounded-2xl bg-white p-14 shadow-lg shadow-zinc-700/10 ring-1 ring-zinc-700/10 transition"
+              class="hidden relative rounded-2xl bg-secondary p-4 p-14 shadow-lg shadow-zinc-700/10 ring-1 ring-zinc-700/10 transition"
             >
               <div class="absolute top-6 right-5">
                 <button
@@ -189,7 +189,7 @@ defmodule TeiserverWeb.CoreComponents do
 
   def flash_group(assigns) do
     ~H"""
-    <div aria-live="polite" aria-atomic="true" class="position-relative" id="flash-group">
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
       <div class="toast-container top-0 end-0 p-3">
         <.flash kind={:info} title="Information" role="alert" flash={@flash} />
         <.flash kind={:success} title="Success!" role="alert" flash={@flash} />
@@ -252,7 +252,7 @@ defmodule TeiserverWeb.CoreComponents do
       <.button phx-click="go" class="ml-2">Send!</.button>
   """
   attr :type, :string, default: nil
-  attr :class, :string, default: nil
+  attr :class, :string, default: "btn-secondary"
   attr :rest, :global, include: ~w(disabled form name value)
   slot :inner_block, required: true
 
@@ -576,9 +576,9 @@ defmodule TeiserverWeb.CoreComponents do
     <div class="mt-16">
       <.link
         navigate={@navigate}
-        class="text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
+        class="btn btn-secondary text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
       >
-        <Fontawesome.icon icon="arrow-left" style="regular" />
+        <i class="fa-fw fa-solid fa-arrow-left" />
         {render_slot(@inner_block)}
       </.link>
     </div>

@@ -1,4 +1,5 @@
 <div>
+  <.flash_group flash={@flash} />
   <% view_colour_value =
     if assigns[:conn] &&
          Kernel.function_exported?(assigns[:conn].private.phoenix_view._, :view_colour, 0) do

@@ -111,6 +111,8 @@ defmodule TeiserverWeb do
 
   def live_view do
     quote do
+      alias Phoenix.LiveView
+
       use Phoenix.LiveView,
         layout: {TeiserverWeb.Layouts, :app}
 
@@ -149,6 +151,7 @@ defmodule TeiserverWeb do
   def live_component do
     quote do
       use Phoenix.LiveComponent
+      alias Phoenix.LiveComponent
 
       defguard is_connected?(socket) when socket.transport_pid != nil
       def ok(socket), do: {:ok, socket}
@@ -237,6 +240,7 @@ defmodule TeiserverWeb do
   def router do
     quote do
       use Phoenix.Router
+
       import Plug.Conn
       import Phoenix.Controller
       import Phoenix.LiveView.Router
@@ -269,9 +273,12 @@ defmodule TeiserverWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import TeiserverWeb.{CoreComponents, NavComponents}
-      import TeiserverWeb.Gettext
+
+      use Gettext, backend: TeiserverWeb.Gettext
+
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
+
       # Routes generation with the ~p sigil
       unquote(verified_routes())
     end

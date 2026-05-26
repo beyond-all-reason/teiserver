@@ -11,6 +11,9 @@ defmodule Teiserver.Moderation do
   alias Teiserver.Moderation.ActionLib
   alias Teiserver.Moderation.Ban
   alias Teiserver.Moderation.BanLib
+  alias Teiserver.Moderation.BannedDomain
+  alias Teiserver.Moderation.BannedIP
+  alias Teiserver.Moderation.BannedPhrase
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Moderation.Report
   alias Teiserver.Moderation.ReportLib
@@ -860,5 +863,341 @@ defmodule Teiserver.Moderation do
         location: location
       })
     end
+  end
+
+  @doc """
+  Returns the list of banned_domains.
+
+  ## Examples
+
+      iex> list_banned_domains()
+      [%BannedDomain{}, ...]
+
+  """
+  def list_banned_domains do
+    Repo.all(BannedDomain)
+  end
+
+  @spec list_banned_domains_cache :: [String.t()]
+  def list_banned_domains_cache do
+    Teiserver.cache_get(:application_metadata_cache, "banned_domains") || []
+  end
+
+  @spec banned_domain?(String.t()) :: boolean()
+  def banned_domain?(email) do
+    [_start, domain] = String.split(email, "@")
+
+    Enum.member?(list_banned_domains_cache(), domain)
+  end
+
+  @doc """
+  Gets a single banned_domain.
+
+  Raises `Ecto.NoResultsError` if the Banned domain does not exist.
+
+  ## Examples
+
+      iex> get_banned_domain!(123)
+      %BannedDomain{}
+
+      iex> get_banned_domain!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_banned_domain!(id), do: Repo.get!(BannedDomain, id)
+
+  @doc """
+  Creates a banned_domain.
+
+  ## Examples
+
+      iex> create_banned_domain(%{field: value})
+      {:ok, %BannedDomain{}}
+
+      iex> create_banned_domain(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_banned_domain(attrs \\ %{}) do
+    %BannedDomain{}
+    |> BannedDomain.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a banned_domain.
+
+  ## Examples
+
+      iex> update_banned_domain(banned_domain, %{field: new_value})
+      {:ok, %BannedDomain{}}
+
+      iex> update_banned_domain(banned_domain, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_banned_domain(%BannedDomain{} = banned_domain, attrs) do
+    banned_domain
+    |> BannedDomain.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a banned_domain.
+
+  ## Examples
+
+      iex> delete_banned_domain(banned_domain)
+      {:ok, %BannedDomain{}}
+
+      iex> delete_banned_domain(banned_domain)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_banned_domain(%BannedDomain{} = banned_domain) do
+    Repo.delete(banned_domain)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking banned_domain changes.
+
+  ## Examples
+
+      iex> change_banned_domain(banned_domain)
+      %Ecto.Changeset{data: %BannedDomain{}}
+
+  """
+  def change_banned_domain(%BannedDomain{} = banned_domain, attrs \\ %{}) do
+    BannedDomain.changeset(banned_domain, attrs)
+  end
+
+  @doc """
+  Returns the list of banned_ips.
+
+  ## Examples
+
+      iex> list_banned_ips()
+      [%BannedIP{}, ...]
+
+  """
+  def list_banned_ips do
+    Repo.all(BannedIP)
+  end
+
+  @doc """
+  Returns the list of banned_ips as IP objects
+
+  ## Examples
+
+      iex> list_banned_ip_ranges()
+      [%BannedIP{}, ...]
+
+  """
+  def list_banned_ip_ranges do
+    list_banned_ips_cache()
+    |> Enum.map(fn x ->
+      BannedIP.cidr_to_subnet(x.cidr)
+    end)
+    |> Enum.into([])
+  end
+
+  @spec list_banned_ips_cache :: [BannedIP.t()]
+  def list_banned_ips_cache do
+    Teiserver.cache_get(:application_metadata_cache, "banned_ips") || []
+  end
+
+  @doc """
+  Gets a single banned_ip.
+
+  Raises `Ecto.NoResultsError` if the Banned ip does not exist.
+
+  ## Examples
+
+      iex> get_banned_ip!(123)
+      %BannedIP{}
+
+      iex> get_banned_ip!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_banned_ip!(id), do: Repo.get!(BannedIP, id)
+
+  @doc """
+  Creates a banned_ip.
+
+  ## Examples
+
+      iex> create_banned_ip(%{field: value})
+      {:ok, %BannedIP{}}
+
+      iex> create_banned_ip(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_banned_ip(attrs \\ %{}) do
+    %BannedIP{}
+    |> BannedIP.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a banned_ip.
+
+  ## Examples
+
+      iex> update_banned_ip(banned_ip, %{field: new_value})
+      {:ok, %BannedIP{}}
+
+      iex> update_banned_ip(banned_ip, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_banned_ip(%BannedIP{} = banned_ip, attrs) do
+    banned_ip
+    |> BannedIP.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a banned_ip.
+
+  ## Examples
+
+      iex> delete_banned_ip(banned_ip)
+      {:ok, %BannedIP{}}
+
+      iex> delete_banned_ip(banned_ip)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_banned_ip(%BannedIP{} = banned_ip) do
+    Repo.delete(banned_ip)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking banned_ip changes.
+
+  ## Examples
+
+      iex> change_banned_ip(banned_ip)
+      %Ecto.Changeset{data: %BannedIP{}}
+
+  """
+  def change_banned_ip(%BannedIP{} = banned_ip, attrs \\ %{}) do
+    BannedIP.changeset(banned_ip, attrs)
+  end
+
+  @spec banned_ip?(String.t() | nil) :: boolean()
+  def banned_ip?(nil), do: false
+
+  def banned_ip?(ip) do
+    case IP.from_string(ip) do
+      {:ok, ip} ->
+        Enum.member?(list_banned_ips_cache(), ip)
+
+      {:error, :einval} ->
+        false
+    end
+  end
+
+  @doc """
+  Returns the list of banned_phrases.
+
+  ## Examples
+
+      iex> list_banned_phrases()
+      [%BannedPhrase{}, ...]
+
+  """
+  def list_banned_phrases do
+    Repo.all(BannedPhrase)
+  end
+
+  @spec list_banned_phrases_cache(atom()) :: [BannedPhrase.t()]
+  def list_banned_phrases_cache(type) do
+    Teiserver.cache_get(:application_metadata_cache, "banned_phrases") ||
+      []
+      |> Enum.filter(fn bp -> bp.type == type end)
+  end
+
+  @doc """
+  Gets a single banned_phrase.
+
+  Raises `Ecto.NoResultsError` if the Banned phrase does not exist.
+
+  ## Examples
+
+      iex> get_banned_phrase!(123)
+      %BannedPhrase{}
+
+      iex> get_banned_phrase!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_banned_phrase!(id), do: Repo.get!(BannedPhrase, id)
+
+  @doc """
+  Creates a banned_phrase.
+
+  ## Examples
+
+      iex> create_banned_phrase(%{field: value})
+      {:ok, %BannedPhrase{}}
+
+      iex> create_banned_phrase(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_banned_phrase(attrs \\ %{}) do
+    %BannedPhrase{}
+    |> BannedPhrase.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a banned_phrase.
+
+  ## Examples
+
+      iex> update_banned_phrase(banned_phrase, %{field: new_value})
+      {:ok, %BannedPhrase{}}
+
+      iex> update_banned_phrase(banned_phrase, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_banned_phrase(%BannedPhrase{} = banned_phrase, attrs) do
+    banned_phrase
+    |> BannedPhrase.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a banned_phrase.
+
+  ## Examples
+
+      iex> delete_banned_phrase(banned_phrase)
+      {:ok, %BannedPhrase{}}
+
+      iex> delete_banned_phrase(banned_phrase)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_banned_phrase(%BannedPhrase{} = banned_phrase) do
+    Repo.delete(banned_phrase)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking banned_phrase changes.
+
+  ## Examples
+
+      iex> change_banned_phrase(banned_phrase)
+      %Ecto.Changeset{data: %BannedPhrase{}}
+
+  """
+  def change_banned_phrase(%BannedPhrase{} = banned_phrase, attrs \\ %{}) do
+    BannedPhrase.changeset(banned_phrase, attrs)
   end
 end

@@ -3,10 +3,15 @@ defmodule Teiserver.ModerationTest do
   alias Teiserver.Moderation
   alias Teiserver.Moderation.Action
   alias Teiserver.Moderation.Ban
+  alias Teiserver.Moderation.BannedDomain
+  alias Teiserver.Moderation.BannedIP
+  alias Teiserver.Moderation.BannedPhrase
   alias Teiserver.Moderation.ModerationTestLib
   alias Teiserver.Moderation.Report
 
   use Teiserver.DataCase, async: true
+
+  import Teiserver.ModerationFixtures
 
   describe "reports" do
     @valid_attrs %{
@@ -191,6 +196,186 @@ defmodule Teiserver.ModerationTest do
     test "change_ban/1 returns a ban changeset" do
       ban = ModerationTestLib.ban_fixture()
       assert %Ecto.Changeset{} = Moderation.change_ban(ban)
+    end
+  end
+
+  describe "banned_domains" do
+    @invalid_attrs %{domain: nil}
+
+    test "list_banned_domains/0 returns all banned_domains" do
+      banned_domain = banned_domain_fixture()
+      assert Moderation.list_banned_domains() == [banned_domain]
+    end
+
+    test "get_banned_domain!/1 returns the banned_domain with given id" do
+      banned_domain = banned_domain_fixture()
+      assert Moderation.get_banned_domain!(banned_domain.id) == banned_domain
+    end
+
+    test "create_banned_domain/1 with valid data creates a banned_domain" do
+      valid_attrs = %{domain: "some domain"}
+
+      assert {:ok, %BannedDomain{} = banned_domain} = Moderation.create_banned_domain(valid_attrs)
+      assert banned_domain.domain == "some domain"
+    end
+
+    test "create_banned_domain/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Moderation.create_banned_domain(@invalid_attrs)
+    end
+
+    test "update_banned_domain/2 with valid data updates the banned_domain" do
+      banned_domain = banned_domain_fixture()
+      update_attrs = %{domain: "some updated domain"}
+
+      assert {:ok, %BannedDomain{} = banned_domain} =
+               Moderation.update_banned_domain(banned_domain, update_attrs)
+
+      assert banned_domain.domain == "some updated domain"
+    end
+
+    test "update_banned_domain/2 with invalid data returns error changeset" do
+      banned_domain = banned_domain_fixture()
+
+      assert {:error, %Ecto.Changeset{}} =
+               Moderation.update_banned_domain(banned_domain, @invalid_attrs)
+
+      assert banned_domain == Moderation.get_banned_domain!(banned_domain.id)
+    end
+
+    test "delete_banned_domain/1 deletes the banned_domain" do
+      banned_domain = banned_domain_fixture()
+      assert {:ok, %BannedDomain{}} = Moderation.delete_banned_domain(banned_domain)
+      assert_raise Ecto.NoResultsError, fn -> Moderation.get_banned_domain!(banned_domain.id) end
+    end
+
+    test "change_banned_domain/1 returns a banned_domain changeset" do
+      banned_domain = banned_domain_fixture()
+      assert %Ecto.Changeset{} = Moderation.change_banned_domain(banned_domain)
+    end
+  end
+
+  describe "banned_ips" do
+    @invalid_attrs %{cidr: nil}
+
+    test "list_banned_ips/0 returns all banned_ips" do
+      banned_ip = banned_ip_fixture()
+      assert Moderation.list_banned_ips() == [banned_ip]
+    end
+
+    test "get_banned_ip!/1 returns the banned_ip with given id" do
+      banned_ip = banned_ip_fixture()
+      assert Moderation.get_banned_ip!(banned_ip.id) == banned_ip
+    end
+
+    test "create_banned_ip/1 with valid data creates a banned_ip" do
+      valid_attrs = %{cidr: "123.123.0.2/32"}
+
+      assert {:ok, %BannedIP{} = banned_ip} = Moderation.create_banned_ip(valid_attrs)
+      assert banned_ip.cidr == "123.123.0.2/32"
+    end
+
+    test "create_banned_ip/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Moderation.create_banned_ip(@invalid_attrs)
+
+      # And test it fails with "good" data that is a bad cidr range
+      assert {:error, %Ecto.Changeset{}} = Moderation.create_banned_ip(%{cidr: "127.0"})
+    end
+
+    test "update_banned_ip/2 with valid data updates the banned_ip" do
+      banned_ip = banned_ip_fixture()
+      update_attrs = %{cidr: "123.123.0.9/32"}
+
+      assert {:ok, %BannedIP{} = banned_ip} = Moderation.update_banned_ip(banned_ip, update_attrs)
+      assert banned_ip.cidr == "123.123.0.9/32"
+    end
+
+    test "update_banned_ip/2 with invalid data returns error changeset" do
+      banned_ip = banned_ip_fixture()
+      assert {:error, %Ecto.Changeset{}} = Moderation.update_banned_ip(banned_ip, @invalid_attrs)
+      assert banned_ip == Moderation.get_banned_ip!(banned_ip.id)
+    end
+
+    test "delete_banned_ip/1 deletes the banned_ip" do
+      banned_ip = banned_ip_fixture()
+      assert {:ok, %BannedIP{}} = Moderation.delete_banned_ip(banned_ip)
+      assert_raise Ecto.NoResultsError, fn -> Moderation.get_banned_ip!(banned_ip.id) end
+    end
+
+    test "change_banned_ip/1 returns a banned_ip changeset" do
+      banned_ip = banned_ip_fixture()
+      assert %Ecto.Changeset{} = Moderation.change_banned_ip(banned_ip)
+    end
+  end
+
+  describe "banned_phrases" do
+    @invalid_attrs %{type: nil, severity: nil, phrase: nil, score_threshold: nil}
+
+    test "list_banned_phrases/0 returns all banned_phrases" do
+      banned_phrase = banned_phrase_fixture()
+      assert Moderation.list_banned_phrases() == [banned_phrase]
+    end
+
+    test "get_banned_phrase!/1 returns the banned_phrase with given id" do
+      banned_phrase = banned_phrase_fixture()
+      assert Moderation.get_banned_phrase!(banned_phrase.id) == banned_phrase
+    end
+
+    test "create_banned_phrase/1 with valid data creates a banned_phrase" do
+      valid_attrs = %{
+        type: "raw",
+        severity: "medium",
+        phrase: "some phrase",
+        score_threshold: 42
+      }
+
+      assert {:ok, %BannedPhrase{} = banned_phrase} = Moderation.create_banned_phrase(valid_attrs)
+      assert banned_phrase.type == :raw
+      assert banned_phrase.severity == :medium
+      assert banned_phrase.phrase == "some phrase"
+      assert banned_phrase.score_threshold == 42
+    end
+
+    test "create_banned_phrase/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Moderation.create_banned_phrase(@invalid_attrs)
+    end
+
+    test "update_banned_phrase/2 with valid data updates the banned_phrase" do
+      banned_phrase = banned_phrase_fixture()
+
+      update_attrs = %{
+        type: "raw",
+        severity: "medium",
+        phrase: "some updated phrase",
+        score_threshold: 43
+      }
+
+      assert {:ok, %BannedPhrase{} = banned_phrase} =
+               Moderation.update_banned_phrase(banned_phrase, update_attrs)
+
+      assert banned_phrase.type == :raw
+      assert banned_phrase.severity == :medium
+      assert banned_phrase.phrase == "some updated phrase"
+      assert banned_phrase.score_threshold == 43
+    end
+
+    test "update_banned_phrase/2 with invalid data returns error changeset" do
+      banned_phrase = banned_phrase_fixture()
+
+      assert {:error, %Ecto.Changeset{}} =
+               Moderation.update_banned_phrase(banned_phrase, @invalid_attrs)
+
+      assert banned_phrase == Moderation.get_banned_phrase!(banned_phrase.id)
+    end
+
+    test "delete_banned_phrase/1 deletes the banned_phrase" do
+      banned_phrase = banned_phrase_fixture()
+      assert {:ok, %BannedPhrase{}} = Moderation.delete_banned_phrase(banned_phrase)
+      assert_raise Ecto.NoResultsError, fn -> Moderation.get_banned_phrase!(banned_phrase.id) end
+    end
+
+    test "change_banned_phrase/1 returns a banned_phrase changeset" do
+      banned_phrase = banned_phrase_fixture()
+      assert %Ecto.Changeset{} = Moderation.change_banned_phrase(banned_phrase)
     end
   end
 end

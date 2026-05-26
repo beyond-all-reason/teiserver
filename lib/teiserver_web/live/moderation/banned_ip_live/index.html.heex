@@ -1,0 +1,54 @@
+<.header>
+  Listing Banned ips
+  <:actions>
+    <.link patch={~p"/moderation/banned_ips/new"}>
+      <.button>New banned ip</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="banned_ips"
+  rows={@streams.banned_ips}
+  row_click={fn {_id, banned_ip} -> JS.navigate(~p"/moderation/banned_ips/#{banned_ip}") end}
+>
+  <:col :let={{_id, banned_ip}} label="Cidr">{banned_ip.cidr}</:col>
+  <:action :let={{_id, banned_ip}}>
+    <div class="sr-only">
+      <.link navigate={~p"/moderation/banned_ips/#{banned_ip}"}>Show</.link>
+    </div>
+    <.link
+      patch={~p"/moderation/banned_ips/#{banned_ip}/edit"}
+      class="btn btn-secondary btn-sm me-2"
+    >
+      Edit
+    </.link>
+  </:action>
+  <:action :let={{id, banned_ip}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: banned_ip.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+      class="btn btn-danger btn-sm"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.back navigate={~p"/moderation"}>Back to moderation</.back>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="banned_ip-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/banned_ips")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@banned_ip.id || :new}
+    title={@page_title}
+    action={@live_action}
+    banned_ip={@banned_ip}
+    patch={~p"/moderation/banned_ips"}
+  />
+</.modal>

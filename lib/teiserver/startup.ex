@@ -6,8 +6,13 @@ defmodule Teiserver.Startup do
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.LobbyIdServer
+  alias Teiserver.Moderation.LoadBannedDomainsTask
+  alias Teiserver.Moderation.LoadBannedIPsTask
+  alias Teiserver.Moderation.LoadBannedPhrasesTask
   alias Teiserver.Telemetry
+
   use TeiserverWeb, :startup
+
   require Logger
 
   @spec startup :: :ok
@@ -28,6 +33,18 @@ defmodule Teiserver.Startup do
         :timer.sleep(200)
         Coordinator.start_coordinator()
         AutomodServer.start_automod_server()
+      end)
+    end
+
+    # If test mode we don't want to load this up for every test as we will generate
+    # a lot of errors related to the SQL sandbox. We have specific unit tests for
+    # these elsewhere in the codebase
+    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+      spawn(fn ->
+        :timer.sleep(200)
+        LoadBannedIPsTask.perform()
+        LoadBannedPhrasesTask.perform()
+        LoadBannedDomainsTask.perform()
       end)
     end
 
