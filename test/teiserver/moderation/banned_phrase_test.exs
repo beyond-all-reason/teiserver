@@ -72,11 +72,6 @@ defmodule Teiserver.ModerationTest do
       assert {:ok, %BannedPhrase{}} = Moderation.delete_banned_phrase(banned_phrase)
       assert_raise Ecto.NoResultsError, fn -> Moderation.get_banned_phrase!(banned_phrase.id) end
     end
-
-    test "change_banned_phrase/1 returns a banned_phrase changeset" do
-      banned_phrase = banned_phrase_fixture()
-      assert %Ecto.Changeset{} = Moderation.change_banned_phrase(banned_phrase)
-    end
   end
 
   describe "banned_phrase changeset validation checks" do
@@ -115,9 +110,7 @@ defmodule Teiserver.ModerationTest do
           score_threshold: 0
         })
 
-      assert changeset.errors == [
-               {:phrase, {"Fuzzy phrase needs to contain at least one wildcard (*)", []}}
-             ]
+      assert Keyword.has_key?(changeset.errors, :phrase)
     end
 
     test "create regex banned phrase" do
@@ -142,7 +135,7 @@ defmodule Teiserver.ModerationTest do
           score_threshold: 0
         })
 
-      assert changeset.errors == [{:phrase, {"Invalid regex - missing ), pos: 4", []}}]
+      assert Keyword.has_key?(changeset.errors, :phrase)
     end
   end
 

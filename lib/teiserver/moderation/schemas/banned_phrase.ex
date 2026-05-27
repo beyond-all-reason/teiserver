@@ -117,30 +117,25 @@ defmodule Teiserver.Moderation.BannedPhrase do
   end
 
   @doc """
-  Performs a more extended set of automated checks to see if the message
-  being posted is
+  Runs through a filtered list of banned phrases and returns the highest severity
+  matched by the message.
   """
   @spec message_severity(String.t(), severity(), [search_type()]) :: nil | BannedPhrase.severity()
   def message_severity(message, min_severity \\ :high, types \\ [:raw, :fuzzy, :regex]) do
-    # First get the list of phrases we want to check against
-    banned_phrases =
+    found_phrase =
       Moderation.list_banned_phrases_cache()
       |> Enum.filter(fn %BannedPhrase{type: type, severity: severity} ->
         severity_is_at_least(severity, min_severity) and Enum.member?(types, type)
       end)
+      |> Enum.find(fn %BannedPhrase{type: type, severity: severity} = banned_phrase ->
+        severity_is_at_least(severity, min_severity) and
+          Enum.member?(types, type) and
+          phrase_match?(banned_phrase, message)
+      end)
 
-    banned_phrases
-    |> Enum.reduce(nil, fn
-      phrase, nil ->
-        if phrase_match?(phrase, message) do
-          phrase.severity
-        else
-          nil
-        end
-
-      _phrase, found_severity ->
-        found_severity
-    end)
+    if found_phrase do
+      found_phrase.severity
+    end
   end
 
   defp severity_is_at_least(severity_tested, severity_minimum) do
@@ -160,11 +155,8 @@ defmodule Teiserver.Moderation.BannedPhrase do
     String.contains?(message, loaded_phrase)
   end
 
-  def phrase_match?(%BannedPhrase{type: :fuzzy, loaded_phrase: loaded_phrase}, message) do
-    Regex.match?(loaded_phrase, message)
-  end
-
-  def phrase_match?(%BannedPhrase{type: :regex, loaded_phrase: loaded_phrase}, message) do
+  def phrase_match?(%BannedPhrase{type: type, loaded_phrase: loaded_phrase}, message)
+      when type in [:regex, :fuzzy] do
     Regex.match?(loaded_phrase, message)
   end
 end
