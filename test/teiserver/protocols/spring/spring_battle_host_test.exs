@@ -3,6 +3,7 @@ defmodule Teiserver.SpringBattleHostTest do
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   alias Teiserver.Lobby
+  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Protocols.Spring
 
   use Teiserver.ServerCase, async: false
@@ -425,5 +426,42 @@ defmodule Teiserver.SpringBattleHostTest do
 
     _send_raw(socket3, "EXIT\n")
     _recv_raw(socket3)
+  end
+
+  test "lobby name validation", %{socket: socket} do
+    limit = LobbyLib.max_name_length()
+    invalid_name = String.duplicate("a", limit + 1)
+
+    # Creating lobby with invalid name fails
+    _send_raw(
+      socket,
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\t#{invalid_name}\tgameName\n"
+    )
+
+    reply = _recv_until(socket)
+
+    assert reply == "OPENBATTLEFAILED Lobby name too long\n"
+
+    # Open lobby for update_lobby_title
+    _send_raw(
+      socket,
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\tlobbyName\tgameName\n"
+    )
+
+    reply = _recv_until(socket)
+    ignore_events(socket)
+    assert reply =~ "BATTLEOPENED"
+
+    _send_raw(socket, "c.battle.update_lobby_title #{invalid_name}\n")
+    reply = _recv_until(socket)
+
+    assert reply == "NO cmd=c.battle.update_lobby_title\tLobby name too long\n"
+  end
+
+  defp ignore_events(socket) do
+    case _recv_until(socket) do
+      "" -> nil
+      _response -> ignore_events(socket)
+    end
   end
 end

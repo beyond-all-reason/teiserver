@@ -75,3 +75,5 @@ config :teiserver, Teiserver.Mailer,
   adapter: Bamboo.TestAdapter,
   noreply_address: "noreply@testsite.co.uk",
   contact_address: "info@testsite.co.uk"
+
+config :teiserver, Teiserver.Lobby.LobbyLib, max_name_length: 70

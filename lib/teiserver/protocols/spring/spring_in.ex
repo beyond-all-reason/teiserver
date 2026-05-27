@@ -18,6 +18,7 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Coordinator
   alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Lobby
+  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.AuthIn
   alias Teiserver.Protocols.Spring.BattleIn
@@ -844,6 +845,9 @@ defmodule Teiserver.Protocols.SpringIn do
 
             not Auth.is_bot?(state.userid) ->
               {:failure, "Not a bot"}
+
+            not LobbyLib.name_length_valid?(name) ->
+              {:failure, "Lobby name too long"}
 
             true ->
               password = if Enum.member?(["empty", "*"], password), do: nil, else: password

@@ -595,4 +595,23 @@ defmodule Teiserver.Lobby.LobbyLib do
       nil
     end
   end
+
+  # Lobby name and teaser validation
+  @spec max_name_length :: integer | nil
+  def max_name_length do
+    Application.get_env(:teiserver, Teiserver.Lobby.LobbyLib)[:max_name_length]
+  end
+
+  @spec name_chars_valid?(String.t()) :: boolean
+  def name_chars_valid?(name) do
+    case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, name) do
+      [_match] -> true
+      _no_match -> false
+    end
+  end
+
+  @spec name_length_valid?(String.t()) :: boolean
+  def name_length_valid?(name) do
+    String.length(name) <= max_name_length()
+  end
 end
