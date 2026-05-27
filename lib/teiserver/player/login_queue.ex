@@ -169,7 +169,8 @@ defmodule Teiserver.Player.LoginQueue do
       type: "integer",
       permissions: ["Admin"],
       description: "Maximum number of concurrent Tachyon player sessions",
-      default: 1000
+      default: 1000,
+      update_callback: &__MODULE__.set_limit/1
     })
   end
 end

@@ -307,7 +307,7 @@ defmodule Teiserver.Player.TachyonHandler do
         _message,
         %{status: :waiting} = state
       ) do
-    {:error_response, :invalid_request, state}
+    {:error_response, :invalid_request, "waiting for login", state}
   end
 
   def handle_command("system/disconnect", "request", _message_id, _message, state) do
