@@ -25,7 +25,7 @@ defmodule Teiserver.Account.MFAReport do
   end
 
   defp query_data do
-    roles = AuthLib.mfa_roles()
+    roles = AuthLib.mfa_roles() |> List.delete("Bot")
 
     query = """
     SELECT
@@ -40,6 +40,7 @@ defmodule Teiserver.Account.MFAReport do
       ON totps.user_id = users.id
     WHERE
       users.roles && $1::varchar[]
+      AND 'Bot' != ALL(users.roles)
       AND totps.user_id IS NULL -- Remove anybody with a TOTPS entry
     ORDER BY
       users.name ASC
