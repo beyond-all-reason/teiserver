@@ -135,13 +135,8 @@ defmodule Teiserver.Account.AuthLib do
   end
 
   defp permission_test(permissions_held, permission_required) do
-    Logger.debug(
-      "Permission test, has: #{Kernel.inspect(permissions_held)}, needs: #{Kernel.inspect(permission_required)}"
-    )
-
     cond do
       Enum.empty?(permissions_held) ->
-        Logger.debug("AuthLib.allow?() -> No permissions held")
         false
 
       # Server devs always have permission
@@ -154,7 +149,6 @@ defmodule Teiserver.Account.AuthLib do
 
       # Default to not having permission
       true ->
-        Logger.debug("AuthLib.allow?() -> Permission not found: #{permission_required}")
         false
     end
   end
