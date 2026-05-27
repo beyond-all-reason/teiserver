@@ -3,6 +3,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   Run with mix teiserver.fakedata
   """
 
+  @shortdoc "generate seeding data for local dev"
+
   alias Ecto.Multi
   alias Teiserver.Account
   alias Teiserver.Account.User
