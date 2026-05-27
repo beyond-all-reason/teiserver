@@ -58,30 +58,21 @@ defmodule Teiserver.Moderation.BannedPhrase do
   defp validate_fuzzy_phrase(%Changeset{} = changeset) do
     phrase = get_field(changeset, :phrase) || ""
 
-    {regex_result, possible_regex_error} =
-      phrase
-      |> Regex.escape()
-      |> String.replace("\\*", ".*")
-      |> Regex.compile()
+    pattern = phrase |> Regex.escape() |> String.replace("\\*", ".*")
 
-    cond do
-      not String.contains?(phrase, "*") ->
-        add_error(changeset, :phrase, "Fuzzy phrase needs to contain at least one wildcard (*)")
-
-      regex_result == :error ->
-        {error_chars, pos} = possible_regex_error
-
-        error_str = List.to_string(error_chars)
-        add_error(changeset, :phrase, "Invalid regex - #{error_str}, pos: #{pos}")
-
-      true ->
-        changeset
+    if String.contains?(phrase, "*") do
+      validate_pattern(changeset, pattern)
+    else
+      add_error(changeset, :phrase, "Fuzzy phrase needs to contain at least one wildcard (*)")
     end
   end
 
   defp validate_regex_phrase(%Changeset{} = changeset) do
     pattern = get_field(changeset, :phrase)
+    validate_pattern(changeset, pattern)
+  end
 
+  defp validate_pattern(%Changeset{} = changeset, pattern) do
     case Regex.compile(pattern) do
       {:ok, _regex} ->
         changeset
