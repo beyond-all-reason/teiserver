@@ -230,18 +230,23 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       assert data["invited"] == []
     end
 
-    test "max size enforced", ctx do
+    test "max size enforced", _ctx do
       Party.update_max_size(2)
+      creator = setup_client()
+      setup_party(creator.client)
+
       ok_client = setup_client()
-      assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, ok_client.user.id)
+
+      assert %{"status" => "success"} =
+               Tachyon.invite_to_party!(creator.client, ok_client.user.id)
 
       assert %{"commandId" => "party/updated", "data" => %{"maxMembers" => 2}} =
-               Tachyon.recv_message!(ctx.client)
+               Tachyon.recv_message!(creator.client)
 
       at_capacity_ctx = setup_client()
 
       assert %{"status" => "failed", "reason" => "invalid_request"} =
-               Tachyon.invite_to_party!(ctx.client, at_capacity_ctx.user.id)
+               Tachyon.invite_to_party!(creator.client, at_capacity_ctx.user.id)
     end
 
     test "timeout for invites", ctx do
@@ -273,15 +278,20 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
                "commandId" => "party/updated",
                "data" => %{"maxMembers" => 3}
              } = Tachyon.recv_message!(ctx.client)
+    end
 
+    test "maxMembers reflects config at party creation time" do
       Party.update_max_size(5)
-      ctx3 = setup_client()
-      assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, ctx3.user.id)
+      creator = setup_client()
+      setup_party(creator.client)
+
+      ctx2 = setup_client()
+      assert %{"status" => "success"} = Tachyon.invite_to_party!(creator.client, ctx2.user.id)
 
       assert %{
-               "commandId" => "party/updated",
-               "data" => %{"maxMembers" => 5}
-             } = Tachyon.recv_message!(ctx.client)
+               "commandId" => "party/invited",
+               "data" => %{"party" => %{"maxMembers" => 5}}
+             } = Tachyon.recv_message!(ctx2.client)
     end
   end
 

@@ -5,14 +5,12 @@ defmodule Teiserver.Player.TachyonHandler do
 
   alias Teiserver.Account
   alias Teiserver.CacheUser
-  alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.TachyonParser
   alias Teiserver.Matchmaking
   alias Teiserver.Messaging
-  alias Teiserver.Party.Server
   alias Teiserver.Player.Registry
   alias Teiserver.Player.Session
   alias Teiserver.Player.SessionRegistry
@@ -1133,7 +1131,7 @@ defmodule Teiserver.Player.TachyonHandler do
             joinedAt: DateTime.to_unix(m.joined_at, :microsecond)
           }
         end),
-      maxMembers: Config.get_site_config_cache(Server.max_size_key()),
+      maxMembers: party_state.max_members,
       invited:
         Enum.map(party_state.invited, fn {_id, m} ->
           %{
