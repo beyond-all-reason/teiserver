@@ -6,6 +6,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   alias Teiserver.Account.UserLib
   alias Teiserver.Communication
   alias Teiserver.Config
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Moderation
   alias Teiserver.Moderation.Action
@@ -245,6 +246,17 @@ defmodule TeiserverWeb.Moderation.ActionController do
   def create(conn, %{"action" => action_params}) do
     user = Account.get_user(action_params["target_id"])
 
+    expires_string = action_params["expires"] || ""
+
+    expires =
+      case DateHelper.human_input_to_datetime(expires_string) do
+        {:ok, expires_datetime} ->
+          expires_datetime
+
+        nil ->
+          action_params["expires"]
+      end
+
     restrictions =
       action_params["restrictions"]
       |> Map.values()
@@ -252,7 +264,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
     action_params =
       Map.merge(action_params, %{
-        "restrictions" => restrictions
+        "restrictions" => restrictions,
+        "expires" => expires
       })
 
     report_ids =

@@ -23,17 +23,8 @@ defmodule Teiserver.Account.TimeCompareReport do
   def run(_conn, params) do
     params = apply_defaults(params)
 
-    {start_date, end_date} =
-      case HumanTime.relative(params["the_date"]) do
-        {:ok, datetime} ->
-          start_date = DateHelper.beginning_of_day(datetime)
-          end_date = DateTime.shift(start_date, day: 1)
-
-          {start_date, end_date}
-
-        _error ->
-          {nil, nil}
-      end
+    start_date = DateHelper.parse_ymd(params["the_date"])
+    end_date = Date.shift(start_date, day: 1)
 
     results = get_data(params, {start_date, end_date})
 
@@ -112,8 +103,8 @@ defmodule Teiserver.Account.TimeCompareReport do
     logs =
       Logging.list_server_minute_logs(
         search: [
-          start_timestamp: start_date,
-          end_timestamp: end_date
+          start_timestamp: DateHelper.to_datetime(start_date),
+          end_timestamp: DateHelper.to_datetime(end_date)
         ],
         order: "Oldest first",
         limit: 1440
@@ -242,15 +233,16 @@ defmodule Teiserver.Account.TimeCompareReport do
         {"account_user#{i}", ""}
       end)
 
+    today =
+      DateHelper.today()
+      |> DateHelper.to_datetime()
+      |> DateHelper.date_to_str(:ymd)
+
     acc_values
     |> Map.merge(%{
-      "the_date" => "Yesterday",
+      "the_date" => today,
       "overlap" => "false",
       "skip_nil" => "false",
-
-      # "account_user1" => "#17899, EvolvedMonkey",
-      # "account_user2" => "#1332, Flash",
-
       "tabular" => "false"
     })
     |> Map.merge(Map.get(params, "report", %{}))

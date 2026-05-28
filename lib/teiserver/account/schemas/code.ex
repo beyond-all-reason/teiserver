@@ -15,10 +15,6 @@ defmodule Teiserver.Account.Code do
   end
 
   def changeset(code, attrs \\ %{}) do
-    attrs =
-      attrs
-      |> parse_humantimes([:expires])
-
     code
     |> cast(attrs, ~w(value purpose metadata expires user_id)a)
     |> validate_required(~w(value purpose expires user_id)a)

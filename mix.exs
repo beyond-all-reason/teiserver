@@ -98,7 +98,6 @@ defmodule Teiserver.MixProject do
       {:guardian, "~> 2.1"},
       {:argon2_elixir, "~> 4.1"},
       {:bodyguard, "~> 2.4"},
-      {:human_time, "~> 0.3.0"},
       {:oban, "~> 2.15"},
       {:parallel_stream, "~> 1.1.0"},
       {:con_cache, "~> 1.0"},
