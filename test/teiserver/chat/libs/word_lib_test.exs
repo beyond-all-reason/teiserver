@@ -8,11 +8,12 @@ defmodule Teiserver.Chat.WordLibTest do
   use Teiserver.DataCase, async: false
 
   import TeiserverTestLib,
-    only: [new_user: 0]
+    only: [new_user: 0, make_lobby: 0]
 
   setup do
     TeiserverTestLib.start_coordinator!()
-    :ok
+    lobby_id = make_lobby()
+    %{lobby_id: lobby_id}
   end
 
   test "bad words" do
@@ -73,32 +74,32 @@ defmodule Teiserver.Chat.WordLibTest do
     assert chatty_user.restrictions == ["Bridging"]
   end
 
-  test "de-bridging - lobby send_message" do
+  test "de-bridging - lobby send_message", %{lobby_id: lobby_id} do
     chatty_user = new_user()
 
     chatty_user = Account.get_user(chatty_user.id)
     assert chatty_user.restrictions == []
 
-    ChatLib.say(chatty_user.id, "harmless message", 1)
+    ChatLib.say(chatty_user.id, "harmless message", lobby_id)
     chatty_user = Account.get_user(chatty_user.id)
     assert chatty_user.restrictions == []
 
-    ChatLib.say(chatty_user.id, "night night tards", 1)
+    ChatLib.say(chatty_user.id, "night night tards", lobby_id)
     chatty_user = Account.get_user(chatty_user.id)
     assert chatty_user.restrictions == ["Bridging"]
   end
 
-  test "de-bridging - lobby send_message_ex" do
+  test "de-bridging - lobby send_message_ex", %{lobby_id: lobby_id} do
     chatty_user = new_user()
 
     chatty_user = Account.get_user(chatty_user.id)
     assert chatty_user.restrictions == []
 
-    ChatLib.sayex(chatty_user.id, "harmless message", 1)
+    ChatLib.sayex(chatty_user.id, "harmless message", lobby_id)
     chatty_user = Account.get_user(chatty_user.id)
     assert chatty_user.restrictions == []
 
-    ChatLib.sayex(chatty_user.id, "night night tards", 1)
+    ChatLib.sayex(chatty_user.id, "night night tards", lobby_id)
     chatty_user = Account.get_user(chatty_user.id)
     assert chatty_user.restrictions == ["Bridging"]
   end
