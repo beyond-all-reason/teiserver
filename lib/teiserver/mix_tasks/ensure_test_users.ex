@@ -12,6 +12,8 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
 
   @shortdoc "create random users for load testing"
 
+  alias Req.Request
+  alias Req.Response
   use Mix.Task
 
   @impl Mix.Task
@@ -28,7 +30,7 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
           exit({:shutdown, 1})
       end
 
-    HTTPoison.start()
+    Application.ensure_all_started([:req])
 
     Task.async_stream(
       1..parsed.count,
@@ -49,15 +51,13 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
     user = "test_user_#{String.pad_leading(to_string(i), 7, "0")}"
     data = Jason.encode!(%{email: "#{user}@test.local"})
 
-    headers = [
-      {"Content-Type", "application/json"},
-      {"Authorization", "Bearer #{token}"}
-    ]
+    headers = [{"content-type", "application/json"}, {"authorization", "Bearer #{token}"}]
 
-    resp =
-      HTTPoison.post!(url, data, headers)
+    {_req, %Response{} = resp} =
+      Request.new(url: url, method: :post, body: data, headers: headers)
+      |> Request.run_request()
 
-    case resp.status_code do
+    case resp.status do
       200 ->
         convert_response(resp.body)
 
@@ -74,8 +74,11 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
             permissions: ["Verified"]
           })
 
-        resp = HTTPoison.post!(url, data, headers)
-        200 = resp.status_code
+        {_req, resp} =
+          Request.new(url: url, method: :post, body: data, headers: headers)
+          |> Request.run_request()
+
+        200 = resp.status
         convert_response(resp.body)
     end
   end
