@@ -63,7 +63,11 @@ defmodule Teiserver.Moderation.BannedPhrase do
     if String.contains?(phrase, "*") do
       validate_pattern(changeset, pattern)
     else
-      add_error(changeset, :phrase, "Fuzzy phrase needs to contain at least one wildcard (*)")
+      add_error(
+        changeset,
+        :phrase,
+        "Fuzzy phrase needs to contain at least one wildcard (*), did you mean to use the 'raw' type?"
+      )
     end
   end
 
