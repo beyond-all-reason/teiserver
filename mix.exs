@@ -98,7 +98,6 @@ defmodule Teiserver.MixProject do
       {:guardian, "~> 2.1"},
       {:argon2_elixir, "~> 4.1"},
       {:bodyguard, "~> 2.4"},
-      {:human_time, "~> 0.3.0"},
       {:oban, "~> 2.15"},
       {:parallel_stream, "~> 1.1.0"},
       {:con_cache, "~> 1.0"},
@@ -110,7 +109,10 @@ defmodule Teiserver.MixProject do
       {:dialyxir, "~> 1.4.7", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:dart_sass, "~> 0.7", only: [:dev]},
-      {:tzdata, "~> 1.1.2"},
+      {:tzdata,
+       git: "https://github.com/cheerfulstoic/tzdata.git",
+       ref: "e76e9e31a78fc19334abdf53fd11b8d1cb50e08a",
+       override: true},
       {:ex_ulid, "~> 0.1.0"},
       {:mock, "~> 0.3.0", only: :test},
       # Provides a DSL on top of Ecto.Schema to define schemas with typespecs without all the boilerplate code.
@@ -167,7 +169,7 @@ defmodule Teiserver.MixProject do
        git: "https://github.com/geekingfrog/websocket_sync_client.git",
        ref: "d655018589f9ade836afb8df8ed5f45f53500173",
        only: [:dev, :test]},
-      {:httpoison, "~> 2.0", only: [:dev, :test]},
+      {:req, "~> 0.5.0", only: [:dev, :test]},
       {:nimble_totp, "~> 1.0"},
       {:eqrcode, "~> 0.2.1"},
       {:recon, "~> 2.5.6"}

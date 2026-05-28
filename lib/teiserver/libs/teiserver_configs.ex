@@ -4,6 +4,7 @@ defmodule Teiserver.TeiserverConfigs do
   alias Teiserver.Account
   alias Teiserver.Lobby
   alias Teiserver.Party
+  alias Teiserver.Player.LoginQueue
   alias Teiserver.Tachyon
 
   import Teiserver.Config, only: [add_site_config_type: 1]
@@ -308,7 +309,9 @@ defmodule Teiserver.TeiserverConfigs do
       description: "The cap for number of concurrent users",
       default: 1000,
       value_label: "",
-      update_callback: fn rate -> Account.set_login_limit(rate) end
+      update_callback: fn rate ->
+        Account.set_login_limit(rate)
+      end
     })
 
     add_site_config_type(%{
@@ -740,6 +743,7 @@ defmodule Teiserver.TeiserverConfigs do
   defp tachyon_configs do
     Tachyon.setup_site_configs()
     Party.setup_site_configs()
+    LoginQueue.setup_site_configs()
     :ok
   end
 end

@@ -11,6 +11,8 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Helpers.TachyonParser
   alias Teiserver.Matchmaking
   alias Teiserver.Messaging
+  alias Teiserver.Player
+  alias Teiserver.Player.LoginQueue
   alias Teiserver.Player.Registry
   alias Teiserver.Player.Session
   alias Teiserver.Player.SessionRegistry
@@ -22,11 +24,17 @@ defmodule Teiserver.Player.TachyonHandler do
 
   @behaviour Handler
 
-  @type state :: %{
-          user: T.user(),
-          sess_monitor: reference(),
-          pending_responses: Handler.pending_responses()
-        }
+  @type state ::
+          %{
+            user: T.user(),
+            status: :waiting
+          }
+          | %{
+              user: T.user(),
+              status: :admitted,
+              sess_monitor: reference(),
+              pending_responses: Handler.pending_responses()
+            }
 
   @impl Handler
   def connect(conn) do
@@ -51,19 +59,42 @@ defmodule Teiserver.Player.TachyonHandler do
   @impl Handler
   @spec init(%{user: T.user()}) :: Handler.result()
   def init(initial_state) do
-    # this is inside the process that maintain the connection
-    {:ok, session_pid, sess_state} = setup_session(initial_state.user)
-
-    sess_monitor = Process.monitor(session_pid)
-
-    state =
-      initial_state |> Map.put(:sess_monitor, sess_monitor) |> Map.put(:pending_responses, %{})
-
     user = initial_state.user
     Logger.metadata(actor_type: :connection, actor_id: to_string(user.id))
 
-    event = build_user_self_event(user, sess_state)
-    {:event, "user/self", event, state}
+    cond do
+      Player.lookup_session(user.id) != nil ->
+        do_admit(initial_state)
+
+      LoginQueue.attempt_login(user.id) ->
+        do_admit(initial_state)
+
+      true ->
+        state = Map.put(initial_state, :status, :waiting)
+        {:ok, state}
+    end
+  end
+
+  defp do_admit(state) do
+    {:ok, session_pid, sess_state} = setup_session(state.user)
+    sess_monitor = Process.monitor(session_pid)
+
+    new_state =
+      state
+      |> Map.put(:status, :admitted)
+      |> Map.put(:sess_monitor, sess_monitor)
+      |> Map.put(:pending_responses, Map.get(state, :pending_responses, %{}))
+
+    event = build_user_self_event(state.user, sess_state)
+    {:event, "user/self", event, new_state}
+  end
+
+  @doc """
+  Notify the connection handler that login has been accepted and admission can proceed.
+  Called by `LoginQueue` when a slot opens for a queued player.
+  """
+  def notify_login_accepted(pid) when is_pid(pid) do
+    send(pid, :login_accepted)
   end
 
   def force_disconnect(nil), do: :ok
@@ -78,6 +109,10 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   @impl Handler
+  def handle_info(:login_accepted, state) do
+    do_admit(state)
+  end
+
   def handle_info({:DOWN, _ref, :process, _pid, reason}, state) do
     Logger.warning(
       "Session for player went down because #{inspect(reason)}, terminating connection"
@@ -265,6 +300,16 @@ defmodule Teiserver.Player.TachyonHandler do
           term(),
           state()
         ) :: WebSock.handle_result()
+  def handle_command(
+        _command_id,
+        _message_type,
+        _message_id,
+        _message,
+        %{status: :waiting} = state
+      ) do
+    {:error_response, :invalid_request, "waiting for login", state}
+  end
+
   def handle_command("system/disconnect", "request", _message_id, _message, state) do
     Session.disconnect(state.user.id)
 
@@ -1133,6 +1178,7 @@ defmodule Teiserver.Player.TachyonHandler do
             joinedAt: DateTime.to_unix(m.joined_at, :microsecond)
           }
         end),
+      maxMembers: party_state.max_members,
       invited:
         Enum.map(party_state.invited, fn {_id, m} ->
           %{

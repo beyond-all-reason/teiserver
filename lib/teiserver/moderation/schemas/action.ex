@@ -27,7 +27,6 @@ defmodule Teiserver.Moderation.Action do
     params =
       params
       |> trim_strings(~w(reason notes)a)
-      |> parse_humantimes(~w(expires)a)
 
     struct
     |> cast(

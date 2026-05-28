@@ -304,4 +304,47 @@ defmodule Teiserver.Helpers.DateHelperTest do
       assert DateHelper.less_than(~U[2026-05-19 00:00:00Z], nil) == false
     end
   end
+
+  describe "human_input_to_datetime" do
+    @now ~U[2026-05-19 09:00:00Z]
+
+    test "no match" do
+      assert DateHelper.human_input_to_datetime("some stuff", @now) == nil
+    end
+
+    test "seconds" do
+      assert DateHelper.human_input_to_datetime("1s", @now) == {:ok, ~U[2026-05-19 09:00:01Z]}
+
+      assert DateHelper.human_input_to_datetime("1 second", @now) ==
+               {:ok, ~U[2026-05-19 09:00:01Z]}
+    end
+
+    test "hours" do
+      assert DateHelper.human_input_to_datetime("3h", @now) == {:ok, ~U[2026-05-19 12:00:00Z]}
+
+      assert DateHelper.human_input_to_datetime("6 hours", @now) ==
+               {:ok, ~U[2026-05-19 15:00:00Z]}
+
+      assert DateHelper.human_input_to_datetime("12h 6hours", @now) ==
+               {:ok, ~U[2026-05-19 21:00:00Z]}
+    end
+
+    test "days" do
+      assert DateHelper.human_input_to_datetime("3d", @now) == {:ok, ~U[2026-05-22 09:00:00Z]}
+      assert DateHelper.human_input_to_datetime("6 days", @now) == {:ok, ~U[2026-05-25 09:00:00Z]}
+
+      assert DateHelper.human_input_to_datetime("13d 6days", @now) ==
+               {:ok, ~U[2026-06-01 09:00:00Z]}
+    end
+
+    test "months" do
+      assert DateHelper.human_input_to_datetime("3m", @now) == {:ok, ~U[2026-08-19 09:00:00Z]}
+
+      assert DateHelper.human_input_to_datetime("6 months", @now) ==
+               {:ok, ~U[2026-11-19 09:00:00Z]}
+
+      assert DateHelper.human_input_to_datetime("12m 6months", @now) ==
+               {:ok, ~U[2027-05-19 09:00:00Z]}
+    end
+  end
 end

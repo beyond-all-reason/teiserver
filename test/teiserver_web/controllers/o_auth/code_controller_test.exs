@@ -102,6 +102,52 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
       assert is_binary(json_resp["access_token"]), "has access_token"
     end
 
+    test "can use a client secret instead of PKCE", ctx do
+      app =
+        OAuthFixtures.app_attrs(ctx[:user].id)
+        |> Map.put(:confidential?, true)
+        |> OAuthFixtures.create_app()
+
+      code =
+        OAuthFixtures.code_attrs(ctx[:user], app)
+        |> Map.drop([:challenge, :challenge_method])
+        |> OAuthFixtures.create_code()
+
+      data = %{
+        grant_type: "authorization_code",
+        code: code.value,
+        redirect_uri: code.redirect_uri,
+        client_id: app.uid,
+        client_secret: app.plain_text_secret
+      }
+
+      resp = post(ctx[:conn], ~p"/oauth/token", data) |> json_response(200)
+      assert resp["token_type"] == "Bearer", "bearer token type"
+    end
+
+    test "must use client secret for confidential clients", ctx do
+      app =
+        OAuthFixtures.app_attrs(ctx[:user].id)
+        |> Map.put(:confidential?, true)
+        |> OAuthFixtures.create_app()
+
+      code =
+        OAuthFixtures.code_attrs(ctx[:user], app)
+        |> Map.drop([:challenge, :challenge_method])
+        |> OAuthFixtures.create_code()
+
+      data = %{
+        grant_type: "authorization_code",
+        code: code.value,
+        redirect_uri: code.redirect_uri,
+        client_id: app.uid
+        # ! no client secret
+      }
+
+      resp = post(ctx[:conn], ~p"/oauth/token", data) |> json_response(400)
+      assert resp["error_description"] =~ "missing required client_secret"
+    end
+
     test "must not provide client_id twice", %{conn: conn} = setup_data do
       data = get_valid_data(setup_data)
 
@@ -338,6 +384,26 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
       resp = post(conn, ~p"/oauth/token", data)
       assert %{"error" => "invalid_request"} = json_response(resp, 400)
+    end
+
+    # https://datatracker.ietf.org/doc/html/rfc6749#section-3.2.1
+    test "confidential client can get refresh token", ctx do
+      app =
+        OAuthFixtures.app_attrs(ctx[:user].id)
+        |> Map.put(:confidential?, true)
+        |> OAuthFixtures.create_app()
+
+      {:ok, token} = OAuth.create_token(ctx[:user], app, scopes: app.scopes)
+
+      data = %{
+        grant_type: "refresh_token",
+        client_id: app.uid,
+        client_secret: app.plain_text_secret,
+        refresh_token: token.refresh_token.value
+      }
+
+      resp = post(ctx[:conn], ~p"/oauth/token", data) |> json_response(200)
+      assert resp["token_type"] == "Bearer"
     end
   end
 

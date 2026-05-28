@@ -35,7 +35,8 @@ defmodule Teiserver.Party.Server do
               timeout_ref: :timer.tref()
             }
           },
-          matchmaking: nil | %{queues: [{Matchmaking.queue_id(), version :: String.t()}]}
+          matchmaking: nil | %{queues: [{Matchmaking.queue_id(), version :: String.t()}]},
+          max_members: pos_integer()
         }
 
   @default_call_timeout 5000
@@ -220,7 +221,8 @@ defmodule Teiserver.Party.Server do
         members: %{},
         invited: %{},
         ids_to_rejoin: MapSet.new(),
-        matchmaking: nil
+        matchmaking: nil,
+        max_members: Config.get_site_config_cache(max_size_key())
       }
       |> add_member(user_id, creator_pid)
 
@@ -256,7 +258,8 @@ defmodule Teiserver.Party.Server do
       ids_to_rejoin: MapSet.difference(snapshot.ids_to_rejoin, expired_invite_ids),
       invited: invited,
       # no restoration of matchmaking yet
-      matchmaking: nil
+      matchmaking: nil,
+      max_members: Config.get_site_config_cache(max_size_key())
     }
 
     timeout = Tachyon.get_restoration_timeout()
@@ -300,13 +303,11 @@ defmodule Teiserver.Party.Server do
     invited = Map.get(data.invited, user_id)
     member = Map.get(data.members, user_id)
 
-    max_size = Config.get_site_config_cache(max_size_key())
-
     cond do
       invited != nil || member != nil ->
         {:keep_state, data, [{:reply, from, {:error, :already_invited}}]}
 
-      Enum.count(data.invited) + Enum.count(data.members) >= max_size ->
+      Enum.count(data.invited) + Enum.count(data.members) >= data.max_members ->
         {:keep_state, data, [{:reply, from, {:error, :party_at_capacity}}]}
 
       true ->

@@ -880,7 +880,7 @@ defmodule Teiserver.Moderation do
 
   @spec list_banned_domains_cache :: [String.t()]
   def list_banned_domains_cache do
-    Teiserver.cache_get(:application_metadata_cache, "banned_domains") || []
+    Teiserver.cache_get(:application_metadata_cache, "banned_domains", [])
   end
 
   @spec banned_domain?(String.t()) :: boolean()
@@ -1003,7 +1003,7 @@ defmodule Teiserver.Moderation do
 
   @spec list_banned_ips_cache :: [BannedIP.t()]
   def list_banned_ips_cache do
-    Teiserver.cache_get(:application_metadata_cache, "banned_ips") || []
+    Teiserver.cache_get(:application_metadata_cache, "banned_ips", [])
   end
 
   @doc """
@@ -1113,11 +1113,9 @@ defmodule Teiserver.Moderation do
     Repo.all(BannedPhrase)
   end
 
-  @spec list_banned_phrases_cache(atom()) :: [BannedPhrase.t()]
-  def list_banned_phrases_cache(type) do
-    Teiserver.cache_get(:application_metadata_cache, "banned_phrases") ||
-      []
-      |> Enum.filter(fn bp -> bp.type == type end)
+  @spec list_banned_phrases_cache() :: [BannedPhrase.t()]
+  def list_banned_phrases_cache do
+    Teiserver.cache_get(:application_metadata_cache, "banned_phrases", [])
   end
 
   @doc """

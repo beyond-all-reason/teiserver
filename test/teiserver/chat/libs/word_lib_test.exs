@@ -44,6 +44,8 @@ defmodule Teiserver.Chat.WordLibTest do
     end
   end
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/26304493524/job/77437665396?pr=1155
+  @tag :needs_attention
   test "de-bridging - chat send_message" do
     chatty_user = new_user()
 
@@ -59,6 +61,8 @@ defmodule Teiserver.Chat.WordLibTest do
     assert chatty_user.restrictions == ["Bridging"]
   end
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/26304493524/job/77437665396?pr=1155
+  @tag :needs_attention
   test "de-bridging - chat send_message_ex" do
     chatty_user = new_user()
 

@@ -2,7 +2,6 @@ defmodule Teiserver.Chat.WordLib do
   @moduledoc false
   alias Teiserver.Config
   alias Teiserver.Helper.StringHelper
-  alias Teiserver.Moderation
   alias Teiserver.Plugins
 
   use Plugins
@@ -94,7 +93,7 @@ defmodule Teiserver.Chat.WordLib do
     end
   end
 
-  # TODO: Refactor this to return a BannedPhrase struct
+  # TODO: Replace all calls to this with BannedPhrase.message_severity
   @spec blacklisted_phrase?(String.t()) :: boolean()
   @decorate Plugins.plugin(:blacklisted_phrase?)
   def blacklisted_phrase?(text) do
@@ -110,13 +109,6 @@ defmodule Teiserver.Chat.WordLib do
           Regex.match?(r, text)
       end)
 
-    result || blacklisted_custom_phrase?(text)
-  end
-
-  defp blacklisted_custom_phrase?(text) do
-    Moderation.list_banned_phrases_cache(:regex)
-    |> Enum.any?(fn regex ->
-      not is_nil(Regex.run(regex, text))
-    end)
+    result
   end
 end
