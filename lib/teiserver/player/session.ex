@@ -2014,7 +2014,7 @@ defmodule Teiserver.Player.Session do
             nil
           else
             Party.get_state(id)
-            |> Map.take([:id, :version, :members, :invited, :matchmaking])
+            |> Map.take([:id, :version, :members, :invited, :matchmaking, :max_members])
           end
         end)
       end)

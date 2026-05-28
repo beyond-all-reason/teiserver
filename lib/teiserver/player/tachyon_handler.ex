@@ -1133,6 +1133,7 @@ defmodule Teiserver.Player.TachyonHandler do
             joinedAt: DateTime.to_unix(m.joined_at, :microsecond)
           }
         end),
+      maxMembers: party_state.max_members,
       invited:
         Enum.map(party_state.invited, fn {_id, m} ->
           %{
