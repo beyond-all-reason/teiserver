@@ -7,9 +7,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.CalculateSmurfKeyTask
+  alias Teiserver.Account.UserLib
   alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Client
+  alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.ChatLib
@@ -380,6 +382,27 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
+  def handle_griefing(username, event_type_name, game_time, match_id) do
+    userid = Account.get_userid_from_name(username)
+
+    case event_type_name do
+      "allycommloaded" ->
+        if UserLib.new_account?(userid) do
+          Telemetry.log_simple_match_event(userid, match_id, "newuserliftingcomms", game_time)
+
+          Logger.info(
+            "match-event: Kicking user #{username} from #{match_id} for likely attempted griefing by lifting an ally commander as a new account."
+          )
+
+          client = Account.get_client_by_id(userid)
+          Coordinator.send_to_host(client.lobby_id, "!kickban #{client.name}")
+        end
+
+      _other_event ->
+        nil
+    end
+  end
+
   defp handle_json_msg(%{"username" => username, "GPU" => _gpu} = contents, from_id) do
     case CacheUser.get_user_by_name(username) do
       nil ->
@@ -401,14 +424,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           }
 
           Account.update_user_stat(user.id, stats)
-
-          hw1 = CalculateSmurfKeyTask.calculate_hw1_fingerprint(stats)
-          hw2 = CalculateSmurfKeyTask.calculate_hw2_fingerprint(stats)
-          hw3 = CalculateSmurfKeyTask.calculate_hw3_fingerprint(stats)
-
-          Account.create_smurf_key(user.id, "hw1", hw1)
-          Account.create_smurf_key(user.id, "hw2", hw2)
-          Account.create_smurf_key(user.id, "hw3", hw3)
+          CalculateSmurfKeyTask.calculate_apply_keys(stats, user)
           AutomodServer.check_user(user.id)
         end
     end
@@ -454,6 +470,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     Logger.debug("Starting up Match monitor server")
     account = get_match_monitor_account()
     Teiserver.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
+
     {:ok, user, client} = CacheUser.internal_client_login(account.id)
 
     rooms = ["autohosts"]

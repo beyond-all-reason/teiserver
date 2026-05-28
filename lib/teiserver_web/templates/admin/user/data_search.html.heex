@@ -70,6 +70,18 @@
     </div>
 
     <div class="col-md-4 col-xl-2 search-form-input my-2">
+      <label for="data_search_ip" class="control-label">IP (single/prefix, e.g. 127.0.0): </label>
+      <input
+        type="text"
+        name="data_search[ip]"
+        id="data_search_ip"
+        value={@params["ip"]}
+        placeholder=""
+        class="form-control"
+      />
+    </div>
+
+    <div class="col-md-4 col-xl-2 search-form-input my-2">
       <label for="data_search_os" class="control-label">Custom field: </label>
       <input
         type="text"

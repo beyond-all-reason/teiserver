@@ -44,6 +44,8 @@ defmodule Teiserver.Protocols.SpringIn do
 
   @action_commands ~w(SAY SAYEX SAYPRIVATE SAYBATTLE SAYBATTLEPRIVATEEX JOINBATTLE LEAVEBATTLE)
 
+  @cluster_manager_regex ~r/^Host\[[A-Z]+\d+\]$/
+
   # Commands that don't require the user to be logged in
   @unauthenticated_commands ~w(
     PING STLS LOGIN REGISTER CONFIRMAGREEMENT RESETPASSWORDREQUEST EXIT CHANGEPASSWORD LISTCOMPFLAGS
@@ -298,7 +300,12 @@ defmodule Teiserver.Protocols.SpringIn do
         })
 
       {:ok, user} ->
-        optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
+        optimisation_level =
+          if Regex.match?(@cluster_manager_regex, user.name) do
+            :none
+          else
+            Map.get(@optimisation_level, user.lobby_client, :full)
+          end
 
         new_state =
           SpringOut.do_login_accepted(state, user, optimisation_level)
@@ -348,18 +355,39 @@ defmodule Teiserver.Protocols.SpringIn do
         state
 
       user ->
-        correct_code = Account.get_user_stat_data(user.id)["verification_code"]
+        stat_data = Account.get_user_stat_data(user.id)
 
-        case code == to_string(correct_code) do
+        correct_code = Map.get(stat_data, "verification_code")
+
+        require_manual_email? =
+          Enum.any?([
+            Map.get(stat_data, "vpn?", false),
+            Map.get(stat_data, "ip_check_bad?", false)
+          ])
+
+        cond do
+          code != to_string(correct_code) ->
+            reply(:denied, "Incorrect code", msg_id, state)
+            state
+
+          require_manual_email? ->
+            validation_email =
+              Config.get_site_config_cache("teiserver.Manual validation email address")
+
+            reply(
+              :denied,
+              "Your account was flagged for manual validation. Please send an email to \"#{validation_email}\" from the address you used to register.",
+              msg_id,
+              state
+            )
+
+            state
+
           true ->
             Account.verify_user(user.id)
 
             optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
             SpringOut.do_login_accepted(state, user, optimisation_level)
-
-          false ->
-            reply(:denied, "Incorrect code", msg_id, state)
-            state
         end
     end
   end

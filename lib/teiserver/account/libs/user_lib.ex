@@ -7,6 +7,7 @@ defmodule Teiserver.Account.UserLib do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserQueries
   alias Teiserver.CacheUser
+  alias Teiserver.Config
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging
   use TeiserverWeb, :library_newform
@@ -68,6 +69,28 @@ defmodule Teiserver.Account.UserLib do
     args
     |> UserQueries.query_users()
     |> Repo.all()
+  end
+
+  @spec list_users_by_data(%{String.t() => String.t()}) :: [User.t()]
+  def list_users_by_data(data_search_params) do
+    id_list =
+      Account.list_user_stats(
+        search: [
+          data_equal: {"hardware:gpuinfo", data_search_params["gpu"]},
+          data_equal: {"hardware:cpuinfo", data_search_params["cpu"]},
+          data_equal: {"hardware:osinfo", data_search_params["os"]},
+          data_equal: {"hardware:raminfo", data_search_params["ram"]},
+          data_equal: {"hardware:displaymax", data_search_params["screen"]},
+          data_string_starts_with: {"last_ip", data_search_params["ip"]},
+          data_equal: {data_search_params["custom_field"], data_search_params["custom_value"]}
+        ],
+        select: [:user_id],
+        limit: :infinity
+      )
+      |> Stream.map(fn stats -> stats.user_id end)
+      |> Enum.to_list()
+
+    list_users(search: [id_in: id_list])
   end
 
   @spec count_users() :: integer
@@ -430,5 +453,13 @@ defmodule Teiserver.Account.UserLib do
       true ->
         :ok
     end
+  end
+
+  @spec new_account?(User.id()) :: boolean()
+  def new_account?(user_id) do
+    user_stats = Account.get_user_stat_data(user_id)
+    play_hours = (user_stats["player_minutes"] || 0) / 60
+    play_time_cutoff = Config.get_site_config_cache("teiserver.New player cutoff")
+    play_hours < play_time_cutoff
   end
 end
