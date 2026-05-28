@@ -9,6 +9,27 @@ defmodule TeiserverWeb.BasicAuthBotPlugTest do
     assert resp.status == 401
   end
 
+  test "invalid auth header", %{conn: conn} do
+    conn = put_req_header(conn, "authorization", "Basic this-is-garbage")
+
+    %Plug.Conn{} = resp = BasicAuthBotPlug.call(conn, %{})
+    assert resp.status == 401
+  end
+
+  test "encoded auth header but invalid format", %{conn: conn} do
+    conn = put_req_header(conn, "authorization", Base.encode64("invalidformat"))
+
+    %Plug.Conn{} = resp = BasicAuthBotPlug.call(conn, %{})
+    assert resp.status == 401
+  end
+
+  test "basic auth invalid encoded value", %{conn: conn} do
+    conn = put_req_header(conn, "authorization", "Basic #{Base.encode64("invalidformat")}")
+
+    %Plug.Conn{} = resp = BasicAuthBotPlug.call(conn, %{})
+    assert resp.status == 401
+  end
+
   test "no account", %{conn: conn} do
     conn = put_auth_header(conn, "username", "password")
     %Plug.Conn{} = resp = BasicAuthBotPlug.call(conn, %{})
