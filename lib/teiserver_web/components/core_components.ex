@@ -191,12 +191,12 @@ defmodule TeiserverWeb.CoreComponents do
     ~H"""
     <div aria-live="polite" aria-atomic="true" class="position-relative">
       <div class="toast-container top-0 end-0 p-3">
-        <.flash kind={:info} title="Information" role="alert" flash={@flash} />
-        <.flash kind={:success} title="Success!" role="alert" flash={@flash} />
-        <.flash kind={:warning} title="Warning!" role="alert" flash={@flash} />
-        <.flash kind={:error} title="Error!" role="alert" flash={@flash} />
+        <.flash id="flash-info" kind={:info} title="Information" role="alert" flash={@flash} />
+        <.flash id="flash-success" kind={:success} title="Success!" role="alert" flash={@flash} />
+        <.flash id="flash-warning" kind={:warning} title="Warning!" role="alert" flash={@flash} />
+        <.flash id="flash-error" kind={:error} title="Error!" role="alert" flash={@flash} />
         <.flash
-          id="disconnected"
+          id="flash-disconnected"
           kind={:error}
           title="Reconnecting to the server"
           close={false}
@@ -433,7 +433,7 @@ defmodule TeiserverWeb.CoreComponents do
 
   def error(assigns) do
     ~H"""
-    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600">
+    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 bg-danger_transparent p-2">
       <Fontawesome.icon icon="circle-exclamation" style="solid" />
       {render_slot(@inner_block)}
     </p>

@@ -5,7 +5,6 @@ defmodule Teiserver.ModerationTest do
   alias Teiserver.Moderation.Ban
   alias Teiserver.Moderation.BannedDomain
   alias Teiserver.Moderation.BannedIP
-  alias Teiserver.Moderation.BannedPhrase
   alias Teiserver.Moderation.ModerationTestLib
   alias Teiserver.Moderation.Report
 
@@ -304,78 +303,6 @@ defmodule Teiserver.ModerationTest do
     test "change_banned_ip/1 returns a banned_ip changeset" do
       banned_ip = banned_ip_fixture()
       assert %Ecto.Changeset{} = Moderation.change_banned_ip(banned_ip)
-    end
-  end
-
-  describe "banned_phrases" do
-    @invalid_attrs %{type: nil, severity: nil, phrase: nil, score_threshold: nil}
-
-    test "list_banned_phrases/0 returns all banned_phrases" do
-      banned_phrase = banned_phrase_fixture()
-      assert Moderation.list_banned_phrases() == [banned_phrase]
-    end
-
-    test "get_banned_phrase!/1 returns the banned_phrase with given id" do
-      banned_phrase = banned_phrase_fixture()
-      assert Moderation.get_banned_phrase!(banned_phrase.id) == banned_phrase
-    end
-
-    test "create_banned_phrase/1 with valid data creates a banned_phrase" do
-      valid_attrs = %{
-        type: "raw",
-        severity: "medium",
-        phrase: "some phrase",
-        score_threshold: 42
-      }
-
-      assert {:ok, %BannedPhrase{} = banned_phrase} = Moderation.create_banned_phrase(valid_attrs)
-      assert banned_phrase.type == :raw
-      assert banned_phrase.severity == :medium
-      assert banned_phrase.phrase == "some phrase"
-      assert banned_phrase.score_threshold == 42
-    end
-
-    test "create_banned_phrase/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Moderation.create_banned_phrase(@invalid_attrs)
-    end
-
-    test "update_banned_phrase/2 with valid data updates the banned_phrase" do
-      banned_phrase = banned_phrase_fixture()
-
-      update_attrs = %{
-        type: "raw",
-        severity: "medium",
-        phrase: "some updated phrase",
-        score_threshold: 43
-      }
-
-      assert {:ok, %BannedPhrase{} = banned_phrase} =
-               Moderation.update_banned_phrase(banned_phrase, update_attrs)
-
-      assert banned_phrase.type == :raw
-      assert banned_phrase.severity == :medium
-      assert banned_phrase.phrase == "some updated phrase"
-      assert banned_phrase.score_threshold == 43
-    end
-
-    test "update_banned_phrase/2 with invalid data returns error changeset" do
-      banned_phrase = banned_phrase_fixture()
-
-      assert {:error, %Ecto.Changeset{}} =
-               Moderation.update_banned_phrase(banned_phrase, @invalid_attrs)
-
-      assert banned_phrase == Moderation.get_banned_phrase!(banned_phrase.id)
-    end
-
-    test "delete_banned_phrase/1 deletes the banned_phrase" do
-      banned_phrase = banned_phrase_fixture()
-      assert {:ok, %BannedPhrase{}} = Moderation.delete_banned_phrase(banned_phrase)
-      assert_raise Ecto.NoResultsError, fn -> Moderation.get_banned_phrase!(banned_phrase.id) end
-    end
-
-    test "change_banned_phrase/1 returns a banned_phrase changeset" do
-      banned_phrase = banned_phrase_fixture()
-      assert %Ecto.Changeset{} = Moderation.change_banned_phrase(banned_phrase)
     end
   end
 end

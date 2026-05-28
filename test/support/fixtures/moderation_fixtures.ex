@@ -11,10 +11,12 @@ defmodule Teiserver.ModerationFixtures do
   """
   def banned_domain_fixture(attrs \\ %{}) do
     {:ok, banned_domain} =
-      attrs
-      |> Enum.into(%{
-        domain: "some domain"
-      })
+      Map.merge(
+        %{
+          domain: "some domain"
+        },
+        attrs
+      )
       |> Moderation.create_banned_domain()
 
     banned_domain
@@ -25,10 +27,12 @@ defmodule Teiserver.ModerationFixtures do
   """
   def banned_ip_fixture(attrs \\ %{}) do
     {:ok, banned_ip} =
-      attrs
-      |> Enum.into(%{
-        cidr: "192.168.0.1/32"
-      })
+      Map.merge(
+        %{
+          cidr: "192.168.0.1/32"
+        },
+        attrs
+      )
       |> Moderation.create_banned_ip()
 
     banned_ip
@@ -39,13 +43,15 @@ defmodule Teiserver.ModerationFixtures do
   """
   def banned_phrase_fixture(attrs \\ %{}) do
     {:ok, banned_phrase} =
-      attrs
-      |> Enum.into(%{
-        phrase: "some phrase",
-        score_threshold: 42,
-        severity: :low,
-        type: :raw
-      })
+      Map.merge(
+        %{
+          phrase: "some phrase",
+          score_threshold: 42,
+          severity: :low,
+          type: :raw
+        },
+        attrs
+      )
       |> Moderation.create_banned_phrase()
 
     banned_phrase

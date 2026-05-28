@@ -38,8 +38,8 @@ defmodule Teiserver do
   end
 
   # Cache stuff
-  @spec cache_get(atom, any) :: any
-  defdelegate cache_get(table, key), to: CacheHelper
+  @spec cache_get(atom, any, any) :: any
+  defdelegate cache_get(table, key, default \\ nil), to: CacheHelper
 
   @spec cache_get_or_store(atom, any, function) :: any
   defdelegate cache_get_or_store(table, key, func), to: CacheHelper

@@ -3,13 +3,13 @@ defmodule Teiserver.Helpers.CacheHelper do
 
   require Logger
 
-  @spec cache_get(atom, any) :: any
-  def cache_get(table, key) do
-    ConCache.get(table, key)
+  @spec cache_get(atom, any, any) :: any
+  def cache_get(table, key, default \\ nil) do
+    ConCache.get(table, key) || default
   catch
     :exit, :noproc ->
       Logger.warning("Cache #{table} is down")
-      nil
+      default
   end
 
   @spec cache_get_or_store(atom, any, function) :: any
