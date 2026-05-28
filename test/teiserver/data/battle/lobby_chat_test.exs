@@ -6,6 +6,8 @@ defmodule Teiserver.Data.Battle.ChatLibTest do
   use Teiserver.DataCase, async: false
   import Teiserver.TeiserverTestLib, only: [new_user: 0]
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/26304493524/job/77437665396?pr=1155
+  @tag :needs_attention
   test "test lobby chat as bot" do
     bot_user = new_user()
     {:ok, bot_user} = Auth.add_roles(bot_user.id, ["Bot"])

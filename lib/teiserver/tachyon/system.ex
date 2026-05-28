@@ -7,6 +7,7 @@ defmodule Teiserver.Tachyon.System do
   alias Teiserver.Party
   alias Teiserver.Player
   alias Teiserver.Tachyon.Config
+
   alias Teiserver.Tachyon.Schema
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
