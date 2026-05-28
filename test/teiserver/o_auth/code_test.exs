@@ -4,6 +4,7 @@ defmodule Teiserver.OAuth.CodeTest do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.OAuth
+  alias Teiserver.OAuth.Token
   alias Teiserver.OAuthFixtures
   alias Teiserver.TeiserverTestLib
   use Teiserver.DataCase, async: true
@@ -23,7 +24,41 @@ defmodule Teiserver.OAuth.CodeTest do
         redirect_uris: ["http://localhost/foo"]
       })
 
-    {:ok, user: user, app: app}
+    {:ok, confidential_app} =
+      OAuth.create_application(%{
+        name: "Testing app",
+        uid: "confidential_uid",
+        owner_id: user.id,
+        scopes: ["tachyon.lobby"],
+        redirect_uris: ["http://localhost/foo"],
+        confidential?: true
+      })
+
+    {:ok, user: user, app: app, confidential_app: confidential_app}
+  end
+
+  test "challenge_method required if challenge is set", %{user: user, app: app} do
+    code_attrs = %{
+      application: app,
+      scopes: app.scopes,
+      redirect_uri: List.first(app.redirect_uris),
+      challenge: "vqIld9nxOPe5uX_ndiRlwafYdt94ogYOZDlGIyj68jc"
+    }
+
+    {:error, err} = OAuth.create_code(user, code_attrs)
+    assert Keyword.has_key?(err.errors, :challenge_method)
+  end
+
+  test "challenge required if challenge_method is set", %{user: user, app: app} do
+    code_attrs = %{
+      application: app,
+      scopes: app.scopes,
+      redirect_uri: List.first(app.redirect_uris),
+      challenge_method: "S256"
+    }
+
+    {:error, err} = OAuth.create_code(user, code_attrs)
+    assert Keyword.has_key?(err.errors, :challenge)
   end
 
   test "can get valid code", %{user: user, app: app} do
@@ -45,7 +80,7 @@ defmodule Teiserver.OAuth.CodeTest do
     attrs = create_code_attrs(user, updated_app)
 
     code_attrs = %{
-      id: app.id,
+      application: updated_app,
       scopes: app.scopes,
       redirect_uri: nil,
       challenge: attrs.challenge,
@@ -57,29 +92,58 @@ defmodule Teiserver.OAuth.CodeTest do
 
   test "can exchange valid code for token", %{user: user, app: app} do
     assert {:ok, code, attrs} = create_code(user, app)
-    assert {:ok, token} = OAuth.exchange_code(code, attrs._verifier, attrs.redirect_uri)
+
+    assert {:ok, token} =
+             OAuth.exchange_code(code,
+               verifier: attrs._verifier,
+               redirect_uri: attrs.redirect_uri
+             )
+
     assert token.scopes == code.scopes
     assert token.owner_id == user.id
     # the code is now consumed and not available anymore
     assert {:error, :no_code} = OAuth.get_valid_code(code.value)
   end
 
+  test "pkce is required for public apps", %{user: user, app: app} do
+    code_attrs = %{
+      application: app,
+      scopes: app.scopes,
+      redirect_uri: List.first(app.redirect_uris)
+    }
+
+    {:error, err} = OAuth.create_code(user, code_attrs)
+    assert Keyword.has_key?(err.errors, :challenge)
+  end
+
+  test "pkce is optional for confidential apps", %{user: user, confidential_app: app} do
+    code_attrs = %{
+      application: app,
+      scopes: app.scopes,
+      redirect_uri: List.first(app.redirect_uris)
+    }
+
+    {:ok, _code} = OAuth.create_code(user, code_attrs)
+  end
+
   test "cannot exchange expired code for token", %{user: user, app: app} do
     yesterday = DateTime.shift(DateTime.utc_now(), day: -1)
     assert {:ok, code, attrs} = create_code(user, app, expires_at: yesterday)
-    assert {:error, :expired} = OAuth.exchange_code(code, attrs._verifier)
+    assert {:error, :expired} = OAuth.exchange_code(code, verifier: attrs._verifier)
   end
 
   test "must use valid verifier", %{user: user, app: app} do
     assert {:ok, code, attrs} = create_code(user, app)
     attrs = Map.put(attrs, :id, app.id)
     no_match = :crypto.strong_rand_bytes(38) |> Base.hex_encode32(padding: false)
-    assert {:error, _reason} = OAuth.exchange_code(code, no_match)
+    assert {:error, _reason} = OAuth.exchange_code(code, verifier: no_match)
 
     no_match =
       "lollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollollol"
 
-    assert {:error, err} = OAuth.exchange_code(code, no_match, attrs.redirect_uri)
+    assert {:error, err} =
+             OAuth.exchange_code(code, verifier: no_match, redirect_uri: attrs.redirect_uri)
+
     assert err =~ "doesn't match"
   end
 
@@ -89,7 +153,10 @@ defmodule Teiserver.OAuth.CodeTest do
     verifier = "TOO_SHORT"
     challenge = OAuthFixtures.hash_verifier(verifier)
     {:ok, code} = OAuth.create_code(user, %{attrs | challenge: challenge})
-    assert {:error, err} = OAuth.exchange_code(code, verifier, attrs.redirect_uri)
+
+    assert {:error, err} =
+             OAuth.exchange_code(code, verifier: verifier, redirect_uri: attrs.redirect_uri)
+
     assert err =~ "cannot be less than"
   end
 
@@ -99,8 +166,91 @@ defmodule Teiserver.OAuth.CodeTest do
     verifier = String.duplicate("a", 129)
     challenge = OAuthFixtures.hash_verifier(verifier)
     {:ok, code} = OAuth.create_code(user, %{attrs | challenge: challenge})
-    assert {:error, err} = OAuth.exchange_code(code, verifier, attrs.redirect_uri)
+
+    assert {:error, err} =
+             OAuth.exchange_code(code, verifier: verifier, redirect_uri: attrs.redirect_uri)
+
     assert err =~ "cannot be more than"
+  end
+
+  test "must pass valid challenge method", %{user: user, app: app} do
+    code_attrs = %{
+      application: app,
+      redirect_uri: List.first(app.redirect_uris),
+      scopes: app.scopes,
+      challenge: OAuthFixtures.code_attrs(user, app).challenge,
+      challenge_method: "lolnope that's not supported"
+    }
+
+    {:error, err} = OAuth.create_code(user, code_attrs)
+    assert Keyword.has_key?(err.errors, :challenge_method)
+  end
+
+  test "confidential clients don't need pkce for tokens", %{user: user, confidential_app: app} do
+    code =
+      OAuthFixtures.code_attrs(user, app)
+      |> Map.drop([:challenge, :challenge_method, :_verifier])
+      |> OAuthFixtures.create_code()
+
+    assert {:ok, %Token{}} =
+             OAuth.exchange_code(code,
+               client_secret: app.plain_text_secret,
+               redirect_uri: List.first(app.redirect_uris)
+             )
+  end
+
+  test "confidential clients must not provide verifier when no challenge", %{
+    user: user,
+    confidential_app: app
+  } do
+    code =
+      OAuthFixtures.code_attrs(user, app)
+      |> Map.drop([:challenge, :challenge_method, :_verifier])
+      |> OAuthFixtures.create_code()
+
+    assert {:error, _err} =
+             OAuth.exchange_code(code,
+               client_secret: app.plain_text_secret,
+               verifier: "hello",
+               redirect_uri: List.first(app.redirect_uris)
+             )
+  end
+
+  test "confidential client must provide client secret", %{user: user, confidential_app: app} do
+    code =
+      OAuthFixtures.code_attrs(user, app)
+      |> Map.drop([:challenge, :challenge_method, :_verifier])
+      |> OAuthFixtures.create_code()
+
+    assert {:error, _err} = OAuth.exchange_code(code, redirect_uri: List.first(app.redirect_uris))
+  end
+
+  test "confidential client must provide correct client secret", %{
+    user: user,
+    confidential_app: app
+  } do
+    code =
+      OAuthFixtures.code_attrs(user, app)
+      |> Map.drop([:challenge, :challenge_method, :_verifier])
+      |> OAuthFixtures.create_code()
+
+    assert {:error, _err} =
+             OAuth.exchange_code(code,
+               client_secret: "this is not it",
+               redirect_uri: List.first(app.redirect_uris)
+             )
+  end
+
+  test "public client must not provide a client secret", %{user: user, app: app} do
+    assert {:ok, code, attrs} = create_code(user, app)
+    attrs = Map.put(attrs, :id, app.id)
+
+    assert {:error, _reason} =
+             OAuth.exchange_code(code,
+               verifier: attrs._verifier,
+               redirect_uri: List.first(app.redirect_uris),
+               client_secret: "hello"
+             )
   end
 
   test "can delete expired codes", %{user: user, app: app} do

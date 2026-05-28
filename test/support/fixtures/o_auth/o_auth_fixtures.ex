@@ -37,7 +37,7 @@ defmodule Teiserver.OAuthFixtures do
       value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(),
       owner: user,
       owner_id: user.id,
-      application_id: app.id,
+      application: app,
       scopes: app.scopes,
       expires_at: DateTime.shift(now, minute: 5),
       redirect_uri: List.first(app.redirect_uris),

@@ -104,6 +104,20 @@ defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
       assert html_response(resp, 400) =~ "invalid client_id"
     end
 
+    test "invalid request when incorrect challenge method", %{conn: conn, app: app} do
+      data = %{
+        client_id: app.uid,
+        response_type: "code",
+        code_challenge: "blah",
+        code_challenge_method: "this is not valid",
+        redirect_uri: hd(app.redirect_uris),
+        state: "some random state"
+      }
+
+      resp = post(conn, ~p"/oauth/authorize", data)
+      assert html_response(resp, 400) =~ "Bad request"
+    end
+
     test "redirected for invalid response type", %{conn: conn, app: app} do
       data = %{
         client_id: app.uid,

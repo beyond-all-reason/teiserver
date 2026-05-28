@@ -5,6 +5,7 @@ defmodule Teiserver.OAuth do
   alias Teiserver.Bot.Bot
 
   alias Teiserver.OAuth.Application
+  alias Teiserver.OAuth.ApplicationLib
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.OAuth.Code
   alias Teiserver.OAuth.CodeQueries
@@ -119,11 +120,11 @@ defmodule Teiserver.OAuth do
   @spec create_code(
           User.t(),
           %{
-            id: integer(),
-            scopes: Application.scopes(),
-            redirect_uri: String.t(),
-            challenge: String.t(),
-            challenge_method: String.t()
+            required(:application) => Application.t(),
+            required(:scopes) => Application.scopes(),
+            required(:redirect_uri) => String.t(),
+            optional(:challenge) => String.t(),
+            optional(:challenge_method) => String.t()
           },
           options()
         ) ::
@@ -132,15 +133,15 @@ defmodule Teiserver.OAuth do
 
   def create_code(%User{} = user, attrs, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
-    app_id = attrs.id
+    %Application{} = app = attrs.application
 
-    if ApplicationQueries.application_allows_code?(app_id) do
+    if ApplicationQueries.application_allows_code?(app) do
       # don't do any validation on the challenge yet, this is done when exchanging
       # the code for a token
       attrs = %{
         value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(),
         owner: user,
-        application_id: app_id,
+        application: attrs.application,
         scopes: attrs.scopes,
         expires_at: DateTime.shift(now, minute: 5),
         redirect_uri: Map.get(attrs, :redirect_uri),
@@ -258,15 +259,20 @@ defmodule Teiserver.OAuth do
   Given an authorization code, creates and return an authentication token
   (and its associated refresh token).
   """
-  @spec exchange_code(Code.t(), String.t(), String.t() | nil, options()) ::
+  @type exchange_arg ::
+          {:verifier, String.t()} | {:redirect_uri, String.t() | {:client_secret, String.t()}}
+  @type exchange_args :: [exchange_arg()]
+  @spec exchange_code(Code.t(), args :: exchange_args(), options()) ::
           {:ok, Token.t()} | {:error, term()}
-  def exchange_code(code, verifier, redirect_uri \\ nil, opts \\ []) do
+  def exchange_code(code, args, opts \\ []) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
+    redirect_uri = args[:redirect_uri]
 
     with {:ok, code} <- check_expiry(code, now),
          :ok <-
            if(code.redirect_uri == redirect_uri, do: :ok, else: {:error, :redirect_uri_mismatch}),
-         :ok <- check_verifier(code, verifier) do
+         :ok <- check_verifier(code, args[:verifier]),
+         :ok <- check_client_secret(code.application, args[:client_secret]) do
       Repo.transaction(fn ->
         Repo.delete!(code)
 
@@ -283,20 +289,38 @@ defmodule Teiserver.OAuth do
   end
 
   @spec check_verifier(Code.t(), String.t()) :: :ok | {:error, term()}
-  defp check_verifier(%Code{challenge_method: :plain, challenge: challenge}, verifier) do
+  defp check_verifier(%Code{} = code, verifier) do
+    case {code.challenge, verifier} do
+      # only confidential clients can create code without a challenge, not
+      # passing a verifier is thus OK
+      {nil, nil} ->
+        :ok
+
+      {nil, _not_nil} ->
+        {:error, "unexpected code verifier"}
+
+      {_challenge, nil} ->
+        {:error, "missing code verifier, PKCE is required"}
+
+      _x ->
+        do_check_verifier(code, verifier)
+    end
+  end
+
+  defp do_check_verifier(%Code{challenge_method: :plain, challenge: challenge}, verifier) do
     with :ok <- valid_verifier(verifier) do
       compare_hash(challenge, verifier)
     end
   end
 
-  defp check_verifier(%Code{challenge_method: :S256, challenge: challenge}, verifier) do
+  defp do_check_verifier(%Code{challenge_method: :S256, challenge: challenge}, verifier) do
     with :ok <- valid_verifier(verifier),
          {:ok, challenge} <- Base.url_decode64(challenge, padding: false, ignore: :whitespace) do
       compare_hash(challenge, :crypto.hash(:sha256, verifier))
     end
   end
 
-  defp check_verifier(_code, _verifier), do: {:error, :invalid_verifier}
+  defp do_check_verifier(_code, _verifier), do: {:error, :invalid_verifier}
 
   # A-Z, a-z, 0-9, and the punctuation characters -._~
   defp valid_verifier(verifier) do
@@ -330,7 +354,29 @@ defmodule Teiserver.OAuth do
     end
   end
 
-  @spec refresh_token(Token.t(), [option() | {:scopes, Application.scopes()}]) ::
+  defp check_client_secret(%Application{} = app, client_secret) do
+    case {ApplicationLib.confidential?(app), client_secret} do
+      {false, nil} ->
+        :ok
+
+      {false, _s} ->
+        {:error, "public client don't have client_secret"}
+
+      {true, nil} ->
+        {:error, "missing required client_secret"}
+
+      {true, s} ->
+        if ApplicationLib.verify_secret(s, app) do
+          :ok
+        else
+          {:error, "invalid client_secret"}
+        end
+    end
+  end
+
+  @spec refresh_token(Token.t(), [
+          option() | {:scopes, Application.scopes()} | {:client_secret, String.t()}
+        ]) ::
           {:ok, Token.t()} | {:error, term()}
   def refresh_token(token, opts \\ [])
 
@@ -341,39 +387,36 @@ defmodule Teiserver.OAuth do
   def refresh_token(token, opts) do
     now = Keyword.get(opts, :now, DateTime.utc_now())
 
-    case check_expiry(token, now) do
-      {:error, :expired} ->
-        {:error, :expired}
-
-      _result ->
-        token =
-          if Enum.all?([:application, :bot, :owner], &Ecto.assoc_loaded?(Map.get(token, &1))) do
-            token
-          else
-            TokenQueries.get_token(token.value)
-          end
-
-        scopes = Keyword.get(opts, :scopes, token.scopes)
-
-        refresh_attr = %{
-          id: token.application.id,
-          scopes: scopes,
-          original_scopes: token.original_scopes
-        }
-
-        tx_result =
-          Repo.transaction(fn ->
-            with {:ok, new_token} <-
-                   create_token(token.owner, refresh_attr, Keyword.put(opts, :scopes, scopes)) do
-              TokenQueries.delete_refresh_token(token)
-              new_token
-            end
-          end)
-
-        case tx_result do
-          {:ok, {:error, err}} -> {:error, err}
-          other -> other
+    with {:ok, _tok} <- check_expiry(token, now),
+         :ok <- check_client_secret(token.application, opts[:client_secret]) do
+      token =
+        if Enum.all?([:application, :bot, :owner], &Ecto.assoc_loaded?(Map.get(token, &1))) do
+          token
+        else
+          TokenQueries.get_token(token.value)
         end
+
+      scopes = Keyword.get(opts, :scopes, token.scopes)
+
+      refresh_attr = %{
+        id: token.application.id,
+        scopes: scopes,
+        original_scopes: token.original_scopes
+      }
+
+      tx_result =
+        Repo.transaction(fn ->
+          with {:ok, new_token} <-
+                 create_token(token.owner, refresh_attr, Keyword.put(opts, :scopes, scopes)) do
+            TokenQueries.delete_refresh_token(token)
+            new_token
+          end
+        end)
+
+      case tx_result do
+        {:ok, {:error, err}} -> {:error, err}
+        other -> other
+      end
     end
   end
 

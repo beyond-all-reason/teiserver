@@ -5,6 +5,7 @@ defmodule Teiserver.OAuth.Code do
   alias Teiserver.Account
   alias Teiserver.Account.User
   alias Teiserver.OAuth
+  alias Teiserver.OAuth.ApplicationLib
   alias Teiserver.OAuth.Libs.ScopeLib
 
   use TeiserverWeb, :schema
@@ -25,10 +26,18 @@ defmodule Teiserver.OAuth.Code do
   def changeset(code, attrs) do
     owner = get_owner(code, attrs)
 
+    app = Map.get(attrs, :application) || Map.get(code, :application)
+
     attrs =
       attrs
       |> uniq_lists(~w(scopes)a)
       |> Map.put(:owner_id, owner.id)
+      |> then(fn attrs ->
+        case app do
+          nil -> attrs
+          app -> Map.put(attrs, :application_id, app.id)
+        end
+      end)
 
     code
     |> cast(attrs, [
@@ -46,10 +55,11 @@ defmodule Teiserver.OAuth.Code do
       :owner_id,
       :application_id,
       :scopes,
-      :expires_at,
-      :challenge,
-      :challenge_method
+      :expires_at
     ])
+    |> Changeset.assoc_constraint(:application)
+    |> validate_required_together([:challenge, :challenge_method])
+    |> ensure_challenge_public_apps(app)
     |> Changeset.validate_subset(:scopes, OAuth.allowed_scopes())
     |> Changeset.validate_change(:scopes, fn :scopes, scopes ->
       case ScopeLib.all_scopes_allowed?(owner, scopes) do
@@ -64,4 +74,22 @@ defmodule Teiserver.OAuth.Code do
 
   defp get_owner(_app, %{owner: %Account.User{} = owner}), do: owner
   defp get_owner(%__MODULE__{owner: %Account.User{} = owner}, _attrs), do: owner
+
+  # ensure that if one of the given attr is given, then all of them must be
+  # present in the changeset
+  defp validate_required_together(changeset, attrs) do
+    if Enum.any?(attrs, &Changeset.get_change(changeset, &1)) do
+      Changeset.validate_required(changeset, attrs)
+    else
+      changeset
+    end
+  end
+
+  defp ensure_challenge_public_apps(changeset, %OAuth.Application{} = app) do
+    if ApplicationLib.confidential?(app) do
+      changeset
+    else
+      validate_required(changeset, [:challenge, :challenge_method])
+    end
+  end
 end

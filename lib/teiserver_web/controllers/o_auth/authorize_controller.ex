@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.OAuth.AuthorizeController do
+  alias Ecto.Changeset
   alias Teiserver.OAuth
 
   use TeiserverWeb, :controller
@@ -76,22 +77,30 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
       Map.get(params, "response_type") != "code" ->
         error_redirect(conn, redir_url, "unsupported_response_type", "only code is supported")
 
-      Map.get(params, "code_challenge_method") != "S256" ->
-        error_redirect(conn, redir_url, "invalid_request", "only S256 is supported")
-
       Map.get(params, "code_challenge") == nil ->
         error_redirect(conn, redir_url, "invalid_request", "a code challenge must be provided")
 
       true ->
         code_params = %{
-          id: app.id,
+          application: app,
           redirect_uri: URI.to_string(redir_url),
           scopes: app.scopes,
           challenge: Map.get(params, "code_challenge"),
-          challenge_method: "S256"
+          challenge_method: Map.get(params, "code_challenge_method")
         }
 
         case OAuth.create_code(conn.assigns.current_user, code_params) do
+          {:error, %Changeset{} = err} ->
+            errors =
+              Changeset.traverse_errors(err, fn {msg, _opts} -> msg end)
+              |> Enum.map(fn {k, msgs} ->
+                errs = Enum.join(msgs, ", ")
+                "#{k}: #{errs}"
+              end)
+
+            reason = Enum.join(errors, " - ")
+            bad_request(conn, reason)
+
           {:error, _reason} ->
             error_redirect(conn, redir_url, "server_error", "something went wrong")
 

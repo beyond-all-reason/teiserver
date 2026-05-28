@@ -19,7 +19,17 @@ defmodule Teiserver.OAuth.TokenTest do
         scopes: ["tachyon.lobby", "admin.map"]
       })
 
-    {:ok, user: user, app: app}
+    {:ok, confidential_app} =
+      OAuth.create_application(%{
+        name: "Testing app",
+        uid: "confidential_uid",
+        owner_id: user.id,
+        scopes: ["tachyon.lobby"],
+        redirect_uris: ["http://localhost/foo"],
+        confidential?: true
+      })
+
+    {:ok, user: user, app: app, confidential_app: confidential_app}
   end
 
   test "token must have an owner", %{app: app} do
@@ -71,8 +81,8 @@ defmodule Teiserver.OAuth.TokenTest do
 
   test "can refresh a token", %{user: user, app: app} do
     assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
-    assert {:ok, _token} = OAuth.get_valid_token(token.refresh_token.value)
-    assert {:ok, new_token} = OAuth.refresh_token(token.refresh_token)
+    assert {:ok, refresh_token} = OAuth.get_valid_token(token.refresh_token.value)
+    assert {:ok, new_token} = OAuth.refresh_token(refresh_token)
 
     # the previous token and its refresh token should have been invalidated
     assert {:error, :no_token} = OAuth.get_valid_token(token.value)
@@ -83,20 +93,43 @@ defmodule Teiserver.OAuth.TokenTest do
     assert new_token_fresh.id == new_token.id
   end
 
+  test "confidential clients can get refresh tokens", %{user: user, confidential_app: app} do
+    assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
+    assert {:ok, refresh_token} = OAuth.get_valid_token(token.refresh_token.value)
+
+    assert {:ok, %Token{}} =
+             OAuth.refresh_token(refresh_token, client_secret: app.plain_text_secret)
+  end
+
+  test "confidential clients must provide client secret", %{user: user, confidential_app: app} do
+    assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
+    assert {:ok, refresh_token} = OAuth.get_valid_token(token.refresh_token.value)
+    assert {:error, _err} = OAuth.refresh_token(refresh_token)
+  end
+
+  test "confidential clients must provide correct client secret", %{
+    user: user,
+    confidential_app: app
+  } do
+    assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
+    assert {:ok, refresh_token} = OAuth.get_valid_token(token.refresh_token.value)
+    assert {:error, _err} = OAuth.refresh_token(refresh_token, client_secret: "nope")
+  end
+
   test "can change scopes at refresh", %{user: user, app: app} do
     assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
-    assert {:ok, _token} = OAuth.get_valid_token(token.refresh_token.value)
-    assert {:ok, new_token} = OAuth.refresh_token(token.refresh_token, scopes: ["tachyon.lobby"])
+    assert {:ok, refresh_token} = OAuth.get_valid_token(token.refresh_token.value)
+    assert {:ok, new_token} = OAuth.refresh_token(refresh_token, scopes: ["tachyon.lobby"])
     assert MapSet.new(new_token.scopes) == MapSet.new(["tachyon.lobby"])
     assert MapSet.new(token.scopes) == MapSet.new(new_token.original_scopes)
   end
 
   test "cannot get more scopes than originally", %{user: user, app: app} do
     assert {:ok, token} = OAuth.create_token(user, app, scopes: app.scopes)
-    assert {:ok, _token} = OAuth.get_valid_token(token.refresh_token.value)
+    assert {:ok, refresh_token} = OAuth.get_valid_token(token.refresh_token.value)
 
     {:error, changeset} =
-      OAuth.refresh_token(token.refresh_token, scopes: ["tachyon.lobby", "lolscope"])
+      OAuth.refresh_token(refresh_token, scopes: ["tachyon.lobby", "lolscope"])
 
     assert Keyword.get(changeset.errors, :scopes) != nil
   end
@@ -110,8 +143,8 @@ defmodule Teiserver.OAuth.TokenTest do
   test "cannot get scopes at refresh without correct roles", %{user: user, app: app} do
     {:ok, user} = Auth.remove_roles(user, ["Admin"])
     assert {:ok, token} = OAuth.create_token(user, app, scopes: ["tachyon.lobby"])
-    assert {:ok, _token} = OAuth.get_valid_token(token.refresh_token.value)
-    assert {:error, err} = OAuth.refresh_token(token.refresh_token, scopes: ["admin.map"])
+    assert {:ok, refresh_token} = OAuth.get_valid_token(token.refresh_token.value)
+    assert {:error, err} = OAuth.refresh_token(refresh_token, scopes: ["admin.map"])
     assert Keyword.has_key?(err.errors, :scopes)
   end
 
