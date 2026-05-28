@@ -9,21 +9,16 @@ defmodule Teiserver.Plugs.BasicAuthBotPlug do
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    case get_req_header(conn, "authorization") do
-      ["Basic " <> encoded] ->
-        with {:ok, decoded} <- Base.decode64(encoded),
-             [username, password] <- String.split(decoded, ":", parts: 2),
-             %{id: id} <- Account.get_user_by_name(username),
-             %User{} = db_user <- Account.get_user(id),
-             true <- Auth.is_bot?(db_user),
-             true <- Account.verify_plain_password(password, db_user.password) do
-          conn
-        else
-          _error -> unauthorized(conn)
-        end
-
-      _other ->
-        unauthorized(conn)
+    with ["Basic " <> encoded] <- get_req_header(conn, "authorization"),
+         {:ok, decoded} <- Base.decode64(encoded),
+         [username, password] <- String.split(decoded, ":", parts: 2),
+         %{id: id} <- Account.get_user_by_name(username),
+         %User{} = db_user <- Account.get_user(id),
+         true <- Auth.is_bot?(db_user),
+         true <- Account.verify_plain_password(password, db_user.password) do
+      conn
+    else
+      _error -> unauthorized(conn)
     end
   end
 
