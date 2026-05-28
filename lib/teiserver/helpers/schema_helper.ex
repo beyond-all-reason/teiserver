@@ -1,8 +1,6 @@
 defmodule Teiserver.Helper.SchemaHelper do
   @moduledoc false
 
-  import Ecto.Changeset, only: [get_field: 2]
-
   @spec trim_strings(map(), List.t()) :: map()
   def trim_strings(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
@@ -126,88 +124,5 @@ defmodule Teiserver.Helper.SchemaHelper do
           {k, v}
       end
     end)
-  end
-
-  def parse_humantimes(params, names) do
-    names = Enum.map(names, fn n -> Atom.to_string(n) end)
-
-    params
-    |> Map.new(fn {k, v} ->
-      case Enum.member?(names, k) do
-        true ->
-          case v do
-            nil ->
-              {k, nil}
-
-            %DateTime{} = d ->
-              {k, d}
-
-            _value ->
-              case HumanTime.relative(v) do
-                {:ok, ht_v} ->
-                  {k, ht_v}
-
-                {:error, _reason} ->
-                  # We need to do this replace to stop "invalid string" appearing multiple times
-                  {k, String.replace(v, " - Invalid format", "") <> " - Invalid format"}
-              end
-          end
-
-        false ->
-          {k, v}
-      end
-    end)
-  end
-
-  # @spec validate_human_time(map, list | atom, Keyword.t) :: t
-  def validate_human_time(changeset, fields) when not is_nil(fields) do
-    %{required: required, errors: errors, changes: changes} = changeset
-    message = "Invalid format"
-    fields = List.wrap(fields)
-
-    fields_with_errors =
-      for field <- fields,
-          ht_valid?(changeset, field),
-          ensure_field_exists!(changeset, field),
-          is_nil(errors[field]),
-          do: field
-
-    case fields_with_errors do
-      [] ->
-        %{changeset | required: fields ++ required}
-
-      _fields ->
-        new_errors = Enum.map(fields_with_errors, &{&1, {message, [human_time: :invalid]}})
-        changes = Map.drop(changes, fields_with_errors)
-
-        %{
-          changeset
-          | changes: changes,
-            required: fields ++ required,
-            errors: new_errors ++ errors,
-            valid?: false
-        }
-    end
-  end
-
-  defp ensure_field_exists!(%{types: types, data: data}, field) do
-    if !Map.has_key?(types, field) do
-      raise ArgumentError, "unknown field #{inspect(field)} in #{inspect(data)}"
-    end
-
-    true
-  end
-
-  defp ht_valid?(changeset, field) when is_atom(field) do
-    case get_field(changeset, field) do
-      nil ->
-        false
-
-      v ->
-        case HumanTime.relative(v) do
-          {:error, _reason} -> true
-          {:ok, _result} -> false
-        end
-    end
   end
 end

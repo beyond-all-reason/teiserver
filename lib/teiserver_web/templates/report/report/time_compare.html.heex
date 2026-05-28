@@ -70,7 +70,7 @@
         <br /><br />
 
         <%= if @end_date do %>
-          <h4>{date_to_str(@start_date, format: :ymd_hms)}</h4>
+          <h4>{Calendar.strftime(@start_date, "%Y-%m-%d")}</h4>
         <% else %>
           <h4>No date found</h4>
         <% end %>

@@ -8,6 +8,15 @@ defmodule Teiserver.Helper.DateHelper do
     end
   end
 
+  @doc """
+  Return a date object for today
+  """
+  @spec today() :: Date.t()
+  def today do
+    DateTime.utc_now()
+    |> DateTime.to_date()
+  end
+
   @spec compare(
           DateTime.t() | NaiveDateTime.t() | Date.t(),
           DateTime.t() | NaiveDateTime.t() | Date.t()
@@ -22,8 +31,8 @@ defmodule Teiserver.Helper.DateHelper do
     "<t:#{the_time |> to_utc_datetime() |> DateTime.to_unix()}:f>"
   end
 
-  @spec date_to_str(DateTime.t()) :: String.t()
-  @spec date_to_str(DateTime.t(), list) :: String.t()
+  @spec date_to_str(Date.t() | DateTime.t()) :: String.t()
+  @spec date_to_str(Date.t() | DateTime.t(), list) :: String.t()
   def date_to_str(the_time), do: date_to_str(the_time, [])
   def date_to_str(nil, _format), do: ""
 
@@ -425,4 +434,34 @@ defmodule Teiserver.Helper.DateHelper do
 
   @spec quarter(Date.t() | DateTime.t()) :: integer()
   def quarter(date), do: div(date.month - 1, 3) + 1
+
+  @doc """
+  Converts human inputs like "3d" into a date relative to now.
+  """
+  @human_input_regex ~r/([1-9][0-9]*?)\s?(s|seconds?|h|hours?|d|days?|m|months?)/
+
+  @spec human_input_to_datetime(String.t(), DateTime.t() | nil) :: {:ok, DateTime.t()} | nil
+  def human_input_to_datetime(human_input, now \\ nil) do
+    now = now || DateTime.utc_now()
+    human_input = String.downcase(human_input)
+
+    case Regex.run(@human_input_regex, human_input) do
+      [_full, count, unit] ->
+        count = String.to_integer(count)
+        unit = String.first(unit)
+
+        duration =
+          case unit do
+            "s" -> Duration.new!(second: count)
+            "h" -> Duration.new!(hour: count)
+            "d" -> Duration.new!(day: count)
+            "m" -> Duration.new!(month: count)
+          end
+
+        {:ok, DateTime.shift(now, duration)}
+
+      _any_other ->
+        nil
+    end
+  end
 end
