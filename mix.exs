@@ -110,7 +110,10 @@ defmodule Teiserver.MixProject do
       {:dialyxir, "~> 1.4.7", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:dart_sass, "~> 0.7", only: [:dev]},
-      {:tzdata, "~> 1.1.2"},
+      {:tzdata,
+       git: "https://github.com/cheerfulstoic/tzdata.git",
+       ref: "e76e9e31a78fc19334abdf53fd11b8d1cb50e08a",
+       override: true},
       {:ex_ulid, "~> 0.1.0"},
       {:mock, "~> 0.3.0", only: :test},
       # Provides a DSL on top of Ecto.Schema to define schemas with typespecs without all the boilerplate code.
