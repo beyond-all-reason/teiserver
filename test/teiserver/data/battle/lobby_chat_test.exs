@@ -18,7 +18,7 @@ defmodule Teiserver.Data.Battle.ChatLibTest do
         founder_id: bot_user.id,
         founder_name: bot_user.name,
         name: "lobby_chat_test_as_bot",
-        id: 1
+        id: :rand.uniform(999_999_999_999_999)
       })
       |> Lobby.add_lobby()
 
