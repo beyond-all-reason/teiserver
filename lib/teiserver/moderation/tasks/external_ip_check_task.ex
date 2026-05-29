@@ -11,18 +11,8 @@ defmodule Teiserver.Moderation.Tasks.ExternalIPCheckTask do
     key = Config.get_site_config_cache("teiserver.External IP check key")
     endpoint = Config.get_site_config_cache("teiserver.External IP check endpoint")
 
-    query =
-      URI.encode_query(%{
-        "q" => ip,
-        "key" => key
-      })
-
-    url = "#{endpoint}?#{query}"
-
-    case Req.get(url) do
+    case Req.get(endpoint, params: [q: ip, key: key]) do
       {:ok, %Response{body: body}} ->
-        data = body |> Jason.decode!()
-
         [
           {:is_abuser, "teiserver.external_ip_ban_is_abuser"},
           {:is_bogon, "teiserver.external_ip_ban_is_bogon"},
@@ -33,7 +23,7 @@ defmodule Teiserver.Moderation.Tasks.ExternalIPCheckTask do
           {:is_vpn, "teiserver.external_ip_ban_is_vpn"}
         ]
         |> Enum.filter(fn {k, v} ->
-          Config.get_site_config_cache(v) and data[to_string(k)]
+          Config.get_site_config_cache(v) and body[to_string(k)]
         end)
         |> Enum.map(fn {k, _v} -> k end)
 

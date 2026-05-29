@@ -366,7 +366,7 @@ defmodule Teiserver.Protocols.SpringIn do
           ])
 
         cond do
-          code != to_string(correct_code) ->
+          code != correct_code ->
             reply(:denied, "Incorrect code", msg_id, state)
             state
 

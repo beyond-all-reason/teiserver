@@ -12,7 +12,9 @@ defmodule Teiserver.Game.MatchRatingLibTest do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Repo
 
-  use Teiserver.DataCase, async: true
+  # Not async as sometimes will trigger a foreign key constraint error for
+  # `teiserver_account_ratings_rating_type_id_fkey`
+  use Teiserver.DataCase, async: false
 
   setup do
     # Ensure the active season is set for the tests

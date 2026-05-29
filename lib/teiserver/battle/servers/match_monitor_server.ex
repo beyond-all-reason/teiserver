@@ -7,11 +7,9 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.CalculateSmurfKeyTask
-  alias Teiserver.Account.UserLib
   alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Client
-  alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.ChatLib
@@ -380,27 +378,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     )
 
     {:noreply, state}
-  end
-
-  def handle_griefing(username, event_type_name, game_time, match_id) do
-    userid = Account.get_userid_from_name(username)
-
-    case event_type_name do
-      "allycommloaded" ->
-        if UserLib.new_account?(userid) do
-          Telemetry.log_simple_match_event(userid, match_id, "newuserliftingcomms", game_time)
-
-          Logger.info(
-            "match-event: Kicking user #{username} from #{match_id} for likely attempted griefing by lifting an ally commander as a new account."
-          )
-
-          client = Account.get_client_by_id(userid)
-          Coordinator.send_to_host(client.lobby_id, "!kickban #{client.name}")
-        end
-
-      _other_event ->
-        nil
-    end
   end
 
   defp handle_json_msg(%{"username" => username, "GPU" => _gpu} = contents, from_id) do
