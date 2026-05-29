@@ -1,4 +1,4 @@
-defmodule Teiserver.ModerationTest do
+defmodule Teiserver.Moderation.BannedPhraseTest do
   alias Teiserver.Moderation
   alias Teiserver.Moderation.BannedPhrase
   alias Teiserver.Moderation.LoadBannedPhrasesTask
