@@ -66,14 +66,14 @@ defmodule Teiserver.Moderation.ActivityReport do
           "Suspensions"
           | build_line(dates, actions, fn a ->
               Enum.member?(a.restrictions, "Login") and
-                DateTime.compare(a.expires, permanent) == :lt
+                DateHelper.compare(a.expires, permanent) == :lt
             end)
         ],
         [
           "Bans"
           | build_line(dates, actions, fn a ->
               Enum.member?(a.restrictions, "Login") and
-                DateTime.compare(a.expires, permanent) == :gt
+                DateHelper.compare(a.expires, permanent) == :gt
             end)
         ]
       ]
