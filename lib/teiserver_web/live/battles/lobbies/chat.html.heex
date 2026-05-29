@@ -1,12 +1,6 @@
 <% bsname = @view_colour
 moderator = allow?(@current_user, "Moderator") %>
 
-{render(
-  TeiserverWeb.Battle.GeneralView,
-  "sub_menu.html",
-  Map.merge(assigns, %{active: "battle_lobbies", conn: @socket})
-)}
-
 <style type="text/css">
   .chat-row {
     margin: 1px 0;

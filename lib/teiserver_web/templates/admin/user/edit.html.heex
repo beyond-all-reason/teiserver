@@ -1,11 +1,4 @@
 <% bsname = view_colour() %>
-
-{render(
-  TeiserverWeb.Admin.GeneralView,
-  "sub_menu.html",
-  Map.merge(assigns, %{active: "users"})
-)}
-
 <div class="row">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>

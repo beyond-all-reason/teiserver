@@ -1,11 +1,5 @@
 <% bsname = view_colour() %>
 
-{render(
-  TeiserverWeb.Admin.GeneralView,
-  "sub_menu.html",
-  Map.merge(assigns, %{active: "users"})
-)}
-
 <script type="text/javascript">
   function new_rating_value(index) {
     skill = $("#" + index + "_skill").val();
