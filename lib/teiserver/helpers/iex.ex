@@ -5,6 +5,9 @@ defmodule Teiserver.Helpers.Iex do
   alias Teiserver.Helpers.Iex, as: Dbg
   """
 
+  alias Teiserver.Coordinator
+  alias Teiserver.Lobby
+
   @doc """
   Returns the list of keys for the given registry
   Some registries are "aliased" :lobbies, :sessions, :players, :autohosts
@@ -55,5 +58,16 @@ defmodule Teiserver.Helpers.Iex do
     rescue
       ArgumentError -> Registry.select(reg, spec)
     end
+  end
+
+  @doc """
+  Broadcast a message to all running lobby warning of impending server restart
+  """
+  def broadcast_server_restart(message \\ nil) do
+    message = message || "** SERVER RESTARTING **"
+    coordinator_id = Coordinator.get_coordinator_userid()
+
+    Lobby.list_lobby_ids()
+    |> Enum.each(&Lobby.say(coordinator_id, message, &1))
   end
 end
