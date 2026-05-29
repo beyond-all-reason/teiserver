@@ -130,7 +130,7 @@ defmodule Teiserver.EmailHelper do
   defp do_new_user(user) do
     stats = Account.get_user_stat_data(user.id)
     host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-    website_url = "https://#{host}"
+    website_url = Application.get_env(:teiserver, Teiserver)[:main_website]
     verification_code = stats["verification_code"]
 
     message_id = "<#{UUID.uuid4()}@#{host}>"
