@@ -130,7 +130,7 @@ defmodule Teiserver.EmailHelper do
   defp do_new_user(user) do
     stats = Account.get_user_stat_data(user.id)
     host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-    website_url = "https://#{host}"
+    website_url = Application.get_env(:teiserver, Teiserver)[:main_website]
     verification_code = stats["verification_code"]
 
     message_id = "<#{UUID.uuid4()}@#{host}>"
@@ -145,7 +145,7 @@ defmodule Teiserver.EmailHelper do
 
     <p>To find out more about #{game_name} visit our <a href="#{website_url}">website</a> .<p>
 
-    <p>Please also take time to read our <a href="#{website_url}/privacy">privacy policy</a>.</p>
+    <p>Please also take time to read our <a href="#{website_url}privacy">privacy policy</a>.</p>
 
     <p>If you experience any issues with registration or have other questions please get in touch through our <a href="#{discord}">discord</a>.</p>
     """
@@ -157,7 +157,7 @@ defmodule Teiserver.EmailHelper do
 
     To find out more about #{game_name} visit our website at #{website_url}.
 
-    Please also take time to read our privacy policy at #{website_url}/privacy.
+    Please also take time to read our privacy policy at #{website_url}privacy.
 
     If you experience any issues with registration or have other questions please get in touch through our  discord at #{discord}.
     """
