@@ -2,14 +2,14 @@
   <div class="col-md-6">
     {central_component("detail_line",
       label: "Registered",
-      value: date_to_str(@user.inserted_at, format: :hms_or_hmsymd, tz: @tz)
+      value: date_to_str(@user.inserted_at, format: :hms_or_hms_ymd, tz: @tz)
     )}
 
     {central_component("detail_line",
       label: "Last login",
       value:
         date_to_str(@user.last_login,
-          format: :hms_or_hmsymd,
+          format: :hms_or_hms_ymd,
           tz: @tz
         )
     )}
@@ -18,7 +18,7 @@
       label: "Last played",
       value:
         date_to_str(@user.last_played,
-          format: :hms_or_hmsymd,
+          format: :hms_or_hms_ymd,
           tz: @tz
         )
     )}
@@ -27,7 +27,7 @@
       label: "Last logout",
       value:
         date_to_str(@user.last_logout,
-          format: :hms_or_hmsymd,
+          format: :hms_or_hms_ymd,
           tz: @tz
         )
     )}

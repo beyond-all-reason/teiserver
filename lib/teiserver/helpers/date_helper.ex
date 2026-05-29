@@ -1,11 +1,35 @@
 defmodule Teiserver.Helper.DateHelper do
   @moduledoc false
 
-  defp convert(timestamp, tz) do
+  defp convert(%Date{} = date, tz) do
+    convert(to_datetime(date), tz)
+  end
+
+  defp convert(%DateTime{} = timestamp, tz) do
     case DateTime.shift_zone(timestamp, tz, Tzdata.TimeZoneDatabase) do
       {:ok, new_timestamp} -> new_timestamp
       _error -> timestamp
     end
+  end
+
+  @doc """
+  Wraps the Calendar.strftime function to give a different
+  output if it is the same day (time) or a different day (date)
+  """
+  @spec hms_or_ymd(DateTime.t()) :: String.t()
+  def hms_or_ymd(%DateTime{} = the_time) do
+    time_date = DateTime.to_date(the_time)
+    today_date = DateTime.new!(today(), ~T[00:00:00.0])
+
+    if Date.compare(time_date, today_date) == :eq do
+      Calendar.strftime(the_time, "%X")
+    else
+      Calendar.strftime(the_time, "%x")
+    end
+  end
+
+  def strftime(the_time, :ymd_hms) do
+    Calendar.strftime(the_time, "%Y-%m-%d %I:%M:%S")
   end
 
   @doc """
@@ -39,8 +63,6 @@ defmodule Teiserver.Helper.DateHelper do
   def date_to_str(the_time, format) when is_atom(format) do
     date_to_str(the_time, format: format)
   end
-
-  def date_to_str(the_time, format: :dmy_text, tz: tz), do: dmy_text(the_time, tz)
 
   def date_to_str(%NaiveDateTime{} = the_time, args) do
     the_time
@@ -83,14 +105,11 @@ defmodule Teiserver.Helper.DateHelper do
         :email_date ->
           Calendar.strftime(the_time, "%a, %d %b %Y %H:%M:%S %z")
 
-        :hms_or_hmsymd ->
-          _hms_or_hmsymd(the_time, now)
-
         :hms_or_dmy ->
           _hms_or_dmy(the_time, now)
 
         :hms_or_ymd ->
-          _hms_or_ymd(the_time, now)
+          hms_or_ymd(the_time)
 
         :hms_or_hms_ymd ->
           _hms_or_hms_ymd(the_time, now)
@@ -138,44 +157,6 @@ defmodule Teiserver.Helper.DateHelper do
     end
   end
 
-  @spec datetime_min(DateTime.t(), DateTime.t()) :: DateTime.t()
-  @spec datetime_min(Date.t(), Date.t()) :: Date.t()
-  def datetime_min(dt1, dt2) do
-    if compare(dt1, dt2) == :lt do
-      dt1
-    else
-      dt2
-    end
-  end
-
-  @spec datetime_max(DateTime.t(), DateTime.t()) :: DateTime.t()
-  @spec datetime_max(Date.t(), Date.t()) :: Date.t()
-  def datetime_max(dt1, dt2) do
-    if compare(dt1, dt2) == :gt do
-      dt1
-    else
-      dt2
-    end
-  end
-
-  @spec _hms_or_hmsymd(DateTime.t(), DateTime.t()) :: String.t()
-  defp _hms_or_hmsymd(the_time, today) do
-    if DateTime.to_date(the_time) == DateTime.to_date(today) do
-      Calendar.strftime(the_time, "Today at %H:%M:%S")
-    else
-      Calendar.strftime(the_time, "%H:%M:%S %Y-%m-%d")
-    end
-  end
-
-  @spec _hms_or_ymd(DateTime.t(), DateTime.t()) :: String.t()
-  defp _hms_or_ymd(the_time, today) do
-    if DateTime.to_date(the_time) == DateTime.to_date(today) do
-      Calendar.strftime(the_time, "Today at %I:%M:%S")
-    else
-      Calendar.strftime(the_time, "%Y-%m-%d")
-    end
-  end
-
   @spec _hms_or_hms_ymd(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_hms_ymd(the_time, today) do
     if DateTime.to_date(the_time) == DateTime.to_date(today) do
@@ -193,25 +174,6 @@ defmodule Teiserver.Helper.DateHelper do
       Calendar.strftime(the_time, "%d/%m/%Y")
     end
   end
-
-  defp dmy_text(nil, _tz), do: nil
-
-  defp dmy_text(the_time, tz) do
-    converted = convert(the_time, tz || "UTC")
-    day = converted.day
-    "#{day}#{suffix(day)} #{Calendar.strftime(converted, "%B")} #{converted.year}"
-  end
-
-  defp suffix(1), do: "st"
-  defp suffix(21), do: "st"
-  defp suffix(31), do: "st"
-  defp suffix(2), do: "nd"
-  defp suffix(22), do: "nd"
-  defp suffix(32), do: "nd"
-  defp suffix(3), do: "nd"
-  defp suffix(23), do: "nd"
-  defp suffix(33), do: "rd"
-  defp suffix(_day), do: "th"
 
   @doc """
   Parses a date string in "DD/MM/YYYY" format into a `Date`.
@@ -396,7 +358,7 @@ defmodule Teiserver.Helper.DateHelper do
   # --- Date/DateTime helpers replacing Timex functions ---
 
   @spec to_datetime(Date.t()) :: DateTime.t()
-  def to_datetime(date), do: DateTime.new!(date, ~T[00:00:00], "Etc/UTC")
+  def to_datetime(%Date{} = date), do: DateTime.new!(date, ~T[00:00:00], "Etc/UTC")
 
   defp to_utc_datetime(%DateTime{} = dt), do: dt
   defp to_utc_datetime(%NaiveDateTime{} = ndt), do: DateTime.from_naive!(ndt, "Etc/UTC")
