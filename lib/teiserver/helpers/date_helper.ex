@@ -400,7 +400,7 @@ defmodule Teiserver.Helper.DateHelper do
   @doc """
   Converts human inputs like "3d" into a date relative to now.
   """
-  @human_input_regex ~r/([1-9][0-9]*?)\s?(s|seconds?|h|hours?|d|days?|m|months?)/
+  @human_input_regex ~r/([1-9][0-9]*?)\s?(s|seconds?|h|hours?|d|days?|m|months?|y|years?)/
 
   @spec human_input_to_datetime(String.t(), DateTime.t() | nil) :: {:ok, DateTime.t()} | nil
   def human_input_to_datetime(human_input, now \\ nil) do
@@ -418,6 +418,7 @@ defmodule Teiserver.Helper.DateHelper do
             "h" -> Duration.new!(hour: count)
             "d" -> Duration.new!(day: count)
             "m" -> Duration.new!(month: count)
+            "y" -> Duration.new!(year: count)
           end
 
         {:ok, DateTime.shift(now, duration)}
