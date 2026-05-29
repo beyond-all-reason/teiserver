@@ -7,6 +7,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Moderation
 
   use Oban.Worker, queue: :teiserver
@@ -74,7 +75,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
             dt1
 
           dt1, dt2 ->
-            if NaiveDateTime.compare(dt1, dt2) == :lt, do: dt1, else: dt2
+            if DateHelper.compare(dt1, dt2) == :lt, do: dt1, else: dt2
         end)
 
       expires_as_string = new_restricted_until |> Jason.encode!() |> Jason.decode!()

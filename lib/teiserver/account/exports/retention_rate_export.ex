@@ -56,7 +56,7 @@ defmodule Teiserver.Account.RetentionRateExport do
     today_datetime = DateHelper.to_datetime(Date.utc_today())
 
     end_datetime =
-      if DateTime.compare(today_datetime, end_datetime) == :gt do
+      if DateHelper.compare(today_datetime, end_datetime) == :gt do
         end_datetime
       else
         today_datetime

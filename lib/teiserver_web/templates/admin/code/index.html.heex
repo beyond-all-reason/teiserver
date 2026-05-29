@@ -56,7 +56,8 @@
                   <td>{code.user.name}</td>
                   <td>{code.purpose}</td>
                   <td>
-                    {if DateTime.compare(code.expires, DateTime.utc_now()) != :gt do
+                    {if Teiserver.Helper.DateHelper.compare(code.expires, DateTime.utc_now()) !=
+                          :gt do
                       "Expired"
                     else
                       date_to_str(code.expires, format: :hms_or_dmy, tz: @tz)
