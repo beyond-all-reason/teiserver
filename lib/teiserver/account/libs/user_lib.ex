@@ -73,24 +73,9 @@ defmodule Teiserver.Account.UserLib do
 
   @spec list_users_by_data(%{String.t() => String.t()}) :: [User.t()]
   def list_users_by_data(data_search_params) do
-    id_list =
-      Account.list_user_stats(
-        search: [
-          data_equal: {"hardware:gpuinfo", data_search_params["gpu"]},
-          data_equal: {"hardware:cpuinfo", data_search_params["cpu"]},
-          data_equal: {"hardware:osinfo", data_search_params["os"]},
-          data_equal: {"hardware:raminfo", data_search_params["ram"]},
-          data_equal: {"hardware:displaymax", data_search_params["screen"]},
-          data_string_starts_with: {"last_ip", data_search_params["ip"]},
-          data_equal: {data_search_params["custom_field"], data_search_params["custom_value"]}
-        ],
-        select: [:user_id],
-        limit: :infinity
-      )
-      |> Stream.map(fn stats -> stats.user_id end)
-      |> Enum.to_list()
-
-    list_users(search: [id_in: id_list])
+    data_search_params
+    |> UserQueries.user_search_by_data()
+    |> Repo.all()
   end
 
   @spec count_users() :: integer

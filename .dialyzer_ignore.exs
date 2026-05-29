@@ -123,6 +123,7 @@
   {"lib/teiserver_web/controllers/admin/tool_controller.ex", :call},
   {"lib/teiserver_web/controllers/admin/user_controller.ex", :guard_fail},
   {"lib/teiserver_web/controllers/admin/user_controller.ex", :pattern_match},
+  {"lib/teiserver_web/controllers/admin/user_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/battle/match_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/logging/aggregate_view_log_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/logging/match_log_controller.ex", :call},

@@ -9,6 +9,7 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account.Tasks.GdprForgetTask
   alias Teiserver.Account.TOTPLib
   alias Teiserver.Account.UserLib
+  alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.CacheUser
   alias Teiserver.Chat
@@ -169,24 +170,7 @@ defmodule TeiserverWeb.Admin.UserController do
       if params["data_search"] == nil do
         []
       else
-        id_list =
-          Account.list_user_stats(
-            search: [
-              data_equal: {"hardware:gpuinfo", params["data_search"]["gpu"]},
-              data_equal: {"hardware:cpuinfo", params["data_search"]["cpu"]},
-              data_equal: {"hardware:osinfo", params["data_search"]["os"]},
-              data_equal: {"hardware:raminfo", params["data_search"]["ram"]},
-              data_equal: {"hardware:displaymax", params["data_search"]["screen"]},
-              data_equal:
-                {params["data_search"]["custom_field"], params["data_search"]["custom_value"]}
-            ],
-            select: [:user_id],
-            limit: :infinity
-          )
-          |> Stream.map(fn stats -> stats.user_id end)
-          |> Enum.to_list()
-
-        Account.list_users(search: [id_in: id_list])
+        UserLib.list_users_by_data(params["data_search"])
       end
 
     user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
@@ -761,6 +745,28 @@ defmodule TeiserverWeb.Admin.UserController do
 
         stats = Account.get_user_stat_data(user.id)
 
+        games_allied =
+          users
+          |> Map.new(fn %{id: id} ->
+            {id,
+             Battle.list_matches(
+               search: [ally_opponent: {user.id, id, nil}],
+               limit: :infinity
+             )
+             |> length()}
+          end)
+
+        games_vs =
+          users
+          |> Map.new(fn %{id: id} ->
+            {id,
+             Battle.list_matches(
+               search: [ally_opponent: {user.id, nil, id}],
+               limit: :infinity
+             )
+             |> length()}
+          end)
+
         conn
         |> add_breadcrumb(name: "List of possible smurf accounts", url: conn.request_path)
         |> assign(:all_user_keys, all_user_keys)
@@ -773,6 +779,8 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:key_lookup, key_lookup)
         |> assign(:user_key_lookup, user_key_lookup)
         |> assign(:stats_map, stats_map)
+        |> assign(:games_allied, games_allied)
+        |> assign(:games_vs, games_vs)
         |> render("smurf_list.html")
 
       _no_access ->
