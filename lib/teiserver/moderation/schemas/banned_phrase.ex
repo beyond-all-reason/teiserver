@@ -147,7 +147,9 @@ defmodule Teiserver.Moderation.BannedPhrase do
   """
   @spec phrase_match?(BannedPhrase.t(), String.t()) :: boolean()
   def phrase_match?(%BannedPhrase{type: :raw, loaded_phrase: loaded_phrase}, message) do
-    String.contains?(String.downcase(message), loaded_phrase)
+    message
+    |> String.downcase()
+    |> String.contains?(loaded_phrase)
   end
 
   def phrase_match?(%BannedPhrase{type: type, loaded_phrase: loaded_phrase}, message)

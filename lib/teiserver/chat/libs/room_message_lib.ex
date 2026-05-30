@@ -1,6 +1,7 @@
 defmodule Teiserver.Chat.RoomMessageLib do
   @moduledoc false
   alias Teiserver.Chat.RoomMessage
+  alias Teiserver.Chat.TermSearch
   use TeiserverWeb, :library
 
   # Functions
@@ -72,11 +73,15 @@ defmodule Teiserver.Chat.RoomMessageLib do
       where: ilike(room_messages.name, ^ref_like)
   end
 
-  def _search(query, :term, ref) do
-    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
+  def _search(query, :term, ref) when is_binary(ref) do
+    _search(query, :term, {ref, []})
+  end
 
-    from room_messages in query,
-      where: ilike(room_messages.content, ^ref_like)
+  def _search(query, :term, {ref, opts}) do
+    case TermSearch.content_filter(ref, opts) do
+      nil -> query
+      dynamic -> where(query, ^dynamic)
+    end
   end
 
   def _search(query, :inserted_after, timestamp) do

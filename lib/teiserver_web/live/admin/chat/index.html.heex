@@ -12,6 +12,22 @@
             phx-debounce="400"
             autofocus={true}
           />
+          <.input
+            type="checkbox"
+            label="Case sensitive"
+            name="case-sensitive"
+            value={@filters["case-sensitive"]}
+            checked={@filters["case-sensitive"] == "true"}
+            phx-change="filter-update"
+          />
+          <.input
+            type="checkbox"
+            label="Whole word"
+            name="whole-word"
+            value={@filters["whole-word"]}
+            checked={@filters["whole-word"] == "true"}
+            phx-change="filter-update"
+          />
         </div>
 
         <div class="col">
@@ -80,16 +96,17 @@
       <table
         :if={@filters["message-format"] == "Table"}
         class="table table-sm table-hover"
+        style="table-layout: fixed; width: 100%;"
         id="rich-text-block"
       >
         <thead>
           <tr>
-            <th :if={@filters["mode"] != "Direct"}>Location</th>
-            <th :if={@filters["mode"] == "Direct"}>Sender</th>
-            <th :if={@filters["mode"] == "Direct"}>Receiver</th>
-            <th :if={@filters["mode"] != "Direct"}>Sender</th>
+            <th :if={@filters["mode"] != "Direct"} style="width: 15%;">Location</th>
+            <th :if={@filters["mode"] == "Direct"} style="width: 15%;">Sender</th>
+            <th :if={@filters["mode"] == "Direct"} style="width: 15%;">Receiver</th>
+            <th :if={@filters["mode"] != "Direct"} style="width: 15%;">Sender</th>
             <th>Message</th>
-            <th>When</th>
+            <th style="width: 15%;">When</th>
           </tr>
         </thead>
         <tbody>
@@ -123,7 +140,7 @@
                   {@usernames[msg.user_id]}
                 </a>
               </td>
-              <td class="message">{msg.content}</td>
+              <td class="message" style="word-break: break-word;">{msg.content}</td>
               <td>{date_to_str(msg.inserted_at, :hms_or_hms_ymd)}</td>
             </tr>
           <% end %>
