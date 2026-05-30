@@ -2,9 +2,7 @@ defmodule Teiserver.Moderation.BannedPhrase do
   @moduledoc """
   A phrase banned in the game which could warrant an action if detected.
 
-  Matching is case sensitive by default; set `case_sensitive: false` for a
-  case insensitive match. Set `whole_word: true` to only match the phrase
-  when it appears as a standalone word (bounded by word boundaries).
+  All tests are checked as case insensitive.
 
   Types:
     raw - if the phrase is present in the message it will trigger
@@ -29,8 +27,6 @@ defmodule Teiserver.Moderation.BannedPhrase do
     field :score_threshold, :integer
     field :type, Ecto.Enum, values: [:raw, :fuzzy, :regex]
     field :severity, Ecto.Enum, values: [:low, :medium, :high]
-    field :case_sensitive, :boolean, default: true
-    field :whole_word, :boolean, default: false
 
     # The version of the phrase after being loaded into memory,
     # for example a regex would be compiled as a regex so it can be processed
@@ -45,7 +41,7 @@ defmodule Teiserver.Moderation.BannedPhrase do
   @doc false
   def changeset(banned_phrase, attrs) do
     banned_phrase
-    |> cast(attrs, [:phrase, :score_threshold, :type, :severity, :case_sensitive, :whole_word])
+    |> cast(attrs, [:phrase, :score_threshold, :type, :severity])
     |> validate_required([:phrase, :score_threshold, :type, :severity])
     |> unique_constraint([:phrase])
     |> validate_phrase()
@@ -97,7 +93,7 @@ defmodule Teiserver.Moderation.BannedPhrase do
   """
   @spec load_phrase(BannedPhrase.t()) :: BannedPhrase.t()
   def load_phrase(%BannedPhrase{type: :regex, phrase: phrase} = banned_phrase) do
-    {:ok, compiled_phrase} = compile_pattern(phrase, banned_phrase)
+    {:ok, compiled_phrase} = Regex.compile(phrase, "i")
     %BannedPhrase{banned_phrase | loaded_phrase: compiled_phrase}
   end
 
@@ -107,49 +103,13 @@ defmodule Teiserver.Moderation.BannedPhrase do
       |> Regex.escape()
       |> String.replace("\\*", ".*")
 
-    {:ok, compiled_phrase} = compile_pattern(pattern, banned_phrase)
+    {:ok, compiled_phrase} = Regex.compile(pattern, "i")
     %BannedPhrase{banned_phrase | loaded_phrase: compiled_phrase}
   end
 
-  # raw with no matching options stays a plain string for the fast
-  # String.contains? path.
-  def load_phrase(
-        %BannedPhrase{type: :raw, phrase: phrase, whole_word: whole_word} = banned_phrase
-      )
-      when whole_word in [false, nil] do
-    if case_sensitive?(banned_phrase) do
-      %BannedPhrase{banned_phrase | loaded_phrase: phrase}
-    else
-      {:ok, compiled_phrase} = compile_pattern(Regex.escape(phrase), banned_phrase)
-      %BannedPhrase{banned_phrase | loaded_phrase: compiled_phrase}
-    end
+  def load_phrase(%BannedPhrase{phrase: phrase} = banned_phrase) do
+    %BannedPhrase{banned_phrase | loaded_phrase: String.downcase(phrase)}
   end
-
-  # raw with whole_word is promoted to a regex.
-  def load_phrase(%BannedPhrase{type: :raw, phrase: phrase} = banned_phrase) do
-    {:ok, compiled_phrase} = compile_pattern(Regex.escape(phrase), banned_phrase)
-    %BannedPhrase{banned_phrase | loaded_phrase: compiled_phrase}
-  end
-
-  # Compiles the (already escaped/translated) pattern into a Regex, applying
-  # the whole_word and case_sensitive options of the banned phrase.
-  defp compile_pattern(pattern, %BannedPhrase{} = banned_phrase) do
-    pattern
-    |> maybe_wrap_whole_word(banned_phrase)
-    |> Regex.compile(regex_opts(banned_phrase))
-  end
-
-  defp maybe_wrap_whole_word(pattern, %BannedPhrase{whole_word: true}), do: "\\b#{pattern}\\b"
-  defp maybe_wrap_whole_word(pattern, %BannedPhrase{}), do: pattern
-
-  defp regex_opts(%BannedPhrase{} = banned_phrase) do
-    if case_sensitive?(banned_phrase), do: "", else: "i"
-  end
-
-  # Defaults to case sensitive when the field is nil (e.g. a struct built
-  # before the column existed).
-  defp case_sensitive?(%BannedPhrase{case_sensitive: false}), do: false
-  defp case_sensitive?(%BannedPhrase{}), do: true
 
   @doc """
   Runs through a filtered list of banned phrases and returns the highest severity
@@ -186,11 +146,12 @@ defmodule Teiserver.Moderation.BannedPhrase do
   trigger the banned phrase?
   """
   @spec phrase_match?(BannedPhrase.t(), String.t()) :: boolean()
-  def phrase_match?(%BannedPhrase{loaded_phrase: %Regex{} = loaded_phrase}, message) do
-    Regex.match?(loaded_phrase, message)
+  def phrase_match?(%BannedPhrase{type: :raw, loaded_phrase: loaded_phrase}, message) do
+    String.contains?(String.downcase(message), loaded_phrase)
   end
 
-  def phrase_match?(%BannedPhrase{type: :raw, loaded_phrase: loaded_phrase}, message) do
-    String.contains?(message, loaded_phrase)
+  def phrase_match?(%BannedPhrase{type: type, loaded_phrase: loaded_phrase}, message)
+      when type in [:regex, :fuzzy] do
+    Regex.match?(loaded_phrase, message)
   end
 end

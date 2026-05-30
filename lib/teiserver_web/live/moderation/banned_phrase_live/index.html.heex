@@ -18,8 +18,6 @@
   <:col :let={{_id, banned_phrase}} label="Score threshold">{banned_phrase.score_threshold}</:col>
   <:col :let={{_id, banned_phrase}} label="Type">{banned_phrase.type}</:col>
   <:col :let={{_id, banned_phrase}} label="Severity">{banned_phrase.severity}</:col>
-  <:col :let={{_id, banned_phrase}} label="Case sensitive">{banned_phrase.case_sensitive}</:col>
-  <:col :let={{_id, banned_phrase}} label="Whole word">{banned_phrase.whole_word}</:col>
   <:action :let={{_id, banned_phrase}}>
     <div class="sr-only">
       <.link navigate={~p"/moderation/banned_phrases/#{banned_phrase}"}>Show</.link>

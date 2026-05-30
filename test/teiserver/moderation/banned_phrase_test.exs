@@ -149,7 +149,8 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
         |> BannedPhrase.load_phrase()
 
       refute BannedPhrase.phrase_match?(phrase, "the quick brown fox")
-      refute BannedPhrase.phrase_match?(phrase, "the quick Abc fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick Abc fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick ABC fox")
       assert BannedPhrase.phrase_match?(phrase, "the quick abc fox")
     end
 
@@ -164,6 +165,7 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
       refute BannedPhrase.phrase_match?(phrase, "the quick brown fox")
       refute BannedPhrase.phrase_match?(phrase, "the quick abcdd fox")
       assert BannedPhrase.phrase_match?(phrase, "the quick abcde fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick ABCDE fox")
       assert BannedPhrase.phrase_match?(phrase, "the quick abcd-de fox")
     end
 
@@ -176,104 +178,8 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
         |> BannedPhrase.load_phrase()
 
       refute BannedPhrase.phrase_match?(phrase, "the quick brown fox")
-      refute BannedPhrase.phrase_match?(phrase, "the quick Abc fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick Abc fox")
       assert BannedPhrase.phrase_match?(phrase, "the quick abc fox")
-    end
-  end
-
-  describe "case sensitivity and whole word matching" do
-    test "raw defaults to case sensitive, no whole word" do
-      phrase =
-        banned_phrase_fixture(%{phrase: "abc", type: :raw})
-        |> BannedPhrase.load_phrase()
-
-      assert phrase.case_sensitive == true
-      assert phrase.whole_word == false
-      assert BannedPhrase.phrase_match?(phrase, "the quick abc fox")
-      refute BannedPhrase.phrase_match?(phrase, "the quick Abc fox")
-    end
-
-    test "raw case insensitive" do
-      phrase =
-        banned_phrase_fixture(%{phrase: "abc", type: :raw, case_sensitive: false})
-        |> BannedPhrase.load_phrase()
-
-      assert BannedPhrase.phrase_match?(phrase, "the quick abc fox")
-      assert BannedPhrase.phrase_match?(phrase, "the quick ABC fox")
-      assert BannedPhrase.phrase_match?(phrase, "the quick AbC fox")
-      assert BannedPhrase.phrase_match?(phrase, "concATBabc")
-      refute BannedPhrase.phrase_match?(phrase, "the quick xyz fox")
-    end
-
-    test "raw whole word" do
-      phrase =
-        banned_phrase_fixture(%{phrase: "cat", type: :raw, whole_word: true})
-        |> BannedPhrase.load_phrase()
-
-      assert BannedPhrase.phrase_match?(phrase, "the cat sat")
-      refute BannedPhrase.phrase_match?(phrase, "concatenate")
-      refute BannedPhrase.phrase_match?(phrase, "the CAT sat")
-    end
-
-    test "raw whole word and case insensitive" do
-      phrase =
-        banned_phrase_fixture(%{
-          phrase: "cat",
-          type: :raw,
-          whole_word: true,
-          case_sensitive: false
-        })
-        |> BannedPhrase.load_phrase()
-
-      assert BannedPhrase.phrase_match?(phrase, "the cat sat")
-      assert BannedPhrase.phrase_match?(phrase, "the CAT sat")
-      refute BannedPhrase.phrase_match?(phrase, "concatenate")
-      refute BannedPhrase.phrase_match?(phrase, "CONCATENATE")
-    end
-
-    test "raw with special characters is escaped" do
-      phrase =
-        banned_phrase_fixture(%{phrase: "a.c", type: :raw, case_sensitive: false})
-        |> BannedPhrase.load_phrase()
-
-      assert BannedPhrase.phrase_match?(phrase, "the A.C unit")
-      refute BannedPhrase.phrase_match?(phrase, "the abc fox")
-    end
-
-    test "fuzzy case insensitive" do
-      phrase =
-        banned_phrase_fixture(%{phrase: "abc*e", type: :fuzzy, case_sensitive: false})
-        |> BannedPhrase.load_phrase()
-
-      assert BannedPhrase.phrase_match?(phrase, "the quick ABCDE fox")
-      assert BannedPhrase.phrase_match?(phrase, "the quick abcde fox")
-    end
-
-    test "fuzzy whole word" do
-      phrase =
-        banned_phrase_fixture(%{phrase: "abc*e", type: :fuzzy, whole_word: true})
-        |> BannedPhrase.load_phrase()
-
-      assert BannedPhrase.phrase_match?(phrase, "the abcde fox")
-      refute BannedPhrase.phrase_match?(phrase, "theabcdex")
-    end
-
-    test "regex case insensitive" do
-      phrase =
-        banned_phrase_fixture(%{phrase: "[abc]{3}", type: :regex, case_sensitive: false})
-        |> BannedPhrase.load_phrase()
-
-      assert BannedPhrase.phrase_match?(phrase, "the quick ABC fox")
-      assert BannedPhrase.phrase_match?(phrase, "the quick abc fox")
-    end
-
-    test "regex whole word" do
-      phrase =
-        banned_phrase_fixture(%{phrase: "cat", type: :regex, whole_word: true})
-        |> BannedPhrase.load_phrase()
-
-      assert BannedPhrase.phrase_match?(phrase, "the cat sat")
-      refute BannedPhrase.phrase_match?(phrase, "concatenate")
     end
   end
 
