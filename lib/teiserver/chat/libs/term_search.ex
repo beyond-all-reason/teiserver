@@ -24,7 +24,7 @@ defmodule Teiserver.Chat.TermSearch do
   The dynamic references the first query binding positionally, so it works with
   any of the message schemas.
   """
-  @spec content_filter(String.t() | nil, keyword()) :: Ecto.Query.DynamicExpr.t() | nil
+  @spec content_filter(String.t() | nil, keyword()) :: %Ecto.Query.DynamicExpr{} | nil
   def content_filter(term, opts \\ [])
   def content_filter(term, _opts) when term in [nil, ""], do: nil
 
