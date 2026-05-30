@@ -29,6 +29,8 @@ defmodule TeiserverWeb.Moderation.BannedPhraseLive.FormComponent do
           label="Severity"
           options={BannedPhrase.severities()}
         />
+        <.input field={@form[:case_sensitive]} type="checkbox" label="Case sensitive" />
+        <.input field={@form[:whole_word]} type="checkbox" label="Match whole word only" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Banned phrase</.button>
         </:actions>

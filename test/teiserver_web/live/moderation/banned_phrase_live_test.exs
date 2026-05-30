@@ -7,12 +7,21 @@ defmodule TeiserverWeb.BannedPhraseLiveTest do
   import Phoenix.LiveViewTest
   import Teiserver.ModerationFixtures
 
-  @create_attrs %{type: :raw, severity: :low, phrase: "some phrase", score_threshold: 42}
+  @create_attrs %{
+    type: :raw,
+    severity: :low,
+    phrase: "some phrase",
+    score_threshold: 42,
+    case_sensitive: true,
+    whole_word: false
+  }
   @update_attrs %{
     type: :fuzzy,
     severity: :medium,
     phrase: "some updated phrase *",
-    score_threshold: 43
+    score_threshold: 43,
+    case_sensitive: false,
+    whole_word: true
   }
   @invalid_attrs %{type: :raw, severity: :low, phrase: nil, score_threshold: nil}
 

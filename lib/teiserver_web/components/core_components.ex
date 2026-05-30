@@ -327,7 +327,7 @@ defmodule TeiserverWeb.CoreComponents do
         id={@id}
         class="form-check-input"
         type="checkbox"
-        value={@value}
+        value="true"
         checked={@checked}
       />
       <label class="form-check-label" for={@id}>
