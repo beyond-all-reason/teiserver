@@ -42,17 +42,6 @@ config :teiserver, TeiserverWeb.Endpoint,
 
 config :teiserver, Teiserver.OAuth, issuer: "http://localhost:4000"
 
-config :dart_sass,
-  version: "1.61.0",
-  light: [
-    args: ~w(scss/light.scss ../priv/static/assets/light.css),
-    cd: Path.expand("../assets", __DIR__)
-  ],
-  dark: [
-    args: ~w(scss/dark.scss ../priv/static/assets/dark.css),
-    cd: Path.expand("../assets", __DIR__)
-  ]
-
 config :teiserver, Teiserver,
   certs: [
     keyfile: "priv/certs/localhost.key",
