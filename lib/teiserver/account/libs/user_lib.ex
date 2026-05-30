@@ -75,6 +75,7 @@ defmodule Teiserver.Account.UserLib do
   def list_users_by_data(data_search_params) do
     data_search_params
     |> UserQueries.user_search_by_data()
+    |> QueryHelpers.limit_query(200)
     |> Repo.all()
   end
 
