@@ -15,7 +15,7 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
       not LobbyLib.name_length_valid?(new_name) ->
         reply(:spring, :no, {"c.battle.update_lobby_title", "Lobby name too long"}, msg_id, state)
 
-      Lobby.allow?(state.userid, :add_bot, state.lobby_id) ->
+      Lobby.allow?(state.userid, :update_lobby_title, state.lobby_id) ->
         Battle.rename_lobby(state.lobby_id, new_name, nil)
         reply(:spring, :okay, "c.battle.update_lobby_title", msg_id, state)
 

@@ -1,7 +1,7 @@
 defmodule Teiserver.Lobby.LobbyLibTest do
   alias Teiserver.Lobby.LobbyLib
 
-  use ExUnit.Case, async: true
+  use Teiserver.DataCase, async: true
 
   test "name_length_valid? rejects name over character limit" do
     limit = LobbyLib.max_name_length()

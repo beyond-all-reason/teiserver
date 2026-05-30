@@ -250,6 +250,3 @@ end
 
 config :teiserver, TeiserverWeb.Monitoring,
   port: Teiserver.ConfigHelpers.get_env("TEI_METRICS_SERVER_PORT", 4001, :int)
-
-config :teiserver, Teiserver.Lobby.LobbyLib,
-  max_name_length: Teiserver.ConfigHelpers.get_env("TEI_LOBBY_MAX_NAME_LENGTH", 70, :int)
