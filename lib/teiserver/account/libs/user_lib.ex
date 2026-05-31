@@ -73,10 +73,17 @@ defmodule Teiserver.Account.UserLib do
 
   @spec list_users_by_data(%{String.t() => String.t()}) :: [User.t()]
   def list_users_by_data(data_search_params) do
-    data_search_params
-    |> UserQueries.user_search_by_data()
-    |> QueryHelpers.limit_query(200)
-    |> Repo.all()
+    # If nil is returned then the arguments passed in were invalid or
+    # problematic in some way and we will not be running the query
+    case UserQueries.user_search_by_data(data_search_params) do
+      {:ok, query} ->
+        query
+        |> QueryHelpers.limit_query(200)
+        |> Repo.all()
+
+      _any_other ->
+        []
+    end
   end
 
   @spec count_users() :: integer

@@ -80,6 +80,17 @@ defmodule Teiserver.Account.UserLibTest do
                "custom_value" => "some_value"
              }) == [user1, user3]
     end
+
+    test "user_ids_by_data/1 - empty data", %{} do
+      #  No data at all
+      assert user_ids_by_data(%{}) == []
+
+      # Some data but it's empty, should be same result
+      assert user_ids_by_data(%{
+               "cpu" => "",
+               "os" => ""
+             }) == []
+    end
   end
 
   defp user_stat_data_fixtures(_state) do
