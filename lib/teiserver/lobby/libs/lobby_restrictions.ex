@@ -10,8 +10,6 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   alias Teiserver.Config
   alias Teiserver.Helper.StringHelper
 
-  require Logger
-
   @rank_upper_bound 7
   @rating_upper_bound 1000
   @splitter "------------------------------------------------------"

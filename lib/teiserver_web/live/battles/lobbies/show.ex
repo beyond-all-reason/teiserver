@@ -11,8 +11,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   alias Teiserver.Lobby
   alias Teiserver.ServerUserPlug
   alias Teiserver.Telemetry
+
   use TeiserverWeb, :live_view
-  require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """

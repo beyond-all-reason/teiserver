@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Telemetry.GeneralView do
   def view_colour, do: :primary
 
   @spec icon() :: String.t()
-  def icon, do: StylingHelper.icon(:primary)
+  def icon, do: "fa-solid fa-binary"
 
   @spec view_colour(String.t()) :: atom
   def view_colour("infologs"), do: InfologLib.colours()

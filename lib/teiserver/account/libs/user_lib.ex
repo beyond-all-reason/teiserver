@@ -10,8 +10,8 @@ defmodule Teiserver.Account.UserLib do
   alias Teiserver.Config
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging
+
   use TeiserverWeb, :library_newform
-  require Logger
 
   # Functions
   @spec icon :: String.t()

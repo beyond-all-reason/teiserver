@@ -18,8 +18,6 @@ defmodule Teiserver.Room do
 
   use Plugins
 
-  require Logger
-
   @type room :: Chat.RoomServer.room()
 
   @spec create_room(map()) :: map()

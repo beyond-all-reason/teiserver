@@ -23,8 +23,6 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   use Mix.Task
 
-  require Logger
-
   @settings %{
     # days: 365,
     days: 5,

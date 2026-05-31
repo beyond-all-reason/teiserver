@@ -3,8 +3,6 @@ defmodule Teiserver.Protocols.Spring.AuthIn do
 
   alias Teiserver.Protocols.SpringIn
 
-  require Logger
-
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()

@@ -4,7 +4,6 @@ defmodule Teiserver.AssetFixtures do
   alias Teiserver.Asset.Engine
   alias Teiserver.Asset.Game
   alias Teiserver.Repo
-  require Logger
 
   def create_map(attrs) do
     %Asset.Map{} |> Asset.Map.changeset(attrs) |> Repo.insert!()

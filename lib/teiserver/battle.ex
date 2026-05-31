@@ -129,8 +129,6 @@ defmodule Teiserver.Battle do
     |> Repo.one()
   end
 
-  def get_match(nil), do: nil
-
   def get_match(args) do
     match_query(nil, args)
     |> Repo.one()

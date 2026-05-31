@@ -798,7 +798,7 @@ defmodule Teiserver.Protocols.SpringOut do
     Logger.metadata(request_id: "SpringTcpServer##{user.id}")
 
     exempt_from_cmd_throttle =
-      Auth.admin?(user) or Auth.moderator?(user) or Auth.is_bot?(user) == true
+      Auth.admin?(user.id) or Auth.moderator?(user.id) or Auth.is_bot?(user.id) == true
 
     %{
       state

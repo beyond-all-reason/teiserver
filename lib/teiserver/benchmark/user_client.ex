@@ -6,7 +6,7 @@ defmodule Teiserver.Benchmark.UserClient do
   """
 
   use GenServer
-  require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @statuses ~w(4195330 4195394 4194374)

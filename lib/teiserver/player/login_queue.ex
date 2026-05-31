@@ -17,8 +17,6 @@ defmodule Teiserver.Player.LoginQueue do
 
   use GenServer
 
-  require Logger
-
   @limit_config_key "tachyon.Login queue limit"
   @default_tick_period 1_000
 

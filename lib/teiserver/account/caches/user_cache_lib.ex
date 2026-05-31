@@ -6,7 +6,7 @@ defmodule Teiserver.Account.UserCacheLib do
   alias Teiserver.Account.User
   alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
-  require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec get_username(T.userid() | nil) :: String.t() | nil

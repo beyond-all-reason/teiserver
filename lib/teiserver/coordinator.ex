@@ -4,7 +4,6 @@ defmodule Teiserver.Coordinator do
   alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Throttles
-  require Logger
 
   @spec start_coordinator() ::
           {:error, {:already_started, pid()}} | DynamicSupervisor.on_start_child()

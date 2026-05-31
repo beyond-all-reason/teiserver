@@ -16,8 +16,6 @@ defmodule Teiserver.Party do
   alias Teiserver.Party.Supervisor
   alias Teiserver.Tachyon.System
 
-  require Logger
-
   @type id :: Server.id()
   @type state :: Server.state()
 
