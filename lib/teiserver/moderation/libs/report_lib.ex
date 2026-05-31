@@ -3,6 +3,7 @@ defmodule Teiserver.Moderation.ReportLib do
 
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Chat.LobbyMessageLib
+  alias Teiserver.Config
   alias Teiserver.Moderation.Report
   use TeiserverWeb, :library
 
@@ -13,7 +14,8 @@ defmodule Teiserver.Moderation.ReportLib do
   @spec colour :: atom
   def colour, do: :warning
 
-  def get_outstanding_report_max_days, do: 31
+  def get_outstanding_report_max_days,
+    do: Config.get_site_config_val("teiserver.Outstanding report max age")
 
   @spec make_favourite(map()) :: map()
   def make_favourite(report) do

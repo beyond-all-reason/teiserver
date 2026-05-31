@@ -63,6 +63,16 @@ defmodule Teiserver.Account.UserStatLib do
       where: fragment("? @> ?", user_stats.data, ^field)
   end
 
+  def _search(query, :data_string_contains, {field, value}) do
+    from user_stats in query,
+      where: like(fragment("(? ->> ?)::text", user_stats.data, ^field), ^("%" <> value <> "%"))
+  end
+
+  def _search(query, :data_string_starts_with, {field, value}) do
+    from user_stats in query,
+      where: like(fragment("(? ->> ?)::text", user_stats.data, ^field), ^(value <> "%"))
+  end
+
   def field_contains(stats, _field, nil), do: stats
   def field_contains(stats, _field, ""), do: stats
 

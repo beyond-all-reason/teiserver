@@ -57,6 +57,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                 <th>Status</th>
                 <%= if is_moderator do %>
                   <th>HW</th>
+                  <th>IP</th>
                 <% end %>
                 <th>Roles</th>
                 <th>Registered</th>
@@ -89,9 +90,15 @@ is_moderator = allow?(@conn, "Moderator") %>
                       <%= if user_stats["hardware:cpuinfo"] != "" and user_stats["hardware:cpuinfo"] != nil do %>
                         {user_stats["hardware:cpuinfo"]}
                         <br />
-                        {user_stats["hardware:gpuinfo"]}
+                        {user_stats["hardware:gpuinfo"]} @ {user_stats["hardware:displaymax"]}
                       <% else %>
                         &nbsp;
+                      <% end %>
+                    </td>
+
+                    <td>
+                      <%= if user_stats["last_ip"] != "" and user_stats["last_ip"] != nil do %>
+                        {user_stats["last_ip"]}
                       <% end %>
                     </td>
                   <% end %>

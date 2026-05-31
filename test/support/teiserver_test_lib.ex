@@ -311,8 +311,6 @@ defmodule Teiserver.TeiserverTestLib do
     }
   end
 
-  # TODO: Remove this, merging the functionality into the GeneralTestLib
-  # if needed
   @spec conn_setup({:ok, list()}) :: {:ok, list()}
   def conn_setup({:ok, data}) do
     user = data[:user]
@@ -351,8 +349,8 @@ defmodule Teiserver.TeiserverTestLib do
     ["Verified"]
   end
 
-  @spec make_lobby() :: {T.lobby_id(), pid}
-  @spec make_lobby(map()) :: {T.lobby_id(), pid}
+  @spec make_lobby() :: T.lobby_id()
+  @spec make_lobby(map()) :: T.lobby_id()
   def make_lobby(params \\ %{}) do
     host = new_user()
 
@@ -433,6 +431,8 @@ defmodule Teiserver.TeiserverTestLib do
     Account.get_or_add_smurf_key_type("hw1")
     Account.get_or_add_smurf_key_type("hw2")
     Account.get_or_add_smurf_key_type("hw3")
+    Account.get_or_add_smurf_key_type("hw4")
+    Account.get_or_add_smurf_key_type("ip")
 
     Enum.each(MatchRatingLib.rating_type_list(), fn rating_type ->
       Game.get_or_add_rating_type(rating_type)

@@ -7,6 +7,7 @@ defmodule Teiserver.Account.UserLib do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserQueries
   alias Teiserver.CacheUser
+  alias Teiserver.Config
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging
   use TeiserverWeb, :library_newform
@@ -68,6 +69,21 @@ defmodule Teiserver.Account.UserLib do
     args
     |> UserQueries.query_users()
     |> Repo.all()
+  end
+
+  @spec list_users_by_data(%{String.t() => String.t()}) :: [User.t()]
+  def list_users_by_data(data_search_params) do
+    # If nil is returned then the arguments passed in were invalid or
+    # problematic in some way and we will not be running the query
+    case UserQueries.user_search_by_data(data_search_params) do
+      {:ok, query} ->
+        query
+        |> QueryHelpers.limit_query(200)
+        |> Repo.all()
+
+      _any_other ->
+        []
+    end
   end
 
   @spec count_users() :: integer
@@ -430,5 +446,13 @@ defmodule Teiserver.Account.UserLib do
       true ->
         :ok
     end
+  end
+
+  @spec new_account?(User.id()) :: boolean()
+  def new_account?(user_id) do
+    user_stats = Account.get_user_stat_data(user_id)
+    play_hours = (user_stats["player_minutes"] || 0) / 60
+    play_time_cutoff = Config.get_site_config_cache("teiserver.New player cutoff")
+    play_hours < play_time_cutoff
   end
 end

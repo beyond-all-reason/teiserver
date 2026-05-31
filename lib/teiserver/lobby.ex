@@ -814,7 +814,7 @@ defmodule Teiserver.Lobby do
       lobby == nil ->
         false
 
-      CacheUser.is_shadowbanned?(userid) ->
+      CacheUser.shadowbanned?(userid) ->
         false
 
       lobby.founder_id == userid ->

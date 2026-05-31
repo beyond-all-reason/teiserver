@@ -186,7 +186,7 @@ defmodule Teiserver.Room do
   @spec allow?(T.userid()) :: boolean()
   def allow?(userid) do
     cond do
-      CacheUser.is_shadowbanned?(userid) ->
+      CacheUser.shadowbanned?(userid) ->
         false
 
       Account.restricted?(userid, ["All chat", "Room chat"]) ->
