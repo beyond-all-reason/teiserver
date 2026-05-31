@@ -16,7 +16,7 @@ There are several ways to install SPADS, but the recommended method when using T
 Run Teiserver locally, login as root@localhost and go to 
 http://localhost:4000/teiserver/admin/user
 
-Search for a user that has FakeData as the client (i.e. a normal user). Then Edit User > Tick "Bot" and "Verified" > Save Changes
+A spad user is a user with the `Bot` role. The task `teiserver.fakedata` creates some by default with names like spads001 thru spads010. Their password is all `password`.
 
 The SPADS bot must have a name with **20 or less characters**. If you wish to rename the user, remove `edit` from the url, e.g.
 ```
@@ -24,7 +24,7 @@ http://localhost:4000/teiserver/admin/user/{id}
 ```
 Select Actions > Rename.
 
-Note this username as it will be used later. 
+Note this username as it will be used later.
 
 ## Point Chobby to local Teiserver
 Inside your install folder for Beyond All Reason, add a `devmode.txt` file. This will make dev settings available in BAR.

@@ -3,6 +3,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   Run with mix teiserver.fakedata
   """
 
+  @shortdoc "generate seeding data for local dev"
+
   alias Ecto.Multi
   alias Teiserver.Account
   alias Teiserver.Account.User
@@ -44,6 +46,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
     # Accounts
     make_accounts()
+    make_spads_accounts()
 
     make_matches()
     set_active_season(@latest_season)
@@ -105,10 +108,11 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         Range.new(0, users_per_day())
         |> ParallelStream.map(fn _index ->
           minutes = :rand.uniform(24 * 60)
+          name = generate_throwaway_name() |> String.replace(" ", "")
 
           %{
-            name: generate_throwaway_name() |> String.replace(" ", ""),
-            email: UUID.uuid1(),
+            name: name,
+            email: "#{name}@example.com",
             password: root_user.password,
             permissions: [],
             icon: "fa-solid #{StylingHelper.random_icon()}",
@@ -138,6 +142,45 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     Multi.new()
     |> Multi.insert_all(:insert_all, User, new_users)
     |> Repo.transaction()
+  end
+
+  def make_spads_accounts do
+    # this isn't terribly efficient but it's only a few records for a one-off
+    # These are bots that can be used directly with
+    # https://github.com/beyond-all-reason/ansible-spads-setup out of the
+    # box, no need to run the registration step in the playbook
+    ansible_data =
+      Enum.map(1..3, fn i ->
+        name = "clusterTEST#{i}"
+        email = "test#{i}@spads.local"
+        password = "clustertest#{i}pass"
+        {name, email, password}
+      end)
+
+    # and a few other spads account with the same hardcoded password
+    other_data =
+      Enum.map(1..3, fn i ->
+        name = "spadsTEST#{i}"
+        email = "localtest#{i}@spads.local"
+        password = "password"
+        {name, email, password}
+      end)
+
+    Enum.concat(ansible_data, other_data)
+    |> Enum.each(fn {name, email, password} ->
+      Account.create_user(%{
+        name: name,
+        email: email,
+        password: Account.spring_md5_password(password),
+        roles: ["Verified", "Bot", "Moderator"],
+        permissions: ["Verified", "Bot", "Moderator"],
+        icon: "fa-solid fa-robot",
+        colour: "royalblue",
+        data: %{
+          lobby_client: "FakeSpads"
+        }
+      })
+    end)
   end
 
   defp make_telemetry do
