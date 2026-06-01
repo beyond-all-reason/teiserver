@@ -114,15 +114,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
           ally_team_config: ally_team_config(),
           game_options: %{String.t() => String.t()},
           tags: %{String.t() => map()},
-          players: %{
-            T.userid() => %{
-              team: LT.Types.team(),
-              ready?: boolean(),
-              asset_status: asset_status()
-            }
-          },
+          players: %{T.userid() => LT.PlayerDetails.t()},
           spectators: %{
-            join_queue_position: number() | nil
+            T.userid() => %{
+              join_queue_position: number() | nil
+            }
           },
           bots: %{LT.Bot.id() => LT.Bot.t()},
           current_battle:
@@ -155,18 +151,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # represent the ID of a user or a bot slated to play in the game (no spec)
   @typep player_id :: T.userid() | String.t()
 
-  @typep player :: %{
-           id: T.userid(),
-           name: String.t(),
-           # used to generate the start script, and then will be sent to the
-           # player so they can join the battle
-           password: String.t(),
-           pid: pid(),
-           team: LT.Types.team(),
-           ready?: boolean(),
-           asset_status: asset_status()
-         }
-
   @typep spectator :: %{
            id: T.userid(),
            name: String.t(),
@@ -190,7 +174,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            game_options: %{String.t() => String.t()},
            tags: %{String.t() => map()},
            # used to track the players in the lobby.
-           players: %{player_id() => player() | LT.Bot.t()},
+           players: %{player_id() => LT.Player.t() | LT.Bot.t()},
            spectators: %{T.userid() => spectator()},
            bot_idx_counter: non_neg_integer(),
            current_battle:
@@ -453,37 +437,38 @@ defmodule Teiserver.TachyonLobby.Lobby do
         do: MapSet.new([start_params.creator_data.id]),
         else: MapSet.new()
 
-    state = %{
-      id: id,
-      monitors: monitors,
-      name: start_params.name,
-      map_name: start_params.map_name,
-      game_version: start_params.game_version,
-      engine_version: start_params.engine_version,
-      boss_enabled?: boss_enabled?,
-      bosses: bosses,
-      ally_team_config: start_params.ally_team_config,
-      game_options: Map.get(start_params, :game_options, %{}),
-      tags: Map.get(start_params, :tags, %{}),
-      players: %{
-        start_params.creator_data.id => %{
-          id: start_params.creator_data.id,
-          name: start_params.creator_data.name,
-          password: gen_password(),
-          pid: start_params.creator_pid,
-          team: {0, 0, 0},
-          ready?: false,
-          asset_status: :complete
-        }
-      },
-      spectators: %{},
-      bot_idx_counter: 0,
-      current_battle: nil,
-      ids_to_rejoin: MapSet.new(),
-      vote_idx: 1,
-      current_vote: nil,
-      vote_history: %{}
-    }
+    state =
+      %{
+        id: id,
+        monitors: monitors,
+        name: start_params.name,
+        map_name: start_params.map_name,
+        game_version: start_params.game_version,
+        engine_version: start_params.engine_version,
+        boss_enabled?: boss_enabled?,
+        bosses: bosses,
+        ally_team_config: start_params.ally_team_config,
+        game_options: Map.get(start_params, :game_options, %{}),
+        tags: Map.get(start_params, :tags, %{}),
+        players: %{
+          start_params.creator_data.id => %LT.Player{
+            id: start_params.creator_data.id,
+            name: start_params.creator_data.name,
+            password: gen_password(),
+            pid: start_params.creator_pid,
+            team: {0, 0, 0},
+            ready?: false,
+            asset_status: :complete
+          }
+        },
+        spectators: %{},
+        bot_idx_counter: 0,
+        current_battle: nil,
+        ids_to_rejoin: MapSet.new(),
+        vote_idx: 1,
+        current_vote: nil,
+        vote_history: %{}
+      }
 
     TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
     Logger.info("Lobby created by user #{start_params.creator_data.id}")
@@ -534,9 +519,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
       ids_left = MapSet.delete(data.ids_to_rejoin, user_id)
 
       players =
-        if is_map_key(data.players, user_id),
-          do: put_in(data.players, [user_id, :pid], user_pid),
-          else: data.players
+        if is_map_key(data.players, user_id) do
+          Map.update!(data.players, user_id, fn %LT.Player{} = p ->
+            %{p | pid: user_pid}
+          end)
+        else
+          data.players
+        end
 
       spectators =
         if is_map_key(data.spectators, user_id),
@@ -1157,7 +1146,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         data
         |> Map.drop([:monitors])
         |> Map.update!(:players, fn ps ->
-          for {k, v} <- ps, into: %{}, do: {k, Map.delete(v, :pid)}
+          for {k, v} <- ps, into: %{}, do: {k, Map.replace(v, :pid, nil)}
         end)
         |> Map.update!(:spectators, fn ps ->
           for {k, v} <- ps, into: %{}, do: {k, Map.delete(v, :pid)}
@@ -1207,8 +1196,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {players, bots} = Enum.split_with(state.players, fn {_id, p} -> is_map_key(p, :pid) end)
 
     players =
-      Enum.map(players, fn {p_id, p} ->
-        {p_id, Map.take(p, [:team, :ready?, :asset_status])}
+      Enum.map(players, fn {p_id, %LT.Player{} = p} ->
+        player = %LT.PlayerDetails{
+          id: p.id,
+          team: p.team,
+          ready?: p.ready?,
+          asset_status: p.asset_status
+        }
+
+        {p_id, player}
       end)
       |> Enum.into(%{})
 
@@ -1305,12 +1301,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
     process_event({:update_boss, :remove, s_id}, aggregate)
   end
 
-  defp process_event({:move_spec_to_player, p_id, player_data} = ev, aggregate) do
-    player_data = Map.merge(%{ready?: false, asset_status: :complete}, player_data)
+  defp process_event({:move_spec_to_player, p_id, %{team: team}} = ev, aggregate) do
+    spec_data = aggregate.data.spectators[p_id]
 
-    player =
-      Map.merge(aggregate.data.spectators[p_id], player_data)
-      |> Map.delete(:join_queue_position)
+    player = %LT.Player{
+      id: spec_data.id,
+      name: spec_data.name,
+      password: spec_data.password,
+      pid: spec_data.pid,
+      team: team,
+      ready?: false,
+      asset_status: :complete
+    }
 
     aggregate
     |> update_in([:data, :spectators], &Map.delete(&1, p_id))
@@ -1753,7 +1755,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # find an empty slot for a player/bot to play
   # this function isn't too efficient, but it's never going to be run on
   # massive inputs since the engine cannot support more than 254 players anyway
-  @spec find_team(ally_team_config(), %{player_id() => player() | LT.Bot.t()}) ::
+  @spec find_team(ally_team_config(), %{player_id() => LT.Player.t() | LT.Bot.t()}) ::
           LT.Types.team() | nil
   defp find_team(ally_team_config, players) do
     # find the least full ally team

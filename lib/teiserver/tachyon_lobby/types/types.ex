@@ -13,4 +13,6 @@ defmodule Teiserver.TachyonLobby.Types.Types do
   """
   @type team ::
           {allyTeam :: non_neg_integer(), team :: non_neg_integer(), player :: non_neg_integer()}
+
+  @type asset_status :: :missing | :downloading | :complete
 end
