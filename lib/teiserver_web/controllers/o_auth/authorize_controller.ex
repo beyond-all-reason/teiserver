@@ -9,41 +9,38 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
   end
 
   def authorize(conn, %{"client_id" => client_id} = params) do
-    case OAuth.get_application_by_uid(client_id) do
+    with app when app != nil <- OAuth.get_application_by_uid(client_id),
+         true <- OAuth.can_create_code?(app),
+         {:ok, redir_uri} <- OAuth.get_redirect_uri(app, Map.get(conn.params, "redirect_uri")) do
+      reject_uri =
+        error_redirect_uri(
+          conn,
+          redir_uri,
+          "access_denied",
+          "user refused to authorize application"
+        )
+
+      permissions = Enum.map(app.scopes, &OAuth.scope_description/1)
+
+      conn
+      |> render("authorize.html",
+        app_name: app.name,
+        permissions: permissions,
+        params: params,
+        reject_uri: reject_uri
+      )
+    else
       nil ->
         bad_request(conn, "invalid client_id")
 
-      app ->
-        if OAuth.can_create_code?(app) do
-          case OAuth.get_redirect_uri(app, Map.get(conn.params, "redirect_uri")) do
-            {:error, err} ->
-              bad_request(conn, "invalid redirection uri: #{inspect(err)}")
+      false ->
+        conn
+        |> render("bad_request.html",
+          reason: "Cannot use this application to create auth token"
+        )
 
-            {:ok, redir_uri} ->
-              reject_uri =
-                error_redirect_uri(
-                  conn,
-                  redir_uri,
-                  "access_denied",
-                  "user refused to authorize application"
-                )
-
-              permissions = Enum.map(app.scopes, &OAuth.scope_description/1)
-
-              conn
-              |> render("authorize.html",
-                app_name: app.name,
-                permissions: permissions,
-                params: params,
-                reject_uri: reject_uri
-              )
-          end
-        else
-          conn
-          |> render("bad_request.html",
-            reason: "Cannot use this application to create auth token"
-          )
-        end
+      {:error, err} ->
+        bad_request(conn, "invalid redirection uri: #{inspect(err)}")
     end
   end
 
@@ -60,15 +57,15 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
   end
 
   def generate_code(conn, %{"client_id" => client_id, "redirect_uri" => redirect_uri} = params) do
-    case OAuth.get_application_by_uid(client_id) do
+    with app when app != nil <- OAuth.get_application_by_uid(client_id),
+         {:ok, redir_url} <- OAuth.get_redirect_uri(app, redirect_uri) do
+      do_generate_code(conn, app, redir_url, params)
+    else
       nil ->
         bad_request(conn, "invalid client_id")
 
-      app ->
-        case OAuth.get_redirect_uri(app, redirect_uri) do
-          {:error, _reason} -> bad_request(conn, "invalid redirection url")
-          {:ok, redir_url} -> do_generate_code(conn, app, redir_url, params)
-        end
+      {:error, _reason} ->
+        bad_request(conn, "invalid redirection url")
     end
   end
 
