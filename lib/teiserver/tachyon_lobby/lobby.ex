@@ -35,6 +35,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
+  # lobby types
+  alias Teiserver.TachyonLobby.Types, as: LT
 
   require Logger
 
@@ -81,17 +83,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
           optional(:tags) => %{String.t() => map()}
         }
 
-  @typedoc """
-  These represent the indices respectively into
-  {ally team index, team index, player index}
-  since we don't really support "archon mode" though, the player index
-  is likely always going to be 0.
-  For example, a player in the first ally team, in the second spot
-  would have: {0, 1, 0}
-  """
-  @type team ::
-          {allyTeam :: non_neg_integer(), team :: non_neg_integer(), player :: non_neg_integer()}
-
   @type asset_status :: :missing | :downloading | :complete
 
   @type vote_action :: {:change_map, String.t()} | {:appoint_boss, T.userid()} | :start
@@ -124,21 +115,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
           game_options: %{String.t() => String.t()},
           tags: %{String.t() => map()},
           players: %{
-            T.userid() => %{team: team(), ready?: boolean(), asset_status: asset_status()}
+            T.userid() => %{
+              team: LT.Types.team(),
+              ready?: boolean(),
+              asset_status: asset_status()
+            }
           },
           spectators: %{
             join_queue_position: number() | nil
           },
-          bots: %{
-            String.t() => %{
-              host_user_id: T.userid(),
-              team: team(),
-              name: String.t(),
-              short_name: String.t() | nil,
-              version: String.t() | nil,
-              options: %{String.t() => String.t()}
-            }
-          },
+          bots: %{LT.Bot.id() => LT.Bot.t()},
           current_battle:
             nil
             | %{
@@ -176,7 +162,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            # player so they can join the battle
            password: String.t(),
            pid: pid(),
-           team: team(),
+           team: LT.Types.team(),
            ready?: boolean(),
            asset_status: asset_status()
          }
@@ -189,16 +175,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
            password: String.t(),
            pid: pid(),
            join_queue_position: number() | nil
-         }
-
-  @typep bot :: %{
-           id: String.t(),
-           team: team(),
-           host_user_id: T.userid(),
-           short_name: String.t(),
-           name: String.t() | nil,
-           version: String.t() | nil,
-           options: %{String.t() => String.t()}
          }
 
   @typep state :: %{
@@ -214,7 +190,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            game_options: %{String.t() => String.t()},
            tags: %{String.t() => map()},
            # used to track the players in the lobby.
-           players: %{player_id() => player() | bot()},
+           players: %{player_id() => player() | LT.Bot.t()},
            spectators: %{T.userid() => spectator()},
            bot_idx_counter: non_neg_integer(),
            current_battle:
@@ -240,7 +216,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # for updates to broadcast to members
   # for more info on specific events, check how they are handled by `process_event/2`
   @typep event ::
-           {:move_player, player_id(), team()}
+           {:move_player, player_id(), LT.Types.team()}
            | {:add_spectator, spectator()}
            | {:remove_player_from_lobby, player_id()}
            | {:remove_spec_from_lobby, T.userid()}
@@ -823,7 +799,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     else
       bot_id = "bot-#{data.bot_idx_counter}"
 
-      bot = %{
+      bot = %LT.Bot{
         id: bot_id,
         team: {ally_team, in_team_count, 0},
         host_user_id: user_id,
@@ -1777,7 +1753,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # find an empty slot for a player/bot to play
   # this function isn't too efficient, but it's never going to be run on
   # massive inputs since the engine cannot support more than 254 players anyway
-  @spec find_team(ally_team_config(), %{player_id() => player() | bot()}) :: team() | nil
+  @spec find_team(ally_team_config(), %{player_id() => player() | LT.Bot.t()}) ::
+          LT.Types.team() | nil
   defp find_team(ally_team_config, players) do
     # find the least full ally team
     ally_team =
@@ -1985,7 +1962,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
               end
 
             bots =
-              for bot <- bots do
+              for %LT.Bot{} = bot <- bots do
                 %{
                   host_user_id: bot.host_user_id,
                   name: Map.get(bot, :name),
