@@ -16,17 +16,17 @@ defmodule TeiserverWeb.Battle.MatchLive.SubComponents.RatingsComponent do
         <thead>
           <tr>
             <th colspan="4">Name & Party</th>
-            
+
             <th>Team</th>
-            
+
             <th>Pre-game rating</th>
-            
+
             <th>Post-game rating</th>
-            
+
             <th>Change</th>
           </tr>
         </thead>
-        
+
         <tbody>
           <%= for m <- @members do %>
             <% rating = @rating_logs[m.user_id]
@@ -48,13 +48,13 @@ defmodule TeiserverWeb.Battle.MatchLive.SubComponents.RatingsComponent do
                   <i class="fa-fw fa-solid fa-trophy"></i>
                 <% end %>
               </td>
-              
+
               <td style={"background-color: #{m.user.colour}; color: #FFF;"} width="22">
                 <Fontawesome.icon icon={m.user.icon} style="" />
               </td>
-              
+
               <td style={"background-color: #{rgba_css m.user.colour};"}>{m.user.name}</td>
-              
+
               <%= if party_colour do %>
                 <td style={"background-color: #{rgba_css(party_colour, 0.3)};"} width="50">
                   <Fontawesome.icon icon={party_idx} style="solid" size="lg" />
@@ -62,22 +62,22 @@ defmodule TeiserverWeb.Battle.MatchLive.SubComponents.RatingsComponent do
               <% else %>
                 <td style={"background-color: #{rgba_css m.user.colour};"} width="50">&nbsp;</td>
               <% end %>
-              
+
               <td>{m.team_id + 1}</td>
-              
+
               <td>
                 <%= if rating do %>
                   {(rating.value["rating_value"] - rating.value["rating_value_change"])
                   |> round(2)}
                 <% end %>
               </td>
-              
+
               <td>
                 <%= if rating do %>
                   {rating.value["rating_value"] |> round(2)}
                 <% end %>
               </td>
-              
+
               <td class={text_class}>
                 <%= if rating do %>
                   <Fontawesome.icon icon={icon} style="solid" /> {rating.value["rating_value_change"]
