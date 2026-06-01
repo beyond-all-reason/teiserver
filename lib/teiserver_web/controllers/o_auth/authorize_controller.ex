@@ -13,23 +13,30 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
          true <- OAuth.can_create_code?(app),
          {:ok, _parsed_scopes} <- check_requested_scopes(app.scopes, params["scope"]),
          {:ok, redir_uri} <- OAuth.get_redirect_uri(app, Map.get(conn.params, "redirect_uri")) do
-      reject_uri =
-        error_redirect_uri(
-          conn,
-          redir_uri,
-          "access_denied",
-          "user refused to authorize application"
+      authorized_apps = OAuth.list_authorized_applications(conn.assigns.current_user.id)
+
+      if Enum.find(authorized_apps, &(&1.id == app.id)) != nil do
+        params = Map.put(params, "response_type", "code")
+        do_generate_code(conn, app, redir_uri, params)
+      else
+        reject_uri =
+          error_redirect_uri(
+            conn,
+            redir_uri,
+            "access_denied",
+            "user refused to authorize application"
+          )
+
+        permissions = Enum.map(app.scopes, &OAuth.scope_description/1)
+
+        conn
+        |> render("authorize.html",
+          app_name: app.name,
+          permissions: permissions,
+          params: params,
+          reject_uri: reject_uri
         )
-
-      permissions = Enum.map(app.scopes, &OAuth.scope_description/1)
-
-      conn
-      |> render("authorize.html",
-        app_name: app.name,
-        permissions: permissions,
-        params: params,
-        reject_uri: reject_uri
-      )
+      end
     else
       nil ->
         bad_request(conn, "invalid client_id")

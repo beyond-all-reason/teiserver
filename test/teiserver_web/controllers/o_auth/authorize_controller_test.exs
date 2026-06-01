@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuth
+  alias Teiserver.OAuthFixtures
   alias Teiserver.TeiserverTestLib
   use TeiserverWeb.ConnCase
 
@@ -67,6 +68,31 @@ defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
       query = %{client_id: app.uid, redirect_uri: redir_uri, scope: "tachyon.lobby profile"}
       resp = get(conn, ~p"/oauth/authorize?#{query}")
       assert resp.status == 400
+    end
+
+    test "automatically get code when app already authorized", %{
+      conn: conn,
+      app: app,
+      owner: owner
+    } do
+      # because we consider an app to be authorized when there is at least one code/token
+      # that'll likely change as it's not a great modelling.
+      OAuthFixtures.token_attrs(owner, app) |> OAuthFixtures.create_token()
+
+      redir_uri = "http://127.0.0.1/oauth/callback"
+
+      query = %{
+        client_id: app.uid,
+        redirect_uri: redir_uri,
+        code_challenge: "blah",
+        code_challenge_method: "S256",
+        state: "some random state"
+      }
+
+      resp = get(conn, ~p"/oauth/authorize?#{query}")
+      assert redired = redirected_to(resp, 302)
+      parsed = URI.parse(redired).query |> URI.decode_query()
+      {:ok, %OAuth.Code{}} = OAuth.get_valid_code(parsed["code"])
     end
   end
 
