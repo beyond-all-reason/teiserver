@@ -28,6 +28,10 @@
       <li :if={not @has_active_mfa?}>
         <i class="fa-fw fa-lock-open" style="color: #AA0000" title="MFA enabled"></i> No MFA
       </li>
+
+      <li :if={@cache_user.shadowbanned}>
+        <i class="fa-fw fa-ninja" style="color: #AAAAAA" title="Shadowbanned"></i> Shadowbanned
+      </li>
     </ul>
   </div>
 

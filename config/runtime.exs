@@ -216,9 +216,7 @@ end
 log_root_path = Teiserver.ConfigHelpers.get_env("TEI_LOG_ROOT_PATH", "/tmp/teiserver")
 
 config :logger, :error_log, path: "#{log_root_path}/error.log"
-
 config :logger, :notice_log, path: "#{log_root_path}/notice.log"
-
 config :logger, :info_log, path: "#{log_root_path}/info.log"
 
 enable_discord_bridge =

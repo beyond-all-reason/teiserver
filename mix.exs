@@ -93,6 +93,7 @@ defmodule Teiserver.MixProject do
       # Extra deps
       {:logger_file_backend, "~> 0.0.14"},
       {:logger_backends, "~> 1.0"},
+      {:logger_json, "~> 7.0"},
       {:ecto_psql_extras, "~> 0.8"},
       {:breadcrumble, "~> 1.0.0"},
       {:guardian, "~> 2.1"},
@@ -108,7 +109,7 @@ defmodule Teiserver.MixProject do
       {:jump_credo_checks, "~> 0.1.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4.7", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
-      {:dart_sass, "~> 0.7", only: [:dev]},
+      {:dart_sass, "~> 0.7", runtime: Mix.env() == :dev},
       {:tzdata,
        git: "https://github.com/geekingfrog/tzdata.git",
        ref: "cde84a5921ee8b7a8545997c904f657660e210e0",

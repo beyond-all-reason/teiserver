@@ -288,7 +288,7 @@ defmodule Teiserver.CacheUser do
     end
   end
 
-  @spec rename_user(T.userid(), String.t(), boolean) :: :success | {:error, String.t()}
+  @spec rename_user(User.id(), String.t(), boolean) :: :success | {:error, String.t()}
   def rename_user(userid, new_name, admin_action \\ false) do
     new_name = String.trim(new_name)
     user = Account.get_user(userid)
@@ -347,7 +347,7 @@ defmodule Teiserver.CacheUser do
     end
   end
 
-  @spec renamed_recently(T.userid()) :: boolean()
+  @spec renamed_recently(User.id()) :: boolean()
   defp renamed_recently(user_id) do
     rename_log =
       Account.get_user_stat_data(user_id)
@@ -368,7 +368,7 @@ defmodule Teiserver.CacheUser do
     end
   end
 
-  @spec do_rename_user(T.userid(), String.t()) :: :ok
+  @spec do_rename_user(User.id(), String.t()) :: :ok
   defp do_rename_user(userid, new_name) do
     client = Account.get_client_by_id(userid)
 
@@ -413,7 +413,7 @@ defmodule Teiserver.CacheUser do
   Used to change the name of an internal client, should not be triggered
   by user events.
   """
-  @spec system_change_user_name(T.userid(), String.t()) :: :ok
+  @spec system_change_user_name(User.id(), String.t()) :: :ok
   def system_change_user_name(userid, new_name) do
     Client.disconnect(userid, "System rename")
 
@@ -446,7 +446,7 @@ defmodule Teiserver.CacheUser do
   end
 
   # Cache functions
-  @spec get_username(T.userid()) :: String.t() | nil
+  @spec get_username(User.id()) :: String.t() | nil
   defdelegate get_username(userid), to: UserCacheLib
 
   @spec get_userid(String.t()) :: integer() | nil
@@ -461,13 +461,13 @@ defmodule Teiserver.CacheUser do
   @spec get_user_by_discord_id(String.t()) :: T.user() | nil
   defdelegate get_user_by_discord_id(discord_id), to: UserCacheLib
 
-  @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
+  @spec get_userid_by_discord_id(String.t()) :: User.id() | nil
   defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_user_by_token(String.t()) :: T.user() | nil
   defdelegate get_user_by_token(token), to: UserCacheLib
 
-  @spec get_user_by_id(T.userid()) :: T.user() | nil
+  @spec get_user_by_id(User.id()) :: T.user() | nil
   defdelegate get_user_by_id(id), to: UserCacheLib
 
   @spec list_users(list) :: list
@@ -485,14 +485,14 @@ defmodule Teiserver.CacheUser do
   @spec update_user(T.user(), [persist: boolean()] | nil) :: T.user()
   defdelegate update_user(user, persist \\ []), to: UserCacheLib
 
-  @spec decache_user(T.userid()) :: :ok | :no_user
+  @spec decache_user(User.id()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCacheLib
 
-  @spec send_direct_message(T.userid(), T.userid(), String.t()) :: :ok
+  @spec send_direct_message(User.id(), User.id(), String.t()) :: :ok
   def send_direct_message(from_id, to_id, "!joinas" <> s),
     do: send_direct_message(from_id, to_id, "!cv joinas" <> s)
 
-  @spec send_direct_message(T.userid(), T.userid(), list) :: :ok
+  @spec send_direct_message(User.id(), User.id(), list) :: :ok
   def send_direct_message(sender_id, to_id, message_parts) when is_list(message_parts) do
     msg_str = Enum.join(message_parts, "\n")
 
@@ -598,7 +598,7 @@ defmodule Teiserver.CacheUser do
     send_direct_message(from_id, to_id, [message])
   end
 
-  @spec ring(T.userid(), T.userid()) :: :ok
+  @spec ring(User.id(), User.id()) :: :ok
   def ring(ringee_id, ringer_id) do
     PubSub.broadcast(
       Teiserver.PubSub,
@@ -637,13 +637,13 @@ defmodule Teiserver.CacheUser do
     end
   end
 
-  @spec set_flood_level(T.userid(), Integer) :: :ok
+  @spec set_flood_level(User.id(), Integer) :: :ok
   def set_flood_level(userid, value \\ 10) do
     Teiserver.cache_put(:teiserver_login_count, userid, value)
     :ok
   end
 
-  @spec login_flood_check(T.userid()) :: :allow | :block
+  @spec login_flood_check(User.id()) :: :allow | :block
   def login_flood_check(userid) do
     login_count = Teiserver.cache_get(:teiserver_login_count, userid) || 0
     rate_limit = Config.get_site_config_cache("system.Login limit count")
@@ -656,7 +656,7 @@ defmodule Teiserver.CacheUser do
     end
   end
 
-  @spec internal_client_login(T.userid()) :: {:ok, T.user(), T.client()} | :error
+  @spec internal_client_login(User.id()) :: {:ok, T.user(), T.client()} | :error
   def internal_client_login(userid) do
     case get_user_by_id(userid) do
       nil ->
@@ -680,7 +680,7 @@ defmodule Teiserver.CacheUser do
   end
 
   @spec try_login(String.t(), String.t(), String.t(), String.t()) ::
-          {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
+          {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), User.id()}
   def try_login(token, ip, lobby, lobby_hash) do
     wait_for_startup()
 
@@ -1024,33 +1024,36 @@ defmodule Teiserver.CacheUser do
       |> String.trim()
       |> String.upcase()
 
-    # Handler incase they somehow have an empty country after this
+    # Handler in case they somehow have an empty country after this
     case c do
       "" -> "??"
       c -> c
     end
   end
 
-  # credo:disable-for-lines:8 Credo.Check.Readability.PredicateFunctionNames
-  @spec is_shadowbanned?(T.userid() | T.user()) :: boolean()
-  def is_shadowbanned?(nil), do: true
+  @spec shadowbanned?(User.id() | T.user()) :: boolean()
+  def shadowbanned?(nil), do: true
 
-  def is_shadowbanned?(userid) when is_integer(userid),
-    do: is_shadowbanned?(get_user_by_id(userid))
+  def shadowbanned?(userid) when is_integer(userid),
+    do: shadowbanned?(get_user_by_id(userid))
 
-  def is_shadowbanned?(%{shadowbanned: true}), do: true
-  def is_shadowbanned?(_user), do: false
+  def shadowbanned?(%{shadowbanned: true}), do: true
+  def shadowbanned?(_user), do: false
 
-  @spec shadowban_user(T.userid()) :: :ok
+  @spec shadowban_user(User.id()) :: :ok
   def shadowban_user(nil), do: :ok
 
   def shadowban_user(userid) when is_integer(userid) do
     Account.update_cache_user(userid, %{shadowbanned: true})
-    Client.shadowban_client(userid)
     :ok
   end
 
-  @spec rank_time(T.userid()) :: non_neg_integer()
+  def unshadowban_user(userid) when is_integer(userid) do
+    Account.update_cache_user(userid, %{shadowbanned: false})
+    :ok
+  end
+
+  @spec rank_time(User.id()) :: non_neg_integer()
   @decorate Plugins.plugin(:rank_time)
   def rank_time(userid) do
     stats = Account.get_user_stat(userid) || %{data: %{}}
@@ -1064,7 +1067,7 @@ defmodule Teiserver.CacheUser do
   end
 
   # Based on actual ingame time
-  @spec calculate_rank(T.userid(), String.t()) :: non_neg_integer()
+  @spec calculate_rank(User.id(), String.t()) :: non_neg_integer()
   def calculate_rank(userid, "Playtime") do
     ingame_hours = rank_time(userid)
 
@@ -1123,13 +1126,13 @@ defmodule Teiserver.CacheUser do
     end
   end
 
-  @spec calculate_rank(T.userid()) :: non_neg_integer()
+  @spec calculate_rank(User.id()) :: non_neg_integer()
   def calculate_rank(userid) do
     method = Config.get_site_config_cache("profile.Rank method")
     calculate_rank(userid, method)
   end
 
-  @spec allow?(T.userid() | T.user() | nil, String.t() | atom | [String.t()]) :: boolean()
+  @spec allow?(User.id() | T.user() | nil, String.t() | atom | [String.t()]) :: boolean()
   def allow?(nil, _required), do: false
 
   def allow?(userid, required) when is_integer(userid),

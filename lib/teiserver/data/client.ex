@@ -110,7 +110,7 @@ defmodule Teiserver.Client do
         ip: ip || stats["last_ip"],
         country: stats["country"] || "??",
         lobby_client: stats["lobby_client"],
-        shadowbanned: CacheUser.is_shadowbanned?(user),
+        shadowbanned: CacheUser.shadowbanned?(user),
         muted: Account.has_mute?(db_user),
         awaiting_warn_ack: false,
         warned: false,
@@ -310,14 +310,6 @@ defmodule Teiserver.Client do
         event: :disconnected
       }
     )
-  end
-
-  @spec shadowban_client(T.userid()) :: :ok
-  def shadowban_client(userid) do
-    # client = get_client_by_id(userid)
-    # update(%{client | shadowbanned: true}, :silent)
-    disconnect(userid, "shadowban")
-    :ok
   end
 
   @spec set_awaiting_warn_ack(T.userid()) :: :ok

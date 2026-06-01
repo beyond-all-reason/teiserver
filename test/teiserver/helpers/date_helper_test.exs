@@ -346,5 +346,15 @@ defmodule Teiserver.Helpers.DateHelperTest do
       assert DateHelper.human_input_to_datetime("12m 6months", @now) ==
                {:ok, ~U[2027-05-19 09:00:00Z]}
     end
+
+    test "years" do
+      assert DateHelper.human_input_to_datetime("3y", @now) == {:ok, ~U[2029-05-19 09:00:00Z]}
+
+      assert DateHelper.human_input_to_datetime("6 years", @now) ==
+               {:ok, ~U[2032-05-19 09:00:00Z]}
+
+      assert DateHelper.human_input_to_datetime("12y 6years", @now) ==
+               {:ok, ~U[2038-05-19 09:00:00Z]}
+    end
   end
 end

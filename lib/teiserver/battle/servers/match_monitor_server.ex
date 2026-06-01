@@ -401,14 +401,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           }
 
           Account.update_user_stat(user.id, stats)
-
-          hw1 = CalculateSmurfKeyTask.calculate_hw1_fingerprint(stats)
-          hw2 = CalculateSmurfKeyTask.calculate_hw2_fingerprint(stats)
-          hw3 = CalculateSmurfKeyTask.calculate_hw3_fingerprint(stats)
-
-          Account.create_smurf_key(user.id, "hw1", hw1)
-          Account.create_smurf_key(user.id, "hw2", hw2)
-          Account.create_smurf_key(user.id, "hw3", hw3)
+          CalculateSmurfKeyTask.calculate_apply_keys(stats, user)
           AutomodServer.check_user(user.id)
         end
     end
@@ -454,6 +447,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     Logger.debug("Starting up Match monitor server")
     account = get_match_monitor_account()
     Teiserver.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
+
     {:ok, user, client} = CacheUser.internal_client_login(account.id)
 
     rooms = ["autohosts"]

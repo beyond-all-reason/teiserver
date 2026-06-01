@@ -20,12 +20,11 @@ defmodule Teiserver.Application do
 
   @impl Application
   def start(_type, _args) do
-    LoggerBackends.add(LoggerBackends.Console)
     LoggerBackends.add({LoggerFileBackend, :error_log})
     LoggerBackends.add({LoggerFileBackend, :notice_log})
     LoggerBackends.add({LoggerFileBackend, :info_log})
+    Logger.add_handlers(:teiserver)
 
-    # List all child processes to be supervised
     children =
       [
         Teiserver.PromEx,

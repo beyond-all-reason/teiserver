@@ -140,6 +140,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Manual validation email address",
+      section: "Registrations",
+      type: "string",
+      permissions: ["Admin"],
+      description:
+        "Email address to include in the user-visible error message, when manual validation is needed.",
+      default: ""
+    })
+
+    add_site_config_type(%{
       key: "site.Main site link",
       section: "Site management",
       type: "string",
@@ -195,6 +205,124 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["Admin"],
       description: "Prevents someone from being a player if they don't have a Chobby key yet.",
       default: false
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.VPN blocklist URL",
+      section: "Moderation",
+      type: "string",
+      permissions: ["Moderator"],
+      description: "URL of raw, newline-separated file with blocked IP ranges"
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.External IP check enabled",
+      section: "ExternalIP",
+      type: "boolean",
+      permissions: ["Admin"],
+      description: "Enable/disable external IP check",
+      default: false
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.External IP check endpoint",
+      section: "ExternalIP",
+      type: "string",
+      permissions: ["Admin"],
+      description: "API endpoint URL for external IP checks",
+      default: ""
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.External IP check key",
+      section: "ExternalIP",
+      type: "string",
+      permissions: ["Admin"],
+      description: "API key for external ip check",
+      default: ""
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.external_ip_ban_is_abuser",
+      section: "ExternalIP",
+      type: "boolean",
+      permissions: ["Moderator"],
+      description: "Blacklist is_abuser on external ip checks",
+      default: true
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.external_ip_ban_is_bogon",
+      section: "ExternalIP",
+      type: "boolean",
+      permissions: ["Moderator"],
+      description: "Blacklist is_bogon on external ip checks",
+      default: false
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.external_ip_ban_is_crawler",
+      section: "ExternalIP",
+      type: "boolean",
+      permissions: ["Moderator"],
+      description: "Blacklist is_crawler on external ip checks",
+      default: true
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.external_ip_ban_is_datacenter",
+      section: "ExternalIP",
+      type: "boolean",
+      permissions: ["Moderator"],
+      description: "Blacklist is_datacenter on external ip checks",
+      default: true
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.external_ip_ban_is_proxy",
+      section: "ExternalIP",
+      type: "boolean",
+      permissions: ["Moderator"],
+      description: "Blacklist is_proxy on external ip checks",
+      default: true
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.external_ip_ban_is_tor",
+      section: "ExternalIP",
+      type: "boolean",
+      permissions: ["Moderator"],
+      description: "Blacklist is_tor on external ip checks",
+      default: true
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.external_ip_ban_is_vpn",
+      section: "ExternalIP",
+      type: "boolean",
+      permissions: ["Moderator"],
+      description: "Blacklist is_vpn on external ip checks",
+      default: true
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.New player cutoff",
+      section: "Moderation",
+      type: "integer",
+      permissions: ["Moderator"],
+      description:
+        "Number of hours after which an account is no longer considered a new account for purposes of automod actions",
+      default: 30
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Outstanding report max age",
+      section: "Moderation",
+      type: "integer",
+      permissions: ["Moderator"],
+      default: 31,
+      description:
+        "The maximum age of an outstanding report before it falls off the default filter"
     })
   end
 

@@ -73,22 +73,26 @@ is_moderator = allow?(@conn, "Moderator") %>
           "hw1" => "danger",
           "hw2" => "danger",
           "hw3" => "danger",
+          "hw4" => "danger",
           "client_app_hash" => "warning",
           "wb1" => "success",
           "chobby_hash" => "info",
           "chobby_sysinfo_hash" => "info",
-          "chobby_mac_hash" => "info"
+          "chobby_mac_hash" => "info",
+          "ip" => "info"
         }
 
         type_icons = %{
           "hw1" => "fa-computer",
           "hw2" => "fa-computer",
           "hw3" => "fa-computer",
+          "hw4" => "fa-computer",
           "client_app_hash" => "fa-code",
           "wb1" => "fa-globe",
           "chobby_hash" => "fa-computer",
           "chobby_sysinfo_hash" => "fa-laptop-code",
-          "chobby_mac_hash" => "fa-laptop-file"
+          "chobby_mac_hash" => "fa-laptop-file",
+          "ip" => "fa-network-wired"
         }
 
         short_name = %{
@@ -148,6 +152,9 @@ is_moderator = allow?(@conn, "Moderator") %>
                       {"#{hours}h"}
                     </td>
 
+                    <td>-</td>
+                    <td>-</td>
+
                     <%= for _type <- @key_types do %>
                       <td>
                         -
@@ -180,7 +187,9 @@ is_moderator = allow?(@conn, "Moderator") %>
                   </tr>
 
                   <%= for user <- @users do %>
-                    <% user_stats = @stats_map[user.id] %>
+                    <% user_stats = @stats_map[user.id]
+                    games_allied = @games_allied[user.id]
+                    games_vs = @games_vs[user.id] %>
 
                     <tr>
                       <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
@@ -201,6 +210,9 @@ is_moderator = allow?(@conn, "Moderator") %>
                         {"#{hours}h"}
                       </td>
 
+                      <td>{games_allied}</td>
+                      <td>{games_vs}</td>
+
                       <%= for type <- @key_types do %>
                         <td>
                           <%= if Map.has_key?(@key_lookup, {type, user.id}) do %>
@@ -209,7 +221,7 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                             <i
                               class={"fa-fw fa-solid #{type_icons[type]} text-#{type_colours[type]}"}
-                              title={"Matching key against #{date_to_str(match.last_updated, format: :ymd)}"}
+                              title={"Matching key against #{date_to_str(match.last_updated, format: :ymd)}:\n#{user_key.value}"}
                             >
                             </i>
                             <span class="key-date">
@@ -279,30 +291,28 @@ is_moderator = allow?(@conn, "Moderator") %>
           <div class="col-xl-4 col-xxl-6">
             <h4>Key counts</h4>
             A high number of keys here can increase the chances of a false positive
-            <div class="table-responsive">
-              <table class="table table-sm">
-                <thead>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= for {type_name, count} <- @key_count_by_type_name do %>
                   <tr>
-                    <th>Type</th>
-                    <th>Count</th>
+                    <td>
+                      <i class={"fa-fw fa-solid #{type_icons[type_name]} text-#{type_colours[type_name]}"}>
+                      </i>
+                      &nbsp; {type_name}
+                    </td>
+                    <td>
+                      {count}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  <%= for {type_name, count} <- @key_count_by_type_name do %>
-                    <tr>
-                      <td>
-                        <i class={"fa-fw fa-solid #{type_icons[type_name]} text-#{type_colours[type_name]}"}>
-                        </i>
-                        &nbsp; {type_name}
-                      </td>
-                      <td>
-                        {count}
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
+                <% end %>
+              </tbody>
+            </table>
           </div>
 
           <div :if={allow?(@conn, "Moderator")} class="col-xl-8 col-xxl-6">
@@ -378,6 +388,62 @@ is_moderator = allow?(@conn, "Moderator") %>
               </table>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-6">
+          <textarea id="user_data" rows="28" class="form-control monospace m1"><%= Jason.encode! Map.drop(@user.data, ["password_hash", "ip"]), pretty: true %></textarea>
+        </div>
+        <div class="col-md-6">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Value</th>
+                <th>Occurences in playerbase</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% keys =
+                @stats
+                |> Map.filter(fn {key, _val} ->
+                  String.contains?(key, "hardware") or
+                    key in ["last_ip", "country", "lobby_client", "lobby_hash"]
+                end)
+                |> Map.keys()
+                |> Enum.sort() %>
+              <%= for key <- keys do %>
+                <% value = @stats[key] %>
+                <tr>
+                  <td>{key}</td>
+                  <td>{Kernel.inspect(value)}</td>
+                  <td>
+                    {Teiserver.Account.list_user_stats(
+                      search: [data_equal: {key, value}],
+                      select: [:user_id],
+                      limit: :infinity
+                    )
+                    |> Enum.count()}
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+
+          <form action={~p"/teiserver/admin/users/data_search"} method="post" class="">
+            <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+            <input type="hidden" name="data_search[cpu]" value={@stats["hardware:cpuinfo"]} />
+            <input type="hidden" name="data_search[gpu]" value={@stats["hardware:gpuinfo"]} />
+            <input type="hidden" name="data_search[ram]" value={@stats["hardware:raminfo"]} />
+            <input type="hidden" name="data_search[os]" value={@stats["hardware:osinfo"]} />
+            <input type="hidden" name="data_search[ip]" value={@stats["last_ip"]} />
+            <input type="hidden" name="data_search[screen]" value={@stats["hardware:displaymax"]} />
+
+            <button type="submit" class={"btn btn-#{bsname}"}>
+              <i class="fa-fw fa-solid fa-search"></i> Data search (pre-filled, click Search)
+            </button>
+          </form>
         </div>
       </div>
     </div>
