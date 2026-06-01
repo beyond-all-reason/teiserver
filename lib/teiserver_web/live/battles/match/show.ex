@@ -17,6 +17,12 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   import Teiserver.Helpers.ComponentHelper
   import Teiserver.Helper.ColourHelper
 
+  import TeiserverWeb.Battle.MatchLive.SubComponents.OverviewComponent
+  import TeiserverWeb.Battle.MatchLive.SubComponents.PlayersComponent
+  import TeiserverWeb.Battle.MatchLive.SubComponents.RatingsComponent
+  import TeiserverWeb.Battle.MatchLive.SubComponents.BalanceComponent
+  import TeiserverWeb.Battle.MatchLive.SubComponents.EventsComponent
+
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
     socket =
@@ -128,10 +134,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           x.user_id == current_user.id
         end)
 
-      current_user_team_id = if find_current_user, do: find_current_user.team_id, else: nil
-
-      prediction_text = get_prediction_text(rating_logs, members)
-
       # Creates a map where the party_id refers to an integer
       # but only includes parties with 2 or more members
       parties =
@@ -147,41 +149,20 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         end)
         |> Map.new()
 
-      # Now for balance related stuff
-      partied_players =
-        members
-        |> Enum.group_by(fn p -> p.party_id end, fn p -> p.user_id end)
+      game_id =
+        cond do
+          match.game_id -> match.game_id
+          match.data -> match.data["export_data"]["gameId"]
+          true -> nil
+        end
 
-      groups =
-        partied_players
-        |> Enum.map(fn
-          # The nil group is players without a party, they need to
-          # be broken out of the party
-          {nil, player_id_list} ->
-            player_id_list
-            |> Enum.filter(fn userid -> rating_logs[userid] != nil end)
-            |> Enum.map(fn userid ->
-              %{userid => rating_logs[userid].value}
-            end)
+      replay =
+        if game_id do
+          Application.get_env(:teiserver, Teiserver)[:main_website] <>
+            "/replays?gameId=" <> game_id
+        end
 
-          {_party_id, player_id_list} ->
-            player_id_list
-            |> Enum.filter(fn userid -> rating_logs[userid] != nil end)
-            |> Map.new(fn userid ->
-              {userid, rating_logs[userid].value}
-            end)
-        end)
-        |> List.flatten()
-
-      past_balance =
-        BalanceLib.create_balance(groups, match.team_count,
-          algorithm: algorithm,
-          debug_mode?: true
-        )
-        |> Map.put(:balance_mode, :grouped)
-
-      # What about new balance?
-      new_balance = generate_new_balance_data(match, algorithm)
+      match_rating_status = get_match_rating_status(match)
 
       raw_events =
         Telemetry.list_simple_match_events(where: [match_id: match.id], preload: [:event_types])
@@ -201,150 +182,25 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         end)
         |> Enum.sort_by(fn v -> v end, &<=/2)
 
-      team_lookup =
-        members
-        |> Map.new(fn m ->
-          {m.user_id, m.team_id}
-        end)
-
-      events_by_team_and_type =
-        raw_events
-        |> Enum.group_by(
-          fn e ->
-            {team_lookup[e.user_id] || -1, e.event_type.name}
-          end,
-          fn _event ->
-            1
-          end
-        )
-        |> Enum.map(fn {key, vs} ->
-          {key, Enum.count(vs)}
-        end)
-        |> Enum.sort_by(fn v -> v end, &<=/2)
-
-      balanced_members =
-        if rating_logs == %{} do
-          # It will go here if the match is unprocessed or if
-          # there are no rating logs e.g. unrated match
-          []
-        else
-          Enum.map(members, fn x ->
-            team_id = get_team_id(x.user_id, past_balance.team_players)
-            Map.put(x, :team_id, team_id)
-          end)
-          |> Enum.sort_by(fn m -> rating_logs[m.user.id].value["old_rating_value"] end, &>=/2)
-          |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
-        end
-
-      game_id =
-        cond do
-          match.game_id -> match.game_id
-          match.data -> match.data["export_data"]["gameId"]
-          true -> nil
-        end
-
-      replay =
-        if game_id do
-          Application.get_env(:teiserver, Teiserver)[:main_website] <>
-            "/replays?gameId=" <> game_id
-        end
-
-      match_rating_status = get_match_rating_status(match)
-
       socket
       |> assign(:match, match)
       |> assign(:match_name, match_name)
       |> assign(:members, members)
-      |> assign(:balanced_members, balanced_members)
       |> assign(:rating_logs, rating_logs)
       |> assign(:parties, parties)
-      |> assign(:past_balance, past_balance)
-      |> assign(:new_balance, new_balance)
-      |> assign(:events_by_type, events_by_type)
-      |> assign(:events_by_team_and_type, events_by_team_and_type)
       |> assign(:replay, replay)
       |> assign(:rating_status, match_rating_status)
-      |> assign(:prediction_text, prediction_text)
-      |> assign(:current_user_team_id, current_user_team_id)
+      |> assign(:events_by_type, events_by_type)
     else
       socket
       |> assign(:match, nil)
       |> assign(:match_name, "Loading...")
       |> assign(:members, [])
-      |> assign(:rating_logs, [])
+      |> assign(:rating_logs, %{})
       |> assign(:parties, %{})
-      |> assign(:past_balance, %{})
-      |> assign(:new_balance, %{})
-      |> assign(:events_by_type, %{})
-      |> assign(:events_by_team_and_type, %{})
       |> assign(:replay, nil)
       |> assign(:rating_status, nil)
-      |> assign(:prediction_text, [])
-    end
-  end
-
-  defp get_prediction_text(rating_logs, members) do
-    if rating_logs == %{} do
-      # Unrated match will not have rating logs
-      []
-    else
-      simple_rating_logs =
-        Enum.map(members, fn m ->
-          logs = rating_logs[m.user_id].value
-
-          %{
-            team_id: m.team_id,
-            old_skill: logs["old_skill"],
-            old_uncertainty: logs["old_uncertainty"]
-          }
-        end)
-        |> Enum.group_by(fn x -> x.team_id end)
-        |> Enum.map(fn {_key, value} ->
-          Enum.map(value, fn y ->
-            {y.old_skill, y.old_uncertainty}
-          end)
-        end)
-
-      # predict_win may not be reliable if team count not equal to 2
-      if length(simple_rating_logs) == 2 do
-        prediction = Openskill.predict_win(simple_rating_logs)
-
-        prediction_text_values =
-          Enum.map(prediction, fn x ->
-            percentage = (x * 100) |> NumberHelper.round(1)
-            "#{percentage}%"
-          end)
-
-        team_ratings =
-          Util.team_rating(simple_rating_logs)
-
-        skill_text_values =
-          Enum.map(team_ratings, fn {skill, _sigma_sq, _extra1, _extra2} ->
-            "#{skill |> NumberHelper.round(1)}"
-          end)
-
-        uncertainty_text_values =
-          Enum.map(team_ratings, fn {_skill, sigma_sq, _extra1, _extra2} ->
-            "#{sigma_sq |> NumberHelper.round(1)}"
-          end)
-
-        [
-          %{
-            label: "Openskill library win predict: ",
-            value: "[#{prediction_text_values |> Enum.join(", ")}]"
-          },
-          %{
-            label: "Team skill (μ): ",
-            value: "[#{skill_text_values |> Enum.join(", ")}]"
-          },
-          %{
-            label: "Team uncertainty squared (σ²): ",
-            value: "[#{uncertainty_text_values |> Enum.join(", ")}]"
-          }
-        ]
-      else
-        []
-      end
+      |> assign(:events_by_type, [])
     end
   end
 
@@ -376,49 +232,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       |> Map.put("old_num_matches", old_num_matches)
 
     Map.put(log, :value, new_log_value)
-  end
-
-  def get_team_id(player_id, team_players) do
-    {team_id, _players} =
-      Enum.find(team_players, fn {_k, player_ids} ->
-        Enum.any?(player_ids, fn x -> x == player_id end)
-      end)
-
-    # team_id should start at 0 even though first key is 1
-    team_id - 1
-  end
-
-  defp generate_new_balance_data(match, algorithm) do
-    # For the section "If balance we made using current ratings", do not fuzz ratings
-    # This means the rating used is exactly equal to what is stored in database
-    fuzz_multiplier = 0
-    rating_type = MatchLib.game_type(match.team_size, match.team_count)
-
-    partied_players =
-      match.members
-      |> Enum.group_by(fn p -> p.party_id end, fn p -> p.user_id end)
-
-    groups =
-      partied_players
-      |> Enum.map(fn
-        # The nil group is players without a party, they need to
-        # be broken out of the party
-        {nil, player_id_list} ->
-          player_id_list
-          |> Enum.map(fn userid ->
-            %{userid => BalanceLib.get_user_rating_rank(userid, rating_type, fuzz_multiplier)}
-          end)
-
-        {_party_id, player_id_list} ->
-          player_id_list
-          |> Map.new(fn userid ->
-            {userid, BalanceLib.get_user_rating_rank(userid, rating_type, fuzz_multiplier)}
-          end)
-      end)
-      |> List.flatten()
-
-    BalanceLib.create_balance(groups, match.team_count, algorithm: algorithm, debug_mode?: true)
-    |> Map.put(:balance_mode, :grouped)
   end
 
   defp get_match_rating_status(match) do
