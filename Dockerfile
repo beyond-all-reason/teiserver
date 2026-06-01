@@ -47,19 +47,13 @@ RUN mix deps.get
 RUN mkdir config
 COPY config/config.exs config/
 
-# Need to also compiled dev to be able to compile static assets...
-COPY config/dev.exs config/
-RUN MIX_ENV=dev mix deps.compile
-
-# Now time to compile dependencies for prod.
+# Compile dependencies for prod.
 COPY config/prod.exs config/
 RUN mix deps.compile
 
 COPY priv priv
 COPY assets assets
-# The assets compilation works only in dev environment but files are needed for
-# the prod one... https://github.com/beyond-all-reason/teiserver/issues/238
-RUN MIX_ENV=dev mix assets.deploy
+RUN mix assets.deploy
 
 # Compile for prod
 COPY lib lib

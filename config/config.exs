@@ -93,6 +93,17 @@ config :esbuild,
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 
+config :dart_sass,
+  version: "1.61.0",
+  light: [
+    args: ~w(scss/light.scss ../priv/static/assets/light.css),
+    cd: Path.expand("../assets", __DIR__)
+  ],
+  dark: [
+    args: ~w(scss/dark.scss ../priv/static/assets/dark.css),
+    cd: Path.expand("../assets", __DIR__)
+  ]
+
 config :teiserver, Teiserver.SpringTcpServer,
   # Heatbeat interval in ms
   heartbeat_interval: 30_000,
