@@ -23,8 +23,8 @@
         </ul>
 
         <% keys_to_copy =
-          ~w(client_id response_type code_challenge code_challenge_method redirect_uri state) %>
-        <form action={~p"/oauth/authorize"} method="post">
+          ~w(client_id response_type code_challenge code_challenge_method redirect_uri state scope) %>
+        <form action={~p"/oauth/authorize"} method="post" id="authorize">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
           <%= for key <- keys_to_copy do %>
             <input type="hidden" name={key} value={@params[key]} />
