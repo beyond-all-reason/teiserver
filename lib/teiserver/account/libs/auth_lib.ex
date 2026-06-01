@@ -9,8 +9,6 @@ defmodule Teiserver.Account.AuthLib do
   alias Teiserver.Account
   alias Teiserver.Account.RoleLib
 
-  require Logger
-
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-address-card"
 

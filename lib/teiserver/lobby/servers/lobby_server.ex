@@ -11,8 +11,8 @@ defmodule Teiserver.Battle.LobbyServer do
   alias Teiserver.Lobby.CommandLib
   alias Teiserver.Lobby.LobbyRestrictions
   alias Teiserver.Telemetry
+
   use GenServer
-  require Logger
 
   @player_list_cache_age_max 200
 

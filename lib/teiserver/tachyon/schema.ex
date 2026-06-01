@@ -3,7 +3,6 @@ defmodule Teiserver.Tachyon.Schema do
   utilities to parse tachyon schemas
   """
   alias Teiserver.Helpers.CacheHelper
-  require Logger
 
   @type command_id :: String.t()
   @type message_id :: String.t()

@@ -8,7 +8,6 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   alias Teiserver.Config
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ActionLib
-  require Logger
 
   @behaviour Teiserver.Bridge.BridgeCommandBehaviour
 

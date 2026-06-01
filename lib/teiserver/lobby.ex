@@ -171,8 +171,6 @@ defmodule Teiserver.Lobby do
 
   # Used to send the user PID a join battle command
   @spec do_force_add_user_to_lobby(T.client(), T.lobby_id()) :: :ok | nil
-  defp do_force_add_user_to_lobby(nil, _lobby_id), do: nil
-
   defp do_force_add_user_to_lobby(client, lobby_id) do
     Telemetry.log_simple_server_event(client.userid, "lobby.force_add_user_to_lobby")
     remove_user_from_any_lobby(client.userid)
@@ -192,11 +190,11 @@ defmodule Teiserver.Lobby do
     )
 
     # TODO: Depreciate this
-    if client != nil and client.protocol == :spring do
+    if client.protocol == :spring do
       send(client.tcp_pid, {:force_join_battle, lobby_id, script_password})
     end
 
-    if client != nil and client.protocol != :spring do
+    if client.protocol != :spring do
       add_user_to_battle(client.userid, lobby_id)
     end
 

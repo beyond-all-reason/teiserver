@@ -8,8 +8,6 @@ defmodule Teiserver.Chat.RoomServer do
 
   use GenServer, restart: :temporary
 
-  require Logger
-
   @type room :: %{
           name: String.t(),
           members: MapSet.t(T.userid()),

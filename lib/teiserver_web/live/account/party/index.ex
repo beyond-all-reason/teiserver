@@ -2,8 +2,8 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.PartyLib
+
   use TeiserverWeb, :live_view
-  require Logger
 
   @impl Phoenix.LiveView
   def mount(params, session, socket) do

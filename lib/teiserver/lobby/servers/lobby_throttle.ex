@@ -5,8 +5,8 @@ defmodule Teiserver.Battle.LobbyThrottle do
   player_changes lists players that have changed (added, updated or removed!)
   """
   alias Phoenix.PubSub
+
   use GenServer
-  require Logger
 
   @update_interval 500
 

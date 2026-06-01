@@ -3,7 +3,6 @@ defmodule Teiserver.Coordinator.Parser do
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
-  require Logger
 
   @passthrough ~w(explain)
 

@@ -5,8 +5,8 @@ defmodule Teiserver.Account.AccoladeLib do
   alias Teiserver.Account
   alias Teiserver.Account.Accolade
   alias Teiserver.Data.Types, as: T
+
   use TeiserverWeb, :library
-  require Logger
 
   def miss_count_limit, do: 20
 

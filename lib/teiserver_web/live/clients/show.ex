@@ -5,8 +5,9 @@ defmodule TeiserverWeb.ClientLive.Show do
   alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Client
+
   use TeiserverWeb, :live_view
-  require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """

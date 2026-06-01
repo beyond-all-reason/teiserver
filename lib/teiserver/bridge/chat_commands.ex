@@ -7,7 +7,6 @@ defmodule Teiserver.Bridge.ChatCommands do
   alias Teiserver.Communication
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Logging
-  require Logger
 
   @always_allow ~w(whatwas unit define text)
 

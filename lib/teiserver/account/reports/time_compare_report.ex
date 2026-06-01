@@ -36,27 +36,6 @@ defmodule Teiserver.Account.TimeCompareReport do
     })
   end
 
-  defp get_data(_params, {nil, _end_date}) do
-    %{}
-  end
-
-  defp get_data(%{"tabular" => "true"} = params, {start_date, end_date}) do
-    end_date = DateTime.shift(end_date, day: 7)
-    logs = get_logs(params, {start_date, end_date})
-
-    usernames =
-      params
-      |> get_user_ids()
-      |> Map.new(fn userid -> {userid, Account.get_username_by_id(userid)} end)
-
-    stats = get_stats(params, logs)
-
-    %{
-      usernames: usernames,
-      stats: stats
-    }
-  end
-
   defp get_data(params, {start_date, end_date}) do
     logs = get_logs(params, {start_date, end_date})
 
@@ -242,8 +221,7 @@ defmodule Teiserver.Account.TimeCompareReport do
     |> Map.merge(%{
       "the_date" => today,
       "overlap" => "false",
-      "skip_nil" => "false",
-      "tabular" => "false"
+      "skip_nil" => "false"
     })
     |> Map.merge(Map.get(params, "report", %{}))
   end
