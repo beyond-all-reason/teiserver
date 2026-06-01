@@ -115,11 +115,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           game_options: %{String.t() => String.t()},
           tags: %{String.t() => map()},
           players: %{T.userid() => LT.PlayerDetails.t()},
-          spectators: %{
-            T.userid() => %{
-              join_queue_position: number() | nil
-            }
-          },
+          spectators: %{T.userid() => LT.SpectatorDetails.t()},
           bots: %{LT.Bot.id() => LT.Bot.t()},
           current_battle:
             nil
@@ -151,16 +147,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # represent the ID of a user or a bot slated to play in the game (no spec)
   @typep player_id :: T.userid() | String.t()
 
-  @typep spectator :: %{
-           id: T.userid(),
-           name: String.t(),
-           # used to generate the start script, and then will be sent to the
-           # player so they can join the battle
-           password: String.t(),
-           pid: pid(),
-           join_queue_position: number() | nil
-         }
-
   @typep state :: %{
            id: id(),
            monitors: MC.t(),
@@ -175,7 +161,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            tags: %{String.t() => map()},
            # used to track the players in the lobby.
            players: %{player_id() => LT.Player.t() | LT.Bot.t()},
-           spectators: %{T.userid() => spectator()},
+           spectators: %{T.userid() => LT.Spectator.t()},
            bot_idx_counter: non_neg_integer(),
            current_battle:
              nil
@@ -201,7 +187,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # for more info on specific events, check how they are handled by `process_event/2`
   @typep event ::
            {:move_player, player_id(), LT.Types.team()}
-           | {:add_spectator, spectator()}
+           | {:add_spectator, LT.Spectator.t()}
            | {:remove_player_from_lobby, player_id()}
            | {:remove_spec_from_lobby, T.userid()}
            | {:move_spec_to_player, T.userid(), player_data :: map()}
@@ -528,9 +514,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
         end
 
       spectators =
-        if is_map_key(data.spectators, user_id),
-          do: put_in(data.spectators, [user_id, :pid], user_pid),
-          else: data.spectators
+        if is_map_key(data.spectators, user_id) do
+          Map.update!(data.spectators, user_id, fn %LT.Spectator{} = s ->
+            %{s | pid: user_pid}
+          end)
+        else
+          data.spectators
+        end
 
       data =
         %{data | players: players, spectators: spectators, ids_to_rejoin: ids_left}
@@ -583,7 +573,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def handle_event({:call, from}, {:join, join_data, pid}, _state, data) do
     user_id = join_data.id
 
-    spec_data = %{
+    spec_data = %LT.Spectator{
       id: user_id,
       name: join_data.name,
       password: gen_password(),
@@ -1149,7 +1139,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           for {k, v} <- ps, into: %{}, do: {k, Map.replace(v, :pid, nil)}
         end)
         |> Map.update!(:spectators, fn ps ->
-          for {k, v} <- ps, into: %{}, do: {k, Map.delete(v, :pid)}
+          for {k, v} <- ps, into: %{}, do: {k, Map.replace(v, :pid, nil)}
         end)
         |> :erlang.term_to_binary()
 
@@ -1209,8 +1199,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> Enum.into(%{})
 
     spectators =
-      Enum.map(state.spectators, fn {s_id, s} ->
-        {s_id, %{join_queue_position: s.join_queue_position}}
+      Enum.map(state.spectators, fn {s_id, %LT.Spectator{} = s} ->
+        spec = %LT.SpectatorDetails{id: s_id, join_queue_position: s.join_queue_position}
+        {s_id, spec}
       end)
       |> Enum.into(%{})
 
@@ -1321,9 +1312,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   defp process_event({:move_player_to_spec, p_id, spec_data} = ev, aggregate) do
-    spec =
-      Map.merge(aggregate.data.players[p_id], spec_data)
-      |> Map.delete(:team)
+    %LT.Player{} = player = aggregate.data.players[p_id]
+
+    spec = %LT.Spectator{
+      id: player.id,
+      name: player.name,
+      password: player.password,
+      pid: player.pid,
+      join_queue_position: spec_data.join_queue_position
+    }
 
     aggregate
     |> update_in([:data, :players], &Map.delete(&1, p_id))
@@ -1838,7 +1835,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # what's the next index to use for join queue spec?
   defp find_spec_queue_pos(spectators) do
     max =
-      Enum.reduce(spectators, nil, fn {_id, s}, max_so_far ->
+      Enum.reduce(spectators, nil, fn {_id, %LT.Spectator{} = s}, max_so_far ->
         cond do
           s.join_queue_position == nil -> max_so_far
           max_so_far == nil -> s.join_queue_position
@@ -1851,7 +1848,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   # which player is next in the join queue?
   defp get_first_player_in_join_queue(spectators) do
-    Enum.reduce(spectators, {nil, nil}, fn {id, s}, {min_so_far, _prev_id} = acc ->
+    Enum.reduce(spectators, {nil, nil}, fn {id, %LT.Spectator{} = s},
+                                           {min_so_far, _prev_id} = acc ->
       cond do
         s.join_queue_position == nil ->
           acc
