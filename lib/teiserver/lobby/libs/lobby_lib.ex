@@ -4,6 +4,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Battle.LobbyServer
+  alias Teiserver.Chat.WordLib
   alias Teiserver.Config
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
@@ -611,7 +612,62 @@ defmodule Teiserver.Lobby.LobbyLib do
   end
 
   @spec name_length_valid?(String.t()) :: boolean
-  def name_length_valid?(name) do
+  defp name_length_valid?(name) do
     String.length(name) <= max_name_length()
+  end
+
+  @err_name_empty "Lobby name must not be empty"
+  @err_name_too_long "Lobby name too long"
+  @err_name_chars_invalid "Lobby name contains invalid characters"
+  @err_name_not_allowed "Lobby name rejected"
+
+  @spec validate_name(String.t()) :: :ok | {:error, String.t()}
+  @spec validate_name(String.t(), boolean) :: :ok | {:error, String.t()}
+  def validate_name(name, add_hints \\ false) do
+    cond do
+      name == "" ->
+        {:error, @err_name_empty}
+
+      not name_length_valid?(name) ->
+        message =
+          validation_error(
+            add_hints,
+            @err_name_too_long,
+            "Maximum #{max_name_length()} characters allowed."
+          )
+
+        {:error, message}
+
+      not name_chars_valid?(name) ->
+        message =
+          validation_error(
+            add_hints,
+            @err_name_chars_invalid,
+            "Allowed characters: alphanumeric, spaces, [, ], <, >, -, +, |, :."
+          )
+
+        {:error, message}
+
+      WordLib.flagged_words(name) > 0 ->
+        message =
+          validation_error(
+            add_hints,
+            @err_name_not_allowed,
+            "Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked."
+          )
+
+        {:error, message}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp validation_error(add_hint, base, hint) do
+    if add_hint do
+      base <> ". " <> hint
+    else
+      base
+    end
   end
 end

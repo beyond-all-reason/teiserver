@@ -7,7 +7,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.CacheUser
-  alias Teiserver.Chat.WordLib
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.ConsulServer
@@ -1246,17 +1245,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     lobby = Lobby.get_lobby(state.lobby_id)
 
     name_validation_error =
-      cond do
-        not LobbyLib.name_length_valid?(new_name) ->
-          "That lobby name is too long"
+      case LobbyLib.validate_name(new_name, true) do
+        {:error, error} ->
+          error
 
-        not LobbyLib.name_chars_valid?(new_name) ->
-          "That name contains one or more invalid characters (alphanumeric, spaces and some special characters allowed)"
-
-        WordLib.flagged_words(new_name) > 0 ->
-          "That lobby name been rejected. Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked."
-
-        true ->
+        :ok ->
           case LobbyRestrictions.check_lobby_name(new_name, state) do
             :ok -> nil
             {:error, error} -> error

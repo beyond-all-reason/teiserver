@@ -11,16 +11,17 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("update_lobby_title", new_name, msg_id, state) do
-    cond do
-      not LobbyLib.name_length_valid?(new_name) ->
-        reply(:spring, :no, {"c.battle.update_lobby_title", "Lobby name too long"}, msg_id, state)
+    case LobbyLib.validate_name(new_name) do
+      {:error, error} ->
+        reply(:spring, :no, {"c.battle.update_lobby_title", error}, msg_id, state)
 
-      Lobby.allow?(state.userid, :update_lobby_title, state.lobby_id) ->
-        Battle.rename_lobby(state.lobby_id, new_name, nil)
-        reply(:spring, :okay, "c.battle.update_lobby_title", msg_id, state)
-
-      true ->
-        state
+      :ok ->
+        if Lobby.allow?(state.userid, :update_lobby_title, state.lobby_id) do
+          Battle.rename_lobby(state.lobby_id, new_name, nil)
+          reply(:spring, :okay, "c.battle.update_lobby_title", msg_id, state)
+        else
+          state
+        end
     end
   end
 

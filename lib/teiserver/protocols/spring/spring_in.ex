@@ -839,43 +839,50 @@ defmodule Teiserver.Protocols.SpringIn do
 
           client = Client.get_client_by_id(state.userid)
 
-          cond do
-            client == nil ->
-              {:failure, "No client"}
+          failure =
+            cond do
+              client == nil ->
+                {:failure, "No client"}
 
-            not Auth.is_bot?(state.userid) ->
-              {:failure, "Not a bot"}
+              not Auth.is_bot?(state.userid) ->
+                {:failure, "Not a bot"}
 
-            not LobbyLib.name_length_valid?(name) ->
-              {:failure, "Lobby name too long"}
+              true ->
+                case LobbyLib.validate_name(name) do
+                  {:error, error} -> {:failure, error}
+                  :ok -> nil
+                end
+            end
 
-            true ->
-              password = if Enum.member?(["empty", "*"], password), do: nil, else: password
+          if failure != nil do
+            failure
+          else
+            password = if Enum.member?(["empty", "*"], password), do: nil, else: password
 
-              lobby =
-                %{
-                  founder_id: state.userid,
-                  founder_name: state.username,
-                  name: name,
-                  type: if(type == "0", do: "normal", else: "replay"),
-                  nattype: nattype,
-                  port: int_parse(port),
-                  max_players: int_parse(max_players),
-                  game_hash: game_hash,
-                  map_hash: map_hash,
-                  password: password,
-                  rank: 0,
-                  locked: false,
-                  engine_name: engine_name,
-                  engine_version: engine_version,
-                  map_name: map_name,
-                  game_name: game_name,
-                  ip: client.ip
-                }
-                |> Lobby.create_lobby()
-                |> Lobby.add_lobby()
+            lobby =
+              %{
+                founder_id: state.userid,
+                founder_name: state.username,
+                name: name,
+                type: if(type == "0", do: "normal", else: "replay"),
+                nattype: nattype,
+                port: int_parse(port),
+                max_players: int_parse(max_players),
+                game_hash: game_hash,
+                map_hash: map_hash,
+                password: password,
+                rank: 0,
+                locked: false,
+                engine_name: engine_name,
+                engine_version: engine_version,
+                map_name: map_name,
+                game_name: game_name,
+                ip: client.ip
+              }
+              |> Lobby.create_lobby()
+              |> Lobby.add_lobby()
 
-              {:success, lobby}
+            {:success, lobby}
           end
 
         nil ->
