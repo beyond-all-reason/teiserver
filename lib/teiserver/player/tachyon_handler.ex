@@ -19,6 +19,7 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Tachyon.Schema
+  alias Teiserver.TachyonLobby.Types, as: LT
 
   require Logger
 
@@ -723,7 +724,7 @@ defmodule Teiserver.Player.TachyonHandler do
           sb = at["startBox"]
           teams = for t <- at["teams"], do: %{max_players: t["maxPlayers"]}
 
-          %{
+          %LT.AllyTeamConfig{
             max_teams: at["maxTeams"],
             start_box: %{
               top: sb["top"],
@@ -887,7 +888,7 @@ defmodule Teiserver.Player.TachyonHandler do
       "name" => :name,
       "mapName" => :map_name,
       "allyTeamConfig" =>
-        {:ally_team_config,
+        {:ally_team_config, LT.AllyTeamConfig,
          %{
            "maxTeams" => :max_teams,
            "startBox" =>

@@ -13,7 +13,7 @@ defmodule Teiserver.TachyonLobby do
   @type details :: Lobby.details()
   @type overview :: TachyonLobby.List.overview()
   @type team :: LT.Types.team()
-  @type ally_team_config :: Lobby.ally_team_config()
+  @type ally_team_config :: [LT.AllyTeamConfig.t()]
 
   @spec list() :: %{Lobby.id() => overview()}
   defdelegate list(), to: TachyonLobby.List

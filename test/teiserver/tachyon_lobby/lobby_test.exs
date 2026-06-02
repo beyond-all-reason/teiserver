@@ -5,6 +5,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   alias Teiserver.Tachyon, as: TachyonLib
   alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.TachyonLobby.Lobby, as: LobbyProcess
+  alias Teiserver.TachyonLobby.Types, as: LT
 
   use Teiserver.DataCase
 
@@ -1849,7 +1850,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         Enum.map(teams, fn max_team ->
           x = for _i <- 1..max_team, do: %{max_players: 1}
 
-          %{
+          %LT.AllyTeamConfig{
             max_teams: max_team,
             start_box: %{top: 0, left: 0, bottom: 1, right: 0.2},
             teams: x

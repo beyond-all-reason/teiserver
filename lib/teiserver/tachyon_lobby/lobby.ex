@@ -24,7 +24,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # case basis.
 
   alias Plug.Crypto
-  alias Teiserver.Asset
   alias Teiserver.Autohost
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.Collections
@@ -43,18 +42,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @behaviour :gen_statem
 
   @type id :: String.t()
-
-  @type ally_team_config :: [
-          %{
-            max_teams: pos_integer(),
-            start_box: Asset.startbox(),
-            teams: [
-              %{
-                max_players: pos_integer()
-              }
-            ]
-          }
-        ]
 
   @typedoc """
   Data required for a player to join a lobby. This allow lobbies to
@@ -75,7 +62,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           required(:creator_pid) => pid(),
           required(:name) => String.t(),
           required(:map_name) => String.t(),
-          required(:ally_team_config) => ally_team_config(),
+          required(:ally_team_config) => [LT.AllyTeamConfig.t()],
           optional(:game_version) => String.t(),
           optional(:engine_version) => String.t(),
           optional(:boss_enabled?) => boolean(),
@@ -111,7 +98,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           engine_version: String.t(),
           boss_enabled?: boolean(),
           bosses: MapSet.t(T.userid()),
-          ally_team_config: ally_team_config(),
+          ally_team_config: [LT.AllyTeamConfig.t()],
           game_options: %{String.t() => String.t()},
           tags: %{String.t() => map()},
           players: %{T.userid() => LT.PlayerDetails.t()},
@@ -151,7 +138,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            engine_version: String.t(),
            boss_enabled?: boolean(),
            bosses: MapSet.t(T.userid()),
-           ally_team_config: ally_team_config(),
+           ally_team_config: [LT.AllyTeamConfig.t()],
            game_options: %{String.t() => String.t()},
            tags: %{String.t() => map()},
            # used to track the players in the lobby.
@@ -186,8 +173,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:update_client_status, T.userid(), client_status :: map()}
            | {:update_lobby_name, new_name :: String.t()}
            | {:update_map_name, new_name :: String.t()}
-           | {:update_ally_team_config, old_config :: ally_team_config(),
-              new_config :: ally_team_config()}
+           | {:update_ally_team_config, old_config :: [LT.AllyTeamConfig.t()],
+              new_config :: [LT.AllyTeamConfig.t()]}
            | {:update_game_options, changes :: %{String.t() => String.t() | nil}}
            | {:update_tags, changes :: %{String.t() => map() | nil}}
            | {:start_vote, vote_state()}
@@ -328,7 +315,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @type lobby_update_data :: %{
           optional(:name) => String.t(),
           optional(:map_name) => String.t(),
-          optional(:ally_team_config) => ally_team_config(),
+          optional(:ally_team_config) => [LT.AllyTeamConfig.t()],
           optional(:game_options) => %{String.t() => String.t() | nil},
           optional(:tags) => %{String.t() => map() | nil}
         }
@@ -1327,7 +1314,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     data = aggregate.data
 
     repacked_players =
-      for {_at, at_idx} <- Enum.with_index(data.ally_team_config) do
+      for {%LT.AllyTeamConfig{} = _at, at_idx} <- Enum.with_index(data.ally_team_config) do
         Enum.filter(data.players, fn {_id, %{team: {p_at, _team, _player}}} -> at_idx == p_at end)
         |> Enum.map(fn {_id, p} -> p end)
         |> Enum.sort_by(& &1.team)
@@ -1384,7 +1371,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     spec_ids =
       Enum.map(state.players, fn {p_id, %{team: {x, y, z}}} ->
-        with at_config when not is_nil(at_config) <- Enum.at(new_config, x),
+        with at_config = %LT.AllyTeamConfig{} when not is_nil(at_config) <- Enum.at(new_config, x),
              team_config when not is_nil(team_config) <- Enum.at(at_config.teams, y) do
           if y < at_config.max_teams && z < team_config.max_players,
             do: nil,
@@ -1641,7 +1628,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
         {nil, new_at} ->
           new_at
 
-        {old_at, new_at} ->
+        {%LT.AllyTeamConfig{} = old_at, %LT.AllyTeamConfig{} = new_at} ->
+          # we are broadcasting patch updates, so structs are meaningless
+          # in this context
+          new_at = Map.from_struct(new_at)
+
           Map.update!(new_at, :teams, fn new_teams ->
             Collections.zip_with_padding(old_at.teams, new_teams, nil)
             |> Enum.map(fn {_old_team, new_team} -> new_team end)
@@ -1743,12 +1734,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # find an empty slot for a player/bot to play
   # this function isn't too efficient, but it's never going to be run on
   # massive inputs since the engine cannot support more than 254 players anyway
-  @spec find_team(ally_team_config(), %{player_id() => LT.Player.t() | LT.Bot.t()}) ::
+  @spec find_team([LT.AllyTeamConfig.t()], %{player_id() => LT.Player.t() | LT.Bot.t()}) ::
           LT.Types.team() | nil
   defp find_team(ally_team_config, players) do
     # find the least full ally team
     ally_team =
-      for {at, at_idx} <- Enum.with_index(ally_team_config) do
+      for {%LT.AllyTeamConfig{} = at, at_idx} <- Enum.with_index(ally_team_config) do
         total_capacity = Enum.sum_by(at.teams, fn t -> t.max_players end)
 
         capacity = total_capacity - team_count(at_idx, players)
@@ -1934,7 +1925,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> Map.values()
 
     ally_teams =
-      for {at, at_config} <- Enum.zip(sorted, state.ally_team_config) do
+      for {at, %LT.AllyTeamConfig{} = at_config} <- Enum.zip(sorted, state.ally_team_config) do
         teams =
           Enum.group_by(at, &elem(&1.team, 1))
           |> Map.values()
