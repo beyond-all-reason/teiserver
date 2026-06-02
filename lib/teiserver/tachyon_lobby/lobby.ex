@@ -117,12 +117,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           players: %{T.userid() => LT.PlayerDetails.t()},
           spectators: %{T.userid() => LT.SpectatorDetails.t()},
           bots: %{LT.Bot.id() => LT.Bot.t()},
-          current_battle:
-            nil
-            | %{
-                id: TachyonBattle.id(),
-                started_at: DateTime.t()
-              },
+          current_battle: LT.CurrentBattleDetails.t() | nil,
           current_vote: nil | vote_state(),
           vote_history: %{
             String.t() => %{
@@ -163,13 +158,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            players: %{player_id() => LT.Player.t() | LT.Bot.t()},
            spectators: %{T.userid() => LT.Spectator.t()},
            bot_idx_counter: non_neg_integer(),
-           current_battle:
-             nil
-             | %{
-                 id: Teiserver.TachyonBattle.id(),
-                 pid: pid(),
-                 started_at: DateTime.t()
-               },
+           current_battle: LT.CurrentBattle.t() | nil,
            ids_to_rejoin: MapSet.t(T.userid()),
            vote_idx: integer(),
            current_vote: nil | vote_state(),
@@ -1034,8 +1023,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       now = DateTime.utc_now()
 
+      battle = %LT.CurrentBattle{id: battle_id, pid: battle_pid, started_at: now}
+
       data =
-        %{data | current_battle: %{id: battle_id, pid: battle_pid, started_at: now}}
+        %{data | current_battle: battle}
         |> Map.update!(:monitors, &MC.monitor(&1, battle_pid, :current_battle))
 
       broadcast_update({:update, nil, %{current_battle: data.current_battle}}, data)
