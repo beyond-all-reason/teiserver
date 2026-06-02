@@ -9,22 +9,21 @@ defmodule Teiserver.TachyonLobby do
   alias Teiserver.TachyonLobby.Lobby
   alias Teiserver.TachyonLobby.Types, as: LT
 
-  @type id :: Lobby.id()
-  @type details :: Lobby.details()
+  @type id :: LT.Types.id()
   @type overview :: TachyonLobby.List.overview()
   @type team :: LT.Types.team()
   @type ally_team_config :: [LT.AllyTeamConfig.t()]
 
-  @spec list() :: %{Lobby.id() => overview()}
+  @spec list() :: %{id() => overview()}
   defdelegate list(), to: TachyonLobby.List
 
-  @spec subscribe_updates() :: {non_neg_integer(), %{Lobby.id() => overview()}}
+  @spec subscribe_updates() :: {non_neg_integer(), %{id() => overview()}}
   defdelegate subscribe_updates(), to: TachyonLobby.List
   defdelegate unsubscribe_updates(), to: TachyonLobby.List
 
   @type start_params :: Lobby.start_params()
   @spec create(Lobby.start_params()) ::
-          {:ok, pid(), details()}
+          {:ok, pid(), LT.Details.t()}
           | {:error, {:already_started, pid()} | :max_children | term()}
   def create(start_params)
       when not is_map_key(start_params, :game_version) or start_params.game_version == nil do
@@ -47,17 +46,17 @@ defmodule Teiserver.TachyonLobby do
 
   def create(start_params) do
     with {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
-         {:ok, details} <- Lobby.get_details(id) do
+         {:ok, %LT.Details{} = details} <- Lobby.get_details(id) do
       {:ok, pid, details}
     end
   end
 
   @spec rejoin(id(), T.userid()) ::
-          {:ok, lobby_pid :: pid(), details()} | {:error, :invalid_lobby}
+          {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, :invalid_lobby}
   def rejoin(lobby_id, user_id), do: rejoin(lobby_id, user_id, self())
 
   @spec rejoin(id(), T.userid(), pid()) ::
-          {:ok, lobby_pid :: pid(), details()} | {:error, :invalid_lobby}
+          {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, :invalid_lobby}
   defdelegate rejoin(lobby_id, user_id, pid), to: Lobby
 
   @type client_status_update_data :: Lobby.client_status_update_data()
@@ -73,7 +72,7 @@ defmodule Teiserver.TachyonLobby do
     TachyonLobby.Supervisor.start_lobby_from_snapshot(id, serialized_state)
   end
 
-  @spec lookup(Lobby.id()) :: pid() | nil
+  @spec lookup(id()) :: pid() | nil
   defdelegate lookup(lobby_id), to: TachyonLobby.Registry
 
   @spec count() :: non_neg_integer()
@@ -81,7 +80,7 @@ defmodule Teiserver.TachyonLobby do
 
   @type player_join_data :: Lobby.player_join_data()
   @spec join(id(), player_join_data(), pid()) ::
-          {:ok, lobby_pid :: pid(), details()} | {:error, reason :: term()}
+          {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, reason :: term()}
   defdelegate join(lobby_id, join_data, pid \\ self()), to: Lobby
 
   @spec spectate(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
@@ -129,7 +128,7 @@ defmodule Teiserver.TachyonLobby do
   defdelegate leave(lobby_id, user_id), to: Lobby
 
   @spec join_ally_team(id(), T.userid(), allyTeam :: non_neg_integer()) ::
-          {:ok, details()}
+          {:ok, LT.Details.t()}
           | {:error,
              reason :: :invalid_lobby | :not_in_lobby | :invalid_ally_team | :ally_team_full}
   defdelegate join_ally_team(lobby_id, user_id, ally_team), to: Lobby

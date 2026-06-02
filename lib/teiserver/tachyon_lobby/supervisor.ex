@@ -2,11 +2,12 @@ defmodule Teiserver.TachyonLobby.Supervisor do
   @moduledoc false
   alias Horde.DynamicSupervisor, as: HordeSupervisor
   alias Teiserver.TachyonLobby.Lobby
+  alias Teiserver.TachyonLobby.Types, as: LT
 
   use Horde.DynamicSupervisor
 
   @spec start_lobby(Lobby.start_params()) ::
-          {:ok, %{pid: pid(), id: Lobby.id()}}
+          {:ok, %{pid: pid(), id: LT.Types.id()}}
           | {:error, {:already_started, pid()} | :max_children | term()}
   def start_lobby(start_params) do
     id = Lobby.gen_id()

@@ -15,6 +15,7 @@ defmodule Teiserver.TachyonLobby.List do
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Helpers.PubSubHelper
   alias Teiserver.TachyonLobby.Lobby
+  alias Teiserver.TachyonLobby.Types, as: LT
 
   use GenServer
 
@@ -35,15 +36,15 @@ defmodule Teiserver.TachyonLobby.List do
   @typep state :: %{
            monitors: MC.t(),
            counter: non_neg_integer(),
-           lobbies: %{Lobby.id() => overview()},
+           lobbies: %{LT.Types.id() => overview()},
            # the map is a partial overview
-           changes: %{Lobby.id() => map()}
+           changes: %{LT.Types.id() => map()}
          }
 
   @doc """
   New lobby should call this function so that they get listed
   """
-  @spec register_lobby(pid(), Lobby.id(), overview()) :: :ok
+  @spec register_lobby(pid(), LT.Types.id(), overview()) :: :ok
   def register_lobby(lobby_pid, lobby_id, overview) do
     GenServer.cast(__MODULE__, {:register, {lobby_pid, lobby_id, overview}})
   end
@@ -55,7 +56,7 @@ defmodule Teiserver.TachyonLobby.List do
   # would need to measure.
   # one potential optimisation would be to store the list of lobbies in an
   # ets table that can be directly read from other processes
-  @spec list() :: %{Lobby.id() => overview()}
+  @spec list() :: %{LT.Types.id() => overview()}
   def list do
     {_counter, list} = GenServer.call(__MODULE__, :list)
     list
@@ -75,7 +76,7 @@ defmodule Teiserver.TachyonLobby.List do
   in the list call. It should be ignored
   """
   # similar comment regarding potential perf issue sending large messages
-  @spec subscribe_updates() :: {non_neg_integer(), %{Lobby.id() => overview()}}
+  @spec subscribe_updates() :: {non_neg_integer(), %{LT.Types.id() => overview()}}
   def subscribe_updates do
     PubSubHelper.subscribe(@update_topic)
     GenServer.call(__MODULE__, :list)
@@ -87,7 +88,7 @@ defmodule Teiserver.TachyonLobby.List do
     PubSubHelper.unsubscribe(@update_topic)
   end
 
-  @spec update_lobby(Lobby.id(), map()) :: :ok
+  @spec update_lobby(LT.Types.id(), map()) :: :ok
   def update_lobby(lobby_id, changes) do
     GenServer.cast(__MODULE__, {:update, lobby_id, changes})
   end

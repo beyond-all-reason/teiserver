@@ -3,6 +3,11 @@ defmodule Teiserver.TachyonLobby.Types.Types do
   central location for lobby related types that aren't really suited to be structs
   """
 
+  @type id() :: String.t()
+
+  # represent the ID of a user or a bot slated to play in the game (no spec)
+  @type player_id :: Teiserver.Account.User.id() | String.t()
+
   @typedoc """
   These represent the indices respectively into
   {ally team index, team index, player index}

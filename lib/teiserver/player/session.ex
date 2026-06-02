@@ -23,6 +23,7 @@ defmodule Teiserver.Player.Session do
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
+  alias Teiserver.TachyonLobby.Types, as: LT
 
   # For now, never restart a session. Until some form of state persistence is
   # implemented it's better to just remove the process completely than
@@ -489,13 +490,13 @@ defmodule Teiserver.Player.Session do
           optional(:tags) => %{String.t() => map()}
         }
   @spec create_lobby(T.userid(), lobby_start_params()) ::
-          {:ok, TachyonLobby.details()} | {:error, reason :: term()}
+          {:ok, LT.Details.t()} | {:error, reason :: term()}
   def create_lobby(user_id, start_params) do
     user_id |> via_tuple() |> GenServer.call({:lobby, {:create, start_params}})
   end
 
   @spec lobby_join(T.userid(), TachyonLobby.id()) ::
-          {:ok, TachyonLobby.details()} | {:error, reason :: term()}
+          {:ok, LT.Details.t()} | {:error, reason :: term()}
   def lobby_join(user_id, lobby_id) do
     user_id |> via_tuple() |> GenServer.call({:lobby, {:join, lobby_id}})
   end
@@ -693,7 +694,7 @@ defmodule Teiserver.Player.Session do
 
   defp rejoin_lobby(state, lobby_id) do
     case TachyonLobby.rejoin(lobby_id, state.user.id) do
-      {:ok, lobby_pid, details} ->
+      {:ok, lobby_pid, %LT.Details{} = details} ->
         state =
           state
           |> Map.update!(:monitors, &MC.monitor(&1, lobby_pid, {:lobby, details.id}))
