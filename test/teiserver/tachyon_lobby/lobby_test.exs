@@ -27,7 +27,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   test "must have a game in db" do
     result =
       mk_start_params([1, 1])
-      |> Map.drop([:game_version])
+      |> Map.replace!(:game_version, nil)
       |> Lobby.create()
 
     assert result == {:error, :no_game_version_found}
@@ -38,7 +38,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     {:ok, _pid, details} =
       mk_start_params([1, 1])
-      |> Map.drop([:game_version])
+      |> Map.replace!(:game_version, nil)
       |> Lobby.create()
 
     assert details.game_version == game.name
@@ -47,7 +47,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   test "must have engine in db" do
     result =
       mk_start_params([1, 1])
-      |> Map.drop([:engine_version])
+      |> Map.replace!(:engine_version, nil)
       |> Lobby.create()
 
     assert result == {:error, :no_engine_version_found}
@@ -58,7 +58,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     {:ok, _pid, details} =
       mk_start_params([1, 1])
-      |> Map.drop([:engine_version])
+      |> Map.replace!(:engine_version, nil)
       |> Lobby.create()
 
     assert details.engine_version == engine.name
@@ -1841,7 +1841,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   end
 
   defp mk_start_params(teams) do
-    %{
+    %LT.StartParams{
       creator_data: %{id: @default_user_id, name: "name-#{@default_user_id}"},
       creator_pid: self(),
       name: "test create lobby",
@@ -1862,7 +1862,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   end
 
   defp mk_player(user_id) do
-    %{id: user_id, name: "name-#{user_id}"}
+    %LT.PlayerJoinData{id: user_id, name: "name-#{user_id}"}
   end
 
   # create a lobby with a few specs already in. Simplify the logic when

@@ -41,33 +41,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @behaviour :gen_statem
 
-  @typedoc """
-  Data required for a player to join a lobby. This allow lobbies to
-  be agnostic of how players are represented in the system
-  """
-  @type player_join_data :: %{
-          id: T.userid(),
-          name: String.t()
-        }
-
-  @typedoc """
-  the parameters required to create a new lobby.
-  It's enough data to generate the initial lobby internal state, which in
-  turn can be used to start a battle
-  """
-  @type start_params :: %{
-          required(:creator_data) => player_join_data(),
-          required(:creator_pid) => pid(),
-          required(:name) => String.t(),
-          required(:map_name) => String.t(),
-          required(:ally_team_config) => [LT.AllyTeamConfig.t()],
-          optional(:game_version) => String.t(),
-          optional(:engine_version) => String.t(),
-          optional(:boss_enabled?) => boolean(),
-          optional(:game_options) => %{String.t() => String.t()},
-          optional(:tags) => %{String.t() => map()}
-        }
-
   @type asset_status :: :missing | :downloading | :complete
 
   @typedoc """
@@ -136,14 +109,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
   end
 
-  @spec start_link({LT.Types.id(), start_params()}) :: GenServer.on_start()
-  def start_link({id, _start_params} = args) do
+  @spec start_link({LT.Types.id(), {:user, LT.StartParams.t()} | {:snapshot, binary()}}) ::
+          GenServer.on_start()
+  def start_link({id, _data} = args) do
     via_tuple(id) |> :gen_statem.start_link(__MODULE__, args, [])
   end
 
-  @spec join(LT.Types.id(), player_join_data(), pid()) ::
+  @spec join(LT.Types.id(), LT.PlayerJoinData.t(), pid()) ::
           {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, reason :: term()}
-  def join(lobby_id, join_data, pid \\ self()) do
+  def join(lobby_id, %LT.PlayerJoinData{} = join_data, pid \\ self()) do
     call_lobby(lobby_id, {:join, join_data, pid})
   end
 
@@ -309,19 +283,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def callback_mode, do: :handle_event_function
 
   @impl :gen_statem
-  @spec init({LT.Types.id(), {:user, start_params()} | {:snapshot, binary()}}) ::
+  @spec init({LT.Types.id(), {:user, LT.StartParams.t()} | {:snapshot, binary()}}) ::
           {:ok, term(), LT.Data.t()}
-  def init({id, {:user, start_params}}) do
+  def init({id, {:user, %LT.StartParams{} = start_params}}) do
     Process.flag(:trap_exit, true)
     Logger.metadata(actor_type: :lobby, actor_id: id)
 
     monitors =
       MC.new() |> MC.monitor(start_params.creator_pid, {:user, start_params.creator_data.id})
 
-    boss_enabled? = Map.get(start_params, :boss_enabled?) || false
-
     bosses =
-      if boss_enabled?,
+      if start_params.boss_enabled?,
         do: MapSet.new([start_params.creator_data.id]),
         else: MapSet.new()
 
@@ -333,11 +305,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
         map_name: start_params.map_name,
         game_version: start_params.game_version,
         engine_version: start_params.engine_version,
-        boss_enabled?: boss_enabled?,
+        boss_enabled?: start_params.boss_enabled?,
         bosses: bosses,
         ally_team_config: start_params.ally_team_config,
-        game_options: Map.get(start_params, :game_options, %{}),
-        tags: Map.get(start_params, :tags, %{}),
+        game_options: start_params.game_options,
+        tags: start_params.tags,
         players: %{
           start_params.creator_data.id => %LT.Player{
             id: start_params.creator_data.id,
@@ -468,7 +440,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(
         {:call, from},
-        {:join, join_data, _pid},
+        {:join, %LT.PlayerJoinData{} = join_data, _pid},
         _state,
         %LT.Data{} = data
       )
@@ -492,7 +464,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:keep_state, data, [{:reply, from, {:error, :lobby_full}}]}
   end
 
-  def handle_event({:call, from}, {:join, join_data, pid}, _state, %LT.Data{} = data) do
+  def handle_event(
+        {:call, from},
+        {:join, %LT.PlayerJoinData{} = join_data, pid},
+        _state,
+        %LT.Data{} = data
+      ) do
     user_id = join_data.id
 
     spec_data = %LT.Spectator{

@@ -21,12 +21,12 @@ defmodule Teiserver.TachyonLobby do
   defdelegate subscribe_updates(), to: TachyonLobby.List
   defdelegate unsubscribe_updates(), to: TachyonLobby.List
 
-  @type start_params :: Lobby.start_params()
-  @spec create(Lobby.start_params()) ::
+  @type start_params :: LT.StartParams.t()
+  @spec create(start_params()) ::
           {:ok, pid(), LT.Details.t()}
           | {:error, {:already_started, pid()} | :max_children | term()}
-  def create(start_params)
-      when not is_map_key(start_params, :game_version) or start_params.game_version == nil do
+  def create(%LT.StartParams{} = start_params)
+      when start_params.game_version == nil do
     # This is certainly not what we want to have long term, but for now it makes
     # it easier to change this parameter than having to redeploy
     case Asset.get_default_lobby_game() do
@@ -35,8 +35,8 @@ defmodule Teiserver.TachyonLobby do
     end
   end
 
-  def create(start_params)
-      when not is_map_key(start_params, :engine_version) or start_params.engine_version == nil do
+  def create(%LT.StartParams{} = start_params)
+      when start_params.engine_version == nil do
     # Same as above, it's unlikely we end up with that but it'll do for now
     case Asset.get_default_lobby_engine() do
       nil -> {:error, :no_engine_version_found}
@@ -44,7 +44,7 @@ defmodule Teiserver.TachyonLobby do
     end
   end
 
-  def create(start_params) do
+  def create(%LT.StartParams{} = start_params) do
     with {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
          {:ok, %LT.Details{} = details} <- Lobby.get_details(id) do
       {:ok, pid, details}
@@ -78,7 +78,7 @@ defmodule Teiserver.TachyonLobby do
   @spec count() :: non_neg_integer()
   defdelegate count(), to: TachyonLobby.Registry
 
-  @type player_join_data :: Lobby.player_join_data()
+  @type player_join_data :: LT.PlayerJoinData.t()
   @spec join(id(), player_join_data(), pid()) ::
           {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, reason :: term()}
   defdelegate join(lobby_id, join_data, pid \\ self()), to: Lobby

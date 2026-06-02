@@ -17,6 +17,7 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Player.Session
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Player.SessionSupervisor
+  alias Teiserver.Player.Types, as: PT
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Tachyon.Schema
   alias Teiserver.TachyonLobby.Types, as: LT
@@ -716,7 +717,7 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("lobby/create", "request", _msg_id, msg, state) do
     # TODO: the `lobby/update` has very similar logic. There should be a way
     # to combine the parsing
-    create_data = %{
+    create_data = %PT.LobbyStartParams{
       name: msg["data"]["name"],
       map_name: msg["data"]["mapName"],
       ally_team_config:
@@ -1207,7 +1208,7 @@ defmodule Teiserver.Player.TachyonHandler do
     |> Enum.reject(&is_nil/1)
   end
 
-  defp lobby_details_to_tachyon(details) do
+  defp lobby_details_to_tachyon(%LT.Details{} = details) do
     mappings = %{
       id: :id,
       players: {:players, &player_updates_to_tachyon/1},
