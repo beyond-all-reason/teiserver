@@ -287,6 +287,8 @@ config :teiserver, Teiserver.PromEx,
   ets_flush_interval: 20_000,
   metrics_server: :disabled
 
+config :teiserver, Teiserver.IpCheck, client_module: Teiserver.IpCheck.Api
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
