@@ -89,6 +89,8 @@ config :teiserver, Teiserver.PromEx,
     annotate_app_lifecycle: true
   ]
 
+config :teiserver, Teiserver.IpCheck, client_module: Teiserver.IpCheck.Stub
+
 try do
   import_config "dev.secret.exs"
 rescue

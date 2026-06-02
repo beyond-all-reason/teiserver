@@ -71,6 +71,8 @@ config :teiserver, Oban,
 
 config :teiserver, Teiserver.PromEx, disabled: true
 
+config :teiserver, Teiserver.IpCheck, client_module: Teiserver.IpCheck.Stub
+
 config :teiserver, Teiserver.Mailer,
   adapter: Bamboo.TestAdapter,
   noreply_address: "noreply@testsite.co.uk",
