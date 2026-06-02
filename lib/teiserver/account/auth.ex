@@ -28,7 +28,6 @@ defmodule Teiserver.Account.Auth do
   def authorize(:ratings_post, conn, _data), do: allow?(conn, "Moderator")
   def authorize(:set_stat, conn, _data), do: allow?(conn, "Moderator")
   def authorize(:edit, conn, _data), do: allow?(conn, "Moderator")
-  def authorize(:full_chat, conn, _data), do: allow?(conn, "Reviewer")
   def authorize(:update, conn, _data), do: allow?(conn, "Moderator")
   def authorize(:applying, conn, _data), do: allow?(conn, "Moderator")
   def authorize(:data_search, conn, _data), do: allow?(conn, "Moderator")

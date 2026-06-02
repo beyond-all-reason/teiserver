@@ -44,7 +44,7 @@
 
                   <td>
                     <a
-                      href={Routes.ts_admin_badge_type_path(@conn, :show, badge_type.id)}
+                      href={~p"/teiserver/admin/badge_types/#{badge_type.id}"}
                       class="btn btn-secondary btn-sm"
                     >
                       Show
@@ -53,7 +53,7 @@
 
                   <td>
                     <a
-                      href={Routes.ts_admin_badge_type_path(@conn, :edit, badge_type.id)}
+                      href={~p"/teiserver/admin/badge_types/#{badge_type.id}/edit"}
                       class="btn btn-secondary btn-sm"
                     >
                       Edit

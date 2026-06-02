@@ -674,8 +674,6 @@ defmodule TeiserverWeb.Router do
     get("/users/smurf_merge_form/:from_id/:to_id", UserController, :smurf_merge_form)
     post("/users/smurf_merge_post/:from_id/:to_id", UserController, :smurf_merge_post)
     delete("/users/delete_smurf_key/:id", UserController, :delete_smurf_key)
-    # get("/users/full_chat/:id", UserController, :full_chat)
-    # get("/users/full_chat/:id/:page", UserController, :full_chat)
     get("/users/search", UserController, :index)
     post("/users/set_stat", UserController, :set_stat)
     get("/users/data_search", UserController, :data_search)
@@ -688,7 +686,6 @@ defmodule TeiserverWeb.Router do
     resources("/user", UserController)
 
     resources("/badge_types", BadgeTypeController)
-    resources("/accolades", AccoladeController, only: [:index, :show, :delete])
     get("/accolades/user/:user_id", AccoladeController, :user_show)
 
     get("/matches/by_server/:uuid", MatchController, :server_index)

@@ -61,15 +61,15 @@
 
                   <td>
                     {link("+ 6h",
-                      to: Routes.admin_code_path(@conn, :extend, code, "6"),
+                      to: ~p"/teiserver/admin/codes/#{code.id}/6",
                       class: "btn btn-outline-secondary btn-sm",
                       method: "put"
                     )} &nbsp; {link("+ 24h",
-                      to: Routes.admin_code_path(@conn, :extend, code, "24"),
+                      to: ~p"/teiserver/admin/codes/#{code.id}/24",
                       class: "btn btn-outline-secondary btn-sm",
                       method: "put"
                     )} &nbsp; {link("+ 7d",
-                      to: Routes.admin_code_path(@conn, :extend, code, "168"),
+                      to: ~p"/teiserver/admin/codes/#{code.id}/168",
                       class: "btn btn-outline-secondary btn-sm",
                       method: "put"
                     )}
@@ -92,7 +92,7 @@
 
                   <td>
                     {link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
-                      to: Routes.admin_code_path(@conn, :delete, code),
+                      to: ~p"/teiserver/admin/codes/#{code.id}",
                       method: :delete,
                       data: [confirm: "Are you sure?"],
                       class: "btn btn-danger btn-sm"

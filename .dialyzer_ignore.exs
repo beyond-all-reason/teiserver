@@ -158,13 +158,8 @@
   {"lib/teiserver_web/live/microblog/blog/show.html.heex", :call},
   {"lib/teiserver_web/live/microblog/microblog_components.ex", :call},
   {"lib/teiserver_web/router.ex", :no_return},
-  {"lib/teiserver_web/templates/admin/accolade/edit.html.heex", :call},
-  {"lib/teiserver_web/templates/admin/accolade/new.html.heex", :call},
-  {"lib/teiserver_web/templates/admin/accolade/show.html.heex", :call},
-  {"lib/teiserver_web/templates/admin/chat/index.html.heex", :call},
   {"lib/teiserver_web/templates/admin/lobby/lobby_chat.html.heex", :call},
   {"lib/teiserver_web/templates/admin/lobby/server_chat.html.heex", :call},
-  {"lib/teiserver_web/templates/admin/user/full_chat.html.heex", :call},
   {"lib/teiserver_web/templates/battle/match/index.html.heex", :call},
   {"lib/teiserver_web/templates/battle/match/ratings.html.heex", :call}
 ]

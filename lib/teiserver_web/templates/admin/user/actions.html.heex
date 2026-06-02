@@ -1,13 +1,16 @@
 <div class="dropdown-menu">
   <a
     class="dropdown-item"
-    href={Routes.ts_admin_user_path(@conn, :perform_action, @user, "recache")}
+    href={~p"/teiserver/admin/users/action/#{@user.id}/recache"}
   >
     <Fontawesome.icon icon="fa-sync" style="solid" /> &nbsp;
     Recache
   </a>
 
-  <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :rename_form, @user)}>
+  <a
+    class="dropdown-item"
+    href={~p"/teiserver/admin/users/ratings_form/#{@user.id}"}
+  >
     <Fontawesome.icon icon="fa-pen-field" style="solid" /> &nbsp;
     Rename
   </a>
@@ -17,7 +20,7 @@
     Report form
   </a>
 
-  <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :smurf_search, @user.id)}>
+  <a class="dropdown-item" href={~p"/teiserver/admin/users/smurf_search/#{@user.id}"}>
     <Fontawesome.icon icon="fa-face-angry" style="solid" /> &nbsp;
     Smurf search
   </a>
@@ -26,13 +29,16 @@
 
   <a
     class="dropdown-item"
-    href={Routes.ts_admin_user_path(@conn, :perform_action, @user, "reset_flood_protection")}
+    href={~p"/teiserver/admin/users/perform_action/#{@user.id}/reset_flood_protection"}
   >
     <Fontawesome.icon icon="fa-water-arrow-down" style="solid" /> &nbsp;
     Reset flood protection
   </a>
 
-  <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :reset_password, @user.id)}>
+  <a
+    class="dropdown-item"
+    href={~p"/teiserver/admin/users/reset_password/#{@user.id}"}
+  >
     <Fontawesome.icon icon="fa-shield-alt" style="solid" /> &nbsp;
     Send password reset email
   </a>
