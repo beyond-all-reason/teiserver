@@ -138,7 +138,7 @@ defmodule Teiserver.TachyonLobby do
           :ok | {:error, reason :: :not_in_lobby | :battle_already_started | term()}
   defdelegate start_battle(lobby_id, user_id), to: Lobby
 
-  @type vote_ballot :: Lobby.vote_ballot()
+  @type vote_ballot :: LT.VoteState.vote_ballot()
   @spec vote_submit(id(), T.userid(), {String.t(), vote_ballot()}) ::
           :ok | {:error, :invalid_lobby | :invalid_vote}
   defdelegate vote_submit(lobby_id, user_id, ballot), to: Lobby

@@ -72,20 +72,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @type asset_status :: :missing | :downloading | :complete
 
-  @type vote_action :: {:change_map, String.t()} | {:appoint_boss, T.userid()} | :start
-  @type vote_ballot :: :yes | :no | :abstain
-  @type vote_state :: %{
-          id: String.t(),
-          action: vote_action,
-          initiator: T.userid(),
-          voters: %{T.userid() => :pending | vote_ballot()},
-          duration_s: non_neg_integer(),
-          until: DateTime.t(),
-          quorum: non_neg_integer(),
-          majority: non_neg_integer()
-        }
-  @type vote_outcome :: :passed | :failed | :cancelled | :timeout
-
   @typedoc """
   The public state of the lobby. Anything that clients need to know about
   when in a lobby should be exposed in the details object
@@ -105,12 +91,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
           spectators: %{T.userid() => LT.SpectatorDetails.t()},
           bots: %{LT.Bot.id() => LT.Bot.t()},
           current_battle: LT.CurrentBattleDetails.t() | nil,
-          current_vote: nil | vote_state(),
+          current_vote: LT.VoteState.t() | nil,
           vote_history: %{
             String.t() => %{
-              vote: vote_state(),
+              vote: LT.VoteState.t(),
               finished_at: DateTime.t(),
-              outcome: vote_outcome()
+              outcome: LT.VoteState.vote_outcome()
             }
           }
         }
@@ -148,12 +134,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
            current_battle: LT.CurrentBattle.t() | nil,
            ids_to_rejoin: MapSet.t(T.userid()),
            vote_idx: integer(),
-           current_vote: nil | vote_state(),
+           current_vote: LT.VoteState.t() | nil,
            vote_history: %{
              String.t() => %{
-               vote: vote_state(),
+               vote: LT.VoteState.t(),
                finished_at: DateTime.t(),
-               outcome: vote_outcome()
+               outcome: LT.VoteState.vote_outcome()
              }
            }
          }
@@ -177,9 +163,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
               new_config :: [LT.AllyTeamConfig.t()]}
            | {:update_game_options, changes :: %{String.t() => String.t() | nil}}
            | {:update_tags, changes :: %{String.t() => map() | nil}}
-           | {:start_vote, vote_state()}
-           | {:cast_vote, T.userid(), vote_ballot()}
-           | {:vote_ended, DateTime.t(), vote_outcome()}
+           | {:start_vote, LT.VoteState.t()}
+           | {:cast_vote, T.userid(), LT.VoteState.vote_ballot()}
+           | {:vote_ended, DateTime.t(), LT.VoteState.vote_outcome()}
            | {:update_boss, :add | :remove, T.userid()}
 
   @spec gen_id() :: id()
@@ -329,7 +315,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     call_lobby(lobby_id, {:update_properties, user_id, update_data})
   end
 
-  @spec vote_submit(id(), T.userid(), {String.t(), vote_ballot()}) ::
+  @spec vote_submit(id(), T.userid(), {String.t(), LT.VoteState.vote_ballot()}) ::
           :ok | {:error, :invalid_lobby | :invalid_vote}
   def vote_submit(lobby_id, user_id, ballot) do
     call_lobby(lobby_id, {:vote_submit, user_id, ballot})
@@ -1184,9 +1170,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> Enum.into(%{})
 
     vote_history =
-      Enum.map(state.vote_history, fn {id, record} ->
-        {id,
-         %{finished_at: record.finished_at, vote: record.vote.action, outcome: record.outcome}}
+      Enum.map(state.vote_history, fn {id, %LT.VoteRecord{} = record} ->
+        details = %LT.VoteDetails{
+          finished_at: record.finished_at,
+          vote: record.vote.action,
+          outcome: record.outcome
+        }
+
+        {id, details}
       end)
       |> Enum.into(%{})
 
@@ -1219,7 +1210,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
            updates: [event()],
            actions: [event_actions()]
          }
-  @typep event_actions :: {:vote_ended, final_vote :: vote_state(), outcome :: term()}
+  @typep event_actions :: {:vote_ended, final_vote :: LT.VoteState.t(), outcome :: term()}
   @spec process_events([event()], state()) :: aggregate()
   defp process_events(events, state),
     do:
@@ -1450,7 +1441,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> Map.update!(:updates, &[ev | &1])
   end
 
-  defp process_event({:start_vote, vote_state} = ev, aggregate) do
+  defp process_event({:start_vote, %LT.VoteState{} = vote_state} = ev, aggregate) do
     aggregate
     |> put_in([:data, :current_vote], vote_state)
     |> update_in([:data, :vote_idx], &(&1 + 1))
@@ -1463,7 +1454,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
        do: aggregate
 
   defp process_event({:cast_vote, user_id, ballot} = ev, aggregate) do
-    new_aggregate = aggregate |> put_in([:data, :current_vote, :voters, user_id], ballot)
+    new_aggregate =
+      aggregate
+      |> put_in([:data, :current_vote, Access.key!(:voters), user_id], ballot)
 
     case vote_result(new_aggregate.data.current_vote) do
       :undecided ->
@@ -1492,7 +1485,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # and it allows us not to worry about storing the tref
   defp process_event({:vote_ended, ts, outcome}, aggregate) do
     vote_ev = {:vote_ended, aggregate.data.current_vote, outcome}
-    vote_record = %{vote: aggregate.data.current_vote, finished_at: ts, outcome: outcome}
+
+    vote_record = %LT.VoteRecord{
+      vote: aggregate.data.current_vote,
+      finished_at: ts,
+      outcome: outcome
+    }
+
     history = Map.put(aggregate.data.vote_history, aggregate.data.current_vote.id, vote_record)
 
     history =
@@ -2051,7 +2050,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     # in a game
     quorum = (map_size(voters) * 0.501) |> :math.ceil() |> trunc()
 
-    %{
+    %LT.VoteState{
       id: "vote-#{state.vote_idx}",
       action: action,
       initiator: initiator_id,
@@ -2063,8 +2062,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
   end
 
-  @spec vote_result(vote_state()) :: :undecided | {:ended, :passed | :failed}
-  defp vote_result(vote) do
+  @spec vote_result(LT.VoteState.t()) :: :undecided | {:ended, :passed | :failed}
+  defp vote_result(%LT.VoteState{} = vote) do
     votes = for {_user_id, v} <- vote.voters, do: v
 
     cond do

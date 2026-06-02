@@ -1086,10 +1086,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, details} = LobbyProcess.get_details(id)
       assert map_size(details.vote_history) == 2
       assert vote_id < vote_id2
-      assert details.vote_history[vote_id].outcome == :passed
-      assert details.vote_history[vote_id].vote == {:change_map, "new map"}
-      assert details.vote_history[vote_id2].outcome == :failed
-      assert details.vote_history[vote_id2].vote == {:change_map, "new map2"}
+      record1 = %LT.VoteDetails{} = details.vote_history[vote_id]
+      record2 = %LT.VoteDetails{} = details.vote_history[vote_id2]
+      assert record1.outcome == :passed
+      assert record1.vote == {:change_map, "new map"}
+      assert record2.outcome == :failed
+      assert record2.vote == {:change_map, "new map2"}
     end
 
     test "map stays when vote fails" do
