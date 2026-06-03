@@ -34,6 +34,6 @@ defmodule Teiserver.IpCheck.Api do
 
   defp get_api_key do
     key = Config.get_site_config_cache("teiserver.External IP check key")
-    if key != nil, do: {:ok, key}, else: {:error, :missing_ipapi_key}
+    if key != nil, do: {:ok, key}, else: {:error, :missing_api_key}
   end
 end
