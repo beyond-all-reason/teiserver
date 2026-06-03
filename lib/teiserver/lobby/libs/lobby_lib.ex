@@ -4,6 +4,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Battle.LobbyServer
+  alias Teiserver.Chat.WordLib
   alias Teiserver.Config
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
@@ -593,6 +594,75 @@ defmodule Teiserver.Lobby.LobbyLib do
       end
     else
       nil
+    end
+  end
+
+  # Lobby name and teaser validation
+  @spec max_name_length :: integer
+  def max_name_length do
+    Config.get_site_config_cache("lobby.Maximum lobby name length")
+  end
+
+  @spec name_chars_valid?(String.t()) :: boolean
+  def name_chars_valid?(name) do
+    case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, name) do
+      [_match] -> true
+      _no_match -> false
+    end
+  end
+
+  @spec name_length_valid?(String.t()) :: boolean
+  defp name_length_valid?(name) do
+    String.length(name) <= max_name_length()
+  end
+
+  @spec validate_name(String.t()) :: :ok | {:error, String.t()}
+  @spec validate_name(String.t(), boolean) :: :ok | {:error, String.t()}
+  def validate_name(name, add_hints \\ false) do
+    cond do
+      name == "" ->
+        {:error, "Lobby name must not be empty"}
+
+      not name_length_valid?(name) ->
+        message =
+          validation_error(
+            add_hints,
+            "Lobby name too long",
+            "Maximum #{max_name_length()} characters allowed."
+          )
+
+        {:error, message}
+
+      not name_chars_valid?(name) ->
+        message =
+          validation_error(
+            add_hints,
+            "Lobby name contains invalid characters",
+            "Allowed characters: alphanumeric, spaces, [, ], <, >, -, +, |, :."
+          )
+
+        {:error, message}
+
+      WordLib.flagged_words(name) > 0 ->
+        message =
+          validation_error(
+            add_hints,
+            "Lobby name rejected",
+            "Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked."
+          )
+
+        {:error, message}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp validation_error(add_hint, base, hint) do
+    if add_hint do
+      base <> ". " <> hint
+    else
+      base
     end
   end
 end

@@ -218,7 +218,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   You cannot have all welcome lobby name if there are restrictions
   """
   @spec check_lobby_name(String.t(), any()) ::
-          {:error, String.t()} | {:ok, String.t()} | {:ok, nil}
+          {:error, String.t()} | :ok
   def check_lobby_name(name, consul_state) do
     restrictions = restriction_types(consul_state)
 
@@ -233,11 +233,12 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
         {:error, @noob_title_error}
 
       true ->
-        {:ok, get_tips(name)}
+        :ok
     end
   end
 
-  defp get_tips(name) do
+  @spec get_tips(String.t()) :: [String.t()] | nil
+  def get_tips(name) do
     tips = [] ++ get_noob_looby_tips(name) ++ get_rotato_tips(name)
 
     case length(tips) do

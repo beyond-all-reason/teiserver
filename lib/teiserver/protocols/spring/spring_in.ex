@@ -18,6 +18,7 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Coordinator
   alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Lobby
+  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.AuthIn
   alias Teiserver.Protocols.Spring.BattleIn
@@ -866,40 +867,50 @@ defmodule Teiserver.Protocols.SpringIn do
 
           client = Client.get_client_by_id(state.userid)
 
-          cond do
-            client == nil ->
-              {:failure, "No client"}
+          failure =
+            cond do
+              client == nil ->
+                {:failure, "No client"}
 
-            not Auth.is_bot?(state.userid) ->
-              {:failure, "Not a bot"}
+              not Auth.is_bot?(state.userid) ->
+                {:failure, "Not a bot"}
 
-            true ->
-              password = if Enum.member?(["empty", "*"], password), do: nil, else: password
+              true ->
+                case LobbyLib.validate_name(name) do
+                  {:error, error} -> {:failure, error}
+                  :ok -> nil
+                end
+            end
 
-              lobby =
-                %{
-                  founder_id: state.userid,
-                  founder_name: state.username,
-                  name: name,
-                  type: if(type == "0", do: "normal", else: "replay"),
-                  nattype: nattype,
-                  port: int_parse(port),
-                  max_players: int_parse(max_players),
-                  game_hash: game_hash,
-                  map_hash: map_hash,
-                  password: password,
-                  rank: 0,
-                  locked: false,
-                  engine_name: engine_name,
-                  engine_version: engine_version,
-                  map_name: map_name,
-                  game_name: game_name,
-                  ip: client.ip
-                }
-                |> Lobby.create_lobby()
-                |> Lobby.add_lobby()
+          if failure != nil do
+            failure
+          else
+            password = if Enum.member?(["empty", "*"], password), do: nil, else: password
 
-              {:success, lobby}
+            lobby =
+              %{
+                founder_id: state.userid,
+                founder_name: state.username,
+                name: name,
+                type: if(type == "0", do: "normal", else: "replay"),
+                nattype: nattype,
+                port: int_parse(port),
+                max_players: int_parse(max_players),
+                game_hash: game_hash,
+                map_hash: map_hash,
+                password: password,
+                rank: 0,
+                locked: false,
+                engine_name: engine_name,
+                engine_version: engine_version,
+                map_name: map_name,
+                game_name: game_name,
+                ip: client.ip
+              }
+              |> Lobby.create_lobby()
+              |> Lobby.add_lobby()
+
+            {:success, lobby}
           end
 
         nil ->
