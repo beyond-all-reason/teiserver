@@ -6,7 +6,7 @@
   active: @active,
   icon: :list,
   bsname: bsname,
-  url: Routes.admin_code_path(@conn, :index)
+  url: ~p"/teiserver/admin/codes"
 )}
 
 {central_component("section_menu_button",
@@ -15,11 +15,11 @@
   active: @active,
   icon: :new,
   bsname: bsname,
-  url: Routes.admin_code_path(@conn, :new)
+  url: ~p"/teiserver/admin/codes/new"
 )}
 
 <form
-  action={Routes.admin_code_path(@conn, :index)}
+  action={~p"/teiserver/admin/codes"}
   method="get"
   class="float-end form-inline d-md-block"
 >

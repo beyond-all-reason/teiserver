@@ -55,7 +55,7 @@
     <div class="col">
       <%= if @changeset.data.id do %>
         <a
-          href={Routes.ts_admin_badge_type_path(@conn, :show, @badge_type)}
+          href={~p"/teiserver/admin/badge_types/#{@badge_type.id}"}
           class="btn btn-secondary btn-outline"
         >
           Cancel

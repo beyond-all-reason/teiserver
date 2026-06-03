@@ -24,7 +24,7 @@
 
         <div class="float-end">
           <a
-            href={Routes.ts_admin_badge_type_path(@conn, :edit, @badge_type)}
+            href={~p"/teiserver/admin/badge_types/#{@badge_type.id}/edit"}
             class={"btn btn-outline-#{bsname}"}
           >
             <i class="fa-solid fa-wrench"></i> Edit Badge type

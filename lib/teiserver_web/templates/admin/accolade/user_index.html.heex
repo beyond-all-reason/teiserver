@@ -11,14 +11,6 @@
           View user
         </a>
 
-        {render(
-          TeiserverWeb.Admin.AccoladeView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            show_search: false,
-            active: "user"
-          })
-        )}
         <br /><br />
 
         <div class="row">
@@ -30,7 +22,7 @@
                   <tr>
                     <th colspan="2">Badge</th>
                     <th>Recipient</th>
-                    <th colspan="2">&nbsp;</th>
+                    <th>&nbsp;</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -49,14 +41,6 @@
                         <td>{accolade.recipient.name}</td>
 
                         <td>{date_to_str(accolade.inserted_at, format: :hms_or_dmy)}</td>
-                        <td>
-                          <a
-                            href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)}
-                            class="btn btn-secondary btn-sm"
-                          >
-                            Show
-                          </a>
-                        </td>
                       </tr>
                     <% end %>
                   <% end %>
@@ -72,7 +56,7 @@
                   <tr>
                     <th colspan="2">Badge</th>
                     <th>Giver</th>
-                    <th colspan="2">&nbsp;</th>
+                    <th>&nbsp;</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -91,14 +75,6 @@
                         <td>{accolade.giver.name}</td>
 
                         <td>{date_to_str(accolade.inserted_at, format: :hms_or_dmy)}</td>
-                        <td>
-                          <a
-                            href={Routes.ts_admin_accolade_path(@conn, :show, accolade.id)}
-                            class="btn btn-secondary btn-sm"
-                          >
-                            Show
-                          </a>
-                        </td>
                       </tr>
                     <% end %>
                   <% end %>

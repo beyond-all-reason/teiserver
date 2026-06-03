@@ -12,7 +12,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.CacheUser
-  alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.EmailHelper
   alias Teiserver.Game
@@ -979,57 +978,6 @@ defmodule TeiserverWeb.Admin.UserController do
         |> put_flash(:danger, "Unable to access at least one of these users")
         |> redirect(to: ~p"/teiserver/admin/user")
     end
-  end
-
-  @spec full_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def full_chat(conn, %{"id" => id} = params) do
-    page =
-      Map.get(params, "page", 0)
-      |> int_parse()
-      |> max(0)
-
-    user = Account.get_user!(id)
-
-    mode =
-      case params["mode"] do
-        "room" -> "room"
-        _other -> "lobby"
-      end
-
-    messages =
-      case mode do
-        "lobby" ->
-          Chat.list_lobby_messages(
-            search: [
-              user_id: user.id
-            ],
-            limit: 250,
-            offset: page * 250,
-            order_by: "Newest first"
-          )
-
-        "room" ->
-          Chat.list_room_messages(
-            search: [
-              user_id: user.id
-            ],
-            limit: 250,
-            offset: page * 250,
-            order_by: "Newest first"
-          )
-      end
-
-    last_page = Enum.count(messages) < 250
-
-    conn
-    |> assign(:last_page, last_page)
-    |> assign(:page, page)
-    |> assign(:user, user)
-    |> assign(:mode, mode)
-    |> assign(:messages, messages)
-    |> add_breadcrumb(name: "Show: #{user.name}", url: ~p"/teiserver/admin/user/#{id}")
-    |> add_breadcrumb(name: "Chat logs", url: conn.request_path)
-    |> render("full_chat.html")
   end
 
   @spec relationships(Plug.Conn.t(), map) :: Plug.Conn.t()

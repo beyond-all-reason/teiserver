@@ -18,12 +18,12 @@
 
         {render(
           "form.html",
-          Map.put(assigns, :action, Routes.ts_admin_badge_type_path(@conn, :update, @badge_type))
+          Map.put(assigns, :action, ~p"/teiserver/admin/badge_types/#{@badge_type.id}")
         )}
 
         <hr />
         {link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
-          to: Routes.ts_admin_badge_type_path(@conn, :delete, @badge_type),
+          to: ~p"/teiserver/admin/badge_types/#{@badge_type.id}",
           method: :delete,
           data: [confirm: "Are you sure?"],
           class: "btn btn-danger btn-outline"
