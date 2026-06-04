@@ -10,30 +10,14 @@ defmodule Teiserver.Chat.TermSearchTest do
   use Teiserver.DataCase, async: true
 
   import Teiserver.AccountFixtures
-
-  defp message(user, content) do
-    {:ok, msg} =
-      Chat.create_lobby_message(%{
-        content: content,
-        user_id: user.id,
-        inserted_at: DateTime.utc_now()
-      })
-
-    msg
-  end
-
-  defp contents(search) do
-    Chat.list_lobby_messages(search: search, limit: 100)
-    |> Enum.map(& &1.content)
-    |> Enum.sort()
-  end
+  import Teiserver.ChatFixtures
 
   setup do
     user = user_fixture()
 
-    message(user, "the cat sat")
-    message(user, "the Cat purred")
-    message(user, "concatenate the list")
+    lobby_message_fixture(%{content: "the cat sat", user_id: user.id})
+    lobby_message_fixture(%{content: "the Cat purred", user_id: user.id})
+    lobby_message_fixture(%{content: "concatenate the list", user_id: user.id})
 
     {:ok, user: user}
   end
@@ -43,7 +27,6 @@ defmodule Teiserver.Chat.TermSearchTest do
       assert contents(term: "cat") ==
                ["concatenate the list", "the Cat purred", "the cat sat"]
 
-      # plain string term keeps working for other callers
       assert contents(term: {"cat", []}) ==
                ["concatenate the list", "the Cat purred", "the cat sat"]
     end
@@ -74,5 +57,11 @@ defmodule Teiserver.Chat.TermSearchTest do
     test "wildcard is preserved" do
       assert contents(term: {"con*ate", []}) == ["concatenate the list"]
     end
+  end
+
+  defp contents(search) do
+    Chat.list_lobby_messages(search: search, limit: 100)
+    |> Enum.map(& &1.content)
+    |> Enum.sort()
   end
 end

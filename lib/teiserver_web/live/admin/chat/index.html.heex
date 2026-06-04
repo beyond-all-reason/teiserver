@@ -12,22 +12,36 @@
             phx-debounce="400"
             autofocus={true}
           />
-          <.input
-            type="checkbox"
-            label="Case sensitive"
-            name="case-sensitive"
-            value={@filters["case-sensitive"]}
-            checked={@filters["case-sensitive"] == "true"}
-            phx-change="filter-update"
-          />
-          <.input
-            type="checkbox"
-            label="Whole word"
-            name="whole-word"
-            value={@filters["whole-word"]}
-            checked={@filters["whole-word"] == "true"}
-            phx-change="filter-update"
-          />
+          <div class="form-check">
+            <input name="case-sensitive" type="hidden" value="false" />
+            <input
+              name="case-sensitive"
+              id="case-sensitive"
+              class="form-check-input"
+              type="checkbox"
+              value="true"
+              checked={@filters["case-sensitive"] == "true"}
+              phx-change="filter-update"
+            />
+            <label class="form-check-label" for="case-sensitive">
+              <strong>Case sensitive</strong>
+            </label>
+          </div>
+          <div class="form-check">
+            <input name="whole-word" type="hidden" value="false" />
+            <input
+              name="whole-word"
+              id="whole-word"
+              class="form-check-input"
+              type="checkbox"
+              value="true"
+              checked={@filters["whole-word"] == "true"}
+              phx-change="filter-update"
+            />
+            <label class="form-check-label" for="whole-word">
+              <strong>Whole word</strong>
+            </label>
+          </div>
         </div>
 
         <div class="col">

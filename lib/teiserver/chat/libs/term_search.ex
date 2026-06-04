@@ -33,6 +33,7 @@ defmodule Teiserver.Chat.TermSearch do
     whole_word = Keyword.get(opts, :whole_word, false)
 
     if whole_word do
+      # \y is a word boundary in PostgreSQL POSIX regex (equivalent to \b in PCRE)
       pattern = "\\y" <> regex_term(term) <> "\\y"
 
       if case_sensitive do
@@ -51,11 +52,9 @@ defmodule Teiserver.Chat.TermSearch do
     end
   end
 
-  # Escapes POSIX regex metacharacters in the term, then restores the `*`
-  # wildcard as `.*` so it keeps matching any number of characters.
   defp regex_term(term) do
     term
-    |> String.replace(~r/[.^$*+?()\[\]{}|\\]/, "\\\\\\0")
+    |> Regex.escape()
     |> String.replace("\\*", ".*")
   end
 end
