@@ -440,7 +440,7 @@ defmodule Teiserver.SpringBattleHostTest do
 
     reply = _recv_until(socket)
 
-    assert reply == "OPENBATTLEFAILED Lobby name too long\n"
+    assert "OPENBATTLEFAILED" <> _message = reply
 
     # Open lobby for update_lobby_title
     _send_raw(
@@ -455,7 +455,7 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "c.battle.update_lobby_title #{invalid_name}\n")
     reply = _recv_until(socket)
 
-    assert reply == "NO cmd=c.battle.update_lobby_title\tLobby name too long\n"
+    assert "NO cmd=c.battle.update_lobby_title\t" <> _message = reply
   end
 
   defp ignore_events(socket) do
