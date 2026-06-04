@@ -97,7 +97,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # it has the pid (from the registry).
   # but if the needs arise, this could be overloaded to use a lobby id
   # and the usual via_tuple mechanism
-  @spec get_overview(pid()) :: TachyonLobby.List.overview() | nil
+  @spec get_overview(pid()) :: LT.ListOverview.t() | nil
   def get_overview(lobby_pid) do
     :gen_statem.call(lobby_pid, :get_overview, @default_call_timeout)
   catch
@@ -1160,9 +1160,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
 
-  @spec get_overview_from_state(state :: LT.Data.t()) :: TachyonLobby.List.overview()
+  @spec get_overview_from_state(state :: LT.Data.t()) :: LT.ListOverview.t()
   defp get_overview_from_state(%LT.Data{} = state) do
-    %{
+    %LT.ListOverview{
       name: state.name,
       player_count: map_size(state.players),
       max_player_count:

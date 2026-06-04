@@ -245,7 +245,7 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "lobby/left", %{id: lobby_id, reason: reason}, state}
   end
 
-  def handle_info({:lobby_list, {:add_lobby, lobby_id, overview}}, state) do
+  def handle_info({:lobby_list, {:add_lobby, lobby_id, %LT.ListOverview{} = overview}}, state) do
     data = %{lobbies: %{lobby_id => lobby_overview_to_tachyon(lobby_id, overview)}}
     {:event, "lobby/listUpdated", data, state}
   end

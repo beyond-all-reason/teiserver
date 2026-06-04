@@ -315,7 +315,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
   end
 
   defp overview_fixture do
-    %{
+    %LT.ListOverview{
       name: "lobby name",
       player_count: 1,
       max_player_count: 2,

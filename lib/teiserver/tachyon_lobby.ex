@@ -10,7 +10,7 @@ defmodule Teiserver.TachyonLobby do
   alias Teiserver.TachyonLobby.Types, as: LT
 
   @type id :: LT.Types.id()
-  @type overview :: TachyonLobby.List.overview()
+  @type overview :: LT.ListOverview.t()
   @type team :: LT.Types.team()
   @type ally_team_config :: [LT.AllyTeamConfig.t()]
 
