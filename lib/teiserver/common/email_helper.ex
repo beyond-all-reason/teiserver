@@ -48,7 +48,7 @@ defmodule Teiserver.EmailHelper do
       {:error, error} ->
         Telemetry.log_complex_server_event(user.id, "email.password_reset", %{
           result: "failure",
-          error: error
+          error: inspect(error)
         })
 
         case Account.delete_code(code) do
