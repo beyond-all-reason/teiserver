@@ -7,11 +7,14 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.CalculateSmurfKeyTask
+  alias Teiserver.Account.User
+  alias Teiserver.Account.UserLib
   alias Teiserver.Battle
+  alias Teiserver.Battle.Match
   alias Teiserver.CacheUser
   alias Teiserver.Client
+  alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.Plugins
   alias Teiserver.Protocols.Spring
@@ -42,7 +45,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @spec get_match_monitor_userid() :: T.userid() | nil
+  @spec get_match_monitor_userid() :: User.id() | nil
   def get_match_monitor_userid do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end
@@ -194,6 +197,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         if match_id do
           game_time = int_parse(game_time)
           handle_match_simple_event(username, userid, match_id, event_type_name, game_time)
+          check_for_griefing(username, event_type_name, game_time, match_id)
         else
           Logger.warning("match-event: Cannot get match_id of userid of #{username}")
         end
@@ -378,6 +382,24 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     )
 
     {:noreply, state}
+  end
+
+  @spec check_for_griefing(String.t(), String.t(), pos_integer(), Match.id()) :: any()
+  def check_for_griefing(username, event_type_name, game_time, match_id) do
+    user_id = Account.get_userid_from_name(username)
+
+    case event_type_name do
+      "allycommloaded" ->
+        if UserLib.new_account?(user_id) do
+          # TODO: Log moderation automated action against account for audit
+          Telemetry.log_simple_match_event(user_id, match_id, "newuserliftingcomms", game_time)
+          client = Account.get_client_by_id(user_id)
+          Coordinator.send_to_host(client.lobby_id, "!kickban #{client.name}")
+        end
+
+      _other_event ->
+        nil
+    end
   end
 
   defp handle_json_msg(%{"username" => username, "GPU" => _gpu} = contents, from_id) do
