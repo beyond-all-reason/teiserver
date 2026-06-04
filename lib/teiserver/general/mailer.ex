@@ -1,6 +1,6 @@
 defmodule Teiserver.Mailer do
   @moduledoc false
-  use Bamboo.Mailer, otp_app: :teiserver
+  use Swoosh.Mailer, otp_app: :teiserver
 
   def noreply_address do
     Application.get_env(:teiserver, Teiserver.Mailer)[:noreply_address]

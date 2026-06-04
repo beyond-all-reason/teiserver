@@ -647,6 +647,11 @@ defmodule Teiserver.SpringTcpServer do
     {:stop, :normal, %{new_state | userid: nil}}
   end
 
+  # the test adapter sends the email as a message to the sender process
+  def handle_info({:email, %Swoosh.Email{} = _email}, state) do
+    {:noreply, state}
+  end
+
   @impl GenServer
   def terminate(_reason, state) do
     Client.disconnect(state.userid, "tcp_server terminate")

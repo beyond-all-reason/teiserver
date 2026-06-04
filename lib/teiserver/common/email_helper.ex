@@ -1,6 +1,6 @@
 defmodule Teiserver.EmailHelper do
   @moduledoc false
-  alias Bamboo.Email
+  alias Swoosh.Email
   alias Teiserver.Account
   alias Teiserver.Config
   alias Teiserver.Helper.DateHelper
@@ -12,7 +12,7 @@ defmodule Teiserver.EmailHelper do
     case Config.get_site_config_cache("teiserver.Require email verification") do
       true ->
         case do_new_user(user) do
-          {:ok, _email, _response} ->
+          {:ok, _resp} ->
             Telemetry.log_complex_server_event(user.id, "email.verification", %{
               result: "success"
             })
@@ -35,10 +35,10 @@ defmodule Teiserver.EmailHelper do
 
   def send_password_reset(user, code \\ nil) do
     {code, email} = password_reset(user, code)
-    response = Mailer.deliver_now(email, response: true)
+    response = Mailer.deliver(email, response: true)
 
     case response do
-      {:ok, _email, _response} ->
+      {:ok, _resp} ->
         Telemetry.log_complex_server_event(user.id, "email.password_reset", %{
           result: "success"
         })
@@ -112,15 +112,15 @@ defmodule Teiserver.EmailHelper do
     subject = Application.get_env(:teiserver, Teiserver)[:game_name] <> " - Password reset"
 
     email =
-      Email.new_email()
+      Email.new()
       |> Email.to({user.name, user.email})
       |> Email.from(
         {Application.get_env(:teiserver, Teiserver.Mailer)[:noreply_name],
          Mailer.noreply_address()}
       )
       |> Email.subject(subject)
-      |> Email.put_header("Date", date)
-      |> Email.put_header("Message-Id", message_id)
+      |> Email.header("Date", date)
+      |> Email.header("Message-Id", message_id)
       |> Email.html_body(html_body)
       |> Email.text_body(text_body)
 
@@ -164,14 +164,14 @@ defmodule Teiserver.EmailHelper do
 
     date = DateHelper.date_to_str(DateTime.utc_now(), format: :email_date)
 
-    Email.new_email()
+    Email.new()
     |> Email.to({user.name, user.email})
     |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
     |> Email.subject("BAR - New account")
-    |> Email.put_header("Date", date)
-    |> Email.put_header("Message-Id", message_id)
+    |> Email.header("Date", date)
+    |> Email.header("Message-Id", message_id)
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
-    |> Mailer.deliver_now(response: true)
+    |> Mailer.deliver(response: true)
   end
 end
