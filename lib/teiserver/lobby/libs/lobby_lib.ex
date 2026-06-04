@@ -617,17 +617,25 @@ defmodule Teiserver.Lobby.LobbyLib do
   end
 
   @spec validate_name(String.t()) :: :ok | {:error, String.t()}
-  @spec validate_name(String.t(), boolean) :: :ok | {:error, String.t()}
-  def validate_name(name, add_hints \\ false) do
+  @spec validate_name(String.t(), [{:hints | :subject, boolean}]) :: :ok | {:error, String.t()}
+  def validate_name(name, opts \\ []) do
+    add_hints = Keyword.get(opts, :hints, false)
+
+    prefix =
+      case Keyword.get(opts, :subject, true) do
+        true -> "Lobby "
+        false -> ""
+      end
+
     cond do
       name == "" ->
-        {:error, "Lobby name must not be empty"}
+        {:error, prefix <> "name must not be empty"}
 
       not name_length_valid?(name) ->
         message =
           validation_error(
             add_hints,
-            "Lobby name too long",
+            prefix <> "name is too long",
             "Maximum #{max_name_length()} characters allowed."
           )
 
@@ -637,7 +645,7 @@ defmodule Teiserver.Lobby.LobbyLib do
         message =
           validation_error(
             add_hints,
-            "Lobby name contains invalid characters",
+            prefix <> "name contains invalid characters",
             "Allowed characters: alphanumeric, spaces, [, ], <, >, -, +, |, :."
           )
 
@@ -647,7 +655,7 @@ defmodule Teiserver.Lobby.LobbyLib do
         message =
           validation_error(
             add_hints,
-            "Lobby name rejected",
+            prefix <> "name was rejected",
             "Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked."
           )
 

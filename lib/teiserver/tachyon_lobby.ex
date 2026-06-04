@@ -5,6 +5,7 @@ defmodule Teiserver.TachyonLobby do
 
   alias Teiserver.Asset
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
 
@@ -45,7 +46,8 @@ defmodule Teiserver.TachyonLobby do
   end
 
   def create(start_params) do
-    with {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
+    with :ok <- LobbyLib.validate_name(start_params.name),
+         {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
          {:ok, details} <- Lobby.get_details(id) do
       {:ok, pid, details}
     end

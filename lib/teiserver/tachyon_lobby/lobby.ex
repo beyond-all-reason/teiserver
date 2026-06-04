@@ -30,6 +30,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.KvStore
+  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Messaging
   alias Teiserver.Player
   alias Teiserver.Tachyon
@@ -2022,12 +2023,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec update_property(atom(), term(), state(), T.userid()) ::
           {:ok, [event()]} | {:error, String.t()}
   defp update_property(:name, new_name, _state, _user_id) do
-    # we can expand lobby name validation later
-    if new_name == "" do
-      {:error, "name must not be empty"}
-    end
+    # we can expand lobby name validation later with LobbyRestrictions
+    case LobbyLib.validate_name(new_name, subject: false) do
+      {:error, error} ->
+        {:error, error}
 
-    {:ok, [{:update_lobby_name, new_name}]}
+      :ok ->
+        {:ok, [{:update_lobby_name, new_name}]}
+    end
   end
 
   defp update_property(:map_name, new_name, state, user_id) do
