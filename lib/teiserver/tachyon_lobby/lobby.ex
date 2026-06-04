@@ -43,6 +43,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @type asset_status :: :missing | :downloading | :complete
 
+  # Note[sparse_map_for_update]
+  # do not turn this into a struct!
+  # at time of writing this comment, none of the properties can be removed, but there is
+  # no guarantee that this will stay this way.
+  # There is a semantic difference between %{foo: nil} and %{} (foo is not present).
+  # `foo: nil` means that the property should be removed, but if the key is absent then
+  # nothing changes. If that becomes a struct, then all keys are present by default, and
+  # we lose the ability to tell the difference
   @typedoc """
   sparse map of everything that can be changed for a given bot
   """
@@ -211,6 +219,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
     call_lobby(lobby_id, {:update_bot, update_data})
   end
 
+  # See Note[sparse_map_for_update]
+  @typedoc """
+  sparse map of everything that can be changed for a given bot
+  """
   @type lobby_update_data :: %{
           optional(:name) => String.t(),
           optional(:map_name) => String.t(),
