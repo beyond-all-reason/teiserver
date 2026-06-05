@@ -331,7 +331,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         vote_history: %{}
       }
 
-    # TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
+    TachyonLobby.Registry.put_overview(id, get_overview_from_state(state))
     Logger.info("Lobby created by user #{start_params.creator_data.id}")
     {:ok, :running, state}
   end
@@ -415,7 +415,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       if MapSet.size(ids_left) == 0 do
         Logger.debug("all member rejoined, start up completed")
-        # TachyonLobby.List.register_lobby(self(), data.id, get_overview_from_state(data))
+        TachyonLobby.Registry.put_overview(data.id, get_overview_from_state(data))
 
         if data.current_vote != nil do
           diff = max(0, DateTime.diff(data.current_vote.until, DateTime.utc_now(), :millisecond))
@@ -1753,7 +1753,19 @@ defmodule Teiserver.TachyonLobby.Lobby do
         change_map
       end
 
-    # if change_map != %{}, do: TachyonLobby.List.update_lobby(data.id, change_map)
+    if change_map != %{} do
+      LobbyRegistry.put_overview(data.id, get_overview_from_state(data))
+
+      message = %{
+        counter: data.counter,
+        event: :update_lobby,
+        lobby_id: data.id,
+        changes: change_map
+      }
+
+      PubSubHelper.broadcast(list_topic(), message)
+    end
+
     aggregate
   end
 
