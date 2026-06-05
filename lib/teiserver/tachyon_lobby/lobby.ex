@@ -2024,7 +2024,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           {:ok, [event()]} | {:error, String.t()}
   defp update_property(:name, new_name, _state, _user_id) do
     # we can expand lobby name validation later with LobbyRestrictions
-    case LobbyLib.validate_name(new_name, subject: false) do
+    case LobbyLib.validate_name(new_name) do
       {:error, error} ->
         {:error, error}
 

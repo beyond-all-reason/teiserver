@@ -46,10 +46,21 @@ defmodule Teiserver.TachyonLobby do
   end
 
   def create(start_params) do
-    with :ok <- LobbyLib.validate_name(start_params.name),
+    with :ok <- validate_start_params(start_params),
          {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
          {:ok, details} <- Lobby.get_details(id) do
       {:ok, pid, details}
+    end
+  end
+
+  @spec validate_start_params(Lobby.start_params()) :: :ok | {:error, term()}
+  defp validate_start_params(start_params) do
+    case LobbyLib.validate_name(start_params.name) do
+      {:error, error} ->
+        {:error, "Cannot create lobby: #{error}"}
+
+      :ok ->
+        :ok
     end
   end
 
