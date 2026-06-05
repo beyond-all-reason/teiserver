@@ -97,8 +97,8 @@ defmodule Teiserver.TachyonLobby.ListTest do
       {:ok, _team_details} = Lobby.join_ally_team(details.id, "user2", 1)
 
       id = details.id
-      assert_receive %{event: :update_lobbies, changes: changes, counter: counter, lobby_id: ^id}
-      assert changes == %{details.id => %{player_count: 2}}
+      assert_receive %{event: :update_lobby, changes: changes, counter: counter, lobby_id: ^id}
+      assert changes == %{player_count: 2}
       assert counter > list[details.id].counter
     end
 
@@ -125,6 +125,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
         mk_start_params([1, 1])
         |> Map.put(:creator_pid, creator_pid)
         |> Lobby.create()
+
       Lobby.subscribe_updates()
 
       orig_list_pid = Process.whereis(Lobby.ListMonitor)

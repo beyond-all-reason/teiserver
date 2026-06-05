@@ -256,27 +256,9 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "lobby/listUpdated", data, state}
   end
 
-  def handle_info({:lobby_list, {:update_lobbies, lobbies}}, state) do
-    data =
-      Enum.map(lobbies, fn {id, overview} -> {id, lobby_overview_to_tachyon(id, overview)} end)
-      |> Map.new()
-
-    {:event, "lobby/listUpdated", %{lobbies: data}, state}
-  end
-
   def handle_info({:lobby_list, {:remove_lobby, lobby_id}}, state) do
     data = %{lobbies: %{lobby_id => nil}}
     {:event, "lobby/listUpdated", data, state}
-  end
-
-  def handle_info({:lobby_list, {:reset_list, lobbies}}, state) do
-    lobbies =
-      Enum.map(lobbies, fn {lobby_id, overview} ->
-        {lobby_id, lobby_overview_to_tachyon(lobby_id, overview)}
-      end)
-      |> Enum.into(%{})
-
-    {:event, "lobby/listReset", %{lobbies: lobbies}, state}
   end
 
   def handle_info({:timeout, message_id}, state)

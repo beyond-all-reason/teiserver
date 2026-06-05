@@ -1499,7 +1499,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "list updates when lobby is restored" do
-      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
+      Lobby.subscribe_updates()
       sink_pid = mk_sink()
 
       {:ok, _pid, %LT.Details{id: id}} =
@@ -1512,11 +1512,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       sink_pid = mk_sink()
       {:ok, _lobby_pid, _details} = Lobby.rejoin(id, @default_user_id, sink_pid)
-      assert_receive %{event: :reset_list, lobbies: lobbies}
-      assert lobbies == %{}
-
-      Lobby.List.broadcast_updates()
-      assert_receive %{event: :add_lobby, lobby_id: ^id}
+      assert_receive %{event: :add_lobby, overview: %LT.ListOverview{}, lobby_id: ^id}
     end
   end
 

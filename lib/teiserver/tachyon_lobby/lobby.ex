@@ -1028,6 +1028,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       data =
         %{data | current_battle: battle}
         |> Map.update!(:monitors, &MC.monitor(&1, battle_pid, :current_battle))
+        |> Map.update!(:counter, &(&1 + 1))
 
       broadcast_update({:update, nil, %{current_battle: data.current_battle}}, data)
       update_list(data, %{current_battle: %{started_at: now}})
@@ -1080,7 +1081,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
           end
 
         :current_battle ->
-          data = Map.put(data, :current_battle, nil)
+          data =
+            Map.put(data, :current_battle, nil)
+            |> Map.update!(:counter, &(&1 + 1))
+
           broadcast_update({:update, nil, %{current_battle: nil}}, data)
           update_list(data, %{current_battle: nil})
           data
@@ -1118,6 +1122,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(:state_timeout, :snapshot_timeout, :starting_up, %LT.Data{} = data) do
     Logger.warning("failed to recover before time out. Missing #{inspect(data.ids_to_rejoin)}")
+    message = %{event: :remove_lobby, lobby_id: data.id}
+    PubSubHelper.broadcast(list_topic(), message)
     {:stop, :normal}
   end
 
@@ -2143,10 +2149,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp update_list(%LT.Data{} = data, changes) do
     message = %{
-      event: :update_lobbies,
+      event: :update_lobby,
       counter: data.counter,
       lobby_id: data.id,
-      changes: %{data.id => changes}
+      changes: changes
     }
 
     PubSubHelper.broadcast(list_topic(), message)
