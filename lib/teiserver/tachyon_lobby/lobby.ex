@@ -28,6 +28,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Autohost
   alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.MonitorCollection, as: MC
+  alias Teiserver.Helpers.PubSubHelper
   alias Teiserver.KvStore
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Messaging
@@ -35,6 +36,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
+  alias Teiserver.TachyonLobby.Registry, as: LobbyRegistry
   # lobby types
   alias Teiserver.TachyonLobby.Types, as: LT
 
@@ -92,6 +94,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @default_call_timeout 5000
   @max_vote_history_size 10
+
+  def list_topic, do: "teiserver_tachyonlobby_list"
 
   @spec get_details(LT.Types.id()) :: {:ok, LT.Details.t()} | {:error, reason :: term()}
   def get_details(id) do
@@ -277,7 +281,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   used only for testing
   """
   def trigger_vote_timeout(lobby_id, vote_id) do
-    TachyonLobby.Registry.lookup(lobby_id) |> send({:vote_timeout, vote_id})
+    LobbyRegistry.lookup(lobby_id) |> send({:vote_timeout, vote_id})
   end
 
   @impl :gen_statem
@@ -331,7 +335,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         vote_history: %{}
       }
 
-    TachyonLobby.Registry.put_overview(id, get_overview_from_state(state))
+    register_new_lobby(state)
     Logger.info("Lobby created by user #{start_params.creator_data.id}")
     {:ok, :running, state}
   end
@@ -415,7 +419,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       if MapSet.size(ids_left) == 0 do
         Logger.debug("all member rejoined, start up completed")
-        TachyonLobby.Registry.put_overview(data.id, get_overview_from_state(data))
+        register_new_lobby(data)
 
         if data.current_vote != nil do
           diff = max(0, DateTime.diff(data.current_vote.until, DateTime.utc_now(), :millisecond))
@@ -1139,7 +1143,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec via_tuple(LT.Types.id()) :: GenServer.name()
   defp via_tuple(lobby_id) do
-    TachyonLobby.Registry.via_tuple(lobby_id)
+    LobbyRegistry.via_tuple(lobby_id)
   end
 
   defp call_lobby(lobby_id, message, timeout \\ @default_call_timeout) do
@@ -1224,6 +1228,21 @@ defmodule Teiserver.TachyonLobby.Lobby do
       current_vote: state.current_vote,
       vote_history: vote_history
     }
+  end
+
+  defp register_new_lobby(state) do
+    overview = get_overview_from_state(state)
+    TachyonLobby.ListMonitor.register(state.id, self())
+    LobbyRegistry.put_overview(state.id, overview)
+
+    message = %{
+      event: :add_lobby,
+      counter: state.counter,
+      lobby_id: state.id,
+      overview: overview
+    }
+
+    PubSubHelper.broadcast(list_topic(), message)
   end
 
   # Given a list of events to process (in the event sourcing way) and the initial

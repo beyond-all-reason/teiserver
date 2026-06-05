@@ -5,9 +5,11 @@ defmodule Teiserver.TachyonLobby do
 
   alias Teiserver.Account.User
   alias Teiserver.Asset
+  alias Teiserver.Helpers.PubSubHelper
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
+  alias Teiserver.TachyonLobby.Registry
   alias Teiserver.TachyonLobby.Types, as: LT
 
   @type id :: LT.Types.id()
@@ -15,8 +17,18 @@ defmodule Teiserver.TachyonLobby do
   @type team :: LT.Types.team()
   @type ally_team_config :: [LT.AllyTeamConfig.t()]
 
-  def subscribe_updates(), do: raise "TODO"
-  def unsubscribe_updates(), do: raise "TODO"
+  @spec list() :: %{id() => LT.ListOverview.t()}
+  def list do
+    Registry.list_lobbies()
+  end
+
+  @spec subscribe_updates() :: %{id() => LT.ListOverview.t()}
+  def subscribe_updates do
+    PubSubHelper.subscribe(Lobby.list_topic())
+    Registry.list_lobbies()
+  end
+
+  def unsubscribe_updates, do: PubSubHelper.unsubscribe(Lobby.list_topic())
 
   @type start_params :: LT.StartParams.t()
   @spec create(start_params()) ::
