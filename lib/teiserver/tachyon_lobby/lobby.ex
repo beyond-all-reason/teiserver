@@ -1152,6 +1152,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @spec get_overview_from_state(state :: LT.Data.t()) :: LT.ListOverview.t()
   defp get_overview_from_state(%LT.Data{} = state) do
     %LT.ListOverview{
+      counter: state.counter,
       name: state.name,
       player_count: map_size(state.players),
       max_player_count:
@@ -1235,14 +1236,22 @@ defmodule Teiserver.TachyonLobby.Lobby do
            actions: [event_actions()]
          }
   @typep event_actions :: {:vote_ended, final_vote :: LT.VoteState.t(), outcome :: term()}
+
   @spec process_events([event()], LT.Data.t()) :: aggregate()
-  defp process_events(events, %LT.Data{} = state),
-    do:
+  defp process_events(events, %LT.Data{} = state) do
+    final_aggregate =
       Enum.reduce(
         events,
         %{initial_data: state, data: state, updates: [], actions: []},
         &process_event/2
       )
+
+    if final_aggregate.data != state do
+      update_in(final_aggregate, [:data, Access.key!(:counter)], &(&1 + 1))
+    else
+      final_aggregate
+    end
+  end
 
   @spec process_event(event(), %{data: LT.Data.t(), updates: [event()]}) :: %{
           data: LT.Data.t(),

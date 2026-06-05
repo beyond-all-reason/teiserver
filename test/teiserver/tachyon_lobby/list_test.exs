@@ -20,6 +20,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
       list = Lobby.Registry.list_lobbies()
 
       assert list[details.id] == %LT.ListOverview{
+               counter: 0,
                boss_enabled?: false,
                current_battle: nil,
                engine_version: params.engine_version,
@@ -63,9 +64,13 @@ defmodule Teiserver.TachyonLobby.ListTest do
 
     test "update to lobbies reflected in list" do
       {:ok, _pid, details} = mk_start_params([1, 1]) |> Lobby.create()
+      id = details.id
+      initial_list = Lobby.Registry.list_lobbies()
+
       {:ok, _lobby_pid, _join_details} = Lobby.join(details.id, mk_player("user2"))
       {:ok, _team_details} = Lobby.join_ally_team(details.id, "user2", 1)
-      Polling.poll_until(&Lobby.Registry.list_lobbies/0, &(&1[details.id].player_count == 2))
+      final_list = Polling.poll_until(&Lobby.Registry.list_lobbies/0, &(&1[id].player_count == 2))
+      assert final_list[id].counter > initial_list[id].counter
     end
   end
 
