@@ -1,0 +1,15 @@
+services:
+
+  # dev version of an smtp server so we can easily test sending emails
+  smtp:
+    image: "axllent/mailpit"
+    command: ["--smtp-tls-cert", "sans:localhost", "--smtp-tls-key", "sans:localhost"]
+    container_name: mailpit
+    environment:
+      - "MP_SMTP_AUTH_FILE=/tmp/auth"
+      - "MP_SMTP_AUTH_ALLOW_INSECURE=true"
+    volumes:
+      - ./containers/mailpit-auth:/tmp/auth
+    ports:
+      - "1025:1025"  # smtp server
+      - "8025:8025"  # web UI

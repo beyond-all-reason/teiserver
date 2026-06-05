@@ -184,8 +184,11 @@ config :teiserver, Teiserver.OAuth,
       Application.get_env(:teiserver, Teiserver.OAuth)[:issuer] || "https://#{domain_name}"
 
 if Teiserver.ConfigHelpers.get_env("TEI_ENABLE_EMAIL_INTEGRATION", false, :bool) do
+  default_config = Application.get_env(:teiserver, Teiserver.Mailer)
+
   config :teiserver, Teiserver.Mailer,
-    adapter: Bamboo.SMTPAdapter,
+    # don't override the test adapter
+    adapter: default_config[:adapter] || Bamboo.SMTPAdapter,
     contact_address:
       Teiserver.ConfigHelpers.get_env("TEI_CONTACT_EMAIL_ADDRESS", "info@#{domain_name}"),
     noreply_name: "Beyond All Reason",
