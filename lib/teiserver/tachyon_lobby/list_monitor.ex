@@ -5,6 +5,7 @@ defmodule Teiserver.TachyonLobby.ListMonitor do
   """
 
   alias Teiserver.Helpers.PubSubHelper
+  alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
 
   use GenServer
@@ -22,8 +23,21 @@ defmodule Teiserver.TachyonLobby.ListMonitor do
   @impl GenServer
   def init(_arg) do
     Logger.metadata(actor_type: :lobby_list_monitor)
-    state = %{monitors: %{}}
-    {:ok, state}
+    {:ok, nil, {:continue, :bootstrap_state}}
+  end
+
+  @impl GenServer
+  def handle_continue(:bootstrap_state, _state) do
+    monitors =
+      TachyonLobby.Registry.list_pids()
+      |> Enum.map(fn {lobby_id, pid} ->
+        ref = Process.monitor(pid)
+        {ref, lobby_id}
+      end)
+      |> Enum.into(%{})
+
+    state = %{monitors: monitors}
+    {:noreply, state}
   end
 
   @impl GenServer

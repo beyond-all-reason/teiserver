@@ -51,6 +51,15 @@ defmodule Teiserver.TachyonLobby.Registry do
   end
 
   @doc """
+  for use by the ListMonitor to be able to monitor all lobbies after a restart
+  """
+  @spec list_pids() :: [{LT.Types.id(), pid()}]
+  def list_pids do
+    spec = [{{:"$1", :"$2", :_}, [], [{{:"$1", :"$2"}}]}]
+    Registry.select(__MODULE__, spec)
+  end
+
+  @doc """
   useful for tests, there shouldn't be a need for that outside testing
   """
   def register(lobby_id) do

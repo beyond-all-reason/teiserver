@@ -118,6 +118,30 @@ defmodule Teiserver.TachyonLobby.ListTest do
       assert_receive %{topic: ^topic, event: :remove_lobby, lobby_id: ^id}
     end
 
+    test "monitors setup after list restart" do
+      creator_pid = start_supervised!({Task, fn -> :timer.sleep(:infinity) end})
+
+      {:ok, _pid, details} =
+        mk_start_params([1, 1])
+        |> Map.put(:creator_pid, creator_pid)
+        |> Lobby.create()
+      Lobby.subscribe_updates()
+
+      orig_list_pid = Process.whereis(Lobby.ListMonitor)
+      Process.exit(orig_list_pid, :kill)
+
+      Polling.poll_until(
+        fn -> Process.whereis(Lobby.ListMonitor) end,
+        &(&1 != nil and &1 != orig_list_pid)
+      )
+
+      Process.exit(creator_pid, :exit)
+
+      topic = list_topic()
+      id = details.id
+      assert_receive %{topic: ^topic, event: :remove_lobby, lobby_id: ^id}
+    end
+
     test "can unsubscribe" do
       Lobby.subscribe_updates()
       {:ok, _pid, _details} = mk_start_params([1, 1]) |> Lobby.create()
