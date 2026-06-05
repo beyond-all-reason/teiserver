@@ -7,6 +7,7 @@ defmodule Teiserver.CacheUser do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Account.User
@@ -20,6 +21,8 @@ defmodule Teiserver.CacheUser do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.EmailHelper
   alias Teiserver.Geoip
+  alias Teiserver.Moderation
+  alias Teiserver.Moderation.Tasks.ExternalIPCheckTask
   alias Teiserver.Plugins
   alias Teiserver.Telemetry
 
@@ -228,6 +231,21 @@ defmodule Teiserver.CacheUser do
       "country" => Geoip.get_flag(ip),
       "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string()
     })
+
+    ip_check_results = ExternalIPCheckTask.get_ban_reasons(ip)
+
+    unless Enum.empty?(ip_check_results) do
+      Account.update_user_stat(user.id, %{
+        "ip_check_results" => Enum.join(ip_check_results, ", "),
+        "ip_check_bad?" => true
+      })
+    end
+
+    if Moderation.banned_ip?(ip) do
+      Account.update_user_stat(user.id, %{
+        "banned_ip?" => true
+      })
+    end
 
     # Now add them to the cache
     user
@@ -691,14 +709,6 @@ defmodule Teiserver.CacheUser do
       {:ok, db_user, _claims} ->
         user = get_user_by_id(db_user.id)
 
-        # # If they're a smurf, log them in as the smurf!
-        # user =
-        #   if user.smurf_of_id != nil do
-        #     get_user_by_id(user.smurf_of_id)
-        #   else
-        #     user
-        #   end
-
         cond do
           user.smurf_of_id != nil ->
             Telemetry.log_complex_server_event(db_user.id, "Banned login", %{
@@ -733,6 +743,16 @@ defmodule Teiserver.CacheUser do
               lobby_hash: lobby_hash,
               last_ip: ip
             })
+
+            # One way hash of the creation IP. If enabled during testing we
+            # will get foreign key errors as the test shuts down
+            if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+              Account.create_smurf_key(
+                user.id,
+                "ip",
+                CalculateSmurfKeyTask.calculate_string_fingerprint(ip)
+              )
+            end
 
             {:error, "Unverified", user.id}
 
@@ -985,6 +1005,12 @@ defmodule Teiserver.CacheUser do
       Telemetry.log_simple_server_event(user.id, "account.user_login")
 
       if not bot? do
+        Account.create_smurf_key(
+          user.id,
+          "ip",
+          CalculateSmurfKeyTask.calculate_string_fingerprint(ip)
+        )
+
         Account.create_smurf_key(user.id, "client_app_hash", lobby_hash)
       end
     end
@@ -1170,6 +1196,9 @@ defmodule Teiserver.CacheUser do
       # (and also redundant)
       Account.query_users(search: [email_lower: email], select: [:email]) != [] ->
         {:error, "Email already attached to a user"}
+
+      Moderation.banned_domain?(email) ->
+        {:error, "Due to frequent abuse, that email provider is not allowed."}
 
       true ->
         :ok
