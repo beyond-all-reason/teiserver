@@ -3,6 +3,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerMinuteTaskTest do
   alias Teiserver.Logging.Tasks.PersistServerMinuteTask
   use Teiserver.DataCase
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/26998159837/job/79672243657?pr=1237
+  @tag :needs_attention
   test "perform task" do
     # Run the task
     assert :ok == PersistServerMinuteTask.perform(%{})
