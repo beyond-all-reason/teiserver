@@ -15,12 +15,8 @@ defmodule Teiserver.TachyonLobby do
   @type team :: LT.Types.team()
   @type ally_team_config :: [LT.AllyTeamConfig.t()]
 
-  @spec list() :: %{id() => overview()}
-  defdelegate list(), to: TachyonLobby.List
-
-  @spec subscribe_updates() :: {non_neg_integer(), %{id() => overview()}}
-  defdelegate subscribe_updates(), to: TachyonLobby.List
-  defdelegate unsubscribe_updates(), to: TachyonLobby.List
+  def subscribe_updates(), do: raise "TODO"
+  def unsubscribe_updates(), do: raise "TODO"
 
   @type start_params :: LT.StartParams.t()
   @spec create(start_params()) ::

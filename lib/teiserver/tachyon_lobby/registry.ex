@@ -37,11 +37,6 @@ defmodule Teiserver.TachyonLobby.Registry do
     _e in ArgumentError -> 0
   end
 
-  @spec list_lobbies() :: [{LT.Types.id(), pid()}]
-  def list_lobbies do
-    Registry.select(__MODULE__, [{{:"$1", :"$2", :_}, [], [{{:"$1", :"$2"}}]}])
-  end
-
   @doc """
   useful for tests, there shouldn't be a need for that outside testing
   """

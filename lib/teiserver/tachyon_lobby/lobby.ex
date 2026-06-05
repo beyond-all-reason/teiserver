@@ -93,18 +93,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @default_call_timeout 5000
   @max_vote_history_size 10
 
-  # note: this uses a pid and not a lobby id because it's (currently) only
-  # used by the lobby list process to bootstrap its state, and at that time
-  # it has the pid (from the registry).
-  # but if the needs arise, this could be overloaded to use a lobby id
-  # and the usual via_tuple mechanism
-  @spec get_overview(pid()) :: LT.ListOverview.t() | nil
-  def get_overview(lobby_pid) do
-    :gen_statem.call(lobby_pid, :get_overview, @default_call_timeout)
-  catch
-    :exit, {:noproc, _details} -> nil
-  end
-
   @spec get_details(LT.Types.id()) :: {:ok, LT.Details.t()} | {:error, reason :: term()}
   def get_details(id) do
     call_lobby(id, :get_details)
@@ -343,7 +331,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         vote_history: %{}
       }
 
-    TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
+    # TachyonLobby.List.register_lobby(self(), id, get_overview_from_state(state))
     Logger.info("Lobby created by user #{start_params.creator_data.id}")
     {:ok, :running, state}
   end
@@ -427,7 +415,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       if MapSet.size(ids_left) == 0 do
         Logger.debug("all member rejoined, start up completed")
-        TachyonLobby.List.register_lobby(self(), data.id, get_overview_from_state(data))
+        # TachyonLobby.List.register_lobby(self(), data.id, get_overview_from_state(data))
 
         if data.current_vote != nil do
           diff = max(0, DateTime.diff(data.current_vote.until, DateTime.utc_now(), :millisecond))
@@ -1038,7 +1026,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         |> Map.update!(:monitors, &MC.monitor(&1, battle_pid, :current_battle))
 
       broadcast_update({:update, nil, %{current_battle: data.current_battle}}, data)
-      TachyonLobby.List.update_lobby(data.id, %{current_battle: %{started_at: now}})
+      # TachyonLobby.List.update_lobby(data.id, %{current_battle: %{started_at: now}})
 
       {:keep_state, data, [{:reply, from, :ok}]}
     else
@@ -1090,7 +1078,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         :current_battle ->
           data = Map.put(data, :current_battle, nil)
           broadcast_update({:update, nil, %{current_battle: nil}}, data)
-          TachyonLobby.List.update_lobby(data.id, %{current_battle: nil})
+          # TachyonLobby.List.update_lobby(data.id, %{current_battle: nil})
           data
 
         nil ->
@@ -1765,7 +1753,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         change_map
       end
 
-    if change_map != %{}, do: TachyonLobby.List.update_lobby(data.id, change_map)
+    # if change_map != %{}, do: TachyonLobby.List.update_lobby(data.id, change_map)
     aggregate
   end
 
