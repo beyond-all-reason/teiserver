@@ -35,7 +35,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Player
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
-  alias Teiserver.TachyonLobby
+  alias Teiserver.TachyonLobby.ListMonitor
   alias Teiserver.TachyonLobby.Registry, as: LobbyRegistry
   # lobby types
   alias Teiserver.TachyonLobby.Types, as: LT
@@ -1030,7 +1030,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         |> Map.update!(:monitors, &MC.monitor(&1, battle_pid, :current_battle))
 
       broadcast_update({:update, nil, %{current_battle: data.current_battle}}, data)
-      # TachyonLobby.List.update_lobby(data.id, %{current_battle: %{started_at: now}})
+      update_list(data, %{current_battle: %{started_at: now}})
 
       {:keep_state, data, [{:reply, from, :ok}]}
     else
@@ -1082,7 +1082,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         :current_battle ->
           data = Map.put(data, :current_battle, nil)
           broadcast_update({:update, nil, %{current_battle: nil}}, data)
-          # TachyonLobby.List.update_lobby(data.id, %{current_battle: nil})
+          update_list(data, %{current_battle: nil})
           data
 
         nil ->
@@ -1232,7 +1232,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp register_new_lobby(state) do
     overview = get_overview_from_state(state)
-    TachyonLobby.ListMonitor.register(state.id, self())
+    ListMonitor.register(state.id, self())
     LobbyRegistry.put_overview(state.id, overview)
 
     message = %{
@@ -2139,6 +2139,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
       Enum.count(votes, &(&1 == :yes)) >= vote.majority -> {:ended, :passed}
       true -> {:ended, :failed}
     end
+  end
+
+  defp update_list(%LT.Data{} = data, changes) do
+    message = %{
+      event: :update_lobbies,
+      counter: data.counter,
+      lobby_id: data.id,
+      changes: %{data.id => changes}
+    }
+
+    PubSubHelper.broadcast(list_topic(), message)
   end
 
   @doc """

@@ -102,6 +102,22 @@ defmodule Teiserver.TachyonLobby.ListTest do
       assert counter > list[details.id].counter
     end
 
+    test "get event when lobby dies" do
+      creator_pid = start_supervised!({Task, fn -> :timer.sleep(:infinity) end})
+
+      {:ok, _pid, details} =
+        mk_start_params([1, 1])
+        |> Map.put(:creator_pid, creator_pid)
+        |> Lobby.create()
+
+      Lobby.subscribe_updates()
+      Process.exit(creator_pid, :exit)
+
+      topic = list_topic()
+      id = details.id
+      assert_receive %{topic: ^topic, event: :remove_lobby, lobby_id: ^id}
+    end
+
     test "can unsubscribe" do
       Lobby.subscribe_updates()
       {:ok, _pid, _details} = mk_start_params([1, 1]) |> Lobby.create()
