@@ -2,6 +2,7 @@ defmodule Teiserver.Chat.WordLib do
   @moduledoc false
   alias Teiserver.Config
   alias Teiserver.Helper.StringHelper
+  alias Teiserver.Moderation.BannedPhrase
   alias Teiserver.Plugins
 
   use Plugins
@@ -9,10 +10,6 @@ defmodule Teiserver.Chat.WordLib do
   require Logger
 
   @flagged_regex ~r/(n[i1l]gg(:?[e3]r|a)|cun[t7][s5]?|\b(r[e3])?[t7]ards?\b|卐)/iu
-  @blacklisted_regexs [
-    ~r(superinnapropriateword),
-    ~r(anotherreallybadword)
-  ]
 
   @doc """
   Given a text message it will look for a set of flagged words.
@@ -93,22 +90,12 @@ defmodule Teiserver.Chat.WordLib do
     end
   end
 
-  # TODO: Replace all calls to this with BannedPhrase.message_severity
   @spec blacklisted_phrase?(String.t()) :: boolean()
   @decorate Plugins.plugin(:blacklisted_phrase?)
   def blacklisted_phrase?(text) do
     text = StringHelper.leet_replace(text)
 
-    result =
-      @blacklisted_regexs
-      |> Enum.reduce(false, fn
-        _regex, true ->
-          true
-
-        r, false ->
-          Regex.match?(r, text)
-      end)
-
-    result
+    # If it's a high severity match then yes it is blacklisted
+    BannedPhrase.message_severity(text, :high) == :high
   end
 end

@@ -105,3 +105,12 @@ mix sass.install
 ## What's next?
 
 You should now be ready to start developing Teiserver!<br> Check out the [development guide](/documents/guides/development.md) to help you with getting started.
+
+# Container dependencies
+
+There are some dependencies that run in containers. To start them all: `podman compose up`.
+
+## Email
+
+We use [mailpit](https://mailpit.axllent.org/) as a dev smtp server. It exposes a [web UI](http://localhost:8025/)
+to check the sent emails.

@@ -16,7 +16,19 @@ TEI_TLS_PRIVATE_KEY_PATH = "{{vars.certs_path}}/localhost.key"
 TEI_TLS_CERT_PATH = "{{vars.certs_path}}/localhost.crt"
 TEI_TLS_CA_CERT_PATH = "{{vars.certs_path}}/localhost.crt"
 TEI_TLS_DH_FILE_PATH = "{{vars.certs_path}}/dh-params.pem"
+TEI_CONTACT_EMAIL_ADDRESS = "info@example.com"
+TEI_NOREPLY_EMAIL_ADDRESS = "noreply@example.com"
 PGPASSWORD = "123456789"
+
+# email config
+TEI_ENABLE_EMAIL_INTEGRATION="true"
+TEI_SMTP_SERVER="localhost"
+TEI_SMTP_HOSTNAME="localhost"
+TEI_SMTP_PORT=1025
+# see containers/mailpit-auth
+TEI_SMTP_USERNAME="teitestuser"
+TEI_SMTP_PASSWORD="teitestpassword"
+TEI_SMTP_TLS_VERIFY="false"
 
 [tasks."setup:db"]
 depends = ["pg:start"]

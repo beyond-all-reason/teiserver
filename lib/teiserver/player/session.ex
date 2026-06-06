@@ -20,9 +20,11 @@ defmodule Teiserver.Player.Session do
   alias Teiserver.Party
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Player.SessionSupervisor
+  alias Teiserver.Player.Types, as: PT
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
+  alias Teiserver.TachyonLobby.Types, as: LT
 
   # For now, never restart a session. Until some form of state persistence is
   # implemented it's better to just remove the process completely than
@@ -480,22 +482,15 @@ defmodule Teiserver.Player.Session do
   @typedoc """
   the same as Lobby.start_params, but without any creator data, these are filled by the session
   """
-  @type lobby_start_params :: %{
-          required(:name) => String.t(),
-          required(:map_name) => String.t(),
-          required(:ally_team_config) => TachyonLobby.ally_team_config(),
-          required(:boss_enabled?) => boolean(),
-          required(:game_options) => %{String.t() => String.t()},
-          optional(:tags) => %{String.t() => map()}
-        }
+  @type lobby_start_params :: PT.LobbyStartParams.t()
   @spec create_lobby(T.userid(), lobby_start_params()) ::
-          {:ok, TachyonLobby.details()} | {:error, reason :: term()}
-  def create_lobby(user_id, start_params) do
+          {:ok, LT.Details.t()} | {:error, reason :: term()}
+  def create_lobby(user_id, %PT.LobbyStartParams{} = start_params) do
     user_id |> via_tuple() |> GenServer.call({:lobby, {:create, start_params}})
   end
 
   @spec lobby_join(T.userid(), TachyonLobby.id()) ::
-          {:ok, TachyonLobby.details()} | {:error, reason :: term()}
+          {:ok, LT.Details.t()} | {:error, reason :: term()}
   def lobby_join(user_id, lobby_id) do
     user_id |> via_tuple() |> GenServer.call({:lobby, {:join, lobby_id}})
   end
@@ -693,7 +688,7 @@ defmodule Teiserver.Player.Session do
 
   defp rejoin_lobby(state, lobby_id) do
     case TachyonLobby.rejoin(lobby_id, state.user.id) do
-      {:ok, lobby_pid, details} ->
+      {:ok, lobby_pid, %LT.Details{} = details} ->
         state =
           state
           |> Map.update!(:monitors, &MC.monitor(&1, lobby_pid, {:lobby, details.id}))
@@ -1110,12 +1105,19 @@ defmodule Teiserver.Player.Session do
   def handle_call({:lobby, {:create, _start_params}}, _from, state) when state.lobby != nil,
     do: {:reply, {:error, :already_in_lobby}, state}
 
-  def handle_call({:lobby, {:create, start_params}}, _from, state) do
-    data =
-      Map.merge(start_params, %{
-        creator_data: %{id: state.user.id, name: state.user.name},
-        creator_pid: self()
-      })
+  def handle_call({:lobby, {:create, %PT.LobbyStartParams{} = start_params}}, _from, state) do
+    data = %LT.StartParams{
+      creator_data: %LT.PlayerJoinData{id: state.user.id, name: state.user.name},
+      creator_pid: self(),
+      name: start_params.name,
+      map_name: start_params.map_name,
+      ally_team_config: start_params.ally_team_config,
+      game_version: start_params.game_version,
+      engine_version: start_params.engine_version,
+      boss_enabled?: start_params.boss_enabled? || false,
+      game_options: start_params.game_options,
+      tags: start_params.tags
+    }
 
     case TachyonLobby.create(data) do
       {:ok, pid, details} ->
@@ -1132,7 +1134,9 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_call({:lobby, {:join, lobby_id}}, _from, state) when state.lobby.id == lobby_id do
-    case TachyonLobby.join(lobby_id, %{id: state.user.id, name: state.user.name}, self()) do
+    join_data = %LT.PlayerJoinData{id: state.user.id, name: state.user.name}
+
+    case TachyonLobby.join(lobby_id, join_data, self()) do
       # no need to setup any monitors or update the state since we're already in the lobby
       {:ok, _pid, details} -> {:reply, {:ok, details}, state}
       {:error, reason} -> {:reply, {:error, reason}, state}
@@ -1143,7 +1147,9 @@ defmodule Teiserver.Player.Session do
     do: {:reply, {:error, :already_in_lobby}, state}
 
   def handle_call({:lobby, {:join, lobby_id}}, _from, state) do
-    case TachyonLobby.join(lobby_id, %{id: state.user.id, name: state.user.name}, self()) do
+    join_data = %LT.PlayerJoinData{id: state.user.id, name: state.user.name}
+
+    case TachyonLobby.join(lobby_id, join_data, self()) do
       {:ok, pid, details} ->
         state =
           state

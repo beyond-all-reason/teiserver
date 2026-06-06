@@ -1,24 +1,17 @@
-# defmodule Teiserver.Data.ClientStruct do
-#   @enforce_keys [:in_game, :away, :rank, :moderator, :bot]
-#   defstruct [
-#     :id, :name, :team_size, :icon, :colour, :settings, :conditions, :map_list,
-#     current_search_time: 0, current_size: 0, contents: [], pid: nil
-#   ]
-# end
-
 defmodule Teiserver.Client do
   @moduledoc false
 
-  # alias Teiserver.Helper.DateHelper
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.Account.ClientLib
   alias Teiserver.CacheUser
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
   alias Teiserver.Telemetry
+
   require Logger
 
   @spec create(map()) :: map()
@@ -118,6 +111,15 @@ defmodule Teiserver.Client do
         protocol: protocol
       })
 
+    # If enabled during testing we will get foreign key errors as the test shuts down
+    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+      Account.create_smurf_key(
+        user.id,
+        "ip",
+        CalculateSmurfKeyTask.calculate_string_fingerprint(ip)
+      )
+    end
+
     ClientLib.start_client_server(client)
 
     PubSub.broadcast(
@@ -177,32 +179,32 @@ defmodule Teiserver.Client do
   defdelegate get_client_by_name(name), to: ClientLib
 
   @spec get_client_by_id(nil) :: nil
-  @spec get_client_by_id(T.userid()) :: nil | T.client()
+  @spec get_client_by_id(User.id()) :: nil | T.client()
   defdelegate get_client_by_id(userid), to: ClientLib
 
-  @spec get_clients([T.userid()]) :: List.t()
+  @spec get_clients([User.id()]) :: List.t()
   defdelegate get_clients(id_list), to: ClientLib
 
-  @spec list_client_ids() :: [T.userid()]
+  @spec list_client_ids() :: [User.id()]
   defdelegate list_client_ids(), to: ClientLib
 
   @spec list_clients() :: [T.client()]
   defdelegate list_clients(), to: ClientLib
 
-  @spec list_clients([T.userid()]) :: [T.client()]
+  @spec list_clients([User.id()]) :: [T.client()]
   defdelegate list_clients(id_list), to: ClientLib
 
   @spec update(map(), :silent | :client_updated_status | :client_updated_battlestatus) ::
           T.client()
   def update(client, reason), do: ClientLib.replace_update_client(client, reason)
 
-  @spec get_client_pid(T.userid()) :: pid() | nil
+  @spec get_client_pid(User.id()) :: pid() | nil
   defdelegate get_client_pid(userid), to: ClientLib
 
-  @spec cast_client(T.userid(), any) :: any
+  @spec cast_client(User.id(), any) :: any
   defdelegate cast_client(userid, msg), to: ClientLib
 
-  @spec call_client(T.userid(), any) :: any | nil
+  @spec call_client(User.id(), any) :: any | nil
   defdelegate call_client(userid, msg), to: ClientLib
 
   @spec join_battle(T.client_id(), Integer.t(), boolean()) :: nil | T.client()
@@ -237,7 +239,7 @@ defmodule Teiserver.Client do
     end
   end
 
-  @spec disconnect(T.userid(), nil | String.t()) :: nil | :ok | {:error, any}
+  @spec disconnect(User.id(), nil | String.t()) :: nil | :ok | {:error, any}
   def disconnect(userid, reason \\ nil) do
     case get_client_by_id(userid) do
       nil -> nil
@@ -245,7 +247,7 @@ defmodule Teiserver.Client do
     end
   end
 
-  @spec kick_disconnect(T.userid(), nil | String.t()) :: nil | :ok | {:error, any}
+  @spec kick_disconnect(User.id(), nil | String.t()) :: nil | :ok | {:error, any}
   def kick_disconnect(userid, reason \\ nil) do
     case get_client_by_id(userid) do
       nil -> nil
@@ -312,7 +314,7 @@ defmodule Teiserver.Client do
     )
   end
 
-  @spec set_awaiting_warn_ack(T.userid()) :: :ok
+  @spec set_awaiting_warn_ack(User.id()) :: :ok
   def set_awaiting_warn_ack(userid) do
     case get_client_by_id(userid) do
       nil ->
@@ -325,14 +327,14 @@ defmodule Teiserver.Client do
     :ok
   end
 
-  @spec clear_awaiting_warn_ack(T.userid()) :: :ok
+  @spec clear_awaiting_warn_ack(User.id()) :: :ok
   def clear_awaiting_warn_ack(userid) do
     client = get_client_by_id(userid)
     update(%{client | awaiting_warn_ack: false}, :silent)
     :ok
   end
 
-  @spec enable_client_message_print(T.userid()) :: :ok
+  @spec enable_client_message_print(User.id()) :: :ok
   def enable_client_message_print(userid) do
     case get_client_by_id(userid) do
       nil ->
@@ -344,7 +346,7 @@ defmodule Teiserver.Client do
     end
   end
 
-  @spec disable_client_message_print(T.userid()) :: :ok
+  @spec disable_client_message_print(User.id()) :: :ok
   def disable_client_message_print(userid) do
     case get_client_by_id(userid) do
       nil ->
@@ -356,7 +358,7 @@ defmodule Teiserver.Client do
     end
   end
 
-  @spec enable_server_message_print(T.userid()) :: :ok
+  @spec enable_server_message_print(User.id()) :: :ok
   def enable_server_message_print(userid) do
     case get_client_by_id(userid) do
       nil ->
@@ -368,7 +370,7 @@ defmodule Teiserver.Client do
     end
   end
 
-  @spec disable_server_message_print(T.userid()) :: :ok
+  @spec disable_server_message_print(User.id()) :: :ok
   def disable_server_message_print(userid) do
     case get_client_by_id(userid) do
       nil ->

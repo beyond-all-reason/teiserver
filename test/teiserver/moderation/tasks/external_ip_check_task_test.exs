@@ -7,6 +7,8 @@ defmodule Teiserver.Moderation.Tasks.ExternalIpCheckTaskTest do
 
   use Teiserver.DataCase, async: false
 
+  import ExUnit.CaptureLog
+
   describe "return ban reason when config enabled" do
     test "abuser" do
       setup_config("teiserver.external_ip_ban_is_abuser", true)
@@ -50,7 +52,12 @@ defmodule Teiserver.Moderation.Tasks.ExternalIpCheckTaskTest do
   end
 
   test "doesn't raise on error" do
-    assert ExternalIPCheckTask.get_ban_reasons(Stub.error_ip()) == []
+    {result, _log} =
+      with_log(fn ->
+        ExternalIPCheckTask.get_ban_reasons(Stub.error_ip())
+      end)
+
+    assert result == []
   end
 
   defp setup_config(key, value) do
