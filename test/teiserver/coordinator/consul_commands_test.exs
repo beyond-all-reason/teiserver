@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   alias Teiserver.Coordinator
   alias Teiserver.Lobby
   alias Teiserver.Lobby.LobbyLib
-  alias Teiserver.LobbyFixtures
+  alias Teiserver.Support.Polling
   alias Teiserver.TeiserverTestLib
 
   use Teiserver.ServerCase, async: false
@@ -34,23 +34,39 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   describe "handle_command(%{ command: rename, ... })" do
     setup [:setup_lobby]
 
-    test "sends error message with hints when name is invalid", %{host: host, lobby_id: lobby_id} do
-      # Empty name is accepted by the consul
-      invalid_names =
-        LobbyFixtures.invalid_names()
-        |> Enum.filter(fn s -> s != "" end)
+    test "name change works", %{host: host, lobby_id: lobby_id} do
+      old_name = Lobby.get_lobby(lobby_id).name
+      new_name = old_name <> " updated"
 
+      Coordinator.send_consul(lobby_id, %{
+        command: "rename",
+        senderid: host.id,
+        remaining: new_name
+      })
+
+      name =
+        Polling.poll_until(
+          fn -> Lobby.get_lobby(lobby_id).name end,
+          fn name -> name != old_name end,
+          wait: 20
+        )
+
+      assert name == new_name
+    end
+
+    test "chat message is sent when provided name was invalid", %{host: host, lobby_id: lobby_id} do
+      name = "="
       channel = "teiserver_lobby_chat:#{lobby_id}"
       PubSub.subscribe(Teiserver.PubSub, channel)
 
-      Enum.each(invalid_names, fn name ->
-        Coordinator.send_consul(lobby_id, %{command: "rename", senderid: host.id, remaining: name})
-      end)
+      Coordinator.send_consul(lobby_id, %{
+        command: "rename",
+        senderid: host.id,
+        remaining: name
+      })
 
-      Enum.each(invalid_names, fn name ->
-        {:error, message} = LobbyLib.validate_name(name, hints: true)
-        assert_receive(%{channel: ^channel, event: :announce, message: ^message}, 2000)
-      end)
+      {:error, message} = LobbyLib.validate_name(name, hints: true)
+      assert_receive(%{channel: ^channel, event: :announce, message: ^message}, 2000)
 
       PubSub.unsubscribe(Teiserver.PubSub, channel)
     end

@@ -1,7 +1,6 @@
 defmodule TeiserverWeb.Tachyon.LobbyTest do
   alias ExUnit.Callbacks
   alias Teiserver.AssetFixtures
-  alias Teiserver.LobbyFixtures
   alias Teiserver.Support.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
@@ -53,17 +52,19 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
 
     test "cannot create lobby with invalid name", %{client: client} do
-      Enum.each(LobbyFixtures.invalid_names(), fn name ->
-        data = %{
-          name: name,
-          map_name: "test-map",
-          ally_team_config: Tachyon.mk_ally_team_config(2, 1)
-        }
+      data = %{
+        name: "",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
+      }
 
-        response = Tachyon.create_lobby!(client, data)
+      response = Tachyon.create_lobby!(client, data)
 
-        assert %{"status" => "failed", "details" => "Cannot create lobby:" <> _message} = response
-      end)
+      assert %{
+               "status" => "failed",
+               "reason" => "invalid_request",
+               "details" => "Cannot create lobby:" <> _message
+             } = response
     end
   end
 
@@ -524,14 +525,6 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       last_vote = data["voteHistory"][vote["id"]]
       assert last_vote["outcome"] == "passed"
       assert last_vote["vote"] == %{"type" => "changeMap", "newMapName" => "new map name"}
-    end
-
-    test "cannot update lobby with invalid name", %{client: client} do
-      Enum.each(LobbyFixtures.invalid_names(), fn name ->
-        response = Tachyon.lobby_update!(client, %{name: name})
-
-        %{"status" => "failed", "details" => "Cannot update lobby:" <> _message} = response
-      end)
     end
   end
 

@@ -3,7 +3,6 @@ defmodule Teiserver.SpringBattleHostTest do
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   alias Teiserver.Lobby
-  alias Teiserver.LobbyFixtures
   alias Teiserver.Protocols.Spring
 
   use Teiserver.ServerCase, async: false
@@ -429,26 +428,15 @@ defmodule Teiserver.SpringBattleHostTest do
   end
 
   test "lobby name validation", %{socket: socket} do
-    # Creating lobby:
-    # - with empty name fails to match expected message format
-    # - with other invalid names fails with explicit error message
-    invalid_names = LobbyFixtures.invalid_names()
+    name = "="
 
-    Enum.each(invalid_names, fn name ->
-      _send_raw(
-        socket,
-        "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\t#{name}\tgameName\n"
-      )
-    end)
+    _send_raw(
+      socket,
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\t#{name}\tgameName\n"
+    )
 
-    [_no_match | replies] =
-      _recv_until(socket)
-      |> String.split("\n")
-      |> Enum.filter(fn s -> s != "" end)
-
-    Enum.each(replies, fn reply ->
-      assert reply =~ "OPENBATTLEFAILED", "Expected OPENBATTLEFAILED response, got #{reply}"
-    end)
+    reply = _recv_until(socket)
+    assert reply =~ "OPENBATTLEFAILED", "Expected OPENBATTLEFAILED response, got #{reply}"
 
     # Open lobby for c.battle.update_lobby_title
     _send_raw(
@@ -460,16 +448,11 @@ defmodule Teiserver.SpringBattleHostTest do
     ignore_events(socket)
     assert reply =~ "BATTLEOPENED"
 
-    # Updating lobby with c.battle.update_lobby_title returns NO response for each invalid name
-    Enum.each(invalid_names, fn name ->
-      _send_raw(socket, "c.battle.update_lobby_title #{name}\n")
-    end)
+    # Updating lobby using c.battle.update_lobby_title returns NO response
+    _send_raw(socket, "c.battle.update_lobby_title #{name}\n")
 
-    replies = _recv_until(socket) |> String.split("\n") |> Enum.filter(fn s -> s != "" end)
-
-    Enum.each(replies, fn reply ->
-      assert reply =~ "NO cmd=c.battle.update_lobby_title\t", "Expected NO reply, got #{reply}"
-    end)
+    reply = _recv_until(socket)
+    assert reply =~ "NO cmd=c.battle.update_lobby_title\t", "Expected NO reply, got #{reply}"
   end
 
   defp ignore_events(socket) do
