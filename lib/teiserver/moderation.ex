@@ -925,7 +925,7 @@ defmodule Teiserver.Moderation do
     %BannedDomain{}
     |> BannedDomain.changeset(attrs)
     |> Repo.insert()
-    |> LoadBannedDomainsTask.maybe_recache()
+    |> LoadBannedDomainsTask.cache_if_ok()
   end
 
   @doc """
@@ -944,7 +944,7 @@ defmodule Teiserver.Moderation do
     banned_domain
     |> BannedDomain.changeset(attrs)
     |> Repo.update()
-    |> LoadBannedDomainsTask.maybe_recache()
+    |> LoadBannedDomainsTask.cache_if_ok()
   end
 
   @doc """
@@ -961,7 +961,7 @@ defmodule Teiserver.Moderation do
   """
   def delete_banned_domain(%BannedDomain{} = banned_domain) do
     Repo.delete(banned_domain)
-    |> LoadBannedDomainsTask.maybe_recache()
+    |> LoadBannedDomainsTask.cache_if_ok()
   end
 
   @doc """
@@ -1044,7 +1044,7 @@ defmodule Teiserver.Moderation do
     %BannedIP{}
     |> BannedIP.changeset(attrs)
     |> Repo.insert()
-    |> LoadBannedIPsTask.maybe_recache()
+    |> LoadBannedIPsTask.cache_if_ok()
   end
 
   @doc """
@@ -1063,7 +1063,7 @@ defmodule Teiserver.Moderation do
     banned_ip
     |> BannedIP.changeset(attrs)
     |> Repo.update()
-    |> LoadBannedIPsTask.maybe_recache()
+    |> LoadBannedIPsTask.cache_if_ok()
   end
 
   @doc """
@@ -1080,7 +1080,7 @@ defmodule Teiserver.Moderation do
   """
   def delete_banned_ip(%BannedIP{} = banned_ip) do
     Repo.delete(banned_ip)
-    |> LoadBannedIPsTask.maybe_recache()
+    |> LoadBannedIPsTask.cache_if_ok()
   end
 
   @doc """
@@ -1159,7 +1159,7 @@ defmodule Teiserver.Moderation do
     %BannedPhrase{}
     |> BannedPhrase.changeset(attrs)
     |> Repo.insert()
-    |> LoadBannedPhrasesTask.maybe_recache()
+    |> LoadBannedPhrasesTask.cache_if_ok()
   end
 
   @doc """
@@ -1178,7 +1178,7 @@ defmodule Teiserver.Moderation do
     banned_phrase
     |> BannedPhrase.changeset(attrs)
     |> Repo.update()
-    |> LoadBannedPhrasesTask.maybe_recache()
+    |> LoadBannedPhrasesTask.cache_if_ok()
   end
 
   @doc """
@@ -1195,7 +1195,7 @@ defmodule Teiserver.Moderation do
   """
   def delete_banned_phrase(%BannedPhrase{} = banned_phrase) do
     Repo.delete(banned_phrase)
-    |> LoadBannedPhrasesTask.maybe_recache()
+    |> LoadBannedPhrasesTask.cache_if_ok()
   end
 
   @doc """

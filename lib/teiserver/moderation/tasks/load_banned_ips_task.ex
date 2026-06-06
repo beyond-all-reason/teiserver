@@ -21,10 +21,10 @@ defmodule Teiserver.Moderation.LoadBannedIPsTask do
     )
   end
 
-  def maybe_recache({:ok, struct}) do
+  def cache_if_ok({:ok, struct}) do
     perform()
     {:ok, struct}
   end
 
-  def maybe_recache(result), do: result
+  def cache_if_ok(result), do: result
 end
