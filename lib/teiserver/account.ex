@@ -66,16 +66,16 @@ defmodule Teiserver.Account do
   @spec count_users(list) :: integer
   defdelegate count_users(args), to: UserLib
 
-  @spec get_user!(T.userid()) :: User.t()
+  @spec get_user!(User.id()) :: User.t()
   defdelegate get_user!(user_id), to: UserLib
 
-  @spec get_user!(T.userid(), keyword()) :: User.t() | nil
+  @spec get_user!(User.id(), keyword()) :: User.t() | nil
   defdelegate get_user!(user_id, args), to: UserLib
 
-  @spec get_user(T.userid()) :: User.t() | nil
+  @spec get_user(User.id()) :: User.t() | nil
   defdelegate get_user(user_id), to: UserLib
 
-  @spec get_user(T.userid() | nil, keyword()) :: User.t() | nil
+  @spec get_user(User.id() | nil, keyword()) :: User.t() | nil
   defdelegate get_user(user_id, args), to: UserLib
 
   @spec query_users(list) :: [User.t()]
@@ -687,7 +687,7 @@ defmodule Teiserver.Account do
     |> Repo.one()
   end
 
-  @spec get_smurf_key(T.userid(), non_neg_integer(), String.t()) :: list()
+  @spec get_smurf_key(User.id(), non_neg_integer(), String.t()) :: list()
   def get_smurf_key(user_id, type_id, value) do
     smurf_key_query(nil,
       search: [
@@ -982,13 +982,13 @@ defmodule Teiserver.Account do
     |> Repo.one()
   end
 
-  @spec get_rating(T.userid(), integer()) :: Rating.t() | nil
+  @spec get_rating(User.id(), integer()) :: Rating.t() | nil
   def get_rating(user_id, rating_type_id)
       when is_integer(user_id) and is_integer(rating_type_id) do
     get_rating(user_id, rating_type_id, MatchRatingLib.active_season())
   end
 
-  @spec get_rating(T.userid(), integer(), integer()) :: Rating.t() | nil
+  @spec get_rating(User.id(), integer(), integer()) :: Rating.t() | nil
   def get_rating(user_id, rating_type_id, season)
       when is_integer(user_id) and is_integer(rating_type_id) and is_integer(season) do
     Teiserver.cache_get_or_store(:teiserver_user_ratings, {user_id, rating_type_id, season}, fn ->
@@ -1004,12 +1004,12 @@ defmodule Teiserver.Account do
     end)
   end
 
-  @spec get_player_highest_leaderboard_rating(T.userid()) :: number()
+  @spec get_player_highest_leaderboard_rating(User.id()) :: number()
   def get_player_highest_leaderboard_rating(user_id) do
     get_player_highest_leaderboard_rating(user_id, MatchRatingLib.active_season())
   end
 
-  @spec get_player_highest_leaderboard_rating(T.userid(), integer()) :: number()
+  @spec get_player_highest_leaderboard_rating(User.id(), integer()) :: number()
   def get_player_highest_leaderboard_rating(user_id, season) do
     result =
       rating_query(
@@ -1030,7 +1030,7 @@ defmodule Teiserver.Account do
     end
   end
 
-  @spec get_player_lowest_uncertainty(T.userid()) :: number()
+  @spec get_player_lowest_uncertainty(User.id()) :: number()
   def get_player_lowest_uncertainty(user_id) do
     result =
       rating_query(
@@ -1598,61 +1598,61 @@ defmodule Teiserver.Account do
   @spec past_tense_of_state(String.t() | map) :: String.t()
   defdelegate past_tense_of_state(state), to: RelationshipLib
 
-  @spec follow_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
+  @spec follow_user(User.id(), User.id()) :: {:ok, Relationship.t()}
   defdelegate follow_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec ignore_user(T.userid(), T.userid()) :: {:ok, Relationship.t()} | {:error, String.t()}
+  @spec ignore_user(User.id(), User.id()) :: {:ok, Relationship.t()} | {:error, String.t()}
   defdelegate ignore_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec unignore_user(T.userid(), T.userid()) :: {:ok, Relationship.t()}
+  @spec unignore_user(User.id(), User.id()) :: {:ok, Relationship.t()}
   defdelegate unignore_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec avoid_user(T.userid(), T.userid()) :: {:ok, Relationship.t()} | {:error, String.t()}
+  @spec avoid_user(User.id(), User.id()) :: {:ok, Relationship.t()} | {:error, String.t()}
   defdelegate avoid_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec block_user(T.userid(), T.userid()) :: {:ok, Relationship.t()} | {:error, String.t()}
+  @spec block_user(User.id(), User.id()) :: {:ok, Relationship.t()} | {:error, String.t()}
   defdelegate block_user(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec reset_relationship_state(T.userid(), T.userid()) :: {:ok, Relationship.t()}
+  @spec reset_relationship_state(User.id(), User.id()) :: {:ok, Relationship.t()}
   defdelegate reset_relationship_state(from_user_id, to_user_id), to: RelationshipLib
 
-  @spec calculate_relationship_stats(T.userid()) :: :ok
+  @spec calculate_relationship_stats(User.id()) :: :ok
   defdelegate calculate_relationship_stats(userid), to: RelationshipLib
 
-  @spec decache_relationships(T.userid()) :: :ok
+  @spec decache_relationships(User.id()) :: :ok
   defdelegate decache_relationships(userid), to: RelationshipLib
 
-  @spec list_userids_avoiding_this_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_avoiding_this_userid(User.id()) :: [User.id()]
   defdelegate list_userids_avoiding_this_userid(userid), to: RelationshipLib
 
-  @spec list_userids_avoided_by_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_avoided_by_userid(User.id()) :: [User.id()]
   defdelegate list_userids_avoided_by_userid(userid), to: RelationshipLib
 
-  @spec list_userids_blocking_this_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_blocking_this_userid(User.id()) :: [User.id()]
   defdelegate list_userids_blocking_this_userid(userid), to: RelationshipLib
 
-  @spec list_userids_blocked_by_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_blocked_by_userid(User.id()) :: [User.id()]
   defdelegate list_userids_blocked_by_userid(userid), to: RelationshipLib
 
-  @spec list_userids_ignored_by_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_ignored_by_userid(User.id()) :: [User.id()]
   defdelegate list_userids_ignored_by_userid(userid), to: RelationshipLib
 
-  @spec list_userids_followed_by_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_followed_by_userid(User.id()) :: [User.id()]
   defdelegate list_userids_followed_by_userid(userid), to: RelationshipLib
 
-  @spec does_a_follow_b?(T.userid(), T.userid()) :: boolean
+  @spec does_a_follow_b?(User.id(), User.id()) :: boolean
   defdelegate does_a_follow_b?(u1, u2), to: RelationshipLib
 
-  @spec does_a_ignore_b?(T.userid(), T.userid()) :: boolean
+  @spec does_a_ignore_b?(User.id(), User.id()) :: boolean
   defdelegate does_a_ignore_b?(u1, u2), to: RelationshipLib
 
-  @spec does_a_block_b?(T.userid(), T.userid()) :: boolean
+  @spec does_a_block_b?(User.id(), User.id()) :: boolean
   defdelegate does_a_block_b?(u1, u2), to: RelationshipLib
 
-  @spec does_a_avoid_b?(T.userid(), T.userid()) :: boolean
+  @spec does_a_avoid_b?(User.id(), User.id()) :: boolean
   defdelegate does_a_avoid_b?(u1, u2), to: RelationshipLib
 
-  @spec check_block_status(T.userid(), [T.userid()]) :: :ok | :blocking | :blocked
+  @spec check_block_status(User.id(), [User.id()]) :: :ok | :blocking | :blocked
   defdelegate check_block_status(userid, userid_list), to: RelationshipLib
 
   @spec profile_view_permissions(
@@ -1684,7 +1684,7 @@ defmodule Teiserver.Account do
   @doc """
   Returns the list of friends for the given user
   """
-  @spec list_friends_for_user(map() | T.userid()) :: [map()]
+  @spec list_friends_for_user(map() | User.id()) :: [map()]
   def list_friends_for_user(%{id: id}), do: list_friends_for_user(id)
 
   def list_friends_for_user(user_id) do
@@ -1770,7 +1770,7 @@ defmodule Teiserver.Account do
     result
   end
 
-  @spec create_friend(T.userid(), T.userid()) :: {:ok, Friend.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_friend(User.id(), User.id()) :: {:ok, Friend.t()} | {:error, Ecto.Changeset.t()}
   def create_friend(uid1, uid2) do
     [u1, u2] = Enum.sort([uid1, uid2])
 
@@ -1861,7 +1861,7 @@ defmodule Teiserver.Account do
     Friend.changeset(friend, attrs)
   end
 
-  @spec list_friend_ids_of_user(T.userid()) :: [T.userid()]
+  @spec list_friend_ids_of_user(User.id()) :: [User.id()]
   defdelegate list_friend_ids_of_user(userid), to: FriendLib
 
   @doc """
@@ -2105,35 +2105,35 @@ defmodule Teiserver.Account do
     FriendRequest.changeset(friend_request, attrs)
   end
 
-  @spec can_send_friend_request?(T.userid(), T.userid()) :: boolean
+  @spec can_send_friend_request?(User.id(), User.id()) :: boolean
   defdelegate can_send_friend_request?(from_id, to_id), to: FriendRequestLib
 
-  @spec can_send_friend_request_with_reason?(T.userid(), T.userid()) ::
+  @spec can_send_friend_request_with_reason?(User.id(), User.id()) ::
           {true, :ok} | {false, String.t()}
   defdelegate can_send_friend_request_with_reason?(from_id, to_id), to: FriendRequestLib
 
-  @spec list_outgoing_friend_requests_of_userid(T.userid()) :: [T.userid()]
+  @spec list_outgoing_friend_requests_of_userid(User.id()) :: [User.id()]
   defdelegate list_outgoing_friend_requests_of_userid(userid), to: FriendRequestLib
 
-  @spec list_requests_for_user(T.userid()) :: {outgoing :: [map()], incoming :: [map()]}
+  @spec list_requests_for_user(User.id()) :: {outgoing :: [map()], incoming :: [map()]}
   defdelegate list_requests_for_user(userid), to: FriendRequestLib
 
-  @spec list_incoming_friend_requests_of_userid(T.userid()) :: [T.userid()]
+  @spec list_incoming_friend_requests_of_userid(User.id()) :: [User.id()]
   defdelegate list_incoming_friend_requests_of_userid(userid), to: FriendRequestLib
 
-  @spec accept_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
+  @spec accept_friend_request(User.id(), User.id()) :: :ok | {:error, String.t()}
   defdelegate accept_friend_request(from_userid, to_userid), to: FriendRequestLib
 
   @spec accept_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
   defdelegate accept_friend_request(req), to: FriendRequestLib
 
-  @spec decline_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
+  @spec decline_friend_request(User.id(), User.id()) :: :ok | {:error, String.t()}
   defdelegate decline_friend_request(from_userid, to_userid), to: FriendRequestLib
 
   @spec decline_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
   defdelegate decline_friend_request(req), to: FriendRequestLib
 
-  @spec rescind_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
+  @spec rescind_friend_request(User.id(), User.id()) :: :ok | {:error, String.t()}
   defdelegate rescind_friend_request(from_userid, to_userid), to: FriendRequestLib
 
   @spec rescind_friend_request(FriendRequest.t()) :: :ok | {:error, String.t()}
@@ -2141,10 +2141,10 @@ defmodule Teiserver.Account do
 
   # User functions
 
-  @spec get_username(T.userid()) :: String.t() | nil
+  @spec get_username(User.id()) :: String.t() | nil
   defdelegate get_username(userid), to: UserCacheLib
 
-  @spec get_username_by_id(T.userid()) :: String.t() | nil
+  @spec get_username_by_id(User.id()) :: String.t() | nil
   defdelegate get_username_by_id(userid), to: UserCacheLib
 
   @spec get_userid_from_name(String.t()) :: integer() | nil
@@ -2159,19 +2159,19 @@ defmodule Teiserver.Account do
   @spec get_user_by_discord_id(String.t()) :: T.user() | nil
   defdelegate get_user_by_discord_id(discord_id), to: UserCacheLib
 
-  @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
+  @spec get_userid_by_discord_id(String.t()) :: User.id() | nil
   defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_user_by_token(String.t()) :: T.user() | nil
   defdelegate get_user_by_token(token), to: UserCacheLib
 
-  @spec get_user_by_id(T.userid()) :: T.user() | nil
+  @spec get_user_by_id(User.id()) :: T.user() | nil
   defdelegate get_user_by_id(id), to: UserCacheLib
 
   @spec list_users_from_cache(list) :: list
   def list_users_from_cache(id_list), do: UserCacheLib.list_users(id_list)
 
-  @spec recache_user(T.userid() | User.t()) :: :ok
+  @spec recache_user(User.id() | User.t()) :: :ok
   defdelegate recache_user(id), to: UserCacheLib
 
   @spec convert_user(T.user()) :: T.user()
@@ -2180,54 +2180,54 @@ defmodule Teiserver.Account do
   @spec add_user(T.user()) :: T.user()
   defdelegate add_user(user), to: UserCacheLib
 
-  @spec update_cache_user(T.userid(), map()) :: T.user()
+  @spec update_cache_user(User.id(), map()) :: T.user()
   def update_cache_user(userid, user), do: UserCacheLib.update_cache_user(userid, user)
 
-  @spec decache_user(T.userid()) :: :ok | :no_user
+  @spec decache_user(User.id()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCacheLib
 
   @spec make_bot_password() :: String.t()
   defdelegate make_bot_password(), to: UserLib
 
-  @spec rename_user(T.userid(), String.t(), boolean) :: :success | {:error, String.t()}
+  @spec rename_user(User.id(), String.t(), boolean) :: :success | {:error, String.t()}
   defdelegate rename_user(userid, new_name, admin_action \\ false), to: Teiserver.CacheUser
 
   @spec valid_name?(String.t(), boolean()) :: :ok | {:error, String.t()}
   defdelegate valid_name?(new_name, admin_action), to: Teiserver.CacheUser
 
-  @spec system_change_user_name(T.userid(), String.t()) :: :ok
+  @spec system_change_user_name(User.id(), String.t()) :: :ok
   defdelegate system_change_user_name(userid, new_name), to: Teiserver.CacheUser
 
   # Client stuff
   @spec get_client_by_name(String.t()) :: nil | T.client()
   defdelegate get_client_by_name(name), to: ClientLib
 
-  @spec get_client_by_id(T.userid()) :: nil | T.client()
+  @spec get_client_by_id(User.id()) :: nil | T.client()
   defdelegate get_client_by_id(userid), to: ClientLib
 
-  @spec client_exists?(T.userid()) :: boolean()
+  @spec client_exists?(User.id()) :: boolean()
   defdelegate client_exists?(userid), to: ClientLib
 
-  @spec get_clients([T.userid()]) :: list()
+  @spec get_clients([User.id()]) :: list()
   defdelegate get_clients(id_list), to: ClientLib
 
-  @spec list_client_ids() :: [T.userid()]
+  @spec list_client_ids() :: [User.id()]
   defdelegate list_client_ids(), to: ClientLib
 
   @spec list_clients() :: [T.client()]
   defdelegate list_clients(), to: ClientLib
 
-  @spec list_clients([T.userid()]) :: [T.client()]
+  @spec list_clients([User.id()]) :: [T.client()]
   defdelegate list_clients(id_list), to: ClientLib
 
-  @spec update_client(T.userid(), map()) :: nil | :ok
+  @spec update_client(User.id(), map()) :: nil | :ok
   defdelegate update_client(userid, partial_client), to: ClientLib
 
   # TODO: Remove these in favour of update_client
   @spec merge_update_client(map()) :: nil | :ok
   defdelegate merge_update_client(client), to: ClientLib
 
-  @spec merge_update_client(T.userid(), map()) :: nil | :ok
+  @spec merge_update_client(User.id(), map()) :: nil | :ok
   defdelegate merge_update_client(userid, client), to: ClientLib
 
   @spec replace_update_client(
@@ -2236,16 +2236,16 @@ defmodule Teiserver.Account do
         ) :: T.client()
   defdelegate replace_update_client(client, reason), to: ClientLib
 
-  @spec move_client_to_party(T.userid(), T.party_id()) :: :ok | nil
+  @spec move_client_to_party(User.id(), T.party_id()) :: :ok | nil
   defdelegate move_client_to_party(userid, party_id), to: ClientLib
 
-  @spec get_client_pid(T.userid()) :: pid() | nil
+  @spec get_client_pid(User.id()) :: pid() | nil
   defdelegate get_client_pid(userid), to: ClientLib
 
-  @spec cast_client(T.userid(), any) :: any
+  @spec cast_client(User.id(), any) :: any
   defdelegate cast_client(userid, msg), to: ClientLib
 
-  @spec call_client(T.userid(), any) :: any | nil
+  @spec call_client(User.id(), any) :: any | nil
   defdelegate call_client(userid, msg), to: ClientLib
 
   @spec count_client() :: non_neg_integer()
@@ -2265,25 +2265,25 @@ defmodule Teiserver.Account do
   @spec get_party(T.party_id()) :: T.party()
   defdelegate get_party(party_id), to: PartyLib
 
-  @spec create_party(T.userid()) :: T.party()
+  @spec create_party(User.id()) :: T.party()
   defdelegate create_party(userid), to: PartyLib
 
-  @spec create_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  @spec create_party_invite(T.party_id(), User.id()) :: :ok | nil
   defdelegate create_party_invite(party_id, userid), to: PartyLib
 
-  @spec accept_party_invite(T.party_id(), T.userid()) :: {true, map()} | {false, String.t()} | nil
+  @spec accept_party_invite(T.party_id(), User.id()) :: {true, map()} | {false, String.t()} | nil
   defdelegate accept_party_invite(party_id, userid), to: PartyLib
 
-  @spec cancel_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  @spec cancel_party_invite(T.party_id(), User.id()) :: :ok | nil
   defdelegate cancel_party_invite(party_id, userid), to: PartyLib
 
-  @spec leave_party(T.party_id(), T.userid()) :: :ok | nil
+  @spec leave_party(T.party_id(), User.id()) :: :ok | nil
   defdelegate leave_party(party_id, userid), to: PartyLib
 
-  @spec kick_user_from_party(T.party_id(), T.userid()) :: :ok | nil
+  @spec kick_user_from_party(T.party_id(), User.id()) :: :ok | nil
   defdelegate kick_user_from_party(party_id, userid), to: PartyLib
 
-  @spec move_user_to_party(T.party_id(), T.userid()) :: :ok | nil
+  @spec move_user_to_party(T.party_id(), User.id()) :: :ok | nil
   defdelegate move_user_to_party(party_id, userid), to: PartyLib
 
   @spec party_exists?(T.party_id()) :: boolean()
@@ -2295,13 +2295,13 @@ defmodule Teiserver.Account do
   @spec call_party(T.party_id(), any) :: any | nil
   defdelegate call_party(party_id, msg), to: PartyLib
 
-  @spec hide_contributor_rank?(T.userid()) :: boolean()
+  @spec hide_contributor_rank?(User.id()) :: boolean()
   def hide_contributor_rank?(userid) do
     stats_data = get_user_stat_data(userid)
     Map.get(stats_data, "hide_contributor_rank", false)
   end
 
-  @spec set_hide_contributor_rank(T.userid(), boolean()) :: any()
+  @spec set_hide_contributor_rank(User.id(), boolean()) :: any()
   def set_hide_contributor_rank(userid, boolean_value) do
     update_user_stat(userid, %{
       "hide_contributor_rank" => boolean_value
@@ -2342,7 +2342,7 @@ defmodule Teiserver.Account do
   defdelegate set_login_limit(limit), to: LoginThrottleServer
   defdelegate reset_login_rate_limiter(rate), to: LoginThrottleServer, as: :reset_rate_limiter
 
-  @spec verify_user(User.t() | T.userid()) :: map() | nil
+  @spec verify_user(User.t() | User.id()) :: map() | nil
   def verify_user(%User{} = user) do
     delete_user_stat_keys(user.id, ~w(verification_code))
 
@@ -2353,7 +2353,7 @@ defmodule Teiserver.Account do
     get_user(userid) |> verify_user()
   end
 
-  @spec restricted?(T.userid() | User.t() | nil, String.t() | [String.t()]) :: boolean()
+  @spec restricted?(User.id() | User.t() | nil, String.t() | [String.t()]) :: boolean()
   def restricted?(nil, _restriction), do: true
 
   def restricted?(userid, restriction) when is_integer(userid),

@@ -1,11 +1,11 @@
 defmodule Teiserver.Communication do
   @moduledoc false
 
+  alias Teiserver.Account.User
   alias Teiserver.Communication.DiscordChannel
   alias Teiserver.Communication.DiscordChannelLib
   alias Teiserver.Communication.TextCallback
   alias Teiserver.Communication.TextCallbackLib
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
   import Ecto.Query, warn: false
@@ -250,7 +250,7 @@ defmodule Teiserver.Communication do
           map | nil | {:error, any()}
   defdelegate delete_discord_message(channel_id, message_id), to: DiscordChannelLib
 
-  @spec send_discord_dm(T.userid(), String.t()) :: map | nil | {:error, any()}
+  @spec send_discord_dm(User.id(), String.t()) :: map | nil | {:error, any()}
   defdelegate send_discord_dm(userid, message), to: DiscordChannelLib
 
   @spec create_discord_reaction(non_neg_integer | String.t(), non_neg_integer, String.t()) ::

@@ -3,7 +3,7 @@ defmodule Teiserver.Party.Supervisor do
   Supervise player's parties
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
   alias Teiserver.Party
 
   use DynamicSupervisor
@@ -11,7 +11,7 @@ defmodule Teiserver.Party.Supervisor do
   @doc """
   Create a new party
   """
-  @spec start_party(Party.Server.id(), T.userid(), pid()) ::
+  @spec start_party(Party.Server.id(), User.id(), pid()) ::
           DynamicSupervisor.on_start_child()
   def start_party(party_id, user_id, creator_pid) do
     DynamicSupervisor.start_child(

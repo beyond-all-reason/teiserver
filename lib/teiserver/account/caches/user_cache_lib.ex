@@ -9,10 +9,10 @@ defmodule Teiserver.Account.UserCacheLib do
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
-  @spec get_username(T.userid() | nil) :: String.t() | nil
+  @spec get_username(User.id() | nil) :: String.t() | nil
   def get_username(userid), do: get_username_by_id(userid)
 
-  @spec get_username_by_id(T.userid() | nil) :: String.t() | nil
+  @spec get_username_by_id(User.id() | nil) :: String.t() | nil
   def get_username_by_id(nil), do: nil
   def get_username_by_id(""), do: nil
 
@@ -27,7 +27,7 @@ defmodule Teiserver.Account.UserCacheLib do
     end)
   end
 
-  @spec get_userid(String.t() | nil) :: T.userid() | nil
+  @spec get_userid(String.t() | nil) :: User.id() | nil
   def get_userid(nil), do: nil
   def get_userid(""), do: nil
 
@@ -108,7 +108,7 @@ defmodule Teiserver.Account.UserCacheLib do
     end
   end
 
-  @spec get_user_by_id(T.userid() | nil) :: T.user() | nil
+  @spec get_user_by_id(User.id() | nil) :: T.user() | nil
   def get_user_by_id(nil), do: nil
   def get_user_by_id(""), do: nil
 
@@ -122,7 +122,7 @@ defmodule Teiserver.Account.UserCacheLib do
     end)
   end
 
-  @spec get_userid_by_discord_id(String.t() | nil) :: T.userid() | nil
+  @spec get_userid_by_discord_id(String.t() | nil) :: User.id() | nil
   def get_userid_by_discord_id(nil), do: nil
 
   def get_userid_by_discord_id(discord_id) do
@@ -164,7 +164,7 @@ defmodule Teiserver.Account.UserCacheLib do
     |> Enum.filter(fn user -> user != nil end)
   end
 
-  @spec recache_user(T.userid() | CacheUser.t() | map()) :: :ok
+  @spec recache_user(User.id() | CacheUser.t() | map()) :: :ok
   def recache_user(id) when is_integer(id) do
     Teiserver.cache_delete(:account_user_cache, id)
     Teiserver.cache_delete(:account_user_cache_bang, id)
@@ -295,7 +295,7 @@ defmodule Teiserver.Account.UserCacheLib do
     user
   end
 
-  @spec update_cache_user(T.userid(), map()) :: CacheUser.t() | map()
+  @spec update_cache_user(User.id(), map()) :: CacheUser.t() | map()
   def update_cache_user(userid, data) do
     user = get_user_by_id(userid)
     new_user = Map.merge(user, data)
@@ -304,7 +304,7 @@ defmodule Teiserver.Account.UserCacheLib do
     new_user
   end
 
-  @spec decache_user(T.userid()) :: :ok | :no_user
+  @spec decache_user(User.id()) :: :ok | :no_user
   def decache_user(userid) do
     user = get_user_by_id(userid)
 

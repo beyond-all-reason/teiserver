@@ -1,7 +1,7 @@
 defmodule Teiserver.Matchmaking do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.QueueRegistry
@@ -52,22 +52,22 @@ defmodule Teiserver.Matchmaking do
   @doc """
   Request the player to join the specified queue.
   """
-  @spec join_queue(queue_id(), version :: String.t(), T.userid(), Party.id() | nil) ::
+  @spec join_queue(queue_id(), version :: String.t(), User.id(), Party.id() | nil) ::
           join_result()
   def join_queue(queue_id, version, member, party_id \\ nil) do
     QueueServer.join_queue(queue_id, version, member, party_id)
   end
 
-  @spec party_join_queue(queue_id(), version :: String.t(), Party.id(), [%{id: T.userid()}]) ::
+  @spec party_join_queue(queue_id(), version :: String.t(), Party.id(), [%{id: User.id()}]) ::
           {:ok, queue_pid :: pid()} | {:error, reason :: term()}
   defdelegate party_join_queue(queue_id, version, party_id, players), to: Matchmaking.QueueServer
 
-  @spec leave_queue(queue_id(), T.userid()) :: leave_result()
+  @spec leave_queue(queue_id(), User.id()) :: leave_result()
   def leave_queue(queue_id, user_id) do
     QueueServer.leave_queue(queue_id, user_id)
   end
 
-  @spec cancel(pid(), T.userid()) :: :ok
+  @spec cancel(pid(), User.id()) :: :ok
   defdelegate cancel(room_pid, user_id), to: Matchmaking.PairingRoom
 
   @doc """

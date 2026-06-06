@@ -3,9 +3,9 @@ defmodule Teiserver.Communication.DiscordChannelLib do
 
   alias Nostrum.Api.User, as: NostrumUser
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Communication.DiscordChannel
   alias Teiserver.Communication.DiscordChannelQueries
-  alias Teiserver.Data.Types, as: T
   use TeiserverWeb, :library_newform
 
   @spec special_channels() :: [String.t()]
@@ -256,7 +256,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
-  @spec send_discord_dm(T.userid(), String.t()) :: map | nil | {:error, any()}
+  @spec send_discord_dm(User.id(), String.t()) :: map | nil | {:error, any()}
   def send_discord_dm(userid, message) do
     if use_discord?() do
       user = Account.get_user_by_id(userid)

@@ -3,7 +3,7 @@ defmodule Teiserver.Account.PartyServer do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.PartyLib
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
   use GenServer
   require Logger
 
@@ -207,7 +207,7 @@ defmodule Teiserver.Account.PartyServer do
     {:noreply, state}
   end
 
-  @spec add_member(T.userid(), map()) :: map()
+  @spec add_member(User.id(), map()) :: map()
   def add_member(userid, %{party: party} = _state) do
     new_invites = List.delete(party.pending_invites, userid)
     new_members = [userid | party.members] |> Enum.uniq()
@@ -232,7 +232,7 @@ defmodule Teiserver.Account.PartyServer do
     %{party | pending_invites: new_invites, members: new_members}
   end
 
-  @spec remove_member(T.userid(), map()) :: map()
+  @spec remove_member(User.id(), map()) :: map()
   def remove_member(userid, %{party: %{members: members} = party} = state) do
     if Enum.member?(members, userid) do
       do_remove_member(userid, state)

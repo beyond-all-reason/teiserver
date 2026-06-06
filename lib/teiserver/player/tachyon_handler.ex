@@ -4,6 +4,7 @@ defmodule Teiserver.Player.TachyonHandler do
   """
 
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
@@ -1141,7 +1142,7 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  @spec get_user_friends(T.userid()) ::
+  @spec get_user_friends(User.id()) ::
           {friends :: [term()], incoming :: [term()], outgoing :: [term()]}
   def get_user_friends(user_id) do
     epoch = ~N[1970-01-01 00:00:00]

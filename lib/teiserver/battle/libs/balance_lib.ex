@@ -4,9 +4,9 @@ defmodule Teiserver.Battle.BalanceLib do
   """
 
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Config
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Game.MatchRatingLib
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
@@ -589,7 +589,7 @@ defmodule Teiserver.Battle.BalanceLib do
     }
   end
 
-  @spec get_user_rating_value_uncertainty_pair(T.userid(), String.t() | non_neg_integer()) ::
+  @spec get_user_rating_value_uncertainty_pair(User.id(), String.t() | non_neg_integer()) ::
           {BT.rating_value(), number()}
   def get_user_rating_value_uncertainty_pair(userid, rating_type_id)
       when is_integer(rating_type_id) do
@@ -609,7 +609,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   Used to get the rating value of the user for public/reporting purposes
   """
-  @spec get_user_rating_value(T.userid(), String.t() | non_neg_integer()) :: BT.rating_value()
+  @spec get_user_rating_value(User.id(), String.t() | non_neg_integer()) :: BT.rating_value()
   def get_user_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
     Account.get_rating(userid, rating_type_id) |> convert_rating()
   end
@@ -621,7 +621,7 @@ defmodule Teiserver.Battle.BalanceLib do
     get_user_rating_value(userid, rating_type_id)
   end
 
-  @spec get_user_balance_rating_value(T.userid(), String.t() | non_neg_integer()) ::
+  @spec get_user_balance_rating_value(User.id(), String.t() | non_neg_integer()) ::
           BT.rating_value()
   defp get_user_balance_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
     get_user_rating_value(userid, rating_type_id)
@@ -761,7 +761,7 @@ defmodule Teiserver.Battle.BalanceLib do
     max(skill - 3 * uncertainty, 0)
   end
 
-  @spec balance_group([T.userid()], String.t() | non_neg_integer()) :: number()
+  @spec balance_group([User.id()], String.t() | non_neg_integer()) :: number()
   def balance_group(userids, rating_type) do
     userids
     |> Enum.map(fn userid ->

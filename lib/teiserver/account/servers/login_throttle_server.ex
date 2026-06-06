@@ -7,13 +7,13 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.User
   alias Teiserver.Config
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
   use GenServer
   require Logger
 
-  @typep member :: %{pid: pid(), mon_ref: reference(), user_id: T.userid()}
+  @typep member :: %{pid: pid(), mon_ref: reference(), user_id: User.id()}
   @typep state :: %{
            tick_timer_ref: :timer.tref() | nil,
            total_limit: non_neg_integer(),
@@ -57,7 +57,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   @doc """
   This is the function call used as part of login attempts.
   """
-  @spec attempt_login(pid(), T.userid()) :: boolean()
+  @spec attempt_login(pid(), User.id()) :: boolean()
   def attempt_login(pid, userid) do
     GenServer.call(__MODULE__, {:attempt_login, pid, userid})
   end
@@ -181,7 +181,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
 
   # If a user isn't allowed to login right away they need to be queued up
   # this function takes care of all the work around that
-  @spec add_user_to_queue(state(), pid(), T.userid()) :: state()
+  @spec add_user_to_queue(state(), pid(), User.id()) :: state()
   defp add_user_to_queue(state, pid, user_id) do
     member = %{pid: pid, mon_ref: Process.monitor(pid), user_id: user_id}
 
@@ -226,7 +226,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   # Either for operational reasons: bots like spads should never be kept out
   # or for marketing reason: vips, server operators, mods and whatnot
   # there aren't many of these users, so allowing them doesn't have a big impact
-  @spec categorise_user(T.userid()) :: atom
+  @spec categorise_user(User.id()) :: atom
   defp categorise_user(userid) do
     if Auth.has_any_role?(userid, ["Bot", "Contributor", "VIP", "BAR+"]) do
       :instant

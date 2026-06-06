@@ -8,6 +8,7 @@ defmodule Teiserver.TachyonBattle do
   suggest, is meant to be used with tachyon and autohosts.
   """
 
+  alias Teiserver.Account.User
   alias Teiserver.Autohost
   alias Teiserver.Battle
   alias Teiserver.Bot
@@ -68,7 +69,7 @@ defmodule Teiserver.TachyonBattle do
 
   @spec add_player(
           T.id(),
-          Teiserver.Data.Types.userid(),
+          User.id(),
           name :: String.t(),
           password :: String.t()
         ) :: {:ok, connection_info()} | {:error, term()}

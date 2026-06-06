@@ -2,9 +2,11 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
   @moduledoc false
 
   alias Phoenix.PubSub
+  alias Teiserver.Account.User
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.UserProperty
   alias Teiserver.Telemetry.UserPropertyQueries
+
   use TeiserverWeb, :library
 
   @broadcast_property_types ~w(hardware:cpuinfo hardware:macAddrHash hardware:sysInfoHash)
@@ -16,7 +18,7 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
   @spec colours :: atom
   def colours, do: :default
 
-  @spec log_user_property(T.userid(), String.t(), String.t()) ::
+  @spec log_user_property(User.id(), String.t(), String.t()) ::
           {:error, Ecto.Changeset} | {:ok, UserProperty}
   def log_user_property(userid, property_type_name, value) do
     property_type_id = Telemetry.get_or_add_property_type(property_type_name)
@@ -83,7 +85,7 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_user_property!(T.userid(), String.t() | non_neg_integer()) :: UserProperty.t()
+  @spec get_user_property!(User.id(), String.t() | non_neg_integer()) :: UserProperty.t()
   def get_user_property!(userid, property_type_id) when is_integer(property_type_id) do
     [user_id: userid, property_type_id: property_type_id]
     |> UserPropertyQueries.query_user_properties()
@@ -95,7 +97,7 @@ defmodule Teiserver.Telemetry.UserPropertyLib do
     get_user_property!(userid, property_type_id)
   end
 
-  @spec get_user_property(T.userid(), String.t() | non_neg_integer()) :: UserProperty.t() | nil
+  @spec get_user_property(User.id(), String.t() | non_neg_integer()) :: UserProperty.t() | nil
   def get_user_property(userid, property_type_id) when is_integer(property_type_id) do
     [user_id: userid, property_type_id: property_type_id]
     |> UserPropertyQueries.query_user_properties()

@@ -2,11 +2,12 @@ defmodule Teiserver.Lobby.CommandLib do
   @moduledoc false
 
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.ChatLib
 
-  @spec handle_command(T.lobby_server_state(), T.userid(), String.t()) :: T.lobby_server_state()
+  @spec handle_command(T.lobby_server_state(), User.id(), String.t()) :: T.lobby_server_state()
   def handle_command(state, userid, message) do
     [name | args] = String.split(message, " ")
     name = String.downcase(name)

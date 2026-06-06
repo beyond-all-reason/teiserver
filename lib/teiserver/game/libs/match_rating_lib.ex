@@ -7,11 +7,11 @@ defmodule Teiserver.Game.MatchRatingLib do
   alias Ecto.Adapters.SQL
   alias Ecto.Multi
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Config
   alias Teiserver.Coordinator
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Game
   alias Teiserver.Game.RatingLog
   alias Teiserver.Repo
@@ -409,7 +409,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     {new_skill, u}
   end
 
-  @spec do_update_rating(T.userid(), map(), map(), {number(), number()}, boolean(), any()) :: any
+  @spec do_update_rating(User.id(), map(), map(), {number(), number()}, boolean(), any()) :: any
   defp do_update_rating(user_id, match, user_rating, rating_update, win?, opts) do
     rerate? = Keyword.get(opts, :rerate?, false)
     # It's possible they don't yet have a rating
@@ -505,7 +505,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     :ok
   end
 
-  @spec get_player_rating(T.userid()) :: map
+  @spec get_player_rating(User.id()) :: map
   def get_player_rating(user_id) do
     stats = Account.get_user_stat_data(user_id)
 
