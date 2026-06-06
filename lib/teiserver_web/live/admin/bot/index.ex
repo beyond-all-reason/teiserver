@@ -34,9 +34,17 @@ defmodule TeiserverWeb.Admin.BotLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    socket
-    |> assign(:page_title, "Edit bot")
-    |> assign(:bot, Bot.get_by_id(id))
+    case Bot.get_by_id(id) do
+      nil ->
+        socket
+        |> put_flash(:error, "Bot not found")
+        |> push_navigate(to: ~p"/teiserver/admin/bot")
+
+      bot ->
+        socket
+        |> assign(:page_title, "Edit bot")
+        |> assign(:bot, bot)
+    end
   end
 
   defp apply_action(socket, :index, _params) do

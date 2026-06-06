@@ -22,16 +22,21 @@ defmodule TeiserverWeb.Admin.BotLive.Show do
 
   @impl LiveView
   def handle_params(%{"id" => id}, _url, socket) do
-    bot = Bot.get_by_id(id)
+    case Bot.get_by_id(id) do
+      nil ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Bot not found")
+         |> push_navigate(to: ~p"/teiserver/admin/bot")}
 
-    socket =
-      socket
-      |> assign(:page_title, page_title(socket.assigns.live_action, bot))
-      |> assign(:bot, bot)
-      |> assign(:credentials, CredentialQueries.for_bot(bot))
-      |> assign(:applications, ApplicationQueries.list_applications())
-
-    {:noreply, socket}
+      bot ->
+        {:noreply,
+         socket
+         |> assign(:page_title, page_title(socket.assigns.live_action, bot))
+         |> assign(:bot, bot)
+         |> assign(:credentials, CredentialQueries.for_bot(bot))
+         |> assign(:applications, ApplicationQueries.list_applications())}
+    end
   end
 
   @impl LiveView
@@ -86,19 +91,28 @@ defmodule TeiserverWeb.Admin.BotLive.Show do
 
   @impl LiveView
   def handle_event("delete_credential", _params, socket) do
-    case OAuth.delete_credential(socket.assigns.credential_to_delete) do
-      :ok ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Credential deleted")
-         |> assign(:credential_to_delete, nil)
-         |> assign(:credentials, CredentialQueries.for_bot(socket.assigns.bot))}
+    cred = socket.assigns.credential_to_delete
 
-      {:error, err} ->
-        {:noreply,
-         socket
-         |> put_flash(:danger, inspect(err))
-         |> assign(:credential_to_delete, nil)}
+    if cred.bot_id != socket.assigns.bot.id do
+      {:noreply,
+       socket
+       |> put_flash(:danger, "Credential doesn't match bot")
+       |> assign(:credential_to_delete, nil)}
+    else
+      case OAuth.delete_credential(cred) do
+        :ok ->
+          {:noreply,
+           socket
+           |> put_flash(:info, "Credential deleted")
+           |> assign(:credential_to_delete, nil)
+           |> assign(:credentials, CredentialQueries.for_bot(socket.assigns.bot))}
+
+        {:error, err} ->
+          {:noreply,
+           socket
+           |> put_flash(:danger, inspect(err))
+           |> assign(:credential_to_delete, nil)}
+      end
     end
   end
 
