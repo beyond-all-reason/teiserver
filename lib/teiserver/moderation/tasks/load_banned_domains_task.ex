@@ -17,4 +17,11 @@ defmodule Teiserver.Moderation.LoadBannedDomainsTask do
       banned_domains
     )
   end
+
+  def maybe_recache({:ok, struct}) do
+    perform()
+    {:ok, struct}
+  end
+
+  def maybe_recache(result), do: result
 end

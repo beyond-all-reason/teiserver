@@ -20,4 +20,11 @@ defmodule Teiserver.Moderation.LoadBannedIPsTask do
       blocked_ip_ranges
     )
   end
+
+  def maybe_recache({:ok, struct}) do
+    perform()
+    {:ok, struct}
+  end
+
+  def maybe_recache(result), do: result
 end

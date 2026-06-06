@@ -20,4 +20,11 @@ defmodule Teiserver.Moderation.LoadBannedPhrasesTask do
       banned_phrases
     )
   end
+
+  def maybe_recache({:ok, struct}) do
+    perform()
+    {:ok, struct}
+  end
+
+  def maybe_recache(result), do: result
 end

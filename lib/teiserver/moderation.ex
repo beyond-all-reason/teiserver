@@ -925,14 +925,7 @@ defmodule Teiserver.Moderation do
     %BannedDomain{}
     |> BannedDomain.changeset(attrs)
     |> Repo.insert()
-    |> then(fn
-      {:ok, _struct} = result ->
-        LoadBannedDomainsTask.perform()
-        result
-
-      result ->
-        result
-    end)
+    |> LoadBannedDomainsTask.maybe_recache()
   end
 
   @doc """
@@ -951,14 +944,7 @@ defmodule Teiserver.Moderation do
     banned_domain
     |> BannedDomain.changeset(attrs)
     |> Repo.update()
-    |> then(fn
-      {:ok, _struct} = result ->
-        LoadBannedDomainsTask.perform()
-        result
-
-      result ->
-        result
-    end)
+    |> LoadBannedDomainsTask.maybe_recache()
   end
 
   @doc """
@@ -975,14 +961,7 @@ defmodule Teiserver.Moderation do
   """
   def delete_banned_domain(%BannedDomain{} = banned_domain) do
     Repo.delete(banned_domain)
-    |> then(fn
-      {:ok, _struct} = result ->
-        LoadBannedDomainsTask.perform()
-        result
-
-      result ->
-        result
-    end)
+    |> LoadBannedDomainsTask.maybe_recache()
   end
 
   @doc """
@@ -1065,14 +1044,7 @@ defmodule Teiserver.Moderation do
     %BannedIP{}
     |> BannedIP.changeset(attrs)
     |> Repo.insert()
-    |> then(fn
-      {:ok, _struct} = result ->
-        LoadBannedIPsTask.perform()
-        result
-
-      result ->
-        result
-    end)
+    |> LoadBannedIPsTask.maybe_recache()
   end
 
   @doc """
@@ -1091,14 +1063,7 @@ defmodule Teiserver.Moderation do
     banned_ip
     |> BannedIP.changeset(attrs)
     |> Repo.update()
-    |> then(fn
-      {:ok, _struct} = result ->
-        LoadBannedIPsTask.perform()
-        result
-
-      result ->
-        result
-    end)
+    |> LoadBannedIPsTask.maybe_recache()
   end
 
   @doc """
@@ -1115,14 +1080,7 @@ defmodule Teiserver.Moderation do
   """
   def delete_banned_ip(%BannedIP{} = banned_ip) do
     Repo.delete(banned_ip)
-    |> then(fn
-      {:ok, _struct} = result ->
-        LoadBannedIPsTask.perform()
-        result
-
-      result ->
-        result
-    end)
+    |> LoadBannedIPsTask.maybe_recache()
   end
 
   @doc """
@@ -1201,14 +1159,7 @@ defmodule Teiserver.Moderation do
     %BannedPhrase{}
     |> BannedPhrase.changeset(attrs)
     |> Repo.insert()
-    |> then(fn
-      {:ok, _struct} = result ->
-        LoadBannedPhrasesTask.perform()
-        result
-
-      result ->
-        result
-    end)
+    |> LoadBannedPhrasesTask.maybe_recache()
   end
 
   @doc """
@@ -1227,14 +1178,7 @@ defmodule Teiserver.Moderation do
     banned_phrase
     |> BannedPhrase.changeset(attrs)
     |> Repo.update()
-    |> then(fn
-      {:ok, _struct} = result ->
-        LoadBannedPhrasesTask.perform()
-        result
-
-      result ->
-        result
-    end)
+    |> LoadBannedPhrasesTask.maybe_recache()
   end
 
   @doc """
@@ -1251,14 +1195,7 @@ defmodule Teiserver.Moderation do
   """
   def delete_banned_phrase(%BannedPhrase{} = banned_phrase) do
     Repo.delete(banned_phrase)
-    |> then(fn
-      {:ok, _struct} = result ->
-        LoadBannedPhrasesTask.perform()
-        result
-
-      result ->
-        result
-    end)
+    |> LoadBannedPhrasesTask.maybe_recache()
   end
 
   @doc """
