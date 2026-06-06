@@ -1,0 +1,60 @@
+<.header>
+  Bots
+  <:actions>
+    <.link patch={~p"/teiserver/admin/bot/new"}>
+      <.button>New bot</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="bots" rows={@streams.bots}>
+  <:col :let={{_id, bot}} label="Name">{bot.name}</:col>
+  <:col :let={{_id, bot}} label="Credentials">{Map.get(@cred_counts, bot.id, 0)}</:col>
+  <:action :let={{_id, bot}}>
+    <.link navigate={~p"/teiserver/admin/bot/#{bot.id}"} class="btn btn-secondary btn-sm">
+      Show
+    </.link>
+  </:action>
+  <:action :let={{_id, bot}}>
+    <.link patch={~p"/teiserver/admin/bot/#{bot.id}/edit"} class="btn btn-secondary btn-sm">
+      Edit
+    </.link>
+  </:action>
+  <:action :let={{_id, bot}}>
+    <.link
+      phx-click={JS.push("confirm_delete", value: %{id: bot.id})}
+      class="btn btn-danger btn-sm"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@bot_to_delete}
+  id="confirm-delete-modal"
+  show
+  on_cancel={JS.push("cancel_delete")}
+  on_confirm={JS.push("delete")}
+>
+  <:title>Delete bot {@bot_to_delete.name}?</:title>
+  <:subtitle>This action cannot be undone.</:subtitle>
+  <:confirm>Yes, delete</:confirm>
+  <:cancel>Cancel</:cancel>
+</.modal>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="bot-form-modal"
+  show
+  on_cancel={JS.patch(~p"/teiserver/admin/bot")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@bot.id || :new}
+    title={@page_title}
+    action={@live_action}
+    bot={@bot}
+    patch={~p"/teiserver/admin/bot"}
+  />
+</.modal>
