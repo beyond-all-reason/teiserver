@@ -247,6 +247,12 @@ defmodule Teiserver.CacheUser do
       })
     end
 
+    if Moderation.vpn_ip?(ip) do
+      Account.update_user_stat(user.id, %{
+        "vpn_ip?" => true
+      })
+    end
+
     # Now add them to the cache
     user
     |> convert_user()
