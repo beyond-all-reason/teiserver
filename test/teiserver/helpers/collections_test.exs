@@ -1,4 +1,9 @@
+defmodule Teiserver.Helpers.CollectionsTest.TestStruct do
+  defstruct [:foo, :bar]
+end
+
 defmodule Teiserver.Helpers.CollectionsTest do
+  alias Teiserver.Helpers.CollectionsTest.TestStruct
   use ExUnit.Case
 
   import Teiserver.Helpers.Collections, only: [transform_map: 2]
@@ -93,6 +98,28 @@ defmodule Teiserver.Helpers.CollectionsTest do
       spec = %{foo: fn m, _k -> Map.put(m, :key, "nope") end}
       data = %{foo: nil}
       expected = %{key: "nope"}
+      assert transform_map(data, spec) == expected
+    end
+
+    test "can create structs" do
+      spec = %{"data" => {:data, TestStruct, %{"foo" => :foo, "bar" => :bar}}}
+      data = %{"data" => %{"foo" => "fooval", "bar" => "barval"}}
+
+      expected = %{
+        data: %TestStruct{foo: "fooval", bar: "barval"}
+      }
+
+      assert transform_map(data, spec) == expected
+    end
+
+    test "can create structs in lists" do
+      spec = %{"data" => {:data, TestStruct, %{"foo" => :foo, "bar" => :bar}}}
+      data = %{"data" => [%{"foo" => "fooval", "bar" => "barval"}]}
+
+      expected = %{
+        data: [%TestStruct{foo: "fooval", bar: "barval"}]
+      }
+
       assert transform_map(data, spec) == expected
     end
   end

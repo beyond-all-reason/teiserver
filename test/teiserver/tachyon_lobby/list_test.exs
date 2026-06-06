@@ -1,5 +1,6 @@
 defmodule Teiserver.TachyonLobby.ListTest do
   alias Teiserver.TachyonLobby, as: Lobby
+  alias Teiserver.TachyonLobby.Types, as: LT
   use Teiserver.DataCase
   import Teiserver.Support.Polling, only: [poll_until: 2]
 
@@ -61,7 +62,10 @@ defmodule Teiserver.TachyonLobby.ListTest do
     {sink_pid, id, _pid} = mk_lobby()
 
     assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
-    {:ok, _lobby_pid, _details} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+
+    {:ok, _lobby_pid, _details} =
+      Lobby.join(id, %LT.PlayerJoinData{id: "user2", name: "name-user2"}, sink_pid)
+
     {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
     Lobby.List.broadcast_updates()
     assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
@@ -84,9 +88,15 @@ defmodule Teiserver.TachyonLobby.ListTest do
     {sink_pid, id, _pid} = mk_lobby([3, 3])
 
     assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
-    {:ok, _lobby_pid1, _details1} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+
+    {:ok, _lobby_pid1, _details1} =
+      Lobby.join(id, %LT.PlayerJoinData{id: "user2", name: "name-user2"}, sink_pid)
+
     {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
-    {:ok, _lobby_pid2, _details2} = Lobby.join(id, %{id: "user3", name: "name-user3"}, sink_pid)
+
+    {:ok, _lobby_pid2, _details2} =
+      Lobby.join(id, %LT.PlayerJoinData{id: "user3", name: "name-user3"}, sink_pid)
+
     {:ok, _details} = Lobby.join_ally_team(id, "user3", 1)
     Lobby.List.broadcast_updates()
     assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 3}}}
@@ -97,9 +107,14 @@ defmodule Teiserver.TachyonLobby.ListTest do
     {_sink_pid2, id2, _pid2} = mk_lobby()
     assert {_initial_counter, _lobbies} = Lobby.subscribe_updates()
 
-    {:ok, _lobby_pid1, _details1} = Lobby.join(id1, %{id: "user2", name: "name-user2"}, sink_pid)
+    {:ok, _lobby_pid1, _details1} =
+      Lobby.join(id1, %LT.PlayerJoinData{id: "user2", name: "name-user2"}, sink_pid)
+
     {:ok, _details} = Lobby.join_ally_team(id1, "user2", 1)
-    {:ok, _lobby_pid2, _details2} = Lobby.join(id2, %{id: "user3", name: "name-user3"}, sink_pid)
+
+    {:ok, _lobby_pid2, _details2} =
+      Lobby.join(id2, %LT.PlayerJoinData{id: "user3", name: "name-user3"}, sink_pid)
+
     {:ok, _details} = Lobby.join_ally_team(id2, "user3", 1)
 
     Lobby.List.broadcast_updates()
@@ -120,7 +135,10 @@ defmodule Teiserver.TachyonLobby.ListTest do
     {sink_pid, id, _pid} = mk_lobby()
 
     assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
-    {:ok, _lobby_pid, _details} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+
+    {:ok, _lobby_pid, _details} =
+      Lobby.join(id, %LT.PlayerJoinData{id: "user2", name: "name-user2"}, sink_pid)
+
     :ok = Lobby.join_queue(id, "user2")
     Lobby.List.broadcast_updates()
     assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
@@ -131,7 +149,10 @@ defmodule Teiserver.TachyonLobby.ListTest do
 
     assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
     {:ok, _bot_id1} = Lobby.add_bot(id, "1234", 1, "bot")
-    {:ok, _lobby_pid, _details} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+
+    {:ok, _lobby_pid, _details} =
+      Lobby.join(id, %LT.PlayerJoinData{id: "user2", name: "name-user2"}, sink_pid)
+
     {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
     Lobby.List.broadcast_updates()
 
@@ -142,7 +163,10 @@ defmodule Teiserver.TachyonLobby.ListTest do
     {sink_pid, id, _pid} = mk_lobby()
 
     assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
-    {:ok, _lobby_pid, _details} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+
+    {:ok, _lobby_pid, _details} =
+      Lobby.join(id, %LT.PlayerJoinData{id: "user2", name: "name-user2"}, sink_pid)
+
     {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
     Lobby.List.broadcast_updates()
     assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
@@ -168,7 +192,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
       Enum.map([2, 3, 4, 5], fn i ->
         {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
         player_id = to_string(i)
-        player = %{id: player_id, name: "name-#{player_id}"}
+        player = %LT.PlayerJoinData{id: player_id, name: "name-#{player_id}"}
         {:ok, _lobby_pid, _details} = Lobby.join(id, player, sink_pid)
         {to_string(i), Map.put(player, :pid, sink_pid)}
       end)
@@ -275,7 +299,10 @@ defmodule Teiserver.TachyonLobby.ListTest do
     test "ally team config change triggers player count change" do
       {sink_pid, id, _pid} = mk_lobby([1, 1])
       assert {_initial_counter, %{}} = Lobby.subscribe_updates()
-      {:ok, _lobby_pid, _details} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
+
+      {:ok, _lobby_pid, _details} =
+        Lobby.join(id, %LT.PlayerJoinData{id: "user2", name: "name-user2"}, sink_pid)
+
       {:ok, _join_details} = Lobby.join_ally_team(id, "user2", 1)
       Lobby.List.broadcast_updates()
       assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
@@ -288,7 +315,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
   end
 
   defp overview_fixture do
-    %{
+    %LT.ListOverview{
       name: "lobby name",
       player_count: 1,
       max_player_count: 2,
@@ -300,7 +327,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
   end
 
   defp mk_start_params(teams) do
-    %{
+    %LT.StartParams{
       creator_data: %{id: "1234", name: "name-1234"},
       creator_pid: self(),
       name: "test create lobby",
@@ -311,7 +338,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
         Enum.map(teams, fn max_team ->
           x = for _i <- 1..max_team, do: %{max_players: 1}
 
-          %{
+          %LT.AllyTeamConfig{
             max_teams: max_team,
             start_box: %{top: 0, left: 0, bottom: 1, right: 0.2},
             teams: x
