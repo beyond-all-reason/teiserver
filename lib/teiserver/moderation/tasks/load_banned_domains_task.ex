@@ -17,4 +17,11 @@ defmodule Teiserver.Moderation.LoadBannedDomainsTask do
       banned_domains
     )
   end
+
+  def cache_if_ok({:ok, struct}) do
+    perform()
+    {:ok, struct}
+  end
+
+  def cache_if_ok(result), do: result
 end
