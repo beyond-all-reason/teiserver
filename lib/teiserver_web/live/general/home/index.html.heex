@@ -19,12 +19,12 @@
   </.menu_card>
 
   <.menu_card
-    :if={false and allow?(@current_user, "Moderator")}
-    icon="question"
+    :if={allow?(@current_user, "Overwatch") and not allow?(@current_user, "Contributor")}
+    icon="fa-eye"
     icon_class="fa-solid"
-    url={~p"/teiserver/admin"}
+    url={~p"/moderation"}
   >
-    Appeals
+    Overwatch
   </.menu_card>
 
   <.menu_card

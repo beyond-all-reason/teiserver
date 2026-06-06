@@ -24,7 +24,7 @@
   )}
 
   <.menu_card
-    :if={allow?(@socket, "Moderator")}
+    :if={allow?(@conn, "Moderator")}
     icon="text-slash"
     url={~p"/moderation/banned_phrases"}
   >
@@ -32,7 +32,7 @@
   </.menu_card>
 
   <.menu_card
-    :if={allow?(@socket, "Moderator")}
+    :if={allow?(@conn, "Moderator")}
     icon="globe"
     url={~p"/moderation/banned_domains"}
   >
@@ -40,7 +40,7 @@
   </.menu_card>
 
   <.menu_card
-    :if={allow?(@socket, "Moderator")}
+    :if={allow?(@conn, "Moderator")}
     icon="location-dot"
     url={~p"/moderation/banned_ips"}
   >
