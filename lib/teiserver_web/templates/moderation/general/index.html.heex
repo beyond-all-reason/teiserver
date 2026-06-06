@@ -23,15 +23,27 @@
     link: Routes.moderation_ban_path(@conn, :index)
   )}
 
-  <.menu_card icon="text-slash" url={~p"/moderation/banned_phrases"}>
+  <.menu_card
+    :if={allow?(@socket, "Moderator")}
+    icon="text-slash"
+    url={~p"/moderation/banned_phrases"}
+  >
     Banned Phrases
   </.menu_card>
 
-  <.menu_card icon="globe" url={~p"/moderation/banned_domains"}>
+  <.menu_card
+    :if={allow?(@socket, "Moderator")}
+    icon="globe"
+    url={~p"/moderation/banned_domains"}
+  >
     Banned domains
   </.menu_card>
 
-  <.menu_card icon="location-dot" url={~p"/moderation/banned_ips"}>
+  <.menu_card
+    :if={allow?(@socket, "Moderator")}
+    icon="location-dot"
+    url={~p"/moderation/banned_ips"}
+  >
     Banned IPs
   </.menu_card>
 </div>
