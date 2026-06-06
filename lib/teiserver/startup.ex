@@ -9,7 +9,7 @@ defmodule Teiserver.Startup do
   alias Teiserver.Moderation.LoadBannedDomainsTask
   alias Teiserver.Moderation.LoadBannedIPsTask
   alias Teiserver.Moderation.LoadBannedPhrasesTask
-  alias Teiserver.Moderation.Tasks.LoadVpnsTask
+  alias Teiserver.Moderation.Tasks.LoadVPNsTask
   alias Teiserver.Telemetry
 
   use TeiserverWeb, :startup
@@ -43,7 +43,7 @@ defmodule Teiserver.Startup do
     if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
       spawn(fn ->
         :timer.sleep(200)
-        LoadVpnsTask.perform()
+        LoadVPNsTask.perform()
         LoadBannedIPsTask.perform()
         LoadBannedPhrasesTask.perform()
         LoadBannedDomainsTask.perform()

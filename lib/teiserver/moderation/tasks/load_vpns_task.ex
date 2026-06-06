@@ -1,4 +1,4 @@
-defmodule Teiserver.Moderation.Tasks.LoadVpnsTask do
+defmodule Teiserver.Moderation.Tasks.LoadVPNsTask do
   @moduledoc """
   Loads the list of IPs known to be VPNs into a cache.
   """
