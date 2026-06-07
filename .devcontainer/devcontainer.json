@@ -22,6 +22,10 @@
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 
+	"overrideCommand": true,
+	"postStartCommand": "./.devcontainer/startup.sh",
+	"postCreateCommand": "./.devcontainer/setup.sh",
+
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [4000, 8000, 8001, 4001, 8025],
 
