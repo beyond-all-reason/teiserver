@@ -107,20 +107,20 @@
     </div>
 
     <div :if={not Enum.empty?(@messages)}>
+      <div class="table-responsive">
       <table
         :if={@filters["message-format"] == "Table"}
         class="table table-sm table-hover"
-        style="table-layout: fixed; width: 100%;"
         id="rich-text-block"
       >
         <thead>
           <tr>
-            <th :if={@filters["mode"] != "Direct"} style="width: 15%;">Location</th>
-            <th :if={@filters["mode"] == "Direct"} style="width: 15%;">Sender</th>
-            <th :if={@filters["mode"] == "Direct"} style="width: 15%;">Receiver</th>
-            <th :if={@filters["mode"] != "Direct"} style="width: 15%;">Sender</th>
+            <th :if={@filters["mode"] != "Direct"}>Location</th>
+            <th :if={@filters["mode"] == "Direct"}>Sender</th>
+            <th :if={@filters["mode"] == "Direct"}>Receiver</th>
+            <th :if={@filters["mode"] != "Direct"}>Sender</th>
             <th>Message</th>
-            <th style="width: 15%;">When</th>
+            <th>When</th>
           </tr>
         </thead>
         <tbody>
@@ -160,6 +160,7 @@
           <% end %>
         </tbody>
       </table>
+      </div>
 
       <div :if={@filters["message-format"] == "Raw"} class="row" id="raw-text-block">
         <div class="col-md-12">

@@ -74,10 +74,7 @@ defmodule Teiserver.Chat.LobbyMessageLib do
   end
 
   def _search(query, :term, {ref, opts}) do
-    case TermSearch.content_filter(ref, opts) do
-      nil -> query
-      dynamic -> where(query, ^dynamic)
-    end
+    TermSearch.content_filter(query, ref, opts)
   end
 
   def _search(query, :inserted_after, timestamp) do

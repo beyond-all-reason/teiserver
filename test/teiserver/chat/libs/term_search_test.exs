@@ -1,7 +1,7 @@
 defmodule Teiserver.Chat.TermSearchTest do
   @moduledoc """
   Exercises the `:term` search options (case sensitive / whole word) through
-  the lobby message query path. The same `TermSearch.content_filter/2` logic
+  the lobby message query path. The same `TermSearch.content_filter/3` logic
   backs the room, party and direct message libs.
   """
 
