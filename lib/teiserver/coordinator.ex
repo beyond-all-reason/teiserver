@@ -21,7 +21,7 @@ defmodule Teiserver.Coordinator do
     end
   end
 
-  @spec get_coordinator_userid() :: T.userid()
+  @spec get_coordinator_userid() :: User.id()
   def get_coordinator_userid do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_coordinator_userid")
   end
@@ -257,14 +257,14 @@ defmodule Teiserver.Coordinator do
   end
 
   # Commands for the coordinator account to perform
-  @spec send_to_host(T.userid(), String.t()) :: :ok
+  @spec send_to_host(User.id(), String.t()) :: :ok
   def send_to_host(nil, _msg), do: :ok
 
   def send_to_host(lobby_id, msg) do
     send_to_host(get_coordinator_userid(), lobby_id, msg)
   end
 
-  @spec send_to_host(T.userid(), T.userid(), String.t()) :: :ok
+  @spec send_to_host(User.id(), User.id(), String.t()) :: :ok
   def send_to_host(nil, _lobby_id, _msg), do: :ok
 
   def send_to_host(from_id, lobby_id, msg) do
@@ -277,7 +277,7 @@ defmodule Teiserver.Coordinator do
     :ok
   end
 
-  @spec send_to_user(T.userid(), String.t()) :: :ok
+  @spec send_to_user(User.id(), String.t()) :: :ok
   def send_to_user(userid, msg) do
     CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
   end

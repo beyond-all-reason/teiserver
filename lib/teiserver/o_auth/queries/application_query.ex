@@ -1,6 +1,6 @@
 defmodule Teiserver.OAuth.ApplicationQueries do
   @moduledoc false
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.CodeQueries
   alias Teiserver.OAuth.CredentialQueries
@@ -95,7 +95,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   @doc """
   Returns all OAuth applications that the user has authorized (has tokens for, including expired ones).
   """
-  @spec list_authorized_applications(T.userid()) :: [Application.t()]
+  @spec list_authorized_applications(User.id()) :: [Application.t()]
   def list_authorized_applications(user_id) do
     base_query()
     |> join(:left, [app], token in Teiserver.OAuth.Token,
@@ -111,7 +111,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   Returns the count of active tokens for each application that the user has authorized.
   Counts only the user's tokens, not all tokens for the application.
   """
-  @spec get_application_token_counts(T.userid()) :: %{
+  @spec get_application_token_counts(User.id()) :: %{
           Application.id() => non_neg_integer()
         }
   def get_application_token_counts(user_id) do
@@ -129,7 +129,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   Deletes all tokens (access and refresh) for a specific application and user.
   Returns the count of deleted tokens.
   """
-  @spec delete_user_application_tokens(T.userid(), Application.id()) ::
+  @spec delete_user_application_tokens(User.id(), Application.id()) ::
           non_neg_integer()
   def delete_user_application_tokens(user_id, application_id) do
     {count, _deleted} =
@@ -146,7 +146,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   Deletes all authorization codes for a specific application and user.
   Returns the count of deleted codes.
   """
-  @spec delete_user_application_codes(T.userid(), Application.id()) ::
+  @spec delete_user_application_codes(User.id(), Application.id()) ::
           non_neg_integer()
   def delete_user_application_codes(user_id, application_id) do
     {count, _deleted} =

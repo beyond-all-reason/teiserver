@@ -4,7 +4,7 @@ defmodule Teiserver.Account.FriendRequestLib do
   alias Teiserver.Account
   alias Teiserver.Account.FriendRequest
   alias Teiserver.Account.RelationshipLib
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
 
   @spec colours :: atom
   def colours, do: :success
@@ -35,13 +35,13 @@ defmodule Teiserver.Account.FriendRequestLib do
     end
   end
 
-  @spec can_send_friend_request?(T.userid(), T.userid()) :: boolean
+  @spec can_send_friend_request?(User.id(), User.id()) :: boolean
   def can_send_friend_request?(from_id, to_id) do
     {result, _reason} = can_send_friend_request_with_reason?(from_id, to_id)
     result
   end
 
-  @spec can_send_friend_request_with_reason?(T.userid(), T.userid()) ::
+  @spec can_send_friend_request_with_reason?(User.id(), User.id()) ::
           {true, :ok} | {false, atom()}
   def can_send_friend_request_with_reason?(from_id, to_id) do
     cond do
@@ -80,7 +80,7 @@ defmodule Teiserver.Account.FriendRequestLib do
   end
 
   # Functions
-  @spec accept_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
+  @spec accept_friend_request(User.id(), User.id()) :: :ok | {:error, String.t()}
   def accept_friend_request(from_id, to_id) do
     case Account.get_friend_request(from_id, to_id) do
       nil ->
@@ -122,7 +122,7 @@ defmodule Teiserver.Account.FriendRequestLib do
     end
   end
 
-  @spec decline_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
+  @spec decline_friend_request(User.id(), User.id()) :: :ok | {:error, String.t()}
   def decline_friend_request(from_id, to_id) do
     case Account.get_friend_request(from_id, to_id) do
       nil ->
@@ -155,7 +155,7 @@ defmodule Teiserver.Account.FriendRequestLib do
   The same as declining for now but intended to be used where the person declining
   is the sender
   """
-  @spec rescind_friend_request(T.userid(), T.userid()) :: :ok | {:error, String.t()}
+  @spec rescind_friend_request(User.id(), User.id()) :: :ok | {:error, String.t()}
   def rescind_friend_request(from_id, to_id) do
     case Account.get_friend_request(from_id, to_id) do
       nil ->
@@ -187,7 +187,7 @@ defmodule Teiserver.Account.FriendRequestLib do
   @doc """
   Returns all friend requests for the given user
   """
-  @spec list_requests_for_user(T.userid()) :: {outgoing :: [map()], incoming :: [map()]}
+  @spec list_requests_for_user(User.id()) :: {outgoing :: [map()], incoming :: [map()]}
   def list_requests_for_user(userid) do
     Account.list_friend_requests(where: [to_or_from_is: userid])
     |> Enum.reduce({[], []}, fn req, {outgoing, incoming} ->
@@ -199,13 +199,13 @@ defmodule Teiserver.Account.FriendRequestLib do
     end)
   end
 
-  @spec list_incoming_friend_requests_of_userid(T.userid()) :: [T.userid()]
+  @spec list_incoming_friend_requests_of_userid(User.id()) :: [User.id()]
   def list_incoming_friend_requests_of_userid(userid) do
     {_outgoing, incoming} = list_requests_for_user(userid)
     Enum.map(incoming, fn incoming -> incoming.from_user_id end)
   end
 
-  @spec list_outgoing_friend_requests_of_userid(T.userid()) :: [T.userid()]
+  @spec list_outgoing_friend_requests_of_userid(User.id()) :: [User.id()]
   def list_outgoing_friend_requests_of_userid(userid) do
     {outgoing, _incoming} = list_requests_for_user(userid)
     Enum.map(outgoing, fn outgoing -> outgoing.to_user_id end)

@@ -30,13 +30,13 @@ defmodule Teiserver.Lobby do
   def colours, do: :primary2
 
   # ChatLib
-  @spec say(T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  @spec say(User.id(), String.t(), T.lobby_id()) :: :ok | {:error, any}
   defdelegate say(userid, msg, lobby_id), to: ChatLib
 
-  @spec sayex(T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  @spec sayex(User.id(), String.t(), T.lobby_id()) :: :ok | {:error, any}
   defdelegate sayex(userid, msg, lobby_id), to: ChatLib
 
-  @spec sayprivateex(T.userid(), T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  @spec sayprivateex(User.id(), User.id(), String.t(), T.lobby_id()) :: :ok | {:error, any}
   defdelegate sayprivateex(from_id, to_id, msg, lobby_id), to: ChatLib
 
   def new_bot(data) do
@@ -160,7 +160,7 @@ defmodule Teiserver.Lobby do
     :ok
   end
 
-  @spec force_add_user_to_lobby(T.userid(), T.lobby_id()) :: :ok | nil
+  @spec force_add_user_to_lobby(User.id(), T.lobby_id()) :: :ok | nil
   def force_add_user_to_lobby(userid, lobby_id) do
     client = Account.get_client_by_id(userid)
 
@@ -265,7 +265,7 @@ defmodule Teiserver.Lobby do
     end
   end
 
-  @spec remove_user_from_battle(T.userid(), T.lobby_id()) :: nil | :ok | {:error, any}
+  @spec remove_user_from_battle(User.id(), T.lobby_id()) :: nil | :ok | {:error, any}
   def remove_user_from_battle(_uid, nil), do: nil
 
   def remove_user_from_battle(userid, lobby_id) do
@@ -327,7 +327,7 @@ defmodule Teiserver.Lobby do
     end
   end
 
-  @spec kick_user_from_battle(T.userid(), T.lobby_id()) :: nil | :ok | {:error, any}
+  @spec kick_user_from_battle(User.id(), T.lobby_id()) :: nil | :ok | {:error, any}
   def kick_user_from_battle(userid, lobby_id) do
     user = Account.get_user_by_id(userid)
 
@@ -459,7 +459,7 @@ defmodule Teiserver.Lobby do
     end
   end
 
-  @spec rename_lobby(T.lobby_id(), String.t(), T.userid()) :: :ok
+  @spec rename_lobby(T.lobby_id(), String.t(), User.id()) :: :ok
   def rename_lobby(lobby_id, new_name, userid) do
     case Battle.lobby_exists?(lobby_id) do
       false ->
@@ -509,7 +509,7 @@ defmodule Teiserver.Lobby do
     update_lobby(%{lobby | silence: false}, nil, :unsilence)
   end
 
-  @spec can_join?(T.userid(), integer(), String.t() | nil, String.t() | nil) ::
+  @spec can_join?(User.id(), integer(), String.t() | nil, String.t() | nil) ::
           {:failure, String.t()} | {:waiting_on_host, String.t()}
   def can_join?(userid, lobby_id, password \\ nil, script_password \\ nil) do
     lobby_id = int_parse(lobby_id)
@@ -553,7 +553,7 @@ defmodule Teiserver.Lobby do
     end
   end
 
-  @spec server_allows_join?(T.userid(), integer(), String.t() | nil) ::
+  @spec server_allows_join?(User.id(), integer(), String.t() | nil) ::
           {:failure, String.t()} | true
   def server_allows_join?(userid, lobby_id, password \\ nil) do
     lobby = get_lobby(lobby_id)
@@ -614,7 +614,7 @@ defmodule Teiserver.Lobby do
     end
   end
 
-  @spec accept_join_request(T.userid(), T.lobby_id()) :: :ok
+  @spec accept_join_request(User.id(), T.lobby_id()) :: :ok
   def accept_join_request(userid, lobby_id) do
     client = Client.get_client_by_id(userid)
 
@@ -641,7 +641,7 @@ defmodule Teiserver.Lobby do
     :ok
   end
 
-  @spec deny_join_request(T.userid(), T.lobby_id(), String.t()) :: :ok
+  @spec deny_join_request(User.id(), T.lobby_id(), String.t()) :: :ok
   def deny_join_request(userid, lobby_id, reason) do
     PubSub.broadcast(
       Teiserver.PubSub,
@@ -665,7 +665,7 @@ defmodule Teiserver.Lobby do
     :ok
   end
 
-  @spec force_change_client(T.userid(), T.userid(), map()) :: :ok
+  @spec force_change_client(User.id(), User.id(), map()) :: :ok
   def force_change_client(_changer_id, nil, _new_values), do: nil
 
   def force_change_client(changer_id, client_id, new_values) do
@@ -700,7 +700,7 @@ defmodule Teiserver.Lobby do
     Account.replace_update_client(new_client, :client_updated_battlestatus)
   end
 
-  @spec allow?(T.userid(), atom, T.lobby_id()) :: boolean()
+  @spec allow?(User.id(), atom, T.lobby_id()) :: boolean()
   def allow?(nil, _field, _lobby_id), do: false
   def allow?(_userid, nil, _lobby_id), do: false
   def allow?(_userid, _field, nil), do: false
@@ -804,7 +804,7 @@ defmodule Teiserver.Lobby do
     end
   end
 
-  @spec allow_say?(T.userid(), T.lobby_id()) :: boolean()
+  @spec allow_say?(User.id(), T.lobby_id()) :: boolean()
   def allow_say?(userid, lobby_id) do
     lobby = get_lobby(lobby_id)
 

@@ -3,8 +3,8 @@ defmodule Teiserver.Matchmaking.Member do
   member of a queue. Holds of the information required to match members together.
   A member can be a party of players. Parties must not be broken.
   """
+  alias Teiserver.Account.User
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Game
 
   @enforce_keys [:id, :player_ids, :joined_at]
@@ -29,17 +29,17 @@ defmodule Teiserver.Matchmaking.Member do
   """
   @type t() :: %__MODULE__{
           id: binary(),
-          player_ids: [T.userid()],
+          player_ids: [User.id()],
           rating: rating(),
           # aggregate of player to avoid for this member
-          avoid: [T.userid()],
+          avoid: [User.id()],
           joined_at: DateTime.t()
         }
 
   @doc """
   generate a member from the provided ids and game type (for ratings)
   """
-  @spec new(T.userid() | [T.userid()], game_type :: String.t()) :: t()
+  @spec new(User.id() | [User.id()], game_type :: String.t()) :: t()
   def new(player_ids, game_type) when not is_list(player_ids), do: new([player_ids], game_type)
 
   def new(player_ids, game_type) do
@@ -54,7 +54,7 @@ defmodule Teiserver.Matchmaking.Member do
     }
   end
 
-  @spec get_member_rating([T.userid()], game_type :: String.t()) :: rating()
+  @spec get_member_rating([User.id()], game_type :: String.t()) :: rating()
   def get_member_rating(player_ids, game_type) do
     default = BalanceLib.default_rating()
     default = %{skill: default.rating_value, uncertainty: default.uncertainty}

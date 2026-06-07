@@ -83,8 +83,8 @@ defmodule Teiserver.Moderation do
   @doc """
 
   """
-  @spec list_outstanding_reports_against_user(T.userid()) :: List.t()
-  @spec list_outstanding_reports_against_user(T.userid(), List.t()) :: List.t()
+  @spec list_outstanding_reports_against_user(User.id()) :: List.t()
+  @spec list_outstanding_reports_against_user(User.id(), List.t()) :: List.t()
   def list_outstanding_reports_against_user(userid, args \\ []) do
     search = [
       target_id: userid,
@@ -299,7 +299,7 @@ defmodule Teiserver.Moderation do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_response!(non_neg_integer(), T.userid()) :: Response.t()
+  @spec get_response!(non_neg_integer(), User.id()) :: Response.t()
   def get_response!(report_id, user_id) do
     response_query(
       search: [
@@ -324,7 +324,7 @@ defmodule Teiserver.Moderation do
       nil
 
   """
-  @spec get_response(non_neg_integer(), T.userid()) :: Response.t() | nil
+  @spec get_response(non_neg_integer(), User.id()) :: Response.t() | nil
   def get_response(report_id, user_id) do
     response_query(
       search: [
@@ -835,7 +835,7 @@ defmodule Teiserver.Moderation do
   end
 
   # Others
-  @spec unbridge_user(nil | T.user() | T.userid(), String.t(), non_neg_integer(), String.t()) ::
+  @spec unbridge_user(nil | T.user() | User.id(), String.t(), non_neg_integer(), String.t()) ::
           any
   def unbridge_user(userid, message, flagged_word_count, location) when is_integer(userid) do
     unbridge_user(Account.get_user(userid), message, flagged_word_count, location)

@@ -6,6 +6,7 @@ defmodule Teiserver.Battle do
   alias ExULID.ULID
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Battle.Match
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Battle.MatchMembership
@@ -231,7 +232,7 @@ defmodule Teiserver.Battle do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_match_from_founder_id(T.userid()) ::
+  @spec create_match_from_founder_id(User.id()) ::
           {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
   def create_match_from_founder_id(founder_id) do
     %Match{}
@@ -756,7 +757,7 @@ defmodule Teiserver.Battle do
   @spec get_combined_lobby_state(T.lobby_id()) :: map() | nil
   defdelegate get_combined_lobby_state(id), to: LobbyLib
 
-  @spec get_lobby_founder_id(T.lobby_id()) :: T.userid() | nil
+  @spec get_lobby_founder_id(T.lobby_id()) :: User.id() | nil
   defdelegate get_lobby_founder_id(id), to: LobbyLib
 
   @spec get_lobby_match_uuid(T.lobby_id()) :: String.t() | nil
@@ -765,7 +766,7 @@ defmodule Teiserver.Battle do
   @spec get_lobby_match_id(T.lobby_id()) :: T.match_id() | nil
   defdelegate get_lobby_match_id(lobby_id), to: LobbyLib
 
-  @spec get_match_id_from_userid(T.userid()) :: T.match_id() | nil
+  @spec get_match_id_from_userid(User.id()) :: T.match_id() | nil
   defdelegate get_match_id_from_userid(userid), to: LobbyLib
 
   @spec get_lobby_server_uuid(T.lobby_id()) :: String.t() | nil
@@ -777,7 +778,7 @@ defmodule Teiserver.Battle do
   @spec get_lobby_by_server_uuid(String.t()) :: T.lobby() | nil
   defdelegate get_lobby_by_server_uuid(uuid), to: LobbyLib
 
-  @spec get_lobby_member_list(T.lobby_id()) :: [T.userid()] | nil
+  @spec get_lobby_member_list(T.lobby_id()) :: [User.id()] | nil
   defdelegate get_lobby_member_list(id), to: LobbyLib
 
   @spec list_lobby_players(T.lobby_id()) :: [T.client()] | nil
@@ -799,26 +800,26 @@ defmodule Teiserver.Battle do
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   defdelegate update_lobby(lobby, data, reason), to: LobbyLib
 
-  @spec rename_lobby(T.lobby_id(), String.t(), T.userid() | nil) :: :ok | nil
+  @spec rename_lobby(T.lobby_id(), String.t(), User.id() | nil) :: :ok | nil
   defdelegate rename_lobby(lobby_id, new_base_name, renamer_id), to: LobbyLib
 
   # Requests
-  @spec can_join?(T.userid(), T.lobby_id(), String.t() | nil) ::
+  @spec can_join?(User.id(), T.lobby_id(), String.t() | nil) ::
           {:failure, String.t()} | true
   defdelegate can_join?(userid, lobby_id, password \\ nil), to: Lobby
 
-  @spec server_allows_join?(T.userid(), T.lobby_id(), String.t() | nil) ::
+  @spec server_allows_join?(User.id(), T.lobby_id(), String.t() | nil) ::
           {:failure, String.t()} | true
   defdelegate server_allows_join?(userid, lobby_id, password \\ nil), to: Lobby
 
   # Chat
-  @spec say(T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  @spec say(User.id(), String.t(), T.lobby_id()) :: :ok | {:error, any}
   defdelegate say(userid, msg, lobby_id), to: ChatLib
 
-  @spec sayex(T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  @spec sayex(User.id(), String.t(), T.lobby_id()) :: :ok | {:error, any}
   defdelegate sayex(userid, msg, lobby_id), to: ChatLib
 
-  @spec sayprivateex(T.userid(), T.userid(), String.t(), T.lobby_id()) :: :ok | {:error, any}
+  @spec sayprivateex(User.id(), User.id(), String.t(), T.lobby_id()) :: :ok | {:error, any}
   defdelegate sayprivateex(from_id, to_id, msg, lobby_id), to: ChatLib
 
   # Bots
@@ -858,13 +859,13 @@ defmodule Teiserver.Battle do
   defdelegate remove_modoptions(lobby_id, keys), to: LobbyLib
 
   # Actions
-  @spec add_user_to_lobby(T.userid(), T.lobby_id(), String.t()) :: :ok
+  @spec add_user_to_lobby(User.id(), T.lobby_id(), String.t()) :: :ok
   defdelegate add_user_to_lobby(userid, lobby_id, script_password), to: LobbyLib
 
-  @spec remove_user_from_lobby(T.userid(), T.lobby_id()) :: :ok
+  @spec remove_user_from_lobby(User.id(), T.lobby_id()) :: :ok
   defdelegate remove_user_from_lobby(userid, lobby_id), to: LobbyLib
 
-  @spec force_add_user_to_lobby(T.userid(), T.lobby_id()) :: :ok | nil
+  @spec force_add_user_to_lobby(User.id(), T.lobby_id()) :: :ok | nil
   defdelegate force_add_user_to_lobby(userid, lobby_id), to: Lobby
 
   # Balance

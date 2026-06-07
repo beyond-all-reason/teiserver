@@ -8,6 +8,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.User
   alias Teiserver.Bridge.CommandLib
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.CacheUser
@@ -15,7 +16,6 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Teiserver.Client
   alias Teiserver.Communication
   alias Teiserver.Config
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Room
   use GenServer
   require Logger
@@ -27,7 +27,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     GenServer.start_link(__MODULE__, opts[:data], name: via_tuple())
   end
 
-  @spec get_bridge_userid() :: T.userid()
+  @spec get_bridge_userid() :: User.id()
   def get_bridge_userid do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_bridge_userid")
   end
@@ -48,7 +48,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     send(bridge_pid, message)
   end
 
-  @spec send_direct_message(T.userid(), String.t()) :: :ok | nil
+  @spec send_direct_message(User.id(), String.t()) :: :ok | nil
   def send_direct_message(userid, message) do
     user = Account.get_user_by_id(userid)
 

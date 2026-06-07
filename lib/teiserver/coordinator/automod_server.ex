@@ -8,7 +8,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Moderation
   use GenServer
   require Logger
@@ -16,7 +15,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @tick_interval 60_000
 
-  @spec check_user(T.userid()) :: String.t()
+  @spec check_user(User.id()) :: String.t()
   def check_user(userid) do
     check_wrapper(userid)
   end
@@ -135,7 +134,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   # Internal functions
-  @spec check_wrapper(T.userid()) :: String.t()
+  @spec check_wrapper(User.id()) :: String.t()
   defp check_wrapper(userid) do
     user = Account.get_user(userid)
 
@@ -160,7 +159,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
     end
   end
 
-  @spec do_check(T.userid() | User.t()) :: String.t()
+  @spec do_check(User.id() | User.t()) :: String.t()
   def do_check(userid) when is_integer(userid) do
     do_check(Account.get_user(userid))
   end

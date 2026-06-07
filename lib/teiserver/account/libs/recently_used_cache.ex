@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.RecentlyUsedCache do
   @moduledoc false
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
 
   @recently_used_limit 50
 
@@ -33,7 +33,7 @@ defmodule Teiserver.Account.RecentlyUsedCache do
     %{}
   end
 
-  @spec get_recently(Plug.Conn.t() | T.userid()) :: [map()]
+  @spec get_recently(Plug.Conn.t() | User.id()) :: [map()]
   def get_recently(%{assigns: %{current_user: current_user}}) do
     get_recently(current_user.id)
   end

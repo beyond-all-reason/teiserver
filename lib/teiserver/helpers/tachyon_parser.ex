@@ -3,7 +3,7 @@ defmodule Teiserver.Helpers.TachyonParser do
   To group generally useful parsing function related to tachyon that can be
   used for both players and autohost
   """
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
 
   @spec parse_int(String.t()) :: {:ok, integer()} | :error
   def parse_int(raw) do
@@ -13,7 +13,7 @@ defmodule Teiserver.Helpers.TachyonParser do
     end
   end
 
-  @spec parse_user_ids([String.t()]) :: {valid_ids :: [T.userid()], invalid_ids :: [String.t()]}
+  @spec parse_user_ids([String.t()]) :: {valid_ids :: [User.id()], invalid_ids :: [String.t()]}
   def parse_user_ids(raw_ids) do
     Enum.reduce(raw_ids, {[], []}, fn raw_id, {ok, invalid} ->
       case Integer.parse(raw_id) do
@@ -23,7 +23,7 @@ defmodule Teiserver.Helpers.TachyonParser do
     end)
   end
 
-  @spec parse_user_id(String.t()) :: {:ok, T.userid()} | {:error, :invalid_id}
+  @spec parse_user_id(String.t()) :: {:ok, User.id()} | {:error, :invalid_id}
   def parse_user_id(raw) do
     case Integer.parse(raw) do
       {id, ""} -> {:ok, id}

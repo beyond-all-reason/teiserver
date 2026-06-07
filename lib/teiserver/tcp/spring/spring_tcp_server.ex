@@ -1188,7 +1188,7 @@ defmodule Teiserver.SpringTcpServer do
     {:stop, :normal, %{state | userid: nil}}
   end
 
-  # @spec introduce_user(T.client() | T.userid() | nil, map()) :: map()
+  # @spec introduce_user(T.client() | User.id() | nil, map()) :: map()
   # defp introduce_user(nil, state), do: state
 
   # defp introduce_user(userid, state) when is_integer(userid) do
@@ -1202,7 +1202,7 @@ defmodule Teiserver.SpringTcpServer do
   #   %{state | known_users: new_known}
   # end
 
-  # @spec forget_user(T.client() | T.userid() | nil, map()) :: map()
+  # @spec forget_user(T.client() | User.id() | nil, map()) :: map()
   # defp forget_user(nil, state), do: state
 
   # defp forget_user(userid, state) when is_integer(userid) do

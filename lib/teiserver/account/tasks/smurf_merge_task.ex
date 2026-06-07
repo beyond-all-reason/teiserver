@@ -2,13 +2,14 @@ defmodule Teiserver.Account.SmurfMergeTask do
   @moduledoc false
 
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
+
   require Logger
 
-  @spec perform(T.userid(), T.userid(), map()) :: :ok
+  @spec perform(User.id(), User.id(), map()) :: :ok
   def perform(from_id, to_id, settings) do
     merge_ratings(from_id, to_id, settings["ratings"])
     # merge_actions(from_id, to_id, settings["reports"])
@@ -18,7 +19,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
     :ok
   end
 
-  @spec merge_ratings(T.userid(), T.userid(), String.t()) :: :ok
+  @spec merge_ratings(User.id(), User.id(), String.t()) :: :ok
   defp merge_ratings(_from_id, _to_id, "false"), do: :ok
 
   defp merge_ratings(from_id, to_id, "true") do
@@ -71,7 +72,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
     end)
   end
 
-  @spec merge_names(T.userid(), T.userid(), String.t()) :: :ok
+  @spec merge_names(User.id(), User.id(), String.t()) :: :ok
   defp merge_names(_from_id, _to_id, "false"), do: :ok
 
   defp merge_names(from_id, to_id, "true") do
@@ -92,7 +93,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
     Account.update_user_stat(to_id, %{"previous_names" => new_previous})
   end
 
-  @spec merge_mutes(T.userid(), T.userid(), String.t()) :: :ok
+  @spec merge_mutes(User.id(), User.id(), String.t()) :: :ok
   defp merge_mutes(_from_id, _to_id, "false"), do: :ok
 
   defp merge_mutes(from_id, to_id, "true") do

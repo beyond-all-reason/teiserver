@@ -5,8 +5,8 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
   # alias Teiserver.Repo
   # import Ecto.Query, warn: false
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Battle.MatchLib
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.DateHelper
@@ -15,7 +15,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
   @match_cache_recent_days 7
   @match_cache_max_days 31
 
-  @spec match_processed(map(), T.userid()) :: no_return()
+  @spec match_processed(map(), User.id()) :: no_return()
   def match_processed(match, userid) do
     case match.game_type do
       "Duel" -> do_match_processed_duel(userid)
@@ -240,7 +240,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
     :ok
   end
 
-  @spec disconnected(T.userid()) :: :ok
+  @spec disconnected(User.id()) :: :ok
   def disconnected(_userid) do
     :ok
   end

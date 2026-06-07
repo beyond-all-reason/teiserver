@@ -4,6 +4,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias ExULID.ULID
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.CacheUser
@@ -11,7 +12,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.ConsulServer
   alias Teiserver.Coordinator.RikerssMemes
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.Lobby.LobbyLib
@@ -1798,6 +1798,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  @spec get_queue(map()) :: [T.userid()]
+  @spec get_queue(map()) :: [User.id()]
   defdelegate get_queue(state), to: ConsulServer
 end

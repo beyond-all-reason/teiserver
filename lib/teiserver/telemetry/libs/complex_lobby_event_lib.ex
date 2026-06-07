@@ -2,6 +2,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventLib do
   @moduledoc false
 
   alias Phoenix.PubSub
+  alias Teiserver.Account.User
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ComplexLobbyEvent
   alias Teiserver.Telemetry.ComplexLobbyEventQueries
@@ -15,7 +16,7 @@ defmodule Teiserver.Telemetry.ComplexLobbyEventLib do
   @spec icon() :: String.t()
   def icon, do: "fa-people-group"
 
-  @spec log_complex_lobby_event(T.userid(), T.match_id(), String, map()) ::
+  @spec log_complex_lobby_event(User.id(), T.match_id(), String, map()) ::
           {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
   def log_complex_lobby_event(userid, match_id, event_type_name, value) do
     event_type_id = Telemetry.get_or_add_complex_lobby_event_type(event_type_name)

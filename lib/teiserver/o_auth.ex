@@ -1,9 +1,8 @@
 defmodule Teiserver.OAuth do
   @moduledoc false
-  alias Teiserver.Repo
-
+  alias Plug.Conn
+  alias Teiserver.Account.User
   alias Teiserver.Bot.Bot
-
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.ApplicationLib
   alias Teiserver.OAuth.ApplicationQueries
@@ -14,10 +13,7 @@ defmodule Teiserver.OAuth do
   alias Teiserver.OAuth.Libs.ScopeLib
   alias Teiserver.OAuth.Token
   alias Teiserver.OAuth.TokenQueries
-
-  alias Plug.Conn
-  alias Teiserver.Account.User
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Repo
 
   defdelegate allowed_scopes(), to: ScopeLib
   defdelegate scope_description(scope), to: ScopeLib
@@ -555,14 +551,14 @@ defmodule Teiserver.OAuth do
   @doc """
   Returns all OAuth applications that the user has authorized (has tokens for, including expired ones).
   """
-  @spec list_authorized_applications(T.userid()) :: [Application.t()]
+  @spec list_authorized_applications(User.id()) :: [Application.t()]
   defdelegate list_authorized_applications(user_id), to: ApplicationQueries
 
   @doc """
   Returns the count of active tokens for each application that the user has authorized.
   Counts only the user's tokens, not all tokens for the application.
   """
-  @spec get_application_token_counts(T.userid()) :: %{
+  @spec get_application_token_counts(User.id()) :: %{
           Application.id() => non_neg_integer()
         }
   defdelegate get_application_token_counts(user_id), to: ApplicationQueries
@@ -571,7 +567,7 @@ defmodule Teiserver.OAuth do
   Revokes all tokens and codes for a specific application for a user.
   This includes access tokens, refresh tokens, and authorization codes.
   """
-  @spec revoke_application_access(T.userid(), Application.id()) ::
+  @spec revoke_application_access(User.id(), Application.id()) ::
           :ok | {:error, term()}
   def revoke_application_access(user_id, application_id) do
     result =
