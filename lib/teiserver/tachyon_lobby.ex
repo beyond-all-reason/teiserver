@@ -5,7 +5,6 @@ defmodule Teiserver.TachyonLobby do
 
   alias Teiserver.Account.User
   alias Teiserver.Asset
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
