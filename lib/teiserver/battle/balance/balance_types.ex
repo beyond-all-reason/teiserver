@@ -2,12 +2,12 @@ defmodule Teiserver.Battle.Balance.BalanceTypes do
   @moduledoc false
   # alias Teiserver.Battle.Balance.BalanceTypes, as: BT
 
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
 
   @type rating_value() :: float()
-  @type player_group() :: %{T.userid() => rating_value()}
+  @type player_group() :: %{User.id() => rating_value()}
   @type expanded_group() :: %{
-          members: [T.userid()],
+          members: [User.id()],
           ratings: [rating_value()],
           names: [String.t()],
           ranks: [non_neg_integer()],
@@ -17,7 +17,7 @@ defmodule Teiserver.Battle.Balance.BalanceTypes do
         }
 
   @type group() :: %{
-          members: [T.userid()],
+          members: [User.id()],
           ratings: [rating_value()],
           group_rating: rating_value(),
           count: non_neg_integer()

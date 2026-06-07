@@ -3,9 +3,9 @@ defmodule Teiserver.Config do
   The Config context.
   """
 
+  alias Teiserver.Account.User
   alias Teiserver.Config.SiteConfig
   alias Teiserver.Config.UserConfig
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.NumberHelper
   alias Teiserver.Repo
 
@@ -90,10 +90,10 @@ defmodule Teiserver.Config do
     end)
   end
 
-  @spec get_user_config(T.userid()) :: UserConfig.t() | nil
+  @spec get_user_config(User.id()) :: UserConfig.t() | nil
   def get_user_config(id), do: Repo.get(UserConfig, id)
 
-  @spec get_user_config(T.userid(), String.t()) :: UserConfig.t() | nil
+  @spec get_user_config(User.id(), String.t()) :: UserConfig.t() | nil
   def get_user_config(user_id, key) do
     query =
       from user_config in UserConfig,

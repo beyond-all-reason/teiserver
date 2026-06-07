@@ -3,6 +3,7 @@ defmodule Teiserver.TachyonLobby do
   Everything related to lobbies using tachyon
   """
 
+  alias Teiserver.Account.User
   alias Teiserver.Asset
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.LobbyLib
@@ -64,16 +65,16 @@ defmodule Teiserver.TachyonLobby do
     end
   end
 
-  @spec rejoin(id(), T.userid()) ::
+  @spec rejoin(id(), User.id()) ::
           {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, :invalid_lobby}
   def rejoin(lobby_id, user_id), do: rejoin(lobby_id, user_id, self())
 
-  @spec rejoin(id(), T.userid(), pid()) ::
+  @spec rejoin(id(), User.id(), pid()) ::
           {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, :invalid_lobby}
   defdelegate rejoin(lobby_id, user_id, pid), to: Lobby
 
   @type client_status_update_data :: Lobby.client_status_update_data()
-  @spec update_client_status(id(), T.userid(), client_status_update_data()) ::
+  @spec update_client_status(id(), User.id(), client_status_update_data()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby}
   defdelegate update_client_status(lobby_id, user_id, update_data), to: Lobby
 
@@ -96,10 +97,10 @@ defmodule Teiserver.TachyonLobby do
           {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, reason :: term()}
   defdelegate join(lobby_id, join_data, pid \\ self()), to: Lobby
 
-  @spec spectate(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
+  @spec spectate(id(), User.id()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   defdelegate spectate(lobby_id, user_id), to: Lobby
 
-  @spec join_battle(id(), T.userid()) ::
+  @spec join_battle(id(), User.id()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :invalid_battle | term()}
   defdelegate join_battle(lobby_id, user_id), to: Lobby
 
@@ -108,7 +109,7 @@ defmodule Teiserver.TachyonLobby do
   @type add_bot_opts :: [add_bot_opt]
   @spec add_bot(
           id(),
-          T.userid(),
+          User.id(),
           ally_team :: non_neg_integer(),
           short_name :: String.t(),
           add_bot_opts()
@@ -130,43 +131,43 @@ defmodule Teiserver.TachyonLobby do
   defdelegate update_bot(lobby_id, update_data), to: Lobby
 
   @type lobby_update_data :: Lobby.lobby_update_data()
-  @spec update_properties(id(), T.userid(), lobby_update_data()) ::
+  @spec update_properties(id(), User.id(), lobby_update_data()) ::
           :ok | {:error, :invalid_lobby | term()}
   defdelegate update_properties(lobby_id, user_id, update_data), to: Lobby
 
-  @spec join_queue(id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
+  @spec join_queue(id(), User.id()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   defdelegate join_queue(lobby_id, user_id), to: Lobby
 
-  @spec leave(id(), T.userid()) :: :ok | {:error, reason :: term()}
+  @spec leave(id(), User.id()) :: :ok | {:error, reason :: term()}
   defdelegate leave(lobby_id, user_id), to: Lobby
 
-  @spec join_ally_team(id(), T.userid(), allyTeam :: non_neg_integer()) ::
+  @spec join_ally_team(id(), User.id(), allyTeam :: non_neg_integer()) ::
           {:ok, LT.Details.t()}
           | {:error,
              reason :: :invalid_lobby | :not_in_lobby | :invalid_ally_team | :ally_team_full}
   defdelegate join_ally_team(lobby_id, user_id, ally_team), to: Lobby
 
-  @spec start_battle(id(), T.userid()) ::
+  @spec start_battle(id(), User.id()) ::
           :ok | {:error, reason :: :not_in_lobby | :battle_already_started | term()}
   defdelegate start_battle(lobby_id, user_id), to: Lobby
 
   @type vote_ballot :: LT.VoteState.vote_ballot()
-  @spec vote_submit(id(), T.userid(), {String.t(), vote_ballot()}) ::
+  @spec vote_submit(id(), User.id(), {String.t(), vote_ballot()}) ::
           :ok | {:error, :invalid_lobby | :invalid_vote}
   defdelegate vote_submit(lobby_id, user_id, ballot), to: Lobby
 
-  @spec send_message(id(), T.userid(), String.t()) ::
+  @spec send_message(id(), User.id(), String.t()) ::
           :ok | {:error, :invalid_request, reason :: term()}
   defdelegate send_message(lobby_id, from_id, msg_content), to: Lobby
 
   @doc """
   make the given player a boss. Only a boss can do that
   """
-  @spec appoint_boss(id(), T.userid(), appointee_id :: T.userid()) ::
+  @spec appoint_boss(id(), User.id(), appointee_id :: User.id()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
   defdelegate appoint_boss(lobby_id, user_id, appointee_id), to: Lobby
 
-  @spec unboss(id(), T.userid(), boss_id :: T.userid()) ::
+  @spec unboss(id(), User.id(), boss_id :: User.id()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
   defdelegate unboss(lobby_id, user_id, boss_id), to: Lobby
 end

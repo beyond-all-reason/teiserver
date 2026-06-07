@@ -1,11 +1,11 @@
 defmodule Teiserver.Autohost do
   @moduledoc false
+  alias Teiserver.Account.User
   alias Teiserver.Autohost.Session
   alias Teiserver.Autohost.SessionRegistry
   alias Teiserver.Autohost.TachyonHandler
   alias Teiserver.Bot.Bot
   alias Teiserver.BotQueries
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.TachyonBattle
 
   @type id :: Teiserver.Bot.Bot.id()
@@ -31,13 +31,13 @@ defmodule Teiserver.Autohost do
         }
 
   @type player :: %{
-          user_id: T.userid(),
+          user_id: User.id(),
           name: String.t(),
           password: String.t()
         }
 
   @type bot :: %{
-          host_user_id: T.userid(),
+          host_user_id: User.id(),
           name: String.t(),
           ai_short_name: String.t(),
           ai_version: String.t(),

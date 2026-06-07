@@ -5,10 +5,10 @@ defmodule Teiserver.Autohost.TachyonHandler do
   This is treated separately from a player connection because they fulfill
   very different roles, have very different behaviour and states.
   """
+  alias Teiserver.Account.User
   alias Teiserver.Autohost.Session
   alias Teiserver.Autohost.SessionSupervisor
   alias Teiserver.Bot.Bot
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.TachyonParser
   alias Teiserver.Tachyon.Handler
@@ -301,11 +301,11 @@ defmodule Teiserver.Autohost.TachyonHandler do
   end
 
   @type update_event_data ::
-          {:player_joined, %{user_id: T.userid(), player_number: integer()}}
-          | {:player_left, %{user_id: T.userid(), reason: :lost_connection | :left | :kicked}}
-          | {:player_defeated, %{user_id: T.userid()}}
+          {:player_joined, %{user_id: User.id(), player_number: integer()}}
+          | {:player_left, %{user_id: User.id(), reason: :lost_connection | :left | :kicked}}
+          | {:player_defeated, %{user_id: User.id()}}
           | :start
-          | {:finished, %{user_id: T.userid(), winning_ally_teams: nonempty_list(integer())}}
+          | {:finished, %{user_id: User.id(), winning_ally_teams: nonempty_list(integer())}}
           | {:engine_message, %{message: String.t()}}
           | {:engine_warning, %{message: String.t()}}
           | {:engine_crash, %{details: String.t() | nil}}
@@ -313,13 +313,13 @@ defmodule Teiserver.Autohost.TachyonHandler do
              %{
                destination: :allies | :all | :spectators,
                message: String.t(),
-               user_id: T.userid()
+               user_id: User.id()
              }}
-          | {:player_chat_dm, %{message: String.t(), user_id: T.userid(), to_user_id: T.userid()}}
+          | {:player_chat_dm, %{message: String.t(), user_id: User.id(), to_user_id: User.id()}}
           | :engine_quit
           | {:luamsg,
              %{
-               user_id: T.userid(),
+               user_id: User.id(),
                script: :ui | :game | :rules,
                ui_mode: :all | :allies | :spectators | nil,
                data: String.t()

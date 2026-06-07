@@ -2,11 +2,11 @@ defmodule Teiserver.Account.MergeAccountsTask do
   @moduledoc false
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Admin.DeleteUserTask
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Repo
 
-  @spec perform(T.userid(), T.userid()) :: :no_user | :ok
+  @spec perform(User.id(), User.id()) :: :no_user | :ok
   def perform(deleting_id, keeping_id) do
     query = "UPDATE teiserver_telemetry_complex_client_events SET user_id = $1 WHERE user_id = $2"
 

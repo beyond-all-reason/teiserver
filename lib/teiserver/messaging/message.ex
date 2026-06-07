@@ -1,12 +1,14 @@
 defmodule Teiserver.Messaging.Message do
   @moduledoc false
+  alias Teiserver.Account.User
+
   @enforce_keys [:content, :source, :timestamp, :marker]
   defstruct [:content, :source, :timestamp, :marker]
 
   @type entity ::
-          {:player, Teiserver.Data.Types.userid()}
-          | {:party, Teiserver.Party.id(), Teiserver.Data.Types.userid()}
-          | {:lobby, Teiserver.TachyonLobby.id(), Teiserver.Data.Types.userid()}
+          {:player, User.id()}
+          | {:party, Teiserver.Party.id(), User.id()}
+          | {:lobby, Teiserver.TachyonLobby.id(), User.id()}
   @type t :: %__MODULE__{
           content: String.t(),
           source: entity(),

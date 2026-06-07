@@ -34,7 +34,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     call_lobby(lobby_id, :get_match_id)
   end
 
-  @spec get_match_id_from_userid(T.userid()) :: T.match_id() | nil
+  @spec get_match_id_from_userid(User.id()) :: T.match_id() | nil
   def get_match_id_from_userid(userid) do
     case Account.get_client_by_id(userid) do
       nil ->
@@ -140,7 +140,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     cast_lobby(lobby_id, {:update_values, new_values})
   end
 
-  @spec rename_lobby(T.lobby_id(), String.t(), T.userid() | nil) :: :ok | nil
+  @spec rename_lobby(T.lobby_id(), String.t(), User.id() | nil) :: :ok | nil
   def rename_lobby(lobby_id, new_base_name, renamer_id) do
     cast_lobby(lobby_id, {:rename_lobby, new_base_name, renamer_id})
   end
@@ -336,17 +336,17 @@ defmodule Teiserver.Lobby.LobbyLib do
   def remove_modoptions(lobby_id, keys), do: cast_lobby(lobby_id, {:remove_modoptions, keys})
 
   # Membership
-  @spec add_user_to_lobby(T.userid(), T.lobby_id(), String.t()) :: nil | :ok
+  @spec add_user_to_lobby(User.id(), T.lobby_id(), String.t()) :: nil | :ok
   def add_user_to_lobby(userid, lobby_id, script_password) do
     cast_lobby(lobby_id, {:add_user, userid, script_password})
   end
 
-  @spec remove_user_from_lobby(T.userid(), T.lobby_id()) :: nil | :ok
+  @spec remove_user_from_lobby(User.id(), T.lobby_id()) :: nil | :ok
   def remove_user_from_lobby(userid, lobby_id) do
     cast_lobby(lobby_id, {:remove_user, userid})
   end
 
-  @spec get_lobby_member_list(T.lobby_id()) :: [T.userid()] | nil
+  @spec get_lobby_member_list(T.lobby_id()) :: [User.id()] | nil
   def get_lobby_member_list(lobby_id) do
     call_lobby(lobby_id, :get_member_list)
   end

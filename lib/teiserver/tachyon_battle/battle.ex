@@ -1,5 +1,6 @@
 defmodule Teiserver.TachyonBattle.Battle do
   @moduledoc false
+  alias Teiserver.Account.User
   alias Teiserver.Autohost
   alias Teiserver.Battle
   alias Teiserver.TachyonBattle.Registry
@@ -32,7 +33,7 @@ defmodule Teiserver.TachyonBattle.Battle do
           # or do some actions.
           # This is not limited only to players *currently* in the battle
           participants: %{
-            Teiserver.Data.Types.userid() => %{
+            User.id() => %{
               name: String.t(),
               password: String.t()
             }
@@ -76,7 +77,7 @@ defmodule Teiserver.TachyonBattle.Battle do
 
   @spec add_player(
           T.id(),
-          Teiserver.Data.Types.userid(),
+          User.id(),
           name :: String.t(),
           password :: String.t()
         ) :: {:ok, connection_info()} | {:error, term()}

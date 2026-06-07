@@ -4,8 +4,8 @@ defmodule Teiserver.Party.Server do
   """
 
   alias Plug.Crypto
+  alias Teiserver.Account.User
   alias Teiserver.Config
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.KvStore
   alias Teiserver.Matchmaking
@@ -25,11 +25,11 @@ defmodule Teiserver.Party.Server do
           id: id(),
           pid: pid(),
           monitors: MC.t(),
-          members: %{T.userid() => %{id: T.userid(), joined_at: DateTime.t()}},
-          ids_to_rejoin: MapSet.t(T.userid()),
+          members: %{User.id() => %{id: User.id(), joined_at: DateTime.t()}},
+          ids_to_rejoin: MapSet.t(User.id()),
           invited: %{
-            T.userid() => %{
-              id: T.userid(),
+            User.id() => %{
+              id: User.id(),
               invited_at: DateTime.t(),
               valid_until: DateTime.t(),
               timeout_ref: :timer.tref()
@@ -54,7 +54,7 @@ defmodule Teiserver.Party.Server do
   """
   def invite_valid_duration_key, do: "party.invite-valid-duration-s"
 
-  @spec leave_party(id(), T.userid()) :: :ok | {:error, :invalid_party | :not_a_member}
+  @spec leave_party(id(), User.id()) :: :ok | {:error, :invalid_party | :not_a_member}
   def leave_party(party_id, user_id) do
     via_tuple(party_id) |> :gen_statem.call({:leave, user_id}, @default_call_timeout)
   catch
@@ -65,7 +65,7 @@ defmodule Teiserver.Party.Server do
   To be called when the system is starting up and recovering from a restart.
   The player has to already be in the party (member or invited).
   """
-  @spec rejoin(id(), T.userid(), pid() | nil) ::
+  @spec rejoin(id(), User.id(), pid() | nil) ::
           {:ok, state()} | {:error, :invalid_party | :not_a_member}
   def rejoin(party_id, user_id, pid \\ self()) do
     via_tuple(party_id) |> :gen_statem.call({:rejoin, user_id, pid}, @default_call_timeout)
@@ -76,7 +76,7 @@ defmodule Teiserver.Party.Server do
   @doc """
   Create an invite for the given player, ensuring they're not alreay part of the party
   """
-  @spec create_invite(id(), T.userid()) ::
+  @spec create_invite(id(), User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
   def create_invite(party_id, user_id, pid \\ self()) do
     via_tuple(party_id) |> :gen_statem.call({:create_invite, user_id, pid}, @default_call_timeout)
@@ -84,7 +84,7 @@ defmodule Teiserver.Party.Server do
     :exit, {:noproc, _details} -> {:error, :invalid_party}
   end
 
-  @spec accept_invite(id(), T.userid()) ::
+  @spec accept_invite(id(), User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :not_invited}
   def accept_invite(party_id, user_id) do
     via_tuple(party_id)
@@ -96,7 +96,7 @@ defmodule Teiserver.Party.Server do
     :exit, {:noproc, _details} -> {:error, :invalid_party}
   end
 
-  @spec decline_invite(id(), T.userid()) ::
+  @spec decline_invite(id(), User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :not_invited}
   def decline_invite(party_id, user_id) do
     via_tuple(party_id) |> :gen_statem.call({:decline_invite, user_id}, @default_call_timeout)
@@ -107,7 +107,7 @@ defmodule Teiserver.Party.Server do
   @doc """
   cancel a pending invite. Any member can do that
   """
-  @spec cancel_invite(id(), T.userid()) ::
+  @spec cancel_invite(id(), User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :not_in_party | :not_invited}
   def cancel_invite(party_id, user_id) do
     via_tuple(party_id) |> :gen_statem.call({:cancel_invite, user_id}, @default_call_timeout)
@@ -119,7 +119,7 @@ defmodule Teiserver.Party.Server do
   Kick the specified member from the party. The user doing the kicking must
   be a member of the party (and not merely invited)
   """
-  @spec kick_user(id(), user_kicking :: T.userid(), kicked_user :: T.userid()) ::
+  @spec kick_user(id(), user_kicking :: User.id(), kicked_user :: User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :invalid_target | :not_a_member}
   def kick_user(party_id, actor_id, target_id) do
     via_tuple(party_id)
@@ -174,7 +174,7 @@ defmodule Teiserver.Party.Server do
     via_tuple(party_id) |> :gen_statem.cast(:lost_matchmaking_queue)
   end
 
-  @spec send_message(id(), T.userid(), String.t()) ::
+  @spec send_message(id(), User.id(), String.t()) ::
           :ok | {:error, :invalid_request, reason :: term()}
   def send_message(party_id, from_id, msg_content) do
     via_tuple(party_id)

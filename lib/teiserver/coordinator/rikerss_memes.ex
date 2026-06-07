@@ -1,8 +1,8 @@
 defmodule Teiserver.Coordinator.RikerssMemes do
   @moduledoc false
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Battle
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.ChatLib
 
   @meme_list ~w(ticks poor rich crazy undo deathmatch)
@@ -11,7 +11,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   @crazy_multiplier_opts_middler ~w(0.5 0.7 1 1 1 1 1 1 1 1.5 2)
   @crazy_multiplier_opts_positive ~w(1 1 1 1 1.5 2)
 
-  @spec handle_meme(String.t(), T.userid(), map()) :: [String.t()]
+  @spec handle_meme(String.t(), User.id(), map()) :: [String.t()]
   def handle_meme("ticks", senderid, %{lobby_id: lobby_id} = _state) do
     sender = Account.get_user_by_id(senderid)
 

@@ -1,8 +1,6 @@
 defmodule Teiserver.Moderation do
   @moduledoc false
 
-  alias Teiserver.Repo
-  # require Logger
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Data.Types, as: T
@@ -22,6 +20,7 @@ defmodule Teiserver.Moderation do
   alias Teiserver.Moderation.ReportLib
   alias Teiserver.Moderation.Response
   alias Teiserver.Moderation.ResponseLib
+  alias Teiserver.Repo
 
   import Ecto.Query, warn: false
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
@@ -84,8 +83,8 @@ defmodule Teiserver.Moderation do
   @doc """
 
   """
-  @spec list_outstanding_reports_against_user(T.userid()) :: List.t()
-  @spec list_outstanding_reports_against_user(T.userid(), List.t()) :: List.t()
+  @spec list_outstanding_reports_against_user(User.id()) :: List.t()
+  @spec list_outstanding_reports_against_user(User.id(), List.t()) :: List.t()
   def list_outstanding_reports_against_user(userid, args \\ []) do
     search = [
       target_id: userid,
@@ -300,7 +299,7 @@ defmodule Teiserver.Moderation do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_response!(non_neg_integer(), T.userid()) :: Response.t()
+  @spec get_response!(non_neg_integer(), User.id()) :: Response.t()
   def get_response!(report_id, user_id) do
     response_query(
       search: [
@@ -325,7 +324,7 @@ defmodule Teiserver.Moderation do
       nil
 
   """
-  @spec get_response(non_neg_integer(), T.userid()) :: Response.t() | nil
+  @spec get_response(non_neg_integer(), User.id()) :: Response.t() | nil
   def get_response(report_id, user_id) do
     response_query(
       search: [
@@ -836,7 +835,7 @@ defmodule Teiserver.Moderation do
   end
 
   # Others
-  @spec unbridge_user(nil | T.user() | T.userid(), String.t(), non_neg_integer(), String.t()) ::
+  @spec unbridge_user(nil | T.user() | User.id(), String.t(), non_neg_integer(), String.t()) ::
           any
   def unbridge_user(userid, message, flagged_word_count, location) when is_integer(userid) do
     unbridge_user(Account.get_user(userid), message, flagged_word_count, location)
@@ -888,9 +887,13 @@ defmodule Teiserver.Moderation do
 
   @spec banned_domain?(String.t()) :: boolean()
   def banned_domain?(email) do
-    [_start, domain] = String.split(email, "@")
+    case String.split(email, "@") do
+      [_start, domain] ->
+        Enum.member?(list_banned_domains_cache(), domain)
 
-    Enum.member?(list_banned_domains_cache(), domain)
+      _no_email ->
+        false
+    end
   end
 
   @doc """
@@ -1009,7 +1012,7 @@ defmodule Teiserver.Moderation do
 
   @spec list_banned_ips_cache :: [BannedIP.t()]
   def list_banned_ips_cache do
-    Teiserver.cache_get(:application_metadata_cache, "banned_ips", [])
+    Teiserver.cache_get(:application_metadata_cache, "banned_ip_ranges", [])
   end
 
   @doc """
@@ -1102,7 +1105,8 @@ defmodule Teiserver.Moderation do
   def banned_ip?(ip) do
     case IP.from_string(ip) do
       {:ok, ip} ->
-        Enum.member?(list_banned_ips_cache(), ip)
+        list_banned_ips_cache()
+        |> Enum.any?(fn x -> ip in x end)
 
       {:error, :einval} ->
         false
@@ -1209,5 +1213,25 @@ defmodule Teiserver.Moderation do
   """
   def change_banned_phrase(%BannedPhrase{} = banned_phrase, attrs \\ %{}) do
     BannedPhrase.changeset(banned_phrase, attrs)
+  end
+
+  # VPNs
+  @spec list_vpn_cache :: [String.t()]
+  def list_vpn_cache do
+    Teiserver.cache_get(:application_metadata_cache, "blocked_vpn_ranges", [])
+  end
+
+  @spec vpn_ip?(String.t() | nil) :: boolean()
+  def vpn_ip?(nil), do: false
+
+  def vpn_ip?(ip) do
+    case IP.from_string(ip) do
+      {:ok, ip} ->
+        list_vpn_cache()
+        |> Enum.any?(fn x -> ip in x end)
+
+      {:error, :einval} ->
+        false
+    end
   end
 end

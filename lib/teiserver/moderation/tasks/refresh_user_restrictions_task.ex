@@ -4,9 +4,9 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
   """
 
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Client
   alias Teiserver.Coordinator
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.DateHelper
   alias Teiserver.Moderation
 
@@ -38,7 +38,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
     :ok
   end
 
-  @spec refresh_user(T.userid()) :: :ok
+  @spec refresh_user(User.id()) :: :ok
   def refresh_user(user_id) do
     actions =
       Moderation.list_actions(

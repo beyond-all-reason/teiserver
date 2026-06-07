@@ -1,10 +1,10 @@
 defmodule Teiserver.Chat.RoomSupervisor do
   @moduledoc false
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
 
   use DynamicSupervisor
 
-  @spec start_room(String.t(), T.userid(), String.t(), String.t()) ::
+  @spec start_room(String.t(), User.id(), String.t(), String.t()) ::
           DynamicSupervisor.on_start_child()
   def start_room(room_name, author_id, topic, password) do
     arg = %{

@@ -9,7 +9,7 @@ defmodule Teiserver.Player do
   reconnection of player if/when they crash.
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
   alias Teiserver.Matchmaking
   alias Teiserver.Party
   alias Teiserver.Player
@@ -18,16 +18,16 @@ defmodule Teiserver.Player do
   @doc """
   Returns the pid of the session registered with a given user id
   """
-  @spec lookup_session(T.userid()) :: pid() | nil
+  @spec lookup_session(User.id()) :: pid() | nil
   defdelegate lookup_session(user_id), to: Player.SessionRegistry, as: :lookup
 
   @doc """
   Returns the pid of the connection registered with a given user id
   """
-  @spec lookup_connection(T.userid()) :: pid() | nil
+  @spec lookup_connection(User.id()) :: pid() | nil
   defdelegate lookup_connection(user_id), to: Player.Registry, as: :lookup
 
-  @spec connection_via_tuple(T.userid()) :: GenServer.name()
+  @spec connection_via_tuple(User.id()) :: GenServer.name()
   defdelegate connection_via_tuple(user_id), to: Player.Registry, as: :via_tuple
 
   defdelegate restore_sessions(), to: Player.Session
@@ -35,7 +35,7 @@ defmodule Teiserver.Player do
   @doc """
   To be used when a process is interested in the presence of a given player.
   """
-  @spec monitor_session(T.userid()) :: reference() | nil
+  @spec monitor_session(User.id()) :: reference() | nil
   def monitor_session(user_id) do
     pid = lookup_session(user_id)
 
@@ -46,13 +46,13 @@ defmodule Teiserver.Player do
     end
   end
 
-  @spec conn_state(T.userid()) :: Player.Session.conn_state()
+  @spec conn_state(User.id()) :: Player.Session.conn_state()
   defdelegate conn_state(user_id), to: Player.Session
 
   @doc """
   When a queued player is matched with other, need to let them know
   """
-  @spec matchmaking_notify_found(T.userid(), Matchmaking.queue_id(), pid(), timeout()) :: :ok
+  @spec matchmaking_notify_found(User.id(), Matchmaking.queue_id(), pid(), timeout()) :: :ok
   defdelegate matchmaking_notify_found(user_id, queue_id, room_pid, timeout_ms),
     to: Player.Session
 
@@ -60,22 +60,22 @@ defmodule Teiserver.Player do
   When a pairing fails because one of the player declines the pairing or leaves
   the queues
   """
-  @spec matchmaking_notify_lost(T.userid(), Matchmaking.lost_reason()) :: :ok
+  @spec matchmaking_notify_lost(User.id(), Matchmaking.lost_reason()) :: :ok
   defdelegate matchmaking_notify_lost(user_id, reason), to: Player.Session
 
-  @spec matchmaking_notify_cancelled(T.userid(), Matchmaking.cancelled_reason()) :: :ok
+  @spec matchmaking_notify_cancelled(User.id(), Matchmaking.cancelled_reason()) :: :ok
   defdelegate matchmaking_notify_cancelled(user_id, reason), to: Player.Session
 
   @doc """
   To send the notification as players ready up for a pairing
   """
-  @spec matchmaking_found_update(T.userid(), non_neg_integer(), pid()) :: :ok
+  @spec matchmaking_found_update(User.id(), non_neg_integer(), pid()) :: :ok
   defdelegate matchmaking_found_update(user_id, ready_count, room_pid), to: Player.Session
 
   @doc """
   Leave all the queues, and effectively removes the player from any matchmaking
   """
-  @spec matchmaking_leave_queues(T.userid()) :: Matchmaking.leave_result()
+  @spec matchmaking_leave_queues(User.id()) :: Matchmaking.leave_result()
   defdelegate matchmaking_leave_queues(user_id), to: Player.Session, as: :leave_queues
 
   @type start_data :: Player.Session.start_data()
@@ -83,7 +83,7 @@ defmodule Teiserver.Player do
   @doc """
   It's go time! the player should join a game
   """
-  @spec battle_start(T.userid(), {TachyonBattle.id(), pid()}, start_data()) ::
+  @spec battle_start(User.id(), {TachyonBattle.id(), pid()}, start_data()) ::
           :ok
   defdelegate battle_start(user_id, battle_id, battle_start_data), to: Player.Session
 
@@ -91,7 +91,7 @@ defmodule Teiserver.Player do
   Let the player know that they can join a battle associated with a lobby
   """
   @spec lobby_join_battle(
-          T.userid(),
+          User.id(),
           {TachyonBattle.id(), pid()},
           start_data(),
           password :: String.t()
@@ -114,7 +114,7 @@ defmodule Teiserver.Player do
   @doc """
   Let the player know that they are no longer invited/member of the party
   """
-  @spec party_notify_removed(T.userid(), Party.state()) :: :ok
+  @spec party_notify_removed(User.id(), Party.state()) :: :ok
   defdelegate party_notify_removed(user_id, party_state), to: Player.Session
 
   @doc """
@@ -122,7 +122,7 @@ defmodule Teiserver.Player do
   matchmaking and it should join the specified queues.
   """
   @spec party_notify_join_queues(
-          T.userid(),
+          User.id(),
           [{Matchmaking.queue_id(), version :: String.t()}],
           Party.state()
         ) :: :ok
@@ -131,7 +131,7 @@ defmodule Teiserver.Player do
   @doc """
   Sends a user/self event to a user when their roles are updated
   """
-  @spec update_user_roles(T.userid(), [String.t()]) :: :ok
+  @spec update_user_roles(User.id(), [String.t()]) :: :ok
   defdelegate update_user_roles(user_id, roles), to: Player.Session
 
   @doc """

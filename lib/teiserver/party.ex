@@ -8,8 +8,8 @@ defmodule Teiserver.Party do
   with regard to invites.
   """
 
+  alias Teiserver.Account.User
   alias Teiserver.Config
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Matchmaking
   alias Teiserver.Party.Registry
   alias Teiserver.Party.Server
@@ -19,7 +19,7 @@ defmodule Teiserver.Party do
   @type id :: Server.id()
   @type state :: Server.state()
 
-  @spec create_party(T.userid(), pid() | nil) :: {:ok, id(), pid()} | {:error, reason :: term()}
+  @spec create_party(User.id(), pid() | nil) :: {:ok, id(), pid()} | {:error, reason :: term()}
   def create_party(user_id, pid \\ self()) do
     party_id = Server.gen_party_id()
 
@@ -39,11 +39,11 @@ defmodule Teiserver.Party do
     Supervisor.start_party_from_snapshot(id, serialized_state)
   end
 
-  @spec rejoin(id(), T.userid()) ::
+  @spec rejoin(id(), User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :not_a_member}
   def rejoin(party_id, user_id), do: rejoin(party_id, user_id, self())
 
-  @spec rejoin(id(), T.userid(), pid() | nil) ::
+  @spec rejoin(id(), User.id(), pid() | nil) ::
           {:ok, state()} | {:error, :invalid_party | :not_a_member}
   defdelegate rejoin(party_id, user_id, pid), to: Server
 
@@ -56,30 +56,30 @@ defmodule Teiserver.Party do
   @spec get_state(id()) :: state() | nil
   defdelegate get_state(party_id), to: Server
 
-  @spec leave_party(id(), T.userid()) :: :ok | {:error, :invalid_party | :not_a_member}
+  @spec leave_party(id(), User.id()) :: :ok | {:error, :invalid_party | :not_a_member}
   defdelegate leave_party(party_id, user_id), to: Server
 
-  @spec create_invite(id(), T.userid()) ::
+  @spec create_invite(id(), User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
   def create_invite(party_id, user_id), do: create_invite(party_id, user_id, self())
 
-  @spec create_invite(id(), T.userid(), pid()) ::
+  @spec create_invite(id(), User.id(), pid()) ::
           {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
   defdelegate create_invite(party_id, user_id, pid), to: Server
 
-  @spec accept_invite(id(), T.userid()) ::
+  @spec accept_invite(id(), User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :not_invited}
   defdelegate accept_invite(party_id, user_id), to: Server
 
-  @spec decline_invite(id(), T.userid()) ::
+  @spec decline_invite(id(), User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :not_invited}
   defdelegate decline_invite(party_id, user_id), to: Server
 
-  @spec cancel_invite(id(), T.userid()) ::
+  @spec cancel_invite(id(), User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :not_in_party | :not_invited}
   defdelegate cancel_invite(party_id, user_id), to: Server
 
-  @spec kick_user(id(), user_kicking :: T.userid(), kicked_user :: T.userid()) ::
+  @spec kick_user(id(), user_kicking :: User.id(), kicked_user :: User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :invalid_target | :not_a_member}
   defdelegate kick_user(party_id, actor_id, target_id), to: Server
 
@@ -89,7 +89,7 @@ defmodule Teiserver.Party do
   @spec matchmaking_notify_cancel(id()) :: :ok
   defdelegate matchmaking_notify_cancel(party_id), to: Server
 
-  @spec send_message(id(), T.userid(), String.t()) ::
+  @spec send_message(id(), User.id(), String.t()) ::
           :ok | {:error, :invalid_request, reason :: term()}
   defdelegate send_message(party_id, from_id, msg_content), to: Server
 

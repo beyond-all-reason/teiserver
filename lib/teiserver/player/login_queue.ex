@@ -10,8 +10,8 @@ defmodule Teiserver.Player.LoginQueue do
   players are admitted in FIFO order. Disconnected waiting players are skipped.
   """
 
+  alias Teiserver.Account.User
   alias Teiserver.Config
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Player.TachyonHandler
 
@@ -31,7 +31,7 @@ defmodule Teiserver.Player.LoginQueue do
   When queued, the caller will be notified via `TachyonHandler.notify_login_accepted/1`
   once a slot opens up.
   """
-  @spec attempt_login(T.userid(), pid()) :: boolean()
+  @spec attempt_login(User.id(), pid()) :: boolean()
   def attempt_login(user_id, pid \\ self()) do
     GenServer.call(__MODULE__, {:attempt_login, pid, user_id})
   end

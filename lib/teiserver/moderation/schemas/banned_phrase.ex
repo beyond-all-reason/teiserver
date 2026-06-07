@@ -118,15 +118,24 @@ defmodule Teiserver.Moderation.BannedPhrase do
   @spec message_severity(String.t(), severity(), [search_type()]) :: nil | BannedPhrase.severity()
   def message_severity(message, min_severity \\ :high, types \\ [:raw, :fuzzy, :regex]) do
     found_phrase =
-      Moderation.list_banned_phrases_cache()
-      |> Enum.filter(fn %BannedPhrase{type: type, severity: severity} ->
-        severity_is_at_least(severity, min_severity) and Enum.member?(types, type)
-      end)
-      |> Enum.find(fn %BannedPhrase{type: type, severity: severity} = banned_phrase ->
-        severity_is_at_least(severity, min_severity) and
-          Enum.member?(types, type) and
-          phrase_match?(banned_phrase, message)
-      end)
+      :telemetry.span(
+        [:teiserver, :moderation, :message_severity],
+        %{min_severity: min_severity},
+        fn ->
+          found_phrase =
+            Moderation.list_banned_phrases_cache()
+            |> Enum.filter(fn %BannedPhrase{type: type, severity: severity} ->
+              severity_is_at_least(severity, min_severity) and Enum.member?(types, type)
+            end)
+            |> Enum.find(fn %BannedPhrase{type: type, severity: severity} = banned_phrase ->
+              severity_is_at_least(severity, min_severity) and
+                Enum.member?(types, type) and
+                phrase_match?(banned_phrase, message)
+            end)
+
+          {found_phrase, %{min_severity: min_severity, matched: found_phrase != nil}}
+        end
+      )
 
     if found_phrase do
       found_phrase.severity

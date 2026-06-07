@@ -2,6 +2,7 @@ defmodule Teiserver.Telemetry.SimpleClientEventLib do
   @moduledoc false
 
   alias Phoenix.PubSub
+  alias Teiserver.Account.User
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.SimpleClientEvent
   alias Teiserver.Telemetry.SimpleClientEventQueries
@@ -15,7 +16,7 @@ defmodule Teiserver.Telemetry.SimpleClientEventLib do
   @spec icon() :: String.t()
   def icon, do: "fa-grip-lines"
 
-  @spec log_simple_client_event(T.userid(), String.t()) ::
+  @spec log_simple_client_event(User.id(), String.t()) ::
           {:error, Ecto.Changeset} | {:ok, SimpleClientEvent}
   def log_simple_client_event(userid, event_type_name) when is_integer(userid) do
     event_type_id = Telemetry.get_or_add_simple_client_event_type(event_type_name)

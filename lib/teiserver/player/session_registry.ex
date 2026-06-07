@@ -3,7 +3,7 @@ defmodule Teiserver.Player.SessionRegistry do
   Registry used to track player presence
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
 
   def start_link do
     Horde.Registry.start_link(keys: :unique, name: __MODULE__)
@@ -12,12 +12,12 @@ defmodule Teiserver.Player.SessionRegistry do
   @doc """
   How to reach a given session
   """
-  @spec via_tuple(T.userid()) :: GenServer.name()
+  @spec via_tuple(User.id()) :: GenServer.name()
   def via_tuple(user_id) do
     {:via, Horde.Registry, {__MODULE__, user_id}}
   end
 
-  @spec lookup(T.userid()) :: pid() | nil
+  @spec lookup(User.id()) :: pid() | nil
   def lookup(user_id) do
     case Horde.Registry.lookup(__MODULE__, user_id) do
       [{pid, _value}] -> pid

@@ -2,6 +2,7 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventLib do
   @moduledoc false
 
   alias Phoenix.PubSub
+  alias Teiserver.Account.User
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.SimpleLobbyEvent
   alias Teiserver.Telemetry.SimpleLobbyEventQueries
@@ -15,7 +16,7 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventLib do
   @spec icon() :: String.t()
   def icon, do: "fa-user-group"
 
-  @spec log_simple_lobby_event(T.userid(), T.match_id(), String.t()) ::
+  @spec log_simple_lobby_event(User.id(), T.match_id(), String.t()) ::
           {:error, Ecto.Changeset} | {:ok, SimpleLobbyEvent}
   def log_simple_lobby_event(userid, match_id, event_type_name) do
     event_type_id = Telemetry.get_or_add_simple_lobby_event_type(event_type_name)

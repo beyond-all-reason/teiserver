@@ -3,6 +3,7 @@ defmodule Teiserver.Lobby.ChatLib do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Chat
@@ -12,7 +13,7 @@ defmodule Teiserver.Lobby.ChatLib do
   alias Teiserver.Lobby
   alias Teiserver.Moderation
 
-  @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  @spec say(User.id(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def say(nil, _msg, _lobby_id), do: {:error, "No userid"}
   def say(_userid, _msg, nil), do: {:error, "No lobby"}
 
@@ -60,7 +61,7 @@ defmodule Teiserver.Lobby.ChatLib do
     end
   end
 
-  @spec do_say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  @spec do_say(User.id(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def do_say(userid, "$ " <> msg, lobby_id), do: do_say(userid, "$#{msg}", lobby_id)
 
   def do_say(userid, msg, lobby_id) do
@@ -128,7 +129,7 @@ defmodule Teiserver.Lobby.ChatLib do
     end
   end
 
-  @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  @spec sayex(User.id(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def sayex(userid, msg, lobby_id) do
     msg = trim_message(msg)
     user = Account.get_user(userid)
@@ -193,7 +194,7 @@ defmodule Teiserver.Lobby.ChatLib do
     end
   end
 
-  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) ::
+  @spec sayprivateex(User.id(), User.id(), String.t(), Types.lobby_id()) ::
           :ok | {:error, any}
   def sayprivateex(from_id, to_id, msg, lobby_id) do
     msg = trim_message(msg)

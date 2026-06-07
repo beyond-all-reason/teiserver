@@ -29,7 +29,7 @@ defmodule Teiserver.ModerationFixtures do
     {:ok, banned_ip} =
       Map.merge(
         %{
-          cidr: "192.168.0.1/32"
+          cidr: "192.168.0.1/24"
         },
         attrs
       )

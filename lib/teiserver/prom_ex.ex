@@ -70,6 +70,7 @@ defmodule Teiserver.PromEx do
       # Plugins.Broadway,
 
       # Add your own PromEx metrics plugins
+      Teiserver.Monitoring.Internal,
       Teiserver.Monitoring.Tachyon,
       Teiserver.Monitoring.Spring
     ]

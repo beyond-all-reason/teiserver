@@ -24,8 +24,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # case basis.
 
   alias Plug.Crypto
+  alias Teiserver.Account.User
   alias Teiserver.Autohost
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.KvStore
@@ -70,12 +70,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
            {:move_player, LT.Types.player_id(), LT.Types.team()}
            | {:add_spectator, LT.Spectator.t()}
            | {:remove_player_from_lobby, LT.Types.player_id()}
-           | {:remove_spec_from_lobby, T.userid()}
-           | {:move_spec_to_player, T.userid(), player_data :: map()}
-           | {:move_player_to_spec, T.userid(), spec_data :: map()}
+           | {:remove_spec_from_lobby, User.id()}
+           | {:move_spec_to_player, User.id(), player_data :: map()}
+           | {:move_player_to_spec, User.id(), spec_data :: map()}
            | :repack_players
            | :fill_from_join_queue
-           | {:update_client_status, T.userid(), client_status :: map()}
+           | {:update_client_status, User.id(), client_status :: map()}
            | {:update_lobby_name, new_name :: String.t()}
            | {:update_map_name, new_name :: String.t()}
            | {:update_ally_team_config, old_config :: [LT.AllyTeamConfig.t()],
@@ -83,9 +83,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:update_game_options, changes :: %{String.t() => String.t() | nil}}
            | {:update_tags, changes :: %{String.t() => map() | nil}}
            | {:start_vote, LT.VoteState.t()}
-           | {:cast_vote, T.userid(), LT.VoteState.vote_ballot()}
+           | {:cast_vote, User.id(), LT.VoteState.vote_ballot()}
            | {:vote_ended, DateTime.t(), LT.VoteState.vote_outcome()}
-           | {:update_boss, :add | :remove, T.userid()}
+           | {:update_boss, :add | :remove, User.id()}
 
   @spec gen_id() :: LT.Types.id()
   def gen_id, do: UUID.uuid4()
@@ -130,7 +130,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     call_lobby(lobby_id, {:join, join_data, pid})
   end
 
-  @spec leave(LT.Types.id(), T.userid()) :: :ok | {:error, reason :: :lobby_full | term()}
+  @spec leave(LT.Types.id(), User.id()) :: :ok | {:error, reason :: :lobby_full | term()}
   def leave(lobby_id, user_id) do
     via_tuple(lobby_id) |> :gen_statem.call({:leave, user_id}, @default_call_timeout)
   catch
@@ -139,7 +139,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     :exit, {:shutdown, _reason} -> :ok
   end
 
-  @spec join_ally_team(LT.Types.id(), T.userid(), allyTeam :: non_neg_integer()) ::
+  @spec join_ally_team(LT.Types.id(), User.id(), allyTeam :: non_neg_integer()) ::
           {:ok, LT.Details.t()}
           | {:error,
              reason :: :invalid_lobby | :not_in_lobby | :invalid_ally_team | :ally_team_full}
@@ -147,7 +147,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     call_lobby(lobby_id, {:join_ally_team, user_id, ally_team})
   end
 
-  @spec spectate(LT.Types.id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
+  @spec spectate(LT.Types.id(), User.id()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   def spectate(lobby_id, user_id) do
     call_lobby(lobby_id, {:spectate, user_id})
   end
@@ -155,13 +155,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @doc """
   request to be added as a spectator to the battle being played
   """
-  @spec join_battle(LT.Types.id(), T.userid()) ::
+  @spec join_battle(LT.Types.id(), User.id()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :invalid_battle | term()}
   def join_battle(lobby_id, user_id) do
     call_lobby(lobby_id, {:join_battle, user_id})
   end
 
-  @spec rejoin(LT.Types.id(), T.userid(), pid()) ::
+  @spec rejoin(LT.Types.id(), User.id(), pid()) ::
           {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, :invalid_lobby}
   def rejoin(lobby_id, user_id, pid) do
     call_lobby(lobby_id, {:rejoin, user_id, pid})
@@ -171,7 +171,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           optional(:ready?) => boolean(),
           optional(:asset_status) => asset_status()
         }
-  @spec update_client_status(LT.Types.id(), T.userid(), client_status_update_data()) ::
+  @spec update_client_status(LT.Types.id(), User.id(), client_status_update_data()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :not_a_player}
   def update_client_status(lobby_id, user_id, update_data) do
     call_lobby(lobby_id, {:update_client_status, user_id, update_data})
@@ -183,7 +183,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec add_bot(
           LT.Types.id(),
-          T.userid(),
+          User.id(),
           ally_team :: non_neg_integer(),
           short_name :: String.t(),
           add_bot_opts()
@@ -235,19 +235,19 @@ defmodule Teiserver.TachyonLobby.Lobby do
   @doc """
   Update lobby properties, like ally team config, names and whatnot
   """
-  @spec update_properties(LT.Types.id(), T.userid(), lobby_update_data()) ::
+  @spec update_properties(LT.Types.id(), User.id(), lobby_update_data()) ::
           :ok | {:error, :invalid_lobby | term()}
   def update_properties(lobby_id, user_id, update_data) do
     call_lobby(lobby_id, {:update_properties, user_id, update_data})
   end
 
-  @spec vote_submit(LT.Types.id(), T.userid(), {String.t(), LT.VoteState.vote_ballot()}) ::
+  @spec vote_submit(LT.Types.id(), User.id(), {String.t(), LT.VoteState.vote_ballot()}) ::
           :ok | {:error, :invalid_lobby | :invalid_vote}
   def vote_submit(lobby_id, user_id, ballot) do
     call_lobby(lobby_id, {:vote_submit, user_id, ballot})
   end
 
-  @spec send_message(LT.Types.id(), T.userid(), String.t()) ::
+  @spec send_message(LT.Types.id(), User.id(), String.t()) ::
           :ok | {:error, :invalid_request, reason :: term()}
   def send_message(lobby_id, from_id, msg_content) do
     call_lobby(lobby_id, {:send_message, from_id, msg_content})
@@ -262,24 +262,24 @@ defmodule Teiserver.TachyonLobby.Lobby do
     via_tuple(lobby_id) |> :gen_statem.call(:get_start_script, @default_call_timeout)
   end
 
-  @spec join_queue(LT.Types.id(), T.userid()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
+  @spec join_queue(LT.Types.id(), User.id()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}
   def join_queue(lobby_id, user_id) do
     call_lobby(lobby_id, {:join_queue, user_id})
   end
 
-  @spec appoint_boss(LT.Types.id(), T.userid(), appointee_id :: T.userid()) ::
+  @spec appoint_boss(LT.Types.id(), User.id(), appointee_id :: User.id()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
   def appoint_boss(lobby_id, user_id, appointee_id) do
     call_lobby(lobby_id, {:appoint_boss, user_id, appointee_id})
   end
 
-  @spec unboss(LT.Types.id(), T.userid(), boss_id :: T.userid()) ::
+  @spec unboss(LT.Types.id(), User.id(), boss_id :: User.id()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
   def unboss(lobby_id, user_id, boss_id) do
     call_lobby(lobby_id, {:unboss, user_id, boss_id})
   end
 
-  @spec start_battle(LT.Types.id(), T.userid()) ::
+  @spec start_battle(LT.Types.id(), User.id()) ::
           :ok | {:error, reason :: :not_in_lobby | :battle_already_started | term()}
   def start_battle(lobby_id, user_id) do
     call_lobby(lobby_id, {:start_battle, user_id})
@@ -1884,7 +1884,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> elem(1)
   end
 
-  @spec remove_player_from_lobby(T.userid(), LT.Data.t()) :: LT.Data.t()
+  @spec remove_player_from_lobby(User.id(), LT.Data.t()) :: LT.Data.t()
   defp remove_player_from_lobby(user_id, %LT.Data{} = state) do
     # if the user leaving is associated with any bot, we need to remove all of
     # them as well.
@@ -1904,7 +1904,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     aggregate.data
   end
 
-  @spec remove_spectator_from_lobby(T.userid(), LT.Data.t()) :: LT.Data.t()
+  @spec remove_spectator_from_lobby(User.id(), LT.Data.t()) :: LT.Data.t()
   defp remove_spectator_from_lobby(user_id, %LT.Data{} = state) do
     bot_ids_to_remove =
       Enum.filter(state.players, fn {_bot_id, b} -> Map.get(b, :host_user_id) == user_id end)
@@ -2015,7 +2015,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> Map.merge(Map.take(state, [:game_options]))
   end
 
-  @spec update_property(atom(), term(), LT.Data.t(), T.userid()) ::
+  @spec update_property(atom(), term(), LT.Data.t(), User.id()) ::
           {:ok, [event()]} | {:error, String.t()}
   defp update_property(:name, new_name, _state, _user_id) do
     # we can expand lobby name validation later with LobbyRestrictions
