@@ -48,7 +48,18 @@ defmodule TeiserverWeb.Telemetry do
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
       summary("vm.total_run_queue_lengths.total"),
       summary("vm.total_run_queue_lengths.cpu"),
-      summary("vm.total_run_queue_lengths.io")
+      summary("vm.total_run_queue_lengths.io"),
+
+      # Moderation
+      distribution(
+        [:moderation, :message_severity],
+        event_name: [:teiserver, :moderation, :message_severity, :stop],
+        measurement: :duration,
+        reporter_options: [
+          buckets: [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181]
+        ],
+        tags: [:matched]
+      )
     ] ++
       TeiserverTelemetry.metrics()
 
