@@ -6,7 +6,10 @@ services:
       dockerfile: Dockerfile.dev
     container_name: teiserver
     ports:
-      - "4000:4000"
+      - "4000:4000" # TEI Spring TCP
+      - "8000:8000" # Spring TCP
+      - "8001:8001" # Spring TCP (TLS)
+      - "4001:4001" # Metrics server
     depends_on:
       - database
       - mailserver
@@ -75,7 +78,7 @@ services:
       #- TEI_METRICS_SERVER_PORT=4001
 
   database:
-    image: postgres:latest
+    image: postgres:17.10
     container_name: teiserver-database
     environment:
       - POSTGRES_DB=teiserver_dev
