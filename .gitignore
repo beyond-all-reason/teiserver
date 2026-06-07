@@ -51,6 +51,10 @@ runtime/
 /priv/static/**/*.gz
 /priv/static/cache_manifest.json
 
+# Devcontainer
+/.devcontainer/.setup_complete
+/containers/database/
+
 # Other
 /assets/static/images/landing/*
 /assets/static/images/logo/*
