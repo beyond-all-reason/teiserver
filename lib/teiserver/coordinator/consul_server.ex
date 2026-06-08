@@ -30,7 +30,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password?)
-  @boss_commands ~w(balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
+  @boss_commands ~w(balancealgorithm gatekeeper welcome-message reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec lock unlock makebalance set-config-teaser)
   @admin_commands ~w(shuffle)
 

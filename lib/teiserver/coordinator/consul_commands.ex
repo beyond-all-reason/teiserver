@@ -11,7 +11,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.ConsulServer
-  alias Teiserver.Coordinator.RikerssMemes
   alias Teiserver.Lobby
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.Lobby.LobbyLib
@@ -1681,21 +1680,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{state | bans: new_bans}
         |> ConsulServer.broadcast_update("ban")
     end
-  end
-
-  def handle_command(%{command: "meme", remaining: meme, senderid: senderid}, state) do
-    meme = String.downcase(meme)
-
-    msg = RikerssMemes.handle_meme(meme, senderid, state)
-
-    if not Enum.empty?(msg) do
-      Lobby.list_lobby_players!(state.lobby_id)
-      |> Enum.each(fn playerid ->
-        CacheUser.send_direct_message(state.coordinator_id, playerid, msg)
-      end)
-    end
-
-    state
   end
 
   def handle_command(%{command: "reset"} = _cmd, state) do
