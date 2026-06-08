@@ -9,14 +9,16 @@ defmodule Teiserver.Lobby.LobbyLibTest do
     end
 
     test "rejects name over character limit" do
-      limit = LobbyLib.max_name_length()
-      result = String.duplicate("a", limit + 1) |> LobbyLib.validate_name()
-
-      assert {:error, _msg} = result
+      name = String.duplicate("a", LobbyLib.max_name_length() + 1)
+      assert {:error, _msg} = LobbyLib.validate_name(name)
     end
 
     test "rejects name with invalid characters" do
-      assert {:error, _msg} = LobbyLib.validate_name("invalid char: =")
+      assert {:error, _msg} = LobbyLib.validate_name("invalid: =")
+    end
+
+    test "rejects name with flagged words" do
+      assert {:error, _msg} = LobbyLib.validate_name("cun7")
     end
   end
 end

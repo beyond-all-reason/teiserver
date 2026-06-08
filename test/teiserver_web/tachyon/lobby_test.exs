@@ -50,6 +50,22 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"status" => "failed", "reason" => "invalid_request", "details" => "already_in_lobby"} =
         Tachyon.create_lobby!(client, lobby_data2)
     end
+
+    test "cannot create lobby with invalid name", %{client: client} do
+      data = %{
+        name: "",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
+      }
+
+      response = Tachyon.create_lobby!(client, data)
+
+      assert %{
+               "status" => "failed",
+               "reason" => "invalid_request",
+               "details" => "Cannot create lobby:" <> _message
+             } = response
+    end
   end
 
   describe "join lobby" do

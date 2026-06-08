@@ -942,6 +942,13 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, %{name: "new name"}}}
     end
 
+    test "name must be valid" do
+      {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 1]) |> Lobby.create()
+
+      {:error, _error} = Lobby.update_properties(id, @default_user_id, %{name: "="})
+    end
+
     test "map name" do
       {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()

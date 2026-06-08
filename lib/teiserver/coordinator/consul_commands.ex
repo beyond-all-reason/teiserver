@@ -1245,7 +1245,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     lobby = Lobby.get_lobby(state.lobby_id)
 
     name_validation_error =
-      case LobbyLib.validate_name(new_name, true) do
+      case LobbyLib.validate_name(new_name, hints: true) do
         {:error, error} ->
           error
 

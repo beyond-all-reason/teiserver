@@ -5,6 +5,7 @@ defmodule Teiserver.TachyonLobby do
 
   alias Teiserver.Account.User
   alias Teiserver.Asset
+  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
   alias Teiserver.TachyonLobby.Types, as: LT
@@ -45,9 +46,21 @@ defmodule Teiserver.TachyonLobby do
   end
 
   def create(%LT.StartParams{} = start_params) do
-    with {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
+    with :ok <- validate_start_params(start_params),
+         {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
          {:ok, %LT.Details{} = details} <- Lobby.get_details(id) do
       {:ok, pid, details}
+    end
+  end
+
+  @spec validate_start_params(start_params()) :: :ok | {:error, term()}
+  defp validate_start_params(%LT.StartParams{} = start_params) do
+    case LobbyLib.validate_name(start_params.name) do
+      {:error, error} ->
+        {:error, "Cannot create lobby: #{error}"}
+
+      :ok ->
+        :ok
     end
   end
 
