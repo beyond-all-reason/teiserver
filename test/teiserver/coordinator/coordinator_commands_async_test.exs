@@ -1,4 +1,4 @@
-defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
+defmodule Teiserver.Coordinator.CoordinatorCommandsAsyncTest do
   alias Teiserver.Coordinator.CoordinatorCommands
 
   use ExUnit.Case, async: true
