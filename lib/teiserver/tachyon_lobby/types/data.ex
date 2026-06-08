@@ -61,6 +61,6 @@ defmodule Teiserver.TachyonLobby.Types.Data do
           vote_idx: integer(),
           current_vote: LT.VoteState.t() | nil,
           vote_history: %{String.t() => LT.VoteRecord.t()},
-          banned_users: %{User.id() => DateTime.t()},
+          banned_users: %{User.id() => DateTime.t()}
         }
 end

@@ -1243,7 +1243,7 @@ defmodule Teiserver.Player.Session do
     result = TachyonLobby.kickban(state.lobby.id, state.user.id, target_id, ban_until)
     {:reply, result, state}
   end
-  
+
   def handle_call({:lobby, :appoint_boss, _appointee_id}, _from, state)
       when is_nil(state.lobby),
       do: {:reply, {:error, :not_in_lobby}, state}
