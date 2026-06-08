@@ -25,7 +25,7 @@ defmodule Teiserver.IpCheck.Api do
   end
 
   defp get_api_endpoint do
-    endpoint = Config.get_site_config_cache("teiserver.External IP check key")
+    endpoint = Config.get_site_config_cache("teiserver.External IP check endpoint")
 
     if endpoint != nil || endpoint != "",
       do: {:ok, endpoint},

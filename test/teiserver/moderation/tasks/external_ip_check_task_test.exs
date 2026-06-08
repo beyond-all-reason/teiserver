@@ -1,6 +1,5 @@
 defmodule Teiserver.Moderation.Tasks.ExternalIpCheckTaskTest do
   alias ExUnit.Callbacks
-
   alias Teiserver.Config
   alias Teiserver.IpCheck.Stub
   alias Teiserver.Moderation.Tasks.ExternalIPCheckTask
@@ -10,6 +9,10 @@ defmodule Teiserver.Moderation.Tasks.ExternalIpCheckTaskTest do
   import ExUnit.CaptureLog
 
   describe "return ban reason when config enabled" do
+    setup do
+      setup_config("teiserver.External IP check enabled", true)
+    end
+
     test "abuser" do
       setup_config("teiserver.external_ip_ban_is_abuser", true)
       assert ExternalIPCheckTask.get_ban_reasons(Stub.abuser_ip()) == [:is_abuser]
