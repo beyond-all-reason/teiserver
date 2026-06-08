@@ -37,7 +37,8 @@ defmodule Teiserver.TachyonLobby.Types.Data do
     ids_to_rejoin: MapSet.new(),
     vote_idx: 1,
     current_vote: nil,
-    vote_history: %{}
+    vote_history: %{},
+    banned_users: %{}
   ]
 
   @type t() :: %__MODULE__{
@@ -59,6 +60,7 @@ defmodule Teiserver.TachyonLobby.Types.Data do
           ids_to_rejoin: MapSet.t(),
           vote_idx: integer(),
           current_vote: LT.VoteState.t() | nil,
-          vote_history: %{String.t() => LT.VoteRecord.t()}
+          vote_history: %{String.t() => LT.VoteRecord.t()},
+          banned_users: %{User.id() => DateTime.t()},
         }
 end

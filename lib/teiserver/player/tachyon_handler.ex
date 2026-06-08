@@ -246,6 +246,16 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "lobby/left", %{id: lobby_id, reason: reason}, state}
   end
 
+  def handle_info({:lobby, lobby_id, {:left, reason, ban_until}}, state) do
+    data =
+      case ban_until do
+        nil -> %{id: lobby_id, reason: reason}
+        dt -> %{id: lobby_id, reason: reason, bannedUntil: DateTime.to_unix(dt, :microsecond)}
+      end
+
+    {:event, "lobby/left", data, state}
+  end
+
   def handle_info({:lobby_list, {:add_lobby, lobby_id, %LT.ListOverview{} = overview}}, state) do
     data = %{lobbies: %{lobby_id => lobby_overview_to_tachyon(lobby_id, overview)}}
     {:event, "lobby/listUpdated", data, state}
@@ -1012,6 +1022,17 @@ defmodule Teiserver.Player.TachyonHandler do
     {:response, state}
   end
 
+  def handle_command("lobby/kickban", "request", _msg_id, %{"data" => data}, state) do
+    target_id = data["userId"]
+    ban_until = parse_ban_until(data["banUntil"])
+
+      case Session.lobby_kickban(state.user.id, target_id, ban_until) do
+        :ok -> {:response, state}
+        {:error, :unauthorized} -> {:error_response, :unauthorized, state}
+        {:error, reason} -> {:error_response, :invalid_request, to_string(reason), state}
+      end
+  end
+
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
   end
@@ -1433,6 +1454,14 @@ defmodule Teiserver.Player.TachyonHandler do
       end
     else
       %{}
+    end
+  end
+
+  defp parse_ban_until(nil), do: nil
+  defp parse_ban_until(ts) do
+    case DateTime.from_unix(ts, :microsecond) do
+      {:ok, dt} -> if DateTime.compare(dt, DateTime.utc_now()) == :gt, do: dt, else: nil
+      _ -> nil
     end
   end
 end

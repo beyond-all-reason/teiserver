@@ -1,0 +1,46 @@
+{
+  "$id": "https://schema.beyondallreason.dev/tachyon/lobby/kickban/request.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LobbyKickbanRequest",
+  "tachyon": {
+    "source": "user",
+    "target": "server",
+    "scopes": [
+      "tachyon.lobby"
+    ]
+  },
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "request"
+    },
+    "messageId": {
+      "type": "string"
+    },
+    "commandId": {
+      "const": "lobby/kickban"
+    },
+    "data": {
+      "title": "LobbyKickbanRequestData",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "$ref": "../../definitions/userId.json"
+        },
+        "banUntil": {
+          "$ref": "../../definitions/unixTime.json",
+          "description": "omit this field (or set it in the past) to merely kick the player"
+        }
+      },
+      "required": [
+        "userId"
+      ]
+    }
+  },
+  "required": [
+    "type",
+    "messageId",
+    "commandId",
+    "data"
+  ]
+}

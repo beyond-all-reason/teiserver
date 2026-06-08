@@ -1,7 +1,7 @@
 {
-  "$id": "https://schema.beyondallreason.dev/tachyon/lobby/join/response.json",
+  "$id": "https://schema.beyondallreason.dev/tachyon/lobby/kickban/response.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "LobbyJoinResponse",
+  "title": "LobbyKickbanResponse",
   "tachyon": {
     "source": "server",
     "target": "user",
@@ -11,7 +11,7 @@
   },
   "anyOf": [
     {
-      "title": "LobbyJoinOkResponse",
+      "title": "LobbyKickbanOkResponse",
       "type": "object",
       "properties": {
         "type": {
@@ -21,26 +21,21 @@
           "type": "string"
         },
         "commandId": {
-          "const": "lobby/join"
+          "const": "lobby/kickban"
         },
         "status": {
           "const": "success"
-        },
-        "data": {
-          "$ref": "../../definitions/lobbyDetails.json",
-          "title": "LobbyJoinOkResponseData"
         }
       },
       "required": [
         "type",
         "messageId",
         "commandId",
-        "status",
-        "data"
+        "status"
       ]
     },
     {
-      "title": "LobbyJoinFailResponse",
+      "title": "LobbyKickbanFailResponse",
       "type": "object",
       "properties": {
         "type": {
@@ -50,15 +45,13 @@
           "type": "string"
         },
         "commandId": {
-          "const": "lobby/join"
+          "const": "lobby/kickban"
         },
         "status": {
           "const": "failed"
         },
         "reason": {
           "enum": [
-            "lobby_full",
-            "banned",
             "internal_error",
             "unauthorized",
             "invalid_request",
