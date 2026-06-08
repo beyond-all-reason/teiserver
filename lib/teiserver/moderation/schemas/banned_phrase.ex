@@ -2,7 +2,7 @@ defmodule Teiserver.Moderation.BannedPhrase do
   @moduledoc """
   A phrase banned in the game which could warrant an action if detected.
 
-  All tests are checked as case sensitive.
+  All tests are checked as case insensitive.
 
   Types:
     raw - if the phrase is present in the message it will trigger
@@ -93,7 +93,7 @@ defmodule Teiserver.Moderation.BannedPhrase do
   """
   @spec load_phrase(BannedPhrase.t()) :: BannedPhrase.t()
   def load_phrase(%BannedPhrase{type: :regex, phrase: phrase} = banned_phrase) do
-    {:ok, compiled_phrase} = Regex.compile(phrase)
+    {:ok, compiled_phrase} = Regex.compile(phrase, "i")
     %BannedPhrase{banned_phrase | loaded_phrase: compiled_phrase}
   end
 
@@ -103,12 +103,12 @@ defmodule Teiserver.Moderation.BannedPhrase do
       |> Regex.escape()
       |> String.replace("\\*", ".*")
 
-    {:ok, compiled_phrase} = Regex.compile(pattern)
+    {:ok, compiled_phrase} = Regex.compile(pattern, "i")
     %BannedPhrase{banned_phrase | loaded_phrase: compiled_phrase}
   end
 
   def load_phrase(%BannedPhrase{phrase: phrase} = banned_phrase) do
-    %BannedPhrase{banned_phrase | loaded_phrase: phrase}
+    %BannedPhrase{banned_phrase | loaded_phrase: String.downcase(phrase)}
   end
 
   @doc """
@@ -156,7 +156,9 @@ defmodule Teiserver.Moderation.BannedPhrase do
   """
   @spec phrase_match?(BannedPhrase.t(), String.t()) :: boolean()
   def phrase_match?(%BannedPhrase{type: :raw, loaded_phrase: loaded_phrase}, message) do
-    String.contains?(message, loaded_phrase)
+    message
+    |> String.downcase()
+    |> String.contains?(loaded_phrase)
   end
 
   def phrase_match?(%BannedPhrase{type: type, loaded_phrase: loaded_phrase}, message)

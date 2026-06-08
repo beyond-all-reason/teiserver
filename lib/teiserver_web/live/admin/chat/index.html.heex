@@ -12,6 +12,36 @@
             phx-debounce="400"
             autofocus={true}
           />
+          <div class="form-check">
+            <input name="case-sensitive" type="hidden" value="false" />
+            <input
+              name="case-sensitive"
+              id="case-sensitive"
+              class="form-check-input"
+              type="checkbox"
+              value="true"
+              checked={@filters["case-sensitive"] == "true"}
+              phx-change="filter-update"
+            />
+            <label class="form-check-label" for="case-sensitive">
+              <strong>Case sensitive</strong>
+            </label>
+          </div>
+          <div class="form-check">
+            <input name="whole-word" type="hidden" value="false" />
+            <input
+              name="whole-word"
+              id="whole-word"
+              class="form-check-input"
+              type="checkbox"
+              value="true"
+              checked={@filters["whole-word"] == "true"}
+              phx-change="filter-update"
+            />
+            <label class="form-check-label" for="whole-word">
+              <strong>Whole word</strong>
+            </label>
+          </div>
         </div>
 
         <div class="col">
@@ -77,58 +107,60 @@
     </div>
 
     <div :if={not Enum.empty?(@messages)}>
-      <table
-        :if={@filters["message-format"] == "Table"}
-        class="table table-sm table-hover"
-        id="rich-text-block"
-      >
-        <thead>
-          <tr>
-            <th :if={@filters["mode"] != "Direct"}>Location</th>
-            <th :if={@filters["mode"] == "Direct"}>Sender</th>
-            <th :if={@filters["mode"] == "Direct"}>Receiver</th>
-            <th :if={@filters["mode"] != "Direct"}>Sender</th>
-            <th>Message</th>
-            <th>When</th>
-          </tr>
-        </thead>
-        <tbody>
-          <%= for msg <- @messages do %>
+      <div class="table-responsive">
+        <table
+          :if={@filters["message-format"] == "Table"}
+          class="table table-sm table-hover"
+          id="rich-text-block"
+        >
+          <thead>
             <tr>
-              <td :if={@filters["mode"] == "Lobby"}>
-                <a href={~p"/battle/chat/#{msg.match_id}/#{msg.user_id}"}>
-                  {msg.match_id}
-                </a>
-              </td>
-              <td :if={@filters["mode"] == "Room"}>
-                {msg.chat_room}
-              </td>
-              <td :if={@filters["mode"] == "Party"}>
-                Party
-              </td>
-
-              <td :if={@filters["mode"] == "Direct"}>
-                <a href={~p"/teiserver/admin/user/#{msg.from_id}"}>
-                  {@usernames[msg.from_id]}
-                </a>
-              </td>
-              <td :if={@filters["mode"] == "Direct"}>
-                <a href={~p"/teiserver/admin/user/#{msg.to_id}"}>
-                  {@usernames[msg.to_id]}
-                </a>
-              </td>
-
-              <td :if={@filters["mode"] != "Direct"}>
-                <a href={~p"/teiserver/admin/user/#{msg.user_id}"}>
-                  {@usernames[msg.user_id]}
-                </a>
-              </td>
-              <td class="message">{msg.content}</td>
-              <td>{date_to_str(msg.inserted_at, :hms_or_hms_ymd)}</td>
+              <th :if={@filters["mode"] != "Direct"}>Location</th>
+              <th :if={@filters["mode"] == "Direct"}>Sender</th>
+              <th :if={@filters["mode"] == "Direct"}>Receiver</th>
+              <th :if={@filters["mode"] != "Direct"}>Sender</th>
+              <th>Message</th>
+              <th>When</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <%= for msg <- @messages do %>
+              <tr>
+                <td :if={@filters["mode"] == "Lobby"}>
+                  <a href={~p"/battle/chat/#{msg.match_id}/#{msg.user_id}"}>
+                    {msg.match_id}
+                  </a>
+                </td>
+                <td :if={@filters["mode"] == "Room"}>
+                  {msg.chat_room}
+                </td>
+                <td :if={@filters["mode"] == "Party"}>
+                  Party
+                </td>
+
+                <td :if={@filters["mode"] == "Direct"}>
+                  <a href={~p"/teiserver/admin/user/#{msg.from_id}"}>
+                    {@usernames[msg.from_id]}
+                  </a>
+                </td>
+                <td :if={@filters["mode"] == "Direct"}>
+                  <a href={~p"/teiserver/admin/user/#{msg.to_id}"}>
+                    {@usernames[msg.to_id]}
+                  </a>
+                </td>
+
+                <td :if={@filters["mode"] != "Direct"}>
+                  <a href={~p"/teiserver/admin/user/#{msg.user_id}"}>
+                    {@usernames[msg.user_id]}
+                  </a>
+                </td>
+                <td class="message" style="word-break: break-word;">{msg.content}</td>
+                <td>{date_to_str(msg.inserted_at, :hms_or_hms_ymd)}</td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
 
       <div :if={@filters["message-format"] == "Raw"} class="row" id="raw-text-block">
         <div class="col-md-12">

@@ -2,6 +2,7 @@ defmodule Teiserver.Chat.DirectMessageLib do
   @moduledoc false
 
   alias Teiserver.Chat.DirectMessage
+  alias Teiserver.Chat.TermSearch
   use TeiserverWeb, :library
 
   # Queries
@@ -53,11 +54,12 @@ defmodule Teiserver.Chat.DirectMessageLib do
       where: direct_messages.id in ^id_list
   end
 
-  def _search(query, :term, ref) do
-    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
+  def _search(query, :term, ref) when is_binary(ref) do
+    _search(query, :term, {ref, []})
+  end
 
-    from direct_messages in query,
-      where: ilike(direct_messages.content, ^ref_like)
+  def _search(query, :term, {ref, opts}) do
+    TermSearch.content_filter(query, ref, opts)
   end
 
   def _search(query, :inserted_after, timestamp) do
