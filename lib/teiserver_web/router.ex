@@ -513,6 +513,15 @@ defmodule TeiserverWeb.Router do
   scope "/moderation", TeiserverWeb.Moderation, as: :moderation do
     pipe_through([:browser, :app_layout, :protected])
 
+    live_session :actions,
+      layout: {TeiserverWeb.Layouts, :moderation},
+      on_mount: [
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Moderator"}}
+      ] do
+      live "/actions/smurf_link/:user_id", ActionLive.SmurfLink, :show
+    end
+
     live_session :banned_domains,
       layout: {TeiserverWeb.Layouts, :moderation},
       on_mount: [

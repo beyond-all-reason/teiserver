@@ -44,6 +44,15 @@
   </a>
 
   <a
+    :if={allow?(@conn, "Moderator")}
+    class="dropdown-item"
+    href={~p"/moderation/actions/smurf_link/#{@user.id}"}
+  >
+    <Fontawesome.icon icon="fa-link" style="solid" /> &nbsp;
+    Smurf link
+  </a>
+
+  <a
     class="dropdown-item"
     href={"#{Routes.moderation_ban_path(@conn, :new_with_user)}?teiserver_user=#{@user.id}"}
   >
