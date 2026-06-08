@@ -1,14 +1,20 @@
 defmodule Teiserver.Moderation.BannedIPTest do
+  alias ExUnit.Callbacks
+  alias Teiserver.Config
   alias Teiserver.Moderation
   alias Teiserver.Moderation.BannedIP
   alias Teiserver.Moderation.LoadBannedIPsTask
 
-  use Teiserver.DataCase, async: true
+  use Teiserver.DataCase, async: false
 
   import IP
   import Teiserver.ModerationFixtures
 
   describe "banned_ip standard utility functions" do
+    setup do
+      setup_config("teiserver.External IP check enabled", true)
+    end
+
     test "list_banned_ips/0 returns all banned_ips" do
       banned_ip = banned_ip_fixture()
       assert Moderation.list_banned_ips() == [banned_ip]
@@ -116,5 +122,11 @@ defmodule Teiserver.Moderation.BannedIPTest do
       assert ip1 == ~i"127.0.0.0/18"
       assert ip2 == ~i"192.128.0.1/22"
     end
+  end
+
+  defp setup_config(key, value) do
+    original_value = Config.get_site_config_cache(key)
+    Config.update_site_config(key, value)
+    Callbacks.on_exit(fn -> Config.update_site_config(key, original_value) end)
   end
 end
