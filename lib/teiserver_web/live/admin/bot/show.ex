@@ -14,8 +14,6 @@ defmodule TeiserverWeb.Admin.BotLive.Show do
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Bots", url: "/teiserver/admin/bot")
       |> assign(:client_secret, nil)
-      |> assign(:confirm_delete, false)
-      |> assign(:credential_to_delete, nil)
 
     {:ok, socket}
   end
@@ -40,13 +38,11 @@ defmodule TeiserverWeb.Admin.BotLive.Show do
   end
 
   @impl LiveView
-  def handle_event("confirm_delete", _params, socket) do
-    {:noreply, assign(socket, :confirm_delete, true)}
-  end
-
-  @impl LiveView
-  def handle_event("cancel_delete", _params, socket) do
-    {:noreply, assign(socket, :confirm_delete, false)}
+  def handle_info({FormComponent, {:saved, bot}}, socket) do
+    {:noreply,
+     socket
+     |> assign(:bot, bot)
+     |> assign(:page_title, page_title(:show, bot))}
   end
 
   @impl LiveView
@@ -61,58 +57,47 @@ defmodule TeiserverWeb.Admin.BotLive.Show do
 
   @impl LiveView
   def handle_event("create_credential", %{"application" => app_id}, socket) do
-    app = ApplicationQueries.get_application_by_id(app_id)
-    client_id = UUID.uuid4()
-    secret = 32 |> :crypto.strong_rand_bytes() |> Base.hex_encode32()
+    case ApplicationQueries.get_application_by_id(app_id) do
+      nil ->
+        {:noreply, put_flash(socket, :error, "Application not found")}
 
-    case OAuth.create_credentials(app, socket.assigns.bot, client_id, secret) do
-      {:ok, _cred} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Credential created")
-         |> assign(:client_secret, secret)
-         |> assign(:credentials, CredentialQueries.for_bot(socket.assigns.bot))}
+      app ->
+        {client_id, secret} = OAuth.generate_client_credentials()
 
-      {:error, err} ->
-        {:noreply, put_flash(socket, :danger, inspect(err))}
+        case OAuth.create_credentials(app, socket.assigns.bot, client_id, secret) do
+          {:ok, _cred} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Credential created")
+             |> assign(:client_secret, secret)
+             |> assign(:credentials, CredentialQueries.for_bot(socket.assigns.bot))}
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            {:noreply, put_flash(socket, :error, inspect(changeset.errors))}
+        end
     end
   end
 
   @impl LiveView
-  def handle_event("confirm_delete_credential", %{"cred_id" => cred_id}, socket) do
-    {:noreply,
-     assign(socket, :credential_to_delete, CredentialQueries.get_credential_by_id(cred_id))}
-  end
+  def handle_event("delete_credential", %{"cred_id" => cred_id}, socket) do
+    case CredentialQueries.get_credential_by_id(cred_id) do
+      nil ->
+        {:noreply, put_flash(socket, :error, "Credential not found")}
 
-  @impl LiveView
-  def handle_event("cancel_delete_credential", _params, socket) do
-    {:noreply, assign(socket, :credential_to_delete, nil)}
-  end
+      cred when cred.bot_id != socket.assigns.bot.id ->
+        {:noreply, put_flash(socket, :error, "Credential doesn't match bot")}
 
-  @impl LiveView
-  def handle_event("delete_credential", _params, socket) do
-    cred = socket.assigns.credential_to_delete
+      cred ->
+        case OAuth.delete_credential(cred) do
+          :ok ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Credential deleted")
+             |> assign(:credentials, CredentialQueries.for_bot(socket.assigns.bot))}
 
-    if cred.bot_id != socket.assigns.bot.id do
-      {:noreply,
-       socket
-       |> put_flash(:danger, "Credential doesn't match bot")
-       |> assign(:credential_to_delete, nil)}
-    else
-      case OAuth.delete_credential(cred) do
-        :ok ->
-          {:noreply,
-           socket
-           |> put_flash(:info, "Credential deleted")
-           |> assign(:credential_to_delete, nil)
-           |> assign(:credentials, CredentialQueries.for_bot(socket.assigns.bot))}
-
-        {:error, err} ->
-          {:noreply,
-           socket
-           |> put_flash(:danger, inspect(err))
-           |> assign(:credential_to_delete, nil)}
-      end
+          {:error, %Ecto.Changeset{} = changeset} ->
+            {:noreply, put_flash(socket, :error, inspect(changeset.errors))}
+        end
     end
   end
 

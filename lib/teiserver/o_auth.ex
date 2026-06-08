@@ -420,6 +420,13 @@ defmodule Teiserver.OAuth do
     end
   end
 
+  @spec generate_client_credentials() :: {client_id :: String.t(), secret :: String.t()}
+  def generate_client_credentials do
+    client_id = UUID.uuid4()
+    secret = 32 |> :crypto.strong_rand_bytes() |> Base.hex_encode32()
+    {client_id, secret}
+  end
+
   @doc """
   Given a client_id, an application/app_id a bot/id and a cleartext secret, hash and persist it
   """

@@ -1,5 +1,4 @@
 defmodule TeiserverWeb.Admin.BotLive.Index do
-  alias Teiserver.Bot
   alias Teiserver.BotQueries
   alias Teiserver.OAuth.CredentialQueries
   alias TeiserverWeb.Admin.BotLive.FormComponent
@@ -17,7 +16,6 @@ defmodule TeiserverWeb.Admin.BotLive.Index do
       |> add_breadcrumb(name: "Bots", url: "/teiserver/admin/bot")
       |> stream(:bots, bots)
       |> assign(:cred_counts, cred_count)
-      |> assign(:bot_to_delete, nil)
 
     {:ok, socket}
   end
@@ -33,16 +31,16 @@ defmodule TeiserverWeb.Admin.BotLive.Index do
     |> assign(:bot, %Teiserver.Bot.Bot{})
   end
 
-  defp apply_action(socket, :edit, %{"id" => id}) do
-    case Bot.get_by_id(id) do
+  defp apply_action(socket, :delete, %{"id" => id}) do
+    case BotQueries.get_by_id(id) do
       nil ->
         socket
         |> put_flash(:error, "Bot not found")
-        |> push_navigate(to: ~p"/teiserver/admin/bot")
+        |> push_patch(to: ~p"/teiserver/admin/bot")
 
       bot ->
         socket
-        |> assign(:page_title, "Edit bot")
+        |> assign(:page_title, "Delete bot")
         |> assign(:bot, bot)
     end
   end
@@ -59,23 +57,14 @@ defmodule TeiserverWeb.Admin.BotLive.Index do
   end
 
   @impl LiveView
-  def handle_event("confirm_delete", %{"id" => id}, socket) do
-    {:noreply, assign(socket, :bot_to_delete, Bot.get_by_id(id))}
-  end
-
-  @impl LiveView
-  def handle_event("cancel_delete", _params, socket) do
-    {:noreply, assign(socket, :bot_to_delete, nil)}
-  end
-
-  @impl LiveView
   def handle_event("delete", _params, socket) do
-    bot = socket.assigns.bot_to_delete
-    :ok = Bot.delete(bot)
+    bot = socket.assigns.bot
+    :ok = Teiserver.Bot.delete(bot)
 
     {:noreply,
      socket
      |> stream_delete(:bots, bot)
-     |> assign(:bot_to_delete, nil)}
+     |> put_flash(:info, "Bot deleted")
+     |> push_patch(to: ~p"/teiserver/admin/bot")}
   end
 end

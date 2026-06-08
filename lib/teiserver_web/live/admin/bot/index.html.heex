@@ -16,42 +16,34 @@
     </.link>
   </:action>
   <:action :let={{_id, bot}}>
-    <.link patch={~p"/teiserver/admin/bot/#{bot.id}/edit"} class="btn btn-secondary btn-sm">
-      Edit
-    </.link>
-  </:action>
-  <:action :let={{_id, bot}}>
-    <.link
-      phx-click={JS.push("confirm_delete", value: %{id: bot.id})}
-      class="btn btn-danger btn-sm"
-    >
+    <.link patch={~p"/teiserver/admin/bot/#{bot.id}/delete"} class="btn btn-danger btn-sm">
       Delete
     </.link>
   </:action>
 </.table>
 
 <.modal
-  :if={@bot_to_delete}
+  :if={@live_action == :delete && @bot}
   id="confirm-delete-modal"
   show
-  on_cancel={JS.push("cancel_delete")}
+  on_cancel={JS.patch(~p"/teiserver/admin/bot")}
   on_confirm={JS.push("delete")}
 >
-  <:title>Delete bot {@bot_to_delete.name}?</:title>
+  <:title>Delete bot {@bot.name}?</:title>
   <:subtitle>This action cannot be undone.</:subtitle>
   <:confirm>Yes, delete</:confirm>
   <:cancel>Cancel</:cancel>
 </.modal>
 
 <.modal
-  :if={@live_action in [:new, :edit]}
+  :if={@live_action == :new}
   id="bot-form-modal"
   show
   on_cancel={JS.patch(~p"/teiserver/admin/bot")}
 >
   <.live_component
     module={FormComponent}
-    id={@bot.id || :new}
+    id={:new}
     title={@page_title}
     action={@live_action}
     bot={@bot}

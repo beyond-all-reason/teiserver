@@ -50,11 +50,11 @@ defmodule TeiserverWeb.Admin.BotLive.FormComponent do
 
     {:noreply,
      socket
-     |> put_flash(:info, "Saved!")
+     |> put_flash(:info, "Bot saved correctly")
      |> push_patch(to: socket.assigns.patch)}
   end
 
-  defp save(socket, {:error, changeset}) do
+  defp save(socket, {:error, %Ecto.Changeset{} = changeset}) do
     {:noreply, assign(socket, form: to_form(changeset))}
   end
 end

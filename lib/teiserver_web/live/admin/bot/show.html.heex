@@ -4,18 +4,16 @@
     <.link patch={~p"/teiserver/admin/bot/#{@bot.id}/edit"} phx-click={JS.push_focus()}>
       <.button>Edit</.button>
     </.link>
-    <.button phx-click="confirm_delete" class="btn-danger">
+    <.button phx-click={show_modal("confirm-delete-bot")} class="btn-danger">
       Delete bot
     </.button>
   </:actions>
 </.header>
 
 <.modal
-  :if={@confirm_delete}
-  id="confirm-delete-modal"
-  show
-  on_cancel={JS.push("cancel_delete")}
-  on_confirm={JS.push("delete_bot")}
+  id="confirm-delete-bot"
+  on_cancel={hide_modal("confirm-delete-bot")}
+  on_confirm={JS.push("delete_bot") |> hide_modal("confirm-delete-bot")}
 >
   <:title>Delete bot {@bot.name}?</:title>
   <:subtitle>This action cannot be undone. All credentials will also be deleted.</:subtitle>
@@ -39,7 +37,8 @@
     <:col :let={cred} label="Scopes">{Enum.join(cred.application.scopes, ", ")}</:col>
     <:action :let={cred}>
       <.link
-        phx-click={JS.push("confirm_delete_credential", value: %{cred_id: cred.id})}
+        phx-click={JS.push("delete_credential", value: %{cred_id: cred.id})}
+        data-confirm="Are you sure you want to delete this credential?"
         class="btn btn-danger btn-sm"
       >
         Delete
@@ -47,19 +46,6 @@
     </:action>
   </.table>
 <% end %>
-
-<.modal
-  :if={@credential_to_delete}
-  id="confirm-delete-credential-modal"
-  show
-  on_cancel={JS.push("cancel_delete_credential")}
-  on_confirm={JS.push("delete_credential")}
->
-  <:title>Delete credential?</:title>
-  <:subtitle>This credential will be permanently removed.</:subtitle>
-  <:confirm>Yes, delete</:confirm>
-  <:cancel>Cancel</:cancel>
-</.modal>
 
 <h2>Create credential</h2>
 <form phx-submit="create_credential">

@@ -77,28 +77,27 @@ defmodule TeiserverWeb.Admin.BotLiveTest do
       assert_patch(live, ~p"/teiserver/admin/bot")
 
       html = render(live)
-      assert html =~ "Saved!"
+      assert html =~ "Bot saved correctly"
       assert html =~ "new test bot"
 
       assert Enum.any?(BotQueries.list_bots(), &(&1.name == "new test bot"))
     end
 
-    test "deletes bot with confirmation", %{conn: conn} do
+    test "deletes bot with confirmation modal", %{conn: conn} do
       bot = BotFixtures.create_bot("bot to delete")
       {:ok, live, _html} = live(conn, ~p"/teiserver/admin/bot")
 
       assert render(live) =~ "bot to delete"
 
-      live
-      |> element("#bots-#{bot.id} a", "Delete")
-      |> render_click()
-
+      live |> element("a", "Delete") |> render_click()
+      assert_patch(live, ~p"/teiserver/admin/bot/#{bot.id}/delete")
       assert render(live) =~ "Delete bot bot to delete?"
 
       live
       |> element("#confirm-delete-modal-confirm")
       |> render_click()
 
+      assert_patch(live, ~p"/teiserver/admin/bot")
       refute render(live) =~ "bot to delete"
       assert is_nil(Bot.get_by_id(bot.id))
     end
@@ -145,22 +144,17 @@ defmodule TeiserverWeb.Admin.BotLiveTest do
       |> form("#bot-form", bot: %{name: "updated name"})
       |> render_submit()
 
-      assert_patch(live, ~p"/teiserver/admin/bot")
+      assert_patch(live, ~p"/teiserver/admin/bot/#{bot.id}")
 
       html = render(live)
-      assert html =~ "Saved!"
+      assert html =~ "Bot saved correctly"
       assert %Bot.Bot{name: "updated name"} = Bot.get_by_id(bot.id)
     end
 
-    test "deletes bot with confirmation", %{conn: conn, bot: bot} do
+    test "deletes bot", %{conn: conn, bot: bot} do
       {:ok, live, _html} = live(conn, ~p"/teiserver/admin/bot/#{bot.id}")
 
-      live |> element("button", "Delete bot") |> render_click()
-      assert render(live) =~ "Delete bot #{bot.name}?"
-
-      live
-      |> element("#confirm-delete-modal-confirm")
-      |> render_click()
+      render_click(live, "delete_bot")
 
       flash = assert_redirect(live, ~p"/teiserver/admin/bot")
       assert flash["info"] == "Bot deleted"
@@ -171,7 +165,7 @@ defmodule TeiserverWeb.Admin.BotLiveTest do
   describe "Credentials" do
     setup [:auth, :create_bot, :create_app]
 
-    test "creates credential", %{conn: conn, bot: bot, app: app} do
+    test "creates credential with valid hashed secret", %{conn: conn, bot: bot, app: app} do
       {:ok, live, _html} = live(conn, ~p"/teiserver/admin/bot/#{bot.id}")
 
       live
@@ -181,17 +175,7 @@ defmodule TeiserverWeb.Admin.BotLiveTest do
       html = render(live)
       assert html =~ "Credential created"
       assert html =~ "Secret only shown once!"
-      assert [_created] = CredentialQueries.for_bot(bot)
-    end
 
-    test "creates credential with valid hashed secret", %{conn: conn, bot: bot, app: app} do
-      {:ok, live, _html} = live(conn, ~p"/teiserver/admin/bot/#{bot.id}")
-
-      live
-      |> form("form[phx-submit=create_credential]", application: app.id)
-      |> render_submit()
-
-      html = render(live)
       [_full, secret] = Regex.run(~r/Secret only shown once! <pre>([^<]+)<\/pre>/, html)
       secret = String.trim(secret)
 
@@ -199,21 +183,13 @@ defmodule TeiserverWeb.Admin.BotLiveTest do
       assert Argon2.verify_pass(secret, cred.hashed_secret)
     end
 
-    test "deletes credential with confirmation", %{conn: conn, bot: bot, app: app} do
-      {:ok, _cred} = OAuth.create_credentials(app, bot, "client_id_1", "secret123")
+    test "deletes credential", %{conn: conn, bot: bot, app: app} do
+      {:ok, cred} = OAuth.create_credentials(app, bot, "client_id_1", "secret123")
       {:ok, live, _html} = live(conn, ~p"/teiserver/admin/bot/#{bot.id}")
 
       assert render(live) =~ "client_id_1"
 
-      live
-      |> element("a", "Delete")
-      |> render_click()
-
-      assert render(live) =~ "Delete credential?"
-
-      live
-      |> element("#confirm-delete-credential-modal-confirm")
-      |> render_click()
+      render_click(live, "delete_credential", %{"cred_id" => to_string(cred.id)})
 
       html = render(live)
       assert html =~ "Credential deleted"
@@ -226,8 +202,7 @@ defmodule TeiserverWeb.Admin.BotLiveTest do
 
       {:ok, live, _html} = live(conn, ~p"/teiserver/admin/bot/#{bot.id}")
 
-      render_hook(live, "confirm_delete_credential", %{"cred_id" => to_string(cred.id)})
-      render_hook(live, "delete_credential", %{})
+      render_click(live, "delete_credential", %{"cred_id" => to_string(cred.id)})
 
       assert render(live) =~ "Bot: #{bot.name}"
       assert [_still_exists] = CredentialQueries.for_bot(other_bot)

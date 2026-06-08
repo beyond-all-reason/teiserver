@@ -708,8 +708,9 @@ defmodule TeiserverWeb.Router do
       ] do
       live "/bot", BotLive.Index, :index
       live "/bot/new", BotLive.Index, :new
-      live "/bot/:id/edit", BotLive.Index, :edit
+      live "/bot/:id/delete", BotLive.Index, :delete
       live "/bot/:id", BotLive.Show, :show
+      live "/bot/:id/edit", BotLive.Show, :edit
     end
 
     get("/asset", AssetController, :index)
