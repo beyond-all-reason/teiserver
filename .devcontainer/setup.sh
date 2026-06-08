@@ -1,9 +1,5 @@
-echo "Installing dependencies..."
-mix deps.get
-
-echo "Setting up database..."
-mix ecto.create
-mix ecto.migrate
+echo "Running initial setup..."
+mix setup
 
 echo "Loading test data..."
 mix teiserver.fakedata
