@@ -12,7 +12,7 @@ defmodule Teiserver.IpCheck.Api do
     with {:ok, endpoint} <- get_api_endpoint(),
          {:ok, key} <- get_api_key(),
          {:ok, %Response{body: body}} <- Req.get(endpoint, params: [q: ip, key: key]) do
-      %IpInfo{
+      result = %IpInfo{
         abuser?: body["is_abuser"],
         bogon?: body["is_bogon"],
         crawler?: body["is_crawler"],
@@ -21,6 +21,8 @@ defmodule Teiserver.IpCheck.Api do
         tor?: body["is_tor"],
         vpn?: body["is_vpn"]
       }
+
+      {:ok, result}
     end
   end
 
