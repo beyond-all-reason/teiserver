@@ -1700,6 +1700,23 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "kickban" do
+    test "banned player cannot rejoin lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+      ban_until = DateTime.add(DateTime.utc_now(), 3600, :second)
+      :ok = Lobby.kickban(id, @default_user_id, "user2", ban_until)
+
+      {:error, :banned} = Lobby.join(id, mk_player("user2"), sink_pid)
+    end
+  end
+
   # note: [test lobby battle]
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the
