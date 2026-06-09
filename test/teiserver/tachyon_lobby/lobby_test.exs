@@ -1715,6 +1715,137 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       {:error, :banned} = Lobby.join(id, mk_player("user2"), sink_pid)
     end
+
+    test "kicked spectator can rejoin lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.kickban(id, @default_user_id, "user2")
+      assert_receive {:lobby, ^id, {:left, "kicked", nil}}
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      refute is_map_key(details.spectators, "user2")
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+    end
+
+    test "player can rejoin lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 0)
+
+      :ok = Lobby.kickban(id, @default_user_id, "user2")
+      assert_receive {:lobby, ^id, {:left, "kicked", nil}}
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      refute is_map_key(details.players, "user2")
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 0)
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert is_map_key(details.players, "user2")
+    end
+
+    test "fails when caller is not in lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:error, :not_in_lobby} = Lobby.kickban(id, "not-in-lobby", "user2")
+    end
+
+    test "fails when target is not in lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:error, :invalid_request} = Lobby.kickban(id, @default_user_id, "user2")
+    end
+
+    test "fails when boss is not enabled" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Lobby.create()
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:error, :no_boss_allowed} = Lobby.kickban(id, @default_user_id, "user2")
+    end
+
+    test "fails when caller is not a boss" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:error, :unauthorized} = Lobby.kickban(id, "user2", @default_user_id)
+    end
+
+    test "starts a vote when no boss and multiple players" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([3, 3])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, sink_pid2} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, sink_pid3} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid2)
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user3"), sink_pid3)
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 0)
+      {:ok, _details} = Lobby.join_ally_team(id, "user3", 0)
+      drain_msg_queue()
+
+      :ok = Lobby.unboss(id, @default_user_id, @default_user_id)
+      drain_msg_queue()
+
+      :ok = Lobby.kickban(id, @default_user_id, "user2")
+
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      assert vote.action == {:kickban, "user2", nil}
+      assert vote.voters[@default_user_id] == :yes
+      assert vote.voters["user2"] == :pending
+      assert vote.voters["user3"] == :pending
+    end
+
+    test "expired ban allows rejoin lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      ban_until = DateTime.add(DateTime.utc_now(), 1, :second)
+      :ok = Lobby.kickban(id, @default_user_id, "user2", ban_until)
+
+      {:error, :banned} = Lobby.join(id, mk_player("user2"), sink_pid)
+
+      Process.sleep(1100)
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+    end
   end
 
   # note: [test lobby battle]
