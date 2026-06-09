@@ -162,8 +162,7 @@ defmodule TeiserverWeb.Admin.BotControllerTest do
       assert conn.status == 400
 
       # cred is still here
-      assert {:ok, cred} = OAuth.get_valid_credentials("client_id", "verysecret")
-      refute is_nil(cred)
+      assert {:ok, _cred} = OAuth.get_valid_credentials("client_id", "verysecret")
     end
   end
 end

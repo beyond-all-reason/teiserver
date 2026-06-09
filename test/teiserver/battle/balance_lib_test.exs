@@ -22,7 +22,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-      assert result = %{has_parties?: false}
+      assert %{has_parties?: false} = result
     end)
   end
 
@@ -40,7 +40,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-      assert result = %{has_parties?: false}
+      assert %{has_parties?: false} = result
     end)
   end
 
@@ -61,7 +61,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-      assert result = %{has_parties?: false}
+      assert %{has_parties?: false} = result
     end)
   end
 
@@ -82,7 +82,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-      assert result = %{has_parties?: false}
+      assert %{has_parties?: false} = result
     end)
   end
 
@@ -105,7 +105,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-      assert result = %{has_parties?: false}
+      assert %{has_parties?: false} = result
     end)
   end
 

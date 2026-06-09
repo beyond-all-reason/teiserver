@@ -136,7 +136,6 @@ defmodule Teiserver.SpringBattleHostTest do
 
     # Check the battle actually got created
     battle = Lobby.get_lobby(lobby_id)
-    assert battle != nil
     assert Enum.empty?(battle.players)
 
     # Now create a user to join the battle
@@ -192,7 +191,6 @@ defmodule Teiserver.SpringBattleHostTest do
     # after kicking a player, it was caused by the host disconnecting
     # and in the process closed out the battle
     battle = Lobby.get_lobby(lobby_id)
-    assert battle != nil
 
     # Adding start rectangles
     assert Enum.empty?(battle.start_areas)

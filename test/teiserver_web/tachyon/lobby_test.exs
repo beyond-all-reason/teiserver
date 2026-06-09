@@ -716,8 +716,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => update}} =
         Tachyon.recv_message!(client)
 
-      assert {:ok, _dt, _offset} =
-               DateTime.from_iso8601(update[lobby_id]["currentBattle"]["startedAt]"])
+      assert is_integer(update[lobby_id]["currentBattle"]["startedAt"])
 
       assert update[lobby_id]["id"] == lobby_id
 

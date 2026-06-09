@@ -47,7 +47,7 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
     ]
 
     result = BalanceLib.create_balance(groups, 2, algorithm: "loser_picks")
-    assert result != nil
+    assert %{has_parties?: true} = result
   end
 
   test "does team have parties" do

@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
 
       assert user.id in Battle.get_lobby_member_list(lobby_id)
 
-      assert Lobby.get_lobby(lobby_id) != nil
+      assert %{id: ^lobby_id} = Lobby.get_lobby(lobby_id)
       Lobby.close_lobby(lobby_id)
       assert Lobby.get_lobby(lobby_id) == nil
     end
@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
              |> element("span[phx-click=join]")
              |> has_element?()
 
-      assert Lobby.get_lobby(lobby_id) != nil
+      assert %{id: ^lobby_id} = Lobby.get_lobby(lobby_id)
       Lobby.close_lobby(lobby_id)
       assert Lobby.get_lobby(lobby_id) == nil
     end
@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
       # Skip client login
 
       lobby_id = TeiserverTestLib.make_lobby(%{name: "OverviewTestFlash"})
-      assert Lobby.get_lobby(lobby_id) != nil
+      assert %{id: ^lobby_id} = Lobby.get_lobby(lobby_id)
 
       Battle.force_add_user_to_lobby(profile_user.id, lobby_id)
 

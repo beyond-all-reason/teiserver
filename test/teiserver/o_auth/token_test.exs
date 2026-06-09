@@ -131,7 +131,7 @@ defmodule Teiserver.OAuth.TokenTest do
     {:error, changeset} =
       OAuth.refresh_token(refresh_token, scopes: ["tachyon.lobby", "lolscope"])
 
-    assert Keyword.get(changeset.errors, :scopes) != nil
+    assert Keyword.has_key?(changeset.errors, :scopes)
   end
 
   test "cannot get scopes without correct roles", %{user: user, app: app} do

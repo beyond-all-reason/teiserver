@@ -434,9 +434,9 @@ CLIENTS test_room #{user.name}\n"
 
     # Check our starting situation
     assert UserCacheLib.get_user_by_name(new_name) == nil
-    assert UserCacheLib.get_user_by_name(old_name) != nil
-    assert UserCacheLib.get_user_by_id(userid) != nil
-    assert Client.get_client_by_id(userid) != nil
+    assert %{name: ^old_name} = UserCacheLib.get_user_by_name(old_name)
+    assert %{id: ^userid} = UserCacheLib.get_user_by_id(userid)
+    assert %{userid: ^userid} = Client.get_client_by_id(userid)
 
     # Rename with an invalid name
     _send_raw(socket, "RENAMEACCOUNT Y--Y\n")

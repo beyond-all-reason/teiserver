@@ -41,7 +41,6 @@ defmodule Teiserver.SpringHandleTest do
 
     for v <- values do
       resp = SpringIn.handle(v, state)
-      assert is_map(resp)
       assert Map.has_key?(resp, :user)
       assert Map.has_key?(resp, :lobby_host)
     end
