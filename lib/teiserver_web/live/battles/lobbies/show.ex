@@ -129,18 +129,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       Account.list_clients(id_list)
       |> Map.new(fn c -> {c.userid, c} end)
 
-    # Creates a map where the party_id refers to an integer
-    # but only includes parties with 2 or more members
-    parties =
-      clients
-      |> Enum.map(fn {_userid, c} -> c end)
-      |> Enum.filter(fn c -> c.player end)
-      |> Enum.group_by(fn m -> m.party_id end)
-      |> Map.drop([nil])
-      |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
-      |> Map.keys()
-      |> Enum.zip(StylingHelper.bright_hex_colour_list())
-      |> Map.new()
+    parties = compute_parties(clients)
 
     stats =
       users
@@ -210,7 +199,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
     # Players
 
-    # TODO: This can likely be optimised somewhat
     socket =
       case player_changes do
         [] ->
@@ -218,7 +206,22 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
         _changes ->
           players = Battle.get_lobby_member_list(assigns.id)
-          {users, clients, ratings, parties, stats} = get_user_and_clients(players, consul_state)
+          existing_ids = assigns.users |> Map.keys() |> MapSet.new()
+          new_ids = MapSet.new(players)
+
+          added = MapSet.difference(new_ids, existing_ids) |> MapSet.to_list()
+          removed = MapSet.difference(existing_ids, new_ids)
+
+          {new_users, new_clients, new_ratings, _newparties, new_stats} =
+            get_user_and_clients(added, consul_state)
+
+          users = assigns.users |> Map.drop(MapSet.to_list(removed)) |> Map.merge(new_users)
+          clients = assigns.clients |> Map.drop(MapSet.to_list(removed)) |> Map.merge(new_clients)
+          ratings = assigns.ratings |> Map.drop(MapSet.to_list(removed)) |> Map.merge(new_ratings)
+          stats = assigns.stats |> Map.drop(MapSet.to_list(removed)) |> Map.merge(new_stats)
+
+          # Parties must be still recomputed from the full client set (ordering matters)
+          parties = compute_parties(clients)
 
           new_lobby = Map.put(assigns[:lobby], :players, players)
 
@@ -351,6 +354,18 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     })
 
     {:noreply, socket}
+  end
+
+  defp compute_parties(clients) do
+    clients
+    |> Enum.map(fn {_userid, c} -> c end)
+    |> Enum.filter(fn c -> c.player end)
+    |> Enum.group_by(fn m -> m.party_id end)
+    |> Map.drop([nil])
+    |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
+    |> Map.keys()
+    |> Enum.zip(StylingHelper.bright_hex_colour_list())
+    |> Map.new()
   end
 
   defp get_consul_state(id) when is_number(id) do
