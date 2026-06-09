@@ -2,6 +2,11 @@
 
 This guide should contain all the necessary steps for setting up Teiserver locally.
 
+## Using the devcontainer
+A simple way to get started for a basic local setup  is to use [Visual Studio Code](https://code.visualstudio.com/) 
+(vscode) together with the [devcontainers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+plugin. This will start a [Docker](https://www.docker.com/products/docker-desktop/) container with all the requirements pre-installed.
+
 ## Using mise
 
 You can use [mise](https://mise.jdx.dev/dev-tools/) to automatically manage the

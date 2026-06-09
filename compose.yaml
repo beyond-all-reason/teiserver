@@ -1,15 +1,105 @@
 services:
 
-  # dev version of an smtp server so we can easily test sending emails
-  smtp:
+  teiserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: teiserver
+    ports:
+      - "4000:4000" # TEI Spring TCP
+      - "8000:8000" # Spring TCP
+      - "8001:8001" # Spring TCP (TLS)
+      - "4001:4001" # Metrics server
+    depends_on:
+      - database
+      - mailserver
+    volumes:
+      - .:/workspaces/teiserver:cached
+      - teiserver_deps:/workspaces/teiserver/deps
+      - teiserver_build:/workspaces/teiserver/_build
+    environment:
+      # Phoenix server configuration
+      - NODE_ENV=dev
+      - PORT=4000
+      - PHX_SERVER=true
+      # Domain and setup
+      #- TEI_DOMAIN_NAME=beyondallreason.info
+      #- TEI_SETUP_ROOT_KEY=
+      # Blog settings
+      #- TEI_BLOG_ALLOW_UPLOAD=FALSE
+      #- TEI_BLOG_UPLOAD_PATH=
+      #- TEI_BLOG_UPLOAD_EXTENSIONS=".jpg .jpeg .png"
+      # Node configuration
+      #- TEI_NODE_NAME=local
+      # Database settings
+      - TEI_DB_HOSTNAME=database
+      - TEI_DB_NAME=teiserver_dev
+      - TEI_DB_USERNAME=teiserver_dev
+      - TEI_DB_PASSWORD=123456789
+      - TEI_DB_POOL_SIZE=5
+      - TEI_DB_TIMEOUT=5000
+      - TEI_DB_QUEUE_INTERVAL=1000
+      # Origin checking
+      - TEI_SHOULD_CHECK_ORIGIN=false
+      # Port and secrets
+      - TEI_PORT=4000
+      - TEI_HTTP_SECRET_KEY_BASE=6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy
+      # Spring TCP listener
+      #- TEI_SPRING_TCP_PORT=4000
+      # TLS settings
+      #- TEI_TLS_PRIVATE_KEY_PATH=
+      #- TEI_TLS_CERT_PATH=
+      #- TEI_TLS_CA_CERT_PATH=
+      #- TEI_SPRING_TLS_PORT=443
+      #- TEI_TLS_DH_FILE_PATH=/etc/ssl/dhparam.pem
+      # Guardian (authentication)
+      #- TEI_GUARDIAN_ISSUER=teiserver
+      #- TEI_GUARDIAN_SECRET_KEY=
+      # OAuth
+      - TEI_OAUTH_ISSUER=http://localhost:4000
+      # Email integration
+      - TEI_ENABLE_EMAIL_INTEGRATION=true
+      #- TEI_CONTACT_EMAIL_ADDRESS=info@beyondallreason.info
+      #- TEI_NOREPLY_EMAIL_ADDRESS=noreply@beyondallreason.info
+      - TEI_SMTP_SERVER=mailserver
+      - TEI_SMTP_HOSTNAME=mailserver
+      - TEI_SMTP_PORT=1025
+      - TEI_SMTP_USERNAME=teitestuser
+      - TEI_SMTP_PASSWORD=teitestpassword
+      - TEI_SMTP_TLS_VERIFY=false
+      # Logging
+      #- TEI_LOG_ROOT_PATH=/tmp/teiserver
+      # Discord bridge
+      #- TEI_ENABLE_DISCORD_BRIDGE=false
+      #- TEI_DISCORD_BOT_TOKEN=
+      #- TEI_DISCORD_GUILD_ID=
+      #- TEI_DISCORD_BOT_NAME=
+      # Metrics server
+      #- TEI_METRICS_SERVER_PORT=4001
+
+  database:
+    image: postgres:17.10
+    container_name: teiserver-database
+    environment:
+      - POSTGRES_DB=teiserver_dev
+      - POSTGRES_USER=teiserver_dev
+      - POSTGRES_PASSWORD=123456789
+    volumes:
+      - ./containers/database:/var/lib/postgresql
+    restart: unless-stopped
+
+  mailserver:
     image: "axllent/mailpit"
     command: ["--smtp-tls-cert", "sans:localhost", "--smtp-tls-key", "sans:localhost"]
-    container_name: mailpit
+    container_name: teiserver-mailserver
     environment:
       - "MP_SMTP_AUTH_FILE=/tmp/auth"
       - "MP_SMTP_AUTH_ALLOW_INSECURE=true"
     volumes:
       - ./containers/mailpit-auth:/tmp/auth
     ports:
-      - "1025:1025"  # smtp server
       - "8025:8025"  # web UI
+
+volumes:
+  teiserver_deps:
+  teiserver_build:
