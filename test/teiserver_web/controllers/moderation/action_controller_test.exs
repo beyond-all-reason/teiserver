@@ -16,10 +16,14 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   @create_attrs %{
     reason: "some name",
     restrictions: %{"Login" => "Login"},
-    expires: "1 day",
+    duration: "1d",
     score_modifier: "10000"
   }
-  @update_attrs %{reason: "some updated name", restrictions: %{"Warning" => "Warning"}}
+  @update_attrs %{
+    reason: "some updated name",
+    restrictions: %{"Warning" => "Warning"},
+    duration: "7d"
+  }
   @invalid_attrs %{reason: nil, restrictions: %{}}
 
   describe "index" do
@@ -160,7 +164,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   describe "halt action" do
     test "halts chosen action", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
-      assert NaiveDateTime.compare(action.expires, NaiveDateTime.utc_now()) == :gt
+      assert is_nil(action.expires)
 
       conn = put(conn, Routes.moderation_action_path(conn, :halt, action.id))
       assert redirected_to(conn) == Routes.moderation_action_path(conn, :show, action)

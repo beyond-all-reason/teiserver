@@ -2,7 +2,6 @@ defmodule Teiserver.Moderation.Action do
   @moduledoc false
 
   alias Ecto.Changeset
-  alias Teiserver.Helper.DateHelper
 
   use TeiserverWeb, :schema
 
@@ -14,6 +13,7 @@ defmodule Teiserver.Moderation.Action do
     field :restrictions, {:array, :string}
     field :score_modifier, :integer
     field :expires, :naive_datetime
+    field :duration, :integer
 
     field :hidden, :boolean, default: false
 
@@ -31,20 +31,23 @@ defmodule Teiserver.Moderation.Action do
     struct
     |> cast(
       params,
-      ~w(target_id reason restrictions score_modifier expires notes hidden discord_message_id appeal_status)a
+      ~w(target_id reason restrictions score_modifier expires duration notes hidden discord_message_id appeal_status)a
     )
-    |> validate_required(~w(target_id reason restrictions expires score_modifier)a)
+    |> validate_required(~w(target_id reason restrictions duration score_modifier)a)
     |> adjust_restrictions()
     |> validate_length(:restrictions, min: 1)
   end
 
+  # 10 years in seconds
+  @permanent_threshold_seconds 10 * 365 * 24 * 3_600
+
   defp adjust_restrictions(%Ecto.Changeset{} = struct) do
-    years = DateTime.shift(DateTime.utc_now(), year: 10)
-    expires = Changeset.get_field(struct, :expires, [])
+    duration = Changeset.get_field(struct, :duration)
     inbound_restrictions = Changeset.get_field(struct, :restrictions, [])
 
     new_restrictions =
-      if DateHelper.greater_than(expires, years) and Enum.member?(inbound_restrictions, "Login") do
+      if duration && duration >= @permanent_threshold_seconds &&
+           Enum.member?(inbound_restrictions, "Login") do
         ["Permanently banned" | inbound_restrictions] |> Enum.uniq()
       else
         (inbound_restrictions || []) |> List.delete("Permanently banned")

@@ -97,6 +97,11 @@ defmodule Teiserver.Moderation.ActionLib do
 
   def _search(query, :expiry, "All"), do: query
 
+  def _search(query, :expiry, "Pending only") do
+    from actions in query,
+      where: is_nil(actions.expires)
+  end
+
   def _search(query, :expiry, "Completed only") do
     from actions in query,
       where: actions.expires < ^DateTime.utc_now()

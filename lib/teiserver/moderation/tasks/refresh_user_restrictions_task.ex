@@ -66,17 +66,21 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
         |> List.flatten()
         |> Enum.uniq()
 
-      new_restricted_until =
+      expires_dates =
         actions
         |> Enum.map(fn a -> a.expires end)
-        |> List.flatten()
-        |> Enum.reduce(nil, fn
-          dt1, nil ->
-            dt1
+        |> Enum.reject(&is_nil/1)
 
-          dt1, dt2 ->
-            if DateHelper.compare(dt1, dt2) == :lt, do: dt1, else: dt2
-        end)
+      new_restricted_until =
+        case expires_dates do
+          [] ->
+            nil
+
+          dates ->
+            Enum.reduce(dates, fn dt1, dt2 ->
+              if DateHelper.compare(dt1, dt2) == :lt, do: dt1, else: dt2
+            end)
+        end
 
       expires_as_string = new_restricted_until |> Jason.encode!() |> Jason.decode!()
 

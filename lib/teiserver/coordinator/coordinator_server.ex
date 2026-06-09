@@ -16,6 +16,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Teiserver.Coordinator.Parser
   alias Teiserver.Lobby
   alias Teiserver.Moderation
+  alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Room
   alias Teiserver.Telemetry
 
@@ -225,6 +226,31 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           "skylobby is not supported so is not benefiting from new features. Future server improvements are likely to break it; please instead use the official Chobby client available from our website - https://www.beyondallreason.info/download"
         )
       end
+
+      pending_actions =
+        Moderation.list_actions(
+          search: [
+            target_id: userid,
+            expiry: "Pending only"
+          ]
+        )
+
+      db_user =
+        if Enum.empty?(pending_actions) do
+          db_user
+        else
+          now = DateTime.utc_now()
+
+          Enum.each(pending_actions, fn action ->
+            if action.duration do
+              expires = DateTime.add(now, action.duration, :second)
+              Moderation.update_action(action, %{"expires" => expires})
+            end
+          end)
+
+          RefreshUserRestrictionsTask.refresh_user(userid)
+          Account.get_user(userid)
+        end
 
       relevant_restrictions =
         db_user.restrictions
