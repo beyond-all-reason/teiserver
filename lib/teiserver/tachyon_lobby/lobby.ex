@@ -468,7 +468,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(
         {:call, from},
-        {:join, %LT.PlayerJoinData{id: user_id} = _join_data, _pid},
+        {:join, %LT.PlayerJoinData{id: user_id} = join_data, pid},
         _state,
         %LT.Data{} = data
       )
@@ -477,7 +477,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     if ban_expired?(ban_until) do
       data = update_in(data.banned_users, &Map.delete(&1, user_id))
-      {:keep_state, data, [{:postpone, true}]}
+      {:keep_state, data, [{:next_event, {:call, from}, {:join, join_data, pid}}]}
     else
       {:keep_state, data, [{:reply, from, {:error, :banned}}]}
     end
