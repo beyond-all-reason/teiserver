@@ -3,6 +3,7 @@ defmodule Teiserver.Chat.ChatRoomTest do
   alias Teiserver.Chat
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Room
+  alias Teiserver.Support.Polling
 
   use Teiserver.DataCase
 
@@ -122,8 +123,11 @@ defmodule Teiserver.Chat.ChatRoomTest do
 
     send(sink_task.pid, nil)
     Task.await(sink_task)
-    room = Room.get_room(name)
-    assert not MapSet.member?(room.members, 123)
+
+    Polling.poll_until(fn -> Room.get_room(name) end, fn room ->
+      not MapSet.member?(room.members, 123)
+    end)
+
     assert Room.list_rooms() == [{name, 0}]
   end
 
