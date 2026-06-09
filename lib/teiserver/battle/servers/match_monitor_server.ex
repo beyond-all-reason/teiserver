@@ -553,7 +553,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   @impl GenServer
   def terminate(_reason, state) do
-    Client.disconnect(state.userid, "match monitor terminate")
+    Map.get(state, :userid)
+    |> Client.disconnect("match monitor terminate")
   end
 
   @spec get_match_monitor_pid() :: pid() | nil

@@ -498,7 +498,8 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @impl GenServer
   def terminate(_reason, state) do
-    Client.disconnect(state.userid, "bridge terminate")
+    Map.get(state, :userid)
+    |> Client.disconnect("bridge terminate")
   end
 
   @spec get_bridge_pid() :: pid | nil
