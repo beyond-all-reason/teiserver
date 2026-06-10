@@ -782,8 +782,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         _state,
         %LT.Data{} = data
       ) do
-    patch_merge(data.players[bot_id], update_data)
-    data = update_in(data.players[bot_id], &patch_merge(&1, update_data))
+    data = update_in(data.players[bot_id], &Collections.patch_merge(&1, update_data))
     broadcast_update({:update, nil, %{players: %{bot_id => update_data}}}, data)
     {:keep_state, data, [{:reply, from, :ok}]}
   end
@@ -1570,13 +1569,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp process_event({:update_game_options, changes} = ev, aggregate) do
     aggregate
-    |> update_in([:data, Access.key!(:game_options)], &patch_merge(&1, changes))
+    |> update_in([:data, Access.key!(:game_options)], &Collections.patch_merge(&1, changes))
     |> Map.update!(:updates, &[ev | &1])
   end
 
   defp process_event({:update_tags, changes} = ev, aggregate) do
     aggregate
-    |> update_in([:data, Access.key!(:tags)], &patch_merge(&1, changes))
+    |> update_in([:data, Access.key!(:tags)], &Collections.patch_merge(&1, changes))
     |> Map.update!(:updates, &[ev | &1])
   end
 
@@ -2272,22 +2271,5 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
 
     PubSubHelper.broadcast(list_topic(), message)
-  end
-
-  @doc """
-  apply some updates onto a base map according to json merge patch semantics
-
-  This function could be extracted out in a more general module but for now
-  that'll do.
-  """
-  @spec patch_merge(base :: map(), updates :: map()) :: map()
-  def patch_merge(base, updates) do
-    Enum.reduce(updates, base, fn {k, v}, m ->
-      cond do
-        v == nil -> Map.delete(m, k)
-        is_map(v) -> Map.update(m, k, v, &patch_merge(&1, v))
-        true -> Map.put(m, k, v)
-      end
-    end)
   end
 end

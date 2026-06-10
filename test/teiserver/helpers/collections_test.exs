@@ -6,7 +6,7 @@ defmodule Teiserver.Helpers.CollectionsTest do
   alias Teiserver.Helpers.CollectionsTest.TestStruct
   use ExUnit.Case
 
-  import Teiserver.Helpers.Collections, only: [transform_map: 2]
+  import Teiserver.Helpers.Collections, only: [transform_map: 2, patch_merge: 2]
 
   describe "transform map" do
     test "converts keys" do
@@ -121,6 +121,39 @@ defmodule Teiserver.Helpers.CollectionsTest do
       }
 
       assert transform_map(data, spec) == expected
+    end
+  end
+
+  describe "patch merge" do
+    test "update a simple (non map) value" do
+      assert patch_merge(%{key: "s1"}, %{key: "s2"}) == %{key: "s2"}
+
+      result = patch_merge(%{"string-key" => "s1"}, %{"string-key" => "s2"})
+      assert result == %{"string-key" => "s2"}
+    end
+
+    test "can add new keys" do
+      result = patch_merge(%{key: "foo"}, %{other: 2})
+      assert result == %{key: "foo", other: 2}
+    end
+
+    test "can delete keys when value is nil" do
+      result = patch_merge(%{foo: "fooval", bar: "barkey"}, %{bar: nil})
+      assert result == %{foo: "fooval"}
+    end
+
+    test "set map as value when new key" do
+      result = patch_merge(%{}, %{foo: %{key: "val"}})
+      assert result == %{foo: %{key: "val"}}
+    end
+
+    test "can recursively update nested maps" do
+      result =
+        patch_merge(%{foo: %{key: "base-key", foo: "bar"}}, %{
+          foo: %{key: 2, foo: nil, bar: "updated"}
+        })
+
+      assert result == %{foo: %{key: 2, bar: "updated"}}
     end
   end
 end
