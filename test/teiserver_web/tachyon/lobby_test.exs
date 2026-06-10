@@ -1,5 +1,8 @@
 defmodule TeiserverWeb.Tachyon.LobbyTest do
+  alias ExUnit.Callbacks
   alias Teiserver.AssetFixtures
+  alias Teiserver.Player
+  alias Teiserver.Player.Session
   alias Teiserver.Support.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
@@ -600,8 +603,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       {Tachyon, :setup_autohost}
     ]
 
-    test "subscribe list updates", %{client: client} do
-      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+    test "subscribe list updates", %{client: client, user: user} do
+      subscribe_lobby_list!(client, user.id)
 
       %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => %{}}} =
         Tachyon.recv_message!(client)
@@ -684,7 +687,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
 
     test "start battle", %{client: client} = ctx do
-      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+      subscribe_lobby_list!(client, ctx[:user].id)
       %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
 
       # create lobby with another client so that only list updates are sent to
@@ -730,12 +733,12 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       assert update[lobby_id]["currentBattle"] == nil
     end
 
-    test "avoid duplicate subscription", %{client: client} do
+    test "avoid duplicate subscription", %{client: client, user: user} do
       # create lobby with another client so that only list updates are sent to
       # the original client, it makes the tests a bit simpler
       {:ok, ctx2} = Tachyon.setup_client()
 
-      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+      subscribe_lobby_list!(client, user.id)
 
       %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
 
@@ -912,5 +915,18 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       AssetFixtures.create_engine(%{name: "test-lobby-engine", in_matchmaking: true})
 
     {:ok, game: game, engine: engine}
+  end
+
+  defp subscribe_lobby_list!(client, user_id) do
+    %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+    Callbacks.start_link_supervised!({Task, fn -> continuously_flush_list_updates(user_id) end})
+  end
+
+  defp continuously_flush_list_updates(user_id) do
+    Player.lookup_session(user_id)
+    |> Session.flush_lobby_list_updates()
+
+    :timer.sleep(10)
+    continuously_flush_list_updates(user_id)
   end
 end

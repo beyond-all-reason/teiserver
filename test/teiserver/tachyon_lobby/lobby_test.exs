@@ -1957,7 +1957,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
-
   defp mk_start_params(teams) do
     %LT.StartParams{
       creator_data: %{id: @default_user_id, name: "name-#{@default_user_id}"},

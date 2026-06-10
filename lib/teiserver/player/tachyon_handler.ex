@@ -256,18 +256,15 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "lobby/left", data, state}
   end
 
-  def handle_info({:lobby_list, {:add_lobby, lobby_id, %LT.ListOverview{} = overview}}, state) do
-    data = %{lobbies: %{lobby_id => lobby_overview_to_tachyon(lobby_id, overview)}}
-    {:event, "lobby/listUpdated", data, state}
-  end
+  def handle_info({:lobby_list, {:update_lobbies, changes}}, state) do
+    data = %{
+      lobbies:
+        Enum.map(changes, fn {id, change} ->
+          {id, lobby_overview_to_tachyon(id, change)}
+        end)
+        |> Enum.into(%{})
+    }
 
-  def handle_info({:lobby_list, {:update_lobby, lobby_id, overview}}, state) do
-    data = %{lobbies: %{lobby_id => lobby_overview_to_tachyon(lobby_id, overview)}}
-    {:event, "lobby/listUpdated", data, state}
-  end
-
-  def handle_info({:lobby_list, {:remove_lobby, lobby_id}}, state) do
-    data = %{lobbies: %{lobby_id => nil}}
     {:event, "lobby/listUpdated", data, state}
   end
 
@@ -1399,6 +1396,8 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   # handle partial overview object
+  defp lobby_overview_to_tachyon(_lobby_id, nil), do: nil
+
   defp lobby_overview_to_tachyon(lobby_id, overview) do
     mapping_spec = %{
       name: :name,
