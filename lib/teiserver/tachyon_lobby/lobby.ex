@@ -1876,33 +1876,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     final_player_count = Enum.count(aggregate.data.players, fn {_id, p} -> not bot_id?(p.id) end)
 
-    change_map =
-      Enum.reduce(events, %{}, fn ev, change_map ->
-        case ev do
-          {:update_lobby_name, new_name} ->
-            Map.put(change_map, :name, new_name)
-
-          {:update_map_name, new_name} ->
-            Map.put(change_map, :map_name, new_name)
-
-          {:update_ally_team_config, _old_config, new_config} ->
-            change_map
-            |> Map.put(
-              :max_player_count,
-              Enum.sum(
-                for at <- new_config, team <- at.teams do
-                  team.max_players
-                end
-              )
-            )
-            # although the player count may not have changed, for simplicity sake
-            # just include it. We're already sending a message anyway
-            |> Map.put(:player_count, final_player_count)
-
-          _other ->
-            change_map
-        end
-      end)
+    change_map = overview_changes_from_events(events)
 
     change_map =
       if final_player_count != initial_player_count do
@@ -1912,6 +1886,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
       end
 
     if change_map != %{} do
+      # # although the player count may not have changed, for simplicity sake
+      # # just include it. We're already sending a message anyway
+      change_map = Map.put(change_map, :player_count, final_player_count)
       LobbyRegistry.put_overview(data.id, get_overview_from_state(data))
 
       message = %{
@@ -1925,6 +1902,32 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
 
     aggregate
+  end
+
+  defp overview_changes_from_events(events) do
+    Enum.reduce(events, %{}, fn ev, change_map ->
+      case ev do
+        {:update_lobby_name, new_name} ->
+          Map.put(change_map, :name, new_name)
+
+        {:update_map_name, new_name} ->
+          Map.put(change_map, :map_name, new_name)
+
+        {:update_ally_team_config, _old_config, new_config} ->
+          change_map
+          |> Map.put(
+            :max_player_count,
+            Enum.sum(
+              for at <- new_config, team <- at.teams do
+                team.max_players
+              end
+            )
+          )
+
+        _other ->
+          change_map
+      end
+    end)
   end
 
   # find an empty slot for a player/bot to play
