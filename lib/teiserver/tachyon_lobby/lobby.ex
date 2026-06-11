@@ -78,7 +78,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:move_player_to_spec, User.id(), spec_data :: map()}
            | :repack_players
            | :fill_from_join_queue
-           | {:update_map_name, new_name :: String.t()}
            | {:update_ally_team_config, old_config :: [LT.AllyTeamConfig.t()],
               new_config :: [LT.AllyTeamConfig.t()]}
            | {:start_vote, LT.VoteState.t()}
@@ -1366,17 +1365,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
       Event.apply_event(event, agg)
     else
       result = process_event(event, %{data: agg.data, updates: [], actions: []})
-      new_changes = Enum.reduce(result.updates, agg.changes, &update_change_from_event/2)
 
-      overview_changes =
-        Map.merge(agg.overview_changes, overview_changes_from_events(result.updates))
-
-      %LT.Aggregate{
-        data: result.data,
-        changes: new_changes,
-        overview_changes: overview_changes,
-        side_effects: Map.get(result, :actions, []) ++ agg.side_effects
-      }
+      case result do
+        %LT.Aggregate{} -> result
+        _map -> merge_map_aggregate_to_struct(agg, result)
+      end
     end
   end
 
@@ -1504,12 +1497,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
-  defp process_event({:update_map_name, new_name} = ev, aggregate) do
-    aggregate
-    |> put_in([:data, Access.key!(:map_name)], new_name)
-    |> update_in([:updates], &[ev | &1])
-  end
-
   defp process_event({:update_ally_team_config, _old_config, new_config} = ev, aggregate) do
     state = aggregate.data
 
@@ -1622,7 +1609,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
             new_aggregate
 
           {:passed, {:change_map, new_map}} ->
-            process_event({:update_map_name, new_map}, new_aggregate)
+            # until all events have been converted to structs, and we don't carry around
+            # the non-struct aggregate, need some transformation there
+            agg = merge_map_aggregate_to_struct(%LT.Aggregate{data: new_aggregate.data}, new_aggregate)
+            apply_event(%Events.UpdateMapName{new_map: new_map}, agg)
 
           {:passed, {:appoint_boss, boss_id}} ->
             process_event({:update_boss, :add, boss_id}, new_aggregate)
@@ -1780,9 +1770,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp update_change_from_event(:repack_players, change_map), do: change_map
 
-  defp update_change_from_event({:update_map_name, new_name}, change_map),
-    do: Map.put(change_map, :map_name, new_name)
-
   defp update_change_from_event({:update_ally_team_config, old_config, new_config}, change_map) do
     changes =
       Collections.zip_with_padding(old_config, new_config, nil)
@@ -1862,9 +1849,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp overview_changes_from_events(events) do
     Enum.reduce(events, %{}, fn ev, change_map ->
       case ev do
-        {:update_map_name, new_name} ->
-          Map.put(change_map, :map_name, new_name)
-
         {:update_ally_team_config, _old_config, new_config} ->
           change_map
           |> Map.put(
@@ -2179,7 +2163,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
-  defp update_property(:map_name, new_name, %LT.Data{} = state, user_id) do
+  defp update_property(:map_name, new_map, %LT.Data{} = state, user_id) do
     cond do
       not is_map_key(state.players, user_id) ->
         {:error, "Only players can change the map"}
@@ -2187,12 +2171,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
       state.current_vote ->
         case state.current_vote.action do
           # make changing map idempotent, it's just a nicer API this way
-          {:change_map, ^new_name} -> {:ok, []}
+          {:change_map, ^new_map} -> {:ok, []}
           _other_action -> {:error, :vote_in_progress}
         end
 
       Enum.count(state.players, fn {_id, p} -> not bot_id?(p.id) end) > 1 ->
-        vote = new_vote(state, user_id, {:change_map, new_name})
+        vote = new_vote(state, user_id, {:change_map, new_map})
 
         :timer.seconds(vote.duration_s)
         |> :timer.send_after({:vote_timeout, vote.id})
@@ -2200,7 +2184,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         {:ok, [{:start_vote, vote}]}
 
       true ->
-        {:ok, [{:update_map_name, new_name}]}
+        {:ok, [%Events.UpdateMapName{new_map: new_map}]}
     end
   end
 
@@ -2270,5 +2254,19 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
 
     PubSubHelper.broadcast(list_topic(), message)
+  end
+
+  defp merge_map_aggregate_to_struct(%LT.Aggregate{} = agg, map_aggregate) do
+    new_changes = Enum.reduce(map_aggregate.updates, agg.changes, &update_change_from_event/2)
+
+    overview_changes =
+      Map.merge(agg.overview_changes, overview_changes_from_events(map_aggregate.updates))
+
+    %LT.Aggregate{
+      data: map_aggregate.data,
+      changes: new_changes,
+      overview_changes: overview_changes,
+      side_effects: Map.get(map_aggregate, :actions, []) ++ agg.side_effects
+    }
   end
 end
