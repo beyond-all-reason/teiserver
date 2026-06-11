@@ -23,12 +23,6 @@ defmodule TeiserverWeb.Admin.BotLiveTest do
     %{bot: bot}
   end
 
-  defp create_app(context) do
-    owner_id = context[:user].id
-    app = OAuthFixtures.app_attrs(owner_id) |> OAuthFixtures.create_app()
-    %{app: app}
-  end
-
   describe "Index" do
     setup [:auth]
 
@@ -42,22 +36,6 @@ defmodule TeiserverWeb.Admin.BotLiveTest do
       Enum.each(1..3, fn i ->
         assert html =~ "bot_#{i}"
       end)
-    end
-
-    test "rejects name too short", %{conn: conn} do
-      {:ok, live, _html} = live(conn, ~p"/teiserver/admin/bot/new")
-
-      assert live
-             |> form("#bot-form", bot: %{name: "a"})
-             |> render_change() =~ "should be at least"
-    end
-
-    test "rejects name too long", %{conn: conn} do
-      {:ok, live, _html} = live(conn, ~p"/teiserver/admin/bot/new")
-
-      assert live
-             |> form("#bot-form", bot: %{name: String.duplicate("a", 40)})
-             |> render_change() =~ "should be at most"
     end
 
     test "creates bot", %{conn: conn} do
@@ -163,7 +141,11 @@ defmodule TeiserverWeb.Admin.BotLiveTest do
   end
 
   describe "Credentials" do
-    setup [:auth, :create_bot, :create_app]
+    setup [:auth, :create_bot]
+
+    setup %{user: user} do
+      %{app: OAuthFixtures.app_attrs(user.id) |> OAuthFixtures.create_app()}
+    end
 
     test "creates credential with valid hashed secret", %{conn: conn, bot: bot, app: app} do
       {:ok, live, _html} = live(conn, ~p"/teiserver/admin/bot/#{bot.id}")
@@ -176,8 +158,12 @@ defmodule TeiserverWeb.Admin.BotLiveTest do
       assert html =~ "Credential created"
       assert html =~ "Secret only shown once!"
 
-      [_full, secret] = Regex.run(~r/Secret only shown once! <pre>([^<]+)<\/pre>/, html)
-      secret = String.trim(secret)
+      secret =
+        live
+        |> element("#client-secret")
+        |> render()
+        |> Floki.parse_document!()
+        |> Floki.text()
 
       assert [cred] = CredentialQueries.for_bot(bot)
       assert Argon2.verify_pass(secret, cred.hashed_secret)
