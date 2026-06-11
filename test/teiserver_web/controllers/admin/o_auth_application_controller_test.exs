@@ -79,7 +79,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
       resp = assert html_response(conn, 200)
       assert resp =~ "generic name"
       db_app = OAuth.get_application_by_uid(data["application"]["uid"])
-      assert is_binary(db_app.secret)
+      assert String.starts_with?(db_app.secret, "$argon2")
       {:ok, parsed} = Floki.parse_document(resp)
       element = Floki.find(parsed, "#plain_client_secret")
       secret = Floki.text(element)

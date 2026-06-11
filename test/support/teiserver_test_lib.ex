@@ -160,7 +160,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_raw({:sslsocket, _tcp, _tls} = socket) do
     case :ssl.recv(socket, 0, 500) do
-      {:ok, reply} -> reply |> to_string()
+      {:ok, reply} -> IO.iodata_to_binary(reply)
       {:error, :timeout} -> :timeout
       {:error, :closed} -> :closed
     end
@@ -168,7 +168,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_raw(socket) do
     case :gen_tcp.recv(socket, 0, 500) do
-      {:ok, reply} -> reply |> to_string()
+      {:ok, reply} -> IO.iodata_to_binary(reply)
       {:error, :timeout} -> :timeout
       {:error, :closed} -> :closed
     end
@@ -187,7 +187,7 @@ defmodule Teiserver.TeiserverTestLib do
   def _recv_until({:sslsocket, _tcp, _tls} = socket, acc) do
     case :ssl.recv(socket, 0, 1000) do
       {:ok, reply} ->
-        _recv_until(socket, acc <> to_string(reply))
+        _recv_until(socket, acc <> IO.iodata_to_binary(reply))
 
       {:error, :timeout} ->
         acc
@@ -197,7 +197,7 @@ defmodule Teiserver.TeiserverTestLib do
   def _recv_until(socket, acc) do
     case :gen_tcp.recv(socket, 0, 1000) do
       {:ok, reply} ->
-        _recv_until(socket, acc <> to_string(reply))
+        _recv_until(socket, acc <> IO.iodata_to_binary(reply))
 
       {:error, :timeout} ->
         acc

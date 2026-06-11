@@ -74,6 +74,6 @@ config :teiserver, Teiserver.PromEx, disabled: true
 config :teiserver, Teiserver.IpCheck, client_module: Teiserver.IpCheck.Stub
 
 config :teiserver, Teiserver.Mailer,
-  adapter: Bamboo.TestAdapter,
+  adapter: Swoosh.Adapters.Test,
   noreply_address: "noreply@testsite.co.uk",
   contact_address: "info@testsite.co.uk"

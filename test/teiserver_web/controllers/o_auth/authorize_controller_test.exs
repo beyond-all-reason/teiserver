@@ -94,6 +94,60 @@ defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
       parsed = URI.parse(redired).query |> URI.decode_query()
       {:ok, %OAuth.Code{}} = OAuth.get_valid_code(parsed["code"])
     end
+
+    test "automatically get code when app already authorized (confidential client)", %{
+      conn: conn,
+      owner: owner
+    } do
+      {:ok, app} =
+        OAuth.create_application(%{
+          name: "testing app",
+          uid: "test_app_scopes",
+          owner_id: owner.id,
+          scopes: ["profile", "email", "groups"],
+          redirect_uris: ["http://127.0.0.1:6789/oauth/callback"],
+          confidential?: true
+        })
+
+      # because we consider an app to be authorized when there is at least one code/token
+      # that'll likely change as it's not a great modelling.
+      OAuthFixtures.token_attrs(owner, app) |> OAuthFixtures.create_token()
+
+      redir_uri = "http://127.0.0.1/oauth/callback"
+
+      query = %{
+        client_id: app.uid,
+        redirect_uri: redir_uri,
+        state: "some random state"
+        # no code challenge
+      }
+
+      resp = get(conn, ~p"/oauth/authorize?#{query}")
+      assert redired = redirected_to(resp, 302)
+      parsed = URI.parse(redired).query |> URI.decode_query()
+      {:ok, %OAuth.Code{}} = OAuth.get_valid_code(parsed["code"])
+    end
+
+    test "authorized public client still must pass a code challenge", %{
+      conn: conn,
+      app: app,
+      owner: owner
+    } do
+      # because we consider an app to be authorized when there is at least one code/token
+      # that'll likely change as it's not a great modelling.
+      OAuthFixtures.token_attrs(owner, app) |> OAuthFixtures.create_token()
+
+      redir_uri = "http://127.0.0.1/oauth/callback"
+
+      query = %{
+        client_id: app.uid,
+        redirect_uri: redir_uri,
+        state: "some random state"
+      }
+
+      resp = get(conn, ~p"/oauth/authorize?#{query}")
+      assert resp.status == 400
+    end
   end
 
   describe "generate code" do
@@ -114,7 +168,6 @@ defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
 
       assert URI.to_string(%{parsed | query: nil}) == hd(app.redirect_uris)
       query = URI.decode_query(parsed.query)
-      assert query["code"] != nil
       assert query["state"] == data[:state]
       {:ok, code} = OAuth.get_valid_code(query["code"])
       assert code.redirect_uri == data.redirect_uri

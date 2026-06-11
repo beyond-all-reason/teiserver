@@ -14,7 +14,7 @@ defmodule Teiserver.Lobby.Commands.ExplainCommandTest do
 
     user = TeiserverTestLib.new_user()
     lobby_id = TeiserverTestLib.make_lobby(%{name: "ExplainCommandTestText"})
-    assert Lobby.get_lobby(lobby_id) != nil
+    assert %{id: ^lobby_id} = Lobby.get_lobby(lobby_id)
     chat_listener = PubsubListener.new_listener(["teiserver_lobby_chat:#{lobby_id}"])
     client_listener = PubsubListener.new_listener(["teiserver_client_messages:#{user.id}"])
 

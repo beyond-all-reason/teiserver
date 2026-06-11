@@ -63,8 +63,7 @@ defmodule Teiserver.SpringRawTest do
     _send_raw(socket, "REGISTER #{name} #{password} raw_register_email@email.com\n")
     reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONACCEPTED\n"
-    user = UserCacheLib.get_user_by_name(name)
-    assert user != nil
+    assert %{name: ^name} = UserCacheLib.get_user_by_name(name)
 
     # Now check the DB!
     db_users = Account.list_users(search: [name: name])
@@ -83,7 +82,7 @@ defmodule Teiserver.SpringRawTest do
     _send_raw(socket, "REGISTER #{username} #{password} #{username}@email.e\n")
     _reply = _recv_raw(socket)
     user = UserCacheLib.get_user_by_name(username)
-    assert user != nil
+    assert %{name: ^username} = user
     Account.verify_user(user.id)
 
     # First try to login with a bad-case username

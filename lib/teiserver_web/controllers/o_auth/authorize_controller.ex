@@ -88,9 +88,6 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
       Map.get(params, "response_type") != "code" ->
         error_redirect(conn, redir_url, "unsupported_response_type", "only code is supported")
 
-      Map.get(params, "code_challenge") == nil ->
-        error_redirect(conn, redir_url, "invalid_request", "a code challenge must be provided")
-
       elem(checked_scopes, 0) == :error ->
         {:error, {:invalid_scopes, scopes}} = checked_scopes
         scopes = Enum.join(scopes, ", ")

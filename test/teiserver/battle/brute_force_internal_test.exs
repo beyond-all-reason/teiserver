@@ -34,14 +34,9 @@ defmodule Teiserver.Battle.BruteForceInternalTest do
       %{name: "HungDaddy", rating: 2.8}
     ]
 
-    result = BruteForce.party_broken?(first_team, party)
-    refute result
-
-    result = BruteForce.party_broken?(second_team, party)
-    assert result
-
-    result = BruteForce.party_broken?(third_team, party)
-    refute result
+    refute BruteForce.party_broken?(first_team, party)
+    assert BruteForce.party_broken?(second_team, party)
+    refute BruteForce.party_broken?(third_team, party)
   end
 
   test "log parties" do

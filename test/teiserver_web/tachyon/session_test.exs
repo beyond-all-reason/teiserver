@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
     Tachyon.abrupt_disconnect!(client)
     assert {:error, :disconnected} = WSC.send_message(client, {:text, "test_ping"})
     sess_pid = SessionRegistry.lookup(user.id)
-    assert sess_pid != nil
+    assert is_pid(sess_pid)
     ref = Process.monitor(sess_pid)
     poll_until(fn -> Player.lookup_connection(user.id) end, &is_nil/1)
     send(sess_pid, :connection_timeout)

@@ -24,7 +24,7 @@ defmodule Teiserver.Battle.MatchMonitorTest do
 
     # Get the MatchMonitorServer PID
     monitor_pid = MatchMonitorServer.get_match_monitor_pid()
-    assert monitor_pid != nil
+    assert is_pid(monitor_pid)
 
     # Send a launch message for a non-existent lobby
     send(monitor_pid, {:new_message, 99_999, "autohosts", "* Launching game..."})

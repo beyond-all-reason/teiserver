@@ -113,7 +113,6 @@ defmodule Teiserver.Account.TOTPLibTest do
 
     test "generates new secret if not set", %{user_without_totp: user} do
       {:new, secret} = TOTPLib.get_or_generate_secret(user.id)
-      assert secret != nil
       assert String.length(secret) > 0
     end
   end

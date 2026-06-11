@@ -47,8 +47,15 @@ defmodule Teiserver.Battle.StartScriptTest do
     }
 
     {:ok, match} = Battle.create_match_from_start_script(start_script, false)
-    assert Battle.get_match_membership(user1.id, match.id) != nil
-    assert Battle.get_match_membership(user2.id, match.id) != nil
+    match_id = match.id
+    user1_id = user1.id
+    user2_id = user2.id
+
+    assert %{user_id: ^user1_id, match_id: ^match_id} =
+             Battle.get_match_membership(user1.id, match.id)
+
+    assert %{user_id: ^user2_id, match_id: ^match_id} =
+             Battle.get_match_membership(user2.id, match.id)
   end
 
   test "test start script 1 vs bot" do
@@ -85,6 +92,10 @@ defmodule Teiserver.Battle.StartScriptTest do
     }
 
     {:ok, match} = Battle.create_match_from_start_script(start_script, false)
-    assert Battle.get_match_membership(user1.id, match.id) != nil
+    user_id = user1.id
+    match_id = match.id
+
+    assert %{user_id: ^user_id, match_id: ^match_id} =
+             Battle.get_match_membership(user1.id, match.id)
   end
 end

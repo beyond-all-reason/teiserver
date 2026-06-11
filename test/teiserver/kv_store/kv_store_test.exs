@@ -72,7 +72,7 @@ defmodule Teiserver.KvStore.KvStoreTest do
 
   test "can delete a blob" do
     :ok = KV.put("test_store", "key", "val")
-    assert KV.get("test_store", "key") != nil
+    assert %{value: "val"} = KV.get("test_store", "key")
     :ok = KV.delete("test_store", "key")
     assert KV.get("test_store", "key") == nil
   end
@@ -88,7 +88,7 @@ defmodule Teiserver.KvStore.KvStoreTest do
 
     assert 2 == KV.delete_many([{"test_store1", "key2"}, {"test_store2", "key1"}])
 
-    assert KV.get("test_store1", "key1") != nil
+    assert %{value: "val1"} = KV.get("test_store1", "key1")
     assert KV.get("test_store1", "key2") == nil
     assert KV.get("test_store2", "key1") == nil
   end
@@ -98,6 +98,6 @@ defmodule Teiserver.KvStore.KvStoreTest do
 
     KV.delete_many([])
 
-    assert KV.get("test_store1", "key1") != nil
+    assert %{value: "val1"} = KV.get("test_store1", "key1")
   end
 end
