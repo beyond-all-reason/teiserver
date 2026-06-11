@@ -47,7 +47,6 @@ defmodule TeiserverWeb.Microblog.Blog.PreferenceLiveTest do
       refute html =~ "disabled-reset-#{tag3.id}"
 
       user_preference = Microblog.get_user_preference(user.id)
-      assert user_preference != nil
       assert user_preference.tag_mode == "Block"
       assert user_preference.enabled_tags == []
       assert user_preference.disabled_tags == [tag1.id]

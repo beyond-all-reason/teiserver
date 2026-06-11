@@ -46,7 +46,7 @@ defmodule Teiserver.OAuth.CodeTest do
     }
 
     {:error, err} = OAuth.create_code(user, code_attrs)
-    assert Keyword.has_key?(err.errors, :challenge_method)
+    assert {_msg, _opts} = Keyword.get(err.errors, :challenge_method)
   end
 
   test "challenge required if challenge_method is set", %{user: user, app: app} do
@@ -58,7 +58,7 @@ defmodule Teiserver.OAuth.CodeTest do
     }
 
     {:error, err} = OAuth.create_code(user, code_attrs)
-    assert Keyword.has_key?(err.errors, :challenge)
+    assert {_msg, _opts} = Keyword.get(err.errors, :challenge)
   end
 
   test "can get valid code", %{user: user, app: app} do
@@ -113,7 +113,7 @@ defmodule Teiserver.OAuth.CodeTest do
     }
 
     {:error, err} = OAuth.create_code(user, code_attrs)
-    assert Keyword.has_key?(err.errors, :challenge)
+    assert {_msg, _opts} = Keyword.get(err.errors, :challenge)
   end
 
   test "pkce is optional for confidential apps", %{user: user, confidential_app: app} do
@@ -183,7 +183,7 @@ defmodule Teiserver.OAuth.CodeTest do
     }
 
     {:error, err} = OAuth.create_code(user, code_attrs)
-    assert Keyword.has_key?(err.errors, :challenge_method)
+    assert {_msg, _opts} = Keyword.get(err.errors, :challenge_method)
   end
 
   test "confidential clients don't need pkce for tokens", %{user: user, confidential_app: app} do
@@ -309,7 +309,7 @@ defmodule Teiserver.OAuth.CodeTest do
 
     attrs = OAuthFixtures.code_attrs(user, app) |> Map.merge(app)
     {:error, err} = OAuth.create_code(user, attrs)
-    assert Keyword.has_key?(err.errors, :scopes)
+    assert {_msg, _opts} = Keyword.get(err.errors, :scopes)
   end
 
   defp create_code_attrs(user, app, opts \\ []) do

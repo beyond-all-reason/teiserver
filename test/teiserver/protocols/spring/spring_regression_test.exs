@@ -59,7 +59,6 @@ defmodule Teiserver.SpringRegressionTest do
 
     # Check the battle actually got created
     battle = Lobby.get_lobby(lobby_id)
-    assert battle != nil
     assert Enum.empty?(battle.players)
 
     # Now, lets see what we have in our pubsub
@@ -68,7 +67,8 @@ defmodule Teiserver.SpringRegressionTest do
     msg = hd(global_messages)
     assert msg.channel == "teiserver_global_lobby_updates"
     assert msg.event == :opened
-    assert is_map(msg.lobby)
+
+    assert %{id: ^lobby_id} = msg.lobby
 
     # Right, time to send an UPDATEBATTLEINFO command
     _send_raw(
@@ -82,6 +82,6 @@ defmodule Teiserver.SpringRegressionTest do
     msg = hd(global_messages)
     assert msg.channel == "teiserver_global_lobby_updates"
     assert msg.event == :updated_values
-    assert is_map(msg.new_values)
+    assert %{map_name: "Map name here"} = msg.new_values
   end
 end

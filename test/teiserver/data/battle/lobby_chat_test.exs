@@ -22,8 +22,8 @@ defmodule Teiserver.Data.Battle.ChatLibTest do
       })
       |> Lobby.add_lobby()
 
-    assert Lobby.get_lobby(lobby.id) != nil
-
+    lobby_id = lobby.id
+    assert %{id: ^lobby_id} = Lobby.get_lobby(lobby_id)
     Battle.set_modoption(lobby.id, "server/match/uuid", UUID.uuid1())
 
     {:ok, chat_log} = ChatLib.persist_message(bot_user, "Message from the bot", lobby.id, :say)

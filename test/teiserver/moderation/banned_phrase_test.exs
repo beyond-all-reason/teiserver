@@ -110,7 +110,7 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
           score_threshold: 0
         })
 
-      assert Keyword.has_key?(changeset.errors, :phrase)
+      assert {_msg, _opts} = Keyword.get(changeset.errors, :phrase)
     end
 
     test "create regex banned phrase" do
@@ -135,7 +135,7 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
           score_threshold: 0
         })
 
-      assert Keyword.has_key?(changeset.errors, :phrase)
+      assert {_msg, _opts} = Keyword.get(changeset.errors, :phrase)
     end
   end
 

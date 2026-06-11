@@ -102,8 +102,8 @@ defmodule TeiserverWeb.Live.ClientTest do
       %{user: user} = TeiserverTestLib.auth_setup(server_context)
 
       {:ok, view, _html} = live(conn, "/teiserver/admin/client/#{user.id}")
-      assert Client.get_client_by_id(user.id) != nil
-
+      user_id = user.id
+      assert %{userid: ^user_id} = Client.get_client_by_id(user.id)
       render_click(view, "force-reconnect", %{})
       assert_redirect(view, "/teiserver/admin/client", 250)
 

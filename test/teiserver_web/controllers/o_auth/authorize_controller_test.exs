@@ -168,7 +168,6 @@ defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
 
       assert URI.to_string(%{parsed | query: nil}) == hd(app.redirect_uris)
       query = URI.decode_query(parsed.query)
-      assert query["code"] != nil
       assert query["state"] == data[:state]
       {:ok, code} = OAuth.get_valid_code(query["code"])
       assert code.redirect_uri == data.redirect_uri

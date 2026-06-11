@@ -22,8 +22,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-      assert result != nil
-      refute Map.get(result, :has_parties?, true)
+      assert %{has_parties?: false} = result
     end)
   end
 
@@ -41,8 +40,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-      assert result != nil
-      refute Map.get(result, :has_parties?, true)
+      assert %{has_parties?: false} = result
     end)
   end
 
@@ -63,8 +61,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-      assert result != nil
-      refute Map.get(result, :has_parties?, true)
+      assert %{has_parties?: false} = result
     end)
   end
 
@@ -85,8 +82,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-      assert result != nil
-      refute Map.get(result, :has_parties?, true)
+      assert %{has_parties?: false} = result
     end)
   end
 
@@ -109,8 +105,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-      assert result != nil
-      refute Map.get(result, :has_parties?, true)
+      assert %{has_parties?: false} = result
     end)
   end
 
@@ -146,10 +141,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
           algorithm: algorithm_name
         )
 
-      assert result != nil
       # has_parties? might be true/false depending on the algorithm.
       # Just check that the key exists
-      assert Map.has_key?(result, :has_parties?)
+      assert %{has_parties?: _parties} = result
     end)
   end
 end

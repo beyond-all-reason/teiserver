@@ -131,7 +131,7 @@ defmodule Teiserver.Game.BalancerServerTest do
       {:make_balance, team_count, [], players}
     )
 
-    refute GenServer.call(pid, :get_current_balance) == nil
+    assert %{hash: _hash} = GenServer.call(pid, :get_current_balance)
   end
 
   test "reset_hashes clears hash and result" do
@@ -146,8 +146,8 @@ defmodule Teiserver.Game.BalancerServerTest do
       {:make_balance, team_count, [], players}
     )
 
-    refute GenServer.call(pid, :get_current_balance) == nil
-    refute GenServer.call(pid, :report_state) |> Map.get(:last_balance_result, :not_found) == nil
+    assert %{hash: _hash} = GenServer.call(pid, :get_current_balance)
+    assert %{last_balance_result: %{hash: _hash}} = GenServer.call(pid, :report_state)
 
     GenServer.cast(
       pid,
@@ -170,8 +170,8 @@ defmodule Teiserver.Game.BalancerServerTest do
       {:make_balance, team_count, [], players}
     )
 
-    refute GenServer.call(pid, :get_current_balance) == nil
-    refute GenServer.call(pid, :report_state) |> Map.get(:last_balance_result, :not_found) == nil
+    assert %{hash: _hash} = GenServer.call(pid, :get_current_balance)
+    assert %{last_balance_result: %{hash: _hash}} = GenServer.call(pid, :report_state)
 
     GenServer.cast(
       pid,
