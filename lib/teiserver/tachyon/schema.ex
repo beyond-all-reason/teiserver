@@ -20,32 +20,35 @@ defmodule Teiserver.Tachyon.Schema do
   @spec parse_envelope(any()) ::
           {:ok, command_id(), message_type(), message_id()} | {:error, term()}
   def parse_envelope(raw_json) do
-    schema =
-      Teiserver.cache_get_or_store(@cache_name, :envelope, fn ->
-        """
-        {
-          "title": "tachyon envelope",
-          "type": "object",
-          "properties": {
-            "type": {"type": "string"},
-            "messageId": {"type": "string"},
-            "commandId": {"type": "string"},
-            "data": {"type": "object"}
-          },
-          "required": ["type", "messageId", "commandId"]
-        }
-        """
-        |> Jason.decode!()
-        |> JsonXema.new()
-      end)
+    with :ok <- check_map(raw_json),
+         :ok <- check_str_key(raw_json, "messageId"),
+         :ok <- check_str_key(raw_json, "type"),
+         :ok <- check_str_key(raw_json, "commandId"),
+         :ok <- check_data(raw_json) do
+      {:ok, raw_json["commandId"], raw_json["type"], raw_json["messageId"]}
+    else
+      {:error, err} -> {:error, "Invalid tachyon message: #{err}"}
+    end
+  end
 
-    case JsonXema.validate(schema, raw_json) do
-      :ok ->
-        {:ok, Map.get(raw_json, "commandId"), Map.get(raw_json, "type"),
-         Map.get(raw_json, "messageId")}
+  def check_map(obj) when is_map(obj), do: :ok
+  def check_map(_obj), do: {:error, "invalid type, expected object"}
 
-      {:error, err} ->
-        {:error, "Invalid tachyon message: #{inspect(err)}"}
+  defp check_str_key(obj, k) do
+    cond do
+      not is_map_key(obj, k) -> {:error, "missing key #{k}"}
+      not is_binary(obj[k]) -> {:error, "invalid type for key #{k}"}
+      true -> :ok
+    end
+  end
+
+  defp check_data(obj) do
+    data = obj["data"]
+
+    if data != nil and not is_map(data) do
+      {:error, "data must be an object"}
+    else
+      :ok
     end
   end
 
