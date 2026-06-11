@@ -171,11 +171,8 @@ defmodule Teiserver.ModerationTest do
       expires = DateTime.add(now, action.duration, :second)
       {:ok, updated} = Moderation.update_action(action, %{"expires" => expires})
 
-      refute is_nil(updated.expires)
-      assert NaiveDateTime.compare(updated.expires, NaiveDateTime.utc_now()) == :gt
-
-      expected = NaiveDateTime.add(NaiveDateTime.utc_now(), action.duration, :second)
-      assert abs(NaiveDateTime.diff(updated.expires, expected, :second)) < 5
+      expected_expires = expires |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
+      assert updated.expires == expected_expires
 
       # Action should now appear in "Unexpired only", not in "Pending only"
       pending =
