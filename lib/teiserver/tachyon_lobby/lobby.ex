@@ -81,8 +81,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:update_map_name, new_name :: String.t()}
            | {:update_ally_team_config, old_config :: [LT.AllyTeamConfig.t()],
               new_config :: [LT.AllyTeamConfig.t()]}
-           | {:update_game_options, changes :: %{String.t() => String.t() | nil}}
-           | {:update_tags, changes :: %{String.t() => map() | nil}}
            | {:start_vote, LT.VoteState.t()}
            | {:cast_vote, User.id(), LT.VoteState.vote_ballot()}
            | {:vote_ended, DateTime.t(), LT.VoteState.vote_outcome()}
@@ -1594,18 +1592,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
     new_aggregate |> put_in([:updates], [ev | final_events] ++ aggregate.updates)
   end
 
-  defp process_event({:update_game_options, changes} = ev, aggregate) do
-    aggregate
-    |> update_in([:data, Access.key!(:game_options)], &Collections.patch_merge(&1, changes))
-    |> Map.update!(:updates, &[ev | &1])
-  end
-
-  defp process_event({:update_tags, changes} = ev, aggregate) do
-    aggregate
-    |> update_in([:data, Access.key!(:tags)], &Collections.patch_merge(&1, changes))
-    |> Map.update!(:updates, &[ev | &1])
-  end
-
   defp process_event({:start_vote, %LT.VoteState{} = vote_state} = ev, aggregate) do
     aggregate
     |> put_in([:data, Access.key!(:current_vote)], vote_state)
@@ -1820,12 +1806,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     Map.put(change_map, :ally_team_config, changes)
   end
-
-  defp update_change_from_event({:update_game_options, changes}, change_map),
-    do: Map.put(change_map, :game_options, changes)
-
-  defp update_change_from_event({:update_tags, changes}, change_map),
-    do: Map.put(change_map, :tags, changes)
 
   defp update_change_from_event({:start_vote, vote}, change_map),
     do: Map.put(change_map, :current_vote, vote)
@@ -2230,11 +2210,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp update_property(:game_options, changes, _state, _user_id) do
     # TODO: set a size limit on that thing to avoid a DOS
-    {:ok, [{:update_game_options, changes}]}
+    {:ok, [%Events.UpdateGameOptions{changes: changes}]}
   end
 
   defp update_property(:tags, changes, _state, _user_id) do
-    {:ok, [{:update_tags, changes}]}
+    {:ok, [%Events.UpdateTags{changes: changes}]}
   end
 
   defp update_property(prop, _value, _state, _user_id),
