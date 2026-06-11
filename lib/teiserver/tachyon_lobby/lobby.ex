@@ -78,7 +78,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:move_player_to_spec, User.id(), spec_data :: map()}
            | :repack_players
            | :fill_from_join_queue
-           | {:update_lobby_name, new_name :: String.t()}
            | {:update_map_name, new_name :: String.t()}
            | {:update_ally_team_config, old_config :: [LT.AllyTeamConfig.t()],
               new_config :: [LT.AllyTeamConfig.t()]}
@@ -1507,12 +1506,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
-  defp process_event({:update_lobby_name, new_name} = ev, aggregate) do
-    aggregate
-    |> put_in([:data, Access.key!(:name)], new_name)
-    |> update_in([:updates], &[ev | &1])
-  end
-
   defp process_event({:update_map_name, new_name} = ev, aggregate) do
     aggregate
     |> put_in([:data, Access.key!(:map_name)], new_name)
@@ -1801,9 +1794,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp update_change_from_event(:repack_players, change_map), do: change_map
 
-  defp update_change_from_event({:update_lobby_name, new_name}, change_map),
-    do: Map.put(change_map, :name, new_name)
-
   defp update_change_from_event({:update_map_name, new_name}, change_map),
     do: Map.put(change_map, :map_name, new_name)
 
@@ -1892,9 +1882,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp overview_changes_from_events(events) do
     Enum.reduce(events, %{}, fn ev, change_map ->
       case ev do
-        {:update_lobby_name, new_name} ->
-          Map.put(change_map, :name, new_name)
-
         {:update_map_name, new_name} ->
           Map.put(change_map, :map_name, new_name)
 
@@ -2208,7 +2195,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         {:error, error}
 
       :ok ->
-        {:ok, [{:update_lobby_name, new_name}]}
+        {:ok, [%Events.UpdateLobbyName{new_name: new_name}]}
     end
   end
 
