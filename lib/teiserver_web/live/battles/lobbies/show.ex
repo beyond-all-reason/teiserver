@@ -234,7 +234,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
           ratings = assigns.ratings |> Map.drop(removed_list) |> Map.merge(new_ratings)
           stats = assigns.stats |> Map.drop(removed_list) |> Map.merge(new_stats)
 
-          #Parties must be still recomputed from the full client set (ordering matters)
+          # Parties must be still recomputed from the full client set (ordering matters)
           parties = compute_parties(clients)
 
           new_lobby = Map.put(assigns[:lobby], :players, players)
