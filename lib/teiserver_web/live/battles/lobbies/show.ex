@@ -208,19 +208,33 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
           players = Battle.get_lobby_member_list(assigns.id)
           existing_ids = assigns.users |> Map.keys() |> MapSet.new()
           new_ids = MapSet.new(players)
+          changed_ids = MapSet.new(player_changes)
 
           added = MapSet.difference(new_ids, existing_ids) |> MapSet.to_list()
           removed = MapSet.difference(existing_ids, new_ids)
+          status_changed = existing_ids |> MapSet.intersection(changed_ids) |> MapSet.to_list()
 
-          {new_users, new_clients, new_ratings, _newparties, new_stats} =
+          {new_users, new_clients, new_ratings, _new_parties, new_stats} =
             get_user_and_clients(added, consul_state)
 
-          users = assigns.users |> Map.drop(MapSet.to_list(removed)) |> Map.merge(new_users)
-          clients = assigns.clients |> Map.drop(MapSet.to_list(removed)) |> Map.merge(new_clients)
-          ratings = assigns.ratings |> Map.drop(MapSet.to_list(removed)) |> Map.merge(new_ratings)
-          stats = assigns.stats |> Map.drop(MapSet.to_list(removed)) |> Map.merge(new_stats)
+          updated_clients =
+            status_changed
+            |> Map.new(fn id -> {id, Account.get_client_by_id(id)} end)
+            |> Map.reject(fn {_i, c} -> is_nil(c) end)
 
-          # Parties must be still recomputed from the full client set (ordering matters)
+          removed_list = MapSet.to_list(removed)
+          users = assigns.users |> Map.drop(removed_list) |> Map.merge(new_users)
+
+          clients =
+            assigns.clients
+            |> Map.drop(removed_list)
+            |> Map.merge(new_clients)
+            |> Map.merge(updated_clients)
+
+          ratings = assigns.ratings |> Map.drop(removed_list) |> Map.merge(new_ratings)
+          stats = assigns.stats |> Map.drop(removed_list) |> Map.merge(new_stats)
+
+          #Parties must be still recomputed from the full client set (ordering matters)
           parties = compute_parties(clients)
 
           new_lobby = Map.put(assigns[:lobby], :players, players)
