@@ -22,10 +22,10 @@ defmodule Teiserver.Tachyon.Schema do
   def parse_envelope(raw_json) do
     with :ok <- check_map(raw_json),
          :ok <- check_str_key(raw_json, "messageId"),
-         :ok <- check_str_key(raw_json, "type"),
+         {:ok, typ} <- check_type(raw_json),
          :ok <- check_str_key(raw_json, "commandId"),
          :ok <- check_data(raw_json) do
-      {:ok, raw_json["commandId"], raw_json["type"], raw_json["messageId"]}
+      {:ok, raw_json["commandId"], typ, raw_json["messageId"]}
     else
       {:error, err} -> {:error, "Invalid tachyon message: #{err}"}
     end
@@ -39,6 +39,18 @@ defmodule Teiserver.Tachyon.Schema do
       not is_map_key(obj, k) -> {:error, "missing key #{k}"}
       not is_binary(obj[k]) -> {:error, "invalid type for key #{k}"}
       true -> :ok
+    end
+  end
+
+  defp check_type(obj) do
+    with :ok <- check_str_key(obj, "type") do
+      typ = obj["type"]
+
+      if typ in ["request", "response", "event"] do
+        {:ok, typ}
+      else
+        {:error, "type must be one of request, response, event but got #{typ}"}
+      end
     end
   end
 

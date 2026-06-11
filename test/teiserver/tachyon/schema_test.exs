@@ -50,6 +50,11 @@ defmodule Teiserver.Tachyon.SchemaTest do
       {:error, _msg} = Schema.parse_envelope(obj)
     end
 
+    test "type must be one of event/request/response" do
+      obj = %{"type" => "wat?", "commandId" => "ns/cmd", "messageId" => "123"}
+      {:error, _msg} = Schema.parse_envelope(obj)
+    end
+
     test "commandId required" do
       obj = %{"type" => "request", "messageId" => "123"}
       {:error, _msg} = Schema.parse_envelope(obj)
