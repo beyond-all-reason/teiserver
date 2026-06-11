@@ -210,6 +210,20 @@
 
         <div class="old-help-box-large"></div>
 
+        <%= if @params["tabular"] != "true" do %>
+          <div id="chart" class="with-transitions mt-3" style="height: 400px;"></div>
+
+          <div class="row">
+            <div class="col">&nbsp;</div>
+            <div class="col">0 = Offline</div>
+            <div class="col">1 = Menu</div>
+            <div class="col">2 = Lobby</div>
+            <div class="col">3 = Spectator</div>
+            <div class="col">4 = Player</div>
+            <div class="col">&nbsp;</div>
+          </div>
+        <% end %>
+
         <%= if assigns[:stats] do %>
           <table class="table d-inline float-start">
             <thead>

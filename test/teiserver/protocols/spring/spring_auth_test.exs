@@ -138,18 +138,17 @@ IGNORELISTEND\n"
     assert reply == "SAIDPRIVATE #{user2.name} What about now?\n"
   end
 
-  # TODO: Make this work
-  # test "SAYPRIVATE with special characters", %{socket: socket1, user: user} = context do
-  #   user2 = new_user()
-  #   %{socket: socket2} = auth_setup(context, user2)
-  #   reply = _recv_raw(socket1)
-  #   assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
-  #   assert reply =~ " LuaLobby Chobby\n"
+  test "SAYPRIVATE with special characters", %{socket: socket1, user: user} = context do
+    user2 = new_user()
+    %{socket: socket2} = auth_setup(context, user2)
+    reply = _recv_raw(socket1)
+    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
+    assert reply =~ " LuaLobby Chobby\n"
 
-  #   _send_raw(socket2, "SAYPRIVATE #{user.name} тест!\n")
-  #   reply = _recv_raw(socket1)
-  #   assert reply == "SAIDPRIVATE #{user2.name} тест!\n"
-  # end
+    _send_raw(socket2, "SAYPRIVATE #{user.name} тест!\n")
+    reply = _recv_raw(socket1)
+    assert reply == "SAIDPRIVATE #{user2.name} тест!\n"
+  end
 
   test "FRIENDLIST, ADDFRIEND, REMOVEFRIEIND, ACCEPTFRIENDREQUEST, DECLINEFRIENDREQUEST",
        %{
