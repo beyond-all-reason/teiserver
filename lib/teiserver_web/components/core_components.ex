@@ -129,7 +129,6 @@ defmodule TeiserverWeb.CoreComponents do
     values: [:info, :success, :warning, :error],
     doc: "used for styling and flash lookup"
 
-  attr :autoshow, :boolean, default: true, doc: "whether to auto show the flash on mount"
   attr :close, :boolean, default: true, doc: "whether the flash can be closed"
   attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
   slot :inner_block, doc: "the optional inner block that renders the flash message"
@@ -152,7 +151,6 @@ defmodule TeiserverWeb.CoreComponents do
     <div
       :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
       id={@id}
-      phx-mounted={@autoshow && show("##{@id}")}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       aria-live="assertive"
@@ -195,16 +193,29 @@ defmodule TeiserverWeb.CoreComponents do
         <.flash id="flash-success" kind={:success} title="Success!" role="alert" flash={@flash} />
         <.flash id="flash-warning" kind={:warning} title="Warning!" role="alert" flash={@flash} />
         <.flash id="flash-error" kind={:error} title="Error!" role="alert" flash={@flash} />
+
         <.flash
-          id="flash-disconnected"
+          id="client-error"
           kind={:error}
-          title="Reconnecting to the server"
-          close={false}
-          autoshow={false}
-          phx-disconnected={show("#disconnected")}
-          phx-connected={hide("#disconnected")}
+          title={gettext("We can't find the internet")}
+          phx-disconnected={show(".phx-client-error #client-error") |> JS.remove_attribute("hidden")}
+          phx-connected={hide("#client-error") |> JS.set_attribute({"hidden", ""})}
+          hidden
         >
-          Attempting to reconnect <Fontawesome.icon icon="sync" class="fa-spin" />
+          {gettext("Attempting to reconnect")}
+          <%!-- <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" /> --%>
+        </.flash>
+
+        <.flash
+          id="server-error"
+          kind={:error}
+          title={gettext("Something went wrong!")}
+          phx-disconnected={show(".phx-server-error #server-error") |> JS.remove_attribute("hidden")}
+          phx-connected={hide("#server-error") |> JS.set_attribute({"hidden", ""})}
+          hidden
+        >
+          {gettext("Attempting to reconnect")}
+          <%!-- <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" /> --%>
         </.flash>
       </div>
     </div>
@@ -246,29 +257,40 @@ defmodule TeiserverWeb.CoreComponents do
   end
 
   @doc """
-  Renders a button.
+  Renders a button with navigation support.
+
   ## Examples
+
       <.button>Send!</.button>
-      <.button phx-click="go" class="ml-2">Send!</.button>
+      <.button phx-click="go" variant="primary">Send!</.button>
+      <.button navigate={~p"/"}>Home</.button>
   """
-  attr :type, :string, default: nil
-  attr :class, :string, default: "btn-secondary"
-  attr :rest, :global, include: ~w(disabled form name value)
+  attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
+  attr :class, :any
+  attr :variant, :string, values: ~w(primary)
   slot :inner_block, required: true
 
-  def button(assigns) do
-    ~H"""
-    <button
-      type={@type}
-      class={[
-        "phx-submit-loading:opacity-75 btn",
-        @class
-      ]}
-      {@rest}
-    >
-      {render_slot(@inner_block)}
-    </button>
-    """
+  def button(%{rest: rest} = assigns) do
+    variants = %{"primary" => "btn-primary", nil => "btn-primary btn-soft"}
+
+    assigns =
+      assign_new(assigns, :class, fn ->
+        ["btn", Map.fetch!(variants, assigns[:variant])]
+      end)
+
+    if rest[:href] || rest[:navigate] || rest[:patch] do
+      ~H"""
+      <.link class={@class} {@rest}>
+        {render_slot(@inner_block)}
+      </.link>
+      """
+    else
+      ~H"""
+      <button class={@class} {@rest}>
+        {render_slot(@inner_block)}
+      </button>
+      """
+    end
   end
 
   @doc """
@@ -298,10 +320,15 @@ defmodule TeiserverWeb.CoreComponents do
   attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
   attr :options, :list, doc: "the options to pass to HTMLForm.options_for_select/2"
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
+  attr :class, :any, default: nil, doc: "the input class to use over defaults"
   attr :text, :string, doc: "regular text to follow a label"
   attr :description, :string, doc: "optional description to display if component allows"
-  attr :rest, :global, include: ~w(autocomplete cols disabled form max maxlength min minlength
-                                   pattern placeholder readonly required rows size step)
+
+  attr :rest, :global,
+    include:
+      ~w(accept autocomplete capture cols disabled form list max maxlength
+                                  min minlength pattern placeholder readonly required rows size step)
+
   slot :inner_block
 
   def input(%{field: %FormField{} = field} = assigns) do
@@ -392,6 +419,7 @@ defmodule TeiserverWeb.CoreComponents do
     """
   end
 
+  # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
     <div>
@@ -402,7 +430,7 @@ defmodule TeiserverWeb.CoreComponents do
         id={@id || @name}
         value={HTMLForm.normalize_value(@type, @value)}
         class={[
-          "form-control",
+          @class || "w-full input form-control",
           @errors != [] && "border-danger"
         ]}
         {@rest}

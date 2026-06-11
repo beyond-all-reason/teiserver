@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Router do
     plug(:accepts, ["html"])
     plug(:fetch_session)
     plug(:fetch_live_flash)
-    plug :put_root_layout, {TeiserverWeb.Layouts, :root}
+    plug :put_root_layout, {TeiserverWeb.Layouts, :root_bs}
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
     plug(Teiserver.Account.DefaultsPlug)
@@ -29,7 +29,7 @@ defmodule TeiserverWeb.Router do
     plug(:accepts, ["html"])
     plug(:fetch_session)
     plug(:fetch_live_flash)
-    plug :put_root_layout, {TeiserverWeb.Layouts, :root}
+    plug :put_root_layout, {TeiserverWeb.Layouts, :root_bs}
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
     plug(Teiserver.Account.DefaultsPlug)
@@ -38,12 +38,16 @@ defmodule TeiserverWeb.Router do
     plug(Teiserver.Plugs.CachePlug)
   end
 
+  pipeline :tailwind do
+    plug :put_root_layout, {TeiserverWeb.Layouts, :root_tw}
+  end
+
   pipeline :app_layout do
     plug(:put_layout, {TeiserverWeb.Layouts, :app})
   end
 
   pipeline :nomenu_layout do
-    plug(:put_layout, {TeiserverWeb.Layouts, :root})
+    plug(:put_layout, {TeiserverWeb.Layouts, :root_bs})
   end
 
   pipeline :protected do
@@ -142,6 +146,7 @@ defmodule TeiserverWeb.Router do
     post("/otp", SessionController, :verify_totp)
     get("/logout", SessionController, :logout)
     post("/logout", SessionController, :logout)
+    delete("/logout", SessionController, :logout)
 
     get("/forgot_password", SessionController, :forgot_password)
     post("/send_password_reset", SessionController, :send_password_reset)
@@ -529,21 +534,6 @@ defmodule TeiserverWeb.Router do
       live "/actions/smurf_link/:user_id", ActionLive.SmurfLink, :show
     end
 
-    live_session :banned_domains,
-      layout: {TeiserverWeb.Layouts, :moderation},
-      on_mount: [
-        {UserAuthentication, :ensure_authenticated},
-        {UserAuthentication, {:authorise, "Moderator"}}
-      ] do
-      # Banned domains
-      live "/banned_domains", BannedDomainLive.Index, :index
-      live "/banned_domains/new", BannedDomainLive.Index, :new
-      live "/banned_domains/:id/edit", BannedDomainLive.Index, :edit
-
-      live "/banned_domains/:id", BannedDomainLive.Show, :show
-      live "/banned_domains/:id/show/edit", BannedDomainLive.Show, :edit
-    end
-
     live_session :banned_ips,
       layout: {TeiserverWeb.Layouts, :moderation},
       on_mount: [
@@ -572,6 +562,22 @@ defmodule TeiserverWeb.Router do
 
       live "/banned_phrases/:id", BannedPhraseLive.Show, :show
       live "/banned_phrases/:id/show/edit", BannedPhraseLive.Show, :edit
+    end
+  end
+
+  scope "/moderation", TeiserverWeb.Moderation, as: :moderation_tw do
+    pipe_through([:browser, :app_layout, :protected, :tailwind])
+
+    live_session :banned_domains,
+      layout: {TeiserverWeb.Layouts, :moderation_tw},
+      on_mount: [
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Moderator"}}
+      ] do
+      live "/banned_domains", BannedDomainLive.Index, :index
+      live "/banned_domains/new", BannedDomainLive.Form, :new
+      live "/banned_domains/:id", BannedDomainLive.Show, :show
+      live "/banned_domains/:id/edit", BannedDomainLive.Form, :edit
     end
   end
 
