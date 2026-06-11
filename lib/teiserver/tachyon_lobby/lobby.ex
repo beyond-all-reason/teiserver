@@ -37,15 +37,15 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby.Event
+  alias Teiserver.TachyonLobby.Events
   alias Teiserver.TachyonLobby.ListMonitor
   alias Teiserver.TachyonLobby.Registry, as: LobbyRegistry
   # lobby types
   alias Teiserver.TachyonLobby.Types, as: LT
+
   require Logger
 
   @behaviour :gen_statem
-
-  @type asset_status :: :missing | :downloading | :complete
 
   # Note[sparse_map_for_update]
   # do not turn this into a struct!
@@ -78,7 +78,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
            | {:move_player_to_spec, User.id(), spec_data :: map()}
            | :repack_players
            | :fill_from_join_queue
-           | {:update_client_status, User.id(), client_status :: map()}
            | {:update_lobby_name, new_name :: String.t()}
            | {:update_map_name, new_name :: String.t()}
            | {:update_ally_team_config, old_config :: [LT.AllyTeamConfig.t()],
@@ -164,7 +163,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @type client_status_update_data :: %{
           optional(:ready?) => boolean(),
-          optional(:asset_status) => asset_status()
+          optional(:asset_status) => LT.Types.asset_status()
         }
   @spec update_client_status(LT.Types.id(), User.id(), client_status_update_data()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :not_a_player}
@@ -716,7 +715,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
         %LT.Data{} = data
       ) do
     supported_properties = [:ready?, :asset_status]
-    event = {:update_client_status, user_id, Map.take(update_data, supported_properties)}
+
+    event = %Events.UpdateClientStatus{
+      user_id: user_id,
+      client_status_updates: Map.take(update_data, supported_properties)
+    }
+
     data = process_events(data, [event])
     {:keep_state, data, [{:reply, from, :ok}]}
   end
@@ -1503,12 +1507,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
-  defp process_event({:update_client_status, p_id, changes} = ev, aggregate) do
-    aggregate
-    |> update_in([:data, Access.key!(:players), p_id], &Map.merge(&1, changes))
-    |> update_in([:updates], &[ev | &1])
-  end
-
   defp process_event({:update_lobby_name, new_name} = ev, aggregate) do
     aggregate
     |> put_in([:data, Access.key!(:name)], new_name)
@@ -1802,12 +1800,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   defp update_change_from_event(:repack_players, change_map), do: change_map
-
-  defp update_change_from_event({:update_client_status, p_id, changes}, change_map) do
-    change_map
-    |> Map.put_new(:players, %{})
-    |> put_in([:players, p_id], changes)
-  end
 
   defp update_change_from_event({:update_lobby_name, new_name}, change_map),
     do: Map.put(change_map, :name, new_name)
