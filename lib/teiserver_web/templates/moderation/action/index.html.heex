@@ -59,7 +59,7 @@
                       <td>Expired</td>
                       <td>{duration_to_str(action.inserted_at, action.expires)}</td>
                     <% action.expires != nil -> %>
-                      <td>{action.expires |> date_to_str(format: :hms_or_ymd)}</td>
+                      <td>{action.expires |> date_to_str(format: :ymd_hms24)}</td>
                       <td>{duration_to_str(action.inserted_at, action.expires)}</td>
                     <% action.duration != nil -> %>
                       <td class="text-info">Pending acknowledgement</td>

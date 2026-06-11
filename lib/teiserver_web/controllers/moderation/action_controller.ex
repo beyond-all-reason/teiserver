@@ -246,9 +246,11 @@ defmodule TeiserverWeb.Moderation.ActionController do
   def create(conn, %{"action" => action_params}) do
     user = Account.get_user(action_params["target_id"])
 
+    now = DateTime.utc_now()
+
     duration_seconds =
-      case DateHelper.human_input_to_datetime(action_params["duration"] || "") do
-        {:ok, future_datetime} -> DateTime.diff(future_datetime, DateTime.utc_now())
+      case DateHelper.human_input_to_datetime(action_params["duration"] || "", now) do
+        {:ok, future_datetime} -> DateTime.diff(future_datetime, now)
         nil -> nil
       end
 
@@ -346,9 +348,11 @@ defmodule TeiserverWeb.Moderation.ActionController do
   def update(conn, %{"id" => id, "action" => action_params}) do
     action = Moderation.get_action!(id)
 
+    now = DateTime.utc_now()
+
     duration_seconds =
-      case DateHelper.human_input_to_datetime(action_params["duration"] || "") do
-        {:ok, future_datetime} -> DateTime.diff(future_datetime, DateTime.utc_now())
+      case DateHelper.human_input_to_datetime(action_params["duration"] || "", now) do
+        {:ok, future_datetime} -> DateTime.diff(future_datetime, now)
         nil -> nil
       end
 
@@ -357,11 +361,18 @@ defmodule TeiserverWeb.Moderation.ActionController do
       |> Map.values()
       |> Enum.reject(fn v -> v == "false" end)
 
+    expires =
+      if duration_seconds != nil and action.expires != nil do
+        NaiveDateTime.add(action.inserted_at, duration_seconds, :second)
+      else
+        nil
+      end
+
     action_params =
       Map.merge(action_params, %{
         "restrictions" => restrictions,
         "duration" => duration_seconds,
-        "expires" => nil
+        "expires" => expires
       })
 
     case Moderation.update_action(action, action_params) do

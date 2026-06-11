@@ -27,7 +27,11 @@
     <div class="col-lg-6">
       <div class="form-group my-2">
         {label(f, :duration, class: "control-label")}
-        {text_input(f, :duration, class: "form-control", placeholder: "e.g. 7d, 24h, 1m, 1y")}
+        {text_input(f, :duration,
+          class: "form-control",
+          placeholder: "e.g. 7d, 24h, 1m, 1y",
+          value: seconds_to_duration_input(Ecto.Changeset.get_field(@changeset, :duration))
+        )}
         <small class="text-muted">
           Timer starts when the user logs in and acknowledges the action.
           Format: <code>s</code>

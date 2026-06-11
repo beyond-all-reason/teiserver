@@ -99,6 +99,9 @@ defmodule Teiserver.Helper.DateHelper do
         :ymd_hms ->
           Calendar.strftime(the_time, "%Y-%m-%d %I:%M:%S")
 
+        :ymd_hms24 ->
+          Calendar.strftime(the_time, "%Y-%m-%d %H:%M:%S")
+
         :hms ->
           Calendar.strftime(the_time, "%I:%M:%S")
 

@@ -25,4 +25,17 @@ defmodule TeiserverWeb.Moderation.ActionView do
       true -> "#{div(seconds, 60)} minute(s)"
     end
   end
+
+  @spec seconds_to_duration_input(integer() | nil) :: String.t()
+  def seconds_to_duration_input(nil), do: ""
+
+  def seconds_to_duration_input(seconds) do
+    cond do
+      rem(seconds, 86_400 * 365) == 0 -> "#{div(seconds, 86_400 * 365)}y"
+      rem(seconds, 86_400 * 30) == 0 -> "#{div(seconds, 86_400 * 30)}m"
+      rem(seconds, 86_400) == 0 -> "#{div(seconds, 86_400)}d"
+      rem(seconds, 3_600) == 0 -> "#{div(seconds, 3_600)}h"
+      true -> "#{seconds}s"
+    end
+  end
 end
