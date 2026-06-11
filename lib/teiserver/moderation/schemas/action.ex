@@ -33,7 +33,7 @@ defmodule Teiserver.Moderation.Action do
       params,
       ~w(target_id reason restrictions score_modifier expires duration notes hidden discord_message_id appeal_status)a
     )
-    |> validate_required(~w(target_id reason restrictions duration score_modifier)a)
+    |> validate_required(~w(target_id reason restrictions score_modifier)a)
     |> adjust_restrictions()
     |> validate_length(:restrictions, min: 1)
   end
