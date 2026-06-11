@@ -36,11 +36,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Player
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
+  alias Teiserver.TachyonLobby.Event
   alias Teiserver.TachyonLobby.ListMonitor
   alias Teiserver.TachyonLobby.Registry, as: LobbyRegistry
   # lobby types
   alias Teiserver.TachyonLobby.Types, as: LT
-
   require Logger
 
   @behaviour :gen_statem
@@ -1331,6 +1331,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
     final_aggregate.data
   end
 
+  # TODO: this should live under Event, or something outside this module
+  # because implementing the Event protocol may require to compute intermediate
+  # aggregates, and having this function there creates some circular dependencies
   defp compute_aggregate(%LT.Data{} = data, events) do
     aggregate = %LT.Aggregate{data: data}
 
@@ -1355,19 +1358,25 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end)
   end
 
+  # TODO: this should be a temporary function until all events are converted to
+  # structs which implement the Event protocol
   defp apply_event(event, %LT.Aggregate{} = agg) do
-    result = process_event(event, %{data: agg.data, updates: [], actions: []})
-    new_changes = Enum.reduce(result.updates, agg.changes, &update_change_from_event/2)
+    if Event.impl_for(event) != nil do
+      Event.apply_event(event, agg)
+    else
+      result = process_event(event, %{data: agg.data, updates: [], actions: []})
+      new_changes = Enum.reduce(result.updates, agg.changes, &update_change_from_event/2)
 
-    overview_changes =
-      Map.merge(agg.overview_changes, overview_changes_from_events(result.updates))
+      overview_changes =
+        Map.merge(agg.overview_changes, overview_changes_from_events(result.updates))
 
-    %LT.Aggregate{
-      data: result.data,
-      changes: new_changes,
-      overview_changes: overview_changes,
-      side_effects: Map.get(result, :actions, []) ++ agg.side_effects
-    }
+      %LT.Aggregate{
+        data: result.data,
+        changes: new_changes,
+        overview_changes: overview_changes,
+        side_effects: Map.get(result, :actions, []) ++ agg.side_effects
+      }
+    end
   end
 
   @spec process_event(event(), %{data: LT.Data.t(), updates: [event()], actions: list()}) :: %{
