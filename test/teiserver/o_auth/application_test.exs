@@ -14,7 +14,7 @@ defmodule Teiserver.OAuth.ApplicationTest do
                scopes: ["lol"]
              })
 
-    assert Keyword.fetch!(changeset.errors, :scopes)
+    assert {_msg, _opts} = Keyword.get(changeset.errors, :scopes)
   end
 
   test "can retrieve an app by uid" do
@@ -146,7 +146,7 @@ defmodule Teiserver.OAuth.ApplicationTest do
       |> Map.put(:scopes, ["admin.user"])
       |> OAuth.create_application()
 
-    assert Keyword.has_key?(err.errors, :scopes)
+    assert {_msg, _opts} = Keyword.get(err.errors, :scopes)
   end
 
   test "cannot update app with scopes if user doesn't have permissions" do
@@ -155,6 +155,6 @@ defmodule Teiserver.OAuth.ApplicationTest do
     {:ok, app} = valid_attrs(user) |> OAuth.create_application()
 
     {:error, err} = OAuth.update_application(app, %{scopes: ["admin.map"]})
-    assert Keyword.has_key?(err.errors, :scopes)
+    assert {_msg, _opts} = Keyword.get(err.errors, :scopes)
   end
 end

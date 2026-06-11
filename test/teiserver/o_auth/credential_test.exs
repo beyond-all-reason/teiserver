@@ -28,10 +28,12 @@ defmodule Teiserver.OAuth.CredentialTest do
   setup [:setup_bot, :setup_app]
 
   test "can create and retrieve credentials", %{app: app, bot: bot} do
-    assert {:ok, created_cred} =
+    assert {:ok, %OAuth.Credential{} = created_cred} =
              OAuth.create_credentials(app, bot, "some-client-id", "very-secret")
 
-    assert {:ok, cred} = OAuth.get_valid_credentials("some-client-id", "very-secret")
+    assert {:ok, %OAuth.Credential{} = cred} =
+             OAuth.get_valid_credentials("some-client-id", "very-secret")
+
     assert created_cred.id == cred.id
     assert cred.application.uid == app.uid
     # sanity check to make sure we're not storing cleartext password
@@ -39,7 +41,7 @@ defmodule Teiserver.OAuth.CredentialTest do
   end
 
   test "can get a token from credentials", %{app: app, bot: bot} do
-    assert {:ok, created_cred} =
+    assert {:ok, %OAuth.Credential{} = created_cred} =
              OAuth.create_credentials(app, bot, "some-client-id", "very-secret")
 
     assert {:ok, token} = OAuth.get_token_from_credentials(created_cred, app.scopes)
@@ -51,7 +53,7 @@ defmodule Teiserver.OAuth.CredentialTest do
   test "must provide scopes", %{app: app, bot: bot} do
     OAuthFixtures.update_app(app, %{scopes: ["tachyon.lobby", "admin.engine"]})
 
-    assert {:ok, created_cred} =
+    assert {:ok, %OAuth.Credential{} = created_cred} =
              OAuth.create_credentials(app, bot, "some-client-id", "very-secret")
 
     assert {:error, :invalid_scope} =
@@ -61,7 +63,7 @@ defmodule Teiserver.OAuth.CredentialTest do
   test "must provide valid scopes", %{app: app, bot: bot} do
     OAuthFixtures.update_app(app, %{scopes: ["tachyon.lobby", "admin.engine"]})
 
-    assert {:ok, created_cred} =
+    assert {:ok, %OAuth.Credential{} = created_cred} =
              OAuth.create_credentials(app, bot, "some-client-id", "very-secret")
 
     assert {:error, :invalid_scope} =
