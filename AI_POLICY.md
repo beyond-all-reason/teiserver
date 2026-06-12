@@ -19,7 +19,7 @@ If maintainers reasonably suspect undisclosed AI use, the pull request will be c
 
 **Non-direct AI usage does not require disclosure.**  
 
-If AI writes no code it's usage does not need to be disclosed. If any code was directly written by AI it must be disclosed.
+Anything showing in the diffs was directly authored by AI, it must be disclosed.
 
 ## Verification and testing
 
@@ -40,7 +40,7 @@ It is recommended to attach test artifacts, such as screenshots or recordings, t
 - Verbosity, noise, and speculative content must be removed.
 - Contributors remain responsible for research, accuracy, and clarity.
 
-AI may assist with explanations, summaries, or drafting, but must not replace understanding or judgement. Having an AI post for you will result in a request to stop, repeat incidents will result in a ban.
+AI may assist with explanations, summaries, or drafting, but must not replace understanding or judgement. The author of the PR must write the description in part to demonstrate their understanding of the chnage. Having an AI post for you will result in a request to stop, repeat incidents will result in a ban.
 
 ## Prohibited content
 
