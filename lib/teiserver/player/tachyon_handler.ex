@@ -627,8 +627,8 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("party/create", "request", _message_id, _msg, state) do
     case Session.create_party(state.user.id) do
-      {:ok, party_id} ->
-        data = %{partyId: party_id}
+      {:ok, party_state} ->
+        data = %{party: party_state_to_tachyon(party_state)}
         {:response, data, state}
 
       {:error, :already_in_party} ->

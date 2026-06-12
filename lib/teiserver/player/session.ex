@@ -416,7 +416,7 @@ defmodule Teiserver.Player.Session do
   end
 
   @spec create_party(User.id()) ::
-          {:ok, Party.id()} | {:error, :already_in_party} | {:error, reason :: term()}
+          {:ok, Party.state()} | {:error, :already_in_party} | {:error, reason :: term()}
   def create_party(user_id) do
     user_id |> via_tuple() |> GenServer.call({:party, :create})
   end
@@ -928,6 +928,8 @@ defmodule Teiserver.Player.Session do
   def handle_call({:party, :create}, _from, state) do
     case Party.create_party(state.user.id) do
       {:ok, party_id, pid} ->
+        party_state = Party.get_state(party_id)
+
         state =
           state
           |> put_in([:party, :current_party], party_id)
@@ -936,10 +938,10 @@ defmodule Teiserver.Player.Session do
         case leave_matchmaking(state) do
           {:ok, state} ->
             state = send_to_player(state, {:matchmaking, {:cancelled, :intentional}})
-            {:reply, {:ok, party_id}, state}
+            {:reply, {:ok, party_state}, state}
 
           _other ->
-            {:reply, {:ok, party_id}, state}
+            {:reply, {:ok, party_state}, state}
         end
 
       {:error, reason} ->
