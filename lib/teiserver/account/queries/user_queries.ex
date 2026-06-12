@@ -540,6 +540,12 @@ defmodule Teiserver.Account.UserQueries do
     from(users in User, as: :users)
   end
 
+  @spec where_id(t(), pos_integer() | String.t()) :: t()
+  def where_id(query, id) do
+    from users in query,
+      where: users.id == ^id
+  end
+
   @spec where_name(t(), String.t()) :: t()
   def where_name(query, search_term) do
     from users in query,

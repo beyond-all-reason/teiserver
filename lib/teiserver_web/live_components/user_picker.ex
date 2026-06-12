@@ -26,6 +26,8 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
 
   import Ecto.Query, only: [limit: 2]
 
+  @display_limit 10
+
   attr :id, :any
 
   attr :field, Phoenix.HTML.FormField,
@@ -131,23 +133,18 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
     |> assign(input_value: input_value)
   end
 
-  defp update_search(%{assigns: %{search_term: search_term}} = socket) do
-    exact_matches =
-      UserQueries.users()
-      |> UserQueries.where_name(search_term)
-      |> Repo.all()
+  defp update_search(%{assigns: %{search_term: raw_search_term}} = socket) do
+    search_term = String.trim(raw_search_term)
 
-    # We display at most 10 users, exact matches always come first
-    query_limit = 10 - Enum.count(exact_matches)
-    exact_ids = Enum.map(exact_matches, & &1.id)
+    found_user = search_by_id(search_term)
+    exact_matches = search_for_exact_name_match(search_term)
 
-    users =
-      UserQueries.users()
-      |> UserQueries.where_name_like(search_term)
-      |> UserQueries.where_id_not_in(exact_ids)
-      |> UserQueries.order_by_name()
-      |> limit(^query_limit)
-      |> Repo.all()
+    # If we found a user through ID search we want to put that at the front
+    # of the exact matches
+    exact_matches = Enum.reject([found_user | exact_matches], &is_nil(&1))
+    found_ids = Enum.map(exact_matches, & &1.id)
+
+    users = search_by_name_like(search_term, found_ids)
 
     socket
     |> assign(users: exact_matches ++ users)
@@ -155,6 +152,44 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
 
   # No search term
   defp update_search(socket), do: socket
+
+  defp search_by_id(""), do: nil
+
+  defp search_by_id(search_term) do
+    case Integer.parse(search_term) do
+      {number, _rem} ->
+        UserQueries.users()
+        |> UserQueries.where_id(number)
+        |> limit(1)
+        |> Repo.one()
+
+      _error ->
+        nil
+    end
+  end
+
+  # Case sensitive name match
+  defp search_for_exact_name_match(""), do: []
+
+  defp search_for_exact_name_match(search_term) do
+    UserQueries.users()
+    |> UserQueries.where_name(search_term)
+    |> Repo.all()
+  end
+
+  defp search_by_name_like("", _ids), do: []
+
+  defp search_by_name_like(search_term, found_ids) do
+    # We display at most N users, exact matches always come first
+    query_limit = @display_limit - Enum.count(found_ids)
+
+    UserQueries.users()
+    |> UserQueries.where_name_like(search_term)
+    |> UserQueries.where_id_not_in(found_ids)
+    |> UserQueries.order_by_name()
+    |> limit(^query_limit)
+    |> Repo.all()
+  end
 
   @doc """
   <.picker_form name={"name"} />
@@ -166,7 +201,7 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   def picker_form(assigns) do
     ~H"""
     <.modal id="user-picker-search" on_cancel={JS.push("hide-picker", target: @myself)}>
-      Search for user by name
+      Search for user by name or ID
       <.input
         id="user-picker-search-input"
         name="user-search-term"
