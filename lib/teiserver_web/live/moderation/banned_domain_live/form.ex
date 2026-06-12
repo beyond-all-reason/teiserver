@@ -72,10 +72,6 @@ defmodule TeiserverWeb.Moderation.BannedDomainLive.Form do
   end
 
   def handle_event("save", %{"banned_domain" => banned_domain_params}, socket) do
-    IO.puts("")
-    IO.inspect("X", label: "#{__MODULE__}:#{__ENV__.line}")
-    IO.puts("")
-
     save_banned_domain(socket, socket.assigns.live_action, banned_domain_params)
   end
 
