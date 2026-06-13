@@ -14,11 +14,23 @@ end
 
 defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.RemovePlayerFromLobby do
   alias Teiserver.Helpers.MonitorCollection, as: MC
+  alias Teiserver.TachyonLobby.Event
   alias Teiserver.TachyonLobby.Events
   alias Teiserver.TachyonLobby.Events.RemovePlayerFromLobby
   alias Teiserver.TachyonLobby.Types, as: LT
 
   def apply_event(%RemovePlayerFromLobby{} = ev, %LT.Aggregate{} = agg) do
+    agg =
+      Enum.reduce(
+        [
+          %Events.CancelKickVote{user_id: ev.player_id},
+          %Events.CastVote{user_id: ev.player_id, vote: agg.data.current_vote, ballot: :abstain},
+          %Events.UpdateBoss{action: :remove, appointee_id: ev.player_id}
+        ],
+        agg,
+        &Event.apply_event/2
+      )
+
     # if the user leaving is associated with any bot, we need to remove all of
     # them as well.
     ids_to_remove =
@@ -44,17 +56,8 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.RemoveP
       |> update_in([:players], &Map.merge(&1, removed_changes))
 
     overview_changes = Map.put(agg.overview_changes, :player_count, map_size(data.players))
+    agg = %{agg | data: data, changes: changes, overview_changes: overview_changes}
 
-    # TODO This should handle voting and boss updates once these are converted to structs
-    # aggregate = process_event({:cast_vote, p_id, :abstain}, aggregate)
-    # process_event({:update_boss, :remove, p_id}, aggregate)
-    # TODO: this should handle cancelling kickban vote as well
-    new_aggregate = %{agg | data: data, changes: changes, overview_changes: overview_changes}
-
-    Enum.reduce(
-      [%Events.RepackPlayers{}, %Events.FillFromJoinQueue{}],
-      new_aggregate,
-      &Teiserver.TachyonLobby.Event.apply_event/2
-    )
+    Enum.reduce([%Events.RepackPlayers{}, %Events.FillFromJoinQueue{}], agg, &Event.apply_event/2)
   end
 end

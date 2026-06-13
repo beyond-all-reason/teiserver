@@ -1127,8 +1127,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert result == :failed
     end
 
-    # re-enable when voting events are converted to structs
-    @tag :skip
     test "voter disconnect is the same as leaving (abstain)" do
       %{id: id, users: users} = setup_full_lobby([1, 1])
       :ok = Lobby.join_queue(id, "2")
@@ -1255,8 +1253,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert data.bosses == %{"2" => %{}}
     end
 
-    # re-enable when boss events are converted to structs
-    @tag :skip
     test "leaving lobby unboss" do
       %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
       :ok = Lobby.appoint_boss(id, @default_user_id, "2")
@@ -1864,8 +1860,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       :ok = Lobby.vote_submit(id, "user3", {vote.id, :yes})
 
-      assert_receive {:lobby, ^id, {:updated, %{players: %{"user2" => nil}}}}
-      assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
+      assert_receive {:lobby, ^id, {:updated, %{players: %{"user2" => nil}, current_vote: nil}}}
       assert_receive {:lobby, ^id, {:vote_ended, _vote_id, :passed}}
 
       {:ok, details} = LobbyProcess.get_details(id)
@@ -1873,7 +1868,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       refute is_map_key(details.spectators, "user2")
     end
 
-    @tag :skip
     test "kickban vote is cancelled when target leaves" do
       {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([3, 3])
