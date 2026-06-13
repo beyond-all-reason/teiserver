@@ -8,19 +8,34 @@ defmodule TeiserverWeb.Moderation.BannedDomainLive.Form do
   @impl LiveView
   def render(assigns) do
     ~H"""
-    <div>
-      <.header>
-        {@page_title}
-        <:subtitle>Use this form to manage banned_domain records in your database.</:subtitle>
-      </.header>
+    <div class="w-full max-w-3xl mx-auto px-4 py-8">
+      <div class="mb-6">
+        <.header>
+          {@page_title}
+        </.header>
+      </div>
 
-      <.simple_form for={@form} id="banned_domain-form" phx-change="validate" phx-submit="save">
-        <.input field={@form[:domain]} type="text" label="Domain" />
-        <footer>
-          <.button phx-disable-with="Saving..." variant="primary">Save Banned domain</.button>
-          <.button navigate={return_path(@return_to, @banned_domain)}>Cancel</.button>
-        </footer>
-      </.simple_form>
+      <div class="bg-white border-0 md:border-l border-r border-t border-gray-300 rounded-lg shadow-sm p-6">
+        <.simple_form
+          for={@form}
+          id="banned_domain-form"
+          phx-change="validate"
+          phx-submit="save"
+          class="space-y-4 mx-auto"
+        >
+          <div>
+            <label for="banned_domain-domain" class="block text-sm font-medium text-gray-700 mb-1">
+              Domain
+            </label>
+            <.input field={@form[:domain]} type="text" id="banned_domain-domain" autocomplete="off" />
+          </div>
+
+          <footer class="flex items-center justify-between mt-4">
+            <.button navigate={return_path(@return_to, @banned_domain)}>Cancel</.button>
+            <.button phx-disable-with="Saving..." variant="primary">Save Banned domain</.button>
+          </footer>
+        </.simple_form>
+      </div>
     </div>
     """
   end

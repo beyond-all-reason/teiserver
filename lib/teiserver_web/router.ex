@@ -571,6 +571,7 @@ defmodule TeiserverWeb.Router do
     live_session :banned_domains,
       layout: {TeiserverWeb.Layouts, :moderation_tw},
       on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "moderation"}}},
         {UserAuthentication, :ensure_authenticated},
         {UserAuthentication, {:authorise, "Moderator"}}
       ] do

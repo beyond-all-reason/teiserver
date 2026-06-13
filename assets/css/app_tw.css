@@ -102,3 +102,7 @@
 }
 
 /* This file is for your main application CSS */
+/* This file is for your main application CSS */
+.menu-active {
+  @apply bg-primary text-primary-content rounded-md;
+}
