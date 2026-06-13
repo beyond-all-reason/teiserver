@@ -161,5 +161,7 @@
   {"lib/teiserver_web/templates/admin/lobby/lobby_chat.html.heex", :call},
   {"lib/teiserver_web/templates/admin/lobby/server_chat.html.heex", :call},
   {"lib/teiserver_web/templates/battle/match/index.html.heex", :call},
-  {"lib/teiserver_web/templates/battle/match/ratings.html.heex", :call}
+  {"lib/teiserver_web/templates/battle/match/ratings.html.heex", :call},
+  {"lib/teiserver_web/live/moderation/action_live/smurf_link.ex", :callback_arg_type_mismatch},
+  {"lib/teiserver_web/live/moderation/action_live/smurf_link.ex", :call}
 ]

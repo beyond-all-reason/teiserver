@@ -533,4 +533,45 @@ defmodule Teiserver.Account.UserQueries do
       {:ok, query}
     end
   end
+
+  # New query style
+  @spec users() :: t()
+  def users do
+    from(users in User, as: :users)
+  end
+
+  @spec where_id(t(), pos_integer() | String.t()) :: t()
+  def where_id(query, id) do
+    from users in query,
+      where: users.id == ^id
+  end
+
+  @spec where_name(t(), String.t()) :: t()
+  def where_name(query, search_term) do
+    from users in query,
+      where: users.name == ^search_term
+  end
+
+  @spec where_name_like(t(), String.t()) :: t()
+  def where_name_like(query, search_term) do
+    uname = "%" <> search_term <> "%"
+
+    from users in query,
+      where: ilike(users.name, ^uname)
+  end
+
+  @spec where_id_not_in(t(), [User.id()]) :: t()
+  def where_id_not_in(query, ids) do
+    from users in query,
+      where: users.id not in ^ids
+  end
+
+  @spec order_by_name(t(), :asc | :desc) :: t()
+  def order_by_name(query, direction \\ :asc) do
+    if direction == :asc do
+      from(users in query, order_by: [asc: users.name])
+    else
+      from(users in query, order_by: [desc: users.name])
+    end
+  end
 end

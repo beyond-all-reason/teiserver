@@ -37,6 +37,8 @@ defmodule TeiserverWeb.ConnCase do
       import ConnTest
       import TeiserverWeb.ConnCase
 
+      import Phoenix.LiveViewTest
+
       # The default endpoint for testing
       unquote(TeiserverWeb.verified_routes())
       @endpoint TeiserverWeb.Endpoint

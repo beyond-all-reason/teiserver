@@ -1,0 +1,23 @@
+<.header>
+  Smurf link user
+</.header>
+
+<div class="alert alert-warning">
+  This page is incomplete, it currently exists to show and test the new user-picker. Please provide feedback on it to the Server team on the discord.
+</div>
+
+<div class="p-4 mb-4" style="background-color: rgba(150, 150, 150, 0.3)">
+  <.header>
+    Marking {@user.name} as a smurf of:
+  </.header>
+
+  <.live_component
+    module={TeiserverWeb.LiveComponents.UserPicker}
+    id="user-picker"
+    name="user-picker"
+    label="User to link to:"
+    value={}
+  />
+</div>
+
+<.back navigate={~p"/moderation"}>Back to moderation</.back>
