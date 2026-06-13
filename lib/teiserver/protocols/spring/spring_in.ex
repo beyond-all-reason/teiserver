@@ -1270,6 +1270,9 @@ defmodule Teiserver.Protocols.SpringIn do
           String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
             msg |> String.trim() |> String.slice(0..1024)
 
+          String.starts_with?(lowercase_msg, "!mode ") ->
+            msg |> String.trim() |> String.slice(0..1024)
+
           true ->
             msg |> String.trim() |> String.slice(0..256)
         end
@@ -1294,6 +1297,9 @@ defmodule Teiserver.Protocols.SpringIn do
             msg |> String.trim() |> String.slice(0..16_384)
 
           String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
+            msg |> String.trim() |> String.slice(0..1024)
+
+          String.starts_with?(lowercase_msg, "!mode ") ->
             msg |> String.trim() |> String.slice(0..1024)
 
           true ->
