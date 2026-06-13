@@ -208,6 +208,14 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Email domain blocklist URL",
+      section: "Moderation",
+      type: "string",
+      permissions: ["Moderator"],
+      description: "URL of raw, newline-separated file with blocked email domains"
+    })
+
+    add_site_config_type(%{
       key: "teiserver.VPN blocklist URL",
       section: "Moderation",
       type: "string",

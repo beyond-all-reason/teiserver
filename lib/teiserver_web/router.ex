@@ -258,6 +258,13 @@ defmodule TeiserverWeb.Router do
       live "/:userid/accolades", ProfileLive.Accolades, :accolades
       live "/:userid/matches", ProfileLive.Matches, :matches
       live "/:userid/playtime", ProfileLive.Playtime, :playtime
+    end
+
+    live_session :authed_profiles,
+      on_mount: [
+        {Teiserver.Account.AuthPlug, :mount_current_user},
+        {Teiserver.Account.AuthPlug, :ensure_authenticated}
+      ] do
       live "/:userid/appearance", ProfileLive.Appearance, :appearance
       live "/:userid/relationships", ProfileLive.Relationships, :relationships
       live "/:userid/contributor", ProfileLive.Contributor, :contributor
