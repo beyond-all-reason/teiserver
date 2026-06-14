@@ -14,7 +14,7 @@ defmodule TeiserverWeb.LiveComponents.UserPickerTest do
         })
 
       assert html =~
-               ~s(<input type="text" name="user-picker" id="user-picker" class="form-control " disabled="disabled" placeholder="">)
+               ~s(<input type="text" name="user-picker" id="user-picker" class="w-full input form-control" disabled="disabled" placeholder="">)
 
       refute html =~ ~s(id="user-picker-search")
     end
