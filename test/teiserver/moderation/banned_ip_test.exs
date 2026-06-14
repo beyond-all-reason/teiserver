@@ -27,11 +27,11 @@ defmodule Teiserver.Moderation.BannedIPTest do
 
     test "create_banned_ip/1 with valid data creates a banned_ip" do
       valid_attrs = %{
-        cidr: "192.168.0.1/22"
+        cidr: "200.200.0.1/22"
       }
 
       assert {:ok, %BannedIP{} = banned_ip} = Moderation.create_banned_ip(valid_attrs)
-      assert banned_ip.cidr == "192.168.0.1/22"
+      assert banned_ip.cidr == "200.200.0.1/22"
     end
 
     test "create_banned_ip/1 with invalid data returns error changeset" do
@@ -46,13 +46,13 @@ defmodule Teiserver.Moderation.BannedIPTest do
       banned_ip = banned_ip_fixture()
 
       update_attrs = %{
-        cidr: "192.168.0.1/20"
+        cidr: "200.200.0.1/20"
       }
 
       assert {:ok, %BannedIP{} = banned_ip} =
                Moderation.update_banned_ip(banned_ip, update_attrs)
 
-      assert banned_ip.cidr == "192.168.0.1/20"
+      assert banned_ip.cidr == "200.200.0.1/20"
     end
 
     test "update_banned_ip/2 with invalid data returns error changeset" do
@@ -74,32 +74,32 @@ defmodule Teiserver.Moderation.BannedIPTest do
   describe "test banned_ip matches" do
     test "matches" do
       banned_ip_fixture(%{
-        cidr: "192.128.0.1/30"
+        cidr: "100.100.0.1/30"
       })
 
       banned_ip_fixture(%{
-        cidr: "127.0.0.1/18"
+        cidr: "200.200.0.1/18"
       })
 
       LoadBannedIPsTask.perform()
 
-      assert Moderation.banned_ip?("192.128.0.1")
-      assert Moderation.banned_ip?("192.128.0.2")
-      refute Moderation.banned_ip?("192.128.0.4")
+      assert Moderation.banned_ip?("100.100.0.1")
+      assert Moderation.banned_ip?("100.100.0.2")
+      refute Moderation.banned_ip?("100.100.0.4")
 
-      assert Moderation.banned_ip?("127.0.0.1")
-      refute Moderation.banned_ip?("127.0.64.1")
+      assert Moderation.banned_ip?("200.200.0.1")
+      refute Moderation.banned_ip?("200.200.64.1")
     end
 
     test "no match" do
       banned_ip_fixture(%{
-        cidr: "127.0.0.1/18"
+        cidr: "200.200.0.1/18"
       })
 
       LoadBannedIPsTask.perform()
 
       # Not in the range
-      refute Moderation.banned_ip?("192.128.0.1")
+      refute Moderation.banned_ip?("100.100.0.1")
 
       # Not an IP
       refute Moderation.banned_ip?("not an IP")
@@ -109,18 +109,18 @@ defmodule Teiserver.Moderation.BannedIPTest do
   describe "load task" do
     test "task loads cidrs into the cache" do
       banned_ip_fixture(%{
-        cidr: "192.128.0.1/22"
+        cidr: "100.100.0.1/22"
       })
 
       banned_ip_fixture(%{
-        cidr: "127.0.0.1/18"
+        cidr: "200.200.0.1/18"
       })
 
       LoadBannedIPsTask.perform()
 
       [ip1, ip2] = Moderation.list_banned_ips_cache() |> Enum.sort()
-      assert ip1 == ~i"127.0.0.0/18"
-      assert ip2 == ~i"192.128.0.1/22"
+      assert ip1 == ~i"200.200.0.0/18"
+      assert ip2 == ~i"100.100.0.1/22"
     end
   end
 
