@@ -74,9 +74,10 @@ defmodule Teiserver.Account.RetentionReport do
 
         if last_played != nil and last_login != nil do
           inserted_date = NaiveDateTime.to_date(user.inserted_at)
+          last_login_date = DateTime.to_date(last_login)
 
           %{
-            last_login: Date.diff(inserted_date, DateTime.to_date(last_login)) |> abs(),
+            last_login: Date.diff(inserted_date, last_login_date) |> abs(),
             last_played: Date.diff(inserted_date, last_played) |> abs()
           }
         end

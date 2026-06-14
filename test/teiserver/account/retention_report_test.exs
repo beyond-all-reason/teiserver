@@ -1,8 +1,8 @@
 defmodule Teiserver.Account.RetentionReportTest do
   @moduledoc false
   alias Teiserver.Account.RetentionReport
-  alias Teiserver.Logging
   alias Teiserver.Helpers.GeneralTestLib
+  alias Teiserver.Logging
 
   use Teiserver.DataCase, async: false
 
@@ -20,7 +20,7 @@ defmodule Teiserver.Account.RetentionReportTest do
       # a 500 for the page.
       {:ok, user} =
         user
-        |> change(last_login: DateTime.utc_now() |> DateTime.truncate(:second))
+        |> change(last_login: DateTime.utc_now(:second))
         |> Repo.update()
 
       {:ok, _log} =
@@ -32,14 +32,14 @@ defmodule Teiserver.Account.RetentionReportTest do
       result = RetentionReport.run(nil, %{})
 
       assert result.user_count == 1
-      assert is_list(result.graph_data)
+      assert [["Login" | _], ["Play" | _]] = result.graph_data
     end
 
     test "runs with no matching players" do
       result = RetentionReport.run(nil, %{})
 
       assert result.user_count == 0
-      assert is_list(result.graph_data)
+      assert [["Login" | _], ["Play" | _]] = result.graph_data
     end
   end
 end
