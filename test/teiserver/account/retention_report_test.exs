@@ -32,14 +32,14 @@ defmodule Teiserver.Account.RetentionReportTest do
       result = RetentionReport.run(nil, %{})
 
       assert result.user_count == 1
-      assert [["Login" | _], ["Play" | _]] = result.graph_data
+      assert [["Login" | _login], ["Play" | _play]] = result.graph_data
     end
 
     test "runs with no matching players" do
       result = RetentionReport.run(nil, %{})
 
       assert result.user_count == 0
-      assert [["Login" | _], ["Play" | _]] = result.graph_data
+      assert [["Login" | _login], ["Play" | _play]] = result.graph_data
     end
   end
 end
