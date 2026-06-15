@@ -993,23 +993,6 @@ defmodule Teiserver.Moderation do
     Repo.all(BannedIP)
   end
 
-  @doc """
-  Returns the list of banned_ips as IP objects
-
-  ## Examples
-
-      iex> list_banned_ip_ranges()
-      [%BannedIP{}, ...]
-
-  """
-  def list_banned_ip_ranges do
-    list_banned_ips_cache()
-    |> Enum.map(fn x ->
-      BannedIP.cidr_to_subnet(x.cidr)
-    end)
-    |> Enum.into([])
-  end
-
   @spec list_banned_ips_cache :: [BannedIP.t()]
   def list_banned_ips_cache do
     Teiserver.cache_get(:application_metadata_cache, "banned_ip_ranges", [])
