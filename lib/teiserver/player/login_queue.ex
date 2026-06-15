@@ -60,10 +60,19 @@ defmodule Teiserver.Player.LoginQueue do
   If `should_fill?` is true, the new rate limiter starts with full permits and
   admits users immediately up to the burst capacity.
   """
-  @spec set_rate(non_neg_integer(), boolean()) :: :ok
-  def set_rate(rate, should_fill? \\ false) do
-    GenServer.call(__MODULE__, {:set_rate, rate, should_fill?})
+  @spec set_rate(BurstyRateLimiter.t()) :: :ok
+  def set_rate(%BurstyRateLimiter{} = rl) do
+    GenServer.call(__MODULE__, {:set_rate, rl})
   end
+
+  @spec set_rate(non_neg_integer(), boolean()) :: :ok
+  def set_rate(rate, should_fill? \\ false)
+
+  def set_rate(rate, true),
+    do: rate |> BurstyRateLimiter.per_minute() |> BurstyRateLimiter.set_full() |> set_rate()
+
+  def set_rate(rate, false),
+    do: rate |> BurstyRateLimiter.per_minute() |> BurstyRateLimiter.set_empty() |> set_rate()
 
   @doc """
   Manually trigger a tick. Used in tests to control timing deterministically.
@@ -116,12 +125,7 @@ defmodule Teiserver.Player.LoginQueue do
     {:reply, :ok, %{state | total_limit: limit}}
   end
 
-  def handle_call({:set_rate, rate, should_fill?}, _from, state) do
-    rl = BurstyRateLimiter.per_minute(rate)
-
-    rl =
-      if should_fill?, do: BurstyRateLimiter.set_full(rl), else: BurstyRateLimiter.set_empty(rl)
-
+  def handle_call({:set_rate, %BurstyRateLimiter{} = rl}, _from, state) do
     {:reply, :ok, %{state | rate_limiter: rl}}
   end
 
