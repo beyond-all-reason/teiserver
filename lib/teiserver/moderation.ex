@@ -889,7 +889,7 @@ defmodule Teiserver.Moderation do
   def banned_domain?(email) do
     case String.split(email, "@") do
       [_start, domain] ->
-        Enum.member?(list_banned_domains_cache(), domain)
+        String.contains?(domain, list_banned_domains_cache())
 
       _no_email ->
         false
