@@ -1,9 +1,9 @@
 <.header>
   Listing banned domains
   <:actions>
-    <.link patch={~p"/moderation/banned_domains/new"}>
-      <.button>New banned domain</.button>
-    </.link>
+    <.button navigate={~p"/moderation/banned_domains/new"}>
+      <i class="fa fa-plus fa-solid" /> New banned domain
+    </.button>
   </:actions>
 </.header>
 
@@ -20,7 +20,7 @@
       <.link navigate={~p"/moderation/banned_domains/#{banned_domain}"}>Show</.link>
     </div>
     <.link
-      patch={~p"/moderation/banned_domains/#{banned_domain}/edit"}
+      navigate={~p"/moderation/banned_domains/#{banned_domain}/edit"}
       class="btn btn-secondary btn-sm me-2"
     >
       Edit

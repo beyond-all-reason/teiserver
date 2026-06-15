@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.NavComponents do
   @moduledoc false
-  # alias Phoenix.LiveView.JS
+  alias Phoenix.LiveView.JS
 
   use Phoenix.Component
 
@@ -152,6 +152,108 @@ defmodule TeiserverWeb.NavComponents do
         </div>
         <!-- Collapsible wrapper -->
       </div>
+    </nav>
+    """
+  end
+
+  @doc """
+  <TeiserverWeb.NavComponents.top_navbar_tw active={"string"} />
+  """
+  attr :current_user, :map, required: true
+  attr :active, :string, required: true
+
+  def top_navbar_tw(assigns) do
+    ~H"""
+    <nav>
+      <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
+        <li>
+          <button
+            class="flex p-2 cursor-pointer [[data-theme=system]_&]:bg-blue-900"
+            phx-click={JS.dispatch("phx:set-theme")}
+            data-phx-theme="system"
+          >
+            <Fontawesome.icon icon="desktop" style="solid" class="opacity-75 hover:opacity-100" />
+          </button>
+        </li>
+        <li>
+          <button
+            class="flex p-2 cursor-pointer [[data-theme=light]_&]:bg-blue-200"
+            phx-click={JS.dispatch("phx:set-theme")}
+            data-phx-theme="light"
+          >
+            <Fontawesome.icon icon="sun" style="solid" class="opacity-75 hover:opacity-100" />
+          </button>
+        </li>
+        <li>
+          <button
+            class="flex p-2 cursor-pointer [[data-theme=dark]_&]:bg-blue-900"
+            phx-click={JS.dispatch("phx:set-theme")}
+            data-phx-theme="dark"
+          >
+            <Fontawesome.icon icon="moon" style="solid" class="opacity-75 hover:opacity-100" />
+          </button>
+        </li>
+        <li class={[@active == "home" && "menu-active"]}>
+          <.link href={~p"/"}>Home</.link>
+        </li>
+        <li class={[@active == "microblog" && "menu-active"]}>
+          <.link href={~p"/microblog"}>Blog</.link>
+        </li>
+        <%= if @current_user do %>
+          <li class={[@active == "chat" && "menu-active"]}>
+            <.link href={~p"/chat"}>Chat</.link>
+          </li>
+
+          <li :if={allow?(@current_user, "Server")} class={[@active == "logging" && "menu-active"]}>
+            <.link href={~p"/logging"}>Logging</.link>
+          </li>
+
+          <li class={[@active == "lobbies" && "menu-active"]}>
+            <.link href={~p"/battle/lobbies"}>Lobbies</.link>
+          </li>
+
+          <li class={[@active == "match" && "menu-active"]}>
+            <.link href={~p"/battle"}>Matches</.link>
+          </li>
+
+          <li class={[@active == "leaderboard" && "menu-active"]}>
+            <.link href={~p"/battle/ratings/leaderboard"}>Leaderboard</.link>
+          </li>
+
+          <li
+            :if={allow_any?(@current_user, ["Contributor", "Overwatch"])}
+            class={[@active == "teiserver_reports" && "menu-active"]}
+          >
+            <.link href={~p"/teiserver/reports"}>Reports</.link>
+          </li>
+
+          <li
+            :if={allow?(@current_user, "Moderator")}
+            class={[@active == "teiserver_user" && "menu-active"]}
+          >
+            <.link href={~p"/teiserver/admin/user"}>Users</.link>
+          </li>
+
+          <li
+            :if={allow?(@current_user, "Overwatch")}
+            class={[@active == "moderation" && "menu-active"]}
+          >
+            <.link href={~p"/moderation"}>Moderation</.link>
+          </li>
+
+          <li :if={allow?(@current_user, "Contributor")} class={[@active == "admin" && "menu-active"]}>
+            <.link href={~p"/teiserver/admin"}>Admin</.link>
+          </li>
+
+          <li>
+            <.link href={~p"/logout"} method="delete">Log out</.link>
+          </li>
+        <% else %>
+          <li class={[@active == "login" && "menu-active"]}>
+            <.link href={~p"/login"}>Log in</.link>
+          </li>
+        <% end %>
+      </ul>
     </nav>
     """
   end

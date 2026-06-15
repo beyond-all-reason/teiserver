@@ -3,7 +3,7 @@
   <:subtitle>This is a banned_domain record from your database.</:subtitle>
   <:actions>
     <.link
-      patch={~p"/moderation/banned_domains/#{@banned_domain}/show/edit"}
+      navigate={~p"/moderation/banned_domains/#{@banned_domain}/edit?return_to=show"}
       phx-click={JS.push_focus()}
     >
       <.button>Edit banned domain</.button>

@@ -85,22 +85,33 @@ config :teiserver, TeiserverWeb.Endpoint,
   ]
 
 config :esbuild,
-  version: "0.14.41",
+  version: "0.25.4",
   default: [
     args:
-      ~w(js/app.js --bundle --target=es2016 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
+      ~w(js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
     cd: Path.expand("../assets", __DIR__),
-    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+    env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
+  ]
+
+# Configure tailwind (the version is required)
+config :tailwind,
+  version: "4.1.12",
+  teiserver: [
+    args: ~w(
+      --input=assets/css/app_tw.css
+      --output=priv/static/assets/css/app_tw.css
+    ),
+    cd: Path.expand("..", __DIR__)
   ]
 
 config :dart_sass,
   version: "1.61.0",
   light: [
-    args: ~w(scss/light.scss ../priv/static/assets/light.css),
+    args: ~w(scss/light.scss ../priv/static/assets/light_bs.css),
     cd: Path.expand("../assets", __DIR__)
   ],
   dark: [
-    args: ~w(scss/dark.scss ../priv/static/assets/dark.css),
+    args: ~w(scss/dark.scss ../priv/static/assets/dark_bs.css),
     cd: Path.expand("../assets", __DIR__)
   ]
 
