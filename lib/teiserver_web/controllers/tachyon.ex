@@ -13,7 +13,15 @@ defmodule TeiserverWeb.TachyonController do
 
   @subprotocol_hdr_name "sec-websocket-protocol"
 
-  def connect(conn, _opts) do
+  def connect(conn, opts) do
+    start = :erlang.monotonic_time(:millisecond)
+    result = do_connect(conn, opts)
+    elapsed = :erlang.monotonic_time(:millisecond) - start
+    :telemetry.execute([:tachyon, :connect], %{duration: elapsed})
+    result
+  end
+
+  defp do_connect(conn, _opts) do
     with {:ok, subprotocol, handler} <- handler_for_version(conn),
          {:ok, state} <- handler.connect(conn) do
       try do
