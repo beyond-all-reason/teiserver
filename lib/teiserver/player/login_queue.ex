@@ -12,6 +12,7 @@ defmodule Teiserver.Player.LoginQueue do
 
   alias Teiserver.Account.User
   alias Teiserver.Config
+  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Player.TachyonHandler
 
@@ -19,6 +20,7 @@ defmodule Teiserver.Player.LoginQueue do
 
   @limit_config_key "tachyon.Login queue limit"
   @default_tick_period 1_000
+  @rate_config_key "tachyon.Login rate"
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -54,6 +56,25 @@ defmodule Teiserver.Player.LoginQueue do
   end
 
   @doc """
+  Set the login rate (users per minute).
+  If `should_fill?` is true, the new rate limiter starts with full permits and
+  admits users immediately up to the burst capacity.
+  """
+  @spec set_rate(BurstyRateLimiter.t()) :: :ok
+  def set_rate(%BurstyRateLimiter{} = rl) do
+    GenServer.call(__MODULE__, {:set_rate, rl})
+  end
+
+  @spec set_rate(non_neg_integer(), boolean()) :: :ok
+  def set_rate(rate, should_fill? \\ false)
+
+  def set_rate(rate, true),
+    do: rate |> BurstyRateLimiter.per_minute() |> BurstyRateLimiter.set_full() |> set_rate()
+
+  def set_rate(rate, false),
+    do: rate |> BurstyRateLimiter.per_minute() |> BurstyRateLimiter.set_empty() |> set_rate()
+
+  @doc """
   Manually trigger a tick. Used in tests to control timing deterministically.
   """
   def tick do
@@ -65,11 +86,15 @@ defmodule Teiserver.Player.LoginQueue do
     Logger.metadata(actor_id: :login_queue)
     {:ok, timer_ref} = :timer.send_interval(@default_tick_period, :tick)
 
+    default_rate = Config.get_site_config_cache(@rate_config_key)
+    rate_limiter = BurstyRateLimiter.per_minute(default_rate) |> BurstyRateLimiter.set_empty()
+
     state = %{
       tick_timer_ref: timer_ref,
       total_limit: Config.get_site_config_cache(@limit_config_key),
       queue: :queue.new(),
-      monitors: MapSet.new()
+      monitors: MapSet.new(),
+      rate_limiter: rate_limiter
     }
 
     {:ok, state}
@@ -84,22 +109,24 @@ defmodule Teiserver.Player.LoginQueue do
     capacity = available_capacity(state)
 
     if capacity > 0 && :queue.is_empty(state.queue) do
-      {:reply, true, state}
+      case BurstyRateLimiter.try_acquire(state.rate_limiter) do
+        {:ok, updated_rl} ->
+          {:reply, true, %{state | rate_limiter: updated_rl}}
+
+        _error ->
+          {:reply, false, enqueue_member(state, pid, user_id)}
+      end
     else
-      mon_ref = Process.monitor(pid)
-      member = %{pid: pid, mon_ref: mon_ref, user_id: user_id}
-
-      new_state =
-        state
-        |> Map.update!(:queue, &:queue.in(member, &1))
-        |> Map.update!(:monitors, &MapSet.put(&1, pid))
-
-      {:reply, false, new_state}
+      {:reply, false, enqueue_member(state, pid, user_id)}
     end
   end
 
   def handle_call({:set_limit, limit}, _from, state) do
     {:reply, :ok, %{state | total_limit: limit}}
+  end
+
+  def handle_call({:set_rate, %BurstyRateLimiter{} = rl}, _from, state) do
+    {:reply, :ok, %{state | rate_limiter: rl}}
   end
 
   @impl GenServer
@@ -131,6 +158,15 @@ defmodule Teiserver.Player.LoginQueue do
     {:noreply, Map.update!(state, :monitors, &MapSet.delete(&1, pid))}
   end
 
+  defp enqueue_member(state, pid, user_id) do
+    mon_ref = Process.monitor(pid)
+    member = %{pid: pid, mon_ref: mon_ref, user_id: user_id}
+
+    state
+    |> Map.update!(:queue, &:queue.in(member, &1))
+    |> Map.update!(:monitors, &MapSet.put(&1, pid))
+  end
+
   defp dequeue_members(n, state) when n <= 0, do: state
 
   defp dequeue_members(n, state) do
@@ -148,8 +184,14 @@ defmodule Teiserver.Player.LoginQueue do
           |> Map.replace!(:queue, rest)
 
         if still_connected? do
-          TachyonHandler.notify_login_accepted(member.pid)
-          dequeue_members(n - 1, new_state)
+          case BurstyRateLimiter.try_acquire(new_state.rate_limiter) do
+            {:ok, rl} ->
+              TachyonHandler.notify_login_accepted(member.pid)
+              dequeue_members(n - 1, %{new_state | rate_limiter: rl})
+
+            _error ->
+              state
+          end
         else
           dequeue_members(n, new_state)
         end
@@ -169,6 +211,16 @@ defmodule Teiserver.Player.LoginQueue do
       description: "Maximum number of concurrent Tachyon player sessions",
       default: 1_000_000,
       update_callback: &__MODULE__.set_limit/1
+    })
+
+    Config.add_site_config_type(%{
+      key: @rate_config_key,
+      section: "Tachyon",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "How many users per minute can log in via Tachyon",
+      default: 100_000,
+      update_callback: &__MODULE__.set_rate/1
     })
   end
 end
