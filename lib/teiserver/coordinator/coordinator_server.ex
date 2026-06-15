@@ -328,6 +328,21 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
 
+  # Special debugging to see what is being sent
+  def handle_info({:timeout, duration}, state) do
+    :timer.sleep(duration)
+    {:noreply, state}
+  end
+
+  # Catchall handle_info
+  def handle_info(msg, state) do
+    Logger.error(
+      "CoordinatorServer handle_info error. No handler for msg of #{Kernel.inspect(msg)}"
+    )
+
+    {:noreply, state}
+  end
+
   defp activate_warning_actions(userid) do
     pending_warnings =
       Moderation.list_actions(
@@ -354,21 +369,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         Moderation.update_action(action, %{"expires" => expires})
       end
     end)
-  end
-
-  # Special debugging to see what is being sent
-  def handle_info({:timeout, duration}, state) do
-    :timer.sleep(duration)
-    {:noreply, state}
-  end
-
-  # Catchall handle_info
-  def handle_info(msg, state) do
-    Logger.error(
-      "CoordinatorServer handle_info error. No handler for msg of #{Kernel.inspect(msg)}"
-    )
-
-    {:noreply, state}
   end
 
   def make_and_cache_coordinator_account do
