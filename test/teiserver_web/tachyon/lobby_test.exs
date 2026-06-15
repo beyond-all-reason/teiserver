@@ -1,5 +1,4 @@
 defmodule TeiserverWeb.Tachyon.LobbyTest do
-  alias ExUnit.Callbacks
   alias Teiserver.AssetFixtures
   alias Teiserver.Support.Tachyon
   alias Teiserver.TachyonBattle
@@ -603,7 +602,6 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "subscribe list updates", %{client: client} do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-      Callbacks.start_link_supervised!({Task, &continuously_send_list_update/0})
 
       %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => %{}}} =
         Tachyon.recv_message!(client)
@@ -687,7 +685,6 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
     test "start battle", %{client: client} = ctx do
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-      Callbacks.start_link_supervised!({Task, &continuously_send_list_update/0})
       %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
 
       # create lobby with another client so that only list updates are sent to
@@ -731,32 +728,6 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         Tachyon.recv_message!(client)
 
       assert update[lobby_id]["currentBattle"] == nil
-    end
-
-    test "list reset", %{client: client} do
-      # create lobby with another client so that only list updates are sent to
-      # the original client, it makes the tests a bit simpler
-      {:ok, ctx2} = Tachyon.setup_client()
-
-      {:ok, lobby_id: lobby_id} =
-        setup_lobby(%{client: ctx2[:client]}, %{
-          ally_team_config: Tachyon.mk_ally_team_config(2, 2)
-        })
-
-      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-
-      %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => lobbies}} =
-        Tachyon.recv_message!(client)
-
-      assert is_map_key(lobbies, lobby_id)
-
-      Process.whereis(TachyonLobby.List)
-      |> Process.exit(:kill)
-
-      %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => lobbies2}} =
-        Tachyon.recv_message!(client)
-
-      assert lobbies == lobbies2
     end
 
     test "avoid duplicate subscription", %{client: client} do
@@ -941,12 +912,5 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       AssetFixtures.create_engine(%{name: "test-lobby-engine", in_matchmaking: true})
 
     {:ok, game: game, engine: engine}
-  end
-
-  # to force the list update without having to rely on a slow update timer
-  defp continuously_send_list_update do
-    TachyonLobby.List.broadcast_updates()
-    :timer.sleep(10)
-    continuously_send_list_update()
   end
 end

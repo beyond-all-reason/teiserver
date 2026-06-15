@@ -88,7 +88,7 @@ defmodule Teiserver.Player.Session do
           user_subscriptions: MapSet.t(User.id()),
           battle: battle_state(),
           lobby: nil | %{id: TachyonLobby.id()},
-          lobby_list_subscription: nil | %{counter: non_neg_integer()}
+          lobby_list_subscription: nil | %{TachyonLobby.id() => integer()}
         }
 
   # TODO: would be better to have that as a db setting, perhaps passed as an
@@ -579,7 +579,7 @@ defmodule Teiserver.Player.Session do
     user_id |> via_tuple() |> GenServer.call({:lobby, :join_battle})
   end
 
-  @spec subscribe_lobby_list(User.id()) :: {:ok, %{TachyonLobby.id() => TachyonLobby.overview()}}
+  @spec subscribe_lobby_list(User.id()) :: {:ok, %{TachyonLobby.id() => LT.ListOverview.t()}}
   def subscribe_lobby_list(user_id) do
     user_id |> via_tuple() |> GenServer.call({:lobby, :subscribe_list})
   end
@@ -1306,8 +1306,13 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:lobby, :subscribe_list}, _from, state) do
     if state.lobby_list_subscription == nil do
-      {counter, list} = TachyonLobby.subscribe_updates()
-      {:reply, {:ok, list}, %{state | lobby_list_subscription: %{counter: counter}}}
+      list = TachyonLobby.subscribe_updates()
+
+      subscription_state =
+        Enum.map(list, fn {id, %LT.ListOverview{counter: counter}} -> {id, counter} end)
+        |> Enum.into(%{})
+
+      {:reply, {:ok, list}, %{state | lobby_list_subscription: subscription_state}}
     else
       list = TachyonLobby.list()
       {:reply, {:ok, list}, state}
@@ -1801,38 +1806,38 @@ defmodule Teiserver.Player.Session do
   def handle_info(
         %{
           topic: "teiserver_tachyonlobby_list",
-          counter: c,
-          event: event
-        },
-        state
-      )
-      when event != :reset_list and
-             (state.lobby_list_subscription == nil or
-                state.lobby_list_subscription.counter >= c) do
-    {:noreply, state}
-  end
-
-  def handle_info(
-        %{
-          topic: "teiserver_tachyonlobby_list",
-          counter: c
+          lobby_id: lobby_id
         } = ev,
         state
       ) do
-    state = put_in(state.lobby_list_subscription.counter, c)
+    if state.lobby_list_subscription == nil do
+      {:noreply, state}
+    else
+      stale? =
+        is_map_key(ev, :counter) and is_map_key(state.lobby_list_subscription, lobby_id) and
+          state.lobby_list_subscription[lobby_id] >= ev.counter
+
+      if stale?, do: {:noreply, state}, else: do_handle_lobby_list_event(ev, state)
+    end
+  end
+
+  def do_handle_lobby_list_event(ev, state) do
+    state =
+      if ev.event == :remove_lobby do
+        update_in(state.lobby_list_subscription, &Map.delete(&1, ev.lobby_id))
+      else
+        put_in(state, [:lobby_list_subscription, ev.lobby_id], ev.counter)
+      end
 
     case ev.event do
       :add_lobby ->
         send_to_player!({:lobby_list, {:add_lobby, ev.lobby_id, ev.overview}}, state)
 
-      :update_lobbies ->
-        send_to_player!({:lobby_list, {:update_lobbies, ev.changes}}, state)
+      :update_lobby ->
+        send_to_player!({:lobby_list, {:update_lobby, ev.lobby_id, ev.changes}}, state)
 
       :remove_lobby ->
         send_to_player!({:lobby_list, {:remove_lobby, ev.lobby_id}}, state)
-
-      :reset_list ->
-        send_to_player!({:lobby_list, {:reset_list, ev.lobbies}}, state)
 
       _unknown ->
         raise "Unknow lobby_list event: #{inspect(ev.event)} -- #{inspect(ev)}"

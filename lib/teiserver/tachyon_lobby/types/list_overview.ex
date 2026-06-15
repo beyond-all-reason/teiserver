@@ -7,6 +7,7 @@ defmodule Teiserver.TachyonLobby.Types.ListOverview do
   """
 
   @enforce_keys [
+    :counter,
     :name,
     :player_count,
     :max_player_count,
@@ -16,6 +17,7 @@ defmodule Teiserver.TachyonLobby.Types.ListOverview do
     :boss_enabled?
   ]
   defstruct [
+    :counter,
     :name,
     :player_count,
     :max_player_count,
@@ -28,6 +30,7 @@ defmodule Teiserver.TachyonLobby.Types.ListOverview do
   ]
 
   @type t() :: %__MODULE__{
+          counter: integer(),
           name: String.t(),
           player_count: non_neg_integer(),
           max_player_count: non_neg_integer(),
