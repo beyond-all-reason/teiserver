@@ -47,6 +47,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   @cluster_manager_regex ~r/^Host\[[A-Z]+\d+\]$/
 
+  # Battle chat commands that carry more data than a normal message (e.g. modoption
+  # key=value pairs) and so get a 1024-char allowance instead of the default 256.
+  @long_battle_command_prefixes ["$welcome-message", "!welcome-message", "!mode "]
+
   # Commands that don't require the user to be logged in
   @unauthenticated_commands ~w(
     PING STLS LOGIN REGISTER CONFIRMAGREEMENT RESETPASSWORDREQUEST EXIT CHANGEPASSWORD LISTCOMPFLAGS
@@ -1267,10 +1271,7 @@ defmodule Teiserver.Protocols.SpringIn do
               String.starts_with?(lowercase_msg, "!bset tweakunits") ->
             msg |> String.trim() |> String.slice(0..16_384)
 
-          String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
-            msg |> String.trim() |> String.slice(0..1024)
-
-          String.starts_with?(lowercase_msg, "!mode ") ->
+          String.starts_with?(lowercase_msg, @long_battle_command_prefixes) ->
             msg |> String.trim() |> String.slice(0..1024)
 
           true ->
@@ -1296,10 +1297,7 @@ defmodule Teiserver.Protocols.SpringIn do
               String.starts_with?(lowercase_msg, "!bset tweakunits") ->
             msg |> String.trim() |> String.slice(0..16_384)
 
-          String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
-            msg |> String.trim() |> String.slice(0..1024)
-
-          String.starts_with?(lowercase_msg, "!mode ") ->
+          String.starts_with?(lowercase_msg, @long_battle_command_prefixes) ->
             msg |> String.trim() |> String.slice(0..1024)
 
           true ->
