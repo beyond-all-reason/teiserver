@@ -889,7 +889,7 @@ defmodule Teiserver.Moderation do
   def banned_domain?(email) do
     case String.split(email, "@") do
       [_start, domain] ->
-        Enum.member?(list_banned_domains_cache(), domain)
+        String.contains?(domain, list_banned_domains_cache())
 
       _no_email ->
         false
@@ -991,23 +991,6 @@ defmodule Teiserver.Moderation do
   """
   def list_banned_ips do
     Repo.all(BannedIP)
-  end
-
-  @doc """
-  Returns the list of banned_ips as IP objects
-
-  ## Examples
-
-      iex> list_banned_ip_ranges()
-      [%BannedIP{}, ...]
-
-  """
-  def list_banned_ip_ranges do
-    list_banned_ips_cache()
-    |> Enum.map(fn x ->
-      BannedIP.cidr_to_subnet(x.cidr)
-    end)
-    |> Enum.into([])
   end
 
   @spec list_banned_ips_cache :: [BannedIP.t()]

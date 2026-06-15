@@ -70,13 +70,15 @@ defmodule Teiserver.Moderation.BannedDomainTest do
       })
 
       banned_domain_fixture(%{
-        domain: "some_domain.org"
+        domain: "some_domain.foo.bar"
       })
 
       LoadBannedDomainsTask.perform()
 
       assert Moderation.banned_domain?("me@some_domain.com")
-      assert Moderation.banned_domain?("me@some_domain.org")
+      assert Moderation.banned_domain?("me@some_domain.foo.bar")
+      assert Moderation.banned_domain?("me@some_subdomain.some_domain.com")
+      assert Moderation.banned_domain?("me@some_subdomain.some_domain.foo.bar")
       refute Moderation.banned_domain?("me@not me")
     end
 
