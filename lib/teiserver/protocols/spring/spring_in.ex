@@ -362,7 +362,8 @@ defmodule Teiserver.Protocols.SpringIn do
 
         require_manual_email? =
           Enum.any?([
-            Map.get(stat_data, "vpn?", false),
+            Map.get(stat_data, "banned_ip?", false),
+            Map.get(stat_data, "vpn_ip?", false),
             Map.get(stat_data, "ip_check_bad?", false)
           ])
 
