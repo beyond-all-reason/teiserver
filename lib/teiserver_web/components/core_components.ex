@@ -205,18 +205,6 @@ defmodule TeiserverWeb.CoreComponents do
           {gettext("Attempting to reconnect")}
           <%!-- <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" /> --%>
         </.flash>
-
-        <.flash
-          id="server-error"
-          kind={:error}
-          title={gettext("Something went wrong!")}
-          phx-disconnected={show(".phx-server-error #server-error") |> JS.remove_attribute("hidden")}
-          phx-connected={hide("#server-error") |> JS.set_attribute({"hidden", ""})}
-          hidden
-        >
-          {gettext("Attempting to reconnect")}
-          <%!-- <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" /> --%>
-        </.flash>
       </div>
     </div>
     """
@@ -480,7 +468,7 @@ defmodule TeiserverWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8 text-zinc-800">
+        <h1 class="text-lg font-semibold leading-8 text-zinc-400">
           {render_slot(@inner_block)}
         </h1>
         <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">

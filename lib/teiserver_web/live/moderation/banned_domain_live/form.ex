@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Moderation.BannedDomainLive.Form do
         </.header>
       </div>
 
-      <div class="bg-white border-0 md:border-l border-r border-t border-gray-300 rounded-lg shadow-sm p-6">
+      <div class="bg-gray-200 border-0 md:border-l border-r border-t border-gray-300 rounded-lg shadow-sm p-6">
         <.simple_form
           for={@form}
           id="banned_domain-form"
