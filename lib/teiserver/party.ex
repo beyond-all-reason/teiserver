@@ -19,13 +19,13 @@ defmodule Teiserver.Party do
   @type id :: Server.id()
   @type state :: Server.state()
 
-  @spec create_party(User.id(), pid() | nil) :: {:ok, id(), pid()} | {:error, reason :: term()}
+  @spec create_party(User.id(), pid() | nil) :: {:ok, state(), pid()} | {:error, reason :: term()}
   def create_party(user_id, pid \\ self()) do
     party_id = Server.gen_party_id()
 
     case Supervisor.start_party(party_id, user_id, pid) do
-      {:ok, pid} -> {:ok, party_id, pid}
-      {:ok, pid, _info} -> {:ok, party_id, pid}
+      {:ok, server_pid} -> {:ok, Server.get_state(party_id), server_pid}
+      {:ok, server_pid, _info} -> {:ok, Server.get_state(party_id), server_pid}
       :ignore -> {:error, :ignore}
       {:error, reason} -> {:error, reason}
     end

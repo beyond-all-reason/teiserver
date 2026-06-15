@@ -158,7 +158,7 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
       assert %{"status" => "success"} = Tachyon.subscribe_messaging!(ctx.receiver_client)
       assert %{"status" => "success"} = Tachyon.subscribe_messaging!(invited[:client])
 
-      %{"status" => "success", "data" => %{"partyId" => party_id}} =
+      %{"status" => "success", "data" => %{"party" => %{"id" => party_id}}} =
         Tachyon.create_party!(ctx.sender_client)
 
       %{"status" => "success"} = Tachyon.invite_to_party!(ctx.sender_client, ctx.receiver.id)
