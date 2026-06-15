@@ -53,20 +53,8 @@
                   <td>{action.reason |> String.slice(0..100)}</td>
                   <td>{action.restrictions |> Enum.join(", ")}</td>
 
-                  <td>{action.inserted_at |> date_to_str(format: :hms_or_ymd)}</td>
-                  <%= cond do %>
-                    <% action.expires != nil and NaiveDateTime.compare(NaiveDateTime.utc_now(), action.expires) == :gt -> %>
-                      <td>Expired</td>
-                      <td>{duration_to_str(action.inserted_at, action.expires)}</td>
-                    <% action.expires != nil -> %>
-                      <td>{action.expires |> date_to_str(format: :ymd_hms24)}</td>
-                      <td>{duration_to_str(action.inserted_at, action.expires)}</td>
-                    <% action.duration != nil -> %>
-                      <td class="text-info">Pending acknowledgement</td>
-                      <td>{format_duration(action.duration)}</td>
-                    <% true -> %>
-                      <td colspan="2" class="text-warning">Permanent</td>
-                  <% end %>
+                  <td>{action.inserted_at |> date_to_str(format: :ymd_hms24)}</td>
+                  <.action_status action={action} />
 
                   <td>
                     <a href={~p"/moderation/action/#{action.id}"} class="btn btn-secondary btn-sm">

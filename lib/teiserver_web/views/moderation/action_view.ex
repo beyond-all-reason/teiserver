@@ -13,8 +13,26 @@ defmodule TeiserverWeb.Moderation.ActionView do
   @spec icon() :: String.t()
   def icon, do: ActionLib.icon()
 
+  def action_status(assigns) do
+    ~H"""
+    <%= cond do %>
+      <% @action.expires != nil and NaiveDateTime.compare(NaiveDateTime.utc_now(), @action.expires) == :gt -> %>
+        <td>Expired</td>
+        <td>{duration_to_str(@action.inserted_at, @action.expires)}</td>
+      <% @action.expires != nil -> %>
+        <td>{@action.expires |> date_to_str(format: :ymd_hms24)}</td>
+        <td>{duration_to_str(@action.inserted_at, @action.expires)}</td>
+      <% @action.duration != nil -> %>
+        <td class="text-info">Pending acknowledgement</td>
+        <td>{format_duration(@action.duration)}</td>
+      <% true -> %>
+        <td colspan="2" class="text-warning">Permanent</td>
+    <% end %>
+    """
+  end
+
   @spec format_duration(integer() | nil) :: String.t()
-  def format_duration(nil), do: "—"
+  def format_duration(nil), do: "Permanent"
 
   def format_duration(seconds) do
     cond do

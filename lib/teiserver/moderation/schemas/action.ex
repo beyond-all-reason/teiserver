@@ -38,19 +38,15 @@ defmodule Teiserver.Moderation.Action do
     |> validate_length(:restrictions, min: 1)
   end
 
-  # 10 years in seconds
-  @permanent_threshold_seconds 10 * 365 * 24 * 3_600
-
   defp adjust_restrictions(%Ecto.Changeset{} = struct) do
     duration = Changeset.get_field(struct, :duration)
-    inbound_restrictions = Changeset.get_field(struct, :restrictions, [])
+    inbound_restrictions = Changeset.get_field(struct, :restrictions) || []
 
     new_restrictions =
-      if duration && duration >= @permanent_threshold_seconds &&
-           Enum.member?(inbound_restrictions, "Login") do
+      if is_nil(duration) and Enum.member?(inbound_restrictions, "Login") do
         ["Permanently banned" | inbound_restrictions] |> Enum.uniq()
       else
-        (inbound_restrictions || []) |> List.delete("Permanently banned")
+        List.delete(inbound_restrictions, "Permanently banned")
       end
 
     Changeset.put_change(struct, :restrictions, new_restrictions)

@@ -203,7 +203,7 @@ defmodule TeiserverWeb.Moderation.BanController do
             reason: ban.reason,
             restrictions: ["Login"],
             score_modifier: 0,
-            duration: 1_000 * 365 * 86_400
+            duration: nil
           })
 
         ActionLib.maybe_create_discord_post(action)
