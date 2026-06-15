@@ -9,6 +9,8 @@ defmodule Teiserver.Account.AuthLib do
   alias Teiserver.Account
   alias Teiserver.Account.RoleLib
 
+  import Teiserver.Account.Auth, only: [is_bot?: 1]
+
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-address-card"
 
@@ -181,8 +183,16 @@ defmodule Teiserver.Account.AuthLib do
   # If the permission requires MFA then check for it, otherwise return true
   # as their MFA status doesn't matter
   # if mfa_required? is not set then it will always return true
+  # bots do not require MFA
   defp mfa_test(user, permissions_required) do
-    if mfa_required?() and contains_mfa_role?(permissions_required) do
+    conditions =
+      Enum.all?([
+        mfa_required?(),
+        contains_mfa_role?(permissions_required),
+        not is_bot?(user)
+      ])
+
+    if conditions do
       has_active_mfa?(user)
     else
       true
