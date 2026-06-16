@@ -982,9 +982,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
       end
 
     cond do
-      not data.boss_enabled? ->
-        {:keep_state, data, [{:reply, from, {:error, :no_boss_allowed}}]}
-
       not Enum.empty?(data.bosses) and not MapSet.member?(data.bosses, user_id) ->
         {:keep_state, data, [{:reply, from, {:error, :unauthorized}}]}
 
@@ -1595,12 +1592,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
           {:passed, {:appoint_boss, boss_id}} ->
             process_event({:update_boss, :add, boss_id}, new_aggregate)
 
-          # just let the thing crash if a new vote action shows up. It'll be easy
-          # to spot and fix/add support. :start isn't yet supported
-
           {:passed, {:kickban, target_id, ban_until}} ->
             new_data = do_kickban(target_id, ban_until, new_aggregate.data)
             %{new_aggregate | data: new_data}
+
+          # just let the thing crash if a new vote action shows up. It'll be easy
+          # to spot and fix/add support. :start isn't yet supported
         end
     end
   end
