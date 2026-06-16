@@ -177,4 +177,8 @@ defmodule Teiserver.TachyonLobby do
   @spec unboss(id(), User.id(), boss_id :: User.id()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
   defdelegate unboss(lobby_id, user_id, boss_id), to: Lobby
+
+  @spec kickban(id(), User.id(), target_id :: User.id(), ban_until :: DateTime.t() | nil) ::
+          :ok | {:error, :invalid_lobby | :not_in_lobby | :unauthorized | term()}
+  defdelegate kickban(lobby_id, user_id, target_id, ban_until \\ nil), to: Lobby
 end

@@ -245,6 +245,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
     call_lobby(lobby_id, {:send_message, from_id, msg_content})
   end
 
+  @spec kickban(LT.Types.id(), User.id(), target_id :: User.id(), ban_until :: DateTime.t() | nil) ::
+          :ok | {:error, :invalid_lobby | :not_in_lobby | :unauthorized | term()}
+  def kickban(lobby_id, user_id, target_id, ban_until \\ nil) do
+    call_lobby(lobby_id, {:kickban, user_id, target_id, ban_until})
+  end
+
   @doc """
   This should only be used for tests, because there is some gnarly logic in
   generating the start script and it's a bit hard to test end to end
@@ -451,6 +457,23 @@ defmodule Teiserver.TachyonLobby.Lobby do
       )
       when is_map_key(data.players, join_data.id) or is_map_key(data.spectators, join_data.id) do
     {:keep_state, data, [{:reply, from, {:ok, self(), get_details_from_state(data)}}]}
+  end
+
+  def handle_event(
+        {:call, from},
+        {:join, %LT.PlayerJoinData{id: user_id} = join_data, pid},
+        _state,
+        %LT.Data{} = data
+      )
+      when is_map_key(data.banned_users, user_id) do
+    ban_until = data.banned_users[user_id]
+
+    if ban_expired?(ban_until) do
+      data = update_in(data.banned_users, &Map.delete(&1, user_id))
+      {:keep_state, data, [{:next_event, {:call, from}, {:join, join_data, pid}}]}
+    else
+      {:keep_state, data, [{:reply, from, {:error, :banned}}]}
+    end
   end
 
   # 251 is the (current) engine limit for specs + players + bots
@@ -917,6 +940,61 @@ defmodule Teiserver.TachyonLobby.Lobby do
               process_events(events, data) |> broadcast_updates() |> Map.get(:data)
           end
 
+        {:keep_state, data, [{:reply, from, :ok}]}
+    end
+  end
+
+  def handle_event(
+        {:call, from},
+        {:kickban, user_id, _target_id, _ban_until},
+        _state,
+        %LT.Data{} = data
+      )
+      when not is_map_key(data.players, user_id) and not is_map_key(data.spectators, user_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :not_in_lobby}}]}
+
+  def handle_event(
+        {:call, from},
+        {:kickban, _user_id, target_id, _ban_until},
+        _state,
+        %LT.Data{} = data
+      )
+      when not is_map_key(data.players, target_id) and not is_map_key(data.spectators, target_id),
+      do: {:keep_state, data, [{:reply, from, {:error, :invalid_request}}]}
+
+  def handle_event(
+        {:call, from},
+        {:kickban, user_id, target_id, ban_until},
+        _state,
+        %LT.Data{} = data
+      ) do
+    effective_ban_until =
+      case ban_until do
+        nil -> nil
+        dt -> if DateTime.compare(dt, DateTime.utc_now()) == :gt, do: dt, else: nil
+      end
+
+    cond do
+      not Enum.empty?(data.bosses) and not MapSet.member?(data.bosses, user_id) ->
+        {:keep_state, data, [{:reply, from, {:error, :unauthorized}}]}
+
+      Enum.empty?(data.bosses) and Enum.count(data.players, &(!bot_id?(elem(&1, 0)))) > 1 ->
+        vote = new_vote(data, user_id, {:kickban, target_id, effective_ban_until})
+
+        :timer.seconds(vote.duration_s)
+        |> :timer.send_after({:vote_timeout, vote.id})
+
+        events = [{:start_vote, vote}]
+
+        data =
+          process_events(events, data)
+          |> broadcast_updates()
+          |> Map.get(:data)
+
+        {:keep_state, data, [{:reply, from, :ok}]}
+
+      true ->
+        data = do_kickban(target_id, effective_ban_until, data)
         {:keep_state, data, [{:reply, from, :ok}]}
     end
   end
@@ -1536,6 +1614,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
           {:passed, {:appoint_boss, boss_id}} ->
             process_event({:update_boss, :add, boss_id}, new_aggregate)
+
+          {:passed, {:kickban, target_id, ban_until}} ->
+            new_data = do_kickban(target_id, ban_until, new_aggregate.data)
+            %{new_aggregate | data: new_data}
+
             # just let the thing crash if a new vote action shows up. It'll be easy
             # to spot and fix/add support. :start isn't yet supported
         end
@@ -1982,6 +2065,39 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   defp gen_password, do: :crypto.strong_rand_bytes(16) |> Base.encode16()
+
+  defp ban_expired?(ban_until) do
+    DateTime.compare(ban_until, DateTime.utc_now()) != :gt
+  end
+
+  defp do_kickban(target_id, ban_until, %LT.Data{} = data) do
+    target_pid =
+      case {data.players[target_id], data.spectators[target_id]} do
+        {%{pid: pid}, _spec} -> pid
+        {_player, %{pid: pid}} -> pid
+        _not_found -> nil
+      end
+
+    data =
+      case ban_until do
+        nil -> data
+        dt -> put_in(data.banned_users[target_id], dt)
+      end
+
+    data =
+      if is_map_key(data.players, target_id) do
+        remove_player_from_lobby(target_id, data)
+      else
+        remove_spectator_from_lobby(target_id, data)
+      end
+
+    if target_pid do
+      reason = if ban_until != nil, do: "banned", else: "kicked"
+      send(target_pid, {:lobby, data.id, {:left, reason, ban_until}})
+    end
+
+    data
+  end
 
   # in tests, some user ids are string
   defp bot_id?(id) when is_integer(id), do: false

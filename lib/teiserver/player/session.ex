@@ -551,6 +551,12 @@ defmodule Teiserver.Player.Session do
     user_id |> via_tuple() |> GenServer.call({:lobby, :vote_submit, vote_id, ballot})
   end
 
+  @spec lobby_kickban(User.id(), target_id :: User.id(), ban_until :: DateTime.t() | nil) ::
+          :ok | {:error, reason :: term()}
+  def lobby_kickban(user_id, target_id, ban_until \\ nil) do
+    user_id |> via_tuple() |> GenServer.call({:lobby, {:kickban, target_id, ban_until}})
+  end
+
   @spec lobby_appoint_boss(User.id(), User.id()) ::
           :ok | {:error, :invalid_lobby | term()}
   def lobby_appoint_boss(user_id, appointee_id) do
@@ -1227,6 +1233,15 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:lobby, :vote_submit, vote_id, ballot}, _from, state) do
     {:reply, TachyonLobby.vote_submit(state.lobby.id, state.user.id, {vote_id, ballot}), state}
+  end
+
+  def handle_call({:lobby, {:kickban, _target_id, _ban_until}}, _from, state)
+      when is_nil(state.lobby),
+      do: {:reply, {:error, :not_in_lobby}, state}
+
+  def handle_call({:lobby, {:kickban, target_id, ban_until}}, _from, state) do
+    result = TachyonLobby.kickban(state.lobby.id, state.user.id, target_id, ban_until)
+    {:reply, result, state}
   end
 
   def handle_call({:lobby, :appoint_boss, _appointee_id}, _from, state)
