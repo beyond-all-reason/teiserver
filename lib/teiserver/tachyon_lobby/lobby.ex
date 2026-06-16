@@ -1596,8 +1596,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
             new_data = do_kickban(target_id, ban_until, new_aggregate.data)
             %{new_aggregate | data: new_data}
 
-          # just let the thing crash if a new vote action shows up. It'll be easy
-          # to spot and fix/add support. :start isn't yet supported
+            # just let the thing crash if a new vote action shows up. It'll be easy
+            # to spot and fix/add support. :start isn't yet supported
         end
     end
   end
