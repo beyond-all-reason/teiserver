@@ -18,17 +18,6 @@ defmodule Teiserver.Autohost.Session do
 
   @default_call_timeout 5000
 
-  @typep data :: %{
-           autohost: Bot.t(),
-           conn_pid: pid(),
-           monitors: MC.t(),
-           max_battles: non_neg_integer(),
-           current_battles: non_neg_integer(),
-           pending_battles: %{TachyonBattle.id() => {GenServer.from(), AT.StartScript.t()}},
-           active_battles: %{TachyonBattle.id() => AT.BattleData.t()},
-           pending_replies: %{reference() => GenServer.from()}
-         }
-
   @typep state :: :handshaking | :connected
 
   def child_spec({autohost, _conn_pid} = args) do
@@ -150,7 +139,7 @@ defmodule Teiserver.Autohost.Session do
   end
 
   @impl :gen_statem
-  @spec init({Bot.t(), pid()}) :: {:ok, state(), data(), term()}
+  @spec init({Bot.t(), pid()}) :: {:ok, state(), AT.SessionData.t(), term()}
   def init({autohost, conn_pid}) do
     Logger.metadata(actor_type: :autohost_session, actor_id: autohost.id)
     Process.link(conn_pid)
@@ -158,22 +147,13 @@ defmodule Teiserver.Autohost.Session do
     Logger.info("session started")
     SessionRegistry.set_value(%AT.Overview{id: autohost.id, max_battles: 0, current_battles: 0})
 
-    data = %{
-      autohost: autohost,
-      conn_pid: conn_pid,
-      monitors: MC.new(),
-      max_battles: 0,
-      current_battles: 0,
-      pending_battles: %{},
-      active_battles: %{},
-      pending_replies: %{}
-    }
+    data = %AT.SessionData{autohost: autohost, conn_pid: conn_pid}
 
     {:ok, :handshaking, data, [{:next_event, :internal, :subscribe_updates}]}
   end
 
   @impl :gen_statem
-  def handle_event(:internal, :subscribe_updates, _state, data) do
+  def handle_event(:internal, :subscribe_updates, _state, %AT.SessionData{} = data) do
     since = get_subscription_start(data)
 
     case TachyonHandler.subscribe_updates(data.conn_pid, since) do
@@ -182,7 +162,7 @@ defmodule Teiserver.Autohost.Session do
     end
   end
 
-  def handle_event({:call, _from}, _event, :handshaking, data) do
+  def handle_event({:call, _from}, _event, :handshaking, %AT.SessionData{} = data) do
     {:keep_state, data, [{:postpone, true}]}
   end
 
@@ -211,78 +191,93 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data}
   end
 
-  def handle_event({:call, from}, {:send_message, _payload}, _state, data)
+  def handle_event({:call, from}, {:send_message, _payload}, _state, %AT.SessionData{} = data)
       when data.conn_pid == nil,
       do: {:keep_state, data, [{:reply, from, {:error, :no_autohost}}]}
 
-  def handle_event({:call, from}, {:send_message, %{battle_id: battle_id}}, _state, data)
+  def handle_event(
+        {:call, from},
+        {:send_message, %{battle_id: battle_id}},
+        _state,
+        %AT.SessionData{} = data
+      )
       when not is_map_key(data.active_battles, battle_id),
       do: {:keep_state, data, [{:reply, from, {:error, :invalid_battle}}]}
 
-  def handle_event({:call, from}, {:send_message, payload}, _state, data) do
+  def handle_event({:call, from}, {:send_message, payload}, _state, %AT.SessionData{} = data) do
     ref = make_ref()
     TachyonHandler.send_message(data.conn_pid, ref, payload)
     data = Map.update!(data, :pending_replies, &Map.put(&1, ref, from))
     {:keep_state, data}
   end
 
-  def handle_event({:call, from}, {:kill_battle, _battle_id}, _state, data)
+  def handle_event({:call, from}, {:kill_battle, _battle_id}, _state, %AT.SessionData{} = data)
       when data.conn_pid == nil,
       do: {:keep_state, data, [{:reply, from, {:error, :no_autohost}}]}
 
-  def handle_event({:call, from}, {:kill_battle, battle_id}, _state, data)
+  def handle_event({:call, from}, {:kill_battle, battle_id}, _state, %AT.SessionData{} = data)
       when not is_map_key(data.active_battles, battle_id),
       do: {:keep_state, data, [{:reply, from, {:error, :invalid_battle}}]}
 
-  def handle_event({:call, from}, {:kill_battle, battle_id}, _state, data) do
+  def handle_event({:call, from}, {:kill_battle, battle_id}, _state, %AT.SessionData{} = data) do
     ref = make_ref()
     TachyonHandler.kill_battle(data.conn_pid, ref, battle_id)
     data = Map.update!(data, :pending_replies, &Map.put(&1, ref, from))
     {:keep_state, data}
   end
 
-  def handle_event({:call, from}, {:add_player, _add_data}, _state, data)
+  def handle_event({:call, from}, {:add_player, _add_data}, _state, %AT.SessionData{} = data)
       when data.conn_pid == nil,
       do: {:keep_state, data, [{:reply, from, {:error, :no_autohost}}]}
 
-  def handle_event({:call, from}, {:add_player, add_data}, _state, data)
+  def handle_event({:call, from}, {:add_player, add_data}, _state, %AT.SessionData{} = data)
       when not is_map_key(data.active_battles, add_data.battle_id),
       do: {:keep_state, data, [{:reply, from, {:error, :invalid_battle}}]}
 
-  def handle_event({:call, from}, {:add_player, add_data}, _state, data) do
+  def handle_event({:call, from}, {:add_player, add_data}, _state, %AT.SessionData{} = data) do
     ref = make_ref()
     TachyonHandler.add_player(data.conn_pid, ref, add_data)
     data = Map.update!(data, :pending_replies, &Map.put(&1, ref, from))
     {:keep_state, data}
   end
 
-  def handle_event({:call, from}, :inspect_subscription_start, _state, data) do
+  def handle_event(
+        {:call, from},
+        :inspect_subscription_start,
+        _state,
+        %AT.SessionData{} = data
+      ) do
     {:keep_state, data, [{:reply, from, get_subscription_start(data)}]}
   end
 
-  def handle_event(:info, {:reply_kill_battle, ref, _resp}, _state, data)
+  def handle_event(:info, {:reply_kill_battle, ref, _resp}, _state, %AT.SessionData{} = data)
       when not is_map_key(data.pending_replies, ref),
       do: {:keep_state, data}
 
-  def handle_event(:info, {:reply_kill_battle, ref, resp}, _state, data) do
+  def handle_event(:info, {:reply_kill_battle, ref, resp}, _state, %AT.SessionData{} = data) do
     {from, pending_replies} = Map.pop!(data.pending_replies, ref)
     data = %{data | pending_replies: pending_replies}
     GenServer.reply(from, resp)
     {:keep_state, data}
   end
 
-  def handle_event(:info, {:reply_add_player, ref, _resp}, _state, data)
+  def handle_event(:info, {:reply_add_player, ref, _resp}, _state, %AT.SessionData{} = data)
       when not is_map_key(data.pending_replies, ref),
       do: {:keep_state, data}
 
-  def handle_event(:info, {:reply_add_player, ref, resp}, _state, data) do
+  def handle_event(:info, {:reply_add_player, ref, resp}, _state, %AT.SessionData{} = data) do
     {from, pending_replies} = Map.pop!(data.pending_replies, ref)
     data = %{data | pending_replies: pending_replies}
     GenServer.reply(from, resp)
     {:keep_state, data}
   end
 
-  def handle_event(:info, {:DOWN, ref, :process, _pid, _reason}, _state, data) do
+  def handle_event(
+        :info,
+        {:DOWN, ref, :process, _pid, _reason},
+        _state,
+        %AT.SessionData{} = data
+      ) do
     val = MC.get_val(data.monitors, ref)
     data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
 
@@ -297,7 +292,7 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data}
   end
 
-  def handle_event(:info, {:EXIT, from, reason}, _state, data) do
+  def handle_event(:info, {:EXIT, from, reason}, _state, %AT.SessionData{} = data) do
     Logger.info(
       "Exit sent from #{inspect(from)} because #{inspect(reason)}. Conn pid is #{inspect(data.conn_pid)}"
     )
@@ -305,7 +300,12 @@ defmodule Teiserver.Autohost.Session do
     {:stop, reason}
   end
 
-  def handle_event(:info, {:update_capacity, max_battles, current_battles}, state, data) do
+  def handle_event(
+        :info,
+        {:update_capacity, max_battles, current_battles},
+        state,
+        %AT.SessionData{} = data
+      ) do
     data = %{data | max_battles: max_battles, current_battles: current_battles}
 
     value = %AT.Overview{
@@ -322,10 +322,20 @@ defmodule Teiserver.Autohost.Session do
     end
   end
 
-  def handle_event(:info, {:reply_start_battle, battle_id, _resp}, _state, data)
+  def handle_event(
+        :info,
+        {:reply_start_battle, battle_id, _resp},
+        _state,
+        %AT.SessionData{} = data
+      )
       when not is_map_key(data.pending_battles, battle_id), do: {:keep_state, data}
 
-  def handle_event(:info, {:reply_start_battle, battle_id, resp}, _state, data) do
+  def handle_event(
+        :info,
+        {:reply_start_battle, battle_id, resp},
+        _state,
+        %AT.SessionData{} = data
+      ) do
     {{from, start_script}, pending_battles} = Map.pop!(data.pending_battles, battle_id)
 
     case resp do
@@ -351,12 +361,12 @@ defmodule Teiserver.Autohost.Session do
     end
   end
 
-  def handle_event(:info, {:reply_send_message, ref, _resp}, _state, data)
+  def handle_event(:info, {:reply_send_message, ref, _resp}, _state, %AT.SessionData{} = data)
       when not is_map_key(data.pending_replies, ref) do
     {:keep_state, data}
   end
 
-  def handle_event(:info, {:reply_send_message, ref, resp}, _state, data) do
+  def handle_event(:info, {:reply_send_message, ref, resp}, _state, %AT.SessionData{} = data) do
     {from, pending_replies} = Map.pop!(data.pending_replies, ref)
     data = %{data | pending_replies: pending_replies}
     GenServer.reply(from, resp)
@@ -367,30 +377,45 @@ defmodule Teiserver.Autohost.Session do
   # Because the autohost is the ultimate source of truth when it comes to running
   # battle, so if it tells teiserver that something is running, we need to
   # create a corresponding process. But for now, just drop the message
-  def handle_event(:info, {:update_event, %{battle_id: battle_id}}, _state, data)
+  def handle_event(
+        :info,
+        {:update_event, %{battle_id: battle_id}},
+        _state,
+        %AT.SessionData{} = data
+      )
       when not is_map_key(data.active_battles, battle_id),
       do: {:keep_state, data}
 
-  def handle_event(:info, {:update_event, event}, _state, data) do
+  def handle_event(:info, {:update_event, event}, _state, %AT.SessionData{} = data) do
     TachyonBattle.send_update_event(event)
 
     data =
       data
       |> update_in(
-        [:active_battles, event.battle_id, Access.key!(:pending_acks)],
+        [Access.key!(:active_battles), event.battle_id, Access.key!(:pending_acks)],
         &:queue.in(event.time, &1)
       )
 
     {:keep_state, data}
   end
 
-  def handle_event(:info, {:ack_update_event, battle_id, _timestamp}, _state, data)
+  def handle_event(
+        :info,
+        {:ack_update_event, battle_id, _timestamp},
+        _state,
+        %AT.SessionData{} = data
+      )
       when not is_map_key(data.active_battles, battle_id),
       do: {:keep_state, data}
 
-  def handle_event(:info, {:ack_update_event, battle_id, timestamp}, _state, data) do
+  def handle_event(
+        :info,
+        {:ack_update_event, battle_id, timestamp},
+        _state,
+        %AT.SessionData{} = data
+      ) do
     data =
-      update_in(data, [:active_battles, battle_id], fn %AT.BattleData{} = battle_data ->
+      update_in(data, [Access.key!(:active_battles), battle_id], fn %AT.BattleData{} = battle_data ->
         case :queue.out(battle_data.pending_acks) do
           {{:value, ^timestamp}, q2} ->
             %{battle_data | pending_acks: q2, last_acked_ts: timestamp}
