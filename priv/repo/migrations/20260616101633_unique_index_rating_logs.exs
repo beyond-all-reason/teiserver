@@ -2,7 +2,7 @@ defmodule Teiserver.Repo.Migrations.UniqueIndexRatingLogs do
   use Ecto.Migration
 
   def up do
-    # Remove duplicate entries keeping the earliest 
+    # Remove duplicate entries keeping the earliest
     # (lowest id) per (match_id, user_id, rating_type_id)
     execute("""
     DELETE FROM teiserver_game_rating_logs
