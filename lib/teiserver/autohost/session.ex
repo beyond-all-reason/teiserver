@@ -8,6 +8,7 @@ defmodule Teiserver.Autohost.Session do
   alias Teiserver.Autohost
   alias Teiserver.Autohost.SessionRegistry
   alias Teiserver.Autohost.TachyonHandler
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Bot.Bot
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.TachyonBattle
@@ -165,7 +166,7 @@ defmodule Teiserver.Autohost.Session do
     Process.link(conn_pid)
     Process.flag(:trap_exit, true)
     Logger.info("session started")
-    SessionRegistry.set_value(autohost.id, 0, 0)
+    SessionRegistry.set_value(%AT.Overview{id: autohost.id, max_battles: 0, current_battles: 0})
 
     data = %{
       autohost: autohost,
@@ -316,7 +317,8 @@ defmodule Teiserver.Autohost.Session do
 
   def handle_event(:info, {:update_capacity, max_battles, current_battles}, state, data) do
     data = %{data | max_battles: max_battles, current_battles: current_battles}
-    SessionRegistry.set_value(data.autohost.id, max_battles, current_battles)
+    value = %AT.Overview{id: data.autohost.id, max_battles: max_battles, current_battles: current_battles}
+    SessionRegistry.set_value(value)
 
     case state do
       :handshaking -> {:next_state, :connected, data}

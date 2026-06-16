@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Tachyon.Autohost do
   alias Teiserver.Autohost
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.BotFixtures
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuthFixtures
@@ -103,8 +104,8 @@ defmodule TeiserverWeb.Tachyon.Autohost do
 
     expected =
       MapSet.new([
-        %{id: autohost.id, max_battles: 10, current_battles: 0},
-        %{id: other_autohost.id, max_battles: 15, current_battles: 1}
+        %AT.Overview{id: autohost.id, max_battles: 10, current_battles: 0},
+        %AT.Overview{id: other_autohost.id, max_battles: 15, current_battles: 1}
       ])
 
     poll_until(&Autohost.list/0, fn l ->

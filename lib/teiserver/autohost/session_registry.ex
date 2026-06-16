@@ -3,13 +3,8 @@ defmodule Teiserver.Autohost.SessionRegistry do
   Registry used to identify autohost sessions
   """
 
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Bot.Bot
-
-  @type reg_value :: %{
-          id: Bot.id(),
-          max_battles: non_neg_integer(),
-          current_battles: non_neg_integer()
-        }
 
   def start_link do
     Registry.start_link(keys: :unique, name: __MODULE__)
@@ -23,13 +18,13 @@ defmodule Teiserver.Autohost.SessionRegistry do
     {:via, Registry, {__MODULE__, autohost_id}}
   end
 
-  @spec register(reg_value) :: {:ok, pid()} | {:error, {:already_registered, pid()}}
-  def register(%{id: autohost_id} = val) do
+  @spec register(AT.Overview.t()) :: {:ok, pid()} | {:error, {:already_registered, pid()}}
+  def register(%AT.Overview{id: autohost_id} = val) do
     # this is needed mostly for tests
     Registry.register(__MODULE__, autohost_id, val)
   end
 
-  @spec lookup(Bot.id()) :: {pid(), reg_value()} | nil
+  @spec lookup(Bot.id()) :: {pid(), AT.Overview.t()} | nil
   def lookup(autohost_id) do
     case Registry.lookup(__MODULE__, autohost_id) do
       [x] -> x
@@ -37,28 +32,18 @@ defmodule Teiserver.Autohost.SessionRegistry do
     end
   end
 
-  @spec set_value(
-          Bot.id(),
-          max_battles :: non_neg_integer(),
-          current_battles :: non_neg_integer()
-        ) :: reg_value()
-  def set_value(autohost_id, max_battles, current_battles) do
-    value = %{
-      id: autohost_id,
-      max_battles: max_battles,
-      current_battles: current_battles
-    }
-
-    result = Registry.update_value(__MODULE__, autohost_id, fn _old -> value end)
+  @spec set_value(AT.Overview.t()) :: AT.Overview.t()
+  def set_value(%AT.Overview{id: autohost_id} = overview) do
+    result = Registry.update_value(__MODULE__, autohost_id, fn _old -> overview end)
 
     if result == :error do
-      Registry.register(__MODULE__, autohost_id, value)
+      Registry.register(__MODULE__, autohost_id, overview)
     end
 
-    value
+    overview
   end
 
-  @spec get_value(Bot.id()) :: reg_value() | nil
+  @spec get_value(Bot.id()) :: AT.Overview.t() | nil
   def get_value(autohost_id) do
     case Registry.lookup(__MODULE__, autohost_id) do
       [{_pid, val}] -> val
@@ -80,7 +65,7 @@ defmodule Teiserver.Autohost.SessionRegistry do
   @doc """
   Returns all the currently registered autohosts sessions
   """
-  @spec list() :: [reg_value()]
+  @spec list() :: [AT.Overview.t()]
   def list do
     Registry.select(__MODULE__, [{{:_, :_, :"$1"}, [], [:"$1"]}])
   end
