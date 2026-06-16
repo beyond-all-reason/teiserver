@@ -5,6 +5,7 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
   """
 
   alias Teiserver.Account.UserCacheLib
+  alias Teiserver.OAuth
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.OAuth.Token
   alias Teiserver.Repo
@@ -14,7 +15,7 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
     with {:ok, user} <- get_user(username_or_email),
          {:ok, app} <- get_app(app_uid) do
       token_attr = %{
-        value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
+        value: OAuth.generate_token_value(),
         owner_id: user.id,
         application_id: app.id,
         scopes: app.scopes,
