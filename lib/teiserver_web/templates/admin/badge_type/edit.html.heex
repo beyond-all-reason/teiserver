@@ -24,7 +24,7 @@
         <hr />
         {link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
           to: ~p"/teiserver/admin/badge_types/#{@badge_type.id}",
-          method: :delete,
+          method: "delete",
           data: [confirm: "Are you sure?"],
           class: "btn btn-danger btn-outline"
         )}

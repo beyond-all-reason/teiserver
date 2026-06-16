@@ -99,7 +99,7 @@ config :tailwind,
   teiserver: [
     args: ~w(
       --input=assets/css/app_tw.css
-      --output=priv/static/assets/css/app_tw.css
+      --output=priv/static/assets/app_tw.css
     ),
     cd: Path.expand("..", __DIR__)
   ]

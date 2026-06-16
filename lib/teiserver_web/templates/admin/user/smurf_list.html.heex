@@ -270,8 +270,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                           {link(raw("<i class='far fa-fw fa-link'></i> Smurf link"),
                             to:
                               ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}",
-                            method: :put,
-                            # data: [confirm: "Are you sure?"],
+                            method: "put",
                             class: "btn btn-sm btn-warning"
                           )}
                         </td>
