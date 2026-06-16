@@ -135,7 +135,7 @@ defmodule Teiserver.OAuth do
       # don't do any validation on the challenge yet, this is done when exchanging
       # the code for a token
       attrs = %{
-        value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(),
+        value: generate_token_value(),
         owner: user,
         application: attrs.application,
         scopes: attrs.scopes,
@@ -198,7 +198,7 @@ defmodule Teiserver.OAuth do
     else
       token_attrs =
         %{
-          value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
+          value: generate_token_value(),
           application_id: application.id,
           scopes: scopes,
           original_scopes: Map.get(application, :original_scopes, application.scopes),
@@ -210,7 +210,7 @@ defmodule Teiserver.OAuth do
       refresh_attrs =
         if Keyword.get(opts, :create_refresh, true) do
           %{
-            value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
+            value: generate_token_value(),
             application_id: application.id,
             scopes: scopes,
             original_scopes: application.scopes,
@@ -421,6 +421,11 @@ defmodule Teiserver.OAuth do
     client_id = UUID.uuid4()
     secret = 32 |> :crypto.strong_rand_bytes() |> Base.hex_encode32()
     {client_id, secret}
+  end
+
+  @spec generate_token_value() :: String.t()
+  def generate_token_value do
+    32 |> :crypto.strong_rand_bytes() |> Base.hex_encode32(padding: false)
   end
 
   @doc """
