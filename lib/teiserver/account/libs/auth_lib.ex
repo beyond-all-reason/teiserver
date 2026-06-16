@@ -7,9 +7,8 @@ defmodule Teiserver.Account.AuthLib do
   alias Phoenix.LiveView.Socket
   alias Plug.Conn
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.RoleLib
-
-  import Teiserver.Account.Auth, only: [is_bot?: 1]
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-address-card"
@@ -189,7 +188,7 @@ defmodule Teiserver.Account.AuthLib do
       Enum.all?([
         mfa_required?(),
         contains_mfa_role?(permissions_required),
-        not is_bot?(user)
+        not Auth.is_bot?(user)
       ])
 
     if conditions do
