@@ -18,5 +18,6 @@ defmodule Teiserver.Bot.Bot do
     |> cast(attrs, [:name])
     |> Changeset.validate_required([:name])
     |> Changeset.validate_length(:name, min: 3, max: 30)
+    |> Changeset.unique_constraint(:name)
   end
 end

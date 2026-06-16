@@ -16,4 +16,10 @@ defmodule Teiserver.Bot.BotTest do
     changeset = Bot.change_bot(%Bot.Bot{}, %{name: String.duplicate("a", 40)})
     assert %{name: ["should be at most 30 character(s)"]} = errors_on(changeset)
   end
+
+  test "rejects duplicate name" do
+    {:ok, _bot} = Bot.create_bot(%{name: "duplicate"})
+    assert {:error, changeset} = Bot.create_bot(%{name: "duplicate"})
+    assert %{name: ["has already been taken"]} = errors_on(changeset)
+  end
 end
