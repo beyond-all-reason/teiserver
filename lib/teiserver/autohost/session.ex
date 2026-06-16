@@ -5,7 +5,6 @@ defmodule Teiserver.Autohost.Session do
   cleanly shutdown when required.
   """
 
-  alias Teiserver.Autohost
   alias Teiserver.Autohost.SessionRegistry
   alias Teiserver.Autohost.TachyonHandler
   alias Teiserver.Autohost.Types, as: AT
@@ -19,23 +18,14 @@ defmodule Teiserver.Autohost.Session do
 
   @default_call_timeout 5000
 
-  @typep battle_data :: %{
-           start_script: Autohost.start_script(),
-           ips: [String.t()],
-           port: non_neg_integer(),
-           # it is guaranteed that the event timestamp is unique per battle
-           pending_acks: :queue.queue(time: DateTime.t()),
-           last_acked_ts: DateTime.t() | nil
-         }
-
   @typep data :: %{
            autohost: Bot.t(),
            conn_pid: pid(),
            monitors: MC.t(),
            max_battles: non_neg_integer(),
            current_battles: non_neg_integer(),
-           pending_battles: %{TachyonBattle.id() => {GenServer.from(), Autohost.start_script()}},
-           active_battles: %{TachyonBattle.id() => battle_data()},
+           pending_battles: %{TachyonBattle.id() => {GenServer.from(), AT.StartScript.t()}},
+           active_battles: %{TachyonBattle.id() => AT.BattleData.t()},
            pending_replies: %{reference() => GenServer.from()}
          }
 
@@ -59,7 +49,7 @@ defmodule Teiserver.Autohost.Session do
   @type start_response :: %{ips: [String.t()], port: integer()}
 
   # TODO: there should be some kind of retry here
-  @spec start_battle(Bot.id(), TachyonBattle.id(), pid(), Autohost.start_script()) ::
+  @spec start_battle(Bot.id(), TachyonBattle.id(), pid(), AT.StartScript.t()) ::
           {:ok, autohost_pid :: pid(), start_response()} | {:error, term()}
   def start_battle(autohost_id, battle_id, battle_pid, start_script) do
     autohost_id
@@ -317,7 +307,13 @@ defmodule Teiserver.Autohost.Session do
 
   def handle_event(:info, {:update_capacity, max_battles, current_battles}, state, data) do
     data = %{data | max_battles: max_battles, current_battles: current_battles}
-    value = %AT.Overview{id: data.autohost.id, max_battles: max_battles, current_battles: current_battles}
+
+    value = %AT.Overview{
+      id: data.autohost.id,
+      max_battles: max_battles,
+      current_battles: current_battles
+    }
+
     SessionRegistry.set_value(value)
 
     case state do
@@ -338,12 +334,10 @@ defmodule Teiserver.Autohost.Session do
         {:keep_state, data}
 
       {:ok, start_response} ->
-        battle_data = %{
+        battle_data = %AT.BattleData{
           start_script: start_script,
           ips: start_response.ips,
-          port: start_response.port,
-          pending_acks: :queue.new(),
-          last_acked_ts: nil
+          port: start_response.port
         }
 
         data =
@@ -382,7 +376,10 @@ defmodule Teiserver.Autohost.Session do
 
     data =
       data
-      |> update_in([:active_battles, event.battle_id, :pending_acks], &:queue.in(event.time, &1))
+      |> update_in(
+        [:active_battles, event.battle_id, Access.key!(:pending_acks)],
+        &:queue.in(event.time, &1)
+      )
 
     {:keep_state, data}
   end
@@ -393,7 +390,7 @@ defmodule Teiserver.Autohost.Session do
 
   def handle_event(:info, {:ack_update_event, battle_id, timestamp}, _state, data) do
     data =
-      update_in(data, [:active_battles, battle_id], fn battle_data ->
+      update_in(data, [:active_battles, battle_id], fn %AT.BattleData{} = battle_data ->
         case :queue.out(battle_data.pending_acks) do
           {{:value, ^timestamp}, q2} ->
             %{battle_data | pending_acks: q2, last_acked_ts: timestamp}
@@ -418,7 +415,7 @@ defmodule Teiserver.Autohost.Session do
   # but it works just fine with negative number
   @dialyzer {:nowarn_function, get_subscription_start: 1}
   defp get_subscription_start(state) do
-    for {_battle_id, battle_data} <- state.active_battles do
+    for {_battle_id, %AT.BattleData{} = battle_data} <- state.active_battles do
       case {battle_data.last_acked_ts, :queue.peek(battle_data.pending_acks)} do
         {x, _pending} when not is_nil(x) ->
           x

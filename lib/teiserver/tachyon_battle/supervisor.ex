@@ -1,6 +1,7 @@
 defmodule Teiserver.TachyonBattle.Supervisor do
   @moduledoc false
 
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.TachyonBattle.Battle
   alias Teiserver.TachyonBattle.Types, as: T
 
@@ -19,10 +20,10 @@ defmodule Teiserver.TachyonBattle.Supervisor do
           T.id(),
           T.match_id(),
           Teiserver.Autohost.id(),
-          Teiserver.Autohost.start_script()
+          AT.StartScript.t()
         ) ::
           DynamicSupervisor.on_start_child()
-  def start_battle(battle_id, match_id, autohost_id, start_script) do
+  def start_battle(battle_id, match_id, autohost_id, %AT.StartScript{} = start_script) do
     DynamicSupervisor.start_child(
       __MODULE__,
       {Battle,

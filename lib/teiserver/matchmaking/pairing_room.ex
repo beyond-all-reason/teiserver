@@ -9,6 +9,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   alias Teiserver.Account.User
   alias Teiserver.Asset
   alias Teiserver.Autohost
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Matchmaking.QueueSupervisor
@@ -251,9 +252,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   end
 
   @spec start_script(state(), %{version: String.t()}, String.t(), Asset.Map.t()) ::
-          Autohost.start_script()
+          AT.StartScript.t()
   defp start_script(state, engine, game, map) do
-    %{
+    %AT.StartScript{
       engine_version: engine.version,
       game_name: game,
       map_name: map.spring_name,

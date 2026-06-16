@@ -7,6 +7,7 @@ defmodule Teiserver.Battle do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.User
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Battle.Match
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Battle.MatchMembership
@@ -384,9 +385,9 @@ defmodule Teiserver.Battle do
     :ok
   end
 
-  @spec create_match_from_start_script(Teiserver.Autohost.start_script(), boolean()) ::
+  @spec create_match_from_start_script(AT.StartScript.t(), boolean()) ::
           {:ok, Match.t()} | {:error, Ecto.Changeset.t()}
-  def create_match_from_start_script(start_script, is_matchmaking) do
+  def create_match_from_start_script(%AT.StartScript{} = start_script, is_matchmaking) do
     ally_teams = start_script.ally_teams
 
     team_count = ally_teams |> Enum.count()

@@ -26,6 +26,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Plug.Crypto
   alias Teiserver.Account.User
   alias Teiserver.Autohost
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Helpers.PubSubHelper
@@ -255,7 +256,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   This should only be used for tests, because there is some gnarly logic in
   generating the start script and it's a bit hard to test end to end
   """
-  @spec get_start_script(LT.Types.id()) :: Autohost.start_script()
+  @spec get_start_script(LT.Types.id()) :: AT.StartScript.t()
   def get_start_script(lobby_id) do
     via_tuple(lobby_id) |> :gen_statem.call(:get_start_script, @default_call_timeout)
   end
@@ -2103,7 +2104,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp bot_id?(id) when is_integer(id), do: false
   defp bot_id?(id), do: String.starts_with?(id, "bot")
 
-  @spec gen_start_script(LT.Data.t()) :: Autohost.start_script()
+  @spec gen_start_script(LT.Data.t()) :: AT.StartScript.t()
   defp gen_start_script(%LT.Data{} = state) do
     sorted =
       Map.values(state.players)
@@ -2123,7 +2124,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
             players =
               for player <- players do
-                %{
+                %AT.Player{
                   user_id: player.id,
                   name: player.name,
                   password: player.password
@@ -2132,15 +2133,13 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
             bots =
               for %LT.Bot{} = bot <- bots do
-                %{
+                %AT.Bot{
                   host_user_id: bot.host_user_id,
                   name: Map.get(bot, :name),
                   ai_short_name: bot.short_name,
                   ai_version: Map.get(bot, :version),
                   ai_options: bot.options
                 }
-                |> Enum.reject(fn {_key, v} -> v == nil || v == %{} end)
-                |> Map.new()
               end
 
             %{players: players, bots: bots}
@@ -2151,7 +2150,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         %{teams: teams, startBox: at_config.start_box}
       end
 
-    %{
+    %AT.StartScript{
       engine_version: state.engine_version,
       game_name: state.game_version,
       map_name: state.map_name,
@@ -2160,9 +2159,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
       spectators:
         Enum.map(state.spectators, fn {_s_id, s} ->
           %{user_id: s.id, name: s.name, password: s.password}
-        end)
+        end),
+      game_options: state.game_options
     }
-    |> Map.merge(Map.take(state, [:game_options]))
   end
 
   @spec update_property(atom(), term(), LT.Data.t(), User.id()) ::

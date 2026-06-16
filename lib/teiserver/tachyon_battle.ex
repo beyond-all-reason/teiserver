@@ -10,6 +10,7 @@ defmodule Teiserver.TachyonBattle do
 
   alias Teiserver.Account.User
   alias Teiserver.Autohost
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Battle
   alias Teiserver.Bot
   alias Teiserver.TachyonBattle
@@ -27,9 +28,9 @@ defmodule Teiserver.TachyonBattle do
   @doc """
   Start a battle process and connects it to the given autohost
   """
-  @spec start_battle(Bot.id(), Autohost.start_script(), boolean()) ::
+  @spec start_battle(Bot.id(), AT.StartScript.t(), boolean()) ::
           {:ok, {id(), pid()}, connection_info()} | {:error, term()}
-  def start_battle(autohost_id, start_script, is_matchmaking) do
+  def start_battle(autohost_id, %AT.StartScript{} = start_script, is_matchmaking) do
     with {:ok, match} <- Battle.create_match_from_start_script(start_script, is_matchmaking),
          {:ok, battle_id, pid} <- start_battle_process(autohost_id, match.id, start_script) do
       case TachyonBattle.Battle.get_connection_info(battle_id) do
@@ -39,9 +40,9 @@ defmodule Teiserver.TachyonBattle do
     end
   end
 
-  @spec start_battle_process(Autohost.id(), T.match_id(), Autohost.start_script()) ::
+  @spec start_battle_process(Autohost.id(), T.match_id(), AT.StartScript.t()) ::
           {:ok, T.id(), pid()} | {:error, term()}
-  def start_battle_process(autohost_id, match_id, start_script) do
+  def start_battle_process(autohost_id, match_id, %AT.StartScript{} = start_script) do
     battle_id = gen_id()
 
     # TODO: handle potential errors, like "already registered"
