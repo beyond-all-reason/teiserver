@@ -29,14 +29,14 @@
             <%= if @report.closed do %>
               {link(raw("<i class='fa-solid fa-fw fa-folder-open'></i> Open"),
                 to: ~p"/moderation/report/#{@report.id}/open",
-                method: :put,
+                method: "put",
                 class: "btn btn-outline-#{bsname}"
               )}
             <% else %>
               <%= if @report.result_id == nil do %>
                 {link(raw("<i class='fa-solid fa-fw fa-folder-closed'></i> Close"),
                   to: ~p"/moderation/report/#{@report.id}/close",
-                  method: :put,
+                  method: "put",
                   class: "btn btn-outline-#{bsname}"
                 )}
               <% end %>
