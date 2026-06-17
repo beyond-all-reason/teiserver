@@ -4,6 +4,10 @@ defmodule Teiserver.MetadataCache do
   """
 
   alias Teiserver.Helpers.CacheHelper
+  alias Teiserver.Moderation.LoadBannedDomainsTask
+  alias Teiserver.Moderation.LoadBannedIPsTask
+  alias Teiserver.Moderation.LoadBannedPhrasesTask
+  alias Teiserver.Moderation.Tasks.LoadVPNsTask
 
   use Supervisor
 
@@ -14,9 +18,17 @@ defmodule Teiserver.MetadataCache do
   @impl Supervisor
   def init(_arg) do
     children = [
-      CacheHelper.concache_perm_sup(:application_metadata_cache)
+      CacheHelper.concache_perm_sup(:application_metadata_cache),
+      {Task,
+       fn ->
+         LoadVPNsTask.perform()
+         LoadBannedIPsTask.perform()
+         LoadBannedPhrasesTask.perform()
+         LoadBannedDomainsTask.perform()
+       end}
+      |> Supervisor.child_spec(restart: :transient)
     ]
 
-    Supervisor.init(children, strategy: :one_for_one)
+    Supervisor.init(children, strategy: :rest_for_one)
   end
 end
