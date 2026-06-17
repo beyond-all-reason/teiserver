@@ -1015,6 +1015,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
         case Session.lobby_kickban(state.user.id, target_id, ban_until) do
           :ok -> {:response, state}
+          {:error, :not_boss} -> {:error_response, :unauthorized, state}
           {:error, reason} -> {:error_response, :invalid_request, to_string(reason), state}
         end
 
@@ -1401,8 +1402,21 @@ defmodule Teiserver.Player.TachyonHandler do
 
   defp vote_action_to_tachyon(action) do
     case action do
-      {:change_map, name} -> %{type: :changeMap, newMapName: name}
-      {:appoint_boss, boss_id} -> %{type: :appointBoss, bossId: to_string(boss_id)}
+      {:change_map, name} ->
+        %{type: :changeMap, newMapName: name}
+
+      {:appoint_boss, boss_id} ->
+        %{type: :appointBoss, bossId: to_string(boss_id)}
+
+      {:kickban, user_id, nil} ->
+        %{type: :kickban, userId: to_string(user_id)}
+
+      {:kickban, user_id, ban_until} ->
+        %{
+          type: :kickban,
+          userId: to_string(user_id),
+          banUntil: DateTime.to_unix(ban_until, :microsecond)
+        }
     end
   end
 

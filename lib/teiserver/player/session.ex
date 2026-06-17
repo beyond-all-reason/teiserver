@@ -491,7 +491,9 @@ defmodule Teiserver.Player.Session do
   end
 
   @spec lobby_join(User.id(), TachyonLobby.id()) ::
-          {:ok, LT.Details.t()} | {:error, reason :: term()}
+          {:ok, LT.Details.t()}
+          | {:error, :banned, ban_until :: DateTime.t()}
+          | {:error, reason :: term()}
   def lobby_join(user_id, lobby_id) do
     user_id |> via_tuple() |> GenServer.call({:lobby, {:join, lobby_id}})
   end

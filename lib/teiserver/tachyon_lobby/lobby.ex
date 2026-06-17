@@ -117,7 +117,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   @spec join(LT.Types.id(), LT.PlayerJoinData.t(), pid()) ::
-          {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, reason :: term()}
+          {:ok, lobby_pid :: pid(), LT.Details.t()}
+          | {:error, :banned, ban_until :: DateTime.t()}
+          | {:error, reason :: term()}
   def join(lobby_id, %LT.PlayerJoinData{} = join_data, pid \\ self()) do
     call_lobby(lobby_id, {:join, join_data, pid})
   end
