@@ -757,6 +757,10 @@ defmodule Teiserver.Player.TachyonHandler do
       {:error, :lobby_full} ->
         {:error_response, :lobby_full, state}
 
+      {:error, :banned, ban_until} ->
+        details = "Banned until #{DateTime.to_unix(ban_until, :microsecond)}"
+        {:error_response, :banned, details, state}
+
       {:error, reason} ->
         {:error_response, :invalid_request, to_string(reason), state}
     end
@@ -1005,13 +1009,17 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/kickban", "request", _msg_id, %{"data" => data}, state) do
-    target_id = data["userId"]
-    ban_until = parse_ban_until(data["banUntil"])
+    case TachyonParser.parse_user_id(data["userId"]) do
+      {:ok, target_id} ->
+        ban_until = parse_ban_until(data["banUntil"])
 
-    case Session.lobby_kickban(state.user.id, target_id, ban_until) do
-      :ok -> {:response, state}
-      {:error, :unauthorized} -> {:error_response, :unauthorized, state}
-      {:error, reason} -> {:error_response, :invalid_request, to_string(reason), state}
+        case Session.lobby_kickban(state.user.id, target_id, ban_until) do
+          :ok -> {:response, state}
+          {:error, reason} -> {:error_response, :invalid_request, to_string(reason), state}
+        end
+
+      {:error, err} ->
+        {:error_response, :invalid_request, to_string(err), state}
     end
   end
 

@@ -575,6 +575,42 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "kickban" do
+    test "boss can kick a player" do
+      {:ok, ctx} = Tachyon.setup_client()
+      {:ok, lobby_data} = setup_lobby(%{client: ctx[:client]}, %{boss_enabled?: true})
+
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_data[:lobby_id])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
+
+      %{"status" => "success"} = Tachyon.lobby_kickban(ctx[:client], ctx2[:user].id)
+
+      %{"commandId" => "lobby/left", "data" => data} = Tachyon.recv_message!(ctx2[:client])
+      assert data["reason"] == "kicked"
+    end
+
+    test "invalid user id returns error" do
+      {:ok, ctx} = Tachyon.setup_client()
+      {:ok, _lobby_data} = setup_lobby(%{client: ctx[:client]}, %{boss_enabled?: true})
+
+      :ok = Tachyon.send_request(ctx[:client], "lobby/kickban", %{userId: "not-a-number"})
+      {:ok, resp} = Tachyon.recv_message(ctx[:client])
+      assert resp["status"] == "failed"
+      assert resp["reason"] == "invalid_request"
+    end
+
+    test "cannot kickban player not in lobby" do
+      {:ok, ctx} = Tachyon.setup_client()
+      {:ok, _lobby_data} = setup_lobby(%{client: ctx[:client]}, %{boss_enabled?: true})
+
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      %{"status" => "failed", "reason" => "invalid_request"} =
+        Tachyon.lobby_kickban(ctx[:client], ctx2[:user].id)
+    end
+  end
+
   describe "update client status" do
     setup [:setup_lobby]
 

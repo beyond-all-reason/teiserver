@@ -1165,6 +1165,9 @@ defmodule Teiserver.Player.Session do
 
         {:reply, {:ok, details}, state}
 
+      {:error, :banned, ban_until} ->
+        {:reply, {:error, :banned, ban_until}, state}
+
       {:error, reason} ->
         {:reply, {:error, reason}, state}
     end

@@ -472,7 +472,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       data = update_in(data.banned_users, &Map.delete(&1, user_id))
       {:keep_state, data, [{:next_event, {:call, from}, {:join, join_data, pid}}]}
     else
-      {:keep_state, data, [{:reply, from, {:error, :banned}}]}
+      {:keep_state, data, [{:reply, from, {:error, :banned, ban_until}}]}
     end
   end
 
@@ -968,18 +968,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
         _state,
         %LT.Data{} = data
       ) do
-    effective_ban_until =
-      case ban_until do
-        nil -> nil
-        dt -> if DateTime.compare(dt, DateTime.utc_now()) == :gt, do: dt, else: nil
-      end
-
     cond do
       not Enum.empty?(data.bosses) and not MapSet.member?(data.bosses, user_id) ->
-        {:keep_state, data, [{:reply, from, {:error, :unauthorized}}]}
+        {:keep_state, data, [{:reply, from, {:error, :not_boss}}]}
 
       Enum.empty?(data.bosses) and Enum.count(data.players, &(!bot_id?(elem(&1, 0)))) > 1 ->
-        vote = new_vote(data, user_id, {:kickban, target_id, effective_ban_until})
+        vote = new_vote(data, user_id, {:kickban, target_id, ban_until})
 
         :timer.seconds(vote.duration_s)
         |> :timer.send_after({:vote_timeout, vote.id})
@@ -994,7 +988,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         {:keep_state, data, [{:reply, from, :ok}]}
 
       true ->
-        data = do_kickban(target_id, effective_ban_until, data)
+        data = do_kickban(target_id, ban_until, data)
         {:keep_state, data, [{:reply, from, :ok}]}
     end
   end
@@ -1188,6 +1182,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(:info, {:vote_timeout, _vote_id}, _state, %LT.Data{} = data),
     do: {:keep_state, data}
+
+  def handle_event(:info, {:ban_expired, user_id}, _state, %LT.Data{} = data) do
+    {:keep_state, update_in(data.banned_users, &Map.delete(&1, user_id))}
+  end
 
   def handle_event(:info, {:EXIT, _pid, reason}, _state, %LT.Data{} = _data) do
     {:stop, reason}
@@ -1386,6 +1384,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> update_in([:updates], &[ev | &1])
 
     aggregate = process_event({:cast_vote, p_id, :abstain}, aggregate)
+    aggregate = maybe_cancel_kick_vote(p_id, aggregate)
     process_event({:update_boss, :remove, p_id}, aggregate)
   end
 
@@ -1397,6 +1396,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> update_in([:updates], &[ev | &1])
 
     aggregate = process_event({:cast_vote, s_id, :abstain}, aggregate)
+    aggregate = maybe_cancel_kick_vote(s_id, aggregate)
     process_event({:update_boss, :remove, s_id}, aggregate)
   end
 
@@ -1616,8 +1616,37 @@ defmodule Teiserver.TachyonLobby.Lobby do
             process_event({:update_boss, :add, boss_id}, new_aggregate)
 
           {:passed, {:kickban, target_id, ban_until}} ->
-            new_data = do_kickban(target_id, ban_until, new_aggregate.data)
-            %{new_aggregate | data: new_data}
+            data = new_aggregate.data
+
+            target_in_lobby? =
+              is_map_key(data.players, target_id) or
+                is_map_key(data.spectators, target_id)
+
+            cond do
+              target_in_lobby? ->
+                new_data = do_kickban(target_id, ban_until, new_aggregate.data)
+                %{new_aggregate | data: new_data}
+
+              ban_until != nil ->
+                effective_ban_until =
+                  if DateTime.compare(ban_until, DateTime.utc_now()) == :gt,
+                    do: ban_until,
+                    else: nil
+
+                case effective_ban_until do
+                  nil ->
+                    new_aggregate
+
+                  dt ->
+                    ms = DateTime.diff(dt, DateTime.utc_now(), :millisecond)
+                    if ms > 0, do: :timer.send_after(ms, {:ban_expired, target_id})
+                    new_data = put_in(data.banned_users[target_id], dt)
+                    %{new_aggregate | data: new_data}
+                end
+
+              true ->
+                new_aggregate
+            end
 
             # just let the thing crash if a new vote action shows up. It'll be easy
             # to spot and fix/add support. :start isn't yet supported
@@ -1676,6 +1705,19 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> Map.update!(:updates, &[ev | &1])
     else
       aggregate
+    end
+  end
+
+  defp maybe_cancel_kick_vote(leaving_user_id, aggregate) do
+    case aggregate.data.current_vote do
+      nil ->
+        aggregate
+
+      %{action: {:kickban, ^leaving_user_id, nil}} ->
+        process_event({:vote_ended, DateTime.utc_now(), :failed}, aggregate)
+
+      _other ->
+        aggregate
     end
   end
 
@@ -2078,10 +2120,21 @@ defmodule Teiserver.TachyonLobby.Lobby do
         _not_found -> nil
       end
 
-    data =
+    effective_ban_until =
       case ban_until do
-        nil -> data
-        dt -> put_in(data.banned_users[target_id], dt)
+        nil -> nil
+        dt -> if DateTime.compare(dt, DateTime.utc_now()) == :gt, do: dt, else: nil
+      end
+
+    data =
+      case effective_ban_until do
+        nil ->
+          data
+
+        dt ->
+          ms = DateTime.diff(dt, DateTime.utc_now(), :millisecond)
+          if ms > 0, do: :timer.send_after(ms, {:ban_expired, target_id})
+          put_in(data.banned_users[target_id], dt)
       end
 
     data =
@@ -2092,8 +2145,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       end
 
     if target_pid do
-      reason = if ban_until != nil, do: "banned", else: "kicked"
-      send(target_pid, {:lobby, data.id, {:left, reason, ban_until}})
+      reason = if effective_ban_until != nil, do: "banned", else: "kicked"
+      send(target_pid, {:lobby, data.id, {:left, reason, effective_ban_until}})
     end
 
     data
