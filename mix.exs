@@ -191,9 +191,10 @@ defmodule Teiserver.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.build": ["compile", "tailwind teiserver", "esbuild teiserver"],
       "assets.deploy": [
         "tailwind teiserver --minify",
-        "esbuild default --minify",
+        "esbuild teiserver --minify",
         "sass dark --no-source-map --style=compressed",
         "sass light --no-source-map --style=compressed",
         "phx.digest"
