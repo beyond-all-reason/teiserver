@@ -50,7 +50,7 @@ defmodule Teiserver.SpringTcpServerTest do
 
   # https://github.com/beyond-all-reason/teiserver/actions/runs/27694115835/job/81912599640
   # https://github.com/beyond-all-reason/teiserver/actions/runs/27611321330/job/81636135118
-  @tag needs_attention
+  @tag :needs_attention
   test "tcp startup and exit", %{socket: socket} do
     password = "X03MO1qnZdYdgyfeuILPmQ=="
     username = "test_user_tcpnew"
