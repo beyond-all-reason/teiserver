@@ -2,8 +2,10 @@ defmodule Teiserver.Logging.AuditLogLib do
   @moduledoc false
 
   alias Teiserver.Logging.AuditLog
+  alias Teiserver.Repo
 
   use TeiserverWeb, :library
+  use TeiserverWeb, :queries
 
   @spec colours() :: atom
   def colours, do: :danger2
@@ -11,15 +13,12 @@ defmodule Teiserver.Logging.AuditLogLib do
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-archive"
 
-  @spec add_audit_types([String.t()]) :: :ok
-  def add_audit_types(types) do
-    new_types = list_audit_types() ++ types
-    Teiserver.store_put(:application_metadata_cache, "audit_types", new_types)
-  end
-
   @spec list_audit_types :: [String.t()]
   def list_audit_types do
-    Teiserver.cache_get(:application_metadata_cache, "audit_types") || []
+    query = from logs in AuditLog, as: :audit_log, distinct: :action, select: [:action]
+
+    Repo.all(query)
+    |> Enum.map(& &1.action)
   end
 
   # Queries
