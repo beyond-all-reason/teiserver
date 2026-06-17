@@ -880,20 +880,37 @@ defmodule Teiserver.Moderation do
     Repo.all(BannedDomain)
   end
 
-  @spec list_banned_domains_cache :: [String.t()]
+  @spec list_banned_domains_cache :: MapSet.t(String.t())
   def list_banned_domains_cache do
-    Teiserver.cache_get(:application_metadata_cache, "banned_domains", [])
+    Teiserver.cache_get(:application_metadata_cache, "banned_domains", MapSet.new())
   end
 
   @spec banned_domain?(String.t()) :: boolean()
   def banned_domain?(email) do
     case String.split(email, "@") do
       [_start, domain] ->
-        String.contains?(domain, list_banned_domains_cache())
+        banned_domains = list_banned_domains_cache()
+
+        domain
+        |> String.downcase()
+        |> domain_segments()
+        |> Enum.any?(&MapSet.member?(banned_domains, &1))
 
       _no_email ->
         false
     end
+  end
+
+  # Given a full email domain such as sub.domain.foo.bar
+  # will return a diminishing list of the dot-separated
+  # parts of the list, e.g.
+  # ["sub.domain.foo.bar", "domain.foo.bar", "foo.bar", "bar"]
+  defp domain_segments(domain) do
+    String.split(domain, ".")
+    |> Enum.reverse()
+    |> Enum.scan(fn elem, acc ->
+      elem <> "." <> acc
+    end)
   end
 
   @doc """
@@ -993,9 +1010,9 @@ defmodule Teiserver.Moderation do
     Repo.all(BannedIP)
   end
 
-  @spec list_banned_ips_cache :: [BannedIP.t()]
+  @spec list_banned_ips_cache :: MapSet.t(BannedIP.t())
   def list_banned_ips_cache do
-    Teiserver.cache_get(:application_metadata_cache, "banned_ip_ranges", [])
+    Teiserver.cache_get(:application_metadata_cache, "banned_ip_ranges", MapSet.new())
   end
 
   @doc """
@@ -1199,9 +1216,9 @@ defmodule Teiserver.Moderation do
   end
 
   # VPNs
-  @spec list_vpn_cache :: [String.t()]
+  @spec list_vpn_cache :: MapSet.t(String.t())
   def list_vpn_cache do
-    Teiserver.cache_get(:application_metadata_cache, "blocked_vpn_ranges", [])
+    Teiserver.cache_get(:application_metadata_cache, "banned_vpn_ranges", MapSet.new())
   end
 
   @spec vpn_ip?(String.t() | nil) :: boolean()

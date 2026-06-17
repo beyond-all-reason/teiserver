@@ -17,7 +17,7 @@ defmodule Teiserver.Moderation.LoadBannedIPsTask do
     CacheHelper.store_put(
       :application_metadata_cache,
       "banned_ip_ranges",
-      banned_ip_ranges
+      MapSet.new(banned_ip_ranges)
     )
   end
 
