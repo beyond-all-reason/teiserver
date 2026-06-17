@@ -98,6 +98,7 @@ services:
     volumes:
       - ./containers/mailpit-auth:/tmp/auth
     ports:
+      - "1025:1025"  # smtp port
       - "8025:8025"  # web UI
 
 volumes:
