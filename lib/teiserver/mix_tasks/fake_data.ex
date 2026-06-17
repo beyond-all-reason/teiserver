@@ -88,13 +88,26 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   """
   @spec generate_throwaway_name() :: String.t()
   def generate_throwaway_name do
-    [
-      Teiserver.store_get(:application_metadata_cache, "random_names_1"),
-      Teiserver.store_get(:application_metadata_cache, "random_names_2"),
-      Teiserver.store_get(:application_metadata_cache, "random_names_3")
-    ]
-    |> Enum.filter(fn l -> l != [] end)
-    |> Enum.map_join(" ", fn l -> Enum.random(l) |> String.capitalize() end)
+    names1 =
+      ~w(serene energised humble auspicious decisive exemplary cheerful
+        determined playful spry springy)
+
+    names2 =
+      ~w(maroon cherry rose ruby amber carrot lemon beige mint lime cadmium
+        aqua cerulean lavender indigo magenta amethyst)
+
+    names3 =
+      ~w(tick pawn lazarus rocketeer crossbow mace centurion tumbleweed smuggler compass
+        ghost sprinter butler webber platypus hound welder recluse archangel
+        gunslinger sharpshooter umbrella fatboy
+        marauder vanguard razorback titan
+        grunt graverobber aggravator trasher thug bedbug
+        deceiver augur spectre fiend twitcher duck skuttle sumo arbiter manticore
+        termite commando mammoth shiva karganeth catapult behemoth juggernaught
+      )
+
+    [names1, names2, names3]
+    |> Enum.map_join("", fn l -> Enum.random(l) |> String.capitalize() end)
   end
 
   defp make_accounts do
@@ -106,7 +119,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
         Range.new(0, users_per_day())
         |> ParallelStream.map(fn _index ->
           minutes = :rand.uniform(24 * 60)
-          name = generate_throwaway_name() |> String.replace(" ", "")
+          name = generate_throwaway_name()
 
           %{
             name: name,
