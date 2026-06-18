@@ -66,22 +66,35 @@ defmodule Teiserver.Moderation.BannedDomainTest do
   describe "test banned_domain matches" do
     test "matches" do
       banned_domain_fixture(%{
-        domain: "some_domain.com"
+        domain: "banned.com"
       })
 
       banned_domain_fixture(%{
-        domain: "some_domain.foo.bar"
+        domain: "blocked.foo.bar"
       })
 
       LoadBannedDomainsTask.perform()
 
-      assert Moderation.banned_domain?("me@some_domain.com")
-      assert Moderation.banned_domain?("me@some_domain.foo.bar")
-      assert Moderation.banned_domain?("me@some_subdomain.some_domain.com")
-      assert Moderation.banned_domain?("me@some_subdomain.some_domain.foo.bar")
-      refute Moderation.banned_domain?("me@some_domain.com.foo.bar")
-      refute Moderation.banned_domain?("me@different_some_domain.foo.bar")
-      refute Moderation.banned_domain?("me@some_domain.foo.bar.legit")
+      # Happy path examples, we want to ban these
+      assert Moderation.banned_domain?("me@banned.com")
+      assert Moderation.banned_domain?("me@blocked.foo.bar")
+
+      # Assert we ban on subdomains of banned domains
+      assert Moderation.banned_domain?("me@sub.banned.com")
+      assert Moderation.banned_domain?("me@sub.blocked.foo.bar")
+
+      # Don't ban when there is a component in the middle of the domain
+      refute Moderation.banned_domain?("me@banned.legit.foo.bar")
+
+      # We want to ban on the name of the domain as a whole, not a wildcard
+      # so if a domain has a banned domain as a substring, it is
+      # considered different
+      refute Moderation.banned_domain?("me@different_blocked.foo.bar")
+
+      # x.y.z is not the same as x.y, if we ban x.y we don't want to ban x.y.z
+      refute Moderation.banned_domain?("me@blocked.foo.bar.legit")
+
+      # Not banned, not relevant
       refute Moderation.banned_domain?("me@not me")
     end
 
