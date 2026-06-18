@@ -54,6 +54,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       assert name == new_name
     end
 
+    # https://github.com/beyond-all-reason/teiserver/actions/runs/27750791250/job/82100476908?pr=1302
     test "chat message is sent when provided name was invalid", %{host: host, lobby_id: lobby_id} do
       name = "="
       channel = "teiserver_lobby_chat:#{lobby_id}"
