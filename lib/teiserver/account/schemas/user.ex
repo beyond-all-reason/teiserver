@@ -61,7 +61,6 @@ defmodule Teiserver.Account.User do
       restricted_until: nil,
       shadowbanned: false,
       lobby_hash: [],
-      hw_hash: nil,
       chobby_hash: nil,
       print_client_messages: false,
       print_server_messages: false,

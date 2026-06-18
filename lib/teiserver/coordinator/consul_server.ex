@@ -729,25 +729,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
         new_client
       end
 
-    # It's possible we are not allowing new players to become players
-    new_client =
-      if Config.get_site_config_cache("teiserver.Require HW data to play") do
-        player_count = Battle.get_lobby_player_count(state.lobby_id)
-
-        if player_count > 4 do
-          if user.hw_hash == nil do
-            Logger.warning("hw hash block for #{Account.get_username(userid)}")
-            %{new_client | player: false}
-          else
-            new_client
-          end
-        else
-          new_client
-        end
-      else
-        new_client
-      end
-
     # Same but for chobby data
     new_client =
       if Config.get_site_config_cache("teiserver.Require Chobby data to play") do
@@ -943,22 +924,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp allow_join(userid, state) do
     client = Client.get_client_by_id(userid)
     {ban_state, reason} = check_ban_state(userid, state)
-
-    if Config.get_site_config_cache("teiserver.Require Chobby login") == true do
-      if client != nil do
-        user = CacheUser.get_user_by_id(userid)
-
-        case user.hw_hash do
-          "" ->
-            Logger.error(
-              "JOINBATTLE with empty hash - name: #{user.name}, client: #{user.lobby_client}"
-            )
-
-          _hash ->
-            :ok
-        end
-      end
-    end
 
     # Blocking using relationships
     player_ids = list_player_ids(state)

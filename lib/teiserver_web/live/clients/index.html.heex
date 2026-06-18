@@ -42,7 +42,6 @@
               <th>Name</th>
               <th>Party</th>
               <th>Lobby</th>
-              <th>HW</th>
               <th>CHB</th>
               <th>Status</th>
               <th>Bot</th>
@@ -68,14 +67,6 @@
                         </.link>
                       <% end %>
                     </td>
-                    <td>
-                      <%= if user.hw_hash != nil and user.hw_hash != "" do %>
-                        <i class="fa-fw far fa-check"></i>
-                      <% else %>
-                        &nbsp;
-                      <% end %>
-                    </td>
-
                     <td>
                       <%= if user.chobby_hash != nil and user.chobby_hash != "" do %>
                         <i class="fa-fw far fa-check"></i>
