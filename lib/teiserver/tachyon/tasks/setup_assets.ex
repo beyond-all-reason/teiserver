@@ -82,6 +82,8 @@ defmodule Teiserver.Tachyon.Tasks.SetupAssets do
   end
 
   defp load_maps_from_json do
+    # the file there is coming from
+    # https://maps-metadata.beyondallreason.dev/latest/teiserver_maps.validated.json
     json_path = Path.join([Application.app_dir(:teiserver), "priv", "data", "maps.json"])
     content = File.read!(json_path)
     %{"maps" => maps} = Jason.decode!(content)

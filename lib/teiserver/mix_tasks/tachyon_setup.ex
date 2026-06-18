@@ -2,11 +2,13 @@ defmodule Mix.Tasks.Teiserver.TachyonSetup do
   @moduledoc """
   Ensure there is an OAuth app for tachyon lobby and another one to control
   assets like maps and engines with bots.
+  Ensure there is at least a valid engine and game version.
+  Populate the map metadata table from a fixture file
 
   Usage: `mix teiserver.tachyon_setup`
   """
 
-  @shortdoc "setup oauth apps for tachyon"
+  @shortdoc "setup various data for tachyon"
 
   alias Teiserver.Repo
   alias Teiserver.Tachyon.Tasks.SetupApps
