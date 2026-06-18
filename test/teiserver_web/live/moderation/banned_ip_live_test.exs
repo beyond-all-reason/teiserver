@@ -7,8 +7,8 @@ defmodule TeiserverWeb.BannedIPLiveTest do
   import Phoenix.LiveViewTest
   import Teiserver.ModerationFixtures
 
-  @create_attrs %{cidr: "127.0.0.1/32"}
-  @update_attrs %{cidr: "192.168.0.1/32"}
+  @create_attrs %{cidr: "100.100.0.1/32"}
+  @update_attrs %{cidr: "200.200.0.1/32"}
   @invalid_attrs %{cidr: nil}
 
   describe "Index" do
@@ -41,7 +41,7 @@ defmodule TeiserverWeb.BannedIPLiveTest do
 
       html = render(index_live)
       assert html =~ "Banned ip created successfully"
-      assert html =~ "127.0.0.1/32"
+      assert html =~ "100.100.0.1/32"
     end
 
     test "updates banned_ip in listing", %{conn: conn, banned_ip: banned_ip} do
@@ -64,7 +64,7 @@ defmodule TeiserverWeb.BannedIPLiveTest do
 
       html = render(index_live)
       assert html =~ "Banned ip updated successfully"
-      assert html =~ "192.168.0.1/32"
+      assert html =~ "200.200.0.1/32"
     end
 
     test "deletes banned_ip in listing", %{conn: conn, banned_ip: banned_ip} do
@@ -105,7 +105,7 @@ defmodule TeiserverWeb.BannedIPLiveTest do
 
       html = render(show_live)
       assert html =~ "Banned ip updated successfully"
-      assert html =~ "192.168.0.1/32"
+      assert html =~ "200.200.0.1/32"
     end
   end
 
