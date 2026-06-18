@@ -79,6 +79,9 @@ defmodule Teiserver.Moderation.BannedDomainTest do
       assert Moderation.banned_domain?("me@some_domain.foo.bar")
       assert Moderation.banned_domain?("me@some_subdomain.some_domain.com")
       assert Moderation.banned_domain?("me@some_subdomain.some_domain.foo.bar")
+      refute Moderation.banned_domain?("me@some_domain.com.foo.bar")
+      refute Moderation.banned_domain?("me@different_some_domain.foo.bar")
+      refute Moderation.banned_domain?("me@some_domain.foo.bar.legit")
       refute Moderation.banned_domain?("me@not me")
     end
 

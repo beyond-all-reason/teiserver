@@ -13,7 +13,7 @@ defmodule Teiserver.Moderation.Tasks.LoadVPNsTask do
   def perform do
     url = Config.get_site_config_cache("teiserver.VPN blocklist URL")
 
-    blocked_vpn_ranges =
+    banned_vpn_ranges =
       with true <- url != nil and url != "",
            {:ok, %Response{status: 200, body: body}} <- Req.get(url),
            cidr_list <- String.split(body, "\n") do
@@ -35,8 +35,8 @@ defmodule Teiserver.Moderation.Tasks.LoadVPNsTask do
 
     CacheHelper.store_put(
       :application_metadata_cache,
-      "blocked_vpn_ranges",
-      blocked_vpn_ranges
+      "banned_vpn_ranges",
+      MapSet.new(banned_vpn_ranges)
     )
   end
 end

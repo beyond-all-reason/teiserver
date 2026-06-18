@@ -33,7 +33,7 @@ defmodule Teiserver.Moderation.LoadBannedDomainsTask do
     CacheHelper.store_put(
       :application_metadata_cache,
       "banned_domains",
-      external_banned_domains ++ internal_banned_domains
+      MapSet.new(external_banned_domains ++ internal_banned_domains)
     )
   end
 
