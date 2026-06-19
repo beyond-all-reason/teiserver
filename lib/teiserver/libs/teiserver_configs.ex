@@ -131,15 +131,6 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "teiserver.Require Chobby login",
-      section: "Registrations",
-      type: "boolean",
-      permissions: ["Server"],
-      description: "Prevents users logging in with anything other than Chobby",
-      default: false
-    })
-
-    add_site_config_type(%{
       key: "teiserver.Manual validation email address",
       section: "Registrations",
       type: "string",
@@ -187,15 +178,6 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["Admin"],
       description: "The delay in seconds after a user logs in for the automod to check on them.",
       default: 120
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Require HW data to play",
-      section: "Moderation",
-      type: "boolean",
-      permissions: ["Admin"],
-      description: "Prevents someone from being a player if they don't have a HW hash yet.",
-      default: false
     })
 
     add_site_config_type(%{

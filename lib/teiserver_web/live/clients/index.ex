@@ -156,6 +156,6 @@ defmodule TeiserverWeb.ClientLive.Index do
   defp limited_user(nil), do: nil
 
   defp limited_user(user) do
-    Map.take(user, ~w(id bot moderator hw_hash chobby_hash)a)
+    Map.take(user, ~w(id bot moderator chobby_hash)a)
   end
 end
