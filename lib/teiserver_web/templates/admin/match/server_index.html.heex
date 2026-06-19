@@ -33,7 +33,7 @@
 
         <div class="float-end">
           <a
-            href={Routes.ts_admin_lobby_path(@conn, :server_chat, @uuid)}
+            href={~p"/teiserver/admin/lobbies/#{@uuid}/server_chat"}
             class={"btn btn-outline-#{bsname}"}
           >
             <i class="fa-fw fa-solid fa-server"></i> &nbsp;

@@ -33,7 +33,7 @@
 
         <hr />
 
-        <form action={Routes.moderation_action_path(@conn, :new_with_user)} method="get" class="">
+        <form action={~p"/moderation/action/new_with_user"} method="get" class="">
           <div class="row">
             <label for="control_id" class="col-md-2 control-label">Select user:</label>
             <div class="col-md-10">

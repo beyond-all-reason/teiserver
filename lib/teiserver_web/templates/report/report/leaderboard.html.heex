@@ -30,7 +30,7 @@ user_moderator = allow?(@current_user, "Moderator") %>
         <br /><br />
 
         <form
-          action={Routes.ts_reports_report_path(@conn, :show, "leaderboard")}
+          action={~p"/teiserver/reports/show/leaderboard"}
           method="post"
           class="form-horizontal mb-4"
         >
