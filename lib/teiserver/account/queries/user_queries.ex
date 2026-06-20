@@ -566,6 +566,12 @@ defmodule Teiserver.Account.UserQueries do
       where: users.id not in ^ids
   end
 
+  @spec where_smurf_of(t(), User.id()) :: t()
+  def where_smurf_of(query, user_id) do
+    from users in query,
+      where: users.smurf_of_id == ^user_id
+  end
+
   @spec order_by_name(t(), :asc | :desc) :: t()
   def order_by_name(query, direction \\ :asc) do
     if direction == :asc do
