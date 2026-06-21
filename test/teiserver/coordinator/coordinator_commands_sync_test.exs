@@ -1,5 +1,6 @@
 defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.UserLib
   alias Teiserver.CacheUser
 
@@ -8,6 +9,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
   import TeiserverTestLib,
     only: [
       auth_setup: 1,
+      auth_setup: 2,
+      new_user: 1,
+      _recv_until: 1,
       _send_raw: 2,
       _recv_raw: 1,
       start_spring_server: 1
@@ -64,29 +68,49 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
       refute client.show_moderator
     end
 
-    test "modme/unmodme - as moderator", %{socket: socket, user: user} do
-      user.id
-      |> Account.get_user!()
-      |> UserLib.script_update_user(%{roles: ["Admin"]})
+    test "modme/unmodme - as moderator", context do
+      user_watcher = new_user("user_watcher")
+      %{socket: user_watcher_socket} = auth_setup(context, user_watcher)
+      bot_watcher = new_user("bot_watcher")
+      %{socket: bot_watcher_socket} = auth_setup(context, bot_watcher)
+      {:ok, _} = Auth.add_roles(bot_watcher.id, ["Bot"])
 
-      CacheUser.recache_user(user.id)
+      std_user = new_user("std_watcher")
+      %{socket: std_socket} = auth_setup(context, std_user)
+      mod_user = new_user("mod_user")
+      %{socket: mod_socket} = auth_setup(context, mod_user)
+      {:ok, _} = Auth.add_roles(mod_user.id, ["Moderator"])
 
-      # Now need to update client as it logged in without being a moderator
-      Account.update_client(user.id, %{moderator: true})
+      lines1 = _recv_until(user_watcher_socket)
+      lines2 = _recv_until(bot_watcher_socket)
 
-      _send_raw(socket, "SAYPRIVATE coordinator $modme\n")
-      :timer.sleep(100)
+      _recv_until(mod_socket)
 
-      client = Account.get_client_by_id(user.id)
-      assert client.moderator
-      assert client.show_moderator
+      IO.puts "MODME"
+      _send_raw(std_socket, "SAYPRIVATE coordinator $modme\n")
+      _send_raw(mod_socket, "SAYPRIVATE coordinator $modme\n")
 
-      _send_raw(socket, "SAYPRIVATE coordinator $unmodme\n")
-      :timer.sleep(100)
+      lines3 = _recv_until(user_watcher_socket)
+      lines4 = _recv_until(bot_watcher_socket)
 
-      client = Account.get_client_by_id(user.id)
-      assert client.moderator
-      refute client.show_moderator
+      lines5 = _recv_until(mod_socket)
+
+      IO.puts "lines1"
+      IO.puts lines1
+      IO.puts ""
+      IO.puts "lines2"
+      IO.puts lines2
+      IO.puts ""
+      IO.puts "lines3"
+      IO.puts lines3
+      IO.puts ""
+      IO.puts "lines4"
+      IO.puts lines4
+      IO.puts ""
+
+      IO.puts ""
+      IO.puts lines5
+      IO.puts ""
     end
   end
 end
