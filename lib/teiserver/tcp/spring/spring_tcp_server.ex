@@ -11,6 +11,7 @@ defmodule Teiserver.SpringTcpServer do
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
+  alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.PartyIn
   alias Teiserver.Protocols.SpringIn
   alias Teiserver.Protocols.SpringOut
@@ -772,7 +773,11 @@ defmodule Teiserver.SpringTcpServer do
       new_knowns = Map.put(state.known_users, userid, new_user)
       %{state | known_users: new_knowns}
     else
-      SpringOut.reply(:client_status, new_client, nil, state)
+      # For bots we want to show them as a moderator regardless of what
+      # they are showing to others
+      true_mod_status = Auth.is_bot?(state.userid)
+      status = Spring.create_client_status(new_client, true_mod_status)
+      SpringOut.reply(:client_status, {new_client.name, status}, nil, state)
     end
   end
 

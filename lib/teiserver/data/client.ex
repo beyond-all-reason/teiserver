@@ -23,6 +23,9 @@ defmodule Teiserver.Client do
         away: false,
         rank: 1,
         moderator: false,
+
+        # Used to control showing/hiding the moderator-ness of the client
+        show_moderator: false,
         bot: false,
 
         # Battle stuff
@@ -97,6 +100,7 @@ defmodule Teiserver.Client do
         tcp_pid: self(),
         rank: user.rank,
         moderator: Auth.moderator?(db_user) or Auth.is_event_organizer?(db_user),
+        show_moderator: false,
         bot: Auth.is_bot?(db_user),
         away: false,
         in_game: false,
@@ -197,6 +201,9 @@ defmodule Teiserver.Client do
   @spec update(map(), :silent | :client_updated_status | :client_updated_battlestatus) ::
           T.client()
   def update(client, reason), do: ClientLib.replace_update_client(client, reason)
+
+  @spec merge_update_client(User.id(), map()) :: nil | :ok
+  defdelegate merge_update_client(user_id, updates), to: ClientLib
 
   @spec get_client_pid(User.id()) :: pid() | nil
   defdelegate get_client_pid(userid), to: ClientLib

@@ -50,5 +50,43 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
 
       Application.put_env(:teiserver, Teiserver, config)
     end
+
+    test "modme - not moderator", %{socket: socket, user: user} do
+      client = Account.get_client_by_id(user.id)
+      refute client.moderator
+      refute client.show_moderator
+
+      _send_raw(socket, "SAYPRIVATE coordinator $modme\n")
+      :timer.sleep(100)
+
+      client = Account.get_client_by_id(user.id)
+      refute client.moderator
+      refute client.show_moderator
+    end
+
+    test "modme/unmodme - as moderator", %{socket: socket, user: user} do
+      user.id
+      |> Account.get_user!()
+      |> UserLib.script_update_user(%{roles: ["Admin"]})
+
+      CacheUser.recache_user(user.id)
+
+      # Now need to update client as it logged in without being a moderator
+      Account.update_client(user.id, %{moderator: true})
+
+      _send_raw(socket, "SAYPRIVATE coordinator $modme\n")
+      :timer.sleep(100)
+
+      client = Account.get_client_by_id(user.id)
+      assert client.moderator
+      assert client.show_moderator
+
+      _send_raw(socket, "SAYPRIVATE coordinator $unmodme\n")
+      :timer.sleep(100)
+
+      client = Account.get_client_by_id(user.id)
+      assert client.moderator
+      refute client.show_moderator
+    end
   end
 end

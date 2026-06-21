@@ -19,9 +19,16 @@ defmodule Teiserver.Protocols.Spring do
     }
   end
 
-  @spec create_client_status(map()) :: Integer.t()
-  def create_client_status(client) do
+  @spec create_client_status(map(), boolean()) :: Integer.t()
+  def create_client_status(client, true_mod_status \\ false) do
     [r1, r2, r3] = BitParse.parse_bits("#{client.rank || 1}", 3)
+
+    moderator =
+      if true_mod_status do
+        client.moderator
+      else
+        Map.get(client, :show_moderator, client.moderator)
+      end
 
     [
       if(client.in_game, do: 1, else: 0),
@@ -29,7 +36,7 @@ defmodule Teiserver.Protocols.Spring do
       r3,
       r2,
       r1,
-      if(client.moderator, do: 1, else: 0),
+      if(moderator, do: 1, else: 0),
       if(client.bot, do: 1, else: 0)
     ]
     |> Enum.reverse()
