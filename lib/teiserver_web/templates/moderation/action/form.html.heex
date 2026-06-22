@@ -58,7 +58,7 @@
   <div class="form-group my-4">
     <%= if @changeset.data.id do %>
       <a
-        href={Routes.moderation_action_path(@conn, :show, @changeset.data.id)}
+        href={~p"/moderation/action/#{@changeset.data.id}"}
         class="btn btn-secondary btn-outline"
       >
         Cancel

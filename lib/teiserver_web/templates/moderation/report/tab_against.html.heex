@@ -43,7 +43,7 @@
         <td>
           <%= if report.result_id do %>
             <a
-              href={Routes.moderation_action_path(@conn, :show, report.result_id)}
+              href={~p"/moderation/action/#{report.result_id}"}
               class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()} btn-block"}
             >
               {central_component("icon",

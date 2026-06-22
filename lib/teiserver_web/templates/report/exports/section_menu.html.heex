@@ -7,7 +7,7 @@
     active: @active,
     icon: Teiserver.Game.MatchRatingsExport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_exports_path(@conn, :show, "match_ratings")
+    url: ~p"/teiserver/reports/exports/match_ratings"
   )}
 <% end %>
 
@@ -18,7 +18,7 @@
     active: @active,
     icon: Teiserver.Game.PlayerRatingsExport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_exports_path(@conn, :show, "player_ratings")
+    url: ~p"/teiserver/reports/exports/player_ratings"
   )}
 <% end %>
 
@@ -29,7 +29,7 @@
     active: @active,
     icon: Teiserver.Game.RatingLogsExport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_exports_path(@conn, :show, "rating_logs")
+    url: ~p"/teiserver/reports/exports/rating_logs"
   )}
 <% end %>
 
@@ -40,7 +40,7 @@
     active: @active,
     icon: Teiserver.Game.MatchDataTableExport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_exports_path(@conn, :show, "match_datatable")
+    url: ~p"/teiserver/reports/exports/match_datatable"
   )}
 <% end %>
 
@@ -51,7 +51,7 @@
     active: @active,
     icon: Teiserver.Account.PlayerCountExport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_exports_path(@conn, :show, "player_count")
+    url: ~p"/teiserver/reports/exports/player_count"
   )}
 <% end %>
 
@@ -62,6 +62,6 @@
     active: @active,
     icon: Teiserver.Account.RetentionRateExport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_exports_path(@conn, :show, "retention_rate")
+    url: ~p"/teiserver/reports/exports/retention_rate"
   )}
 <% end %>

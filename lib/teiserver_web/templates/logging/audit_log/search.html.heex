@@ -15,7 +15,7 @@
         </div>
 
         <form
-          action={Routes.logging_audit_log_path(@conn, :search)}
+          action={~p"/logging/audit/search"}
           method="post"
           class="form-horizontal"
           id="search-box"

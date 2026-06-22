@@ -23,7 +23,7 @@
 
         {render(
           "form.html",
-          Map.put(assigns, :action, Routes.moderation_action_path(@conn, :update, @action))
+          Map.put(assigns, :action, ~p"/moderation/action/#{@action.id}")
         )}
 
         <hr />

@@ -11,13 +11,13 @@ defmodule TeiserverWeb.Logging.AuditLogControllerTest do
   end
 
   test "lists all entries on index", %{conn: conn} do
-    conn = get(conn, Routes.logging_audit_log_path(conn, :index))
+    conn = get(conn, ~p"/logging/audit")
     assert html_response(conn, 200) =~ "Audit logs"
   end
 
   test "searches logs", %{conn: conn, user: user} do
     conn =
-      post(conn, Routes.logging_audit_log_path(conn, :search),
+      post(conn, ~p"/logging/audit/search",
         search: %{
           name: "Test",
           action: "Bedrock object import",
@@ -30,7 +30,7 @@ defmodule TeiserverWeb.Logging.AuditLogControllerTest do
 
   test "searches logs (empty values)", %{conn: conn} do
     conn =
-      post(conn, Routes.logging_audit_log_path(conn, :search),
+      post(conn, ~p"/logging/audit/search",
         search: %{
           name: "",
           action: "All",
@@ -44,10 +44,10 @@ defmodule TeiserverWeb.Logging.AuditLogControllerTest do
   test "shows chosen resource", %{conn: conn} do
     # We need to call a path first because currently the conn has
     # no current_user assigned
-    conn = get(conn, Routes.logging_audit_log_path(conn, :index))
+    conn = get(conn, ~p"/logging/audit")
     audit_log = Helpers.add_audit_log(conn, "action", %{})
 
-    conn = get(conn, Routes.logging_audit_log_path(conn, :show, audit_log))
+    conn = get(conn, ~p"/logging/audit/#{audit_log.id}")
     assert html_response(conn, 200) =~ "Audit log ##{audit_log.id}"
   end
 end

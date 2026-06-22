@@ -15,7 +15,7 @@
       icon: Teiserver.Game.MatchRatingsExport.icon(),
       name: "match_ratings",
       text: "Match ratings",
-      link: Routes.ts_reports_exports_path(@conn, :show, "match_ratings")
+      link: ~p"/teiserver/reports/exports/match_ratings"
     )}
   <% end %>
 
@@ -25,7 +25,7 @@
       icon: Teiserver.Game.PlayerRatingsExport.icon(),
       name: "player_ratings",
       text: "Current ratings",
-      link: Routes.ts_reports_exports_path(@conn, :show, "player_ratings")
+      link: ~p"/teiserver/reports/exports/player_ratings"
     )}
   <% end %>
 
@@ -35,7 +35,7 @@
       icon: Teiserver.Game.RatingLogsExport.icon(),
       name: "player_ratings",
       text: "Rating logs",
-      link: Routes.ts_reports_exports_path(@conn, :show, "rating_logs")
+      link: ~p"/teiserver/reports/exports/rating_logs"
     )}
   <% end %>
 
@@ -45,7 +45,7 @@
       icon: Teiserver.Game.MatchDataTableExport.icon(),
       name: "match_datatable",
       text: "Match datatable",
-      link: Routes.ts_reports_exports_path(@conn, :show, "match_datatable")
+      link: ~p"/teiserver/reports/exports/match_datatable"
     )}
   <% end %>
 </div>
@@ -60,7 +60,7 @@
       icon: Teiserver.Account.PlayerCountExport.icon(),
       name: "player_count",
       text: "Player counts",
-      link: Routes.ts_reports_exports_path(@conn, :show, "player_count")
+      link: ~p"/teiserver/reports/exports/player_count"
     )}
   <% end %>
 
@@ -70,7 +70,7 @@
       icon: Teiserver.Account.RetentionRateExport.icon(),
       name: "retention_rate",
       text: "Retention",
-      link: Routes.ts_reports_exports_path(@conn, :show, "retention_rate")
+      link: ~p"/teiserver/reports/exports/retention_rate"
     )}
   <% end %>
 </div>

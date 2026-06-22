@@ -61,7 +61,7 @@
         <br /><br />
 
         <form
-          action={Routes.ts_reports_report_path(@conn, :show, "moderation_activity")}
+          action={~p"/teiserver/reports/show/moderation_activity"}
           method="post"
           class="form-horizontal"
         >

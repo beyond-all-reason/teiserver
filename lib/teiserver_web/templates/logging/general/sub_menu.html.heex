@@ -65,7 +65,7 @@
               name: "audit",
               label: "Audit",
               active: @active,
-              url: Routes.logging_audit_log_path(@conn, :index),
+              url: ~p"/logging/audit",
               icon: Teiserver.Logging.AuditLogLib.icon()
             )}
           <% end %>
