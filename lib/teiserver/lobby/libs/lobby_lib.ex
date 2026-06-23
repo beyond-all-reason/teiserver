@@ -605,7 +605,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec name_chars_valid?(String.t()) :: boolean
   def name_chars_valid?(name) do
-    case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, name) do
+    case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:()]+$/, name) do
       [_match] -> true
       _no_match -> false
     end
