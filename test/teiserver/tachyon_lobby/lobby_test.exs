@@ -11,7 +11,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   use Teiserver.DataCase
 
   import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until_nil: 1]
-  import LobbyProcess, only: [patch_merge: 2]
 
   @moduletag :tachyon
 
@@ -1959,40 +1958,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       %{bots: [%{host_user_id: @default_user_id, ai_short_name: "bot short name"}]} = t2
       assert not is_map_key(t1, :bots)
       assert not is_map_key(t2, :players)
-    end
-  end
-
-  # again, this should probably be exatracted in a more general module
-  describe "patch merge" do
-    test "update a simple (non map) value" do
-      assert patch_merge(%{key: "s1"}, %{key: "s2"}) == %{key: "s2"}
-
-      result = patch_merge(%{"string-key" => "s1"}, %{"string-key" => "s2"})
-      assert result == %{"string-key" => "s2"}
-    end
-
-    test "can add new keys" do
-      result = patch_merge(%{key: "foo"}, %{other: 2})
-      assert result == %{key: "foo", other: 2}
-    end
-
-    test "can delete keys when value is nil" do
-      result = patch_merge(%{foo: "fooval", bar: "barkey"}, %{bar: nil})
-      assert result == %{foo: "fooval"}
-    end
-
-    test "set map as value when new key" do
-      result = patch_merge(%{}, %{foo: %{key: "val"}})
-      assert result == %{foo: %{key: "val"}}
-    end
-
-    test "can recursively update nested maps" do
-      result =
-        patch_merge(%{foo: %{key: "base-key", foo: "bar"}}, %{
-          foo: %{key: 2, foo: nil, bar: "updated"}
-        })
-
-      assert result == %{foo: %{key: 2, bar: "updated"}}
     end
   end
 

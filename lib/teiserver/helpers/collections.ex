@@ -70,4 +70,18 @@ defmodule Teiserver.Helpers.Collections do
       {[x | rest1], [y | rest2]} -> zip_with_padding(rest1, rest2, padding, [{x, y} | acc])
     end
   end
+
+  @doc """
+  apply some updates onto a base map according to json merge patch semantics
+  """
+  @spec patch_merge(base :: map(), updates :: map()) :: map()
+  def patch_merge(base, updates) do
+    Enum.reduce(updates, base, fn {k, v}, m ->
+      cond do
+        v == nil -> Map.delete(m, k)
+        is_map(v) -> Map.update(m, k, v, &patch_merge(&1, v))
+        true -> Map.put(m, k, v)
+      end
+    end)
+  end
 end

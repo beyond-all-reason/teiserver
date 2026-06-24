@@ -88,7 +88,12 @@ defmodule Teiserver.Player.Session do
           user_subscriptions: MapSet.t(User.id()),
           battle: battle_state(),
           lobby: nil | %{id: TachyonLobby.id()},
-          lobby_list_subscription: nil | %{TachyonLobby.id() => integer()}
+          lobby_list_subscription:
+            nil
+            | %{
+                timer_ref: :timer.tref(),
+                lobbies: %{TachyonLobby.id() => %{counter: integer(), changes: map()}}
+              }
         }
 
   # TODO: would be better to have that as a db setting, perhaps passed as an
@@ -593,6 +598,13 @@ defmodule Teiserver.Player.Session do
   @spec unsubscribe_lobby_list(User.id()) :: :ok
   def unsubscribe_lobby_list(user_id) do
     user_id |> via_tuple() |> GenServer.call({:lobby, :unsubscribe_list})
+  end
+
+  @doc """
+  Used in test to force the batched updates to be sent without having to wait
+  """
+  def flush_lobby_list_updates(session_pid) do
+    send(session_pid, :flush_lobby_list_updates)
   end
 
   def restore_sessions do
@@ -1323,9 +1335,14 @@ defmodule Teiserver.Player.Session do
     if state.lobby_list_subscription == nil do
       list = TachyonLobby.subscribe_updates()
 
-      subscription_state =
-        Enum.map(list, fn {id, %LT.ListOverview{counter: counter}} -> {id, counter} end)
+      lobbies =
+        Enum.map(list, fn {id, %LT.ListOverview{counter: counter}} ->
+          {id, %{counter: counter, changes: %{}}}
+        end)
         |> Enum.into(%{})
+
+      {:ok, ref} = :timer.seconds(5) |> :timer.send_interval(:flush_lobby_list_updates)
+      subscription_state = %{timer_ref: ref, lobbies: lobbies}
 
       {:reply, {:ok, list}, %{state | lobby_list_subscription: subscription_state}}
     else
@@ -1336,7 +1353,13 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:lobby, :unsubscribe_list}, _from, state) do
     TachyonLobby.unsubscribe_updates()
-    {:reply, :ok, %{state | lobby_list_subscription: nil}}
+
+    if state.lobby_list_subscription != nil do
+      :timer.cancel(state.lobby_list_subscription.timer_ref)
+      {:reply, :ok, %{state | lobby_list_subscription: nil}}
+    else
+      {:reply, :ok, state}
+    end
   end
 
   @impl GenServer
@@ -1818,6 +1841,36 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
+  def handle_info(:flush_lobby_list_updates, state) when state.lobby_list_subscription == nil,
+    do: {:noreply, state}
+
+  def handle_info(:flush_lobby_list_updates, state) do
+    {lobbies, changes} =
+      Enum.reduce(state.lobby_list_subscription.lobbies, {%{}, %{}}, fn {lobby_id, data},
+                                                                        {lobbies, changes} ->
+        new_lobbies =
+          if data.changes == nil,
+            do: lobbies,
+            else: Map.put(lobbies, lobby_id, %{counter: data.counter, changes: %{}})
+
+        new_changes =
+          if data.changes == %{},
+            do: changes,
+            else: Map.put(changes, lobby_id, data.changes)
+
+        {new_lobbies, new_changes}
+      end)
+
+    if changes != %{} do
+      message = {:lobby_list, {:update_lobbies, changes}}
+      send_to_player!(message, state)
+    end
+
+    state = put_in(state.lobby_list_subscription.lobbies, lobbies)
+
+    {:noreply, state}
+  end
+
   def handle_info(
         %{
           topic: "teiserver_tachyonlobby_list",
@@ -1829,8 +1882,14 @@ defmodule Teiserver.Player.Session do
       {:noreply, state}
     else
       stale? =
-        is_map_key(ev, :counter) and is_map_key(state.lobby_list_subscription, lobby_id) and
-          state.lobby_list_subscription[lobby_id] >= ev.counter
+        with true <- ev.event != :remove_lobby,
+             lobby_state when lobby_state != nil <-
+               state.lobby_list_subscription.lobbies[lobby_id],
+             true <- lobby_state.counter >= ev.counter do
+          true
+        else
+          _nil_or_false -> false
+        end
 
       if stale?, do: {:noreply, state}, else: do_handle_lobby_list_event(ev, state)
     end
@@ -1838,25 +1897,25 @@ defmodule Teiserver.Player.Session do
 
   def do_handle_lobby_list_event(ev, state) do
     state =
-      if ev.event == :remove_lobby do
-        update_in(state.lobby_list_subscription, &Map.delete(&1, ev.lobby_id))
-      else
-        put_in(state, [:lobby_list_subscription, ev.lobby_id], ev.counter)
+      case ev do
+        %{event: :add_lobby, overview: %LT.ListOverview{} = overview} ->
+          initial = %{counter: ev.counter, changes: Map.from_struct(overview)}
+          put_in(state.lobby_list_subscription.lobbies[ev.lobby_id], initial)
+
+        %{event: :update_lobby, changes: changes} ->
+          update_in(state.lobby_list_subscription.lobbies[ev.lobby_id], fn data ->
+            %{counter: ev.counter, changes: Map.merge(data.changes, changes)}
+          end)
+
+        %{event: :remove_lobby, lobby_id: lobby_id} ->
+          put_in(state.lobby_list_subscription.lobbies[lobby_id], %{
+            counter: -1,
+            changes: nil
+          })
+
+        _unknown ->
+          raise "Unknow lobby_list event: #{inspect(ev.event)} -- #{inspect(ev)}"
       end
-
-    case ev.event do
-      :add_lobby ->
-        send_to_player!({:lobby_list, {:add_lobby, ev.lobby_id, ev.overview}}, state)
-
-      :update_lobby ->
-        send_to_player!({:lobby_list, {:update_lobby, ev.lobby_id, ev.changes}}, state)
-
-      :remove_lobby ->
-        send_to_player!({:lobby_list, {:remove_lobby, ev.lobby_id}}, state)
-
-      _unknown ->
-        raise "Unknow lobby_list event: #{inspect(ev.event)} -- #{inspect(ev)}"
-    end
 
     {:noreply, state}
   end
