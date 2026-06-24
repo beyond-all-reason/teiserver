@@ -1,48 +1,17 @@
 defmodule Teiserver.Autohost do
   @moduledoc false
-  alias Teiserver.Account.User
   alias Teiserver.Autohost.Session
   alias Teiserver.Autohost.SessionRegistry
   alias Teiserver.Autohost.TachyonHandler
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Bot.Bot
   alias Teiserver.BotQueries
   alias Teiserver.TachyonBattle
 
   @type id :: Teiserver.Bot.Bot.id()
-  @type reg_value :: SessionRegistry.reg_value()
 
-  @type start_script :: %{
-          required(:engine_version) => String.t(),
-          required(:game_name) => String.t(),
-          required(:map_name) => String.t(),
-          required(:start_pos_type) => :fixed | :random | :ingame | :beforegame,
-          required(:ally_teams) => [ally_team(), ...],
-          optional(:game_options) => %{String.t() => String.t()},
-          optional(:spectators) => [player()],
-          optional(:bots) => [bot()]
-        }
-
-  @type ally_team :: %{
-          teams: [team(), ...]
-        }
-
-  @type team :: %{
-          players: [player()]
-        }
-
-  @type player :: %{
-          user_id: User.id(),
-          name: String.t(),
-          password: String.t()
-        }
-
-  @type bot :: %{
-          host_user_id: User.id(),
-          name: String.t(),
-          ai_short_name: String.t(),
-          ai_version: String.t(),
-          ai_options: %{String.t() => term()}
-        }
+  @type ally_team :: AT.StartScript.ally_team()
+  @type team :: AT.StartScript.team()
 
   @type start_response :: Session.start_response()
 
@@ -65,17 +34,17 @@ defmodule Teiserver.Autohost do
   @doc """
   Returns the data associated with an autohost session
   """
-  @spec lookup_autohost(Bot.id()) :: {pid(), reg_value()} | nil
+  @spec lookup_autohost(Bot.id()) :: {pid(), AT.Overview.t()} | nil
   def lookup_autohost(bot_id) do
     SessionRegistry.lookup(bot_id)
   end
 
-  @spec lookup_autohost(Bot.id()) :: {pid(), reg_value()} | nil
+  @spec lookup_autohost(Bot.id()) :: {pid(), AT.Overview.t()} | nil
   def lookup_autohost_connection(bot_id) do
     Teiserver.Autohost.Registry.lookup(bot_id)
   end
 
-  @spec list() :: [reg_value()]
+  @spec list() :: [AT.Overview.t()]
   defdelegate list(), to: SessionRegistry
 
   @doc """
@@ -86,12 +55,12 @@ defmodule Teiserver.Autohost do
   def find_autohost(_params \\ %{}) do
     autohost_val =
       SessionRegistry.list()
-      |> Enum.find(fn %{max_battles: m, current_battles: c} -> m > c end)
+      |> Enum.find(fn %AT.Overview{max_battles: m, current_battles: c} -> m > c end)
 
-    if autohost_val == nil, do: nil, else: autohost_val[:id]
+    if autohost_val == nil, do: nil, else: autohost_val.id
   end
 
-  @spec start_battle(Bot.id(), TachyonBattle.id(), pid(), start_script()) ::
+  @spec start_battle(Bot.id(), TachyonBattle.id(), pid(), AT.StartScript.t()) ::
           {:ok, autohost_pid :: pid(), start_response()} | {:error, term()}
   defdelegate start_battle(bot_id, battle_id, battle_pid, start_script),
     to: Session

@@ -1,6 +1,7 @@
 defmodule Teiserver.TachyonLobby.LobbyTest do
   alias ExUnit.Callbacks
   alias Teiserver.AssetFixtures
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.KvStore
   alias Teiserver.Tachyon, as: TachyonLib
   alias Teiserver.TachyonLobby, as: Lobby
@@ -1890,7 +1891,10 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         mk_start_params([2, 2]) |> Lobby.create()
 
       start_script = LobbyProcess.get_start_script(id)
-      %{ally_teams: [%{teams: [%{players: [%{user_id: @default_user_id}]}]}]} = start_script
+
+      %AT.StartScript{
+        ally_teams: [%{teams: [%{players: [%AT.Player{user_id: @default_user_id}]}]}]
+      } = start_script
     end
 
     test "with a spec" do

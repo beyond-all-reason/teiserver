@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle.StartScriptTest do
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Battle
   alias Teiserver.Helpers.GeneralTestLib
 
@@ -8,14 +9,14 @@ defmodule Teiserver.Battle.StartScriptTest do
     user1 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     user2 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
-    start_script = %{
+    start_script = %AT.StartScript{
       game_name: "Beyond All Reason test-28379-33ba377",
       ally_teams: [
         %{
           teams: [
             %{
               players: [
-                %{
+                %AT.Player{
                   name: user1.name,
                   user_id: user1.id,
                   password: "AAAAAAA"
@@ -29,7 +30,7 @@ defmodule Teiserver.Battle.StartScriptTest do
           teams: [
             %{
               players: [
-                %{
+                %AT.Player{
                   name: user2.name,
                   user_id: user2.id,
                   password: "BBBBBBB"
@@ -61,14 +62,14 @@ defmodule Teiserver.Battle.StartScriptTest do
   test "test start script 1 vs bot" do
     user1 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
-    start_script = %{
+    start_script = %AT.StartScript{
       game_name: "Beyond All Reason test-28379-33ba377",
       ally_teams: [
         %{
           teams: [
             %{
               players: [
-                %{
+                %AT.Player{
                   name: user1.name,
                   user_id: user1.id,
                   password: "AAAAAAA"
