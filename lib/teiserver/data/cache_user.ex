@@ -518,7 +518,6 @@ defmodule Teiserver.CacheUser do
     msg_str = Enum.join(message_parts, "\n")
 
     sender_bot? = Auth.is_bot?(sender_id)
-    receiver_bot? = Auth.is_bot?(to_id)
     blacklisted? = sender_bot? == false and WordLib.blacklisted_phrase?(msg_str)
 
     allowed =
@@ -533,8 +532,8 @@ defmodule Teiserver.CacheUser do
     end
 
     if allowed do
-      # Persist but only if no bots are involved
-      if not receiver_bot? and not sender_bot? do
+      # Persist but only if messsages aren't sent by bots
+      if not sender_bot? do
         Chat.create_direct_message(%{
           to_id: to_id,
           from_id: sender_id,
