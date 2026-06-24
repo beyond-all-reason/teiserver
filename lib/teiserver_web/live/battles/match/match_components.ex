@@ -1,7 +1,25 @@
 defmodule TeiserverWeb.Battle.MatchComponents do
   @moduledoc false
+  alias Teiserver.Battle
   use TeiserverWeb, :component
   import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
+
+  defp build_download_link(nil), do: nil
+
+  defp build_download_link(game_id) do
+    url = Application.get_env(:teiserver, :replay)[:api_url] <> game_id
+
+    with {:ok, response} <- HTTPoison.get(url).body,
+         {:ok, json} <- Jason.decode(response) do
+      filename =
+        json["fileName"]
+        |> String.replace(" ", "%20")
+
+      Application.get_env(:teiserver, :replay)[:storage_url] <> filename
+    else
+      {:error, _message} -> nil
+    end
+  end
 
   @doc """
   <TeiserverWeb.Battle.MatchComponents.section_menu active={active} bsname={} />
@@ -13,6 +31,12 @@ defmodule TeiserverWeb.Battle.MatchComponents do
   attr :replay, :string, default: nil
 
   def section_menu(assigns) do
+    download_link =
+      Battle.get_match(assigns.match_id).game_id
+      |> build_download_link()
+
+    assign(assigns, :download_link, download_link)
+
     ~H"""
     <.section_menu_button
       bsname={@view_colour}
@@ -61,6 +85,18 @@ defmodule TeiserverWeb.Battle.MatchComponents do
         Chat
       </.section_menu_button>
     <% end %>
+
+    <div class="float-end">
+      <.section_menu_button
+        :if={@download_link != nil}
+        bsname={@view_colour}
+        icon={StylingHelper.icon(:export)}
+        active={false}
+        url={@download_link}
+      >
+        Download Replay
+      </.section_menu_button>
+    </div>
 
     <div class="float-end">
       <.section_menu_button

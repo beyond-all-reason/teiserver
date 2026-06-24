@@ -220,6 +220,18 @@ config :logger, :error_log, path: "#{log_root_path}/error.log"
 config :logger, :notice_log, path: "#{log_root_path}/notice.log"
 config :logger, :info_log, path: "#{log_root_path}/info.log"
 
+config :teiserver, TeiserverWeb,
+  api_url:
+    Teiserver.ConfigHelpers.get_env(
+      "BAR_LIVE_SERVICES_API_URL",
+      "https://api.bar-rts.com/replays/"
+    ),
+  storage_url:
+    Teiserver.ConfigHelpers.get_env(
+      "BAR_REPLAY_STORAGE_URL",
+      "https://storage.uk.cloud.ovh.net/v1/AUTH_10286efc0d334efd917d476d7183232e/BAR/demos/"
+    )
+
 enable_discord_bridge =
   Teiserver.ConfigHelpers.get_env("TEI_ENABLE_DISCORD_BRIDGE", false, :bool)
 
