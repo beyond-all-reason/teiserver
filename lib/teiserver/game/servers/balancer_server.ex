@@ -387,7 +387,7 @@ defmodule Teiserver.Game.BalancerServer do
     # :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")
 
     # Update the queue pids cache to point to this process
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.BalancerRegistry,
       lobby_id,
       lobby_id

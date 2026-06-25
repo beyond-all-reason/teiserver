@@ -22,7 +22,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec start_automod_server() :: :ok | {:failure, String.t()}
   def start_automod_server do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
+    case Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
       [{_pid, _val}] ->
         {:failure, "Already started"}
 
@@ -123,7 +123,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ServerRegistry,
       "AutomodServer",
       :automod
@@ -213,7 +213,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec get_automod_pid() :: pid() | nil
   def get_automod_pid do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
+    case Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
       [{pid, _val}] ->
         pid
 

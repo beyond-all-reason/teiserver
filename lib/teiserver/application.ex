@@ -71,15 +71,15 @@ defmodule Teiserver.Application do
 
         # Teiserver stuff
         # Global/singleton registries
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ThrottleRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ConsulRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.BalancerRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueWaitRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueMatchRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.ThrottleRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.ConsulRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.BalancerRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.QueueWaitRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.QueueMatchRegistry]},
 
         # These are for tracking the number of servers on the local node
         {Registry, keys: :duplicate, name: Teiserver.LocalPoolRegistry},

@@ -5,24 +5,24 @@ defmodule Teiserver.TachyonBattle.Registry do
   alias Teiserver.TachyonBattle.Types, as: T
 
   def child_spec(_arg) do
-    Supervisor.child_spec(Horde.Registry,
+    Supervisor.child_spec(Registry,
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}
     )
   end
 
   def start_link do
-    Horde.Registry.start_link(keys: :unique, name: __MODULE__)
+    Registry.start_link(keys: :unique, name: __MODULE__)
   end
 
   @spec via_tuple(T.id()) :: GenServer.name()
   def via_tuple(battle_id) do
-    {:via, Horde.Registry, {__MODULE__, battle_id}}
+    {:via, Registry, {__MODULE__, battle_id}}
   end
 
   @spec lookup(T.id()) :: pid() | nil
   def lookup(battle_id) do
-    case Horde.Registry.lookup(__MODULE__, battle_id) do
+    case Registry.lookup(__MODULE__, battle_id) do
       [{pid, _value}] -> pid
       _other -> nil
     end

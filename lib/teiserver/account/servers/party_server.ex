@@ -284,7 +284,7 @@ defmodule Teiserver.Account.PartyServer do
   @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(%{party: %{id: id} = party}) do
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.PartyRegistry,
       id,
       id

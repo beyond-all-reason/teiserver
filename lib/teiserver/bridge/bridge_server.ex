@@ -504,11 +504,11 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec get_bridge_pid() :: pid | nil
   def get_bridge_pid do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "BridgeServer") do
+    case Registry.lookup(Teiserver.ServerRegistry, "BridgeServer") do
       [{pid, _data}] -> pid
       _x -> nil
     end
   end
 
-  defp via_tuple, do: {:via, Horde.Registry, {Teiserver.ServerRegistry, "BridgeServer"}}
+  defp via_tuple, do: {:via, Registry, {Teiserver.ServerRegistry, "BridgeServer"}}
 end
