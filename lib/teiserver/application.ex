@@ -159,7 +159,8 @@ defmodule Teiserver.Application do
         TeiserverWeb.Endpoint,
 
         # Start the ranch TCP listener process for the Spring protocol
-        spring_server_child(Teiserver.RawSpringTcpServer, :tcp),
+        spring_server_child(Teiserver.RawSpringTcpServer, :tcp)
+        |> IO.inspect(label: "tcp child spec?"),
         # Start the ranch TLS listener process for the Spring protocol
         spring_server_child(Teiserver.SSLSpringTcpServer, :tls),
 
@@ -239,7 +240,7 @@ defmodule Teiserver.Application do
       Application.get_env(:teiserver, Teiserver.SpringTcpServer)
       |> Keyword.fetch!(:listeners)
 
-    if Keyword.get(listeners, :disable_startup) != true do
+    if Application.get_env(:teiserver, Teiserver.SpringTcpServer)[:disable_startup] != true do
       listeners
       |> Keyword.get(transport_type, [])
       |> spring_server_listener_child(ref, transport_type)
@@ -247,16 +248,16 @@ defmodule Teiserver.Application do
   end
 
   # When the listener is not configured we dont start the listener
-  defp spring_server_listener_child(listener_opts, _ref, _transport)
-       when listener_opts in [nil, false, []],
-       do: nil
+  def spring_server_listener_child(listener_opts, _ref, _transport)
+      when listener_opts in [nil, false, []],
+      do: nil
 
-  defp spring_server_listener_child(listener_opts, ref, :tcp) when is_list(listener_opts) do
+  def spring_server_listener_child(listener_opts, ref, :tcp) when is_list(listener_opts) do
     listener_opts = Map.new(listener_opts)
     :ranch.child_spec(ref, :ranch_tcp, listener_opts, Teiserver.SpringTcpServer, [])
   end
 
-  defp spring_server_listener_child(listener_opts, ref, :tls) when is_list(listener_opts) do
+  def spring_server_listener_child(listener_opts, ref, :tls) when is_list(listener_opts) do
     listener_opts = Map.new(listener_opts)
     :ranch.child_spec(ref, :ranch_ssl, listener_opts, Teiserver.SpringTcpServer, [])
   end
