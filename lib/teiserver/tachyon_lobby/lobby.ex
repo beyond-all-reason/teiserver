@@ -1385,8 +1385,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> update_in([:data, Access.key!(:monitors)], &MC.demonitor_by_val(&1, {:user, p_id}))
       |> update_in([:updates], &[ev | &1])
 
-    aggregate = process_event({:cast_vote, p_id, :abstain}, aggregate)
     aggregate = maybe_cancel_kick_vote(p_id, aggregate)
+    aggregate = process_event({:cast_vote, p_id, :abstain}, aggregate)
     process_event({:update_boss, :remove, p_id}, aggregate)
   end
 
@@ -1397,8 +1397,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
       |> update_in([:data, Access.key!(:monitors)], &MC.demonitor_by_val(&1, {:user, s_id}))
       |> update_in([:updates], &[ev | &1])
 
-    aggregate = process_event({:cast_vote, s_id, :abstain}, aggregate)
     aggregate = maybe_cancel_kick_vote(s_id, aggregate)
+    aggregate = process_event({:cast_vote, s_id, :abstain}, aggregate)
     process_event({:update_boss, :remove, s_id}, aggregate)
   end
 
@@ -1712,11 +1712,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   defp maybe_cancel_kick_vote(leaving_user_id, aggregate) do
     case aggregate.data.current_vote do
-      nil ->
-        aggregate
-
       %{action: {:kickban, ^leaving_user_id, nil}} ->
-        process_event({:vote_ended, DateTime.utc_now(), :failed}, aggregate)
+        process_event({:vote_ended, DateTime.utc_now(), :cancelled}, aggregate)
 
       _other ->
         aggregate

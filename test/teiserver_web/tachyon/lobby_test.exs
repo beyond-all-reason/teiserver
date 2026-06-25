@@ -586,6 +586,10 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       %{"status" => "success"} = Tachyon.lobby_kickban(ctx[:client], ctx2[:user].id)
 
+      kicked_user_id = to_string(ctx2[:user].id)
+      %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
+      assert updated["spectators"][kicked_user_id] == nil
+
       %{"commandId" => "lobby/left", "data" => data} = Tachyon.recv_message!(ctx2[:client])
       assert data["reason"] == "kicked"
     end

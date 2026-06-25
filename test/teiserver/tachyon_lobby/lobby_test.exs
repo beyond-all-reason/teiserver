@@ -1765,7 +1765,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.kickban(id, @default_user_id, "user2")
 
       assert_receive {:lobby, ^id, {:left, "kicked", nil}}
-      refute_receive {:lobby, ^id, {:updated, _}}, 100
+      refute_receive {:lobby, ^id, {:updated, _}}, 30
     end
 
     test "player can rejoin lobby" do
@@ -1860,12 +1860,42 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       :ok = Lobby.vote_submit(id, "user3", {vote.id, :yes})
 
+      assert_receive {:lobby, ^id, {:updated, %{players: %{"user2" => nil}}}}
       assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
       assert_receive {:lobby, ^id, {:vote_ended, _vote_id, :passed}}
 
       {:ok, details} = LobbyProcess.get_details(id)
       refute is_map_key(details.players, "user2")
       refute is_map_key(details.spectators, "user2")
+    end
+
+    test "kickban vote is cancelled when target leaves" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([3, 3])
+        |> Lobby.create()
+
+      {:ok, sink_pid2} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, sink_pid3} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid2)
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user3"), sink_pid3)
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 0)
+      {:ok, _details} = Lobby.join_ally_team(id, "user3", 0)
+      drain_msg_queue()
+
+      :ok = Lobby.kickban(id, @default_user_id, "user2")
+
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      assert vote.action == {:kickban, "user2", nil}
+
+      :ok = Lobby.leave(id, "user2")
+
+      assert_receive {
+        :lobby,
+        ^id,
+        {:updated, %{current_vote: nil, players: %{"user2" => nil}}}
+      }
+
+      assert_receive {:lobby, ^id, {:vote_ended, _vote_id, :cancelled}}
     end
 
     test "expired ban allows rejoin lobby" do
