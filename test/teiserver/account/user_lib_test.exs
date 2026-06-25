@@ -1,6 +1,8 @@
 defmodule Teiserver.Account.UserLibTest do
   @moduledoc false
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
+  alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
   alias Teiserver.AccountFixtures
 
@@ -90,6 +92,56 @@ defmodule Teiserver.Account.UserLibTest do
                "cpu" => "",
                "os" => ""
              }) == []
+    end
+  end
+
+  describe "smurf" do
+    test "valid link" do
+      %User{} = moderator = AccountFixtures.user_fixture()
+      {:ok, %User{} = moderator} = Auth.add_roles(moderator.id, ["Moderator"])
+      %User{} = origin = AccountFixtures.user_fixture()
+      %User{} = smurf = AccountFixtures.user_fixture()
+
+      result = UserLib.mark_user_as_smurf_of(moderator, %{smurf: smurf, origin: origin})
+      assert result == :ok
+
+      origin = Account.get_user!(origin.id)
+      smurf = Account.get_user!(smurf.id)
+
+      assert is_nil(origin.smurf_of_id)
+      assert smurf.smurf_of_id == origin.id
+    end
+
+    test "no access" do
+      %User{} = moderator = AccountFixtures.user_fixture()
+      %User{} = origin = AccountFixtures.user_fixture()
+      %User{} = smurf = AccountFixtures.user_fixture()
+
+      result = UserLib.mark_user_as_smurf_of(moderator, %{smurf: smurf, origin: origin})
+      assert result == {:error, "No access to one or both users"}
+    end
+
+    test "duplicate user" do
+      # If A is a smurf of B, B cannot be made a smurf of A
+      %User{} = moderator = AccountFixtures.user_fixture()
+      {:ok, %User{} = moderator} = Auth.add_roles(moderator.id, ["Moderator"])
+      %User{} = origin = AccountFixtures.user_fixture()
+
+      result = UserLib.mark_user_as_smurf_of(moderator, %{smurf: origin, origin: origin})
+      assert result == {:error, "Invalid combination of users selected"}
+    end
+
+    test "circular link" do
+      # If A is a smurf of B, B cannot be made a smurf of A
+      %User{} = moderator = AccountFixtures.user_fixture()
+      {:ok, %User{} = moderator} = Auth.add_roles(moderator.id, ["Moderator"])
+      %User{} = origin = AccountFixtures.user_fixture()
+      %User{} = smurf = AccountFixtures.user_fixture()
+
+      {:ok, origin} = Account.script_update_user(origin, %{smurf_of_id: smurf.id})
+
+      result = UserLib.mark_user_as_smurf_of(moderator, %{smurf: smurf, origin: origin})
+      assert result == {:error, "Invalid combination of users selected"}
     end
   end
 

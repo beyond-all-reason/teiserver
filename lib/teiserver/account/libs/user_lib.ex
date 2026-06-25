@@ -475,11 +475,12 @@ defmodule Teiserver.Account.UserLib do
     with true <- smurf.id != origin.id,
          true <- moderator.id != smurf.id,
          true <- moderator.id != origin.id,
+         true <- origin.smurf_of_id != smurf.id,
          {true, _roles} <- has_access(smurf, moderator),
          {true, _roles} <- has_access(origin, moderator) do
       do_mark_user_as_smurf_of(moderator.id, %{smurf: %User{} = smurf, origin: %User{} = origin})
     else
-      false -> {:error, "Smurf, Origin and Moderator must all be different people"}
+      false -> {:error, "Invalid combination of users selected"}
       {false, :no_access} -> {:error, "No access to one or both users"}
       {false, :not_found} -> {:error, "Unable to find one or more of the users"}
     end
