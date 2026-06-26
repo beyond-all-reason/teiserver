@@ -167,7 +167,11 @@ defmodule TeiserverWeb.NavComponents do
     <nav>
       <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
         <li>
+          <%!--
+            Setting this to false for now as it will not correctly select dark CSS in some cases
+          --%>
           <button
+            :if={false}
             class="flex p-2 cursor-pointer [[data-theme=system]_&]:bg-blue-900"
             phx-click={JS.dispatch("phx:set-theme")}
             data-phx-theme="system"
@@ -222,14 +226,14 @@ defmodule TeiserverWeb.NavComponents do
 
           <li
             :if={allow_any?(@current_user, ["Contributor", "Overwatch"])}
-            class={[@active == "teiserver_reports" && "menu-active"]}
+            class={[@active == "reports" && "menu-active"]}
           >
             <.link href={~p"/teiserver/reports"}>Reports</.link>
           </li>
 
           <li
             :if={allow?(@current_user, "Moderator")}
-            class={[@active == "teiserver_user" && "menu-active"]}
+            class={[@active == "users" && "menu-active"]}
           >
             <.link href={~p"/teiserver/admin/user"}>Users</.link>
           </li>

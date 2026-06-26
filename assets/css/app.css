@@ -102,7 +102,14 @@
 }
 
 /* This file is for your main application CSS */
-/* This file is for your main application CSS */
 .menu-active {
   @apply bg-primary text-primary-content rounded-md;
+}
+
+.content-div {
+  @apply bg-gray-200 dark:bg-gray-800 rounded-lg;
+}
+
+.input[type="text"] {
+  @apply text-gray-800 dark:text-gray-100;
 }

@@ -2,19 +2,13 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   @moduledoc """
   Designed to be used as part of a form as an input. When compressed it will show a text field but when in selection mode it will expand to allow for searching of users.
 
-  <.live_component module={TeiserverWeb.LiveComponents.UserPicker}
-    id="user-picker"
-    name="user-picker"
-    label="User search:"
-    field={@form[:email]}
-  />
+  It will submit the ID value of the selected user but will display the ID and name of the user.
 
   <.live_component
       module={TeiserverWeb.LiveComponents.UserPicker}
       id="user-picker"
-      name="user-picker"
-      label="User search:"
-      value={}
+      field={@form[:smurf_user_id]}
+      label="User to link to:"
     />
   """
   alias Teiserver.Account.User
@@ -27,6 +21,7 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   import Ecto.Query, only: [limit: 2]
 
   @display_limit 10
+  @debounce 250
 
   attr :id, :any
 
@@ -37,55 +32,62 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   attr :name, :any
   attr :label, :any, default: nil
   attr :value, User, default: nil
+  attr :ignore_ids, :list, default: []
   attr :search_term, :string, default: ""
 
-  def render(%{field: nil} = assigns) do
-    ~H"""
-    <div>
-      <CoreComponents.label :if={@label} for={@id}>{@label}</CoreComponents.label>
-      <div class="input-group">
-        <span class="input-group-prepend">
-          <span
-            class="input-group-addon btn-primary btn-outline btn"
-            phx-click="show-picker"
-            phx-target={@myself}
-          >
-            <i class="fa-solid fa-fw fa-magnifying-glass"></i>
-          </span>
-        </span>
-        <.input
-          name={@name}
-          value={@input_value}
-          disabled="disabled"
-          placeholder=""
-        />
-
-        <.picker_form :if={@show_form?} search_term={@search_term} myself={@myself} users={@users} />
-      </div>
-    </div>
-    """
-  end
-
-  # Render with a field, need to have the value we show be useful to the user
-  # but the value submitted be the ID
   def render(assigns) do
     ~H"""
     <div>
-      Not implemented yet
+      <div>
+        <CoreComponents.label :if={@label} for={@id}>{@label}</CoreComponents.label>
+
+        <div class="w-full inline-flex border rounded-lg">
+          <div
+            class="w-15 text-center pt-3 bg-green-400 text-green-900 dark:bg-green-800 dark:text-green-50 cursor-pointer rounded-l-lg user-picker-search-button"
+            phx-click={
+              JS.push("show-picker")
+              |> JS.toggle(to: "##{@uniq_id}-picker-form")
+              |> JS.focus(to: "##{@uniq_id}-search-input")
+            }
+            phx-target={@myself}
+          >
+            <i class="fa-solid fa-lg fa-fw fa-magnifying-glass"></i>
+          </div>
+
+          <.input_tw
+            name="none"
+            value={@shown_value}
+            placeholder="Click green button to search"
+          />
+          <.input_tw
+            field={@field}
+            value={@actual_value}
+            type="hidden"
+          />
+        </div>
+
+        <.picker_form
+          show={@show_form?}
+          search_term={@search_term}
+          myself={@myself}
+          users={@users}
+          uniq_id={@uniq_id}
+        />
+      </div>
     </div>
     """
   end
 
   def mount(socket) do
     socket
-    |> assign(users: [], show_form?: false)
+    |> assign(users: [], show_form?: false, uniq_id: generate_id(), ignore_ids: [])
     |> ok()
   end
 
   def update(assigns, socket) do
     socket
     |> assign(assigns)
-    |> update_input_value()
+    |> update_input_values()
     |> update_search()
     |> ok()
   end
@@ -117,34 +119,57 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
       |> Enum.find(fn user -> user.id == user_id end)
 
     socket
-    |> assign(value: user, show_form?: false)
-    |> update_input_value()
+    |> assign(value: user, show_form?: false, users: [])
+    |> update_input_values()
     |> noreply()
   end
 
-  defp update_input_value(%{assigns: assigns} = socket) do
-    input_value =
+  # We use this to allow us to have multiple pickers on the same page
+  # and their IDs won't overlap
+  defp generate_id do
+    alphabet = ~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+    1..20
+    |> Enum.map(fn _idx -> Enum.random(alphabet) end)
+    |> List.to_string()
+  end
+
+  defp update_input_values(%{assigns: assigns} = socket) do
+    shown_value =
       case assigns[:value] do
         nil -> nil
         %User{id: id, name: name} -> "##{id} - #{name}"
       end
 
+    actual_value =
+      case assigns[:value] do
+        nil -> nil
+        %User{id: id} -> id
+      end
+
     socket
-    |> assign(input_value: input_value)
+    |> assign(shown_value: shown_value, actual_value: actual_value)
   end
 
-  defp update_search(%{assigns: %{search_term: raw_search_term}} = socket) do
+  defp update_search(
+         %{
+           assigns: %{
+             search_term: raw_search_term,
+             ignore_ids: ignore_ids
+           }
+         } = socket
+       ) do
     search_term = String.trim(raw_search_term)
 
-    found_user = search_by_id(search_term)
-    exact_matches = search_for_exact_name_match(search_term)
+    found_user = search_by_id(search_term, ignore_ids)
+    exact_matches = search_for_exact_name_match(search_term, ignore_ids)
 
     # If we found a user through ID search we want to put that at the front
     # of the exact matches
     exact_matches = Enum.reject([found_user | exact_matches], &is_nil(&1))
     found_ids = Enum.map(exact_matches, & &1.id)
 
-    users = search_by_name_like(search_term, found_ids)
+    users = search_by_name_like(search_term, found_ids ++ ignore_ids)
 
     socket
     |> assign(users: exact_matches ++ users)
@@ -153,13 +178,14 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   # No search term
   defp update_search(socket), do: socket
 
-  defp search_by_id(""), do: nil
+  defp search_by_id("", _ignore_ids), do: nil
 
-  defp search_by_id(search_term) do
+  defp search_by_id(search_term, ignore_ids) do
     case Integer.parse(search_term) do
       {number, _rem} ->
         UserQueries.users()
         |> UserQueries.where_id(number)
+        |> UserQueries.where_id_not_in(ignore_ids)
         |> limit(1)
         |> Repo.one()
 
@@ -169,46 +195,60 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   end
 
   # Case sensitive name match
-  defp search_for_exact_name_match(""), do: []
+  defp search_for_exact_name_match("", _ignore_ids), do: []
 
-  defp search_for_exact_name_match(search_term) do
+  defp search_for_exact_name_match(search_term, ignore_ids) do
     UserQueries.users()
     |> UserQueries.where_name(search_term)
+    |> UserQueries.where_id_not_in(ignore_ids)
     |> Repo.all()
   end
 
-  defp search_by_name_like("", _ids), do: []
+  defp search_by_name_like("", _ignore_ids), do: []
 
-  defp search_by_name_like(search_term, found_ids) do
+  defp search_by_name_like(search_term, ignore_ids) do
     # We display at most N users, exact matches always come first
-    query_limit = @display_limit - Enum.count(found_ids)
+    query_limit = @display_limit - Enum.count(ignore_ids)
 
     UserQueries.users()
     |> UserQueries.where_name_like(search_term)
-    |> UserQueries.where_id_not_in(found_ids)
+    |> UserQueries.where_id_not_in(ignore_ids)
     |> UserQueries.order_by_name()
     |> limit(^query_limit)
     |> Repo.all()
   end
 
   @doc """
-  <.picker_form name={"name"} />
+  <.picker_form
+    show={@show_form?}
+    search_term={@search_term}
+    myself={@myself}
+    users={@users}
+    uniq_id={@uniq_id}
+  />
   """
+  attr :uniq_id, :string
   attr :search_term, :string, default: ""
   attr :myself, :any, required: true
+  attr :show, :boolean, required: false
   attr :users, :list, default: []
 
   def picker_form(assigns) do
+    assigns =
+      assigns
+      |> assign(debounce: @debounce)
+
     ~H"""
-    <.modal id="user-picker-search" on_cancel={JS.push("hide-picker", target: @myself)}>
-      Search for user by name or ID
+    <div class={["mt-2", not @show && "hidden"]} id={"#{@uniq_id}-picker-form"}>
+      Search for user by name or ID, search will take place as soon as you stop typing
       <.input
-        id="user-picker-search-input"
+        id={"#{@uniq_id}-search-input"}
         name="user-search-term"
         value={@search_term}
         phx-keyup="update-search"
-        phx-debounce="500"
+        phx-debounce={@debounce}
         phx-target={@myself}
+        class="w-full input user-picker-search-input"
         placeholder="Search by name"
       />
 
@@ -216,12 +256,15 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
         :if={not Enum.empty?(@users)}
         id="users-table"
         rows={@users}
-        table_class="table-sm table-hover"
+        table_class="table-sm table-hover user-picker-search-results"
       >
         <:col :let={user} label="Name">
           <div
             class="cursor-pointer"
-            phx-click="select-user"
+            phx-click={
+              JS.push("select-user", value: %{user_id: to_string(user.id)})
+              |> JS.toggle(to: "##{@uniq_id}-picker-form")
+            }
             phx-value-user_id={user.id}
             phx-target={@myself}
           >
@@ -230,7 +273,7 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
           </div>
         </:col>
       </.table>
-    </.modal>
+    </div>
     """
   end
 end

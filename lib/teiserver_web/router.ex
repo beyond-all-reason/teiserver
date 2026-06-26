@@ -523,11 +523,12 @@ defmodule TeiserverWeb.Router do
   end
 
   scope "/moderation", TeiserverWeb.Moderation, as: :moderation do
-    pipe_through([:browser, :app_layout, :protected])
+    pipe_through([:browser, :app_layout, :protected, :tailwind])
 
     live_session :actions,
-      layout: {TeiserverWeb.Layouts, :moderation},
+      layout: {TeiserverWeb.Layouts, :moderation_tw},
       on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "users"}}},
         {UserAuthentication, :ensure_authenticated},
         {UserAuthentication, {:authorise, "Moderator"}}
       ] do

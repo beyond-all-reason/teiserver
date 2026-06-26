@@ -2,22 +2,29 @@
   Smurf link user
 </.header>
 
-<div class="alert alert-warning">
-  This page is incomplete, it currently exists to show and test the new user-picker. Please provide feedback on it to the Server team on the discord.
-</div>
-
-<div class="p-4 mb-4" style="background-color: rgba(150, 150, 150, 0.3)">
+<div class="p-4 mb-4 content-div">
   <.header>
-    Marking {@user.name} as a smurf of:
+    Marking <strong>{@user.name}</strong> as a smurf of:
   </.header>
 
-  <.live_component
-    module={TeiserverWeb.LiveComponents.UserPicker}
-    id="user-picker"
-    name="user-picker"
-    label="User to link to:"
-    value={}
-  />
+  <.simple_form
+    for={@form}
+    id="smurf-link-form"
+    phx-change="validate"
+    phx-submit="save"
+  >
+    <.live_component
+      module={TeiserverWeb.LiveComponents.UserPicker}
+      id="user-picker"
+      field={@form[:smurf_user_id]}
+      ignore_ids={[@current_user.id, @user.id]}
+      label="User to link to:"
+    />
+
+    <:actions>
+      <.button phx-disable-with="Saving...">Add smurf link</.button>
+    </:actions>
+  </.simple_form>
 </div>
 
-<.back navigate={~p"/moderation"}>Back to moderation</.back>
+<.back navigate={~p"/teiserver/admin/user/#{@user.id}"}>Back to {@user.name}</.back>
