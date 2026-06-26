@@ -101,7 +101,9 @@ defmodule Teiserver.TachyonLobby do
 
   @type player_join_data :: LT.PlayerJoinData.t()
   @spec join(id(), player_join_data(), pid()) ::
-          {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, reason :: term()}
+          {:ok, lobby_pid :: pid(), LT.Details.t()}
+          | {:error, :banned, ban_until :: DateTime.t()}
+          | {:error, reason :: term()}
   defdelegate join(lobby_id, join_data, pid \\ self()), to: Lobby
 
   @spec spectate(id(), User.id()) :: :ok | {:error, :invalid_lobby | :not_in_lobby}

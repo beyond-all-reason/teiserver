@@ -645,6 +645,19 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
+  def lobby_kickban(client, user_id, ban_until \\ nil) do
+    data = %{userId: to_string(user_id)}
+
+    data =
+      if ban_until,
+        do: Map.put(data, :banUntil, DateTime.to_unix(ban_until, :microsecond)),
+        else: data
+
+    :ok = send_request(client, "lobby/kickban", data)
+    {:ok, resp} = recv_message(client)
+    resp
+  end
+
   def lobby_update_client_status(client, update_data) do
     :ok = send_request(client, "lobby/updateClientStatus", update_data)
     {:ok, resp} = recv_message(client)
