@@ -55,6 +55,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     end
 
     # https://github.com/beyond-all-reason/teiserver/actions/runs/27750791250/job/82100476908?pr=1302
+    # https://github.com/beyond-all-reason/teiserver/actions/runs/28329652599/job/83925508633?pr=1317
+    @tag :needs_attention
     test "chat message is sent when provided name was invalid", %{host: host, lobby_id: lobby_id} do
       name = "="
       channel = "teiserver_lobby_chat:#{lobby_id}"
