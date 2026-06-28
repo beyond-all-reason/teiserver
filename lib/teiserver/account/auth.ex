@@ -3,6 +3,8 @@ defmodule Teiserver.Account.Auth do
 
   alias Teiserver.Account
   alias Teiserver.Account.User
+  alias Teiserver.CacheUser
+  alias Teiserver.General.RateLimit
   import Teiserver.Account.AuthLib, only: [allow?: 2]
   @behaviour Bodyguard.Policy
 
@@ -151,6 +153,21 @@ defmodule Teiserver.Account.Auth do
       |> Enum.reject(fn r -> Enum.member?(removed_roles, r) end)
 
     Account.script_update_user(user, %{roles: new_roles})
+  end
+
+  @doc """
+  Performs a rate-limit check for a login attempt
+  """
+  @spec can_login?(User.t() | CacheUser.t() | map()) :: boolean()
+  def can_login?(%{id: id}) do
+    key = "failed-login:#{id}"
+    scale = :timer.minutes(1)
+    limit = 4
+
+    case RateLimit.hit(key, scale, limit) do
+      {:allow, _current_count} -> true
+      {:deny, _ms_until_next_window} -> false
+    end
   end
 end
 
