@@ -216,6 +216,11 @@ end
 
 log_root_path = Teiserver.ConfigHelpers.get_env("TEI_LOG_ROOT_PATH", "/tmp/teiserver")
 
+case System.get_env("TEI_LOG_LEVEL") do
+  nil -> nil
+  val -> config :logger, :level, String.to_existing_atom(val)
+end
+
 config :logger, :error_log, path: "#{log_root_path}/error.log"
 config :logger, :notice_log, path: "#{log_root_path}/notice.log"
 config :logger, :info_log, path: "#{log_root_path}/info.log"
