@@ -31,6 +31,9 @@ jobs:
         version-type: "strict"
         version-file: "mise.toml"
 
+    - name: Pin hex to previous version
+      run: mix local.hex 2.4.2 --force
+
     - name: Cache dependencies
       id: cache-deps
       uses: actions/cache@v4
