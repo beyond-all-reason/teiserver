@@ -367,7 +367,16 @@ defmodule Teiserver.Account.UserLib do
         {:error, "Invalid credentials"}
 
       user ->
-        authenticate_user(conn, user, plain_text_password)
+        if Auth.can_login?(user) do
+          authenticate_user(conn, user, plain_text_password)
+        else
+          :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{
+            reason: :rate_limited,
+            user_id: user.id
+          })
+
+          {:error, "Rate limit"}
+        end
     end
   end
 

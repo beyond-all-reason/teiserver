@@ -116,6 +116,7 @@ defmodule Teiserver.MixProject do
        ref: "cde84a5921ee8b7a8545997c904f657660e210e0",
        override: true},
       {:ex_ulid, "~> 0.1.0"},
+      {:hammer, "~> 7.0"},
       {:mock, "~> 0.3.0", only: :test},
       # Provides a DSL on top of Ecto.Schema to define schemas with typespecs without all the boilerplate code.
       {:typed_ecto_schema, "~> 0.4.3", runtime: false},

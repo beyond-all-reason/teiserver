@@ -699,6 +699,10 @@ defmodule Teiserver.CacheUser do
     Config.get_site_config_cache("system.User limit") - client_count
   end
 
+  @doc """
+  This is purely used for the teiserver_test_lib async_auth_setup function
+  TODO: Remove this function and create something more appropriate for the test
+  """
   @spec try_login(String.t(), String.t(), String.t(), String.t()) ::
           {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), User.id()}
   def try_login(token, ip, lobby, lobby_hash) do
@@ -824,6 +828,15 @@ defmodule Teiserver.CacheUser do
 
           Enum.member?(["", "0", nil], lobby_hash) == true and not Auth.is_bot?(db_user) ->
             {:error, "LobbyHash/UserID missing in login"}
+
+          # Rate limited?
+          Auth.can_login?(user) == false ->
+            :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{
+              reason: :rate_limited,
+              user_id: user.id
+            })
+
+            {:error, "Flood protection"}
 
           Account.verify_md5_password(md5_password, db_user.password) == false ->
             if String.contains?(username, "@") do

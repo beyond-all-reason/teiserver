@@ -67,6 +67,7 @@ defmodule Teiserver.Application do
         Teiserver.MetadataCache,
         concache_sup(:application_temp_cache),
         concache_sup(:config_user_cache),
+        Teiserver.General.RateLimit,
 
         # Teiserver stuff
         # Global/singleton registries
