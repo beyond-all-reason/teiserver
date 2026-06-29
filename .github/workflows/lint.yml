@@ -24,18 +24,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Read Elixir and Erlang versions from mise.toml
-      id: versions
-      run: |
-        echo "elixir=$(sed -n 's|elixir = \"\(.*\)\"|\1|p' mise.toml)" >> "$GITHUB_OUTPUT"
-        echo "erlang=$(sed -n 's|erlang = \"\(.*\)\"|\1|p' mise.toml)" >> "$GITHUB_OUTPUT"
-
     - name: Setup Elixir and Erlang
       uses: erlef/setup-beam@v1
       id: setup-beam
       with:
-        otp-version: ${{ steps.versions.outputs.erlang }}
-        elixir-version: ${{ steps.versions.outputs.elixir }}
+        version-type: "strict"
+        version-file: "mise.toml"
 
     - name: Cache dependencies
       id: cache-deps
