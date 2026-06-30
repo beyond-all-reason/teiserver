@@ -826,7 +826,7 @@ defmodule TeiserverWeb.Admin.UserController do
     origin_user = Account.get_user!(origin_id)
 
     result =
-      UserLib.mark_user_as_smurf_of(conn.assigns.current_user.id, %{
+      UserLib.mark_user_as_smurf_of(conn.assigns.current_user, %{
         smurf: smurf_user,
         origin: origin_user
       })
