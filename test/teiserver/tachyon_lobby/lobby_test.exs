@@ -1860,8 +1860,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       :ok = Lobby.vote_submit(id, "user3", {vote.id, :yes})
 
-      assert_receive {:lobby, ^id, {:updated, %{players: %{"user2" => nil}}}}
-      assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
+      assert_receive {:lobby, ^id, {:updated, %{players: %{"user2" => nil}, current_vote: nil}}}
       assert_receive {:lobby, ^id, {:vote_ended, _vote_id, :passed}}
 
       {:ok, details} = LobbyProcess.get_details(id)
