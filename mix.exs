@@ -175,7 +175,8 @@ defmodule Teiserver.MixProject do
       {:req, "~> 0.6.2"},
       {:nimble_totp, "~> 1.0"},
       {:eqrcode, "~> 0.2.1"},
-      {:recon, "~> 2.5.6"}
+      {:recon, "~> 2.5.6"},
+      {:al_check, "~> 0.1.25"}
     ]
   end
 

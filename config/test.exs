@@ -1,14 +1,18 @@
+alias Teiserver.ConfigHelpers
+
 import Config
 
 # This makes anything in our tests involving user passwords (creating or logging in) much faster
 config :argon2_elixir, t_cost: 1, m_cost: 8
 
+partition = System.get_env("MIX_TEST_PARTITION", "0") |> String.to_integer()
+partition_port = partition * 100
+# <> partition
+database_url = "postgresql://teiserver_test:123456789@localhost:5432/teiserver_test"
+
 # Configure your database
 config :teiserver, Teiserver.Repo,
-  username: "teiserver_test",
-  password: "123456789",
-  database: "teiserver_test",
-  hostname: "localhost",
+  url: database_url,
   queue_target: 5000,
   queue_interval: 100_000,
   pool: Ecto.Adapters.SQL.Sandbox,
@@ -49,16 +53,24 @@ config :teiserver, DiscordBridgeBot,
     {"bridge_test_room", nil}
   ]
 
+raw_http_port = System.get_env("TEISERVER_HTTP_PORT", "4002") |> String.to_integer()
+http_port = raw_http_port + partition_port
+
 config :teiserver, TeiserverWeb.Endpoint,
   url: [host: "localhost"],
-  http: [port: 4002],
+  http: [port: http_port],
   # We don't spawn the https endpoint in test
   https: nil,
   # Spawn a real server. This is required for websocket upgrade since it
   # doesn't work with the test Plug.Conn used for "regular" http requests
   server: true
 
-config :teiserver, Teiserver.OAuth, issuer: "http://localhost:4002"
+config :teiserver, Teiserver.OAuth, issuer: "http://localhost:#{http_port}"
+
+metrics_port_raw = System.get_env("TEI_METRICS_SERVER_PORT", "4001") |> String.to_integer()
+metrics_port = metrics_port_raw + partition_port
+
+config :teiserver, TeiserverWeb.Monitoring, port: metrics_port
 
 # Print only warnings and errors during test
 config :logger, level: :warning
