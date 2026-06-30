@@ -1,0 +1,72 @@
+{
+  "checks": {
+    "compile": {
+      "name": "Compile",
+      "run": "mix compile --warnings-as-errors"
+    },
+    "compile_test": {
+      "name": "Compile (test)",
+      "run": "MIX_ENV=test mix compile --warnings-as-errors"
+    },
+    "credo_strict": {
+      "name": "Credo Strict",
+      "run": "mix credo --strict --all"
+    },
+    "dialyzer": {
+      "name": "Dialyzer",
+      "run": "mix dialyzer"
+    },
+    "format": {
+      "name": "Formatting",
+      "run": "mix format --check-formatted"
+    },
+    "modified_test_modules": {
+      "name": "Modified Test Modules",
+      "run": "builtin:modified_test_modules"
+    },
+    "modified_tests": {
+      "name": "Modified Tests",
+      "run": "builtin:modified_tests"
+    }
+  },
+  "coverage": {
+    "html": false,
+    "limit": 80,
+    "mod": "native"
+  },
+  "db_drop": "mix ecto.drop",
+  "db_setup": "mix ecto.setup",
+  "default_repeat": 100,
+  "fast": [
+    "format",
+    "compile",
+    "compile_test",
+    "credo",
+    "credo_strict",
+    "modified_test_modules"
+  ],
+  "fix": [
+    {
+      "run": "mix format"
+    },
+    {
+      "files": ".check/credo*.txt",
+      "run": "mix recode"
+    }
+  ],
+  "max_concurrency": 10,
+  "partitions": 5,
+  "run": [
+    "format",
+    "compile",
+    "compile_test",
+    "dialyzer",
+    "credo_strict",
+    "test"
+  ],
+  "test_args": "--warnings-as-errors --exclude needs_attention",
+  "update": [
+    "mix deps.update al_check",
+    "mix check.install"
+  ]
+}

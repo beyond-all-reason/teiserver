@@ -175,6 +175,9 @@ defmodule Teiserver.SpringRawTest do
     # Welcome message
     _recv_raw(socket)
 
+    # To prevent the cache based flood protection triggering
+    Teiserver.cache_put(:teiserver_login_count, user.id, -100)
+
     # Incorrect password
     for _idx <- 1..4 do
       _send_raw(
@@ -184,9 +187,6 @@ defmodule Teiserver.SpringRawTest do
 
       reply = _recv_until(socket)
       assert reply == "DENIED Invalid password\n"
-
-      # Clear the much shorter lived flood protection
-      Teiserver.cache_put(:teiserver_login_count, user.id, 0)
     end
 
     # The rate limit should now be triggering
