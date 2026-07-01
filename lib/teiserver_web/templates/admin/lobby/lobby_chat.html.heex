@@ -20,7 +20,6 @@
             <%= if @prev_match do %>
               <a
                 href={~p"/teiserver/admin/lobbies/#{@prev_match.id}/lobby_chat"}
-                }
                 class="btn btn-outline-secondary"
               >
                 <i class="fa-fw fa-solid fa-arrow-left"></i> &nbsp;
@@ -31,7 +30,6 @@
             <%= if @next_match do %>
               <a
                 href={~p"/teiserver/admin/lobbies/#{@next_match.id}/lobby_chat"}
-                }
                 class="btn btn-outline-secondary"
               >
                 <i class="fa-fw fa-solid fa-arrow-right"></i> &nbsp;
