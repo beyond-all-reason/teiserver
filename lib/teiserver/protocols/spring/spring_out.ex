@@ -354,9 +354,13 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:client_status, nil), do: ""
 
-  defp do_reply(:client_status, client) do
+  defp do_reply(:client_status, client) when is_map(client) do
     status = Spring.create_client_status(client)
     "CLIENTSTATUS #{client.name} #{status}\n"
+  end
+
+  defp do_reply(:client_status, {name, status}) do
+    "CLIENTSTATUS #{name} #{status}\n"
   end
 
   defp do_reply(:client_battlestatus, nil), do: nil

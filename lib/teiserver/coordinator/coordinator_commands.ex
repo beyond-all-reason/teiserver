@@ -20,7 +20,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   @splitter "---------------------------"
   @always_allow ~w(help whoami whois discord coc mute unmute ignore unignore website party)
   # These commands are handled by coordinator commands, but are not on the always allow list
-  @mod_allow ~w(modparty unparty)
+  @mod_allow ~w(modparty unparty modme unmodme)
   @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no explain)
   @admin_commands ~w(broadcast)
 
@@ -520,6 +520,24 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           end
       end
     end)
+
+    state
+  end
+
+  # Changes the client status to show the person is a moderator
+  defp do_handle(%{command: "modme", senderid: sender_id} = _cmd, state) do
+    client = Account.get_client_by_id(sender_id)
+
+    if client.moderator do
+      Client.merge_update_client(sender_id, %{show_moderator: true})
+    end
+
+    state
+  end
+
+  # Changes the client status to hide the person is a moderator
+  defp do_handle(%{command: "unmodme", senderid: sender_id} = _cmd, state) do
+    Client.merge_update_client(sender_id, %{show_moderator: false})
 
     state
   end
