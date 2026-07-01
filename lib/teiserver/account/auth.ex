@@ -93,6 +93,12 @@ defmodule Teiserver.Account.Auth do
   def vip?(%User{} = user), do: allow?(user, "VIP")
   def vip?(_user), do: false
 
+  @spec trusted?(User.id() | User.t() | nil) :: boolean()
+  def trusted?(nil), do: false
+  def trusted?(userid) when is_integer(userid), do: trusted?(Account.get_user(userid))
+  def trusted?(%User{} = user), do: allow?(user, "Trusted")
+  def trusted?(_user), do: false
+
   @doc """
   If a user possesses any of these roles it returns true
   """
