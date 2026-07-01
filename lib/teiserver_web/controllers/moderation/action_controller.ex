@@ -246,16 +246,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   def create(conn, %{"action" => action_params}) do
     user = Account.get_user(action_params["target_id"])
 
-    expires_string = action_params["expires"] || ""
-
-    expires =
-      case DateHelper.human_input_to_datetime(expires_string) do
-        {:ok, expires_datetime} ->
-          expires_datetime
-
-        nil ->
-          action_params["expires"]
-      end
+    duration_seconds = DateHelper.human_input_to_seconds(action_params["duration"])
 
     restrictions =
       action_params["restrictions"]
@@ -265,7 +256,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
     action_params =
       Map.merge(action_params, %{
         "restrictions" => restrictions,
-        "expires" => expires
+        "duration" => duration_seconds,
+        "expires" => nil
       })
 
     report_ids =
@@ -350,14 +342,25 @@ defmodule TeiserverWeb.Moderation.ActionController do
   def update(conn, %{"id" => id, "action" => action_params}) do
     action = Moderation.get_action!(id)
 
+    duration_seconds = DateHelper.human_input_to_seconds(action_params["duration"])
+
     restrictions =
       action_params["restrictions"]
       |> Map.values()
       |> Enum.reject(fn v -> v == "false" end)
 
+    expires =
+      if duration_seconds != nil and action.expires != nil do
+        NaiveDateTime.add(NaiveDateTime.utc_now(), duration_seconds, :second)
+      else
+        nil
+      end
+
     action_params =
       Map.merge(action_params, %{
-        "restrictions" => restrictions
+        "restrictions" => restrictions,
+        "duration" => duration_seconds,
+        "expires" => expires
       })
 
     case Moderation.update_action(action, action_params) do

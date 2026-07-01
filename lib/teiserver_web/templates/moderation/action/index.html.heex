@@ -53,20 +53,8 @@
                   <td>{action.reason |> String.slice(0..100)}</td>
                   <td>{action.restrictions |> Enum.join(", ")}</td>
 
-                  <td>{action.inserted_at |> date_to_str(format: :hms_or_ymd)}</td>
-                  <%= if action.expires do %>
-                    <%= if NaiveDateTime.compare(NaiveDateTime.utc_now(), action.expires) == :gt do %>
-                      <td>Expired</td>
-                    <% else %>
-                      <td>{action.expires |> date_to_str(format: :hms_or_ymd)}</td>
-                    <% end %>
-
-                    <td>{duration_to_str(action.inserted_at, action.expires)}</td>
-                  <% else %>
-                    <td colspan="2" class="text-warning">
-                      Permanent
-                    </td>
-                  <% end %>
+                  <td>{action.inserted_at |> date_to_str(format: :ymd_hms24)}</td>
+                  <.action_status action={action} />
 
                   <td>
                     <a href={~p"/moderation/action/#{action.id}"} class="btn btn-secondary btn-sm">

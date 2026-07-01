@@ -85,9 +85,22 @@ bsname = view_colour() %>
 
                 <div class="col-lg-6">
                   <div class="form-group my-2">
-                    {label(f, :expires, class: "control-label")}
-                    {text_input(f, :expires, class: "form-control", required: "required")}
-                    {error_tag(f, :expires)}
+                    {label(f, :duration, class: "control-label")}
+                    {text_input(f, :duration,
+                      class: "form-control",
+                      placeholder: "e.g. 7d, 24h, 1m, 1y"
+                    )}
+                    <small class="text-muted">
+                      Timer starts when the user logs in and acknowledges the action.
+                      Leave empty for a permanent ban.
+                      Format: <code>s</code>
+                      seconds, <code>h</code>
+                      hours, <code>d</code>
+                      days, <code>m</code>
+                      months, <code>y</code>
+                      years.
+                    </small>
+                    {error_tag(f, :duration)}
                   </div>
                 </div>
 
@@ -233,7 +246,7 @@ bsname = view_colour() %>
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B6 - Spamming the main chat channel.');
         $('#action_restriction_Room_chat').prop('checked', true);
         $('#action_restriction_Warning_reminder').prop('checked', true);
-        $('#action_expires').val('7 days');
+        $('#action_duration').val('7 days');
       "
                   >
                     #main spam
@@ -247,7 +260,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_All_chat').prop('checked', true);
-        $('#action_expires').val('5 days');
+        $('#action_duration').val('5 days');
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C2 - Hate speech, calls for a person to harm themselves, real-life threats, celebration of horrific events are all regarded as unacceptable.');
       "
                   >
@@ -260,7 +273,7 @@ bsname = view_colour() %>
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_All_chat').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Spectator cheating is completely unacceptable. Given the severity of this, any future attempts at cheating will result in a permanent ban, as will evasion of the suspension.')
-        $('#action_expires').val('21 days');
+        $('#action_duration').val('21 days');
       "
                   >
                     Spec cheating
@@ -271,7 +284,7 @@ bsname = view_colour() %>
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_All_chat').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Purposefully passing on consequential information to a game in progress via things like spectator chat (we understand mistakes happen occasionally) is obviously a form of cheating.')
-        $('#action_expires').val('5 days');
+        $('#action_duration').val('5 days');
       "
                   >
                     Passing Info
@@ -281,7 +294,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_Login').prop('checked', true);
         $('#action_reason').val('Permanent ban.');
-        $('#action_expires').val('1100 years');
+        $('#action_duration').val('');
       "
                   >
                     One-off account permaban
@@ -294,7 +307,7 @@ bsname = view_colour() %>
         $('#action_restriction_All_chat').prop('checked', true);
         $('#action_restriction_Note').prop('checked', true);
         $('#action_reason').val('Permanent ban, possibly a previously banned user.');
-        $('#action_expires').val('1100 years');
+        $('#action_duration').val('');
       "
                   >
                     One-off account permaban (hidden, for ban evaders)
@@ -309,7 +322,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - Evading moderation by creating new accounts is not okay. Continued evasion will lead to a permanent ban.');
-        $('#action_expires').val('1 day');
+        $('#action_duration').val('1 day');
       "
                   >
                     Moderation evasion - 1st offense
@@ -320,7 +333,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_Login').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - Evading moderation, 2nd offense. Continued evasion will lead to a permanent ban.');
-        $('#action_expires').val('1 day');
+        $('#action_duration').val('1 day');
       "
                   >
                     Moderation evasion - 2nd offense
@@ -331,7 +344,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_Login').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - Evading moderation, 3rd offense. We may permanently ban the account if you do not stop trying to evade moderation.');
-        $('#action_expires').val('3 days');
+        $('#action_duration').val('3 days');
       "
                   >
                     Moderation evasion - 3rd offense
@@ -341,7 +354,7 @@ bsname = view_colour() %>
                     onclick={"
         $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Smurf or alt-accounts are not allowed, if you need an exemption or you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
-        $('#action_expires').val('1 day');
+        $('#action_duration').val('1 day');
       "}
                   >
                     Smurfing - 1st offense
@@ -352,7 +365,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_Login').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - You are continuing to create smurf/alt-accounts. This is against the code of conduct. We may permanently ban you if this continues.');
-        $('#action_expires').val('1 day');
+        $('#action_duration').val('1 day');
       "
                   >
                     Smurfing - 2nd offense
@@ -363,7 +376,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_Login').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Smurfing/alt-accounting. 3rd offense, if you do it again we may permanently ban your account.');
-        $('#action_expires').val('3 days');
+        $('#action_duration').val('3 days');
       "
                   >
                     Smurfing - 3rd offense
@@ -415,7 +428,7 @@ bsname = view_colour() %>
         $('#action_restriction_Matchmaking').prop('checked', true);
         $('#action_restriction_Community').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B3 - **Nicknames and clan tags must not be offensive, inappropriate or contain politically charged phrases. Impersonation of other players and real-life figures is also forbidden. Player usernames must not contain references to modern political figures, contemporary movements, or historically controversial figures.** Please rename from `#{@user.name}` (use the Account button in the top right, then go to Recover/Change) to a name not in breach of the Code of Conduct and use the #open-ticket discord channel to notify the moderation team and have the restriction lifted. The discord can be accessed at #{discord_link} ');
-        $('#action_expires').val('1100 years');
+        $('#action_duration').val('');
       "}
                   >
                     Rename
@@ -426,7 +439,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_Bridging').prop('checked', true);
         $('#action_reason').val('Manual unbridging.');
-        $('#action_expires').val('1100 years');
+        $('#action_duration').val('');
       "
                   >
                     Unbridge
@@ -435,7 +448,7 @@ bsname = view_colour() %>
                     class={"btn btn-outline-#{bsname} btn-block"}
                     onclick="
         $('#action_restriction_Note').prop('checked', true);
-        $('#action_expires').val('1s');
+        $('#action_duration').val('1s');
       "
                   >
                     + internal note
@@ -531,20 +544,8 @@ bsname = view_colour() %>
                       <td>{action.notes && action.notes |> String.slice(0..100)}</td>
                       <td>{action.restrictions |> Enum.join(", ")}</td>
 
-                      <td>{action.inserted_at |> date_to_str(format: :hms_or_ymd)}</td>
-                      <%= if action.expires do %>
-                        <%= if NaiveDateTime.compare(NaiveDateTime.utc_now(), action.expires) == :gt do %>
-                          <td>Expired</td>
-                        <% else %>
-                          <td>{action.expires |> date_to_str(format: :hms_or_ymd)}</td>
-                        <% end %>
-
-                        <td>{duration_to_str(action.inserted_at, action.expires)}</td>
-                      <% else %>
-                        <td colspan="2" class="text-warning">
-                          Permanent
-                        </td>
-                      <% end %>
+                      <td>{action.inserted_at |> date_to_str(format: :ymd_hms24)}</td>
+                      <.action_status action={action} />
 
                       <td>
                         <a
