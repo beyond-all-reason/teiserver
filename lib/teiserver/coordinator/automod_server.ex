@@ -151,7 +151,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
       Auth.contributor?(user) ->
         "Developer account"
 
-      Enum.member?(user.roles, "Trusted") ->
+      Auth.trusted?(user) ->
         "Trusted account"
 
       true ->
