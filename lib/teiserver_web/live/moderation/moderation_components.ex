@@ -1,6 +1,10 @@
 defmodule TeiserverWeb.Moderation.ModerationComponents do
   @moduledoc false
+  alias Teiserver.Account.Auth
+  alias Teiserver.Account.User
+
   use TeiserverWeb, :component
+
   import TeiserverWeb.NavComponents, only: [sub_menu_button: 1]
 
   @doc """
@@ -40,6 +44,21 @@ defmodule TeiserverWeb.Moderation.ModerationComponents do
       >
         Bans
       </.sub_menu_button>
+    </div>
+    """
+  end
+
+  @doc """
+  Displays (if appropriate) a warning that this user has some form of VIP status and to check with senior moderators/community management if this needs to be handled in a certain way.
+
+  <.action_warning user={@user} />
+  """
+  attr :user, User, required: true
+
+  def action_warning(assigns) do
+    ~H"""
+    <div :if={Auth.vip?(@user)} class="alert alert-info">
+      This user has VIP or Contributor credentials. Please check with senior moderators and/or community management if any additional communication needs to take place around this action.
     </div>
     """
   end
