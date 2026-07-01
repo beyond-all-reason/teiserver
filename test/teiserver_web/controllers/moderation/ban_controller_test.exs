@@ -18,14 +18,14 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
 
   describe "index" do
     test "lists all bans", %{conn: conn} do
-      conn = get(conn, Routes.moderation_ban_path(conn, :index))
+      conn = get(conn, ~p"/moderation/ban")
       assert html_response(conn, 200) =~ "Listing Bans"
     end
   end
 
   describe "new ban" do
     test "renders select form", %{conn: conn} do
-      conn = get(conn, Routes.moderation_ban_path(conn, :new))
+      conn = get(conn, ~p"/moderation/ban/new")
       assert html_response(conn, 200) =~ "Select user:"
     end
 
@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
       conn =
         get(
           conn,
-          Routes.moderation_ban_path(conn, :new_with_user) <> "?teiserver_user=%23#{user.id}"
+          ~p"/moderation/ban/new_with_user?teiserver_user=%23#{user.id}"
         )
 
       assert html_response(conn, 200) =~ "Adding ban based on"
@@ -47,14 +47,14 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
       user = GeneralTestLib.make_user()
 
       conn =
-        post(conn, Routes.moderation_ban_path(conn, :create),
+        post(conn, ~p"/moderation/ban",
           ban:
             Map.merge(@create_attrs, %{
               source_id: user.id
             })
         )
 
-      assert redirected_to(conn) == Routes.moderation_ban_path(conn, :index)
+      assert redirected_to(conn) == ~p"/moderation/ban"
 
       new_ban = Moderation.list_bans(search: [source_id: user.id])
       assert Enum.count(new_ban) == 1
@@ -64,7 +64,7 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
       user = GeneralTestLib.make_user()
 
       conn =
-        post(conn, Routes.moderation_ban_path(conn, :create),
+        post(conn, ~p"/moderation/ban",
           ban: Map.merge(@invalid_attrs, %{source_id: user.id})
         )
 
@@ -75,13 +75,13 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
   describe "show ban" do
     test "renders show page", %{conn: conn} do
       ban = ModerationTestLib.ban_fixture()
-      resp = get(conn, Routes.moderation_ban_path(conn, :show, ban))
+      resp = get(conn, ~p"/moderation/ban/#{ban.id}")
       assert html_response(resp, 200) =~ "Logs (0)"
     end
 
     test "renders show nil item", %{conn: conn} do
       assert_error_sent 404, fn ->
-        get(conn, Routes.moderation_ban_path(conn, :show, -1))
+        get(conn, ~p"/moderation/ban/-1")
       end
     end
   end
@@ -92,14 +92,14 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
 
       assert ban.enabled == true
 
-      conn = put(conn, Routes.moderation_ban_path(conn, :disable, ban.id))
-      assert redirected_to(conn) == Routes.moderation_ban_path(conn, :index)
+      conn = put(conn, ~p"/moderation/ban/#{ban.id}/disable")
+      assert redirected_to(conn) == ~p"/moderation/ban"
 
       ban = Moderation.get_ban!(ban.id)
       assert ban.enabled == false
 
-      conn = put(conn, Routes.moderation_ban_path(conn, :enable, ban.id))
-      assert redirected_to(conn) == Routes.moderation_ban_path(conn, :index)
+      conn = put(conn, ~p"/moderation/ban/#{ban.id}/enable")
+      assert redirected_to(conn) == ~p"/moderation/ban"
 
       ban = Moderation.get_ban!(ban.id)
       assert ban.enabled == true

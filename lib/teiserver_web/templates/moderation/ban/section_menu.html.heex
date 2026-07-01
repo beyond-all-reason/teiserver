@@ -8,7 +8,7 @@
       active: @active,
       icon: StylingHelper.icon(:list),
       bsname: bsname,
-      url: Routes.moderation_ban_path(@conn, :index)
+      url: ~p"/moderation/ban"
     )}
 
     {central_component("section_menu_button",
@@ -17,7 +17,7 @@
       active: @active,
       icon: StylingHelper.icon(:search),
       bsname: bsname,
-      url: Routes.moderation_ban_path(@conn, :index) <> "?search=true"
+      url: ~p"/moderation/ban?search=true"
     )}
 
     <%= if allow?(@conn, "Moderator") do %>
@@ -27,7 +27,7 @@
         active: @active,
         icon: StylingHelper.icon(:new),
         bsname: bsname,
-        url: Routes.moderation_ban_path(@conn, :new)
+        url: ~p"/moderation/ban/new"
       )}
     <% end %>
 
