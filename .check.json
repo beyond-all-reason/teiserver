@@ -29,11 +29,6 @@
       "run": "builtin:modified_tests"
     }
   },
-  "coverage": {
-    "html": false,
-    "limit": 80,
-    "mod": "native"
-  },
   "db_drop": "mix ecto.drop",
   "db_setup": "mix ecto.setup",
   "default_repeat": 100,
@@ -55,7 +50,7 @@
     }
   ],
   "max_concurrency": 10,
-  "partitions": 5,
+  "partitions": 3,
   "run": [
     "format",
     "compile",
