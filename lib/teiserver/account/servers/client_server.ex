@@ -230,7 +230,7 @@ defmodule Teiserver.Account.ClientServer do
     :timer.send_interval(6_000, :heartbeat)
 
     # Update the queue pids cache to point to this process
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ClientRegistry,
       userid,
       state.client.lobby_client

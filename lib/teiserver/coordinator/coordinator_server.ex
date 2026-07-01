@@ -369,7 +369,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def init(_opts) do
     Process.flag(:trap_exit, true)
 
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ServerRegistry,
       "CoordinatorServer",
       :coordinator

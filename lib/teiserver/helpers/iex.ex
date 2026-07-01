@@ -41,7 +41,7 @@ defmodule Teiserver.Helpers.Iex do
   end
 
   @doc """
-  Same as Registry.select, but also works with Horde.Registry.
+  Same as Registry.select, with some aliases
   """
   def list_reg(reg, spec) do
     reg =
@@ -53,11 +53,7 @@ defmodule Teiserver.Helpers.Iex do
         x -> x
       end
 
-    try do
-      Horde.Registry.select(reg, spec)
-    rescue
-      ArgumentError -> Registry.select(reg, spec)
-    end
+    Registry.select(reg, spec)
   end
 
   @doc """

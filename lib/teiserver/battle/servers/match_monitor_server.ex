@@ -542,7 +542,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     send(self(), :begin)
     Logger.metadata(request_id: "MatchMonitorServer")
 
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ServerRegistry,
       "MatchMonitorServer",
       :match_monitor
@@ -559,7 +559,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   @spec get_match_monitor_pid() :: pid() | nil
   def get_match_monitor_pid do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "MatchMonitorServer") do
+    case Registry.lookup(Teiserver.ServerRegistry, "MatchMonitorServer") do
       [{pid, _value}] ->
         pid
 

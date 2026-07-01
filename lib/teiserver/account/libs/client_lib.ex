@@ -42,7 +42,7 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec list_client_ids() :: [User.id()]
   def list_client_ids do
-    Horde.Registry.select(Teiserver.ClientRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Registry.select(Teiserver.ClientRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_clients() :: [T.client()]
@@ -201,7 +201,7 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec client_exists?(User.id()) :: pid() | boolean
   def client_exists?(userid) do
-    case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
+    case Registry.lookup(Teiserver.ClientRegistry, userid) do
       [{_pid, _value}] -> true
       _other -> false
     end
@@ -209,7 +209,7 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec get_client_pid(User.id()) :: pid() | nil
   def get_client_pid(userid) do
-    case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
+    case Registry.lookup(Teiserver.ClientRegistry, userid) do
       [{pid, _value}] -> pid
       _other -> nil
     end
@@ -217,10 +217,7 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec count_client() :: non_neg_integer()
   def count_client do
-    case Horde.Registry.count(Teiserver.ClientRegistry) do
-      :undefined -> 0
-      n -> n
-    end
+    Registry.count(Teiserver.ClientRegistry)
   end
 
   # this isn't terribly efficient, but I'm not sure how
@@ -232,7 +229,7 @@ defmodule Teiserver.Account.ClientLib do
       ["SPADS v", "SpringLobbyMonitor", "Teiserver Internal Client", "SLTS Client d"]
       |> Enum.map(fn client_name -> {:"=/=", :"$3", client_name} end)
 
-    Horde.Registry.select(Teiserver.ClientRegistry, [{{:_, :_, :"$3"}, guards, [{{:"$3"}}]}])
+    Registry.select(Teiserver.ClientRegistry, [{{:_, :_, :"$3"}, guards, [{{:"$3"}}]}])
     |> Enum.count()
   end
 

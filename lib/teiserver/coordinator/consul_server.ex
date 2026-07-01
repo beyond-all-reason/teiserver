@@ -1425,7 +1425,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     Logger.metadata(request_id: "ConsulServer##{lobby_id}")
 
     # Update the queue pids cache to point to this process
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ConsulRegistry,
       lobby_id,
       lobby_id

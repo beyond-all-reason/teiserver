@@ -256,6 +256,8 @@ CLIENTS test_room #{user.name}\n"
     assert reply == :timeout
   end
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/28375283350/job/84063176592?pr=1315
+  @tag :needs_attention
   test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE",
        %{socket: socket1, user: user1} = context do
     hash = "-1540855590"

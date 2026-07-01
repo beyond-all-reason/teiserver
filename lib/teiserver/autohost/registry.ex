@@ -10,7 +10,7 @@ defmodule Teiserver.Autohost.Registry do
   alias Teiserver.Bot.Bot
 
   def start_link do
-    Horde.Registry.start_link(keys: :unique, name: __MODULE__)
+    Registry.start_link(keys: :unique, name: __MODULE__)
   end
 
   @doc """
@@ -18,12 +18,12 @@ defmodule Teiserver.Autohost.Registry do
   """
   @spec via_tuple(Bot.id()) :: GenServer.name()
   def via_tuple(autohost_id) do
-    {:via, Horde.Registry, {__MODULE__, autohost_id}}
+    {:via, Registry, {__MODULE__, autohost_id}}
   end
 
   @spec lookup(Bot.id()) :: {pid(), AT.Overview.t()} | nil
   def lookup(autohost_id) do
-    case Horde.Registry.lookup(__MODULE__, via_tuple(autohost_id)) do
+    case Registry.lookup(__MODULE__, via_tuple(autohost_id)) do
       [x] -> x
       _other -> nil
     end
@@ -34,11 +34,11 @@ defmodule Teiserver.Autohost.Registry do
   """
   @spec list() :: [AT.Overview.t()]
   def list do
-    Horde.Registry.select(__MODULE__, [{{:_, :_, :"$1"}, [], [:"$1"]}])
+    Registry.select(__MODULE__, [{{:_, :_, :"$1"}, [], [:"$1"]}])
   end
 
   def child_spec(_opts) do
-    Supervisor.child_spec(Horde.Registry,
+    Supervisor.child_spec(Registry,
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}
     )

@@ -82,7 +82,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_global_user_updates")
     :ok = PubSub.subscribe(Teiserver.PubSub, "client_inout")
 
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ThrottleRegistry,
       "__MODULE__",
       :index
