@@ -118,7 +118,7 @@ defmodule Teiserver.Account.RoleLib do
       name: "Contributor",
       colour: "#66AA66",
       icon: "fa-solid fa-code-commit",
-      contains: ["Trusted", "BAR+", "Tester", "Blog helper"],
+      contains: ["Trusted", "BAR+", "Tester", "Blog helper", "VIP"],
       badge: true
     },
     %{name: "Engine", colour: "#007700", icon: "fa-solid fa-engine", contains: ~w(Contributor)},
