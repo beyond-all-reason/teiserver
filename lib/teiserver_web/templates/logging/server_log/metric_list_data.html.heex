@@ -84,3 +84,7 @@
     <% end %>
   </tbody>
 </table>
+
+<%= if assigns[:raw_data] do %>
+  <textarea rows="4" class="form-control monospace"><%= @raw_data %></textarea>
+<% end %>

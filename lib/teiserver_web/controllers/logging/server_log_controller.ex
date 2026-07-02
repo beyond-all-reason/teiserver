@@ -341,6 +341,7 @@ defmodule TeiserverWeb.Logging.ServerLogController do
     |> assign(:logs, logs)
     |> assign(:filter, filter)
     |> assign(:unit, unit)
+    |> assign(:raw_data, data_as_raw_csv(logs))
     |> add_breadcrumb(name: "List #{unit}", url: conn.request_path)
     |> render("metric_list.html")
   end
@@ -532,5 +533,37 @@ defmodule TeiserverWeb.Logging.ServerLogController do
     |> assign(:axis_key, axis_key)
     |> add_breadcrumb(name: "Load", url: conn.request_path)
     |> render("user_cost_graph.html")
+  end
+
+  defp data_as_raw_csv(rows) do
+    headings = [
+      "Date",
+      "Unique users",
+      "Peak users",
+      "Active time (hours)",
+      "Registrations"
+    ]
+
+    data =
+      rows
+      |> Enum.map(fn %{data: data} = row ->
+        total_minutes =
+          Enum.sum([
+            data["aggregates"]["minutes"]["player"],
+            data["aggregates"]["minutes"]["lobby"],
+            data["aggregates"]["minutes"]["spectator"]
+          ])
+
+        [
+          Calendar.strftime(row.date, "%Y-%m-%d"),
+          data["aggregates"]["stats"]["unique_users"],
+          data["aggregates"]["stats"]["peak_user_counts"]["total"],
+          round(total_minutes / 60),
+          data["aggregates"]["stats"]["accounts_created"]
+        ]
+      end)
+
+    CSV.encode([headings] ++ data)
+    |> Enum.to_list()
   end
 end
