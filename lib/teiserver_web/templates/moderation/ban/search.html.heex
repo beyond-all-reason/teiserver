@@ -20,7 +20,7 @@
 
 <div class="search-row">
   <form
-    action={Routes.moderation_ban_path(@conn, :index)}
+    action={~p"/moderation/ban"}
     method="get"
     class="form-horizontal"
     id="search-box"

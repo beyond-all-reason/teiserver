@@ -40,7 +40,7 @@
             name: "bans",
             label: "Bans",
             active: @active,
-            url: Routes.moderation_ban_path(@conn, :index),
+            url: ~p"/moderation/ban",
             icon: Teiserver.Moderation.BanLib.icon()
           )}
         </div>
