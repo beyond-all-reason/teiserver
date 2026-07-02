@@ -319,8 +319,6 @@ defmodule TeiserverWeb.Router do
     get("/ratings/leaderboard", RatingsController, :leaderboard)
     get("/ratings/leaderboard/:type", RatingsController, :leaderboard)
 
-    get("/progression", MatchController, :ratings_graph)
-
     live_session :board_view,
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated}

@@ -96,7 +96,7 @@
     name: "accolades",
     text: "Accolades",
     icon_class: "fa-solid",
-    link: Routes.ts_admin_accolade_path(@conn, :user_show, @user.id)
+    link: ~p"/teiserver/admin/accolades/user/#{@user.id}"
   )}
 
   {central_component("menu_card",
