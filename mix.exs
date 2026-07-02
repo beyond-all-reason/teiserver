@@ -140,6 +140,7 @@ defmodule Teiserver.MixProject do
       # Transient libs we are pinning because of other requirements
       {:decimal, "~> 3.0", override: true},
       {:hackney, "~> 4.0", override: true},
+      {:quic, "~> 1.4.4", override: true},
 
       # gun is a transitive dependency of nostrum. The version 2.1.0 works,
       # while the next one, 2.2.0 produces the following error when starting
