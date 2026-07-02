@@ -64,9 +64,7 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
       user = GeneralTestLib.make_user()
 
       conn =
-        post(conn, ~p"/moderation/ban",
-          ban: Map.merge(@invalid_attrs, %{source_id: user.id})
-        )
+        post(conn, ~p"/moderation/ban", ban: Map.merge(@invalid_attrs, %{source_id: user.id}))
 
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
