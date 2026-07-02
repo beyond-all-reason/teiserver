@@ -72,6 +72,14 @@ ALTER USER teiserver_dev WITH SUPERUSER;
 
 CREATE USER teiserver_test WITH PASSWORD '123456789';
 ALTER USER teiserver_test WITH SUPERUSER;
+
+-- If using partitioned databases
+CREATE USER teiserver_test0 WITH PASSWORD '123456789';
+ALTER USER teiserver_test0 WITH SUPERUSER;
+CREATE USER teiserver_test1 WITH PASSWORD '123456789';
+ALTER USER teiserver_test1 WITH SUPERUSER;
+CREATE USER teiserver_test2 WITH PASSWORD '123456789';
+ALTER USER teiserver_test2 WITH SUPERUSER;
 EOF
 exit
 
