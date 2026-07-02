@@ -72,7 +72,7 @@
     name: "ratings",
     text: "Ratings",
     icon_class: "fa-solid",
-    link: Routes.ts_admin_user_path(@conn, :ratings, @user)
+    link: ~p"/teiserver/admin/users/ratings/#{@user.id}"
   )}
 
   {central_component("menu_card",
@@ -80,7 +80,7 @@
     name: "relationships",
     text: "Relationships",
     icon_class: "fa-solid",
-    link: Routes.ts_admin_user_path(@conn, :relationships, @user)
+    link: ~p"/teiserver/admin/users/relationships/#{@user.id}"
   )}
 
   {central_component("menu_card",
@@ -124,6 +124,6 @@
     name: "smurf",
     text: "Smurf search",
     icon_class: "fa-solid",
-    link: Routes.ts_admin_user_path(@conn, :smurf_search, @user.id)
+    link: ~p"/teiserver/admin/users/smurf_search/#{@user.id}"
   )}
 </div>

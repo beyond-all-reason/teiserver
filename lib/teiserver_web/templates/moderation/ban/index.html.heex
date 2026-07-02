@@ -57,7 +57,7 @@
                   <td>
                     <%= if allow?(@conn, "Reviewer") do %>
                       <a
-                        href={~p"/moderation/ban/#{@ban.id}"}
+                        href={~p"/moderation/ban/#{ban.id}"}
                         class="btn btn-secondary btn-sm"
                       >
                         Show
