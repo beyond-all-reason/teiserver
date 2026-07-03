@@ -518,6 +518,7 @@ defmodule Teiserver.CacheUser do
     msg_str = Enum.join(message_parts, "\n")
 
     sender_bot? = Auth.is_bot?(sender_id)
+    recipient_bot? = Auth.is_bot?(to_id)
     blacklisted? = sender_bot? == false and WordLib.blacklisted_phrase?(msg_str)
 
     allowed =
@@ -532,8 +533,16 @@ defmodule Teiserver.CacheUser do
     end
 
     if allowed do
-      # Persist but only if messsages aren't sent by bots
-      if not sender_bot? do
+      save_message =
+        cond do
+          sender_bot? -> false
+          recipient_bot? and not persist_bot_dm?(msg_str) -> false
+          true -> true
+        end
+
+      # Persist message but not if a JSONRPC being sent to a bot or
+      # if the message was from a bot
+      if save_message do
         Chat.create_direct_message(%{
           to_id: to_id,
           from_id: sender_id,
@@ -616,6 +625,10 @@ defmodule Teiserver.CacheUser do
       end
 
     send_direct_message(from_id, to_id, [message])
+  end
+
+  defp persist_bot_dm?(message) do
+    not String.starts_with?(message, "!#")
   end
 
   @spec ring(User.id(), User.id()) :: :ok
