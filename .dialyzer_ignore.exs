@@ -124,7 +124,6 @@
   {"lib/teiserver_web/controllers/admin/user_controller.ex", :guard_fail},
   {"lib/teiserver_web/controllers/admin/user_controller.ex", :pattern_match},
   {"lib/teiserver_web/controllers/admin/user_controller.ex", :no_return},
-  {"lib/teiserver_web/controllers/battle/match_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/logging/aggregate_view_log_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/logging/match_log_controller.ex", :call},
   {"lib/teiserver_web/controllers/logging/match_log_controller.ex", :no_return},
@@ -160,8 +159,6 @@
   {"lib/teiserver_web/router.ex", :no_return},
   {"lib/teiserver_web/templates/admin/lobby/lobby_chat.html.heex", :call},
   {"lib/teiserver_web/templates/admin/lobby/server_chat.html.heex", :call},
-  {"lib/teiserver_web/templates/battle/match/index.html.heex", :call},
-  {"lib/teiserver_web/templates/battle/match/ratings.html.heex", :call},
   {"lib/teiserver_web/live/moderation/action_live/smurf_link.ex", :callback_arg_type_mismatch},
   {"lib/teiserver_web/live/moderation/action_live/smurf_link.ex", :call}
 ]
