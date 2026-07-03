@@ -36,7 +36,6 @@
     "format",
     "compile",
     "compile_test",
-    "credo",
     "credo_strict",
     "modified_test_modules"
   ],
@@ -60,6 +59,7 @@
     "test"
   ],
   "test_args": "--warnings-as-errors --exclude needs_attention",
+  "test_output": "sections",
   "update": [
     "mix deps.update al_check",
     "mix check.install"
