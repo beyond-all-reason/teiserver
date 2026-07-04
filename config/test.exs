@@ -5,7 +5,7 @@ import Config
 # This makes anything in our tests involving user passwords (creating or logging in) much faster
 config :argon2_elixir, t_cost: 1, m_cost: 8
 
-partition = System.get_env("MIX_TEST_PARTITION", "0") |> String.to_integer()
+partition = System.get_env("MIX_TEST_PARTITION", "1") |> String.to_integer()
 partition_port = partition * 100
 database_url = "postgresql://teiserver_test:123456789@localhost:5432/teiserver_test#{partition}"
 

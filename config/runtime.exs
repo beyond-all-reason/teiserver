@@ -252,7 +252,7 @@ if enable_discord_bridge do
     bot_name: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_NAME")
 end
 
-partition = System.get_env("MIX_TEST_PARTITION", "0") |> String.to_integer()
+partition = System.get_env("MIX_TEST_PARTITION", "1") |> String.to_integer()
 partition_port = partition * 100
 
 config :teiserver, TeiserverWeb.Monitoring,
