@@ -16,6 +16,30 @@ config :teiserver, Teiserver.SpringTcpServer,
   heartbeat_interval: nil,
   heartbeat_timeout: nil
 
+raw_http_port = System.get_env("TEISERVER_HTTP_PORT", "4002") |> String.to_integer()
+
+# Secondary dev nodes should disable the asset watchers, otherwise both nodes
+# race to write the same asset output files (TEISERVER_WATCHERS=off)
+watchers =
+  if System.get_env("TEISERVER_WATCHERS") == "off" do
+    []
+  else
+    [
+      esbuild: {Esbuild, :install_and_run, [:teiserver, ~w(--sourcemap=inline --watch)]},
+      tailwind: {Tailwind, :install_and_run, [:teiserver, ~w(--watch)]},
+      dark_sass: {
+        DartSass,
+        :install_and_run,
+        [:dark, ~w(--embed-source-map --source-map-urls=absolute --watch)]
+      },
+      light_sass: {
+        DartSass,
+        :install_and_run,
+        [:light, ~w(--embed-source-map --source-map-urls=absolute --watch)]
+      }
+    ]
+  end
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -24,23 +48,10 @@ config :teiserver, Teiserver.SpringTcpServer,
 # with webpack to recompile .js and .css sources.
 config :teiserver, TeiserverWeb.Endpoint,
   url: [host: "localhost"],
-  http: [ip: {0, 0, 0, 0}, port: 4000],
-  watchers: [
-    esbuild: {Esbuild, :install_and_run, [:teiserver, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:teiserver, ~w(--watch)]},
-    dark_sass: {
-      DartSass,
-      :install_and_run,
-      [:dark, ~w(--embed-source-map --source-map-urls=absolute --watch)]
-    },
-    light_sass: {
-      DartSass,
-      :install_and_run,
-      [:light, ~w(--embed-source-map --source-map-urls=absolute --watch)]
-    }
-  ]
+  http: [ip: {0, 0, 0, 0}, port: raw_http_port],
+  watchers: watchers
 
-config :teiserver, Teiserver.OAuth, issuer: "http://localhost:4000"
+config :teiserver, Teiserver.OAuth, issuer: "http://localhost:#{raw_http_port}"
 
 config :teiserver, Teiserver,
   certs: [

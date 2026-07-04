@@ -25,9 +25,19 @@ defmodule Teiserver.Application do
     LoggerBackends.add({LoggerFileBackend, :info_log})
     Logger.add_handlers(:teiserver)
 
+    # Topologies are only usable when running in distributed mode, otherwise
+    # libcluster logs a warning on every reconnect attempt
+    cluster_topologies =
+      if Node.alive?() do
+        Application.get_env(:libcluster, :topologies, [])
+      else
+        []
+      end
+
     children =
       [
         Teiserver.PromEx,
+        {Cluster.Supervisor, [cluster_topologies, [name: Teiserver.ClusterSupervisor]]},
         # Migrations
         {Ecto.Migrator,
          repos: Application.fetch_env!(:teiserver, :ecto_repos),
@@ -78,8 +88,12 @@ defmodule Teiserver.Application do
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
         {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueWaitRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueMatchRegistry]},
+
+        # Cluster-wide singletons (CoordinatorServer, MatchMonitorServer,
+        # AutomodServer, LobbyIdServer); children of a dead node are restarted
+        # on a surviving node
+        {Horde.DynamicSupervisor,
+         [strategy: :one_for_one, members: :auto, name: Teiserver.SingletonSupervisor]},
 
         # These are for tracking the number of servers on the local node
         {Registry, keys: :duplicate, name: Teiserver.LocalPoolRegistry},

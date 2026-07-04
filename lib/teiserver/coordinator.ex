@@ -10,8 +10,9 @@ defmodule Teiserver.Coordinator do
   def start_coordinator do
     case get_coordinator_pid() do
       nil ->
-        # Start the supervisor server
-        DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
+        # Start the singleton server, another node may win the race and
+        # start it first
+        Horde.DynamicSupervisor.start_child(Teiserver.SingletonSupervisor, {
           Teiserver.Coordinator.CoordinatorServer,
           name: Teiserver.Coordinator.CoordinatorServer, data: %{}
         })

@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator.AutomodServer do
   @moduledoc false
 
+  alias Horde.DynamicSupervisor, as: HordeSupervisor
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
@@ -9,7 +10,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   alias Teiserver.Config
   alias Teiserver.Coordinator
   alias Teiserver.Moderation
-  use GenServer
+  use GenServer, restart: :transient
   require Logger
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
 
@@ -33,18 +34,28 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec do_start() :: :ok
   defp do_start do
-    {:ok, _automod_pid} =
-      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
+    # Another node may have already started the singleton
+    result =
+      HordeSupervisor.start_child(Teiserver.SingletonSupervisor, {
         Teiserver.Coordinator.AutomodServer,
         name: Teiserver.Coordinator.AutomodServer, data: %{}
       })
+
+    case result do
+      {:ok, _automod_pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
+    end
 
     :ok
   end
 
   @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts[:data], [])
+    GenServer.start_link(__MODULE__, opts[:data], name: via_tuple())
+  end
+
+  defp via_tuple do
+    {:via, Horde.Registry, {Teiserver.ServerRegistry, "AutomodServer", :automod}}
   end
 
   def handle_info(:begin, state) do
@@ -110,6 +121,12 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   def handle_info(%{channel: "telemetry_user_properties"}, state), do: {:noreply, state}
 
+  # Another node won the singleton registration during a Horde registry
+  # merge; step down cleanly so the :transient restart does not respawn us
+  def handle_info({:EXIT, _from, {:name_conflict, _key, _registry, _winning_pid}}, state) do
+    {:stop, :normal, state}
+  end
+
   # Catchall handle_info
   def handle_info(msg, state) do
     Logger.error("AutoMod handle_info error. No handler for msg of #{Kernel.inspect(msg)}")
@@ -123,11 +140,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
-    Horde.Registry.register(
-      Teiserver.ServerRegistry,
-      "AutomodServer",
-      :automod
-    )
+    Process.flag(:trap_exit, true)
 
     :timer.send_after(500, :begin)
     {:ok, %{}}

@@ -50,8 +50,10 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
 
   def start_queue!(state) do
     case HordeSupervisor.start_child(__MODULE__, {QueueServer, state}) do
-      {:error, err} -> raise "Cannot start queue: #{inspect(err)}"
       {:ok, pid} -> {:ok, pid}
+      # another node in the cluster already runs this queue
+      {:error, {:already_started, pid}} -> {:ok, pid}
+      {:error, err} -> raise "Cannot start queue: #{inspect(err)}"
     end
   end
 

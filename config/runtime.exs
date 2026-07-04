@@ -254,3 +254,37 @@ end
 
 config :teiserver, TeiserverWeb.Monitoring,
   port: Teiserver.ConfigHelpers.get_env("TEI_METRICS_SERVER_PORT", 4001, :int)
+
+# Each test partition gets its own database and ports so that
+# `mix test --partitions N` instances can run concurrently
+if config_env() == :test do
+  partition = System.get_env("MIX_TEST_PARTITION", "0")
+  partition_port = String.to_integer(partition) * 100
+
+  config :teiserver, Teiserver.Repo, database: "teiserver_test#{partition}"
+
+  http_port = 4002 + partition_port
+
+  config :teiserver, TeiserverWeb.Endpoint, http: [port: http_port]
+  config :teiserver, Teiserver.OAuth, issuer: "http://localhost:#{http_port}"
+
+  config :teiserver, TeiserverWeb.Monitoring,
+    port: Teiserver.ConfigHelpers.get_env("TEI_METRICS_SERVER_PORT", 4001, :int) + partition_port
+end
+
+# Cluster formation, requires the node to run in distributed mode
+# (--name/--sname). Topologies are ignored when not distributed.
+is_local? = config_env() == :dev
+is_prod? = config_env() == :prod
+
+if is_local? do
+  # Connects to every distributed node registered with the local epmd,
+  # useful for local development (see the justfile)
+  config :libcluster,
+    topologies: [teiserver: [strategy: Cluster.Strategy.LocalEpmd]]
+end
+
+if is_prod? do
+  # TODO: set libcluster topology for prod, e.g. Cluster.Strategy.Epmd with a
+  # static host list or Cluster.Strategy.DNSPoll for discovery
+end

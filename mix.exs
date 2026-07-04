@@ -131,6 +131,7 @@ defmodule Teiserver.MixProject do
       {:mdex, "~> 0.2"},
       {:ranch, "~> 1.8"},
       {:horde, "~> 0.10"},
+      {:libcluster, "~> 3.4"},
       {:etop, "~> 0.7.0"},
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},

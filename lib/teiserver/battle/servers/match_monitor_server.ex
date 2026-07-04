@@ -3,6 +3,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   The server used to monitor the autohosts and get data from them
   """
 
+  alias Horde.DynamicSupervisor, as: HordeSupervisor
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
@@ -22,7 +23,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.Telemetry
 
   use Plugins
-  use GenServer
+  use GenServer, restart: :transient
 
   require Logger
 
@@ -30,19 +31,26 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   @spec do_start() :: :ok
   def do_start do
-    # Start the supervisor server
-    {:ok, _monitor_pid} =
-      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
+    # Start the singleton server, another node may have already done so
+    result =
+      HordeSupervisor.start_child(Teiserver.SingletonSupervisor, {
         Teiserver.Battle.MatchMonitorServer,
         name: Teiserver.Battle.MatchMonitorServer, data: %{}
       })
 
-    :ok
+    case result do
+      {:ok, _monitor_pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
+    end
   end
 
   @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts[:data], [])
+    GenServer.start_link(__MODULE__, opts[:data], name: via_tuple())
+  end
+
+  defp via_tuple do
+    {:via, Horde.Registry, {Teiserver.ServerRegistry, "MatchMonitorServer", :match_monitor}}
   end
 
   @spec get_match_monitor_userid() :: User.id() | nil
@@ -375,6 +383,12 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
+  # Another node won the singleton registration during a Horde registry
+  # merge; step down cleanly so the :transient restart does not respawn us
+  def handle_info({:EXIT, _from, {:name_conflict, _key, _registry, _winning_pid}}, state) do
+    {:stop, :normal, state}
+  end
+
   # Catchall handle_info
   def handle_info(msg, state) do
     Logger.warning(
@@ -541,12 +555,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     Process.flag(:trap_exit, true)
     send(self(), :begin)
     Logger.metadata(request_id: "MatchMonitorServer")
-
-    Horde.Registry.register(
-      Teiserver.ServerRegistry,
-      "MatchMonitorServer",
-      :match_monitor
-    )
 
     {:ok, %{}}
   end

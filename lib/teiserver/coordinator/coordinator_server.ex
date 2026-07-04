@@ -19,7 +19,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Teiserver.Room
   alias Teiserver.Telemetry
 
-  use GenServer
+  use GenServer, restart: :transient
 
   require Logger
 
@@ -32,7 +32,11 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts[:data], [])
+    GenServer.start_link(__MODULE__, opts[:data], name: via_tuple())
+  end
+
+  defp via_tuple do
+    {:via, Horde.Registry, {Teiserver.ServerRegistry, "CoordinatorServer", :coordinator}}
   end
 
   @impl GenServer
@@ -310,6 +314,12 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
 
+  # Another node won the singleton registration during a Horde registry
+  # merge; step down cleanly so the :transient restart does not respawn us
+  def handle_info({:EXIT, _from, {:name_conflict, _key, _registry, _winning_pid}}, state) do
+    {:stop, :normal, state}
+  end
+
   # Catchall handle_info
   def handle_info(msg, state) do
     Logger.error(
@@ -368,12 +378,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
     Process.flag(:trap_exit, true)
-
-    Horde.Registry.register(
-      Teiserver.ServerRegistry,
-      "CoordinatorServer",
-      :coordinator
-    )
 
     send(self(), :begin)
     {:ok, %{client: %{}}}

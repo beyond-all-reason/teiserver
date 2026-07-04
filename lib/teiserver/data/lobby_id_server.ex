@@ -3,19 +3,25 @@ defmodule Teiserver.LobbyIdServer do
   Used as a singleton to create lobby_ids and ensure we increment the counter
   each time across the cluster.
   """
-  use GenServer
+  alias Horde.DynamicSupervisor, as: HordeSupervisor
+
+  use GenServer, restart: :transient
 
   @spec start_lobby_id_server() :: :ok | {:failure, String.t()}
   def start_lobby_id_server do
     case get_server_pid() do
       nil ->
-        {:ok, _coordinator_pid} =
-          DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
+        # Another node may win the race and start the singleton first
+        result =
+          HordeSupervisor.start_child(Teiserver.SingletonSupervisor, {
             __MODULE__,
             name: __MODULE__, data: %{}
           })
 
-        :ok
+        case result do
+          {:ok, _pid} -> :ok
+          {:error, {:already_started, _pid}} -> {:failure, "Already started"}
+        end
 
       _pid ->
         {:failure, "Already started"}
@@ -51,7 +57,11 @@ defmodule Teiserver.LobbyIdServer do
 
   @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(_opts) do
-    GenServer.start_link(__MODULE__, [], [])
+    GenServer.start_link(__MODULE__, [], name: via_tuple())
+  end
+
+  defp via_tuple do
+    {:via, Horde.Registry, {Teiserver.ServerRegistry, "LobbyIdServer", :lobby_id_server}}
   end
 
   def handle_call(:next_id, _from, state) do
@@ -62,13 +72,15 @@ defmodule Teiserver.LobbyIdServer do
     {:noreply, %{state | next_id: next_id}}
   end
 
+  # Another node won the singleton registration during a Horde registry
+  # merge; step down cleanly so the :transient restart does not respawn us
+  def handle_info({:EXIT, _from, {:name_conflict, _key, _registry, _winning_pid}}, state) do
+    {:stop, :normal, state}
+  end
+
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
-    Horde.Registry.register(
-      Teiserver.ServerRegistry,
-      "LobbyIdServer",
-      :lobby_id_server
-    )
+    Process.flag(:trap_exit, true)
 
     {:ok,
      %{

@@ -2,6 +2,7 @@ defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
 
   alias ExUnit.Callbacks
+  alias Horde.DynamicSupervisor, as: HordeSupervisor
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.CacheUser
@@ -519,7 +520,7 @@ defmodule Teiserver.TeiserverTestLib do
 
     on_exit(fn ->
       assert :ok =
-               DynamicSupervisor.terminate_child(Coordinator.DynamicSupervisor, pid)
+               HordeSupervisor.terminate_child(Teiserver.SingletonSupervisor, pid)
     end)
   end
 
