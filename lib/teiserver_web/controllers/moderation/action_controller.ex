@@ -158,6 +158,10 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   @spec new_with_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new_with_user(conn, params) do
+    IO.puts("")
+    IO.inspect(params, label: "#{__MODULE__}:#{__ENV__.line}")
+    IO.puts("")
+
     user =
       case params do
         %{"userid" => userid_str} ->

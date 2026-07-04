@@ -96,7 +96,7 @@
             <%= if not @report.closed do %>
               <a
                 class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
-                href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@report.target_id}_"}
+                href={~p"/moderation/action/new_with_user?teiserver_user=#{@report.target_id}"}
               >
                 {central_component("icon",
                   icon: Teiserver.Moderation.ActionLib.icon(),

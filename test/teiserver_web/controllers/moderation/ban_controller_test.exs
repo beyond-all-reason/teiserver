@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
       conn =
         get(
           conn,
-          ~p"/moderation/ban/new_with_user?teiserver_user=%23#{user.id}"
+          ~p"/moderation/ban/new_with_user?teiserver_user=#{user.id}"
         )
 
       assert html_response(conn, 200) =~ "Adding ban based on"
