@@ -66,11 +66,7 @@
                 <td>
                   {link("Show",
                     to:
-                      Routes.logging_aggregate_view_log_path(
-                        @conn,
-                        :show,
-                        date_to_str(log.date, format: :ymd, tz: @tz)
-                      ),
+                      ~p"/logging/aggregate_views/show/#{date_to_str(log.date, format: :ymd, tz: @tz)}",
                     class: "btn btn-secondary btn-sm"
                   )}
                 </td>

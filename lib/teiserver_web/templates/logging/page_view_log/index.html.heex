@@ -42,7 +42,7 @@
           <% end %>
         </h4>
         <form
-          action={Routes.logging_page_view_log_path(@conn, :search)}
+          action={~p"/logging/page_views/search"}
           method="post"
           class="form-horizontal"
           style="display:none;"
@@ -105,7 +105,7 @@
 
                 <td>
                   {link("Show",
-                    to: Routes.logging_page_view_log_path(@conn, :show, page_view_log),
+                    to: ~p"/logging/page_views/#{page_view_log}",
                     class: "btn btn-secondary btn-sm"
                   )}
                 </td>

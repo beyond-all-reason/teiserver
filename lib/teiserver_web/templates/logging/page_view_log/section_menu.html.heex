@@ -12,7 +12,7 @@
 </script>
 
 <a
-  href={Routes.logging_page_view_log_path(@conn, :index)}
+  href={~p"/logging/page_views"}
   class={"btn btn-outline-#{bsname}"}
   id="section-menu-index"
 >
@@ -21,7 +21,7 @@
 </a>
 
 <a
-  href={"#{Routes.logging_page_view_log_path(@conn, :index)}?search=true"}
+  href={~p"/logging/page_views?search=true"}
   class={"btn btn-outline-#{bsname}"}
   id="section-menu-search"
 >
