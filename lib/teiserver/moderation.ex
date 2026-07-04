@@ -620,6 +620,14 @@ defmodule Teiserver.Moderation do
 
   def broadcast_update_action(v), do: v
 
+  # Used to remove all references to a given action prior to the deletion
+  # of the action
+  defp dereference_action_from_reports_query(%Action{id: action_id}) do
+    from report in Report,
+      where: report.result_id == ^action_id,
+      update: [set: [result_id: nil]]
+  end
+
   @doc """
   Deletes a Action.
 
@@ -634,7 +642,14 @@ defmodule Teiserver.Moderation do
   """
   @spec delete_action(Action.t()) :: {:ok, Action.t()} | {:error, Ecto.Changeset.t()}
   def delete_action(%Action{} = action) do
-    Repo.delete(action)
+    dereference_query = dereference_action_from_reports_query(action)
+
+    Repo.transact(fn ->
+      with {_count, _query} <- Repo.update_all(dereference_query, []),
+           {:ok, %Action{}} <- Repo.delete(action) do
+        {:ok, action}
+      end
+    end)
   end
 
   @doc """
