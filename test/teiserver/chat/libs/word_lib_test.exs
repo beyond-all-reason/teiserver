@@ -27,7 +27,7 @@ defmodule Teiserver.Chat.WordLibTest do
 
   test "allowed names" do
     allowed = [
-      "teifion",
+      "flatulence",
       "Llama"
     ]
 

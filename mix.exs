@@ -223,7 +223,7 @@ defmodule Teiserver.MixProject do
   defp package do
     [
       files: ["lib", "mix.exs", "README.md", "license.md"],
-      maintainers: ["Teifion Jordan"],
+      maintainers: ["Beyond All Reason"],
       licenses: ["MIT"],
       links: %{
         Changelog: "https://github.com/beyond-all-reason/teiserver/blob/master/changelog.md",

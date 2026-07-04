@@ -8,7 +8,7 @@ config :teiserver, Teiserver,
   site_suffix: "",
   site_description: "",
   site_icon: "fa-solid fa-robot",
-  credit: "Teifion Jordan"
+  credit: "Beyond All Reason"
 
 # Default configs
 config :teiserver, Teiserver.Config,

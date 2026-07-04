@@ -59,7 +59,7 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   @doc """
-  Teifion only allowed force_party to be used by mods because it led to noob-stomping unbalanced teams
+  force_party is only allowed to be used by mods because it led to noob-stomping unbalanced teams
   """
   @spec get_allowed_algorithms(boolean()) :: [String.t()]
   def get_allowed_algorithms(is_moderator) do
