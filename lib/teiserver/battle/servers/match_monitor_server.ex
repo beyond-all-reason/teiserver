@@ -253,10 +253,10 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   # Examples of accepted format:
-  # match-chat <Teifion> a: Message to allies
-  # match-chat <Teifion> s: A message to the spectators
-  # match-chat <Teifion> g: A message to the game
-  # match-chat <Teifion> d123: A direct message of some sort, in theory shouldn't appear
+  # match-chat <SomeUser> a: Message to allies
+  # match-chat <SomeUser> s: A message to the spectators
+  # match-chat <SomeUser> g: A message to the game
+  # match-chat <SomeUser> d123: A direct message of some sort, in theory shouldn't appear
   def handle_info({:direct_message, from_id, "match-chat " <> data}, state) do
     case Regex.run(~r/<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
       [_all, username, to, msg] ->
