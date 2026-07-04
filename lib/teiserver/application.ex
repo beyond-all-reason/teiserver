@@ -235,6 +235,7 @@ defmodule Teiserver.Application do
   @impl Application
   @spec prep_stop(map()) :: map()
   def prep_stop(state) do
+    # TODO - PubSub doesn't work here because the endpoint is already stopped
     PubSub.broadcast(
       Teiserver.PubSub,
       "application",
