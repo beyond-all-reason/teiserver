@@ -108,7 +108,7 @@
                   <td>{String.slice(report.extra_text || "", 0..40)}</td>
 
                   <td>
-                    <a href={Routes.moderation_report_path(@conn, :user, report.reporter_id)}>
+                    <a href={~p"/moderation/report/user/#{report.reporter_id}"}>
                       {report.reporter.name}
                     </a>
                   </td>
@@ -119,7 +119,7 @@
 
                   <td>
                     <a
-                      href={Routes.moderation_report_path(@conn, :show, report.id)}
+                      href={~p"/moderation/report/#{report.id}"}
                       class="btn btn-secondary btn-sm"
                     >
                       Details
