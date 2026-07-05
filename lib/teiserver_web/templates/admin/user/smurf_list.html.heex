@@ -346,7 +346,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                       </td>
                       <td :if={allow?(@conn, "Server")}>
                         {link("Delete",
-                          to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id),
+                          to: ~p"/teiserver/admin/users/delete_smurf_key/#{key.id}",
                           class: "btn btn-danger btn-sm",
                           method: "delete",
                           data: [confirm: "Are you sure?"]

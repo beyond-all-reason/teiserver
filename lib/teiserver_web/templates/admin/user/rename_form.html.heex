@@ -20,7 +20,7 @@
           <div class="col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
             <h4>Chosen rename</h4>
             <form
-              action={Routes.ts_admin_user_path(@conn, :rename_post, @user)}
+              action={~p"/teiserver/admin/users/rename_post/#{@user.id}"}
               method="post"
               class=""
             >
@@ -61,7 +61,7 @@
 
             <h4>Random rename</h4>
             <form
-              action={Routes.ts_admin_user_path(@conn, :rename_post, @user)}
+              action={~p"/teiserver/admin/users/rename_post/#{@user.id}"}
               method="post"
               class=""
             >

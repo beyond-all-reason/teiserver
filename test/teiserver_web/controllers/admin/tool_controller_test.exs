@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Admin.ToolControllerTest do
   end
 
   test "index", %{conn: conn} do
-    conn = get(conn, Routes.ts_admin_tool_path(conn, :index))
+    conn = get(conn, ~p"/teiserver/admin/tools")
     assert html_response(conn, 200) =~ "Test page"
   end
 end

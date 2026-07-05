@@ -41,7 +41,6 @@ defmodule TeiserverWeb do
 
       alias Bodyguard.Plug.Authorize
 
-      alias TeiserverWeb.Router.Helpers, as: Routes
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
 
       unquote(verified_routes())
@@ -76,7 +75,6 @@ defmodule TeiserverWeb do
 
       import TeiserverWeb.ErrorHelpers
       use Gettext, backend: TeiserverWeb.Gettext
-      alias TeiserverWeb.Router.Helpers, as: Routes
 
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
 
@@ -261,7 +259,6 @@ defmodule TeiserverWeb do
 
       import TeiserverWeb.ErrorHelpers
       import TeiserverWeb.Gettext
-      alias TeiserverWeb.Router.Helpers, as: Routes
     end
   end
 

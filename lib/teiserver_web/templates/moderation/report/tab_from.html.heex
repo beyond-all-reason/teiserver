@@ -59,7 +59,7 @@
 
         <td>
           <a
-            href={Routes.moderation_report_path(@conn, :show, report.id)}
+            href={~p"/moderation/report/#{report.id}"}
             class="btn btn-secondary btn-sm btn-block"
           >
             <i class="fa-fw fas fa-eye"></i>

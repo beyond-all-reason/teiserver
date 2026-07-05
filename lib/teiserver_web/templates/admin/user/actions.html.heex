@@ -54,7 +54,7 @@
 
   <a
     class="dropdown-item"
-    href={"#{Routes.moderation_ban_path(@conn, :new_with_user)}?teiserver_user=#{@user.id}"}
+    href={~p"/moderation/ban/new_with_user?teiserver_user=#{@user.id}"}
   >
     <Fontawesome.icon icon={Teiserver.Moderation.BanLib.icon()} style="solid" /> &nbsp;
     Add ban

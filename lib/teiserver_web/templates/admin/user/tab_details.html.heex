@@ -126,7 +126,7 @@
 
       <%= if allow?(@conn, "Admin") do %>
         <hr />
-        <form action={Routes.ts_admin_user_path(@conn, :set_stat)} method="post" class="">
+        <form action={~p"/teiserver/admin/users/set_stat"} method="post" class="">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
           <input type="hidden" name="userid" value={@user.id} />
 

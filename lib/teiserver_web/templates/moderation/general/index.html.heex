@@ -4,7 +4,7 @@
     name: "reports",
     text: "Reports",
     icon_class: "fa-solid",
-    link: Routes.moderation_report_path(@conn, :index)
+    link: ~p"/moderation/report"
   )}
 
   {central_component("menu_card",
@@ -20,7 +20,7 @@
     name: "bans",
     text: "Bans",
     icon_class: "fa-solid",
-    link: Routes.moderation_ban_path(@conn, :index)
+    link: ~p"/moderation/ban"
   )}
 
   <.menu_card

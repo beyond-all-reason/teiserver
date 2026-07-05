@@ -67,7 +67,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       conn =
         get(
           conn,
-          Routes.moderation_action_path(conn, :new_with_user) <> "?teiserver_user=%23#{user.id}"
+          ~p"/moderation/action/new_with_user?teiserver_user=#{user.id}"
         )
 
       assert html_response(conn, 200) =~ "Adding action against"

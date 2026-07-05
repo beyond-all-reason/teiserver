@@ -602,7 +602,10 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   def get_user_rating_value_uncertainty_pair(userid, rating_type) do
-    rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+    rating_type_id =
+      MatchRatingLib.rating_type_name_lookup()[rating_type] ||
+        MatchRatingLib.rating_type_name_lookup()["Large Team"]
+
     get_user_rating_value_uncertainty_pair(userid, rating_type_id)
   end
 
