@@ -3,13 +3,12 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   cluster wide supervisor for all matchmaking queues
   """
 
-  alias Horde.DynamicSupervisor, as: HordeSupervisor
   alias Teiserver.Asset
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueRegistry
   alias Teiserver.Matchmaking.QueueServer
 
-  use Horde.DynamicSupervisor
+  use DynamicSupervisor
 
   def default_queues do
     engines =
@@ -49,7 +48,7 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   end
 
   def start_queue!(state) do
-    case HordeSupervisor.start_child(__MODULE__, {QueueServer, state}) do
+    case DynamicSupervisor.start_child(__MODULE__, {QueueServer, state}) do
       {:error, err} -> raise "Cannot start queue: #{inspect(err)}"
       {:ok, pid} -> {:ok, pid}
     end
@@ -61,29 +60,29 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
         :ok
 
       pid ->
-        HordeSupervisor.terminate_child(__MODULE__, pid)
+        DynamicSupervisor.terminate_child(__MODULE__, pid)
     end
   end
 
   @spec start_pairing_room(QueueServer.id(), QueueServer.queue(), [PairingRoom.team()], timeout()) ::
           {:ok, pid()} | {:error, term()}
   def start_pairing_room(queue_id, queue, teams, timeout) do
-    HordeSupervisor.start_child(
+    DynamicSupervisor.start_child(
       __MODULE__,
       {PairingRoom, {queue_id, queue, teams, timeout}}
     )
   end
 
   def start_link(init_arg) do
-    {:ok, sup} = HordeSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+    {:ok, sup} = DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
 
     Enum.each(default_queues(), &start_queue!/1)
 
     {:ok, sup}
   end
 
-  @impl HordeSupervisor
+  @impl DynamicSupervisor
   def init(_init_arg) do
-    HordeSupervisor.init(strategy: :one_for_one, members: :auto)
+    DynamicSupervisor.init(strategy: :one_for_one)
   end
 end

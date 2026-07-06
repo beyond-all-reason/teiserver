@@ -94,10 +94,6 @@ config :teiserver, TeiserverWeb.Endpoint,
       endpoint_defaults[:secret_key_base]
     )
 
-spring_listeners =
-  Application.get_env(:teiserver, Teiserver.SpringTcpServer)
-  |> Keyword.fetch!(:listeners)
-
 tei_defaults = Application.get_env(:teiserver, Teiserver)
 
 spring_listeners =
@@ -167,6 +163,16 @@ else
 
   config :teiserver, TeiserverWeb.Endpoint, https: nil
 end
+
+spring_defaults = Application.get_env(:teiserver, Teiserver.SpringTcpServer, false)
+
+config :teiserver, Teiserver.SpringTcpServer,
+  disable_startup:
+    Teiserver.ConfigHelpers.get_env(
+      "TEI_SPRING_IS_DISABLED",
+      spring_defaults[:disable_startup],
+      :bool
+    )
 
 config :teiserver, Teiserver.Account.Guardian,
   issuer: Teiserver.ConfigHelpers.get_env("TEI_GUARDIAN_ISSUER", "teiserver"),

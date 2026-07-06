@@ -47,7 +47,7 @@ defmodule Teiserver.Account.PartyLib do
 
   @spec party_exists?(T.party_id()) :: boolean()
   def party_exists?(party_id) do
-    case Horde.Registry.lookup(Teiserver.PartyRegistry, party_id) do
+    case Registry.lookup(Teiserver.PartyRegistry, party_id) do
       [{_pid, _value}] -> true
       _other -> false
     end
@@ -55,7 +55,7 @@ defmodule Teiserver.Account.PartyLib do
 
   @spec list_party_ids() :: [T.party_id()]
   def list_party_ids do
-    Horde.Registry.select(Teiserver.PartyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Registry.select(Teiserver.PartyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_parties() :: [T.party()]
@@ -146,7 +146,7 @@ defmodule Teiserver.Account.PartyLib do
 
   @spec get_party_pid(T.party_id()) :: pid() | nil
   def get_party_pid(party_id) do
-    case Horde.Registry.lookup(Teiserver.PartyRegistry, party_id) do
+    case Registry.lookup(Teiserver.PartyRegistry, party_id) do
       [{pid, _value}] -> pid
       _other -> nil
     end

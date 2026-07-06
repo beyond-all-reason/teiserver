@@ -28,7 +28,7 @@ defmodule Teiserver.Coordinator do
 
   @spec get_coordinator_pid() :: pid() | nil
   def get_coordinator_pid do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
+    case Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
       [{pid, _val}] ->
         pid
 
@@ -56,7 +56,7 @@ defmodule Teiserver.Coordinator do
   # Consul related stuff
   @spec get_consul_pid(T.lobby_id()) :: pid() | nil
   def get_consul_pid(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.ConsulRegistry, lobby_id) do
+    case Registry.lookup(Teiserver.ConsulRegistry, lobby_id) do
       [{pid, _val}] ->
         pid
 
@@ -131,7 +131,7 @@ defmodule Teiserver.Coordinator do
   # Balancer related stuff
   @spec get_balancer_pid(T.lobby_id()) :: pid() | nil
   def get_balancer_pid(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.BalancerRegistry, lobby_id) do
+    case Registry.lookup(Teiserver.BalancerRegistry, lobby_id) do
       [{pid, _val}] ->
         pid
 
@@ -290,6 +290,6 @@ defmodule Teiserver.Coordinator do
   # Debug stuff
   @spec list_all_internal_servers :: [T.lobby_id()]
   def list_all_internal_servers do
-    Horde.Registry.select(Teiserver.ServerRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Registry.select(Teiserver.ServerRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 end

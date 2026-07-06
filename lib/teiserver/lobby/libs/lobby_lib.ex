@@ -93,7 +93,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec list_lobby_ids :: [T.lobby_id()]
   def list_lobby_ids do
-    Horde.Registry.select(Teiserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Registry.select(Teiserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_lobbies() :: [T.lobby()]
@@ -106,7 +106,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   @spec list_throttled_lobbies(atom) :: [T.lobby()]
   def list_throttled_lobbies(type) do
     throttle_pid =
-      case Horde.Registry.lookup(Teiserver.ThrottleRegistry, "LobbyIndexThrottle") do
+      case Registry.lookup(Teiserver.ThrottleRegistry, "LobbyIndexThrottle") do
         [{pid, _value}] -> pid
         _no_match -> nil
       end
@@ -422,7 +422,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   def get_lobby_pid(lobby_id) when is_integer(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.LobbyRegistry, lobby_id) do
+    case Registry.lookup(Teiserver.LobbyRegistry, lobby_id) do
       [{pid, _value}] -> pid
       _no_match -> nil
     end
