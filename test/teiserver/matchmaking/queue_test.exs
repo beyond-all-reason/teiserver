@@ -3,6 +3,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueServer
+  alias Teiserver.Player.SessionRegistry
   alias Teiserver.Support.Polling
   use Teiserver.DataCase
 
@@ -17,7 +18,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
     }
 
   setup _context do
-    user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+    user = mk_user()
     id = UUID.uuid4()
 
     map = id |> stg_attr() |> AssetFixtures.create_map()
@@ -74,7 +75,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
       queue_pid: queue_pid,
       version: version
     } do
-      user2 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+      user2 = mk_user()
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user2.id)
       QueueServer.match_players(queue_pid)
@@ -146,7 +147,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
     end
 
     test "tracks party joins", %{queue_id: queue_id, version: version} do
-      user1 = GeneralTestLib.make_user()
+      user1 = mk_user()
       party_id = UUID.uuid4()
 
       # Create a party with 1 player (valid for team_size: 1 queue)
@@ -174,9 +175,13 @@ defmodule Teiserver.Matchmaking.QueueTest do
              }
     end
 
-    test "tracks wait time when matches are created", %{queue_id: queue_id, queue_pid: queue_pid, version: version} do
-      user1 = GeneralTestLib.make_user()
-      user2 = GeneralTestLib.make_user()
+    test "tracks wait time when matches are created", %{
+      queue_id: queue_id,
+      queue_pid: queue_pid,
+      version: version
+    } do
+      user1 = mk_user()
+      user2 = mk_user()
 
       # Join first user
       {:ok, _pid} = Matchmaking.join_queue(queue_id, version, user1.id)
@@ -202,5 +207,11 @@ defmodule Teiserver.Matchmaking.QueueTest do
       # Wait time should be calculated based on the time we passed
       assert stats.total_wait_time_s >= 0
     end
+  end
+
+  defp mk_user() do
+    user = GeneralTestLib.make_user()
+    SessionRegistry.register(user.id, nil)
+    user
   end
 end
