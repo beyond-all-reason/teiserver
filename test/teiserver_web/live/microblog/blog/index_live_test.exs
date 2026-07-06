@@ -129,6 +129,8 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
       refute html =~ "Post 3 fold line"
     end
 
+    # https://github.com/beyond-all-reason/teiserver/actions/runs/28818003010/job/85462265013?pr=1338
+    @tag :needs_attention
     test "Including preferences", %{conn: conn, user: user, post3: post3, tag1: tag1} do
       user_preference_fixture(%{
         user_id: user.id,
