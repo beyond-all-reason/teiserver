@@ -2,7 +2,6 @@ defmodule Teiserver.Matchmaking.QueueTest do
   alias Teiserver.AssetFixtures
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Matchmaking
-  alias Teiserver.Matchmaking.QueueRegistry
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Support.Polling
   use Teiserver.DataCase
@@ -78,7 +77,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
       user2 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user2.id)
-      send(queue_pid, :tick)
+      QueueServer.match_players(queue_pid)
       assert {:error, :already_queued} == Matchmaking.join_queue(queue_id, version, user.id)
     end
   end
@@ -175,7 +174,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
              }
     end
 
-    test "tracks wait time when matches are created", %{queue_id: queue_id, version: version} do
+    test "tracks wait time when matches are created", %{queue_id: queue_id, queue_pid: queue_pid, version: version} do
       user1 = GeneralTestLib.make_user()
       user2 = GeneralTestLib.make_user()
 
@@ -194,10 +193,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
       # Join second user (this should trigger a match)
       {:ok, _pid} = Matchmaking.join_queue(queue_id, version, user2.id)
 
-      # Trigger the tick with a specific time for testing
-      now = DateTime.utc_now()
-      queue_pid = QueueRegistry.lookup(queue_id)
-      send(queue_pid, {:tick, now})
+      QueueServer.match_players(queue_pid)
 
       # Check that wait time was recorded
       {:ok, stats} = Matchmaking.get_stats(queue_id)
