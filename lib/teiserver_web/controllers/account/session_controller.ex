@@ -299,7 +299,6 @@ defmodule TeiserverWeb.Account.SessionController do
   @spec password_reset_form(Conn.t(), map()) :: Conn.t()
   def password_reset_form(conn, %{"value" => value}) do
     code = Account.get_code(value, preload: [:user])
-    changeset = Account.change_user(code.user)
 
     cond do
       code == nil ->
@@ -321,6 +320,8 @@ defmodule TeiserverWeb.Account.SessionController do
         |> render("result.html")
 
       true ->
+        changeset = Account.change_user(code.user)
+
         conn
         |> add_breadcrumb(name: "Password", url: conn.request_path)
         |> assign(:changeset, changeset)
