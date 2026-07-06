@@ -521,7 +521,7 @@ defmodule TeiserverWeb.Router do
   end
 
   scope "/moderation", TeiserverWeb.Moderation, as: :moderation do
-    pipe_through([:browser, :app_layout, :protected, :tailwind])
+    pipe_through([:browser, :protected, :tailwind])
 
     live_session :actions,
       layout: {TeiserverWeb.Layouts, :moderation_tw},
@@ -565,7 +565,7 @@ defmodule TeiserverWeb.Router do
   end
 
   scope "/moderation", TeiserverWeb.Moderation, as: :moderation_tw do
-    pipe_through([:browser, :app_layout, :protected, :tailwind])
+    pipe_through([:browser, :protected, :tailwind])
 
     live_session :banned_domains,
       layout: {TeiserverWeb.Layouts, :moderation_tw},

@@ -159,8 +159,8 @@ defmodule TeiserverWeb.NavComponents do
   @doc """
   <TeiserverWeb.NavComponents.top_navbar_tw active={"string"} />
   """
-  attr :current_user, :map, required: true
-  attr :active, :string, required: true
+  attr :current_user, :map
+  attr :active, :string
 
   def top_navbar_tw(assigns) do
     ~H"""

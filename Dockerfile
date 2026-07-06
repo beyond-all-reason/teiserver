@@ -51,12 +51,12 @@ COPY config/config.exs config/
 COPY config/prod.exs config/
 RUN mix deps.compile
 
+COPY lib lib
 COPY priv priv
 COPY assets assets
 RUN mix assets.deploy
 
 # Compile for prod
-COPY lib lib
 RUN mix compile
 
 # Create release files
