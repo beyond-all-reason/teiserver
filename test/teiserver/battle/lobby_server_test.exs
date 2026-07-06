@@ -61,6 +61,8 @@ defmodule Teiserver.Battle.LobbyServerTest do
     LobbyLib.stop_lobby_server(lobby_id)
   end
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/28818451887/job/85463771972?pr=1339
+  @tag :needs_attention
   test "rename test" do
     host = TeiserverTestLib.new_user()
 
