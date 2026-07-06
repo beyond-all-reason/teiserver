@@ -159,8 +159,7 @@ defmodule Teiserver.Application do
         TeiserverWeb.Endpoint,
 
         # Start the ranch TCP listener process for the Spring protocol
-        spring_server_child(Teiserver.RawSpringTcpServer, :tcp)
-        |> IO.inspect(label: "tcp child spec?"),
+        spring_server_child(Teiserver.RawSpringTcpServer, :tcp),
         # Start the ranch TLS listener process for the Spring protocol
         spring_server_child(Teiserver.SSLSpringTcpServer, :tls),
 
