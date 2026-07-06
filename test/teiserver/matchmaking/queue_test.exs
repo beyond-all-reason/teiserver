@@ -2,6 +2,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
   alias Teiserver.AssetFixtures
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Matchmaking
+  alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Support.Polling
@@ -80,6 +81,68 @@ defmodule Teiserver.Matchmaking.QueueTest do
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user2.id)
       QueueServer.match_players(queue_pid)
       assert {:error, :already_queued} == Matchmaking.join_queue(queue_id, version, user.id)
+    end
+  end
+
+  describe "pairing" do
+    test "get event when paired", %{user: user, queue_id: queue_id, version: version} do
+      user2 = mk_user()
+      assert {:ok, queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
+      assert {:ok, _data} = Matchmaking.join_queue(queue_id, version, user2.id)
+      QueueServer.match_players(queue_pid)
+
+      assert_receive {:"$gen_cast",
+                      {:matchmaking, {:notify_found, ^queue_id, _room_pid, _timeout}}}
+
+      assert_receive {:"$gen_cast",
+                      {:matchmaking, {:notify_found, ^queue_id, _room_pid, _timeout}}}
+    end
+
+    test "get `lost` event when peer decline", %{user: user, queue_id: queue_id, version: version} do
+      user2 = mk_user(register?: false)
+      assert {:ok, queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
+      assert {:ok, _data} = Matchmaking.join_queue(queue_id, version, user2.id)
+      QueueServer.match_players(queue_pid)
+
+      assert_receive {:"$gen_cast",
+                      {:matchmaking, {:notify_found, ^queue_id, room_pid, _timeout}}}
+
+      Matchmaking.cancel(room_pid, user2.id)
+      assert_receive {:"$gen_cast", {:matchmaking, {:lost, :cancel}}}
+    end
+
+    test "get `lost` event when peer decline after ready", %{
+      user: user,
+      queue_id: queue_id,
+      version: version
+    } do
+      user2 = mk_user()
+      assert {:ok, queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
+      assert {:ok, _data} = Matchmaking.join_queue(queue_id, version, user2.id)
+      QueueServer.match_players(queue_pid)
+
+      assert_receive {:"$gen_cast",
+                      {:matchmaking, {:notify_found, ^queue_id, room_pid, _timeout}}}
+
+      Matchmaking.ready(room_pid, %{user_id: user.id, name: user.name, password: "foo123"})
+      assert_receive {:"$gen_cast", {:matchmaking, {:found_update, 1, _room_pid}}}
+      Matchmaking.cancel(room_pid, user2.id)
+      assert_receive {:"$gen_cast", {:matchmaking, {:lost, :cancel}}}
+    end
+
+    test "both player get lost when timeout", %{user: user, queue_id: queue_id, version: version} do
+      user2 = mk_user()
+      assert {:ok, queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
+      assert {:ok, _data} = Matchmaking.join_queue(queue_id, version, user2.id)
+      QueueServer.match_players(queue_pid)
+
+      assert_receive {:"$gen_cast",
+                      {:matchmaking, {:notify_found, ^queue_id, room_pid, _timeout}}}
+
+      Matchmaking.ready(room_pid, %{user_id: user.id, name: user.name, password: "foo123"})
+      PairingRoom.timeout(room_pid)
+      assert_receive {:"$gen_cast", {:matchmaking, {:lost, :timeout}}}
+      assert_receive {:"$gen_cast", {:matchmaking, {:lost, :timeout}}}
     end
   end
 
@@ -209,9 +272,9 @@ defmodule Teiserver.Matchmaking.QueueTest do
     end
   end
 
-  defp mk_user() do
+  defp mk_user(opts \\ []) do
     user = GeneralTestLib.make_user()
-    SessionRegistry.register(user.id, nil)
+    if Keyword.get(opts, :register?, true), do: SessionRegistry.register(user.id, nil)
     user
   end
 end
