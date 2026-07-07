@@ -13,9 +13,7 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
          true <- OAuth.can_create_code?(app),
          {:ok, _parsed_scopes} <- check_requested_scopes(app.scopes, params["scope"]),
          {:ok, redir_uri} <- OAuth.get_redirect_uri(app, Map.get(conn.params, "redirect_uri")) do
-      authorized_apps = OAuth.list_authorized_applications(conn.assigns.current_user.id)
-
-      if Enum.find(authorized_apps, &(&1.id == app.id)) != nil do
+      if auto_redirect?(app, conn.assigns.current_user.id) do
         params = Map.put(params, "response_type", "code")
         do_generate_code(conn, app, redir_uri, params)
       else
@@ -167,6 +165,18 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
     if MapSet.size(invalid_scopes) == 0,
       do: {:ok, scopes},
       else: {:error, {:invalid_scopes, invalid_scopes}}
+  end
+
+  # do not allow auto redirect for public app since this could
+  # allow any other local application to trigger the flow and
+  # get the token for the lobby.
+  defp auto_redirect?(app, user_id) do
+    if OAuth.confidential_app?(app) do
+      authorized_apps = OAuth.list_authorized_applications(user_id)
+      Enum.find(authorized_apps, &(&1.id == app.id)) != nil
+    else
+      false
+    end
   end
 
   defp error_redirect_uri(conn, %URI{} = redir_url, error, description) do

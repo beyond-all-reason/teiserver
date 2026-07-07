@@ -18,6 +18,9 @@ defmodule Teiserver.OAuth do
   defdelegate allowed_scopes(), to: ScopeLib
   defdelegate scope_description(scope), to: ScopeLib
 
+  @spec confidential_app?(Application.t()) :: boolean()
+  defdelegate confidential_app?(app), to: ApplicationLib, as: :confidential?
+
   # @spec change_application(Application.t(), map() | nil) :: Ecto.Changeset
   def change_application(%Application{} = app, attrs \\ %{}) do
     Application.changeset(app, attrs)

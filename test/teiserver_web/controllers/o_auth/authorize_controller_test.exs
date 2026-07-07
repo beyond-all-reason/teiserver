@@ -70,7 +70,7 @@ defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
       assert resp.status == 400
     end
 
-    test "automatically get code when app already authorized", %{
+    test "no automatic authorize for public client", %{
       conn: conn,
       app: app,
       owner: owner
@@ -90,9 +90,7 @@ defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
       }
 
       resp = get(conn, ~p"/oauth/authorize?#{query}")
-      assert redired = redirected_to(resp, 302)
-      parsed = URI.parse(redired).query |> URI.decode_query()
-      {:ok, %OAuth.Code{}} = OAuth.get_valid_code(parsed["code"])
+      assert html_response(resp, 200) =~ app.name
     end
 
     test "automatically get code when app already authorized (confidential client)", %{
@@ -126,27 +124,6 @@ defmodule TeiserverWeb.OAuth.AuthorizeControllerTest do
       assert redired = redirected_to(resp, 302)
       parsed = URI.parse(redired).query |> URI.decode_query()
       {:ok, %OAuth.Code{}} = OAuth.get_valid_code(parsed["code"])
-    end
-
-    test "authorized public client still must pass a code challenge", %{
-      conn: conn,
-      app: app,
-      owner: owner
-    } do
-      # because we consider an app to be authorized when there is at least one code/token
-      # that'll likely change as it's not a great modelling.
-      OAuthFixtures.token_attrs(owner, app) |> OAuthFixtures.create_token()
-
-      redir_uri = "http://127.0.0.1/oauth/callback"
-
-      query = %{
-        client_id: app.uid,
-        redirect_uri: redir_uri,
-        state: "some random state"
-      }
-
-      resp = get(conn, ~p"/oauth/authorize?#{query}")
-      assert resp.status == 400
     end
   end
 
