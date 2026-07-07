@@ -20,8 +20,7 @@ jobs:
       contents: read
     env:
       REGISTRY: ghcr.io
-#      IMAGE: ghcr.io/${{ github.repository }}
-      IMAGE: ghcr.io/chocobocoding/teiserver
+      IMAGE: ghcr.io/${{ github.repository }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
