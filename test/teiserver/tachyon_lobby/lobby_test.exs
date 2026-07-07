@@ -10,6 +10,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   use Teiserver.DataCase
 
+  import Teiserver.Support.LobbyHelpers, only: [mk_start_params: 1]
   import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until_nil: 1]
 
   @moduletag :tachyon
@@ -2025,27 +2026,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert not is_map_key(t1, :bots)
       assert not is_map_key(t2, :players)
     end
-  end
-
-  defp mk_start_params(teams) do
-    %LT.StartParams{
-      creator_data: %{id: @default_user_id, name: "name-#{@default_user_id}"},
-      creator_pid: self(),
-      name: "test create lobby",
-      map_name: "irrelevant map name",
-      game_version: "fake game version",
-      engine_version: "fake engine version",
-      ally_team_config:
-        Enum.map(teams, fn max_team ->
-          x = for _i <- 1..max_team, do: %{max_players: 1}
-
-          %LT.AllyTeamConfig{
-            max_teams: max_team,
-            start_box: %{top: 0, left: 0, bottom: 1, right: 0.2},
-            teams: x
-          }
-        end)
-    }
   end
 
   defp mk_player(user_id) do
