@@ -5,6 +5,7 @@ defmodule Teiserver.TachyonLobby do
 
   alias Teiserver.Account.User
   alias Teiserver.Asset
+  alias Teiserver.Cluster
   alias Teiserver.Helpers.PubSubHelper
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.TachyonLobby
@@ -54,8 +55,12 @@ defmodule Teiserver.TachyonLobby do
   end
 
   def create(%LT.StartParams{} = start_params) do
+    id = Lobby.gen_id()
+    routing_key = {:lobby, id}
+    mfa = {TachyonLobby.Supervisor, :start_lobby, [id, start_params]}
+
     with :ok <- validate_start_params(start_params),
-         {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
+         {:ok, %{pid: pid, id: id}} <- Cluster.replicated_apply(routing_key, mfa),
          {:ok, %LT.Details{} = details} <- Lobby.get_details(id) do
       {:ok, pid, details}
     end
