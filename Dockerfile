@@ -53,10 +53,10 @@ RUN mix deps.compile
 
 COPY priv priv
 COPY assets assets
+COPY lib lib
 RUN mix assets.deploy
 
 # Compile for prod
-COPY lib lib
 RUN mix compile
 
 # Create release files
