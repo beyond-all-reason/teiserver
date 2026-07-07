@@ -8,8 +8,6 @@ defmodule Teiserver.Account.RatingLib do
 
   use TeiserverWeb, :library
 
-  require Logger
-
   # Functions
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-chart-column"

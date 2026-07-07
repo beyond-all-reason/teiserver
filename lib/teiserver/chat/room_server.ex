@@ -1,6 +1,7 @@
 defmodule Teiserver.Chat.RoomServer do
   @moduledoc false
   alias Phoenix.PubSub
+  alias Teiserver.Account.User
   alias Teiserver.Chat
   alias Teiserver.Chat.RoomRegistry
   alias Teiserver.Data.Types, as: T
@@ -8,12 +9,10 @@ defmodule Teiserver.Chat.RoomServer do
 
   use GenServer, restart: :temporary
 
-  require Logger
-
   @type room :: %{
           name: String.t(),
-          members: MapSet.t(T.userid()),
-          author_id: T.userid(),
+          members: MapSet.t(User.id()),
+          author_id: User.id(),
           topic: String.t(),
           password: String.t(),
           monitors: MC.t()
@@ -30,7 +29,7 @@ defmodule Teiserver.Chat.RoomServer do
     :exit, {:noproc, _details} -> nil
   end
 
-  @spec join_room(String.t(), T.userid(), pid() | nil) ::
+  @spec join_room(String.t(), User.id(), pid() | nil) ::
           {:ok, :joined | :already_present} | {:error, :invalid_room}
   def join_room(name, user_id, pid \\ self()) do
     name |> via_tuple() |> GenServer.call({:join_room, user_id, pid})
@@ -38,7 +37,7 @@ defmodule Teiserver.Chat.RoomServer do
     :exit, {:noproc, _details} -> {:error, :invalid_room}
   end
 
-  @spec leave_room(String.t(), T.userid()) :: :ok
+  @spec leave_room(String.t(), User.id()) :: :ok
   def leave_room(name, user_id) do
     name |> via_tuple() |> GenServer.call({:leave_room, user_id})
   catch
@@ -59,14 +58,14 @@ defmodule Teiserver.Chat.RoomServer do
     :exit, {:noproc, _details} -> :ok
   end
 
-  @spec send_message(String.t(), T.userid(), String.t()) :: :ok
+  @spec send_message(String.t(), User.id(), String.t()) :: :ok
   def send_message(name, user_id, message) do
     name |> via_tuple() |> GenServer.call({:send_message, user_id, message})
   catch
     :exit, {:noproc, _details} -> :ok
   end
 
-  @spec send_message_ex(String.t(), T.userid(), String.t()) :: :ok
+  @spec send_message_ex(String.t(), User.id(), String.t()) :: :ok
   def send_message_ex(name, user_id, message) do
     name |> via_tuple() |> GenServer.call({:send_message_ex, user_id, message})
   catch

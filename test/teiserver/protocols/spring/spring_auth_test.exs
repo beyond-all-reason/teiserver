@@ -138,18 +138,17 @@ IGNORELISTEND\n"
     assert reply == "SAIDPRIVATE #{user2.name} What about now?\n"
   end
 
-  # TODO: Make this work
-  # test "SAYPRIVATE with special characters", %{socket: socket1, user: user} = context do
-  #   user2 = new_user()
-  #   %{socket: socket2} = auth_setup(context, user2)
-  #   reply = _recv_raw(socket1)
-  #   assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
-  #   assert reply =~ " LuaLobby Chobby\n"
+  test "SAYPRIVATE with special characters", %{socket: socket1, user: user} = context do
+    user2 = new_user()
+    %{socket: socket2} = auth_setup(context, user2)
+    reply = _recv_raw(socket1)
+    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
+    assert reply =~ " LuaLobby Chobby\n"
 
-  #   _send_raw(socket2, "SAYPRIVATE #{user.name} тест!\n")
-  #   reply = _recv_raw(socket1)
-  #   assert reply == "SAIDPRIVATE #{user2.name} тест!\n"
-  # end
+    _send_raw(socket2, "SAYPRIVATE #{user.name} тест!\n")
+    reply = _recv_raw(socket1)
+    assert reply == "SAIDPRIVATE #{user2.name} тест!\n"
+  end
 
   test "FRIENDLIST, ADDFRIEND, REMOVEFRIEIND, ACCEPTFRIENDREQUEST, DECLINEFRIENDREQUEST",
        %{
@@ -257,6 +256,8 @@ CLIENTS test_room #{user.name}\n"
     assert reply == :timeout
   end
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/28375283350/job/84063176592?pr=1315
+  @tag :needs_attention
   test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE",
        %{socket: socket1, user: user1} = context do
     hash = "-1540855590"
@@ -434,9 +435,9 @@ CLIENTS test_room #{user.name}\n"
 
     # Check our starting situation
     assert UserCacheLib.get_user_by_name(new_name) == nil
-    assert UserCacheLib.get_user_by_name(old_name) != nil
-    assert UserCacheLib.get_user_by_id(userid) != nil
-    assert Client.get_client_by_id(userid) != nil
+    assert %{name: ^old_name} = UserCacheLib.get_user_by_name(old_name)
+    assert %{id: ^userid} = UserCacheLib.get_user_by_id(userid)
+    assert %{userid: ^userid} = Client.get_client_by_id(userid)
 
     # Rename with an invalid name
     _send_raw(socket, "RENAMEACCOUNT Y--Y\n")

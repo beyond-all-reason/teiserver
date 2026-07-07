@@ -4,7 +4,7 @@
     name: "reports",
     text: "Reports",
     icon_class: "fa-solid",
-    link: Routes.moderation_report_path(@conn, :index)
+    link: ~p"/moderation/report"
   )}
 
   {central_component("menu_card",
@@ -12,7 +12,7 @@
     name: "actions",
     text: "Actions",
     icon_class: "fa-solid",
-    link: Routes.moderation_action_path(@conn, :index)
+    link: ~p"/moderation/action"
   )}
 
   {central_component("menu_card",
@@ -20,18 +20,30 @@
     name: "bans",
     text: "Bans",
     icon_class: "fa-solid",
-    link: Routes.moderation_ban_path(@conn, :index)
+    link: ~p"/moderation/ban"
   )}
 
-  <.menu_card icon="text-slash" url={~p"/moderation/banned_phrases"}>
+  <.menu_card
+    :if={allow?(@conn, "Moderator")}
+    icon="text-slash"
+    url={~p"/moderation/banned_phrases"}
+  >
     Banned Phrases
   </.menu_card>
 
-  <.menu_card icon="globe" url={~p"/moderation/banned_domains"}>
+  <.menu_card
+    :if={allow?(@conn, "Moderator")}
+    icon="globe"
+    url={~p"/moderation/banned_domains"}
+  >
     Banned domains
   </.menu_card>
 
-  <.menu_card icon="location-dot" url={~p"/moderation/banned_ips"}>
+  <.menu_card
+    :if={allow?(@conn, "Moderator")}
+    icon="location-dot"
+    url={~p"/moderation/banned_ips"}
+  >
     Banned IPs
   </.menu_card>
 </div>

@@ -63,21 +63,22 @@ defmodule Teiserver.MixProject do
   defp deps do
     [
       # Default phoenix deps
-      {:phoenix, "~> 1.7.22"},
+      {:phoenix, "~> 1.7.24"},
       {:phoenix_ecto, "~> 4.6"},
       {:ecto_sql, "~> 3.14"},
       {:postgrex, ">= 0.22.2"},
       {:phoenix_html, "~> 4.2"},
       {:phoenix_live_reload, "~> 1.5", only: :dev},
+      {:tailwind, "~> 0.4.1", runtime: Mix.env() == :dev},
       {:phoenix_live_view, "~> 1.1"},
       {:lazy_html, ">= 0.1.0", only: :test},
       # see https://hexdocs.pm/phoenix_html/changelog.html#v4-0-0-2023-12-19
       {:phoenix_html_helpers, "~> 1.0"},
       {:floki, ">= 0.37.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8"},
-      {:esbuild, "~> 0.9", runtime: Mix.env() == :dev},
-      {:bamboo, "~> 2.1"},
-      {:bamboo_smtp, "~> 4.0"},
+      {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
+      {:swoosh, "~> 1.26"},
+      {:gen_smtp, "~> 1.3.0"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:prom_ex, "~> 1.11.0"},
@@ -115,6 +116,7 @@ defmodule Teiserver.MixProject do
        ref: "cde84a5921ee8b7a8545997c904f657660e210e0",
        override: true},
       {:ex_ulid, "~> 0.1.0"},
+      {:hammer, "~> 7.0"},
       {:mock, "~> 0.3.0", only: :test},
       # Provides a DSL on top of Ecto.Schema to define schemas with typespecs without all the boilerplate code.
       {:typed_ecto_schema, "~> 0.4.3", runtime: false},
@@ -128,7 +130,6 @@ defmodule Teiserver.MixProject do
       {:csv, "~> 2.4"},
       {:mdex, "~> 0.2"},
       {:ranch, "~> 1.8"},
-      {:horde, "~> 0.10"},
       {:etop, "~> 0.7.0"},
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},
@@ -138,6 +139,7 @@ defmodule Teiserver.MixProject do
       # Transient libs we are pinning because of other requirements
       {:decimal, "~> 3.0", override: true},
       {:hackney, "~> 4.0", override: true},
+      {:quic, "~> 1.4.4", override: true},
 
       # gun is a transitive dependency of nostrum. The version 2.1.0 works,
       # while the next one, 2.2.0 produces the following error when starting
@@ -170,7 +172,7 @@ defmodule Teiserver.MixProject do
        git: "https://github.com/geekingfrog/websocket_sync_client.git",
        ref: "d655018589f9ade836afb8df8ed5f45f53500173",
        only: [:dev, :test]},
-      {:req, "~> 0.5.0", only: [:dev, :test]},
+      {:req, "~> 0.6.2"},
       {:nimble_totp, "~> 1.0"},
       {:eqrcode, "~> 0.2.1"},
       {:recon, "~> 2.5.6"}
@@ -189,8 +191,11 @@ defmodule Teiserver.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.build": ["compile", "tailwind teiserver", "esbuild teiserver"],
       "assets.deploy": [
-        "esbuild default --minify",
+        "tailwind teiserver --minify",
+        "esbuild teiserver --minify",
         "sass dark --no-source-map --style=compressed",
         "sass light --no-source-map --style=compressed",
         "phx.digest"
@@ -217,7 +222,7 @@ defmodule Teiserver.MixProject do
   defp package do
     [
       files: ["lib", "mix.exs", "README.md", "license.md"],
-      maintainers: ["Teifion Jordan"],
+      maintainers: ["Beyond All Reason"],
       licenses: ["MIT"],
       links: %{
         Changelog: "https://github.com/beyond-all-reason/teiserver/blob/master/changelog.md",

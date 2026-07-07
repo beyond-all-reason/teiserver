@@ -11,8 +11,6 @@ defmodule Mix.Tasks.Teiserver.UpdateUserPermissions do
 
   use Mix.Task
 
-  require Logger
-
   def run(_args) do
     Application.ensure_all_started(:teiserver)
     user_ids = get_user_ids()

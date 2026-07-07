@@ -8,8 +8,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
   It also has some associated state for telemetry.
   """
 
+  alias Teiserver.Account.User
   alias Teiserver.Battle.MatchLib
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.Algo
@@ -82,14 +82,14 @@ defmodule Teiserver.Matchmaking.QueueServer do
           # also store pairing rooms
           monitors: MC.t(),
           # list of pairing rooms and which players are in it
-          pairings: [{pid(), [T.userid()]}],
+          pairings: [{pid(), [User.id()]}],
 
           # a buffer when a party is joining, to make sure all player are indeed
           # committed to joining this queue
           pending_parties: %{
             Party.id() => %{
-              waiting_for: [T.userid()],
-              joined: [T.userid()],
+              waiting_for: [User.id()],
+              joined: [User.id()],
               sess_pids: [pid()],
               member: Member.t(),
               tref: :timer.tref()
@@ -182,7 +182,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @doc """
   Join the specified queue
   """
-  @spec join_queue(id(), version :: String.t(), T.userid(), Party.id() | nil) :: join_result()
+  @spec join_queue(id(), version :: String.t(), User.id(), Party.id() | nil) :: join_result()
   def join_queue(queue_id, version, user_id, party_id) do
     sess_pid = self()
 
@@ -207,7 +207,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   This is to ensure all party member are there as a unit and avoid race where
   a member could disconnect in the middle of the joining process.
   """
-  @spec party_join_queue(id(), version :: String.t(), Party.id(), [T.userid()]) ::
+  @spec party_join_queue(id(), version :: String.t(), Party.id(), [User.id()]) ::
           {:ok, queue_pid :: pid()} | {:error, reason :: term()}
   def party_join_queue(queue_id, version, party_id, player_ids) do
     game_type = queue_id |> via_tuple() |> GenServer.call(:get_game_type)
@@ -223,7 +223,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   Leave the specified queue. If the given player is a member of a party, then
   the entire party will leave the queue
   """
-  @spec leave_queue(id(), T.userid()) :: leave_result()
+  @spec leave_queue(id(), User.id()) :: leave_result()
   def leave_queue(queue_id, player_id) do
     queue_id |> via_tuple() |> GenServer.call({:leave_queue, player_id})
   catch
@@ -250,6 +250,12 @@ defmodule Teiserver.Matchmaking.QueueServer do
       name: via_tuple(initial_state.id, initial_state.queue)
     )
   end
+
+  @doc """
+  used for testing only, to force a pairing of players so one can test the rest
+  of the flow.
+  """
+  def match_players(queue_pid) when is_pid(queue_pid), do: send(queue_pid, :tick)
 
   @impl GenServer
   def init(state) do
@@ -587,7 +593,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     Map.update!(state, :pending_parties, &Map.delete(&1, party_id))
   end
 
-  @spec member_can_join_queue?([T.userid()], state()) :: :ok | {:error, reason :: term()}
+  @spec member_can_join_queue?([User.id()], state()) :: :ok | {:error, reason :: term()}
   defp member_can_join_queue?(player_ids, state) do
     member_ids =
       Enum.flat_map(state.members, fn m -> m.player_ids end)

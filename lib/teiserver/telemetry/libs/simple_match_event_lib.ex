@@ -2,6 +2,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventLib do
   @moduledoc false
 
   alias Phoenix.PubSub
+  alias Teiserver.Account.User
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.SimpleMatchEvent
   alias Teiserver.Telemetry.SimpleMatchEventQueries
@@ -15,7 +16,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventLib do
   @spec icon() :: String.t()
   def icon, do: "fa-chess-pawn"
 
-  @spec log_simple_match_event(T.userid(), T.match_id(), String.t(), non_neg_integer) ::
+  @spec log_simple_match_event(User.id(), T.match_id(), String.t(), non_neg_integer) ::
           {:error, Ecto.Changeset} | {:ok, SimpleMatchEvent}
   def log_simple_match_event(userid, match_id, event_type_name, game_time) do
     event_type_id = Telemetry.get_or_add_simple_match_event_type(event_type_name)

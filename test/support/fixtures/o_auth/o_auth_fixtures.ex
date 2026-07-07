@@ -1,6 +1,7 @@
 defmodule Teiserver.OAuthFixtures do
   @moduledoc false
   alias Teiserver.Account
+  alias Teiserver.OAuth
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.Code
   alias Teiserver.OAuth.Credential
@@ -34,7 +35,7 @@ defmodule Teiserver.OAuthFixtures do
     {verifier, challenge, method} = generate_challenge()
 
     %{
-      value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(),
+      value: OAuth.generate_token_value(),
       owner: user,
       owner_id: user.id,
       application: app,
@@ -58,7 +59,7 @@ defmodule Teiserver.OAuthFixtures do
     now = DateTime.utc_now()
 
     %{
-      value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
+      value: OAuth.generate_token_value(),
       owner: user,
       owner_id: user.id,
       application_id: application.id,
@@ -73,7 +74,7 @@ defmodule Teiserver.OAuthFixtures do
     now = DateTime.utc_now()
 
     %{
-      value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
+      value: OAuth.generate_token_value(),
       bot: bot,
       bot_id: bot.id,
       application_id: application.id,

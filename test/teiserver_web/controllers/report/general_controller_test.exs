@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Report.GeneralControllerTest do
   end
 
   test "index", %{conn: conn} do
-    conn = get(conn, Routes.ts_reports_general_path(conn, :index))
+    conn = get(conn, ~p"/teiserver/reports")
 
     assert html_response(conn, 200)
   end

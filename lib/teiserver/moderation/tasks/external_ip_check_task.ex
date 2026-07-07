@@ -2,34 +2,39 @@ defmodule Teiserver.Moderation.Tasks.ExternalIPCheckTask do
   @moduledoc """
   Downloads the IP API data
   """
-  alias Req.Response
   alias Teiserver.Config
+  alias Teiserver.IpCheck
+  alias Teiserver.IpCheck.IpInfo
 
   require Logger
 
-  def query_ip(ip) do
-    key = Config.get_site_config_cache("teiserver.External IP check key")
-    endpoint = Config.get_site_config_cache("teiserver.External IP check endpoint")
+  @spec get_ban_reasons(ip :: String.t()) :: [atom()]
+  def get_ban_reasons(ip) do
+    if Config.get_site_config_cache("teiserver.External IP check enabled") do
+      case IpCheck.query_ip(ip) do
+        {:ok, %IpInfo{} = result} ->
+          [
+            {:is_abuser, :abuser?, "teiserver.external_ip_ban_is_abuser"},
+            {:is_bogon, :bogon?, "teiserver.external_ip_ban_is_bogon"},
+            {:is_crawler, :crawler?, "teiserver.external_ip_ban_is_crawler"},
+            {:is_datacenter, :datacenter?, "teiserver.external_ip_ban_is_datacenter"},
+            {:is_proxy, :proxy?, "teiserver.external_ip_ban_is_proxy"},
+            {:is_tor, :tor?, "teiserver.external_ip_ban_is_tor"},
+            {:is_vpn, :vpn?, "teiserver.external_ip_ban_is_vpn"}
+          ]
+          |> Enum.map(fn {reason, result_key, reason_enabled_key} ->
+            if Config.get_site_config_cache(reason_enabled_key) and Map.get(result, result_key),
+              do: reason,
+              else: nil
+          end)
+          |> Enum.reject(&is_nil/1)
 
-    case Req.get(endpoint, params: [q: ip, key: key]) do
-      {:ok, %Response{body: body}} ->
-        [
-          {:is_abuser, "teiserver.external_ip_ban_is_abuser"},
-          {:is_bogon, "teiserver.external_ip_ban_is_bogon"},
-          {:is_crawler, "teiserver.external_ip_ban_is_crawler"},
-          {:is_datacenter, "teiserver.external_ip_ban_is_datacenter"},
-          {:is_proxy, "teiserver.external_ip_ban_is_proxy"},
-          {:is_tor, "teiserver.external_ip_ban_is_tor"},
-          {:is_vpn, "teiserver.external_ip_ban_is_vpn"}
-        ]
-        |> Enum.filter(fn {k, v} ->
-          Config.get_site_config_cache(v) and body[to_string(k)]
-        end)
-        |> Enum.map(fn {k, _v} -> k end)
-
-      {:error, error} ->
-        Logger.error("Failed to lookup ip #{ip} - #{inspect(error)}")
-        []
+        {:error, reason} ->
+          Logger.error("Failed to get ban reasons for ip #{ip} - #{inspect(reason)}")
+          []
+      end
+    else
+      []
     end
   end
 end

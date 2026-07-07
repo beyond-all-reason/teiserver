@@ -29,7 +29,7 @@
         <br /><br />
 
         <form
-          action={Routes.ts_reports_exports_path(@conn, :show, "player_ratings")}
+          action={~p"/teiserver/reports/exports/player_ratings"}
           method="post"
           class="form-horizontal"
         >

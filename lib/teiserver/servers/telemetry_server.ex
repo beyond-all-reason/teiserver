@@ -4,8 +4,8 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Client
   alias Teiserver.Lobby
+
   use GenServer
-  require Logger
 
   @client_states ~w(lobby menu player spectator total)a
   @tick_period 9_000
@@ -233,15 +233,15 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     #   end
 
     process_counts = %{
-      system_servers: Horde.Registry.count(Teiserver.ServerRegistry),
-      throttle_servers: Horde.Registry.count(Teiserver.ThrottleRegistry),
-      consul_servers: Horde.Registry.count(Teiserver.ConsulRegistry),
-      balancer_servers: Horde.Registry.count(Teiserver.BalancerRegistry),
-      lobby_servers: Horde.Registry.count(Teiserver.LobbyRegistry),
-      client_servers: Horde.Registry.count(Teiserver.ClientRegistry),
-      party_servers: Horde.Registry.count(Teiserver.PartyRegistry),
-      queue_wait_servers: Horde.Registry.count(Teiserver.QueueWaitRegistry),
-      queue_match_servers: Horde.Registry.count(Teiserver.QueueMatchRegistry)
+      system_servers: Registry.count(Teiserver.ServerRegistry),
+      throttle_servers: Registry.count(Teiserver.ThrottleRegistry),
+      consul_servers: Registry.count(Teiserver.ConsulRegistry),
+      balancer_servers: Registry.count(Teiserver.BalancerRegistry),
+      lobby_servers: Registry.count(Teiserver.LobbyRegistry),
+      client_servers: Registry.count(Teiserver.ClientRegistry),
+      party_servers: Registry.count(Teiserver.PartyRegistry),
+      queue_wait_servers: Registry.count(Teiserver.QueueWaitRegistry),
+      queue_match_servers: Registry.count(Teiserver.QueueMatchRegistry)
     }
 
     process_counts =

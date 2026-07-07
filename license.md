@@ -1,4 +1,4 @@
-Copyright (c) 2021 Teifion Jordan
+Copyright (c) 2021 Beyond All Reason
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

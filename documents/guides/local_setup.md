@@ -2,6 +2,11 @@
 
 This guide should contain all the necessary steps for setting up Teiserver locally.
 
+## Using the devcontainer
+A simple way to get started for a basic local setup  is to use [Visual Studio Code](https://code.visualstudio.com/) 
+(vscode) together with the [devcontainers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+plugin. This will start a [Docker](https://www.docker.com/products/docker-desktop/) container with all the requirements pre-installed.
+
 ## Using mise
 
 You can use [mise](https://mise.jdx.dev/dev-tools/) to automatically manage the
@@ -105,3 +110,12 @@ mix sass.install
 ## What's next?
 
 You should now be ready to start developing Teiserver!<br> Check out the [development guide](/documents/guides/development.md) to help you with getting started.
+
+# Container dependencies
+
+There are some dependencies that run in containers. To start them all: `podman compose up`.
+
+## Email
+
+We use [mailpit](https://mailpit.axllent.org/) as a dev smtp server. It exposes a [web UI](http://localhost:8025/)
+to check the sent emails.

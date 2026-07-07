@@ -43,14 +43,6 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
       {"reset-approval", [],
        "Resets the list of approved players to just the ones present at the moment (approved players are able to join even if it is locked and without needing a password). Requires boss privileges.",
        :everybody},
-      {"meme", ["meme"],
-       "A predefined bunch of settings for meme games. It's all Rikerss' fault. Requires boss privileges.
-- ticks: Ticks only, don't go Cortex!
-- Deathmatch:  35k metal, 1k energy, everything builds fast, runs fast and hits hard. No anti-nuke
-- rich: Infinite money
-- poor: No money generation
-- crazy: Random combination of several settings
-- undo: Removes all meme effects", :everybody},
       {"welcome-message", ["message"],
        "Sets the welcome message sent to anybody joining the lobby. Run this command without a message to clear the existing message. Requires boss privileges. Use $$ to add a line return.",
        :everybody},

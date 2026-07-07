@@ -30,7 +30,7 @@ user_moderator = allow?(@current_user, "Moderator") %>
         <br /><br />
 
         <form
-          action={Routes.ts_reports_report_path(@conn, :show, "leaderboard")}
+          action={~p"/teiserver/reports/show/leaderboard"}
           method="post"
           class="form-horizontal mb-4"
         >
@@ -171,7 +171,9 @@ user_moderator = allow?(@current_user, "Moderator") %>
                   <%= if user_moderator do %>
                     <td>
                       <a
-                        href={Routes.ts_admin_user_path(@conn, :ratings, rating.user_id) <> "?filter=#{@params["game_type"]}"}
+                        href={
+                          ~p"/teiserver/admin/users/ratings/#{@user.id}?filter=#{@params["game_type"]}"
+                        }
                         class="btn btn-sm btn-secondary"
                       >
                         Show

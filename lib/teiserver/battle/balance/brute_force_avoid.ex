@@ -15,7 +15,6 @@ defmodule Teiserver.Battle.Balance.BruteForceAvoid do
   alias Teiserver.Battle.Balance.BruteForceAvoidTypes, as: BF
   alias Teiserver.Config
   alias Teiserver.Helpers.Combi
-  require Integer
 
   # Parties will be split if team diff is too large. It either uses absolute value or percentage
   # See get_max_team_diff function below for full details

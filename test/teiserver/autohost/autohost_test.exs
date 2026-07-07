@@ -4,6 +4,7 @@ defmodule Teiserver.Autohost.AutohostTest do
   alias Teiserver.Autohost.Session
   alias Teiserver.Autohost.SessionRegistry
   alias Teiserver.Autohost.TachyonHandler, as: TH
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.BotFixtures
 
   use Teiserver.DataCase, async: false
@@ -35,7 +36,8 @@ defmodule Teiserver.Autohost.AutohostTest do
   end
 
   defp register_autohost(id, max, current) do
-    SessionRegistry.register(%{id: id, max_battles: max, current_battles: current})
+    %AT.Overview{id: id, max_battles: max, current_battles: current}
+    |> SessionRegistry.register()
   end
 
   describe "autohost state" do

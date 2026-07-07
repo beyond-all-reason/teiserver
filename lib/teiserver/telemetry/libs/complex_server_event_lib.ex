@@ -2,6 +2,7 @@ defmodule Teiserver.Telemetry.ComplexServerEventLib do
   @moduledoc false
 
   alias Phoenix.PubSub
+  alias Teiserver.Account.User
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ComplexServerEvent
   alias Teiserver.Telemetry.ComplexServerEventQueries
@@ -15,7 +16,7 @@ defmodule Teiserver.Telemetry.ComplexServerEventLib do
   @spec icon() :: String.t()
   def icon, do: "fa-database"
 
-  @spec log_complex_server_event(T.userid() | nil, String, map()) ::
+  @spec log_complex_server_event(User.id() | nil, String, map()) ::
           {:error, Ecto.Changeset} | {:ok, ComplexServerEvent}
   def log_complex_server_event(userid, event_type_name, value) do
     event_type_id = Telemetry.get_or_add_complex_server_event_type(event_type_name)

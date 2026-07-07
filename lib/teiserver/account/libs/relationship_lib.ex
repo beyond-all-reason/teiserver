@@ -4,6 +4,7 @@ defmodule Teiserver.Account.RelationshipLib do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.User
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Repo
@@ -42,7 +43,7 @@ defmodule Teiserver.Account.RelationshipLib do
   def past_tense_of_state(nil), do: ""
   def past_tense_of_state(%{state: state}), do: past_tense_of_state(state)
 
-  @spec follow_user(T.userid(), T.userid()) :: {:ok, Account.Relationship.t()}
+  @spec follow_user(User.id(), User.id()) :: {:ok, Account.Relationship.t()}
   def follow_user(from_user_id, to_user_id)
       when is_integer(from_user_id) and is_integer(to_user_id) do
     decache_relationships(from_user_id)
@@ -65,7 +66,7 @@ defmodule Teiserver.Account.RelationshipLib do
     })
   end
 
-  @spec ignore_user(T.userid(), T.userid()) ::
+  @spec ignore_user(User.id(), User.id()) ::
           {:ok, Account.Relationship.t()} | {:error, String.t()}
   def ignore_user(from_user_id, to_user_id)
       when is_integer(from_user_id) and is_integer(to_user_id) do
@@ -80,7 +81,7 @@ defmodule Teiserver.Account.RelationshipLib do
     end
   end
 
-  @spec unignore_user(T.userid(), T.userid()) :: {:ok, Account.Relationship.t()}
+  @spec unignore_user(User.id(), User.id()) :: {:ok, Account.Relationship.t()}
   def unignore_user(from_user_id, to_user_id)
       when is_integer(from_user_id) and is_integer(to_user_id) do
     decache_relationships(from_user_id)
@@ -92,7 +93,7 @@ defmodule Teiserver.Account.RelationshipLib do
     })
   end
 
-  @spec avoid_user(T.userid(), T.userid()) ::
+  @spec avoid_user(User.id(), User.id()) ::
           {:ok, Account.Relationship.t()} | {:error, String.t()}
   def avoid_user(from_user_id, to_user_id)
       when is_integer(from_user_id) and is_integer(to_user_id) do
@@ -107,7 +108,7 @@ defmodule Teiserver.Account.RelationshipLib do
     end
   end
 
-  @spec block_user(T.userid(), T.userid()) ::
+  @spec block_user(User.id(), User.id()) ::
           {:ok, Account.Relationship.t()} | {:error, String.t()}
   def block_user(from_user_id, to_user_id)
       when is_integer(from_user_id) and is_integer(to_user_id) do
@@ -122,7 +123,7 @@ defmodule Teiserver.Account.RelationshipLib do
     end
   end
 
-  @spec reset_relationship_state(T.userid(), T.userid()) :: {:ok, Account.Relationship.t()}
+  @spec reset_relationship_state(User.id(), User.id()) :: {:ok, Account.Relationship.t()}
   def reset_relationship_state(from_user_id, to_user_id)
       when is_integer(from_user_id) and is_integer(to_user_id) do
     decache_relationships(from_user_id)
@@ -135,7 +136,7 @@ defmodule Teiserver.Account.RelationshipLib do
     })
   end
 
-  @spec calculate_relationship_stats(T.userid()) :: :ok
+  @spec calculate_relationship_stats(User.id()) :: :ok
   def calculate_relationship_stats(userid) do
     data = %{
       follower_count: 0,
@@ -153,7 +154,7 @@ defmodule Teiserver.Account.RelationshipLib do
     :ok
   end
 
-  @spec decache_relationships(T.userid()) :: :ok
+  @spec decache_relationships(User.id()) :: :ok
   def decache_relationships(userid) do
     Teiserver.cache_delete(:account_follow_cache, userid)
     Teiserver.cache_delete(:account_ignore_cache, userid)
@@ -175,7 +176,7 @@ defmodule Teiserver.Account.RelationshipLib do
   - `relationship_type` - The type of relationship (:friend, :ignore, :avoid, :block)
   - `max_relationships` - Optional limit override (defaults to site config value). Useful for testing.
   """
-  @spec check_relationship_limit(T.userid(), :friend | :ignore | :avoid | :block, integer()) ::
+  @spec check_relationship_limit(User.id(), :friend | :ignore | :avoid | :block, integer()) ::
           :ok | {:error, String.t()}
   def check_relationship_limit(
         user_id,
@@ -209,7 +210,7 @@ defmodule Teiserver.Account.RelationshipLib do
     end
   end
 
-  @spec list_userids_followed_by_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_followed_by_userid(User.id()) :: [User.id()]
   def list_userids_followed_by_userid(userid) do
     Teiserver.cache_get_or_store(:account_follow_cache, userid, fn ->
       Account.list_relationships(
@@ -226,7 +227,7 @@ defmodule Teiserver.Account.RelationshipLib do
   end
 
   # Blocks will be treated as avoids, but avoids will not be treated as blocks
-  @spec list_userids_avoiding_this_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_avoiding_this_userid(User.id()) :: [User.id()]
   def list_userids_avoiding_this_userid(userid) do
     Teiserver.cache_get_or_store(:account_avoiding_this_cache, userid, fn ->
       Account.list_relationships(
@@ -243,7 +244,7 @@ defmodule Teiserver.Account.RelationshipLib do
   end
 
   # Blocks will be treated as avoids, but avoids will not be treated as blocks
-  @spec list_userids_avoided_by_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_avoided_by_userid(User.id()) :: [User.id()]
   def list_userids_avoided_by_userid(userid) do
     Teiserver.cache_get_or_store(:account_avoid_cache, userid, fn ->
       Account.list_relationships(
@@ -261,7 +262,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   # Get userids blocked by a userid
   # Avoids do not count as blocks
-  @spec list_userids_blocked_by_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_blocked_by_userid(User.id()) :: [User.id()]
   def list_userids_blocked_by_userid(userid) do
     Teiserver.cache_get_or_store(:account_block_cache, userid, fn ->
       Account.list_relationships(
@@ -279,7 +280,7 @@ defmodule Teiserver.Account.RelationshipLib do
 
   # Get userids blocking a userid
   # Avoids do not count as blocks
-  @spec list_userids_blocking_this_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_blocking_this_userid(User.id()) :: [User.id()]
   def list_userids_blocking_this_userid(userid) do
     Teiserver.cache_get_or_store(:account_blocking_this_cache, userid, fn ->
       Account.list_relationships(
@@ -295,7 +296,7 @@ defmodule Teiserver.Account.RelationshipLib do
     end)
   end
 
-  @spec list_userids_ignored_by_userid(T.userid()) :: [T.userid()]
+  @spec list_userids_ignored_by_userid(User.id()) :: [User.id()]
   def list_userids_ignored_by_userid(userid) do
     Teiserver.cache_get_or_store(:account_ignore_cache, userid, fn ->
       Account.list_relationships(
@@ -311,23 +312,23 @@ defmodule Teiserver.Account.RelationshipLib do
     end)
   end
 
-  @spec does_a_follow_b?(T.userid(), T.userid()) :: boolean
+  @spec does_a_follow_b?(User.id(), User.id()) :: boolean
   def does_a_follow_b?(u1, u2) do
     u1 |> list_userids_followed_by_userid() |> Enum.member?(u2)
   end
 
-  @spec does_a_ignore_b?(T.userid(), T.userid()) :: boolean
+  @spec does_a_ignore_b?(User.id(), User.id()) :: boolean
   def does_a_ignore_b?(u1, u2) do
     u1 |> list_userids_ignored_by_userid() |> Enum.member?(u2)
   end
 
-  @spec does_a_avoid_b?(T.userid(), T.userid()) :: boolean
+  @spec does_a_avoid_b?(User.id(), User.id()) :: boolean
   def does_a_avoid_b?(u1, u2) do
     u1 |> list_userids_avoided_by_userid() |> Enum.member?(u2) or
       does_a_block_b?(u1, u2)
   end
 
-  @spec does_a_block_b?(T.userid(), T.userid()) :: boolean
+  @spec does_a_block_b?(User.id(), User.id()) :: boolean
   def does_a_block_b?(u1, u2) do
     u1 |> list_userids_blocked_by_userid() |> Enum.member?(u2)
   end
@@ -357,7 +358,7 @@ defmodule Teiserver.Account.RelationshipLib do
     |> Enum.reject(&(&1 == nil))
   end
 
-  @spec check_block_status(T.userid(), [T.userid()]) :: :ok | :blocking | :blocked
+  @spec check_block_status(User.id(), [User.id()]) :: :ok | :blocking | :blocked
   def check_block_status(userid, userid_list) do
     userid_count = Enum.count(userid_list) |> max(1)
 

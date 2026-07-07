@@ -26,8 +26,8 @@ config :teiserver, TeiserverWeb.Endpoint,
   url: [host: "localhost"],
   http: [ip: {0, 0, 0, 0}, port: 4000],
   watchers: [
-    # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    esbuild: {Esbuild, :install_and_run, [:teiserver, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:teiserver, ~w(--watch)]},
     dark_sass: {
       DartSass,
       :install_and_run,
@@ -63,7 +63,8 @@ config :teiserver, TeiserverWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/teiserver_web/(controllers|views|templates)/.*(ex|heex)$"
+      ~r"lib/teiserver_web/(controllers|views|templates)/.*(ex|heex)$",
+      ~r"lib/teiserver_web/(live|live_components|components)/.*(ex|heex)$"
     ]
   ]
 
@@ -88,6 +89,8 @@ config :teiserver, Teiserver.PromEx,
     folder_name: "Teiserver",
     annotate_app_lifecycle: true
   ]
+
+config :teiserver, Teiserver.IpCheck, client_module: Teiserver.IpCheck.Stub
 
 try do
   import_config "dev.secret.exs"

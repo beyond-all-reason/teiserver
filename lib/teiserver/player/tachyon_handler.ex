@@ -4,6 +4,7 @@ defmodule Teiserver.Player.TachyonHandler do
   """
 
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
@@ -17,8 +18,10 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Player.Session
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Player.SessionSupervisor
+  alias Teiserver.Player.Types, as: PT
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Tachyon.Schema
+  alias Teiserver.TachyonLobby.Types, as: LT
 
   require Logger
 
@@ -243,37 +246,26 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "lobby/left", %{id: lobby_id, reason: reason}, state}
   end
 
-  def handle_info({:lobby_list, {:add_lobby, lobby_id, overview}}, state) do
-    data = %{lobbies: %{lobby_id => lobby_overview_to_tachyon(lobby_id, overview)}}
-    {:event, "lobby/listUpdated", data, state}
-  end
-
-  def handle_info({:lobby_list, {:update_lobby, lobby_id, overview}}, state) do
-    data = %{lobbies: %{lobby_id => lobby_overview_to_tachyon(lobby_id, overview)}}
-    {:event, "lobby/listUpdated", data, state}
-  end
-
-  def handle_info({:lobby_list, {:update_lobbies, lobbies}}, state) do
+  def handle_info({:lobby, lobby_id, {:left, reason, ban_until}}, state) do
     data =
-      Enum.map(lobbies, fn {id, overview} -> {id, lobby_overview_to_tachyon(id, overview)} end)
-      |> Map.new()
+      case ban_until do
+        nil -> %{id: lobby_id, reason: reason}
+        dt -> %{id: lobby_id, reason: reason, bannedUntil: DateTime.to_unix(dt, :microsecond)}
+      end
 
-    {:event, "lobby/listUpdated", %{lobbies: data}, state}
+    {:event, "lobby/left", data, state}
   end
 
-  def handle_info({:lobby_list, {:remove_lobby, lobby_id}}, state) do
-    data = %{lobbies: %{lobby_id => nil}}
+  def handle_info({:lobby_list, {:update_lobbies, changes}}, state) do
+    data = %{
+      lobbies:
+        Enum.map(changes, fn {id, change} ->
+          {id, lobby_overview_to_tachyon(id, change)}
+        end)
+        |> Enum.into(%{})
+    }
+
     {:event, "lobby/listUpdated", data, state}
-  end
-
-  def handle_info({:lobby_list, {:reset_list, lobbies}}, state) do
-    lobbies =
-      Enum.map(lobbies, fn {lobby_id, overview} ->
-        {lobby_id, lobby_overview_to_tachyon(lobby_id, overview)}
-      end)
-      |> Enum.into(%{})
-
-    {:event, "lobby/listReset", %{lobbies: lobbies}, state}
   end
 
   def handle_info({:timeout, message_id}, state)
@@ -624,8 +616,8 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("party/create", "request", _message_id, _msg, state) do
     case Session.create_party(state.user.id) do
-      {:ok, party_id} ->
-        data = %{partyId: party_id}
+      {:ok, party_state} ->
+        data = %{party: party_state_to_tachyon(party_state)}
         {:response, data, state}
 
       {:error, :already_in_party} ->
@@ -715,7 +707,7 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("lobby/create", "request", _msg_id, msg, state) do
     # TODO: the `lobby/update` has very similar logic. There should be a way
     # to combine the parsing
-    create_data = %{
+    create_data = %PT.LobbyStartParams{
       name: msg["data"]["name"],
       map_name: msg["data"]["mapName"],
       ally_team_config:
@@ -723,7 +715,7 @@ defmodule Teiserver.Player.TachyonHandler do
           sb = at["startBox"]
           teams = for t <- at["teams"], do: %{max_players: t["maxPlayers"]}
 
-          %{
+          %LT.AllyTeamConfig{
             max_teams: at["maxTeams"],
             start_box: %{
               top: sb["top"],
@@ -761,6 +753,10 @@ defmodule Teiserver.Player.TachyonHandler do
 
       {:error, :lobby_full} ->
         {:error_response, :lobby_full, state}
+
+      {:error, :banned, ban_until} ->
+        details = "Banned until #{DateTime.to_iso8601(ban_until)}"
+        {:error_response, :banned, details, state}
 
       {:error, reason} ->
         {:error_response, :invalid_request, to_string(reason), state}
@@ -887,7 +883,7 @@ defmodule Teiserver.Player.TachyonHandler do
       "name" => :name,
       "mapName" => :map_name,
       "allyTeamConfig" =>
-        {:ally_team_config,
+        {:ally_team_config, LT.AllyTeamConfig,
          %{
            "maxTeams" => :max_teams,
            "startBox" =>
@@ -1007,6 +1003,22 @@ defmodule Teiserver.Player.TachyonHandler do
   def handle_command("lobby/unsubscribeList", "request", _msg_id, _msg, state) do
     :ok = Session.unsubscribe_lobby_list(state.user.id)
     {:response, state}
+  end
+
+  def handle_command("lobby/kickban", "request", _msg_id, %{"data" => data}, state) do
+    case TachyonParser.parse_user_id(data["userId"]) do
+      {:ok, target_id} ->
+        ban_until = parse_ban_until(data["banUntil"])
+
+        case Session.lobby_kickban(state.user.id, target_id, ban_until) do
+          :ok -> {:response, state}
+          {:error, :not_boss} -> {:error_response, :invalid_request, state}
+          {:error, reason} -> {:error_response, :invalid_request, inspect(reason), state}
+        end
+
+      {:error, err} ->
+        {:error_response, :invalid_request, inspect(err), state}
+    end
   end
 
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
@@ -1139,7 +1151,7 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  @spec get_user_friends(T.userid()) ::
+  @spec get_user_friends(User.id()) ::
           {friends :: [term()], incoming :: [term()], outgoing :: [term()]}
   def get_user_friends(user_id) do
     epoch = ~N[1970-01-01 00:00:00]
@@ -1206,7 +1218,7 @@ defmodule Teiserver.Player.TachyonHandler do
     |> Enum.reject(&is_nil/1)
   end
 
-  defp lobby_details_to_tachyon(details) do
+  defp lobby_details_to_tachyon(%LT.Details{} = details) do
     mappings = %{
       id: :id,
       players: {:players, &player_updates_to_tachyon/1},
@@ -1387,12 +1399,27 @@ defmodule Teiserver.Player.TachyonHandler do
 
   defp vote_action_to_tachyon(action) do
     case action do
-      {:change_map, name} -> %{type: :changeMap, newMapName: name}
-      {:appoint_boss, boss_id} -> %{type: :appointBoss, bossId: to_string(boss_id)}
+      {:change_map, name} ->
+        %{type: :changeMap, newMapName: name}
+
+      {:appoint_boss, boss_id} ->
+        %{type: :appointBoss, bossId: to_string(boss_id)}
+
+      {:kickban, user_id, nil} ->
+        %{type: :kickban, userId: to_string(user_id)}
+
+      {:kickban, user_id, ban_until} ->
+        %{
+          type: :kickban,
+          userId: to_string(user_id),
+          banUntil: DateTime.to_unix(ban_until, :microsecond)
+        }
     end
   end
 
   # handle partial overview object
+  defp lobby_overview_to_tachyon(_lobby_id, nil), do: nil
+
   defp lobby_overview_to_tachyon(lobby_id, overview) do
     mapping_spec = %{
       name: :name,
@@ -1430,6 +1457,15 @@ defmodule Teiserver.Player.TachyonHandler do
       end
     else
       %{}
+    end
+  end
+
+  defp parse_ban_until(nil), do: nil
+
+  defp parse_ban_until(ts) do
+    case DateTime.from_unix(ts, :microsecond) do
+      {:ok, dt} -> if DateTime.compare(dt, DateTime.utc_now()) == :gt, do: dt, else: nil
+      _error -> nil
     end
   end
 end

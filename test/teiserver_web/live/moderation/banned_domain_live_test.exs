@@ -23,45 +23,49 @@ defmodule TeiserverWeb.Moderation.BannedDomainLiveTest do
     test "saves banned_domain", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/moderation/banned_domains")
 
-      assert index_live |> element("a", "New banned domain") |> render_click() =~
-               "banned domain"
+      assert {:ok, form_live, _html} =
+               index_live
+               |> element(~s{a[href="/moderation/banned_domains/new"]})
+               |> render_click()
+               |> follow_redirect(conn, ~p"/moderation/banned_domains/new")
 
-      assert_patch(index_live, ~p"/moderation/banned_domains/new")
+      assert render(form_live) =~ "New Banned domain"
 
-      assert index_live
+      assert form_live
              |> form("#banned_domain-form", banned_domain: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
-      assert index_live
-             |> form("#banned_domain-form", banned_domain: %{domain: "a new domain"})
-             |> render_submit()
-
-      assert_patch(index_live, ~p"/moderation/banned_domains")
+      assert {:ok, index_live, _html} =
+               form_live
+               |> form("#banned_domain-form", banned_domain: %{domain: "some domain abcdef"})
+               |> render_submit()
+               |> follow_redirect(conn, ~p"/moderation/banned_domains")
 
       html = render(index_live)
       assert html =~ "Banned domain created successfully"
-      assert html =~ "some domain"
+      assert html =~ "some domain abcdef"
     end
 
     test "updates banned_domain in listing", %{conn: conn, banned_domain: banned_domain} do
       {:ok, index_live, _html} = live(conn, ~p"/moderation/banned_domains")
 
-      assert index_live
-             |> element("#banned_domains-#{banned_domain.id} a", "Edit")
-             |> render_click() =~
-               "Edit banned domain"
+      assert {:ok, form_live, _html} =
+               index_live
+               |> element("#banned_domains-#{banned_domain.id} a", "Edit")
+               |> render_click()
+               |> follow_redirect(conn, ~p"/moderation/banned_domains/#{banned_domain}/edit")
 
-      assert_patch(index_live, ~p"/moderation/banned_domains/#{banned_domain}/edit")
+      assert render(form_live) =~ "Edit Banned domain"
 
-      assert index_live
+      assert form_live
              |> form("#banned_domain-form", banned_domain: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
-      assert index_live
-             |> form("#banned_domain-form", banned_domain: @update_attrs)
-             |> render_submit()
-
-      assert_patch(index_live, ~p"/moderation/banned_domains")
+      assert {:ok, index_live, _html} =
+               form_live
+               |> form("#banned_domain-form", banned_domain: @update_attrs)
+               |> render_submit()
+               |> follow_redirect(conn, ~p"/moderation/banned_domains")
 
       html = render(index_live)
       assert html =~ "Banned domain updated successfully"
@@ -85,27 +89,32 @@ defmodule TeiserverWeb.Moderation.BannedDomainLiveTest do
     test "displays banned_domain", %{conn: conn, banned_domain: banned_domain} do
       {:ok, _show_live, html} = live(conn, ~p"/moderation/banned_domains/#{banned_domain}")
 
-      assert html =~ "Show banned domain"
       assert html =~ banned_domain.domain
     end
 
-    test "updates banned_domain within modal", %{conn: conn, banned_domain: banned_domain} do
+    test "updates banned_domain and returns to show", %{conn: conn, banned_domain: banned_domain} do
       {:ok, show_live, _html} = live(conn, ~p"/moderation/banned_domains/#{banned_domain}")
 
-      assert show_live |> element("a", "Edit") |> render_click() =~
-               "Edit banned domain"
+      assert {:ok, form_live, _html} =
+               show_live
+               |> element("a", "Edit")
+               |> render_click()
+               |> follow_redirect(
+                 conn,
+                 ~p"/moderation/banned_domains/#{banned_domain}/edit?return_to=show"
+               )
 
-      assert_patch(show_live, ~p"/moderation/banned_domains/#{banned_domain}/show/edit")
+      assert render(form_live) =~ "Edit Banned domain"
 
-      assert show_live
+      assert form_live
              |> form("#banned_domain-form", banned_domain: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
-      assert show_live
-             |> form("#banned_domain-form", banned_domain: @update_attrs)
-             |> render_submit()
-
-      assert_patch(show_live, ~p"/moderation/banned_domains/#{banned_domain}")
+      assert {:ok, show_live, _html} =
+               form_live
+               |> form("#banned_domain-form", banned_domain: @update_attrs)
+               |> render_submit()
+               |> follow_redirect(conn, ~p"/moderation/banned_domains/#{banned_domain}")
 
       html = render(show_live)
       assert html =~ "Banned domain updated successfully"
@@ -113,9 +122,9 @@ defmodule TeiserverWeb.Moderation.BannedDomainLiveTest do
     end
   end
 
-  defp create_banned_domain(state) do
+  defp create_banned_domain(_state) do
     banned_domain = banned_domain_fixture()
-    Map.put(state, :banned_domain, banned_domain)
+    %{banned_domain: banned_domain}
   end
 
   defp auth(_state) do

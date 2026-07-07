@@ -4,6 +4,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Battle.LobbyServer
+  alias Teiserver.Chat.WordLib
   alias Teiserver.Config
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
@@ -33,7 +34,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     call_lobby(lobby_id, :get_match_id)
   end
 
-  @spec get_match_id_from_userid(T.userid()) :: T.match_id() | nil
+  @spec get_match_id_from_userid(User.id()) :: T.match_id() | nil
   def get_match_id_from_userid(userid) do
     case Account.get_client_by_id(userid) do
       nil ->
@@ -92,7 +93,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec list_lobby_ids :: [T.lobby_id()]
   def list_lobby_ids do
-    Horde.Registry.select(Teiserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Registry.select(Teiserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_lobbies() :: [T.lobby()]
@@ -105,7 +106,7 @@ defmodule Teiserver.Lobby.LobbyLib do
   @spec list_throttled_lobbies(atom) :: [T.lobby()]
   def list_throttled_lobbies(type) do
     throttle_pid =
-      case Horde.Registry.lookup(Teiserver.ThrottleRegistry, "LobbyIndexThrottle") do
+      case Registry.lookup(Teiserver.ThrottleRegistry, "LobbyIndexThrottle") do
         [{pid, _value}] -> pid
         _no_match -> nil
       end
@@ -139,7 +140,7 @@ defmodule Teiserver.Lobby.LobbyLib do
     cast_lobby(lobby_id, {:update_values, new_values})
   end
 
-  @spec rename_lobby(T.lobby_id(), String.t(), T.userid() | nil) :: :ok | nil
+  @spec rename_lobby(T.lobby_id(), String.t(), User.id() | nil) :: :ok | nil
   def rename_lobby(lobby_id, new_base_name, renamer_id) do
     cast_lobby(lobby_id, {:rename_lobby, new_base_name, renamer_id})
   end
@@ -335,17 +336,17 @@ defmodule Teiserver.Lobby.LobbyLib do
   def remove_modoptions(lobby_id, keys), do: cast_lobby(lobby_id, {:remove_modoptions, keys})
 
   # Membership
-  @spec add_user_to_lobby(T.userid(), T.lobby_id(), String.t()) :: nil | :ok
+  @spec add_user_to_lobby(User.id(), T.lobby_id(), String.t()) :: nil | :ok
   def add_user_to_lobby(userid, lobby_id, script_password) do
     cast_lobby(lobby_id, {:add_user, userid, script_password})
   end
 
-  @spec remove_user_from_lobby(T.userid(), T.lobby_id()) :: nil | :ok
+  @spec remove_user_from_lobby(User.id(), T.lobby_id()) :: nil | :ok
   def remove_user_from_lobby(userid, lobby_id) do
     cast_lobby(lobby_id, {:remove_user, userid})
   end
 
-  @spec get_lobby_member_list(T.lobby_id()) :: [T.userid()] | nil
+  @spec get_lobby_member_list(T.lobby_id()) :: [User.id()] | nil
   def get_lobby_member_list(lobby_id) do
     call_lobby(lobby_id, :get_member_list)
   end
@@ -421,7 +422,7 @@ defmodule Teiserver.Lobby.LobbyLib do
 
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   def get_lobby_pid(lobby_id) when is_integer(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.LobbyRegistry, lobby_id) do
+    case Registry.lookup(Teiserver.LobbyRegistry, lobby_id) do
       [{pid, _value}] -> pid
       _no_match -> nil
     end
@@ -593,6 +594,77 @@ defmodule Teiserver.Lobby.LobbyLib do
       end
     else
       nil
+    end
+  end
+
+  # Lobby name and teaser validation
+  @spec max_name_length :: integer
+  def max_name_length do
+    Config.get_site_config_cache("lobby.Maximum lobby name length")
+  end
+
+  @spec name_chars_valid?(String.t()) :: boolean
+  def name_chars_valid?(name) do
+    case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:()]+$/, name) do
+      [_match] -> true
+      _no_match -> false
+    end
+  end
+
+  @spec name_length_valid?(String.t()) :: boolean
+  defp name_length_valid?(name) do
+    String.length(name) <= max_name_length()
+  end
+
+  @spec validate_name(String.t()) :: :ok | {:error, String.t()}
+  @spec validate_name(String.t(), [{:hints, boolean}]) :: :ok | {:error, String.t()}
+  def validate_name(name, opts \\ []) do
+    add_hints = Keyword.get(opts, :hints, false)
+
+    cond do
+      name == "" ->
+        {:error, "Lobby name must not be empty"}
+
+      not name_length_valid?(name) ->
+        message =
+          validation_error(
+            add_hints,
+            "Lobby name is too long",
+            "Maximum #{max_name_length()} characters allowed."
+          )
+
+        {:error, message}
+
+      not name_chars_valid?(name) ->
+        message =
+          validation_error(
+            add_hints,
+            "Lobby name contains invalid characters",
+            "Allowed characters: alphanumeric, spaces, [, ], <, >, -, +, |, :."
+          )
+
+        {:error, message}
+
+      WordLib.flagged_words(name) > 0 ->
+        message =
+          validation_error(
+            add_hints,
+            "Lobby name was rejected",
+            "Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked."
+          )
+
+        {:error, message}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp validation_error(add_hint, base, hint) do
+    if add_hint do
+      base <> ". " <> hint
+    else
+      base
     end
   end
 end

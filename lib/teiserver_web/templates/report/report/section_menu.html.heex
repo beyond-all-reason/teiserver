@@ -7,7 +7,7 @@
     active: @active,
     icon: Teiserver.Account.ActiveReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "active")
+    url: ~p"/teiserver/reports/show/active"
   )}
 <% end %>
 
@@ -18,7 +18,7 @@
     active: @active,
     icon: Teiserver.Account.TimeSpentReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "time_spent")
+    url: ~p"/teiserver/reports/show/time_spent"
   )}
 <% end %>
 
@@ -29,7 +29,7 @@
     active: @active,
     icon: Teiserver.Account.TimeCompareReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "time_compare")
+    url: ~p"/teiserver/reports/show/time_compare"
   )}
 <% end %>
 
@@ -40,7 +40,7 @@
     active: @active,
     icon: Teiserver.Account.UserAgeReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "user_age")
+    url: ~p"/teiserver/reports/show/user_age"
   )}
 <% end %>
 
@@ -51,7 +51,7 @@
     active: @active,
     icon: Teiserver.Account.VerifiedReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "verified")
+    url: ~p"/teiserver/reports/show/verified"
   )}
 <% end %>
 
@@ -62,7 +62,7 @@
     active: @active,
     icon: Teiserver.Account.RetentionReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "retention")
+    url: ~p"/teiserver/reports/show/retention"
   )}
 <% end %>
 
@@ -73,7 +73,7 @@
     active: @active,
     icon: Teiserver.Account.PopulationReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "population")
+    url: ~p"/teiserver/reports/show/population"
   )}
 <% end %>
 
@@ -84,7 +84,7 @@
     active: @active,
     icon: Teiserver.Account.NewUserFunnelReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "new_user_funnel")
+    url: ~p"/teiserver/reports/show/new_user_funnel"
   )}
 <% end %>
 
@@ -95,7 +95,7 @@
     active: @active,
     icon: Teiserver.Account.AccoladeReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "accolades")
+    url: ~p"/teiserver/reports/show/accolades"
   )}
 <% end %>
 
@@ -106,7 +106,7 @@
     active: @active,
     icon: Teiserver.Account.RelationshipReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "relationships")
+    url: ~p"/teiserver/reports/show/relationships"
   )}
 <% end %>
 
@@ -117,7 +117,7 @@
     active: @active,
     icon: Teiserver.Account.LeaderboardReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "leaderboard")
+    url: ~p"/teiserver/reports/show/leaderboard"
   )}
 <% end %>
 
@@ -128,7 +128,7 @@
     active: @active,
     icon: Teiserver.Account.RecordsReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "records")
+    url: ~p"/teiserver/reports/show/records"
   )}
 <% end %>
 
@@ -139,7 +139,7 @@
     active: @active,
     icon: Teiserver.Account.ReviewReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "review")
+    url: ~p"/teiserver/reports/show/review"
   )}
 <% end %>
 
@@ -150,7 +150,7 @@
     active: @active,
     icon: Teiserver.Account.GrowthReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "growth")
+    url: ~p"/teiserver/reports/show/growth"
   )}
 <% end %>
 
@@ -161,7 +161,7 @@
     active: @active,
     icon: Teiserver.Account.WeekOnWeekReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "week_on_week")
+    url: ~p"/teiserver/reports/show/week_on_week"
   )}
 <% end %>
 
@@ -172,7 +172,7 @@
     active: @active,
     icon: Teiserver.Account.NewSmurfReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "new_smurf")
+    url: ~p"/teiserver/reports/show/new_smurf"
   )}
 <% end %>
 
@@ -183,7 +183,7 @@
     active: @active,
     icon: Teiserver.Account.BanEvasionReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "ban_evasion")
+    url: ~p"/teiserver/reports/show/ban_evasion"
   )}
 <% end %>
 
@@ -194,7 +194,7 @@
     active: @active,
     icon: Teiserver.Account.OpenSkillReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "open_skill")
+    url: ~p"/teiserver/reports/show/open_skill"
   )}
 <% end %>
 
@@ -205,7 +205,7 @@
     active: @active,
     icon: Teiserver.Game.MappingReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "mapping")
+    url: ~p"/teiserver/reports/show/mapping"
   )}
 <% end %>
 
@@ -216,6 +216,6 @@
     active: @active,
     icon: Teiserver.Moderation.ActivityReport.icon(),
     bsname: bsname,
-    url: Routes.ts_reports_report_path(@conn, :show, "moderation_activity")
+    url: ~p"/teiserver/reports/show/moderation_activity"
   )}
 <% end %>

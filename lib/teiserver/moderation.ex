@@ -1,8 +1,6 @@
 defmodule Teiserver.Moderation do
   @moduledoc false
 
-  alias Teiserver.Repo
-  # require Logger
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Data.Types, as: T
@@ -14,11 +12,15 @@ defmodule Teiserver.Moderation do
   alias Teiserver.Moderation.BannedDomain
   alias Teiserver.Moderation.BannedIP
   alias Teiserver.Moderation.BannedPhrase
+  alias Teiserver.Moderation.LoadBannedDomainsTask
+  alias Teiserver.Moderation.LoadBannedIPsTask
+  alias Teiserver.Moderation.LoadBannedPhrasesTask
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Moderation.Report
   alias Teiserver.Moderation.ReportLib
   alias Teiserver.Moderation.Response
   alias Teiserver.Moderation.ResponseLib
+  alias Teiserver.Repo
 
   import Ecto.Query, warn: false
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
@@ -81,8 +83,8 @@ defmodule Teiserver.Moderation do
   @doc """
 
   """
-  @spec list_outstanding_reports_against_user(T.userid()) :: List.t()
-  @spec list_outstanding_reports_against_user(T.userid(), List.t()) :: List.t()
+  @spec list_outstanding_reports_against_user(User.id()) :: List.t()
+  @spec list_outstanding_reports_against_user(User.id(), List.t()) :: List.t()
   def list_outstanding_reports_against_user(userid, args \\ []) do
     search = [
       target_id: userid,
@@ -297,7 +299,7 @@ defmodule Teiserver.Moderation do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_response!(non_neg_integer(), T.userid()) :: Response.t()
+  @spec get_response!(non_neg_integer(), User.id()) :: Response.t()
   def get_response!(report_id, user_id) do
     response_query(
       search: [
@@ -322,7 +324,7 @@ defmodule Teiserver.Moderation do
       nil
 
   """
-  @spec get_response(non_neg_integer(), T.userid()) :: Response.t() | nil
+  @spec get_response(non_neg_integer(), User.id()) :: Response.t() | nil
   def get_response(report_id, user_id) do
     response_query(
       search: [
@@ -618,6 +620,14 @@ defmodule Teiserver.Moderation do
 
   def broadcast_update_action(v), do: v
 
+  # Used to remove all references to a given action prior to the deletion
+  # of the action
+  defp dereference_action_from_reports_query(%Action{id: action_id}) do
+    from report in Report,
+      where: report.result_id == ^action_id,
+      update: [set: [result_id: nil]]
+  end
+
   @doc """
   Deletes a Action.
 
@@ -632,7 +642,14 @@ defmodule Teiserver.Moderation do
   """
   @spec delete_action(Action.t()) :: {:ok, Action.t()} | {:error, Ecto.Changeset.t()}
   def delete_action(%Action{} = action) do
-    Repo.delete(action)
+    dereference_query = dereference_action_from_reports_query(action)
+
+    Repo.transact(fn ->
+      with {_count, _query} <- Repo.update_all(dereference_query, []),
+           {:ok, %Action{}} <- Repo.delete(action) do
+        {:ok, action}
+      end
+    end)
   end
 
   @doc """
@@ -833,7 +850,7 @@ defmodule Teiserver.Moderation do
   end
 
   # Others
-  @spec unbridge_user(nil | T.user() | T.userid(), String.t(), non_neg_integer(), String.t()) ::
+  @spec unbridge_user(nil | T.user() | User.id(), String.t(), non_neg_integer(), String.t()) ::
           any
   def unbridge_user(userid, message, flagged_word_count, location) when is_integer(userid) do
     unbridge_user(Account.get_user(userid), message, flagged_word_count, location)
@@ -878,16 +895,37 @@ defmodule Teiserver.Moderation do
     Repo.all(BannedDomain)
   end
 
-  @spec list_banned_domains_cache :: [String.t()]
+  @spec list_banned_domains_cache :: MapSet.t(String.t())
   def list_banned_domains_cache do
-    Teiserver.cache_get(:application_metadata_cache, "banned_domains", [])
+    Teiserver.cache_get(:application_metadata_cache, "banned_domains", MapSet.new())
   end
 
   @spec banned_domain?(String.t()) :: boolean()
   def banned_domain?(email) do
-    [_start, domain] = String.split(email, "@")
+    case String.split(email, "@") do
+      [_start, domain] ->
+        banned_domains = list_banned_domains_cache()
 
-    Enum.member?(list_banned_domains_cache(), domain)
+        domain
+        |> String.downcase()
+        |> domain_segments()
+        |> Enum.any?(&MapSet.member?(banned_domains, &1))
+
+      _no_email ->
+        false
+    end
+  end
+
+  # Given a full email domain such as sub.domain.foo.bar
+  # will return a diminishing list of the dot-separated
+  # parts of the list, e.g.
+  # ["sub.domain.foo.bar", "domain.foo.bar", "foo.bar", "bar"]
+  defp domain_segments(domain) do
+    String.split(domain, ".")
+    |> Enum.reverse()
+    |> Enum.scan(fn elem, acc ->
+      elem <> "." <> acc
+    end)
   end
 
   @doc """
@@ -922,6 +960,7 @@ defmodule Teiserver.Moderation do
     %BannedDomain{}
     |> BannedDomain.changeset(attrs)
     |> Repo.insert()
+    |> LoadBannedDomainsTask.cache_if_ok()
   end
 
   @doc """
@@ -940,6 +979,7 @@ defmodule Teiserver.Moderation do
     banned_domain
     |> BannedDomain.changeset(attrs)
     |> Repo.update()
+    |> LoadBannedDomainsTask.cache_if_ok()
   end
 
   @doc """
@@ -956,6 +996,7 @@ defmodule Teiserver.Moderation do
   """
   def delete_banned_domain(%BannedDomain{} = banned_domain) do
     Repo.delete(banned_domain)
+    |> LoadBannedDomainsTask.cache_if_ok()
   end
 
   @doc """
@@ -984,26 +1025,9 @@ defmodule Teiserver.Moderation do
     Repo.all(BannedIP)
   end
 
-  @doc """
-  Returns the list of banned_ips as IP objects
-
-  ## Examples
-
-      iex> list_banned_ip_ranges()
-      [%BannedIP{}, ...]
-
-  """
-  def list_banned_ip_ranges do
-    list_banned_ips_cache()
-    |> Enum.map(fn x ->
-      BannedIP.cidr_to_subnet(x.cidr)
-    end)
-    |> Enum.into([])
-  end
-
-  @spec list_banned_ips_cache :: [BannedIP.t()]
+  @spec list_banned_ips_cache :: MapSet.t(BannedIP.t())
   def list_banned_ips_cache do
-    Teiserver.cache_get(:application_metadata_cache, "banned_ips", [])
+    Teiserver.cache_get(:application_metadata_cache, "banned_ip_ranges", MapSet.new())
   end
 
   @doc """
@@ -1038,6 +1062,7 @@ defmodule Teiserver.Moderation do
     %BannedIP{}
     |> BannedIP.changeset(attrs)
     |> Repo.insert()
+    |> LoadBannedIPsTask.cache_if_ok()
   end
 
   @doc """
@@ -1056,6 +1081,7 @@ defmodule Teiserver.Moderation do
     banned_ip
     |> BannedIP.changeset(attrs)
     |> Repo.update()
+    |> LoadBannedIPsTask.cache_if_ok()
   end
 
   @doc """
@@ -1072,6 +1098,7 @@ defmodule Teiserver.Moderation do
   """
   def delete_banned_ip(%BannedIP{} = banned_ip) do
     Repo.delete(banned_ip)
+    |> LoadBannedIPsTask.cache_if_ok()
   end
 
   @doc """
@@ -1093,7 +1120,8 @@ defmodule Teiserver.Moderation do
   def banned_ip?(ip) do
     case IP.from_string(ip) do
       {:ok, ip} ->
-        Enum.member?(list_banned_ips_cache(), ip)
+        list_banned_ips_cache()
+        |> Enum.any?(fn x -> ip in x end)
 
       {:error, :einval} ->
         false
@@ -1150,6 +1178,7 @@ defmodule Teiserver.Moderation do
     %BannedPhrase{}
     |> BannedPhrase.changeset(attrs)
     |> Repo.insert()
+    |> LoadBannedPhrasesTask.cache_if_ok()
   end
 
   @doc """
@@ -1168,6 +1197,7 @@ defmodule Teiserver.Moderation do
     banned_phrase
     |> BannedPhrase.changeset(attrs)
     |> Repo.update()
+    |> LoadBannedPhrasesTask.cache_if_ok()
   end
 
   @doc """
@@ -1184,6 +1214,7 @@ defmodule Teiserver.Moderation do
   """
   def delete_banned_phrase(%BannedPhrase{} = banned_phrase) do
     Repo.delete(banned_phrase)
+    |> LoadBannedPhrasesTask.cache_if_ok()
   end
 
   @doc """
@@ -1197,5 +1228,25 @@ defmodule Teiserver.Moderation do
   """
   def change_banned_phrase(%BannedPhrase{} = banned_phrase, attrs \\ %{}) do
     BannedPhrase.changeset(banned_phrase, attrs)
+  end
+
+  # VPNs
+  @spec list_vpn_cache :: MapSet.t(String.t())
+  def list_vpn_cache do
+    Teiserver.cache_get(:application_metadata_cache, "banned_vpn_ranges", MapSet.new())
+  end
+
+  @spec vpn_ip?(String.t() | nil) :: boolean()
+  def vpn_ip?(nil), do: false
+
+  def vpn_ip?(ip) do
+    case IP.from_string(ip) do
+      {:ok, ip} ->
+        list_vpn_cache()
+        |> Enum.any?(fn x -> ip in x end)
+
+      {:error, :einval} ->
+        false
+    end
   end
 end

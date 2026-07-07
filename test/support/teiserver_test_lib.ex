@@ -122,12 +122,12 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _send_raw({:sslsocket, _tcp, _tls} = socket, msg) do
     :ok = :ssl.send(socket, msg)
-    :timer.sleep(100)
+    :timer.sleep(10)
   end
 
   def _send_raw(socket, msg) do
     :ok = :gen_tcp.send(socket, msg)
-    :timer.sleep(100)
+    :timer.sleep(10)
   end
 
   def _recv_lines, do: _recv_lines(1)
@@ -160,7 +160,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_raw({:sslsocket, _tcp, _tls} = socket) do
     case :ssl.recv(socket, 0, 500) do
-      {:ok, reply} -> reply |> to_string()
+      {:ok, reply} -> IO.iodata_to_binary(reply)
       {:error, :timeout} -> :timeout
       {:error, :closed} -> :closed
     end
@@ -168,7 +168,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_raw(socket) do
     case :gen_tcp.recv(socket, 0, 500) do
-      {:ok, reply} -> reply |> to_string()
+      {:ok, reply} -> IO.iodata_to_binary(reply)
       {:error, :timeout} -> :timeout
       {:error, :closed} -> :closed
     end
@@ -187,7 +187,7 @@ defmodule Teiserver.TeiserverTestLib do
   def _recv_until({:sslsocket, _tcp, _tls} = socket, acc) do
     case :ssl.recv(socket, 0, 1000) do
       {:ok, reply} ->
-        _recv_until(socket, acc <> to_string(reply))
+        _recv_until(socket, acc <> IO.iodata_to_binary(reply))
 
       {:error, :timeout} ->
         acc
@@ -197,7 +197,7 @@ defmodule Teiserver.TeiserverTestLib do
   def _recv_until(socket, acc) do
     case :gen_tcp.recv(socket, 0, 1000) do
       {:ok, reply} ->
-        _recv_until(socket, acc <> to_string(reply))
+        _recv_until(socket, acc <> IO.iodata_to_binary(reply))
 
       {:error, :timeout} ->
         acc
@@ -498,17 +498,22 @@ defmodule Teiserver.TeiserverTestLib do
     listeners =
       for transport_type <- listener_types do
         ref = make_ref()
-        child_spec = Teiserver.Application.spring_server_child(ref, transport_type)
 
+        opts =
+          Application.get_env(:teiserver, Teiserver.SpringTcpServer)[:listeners][transport_type]
+
+        child_spec = Teiserver.Application.spring_server_listener_child(opts, ref, transport_type)
         assert {:ok, pid} = Supervisor.start_child(Teiserver.Supervisor, child_spec)
+        Supervisor.which_children(Teiserver.Supervisor)
 
-        {transport_type, %{pid: pid, port: :ranch.get_port(ref), ref: ref}}
+        {transport_type,
+         %{pid: pid, port: :ranch.get_port(ref), ref: ref, id: elem(child_spec, 0)}}
       end
 
     on_exit(fn ->
-      for %{ref: ref} <- listeners do
-        assert :ok = :ranch.stop_listener(ref)
-      end
+      Enum.each(listeners, fn {_typ, %{id: id}} ->
+        Supervisor.terminate_child(Teiserver.Supervisor, id)
+      end)
     end)
 
     {:ok, %{spring_server: Map.new(listeners)}}

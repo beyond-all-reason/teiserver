@@ -1,6 +1,8 @@
 defmodule TeiserverWeb.Tachyon.LobbyTest do
   alias ExUnit.Callbacks
   alias Teiserver.AssetFixtures
+  alias Teiserver.Player
+  alias Teiserver.Player.Session
   alias Teiserver.Support.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
@@ -49,6 +51,22 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       %{"status" => "failed", "reason" => "invalid_request", "details" => "already_in_lobby"} =
         Tachyon.create_lobby!(client, lobby_data2)
+    end
+
+    test "cannot create lobby with invalid name", %{client: client} do
+      data = %{
+        name: "",
+        map_name: "test-map",
+        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
+      }
+
+      response = Tachyon.create_lobby!(client, data)
+
+      assert %{
+               "status" => "failed",
+               "reason" => "invalid_request",
+               "details" => "Cannot create lobby:" <> _message
+             } = response
     end
   end
 
@@ -560,6 +578,46 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
   end
 
+  describe "kickban" do
+    test "boss can kick a player" do
+      {:ok, ctx} = Tachyon.setup_client()
+      {:ok, lobby_data} = setup_lobby(%{client: ctx[:client]}, %{boss_enabled?: true})
+
+      {:ok, ctx2} = Tachyon.setup_client()
+      %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], lobby_data[:lobby_id])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
+
+      %{"status" => "success"} = Tachyon.lobby_kickban(ctx[:client], ctx2[:user].id)
+
+      kicked_user_id = to_string(ctx2[:user].id)
+      %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
+      assert updated["spectators"][kicked_user_id] == nil
+
+      %{"commandId" => "lobby/left", "data" => data} = Tachyon.recv_message!(ctx2[:client])
+      assert data["reason"] == "kicked"
+    end
+
+    test "invalid user id returns error" do
+      {:ok, ctx} = Tachyon.setup_client()
+      {:ok, _lobby_data} = setup_lobby(%{client: ctx[:client]}, %{boss_enabled?: true})
+
+      :ok = Tachyon.send_request(ctx[:client], "lobby/kickban", %{userId: "not-a-number"})
+      {:ok, resp} = Tachyon.recv_message(ctx[:client])
+      assert resp["status"] == "failed"
+      assert resp["reason"] == "invalid_request"
+    end
+
+    test "cannot kickban player not in lobby" do
+      {:ok, ctx} = Tachyon.setup_client()
+      {:ok, _lobby_data} = setup_lobby(%{client: ctx[:client]}, %{boss_enabled?: true})
+
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      %{"status" => "failed", "reason" => "invalid_request"} =
+        Tachyon.lobby_kickban(ctx[:client], ctx2[:user].id)
+    end
+  end
+
   describe "update client status" do
     setup [:setup_lobby]
 
@@ -585,9 +643,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       {Tachyon, :setup_autohost}
     ]
 
-    test "subscribe list updates", %{client: client} do
-      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-      Callbacks.start_link_supervised!({Task, &continuously_send_list_update/0})
+    test "subscribe list updates", %{client: client, user: user} do
+      subscribe_lobby_list!(client, user.id)
 
       %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => %{}}} =
         Tachyon.recv_message!(client)
@@ -670,8 +727,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     end
 
     test "start battle", %{client: client} = ctx do
-      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-      Callbacks.start_link_supervised!({Task, &continuously_send_list_update/0})
+      subscribe_lobby_list!(client, ctx[:user].id)
       %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
 
       # create lobby with another client so that only list updates are sent to
@@ -700,7 +756,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => update}} =
         Tachyon.recv_message!(client)
 
-      assert update[lobby_id]["currentBattle"]["startedAt"] != nil
+      assert is_integer(update[lobby_id]["currentBattle"]["startedAt"])
+
       assert update[lobby_id]["id"] == lobby_id
 
       # bit of a hack to get the battle id :/
@@ -716,38 +773,12 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       assert update[lobby_id]["currentBattle"] == nil
     end
 
-    test "list reset", %{client: client} do
+    test "avoid duplicate subscription", %{client: client, user: user} do
       # create lobby with another client so that only list updates are sent to
       # the original client, it makes the tests a bit simpler
       {:ok, ctx2} = Tachyon.setup_client()
 
-      {:ok, lobby_id: lobby_id} =
-        setup_lobby(%{client: ctx2[:client]}, %{
-          ally_team_config: Tachyon.mk_ally_team_config(2, 2)
-        })
-
-      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-
-      %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => lobbies}} =
-        Tachyon.recv_message!(client)
-
-      assert is_map_key(lobbies, lobby_id)
-
-      Process.whereis(TachyonLobby.List)
-      |> Process.exit(:kill)
-
-      %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => lobbies2}} =
-        Tachyon.recv_message!(client)
-
-      assert lobbies == lobbies2
-    end
-
-    test "avoid duplicate subscription", %{client: client} do
-      # create lobby with another client so that only list updates are sent to
-      # the original client, it makes the tests a bit simpler
-      {:ok, ctx2} = Tachyon.setup_client()
-
-      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+      subscribe_lobby_list!(client, user.id)
 
       %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
 
@@ -926,10 +957,16 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     {:ok, game: game, engine: engine}
   end
 
-  # to force the list update without having to rely on a slow update timer
-  defp continuously_send_list_update do
-    TachyonLobby.List.broadcast_updates()
+  defp subscribe_lobby_list!(client, user_id) do
+    %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+    Callbacks.start_link_supervised!({Task, fn -> continuously_flush_list_updates(user_id) end})
+  end
+
+  defp continuously_flush_list_updates(user_id) do
+    Player.lookup_session(user_id)
+    |> Session.flush_lobby_list_updates()
+
     :timer.sleep(10)
-    continuously_send_list_update()
+    continuously_flush_list_updates(user_id)
   end
 end

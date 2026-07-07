@@ -19,7 +19,7 @@
           <%= if @match do %>
             <%= if @prev_match do %>
               <a
-                href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @prev_match.id)}
+                href={~p"/teiserver/admin/lobbies/#{@prev_match.id}/lobby_chat"}
                 class="btn btn-outline-secondary"
               >
                 <i class="fa-fw fa-solid fa-arrow-left"></i> &nbsp;
@@ -29,7 +29,7 @@
 
             <%= if @next_match do %>
               <a
-                href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @next_match.id)}
+                href={~p"/teiserver/admin/lobbies/#{@next_match.id}/lobby_chat"}
                 class="btn btn-outline-secondary"
               >
                 <i class="fa-fw fa-solid fa-arrow-right"></i> &nbsp;
@@ -115,7 +115,7 @@
 
         <%= if @page > 0 do %>
           <a
-            href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @match.id, @page - 1)}
+            href={~p"/teiserver/admin/lobbies/#{@match.id}/lobby_chat/#{@page - 1}"}
             class="btn btn-secondary"
           >
             <i class="fa-fw fa-solid fa-arrow-left"></i> &nbsp;
@@ -125,7 +125,7 @@
 
         <%= if not @last_page do %>
           <a
-            href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @match.id, @page + 1)}
+            href={~p"/teiserver/admin/lobbies/#{@match.id}/lobby_chat/#{@page + 1}"}
             class="btn btn-secondary float-end"
           >
             <i class="fa-fw fa-solid fa-arrow-right"></i> &nbsp;

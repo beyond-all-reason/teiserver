@@ -9,41 +9,48 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
   end
 
   def authorize(conn, %{"client_id" => client_id} = params) do
-    case OAuth.get_application_by_uid(client_id) do
+    with app when app != nil <- OAuth.get_application_by_uid(client_id),
+         true <- OAuth.can_create_code?(app),
+         {:ok, _parsed_scopes} <- check_requested_scopes(app.scopes, params["scope"]),
+         {:ok, redir_uri} <- OAuth.get_redirect_uri(app, Map.get(conn.params, "redirect_uri")) do
+      if auto_redirect?(app, conn.assigns.current_user.id) do
+        params = Map.put(params, "response_type", "code")
+        do_generate_code(conn, app, redir_uri, params)
+      else
+        reject_uri =
+          error_redirect_uri(
+            conn,
+            redir_uri,
+            "access_denied",
+            "user refused to authorize application"
+          )
+
+        permissions = Enum.map(app.scopes, &OAuth.scope_description/1)
+
+        conn
+        |> render("authorize.html",
+          app_name: app.name,
+          permissions: permissions,
+          params: params,
+          reject_uri: reject_uri
+        )
+      end
+    else
       nil ->
         bad_request(conn, "invalid client_id")
 
-      app ->
-        if OAuth.can_create_code?(app) do
-          case OAuth.get_redirect_uri(app, Map.get(conn.params, "redirect_uri")) do
-            {:error, err} ->
-              bad_request(conn, "invalid redirection uri: #{inspect(err)}")
+      false ->
+        conn
+        |> render("bad_request.html",
+          reason: "Cannot use this application to create auth token"
+        )
 
-            {:ok, redir_uri} ->
-              reject_uri =
-                error_redirect_uri(
-                  conn,
-                  redir_uri,
-                  "access_denied",
-                  "user refused to authorize application"
-                )
+      {:error, {:invalid_scopes, scopes}} ->
+        scopes = Enum.join(scopes, ", ")
+        bad_request(conn, "Cannot request the following scopes: #{scopes}")
 
-              permissions = Enum.map(app.scopes, &OAuth.scope_description/1)
-
-              conn
-              |> render("authorize.html",
-                app_name: app.name,
-                permissions: permissions,
-                params: params,
-                reject_uri: reject_uri
-              )
-          end
-        else
-          conn
-          |> render("bad_request.html",
-            reason: "Cannot use this application to create auth token"
-          )
-        end
+      {:error, err} ->
+        bad_request(conn, "invalid redirection uri: #{inspect(err)}")
     end
   end
 
@@ -60,31 +67,43 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
   end
 
   def generate_code(conn, %{"client_id" => client_id, "redirect_uri" => redirect_uri} = params) do
-    case OAuth.get_application_by_uid(client_id) do
+    with app when app != nil <- OAuth.get_application_by_uid(client_id),
+         {:ok, redir_url} <- OAuth.get_redirect_uri(app, redirect_uri) do
+      do_generate_code(conn, app, redir_url, params)
+    else
       nil ->
         bad_request(conn, "invalid client_id")
 
-      app ->
-        case OAuth.get_redirect_uri(app, redirect_uri) do
-          {:error, _reason} -> bad_request(conn, "invalid redirection url")
-          {:ok, redir_url} -> do_generate_code(conn, app, redir_url, params)
-        end
+      {:error, _reason} ->
+        bad_request(conn, "invalid redirection url")
     end
   end
 
   defp do_generate_code(conn, app, redir_url, params) do
+    checked_scopes = check_requested_scopes(app.scopes, params["scope"])
+
     cond do
       Map.get(params, "response_type") != "code" ->
         error_redirect(conn, redir_url, "unsupported_response_type", "only code is supported")
 
-      Map.get(params, "code_challenge") == nil ->
-        error_redirect(conn, redir_url, "invalid_request", "a code challenge must be provided")
+      elem(checked_scopes, 0) == :error ->
+        {:error, {:invalid_scopes, scopes}} = checked_scopes
+        scopes = Enum.join(scopes, ", ")
+
+        error_redirect(
+          conn,
+          redir_url,
+          "invalid_request",
+          "cannot request the following scopes #{scopes}"
+        )
 
       true ->
+        {:ok, scopes} = checked_scopes
+
         code_params = %{
           application: app,
           redirect_uri: URI.to_string(redir_url),
-          scopes: app.scopes,
+          scopes: scopes,
           challenge: Map.get(params, "code_challenge"),
           challenge_method: Map.get(params, "code_challenge_method")
         }
@@ -115,6 +134,7 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
                   st -> Map.put(query, "state", st)
                 end
               end)
+              |> Map.put(:scope, Enum.join(code.scopes, " "))
               |> URI.encode_query()
 
             conn |> redirect(external: URI.to_string(%{redir_url | query: query}))
@@ -130,6 +150,33 @@ defmodule TeiserverWeb.OAuth.AuthorizeController do
     conn
     |> put_status(400)
     |> render("bad_request.html", reason: reason)
+  end
+
+  defp check_requested_scopes(app_scopes, nil), do: {:ok, app_scopes}
+
+  defp check_requested_scopes(app_scopes, requested_scope_string) do
+    scopes = String.split(requested_scope_string)
+
+    invalid_scopes =
+      scopes
+      |> MapSet.new()
+      |> MapSet.difference(MapSet.new(app_scopes))
+
+    if MapSet.size(invalid_scopes) == 0,
+      do: {:ok, scopes},
+      else: {:error, {:invalid_scopes, invalid_scopes}}
+  end
+
+  # do not allow auto redirect for public app since this could
+  # allow any other local application to trigger the flow and
+  # get the token for the lobby.
+  defp auto_redirect?(app, user_id) do
+    if OAuth.confidential_app?(app) do
+      authorized_apps = OAuth.list_authorized_applications(user_id)
+      Enum.find(authorized_apps, &(&1.id == app.id)) != nil
+    else
+      false
+    end
   end
 
   defp error_redirect_uri(conn, %URI{} = redir_url, error, description) do

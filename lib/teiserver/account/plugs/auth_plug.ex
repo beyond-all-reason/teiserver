@@ -15,8 +15,6 @@ defmodule Teiserver.Account.AuthPlug do
 
   use TeiserverWeb, :verified_routes
 
-  require Logger
-
   import Plug.Conn
 
   def init(_opts) do

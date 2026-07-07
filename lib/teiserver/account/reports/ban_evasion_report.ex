@@ -2,7 +2,7 @@ defmodule Teiserver.Account.BanEvasionReport do
   @moduledoc false
 
   alias Teiserver.Account
-  require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()

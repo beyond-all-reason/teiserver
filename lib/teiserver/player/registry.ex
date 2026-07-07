@@ -9,19 +9,19 @@ defmodule Teiserver.Player.Registry do
   use a separate registry and keep clients separate.
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
   alias Teiserver.Player.TachyonHandler
 
   def start_link do
-    Horde.Registry.start_link(keys: :unique, name: __MODULE__)
+    Registry.start_link(keys: :unique, name: __MODULE__)
   end
 
   @doc """
   how to reach a given connection
   """
-  @spec via_tuple(T.userid()) :: GenServer.name()
+  @spec via_tuple(User.id()) :: GenServer.name()
   def via_tuple(user_id) do
-    {:via, Horde.Registry, {__MODULE__, user_id}}
+    {:via, Registry, {__MODULE__, user_id}}
   end
 
   @doc """
@@ -29,30 +29,30 @@ defmodule Teiserver.Player.Registry do
   unregister the existing process and kill it, then register.
   This ensure a player has at most one connection alive at a time
   """
-  @spec register_and_kill_existing(T.userid()) :: {:ok, pid()}
+  @spec register_and_kill_existing(User.id()) :: {:ok, pid()}
   def register_and_kill_existing(user_id) do
     case register(user_id) do
       {:ok, pid} ->
         {:ok, pid}
 
       {:error, {:already_registered, existing_conn_pid}} ->
-        Horde.Registry.unregister(__MODULE__, via_tuple(user_id))
+        Registry.unregister(__MODULE__, via_tuple(user_id))
         TachyonHandler.force_disconnect(existing_conn_pid)
         :timer.sleep(1)
         register_and_kill_existing(user_id)
     end
   end
 
-  @spec register(T.userid()) :: {:ok, pid()} | {:error, {:already_registered, pid()}}
+  @spec register(User.id()) :: {:ok, pid()} | {:error, {:already_registered, pid()}}
   def register(user_id) do
     # this is needed because the process that handle the ws connection is spawned
     # by phoenix, so we can't spawn+register in the same step
-    Horde.Registry.register(__MODULE__, via_tuple(user_id), user_id)
+    Registry.register(__MODULE__, via_tuple(user_id), user_id)
   end
 
-  @spec lookup(T.userid()) :: pid() | nil
+  @spec lookup(User.id()) :: pid() | nil
   def lookup(user_id) do
-    case Horde.Registry.lookup(__MODULE__, via_tuple(user_id)) do
+    case Registry.lookup(__MODULE__, via_tuple(user_id)) do
       [{pid, _value}] -> pid
       _other -> nil
     end
@@ -60,14 +60,14 @@ defmodule Teiserver.Player.Registry do
 
   @spec connected_count() :: non_neg_integer()
   def connected_count do
-    case Horde.Registry.count(__MODULE__) do
-      :undefined -> 0
-      x -> x
-    end
+    Registry.count(__MODULE__)
+  rescue
+    # this can happen when attempting to query the registry before it's started
+    _e in ArgumentError -> 0
   end
 
   def child_spec(_opts) do
-    Supervisor.child_spec(Horde.Registry,
+    Supervisor.child_spec(Registry,
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}
     )

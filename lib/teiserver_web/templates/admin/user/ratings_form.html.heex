@@ -26,7 +26,7 @@
         <hr />
 
         <form
-          action={Routes.ts_admin_user_path(@conn, :ratings_post, @user)}
+          action={~p"/teiserver/admin/users/ratings_post/#{@user.id}"}
           method="post"
           class=""
         >
@@ -121,7 +121,7 @@
             </div>
           <% end %>
 
-          <a href={Routes.ts_admin_user_path(@conn, :ratings, @user)} class="btn btn-secondary">
+          <a href={~p"/teiserver/admin/users/ratings/#{@user.id}"} class="btn btn-secondary">
             Cancel
           </a>
 

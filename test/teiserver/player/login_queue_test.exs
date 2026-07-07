@@ -10,6 +10,7 @@ defmodule Teiserver.Player.LoginQueueTest do
   setup _context do
     Teiserver.Tachyon.System.restart()
     LoginQueue.set_tick_period(:infinity)
+    LoginQueue.set_rate(100_000, true)
     :ok
   end
 
@@ -119,6 +120,53 @@ defmodule Teiserver.Player.LoginQueueTest do
     set_capacity(1)
     LoginQueue.tick()
     assert LoginQueue.get_queue_length() == 0
+  end
+
+  test "rate limiter blocks second login even with capacity" do
+    user1 = new_user()
+    user2 = new_user()
+    p2 = fake_conn(:p2)
+
+    set_capacity(10)
+    LoginQueue.set_rate(1, true)
+
+    assert LoginQueue.attempt_login(user1.id) == true
+    assert LoginQueue.attempt_login(user2.id, p2) == false
+    assert LoginQueue.get_queue_length() == 1
+  end
+
+  test "rate limiter delays dequeue even when there is capacity" do
+    user1 = new_user()
+    user2 = new_user()
+    p1 = fake_conn(:p1)
+    p2 = fake_conn(:p2)
+
+    set_capacity(0)
+    LoginQueue.set_rate(1, true)
+    assert LoginQueue.attempt_login(user1.id, p1) == false
+    assert LoginQueue.attempt_login(user2.id, p2) == false
+
+    set_capacity(2)
+    LoginQueue.tick()
+    assert_receive {:p1, :login_accepted}, 100
+    refute_receive {:p2, :login_accepted}, 10
+    assert LoginQueue.get_queue_length() == 1
+  end
+
+  test "admits queued player after rate limit is raised" do
+    user1 = new_user()
+    user2 = new_user()
+    p2 = fake_conn(:p2)
+
+    set_capacity(10)
+    LoginQueue.set_rate(1, true)
+
+    assert LoginQueue.attempt_login(user1.id) == true
+    assert LoginQueue.attempt_login(user2.id, p2) == false
+
+    LoginQueue.set_rate(100_000, true)
+    LoginQueue.tick()
+    assert_receive {:p2, :login_accepted}, 100
   end
 
   defp set_capacity(n) do

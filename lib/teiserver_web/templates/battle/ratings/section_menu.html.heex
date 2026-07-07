@@ -8,6 +8,6 @@ types = Teiserver.Game.MatchRatingLib.rating_type_list() %>
     active: @active,
     icon: "",
     bsname: bsname,
-    url: Routes.ts_battle_ratings_path(@conn, :leaderboard, t)
+    url: ~p"/battle/ratings/leaderboard/#{t}"
   )}
 <% end %>

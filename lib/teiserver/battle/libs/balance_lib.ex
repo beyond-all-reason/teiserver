@@ -4,11 +4,11 @@ defmodule Teiserver.Battle.BalanceLib do
   """
 
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Battle.Balance.BalanceTypes, as: BT
   alias Teiserver.Config
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Game.MatchRatingLib
-  require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1, round: 2]
   # These are default values and can be overridden as part of the call to create_balance()
 
@@ -59,7 +59,7 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   @doc """
-  Teifion only allowed force_party to be used by mods because it led to noob-stomping unbalanced teams
+  force_party is only allowed to be used by mods because it led to noob-stomping unbalanced teams
   """
   @spec get_allowed_algorithms(boolean()) :: [String.t()]
   def get_allowed_algorithms(is_moderator) do
@@ -589,7 +589,7 @@ defmodule Teiserver.Battle.BalanceLib do
     }
   end
 
-  @spec get_user_rating_value_uncertainty_pair(T.userid(), String.t() | non_neg_integer()) ::
+  @spec get_user_rating_value_uncertainty_pair(User.id(), String.t() | non_neg_integer()) ::
           {BT.rating_value(), number()}
   def get_user_rating_value_uncertainty_pair(userid, rating_type_id)
       when is_integer(rating_type_id) do
@@ -602,14 +602,17 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   def get_user_rating_value_uncertainty_pair(userid, rating_type) do
-    rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+    rating_type_id =
+      MatchRatingLib.rating_type_name_lookup()[rating_type] ||
+        MatchRatingLib.rating_type_name_lookup()["Large Team"]
+
     get_user_rating_value_uncertainty_pair(userid, rating_type_id)
   end
 
   @doc """
   Used to get the rating value of the user for public/reporting purposes
   """
-  @spec get_user_rating_value(T.userid(), String.t() | non_neg_integer()) :: BT.rating_value()
+  @spec get_user_rating_value(User.id(), String.t() | non_neg_integer()) :: BT.rating_value()
   def get_user_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
     Account.get_rating(userid, rating_type_id) |> convert_rating()
   end
@@ -621,7 +624,7 @@ defmodule Teiserver.Battle.BalanceLib do
     get_user_rating_value(userid, rating_type_id)
   end
 
-  @spec get_user_balance_rating_value(T.userid(), String.t() | non_neg_integer()) ::
+  @spec get_user_balance_rating_value(User.id(), String.t() | non_neg_integer()) ::
           BT.rating_value()
   defp get_user_balance_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
     get_user_rating_value(userid, rating_type_id)
@@ -761,7 +764,7 @@ defmodule Teiserver.Battle.BalanceLib do
     max(skill - 3 * uncertainty, 0)
   end
 
-  @spec balance_group([T.userid()], String.t() | non_neg_integer()) :: number()
+  @spec balance_group([User.id()], String.t() | non_neg_integer()) :: number()
   def balance_group(userids, rating_type) do
     userids
     |> Enum.map(fn userid ->

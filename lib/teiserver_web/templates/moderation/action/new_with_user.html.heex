@@ -43,11 +43,13 @@ bsname = view_colour() %>
           </a>
         </div>
 
+        <TeiserverWeb.Moderation.ModerationComponents.action_warning user={@user} />
+
         <h3>Adding action against {@user.name}</h3>
 
         <div class="row">
           <div class="col-md-12 mb-4">
-            <%= form_for @changeset, Routes.moderation_action_path(@conn, :create), fn f -> %>
+            <%= form_for @changeset, ~p"/moderation/action", fn f -> %>
               <%= if @changeset.action do %>
                 <div class="alert alert-danger">
                   <p>Oops, something went wrong! Please check the errors below.</p>
@@ -409,7 +411,6 @@ bsname = view_colour() %>
                     onclick={"
         $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_restriction_All_lobbies').prop('checked', true);
-        $('#action_restriction_All_chat').prop('checked', true);
         $('#action_restriction_Room_chat').prop('checked', true);
         $('#action_restriction_Matchmaking').prop('checked', true);
         $('#action_restriction_Community').prop('checked', true);

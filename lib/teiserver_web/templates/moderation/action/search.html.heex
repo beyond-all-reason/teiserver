@@ -20,7 +20,7 @@
 
 <div class="search-row">
   <form
-    action={Routes.moderation_action_path(@conn, :index)}
+    action={~p"/moderation/action"}
     method="get"
     class="form-horizontal"
     id="search-box"

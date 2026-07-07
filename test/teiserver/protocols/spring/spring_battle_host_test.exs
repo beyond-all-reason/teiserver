@@ -136,7 +136,6 @@ defmodule Teiserver.SpringBattleHostTest do
 
     # Check the battle actually got created
     battle = Lobby.get_lobby(lobby_id)
-    assert battle != nil
     assert Enum.empty?(battle.players)
 
     # Now create a user to join the battle
@@ -192,7 +191,6 @@ defmodule Teiserver.SpringBattleHostTest do
     # after kicking a player, it was caused by the host disconnecting
     # and in the process closed out the battle
     battle = Lobby.get_lobby(lobby_id)
-    assert battle != nil
 
     # Adding start rectangles
     assert Enum.empty?(battle.start_areas)
@@ -425,5 +423,40 @@ defmodule Teiserver.SpringBattleHostTest do
 
     _send_raw(socket3, "EXIT\n")
     _recv_raw(socket3)
+  end
+
+  test "lobby name validation", %{socket: socket} do
+    name = "="
+
+    _send_raw(
+      socket,
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\t#{name}\tgameName\n"
+    )
+
+    reply = _recv_until(socket)
+    assert reply =~ "OPENBATTLEFAILED", "Expected OPENBATTLEFAILED response, got #{reply}"
+
+    # Open lobby for c.battle.update_lobby_title
+    _send_raw(
+      socket,
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\tlobbyName\tgameName\n"
+    )
+
+    reply = _recv_until(socket)
+    ignore_events(socket)
+    assert reply =~ "BATTLEOPENED"
+
+    # Updating lobby using c.battle.update_lobby_title returns NO response
+    _send_raw(socket, "c.battle.update_lobby_title #{name}\n")
+
+    reply = _recv_until(socket)
+    assert reply =~ "NO cmd=c.battle.update_lobby_title\t", "Expected NO reply, got #{reply}"
+  end
+
+  defp ignore_events(socket) do
+    case _recv_until(socket) do
+      "" -> nil
+      _response -> ignore_events(socket)
+    end
   end
 end

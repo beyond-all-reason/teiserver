@@ -4,15 +4,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias ExULID.ULID
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.CacheUser
-  alias Teiserver.Chat.WordLib
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.ConsulServer
-  alias Teiserver.Coordinator.RikerssMemes
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.Lobby.LobbyLib
@@ -1234,12 +1232,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "set-config-teaser", remaining: new_teaser} = cmd, state) do
     ConsulServer.say_command(cmd, state)
     new_teaser = String.trim(new_teaser)
-
-    new_teaser =
-      case chars_valid_for_lobby_name?(new_teaser) do
-        true -> new_teaser
-        _invalid -> ""
-      end
+    new_teaser = if LobbyLib.name_chars_valid?(new_teaser), do: new_teaser, else: ""
 
     Battle.update_lobby_values(state.lobby_id, %{teaser: new_teaser})
     LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
@@ -1248,44 +1241,29 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "rename", remaining: new_name, senderid: senderid} = cmd, state) do
     new_name = String.trim(new_name)
-
-    stripped_name =
-      case chars_valid_for_lobby_name?(new_name) do
-        true -> new_name
-        _invalid -> ""
-      end
-
     lobby = Lobby.get_lobby(state.lobby_id)
 
-    {check_name_result, check_name_msg} = LobbyRestrictions.check_lobby_name(stripped_name, state)
+    name_validation_error =
+      case LobbyLib.validate_name(new_name, hints: true) do
+        {:error, error} ->
+          error
+
+        :ok ->
+          case LobbyRestrictions.check_lobby_name(new_name, state) do
+            :ok -> nil
+            {:error, error} -> error
+          end
+      end
 
     cond do
       new_name == "" ->
         Battle.rename_lobby(state.lobby_id, lobby.base_name, nil)
         state
 
-      WordLib.flagged_words(new_name) > 0 ->
+      name_validation_error != nil ->
         Lobby.sayex(
           state.coordinator_id,
-          "That lobby name been rejected. Please be aware that misuse of the lobby naming system can cause your chat privileges to be revoked.",
-          state.lobby_id
-        )
-
-        state
-
-      check_name_result != :ok ->
-        Lobby.sayex(
-          state.coordinator_id,
-          check_name_msg,
-          state.lobby_id
-        )
-
-        state
-
-      new_name != stripped_name ->
-        Lobby.sayex(
-          state.coordinator_id,
-          "That name contains one or more invalid characters (alphanumeric, spaces and some special characters allowed)",
+          name_validation_error,
           state.lobby_id
         )
 
@@ -1301,9 +1279,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         ConsulServer.say_command(cmd, state)
 
-        if check_name_msg != nil do
+        tips = LobbyRestrictions.get_tips(new_name)
+
+        if tips != nil do
           # Send coordinator message which can be long; appears on right
-          CacheUser.send_direct_message(state.coordinator_id, senderid, check_name_msg)
+          CacheUser.send_direct_message(state.coordinator_id, senderid, tips)
         end
 
         state
@@ -1702,21 +1682,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "meme", remaining: meme, senderid: senderid}, state) do
-    meme = String.downcase(meme)
-
-    msg = RikerssMemes.handle_meme(meme, senderid, state)
-
-    if not Enum.empty?(msg) do
-      Lobby.list_lobby_players!(state.lobby_id)
-      |> Enum.each(fn playerid ->
-        CacheUser.send_direct_message(state.coordinator_id, playerid, msg)
-      end)
-    end
-
-    state
-  end
-
   def handle_command(%{command: "reset"} = _cmd, state) do
     ConsulServer.empty_state(state.lobby_id)
     |> ConsulServer.broadcast_update("reset")
@@ -1817,14 +1782,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  @spec chars_valid_for_lobby_name?(String.t()) :: boolean()
-  defp chars_valid_for_lobby_name?(string) do
-    case Regex.run(~r/^[a-zA-Z0-9_\-\[\] \<\>\+\|:]+$/, string) do
-      [_match] -> true
-      _no_match -> false
-    end
-  end
-
-  @spec get_queue(map()) :: [T.userid()]
+  @spec get_queue(map()) :: [User.id()]
   defdelegate get_queue(state), to: ConsulServer
 end

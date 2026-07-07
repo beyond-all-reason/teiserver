@@ -1,6 +1,7 @@
 defmodule Teiserver.Chat.PartyMessageLib do
   @moduledoc false
   alias Teiserver.Chat.PartyMessage
+  alias Teiserver.Chat.TermSearch
   use TeiserverWeb, :library
 
   # Functions
@@ -72,11 +73,12 @@ defmodule Teiserver.Chat.PartyMessageLib do
       where: ilike(party_messages.name, ^ref_like)
   end
 
-  def _search(query, :term, ref) do
-    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
+  def _search(query, :term, ref) when is_binary(ref) do
+    _search(query, :term, {ref, []})
+  end
 
-    from party_messages in query,
-      where: ilike(party_messages.content, ^ref_like)
+  def _search(query, :term, {ref, opts}) do
+    TermSearch.content_filter(query, ref, opts)
   end
 
   def _search(query, :inserted_after, timestamp) do

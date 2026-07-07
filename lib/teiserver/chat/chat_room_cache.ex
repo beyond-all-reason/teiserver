@@ -12,13 +12,10 @@ defmodule Teiserver.Room do
   alias Teiserver.Chat.RoomSupervisor
   alias Teiserver.Chat.WordLib
   alias Teiserver.Coordinator
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Moderation
   alias Teiserver.Plugins
 
   use Plugins
-
-  require Logger
 
   @type room :: Chat.RoomServer.room()
 
@@ -33,7 +30,7 @@ defmodule Teiserver.Room do
     )
   end
 
-  @spec create_room(String.t(), T.userid()) :: map()
+  @spec create_room(String.t(), User.id()) :: map()
   def create_room(room_name, author_id) do
     %{
       name: room_name,
@@ -51,7 +48,7 @@ defmodule Teiserver.Room do
   @spec get_room(String.t()) :: room() | nil
   defdelegate get_room(name), to: RoomServer
 
-  @spec can_join_room?(T.userid(), String.t()) :: true | {false, String.t()}
+  @spec can_join_room?(User.id(), String.t()) :: true | {false, String.t()}
   def can_join_room?(userid, room_name) do
     user = Account.get_user_by_id(userid)
 
@@ -74,7 +71,7 @@ defmodule Teiserver.Room do
     end
   end
 
-  @spec get_or_make_room(String.t(), T.userid()) :: RoomServer.room()
+  @spec get_or_make_room(String.t(), User.id()) :: RoomServer.room()
   def get_or_make_room(name, author_id) do
     case RoomServer.get_room(name) do
       nil ->
@@ -116,7 +113,7 @@ defmodule Teiserver.Room do
   @spec list_rooms() :: [{String.t(), member_count :: non_neg_integer()}]
   defdelegate list_rooms(), to: RoomRegistry
 
-  @spec send_message(T.userid() | User.t(), String.t(), String.t() | [String.t()]) :: nil | :ok
+  @spec send_message(User.id() | User.t(), String.t(), String.t() | [String.t()]) :: nil | :ok
   def send_message(from_id, _room_name, "$" <> msg) do
     CacheUser.send_direct_message(from_id, Coordinator.get_coordinator_userid(), "$" <> msg)
   end
@@ -156,7 +153,7 @@ defmodule Teiserver.Room do
     RoomServer.send_message(room_name, user_id, msg)
   end
 
-  @spec send_message_ex(T.userid(), String.t(), String.t()) :: nil | :ok
+  @spec send_message_ex(User.id(), String.t(), String.t()) :: nil | :ok
   def send_message_ex(from_id, room_name, msg) do
     user = Account.get_user(from_id)
     bot? = Auth.is_bot?(user)
@@ -183,7 +180,7 @@ defmodule Teiserver.Room do
     RoomServer.send_message_ex(room_name, user_id, msg)
   end
 
-  @spec allow?(T.userid()) :: boolean()
+  @spec allow?(User.id()) :: boolean()
   def allow?(userid) do
     cond do
       CacheUser.shadowbanned?(userid) ->

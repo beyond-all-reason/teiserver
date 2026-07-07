@@ -9,7 +9,7 @@ defmodule Teiserver.Party.PartyTest do
   @moduletag :tachyon
 
   test "create party" do
-    assert {:ok, party_id, _pid} = Party.create_party(123)
+    assert {:ok, %{id: party_id}, _pid} = Party.create_party(123)
     Polling.poll_until_some(fn -> Party.lookup(party_id) end)
   end
 
@@ -18,7 +18,7 @@ defmodule Teiserver.Party.PartyTest do
 
     test "restore party from snapshot" do
       sink_pid = mk_sink()
-      {:ok, party_id, party_pid} = Party.create_party(123, sink_pid)
+      {:ok, %{id: party_id}, party_pid} = Party.create_party(123, sink_pid)
       Process.exit(sink_pid, :shutdown)
 
       TachyonLib.restart_system()
@@ -28,7 +28,7 @@ defmodule Teiserver.Party.PartyTest do
 
     test "user leave after restoration tears down party" do
       sink_pid = mk_sink()
-      {:ok, party_id, _party_pid} = Party.create_party(123, sink_pid)
+      {:ok, %{id: party_id}, _party_pid} = Party.create_party(123, sink_pid)
       Process.exit(sink_pid, :shutdown)
 
       TachyonLib.restart_system()
@@ -39,7 +39,7 @@ defmodule Teiserver.Party.PartyTest do
 
     test "monitors are re-setup" do
       sink_pid = mk_sink()
-      {:ok, party_id, _party_pid} = Party.create_party(123, sink_pid)
+      {:ok, %{id: party_id}, _party_pid} = Party.create_party(123, sink_pid)
       Process.exit(sink_pid, :shutdown)
 
       TachyonLib.restart_system()
@@ -52,7 +52,7 @@ defmodule Teiserver.Party.PartyTest do
 
     test "random user can't rejoin" do
       sink_pid = mk_sink()
-      {:ok, party_id, _party_pid} = Party.create_party(123, sink_pid)
+      {:ok, %{id: party_id}, _party_pid} = Party.create_party(123, sink_pid)
       Process.exit(sink_pid, :shutdown)
 
       TachyonLib.restart_system()
@@ -61,7 +61,7 @@ defmodule Teiserver.Party.PartyTest do
 
     test "invited can rejoin" do
       sink_pid = mk_sink()
-      {:ok, party_id, party_pid} = Party.create_party(123, sink_pid)
+      {:ok, %{id: party_id}, party_pid} = Party.create_party(123, sink_pid)
 
       sink_pid2 = mk_sink(:sink2)
       {:ok, _invite} = Party.create_invite(party_id, 456, sink_pid2)
@@ -79,7 +79,7 @@ defmodule Teiserver.Party.PartyTest do
 
     test "timeout if no rejoin in time" do
       sink_pid = mk_sink()
-      {:ok, party_id, _party_pid} = Party.create_party(123, sink_pid)
+      {:ok, %{id: party_id}, _party_pid} = Party.create_party(123, sink_pid)
       Process.exit(sink_pid, :shutdown)
 
       TachyonLib.set_restoration_timeout(0)

@@ -4,9 +4,9 @@ defmodule Teiserver.Account.AccoladeLib do
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
   alias Teiserver.Account.Accolade
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
+
   use TeiserverWeb, :library
-  require Logger
 
   def miss_count_limit, do: 20
 
@@ -192,7 +192,7 @@ defmodule Teiserver.Account.AccoladeLib do
       preload: [giver: givers]
   end
 
-  @spec get_possible_ratings(T.userid(), [map()]) :: any
+  @spec get_possible_ratings(User.id(), [map()]) :: any
   def get_possible_ratings(userid, memberships) do
     their_membership = Enum.filter(memberships, fn m -> m.user_id == userid end) |> hd()
 
@@ -268,7 +268,7 @@ order by name;"
     end)
   end
 
-  @spec get_player_accolades(T.userid()) :: map()
+  @spec get_player_accolades(User.id()) :: map()
   def get_player_accolades(userid) do
     Account.list_accolades(search: [recipient_id: userid, has_badge: true])
     |> Enum.map(fn a -> a.badge_type_id end)

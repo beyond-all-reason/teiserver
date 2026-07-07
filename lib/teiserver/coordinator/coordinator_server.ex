@@ -369,7 +369,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def init(_opts) do
     Process.flag(:trap_exit, true)
 
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ServerRegistry,
       "CoordinatorServer",
       :coordinator
@@ -381,6 +381,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   @impl GenServer
   def terminate(_reason, state) do
-    Client.disconnect(state.userid, "coordinator terminate")
+    Map.get(state, :userid)
+    |> Client.disconnect("coordinator terminate")
   end
 end

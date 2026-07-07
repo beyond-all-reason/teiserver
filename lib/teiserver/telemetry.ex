@@ -1,6 +1,7 @@
 defmodule Teiserver.Telemetry do
   @moduledoc false
 
+  alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
@@ -43,6 +44,7 @@ defmodule Teiserver.Telemetry do
   alias Teiserver.Telemetry.TelemetryLib
   alias Teiserver.Telemetry.UserProperty
   alias Teiserver.Telemetry.UserPropertyLib
+
   import Ecto.Query, warn: false
 
   @spec get_totals_and_reset() :: map()
@@ -401,7 +403,7 @@ defmodule Teiserver.Telemetry do
   # ------------------------ Complex Events ------------------------
   # ------------------------
   # Complex client events
-  @spec log_complex_client_event(T.userid(), String.t(), map) ::
+  @spec log_complex_client_event(User.id(), String.t(), map) ::
           {:error, Ecto.Changeset} | {:ok, ComplexClientEvent}
   defdelegate log_complex_client_event(userid, event_type_name, value), to: ComplexClientEventLib
 
@@ -439,7 +441,7 @@ defmodule Teiserver.Telemetry do
     to: ComplexClientEventLib
 
   # Complex lobby events
-  @spec log_complex_lobby_event(T.userid(), T.match_id(), String.t(), map) ::
+  @spec log_complex_lobby_event(User.id(), T.match_id(), String.t(), map) ::
           {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
   defdelegate log_complex_lobby_event(userid, match_id, event_type_name, value),
     to: ComplexLobbyEventLib
@@ -478,7 +480,7 @@ defmodule Teiserver.Telemetry do
     to: ComplexLobbyEventLib
 
   # Complex match events
-  @spec log_complex_match_event(T.userid(), T.match_id(), String.t(), non_neg_integer, map) ::
+  @spec log_complex_match_event(User.id(), T.match_id(), String.t(), non_neg_integer, map) ::
           {:error, Ecto.Changeset} | {:ok, ComplexMatchEvent}
   defdelegate log_complex_match_event(userid, match_id, event_type_name, game_time, value),
     to: ComplexMatchEventLib
@@ -517,7 +519,7 @@ defmodule Teiserver.Telemetry do
     to: ComplexMatchEventLib
 
   # Complex server events
-  @spec log_complex_server_event(T.userid() | nil, String.t(), map) ::
+  @spec log_complex_server_event(User.id() | nil, String.t(), map) ::
           {:error, Ecto.Changeset} | {:ok, ComplexServerEvent}
   defdelegate log_complex_server_event(userid, event_type_name, value), to: ComplexServerEventLib
 
@@ -558,7 +560,7 @@ defmodule Teiserver.Telemetry do
   # ------------------------ Simple Events ------------------------
   # ------------------------
   # Simple client events
-  @spec log_simple_client_event(T.userid(), String.t()) ::
+  @spec log_simple_client_event(User.id(), String.t()) ::
           {:error, Ecto.Changeset} | {:ok, SimpleClientEvent}
   defdelegate log_simple_client_event(userid, event_type_name), to: SimpleClientEventLib
 
@@ -596,7 +598,7 @@ defmodule Teiserver.Telemetry do
     to: SimpleClientEventLib
 
   # Simple lobby events
-  @spec log_simple_lobby_event(T.userid(), T.match_id(), String.t()) ::
+  @spec log_simple_lobby_event(User.id(), T.match_id(), String.t()) ::
           {:error, Ecto.Changeset} | {:ok, SimpleLobbyEvent}
   defdelegate log_simple_lobby_event(userid, match_id, event_type_name), to: SimpleLobbyEventLib
 
@@ -633,7 +635,7 @@ defmodule Teiserver.Telemetry do
   defdelegate change_simple_lobby_event(simple_lobby_event_type, attrs), to: SimpleLobbyEventLib
 
   # Simple match events
-  @spec log_simple_match_event(T.userid(), T.match_id(), String.t(), non_neg_integer) ::
+  @spec log_simple_match_event(User.id(), T.match_id(), String.t(), non_neg_integer) ::
           {:error, Ecto.Changeset} | {:ok, SimpleMatchEvent}
   defdelegate log_simple_match_event(userid, match_id, event_type_name, game_time),
     to: SimpleMatchEventLib
@@ -671,7 +673,7 @@ defmodule Teiserver.Telemetry do
   defdelegate change_simple_match_event(simple_match_event_type, attrs), to: SimpleMatchEventLib
 
   # Simple server events
-  @spec log_simple_server_event(T.userid(), String.t()) ::
+  @spec log_simple_server_event(User.id(), String.t()) ::
           {:error, Ecto.Changeset} | {:ok, SimpleServerEvent}
   defdelegate log_simple_server_event(userid, event_type_name), to: SimpleServerEventLib
 
@@ -861,7 +863,7 @@ defmodule Teiserver.Telemetry do
   defdelegate change_anon_property(anon_property_type, attrs), to: AnonPropertyLib
 
   # User
-  @spec log_user_property(T.userid(), String.t(), map) ::
+  @spec log_user_property(User.id(), String.t(), map) ::
           {:error, Ecto.Changeset} | {:ok, UserProperty}
   defdelegate log_user_property(userid, property_type_name, value), to: UserPropertyLib
 
@@ -871,10 +873,10 @@ defmodule Teiserver.Telemetry do
   @spec list_user_properties(list) :: [ComplexServerProperty]
   defdelegate list_user_properties(args), to: UserPropertyLib
 
-  @spec get_user_property!(T.userid(), String.t() | non_neg_integer()) :: UserProperty.t()
+  @spec get_user_property!(User.id(), String.t() | non_neg_integer()) :: UserProperty.t()
   defdelegate get_user_property!(userid, property_type_name_or_id), to: UserPropertyLib
 
-  @spec get_user_property(T.userid(), String.t() | non_neg_integer()) :: UserProperty.t() | nil
+  @spec get_user_property(User.id(), String.t() | non_neg_integer()) :: UserProperty.t() | nil
   defdelegate get_user_property(userid, property_type_name_or_id), to: UserPropertyLib
 
   @spec create_user_property() :: {:ok, ComplexServerProperty} | {:error, Ecto.Changeset}

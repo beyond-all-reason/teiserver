@@ -1,9 +1,8 @@
 defmodule Teiserver.OAuth do
   @moduledoc false
-  alias Teiserver.Repo
-
+  alias Plug.Conn
+  alias Teiserver.Account.User
   alias Teiserver.Bot.Bot
-
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.ApplicationLib
   alias Teiserver.OAuth.ApplicationQueries
@@ -14,13 +13,13 @@ defmodule Teiserver.OAuth do
   alias Teiserver.OAuth.Libs.ScopeLib
   alias Teiserver.OAuth.Token
   alias Teiserver.OAuth.TokenQueries
-
-  alias Plug.Conn
-  alias Teiserver.Account.User
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Repo
 
   defdelegate allowed_scopes(), to: ScopeLib
   defdelegate scope_description(scope), to: ScopeLib
+
+  @spec confidential_app?(Application.t()) :: boolean()
+  defdelegate confidential_app?(app), to: ApplicationLib, as: :confidential?
 
   # @spec change_application(Application.t(), map() | nil) :: Ecto.Changeset
   def change_application(%Application{} = app, attrs \\ %{}) do
@@ -139,7 +138,7 @@ defmodule Teiserver.OAuth do
       # don't do any validation on the challenge yet, this is done when exchanging
       # the code for a token
       attrs = %{
-        value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(),
+        value: generate_token_value(),
         owner: user,
         application: attrs.application,
         scopes: attrs.scopes,
@@ -202,7 +201,7 @@ defmodule Teiserver.OAuth do
     else
       token_attrs =
         %{
-          value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
+          value: generate_token_value(),
           application_id: application.id,
           scopes: scopes,
           original_scopes: Map.get(application, :original_scopes, application.scopes),
@@ -214,7 +213,7 @@ defmodule Teiserver.OAuth do
       refresh_attrs =
         if Keyword.get(opts, :create_refresh, true) do
           %{
-            value: :crypto.strong_rand_bytes(32) |> Base.hex_encode32(padding: false),
+            value: generate_token_value(),
             application_id: application.id,
             scopes: scopes,
             original_scopes: application.scopes,
@@ -420,6 +419,18 @@ defmodule Teiserver.OAuth do
     end
   end
 
+  @spec generate_client_credentials() :: {client_id :: String.t(), secret :: String.t()}
+  def generate_client_credentials do
+    client_id = UUID.uuid4()
+    secret = 32 |> :crypto.strong_rand_bytes() |> Base.hex_encode32()
+    {client_id, secret}
+  end
+
+  @spec generate_token_value() :: String.t()
+  def generate_token_value do
+    32 |> :crypto.strong_rand_bytes() |> Base.hex_encode32(padding: false)
+  end
+
   @doc """
   Given a client_id, an application/app_id a bot/id and a cleartext secret, hash and persist it
   """
@@ -555,14 +566,14 @@ defmodule Teiserver.OAuth do
   @doc """
   Returns all OAuth applications that the user has authorized (has tokens for, including expired ones).
   """
-  @spec list_authorized_applications(T.userid()) :: [Application.t()]
+  @spec list_authorized_applications(User.id()) :: [Application.t()]
   defdelegate list_authorized_applications(user_id), to: ApplicationQueries
 
   @doc """
   Returns the count of active tokens for each application that the user has authorized.
   Counts only the user's tokens, not all tokens for the application.
   """
-  @spec get_application_token_counts(T.userid()) :: %{
+  @spec get_application_token_counts(User.id()) :: %{
           Application.id() => non_neg_integer()
         }
   defdelegate get_application_token_counts(user_id), to: ApplicationQueries
@@ -571,7 +582,7 @@ defmodule Teiserver.OAuth do
   Revokes all tokens and codes for a specific application for a user.
   This includes access tokens, refresh tokens, and authorization codes.
   """
-  @spec revoke_application_access(T.userid(), Application.id()) ::
+  @spec revoke_application_access(User.id(), Application.id()) ::
           :ok | {:error, term()}
   def revoke_application_access(user_id, application_id) do
     result =

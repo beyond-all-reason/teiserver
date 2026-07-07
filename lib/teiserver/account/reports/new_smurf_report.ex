@@ -2,7 +2,7 @@ defmodule Teiserver.Account.NewSmurfReport do
   @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec icon() :: String.t()

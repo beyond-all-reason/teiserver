@@ -15,8 +15,22 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
   describe "ratings" do
     test "unauthorized", %{conn: conn} do
-      conn = get(conn, Routes.ts_spads_path(conn, :get_rating, 1, "Large Team"))
+      conn = get(conn, ~p"/teiserver/api/spads/get_rating/1/Large Team")
       assert response(conn, 401)
+    end
+
+    test "not a valid rating type", %{conn: conn} do
+      user = new_bot_user()
+
+      conn =
+        conn
+        |> put_authorization_header(user)
+        |> get(~p"/teiserver/api/spads/get_rating/1/Not_actually_large_team")
+
+      response = response(conn, 200)
+      data = Jason.decode!(response)
+
+      assert data == %{"rating_value" => 16.67, "uncertainty" => 8.33}
     end
 
     test "non-user", %{conn: conn} do
@@ -25,7 +39,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       conn =
         conn
         |> put_authorization_header(user)
-        |> get(Routes.ts_spads_path(conn, :get_rating, -1, "Large Team"))
+        |> get(~p"/teiserver/api/spads/get_rating/1/Large Team")
 
       response = response(conn, 200)
       data = Jason.decode!(response)
@@ -60,7 +74,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       conn =
         conn
         |> put_authorization_header(user)
-        |> get(Routes.ts_spads_path(conn, :get_rating, user.id, "Large Team"))
+        |> get(~p"/teiserver/api/spads/get_rating/#{user.id}/Large_team")
 
       response = response(conn, 200)
       data = Jason.decode!(response)
@@ -71,7 +85,8 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
   describe "balance" do
     test "unauthorized", %{conn: conn} do
-      conn = get(conn, Routes.ts_spads_path(conn, :balance_battle, %{}))
+      params = %{}
+      conn = get(conn, ~p"/teiserver/api/spads/balance_battle", params)
       assert response(conn, 401)
     end
 
@@ -82,7 +97,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       conn =
         conn
         |> put_authorization_header(user)
-        |> get(Routes.ts_spads_path(conn, :balance_battle, params))
+        |> get(~p"/teiserver/api/spads/balance_battle", params)
 
       response = response(conn, 200)
       data = Jason.decode!(response)
@@ -97,7 +112,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       conn =
         conn
         |> put_authorization_header(user)
-        |> get(Routes.ts_spads_path(conn, :balance_battle, params))
+        |> get(~p"/teiserver/api/spads/balance_battle", params)
 
       response = response(conn, 200)
       data = Jason.decode!(response)
@@ -108,19 +123,20 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
     test "bots", %{conn: conn} do
       user = new_bot_user()
 
-      params = %{
-        "bots" =>
-          "{'BARbarianAI(1)': {'color': {'red': 243, 'blue': 0, 'green': 0}, 'skill': 20, 'battleStatus': {'team': 0, 'mode': 1, 'bonus': 0, 'ready': 1, 'side': 0, 'sync': 1, 'id': 2}, 'aiDll': 'BARb', 'owner': 'Teifion'}}",
-        "nbTeams" => "2",
-        "players" =>
-          "{'BEANS': {'scriptPass': '123', 'port': None, 'skill': 16.67, 'color': {'blue': 255, 'red': 0, 'green': 85}, 'ip': None, 'battleStatus': {'ready': 1, 'bonus': 0, 'id': 1, 'side': 0, 'sync': 1, 'workaroundId': 1, 'team': 1, 'mode': 1, 'workaroundTeam': 1}, 'sigma': 8.33}, 'Teifion': {'port': None, 'scriptPass': '5232537262', 'sigma': 4.07, 'ip': None, 'battleStatus': {'mode': 1, 'team': 0, 'workaroundId': 0, 'side': 1, 'sync': 1, 'id': 0, 'bonus': 0, 'ready': 0}, 'skill': 27.65, 'color': {'green': 0, 'blue': 0, 'red': 255}}}",
-        "teamSize" => "2.0"
-      }
+      params =
+        %{
+          "bots" =>
+            "{'BARbarianAI(1)': {'color': {'red': 243, 'blue': 0, 'green': 0}, 'skill': 20, 'battleStatus': {'team': 0, 'mode': 1, 'bonus': 0, 'ready': 1, 'side': 0, 'sync': 1, 'id': 2}, 'aiDll': 'BARb', 'owner': 'SomeUser'}}",
+          "nbTeams" => "2",
+          "players" =>
+            "{'BEANS': {'scriptPass': '123', 'port': None, 'skill': 16.67, 'color': {'blue': 255, 'red': 0, 'green': 85}, 'ip': None, 'battleStatus': {'ready': 1, 'bonus': 0, 'id': 1, 'side': 0, 'sync': 1, 'workaroundId': 1, 'team': 1, 'mode': 1, 'workaroundTeam': 1}, 'sigma': 8.33}, 'SomeUser': {'port': None, 'scriptPass': '5232537262', 'sigma': 4.07, 'ip': None, 'battleStatus': {'mode': 1, 'team': 0, 'workaroundId': 0, 'side': 1, 'sync': 1, 'id': 0, 'bonus': 0, 'ready': 0}, 'skill': 27.65, 'color': {'green': 0, 'blue': 0, 'red': 255}}}",
+          "teamSize" => "2.0"
+        }
 
       conn =
         conn
         |> put_authorization_header(user)
-        |> get(Routes.ts_spads_path(conn, :balance_battle, params))
+        |> get(~p"/teiserver/api/spads/balance_battle", params)
 
       response = response(conn, 200)
       data = Jason.decode!(response)
@@ -163,7 +179,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
   describe "end game data" do
     test "unauthorized", %{conn: conn} do
-      conn = post(conn, Routes.ts_spads_path(conn, :end_game_data))
+      conn = post(conn, ~p"/teiserver/api/spads/end_game_data")
       assert response(conn, 401)
     end
   end

@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle.StartScriptTest do
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Battle
   alias Teiserver.Helpers.GeneralTestLib
 
@@ -8,14 +9,14 @@ defmodule Teiserver.Battle.StartScriptTest do
     user1 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     user2 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
-    start_script = %{
+    start_script = %AT.StartScript{
       game_name: "Beyond All Reason test-28379-33ba377",
       ally_teams: [
         %{
           teams: [
             %{
               players: [
-                %{
+                %AT.Player{
                   name: user1.name,
                   user_id: user1.id,
                   password: "AAAAAAA"
@@ -29,7 +30,7 @@ defmodule Teiserver.Battle.StartScriptTest do
           teams: [
             %{
               players: [
-                %{
+                %AT.Player{
                   name: user2.name,
                   user_id: user2.id,
                   password: "BBBBBBB"
@@ -47,21 +48,28 @@ defmodule Teiserver.Battle.StartScriptTest do
     }
 
     {:ok, match} = Battle.create_match_from_start_script(start_script, false)
-    assert Battle.get_match_membership(user1.id, match.id) != nil
-    assert Battle.get_match_membership(user2.id, match.id) != nil
+    match_id = match.id
+    user1_id = user1.id
+    user2_id = user2.id
+
+    assert %{user_id: ^user1_id, match_id: ^match_id} =
+             Battle.get_match_membership(user1.id, match.id)
+
+    assert %{user_id: ^user2_id, match_id: ^match_id} =
+             Battle.get_match_membership(user2.id, match.id)
   end
 
   test "test start script 1 vs bot" do
     user1 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
-    start_script = %{
+    start_script = %AT.StartScript{
       game_name: "Beyond All Reason test-28379-33ba377",
       ally_teams: [
         %{
           teams: [
             %{
               players: [
-                %{
+                %AT.Player{
                   name: user1.name,
                   user_id: user1.id,
                   password: "AAAAAAA"
@@ -85,6 +93,10 @@ defmodule Teiserver.Battle.StartScriptTest do
     }
 
     {:ok, match} = Battle.create_match_from_start_script(start_script, false)
-    assert Battle.get_match_membership(user1.id, match.id) != nil
+    user_id = user1.id
+    match_id = match.id
+
+    assert %{user_id: ^user_id, match_id: ^match_id} =
+             Battle.get_match_membership(user1.id, match.id)
   end
 end

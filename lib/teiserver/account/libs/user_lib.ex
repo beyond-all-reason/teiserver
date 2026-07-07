@@ -3,15 +3,20 @@ defmodule Teiserver.Account.UserLib do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.User
   alias Teiserver.Account.UserQueries
   alias Teiserver.CacheUser
+  alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging
+  alias Teiserver.Repo
+
   use TeiserverWeb, :library_newform
-  require Logger
+
+  import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
 
   # Functions
   @spec icon :: String.t()
@@ -362,13 +367,23 @@ defmodule Teiserver.Account.UserLib do
         {:error, "Invalid credentials"}
 
       user ->
-        authenticate_user(conn, user, plain_text_password)
+        if Auth.can_login?(user) do
+          authenticate_user(conn, user, plain_text_password)
+        else
+          :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{
+            reason: :rate_limited,
+            user_id: user.id
+          })
+
+          {:error, "Rate limit"}
+        end
     end
   end
 
-  @spec has_access(integer() | map(), Plug.Conn.t()) :: {boolean, nil | :not_found | :no_access}
-  def has_access(target_user_id, conn) when is_integer(target_user_id) do
-    if allow?(conn.permissions, "Server") do
+  @spec has_access(integer() | map(), Plug.Conn.t() | User.t()) ::
+          {boolean, nil | :not_found | :no_access}
+  def has_access(target_user_id, conn_or_user) when is_integer(target_user_id) do
+    if allow?(conn_or_user, "Server") do
       {true, nil}
     else
       {false, :no_access}
@@ -377,23 +392,23 @@ defmodule Teiserver.Account.UserLib do
 
   def has_access(nil, _user), do: {false, :not_found}
 
-  def has_access(target_user, conn) do
+  def has_access(target_user, conn_or_user) do
     cond do
       # Server can access anything
-      allow?(conn, "Server") ->
+      allow?(conn_or_user, "Server") ->
         {true, nil}
 
       # Admin can access anything except Server
-      not allow?(conn, "Server") and allow?(target_user, "Server") ->
+      not allow?(conn_or_user, "Server") and allow?(target_user, "Server") ->
         {false, :restricted_user}
 
-      allow?(conn, "Admin") ->
+      allow?(conn_or_user, "Admin") ->
         {true, nil}
 
-      not allow?(conn, "Admin") and allow?(target_user, "Admin") ->
+      not allow?(conn_or_user, "Admin") and allow?(target_user, "Admin") ->
         {false, :restricted_user}
 
-      allow?(conn, "Moderator") ->
+      allow?(conn_or_user, "Moderator") ->
         {true, nil}
 
       # By default, nobody can access other users
@@ -402,9 +417,9 @@ defmodule Teiserver.Account.UserLib do
     end
   end
 
-  @spec has_access!(integer() | map(), Plug.Conn.t()) :: boolean
-  def has_access!(target_user, conn) do
-    {result, _msg} = has_access(target_user, conn)
+  @spec has_access!(integer() | map(), Plug.Conn.t() | User.t()) :: boolean
+  def has_access!(target_user, conn_or_user) do
+    {result, _msg} = has_access(target_user, conn_or_user)
     result
   end
 
@@ -454,5 +469,72 @@ defmodule Teiserver.Account.UserLib do
     play_hours = (user_stats["player_minutes"] || 0) / 60
     play_time_cutoff = Config.get_site_config_cache("teiserver.New player cutoff")
     play_hours < play_time_cutoff
+  end
+
+  @doc """
+  We use a map as the parameter to make it abundantly clear at the site of
+  the caller which is the origin and which the smurf.
+  """
+  @spec mark_user_as_smurf_of(User.t(), %{smurf: User.t(), origin: User.t()}) ::
+          :ok | {:error, String.t()}
+  def mark_user_as_smurf_of(%User{} = moderator, %{
+        smurf: %User{} = smurf,
+        origin: %User{} = origin
+      }) do
+    with true <- smurf.id != origin.id,
+         true <- moderator.id != smurf.id,
+         true <- moderator.id != origin.id,
+         true <- origin.smurf_of_id != smurf.id,
+         {true, _roles} <- has_access(smurf, moderator),
+         {true, _roles} <- has_access(origin, moderator) do
+      do_mark_user_as_smurf_of(moderator.id, %{smurf: %User{} = smurf, origin: %User{} = origin})
+    else
+      false -> {:error, "Invalid combination of users selected"}
+      {false, :no_access} -> {:error, "No access to one or both users"}
+      {false, :not_found} -> {:error, "Unable to find one or more of the users"}
+    end
+  end
+
+  defp do_mark_user_as_smurf_of(moderator_id, %{
+         smurf: %User{} = smurf,
+         origin: %User{} = origin
+       }) do
+    # If the origin user has a smurf_id somehow then we just point to that
+    actual_origin_id = origin.smurf_of_id || origin.id
+
+    result =
+      Repo.transact(fn ->
+        with {:ok, _updated_user} <-
+               script_update_user(smurf, %{"smurf_of_id" => actual_origin_id}),
+             {:ok, %User{}} <- Auth.add_roles(origin.id, ["Smurfer"]),
+             :ok <- Account.recache_user(smurf.id) do
+          add_audit_log(
+            moderator_id,
+            nil,
+            "Moderation:Mark as smurf",
+            %{
+              smurf_id: smurf.id,
+              origin_id: origin.id,
+              actual_origin_id: actual_origin_id
+            }
+          )
+
+          # Now we update stats for the origin
+          smurf_count =
+            UserQueries.users()
+            |> UserQueries.where_smurf_of(actual_origin_id)
+            |> Repo.aggregate(:count, :id)
+
+          Account.update_user_stat(origin.id, %{"smurf_count" => smurf_count})
+
+          Client.disconnect(smurf.id, "Marked as smurf")
+          {:ok, :ok}
+        end
+      end)
+
+    case result do
+      {:ok, :ok} -> :ok
+      error -> error
+    end
   end
 end

@@ -12,7 +12,6 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
 
   @shortdoc "create random users for load testing"
 
-  alias Req.Request
   alias Req.Response
   use Mix.Task
 
@@ -53,9 +52,7 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
 
     headers = [{"content-type", "application/json"}, {"authorization", "Bearer #{token}"}]
 
-    {_req, %Response{} = resp} =
-      Request.new(url: url, method: :post, body: data, headers: headers)
-      |> Request.run_request()
+    %Response{} = resp = Req.post!(url, body: data, headers: headers)
 
     case resp.status do
       200 ->
@@ -74,18 +71,13 @@ defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
             permissions: ["Verified"]
           })
 
-        {_req, resp} =
-          Request.new(url: url, method: :post, body: data, headers: headers)
-          |> Request.run_request()
-
+        %Response{} = resp = Req.post!(url, body: data, headers: headers)
         200 = resp.status
         convert_response(resp.body)
     end
   end
 
   defp convert_response(body) do
-    body = Jason.decode!(body)
-
     %{
       id: body["user"]["id"],
       name: body["user"]["name"],

@@ -7,6 +7,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.CacheUser
@@ -29,7 +30,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password?)
-  @boss_commands ~w(balancealgorithm gatekeeper welcome-message meme reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
+  @boss_commands ~w(balancealgorithm gatekeeper welcome-message reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec lock unlock makebalance set-config-teaser)
   @admin_commands ~w(shuffle)
 
@@ -563,7 +564,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   # Chat handler
-  @spec handle_lobby_chat(T.userid(), String.t(), map()) :: map()
+  @spec handle_lobby_chat(User.id(), String.t(), map()) :: map()
   defp handle_lobby_chat(
          userid,
          "!ring " <> _remainder,
@@ -728,25 +729,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
         new_client
       end
 
-    # It's possible we are not allowing new players to become players
-    new_client =
-      if Config.get_site_config_cache("teiserver.Require HW data to play") do
-        player_count = Battle.get_lobby_player_count(state.lobby_id)
-
-        if player_count > 4 do
-          if user.hw_hash == nil do
-            Logger.warning("hw hash block for #{Account.get_username(userid)}")
-            %{new_client | player: false}
-          else
-            new_client
-          end
-        else
-          new_client
-        end
-      else
-        new_client
-      end
-
     # Same but for chobby data
     new_client =
       if Config.get_site_config_cache("teiserver.Require Chobby data to play") do
@@ -851,7 +833,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  @spec user_allowed_to_play?(T.userid(), map()) :: boolean()
+  @spec user_allowed_to_play?(User.id(), map()) :: boolean()
   defp user_allowed_to_play?(userid, state) do
     user_allowed_to_play?(
       Account.get_user_by_id(userid),
@@ -938,26 +920,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  @spec allow_join(T.userid(), map()) :: {true, nil} | {false, String.t()}
+  @spec allow_join(User.id(), map()) :: {true, nil} | {false, String.t()}
   defp allow_join(userid, state) do
     client = Client.get_client_by_id(userid)
     {ban_state, reason} = check_ban_state(userid, state)
-
-    if Config.get_site_config_cache("teiserver.Require Chobby login") == true do
-      if client != nil do
-        user = CacheUser.get_user_by_id(userid)
-
-        case user.hw_hash do
-          "" ->
-            Logger.error(
-              "JOINBATTLE with empty hash - name: #{user.name}, client: #{user.lobby_client}"
-            )
-
-          _hash ->
-            :ok
-        end
-      end
-    end
 
     # Blocking using relationships
     player_ids = list_player_ids(state)
@@ -1015,7 +981,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
-  @spec check_ban_state(T.userid(), map()) :: {:player | :spectator | :banned, String.t()}
+  @spec check_ban_state(User.id(), map()) :: {:player | :spectator | :banned, String.t()}
   defp check_ban_state(userid, %{bans: bans, timeouts: timeouts}) do
     cond do
       bans[userid] == nil and timeouts[userid] == nil -> {:player, "Default"}
@@ -1240,7 +1206,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     min(state.host_teamcount * state.host_teamsize, state.player_limit)
   end
 
-  @spec list_player_ids(map()) :: [T.userid()]
+  @spec list_player_ids(map()) :: [User.id()]
   def list_player_ids(state) do
     list_players(state)
     |> Enum.map(fn x ->
@@ -1317,7 +1283,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  # @spec say_message(T.userid(), String.t(), map()) :: map()
+  # @spec say_message(User.id(), String.t(), map()) :: map()
   # def say_message(senderid, msg, state) do
   #   Lobby.say(senderid, msg, state.lobby_id)
   #   state
@@ -1444,7 +1410,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  @spec get_queue(map()) :: [T.userid()]
+  @spec get_queue(map()) :: [User.id()]
   def get_queue(state) do
     state.join_queue ++ state.low_priority_join_queue
   end
@@ -1459,7 +1425,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     Logger.metadata(request_id: "ConsulServer##{lobby_id}")
 
     # Update the queue pids cache to point to this process
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ConsulRegistry,
       lobby_id,
       lobby_id

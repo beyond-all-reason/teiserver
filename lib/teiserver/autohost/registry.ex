@@ -6,16 +6,11 @@ defmodule Teiserver.Autohost.Registry do
   and matchmaking
   """
 
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Bot.Bot
 
-  @type reg_value :: %{
-          id: Bot.id(),
-          max_battles: non_neg_integer(),
-          current_battles: non_neg_integer()
-        }
-
   def start_link do
-    Horde.Registry.start_link(keys: :unique, name: __MODULE__)
+    Registry.start_link(keys: :unique, name: __MODULE__)
   end
 
   @doc """
@@ -23,43 +18,27 @@ defmodule Teiserver.Autohost.Registry do
   """
   @spec via_tuple(Bot.id()) :: GenServer.name()
   def via_tuple(autohost_id) do
-    {:via, Horde.Registry, {__MODULE__, autohost_id}}
+    {:via, Registry, {__MODULE__, autohost_id}}
   end
 
-  @spec register(reg_value) :: {:ok, pid()} | {:error, {:already_registered, pid()}}
-  def register(%{id: autohost_id} = val) do
-    # this is needed because the process that handle the ws connection is spawned
-    # by phoenix, so we can't spawn+register in the same step
-    Horde.Registry.register(__MODULE__, via_tuple(autohost_id), val)
-  end
-
-  @spec unregister(Bot.id()) :: :ok
-  def unregister(autohost_id) do
-    Horde.Registry.unregister(__MODULE__, via_tuple(autohost_id))
-  end
-
-  @spec lookup(Bot.id()) :: {pid(), reg_value()} | nil
+  @spec lookup(Bot.id()) :: {pid(), AT.Overview.t()} | nil
   def lookup(autohost_id) do
-    case Horde.Registry.lookup(__MODULE__, via_tuple(autohost_id)) do
+    case Registry.lookup(__MODULE__, via_tuple(autohost_id)) do
       [x] -> x
       _other -> nil
     end
   end
 
-  def update_value(autohost_id, callback) do
-    Horde.Registry.update_value(__MODULE__, via_tuple(autohost_id), callback)
-  end
-
   @doc """
   Returns all the currently registered autohosts
   """
-  @spec list() :: [reg_value()]
+  @spec list() :: [AT.Overview.t()]
   def list do
-    Horde.Registry.select(__MODULE__, [{{:_, :_, :"$1"}, [], [:"$1"]}])
+    Registry.select(__MODULE__, [{{:_, :_, :"$1"}, [], [:"$1"]}])
   end
 
   def child_spec(_opts) do
-    Supervisor.child_spec(Horde.Registry,
+    Supervisor.child_spec(Registry,
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}
     )

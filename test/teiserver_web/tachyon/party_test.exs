@@ -8,8 +8,20 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
   describe "create" do
     setup [{Tachyon, :setup_client}]
 
-    test "works", %{client: client} do
-      assert %{"status" => "success"} = Tachyon.create_party!(client)
+    test "works", %{client: client, user: user} do
+      assert %{
+               "status" => "success",
+               "data" => %{
+                 "party" => %{
+                   "id" => _party_id,
+                   "members" => [member],
+                   "maxMembers" => _max_members,
+                   "invited" => []
+                 }
+               }
+             } = Tachyon.create_party!(client)
+
+      assert member["userId"] == to_string(user.id)
     end
 
     test "cannot join 2 parties", %{client: client} do
@@ -28,9 +40,9 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
     end
 
     test "can leave party", %{client: client} = ctx do
-      {:ok, party_id: party_id} = setup_party(ctx)
+      {:ok, party: party} = setup_party(ctx)
       assert %{"status" => "success"} = Tachyon.leave_party!(client)
-      Polling.poll_until_nil(fn -> Party.lookup(party_id) end)
+      Polling.poll_until_nil(fn -> Party.lookup(party["id"]) end)
     end
   end
 
@@ -68,7 +80,8 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
                Tachyon.invite_to_party!(ctx.client, user2.id)
     end
 
-    test "works", %{party_id: party_id} = ctx do
+    test "works", ctx do
+      party_id = ctx.party["id"]
       ctx2 = setup_client()
 
       assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, ctx2.user.id)
@@ -104,7 +117,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
                Tachyon.accept_party_invite!(ctx2.client, "not-a-party-id")
 
       assert %{"status" => "failed", "reason" => "invalid_request"} =
-               Tachyon.accept_party_invite!(ctx2.client, ctx.party_id)
+               Tachyon.accept_party_invite!(ctx2.client, ctx.party["id"])
     end
 
     test "accept invite works", ctx do
@@ -142,7 +155,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       ctx2 = setup_client()
       target = setup_client()
 
-      assert %{"status" => "success", "data" => %{"partyId" => party2_id}} =
+      assert %{"status" => "success", "data" => %{"party" => %{"id" => party2_id}}} =
                Tachyon.create_party!(ctx2.client)
 
       # invite `target` to both parties
@@ -155,7 +168,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx2.client)
 
       # accept one invite
-      Tachyon.accept_party_invite!(target.client, ctx.party_id)
+      Tachyon.accept_party_invite!(target.client, ctx.party["id"])
       assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(target.client)
       assert %{"status" => "success"} = Tachyon.leave_party!(target.client)
 
@@ -175,7 +188,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       ctx2 = setup_client()
 
       assert %{"status" => "failed", "reason" => "invalid_request"} =
-               Tachyon.decline_party_invite!(ctx2.client, ctx.party_id)
+               Tachyon.decline_party_invite!(ctx2.client, ctx.party["id"])
     end
 
     test "can decline", ctx do
@@ -185,14 +198,15 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
       assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(ctx2.client)
 
-      assert %{"status" => "success"} = Tachyon.decline_party_invite!(ctx2.client, ctx.party_id)
+      assert %{"status" => "success"} =
+               Tachyon.decline_party_invite!(ctx2.client, ctx.party["id"])
 
       assert %{"commandId" => "party/updated", "data" => data} = Tachyon.recv_message!(ctx.client)
       assert data["invited"] == []
 
       # cannot decline twice
       assert %{"status" => "failed", "reason" => "invalid_request"} =
-               Tachyon.decline_party_invite!(ctx2.client, ctx.party_id)
+               Tachyon.decline_party_invite!(ctx2.client, ctx.party["id"])
     end
 
     test "cannot cancel non existing invites", ctx do
@@ -224,7 +238,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
 
       # invite is now invalid
       assert %{"status" => "failed", "reason" => "invalid_request"} =
-               Tachyon.accept_party_invite!(ctx2.client, ctx.party_id)
+               Tachyon.accept_party_invite!(ctx2.client, ctx.party["id"])
 
       assert %{"commandId" => "party/updated", "data" => data} = Tachyon.recv_message!(ctx.client)
       assert data["invited"] == []
@@ -255,7 +269,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
       assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(ctx2.client)
 
-      party_pid = Party.lookup(ctx.party_id)
+      party_pid = Party.lookup(ctx.party["id"])
       send(party_pid, {:invite_timeout, ctx2.user.id})
 
       assert %{"commandId" => "party/updated", "data" => updated} =
@@ -394,7 +408,7 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       Tachyon.invite_to_party!(ctx.client, invited.user.id)
       assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(invited.client)
       assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
-      Tachyon.decline_party_invite!(invited.client, ctx.party_id)
+      Tachyon.decline_party_invite!(invited.client, ctx.party["id"])
       assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
 
       Tachyon.disconnect!(invited.client)
@@ -413,14 +427,14 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
 
     test "last member disconnecting terminates party", ctx do
       Tachyon.disconnect!(ctx.client)
-      Polling.poll_until_nil(fn -> Party.lookup(ctx.party_id) end)
+      Polling.poll_until_nil(fn -> Party.lookup(ctx.party["id"]) end)
     end
   end
 
   test "handle party server going down" do
     ctx1 = setup_client()
 
-    assert %{"status" => "success", "data" => %{"partyId" => party_id}} =
+    assert %{"status" => "success", "data" => %{"party" => %{"id" => party_id}}} =
              Tachyon.create_party!(ctx1.client)
 
     ctx2 = setup_client()
@@ -460,12 +474,12 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
       user = Tachyon.create_user()
       %{client: client} = Tachyon.connect(user)
 
-      assert %{"status" => "success", "data" => %{"partyId" => party_id}} =
+      assert %{"status" => "success", "data" => %{"party" => %{"id" => party_id}}} =
                Tachyon.create_party!(client)
 
       ctx2 = setup_client()
 
-      assert %{"status" => "success", "data" => %{"partyId" => party2_id}} =
+      assert %{"status" => "success", "data" => %{"party" => %{"id" => party2_id}}} =
                Tachyon.create_party!(ctx2.client)
 
       Tachyon.invite_to_party!(ctx2.client, user.id)
@@ -489,8 +503,9 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
 
     test "parties stays across restart", %{client: client, token: token} do
       Teiserver.Tachyon.enable_state_restoration()
-      assert %{"status" => "success", "data" => data} = Tachyon.create_party!(client)
-      %{"partyId" => party_id} = data
+
+      assert %{"status" => "success", "data" => %{"party" => %{"id" => party_id}}} =
+               Tachyon.create_party!(client)
 
       Teiserver.Tachyon.restart_system()
       assert {:error, :disconnected} == Tachyon.recv_message(client)
@@ -509,8 +524,10 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
 
     test "parties invites stays across restart", %{client: client} do
       Teiserver.Tachyon.enable_state_restoration()
-      assert %{"status" => "success", "data" => data} = Tachyon.create_party!(client)
-      %{"partyId" => party_id} = data
+
+      assert %{"status" => "success", "data" => %{"party" => %{"id" => party_id}}} =
+               Tachyon.create_party!(client)
+
       ctx2 = setup_client()
 
       assert %{"status" => "success"} = Tachyon.invite_to_party!(client, ctx2.user.id)
@@ -535,10 +552,10 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
   defp setup_party(%{client: client}), do: setup_party(client)
 
   defp setup_party(client) do
-    assert %{"status" => "success", "data" => %{"partyId" => party_id}} =
+    assert %{"status" => "success", "data" => %{"party" => party}} =
              Tachyon.create_party!(client)
 
-    {:ok, party_id: party_id}
+    {:ok, party: party}
   end
 
   defp setup_client do

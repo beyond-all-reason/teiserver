@@ -131,7 +131,7 @@
 
                 <td class="text-right">
                   {link("Show",
-                    to: Routes.logging_audit_log_path(@conn, :show, log),
+                    to: ~p"/logging/audit/#{log.id}",
                     class: "btn btn-secondary btn-sm"
                   )}
                 </td>

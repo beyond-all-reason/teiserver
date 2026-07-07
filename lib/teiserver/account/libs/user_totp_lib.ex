@@ -2,13 +2,12 @@ defmodule Teiserver.Account.TOTPLib do
   @moduledoc false
   alias Teiserver.Account.TOTP
   alias Teiserver.Account.User
-  alias Teiserver.Data.Types, as: T
 
   use TeiserverWeb, :library
 
   @allowed_invalid_attempts 5
 
-  @spec get_user_totp(T.userid()) :: {:inactive, nil} | {:active, TOTP.t()}
+  @spec get_user_totp(User.id()) :: {:inactive, nil} | {:active, TOTP.t()}
   defp get_user_totp(user_id) do
     case Repo.get_by(TOTP, user_id: user_id) do
       nil ->
@@ -19,13 +18,13 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_user_totp_status(T.userid() | TOTP.t()) :: :active | :inactive
+  @spec get_user_totp_status(User.id() | TOTP.t()) :: :active | :inactive
   def get_user_totp_status(user_id) do
     {status, _totp} = get_user_totp(user_id)
     status
   end
 
-  @spec get_account_locked(T.userid()) :: boolean()
+  @spec get_account_locked(User.id()) :: boolean()
   def get_account_locked(user_id) do
     {_status, totp} = get_user_totp(user_id)
 
@@ -41,7 +40,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_or_generate_secret(T.userid()) :: {:new | :existing, binary()}
+  @spec get_or_generate_secret(User.id()) :: {:new | :existing, binary()}
   def get_or_generate_secret(user_id) do
     case get_user_totp(user_id) do
       {:inactive, nil} ->
@@ -52,7 +51,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_user_secret(T.userid()) :: :inactive | binary() | nil
+  @spec get_user_secret(User.id()) :: :inactive | binary() | nil
   def get_user_secret(user_id) do
     case get_user_totp(user_id) do
       {:inactive, nil} ->
@@ -63,7 +62,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec get_last_used(T.userid()) :: :inactive | DateTime.t()
+  @spec get_last_used(User.id()) :: :inactive | DateTime.t()
   def get_last_used(user_id) do
     case get_user_totp(user_id) do
       {:inactive, nil} ->
@@ -74,7 +73,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec set_totp(TOTP.t() | T.userid() | nil, map()) ::
+  @spec set_totp(TOTP.t() | User.id() | nil, map()) ::
           {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
   defp set_totp(nil, _attrs) do
     changeset = TOTP.changeset(%TOTP{}, %{})
@@ -98,14 +97,14 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec set_secret(T.userid(), binary()) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
+  @spec set_secret(User.id(), binary()) :: {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()}
   def set_secret(user_id, secret) do
     result = set_totp(user_id, %{user_id: user_id, secret: secret})
     Teiserver.cache_delete(:user_mfa_active, user_id)
     result
   end
 
-  @spec set_last_used(T.userid(), DateTime.t()) ::
+  @spec set_last_used(User.id(), DateTime.t()) ::
           {:ok, TOTP.t()} | {:error, Ecto.Changeset.t()} | {:inactive, User.t()}
   def set_last_used(user_id, last_used) do
     if get_user_totp_status(user_id) == :active do
@@ -121,7 +120,7 @@ defmodule Teiserver.Account.TOTPLib do
     end
   end
 
-  @spec disable_totp(T.userid()) :: :ok | :error
+  @spec disable_totp(User.id()) :: :ok | :error
   def disable_totp(user_id) do
     case get_user_totp(user_id) do
       {:active, totp} ->

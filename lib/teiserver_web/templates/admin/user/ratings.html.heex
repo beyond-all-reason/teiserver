@@ -18,7 +18,7 @@
         <div class="float-end">
           <a
             class={"btn btn-outline-#{bsname}"}
-            href={Routes.ts_admin_user_path(@conn, :ratings_form, @user)}
+            href={~p"/teiserver/admin/users/ratings_form/#{@user.id}"}
           >
             Edit ratings
           </a>
@@ -35,7 +35,7 @@
                 name: "rating-all",
                 label: "All matches",
                 active: @filter,
-                url: Routes.ts_admin_user_path(@conn, :ratings, @user),
+                url: ~p"/teiserver/admin/users/ratings/#{@user.id}",
                 icon: "",
                 bsname: bsname
               )}
@@ -188,7 +188,7 @@
           <.pagination
             page={@page}
             total_pages={@total_pages}
-            base_url={Routes.ts_admin_user_path(@conn, :ratings, @user.id)}
+            base_url={~p"/teiserver/admin/users/ratings/#{@user.id}"}
             limit={@limit}
             total_count={@total_count}
             current_count={@current_count}

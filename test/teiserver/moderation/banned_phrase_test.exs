@@ -110,7 +110,7 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
           score_threshold: 0
         })
 
-      assert Keyword.has_key?(changeset.errors, :phrase)
+      assert {_msg, _opts} = Keyword.get(changeset.errors, :phrase)
     end
 
     test "create regex banned phrase" do
@@ -135,7 +135,7 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
           score_threshold: 0
         })
 
-      assert Keyword.has_key?(changeset.errors, :phrase)
+      assert {_msg, _opts} = Keyword.get(changeset.errors, :phrase)
     end
   end
 
@@ -149,7 +149,8 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
         |> BannedPhrase.load_phrase()
 
       refute BannedPhrase.phrase_match?(phrase, "the quick brown fox")
-      refute BannedPhrase.phrase_match?(phrase, "the quick Abc fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick Abc fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick ABC fox")
       assert BannedPhrase.phrase_match?(phrase, "the quick abc fox")
     end
 
@@ -164,6 +165,7 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
       refute BannedPhrase.phrase_match?(phrase, "the quick brown fox")
       refute BannedPhrase.phrase_match?(phrase, "the quick abcdd fox")
       assert BannedPhrase.phrase_match?(phrase, "the quick abcde fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick ABCDE fox")
       assert BannedPhrase.phrase_match?(phrase, "the quick abcd-de fox")
     end
 
@@ -176,7 +178,7 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
         |> BannedPhrase.load_phrase()
 
       refute BannedPhrase.phrase_match?(phrase, "the quick brown fox")
-      refute BannedPhrase.phrase_match?(phrase, "the quick Abc fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick Abc fox")
       assert BannedPhrase.phrase_match?(phrase, "the quick abc fox")
     end
   end

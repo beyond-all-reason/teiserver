@@ -3,8 +3,9 @@ defmodule Teiserver.Account.GrowthReport do
 
   alias Teiserver.Helper.ChartHelper
   alias Teiserver.Logging
-  require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
+
   @behaviour Teiserver.Common.WebReportBehaviour
 
   @spec name() :: String.t()

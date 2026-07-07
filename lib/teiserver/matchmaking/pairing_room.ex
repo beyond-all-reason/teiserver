@@ -6,9 +6,10 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   ready.
   """
 
+  alias Teiserver.Account.User
   alias Teiserver.Asset
   alias Teiserver.Autohost
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Matchmaking.QueueSupervisor
@@ -24,7 +25,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   @type team :: [Member.t()]
   @type lost_reason :: :cancel | :timeout | {:server_error, term()}
   @type ready_data :: %{
-          user_id: T.userid(),
+          user_id: User.id(),
           name: String.t(),
           password: String.t()
         }
@@ -43,7 +44,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     GenServer.call(room_pid, {:ready, ready_data})
   end
 
-  @spec cancel(pid(), T.userid()) :: :ok
+  @spec cancel(pid(), User.id()) :: :ok
   def cancel(room_pid, user_id) do
     GenServer.cast(room_pid, {:cancel, user_id})
   catch
@@ -63,11 +64,11 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           queue_id: QueueServer.id(),
           queue: QueueServer.queue(),
           teams: [team(), ...],
-          awaiting: [T.userid()],
+          awaiting: [User.id()],
           # holds data from players that have readied up, in a format to be used to
           # create the start script. Maintain the same structure as `teams` but
           # the players for members are flatten
-          readied: [[%{user_id: T.userid(), name: String.t(), password: String.t()}], ...]
+          readied: [[%{user_id: User.id(), name: String.t(), password: String.t()}], ...]
         }
 
   def start_link(init_arg) do
@@ -251,9 +252,9 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   end
 
   @spec start_script(state(), %{version: String.t()}, String.t(), Asset.Map.t()) ::
-          Autohost.start_script()
+          AT.StartScript.t()
   defp start_script(state, engine, game, map) do
-    %{
+    %AT.StartScript{
       engine_version: engine.version,
       game_name: game,
       map_name: map.spring_name,

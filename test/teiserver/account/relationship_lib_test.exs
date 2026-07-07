@@ -20,10 +20,6 @@ defmodule Teiserver.Account.RelationshipLibTest do
         "last_login" => old_login
       })
 
-    assert user1.id != nil
-    assert user2.id != nil
-    assert user3.id != nil
-
     {:ok, _relationship1} = RelationshipLib.avoid_user(user1.id, user2.id)
     {:ok, _relationship2} = RelationshipLib.avoid_user(user1.id, user3.id)
 

@@ -647,6 +647,11 @@ defmodule Teiserver.SpringTcpServer do
     {:stop, :normal, %{new_state | userid: nil}}
   end
 
+  # the test adapter sends the email as a message to the sender process
+  def handle_info({:email, %Swoosh.Email{} = _email}, state) do
+    {:noreply, state}
+  end
+
   @impl GenServer
   def terminate(_reason, state) do
     Client.disconnect(state.userid, "tcp_server terminate")
@@ -1188,7 +1193,7 @@ defmodule Teiserver.SpringTcpServer do
     {:stop, :normal, %{state | userid: nil}}
   end
 
-  # @spec introduce_user(T.client() | T.userid() | nil, map()) :: map()
+  # @spec introduce_user(T.client() | User.id() | nil, map()) :: map()
   # defp introduce_user(nil, state), do: state
 
   # defp introduce_user(userid, state) when is_integer(userid) do
@@ -1202,7 +1207,7 @@ defmodule Teiserver.SpringTcpServer do
   #   %{state | known_users: new_known}
   # end
 
-  # @spec forget_user(T.client() | T.userid() | nil, map()) :: map()
+  # @spec forget_user(T.client() | User.id() | nil, map()) :: map()
   # defp forget_user(nil, state), do: state
 
   # defp forget_user(userid, state) when is_integer(userid) do

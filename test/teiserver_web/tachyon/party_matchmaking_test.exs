@@ -195,7 +195,7 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
         [founder]
       end
 
-    assert %{"status" => "success", "data" => %{"partyId" => party_id}} =
+    assert %{"status" => "success", "data" => %{"party" => %{"id" => party_id}}} =
              Tachyon.create_party!(founder.client)
 
     for member <- tl(members) do

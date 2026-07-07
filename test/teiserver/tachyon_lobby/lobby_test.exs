@@ -1,15 +1,16 @@
 defmodule Teiserver.TachyonLobby.LobbyTest do
   alias ExUnit.Callbacks
   alias Teiserver.AssetFixtures
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.KvStore
   alias Teiserver.Tachyon, as: TachyonLib
   alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.TachyonLobby.Lobby, as: LobbyProcess
+  alias Teiserver.TachyonLobby.Types, as: LT
 
   use Teiserver.DataCase
 
   import Teiserver.Support.Polling, only: [poll_until_some: 1, poll_until_nil: 1]
-  import LobbyProcess, only: [patch_merge: 2]
 
   @moduletag :tachyon
 
@@ -26,7 +27,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   test "must have a game in db" do
     result =
       mk_start_params([1, 1])
-      |> Map.drop([:game_version])
+      |> Map.replace!(:game_version, nil)
       |> Lobby.create()
 
     assert result == {:error, :no_game_version_found}
@@ -37,7 +38,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     {:ok, _pid, details} =
       mk_start_params([1, 1])
-      |> Map.drop([:game_version])
+      |> Map.replace!(:game_version, nil)
       |> Lobby.create()
 
     assert details.game_version == game.name
@@ -46,7 +47,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   test "must have engine in db" do
     result =
       mk_start_params([1, 1])
-      |> Map.drop([:engine_version])
+      |> Map.replace!(:engine_version, nil)
       |> Lobby.create()
 
     assert result == {:error, :no_engine_version_found}
@@ -57,7 +58,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     {:ok, _pid, details} =
       mk_start_params([1, 1])
-      |> Map.drop([:engine_version])
+      |> Map.replace!(:engine_version, nil)
       |> Lobby.create()
 
     assert details.engine_version == engine.name
@@ -120,7 +121,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "as a spectator" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Lobby.create()
 
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
@@ -132,7 +133,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "is idempotent" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 1]) |> Lobby.create()
 
       {:ok, _lobby_pid, details} = Lobby.join(id, mk_player("other-user-id"), self())
@@ -143,7 +144,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "participants get updated events on join" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
@@ -153,7 +154,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _lobby_pid2, _details2} = Lobby.join(id, mk_player("user2"), sink_pid)
@@ -166,7 +167,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "lobby full" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       for i <- 1..250 do
@@ -187,14 +188,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "must be in lobby" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Lobby.create()
 
       {:error, :not_in_lobby} = Lobby.leave(id, "not here")
     end
 
     test "must target valid ally team" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Lobby.create()
 
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"))
@@ -202,7 +203,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "ally team must have empty space" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Lobby.create()
 
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"))
@@ -212,7 +213,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "works" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id} = create_details} =
+      {:ok, _pid, %LT.Details{id: id} = create_details} =
         mk_start_params([1, 1]) |> Lobby.create()
 
       assert %{ready?: false, asset_status: :complete} = create_details.players[@default_user_id]
@@ -229,7 +230,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "player moving also get updates" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
 
       {:ok, _lobby_pid, _join_details} = Lobby.join(id, mk_player("user2"))
@@ -246,7 +247,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "can change ally team" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _lobby_pid, _join_details} = Lobby.join(id, mk_player("user2"), sink_pid)
@@ -260,7 +261,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "changing ally team updates" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _lobby_pid, _join_details} = Lobby.join(id, mk_player("user2"), sink_pid)
@@ -278,7 +279,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "other players are reshuffled" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _lobby_pid, _join_details} = Lobby.join(id, mk_player("user2"), sink_pid)
@@ -303,14 +304,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   describe "leaving" do
     test "cannot leave lobby if not in the lobby" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 1]) |> Lobby.create()
 
       {:error, :not_in_lobby} = Lobby.leave(id, "not here")
     end
 
     test "cannot leave lobby if already left" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 1]) |> Lobby.create()
 
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
@@ -319,7 +320,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "can leave lobby" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
@@ -342,7 +343,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "can leave lobby and rejoin" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       player = mk_player("user2")
@@ -354,7 +355,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "leaving lobby send updates to remaining members" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
@@ -368,7 +369,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "reshuffling player on leave sends updates" do
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
@@ -400,7 +401,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "player pid dying means player is removed from lobby" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
 
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), self())
@@ -412,7 +413,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "spectator pid dying means is removed from lobby" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
@@ -426,7 +427,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "spec leaving removes monitors" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
 
-      {:ok, lobby_pid, %{id: id}} =
+      {:ok, lobby_pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
@@ -442,7 +443,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "player leaving removes monitors" do
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
 
-      {:ok, lobby_pid, %{id: id}} =
+      {:ok, lobby_pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
@@ -464,14 +465,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "must be in lobby" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:error, :not_in_lobby} = Lobby.spectate(id, "not in lobby")
     end
 
     test "works" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       :ok = Lobby.spectate(id, @default_user_id)
@@ -485,7 +486,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "is idempotent" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       :ok = Lobby.spectate(id, @default_user_id)
@@ -501,7 +502,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "not in lobby" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:error, :not_in_lobby} = Lobby.join_queue(id, "not in lobby")
@@ -677,14 +678,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "must be in lobby" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:error, :not_in_lobby} = Lobby.add_bot(id, "random-user-id", 0, "bot short name")
     end
 
     test "must specify valid ally team" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:error, :invalid_ally_team} = Lobby.add_bot(id, @default_user_id, 10, "bot short name")
@@ -692,14 +693,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "must have space in ally team" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Lobby.create()
 
       {:error, :ally_team_full} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
     end
 
     test "add_bot works" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Lobby.create()
 
       {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
@@ -718,7 +719,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "lobby details has the bots" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Lobby.create()
 
       {:ok, bot_id} =
@@ -745,7 +746,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "bots correctly put in teams" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([3, 3]) |> Lobby.create()
 
       {:ok, bot_id1} = Lobby.add_bot(id, @default_user_id, 0, "bot short name")
@@ -758,7 +759,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "bots are taken into account for team capacity" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Lobby.create()
 
       {:ok, _bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
@@ -766,7 +767,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "creator leaving also removes bots" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, sink_pid} = Task.start(:timer, :sleep, [:infinity])
@@ -819,14 +820,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "correct id required to remove bot" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:error, :invalid_bot_id} = Lobby.remove_bot(id, "lolnope")
     end
 
     test "remove_bot works" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
@@ -837,7 +838,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "removing a bot reshuffle the teams" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, bot_id1} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
@@ -852,7 +853,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
     test "removing bot allow specs in join queue to get the spot" do
       # Setup
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Lobby.create()
 
       {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
@@ -893,14 +894,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "update needs correct id" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:error, :invalid_bot_id} = Lobby.update_bot(id, %{id: "lolnope"})
     end
 
     test "can update some properties" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot")
@@ -924,7 +925,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "only supported properties" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:error, _reason} =
@@ -932,7 +933,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "name work" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       :ok = Lobby.update_properties(id, @default_user_id, %{name: "new name"})
@@ -941,8 +942,15 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, %{name: "new name"}}}
     end
 
-    test "map name" do
+    test "name must be valid" do
       {:ok, _pid, %{id: id}} =
+        mk_start_params([2, 1]) |> Lobby.create()
+
+      {:error, _error} = Lobby.update_properties(id, @default_user_id, %{name: "="})
+    end
+
+    test "map name" do
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
@@ -1085,10 +1093,12 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, details} = LobbyProcess.get_details(id)
       assert map_size(details.vote_history) == 2
       assert vote_id < vote_id2
-      assert details.vote_history[vote_id].outcome == :passed
-      assert details.vote_history[vote_id].vote == {:change_map, "new map"}
-      assert details.vote_history[vote_id2].outcome == :failed
-      assert details.vote_history[vote_id2].vote == {:change_map, "new map2"}
+      record1 = %LT.VoteDetails{} = details.vote_history[vote_id]
+      record2 = %LT.VoteDetails{} = details.vote_history[vote_id2]
+      assert record1.outcome == :passed
+      assert record1.vote == {:change_map, "new map"}
+      assert record2.outcome == :failed
+      assert record2.vote == {:change_map, "new map2"}
     end
 
     test "map stays when vote fails" do
@@ -1257,7 +1267,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   describe "update ally team" do
     test "work" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       new_ally_team_config = mk_start_params([1, 1]).ally_team_config
@@ -1284,7 +1294,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "ally team config diff with less ally team teams" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1, 1]) |> Lobby.create()
 
       new_ally_team_config = mk_start_params([1, 1]).ally_team_config
@@ -1298,7 +1308,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "ally team config diff with less teams" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([3]) |> Lobby.create()
 
       new_ally_team_config = mk_start_params([2]).ally_team_config
@@ -1440,7 +1450,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "no snapshot when normal exit" do
       sink_pid = mk_sink()
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
 
       TachyonLib.restart_system()
@@ -1450,7 +1460,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "can rejoin lobby from snapshot" do
       sink_pid = mk_sink()
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
 
       Process.exit(sink_pid, :shutdown)
@@ -1464,7 +1474,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     test "must rejoin first before being able to leave" do
       sink_pid = mk_sink()
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
 
       Process.exit(sink_pid, :shutdown)
@@ -1489,10 +1499,10 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "list updates when lobby is restored" do
-      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
+      Lobby.subscribe_updates()
       sink_pid = mk_sink()
 
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Map.put(:creator_pid, sink_pid) |> Lobby.create()
 
       drain_msg_queue()
@@ -1502,11 +1512,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       sink_pid = mk_sink()
       {:ok, _lobby_pid, _details} = Lobby.rejoin(id, @default_user_id, sink_pid)
-      assert_receive %{event: :reset_list, lobbies: lobbies}
-      assert lobbies == %{}
-
-      Lobby.List.broadcast_updates()
-      assert_receive %{event: :add_lobby, lobby_id: ^id}
+      assert_receive %{event: :add_lobby, overview: %LT.ListOverview{}, lobby_id: ^id}
     end
   end
 
@@ -1516,14 +1522,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "must be in lobby" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:error, :not_in_lobby} = Lobby.update_client_status(id, "user1", %{ready?: true})
     end
 
     test "can update properties one by one" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       :ok = Lobby.update_client_status(id, @default_user_id, %{ready?: true})
@@ -1536,7 +1542,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "can update multiple properties at once" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       :ok =
@@ -1554,7 +1560,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     # could also be handled by client. For now, keep implementation simple
     # and always process the request
     test "send event if no changes" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       :ok = Lobby.update_client_status(id, @default_user_id, %{ready?: false})
@@ -1563,7 +1569,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "only player can update status" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1]) |> Lobby.create()
 
       {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
@@ -1575,7 +1581,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   describe "update game options" do
     test "can add an option" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       :ok = Lobby.update_properties(id, @default_user_id, %{game_options: %{"foo" => "bar"}})
@@ -1585,7 +1591,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "can update option" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2])
         |> Map.put(:game_options, %{"foo" => "bar"})
         |> Lobby.create()
@@ -1599,7 +1605,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "can remove an option" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2])
         |> Map.put(:game_options, %{"foo" => "bar"})
         |> Lobby.create()
@@ -1611,7 +1617,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "can add remove and update in one request" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2])
         |> Map.put(:game_options, %{"foo" => "bar", "ranked" => "true"})
         |> Lobby.create()
@@ -1648,7 +1654,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "can add a tag" do
-      {:ok, _pid, %{id: id}} = mk_start_params([2, 2]) |> Lobby.create()
+      {:ok, _pid, %LT.Details{id: id}} = mk_start_params([2, 2]) |> Lobby.create()
 
       :ok = Lobby.update_properties(id, @default_user_id, %{tags: %{"competitive" => %{}}})
       {:ok, details} = LobbyProcess.get_details(id)
@@ -1657,7 +1663,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "can remove a tag" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2])
         |> Map.put(:tags, %{"competitive" => %{}, "no_rush" => %{}})
         |> Lobby.create()
@@ -1669,7 +1675,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "existing tags survive partial update" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2])
         |> Map.put(:tags, %{"competitive" => %{}, "no_rush" => %{}})
         |> Lobby.create()
@@ -1680,7 +1686,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "can add remove and update in one request" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2])
         |> Map.put(:tags, %{"competitive" => %{}, "no_rush" => %{}})
         |> Lobby.create()
@@ -1697,6 +1703,221 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
+  describe "kickban" do
+    test "banned player cannot rejoin lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+      ban_until = DateTime.add(DateTime.utc_now(), 3600, :second)
+      :ok = Lobby.kickban(id, @default_user_id, "user2", ban_until)
+
+      {:error, :banned, _ban_until} = Lobby.join(id, mk_player("user2"), sink_pid)
+    end
+
+    test "kicked spectator can rejoin lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.kickban(id, @default_user_id, "user2")
+      assert_receive {:lobby, ^id, {:left, "kicked", nil}}
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      refute is_map_key(details.spectators, "user2")
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+    end
+
+    test "kickban remaining members receive updated when player is kicked" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      :ok = Lobby.kickban(id, @default_user_id, "user2")
+      assert_receive {:lobby, ^id, {:updated, %{spectators: %{"user2" => nil}}}}
+    end
+
+    test "kickban kicked player receives only left event, not updated" do
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Map.put(:creator_pid, sink_pid)
+        |> Lobby.create()
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+
+      :ok = Lobby.kickban(id, @default_user_id, "user2")
+
+      assert_receive {:lobby, ^id, {:left, "kicked", nil}}
+      refute_receive {:lobby, ^id, {:updated, _}}, 30
+    end
+
+    test "player can rejoin lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 0)
+
+      :ok = Lobby.kickban(id, @default_user_id, "user2")
+      assert_receive {:lobby, ^id, {:left, "kicked", nil}}
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      refute is_map_key(details.players, "user2")
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+    end
+
+    test "fails when caller is not in lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:error, :not_in_lobby} = Lobby.kickban(id, "not-in-lobby", "user2")
+    end
+
+    test "fails when target is not in lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:error, :invalid_request} = Lobby.kickban(id, @default_user_id, "user2")
+    end
+
+    test "kickban triggers vote when boss is not enabled" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Lobby.create()
+
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 0)
+      drain_msg_queue()
+
+      :ok = Lobby.kickban(id, @default_user_id, "user2")
+
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      assert vote.action == {:kickban, "user2", nil}
+    end
+
+    test "fails when caller is not a boss" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      {:error, :not_boss} = Lobby.kickban(id, "user2", @default_user_id)
+    end
+
+    test "kickban starts a vote when no boss and multiple players" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([3, 3])
+        |> Lobby.create()
+
+      {:ok, sink_pid2} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, sink_pid3} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid2)
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user3"), sink_pid3)
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 0)
+      {:ok, _details} = Lobby.join_ally_team(id, "user3", 0)
+      drain_msg_queue()
+
+      :ok = Lobby.kickban(id, @default_user_id, "user2")
+
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      assert vote.action == {:kickban, "user2", nil}
+      assert vote.voters[@default_user_id] == :yes
+      assert vote.voters["user2"] == :pending
+      assert vote.voters["user3"] == :pending
+
+      :ok = Lobby.vote_submit(id, "user3", {vote.id, :yes})
+
+      assert_receive {:lobby, ^id, {:updated, %{players: %{"user2" => nil}, current_vote: nil}}}
+      assert_receive {:lobby, ^id, {:vote_ended, _vote_id, :passed}}
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      refute is_map_key(details.players, "user2")
+      refute is_map_key(details.spectators, "user2")
+    end
+
+    test "kickban vote is cancelled when target leaves" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([3, 3])
+        |> Lobby.create()
+
+      {:ok, sink_pid2} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, sink_pid3} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid2)
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user3"), sink_pid3)
+      {:ok, _details} = Lobby.join_ally_team(id, "user2", 0)
+      {:ok, _details} = Lobby.join_ally_team(id, "user3", 0)
+      drain_msg_queue()
+
+      :ok = Lobby.kickban(id, @default_user_id, "user2")
+
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      assert vote.action == {:kickban, "user2", nil}
+
+      :ok = Lobby.leave(id, "user2")
+
+      assert_receive {
+        :lobby,
+        ^id,
+        {:updated, %{current_vote: nil, players: %{"user2" => nil}}}
+      }
+
+      assert_receive {:lobby, ^id, {:vote_ended, _vote_id, :cancelled}}
+    end
+
+    test "expired ban allows rejoin lobby" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+      assert_receive {:lobby, ^id, {:updated, _}}
+
+      ban_until = DateTime.add(DateTime.utc_now(), 30, :millisecond)
+      :ok = Lobby.kickban(id, @default_user_id, "user2", ban_until)
+
+      {:error, :banned, _ban_until} = Lobby.join(id, mk_player("user2"), sink_pid)
+
+      Process.sleep(50)
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), sink_pid)
+    end
+  end
+
   # note: [test lobby battle]
   # these tests are a bit anemic because they also require a connected autohost
   # and it's a lot of setup. There are some end to end tests in the
@@ -1708,7 +1929,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "must be in lobby" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:error, :not_in_lobby} = Lobby.start_battle(id, "not in lobby")
@@ -1722,7 +1943,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "must be in lobby" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:error, :not_in_lobby} = Lobby.join_battle(id, "not in lobby")
@@ -1731,15 +1952,18 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
   describe "start script" do
     test "with 1 player" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       start_script = LobbyProcess.get_start_script(id)
-      %{ally_teams: [%{teams: [%{players: [%{user_id: @default_user_id}]}]}]} = start_script
+
+      %AT.StartScript{
+        ally_teams: [%{teams: [%{players: [%AT.Player{user_id: @default_user_id}]}]}]
+      } = start_script
     end
 
     test "with a spec" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("other-user-id"))
@@ -1749,7 +1973,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "with 2 players in the same team" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("other-user-id"))
@@ -1762,7 +1986,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "1 ally team with a player leaving then joining" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("other-user-id"))
@@ -1777,7 +2001,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "2 ally teams" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("other-user-id"))
@@ -1790,7 +2014,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
 
     test "with a bot" do
-      {:ok, _pid, %{id: id}} =
+      {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
       {:ok, _bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
@@ -1803,42 +2027,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
     end
   end
 
-  # again, this should probably be exatracted in a more general module
-  describe "patch merge" do
-    test "update a simple (non map) value" do
-      assert patch_merge(%{key: "s1"}, %{key: "s2"}) == %{key: "s2"}
-
-      result = patch_merge(%{"string-key" => "s1"}, %{"string-key" => "s2"})
-      assert result == %{"string-key" => "s2"}
-    end
-
-    test "can add new keys" do
-      result = patch_merge(%{key: "foo"}, %{other: 2})
-      assert result == %{key: "foo", other: 2}
-    end
-
-    test "can delete keys when value is nil" do
-      result = patch_merge(%{foo: "fooval", bar: "barkey"}, %{bar: nil})
-      assert result == %{foo: "fooval"}
-    end
-
-    test "set map as value when new key" do
-      result = patch_merge(%{}, %{foo: %{key: "val"}})
-      assert result == %{foo: %{key: "val"}}
-    end
-
-    test "can recursively update nested maps" do
-      result =
-        patch_merge(%{foo: %{key: "base-key", foo: "bar"}}, %{
-          foo: %{key: 2, foo: nil, bar: "updated"}
-        })
-
-      assert result == %{foo: %{key: 2, bar: "updated"}}
-    end
-  end
-
   defp mk_start_params(teams) do
-    %{
+    %LT.StartParams{
       creator_data: %{id: @default_user_id, name: "name-#{@default_user_id}"},
       creator_pid: self(),
       name: "test create lobby",
@@ -1849,7 +2039,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         Enum.map(teams, fn max_team ->
           x = for _i <- 1..max_team, do: %{max_players: 1}
 
-          %{
+          %LT.AllyTeamConfig{
             max_teams: max_team,
             start_box: %{top: 0, left: 0, bottom: 1, right: 0.2},
             teams: x
@@ -1859,7 +2049,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   end
 
   defp mk_player(user_id) do
-    %{id: user_id, name: "name-#{user_id}"}
+    %LT.PlayerJoinData{id: user_id, name: "name-#{user_id}"}
   end
 
   # create a lobby with a few specs already in. Simplify the logic when

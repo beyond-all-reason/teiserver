@@ -8,7 +8,6 @@ defmodule Teiserver.Data.Types do
 
   alias Teiserver.CacheUser
 
-  @type userid() :: non_neg_integer()
   @type party_id() :: String.t()
   @type lobby_id() :: non_neg_integer()
   @type lobby_struct() :: Teiserver.Lobby.LobbyStruct.t()

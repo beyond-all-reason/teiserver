@@ -4,7 +4,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
   alias Teiserver.Account
   alias Teiserver.Account.FriendRequestLib
   alias Teiserver.Protocols.SpringIn
-  require Logger
+
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 

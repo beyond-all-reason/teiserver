@@ -18,6 +18,7 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Coordinator
   alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Lobby
+  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.AuthIn
   alias Teiserver.Protocols.Spring.BattleIn
@@ -45,6 +46,10 @@ defmodule Teiserver.Protocols.SpringIn do
   @action_commands ~w(SAY SAYEX SAYPRIVATE SAYBATTLE SAYBATTLEPRIVATEEX JOINBATTLE LEAVEBATTLE)
 
   @cluster_manager_regex ~r/^Host\[[A-Z]+\d+\]$/
+
+  # Battle chat commands that carry more data than a normal message (e.g. modoption
+  # key=value pairs) and so get a 1024-char allowance instead of the default 256.
+  @long_battle_command_prefixes ["$welcome-message", "!welcome-message", "!mode "]
 
   # Commands that don't require the user to be logged in
   @unauthenticated_commands ~w(
@@ -361,7 +366,8 @@ defmodule Teiserver.Protocols.SpringIn do
 
         require_manual_email? =
           Enum.any?([
-            Map.get(stat_data, "vpn?", false),
+            Map.get(stat_data, "banned_ip?", false),
+            Map.get(stat_data, "vpn_ip?", false),
             Map.get(stat_data, "ip_check_bad?", false)
           ])
 
@@ -866,40 +872,50 @@ defmodule Teiserver.Protocols.SpringIn do
 
           client = Client.get_client_by_id(state.userid)
 
-          cond do
-            client == nil ->
-              {:failure, "No client"}
+          failure =
+            cond do
+              client == nil ->
+                {:failure, "No client"}
 
-            not Auth.is_bot?(state.userid) ->
-              {:failure, "Not a bot"}
+              not Auth.is_bot?(state.userid) ->
+                {:failure, "Not a bot"}
 
-            true ->
-              password = if Enum.member?(["empty", "*"], password), do: nil, else: password
+              true ->
+                case LobbyLib.validate_name(name) do
+                  {:error, error} -> {:failure, error}
+                  :ok -> nil
+                end
+            end
 
-              lobby =
-                %{
-                  founder_id: state.userid,
-                  founder_name: state.username,
-                  name: name,
-                  type: if(type == "0", do: "normal", else: "replay"),
-                  nattype: nattype,
-                  port: int_parse(port),
-                  max_players: int_parse(max_players),
-                  game_hash: game_hash,
-                  map_hash: map_hash,
-                  password: password,
-                  rank: 0,
-                  locked: false,
-                  engine_name: engine_name,
-                  engine_version: engine_version,
-                  map_name: map_name,
-                  game_name: game_name,
-                  ip: client.ip
-                }
-                |> Lobby.create_lobby()
-                |> Lobby.add_lobby()
+          if failure != nil do
+            failure
+          else
+            password = if Enum.member?(["empty", "*"], password), do: nil, else: password
 
-              {:success, lobby}
+            lobby =
+              %{
+                founder_id: state.userid,
+                founder_name: state.username,
+                name: name,
+                type: if(type == "0", do: "normal", else: "replay"),
+                nattype: nattype,
+                port: int_parse(port),
+                max_players: int_parse(max_players),
+                game_hash: game_hash,
+                map_hash: map_hash,
+                password: password,
+                rank: 0,
+                locked: false,
+                engine_name: engine_name,
+                engine_version: engine_version,
+                map_name: map_name,
+                game_name: game_name,
+                ip: client.ip
+              }
+              |> Lobby.create_lobby()
+              |> Lobby.add_lobby()
+
+            {:success, lobby}
           end
 
         nil ->
@@ -1255,7 +1271,7 @@ defmodule Teiserver.Protocols.SpringIn do
               String.starts_with?(lowercase_msg, "!bset tweakunits") ->
             msg |> String.trim() |> String.slice(0..16_384)
 
-          String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
+          String.starts_with?(lowercase_msg, @long_battle_command_prefixes) ->
             msg |> String.trim() |> String.slice(0..1024)
 
           true ->
@@ -1281,7 +1297,7 @@ defmodule Teiserver.Protocols.SpringIn do
               String.starts_with?(lowercase_msg, "!bset tweakunits") ->
             msg |> String.trim() |> String.slice(0..16_384)
 
-          String.starts_with?(lowercase_msg, ["$welcome-message", "!welcome-message"]) ->
+          String.starts_with?(lowercase_msg, @long_battle_command_prefixes) ->
             msg |> String.trim() |> String.slice(0..1024)
 
           true ->

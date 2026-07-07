@@ -1,0 +1,22 @@
+ARG ELIXIR_VERSION=1.19.4
+ARG OTP_VERSION=27.3.4
+ARG DEBIAN_VERSION=trixie-20260518
+FROM docker.io/hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}
+
+RUN apt-get update \
+ && apt-get install --no-install-recommends --yes git make build-essential inotify-tools postgresql-client \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN mix local.hex --force \
+ && mix local.rebar --force \
+ && echo '[ -f /etc/motd ] && cat /etc/motd' >> /etc/bash.bashrc
+
+WORKDIR /workspaces/teiserver
+
+ENV MIX_ENV=dev
+
+COPY .devcontainer/startup.sh /startup.sh
+RUN chmod +x /startup.sh
+
+ENTRYPOINT ["/startup.sh"]

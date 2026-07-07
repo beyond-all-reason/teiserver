@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
   test "lists all entries on index", %{conn: conn} do
     page_view_logs_fixture(AccountFixtures.user_fixture())
 
-    conn = get(conn, Routes.logging_page_view_log_path(conn, :index))
+    conn = get(conn, ~p"/logging/page_views")
     assert html_response(conn, 200) =~ "Page view logs - Row count:"
   end
 
@@ -22,7 +22,7 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
     user = AccountFixtures.user_fixture()
 
     conn =
-      post(conn, Routes.logging_page_view_log_path(conn, :search),
+      post(conn, ~p"/logging/page_views/search",
         search: %{
           "account_user" => "##{user.id}",
           "order" => "Newest first"
@@ -36,7 +36,7 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
     page_view_logs_fixture(AccountFixtures.user_fixture())
 
     conn =
-      post(conn, Routes.logging_page_view_log_path(conn, :search),
+      post(conn, ~p"/logging/page_views/search",
         search: %{
           "path" => "section/sub/page",
           "order" => "Newest first"
@@ -49,7 +49,7 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
   test "shows chosen resource", %{conn: conn} do
     user = AccountFixtures.user_fixture()
     page_view_log = page_view_logs_fixture(user) |> List.flatten() |> List.first()
-    conn = get(conn, Routes.logging_page_view_log_path(conn, :show, page_view_log))
+    conn = get(conn, ~p"/logging/page_views/#{page_view_log.id}")
     assert html_response(conn, 200) =~ "127.0.0.1"
   end
 
@@ -57,7 +57,7 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
     user = AccountFixtures.user_fixture()
     page_view_log = page_view_logs_fixture(user) |> List.flatten() |> List.first()
 
-    conn = delete(conn, Routes.logging_page_view_log_path(conn, :delete, page_view_log))
+    conn = delete(conn, ~p"/logging/page_views/#{page_view_log.id}")
     assert redirected_to(conn) == ~p"/logging/page_views"
 
     assert_raise Ecto.NoResultsError,

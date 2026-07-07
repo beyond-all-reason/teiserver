@@ -4,7 +4,6 @@ defmodule Teiserver.Coordinator do
   alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Throttles
-  require Logger
 
   @spec start_coordinator() ::
           {:error, {:already_started, pid()}} | DynamicSupervisor.on_start_child()
@@ -22,14 +21,14 @@ defmodule Teiserver.Coordinator do
     end
   end
 
-  @spec get_coordinator_userid() :: T.userid()
+  @spec get_coordinator_userid() :: User.id()
   def get_coordinator_userid do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_coordinator_userid")
   end
 
   @spec get_coordinator_pid() :: pid() | nil
   def get_coordinator_pid do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
+    case Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
       [{pid, _val}] ->
         pid
 
@@ -57,7 +56,7 @@ defmodule Teiserver.Coordinator do
   # Consul related stuff
   @spec get_consul_pid(T.lobby_id()) :: pid() | nil
   def get_consul_pid(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.ConsulRegistry, lobby_id) do
+    case Registry.lookup(Teiserver.ConsulRegistry, lobby_id) do
       [{pid, _val}] ->
         pid
 
@@ -132,7 +131,7 @@ defmodule Teiserver.Coordinator do
   # Balancer related stuff
   @spec get_balancer_pid(T.lobby_id()) :: pid() | nil
   def get_balancer_pid(lobby_id) do
-    case Horde.Registry.lookup(Teiserver.BalancerRegistry, lobby_id) do
+    case Registry.lookup(Teiserver.BalancerRegistry, lobby_id) do
       [{pid, _val}] ->
         pid
 
@@ -258,14 +257,14 @@ defmodule Teiserver.Coordinator do
   end
 
   # Commands for the coordinator account to perform
-  @spec send_to_host(T.userid(), String.t()) :: :ok
+  @spec send_to_host(User.id(), String.t()) :: :ok
   def send_to_host(nil, _msg), do: :ok
 
   def send_to_host(lobby_id, msg) do
     send_to_host(get_coordinator_userid(), lobby_id, msg)
   end
 
-  @spec send_to_host(T.userid(), T.userid(), String.t()) :: :ok
+  @spec send_to_host(User.id(), User.id(), String.t()) :: :ok
   def send_to_host(nil, _lobby_id, _msg), do: :ok
 
   def send_to_host(from_id, lobby_id, msg) do
@@ -278,7 +277,7 @@ defmodule Teiserver.Coordinator do
     :ok
   end
 
-  @spec send_to_user(T.userid(), String.t()) :: :ok
+  @spec send_to_user(User.id(), String.t()) :: :ok
   def send_to_user(userid, msg) do
     CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
   end
@@ -291,6 +290,6 @@ defmodule Teiserver.Coordinator do
   # Debug stuff
   @spec list_all_internal_servers :: [T.lobby_id()]
   def list_all_internal_servers do
-    Horde.Registry.select(Teiserver.ServerRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Registry.select(Teiserver.ServerRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 end

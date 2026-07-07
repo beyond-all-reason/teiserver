@@ -7,11 +7,14 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.CalculateSmurfKeyTask
+  alias Teiserver.Account.User
+  alias Teiserver.Account.UserLib
   alias Teiserver.Battle
+  alias Teiserver.Battle.Match
   alias Teiserver.CacheUser
   alias Teiserver.Client
+  alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.Plugins
   alias Teiserver.Protocols.Spring
@@ -42,7 +45,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @spec get_match_monitor_userid() :: T.userid() | nil
+  @spec get_match_monitor_userid() :: User.id() | nil
   def get_match_monitor_userid do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end
@@ -194,6 +197,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         if match_id do
           game_time = int_parse(game_time)
           handle_match_simple_event(username, userid, match_id, event_type_name, game_time)
+          check_for_griefing(username, event_type_name, game_time, match_id)
         else
           Logger.warning("match-event: Cannot get match_id of userid of #{username}")
         end
@@ -249,10 +253,10 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   # Examples of accepted format:
-  # match-chat <Teifion> a: Message to allies
-  # match-chat <Teifion> s: A message to the spectators
-  # match-chat <Teifion> g: A message to the game
-  # match-chat <Teifion> d123: A direct message of some sort, in theory shouldn't appear
+  # match-chat <SomeUser> a: Message to allies
+  # match-chat <SomeUser> s: A message to the spectators
+  # match-chat <SomeUser> g: A message to the game
+  # match-chat <SomeUser> d123: A direct message of some sort, in theory shouldn't appear
   def handle_info({:direct_message, from_id, "match-chat " <> data}, state) do
     case Regex.run(~r/<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
       [_all, username, to, msg] ->
@@ -378,6 +382,24 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     )
 
     {:noreply, state}
+  end
+
+  @spec check_for_griefing(String.t(), String.t(), pos_integer(), Match.id()) :: any()
+  def check_for_griefing(username, event_type_name, game_time, match_id) do
+    user_id = Account.get_userid_from_name(username)
+
+    case event_type_name do
+      "allycommloaded" ->
+        if UserLib.new_account?(user_id) do
+          # TODO: Log moderation automated action against account for audit
+          Telemetry.log_simple_match_event(user_id, match_id, "newuserliftingcomms", game_time)
+          client = Account.get_client_by_id(user_id)
+          Coordinator.send_to_host(client.lobby_id, "!kickban #{client.name}")
+        end
+
+      _other_event ->
+        nil
+    end
   end
 
   defp handle_json_msg(%{"username" => username, "GPU" => _gpu} = contents, from_id) do
@@ -520,7 +542,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     send(self(), :begin)
     Logger.metadata(request_id: "MatchMonitorServer")
 
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ServerRegistry,
       "MatchMonitorServer",
       :match_monitor
@@ -531,12 +553,13 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   @impl GenServer
   def terminate(_reason, state) do
-    Client.disconnect(state.userid, "match monitor terminate")
+    Map.get(state, :userid)
+    |> Client.disconnect("match monitor terminate")
   end
 
   @spec get_match_monitor_pid() :: pid() | nil
   def get_match_monitor_pid do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "MatchMonitorServer") do
+    case Registry.lookup(Teiserver.ServerRegistry, "MatchMonitorServer") do
       [{pid, _value}] ->
         pid
 

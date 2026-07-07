@@ -1,0 +1,76 @@
+<.header>
+  Bot: {@bot.name}
+  <:actions>
+    <.link patch={~p"/teiserver/admin/bot/#{@bot.id}/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit</.button>
+    </.link>
+    <.button phx-click={show_modal("confirm-delete-bot")} class="btn-danger">
+      Delete bot
+    </.button>
+  </:actions>
+</.header>
+
+<.modal
+  id="confirm-delete-bot"
+  on_cancel={hide_modal("confirm-delete-bot")}
+  on_confirm={JS.push("delete_bot") |> hide_modal("confirm-delete-bot")}
+>
+  <:title>Delete bot {@bot.name}?</:title>
+  <:subtitle>This action cannot be undone. All credentials will also be deleted.</:subtitle>
+  <:confirm>Yes, delete</:confirm>
+  <:cancel>Cancel</:cancel>
+</.modal>
+
+<div :if={@client_secret} class="alert alert-danger">
+  Secret only shown once! <pre id="client-secret">{@client_secret}</pre>
+</div>
+
+<h2>Credentials</h2>
+
+<%= if @credentials == [] do %>
+  <p>No credentials.</p>
+<% else %>
+  <.table id="credentials" rows={@credentials}>
+    <:col :let={cred} label="Created at">{cred.inserted_at}</:col>
+    <:col :let={cred} label="Application">{cred.application.name}</:col>
+    <:col :let={cred} label="Client ID"><pre>{cred.client_id}</pre></:col>
+    <:col :let={cred} label="Scopes">{Enum.join(cred.application.scopes, ", ")}</:col>
+    <:action :let={cred}>
+      <.link
+        phx-click={JS.push("delete_credential", value: %{cred_id: cred.id})}
+        data-confirm="Are you sure you want to delete this credential?"
+        class="btn btn-danger btn-sm"
+      >
+        Delete
+      </.link>
+    </:action>
+  </.table>
+<% end %>
+
+<h2>Create credential</h2>
+<form phx-submit="create_credential">
+  <.input
+    type="select"
+    name="application"
+    label="Application"
+    options={Enum.map(@applications, &{&1.name, &1.id})}
+    value=""
+  />
+  <.button type="submit" class="btn-primary">Create</.button>
+</form>
+
+<.modal
+  :if={@live_action == :edit}
+  id="bot-edit-modal"
+  show
+  on_cancel={JS.patch(~p"/teiserver/admin/bot/#{@bot.id}")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@bot.id}
+    title={@page_title}
+    action={@live_action}
+    bot={@bot}
+    patch={~p"/teiserver/admin/bot/#{@bot.id}"}
+  />
+</.modal>

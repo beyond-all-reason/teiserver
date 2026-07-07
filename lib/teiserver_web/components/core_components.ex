@@ -4,7 +4,8 @@ defmodule TeiserverWeb.CoreComponents do
   """
 
   alias Fontawesome
-  alias Phoenix.HTML.Form, as: HTMLForm
+  alias Phoenix.Component
+  alias Phoenix.HTML.Form
   alias Phoenix.HTML.FormField
   alias Phoenix.LiveView.JS
 
@@ -129,7 +130,6 @@ defmodule TeiserverWeb.CoreComponents do
     values: [:info, :success, :warning, :error],
     doc: "used for styling and flash lookup"
 
-  attr :autoshow, :boolean, default: true, doc: "whether to auto show the flash on mount"
   attr :close, :boolean, default: true, doc: "whether the flash can be closed"
   attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
   slot :inner_block, doc: "the optional inner block that renders the flash message"
@@ -152,7 +152,6 @@ defmodule TeiserverWeb.CoreComponents do
     <div
       :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
       id={@id}
-      phx-mounted={@autoshow && show("##{@id}")}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       aria-live="assertive"
@@ -195,16 +194,17 @@ defmodule TeiserverWeb.CoreComponents do
         <.flash id="flash-success" kind={:success} title="Success!" role="alert" flash={@flash} />
         <.flash id="flash-warning" kind={:warning} title="Warning!" role="alert" flash={@flash} />
         <.flash id="flash-error" kind={:error} title="Error!" role="alert" flash={@flash} />
+
         <.flash
-          id="flash-disconnected"
+          id="client-error"
           kind={:error}
-          title="Reconnecting to the server"
-          close={false}
-          autoshow={false}
-          phx-disconnected={show("#disconnected")}
-          phx-connected={hide("#disconnected")}
+          title={gettext("We can't find the internet")}
+          phx-disconnected={show(".phx-client-error #client-error") |> JS.remove_attribute("hidden")}
+          phx-connected={hide("#client-error") |> JS.set_attribute({"hidden", ""})}
+          hidden
         >
-          Attempting to reconnect <Fontawesome.icon icon="sync" class="fa-spin" />
+          {gettext("Attempting to reconnect")}
+          <%!-- <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" /> --%>
         </.flash>
       </div>
     </div>
@@ -246,29 +246,40 @@ defmodule TeiserverWeb.CoreComponents do
   end
 
   @doc """
-  Renders a button.
+  Renders a button with navigation support.
+
   ## Examples
+
       <.button>Send!</.button>
-      <.button phx-click="go" class="ml-2">Send!</.button>
+      <.button phx-click="go" variant="primary">Send!</.button>
+      <.button navigate={~p"/"}>Home</.button>
   """
-  attr :type, :string, default: nil
-  attr :class, :string, default: "btn-secondary"
-  attr :rest, :global, include: ~w(disabled form name value)
+  attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
+  attr :class, :any
+  attr :variant, :string, values: ~w(primary)
   slot :inner_block, required: true
 
-  def button(assigns) do
-    ~H"""
-    <button
-      type={@type}
-      class={[
-        "phx-submit-loading:opacity-75 btn",
-        @class
-      ]}
-      {@rest}
-    >
-      {render_slot(@inner_block)}
-    </button>
-    """
+  def button(%{rest: rest} = assigns) do
+    variants = %{"primary" => "btn-primary", nil => "btn-primary btn-soft"}
+
+    assigns =
+      assign_new(assigns, :class, fn ->
+        ["btn", Map.fetch!(variants, assigns[:variant])]
+      end)
+
+    if rest[:href] || rest[:navigate] || rest[:patch] do
+      ~H"""
+      <.link class={@class} {@rest}>
+        {render_slot(@inner_block)}
+      </.link>
+      """
+    else
+      ~H"""
+      <button class={@class} {@rest}>
+        {render_slot(@inner_block)}
+      </button>
+      """
+    end
   end
 
   @doc """
@@ -296,12 +307,17 @@ defmodule TeiserverWeb.CoreComponents do
   attr :errors, :list, default: []
   attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
   attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
-  attr :options, :list, doc: "the options to pass to HTMLForm.options_for_select/2"
+  attr :options, :list, doc: "the options to pass to Form.options_for_select/2"
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
+  attr :class, :any, default: nil, doc: "the input class to use over defaults"
   attr :text, :string, doc: "regular text to follow a label"
   attr :description, :string, doc: "optional description to display if component allows"
-  attr :rest, :global, include: ~w(autocomplete cols disabled form max maxlength min minlength
-                                   pattern placeholder readonly required rows size step)
+
+  attr :rest, :global,
+    include:
+      ~w(accept autocomplete capture cols disabled form list max maxlength
+                                  min minlength pattern placeholder readonly required rows size step)
+
   slot :inner_block
 
   def input(%{field: %FormField{} = field} = assigns) do
@@ -317,7 +333,7 @@ defmodule TeiserverWeb.CoreComponents do
 
   def input(%{type: "checkbox", value: value} = assigns) do
     assigns =
-      assign_new(assigns, :checked, fn -> HTMLForm.normalize_value("checkbox", value) end)
+      assign_new(assigns, :checked, fn -> Form.normalize_value("checkbox", value) end)
 
     ~H"""
     <div class="form-check">
@@ -346,7 +362,7 @@ defmodule TeiserverWeb.CoreComponents do
       <.label :if={@label} for={@id}>{@label}</.label>
       <select id={@id} name={@name} class="form-control" multiple={@multiple} {@rest}>
         <option :if={@prompt} value="">{@prompt}</option>
-        {HTMLForm.options_for_select(@options, @value)}
+        {Form.options_for_select(@options, @value)}
       </select>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
@@ -366,7 +382,7 @@ defmodule TeiserverWeb.CoreComponents do
           @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
         ]}
         {@rest}
-      ><%= HTMLForm.normalize_value("textarea", @value) %></textarea>
+      ><%= Form.normalize_value("textarea", @value) %></textarea>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
@@ -386,12 +402,13 @@ defmodule TeiserverWeb.CoreComponents do
           @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
         ]}
         {@rest}
-      ><%= HTMLForm.normalize_value("textarea", (@value || []) |> Enum.join("\n")) %></textarea>
+      ><%= Form.normalize_value("textarea", (@value || []) |> Enum.join("\n")) %></textarea>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
 
+  # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
     <div>
@@ -400,13 +417,198 @@ defmodule TeiserverWeb.CoreComponents do
         type={@type}
         name={@name}
         id={@id || @name}
-        value={HTMLForm.normalize_value(@type, @value)}
+        value={Form.normalize_value(@type, @value)}
         class={[
-          "form-control",
+          @class || "w-full input form-control",
           @errors != [] && "border-danger"
         ]}
         {@rest}
       />
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
+  @doc """
+  This is an input component from a Phoenix 1.8 project using tailwind
+  styling for use in tailwind pages. Long term this is intended to be
+  mass renamed to `input` and the preceding component removed.
+
+  TODO: Remove normal input calls when bootstrap is replaced.
+
+  Renders an input with label and error messages.
+
+  A `FormField` may be passed as argument,
+  which is used to retrieve the input name, id, and values.
+  Otherwise all attributes may be passed explicitly.
+
+  ## Types
+
+  This function accepts all HTML input types, considering that:
+
+    * You may also set `type="select"` to render a `<select>` tag
+
+    * `type="checkbox"` is used exclusively to render boolean values
+
+    * For live file uploads, see `Phoenix.Component.live_file_input/1`
+
+  See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+  for more information. Unsupported types, such as radio, are best
+  written directly in your templates.
+
+  ## Examples
+
+  ```heex
+  <.input_tw field={@form[:email]} type="email" />
+  <.input_tw name="my-input" errors={["oh no!"]} />
+  ```
+
+  ## Select type
+
+  When using `type="select"`, you must pass the `options` and optionally
+  a `value` to mark which option should be preselected.
+
+  ```heex
+  <.input_tw field={@form[:user_type]} type="select" options={["Admin": "admin", "User": "user"]} />
+  ```
+
+  For more information on what kind of data can be passed to `options` see
+  [`options_for_select`](https://hexdocs.pm/phoenix_html/Phoenix.HTML.Form.html#options_for_select/2).
+  """
+  attr :id, :any, default: nil
+  attr :name, :any
+  attr :label, :string, default: nil
+  attr :value, :any
+
+  attr :type, :string,
+    default: "text",
+    values: ~w(checkbox color date datetime-local email file month number password
+               search select tel text textarea time url week hidden)
+
+  attr :field, FormField,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :errors, :list, default: []
+  attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
+  attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
+  attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
+  attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
+  attr :class, :any, default: nil, doc: "the input class to use over defaults"
+  attr :error_class, :any, default: nil, doc: "the input error class to use over defaults"
+
+  attr :rest, :global,
+    include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
+                multiple pattern placeholder readonly required rows size step)
+
+  def input_tw(%{field: %FormField{} = field} = assigns) do
+    errors = if Component.used_input?(field), do: field.errors, else: []
+
+    assigns
+    |> assign(field: nil, id: assigns.id || field.id)
+    |> assign(:errors, Enum.map(errors, &translate_error(&1)))
+    |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
+    |> assign_new(:value, fn -> field.value end)
+    |> input()
+  end
+
+  def input_tw(%{type: "hidden"} = assigns) do
+    ~H"""
+    <input type="hidden" id={@id} name={@name} value={@value} {@rest} />
+    """
+  end
+
+  def input_tw(%{type: "checkbox"} = assigns) do
+    assigns =
+      assign_new(assigns, :checked, fn ->
+        Form.normalize_value("checkbox", assigns[:value])
+      end)
+
+    ~H"""
+    <div class="fieldset">
+      <label>
+        <input
+          type="hidden"
+          name={@name}
+          value="false"
+          disabled={@rest[:disabled]}
+          form={@rest[:form]}
+        />
+        <span class="label">
+          <input
+            type="checkbox"
+            id={@id}
+            name={@name}
+            value="true"
+            checked={@checked}
+            class={@class || "checkbox checkbox-sm"}
+            {@rest}
+          />{@label}
+        </span>
+      </label>
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
+  def input_tw(%{type: "select"} = assigns) do
+    ~H"""
+    <div class="fieldset">
+      <label>
+        <span :if={@label} class="label mb-1">{@label}</span>
+        <select
+          id={@id}
+          name={@name}
+          class={[@class || "w-full select", @errors != [] && (@error_class || "select-error")]}
+          multiple={@multiple}
+          {@rest}
+        >
+          <option :if={@prompt} value="">{@prompt}</option>
+          {Phoenix.HTML.Form.options_for_select(@options, @value)}
+        </select>
+      </label>
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
+  def input_tw(%{type: "textarea"} = assigns) do
+    ~H"""
+    <div class="fieldset">
+      <label>
+        <span :if={@label} class="label mb-1">{@label}</span>
+        <textarea
+          id={@id}
+          name={@name}
+          class={[
+            @class || "w-full textarea",
+            @errors != [] && (@error_class || "textarea-error")
+          ]}
+          {@rest}
+        >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
+      </label>
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
+  # All other inputs text, datetime-local, url, password, etc. are handled here...
+  def input_tw(assigns) do
+    ~H"""
+    <div class="fieldset">
+      <label>
+        <span :if={@label} class="label mb-1">{@label}</span>
+        <input
+          type={@type}
+          name={@name}
+          id={@id}
+          value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+          class={[
+            @class || "w-full input",
+            @errors != [] && (@error_class || "input-error")
+          ]}
+          {@rest}
+        />
+      </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
@@ -452,10 +654,10 @@ defmodule TeiserverWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8 text-zinc-800">
+        <h1 class="text-lg font-semibold leading-8 text-zinc-600 dark:text-zinc-300">
           {render_slot(@inner_block)}
         </h1>
-        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
+        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-700 dark:text-zinc-200">
           {render_slot(@subtitle)}
         </p>
       </div>

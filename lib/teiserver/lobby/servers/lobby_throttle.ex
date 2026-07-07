@@ -5,8 +5,8 @@ defmodule Teiserver.Battle.LobbyThrottle do
   player_changes lists players that have changed (added, updated or removed!)
   """
   alias Phoenix.PubSub
+
   use GenServer
-  require Logger
 
   @update_interval 500
 
@@ -148,7 +148,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_updates:#{battle_lobby_id}")
 
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ThrottleRegistry,
       "LobbyThrottle:#{battle_lobby_id}",
       battle_lobby_id

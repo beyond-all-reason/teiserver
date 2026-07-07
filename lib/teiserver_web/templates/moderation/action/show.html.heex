@@ -37,7 +37,7 @@
           </a>
 
           <a
-            href={"#{Routes.moderation_action_path(@conn, :index)}?target_id=#{@action.target_id}"}
+            href={~p"/moderation/action?target_id=#{@action.target_id}"}
             class={"btn btn-outline-#{bsname}"}
           >
             <i class="far fa-fw fa-list"></i> Actions for {@action.target.name}
@@ -45,7 +45,7 @@
 
           <%= if allow?(@conn, "Moderator") do %>
             <a
-              href={Routes.moderation_action_path(@conn, :edit, @action)}
+              href={~p"/moderation/action/#{@action.id}/edit"}
               class={"btn btn-outline-#{bsname}"}
             >
               <i class="fa-solid fa-wrench"></i> Edit action

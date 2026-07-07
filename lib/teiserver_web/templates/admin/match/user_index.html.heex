@@ -19,7 +19,7 @@
             label: "Rated matches",
             icon: Teiserver.Account.RatingLib.icon(),
             bsname: bsname,
-            url: Routes.ts_admin_user_path(@conn, :ratings, @user.id)
+            url: ~p"/teiserver/admin/users/ratings/#{@user.id}"
           )}
 
           {central_component("section_menu_button",

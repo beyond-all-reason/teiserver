@@ -2,6 +2,8 @@ defmodule Teiserver.Battle.Match do
   @moduledoc false
   use TeiserverWeb, :schema
 
+  @type id :: pos_integer()
+
   typed_schema "teiserver_battle_matches" do
     field :server_uuid, :string
     field :uuid, :string

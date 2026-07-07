@@ -40,7 +40,7 @@ defmodule Teiserver.LobbyIdServer do
 
   @spec get_server_pid() :: pid() | nil
   defp get_server_pid do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
+    case Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
       [{pid, _data}] ->
         pid
 
@@ -64,7 +64,7 @@ defmodule Teiserver.LobbyIdServer do
 
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ServerRegistry,
       "LobbyIdServer",
       :lobby_id_server

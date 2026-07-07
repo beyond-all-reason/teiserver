@@ -1,13 +1,12 @@
 defmodule Teiserver.Coordinator.Parser do
   @moduledoc false
+  alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Coordinator
-  alias Teiserver.Data.Types, as: T
-  require Logger
 
   @passthrough ~w(explain)
 
-  @spec handle_in(Types.userid(), String.t(), Types.lobby_id()) :: :say | :handled
+  @spec handle_in(User.id(), String.t(), Types.lobby_id()) :: :say | :handled
   def handle_in(userid, msg, lobby_id) do
     lobby = Battle.get_lobby(lobby_id)
 
@@ -32,7 +31,7 @@ defmodule Teiserver.Coordinator.Parser do
     end
   end
 
-  @spec parse_and_handle(Types.userid(), String.t(), map()) :: :handled
+  @spec parse_and_handle(User.id(), String.t(), map()) :: :handled
   defp parse_and_handle(_userid, _msg, nil), do: :handled
 
   defp parse_and_handle(userid, msg, battle) do
@@ -41,7 +40,7 @@ defmodule Teiserver.Coordinator.Parser do
     :handled
   end
 
-  @spec parse_command(T.userid(), String.t()) :: map()
+  @spec parse_command(User.id(), String.t()) :: map()
   def parse_command(userid, string) do
     %{
       raw: string,

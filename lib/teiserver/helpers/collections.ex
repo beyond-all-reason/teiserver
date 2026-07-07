@@ -3,7 +3,7 @@ defmodule Teiserver.Helpers.Collections do
   @doc """
   Helper to recursively transform maps. Useful to parse incoming tachyon data
   into internal structure and vice versa
-  See tests in test/teiserver/tachyon/schema_test.exs for some examples.
+  See tests in Teiserver.Helpers.CollectionsTest for some examples.
   """
   def transform_map(nil, _mapping), do: nil
 
@@ -23,17 +23,30 @@ defmodule Teiserver.Helpers.Collections do
             f.(m, val)
 
           {dest_key, mapping} ->
-            cond do
-              is_function(mapping, 1) -> Map.put(m, dest_key, mapping.(val))
-              is_map(val) -> Map.put(m, dest_key, transform_map(val, mapping))
-              is_list(val) -> Map.put(m, dest_key, Enum.map(val, &transform_map(&1, mapping)))
-              true -> Map.put(m, dest_key, val)
-            end
+            transform_keyval(m, mapping, dest_key, val)
+
+          {dest_key, struct_module, mapping} ->
+            result = transform_keyval(m, mapping, dest_key, val)
+
+            Map.update!(result, dest_key, fn val ->
+              if is_list(val),
+                do: Enum.map(val, &struct(struct_module, &1)),
+                else: struct!(struct_module, val)
+            end)
         end
       else
         m
       end
     end)
+  end
+
+  defp transform_keyval(data, mapping, dest_key, val) do
+    cond do
+      is_function(mapping, 1) -> Map.put(data, dest_key, mapping.(val))
+      is_map(val) -> Map.put(data, dest_key, transform_map(val, mapping))
+      is_list(val) -> Map.put(data, dest_key, Enum.map(val, &transform_map(&1, mapping)))
+      true -> Map.put(data, dest_key, val)
+    end
   end
 
   @doc """
@@ -56,5 +69,19 @@ defmodule Teiserver.Helpers.Collections do
       {[x | rest], []} -> zip_with_padding(rest, [], padding, [{x, padding} | acc])
       {[x | rest1], [y | rest2]} -> zip_with_padding(rest1, rest2, padding, [{x, y} | acc])
     end
+  end
+
+  @doc """
+  apply some updates onto a base map according to json merge patch semantics
+  """
+  @spec patch_merge(base :: map(), updates :: map()) :: map()
+  def patch_merge(base, updates) do
+    Enum.reduce(updates, base, fn {k, v}, m ->
+      cond do
+        v == nil -> Map.delete(m, k)
+        is_map(v) -> Map.update(m, k, v, &patch_merge(&1, v))
+        true -> Map.put(m, k, v)
+      end
+    end)
   end
 end

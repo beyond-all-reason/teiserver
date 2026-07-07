@@ -1,307 +1,163 @@
 defmodule Teiserver.TachyonLobby.ListTest do
+  alias Teiserver.Support.Polling
   alias Teiserver.TachyonLobby, as: Lobby
+  alias Teiserver.TachyonLobby.Types, as: LT
+
   use Teiserver.DataCase
-  import Teiserver.Support.Polling, only: [poll_until: 2]
 
-  @moduletag :tachyon
+  import Teiserver.TachyonLobby.Lobby, only: [list_topic: 0]
 
-  test "no lobbies" do
-    assert Lobby.list() == %{}
-  end
+  @default_user_id "1234"
 
-  test "register a lobby" do
-    overview = overview_fixture()
-
-    Lobby.List.register_lobby(self(), "lobby-id", overview)
-    assert Lobby.list() == %{"lobby-id" => overview}
-  end
-
-  test "remove dead lobbies" do
-    {:ok, pid} =
-      Task.start(fn ->
-        Lobby.List.register_lobby(self(), "lobby-id", overview_fixture())
-        :timer.sleep(:infinity)
-      end)
-
-    poll_until(&Lobby.list/0, &(map_size(&1) == 1))
-    assert %{"lobby-id" => _overview} = Lobby.list()
-    Process.exit(pid, :kill)
-    poll_until(&Lobby.list/0, &(map_size(&1) == 0))
-  end
-
-  test "update subscription" do
-    assert {initial_counter, %{}} = Lobby.subscribe_updates()
-
-    {:ok, pid} =
-      Task.start(fn ->
-        Lobby.List.register_lobby(self(), "lobby-id", overview_fixture())
-        :timer.sleep(:infinity)
-      end)
-
-    assert_receive %{
-                     topic: "teiserver_tachyonlobby_list",
-                     event: :add_lobby,
-                     lobby_id: "lobby-id"
-                   } = ev
-
-    assert ev.counter > initial_counter
-
-    Process.exit(pid, :kill)
-
-    assert_receive %{
-                     topic: "teiserver_tachyonlobby_list",
-                     event: :remove_lobby,
-                     lobby_id: "lobby-id"
-                   } = ev2
-
-    assert ev2.counter > ev.counter
-  end
-
-  test "get updates when player joins or leaves teams" do
-    {sink_pid, id, _pid} = mk_lobby()
-
-    assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
-    {:ok, _lobby_pid, _details} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
-    {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
-    Lobby.List.broadcast_updates()
-    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
-
-    :ok = Lobby.leave(id, "user2")
-    Lobby.List.broadcast_updates()
-    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 1}}}
-  end
-
-  test "player count update when becoming spectator" do
-    {_sink_pid, id, _pid} = mk_lobby()
-
-    assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
-    :ok = Lobby.spectate(id, "1234")
-    Lobby.List.broadcast_updates()
-    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 0}}}
-  end
-
-  test "batch updates" do
-    {sink_pid, id, _pid} = mk_lobby([3, 3])
-
-    assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
-    {:ok, _lobby_pid1, _details1} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
-    {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
-    {:ok, _lobby_pid2, _details2} = Lobby.join(id, %{id: "user3", name: "name-user3"}, sink_pid)
-    {:ok, _details} = Lobby.join_ally_team(id, "user3", 1)
-    Lobby.List.broadcast_updates()
-    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 3}}}
-  end
-
-  test "batch updates across lobbies" do
-    {sink_pid, id1, _pid1} = mk_lobby()
-    {_sink_pid2, id2, _pid2} = mk_lobby()
-    assert {_initial_counter, _lobbies} = Lobby.subscribe_updates()
-
-    {:ok, _lobby_pid1, _details1} = Lobby.join(id1, %{id: "user2", name: "name-user2"}, sink_pid)
-    {:ok, _details} = Lobby.join_ally_team(id1, "user2", 1)
-    {:ok, _lobby_pid2, _details2} = Lobby.join(id2, %{id: "user3", name: "name-user3"}, sink_pid)
-    {:ok, _details} = Lobby.join_ally_team(id2, "user3", 1)
-
-    Lobby.List.broadcast_updates()
-
-    assert_receive %{
-      event: :update_lobbies,
-      changes: %{^id1 => %{player_count: 2}, ^id2 => %{player_count: 2}}
-    }
-  end
-
-  test "don't send updates if no changes" do
-    {_initial_counter, _lobbies} = Lobby.subscribe_updates()
-    Lobby.List.broadcast_updates()
-    refute_receive %{event: :update_lobbies}, 100
-  end
-
-  test "get updates when spec becomes player with join queue" do
-    {sink_pid, id, _pid} = mk_lobby()
-
-    assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
-    {:ok, _lobby_pid, _details} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
-    :ok = Lobby.join_queue(id, "user2")
-    Lobby.List.broadcast_updates()
-    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
-  end
-
-  test "bots are not counted in player count" do
-    {sink_pid, id, _pid} = mk_lobby()
-
-    assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
-    {:ok, _bot_id1} = Lobby.add_bot(id, "1234", 1, "bot")
-    {:ok, _lobby_pid, _details} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
-    {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
-    Lobby.List.broadcast_updates()
-
-    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
-  end
-
-  test "get updates when player dies" do
-    {sink_pid, id, _pid} = mk_lobby()
-
-    assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
-    {:ok, _lobby_pid, _details} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
-    {:ok, _details} = Lobby.join_ally_team(id, "user2", 1)
-    Lobby.List.broadcast_updates()
-    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
-
-    Process.unlink(sink_pid)
-    Process.exit(sink_pid, :exit)
-    assert_receive %{event: :remove_lobby, lobby_id: ^id}
-  end
-
-  test "remove update when last player leaves" do
-    {_sink_pid, id, _pid} = mk_lobby()
-
-    assert {_initial_counter, %{^id => _overview}} = Lobby.subscribe_updates()
-
-    :ok = Lobby.leave(id, "1234")
-    assert_receive %{lobby_id: ^id, event: :remove_lobby}
-  end
-
-  test "get update when spec with bot leaves" do
-    {:ok, _lobby_pid, %{id: id}} = mk_start_params([2, 2]) |> Lobby.create()
-
-    _users =
-      Enum.map([2, 3, 4, 5], fn i ->
-        {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
-        player_id = to_string(i)
-        player = %{id: player_id, name: "name-#{player_id}"}
-        {:ok, _lobby_pid, _details} = Lobby.join(id, player, sink_pid)
-        {to_string(i), Map.put(player, :pid, sink_pid)}
-      end)
-      |> Map.new()
-
-    for _i <- 2..5, do: assert_receive({:lobby, ^id, {:updated, _changes}})
-
-    # fill the lobby with bots
-    {:ok, _bot_id1} = Lobby.add_bot(id, "2", 0, "bot")
-    {:ok, _bot_id2} = Lobby.add_bot(id, "2", 1, "bot")
-    {:ok, _bot_id3} = Lobby.add_bot(id, "2", 1, "bot")
-
-    # also fill a bit the join queue
-    :ok = Lobby.join_queue(id, "3")
-    :ok = Lobby.join_queue(id, "4")
-
-    for _i <- 1..5, do: assert_receive({:lobby, ^id, {:updated, _changes}})
-
-    assert {_initial_counter, %{^id => %{player_count: 1}}} = Lobby.subscribe_updates()
-
-    # player 2 leaving should make all the bots leave and the space should be
-    # taken up by the players in the join queue
-    :ok = Lobby.leave(id, "2")
-    Lobby.List.broadcast_updates()
-    assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 3}}}
-  end
-
-  test "restore state on startup" do
-    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
-
-    {:ok, pid1, %{id: id1}} =
-      mk_start_params([2, 2])
-      |> Map.replace!(:creator_pid, sink_pid)
-      |> Map.replace!(:name, "first lobby")
-      |> Lobby.create()
-
-    {:ok, pid2, %{id: id2}} =
-      mk_start_params([2, 2])
-      |> Map.replace!(:creator_pid, sink_pid)
-      |> Map.replace!(:name, "second lobby")
-      |> Lobby.create()
-
-    Supervisor.terminate_child(Lobby.System, Lobby.List)
-
-    # While the list process is dead, terminate a lobby and create a new one
-    Process.exit(pid1, :kill)
-
-    {:ok, _pid, %{id: id3}} =
-      mk_start_params([2, 2])
-      |> Map.replace!(:creator_pid, sink_pid)
-      |> Map.replace!(:name, "third lobby")
-      |> Lobby.create()
-
-    assert {_initial_counter, %{}} = Lobby.subscribe_updates()
-    Supervisor.restart_child(Lobby.System, Lobby.List)
-
-    assert_receive %{event: :reset_list, lobbies: lobbies}
-    assert not is_map_key(lobbies, id1), "first lobby is no more"
-    assert is_map_key(lobbies, id2), "second lobby is there"
-    assert is_map_key(lobbies, id3), "new lobby is registered"
-
-    # and stopping a lobby after restart still works (aka, monitors are set up)
-    Process.exit(pid2, :kill)
-    assert_receive %{event: :remove_lobby, lobby_id: ^id2}
-  end
-
-  describe "lobby updates" do
-    test "name" do
-      {_sink_pid, id, _pid} = mk_lobby()
-      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
-      Lobby.update_properties(id, "1234", %{name: "new name"})
-      Lobby.List.broadcast_updates()
-      assert_receive %{event: :update_lobbies, changes: %{^id => %{name: "new name"}}}
+  describe "list existing lobbies" do
+    test "no lobbies" do
+      assert Lobby.list() == %{}
     end
 
-    test "map name" do
-      {_sink_pid, id, _pid} = mk_lobby()
-      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
-      Lobby.update_properties(id, "1234", %{map_name: "new map"})
-      Lobby.List.broadcast_updates()
-      assert_receive %{event: :update_lobbies, changes: %{^id => %{map_name: "new map"}}}
+    test "list returns the overview" do
+      params = mk_start_params([1, 1])
+      {:ok, _pid, details} = Lobby.create(params)
+      list = Lobby.list()
+
+      assert list[details.id] == %LT.ListOverview{
+               counter: 0,
+               boss_enabled?: false,
+               current_battle: nil,
+               engine_version: params.engine_version,
+               game_version: params.game_version,
+               map_name: params.map_name,
+               max_player_count: 2,
+               name: params.name,
+               player_count: 1,
+               tags: %{}
+             }
     end
 
-    test "boss enabled?" do
-      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
-      {_sink_pid, _id, _pid} = mk_lobby()
-      Lobby.List.broadcast_updates()
-      assert_receive %{event: :add_lobby, overview: %{boss_enabled?: false}}
+    test "list multiple lobbies" do
+      {:ok, _pid, details1} =
+        mk_start_params([1, 1]) |> Lobby.create()
+
+      {:ok, _pid, details2} =
+        mk_start_params([1, 1]) |> Lobby.create()
+
+      list = Lobby.list()
+      assert map_size(list) == 2
+      assert is_map_key(list, details1.id)
+      assert is_map_key(list, details2.id)
     end
 
-    test "expand ally team config" do
-      {_sink_pid, id, _pid} = mk_lobby([1, 1])
-      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
-      config = mk_start_params([2, 2]).ally_team_config
-      Lobby.update_properties(id, "1234", %{ally_team_config: config})
-      Lobby.List.broadcast_updates()
+    @tag :capture_log
+    test "remove dead lobbies" do
+      creator_pid = start_supervised!({Task, fn -> :timer.sleep(:infinity) end})
 
-      assert_receive %{
-        event: :update_lobbies,
-        changes: %{^id => %{max_player_count: 4, player_count: 1}}
-      }
+      {:ok, _pid, details} =
+        mk_start_params([1, 1])
+        |> Map.put(:creator_pid, creator_pid)
+        |> Lobby.create()
+
+      id = details.id
+
+      %{^id => %{}} = Lobby.list()
+      Process.exit(creator_pid, :exit)
+      Polling.poll_until(&Lobby.list/0, &(&1 == %{}))
     end
 
-    test "ally team config change triggers player count change" do
-      {sink_pid, id, _pid} = mk_lobby([1, 1])
-      assert {_initial_counter, %{}} = Lobby.subscribe_updates()
-      {:ok, _lobby_pid, _details} = Lobby.join(id, %{id: "user2", name: "name-user2"}, sink_pid)
-      {:ok, _join_details} = Lobby.join_ally_team(id, "user2", 1)
-      Lobby.List.broadcast_updates()
-      assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 2}}}
+    test "update to lobbies reflected in list" do
+      {:ok, _pid, details} = mk_start_params([1, 1]) |> Lobby.create()
+      id = details.id
+      initial_list = Lobby.list()
 
-      config = mk_start_params([1]).ally_team_config
-      Lobby.update_properties(id, "1234", %{ally_team_config: config})
-      Lobby.List.broadcast_updates()
-      assert_receive %{event: :update_lobbies, changes: %{^id => %{player_count: 1}}}
+      {:ok, _lobby_pid, _join_details} = Lobby.join(details.id, mk_player("user2"))
+      {:ok, _team_details} = Lobby.join_ally_team(details.id, "user2", 1)
+      final_list = Polling.poll_until(&Lobby.list/0, &(&1[id].player_count == 2))
+      assert final_list[id].counter > initial_list[id].counter
     end
   end
 
-  defp overview_fixture do
-    %{
-      name: "lobby name",
-      player_count: 1,
-      max_player_count: 2,
-      map_name: "new map",
-      engine_version: "engine123",
-      game_version: "game123",
-      boss_enabled?: false
-    }
+  describe "subscription" do
+    test "subscribe gets the full list" do
+      {:ok, _pid, _details} = mk_start_params([1, 1]) |> Lobby.create()
+      list = Lobby.subscribe_updates()
+      assert list == Lobby.list()
+    end
+
+    test "new lobby are broadcasted" do
+      Lobby.subscribe_updates()
+      {:ok, _pid, details} = mk_start_params([1, 1]) |> Lobby.create()
+
+      assert_receive %{event: :add_lobby, overview: %LT.ListOverview{}, lobby_id: lobby_id}
+
+      assert lobby_id == details.id
+    end
+
+    test "lobby changes are broadcasted" do
+      {:ok, _pid, details} = mk_start_params([1, 1]) |> Lobby.create()
+      list = Lobby.subscribe_updates()
+      {:ok, _lobby_pid, _join_details} = Lobby.join(details.id, mk_player("user2"))
+      {:ok, _team_details} = Lobby.join_ally_team(details.id, "user2", 1)
+
+      id = details.id
+      assert_receive %{event: :update_lobby, changes: changes, counter: counter, lobby_id: ^id}
+      assert changes == %{player_count: 2}
+      assert counter > list[details.id].counter
+    end
+
+    test "get event when lobby dies" do
+      creator_pid = start_supervised!({Task, fn -> :timer.sleep(:infinity) end})
+
+      {:ok, _pid, details} =
+        mk_start_params([1, 1])
+        |> Map.put(:creator_pid, creator_pid)
+        |> Lobby.create()
+
+      Lobby.subscribe_updates()
+      Process.exit(creator_pid, :exit)
+
+      topic = list_topic()
+      id = details.id
+      assert_receive %{topic: ^topic, event: :remove_lobby, lobby_id: ^id}
+    end
+
+    test "monitors setup after list restart" do
+      creator_pid = start_supervised!({Task, fn -> :timer.sleep(:infinity) end})
+
+      {:ok, _pid, details} =
+        mk_start_params([1, 1])
+        |> Map.put(:creator_pid, creator_pid)
+        |> Lobby.create()
+
+      Lobby.subscribe_updates()
+
+      orig_list_pid = Process.whereis(Lobby.ListMonitor)
+      Process.exit(orig_list_pid, :kill)
+
+      Polling.poll_until(
+        fn -> Process.whereis(Lobby.ListMonitor) end,
+        &(&1 != nil and &1 != orig_list_pid)
+      )
+
+      Process.exit(creator_pid, :exit)
+
+      topic = list_topic()
+      id = details.id
+      assert_receive %{topic: ^topic, event: :remove_lobby, lobby_id: ^id}
+    end
+
+    test "can unsubscribe" do
+      Lobby.subscribe_updates()
+      {:ok, _pid, _details} = mk_start_params([1, 1]) |> Lobby.create()
+      topic = list_topic()
+      assert_receive %{topic: ^topic}
+
+      Lobby.unsubscribe_updates()
+      {:ok, _pid, _details} = mk_start_params([1, 1]) |> Lobby.create()
+      refute_receive %{topic: ^topic}
+    end
   end
 
   defp mk_start_params(teams) do
-    %{
-      creator_data: %{id: "1234", name: "name-1234"},
+    %LT.StartParams{
+      creator_data: %{id: @default_user_id, name: "name-#{@default_user_id}"},
       creator_pid: self(),
       name: "test create lobby",
       map_name: "irrelevant map name",
@@ -311,7 +167,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
         Enum.map(teams, fn max_team ->
           x = for _i <- 1..max_team, do: %{max_players: 1}
 
-          %{
+          %LT.AllyTeamConfig{
             max_teams: max_team,
             start_box: %{top: 0, left: 0, bottom: 1, right: 0.2},
             teams: x
@@ -320,14 +176,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
     }
   end
 
-  defp mk_lobby(team_config \\ [2, 2]) do
-    {:ok, sink_pid} = Task.start_link(:timer, :sleep, [:infinity])
-
-    {:ok, pid, %{id: id}} =
-      mk_start_params(team_config)
-      |> Map.replace!(:creator_pid, sink_pid)
-      |> Lobby.create()
-
-    {sink_pid, id, pid}
+  defp mk_player(user_id) do
+    %LT.PlayerJoinData{id: user_id, name: "name-#{user_id}"}
   end
 end

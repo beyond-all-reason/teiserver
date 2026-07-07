@@ -94,10 +94,6 @@ config :teiserver, TeiserverWeb.Endpoint,
       endpoint_defaults[:secret_key_base]
     )
 
-spring_listeners =
-  Application.get_env(:teiserver, Teiserver.SpringTcpServer)
-  |> Keyword.fetch!(:listeners)
-
 tei_defaults = Application.get_env(:teiserver, Teiserver)
 
 spring_listeners =
@@ -168,6 +164,16 @@ else
   config :teiserver, TeiserverWeb.Endpoint, https: nil
 end
 
+spring_defaults = Application.get_env(:teiserver, Teiserver.SpringTcpServer, false)
+
+config :teiserver, Teiserver.SpringTcpServer,
+  disable_startup:
+    Teiserver.ConfigHelpers.get_env(
+      "TEI_SPRING_IS_DISABLED",
+      spring_defaults[:disable_startup],
+      :bool
+    )
+
 config :teiserver, Teiserver.Account.Guardian,
   issuer: Teiserver.ConfigHelpers.get_env("TEI_GUARDIAN_ISSUER", "teiserver"),
   # the default is only there so we can run it easily
@@ -184,29 +190,30 @@ config :teiserver, Teiserver.OAuth,
       Application.get_env(:teiserver, Teiserver.OAuth)[:issuer] || "https://#{domain_name}"
 
 if Teiserver.ConfigHelpers.get_env("TEI_ENABLE_EMAIL_INTEGRATION", false, :bool) do
+  default_config = Application.get_env(:teiserver, Teiserver.Mailer)
+
   config :teiserver, Teiserver.Mailer,
-    adapter: Bamboo.SMTPAdapter,
+    # don't override the test adapter
+    adapter: default_config[:adapter] || Swoosh.Adapters.SMTP,
     contact_address:
       Teiserver.ConfigHelpers.get_env("TEI_CONTACT_EMAIL_ADDRESS", "info@#{domain_name}"),
     noreply_name: "Beyond All Reason",
     noreply_address:
       Teiserver.ConfigHelpers.get_env("TEI_NOREPLY_EMAIL_ADDRESS", "noreply@#{domain_name}"),
-    server: Teiserver.ConfigHelpers.get_env("TEI_SMTP_SERVER"),
-    hostname: Teiserver.ConfigHelpers.get_env("TEI_SMTP_HOSTNAME"),
-    # port: 1025,
+    relay: Teiserver.ConfigHelpers.get_env("TEI_SMTP_SERVER"),
     port: Teiserver.ConfigHelpers.get_env("TEI_SMTP_PORT", "587", :int),
     username: Teiserver.ConfigHelpers.get_env("TEI_SMTP_USERNAME"),
     password: Teiserver.ConfigHelpers.get_env("TEI_SMTP_PASSWORD"),
-    # tls: :if_available, # can be `:always` or `:never`
     # can be `:always` or `:never`
     tls: :always,
-    tls_verify:
-      if(Teiserver.ConfigHelpers.get_env("TEI_SMTP_TLS_VERIFY", true, :bool),
-        do: :verify_peer,
-        else: :verify_none
-      ),
-    # or {":system", ALLOWED_TLS_VERSIONS"} w/ comma seprated values (e.g. "tlsv1.1,tlsv1.2")
-    allowed_tls_versions: [:"tlsv1.2"],
+    tls_options: [
+      verify:
+        if(Teiserver.ConfigHelpers.get_env("TEI_SMTP_TLS_VERIFY", true, :bool),
+          do: :verify_peer,
+          else: :verify_none
+        ),
+      versions: [:"tlsv1.2"]
+    ],
     # can be `true`
     no_mx_lookups: false,
     # auth: :if_available # can be `always`. If your smtp relay requires authentication set it to `always`.
@@ -214,6 +221,11 @@ if Teiserver.ConfigHelpers.get_env("TEI_ENABLE_EMAIL_INTEGRATION", false, :bool)
 end
 
 log_root_path = Teiserver.ConfigHelpers.get_env("TEI_LOG_ROOT_PATH", "/tmp/teiserver")
+
+case System.get_env("TEI_LOG_LEVEL") do
+  nil -> nil
+  val -> config :logger, :level, String.to_existing_atom(val)
+end
 
 config :logger, :error_log, path: "#{log_root_path}/error.log"
 config :logger, :notice_log, path: "#{log_root_path}/notice.log"

@@ -137,7 +137,7 @@ defmodule TeiserverWeb.Moderation.BanController do
           |> List.flatten()
           |> Enum.map(fn %{user: user} -> user.id end)
           |> Enum.uniq()
-          |> Enum.map(fn userid -> Account.get_user_by_id(userid) end)
+          |> Enum.map(&Account.get_user!/1)
           |> Enum.reject(fn user ->
             Account.restricted?(user, ["Login", "All lobbies", "All chat"])
           end)

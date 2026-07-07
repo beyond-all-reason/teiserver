@@ -25,7 +25,7 @@
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
         <form
-          action={Routes.logging_aggregate_view_log_path(@conn, :perform_post)}
+          action={~p"/logging/aggregate_views/perform"}
           id="main-form"
           method="post"
         >

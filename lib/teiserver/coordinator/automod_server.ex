@@ -8,7 +8,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Moderation
   use GenServer
   require Logger
@@ -16,14 +15,14 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @tick_interval 60_000
 
-  @spec check_user(T.userid()) :: String.t()
+  @spec check_user(User.id()) :: String.t()
   def check_user(userid) do
     check_wrapper(userid)
   end
 
   @spec start_automod_server() :: :ok | {:failure, String.t()}
   def start_automod_server do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
+    case Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
       [{_pid, _val}] ->
         {:failure, "Already started"}
 
@@ -124,7 +123,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec init(map()) :: {:ok, map()}
   def init(_opts) do
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ServerRegistry,
       "AutomodServer",
       :automod
@@ -135,7 +134,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   # Internal functions
-  @spec check_wrapper(T.userid()) :: String.t()
+  @spec check_wrapper(User.id()) :: String.t()
   defp check_wrapper(userid) do
     user = Account.get_user(userid)
 
@@ -152,7 +151,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
       Auth.contributor?(user) ->
         "Developer account"
 
-      Enum.member?(user.roles, "Trusted") ->
+      Auth.trusted?(user) ->
         "Trusted account"
 
       true ->
@@ -160,7 +159,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
     end
   end
 
-  @spec do_check(T.userid() | User.t()) :: String.t()
+  @spec do_check(User.id() | User.t()) :: String.t()
   def do_check(userid) when is_integer(userid) do
     do_check(Account.get_user(userid))
   end
@@ -214,7 +213,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec get_automod_pid() :: pid() | nil
   def get_automod_pid do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
+    case Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
       [{pid, _val}] ->
         pid
 

@@ -67,18 +67,19 @@ defmodule Teiserver.Application do
         Teiserver.MetadataCache,
         concache_sup(:application_temp_cache),
         concache_sup(:config_user_cache),
+        Teiserver.General.RateLimit,
 
         # Teiserver stuff
         # Global/singleton registries
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ThrottleRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ConsulRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.BalancerRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueWaitRegistry]},
-        {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueMatchRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.ThrottleRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.ConsulRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.BalancerRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.QueueWaitRegistry]},
+        {Registry, [keys: :unique, members: :auto, name: Teiserver.QueueMatchRegistry]},
 
         # These are for tracking the number of servers on the local node
         {Registry, keys: :duplicate, name: Teiserver.LocalPoolRegistry},
@@ -238,7 +239,7 @@ defmodule Teiserver.Application do
       Application.get_env(:teiserver, Teiserver.SpringTcpServer)
       |> Keyword.fetch!(:listeners)
 
-    if Keyword.get(listeners, :disable_startup) != true do
+    if Application.get_env(:teiserver, Teiserver.SpringTcpServer)[:disable_startup] != true do
       listeners
       |> Keyword.get(transport_type, [])
       |> spring_server_listener_child(ref, transport_type)
@@ -246,16 +247,16 @@ defmodule Teiserver.Application do
   end
 
   # When the listener is not configured we dont start the listener
-  defp spring_server_listener_child(listener_opts, _ref, _transport)
-       when listener_opts in [nil, false, []],
-       do: nil
+  def spring_server_listener_child(listener_opts, _ref, _transport)
+      when listener_opts in [nil, false, []],
+      do: nil
 
-  defp spring_server_listener_child(listener_opts, ref, :tcp) when is_list(listener_opts) do
+  def spring_server_listener_child(listener_opts, ref, :tcp) when is_list(listener_opts) do
     listener_opts = Map.new(listener_opts)
     :ranch.child_spec(ref, :ranch_tcp, listener_opts, Teiserver.SpringTcpServer, [])
   end
 
-  defp spring_server_listener_child(listener_opts, ref, :tls) when is_list(listener_opts) do
+  def spring_server_listener_child(listener_opts, ref, :tls) when is_list(listener_opts) do
     listener_opts = Map.new(listener_opts)
     :ranch.child_spec(ref, :ranch_ssl, listener_opts, Teiserver.SpringTcpServer, [])
   end

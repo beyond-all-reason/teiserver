@@ -26,7 +26,7 @@
       <%= if assigns[:user].smurf_of_id do %>
         {link(raw("<i class='far fa-fw fa-link-slash'></i> Clear smurf link"),
           to: ~p"/teiserver/admin/users/cancel_smurf_mark/#{@user.id}",
-          method: :delete,
+          method: "delete",
           class: "btn btn-outline-warning"
         )}
       <% end %>

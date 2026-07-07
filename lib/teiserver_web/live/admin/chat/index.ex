@@ -108,6 +108,8 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
       "timeframe" => "24 hours",
       "mode" => "Lobby",
       "term" => "",
+      "case-sensitive" => "false",
+      "whole-word" => "false",
       "username" => "",
       "user-raw-filter" => "",
       "order" => "Newest first",
@@ -140,6 +142,11 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
         ]
       end
 
+    term =
+      {filters["term"],
+       case_sensitive: filters["case-sensitive"] == "true",
+       whole_word: filters["whole-word"] == "true"}
+
     messages =
       case mode do
         nil ->
@@ -151,7 +158,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
               user_id_in: filters["userids"],
               user_id_not_in: excluded_ids,
               inserted_after: inserted_after,
-              term: filters["term"]
+              term: term
             ],
             limit: 100,
             order_by: filters["order"]
@@ -163,7 +170,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
               user_id_in: filters["userids"],
               user_id_not_in: excluded_ids,
               inserted_after: inserted_after,
-              term: filters["term"]
+              term: term
             ],
             limit: 100,
             order_by: filters["order"]
@@ -175,7 +182,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
               user_id_in: filters["userids"],
               user_id_not_in: excluded_ids,
               inserted_after: inserted_after,
-              term: filters["term"]
+              term: term
             ],
             limit: 100,
             order_by: filters["order"]
@@ -186,7 +193,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
             search: [
               member_id_in: filters["userids"],
               inserted_after: inserted_after,
-              term: filters["term"]
+              term: term
             ],
             limit: 100,
             preload: [:users],

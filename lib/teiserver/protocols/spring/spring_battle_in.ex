@@ -3,6 +3,7 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   alias Teiserver.Lobby
+  alias Teiserver.Lobby.LobbyLib
   alias Teiserver.Protocols.SpringIn
   require Logger
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
@@ -10,11 +11,17 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, map()) :: map()
   def do_handle("update_lobby_title", new_name, msg_id, state) do
-    if Lobby.allow?(state.userid, :update_lobby_title, state.lobby_id) do
-      Battle.rename_lobby(state.lobby_id, new_name, nil)
-      reply(:spring, :okay, "c.battle.update_lobby_title", msg_id, state)
-    else
-      state
+    case LobbyLib.validate_name(new_name) do
+      {:error, error} ->
+        reply(:spring, :no, {"c.battle.update_lobby_title", error}, msg_id, state)
+
+      :ok ->
+        if Lobby.allow?(state.userid, :update_lobby_title, state.lobby_id) do
+          Battle.rename_lobby(state.lobby_id, new_name, nil)
+          reply(:spring, :okay, "c.battle.update_lobby_title", msg_id, state)
+        else
+          state
+        end
     end
   end
 

@@ -23,25 +23,25 @@
 
         {render(
           "form.html",
-          Map.put(assigns, :action, Routes.moderation_action_path(@conn, :update, @action))
+          Map.put(assigns, :action, ~p"/moderation/action/#{@action.id}")
         )}
 
         <hr />
         {link(raw("<i class='fa-brands fa-fw fa-discord'></i>&nbsp; Re post to discord"),
           to: ~p"/moderation/action/re-post/#{@action.id}",
-          method: :put,
+          method: "put",
           data: [confirm: "Are you sure (this is only needed if you deleted the post)?"],
           class: "btn btn-warning"
         )} &nbsp;&nbsp;&nbsp; {link(
           raw("<i class='fa-solid fa-fw fa-octagon'></i>&nbsp; Halt action"),
           to: ~p"/moderation/action/halt/#{@action.id}",
-          method: :put,
+          method: "put",
           data: [confirm: "Are you sure?"],
           class: "btn btn-danger"
         )} &nbsp;&nbsp;&nbsp; {link(
           raw("<i class='fa-solid fa-fw fa-trash'></i>&nbsp; Delete action"),
           to: ~p"/moderation/action/#{@action.id}",
-          method: :delete,
+          method: "delete",
           data: [confirm: "Are you sure?"],
           class: "btn btn-danger2"
         )}

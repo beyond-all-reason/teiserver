@@ -10,7 +10,7 @@
         icon: Teiserver.Account.RatingLib.icon(),
         name: "ratings",
         text: "Ratings",
-        link: Routes.ts_reports_rating_path(@conn, :distribution_table)
+        link: ~p"/teiserver/reports/ratings/distribution_table"
       )}
     <% end %>
 
@@ -29,7 +29,7 @@
       icon: "fa-solid fa-download",
       name: "exports",
       text: "Data exports",
-      link: Routes.ts_reports_exports_path(@conn, :index)
+      link: ~p"/teiserver/reports/exports"
     )}
   <% end %>
 
@@ -43,7 +43,7 @@
       icon: Teiserver.Account.TimeSpentReport.icon(),
       name: "time_spent",
       text: "Time spent",
-      link: Routes.ts_reports_report_path(@conn, :show, "time_spent")
+      link: ~p"/teiserver/reports/show/time_spent"
     )}
   <% end %>
 
@@ -53,7 +53,7 @@
       icon: Teiserver.Account.RelationshipReport.icon(),
       name: "relationships",
       text: "Relationships",
-      link: Routes.ts_reports_report_path(@conn, :show, "relationships")
+      link: ~p"/teiserver/reports/show/relationships"
     )}
   <% end %>
 
@@ -63,7 +63,7 @@
       icon: Teiserver.Account.TimeCompareReport.icon(),
       name: "time_compare",
       text: "Time compare",
-      link: Routes.ts_reports_report_path(@conn, :show, "time_compare")
+      link: ~p"/teiserver/reports/show/time_compare"
     )}
   <% end %>
 </div>
@@ -79,7 +79,7 @@
       icon: Teiserver.Account.ActiveReport.icon(),
       name: "active",
       text: "Active",
-      link: Routes.ts_reports_report_path(@conn, :show, "active")
+      link: ~p"/teiserver/reports/show/active"
     )}
   <% end %>
 
@@ -89,7 +89,7 @@
       icon: Teiserver.Account.UserAgeReport.icon(),
       name: "user_age",
       text: "User age",
-      link: Routes.ts_reports_report_path(@conn, :show, "user_age")
+      link: ~p"/teiserver/reports/show/user_age"
     )}
   <% end %>
 
@@ -99,7 +99,7 @@
       icon: Teiserver.Account.VerifiedReport.icon(),
       name: "verified",
       text: "Verified",
-      link: Routes.ts_reports_report_path(@conn, :show, "verified")
+      link: ~p"/teiserver/reports/show/verified"
     )}
   <% end %>
 
@@ -109,7 +109,7 @@
       icon: Teiserver.Account.RetentionReport.icon(),
       name: "retention",
       text: "Retention",
-      link: Routes.ts_reports_report_path(@conn, :show, "retention")
+      link: ~p"/teiserver/reports/show/retention"
     )}
   <% end %>
 
@@ -119,7 +119,7 @@
       icon: Teiserver.Account.PopulationReport.icon(),
       name: "population",
       text: "Population",
-      link: Routes.ts_reports_report_path(@conn, :show, "population")
+      link: ~p"/teiserver/reports/show/population"
     )}
   <% end %>
 
@@ -129,7 +129,7 @@
       icon: Teiserver.Account.NewUserFunnelReport.icon(),
       name: "new_user_funnel",
       text: "New user funnel",
-      link: Routes.ts_reports_report_path(@conn, :show, "new_user_funnel")
+      link: ~p"/teiserver/reports/show/new_user_funnel"
     )}
   <% end %>
 
@@ -139,7 +139,7 @@
       icon: Teiserver.Account.RecordsReport.icon(),
       name: "records",
       text: "Records",
-      link: Routes.ts_reports_report_path(@conn, :show, "records")
+      link: ~p"/teiserver/reports/show/records"
     )}
   <% end %>
 
@@ -149,7 +149,7 @@
       icon: Teiserver.Account.NewSmurfReport.icon(),
       name: "new_smurf",
       text: "New smurfs",
-      link: Routes.ts_reports_report_path(@conn, :show, "new_smurf")
+      link: ~p"/teiserver/reports/show/new_smurf"
     )}
   <% end %>
 
@@ -159,7 +159,7 @@
       icon: Teiserver.Account.BanEvasionReport.icon(),
       name: "ban_evasion",
       text: "Ban evasion",
-      link: Routes.ts_reports_report_path(@conn, :show, "ban_evasion")
+      link: ~p"/teiserver/reports/show/ban_evasion"
     )}
   <% end %>
 
@@ -169,7 +169,7 @@
       icon: Teiserver.Account.GrowthReport.icon(),
       name: "growth",
       text: "Growth",
-      link: Routes.ts_reports_report_path(@conn, :show, "growth")
+      link: ~p"/teiserver/reports/show/growth"
     )}
   <% end %>
 
@@ -179,7 +179,7 @@
       icon: Teiserver.Account.WeekOnWeekReport.icon(),
       name: "week_on_week",
       text: "Week on Week",
-      link: Routes.ts_reports_report_path(@conn, :show, "week_on_week")
+      link: ~p"/teiserver/reports/show/week_on_week"
     )}
   <% end %>
 </div>
@@ -195,7 +195,7 @@
       icon: Teiserver.Account.AccoladeReport.icon(),
       name: "accolades",
       text: "Accolades",
-      link: Routes.ts_reports_report_path(@conn, :show, "accolades")
+      link: ~p"/teiserver/reports/show/accolades"
     )}
   <% end %>
 
@@ -205,7 +205,7 @@
       icon: Teiserver.Account.LeaderboardReport.icon(),
       name: "leaderboard",
       text: "Leaderboard",
-      link: Routes.ts_reports_report_path(@conn, :show, "leaderboard")
+      link: ~p"/teiserver/reports/show/leaderboard"
     )}
   <% end %>
 
@@ -215,7 +215,7 @@
       icon: Teiserver.Account.ReviewReport.icon(),
       name: "review",
       text: "Review",
-      link: Routes.ts_reports_report_path(@conn, :show, "review")
+      link: ~p"/teiserver/reports/show/review"
     )}
   <% end %>
 
@@ -225,7 +225,7 @@
       icon: Teiserver.Account.OpenSkillReport.icon(),
       name: "open_skill",
       text: "Open Skill",
-      link: Routes.ts_reports_report_path(@conn, :show, "open_skill")
+      link: ~p"/teiserver/reports/show/open_skill"
     )}
   <% end %>
 
@@ -235,7 +235,7 @@
       icon: Teiserver.Game.MappingReport.icon(),
       name: "mapping",
       text: "Mapping",
-      link: Routes.ts_reports_report_path(@conn, :show, "mapping")
+      link: ~p"/teiserver/reports/show/mapping"
     )}
   <% end %>
 
@@ -245,7 +245,7 @@
       icon: Teiserver.Moderation.ActivityReport.icon(),
       name: "moderation_activity",
       text: "Moderation",
-      link: Routes.ts_reports_report_path(@conn, :show, "moderation_activity")
+      link: ~p"/teiserver/reports/show/moderation_activity"
     )}
   <% end %>
 

@@ -131,15 +131,6 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "teiserver.Require Chobby login",
-      section: "Registrations",
-      type: "boolean",
-      permissions: ["Server"],
-      description: "Prevents users logging in with anything other than Chobby",
-      default: false
-    })
-
-    add_site_config_type(%{
       key: "teiserver.Manual validation email address",
       section: "Registrations",
       type: "string",
@@ -190,21 +181,20 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "teiserver.Require HW data to play",
-      section: "Moderation",
-      type: "boolean",
-      permissions: ["Admin"],
-      description: "Prevents someone from being a player if they don't have a HW hash yet.",
-      default: false
-    })
-
-    add_site_config_type(%{
       key: "teiserver.Require Chobby data to play",
       section: "Moderation",
       type: "boolean",
       permissions: ["Admin"],
       description: "Prevents someone from being a player if they don't have a Chobby key yet.",
       default: false
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Email domain blocklist URL",
+      section: "Moderation",
+      type: "string",
+      permissions: ["Moderator"],
+      description: "URL of raw, newline-separated file with blocked email domains"
     })
 
     add_site_config_type(%{
@@ -605,6 +595,15 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["Admin"],
       description: "If enabled unranked lobbies can have rating and rank restrictions set.",
       default: true
+    })
+
+    add_site_config_type(%{
+      key: "lobby.Maximum lobby name length",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["Admin"],
+      description: "Maximum length of lobby name that can be provided by the user.",
+      default: 70
     })
   end
 

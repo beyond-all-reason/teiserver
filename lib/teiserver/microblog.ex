@@ -3,7 +3,7 @@ defmodule Teiserver.Microblog do
   Main point of usage for the microblog system
   """
 
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
   alias Teiserver.Microblog.PollResponse
   alias Teiserver.Microblog.PollResponseLib
   alias Teiserver.Microblog.Post
@@ -175,7 +175,7 @@ defmodule Teiserver.Microblog do
   @spec list_poll_responses(list) :: [PollResponse]
   defdelegate list_poll_responses(args), to: PollResponseLib
 
-  @spec get_poll_response(T.userid(), non_neg_integer()) :: PollResponse.t() | nil
+  @spec get_poll_response(User.id(), non_neg_integer()) :: PollResponse.t() | nil
   defdelegate get_poll_response(user_id, post_id), to: PollResponseLib
 
   @spec create_poll_response() :: {:ok, PollResponse} | {:error, Ecto.Changeset}

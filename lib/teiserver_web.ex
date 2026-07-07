@@ -41,7 +41,6 @@ defmodule TeiserverWeb do
 
       alias Bodyguard.Plug.Authorize
 
-      alias TeiserverWeb.Router.Helpers, as: Routes
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
 
       unquote(verified_routes())
@@ -76,7 +75,6 @@ defmodule TeiserverWeb do
 
       import TeiserverWeb.ErrorHelpers
       use Gettext, backend: TeiserverWeb.Gettext
-      alias TeiserverWeb.Router.Helpers, as: Routes
 
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
 
@@ -142,7 +140,6 @@ defmodule TeiserverWeb do
       defguard is_connected?(socket) when socket.transport_pid != nil
       def ok(socket), do: {:ok, socket}
       def noreply(socket), do: {:noreply, socket}
-      unquote(verified_routes())
       unquote(view_helpers())
       unquote(html_helpers())
     end
@@ -224,7 +221,6 @@ defmodule TeiserverWeb do
       import Teiserver.Account.AuthLib, only: [add_permission_set: 3]
 
       import Teiserver.Config, only: [add_site_config_type: 1]
-      import Teiserver.Logging.AuditLogLib, only: [add_audit_types: 1]
     end
   end
 
@@ -263,7 +259,6 @@ defmodule TeiserverWeb do
 
       import TeiserverWeb.ErrorHelpers
       import TeiserverWeb.Gettext
-      alias TeiserverWeb.Router.Helpers, as: Routes
     end
   end
 

@@ -45,7 +45,7 @@
               name: "page_view",
               label: "Web",
               active: @active,
-              url: Routes.logging_page_view_log_path(@conn, :index),
+              url: ~p"/logging/page_views",
               icon: Teiserver.Logging.PageViewLogLib.icon()
             )}
           <% end %>
@@ -55,7 +55,7 @@
               name: "aggregate",
               label: "Aggregate web",
               active: @active,
-              url: Routes.logging_aggregate_view_log_path(@conn, :index),
+              url: ~p"/logging/aggregate_views",
               icon: Teiserver.Logging.AggregateViewLogLib.icon()
             )}
           <% end %>
@@ -65,7 +65,7 @@
               name: "audit",
               label: "Audit",
               active: @active,
-              url: Routes.logging_audit_log_path(@conn, :index),
+              url: ~p"/logging/audit",
               icon: Teiserver.Logging.AuditLogLib.icon()
             )}
           <% end %>

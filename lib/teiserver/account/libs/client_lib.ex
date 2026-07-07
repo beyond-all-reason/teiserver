@@ -3,6 +3,7 @@ defmodule Teiserver.Account.ClientLib do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Data.Types, as: T
 
@@ -24,14 +25,14 @@ defmodule Teiserver.Account.ClientLib do
   end
 
   @spec get_client_by_id(nil) :: nil
-  @spec get_client_by_id(T.userid()) :: nil | T.client()
+  @spec get_client_by_id(User.id()) :: nil | T.client()
   def get_client_by_id(nil), do: nil
 
   def get_client_by_id(userid) do
     call_client(userid, :get_client_state)
   end
 
-  @spec get_clients([T.userid()]) :: list(T.client())
+  @spec get_clients([User.id()]) :: list(T.client())
   def get_clients([]), do: []
 
   def get_clients(id_list) do
@@ -39,9 +40,9 @@ defmodule Teiserver.Account.ClientLib do
     |> list_clients()
   end
 
-  @spec list_client_ids() :: [T.userid()]
+  @spec list_client_ids() :: [User.id()]
   def list_client_ids do
-    Horde.Registry.select(Teiserver.ClientRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Registry.select(Teiserver.ClientRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_clients() :: [T.client()]
@@ -50,7 +51,7 @@ defmodule Teiserver.Account.ClientLib do
     |> list_clients()
   end
 
-  @spec list_clients([T.userid()]) :: [T.client()]
+  @spec list_clients([User.id()]) :: [T.client()]
   def list_clients(nil), do: []
 
   def list_clients(id_list) do
@@ -60,7 +61,7 @@ defmodule Teiserver.Account.ClientLib do
   end
 
   # Party
-  @spec move_client_to_party(T.userid(), T.party_id()) :: :ok | nil
+  @spec move_client_to_party(User.id(), T.party_id()) :: :ok | nil
   def move_client_to_party(userid, party_id) do
     call_client(userid, {:change_party, party_id})
   end
@@ -71,12 +72,12 @@ defmodule Teiserver.Account.ClientLib do
     cast_client(userid, {:update_values, partial_client})
   end
 
-  @spec merge_update_client(T.userid(), map()) :: nil | :ok
+  @spec merge_update_client(User.id(), map()) :: nil | :ok
   def merge_update_client(userid, partial_client) do
     cast_client(userid, {:update_values, partial_client})
   end
 
-  @spec update_client(T.userid(), map()) :: nil | :ok
+  @spec update_client(User.id(), map()) :: nil | :ok
   def update_client(userid, partial_client) do
     cast_client(userid, {:update_values, partial_client})
   end
@@ -198,17 +199,17 @@ defmodule Teiserver.Account.ClientLib do
     server_pid
   end
 
-  @spec client_exists?(T.userid()) :: pid() | boolean
+  @spec client_exists?(User.id()) :: pid() | boolean
   def client_exists?(userid) do
-    case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
+    case Registry.lookup(Teiserver.ClientRegistry, userid) do
       [{_pid, _value}] -> true
       _other -> false
     end
   end
 
-  @spec get_client_pid(T.userid()) :: pid() | nil
+  @spec get_client_pid(User.id()) :: pid() | nil
   def get_client_pid(userid) do
-    case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
+    case Registry.lookup(Teiserver.ClientRegistry, userid) do
       [{pid, _value}] -> pid
       _other -> nil
     end
@@ -216,10 +217,7 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec count_client() :: non_neg_integer()
   def count_client do
-    case Horde.Registry.count(Teiserver.ClientRegistry) do
-      :undefined -> 0
-      n -> n
-    end
+    Registry.count(Teiserver.ClientRegistry)
   end
 
   # this isn't terribly efficient, but I'm not sure how
@@ -231,11 +229,11 @@ defmodule Teiserver.Account.ClientLib do
       ["SPADS v", "SpringLobbyMonitor", "Teiserver Internal Client", "SLTS Client d"]
       |> Enum.map(fn client_name -> {:"=/=", :"$3", client_name} end)
 
-    Horde.Registry.select(Teiserver.ClientRegistry, [{{:_, :_, :"$3"}, guards, [{{:"$3"}}]}])
+    Registry.select(Teiserver.ClientRegistry, [{{:_, :_, :"$3"}, guards, [{{:"$3"}}]}])
     |> Enum.count()
   end
 
-  @spec cast_client(T.userid(), any) :: any | nil
+  @spec cast_client(User.id(), any) :: any | nil
   def cast_client(userid, msg) do
     case get_client_pid(userid) do
       nil ->
@@ -247,7 +245,7 @@ defmodule Teiserver.Account.ClientLib do
     end
   end
 
-  @spec call_client(T.userid(), any) :: any | nil
+  @spec call_client(User.id(), any) :: any | nil
   def call_client(userid, message) when is_integer(userid) do
     case get_client_pid(userid) do
       nil ->
@@ -265,7 +263,7 @@ defmodule Teiserver.Account.ClientLib do
     end
   end
 
-  @spec stop_client_server(T.userid()) :: :ok | nil
+  @spec stop_client_server(User.id()) :: :ok | nil
   def stop_client_server(userid) do
     case get_client_pid(userid) do
       nil ->
@@ -279,7 +277,7 @@ defmodule Teiserver.Account.ClientLib do
 
   # Used in tests to update a client based on user data
   # not intended to be used as part of standard operation
-  @spec refresh_client(T.userid()) :: map()
+  @spec refresh_client(User.id()) :: map()
   def refresh_client(userid) do
     user = Account.get_user_by_id(userid)
     stats = Account.get_user_stat_data(user.id)

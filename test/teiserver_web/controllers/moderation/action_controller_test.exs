@@ -24,13 +24,13 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
 
   describe "index" do
     test "lists all actions", %{conn: conn} do
-      conn = get(conn, Routes.moderation_action_path(conn, :index))
+      conn = get(conn, ~p"/moderation/action")
       assert html_response(conn, 200) =~ "Listing Actions"
 
       # Now with an action present
       ModerationTestLib.action_fixture()
 
-      conn = get(conn, Routes.moderation_action_path(conn, :index))
+      conn = get(conn, ~p"/moderation/action")
       assert html_response(conn, 200) =~ "Listing Actions"
     end
 
@@ -38,7 +38,8 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       conn =
         post(
           conn,
-          Routes.moderation_action_path(conn, :index, %{"order" => "Latest expiry first"})
+          ~p"/moderation/action/search",
+          action: %{"order" => "Latest expiry first"}
         )
 
       assert html_response(conn, 200) =~ "Listing Actions"
@@ -48,7 +49,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       action = ModerationTestLib.action_fixture()
 
       conn =
-        get(conn, Routes.moderation_action_path(conn, :index) <> "?target_id=#{action.target_id}")
+        get(conn, ~p"/moderation/action" <> "?target_id=#{action.target_id}")
 
       assert html_response(conn, 200) =~ "Listing Actions"
     end
@@ -56,7 +57,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
 
   describe "new action" do
     test "renders select form", %{conn: conn} do
-      conn = get(conn, Routes.moderation_action_path(conn, :new))
+      conn = get(conn, ~p"/moderation/action/new")
       assert html_response(conn, 200) =~ "Select user:"
     end
 
@@ -66,7 +67,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       conn =
         get(
           conn,
-          Routes.moderation_action_path(conn, :new_with_user) <> "?teiserver_user=%23#{user.id}"
+          ~p"/moderation/action/new_with_user?teiserver_user=#{user.id}"
         )
 
       assert html_response(conn, 200) =~ "Adding action against"
@@ -78,9 +79,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       user = GeneralTestLib.make_user()
 
       conn =
-        post(conn, Routes.moderation_action_path(conn, :create),
-          action: Map.put(@create_attrs, "target_id", user.id)
-        )
+        post(conn, ~p"/moderation/action/", action: Map.put(@create_attrs, "target_id", user.id))
 
       assert redirected_to(conn) == ~p"/moderation/action"
 
@@ -92,9 +91,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       user = GeneralTestLib.make_user()
 
       conn =
-        post(conn, Routes.moderation_action_path(conn, :create),
-          action: Map.put(@invalid_attrs, "target_id", user.id)
-        )
+        post(conn, ~p"/moderation/action/", action: Map.put(@invalid_attrs, "target_id", user.id))
 
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
@@ -103,13 +100,13 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   describe "show action" do
     test "renders show page", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
-      resp = get(conn, Routes.moderation_action_path(conn, :show, action))
+      resp = get(conn, ~p"/moderation/action/#{action.id}")
       assert html_response(resp, 200) =~ "Edit action"
     end
 
     test "renders show nil item", %{conn: conn} do
       assert_error_sent 404, fn ->
-        get(conn, Routes.moderation_action_path(conn, :show, -1))
+        get(conn, ~p"/moderation/action/-1")
       end
     end
   end
@@ -117,13 +114,13 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   describe "edit action" do
     test "renders form for editing nil", %{conn: conn} do
       assert_error_sent 404, fn ->
-        get(conn, Routes.moderation_action_path(conn, :edit, -1))
+        get(conn, ~p"/moderation/action/-1/edit")
       end
     end
 
     test "renders form for editing chosen action", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
-      conn = get(conn, Routes.moderation_action_path(conn, :edit, action))
+      conn = get(conn, ~p"/moderation/action/#{action.id}/edit")
       assert html_response(conn, 200) =~ "Save changes"
     end
   end
@@ -133,11 +130,11 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       action = ModerationTestLib.action_fixture()
 
       conn =
-        put(conn, Routes.moderation_action_path(conn, :update, action), action: @update_attrs)
+        put(conn, ~p"/moderation/action/#{action.id}", action: @update_attrs)
 
-      assert redirected_to(conn) == Routes.moderation_action_path(conn, :show, action)
+      assert redirected_to(conn) == ~p"/moderation/action/#{action.id}"
 
-      conn = get(conn, Routes.moderation_action_path(conn, :show, action))
+      conn = get(conn, ~p"/moderation/action/#{action.id}")
       assert html_response(conn, 200) =~ "some updated"
     end
 
@@ -145,14 +142,14 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       action = ModerationTestLib.action_fixture()
 
       conn =
-        put(conn, Routes.moderation_action_path(conn, :update, action), action: @invalid_attrs)
+        put(conn, ~p"/moderation/action/#{action.id}", action: @invalid_attrs)
 
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
 
     test "renders errors when nil object", %{conn: conn} do
       assert_error_sent 404, fn ->
-        put(conn, Routes.moderation_action_path(conn, :update, -1), action: @invalid_attrs)
+        put(conn, ~p"/moderation/action/-1", action: @invalid_attrs)
       end
     end
   end
@@ -162,8 +159,8 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       action = ModerationTestLib.action_fixture()
       assert NaiveDateTime.compare(action.expires, NaiveDateTime.utc_now()) == :gt
 
-      conn = put(conn, Routes.moderation_action_path(conn, :halt, action.id))
-      assert redirected_to(conn) == Routes.moderation_action_path(conn, :show, action)
+      conn = put(conn, ~p"/moderation/action/halt/#{action.id}")
+      assert redirected_to(conn) == ~p"/moderation/action/#{action.id}"
 
       action = Moderation.get_action!(action.id)
       assert NaiveDateTime.compare(action.expires, NaiveDateTime.utc_now()) == :lt
@@ -171,7 +168,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
 
     test "renders error for halting nil item", %{conn: conn} do
       assert_error_sent 404, fn ->
-        put(conn, Routes.moderation_action_path(conn, :halt, -1))
+        put(conn, ~p"/moderation/action/halt/-1")
       end
     end
   end

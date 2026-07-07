@@ -24,7 +24,7 @@
         <hr />
         {link(raw("<i class='far fa-fw fa-trash'></i> Delete"),
           to: ~p"/admin/discord_channels/#{@discord_channel}",
-          method: :delete,
+          method: "delete",
           data: [confirm: "Are you sure?"],
           class: "btn btn-danger btn-outline"
         )}

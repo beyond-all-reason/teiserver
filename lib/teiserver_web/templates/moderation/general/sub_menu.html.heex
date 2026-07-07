@@ -24,7 +24,7 @@
             name: "reports",
             label: "Reports",
             active: @active,
-            url: Routes.moderation_report_path(@conn, :index),
+            url: ~p"/moderation/report",
             icon: Teiserver.Moderation.ReportLib.icon()
           )}
 
@@ -32,7 +32,7 @@
             name: "actions",
             label: "Actions",
             active: @active,
-            url: Routes.moderation_action_path(@conn, :index),
+            url: ~p"/moderation/action",
             icon: Teiserver.Moderation.ActionLib.icon()
           )}
 
@@ -40,7 +40,7 @@
             name: "bans",
             label: "Bans",
             active: @active,
-            url: Routes.moderation_ban_path(@conn, :index),
+            url: ~p"/moderation/ban",
             icon: Teiserver.Moderation.BanLib.icon()
           )}
         </div>

@@ -89,7 +89,7 @@ defmodule Teiserver.Battle.LobbyIndexThrottle do
     send(self(), :startup)
     :timer.send_interval(@update_interval, self(), :tick)
 
-    Horde.Registry.register(
+    Registry.register(
       Teiserver.ThrottleRegistry,
       "LobbyIndexThrottle",
       :index

@@ -15,6 +15,7 @@ defmodule Teiserver.Account.PartyLib do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Party
+  alias Teiserver.Account.User
   alias Teiserver.Chat
   alias Teiserver.Data.Types, as: T
 
@@ -46,7 +47,7 @@ defmodule Teiserver.Account.PartyLib do
 
   @spec party_exists?(T.party_id()) :: boolean()
   def party_exists?(party_id) do
-    case Horde.Registry.lookup(Teiserver.PartyRegistry, party_id) do
+    case Registry.lookup(Teiserver.PartyRegistry, party_id) do
       [{_pid, _value}] -> true
       _other -> false
     end
@@ -54,7 +55,7 @@ defmodule Teiserver.Account.PartyLib do
 
   @spec list_party_ids() :: [T.party_id()]
   def list_party_ids do
-    Horde.Registry.select(Teiserver.PartyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    Registry.select(Teiserver.PartyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_parties() :: [T.party()]
@@ -70,7 +71,7 @@ defmodule Teiserver.Account.PartyLib do
   end
 
   # Create
-  @spec create_party(T.userid()) :: T.party()
+  @spec create_party(User.id()) :: T.party()
   def create_party(nil), do: nil
 
   def create_party(leader_id) do
@@ -86,32 +87,32 @@ defmodule Teiserver.Account.PartyLib do
   end
 
   # Members
-  @spec create_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  @spec create_party_invite(T.party_id(), User.id()) :: :ok | nil
   def create_party_invite(party_id, userid) when is_integer(userid) do
     cast_party(party_id, {:create_invite, userid})
   end
 
-  @spec cancel_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  @spec cancel_party_invite(T.party_id(), User.id()) :: :ok | nil
   def cancel_party_invite(party_id, userid) when is_integer(userid) do
     cast_party(party_id, {:cancel_invite, userid})
   end
 
-  @spec accept_party_invite(T.party_id(), T.userid()) :: {true, map()} | {false, String.t()} | nil
+  @spec accept_party_invite(T.party_id(), User.id()) :: {true, map()} | {false, String.t()} | nil
   def accept_party_invite(party_id, userid) when is_integer(userid) do
     call_party(party_id, {:accept_invite, userid})
   end
 
-  @spec leave_party(T.party_id(), T.userid()) :: :ok | nil
+  @spec leave_party(T.party_id(), User.id()) :: :ok | nil
   def leave_party(party_id, userid) when is_integer(userid) do
     cast_party(party_id, {:member_leave, userid})
   end
 
-  @spec kick_user_from_party(T.party_id(), T.userid()) :: :ok | nil
+  @spec kick_user_from_party(T.party_id(), User.id()) :: :ok | nil
   def kick_user_from_party(party_id, userid) when is_integer(userid) do
     cast_party(party_id, {:kick_member, userid})
   end
 
-  @spec move_user_to_party(T.party_id(), T.userid()) :: :ok | nil
+  @spec move_user_to_party(T.party_id(), User.id()) :: :ok | nil
   def move_user_to_party(party_id, userid) when is_integer(userid) do
     cast_party(party_id, {:add_member, userid})
   end
@@ -145,7 +146,7 @@ defmodule Teiserver.Account.PartyLib do
 
   @spec get_party_pid(T.party_id()) :: pid() | nil
   def get_party_pid(party_id) do
-    case Horde.Registry.lookup(Teiserver.PartyRegistry, party_id) do
+    case Registry.lookup(Teiserver.PartyRegistry, party_id) do
       [{pid, _value}] -> pid
       _other -> nil
     end
@@ -177,7 +178,7 @@ defmodule Teiserver.Account.PartyLib do
     end
   end
 
-  @spec say(T.userid(), T.party_id(), String.t()) :: :ok | nil
+  @spec say(User.id(), T.party_id(), String.t()) :: :ok | nil
   def say(userid, party_id, msg) do
     case party_exists?(party_id) do
       false -> nil
@@ -185,7 +186,7 @@ defmodule Teiserver.Account.PartyLib do
     end
   end
 
-  @spec do_say(T.userid(), T.party_id(), String.t()) :: :ok | nil
+  @spec do_say(User.id(), T.party_id(), String.t()) :: :ok | nil
   defp do_say(userid, party_id, msg) do
     msg = trim_message(msg)
 
@@ -210,7 +211,7 @@ defmodule Teiserver.Account.PartyLib do
     end
   end
 
-  @spec persist_message(T.userid(), String.t(), T.party_id()) :: any
+  @spec persist_message(User.id(), String.t(), T.party_id()) :: any
   def persist_message(userid, msg, party_id) do
     Chat.create_party_message(%{
       content: msg,

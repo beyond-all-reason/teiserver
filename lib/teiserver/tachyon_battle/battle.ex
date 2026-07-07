@@ -1,6 +1,8 @@
 defmodule Teiserver.TachyonBattle.Battle do
   @moduledoc false
+  alias Teiserver.Account.User
   alias Teiserver.Autohost
+  alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Battle
   alias Teiserver.TachyonBattle.Registry
   alias Teiserver.TachyonBattle.Types, as: T
@@ -20,7 +22,7 @@ defmodule Teiserver.TachyonBattle.Battle do
           autohost_id: Autohost.id(),
           autohost_pid: pid(),
           autohost_timeout: timeout(),
-          start_script: Autohost.start_script(),
+          start_script: AT.StartScript.t(),
           # initialised: the battle is waiting for players to join and start the match
           # finished: the battle is over, but there are still some player in the match,
           # maybe looking at stats or whatever
@@ -32,7 +34,7 @@ defmodule Teiserver.TachyonBattle.Battle do
           # or do some actions.
           # This is not limited only to players *currently* in the battle
           participants: %{
-            Teiserver.Data.Types.userid() => %{
+            User.id() => %{
               name: String.t(),
               password: String.t()
             }
@@ -76,7 +78,7 @@ defmodule Teiserver.TachyonBattle.Battle do
 
   @spec add_player(
           T.id(),
-          Teiserver.Data.Types.userid(),
+          User.id(),
           name :: String.t(),
           password :: String.t()
         ) :: {:ok, connection_info()} | {:error, term()}
@@ -110,7 +112,7 @@ defmodule Teiserver.TachyonBattle.Battle do
           battle_id: battle_id,
           match_id: match_id,
           autohost_id: autohost_id,
-          start_script: start_script
+          start_script: %AT.StartScript{} = start_script
         } = args
       ) do
     Logger.metadata(actor_type: :battle, actor_id: battle_id)

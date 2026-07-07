@@ -2,6 +2,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
   @moduledoc false
 
   alias Phoenix.PubSub
+  alias Teiserver.Account.User
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.ComplexMatchEvent
   alias Teiserver.Telemetry.ComplexMatchEventQueries
@@ -15,7 +16,7 @@ defmodule Teiserver.Telemetry.ComplexMatchEventLib do
   @spec icon() :: String.t()
   def icon, do: "fa-chess-queen"
 
-  @spec log_complex_match_event(T.userid(), T.match_id(), String, non_neg_integer, map()) ::
+  @spec log_complex_match_event(User.id(), T.match_id(), String, non_neg_integer, map()) ::
           {:error, Ecto.Changeset} | {:ok, ComplexLobbyEvent}
   def log_complex_match_event(userid, match_id, event_type_name, game_time, value) do
     event_type_id = Telemetry.get_or_add_complex_match_event_type(event_type_name)

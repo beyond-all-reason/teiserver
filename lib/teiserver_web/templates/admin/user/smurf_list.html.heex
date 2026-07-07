@@ -270,8 +270,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                           {link(raw("<i class='far fa-fw fa-link'></i> Smurf link"),
                             to:
                               ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}",
-                            method: :put,
-                            # data: [confirm: "Are you sure?"],
+                            method: "put",
                             class: "btn btn-sm btn-warning"
                           )}
                         </td>
@@ -347,7 +346,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                       </td>
                       <td :if={allow?(@conn, "Server")}>
                         {link("Delete",
-                          to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id),
+                          to: ~p"/teiserver/admin/users/delete_smurf_key/#{key.id}",
                           class: "btn btn-danger btn-sm",
                           method: "delete",
                           data: [confirm: "Are you sure?"]

@@ -20,9 +20,9 @@
                     "title": "PartyCreateOkResponseData",
                     "type": "object",
                     "properties": {
-                        "partyId": { "$ref": "../../definitions/partyId.json" }
+                        "party": { "$ref": "../../definitions/partyState.json" }
                     },
-                    "required": ["partyId"]
+                    "required": ["party"]
                 }
             },
             "required": ["type", "messageId", "commandId", "status", "data"]

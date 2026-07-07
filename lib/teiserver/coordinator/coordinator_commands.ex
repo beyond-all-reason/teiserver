@@ -4,6 +4,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.CodeOfConductData
   alias Teiserver.CacheUser
   alias Teiserver.Client
@@ -525,23 +526,46 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   defp do_handle(%{command: "website", senderid: senderid} = _cmd, state) do
     client = Client.get_client_by_id(senderid)
-
-    {:ok, code} =
-      Account.create_code(%{
-        value: ULID.generate(),
-        purpose: "one_time_login",
-        expires: DateTime.shift(DateTime.utc_now(), minute: 5),
-        user_id: senderid,
-        metadata: %{ip: client.ip}
-      })
+    sender = Account.get_user(senderid)
 
     host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-    url = "https://#{host}/one_time_login/#{code.value}"
 
-    Coordinator.send_to_user(
-      senderid,
-      "Your one-time login link is #{url} it will expire in 5 minutes and must be accessed from the same IP you are accessing the game."
-    )
+    {allowed?, reason} =
+      cond do
+        not AuthLib.mfa_required?() ->
+          {true, nil}
+
+        AuthLib.has_active_mfa?(senderid) ->
+          {false,
+           "You have MFA activated and cannot use one time links, please manually login to the site at https://#{host}"}
+
+        AuthLib.contains_mfa_role?(sender.roles) ->
+          {false,
+           "Your role contains one or more privileged roles, you will need to manually login to the site at https://#{host}"}
+
+        true ->
+          {true, nil}
+      end
+
+    if allowed? do
+      {:ok, code} =
+        Account.create_code(%{
+          value: ULID.generate(),
+          purpose: "one_time_login",
+          expires: DateTime.shift(DateTime.utc_now(), minute: 5),
+          user_id: senderid,
+          metadata: %{ip: client.ip}
+        })
+
+      url = "https://#{host}/one_time_login/#{code.value}"
+
+      Coordinator.send_to_user(
+        senderid,
+        "Your one-time login link is #{url} it will expire in 5 minutes and must be accessed from the same IP you are accessing the game."
+      )
+    else
+      Coordinator.send_to_user(senderid, reason)
+    end
 
     state
   end

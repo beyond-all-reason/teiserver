@@ -7,6 +7,7 @@ defmodule Teiserver.CacheUser do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Account.User
@@ -20,6 +21,8 @@ defmodule Teiserver.CacheUser do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.EmailHelper
   alias Teiserver.Geoip
+  alias Teiserver.Moderation
+  alias Teiserver.Moderation.Tasks.ExternalIPCheckTask
   alias Teiserver.Plugins
   alias Teiserver.Telemetry
 
@@ -73,7 +76,6 @@ defmodule Teiserver.CacheUser do
     :email_change_code,
     :last_login_mins,
     :lobby_hash,
-    :hw_hash,
     :chobby_hash,
     :lobby_client,
     :print_client_messages,
@@ -110,7 +112,6 @@ defmodule Teiserver.CacheUser do
           email_change_code: [String.t()],
           last_login_mins: integer(),
           lobby_hash: String.t() | nil,
-          hw_hash: String.t() | nil,
           chobby_hash: String.t() | nil,
           lobby_client: String.t(),
           print_client_messages: boolean(),
@@ -129,7 +130,6 @@ defmodule Teiserver.CacheUser do
     :restricted_until,
     :shadowbanned,
     :lobby_hash,
-    :hw_hash,
     :chobby_hash,
     :lobby_client,
     :print_client_messages,
@@ -228,6 +228,27 @@ defmodule Teiserver.CacheUser do
       "country" => Geoip.get_flag(ip),
       "verification_code" => (:rand.uniform(899_999) + 100_000) |> to_string()
     })
+
+    ip_check_results = ExternalIPCheckTask.get_ban_reasons(ip)
+
+    unless Enum.empty?(ip_check_results) do
+      Account.update_user_stat(user.id, %{
+        "ip_check_results" => Enum.join(ip_check_results, ", "),
+        "ip_check_bad?" => true
+      })
+    end
+
+    if Moderation.banned_ip?(ip) do
+      Account.update_user_stat(user.id, %{
+        "banned_ip?" => true
+      })
+    end
+
+    if Moderation.vpn_ip?(ip) do
+      Account.update_user_stat(user.id, %{
+        "vpn_ip?" => true
+      })
+    end
 
     # Now add them to the cache
     user
@@ -497,7 +518,7 @@ defmodule Teiserver.CacheUser do
     msg_str = Enum.join(message_parts, "\n")
 
     sender_bot? = Auth.is_bot?(sender_id)
-    receiver_bot? = Auth.is_bot?(to_id)
+    recipient_bot? = Auth.is_bot?(to_id)
     blacklisted? = sender_bot? == false and WordLib.blacklisted_phrase?(msg_str)
 
     allowed =
@@ -512,8 +533,16 @@ defmodule Teiserver.CacheUser do
     end
 
     if allowed do
-      # Persist but only if no bots are involved
-      if not receiver_bot? and not sender_bot? do
+      save_message =
+        cond do
+          sender_bot? -> false
+          recipient_bot? and not persist_bot_dm?(msg_str) -> false
+          true -> true
+        end
+
+      # Persist message but not if a JSONRPC being sent to a bot or
+      # if the message was from a bot
+      if save_message do
         Chat.create_direct_message(%{
           to_id: to_id,
           from_id: sender_id,
@@ -598,6 +627,10 @@ defmodule Teiserver.CacheUser do
     send_direct_message(from_id, to_id, [message])
   end
 
+  defp persist_bot_dm?(message) do
+    not String.starts_with?(message, "!#")
+  end
+
   @spec ring(User.id(), User.id()) :: :ok
   def ring(ringee_id, ringer_id) do
     PubSub.broadcast(
@@ -679,6 +712,10 @@ defmodule Teiserver.CacheUser do
     Config.get_site_config_cache("system.User limit") - client_count
   end
 
+  @doc """
+  This is purely used for the teiserver_test_lib async_auth_setup function
+  TODO: Remove this function and create something more appropriate for the test
+  """
   @spec try_login(String.t(), String.t(), String.t(), String.t()) ::
           {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), User.id()}
   def try_login(token, ip, lobby, lobby_hash) do
@@ -690,14 +727,6 @@ defmodule Teiserver.CacheUser do
 
       {:ok, db_user, _claims} ->
         user = get_user_by_id(db_user.id)
-
-        # # If they're a smurf, log them in as the smurf!
-        # user =
-        #   if user.smurf_of_id != nil do
-        #     get_user_by_id(user.smurf_of_id)
-        #   else
-        #     user
-        #   end
 
         cond do
           user.smurf_of_id != nil ->
@@ -733,6 +762,16 @@ defmodule Teiserver.CacheUser do
               lobby_hash: lobby_hash,
               last_ip: ip
             })
+
+            # One way hash of the creation IP. If enabled during testing we
+            # will get foreign key errors as the test shuts down
+            if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+              Account.create_smurf_key(
+                user.id,
+                "ip",
+                CalculateSmurfKeyTask.calculate_string_fingerprint(ip)
+              )
+            end
 
             {:error, "Unverified", user.id}
 
@@ -802,6 +841,15 @@ defmodule Teiserver.CacheUser do
 
           Enum.member?(["", "0", nil], lobby_hash) == true and not Auth.is_bot?(db_user) ->
             {:error, "LobbyHash/UserID missing in login"}
+
+          # Rate limited?
+          Auth.can_login?(user) == false ->
+            :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{
+              reason: :rate_limited,
+              user_id: user.id
+            })
+
+            {:error, "Flood protection"}
 
           Account.verify_md5_password(md5_password, db_user.password) == false ->
             if String.contains?(username, "@") do
@@ -985,6 +1033,12 @@ defmodule Teiserver.CacheUser do
       Telemetry.log_simple_server_event(user.id, "account.user_login")
 
       if not bot? do
+        Account.create_smurf_key(
+          user.id,
+          "ip",
+          CalculateSmurfKeyTask.calculate_string_fingerprint(ip)
+        )
+
         Account.create_smurf_key(user.id, "client_app_hash", lobby_hash)
       end
     end
@@ -1170,6 +1224,9 @@ defmodule Teiserver.CacheUser do
       # (and also redundant)
       Account.query_users(search: [email_lower: email], select: [:email]) != [] ->
         {:error, "Email already attached to a user"}
+
+      Moderation.banned_domain?(email) ->
+        {:error, "Due to frequent abuse, that email provider is not allowed."}
 
       true ->
         :ok

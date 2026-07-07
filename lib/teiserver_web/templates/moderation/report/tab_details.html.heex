@@ -86,7 +86,7 @@
             <td>Result</td>
             <td>
               <a
-                href={Routes.moderation_action_path(@conn, :show, @report.result_id)}
+                href={~p"/moderation/action/#{@report.result_id}"}
                 class="btn btn-secondary btn-sm"
               >
                 View details

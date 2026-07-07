@@ -14,12 +14,12 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
 
   describe "index" do
     test "lists all reports", %{conn: conn} do
-      conn = get(conn, Routes.moderation_report_path(conn, :index))
+      conn = get(conn, ~p"/moderation/report")
       assert html_response(conn, 200) =~ "Listing Reports"
 
       # Now with at least one report present
       ModerationTestLib.report_fixture()
-      conn = get(conn, Routes.moderation_report_path(conn, :index))
+      conn = get(conn, ~p"/moderation/report")
       assert html_response(conn, 200) =~ "Listing Reports"
     end
 
@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
       report = ModerationTestLib.report_fixture()
 
       conn =
-        get(conn, Routes.moderation_report_path(conn, :index) <> "?target_id=#{report.target_id}")
+        get(conn, ~p"/moderation/report?target_id=#{report.target_id}")
 
       assert html_response(conn, 200) =~ "Listing Reports"
     end
@@ -38,7 +38,7 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
       conn =
         get(
           conn,
-          Routes.moderation_report_path(conn, :index) <> "?reporter_id=#{report.reporter_id}"
+          ~p"/moderation/report?reporter_id=#{report.reporter_id}"
         )
 
       assert html_response(conn, 200) =~ "Listing Reports"
@@ -48,13 +48,13 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
   describe "show report" do
     test "renders show page", %{conn: conn} do
       report = ModerationTestLib.report_fixture()
-      resp = get(conn, Routes.moderation_report_path(conn, :show, report))
+      resp = get(conn, ~p"/moderation/report/#{report}")
       assert html_response(resp, 200) =~ "Filter by target"
     end
 
     test "renders show nil item", %{conn: conn} do
       assert_error_sent 404, fn ->
-        get(conn, Routes.moderation_report_path(conn, :show, -1))
+        get(conn, ~p"/moderation/report/-1")
       end
     end
   end
@@ -63,7 +63,7 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
     test "renders user page - target", %{conn: conn} do
       new_user = GeneralTestLib.make_user()
       report = ModerationTestLib.report_fixture(%{target_id: new_user.id})
-      resp = get(conn, Routes.moderation_report_path(conn, :user, report.target_id))
+      resp = get(conn, ~p"/moderation/report/user/#{report.target_id}")
       assert html_response(resp, 200) =~ "Reports against ("
       assert html_response(resp, 200) =~ "Reports made ("
       assert html_response(resp, 200) =~ "Actions ("
@@ -72,7 +72,7 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
     test "renders user page - reporter", %{conn: conn} do
       new_user = GeneralTestLib.make_user()
       report = ModerationTestLib.report_fixture(%{reporter_id: new_user.id})
-      resp = get(conn, Routes.moderation_report_path(conn, :user, report.reporter_id))
+      resp = get(conn, ~p"/moderation/report/user/#{report.reporter_id}")
       assert html_response(resp, 200) =~ "Reports against ("
       assert html_response(resp, 200) =~ "Reports made ("
       assert html_response(resp, 200) =~ "Actions ("
@@ -82,17 +82,17 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
   describe "delete report" do
     test "deletes chosen report", %{conn: conn} do
       report = ModerationTestLib.report_fixture()
-      conn = delete(conn, Routes.moderation_report_path(conn, :delete, report))
-      assert redirected_to(conn) == Routes.moderation_report_path(conn, :index)
+      conn = delete(conn, ~p"/moderation/report/#{report.id}")
+      assert redirected_to(conn) == ~p"/moderation/report"
 
       assert_error_sent 404, fn ->
-        get(conn, Routes.moderation_report_path(conn, :show, report))
+        get(conn, ~p"/moderation/report/#{report}")
       end
     end
 
     test "renders error for deleting nil item", %{conn: conn} do
       assert_error_sent 404, fn ->
-        delete(conn, Routes.moderation_report_path(conn, :delete, -1))
+        delete(conn, ~p"/moderation/report/-1")
       end
     end
   end

@@ -31,7 +31,7 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
         <br /><br />
 
         <form
-          action={Routes.ts_reports_report_path(@conn, :show, "review")}
+          action={~p"/teiserver/reports/show/review"}
           method="post"
           class="form-horizontal"
         >

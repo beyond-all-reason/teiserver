@@ -12,8 +12,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.CacheUser
-  alias Teiserver.Chat
-  alias Teiserver.Client
   alias Teiserver.EmailHelper
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
@@ -827,49 +825,21 @@ defmodule TeiserverWeb.Admin.UserController do
     smurf_user = Account.get_user!(smurf_id)
     origin_user = Account.get_user!(origin_id)
 
-    access = {
-      UserLib.has_access(smurf_user, conn),
-      UserLib.has_access(origin_user, conn)
-    }
+    result =
+      UserLib.mark_user_as_smurf_of(conn.assigns.current_user, %{
+        smurf: smurf_user,
+        origin: origin_user
+      })
 
-    case access do
-      {{true, _role1}, {true, _role2}} ->
-        # If the origin user has a smurf_id somehow then we just point to that
-        origin_id = origin_user.smurf_of_id || origin_user.id
-
-        {:ok, _updated_user} =
-          Account.script_update_user(smurf_user, %{"smurf_of_id" => origin_id})
-
-        Account.recache_user(smurf_user.id)
-
-        add_audit_log(conn, "Moderation:Mark as smurf", %{
-          smurf_userid: smurf_user.id,
-          origin_id: origin_user.id
-        })
-
-        # Now we update stats for the origin
-        smurf_count =
-          Account.list_users(
-            search: [
-              smurf_of: origin_user.id
-            ],
-            select: [:id]
-          )
-          |> Enum.count()
-
-        # And give the origin the smurfer role
-        Auth.add_roles(origin_user.id, ["Smurfer"])
-        Account.update_user_stat(origin_user.id, %{"smurf_count" => smurf_count})
-
-        Client.disconnect(smurf_user.id, "Marked as smurf")
-
+    case result do
+      :ok ->
         conn
         |> put_flash(:success, "Applied the changes")
         |> redirect(to: ~p"/teiserver/admin/user/#{smurf_user.id}")
 
-      _no_access ->
+      {:error, reason} ->
         conn
-        |> put_flash(:danger, "Unable to access at least one of these users")
+        |> put_flash(:danger, "Marking failed: #{reason}")
         |> redirect(to: ~p"/teiserver/admin/user")
     end
   end
@@ -979,57 +949,6 @@ defmodule TeiserverWeb.Admin.UserController do
         |> put_flash(:danger, "Unable to access at least one of these users")
         |> redirect(to: ~p"/teiserver/admin/user")
     end
-  end
-
-  @spec full_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def full_chat(conn, %{"id" => id} = params) do
-    page =
-      Map.get(params, "page", 0)
-      |> int_parse()
-      |> max(0)
-
-    user = Account.get_user!(id)
-
-    mode =
-      case params["mode"] do
-        "room" -> "room"
-        _other -> "lobby"
-      end
-
-    messages =
-      case mode do
-        "lobby" ->
-          Chat.list_lobby_messages(
-            search: [
-              user_id: user.id
-            ],
-            limit: 250,
-            offset: page * 250,
-            order_by: "Newest first"
-          )
-
-        "room" ->
-          Chat.list_room_messages(
-            search: [
-              user_id: user.id
-            ],
-            limit: 250,
-            offset: page * 250,
-            order_by: "Newest first"
-          )
-      end
-
-    last_page = Enum.count(messages) < 250
-
-    conn
-    |> assign(:last_page, last_page)
-    |> assign(:page, page)
-    |> assign(:user, user)
-    |> assign(:mode, mode)
-    |> assign(:messages, messages)
-    |> add_breadcrumb(name: "Show: #{user.name}", url: ~p"/teiserver/admin/user/#{id}")
-    |> add_breadcrumb(name: "Chat logs", url: conn.request_path)
-    |> render("full_chat.html")
   end
 
   @spec relationships(Plug.Conn.t(), map) :: Plug.Conn.t()

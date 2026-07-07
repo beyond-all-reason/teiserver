@@ -24,8 +24,9 @@ defmodule TeiserverWeb.Endpoint do
   plug(Plug.Static,
     at: "/",
     from: :teiserver,
-    gzip: true,
-    only: TeiserverWeb.static_paths()
+    gzip: not code_reloading?,
+    only: TeiserverWeb.static_paths(),
+    raise_on_missing_only: code_reloading?
   )
 
   # Code reloading can be explicitly enabled under the

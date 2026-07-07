@@ -192,8 +192,8 @@
           {Jump.CredoChecks.PreferTextColumns, start_after: "20260409212629"},
           # {Jump.CredoChecks.TestHasNoAssertions,
           #  custom_assertion_functions: [:await_has, :await_with_timeout]}, - 19 failures
-          {Jump.CredoChecks.TopLevelAliasImportRequire, []}
-          # {Jump.CredoChecks.WeakAssertion, []} - 54 failures
+          {Jump.CredoChecks.TopLevelAliasImportRequire, []},
+          {Jump.CredoChecks.WeakAssertion, []}
         ],
         disabled: [
           #

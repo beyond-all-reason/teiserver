@@ -13,6 +13,8 @@ defmodule Teiserver.Monitoring.Tachyon do
   @tachyon_party_metrics_event_name [:prom_ex, :plugin, :tachyon, :party]
   @tachyon_lobby_metrics_event_name [:prom_ex, :plugin, :tachyon, :lobby]
 
+  @duration_buckets [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181]
+
   @impl PromEx.Plugin
   def event_metrics(_opts) do
     Event.build(
@@ -23,9 +25,17 @@ defmodule Teiserver.Monitoring.Tachyon do
           event_name: [:tachyon, :request],
           measurement: :duration,
           reporter_options: [
-            buckets: [1, 10, 50, 100, 150, 250, 500, 1_000]
+            buckets: @duration_buckets
           ],
           tags: [:command_id]
+        ),
+        distribution(
+          [:teiserver, :tachyon, :connect, :duration],
+          event_name: [:tachyon, :connect],
+          measurement: :duration,
+          reporter_options: [
+            buckets: @duration_buckets
+          ]
         ),
         counter(
           [:teiserver, :tachyon, :login, :ok],

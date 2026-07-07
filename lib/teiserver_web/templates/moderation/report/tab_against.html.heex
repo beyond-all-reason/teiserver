@@ -43,7 +43,7 @@
         <td>
           <%= if report.result_id do %>
             <a
-              href={Routes.moderation_action_path(@conn, :show, report.result_id)}
+              href={~p"/moderation/action/#{report.result_id}"}
               class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()} btn-block"}
             >
               {central_component("icon",
@@ -62,7 +62,7 @@
 
         <td>
           <a
-            href={Routes.moderation_report_path(@conn, :show, report.id)}
+            href={~p"/moderation/report/#{report.id}"}
             class="btn btn-secondary btn-sm btn-block"
           >
             <i class="fa-fw fas fa-eye"></i>

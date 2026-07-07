@@ -30,12 +30,13 @@ defmodule TeiserverWeb.ConnCase do
       alias Teiserver.Config
       alias Teiserver.Support.Tachyon
       alias Teiserver.TeiserverTestLib
-      alias TeiserverWeb.Router.Helpers, as: Routes
 
       # Import conveniences for testing with connections
       import Plug.Conn
       import ConnTest
       import TeiserverWeb.ConnCase
+
+      import Phoenix.LiveViewTest
 
       # The default endpoint for testing
       unquote(TeiserverWeb.verified_routes())
