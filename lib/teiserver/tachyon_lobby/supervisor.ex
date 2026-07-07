@@ -5,12 +5,10 @@ defmodule Teiserver.TachyonLobby.Supervisor do
 
   use DynamicSupervisor
 
-  @spec start_lobby(LT.StartParams.t()) ::
+  @spec start_lobby(LT.Types.id(), LT.StartParams.t()) ::
           {:ok, %{pid: pid(), id: LT.Types.id()}}
           | {:error, {:already_started, pid()} | :max_children | term()}
-  def start_lobby(%LT.StartParams{} = start_params) do
-    id = Lobby.gen_id()
-
+  def start_lobby(id, %LT.StartParams{} = start_params) do
     case DynamicSupervisor.start_child(__MODULE__, {Lobby, {id, {:user, start_params}}}) do
       {:ok, pid} -> {:ok, %{id: id, pid: pid}}
       {:error, err} -> {:error, err}
