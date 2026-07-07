@@ -43,8 +43,6 @@ defmodule Teiserver.Client do
         side: 0,
         role: "spectator",
         lobby_id: nil,
-        print_client_messages: false,
-        print_server_messages: false,
         chat_times: [],
         temp_mute_count: 0,
         ip: nil,
@@ -150,15 +148,6 @@ defmodule Teiserver.Client do
         event: :connected
       }
     )
-
-    # Message logging
-    if user.print_client_messages do
-      enable_client_message_print(user.id)
-    end
-
-    if user.print_server_messages do
-      enable_server_message_print(user.id)
-    end
 
     # Lets give everything a chance to propagate
     :timer.sleep(150)
@@ -332,53 +321,5 @@ defmodule Teiserver.Client do
     client = get_client_by_id(userid)
     update(%{client | awaiting_warn_ack: false}, :silent)
     :ok
-  end
-
-  @spec enable_client_message_print(User.id()) :: :ok
-  def enable_client_message_print(userid) do
-    case get_client_by_id(userid) do
-      nil ->
-        :ok
-
-      client ->
-        send(client.tcp_pid, {:put, :print_client_messages, true})
-        :ok
-    end
-  end
-
-  @spec disable_client_message_print(User.id()) :: :ok
-  def disable_client_message_print(userid) do
-    case get_client_by_id(userid) do
-      nil ->
-        :ok
-
-      client ->
-        send(client.tcp_pid, {:put, :print_client_messages, false})
-        :ok
-    end
-  end
-
-  @spec enable_server_message_print(User.id()) :: :ok
-  def enable_server_message_print(userid) do
-    case get_client_by_id(userid) do
-      nil ->
-        :ok
-
-      client ->
-        send(client.tcp_pid, {:put, :print_server_messages, true})
-        :ok
-    end
-  end
-
-  @spec disable_server_message_print(User.id()) :: :ok
-  def disable_server_message_print(userid) do
-    case get_client_by_id(userid) do
-      nil ->
-        :ok
-
-      client ->
-        send(client.tcp_pid, {:put, :print_server_messages, false})
-        :ok
-    end
   end
 end

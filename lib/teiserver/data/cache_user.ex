@@ -12,6 +12,7 @@ defmodule Teiserver.CacheUser do
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Account.User
   alias Teiserver.Account.UserCacheLib
+  alias Teiserver.Account.UserQueries
   alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Chat
@@ -21,9 +22,11 @@ defmodule Teiserver.CacheUser do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.EmailHelper
   alias Teiserver.Geoip
+  alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Moderation
   alias Teiserver.Moderation.Tasks.ExternalIPCheckTask
   alias Teiserver.Plugins
+  alias Teiserver.Repo
   alias Teiserver.Telemetry
 
   use Plugins
@@ -78,8 +81,6 @@ defmodule Teiserver.CacheUser do
     :lobby_hash,
     :chobby_hash,
     :lobby_client,
-    :print_client_messages,
-    :print_server_messages,
     :discord_dm_channel
   ]
 
@@ -114,8 +115,6 @@ defmodule Teiserver.CacheUser do
           lobby_hash: String.t() | nil,
           chobby_hash: String.t() | nil,
           lobby_client: String.t(),
-          print_client_messages: boolean(),
-          print_server_messages: boolean(),
           discord_dm_channel: String.t() | nil
         }
 
@@ -132,14 +131,29 @@ defmodule Teiserver.CacheUser do
     :lobby_hash,
     :chobby_hash,
     :lobby_client,
-    :print_client_messages,
-    :print_server_messages,
     :discord_id,
     :discord_dm_channel,
     :discord_dm_channel_id,
     :steam_id
   ]
   def data_keys, do: @data_keys
+
+  @doc """
+  Keys duplicated in both data and the user profile
+  """
+  def duplicated_keys do
+    [
+      :rank,
+      :country,
+      :bot,
+      :email_change_code,
+      :last_login_mins,
+      :lobby_hash,
+      :chobby_hash,
+      :lobby_client,
+      :discord_dm_channel
+    ]
+  end
 
   @spec clean_name(String.t()) :: String.t()
   def clean_name(name) do
@@ -1231,5 +1245,85 @@ defmodule Teiserver.CacheUser do
       true ->
         :ok
     end
+  end
+
+  # These functions will be removed as part of the CacheUser struct being removed.
+  # They exist purely to facilitate and assist with the transfer
+
+  @doc """
+  A function to assist in validation we have converted the user struct correctly.
+
+  Returns a map of the differences between the cache and db users in the form:
+  %{
+    field: {cache_user_value, db_user_value}
+  }
+
+  An empty map represents an overlap of values
+  """
+  def compare_to_db_user(user_id) do
+    db_user = Account.get_user!(user_id)
+    cache_user = get_user_by_id(user_id)
+
+    cache_user
+    |> Map.keys()
+    |> List.delete(:__struct__)
+    |> Enum.map(fn key ->
+      cache_value = Map.get(cache_user, key, :not_set)
+      db_value = Map.get(db_user, key, :not_set)
+
+      if db_value != cache_value do
+        {key, {cache_value, db_value}}
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+    |> Map.new()
+  end
+
+  @doc """
+  Given a user_id, populates the user fields from their own data so the field is stored
+  in a column rather than in the data blob.
+  """
+  def populate_user_fields_from_data(user_id) do
+    user = Account.get_user!(user_id)
+
+    Account.script_update_user(user, %{
+      rank: user.data["rank"],
+      country: user.data["country"],
+      bot: user.data["bot"],
+      email_change_code: user.data["email_change_code"],
+      last_login_mins: user.data["last_login_mins"],
+      lobby_hash: user.data["lobby_hash"],
+      chobby_hash: user.data["chobby_hash"],
+      lobby_client: user.data["lobby_client"],
+      discord_dm_channel: user.data["discord_dm_channel"]
+    })
+  end
+
+  @doc """
+  Populates the new user fields from their data field in chunks with a sleep in between each
+  chunk so as to minimise load disruption.<!--  -->
+  """
+  def populate_all_new_user_fields do
+    user_id_chunks =
+      UserQueries.users()
+      |> QueryHelpers.query_select([:id])
+      |> Repo.all()
+      |> Enum.map(& &1.id)
+      |> Enum.chunk_every(2000)
+
+    chunk_count = length(user_id_chunks)
+
+    IO.puts("#{chunk_count} chunks")
+
+    user_id_chunks
+    |> Enum.with_index()
+    |> Enum.map(fn {chunk_ids, idx} ->
+      IO.puts("Populating #{idx}")
+
+      Enum.each(chunk_ids, &populate_user_fields_from_data/1)
+
+      # Sleep to ensure we don't cause too much load on the server
+      :timer.sleep(2000)
+    end)
   end
 end

@@ -1307,8 +1307,6 @@ defmodule Teiserver.SpringTcpServer do
             room_member_cache: %{},
             known_users: %{},
             known_battles: [],
-            print_client_messages: false,
-            print_server_messages: false,
             script_password: nil,
             exempt_from_cmd_throttle: false,
             status_timestamps: [],
