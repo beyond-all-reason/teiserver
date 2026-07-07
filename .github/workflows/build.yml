@@ -4,12 +4,9 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      tags:
-        description: Tag to push the image with
-        required: false
-        type: string
+  release:
+    types:
+      - published
 
 jobs:
   build:
@@ -34,7 +31,7 @@ jobs:
         buildah push $IMAGE:latest
 
     - name: Build tagged image
-      if: inputs.tags
+      if: github.event_name == 'release'
       run: |
-        buildah bud -t $IMAGE:${{ inputs.tags }} .
-        buildah push $IMAGE:${{ inputs.tags }}
+        buildah bud -t $IMAGE:${{ github.event.release.tag_name }} .
+        buildah push $IMAGE:${{ github.event.release.tag_name }}
