@@ -251,6 +251,12 @@ defmodule Teiserver.Matchmaking.QueueServer do
     )
   end
 
+  @doc """
+  used for testing only, to force a pairing of players so one can test the rest
+  of the flow.
+  """
+  def match_players(queue_pid) when is_pid(queue_pid), do: send(queue_pid, :tick)
+
   @impl GenServer
   def init(state) do
     Logger.metadata(actor_type: :mm_queue, actor_id: state.id)
