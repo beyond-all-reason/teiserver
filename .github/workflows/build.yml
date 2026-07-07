@@ -1,0 +1,40 @@
+name: build prod container image and push to registry
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: Tag to push the image with
+        required: false
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build prod container
+    permissions:
+      packages: write
+      contents: read
+    env:
+      REGISTRY: ghcr.io
+      IMAGE: ghcr.io/${{ github.repository }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Login to registry
+      run: buildah login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} $REGISTRY
+
+    - name: Build latest image
+      run: |
+        buildah bud -t $IMAGE:latest .
+        buildah push $IMAGE:latest
+
+    - name: Build tagged image
+      if: inputs.tags
+      run: |
+        buildah bud -t $IMAGE:${{ inputs.tags }} .
+        buildah push $IMAGE:${{ inputs.tags }}
