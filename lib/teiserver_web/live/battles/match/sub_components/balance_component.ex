@@ -58,12 +58,14 @@ defmodule TeiserverWeb.Battle.MatchLive.SubComponents.BalanceComponent do
         # there are no rating logs e.g. unrated match
         []
       else
-        Enum.map(assigns.members, fn x ->
+        assigns.members
+        |> Enum.filter(fn x -> assigns.rating_logs[x.user_id] != nil end)
+        |> Enum.map(fn x ->
           team_id = get_team_id(x.user_id, past_balance.team_players)
           Map.put(x, :team_id, team_id)
         end)
         |> Enum.sort_by(
-          fn m -> assigns.rating_logs[m.user.id].value["old_rating_value"] end,
+          fn m -> assigns.rating_logs[m.user_id].value["old_rating_value"] end,
           &>=/2
         )
         |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
@@ -173,7 +175,7 @@ defmodule TeiserverWeb.Battle.MatchLive.SubComponents.BalanceComponent do
     </div>
     <br />
 
-    <h4>If balance we made using current ratings</h4>
+    <h4>If balance was made using current ratings</h4>
     <div class="table-responsive">
       <table class="table">
         <tbody>
@@ -201,7 +203,7 @@ defmodule TeiserverWeb.Battle.MatchLive.SubComponents.BalanceComponent do
     """
   end
 
-  defp get_team_id(player_id, team_players) do
+  def get_team_id(player_id, team_players) do
     {team_id, _players} =
       Enum.find(team_players, fn {_k, player_ids} ->
         Enum.any?(player_ids, fn x -> x == player_id end)
