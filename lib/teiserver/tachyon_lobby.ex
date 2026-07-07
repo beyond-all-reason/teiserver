@@ -23,6 +23,9 @@ defmodule Teiserver.TachyonLobby do
     Registry.list_lobbies()
   end
 
+  defdelegate routing_key(id), to: Lobby
+  defdelegate gen_id(), to: Lobby
+
   @spec subscribe_updates() :: %{id() => LT.ListOverview.t()}
   def subscribe_updates do
     PubSubHelper.subscribe(Lobby.list_topic())
@@ -55,12 +58,11 @@ defmodule Teiserver.TachyonLobby do
   end
 
   def create(%LT.StartParams{} = start_params) do
-    id = Lobby.gen_id()
-    routing_key = {:lobby, id}
+    id = start_params.id || gen_id()
     mfa = {TachyonLobby.Supervisor, :start_lobby, [id, start_params]}
 
     with :ok <- validate_start_params(start_params),
-         {:ok, %{pid: pid, id: id}} <- Cluster.replicated_apply(routing_key, mfa),
+         {:ok, %{pid: pid, id: id}} <- routing_key(id) |> Cluster.replicated_apply(mfa),
          {:ok, %LT.Details{} = details} <- Lobby.get_details(id) do
       {:ok, pid, details}
     end
