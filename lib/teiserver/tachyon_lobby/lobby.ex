@@ -27,6 +27,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Account.User
   alias Teiserver.Autohost
   alias Teiserver.Autohost.Types, as: AT
+  alias Teiserver.Cluster
   alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Helpers.PubSubHelper
@@ -90,6 +91,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
           GenServer.on_start()
   def start_link({id, _data} = args) do
     via_tuple(id) |> :gen_statem.start_link(__MODULE__, args, [])
+  end
+
+  @doc """
+  this is meant to propagate event processing across replicas and shouldn't
+  be called from other modules
+  """
+  def apply_events(lobby_id, events, opts) do
+    call_lobby(lobby_id, {:apply_events, events, opts}, to_primary?: false)
   end
 
   @spec join(LT.Types.id(), LT.PlayerJoinData.t(), pid()) ::
@@ -1089,6 +1098,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def handle_event({:call, from}, :get_start_script, _state, %LT.Data{} = data),
     do: {:keep_state, data, [{:reply, from, gen_start_script(data)}]}
 
+  def handle_event({:call, from}, {:apply_events, events, opts}, _state, %LT.Data{} = data) do
+    data = process_events(data, events, opts)
+    {:keep_state, data, [{:reply, from, :ok}]}
+  end
+
   def handle_event(:info, {:DOWN, ref, :process, _pid, :shutdown}, state, %LT.Data{} = data) do
     val = MC.get_val(data.monitors, ref)
     data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
@@ -1201,12 +1215,21 @@ defmodule Teiserver.TachyonLobby.Lobby do
     LobbyRegistry.via_tuple(lobby_id)
   end
 
-  defp call_lobby(lobby_id, message, timeout \\ @default_call_timeout) do
-    via_tuple(lobby_id) |> :gen_statem.call(message, timeout)
+  defp call_lobby(lobby_id, message, opts \\ []) do
+    timeout = Keyword.get(opts, :timeout, @default_call_timeout)
+    {m, f, a} = {:gen_statem, :call, [via_tuple(lobby_id), message, timeout]}
+
+    if Keyword.get(opts, :to_primary?, true) do
+      routing_key(lobby_id) |> Cluster.primary_apply({m, f, a}, timeout)
+    else
+      apply(m, f, a)
+    end
   catch
     :exit, {:noproc, _reason} -> {:error, :invalid_lobby}
     :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
+
+  def routing_key(id), do: {:lobby, id}
 
   @spec get_overview_from_state(state :: LT.Data.t()) :: LT.ListOverview.t()
   defp get_overview_from_state(%LT.Data{} = state) do
@@ -1297,18 +1320,36 @@ defmodule Teiserver.TachyonLobby.Lobby do
       overview: overview
     }
 
-    PubSubHelper.broadcast(list_topic(), message)
+    if routing_key(state.id) |> Cluster.primary?() do
+      PubSubHelper.broadcast(list_topic(), message)
+    end
   end
 
   defp process_events(%LT.Data{} = data, events, opts \\ []) do
-    final_aggregate = compute_aggregate(data, events)
-    sender_id = opts[:sender_id]
+    {primary, replicas} = routing_key(data.id) |> Cluster.split_nodes()
 
-    if final_aggregate.changes != %{},
-      do: broadcast_update({:update, sender_id, final_aggregate.changes}, final_aggregate.data)
+    primary? = Node.self() == primary
+    final_aggregate = compute_aggregate(data, events)
+
+    if primary? do
+      sender_id = opts[:sender_id]
+
+      if final_aggregate.changes != %{},
+        do: broadcast_update({:update, sender_id, final_aggregate.changes}, final_aggregate.data)
+
+      replicate_events(replicas, data, events, opts)
+    end
 
     broadcast_list_updates(final_aggregate)
-    Enum.each(final_aggregate.side_effects, &process_event_action(&1, final_aggregate.data))
+
+    # some events have an impact on the state, like vote timeout for example
+    # this isn't ideal since each event need to make a decision whether it
+    # should also apply on the replicas, but for now™ it'll do
+    Enum.each(
+      final_aggregate.side_effects,
+      &process_event_action(&1, primary?, final_aggregate.data)
+    )
+
     final_aggregate.data
   end
 
@@ -1351,7 +1392,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
 
     LobbyRegistry.put_overview(aggregate.data.id, get_overview_from_state(aggregate.data))
-    PubSubHelper.broadcast(list_topic(), message)
+
+    if routing_key(aggregate.data.id) |> Cluster.primary?() do
+      PubSubHelper.broadcast(list_topic(), message)
+    end
+
     :ok
   end
 
@@ -1601,16 +1646,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp update_property(prop, _value, _state, _user_id),
     do: {:error, "update #{prop} is not supported"}
 
-  defp process_event_action({:vote_ended, vote, outcome}, fsm_data) do
-    broadcast_to_members(fsm_data, nil, {:lobby, fsm_data.id, {:vote_ended, vote.id, outcome}})
+  defp process_event_action({:vote_ended, vote, outcome}, primary?, fsm_data) do
+    if primary? do
+      broadcast_to_members(fsm_data, nil, {:lobby, fsm_data.id, {:vote_ended, vote.id, outcome}})
+    end
   end
 
-  defp process_event_action({:send_after, time, message}, _fsm_data) do
+  defp process_event_action({:send_after, time, message}, _primary?, _fsm_data) do
     :timer.send_after(time, message)
   end
 
-  defp process_event_action({:send_to_user, pid, message}, _fsm_data) do
-    send(pid, message)
+  defp process_event_action({:send_to_user, pid, message}, primary?, _fsm_data) do
+    if primary?, do: send(pid, message)
   end
 
   # create a default vote object
@@ -1648,5 +1695,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
 
     PubSubHelper.broadcast(list_topic(), message)
+  end
+
+  defp replicate_events(replicas, %LT.Data{} = data, events, opts) do
+    mfa = {__MODULE__, :apply_events, [data.id, events, opts]}
+
+    # TODO: handle the case where the lobby doesn't exist on the replica
+    # or if the replica fails to apply the events somehow
+    # Also need to figure out the thorny case where the replica is
+    # starting up and bootstraping its state.
+    Cluster.multi_apply(replicas, mfa)
+    |> Enum.each(fn {node, result} ->
+      if result != :ok, do: raise("Error on node #{node}: #{inspect(result)}")
+    end)
+
+    :ok
   end
 end

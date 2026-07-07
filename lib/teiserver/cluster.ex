@@ -23,6 +23,16 @@ defmodule Teiserver.Cluster do
     primary == node
   end
 
+  def primary_apply(routing_key, {m, f, a}, timeout \\ :timer.seconds(5)) do
+    {primary, _replicas} = split_nodes(routing_key)
+
+    if Node.self() == primary do
+      apply(m, f, a)
+    else
+      :erpc.call(primary, m, f, a, timeout)
+    end
+  end
+
   @doc """
   Same as `Kernel.apply/3` but will run the given mfa on the primary and
   the replicas. It will wait for the primary and a majority of replicas to
@@ -48,6 +58,19 @@ defmodule Teiserver.Cluster do
     # and raise or return an error if replicas give different results
     resps = receive_responses(reqs, timeout)
     resps[primary]
+  end
+
+  @doc """
+  `:erpc.call/5` for the given list of nodes and wait for all results
+  """
+  @spec multi_apply([node()], {module(), atom(), [term()]}, timeout()) :: %{node() => term()}
+  def multi_apply(nodes, {m, f, a}, timeout \\ :timer.seconds(5)) do
+    reqs =
+      Enum.reduce(nodes, :erpc.reqids_new(), fn node, reqs ->
+        :erpc.send_request(node, m, f, a, node, reqs)
+      end)
+
+    receive_responses(reqs, timeout)
   end
 
   defp receive_responses(reqs, timeout, result \\ %{}) do
