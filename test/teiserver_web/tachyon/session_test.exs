@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Tachyon.SessionTest do
     assert :connected == Player.conn_state(user.id)
     Process.monitor(conn_pid)
     :ok = WSC.disconnect(client)
-    assert_receive({:DOWN, _, :process, _, :normal})
+    assert_receive({:DOWN, _ref, :process, _pid, {:shutdown, :local_closed}})
     assert is_pid(SessionRegistry.lookup(user.id))
     poll_until(fn -> Player.conn_state(user.id) end, &(&1 == :reconnecting))
   end
