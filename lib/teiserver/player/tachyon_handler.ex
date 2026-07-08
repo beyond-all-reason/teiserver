@@ -279,6 +279,11 @@ defmodule Teiserver.Player.TachyonHandler do
     {:stop, :normal, state}
   end
 
+  def handle_info({:EXIT, _pid, :shutdown}, state) do
+    # TODO: send a proper tachyon message to inform the client it is getting disconnected
+    {:stop, :normal, state}
+  end
+
   def handle_info(msg, state) do
     Logger.warning("unhandled info message: #{inspect(msg)}")
     {:ok, state}
