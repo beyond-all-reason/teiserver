@@ -212,6 +212,8 @@ defmodule Teiserver.Protocols.Spring do
   @doc """
   Takes zipped and base64'd data and tries to extract it
   """
+  def read_compressed_base64(nil), do: {:error, "base64 decode error"}
+
   def read_compressed_base64(raw_string) do
     case Base.url_decode64(raw_string) do
       {:ok, compressed_contents} ->

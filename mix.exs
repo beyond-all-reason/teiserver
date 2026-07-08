@@ -125,7 +125,6 @@ defmodule Teiserver.MixProject do
       # Teiserver libs
       {:openskill,
        git: "https://github.com/beyond-all-reason/openskill.ex.git", branch: "master"},
-      {:cowboy, "~> 2.15"},
       {:statistics, "~> 0.6.2"},
       {:csv, "~> 2.4"},
       {:mdex, "~> 0.2"},
@@ -140,6 +139,7 @@ defmodule Teiserver.MixProject do
       {:decimal, "~> 3.0", override: true},
       {:hackney, "~> 4.0", override: true},
       {:quic, "~> 1.4.4", override: true},
+      {:cowboy, "2.16.0", override: true},
 
       # gun is a transitive dependency of nostrum. The version 2.1.0 works,
       # while the next one, 2.2.0 produces the following error when starting

@@ -1,10 +1,13 @@
 defmodule TeiserverWeb.API.SpadsControllerTest do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.ClientLib
   alias Teiserver.Client
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Lobby
   alias Teiserver.TeiserverTestLib
   alias TeiserverWeb.API.SpadsController
+
   use TeiserverWeb.ConnCase, async: false
 
   import TeiserverTestLib,
@@ -120,8 +123,65 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       assert data == %{}
     end
 
+    test "players", %{conn: conn} do
+      user = new_bot_user()
+
+      player1 = new_user()
+      player2 = new_user()
+
+      Client.login(player1, :spring, "127.0.0.1")
+      Client.login(player2, :spring, "127.0.0.1")
+
+      lobby_id =
+        make_lobby(%{name: "Test", founder_id: user.id, founder_name: user.name})
+
+      Lobby.force_add_user_to_lobby(player1.id, lobby_id)
+      Lobby.force_add_user_to_lobby(player2.id, lobby_id)
+
+      ClientLib.update_client(player1.id, %{player: true})
+      ClientLib.update_client(player2.id, %{player: true})
+
+      params =
+        %{
+          "nbTeams" => "2",
+          "players" =>
+            "{'#{player1.name}': {'scriptPass': '123', 'port': None, 'skill': 16.67, 'color': {'blue': 255, 'red': 0, 'green': 85}, 'ip': None, 'battleStatus': {'ready': 1, 'bonus': 0, 'id': 1, 'side': 0, 'sync': 1, 'workaroundId': 1, 'team': 1, 'mode': 1, 'workaroundTeam': 1}, 'sigma': 8.33}, '#{player2.name}': {'port': None, 'scriptPass': '5232537262', 'sigma': 4.07, 'ip': None, 'battleStatus': {'mode': 1, 'team': 0, 'workaroundId': 0, 'side': 1, 'sync': 1, 'id': 0, 'bonus': 0, 'ready': 0}, 'skill': 27.65, 'color': {'green': 0, 'blue': 0, 'red': 255}}}",
+          "teamSize" => "2.0"
+        }
+
+      conn =
+        conn
+        |> put_authorization_header(user)
+        |> get(~p"/teiserver/api/spads/balance_battle", params)
+
+      response = response(conn, 200)
+      data = Jason.decode!(response)
+
+      assert data["bot_assign_hash"] == %{}
+      assert Map.has_key?(data["player_assign_hash"], player1.name)
+      assert Map.has_key?(data["player_assign_hash"], player2.name)
+    end
+
     test "bots", %{conn: conn} do
       user = new_bot_user()
+
+      player1 = new_user()
+      player2 = new_user()
+
+      # We expect this to return nothing as we have bots included in this but
+      # without a client logged in it won't run the conditionals correctly
+      # and we potentially get a false-positive test result
+      Client.login(player1, :spring, "127.0.0.1")
+      Client.login(player2, :spring, "127.0.0.1")
+
+      lobby_id =
+        make_lobby(%{name: "Test", founder_id: user.id, founder_name: user.name})
+
+      Lobby.force_add_user_to_lobby(player1.id, lobby_id)
+      Lobby.force_add_user_to_lobby(player2.id, lobby_id)
+
+      ClientLib.update_client(player1.id, %{player: true})
+      ClientLib.update_client(player2.id, %{player: true})
 
       params =
         %{
@@ -129,7 +189,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
             "{'BARbarianAI(1)': {'color': {'red': 243, 'blue': 0, 'green': 0}, 'skill': 20, 'battleStatus': {'team': 0, 'mode': 1, 'bonus': 0, 'ready': 1, 'side': 0, 'sync': 1, 'id': 2}, 'aiDll': 'BARb', 'owner': 'SomeUser'}}",
           "nbTeams" => "2",
           "players" =>
-            "{'BEANS': {'scriptPass': '123', 'port': None, 'skill': 16.67, 'color': {'blue': 255, 'red': 0, 'green': 85}, 'ip': None, 'battleStatus': {'ready': 1, 'bonus': 0, 'id': 1, 'side': 0, 'sync': 1, 'workaroundId': 1, 'team': 1, 'mode': 1, 'workaroundTeam': 1}, 'sigma': 8.33}, 'SomeUser': {'port': None, 'scriptPass': '5232537262', 'sigma': 4.07, 'ip': None, 'battleStatus': {'mode': 1, 'team': 0, 'workaroundId': 0, 'side': 1, 'sync': 1, 'id': 0, 'bonus': 0, 'ready': 0}, 'skill': 27.65, 'color': {'green': 0, 'blue': 0, 'red': 255}}}",
+            "{'#{player1.name}': {'scriptPass': '123', 'port': None, 'skill': 16.67, 'color': {'blue': 255, 'red': 0, 'green': 85}, 'ip': None, 'battleStatus': {'ready': 1, 'bonus': 0, 'id': 1, 'side': 0, 'sync': 1, 'workaroundId': 1, 'team': 1, 'mode': 1, 'workaroundTeam': 1}, 'sigma': 8.33}, '#{player2.name}': {'port': None, 'scriptPass': '5232537262', 'sigma': 4.07, 'ip': None, 'battleStatus': {'mode': 1, 'team': 0, 'workaroundId': 0, 'side': 1, 'sync': 1, 'id': 0, 'bonus': 0, 'ready': 0}, 'skill': 27.65, 'color': {'green': 0, 'blue': 0, 'red': 255}}}",
           "teamSize" => "2.0"
         }
 
@@ -174,6 +234,23 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
 
       assert SpadsController.get_balance_team_dimensions(%{team_sizes: %{1 => 8, 2 => 6}}) ==
                {:ok, {2, 8}}
+    end
+
+    test "bad params", %{conn: conn} do
+      # There was an error where passing in a value which didn't decode correctly could
+      # produce an exception, this query contains bad data which would previously have
+      # generated the error
+      user = new_bot_user()
+
+      conn =
+        conn
+        |> put_authorization_header(user)
+        |> get(~p"/teiserver/api/spads/balance_battle?players=")
+
+      response = response(conn, 200)
+      data = Jason.decode!(response)
+
+      assert data == %{}
     end
   end
 
