@@ -32,15 +32,6 @@ defmodule TeiserverWeb.Battle.MatchComponents do
       Ratings
     </.section_menu_button>
 
-    <.section_menu_button
-      bsname={@view_colour}
-      icon={StylingHelper.icon(:chart)}
-      active={@active == "progression"}
-      url={~p"/battle/progression"}
-    >
-      Progression
-    </.section_menu_button>
-
     <%= if @match_id do %>
       <.section_menu_button
         bsname={@view_colour}
