@@ -39,6 +39,16 @@ defmodule Teiserver.Account.User do
     field :discord_dm_channel_id, :integer
     field :steam_id, :integer
 
+    field :rank, :integer, default: 0
+    field :country, :string, default: "??"
+    field :bot, :boolean, default: false
+    field :email_change_code, :string
+    field :last_login_mins, :integer
+    field :lobby_hash, :string
+    field :chobby_hash, :string
+    field :lobby_client, :string
+    field :discord_dm_channel, :integer
+
     has_many :user_configs, Teiserver.Config.UserConfig
 
     # Extra user.ex relations go here
@@ -62,8 +72,6 @@ defmodule Teiserver.Account.User do
       shadowbanned: false,
       lobby_hash: [],
       chobby_hash: nil,
-      print_client_messages: false,
-      print_server_messages: false,
       discord_id: nil,
       discord_dm_channel: nil,
       discord_dm_channel_id: nil,
@@ -81,7 +89,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
@@ -97,7 +105,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id rank country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)

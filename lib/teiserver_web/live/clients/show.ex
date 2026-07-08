@@ -54,23 +54,6 @@ defmodule TeiserverWeb.ClientLive.Show do
         client = Account.get_client_by_id(id)
         user = CacheUser.get_user_by_id(id)
 
-        connection_state =
-          cond do
-            client == nil ->
-              %{}
-
-            Process.alive?(client.tcp_pid) == true ->
-              :sys.get_state(client.tcp_pid)
-
-            true ->
-              %{}
-          end
-
-        # If viewing an internal server process you it won't have these keys and thus we use
-        # this method
-        server_debug_messages = Map.get(connection_state, :print_server_messages, false)
-        client_debug_messages = Map.get(connection_state, :print_client_messages, false)
-
         if client && user do
           {:noreply,
            socket
@@ -78,9 +61,7 @@ defmodule TeiserverWeb.ClientLive.Show do
            |> add_breadcrumb(name: user.name, url: ~p"/teiserver/admin/client/#{id}")
            |> assign(:id, id)
            |> assign(:client, client)
-           |> assign(:user, user)
-           |> assign(:client_debug_messages, client_debug_messages)
-           |> assign(:server_debug_messages, server_debug_messages)}
+           |> assign(:user, user)}
         else
           {:noreply,
            socket
@@ -166,38 +147,6 @@ defmodule TeiserverWeb.ClientLive.Show do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("enable-server-message-logging", _event, socket) do
-    Client.enable_server_message_print(socket.assigns.id)
-
-    {:noreply,
-     socket
-     |> assign(:server_debug_messages, true)}
-  end
-
-  def handle_event("disable-server-message-logging", _event, socket) do
-    Client.disable_server_message_print(socket.assigns.id)
-
-    {:noreply,
-     socket
-     |> assign(:server_debug_messages, false)}
-  end
-
-  def handle_event("enable-client-message-logging", _event, socket) do
-    Client.enable_client_message_print(socket.assigns.id)
-
-    {:noreply,
-     socket
-     |> assign(:client_debug_messages, true)}
-  end
-
-  def handle_event("disable-client-message-logging", _event, socket) do
-    Client.disable_client_message_print(socket.assigns.id)
-
-    {:noreply,
-     socket
-     |> assign(:client_debug_messages, false)}
-  end
-
   def handle_event("force-error-log", _event, socket) do
     p = Account.get_client_by_id(socket.assigns.id) |> Map.get(:tcp_pid)
     send(p, :error_log)

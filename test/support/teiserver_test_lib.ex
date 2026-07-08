@@ -235,8 +235,6 @@ defmodule Teiserver.TeiserverTestLib do
       room_member_cache: %{},
       known_users: %{},
       known_battles: [],
-      print_client_messages: false,
-      print_server_messages: false,
       exempt_from_cmd_throttle: true,
       script_password: nil,
       last_message_invalid: false
@@ -267,8 +265,6 @@ defmodule Teiserver.TeiserverTestLib do
       room_member_cache: %{},
       known_users: %{},
       known_battles: [],
-      print_client_messages: false,
-      print_server_messages: false,
       exempt_from_cmd_throttle: true,
       script_password: nil,
       last_message_invalid: false
@@ -303,8 +299,6 @@ defmodule Teiserver.TeiserverTestLib do
       room_member_cache: %{},
       known_users: %{},
       known_battles: [],
-      print_client_messages: false,
-      print_server_messages: false,
       exempt_from_cmd_throttle: true,
       script_password: nil,
       last_message_invalid: false

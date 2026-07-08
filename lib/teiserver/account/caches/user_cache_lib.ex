@@ -241,8 +241,6 @@ defmodule Teiserver.Account.UserCacheLib do
       lobby_hash: user_data.lobby_hash,
       chobby_hash: user_data.chobby_hash,
       lobby_client: user_data.lobby_client,
-      print_client_messages: user_data.print_client_messages,
-      print_server_messages: user_data.print_server_messages,
       discord_dm_channel: user_data.discord_dm_channel
     }
   end
@@ -280,7 +278,7 @@ defmodule Teiserver.Account.UserCacheLib do
       |> Map.new(fn k -> {to_string(k), Map.get(user, k, Account.default_data()[k])} end)
 
     obj_attrs =
-      CacheUser.keys()
+      (CacheUser.keys() ++ CacheUser.duplicated_keys())
       |> Map.new(fn k -> {to_string(k), Map.get(user, k, Account.default_data()[k])} end)
 
     Account.script_update_user(db_user, Map.put(obj_attrs, "data", data))

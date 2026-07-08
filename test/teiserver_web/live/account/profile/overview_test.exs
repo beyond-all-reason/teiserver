@@ -109,7 +109,7 @@ defmodule TeiserverWeb.Live.Account.Profile.OverviewTest do
 
   defp login_user(user) do
     user
-    |> Map.merge(%{rank: 1, print_client_messages: false, print_server_messages: false})
+    |> Map.merge(%{rank: 1})
     |> Client.login(:spring, "127.0.0.1")
   end
 end

@@ -18,7 +18,6 @@ defmodule Teiserver.TeiserverConfigs do
     moderation_configs()
     discord_configs()
     lobby_configs()
-    debugging_configs()
     profile_configs()
     rating_configs()
     tachyon_configs()
@@ -746,27 +745,6 @@ defmodule Teiserver.TeiserverConfigs do
       type: "integer",
       permissions: ["Admin"],
       description: "The discord ID for the channel broadcasting lobby count"
-    })
-  end
-
-  @spec debugging_configs :: :ok
-  def debugging_configs do
-    add_site_config_type(%{
-      key: "debug.Print outgoing messages",
-      section: "Debug",
-      type: "boolean",
-      default: false,
-      permissions: ["Admin"],
-      description: "Print all outgoing messages"
-    })
-
-    add_site_config_type(%{
-      key: "debug.Print incoming messages",
-      section: "Debug",
-      type: "boolean",
-      default: false,
-      permissions: ["Admin"],
-      description: "Print all incoming messages"
     })
   end
 
