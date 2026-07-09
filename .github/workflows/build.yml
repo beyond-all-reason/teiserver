@@ -25,13 +25,15 @@ jobs:
     - name: Login to registry
       run: buildah login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} $REGISTRY
 
-    - name: Build latest image
-      run: |
-        buildah bud -t $IMAGE:latest .
-        buildah push $IMAGE:latest
+    - name: Build image
+      run: buildah bud -t $IMAGE:latest .
 
-    - name: Build tagged image
+    - name: Push latest image
+      run: buildah push $IMAGE:latest
+
+    - name: Push sha tagged image
+      run: buildah push $IMAGE:latest $IMAGE:${{ github.sha }}
+
+    - name: Push tagged image
       if: github.event_name == 'release'
-      run: |
-        buildah bud -t $IMAGE:${{ github.event.release.tag_name }} .
-        buildah push $IMAGE:${{ github.event.release.tag_name }}
+      run: buildah push $IMAGE:latest $IMAGE:${{ github.event.release.tag_name }}
