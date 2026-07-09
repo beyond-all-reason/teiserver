@@ -5,7 +5,7 @@ defmodule Teiserver.TachyonLobby.ClusterTest do
   alias Teiserver.TachyonLobby.Types, as: LT
 
   use Teiserver.DataCase
-  import Teiserver.Support.LobbyHelpers, only: [mk_start_params: 1]
+  import Teiserver.Support.LobbyHelpers, only: [mk_start_params: 1, mk_start_params: 2]
 
   @moduletag :tachyon
 
@@ -33,6 +33,17 @@ defmodule Teiserver.TachyonLobby.ClusterTest do
     :peer.stop(server_ref)
     {:ok, details} = Lobby.join_ally_team(id, "other-user-id", 1)
     %LT.Details{players: %{"other-user-id" => %{}}} = details
+  end
+
+  test "lobby shutdown on all nodes when empty" do
+    {_server_ref, peer} = ClusterHelpers.start_node(:peer1)
+    id = ClusterHelpers.lobby_id_for_node(peer)
+    {:ok, _pid, _details} = %{mk_start_params([1, 1], "1234") | id: id} |> Lobby.create()
+    Polling.poll_until_some(fn -> :erpc.call(peer, Lobby, :lookup, [id]) end)
+    :ok = Lobby.leave(id, "1234")
+
+    Polling.poll_until_nil(fn -> Lobby.lookup(id) end)
+    Polling.poll_until_nil(fn -> :erpc.call(peer, Lobby, :lookup, [id]) end)
   end
 
   test "replicate to new nodes" do
