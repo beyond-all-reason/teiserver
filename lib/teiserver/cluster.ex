@@ -9,11 +9,9 @@ defmodule Teiserver.Cluster do
 
   This uses rendez-vous hashing to split the nodes
   """
-  @spec split_nodes(term()) :: {node(), [node()]}
-  def split_nodes(routing_key) do
-    [primary | replicas] =
-      [Node.self() | Node.list(:connected)]
-      |> Enum.sort_by(fn node -> :erlang.phash2({node, routing_key}) end)
+  @spec split_nodes(term(), [node()] | nil) :: {node(), [node()]}
+  def split_nodes(routing_key, nodes \\ [Node.self() | Node.list(:connected)]) do
+    [primary | replicas] = Enum.sort_by(nodes, fn node -> :erlang.phash2({node, routing_key}) end)
 
     {primary, replicas}
   end
@@ -71,6 +69,27 @@ defmodule Teiserver.Cluster do
       end)
 
     receive_responses(reqs, timeout)
+  end
+
+  @doc """
+  Blocks the calling process until the teiserver application is started
+  on the given node.
+  This is a no-op in envs other than tests.
+
+  In test however, because nodes are started with the :peer module, they
+  are bare erlang node without anything loaded in them, yet, they will connect
+  to the cluster immediately. To avoid issues calling undefined function, or
+  attempting to call processes that have not started yet this will poll until
+  the app is started.
+  Outside of test, in "real" nodes, the logic to connect the node to other
+  should happen when the rest of the app is already started, so later in the
+  supervision tree
+  """
+  def wait_teiserver_ready(node) do
+    case Application.get_env(:teiserver, Teiserver.Cluster)[:poll_module_function] do
+      nil -> nil
+      {m, f} -> apply(m, f, [node])
+    end
   end
 
   defp receive_responses(reqs, timeout, result \\ %{}) do

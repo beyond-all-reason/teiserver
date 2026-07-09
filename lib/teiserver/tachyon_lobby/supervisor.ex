@@ -23,6 +23,17 @@ defmodule Teiserver.TachyonLobby.Supervisor do
     )
   end
 
+  def start_replica(%LT.Data{} = data) do
+    # TODO: handle race condition there
+    {:ok, _pid} =
+      DynamicSupervisor.start_child(
+        __MODULE__,
+        {Lobby, {data.id, {:replica, data}}}
+      )
+
+    :ok
+  end
+
   def start_link(init_arg) do
     DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
