@@ -112,6 +112,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec leave(LT.Types.id(), User.id()) :: :ok | {:error, reason :: :lobby_full | term()}
   def leave(lobby_id, user_id) do
+    mfa = {__MODULE__, :do_leave, [lobby_id, user_id]}
+    routing_key(lobby_id) |> Cluster.primary_apply(mfa, @default_call_timeout)
+  end
+
+  @doc """
+  for internal use
+  """
+  def do_leave(lobby_id, user_id) do
     via_tuple(lobby_id) |> :gen_statem.call({:leave, user_id}, @default_call_timeout)
   catch
     :exit, {:noproc, _details} -> {:error, :invalid_lobby}

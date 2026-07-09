@@ -1,9 +1,13 @@
 defmodule Teiserver.Player.SessionTest do
   alias ExUnit.Callbacks
+  alias Teiserver.AssetFixtures
+  alias Teiserver.Cluster
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Player
   alias Teiserver.Player.Session
   alias Teiserver.Player.SessionSupervisor
+  alias Teiserver.Player.Types, as: PT
+  alias Teiserver.Support.ClusterHelpers
   alias Teiserver.Support.Polling
   alias Teiserver.Tachyon, as: TachyonLib
   alias Teiserver.TachyonLobby
@@ -13,10 +17,20 @@ defmodule Teiserver.Player.SessionTest do
 
   @moduletag :tachyon
 
+  setup_all do
+    {_out, 0} = System.cmd("epmd", ["-daemon"], env: [])
+    Node.start(:origin, name_domain: :shortnames, hidden: false)
+    :ok
+  end
+
   def setup_session(_context) do
     user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     {:ok, sess_pid} = SessionSupervisor.start_session(user)
-    {:ok, fake_conn} = Task.start(:timer, :sleep, [:infinity])
+
+    {:ok, fake_conn} =
+      Supervisor.child_spec({Task, fn -> :timer.sleep(:infinity) end}, [])
+      |> Callbacks.start_supervised()
+
     Session.replace_connection(sess_pid, fake_conn)
     {:ok, user: user, sess_pid: sess_pid, fake_conn: fake_conn}
   end
@@ -157,6 +171,46 @@ defmodule Teiserver.Player.SessionTest do
       Polling.poll_until(fn -> nil end, fn _result -> not Process.alive?(sess_pid) end)
 
       Polling.poll_until_some(fn -> Player.lookup_session(user.id) end)
+    end
+  end
+
+  defp setup_assets(_ctx) do
+    game = AssetFixtures.create_game(%{name: "test-lobby-game", in_matchmaking: true})
+
+    engine =
+      AssetFixtures.create_engine(%{name: "test-lobby-engine", in_matchmaking: true})
+
+    {:ok, game: game, engine: engine}
+  end
+
+  describe "lobby cluster" do
+    setup [:setup_session, :setup_assets]
+
+    test "track lobbies across replica", ctx do
+      {_server_ref, peer} = ClusterHelpers.start_node(:peer1)
+      Session.replace_connection(ctx.sess_pid, self())
+      start_params = %PT.LobbyStartParams{name: "test", map_name: "Aurelia", ally_team_config: []}
+
+      details =
+        Stream.repeatedly(fn ->
+          {:ok, details} = Session.create_lobby(ctx.user.id, start_params)
+
+          # force a lobby on the replica for this test
+          if TachyonLobby.routing_key(details.id) |> Cluster.primary?() do
+            :ok = Session.lobby_leave(ctx.user.id)
+            nil
+          else
+            details
+          end
+        end)
+        |> Stream.reject(&is_nil/1)
+        |> Enum.at(0)
+
+      Node.disconnect(peer)
+      refute_receive {:lobby, _id, {:left, _reason}}
+
+      TachyonLobby.lookup(details.id) |> Process.exit(:kill)
+      assert_receive {:lobby, _id, {:left, _reason}}
     end
   end
 end

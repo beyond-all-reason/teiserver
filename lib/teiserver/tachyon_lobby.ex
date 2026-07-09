@@ -103,6 +103,17 @@ defmodule Teiserver.TachyonLobby do
   @spec lookup(id()) :: pid() | nil
   defdelegate lookup(lobby_id), to: TachyonLobby.Registry
 
+  @spec lookup_primary(id()) :: pid() | nil
+  def lookup_primary(lobby_id) do
+    Lobby.routing_key(lobby_id)
+    |> Cluster.primary_apply({__MODULE__, :lookup, [lobby_id]})
+  rescue
+    # TODO: this error is a bit too wide, this should only cover for when
+    # the peer node is gone or not loaded (somehow)
+    ErlangError ->
+      nil
+  end
+
   @spec count() :: non_neg_integer()
   defdelegate count(), to: TachyonLobby.Registry
 
