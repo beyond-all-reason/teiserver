@@ -34,6 +34,6 @@ jobs:
     - name: Push sha tagged image
       run: buildah push $IMAGE:latest $IMAGE:${{ github.sha }}
 
-    - name: Push tagged image
+    - name: Push release tagged image
       if: github.event_name == 'release'
       run: buildah push $IMAGE:latest $IMAGE:${{ github.event.release.tag_name }}
