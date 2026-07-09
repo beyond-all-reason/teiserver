@@ -73,6 +73,9 @@ config :teiserver, Teiserver.PromEx, disabled: true
 
 config :teiserver, Teiserver.IpCheck, client_module: Teiserver.IpCheck.Stub
 
+config :teiserver, Teiserver.Cluster,
+  poll_module_function: {Teiserver.Support.Polling, :poll_until_teiserver_ready}
+
 config :teiserver, Teiserver.Mailer,
   adapter: Swoosh.Adapters.Test,
   noreply_address: "noreply@testsite.co.uk",

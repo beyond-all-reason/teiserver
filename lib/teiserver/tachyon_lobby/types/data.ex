@@ -9,6 +9,7 @@ defmodule Teiserver.TachyonLobby.Types.Data do
 
   @enforce_keys [
     :id,
+    :primary?,
     :monitors,
     :name,
     :map_name,
@@ -19,6 +20,7 @@ defmodule Teiserver.TachyonLobby.Types.Data do
   ]
   defstruct [
     :id,
+    :primary?,
     :monitors,
     :name,
     :map_name,
@@ -44,6 +46,7 @@ defmodule Teiserver.TachyonLobby.Types.Data do
 
   @type t() :: %__MODULE__{
           id: LT.Types.id(),
+          primary?: boolean(),
           monitors: MC.t(),
           name: String.t(),
           game_version: String.t(),

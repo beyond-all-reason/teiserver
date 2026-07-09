@@ -41,6 +41,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.TachyonLobby.Events
   alias Teiserver.TachyonLobby.ListMonitor
   alias Teiserver.TachyonLobby.Registry, as: LobbyRegistry
+  alias Teiserver.TachyonLobby.Supervisor, as: LobbySupervisor
   # lobby types
   alias Teiserver.TachyonLobby.Types, as: LT
 
@@ -286,6 +287,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def init({id, {:user, %LT.StartParams{} = start_params}}) do
     Process.flag(:trap_exit, true)
     Logger.metadata(actor_type: :lobby, actor_id: id)
+    :net_kernel.monitor_nodes(true)
 
     monitors =
       MC.new() |> MC.monitor(start_params.creator_pid, {:user, start_params.creator_data.id})
@@ -298,6 +300,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     state =
       %LT.Data{
         id: id,
+        primary?: routing_key(id) |> Cluster.primary?(),
         monitors: monitors,
         name: start_params.name,
         map_name: start_params.map_name,
@@ -337,6 +340,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     Process.flag(:trap_exit, true)
     Logger.metadata(actor_type: :lobby, actor_id: id)
     Logger.debug("Restoring lobby from snapshot")
+    :net_kernel.monitor_nodes(true)
 
     snapshot = Crypto.non_executable_binary_to_term(serialized_data, [:safe])
 
@@ -352,11 +356,37 @@ defmodule Teiserver.TachyonLobby.Lobby do
       snapshot
       |> Map.put(:monitors, MC.new())
       |> Map.put(:ids_to_rejoin, ids_to_rejoin)
+      |> Map.put(:primary?, routing_key(id) |> Cluster.primary?())
 
     timeout = Tachyon.get_restoration_timeout()
     actions = [{:state_timeout, timeout, :snapshot_timeout}]
 
     {:ok, :starting_up, data, actions}
+  end
+
+  def init({id, {:replica, %LT.Data{} = data}}) do
+    Process.flag(:trap_exit, true)
+    Logger.metadata(actor_type: :lobby, actor_id: id)
+    Logger.debug("Starting replica for lobby #{id}")
+    :net_kernel.monitor_nodes(true)
+
+    users = Map.values(data.players) ++ Map.values(data.spectators)
+
+    monitors =
+      Enum.reduce(users, MC.new(), fn user, monitors ->
+        MC.monitor(monitors, user.pid, {:user, user.id})
+      end)
+
+    monitors =
+      if data.current_battle do
+        MC.monitor(monitors, data.current_battle.pid, :current_battle)
+      else
+        monitors
+      end
+
+    data = %{data | monitors: monitors, primary?: routing_key(id) |> Cluster.primary?()}
+    register_new_lobby(data)
+    {:ok, :running, data}
   end
 
   @impl :gen_statem
@@ -1176,6 +1206,25 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(:info, {:EXIT, _pid, reason}, _state, %LT.Data{} = _data) do
     {:stop, reason}
+  end
+
+  def handle_event(:info, {:nodeup, new_node}, _state, %LT.Data{} = data) do
+    Cluster.wait_teiserver_ready(new_node)
+
+    if data.primary? do
+      # TODO: handle the case where this fails. The most likely is when
+      # the new node is the new primary, and it has already been started
+      # through a lobby call
+      :ok = :erpc.call(new_node, LobbySupervisor, :start_replica, [data])
+    end
+
+    data = %{data | primary?: routing_key(data.id) |> Cluster.primary?()}
+    {:keep_state, data, []}
+  end
+
+  def handle_event(:info, {:nodedown, _old_node}, _state, %LT.Data{} = data) do
+    data = %{data | primary?: routing_key(data.id) |> Cluster.primary?()}
+    {:keep_state, data}
   end
 
   def handle_event(:internal, :empty, _state, %LT.Data{} = data) do

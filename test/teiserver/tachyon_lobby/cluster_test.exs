@@ -1,6 +1,7 @@
 defmodule Teiserver.TachyonLobby.ClusterTest do
   alias Mix.Project
   alias Teiserver.Cluster
+  alias Teiserver.Support.Polling
   alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.TachyonLobby.Types, as: LT
 
@@ -39,10 +40,27 @@ defmodule Teiserver.TachyonLobby.ClusterTest do
     %LT.Details{players: %{"other-user-id" => %{}}} = details
   end
 
-  def start_node(name) do
-    {:ok, pid, node} = :peer.start_link(%{name: name})
+  test "replicate to new nodes" do
+    {:ok, _pid, details} = mk_start_params([1, 1]) |> Lobby.create()
+    {_server_ref, peer} = start_node(:peer1)
 
-    Node.connect(node)
+    Polling.poll_until(fn -> :erpc.call(peer, Lobby, :lookup, [details.id]) end, &is_pid/1)
+    # make sure the local lobby is still fine
+    assert is_pid(Lobby.lookup(details.id))
+
+    list = Lobby.list()
+
+    Polling.poll_until_true(
+      fn ->
+        peer_list = :erpc.call(peer, Lobby, :list, [])
+        peer_list == list
+      end,
+      wait: 10
+    )
+  end
+
+  def start_node(name) do
+    {:ok, pid, node} = :peer.start_link(%{name: name, wait_boot: :timer.seconds(1)})
     :erpc.call(node, :code, :add_paths, [:code.get_path()])
 
     Enum.each(Application.loaded_applications(), fn {app, _name, _version} ->
@@ -63,7 +81,7 @@ defmodule Teiserver.TachyonLobby.ClusterTest do
     :erpc.call(node, Mix, :env, [Mix.env()])
 
     app = Project.config()[:app]
-    :erpc.call(node, Application, :ensure_all_started, [app])
+    {:ok, _app} = :erpc.call(node, Application, :ensure_all_started, [app])
 
     {pid, node}
   end
