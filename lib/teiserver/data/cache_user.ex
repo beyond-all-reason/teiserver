@@ -359,7 +359,7 @@ defmodule Teiserver.CacheUser do
         {:error, "That name is in restricted for use by the server, please choose another"}
 
       admin_action == false and WordLib.acceptable_name?(name) == false ->
-        {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
+        {:error, "Not an acceptable name, please see section B3 of the code of conduct"}
 
       clean_name(name) |> String.length() > max_username_length ->
         {:error, "Max length #{max_username_length} characters"}
