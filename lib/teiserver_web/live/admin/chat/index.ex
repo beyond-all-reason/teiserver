@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
   def handle_params(params, _url, %{assigns: %{filters: filters}} = socket) do
     filters =
       if params["userid"] do
-        user = Account.get_user_by_id(params["userid"])
+        user = Account.deprecated_get_user_by_id(params["userid"])
 
         Map.merge(filters, %{
           "username" => user.name,

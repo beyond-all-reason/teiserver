@@ -445,7 +445,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command("user/info", "request", _message_id, msg, state) do
     user_id = msg["data"]["userId"]
-    user = Account.get_user_by_id(user_id)
+    user = Account.deprecated_get_user_by_id(user_id)
     db_user = Account.get_user(user_id)
 
     if user != nil do

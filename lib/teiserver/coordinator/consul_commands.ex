@@ -1083,7 +1083,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           )
 
         "friends" ->
-          sender_friends = [senderid | CacheUser.get_user_by_id(senderid) |> Map.get(:friends)]
+          sender_friends = [
+            senderid | CacheUser.deprecated_get_user_by_id(senderid) |> Map.get(:friends)
+          ]
 
           all_possible_clients
           |> Enum.group_by(

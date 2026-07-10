@@ -206,7 +206,7 @@ defmodule TeiserverWeb.Admin.UserController do
             :data
           ])
 
-        cache_user = Account.get_user_by_id(user.id)
+        cache_user = Account.deprecated_get_user_by_id(user.id)
 
         extra_cache_keys =
           cache_user
@@ -650,7 +650,7 @@ defmodule TeiserverWeb.Admin.UserController do
           case action do
             "recache" ->
               RefreshUserRestrictionsTask.refresh_user(user.id)
-              CacheUser.recache_user(user.id)
+              CacheUser.deprecated_recache_user(user.id)
               {:ok, ""}
 
             "reset_flood_protection" ->
@@ -997,7 +997,7 @@ defmodule TeiserverWeb.Admin.UserController do
     end
 
     RefreshUserRestrictionsTask.refresh_user(user.id)
-    CacheUser.recache_user(user.id)
+    CacheUser.deprecated_recache_user(user.id)
 
     # Now we update stats for the origin
     smurf_count =
@@ -1122,7 +1122,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec shadowban(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def shadowban(conn, %{"id" => id, "state" => state}) do
-    user = Account.get_user_by_id(id)
+    user = Account.deprecated_get_user_by_id(id)
 
     case UserLib.has_access(user, conn) do
       {true, _access} ->

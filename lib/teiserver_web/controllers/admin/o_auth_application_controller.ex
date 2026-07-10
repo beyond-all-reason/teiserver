@@ -187,7 +187,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
 
   # split the comma separated fields and map emails to users
   defp form_to_app(app, raw_scopes) do
-    user_id = Map.get(Account.get_user_by_email(app["owner_email"]) || %{}, :id)
+    user_id = Map.get(Account.deprecated_get_user_by_email(app["owner_email"]) || %{}, :id)
 
     scopes =
       Enum.filter(OAuth.allowed_scopes(), fn scope ->

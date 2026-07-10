@@ -20,7 +20,7 @@ defmodule Teiserver.Bridge.ChatCommands do
       }) do
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
-    user = Account.get_user_by_discord_id(author_id)
+    user = Account.deprecated_get_user_by_discord_id(author_id)
 
     if allow?(cmd, user) do
       handle_command({user, author_id, message_id}, cmd, remaining, channel_id)

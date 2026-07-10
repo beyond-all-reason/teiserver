@@ -345,7 +345,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("CONFIRMAGREEMENT", code, msg_id, %{unverified_id: userid} = state) do
-    case CacheUser.get_user_by_id(userid) do
+    case CacheUser.deprecated_get_user_by_id(userid) do
       nil ->
         Logger.error("CONFIRMAGREEMENT - No user found for ID of '#{userid}'")
         state
@@ -521,7 +521,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("GETUSERID", data, msg_id, state) do
     if CacheUser.allow?(state.userid, :bot) do
-      target = CacheUser.get_user_by_name(data)
+      target = CacheUser.deprecated_get_user_by_name(data)
       hash = target.lobby_hash
       reply(:user_id, {data, hash, target.id}, msg_id, state)
     else

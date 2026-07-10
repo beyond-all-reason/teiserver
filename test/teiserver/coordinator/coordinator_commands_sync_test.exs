@@ -40,7 +40,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
       |> Account.get_user!()
       |> UserLib.script_update_user(%{roles: ["Admin"]})
 
-      CacheUser.recache_user(user.id)
+      CacheUser.deprecated_recache_user(user.id)
 
       _send_raw(socket, "SAYPRIVATE coordinator $website\n")
       reply = _recv_until(socket)

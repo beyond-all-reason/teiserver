@@ -92,7 +92,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
           "data" => %{}
         })
 
-      CacheUser.recache_user(user.id)
+      CacheUser.deprecated_recache_user(user.id)
 
       conn =
         put(conn, ~p"/teiserver/admin/users/rename_post/#{user.id}", new_name: "new_test_name")
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
           "data" => %{}
         })
 
-      CacheUser.recache_user(user.id)
+      CacheUser.deprecated_recache_user(user.id)
 
       conn =
         put(conn, ~p"/teiserver/admin/users/rename_post/#{user.id}",

@@ -14,7 +14,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
       userids_str
       |> String.split("\t")
       |> Enum.map(fn n ->
-        case Account.get_user_by_id(n) do
+        case Account.deprecated_get_user_by_id(n) do
           nil ->
             {n, :no_user}
 
@@ -34,7 +34,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
       userids_str
       |> String.split("\t")
       |> Enum.map(fn n ->
-        case Account.get_user_by_id(n) do
+        case Account.deprecated_get_user_by_id(n) do
           nil ->
             {n, :no_user}
 
@@ -64,7 +64,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
       userids_str
       |> String.split("\t")
       |> Enum.map(fn n ->
-        case Account.get_user_by_id(n) do
+        case Account.deprecated_get_user_by_id(n) do
           nil ->
             {n, :no_user}
 
@@ -84,7 +84,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
 
   def do_handle("whois", userid_str, msg_id, state) do
     result =
-      case Account.get_user_by_id(userid_str) do
+      case Account.deprecated_get_user_by_id(userid_str) do
         nil ->
           {:no_user, userid_str}
 
@@ -97,7 +97,7 @@ defmodule Teiserver.Protocols.Spring.UserIn do
 
   def do_handle("whoisName", userid_str, msg_id, state) do
     result =
-      case Account.get_user_by_name(userid_str) do
+      case Account.deprecated_get_user_by_name(userid_str) do
         nil ->
           {:no_user, userid_str}
 

@@ -19,7 +19,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   defp setup_lobby(_ctx) do
     lobby_id = TeiserverTestLib.make_lobby()
     lobby = Lobby.get_lobby(lobby_id)
-    host = Account.get_user_by_id(lobby.founder_id)
+    host = Account.deprecated_get_user_by_id(lobby.founder_id)
     Client.login(host, :test, "127.0.0.1")
 
     Coordinator.send_consul(lobby_id, {:host_update, host.id, %{host_bosses: [host.id]}})

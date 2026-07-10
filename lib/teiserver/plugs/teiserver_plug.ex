@@ -16,7 +16,7 @@ defmodule Teiserver.ServerUserPlug do
 
   def call(%{assigns: %{current_user: current_user}} = conn, _opts) do
     userid = current_user.id
-    server_user = CacheUser.get_user_by_id(userid)
+    server_user = CacheUser.deprecated_get_user_by_id(userid)
 
     conn
     |> assign(:server_user, server_user)
@@ -33,7 +33,7 @@ defmodule Teiserver.ServerUserPlug do
 
   def live_call(%{assigns: %{current_user: current_user}} = socket) do
     userid = current_user.id
-    server_user = CacheUser.get_user_by_id(userid)
+    server_user = CacheUser.deprecated_get_user_by_id(userid)
 
     socket
     |> LiveViewUtils.assign(:server_user, server_user)

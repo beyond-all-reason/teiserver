@@ -93,7 +93,7 @@ defmodule Teiserver.Account.AccoladeReport do
     users =
       (giver_ids ++ recipient_ids ++ taker_userids ++ giver_userids)
       |> Enum.uniq()
-      |> Map.new(fn userid -> {userid, CacheUser.get_user_by_id(userid)} end)
+      |> Map.new(fn userid -> {userid, CacheUser.deprecated_get_user_by_id(userid)} end)
 
     assigns = %{
       counts: counts,

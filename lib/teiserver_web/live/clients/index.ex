@@ -26,7 +26,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> Map.new(fn {userid, _client} ->
         {
           userid,
-          CacheUser.get_user_by_id(userid) |> limited_user()
+          CacheUser.deprecated_get_user_by_id(userid) |> limited_user()
         }
       end)
       |> Map.filter(fn {_key, value} -> not is_nil(value) end)
@@ -83,7 +83,7 @@ defmodule TeiserverWeb.ClientLive.Index do
         if Map.has_key?(assigns.users, userid) do
           assigns.users[userid]
         else
-          CacheUser.get_user_by_id(userid)
+          CacheUser.deprecated_get_user_by_id(userid)
           |> limited_user()
         end
       end)

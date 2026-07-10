@@ -579,7 +579,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       [now | user_times]
       |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
 
-    user = CacheUser.get_user_by_id(userid)
+    user = CacheUser.deprecated_get_user_by_id(userid)
 
     cond do
       Auth.admin?(user.id) or Auth.moderator?(user.id) ->
@@ -699,7 +699,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp request_user_change_status(_new_client, nil, _state), do: {false, nil}
 
   defp request_user_change_status(new_client, %{userid: userid} = existing, state) do
-    user = Account.get_user_by_id(userid)
+    user = Account.deprecated_get_user_by_id(userid)
     list_status = get_list_status(userid, state)
 
     # We were using this as there were concerns over an autoready feature, leaving it here for now
@@ -836,7 +836,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec user_allowed_to_play?(User.id(), map()) :: boolean()
   defp user_allowed_to_play?(userid, state) do
     user_allowed_to_play?(
-      Account.get_user_by_id(userid),
+      Account.deprecated_get_user_by_id(userid),
       Account.get_client_by_id(userid),
       state
     )
@@ -1302,7 +1302,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec log_command(map(), map()) :: map()
   def log_command(cmd, state) do
     message = "$ " <> command_as_message(cmd)
-    sender = CacheUser.get_user_by_id(cmd.senderid)
+    sender = CacheUser.deprecated_get_user_by_id(cmd.senderid)
     ChatLib.persist_message(sender, message, state.lobby_id, :say)
     state
   end

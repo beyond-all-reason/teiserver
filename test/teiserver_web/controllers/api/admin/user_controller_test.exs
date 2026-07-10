@@ -84,7 +84,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       assert resp["credentials"]["access_token"]
 
       # Verify the created user has the correct stats
-      user = Account.get_user_by_email("testuser2@example.com")
+      user = Account.deprecated_get_user_by_email("testuser2@example.com")
       user_stats = Account.get_user_stat_data(user.id)
       assert user_stats["mu"] == 1500
       assert user_stats["sigma"] == 100
@@ -185,7 +185,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       refute "Server" in resp["user"]["permissions"]
       refute "Admin" in resp["user"]["permissions"]
 
-      stored = Account.get_user_by_email("escalator@example.com")
+      stored = Account.deprecated_get_user_by_email("escalator@example.com")
       assert stored.roles == ["Verified"]
       refute "admin.dev.developer" in stored.permissions
     end
@@ -213,7 +213,7 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       {:ok, _promoted_user} =
         Account.script_update_user(user, %{roles: ["Admin"], permissions: ["Admin"]})
 
-      Account.recache_user(user.id)
+      Account.deprecated_recache_user(user.id)
 
       resp =
         conn

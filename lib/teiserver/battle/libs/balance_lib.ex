@@ -662,7 +662,7 @@ defmodule Teiserver.Battle.BalanceLib do
     # which is permanent (and would be instantiated on login)
     # See application.ex for cache settings
 
-    %{name: name} = Account.get_user_by_id(userid)
+    %{name: name} = Account.deprecated_get_user_by_id(userid)
     %{rating: rating, rank: rank, name: name, uncertainty: uncertainty}
   end
 
@@ -673,7 +673,7 @@ defmodule Teiserver.Battle.BalanceLib do
     stats_data = Account.get_user_stat_data(userid)
     rank = Map.get(stats_data, "rank", 0)
 
-    %{name: name} = Account.get_user_by_id(userid)
+    %{name: name} = Account.deprecated_get_user_by_id(userid)
     %{rating: rating_value, rank: rank, name: name, uncertainty: uncertainty}
   end
 

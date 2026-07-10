@@ -329,7 +329,7 @@ defmodule Teiserver.Lobby do
 
   @spec kick_user_from_battle(User.id(), T.lobby_id()) :: nil | :ok | {:error, any}
   def kick_user_from_battle(userid, lobby_id) do
-    user = Account.get_user_by_id(userid)
+    user = Account.deprecated_get_user_by_id(userid)
 
     if Auth.admin?(user) or Auth.moderator?(user) do
       :ok

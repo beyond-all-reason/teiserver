@@ -354,7 +354,7 @@ defmodule Teiserver.SpringTcpServer do
 
   # We were not able to login right away, instead we had to queue for a bit!
   def handle_info({:login_accepted, userid}, state) do
-    user = Account.get_user_by_id(userid)
+    user = Account.deprecated_get_user_by_id(userid)
     new_state = SpringOut.do_login_accepted(state, user, state.lobby)
 
     if state.lobby_hash == nil do
@@ -717,7 +717,7 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   defp user_updated(fields, state) do
-    new_user = CacheUser.get_user_by_id(state.userid)
+    new_user = CacheUser.deprecated_get_user_by_id(state.userid)
     new_state = %{state | user: new_user}
 
     fields

@@ -51,7 +51,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
 
   @impl Phoenix.LiveView
   def handle_info(%{channel: "room_chat"} = event, socket) do
-    user = Account.get_user_by_id(event.user_id)
+    user = Account.deprecated_get_user_by_id(event.user_id)
 
     message = %{
       id: event.id,

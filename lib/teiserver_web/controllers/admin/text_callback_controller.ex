@@ -53,7 +53,9 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
           order_by: "Newest first"
         )
         |> Enum.map(fn log ->
-          user = Account.get_user_by_discord_id(log.details["discord_user_id"]) || %{name: nil}
+          user =
+            Account.deprecated_get_user_by_discord_id(log.details["discord_user_id"]) ||
+              %{name: nil}
 
           channel =
             Communication.get_discord_channel("id:#{log.details["discord_channel_id"]}") ||

@@ -24,10 +24,11 @@ defmodule Teiserver.Bridge.MessageCommands do
 
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
-    user = CacheUser.get_user_by_discord_id(author)
+    user = CacheUser.deprecated_get_user_by_discord_id(author)
 
     if user do
-      CacheUser.update_user(%{user | discord_dm_channel_id: channel, discord_dm_channel: channel},
+      CacheUser.deprecated_update_user(
+        %{user | discord_dm_channel_id: channel, discord_dm_channel: channel},
         persist: true
       )
     end
@@ -75,9 +76,9 @@ defmodule Teiserver.Bridge.MessageCommands do
 
         if given_code == correct_code do
           Teiserver.cache_delete(:discord_bridge_account_codes, userid)
-          user = CacheUser.get_user_by_id(userid)
+          user = CacheUser.deprecated_get_user_by_id(userid)
 
-          CacheUser.update_user(
+          CacheUser.deprecated_update_user(
             %{
               user
               | discord_id: discord_id,
@@ -87,7 +88,7 @@ defmodule Teiserver.Bridge.MessageCommands do
             persist: true
           )
 
-          CacheUser.recache_user(user.id)
+          CacheUser.deprecated_recache_user(user.id)
 
           reply(channel, "Congratulations, your accounts are now linked.")
         else
