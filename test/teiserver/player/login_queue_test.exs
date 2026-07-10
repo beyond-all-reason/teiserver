@@ -1,5 +1,4 @@
 defmodule Teiserver.Player.LoginQueueTest do
-  alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Player.LoginQueue
 
   use Teiserver.DataCase, async: false
