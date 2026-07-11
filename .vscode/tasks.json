@@ -1,0 +1,40 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+        {
+            "label": "Stop Server",
+            "type": "shell",
+            "command": "./.devcontainer/stop.sh",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "label": "Start Server",
+            "type": "shell",
+            "command": "mix phx.server",
+            "problemMatcher": [],
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "Restart Server",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Stop Server",
+                "Start Server"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
