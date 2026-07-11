@@ -79,7 +79,7 @@ defmodule Teiserver.EmailHelper do
       else
         {:ok, code} =
           Account.create_code(%{
-            value: UUID.uuid1(),
+            value: Base.url_encode64(:crypto.strong_rand_bytes(32), padding: false),
             purpose: "reset_password",
             expires: DateTime.shift(DateTime.utc_now(), hour: 24),
             user_id: user.id
