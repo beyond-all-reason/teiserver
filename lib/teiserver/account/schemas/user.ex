@@ -200,18 +200,18 @@ defmodule Teiserver.Account.User do
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
         |> unique_constraint(:email)
+        |> validate_change(:name, fn :name, name ->
+          case Account.valid_name?(name, false) do
+            :ok -> []
+            {:error, reason} -> [{:name, reason}]
+          end
+        end)
         |> validate_change(:email, fn :email, email ->
           case CacheUser.valid_email?(email) do
             :ok -> []
             {:error, reason} -> [{:email, reason}]
           end
         end)
-      #        |> validate_change(:name, fn :name, name ->
-      #          case Account.valid_name?(name, false) do
-      #            :ok -> []
-      #            {:error, reason} -> [{:name, reason}]
-      #          end
-      #        end)
     end
   end
 

@@ -8,55 +8,56 @@ defmodule Teiserver.Account.UserLibTest do
 
   use Teiserver.DataCase, async: false
 
+  @disallowed_name ".,:;<>{}()+-*/="
+
   describe "disallow renaming to names with disallowed characters" do
-    setup [:disallowed_name]
 
     # create_ first
-    #    test "create_user/1", %{disallowed_name: name} do
-    #      user_vars = %{name: name, email: "test@test.test", password: "password"}
-    #      assert {:error, %{errors: [name: _]}} = UserLib.create_user(user_vars)
-    #    end
+#    test "create_user/1" do
+#      user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
+#      assert {:error, %{errors: [name: _]}} = UserLib.create_user(user_vars)
+#    end
 
-    test "script_create_user/2", %{disallowed_name: name} do
-      user_vars = %{name: name, email: "test@test.test", password: "password"}
+    test "script_create_user/2" do
+      user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
       assert {:error, %{errors: [name: _]}} = UserLib.script_create_user(user_vars, :md5_password)
     end
 
-    test "register_user/2", %{disallowed_name: name} do
-      user_vars = %{name: name, email: "test@test.test", password: "password"}
+    test "register_user/2" do
+      user_vars = %{"name" => @disallowed_name, "email" => "test@test.test", "password" => "password", "password_confirmation" => "password"}
       assert {:error, %{errors: [name: _]}} = UserLib.register_user(user_vars, :md5_password)
     end
 
 
     # update_ next
-    test "update_user/2", %{disallowed_name: name} do
+    test "update_user/2" do
       user = AccountFixtures.user_fixture()
-      assert {:error, %{errors: [name: _]}} = UserLib.update_user(user, %{name: name})
+      assert {:error, %{errors: [name: _]}} = UserLib.update_user(user, %{name: @disallowed_name})
     end
 
-    #    test "update_user_plain_password/2", %{disallowed_name: name} do
-    #      user = AccountFixtures.user_fixture()
-    #      assert {:error, %{errors: [name: _]}} = UserLib.update_user_plain_password(user, %{name: name, password: "password"})
-    #    end
-
-    #    test "update_user_user_form/2", %{disallowed_name: name} do
-    #      user = AccountFixtures.user_fixture()
-    #      assert {:error, %{errors: [name: _]}} = UserLib.update_user_user_form(user, %{name: name, password: "password"})
-    #    end
-
-    test "server_limited_update_user/2", %{disallowed_name: name} do
+    test "update_user_plain_password/2" do
       user = AccountFixtures.user_fixture()
-      assert {:error, %{errors: [name: _]}} = UserLib.server_limited_update_user(user, %{name: name})
+      assert {:error, %{errors: [name: _]}} = UserLib.update_user_plain_password(user, %{"name" => @disallowed_name, "existing" => "password"})
     end
 
-    #    test "server_update_user/2", %{disallowed_name: name} do
+    #    test "update_user_user_form/2" do
     #      user = AccountFixtures.user_fixture()
-    #      assert {:error, %{errors: [name: _]}} = UserLib.server_update_user(user, %{name: name})
+    #      assert {:error, %{errors: [name: _]}} = UserLib.update_user_user_form(user, %{name: @disallowed_name, password: "password"})
     #    end
 
-    test "script_update_user/2", %{disallowed_name: name} do
+    test "server_limited_update_user/2" do
       user = AccountFixtures.user_fixture()
-      assert {:error, %{errors: [name: _]}} = UserLib.script_update_user(user, %{name: name})
+      assert {:error, %{errors: [name: _]}} = UserLib.server_limited_update_user(user, %{name: @disallowed_name})
+    end
+
+#    test "server_update_user/2" do
+#      user = AccountFixtures.user_fixture()
+#      assert {:error, %{errors: [name: _]}} = UserLib.server_update_user(user, %{name: @disallowed_name})
+#    end
+
+    test "script_update_user/2" do
+      user = AccountFixtures.user_fixture()
+      assert {:error, %{errors: [name: _]}} = UserLib.script_update_user(user, %{name: @disallowed_name})
     end
   end
 
@@ -258,9 +259,5 @@ defmodule Teiserver.Account.UserLibTest do
     |> UserLib.list_users_by_data()
     |> Enum.map(& &1.id)
     |> Enum.sort()
-  end
-
-  defp disallowed_name(_data) do
-    %{disallowed_name: ".,:;<>{}()+-*/="}
   end
 end
