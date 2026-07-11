@@ -19,9 +19,9 @@ jobs:
       REGISTRY: ghcr.io
       IMAGE: ghcr.io/${{ github.repository }}
     steps:
-    - name: Lower case repoq
-      run: echo "IMAGE=${IMAGE,,}" >> "$GITHUB_ENV" 
-    
+    - name: Lower case repo name
+      run: echo "IMAGE=${IMAGE,,}" >> "$GITHUB_ENV"
+
     - name: Checkout code
       uses: actions/checkout@v4
 
