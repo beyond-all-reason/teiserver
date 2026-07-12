@@ -33,6 +33,12 @@ defmodule Teiserver.Support.Tachyon do
     user
   end
 
+  def create_user(name) do
+    user = GeneralTestLib.make_user(%{"name" => name, "roles" => ["Verified"]})
+    set_ratings(user, 17)
+    user
+  end
+
   @spec set_rating(Account.User.t(), rating_type :: String.t(), number() | map()) ::
           Account.Rating.t()
   def set_rating(user, rating_type, r) do

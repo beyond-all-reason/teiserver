@@ -30,6 +30,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     test "returns translated roles" do
       user =
         GeneralTestLib.make_user(%{
+          "name" => "user",
           "roles" => ["Verified", "Admin", "Contributor"]
         })
 
@@ -42,7 +43,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
   describe "self event" do
     test "sent after login" do
-      user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+      user = GeneralTestLib.make_user(%{"name" => "user", "roles" => ["Verified"]})
       %{client: client} = Tachyon.connect(user, swallow_first_event: false)
 
       {:ok,
@@ -60,6 +61,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     test "filters out unmappable roles in tachyon messages" do
       user =
         GeneralTestLib.make_user(%{
+          "name" => "user",
           "roles" => ["Verified", "Contributor"]
         })
 
@@ -88,7 +90,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
     test "for offline user", %{client: client} do
       other_user =
-        GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+        GeneralTestLib.make_user(%{"name" => "other_user", "roles" => ["Verified"]})
 
       assert %{"status" => "success"} =
                Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
@@ -129,7 +131,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
     test "when target connects", %{client: client} do
       other_user =
-        GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+        GeneralTestLib.make_user(%{"name" => "other_user", "roles" => ["Verified"]})
 
       assert %{"status" => "success"} =
                Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
@@ -197,7 +199,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     end
 
     test "avoid duplicate subscription", %{client: client} do
-      {:ok, ctx} = Tachyon.setup_client()
+      {:ok, ctx} = Tachyon.setup_client("user")
       other_user = ctx[:user]
 
       assert %{"status" => "success"} =
@@ -227,6 +229,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     test "broadcasts translated roles" do
       user =
         GeneralTestLib.make_user(%{
+          "name" => "user",
           "roles" => ["Verified", "Moderator"]
         })
 

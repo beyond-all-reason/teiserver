@@ -11,9 +11,9 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
   use Teiserver.DataCase
 
   test "perform task" do
-    AccountFixtures.user_fixture()
-    AccountFixtures.user_fixture()
-    AccountFixtures.user_fixture()
+    AccountFixtures.user_fixture(%{name: "user1"})
+    AccountFixtures.user_fixture(%{name: "user2"})
+    AccountFixtures.user_fixture(%{name: "user3"})
 
     # Make some data
     create_day_data(1)

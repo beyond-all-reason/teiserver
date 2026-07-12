@@ -144,7 +144,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       # moderators have access this so we are testing with contributor
       {:ok, setup_opts} =
         TeiserverTestLib.staff_permissions()
-        |> GeneralTestLib.conn_setup()
+        |> GeneralTestLib.conn_setup(name: "test1")
         |> TeiserverTestLib.conn_setup()
 
       conn = Keyword.get(setup_opts, :conn)

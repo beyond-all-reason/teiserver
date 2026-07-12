@@ -153,7 +153,8 @@ defmodule Teiserver.OAuth.ApplicationQueryTest do
       user_code = OAuthFixtures.code_attrs(user, app) |> OAuthFixtures.create_code()
 
       # Create tokens for different user, same app
-      other_user = GeneralTestLib.make_user(%{"roles" => ["Verified", "Admin"]})
+      other_user =
+        GeneralTestLib.make_user(%{"name" => "other_user", "roles" => ["Verified", "Admin"]})
 
       other_user_token =
         OAuthFixtures.token_attrs(other_user, app) |> OAuthFixtures.create_token()

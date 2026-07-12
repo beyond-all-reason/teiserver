@@ -17,8 +17,8 @@ defmodule TeiserverWeb.Tachyon.SystemTest do
       {:ok, app: app}
     end
 
-    defp setup_user(app) do
-      user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+    defp setup_user(app, name) do
+      user = GeneralTestLib.make_user(%{"name" => name, "roles" => ["Verified"]})
       token = OAuthFixtures.token_attrs(user, app) |> OAuthFixtures.create_token()
       client = Tachyon.connect(token)
       {:ok, %{user: user, token: token, client: client}}
@@ -27,8 +27,8 @@ defmodule TeiserverWeb.Tachyon.SystemTest do
     setup [:setup_app]
 
     test "works", %{app: app} do
-      {:ok, %{client: client1}} = setup_user(app)
-      {:ok, %{client: client2}} = setup_user(app)
+      {:ok, %{client: client1}} = setup_user(app, "client1")
+      {:ok, %{client: client2}} = setup_user(app, "client2")
 
       assert %{"data" => %{"userCount" => 2}} = Tachyon.server_stats!(client1)
       assert %{"data" => %{"userCount" => 2}} = Tachyon.server_stats!(client2)

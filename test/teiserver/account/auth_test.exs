@@ -27,7 +27,11 @@ defmodule Teiserver.Account.AuthTest do
 
     test "allow?/2 - bots are exempt" do
       user =
-        AccountFixtures.user_fixture(%{roles: ["Server", "Bot"], permissions: ["Server", "Bot"]})
+        AccountFixtures.user_fixture(%{
+          name: "user",
+          roles: ["Server", "Bot"],
+          permissions: ["Server", "Bot"]
+        })
 
       refute AuthLib.has_active_mfa?(user.id)
       assert AuthLib.allow?(user, "Server")

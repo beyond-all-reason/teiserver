@@ -11,8 +11,8 @@ defmodule TeiserverWeb.Live.Moderation.ActionLive.SmurfLinkTest do
     setup [:auth]
 
     test "searches and links", %{conn: conn} do
-      origin = GeneralTestLib.make_user(%{"name" => "origin_user-testname"})
-      smurf = GeneralTestLib.make_user(%{"name" => "smurf_user-testname"})
+      origin = GeneralTestLib.make_user(%{"name" => "origin_user_testname"})
+      smurf = GeneralTestLib.make_user(%{"name" => "smurf_user_testname"})
 
       {:ok, view, html} = live(conn, ~p"/moderation/actions/smurf_link/#{smurf.id}")
 

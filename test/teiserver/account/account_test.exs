@@ -9,7 +9,7 @@ defmodule Teiserver.AccountTest do
     @valid_attrs %{
       colour: "#AA0000",
       icon: "fa-solid fa-home",
-      name: "some name",
+      name: "some_name",
       permissions: [],
       email: "AnEmailAddress@email.com",
       password: Account.spring_md5_password("some password")
@@ -18,8 +18,8 @@ defmodule Teiserver.AccountTest do
       colour: "#0000AA",
       icon: "fa-solid fa-wrench",
       permissions: [],
-      name: "some updated name",
-      email: "some updated email",
+      name: "some_updated_name",
+      email: "some_updated@email",
       password: Account.spring_md5_password("some updated password")
     }
     @invalid_attrs %{
@@ -94,9 +94,8 @@ defmodule Teiserver.AccountTest do
       assert {:ok, %User{} = user} = Account.create_user(@valid_attrs)
       assert user.colour == "#AA0000"
       assert user.icon == "fa-solid fa-home"
-      assert user.name == "some name"
+      assert user.name == "some_name"
       assert user.permissions == []
-      assert user.name == "some name"
       assert Account.verify_md5_password(@valid_attrs.password, user.password)
     end
 
@@ -109,9 +108,8 @@ defmodule Teiserver.AccountTest do
       assert {:ok, %User{} = user} = Account.update_user(user, @update_attrs)
       assert user.colour == "#0000AA"
       assert user.icon == "fa-solid fa-wrench"
-      assert user.name == "some updated name"
+      assert user.name == "some_updated_name"
       assert user.permissions == []
-      assert user.name == "some updated name"
     end
 
     test "update_user/2 with invalid data returns error changeset" do

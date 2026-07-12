@@ -32,7 +32,7 @@ defmodule Teiserver.Matchmaking.MemberTest do
     end
 
     test "average of ratings" do
-      [u1, u2] = [Tachyon.create_user(), Tachyon.create_user()]
+      [u1, u2] = [Tachyon.create_user("user1"), Tachyon.create_user("user2")]
       rating_attrs(u1.id, "Duel", 30, 2) |> set_rating!()
       rating_attrs(u2.id, "Duel", 50, 4) |> set_rating!()
       assert Member.get_member_rating([u1.id, u2.id], "Duel") == %{skill: 40, uncertainty: 3}

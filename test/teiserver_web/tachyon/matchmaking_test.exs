@@ -410,7 +410,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
   describe "pairing" do
     defp setup_app(_context) do
-      owner = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+      owner = GeneralTestLib.make_user(%{"name" => "app_user", "roles" => ["Verified"]})
 
       app =
         OAuthFixtures.app_attrs(owner.id)
@@ -420,8 +420,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       {:ok, app: app}
     end
 
-    defp setup_user(app) do
-      user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+    defp setup_user(app, name) do
+      user = GeneralTestLib.make_user(%{"name" => name, "roles" => ["Verified"]})
       token = OAuthFixtures.token_attrs(user, app) |> OAuthFixtures.create_token()
       client = Tachyon.connect(token)
       {:ok, %{user: user, token: token, client: client}}
@@ -435,8 +435,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       queue_pid: queue_pid,
       queue_version: version
     } do
-      {:ok, %{user: _user1, client: client1}} = setup_user(app)
-      {:ok, %{user: _user2, client: client2}} = setup_user(app)
+      {:ok, %{user: _user1, client: client1}} = setup_user(app, "user1")
+      {:ok, %{user: _user2, client: client2}} = setup_user(app, "user2")
 
       assert %{"status" => "success"} =
                Tachyon.join_queues!(client1, [%{id: queue_id, version: version}])
@@ -469,8 +469,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       queue_pid: queue_pid,
       queue_version: version
     } do
-      {:ok, %{client: client1}} = setup_user(app)
-      {:ok, %{client: client2}} = setup_user(app)
+      {:ok, %{client: client1}} = setup_user(app, "client1")
+      {:ok, %{client: client2}} = setup_user(app, "client2")
       assert %{"status" => "failed", "reason" => "no_match"} = Tachyon.matchmaking_ready!(client1)
 
       assert %{"status" => "success"} =
@@ -562,11 +562,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       {:ok, queue_id: q1v1_id, queue_pid: q1v1_pid, queue_version: version1v1} = setup_queue(1)
       {:ok, queue_id: q2v2_id, queue_pid: q2v2_pid, queue_version: version2v2} = setup_queue(2)
 
-      clients =
-        Enum.map(1..5, fn _i ->
-          {:ok, %{client: client}} = setup_user(app)
-          client
-        end)
+      clients = setup_clients(app, 5)
 
       [c1, c2, c3, c4, c5] = clients
 
@@ -611,11 +607,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     test "foundUpdate event", %{app: app} do
       {:ok, queue_id: q_id, queue_pid: q_pid, queue_version: version} = setup_queue(2)
 
-      clients =
-        Enum.map(1..4, fn _i ->
-          {:ok, %{client: client}} = setup_user(app)
-          client
-        end)
+      clients = setup_clients(app, 4)
 
       for client <- clients do
         assert %{"status" => "success"} =
@@ -645,11 +637,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         queue_attrs(uuid, 1)
         |> mk_queue()
 
-      clients =
-        Enum.map(1..2, fn _i ->
-          {:ok, %{client: client}} = setup_user(app)
-          client
-        end)
+      clients = setup_clients(app, 2)
 
       for client <- clients do
         assert %{"status" => "success"} =
@@ -905,10 +893,17 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
   end
 
+  defp setup_clients(app, amount) do
+    Enum.map(1..amount, fn i ->
+      {:ok, %{client: client}} = setup_user(app, "user#{i}")
+      client
+    end)
+  end
+
   defp join_and_pair(app, queue, queue_pid, number_of_player) do
     data =
-      Enum.map(1..number_of_player, fn _i ->
-        {:ok, %{client: client} = data} = setup_user(app)
+      Enum.map(1..number_of_player, fn i ->
+        {:ok, %{client: client} = data} = setup_user(app, "user#{i}")
         assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue])
         data
       end)
