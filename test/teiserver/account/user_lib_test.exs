@@ -11,12 +11,11 @@ defmodule Teiserver.Account.UserLibTest do
   @disallowed_name ".,:;<>{}()+-*/="
 
   describe "disallow renaming to names with disallowed characters" do
-
     # create_ first
-#    test "create_user/1" do
-#      user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
-#      assert {:error, %{errors: [name: _]}} = UserLib.create_user(user_vars)
-#    end
+    test "create_user/1" do
+      user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
+      assert {:error, %{errors: [name: _]}} = UserLib.create_user(user_vars)
+    end
 
     test "script_create_user/2" do
       user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
@@ -24,10 +23,15 @@ defmodule Teiserver.Account.UserLibTest do
     end
 
     test "register_user/2" do
-      user_vars = %{"name" => @disallowed_name, "email" => "test@test.test", "password" => "password", "password_confirmation" => "password"}
+      user_vars = %{
+        "name" => @disallowed_name,
+        "email" => "test@test.test",
+        "password" => "password",
+        "password_confirmation" => "password"
+      }
+
       assert {:error, %{errors: [name: _]}} = UserLib.register_user(user_vars, :md5_password)
     end
-
 
     # update_ next
     test "update_user/2" do
@@ -37,32 +41,53 @@ defmodule Teiserver.Account.UserLibTest do
 
     test "update_user_plain_password/2" do
       user = AccountFixtures.user_fixture()
-      assert {:ok, %{name: "Test"}} = UserLib.update_user_plain_password(user, %{"name" => @disallowed_name, "existing" => "password"})
+
+      assert {:ok, %{name: "Test"}} =
+               UserLib.update_user_plain_password(user, %{
+                 "name" => @disallowed_name,
+                 "existing" => "password"
+               })
     end
 
     test "update_user_user_form/2" do
       user = AccountFixtures.user_fixture()
-      assert {:error, %{errors: [name: _]}} = UserLib.update_user_user_form(user, %{"name" => @disallowed_name, "password" => "password"})
+
+      assert {:error, %{errors: [name: _]}} =
+               UserLib.update_user_user_form(user, %{
+                 "name" => @disallowed_name,
+                 "password" => "password"
+               })
     end
 
     test "server_limited_update_user/2" do
       user = AccountFixtures.user_fixture()
-      assert {:error, %{errors: [name: _]}} = UserLib.server_limited_update_user(user, %{name: @disallowed_name})
+
+      assert {:error, %{errors: [name: _]}} =
+               UserLib.server_limited_update_user(user, %{name: @disallowed_name})
     end
 
     test "server_update_user/2" do
       user = AccountFixtures.user_fixture()
-      assert {:error, %{errors: [name: _]}} = UserLib.server_update_user(user, %{name: @disallowed_name})
+
+      assert {:error, %{errors: [name: _]}} =
+               UserLib.server_update_user(user, %{name: @disallowed_name})
     end
 
     test "script_update_user/2" do
       user = AccountFixtures.user_fixture()
-      assert {:error, %{errors: [name: _]}} = UserLib.script_update_user(user, %{name: @disallowed_name})
+
+      assert {:error, %{errors: [name: _]}} =
+               UserLib.script_update_user(user, %{name: @disallowed_name})
     end
 
     test "password_reset_update_user/2" do
       user = AccountFixtures.user_fixture()
-      assert {:ok, %{name: "Test"}} = UserLib.update_user_plain_password(user, %{"name" => @disallowed_name, "existing" => "password"})
+
+      assert {:ok, %{name: "Test"}} =
+               UserLib.update_user_plain_password(user, %{
+                 "name" => @disallowed_name,
+                 "existing" => "password"
+               })
     end
   end
 

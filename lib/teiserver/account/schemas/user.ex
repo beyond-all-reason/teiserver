@@ -88,9 +88,9 @@ defmodule Teiserver.Account.User do
 
     user
     |> cast(
-         attrs,
-         ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
-       )
+      attrs,
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
+    )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
     |> validate_change(:name, fn :name, name ->
@@ -110,9 +110,9 @@ defmodule Teiserver.Account.User do
 
     user
     |> cast(
-         attrs,
-         ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id rank country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
-       )
+      attrs,
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id rank country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
+    )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
     |> validate_change(:email, fn :email, email ->
@@ -143,9 +143,9 @@ defmodule Teiserver.Account.User do
 
     user
     |> cast(
-         attrs,
-         ~w(name email icon colour data roles permissions)a
-       )
+      attrs,
+      ~w(name email icon colour data roles permissions)a
+    )
     |> validate_required(~w(name email)a)
     |> unique_constraint(:email)
     |> validate_change(:name, fn :name, name ->
@@ -185,9 +185,9 @@ defmodule Teiserver.Account.User do
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
         |> add_error(
-             :password_confirmation,
-             "Please enter your password to change your account details."
-           )
+          :password_confirmation,
+          "Please enter your password to change your account details."
+        )
 
       Account.verify_plain_password(attrs["password"], user.password) == false ->
         user
@@ -224,9 +224,9 @@ defmodule Teiserver.Account.User do
         user
         |> change_plain_password(attrs)
         |> add_error(
-             :password_confirmation,
-             "Please enter your existing password to change your password."
-           )
+          :password_confirmation,
+          "Please enter your existing password to change your password."
+        )
 
       Account.verify_plain_password(attrs["existing"], user.password) == false ->
         user
@@ -272,9 +272,9 @@ defmodule Teiserver.Account.User do
 
     user
     |> cast(
-         attrs,
-         ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id)a
-       )
+      attrs,
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id)a
+    )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
     |> validate_change(:email, fn :email, email ->
@@ -353,8 +353,8 @@ defmodule Teiserver.Account.User do
     changeset
     |> validate_length(:password, min: 6)
     |> validate_exclusion(:password, ["1B2M2Y8AsgTpgAmY7PhCfg=="],
-         message: "password not allowed (legacy empty chobby pass)"
-       )
+      message: "password not allowed (legacy empty chobby pass)"
+    )
   end
 
   defp put_plain_password_hash(
