@@ -14,12 +14,14 @@ defmodule Teiserver.Account.UserLibTest do
     # create_ first
     test "create_user/1" do
       user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
-      assert {:error, %{errors: [name: _]}} = UserLib.create_user(user_vars)
+      assert {:error, %{errors: [name: _error]}} = UserLib.create_user(user_vars)
     end
 
     test "script_create_user/2" do
       user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
-      assert {:error, %{errors: [name: _]}} = UserLib.script_create_user(user_vars, :md5_password)
+
+      assert {:error, %{errors: [name: _error]}} =
+               UserLib.script_create_user(user_vars, :md5_password)
     end
 
     test "register_user/2" do
@@ -30,13 +32,15 @@ defmodule Teiserver.Account.UserLibTest do
         "password_confirmation" => "password"
       }
 
-      assert {:error, %{errors: [name: _]}} = UserLib.register_user(user_vars, :md5_password)
+      assert {:error, %{errors: [name: _error]}} = UserLib.register_user(user_vars, :md5_password)
     end
 
     # update_ next
     test "update_user/2" do
       user = AccountFixtures.user_fixture()
-      assert {:error, %{errors: [name: _]}} = UserLib.update_user(user, %{name: @disallowed_name})
+
+      assert {:error, %{errors: [name: _error]}} =
+               UserLib.update_user(user, %{name: @disallowed_name})
     end
 
     test "update_user_plain_password/2" do
@@ -52,7 +56,7 @@ defmodule Teiserver.Account.UserLibTest do
     test "update_user_user_form/2" do
       user = AccountFixtures.user_fixture()
 
-      assert {:error, %{errors: [name: _]}} =
+      assert {:error, %{errors: [name: _error]}} =
                UserLib.update_user_user_form(user, %{
                  "name" => @disallowed_name,
                  "password" => "password"
@@ -62,21 +66,21 @@ defmodule Teiserver.Account.UserLibTest do
     test "server_limited_update_user/2" do
       user = AccountFixtures.user_fixture()
 
-      assert {:error, %{errors: [name: _]}} =
+      assert {:error, %{errors: [name: _error]}} =
                UserLib.server_limited_update_user(user, %{name: @disallowed_name})
     end
 
     test "server_update_user/2" do
       user = AccountFixtures.user_fixture()
 
-      assert {:error, %{errors: [name: _]}} =
+      assert {:error, %{errors: [name: _error]}} =
                UserLib.server_update_user(user, %{name: @disallowed_name})
     end
 
     test "script_update_user/2" do
       user = AccountFixtures.user_fixture()
 
-      assert {:error, %{errors: [name: _]}} =
+      assert {:error, %{errors: [name: _error]}} =
                UserLib.script_update_user(user, %{name: @disallowed_name})
     end
 
