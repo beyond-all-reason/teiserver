@@ -332,7 +332,8 @@ defmodule Teiserver.OAuth do
       s > 128 ->
         {:error, "verifier cannot be more than 128 chars"}
 
-      not String.match?(verifier, ~r/[A-Za-z0-9\-._~]/) ->
+      # Anchor with \A/\z so the whole string must be valid, not just one character
+      not String.match?(verifier, ~r/\A[A-Za-z0-9\-._~]+\z/) ->
         {:error, "verifier contains illegal characters"}
 
       true ->
