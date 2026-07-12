@@ -93,13 +93,13 @@ defmodule Teiserver.Account.User do
        )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> validate_change(:name, fn :name, name ->
+      case Account.valid_name?(name, false) do
+        :ok -> []
+        {:error, reason} -> [{:name, reason}]
+      end
+    end)
     |> put_md5_password_hash()
-    #    |> validate_change(:name, fn :name, name ->
-    #      case Account.valid_name?(name, false) do
-    #        :ok -> []
-    #        {:error, reason} -> [{:name, reason}]
-    #      end
-    #    end)
   end
 
   def changeset(user, attrs, :script) do
@@ -236,12 +236,6 @@ defmodule Teiserver.Account.User do
       true ->
         user
         |> change_plain_password(attrs)
-      #        |> validate_change(:name, fn :name, name ->
-      #          case Account.valid_name?(name, false) do
-      #            :ok -> []
-      #            {:error, reason} -> [{:name, reason}]
-      #          end
-      #        end)
     end
   end
 
