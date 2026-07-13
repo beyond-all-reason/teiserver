@@ -67,6 +67,7 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
     name =
       (Enum.to_list(?A..?Z) ++ Enum.to_list(?0..?9))
       |> Enum.take_random(20)
+      |> List.to_string()
 
     # Wipe all the user fields that contain PII, this new user
     # is persisted via the update_cache_user call below which
