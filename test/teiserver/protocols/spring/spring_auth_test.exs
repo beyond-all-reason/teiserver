@@ -642,7 +642,7 @@ CLIENTS test_room #{user.name}\n"
   # end
 
   test "User age", context do
-    user = new_user("test_user_rank_test", %{"rank" => 5})
+    user = new_user("test_user_rank", %{"rank" => 5})
     %{socket: socket} = auth_setup(context, user)
 
     # [in_game, away, r3, r2, r1, mod, bot]
@@ -655,7 +655,7 @@ CLIENTS test_room #{user.name}\n"
   test "Bad id ADDUSER", %{user: user, socket: socket} do
     {:ok, bad_user} =
       CacheUser.user_register_params_with_md5(
-        "test_user_bad_id",
+        "test_bad_id",
         "test_user_bad_id@email.com",
         Account.spring_md5_password("password")
       )
@@ -677,13 +677,13 @@ CLIENTS test_room #{user.name}\n"
     reply = _recv_raw(socket)
 
     assert reply ==
-             "ADDUSER test_user_bad_id ?? #{bad_user.id} \nCLIENTSTATUS test_user_bad_id 0\n"
+             "ADDUSER test_bad_id ?? #{bad_user.id} \nCLIENTSTATUS test_bad_id 0\n"
 
     Client.disconnect(bad_user.id)
   end
 
   test "GETIP", %{user: user, socket: socket} = context do
-    ip_user = new_user("test_user_ip_user", %{})
+    ip_user = new_user("test_user_ip", %{})
     %{socket: _socket} = auth_setup(context, ip_user)
     _recv_until(socket)
 
@@ -702,7 +702,7 @@ CLIENTS test_room #{user.name}\n"
   end
 
   test "GETUSERID", %{user: user, socket: socket} = context do
-    ip_user = new_user("test_user_id_user", %{})
+    ip_user = new_user("test_user_id", %{})
     %{socket: _socket} = auth_setup(context, ip_user)
     _recv_until(socket)
 

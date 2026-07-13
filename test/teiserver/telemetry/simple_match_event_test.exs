@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.SimpleMatchEventTest do
   test "simple match events" do
     r = :rand.uniform(999_999_999)
 
-    user = TeiserverTestLib.new_user("simple_match_event_user")
+    user = TeiserverTestLib.new_user("simple_match_event")
 
     {:ok, match} =
       Battle.create_match(%{

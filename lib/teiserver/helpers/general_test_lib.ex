@@ -47,7 +47,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
     user =
       if :user in flags do
         make_user(%{
-          "name" => "Current user",
+          "name" => "current_user",
           "email" => "current_user@current_user.com",
           "permissions" => []
         })
@@ -67,7 +67,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   end
 
   # @spec general_setup(list, ) :: tuple
-  def conn_setup(roles \\ [], flags \\ []) do
+  def conn_setup(roles \\ [], flags \\ [], name \\ "current_user") do
     {:ok, _data} = data_setup(flags)
 
     r = :rand.uniform(999_999_999)
@@ -78,7 +78,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
       else
         user =
           make_user(%{
-            "name" => "Current user",
+            "name" => name,
             "email" => "current_user#{r}@current_user#{r}.com",
             "roles" => roles
           })
