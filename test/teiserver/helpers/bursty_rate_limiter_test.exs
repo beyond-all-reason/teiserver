@@ -24,7 +24,7 @@ defmodule Teiserver.Helpers.BurstyRateLimiterTest do
     assert time_to_wait == 500
   end
 
-  test "aquiring many times is the same as one big request" do
+  test "acquiring many times is the same as one big request" do
     now = :erlang.monotonic_time(:millisecond)
     rl = BRL.per_second(2, now)
     {:ok, rl2} = BRL.try_acquire(rl, 1, now)

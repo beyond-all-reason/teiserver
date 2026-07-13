@@ -604,7 +604,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           </div>
 
           <div :if={@stage == :complete} class="card-body">
-            You have succesfully gifted an accolade to {@recipient.name}! <br /><br />
+            You have successfully gifted an accolade to {@recipient.name}! <br /><br />
             <a phx-click="return-to-match" class="btn btn-sm btn-success">
               Return to match details
             </a>

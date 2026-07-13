@@ -15,7 +15,7 @@ defmodule Teiserver.Tachyon.Schema do
   end
 
   @doc """
-  ensure the given argument represent a valid tachyon enveloppe (type, message id, command id)
+  ensure the given argument represent a valid tachyon envelope (type, message id, command id)
   """
   @spec parse_envelope(any()) ::
           {:ok, command_id(), message_type(), message_id()} | {:error, term()}

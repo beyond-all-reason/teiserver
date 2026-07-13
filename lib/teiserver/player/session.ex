@@ -2026,7 +2026,7 @@ defmodule Teiserver.Player.Session do
     # this is the same as send_to_player, but doesn't persist the message if
     # there's no connection at that time.
     # This should be used for messages where there's another way to recover
-    # state without having to rely on an interupted stream of events.
+    # state without having to rely on an interrupted stream of events.
     # For example, player get full party state upon connection, so party events
     # can be not persisted
     if state.conn_pid != nil do

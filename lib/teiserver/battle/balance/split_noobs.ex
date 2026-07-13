@@ -1,6 +1,6 @@
 defmodule Teiserver.Battle.Balance.SplitNoobs do
   @moduledoc """
-  Seperate players into noobs and experienced players. Noobs are players without a party and either
+  Separate players into noobs and experienced players. Noobs are players without a party and either
   high uncertainty or 0 rating. Experienced players are anyone not in the noob category.
 
   IF THERE ARE PARTIES
@@ -233,7 +233,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   @spec get_result(SN.state()) :: SN.result()
   def get_result(state) do
     # This is the best combo with only the top 14 experienced players
-    # This means we brute force at most 14 playesr
+    # This means we brute force at most 14 players
     combo_result = BruteForce.get_best_combo(state.top_experienced, state.parties)
     # These are the remaining players who were not involved in the brute force algorithm
     remaining = state.bottom_experienced ++ state.noobs

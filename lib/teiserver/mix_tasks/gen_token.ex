@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Teiserver.GenToken do
   @moduledoc """
   Creates an oauth token for the given username or email.
-  This is a convenience task to help developping anything requiring an
+  This is a convenience task to help developing anything requiring an
   oauth token like tachyon.
 
   Usage: `mix teiserver.gen_token --user <username/email> [--app <app_uid>]`

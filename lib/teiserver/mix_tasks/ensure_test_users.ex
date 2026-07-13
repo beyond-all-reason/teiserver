@@ -1,6 +1,6 @@
 defmodule Mix.Tasks.Teiserver.EnsureTestUsers do
   @moduledoc """
-  Generate `n` random users based on predictible names.
+  Generate `n` random users based on predictable names.
   The goal is to end up with `n` users and access token ready to be used
   for load testing.
 

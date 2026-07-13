@@ -432,7 +432,7 @@ defmodule Teiserver.Account.RelationshipLib do
     limit $3
     """
 
-    # Not able to use mimimum_time_hours as parameter so have to add into the sql string
+    # Not able to use minimum_time_hours as parameter so have to add into the sql string
 
     results =
       SQL.query!(Repo, query, [
