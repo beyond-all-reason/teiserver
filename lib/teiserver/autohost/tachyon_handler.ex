@@ -25,8 +25,8 @@ defmodule Teiserver.Autohost.TachyonHandler do
           state: :handshaking | :connected
         }
 
-  def start_battle(conn_pid, battle_id, start_script) do
-    send(conn_pid, {:start_battle, battle_id, start_script})
+  def start_battle(conn_pid, battle_id, start_script, cb_state) do
+    send(conn_pid, {:start_battle, battle_id, start_script, cb_state})
   end
 
   @spec subscribe_updates(pid(), DateTime.t()) :: :ok | {:error, reason :: term()}
@@ -56,21 +56,21 @@ defmodule Teiserver.Autohost.TachyonHandler do
   @doc """
   send a message to the autohost with the given pid
   """
-  @spec send_message(pid(), reference(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
+  @spec send_message(pid(), term(), %{battle_id: TachyonBattle.id(), message: String.t()}) ::
           :ok
-  def send_message(conn_pid, ref, payload) when is_pid(conn_pid) do
-    send(conn_pid, {:send_message, ref, payload})
+  def send_message(conn_pid, cb_state, payload) when is_pid(conn_pid) do
+    send(conn_pid, {:send_message, cb_state, payload})
   end
 
-  @spec kill_battle(pid(), reference(), TachyonBattle.id()) :: :ok | {:error, reason :: term()}
-  def kill_battle(conn_pid, ref, battle_id) when is_pid(conn_pid) do
-    send(conn_pid, {:kill_battle, ref, battle_id})
+  @spec kill_battle(pid(), term(), TachyonBattle.id()) :: :ok | {:error, reason :: term()}
+  def kill_battle(conn_pid, cb_state, battle_id) when is_pid(conn_pid) do
+    send(conn_pid, {:kill_battle, cb_state, battle_id})
   end
 
-  @spec add_player(pid(), reference(), TachyonBattle.Types.add_player_data()) ::
+  @spec add_player(pid(), term(), TachyonBattle.Types.add_player_data()) ::
           :ok | {:error, reason :: term()}
-  def add_player(conn_pid, ref, add_data) do
-    send(conn_pid, {:add_player, ref, add_data})
+  def add_player(conn_pid, cb_state, add_data) do
+    send(conn_pid, {:add_player, cb_state, add_data})
   end
 
   @impl Handler
@@ -96,7 +96,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   end
 
   @impl Handler
-  def handle_info({:start_battle, battle_id, start_script}, state) do
+  def handle_info({:start_battle, battle_id, start_script, cb_state}, state) do
     mappings = %{
       engine_version: :engineVersion,
       game_name: :gameName,
@@ -120,7 +120,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
       |> Collections.remove_nil_vals()
       |> Map.put(:battleId, battle_id)
 
-    opts = [cb_state: battle_id]
+    opts = [cb_state: cb_state]
     {:request, "autohost/start", start_script, opts, state}
   end
 
@@ -222,32 +222,12 @@ defmodule Teiserver.Autohost.TachyonHandler do
   def handle_response("autohost/start", _battle_id, _resp, state) when state.session_pid == nil,
     do: {:ok, state}
 
-  def handle_response("autohost/start", battle_id, response, state) do
-    resp =
-      case response do
-        %{"status" => "failed", "reason" => reason} ->
-          msg =
-            case response["details"] do
-              nil -> reason
-              details -> "#{reason} - #{details}"
-            end
-
-          Logger.error("failed to start a battle: #{msg}")
-          {:error, msg}
-
-        %{"status" => "success", "data" => data} ->
-          {:ok, %{ips: data["ips"], port: data["port"]}}
-      end
-
-    Session.reply_start_battle(state.session_pid, battle_id, resp)
-    {:ok, state}
-  end
-
-  def handle_response("autohost/sendMessage", ref, response, state) do
+  def handle_response("autohost/" <> command, cb_state, response, state)
+      when command in ["start", "sendMessage", "kill", "addPlayer"] do
     resp =
       case response["status"] do
         "success" ->
-          :ok
+          parse_response(command, response["data"])
 
         "failed" ->
           err = response["reason"]
@@ -258,45 +238,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
           end
       end
 
-    Session.reply_send_message(state.session_pid, ref, resp)
-    {:ok, state}
-  end
-
-  def handle_response("autohost/kill", ref, response, state) do
-    resp =
-      case response["status"] do
-        "success" ->
-          :ok
-
-        "failed" ->
-          err = response["reason"]
-
-          case Map.get(response, "details") do
-            nil -> {:error, err}
-            details -> {:error, "#{err} - #{details}"}
-          end
-      end
-
-    Session.reply_kill_battle(state.session_pid, ref, resp)
-    {:ok, state}
-  end
-
-  def handle_response("autohost/addPlayer", ref, response, state) do
-    resp =
-      case response["status"] do
-        "success" ->
-          :ok
-
-        "failed" ->
-          err = response["reason"]
-
-          case Map.get(response, "details") do
-            nil -> {:error, err}
-            details -> {:error, "#{err} - #{details}"}
-          end
-      end
-
-    Session.reply_add_player(state.session_pid, ref, resp)
+    Session.async_reply(state.session_pid, cb_state, resp)
     {:ok, state}
   end
 
@@ -463,4 +405,10 @@ defmodule Teiserver.Autohost.TachyonHandler do
       name: b.name
     }
   end
+
+  defp parse_response("start", data) do
+    {:ok, %{ips: data["ips"], port: data["port"]}}
+  end
+
+  defp parse_response(_command, nil), do: :ok
 end

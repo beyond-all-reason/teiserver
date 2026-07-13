@@ -21,8 +21,8 @@ defmodule Teiserver.TachyonBattle.BattleTest do
       %{battle_id: battle_id, autohost_pid: autohost_pid} = setup_autohost_and_battle()
       msg_task = Task.async(fn -> Battle.send_message(battle_id, "hello") end)
 
-      assert_receive {:send_message, ref, %{battle_id: ^battle_id, message: "hello"}}
-      Session.reply_send_message(autohost_pid, ref, :ok)
+      assert_receive {:send_message, cb_state, %{battle_id: ^battle_id, message: "hello"}}
+      Session.async_reply(autohost_pid, cb_state, :ok)
       Task.await(msg_task)
     end
   end
@@ -31,8 +31,8 @@ defmodule Teiserver.TachyonBattle.BattleTest do
     %{battle_id: battle_id, autohost_pid: autohost_pid} = setup_autohost_and_battle()
 
     task = Task.async(fn -> Battle.kill(battle_id) end)
-    assert_receive {:kill_battle, ref, ^battle_id}
-    Session.reply_kill_battle(autohost_pid, ref, :ok)
+    assert_receive {:kill_battle, cb_state, ^battle_id}
+    Session.async_reply(autohost_pid, cb_state, :ok)
     assert Task.await(task) == :ok
   end
 
@@ -40,7 +40,7 @@ defmodule Teiserver.TachyonBattle.BattleTest do
     %{battle_id: battle_id, autohost_pid: autohost_pid} = setup_autohost_and_battle()
     task = Task.async(fn -> Battle.add_player(battle_id, 12345, "playername", "hunter2") end)
 
-    assert_receive {:add_player, ref,
+    assert_receive {:add_player, cb_state,
                     %{
                       name: "playername",
                       user_id: 12345,
@@ -48,7 +48,7 @@ defmodule Teiserver.TachyonBattle.BattleTest do
                       battle_id: ^battle_id
                     }}
 
-    Session.reply_add_player(autohost_pid, ref, :ok)
+    Session.async_reply(autohost_pid, cb_state, :ok)
     {:ok, %{port: _port, ips: _ips}} = Task.await(task)
 
     re_add = Task.async(fn -> Battle.add_player(battle_id, 12345, "playername", "hunter2") end)
@@ -85,13 +85,13 @@ defmodule Teiserver.TachyonBattle.BattleTest do
     add_tasks =
       Enum.map(1..players_to_add, fn i ->
         Task.async(fn ->
-          Battle.add_player(battle_id, 10000 + i, "playername#{i}", "hunted#{i}")
+          Battle.add_player(battle_id, 10000 + i, "playername#{i}", "hunter#{i}")
         end)
       end)
 
     Enum.each(1..players_to_add, fn _i ->
-      assert_receive {:add_player, ref, _}
-      Session.reply_add_player(autohost_pid, ref, :ok)
+      assert_receive {:add_player, cb_state, _}
+      Session.async_reply(autohost_pid, cb_state, :ok)
     end)
 
     Task.await_many(add_tasks)
@@ -121,9 +121,9 @@ defmodule Teiserver.TachyonBattle.BattleTest do
           Battle.start_battle_process(autohost_id, match_id, BotFixtures.start_script())
       end)
 
-    assert_receive {:start_battle, battle_id, start_script}
+    assert_receive {:start_battle, battle_id, start_script, cb_state}
     resp = %{ips: ["1.2.3.4"], port: 12345}
-    Session.reply_start_battle(autohost_pid, battle_id, {:ok, resp})
+    Session.async_reply(autohost_pid, cb_state, {:ok, resp})
     Task.await(start_task)
 
     %{
