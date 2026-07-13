@@ -76,7 +76,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
       queue_pid: queue_pid,
       version: version
     } do
-      user2 = mk_user(name: "user2")
+      user2 = mk_user()
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
       assert {:ok, ^queue_pid} = Matchmaking.join_queue(queue_id, version, user2.id)
       QueueServer.match_players(queue_pid)
@@ -86,7 +86,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
 
   describe "pairing" do
     test "get event when paired", %{user: user, queue_id: queue_id, version: version} do
-      user2 = mk_user(name: "user2")
+      user2 = mk_user()
       assert {:ok, queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
       assert {:ok, _data} = Matchmaking.join_queue(queue_id, version, user2.id)
       QueueServer.match_players(queue_pid)
@@ -99,7 +99,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
     end
 
     test "get `lost` event when peer decline", %{user: user, queue_id: queue_id, version: version} do
-      user2 = mk_user(register?: false, name: "user2")
+      user2 = mk_user(register?: false)
       assert {:ok, queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
       assert {:ok, _data} = Matchmaking.join_queue(queue_id, version, user2.id)
       QueueServer.match_players(queue_pid)
@@ -116,7 +116,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
       queue_id: queue_id,
       version: version
     } do
-      user2 = mk_user(name: "user2")
+      user2 = mk_user()
       assert {:ok, queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
       assert {:ok, _data} = Matchmaking.join_queue(queue_id, version, user2.id)
       QueueServer.match_players(queue_pid)
@@ -131,7 +131,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
     end
 
     test "both player get lost when timeout", %{user: user, queue_id: queue_id, version: version} do
-      user2 = mk_user(name: "user2")
+      user2 = mk_user()
       assert {:ok, queue_pid} = Matchmaking.join_queue(queue_id, version, user.id)
       assert {:ok, _data} = Matchmaking.join_queue(queue_id, version, user2.id)
       QueueServer.match_players(queue_pid)
@@ -210,7 +210,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
     end
 
     test "tracks party joins", %{queue_id: queue_id, version: version} do
-      user1 = mk_user(name: "user2")
+      user1 = mk_user()
       party_id = UUID.uuid4()
 
       # Create a party with 1 player (valid for team_size: 1 queue)
@@ -243,8 +243,8 @@ defmodule Teiserver.Matchmaking.QueueTest do
       queue_pid: queue_pid,
       version: version
     } do
-      user1 = mk_user(name: "user1")
-      user2 = mk_user(name: "user2")
+      user1 = mk_user()
+      user2 = mk_user()
 
       # Join first user
       {:ok, _pid} = Matchmaking.join_queue(queue_id, version, user1.id)
@@ -273,7 +273,7 @@ defmodule Teiserver.Matchmaking.QueueTest do
   end
 
   defp mk_user(opts \\ []) do
-    user = GeneralTestLib.make_user(%{"name" => opts[:name]})
+    user = GeneralTestLib.make_user()
     if Keyword.get(opts, :register?, true), do: SessionRegistry.register(user.id, nil)
     user
   end

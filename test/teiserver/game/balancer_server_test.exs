@@ -64,7 +64,7 @@ defmodule Teiserver.Game.BalancerServerTest do
     users =
       for {rank, i} <- Enum.with_index(list_of_ranks) do
         user =
-          GeneralTestLib.make_user(%{"name" => "user#{i}"})
+          GeneralTestLib.make_user(%{"name" => "user_with_ranks_#{i}"})
           |> Map.put(:party_id, i)
           |> then(fn user -> Map.put(user, :userid, user.id) end)
 

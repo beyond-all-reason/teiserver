@@ -221,9 +221,9 @@ defmodule Teiserver.Account.UserLibTest do
   end
 
   defp user_stat_data_fixtures(_state) do
-    %{id: user1} = AccountFixtures.user_fixture(%{name: "user1"})
-    %{id: user2} = AccountFixtures.user_fixture(%{name: "user2"})
-    %{id: user3} = AccountFixtures.user_fixture(%{name: "user3"})
+    %{id: user1} = AccountFixtures.user_fixture()
+    %{id: user2} = AccountFixtures.user_fixture()
+    %{id: user3} = AccountFixtures.user_fixture()
 
     # These users will have empty, nil or missing fields, they should
     # not show up in the searches

@@ -67,7 +67,6 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "redirects when data is valid", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
-          "name" => "user",
           "email" => "tsuser2@test.local",
           "data" => %{}
         })
@@ -147,14 +146,13 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       # moderators have access this so we are testing with contributor
       {:ok, setup_opts} =
         TeiserverTestLib.staff_permissions()
-        |> GeneralTestLib.conn_setup([], "test1")
+        |> GeneralTestLib.conn_setup()
         |> TeiserverTestLib.conn_setup()
 
       conn = Keyword.get(setup_opts, :conn)
 
       user =
         GeneralTestLib.make_user(%{
-          "name" => "test2",
           "email" => "test_gdpr_no_auth@test.local",
           "data" => %{}
         })

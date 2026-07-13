@@ -6,8 +6,8 @@ defmodule Teiserver.Battle.StartScriptTest do
   use Teiserver.DataCase, async: false
 
   test "test start script duel" do
-    user1 = GeneralTestLib.make_user(%{"name" => "user1", "roles" => ["Verified"]})
-    user2 = GeneralTestLib.make_user(%{"name" => "user2", "roles" => ["Verified"]})
+    user1 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+    user2 = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
     start_script = %AT.StartScript{
       game_name: "Beyond All Reason test-28379-33ba377",

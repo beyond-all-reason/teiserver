@@ -23,8 +23,8 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
   end
 
   defp create_minute_data do
-    AccountFixtures.user_fixture(%{name: "user1"})
-    AccountFixtures.user_fixture(%{name: "user2"})
+    AccountFixtures.user_fixture()
+    AccountFixtures.user_fixture()
 
     all_ids =
       Account.list_users()

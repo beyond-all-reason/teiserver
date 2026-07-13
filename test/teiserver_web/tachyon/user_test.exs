@@ -30,7 +30,6 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     test "returns translated roles" do
       user =
         GeneralTestLib.make_user(%{
-          "name" => "user",
           "roles" => ["Verified", "Admin", "Contributor"]
         })
 
@@ -43,7 +42,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
   describe "self event" do
     test "sent after login" do
-      user = GeneralTestLib.make_user(%{"name" => "user", "roles" => ["Verified"]})
+      user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
       %{client: client} = Tachyon.connect(user, swallow_first_event: false)
 
       {:ok,
@@ -61,7 +60,6 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     test "filters out unmappable roles in tachyon messages" do
       user =
         GeneralTestLib.make_user(%{
-          "name" => "user",
           "roles" => ["Verified", "Contributor"]
         })
 
@@ -199,7 +197,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     end
 
     test "avoid duplicate subscription", %{client: client} do
-      {:ok, ctx} = Tachyon.setup_client("user")
+      {:ok, ctx} = Tachyon.setup_client()
       other_user = ctx[:user]
 
       assert %{"status" => "success"} =
@@ -229,7 +227,6 @@ defmodule TeiserverWeb.Tachyon.UserTest do
     test "broadcasts translated roles" do
       user =
         GeneralTestLib.make_user(%{
-          "name" => "user",
           "roles" => ["Verified", "Moderator"]
         })
 

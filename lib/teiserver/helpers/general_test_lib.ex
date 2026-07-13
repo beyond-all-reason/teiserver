@@ -75,7 +75,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   # TODO: This should be refactored into a single opts argument
   # with the possibility for roles, flags and other rarely used arguments
   # being part of that
-  def conn_setup(roles \\ [], flags \\ [], name \\ "current_user") do
+  def conn_setup(roles \\ [], flags \\ []) do
     {:ok, _data} = data_setup(flags)
 
     r = :rand.uniform(999_999_999)
@@ -86,7 +86,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
       else
         user =
           make_user(%{
-            "name" => name,
+            "name" => "current_user" || "current_user_#{Enum.take_random(@validchars, 7)}",
             "email" => "current_user#{r}@current_user#{r}.com",
             "roles" => roles
           })

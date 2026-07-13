@@ -105,8 +105,8 @@ defmodule Teiserver.Game.MatchRatingLibTest do
 
   test "tau in config is used when rating matches" do
     # Create two user
-    user1 = AccountTestLib.user_fixture(%{name: "user1"})
-    user2 = AccountTestLib.user_fixture(%{name: "user2"})
+    user1 = AccountTestLib.user_fixture()
+    user2 = AccountTestLib.user_fixture()
 
     match = create_fake_match(user1.id, user2.id)
     rating_type_id = Game.get_or_add_rating_type(match.game_type)
@@ -125,8 +125,8 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     Config.update_site_config("rating.Tau", 0)
 
     # Create two user
-    user1 = AccountTestLib.user_fixture(%{name: "user1"})
-    user2 = AccountTestLib.user_fixture(%{name: "user2"})
+    user1 = AccountTestLib.user_fixture()
+    user2 = AccountTestLib.user_fixture()
 
     match = create_fake_match(user1.id, user2.id)
     rating_type_id = Game.get_or_add_rating_type(match.game_type)

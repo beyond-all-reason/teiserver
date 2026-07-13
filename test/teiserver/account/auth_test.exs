@@ -28,7 +28,6 @@ defmodule Teiserver.Account.AuthTest do
     test "allow?/2 - bots are exempt" do
       user =
         AccountFixtures.user_fixture(%{
-          name: "user",
           roles: ["Server", "Bot"],
           permissions: ["Server", "Bot"]
         })

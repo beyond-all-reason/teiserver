@@ -27,8 +27,8 @@ defmodule Teiserver.Support.Tachyon do
     end
   end
 
-  def create_user(name \\ nil) do
-    user = GeneralTestLib.make_user(%{"name" => name, "roles" => ["Verified"]})
+  def create_user do
+    user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     set_ratings(user, 17)
     user
   end

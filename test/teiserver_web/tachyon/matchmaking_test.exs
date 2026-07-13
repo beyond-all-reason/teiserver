@@ -410,7 +410,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
   describe "pairing" do
     defp setup_app(_context) do
-      owner = GeneralTestLib.make_user(%{"name" => "app_user", "roles" => ["Verified"]})
+      owner = GeneralTestLib.make_user(%{"name" => "app_owner", "roles" => ["Verified"]})
 
       app =
         OAuthFixtures.app_attrs(owner.id)
@@ -420,8 +420,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       {:ok, app: app}
     end
 
-    defp setup_user(app, name) do
-      user = GeneralTestLib.make_user(%{"name" => name, "roles" => ["Verified"]})
+    defp setup_user(app) do
+      user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
       token = OAuthFixtures.token_attrs(user, app) |> OAuthFixtures.create_token()
       client = Tachyon.connect(token)
       {:ok, %{user: user, token: token, client: client}}
@@ -435,8 +435,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       queue_pid: queue_pid,
       queue_version: version
     } do
-      {:ok, %{user: _user1, client: client1}} = setup_user(app, "user1")
-      {:ok, %{user: _user2, client: client2}} = setup_user(app, "user2")
+      {:ok, %{user: _user1, client: client1}} = setup_user(app)
+      {:ok, %{user: _user2, client: client2}} = setup_user(app)
 
       assert %{"status" => "success"} =
                Tachyon.join_queues!(client1, [%{id: queue_id, version: version}])
@@ -469,8 +469,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       queue_pid: queue_pid,
       queue_version: version
     } do
-      {:ok, %{client: client1}} = setup_user(app, "client1")
-      {:ok, %{client: client2}} = setup_user(app, "client2")
+      {:ok, %{client: client1}} = setup_user(app)
+      {:ok, %{client: client2}} = setup_user(app)
       assert %{"status" => "failed", "reason" => "no_match"} = Tachyon.matchmaking_ready!(client1)
 
       assert %{"status" => "success"} =
@@ -894,16 +894,16 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   end
 
   defp setup_clients(app, amount) do
-    Enum.map(1..amount, fn i ->
-      {:ok, %{client: client}} = setup_user(app, "user#{i}")
+    Enum.map(1..amount, fn _i ->
+      {:ok, %{client: client}} = setup_user(app)
       client
     end)
   end
 
   defp join_and_pair(app, queue, queue_pid, number_of_player) do
     data =
-      Enum.map(1..number_of_player, fn i ->
-        {:ok, %{client: client} = data} = setup_user(app, "user#{i}")
+      Enum.map(1..number_of_player, fn _i ->
+        {:ok, %{client: client} = data} = setup_user(app)
         assert %{"status" => "success"} = Tachyon.join_queues!(client, [queue])
         data
       end)

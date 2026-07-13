@@ -82,7 +82,6 @@ defmodule TeiserverWeb.TachyonControllerTest do
     test "cannot connect if user is banned", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
-          "name" => "user",
           "roles" => ["Verified"],
           "restrictions" => ["Permanently banned"]
         })
@@ -96,7 +95,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
     end
 
     test "cannot connect if user isn't verified", %{conn: conn} do
-      user = GeneralTestLib.make_user(%{"name" => "user"})
+      user = GeneralTestLib.make_user()
 
       conn =
         valid_tachyon_conn(conn, user)
@@ -109,7 +108,6 @@ defmodule TeiserverWeb.TachyonControllerTest do
     test "cannot connect if user is suspended", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
-          "name" => "user",
           "roles" => ["Verified"],
           "restrictions" => ["Login"]
         })
