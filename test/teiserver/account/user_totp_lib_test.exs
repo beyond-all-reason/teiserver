@@ -7,8 +7,8 @@ defmodule Teiserver.Account.TOTPLibTest do
   use Teiserver.DataCase, async: false
 
   defp users(_context) do
-    user_with_totp = GeneralTestLib.make_user(%{"name" => "has_totp"})
-    user_without_totp = GeneralTestLib.make_user(%{"name" => "has_no_totp"})
+    user_with_totp = GeneralTestLib.make_user(%{name: "has_totp"})
+    user_without_totp = GeneralTestLib.make_user(%{name: "has_no_totp"})
 
     secret = NimbleTOTP.secret()
     {:ok, _totp} = TOTPLib.set_secret(user_with_totp.id, secret)

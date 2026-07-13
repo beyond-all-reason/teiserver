@@ -64,6 +64,10 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
   end
 
   defp forget_user_struct(%User{} = user) do
+    name =
+      (Enum.to_list(?A..?Z) ++ Enum.to_list(?0..?9))
+      |> Enum.take_random(20)
+
     # Wipe all the user fields that contain PII, this new user
     # is persisted via the update_cache_user call below which
     # will call the relevant changeset and update any caches
@@ -73,9 +77,7 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
     # audit the forgetting process if needed
     new_user =
       Map.merge(user, %{
-        name:
-          (Enum.to_list(?A..?Z) ++ Enum.to_list(?0..?9))
-          |> Enum.take_random(20),
+        name: name,
         email: "#{user.id}@#{user.id}.#{user.id}",
         password: UserLib.make_bot_password(),
         icon: "",

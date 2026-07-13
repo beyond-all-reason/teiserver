@@ -4,19 +4,25 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   alias Teiserver.Account
   alias Teiserver.Account.Guardian
   alias TeiserverWeb.UserSocket
+
   import Phoenix.ChannelTest
   import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
 
   @endpoint TeiserverWeb.Endpoint
 
+  @validchars Enum.to_list(?a..?z) ++ Enum.to_list(?0..?9) ++ Enum.to_list(?A..?Z)
+
   # def make_combos(data), do: CombinatorLib.make_combos(data)
 
   def user_fixture, do: make_user(%{"permissions" => []})
 
+  # TODO: This should be replaced by AccountFixtures.user_fixture()
+  # unfortunately they have different signatures so it's not a find
+  # and replace
   def make_user(params \\ %{}) do
     {:ok, u} =
       Account.create_user(%{
-        "name" => params["name"] || "Test",
+        "name" => params["name"] || "TEST_#{Enum.take_random(@validchars, 15)}",
         "email" => params["email"] || "email@email#{:rand.uniform(999_999_999_999)}",
         "colour" => params["colour"] || "#00AA00",
         "icon" => params["icon"] || "fa-solid fa-user",
@@ -66,8 +72,9 @@ defmodule Teiserver.Helpers.GeneralTestLib do
     login(build_conn(), user.email)
   end
 
-  # @spec general_setup(list, ) :: tuple
-  # TODO: Unhappy with this, change it before merge
+  # TODO: This should be refactored into a single opts argument
+  # with the possibility for roles, flags and other rarely used arguments
+  # being part of that
   def conn_setup(roles \\ [], flags \\ [], name \\ "current_user") do
     {:ok, _data} = data_setup(flags)
 
