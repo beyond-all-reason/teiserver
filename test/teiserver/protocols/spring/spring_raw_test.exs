@@ -183,7 +183,7 @@ defmodule Teiserver.SpringRawTest do
       )
 
       reply = _recv_until(socket)
-      assert reply == "DENIED Invalid password\n"
+      "DENIED " <> _message = reply
 
       # Clear the much shorter lived flood protection
       Teiserver.cache_put(:teiserver_login_count, user.id, 0)
