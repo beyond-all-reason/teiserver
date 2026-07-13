@@ -86,7 +86,6 @@ defmodule Teiserver.Helpers.GeneralTestLib do
       else
         user =
           make_user(%{
-            "name" => "current_user" || "current_user_#{Enum.take_random(@validchars, 7)}",
             "email" => "current_user#{r}@current_user#{r}.com",
             "roles" => roles
           })

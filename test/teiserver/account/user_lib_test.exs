@@ -44,7 +44,7 @@ defmodule Teiserver.Account.UserLibTest do
     end
 
     test "update_user_plain_password/2" do
-      user = AccountFixtures.user_fixture()
+      user = AccountFixtures.user_fixture(%{name: "Test"})
 
       assert {:ok, %{name: "Test"}} =
                UserLib.update_user_plain_password(user, %{
@@ -85,7 +85,7 @@ defmodule Teiserver.Account.UserLibTest do
     end
 
     test "password_reset_update_user/2" do
-      user = AccountFixtures.user_fixture()
+      user = AccountFixtures.user_fixture(%{name: "Test"})
 
       assert {:ok, %{name: "Test"}} =
                UserLib.update_user_plain_password(user, %{

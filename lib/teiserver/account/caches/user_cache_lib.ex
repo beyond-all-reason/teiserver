@@ -281,7 +281,11 @@ defmodule Teiserver.Account.UserCacheLib do
       (CacheUser.keys() ++ CacheUser.duplicated_keys())
       |> Map.new(fn k -> {to_string(k), Map.get(user, k, Account.default_data()[k])} end)
 
-    Account.script_update_user(db_user, Map.put(obj_attrs, "data", data))
+    IO.inspect("")
+    IO.inspect(obj_attrs, pretty: true)
+    result = Account.script_update_user(db_user, Map.put(obj_attrs, "data", data))
+    IO.inspect("")
+    IO.inspect(result, pretty: true, limit: 100)
   end
 
   @spec update_user(CacheUser.t() | map(), [persist: boolean()] | nil) :: CacheUser.t() | map()
