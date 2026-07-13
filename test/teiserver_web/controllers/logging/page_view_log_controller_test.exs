@@ -18,8 +18,8 @@ defmodule TeiserverWeb.Logging.PageViewLogControllerTest do
   end
 
   test "search with values - no results", %{conn: conn} do
-    page_view_logs_fixture(AccountFixtures.user_fixture(%{"name" => "page_view_user"}))
-    user = AccountFixtures.user_fixture(%{"name" => "user"})
+    page_view_logs_fixture(AccountFixtures.user_fixture(%{name: "page_view_user"}))
+    user = AccountFixtures.user_fixture(%{name: "user"})
 
     conn =
       post(conn, ~p"/logging/page_views/search",

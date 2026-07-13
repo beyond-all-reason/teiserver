@@ -17,8 +17,8 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   @update_attrs %{
     colour: "#0000AA",
     icon: "fa-solid fa-wrench",
-    name: "some updated name",
-    username: "some updated username"
+    name: "some_updated_name",
+    username: "some_updated_username"
   }
   @invalid_attrs %{colour: nil, icon: nil, name: nil, permissions: nil, username: nil, data: nil}
 
@@ -67,6 +67,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "redirects when data is valid", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
+          "name" => "user",
           "email" => "tsuser2@test.local",
           "data" => %{}
         })
@@ -125,6 +126,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "success", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
+          "name" => "gdpr_forget",
           "email" => "test_gdpr@test.local",
           "data" => %{}
         })
@@ -136,6 +138,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
 
       # Now ensure the user has been forgotten
       user = Account.get_user(user.id)
+      assert user.name != "gdpr_forget"
       assert user.email != "test_gdpr@test.local"
     end
 
@@ -144,13 +147,14 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       # moderators have access this so we are testing with contributor
       {:ok, setup_opts} =
         TeiserverTestLib.staff_permissions()
-        |> GeneralTestLib.conn_setup(name: "test1")
+        |> GeneralTestLib.conn_setup([], "test1")
         |> TeiserverTestLib.conn_setup()
 
       conn = Keyword.get(setup_opts, :conn)
 
       user =
         GeneralTestLib.make_user(%{
+          "name" => "test2",
           "email" => "test_gdpr_no_auth@test.local",
           "data" => %{}
         })

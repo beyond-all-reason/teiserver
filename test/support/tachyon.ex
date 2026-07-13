@@ -84,7 +84,7 @@ defmodule Teiserver.Support.Tachyon do
 
   def setup_client(_context), do: setup_client()
 
-  def setup_client() do
+  def setup_client do
     user = create_user()
     %{client: client, token: token} = connect(user)
     {:ok, user: user, client: client, token: token}

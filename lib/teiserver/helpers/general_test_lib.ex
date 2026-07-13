@@ -67,6 +67,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   end
 
   # @spec general_setup(list, ) :: tuple
+  # TODO: Unhappy with this, change it before merge
   def conn_setup(roles \\ [], flags \\ [], name \\ "current_user") do
     {:ok, _data} = data_setup(flags)
 

@@ -10,7 +10,6 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
   """
 
   alias Ecto.Adapters.SQL
-  alias Ecto.UUID
   alias Plug.Conn
   alias Teiserver.Account
   alias Teiserver.Account.User
@@ -74,7 +73,9 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
     # audit the forgetting process if needed
     new_user =
       Map.merge(user, %{
-        name: UUID.generate(),
+        name:
+          (Enum.to_list(?A..?Z) ++ Enum.to_list(?0..?9))
+          |> Enum.take_random(20),
         email: "#{user.id}@#{user.id}.#{user.id}",
         password: UserLib.make_bot_password(),
         icon: "",

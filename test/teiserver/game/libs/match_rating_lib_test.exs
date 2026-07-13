@@ -4,7 +4,6 @@ defmodule Teiserver.Game.MatchRatingLibTest do
   alias Ecto.Multi
   alias Teiserver.Account
   alias Teiserver.Account.AccountTestLib
-  alias Teiserver.AccountFixtures
   alias Teiserver.Battle
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Config
@@ -106,8 +105,8 @@ defmodule Teiserver.Game.MatchRatingLibTest do
 
   test "tau in config is used when rating matches" do
     # Create two user
-    user1 = AccountTestLib.user_fixture()
-    user2 = AccountTestLib.user_fixture()
+    user1 = AccountTestLib.user_fixture(%{name: "user1"})
+    user2 = AccountTestLib.user_fixture(%{name: "user2"})
 
     match = create_fake_match(user1.id, user2.id)
     rating_type_id = Game.get_or_add_rating_type(match.game_type)
@@ -126,8 +125,8 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     Config.update_site_config("rating.Tau", 0)
 
     # Create two user
-    user1 = AccountTestLib.user_fixture()
-    user2 = AccountTestLib.user_fixture()
+    user1 = AccountTestLib.user_fixture(%{name: "user1"})
+    user2 = AccountTestLib.user_fixture(%{name: "user2"})
 
     match = create_fake_match(user1.id, user2.id)
     rating_type_id = Game.get_or_add_rating_type(match.game_type)
@@ -185,7 +184,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
         processed: true,
         game_type: game_type,
         # All rooms are hosted by the same user for now
-        founder_id: AccountFixtures.user_fixture().id,
+        founder_id: user1_id,
         bots: %{},
         queue_id: nil,
         started: start_time,
