@@ -1,11 +1,32 @@
 defmodule TeiserverWeb.Account.SessionControllerTest do
+  alias ExUnit.Callbacks
+  alias Swoosh.Adapters.Sandbox, as: EmailSandbox
+  alias Swoosh.TestAssertions
   alias Teiserver.Account
   alias Teiserver.Account.Guardian.Plug
   alias Teiserver.Config
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
-  use TeiserverWeb.ConnCase
+  use TeiserverWeb.ConnCase, async: false
+
+  setup_all do
+    mailer = Application.get_env(:teiserver, Teiserver.Mailer)
+    api_client = Application.get_env(:swoosh, :api_client)
+
+    Application.put_env(
+      :teiserver,
+      Teiserver.Mailer,
+      Keyword.put(mailer, :adapter, Swoosh.Adapters.Sandbox)
+    )
+
+    Application.put_env(:swoosh, :api_client, false)
+
+    Callbacks.on_exit(fn ->
+      Application.put_env(:teiserver, Teiserver.Mailer, mailer)
+      Application.put_env(:swoosh, :api_client, api_client)
+    end)
+  end
 
   describe "login" do
     setup do
@@ -143,6 +164,9 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
 
   describe "password reset" do
     setup do
+      :ok = EmailSandbox.checkout()
+      Callbacks.on_exit(&EmailSandbox.checkin/0)
+
       GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions(), [:no_login])
       |> TeiserverTestLib.conn_setup()
     end
@@ -151,6 +175,12 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
       resp = post(conn, ~p"/send_password_reset", %{"email" => user.email, "email2" => ""})
       assert redirected_to(resp) =~ ~p"/"
       [%Account.Code{}] = Account.list_codes(search: [user_id: user.id])
+
+      TestAssertions.assert_email_sent(fn email ->
+        [{name, address}] = email.to
+        assert name == user.name
+        assert address == user.email
+      end)
     end
   end
 end
