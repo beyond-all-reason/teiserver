@@ -158,7 +158,7 @@ defmodule Teiserver.Helper.StringHelper do
     |> String.downcase()
     |> String.replace("1", "l")
     |> String.replace("3", "e")
-    |> String.replace("4", "h")
+    |> String.replace("4", "a")
     |> String.replace("5", "s")
     |> String.replace("7", "t")
     |> String.replace("8", "b")
