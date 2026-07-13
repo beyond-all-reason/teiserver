@@ -140,4 +140,17 @@ defmodule TeiserverWeb.Account.SessionControllerTest do
       assert Plug.current_resource(conn) == nil
     end
   end
+
+  describe "password reset" do
+    setup do
+      GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions(), [:no_login])
+      |> TeiserverTestLib.conn_setup()
+    end
+
+    test "works", %{conn: conn, user: user} do
+      resp = post(conn, ~p"/send_password_reset", %{"email" => user.email, "email2" => ""})
+      assert redirected_to(resp) =~ ~p"/"
+      [%Account.Code{}] = Account.list_codes(search: [user_id: user.id])
+    end
+  end
 end

@@ -199,14 +199,7 @@ defmodule TeiserverWeb.Account.SessionController do
 
   @spec forgot_password(Conn.t(), map()) :: Conn.t()
   def forgot_password(conn, _params) do
-    key = UUID.uuid1()
-    value = UUID.uuid1()
-    Teiserver.cache_put(:codes, key, value)
-
-    conn
-    |> assign(:key, key)
-    |> assign(:value, value)
-    |> render("forgot_password.html")
+    conn |> render("forgot_password.html")
   end
 
   @spec send_password_reset(Conn.t(), map()) :: Conn.t()
@@ -220,9 +213,6 @@ defmodule TeiserverWeb.Account.SessionController do
       else
         Account.get_user_by_email(email) || %{id: -1}
       end
-
-    key = params["key"]
-    expected_value = Teiserver.cache_get(:codes, key)
 
     existing_resets =
       Account.list_codes(
@@ -244,36 +234,8 @@ defmodule TeiserverWeb.Account.SessionController do
         |> assign(:result, "Existing password reset already sent out")
         |> render("result.html")
 
-      expected_value == nil ->
-        key = UUID.uuid1()
-        value = UUID.uuid1()
-        Teiserver.cache_put(:codes, key, value)
-
-        conn
-        |> assign(:key, key)
-        |> assign(:value, value)
-        |> put_flash(:info, "Form timeout")
-        |> render("forgot_password.html")
-
-      params[key] != expected_value ->
-        key = UUID.uuid1()
-        value = UUID.uuid1()
-        Teiserver.cache_put(:codes, key, value)
-
-        conn
-        |> assign(:key, key)
-        |> assign(:value, value)
-        |> put_flash(:info, "The form has timed out")
-        |> render("forgot_password.html")
-
       user.id == -1 ->
-        key = UUID.uuid1()
-        value = UUID.uuid1()
-        Teiserver.cache_put(:codes, key, value)
-
         conn
-        |> assign(:key, key)
-        |> assign(:value, value)
         |> put_flash(:info, "No user by that email")
         |> render("forgot_password.html")
 
