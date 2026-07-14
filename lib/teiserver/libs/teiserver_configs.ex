@@ -377,7 +377,7 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "teiserver.Sprint TCP Server max heap size",
+      key: "teiserver.Spring TCP Server max heap size",
       section: "Legacy protocol",
       type: "integer",
       permissions: ["Server"],

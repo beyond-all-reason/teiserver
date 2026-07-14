@@ -36,7 +36,7 @@ defmodule Teiserver.SpringTcpServer do
   def init(ref, transport, _opts) do
     Process.flag(
       :max_heap_size,
-      Config.get_site_config_cache("teiserver.Sprint TCP Server max heap size")
+      Config.get_site_config_cache("teiserver.Spring TCP Server max heap size")
     )
 
     case init_state(ref, transport) do
