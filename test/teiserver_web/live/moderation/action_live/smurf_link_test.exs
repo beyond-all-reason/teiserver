@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Live.Moderation.ActionLive.SmurfLinkTest do
       # Type into the box, result table should show up
       view
       |> element(~s{input.user-picker-search-input})
-      |> render_keyup(%{value: "_user-testname"})
+      |> render_keyup(%{value: "_user_testname"})
 
       # Even though our user is going to be a name match it should not
       # show up
@@ -51,7 +51,7 @@ defmodule TeiserverWeb.Live.Moderation.ActionLive.SmurfLinkTest do
         |> render()
 
       assert text_field_html ==
-               ~s(<input type="text" name="none" value="##{origin.id} - origin_user-testname" class="w-full input" placeholder="Click green button to search"/>)
+               ~s(<input type="text" name="none" value="##{origin.id} - origin_user_testname" class="w-full input" placeholder="Click green button to search"/>)
 
       hidden_field_html =
         view
