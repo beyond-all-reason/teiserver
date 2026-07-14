@@ -10,14 +10,14 @@ defmodule Teiserver.Data.UserTest do
     # field for users. As such it is possible for there to be a clash.
 
     # This is our base user that will create other users
-    base_user = TeiserverTestLib.new_user("twobot_test_base1")
+    base_user = TeiserverTestLib.new_user("twobot_test_base")
     {:ok, base_user} = Auth.add_roles(base_user.id, ["Server", "Moderator"])
 
-    user1 = CacheUser.register_bot("twobot_test_base1[01]", base_user.id)
-    user2 = CacheUser.register_bot("twobot_test_base1[02]", base_user.id)
+    user1 = CacheUser.register_bot("twobot_test_base[01]", base_user.id)
+    user2 = CacheUser.register_bot("twobot_test_base[02]", base_user.id)
 
     # Now try to register them again
-    user1b = CacheUser.register_bot("twobot_test_base1[01]", base_user.id)
+    user1b = CacheUser.register_bot("twobot_test_base[01]", base_user.id)
 
     assert user1.id == user1b.id
     assert user1.id != user2.id

@@ -562,11 +562,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       {:ok, queue_id: q1v1_id, queue_pid: q1v1_pid, queue_version: version1v1} = setup_queue(1)
       {:ok, queue_id: q2v2_id, queue_pid: q2v2_pid, queue_version: version2v2} = setup_queue(2)
 
-      clients =
-        Enum.map(1..5, fn _i ->
-          {:ok, %{client: client}} = setup_user(app)
-          client
-        end)
+      clients = setup_clients(app, 5)
 
       [c1, c2, c3, c4, c5] = clients
 
@@ -611,11 +607,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     test "foundUpdate event", %{app: app} do
       {:ok, queue_id: q_id, queue_pid: q_pid, queue_version: version} = setup_queue(2)
 
-      clients =
-        Enum.map(1..4, fn _i ->
-          {:ok, %{client: client}} = setup_user(app)
-          client
-        end)
+      clients = setup_clients(app, 4)
 
       for client <- clients do
         assert %{"status" => "success"} =
@@ -645,11 +637,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         queue_attrs(uuid, 1)
         |> mk_queue()
 
-      clients =
-        Enum.map(1..2, fn _i ->
-          {:ok, %{client: client}} = setup_user(app)
-          client
-        end)
+      clients = setup_clients(app, 2)
 
       for client <- clients do
         assert %{"status" => "success"} =
@@ -903,6 +891,13 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
                  Tachyon.recv_message!(client)
       end
     end
+  end
+
+  defp setup_clients(app, amount) do
+    Enum.map(1..amount, fn _i ->
+      {:ok, %{client: client}} = setup_user(app)
+      client
+    end)
   end
 
   defp join_and_pair(app, queue, queue_pid, number_of_player) do

@@ -8,6 +8,93 @@ defmodule Teiserver.Account.UserLibTest do
 
   use Teiserver.DataCase, async: false
 
+  @disallowed_name ".,:;<>{}()+-*/="
+
+  describe "disallow renaming to names with disallowed characters" do
+    # create_ first
+    test "create_user/1" do
+      user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
+      assert match?({:error, %Changeset{errors: [name: _error]}}, UserLib.create_user(user_vars))
+    end
+
+    test "script_create_user/2" do
+      user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
+
+      assert {:error, %{errors: [name: _error]}} =
+               UserLib.script_create_user(user_vars, :md5_password)
+    end
+
+    test "register_user/2" do
+      user_vars = %{
+        "name" => @disallowed_name,
+        "email" => "test@test.test",
+        "password" => "password",
+        "password_confirmation" => "password"
+      }
+
+      assert {:error, %{errors: [name: _error]}} = UserLib.register_user(user_vars, :md5_password)
+    end
+
+    # update_ next
+    test "update_user/2" do
+      user = AccountFixtures.user_fixture()
+
+      assert {:error, %{errors: [name: _error]}} =
+               UserLib.update_user(user, %{name: @disallowed_name})
+    end
+
+    test "update_user_plain_password/2" do
+      user = AccountFixtures.user_fixture(%{name: "Test"})
+
+      assert {:ok, %{name: "Test"}} =
+               UserLib.update_user_plain_password(user, %{
+                 "name" => @disallowed_name,
+                 "existing" => "password"
+               })
+    end
+
+    test "update_user_user_form/2" do
+      user = AccountFixtures.user_fixture()
+
+      assert {:error, %{errors: [name: _error]}} =
+               UserLib.update_user_user_form(user, %{
+                 "name" => @disallowed_name,
+                 "password" => "password"
+               })
+    end
+
+    test "server_limited_update_user/2" do
+      user = AccountFixtures.user_fixture()
+
+      assert {:error, %{errors: [name: _error]}} =
+               UserLib.server_limited_update_user(user, %{name: @disallowed_name})
+    end
+
+    test "server_update_user/2" do
+      user = AccountFixtures.user_fixture()
+
+      assert {:error, %{errors: [name: _error]}} =
+               UserLib.server_update_user(user, %{name: @disallowed_name})
+    end
+
+    test "script_update_user/2" do
+      user = AccountFixtures.user_fixture()
+
+      assert {:error, %{errors: [name: _error]}} =
+               UserLib.script_update_user(user, %{name: @disallowed_name})
+    end
+
+    test "password_reset_update_user/2" do
+      user = AccountFixtures.user_fixture(%{name: "Test"})
+
+      assert {:ok, %{name: "Test"}} =
+               UserLib.update_user_plain_password(user, %{
+                 "name" => @disallowed_name,
+                 "existing" => "password"
+               })
+    end
+  end
+
   describe "list_users_by_data" do
     setup [:user_stat_data_fixtures]
 
@@ -96,11 +183,10 @@ defmodule Teiserver.Account.UserLibTest do
   end
 
   describe "smurf" do
-    test "valid link" do
-      %User{} = moderator = AccountFixtures.user_fixture()
+    setup [:smurf_users]
+
+    test "valid link", %{moderator: moderator, origin: origin, smurf: smurf} do
       {:ok, %User{} = moderator} = Auth.add_roles(moderator.id, ["Moderator"])
-      %User{} = origin = AccountFixtures.user_fixture()
-      %User{} = smurf = AccountFixtures.user_fixture()
 
       result = UserLib.mark_user_as_smurf_of(moderator, %{smurf: smurf, origin: origin})
       assert result == :ok
@@ -112,31 +198,20 @@ defmodule Teiserver.Account.UserLibTest do
       assert smurf.smurf_of_id == origin.id
     end
 
-    test "no access" do
-      %User{} = moderator = AccountFixtures.user_fixture()
-      %User{} = origin = AccountFixtures.user_fixture()
-      %User{} = smurf = AccountFixtures.user_fixture()
-
+    test "no access", %{moderator: moderator, origin: origin, smurf: smurf} do
       result = UserLib.mark_user_as_smurf_of(moderator, %{smurf: smurf, origin: origin})
       assert result == {:error, "No access to one or both users"}
     end
 
-    test "duplicate user" do
-      # If A is a smurf of B, B cannot be made a smurf of A
-      %User{} = moderator = AccountFixtures.user_fixture()
-      {:ok, %User{} = moderator} = Auth.add_roles(moderator.id, ["Moderator"])
-      %User{} = origin = AccountFixtures.user_fixture()
-
+    test "duplicate user", %{moderator: moderator, origin: origin} do
+      # User can not be made smurf of itself
       result = UserLib.mark_user_as_smurf_of(moderator, %{smurf: origin, origin: origin})
       assert result == {:error, "Invalid combination of users selected"}
     end
 
-    test "circular link" do
+    test "circular link", %{moderator: moderator, origin: origin, smurf: smurf} do
       # If A is a smurf of B, B cannot be made a smurf of A
-      %User{} = moderator = AccountFixtures.user_fixture()
       {:ok, %User{} = moderator} = Auth.add_roles(moderator.id, ["Moderator"])
-      %User{} = origin = AccountFixtures.user_fixture()
-      %User{} = smurf = AccountFixtures.user_fixture()
 
       {:ok, origin} = Account.script_update_user(origin, %{smurf_of_id: smurf.id})
 
@@ -199,6 +274,14 @@ defmodule Teiserver.Account.UserLibTest do
     Account.update_user_stat(user_empty_map, %{})
 
     %{users: [user1, user2, user3, user_empty_str, user_empty_map, user_none]}
+  end
+
+  defp smurf_users(_data) do
+    %User{} = moderator = AccountFixtures.user_fixture()
+    %User{} = origin = AccountFixtures.user_fixture()
+    %User{} = smurf = AccountFixtures.user_fixture()
+
+    %{moderator: moderator, origin: origin, smurf: smurf}
   end
 
   defp user_ids_by_data(data) do

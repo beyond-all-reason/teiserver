@@ -642,7 +642,7 @@ CLIENTS test_room #{user.name}\n"
   # end
 
   test "User age", context do
-    user = new_user("test_user_rank_test", %{"rank" => 5})
+    user = new_user("test_user_rank", %{"rank" => 5})
     %{socket: socket} = auth_setup(context, user)
 
     # [in_game, away, r3, r2, r1, mod, bot]
@@ -655,7 +655,7 @@ CLIENTS test_room #{user.name}\n"
   test "Bad id ADDUSER", %{user: user, socket: socket} do
     {:ok, bad_user} =
       CacheUser.user_register_params_with_md5(
-        "test_user_bad_id",
+        "test_bad_id",
         "test_user_bad_id@email.com",
         Account.spring_md5_password("password")
       )
@@ -677,18 +677,18 @@ CLIENTS test_room #{user.name}\n"
     reply = _recv_raw(socket)
 
     assert reply ==
-             "ADDUSER test_user_bad_id ?? #{bad_user.id} \nCLIENTSTATUS test_user_bad_id 0\n"
+             "ADDUSER test_bad_id ?? #{bad_user.id} \nCLIENTSTATUS test_bad_id 0\n"
 
     Client.disconnect(bad_user.id)
   end
 
   test "GETIP", %{user: user, socket: socket} = context do
-    ip_user = new_user("test_user_ip_user", %{})
+    ip_user = new_user("test_user_ip", %{})
     %{socket: _socket} = auth_setup(context, ip_user)
     _recv_until(socket)
 
     # Mod/Bot only so timeout to start with
-    _send_raw(socket, "GETIP test_user_ip_user\n")
+    _send_raw(socket, "GETIP test_user_ip\n")
     reply = _recv_raw(socket)
     assert reply == :timeout
 
@@ -696,18 +696,18 @@ CLIENTS test_room #{user.name}\n"
     :timer.sleep(500)
     _recv_until(socket)
 
-    _send_raw(socket, "GETIP test_user_ip_user\n")
+    _send_raw(socket, "GETIP test_user_ip\n")
     reply = _recv_raw(socket)
-    assert reply == "test_user_ip_user is currently bound to 127.0.0.1\n"
+    assert reply == "test_user_ip is currently bound to 127.0.0.1\n"
   end
 
   test "GETUSERID", %{user: user, socket: socket} = context do
-    ip_user = new_user("test_user_id_user", %{})
+    ip_user = new_user("test_user_id", %{})
     %{socket: _socket} = auth_setup(context, ip_user)
     _recv_until(socket)
 
     # Mod/Bot only so timeout to start with
-    _send_raw(socket, "GETUSERID test_user_id_user\n")
+    _send_raw(socket, "GETUSERID test_user_id\n")
     reply = _recv_raw(socket)
     assert reply == :timeout
 
@@ -715,9 +715,9 @@ CLIENTS test_room #{user.name}\n"
     :timer.sleep(500)
     _recv_until(socket)
 
-    _send_raw(socket, "GETUSERID test_user_id_user\n")
+    _send_raw(socket, "GETUSERID test_user_id\n")
     reply = _recv_raw(socket)
-    assert reply == "The ID for test_user_id_user is 1993717506 0d04a635e200f308 #{ip_user.id}\n"
+    assert reply == "The ID for test_user_id is 1993717506 0d04a635e200f308 #{ip_user.id}\n"
   end
 
   # test "Unicode support - TCP", %{socket: socket1, user: user} = context do

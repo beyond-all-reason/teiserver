@@ -17,8 +17,8 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   @update_attrs %{
     colour: "#0000AA",
     icon: "fa-solid fa-wrench",
-    name: "some updated name",
-    username: "some updated username"
+    name: "some_updated_name",
+    username: "some_updated_username"
   }
   @invalid_attrs %{colour: nil, icon: nil, name: nil, permissions: nil, username: nil, data: nil}
 
@@ -125,6 +125,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "success", %{conn: conn} do
       user =
         GeneralTestLib.make_user(%{
+          "name" => "gdpr_forget",
           "email" => "test_gdpr@test.local",
           "data" => %{}
         })
@@ -136,6 +137,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
 
       # Now ensure the user has been forgotten
       user = Account.get_user(user.id)
+      assert user.name != "gdpr_forget"
       assert user.email != "test_gdpr@test.local"
     end
 

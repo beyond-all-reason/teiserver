@@ -2,6 +2,7 @@ defmodule Teiserver.Account.User do
   @moduledoc false
 
   alias Argon2
+  alias Ecto.Changeset
   alias Teiserver.Account
   alias Teiserver.CacheUser
   alias Teiserver.Helper.StylingHelper
@@ -93,6 +94,7 @@ defmodule Teiserver.Account.User do
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> validate_name_change()
     |> put_md5_password_hash()
   end
 
@@ -115,6 +117,7 @@ defmodule Teiserver.Account.User do
         {:error, reason} -> [{:email, reason}]
       end
     end)
+    |> validate_name_change()
     |> put_md5_password_hash()
   end
 
@@ -136,6 +139,7 @@ defmodule Teiserver.Account.User do
     )
     |> validate_required(~w(name email)a)
     |> unique_constraint(:email)
+    |> validate_name_change()
   end
 
   def changeset(user, attrs, :limited_with_data) do
@@ -147,6 +151,7 @@ defmodule Teiserver.Account.User do
     |> cast(attrs, ~w(name email icon colour data)a)
     |> validate_required([:name, :email])
     |> unique_constraint(:email)
+    |> validate_name_change()
   end
 
   # Updating email or name from user update form requires plain text password confirmation
@@ -176,6 +181,7 @@ defmodule Teiserver.Account.User do
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
         |> unique_constraint(:email)
+        |> validate_name_change()
         |> validate_change(:email, fn :email, email ->
           case CacheUser.valid_email?(email) do
             :ok -> []
@@ -253,6 +259,7 @@ defmodule Teiserver.Account.User do
         {:error, reason} -> [{:email, reason}]
       end
     end)
+    |> validate_name_change()
     |> then(fn changeset ->
       case password_type do
         :plain_password -> put_plain_password_hash(changeset)
@@ -284,12 +291,7 @@ defmodule Teiserver.Account.User do
     |> unique_constraint(:email)
     |> validate_required([:name, :email, :password])
     |> validate_confirmation(:password, required: true, message: "Passwords do not match")
-    |> validate_change(:name, fn :name, name ->
-      case Account.valid_name?(name, false) do
-        :ok -> []
-        {:error, reason} -> [{:name, reason}]
-      end
-    end)
+    |> validate_name_change()
     |> validate_password()
     |> validate_change(:email, fn :email, email ->
       case CacheUser.valid_email?(email) do
@@ -338,6 +340,16 @@ defmodule Teiserver.Account.User do
   end
 
   defp put_md5_password_hash(changeset), do: changeset
+
+  defp validate_name_change(%Changeset{} = changeset) do
+    changeset
+    |> validate_change(:name, fn :name, name ->
+      case Account.valid_name?(name, false) do
+        :ok -> []
+        {:error, reason} -> [{:name, reason}]
+      end
+    end)
+  end
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
   def authorize(_action, conn, _data), do: allow?(conn, "admin.user")
