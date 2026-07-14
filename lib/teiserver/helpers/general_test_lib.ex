@@ -3,13 +3,13 @@ defmodule Teiserver.Helpers.GeneralTestLib do
 
   alias Teiserver.Account
   alias Teiserver.Account.Guardian
+  alias Teiserver.Helper.StringHelper
   alias TeiserverWeb.UserSocket
 
   import Phoenix.ChannelTest
   import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
 
   @endpoint TeiserverWeb.Endpoint
-  @alphanum ~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
   # def make_combos(data), do: CombinatorLib.make_combos(data)
 
@@ -19,10 +19,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   # unfortunately they have different signatures so it's not a find
   # and replace
   def make_user(params \\ %{}) do
-    name =
-      1..15
-      |> Enum.map(fn _idx -> Enum.random(@alphanum) end)
-      |> List.to_string()
+    name = StringHelper.random_name(15)
 
     {:ok, u} =
       Account.create_user(%{

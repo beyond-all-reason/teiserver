@@ -8,7 +8,7 @@ defmodule Teiserver.Helpers.CacheHelper do
     ConCache.get(table, key) || default
   catch
     :exit, :noproc ->
-      Logger.warning("Cache #{table} is down")
+      Logger.warning("Cache #{table} is down (get)")
       default
   end
 
@@ -17,7 +17,7 @@ defmodule Teiserver.Helpers.CacheHelper do
     ConCache.get_or_store(table, key, func)
   catch
     :exit, :noproc ->
-      Logger.warning("Cache #{table} is down")
+      Logger.warning("Cache #{table} is down (get_or_store)")
       func.()
   end
 
@@ -38,7 +38,8 @@ defmodule Teiserver.Helpers.CacheHelper do
     )
   catch
     :exit, :noproc ->
-      Logger.warning("Cache #{table} is down")
+      # If the cache is down we don't need to delete stuff so this solves itself
+      :ok
   end
 
   def cache_delete(table, key), do: cache_delete(table, [key])
@@ -57,7 +58,7 @@ defmodule Teiserver.Helpers.CacheHelper do
     )
   catch
     :exit, :noproc ->
-      Logger.warning("Cache #{table} is down")
+      Logger.warning("Cache #{table} is down (put)")
   end
 
   @doc """
@@ -75,18 +76,44 @@ defmodule Teiserver.Helpers.CacheHelper do
   end
 
   @doc """
-  Puts the `value` into `key` for `table` across the entire cluster. Makes use of Phoenix.PubSub to do so.
-  """
-  @spec cache_update(atom, any, any) :: :ok | {:error, any}
-  def cache_update(table, key, func) do
-    ConCache.update(table, key, func)
+  The first argument is passed through.
 
-    Phoenix.PubSub.broadcast(
-      Teiserver.PubSub,
-      "cluster_hooks",
-      {:cluster_hooks, :update, Node.self(), table, key, func}
-    )
+  If passed an `{:ok, value}` as the first argument it will store the value in
+  the cache table under the key.
+
+  If no key is provided the `id` of the value in the ok'd tuple will be used.
+  """
+  @spec cache_put_on_ok({:ok, any()} | any(), atom) :: {:ok, any()} | any()
+  def cache_put_on_ok(result, table), do: cache_put_on_ok(result, table, nil)
+
+  @spec cache_put_on_ok({:ok, any()} | any(), atom, any()) :: {:ok, any()} | any()
+  def cache_put_on_ok({:ok, value}, table, key) do
+    key = key || value.id
+    cache_put(table, key, value)
+    {:ok, value}
   end
+
+  def cache_put_on_ok(error_value, _table, _key), do: error_value
+
+  @doc """
+  The first argument is passed through.
+
+  If passed an `{:ok, value}` as the first argument it will delete the cached
+  value for that table under that key.
+
+  If no key is provided the `id` of the value in the ok'd tuple will be used.
+  """
+  @spec cache_delete_on_ok({:ok, any()} | any(), atom) :: {:ok, any()} | any()
+  def cache_delete_on_ok(result, table), do: cache_delete_on_ok(result, table, nil)
+
+  @spec cache_delete_on_ok({:ok, any()} | any(), atom, any()) :: {:ok, any()} | any()
+  def cache_delete_on_ok({:ok, value}, table, key) do
+    key = key || value.id
+    cache_delete(table, key)
+    {:ok, value}
+  end
+
+  def cache_delete_on_ok(error_value, _table, _key), do: error_value
 
   # Stores
   @spec store_get(atom, any) :: any

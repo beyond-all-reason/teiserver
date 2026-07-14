@@ -166,4 +166,15 @@ defmodule Teiserver.Helper.StringHelper do
     |> String.replace("-", "")
     |> String.replace("_", "")
   end
+
+  @doc """
+  Generate a random alphanumeric string of characters of a given length
+  """
+  def random_name(len \\ 20) do
+    chars = ~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+    1..len
+    |> Enum.map(fn _idx -> Enum.random(chars) end)
+    |> List.to_string()
+  end
 end

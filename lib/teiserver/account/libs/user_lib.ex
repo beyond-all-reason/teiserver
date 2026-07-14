@@ -6,6 +6,7 @@ defmodule Teiserver.Account.UserLib do
   alias Teiserver.Account.Auth
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.User
+  alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserQueries
   alias Teiserver.CacheUser
   alias Teiserver.Client
@@ -16,6 +17,10 @@ defmodule Teiserver.Account.UserLib do
 
   use TeiserverWeb, :library_newform
 
+  import Teiserver.Helpers.CacheHelper,
+    only: [cache_get_or_store: 3, cache_put_on_ok: 2, cache_delete_on_ok: 2]
+
+  import Teiserver.Helper.NumberHelper, only: [int_parse!: 1]
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
 
   # Functions
@@ -101,6 +106,37 @@ defmodule Teiserver.Account.UserLib do
     args
     |> UserQueries.count_users()
     |> Repo.aggregate(:count, :id)
+  end
+
+  @doc """
+  Attempts to get the user from the cache, failing that it will get it from the database.
+
+  Returns nil if no user found.
+  """
+  @spec get_user_by_id(User.id() | String.t()) :: User.t() | nil
+  def get_user_by_id(user_id) do
+    user_id = int_parse!(user_id)
+    cache_get_or_store(:users_by_id, user_id, fn -> get_user(user_id) end)
+  end
+
+  @doc """
+  Identical to `get_user_by_id/1` but with a raise instead of a nil result in the event of
+  no user found in the database.
+  """
+  @spec get_user_by_id!(User.id() | String.t()) :: User.t()
+  def get_user_by_id!(user_id) do
+    get_user_by_id(user_id) || raise "No user of the ID #{inspect(user_id)}"
+  end
+
+  @spec decache_user(User.t() | User.id()) :: :ok | {:error, any}
+  def decache_user(%User{id: user_id}), do: decache_user(user_id)
+
+  def decache_user(user_id) do
+    user_id = int_parse!(user_id)
+    Teiserver.cache_delete(:users_by_id, user_id)
+
+    # This to be removed as part of the removal of CacheUser removal
+    UserCacheLib.decache_user(user_id)
   end
 
   @doc """
@@ -201,6 +237,8 @@ defmodule Teiserver.Account.UserLib do
     |> User.changeset(attrs, :limited_with_data)
     |> Repo.update()
     |> broadcast_update_user()
+    |> cache_put_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok()
   end
 
   def update_user_plain_password(%User{} = user, attrs) do
@@ -210,6 +248,8 @@ defmodule Teiserver.Account.UserLib do
     |> User.changeset(attrs, :password)
     |> Repo.update()
     |> broadcast_update_user()
+    |> cache_put_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok()
   end
 
   def update_user_user_form(%User{} = user, attrs) do
@@ -219,6 +259,8 @@ defmodule Teiserver.Account.UserLib do
     |> User.changeset(attrs, :user_form)
     |> Repo.update()
     |> broadcast_update_user()
+    |> cache_put_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok()
   end
 
   def server_limited_update_user(%User{} = user, attrs) do
@@ -228,6 +270,8 @@ defmodule Teiserver.Account.UserLib do
     |> User.changeset(attrs, :server_limited_update_user)
     |> Repo.update()
     |> broadcast_update_user()
+    |> cache_put_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok()
   end
 
   def server_update_user(%User{} = user, attrs) do
@@ -237,6 +281,8 @@ defmodule Teiserver.Account.UserLib do
     |> User.changeset(attrs)
     |> Repo.update()
     |> broadcast_update_user()
+    |> cache_put_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok()
   end
 
   def script_update_user(%User{} = user, attrs) do
@@ -246,6 +292,8 @@ defmodule Teiserver.Account.UserLib do
     |> User.changeset(attrs, :script)
     |> Repo.update()
     |> broadcast_update_user()
+    |> cache_put_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok()
   end
 
   def password_reset_update_user(%User{} = user, attrs) do
@@ -255,6 +303,8 @@ defmodule Teiserver.Account.UserLib do
     |> User.changeset(attrs, :password_reset)
     |> Repo.update()
     |> broadcast_update_user()
+    |> cache_put_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok()
   end
 
   @doc """
@@ -271,6 +321,8 @@ defmodule Teiserver.Account.UserLib do
   """
   def delete_user(%User{} = user) do
     Repo.delete(user)
+    |> cache_delete_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok()
   end
 
   @doc """

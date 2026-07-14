@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
 
   @impl Phoenix.LiveView
   def handle_params(%{"id" => id}, _url, socket) do
-    user = Account.deprecated_get_user_by_id(id)
+    user = Account.get_user_by_id(id)
 
     socket =
       socket

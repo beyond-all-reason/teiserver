@@ -14,10 +14,9 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
   alias Teiserver.Account
   alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
+  alias Teiserver.Helper.StringHelper
   alias Teiserver.Logging.Helpers, as: LoggingHelpers
   alias Teiserver.Repo
-
-  @alphanum ~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
   @doc """
   Given the conn of the user performing the forgetting and a user struct
@@ -66,11 +65,6 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
   end
 
   defp forget_user_struct(%User{} = user) do
-    name =
-      1..20
-      |> Enum.map(fn _idx -> Enum.random(@alphanum) end)
-      |> List.to_string()
-
     # Wipe all the user fields that contain PII, this new user
     # is persisted via the update_cache_user call below which
     # will call the relevant changeset and update any caches
@@ -80,7 +74,7 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
     # audit the forgetting process if needed
     new_user =
       Map.merge(user, %{
-        name: name,
+        name: StringHelper.random_name(),
         email: "#{user.id}@#{user.id}.#{user.id}",
         password: UserLib.make_bot_password(),
         icon: "",

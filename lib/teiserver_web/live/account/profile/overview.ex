@@ -12,9 +12,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
   use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
-  def mount(%{"userid" => userid_str}, _session, socket) do
-    userid = String.to_integer(userid_str)
-    user = Account.deprecated_get_user_by_id(userid)
+  def mount(%{"userid" => user_id}, _session, socket) do
+    user = Account.get_user_by_id(user_id)
 
     socket =
       if is_nil(user) do
@@ -25,7 +24,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         :ok =
           PubSub.subscribe(
             Teiserver.PubSub,
-            "teiserver_client_messages:#{userid}"
+            "teiserver_client_messages:#{user_id}"
           )
 
         socket
@@ -34,7 +33,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Overview do
         |> assign(:view_colour, UserLib.colours())
         |> assign(:user, user)
         |> assign(:role_data, RoleLib.role_data())
-        |> assign(:client, Account.get_client_by_id(userid))
+        |> assign(:client, Account.get_client_by_id(user.id))
         |> get_relationships_and_permissions()
         |> assign_accolade_notification()
       end

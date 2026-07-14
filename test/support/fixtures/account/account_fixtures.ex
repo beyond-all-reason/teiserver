@@ -5,8 +5,7 @@ defmodule Teiserver.AccountFixtures do
   """
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
-
-  @alphanum ~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+  alias Teiserver.Helper.StringHelper
 
   @doc """
   Generate a tag.
@@ -17,10 +16,7 @@ defmodule Teiserver.AccountFixtures do
       |> Map.get(:permissions, [])
       |> AuthLib.split_permissions()
 
-    name =
-      1..15
-      |> Enum.map(fn _idx -> Enum.random(@alphanum) end)
-      |> List.to_string()
+    name = StringHelper.random_name(15)
 
     {:ok, user} =
       attrs

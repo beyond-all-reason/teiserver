@@ -2162,11 +2162,20 @@ defmodule Teiserver.Account do
   @spec get_userid_by_discord_id(String.t()) :: User.id() | nil
   defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib
 
+  @spec get_user_by_id(User.id()) :: User.t() | nil
+  defdelegate get_user_by_id(id), to: UserLib
+
+  @spec get_user_by_id!(User.id()) :: User.t()
+  defdelegate get_user_by_id!(id), to: UserLib
+
   @spec deprecated_get_user_by_id(User.id()) :: T.user() | nil
   defdelegate deprecated_get_user_by_id(id), to: UserCacheLib
 
   @spec list_users_from_cache(list) :: list
   def list_users_from_cache(id_list), do: UserCacheLib.deprecated_list_users(id_list)
+
+  @spec decache_user(User.t()) :: :ok
+  defdelegate decache_user(user_or_user_id), to: UserLib
 
   @spec deprecated_recache_user(User.id() | User.t()) :: :ok
   defdelegate deprecated_recache_user(id), to: UserCacheLib
@@ -2179,9 +2188,6 @@ defmodule Teiserver.Account do
 
   @spec update_cache_user(User.id(), map()) :: T.user()
   def update_cache_user(userid, user), do: UserCacheLib.update_cache_user(userid, user)
-
-  @spec decache_user(User.id()) :: :ok | :no_user
-  defdelegate decache_user(userid), to: UserCacheLib
 
   @spec make_bot_password() :: String.t()
   defdelegate make_bot_password(), to: UserLib

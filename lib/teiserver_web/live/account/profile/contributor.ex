@@ -8,14 +8,13 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
-  def mount(%{"userid" => userid_str}, _session, socket) do
-    userid = String.to_integer(userid_str)
-    user = Account.deprecated_get_user_by_id(userid)
-    hide_contributor_rank = Account.hide_contributor_rank?(userid)
+  def mount(%{"userid" => user_id}, _session, socket) do
+    user = Account.get_user_by_id(user_id)
+    hide_contributor_rank = Account.hide_contributor_rank?(user.id)
 
     socket =
       cond do
-        user == nil ->
+        is_nil(user) ->
           socket
           |> put_flash(:info, "Unable to find that user")
           |> redirect(to: ~p"/")

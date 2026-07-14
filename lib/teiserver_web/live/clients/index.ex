@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.ClientLive.Index do
   alias Phoenix.PubSub
   alias Teiserver
+  alias Teiserver.Account
   alias Teiserver.Account.UserLib
-  alias Teiserver.CacheUser
   alias Teiserver.Client
 
   use TeiserverWeb, :live_view
@@ -26,7 +26,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> Map.new(fn {userid, _client} ->
         {
           userid,
-          CacheUser.deprecated_get_user_by_id(userid) |> limited_user()
+          userid |> Account.get_user_by_id() |> limited_user()
         }
       end)
       |> Map.filter(fn {_key, value} -> not is_nil(value) end)
@@ -83,8 +83,7 @@ defmodule TeiserverWeb.ClientLive.Index do
         if Map.has_key?(assigns.users, userid) do
           assigns.users[userid]
         else
-          CacheUser.deprecated_get_user_by_id(userid)
-          |> limited_user()
+          userid |> Account.get_user_by_id() |> limited_user()
         end
       end)
       |> Enum.reject(&is_nil(&1))

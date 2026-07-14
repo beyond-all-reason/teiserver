@@ -99,15 +99,10 @@ defmodule Teiserver.Application do
         concache_sup(:teiserver_user_ratings, global_ttl: 60_000),
         concache_sup(:teiserver_game_rating_types, global_ttl: 60_000),
 
+        # New user caches
+        concache_perm_sup(:users_by_id),
+
         # Caches
-
-        # Caches - User
-        # concache_sup(:users_lookup_name_with_id, [global_ttl: 300_000]),
-        # concache_sup(:users_lookup_id_with_name, [global_ttl: 300_000]),
-        # concache_sup(:users_lookup_id_with_email, [global_ttl: 300_000]),
-        # concache_sup(:users_lookup_id_with_discord, [global_ttl: 300_000]),
-        # concache_sup(:users, [global_ttl: 300_000]),
-
         concache_perm_sup(:users_lookup_name_with_id),
         concache_perm_sup(:users_lookup_id_with_name),
         concache_perm_sup(:users_lookup_id_with_email),
