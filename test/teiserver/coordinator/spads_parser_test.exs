@@ -3,16 +3,44 @@ defmodule Teiserver.Coordinator.SpadsParserTest do
   use Teiserver.DataCase, async: true
   import Teiserver.TeiserverTestLib, only: [new_user: 0]
 
-  test "parsing teamSize information" do
-    result = SpadsParser.handle_in("Global setting changed by marseel (teamSize=5)", %{})
-    {:host_update, host_data} = result
-    assert host_data.host_teamsize == 5
+  describe "parsing teamSize information" do
+    test "parses a single-digit value" do
+      result = SpadsParser.handle_in("Global setting changed by marseel (teamSize=3)", %{})
+      {:host_update, host_data} = result
+      assert host_data.host_teamsize == 3
+    end
+
+    test "parses a two-digit value" do
+      result = SpadsParser.handle_in("Global setting changed by marseel (teamSize=10)", %{})
+      {:host_update, host_data} = result
+      assert host_data.host_teamsize == 10
+    end
+
+    test "parses a two-digit value with repeated digits" do
+      result = SpadsParser.handle_in("Global setting changed by marseel (teamSize=11)", %{})
+      {:host_update, host_data} = result
+      assert host_data.host_teamsize == 11
+    end
   end
 
-  test "parsing nbTeams information" do
-    result = SpadsParser.handle_in("Global setting changed by marseel (nbTeams=3)", %{})
-    {:host_update, host_data} = result
-    assert host_data.host_teamcount == 3
+  describe "parsing nbTeams information" do
+    test "parses a single-digit value" do
+      result = SpadsParser.handle_in("Global setting changed by marseel (nbTeams=3)", %{})
+      {:host_update, host_data} = result
+      assert host_data.host_teamcount == 3
+    end
+
+    test "parses a two-digit value" do
+      result = SpadsParser.handle_in("Global setting changed by marseel (nbTeams=10)", %{})
+      {:host_update, host_data} = result
+      assert host_data.host_teamcount == 10
+    end
+
+    test "parses a two-digit value with repeated digits" do
+      result = SpadsParser.handle_in("Global setting changed by marseel (nbTeams=11)", %{})
+      {:host_update, host_data} = result
+      assert host_data.host_teamcount == 11
+    end
   end
 
   test "parsing adding bosses" do
