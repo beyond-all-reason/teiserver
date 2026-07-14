@@ -4,5 +4,5 @@ defmodule Teiserver.General.RateLimit do
   rate limiting
   """
 
-  use Hammer, backend: :ets
+  use Hammer, backend: :ets, algorithm: :sliding_window
 end
