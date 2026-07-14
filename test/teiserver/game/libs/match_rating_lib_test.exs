@@ -4,6 +4,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
   alias Ecto.Multi
   alias Teiserver.Account
   alias Teiserver.Account.AccountTestLib
+  alias Teiserver.AccountFixtures
   alias Teiserver.Battle
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Config
@@ -184,7 +185,7 @@ defmodule Teiserver.Game.MatchRatingLibTest do
         processed: true,
         game_type: game_type,
         # All rooms are hosted by the same user for now
-        founder_id: user1_id,
+        founder_id: AccountFixtures.user_fixture().id,
         bots: %{},
         queue_id: nil,
         started: start_time,

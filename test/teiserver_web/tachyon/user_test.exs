@@ -88,7 +88,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
     test "for offline user", %{client: client} do
       other_user =
-        GeneralTestLib.make_user(%{"name" => "other_user", "roles" => ["Verified"]})
+        GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
       assert %{"status" => "success"} =
                Tachyon.subscribe_updates!(client, [to_string(other_user.id)])
@@ -129,7 +129,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
     test "when target connects", %{client: client} do
       other_user =
-        GeneralTestLib.make_user(%{"name" => "other_user", "roles" => ["Verified"]})
+        GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
       assert %{"status" => "success"} =
                Tachyon.subscribe_updates!(client, [to_string(other_user.id)])

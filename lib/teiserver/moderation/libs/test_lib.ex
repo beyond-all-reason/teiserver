@@ -7,8 +7,8 @@ defmodule Teiserver.Moderation.ModerationTestLib do
   def report_fixture(attrs \\ %{}) do
     {:ok, report} =
       %{
-        reporter_id: GeneralTestLib.make_user(%{"name" => "reporter"}).id,
-        target_id: GeneralTestLib.make_user(%{"name" => "target"}).id,
+        reporter_id: GeneralTestLib.make_user().id,
+        target_id: GeneralTestLib.make_user().id,
         type: "type",
         sub_type: "sub_type",
         extra_text: "extra text",
@@ -42,8 +42,8 @@ defmodule Teiserver.Moderation.ModerationTestLib do
   def ban_fixture(attrs \\ %{}) do
     {:ok, ban} =
       %{
-        source_id: GeneralTestLib.make_user(%{"name" => "source"}).id,
-        added_by_id: GeneralTestLib.make_user(%{"name" => "added_by"}).id,
+        source_id: GeneralTestLib.make_user().id,
+        added_by_id: GeneralTestLib.make_user().id,
         key_values: ["key1", "key2"],
         enabled: true,
         reason: "Reason goes here"

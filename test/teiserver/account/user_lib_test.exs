@@ -227,9 +227,9 @@ defmodule Teiserver.Account.UserLibTest do
 
     # These users will have empty, nil or missing fields, they should
     # not show up in the searches
-    %{id: user_empty_str} = AccountFixtures.user_fixture(%{name: "user_empty_str"})
-    %{id: user_empty_map} = AccountFixtures.user_fixture(%{name: "user_empty_map"})
-    %{id: user_none} = AccountFixtures.user_fixture(%{name: "user_none"})
+    %{id: user_empty_str} = AccountFixtures.user_fixture()
+    %{id: user_empty_map} = AccountFixtures.user_fixture()
+    %{id: user_none} = AccountFixtures.user_fixture()
 
     Account.update_user_stat(user1, %{
       "hardware:gpuinfo" => "AMD",
@@ -277,9 +277,9 @@ defmodule Teiserver.Account.UserLibTest do
   end
 
   defp smurf_users(_data) do
-    %User{} = moderator = AccountFixtures.user_fixture(%{name: "moderator"})
-    %User{} = origin = AccountFixtures.user_fixture(%{name: "origin"})
-    %User{} = smurf = AccountFixtures.user_fixture(%{name: "smurf"})
+    %User{} = moderator = AccountFixtures.user_fixture()
+    %User{} = origin = AccountFixtures.user_fixture()
+    %User{} = smurf = AccountFixtures.user_fixture()
 
     %{moderator: moderator, origin: origin, smurf: smurf}
   end

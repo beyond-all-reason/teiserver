@@ -9,8 +9,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
 
   @endpoint TeiserverWeb.Endpoint
-
-  @validchars Enum.to_list(?a..?z) ++ Enum.to_list(?0..?9) ++ Enum.to_list(?A..?Z)
+  @alphanum ~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
   # def make_combos(data), do: CombinatorLib.make_combos(data)
 
@@ -20,9 +19,14 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   # unfortunately they have different signatures so it's not a find
   # and replace
   def make_user(params \\ %{}) do
+    name =
+      1..15
+      |> Enum.map(fn _idx -> Enum.random(@alphanum) end)
+      |> List.to_string()
+
     {:ok, u} =
       Account.create_user(%{
-        "name" => params["name"] || "TEST_#{Enum.take_random(@validchars, 15)}",
+        "name" => params["name"] || "TEST_#{name}",
         "email" => params["email"] || "email@email#{:rand.uniform(999_999_999_999)}",
         "colour" => params["colour"] || "#00AA00",
         "icon" => params["icon"] || "fa-solid fa-user",

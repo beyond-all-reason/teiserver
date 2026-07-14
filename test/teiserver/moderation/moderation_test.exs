@@ -39,8 +39,8 @@ defmodule Teiserver.ModerationTest do
       assert {:ok, %Report{} = report} =
                @valid_attrs
                |> Map.merge(%{
-                 "reporter_id" => GeneralTestLib.make_user(%{"name" => "reporter"}).id,
-                 "target_id" => GeneralTestLib.make_user(%{"name" => "target"}).id
+                 "reporter_id" => GeneralTestLib.make_user().id,
+                 "target_id" => GeneralTestLib.make_user().id
                })
                |> Moderation.create_report()
 
@@ -162,8 +162,8 @@ defmodule Teiserver.ModerationTest do
       assert {:ok, %Ban{} = ban} =
                @valid_attrs
                |> Map.merge(%{
-                 "source_id" => GeneralTestLib.make_user(%{"name" => "source"}).id,
-                 "added_by_id" => GeneralTestLib.make_user(%{"name" => "added_by"}).id
+                 "source_id" => GeneralTestLib.make_user().id,
+                 "added_by_id" => GeneralTestLib.make_user().id
                })
                |> Moderation.create_ban()
 

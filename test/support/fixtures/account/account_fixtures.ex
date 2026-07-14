@@ -6,7 +6,7 @@ defmodule Teiserver.AccountFixtures do
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
 
-  @validchars Enum.to_list(?a..?z) ++ Enum.to_list(?0..?9) ++ Enum.to_list(?A..?Z)
+  @alphanum ~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
   @doc """
   Generate a tag.
@@ -17,10 +17,15 @@ defmodule Teiserver.AccountFixtures do
       |> Map.get(:permissions, [])
       |> AuthLib.split_permissions()
 
+    name =
+      1..15
+      |> Enum.map(fn _idx -> Enum.random(@alphanum) end)
+      |> List.to_string()
+
     {:ok, user} =
       attrs
       |> Enum.into(%{
-        name: "TEST_#{Enum.take_random(@validchars, 15)}",
+        name: "TEST_#{name}",
         email: "email@email#{:rand.uniform(999_999_999_999)}",
         colour: "#00AA00",
         icon: "fa-solid fa-user",

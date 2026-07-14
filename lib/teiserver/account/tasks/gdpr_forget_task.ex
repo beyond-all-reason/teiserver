@@ -17,6 +17,8 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
   alias Teiserver.Logging.Helpers, as: LoggingHelpers
   alias Teiserver.Repo
 
+  @alphanum ~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
   @doc """
   Given the conn of the user performing the forgetting and a user struct
   of the user being forgotten, attempt to forget the user.
@@ -65,9 +67,7 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
 
   defp forget_user_struct(%User{} = user) do
     name =
-     @alphanum ~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-     1..20
+      1..20
       |> Enum.map(fn _idx -> Enum.random(@alphanum) end)
       |> List.to_string()
 

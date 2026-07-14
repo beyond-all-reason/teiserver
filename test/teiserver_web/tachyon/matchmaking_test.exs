@@ -410,7 +410,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
   describe "pairing" do
     defp setup_app(_context) do
-      owner = GeneralTestLib.make_user(%{"name" => "app_owner", "roles" => ["Verified"]})
+      owner = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
 
       app =
         OAuthFixtures.app_attrs(owner.id)
