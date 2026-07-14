@@ -9,12 +9,12 @@ defmodule Teiserver.Coordinator.SpadsParser do
   def handle_in(msg, state) do
     cond do
       # Team Size
-      match = Regex.run(~r/teamSize=(\d)+/, msg) ->
+      match = Regex.run(~r/teamSize=(\d+)/, msg) ->
         [_full, size] = match
         {:host_update, %{host_teamsize: String.to_integer(size)}}
 
       # Team count
-      match = Regex.run(~r/nbTeams=(\d)+/, msg) ->
+      match = Regex.run(~r/nbTeams=(\d+)/, msg) ->
         [_full, count] = match
         {:host_update, %{host_teamcount: String.to_integer(count)}}
 
