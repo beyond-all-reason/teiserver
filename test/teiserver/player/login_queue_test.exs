@@ -143,7 +143,8 @@ defmodule Teiserver.Player.LoginQueueTest do
     p2 = fake_conn(:p2)
 
     set_capacity(0)
-    LoginQueue.set_rate(1, true)
+    LoginQueue.set_rate(1, false)
+    :timer.sleep(1)
     assert LoginQueue.attempt_login(user1.id, p1) == false
     assert LoginQueue.attempt_login(user2.id, p2) == false
 
@@ -160,7 +161,8 @@ defmodule Teiserver.Player.LoginQueueTest do
     p2 = fake_conn(:p2)
 
     set_capacity(10)
-    LoginQueue.set_rate(1, true)
+    LoginQueue.set_rate(1, false)
+    :timer.sleep(1)
 
     assert LoginQueue.attempt_login(user1.id) == true
     assert LoginQueue.attempt_login(user2.id, p2) == false
