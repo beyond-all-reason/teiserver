@@ -19,6 +19,7 @@ defmodule Teiserver.Player.Session do
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Messaging
   alias Teiserver.Party
+  alias Teiserver.Party.Types, as: PartyTypes
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Player.Types, as: PT
@@ -421,7 +422,7 @@ defmodule Teiserver.Player.Session do
   end
 
   @spec create_party(User.id()) ::
-          {:ok, Party.state()} | {:error, :already_in_party} | {:error, reason :: term()}
+          {:ok, PartyTypes.Data.t()} | {:error, :already_in_party} | {:error, reason :: term()}
   def create_party(user_id) do
     user_id |> via_tuple() |> GenServer.call({:party, :create})
   end
@@ -461,27 +462,27 @@ defmodule Teiserver.Player.Session do
     actor_id |> via_tuple() |> GenServer.call({:party, {:kick_player, target_id}})
   end
 
-  @spec party_notify_invited(User.id(), Party.state()) :: :ok
-  def party_notify_invited(user_id, party_state) do
+  @spec party_notify_invited(User.id(), PartyTypes.Data.t()) :: :ok
+  def party_notify_invited(user_id, %PartyTypes.Data{} = party_state) do
     user_id |> via_tuple() |> GenServer.cast({:party, {:invited, party_state}})
   end
 
-  @spec party_notify_updated(User.id(), Party.state()) :: :ok
-  def party_notify_updated(user_id, party_state) do
+  @spec party_notify_updated(User.id(), PartyTypes.Data.t()) :: :ok
+  def party_notify_updated(user_id, %PartyTypes.Data{} = party_state) do
     user_id |> via_tuple() |> GenServer.cast({:party, {:updated, party_state}})
   end
 
-  @spec party_notify_removed(User.id(), Party.state()) :: :ok
-  def party_notify_removed(user_id, party_state) do
+  @spec party_notify_removed(User.id(), PartyTypes.Data.t()) :: :ok
+  def party_notify_removed(user_id, %PartyTypes.Data{} = party_state) do
     user_id |> via_tuple() |> GenServer.cast({:party, {:removed, party_state}})
   end
 
   @spec party_notify_join_queues(
           User.id(),
           [{Matchmaking.queue_id(), version :: String.t()}],
-          Party.state()
+          PartyTypes.Data.t()
         ) :: :ok
-  def party_notify_join_queues(user_id, queues, party_state) do
+  def party_notify_join_queues(user_id, queues, %PartyTypes.Data{} = party_state) do
     user_id |> via_tuple() |> GenServer.cast({:party, {:join_queues, queues, party_state}})
   end
 
@@ -657,7 +658,7 @@ defmodule Teiserver.Player.Session do
       {:ok, state}
     else
       case Party.rejoin(party_snapshot.current_party, state.user.id) do
-        {:ok, party_state} ->
+        {:ok, %PartyTypes.Data{} = party_state} ->
           state =
             state
             |> put_in([:party, :current_party], party_state.id)
@@ -676,7 +677,7 @@ defmodule Teiserver.Player.Session do
     result =
       Enum.reduce_while(party_snapshot.invited_to, state, fn {_version, id}, state ->
         case Party.rejoin(id, state.user.id) do
-          {:ok, party_state} ->
+          {:ok, %PartyTypes.Data{} = party_state} ->
             state =
               state
               |> update_in([:party, :invited_to], fn invites ->
@@ -947,7 +948,7 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:party, :create}, _from, state) do
     case Party.create_party(state.user.id) do
-      {:ok, party_state, pid} ->
+      {:ok, %PartyTypes.Data{} = party_state, pid} ->
         state =
           state
           |> put_in([:party, :current_party], party_state.id)
@@ -1024,7 +1025,7 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:party, {:invite, party_id, invited_id}}, _from, state) do
     case Party.create_invite(party_id, invited_id) do
-      {:ok, party_state} ->
+      {:ok, %PartyTypes.Data{} = party_state} ->
         state =
           state
           |> update_in([:party, :invited_to], fn invited ->
@@ -1094,7 +1095,7 @@ defmodule Teiserver.Player.Session do
     party_id = state.party.current_party
 
     case Party.cancel_invite(party_id, invited_user_id) do
-      {:ok, party_state} ->
+      {:ok, %PartyTypes.Data{} = party_state} ->
         state = state |> put_in([:party, :version], party_state.version)
 
         {:reply, :ok, state}
@@ -1113,7 +1114,7 @@ defmodule Teiserver.Player.Session do
     party_id = state.party.current_party
 
     case Party.kick_user(party_id, state.user.id, target_id) do
-      {:ok, party_state} ->
+      {:ok, %PartyTypes.Data{} = party_state} ->
         state = state |> put_in([:party, :version], party_state.version)
 
         {:reply, :ok, state}
@@ -1604,7 +1605,7 @@ defmodule Teiserver.Player.Session do
     {:noreply, new_state}
   end
 
-  def handle_cast({:party, {:updated, party_state}}, state) do
+  def handle_cast({:party, {:updated, %PartyTypes.Data{} = party_state}}, state) do
     if (state.party.current_party == party_state.id && state.party.version <= party_state.version) ||
          Enum.any?(state.party.invited_to, fn {v, id} ->
            id == party_state.id && v <= party_state.version
@@ -1614,14 +1615,14 @@ defmodule Teiserver.Player.Session do
           do: put_in(state.party.version, party_state.version),
           else: state
 
-      send_to_player!({:party, {:updated, party_state}}, state)
+      send_to_player!({:party, {:updated, %PartyTypes.Data{} = party_state}}, state)
       {:noreply, state}
     else
       {:noreply, state}
     end
   end
 
-  def handle_cast({:party, {:removed, party_state}}, state) do
+  def handle_cast({:party, {:removed, %PartyTypes.Data{} = party_state}}, state) do
     state =
       if party_state.id == state.party.current_party do
         send_to_player!({:party, {:removed, party_state.id}}, state)
@@ -1644,11 +1645,11 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
-  def handle_cast({:party, {:join_queues, _queues, party_state}}, state)
+  def handle_cast({:party, {:join_queues, _queues, %PartyTypes.Data{} = party_state}}, state)
       when state.party.current_party != party_state.id,
       do: {:noreply, state}
 
-  def handle_cast({:party, {:join_queues, queues, party_state}}, state) do
+  def handle_cast({:party, {:join_queues, queues, %PartyTypes.Data{} = party_state}}, state) do
     case state.matchmaking do
       :no_matchmaking ->
         case join_matchmaking(queues, state) do
