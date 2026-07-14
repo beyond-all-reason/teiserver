@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   @impl Phoenix.LiveView
   def mount(%{"userid" => userid_str}, _session, socket) do
     userid = String.to_integer(userid_str)
-    user = Account.get_user_by_id(userid)
+    user = Account.deprecated_get_user_by_id(userid)
     hide_contributor_rank = Account.hide_contributor_rank?(userid)
 
     socket =
@@ -87,7 +87,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
         "bar_plus.flag" => assigns.temp_country_code
       })
 
-      Account.recache_user(assigns.user.id)
+      Account.deprecated_recache_user(assigns.user.id)
 
       {:noreply,
        socket
@@ -117,7 +117,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
       end
 
     Account.set_hide_contributor_rank(assigns.user.id, boolean_value)
-    Account.recache_user(assigns.user.id)
+    Account.deprecated_recache_user(assigns.user.id)
 
     {:noreply,
      socket

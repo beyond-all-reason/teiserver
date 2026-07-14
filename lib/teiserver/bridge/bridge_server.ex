@@ -50,7 +50,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec send_direct_message(User.id(), String.t()) :: :ok | nil
   def send_direct_message(userid, message) do
-    user = Account.get_user_by_id(userid)
+    user = Account.deprecated_get_user_by_id(userid)
 
     if user.discord_dm_channel && user.discord_dm_channel_id == nil do
       nil
@@ -445,7 +445,7 @@ defmodule Teiserver.Bridge.BridgeServer do
           country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
         })
 
-        CacheUser.recache_user(account.id)
+        CacheUser.deprecated_recache_user(account.id)
         account
 
       account ->

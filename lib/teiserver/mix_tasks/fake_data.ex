@@ -494,7 +494,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   end
 
   defp make_one_time_code do
-    root_user = Account.get_user_by_email("root@localhost")
+    root_user = Account.deprecated_get_user_by_email("root@localhost")
 
     Config.update_site_config("user.Enable one time links", "true")
 

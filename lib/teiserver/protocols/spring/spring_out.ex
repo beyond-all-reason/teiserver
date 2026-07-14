@@ -485,7 +485,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:chat_message, {from_id, room_name, messages, state_user})
        when is_list(messages) do
-    from_user = Account.get_user_by_id(from_id)
+    from_user = Account.deprecated_get_user_by_id(from_id)
 
     if not Account.does_a_ignore_b?(state_user.id, from_id) or
          Auth.admin?(from_user) or

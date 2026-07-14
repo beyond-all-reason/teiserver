@@ -39,7 +39,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
 
     user_ids =
       all_ids
-      |> CacheUser.list_users()
+      |> CacheUser.deprecated_list_users()
       |> Enum.filter(fn u -> u.bot == false end)
       |> Enum.map(fn u -> u.id end)
 
@@ -119,7 +119,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
     user_ids =
       Account.list_users()
       |> Enum.map(fn u -> u.id end)
-      |> CacheUser.list_users()
+      |> CacheUser.deprecated_list_users()
       |> Enum.filter(fn u -> u.bot == false end)
       |> Enum.map(fn u -> u.id end)
 

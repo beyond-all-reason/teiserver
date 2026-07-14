@@ -287,7 +287,7 @@ defmodule Teiserver.CacheUser do
   end
 
   def register_bot(bot_name, bot_host_id) do
-    existing_bot = get_user_by_name(bot_name)
+    existing_bot = deprecated_get_user_by_name(bot_name)
 
     cond do
       allow?(bot_host_id, :moderator) == false ->
@@ -297,7 +297,7 @@ defmodule Teiserver.CacheUser do
         existing_bot
 
       true ->
-        host = get_user_by_id(bot_host_id)
+        host = deprecated_get_user_by_id(bot_host_id)
 
         params =
           user_register_params_with_md5(bot_name, host.email, host.password, %{
@@ -407,7 +407,7 @@ defmodule Teiserver.CacheUser do
   defp do_rename_user(userid, new_name) do
     client = Account.get_client_by_id(userid)
 
-    user = get_user_by_id(userid)
+    user = deprecated_get_user_by_id(userid)
     old_name = user.name
 
     set_flood_level(user.id, 10)
@@ -429,7 +429,7 @@ defmodule Teiserver.CacheUser do
     })
 
     # We need to re-get the user to ensure we don't overwrite our banned flag
-    user = get_user_by_id(userid)
+    user = deprecated_get_user_by_id(userid)
     decache_user(user.id)
 
     db_user = Account.get_user!(userid)
@@ -440,7 +440,7 @@ defmodule Teiserver.CacheUser do
     end
 
     Teiserver.cache_delete(:users_lookup_id_with_name, old_name)
-    recache_user(userid)
+    deprecated_recache_user(userid)
     :ok
   end
 
@@ -456,7 +456,7 @@ defmodule Teiserver.CacheUser do
     Account.update_user(db_user, %{"name" => new_name})
 
     :timer.sleep(100)
-    recache_user(userid)
+    deprecated_recache_user(userid)
     :ok
   end
 
@@ -464,10 +464,10 @@ defmodule Teiserver.CacheUser do
   def request_email_change(nil, _new_email), do: {:error, "no user"}
 
   def request_email_change(user, new_email) do
-    case get_user_by_email(new_email) do
+    case deprecated_get_user_by_email(new_email) do
       nil ->
         code = :rand.uniform(899_999) + 100_000
-        {:ok, update_user(%{user | email_change_code: ["#{code}", new_email]})}
+        {:ok, deprecated_update_user(%{user | email_change_code: ["#{code}", new_email]})}
 
       _existing_user ->
         {:error, "Email already in use"}
@@ -477,7 +477,10 @@ defmodule Teiserver.CacheUser do
   @spec change_email(T.user(), String.t()) :: T.user()
   def change_email(user, new_email) do
     decache_user(user.id)
-    update_user(%{user | email: new_email, email_change_code: [nil, nil]}, persist: true)
+
+    deprecated_update_user(%{user | email: new_email, email_change_code: [nil, nil]},
+      persist: true
+    )
   end
 
   # Cache functions
@@ -487,29 +490,26 @@ defmodule Teiserver.CacheUser do
   @spec get_userid(String.t()) :: integer() | nil
   defdelegate get_userid(username), to: UserCacheLib
 
-  @spec get_user_by_name(String.t()) :: T.user() | nil
-  defdelegate get_user_by_name(username), to: UserCacheLib
+  @spec deprecated_get_user_by_name(String.t()) :: T.user() | nil
+  defdelegate deprecated_get_user_by_name(username), to: UserCacheLib
 
-  @spec get_user_by_email(String.t()) :: T.user() | nil
-  defdelegate get_user_by_email(email), to: UserCacheLib
+  @spec deprecated_get_user_by_email(String.t()) :: T.user() | nil
+  defdelegate deprecated_get_user_by_email(email), to: UserCacheLib
 
-  @spec get_user_by_discord_id(String.t()) :: T.user() | nil
-  defdelegate get_user_by_discord_id(discord_id), to: UserCacheLib
+  @spec deprecated_get_user_by_discord_id(String.t()) :: T.user() | nil
+  defdelegate deprecated_get_user_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_userid_by_discord_id(String.t()) :: User.id() | nil
   defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib
 
-  @spec get_user_by_token(String.t()) :: T.user() | nil
-  defdelegate get_user_by_token(token), to: UserCacheLib
+  @spec deprecated_get_user_by_id(User.id()) :: T.user() | nil
+  defdelegate deprecated_get_user_by_id(id), to: UserCacheLib
 
-  @spec get_user_by_id(User.id()) :: T.user() | nil
-  defdelegate get_user_by_id(id), to: UserCacheLib
+  @spec deprecated_list_users(list) :: list
+  defdelegate deprecated_list_users(id_list), to: UserCacheLib
 
-  @spec list_users(list) :: list
-  defdelegate list_users(id_list), to: UserCacheLib
-
-  @spec recache_user(Integer.t()) :: :ok
-  defdelegate recache_user(id), to: UserCacheLib
+  @spec deprecated_recache_user(Integer.t()) :: :ok
+  defdelegate deprecated_recache_user(id), to: UserCacheLib
 
   @spec convert_user(T.user()) :: T.user()
   defdelegate convert_user(user), to: UserCacheLib
@@ -517,8 +517,8 @@ defmodule Teiserver.CacheUser do
   @spec add_user(T.user()) :: T.user()
   defdelegate add_user(user), to: UserCacheLib
 
-  @spec update_user(T.user(), [persist: boolean()] | nil) :: T.user()
-  defdelegate update_user(user, persist \\ []), to: UserCacheLib
+  @spec deprecated_update_user(T.user(), [persist: boolean()] | nil) :: T.user()
+  defdelegate deprecated_update_user(user, persist \\ []), to: UserCacheLib
 
   @spec decache_user(User.id()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCacheLib
@@ -705,7 +705,7 @@ defmodule Teiserver.CacheUser do
 
   @spec internal_client_login(User.id()) :: {:ok, T.user(), T.client()} | :error
   def internal_client_login(userid) do
-    case get_user_by_id(userid) do
+    case deprecated_get_user_by_id(userid) do
       nil ->
         :error
 
@@ -740,7 +740,7 @@ defmodule Teiserver.CacheUser do
         {:error, "token_login_failed"}
 
       {:ok, db_user, _claims} ->
-        user = get_user_by_id(db_user.id)
+        user = deprecated_get_user_by_id(db_user.id)
 
         cond do
           user.smurf_of_id != nil ->
@@ -823,7 +823,7 @@ defmodule Teiserver.CacheUser do
   def try_md5_login(username, md5_password, ip, lobby, lobby_hash) do
     wait_for_startup()
 
-    case get_user_by_name(username) do
+    case deprecated_get_user_by_name(username) do
       nil ->
         {:error, "No user found for '#{username}'"}
 
@@ -831,7 +831,7 @@ defmodule Teiserver.CacheUser do
         # # If they're a smurf, log them in as the smurf!
         # {user, username} =
         #   if user.smurf_of_id != nil do
-        #     origin_user = get_user_by_id(user.smurf_of_id)
+        #     origin_user = deprecated_get_user_by_id(user.smurf_of_id)
 
         #     {origin_user, origin_user.name}
         #   else
@@ -1030,7 +1030,7 @@ defmodule Teiserver.CacheUser do
         lobby_hash: lobby_hash
     }
 
-    update_user(user, persist: true)
+    deprecated_update_user(user, persist: true)
 
     Account.update_user_stat(user.id, %{
       bot: bot?,
@@ -1103,7 +1103,7 @@ defmodule Teiserver.CacheUser do
   def shadowbanned?(nil), do: true
 
   def shadowbanned?(userid) when is_integer(userid),
-    do: shadowbanned?(get_user_by_id(userid))
+    do: shadowbanned?(deprecated_get_user_by_id(userid))
 
   def shadowbanned?(%{shadowbanned: true}), do: true
   def shadowbanned?(_user), do: false
@@ -1204,7 +1204,7 @@ defmodule Teiserver.CacheUser do
   def allow?(nil, _required), do: false
 
   def allow?(userid, required) when is_integer(userid),
-    do: allow?(get_user_by_id(userid), required)
+    do: allow?(deprecated_get_user_by_id(userid), required)
 
   def allow?(user, required) do
     db_user = Account.get_user(user.id)
@@ -1262,7 +1262,7 @@ defmodule Teiserver.CacheUser do
   """
   def compare_to_db_user(user_id) do
     db_user = Account.get_user!(user_id)
-    cache_user = get_user_by_id(user_id)
+    cache_user = deprecated_get_user_by_id(user_id)
 
     cache_user
     |> Map.keys()

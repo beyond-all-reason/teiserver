@@ -94,7 +94,7 @@ defmodule TeiserverWeb.Admin.MatchController do
 
     total_pages = div(total_count - 1, limit) + 1
 
-    user = Account.get_user_by_id(userid)
+    user = Account.deprecated_get_user_by_id(userid)
 
     conn
     |> assign(:user, user)

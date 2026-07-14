@@ -195,7 +195,7 @@ defmodule Teiserver.Account.UserLib do
 
   """
   def update_user(%User{} = user, attrs) do
-    Account.recache_user(user.id)
+    Account.deprecated_recache_user(user.id)
 
     user
     |> User.changeset(attrs, :limited_with_data)
@@ -204,7 +204,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def update_user_plain_password(%User{} = user, attrs) do
-    Account.recache_user(user.id)
+    Account.deprecated_recache_user(user.id)
 
     user
     |> User.changeset(attrs, :password)
@@ -213,7 +213,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def update_user_user_form(%User{} = user, attrs) do
-    Account.recache_user(user.id)
+    Account.deprecated_recache_user(user.id)
 
     user
     |> User.changeset(attrs, :user_form)
@@ -222,7 +222,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def server_limited_update_user(%User{} = user, attrs) do
-    Account.recache_user(user.id)
+    Account.deprecated_recache_user(user.id)
 
     user
     |> User.changeset(attrs, :server_limited_update_user)
@@ -231,7 +231,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def server_update_user(%User{} = user, attrs) do
-    Account.recache_user(user.id)
+    Account.deprecated_recache_user(user.id)
 
     user
     |> User.changeset(attrs)
@@ -240,7 +240,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def script_update_user(%User{} = user, attrs) do
-    Account.recache_user(user.id)
+    Account.deprecated_recache_user(user.id)
 
     user
     |> User.changeset(attrs, :script)
@@ -249,7 +249,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def password_reset_update_user(%User{} = user, attrs) do
-    Account.recache_user(user.id)
+    Account.deprecated_recache_user(user.id)
 
     user
     |> User.changeset(attrs, :password_reset)
@@ -507,7 +507,7 @@ defmodule Teiserver.Account.UserLib do
         with {:ok, _updated_user} <-
                script_update_user(smurf, %{"smurf_of_id" => actual_origin_id}),
              {:ok, %User{}} <- Auth.add_roles(origin.id, ["Smurfer"]),
-             :ok <- Account.recache_user(smurf.id) do
+             :ok <- Account.deprecated_recache_user(smurf.id) do
           add_audit_log(
             moderator_id,
             nil,

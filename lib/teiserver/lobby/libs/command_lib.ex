@@ -93,7 +93,7 @@ defmodule Teiserver.Lobby.CommandLib do
   @spec log_command(map, T.lobby_id()) :: any()
   def log_command(cmd, lobby_id) do
     message = "$ " <> command_as_message(cmd)
-    sender = Account.get_user_by_id(cmd.userid)
+    sender = Account.deprecated_get_user_by_id(cmd.userid)
     ChatLib.persist_message(sender, message, lobby_id, :say)
   end
 

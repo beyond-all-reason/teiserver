@@ -35,9 +35,9 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
   defp get_user(username_or_email) do
     user =
       if String.contains?(username_or_email, "@") do
-        UserCacheLib.get_user_by_email(username_or_email)
+        UserCacheLib.deprecated_get_user_by_email(username_or_email)
       else
-        UserCacheLib.get_user_by_name(username_or_email)
+        UserCacheLib.deprecated_get_user_by_name(username_or_email)
       end
 
     if is_nil(user) do

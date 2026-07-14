@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         players = id |> int_parse() |> Lobby.list_lobby_players!()
         clients = get_clients(players)
 
-        bar_user = Account.get_user_by_id(socket.assigns.current_user.id)
+        bar_user = Account.deprecated_get_user_by_id(socket.assigns.current_user.id)
         lobby = Map.put(lobby, :uuid, Battle.get_lobby_match_uuid(id))
 
         messages =
@@ -262,7 +262,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       |> Enum.map(fn {id, _message} -> id end)
       |> Enum.uniq()
       |> Enum.filter(fn userid -> not Map.has_key?(user_map, userid) end)
-      |> Map.new(fn userid -> {userid, Account.get_user_by_id(userid)} end)
+      |> Map.new(fn userid -> {userid, Account.deprecated_get_user_by_id(userid)} end)
 
     socket
     |> assign(:user_map, Map.merge(user_map, extra_users))

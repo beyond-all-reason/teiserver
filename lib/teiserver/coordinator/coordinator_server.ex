@@ -161,7 +161,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         CacheUser.send_direct_message(state.userid, userid, "Thank you")
 
       _other_message ->
-        user = CacheUser.get_user_by_id(userid)
+        user = CacheUser.deprecated_get_user_by_id(userid)
         Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
 
         if not Auth.is_bot?(user) do
@@ -208,7 +208,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info(%{channel: "client_inout"}, state), do: {:noreply, state}
 
   def handle_info({:do_client_inout, :login, userid}, state) do
-    user = CacheUser.get_user_by_id(userid)
+    user = CacheUser.deprecated_get_user_by_id(userid)
     db_user = Account.get_user(userid)
 
     if user do
@@ -356,7 +356,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
         })
 
-        CacheUser.recache_user(account.id)
+        CacheUser.deprecated_recache_user(account.id)
         account
 
       account ->

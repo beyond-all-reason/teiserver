@@ -535,7 +535,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
   end
 
   defp create_discord_text(post) do
-    user = Account.get_user_by_id(post.poster_id)
+    user = Account.deprecated_get_user_by_id(post.poster_id)
 
     host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     create_discord_text(user, post, host)

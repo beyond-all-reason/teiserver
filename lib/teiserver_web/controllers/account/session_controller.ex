@@ -211,7 +211,7 @@ defmodule TeiserverWeb.Account.SessionController do
       if email == "" do
         %{id: -1}
       else
-        Account.get_user_by_email(email) || %{id: -1}
+        Account.deprecated_get_user_by_email(email) || %{id: -1}
       end
 
     existing_resets =

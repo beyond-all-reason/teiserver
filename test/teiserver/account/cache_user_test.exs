@@ -7,12 +7,12 @@ defmodule Teiserver.Account.CacheUserTest do
 
   test "persisting a user updates the extra fields" do
     user = AccountFixtures.user_fixture()
-    cache_user = CacheUser.get_user_by_id(user.id)
+    cache_user = CacheUser.deprecated_get_user_by_id(user.id)
 
     # Update it without persisting the change, we do not expect
     # it to update the database
     cache_user = Map.merge(cache_user, %{rank: 3, lobby_hash: "blobby"})
-    cache_user = CacheUser.update_user(cache_user)
+    cache_user = CacheUser.deprecated_update_user(cache_user)
 
     user = Account.get_user!(user.id)
 
@@ -34,7 +34,7 @@ defmodule Teiserver.Account.CacheUserTest do
         discord_dm_channel: 456
       })
 
-    cache_user = CacheUser.update_user(cache_user, persist: true)
+    cache_user = CacheUser.deprecated_update_user(cache_user, persist: true)
 
     user = Account.get_user!(user.id)
 

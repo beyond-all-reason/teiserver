@@ -279,7 +279,7 @@ defmodule Teiserver.Account.ClientLib do
   # not intended to be used as part of standard operation
   @spec refresh_client(User.id()) :: map()
   def refresh_client(userid) do
-    user = Account.get_user_by_id(userid)
+    user = Account.deprecated_get_user_by_id(userid)
     stats = Account.get_user_stat_data(user.id)
 
     client = get_client_by_id(userid)

@@ -83,10 +83,10 @@ defmodule Teiserver.HookServer do
         nil
 
       :create_user ->
-        CacheUser.recache_user(payload.id)
+        CacheUser.deprecated_recache_user(payload.id)
 
       :update_user ->
-        CacheUser.recache_user(payload.id)
+        CacheUser.deprecated_recache_user(payload.id)
 
       :create_report ->
         :ok

@@ -98,7 +98,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
   end
 
   defp update_client_with_restrictions(client, new_restrictions) do
-    Account.recache_user(client.userid)
+    Account.deprecated_recache_user(client.userid)
 
     if Enum.member?(new_restrictions, "All chat") or Enum.member?(new_restrictions, "Battle chat") do
       Coordinator.send_to_host(client.lobby_id, "!mute #{client.name}")

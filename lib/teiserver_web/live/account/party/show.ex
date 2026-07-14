@@ -25,7 +25,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
         []
       end
 
-    user = Account.get_user_by_id(socket.assigns.current_user.id)
+    user = Account.deprecated_get_user_by_id(socket.assigns.current_user.id)
     friends = Account.list_friend_ids_of_user(socket.assigns.current_user.id)
 
     :ok =
