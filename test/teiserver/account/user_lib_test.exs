@@ -14,7 +14,7 @@ defmodule Teiserver.Account.UserLibTest do
     # create_ first
     test "create_user/1" do
       user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
-      assert {:error, %{errors: [name: _error]}} = UserLib.create_user(user_vars)
+      assert match?({:error, %Changeset{errors: [name: _error]}}, UserLib.create_user(user_vars))
     end
 
     test "script_create_user/2" do
