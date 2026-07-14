@@ -65,8 +65,10 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
 
   defp forget_user_struct(%User{} = user) do
     name =
-      (Enum.to_list(?A..?Z) ++ Enum.to_list(?0..?9))
-      |> Enum.take_random(20)
+     @alphanum ~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+     1..20
+      |> Enum.map(fn _idx -> Enum.random(@alphanum) end)
       |> List.to_string()
 
     # Wipe all the user fields that contain PII, this new user
