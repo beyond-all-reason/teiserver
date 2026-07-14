@@ -9,7 +9,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
     only: [
       auth_setup: 1,
       _send_raw: 2,
-      _recv_raw: 1,
+      _recv_until: 1,
       start_spring_server: 1
     ]
 
@@ -24,7 +24,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
   describe "commands" do
     test "$website - okay", %{socket: socket} do
       _send_raw(socket, "SAYPRIVATE Coordinator $website\n")
-      reply = _recv_raw(socket)
+      reply = _recv_until(socket)
 
       assert reply =~
                "SAYPRIVATE Coordinator $website\nSAIDPRIVATE Coordinator Your one-time login link is https://localhost/one_time_login"
@@ -43,7 +43,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
       CacheUser.recache_user(user.id)
 
       _send_raw(socket, "SAYPRIVATE coordinator $website\n")
-      reply = _recv_raw(socket)
+      reply = _recv_until(socket)
 
       assert reply ==
                "SAYPRIVATE Coordinator $website\nSAIDPRIVATE Coordinator Your role contains one or more privileged roles, you will need to manually login to the site at https://localhost\n"
