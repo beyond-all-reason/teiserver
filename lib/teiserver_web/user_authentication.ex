@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.UserAuthentication do
   @moduledoc """
   The module handling user authentication as part of live sessions.
-  Authorisation takes place in the the Auth and AuthLib modules.
+  Authorisation takes place in the Auth and AuthLib modules.
   """
 
   alias Phoenix.Component

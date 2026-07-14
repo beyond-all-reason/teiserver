@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Teiserver.PartyBalanceStats do
   @moduledoc """
   Try and get stats on how well balancer keeps parties
-  If you want to run this task invidually, use:
+  If you want to run this task individually, use:
   mix teiserver.party_balance_stats
   On integration server it is recommended you output to a specific path as follows:
   mix teiserver.party_balance_stats /var/log/teiserver/results.txt

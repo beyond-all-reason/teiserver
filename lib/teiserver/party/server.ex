@@ -74,7 +74,7 @@ defmodule Teiserver.Party.Server do
   end
 
   @doc """
-  Create an invite for the given player, ensuring they're not alreay part of the party
+  Create an invite for the given player, ensuring they're not already part of the party
   """
   @spec create_invite(id(), User.id()) ::
           {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
@@ -165,7 +165,7 @@ defmodule Teiserver.Party.Server do
   end
 
   @doc """
-  Let the party know that it is no longer in matchmaking. The responsability
+  Let the party know that it is no longer in matchmaking. The responsibility
   to let the player know falls upon the matchmaking system, this is only
   to set the party state.
   """

@@ -11,7 +11,7 @@ defmodule Teiserver.Tachyon.Config do
       section: "Tachyon",
       type: "boolean",
       permissions: ["Admin"],
-      description: "Should the server store and restore state accross restarts?",
+      description: "Should the server store and restore state across restarts?",
       default: false
     })
 

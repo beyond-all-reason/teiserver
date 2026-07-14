@@ -182,7 +182,7 @@ defmodule TeiserverWeb.Tachyon.FriendTest do
                Tachyon.accept_friend_request!(ctx[:client], "wtfid")
     end
 
-    test "accept non existant request", ctx do
+    test "accept nonexistent request", ctx do
       assert %{"status" => "failed", "reason" => "no_pending_request"} =
                Tachyon.accept_friend_request!(ctx[:client], ctx[:user2].id)
     end
