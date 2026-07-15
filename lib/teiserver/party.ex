@@ -20,13 +20,13 @@ defmodule Teiserver.Party do
   @type id :: PT.Data.id()
 
   @spec create_party(User.id(), pid() | nil) ::
-          {:ok, PT.Overview.t(), pid()} | {:error, reason :: term()}
+          {:ok, PT.Overview.t()} | {:error, reason :: term()}
   def create_party(user_id, pid \\ self()) do
     party_id = Server.gen_party_id()
 
     case Supervisor.start_party(party_id, user_id, pid) do
-      {:ok, server_pid} -> {:ok, Server.get_overview(party_id), server_pid}
-      {:ok, server_pid, _info} -> {:ok, Server.get_overview(party_id), server_pid}
+      {:ok, _server_pid} -> {:ok, Server.get_overview(party_id)}
+      {:ok, _server_pid, _info} -> {:ok, Server.get_overview(party_id)}
       :ignore -> {:error, :ignore}
       {:error, reason} -> {:error, reason}
     end

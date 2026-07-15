@@ -950,11 +950,11 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:party, :create}, _from, state) do
     case Party.create_party(state.user.id) do
-      {:ok, %PartyTypes.Overview{} = party_state, pid} ->
+      {:ok, %PartyTypes.Overview{} = party_state} ->
         state =
           state
           |> put_in([:party, :current_party], party_state.id)
-          |> Map.update!(:monitors, &MC.monitor(&1, pid, :current_party))
+          |> Map.update!(:monitors, &MC.monitor(&1, party_state.pid, :current_party))
 
         case leave_matchmaking(state) do
           {:ok, state} ->
