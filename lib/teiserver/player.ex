@@ -114,7 +114,7 @@ defmodule Teiserver.Player do
   @doc """
   Let the player know that they are no longer invited/member of the party
   """
-  @spec party_notify_removed(User.id(), PartyTypes.Data.t()) :: :ok
+  @spec party_notify_removed(User.id(), PartyTypes.Overview.t()) :: :ok
   defdelegate party_notify_removed(user_id, party_state), to: Player.Session
 
   @doc """
@@ -124,7 +124,7 @@ defmodule Teiserver.Player do
   @spec party_notify_join_queues(
           User.id(),
           [{Matchmaking.queue_id(), version :: String.t()}],
-          PartyTypes.Data.t()
+          PartyTypes.Overview.t()
         ) :: :ok
   defdelegate party_notify_join_queues(user_id, queues, party_state), to: Player.Session
 

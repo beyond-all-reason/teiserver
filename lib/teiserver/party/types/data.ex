@@ -9,16 +9,11 @@ defmodule Teiserver.Party.Types.Data do
 
   @type id :: String.t()
 
-  @enforce_keys [:version, :id, :pid, :members, :max_members]
+  @enforce_keys [:version, :id, :members, :max_members]
   defstruct [
     # versionning of the state to avoid races between call and cast
     :version,
     :id,
-    # this is useful because the state is exposed to caller in some
-    # cases (like create invite)
-    # TODO: have a different struct for the "public state" visible
-    # from clients
-    :pid,
     :members,
     :max_members,
     invited: %{},
@@ -30,7 +25,6 @@ defmodule Teiserver.Party.Types.Data do
   @type t :: %__MODULE__{
           version: integer(),
           id: id(),
-          pid: pid(),
           monitors: MC.t(),
           members: %{User.id() => %{id: User.id(), joined_at: DateTime.t()}},
           ids_to_rejoin: MapSet.t(User.id()),

@@ -46,7 +46,7 @@ defmodule Teiserver.Party.Server do
   The player has to already be in the party (member or invited).
   """
   @spec rejoin(PT.Data.id(), User.id(), pid() | nil) ::
-          {:ok, PT.Data.t()} | {:error, :invalid_party | :not_a_member}
+          {:ok, PT.Overview.t()} | {:error, :invalid_party | :not_a_member}
   def rejoin(party_id, user_id, pid \\ self()) do
     via_tuple(party_id) |> :gen_statem.call({:rejoin, user_id, pid}, @default_call_timeout)
   catch
@@ -57,7 +57,8 @@ defmodule Teiserver.Party.Server do
   Create an invite for the given player, ensuring they're not alreay part of the party
   """
   @spec create_invite(PT.Data.id(), User.id()) ::
-          {:ok, PT.Data.t()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
+          {:ok, PT.Overview.t()}
+          | {:error, :invalid_party | :already_invited | :party_at_capacity}
   def create_invite(party_id, user_id, pid \\ self()) do
     via_tuple(party_id) |> :gen_statem.call({:create_invite, user_id, pid}, @default_call_timeout)
   catch
@@ -65,7 +66,7 @@ defmodule Teiserver.Party.Server do
   end
 
   @spec accept_invite(PT.Data.id(), User.id()) ::
-          {:ok, PT.Data.t()} | {:error, :invalid_party | :not_invited}
+          {:ok, PT.Overview.t()} | {:error, :invalid_party | :not_invited}
   def accept_invite(party_id, user_id) do
     via_tuple(party_id)
     |> :gen_statem.call(
@@ -77,7 +78,7 @@ defmodule Teiserver.Party.Server do
   end
 
   @spec decline_invite(PT.Data.id(), User.id()) ::
-          {:ok, PT.Data.t()} | {:error, :invalid_party | :not_invited}
+          {:ok, PT.Overview.t()} | {:error, :invalid_party | :not_invited}
   def decline_invite(party_id, user_id) do
     via_tuple(party_id) |> :gen_statem.call({:decline_invite, user_id}, @default_call_timeout)
   catch
@@ -88,7 +89,7 @@ defmodule Teiserver.Party.Server do
   cancel a pending invite. Any member can do that
   """
   @spec cancel_invite(PT.Data.id(), User.id()) ::
-          {:ok, PT.Data.t()} | {:error, :invalid_party | :not_in_party | :not_invited}
+          {:ok, PT.Overview.t()} | {:error, :invalid_party | :not_in_party | :not_invited}
   def cancel_invite(party_id, user_id) do
     via_tuple(party_id) |> :gen_statem.call({:cancel_invite, user_id}, @default_call_timeout)
   catch
@@ -100,7 +101,7 @@ defmodule Teiserver.Party.Server do
   be a member of the party (and not merely invited)
   """
   @spec kick_user(PT.Data.id(), user_kicking :: User.id(), kicked_user :: User.id()) ::
-          {:ok, PT.Data.t()} | {:error, :invalid_party | :invalid_target | :not_a_member}
+          {:ok, PT.Overview.t()} | {:error, :invalid_party | :invalid_target | :not_a_member}
   def kick_user(party_id, actor_id, target_id) do
     via_tuple(party_id)
     |> :gen_statem.call(
@@ -112,11 +113,11 @@ defmodule Teiserver.Party.Server do
   end
 
   @doc """
-  Get the party state
+  Get the public party data
   """
-  @spec get_state(PT.Data.id()) :: PT.Data.t() | nil
-  def get_state(party_id) do
-    via_tuple(party_id) |> :gen_statem.call(:get_state, @default_call_timeout)
+  @spec get_overview(PT.Data.id()) :: PT.Overview.t() | nil
+  def get_overview(party_id) do
+    via_tuple(party_id) |> :gen_statem.call(:get_overview, @default_call_timeout)
   catch
     :exit, {:noproc, _details} -> nil
   end
@@ -196,7 +197,6 @@ defmodule Teiserver.Party.Server do
       %PT.Data{
         version: 0,
         id: party_id,
-        pid: self(),
         members: %{},
         max_members: Config.get_site_config_cache(max_size_key())
       }
@@ -228,7 +228,6 @@ defmodule Teiserver.Party.Server do
     data = %PT.Data{
       version: snapshot.version,
       id: party_id,
-      pid: self(),
       members: snapshot.members,
       ids_to_rejoin: MapSet.difference(snapshot.ids_to_rejoin, expired_invite_ids),
       invited: invited,
@@ -244,8 +243,8 @@ defmodule Teiserver.Party.Server do
   end
 
   @impl :gen_statem
-  def handle_event({:call, from}, :get_state, _state, %PT.Data{} = data) do
-    {:keep_state, data, [{:reply, from, data}]}
+  def handle_event({:call, from}, :get_overview, _state, %PT.Data{} = data) do
+    {:keep_state, data, [{:reply, from, overview_from_data(data)}]}
   end
 
   def handle_event({:call, from}, {:leave, user_id}, :running, %PT.Data{} = data) do
@@ -263,7 +262,7 @@ defmodule Teiserver.Party.Server do
           |> Map.update!(:monitors, &MC.demonitor_by_val(&1, user_id))
 
         for id <- Map.keys(data.invited) |> Stream.concat(Map.keys(data.members)) do
-          Player.party_notify_updated(id, new_data)
+          Player.party_notify_updated(id, overview_from_data(new_data))
         end
 
         {:keep_state, new_data, {:reply, from, :ok}}
@@ -315,10 +314,10 @@ defmodule Teiserver.Party.Server do
 
         # don't send the updated event to the newly invited player
         for id <- Map.keys(data.invited) |> Stream.concat(Map.keys(data.members)) do
-          Player.party_notify_updated(id, new_data)
+          Player.party_notify_updated(id, overview_from_data(new_data))
         end
 
-        {:keep_state, new_data, [{:reply, from, {:ok, new_data}}]}
+        {:keep_state, new_data, [{:reply, from, {:ok, overview_from_data(new_data)}}]}
     end
   end
 
@@ -340,7 +339,7 @@ defmodule Teiserver.Party.Server do
           |> add_member(user_id, user_pid)
 
         notify_updated(data)
-        {:keep_state, data, [{:reply, from, {:ok, data}}]}
+        {:keep_state, data, [{:reply, from, {:ok, overview_from_data(data)}}]}
     end
   end
 
@@ -362,7 +361,7 @@ defmodule Teiserver.Party.Server do
 
         notify_updated(data)
 
-        {:keep_state, data, [{:reply, from, {:ok, data}}]}
+        {:keep_state, data, [{:reply, from, {:ok, overview_from_data(data)}}]}
     end
   end
 
@@ -373,7 +372,7 @@ defmodule Teiserver.Party.Server do
 
       invite ->
         data = cancel_invite_internal(invite, data)
-        {:keep_state, data, [{:reply, from, {:ok, data}}]}
+        {:keep_state, data, [{:reply, from, {:ok, overview_from_data(data)}}]}
     end
   end
 
@@ -395,9 +394,9 @@ defmodule Teiserver.Party.Server do
           |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:member, target_id}))
           |> Map.put(:members, rest)
 
-        Player.party_notify_removed(target_id, data)
+        Player.party_notify_removed(target_id, overview_from_data(data))
         notify_updated(data)
-        {:keep_state, data, [{:reply, from, {:ok, data}}]}
+        {:keep_state, data, [{:reply, from, {:ok, overview_from_data(data)}}]}
     end
   end
 
@@ -451,7 +450,7 @@ defmodule Teiserver.Party.Server do
           end)
 
         for id <- Map.keys(data.members) do
-          Player.party_notify_join_queues(id, queues, data)
+          Player.party_notify_join_queues(id, queues, overview_from_data(data))
         end
 
         {:keep_state, data, [{:reply, from, :ok}]}
@@ -511,7 +510,7 @@ defmodule Teiserver.Party.Server do
           MC.monitor(mc, user_pid, val)
         end)
 
-      actions = [{:reply, from, {:ok, data}}]
+      actions = [{:reply, from, {:ok, overview_from_data(data)}}]
 
       if MapSet.size(data.ids_to_rejoin) == 0 do
         Logger.debug("all member rejoined, start up completed")
@@ -639,7 +638,7 @@ defmodule Teiserver.Party.Server do
 
   defp notify_updated(data) do
     for id <- Map.keys(data.invited) |> Stream.concat(Map.keys(data.members)) do
-      Player.party_notify_updated(id, Map.drop(data, [:monitors]))
+      Player.party_notify_updated(id, overview_from_data(data))
     end
 
     data
@@ -647,6 +646,17 @@ defmodule Teiserver.Party.Server do
 
   defp via_tuple(party_id) do
     Party.Registry.via_tuple(party_id)
+  end
+
+  defp overview_from_data(%PT.Data{} = data) do
+    %PT.Overview{
+      version: data.version,
+      id: data.id,
+      pid: self(),
+      members: data.members,
+      invited: data.invited,
+      max_members: data.max_members
+    }
   end
 
   defp bump(data), do: Map.update!(data, :version, &(&1 + 1))
@@ -681,7 +691,7 @@ defmodule Teiserver.Party.Server do
       |> Map.update!(:invited, &Map.delete(&1, invite.id))
       |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:invite, invite.id}))
 
-    Player.party_notify_removed(invite.id, data)
+    Player.party_notify_removed(invite.id, overview_from_data(data))
     notify_updated(data)
     data
   end

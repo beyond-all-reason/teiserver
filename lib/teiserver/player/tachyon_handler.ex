@@ -215,12 +215,12 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "user/self", event, state}
   end
 
-  def handle_info({:party, {:invited, %PartyTypes.Data{} = party_state}}, state) do
+  def handle_info({:party, {:invited, %PartyTypes.Overview{} = party_state}}, state) do
     event = %{party: party_state_to_tachyon(party_state)}
     {:event, "party/invited", event, state}
   end
 
-  def handle_info({:party, {:updated, %PartyTypes.Data{} = party_state}}, state) do
+  def handle_info({:party, {:updated, %PartyTypes.Overview{} = party_state}}, state) do
     event = party_state_to_tachyon(party_state)
     {:event, "party/updated", event, state}
   end
