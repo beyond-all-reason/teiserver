@@ -23,6 +23,7 @@ defmodule Teiserver.Player.Session do
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Player.Types, as: PT
+  alias Teiserver.Player.Types.MessagingState
   alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
@@ -42,23 +43,12 @@ defmodule Teiserver.Player.Session do
           | {:searching, PT.MmSearchingState.t()}
           | {:pairing, PT.MmPairingState.t()}
 
-  @type messaging_state :: %{
-          store_messages?: boolean(),
-          subscribed?: boolean(),
-          # for simplicity, only hold one buffer for everything. This may lead to
-          # problems if a few sources are really noisy, they will force out
-          # the other messages. We can deal with that later with a smaller
-          # buffer per source, and the added complexity of having to limit
-          # that total size
-          buffer: BQ.t(Messaging.message())
-        }
-
   @type state :: %{
           user: T.user(),
           monitors: MC.t(),
           conn_pid: pid() | nil,
           matchmaking: matchmaking_state(),
-          messaging_state: messaging_state(),
+          messaging_state: MessagingState.t(),
           party: PT.PartyState.t(),
           user_subscriptions: MapSet.t(User.id()),
           battle: PT.BattleState.t() | nil,
@@ -70,10 +60,6 @@ defmodule Teiserver.Player.Session do
                 lobbies: %{TachyonLobby.id() => %{counter: integer(), changes: map()}}
               }
         }
-
-  # TODO: would be better to have that as a db setting, perhaps passed as an
-  # argument to init()
-  @messaging_buffer_size 200
 
   @connection_timeout 30_000
 
@@ -116,11 +102,7 @@ defmodule Teiserver.Player.Session do
       monitors: MC.new(),
       conn_pid: nil,
       matchmaking: initial_matchmaking_state(),
-      messaging_state: %{
-        store_messages?: true,
-        subscribed?: false,
-        buffer: BQ.new(@messaging_buffer_size)
-      },
+      messaging_state: MessagingState.default(),
       user_subscriptions: MapSet.new(),
       party: %PT.PartyState{},
       battle: nil,
@@ -820,9 +802,9 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:messaging, {:subscribe, since}}, _from, state) do
     state =
-      state
-      |> put_in([:messaging_state, :subscribed?], true)
-      |> put_in([:messaging_state, :store_messages?], true)
+      Map.update!(state, :messaging_state, fn %MessagingState{} = st ->
+        %{st | subscribed?: true, store_messages?: true}
+      end)
 
     buffer = state.messaging_state.buffer
 
@@ -1686,7 +1668,7 @@ defmodule Teiserver.Player.Session do
         state =
           state
           |> Map.put(:conn_pid, nil)
-          |> put_in([:messaging_state, :subscribed?], false)
+          |> put_in([:messaging_state, Access.key!(:subscribed?)], false)
 
         if is_nil(state.battle) do
           {:ok, _tref} = :timer.send_after(@connection_timeout, :connection_timeout)
