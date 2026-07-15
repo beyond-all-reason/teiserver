@@ -64,15 +64,6 @@ defmodule Teiserver.Player.Session do
           buffer: BQ.t(Messaging.message())
         }
 
-  @type party_state :: %{
-          # the last party state version gotten from the party through GenServer.call
-          # this is used to avoid races where the reply of the call would be processed
-          # before a message already in the mailbox
-          version: integer(),
-          current_party: Party.id() | nil,
-          invited_to: [{integer(), Party.id()}]
-        }
-
   @type battle_state ::
           nil
           | %{
@@ -85,7 +76,7 @@ defmodule Teiserver.Player.Session do
           conn_pid: pid() | nil,
           matchmaking: matchmaking_state(),
           messaging_state: messaging_state(),
-          party: party_state(),
+          party: PT.PartyState.t(),
           user_subscriptions: MapSet.t(User.id()),
           battle: battle_state(),
           lobby: nil | %{id: TachyonLobby.id()},
@@ -148,7 +139,7 @@ defmodule Teiserver.Player.Session do
         buffer: BQ.new(@messaging_buffer_size)
       },
       user_subscriptions: MapSet.new(),
-      party: initial_party_state(),
+      party: %PT.PartyState{},
       battle: nil,
       lobby: nil,
       lobby_list_subscription: nil
@@ -380,7 +371,7 @@ defmodule Teiserver.Player.Session do
   connections.
   """
   @spec replace_connection(pid(), pid()) ::
-          {:ok, old_conn_pid :: pid() | nil, session_state :: %{party: party_state()}} | :died
+          {:ok, old_conn_pid :: pid() | nil, session_state :: %{party: PT.PartyState.t()}} | :died
   def replace_connection(sess_pid, new_conn_pid) do
     GenServer.call(sess_pid, {:replace, new_conn_pid})
   catch
@@ -663,8 +654,9 @@ defmodule Teiserver.Player.Session do
         {:ok, %PartyTypes.Overview{} = party_state} ->
           state =
             state
-            |> put_in([:party, :current_party], party_state.id)
-            |> put_in([:party, :version], party_state.version)
+            |> Map.update!(:party, fn p ->
+              %{p | current_party: party_state.id, version: party_state.version}
+            end)
             |> Map.update!(:monitors, &MC.monitor(&1, party_state.pid, :current_party))
 
           {:ok, state}
@@ -682,7 +674,7 @@ defmodule Teiserver.Player.Session do
           {:ok, %PartyTypes.Overview{} = party_state} ->
             state =
               state
-              |> update_in([:party, :invited_to], fn invites ->
+              |> update_in([:party, Access.key!(:invited_to)], fn invites ->
                 [{party_state.version, id} | invites]
               end)
               |> Map.update!(
@@ -738,7 +730,7 @@ defmodule Teiserver.Player.Session do
     {current_party, invited_to} = get_party_states(state.party)
 
     party_state =
-      %{
+      %PT.PartyState{
         version: if(current_party == nil, do: nil, else: current_party.version),
         current_party: if(current_party == nil, do: nil, else: current_party.id),
         invited_to: Enum.map(invited_to, fn st -> {st.version, st.id} end)
@@ -953,7 +945,7 @@ defmodule Teiserver.Player.Session do
       {:ok, %PartyTypes.Overview{} = party_state} ->
         state =
           state
-          |> put_in([:party, :current_party], party_state.id)
+          |> put_in([:party, Access.key!(:current_party)], party_state.id)
           |> Map.update!(:monitors, &MC.monitor(&1, party_state.pid, :current_party))
 
         case leave_matchmaking(state) do
@@ -979,7 +971,7 @@ defmodule Teiserver.Player.Session do
       :ok ->
         state =
           state
-          |> put_in([:party, :current_party], nil)
+          |> put_in([:party, Access.key!(:current_party)], nil)
           |> Map.update!(:monitors, &MC.demonitor_by_val(&1, :current_party))
 
         {left_mm?, state} =
@@ -993,7 +985,7 @@ defmodule Teiserver.Player.Session do
         {:reply, :ok, state}
 
       {:error, :not_a_member} ->
-        {:reply, :ok, %{state | party: initial_party_state()}}
+        {:reply, :ok, %{state | party: %PT.PartyState{}}}
 
       {:error, reason} ->
         {:reply, {:error, reason}, state}
@@ -1030,7 +1022,7 @@ defmodule Teiserver.Player.Session do
       {:ok, %PartyTypes.Overview{} = party_state} ->
         state =
           state
-          |> update_in([:party, :invited_to], fn invited ->
+          |> update_in([:party, Access.key!(:invited_to)], fn invited ->
             [{party_state.version, party_state.id} | invited]
           end)
           |> Map.update!(
@@ -1050,12 +1042,16 @@ defmodule Teiserver.Player.Session do
     case Party.accept_invite(party_id, state.user.id) do
       {:ok, party_state} ->
         state =
-          state
-          |> update_in([:party, :invited_to], fn invited ->
-            Enum.filter(invited, fn {_version, p_id} -> p_id != party_id end)
+          Map.update!(state, :party, fn %PT.PartyState{} = p ->
+            invited_to = Enum.filter(p.invited_to, fn {_version, p_id} -> p_id != party_id end)
+
+            %{
+              p
+              | invited_to: invited_to,
+                current_party: party_state.id,
+                version: party_state.version
+            }
           end)
-          |> put_in([:party, :current_party], party_state.id)
-          |> put_in([:party, :version], party_state.version)
 
         case leave_matchmaking(state) do
           {:ok, state} ->
@@ -1073,13 +1069,12 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:party, {:decline_invite, party_id}}, _from, state) do
     case Party.decline_invite(party_id, state.user.id) do
-      {:ok, party_state} ->
+      {:ok, _party_state} ->
         state =
           state
-          |> update_in([:party, :invited_to], fn invited ->
+          |> update_in([:party, Access.key!(:invited_to)], fn invited ->
             Enum.filter(invited, fn {_version, p_id} -> p_id != party_id end)
           end)
-          |> put_in([:party, :version], party_state.version)
 
         {:reply, :ok, state}
 
@@ -1098,7 +1093,7 @@ defmodule Teiserver.Player.Session do
 
     case Party.cancel_invite(party_id, invited_user_id) do
       {:ok, %PartyTypes.Overview{} = party_state} ->
-        state = state |> put_in([:party, :version], party_state.version)
+        state = state |> put_in([:party, Access.key!(:version)], party_state.version)
 
         {:reply, :ok, state}
 
@@ -1117,7 +1112,7 @@ defmodule Teiserver.Player.Session do
 
     case Party.kick_user(party_id, state.user.id, target_id) do
       {:ok, %PartyTypes.Overview{} = party_state} ->
-        state = state |> put_in([:party, :version], party_state.version)
+        state = state |> put_in([:party, Access.key!(:version)], party_state.version)
 
         {:reply, :ok, state}
 
@@ -1756,11 +1751,11 @@ defmodule Teiserver.Player.Session do
 
       :current_party ->
         case state do
-          %{party: %{current_party: party_id}} ->
+          %{party: %PT.PartyState{current_party: party_id}} ->
             send_to_player!({:party, {:removed, party_id}}, state)
 
             state =
-              Map.update!(state, :party, fn st ->
+              Map.update!(state, :party, fn %PT.PartyState{} = st ->
                 %{st | version: 0, current_party: nil}
               end)
 
@@ -2091,9 +2086,6 @@ defmodule Teiserver.Player.Session do
       }
     )
   end
-
-  @spec initial_party_state() :: party_state()
-  defp initial_party_state, do: %{version: 0, current_party: nil, invited_to: []}
 
   # Gather the state of all relevant parties for the given session
   defp get_party_states(party_state) do
