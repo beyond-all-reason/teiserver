@@ -13,4 +13,23 @@ defmodule Teiserver.Coordinator.CoordinatorParserTest do
     assert cmd.command == "map"
     assert cmd.remaining == "map_name"
   end
+
+  describe "parsing commands typed in capital letters" do
+    test "an all-caps command still works" do
+      cmd = Parser.parse_command(1, "$STATUS")
+      assert cmd.command == "status"
+    end
+
+    test "a capitalized command still works" do
+      cmd = Parser.parse_command(1, "$Roll 2d6")
+      assert cmd.command == "roll"
+      assert cmd.remaining == "2d6"
+    end
+
+    test "the argument keeps its original letters" do
+      cmd = Parser.parse_command(1, "$Rename VeryAwesomeLobbyName")
+      assert cmd.command == "rename"
+      assert cmd.remaining == "VeryAwesomeLobbyName"
+    end
+  end
 end
