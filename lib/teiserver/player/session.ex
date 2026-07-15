@@ -39,19 +39,8 @@ defmodule Teiserver.Player.Session do
 
   @type matchmaking_state ::
           :no_matchmaking
-          | {:searching,
-             %{
-               joined_queues: nonempty_list({Matchmaking.queue_id(), version :: String.t()})
-             }}
-          | {:pairing,
-             %{
-               paired_queue: {Matchmaking.queue_id(), version :: String.t()},
-               room: pid(),
-               # a list of the other queues to rejoin in case the pairing fails
-               frozen_queues: [{Matchmaking.queue_id(), version :: String.t()}],
-               readied: boolean(),
-               battle_password: String.t()
-             }}
+          | {:searching, PT.MmSearchingState.t()}
+          | {:pairing, PT.MmPairingState.t()}
 
   @type messaging_state :: %{
           store_messages?: boolean(),
@@ -751,7 +740,7 @@ defmodule Teiserver.Player.Session do
     user_id = state.user.id
 
     case state.matchmaking do
-      {:searching, %{joined_queues: joined_queues}} ->
+      {:searching, %PT.MmSearchingState{joined_queues: joined_queues}} ->
         Enum.each(joined_queues, fn queue_id ->
           QueueServer.leave_queue(queue_id, user_id)
         end)
@@ -807,7 +796,7 @@ defmodule Teiserver.Player.Session do
 
   def handle_call({:matchmaking, :ready}, _from, state) do
     case state.matchmaking do
-      {:pairing, %{room: room_pid} = pairing_state} ->
+      {:pairing, %PT.MmPairingState{room: room_pid} = pairing_state} ->
         password = :crypto.strong_rand_bytes(16) |> Base.encode16()
 
         data = %{
@@ -819,7 +808,7 @@ defmodule Teiserver.Player.Session do
         new_state = %{
           state
           | matchmaking:
-              {:pairing, %{pairing_state | readied: true} |> Map.put(:battle_password, password)}
+              {:pairing, %{pairing_state | readied?: true} |> Map.put(:battle_password, password)}
         }
 
         {:reply, Matchmaking.ready(room_pid, data), new_state}
@@ -1382,11 +1371,11 @@ defmodule Teiserver.Player.Session do
 
       new_mm_state =
         {:pairing,
-         %{
+         %PT.MmPairingState{
            paired_queue: paired_queue,
            room: room_pid,
            frozen_queues: other_queues,
-           readied: false
+           readied?: false
          }}
 
       new_state =
@@ -1416,11 +1405,11 @@ defmodule Teiserver.Player.Session do
         {:noreply, state}
 
       {:pairing,
-       %{
+       %PT.MmPairingState{
          paired_queue: q_id,
          room: _room_pid,
          frozen_queues: frozen_queues,
-         readied: readied
+         readied?: readied
        }} ->
         monitors =
           state.monitors
@@ -1476,7 +1465,7 @@ defmodule Teiserver.Player.Session do
 
   def handle_cast({:matchmaking, {:found_update, current, room_pid}}, state) do
     case state.matchmaking do
-      {:pairing, %{room: ^room_pid}} ->
+      {:pairing, %PT.MmPairingState{room: ^room_pid}} ->
         {:noreply, send_to_player(state, {:matchmaking, {:found_update, current}})}
 
       _other ->
@@ -1488,7 +1477,7 @@ defmodule Teiserver.Player.Session do
     Logger.info("entering battle #{battle_id}")
 
     case state.matchmaking do
-      {:pairing, %{readied: true, battle_password: pass, room: _room_pid}} ->
+      {:pairing, %PT.MmPairingState{readied?: true, battle_password: pass, room: _room_pid}} ->
         data = %{
           username: state.user.name,
           password: pass,
@@ -1721,7 +1710,7 @@ defmodule Teiserver.Player.Session do
                 {:noreply, state}
             end
 
-          %{matchmaking: {:pairing, %{paired_queue: ^queue_id} = pairing_st}} ->
+          %{matchmaking: {:pairing, %PT.MmPairingState{paired_queue: ^queue_id} = pairing_st}} ->
             state =
               leave_all_queues([pairing_st.paired_queue | pairing_st.frozen_queues], state)
               |> send_to_player({:matchmaking, {:cancelled, :server_error}})
@@ -1734,7 +1723,7 @@ defmodule Teiserver.Player.Session do
 
       :mm_room ->
         case state do
-          %{matchmaking: {:pairing, %{paired_queue: _qid} = pairing_st}} ->
+          %{matchmaking: {:pairing, %PT.MmPairingState{paired_queue: _qid} = pairing_st}} ->
             state =
               leave_all_queues([pairing_st.paired_queue | pairing_st.frozen_queues], state)
               |> send_to_player({:matchmaking, {:cancelled, :server_error}})
@@ -1928,7 +1917,7 @@ defmodule Teiserver.Player.Session do
   defp join_matchmaking(queues, state) do
     case join_all_queues(state.user.id, state.party.current_party, state.monitors, queues, []) do
       {:ok, monitors, joined} ->
-        new_mm_state = {:searching, %{joined_queues: joined}}
+        new_mm_state = {:searching, %PT.MmSearchingState{joined_queues: joined}}
 
         new_state =
           state
@@ -1977,11 +1966,11 @@ defmodule Teiserver.Player.Session do
       :no_matchmaking ->
         {{:error, :not_queued}, state}
 
-      {:searching, %{joined_queues: joined_queues}} ->
+      {:searching, %PT.MmSearchingState{joined_queues: joined_queues}} ->
         new_state = leave_all_queues(joined_queues, state)
         {:ok, new_state}
 
-      {:pairing, %{room: _pid} = pairing_state} ->
+      {:pairing, %PT.MmPairingState{} = pairing_state} ->
         monitors = MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
         queues_to_leave = [pairing_state.paired_queue | pairing_state.frozen_queues]
         new_state = leave_all_queues(queues_to_leave, state)
