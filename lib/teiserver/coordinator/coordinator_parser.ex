@@ -66,11 +66,11 @@ defmodule Teiserver.Coordinator.Parser do
 
   @spec parse_command_name(map()) :: map()
   defp parse_command_name(%{remaining: string} = cmd) do
-    case Regex.run(~r/\$([a-z0-9\-\?]+) ?/, string) do
+    case Regex.run(~r/\$([a-zA-Z0-9\-\?]+) ?/, string) do
       [_full, command_name] ->
         %{
           cmd
-          | command: command_name,
+          | command: String.downcase(command_name),
             remaining: String.slice(string, String.length(command_name) + 2, 999)
         }
 
