@@ -64,12 +64,6 @@ defmodule Teiserver.Player.Session do
           buffer: BQ.t(Messaging.message())
         }
 
-  @type battle_state ::
-          nil
-          | %{
-              id: TachyonBattle.id()
-            }
-
   @type state :: %{
           user: T.user(),
           monitors: MC.t(),
@@ -78,7 +72,7 @@ defmodule Teiserver.Player.Session do
           messaging_state: messaging_state(),
           party: PT.PartyState.t(),
           user_subscriptions: MapSet.t(User.id()),
-          battle: battle_state(),
+          battle: PT.BattleState.t() | nil,
           lobby: nil | %{id: TachyonLobby.id()},
           lobby_list_subscription:
             nil
@@ -1513,9 +1507,10 @@ defmodule Teiserver.Player.Session do
 
         # TODO: this should ideally come from an engine event, but in first approximation it'll do
         broadcast_user_update!(state.user, :playing)
+        battle_state = %PT.BattleState{id: battle_id}
 
         {:noreply,
-         %{state | matchmaking: :no_matchmaking, monitors: monitors, battle: %{id: battle_id}}}
+         %{state | matchmaking: :no_matchmaking, monitors: monitors, battle: battle_state}}
 
       _other ->
         Logger.warning(
@@ -1556,8 +1551,9 @@ defmodule Teiserver.Player.Session do
 
         # TODO: this should ideally come from an engine event, but in first approximation it'll do
         broadcast_user_update!(state.user, :playing)
+        battle_state = %PT.BattleState{id: battle_id}
 
-        {:noreply, %{state | monitors: monitors, battle: %{id: battle_id}}}
+        {:noreply, %{state | monitors: monitors, battle: battle_state}}
     end
   end
 
