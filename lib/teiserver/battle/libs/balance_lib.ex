@@ -806,7 +806,7 @@ defmodule Teiserver.Battle.BalanceLib do
     possible_players =
       solo_players
       |> Enum.filter(fn solo ->
-        solo.group_rating > rating_lower_bound or solo.group_rating < rating_upper_bound
+        solo.group_rating > rating_lower_bound and solo.group_rating < rating_upper_bound
       end)
 
     if Enum.count(possible_players) < group.count do
