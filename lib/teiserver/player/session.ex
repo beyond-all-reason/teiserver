@@ -38,29 +38,6 @@ defmodule Teiserver.Player.Session do
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 
-  @type matchmaking_state ::
-          :no_matchmaking
-          | {:searching, PT.MmSearchingState.t()}
-          | {:pairing, PT.MmPairingState.t()}
-
-  @type state :: %{
-          user: T.user(),
-          monitors: MC.t(),
-          conn_pid: pid() | nil,
-          matchmaking: matchmaking_state(),
-          messaging_state: MessagingState.t(),
-          party: PT.PartyState.t(),
-          user_subscriptions: MapSet.t(User.id()),
-          battle: PT.BattleState.t() | nil,
-          lobby: nil | %{id: TachyonLobby.id()},
-          lobby_list_subscription:
-            nil
-            | %{
-                timer_ref: :timer.tref(),
-                lobbies: %{TachyonLobby.id() => %{counter: integer(), changes: map()}}
-              }
-        }
-
   @connection_timeout 30_000
 
   def start_link({user_id, arg}) do
@@ -69,7 +46,7 @@ defmodule Teiserver.Player.Session do
 
   @impl GenServer
   @spec init({:manual, pid(), T.user()} | {:snapshot, term()}) ::
-          {:ok, state()} | {:continue, term()}
+          {:ok, PT.Data.t()} | {:continue, term()}
   def init({:manual, conn_pid, user}) do
     Process.flag(:trap_exit, true)
     Logger.metadata(actor_type: :session, user_id: user.id, actor_id: user.id)
@@ -97,7 +74,7 @@ defmodule Teiserver.Player.Session do
   end
 
   defp initial_empty_state(user) do
-    %{
+    %PT.Data{
       user: user,
       monitors: MC.new(),
       conn_pid: nil,
@@ -112,7 +89,7 @@ defmodule Teiserver.Player.Session do
   end
 
   @impl GenServer
-  def terminate(:shutdown, state) do
+  def terminate(:shutdown, %PT.Data{} = state) do
     if Tachyon.should_restore_state?() do
       # store more stuff as we enable the restoration of
       # more state at startup
@@ -639,7 +616,7 @@ defmodule Teiserver.Player.Session do
           {:ok, %PartyTypes.Overview{} = party_state} ->
             state =
               state
-              |> update_in([:party, Access.key!(:invited_to)], fn invites ->
+              |> update_in([Access.key!(:party), Access.key!(:invited_to)], fn invites ->
                 [{party_state.version, id} | invites]
               end)
               |> Map.update!(
@@ -683,7 +660,7 @@ defmodule Teiserver.Player.Session do
   end
 
   @impl GenServer
-  def handle_call({:replace, new_conn_pid}, _from, state) do
+  def handle_call({:replace, new_conn_pid}, _from, %PT.Data{} = state) do
     original_conn_pid = state.conn_pid
 
     monitors =
@@ -713,12 +690,12 @@ defmodule Teiserver.Player.Session do
     {:reply, {:ok, original_conn_pid, self_state}, new_state}
   end
 
-  def handle_call(:conn_state, _from, state) do
+  def handle_call(:conn_state, _from, %PT.Data{} = state) do
     result = if is_nil(state.conn_pid), do: :reconnecting, else: :connected
     {:reply, result, state}
   end
 
-  def handle_call(:disconnect, _from, state) do
+  def handle_call(:disconnect, _from, %PT.Data{} = state) do
     user_id = state.user.id
 
     case state.matchmaking do
@@ -738,10 +715,10 @@ defmodule Teiserver.Player.Session do
   end
 
   # this should never happen because the json schema already checks for minimum length
-  def handle_call({:matchmaking, {:join_queues, []}}, _from, state),
+  def handle_call({:matchmaking, {:join_queues, []}}, _from, %PT.Data{} = state),
     do: {:reply, {:error, :invalid_request}, state}
 
-  def handle_call({:matchmaking, {:join_queues, queues}}, _from, state) do
+  def handle_call({:matchmaking, {:join_queues, queues}}, _from, %PT.Data{} = state) do
     case state.matchmaking do
       :no_matchmaking ->
         case state.party.current_party do
@@ -771,12 +748,12 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:matchmaking, :leave_queues}, _from, state) do
+  def handle_call({:matchmaking, :leave_queues}, _from, %PT.Data{} = state) do
     {resp, state} = leave_matchmaking(state)
     {:reply, resp, state}
   end
 
-  def handle_call({:matchmaking, :ready}, _from, state) do
+  def handle_call({:matchmaking, :ready}, _from, %PT.Data{} = state) do
     case state.matchmaking do
       {:pairing, %PT.MmPairingState{room: room_pid} = pairing_state} ->
         password = :crypto.strong_rand_bytes(16) |> Base.encode16()
@@ -800,7 +777,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:messaging, {:subscribe, since}}, _from, state) do
+  def handle_call({:messaging, {:subscribe, since}}, _from, %PT.Data{} = state) do
     state =
       Map.update!(state, :messaging_state, fn %MessagingState{} = st ->
         %{st | subscribed?: true, store_messages?: true}
@@ -835,29 +812,37 @@ defmodule Teiserver.Player.Session do
     {:reply, {:ok, has_missed_messages, msg_to_send}, state}
   end
 
-  def handle_call({:messaging, {:send_party_message, _message_content}}, _from, state)
+  def handle_call(
+        {:messaging, {:send_party_message, _message_content}},
+        _from,
+        %PT.Data{} = state
+      )
       when state.party.current_party == nil,
       do: {:reply, {:error, "not in party"}}
 
-  def handle_call({:messaging, {:send_party_message, message_content}}, _from, state) do
+  def handle_call({:messaging, {:send_party_message, message_content}}, _from, %PT.Data{} = state) do
     case Party.send_message(state.party.current_party, state.user.id, message_content) do
       :ok -> {:reply, :ok, state}
       {:error, :invalid_request, reason} -> {:reply, {:error, reason}, state}
     end
   end
 
-  def handle_call({:messaging, {:send_lobby_message, _content}}, _from, state)
+  def handle_call(
+        {:messaging, {:send_lobby_message, _content}},
+        _from,
+        %PT.Data{} = %PT.Data{} = state
+      )
       when state.lobby == nil,
       do: {:reply, {:error, "not in lobby"}, state}
 
-  def handle_call({:messaging, {:send_lobby_message, message_content}}, _from, state) do
+  def handle_call({:messaging, {:send_lobby_message, message_content}}, _from, %PT.Data{} = state) do
     case TachyonLobby.send_message(state.lobby.id, state.user.id, message_content) do
       :ok -> {:reply, :ok, state}
       {:error, :invalid_request, reason} -> {:reply, {:error, reason}, state}
     end
   end
 
-  def handle_call({:user, {:subscribe_updates, user_ids}}, _from, state) do
+  def handle_call({:user, {:subscribe_updates, user_ids}}, _from, %PT.Data{} = state) do
     users = Account.query_users(where: [id_in: user_ids])
 
     if Enum.count(users) != Enum.count(user_ids) do
@@ -878,7 +863,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:user, {:unsubscribe_updates, user_ids}}, _from, state) do
+  def handle_call({:user, {:unsubscribe_updates, user_ids}}, _from, %PT.Data{} = state) do
     user_ids = MapSet.new(user_ids)
     to_remove = MapSet.intersection(user_ids, state.user_subscriptions)
 
@@ -890,7 +875,7 @@ defmodule Teiserver.Player.Session do
     {:reply, :ok, %{state | user_subscriptions: new_subs}}
   end
 
-  def handle_call({:user, :get_info}, _from, state) do
+  def handle_call({:user, :get_info}, _from, %PT.Data{} = state) do
     status =
       if is_nil(state.battle) do
         :menu
@@ -901,16 +886,16 @@ defmodule Teiserver.Player.Session do
     {:reply, %{status: status}, state}
   end
 
-  def handle_call({:party, :create}, _from, state)
+  def handle_call({:party, :create}, _from, %PT.Data{} = state)
       when state.party.current_party != nil,
       do: {:reply, {:error, :already_in_party}, state}
 
-  def handle_call({:party, :create}, _from, state) do
+  def handle_call({:party, :create}, _from, %PT.Data{} = state) do
     case Party.create_party(state.user.id) do
       {:ok, %PartyTypes.Overview{} = party_state} ->
         state =
           state
-          |> put_in([:party, Access.key!(:current_party)], party_state.id)
+          |> put_in([Access.key!(:party), Access.key!(:current_party)], party_state.id)
           |> Map.update!(:monitors, &MC.monitor(&1, party_state.pid, :current_party))
 
         case leave_matchmaking(state) do
@@ -927,16 +912,16 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:party, :leave}, _from, state)
+  def handle_call({:party, :leave}, _from, %PT.Data{} = state)
       when is_nil(state.party.current_party),
       do: {:reply, {:error, :not_in_party}, state}
 
-  def handle_call({:party, :leave}, _from, state) do
+  def handle_call({:party, :leave}, _from, %PT.Data{} = state) do
     case Party.leave_party(state.party.current_party, state.user.id) do
       :ok ->
         state =
           state
-          |> put_in([:party, Access.key!(:current_party)], nil)
+          |> put_in([Access.key!(:party), Access.key!(:current_party)], nil)
           |> Map.update!(:monitors, &MC.demonitor_by_val(&1, :current_party))
 
         {left_mm?, state} =
@@ -957,11 +942,11 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:party, {:invite, _user_id}}, _from, state)
+  def handle_call({:party, {:invite, _user_id}}, _from, %PT.Data{} = state)
       when is_nil(state.party.current_party),
       do: {:reply, {:error, :not_in_party}, state}
 
-  def handle_call({:party, {:invite, user_id}}, _from, state) do
+  def handle_call({:party, {:invite, user_id}}, _from, %PT.Data{} = state) do
     # go through the other session as well to ensure valid and connected player
     msg = {:party, {:invite, state.party.current_party, user_id}}
 
@@ -982,12 +967,12 @@ defmodule Teiserver.Player.Session do
       {:reply, {:error, :invalid_player}, state}
   end
 
-  def handle_call({:party, {:invite, party_id, invited_id}}, _from, state) do
+  def handle_call({:party, {:invite, party_id, invited_id}}, _from, %PT.Data{} = state) do
     case Party.create_invite(party_id, invited_id) do
       {:ok, %PartyTypes.Overview{} = party_state} ->
         state =
           state
-          |> update_in([:party, Access.key!(:invited_to)], fn invited ->
+          |> update_in([Access.key!(:party), Access.key!(:invited_to)], fn invited ->
             [{party_state.version, party_state.id} | invited]
           end)
           |> Map.update!(
@@ -1003,7 +988,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:party, {:accept_invite, party_id}}, _from, state) do
+  def handle_call({:party, {:accept_invite, party_id}}, _from, %PT.Data{} = state) do
     case Party.accept_invite(party_id, state.user.id) do
       {:ok, party_state} ->
         state =
@@ -1032,12 +1017,12 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:party, {:decline_invite, party_id}}, _from, state) do
+  def handle_call({:party, {:decline_invite, party_id}}, _from, %PT.Data{} = state) do
     case Party.decline_invite(party_id, state.user.id) do
       {:ok, _party_state} ->
         state =
           state
-          |> update_in([:party, Access.key!(:invited_to)], fn invited ->
+          |> update_in([Access.key!(:party), Access.key!(:invited_to)], fn invited ->
             Enum.filter(invited, fn {_version, p_id} -> p_id != party_id end)
           end)
 
@@ -1048,17 +1033,17 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:party, {:cancel_invite, _invited_user_id}}, _from, state)
+  def handle_call({:party, {:cancel_invite, _invited_user_id}}, _from, %PT.Data{} = state)
       when state.party.current_party == nil do
     {:reply, {:error, :not_in_party}, state}
   end
 
-  def handle_call({:party, {:cancel_invite, invited_user_id}}, _from, state) do
+  def handle_call({:party, {:cancel_invite, invited_user_id}}, _from, %PT.Data{} = state) do
     party_id = state.party.current_party
 
     case Party.cancel_invite(party_id, invited_user_id) do
       {:ok, %PartyTypes.Overview{} = party_state} ->
-        state = state |> put_in([:party, Access.key!(:version)], party_state.version)
+        state = state |> put_in([Access.key!(:party), Access.key!(:version)], party_state.version)
 
         {:reply, :ok, state}
 
@@ -1067,17 +1052,17 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:party, {:kick_player, _target_id}}, _from, state)
+  def handle_call({:party, {:kick_player, _target_id}}, _from, %PT.Data{} = state)
       when state.party.current_party == nil do
     {:reply, {:error, :not_in_party}, state}
   end
 
-  def handle_call({:party, {:kick_player, target_id}}, _from, state) do
+  def handle_call({:party, {:kick_player, target_id}}, _from, %PT.Data{} = state) do
     party_id = state.party.current_party
 
     case Party.kick_user(party_id, state.user.id, target_id) do
       {:ok, %PartyTypes.Overview{} = party_state} ->
-        state = state |> put_in([:party, Access.key!(:version)], party_state.version)
+        state = state |> put_in([Access.key!(:party), Access.key!(:version)], party_state.version)
 
         {:reply, :ok, state}
 
@@ -1086,10 +1071,15 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:lobby, {:create, _start_params}}, _from, state) when state.lobby != nil,
-    do: {:reply, {:error, :already_in_lobby}, state}
+  def handle_call({:lobby, {:create, _start_params}}, _from, %PT.Data{} = state)
+      when state.lobby != nil,
+      do: {:reply, {:error, :already_in_lobby}, state}
 
-  def handle_call({:lobby, {:create, %PT.LobbyStartParams{} = start_params}}, _from, state) do
+  def handle_call(
+        {:lobby, {:create, %PT.LobbyStartParams{} = start_params}},
+        _from,
+        %PT.Data{} = state
+      ) do
     data = %LT.StartParams{
       creator_data: %LT.PlayerJoinData{id: state.user.id, name: state.user.name},
       creator_pid: self(),
@@ -1117,7 +1107,8 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:lobby, {:join, lobby_id}}, _from, state) when state.lobby.id == lobby_id do
+  def handle_call({:lobby, {:join, lobby_id}}, _from, %PT.Data{} = state)
+      when state.lobby.id == lobby_id do
     join_data = %LT.PlayerJoinData{id: state.user.id, name: state.user.name}
 
     case TachyonLobby.join(lobby_id, join_data, self()) do
@@ -1127,10 +1118,11 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:lobby, {:join, _lobby_id}}, _from, state) when state.lobby != nil,
-    do: {:reply, {:error, :already_in_lobby}, state}
+  def handle_call({:lobby, {:join, _lobby_id}}, _from, %PT.Data{} = state)
+      when state.lobby != nil,
+      do: {:reply, {:error, :already_in_lobby}, state}
 
-  def handle_call({:lobby, {:join, lobby_id}}, _from, state) do
+  def handle_call({:lobby, {:join, lobby_id}}, _from, %PT.Data{} = state) do
     join_data = %LT.PlayerJoinData{id: state.user.id, name: state.user.name}
 
     case TachyonLobby.join(lobby_id, join_data, self()) do
@@ -1150,10 +1142,11 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:lobby, {:join_ally_team, _ally_team}}, _from, state) when is_nil(state.lobby),
-    do: {:reply, {:error, :not_in_lobby}, state}
+  def handle_call({:lobby, {:join_ally_team, _ally_team}}, _from, %PT.Data{} = state)
+      when is_nil(state.lobby),
+      do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, {:join_ally_team, ally_team}}, _from, state) do
+  def handle_call({:lobby, {:join_ally_team, ally_team}}, _from, %PT.Data{} = state) do
     resp =
       case TachyonLobby.join_ally_team(state.lobby.id, state.user.id, ally_team) do
         {:ok, _details} -> :ok
@@ -1163,94 +1156,98 @@ defmodule Teiserver.Player.Session do
     {:reply, resp, state}
   end
 
-  def handle_call({:lobby, :spectate}, _from, state) when is_nil(state.lobby),
+  def handle_call({:lobby, :spectate}, _from, %PT.Data{} = state) when is_nil(state.lobby),
     do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :spectate}, _from, state) do
+  def handle_call({:lobby, :spectate}, _from, %PT.Data{} = state) do
     {:reply, TachyonLobby.spectate(state.lobby.id, state.user.id), state}
   end
 
-  def handle_call({:lobby, :join_queue}, _from, state) when is_nil(state.lobby),
+  def handle_call({:lobby, :join_queue}, _from, %PT.Data{} = state) when is_nil(state.lobby),
     do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :join_queue}, _from, state) do
+  def handle_call({:lobby, :join_queue}, _from, %PT.Data{} = state) do
     {:reply, TachyonLobby.join_queue(state.lobby.id, state.user.id), state}
   end
 
-  def handle_call({:lobby, :add_bot, _ally_team, _short_name, _opts}, _from, state)
+  def handle_call({:lobby, :add_bot, _ally_team, _short_name, _opts}, _from, %PT.Data{} = state)
       when is_nil(state.lobby),
       do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :add_bot, ally_team, short_name, opts}, _from, state) do
+  def handle_call({:lobby, :add_bot, ally_team, short_name, opts}, _from, %PT.Data{} = state) do
     {:reply, TachyonLobby.add_bot(state.lobby.id, state.user.id, ally_team, short_name, opts),
      state}
   end
 
-  def handle_call({:lobby, :remove_bot, _bot_id}, _from, state) when is_nil(state.lobby),
-    do: {:reply, {:error, :not_in_lobby}, state}
+  def handle_call({:lobby, :remove_bot, _bot_id}, _from, %PT.Data{} = state)
+      when is_nil(state.lobby),
+      do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :remove_bot, bot_id}, _from, state) do
+  def handle_call({:lobby, :remove_bot, bot_id}, _from, %PT.Data{} = state) do
     {:reply, TachyonLobby.remove_bot(state.lobby.id, bot_id), state}
   end
 
-  def handle_call({:lobby, :update_bot, _data}, _from, state) when is_nil(state.lobby),
-    do: {:reply, {:error, :not_in_lobby}, state}
+  def handle_call({:lobby, :update_bot, _data}, _from, %PT.Data{} = state)
+      when is_nil(state.lobby),
+      do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :update_bot, data}, _from, state) do
+  def handle_call({:lobby, :update_bot, data}, _from, %PT.Data{} = state) do
     {:reply, TachyonLobby.update_bot(state.lobby.id, data), state}
   end
 
-  def handle_call({:lobby, :update_properties, _data}, _from, state) when is_nil(state.lobby),
-    do: {:reply, {:error, :not_in_lobby}, state}
+  def handle_call({:lobby, :update_properties, _data}, _from, %PT.Data{} = state)
+      when is_nil(state.lobby),
+      do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :update_properties, data}, _from, state) do
+  def handle_call({:lobby, :update_properties, data}, _from, %PT.Data{} = state) do
     {:reply, TachyonLobby.update_properties(state.lobby.id, state.user.id, data), state}
   end
 
-  def handle_call({:lobby, :vote_submit, _vote_id, _ballot}, _from, state)
+  def handle_call({:lobby, :vote_submit, _vote_id, _ballot}, _from, %PT.Data{} = state)
       when is_nil(state.lobby),
       do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :vote_submit, vote_id, ballot}, _from, state) do
+  def handle_call({:lobby, :vote_submit, vote_id, ballot}, _from, %PT.Data{} = state) do
     {:reply, TachyonLobby.vote_submit(state.lobby.id, state.user.id, {vote_id, ballot}), state}
   end
 
-  def handle_call({:lobby, {:kickban, _target_id, _ban_until}}, _from, state)
+  def handle_call({:lobby, {:kickban, _target_id, _ban_until}}, _from, %PT.Data{} = state)
       when is_nil(state.lobby),
       do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, {:kickban, target_id, ban_until}}, _from, state) do
+  def handle_call({:lobby, {:kickban, target_id, ban_until}}, _from, %PT.Data{} = state) do
     result = TachyonLobby.kickban(state.lobby.id, state.user.id, target_id, ban_until)
     {:reply, result, state}
   end
 
-  def handle_call({:lobby, :appoint_boss, _appointee_id}, _from, state)
+  def handle_call({:lobby, :appoint_boss, _appointee_id}, _from, %PT.Data{} = state)
       when is_nil(state.lobby),
       do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :appoint_boss, appointee_id}, _from, state) do
+  def handle_call({:lobby, :appoint_boss, appointee_id}, _from, %PT.Data{} = state) do
     {:reply, TachyonLobby.appoint_boss(state.lobby.id, state.user.id, appointee_id), state}
   end
 
-  def handle_call({:lobby, :unboss, _boss_id}, _from, state)
+  def handle_call({:lobby, :unboss, _boss_id}, _from, %PT.Data{} = state)
       when is_nil(state.lobby),
       do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :unboss, boss_id}, _from, state) do
+  def handle_call({:lobby, :unboss, boss_id}, _from, %PT.Data{} = state) do
     {:reply, TachyonLobby.unboss(state.lobby.id, state.user.id, boss_id), state}
   end
 
-  def handle_call({:lobby, :update_client_status, _data}, _from, state) when is_nil(state.lobby),
-    do: {:reply, {:error, :not_in_lobby}, state}
+  def handle_call({:lobby, :update_client_status, _data}, _from, %PT.Data{} = state)
+      when is_nil(state.lobby),
+      do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :update_client_status, data}, _from, state) do
+  def handle_call({:lobby, :update_client_status, data}, _from, %PT.Data{} = state) do
     {:reply, TachyonLobby.update_client_status(state.lobby.id, state.user.id, data), state}
   end
 
-  def handle_call({:lobby, :leave}, _from, state) when is_nil(state.lobby),
+  def handle_call({:lobby, :leave}, _from, %PT.Data{} = state) when is_nil(state.lobby),
     do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :leave}, _from, state) do
+  def handle_call({:lobby, :leave}, _from, %PT.Data{} = state) do
     case TachyonLobby.leave(state.lobby.id, state.user.id) do
       :ok ->
         state =
@@ -1265,11 +1262,11 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:lobby, :start_battle}, _from, state)
+  def handle_call({:lobby, :start_battle}, _from, %PT.Data{} = state)
       when state.lobby == nil,
       do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :start_battle}, _from, state) do
+  def handle_call({:lobby, :start_battle}, _from, %PT.Data{} = state) do
     case TachyonLobby.start_battle(state.lobby.id, state.user.id) do
       # the update of the state wrt to current battle is done by the lobby
       # itself using Session.battle_start to notify all members
@@ -1284,11 +1281,11 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:lobby, :join_battle}, _from, state)
+  def handle_call({:lobby, :join_battle}, _from, %PT.Data{} = state)
       when state.lobby == nil,
       do: {:reply, {:error, :not_in_lobby}, state}
 
-  def handle_call({:lobby, :join_battle}, _from, state) do
+  def handle_call({:lobby, :join_battle}, _from, %PT.Data{} = state) do
     case TachyonLobby.join_battle(state.lobby.id, state.user.id) do
       # same note as start_battle
       :ok ->
@@ -1299,7 +1296,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:lobby, :subscribe_list}, _from, state) do
+  def handle_call({:lobby, :subscribe_list}, _from, %PT.Data{} = state) do
     if state.lobby_list_subscription == nil do
       list = TachyonLobby.subscribe_updates()
 
@@ -1319,7 +1316,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:lobby, :unsubscribe_list}, _from, state) do
+  def handle_call({:lobby, :unsubscribe_list}, _from, %PT.Data{} = state) do
     TachyonLobby.unsubscribe_updates()
 
     if state.lobby_list_subscription != nil do
@@ -1367,7 +1364,10 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:matchmaking, {:notify_found, _queue_id, room_pid, _timeout_ms}}, state) do
+  def handle_cast(
+        {:matchmaking, {:notify_found, _queue_id, room_pid, _timeout_ms}},
+        %PT.Data{} = state
+      ) do
     # we're not searching anything. This can happen as a race when two queues
     # match the same player at the same time.
     # Do log it since it should not happen too often unless something is wrong
@@ -1377,7 +1377,7 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
-  def handle_cast({:matchmaking, {:lost, reason}}, state) do
+  def handle_cast({:matchmaking, {:lost, reason}}, %PT.Data{} = state) do
     case state.matchmaking do
       :no_matchmaking ->
         {:noreply, state}
@@ -1434,7 +1434,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:matchmaking, {:cancelled, reason}}, state) do
+  def handle_cast({:matchmaking, {:cancelled, reason}}, %PT.Data{} = state) do
     case leave_matchmaking(state) do
       {:ok, state} ->
         state = send_to_player(state, {:matchmaking, {:cancelled, reason}})
@@ -1445,7 +1445,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:matchmaking, {:found_update, current, room_pid}}, state) do
+  def handle_cast({:matchmaking, {:found_update, current, room_pid}}, %PT.Data{} = state) do
     case state.matchmaking do
       {:pairing, %PT.MmPairingState{room: ^room_pid}} ->
         {:noreply, send_to_player(state, {:matchmaking, {:found_update, current}})}
@@ -1455,7 +1455,10 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:battle, {:start, {battle_id, battle_pid}, battle_start_data}}, state) do
+  def handle_cast(
+        {:battle, {:start, {battle_id, battle_pid}, battle_start_data}},
+        %PT.Data{} = state
+      ) do
     Logger.info("entering battle #{battle_id}")
 
     case state.matchmaking do
@@ -1528,7 +1531,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:messaging, {:dm, message}}, state) do
+  def handle_cast({:messaging, {:dm, message}}, %PT.Data{} = state) do
     state =
       if state.messaging_state.store_messages? do
         update_in(state.messaging_state.buffer, fn buf -> BQ.put(buf, message) end)
@@ -1546,7 +1549,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:friend, {event, from_id}}, state)
+  def handle_cast({:friend, {event, from_id}}, %PT.Data{} = state)
       when event in [
              :request_received,
              :request_cancelled,
@@ -1558,18 +1561,18 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
-  def handle_cast({:user, :get_subscribe_state}, state) do
+  def handle_cast({:user, :get_subscribe_state}, %PT.Data{} = state) do
     broadcast_user_update!(state.user, :menu)
     {:noreply, state}
   end
 
-  def handle_cast({:user, {:role_updated, roles}}, state) do
+  def handle_cast({:user, {:role_updated, roles}}, %PT.Data{} = state) do
     send_to_player!({:user, {:role_updated, roles}}, state)
     new_state = %{state | user: %{state.user | roles: roles}}
     {:noreply, new_state}
   end
 
-  def handle_cast({:party, {:updated, %PartyTypes.Overview{} = party_state}}, state) do
+  def handle_cast({:party, {:updated, %PartyTypes.Overview{} = party_state}}, %PT.Data{} = state) do
     if (state.party.current_party == party_state.id && state.party.version <= party_state.version) ||
          Enum.any?(state.party.invited_to, fn {v, id} ->
            id == party_state.id && v <= party_state.version
@@ -1586,7 +1589,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_cast({:party, {:removed, %PartyTypes.Overview{} = party_state}}, state) do
+  def handle_cast({:party, {:removed, %PartyTypes.Overview{} = party_state}}, %PT.Data{} = state) do
     state =
       if party_state.id == state.party.current_party do
         send_to_player!({:party, {:removed, party_state.id}}, state)
@@ -1609,11 +1612,17 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
-  def handle_cast({:party, {:join_queues, _queues, %PartyTypes.Overview{} = party_state}}, state)
+  def handle_cast(
+        {:party, {:join_queues, _queues, %PartyTypes.Overview{} = party_state}},
+        %PT.Data{} = state
+      )
       when state.party.current_party != party_state.id,
       do: {:noreply, state}
 
-  def handle_cast({:party, {:join_queues, queues, %PartyTypes.Overview{} = party_state}}, state) do
+  def handle_cast(
+        {:party, {:join_queues, queues, %PartyTypes.Overview{} = party_state}},
+        %PT.Data{} = state
+      ) do
     case state.matchmaking do
       :no_matchmaking ->
         case join_matchmaking(queues, state) do
@@ -1654,7 +1663,7 @@ defmodule Teiserver.Player.Session do
   end
 
   @impl GenServer
-  def handle_info({:DOWN, ref, :process, _pid, reason}, state) do
+  def handle_info({:DOWN, ref, :process, _pid, reason}, %PT.Data{} = state) do
     val = MC.get_val(state.monitors, ref)
     state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
 
@@ -1668,7 +1677,7 @@ defmodule Teiserver.Player.Session do
         state =
           state
           |> Map.put(:conn_pid, nil)
-          |> put_in([:messaging_state, Access.key!(:subscribed?)], false)
+          |> put_in([Access.key!(:messaging_state), Access.key!(:subscribed?)], false)
 
         if is_nil(state.battle) do
           {:ok, _tref} = :timer.send_after(@connection_timeout, :connection_timeout)
@@ -1768,14 +1777,16 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_info({:EXIT, from_pid, :normal}, state) when from_pid != self(),
+  def handle_info({:EXIT, from_pid, :normal}, %PT.Data{} = state) when from_pid != self(),
     do: {:noreply, state}
 
   # :please_die is used in test
-  def handle_info({:EXIT, _from_pid, :please_die}, state), do: {:stop, :normal, state}
-  def handle_info({:EXIT, _from_pid, reason}, state), do: {:stop, reason, state}
+  def handle_info({:EXIT, _from_pid, :please_die}, %PT.Data{} = state),
+    do: {:stop, :normal, state}
 
-  def handle_info(:connection_timeout, state) do
+  def handle_info({:EXIT, _from_pid, reason}, %PT.Data{} = state), do: {:stop, reason, state}
+
+  def handle_info(:connection_timeout, %PT.Data{} = state) do
     if is_nil(state.conn_pid) and is_nil(state.battle) do
       Logger.debug("Player timed out, stopping session")
       {:stop, :normal, state}
@@ -1803,18 +1814,19 @@ defmodule Teiserver.Player.Session do
     {:noreply, state}
   end
 
-  def handle_info({:lobby, lobby_id, _event}, state) when state.lobby.id != lobby_id,
+  def handle_info({:lobby, lobby_id, _event}, %PT.Data{} = state) when state.lobby.id != lobby_id,
     do: {:noreply, state}
 
-  def handle_info({:lobby, lobby_id, event}, state) do
+  def handle_info({:lobby, lobby_id, event}, %PT.Data{} = state) do
     state = send_to_player(state, {:lobby, lobby_id, event})
     {:noreply, state}
   end
 
-  def handle_info(:flush_lobby_list_updates, state) when state.lobby_list_subscription == nil,
-    do: {:noreply, state}
+  def handle_info(:flush_lobby_list_updates, %PT.Data{} = state)
+      when state.lobby_list_subscription == nil,
+      do: {:noreply, state}
 
-  def handle_info(:flush_lobby_list_updates, state) do
+  def handle_info(:flush_lobby_list_updates, %PT.Data{} = state) do
     {lobbies, changes} =
       Enum.reduce(state.lobby_list_subscription.lobbies, {%{}, %{}}, fn {lobby_id, data},
                                                                         {lobbies, changes} ->
@@ -1865,7 +1877,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def do_handle_lobby_list_event(ev, state) do
+  def do_handle_lobby_list_event(ev, %PT.Data{} = state) do
     state =
       case ev do
         %{event: :add_lobby, overview: %LT.ListOverview{} = overview} ->
@@ -1896,7 +1908,7 @@ defmodule Teiserver.Player.Session do
 
   # assume all checks have been done, and make the current player join
   # the specified queues, modifying the state accordingly and returning it
-  defp join_matchmaking(queues, state) do
+  defp join_matchmaking(queues, %PT.Data{} = state) do
     case join_all_queues(state.user.id, state.party.current_party, state.monitors, queues, []) do
       {:ok, monitors, joined} ->
         new_mm_state = {:searching, %PT.MmSearchingState{joined_queues: joined}}
@@ -1943,7 +1955,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  defp leave_matchmaking(state) do
+  defp leave_matchmaking(%PT.Data{} = state) do
     case state.matchmaking do
       :no_matchmaking ->
         {{:error, :not_queued}, state}
@@ -1960,7 +1972,7 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  defp leave_all_queues(queues_to_leave, state) do
+  defp leave_all_queues(queues_to_leave, %PT.Data{} = state) do
     # TODO tachyon_mvp: leaving queue ignore failure there.
     # It is a bit unclear what kind of failure can happen, and also
     # what should be done in that case
@@ -1986,8 +1998,8 @@ defmodule Teiserver.Player.Session do
     state
   end
 
-  @spec send_to_player!(term(), state()) :: :ok
-  defp send_to_player!(message, state) do
+  @spec send_to_player!(term(), PT.Data.t()) :: :ok
+  defp send_to_player!(message, %PT.Data{} = state) do
     # this is the same as send_to_player, but doesn't persist the message if
     # there's no connection at that time.
     # This should be used for messages where there's another way to recover
