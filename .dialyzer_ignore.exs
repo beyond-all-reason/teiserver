@@ -143,7 +143,6 @@
   {"lib/teiserver_web/controllers/telemetry/simple_match_event_controller.ex", :call},
   {"lib/teiserver_web/controllers/telemetry/simple_server_event_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/telemetry/simple_server_event_controller.ex", :call},
-  {"lib/teiserver_web/live/account/party/show.ex", :call},
   {"lib/teiserver_web/live/account/profile/matches.ex", :unused_fun},
   {"lib/teiserver_web/live/account/relationship/index.html.heex", :call},
   {"lib/teiserver_web/live/admin/chat/index.html.heex", :call},

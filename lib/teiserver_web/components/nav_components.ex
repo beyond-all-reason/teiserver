@@ -91,12 +91,6 @@ defmodule TeiserverWeb.NavComponents do
 
             <.top_nav_item text="Lobbies" active={@active == "lobbies"} route={~p"/battle/lobbies"} />
 
-            <.top_nav_item
-              text="Parties"
-              route={~p"/teiserver/account/parties"}
-              active={@active == "parties"}
-            />
-
             <.top_nav_item text="Matches" route={~p"/battle"} active={@active == "match"} />
 
             <.top_nav_item

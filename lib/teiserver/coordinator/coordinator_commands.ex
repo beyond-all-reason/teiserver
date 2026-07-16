@@ -101,33 +101,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
-  defp do_handle(%{command: "party", senderid: senderid} = _cmd, state) do
-    client = Account.get_client_by_id(senderid)
-
-    {:ok, code} =
-      Account.create_code(%{
-        value: ULID.generate(),
-        purpose: "one_time_login",
-        expires: DateTime.shift(DateTime.utc_now(), minute: 5),
-        user_id: senderid,
-        metadata: %{
-          ip: client.ip,
-          redirect: "/teiserver/account/parties"
-        }
-      })
-
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-    url = "https://#{host}/one_time_login/#{code.value}"
-
-    Coordinator.send_to_user(senderid, [
-      "To access parties please use this link - #{url}",
-      "You can use the $explain command to see how balance is being calculated and why you are/are not being teamed with your party",
-      "We are working on handling it within the new client and protocol, the website is only a temporary measure."
-    ])
-
-    state
-  end
-
   defp do_handle(%{command: "whoami", senderid: senderid} = _cmd, state) do
     sender = CacheUser.deprecated_get_user_by_id(senderid)
     stats = Account.get_user_stat_data(senderid)
