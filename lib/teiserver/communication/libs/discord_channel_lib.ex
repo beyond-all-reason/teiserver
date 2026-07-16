@@ -281,6 +281,8 @@ defmodule Teiserver.Communication.DiscordChannelLib do
         true ->
           {:error, "No discord id for user"}
       end
+    else
+      {:error, :discord_disabled}
     end
   end
 
