@@ -34,7 +34,7 @@
                     &nbsp;
                   </td>
                   <td style={"background-color: #{@current_user.colour}; color: #FFF;"} width="22">
-                    {central_component("icon", icon: @current_user.icon)}
+                    <Fontawesome.icon icon={@current_user.icon} style="regular" />
                   </td>
                   <td>{@current_user.name}</td>
 
@@ -55,7 +55,7 @@
                     #{pos + 1}
                   </td>
                   <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                    {central_component("icon", icon: rating.user.icon)}
+                    <Fontawesome.icon icon={rating.user.icon} style="regular" />
                   </td>
                   <td>{rating.user.name}</td>
 

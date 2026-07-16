@@ -73,7 +73,7 @@ is_moderator = allow?(@conn, "Moderator") %>
               <%= for {user, user_stats} <- @users do %>
                 <tr>
                   <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-                    {central_component("icon", icon: user.icon)}
+                    <Fontawesome.icon icon={user.icon} style="regular" />
                   </td>
                   <td>{user.name}</td>
                   <%= if is_moderator do %>

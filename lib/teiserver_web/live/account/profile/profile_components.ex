@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
       <div class="col" id="nav-col">
         <.tab_header>
           <.tab_nav url={~p"/profile/#{@userid}/overview"} selected={@tab == "overview"}>
-            <Fontawesome.icon icon_atom={:summary} style="solid" /> Overview
+            <Fontawesome.icon icon="fa-info" style="solid" /> Overview
           </.tab_nav>
 
           <.tab_nav url={~p"/profile/#{@userid}/matches"} selected={@tab == "matches"}>

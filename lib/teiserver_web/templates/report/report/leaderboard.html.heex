@@ -138,7 +138,7 @@ user_moderator = allow?(@current_user, "Moderator") %>
                     #{pos + 1}
                   </td>
                   <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
-                    {central_component("icon", icon: rating.user.icon)}
+                    <Fontawesome.icon icon={rating.user.icon} style="regular" />
                   </td>
                   <td><TeiserverWeb.UserComponents.status_icon user={rating.user} /></td>
                   <td>{rating.user.name}</td>

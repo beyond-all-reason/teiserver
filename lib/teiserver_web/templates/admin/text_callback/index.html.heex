@@ -39,7 +39,7 @@
               <%= for text_callback <- @text_callbacks do %>
                 <tr>
                   <td style={"background-color: #{text_callback.colour}; color: #FFF;"} width="22">
-                    {central_component("icon", icon: text_callback.icon)}
+                    <Fontawesome.icon icon={text_callback.icon} style="regular" />
                   </td>
                   <td style={"background-color: #{rgba_css text_callback.colour};"}>
                     {text_callback.name}

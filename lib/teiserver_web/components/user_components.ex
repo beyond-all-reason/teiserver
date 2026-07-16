@@ -101,14 +101,14 @@ defmodule TeiserverWeb.UserComponents do
             <Fontawesome.icon
               icon={r.type_icon}
               style="regular"
-              css_style={"color: #{r.type_colour}"}
+              css={"color: #{r.type_colour}"}
             />
 
             <%= if r.item_icon do %>
               <Fontawesome.icon
                 icon={r.item_icon}
                 style="regular"
-                css_style={"color: #{r.item_colour}"}
+                css={"color: #{r.item_colour}"}
               />
             <% else %>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

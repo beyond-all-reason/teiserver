@@ -47,7 +47,7 @@
             class="btn btn-outline-warning"
             href={~p"/moderation/report?target_id=#{@report.target_id}"}
           >
-            {central_component("icon", icon: "fa-solid fa-share-from-square")} &nbsp;
+            <Fontawesome.icon icon="fa-solid fa-share-from-square" style="regular" /> &nbsp;
             Filter by target
           </a>
 
@@ -55,7 +55,7 @@
             class="btn btn-outline-warning"
             href={~p"/moderation/report?reporter_id=#{@report.reporter_id}"}
           >
-            {central_component("icon", icon: "fa-solid fa-bullseye")} &nbsp;
+            <Fontawesome.icon icon="fa-solid fa-bullseye" style="regular" /> &nbsp;
             Filter by reporter
           </a>
 
@@ -63,10 +63,7 @@
             class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
             href={~p"/moderation/report/user/#{@report.target_id}"}
           >
-            {central_component("icon",
-              icon: Teiserver.Account.UserLib.icon(),
-              class: "fa-solid"
-            )} &nbsp;
+            <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" /> &nbsp;
             User mod profile
           </a>
 
@@ -75,10 +72,8 @@
               class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
               href={~p"/admin/chat?userid=#{@report.target_id}"}
             >
-              {central_component("icon",
-                icon: Teiserver.Chat.LobbyMessageLib.icon(),
-                class: "fa-solid"
-              )} &nbsp;
+              <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" />
+              &nbsp;
               User chat
             </a>
 
@@ -86,10 +81,7 @@
               class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}
               href={~p"/teiserver/admin/user/#{@report.target_id}"}
             >
-              {central_component("icon",
-                icon: Teiserver.Account.UserLib.icon(),
-                class: "fa-solid"
-              )} &nbsp;
+              <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="solid" /> &nbsp;
               User admin
             </a>
 
@@ -98,10 +90,8 @@
                 class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"}
                 href={~p"/moderation/action/new_with_user?teiserver_user=#{@report.target_id}"}
               >
-                {central_component("icon",
-                  icon: Teiserver.Moderation.ActionLib.icon(),
-                  class: "fa-solid"
-                )} &nbsp;
+                <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
+                &nbsp;
                 Action user
               </a>
             <% end %>
@@ -112,10 +102,12 @@
           {@report.reporter.name} reported {@report.target.name}
 
           <%= if @report.result_id do %>
-            &nbsp; {central_component("icon",
-              icon: Teiserver.Moderation.ActionLib.icon(),
-              class: "text-danger fa-solid"
-            )}
+            &nbsp;
+            <Fontawesome.icon
+              icon={Teiserver.Moderation.ActionLib.icon()}
+              style="solid"
+              class="text-danger"
+            />
           <% end %>
 
           <%= if @report.closed do %>
@@ -126,16 +118,14 @@
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li>
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              {central_component("icon", icon: "fas fa-file-alt")} Details
+              <Fontawesome.icon icon="fas fa-file-alt" style="regular" /> Details
             </a>
           </li>
 
           <li class="nav-item" role="presentation">
             <a href="#actions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              {central_component("icon",
-                icon: Teiserver.Moderation.ActionLib.icon(),
-                class: "fa-solid"
-              )} Actions ({Enum.count(@actions)})
+              <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
+              Actions ({Enum.count(@actions)})
             </a>
           </li>
         </ul>
