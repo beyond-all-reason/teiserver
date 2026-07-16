@@ -339,14 +339,6 @@ defmodule TeiserverWeb.Router do
     end
   end
 
-  scope "/teiserver/account", TeiserverWeb.Account.PartyLive, as: :ts_game do
-    pipe_through([:browser, :app_layout, :protected])
-
-    live("/parties", Index, :index)
-    live("/parties/:mode", Index, :index)
-    live("/parties/show/:id", Show, :show)
-  end
-
   scope "/telemetry", TeiserverWeb.Telemetry do
     pipe_through([:browser, :app_layout, :protected])
 
@@ -471,13 +463,6 @@ defmodule TeiserverWeb.Router do
 
     live("/client", Index, :index)
     live("/client/:id", Show, :show)
-  end
-
-  scope "/teiserver/admin", TeiserverWeb.PartyLive, as: :ts_admin do
-    pipe_through([:browser, :app_layout, :protected])
-
-    live("/party", Index, :index)
-    live("/party/:id", Show, :show)
   end
 
   scope "/moderation", TeiserverWeb.Moderation do
