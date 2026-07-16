@@ -8,6 +8,7 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account.SmurfMergeTask
   alias Teiserver.Account.Tasks.GdprForgetTask
   alias Teiserver.Account.TOTPLib
+  alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
@@ -1122,7 +1123,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec shadowban(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def shadowban(conn, %{"id" => id, "state" => state}) do
-    user = Account.deprecated_get_user_by_id(id)
+    %User{} = user = Account.get_user_by_id(id)
 
     case UserLib.has_access(user, conn) do
       {true, _access} ->

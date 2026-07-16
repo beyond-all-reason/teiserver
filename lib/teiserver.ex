@@ -53,9 +53,6 @@ defmodule Teiserver do
   @spec cache_insert_new(atom, any, any) :: :ok | {:error, any}
   defdelegate cache_insert_new(table, key, value), to: CacheHelper
 
-  @spec cache_update(atom, any, any) :: :ok | {:error, any}
-  defdelegate cache_update(table, key, func), to: CacheHelper
-
   @spec store_get(atom, any) :: any
   defdelegate store_get(table, key), to: CacheHelper
 

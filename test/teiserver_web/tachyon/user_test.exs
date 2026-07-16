@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Tachyon.UserTest do
   describe "info" do
     test "works", %{user: user, client: client} do
       %{id: user_id, name: name} = user
-      %{country: country} = Account.deprecated_get_user_by_id(user_id)
+      %{country: country} = Account.get_user_by_id(user_id)
       user_id = to_string(user_id)
 
       assert %{

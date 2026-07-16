@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.PartyLib
+  alias Teiserver.Account.User
   alias Teiserver.Battle
 
   use TeiserverWeb, :live_view
@@ -25,7 +26,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
         []
       end
 
-    user = Account.deprecated_get_user_by_id(socket.assigns.current_user.id)
+    %User{} = user = Account.get_user_by_id(socket.assigns.current_user.id)
     friends = Account.list_friend_ids_of_user(socket.assigns.current_user.id)
 
     :ok =

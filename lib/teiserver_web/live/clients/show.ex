@@ -52,7 +52,7 @@ defmodule TeiserverWeb.ClientLive.Show do
         id = int_parse(id)
         PubSub.subscribe(Teiserver.PubSub, "teiserver_client_watch:#{id}")
         client = Account.get_client_by_id(id)
-        user = CacheUser.deprecated_get_user_by_id(id)
+        user = Account.get_user_by_id(id)
 
         if client && user do
           {:noreply,

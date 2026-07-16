@@ -8,9 +8,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
   use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
-  def mount(%{"userid" => userid_str}, _session, socket) do
-    userid = String.to_integer(userid_str)
-    user = Account.deprecated_get_user_by_id(userid)
+  def mount(%{"userid" => user_id}, _session, socket) do
+    user = Account.get_user_by_id(user_id)
 
     socket =
       if is_nil(user) do

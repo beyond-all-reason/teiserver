@@ -9,6 +9,17 @@ defmodule Teiserver.Helper.NumberHelper do
   def int_parse(l) when is_list(l), do: Enum.map(l, &int_parse/1)
   def int_parse(s), do: String.trim(s) |> String.to_integer()
 
+  @doc """
+  Allows us to parse a string as an integer but empty strings and nil
+  values will result in an error.
+
+  The intended purpose is to allow a common key to be used in caches
+  where a string representation of the id may be passed in (e.g. by web)
+  """
+  @spec int_parse!(String.t() | number()) :: Integer.t()
+  def int_parse!(i) when is_number(i), do: round(i)
+  def int_parse!(s), do: String.trim(s) |> String.to_integer()
+
   @spec float_parse(String.t() | nil | number() | List.t()) :: Float.t() | List.t()
   def float_parse(""), do: 0.0
   def float_parse(nil), do: 0.0

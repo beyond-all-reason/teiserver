@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Admin.MatchController do
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Battle
 
   use TeiserverWeb, :controller
@@ -94,7 +95,7 @@ defmodule TeiserverWeb.Admin.MatchController do
 
     total_pages = div(total_count - 1, limit) + 1
 
-    user = Account.deprecated_get_user_by_id(userid)
+    %User{} = user = Account.get_user_by_id(userid)
 
     conn
     |> assign(:user, user)

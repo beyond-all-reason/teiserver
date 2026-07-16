@@ -150,26 +150,17 @@ defmodule Teiserver.Account.UserCacheLib do
   end
 
   @spec deprecated_recache_user(User.id() | CacheUser.t() | map()) :: :ok
+  def deprecated_recache_user(%{id: id}), do: deprecated_recache_user(id)
+
   def deprecated_recache_user(id) when is_integer(id) do
     Teiserver.cache_delete(:account_user_cache, id)
     Teiserver.cache_delete(:account_user_cache_bang, id)
     Teiserver.cache_delete(:account_membership_cache, id)
     Teiserver.cache_delete(:config_user_cache, id)
 
-    # decache_user(id)
     Account.decache_relationships(id)
 
     Account.get_user(id)
-    |> convert_user()
-    |> add_user()
-
-    :ok
-  end
-
-  def deprecated_recache_user(user) do
-    Account.deprecated_recache_user(user.id)
-
-    user
     |> convert_user()
     |> add_user()
 
@@ -287,12 +278,37 @@ defmodule Teiserver.Account.UserCacheLib do
     new_user
   end
 
+  @doc """
+  A function purely for UserLib to be able to flash the cache when a User is updated
+  and we want to ensure these caches are cleared correctly.
+  """
+  def decache_user_on_ok({:ok, %User{} = user} = result) do
+    Teiserver.cache_delete(:users, user.id)
+    Teiserver.cache_delete(:users_lookup_name_with_id, user.id)
+    Teiserver.cache_delete(:users_lookup_id_with_name, cachename(user.name))
+    Teiserver.cache_delete(:users_lookup_id_with_email, cachename(user.email))
+
+    if user.discord_id do
+      Teiserver.cache_delete(:users_lookup_id_with_discord, user.discord_id)
+    end
+
+    result
+  end
+
+  def decache_user_on_ok(result), do: result
+
   @spec decache_user(User.id()) :: :ok | :no_user
   def decache_user(userid) do
     user = deprecated_get_user_by_id(userid)
 
     # Teiserver.cache_delete(:users, userid)
     if user do
+      # This is used by the UserLib, to prevent us having to have both functions
+      # call the other we instead have the UserLib call here and once this is removed
+      # we just need to remove the call to this.
+      Teiserver.cache_delete(:users_by_id, user.id)
+
+      Teiserver.cache_delete(:users, user.id)
       Teiserver.cache_delete(:users_lookup_name_with_id, user.id)
       Teiserver.cache_delete(:users_lookup_id_with_name, cachename(user.name))
       Teiserver.cache_delete(:users_lookup_id_with_email, cachename(user.email))

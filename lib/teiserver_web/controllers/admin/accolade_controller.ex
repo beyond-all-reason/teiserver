@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Admin.AccoladeController do
   alias Teiserver.Account
+  alias Teiserver.Account.User
 
   use TeiserverWeb, :controller
 
@@ -33,7 +34,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
         order_by: "Newest first"
       )
 
-    user = Account.deprecated_get_user_by_id(user_id)
+    %User{} = user = Account.get_user_by_id(user_id)
 
     conn
     |> assign(:accolades, accolades)

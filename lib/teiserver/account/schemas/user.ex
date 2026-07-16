@@ -71,7 +71,7 @@ defmodule Teiserver.Account.User do
       restrictions: [],
       restricted_until: nil,
       shadowbanned: false,
-      lobby_hash: [],
+      lobby_hash: nil,
       chobby_hash: nil,
       discord_id: nil,
       discord_dm_channel: nil,
