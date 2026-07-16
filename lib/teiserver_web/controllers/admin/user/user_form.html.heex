@@ -1,6 +1,6 @@
 <% bsname = view_colour() %>
 
-<%= form_for @changeset, @action, fn f -> %>
+<.form :let={f} for={@changeset} action={@action}>
   <%= if @changeset.action do %>
     <div class="alert alert-danger">
       <p>Oops, something went wrong! Please check the errors below.</p>
@@ -9,27 +9,24 @@
 
   <div class="form-group row">
     <div class="col-xl-4 col-lg-4">
-      {label(f, :name, class: "control-label")}
-      {text_input(f, :name, class: "form-control", disabled: "disabled")}
-      {error_tag(f, :name)}
+      <.input field={f[:name]} type="text-area" class="form-control" disabled="disabled" />
     </div>
 
     <%= if allow?(@conn, "Admin") do %>
       <div class="col-xl-4 col-lg-4">
-        {label(f, :email, class: "control-label")}
-        {text_input(f, :email, class: "form-control")}
-        {error_tag(f, :email)}
+        <.input field={f[:email]} type="text-area" class="form-control" />
       </div>
     <% end %>
 
     <div class="col-xl-4 col-lg-4">
-      <%= if assigns[:user].smurf_of_id do %>
-        {link(raw("<i class='far fa-fw fa-link-slash'></i> Clear smurf link"),
-          to: ~p"/teiserver/admin/users/cancel_smurf_mark/#{@user.id}",
-          method: "delete",
-          class: "btn btn-outline-warning"
-        )}
-      <% end %>
+      <.link
+        :if={assigns[:user].smurf_of_id}
+        to={~p"/teiserver/admin/users/cancel_smurf_mark/#{@user.id}"}
+        method="delete"
+        class="btn btn-outline-warning"
+      >
+        <i class="far fa-fw fa-link-slash"></i> Clear smurf link
+      </.link>
     </div>
   </div>
 
@@ -195,4 +192,4 @@
       class={"btn btn-#{bsname} float-end"}
     />
   </div>
-<% end %>
+</.form>

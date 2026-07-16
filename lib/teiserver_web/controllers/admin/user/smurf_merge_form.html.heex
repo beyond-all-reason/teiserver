@@ -12,9 +12,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Admin.UserView,
-          "section_menu.html",
+        {UserHTML.section_menu(
           Map.merge(assigns, %{
             active: "smurf_merge_form"
           })
@@ -47,7 +45,7 @@
           <div class="row">
             <div class="col-md-12 m-3 inactive">
               <h5 class="text-primary">
-                {central_component("icon", icon: "fa-solid fa-link")} &nbsp;
+                <Fontawesome.icon icon="fa-link" classs="fa-solid" style="regular" /> &nbsp;
                 <label for="" class="control-label">Link accounts</label>
               </h5>
               {central_component("checkbox",
@@ -64,7 +62,7 @@
           <div class="row">
             <div class="col-md-12 m-3">
               <h5 class={"text-#{Teiserver.Account.RatingLib.colours}"}>
-                {central_component("icon", icon: Teiserver.Account.RatingLib.icon())} &nbsp;
+                <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="regular" /> &nbsp;
                 <label for="" class="control-label">Ratings</label>
               </h5>
               {central_component("checkbox",
@@ -81,9 +79,7 @@
           <div class="row">
             <div class="col-md-12 m-3">
               <h5 class="text-warning">
-                {central_component("icon",
-                  icon: Teiserver.Helper.StylingHelper.icon(:moderation)
-                )} &nbsp; <label for="" class="control-label">Moderation reports/actions</label>
+                <Fontawesome.icon icon={Teiserver.Helper.StylingHelper.icon(:moderation)} style="regular" /> &nbsp; <label for="" class="control-label">Moderation reports/actions</label>
               </h5>
               {central_component("checkbox",
                 name: "merge[reports]",
@@ -100,7 +96,7 @@
           <div class="row">
             <div class="col-md-12 m-3">
               <h5 class="text-danger">
-                {central_component("icon", icon: Teiserver.Account.RelationshipReport.icon())} &nbsp;
+                <Fontawesome.icon icon={Teiserver.Helper.StylingHelper.icon(:moderation)} style="regular" /> &nbsp;
                 <label for="" class="control-label">Mutes/Ignores</label>
               </h5>
               {central_component("checkbox",
@@ -118,7 +114,7 @@
           <div class="row">
             <div class="col-md-12 m-3">
               <h5 class="text-info2">
-                {central_component("icon", icon: "fa-solid fa-input-text")} &nbsp;
+                <Fontawesome.icon icon="fa-input-text" class="fa-solid" style="regular" /> &nbsp;
                 <label for="" class="control-label">Names</label>
               </h5>
               {central_component("checkbox",
@@ -136,7 +132,7 @@
           <div class="row">
             <div class="col-md-12 m-3 inactive">
               <h5 class="text-warning2">
-                {central_component("icon", icon: Teiserver.Account.UserLib.icon())} &nbsp;
+                <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="regular" /> &nbsp;
                 <label for="" class="control-label">Old account ({@from_user.name})</label>
               </h5>
               {central_component("checkbox",

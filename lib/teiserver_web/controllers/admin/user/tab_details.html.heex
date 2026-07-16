@@ -11,13 +11,13 @@
 
     {central_component("detail_line",
       label: "Created",
-      value: date_to_str(@user.inserted_at, format: :hms_or_hms_ymd, tz: @tz)
+      value: DateHelper.date_to_str(@user.inserted_at, format: :hms_or_hms_ymd, tz: @tz)
     )}
 
     {central_component("detail_line",
       label: "Last login",
       value:
-        date_to_str(@user.last_login,
+        DateHelper.date_to_str(@user.last_login,
           format: :hms_or_hms_ymd,
           tz: @tz
         )
@@ -26,7 +26,7 @@
     {central_component("detail_line",
       label: "Last played",
       value:
-        date_to_str(@user.last_played,
+        DateHelper.date_to_str(@user.last_played,
           format: :hms_or_hms_ymd,
           tz: @tz
         )
@@ -35,7 +35,7 @@
     {central_component("detail_line",
       label: "Last logout",
       value:
-        date_to_str(@user.last_logout,
+        DateHelper.date_to_str(@user.last_logout,
           format: :hms_or_hms_ymd,
           tz: @tz
         )

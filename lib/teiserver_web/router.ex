@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Router do
     plug(:accepts, ["html"])
     plug(:fetch_session)
     plug(:fetch_live_flash)
-    plug :put_root_layout, {TeiserverWeb.Layouts, :root_bs}
+    plug :put_root_layout, html: {TeiserverWeb.Layouts, :root_bs}
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
     plug(Teiserver.Account.DefaultsPlug)
@@ -29,7 +29,7 @@ defmodule TeiserverWeb.Router do
     plug(:accepts, ["html"])
     plug(:fetch_session)
     plug(:fetch_live_flash)
-    plug :put_root_layout, {TeiserverWeb.Layouts, :root_bs}
+    plug :put_root_layout, html: {TeiserverWeb.Layouts, :root_bs}
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
     plug(Teiserver.Account.DefaultsPlug)
@@ -39,15 +39,15 @@ defmodule TeiserverWeb.Router do
   end
 
   pipeline :tailwind do
-    plug :put_root_layout, {TeiserverWeb.Layouts, :root_tw}
+    plug :put_root_layout, html: {TeiserverWeb.Layouts, :root_tw}
   end
 
   pipeline :app_layout do
-    plug(:put_layout, {TeiserverWeb.Layouts, :app})
+    plug(:put_layout, html: {TeiserverWeb.Layouts, :app})
   end
 
   pipeline :nomenu_layout do
-    plug(:put_layout, {TeiserverWeb.Layouts, :root_bs})
+    plug(:put_layout, html: {TeiserverWeb.Layouts, :root_bs})
   end
 
   pipeline :protected do

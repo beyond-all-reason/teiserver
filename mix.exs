@@ -13,7 +13,8 @@ defmodule Teiserver.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      test_coverage: [tool: ExCoveralls]
+      test_coverage: [tool: ExCoveralls],
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 
@@ -63,7 +64,7 @@ defmodule Teiserver.MixProject do
   defp deps do
     [
       # Default phoenix deps
-      {:phoenix, "~> 1.7.24"},
+      {:phoenix, "~> 1.8.9"},
       {:phoenix_ecto, "~> 4.6"},
       {:ecto_sql, "~> 3.14"},
       {:postgrex, ">= 0.22.2"},
