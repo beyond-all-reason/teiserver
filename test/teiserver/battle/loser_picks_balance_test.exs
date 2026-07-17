@@ -330,17 +330,20 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
                  %{count: 1, group_rating: 8, members: [116], ratings: [8]}
                ],
                2 => [
-                 %{count: 1, group_rating: 35, members: [104], ratings: ~c"#"},
+                 %{count: 1, group_rating: 35, members: [104], ratings: [35]},
                  %{count: 1, group_rating: 34, members: [105], ratings: [34]},
                  %{count: 1, group_rating: 28, members: [107], ratings: [28]},
                  %{count: 1, group_rating: 26, members: [109], ratings: [26]},
                  %{count: 1, group_rating: 21, members: [111], ratings: [21]},
                  %{count: 1, group_rating: 16, members: [113], ratings: [16]},
                  %{count: 1, group_rating: 14, members: [115], ratings: [14]},
-                 %{count: 1, group_rating: 10, members: [103], ratings: ~c"\n"}
+                 %{count: 1, group_rating: 10, members: [103], ratings: [10]}
                ]
              },
-             team_players: %{1 => ~c"ejlnprft", 2 => ~c"hikmoqsg"},
+             team_players: %{
+               1 => [101, 106, 108, 110, 112, 114, 102, 116],
+               2 => [104, 105, 107, 109, 111, 113, 115, 103]
+             },
              team_sizes: %{1 => 8, 2 => 8},
              means: %{1 => 23.0, 2 => 23.0},
              stdevs: %{1 => 12.816005617976296, 2 => 8.674675786448736},
@@ -376,12 +379,12 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
              # The captain should be the user with the highest rating on each team
-             captains: %{1 => 104, 2 => 101},
+             captains: %{1 => 101, 2 => 104},
              deviation: 2,
              ratings: %{1 => 248, 2 => 253},
              team_groups: %{
                1 => [
-                 %{count: 3, group_rating: 151, members: [104, 105, 106], ratings: [51, 50, 50]},
+                 %{count: 3, group_rating: 151, members: [101, 102, 103], ratings: [52, 50, 49]},
                  %{count: 1, group_rating: 28, members: [107], ratings: [28]},
                  %{count: 1, group_rating: 25, members: [110], ratings: [25]},
                  %{count: 1, group_rating: 21, members: [111], ratings: [21]},
@@ -389,7 +392,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
                  %{count: 1, group_rating: 8, members: [116], ratings: [8]}
                ],
                2 => [
-                 %{count: 3, group_rating: 151, members: [101, 102, 103], ratings: [52, 50, 49]},
+                 %{count: 3, group_rating: 151, members: [104, 105, 106], ratings: [51, 50, 50]},
                  %{count: 1, group_rating: 27, members: [108], ratings: [27]},
                  %{count: 1, group_rating: 26, members: [109], ratings: [26]},
                  %{count: 1, group_rating: 19, members: [112], ratings: [19]},
@@ -398,12 +401,12 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
                ]
              },
              team_players: %{
-               1 => [104, 105, 106, 107, 110, 111, 114, 116],
-               2 => [101, 102, 103, 108, 109, 112, 113, 115]
+               1 => [101, 102, 103, 107, 110, 111, 114, 116],
+               2 => [104, 105, 106, 108, 109, 112, 113, 115]
              },
              team_sizes: %{1 => 8, 2 => 8},
              means: %{1 => 31.0, 2 => 31.625},
-             stdevs: %{1 => 16.015617378046965, 2 => 15.090870584562046},
+             stdevs: %{1 => 16.0312195418814, 2 => 15.074295174236173},
              has_parties?: true
            }
 
