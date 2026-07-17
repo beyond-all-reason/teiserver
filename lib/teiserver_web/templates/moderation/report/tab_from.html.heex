@@ -41,7 +41,7 @@
           <%= if report.result_id do %>
             <a
               href={~p"/moderation/action/#{report.result_id}"}
-              class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()} btn-block"}
+              class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()}"}
             >
               {central_component("icon",
                 icon: Teiserver.Moderation.ActionLib.icon(),
