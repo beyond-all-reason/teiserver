@@ -132,15 +132,13 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
   def handle_event({:INTERACTION_CREATE, %{data: data} = interaction, _ws}) do
     options_map =
-      cond do
-        data.options == nil ->
-          %{}
-
-        true ->
-          data.options
-          |> Map.new(fn %{name: name, value: value} ->
-            {name, value}
-          end)
+      if data.options == nil do
+        %{}
+      else
+        data.options
+        |> Map.new(fn %{name: name, value: value} ->
+          {name, value}
+        end)
       end
 
     response = CommandLib.handle_command(interaction, options_map)
