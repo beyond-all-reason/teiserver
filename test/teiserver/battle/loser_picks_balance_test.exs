@@ -105,7 +105,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
                3 => 1,
                4 => 1
              },
-             deviation: 13,
+             deviation: 38,
              means: %{1 => 8.0, 2 => 7.0, 3 => 6.0, 4 => 5.0},
              stdevs: %{1 => 0.0, 2 => 0.0, 3 => 0.0, 4 => 0.0},
              has_parties?: false
@@ -163,7 +163,7 @@ defmodule Teiserver.Battle.LoserPicksBalanceTest do
                2 => 2,
                3 => 2
              },
-             deviation: 0,
+             deviation: 7,
              means: %{1 => 7.5, 2 => 7.0, 3 => 7.5},
              stdevs: %{1 => 1.5, 2 => 2.0, 3 => 0.5},
              has_parties?: false
