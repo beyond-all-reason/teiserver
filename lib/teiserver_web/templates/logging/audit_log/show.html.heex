@@ -26,40 +26,39 @@
       <div class="card-body">
         <h2>Audit log #{@log.id}</h2>
 
-        {central_component("detail_line",
-          label: "Action",
-          value: @log.action
-        )}
+        <.detail_line
+          label="Action"
+          value={@log.action}
+        />
 
-        {central_component("detail_line",
-          label: "IP",
-          value: @log.ip
-        )}
+        <.detail_line
+          label="IP"
+          value={@log.ip}
+        />
 
-        {central_component("detail_line",
-          label: "Timestamp",
-          value: date_to_str(@log.inserted_at, format: :hms_or_dmy, tz: @tz)
-        )}
+        <.detail_line
+          label="Timestamp"
+          value={date_to_str(@log.inserted_at, format: :hms_or_dmy, tz: @tz)}
+        />
 
         <%= if @log.user_id do %>
-          {central_component("detail_line",
-            label: "User",
-            icon: %{
-              colour: @log.user.colour,
-              icon: @log.user.icon
-            },
-            value: @log.user.name,
-            link: %{
-              path: ~p"/teiserver/admin/user/#{@log.user_id}",
-              bsname: elem(Teiserver.Account.UserLib.colours() |> colours(), 2),
-              icon: Teiserver.Account.UserLib.icon()
+          <.detail_line
+            label="User"
+            icon={@log.user.icon}
+            value={@log.user.name}
+            link={
+              %{
+                path: ~p"/teiserver/admin/user/#{@log.user_id}",
+                bsname: elem(Teiserver.Account.UserLib.colours() |> colours(), 2),
+                icon: Teiserver.Account.UserLib.icon()
+              }
             }
-          )}
+          />
         <% else %>
-          {central_component("detail_line",
-            label: "User",
-            value: "none"
-          )}
+          <.detail_line
+            label="User"
+            value="none"
+          />
         <% end %>
 
         <br /><br />
