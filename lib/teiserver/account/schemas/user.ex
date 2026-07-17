@@ -4,6 +4,7 @@ defmodule Teiserver.Account.User do
   alias Argon2
   alias Ecto.Changeset
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.CacheUser
   alias Teiserver.Helper.StylingHelper
 
@@ -90,7 +91,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
@@ -107,7 +108,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id rank country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id rank country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
@@ -249,7 +250,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
@@ -305,6 +306,10 @@ defmodule Teiserver.Account.User do
         :md5_password -> put_md5_password_hash(changeset)
       end
     end)
+  end
+
+  def smurf_changeset(%User{} = user, attrs) do
+    cast(user, attrs, [:smurf_of_id])
   end
 
   defp change_plain_password(user, attrs) do

@@ -852,7 +852,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case UserLib.has_access(user, conn) do
       {true, _role} ->
-        case Account.script_update_user(user, %{"smurf_of_id" => nil}) do
+        case Account.update_user_smurf(user, %{smurf_of_id: nil}) do
           {:ok, user} ->
             add_audit_log(conn, "Moderation:Cancel smurf mark", %{
               smurf_userid: user.id,
