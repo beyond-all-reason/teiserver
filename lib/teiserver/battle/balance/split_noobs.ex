@@ -269,7 +269,7 @@ defmodule Teiserver.Battle.Balance.SplitNoobs do
   end
 
   def log_noob(%{name: name, rating: rating, uncertainty: uncertainty, rank: rank}) do
-    chev = rank || 0 + 1
+    chev = (rank || 0) + 1
 
     "#{name} (#{format(rating)}, chev: #{chev}, σ: #{format(uncertainty)})"
   end
