@@ -452,8 +452,8 @@ defmodule Teiserver.Account.UserQueries do
   end
 
   def _preload(query, :user_stat) do
-    from user in query,
-      left_join: user_stats in assoc(user, :user_stat),
+    from users in query,
+      left_join: user_stats in assoc(users, :user_stat),
       preload: [user_stat: user_stats]
   end
 
