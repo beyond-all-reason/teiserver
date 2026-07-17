@@ -88,7 +88,7 @@ defmodule Teiserver.General.StringHelpersTest do
       {"#100 name email", 100}
     ]
 
-    for [name, expected] <- pairs do
+    for {name, expected} <- pairs do
       result = StringHelper.get_hash_id(name)
 
       assert result == expected, message: "Input: #{name}, Got: #{result}, Expected: #{expected}"
