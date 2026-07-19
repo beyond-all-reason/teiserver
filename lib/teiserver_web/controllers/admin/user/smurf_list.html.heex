@@ -32,11 +32,8 @@ is_moderator = allow?(@conn, "Moderator") %>
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Admin.UserView,
-          "section_menu.html",
+        {UserHTML.section_menu(
           Map.merge(assigns, %{
-            show_search: false,
             active: "smurf"
           })
         )}
@@ -162,14 +159,14 @@ is_moderator = allow?(@conn, "Moderator") %>
                     <% end %>
 
                     <td>
-                      {date_to_str(@user.last_login,
+                      {DateHelper.date_to_str(@user.last_login,
                         format: :hms_or_ymd,
                         tz: @tz
                       )}
                     </td>
 
                     <td>
-                      {date_to_str(@user.inserted_at, format: :hms_or_ymd)}
+                      {DateHelper.date_to_str(@user.inserted_at, format: :hms_or_ymd)}
                     </td>
 
                     <td>
@@ -221,11 +218,11 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                             <i
                               class={"fa-fw fa-solid #{type_icons[type]} text-#{type_colours[type]}"}
-                              title={"Matching key against #{date_to_str(match.last_updated, format: :ymd)}:\n#{user_key.value}"}
+                              title={"Matching key against #{DateHelper.date_to_str(match.last_updated, format: :ymd)}:\n#{user_key.value}"}
                             >
                             </i>
                             <span class="key-date">
-                              {date_to_str(match.last_updated, format: :ymd)}/{date_to_str(
+                              {DateHelper.date_to_str(match.last_updated, format: :ymd)}/{DateHelper.date_to_str(
                                 user_key.last_updated,
                                 format: :ymd
                               )}
@@ -235,14 +232,14 @@ is_moderator = allow?(@conn, "Moderator") %>
                       <% end %>
 
                       <td>
-                        {date_to_str(user.last_login,
+                        {DateHelper.date_to_str(user.last_login,
                           format: :hms_or_ymd,
                           tz: @tz
                         )}
                       </td>
 
                       <td>
-                        {date_to_str(user.inserted_at, format: :hms_or_ymd)}
+                        {DateHelper.date_to_str(user.inserted_at, format: :hms_or_ymd)}
                       </td>
 
                       <td>
@@ -267,12 +264,15 @@ is_moderator = allow?(@conn, "Moderator") %>
 
                       <%= if is_moderator and user.smurf_of_id == nil and @user.smurf_of_id == nil do %>
                         <td>
-                          {link(raw("<i class='far fa-fw fa-link'></i> Smurf link"),
-                            to:
-                              ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}",
-                            method: "put",
-                            class: "btn btn-sm btn-warning"
-                          )}
+                          <.link
+                            to={
+                              ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}"
+                            }
+                            method="put"
+                            class="btn btn-sm btn-warning"
+                          >
+                            <i class="far fa-fw fa-link"></i> Smurf link
+                          </.link>
                         </td>
                       <% else  # TODO if @user.smurf_of_id == nil, link to parent? %>
                         <td></td>
@@ -342,15 +342,17 @@ is_moderator = allow?(@conn, "Moderator") %>
                         <% end %>
                       </td>
                       <td>
-                        {date_to_str(key.last_updated, format: :hms_or_ymd)}
+                        {DateHelper.date_to_str(key.last_updated, format: :hms_or_ymd)}
                       </td>
                       <td :if={allow?(@conn, "Server")}>
-                        {link("Delete",
-                          to: ~p"/teiserver/admin/users/delete_smurf_key/#{key.id}",
-                          class: "btn btn-danger btn-sm",
-                          method: "delete",
-                          data: [confirm: "Are you sure?"]
-                        )}
+                        <.link
+                          to={~p"/teiserver/admin/users/delete_smurf_key/#{key.id}"}
+                          class="btn btn-danger btn-sm"
+                          method="delete"
+                          data={[confirm: "Are you sure?"]}
+                        >
+                          Delete
+                        </.link>
                       </td>
                     </tr>
                   <% end %>

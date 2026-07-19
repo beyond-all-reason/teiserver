@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Admin.GeneralView do
+defmodule TeiserverWeb.Admin.GeneralHTML do
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Account.BadgeTypeLib
   alias Teiserver.Account.CodeLib
@@ -9,10 +9,13 @@ defmodule TeiserverWeb.Admin.GeneralView do
   alias Teiserver.Communication.DiscordChannelLib
   alias Teiserver.Communication.TextCallbackLib
   alias Teiserver.Config.SiteConfigLib
+  alias Teiserver.Helper.StylingHelper
   alias Teiserver.OAuth.ApplicationLib
   alias Teiserver.Telemetry.TelemetryLib
 
-  use TeiserverWeb, :view
+  use TeiserverWeb, :html
+
+  embed_templates "*"
 
   @spec view_colour() :: atom
   def view_colour, do: :info

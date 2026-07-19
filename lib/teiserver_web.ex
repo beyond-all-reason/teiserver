@@ -28,7 +28,7 @@ defmodule TeiserverWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: TeiserverWeb
+      use Phoenix.Controller, formats: [:html, :json]
       import Phoenix.LiveView.Controller
       import Plug.Conn
       import TeiserverWeb.Gettext
@@ -101,6 +101,26 @@ defmodule TeiserverWeb do
       # Import convenience functions from controllers
       import Phoenix.Controller,
         only: [get_csrf_token: 0, view_module: 1, view_template: 1]
+
+      alias Teiserver.Helper.StylingHelper
+      import Teiserver.Helper.StylingHelper, only: [colours: 1, colours: 2]
+
+      alias Teiserver.Helper.ColourHelper
+      import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
+      import Teiserver.Helpers.InputHelper
+      import Teiserver.Helpers.ComponentHelper
+      alias Teiserver.Helper.DateHelper
+
+      import Teiserver.Config, only: [get_user_config_cache: 2, get_site_config_cache: 1]
+
+      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
+
+      import Teiserver.Helper.NumberHelper,
+        only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
+
+      import TeiserverWeb.CoreComponents
+      import TeiserverWeb.NavComponents
+      import TeiserverWeb.PaginationComponents
 
       # Include general helpers for rendering HTML
       unquote(html_helpers())
@@ -273,6 +293,7 @@ defmodule TeiserverWeb do
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
+      alias TeiserverWeb.Layouts
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())

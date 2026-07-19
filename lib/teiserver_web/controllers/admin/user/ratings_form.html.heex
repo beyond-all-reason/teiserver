@@ -15,9 +15,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Admin.UserView,
-          "section_menu.html",
+        {UserHTML.section_menu(
           Map.merge(assigns, %{
             active: "ratings_form"
           })

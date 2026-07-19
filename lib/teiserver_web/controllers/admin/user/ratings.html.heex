@@ -4,12 +4,8 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Admin.UserView,
-          "section_menu.html",
+        {UserHTML.section_menu(
           Map.merge(assigns, %{
-            quick_search: "",
-            show_search: false,
             active: "ratings"
           })
         )}
@@ -168,7 +164,7 @@
                   <td class={text_class}>
                     <i class={"fa-fw fa-solid fa-#{icon}"}></i>
                   </td>
-                  <td>{date_to_str(log.inserted_at, format: :hms_or_dmy)}</td>
+                  <td>{DateHelper.date_to_str(log.inserted_at, format: :hms_or_dmy)}</td>
                   <%= if log.match do %>
                     <td>
                       <a href={~p"/battle/#{log.match.id}"} class="btn btn-secondary btn-sm">
