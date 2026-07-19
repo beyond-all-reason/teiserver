@@ -14,18 +14,19 @@ defmodule Teiserver.Party do
   alias Teiserver.Party.Registry
   alias Teiserver.Party.Server
   alias Teiserver.Party.Supervisor
+  alias Teiserver.Party.Types, as: PT
   alias Teiserver.Tachyon.System
 
-  @type id :: Server.id()
-  @type state :: Server.state()
+  @type id :: PT.Data.id()
 
-  @spec create_party(User.id(), pid() | nil) :: {:ok, state(), pid()} | {:error, reason :: term()}
+  @spec create_party(User.id(), pid() | nil) ::
+          {:ok, PT.Overview.t()} | {:error, reason :: term()}
   def create_party(user_id, pid \\ self()) do
     party_id = Server.gen_party_id()
 
     case Supervisor.start_party(party_id, user_id, pid) do
-      {:ok, server_pid} -> {:ok, Server.get_state(party_id), server_pid}
-      {:ok, server_pid, _info} -> {:ok, Server.get_state(party_id), server_pid}
+      {:ok, _server_pid} -> {:ok, Server.get_overview(party_id)}
+      {:ok, _server_pid, _info} -> {:ok, Server.get_overview(party_id)}
       :ignore -> {:error, :ignore}
       {:error, reason} -> {:error, reason}
     end
@@ -40,11 +41,11 @@ defmodule Teiserver.Party do
   end
 
   @spec rejoin(id(), User.id()) ::
-          {:ok, state()} | {:error, :invalid_party | :not_a_member}
+          {:ok, PT.Overview.t()} | {:error, :invalid_party | :not_a_member}
   def rejoin(party_id, user_id), do: rejoin(party_id, user_id, self())
 
   @spec rejoin(id(), User.id(), pid() | nil) ::
-          {:ok, state()} | {:error, :invalid_party | :not_a_member}
+          {:ok, PT.Overview.t()} | {:error, :invalid_party | :not_a_member}
   defdelegate rejoin(party_id, user_id, pid), to: Server
 
   @spec lookup(id()) :: pid() | nil
@@ -53,34 +54,36 @@ defmodule Teiserver.Party do
   @spec count() :: non_neg_integer()
   defdelegate count(), to: Registry
 
-  @spec get_state(id()) :: state() | nil
-  defdelegate get_state(party_id), to: Server
+  @spec get_overview(id()) :: PT.Overview.t() | nil
+  defdelegate get_overview(party_id), to: Server
 
   @spec leave_party(id(), User.id()) :: :ok | {:error, :invalid_party | :not_a_member}
   defdelegate leave_party(party_id, user_id), to: Server
 
   @spec create_invite(id(), User.id()) ::
-          {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
+          {:ok, PT.Overview.t()}
+          | {:error, :invalid_party | :already_invited | :party_at_capacity}
   def create_invite(party_id, user_id), do: create_invite(party_id, user_id, self())
 
   @spec create_invite(id(), User.id(), pid()) ::
-          {:ok, state()} | {:error, :invalid_party | :already_invited | :party_at_capacity}
+          {:ok, PT.Overview.t()}
+          | {:error, :invalid_party | :already_invited | :party_at_capacity}
   defdelegate create_invite(party_id, user_id, pid), to: Server
 
   @spec accept_invite(id(), User.id()) ::
-          {:ok, state()} | {:error, :invalid_party | :not_invited}
+          {:ok, PT.Overview.t()} | {:error, :invalid_party | :not_invited}
   defdelegate accept_invite(party_id, user_id), to: Server
 
   @spec decline_invite(id(), User.id()) ::
-          {:ok, state()} | {:error, :invalid_party | :not_invited}
+          {:ok, PT.Overview.t()} | {:error, :invalid_party | :not_invited}
   defdelegate decline_invite(party_id, user_id), to: Server
 
   @spec cancel_invite(id(), User.id()) ::
-          {:ok, state()} | {:error, :invalid_party | :not_in_party | :not_invited}
+          {:ok, PT.Overview.t()} | {:error, :invalid_party | :not_in_party | :not_invited}
   defdelegate cancel_invite(party_id, user_id), to: Server
 
   @spec kick_user(id(), user_kicking :: User.id(), kicked_user :: User.id()) ::
-          {:ok, state()} | {:error, :invalid_party | :invalid_target | :not_a_member}
+          {:ok, PT.Overview.t()} | {:error, :invalid_party | :invalid_target | :not_a_member}
   defdelegate kick_user(party_id, actor_id, target_id), to: Server
 
   @spec join_queues(id(), [Matchmaking.queue_id()]) :: :ok | {:error, reason :: term()}
