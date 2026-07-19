@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
-    page = params["page"] - 1
+    page = params["page"]
     limit = params["limit"]
 
     search_args = extract_search_params(params)

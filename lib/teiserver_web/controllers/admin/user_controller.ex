@@ -46,7 +46,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
-    page = params["page"] - 1
+    page = params["page"]
     limit = params["limit"]
 
     search_term = get_search_term(params)
@@ -100,7 +100,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def search(conn, params) do
-    page = params["page"] - 1
+    page = params["page"]
     limit = params["limit"]
 
     id_list =
@@ -439,7 +439,7 @@ defmodule TeiserverWeb.Admin.UserController do
         filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter]
         season = MatchRatingLib.active_season()
 
-        page = params["page"] - 1
+        page = params["page"]
 
         limit = params["limit"] - 1
 
