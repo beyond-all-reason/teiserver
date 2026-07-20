@@ -578,7 +578,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
          author: author,
          content: content,
          channel_id: channel_id,
-         mentions: mentions
+         mentions: mentions,
+         member: %{nick: nick}
        }) do
     # Mentions come through encoded in a way we don't want to preserve, this substitutes them
     new_content =
@@ -606,11 +607,13 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     #     end
     # end
 
+    name = nick || author.global_name
+
     message =
       if from_id == bridge_user_id do
         new_content
         |> Enum.map(fn row ->
-          "#{author.username}: #{row}"
+          "#{name}: #{row}"
         end)
       else
         new_content
