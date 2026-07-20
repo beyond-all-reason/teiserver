@@ -126,21 +126,15 @@ defmodule Teiserver.Microblog.PostLib do
   end
 
   defp broadcast_create_post({:ok, %Post{} = post}) do
-    spawn(fn ->
-      # We sleep this because sometimes the message is seen fast enough the database doesn't
-      # show as having the new data (row lock maybe?)
-      :timer.sleep(1000)
-
-      PubSub.broadcast(
-        TsPubSub,
-        "microblog_posts",
-        %{
-          channel: "microblog_posts",
-          event: :post_created,
-          post: post
-        }
-      )
-    end)
+    PubSub.broadcast(
+      TsPubSub,
+      "microblog_posts",
+      %{
+        channel: "microblog_posts",
+        event: :post_created,
+        post: post
+      }
+    )
 
     {:ok, post}
   end
