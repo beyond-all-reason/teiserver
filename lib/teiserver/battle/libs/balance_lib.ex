@@ -703,7 +703,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   Expects a map of %{team_id => rating_value}
 
-  Returns the deviation in percentage points between the two teams
+  Returns the deviation in percentage points between the best and worst teams
   """
   @spec get_deviation(map()) :: non_neg_integer()
   def get_deviation(team_ratings) do
@@ -724,7 +724,7 @@ defmodule Teiserver.Battle.BalanceLib do
           |> Enum.map(fn {_team, s} -> s end)
 
         [max_score | remaining] = raw_scores
-        [min_score | _rest] = remaining
+        min_score = List.last(remaining)
 
         # Max score skill needs always be at least one for this to not bork
         max_score = max(max_score, 1)
