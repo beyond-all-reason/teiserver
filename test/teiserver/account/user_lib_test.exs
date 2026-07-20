@@ -112,6 +112,57 @@ defmodule Teiserver.Account.UserLibTest do
     end
   end
 
+  describe "try parsing different user ids" do
+    test "try a regular number" do
+      assert UserLib.parse_user_id(123) == {:ok, 123}
+    end
+
+    test "try a string" do
+      assert UserLib.parse_user_id("123") == {:ok, 123}
+    end
+
+    test "try a string with some whitespace" do
+      assert UserLib.parse_user_id(" 123 ") == {:ok, 123}
+    end
+
+    test "try the largest accepted number" do
+      num = Integer.pow(2, 63) - 1
+      assert UserLib.parse_user_id(num) == {:ok, num}
+    end
+
+    test "try the smallest accepted number" do
+      num = -Integer.pow(2, 63)
+      assert UserLib.parse_user_id(num) == {:ok, num}
+    end
+
+    test "try a number that's too big" do
+      num = Integer.pow(2, 63)
+      assert UserLib.parse_user_id(num) == {:error, :out_of_range}
+    end
+
+    test "try a number that's too small" do
+      num = -Integer.pow(2, 63) - 1
+      assert UserLib.parse_user_id(num) == {:error, :out_of_range}
+    end
+
+    test "try a number that's too long" do
+      num = String.duplicate("2", 1000)
+      assert UserLib.parse_user_id(num) == {:error, :out_of_range}
+    end
+
+    test "letters aren't allowed" do
+      assert UserLib.parse_user_id("aaaaaaaaaa") == {:error, :not_an_integer}
+    end
+
+    test "garbage isn't allowed" do
+      assert UserLib.parse_user_id("123abc") == {:error, :not_an_integer}
+    end
+
+    test "empty string isn't allowed" do
+      assert UserLib.parse_user_id("") == {:error, :not_an_integer}
+    end
+  end
+
   describe "list_users_by_data" do
     setup [:user_stat_data_fixtures]
 

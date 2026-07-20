@@ -23,6 +23,9 @@ defmodule Teiserver.Account.UserLib do
   import Teiserver.Helper.NumberHelper, only: [int_parse!: 1]
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
 
+  @bigint_max Integer.pow(2, 63) - 1
+  @bigint_min -Integer.pow(2, 63)
+
   # Functions
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-user"
@@ -106,6 +109,22 @@ defmodule Teiserver.Account.UserLib do
     args
     |> UserQueries.count_users()
     |> Repo.aggregate(:count, :id)
+  end
+
+  @spec parse_user_id(User.id() | String.t()) :: {:ok, User.id()} | {:error, atom}
+  def parse_user_id(user_id) when is_integer(user_id) do
+    if user_id >= @bigint_min and user_id <= @bigint_max do
+      {:ok, user_id}
+    else
+      {:error, :out_of_range}
+    end
+  end
+
+  def parse_user_id(user_id) when is_binary(user_id) do
+    case user_id |> String.trim() |> Integer.parse() do
+      {id, ""} -> parse_user_id(id)
+      _reason -> {:error, :not_an_integer}
+    end
   end
 
   @doc """
