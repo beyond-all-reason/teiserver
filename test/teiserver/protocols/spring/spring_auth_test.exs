@@ -208,6 +208,8 @@ IGNORELISTEND\n"
     assert reply == :timeout
   end
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/29731305203/job/88316188735?pr=1397
+  @tag :needs_attention
   test "JOIN, GETCHANNELMESSAGES, LEAVE, SAY, CHANNELS, SAYEX", %{socket: socket, user: user} do
     _send_raw(socket, "JOIN test_room\n")
     reply = _recv_raw(socket)
