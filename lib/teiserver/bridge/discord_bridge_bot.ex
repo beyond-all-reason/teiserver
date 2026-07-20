@@ -603,12 +603,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     #     end
     # end
 
-    name =
-      if nick == nil do
-        author.global_name
-      else
-        nick
-      end
+    name = nick || author.global_name
 
     message =
       if from_id == bridge_user_id do
