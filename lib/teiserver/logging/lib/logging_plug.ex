@@ -22,9 +22,7 @@ defmodule Teiserver.Logging.LoggingPlug do
     # conn = Map.put(conn, :peer, new_peer)
 
     Conn.register_before_send(conn, fn conn ->
-      if conn.status == 500 do
-        # log_error(conn)
-      else
+      if conn.status >= 200 and conn.status <= 399 do
         log_view(conn, start_tick, ip |> Tuple.to_list() |> Enum.join("."))
       end
 
@@ -69,10 +67,12 @@ defmodule Teiserver.Logging.LoggingPlug do
     # Log as micro seconds
     load_time = :os.system_time(:micro_seconds) - start_tick
 
+    joined_path = Enum.join(path, "/")
+
     page_log =
       PageViewLog.changeset(%PageViewLog{}, %{
         section: section,
-        path: Enum.join(path, "/"),
+        path: joined_path,
         method: conn.method,
         ip: ip,
         load_time: load_time,
