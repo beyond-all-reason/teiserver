@@ -140,7 +140,7 @@ defmodule TeiserverWeb.PaginationComponents do
                         class="dropdown-item"
                         href={
                           build_pagination_url(@base_url, @current_params, @include_params, %{
-                            "page" => "1",
+                            "page" => "0",
                             "limit" => "10"
                           })
                         }
@@ -153,7 +153,7 @@ defmodule TeiserverWeb.PaginationComponents do
                         class="dropdown-item"
                         href={
                           build_pagination_url(@base_url, @current_params, @include_params, %{
-                            "page" => "1",
+                            "page" => "0",
                             "limit" => "25"
                           })
                         }
@@ -166,7 +166,7 @@ defmodule TeiserverWeb.PaginationComponents do
                         class="dropdown-item"
                         href={
                           build_pagination_url(@base_url, @current_params, @include_params, %{
-                            "page" => "1",
+                            "page" => "0",
                             "limit" => "50"
                           })
                         }
@@ -179,7 +179,7 @@ defmodule TeiserverWeb.PaginationComponents do
                         class="dropdown-item"
                         href={
                           build_pagination_url(@base_url, @current_params, @include_params, %{
-                            "page" => "1",
+                            "page" => "0",
                             "limit" => "100"
                           })
                         }
@@ -192,7 +192,7 @@ defmodule TeiserverWeb.PaginationComponents do
                         class="dropdown-item"
                         href={
                           build_pagination_url(@base_url, @current_params, @include_params, %{
-                            "page" => "1",
+                            "page" => "0",
                             "limit" => "500"
                           })
                         }
@@ -243,7 +243,7 @@ defmodule TeiserverWeb.PaginationComponents do
                           @base_url,
                           @current_params,
                           @include_params,
-                          %{"page" => @page + 1},
+                          %{"page" => @page - 1},
                           []
                         )
                       }
@@ -265,10 +265,11 @@ defmodule TeiserverWeb.PaginationComponents do
                       <span class="page-link">…</span>
                     </li>
                   <% else %>
+                    <% page_number = page_num + 1 %>
                     <li class={"page-item #{if page_num == @page, do: "active"}"}>
                       <%= if page_num == @page do %>
                         <span class="page-link">
-                          {page_num + 1}
+                          {page_number}
                           <span class="visually-hidden">(current)</span>
                         </span>
                       <% else %>
@@ -278,13 +279,13 @@ defmodule TeiserverWeb.PaginationComponents do
                               @base_url,
                               @current_params,
                               @include_params,
-                              %{"page" => page_num + 1},
+                              %{"page" => page_num},
                               []
                             )
                           }
                           class="page-link"
                         >
-                          {page_num + 1}
+                          {page_number}
                         </.link>
                       <% end %>
                     </li>
@@ -300,7 +301,7 @@ defmodule TeiserverWeb.PaginationComponents do
                           @base_url,
                           @current_params,
                           @include_params,
-                          %{"page" => @page + 2},
+                          %{"page" => @page + 1},
                           []
                         )
                       }
@@ -350,7 +351,7 @@ defmodule TeiserverWeb.PaginationComponents do
       # Build URL for LiveView push_patch (preserving all search parameters)
       build_pagination_url("/moderation/overwatch", filters,
         ["actioned-filter", "closed-filter", "kind-filter", "timeframe-filter", "target_id", "limit"],
-        %{"page" => "1"})
+        %{"page" => "0"})
 
   ## Behavior
 

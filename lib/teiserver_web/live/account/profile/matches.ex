@@ -41,7 +41,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Matches do
 
     socket =
       socket
-      |> assign(:page, parsed.page - 1)
+      |> assign(:page, parsed.page)
       |> assign(:limit, parsed.limit)
       |> check_privacy_and_load_matches()
 
