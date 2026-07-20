@@ -194,7 +194,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   def enact_ban([ban | _rest], userid) do
     user = Account.get_user!(userid)
-    {:ok, _update_result} = Account.server_update_user(user, %{"smurf_of_id" => ban.source_id})
+    {:ok, _update_result} = Account.server_update_user(user, %{smurf_of_id: ban.source_id})
 
     add_audit_log(
       Coordinator.get_coordinator_userid(),

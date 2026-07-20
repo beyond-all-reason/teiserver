@@ -213,7 +213,7 @@ defmodule Teiserver.Account.UserLibTest do
       # If A is a smurf of B, B cannot be made a smurf of A
       {:ok, %User{} = moderator} = Auth.add_roles(moderator.id, ["Moderator"])
 
-      {:ok, origin} = Account.script_update_user(origin, %{smurf_of_id: smurf.id})
+      {:ok, origin} = Account.update_user_smurf(origin, %{smurf_of_id: smurf.id})
 
       result = UserLib.mark_user_as_smurf_of(moderator, %{smurf: smurf, origin: origin})
       assert result == {:error, "Invalid combination of users selected"}

@@ -126,6 +126,10 @@ defmodule Teiserver.Account do
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate password_reset_update_user(user, attrs), to: UserLib
 
+  @spec update_user_smurf(User.t(), map) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  defdelegate update_user_smurf(user, attrs), to: UserLib
+
   @spec delete_user(User.t()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate delete_user(user), to: UserLib
 

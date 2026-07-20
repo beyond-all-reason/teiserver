@@ -307,6 +307,15 @@ defmodule Teiserver.Account.UserLib do
     |> UserCacheLib.decache_user_on_ok()
   end
 
+  def update_user_smurf(%User{} = user, attrs) do
+    user
+    |> User.smurf_changeset(attrs)
+    |> Repo.update()
+    |> broadcast_update_user()
+    |> cache_put_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok()
+  end
+
   @doc """
   Deletes a user.
 
@@ -557,7 +566,7 @@ defmodule Teiserver.Account.UserLib do
     result =
       Repo.transact(fn ->
         with {:ok, _updated_user} <-
-               script_update_user(smurf, %{"smurf_of_id" => actual_origin_id}),
+               update_user_smurf(smurf, %{smurf_of_id: actual_origin_id}),
              {:ok, %User{}} <- Auth.add_roles(origin.id, ["Smurfer"]),
              :ok <- Account.deprecated_recache_user(smurf.id) do
           add_audit_log(
