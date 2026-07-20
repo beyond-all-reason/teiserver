@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
     test "viewing the blog", %{conn: conn, post1: post1} do
       {:ok, index_live, html} = live(conn, ~p"/microblog")
 
-      assert html =~ "RSS"
+      assert main_blog_page?(html)
       assert html =~ "Post 1 title"
       assert html =~ "Post 2 title"
       assert html =~ "Post 3 title"
@@ -76,7 +76,7 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
       assert_redirect(index_live, ~p"/microblog/show/#{post1.id}")
 
       {:ok, _show_live, html} = live(conn, ~p"/microblog/show/#{post1.id}")
-      refute html =~ "RSS"
+      refute main_blog_page?(html)
       assert html =~ "Post 1 title"
       refute html =~ "Post 2 title"
       refute html =~ "Post 3 title"
@@ -97,7 +97,7 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
     test "User without preferences", %{conn: conn, user: _user, post1: post1} do
       {:ok, index_live, html} = live(conn, ~p"/microblog")
 
-      assert html =~ "RSS"
+      assert main_blog_page?(html)
       assert html =~ "Post 1 title"
       assert html =~ "Post 2 title"
       assert html =~ "Post 3 title"
@@ -115,7 +115,7 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
       assert_redirect(index_live, ~p"/microblog/show/#{post1.id}")
 
       {:ok, _show_live, html} = live(conn, ~p"/microblog/show/#{post1.id}")
-      refute html =~ "RSS"
+      refute main_blog_page?(html)
       assert html =~ "Post 1 title"
       refute html =~ "Post 2 title"
       refute html =~ "Post 3 title"
@@ -130,7 +130,6 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
     end
 
     # https://github.com/beyond-all-reason/teiserver/actions/runs/28818003010/job/85462265013?pr=1338
-    @tag :needs_attention
     test "Including preferences", %{conn: conn, user: user, post3: post3, tag1: tag1} do
       user_preference_fixture(%{
         user_id: user.id,
@@ -143,7 +142,7 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
 
       {:ok, index_live, html} = live(conn, ~p"/microblog")
 
-      assert html =~ "RSS"
+      assert main_blog_page?(html)
       refute html =~ "Post 1 title"
       refute html =~ "Post 2 title"
       assert html =~ "Post 3 title"
@@ -161,7 +160,7 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
       assert_redirect(index_live, ~p"/microblog/show/#{post3.id}")
 
       {:ok, _show_live, html} = live(conn, ~p"/microblog/show/#{post3.id}")
-      refute html =~ "RSS"
+      refute main_blog_page?(html)
       refute html =~ "Post 1 title"
       refute html =~ "Post 2 title"
       assert html =~ "Post 3 title"
@@ -174,5 +173,17 @@ defmodule TeiserverWeb.Microblog.Blog.IndexLiveTest do
       refute html =~ "Post 2 fold line"
       assert html =~ "Post 3 fold line"
     end
+  end
+
+  defp main_blog_page?(full_html) do
+    {:ok, parsed} = Floki.parse_document(full_html)
+    # This is **janky as hell** ideally the page title wouldn't be in a random
+    # <h3> element, but in a semantic element. I cba to also fix the css now
+    # so this will do
+    txt =
+      Floki.find(parsed, "#main-blog-div h3")
+      |> Floki.text()
+
+    txt == "Blog"
   end
 end
