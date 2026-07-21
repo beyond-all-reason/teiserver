@@ -8,6 +8,7 @@ defmodule Teiserver.Account.AuthLib do
   alias Plug.Conn
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.Role
   alias Teiserver.Account.RoleLib
 
   @spec icon :: String.t()
@@ -43,13 +44,16 @@ defmodule Teiserver.Account.AuthLib do
     permission_list ++ sections ++ modules
   end
 
+  @doc """
+  Given a list of roles, extract a combined list of all the permissions granted by these roles.
+  """
   @spec get_permissions_from_roles([String.t()]) :: [String.t()]
   def get_permissions_from_roles(roles) do
     roles
     |> Enum.map(fn role_name ->
       case RoleLib.role_data(role_name) do
         nil -> [role_name]
-        %{contains: permissions} -> [role_name | permissions]
+        %Role{contains: permissions} -> [role_name | permissions]
       end
     end)
     |> List.flatten()

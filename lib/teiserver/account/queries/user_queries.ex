@@ -255,51 +255,6 @@ defmodule Teiserver.Account.UserQueries do
     query
   end
 
-  def _where(query, :tester, "Trusted") do
-    from users in query,
-      where: "Trusted" in users.roles
-  end
-
-  def _where(query, :tester, "Tester") do
-    from users in query,
-      where: "Tester" in users.roles
-  end
-
-  def _where(query, :tester, "Normal") do
-    from users in query,
-      where: "Tester" not in users.roles
-  end
-
-  def _where(query, :streamer, "Streamer") do
-    from users in query,
-      where: "Streamer" in users.roles
-  end
-
-  def _where(query, :streamer, "Normal") do
-    from users in query,
-      where: "Streamer" not in users.roles
-  end
-
-  def _where(query, :donor, "Donor") do
-    from users in query,
-      where: "Donor" in users.roles
-  end
-
-  def _where(query, :donor, "Normal") do
-    from users in query,
-      where: "Donor" not in users.roles
-  end
-
-  def _where(query, :gdt_member, "GDT") do
-    from users in query,
-      where: "GDT" in users.roles
-  end
-
-  def _where(query, :gdt_member, "Normal") do
-    from users in query,
-      where: "GDT" not in users.roles
-  end
-
   def _where(query, :contributor, "Contributor") do
     from users in query,
       where: "Contributor" in users.roles

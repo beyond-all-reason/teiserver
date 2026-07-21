@@ -1022,9 +1022,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         "contributor" ->
           "contributor"
 
-        "dev" ->
-          "dev"
-
         "admin" ->
           "admin"
 
@@ -1038,7 +1035,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,
-            "Shuffle types are party, friends, contributor, dev, admin, all and default; using 'default'",
+            "Shuffle types are party, friends, contributor, admin, all and default; using 'default'",
             state.lobby_id
           )
 
@@ -1102,17 +1099,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           |> Enum.group_by(
             fn %{userid: userid} ->
               Auth.contributor?(userid)
-            end,
-            fn %{userid: userid} ->
-              userid
-            end
-          )
-
-        "dev" ->
-          all_possible_clients
-          |> Enum.group_by(
-            fn %{userid: userid} ->
-              Auth.has_any_role?(userid, "Core")
             end,
             fn %{userid: userid} ->
               userid

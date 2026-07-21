@@ -335,7 +335,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   @spec staff_permissions() :: [String.t()]
   def staff_permissions do
-    ["Core", "Contributor"] ++ player_permissions()
+    ["Contributor"] ++ player_permissions()
   end
 
   @spec player_permissions() :: [String.t()]

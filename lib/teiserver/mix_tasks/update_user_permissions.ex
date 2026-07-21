@@ -6,6 +6,7 @@ defmodule Mix.Tasks.Teiserver.UpdateUserPermissions do
 
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
+  alias Teiserver.Account.Role
   alias Teiserver.Account.RoleLib
   alias Teiserver.Repo
 
@@ -22,7 +23,7 @@ defmodule Mix.Tasks.Teiserver.UpdateUserPermissions do
       permissions =
         roles
         |> Enum.map(fn role_name ->
-          role_def = RoleLib.role_data(role_name)
+          %Role{} = role_def = RoleLib.role_data(role_name)
           [role_name | role_def.contains]
         end)
         |> List.flatten()

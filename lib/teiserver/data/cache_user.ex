@@ -1170,7 +1170,7 @@ defmodule Teiserver.CacheUser do
       Auth.has_any_role?(userid, ["Tournament winner"]) ->
         7
 
-      Auth.has_any_role?(userid, ~w(Core Contributor)) and
+      Auth.contributor?(userid) and
           !Account.hide_contributor_rank?(userid) ->
         6
 

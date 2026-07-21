@@ -4,6 +4,7 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Role
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.SmurfMergeTask
   alias Teiserver.Account.Tasks.GdprForgetTask
@@ -259,7 +260,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:community_roles, RoleLib.community_roles())
         |> assign(:privileged_roles, RoleLib.privileged_roles())
         |> assign(:property_roles, RoleLib.property_roles())
-        |> assign(:role_styling_map, RoleLib.role_data())
+        |> assign(:role_data, RoleLib.role_data())
         |> assign(:has_active_mfa?, has_active_mfa?(user.id))
         |> add_breadcrumb(name: "Edit: #{user.name}", url: conn.request_path)
         |> render("edit.html")
@@ -286,6 +287,9 @@ defmodule TeiserverWeb.Admin.UserController do
 
         Enum.member?(current_user.roles, "Admin") ->
           RoleLib.allowed_role_management("Admin")
+
+        Enum.member?(current_user.roles, "Senior moderator") ->
+          RoleLib.allowed_role_management("Senior moderator")
 
         Enum.member?(current_user.roles, "Moderator") ->
           RoleLib.allowed_role_management("Moderator")
@@ -318,7 +322,7 @@ defmodule TeiserverWeb.Admin.UserController do
     permissions =
       new_roles
       |> Enum.map(fn role_name ->
-        role_def = RoleLib.role_data(role_name)
+        %Role{} = role_def = RoleLib.role_data(role_name)
         [role_name | role_def.contains]
       end)
       |> List.flatten()
@@ -373,7 +377,7 @@ defmodule TeiserverWeb.Admin.UserController do
             |> assign(:community_roles, RoleLib.community_roles())
             |> assign(:privileged_roles, RoleLib.privileged_roles())
             |> assign(:property_roles, RoleLib.property_roles())
-            |> assign(:role_styling_map, RoleLib.role_data())
+            |> assign(:role_data, RoleLib.role_data())
             |> assign(:has_active_mfa?, has_active_mfa?(user.id))
             |> render("edit.html", user: user, changeset: changeset)
         end
@@ -1041,7 +1045,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case UserLib.has_access(user, conn) do
       {true, _role} ->
-        admin_action = AuthLib.allow?(conn, "admin.dev")
+        admin_action = AuthLib.allow?(conn, "Senior moderator")
 
         case CacheUser.rename_user(user.id, new_name, admin_action) do
           :success ->
