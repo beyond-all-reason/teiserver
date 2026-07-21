@@ -149,13 +149,10 @@ if use_tls? do
       root: ".",
       cache_static_manifest: "priv/static/cache_manifest.json",
       server: true,
-      https:
-        Keyword.merge(
-          cert_opts,
-          # dhfile is not supported for tls 1.3
-          # https://www.erlang.org/doc/man/ssl.html#type-dh_file
-          dhfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_DH_FILE_PATH", "/etc/ssl/dhparam.pem")
-        )
+      https: [
+        keyfile: cert_opts[:keyfile],
+        certfile: cert_opts[:certfile]
+      ]
   end
 else
   config :teiserver, Teiserver.SpringTcpServer,
