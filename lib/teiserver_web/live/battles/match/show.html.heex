@@ -33,7 +33,7 @@
       </h3>
       <br />
 
-      <%= if @rating_status != nil and allow?(@current_user, "Tester") do %>
+      <%= if @rating_status != nil and allow?(@current_user, "Contributor") do %>
         <% {alert_type, status} = @rating_status %>
         <div class={"alert alert-#{alert_type} alert-dismissible fade show"} role="alert">
           {status}
@@ -61,7 +61,7 @@
           </.tab_nav>
         <% end %>
 
-        <%= if @rating_logs != %{} and allow_any?(@current_user, ["Overwatch", "Tester"]) do %>
+        <%= if @rating_logs != %{} and allow_any?(@current_user, ["Overwatch", "Contributor"]) do %>
           <.tab_nav url={~p"/battle/#{@match.id}/balance"} selected={@tab == :balance}>
             <Fontawesome.icon icon="fa-solid fa-scale-balanced" style="solid" /> Balance
           </.tab_nav>
@@ -323,7 +323,7 @@
         </div>
       <% end %>
 
-      <%= if allow_any?(@current_user, ["Overwatch", "Tester"]) do %>
+      <%= if allow_any?(@current_user, ["Overwatch", "Contributor"]) do %>
         <div :if={@tab == :balance} class="p-4">
           <form method="post" class="">
             <.input

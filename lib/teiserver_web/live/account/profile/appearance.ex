@@ -2,10 +2,18 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
   @moduledoc false
 
   alias Teiserver.Account
+  alias Teiserver.Account.Role
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.UserLib
   alias TeiserverWeb.Account.ProfileLive.Overview
   use TeiserverWeb, :live_view
+
+  @default_role %Role{
+    name: "Default",
+    colour: "#666666",
+    icon: "fa-solid fa-user",
+    contains: []
+  }
 
   @impl Phoenix.LiveView
   def mount(%{"userid" => user_id}, _session, socket) do
@@ -50,10 +58,10 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
         if RoleLib.role_data(role_name) do
           RoleLib.role_data(role_name)
         else
-          RoleLib.role_data("Default")
+          @default_role
         end
       else
-        RoleLib.role_data("Default")
+        @default_role
       end
 
     user = Account.get_user!(assigns.current_user.id)
@@ -84,7 +92,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Appearance do
       end)
 
     options =
-      (RoleLib.global_roles() ++ filtered_roles)
+      filtered_roles
       |> Enum.map(fn r ->
         role_data[r]
       end)

@@ -51,7 +51,7 @@ defmodule Teiserver.Account.PermissionCache do
     add_permission_set(
       "teiserver",
       "player",
-      ~w(account tester contributor dev streamer donor verified bot moderator)
+      ~w(account contributor dev verified bot moderator)
     )
 
     :ok = Startup.startup()
