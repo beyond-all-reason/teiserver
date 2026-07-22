@@ -70,32 +70,29 @@
   <div class="col-xl-6 col-lg-12">
     <div class="card">
       <div class="card-body">
-        {central_component("section_menu_button",
-          name: "list",
-          label: "List",
-          active: "list",
-          icon: StylingHelper.icon(:list, "thin"),
-          bsname: :primary,
-          url: "#"
-        )}
+        <.section_menu_button
+          icon={StylingHelper.icon(:list, "thin")}
+          bsname={:primary}
+          url="#"
+        >
+          List
+        </.section_menu_button>
 
-        {central_component("section_menu_button",
-          name: "show",
-          label: "Show",
-          active: "",
-          icon: StylingHelper.icon(:show, "thin"),
-          bsname: :primary,
-          url: "#"
-        )}
+        <.section_menu_button
+          icon={StylingHelper.icon(:show, "thin")}
+          bsname={:primary}
+          url="#"
+        >
+          Show
+        </.section_menu_button>
 
-        {central_component("section_menu_button",
-          name: "edit",
-          label: "Edit",
-          active: "",
-          icon: StylingHelper.icon(:edit, "thin"),
-          bsname: :primary,
-          url: "#"
-        )}
+        <.section_menu_button
+          icon={StylingHelper.icon(:edit, "thin")}
+          bsname={:primary}
+          url="#"
+        >
+          Edit
+        </.section_menu_button>
         <br /><br />
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">

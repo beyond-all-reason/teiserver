@@ -1,21 +1,21 @@
 <% bsname = view_colour() %>
 
-{central_component("section_menu_button",
-  name: "index",
-  label: "List",
-  active: @active,
-  icon: "fa-solid fa-bars",
-  bsname: bsname,
-  url: ~p"/admin/text_callbacks"
-)}
+<.section_menu_button
+  active={@active == "index"}
+  icon="fa-solid fa-bars"
+  bsname={bsname}
+  url={~p"/admin/text_callbacks"}
+>
+  List
+</.section_menu_button>
 
 <%= if allow?(@conn, "Admin") do %>
-  {central_component("section_menu_button",
-    name: "new",
-    label: "New",
-    active: @active,
-    icon: "fa-solid fa-plus",
-    bsname: bsname,
-    url: ~p"/admin/text_callbacks/new"
-  )}
+  <.section_menu_button
+    active={@active == "new"}
+    icon="fa-solid fa-plus"
+    bsname={bsname}
+    url={~p"/admin/text_callbacks/new"}
+  >
+    New
+  </.section_menu_button>
 <% end %>

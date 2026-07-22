@@ -1,22 +1,22 @@
 <% bsname = view_colour() %>
 
-{central_component("section_menu_button",
-  name: "index",
-  label: "List",
-  active: @active,
-  icon: "fa-solid fa-bars",
-  bsname: bsname,
-  url: ~p"/teiserver/admin/badge_types"
-)}
+<.section_menu_button
+  active={@active == "index"}
+  icon="fa-solid fa-bars"
+  bsname={bsname}
+  url={~p"/teiserver/admin/badge_types"}
+>
+  List
+</.section_menu_button>
 
-{central_component("section_menu_button",
-  name: "new",
-  label: "New",
-  active: @active,
-  icon: "fa-solid fa-plus",
-  bsname: bsname,
-  url: ~p"/teiserver/admin/badge_types/new"
-)}
+<.section_menu_button
+  active={@active == "new"}
+  icon="fa-solid fa-plus"
+  bsname={bsname}
+  url={~p"/teiserver/admin/badge_types/new"}
+>
+  New
+</.section_menu_button>
 
 <form
   action={~p"/teiserver/admin/badge_types"}

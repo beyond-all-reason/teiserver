@@ -1,63 +1,64 @@
 <% bsname = view_colour() %>
 
-{central_component("section_menu_button",
-  name: "day_metrics",
-  label: "Daily metrics",
-  active: @active,
-  icon: "fa-solid fa-bars",
-  bsname: bsname,
-  url: ~p"/logging/match/day_metrics"
-)}
+<.section_menu_button
+  active={@active == "day_metrics"}
+  icon="fa-solid fa-bars"
+  bsname={bsname}
+  url={~p"/logging/match/day_metrics"}
+>
+  Daily metrics
+</.section_menu_button>
 
-{central_component("section_menu_button",
-  name: "today",
-  label: "Today",
-  active: @active,
-  icon: "fa-solid fa-waveform",
-  bsname: bsname,
-  url: ~p"/logging/match/day_metrics/today"
-)}
+<.section_menu_button
+  active={@active == "today"}
+  icon="fa-solid fa-waveform"
+  bsname={bsname}
+  url={~p"/logging/match/day_metrics/today"}
+>
+  Today
+</.section_menu_button>
 
-{central_component("section_menu_button",
-  name: "graph",
-  label: "Graph",
-  active: @active,
-  icon: "fa-solid fa-chart-line-up",
-  bsname: bsname,
-  url: ~p"/logging/match/day_metrics/graph"
-)}
+<.section_menu_button
+  active={@active == "graph"}
+  icon="fa-solid fa-chart-line-up"
+  bsname={bsname}
+  url={~p"/logging/match/day_metrics/graph"}
+>
+  Graph
+</.section_menu_button>
 
-{central_component("section_menu_button",
-  name: "download",
-  label: "Download",
-  active: @active,
-  icon: "fa-solid fa-download",
-  bsname: bsname,
-  url: ~p"/logging/match/day_metrics/export"
-)} &nbsp;&nbsp;&nbsp;&nbsp;
-{central_component("section_menu_button",
-  name: "month_metrics",
-  label: "Monthly metrics",
-  active: @active,
-  icon: "fa-solid fa-bars",
-  bsname: bsname,
-  url: ~p"/logging/match/month_metrics"
-)}
+<.section_menu_button
+  active={@active == "download"}
+  icon="fa-solid fa-download"
+  bsname={bsname}
+  url={~p"/logging/match/day_metrics/export"}
+>
+  Download
+</.section_menu_button>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<.section_menu_button
+  active={@active == "month_metrics"}
+  icon="fa-solid fa-bars"
+  bsname={bsname}
+  url={~p"/logging/match/month_metrics"}
+>
+  Monthly metrics
+</.section_menu_button>
 
-{central_component("section_menu_button",
-  name: "this_month",
-  label: "Month to date",
-  active: @active,
-  icon: "fa-solid fa-waveform",
-  bsname: bsname,
-  url: ~p"/logging/match/month_metrics/today"
-)}
+<.section_menu_button
+  active={@active == "this_month"}
+  icon="fa-solid fa-waveform"
+  bsname={bsname}
+  url={~p"/logging/match/month_metrics/today"}
+>
+  Month to date
+</.section_menu_button>
 
-{central_component("section_menu_button",
-  name: "month_graph",
-  label: "Graph",
-  active: @active,
-  icon: "fa-solid fa-chart-line-up",
-  bsname: bsname,
-  url: ~p"/logging/match/month_metrics/graph"
-)}
+<.section_menu_button
+  active={@active == "month_graph"}
+  icon="fa-solid fa-chart-line-up"
+  bsname={bsname}
+  url={~p"/logging/match/month_metrics/graph"}
+>
+  Graph
+</.section_menu_button>

@@ -22,14 +22,13 @@
     <br /><br />
 
     <%= for tf <- timeframes do %>
-      {central_component("section_menu_button",
-        name: "tf-#{tf}",
-        label: tf,
-        active: "tf-#{@timeframe}",
-        bsname: bsname,
-        icon: "",
-        url: "?tf=#{tf}"
-      )}
+      <.section_menu_button
+        active={@timeframe == tf}
+        bsname={bsname}
+        url={"?tf=#{tf}"}
+      >
+        {tf}
+      </.section_menu_button>
     <% end %>
   </div>
 

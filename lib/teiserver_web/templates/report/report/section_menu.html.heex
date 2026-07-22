@@ -1,221 +1,221 @@
 <% bsname = view_colour() %>
 
 <%= if allow?(@current_user, Teiserver.Account.ActiveReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "active",
-    label: "Active",
-    active: @active,
-    icon: Teiserver.Account.ActiveReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/active"
-  )}
+  <.section_menu_button
+    active={@active == "active"}
+    icon={Teiserver.Account.ActiveReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/active"}
+  >
+    Active
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.TimeSpentReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "time_spent",
-    label: "Time spent",
-    active: @active,
-    icon: Teiserver.Account.TimeSpentReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/time_spent"
-  )}
+  <.section_menu_button
+    active={@active == "time_spent"}
+    icon={Teiserver.Account.TimeSpentReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/time_spent"}
+  >
+    Time spent
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.TimeCompareReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "time_compare",
-    label: "Time compare",
-    active: @active,
-    icon: Teiserver.Account.TimeCompareReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/time_compare"
-  )}
+  <.section_menu_button
+    active={@active == "time_compare"}
+    icon={Teiserver.Account.TimeCompareReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/time_compare"}
+  >
+    Time compare
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.UserAgeReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "user_age",
-    label: "User age",
-    active: @active,
-    icon: Teiserver.Account.UserAgeReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/user_age"
-  )}
+  <.section_menu_button
+    active={@active == "user_age"}
+    icon={Teiserver.Account.UserAgeReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/user_age"}
+  >
+    User age
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.VerifiedReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "verified",
-    label: "Verified",
-    active: @active,
-    icon: Teiserver.Account.VerifiedReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/verified"
-  )}
+  <.section_menu_button
+    active={@active == "verified"}
+    icon={Teiserver.Account.VerifiedReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/verified"}
+  >
+    Verified
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.RetentionReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "retention",
-    label: "Retention",
-    active: @active,
-    icon: Teiserver.Account.RetentionReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/retention"
-  )}
+  <.section_menu_button
+    active={@active == "retention"}
+    icon={Teiserver.Account.RetentionReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/retention"}
+  >
+    Retention
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.PopulationReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "population",
-    label: "Population",
-    active: @active,
-    icon: Teiserver.Account.PopulationReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/population"
-  )}
+  <.section_menu_button
+    active={@active == "population"}
+    icon={Teiserver.Account.PopulationReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/population"}
+  >
+    Population
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.NewUserFunnelReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "new_user_funnel",
-    label: "User funnel",
-    active: @active,
-    icon: Teiserver.Account.NewUserFunnelReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/new_user_funnel"
-  )}
+  <.section_menu_button
+    active={@active == "new_user_funnel"}
+    icon={Teiserver.Account.NewUserFunnelReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/new_user_funnel"}
+  >
+    User funnel
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) and Application.get_env(:teiserver, Teiserver)[:enable_accolade_mode] == true do %>
-  {central_component("section_menu_button",
-    name: "accolades",
-    label: "Accolades",
-    active: @active,
-    icon: Teiserver.Account.AccoladeReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/accolades"
-  )}
+  <.section_menu_button
+    active={@active == "accolades"}
+    icon={Teiserver.Account.AccoladeReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/accolades"}
+  >
+    Accolades
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.RelationshipReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "relationships",
-    label: "Relationships",
-    active: @active,
-    icon: Teiserver.Account.RelationshipReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/relationships"
-  )}
+  <.section_menu_button
+    active={@active == "relationships"}
+    icon={Teiserver.Account.RelationshipReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/relationships"}
+  >
+    Relationships
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.LeaderboardReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "leaderboard",
-    label: "Leaderboard",
-    active: @active,
-    icon: Teiserver.Account.LeaderboardReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/leaderboard"
-  )}
+  <.section_menu_button
+    active={@active == "leaderboard"}
+    icon={Teiserver.Account.LeaderboardReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/leaderboard"}
+  >
+    Leaderboard
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.RecordsReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "records",
-    label: "Records",
-    active: @active,
-    icon: Teiserver.Account.RecordsReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/records"
-  )}
+  <.section_menu_button
+    active={@active == "records"}
+    icon={Teiserver.Account.RecordsReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/records"}
+  >
+    Records
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.ReviewReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "review",
-    label: "Review",
-    active: @active,
-    icon: Teiserver.Account.ReviewReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/review"
-  )}
+  <.section_menu_button
+    active={@active == "review"}
+    icon={Teiserver.Account.ReviewReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/review"}
+  >
+    Review
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.GrowthReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "growth",
-    label: "Growth",
-    active: @active,
-    icon: Teiserver.Account.GrowthReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/growth"
-  )}
+  <.section_menu_button
+    active={@active == "growth"}
+    icon={Teiserver.Account.GrowthReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/growth"}
+  >
+    Growth
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.WeekOnWeekReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "week_on_week",
-    label: "Week on Week",
-    active: @active,
-    icon: Teiserver.Account.WeekOnWeekReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/week_on_week"
-  )}
+  <.section_menu_button
+    active={@active == "week_on_week"}
+    icon={Teiserver.Account.WeekOnWeekReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/week_on_week"}
+  >
+    Week on Week
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.NewSmurfReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "new_smurf",
-    label: "New smurfs",
-    active: @active,
-    icon: Teiserver.Account.NewSmurfReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/new_smurf"
-  )}
+  <.section_menu_button
+    active={@active == "new_smurf"}
+    icon={Teiserver.Account.NewSmurfReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/new_smurf"}
+  >
+    New smurfs
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.BanEvasionReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "ban_evasion",
-    label: "Ban evasion",
-    active: @active,
-    icon: Teiserver.Account.BanEvasionReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/ban_evasion"
-  )}
+  <.section_menu_button
+    active={@active == "ban_evasion"}
+    icon={Teiserver.Account.BanEvasionReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/ban_evasion"}
+  >
+    Ban evasion
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Account.OpenSkillReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "open_skill",
-    label: "Open Skill",
-    active: @active,
-    icon: Teiserver.Account.OpenSkillReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/open_skill"
-  )}
+  <.section_menu_button
+    active={@active == "open_skill"}
+    icon={Teiserver.Account.OpenSkillReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/open_skill"}
+  >
+    Open Skill
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Game.MappingReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "mapping",
-    label: "Mapping",
-    active: @active,
-    icon: Teiserver.Game.MappingReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/mapping"
-  )}
+  <.section_menu_button
+    active={@active == "mapping"}
+    icon={Teiserver.Game.MappingReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/mapping"}
+  >
+    Mapping
+  </.section_menu_button>
 <% end %>
 
 <%= if allow?(@current_user, Teiserver.Moderation.ActivityReport.permissions()) do %>
-  {central_component("section_menu_button",
-    name: "moderation_activity",
-    label: "Moderation",
-    active: @active,
-    icon: Teiserver.Moderation.ActivityReport.icon(),
-    bsname: bsname,
-    url: ~p"/teiserver/reports/show/moderation_activity"
-  )}
+  <.section_menu_button
+    active={@active == "moderation_activity"}
+    icon={Teiserver.Moderation.ActivityReport.icon()}
+    bsname={bsname}
+    url={~p"/teiserver/reports/show/moderation_activity"}
+  >
+    Moderation
+  </.section_menu_button>
 <% end %>

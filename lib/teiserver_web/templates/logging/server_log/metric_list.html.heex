@@ -29,65 +29,69 @@
         </.section_menu_button>
 
         <%= if @unit == "day" do %>
-          &nbsp;&nbsp; {central_component("section_menu_button",
-            name: "filter-hourly-users",
-            label: "Users",
-            active: "filter-#{@filter}",
-            icon: "fa-solid fa-grid-4",
-            bsname: bsname,
-            url: "?filter=hourly-users"
-          )}
+          &nbsp;&nbsp;
+          <.section_menu_button
+            active={@filter == "hourly-users"}
+            icon="fa-solid fa-grid-4"
+            bsname={bsname}
+            url="?filter=hourly-users"
+          >
+            Users
+          </.section_menu_button>
 
-          {central_component("section_menu_button",
-            name: "filter-hourly-players",
-            label: "Players",
-            active: "filter-#{@filter}",
-            icon: "fa-solid fa-grid-4",
-            bsname: bsname,
-            url: "?filter=hourly-players"
-          )}
+          <.section_menu_button
+            active={@filter == "hourly-players"}
+            icon="fa-solid fa-grid-4"
+            bsname={bsname}
+            url="?filter=hourly-players"
+          >
+            Players
+          </.section_menu_button>
 
-          {central_component("section_menu_button",
-            name: "filter-hourly-battles",
-            label: "Battles",
-            active: "filter-#{@filter}",
-            icon: "fa-solid fa-grid-4",
-            bsname: bsname,
-            url: "?filter=hourly-battles"
-          )}
+          <.section_menu_button
+            active={@filter == "hourly-battles"}
+            icon="fa-solid fa-grid-4"
+            bsname={bsname}
+            url="?filter=hourly-battles"
+          >
+            Battles
+          </.section_menu_button>
         <% end %>
-        &nbsp;&nbsp; {central_component("section_menu_button",
-          name: "filter-graph-unique-users",
-          label: "Uniques",
-          active: "filter-#{@filter}",
-          icon: StylingHelper.icon(:chart),
-          bsname: bsname,
-          url: "?filter=graph-unique-users"
-        )}
+        &nbsp;&nbsp;
+        <.section_menu_button
+          active={@filter == "graph-unique-users"}
+          icon={StylingHelper.icon(:chart)}
+          bsname={bsname}
+          url="?filter=graph-unique-users"
+        >
+          Uniques
+        </.section_menu_button>
 
-        {central_component("section_menu_button",
-          name: "filter-graph-peak-users",
-          label: "Peaks",
-          active: "filter-#{@filter}",
-          icon: StylingHelper.icon(:chart),
-          bsname: bsname,
-          url: "?filter=graph-peak-users"
-        )}
+        <.section_menu_button
+          active={@filter == "graph-peak-users"}
+          icon={StylingHelper.icon(:chart)}
+          bsname={bsname}
+          url="?filter=graph-peak-users"
+        >
+          Peaks
+        </.section_menu_button>
 
-        {central_component("section_menu_button",
-          name: "filter-graph-time",
-          label: "Time",
-          active: "filter-#{@filter}",
-          icon: StylingHelper.icon(:chart),
-          bsname: bsname,
-          url: "?filter=graph-time"
-        )} &nbsp;&nbsp;
+        <.section_menu_button
+          active={@filter == "graph-time"}
+          icon={StylingHelper.icon(:chart)}
+          bsname={bsname}
+          url="?filter=graph-time"
+        >
+          Time
+        </.section_menu_button>
+        &nbsp;&nbsp;
         <.section_menu_button
           bsname={bsname}
           icon={StylingHelper.icon(:chart)}
           active={@filter == "graph-client-events"}
           url="?filter=graph-client-events"
         >
+          >
           Client
         </.section_menu_button>
 
@@ -97,6 +101,7 @@
           active={@filter == "graph-server-events"}
           url="?filter=graph-server-events"
         >
+          >
           Server
         </.section_menu_button>
 
@@ -106,6 +111,7 @@
           active={@filter == "graph-lobby-events"}
           url="?filter=graph-lobby-events"
         >
+          >
           Lobby
         </.section_menu_button>
 
@@ -115,6 +121,7 @@
           active={@filter == "graph-match-events"}
           url="?filter=graph-match-events"
         >
+          >
           Match
         </.section_menu_button>
 
@@ -124,6 +131,7 @@
           active={@filter == "graph-infologs"}
           url="?filter=graph-infologs"
         >
+          >
           Infolog
         </.section_menu_button>
 

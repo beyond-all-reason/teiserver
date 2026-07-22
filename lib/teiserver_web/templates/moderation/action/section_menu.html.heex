@@ -2,54 +2,49 @@
 
 <div class="row">
   <div class="col-md-9">
-    {central_component("section_menu_button",
-      name: "list",
-      label: "List",
-      active: @active,
-      icon: StylingHelper.icon(:list),
-      bsname: bsname,
-      url: ~p"/moderation/action"
-    )}
+    <.section_menu_button
+      icon={StylingHelper.icon(:list)}
+      bsname={bsname}
+      url={~p"/moderation/action"}
+    >
+      List
+    </.section_menu_button>
 
-    {central_component("section_menu_button",
-      name: "search",
-      label: "Search",
-      active: @active,
-      icon: StylingHelper.icon(:search),
-      bsname: bsname,
-      url: ~p"/moderation/action/search"
-    )}
+    <.section_menu_button
+      icon={StylingHelper.icon(:search)}
+      bsname={bsname}
+      url={~p"/moderation/action/search"}
+    >
+      Search
+    </.section_menu_button>
 
     <%= if allow?(@conn, "Moderator") do %>
-      {central_component("section_menu_button",
-        name: "new",
-        label: "New",
-        active: @active,
-        icon: StylingHelper.icon(:new),
-        bsname: bsname,
-        url: ~p"/moderation/action/new"
-      )}
+      <.section_menu_button
+        icon={StylingHelper.icon(:new)}
+        bsname={bsname}
+        url={~p"/moderation/action/new"}
+      >
+        New
+      </.section_menu_button>
     <% end %>
 
     <%= case @active do %>
       <% "show" -> %>
-        {central_component("section_menu_button",
-          name: "show",
-          label: "Show",
-          active: @active,
-          icon: StylingHelper.icon(:show),
-          bsname: bsname,
-          url: "#"
-        )}
+        <.section_menu_button
+          icon={StylingHelper.icon(:show)}
+          bsname={bsname}
+          url="#"
+        >
+          Show
+        </.section_menu_button>
       <% "edit" -> %>
-        {central_component("section_menu_button",
-          name: "edit",
-          label: "Edit",
-          active: @active,
-          icon: StylingHelper.icon(:edit),
-          bsname: bsname,
-          url: "#"
-        )}
+        <.section_menu_button
+          icon={StylingHelper.icon(:edit)}
+          bsname={bsname}
+          url="#"
+        >
+          Edit
+        </.section_menu_button>
       <% _ -> %>
     <% end %>
   </div>
