@@ -60,6 +60,13 @@ defmodule Teiserver.Account.RoleLib do
                  contains: ["Trusted", "BAR+", "VIP"],
                  badge: true
                },
+               %Role{
+                 name: "Overwatch Tech",
+                 colour: "#E5FF00",
+                 icon: "fa-solid fa-screwdriver-wrench",
+                 contains: ["Trusted", "BAR+", "VIP"],
+                 badge: true
+               },
 
                # Authority
                %Role{
@@ -180,9 +187,7 @@ defmodule Teiserver.Account.RoleLib do
 
   @spec staff_roles :: [String.t()]
   def staff_roles do
-    [
-      "Contributor"
-    ]
+    ["Contributor", "Overwatch Tech"]
   end
 
   @spec community_roles :: [String.t()]
