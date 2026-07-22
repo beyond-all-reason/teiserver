@@ -45,7 +45,7 @@
                     <%= if user do %>
                       <tr>
                         <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-                          {central_component("icon", icon: user.icon)}
+                          <Fontawesome.icon icon={user.icon} style="regular" />
                         </td>
                         <td style={"background-color: #{rgba_css user.colour};"}>
                           {user.name}

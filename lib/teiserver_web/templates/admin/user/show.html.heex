@@ -59,7 +59,8 @@
                 "btn btn-outline-#{bsname}"
               end %>
             <a href={~p"/teiserver/admin/client/#{@user.id}"} class={class} id="section-menu-new">
-              {central_component("icon", icon: Teiserver.Account.ClientLib.icon())} &nbsp;
+              <Fontawesome.icon icon={Teiserver.Account.ClientLib.icon()} style="regular" />
+              &nbsp;
               Client view
             </a>
           <% end %>
@@ -72,10 +73,7 @@
         </div>
 
         <h3 style={"color: #{@user.colour}"}>
-          {@user.name} &nbsp; {central_component("icon",
-            icon: @user.icon,
-            icon_class: "fa-solid"
-          )}
+          {@user.name} &nbsp; <Fontawesome.icon icon={@user.icon} style="solid" />
         </h3>
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">

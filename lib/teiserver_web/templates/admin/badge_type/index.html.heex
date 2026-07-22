@@ -36,7 +36,7 @@
               <%= for badge_type <- @badge_types do %>
                 <tr>
                   <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
-                    {central_component("icon", icon: badge_type.icon)}
+                    <Fontawesome.icon icon={badge_type.icon} style="regular" />
                   </td>
                   <td>{badge_type.name}</td>
                   <td>{badge_type.purpose}</td>

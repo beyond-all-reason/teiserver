@@ -13,8 +13,9 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   alias Teiserver.Helper.NumberHelper
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Telemetry
+
   use TeiserverWeb, :live_view
-  import Teiserver.Helpers.ComponentHelper
+
   import Teiserver.Helper.ColourHelper
 
   @impl Phoenix.LiveView
@@ -633,7 +634,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
                 <%= for badge_type <- @badge_types do %>
                   <tr>
                     <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
-                      {central_component("icon", icon: badge_type.icon)}
+                      <Fontawesome.icon icon={badge_type.icon} style="regular" />
                     </td>
                     <td style={"background-color: #{rgba_css badge_type.colour};"}>
                       {badge_type.name}

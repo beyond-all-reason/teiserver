@@ -43,10 +43,7 @@
               href={~p"/moderation/action/#{report.result_id}"}
               class={"btn btn-sm btn-#{Teiserver.Moderation.ActionLib.colour()} btn-block"}
             >
-              {central_component("icon",
-                icon: Teiserver.Moderation.ActionLib.icon(),
-                class: "fa-solid"
-              )}
+              <Fontawesome.icon icon={Teiserver.Moderation.ActionLib.icon()} style="solid" />
             </a>
           <% end %>
 

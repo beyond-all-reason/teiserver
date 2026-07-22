@@ -24,7 +24,7 @@
         <%= for accolade <- @accolades do %>
           <tr>
             <td style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"} width="22">
-              {central_component("icon", icon: accolade.badge_type.icon)}
+              <Fontawesome.icon icon={accolade.badge_type.icon} style="regular" />
             </td>
             <td style={"background-color: #{rgba_css accolade.badge_type.colour};"}>
               {accolade.badge_type.name}

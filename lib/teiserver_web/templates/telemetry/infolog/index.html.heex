@@ -67,7 +67,7 @@
                 <tr>
                   <%= if log.user do %>
                     <td style={"background-color: #{log.user.colour}; color: #FFF;"} width="22">
-                      {central_component("icon", icon: log.user.icon)}
+                      <Fontawesome.icon icon={log.user.icon} style="regular" />
                     </td>
                     <td>{log.user.name}</td>
                   <% else %>

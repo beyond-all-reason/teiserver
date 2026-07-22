@@ -142,7 +142,8 @@
           href={~p"/logging/match/day_metrics"}
           class={"btn float-end btn-outline-#{TeiserverWeb.Logging.MatchLogView.view_colour}"}
         >
-          {central_component("icon", icon: TeiserverWeb.Logging.MatchLogView.icon())} &nbsp;
+          <Fontawesome.icon icon={TeiserverWeb.Logging.MatchLogView.icon()} style="regular" />
+          &nbsp;
           Match data
         </a>
         <br /><br />

@@ -1,45 +1,84 @@
 defmodule Fontawesome do
   @moduledoc """
-  Example usage:
 
-  <Fontawesome.icon icon="arrow-left" style="regular" />
-  <Fontawesome.icon icon="arrow-left" style="regular" class="text-danger" />
+  Example usage:
+  ```
+  <Fontawesome.icon icon="arrow-left" />
+
+  <Fontawesome.icon icon="icon2" style="solid" />
+
+  <Fontawesome.icon icon="another-icon" weight="sharp" />
+
+  <Fontawesome.icon
+    icon="everything"
+    style="thin"
+    weight="sharp"
+    size="2x"
+    class="my-css-class"
+    css="border: 1px solid red;"
+    phx-click="do-something"
+  />
+  ```
+
+  Additionally contains lists of icon names with `Fontawesome.regular_icons/0` and `Fontawesome.brand_icons/0`
   """
   use Phoenix.Component
 
-  attr :icon, :string
-  attr :icon_atom, :atom
-  attr :class, :string, default: ""
-  attr :size, :string, default: nil
-  attr :weight, :string, default: "solid"
-  attr :style, :string, default: "solid"
-  attr :css_style, :string, default: ""
+  attr(:icon, :string, required: true)
+  attr(:style, :string, default: "regular")
+  attr(:weight, :string, default: nil)
+  attr(:size, :string, default: nil)
+  attr(:class, :any, default: nil)
+  attr(:css, :string, default: nil)
+  attr(:rest, :global)
 
+  @doc """
+  Returns a fontawesome icon as a Phoenix.LiveView.Rendered object.
+
+  Requires:
+    `icon`: The fontawesome icon you wish to display, you do not need to prefix it with "fa-"
+
+  Optional arguments:
+    `style`: regular, solid, light, thin, duotone or brand
+    `weight`: classic or sharp
+    `size`: the fx weight class, you do not need to prefix it with "fa-"
+    `class`: css classes placed into the "class" attribute after the above classes
+    `css`: css placed into the "style" attribute
+  """
   @spec icon(map) :: Phoenix.LiveView.Rendered.t()
   def icon(assigns) do
-    style = fa_prefix(assigns[:style])
-    size = fa_prefix(assigns[:size])
-    weight = fa_prefix(assigns[:weight])
+    style =
+      assigns[:style]
+      |> fa_prefix()
+      |> free_style()
 
-    icon_name =
-      cond do
-        assigns[:icon] && is_atom(assigns[:icon]) -> icon_lookup(assigns[:icon])
-        assigns[:icon_atom] && is_atom(assigns[:icon_atom]) -> icon_lookup(assigns[:icon_atom])
-        true -> fa_prefix(assigns[:icon])
-      end
+    weight =
+      assigns[:weight]
+      |> fa_prefix()
+
+    size = fa_prefix(assigns[:size])
+    icon_name = fa_prefix(assigns[:icon])
 
     assigns =
       assigns
       |> assign(:class, "fa-fw #{style} #{size} #{weight} #{icon_name} #{assigns[:class]}")
 
     ~H"""
-    <i class={@class} style={@css_style}></i>
+    <i class={@class} style={@css} {@rest}></i>
     """
   end
 
+  # Prefixes the relevant word with "fa-" if it is not already prefixed so
   defp fa_prefix("fa-" <> s), do: "fa-" <> s
-  defp fa_prefix(nil), do: ""
+  defp fa_prefix(""), do: ""
+  defp fa_prefix(nil), do: nil
   defp fa_prefix(s), do: "fa-" <> s
+
+  # Used to make the styling of icons limited to the free version
+  defp free_style("fa-brand"), do: "fa-brand"
+  defp free_style(""), do: ""
+  defp free_style(nil), do: nil
+  defp free_style(_any), do: "fa-solid"
 
   @spec icon_lookup(atom) :: String.t()
   def icon_lookup(:report), do: "fa-signal"
