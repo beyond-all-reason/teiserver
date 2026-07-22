@@ -21,7 +21,7 @@ defmodule Teiserver.Account.RoleLib do
                %Role{
                  name: "Bot",
                  colour: "#777777",
-                 icon: "fa-solid fa-user-robot",
+                 icon: "fa-solid fa-robot",
                  contains: []
                },
                %Role{
@@ -41,7 +41,7 @@ defmodule Teiserver.Account.RoleLib do
                %Role{
                  name: "VIP",
                  colour: "#AA8833",
-                 icon: "fa-solid fa-sparkles",
+                 icon: "fa-solid fa-champagne-glasses",
                  contains: ~w(Trusted)
                },
                %Role{
@@ -65,13 +65,13 @@ defmodule Teiserver.Account.RoleLib do
                %Role{
                  name: "Overwatch",
                  colour: "#AA7733",
-                 icon: "fa-solid fa-clipboard-list-check",
+                 icon: "fa-solid fa-user-secret",
                  contains: ["BAR+", "Trusted"]
                },
                %Role{
                  name: "Reviewer",
                  colour: "#AA7700",
-                 icon: "fa-solid fa-user-magnifying-glass",
+                 icon: "fa-solid fa-magnifying-glass",
                  contains: ["Overwatch", "BAR+", "Trusted"]
                },
                %Role{
@@ -122,7 +122,7 @@ defmodule Teiserver.Account.RoleLib do
                %Role{
                  name: "Server",
                  colour: "#AA2088",
-                 icon: "fa-solid fa-user-gear",
+                 icon: "fa-solid fa-gear",
                  contains: [
                    "Admin",
                    "Senior moderator",
