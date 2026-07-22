@@ -27,6 +27,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.Account.User
   alias Teiserver.Autohost
   alias Teiserver.Autohost.Types, as: AT
+  alias Teiserver.Cluster
   alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Helpers.PubSubHelper
@@ -40,6 +41,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.TachyonLobby.Events
   alias Teiserver.TachyonLobby.ListMonitor
   alias Teiserver.TachyonLobby.Registry, as: LobbyRegistry
+  alias Teiserver.TachyonLobby.Supervisor, as: LobbySupervisor
   # lobby types
   alias Teiserver.TachyonLobby.Types, as: LT
 
@@ -92,6 +94,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
     via_tuple(id) |> :gen_statem.start_link(__MODULE__, args, [])
   end
 
+  @doc """
+  this is meant to propagate event processing across replicas and shouldn't
+  be called from other modules
+  """
+  def apply_events(lobby_id, events, opts) do
+    call_lobby(lobby_id, {:apply_events, events, opts}, to_primary?: false)
+  end
+
   @spec join(LT.Types.id(), LT.PlayerJoinData.t(), pid()) ::
           {:ok, lobby_pid :: pid(), LT.Details.t()}
           | {:error, :banned, ban_until :: DateTime.t()}
@@ -102,6 +112,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec leave(LT.Types.id(), User.id()) :: :ok | {:error, reason :: :lobby_full | term()}
   def leave(lobby_id, user_id) do
+    mfa = {__MODULE__, :do_leave, [lobby_id, user_id]}
+    routing_key(lobby_id) |> Cluster.primary_apply(mfa, @default_call_timeout)
+  end
+
+  @doc """
+  for internal use
+  """
+  def do_leave(lobby_id, user_id) do
     via_tuple(lobby_id) |> :gen_statem.call({:leave, user_id}, @default_call_timeout)
   catch
     :exit, {:noproc, _details} -> {:error, :invalid_lobby}
@@ -277,6 +295,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def init({id, {:user, %LT.StartParams{} = start_params}}) do
     Process.flag(:trap_exit, true)
     Logger.metadata(actor_type: :lobby, actor_id: id)
+    :net_kernel.monitor_nodes(true)
 
     monitors =
       MC.new() |> MC.monitor(start_params.creator_pid, {:user, start_params.creator_data.id})
@@ -289,6 +308,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     state =
       %LT.Data{
         id: id,
+        primary?: routing_key(id) |> Cluster.primary?(),
         monitors: monitors,
         name: start_params.name,
         map_name: start_params.map_name,
@@ -328,6 +348,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     Process.flag(:trap_exit, true)
     Logger.metadata(actor_type: :lobby, actor_id: id)
     Logger.debug("Restoring lobby from snapshot")
+    :net_kernel.monitor_nodes(true)
 
     snapshot = Crypto.non_executable_binary_to_term(serialized_data, [:safe])
 
@@ -343,11 +364,37 @@ defmodule Teiserver.TachyonLobby.Lobby do
       snapshot
       |> Map.put(:monitors, MC.new())
       |> Map.put(:ids_to_rejoin, ids_to_rejoin)
+      |> Map.put(:primary?, routing_key(id) |> Cluster.primary?())
 
     timeout = Tachyon.get_restoration_timeout()
     actions = [{:state_timeout, timeout, :snapshot_timeout}]
 
     {:ok, :starting_up, data, actions}
+  end
+
+  def init({id, {:replica, %LT.Data{} = data}}) do
+    Process.flag(:trap_exit, true)
+    Logger.metadata(actor_type: :lobby, actor_id: id)
+    Logger.debug("Starting replica for lobby #{id}")
+    :net_kernel.monitor_nodes(true)
+
+    users = Map.values(data.players) ++ Map.values(data.spectators)
+
+    monitors =
+      Enum.reduce(users, MC.new(), fn user, monitors ->
+        MC.monitor(monitors, user.pid, {:user, user.id})
+      end)
+
+    monitors =
+      if data.current_battle do
+        MC.monitor(monitors, data.current_battle.pid, :current_battle)
+      else
+        monitors
+      end
+
+    data = %{data | monitors: monitors, primary?: routing_key(id) |> Cluster.primary?()}
+    register_new_lobby(data)
+    {:ok, :running, data}
   end
 
   @impl :gen_statem
@@ -487,30 +534,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
 
     events = [%Events.AddSpectator{spec: spec_data}]
-    data = process_events(data, events, sender_id: user_id)
+    data = process_events(data, events, sender_id: user_id).data
     {:keep_state, data, [{:reply, from, {:ok, self(), get_details_from_state(data)}}]}
   end
 
   def handle_event({:call, from}, {:leave, user_id}, _state, %LT.Data{} = data)
       when is_map_key(data.players, user_id) do
-    case remove_player_from_lobby(user_id, data) do
-      data when map_size(data.players) > 0 or map_size(data.spectators) > 0 ->
-        {:keep_state, data, [{:reply, from, :ok}]}
-
-      data ->
-        {:keep_state, data, [{:reply, from, :ok}, {:next_event, :internal, :empty}]}
-    end
+    final_aggregate = remove_player_from_lobby(user_id, data)
+    {:keep_state, final_aggregate.data, [{:reply, from, :ok} | final_aggregate.actions]}
   end
 
   def handle_event({:call, from}, {:leave, user_id}, _state, %LT.Data{} = data)
       when is_map_key(data.spectators, user_id) do
-    data = remove_spectator_from_lobby(user_id, data)
-
-    if map_size(data.players) > 0 or map_size(data.spectators) > 0 do
-      {:keep_state, data, [{:reply, from, :ok}]}
-    else
-      {:keep_state, data, [{:reply, from, :ok}, {:next_event, :internal, :empty}]}
-    end
+    final_aggregate = remove_spectator_from_lobby(user_id, data)
+    {:keep_state, final_aggregate.data, [{:reply, from, :ok} | final_aggregate.actions]}
   end
 
   def handle_event({:call, from}, {:leave, _user_id}, _state, %LT.Data{} = data),
@@ -575,7 +612,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           {true, nil} ->
             # we're moving a player from a different ally team
             events = [%Events.MovePlayer{player_id: user_id, team: team}]
-            data = process_events(data, events)
+            data = process_events(data, events).data
 
             {:keep_state, data, [{:reply, from, {:ok, get_details_from_state(data)}}]}
 
@@ -583,7 +620,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
             # Adding a spec into an ally team. The way we construct the team
             # means it doesn't require any reshuffling of existing players
             events = [%Events.MoveSpecToPlayer{user_id: user_id, player_data: %{team: team}}]
-            data = process_events(data, events)
+            data = process_events(data, events).data
 
             {:keep_state, data, [{:reply, from, {:ok, get_details_from_state(data)}}]}
         end
@@ -609,7 +646,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def handle_event({:call, from}, {:spectate, user_id}, _state, %LT.Data{} = data)
       when is_map_key(data.players, user_id) do
     events = [%Events.MovePlayerToSpec{user_id: user_id, spec_data: %{join_queue_position: nil}}]
-    data = process_events(data, events)
+    data = process_events(data, events).data
     {:keep_state, data, [{:reply, from, :ok}]}
   end
 
@@ -691,7 +728,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       client_status_updates: Map.take(update_data, supported_properties)
     }
 
-    data = process_events(data, [event])
+    data = process_events(data, [event]).data
     {:keep_state, data, [{:reply, from, :ok}]}
   end
 
@@ -745,7 +782,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       %Events.FillFromJoinQueue{}
     ]
 
-    data = process_events(data, events)
+    data = process_events(data, events).data
 
     {:keep_state, data, [{:reply, from, :ok}]}
   end
@@ -796,7 +833,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         end)
 
       if Enum.empty?(errors) do
-        final_data = process_events(fsm_data, events)
+        final_data = process_events(fsm_data, events).data
         {:keep_state, final_data, [{:reply, from, :ok}]}
       else
         message = Enum.join(errors, ", ")
@@ -825,7 +862,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       ) do
     if is_map_key(data.current_vote.voters, user_id) do
       event = %Events.CastVote{user_id: user_id, vote: data.current_vote, ballot: ballot}
-      data = process_events(data, [event])
+      data = process_events(data, [event]).data
       {:keep_state, data, [{:reply, from, :ok}]}
     else
       {:keep_state, data, [{:reply, from, {:error, :invalid_vote}}]}
@@ -891,7 +928,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           %Events.MovePlayerToSpec{user_id: user_id, spec_data: %{join_queue_position: pos}}
         ]
 
-        data = process_events(data, events)
+        data = process_events(data, events).data
 
         {:keep_state, data, [{:reply, from, :ok}]}
 
@@ -915,7 +952,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
                 %Events.MoveSpecToPlayer{user_id: user_id, player_data: %{team: team}}
               ]
 
-              process_events(data, events)
+              process_events(data, events).data
           end
 
         {:keep_state, data, [{:reply, from, :ok}]}
@@ -953,12 +990,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
       Enum.empty?(data.bosses) and Enum.count(data.players, &(!bot_id?(elem(&1, 0)))) > 1 ->
         vote = new_vote(data, user_id, {:kickban, target_id, ban_until})
         events = [%Events.StartVote{vote_state: vote}]
-        data = process_events(data, events)
+        data = process_events(data, events).data
 
         {:keep_state, data, [{:reply, from, :ok}]}
 
       true ->
-        data = process_events(data, [%Events.Kickban{user_id: target_id, ban_until: ban_until}])
+        data =
+          process_events(data, [%Events.Kickban{user_id: target_id, ban_until: ban_until}]).data
+
         {:keep_state, data, [{:reply, from, :ok}]}
     end
   end
@@ -998,7 +1037,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       Enum.empty?(data.bosses) and Enum.count(data.players, &(!bot_id?(elem(&1, 0)))) > 1 ->
         vote = new_vote(data, user_id, {:appoint_boss, appointee_id})
         events = [%Events.StartVote{vote_state: vote}]
-        data = process_events(data, events)
+        data = process_events(data, events).data
         {:keep_state, data, [{:reply, from, :ok}]}
 
       MapSet.member?(data.bosses, appointee_id) ->
@@ -1006,7 +1045,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       true ->
         events = [%Events.UpdateBoss{action: :add, appointee_id: appointee_id}]
-        data = process_events(data, events)
+        data = process_events(data, events).data
         {:keep_state, data, [{:reply, from, :ok}]}
     end
   end
@@ -1029,7 +1068,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       true ->
         events = [%Events.UpdateBoss{action: :remove, appointee_id: boss_id}]
-        data = process_events(data, events)
+        data = process_events(data, events).data
         {:keep_state, data, [{:reply, from, :ok}]}
     end
   end
@@ -1089,6 +1128,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
   def handle_event({:call, from}, :get_start_script, _state, %LT.Data{} = data),
     do: {:keep_state, data, [{:reply, from, gen_start_script(data)}]}
 
+  def handle_event({:call, from}, {:apply_events, events, opts}, _state, %LT.Data{} = data) do
+    final_aggregate = process_events(data, events, opts)
+    {:keep_state, final_aggregate.data, [{:reply, from, :ok} | final_aggregate.actions]}
+  end
+
   def handle_event(:info, {:DOWN, ref, :process, _pid, :shutdown}, state, %LT.Data{} = data) do
     val = MC.get_val(data.monitors, ref)
     data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
@@ -1108,11 +1152,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
     val = MC.get_val(data.monitors, ref)
     data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
 
-    data =
-      case val do
-        {:user, user_id} ->
-          Logger.debug("user #{user_id} disappeared from the lobby because #{inspect(reason)}")
+    case val do
+      {:user, user_id} ->
+        Logger.debug("user #{user_id} disappeared from the lobby because #{inspect(reason)}")
 
+        aggregate =
           cond do
             is_map_key(data.players, user_id) ->
               remove_player_from_lobby(user_id, data)
@@ -1121,23 +1165,19 @@ defmodule Teiserver.TachyonLobby.Lobby do
               remove_spectator_from_lobby(user_id, data)
           end
 
-        :current_battle ->
-          data =
-            Map.put(data, :current_battle, nil)
-            |> Map.update!(:counter, &(&1 + 1))
+        {:keep_state, aggregate.data, aggregate.actions}
 
-          broadcast_update({:update, nil, %{current_battle: nil}}, data)
-          update_list(data, %{current_battle: nil})
-          data
+      :current_battle ->
+        data =
+          Map.put(data, :current_battle, nil)
+          |> Map.update!(:counter, &(&1 + 1))
 
-        nil ->
-          data
-      end
+        broadcast_update({:update, nil, %{current_battle: nil}}, data)
+        update_list(data, %{current_battle: nil})
+        {:keep_state, data}
 
-    if Enum.empty?(data.players) and Enum.empty?(data.spectators) do
-      {:keep_state, data, [{:next_event, :internal, :empty}]}
-    else
-      {:keep_state, data}
+      nil ->
+        {:keep_state, data}
     end
   end
 
@@ -1149,7 +1189,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       outcome: :timeout
     }
 
-    data = process_events(data, [event])
+    data = process_events(data, [event]).data
     {:keep_state, data}
   end
 
@@ -1162,6 +1202,25 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(:info, {:EXIT, _pid, reason}, _state, %LT.Data{} = _data) do
     {:stop, reason}
+  end
+
+  def handle_event(:info, {:nodeup, new_node}, _state, %LT.Data{} = data) do
+    Cluster.wait_teiserver_ready(new_node)
+
+    if data.primary? do
+      # TODO: handle the case where this fails. The most likely is when
+      # the new node is the new primary, and it has already been started
+      # through a lobby call
+      :ok = :erpc.call(new_node, LobbySupervisor, :start_replica, [data])
+    end
+
+    data = %{data | primary?: routing_key(data.id) |> Cluster.primary?()}
+    {:keep_state, data, []}
+  end
+
+  def handle_event(:info, {:nodedown, _old_node}, _state, %LT.Data{} = data) do
+    data = %{data | primary?: routing_key(data.id) |> Cluster.primary?()}
+    {:keep_state, data}
   end
 
   def handle_event(:internal, :empty, _state, %LT.Data{} = data) do
@@ -1201,12 +1260,21 @@ defmodule Teiserver.TachyonLobby.Lobby do
     LobbyRegistry.via_tuple(lobby_id)
   end
 
-  defp call_lobby(lobby_id, message, timeout \\ @default_call_timeout) do
-    via_tuple(lobby_id) |> :gen_statem.call(message, timeout)
+  defp call_lobby(lobby_id, message, opts \\ []) do
+    timeout = Keyword.get(opts, :timeout, @default_call_timeout)
+    {m, f, a} = {:gen_statem, :call, [via_tuple(lobby_id), message, timeout]}
+
+    if Keyword.get(opts, :to_primary?, true) do
+      routing_key(lobby_id) |> Cluster.primary_apply({m, f, a}, timeout)
+    else
+      apply(m, f, a)
+    end
   catch
     :exit, {:noproc, _reason} -> {:error, :invalid_lobby}
     :exit, {:shutdown, _reason} -> {:error, :invalid_lobby}
   end
+
+  def routing_key(id), do: {:lobby, id}
 
   @spec get_overview_from_state(state :: LT.Data.t()) :: LT.ListOverview.t()
   defp get_overview_from_state(%LT.Data{} = state) do
@@ -1297,19 +1365,37 @@ defmodule Teiserver.TachyonLobby.Lobby do
       overview: overview
     }
 
-    PubSubHelper.broadcast(list_topic(), message)
+    if routing_key(state.id) |> Cluster.primary?() do
+      PubSubHelper.broadcast(list_topic(), message)
+    end
   end
 
   defp process_events(%LT.Data{} = data, events, opts \\ []) do
-    final_aggregate = compute_aggregate(data, events)
-    sender_id = opts[:sender_id]
+    {primary, replicas} = routing_key(data.id) |> Cluster.split_nodes()
 
-    if final_aggregate.changes != %{},
-      do: broadcast_update({:update, sender_id, final_aggregate.changes}, final_aggregate.data)
+    primary? = Node.self() == primary
+    final_aggregate = compute_aggregate(data, events)
+
+    if primary? do
+      sender_id = opts[:sender_id]
+
+      if final_aggregate.changes != %{},
+        do: broadcast_update({:update, sender_id, final_aggregate.changes}, final_aggregate.data)
+
+      replicate_events(replicas, data, events, opts)
+    end
 
     broadcast_list_updates(final_aggregate)
-    Enum.each(final_aggregate.side_effects, &process_event_action(&1, final_aggregate.data))
-    final_aggregate.data
+
+    # some events have an impact on the state, like vote timeout for example
+    # this isn't ideal since each event need to make a decision whether it
+    # should also apply on the replicas, but for now™ it'll do
+    Enum.each(
+      final_aggregate.side_effects,
+      &process_event_action(&1, primary?, final_aggregate.data)
+    )
+
+    final_aggregate
   end
 
   def compute_aggregate(%LT.Data{} = data, events) do
@@ -1322,18 +1408,29 @@ defmodule Teiserver.TachyonLobby.Lobby do
     final_player_count =
       Enum.count(final_aggregate.data.players, fn {_id, p} -> not bot_id?(p.id) end)
 
-    update_in(final_aggregate, [Access.key!(:overview_changes)], fn changes ->
-      if final_player_count != initial_player_count do
-        Map.put(changes, :player_count, final_player_count)
-      else
-        changes
-      end
-    end)
-    |> update_in([Access.key!(:data), Access.key!(:counter)], fn c ->
-      if final_aggregate.data != data,
-        do: c + 1,
-        else: c
-    end)
+    final_aggregate =
+      update_in(final_aggregate, [Access.key!(:overview_changes)], fn changes ->
+        if final_player_count != initial_player_count do
+          Map.put(changes, :player_count, final_player_count)
+        else
+          changes
+        end
+      end)
+      |> update_in([Access.key!(:data), Access.key!(:counter)], fn c ->
+        if final_aggregate.data != data,
+          do: c + 1,
+          else: c
+      end)
+
+    lobby_empty? =
+      map_size(final_aggregate.data.players) == 0 and
+        map_size(final_aggregate.data.spectators) == 0
+
+    if lobby_empty? do
+      %{final_aggregate | actions: final_aggregate.actions ++ [{:next_event, :internal, :empty}]}
+    else
+      final_aggregate
+    end
   end
 
   defp broadcast_list_updates(%LT.Aggregate{} = agg)
@@ -1351,7 +1448,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
 
     LobbyRegistry.put_overview(aggregate.data.id, get_overview_from_state(aggregate.data))
-    PubSubHelper.broadcast(list_topic(), message)
+
+    if routing_key(aggregate.data.id) |> Cluster.primary?() do
+      PubSubHelper.broadcast(list_topic(), message)
+    end
+
     :ok
   end
 
@@ -1470,12 +1571,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
     |> elem(1)
   end
 
-  @spec remove_player_from_lobby(User.id(), LT.Data.t()) :: LT.Data.t()
+  @spec remove_player_from_lobby(User.id(), LT.Data.t()) :: LT.Aggregate.t()
   defp remove_player_from_lobby(user_id, %LT.Data{} = data) do
     process_events(data, [%Events.RemovePlayerFromLobby{player_id: user_id}])
   end
 
-  @spec remove_spectator_from_lobby(User.id(), LT.Data.t()) :: LT.Data.t()
+  @spec remove_spectator_from_lobby(User.id(), LT.Data.t()) :: LT.Aggregate.t()
   defp remove_spectator_from_lobby(user_id, %LT.Data{} = data) do
     process_events(data, [%Events.RemoveSpecFromLobby{user_id: user_id}])
   end
@@ -1601,16 +1702,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp update_property(prop, _value, _state, _user_id),
     do: {:error, "update #{prop} is not supported"}
 
-  defp process_event_action({:vote_ended, vote, outcome}, fsm_data) do
-    broadcast_to_members(fsm_data, nil, {:lobby, fsm_data.id, {:vote_ended, vote.id, outcome}})
+  defp process_event_action({:vote_ended, vote, outcome}, primary?, fsm_data) do
+    if primary? do
+      broadcast_to_members(fsm_data, nil, {:lobby, fsm_data.id, {:vote_ended, vote.id, outcome}})
+    end
   end
 
-  defp process_event_action({:send_after, time, message}, _fsm_data) do
+  defp process_event_action({:send_after, time, message}, _primary?, _fsm_data) do
     :timer.send_after(time, message)
   end
 
-  defp process_event_action({:send_to_user, pid, message}, _fsm_data) do
-    send(pid, message)
+  defp process_event_action({:send_to_user, pid, message}, primary?, _fsm_data) do
+    if primary?, do: send(pid, message)
   end
 
   # create a default vote object
@@ -1648,5 +1751,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
     }
 
     PubSubHelper.broadcast(list_topic(), message)
+  end
+
+  defp replicate_events(replicas, %LT.Data{} = data, events, opts) do
+    mfa = {__MODULE__, :apply_events, [data.id, events, opts]}
+
+    # TODO: handle the case where the lobby doesn't exist on the replica
+    # or if the replica fails to apply the events somehow
+    # Also need to figure out the thorny case where the replica is
+    # starting up and bootstraping its state.
+    Cluster.multi_apply(replicas, mfa)
+    |> Enum.each(fn {node, result} ->
+      if result != :ok, do: raise("Error on node #{node}: #{inspect(result)}")
+    end)
+
+    :ok
   end
 end

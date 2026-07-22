@@ -1760,9 +1760,16 @@ defmodule Teiserver.Player.Session do
         end
 
       {:lobby, lobby_id} ->
-        Logger.info("Lobby #{lobby_id} went down because #{inspect(reason)}")
-        send_to_player!({:lobby, lobby_id, {:left, "lobby crashed"}}, state)
-        {:noreply, %{state | lobby: nil}}
+        case TachyonLobby.lookup_primary(lobby_id) do
+          nil ->
+            Logger.info("Lobby #{lobby_id} went down because #{inspect(reason)}")
+            send_to_player!({:lobby, lobby_id, {:left, "lobby crashed"}}, state)
+            {:noreply, %{state | lobby: nil}}
+
+          pid ->
+            monitors = MC.monitor(state.monitors, pid, {:lobby, lobby_id})
+            {:noreply, %{state | monitors: monitors}}
+        end
 
       {:battle, battle_id} ->
         Logger.info("battle #{battle_id} went down because #{inspect(reason)}")

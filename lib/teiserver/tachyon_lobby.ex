@@ -5,6 +5,7 @@ defmodule Teiserver.TachyonLobby do
 
   alias Teiserver.Account.User
   alias Teiserver.Asset
+  alias Teiserver.Cluster
   alias Teiserver.Helpers.PubSubHelper
   alias Teiserver.Lobby.LobbyLib
   alias Teiserver.TachyonLobby
@@ -21,6 +22,9 @@ defmodule Teiserver.TachyonLobby do
   def list do
     Registry.list_lobbies()
   end
+
+  defdelegate routing_key(id), to: Lobby
+  defdelegate gen_id(), to: Lobby
 
   @spec subscribe_updates() :: %{id() => LT.ListOverview.t()}
   def subscribe_updates do
@@ -54,8 +58,11 @@ defmodule Teiserver.TachyonLobby do
   end
 
   def create(%LT.StartParams{} = start_params) do
+    id = start_params.id || gen_id()
+    mfa = {TachyonLobby.Supervisor, :start_lobby, [id, start_params]}
+
     with :ok <- validate_start_params(start_params),
-         {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
+         {:ok, %{pid: pid, id: id}} <- routing_key(id) |> Cluster.replicated_apply(mfa),
          {:ok, %LT.Details{} = details} <- Lobby.get_details(id) do
       {:ok, pid, details}
     end
@@ -95,6 +102,17 @@ defmodule Teiserver.TachyonLobby do
 
   @spec lookup(id()) :: pid() | nil
   defdelegate lookup(lobby_id), to: TachyonLobby.Registry
+
+  @spec lookup_primary(id()) :: pid() | nil
+  def lookup_primary(lobby_id) do
+    Lobby.routing_key(lobby_id)
+    |> Cluster.primary_apply({__MODULE__, :lookup, [lobby_id]})
+  rescue
+    # TODO: this error is a bit too wide, this should only cover for when
+    # the peer node is gone or not loaded (somehow)
+    ErlangError ->
+      nil
+  end
 
   @spec count() :: non_neg_integer()
   defdelegate count(), to: TachyonLobby.Registry
