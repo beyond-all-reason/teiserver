@@ -21,63 +21,62 @@
       <div class="card-body" style="padding: 0 15px;">
         <div class="row">
           <%= if allow?(@current_user, "Admin") do %>
-            {central_component("sub_menu_icon",
-              icon: Teiserver.Logging.ServerDayLogLib.icon(),
-              name: "server",
-              label: "Server",
-              active: @active,
-              url: ~p"/logging/server"
-            )}
+            <.sub_menu_button
+              icon={Teiserver.Logging.ServerDayLogLib.icon()}
+              active={@active == "server"}
+              url={~p"/logging/server"}
+            >
+              Server
+            </.sub_menu_button>
           <% end %>
 
           <%= if allow?(@current_user, "Admin") do %>
-            {central_component("sub_menu_icon",
-              icon: Teiserver.Battle.MatchLib.icon(),
-              name: "match",
-              label: "Match",
-              active: @active,
-              url: ~p"/logging/match/day_metrics"
-            )}
+            <.sub_menu_button
+              icon={Teiserver.Battle.MatchLib.icon()}
+              active={@active == "match"}
+              url={~p"/logging/match/day_metrics"}
+            >
+              Match
+            </.sub_menu_button>
           <% end %>
 
           <%= if allow?(@current_user, "Server") do %>
-            {central_component("sub_menu_icon",
-              name: "page_view",
-              label: "Web",
-              active: @active,
-              url: ~p"/logging/page_views",
-              icon: Teiserver.Logging.PageViewLogLib.icon()
-            )}
+            <.sub_menu_button
+              active={@active == "page_view"}
+              url={~p"/logging/page_views"}
+              icon={Teiserver.Logging.PageViewLogLib.icon()}
+            >
+              Web
+            </.sub_menu_button>
           <% end %>
 
           <%= if allow?(@current_user, "Server") do %>
-            {central_component("sub_menu_icon",
-              name: "aggregate",
-              label: "Aggregate web",
-              active: @active,
-              url: ~p"/logging/aggregate_views",
-              icon: Teiserver.Logging.AggregateViewLogLib.icon()
-            )}
+            <.sub_menu_button
+              active={@active == "aggregate"}
+              url={~p"/logging/aggregate_views"}
+              icon={Teiserver.Logging.AggregateViewLogLib.icon()}
+            >
+              Aggregate web
+            </.sub_menu_button>
           <% end %>
 
           <%= if allow?(@current_user, "Server") do %>
-            {central_component("sub_menu_icon",
-              name: "audit",
-              label: "Audit",
-              active: @active,
-              url: ~p"/logging/audit",
-              icon: Teiserver.Logging.AuditLogLib.icon()
-            )}
+            <.sub_menu_button
+              active={@active == "audit"}
+              url={~p"/logging/audit"}
+              icon={Teiserver.Logging.AuditLogLib.icon()}
+            >
+              Audit
+            </.sub_menu_button>
           <% end %>
 
           <%= if allow?(@current_user, "Server") do %>
-            {central_component("sub_menu_icon",
-              name: "live_dashboard",
-              label: "Live dashboard",
-              active: @active,
-              url: ~p"/logging/live/dashboard",
-              icon: "fa-solid fa-tachograph-digital"
-            )}
+            <.sub_menu_button
+              url={~p"/logging/live/dashboard"}
+              icon="fa-solid fa-tachograph-digital"
+            >
+              Live dashboard
+            </.sub_menu_button>
           <% end %>
         </div>
       </div>
