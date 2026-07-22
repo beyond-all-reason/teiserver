@@ -1,24 +1,27 @@
 <div class="row page-row">
-  {central_component("menu_card",
-    icon_class: "fa-solid",
-    icon: "fa-solid fa-map-marker-question",
-    text: "Test page",
-    link: ~p"/teiserver/admin/tools/test_page"
-  )}
+  <.menu_card
+    icon_class="fa-solid"
+    icon="fa-solid fa-map-marker-question"
+    url={~p"/teiserver/admin/tools/test_page"}
+  >
+    Test page
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon_class: "fa-solid",
-    icon: "fa-brands fa-font-awesome",
-    text: "FA List",
-    link: ~p"/teiserver/admin/tools/falist"
-  )}
+  <.menu_card
+    icon_class="fa-solid"
+    icon="fa-brands fa-font-awesome"
+    url={~p"/teiserver/admin/tools/falist"}
+  >
+    FA List
+  </.menu_card>
 </div>
 
 <div class="row page-row">
-  {central_component("menu_card",
-    icon_class: "fa-solid",
-    icon: StylingHelper.icon(:back),
-    text: "Back",
-    link: ~p"/teiserver/admin"
-  )}
+  <.menu_card
+    icon_class="fa-solid"
+    icon={StylingHelper.icon(:back)}
+    url={~p"/teiserver/admin"}
+  >
+    Back
+  </.menu_card>
 </div>

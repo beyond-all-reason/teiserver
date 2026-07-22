@@ -1,27 +1,27 @@
 <div class="row page-row">
-  {central_component("menu_card",
-    icon: Teiserver.Moderation.ReportLib.icon(),
-    name: "reports",
-    text: "Reports",
-    icon_class: "fa-solid",
-    link: ~p"/moderation/report"
-  )}
+  <.menu_card
+    icon={Teiserver.Moderation.ReportLib.icon()}
+    icon_class="fa-solid"
+    url={~p"/moderation/report"}
+  >
+    Reports
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon: Teiserver.Moderation.ActionLib.icon(),
-    name: "actions",
-    text: "Actions",
-    icon_class: "fa-solid",
-    link: ~p"/moderation/action"
-  )}
+  <.menu_card
+    icon={Teiserver.Moderation.ActionLib.icon()}
+    icon_class="fa-solid"
+    url={~p"/moderation/action"}
+  >
+    Actions
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon: Teiserver.Moderation.BanLib.icon(),
-    name: "bans",
-    text: "Bans",
-    icon_class: "fa-solid",
-    link: ~p"/moderation/ban"
-  )}
+  <.menu_card
+    icon={Teiserver.Moderation.BanLib.icon()}
+    icon_class="fa-solid"
+    url={~p"/moderation/ban"}
+  >
+    Bans
+  </.menu_card>
 
   <.menu_card
     :if={allow?(@conn, "Moderator")}
@@ -49,11 +49,11 @@
 </div>
 
 <div class="row page-row">
-  {central_component("menu_card",
-    icon_class: "fa-solid",
-    name: "",
-    icon: StylingHelper.icon(:back),
-    text: "Back",
-    link: ~p"/teiserver/admin"
-  )}
+  <.menu_card
+    icon_class="fa-solid"
+    icon={StylingHelper.icon(:back)}
+    url={~p"/teiserver/admin"}
+  >
+    Back
+  </.menu_card>
 </div>
