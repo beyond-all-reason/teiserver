@@ -56,7 +56,7 @@
       <% end %>
     </div>
 
-    <div :if={allow?(@conn, "Admin")} class="col">
+    <div :if={allow?(@conn, "Senior moderator")} class="col">
       <h5>Moderation</h5>
       <%= for r <- @moderation_roles do %>
         <% role = @role_data[r]
@@ -67,12 +67,14 @@
           else
             r
           end %>
-        {central_component("checkbox",
-          id: "user_#{r}",
-          name: "user[#{r}]",
-          label: label,
-          checked: r in (@changeset.data.roles || [])
-        )}
+        <div :if={r in @changeable_roles}>
+          {central_component("checkbox",
+            id: "user_#{r}",
+            name: "user[#{r}]",
+            label: label,
+            checked: r in (@changeset.data.roles || [])
+          )}
+        </div>
       <% end %>
     </div>
 

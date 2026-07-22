@@ -245,7 +245,26 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec edit(Plug.Conn.t(), map) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
+    current_user = conn.assigns.current_user
     user = Account.get_user(id)
+
+    changeable_roles =
+      cond do
+        Enum.member?(current_user.roles, "Server") ->
+          RoleLib.allowed_role_management("Server")
+
+        Enum.member?(current_user.roles, "Admin") ->
+          RoleLib.allowed_role_management("Admin")
+
+        Enum.member?(current_user.roles, "Senior moderator") ->
+          RoleLib.allowed_role_management("Senior moderator")
+
+        Enum.member?(current_user.roles, "Moderator") ->
+          RoleLib.allowed_role_management("Moderator")
+
+        true ->
+          []
+      end
 
     case UserLib.has_access(user, conn) do
       {true, _role} ->
@@ -262,6 +281,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:property_roles, RoleLib.property_roles())
         |> assign(:role_data, RoleLib.role_data())
         |> assign(:has_active_mfa?, has_active_mfa?(user.id))
+        |> assign(:changeable_roles, changeable_roles)
         |> add_breadcrumb(name: "Edit: #{user.name}", url: conn.request_path)
         |> render("edit.html")
 
@@ -379,6 +399,7 @@ defmodule TeiserverWeb.Admin.UserController do
             |> assign(:property_roles, RoleLib.property_roles())
             |> assign(:role_data, RoleLib.role_data())
             |> assign(:has_active_mfa?, has_active_mfa?(user.id))
+            |> assign(:changeable_roles, changeable_roles)
             |> render("edit.html", user: user, changeset: changeset)
         end
 
