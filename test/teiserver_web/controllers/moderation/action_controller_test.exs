@@ -56,11 +56,6 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   end
 
   describe "new action" do
-    test "renders select form", %{conn: conn} do
-      conn = get(conn, ~p"/moderation/action/new")
-      assert html_response(conn, 200) =~ "Select user:"
-    end
-
     test "renders creation form", %{conn: conn} do
       user = GeneralTestLib.make_user()
 

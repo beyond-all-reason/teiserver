@@ -6,12 +6,6 @@
   Map.merge(assigns, %{active: "reports"})
 )}
 
-{central_component("picker_script",
-  module: Teiserver.Account.UserLib,
-  name: "account_user",
-  title: "User search"
-)}
-
 <%= if assigns[:lines] do %>
   <script src={~p"/js/d3.js"}>
   </script>
@@ -151,11 +145,7 @@
                 <label for={"search_account_user#{i}"} class="control-label">
                   User {i}:
                 </label>
-                {render(TeiserverWeb.Account.UserView, "picker.html",
-                  input_name: "report[account_user#{i}]",
-                  input_id: "report_account_user#{i}",
-                  value: @params["account_user#{i}"]
-                )}
+                You cannot currently search by user. (Issue #1415)
               </div>
             <% end %>
 
