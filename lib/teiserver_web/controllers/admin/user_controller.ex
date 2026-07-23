@@ -466,7 +466,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
         page = params["page"]
 
-        limit = params["limit"] - 1
+        limit = params["limit"]
 
         ratings =
           Account.list_ratings(
