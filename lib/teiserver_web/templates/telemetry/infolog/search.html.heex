@@ -1,19 +1,5 @@
 <% {fg, _bg, bsname} = view_colour() |> colours() %>
 
-<script type="text/javascript" charset="utf-8">
-  $(function() {
-    $('select').select2({
-      width: "100%"
-    });
-  });
-</script>
-
-{central_component("icon_dropdown_js", [])}
-
-<link rel="stylesheet" href={~p"/css/select2.css"} />
-<script src={~p"/js/select2.js"}>
-</script>
-
 <div class="search-row pt-3">
   <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">
     <i class="fa-solid fa-fw fa-search"></i> Show search form

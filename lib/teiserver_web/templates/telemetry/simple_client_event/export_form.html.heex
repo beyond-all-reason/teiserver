@@ -1,22 +1,10 @@
 <% bsname = view_colour() %>
 
-<link rel="stylesheet" href={~p"/css/select2.css"} />
-<script src={~p"/js/select2.js"}>
-</script>
-
 <TeiserverWeb.Telemetry.TelemetryComponents.sub_menu
   active="simple_client_events"
   view_colour={view_colour()}
   current_user={@current_user}
 />
-
-<script type="text/javascript" charset="utf-8">
-  $(function() {
-    $('.list-builder-select').select2({
-      width: "100%"
-    });
-  });
-</script>
 
 <div class="row section-menu">
   <div class="col-md-12">
