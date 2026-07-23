@@ -173,60 +173,65 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
                 <div class="tab-pane" id="compare_server_details_tab" style="padding:5px;">
                   <div class="row">
                     <div class="col-md-6">
-                      {central_component("detail_line",
-                        label: "Unique users",
-                        value:
+                      <.detail_line
+                        label="Unique users"
+                        value={
                           percent(
                             @data.server["aggregates"]["stats"]["unique_users"] /
                               @data.past_server["aggregates"]["stats"]["unique_users"]
-                          ),
-                        append: "%"
-                      )}
+                          )
+                        }
+                        suffix="%"
+                      />
 
-                      {central_component("detail_line",
-                        label: "Peak total users",
-                        value:
+                      <.detail_line
+                        label="Peak total users"
+                        value={
                           percent(
                             @data.server["aggregates"]["stats"]["peak_user_counts"]["total"] /
                               @data.past_server["aggregates"]["stats"]["peak_user_counts"][
                                 "total"
                               ]
-                          ),
-                        append: "%"
-                      )}
+                          )
+                        }
+                        suffix="%"
+                      />
 
-                      {central_component("detail_line",
-                        label: "User registrations",
-                        value:
+                      <.detail_line
+                        label="User registrations"
+                        value={
                           percent(
                             @data.server["aggregates"]["stats"]["accounts_created"] /
                               @data.past_server["aggregates"]["stats"]["accounts_created"]
-                          ),
-                        append: "%"
-                      )}
+                          )
+                        }
+                        suffix="%"
+                      />
                     </div>
                     <div class="col-md-6">
-                      {central_component("detail_line",
-                        label: "Unique players",
-                        value:
+                      <.detail_line
+                        label="Unique players"
+                        value={
                           percent(
                             @data.server["aggregates"]["stats"]["unique_players"] /
                               @data.past_server["aggregates"]["stats"]["unique_players"]
-                          ),
-                        append: "%"
-                      )}
+                          )
+                        }
+                        suffix="%"
+                      />
 
-                      {central_component("detail_line",
-                        label: "Peak players",
-                        value:
+                      <.detail_line
+                        label="Peak players"
+                        value={
                           percent(
                             @data.server["aggregates"]["stats"]["peak_user_counts"]["players"] /
                               @data.past_server["aggregates"]["stats"]["peak_user_counts"][
                                 "players"
                               ]
-                          ),
-                        append: "%"
-                      )}
+                          )
+                        }
+                        suffix="%"
+                      />
                     </div>
                   </div>
 
@@ -234,55 +239,60 @@ show_compare = @data.past_server["aggregates"]["stats"]["unique_users"] != 0 %>
                   <h4>Time spent by state</h4>
                   <div class="row">
                     <div class="col-md-6">
-                      {central_component("detail_line",
-                        label: "Player",
-                        value:
+                      <.detail_line
+                        label="Player"
+                        value={
                           percent(
                             @data.server["aggregates"]["minutes"]["player"] /
                               @data.past_server["aggregates"]["minutes"]["player"]
-                          ),
-                        append: "%"
-                      )}
+                          )
+                        }
+                        suffix="%"
+                      />
 
-                      {central_component("detail_line",
-                        label: "Spectator",
-                        value:
+                      <.detail_line
+                        label="Spectator"
+                        value={
                           percent(
                             @data.server["aggregates"]["minutes"]["spectator"] /
                               @data.past_server["aggregates"]["minutes"]["spectator"]
-                          ),
-                        append: "%"
-                      )}
+                          )
+                        }
+                        suffix="%"
+                      />
 
-                      {central_component("detail_line",
-                        label: "Lobby",
-                        value:
+                      <.detail_line
+                        label="Lobby"
+                        value={
                           percent(
                             @data.server["aggregates"]["minutes"]["lobby"] /
                               @data.past_server["aggregates"]["minutes"]["lobby"]
-                          ),
-                        append: "%"
-                      )}
+                          )
+                        }
+                        suffix="%"
+                      />
 
-                      {central_component("detail_line",
-                        label: "Menu",
-                        value:
+                      <.detail_line
+                        label="Menu"
+                        value={
                           percent(
                             @data.server["aggregates"]["minutes"]["menu"] /
                               @data.past_server["aggregates"]["minutes"]["menu"]
-                          ),
-                        append: "%"
-                      )}
+                          )
+                        }
+                        suffix="%"
+                      />
 
-                      {central_component("detail_line",
-                        label: "Total",
-                        value:
+                      <.detail_line
+                        label="Total"
+                        value={
                           percent(
                             @data.server["aggregates"]["minutes"]["total"] /
                               @data.past_server["aggregates"]["minutes"]["total"]
-                          ),
-                        append: "%"
-                      )}
+                          )
+                        }
+                        suffix="%"
+                      />
                     </div>
                     <div class="col-md-6"></div>
                   </div>

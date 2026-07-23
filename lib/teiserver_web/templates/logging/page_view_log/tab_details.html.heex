@@ -1,62 +1,62 @@
 <br />
 
-{central_component("detail_line",
-  label: "Timestamp",
-  value: date_to_str(@page_view_log.inserted_at, format: :hms_dmy, tz: @tz)
-)}
+<.detail_line
+  label="Timestamp"
+  value={date_to_str(@page_view_log.inserted_at, format: :hms_dmy, tz: @tz)}
+/>
 
-{central_component("detail_line",
-  label: "User",
-  icon: %{
-    colour: @page_view_log.user.colour,
-    icon: @page_view_log.user.icon
-  },
-  value: @page_view_log.user.name,
-  link: %{
-    path: ~p"/teiserver/admin/user/#{@page_view_log.user_id}",
-    bsname: elem(Teiserver.Account.UserLib.colours() |> colours(), 2),
-    icon: Teiserver.Account.UserLib.icon()
+<.detail_line
+  label="User"
+  icon={@page_view_log.user.icon}
+  value={@page_view_log.user.name}
+  link={
+    %{
+      path: ~p"/teiserver/admin/user/#{@page_view_log.user_id}",
+      bsname: elem(Teiserver.Account.UserLib.colours() |> colours(), 2),
+      icon: Teiserver.Account.UserLib.icon()
+    }
   }
-)}
+/>
 
-{central_component("detail_line",
-  label: "Section",
-  value: @page_view_log.section
-)}
+<.detail_line
+  label="Section"
+  value={@page_view_log.section}
+/>
 
-{central_component("detail_line",
-  label: "Path",
-  value: @page_view_log.path
-)}
+<.detail_line
+  label="Path"
+  value={@page_view_log.path}
+/>
 
-{central_component("detail_line",
-  label: "Full route",
-  value: "#{@page_view_log.section}/#{@page_view_log.path}",
-  link: %{
+<.detail_line
+  label="Full route"
+  value={"#{@page_view_log.section}/#{@page_view_log.path}"}
+  link:
+  {%{
     path: "/#{@page_view_log.section}/#{@page_view_log.path}",
     bsname: "primary",
     icon: Teiserver.Logging.PageViewLogLib.icon()
-  }
-)}
+  }}
+/>
 
 <hr />
 
-{central_component("detail_line",
-  label: "Method",
-  value: @page_view_log.method
-)}
+<.detail_line
+  label="Method"
+  value={@page_view_log.method}
+/>
 
-{central_component("detail_line",
-  label: "Status",
-  value: @page_view_log.status
-)}
+<.detail_line
+  label="Status"
+  value={@page_view_log.status}
+/>
 
-{central_component("detail_line",
-  label: "IP",
-  value: @page_view_log.ip
-)}
+<.detail_line
+  label="IP"
+  value={@page_view_log.ip}
+/>
 
-{central_component("detail_line",
-  label: "Load time",
-  value: "#{round(@page_view_log.load_time / 100) / 10}ms"
-)}
+<.detail_line
+  label="Load time"
+  value={"#{round(@page_view_log.load_time / 100) / 10}ms"}
+/>

@@ -2,168 +2,169 @@
 
 <div class="page-row row">
   <div class="col-md-6">
-    <%= if allow?(@conn, "Moderator") do %>
-      {central_component("detail_line",
-        label: "Email",
-        value: @user.email
-      )}
-    <% end %>
+    <.detail_line
+      :if={allow?(@conn, "Moderator")}
+      label="Email"
+      value={@user.email}
+    />
 
-    {central_component("detail_line",
-      label: "Created",
-      value: date_to_str(@user.inserted_at, format: :hms_or_hms_ymd, tz: @tz)
-    )}
+    <.detail_line
+      label="Created"
+      value={date_to_str(@user.inserted_at, format: :hms_or_hms_ymd, tz: @tz)}
+    />
 
-    {central_component("detail_line",
-      label: "Last login",
-      value:
+    <.detail_line
+      label="Last login"
+      value={
         date_to_str(@user.last_login,
           format: :hms_or_hms_ymd,
           tz: @tz
         )
-    )}
+      }
+    />
 
-    {central_component("detail_line",
-      label: "Last played",
-      value:
+    <.detail_line
+      label="Last played"
+      value={
         date_to_str(@user.last_played,
           format: :hms_or_hms_ymd,
           tz: @tz
         )
-    )}
+      }
+    />
 
-    {central_component("detail_line",
-      label: "Last logout",
-      value:
+    <.detail_line
+      label="Last logout"
+      value={
         date_to_str(@user.last_logout,
           format: :hms_or_hms_ymd,
           tz: @tz
         )
-    )}
+      }
+    />
 
-    {central_component("detail_line",
-      label: "Lobby",
-      value: @user.data["lobby_client"]
-    )}
+    <.detail_line
+      label="Lobby"
+      value={@user.data["lobby_client"]}
+    />
   </div>
 
   <div class="col-md-6">
-    {central_component("detail_line",
-      label: "Accolade miss count",
-      value: @user_stats["accolade_miss_count"],
-      width: 200
-    )}
+    <.detail_line
+      label="Accolade miss count"
+      value={@user_stats["accolade_miss_count"]}
+      width={200}
+    />
 
     <% mins = rem(@user_stats["player_minutes"] || 0, 60)
     hours = (:math.floor(@user_stats["player_minutes"] || 0) / 60) |> round() %>
-    {central_component("detail_line",
-      label: "Player time",
-      value: "#{hours} hours, #{mins} minutes",
-      width: 200
-    )}
+    <.detail_line
+      label="Player time"
+      value={"#{hours} hours, #{mins} minutes"}
+      width={200}
+    />
 
     <% mins = rem(@user_stats["spectator_minutes"] || 0, 60)
     hours = (:math.floor(@user_stats["spectator_minutes"] || 0) / 60) |> round() %>
-    {central_component("detail_line",
-      label: "Spectator time",
-      value: "#{hours} hours, #{mins} minutes",
-      width: 200
-    )}
+    <.detail_line
+      label="Spectator time"
+      value={"#{hours} hours, #{mins} minutes"}
+      width={200}
+    />
 
-    <%= if (@user_stats["smurf_count"] || 0) > 0 do %>
-      {central_component("detail_line",
-        label: "Smurf count",
-        value: @user_stats["smurf_count"],
-        width: 200
-      )}
-    <% end %>
+    <.detail_line
+      :if={(@user_stats["smurf_count"] || 0) > 0}
+      label="Smurf count"
+      value={@user_stats["smurf_count"]}
+      width={200}
+    />
 
-    {central_component("detail_line",
-      label: "Discord ID",
-      value: @user.discord_id,
-      width: 200
-    )}
+    <.detail_line
+      label="Discord ID"
+      value={@user.discord_id}
+      width={200}
+    />
   </div>
 
   <%= if allow?(@conn, "Server") do %>
     <div class="col-md-12">
-      {central_component("detail_line",
-        label: "Roles",
-        value: Enum.join(@user.roles || [], ", "),
-        width: 200
-      )}
+      <.detail_line
+        label="Roles"
+        value={Enum.join(@user.roles || [], ", ")}
+        width={200}
+      />
 
-      {central_component("detail_line",
-        label: "Permissions",
-        value: Enum.join(@user.permissions, ", "),
-        width: 200
-      )}
+      <.detail_line
+        label="Permissions"
+        value={Enum.join(@user.permissions, ", ")}
+        width={200}
+      />
     </div>
   <% end %>
 </div>
 
-<%= if allow?(@conn, "Moderator") do %>
-  <div class="row mt-2">
-    <div class="col-md-6">
-      <textarea id="user_data" rows="28" class="form-control monospace m1"><%= Jason.encode! Map.drop(@user.data, ["ip"]), pretty: true %></textarea>
-    </div>
-    <div class="col-md-6">
-      <table class="table table-sm">
-        <tbody>
-          <% keys =
-            @user_stats
-            |> Map.keys()
-            |> Enum.sort() %>
-          <%= for key <- keys do %>
-            <% value = @user_stats[key] %>
-            <tr>
-              <td>{key}</td>
-              <td>{Kernel.inspect(value)}</td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-
-      <%= if allow?(@conn, "Admin") do %>
-        <hr />
-        <form action={~p"/teiserver/admin/users/set_stat"} method="post" class="">
-          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-          <input type="hidden" name="userid" value={@user.id} />
-
-          <div class="row" style="padding: 10px;">
-            <input type="text" name="key" value="" class="form-control" placeholder="key" />
-          </div>
-
-          <div class="row" style="padding: 10px;">
-            <input type="text" name="value" value="" class="form-control" placeholder="value" />
-          </div>
-
-          <button type="submit" class={"btn btn-#{bsname} float-end"}>
-            Set stat
-          </button>
-        </form>
-      <% end %>
-
-      <br /><br />
-      <hr />
-      <form action={~p"/teiserver/admin/users/data_search"} method="post" class="">
-        <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-
-        <input type="hidden" name="data_search[cpu]" value={@user_stats["hardware:cpuinfo"]} />
-        <input type="hidden" name="data_search[gpu]" value={@user_stats["hardware:gpuinfo"]} />
-        <input type="hidden" name="data_search[ram]" value={@user_stats["hardware:raminfo"]} />
-        <input type="hidden" name="data_search[os]" value={@user_stats["hardware:osinfo"]} />
-        <input type="hidden" name="data_search[ip]" value={@user_stats["last_ip"]} />
-        <input
-          type="hidden"
-          name="data_search[screen]"
-          value={@user_stats["hardware:displaymax"]}
-        />
-
-        <button type="submit" class={"btn btn-#{bsname}"}>
-          <i class="fa-fw fa-solid fa-search"></i> Data search (pre-filled, click Search)
-        </button>
-      </form>
-    </div>
+<div :if={allow?(@conn, "Moderator")} class="row mt-2">
+  <div class="col-md-6">
+    <textarea id="user_data" rows="28" class="form-control monospace m1"><%= Jason.encode! Map.drop(@user.data, ["ip"]), pretty: true %></textarea>
   </div>
-<% end %>
+  <div class="col-md-6">
+    <table class="table table-sm">
+      <tbody>
+        <% keys =
+          @user_stats
+          |> Map.keys()
+          |> Enum.sort() %>
+        <%= for key <- keys do %>
+          <% value = @user_stats[key] %>
+          <tr>
+            <td>{key}</td>
+            <td>{Kernel.inspect(value)}</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <form
+      :if={allow?(@conn, "Admin")}
+      action={~p"/teiserver/admin/users/set_stat"}
+      method="post"
+      class="mt-4"
+    >
+      <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+      <input type="hidden" name="userid" value={@user.id} />
+
+      <div class="row" style="padding: 10px;">
+        <input type="text" name="key" value="" class="form-control" placeholder="key" />
+      </div>
+
+      <div class="row" style="padding: 10px;">
+        <input type="text" name="value" value="" class="form-control" placeholder="value" />
+      </div>
+
+      <button type="submit" class={"btn btn-#{bsname} float-end"}>
+        Set stat
+      </button>
+    </form>
+
+    <br /><br />
+    <hr />
+    <form action={~p"/teiserver/admin/users/data_search"} method="post" class="">
+      <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+      <input type="hidden" name="data_search[cpu]" value={@user_stats["hardware:cpuinfo"]} />
+      <input type="hidden" name="data_search[gpu]" value={@user_stats["hardware:gpuinfo"]} />
+      <input type="hidden" name="data_search[ram]" value={@user_stats["hardware:raminfo"]} />
+      <input type="hidden" name="data_search[os]" value={@user_stats["hardware:osinfo"]} />
+      <input type="hidden" name="data_search[ip]" value={@user_stats["last_ip"]} />
+      <input
+        type="hidden"
+        name="data_search[screen]"
+        value={@user_stats["hardware:displaymax"]}
+      />
+
+      <button type="submit" class={"btn btn-#{bsname}"}>
+        <i class="fa-fw fa-solid fa-search"></i> Data search (pre-filled, click Search)
+      </button>
+    </form>
+  </div>
+</div>

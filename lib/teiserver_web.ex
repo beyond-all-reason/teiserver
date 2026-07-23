@@ -83,6 +83,7 @@ defmodule TeiserverWeb do
 
       import TeiserverWeb.CoreComponents
       import TeiserverWeb.NavComponents
+      import TeiserverWeb.Components.DetailLine, only: [detail_line: 1]
       unquote(verified_routes())
 
       import Phoenix.LiveView
@@ -268,6 +269,7 @@ defmodule TeiserverWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import TeiserverWeb.{CoreComponents, NavComponents}
+      import TeiserverWeb.Components.DetailLine, only: [detail_line: 1]
 
       use Gettext, backend: TeiserverWeb.Gettext
 
