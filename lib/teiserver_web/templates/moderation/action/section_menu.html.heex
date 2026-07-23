@@ -18,16 +18,6 @@
       Search
     </.section_menu_button>
 
-    <%= if allow?(@conn, "Moderator") do %>
-      <.section_menu_button
-        icon={StylingHelper.icon(:new)}
-        bsname={bsname}
-        url={~p"/moderation/action/new"}
-      >
-        New
-      </.section_menu_button>
-    <% end %>
-
     <%= case @active do %>
       <% "show" -> %>
         <.section_menu_button

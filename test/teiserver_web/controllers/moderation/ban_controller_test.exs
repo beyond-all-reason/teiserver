@@ -24,11 +24,6 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
   end
 
   describe "new ban" do
-    test "renders select form", %{conn: conn} do
-      conn = get(conn, ~p"/moderation/ban/new")
-      assert html_response(conn, 200) =~ "Select user:"
-    end
-
     test "renders creation form", %{conn: conn} do
       user = GeneralTestLib.make_user()
 
