@@ -31,26 +31,23 @@
         <div class="row">
           <div class="col-md-12">
             <%= if @filter != nil do %>
-              {central_component("section_menu_button",
-                name: "rating-all",
-                label: "All matches",
-                active: @filter,
-                url: ~p"/teiserver/admin/users/ratings/#{@user.id}",
-                icon: "",
-                bsname: bsname
-              )}
+              <.section_menu_button
+                url={~p"/teiserver/admin/users/ratings/#{@user.id}"}
+                icon=""
+                bsname={bsname}
+              >
+                All matches
+              </.section_menu_button>
             <% end %>
 
             <%= for rt <- @rating_type_list do %>
               <%= if @ratings[rt] != nil do %>
-                {central_component("section_menu_button",
-                  name: rt,
-                  label: raw("#{rt} &nbsp;&nbsp;&nbsp; #{@ratings[rt].rating_value |> round(2)}"),
-                  active: @filter,
-                  url: "?filter=#{rt}",
-                  icon: "",
-                  bsname: bsname
-                )}
+                <.section_menu_button
+                  url={"?filter=#{rt}"}
+                  bsname={bsname}
+                >
+                  {rt} &nbsp;&nbsp;&nbsp; {@ratings[rt].rating_value |> round(2)}
+                </.section_menu_button>
               <% end %>
             <% end %>
           </div>

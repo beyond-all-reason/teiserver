@@ -1,22 +1,22 @@
 <% bsname = view_colour() %>
 
-{central_component("section_menu_button",
-  name: "index",
-  label: "List",
-  active: @active,
-  icon: :list,
-  bsname: bsname,
-  url: ~p"/teiserver/admin/codes"
-)}
+<.section_menu_button
+  active={@active == "index"}
+  icon={:list}
+  bsname={bsname}
+  url={~p"/teiserver/admin/codes"}
+>
+  List
+</.section_menu_button>
 
-{central_component("section_menu_button",
-  name: "new",
-  label: "New",
-  active: @active,
-  icon: :new,
-  bsname: bsname,
-  url: ~p"/teiserver/admin/codes/new"
-)}
+<.section_menu_button
+  active={@active == "new"}
+  icon={:new}
+  bsname={bsname}
+  url={~p"/teiserver/admin/codes/new"}
+>
+  New
+</.section_menu_button>
 
 <form
   action={~p"/teiserver/admin/codes"}

@@ -2,12 +2,10 @@
 types = Teiserver.Game.MatchRatingLib.rating_type_list() %>
 
 <%= for t <- types do %>
-  {central_component("section_menu_button",
-    name: t,
-    label: t,
-    active: @active,
-    icon: "",
-    bsname: bsname,
-    url: ~p"/battle/ratings/leaderboard/#{t}"
-  )}
+  <.section_menu_button
+    bsname={bsname}
+    url={~p"/battle/ratings/leaderboard/#{t}"}
+  >
+    {t}
+  </.section_menu_button>
 <% end %>

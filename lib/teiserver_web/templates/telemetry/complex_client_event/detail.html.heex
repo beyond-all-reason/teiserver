@@ -24,27 +24,25 @@
         <br /><br />
 
         <%= for key <- @schema_keys do %>
-          {central_component("section_menu_button",
-            name: "key-#{key}",
-            label: key,
-            active: "key-#{@key}",
-            bsname: bsname,
-            icon: "",
-            url: "?key=#{key}&tf=#{@timeframe}"
-          )}
+          <.section_menu_button
+            active={key == @key}
+            bsname={bsname}
+            url={"?key=#{key}&tf=#{@timeframe}"}
+          >
+            {key}
+          </.section_menu_button>
         <% end %>
         &nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp;&nbsp;
         <%= for tf <- timeframes do %>
-          {central_component("section_menu_button",
-            name: "tf-#{tf}",
-            label: tf,
-            active: "tf-#{@timeframe}",
-            bsname: bsname,
-            icon: "",
-            url: "?key=#{@key}&tf=#{tf}"
-          )}
+          <.section_menu_button
+            active={tf == @timeframe}
+            bsname={bsname}
+            url={"?key=#{@key}&tf=#{tf}"}
+          >
+            {tf}
+          </.section_menu_button>
         <% end %>
 
         <br /><br />
