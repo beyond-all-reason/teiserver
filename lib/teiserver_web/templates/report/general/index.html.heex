@@ -5,32 +5,32 @@
     </div>
 
     <%= if allow?(@current_user, "Moderator") do %>
-      {central_component("menu_card",
-        size: :small,
-        icon: Teiserver.Account.RatingLib.icon(),
-        name: "ratings",
-        text: "Ratings",
-        link: ~p"/teiserver/reports/ratings/distribution_table"
-      )}
+      <.menu_card
+        size={:small}
+        icon={Teiserver.Account.RatingLib.icon()}
+        url={~p"/teiserver/reports/ratings/distribution_table"}
+      >
+        Ratings
+      </.menu_card>
     <% end %>
 
     <%= if allow?(@current_user, "Engine") do %>
-      {central_component("menu_card",
-        size: :small,
-        icon: Teiserver.Telemetry.InfologLib.icon(),
-        name: "infolog",
-        text: "Infologs",
-        link: ~p"/telemetry/infolog"
-      )}
+      <.menu_card
+        size={:small}
+        icon={Teiserver.Telemetry.InfologLib.icon()}
+        url={~p"/telemetry/infolog"}
+      >
+        Infologs
+      </.menu_card>
     <% end %>
 
-    {central_component("menu_card",
-      size: :small,
-      icon: "fa-solid fa-download",
-      name: "exports",
-      text: "Data exports",
-      link: ~p"/teiserver/reports/exports"
-    )}
+    <.menu_card
+      size={:small}
+      icon="fa-solid fa-download"
+      url={~p"/teiserver/reports/exports"}
+    >
+      Data exports
+    </.menu_card>
   <% end %>
 
   <div class="col-md-12">
@@ -38,33 +38,33 @@
   </div>
 
   <%= if allow?(@current_user, Teiserver.Account.TimeSpentReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.TimeSpentReport.icon(),
-      name: "time_spent",
-      text: "Time spent",
-      link: ~p"/teiserver/reports/show/time_spent"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.TimeSpentReport.icon()}
+      url={~p"/teiserver/reports/show/time_spent"}
+    >
+      Time spent
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.RelationshipReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.RelationshipReport.icon(),
-      name: "relationships",
-      text: "Relationships",
-      link: ~p"/teiserver/reports/show/relationships"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.RelationshipReport.icon()}
+      url={~p"/teiserver/reports/show/relationships"}
+    >
+      Relationships
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.TimeCompareReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.TimeCompareReport.icon(),
-      name: "time_compare",
-      text: "Time compare",
-      link: ~p"/teiserver/reports/show/time_compare"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.TimeCompareReport.icon()}
+      url={~p"/teiserver/reports/show/time_compare"}
+    >
+      Time compare
+    </.menu_card>
   <% end %>
 </div>
 
@@ -74,113 +74,113 @@
   </div>
 
   <%= if allow?(@current_user, Teiserver.Account.ActiveReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.ActiveReport.icon(),
-      name: "active",
-      text: "Active",
-      link: ~p"/teiserver/reports/show/active"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.ActiveReport.icon()}
+      url={~p"/teiserver/reports/show/active"}
+    >
+      Active
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.UserAgeReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.UserAgeReport.icon(),
-      name: "user_age",
-      text: "User age",
-      link: ~p"/teiserver/reports/show/user_age"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.UserAgeReport.icon()}
+      url={~p"/teiserver/reports/show/user_age"}
+    >
+      User age
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.VerifiedReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.VerifiedReport.icon(),
-      name: "verified",
-      text: "Verified",
-      link: ~p"/teiserver/reports/show/verified"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.VerifiedReport.icon()}
+      url={~p"/teiserver/reports/show/verified"}
+    >
+      Verified
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.RetentionReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.RetentionReport.icon(),
-      name: "retention",
-      text: "Retention",
-      link: ~p"/teiserver/reports/show/retention"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.RetentionReport.icon()}
+      url={~p"/teiserver/reports/show/retention"}
+    >
+      Retention
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.PopulationReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.PopulationReport.icon(),
-      name: "population",
-      text: "Population",
-      link: ~p"/teiserver/reports/show/population"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.PopulationReport.icon()}
+      url={~p"/teiserver/reports/show/population"}
+    >
+      Population
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.NewUserFunnelReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.NewUserFunnelReport.icon(),
-      name: "new_user_funnel",
-      text: "New user funnel",
-      link: ~p"/teiserver/reports/show/new_user_funnel"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.NewUserFunnelReport.icon()}
+      url={~p"/teiserver/reports/show/new_user_funnel"}
+    >
+      New user funnel
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.RecordsReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.RecordsReport.icon(),
-      name: "records",
-      text: "Records",
-      link: ~p"/teiserver/reports/show/records"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.RecordsReport.icon()}
+      url={~p"/teiserver/reports/show/records"}
+    >
+      Records
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.NewSmurfReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.NewSmurfReport.icon(),
-      name: "new_smurf",
-      text: "New smurfs",
-      link: ~p"/teiserver/reports/show/new_smurf"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.NewSmurfReport.icon()}
+      url={~p"/teiserver/reports/show/new_smurf"}
+    >
+      New smurfs
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.BanEvasionReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.BanEvasionReport.icon(),
-      name: "ban_evasion",
-      text: "Ban evasion",
-      link: ~p"/teiserver/reports/show/ban_evasion"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.BanEvasionReport.icon()}
+      url={~p"/teiserver/reports/show/ban_evasion"}
+    >
+      Ban evasion
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.GrowthReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.GrowthReport.icon(),
-      name: "growth",
-      text: "Growth",
-      link: ~p"/teiserver/reports/show/growth"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.GrowthReport.icon()}
+      url={~p"/teiserver/reports/show/growth"}
+    >
+      Growth
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.WeekOnWeekReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.WeekOnWeekReport.icon(),
-      name: "week_on_week",
-      text: "Week on Week",
-      link: ~p"/teiserver/reports/show/week_on_week"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.WeekOnWeekReport.icon()}
+      url={~p"/teiserver/reports/show/week_on_week"}
+    >
+      Week on Week
+    </.menu_card>
   <% end %>
 </div>
 
@@ -190,63 +190,63 @@
   </div>
 
   <%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) and Application.get_env(:teiserver, Teiserver)[:enable_accolade_mode] == true do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.AccoladeReport.icon(),
-      name: "accolades",
-      text: "Accolades",
-      link: ~p"/teiserver/reports/show/accolades"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.AccoladeReport.icon()}
+      url={~p"/teiserver/reports/show/accolades"}
+    >
+      Accolades
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.LeaderboardReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.LeaderboardReport.icon(),
-      name: "leaderboard",
-      text: "Leaderboard",
-      link: ~p"/teiserver/reports/show/leaderboard"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.LeaderboardReport.icon()}
+      url={~p"/teiserver/reports/show/leaderboard"}
+    >
+      Leaderboard
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.ReviewReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.ReviewReport.icon(),
-      name: "review",
-      text: "Review",
-      link: ~p"/teiserver/reports/show/review"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.ReviewReport.icon()}
+      url={~p"/teiserver/reports/show/review"}
+    >
+      Review
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Account.OpenSkillReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Account.OpenSkillReport.icon(),
-      name: "open_skill",
-      text: "Open Skill",
-      link: ~p"/teiserver/reports/show/open_skill"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Account.OpenSkillReport.icon()}
+      url={~p"/teiserver/reports/show/open_skill"}
+    >
+      Open Skill
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Game.MappingReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Game.MappingReport.icon(),
-      name: "mapping",
-      text: "Mapping",
-      link: ~p"/teiserver/reports/show/mapping"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Game.MappingReport.icon()}
+      url={~p"/teiserver/reports/show/mapping"}
+    >
+      Mapping
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, Teiserver.Moderation.ActivityReport.permissions()) do %>
-    {central_component("menu_card",
-      size: :small,
-      icon: Teiserver.Moderation.ActivityReport.icon(),
-      name: "moderation_activity",
-      text: "Moderation",
-      link: ~p"/teiserver/reports/show/moderation_activity"
-    )}
+    <.menu_card
+      size={:small}
+      icon={Teiserver.Moderation.ActivityReport.icon()}
+      url={~p"/teiserver/reports/show/moderation_activity"}
+    >
+      Moderation
+    </.menu_card>
   <% end %>
 
   <.menu_card
@@ -269,12 +269,12 @@
 </div>
 
 <div class="row mt-2">
-  {central_component("menu_card",
-    size: :small,
-    icon_class: "fa-solid",
-    name: "",
-    icon: StylingHelper.icon(:back),
-    text: "Back",
-    link: ~p"/"
-  )}
+  <.menu_card
+    size={:small}
+    icon_class="fa-solid"
+    icon={StylingHelper.icon(:back)}
+    url={~p"/"}
+  >
+    Back
+  </.menu_card>
 </div>

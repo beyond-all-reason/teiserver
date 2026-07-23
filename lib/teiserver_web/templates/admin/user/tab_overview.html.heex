@@ -1,9 +1,9 @@
 <style type="text/css">
   .role-badge {
-    width: 150px;
-    display: inline-block;
-    text-align: center;
-    font-size: 1.5em;
+    width=150px;
+    display=inline-block;
+    text-align=center;
+    font-size=1.5em;
   }
 </style>
 
@@ -15,22 +15,22 @@
         <% data = @role_data[role] %>
         <%= if data != nil and Map.get(data, :badge) != false do %>
           <li>
-            <i class={"fa-fw #{data.icon}"} style={"color: #{data.colour}"} title={role}></i>
+            <i class={"fa-fw #{data.icon}"} style={"color=#{data.colour}"} title={role}></i>
             {role}
           </li>
         <% end %>
       <% end %>
 
       <li :if={@has_active_mfa?}>
-        <i class="fa-fw fa-lock" style="color: #00AA00" title="MFA enabled"></i> Active MFA
+        <i class="fa-fw fa-lock" style="color=#00AA00" title="MFA enabled"></i> Active MFA
       </li>
 
       <li :if={not @has_active_mfa?}>
-        <i class="fa-fw fa-lock-open" style="color: #AA0000" title="MFA enabled"></i> No MFA
+        <i class="fa-fw fa-lock-open" style="color=#AA0000" title="MFA enabled"></i> No MFA
       </li>
 
       <li :if={@cache_user.shadowbanned}>
-        <i class="fa-fw fa-ninja" style="color: #AAAAAA" title="Shadowbanned"></i> Shadowbanned
+        <i class="fa-fw fa-ninja" style="color=#AAAAAA" title="Shadowbanned"></i> Shadowbanned
       </li>
     </ul>
   </div>
@@ -59,71 +59,79 @@
     <h4>Profile/history</h4>
   </div>
 
-  {central_component("menu_card",
-    icon: Teiserver.Chat.LobbyMessageLib.icon(),
-    name: "chat",
-    text: "Chat",
-    icon_class: "fa-solid",
-    link: ~p"/admin/chat?userid=#{@user.id}"
-  )}
+  <.menu_card
+    icon={Teiserver.Chat.LobbyMessageLib.icon()}
+    name="chat"
+    icon_class="fa-solid"
+    url={~p"/admin/chat?userid=#{@user.id}"}
+  >
+    Chat
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon: Teiserver.Account.RatingLib.icon(),
-    name: "ratings",
-    text: "Ratings",
-    icon_class: "fa-solid",
-    link: ~p"/teiserver/admin/users/ratings/#{@user.id}"
-  )}
+  <.menu_card
+    icon={Teiserver.Account.RatingLib.icon()}
+    name="ratings"
+    icon_class="fa-solid"
+    url={~p"/teiserver/admin/users/ratings/#{@user.id}"}
+  >
+    Ratings
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon: Teiserver.icon(:relationship),
-    name: "relationships",
-    text: "Relationships",
-    icon_class: "fa-solid",
-    link: ~p"/teiserver/admin/users/relationships/#{@user.id}"
-  )}
+  <.menu_card
+    icon={Teiserver.icon(:relationship)}
+    name="relationships"
+    icon_class="fa-solid"
+    url={~p"/teiserver/admin/users/relationships/#{@user.id}"}
+  >
+    Relationships
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon: Teiserver.Battle.MatchLib.icon(),
-    name: "matches",
-    text: "Matches",
-    icon_class: "fa-solid",
-    link: ~p"/teiserver/admin/matches/user/#{@user.id}"
-  )}
+  <.menu_card
+    icon={Teiserver.Battle.MatchLib.icon()}
+    name="matches"
+    icon_class="fa-solid"
+    url={~p"/teiserver/admin/matches/user/#{@user.id}"}
+  >
+    Matches
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon: Teiserver.Account.AccoladeLib.icon(),
-    name: "accolades",
-    text: "Accolades",
-    icon_class: "fa-solid",
-    link: ~p"/teiserver/admin/accolades/user/#{@user.id}"
-  )}
+  <.menu_card
+    icon={Teiserver.Account.AccoladeLib.icon()}
+    name="accolades"
+    icon_class="fa-solid"
+    url={~p"/teiserver/admin/accolades/user/#{@user.id}"}
+  >
+    Accolades
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon: "fa-solid fa-user-circle",
-    name: "profile",
-    text: "Profile",
-    icon_class: "fa-solid",
-    link: ~p"/profile/#{@user.id}"
-  )}
+  <.menu_card
+    icon="fa-solid fa-user-circle"
+    name="profile"
+    icon_class="fa-solid"
+    url={~p"/profile/#{@user.id}"}
+  >
+    Profile
+  </.menu_card>
 
   <div class="col-md-12">
     <h4>Moderation</h4>
   </div>
 
-  {central_component("menu_card",
-    icon: "fa-solid #{Teiserver.Moderation.ReportLib.icon()}",
-    name: "moderation",
-    text: "Reports",
-    icon_class: "fa-solid",
-    link: ~p"/moderation/report/user/#{@user}"
-  )}
+  <.menu_card
+    icon={"fa-solid #{Teiserver.Moderation.ReportLib.icon()}"}
+    name="moderation"
+    icon_class="fa-solid"
+    url={~p"/moderation/report/user/#{@user}"}
+  >
+    Reports
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon: "fa-solid fa-face-angry",
-    name: "smurf",
-    text: "Smurf search",
-    icon_class: "fa-solid",
-    link: ~p"/teiserver/admin/users/smurf_search/#{@user.id}"
-  )}
+  <.menu_card
+    icon="fa-solid fa-face-angry"
+    name="smurf"
+    icon_class="fa-solid"
+    url={~p"/teiserver/admin/users/smurf_search/#{@user.id}"}
+  >
+    Smurf search
+  </.menu_card>
 </div>

@@ -1,70 +1,75 @@
 <div class="row mt-3">
   <%= if allow?(@current_user, "Admin") do %>
-    {central_component("menu_card",
-      size: :medium,
-      icon: Teiserver.Logging.ServerDayLogLib.icon(),
-      name: "server",
-      text: "Server",
-      link: ~p"/logging/server"
-    )}
+    <.menu_card
+      size={:medium}
+      icon={Teiserver.Logging.ServerDayLogLib.icon()}
+      url={~p"/logging/server"}
+    >
+      Server
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@current_user, "Admin") do %>
-    {central_component("menu_card",
-      size: :medium,
-      icon: Teiserver.Battle.MatchLib.icon(),
-      name: "match",
-      text: "Match",
-      link: ~p"/logging/match/day_metrics"
-    )}
+    <.menu_card
+      size={:medium}
+      icon={Teiserver.Battle.MatchLib.icon()}
+      url={~p"/logging/match/day_metrics"}
+    >
+      Match
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@conn, "Server") do %>
-    {central_component("menu_card",
-      size: :medium,
-      icon_class: "fa-solid",
-      icon: Teiserver.Logging.PageViewLogLib.icon(),
-      text: "Web views",
-      link: ~p"/logging/page_views"
-    )}
+    <.menu_card
+      size={:medium}
+      icon_class="fa-solid"
+      icon={Teiserver.Logging.PageViewLogLib.icon()}
+      url={~p"/logging/page_views"}
+    >
+      Web views
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@conn, "Server") do %>
-    {central_component("menu_card",
-      size: :medium,
-      icon_class: "fa-solid",
-      icon: Teiserver.Logging.AggregateViewLogLib.icon(),
-      text: "Web aggregate",
-      link: ~p"/logging/aggregate_views"
-    )}
+    <.menu_card
+      size={:medium}
+      icon_class="fa-solid"
+      icon={Teiserver.Logging.AggregateViewLogLib.icon()}
+      url={~p"/logging/aggregate_views"}
+    >
+      Web aggregate
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@conn, "Server") do %>
-    {central_component("menu_card",
-      size: :medium,
-      icon_class: "fa-solid",
-      icon: Teiserver.Logging.AuditLogLib.icon(),
-      text: "Audit",
-      link: ~p"/logging/audit"
-    )}
+    <.menu_card
+      size={:medium}
+      icon_class="fa-solid"
+      icon={Teiserver.Logging.AuditLogLib.icon()}
+      url={~p"/logging/audit"}
+    >
+      Audit
+    </.menu_card>
   <% end %>
 
   <%= if allow?(@conn, "Server") do %>
-    {central_component("menu_card",
-      size: :medium,
-      icon_class: "fa-solid",
-      icon: "fa-solid fa-tachometer-alt",
-      text: "Live dashboard",
-      link: ~p"/logging/live/dashboard"
-    )}
+    <.menu_card
+      size={:medium}
+      icon_class="fa-solid"
+      icon="fa-solid fa-tachometer-alt"
+      url={~p"/logging/live/dashboard"}
+    >
+      Live dashboard
+    </.menu_card>
   <% end %>
 </div>
 
 <div class="row mt-3">
-  {central_component("menu_card",
-    icon_class: "fa-solid",
-    icon: StylingHelper.icon(:back),
-    text: "Back",
-    link: ~p"/"
-  )}
+  <.menu_card
+    icon_class="fa-solid"
+    icon={StylingHelper.icon(:back)}
+    url={~p"/"}
+  >
+    Back
+  </.menu_card>
 </div>
