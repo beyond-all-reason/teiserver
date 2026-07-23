@@ -1,16 +1,10 @@
-<% {fg, _bg, bsname} = view_colour() |> colours() %>
+<% {_fg, _bg, bsname} = view_colour() |> colours() %>
 
 {render(
   TeiserverWeb.Logging.GeneralView,
   "sub_menu.html",
   Map.merge(assigns, %{active: "match"})
 )}
-
-{central_component("icon_dropdown_js", [])}
-
-<link rel="stylesheet" href={~p"/css/select2.css"} />
-<script src={~p"/js/select2.js"}>
-</script>
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -32,15 +26,16 @@
 
           <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
-              <label for="report_export_type" class="control-label">Export type: </label>
-              {central_component("icon_dropdown", %{
-                name: "report[export_type]",
-                id: "report_export_type",
-                selected: @params[:active],
-                enumerable: [
-                  %{id: "Raw data", icon: "fa-solid fa-th", colour: fg}
-                ]
-              })}
+              <.input
+                type="select"
+                id="report_export_type"
+                name="report[export_type]"
+                label="Export type"
+                value={Map.get(@params, "fields", "split")}
+                options={[
+                  "Raw data"
+                ]}
+              />
             </div>
           </div>
 

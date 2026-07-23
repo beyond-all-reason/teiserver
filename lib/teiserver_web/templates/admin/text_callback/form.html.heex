@@ -1,17 +1,5 @@
 <% bsname = view_colour() %>
 
-<link rel="stylesheet" href={~p"/css/select2.css"} />
-<script src={~p"/js/select2.js"}>
-</script>
-
-<script type="text/javascript" charset="utf-8">
-  $(function() {
-    $('.list-builder-select').select2({
-      width: "100%"
-    });
-  });
-</script>
-
 <%= form_for @changeset, @action, fn f -> %>
   <%= if @changeset.action do %>
     <div class="alert alert-danger">

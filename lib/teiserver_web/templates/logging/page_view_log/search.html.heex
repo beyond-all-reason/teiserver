@@ -1,4 +1,4 @@
-<% {fg, _bg, bsname} = view_colour() |> colours() %>
+<% {_fg, _bg, bsname} = view_colour() |> colours() %>
 {central_component("picker_script",
   module: Teiserver.Account.UserLib,
   name: "account_user",
@@ -7,20 +7,10 @@
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
-    $('select').select2({
-      width: "100%",
-    });
-
     <%= if @show_search == true do %>
       show_search();
     <% end %>
   });
-</script>
-
-{central_component("icon_dropdown_js", [])}
-
-<link rel="stylesheet" href={~p"/css/select2.css"} />
-<script src={~p"/js/select2.js"}>
 </script>
 
 <div class="row">
@@ -61,31 +51,32 @@
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
-              <label for="search_section" class="control-label">Section: </label>
-              {central_component("icon_dropdown", %{
-                name: "search[section]",
-                id: "search_section",
-                selected: @params["section"],
-                enumerable: [
-                  %{id: "any", name: "Any section", icon: "fa-solid fa-th", colour: fg},
-                  %{id: "admin", icon: "fa-solid fa-user-circle", colour: fg}
-                ]
-              })}
+              <.input
+                type="select"
+                id="search_section"
+                name="search[section]"
+                label="Section"
+                value={@params["section"]}
+                options={[
+                  {"Any section", "any"},
+                  {"Admin", "admin"}
+                ]}
+              />
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
-              <label for="search_limit" class="control-label">Limit: </label>
-              {select(
-                :search,
-                :limit,
-                [
-                  {"50", "50"},
-                  {"100", "100"},
-                  {"200", "200"}
-                ],
-                class: "form-control",
-                selected: @params["limit"]
-              )}
+              <.input
+                type="select"
+                id="search_limit"
+                name="search[limit]"
+                label="Limit"
+                value={@params["limit"]}
+                options={[
+                  "50",
+                  "100",
+                  "200"
+                ]}
+              />
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
@@ -111,17 +102,18 @@
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
-              <label for="search_order_by" class="control-label">Order by: </label>
-              {central_component("icon_dropdown", %{
-                name: "search[order]",
-                id: "search_search_group",
-                selected: @params["order"],
-                enumerable: [
-                  %{id: "Newest first", icon: "fa-solid fa-sort-numeric-down", colour: fg},
-                  %{id: "Oldest first", icon: "fa-solid fa-sort-numeric-up", colour: fg},
-                  %{id: "Slowest", icon: "fa-solid fa-hourglass-end", colour: fg}
-                ]
-              })}
+              <.input
+                type="select"
+                id="search_order"
+                name="search[order]"
+                label="Order by"
+                value={@params["order"]}
+                options={[
+                  "Newest first",
+                  "Oldest first",
+                  "Slowest"
+                ]}
+              />
             </div>
           </div>
 
