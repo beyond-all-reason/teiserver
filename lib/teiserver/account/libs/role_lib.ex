@@ -214,7 +214,7 @@ defmodule Teiserver.Account.RoleLib do
   end
 
   def allowed_role_management("Senior moderator") do
-    allowed_role_management("Moderator") ++ ["Overwatch"]
+    allowed_role_management("Moderator") ++ ["Overwatch", "Reviewer"]
   end
 
   def allowed_role_management("Moderator") do
