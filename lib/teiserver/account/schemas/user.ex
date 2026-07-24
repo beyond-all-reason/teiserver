@@ -358,4 +358,28 @@ defmodule Teiserver.Account.User do
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
   def authorize(_action, conn, _data), do: allow?(conn, "admin.user")
+
+  @doc """
+  Ensure the user id is at least somewhat correct
+  """
+  @spec parse_user_id(id() | String.t()) :: {:ok, id()} | {:error, reason :: term()}
+  def parse_user_id(user_id) when is_integer(user_id) do
+    # this is a postgres constraint since user id are also bigints
+    bigint_max = Integer.pow(2, 63) - 1
+
+    if user_id >= 0 && user_id < bigint_max do
+      {:ok, user_id}
+    else
+      {:error, :out_of_range}
+    end
+  end
+
+  def parse_user_id(user_id) when is_binary(user_id) do
+    case user_id |> String.trim() |> Integer.parse() do
+      {id, ""} -> parse_user_id(id)
+      _err -> {:error, :invalid}
+    end
+  end
+
+  def parse_user_id(_user_id), do: {:error, :invalid}
 end
