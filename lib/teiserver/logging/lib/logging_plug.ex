@@ -58,7 +58,10 @@ defmodule Teiserver.Logging.LoggingPlug do
   defp log_view(conn, start_tick, ip) do
     user_id = get_user_id(conn)
 
-    [_empty, section | path] = String.split(conn.request_path, "/")
+    route_info =
+      Phoenix.Router.route_info(TeiserverWeb.Router, conn.method, conn.request_path, conn.host)
+
+    [_empty, section | _rest] = String.split(conn.request_path, "/")
 
     # Log as seconds
     # load_time = (:os.system_time(:micro_seconds) - start_tick)/1000000
@@ -72,7 +75,9 @@ defmodule Teiserver.Logging.LoggingPlug do
     page_log =
       PageViewLog.changeset(%PageViewLog{}, %{
         section: section,
-        path: Enum.join(path, "/"),
+        # don't log the actual path with the params in them as this
+        # is going to generate a lot of noise and catch garbage
+        path: route_info.route,
         method: conn.method,
         ip: ip,
         load_time: load_time,
