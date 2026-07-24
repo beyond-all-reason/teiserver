@@ -115,8 +115,10 @@ defmodule Teiserver.Account.UserLib do
   """
   @spec get_user_by_id(User.id() | String.t()) :: User.t() | nil
   def get_user_by_id(user_id) do
-    user_id = int_parse!(user_id)
-    cache_get_or_store(:users_by_id, user_id, fn -> get_user(user_id) end)
+    case User.parse_user_id(user_id) do
+      {:ok, user_id} -> cache_get_or_store(:users_by_id, user_id, fn -> get_user(user_id) end)
+      {:error, _reason} -> nil
+    end
   end
 
   @doc """

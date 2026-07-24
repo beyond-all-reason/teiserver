@@ -10,6 +10,23 @@ defmodule Teiserver.Account.UserLibTest do
 
   @disallowed_name ".,:;<>{}()+-*/="
 
+  describe "basic checks on user id" do
+    test "reject malformed id" do
+      assert Account.get_user_by_id("can-i-haz-user") == nil
+    end
+
+    test "reject negative uid" do
+      assert Account.get_user_by_id("-3") == nil
+      assert Account.get_user_by_id(-3) == nil
+    end
+
+    test "reject out of bound uid" do
+      bigint = Integer.pow(2, 64)
+      assert Account.get_user_by_id(bigint) == nil
+      assert Account.get_user_by_id(bigint) == nil
+    end
+  end
+
   describe "disallow renaming to names with disallowed characters" do
     # create_ first
     test "create_user/1" do
