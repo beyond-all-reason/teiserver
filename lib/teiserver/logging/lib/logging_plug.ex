@@ -13,7 +13,7 @@ defmodule Teiserver.Logging.LoggingPlug do
 
   @spec call(Plug.Conn.t(), list()) :: Plug.Conn.t()
   def call(conn, _ops) do
-    start_tick = :os.system_time(:micro_seconds)
+    start_tick = :erlang.monotonic_time(:microsecond)
 
     ip = get_ip_from_conn(conn) || "Error finding IP"
 
@@ -63,14 +63,7 @@ defmodule Teiserver.Logging.LoggingPlug do
 
     [_empty, section | _rest] = String.split(conn.request_path, "/")
 
-    # Log as seconds
-    # load_time = (:os.system_time(:micro_seconds) - start_tick)/1000000
-
-    # Log as milli seconds (1/1000th)
-    # load_time = (:os.system_time(:micro_seconds) - start_tick)/1000
-
-    # Log as micro seconds
-    load_time = :os.system_time(:micro_seconds) - start_tick
+    load_time = :erlang.monotonic_time(:microsecond) - start_tick
 
     page_log =
       PageViewLog.changeset(%PageViewLog{}, %{
