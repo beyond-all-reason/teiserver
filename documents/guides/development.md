@@ -249,6 +249,30 @@ Eventually we want to move the balance algorithms to some external solver which 
 
 The balance alrogirhtms are located in [this](/lib/teiserver/battle/balance) directory.
 
+### Working under the devcontainer
+
+The commands under [Testing](#testing) and [Useful tools and commands](#useful-tools-and-commands) must be invoked in the container's environment with the environment's variables set accordingly. It's simpler to pass the right values for the variables to the environment compared to reconfiguring the container's environment by editing `compose.yml` and restarting the container. You can do this in the following manners:
+```bash
+docker exec -it teiserver bash
+```
+for an interactive shell; or
+```bash
+docker exec [-e VAR=value]... teiserver [command]
+```
+for single commands.
+
+For instance, to run tests interactively:
+```bash
+docker exec -it teiserver bash
+# We're now using bash in the container
+MIX_ENV=test TEI_DB_NAME=teiserver_test mix test --exclude needs_attention
+```
+
+To run tests non-interactively:
+```bash
+docker exec -e MIX_ENV=test -e TEI_DB_NAME=teiserver_test teiserver mix test --exclude needs_attention
+```
+
 ## Main 3rd party dependencies
 
 The main dependencies of the project are:
