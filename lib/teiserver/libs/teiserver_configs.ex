@@ -798,10 +798,11 @@ defmodule Teiserver.TeiserverConfigs do
       section: "User permissions",
       type: "select",
       permissions: ["Admin"],
-      description: "Users are able to view (and edit) their group memberships.",
+      description:
+        "Allow account registration, allow registration by link only, or disable registration.",
       opts: [choices: ["Allowed", "Link only", "Disabled"]],
       default: "Allowed",
-      value_label: "Enable account group pages"
+      value_label: "User registration mode"
     })
 
     add_site_config_type(%{
