@@ -7,20 +7,10 @@
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
-    $('select').select2({
-      width: "100%",
-    });
-
     <%= if @show_search == true do %>
       show_search();
     <% end %>
   });
-</script>
-
-{central_component("icon_dropdown_js", [])}
-
-<link rel="stylesheet" href={~p"/css/select2.css"} />
-<script src={~p"/js/select2.js"}>
 </script>
 
 <div class="row">
