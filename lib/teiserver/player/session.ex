@@ -951,7 +951,7 @@ defmodule Teiserver.Player.Session do
     msg = {:party, {:invite, state.party.current_party, user_id}}
 
     try do
-      case user_id |> via_tuple() |> GenServer.call(msg) do
+      case user_id |> via_tuple() |> GenServer.call(msg, :timer.seconds(2)) do
         :ok -> {:reply, :ok, state}
         {:error, reason} -> {:reply, {:error, reason}, state}
       end
