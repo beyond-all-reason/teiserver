@@ -34,7 +34,6 @@ config :teiserver, TeiserverWeb.Endpoint,
   pubsub_server: Teiserver.PubSub,
   debug_errors: Config.config_env() == :dev,
   code_reloader: Config.config_env() == :dev,
-  check_origin: Config.config_env() == :prod,
   version: Mix.Project.config()[:version],
   https: [
     versions: [:"tlsv1.2"],
