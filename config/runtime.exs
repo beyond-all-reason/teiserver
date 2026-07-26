@@ -68,7 +68,7 @@ config :teiserver, Teiserver.Repo,
 
 check_origin =
   if Teiserver.ConfigHelpers.get_env("TEI_SHOULD_CHECK_ORIGIN", false, :bool) do
-    :conn
+    ["//#{domain_name}"]
   else
     false
   end
