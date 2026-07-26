@@ -5,6 +5,7 @@ defmodule Teiserver.Application do
 
   alias Phoenix.PubSub
   alias Teiserver.Helper.ObanLogger
+  alias Teiserver.Logging
   alias Teiserver.Plugins
   alias Teiserver.Startup
   alias TeiserverWeb.Endpoint
@@ -20,10 +21,7 @@ defmodule Teiserver.Application do
 
   @impl Application
   def start(_type, _args) do
-    LoggerBackends.add({LoggerFileBackend, :error_log})
-    LoggerBackends.add({LoggerFileBackend, :notice_log})
-    LoggerBackends.add({LoggerFileBackend, :info_log})
-    Logger.add_handlers(:teiserver)
+    Logging.setup_loggers()
 
     children =
       [
