@@ -4,14 +4,13 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
   Assumes the basics of parties and matchmaking are working already
   """
 
+  alias ExUnit.Callbacks
   alias Teiserver.Asset
   alias Teiserver.AssetFixtures
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Matchmaking.QueueSupervisor
   alias Teiserver.Support.Tachyon
   use Teiserver.DataCase
-
-  @moduletag :wip
 
   test "all members join matchmaking" do
     {_party_id, [m1, m2], _invited} = setup_party(2, 0)
@@ -243,7 +242,7 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
 
     AssetFixtures.create_map(map_attrs)
 
-    map_attrs = %{
+    queue_attrs = %{
       id: queue_id,
       name: queue_id,
       team_size: team_size,
@@ -254,8 +253,9 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
       maps: Asset.get_maps_for_queue(queue_id)
     }
 
-    state = QueueServer.init_state(map_attrs)
+    state = QueueServer.init_state(queue_attrs)
     {:ok, pid} = QueueSupervisor.start_queue!(state)
+    Callbacks.on_exit(fn -> QueueSupervisor.terminate_queue(queue_id) end)
     version = state.queue.version
 
     %{id: queue_id, pid: pid, version: version}
