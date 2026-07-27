@@ -4,14 +4,13 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
   Assumes the basics of parties and matchmaking are working already
   """
 
+  alias ExUnit.Callbacks
   alias Teiserver.Asset
   alias Teiserver.AssetFixtures
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Matchmaking.QueueSupervisor
   alias Teiserver.Support.Tachyon
   use Teiserver.DataCase
-
-  @moduletag :wip
 
   test "all members join matchmaking" do
     {_party_id, [m1, m2], _invited} = setup_party(2, 0)
@@ -27,6 +26,34 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
              Tachyon.recv_message!(m2.client)
 
     assert MapSet.new(data["queues"]) == MapSet.new([q1.id, q2.id])
+  end
+
+  # TODO: make this test pass
+  @tag :skip
+  test "failure to join doesn't invite other players" do
+    queue_id = "queue_without_map"
+
+    queue_attrs = %{
+      id: queue_id,
+      name: queue_id,
+      team_size: 2,
+      team_count: 2,
+      settings: %{tick_interval_ms: :manual, max_distance: 15},
+      engines: [%{version: "2025.04.01"}],
+      games: [%{spring_game: "BAR-27948-17aa95a"}],
+      maps: []
+    }
+
+    state = QueueServer.init_state(queue_attrs)
+    {:ok, _pid} = QueueSupervisor.start_queue!(state)
+    Callbacks.on_exit(fn -> QueueSupervisor.terminate_queue(queue_id) end)
+
+    {_party_id1, [m1, m2], _invited1} = setup_party(2, 0)
+
+    assert %{"status" => "failed", "reason" => "internal_error"} =
+             Tachyon.join_queues!(m1.client, [%{id: queue_id, version: state.queue.version}])
+
+    assert {:error, :timeout} = Tachyon.recv_message(m2.client, timeout: 30)
   end
 
   test "parties are matched together" do
@@ -243,7 +270,7 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
 
     AssetFixtures.create_map(map_attrs)
 
-    map_attrs = %{
+    queue_attrs = %{
       id: queue_id,
       name: queue_id,
       team_size: team_size,
@@ -254,8 +281,9 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
       maps: Asset.get_maps_for_queue(queue_id)
     }
 
-    state = QueueServer.init_state(map_attrs)
+    state = QueueServer.init_state(queue_attrs)
     {:ok, pid} = QueueSupervisor.start_queue!(state)
+    Callbacks.on_exit(fn -> QueueSupervisor.terminate_queue(queue_id) end)
     version = state.queue.version
 
     %{id: queue_id, pid: pid, version: version}

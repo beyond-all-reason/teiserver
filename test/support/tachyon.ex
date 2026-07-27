@@ -256,8 +256,6 @@ defmodule Teiserver.Support.Tachyon do
     WSC.send_message(client, {:text, event(command_id, data) |> Jason.encode!()})
   end
 
-  # TODO tachyon_mvp: create a version of this function that also check the
-  # the response against the expected json schema
   def recv_message(client, opts \\ []) do
     opts = Keyword.put_new(opts, :timeout, 300)
 

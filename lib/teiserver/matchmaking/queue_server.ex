@@ -228,6 +228,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     queue_id |> via_tuple() |> GenServer.call({:leave_queue, player_id})
   catch
     :exit, {:noproc, _details} -> {:error, :invalid_queue}
+    :exit, {:shutdown, _reason} -> :ok
   end
 
   @doc """
