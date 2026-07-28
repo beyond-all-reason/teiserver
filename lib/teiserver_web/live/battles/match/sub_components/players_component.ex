@@ -4,9 +4,7 @@ defmodule TeiserverWeb.Battle.MatchLive.SubComponents.PlayersComponent do
   import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
   import Teiserver.Helper.NumberHelper, only: [normalize: 1, round: 2]
 
-  alias Teiserver.Account.RatingLib
   alias Teiserver.Helper.NumberHelper
-  alias Teiserver.Battle.MatchLib
 
   attr :members, :list, required: true
   attr :match, :map, required: true

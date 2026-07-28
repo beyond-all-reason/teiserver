@@ -1,7 +1,6 @@
 defmodule TeiserverWeb.Battle.MatchLive.Show do
   @moduledoc false
 
-  alias Openskill.Util
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Battle
@@ -10,7 +9,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   alias Teiserver.Config
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
-  alias Teiserver.Helper.NumberHelper
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Telemetry
   use TeiserverWeb, :live_view
@@ -87,7 +85,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   # end
 
   defp get_match(
-         %{assigns: %{id: id, algorithm: algorithm, current_user: current_user}} =
+         %{assigns: %{id: id}} =
            socket
        ) do
     if connected?(socket) do
@@ -129,10 +127,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         )
         |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
 
-      find_current_user =
-        Enum.find(members, fn x ->
-          x.user_id == current_user.id
-        end)
 
       # Creates a map where the party_id refers to an integer
       # but only includes parties with 2 or more members

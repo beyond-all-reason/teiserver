@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Battle.MatchLive.SubComponents.BalanceComponent do
   @moduledoc false
   use TeiserverWeb, :component
   import TeiserverWeb.CoreComponents
-  import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
+  import Teiserver.Helper.ColourHelper, only: [rgba_css: 2]
   import Teiserver.Helper.NumberHelper, only: [round: 2]
 
   alias Teiserver.Battle.BalanceLib
