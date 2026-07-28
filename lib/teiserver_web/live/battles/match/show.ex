@@ -127,7 +127,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
         )
         |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
 
-
       # Creates a map where the party_id refers to an integer
       # but only includes parties with 2 or more members
       parties =
