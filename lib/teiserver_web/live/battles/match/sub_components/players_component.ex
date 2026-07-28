@@ -1,10 +1,13 @@
 defmodule TeiserverWeb.Battle.MatchLive.SubComponents.PlayersComponent do
   @moduledoc false
+
+  alias Openskill.Util
+  alias Teiserver.Helper.NumberHelper
+
   use TeiserverWeb, :component
+
   import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
   import Teiserver.Helper.NumberHelper, only: [normalize: 1, round: 2]
-
-  alias Teiserver.Helper.NumberHelper
 
   attr :members, :list, required: true
   attr :match, :map, required: true
@@ -191,8 +194,7 @@ defmodule TeiserverWeb.Battle.MatchLive.SubComponents.PlayersComponent do
             "#{percentage}%"
           end)
 
-        team_ratings =
-          Openskill.Util.team_rating(simple_rating_logs)
+        team_ratings = Util.team_rating(simple_rating_logs)
 
         skill_text_values =
           Enum.map(team_ratings, fn {skill, _sigma_sq, _extra1, _extra2} ->

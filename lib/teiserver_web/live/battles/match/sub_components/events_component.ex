@@ -1,9 +1,12 @@
 defmodule TeiserverWeb.Battle.MatchLive.SubComponents.EventsComponent do
   @moduledoc false
-  use TeiserverWeb, :component
-  import TeiserverWeb.CoreComponents
 
   alias Teiserver.Telemetry
+
+  use TeiserverWeb, :component
+
+  import TeiserverWeb.CoreComponents
+
   attr :match_id, :integer, required: true
   attr :members, :list, required: true
   attr :events_by_type, :list, required: true
