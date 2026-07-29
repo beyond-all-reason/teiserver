@@ -5,6 +5,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
 
   alias Teiserver.Account
   alias Teiserver.Account.User
+  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Helper.DateHelper
@@ -28,7 +29,8 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
         search: [
           data_less_than: {"restricted_until", now_as_string}
         ],
-        select: [:id]
+        select: [:id],
+        limit: :infinity
       )
       |> Enum.each(fn %{id: userid} ->
         refresh_user(userid)
@@ -95,6 +97,11 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
         update_client_with_restrictions(client, new_restrictions)
       end
     end
+
+    # There was a bug where not all users were refreshed correctly
+    # but the changes made after the fix didn't come into effect
+    # until after they were recached
+    CacheUser.deprecated_recache_user(user_id)
   end
 
   defp update_client_with_restrictions(client, new_restrictions) do
