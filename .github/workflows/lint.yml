@@ -67,8 +67,10 @@ jobs:
 
     # decimal is a transitive dependency to 3 other packages and it's going to be a pain to update
     # so for the moment, just ignore the error
+    # gun is a transitive dependency used by nostrum and will also be a problem to update but is
+    # only used by Nostrum for discord
     - name: Check for vulnerable dependencies # https://github.com/mirego/mix_audit
-      run: mix deps.audit --ignore-package-names decimal
+      run: mix deps.audit --ignore-package-names decimal,gun
 
     - name: Ensure Elixir code is formatted # https://hexdocs.pm/mix/Mix.Tasks.Format.html
       run: mix format --check-formatted
