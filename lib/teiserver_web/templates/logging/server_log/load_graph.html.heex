@@ -291,39 +291,39 @@ all_col_class = col_class <> " all-chart" %>
                   <form action={~p"/logging/server/load"} method="get" class="">
                     <div class="row">
                       <div class="col-xl-3 col-lg-4 col-md-6 my-2">
-                        <label for="hours" class="control-label">Hours</label>
-                        {central_component("icon_dropdown",
-                          name: "hours",
-                          id: "hours",
-                          enumerable: [
-                            %{id: "1", name: "1"},
-                            %{id: "3", name: "3"},
-                            %{id: "6", name: "6"},
-                            %{id: "24", name: "24"},
-                            %{id: "48", name: "48 (2 days)"},
-                            %{id: "168", name: "168 (7 days)"},
-                            %{id: "504", name: "504 (21 days)"}
-                          ],
-                          selected: Map.get(@params, "hours", "3")
-                        )}
+                        <.input
+                          type="select"
+                          id="hours"
+                          name="hours"
+                          label="Hours"
+                          value={Map.get(@params, "hours", "3")}
+                          options={[
+                            {"1", "1"},
+                            {"3", "3"},
+                            {"6", "6"},
+                            {"24", "24"},
+                            {"48 (2 days)", "48"},
+                            {"168 (7 days)", "168"},
+                            {"504 (21 days)", "504"}
+                          ]}
+                        />
                       </div>
 
                       <div class="col-xl-3 col-lg-4 col-md-6 my-2">
-                        <label for="resolution" class="control-label">
-                          Resolution (minutes per point)
-                        </label>
-                        {central_component("icon_dropdown",
-                          name: "resolution",
-                          id: "resolution",
-                          enumerable: [
-                            %{id: "1", name: "1"},
-                            %{id: "5", name: "5"},
-                            %{id: "30", name: "30"},
-                            %{id: "60", name: "60"},
-                            %{id: "360", name: "360 (6 hours)"}
-                          ],
-                          selected: Map.get(@params, "resolution", "1")
-                        )}
+                        <.input
+                          type="select"
+                          id="resolution"
+                          name="resolution"
+                          label="Resolution (minutes per point)"
+                          value={Map.get(@params, "hours", "3")}
+                          options={[
+                            {"1", "1"},
+                            {"5", "5"},
+                            {"30", "30"},
+                            {"60", "60"},
+                            {"360 (6 hours)", "360"}
+                          ]}
+                        />
                       </div>
 
                       <div class="col-xl-3 col-lg-4 col-md-6 my-2">

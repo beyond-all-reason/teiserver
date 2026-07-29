@@ -62,30 +62,32 @@
               <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
               <div class="row">
                 <div class="col-xl-3 col-lg-4 col-md-12 my-3">
-                  <label for="fields" class="control-label">Fields</label>
-                  {central_component("icon_dropdown",
-                    name: "fields",
-                    id: "fields",
-                    enumerable: [
-                      %{id: "split", name: "Split"},
-                      %{id: "grouped1", name: "Grouped (PvP, PvE, Bots)"},
-                      %{id: "grouped2", name: "Grouped (PvP, Co-op)"}
-                    ],
-                    selected: Map.get(@params, "fields", "split")
-                  )}
+                  <.input
+                    type="select"
+                    id="fields"
+                    name="fields"
+                    label="Fields"
+                    value={Map.get(@params, "fields", "split")}
+                    options={[
+                      "Split",
+                      "Grouped (PvP, PvE, Bots)",
+                      "Grouped (PvP, Co-op)"
+                    ]}
+                  />
                 </div>
 
                 <div class="col-xl-3 col-lg-4 col-md-12 my-3">
-                  <label for="type" class="control-label">Type</label>
-                  {central_component("icon_dropdown",
-                    name: "type",
-                    id: "type",
-                    enumerable: [
-                      %{id: "total_count", name: "Raw"},
-                      %{id: "weighted_count", name: "Weighted"}
-                    ],
-                    selected: Map.get(@params, "type", "total_count")
-                  )}
+                  <.input
+                    type="select"
+                    id="type"
+                    name="type"
+                    label="Type"
+                    value={Map.get(@params, "type", "total_count")}
+                    options={[
+                      "Raw",
+                      "Weighted"
+                    ]}
+                  />
                 </div>
 
                 <div class="col-xl-3 col-lg-4 col-md-12 my-3">

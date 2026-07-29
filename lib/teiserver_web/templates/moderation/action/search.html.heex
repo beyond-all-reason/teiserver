@@ -1,21 +1,11 @@
-<% {fg, _bg, bsname} = view_colour() |> colours() %>
+<% {_fg, _bg, bsname} = view_colour() |> colours() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
     $('.datepicker').datepicker({
       format: "dd/mm/yyyy"
     });
-
-    $('select').select2({
-      width: "100%"
-    });
   });
-</script>
-
-{central_component("icon_dropdown_js", [])}
-
-<link rel="stylesheet" href={~p"/css/select2.css"} />
-<script src={~p"/js/select2.js"}>
 </script>
 
 <div class="search-row">
@@ -30,35 +20,37 @@
 
     <div class="row">
       <div class="col-md-4 col-xl-2 search-form-input">
-        <label for="search_order" class="control-label">Expiry: </label>
-        {central_component("icon_dropdown", %{
-          name: "expiry",
-          id: "search_expiry",
-          selected: @params["expiry"] || "All",
-          enumerable: [
-            %{id: "All", icon: "fa-solid fa-th", colour: fg},
-            %{id: "Completed only", icon: "fa-solid fa-check", colour: fg},
-            %{id: "Unexpired only", icon: "fa-solid fa-play", colour: fg},
-            %{id: "Unexpired not permanent", icon: "fa-solid fa-clock", colour: fg},
-            %{id: "Permanent only", icon: "fa-solid fa-infinity", colour: fg},
-            %{id: "All active", icon: "fa-solid fa-clock", colour: fg}
-          ]
-        })}
+        <.input
+          type="select"
+          id="search_expiry"
+          name="expiry"
+          label="Expiry"
+          value={@params["expiry"] || "All"}
+          options={[
+            "All",
+            "Completed only",
+            "Unexpired only",
+            "Unexpired not permanent",
+            "Permanent only",
+            "All active"
+          ]}
+        />
       </div>
 
       <div class="col-md-4 col-xl-2 search-form-input">
-        <label for="search_order" class="control-label">Order by: </label>
-        {central_component("icon_dropdown", %{
-          name: "order",
-          id: "search_order",
-          selected: @params["order"] || "Newest first",
-          enumerable: [
-            %{id: "Most recently inserted first", icon: "fas fa-sort-numeric-down", colour: fg},
-            %{id: "Oldest inserted first", icon: "fas fa-sort-numeric-up", colour: fg},
-            %{id: "Earliest expiry first", icon: "fas fa-sort-numeric-down", colour: fg},
-            %{id: "Latest expiry first", icon: "fas fa-sort-numeric-up", colour: fg}
-          ]
-        })}
+        <.input
+          type="select"
+          id="search_order"
+          name="order"
+          label="Order by"
+          value={@params["state"] || "Open"}
+          options={[
+            "Most recently inserted first",
+            "Oldest inserted first",
+            "Earliest expiry first",
+            "Latest expiry first"
+          ]}
+        />
       </div>
     </div>
 
