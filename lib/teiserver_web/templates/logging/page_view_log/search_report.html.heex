@@ -1,11 +1,5 @@
 <% bsname = view_colour() %>
 
-{central_component("picker_script",
-  module: Teiserver.Account.UserLib,
-  name: "account_user",
-  title: "User search"
-)}
-
 <div class="row">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
@@ -35,7 +29,7 @@
 
             <div class="col-md-4 col-xl-2">
               <label for="teiserver-user-search" class="control-label">Specific user: </label>
-              {render(TeiserverWeb.Account.UserView, "picker.html")}
+              <br />You cannot currently search by user. (Issue #1416)
             </div>
 
             <div class="col-md-4 col-xl-2">
