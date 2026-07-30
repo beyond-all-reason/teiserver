@@ -45,7 +45,6 @@ defmodule Teiserver.Account.User do
     field :country, :string, default: "??"
     field :bot, :boolean, default: false
     field :email_change_code, :string
-    field :last_login_mins, :integer
     field :lobby_hash, :string
     field :chobby_hash, :string
     field :lobby_client, :string
@@ -68,7 +67,6 @@ defmodule Teiserver.Account.User do
       bot: false,
       email_change_code: nil,
       last_login: nil,
-      last_login_mins: nil,
       restrictions: [],
       restricted_until: nil,
       shadowbanned: false,
@@ -91,7 +89,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id country bot email_change_code lobby_hash chobby_hash lobby_client discord_dm_channel)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
@@ -108,7 +106,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id rank country bot email_change_code last_login_mins lobby_hash chobby_hash lobby_client discord_dm_channel)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id rank country bot email_change_code lobby_hash chobby_hash lobby_client discord_dm_channel)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)

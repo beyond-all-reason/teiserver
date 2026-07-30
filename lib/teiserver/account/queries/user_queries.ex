@@ -111,16 +111,6 @@ defmodule Teiserver.Account.UserQueries do
       where: users.inserted_at < ^timestamp
   end
 
-  def _where(query, :last_login_mins_greater_than, value) do
-    from users in query,
-      where: users.last_login_mins > ^value
-  end
-
-  def _where(query, :last_login_mins_less_than, value) do
-    from users in query,
-      where: users.last_login_mins < ^value
-  end
-
   def _where(query, :restricted_until_before, timestamp) do
     from users in query,
       where: users.restricted_until < ^timestamp
@@ -256,6 +246,16 @@ defmodule Teiserver.Account.UserQueries do
   def _where(query, :last_login_before, timestamp) do
     from users in query,
       where: users.last_login < ^timestamp
+  end
+
+  def _where(query, :has_logged_in, true) do
+    from users in query,
+      where: not is_nil(users.last_login)
+  end
+
+  def _where(query, :has_logged_in, false) do
+    from users in query,
+      where: is_nil(users.last_login)
   end
 
   @spec do_order_by(t(), list | nil) :: t()

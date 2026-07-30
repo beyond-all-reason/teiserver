@@ -25,14 +25,11 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
     start_date =
       DateTime.utc_now()
       |> DateTime.shift(hour: -26)
-      |> DateTime.to_unix()
-
-    start_date = round(start_date / 60)
 
     user_ids =
       Account.list_users(
         search: [
-          last_login_mins_greater_than: start_date,
+          last_login_after: start_date,
           not_has_role: "Bot",
           smurf_of: false
         ],

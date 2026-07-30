@@ -40,7 +40,8 @@ defmodule Teiserver.AccountTest do
       # We don't care about the actual results at this point, just that the filters are called
       Account.list_users(
         search: [
-          last_login_mins_greater_than: 123,
+          last_login_after: ~U[2020-01-01 00:00:00Z],
+          has_logged_in: true,
           restricted_until_before: DateTime.utc_now(),
           discord_id: 123,
           lobby_client: "bar_lobby",

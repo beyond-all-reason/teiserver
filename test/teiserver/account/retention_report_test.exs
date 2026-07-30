@@ -19,7 +19,7 @@ defmodule Teiserver.Account.RetentionReportTest do
       # a 500 for the page.
       {:ok, user} =
         user
-        |> change(last_login: DateTime.utc_now(:second), last_login_mins: 60)
+        |> change(last_login: DateTime.utc_now(:second))
         |> Repo.update()
 
       {:ok, _log} =

@@ -217,7 +217,6 @@ defmodule Teiserver.Account.UserCacheLib do
       country: user_data.country,
       bot: user_data.bot,
       email_change_code: user_data.email_change_code,
-      last_login_mins: user_data.last_login_mins,
       lobby_hash: user_data.lobby_hash,
       chobby_hash: user_data.chobby_hash,
       lobby_client: user_data.lobby_client,
