@@ -31,7 +31,9 @@
     </div>
 
     <div class="col-lg-6 my-2">
-      {central_component("fa5_icon_picker", %{form: f, field: :icon})}
+      {label(f, :icon, class: "control-label")}
+      {text_input(f, :icon, class: "form-control")}
+      {error_tag(f, :icon)}
     </div>
   </div>
 
