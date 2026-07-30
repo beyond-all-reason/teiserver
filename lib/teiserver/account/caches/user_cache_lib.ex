@@ -115,7 +115,7 @@ defmodule Teiserver.Account.UserCacheLib do
       user =
         Account.query_user(
           search: [
-            data_equal: {"discord_id", discord_id}
+            discord_id: discord_id
           ],
           select: [:id]
         )

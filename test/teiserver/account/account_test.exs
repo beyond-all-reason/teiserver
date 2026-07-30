@@ -40,9 +40,10 @@ defmodule Teiserver.AccountTest do
       # We don't care about the actual results at this point, just that the filters are called
       Account.list_users(
         search: [
-          data_equal: {"field", "value"},
-          data_greater_than: {"field", "123"},
-          data_less_than: {"field", "123"},
+          last_login_mins_greater_than: 123,
+          restricted_until_before: DateTime.utc_now(),
+          discord_id: 123,
+          lobby_client: "bar_lobby",
           warn_mute_or_ban: nil,
 
           # Tests the fallback to Teiserver.UserLib
@@ -51,32 +52,26 @@ defmodule Teiserver.AccountTest do
         joins: [:user_stat]
       )
 
-      # Flag filters as true
-      Account.list_users(
-        search: [
-          bot: "Robot",
-          moderator: "Moderator",
-          contributor: "Contributor",
-          developer: "Developer"
-        ]
-      )
-
-      # Flag filters as false
-      Account.list_users(
-        search: [
-          bot: "Person",
-          moderator: "User",
-          contributor: "Normal",
-          developer: "Normal"
-        ]
-      )
+      # Mod action filters
+      Account.list_users(search: [mod_action: "Banned"])
+      Account.list_users(search: [mod_action: "Not banned"])
+      Account.list_users(search: [mod_action: "Muted"])
+      Account.list_users(search: [mod_action: "Shadowbanned"])
+      Account.list_users(search: [mod_action: "Warned"])
+      Account.list_users(search: [mod_action: "Any action"])
+      Account.list_users(search: [mod_action: "Muted or banned"])
+      Account.list_users(search: [mod_action: "Not muted or banned"])
+      Account.list_users(search: [mod_action: "Permanently banned"])
+      Account.list_users(search: [not_mod_action: "Bridging"])
 
       # Order by
-      Account.list_users(order_by: [{:data, "field", :asc}])
-      Account.list_users(order_by: [{:data, "field", :desc}])
-
-      # Fallback
-      Account.list_users(order_by: [{:data, "field", :desc}])
+      Account.list_users(order_by: "Name (A-Z)")
+      Account.list_users(order_by: "Name (Z-A)")
+      Account.list_users(order_by: "Last logged in")
+      Account.list_users(order_by: "Last logged out")
+      Account.list_users(order_by: "Last played")
+      Account.list_users(order_by: "Newest first")
+      Account.list_users(order_by: "Oldest first")
     end
 
     test "get_user!/1 returns the user with given id" do
