@@ -1,7 +1,6 @@
 defmodule Teiserver.Account.PopulationReport do
   @moduledoc false
   alias Ecto.Adapters.SQL
-  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
 
@@ -50,13 +49,7 @@ defmodule Teiserver.Account.PopulationReport do
         d -> d
       end
 
-    start_date_mins =
-      start_date
-      |> DateHelper.to_datetime()
-      |> DateTime.to_unix()
-      |> Kernel.div(60)
-
-    "users.data ->> 'last_login_mins' >= '#{start_date_mins}'"
+    "users.last_login >= '#{start_date}'"
   end
 
   defp exclude_bots_where("true") do

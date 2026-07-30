@@ -20,14 +20,12 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
   def perform(_job) do
     if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
          true do
-      now_as_string = DateTime.utc_now() |> Jason.encode!() |> Jason.decode!()
-
       # Find all users who are muted or banned
       # we have these anti-nil things to handle if the job
       # runs just after startup the users may not be in the cache
       Account.list_users(
         search: [
-          data_less_than: {"restricted_until", now_as_string}
+          restricted_until_before: DateTime.utc_now()
         ],
         select: [:id],
         limit: :infinity

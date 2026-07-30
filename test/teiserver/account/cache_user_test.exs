@@ -30,7 +30,6 @@ defmodule Teiserver.Account.CacheUserTest do
         country: "DE",
         bot: true,
         email_change_code: "123",
-        last_login_mins: 123,
         lobby_hash: "some-hash",
         chobby_hash: "c-hash",
         lobby_client: "client-name",
@@ -46,7 +45,6 @@ defmodule Teiserver.Account.CacheUserTest do
     assert {cache_user.country, user.country} == {"DE", "DE"}
     assert {cache_user.bot, user.bot} == {true, true}
     assert {cache_user.email_change_code, user.email_change_code} == {"123", "123"}
-    assert {cache_user.last_login_mins, user.last_login_mins} == {123, 123}
     assert {cache_user.lobby_hash, user.lobby_hash} == {"some-hash", "some-hash"}
     assert {cache_user.chobby_hash, user.chobby_hash} == {"c-hash", "c-hash"}
     assert {cache_user.lobby_client, user.lobby_client} == {"client-name", "client-name"}
@@ -125,7 +123,6 @@ defmodule Teiserver.Account.CacheUserTest do
       assert db_user.country == cache_user.country
       assert db_user.bot == cache_user.bot
       assert db_user.email_change_code == cache_user.email_change_code
-      assert db_user.last_login_mins == cache_user.last_login_mins
       assert db_user.lobby_hash == cache_user.lobby_hash
       assert db_user.chobby_hash == cache_user.chobby_hash
       assert db_user.lobby_client == cache_user.lobby_client

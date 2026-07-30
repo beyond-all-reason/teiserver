@@ -97,14 +97,14 @@ defmodule Teiserver.Account.SmurfMergeTask do
   defp merge_mutes(_from_id, _to_id, "false"), do: :ok
 
   defp merge_mutes(from_id, to_id, "true") do
-    Account.list_users(
-      search: [
-        data_contains_number: {"ignored", from_id}
+    Account.list_relationships(
+      where: [
+        to_user_id: from_id,
+        ignore: true
       ],
-      select: [:id],
-      limit: :infinity
+      select: [:from_user_id]
     )
-    |> Enum.each(fn %{id: ignorer_id} ->
+    |> Enum.each(fn %{from_user_id: ignorer_id} ->
       case Account.ignore_user(ignorer_id, to_id) do
         {:ok, _relationship} ->
           :ok

@@ -80,8 +80,8 @@ defmodule Teiserver.Account.RetentionRateExport do
           inserted_after: start_datetime,
           inserted_before: end_datetime,
           has_role: "Verified",
-          data_greater_than: {"last_login_mins", "0"},
-          bot: "Person"
+          not_has_role: "Bot",
+          has_logged_in: true
         ],
         select: [:id, :inserted_at],
         limit: :infinity

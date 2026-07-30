@@ -111,46 +111,19 @@ defmodule Teiserver.Account.UserQueries do
       where: users.inserted_at < ^timestamp
   end
 
-  def _where(query, :data_equal, {field, value}) do
+  def _where(query, :restricted_until_before, timestamp) do
     from users in query,
-      where: fragment("? ->> ? = ?", users.data, ^field, ^value)
+      where: users.restricted_until < ^timestamp
   end
 
-  def _where(query, :data_greater_than, {field, value}) do
+  def _where(query, :restricted_until_after, timestamp) do
     from users in query,
-      where: fragment("? ->> ? > ?", users.data, ^field, ^value)
+      where: users.restricted_until > ^timestamp
   end
 
-  def _where(query, :data_less_than, {field, value}) do
+  def _where(query, :discord_id, discord_id) do
     from users in query,
-      where: fragment("? ->> ? < ?", users.data, ^field, ^value)
-  end
-
-  def _where(query, :data_not, {field, value}) do
-    from users in query,
-      where: fragment("? ->> ? != ?", users.data, ^field, ^value)
-  end
-
-  # https://www.postgresql.org/docs/current/functions-json.html - Unable to find a function for this :(
-  def _where(query, :data_contains, {field, value}) do
-    from users in query,
-      where: fragment("? ->> ? @> ?", users.data, ^field, ^value)
-  end
-
-  def _where(query, :data_not_contains, {field, value}) do
-    from users in query,
-      where: fragment("not ? ->> ? @> ?", users.data, ^field, ^value)
-  end
-
-  def _where(query, :data_contains_key, field) do
-    from users in query,
-      where: fragment("? @> ?", users.data, ^field)
-  end
-
-  # E.g. [data_contains_number: {"ignored", 9265}]
-  def _where(query, :data_contains_number, {field, value}) when is_number(value) do
-    from users in query,
-      where: fragment("(? ->> ?)::jsonb @> ?::jsonb", users.data, ^field, ^value)
+      where: users.discord_id == ^discord_id
   end
 
   def _where(query, :has_role, role_name) do
@@ -161,22 +134,6 @@ defmodule Teiserver.Account.UserQueries do
   def _where(query, :not_has_role, role_name) do
     from users in query,
       where: ^role_name not in users.roles
-  end
-
-  def _where(query, :bot, "Person") do
-    _where(query, :not_has_role, "Bot")
-  end
-
-  def _where(query, :bot, "Robot") do
-    _where(query, :has_role, "Bot")
-  end
-
-  def _where(query, :moderator, "User") do
-    _where(query, :not_has_role, "Moderator")
-  end
-
-  def _where(query, :moderator, "Moderator") do
-    _where(query, :has_role, "Moderator")
   end
 
   def _where(query, :smurf_of, userid) when is_integer(userid) do
@@ -197,117 +154,63 @@ defmodule Teiserver.Account.UserQueries do
       where: is_nil(users.smurf_of_id)
   end
 
-  def _where(query, :verified, true) do
-    from users in query,
-      where: "Verified" in users.roles
-  end
-
-  def _where(query, :verified, false) do
-    from users in query,
-      where: "Verified" not in users.roles
-  end
-
   def _where(query, :mod_action, "Banned") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"")
+      where: "Login" in users.restrictions
   end
 
   def _where(query, :mod_action, "Not banned") do
     from users in query,
-      where: not fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"")
+      where: "Login" not in users.restrictions
   end
 
   def _where(query, :mod_action, "Muted") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"All chat\"")
+      where: "All chat" in users.restrictions
   end
 
   def _where(query, :mod_action, "Shadowbanned") do
     from users in query,
-      where: fragment("? ->> ? = ?", users.data, "shadowbanned", "true")
+      where: users.shadowbanned == true
   end
 
   def _where(query, :mod_action, "Warned") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"Warning reminder\"")
+      where: "Warning reminder" in users.restrictions
   end
 
   def _where(query, :mod_action, "Any action") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"Warning reminder\"")
+      where: users.restrictions != ^[]
   end
 
   def _where(query, :mod_action, "Muted or banned") do
     from users in query,
-      where:
-        fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"") or
-          fragment("? -> ? @> ?", users.data, "restrictions", "\"All chat\"")
+      where: "Login" in users.restrictions or "All chat" in users.restrictions
   end
 
-  def _where(query, :mod_action, "not muted or banned") do
+  def _where(query, :mod_action, "Not muted or banned") do
     from users in query,
-      where:
-        not (fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"") or
-               fragment("? -> ? @> ?", users.data, "restrictions", "\"All chat\""))
+      where: "Login" not in users.restrictions and "All chat" not in users.restrictions
   end
 
   def _where(query, :mod_action, "Any user") do
     query
   end
 
-  def _where(query, :contributor, "Contributor") do
+  def _where(query, :mod_action, action) do
     from users in query,
-      where: "Contributor" in users.roles
+      where: ^action in users.restrictions
   end
 
-  def _where(query, :contributor, "Normal") do
+  def _where(query, :not_mod_action, action) do
     from users in query,
-      where: "Contributor" not in users.roles
-  end
-
-  def _where(query, :developer, "Developer") do
-    from users in query,
-      where: "Developer" in users.roles
-  end
-
-  def _where(query, :developer, "Normal") do
-    from users in query,
-      where: "Developer" not in users.roles
-  end
-
-  def _where(query, :overwatch, "Overwatch") do
-    from users in query,
-      where: "Overwatch" in users.roles
-  end
-
-  def _where(query, :overwatch, "Normal") do
-    from users in query,
-      where: "Overwatch" not in users.roles
-  end
-
-  def _where(query, :caster, "Caster") do
-    from users in query,
-      where: "Caster" in users.roles
-  end
-
-  def _where(query, :caster, "Normal") do
-    from users in query,
-      where: "Caster" not in users.roles
-  end
-
-  def _where(query, :vip, "VIP") do
-    from users in query,
-      where: "VIP" in users.roles
-  end
-
-  def _where(query, :vip, "Normal") do
-    from users in query,
-      where: "VIP" not in users.roles
+      where: ^action not in users.restrictions
   end
 
   def _where(query, :lobby_client, lobby_client) do
     from users in query,
-      where: fragment("? ->> ? = ?", users.data, "lobby_client", ^lobby_client)
+      where: users.lobby_client == ^lobby_client
   end
 
   def _where(query, :previous_names, name) do
@@ -335,6 +238,16 @@ defmodule Teiserver.Account.UserQueries do
   def _where(query, :last_login_before, timestamp) do
     from users in query,
       where: users.last_login < ^timestamp
+  end
+
+  def _where(query, :has_logged_in, true) do
+    from users in query,
+      where: not is_nil(users.last_login)
+  end
+
+  def _where(query, :has_logged_in, false) do
+    from users in query,
+      where: is_nil(users.last_login)
   end
 
   @spec do_order_by(t(), list | nil) :: t()
@@ -370,10 +283,8 @@ defmodule Teiserver.Account.UserQueries do
   end
 
   def _order_by(query, "Last logged in") do
-    field = "last_login"
-
     from users in query,
-      order_by: [desc: fragment("? -> ?", users.data, ^field)]
+      order_by: [desc: users.last_login]
   end
 
   def _order_by(query, "Last played") do
@@ -384,16 +295,6 @@ defmodule Teiserver.Account.UserQueries do
   def _order_by(query, "Last logged out") do
     from users in query,
       order_by: [desc: users.last_logout]
-  end
-
-  def _order_by(query, {:data, field, :asc}) do
-    from users in query,
-      order_by: [asc: fragment("? -> ?", users.data, ^field)]
-  end
-
-  def _order_by(query, {:data, field, :desc}) do
-    from users in query,
-      order_by: [desc: fragment("? -> ?", users.data, ^field)]
   end
 
   @spec do_preload(t(), list() | nil) :: t()
