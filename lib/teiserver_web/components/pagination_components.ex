@@ -382,7 +382,17 @@ defmodule TeiserverWeb.PaginationComponents do
   # Helper function for building query strings consistently
   defp build_query_string(params) do
     params
-    |> Enum.map_join("&", fn {k, v} -> "#{k}=#{URI.encode_www_form(to_string(v))}" end)
+    |> Enum.map_join("&", fn
+      # This first clause is for when we have a nested params set
+      {top_key, %{} = values} ->
+        values
+        |> Enum.map_join("&", fn
+          {k, v} -> "#{top_key}[#{k}]=#{URI.encode_www_form(to_string(v))}"
+        end)
+
+      {k, v} ->
+        "#{k}=#{URI.encode_www_form(to_string(v))}"
+    end)
   end
 
   # Centralized parameter preparation with overrides and exclusions
