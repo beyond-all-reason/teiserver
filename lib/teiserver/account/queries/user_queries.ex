@@ -136,14 +136,6 @@ defmodule Teiserver.Account.UserQueries do
       where: ^role_name not in users.roles
   end
 
-  def _where(query, :bot, "Person") do
-    _where(query, :not_has_role, "Bot")
-  end
-
-  def _where(query, :bot, "Robot") do
-    _where(query, :has_role, "Bot")
-  end
-
   def _where(query, :smurf_of, userid) when is_integer(userid) do
     from users in query,
       where: users.smurf_of_id == ^userid
@@ -202,6 +194,10 @@ defmodule Teiserver.Account.UserQueries do
       where: "Login" not in users.restrictions and "All chat" not in users.restrictions
   end
 
+  def _where(query, :mod_action, "Any user") do
+    query
+  end
+
   def _where(query, :mod_action, action) do
     from users in query,
       where: ^action in users.restrictions
@@ -210,10 +206,6 @@ defmodule Teiserver.Account.UserQueries do
   def _where(query, :not_mod_action, action) do
     from users in query,
       where: ^action not in users.restrictions
-  end
-
-  def _where(query, :mod_action, "Any user") do
-    query
   end
 
   def _where(query, :lobby_client, lobby_client) do

@@ -121,7 +121,6 @@ defmodule TeiserverWeb.Admin.UserController do
       (Account.list_users(
          search: [
            name_or_email: Map.get(params, "name", "") |> String.trim(),
-           bot: params["search"]["bot"],
            has_role: params["search"]["role"],
            ip: params["search"]["ip"],
            lobby_client: params["search"]["lobby_client"],
@@ -141,7 +140,6 @@ defmodule TeiserverWeb.Admin.UserController do
       Account.count_users(
         search: [
           name_or_email: Map.get(params, "name", "") |> String.trim(),
-          bot: params["search"]["bot"],
           has_role: params["search"]["role"],
           ip: params["search"]["ip"],
           lobby_client: params["search"]["lobby_client"],

@@ -3,7 +3,7 @@ defmodule Teiserver.Repo.Migrations.RemoveLastLoginMins do
 
   def change do
     alter table(:account_users) do
-      remove :last_login_mins, :integer
+      remove :last_login_mins
     end
   end
 end
