@@ -87,6 +87,7 @@ defmodule Teiserver.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.8"},
       {:plug, "~> 1.19.2"},
+      {:bandit, "~> 1.12"},
 
       # Temporary deps while we transition away from views
       {:phoenix_view, "~> 2.0"},
