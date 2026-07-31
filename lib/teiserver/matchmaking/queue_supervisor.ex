@@ -43,6 +43,36 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
         games: games,
         maps: Asset.get_maps_for_queue("2v2"),
         algo: :bruteforce_filter
+      }),
+      QueueServer.init_state(%{
+        id: "3v3",
+        name: "3v3",
+        team_size: 3,
+        team_count: 2,
+        engines: engines,
+        games: games,
+        maps: Asset.get_maps_for_queue("3v3"),
+        algo: :bruteforce_filter
+      }),
+      QueueServer.init_state(%{
+        id: "4v4",
+        name: "4v4",
+        team_size: 4,
+        team_count: 2,
+        engines: engines,
+        games: games,
+        maps: Asset.get_maps_for_queue("4v4"),
+        algo: :bruteforce_filter
+      }),
+      QueueServer.init_state(%{
+        id: "5v5",
+        name: "5v5",
+        team_size: 5,
+        team_count: 2,
+        engines: engines,
+        games: games,
+        maps: Asset.get_maps_for_queue("5v5"),
+        algo: :bruteforce_filter
       })
     ]
   end
