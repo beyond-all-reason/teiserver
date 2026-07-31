@@ -120,7 +120,7 @@ defmodule TeiserverWeb.Router do
     live_session :microblog_admin,
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated},
-        {Teiserver.Account.AuthPlug, {:authorise, "Blog helper"}}
+        {Teiserver.Account.AuthPlug, {:authorise, "Contributor"}}
       ] do
       live "/admin/posts", Admin.PostLive.Index, :index
       live "/admin/posts/:id", Admin.PostLive.Show, :show

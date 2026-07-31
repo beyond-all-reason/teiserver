@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Microblog.Admin.PostLive.Index do
 
   @impl Phoenix.LiveView
   def handle_params(params, _url, socket) do
-    case allow?(socket.assigns[:current_user], "Blog helper") do
+    case allow?(socket.assigns[:current_user], "Contributor") do
       true ->
         {:noreply, apply_action(socket, socket.assigns.live_action, params)}
 
