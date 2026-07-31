@@ -36,7 +36,7 @@ defmodule TeiserverWeb.MicroblogComponents do
       </.sub_menu_button>
 
       <.sub_menu_button
-        :if={allow?(@current_user, "Blog helper")}
+        :if={allow?(@current_user, "Contributor")}
         bsname={@view_colour}
         icon={Teiserver.Microblog.PostLib.icon()}
         active={@active == "posts"}
