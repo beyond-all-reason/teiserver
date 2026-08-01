@@ -125,7 +125,9 @@ Multiple locks can be engaged at the same time
       {"specafk", [],
        "Everybody is sent a message asking them to confirm they are not afk. If they don't respond within 40 seconds they are moved to spectators. Requires boss privileges.",
        :moderator},
-      {"playerlimit", ["limit"], "Sets a new player limit for this specific host.", :moderator}
+      {"playerlimit", ["limit"], "Sets a new player limit for this specific host.", :moderator},
+      {"modme", [], "(Re)gain moderator privileges", :moderator},
+      {"unmodme", [], "Drops moderator privileges for this session", :moderator}
     ]
 
     # $command - Coordinator command

@@ -593,6 +593,14 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info(
+        %{channel: "teiserver_global_user_updates", event: :client_updated} = msg,
+        state
+      ) do
+    new_state = client_status_update(msg.client, state)
+    {:noreply, new_state}
+  end
+
   def handle_info(%{channel: "teiserver_global_user_updates"}, state) do
     {:noreply, state}
   end

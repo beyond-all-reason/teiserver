@@ -1,7 +1,10 @@
 defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.UserLib
+  alias Teiserver.BitParse
   alias Teiserver.CacheUser
+  alias Teiserver.TeiserverTestLib
 
   use Teiserver.ServerCase, async: false
 
@@ -49,6 +52,35 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
                "SAYPRIVATE Coordinator $website\nSAIDPRIVATE Coordinator Your role contains one or more privileged roles, you will need to manually login to the site at https://localhost\n"
 
       Application.put_env(:teiserver, Teiserver, config)
+    end
+
+    test "$modme/$unmodme", %{socket: socket} = ctx do
+      mod = TeiserverTestLib.new_user()
+      Auth.add_roles(mod.id, ["Moderator"])
+      %{socket: mod_socket} = TeiserverTestLib.auth_setup(ctx, mod)
+      [_adduser, status] = TeiserverTestLib._recv_until(socket) |> String.split("\n", trim: true)
+      ["CLIENTSTATUS", mod_name, str_status] = String.split(status)
+      assert mod_name == mod.name
+      BitParse.parse_bits(str_status, 7)
+      [_bot_bit, mod_bit | _rest] = BitParse.parse_bits(str_status, 7)
+      assert mod_bit == 1
+
+      _send_raw(mod_socket, "SAYPRIVATE coordinator $unmodme\n")
+      ["CLIENTSTATUS", mod_name, str_status] = _recv_until(socket) |> String.split()
+      assert mod_name == mod.name
+      [_bot_bit, mod_bit | _rest] = BitParse.parse_bits(str_status, 7)
+      assert mod_bit == 0
+
+      _send_raw(mod_socket, "SAYPRIVATE coordinator $modme\n")
+      ["CLIENTSTATUS", mod_name, str_status] = _recv_until(socket) |> String.split()
+      assert mod_name == mod.name
+      [_bot_bit, mod_bit | _rest] = BitParse.parse_bits(str_status, 7)
+      assert mod_bit == 1
+
+      # only mods can $modme
+      _recv_until(mod_socket)
+      _send_raw(socket, "SAYPRIVATE coordinator $modme\n")
+      assert _recv_until(mod_socket) == ""
     end
   end
 end

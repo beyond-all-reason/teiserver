@@ -82,6 +82,11 @@ defmodule Teiserver.Account.ClientLib do
     cast_client(userid, {:update_values, partial_client})
   end
 
+  @spec set_moderator_bit(User.id(), boolean()) :: nil | :ok
+  def set_moderator_bit(userid, moderator?) do
+    cast_client(userid, {:set_moderator_bit, moderator?})
+  end
+
   @spec replace_update_client(
           map(),
           :silent | :client_updated_status | :client_updated_battlestatus

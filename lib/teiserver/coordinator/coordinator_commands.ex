@@ -18,9 +18,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Moderation
 
   @splitter "---------------------------"
-  @always_allow ~w(help whoami whois discord coc mute unmute ignore unignore website party)
+  @always_allow ~w(help whoami whois discord coc mute unmute ignore unignore website party modme)
   # These commands are handled by coordinator commands, but are not on the always allow list
-  @mod_allow ~w(modparty unparty)
+  @mod_allow ~w(modparty unparty unmodme)
   @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no explain)
   @admin_commands ~w(broadcast)
 
@@ -543,6 +543,14 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
+  defp do_handle(%{command: "modme", senderid: sender_id} = _cmd, state) do
+    if Auth.moderator?(sender_id) do
+      Client.set_moderator_bit(sender_id, true)
+    end
+
+    state
+  end
+
   # Admin commands
   defp do_handle(
          %{command: "broadcast", senderid: senderid, remaining: message},
@@ -557,6 +565,11 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   end
 
   # Moderator commands
+  defp do_handle(%{command: "unmodme", senderid: sender_id} = _cmd, state) do
+    Client.set_moderator_bit(sender_id, false)
+    state
+  end
+
   defp do_handle(%{command: command, senderid: senderid} = _cmd, state) do
     CacheUser.send_direct_message(
       state.userid,
