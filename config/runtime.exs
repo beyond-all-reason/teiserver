@@ -39,6 +39,11 @@ config :teiserver,
   blog_upload_extensions:
     System.get_env("TEI_BLOG_UPLOAD_EXTENSIONS", ".jpg .jpeg .png") |> String.split(" ")
 
+# This allows us to default to certain values for dev, test and prod but also
+# allow easily overriding them at startup in this runtime.exs
+default_mfa_requirement =
+  Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
+
 config :teiserver, Teiserver,
   game_name: "Beyond All Reason",
   game_name_short: "BAR",
@@ -51,6 +56,8 @@ config :teiserver, Teiserver,
   enable_benchmark: false,
   node_name: Teiserver.ConfigHelpers.get_env("TEI_NODE_NAME", "local"),
   enable_managed_lobbies: true,
+  require_mfa_for_privileged_roles:
+    Teiserver.ConfigHelpers.get_env("TEI_MFA_REQUIRED", default_mfa_requirement, :bool),
   user_agreement:
     "A verification code has been sent to your email address. Please read our terms of service at https://www.beyondallreason.info/privacy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
 
