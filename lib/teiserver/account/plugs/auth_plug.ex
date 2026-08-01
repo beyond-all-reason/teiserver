@@ -23,9 +23,9 @@ defmodule Teiserver.Account.AuthPlug do
 
   def call(conn, _opts) do
     user =
-      case Guardian.resource_from_token(conn.cookies["guardian_default_token"]) do
-        {:ok, user, _claims} -> Account.get_user!(user.id)
-        _error -> nil
+      case GuardianPlug.current_resource(conn) do
+        nil -> user_from_remember_me_cookie(conn)
+        user -> Account.get_user!(user.id)
       end
 
     user_token =
@@ -61,6 +61,13 @@ defmodule Teiserver.Account.AuthPlug do
       |> Controller.redirect(to: ~p"/logout")
     else
       conn
+    end
+  end
+
+  defp user_from_remember_me_cookie(conn) do
+    case Guardian.resource_from_token(conn.cookies["guardian_default_token"]) do
+      {:ok, user, _claims} -> Account.get_user!(user.id)
+      _error -> nil
     end
   end
 
