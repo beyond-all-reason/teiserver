@@ -9,6 +9,10 @@
 		"../compose.yaml"
 	],
 
+	"remoteEnv": {
+		"EDITOR": "code --wait"
+	},
+
 	// The 'service' property is the name of the service for the container that VS Code should
 	// use. Update this value and .devcontainer/docker-compose.yml to the real service name.
 	"service": "teiserver",
