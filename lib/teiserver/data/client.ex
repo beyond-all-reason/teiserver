@@ -196,6 +196,9 @@ defmodule Teiserver.Client do
   @spec call_client(User.id(), any) :: any | nil
   defdelegate call_client(userid, msg), to: ClientLib
 
+  @spec set_moderator_bit(User.id(), boolean()) :: nil | :ok
+  defdelegate set_moderator_bit(user_id, moderator?), to: ClientLib
+
   @spec join_battle(T.client_id(), Integer.t(), boolean()) :: nil | T.client()
   def join_battle(userid, lobby_id, lobby_host) do
     case get_client_by_id(userid) do
