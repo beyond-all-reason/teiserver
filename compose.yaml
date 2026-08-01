@@ -55,6 +55,8 @@ services:
       # Guardian (authentication)
       #- TEI_GUARDIAN_ISSUER=teiserver
       #- TEI_GUARDIAN_SECRET_KEY=
+      # Internal authorisation
+      - TEI_MFA_REQUIRED=true
       # OAuth
       - TEI_OAUTH_ISSUER=http://localhost:4000
       # Email integration
