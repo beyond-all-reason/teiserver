@@ -35,6 +35,17 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Run Tests",
+            "type": "shell",
+            "command": "MIX_ENV=test TEI_DB_NAME=teiserver_test TEI_DB_USERNAME=teiserver_test TEI_PORT=4922 TEI_METRICS_SERVER_PORT=4923 TEI_OAUTH_ISSUER=http://localhost:4922 mix test --raise --warnings-as-errors --exclude needs_attention 2>&1",
+            "problemMatcher": [],
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
         }
     ]
 }
