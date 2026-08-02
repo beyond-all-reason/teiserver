@@ -970,6 +970,20 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_call({:party, {:accept_invite, party_id}}, _from, %PT.Data{} = state) do
+    state =
+      case do_leave_party(state) do
+        {:ok, new_state} ->
+          new_state
+
+        {:error, :not_in_party} ->
+          state
+
+        # this should never happen, better crash loudly so we can debug that
+        {:error, reason} ->
+          Logger.error("cannot leave party #{inspect(state.party)} - #{inspect(reason)}")
+          raise "Cannot leave a party when joining another??? #{inspect(reason)}"
+      end
+
     case Party.accept_invite(party_id, state.user.id) do
       {:ok, party_state} ->
         state =

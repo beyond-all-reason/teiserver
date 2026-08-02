@@ -179,6 +179,51 @@ defmodule TeiserverWeb.Tachyon.PartyTest do
                Tachyon.recv_message!(target.client)
     end
 
+    test "accepting invite makes user leave other party", ctx do
+      ctx2 = setup_client()
+      target = setup_client()
+
+      assert %{"status" => "success", "data" => %{"party" => %{"id" => party2_id}}} =
+               Tachyon.create_party!(ctx2.client)
+
+      # invite `target` to both parties
+      assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx.client, target.user.id)
+      assert %{"status" => "success"} = Tachyon.invite_to_party!(ctx2.client, target.user.id)
+
+      assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(target.client)
+      assert %{"commandId" => "party/invited"} = Tachyon.recv_message!(target.client)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx2.client)
+
+      # accept one invite
+      Tachyon.accept_party_invite!(target.client, ctx.party["id"])
+      assert %{"commandId" => "party/updated"} = updated1 = Tachyon.recv_message!(target.client)
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(ctx.client)
+
+      assert Enum.any?(updated1["data"]["members"], fn m ->
+               m["userId"] == to_string(target.user.id)
+             end)
+
+      # accept the other invite
+      %{"status" => "success"} = Tachyon.accept_party_invite!(target.client, party2_id)
+
+      assert %{"commandId" => "party/updated"} = Tachyon.recv_message!(target.client)
+
+      assert %{"commandId" => "party/updated"} =
+               party1_updated = Tachyon.recv_message!(ctx.client)
+
+      refute Enum.any?(party1_updated["data"]["members"], fn m ->
+               m["userId"] == to_string(target.user.id)
+             end)
+
+      assert %{"commandId" => "party/updated"} =
+               party2_updated = Tachyon.recv_message!(ctx2.client)
+
+      assert Enum.any?(party2_updated["data"]["members"], fn m ->
+               m["userId"] == to_string(target.user.id)
+             end)
+    end
+
     test "cannot decline for non existing party", ctx do
       assert %{"status" => "failed", "reason" => "invalid_request"} =
                Tachyon.decline_party_invite!(ctx.client, "lolnope-thats-not-a-party")
