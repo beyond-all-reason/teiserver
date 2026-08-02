@@ -46,6 +46,10 @@
                 "currentLobby": {
                     "anyOf": [{ "type": "string" }, { "type": "null" }]
                 },
+                "clanInvites": {
+                    "type": "array",
+                    "items": { "$ref": "../definitions/clanId.json" }
+                },
                 "matchmaking": {
                     "anyOf": [
                         {
@@ -122,6 +126,7 @@
                 "incomingFriendRequest",
                 "ignoreIds",
                 "currentLobby",
+                "clanInvites",
                 "matchmaking"
             ]
         }
