@@ -917,28 +917,9 @@ defmodule Teiserver.Player.Session do
       do: {:reply, {:error, :not_in_party}, state}
 
   def handle_call({:party, :leave}, _from, %PT.Data{} = state) do
-    case Party.leave_party(state.party.current_party, state.user.id) do
-      :ok ->
-        state =
-          state
-          |> put_in([Access.key!(:party), Access.key!(:current_party)], nil)
-          |> Map.update!(:monitors, &MC.demonitor_by_val(&1, :current_party))
-
-        {left_mm?, state} =
-          leave_matchmaking(state)
-
-        state =
-          if left_mm? == :ok,
-            do: send_to_player(state, {:matchmaking, {:cancelled, :party_user_left}}),
-            else: state
-
-        {:reply, :ok, state}
-
-      {:error, :not_a_member} ->
-        {:reply, :ok, %{state | party: %PT.PartyState{}}}
-
-      {:error, reason} ->
-        {:reply, {:error, reason}, state}
+    case do_leave_party(state) do
+      {:error, reason} -> {:reply, {:error, reason}, state}
+      {:ok, new_state} -> {:reply, :ok, new_state}
     end
   end
 
@@ -2003,6 +1984,35 @@ defmodule Teiserver.Player.Session do
     end
 
     state
+  end
+
+  defp do_leave_party(%PT.Data{} = data) when is_nil(data.party.current_party),
+    do: {:error, :not_in_party}
+
+  defp do_leave_party(%PT.Data{} = data) do
+    case Party.leave_party(data.party.current_party, data.user.id) do
+      :ok ->
+        data =
+          data
+          |> put_in([Access.key!(:party), Access.key!(:current_party)], nil)
+          |> Map.update!(:monitors, &MC.demonitor_by_val(&1, :current_party))
+
+        {left_mm?, data} =
+          leave_matchmaking(data)
+
+        data =
+          if left_mm? == :ok,
+            do: send_to_player(data, {:matchmaking, {:cancelled, :party_user_left}}),
+            else: data
+
+        {:ok, data}
+
+      {:error, :not_a_member} ->
+        {:ok, %{data | party: %PT.PartyState{}}}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
   @spec send_to_player!(term(), PT.Data.t()) :: :ok
