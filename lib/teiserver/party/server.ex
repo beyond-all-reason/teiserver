@@ -39,6 +39,7 @@ defmodule Teiserver.Party.Server do
     via_tuple(party_id) |> :gen_statem.call({:leave, user_id}, @default_call_timeout)
   catch
     :exit, {:noproc, _details} -> {:error, :invalid_party}
+    :exit, {:shutdown, _reason} -> :ok
   end
 
   @doc """
