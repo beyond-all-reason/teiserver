@@ -1048,6 +1048,8 @@ defmodule Teiserver.Player.TachyonHandler do
         outgoingFriendRequest: outgoing,
         incomingFriendRequest: incoming,
         ignoreIds: [],
+        # TODO: see https://github.com/beyond-all-reason/teiserver/issues/1450
+        matchmaking: %{state: :no_matchmaking},
         currentLobby: sess_state[:current_lobby],
         roles: roles_to_tachyon(user.roles)
       }

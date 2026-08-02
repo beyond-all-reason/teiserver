@@ -45,6 +45,73 @@
                 },
                 "currentLobby": {
                     "anyOf": [{ "type": "string" }, { "type": "null" }]
+                },
+                "matchmaking": {
+                    "anyOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "state": { "const": "no_matchmaking" }
+                            },
+                            "required": ["state"]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "state": { "const": "queuing" },
+                                "queues": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": { "type": "string" },
+                                            "version": { "type": "string" }
+                                        },
+                                        "required": ["id", "version"]
+                                    },
+                                    "minItems": 1
+                                }
+                            },
+                            "required": ["state", "queues"]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "state": { "const": "found" },
+                                "queue": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": { "type": "string" },
+                                        "version": { "type": "string" },
+                                        "timeoutAt": {
+                                            "$ref": "../definitions/unixTime.json"
+                                        },
+                                        "hasAlreadyReadied": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "version",
+                                        "timeoutAt",
+                                        "hasAlreadyReadied"
+                                    ]
+                                },
+                                "otherQueues": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": { "type": "string" },
+                                            "version": { "type": "string" }
+                                        },
+                                        "required": ["id", "version"]
+                                    }
+                                }
+                            },
+                            "required": ["state", "queue", "otherQueues"]
+                        }
+                    ]
                 }
             },
             "required": [
@@ -54,7 +121,8 @@
                 "outgoingFriendRequest",
                 "incomingFriendRequest",
                 "ignoreIds",
-                "currentLobby"
+                "currentLobby",
+                "matchmaking"
             ]
         }
     ]
