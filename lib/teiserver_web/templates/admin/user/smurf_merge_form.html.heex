@@ -50,14 +50,15 @@
                 <Fontawesome.icon icon="fa-solid fa-link" style="regular" /> &nbsp;
                 <label for="" class="control-label">Link accounts</label>
               </h5>
-              {central_component("checkbox",
-                name: "merge[link]",
-                id: "merge_link_create",
-                value: "true",
-                label: "Create link",
-                checked: true,
-                description: "A smurf link between the two accounts will be created"
-              )}
+              <.input
+                type="checkbox"
+                id="merge_link_create"
+                name="merge[link]"
+                checked={true}
+                label="Create link"
+                description="A smurf link between the two accounts will be created"
+                value={true}
+              />
             </div>
           </div>
 
@@ -67,14 +68,15 @@
                 <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="regular" />
                 &nbsp; <label for="" class="control-label">Ratings</label>
               </h5>
-              {central_component("checkbox",
-                name: "merge[ratings]",
-                id: "merge_ratings_pick_highest",
-                value: "true",
-                label: "Pick highest value",
-                checked: true,
-                description: "The highest score from each user will be used for each rating"
-              )}
+              <.input
+                type="checkbox"
+                id="merge_ratings_pick_highest"
+                name="merge[ratings]"
+                checked={true}
+                label="Pick highest value"
+                description="The highest score from each user will be used for each rating"
+                value={true}
+              />
             </div>
           </div>
 
@@ -86,15 +88,15 @@
                   style="regular"
                 /> &nbsp; <label for="" class="control-label">Moderation reports/actions</label>
               </h5>
-              {central_component("checkbox",
-                name: "merge[reports]",
-                id: "merge_reports_copy",
-                value: "true",
-                label: "Copy",
-                checked: true,
-                description:
-                  "Reports for #{@from_user.name} will be duplicated to #{@to_user.name}"
-              )}
+              <.input
+                type="checkbox"
+                id="merge_reports_copy"
+                name="merge[reports]"
+                checked={true}
+                label="Copy"
+                description={"Reports for #{@from_user.name} will be duplicated to #{@to_user.name}"}
+                value={true}
+              />
             </div>
           </div>
 
@@ -106,15 +108,15 @@
                   style="regular"
                 /> &nbsp; <label for="" class="control-label">Mutes/Ignores</label>
               </h5>
-              {central_component("checkbox",
-                name: "merge[mutes]",
-                id: "merge_mutes_duplicate",
-                value: "true",
-                label: "Duplicate",
-                checked: true,
-                description:
-                  "Users who have muted #{@from_user.name} will add #{@to_user.name} as a mute"
-              )}
+              <.input
+                type="checkbox"
+                id="merge_mutes_duplicate"
+                name="merge[mutes]"
+                checked={true}
+                label="Duplicate"
+                description={"Users who have muted #{@from_user.name} will add #{@to_user.name} as a mute"}
+                value={true}
+              />
             </div>
           </div>
 
@@ -124,15 +126,15 @@
                 <Fontawesome.icon icon="fa-solid fa-input-text" style="regular" /> &nbsp;
                 <label for="" class="control-label">Names</label>
               </h5>
-              {central_component("checkbox",
-                name: "merge[names]",
-                id: "merge_names_duplicate",
-                value: "true",
-                label: "Duplicate",
-                checked: true,
-                description:
-                  "Past names used by #{@from_user.name} will be copied over to #{@to_user.name}"
-              )}
+              <.input
+                type="checkbox"
+                id="merge_names_duplicate"
+                name="merge[names]"
+                checked={true}
+                label="Duplicate"
+                description={"Past names used by #{@from_user.name} will be copied over to #{@to_user.name}"}
+                value={true}
+              />
             </div>
           </div>
 
@@ -142,14 +144,15 @@
                 <Fontawesome.icon icon={Teiserver.Account.UserLib.icon()} style="regular" />
                 &nbsp; <label for="" class="control-label">Old account ({@from_user.name})</label>
               </h5>
-              {central_component("checkbox",
-                name: "merge[old_account]",
-                id: "merge_old_account_deactivate",
-                value: "true",
-                label: "Deactivate",
-                checked: false,
-                description: "The account #{@from_user.name} will be deactivated"
-              )}
+              <.input
+                type="checkbox"
+                id="merge_old_account_deactivate"
+                name="merge[old_account]"
+                checked={true}
+                label="Deactivate"
+                description={"The account #{@from_user.name} will be deactivated"}
+                value={true}
+              />
             </div>
           </div>
 

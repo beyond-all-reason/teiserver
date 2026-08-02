@@ -69,14 +69,15 @@ user_moderator = allow?(@current_user, "Moderator") %>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_limit" class="control-label">Extended dataset</label>
-              {central_component("checkbox",
-                name: "report[extended]",
-                id: "report_extended",
-                value: "true",
-                label: "",
-                checked: @params["extended"] == "true",
-                description: "win/loss, match count"
-              )}
+              <.input
+                type="checkbox"
+                id="report_extended"
+                name="report[extended]"
+                checked={@params["extended"] == "true"}
+                label=""
+                value="true"
+                description="win/loss, match count"
+              />
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">

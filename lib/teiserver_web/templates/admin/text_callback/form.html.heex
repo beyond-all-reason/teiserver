@@ -16,14 +16,7 @@
 
     <div class="col-lg-6 my-2">
       <br />
-      {central_component("checkbox",
-        name: "text_callback[enabled]",
-        id: "text_callback_enabled",
-        value: "true",
-        label: "Enabled",
-        field: :enabled,
-        changeset: @changeset
-      )}
+      <.input field={f[:enabled]} type="checkbox" label="Enabled" />
     </div>
 
     <div class="col-lg-6 my-2">
@@ -39,13 +32,14 @@
 
   <div class="row">
     <div class="col-lg-6 my-2">
-      {central_component("checkbox",
-        name: "text_callback[rules][delete_trigger]",
-        id: "text_callback_rules_delete_trigger",
-        value: "true",
-        label: "Delete triggering message",
-        checked: Map.get(@changeset.data.rules, "delete_trigger", false) == "true"
-      )}
+      <.input
+        type="checkbox"
+        id="text_callback_rules_delete_trigger"
+        name="text_callback[rules][delete_trigger]"
+        label="Delete triggering message"
+        checked={Map.get(@changeset.data.rules, "delete_trigger", false) == "true"}
+        value="true"
+      />
     </div>
   </div>
 

@@ -373,23 +373,23 @@
 
               <div class="col-md-6">
                 <div class="p-2">
-                  {central_component("checkbox",
-                    name: "cb1",
-                    id: "cb1",
-                    value: "true",
-                    label: "Checkbox 1",
-                    checked: true,
-                    description: ""
-                  )}
+                  <.input
+                    type="checkbox"
+                    id="cb1"
+                    name="cb1"
+                    label="Checkbox 1"
+                    checked={true}
+                    value="true"
+                  />
 
-                  {central_component("checkbox",
-                    name: "cb2",
-                    id: "cb2",
-                    value: "true",
-                    label: "Checkbox 2",
-                    checked: false,
-                    description: ""
-                  )}
+                  <.input
+                    type="checkbox"
+                    id="cb1"
+                    name="cb1"
+                    label="Checkbox 2"
+                    checked={false}
+                    value="true"
+                  />
                 </div>
               </div>
 

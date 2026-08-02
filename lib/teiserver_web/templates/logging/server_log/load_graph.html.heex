@@ -350,13 +350,13 @@ all_col_class = col_class <> " all-chart" %>
 
                       <div class="col-xl-3 col-lg-4 col-md-6 my-2">
                         <br />
-                        {central_component("checkbox",
-                          id: "all_charts",
-                          name: "all_charts",
-                          label: "Show all charts",
-                          skip_hidden: true,
-                          checked: @params["all_charts"] == "true"
-                        )}
+                        <.input
+                          type="checkbox"
+                          id="all_charts"
+                          name="all_charts"
+                          checked={@params["all_charts"] == "true"}
+                          label="Show all charts"
+                        />
                       </div>
 
                       <div class="col-md-12 my-2">

@@ -109,15 +109,17 @@ bsname = view_colour() %>
                     <strong>{section}</strong>
                     <%= for r <- r_list do %>
                       <% r_clean = String.replace(r, " ", "_") %>
-                      {central_component("checkbox",
-                        id: "action_restriction_#{r_clean}",
-                        name: "action[restrictions][#{r_clean}]",
-                        label: r,
-                        value: r,
-                        checked:
+                      <.input
+                        type="checkbox"
+                        id={"action_restriction_#{r_clean}"}
+                        name={"action[restrictions][#{r_clean}]"}
+                        checked={
                           (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
                           |> Enum.member?(r)
-                      )}
+                        }
+                        label={r}
+                        value={r}
+                      />
                     <% end %>
                   </div>
                 <% end %>
@@ -478,13 +480,14 @@ bsname = view_colour() %>
                           <td>{r.type}/{r.sub_type}</td>
                           <td>{r.extra_text}</td>
                           <td>
-                            {central_component("checkbox",
-                              id: "action_report_#{r.id}",
-                              name: "action[reports][#{r.id}]",
-                              label: "",
-                              value: r.id,
-                              checked: Enum.member?(@selected_report_ids, r.id)
-                            )}
+                            <.input
+                              type="checkbox"
+                              id={"action_report_#{r.id}"}
+                              name={"action[reports][#{r.id}]"}
+                              checked={Enum.member?(@selected_report_ids, r.id)}
+                              label=""
+                              value={r.id}
+                            />
                           </td>
                         </tr>
                       <% end %>

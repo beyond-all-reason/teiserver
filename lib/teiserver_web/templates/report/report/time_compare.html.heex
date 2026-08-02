@@ -162,26 +162,26 @@
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_overlap" class="control-label">Overlaps:</label>
-              {central_component("checkbox",
-                name: "report[overlap]",
-                id: "report_overlap",
-                value: "true",
-                label: "Only show overlapping data",
-                checked: @params["overlap"] == "true",
-                description: ""
-              )}
+              <.input
+                type="checkbox"
+                id="report_overlap"
+                name="report[overlap]"
+                checked={@params["overlap"] == "true"}
+                label="Only show overlapping data"
+                value="true"
+              />
             </div>
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_skip_nil" class="control-label">Ignore empty:</label>
-              {central_component("checkbox",
-                name: "report[skip_nil]",
-                id: "report_skip_nil",
-                value: "true",
-                label: "Ignore logs with no activity",
-                checked: @params["skip_nil"] == "true",
-                description: ""
-              )}
+              <.input
+                type="checkbox"
+                id="report_skip_nil"
+                name="report[skip_nil]"
+                checked={@params["skip_nil"] == "true"}
+                label="Ignore logs with no activity"
+                value="true"
+              />
             </div>
           </div>
 

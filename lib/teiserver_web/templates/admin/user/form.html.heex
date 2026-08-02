@@ -47,12 +47,14 @@
           else
             r
           end %>
-        {central_component("checkbox",
-          id: "user_#{r}",
-          name: "user[#{r}]",
-          label: label,
-          checked: r in (@changeset.data.roles || [])
-        )}
+        <.input
+          type="checkbox"
+          id={"user_#{r}"}
+          name={"user[#{r}]"}
+          label={label}
+          checked={r in (@changeset.data.roles || [])}
+          value="true"
+        />
       <% end %>
     </div>
 
@@ -68,12 +70,14 @@
             r
           end %>
         <div :if={r in @changeable_roles}>
-          {central_component("checkbox",
-            id: "user_#{r}",
-            name: "user[#{r}]",
-            label: label,
-            checked: r in (@changeset.data.roles || [])
-          )}
+          <.input
+            type="checkbox"
+            id={"user_#{r}"}
+            name={"user[#{r}]"}
+            label={label}
+            checked={r in (@changeset.data.roles || [])}
+            value="true"
+          />
         </div>
       <% end %>
     </div>
@@ -89,12 +93,14 @@
           else
             r
           end %>
-        {central_component("checkbox",
-          id: "user_#{r}",
-          name: "user[#{r}]",
-          label: label,
-          checked: r in (@changeset.data.roles || [])
-        )}
+        <.input
+          type="checkbox"
+          id={"user_#{r}"}
+          name={"user[#{r}]"}
+          label={label}
+          checked={r in (@changeset.data.roles || [])}
+          value="true"
+        />
       <% end %>
     </div>
 
@@ -109,12 +115,14 @@
           else
             r
           end %>
-        {central_component("checkbox",
-          id: "user_#{r}",
-          name: "user[#{r}]",
-          label: label,
-          checked: r in (@changeset.data.roles || [])
-        )}
+        <.input
+          type="checkbox"
+          id={"user_#{r}"}
+          name={"user[#{r}]"}
+          label={label}
+          checked={r in (@changeset.data.roles || [])}
+          value="true"
+        />
       <% end %>
     </div>
 
@@ -129,12 +137,14 @@
           else
             r
           end %>
-        {central_component("checkbox",
-          id: "user_#{r}",
-          name: "user[#{r}]",
-          label: label,
-          checked: r in (@changeset.data.roles || [])
-        )}
+        <.input
+          type="checkbox"
+          id={"user_#{r}"}
+          name={"user[#{r}]"}
+          label={label}
+          checked={r in (@changeset.data.roles || [])}
+          value="true"
+        />
       <% end %>
     </div>
 
@@ -149,12 +159,14 @@
           else
             r
           end %>
-        {central_component("checkbox",
-          id: "user_#{r}",
-          name: "user[#{r}]",
-          label: label,
-          checked: r in (@changeset.data.roles || [])
-        )}
+        <.input
+          type="checkbox"
+          id={"user_#{r}"}
+          name={"user[#{r}]"}
+          label={label}
+          checked={r in (@changeset.data.roles || [])}
+          value="true"
+        />
       <% end %>
     </div>
   </div>

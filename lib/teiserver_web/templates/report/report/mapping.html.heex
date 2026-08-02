@@ -96,43 +96,47 @@
 
           <div class="row mt-4">
             <div class="col-md-3 col-xl-2">
-              {central_component("checkbox",
-                name: "report[types][]",
-                id: "report_types_duel",
-                value: "Duel",
-                label: "Duels",
-                checked: Enum.member?(@params["types"], "Duel")
-              )}
+              <.input
+                type="checkbox"
+                id="report_types_duel"
+                name="report[types][]"
+                checked={Enum.member?(@params["types"], "Duel")}
+                label="Duels"
+                value="Duel"
+              />
             </div>
 
             <div class="col-md-3 col-xl-2">
-              {central_component("checkbox",
-                name: "report[types][]",
-                id: "report_types_team",
-                value: "Team",
-                label: "Teams",
-                checked: Enum.member?(@params["types"], "Team")
-              )}
+              <.input
+                type="checkbox"
+                id="report_types_team"
+                name="report[types][]"
+                checked={Enum.member?(@params["types"], "Team")}
+                label="Teams"
+                value="Team"
+              />
             </div>
 
             <div class="col-md-3 col-xl-2">
-              {central_component("checkbox",
-                name: "report[types][]",
-                id: "report_types_small_team",
-                value: "Small Team",
-                label: "Small Teams",
-                checked: Enum.member?(@params["types"], "Small Team")
-              )}
+              <.input
+                type="checkbox"
+                id="report_types_small_team"
+                name="report[types][]"
+                checked={Enum.member?(@params["types"], "Small Team")}
+                label="Small Teams"
+                value="Small Team"
+              />
             </div>
 
             <div class="col-md-3 col-xl-2">
-              {central_component("checkbox",
-                name: "report[types][]",
-                id: "report_types_large_team",
-                value: "Large Team",
-                label: "Large Teams",
-                checked: Enum.member?(@params["types"], "Large Team")
-              )}
+              <.input
+                type="checkbox"
+                id="report_types_large_team"
+                name="report[types][]"
+                checked={Enum.member?(@params["types"], "Large Team")}
+                label="Large Teams"
+                value="Large Team"
+              />
             </div>
           </div>
 
