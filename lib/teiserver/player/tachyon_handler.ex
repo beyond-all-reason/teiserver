@@ -1050,6 +1050,9 @@ defmodule Teiserver.Player.TachyonHandler do
         ignoreIds: [],
         # TODO: see https://github.com/beyond-all-reason/teiserver/issues/1450
         matchmaking: %{state: :no_matchmaking},
+        # TODO. For now it's just there so clients don't break on missing
+        # required property
+        clanInvites: [],
         currentLobby: sess_state[:current_lobby],
         roles: roles_to_tachyon(user.roles)
       }

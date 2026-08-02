@@ -1,0 +1,6 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/clanId.json",
+    "title": "ClanId",
+    "type": "string",
+    "examples": ["12345"]
+}
