@@ -253,7 +253,8 @@ defmodule Teiserver.Party.Server do
         {:keep_state, data, [{:reply, from, {:error, :not_a_member}}]}
 
       {_member, rest} when map_size(rest) == 0 ->
-        {:stop_and_reply, :normal, [{:reply, from, :ok}], %{data | members: %{}} |> bump()}
+        new_data = %{data | members: %{}} |> bump()
+        {:keep_state, new_data, [{:reply, from, :ok}, {:next_event, :internal, :empty}]}
 
       {_member, new_members} ->
         new_data =
@@ -597,6 +598,10 @@ defmodule Teiserver.Party.Server do
 
   def handle_event(:info, _event, :starting_up, %PT.Data{} = data) do
     {:keep_state, data, [:postpone]}
+  end
+
+  def handle_event(:internal, :empty, _state, %PT.Data{} = data) do
+    {:stop, {:shutdown, :empty}, data}
   end
 
   def handle_event(:state_timeout, :snapshot_timeout, :starting_up, %PT.Data{} = data) do
