@@ -79,6 +79,11 @@ defmodule TeiserverWeb.Admin.BotLive.Show do
   end
 
   @impl LiveView
+  def handle_event("create_credential", _params, socket) do
+    {:noreply, put_flash(socket, :error, "Missing application")}
+  end
+
+  @impl LiveView
   def handle_event("delete_credential", %{"cred_id" => cred_id}, socket) do
     case CredentialQueries.get_credential_by_id(cred_id) do
       nil ->
