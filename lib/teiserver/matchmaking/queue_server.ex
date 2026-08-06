@@ -211,7 +211,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           {:ok, queue_pid :: pid()} | {:error, reason :: term()}
   def party_join_queue(queue_id, version, party_id, player_ids) do
     game_type = queue_id |> via_tuple() |> GenServer.call(:get_game_type)
-    member = Member.new(player_ids, game_type)
+    member = %{Member.new(player_ids, game_type) | party_id: party_id}
     queue_id |> via_tuple() |> GenServer.call({:party_join_queue, version, party_id, member})
   catch
     :exit, {:noproc, _details} -> {:no, :invalid_queue}

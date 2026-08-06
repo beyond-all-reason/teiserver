@@ -30,7 +30,7 @@ defmodule Teiserver.Support.Tachyon.Matchmaking do
       QueueServer.init_state(attrs)
 
     {:ok, pid} = QueueServer.start_link(initial_state)
-    %{state: initial_state, id: attrs.id, pid: pid}
+    %{state: initial_state, id: attrs.id, version: initial_state.queue.version, pid: pid}
   end
 
   defp stg_attr(id),
@@ -40,4 +40,6 @@ defmodule Teiserver.Support.Tachyon.Matchmaking do
       thumbnail_url: "https://www.beyondallreason.info/map/?!",
       matchmaking_queues: [id]
     }
+
+  defdelegate match_players(queue_pid), to: QueueServer
 end

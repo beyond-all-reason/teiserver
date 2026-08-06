@@ -3,12 +3,15 @@ defmodule Teiserver.Player.SessionTest do
   alias Teiserver.AssetFixtures
   alias Teiserver.Cluster
   alias Teiserver.Helpers.GeneralTestLib
+  alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Player
   alias Teiserver.Player.Session
   alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Player.Types, as: PT
   alias Teiserver.Support.ClusterHelpers
   alias Teiserver.Support.Polling
+  alias Teiserver.Support.Tachyon.Matchmaking, as: SupportMM
+  alias Teiserver.Support.TaggedEcho
   alias Teiserver.Tachyon, as: TachyonLib
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Registry, as: LobbyRegistry
@@ -23,16 +26,29 @@ defmodule Teiserver.Player.SessionTest do
     :ok
   end
 
-  def setup_session(_context) do
+  defp setup_void_session do
     user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
     {:ok, sess_pid} = SessionSupervisor.start_session(user)
 
     {:ok, fake_conn} =
-      Supervisor.child_spec({Task, fn -> :timer.sleep(:infinity) end}, [])
+      Supervisor.child_spec({Task, fn -> :timer.sleep(:infinity) end}, id: {:fake, user.id})
       |> Callbacks.start_supervised()
 
     Session.replace_connection(sess_pid, fake_conn)
-    {:ok, user: user, sess_pid: sess_pid, fake_conn: fake_conn}
+    %{user: user, sess_pid: sess_pid, fake_conn: fake_conn}
+  end
+
+  defp setup_forwarded_session(tag) do
+    ctx = setup_void_session()
+    {:ok, echo_pid} = TaggedEcho.start(tag)
+    Session.replace_connection(ctx.sess_pid, echo_pid)
+
+    Map.put(ctx, :echo_pid, echo_pid)
+    |> Map.delete(:fake_conn)
+  end
+
+  def setup_session(_context) do
+    {:ok, setup_void_session()}
   end
 
   def setup_config(_context) do
@@ -160,6 +176,45 @@ defmodule Teiserver.Player.SessionTest do
 
       Session.trigger_connection_timeout(sess_pid)
       refute_receive {:DOWN, ^ref, :process, _, _}
+    end
+  end
+
+  describe "lobby and matchmaking" do
+    test "party cancel mm can still requeue after" do
+      ctx1 = setup_forwarded_session(:user1)
+      ctx2 = setup_forwarded_session(:user2)
+
+      other_ctx = [setup_void_session(), setup_void_session()]
+
+      # we want to trigger a cancel event
+      queue_settings =
+        QueueServer.default_settings()
+        |> Map.put(:pairing_timeout, 1)
+
+      queue_ctx =
+        %{team_size: 2, settings: queue_settings}
+        |> SupportMM.queue_attrs()
+        |> SupportMM.start_queue()
+
+      {:ok, party} = Session.create_party(ctx1.user.id)
+      :ok = Session.invite_to_party(ctx1.user.id, ctx2.user.id)
+      :ok = Session.accept_invite_to_party(ctx2.user.id, party.id)
+
+      :ok = Session.join_queues(ctx1.user.id, [{queue_ctx.id, queue_ctx.version}])
+      assert_receive {:user2, {:matchmaking, {:queues_joined, _queues}}}
+
+      Enum.each(other_ctx, fn ctx ->
+        :ok = Session.join_queues(ctx.user.id, [{queue_ctx.id, queue_ctx.version}])
+      end)
+
+      SupportMM.match_players(queue_ctx.pid)
+      assert_receive {:user1, {:matchmaking, {:notify_found, _queue, _timeout}}}
+      assert_receive {:user2, {:matchmaking, {:notify_found, _queue, _timeout}}}
+
+      assert_receive {:user1, {:matchmaking, {:cancelled, :timeout}}}
+
+      :ok = Session.join_queues(ctx1.user.id, [{queue_ctx.id, queue_ctx.version}])
+      assert_receive {:user2, {:matchmaking, {:queues_joined, _queues}}}
     end
   end
 
