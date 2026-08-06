@@ -13,6 +13,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Matchmaking.QueueSupervisor
+  alias Teiserver.Party
   alias Teiserver.Player
   alias Teiserver.TachyonBattle
 
@@ -222,6 +223,8 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     QueueServer.disband_pairing(state.queue_id, self())
 
     for team <- state.teams, member <- team do
+      if member.party_id, do: Party.matchmaking_notify_cancel(member.party_id)
+
       for p_id <- member.player_ids do
         if p_id == user_id do
           # when a user in a party leaves while in a pairing room, need to let know
@@ -244,8 +247,12 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   def handle_info(:timeout, state) do
     QueueServer.disband_pairing(state.queue_id, self())
 
-    for team <- state.teams, member <- team, player_id <- member.player_ids do
-      Player.matchmaking_notify_lost(player_id, :timeout)
+    for team <- state.teams, member <- team do
+      if member.party_id, do: Party.matchmaking_notify_cancel(member.party_id)
+
+      for player_id <- member.player_ids do
+        Player.matchmaking_notify_lost(player_id, :timeout)
+      end
     end
 
     {:stop, :normal, state}
