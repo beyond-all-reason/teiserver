@@ -73,7 +73,7 @@ defmodule Teiserver.Tachyon.Tasks.SetupApps do
   end
 
   defp find_root_user! do
-    case Account.deprecated_get_user_by_email("root@localhost") do
+    case Account.query_user(search: [email_lower: "root@localhost"]) do
       nil -> raise "Cannot find root user root@localhost, set it up first"
       root -> root
     end
