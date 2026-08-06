@@ -4,7 +4,7 @@ defmodule Teiserver.Logging.Filter do
   """
 
   def filter(event, _args) do
-    if event.meta.mfa == {Phoenix.Socket.Transport, :check_origin, 5},
+    if Map.get(event.meta, :mfa) == {Phoenix.Socket.Transport, :check_origin, 5},
       do: :stop,
       else: :ignore
   end
