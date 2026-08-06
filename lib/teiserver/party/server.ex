@@ -491,7 +491,7 @@ defmodule Teiserver.Party.Server do
   def handle_event(:cast, :lost_matchmaking_queue, :running, %PT.Data{} = data) do
     monitors =
       Enum.reduce(data.matchmaking.queues, data.monitors, fn queue_id, mc ->
-        MC.demonitor_by_val(mc, queue_id)
+        MC.demonitor_by_val(mc, {:queue, queue_id})
       end)
 
     {:keep_state, %{data | monitors: monitors, matchmaking: nil}}
@@ -555,8 +555,8 @@ defmodule Teiserver.Party.Server do
           data
       end
 
-    case state do
-      :running -> {:next_state, :shutting_down, data}
+    case {state, val} do
+      {:running, val} when val != nil -> {:next_state, :shutting_down, data}
       _other_state -> {:keep_state, data}
     end
   end
