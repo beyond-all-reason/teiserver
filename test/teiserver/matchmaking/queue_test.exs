@@ -1,41 +1,19 @@
 defmodule Teiserver.Matchmaking.QueueTest do
-  alias Teiserver.AssetFixtures
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Player.SessionRegistry
   alias Teiserver.Support.Polling
+  alias Teiserver.Support.Tachyon.Matchmaking, as: SupportMM
   use Teiserver.DataCase
 
   @moduletag :tachyon
 
-  defp stg_attr(id),
-    do: %{
-      spring_name: "Supreme that glitters",
-      display_name: "Supreme That Glitters",
-      thumbnail_url: "https://www.beyondallreason.info/map/?!",
-      matchmaking_queues: [id]
-    }
-
   setup _context do
     user = mk_user()
-    id = UUID.uuid4()
-
-    map = id |> stg_attr() |> AssetFixtures.create_map()
-
-    initial_state =
-      QueueServer.init_state(%{
-        id: id,
-        name: id,
-        team_size: 1,
-        team_count: 2,
-        engines: ["spring", "recoil"],
-        games: ["BAR test version", "BAR release version"],
-        maps: [map]
-      })
-
-    {:ok, pid} = QueueServer.start_link(initial_state)
+    %{state: initial_state, id: id, pid: pid} = SupportMM.start_queue()
+    map = List.first(initial_state.queue.maps)
 
     {:ok,
      user: user, queue_id: id, queue_pid: pid, version: initial_state.queue.version, map: map}
