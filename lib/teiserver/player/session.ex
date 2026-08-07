@@ -38,7 +38,7 @@ defmodule Teiserver.Player.Session do
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 
-  @connection_timeout 30_000
+  @connection_timeout :timer.seconds(30)
 
   def start_link({user_id, arg}) do
     GenServer.start_link(__MODULE__, arg, name: via_tuple(user_id))
