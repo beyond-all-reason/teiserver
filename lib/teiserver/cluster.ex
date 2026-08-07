@@ -10,7 +10,7 @@ defmodule Teiserver.Cluster do
   This uses rendez-vous hashing to split the nodes
   """
   @spec split_nodes(term(), [node()] | nil) :: {node(), [node()]}
-  def split_nodes(routing_key, nodes \\ [Node.self() | Node.list(:connected)]) do
+  def split_nodes(routing_key, nodes \\ [Node.self() | Node.list()]) do
     [primary | replicas] = Enum.sort_by(nodes, fn node -> :erlang.phash2({node, routing_key}) end)
 
     {primary, replicas}
