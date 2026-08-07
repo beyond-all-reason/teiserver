@@ -89,14 +89,14 @@
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_skip0" class="control-label">Skip day 0:</label>
-              {central_component("checkbox",
-                name: "report[skip0]",
-                id: "report_skip0",
-                value: "true",
-                label: "Skip day 0",
-                checked: @params["skip0"] == "true",
-                description: ""
-              )}
+              <.input
+                type="checkbox"
+                id="report_skip0"
+                name="report[skip0]"
+                checked={@params["skip0"] == "true"}
+                label="Skip day 0"
+                value="true"
+              />
             </div>
           </div>
 

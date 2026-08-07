@@ -40,15 +40,17 @@
         <strong>{section}</strong>
         <%= for r <- r_list do %>
           <% r_clean = String.replace(r, " ", "_") %>
-          {central_component("checkbox",
-            id: "action_restriction_#{r_clean}",
-            name: "action[restrictions][#{r_clean}]",
-            label: r,
-            value: r,
-            checked:
+          <.input
+            type="checkbox"
+            id={"action_restriction_#{r_clean}"}
+            name={"action[restrictions][#{r_clean}]"}
+            checked={
               (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
               |> Enum.member?(r)
-          )}
+            }
+            label={r}
+            value={r}
+          />
         <% end %>
       </div>
     <% end %>

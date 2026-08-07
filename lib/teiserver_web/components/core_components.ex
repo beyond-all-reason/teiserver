@@ -331,7 +331,9 @@ defmodule TeiserverWeb.CoreComponents do
     |> input()
   end
 
-  def input(%{type: "checkbox", value: value} = assigns) do
+  def input(%{type: "checkbox"} = assigns) do
+    value = assigns[:value] || "true"
+
     assigns =
       assign_new(assigns, :checked, fn -> Form.normalize_value("checkbox", value) end)
 
@@ -343,8 +345,9 @@ defmodule TeiserverWeb.CoreComponents do
         id={@id}
         class="form-check-input"
         type="checkbox"
-        value={@value}
+        value={assigns[:value] || "true"}
         checked={@checked}
+        {@rest}
       />
       <label class="form-check-label" for={@id}>
         <strong>{@label}</strong>{assigns[:text]}

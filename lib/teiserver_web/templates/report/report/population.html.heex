@@ -81,14 +81,14 @@
 
             <div class="col-md-3 col-xl-2 search-form-input">
               <label for="report_exclude_bots" class="control-label">Exclude bots:</label>
-              {central_component("checkbox",
-                name: "report[exclude_bots]",
-                id: "report_exclude_bots",
-                value: "true",
-                label: "Exclude bot accounts",
-                checked: @params["exclude_bots"] == "true",
-                description: ""
-              )}
+              <.input
+                type="checkbox"
+                id="report_exclude_bots"
+                name="report[exclude_bots]"
+                checked={@params["exclude_bots"] == "true"}
+                label=""
+                value="true"
+              />
             </div>
           </div>
 

@@ -57,14 +57,15 @@
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_limit" class="control-label">Exclude banned users</label>
-              {central_component("checkbox",
-                name: "report[exclude_banned]",
-                id: "report_exclude_banned",
-                value: "true",
-                label: "",
-                checked: @params["exclude_banned"] == "true",
-                description: "exclude banned users from all queries"
-              )}
+              <.input
+                type="checkbox"
+                id="report_exclude_banned"
+                name="report[exclude_banned]"
+                checked={@params["exclude_banned"] == "true"}
+                label=""
+                value="true"
+                description="exclude banned users from all queries"
+              />
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">

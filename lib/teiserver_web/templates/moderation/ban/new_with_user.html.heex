@@ -142,13 +142,14 @@ type_icons = %{
                             </label>
                           </td>
                           <td>
-                            {central_component("checkbox",
-                              name: "ban[key_values][]",
-                              id: "ban_type_#{key.value}",
-                              value: key.value,
-                              label: "",
-                              checked: false
-                            )}
+                            <.input
+                              type="checkbox"
+                              id={"ban_type_#{key.value}"}
+                              name="ban[key_values][]"
+                              checked={false}
+                              label=""
+                              value={key.value}
+                            />
                           </td>
                         </tr>
                       <% end %>

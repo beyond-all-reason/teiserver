@@ -31,17 +31,6 @@
               <label for="teiserver-user-search" class="control-label">Specific user: </label>
               <br />You cannot currently search by user. (Issue #1416)
             </div>
-
-            <div class="col-md-4 col-xl-2">
-              {central_component("checkbox",
-                name: "f[no_root]",
-                id: "f_no_root",
-                value: "true",
-                label: "Do not include developers",
-                field: :not_root,
-                changeset: @changeset
-              )}
-            </div>
           </div>
 
           <div class="form-group">
