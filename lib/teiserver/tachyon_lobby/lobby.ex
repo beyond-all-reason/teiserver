@@ -1133,13 +1133,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
     {:keep_state, final_aggregate.data, [{:reply, from, :ok} | final_aggregate.actions]}
   end
 
-  def handle_event(:info, {:DOWN, ref, :process, _pid, :shutdown}, state, %LT.Data{} = data) do
+  def handle_event(:info, {:DOWN, ref, :process, _pid, :shutdown} = ev, state, %LT.Data{} = data) do
     val = MC.get_val(data.monitors, ref)
     data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
 
     case state do
-      :shutting_down -> {:keep_state, data}
-      _other -> {:next_state, :shutting_down, data}
+      :shutting_down ->
+        {:keep_state, data}
+
+      _other ->
+        Logger.info(
+          "lobby entering shutting down state from ev=#{inspect(ev)} for val #{inspect(val)}"
+        )
+
+        {:next_state, :shutting_down, data}
     end
   end
 
