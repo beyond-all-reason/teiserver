@@ -80,13 +80,13 @@ defmodule Teiserver.ModerationTest do
       "reason" => "some reason",
       "restrictions" => ["r1", "r2"],
       "score_modifier" => "1000",
-      "expires" => DateTime.utc_now()
+      "duration" => 7 * 86_400
     }
     @update_attrs %{
       "reason" => "some updated reason",
       "restrictions" => ["u1", "u2"],
       "score_modifier" => "1500",
-      "expires" => DateTime.utc_now()
+      "duration" => 14 * 86_400
     }
     @invalid_attrs %{"reason" => nil}
 
@@ -136,6 +136,53 @@ defmodule Teiserver.ModerationTest do
     test "change_action/1 returns a action changeset" do
       action = ModerationTestLib.action_fixture()
       assert %Ecto.Changeset{} = Moderation.change_action(action)
+    end
+
+    test "expires is nil until user logs in" do
+      {:ok, action} =
+        @valid_attrs
+        |> Map.merge(%{"target_id" => GeneralTestLib.make_user().id})
+        |> Moderation.create_action()
+
+      assert action.duration == 7 * 86_400
+      assert is_nil(action.expires)
+
+      # Action should appear in "Pending only" query, not in "Unexpired only"
+      pending =
+        Moderation.list_actions(search: [target_id: action.target_id, expiry: "Pending only"])
+
+      unexpired =
+        Moderation.list_actions(search: [target_id: action.target_id, expiry: "Unexpired only"])
+
+      assert Enum.any?(pending, &(&1.id == action.id))
+      refute Enum.any?(unexpired, &(&1.id == action.id))
+    end
+
+    test "expires is set after user logs in" do
+      {:ok, action} =
+        @valid_attrs
+        |> Map.merge(%{"target_id" => GeneralTestLib.make_user().id})
+        |> Moderation.create_action()
+
+      assert is_nil(action.expires)
+
+      # Simulate coordinator login: set expires = now + duration
+      now = DateTime.utc_now()
+      expires = DateTime.add(now, action.duration, :second)
+      {:ok, updated} = Moderation.update_action(action, %{"expires" => expires})
+
+      expected_expires = expires |> DateTime.to_naive() |> NaiveDateTime.truncate(:second)
+      assert updated.expires == expected_expires
+
+      # Action should now appear in "Unexpired only", not in "Pending only"
+      pending =
+        Moderation.list_actions(search: [target_id: action.target_id, expiry: "Pending only"])
+
+      unexpired =
+        Moderation.list_actions(search: [target_id: action.target_id, expiry: "Unexpired only"])
+
+      refute Enum.any?(pending, &(&1.id == action.id))
+      assert Enum.any?(unexpired, &(&1.id == action.id))
     end
   end
 

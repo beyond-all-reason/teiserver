@@ -99,6 +99,9 @@ defmodule Teiserver.Helper.DateHelper do
         :ymd_hms ->
           Calendar.strftime(the_time, "%Y-%m-%d %I:%M:%S")
 
+        :ymd_hms24 ->
+          Calendar.strftime(the_time, "%Y-%m-%d %H:%M:%S")
+
         :hms ->
           Calendar.strftime(the_time, "%I:%M:%S")
 
@@ -403,7 +406,11 @@ defmodule Teiserver.Helper.DateHelper do
   @human_input_regex ~r/([1-9][0-9]*?)\s?(s|seconds?|h|hours?|d|days?|m|months?|y|years?)/
 
   @spec human_input_to_datetime(String.t(), DateTime.t() | nil) :: {:ok, DateTime.t()} | nil
-  def human_input_to_datetime(human_input, now \\ nil) do
+  def human_input_to_datetime(human_input, now \\ nil)
+  def human_input_to_datetime(nil, _now), do: nil
+  def human_input_to_datetime("", _now), do: nil
+
+  def human_input_to_datetime(human_input, now) do
     now = now || DateTime.utc_now()
     human_input = String.downcase(human_input)
 
@@ -422,6 +429,34 @@ defmodule Teiserver.Helper.DateHelper do
           end
 
         {:ok, DateTime.shift(now, duration)}
+
+      _any_other ->
+        nil
+    end
+  end
+
+  @doc """
+  Converts human input like "7d" directly to seconds without going through DateTime.
+  """
+  @spec human_input_to_seconds(String.t() | nil) :: integer() | nil
+  def human_input_to_seconds(nil), do: nil
+  def human_input_to_seconds(""), do: nil
+
+  def human_input_to_seconds(human_input) do
+    human_input = String.downcase(human_input)
+
+    case Regex.run(@human_input_regex, human_input) do
+      [_full, count, unit] ->
+        count = String.to_integer(count)
+        unit = String.first(unit)
+
+        case unit do
+          "s" -> count
+          "h" -> count * 3_600
+          "d" -> count * 86_400
+          "m" -> count * 30 * 86_400
+          "y" -> count * 365 * 86_400
+        end
 
       _any_other ->
         nil
