@@ -255,12 +255,12 @@ defmodule Teiserver.TachyonBattle.Battle do
 
       {:engine_crash, _details} ->
         Battle.end_tachyon_match(state.match_id, ev.time)
-        {:stop, :shutdown, %{state | battle_state: :shutting_down}}
+        {:stop, :normal, %{state | battle_state: :shutting_down}}
 
       :engine_quit ->
         Battle.end_tachyon_match(state.match_id, ev.time)
         Battle.rate_tachyon_match(state.match_id)
-        {:stop, :shutdown, %{state | battle_state: :shutting_down}}
+        {:stop, :normal, %{state | battle_state: :shutting_down}}
 
       {:player_chat_broadcast, %{destination: :all, message: "!stop"}} ->
         if state.autohost_pid != nil do
