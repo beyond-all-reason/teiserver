@@ -3,7 +3,7 @@ defmodule TeiserverWeb.API.BattleController do
   # alias Teiserver.Battle
 
   plug(Bodyguard.Plug.Authorize,
-    fallback: TeiserverWeb.Controllers.BodyguardFallback,
+    fallback: TeiserverWeb.Controllers.ApiBodyguardFallback,
     policy: Teiserver.Battle.ApiAuth,
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}

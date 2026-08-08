@@ -1,5 +1,9 @@
 defmodule Teiserver.Account.ErrorHandler do
-  @moduledoc false
+  @moduledoc """
+  Guardian error handler for `Teiserver.Account.AuthPipeline`, i.e. the browser.
+  Failures send the user to the login page, which is why the api does not go
+  through this pipeline at all - see `Teiserver.Account.ApiAuthPlug`.
+  """
 
   alias Phoenix.Controller
 
