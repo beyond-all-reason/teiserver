@@ -20,6 +20,7 @@ defmodule Teiserver.MixProject do
   def cli do
     [
       preferred_envs: [
+        lint: :test,
         precommit: :test,
         coveralls: :test,
         "coveralls.detail": :test,
@@ -201,11 +202,24 @@ defmodule Teiserver.MixProject do
         "sass light --no-source-map --style=compressed",
         "phx.digest"
       ],
+      # Everything the "Lint and style checks" github action runs, in the same
+      # order, so a failure here is a failure there. Keep in step with
+      # .github/workflows/lint.yml
+      lint: [
+        "deps.unlock --check-unused",
+        "hex.audit",
+        # decimal and gun are transitive dependencies that are a pain to
+        # update, see the workflow for the details
+        "deps.audit --ignore-package-names decimal,gun",
+        "format --check-formatted",
+        "compile --warnings-as-errors",
+        "credo --strict"
+      ],
       precommit: [
         "deps.unlock --check-unused",
-        "compile --force --warning-as-errors",
+        "compile --force --warnings-as-errors",
         "format",
-        "credo",
+        "credo --strict",
         "test --raise --warnings-as-errors --exclude needs_attention",
         "cmd --shell MIX_ENV=dev mix dialyzer --list-unused-filters"
       ]
