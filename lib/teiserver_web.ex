@@ -68,7 +68,6 @@ defmodule TeiserverWeb do
       alias Teiserver.Helper.ColourHelper
       import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
       import Teiserver.Helpers.InputHelper
-      import Teiserver.Helpers.ComponentHelper
       import Teiserver.Helper.DateHelper
 
       import Teiserver.Config, only: [get_user_config_cache: 2, get_site_config_cache: 1]
