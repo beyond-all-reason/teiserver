@@ -1,4 +1,5 @@
 defmodule Teiserver.Account.ApiAuthPlugTest do
+  alias Phoenix.Controller
   alias Teiserver.Account
   alias Teiserver.Account.ApiAuthPlug
   alias Teiserver.Account.Guardian
@@ -8,7 +9,7 @@ defmodule Teiserver.Account.ApiAuthPlugTest do
 
   defp run(conn) do
     conn
-    |> Phoenix.Controller.accepts(["json"])
+    |> Controller.accepts(["json"])
     |> ApiAuthPlug.call(ApiAuthPlug.init([]))
   end
 

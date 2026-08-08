@@ -20,9 +20,9 @@ defmodule Teiserver.Account.ApiAuthPlug do
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Guardian
 
-  import Plug.Conn
-
   require Logger
+
+  import Plug.Conn
 
   @behaviour Plug
 
