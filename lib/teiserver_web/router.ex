@@ -630,14 +630,6 @@ defmodule TeiserverWeb.Router do
   scope "/admin", TeiserverWeb.Admin do
     pipe_through([:live_browser, :protected])
 
-    live_session :live_test_page_view,
-      on_mount: [
-        {Teiserver.Account.AuthPlug, :ensure_authenticated}
-      ] do
-      live "/test_page", TestPageLive.Index, :index
-      live "/test_page/:tab", TestPageLive.Index, :index
-    end
-
     live_session :admin_chat_liveview,
       on_mount: [
         {Teiserver.Account.AuthPlug, :ensure_authenticated},
@@ -663,7 +655,6 @@ defmodule TeiserverWeb.Router do
 
     get("/tools", ToolController, :index)
     get("/tools/falist", ToolController, :falist)
-    get("/tools/test_page", ToolController, :test_page)
 
     get("/users/rename_form/:id", UserController, :rename_form)
     put("/users/rename_post/:id", UserController, :rename_post)

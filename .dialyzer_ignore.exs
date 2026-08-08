@@ -119,8 +119,6 @@
   {"lib/teiserver_web/controllers/admin/discord_channel_controller.ex", :pattern_match},
   {"lib/teiserver_web/controllers/admin/lobby_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/admin/match_controller.ex", :no_return},
-  {"lib/teiserver_web/controllers/admin/tool_controller.ex", :no_return},
-  {"lib/teiserver_web/controllers/admin/tool_controller.ex", :call},
   {"lib/teiserver_web/controllers/admin/user_controller.ex", :guard_fail},
   {"lib/teiserver_web/controllers/admin/user_controller.ex", :pattern_match},
   {"lib/teiserver_web/controllers/admin/user_controller.ex", :no_return},
