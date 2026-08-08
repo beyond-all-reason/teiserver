@@ -12,51 +12,73 @@ defmodule Teiserver.Account.AuthPlugTest do
   # the session, cookies and flash
   defp run(conn) do
     conn
-    |> init_test_session(%{})
     |> fetch_cookies()
     |> Controller.fetch_flash([])
     |> AuthPipeline.call(AuthPipeline.init([]))
     |> AuthPlug.call([])
   end
 
-  test "assigns current_user from a verified bearer token", %{conn: conn} do
-    user = GeneralTestLib.make_user()
+  defp with_session_token(conn, user) do
     {:ok, token, _claims} = Guardian.encode_and_sign(user)
+    init_test_session(conn, %{"guardian_default_token" => token})
+  end
+
+  test "assigns current_user from the session", %{conn: conn} do
+    user = GeneralTestLib.make_user()
 
     conn =
       conn
-      |> put_req_header("authorization", "Bearer #{token}")
+      |> with_session_token(user)
       |> run()
 
     assert conn.assigns.current_user.id == user.id
-    assert conn.assigns.user_token == token
+    assert conn.assigns.user_token != ""
   end
 
   test "assigns no user without credentials", %{conn: conn} do
-    conn = run(conn)
+    conn =
+      conn
+      |> init_test_session(%{})
+      |> run()
 
     assert conn.assigns.current_user == nil
     assert conn.assigns.totp_status == nil
   end
 
-  # The bearer path must not shadow the long lived remember me cookie the web
-  # session relies on
+  # The session is short lived, the remember me cookie is what keeps a browser
+  # logged in across sessions
   test "falls back to the remember me cookie", %{conn: conn} do
     user = GeneralTestLib.make_user()
     {:ok, token, _claims} = Guardian.encode_and_sign(user)
 
     conn =
       conn
+      |> init_test_session(%{})
       |> put_req_cookie("guardian_default_token", token)
       |> run()
 
     assert conn.assigns.current_user.id == user.id
   end
 
-  test "ignores an unparseable bearer token", %{conn: conn} do
+  # Bearer tokens are handled by the api pipeline, the browser must not care
+  test "ignores an authorization header", %{conn: conn} do
+    user = GeneralTestLib.make_user()
+    {:ok, token, _claims} = Guardian.encode_and_sign(user)
+
     conn =
       conn
-      |> put_req_header("authorization", "Bearer nonsense")
+      |> init_test_session(%{})
+      |> put_req_header("authorization", "Bearer #{token}")
+      |> run()
+
+    assert conn.assigns.current_user == nil
+  end
+
+  test "ignores an unparseable remember me cookie", %{conn: conn} do
+    conn =
+      conn
+      |> init_test_session(%{})
+      |> put_req_cookie("guardian_default_token", "nonsense")
       |> run()
 
     assert conn.assigns.current_user == nil
@@ -64,28 +86,27 @@ defmodule Teiserver.Account.AuthPlugTest do
 
   test "signs out a user restricted from logging in", %{conn: conn} do
     user = GeneralTestLib.make_user(%{"restrictions" => ["Login"]})
-    {:ok, token, _claims} = Guardian.encode_and_sign(user)
 
     conn =
       conn
-      |> put_req_header("authorization", "Bearer #{token}")
+      |> with_session_token(user)
       |> run()
 
     assert conn.assigns.current_user == nil
-    assert conn.halted or conn.status == 302
+    assert redirected_to(conn) == ~p"/logout"
   end
 
   test "signs out a smurf", %{conn: conn} do
     origin = GeneralTestLib.make_user()
     smurf = GeneralTestLib.make_user()
     {:ok, smurf} = Account.update_user_smurf(smurf, %{smurf_of_id: origin.id})
-    {:ok, token, _claims} = Guardian.encode_and_sign(smurf)
 
     conn =
       conn
-      |> put_req_header("authorization", "Bearer #{token}")
+      |> with_session_token(smurf)
       |> run()
 
     assert conn.assigns.current_user == nil
+    assert redirected_to(conn) == ~p"/logout"
   end
 end

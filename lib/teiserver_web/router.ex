@@ -63,14 +63,15 @@ defmodule TeiserverWeb.Router do
     plug(Teiserver.Plugs.BasicAuthBotPlug)
   end
 
+  # a pipeline for json api endpoints authenticated with a guardian bearer
+  # token. ApiAuthPlug halts the request itself, so there is no
+  # EnsureAuthenticated here
   pipeline :token_api do
     plug(:accepts, ["json"])
     plug(:put_secure_browser_headers)
     plug(Teiserver.Logging.LoggingPlug)
-    plug(Teiserver.Account.AuthPipeline)
-    plug(Teiserver.Account.AuthPlug)
+    plug(Teiserver.Account.ApiAuthPlug)
     plug(Teiserver.Plugs.CachePlug)
-    plug(Guardian.Plug.EnsureAuthenticated)
   end
 
   # a pipeline to use for any api endpoint consuming json and expecting

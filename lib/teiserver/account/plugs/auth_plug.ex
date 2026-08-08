@@ -1,5 +1,11 @@
 defmodule Teiserver.Account.AuthPlug do
-  @moduledoc false
+  @moduledoc """
+  Browser side authentication. Assigns `:current_user` from the session token
+  verified by `Teiserver.Account.AuthPipeline`, falling back to the long lived
+  remember me cookie, and bounces banned users to the logout page.
+
+  The api counterpart is `Teiserver.Account.ApiAuthPlug`.
+  """
 
   alias ExULID.ULID
   alias Phoenix.Component
@@ -97,19 +103,8 @@ defmodule Teiserver.Account.AuthPlug do
     end
   end
 
-  defp banned_user?(%{assigns: %{current_user: nil}}), do: false
-
   defp banned_user?(%{assigns: %{current_user: current_user}} = _conn_or_socket) do
-    cond do
-      Account.restricted?(current_user.id, ["Login"]) ->
-        true
-
-      current_user.smurf_of_id != nil ->
-        true
-
-      true ->
-        false
-    end
+    AuthLib.blocked_from_login?(current_user)
   end
 
   @doc """

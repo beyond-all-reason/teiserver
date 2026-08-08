@@ -231,4 +231,16 @@ defmodule Teiserver.Account.AuthLib do
   def current_user(conn) do
     conn.assigns[:current_user]
   end
+
+  @doc """
+  Returns true if the user is not allowed to be signed in at all, regardless of
+  how they authenticated. How to respond to that is up to the caller, the web
+  and api auth plugs each do their own thing.
+  """
+  @spec blocked_from_login?(Teiserver.Account.User.t() | nil) :: boolean()
+  def blocked_from_login?(nil), do: false
+
+  def blocked_from_login?(user) do
+    Account.restricted?(user.id, ["Login"]) or user.smurf_of_id != nil
+  end
 end
