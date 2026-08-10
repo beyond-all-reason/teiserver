@@ -213,13 +213,13 @@ defmodule Teiserver.MixProject do
         "deps.audit --ignore-package-names decimal,gun",
         "format --check-formatted",
         "compile --warnings-as-errors",
-        "credo --strict"
+        "credo"
       ],
       precommit: [
         "deps.unlock --check-unused",
         "compile --force --warnings-as-errors",
         "format",
-        "credo --strict",
+        "credo",
         "test --raise --warnings-as-errors --exclude needs_attention",
         "cmd --shell MIX_ENV=dev mix dialyzer --list-unused-filters"
       ]

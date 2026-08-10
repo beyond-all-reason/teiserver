@@ -27,7 +27,7 @@ cat > /etc/motd << 'MOTD'
     Email:    root@localhost
     Password: password
 
-  Before pushing, run the lint and style checks CI does:
+  Before pushing, run the same lint and style checks CI does:
     $ MIX_ENV=test mix lint
   or use the "Run Linter" task from the VS Code command palette.
   For the full set (lint, tests and dialyzer), run:
