@@ -12,14 +12,10 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Admin.BadgeTypeView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            show_search: false,
-            active: ""
-          })
-        )}
+        <TeiserverWeb.Components.Admin.BadgeTypeComponents.section_menu
+          active="show"
+          colour={bsname}
+        />
         <hr />
 
         <div class="float-end">

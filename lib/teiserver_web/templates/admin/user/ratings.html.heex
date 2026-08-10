@@ -4,15 +4,11 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Admin.UserView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            quick_search: "",
-            show_search: false,
-            active: "ratings"
-          })
-        )}
+        <TeiserverWeb.Components.Admin.UserComponents.section_menu
+          active="ratings"
+          colour={bsname}
+          current_user={@current_user}
+        />
         <hr />
 
         <div class="float-end">

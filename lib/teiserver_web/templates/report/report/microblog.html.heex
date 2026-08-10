@@ -17,14 +17,6 @@
           <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
-
-        {render(
-          TeiserverWeb.Report.ReportView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            active: "microblog"
-          })
-        )}
         <br /><br />
 
         <.table id="posts" rows={@posts} table_class="table-sm table-hover">

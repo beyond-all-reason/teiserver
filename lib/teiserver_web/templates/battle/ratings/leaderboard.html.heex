@@ -1,16 +1,18 @@
-<% bsname = view_colour() %>
+<% bsname = view_colour()
+types = Teiserver.Game.MatchRatingLib.rating_type_list() %>
 <div class="row section-menu">
   <div class="col-md-12 col-lg-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Battle.RatingsView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            show_search: false,
-            active: @type_name
-          })
-        )}
+        <%= for t <- types do %>
+          <.section_menu_button
+            bsname={bsname}
+            url={~p"/battle/ratings/leaderboard/#{t}"}
+          >
+            {t}
+          </.section_menu_button>
+        <% end %>
+
         <br /><br />
         The leaderboard weighs uncertainty a lot more than lobby balance. As a result the number you see here will not be the same as the value you see ingame.
         <div class="table-responsive">

@@ -4,15 +4,11 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Admin.UserView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            quick_search: "",
-            show_search: false,
-            active: "show"
-          })
-        )}
+        <TeiserverWeb.Components.Admin.UserComponents.section_menu
+          active="relationships"
+          colour={bsname}
+          current_user={@current_user}
+        />
         <hr />
 
         <a class={"btn btn-outline-#{bsname} float-end"} href={~p"/teiserver/admin/user/#{@user}"}>
