@@ -1009,6 +1009,23 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  # Enables quantum mode where each team has 1 commander and full shared control
+  # next step will be to add options to it allowing you to pick how many commanders
+  # are shared on a team or which teams are used but for now we're keeping it simple
+  def handle_command(
+        %{command: "quantum", remaining: _remaining, senderid: _senderid} = _cmd,
+        %{quantum_mode?: false} = state
+      ) do
+    %{state | quantum_mode?: true}
+  end
+
+  def handle_command(
+        %{command: "quantum", remaining: _remaining, senderid: _senderid} = _cmd,
+        %{quantum_mode?: true} = state
+      ) do
+    %{state | quantum_mode?: false}
+  end
+
   #################### VIP Streamer
   def handle_command(%{command: "shuffle", remaining: remaining, senderid: senderid}, state) do
     mode =

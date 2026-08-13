@@ -559,7 +559,8 @@ defmodule Teiserver.Battle.LobbyServer do
         teaser,
         LobbyRestrictions.get_rank_bounds_for_title(consul_state),
         LobbyRestrictions.get_rating_bounds_for_title(consul_state),
-        if(consul_state == nil or consul_state.ranked, do: nil, else: "Unranked")
+        if(consul_state == nil or consul_state.ranked, do: nil, else: "Unranked"),
+        if(consul_state != nil and consul_state.quantum_mode?, do: "Quantum")
       ]
       |> Enum.reject(&(&1 == nil))
       |> Enum.join(" | ")

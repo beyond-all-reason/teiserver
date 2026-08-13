@@ -30,7 +30,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password?)
-  @boss_commands ~w(balancealgorithm gatekeeper welcome-message reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
+  @boss_commands ~w(balancealgorithm gatekeeper welcome-message reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels quantum)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec lock unlock makebalance set-config-teaser)
   @admin_commands ~w(shuffle)
 
@@ -1060,8 +1060,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  # Ensure no two players have the same player_number
-  defp fix_ids(state) do
+  # Ensure no two players have the same player_number unless it's quantum mode
+  # in which case there's going to be overlap
+  defp fix_ids(%{quantum_mode?: false} = state) do
     players = list_players(state)
 
     # Never do this for more than 256 players
@@ -1088,6 +1089,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
         end)
       end
     end
+  end
+
+  # At this stage quantum mode will set all players in a team to have the same shared
+  # commander
+  defp fix_ids(%{quantum_mode?: true} = state) do
+    list_players(state)
+    |> Enum.each(fn player_client ->
+      Client.update(
+        %{player_client | player_number: player_client.team_number, ready: true},
+        :client_updated_battlestatus
+      )
+    end)
   end
 
   @spec afk_check_update(map()) :: map()
@@ -1359,6 +1372,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       afk_check_list: [],
       afk_check_at: nil,
       last_seen_map: %{},
+      quantum_mode?: false,
 
       # Toggle with Coordinator.cast_consul(lobby_id, {:put, :unready_can_play, true})
       unready_can_play: false,
