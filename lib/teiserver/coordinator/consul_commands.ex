@@ -1025,7 +1025,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     )
 
     # Make the game unranked
-    Battle.set_modoption(state.lobby_id, "game/modoptions/ranked_game", 0)
+    Battle.set_modoption(state.lobby_id, "game/modoptions/ranked_game", "0")
 
     %{state | quantum_mode?: true}
   end
