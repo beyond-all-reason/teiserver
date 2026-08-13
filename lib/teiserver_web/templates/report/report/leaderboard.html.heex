@@ -18,15 +18,6 @@ user_moderator = allow?(@current_user, "Moderator") %>
           <i class="fa-fw fa-solid fa-circle-info"></i> &nbsp;
           Show/Hide help
         </div>
-        {render(
-          TeiserverWeb.Report.ReportView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            quick_search: "",
-            show_search: false,
-            active: "leaderboard"
-          })
-        )}
         <br /><br />
 
         <form

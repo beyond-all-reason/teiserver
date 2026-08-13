@@ -10,15 +10,6 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Report.ReportView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            quick_search: "",
-            show_search: false,
-            active: "mfa"
-          })
-        )}
         <br /><br />
 
         <.table id="users-table" rows={@users} table_class="table-sm table-hover">

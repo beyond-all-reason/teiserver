@@ -3,7 +3,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   alias Teiserver.Account.BadgeTypeLib
   alias Teiserver.Account.CodeLib
   alias Teiserver.Account.UserLib
-  alias Teiserver.Admin.ToolLib
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Chat.LobbyMessageLib
   alias Teiserver.Communication.DiscordChannelLib
@@ -23,7 +22,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   @spec view_colour(String.t()) :: atom()
   def view_colour("users"), do: UserLib.colours()
   def view_colour("telemetry"), do: TelemetryLib.colours()
-  def view_colour("tools"), do: ToolLib.colours()
   def view_colour("chat"), do: LobbyMessageLib.colours()
   def view_colour("accolades"), do: AccoladeLib.colours()
   def view_colour("matches"), do: MatchLib.colours()
@@ -31,7 +29,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def view_colour("text_callbacks"), do: TextCallbackLib.colours()
   def view_colour("discord_channels"), do: DiscordChannelLib.colours()
   def view_colour("config"), do: SiteConfigLib.colours()
-  def view_colour("tool"), do: ToolLib.colours()
   def view_colour("codes"), do: CodeLib.colours()
   def view_colour("oauth_applications"), do: ApplicationLib.colours()
 end

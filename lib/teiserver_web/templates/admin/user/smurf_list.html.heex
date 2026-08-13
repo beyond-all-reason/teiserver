@@ -32,14 +32,11 @@ is_moderator = allow?(@conn, "Moderator") %>
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Admin.UserView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            show_search: false,
-            active: "smurf"
-          })
-        )}
+        <TeiserverWeb.Components.Admin.UserComponents.section_menu
+          active="smurf"
+          colour={bsname}
+          current_user={@current_user}
+        />
 
         <div class="old-help-box-large">
           Lists all users {@user.name} shares a matched key with. In the list of matches it will show the most recent match date as used by the user being matched with. This allows you to see how recently the matched player had that value vs when it was last used by {@user.name}.

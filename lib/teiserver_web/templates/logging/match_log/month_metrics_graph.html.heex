@@ -44,15 +44,10 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Logging.MatchLogView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            quick_search: "",
-            show_search: false,
-            active: "month_graph"
-          })
-        )}
+        <TeiserverWeb.Components.Logging.MatchLogComponents.section_menu
+          active="month_graph"
+          colour={bsname}
+        />
 
         <br /><br />
 

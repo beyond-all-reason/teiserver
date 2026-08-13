@@ -156,15 +156,6 @@
   >
     Site config
   </.menu_card>
-
-  <.menu_card
-    :if={allow_any?(@conn, ~w(Server))}
-    icon={Teiserver.Admin.ToolLib.icon()}
-    url={~p"/teiserver/admin/tools"}
-    size={:small}
-  >
-    Admin tools
-  </.menu_card>
 </div>
 
 <div class="row page-row">

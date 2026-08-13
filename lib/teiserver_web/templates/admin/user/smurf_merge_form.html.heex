@@ -12,13 +12,11 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Admin.UserView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            active: "smurf_merge_form"
-          })
-        )}
+        <TeiserverWeb.Components.Admin.UserComponents.section_menu
+          active="smurf_merge_form"
+          colour={bsname}
+          current_user={@current_user}
+        />
 
         <hr />
 

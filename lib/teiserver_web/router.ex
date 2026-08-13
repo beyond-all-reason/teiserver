@@ -653,9 +653,6 @@ defmodule TeiserverWeb.Router do
     get("/", GeneralController, :index)
     get("/metrics", GeneralController, :metrics)
 
-    get("/tools", ToolController, :index)
-    get("/tools/falist", ToolController, :falist)
-
     get("/users/rename_form/:id", UserController, :rename_form)
     put("/users/rename_post/:id", UserController, :rename_post)
     get("/users/reset_password/:id", UserController, :reset_password)
