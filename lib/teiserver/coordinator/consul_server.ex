@@ -1112,9 +1112,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # commander
   defp fix_ids(%{quantum_mode?: true} = state) do
     list_players(state)
+    |> Enum.reject(fn player_client ->
+      player_client.player_number == player_client.team_number
+    end)
     |> Enum.each(fn player_client ->
       Client.update(
-        %{player_client | player_number: player_client.team_number, ready: true},
+        %{player_client | player_number: player_client.team_number},
         :client_updated_battlestatus
       )
     end)
