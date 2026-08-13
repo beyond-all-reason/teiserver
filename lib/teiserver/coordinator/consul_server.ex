@@ -63,7 +63,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_call(:get_consul_state, _from, state) do
     result =
-      ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play level_to_spectate locks bans timeouts welcome_message join_queue low_priority_join_queue approved_users host_bosses host_preset host_teamsize host_teamcount player_limit ranked)a
+      ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play level_to_spectate locks bans timeouts welcome_message join_queue low_priority_join_queue approved_users host_bosses host_preset host_teamsize host_teamcount player_limit ranked quantum_mode?)a
       |> Map.new(fn key ->
         {key, Map.get(state, key)}
       end)
@@ -468,10 +468,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       {:noreply, new_state}
     else
-      {:noreply, %{state | ranked: true}}
+      if state.quantum_mode? do
+        ChatLib.say(
+          state.coordinator_id,
+          "Ranked mode has been enabled, we have disabled Quantum mode as a result.",
+          state.lobby_id
+        )
+      end
+
+      {:noreply, %{state | ranked: true, quantum_mode?: false}}
     end
   end
 
+  # Ranked set to true
   def handle_info(
         %{
           channel: "teiserver_lobby_updates",
@@ -480,9 +489,17 @@ defmodule Teiserver.Coordinator.ConsulServer do
         },
         state
       ) do
+    if state.quantum_mode? do
+      ChatLib.say(
+        state.coordinator_id,
+        "Ranked mode has been enabled, we have disabled Quantum mode as a result.",
+        state.lobby_id
+      )
+    end
+
     # Default to ranked true
     LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-    {:noreply, %{state | ranked: true}}
+    {:noreply, %{state | ranked: true, quantum_mode?: false}}
   end
 
   def handle_info(%{channel: "teiserver_lobby_updates"}, state) do
