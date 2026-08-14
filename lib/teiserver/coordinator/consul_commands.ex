@@ -1026,6 +1026,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     # Make the game unranked
     Battle.set_modoption(state.lobby_id, "game/modoptions/ranked_game", "0")
+    Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "1")
+
+    # This will fix_ids but also anything else we want to check on
+    send(self(), :tick)
 
     %{state | quantum_mode?: true}
   end
@@ -1041,6 +1045,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       "#{sender_name} disabled Quantum mode. The game is still unranked.",
       state.lobby_id
     )
+
+    Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "0")
 
     %{state | quantum_mode?: false}
   end

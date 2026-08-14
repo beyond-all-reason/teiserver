@@ -175,16 +175,6 @@ defmodule Teiserver.Coordinator do
     end
   end
 
-  @spec send_balancer(T.lobby_id(), any) :: any
-  def send_balancer(nil, _msg), do: :ok
-
-  def send_balancer(lobby_id, msg) when is_integer(lobby_id) do
-    case get_balancer_pid(lobby_id) do
-      nil -> nil
-      pid -> send(pid, msg)
-    end
-  end
-
   @spec call_balancer(pid() | T.lobby_id(), any) :: any
   def call_balancer(lobby_id, msg) when is_integer(lobby_id) do
     case get_balancer_pid(lobby_id) do
