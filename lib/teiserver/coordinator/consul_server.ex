@@ -372,9 +372,26 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(
-        %{channel: "teiserver_lobby_updates", event: :updated_client_battlestatus},
+        %{channel: "teiserver_lobby_updates", event: :updated_client_battlestatus} = msg,
         state
       ) do
+    if state.quantum_mode? do
+      %{client: client, userid: userid} = msg
+
+      # If we are in quantum mode we want to try and keep these aligned
+      # if team_number is nil we don't want to change anything though
+      if client.team_number != nil and client.team_number != client.player_number do
+        # The map passed to us doesn't always have the full client so we need to
+        # get it to update it properly
+        client = Client.get_client_by_id(userid)
+
+        Client.update(
+          %{client | player_number: client.team_number},
+          :client_updated_battlestatus
+        )
+      end
+    end
+
     player_count_changed(state)
     {:noreply, state}
   end
@@ -468,6 +485,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       {:noreply, new_state}
     else
+      # Ranked is set to "1"
       if state.quantum_mode? do
         ChatLib.say(
           state.coordinator_id,
@@ -475,6 +493,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
           state.lobby_id
         )
       end
+
+      Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "0")
 
       {:noreply, %{state | ranked: true, quantum_mode?: false}}
     end
@@ -496,6 +516,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
         state.lobby_id
       )
     end
+
+    Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "0")
 
     # Default to ranked true
     LobbyLib.cast_lobby(state.lobby_id, :refresh_name)

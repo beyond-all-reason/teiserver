@@ -10,6 +10,20 @@ defmodule Teiserver.Common.PubsubListener do
   # Check mailbox
   messages = PubsubListener.get(listener)
   ```
+
+  The PubsubListener can also be used for debugging processes during a test, you can attach it to
+  a pid and it will store the messages sent to that process. Given the structure of them you may
+  want to use Enum.each to print them:
+  ```
+  messages = PubsubListener.get(listener)
+
+  messages
+  |> Enum.each(fn
+    {:trace, _pid, _rec_or_send, m} ->
+      IO.inspect m
+  end)
+  IO.puts length(messages)
+  ```
   """
 
   alias Phoenix.PubSub
@@ -23,6 +37,16 @@ defmodule Teiserver.Common.PubsubListener do
 
   def get(pid) do
     GenServer.call(pid, :get)
+  end
+
+  @doc """
+  Given a PID it will trace all messages sent to that PID as if it was subscribed to them
+  """
+  def trace(listener_pid, pid_to_trace) do
+    :erlang.trace(pid_to_trace, true, [
+      :receive,
+      {:tracer, listener_pid}
+    ])
   end
 
   def start_link(rooms) do
@@ -47,7 +71,8 @@ defmodule Teiserver.Common.PubsubListener do
   end
 
   def handle_call(:get, _from, state) do
-    {:reply, state, []}
+    # We prepend when building the list so need to reverse it here
+    {:reply, Enum.reverse(state), []}
   end
 
   def init(rooms) do

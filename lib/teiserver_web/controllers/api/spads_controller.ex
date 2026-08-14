@@ -162,6 +162,14 @@ defmodule TeiserverWeb.API.SpadsController do
 
             bot_result = %{}
 
+            # Tell the consul server to tick, there are certain things
+            # we might want to do after balance is applied and clientstatuses
+            # moved around
+            case Coordinator.get_consul_pid(client.lobby_id) do
+              nil -> :ok
+              pid -> :timer.send_after(100, pid, :tick)
+            end
+
             conn
             |> put_status(200)
             |> assign(:deviation, balance_result.deviation)
