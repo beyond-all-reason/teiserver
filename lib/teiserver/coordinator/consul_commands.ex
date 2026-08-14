@@ -574,8 +574,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           state.lobby_id
         )
     end
-
-    state
   end
 
   #################### Boss
@@ -1043,6 +1041,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     )
 
     %{state | quantum_mode?: false}
+  end
+
+  def handle_command(%{command: "fixids"}, state) do
+    send(self(), :fix_ids)
+    state
   end
 
   #################### VIP Streamer
