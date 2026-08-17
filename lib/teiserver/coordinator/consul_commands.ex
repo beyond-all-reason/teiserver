@@ -574,8 +574,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           state.lobby_id
         )
     end
-
-    state
   end
 
   #################### Boss
@@ -1049,6 +1047,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "0")
 
     %{state | quantum_mode?: false}
+  end
+
+  def handle_command(%{command: "fixids"}, state) do
+    send(self(), :fix_ids)
+    state
   end
 
   #################### VIP Streamer

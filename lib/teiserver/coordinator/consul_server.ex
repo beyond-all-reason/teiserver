@@ -30,7 +30,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password?)
-  @boss_commands ~w(balancealgorithm gatekeeper welcome-message reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels quantum)
+  @boss_commands ~w(balancealgorithm gatekeeper welcome-message reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels quantum fixids)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec lock unlock makebalance set-config-teaser)
   @admin_commands ~w(shuffle)
 
@@ -113,6 +113,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
     else
       {:noreply, state}
     end
+  end
+
+  # Manually trigger fix_ids without doing a tick update
+  def handle_info(:fix_ids, state) do
+    fix_ids(state)
+    {:noreply, state}
   end
 
   def handle_info({:put, key, value}, state) do

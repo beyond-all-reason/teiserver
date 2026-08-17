@@ -74,6 +74,12 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
       {"resetchevlevels", [],
        "Resets the chevron level restrictions to not exist. Requires boss privileges.",
        :everybody},
+      {"fixids", [],
+       "Tells the server to fix overlapping player IDs. If you have two or more people inadvertently playing as the same person (same colour, one commander etc) then this should fix that. Requires boss privileges.",
+       :everybody},
+      {"quantum", [],
+       "Toggles quantum mode, when enabled each team will have 1 commander shared between all players on that team. This includes full shared unit and resource control. Requires boss privileges.",
+       :everybody},
 
       # ---- "hosts" only ----
       {"lock", ["(team | player | spectator | side)"],
