@@ -83,15 +83,10 @@ col_class = col_class <> " my-2" %>
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Logging.ServerLogView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            quick_search: "",
-            show_search: false,
-            active: "user_cost"
-          })
-        )}
+        <TeiserverWeb.Components.Logging.ServerViewLogComponents.section_menu
+          active="user_cost"
+          colour={bsname}
+        />
         <br /><br />
 
         <div class="row">

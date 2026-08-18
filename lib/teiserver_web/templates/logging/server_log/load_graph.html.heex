@@ -272,15 +272,10 @@ all_col_class = col_class <> " all-chart" %>
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Logging.ServerLogView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            quick_search: "",
-            show_search: false,
-            active: "load"
-          })
-        )}
+        <TeiserverWeb.Components.Logging.ServerViewLogComponents.section_menu
+          active="load"
+          colour={bsname}
+        />
         <br /><br />
 
         <div class="row">

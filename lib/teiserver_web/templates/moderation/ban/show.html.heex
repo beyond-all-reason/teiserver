@@ -14,14 +14,10 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Moderation.BanView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            show_search: false,
-            active: "show"
-          })
-        )}
+        <TeiserverWeb.Components.Moderation.BanComponents.section_menu
+          active="show"
+          colour={bsname}
+        />
         <hr />
 
         <div class="float-end">

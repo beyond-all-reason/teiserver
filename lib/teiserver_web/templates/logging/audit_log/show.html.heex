@@ -10,11 +10,10 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(TeiserverWeb.Logging.AuditLogView, "section_menu.html",
-          conn: @conn,
-          show_search: false,
-          active: ""
-        )}
+        <TeiserverWeb.Components.Logging.AuditLogComponents.section_menu
+          active="show"
+          colour={bsname}
+        />
       </div>
     </div>
   </div>
