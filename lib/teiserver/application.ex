@@ -141,10 +141,8 @@ defmodule Teiserver.Application do
         {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
         # serve metrics on a different port so that it's easier at the proxy
         # level to control access and scrape stuff
-        {Plug.Cowboy,
-         scheme: :http,
-         plug: TeiserverWeb.Monitoring.Router,
-         options: [port: MonitoringRouter.port()]},
+        {Bandit,
+         scheme: :http, plug: TeiserverWeb.Monitoring.Router, port: MonitoringRouter.port()},
         Teiserver.Communication.Cache,
 
         # Start the endpoint after the rest of the systems are up
