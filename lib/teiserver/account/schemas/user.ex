@@ -17,6 +17,7 @@ defmodule Teiserver.Account.User do
   typed_schema "account_users" do
     field :name, :string
     field :email, :string
+    field :previous_emails, {:array, :string}, default: []
     field :password, :string, redact: true
 
     field :icon, :string
@@ -36,6 +37,7 @@ defmodule Teiserver.Account.User do
     field :last_login, :utc_datetime
     field :last_played, :utc_datetime
     field :last_logout, :utc_datetime
+    field :email_last_changed_at, :utc_datetime
 
     field :discord_id, :integer
     field :discord_dm_channel_id, :integer
@@ -127,66 +129,50 @@ defmodule Teiserver.Account.User do
   end
 
   def changeset(user, attrs, :server_limited_update_user) do
-    attrs =
-      attrs
-      |> remove_whitespace([:email])
-
     user
     |> cast(
       attrs,
-      ~w(name email icon colour data roles permissions)a
+      ~w(name icon colour data roles permissions)a
     )
-    |> validate_required(~w(name email)a)
-    |> unique_constraint(:email)
+    |> validate_required([:name])
     |> validate_name_change()
   end
 
   def changeset(user, attrs, :limited_with_data) do
-    attrs =
-      attrs
-      |> remove_whitespace([:email])
-
     user
-    |> cast(attrs, ~w(name email icon colour data)a)
-    |> validate_required([:name, :email])
-    |> unique_constraint(:email)
+    |> cast(attrs, ~w(name icon colour data)a)
+    |> validate_required([:name])
     |> validate_name_change()
   end
 
-  # Updating email or name from user update form requires plain text password confirmation
-  def changeset(user, attrs, :user_form) do
-    attrs =
-      attrs
-      |> remove_whitespace([:email])
+  # Requires the password to be used for email address changes
+  def changeset(%User{email: old_email} = user, attrs, :email) do
+    attrs = remove_whitespace(attrs, [:email])
 
-    cond do
-      attrs["password"] == nil or attrs["password"] == "" ->
-        user
-        |> cast(attrs, [:name, :email])
-        |> validate_required([:name, :email])
-        |> add_error(
-          :password_confirmation,
-          "Please enter your password to change your account details."
-        )
+    new_previous_emails = [old_email | user.previous_emails]
 
-      Account.verify_plain_password(attrs["password"], user.password) == false ->
-        user
-        |> cast(attrs, [:name, :email])
-        |> validate_required([:name, :email])
-        |> add_error(:password_confirmation, "Incorrect password")
-
-      true ->
-        user
-        |> cast(attrs, [:name, :email])
-        |> validate_required([:name, :email])
-        |> unique_constraint(:email)
-        |> validate_name_change()
-        |> validate_change(:email, fn :email, email ->
-          case CacheUser.valid_email?(email) do
-            :ok -> []
-            {:error, reason} -> [{:email, reason}]
-          end
-        end)
+    if Account.verify_plain_password(attrs["password"] || "", user.password) do
+      user
+      |> cast(attrs, [:email])
+      |> cast(
+        %{previous_emails: new_previous_emails, email_last_changed_at: DateTime.utc_now()},
+        [
+          :previous_emails,
+          :email_last_changed_at
+        ]
+      )
+      |> validate_required([:email, :previous_emails])
+      |> unique_constraint(:email)
+      |> validate_change(:email, fn :email, email ->
+        case CacheUser.valid_email?(email) do
+          :ok -> []
+          {:error, reason} -> [{:email, reason}]
+        end
+      end)
+    else
+      user
+      |> cast(attrs, [:email])
+      |> add_error(:password, "Incorrect password")
     end
   end
 

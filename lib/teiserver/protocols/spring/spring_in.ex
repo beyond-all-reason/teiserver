@@ -437,43 +437,26 @@ defmodule Teiserver.Protocols.SpringIn do
     reply(:okay, url, msg_id, state)
   end
 
-  defp do_handle("CHANGEEMAILREQUEST", new_email, msg_id, state) do
-    result = CacheUser.request_email_change(state.user, new_email)
+  defp do_handle("CHANGEEMAILREQUEST", _new_email, msg_id, state) do
+    reply(
+      :change_email_request_denied,
+      "This feature is no longer supported in client, please use the website to change your email address.",
+      msg_id,
+      state
+    )
 
-    case result do
-      {:error, reason} ->
-        reply(:change_email_request_denied, reason, msg_id, state)
-        state
-
-      {:ok, new_user} ->
-        reply(:change_email_request_accepted, nil, msg_id, state)
-        %{state | user: new_user}
-    end
+    state
   end
 
-  defp do_handle("CHANGEEMAIL", data, msg_id, state) do
-    case Regex.run(~r/(\S+) (\S+)/, data) do
-      [_full_match, new_email, supplied_code] ->
-        [correct_code, expected_email] = state.user.email_change_code
+  defp do_handle("CHANGEEMAIL", _data, msg_id, state) do
+    reply(
+      :change_email_denied,
+      "This feature is no longer supported in client, please use the website to change your email address.",
+      msg_id,
+      state
+    )
 
-        cond do
-          correct_code != supplied_code ->
-            reply(:change_email_denied, "bad code", msg_id, state)
-            state
-
-          new_email != expected_email ->
-            reply(:change_email_denied, "bad email", msg_id, state)
-            state
-
-          true ->
-            new_user = CacheUser.change_email(state.user, new_email)
-            reply(:change_email_accepted, nil, msg_id, state)
-            %{state | user: new_user}
-        end
-
-      _no_match_result ->
-        _no_match(state, "CHANGEEMAIL", msg_id, data)
-    end
+    state
   end
 
   defp do_handle("EXIT", _reason, _msg_id, state) do

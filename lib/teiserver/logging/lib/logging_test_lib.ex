@@ -2,6 +2,7 @@ defmodule Teiserver.Logging.LoggingTestLib do
   @moduledoc false
 
   alias Teiserver.AccountFixtures
+  alias Teiserver.Logging
   alias Teiserver.Logging.AggregateViewLog
   alias Teiserver.Logging.AggregateViewLogLib
   alias Teiserver.Logging.AuditLog
@@ -80,5 +81,10 @@ defmodule Teiserver.Logging.LoggingTestLib do
          aggregate_logs: aggregate_logs,
          page_view_logs: page_view_logs
        ]}
+  end
+
+  def get_most_recent_audit_log_for_user(user_id) do
+    Logging.list_audit_logs(where: [user_id: user_id], limit: 1, order_by: "Newest first")
+    |> List.first()
   end
 end

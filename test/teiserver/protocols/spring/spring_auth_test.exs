@@ -532,41 +532,13 @@ CLIENTS test_room #{user.name}\n"
     _send_raw(socket, "EXIT\n")
   end
 
-  test "CHANGEEMAIL", %{socket: socket, user: user} do
-    # Make the request
+  test "CHANGEEMAIL", %{socket: socket} do
+    # We no longer support this command, we just need to ensure calling it doesn't cause an exception
     _send_raw(socket, "CHANGEEMAILREQUEST new_email@email.com\n")
     reply = _recv_raw(socket)
-    assert reply == "CHANGEEMAILREQUESTACCEPTED\n"
-    new_user = UserCacheLib.deprecated_get_user_by_id(user.id)
-    [code, new_email] = new_user.email_change_code
-    assert new_email == "new_email@email.com"
 
-    # Submit a bad code
-    _send_raw(socket, "CHANGEEMAIL new_email@email.com bad_code\n")
-    reply = _recv_raw(socket)
-    assert reply == "CHANGEEMAILDENIED bad code\n"
-
-    # Submit a bad email
-    _send_raw(socket, "CHANGEEMAIL bad_email #{code}\n")
-    reply = _recv_raw(socket)
-    assert reply == "CHANGEEMAILDENIED bad email\n"
-
-    # Now do it correctly
-    _send_raw(socket, "CHANGEEMAIL new_email@email.com #{code}\n")
-    reply = _recv_raw(socket)
-    assert reply == "CHANGEEMAILACCEPTED\n"
-    new_user = UserCacheLib.deprecated_get_user_by_id(user.id)
-    assert new_user.email == "new_email@email.com"
-    assert new_user.email_change_code == [nil, nil]
-  end
-
-  test "CHANGEEMAIL to email already taken", %{socket: socket} do
-    other_user = TeiserverTestLib.new_user()
-
-    # Make the request
-    _send_raw(socket, "CHANGEEMAILREQUEST #{other_user.email}\n")
-    reply = _recv_raw(socket)
-    assert reply == "CHANGEEMAILREQUESTDENIED Email already in use\n"
+    assert reply ==
+             "CHANGEEMAILREQUESTDENIED This feature is no longer supported in client, please use the website to change your email address.\n"
   end
 
   test "CREATEBOTACCOUNT - no mod", %{socket: socket, user: user} do

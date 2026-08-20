@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.UserLib do
   @moduledoc false
 
+  alias Ecto.Changeset
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
@@ -11,6 +12,7 @@ defmodule Teiserver.Account.UserLib do
   alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Config
+  alias Teiserver.EmailHelper
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging
   alias Teiserver.Repo
@@ -254,15 +256,56 @@ defmodule Teiserver.Account.UserLib do
     |> UserCacheLib.decache_user_on_ok()
   end
 
-  def update_user_user_form(%User{} = user, attrs) do
+  @doc """
+  Updates the user email, if the update is successful then the
+  old and new emails will be informed of the change.
+  """
+  def update_user_user_email(%User{} = user, attrs, ip_address) do
     Account.deprecated_recache_user(user.id)
 
-    user
-    |> User.changeset(attrs, :user_form)
-    |> Repo.update()
-    |> broadcast_update_user()
-    |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    # We do everything as a transaction so we can revert the change if something goes wrong
+    # with the email sending. Unfortunately there is no way to un-send the email to the old
+    # address if something goes wrong with sending to the new address
+    result =
+      Repo.transact(fn ->
+        with %Changeset{valid?: true} = changeset <- User.changeset(user, attrs, :email),
+             {:ok, %User{} = user} <- Repo.update(changeset),
+             {:ok, %{}} <- EmailHelper.email_changed(user) do
+          Logging.add_audit_log(user.id, ip_address, "email_change_success", %{})
+
+          {:ok, user}
+          |> broadcast_update_user()
+          |> cache_put_on_ok(:users_by_id)
+          |> UserCacheLib.decache_user_on_ok()
+        else
+          {:error, %Changeset{} = changeset} ->
+            {:error, changeset}
+
+          result ->
+            {:error, result}
+        end
+      end)
+
+    # If the transaction fails, we will insert an audit log. We have to do this outside
+    # of the transaction or the log creation will be rolled back
+    case result do
+      {:ok, user} ->
+        {:ok, user}
+
+      {:error, %Changeset{valid?: false} = changeset} ->
+        Logging.add_audit_log(user.id, ip_address, "email_change_failure", %{
+          reason: "Invalid changeset"
+        })
+
+        {:error, changeset}
+
+      {:error, err} ->
+        Logging.add_audit_log(user.id, ip_address, "email_change_failure", %{
+          reason: "Unexpected result"
+        })
+
+        raise "Unexpected result: #{inspect(err)}"
+    end
   end
 
   def server_limited_update_user(%User{} = user, attrs) do
