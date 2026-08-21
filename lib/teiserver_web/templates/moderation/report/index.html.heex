@@ -9,7 +9,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <TeiserverWeb.Moderation.ReportComponents.section_menu
+        <TeiserverWeb.Components.Moderation.ReportComponents.section_menu
           active={if @conn.params["search"] == "true", do: "search", else: "index"}
           view_colour={view_colour()}
           current_user={@current_user}

@@ -20,11 +20,10 @@
   <div class="col-md-12">
     <div class="card card-<= bsname >">
       <div class="card-body">
-        {render(Teiserver.Logging.PageViewLogView, "section_menu.html",
-          conn: @conn,
-          permissions: @current_user.permissions,
-          active: "table"
-        )}
+        <TeiserverWeb.Components.Logging.PageViewLogComponents.section_menu
+          active="table"
+          colour={bsname}
+        />
       </div>
     </div>
   </div>

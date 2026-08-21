@@ -55,11 +55,10 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(TeiserverWeb.Logging.AuditLogView, "section_menu.html",
-          conn: @conn,
-          show_search: @show_search,
-          active: if(@show_search, do: "search", else: "index")
-        )}
+        <TeiserverWeb.Components.Logging.AuditLogComponents.section_menu
+          active="index"
+          colour={bsname}
+        />
 
         <div class="float-end">
           <span class={"btn btn-#{bsname} btn-outline"} onclick="hide_all();">

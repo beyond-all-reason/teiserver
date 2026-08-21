@@ -1,11 +1,23 @@
-<% bsname = view_colour() %>
+defmodule TeiserverWeb.Components.Moderation.BanComponents do
+  @moduledoc """
+  Components for Ban pages
+  """
 
-<div class="row">
-  <div class="col-md-9">
+  use TeiserverWeb, :component
+  import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
+
+  @doc """
+  <TeiserverWeb.Components.Moderation.BanComponents.section_menu active={active} colour={} />
+  """
+  attr :colour, :string, required: true
+  attr :active, :string, required: true
+
+  def section_menu(assigns) do
+    ~H"""
     <.section_menu_button
-      active={@active == "list"}
+      active={@active == "index"}
       icon={StylingHelper.icon(:list)}
-      bsname={bsname}
+      bsname={@colour}
       url={~p"/moderation/ban"}
     >
       List
@@ -14,7 +26,7 @@
     <.section_menu_button
       active={@active == "search"}
       icon={StylingHelper.icon(:search)}
-      bsname={bsname}
+      bsname={@colour}
       url={~p"/moderation/ban?search=true"}
     >
       Search
@@ -25,7 +37,7 @@
         <.section_menu_button
           active={@active == "show"}
           icon={StylingHelper.icon(:show)}
-          bsname={bsname}
+          bsname={@colour}
           url="#"
         >
           Show
@@ -34,12 +46,13 @@
         <.section_menu_button
           active={@active == "edit"}
           icon={StylingHelper.icon(:edit)}
-          bsname={bsname}
+          bsname={@colour}
           url="#"
         >
           Edit
         </.section_menu_button>
       <% _ -> %>
     <% end %>
-  </div>
-</div>
+    """
+  end
+end
