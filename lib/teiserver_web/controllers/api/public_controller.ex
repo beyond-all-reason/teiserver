@@ -30,7 +30,7 @@ defmodule TeiserverWeb.API.PublicController do
             |> put_status(200)
             |> json(ratings)
 
-          season < active_season ->
+          season > 0 and season < active_season ->
             # 35 days before last match of the season for older seasons
             activity_time =
               Account.list_ratings(
