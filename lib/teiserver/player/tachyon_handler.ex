@@ -164,7 +164,17 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "matchmaking/queuesJoined", data, state}
   end
 
-  def handle_info({:battle_start, data}, state) do
+  def handle_info({:battle_start, %PT.BattleState{} = battle_state}, state) do
+    data = %{
+      username: battle_state.username,
+      password: battle_state.password,
+      ip: battle_state.ip,
+      port: battle_state.port,
+      engine: %{version: battle_state.engine.version},
+      game: %{springName: battle_state.game.spring_name},
+      map: %{springName: battle_state.map.spring_name}
+    }
+
     {:request, "battle/start", data, [], state}
   end
 
@@ -1034,7 +1044,7 @@ defmodule Teiserver.Player.TachyonHandler do
   defp build_user_self_event(user, sess_state) do
     {friends, incoming, outgoing} = get_user_friends(user.id)
 
-    %{
+    event = %{
       user: %{
         userId: to_string(user.id),
         username: user.name,
@@ -1057,6 +1067,12 @@ defmodule Teiserver.Player.TachyonHandler do
         roles: roles_to_tachyon(user.roles)
       }
     }
+
+    if sess_state.current_battle do
+      Map.put(event, :currentBattle, battle_state_to_tachyon(sess_state.current_battle))
+    else
+      event
+    end
   end
 
   # Ensure a session is started for the given user id. Register both the session
@@ -1071,7 +1087,7 @@ defmodule Teiserver.Player.TachyonHandler do
     case SessionSupervisor.start_session(user) do
       {:ok, session_pid} ->
         {:ok, _pid} = Registry.register_and_kill_existing(user.id)
-        {:ok, session_pid, %{party: nil, invited_to_parties: []}}
+        {:ok, session_pid, %{party: nil, invited_to_parties: [], current_battle: nil}}
 
       {:error, {:already_started, pid}} ->
         case Session.replace_connection(pid, self()) do
@@ -1211,6 +1227,22 @@ defmodule Teiserver.Player.TachyonHandler do
         end)
     }
   end
+
+  def battle_state_to_tachyon(nil), do: nil
+
+  def battle_state_to_tachyon(%PT.BattleState{} = battle) do
+    %{
+      username: battle.username,
+      password: battle.password,
+      ip: battle.ip,
+      port: battle.port,
+      engine: %{version: battle.engine.version},
+      game: %{springName: battle.game.spring_name},
+      map: %{springName: battle.map.spring_name}
+    }
+  end
+
+  # battle_state_to_tachyon(sess_state.current_battle),
 
   # Converts Teiserver role names to Tachyon role names.
   # Only roles that have Tachyon equivalents are included.

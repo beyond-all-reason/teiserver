@@ -677,8 +677,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
           ips: ips,
           port: port,
           engine: %{version: data.engine_version},
-          game: %{springName: data.game_version},
-          map: %{springName: data.map_name}
+          game: %{spring_name: data.game_version},
+          map: %{spring_name: data.map_name}
         }
 
         Player.lobby_join_battle(
@@ -1093,8 +1093,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
         ips: host_data.ips,
         port: host_data.port,
         engine: %{version: data.engine_version},
-        game: %{springName: data.game_version},
-        map: %{springName: data.map_name}
+        game: %{spring_name: data.game_version},
+        map: %{spring_name: data.map_name}
       }
 
       for {p_id, p} <- Enum.concat(data.players, data.spectators),

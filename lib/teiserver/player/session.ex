@@ -193,8 +193,8 @@ defmodule Teiserver.Player.Session do
           ips: [String.t()],
           port: integer(),
           engine: %{version: String.t()},
-          game: %{springName: String.t()},
-          map: %{springName: String.t()}
+          game: %{spring_name: String.t()},
+          map: %{spring_name: String.t()}
         }
 
   @doc """
@@ -684,7 +684,8 @@ defmodule Teiserver.Player.Session do
     self_state = %{
       party: current_party,
       invited_to_parties: invited_to,
-      current_lobby: get_in(state.lobby.id)
+      current_lobby: get_in(state.lobby.id),
+      current_battle: state.battle
     }
 
     {:reply, {:ok, original_conn_pid, self_state}, new_state}
@@ -1458,7 +1459,8 @@ defmodule Teiserver.Player.Session do
 
     case state.matchmaking do
       {:pairing, %PT.MmPairingState{readied?: true, battle_password: pass, room: _room_pid}} ->
-        data = %{
+        battle_state = %PT.BattleState{
+          id: battle_id,
           username: state.user.name,
           password: pass,
           ip: hd(battle_start_data.ips),
@@ -1468,7 +1470,7 @@ defmodule Teiserver.Player.Session do
           map: battle_start_data.map
         }
 
-        state = send_to_player(state, {:battle_start, data})
+        state = send_to_player(state, {:battle_start, battle_state})
 
         monitors =
           MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
@@ -1476,7 +1478,6 @@ defmodule Teiserver.Player.Session do
 
         # TODO: this should ideally come from an engine event, but in first approximation it'll do
         broadcast_user_update!(state.user, :playing)
-        battle_state = %PT.BattleState{id: battle_id}
 
         {:noreply,
          %{state | matchmaking: :no_matchmaking, monitors: monitors, battle: battle_state}}
@@ -1505,7 +1506,8 @@ defmodule Teiserver.Player.Session do
         {:noreply, state}
 
       %{id: _lobby_id} ->
-        data = %{
+        battle_state = %PT.BattleState{
+          id: battle_id,
           username: state.user.name,
           password: password,
           ip: hd(battle_start_data.ips),
@@ -1515,12 +1517,11 @@ defmodule Teiserver.Player.Session do
           map: battle_start_data.map
         }
 
-        state = send_to_player(state, {:battle_start, data})
+        state = send_to_player(state, {:battle_start, battle_state})
         monitors = MC.monitor(state.monitors, battle_pid, {:battle, battle_id})
 
         # TODO: this should ideally come from an engine event, but in first approximation it'll do
         broadcast_user_update!(state.user, :playing)
-        battle_state = %PT.BattleState{id: battle_id}
 
         {:noreply, %{state | monitors: monitors, battle: battle_state}}
     end
