@@ -49,7 +49,12 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # Battle chat commands that carry more data than a normal message (e.g. modoption
   # key=value pairs) and so get a 1024-char allowance instead of the default 256.
-  @long_battle_command_prefixes ["$welcome-message", "!welcome-message", "!mode "]
+  @long_battle_command_prefixes [
+    "$welcome-message",
+    "!welcome-message",
+    "!mode ",
+    "!bset mapmetadata"
+  ]
 
   # Commands that don't require the user to be logged in
   @unauthenticated_commands ~w(
