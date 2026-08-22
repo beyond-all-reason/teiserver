@@ -87,8 +87,8 @@ defmodule Teiserver.Player.SessionTest do
       ips: ["127.0.0.1"],
       port: 1234,
       engine: %{version: "v1"},
-      game: %{springName: "game"},
-      map: %{springName: "map"}
+      game: %{spring_name: "game"},
+      map: %{spring_name: "map"}
     }
 
     Session.lobby_join_battle(user_id, {"battle-id", fake_battle_pid}, start_data, "password")

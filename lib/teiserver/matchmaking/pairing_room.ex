@@ -167,8 +167,8 @@ defmodule Teiserver.Matchmaking.PairingRoom do
         battle_start_data =
           host_data
           |> Map.put(:engine, engine)
-          |> Map.put(:game, %{springName: game})
-          |> Map.put(:map, %{springName: map.spring_name})
+          |> Map.put(:game, %{spring_name: game})
+          |> Map.put(:map, %{spring_name: map.spring_name})
 
         for team <- state.teams, member <- team, p_id <- member.player_ids do
           Player.battle_start(p_id, battle_data, battle_start_data)

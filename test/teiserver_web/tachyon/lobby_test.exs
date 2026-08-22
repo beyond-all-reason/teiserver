@@ -278,6 +278,17 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"commandId" => "lobby/joinBattle", "status" => "success"} =
         Tachyon.recv_message!(ctx3[:client])
 
+      # battle should be present in the user/self event
+      Tachyon.abrupt_disconnect!(ctx3[:client])
+      %{client: client3} = Tachyon.connect(ctx3[:user], swallow_first_event: false)
+
+      %{"commandId" => "user/self", "data" => %{"currentBattle" => tachyon_battle}} =
+        Tachyon.recv_message!(client3)
+
+      # only lightly test event since the structure is checked by json schema, and the
+      # content is rather straightforward
+      assert tachyon_battle["username"] == ctx3[:user].name
+
       # when battle terminates members should get notified
       TachyonBattle.lookup(battle_id) |> Process.exit(:kill)
       %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
