@@ -1392,7 +1392,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_full_match, battlestatus, team_colour] ->
         updates =
           Spring.parse_battle_status(battlestatus)
-          |> Map.take([:ready, :player_number, :team_number, :player, :sync, :side])
+          |> Map.take([:ready, :team_number, :player, :sync, :side])
 
         existing = Client.get_client_by_id(state.userid)
 

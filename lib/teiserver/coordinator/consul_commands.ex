@@ -1007,33 +1007,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  # Enables quantum mode where each team has 1 commander and full shared control
-  # next step will be to add options to it allowing you to pick how many commanders
-  # are shared on a team or which teams are used but for now we're keeping it simple
+  # Disables quantum mode if enabled
   def handle_command(
-        %{command: "quantum", remaining: _remaining, senderid: senderid} = _cmd,
-        %{quantum_mode?: false} = state
-      ) do
-    sender_name = Account.get_username_by_id(senderid)
-
-    ChatLib.say(
-      state.coordinator_id,
-      "#{sender_name} enabled Quantum mode, all players on a team will share the same commander and units. The game will not be ranked.",
-      state.lobby_id
-    )
-
-    # Make the game unranked
-    Battle.set_modoption(state.lobby_id, "game/modoptions/ranked_game", "0")
-    Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "1")
-
-    # This will fix_ids but also anything else we want to check on
-    send(self(), :tick)
-
-    %{state | quantum_mode?: true}
-  end
-
-  def handle_command(
-        %{command: "quantum", remaining: _remaining, senderid: senderid} = _cmd,
+        %{command: "quantum", remaining: "", senderid: senderid} = _cmd,
         %{quantum_mode?: true} = state
       ) do
     sender_name = Account.get_username_by_id(senderid)
@@ -1045,8 +1021,42 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     )
 
     Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "0")
+    Battle.remove_modoptions(state.lobby_id, ["game/quantum/coms"])
 
     %{state | quantum_mode?: false}
+  end
+
+  # Enables quantum mode where each team has 1 commander and full shared control
+  # next step will be to add options to it allowing you to pick how many commanders
+  # are shared on a team or which teams are used but for now we're keeping it simple
+  def handle_command(
+        %{command: "quantum", remaining: remaining, senderid: senderid} = _cmd,
+        state
+      ) do
+    sender_name = Account.get_username_by_id(senderid)
+
+    # Extract arguments from the command
+    command_args =
+      extract_command_args(remaining)
+      |> Map.take(["coms"])
+
+    commander_count = Map.get(command_args, "coms", "1")
+
+    ChatLib.say(
+      state.coordinator_id,
+      "#{sender_name} enabled Quantum mode, all players on a team will share the same commander and units. The game will not be ranked.",
+      state.lobby_id
+    )
+
+    # Make the game unranked
+    Battle.set_modoption(state.lobby_id, "game/modoptions/ranked_game", "0")
+    Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "1")
+    Battle.set_modoption(state.lobby_id, "game/quantum/coms", commander_count)
+
+    # This will fix_ids but also anything else we want to check on
+    send(self(), :tick)
+
+    %{state | quantum_mode?: true}
   end
 
   def handle_command(%{command: "fixids"}, state) do
@@ -1817,4 +1827,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   @spec get_queue(map()) :: [User.id()]
   defdelegate get_queue(state), to: ConsulServer
+
+  # Expects a string of args of the form "key1=value1 key2=value2"
+  @spec extract_command_args(String.t()) :: map()
+  defp extract_command_args(arg_string) do
+    arg_string
+    |> String.split(" ")
+    |> Enum.filter(fn arg_pair_string -> String.contains?(arg_pair_string, "=") end)
+    |> Map.new(fn arg_pair_string ->
+      [key, value | _other] = String.split(arg_pair_string, "=")
+      {key, value}
+    end)
+  end
 end
