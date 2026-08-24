@@ -1069,7 +1069,7 @@ defmodule Teiserver.Player.TachyonHandler do
     }
 
     if sess_state.current_battle do
-      Map.put(event, :currentBattle, battle_state_to_tachyon(sess_state.current_battle))
+      put_in(event, [:user, :currentBattle], battle_state_to_tachyon(sess_state.current_battle))
     else
       event
     end
@@ -1241,8 +1241,6 @@ defmodule Teiserver.Player.TachyonHandler do
       map: %{springName: battle.map.spring_name}
     }
   end
-
-  # battle_state_to_tachyon(sess_state.current_battle),
 
   # Converts Teiserver role names to Tachyon role names.
   # Only roles that have Tachyon equivalents are included.
