@@ -69,8 +69,9 @@ jobs:
     # so for the moment, just ignore the error
     # gun is a transitive dependency used by nostrum and will also be a problem to update but is
     # only used by Nostrum for discord
+    # in the same vein cowlib is also a transitive dependency and used only within that context
     - name: Check for vulnerable dependencies # https://github.com/mirego/mix_audit
-      run: mix deps.audit --ignore-package-names decimal,gun
+      run: mix deps.audit --ignore-package-names decimal,gun,cowlib
 
     - name: Ensure Elixir code is formatted # https://hexdocs.pm/mix/Mix.Tasks.Format.html
       run: mix format --check-formatted

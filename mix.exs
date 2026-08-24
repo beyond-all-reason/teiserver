@@ -85,7 +85,6 @@ defmodule Teiserver.MixProject do
       {:peep, "~> 3.5.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.8"},
       {:plug, "~> 1.19.2"},
       {:bandit, "~> 1.12"},
 
@@ -131,7 +130,6 @@ defmodule Teiserver.MixProject do
       {:mdex, "~> 0.2"},
       {:ranch, "~> 1.8"},
       {:etop, "~> 0.7.0"},
-      {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:json_xema, "~> 0.3"},
       {:nostrum, "~> 0.10.4"},
       {:decorator, "~> 1.2"},
@@ -140,7 +138,6 @@ defmodule Teiserver.MixProject do
       {:decimal, "~> 3.0", override: true},
       {:hackney, "~> 4.0", override: true},
       {:quic, "~> 1.4.4", override: true},
-      {:cowboy, "2.16.0", override: true},
 
       # gun is a transitive dependency of nostrum. The version 2.1.0 works,
       # while the next one, 2.2.0 produces the following error when starting
@@ -207,7 +204,7 @@ defmodule Teiserver.MixProject do
         "format",
         "credo",
         "test --raise --warnings-as-errors --exclude needs_attention",
-        "cmd --shell MIX_ENV=dev mix dialyzer --list-unused-filters"
+        "cmd --shell MIX_ENV=dev mix dialyzer"
       ]
     ]
   end
