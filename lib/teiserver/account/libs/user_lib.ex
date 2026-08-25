@@ -260,7 +260,7 @@ defmodule Teiserver.Account.UserLib do
   Updates the user email, if the update is successful then the
   old and new emails will be informed of the change.
   """
-  def update_user_user_email(%User{} = user, attrs, ip_address) do
+  def update_user_email(%User{} = user, attrs, ip_address) do
     Account.deprecated_recache_user(user.id)
 
     # We do everything as a transaction so we can revert the change if something goes wrong

@@ -57,7 +57,7 @@ defmodule TeiserverWeb.Account.GeneralController do
 
       ip = LoggingPlug.get_ip_from_conn(conn)
 
-      case Account.update_user_user_email(user, user_params, ip) do
+      case Account.update_user_email(user, user_params, ip) do
         {:ok, _user} ->
           conn
           |> put_flash(:info, "Account details updated successfully.")

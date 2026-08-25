@@ -254,9 +254,11 @@ defmodule Teiserver.Account.AuthLib do
   """
   @spec need_to_mfa_refresh?(User.id()) :: boolean()
   def need_to_mfa_refresh?(user_id) do
+    max_age = Application.get_env(:teiserver, Teiserver)[:mfa_privilege_refresh_max_age] || 300
+
     case get_user_mfa_age_in_seconds(user_id) do
       :inactive -> false
-      age -> age > 300
+      age -> age > max_age
     end
   end
 end

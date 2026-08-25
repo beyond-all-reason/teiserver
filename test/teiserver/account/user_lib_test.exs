@@ -28,7 +28,7 @@ defmodule Teiserver.Account.UserLibTest do
     end
   end
 
-  describe "update_user_user_email/3" do
+  describe "update_user_email/3" do
     setup do
       user = AccountFixtures.user_fixture()
       %{user: user}
@@ -36,7 +36,7 @@ defmodule Teiserver.Account.UserLibTest do
 
     test "no password confirmation", %{user: user} do
       result =
-        UserLib.update_user_user_email(
+        UserLib.update_user_email(
           user,
           %{
             "email" => "test@test.com"
@@ -54,7 +54,7 @@ defmodule Teiserver.Account.UserLibTest do
 
     test "wrong password", %{user: user} do
       result =
-        UserLib.update_user_user_email(
+        UserLib.update_user_email(
           user,
           %{
             "email" => "test@test.com",
@@ -73,7 +73,7 @@ defmodule Teiserver.Account.UserLibTest do
 
     test "invalid email", %{user: user} do
       result =
-        UserLib.update_user_user_email(
+        UserLib.update_user_email(
           user,
           %{
             "email" => "test@test",
@@ -94,7 +94,7 @@ defmodule Teiserver.Account.UserLibTest do
       %User{email: old_email} = user
 
       {:ok, new_user} =
-        UserLib.update_user_user_email(
+        UserLib.update_user_email(
           user,
           %{
             "email" => "test@test.com",
@@ -124,7 +124,7 @@ defmodule Teiserver.Account.UserLibTest do
       user = Account.get_user_by_id!(user.id)
 
       {:ok, new_user2} =
-        UserLib.update_user_user_email(
+        UserLib.update_user_email(
           user,
           %{
             "email" => "example@example.com",

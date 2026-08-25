@@ -109,9 +109,9 @@ defmodule Teiserver.Account do
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate update_user_plain_password(user, attrs), to: UserLib
 
-  @spec update_user_user_email(User.t(), map, String.t()) ::
+  @spec update_user_email(User.t(), map, String.t()) ::
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  defdelegate update_user_user_email(user, attrs, ip), to: UserLib
+  defdelegate update_user_email(user, attrs, ip), to: UserLib
 
   @spec server_limited_update_user(User.t(), map) ::
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
