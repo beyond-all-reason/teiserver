@@ -9,7 +9,9 @@ defmodule TeiserverWeb.UserAuthentication do
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Guardian
+  alias Teiserver.Account.Scope
   alias Teiserver.Account.User
+  alias Teiserver.Logging.LoggingPlug
 
   use TeiserverWeb, :verified_routes
 
@@ -148,4 +150,19 @@ defmodule TeiserverWeb.UserAuthentication do
   defp maybe_store_return_to(conn), do: conn
 
   defp signed_in_path(_conn), do: ~p"/"
+
+  @doc """
+  Populates the scope for the user if one is assigned
+  """
+  def fetch_current_scope_for_user(%{assigns: %{current_user: %User{} = user}} = conn, _opts) do
+    scope = %Scope{
+      user: user,
+      ip: LoggingPlug.get_ip_from_conn(conn)
+    }
+
+    assign(conn, :scope, scope)
+  end
+
+  # Fallback for no user assigned
+  def fetch_current_scope_for_user(conn, _opts), do: conn
 end

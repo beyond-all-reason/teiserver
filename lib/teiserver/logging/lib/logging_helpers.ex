@@ -1,6 +1,7 @@
 defmodule Teiserver.Logging.Helpers do
   @moduledoc false
 
+  alias Teiserver.Account.Scope
   alias Teiserver.Logging
 
   @spec add_anonymous_audit_log(String.t(), map()) :: Teiserver.Logging.AuditLog.t()
@@ -32,8 +33,20 @@ defmodule Teiserver.Logging.Helpers do
     the_log
   end
 
-  @spec add_audit_log(Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t(), map()) ::
+  @spec add_audit_log(Scope.t() | Plug.Conn.t() | Phoenix.LiveView.Socket.t(), String.t(), map()) ::
           Teiserver.Logging.AuditLog.t()
+  def add_audit_log(%Scope{} = scope, action, details) do
+    {:ok, the_log} =
+      Logging.create_audit_log(%{
+        action: action,
+        user_id: scope.user.id,
+        details: details,
+        ip: scope.ip
+      })
+
+    the_log
+  end
+
   def add_audit_log(%Phoenix.LiveView.Socket{} = socket, action, details) do
     {:ok, the_log} =
       Logging.create_audit_log(%{

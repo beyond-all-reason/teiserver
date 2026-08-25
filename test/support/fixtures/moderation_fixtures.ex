@@ -4,6 +4,8 @@ defmodule Teiserver.ModerationFixtures do
   entities via the `Teiserver.Moderation` context.
   """
 
+  alias Teiserver.Account.Scope
+  alias Teiserver.AccountFixtures
   alias Teiserver.Moderation
 
   @doc """
@@ -55,5 +57,26 @@ defmodule Teiserver.ModerationFixtures do
       |> Moderation.create_banned_phrase()
 
     banned_phrase
+  end
+
+  def anti_abuse_record_fixture(%Scope{} = scope) do
+    anti_abuse_record_fixture(%{scope: scope})
+  end
+
+  def anti_abuse_record_fixture(attrs) do
+    {:ok, anti_abuse_record} =
+      attrs
+      |> Enum.into(%{
+        user_id: attrs[:user_id] || AccountFixtures.user_fixture().id,
+        expires_at: attrs[:expires_at] || DateTime.utc_now() |> DateTime.shift(year: 2),
+        clean: attrs[:clean] == true,
+        hashes: attrs[:hashes] || %{},
+        notes: attrs[:notes] || "",
+        restored_at: attrs[:restored_at],
+        restored_by_id: attrs[:restored_by_id] || AccountFixtures.user_fixture().id
+      })
+      |> Moderation.create_anti_abuse_record(attrs[:scope])
+
+    anti_abuse_record
   end
 end

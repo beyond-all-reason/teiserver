@@ -3,10 +3,14 @@ defmodule Teiserver.Moderation do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Scope
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Logging.Helpers, as: LoggingHelper
   alias Teiserver.Moderation.Action
   alias Teiserver.Moderation.ActionLib
+  alias Teiserver.Moderation.AntiAbuseRecord
+  alias Teiserver.Moderation.AntiAbuseRecordQueries
   alias Teiserver.Moderation.Ban
   alias Teiserver.Moderation.BanLib
   alias Teiserver.Moderation.BannedDomain
@@ -1248,5 +1252,146 @@ defmodule Teiserver.Moderation do
       {:error, :einval} ->
         false
     end
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking anti_abuse_record changes.
+
+  ## Examples
+
+      iex> change_anti_abuse_record(anti_abuse_record)
+      %Ecto.Changeset{source: %AntiAbuseRecord{}}
+
+  """
+  @spec change_anti_abuse_record(AntiAbuseRecord.t()) :: Ecto.Changeset.t()
+  def change_anti_abuse_record(%AntiAbuseRecord{} = anti_abuse_record) do
+    AntiAbuseRecord.changeset(anti_abuse_record, %{})
+  end
+
+  @doc """
+  Gets a single anti_abuse_record.
+
+  Returns `nil` if the AntiAbuseRecord does not exist.
+
+  ## Examples
+
+      iex> get_anti_abuse_record(123, scope)
+      %AntiAbuseRecord{}
+
+      iex> get_anti_abuse_record(456, scope)
+      nil
+
+  """
+  def get_anti_abuse_record(id, %Scope{} = scope) do
+    AntiAbuseRecordQueries.anti_abuse_records()
+    |> AntiAbuseRecordQueries.where_id(id)
+    |> Repo.one()
+    |> log_anti_abuse_record_access(scope, :get)
+  end
+
+  @doc """
+  Creates a anti_abuse_record.
+
+  ## Examples
+
+      iex> create_anti_abuse_record(%{field: value})
+      {:ok, %AntiAbuseRecord{}}
+
+      iex> create_anti_abuse_record(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_anti_abuse_record(map(), Scope.t()) ::
+          {:ok, AntiAbuseRecord.t()} | {:error, Ecto.Changeset.t()}
+  def create_anti_abuse_record(attrs, %Scope{} = scope) do
+    %AntiAbuseRecord{}
+    |> AntiAbuseRecord.changeset(attrs)
+    |> Repo.insert()
+    |> log_anti_abuse_record_access(scope, :create)
+  end
+
+  @doc """
+  Updates a anti_abuse_record.
+
+  ## Examples
+
+      iex> update_anti_abuse_record(anti_abuse_record, %{field: new_value})
+      {:ok, %AntiAbuseRecord{}}
+
+      iex> update_anti_abuse_record(anti_abuse_record, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_anti_abuse_record(AntiAbuseRecord.t(), map(), Scope.t()) ::
+          {:ok, AntiAbuseRecord.t()} | {:error, Ecto.Changeset.t()}
+  def update_anti_abuse_record(%AntiAbuseRecord{} = anti_abuse_record, attrs, scope) do
+    anti_abuse_record
+    |> AntiAbuseRecord.changeset(attrs)
+    |> Repo.update()
+    |> log_anti_abuse_record_access(scope, :update)
+  end
+
+  @doc """
+  Deletes a AntiAbuseRecord.
+
+  ## Examples
+
+      iex> delete_anti_abuse_record(anti_abuse_record)
+      {:ok, %AntiAbuseRecord{}}
+
+      iex> delete_anti_abuse_record(anti_abuse_record)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_anti_abuse_record(AntiAbuseRecord.t(), Scope.t()) ::
+          {:ok, AntiAbuseRecord.t()} | {:error, Ecto.Changeset.t()}
+  def delete_anti_abuse_record(%AntiAbuseRecord{} = anti_abuse_record, scope) do
+    Repo.delete(anti_abuse_record)
+    |> log_anti_abuse_record_access(scope, :delete)
+  end
+
+  @doc """
+  Logs access to something related to anti-abuse records. Intended to take a piped argument
+  and pass through that argument while using it to populate the AuditLog.
+  """
+  def log_anti_abuse_record_access({:ok, %AntiAbuseRecord{} = record}, %Scope{} = scope, action) do
+    LoggingHelper.add_audit_log(scope, "access_anti_abuse_record", %{
+      id: record.id,
+      action: action
+    })
+
+    {:ok, record}
+  end
+
+  def log_anti_abuse_record_access(%AntiAbuseRecord{} = record, %Scope{} = scope, action) do
+    LoggingHelper.add_audit_log(scope, "access_anti_abuse_record", %{
+      id: record.id,
+      action: action
+    })
+
+    record
+  end
+
+  # If the changeset has an error in it we want to know they tried to use a changeset but it borked
+  def log_anti_abuse_record_access({:error, %Ecto.Changeset{} = chg}, %Scope{} = scope, action) do
+    LoggingHelper.add_audit_log(scope, "access_anti_abuse_record", %{
+      id: Map.get(chg.data, :id),
+      action: action,
+      changeset_action: chg.action
+    })
+
+    {:error, chg}
+  end
+
+  def log_anti_abuse_record_access(nil, %Scope{} = scope, action) do
+    LoggingHelper.add_audit_log(scope, "access_anti_abuse_record", %{id: nil, action: action})
+    nil
+  end
+
+  # Fallback, ideally we never see this but we'd rather log that something
+  # anti_abuse_record was happening than not log it at all
+  def log_anti_abuse_record_access(piped_value, %Scope{} = scope, action) do
+    LoggingHelper.add_audit_log(scope, "anti_abuse_record_log_fallback", %{action: action})
+    piped_value
   end
 end

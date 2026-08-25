@@ -114,6 +114,6 @@ defmodule Teiserver.Logging.AuditLogLib do
 
   def order_by(query, "Newest first") do
     from logs in query,
-      order_by: [desc: logs.inserted_at]
+      order_by: [desc: logs.inserted_at, desc: logs.id]
   end
 end
