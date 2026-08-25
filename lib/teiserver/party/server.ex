@@ -11,6 +11,8 @@ defmodule Teiserver.Party.Server do
   alias Teiserver.Matchmaking
   alias Teiserver.Messaging
   alias Teiserver.Party
+  alias Teiserver.Party.Event
+  alias Teiserver.Party.Events
   alias Teiserver.Party.Types, as: PT
   alias Teiserver.Player
   alias Teiserver.Tachyon
@@ -249,24 +251,12 @@ defmodule Teiserver.Party.Server do
   end
 
   def handle_event({:call, from}, {:leave, user_id}, :running, %PT.Data{} = data) do
-    case Map.pop(data.members, user_id) do
-      {nil, _members} ->
-        {:keep_state, data, [{:reply, from, {:error, :not_a_member}}]}
+    aggregate = process_events(data, [%Events.Leave{leaver_id: user_id}])
 
-      {_member, rest} when map_size(rest) == 0 ->
-        {:stop_and_reply, :normal, [{:reply, from, :ok}], %{data | members: %{}} |> bump()}
-
-      {_member, new_members} ->
-        new_data =
-          %{data | members: new_members}
-          |> bump()
-          |> Map.update!(:monitors, &MC.demonitor_by_val(&1, user_id))
-
-        for id <- Map.keys(data.invited) |> Stream.concat(Map.keys(data.members)) do
-          Player.party_notify_updated(id, overview_from_data(new_data))
-        end
-
-        {:keep_state, new_data, {:reply, from, :ok}}
+    if aggregate.data == data do
+      {:keep_state, data, [{:reply, from, {:error, :not_a_member}}]}
+    else
+      {:keep_state, aggregate.data, [{:reply, from, :ok} | aggregate.actions]}
     end
   end
 
@@ -600,6 +590,10 @@ defmodule Teiserver.Party.Server do
     {:keep_state, data, [:postpone]}
   end
 
+  def handle_event(:internal, :empty, _state, %PT.Data{} = data) do
+    {:stop, {:shutdown, :empty}, data}
+  end
+
   def handle_event(:state_timeout, :snapshot_timeout, :starting_up, %PT.Data{} = data) do
     Logger.warning("failed to recover before time out. Missing #{inspect(data.ids_to_rejoin)}")
     {:stop, :normal}
@@ -636,6 +630,43 @@ defmodule Teiserver.Party.Server do
   end
 
   def terminate(_reason, _state, %PT.Data{} = _data), do: nil
+
+  defp process_events(%PT.Data{} = data, events) do
+    new_aggregate = compute_aggregate(data, events)
+
+    Enum.each(new_aggregate.side_effects, fn effect ->
+      process_side_effect(new_aggregate.data, effect)
+    end)
+
+    new_aggregate
+  end
+
+  defp compute_aggregate(%PT.Data{} = data, events) do
+    aggregate = %PT.Aggregate{data: data}
+    final_aggregate = Enum.reduce(events, aggregate, &Event.apply_event/2)
+
+    if aggregate.data == final_aggregate.data do
+      final_aggregate
+    else
+      final_aggregate = update_in(final_aggregate.data.version, &(&1 + 1))
+
+      if map_size(final_aggregate.data.members) == 0 do
+        update_in(final_aggregate.actions, &(&1 ++ [{:next_event, :internal, :empty}]))
+      else
+        final_aggregate
+      end
+    end
+  end
+
+  defp process_side_effect(%PT.Data{} = data, :notify_updated) do
+    overview = overview_from_data(data)
+
+    Map.keys(data.invited)
+    |> Enum.concat(Map.keys(data.members))
+    |> Enum.each(fn id ->
+      Player.party_notify_updated(id, overview)
+    end)
+  end
 
   defp notify_updated(data) do
     for id <- Map.keys(data.invited) |> Stream.concat(Map.keys(data.members)) do
