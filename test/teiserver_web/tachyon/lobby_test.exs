@@ -282,7 +282,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       Tachyon.abrupt_disconnect!(ctx3[:client])
       %{client: client3} = Tachyon.connect(ctx3[:user], swallow_first_event: false)
 
-      %{"commandId" => "user/self", "data" => %{"currentBattle" => tachyon_battle}} =
+      %{"commandId" => "user/self", "data" => %{"user" => %{"currentBattle" => tachyon_battle}}} =
         Tachyon.recv_message!(client3)
 
       # only lightly test event since the structure is checked by json schema, and the
