@@ -2,6 +2,7 @@ defmodule Teiserver.Coordinator.QuantumCommandTest do
   alias Teiserver.Account
   alias Teiserver.Account.ClientLib
   alias Teiserver.AccountFixtures
+  alias Teiserver.Battle
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Lobby
@@ -90,6 +91,15 @@ defmodule Teiserver.Coordinator.QuantumCommandTest do
 
       consul_state = Coordinator.call_consul(lobby_id, :get_consul_state, 1000)
       refute consul_state.quantum_mode?
+
+      # Turn it on with com count = 2
+      ChatLib.say(user1.id, "$quantum coms=2", lobby_id)
+
+      consul_state = Coordinator.call_consul(lobby_id, :get_consul_state)
+      assert consul_state.quantum_mode?
+
+      mo = Battle.get_modoptions(lobby_id)
+      assert mo["game/quantum/coms"] == "2"
     end
 
     test "Balance does not disrupt", context do
