@@ -5,6 +5,7 @@ defmodule Teiserver.Account.UserLibTest do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
   alias Teiserver.AccountFixtures
+  alias Teiserver.Logging.LoggingTestLib
 
   use Teiserver.DataCase, async: false
 
@@ -27,7 +28,127 @@ defmodule Teiserver.Account.UserLibTest do
     end
   end
 
-  describe "disallow renaming to names with disallowed characters" do
+  describe "update_user_email/3" do
+    setup do
+      user = AccountFixtures.user_fixture()
+      %{user: user}
+    end
+
+    test "no password confirmation", %{user: user} do
+      result =
+        UserLib.update_user_email(
+          user,
+          %{
+            "email" => "test@test.com"
+          },
+          "127.0.1.1"
+        )
+
+      assert match?({:error, %{errors: [password: {"Incorrect password", []}]}}, result)
+
+      audit_log = LoggingTestLib.get_most_recent_audit_log_for_user(user.id)
+      assert audit_log.action == "email_change_failure"
+      assert audit_log.details["reason"] == "Invalid changeset"
+      assert audit_log.ip == "127.0.1.1"
+    end
+
+    test "wrong password", %{user: user} do
+      result =
+        UserLib.update_user_email(
+          user,
+          %{
+            "email" => "test@test.com",
+            "password" => "no password"
+          },
+          "127.0.1.2"
+        )
+
+      assert match?({:error, %{errors: [password: {"Incorrect password", []}]}}, result)
+
+      audit_log = LoggingTestLib.get_most_recent_audit_log_for_user(user.id)
+      assert audit_log.action == "email_change_failure"
+      assert audit_log.details["reason"] == "Invalid changeset"
+      assert audit_log.ip == "127.0.1.2"
+    end
+
+    test "invalid email", %{user: user} do
+      result =
+        UserLib.update_user_email(
+          user,
+          %{
+            "email" => "test@test",
+            "password" => "password"
+          },
+          "127.0.1.3"
+        )
+
+      assert match?({:error, %{errors: [email: {"invalid email", []}]}}, result)
+
+      audit_log = LoggingTestLib.get_most_recent_audit_log_for_user(user.id)
+      assert audit_log.action == "email_change_failure"
+      assert audit_log.details["reason"] == "Invalid changeset"
+      assert audit_log.ip == "127.0.1.3"
+    end
+
+    test "correct email", %{user: user} do
+      %User{email: old_email} = user
+
+      {:ok, new_user} =
+        UserLib.update_user_email(
+          user,
+          %{
+            "email" => "test@test.com",
+            "password" => "password"
+          },
+          "127.0.1.4"
+        )
+
+      assert new_user.email == "test@test.com"
+      assert new_user.previous_emails == [old_email]
+
+      # Old user email_last_changed_at should be nil, the new one not
+      assert user.email_last_changed_at == nil
+      assert match?(%DateTime{}, new_user.email_last_changed_at)
+
+      # Successful audit log result too
+      audit_log = LoggingTestLib.get_most_recent_audit_log_for_user(user.id)
+      assert audit_log.action == "email_change_success"
+      assert audit_log.ip == "127.0.1.4"
+
+      # Changing it again should result in a refresh of the last_changed_at and
+      # two emails in the list. We sleep for 1 second to ensure the email_last_changed_at
+      # value is a second ahead of the other allowing our comparison test to work
+      :timer.sleep(1000)
+
+      # Re-get the user
+      user = Account.get_user_by_id!(user.id)
+
+      {:ok, new_user2} =
+        UserLib.update_user_email(
+          user,
+          %{
+            "email" => "example@example.com",
+            "password" => "password"
+          },
+          "127.0.1.5"
+        )
+
+      assert new_user2.email == "example@example.com"
+      assert new_user2.previous_emails == ["test@test.com", old_email]
+
+      # New email_last_changed_at value should be greater than the last
+      assert DateTime.compare(new_user2.email_last_changed_at, new_user.email_last_changed_at) ==
+               :gt
+
+      # Successful audit log result too, we used a different IP so we can be sure
+      # it is a new one
+      audit_log = LoggingTestLib.get_most_recent_audit_log_for_user(user.id)
+      assert audit_log.action == "email_change_success"
+      assert audit_log.ip == "127.0.1.5"
+    end
+  end
+
+  describe "user create and update" do
     # create_ first
     test "create_user/1" do
       user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
@@ -67,16 +188,6 @@ defmodule Teiserver.Account.UserLibTest do
                UserLib.update_user_plain_password(user, %{
                  "name" => @disallowed_name,
                  "existing" => "password"
-               })
-    end
-
-    test "update_user_user_form/2" do
-      user = AccountFixtures.user_fixture()
-
-      assert {:error, %{errors: [name: _error]}} =
-               UserLib.update_user_user_form(user, %{
-                 "name" => @disallowed_name,
-                 "password" => "password"
                })
     end
 

@@ -2,11 +2,17 @@ defmodule Teiserver.EmailHelper do
   @moduledoc false
   alias Swoosh.Email
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Config
   alias Teiserver.Helper.DateHelper
   alias Teiserver.Mailer
   alias Teiserver.Telemetry
+
   require Logger
+
+  defp host, do: Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+
+  defp privacy_email, do: Application.get_env(:teiserver, Teiserver)[:privacy_email]
 
   def new_user(user) do
     case Config.get_site_config_cache("teiserver.Require email verification") do
@@ -88,8 +94,7 @@ defmodule Teiserver.EmailHelper do
         code
       end
 
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-    url = "https://#{host}/password_reset/#{code.value}"
+    url = "https://#{host()}/password_reset/#{code.value}"
 
     html_body = """
     <p>A password reset has been requested for your account. To reset your password follow the link below. If you did not request this reset please ignore this email. The code will expire in 24 hours.</p>
@@ -129,11 +134,10 @@ defmodule Teiserver.EmailHelper do
 
   defp do_new_user(user) do
     stats = Account.get_user_stat_data(user.id)
-    host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
     website_url = Application.get_env(:teiserver, Teiserver)[:main_website]
     verification_code = stats["verification_code"]
 
-    message_id = "<#{UUID.uuid4()}@#{host}>"
+    message_id = "<#{UUID.uuid4()}@#{host()}>"
 
     game_name = Application.get_env(:teiserver, Teiserver)[:game_name]
     discord = Application.get_env(:teiserver, Teiserver)[:discord]
@@ -168,6 +172,105 @@ defmodule Teiserver.EmailHelper do
     |> Email.to({user.name, user.email})
     |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
     |> Email.subject("BAR - New account")
+    |> Email.header("Date", date)
+    |> Email.header("Message-Id", message_id)
+    |> Email.html_body(html_body)
+    |> Email.text_body(text_body)
+    |> Mailer.deliver(response: true)
+  end
+
+  def email_changed(%User{} = user) do
+    # We specifically send to the old address first to ensure if something goes wrong we
+    # do not send anything to the new address
+    {:ok, _success} = email_changed_old_address(user)
+    {:ok, _success} = email_changed_new_address(user)
+  end
+
+  defp email_changed_old_address(%User{} = user) do
+    now = Calendar.strftime(DateTime.utc_now(), "%a, %d %b %Y %H:%M:%S %z")
+
+    # The email to privacy@beyondallreason.info used as a link is intended to be replaced by a
+    # link to the support ticketing system we will later make use of
+    html_body = """
+    Hello,
+
+    The email address on the Beyond All Reason account #{user.name} was changed on #{now}. This address will no longer receive messages about that account.
+
+    If this was you, nothing further is needed.
+
+    If this was not you, act now: someone may have access to your account. Open a ticket with us immediately at <a href="mailto:#{privacy_email()}">#{privacy_email()}</a>, replying from this address, and we will help you recover it. Do not reply with your password; we will never ask for it.
+
+    For security, account deletion cannot be requested through our self-service page for 14 days after an email change.
+
+    Beyond All Reason <a href="mailto:#{privacy_email()}">#{privacy_email()}</a>
+    """
+
+    text_body = """
+    Hello,
+
+    The email address on the Beyond All Reason account #{user.name} was changed on #{now}. This address will no longer receive messages about that account.
+
+    If this was you, nothing further is needed.
+
+    If this was not you, act now: someone may have access to your account. Open a ticket with us immediately at #{privacy_email()}, replying from this address, and we will help you recover it. Do not reply with your password; we will never ask for it.
+
+    For security, account deletion cannot be requested through our self-service page for 14 days after an email change.
+
+    Beyond All Reason: #{privacy_email()}
+    """
+
+    message_id = "<#{UUID.uuid4()}@#{host()}>"
+    date = DateHelper.date_to_str(DateTime.utc_now(), format: :email_date)
+
+    old_email = hd(user.previous_emails)
+
+    Email.new()
+    |> Email.to({user.name, old_email})
+    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
+    |> Email.subject("BAR - Your Beyond All Reason email address was changed")
+    |> Email.header("Date", date)
+    |> Email.header("Message-Id", message_id)
+    |> Email.html_body(html_body)
+    |> Email.text_body(text_body)
+    |> Mailer.deliver(response: true)
+  end
+
+  defp email_changed_new_address(%User{} = user) do
+    now = Calendar.strftime(DateTime.utc_now(), "%a, %d %b %Y %H:%M:%S %z")
+
+    # The email to #{privacy_email()} used as a link is intended to be replaced by a
+    # link to the support ticketing system we will later make use of
+    html_body = """
+    Hello,
+
+    This address is now the email address for the Beyond All Reason account #{user.name} was changed on #{now}. The previous address has been notified as well.
+
+    If you did not make this change, open a ticket with us at <a href="mailto:#{privacy_email()}">#{privacy_email()}</a> straight away. Do not reply with your password; we will never ask for it.
+
+    For security, account deletion cannot be requested through our self-service page for 14 days after an email change.
+
+    Beyond All Reason <a href="mailto:#{privacy_email()}">#{privacy_email()}</a>
+    """
+
+    text_body = """
+    Hello,
+
+    This address is now the email address for the Beyond All Reason account #{user.name} was changed on #{now}. The previous address has been notified as well.
+
+    If you did not make this change, open a ticket with us at #{privacy_email()} straight away. Do not reply with your password; we will never ask for it.
+
+    For security, account deletion cannot be requested through our self-service page for 14 days after an email change.
+
+    Beyond All Reason #{privacy_email()}
+    """
+
+    message_id = "<#{UUID.uuid4()}@#{host()}>"
+    date = DateHelper.date_to_str(DateTime.utc_now(), format: :email_date)
+
+    Email.new()
+    |> Email.to({user.name, user.email})
+    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
+    |> Email.subject("BAR - Your Beyond All Reason email address was changed")
     |> Email.header("Date", date)
     |> Email.header("Message-Id", message_id)
     |> Email.html_body(html_body)

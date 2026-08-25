@@ -98,6 +98,41 @@ defmodule TeiserverWeb.Account.SessionController do
     end
   end
 
+  def refresh_totp(conn, %{"user_id" => user_id, "otp" => otp, "redirect" => redirect}) do
+    user = UserLib.get_user(user_id)
+
+    case Account.validate_totp(user, otp) do
+      :ok ->
+        conn
+        |> redirect(to: redirect)
+
+      {:error, reason} ->
+        flash_message =
+          case reason do
+            :used ->
+              "Code has already been used."
+
+            :invalid ->
+              "Invalid code."
+
+            :locked ->
+              login_reply(
+                {:error,
+                 "The MFA one time password has been entered wrong too many times. Please reset your password to remove MFA from your account."},
+                conn
+              )
+
+            _other ->
+              "There was a problem verifying the code."
+          end
+
+        conn
+        |> put_flash(:warning, flash_message)
+        |> assign(:user, user)
+        |> render("totp.html")
+    end
+  end
+
   @spec one_time_login(Conn.t(), map()) :: Conn.t()
   def one_time_login(conn, %{"value" => value}) do
     ip =

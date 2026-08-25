@@ -404,16 +404,8 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # Email change request
-  defp do_reply(:change_email_accepted, nil) do
-    "CHANGEEMAILACCEPTED\n"
-  end
-
   defp do_reply(:change_email_denied, reason) do
     "CHANGEEMAILDENIED #{reason}\n"
-  end
-
-  defp do_reply(:change_email_request_accepted, nil) do
-    "CHANGEEMAILREQUESTACCEPTED\n"
   end
 
   # SLDB

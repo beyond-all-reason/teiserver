@@ -10,6 +10,8 @@ defmodule Teiserver.Account.AuthLib do
   alias Teiserver.Account.Auth
   alias Teiserver.Account.Role
   alias Teiserver.Account.RoleLib
+  alias Teiserver.Account.TOTPLib
+  alias Teiserver.Account.User
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-address-card"
@@ -230,5 +232,33 @@ defmodule Teiserver.Account.AuthLib do
   @spec current_user(Plug.Conn.t()) :: Teiserver.Account.User.t() | nil
   def current_user(conn) do
     conn.assigns[:current_user]
+  end
+
+  @doc """
+  Returns how many seconds ago they last used their MFA
+  """
+  @spec get_user_mfa_age_in_seconds(User.id()) :: :inactive | non_neg_integer()
+  def get_user_mfa_age_in_seconds(user_id) do
+    case TOTPLib.get_last_used(user_id) do
+      :inactive ->
+        :inactive
+
+      %DateTime{} = last_used_dt ->
+        DateTime.diff(DateTime.utc_now(), last_used_dt)
+    end
+  end
+
+  @doc """
+  Returns a boolean saying if the MFA of a user needs to refresh (it was last used
+  more than 5 minutes ago), in the event the user has no MFA it will not require a refresh.
+  """
+  @spec need_to_mfa_refresh?(User.id()) :: boolean()
+  def need_to_mfa_refresh?(user_id) do
+    max_age = Application.get_env(:teiserver, Teiserver)[:mfa_privilege_refresh_max_age] || 300
+
+    case get_user_mfa_age_in_seconds(user_id) do
+      :inactive -> false
+      age -> age > max_age
+    end
   end
 end

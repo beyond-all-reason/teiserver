@@ -144,6 +144,7 @@ defmodule TeiserverWeb.Router do
     post("/login", SessionController, :login)
     get("/otp", SessionController, :otp)
     post("/otp", SessionController, :verify_totp)
+    post("/refresh_otp", SessionController, :refresh_totp)
     get("/logout", SessionController, :logout)
     post("/logout", SessionController, :logout)
     delete("/logout", SessionController, :logout)
