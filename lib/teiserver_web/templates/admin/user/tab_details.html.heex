@@ -87,7 +87,7 @@
 
     <.detail_line
       label="Last email(s)"
-      value={Enum.join(Enum.reverse(@user.previous_emails), ", ")}
+      value={Enum.join(Enum.reverse(@user.previous_emails || []), ", ")}
       width={200}
     />
   </div>
