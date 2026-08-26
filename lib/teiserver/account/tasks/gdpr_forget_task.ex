@@ -109,23 +109,17 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
   defp forget_user_references(%User{id: user_id} = _user) do
     [
       {"account_codes", :user_id},
-      {"account_friend_requests", :from_user_id},
-      {"account_friend_requests", :to_user_id},
       {"account_friends", :user1_id},
       {"account_friends", :user2_id},
       {"account_relationships", :from_user_id},
-      {"account_relationships", :to_user_id},
       {"account_user_tokens", :user_id},
       {"config_user", :user_id},
-      {"direct_messages", :from_id},
-      {"direct_messages", :to_id},
       {"microblog_poll_responses", :user_id},
       {"microblog_user_preferences", :user_id},
       {"oauth_applications", :owner_id},
       {"oauth_codes", :owner_id},
       {"oauth_tokens", :owner_id},
       {"page_view_logs", :user_id},
-      {"teiserver_account_accolades", :giver_id},
       {"teiserver_account_accolades", :recipient_id},
       {"teiserver_account_user_totps", :user_id},
       {"telemetry_user_properties", :user_id}
