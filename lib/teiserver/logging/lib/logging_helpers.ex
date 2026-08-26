@@ -39,7 +39,7 @@ defmodule Teiserver.Logging.Helpers do
     {:ok, the_log} =
       Logging.create_audit_log(%{
         action: action,
-        user_id: scope.user.id,
+        user_id: scope.user && scope.user.id,
         details: details,
         ip: scope.ip
       })
