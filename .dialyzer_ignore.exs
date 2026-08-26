@@ -158,5 +158,7 @@
   {"lib/teiserver_web/templates/admin/lobby/server_chat.html.heex", :call},
   {"lib/teiserver_web/live/moderation/action_live/smurf_link.ex", :callback_arg_type_mismatch},
   {"lib/teiserver_web/live/moderation/action_live/smurf_link.ex", :call},
-  {"lib/teiserver/account/tasks/merge_accounts_task.ex", :no_return}
+  {"lib/teiserver/account/tasks/merge_accounts_task.ex", :no_return},
+  {"test/support/fixtures/moderation_fixtures.ex"},
+  {"lib/teiserver/moderation.ex"}
 ]

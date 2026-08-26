@@ -17,10 +17,6 @@ defmodule Teiserver.Logging.LoggingPlug do
 
     ip = get_ip_from_conn(conn) || "Error finding IP"
 
-    # conn = Map.put(conn, :remote_ip, ip)
-    # new_peer = {ip, conn.peer |> elem(1)}
-    # conn = Map.put(conn, :peer, new_peer)
-
     Conn.register_before_send(conn, fn conn ->
       if conn.status == 500 do
         # log_error(conn)
@@ -83,11 +79,24 @@ defmodule Teiserver.Logging.LoggingPlug do
     end
   end
 
+  @doc """
+  Return the IP used by the Conn struct
+  """
   def get_ip_from_conn(conn) do
     case List.keyfind(conn.req_headers, "x-real-ip", 0) do
-      {_key, ip} -> convert_from_x_real_ip(ip)
-      nil -> conn.remote_ip
-      _other -> nil
+      {_key, ip} ->
+        convert_from_x_real_ip(ip)
+
+      nil ->
+        # If it's the tuple then that's local development
+        # and we want to represent it using 127.0.0.1
+        case conn.remote_ip do
+          {0, 0, 0, 0, 0, 65535, 32512, 1} -> "127.0.0.1"
+          ip -> ip
+        end
+
+      _other ->
+        nil
     end
   end
 end

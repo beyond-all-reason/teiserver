@@ -3,6 +3,8 @@ defmodule TeiserverWeb.Router do
 
   use TeiserverWeb, :router
 
+  import TeiserverWeb.UserAuthentication
+
   pipeline :logging_live_auth do
     plug Bodyguard.Plug.Authorize,
       fallback: TeiserverWeb.Controllers.BodyguardFallback,
@@ -36,6 +38,7 @@ defmodule TeiserverWeb.Router do
     plug(Teiserver.Account.AuthPipeline)
     plug(Teiserver.Account.AuthPlug)
     plug(Teiserver.Plugs.CachePlug)
+    plug :fetch_current_scope_for_user
   end
 
   pipeline :tailwind do

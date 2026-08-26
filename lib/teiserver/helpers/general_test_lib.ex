@@ -3,6 +3,8 @@ defmodule Teiserver.Helpers.GeneralTestLib do
 
   alias Teiserver.Account
   alias Teiserver.Account.Guardian
+  alias Teiserver.Account.Scope
+  alias Teiserver.Account.User
   alias Teiserver.Helper.StringHelper
   alias TeiserverWeb.UserSocket
 
@@ -122,5 +124,15 @@ defmodule Teiserver.Helpers.GeneralTestLib do
       end
 
     {:ok, r: r, user: user, jwt: jwt, conn: conn, user_token: jwt, socket: socket}
+  end
+
+  @doc """
+  Creates a scope fixture from the user provided
+  """
+  def scope_fixture(%User{} = user, attrs \\ %{}) do
+    %Scope{
+      user: user,
+      ip: attrs[:ip] || "127.0.0.1"
+    }
   end
 end
