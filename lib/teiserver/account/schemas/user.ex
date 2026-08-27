@@ -128,7 +128,27 @@ defmodule Teiserver.Account.User do
     cast(struct, %{permissions: permissions}, [:permissions])
   end
 
-  def changeset(user, attrs, :server_limited_update_user) do
+  def changeset(user, attrs, :admin_update_user) do
+    user
+    |> cast(
+      attrs,
+      ~w(name email icon colour data roles permissions)a
+    )
+    |> validate_required([:name])
+    |> validate_name_change()
+  end
+
+  def changeset(user, attrs, :senior_moderator_update_user) do
+    user
+    |> cast(
+      attrs,
+      ~w(name email icon colour data roles permissions)a
+    )
+    |> validate_required([:name])
+    |> validate_name_change()
+  end
+
+  def changeset(user, attrs, :moderator_update_user) do
     user
     |> cast(
       attrs,

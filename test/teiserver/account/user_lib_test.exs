@@ -191,21 +191,56 @@ defmodule Teiserver.Account.UserLibTest do
                })
     end
 
-    test "server_limited_update_user/2" do
+    test "admin_update_user/2 - success" do
+      user = AccountFixtures.user_fixture()
+
+      assert {:ok, %{name: "AdminUser"}} =
+               UserLib.admin_update_user(user, %{"name" => "AdminUser"})
+    end
+
+    test "admin_update_user/2 - error" do
       user = AccountFixtures.user_fixture()
 
       assert {:error, %{errors: [name: _error]}} =
-               UserLib.server_limited_update_user(user, %{name: @disallowed_name})
+               UserLib.admin_update_user(user, %{name: @disallowed_name})
     end
 
-    test "server_update_user/2" do
+    test "senior_moderator_update_user/2 - success" do
+      user = AccountFixtures.user_fixture()
+
+      assert {:ok, %{name: "SeniorModeratorUser"}} =
+               UserLib.senior_moderator_update_user(user, %{"name" => "SeniorModeratorUser"})
+    end
+
+    test "senior_moderator_update_user/2 - error" do
+      user = AccountFixtures.user_fixture()
+
+      assert {:error, %{errors: [name: _error]}} =
+               UserLib.senior_moderator_update_user(user, %{name: @disallowed_name})
+    end
+
+    test "moderator_update_user/2 - success" do
+      user = AccountFixtures.user_fixture()
+
+      assert {:ok, %{name: "ModeratorUser"}} =
+               UserLib.moderator_update_user(user, %{"name" => "ModeratorUser"})
+    end
+
+    test "moderator_update_user/2 - error" do
+      user = AccountFixtures.user_fixture()
+
+      assert {:error, %{errors: [name: _error]}} =
+               UserLib.moderator_update_user(user, %{name: @disallowed_name})
+    end
+
+    test "server_update_user/2 - error" do
       user = AccountFixtures.user_fixture()
 
       assert {:error, %{errors: [name: _error]}} =
                UserLib.server_update_user(user, %{name: @disallowed_name})
     end
 
-    test "script_update_user/2" do
+    test "script_update_user/2 - error" do
       user = AccountFixtures.user_fixture()
 
       assert {:error, %{errors: [name: _error]}} =
