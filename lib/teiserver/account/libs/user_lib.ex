@@ -308,11 +308,33 @@ defmodule Teiserver.Account.UserLib do
     end
   end
 
-  def server_limited_update_user(%User{} = user, attrs) do
+  def admin_update_user(%User{} = user, attrs) do
     Account.deprecated_recache_user(user.id)
 
     user
-    |> User.changeset(attrs, :server_limited_update_user)
+    |> User.changeset(attrs, :admin_update_user)
+    |> Repo.update()
+    |> broadcast_update_user()
+    |> cache_put_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok()
+  end
+
+  def senior_moderator_update_user(%User{} = user, attrs) do
+    Account.deprecated_recache_user(user.id)
+
+    user
+    |> User.changeset(attrs, :senior_moderator_update_user)
+    |> Repo.update()
+    |> broadcast_update_user()
+    |> cache_put_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok()
+  end
+
+  def moderator_update_user(%User{} = user, attrs) do
+    Account.deprecated_recache_user(user.id)
+
+    user
+    |> User.changeset(attrs, :moderator_update_user)
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
