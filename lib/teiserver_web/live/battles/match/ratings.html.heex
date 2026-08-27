@@ -99,7 +99,7 @@
                 true ->
                   {"text-secondary column-delta", "pause"}
               end %>
-            <tr class="position-relative">
+            <tr phx-click={log.match && JS.navigate(~p"/battle/#{log.match_id}")}>
               <%= if log.match do %>
                 <td>
                   {log.match.map}
@@ -139,7 +139,9 @@
 
               <%= if log.match do %>
                 <td>
-                  <.link navigate={~p"/battle/#{log.match_id}"} class="stretched-link"></.link>
+                  <div class="visually-hidden">
+                    <.link navigate={~p"/battle/#{log.match_id}"}>Show</.link>
+                  </div>
                 </td>
               <% else %>
                 <td>&nbsp;</td>
