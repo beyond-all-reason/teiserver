@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Battle.MatchLive.RatingsLiveTest do
-  alias Teiserver.Helpers.GeneralTestLib
+  alias Ecto.UUID
   alias Teiserver.Battle
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
   use TeiserverWeb.ConnCase, async: true
@@ -36,13 +37,13 @@ defmodule TeiserverWeb.Battle.MatchLive.RatingsLiveTest do
 
     {:ok, conn} = Keyword.fetch(kw, :conn)
     {:ok, user} = Keyword.fetch(kw, :user)
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
+    now = DateTime.utc_now(:second)
     rating_type_id = MatchRatingLib.rating_type_name_lookup()["Large Team"]
 
     {:ok, match} =
       Battle.create_match(%{
-        uuid: Ecto.UUID.generate(),
-        server_uuid: Ecto.UUID.generate(),
+        uuid: UUID.generate(),
+        server_uuid: UUID.generate(),
         map: "Comet Catcher",
         tags: %{},
         team_count: 2,
