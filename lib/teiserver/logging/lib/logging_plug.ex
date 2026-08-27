@@ -91,7 +91,7 @@ defmodule Teiserver.Logging.LoggingPlug do
         # If it's the tuple then that's local development
         # and we want to represent it using 127.0.0.1
         case conn.remote_ip do
-          {0, 0, 0, 0, 0, 65535, 32512, 1} -> "127.0.0.1"
+          {0, 0, 0, 0, 0, 65535, 32512, 1} -> {127, 0, 0, 1}
           ip -> ip
         end
 
