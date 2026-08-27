@@ -6,6 +6,8 @@ defmodule TeiserverWeb.Moderation.ActionLive.SmurfLink do
 
   use TeiserverWeb, :live_view
 
+  require Logger
+
   @impl LiveView
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -14,11 +16,16 @@ defmodule TeiserverWeb.Moderation.ActionLive.SmurfLink do
   @impl LiveView
   def handle_params(%{"user_id" => user_id}, _url, socket) do
     user = Account.get_user(user_id)
+    existing_smurf_of = user.smurf_of_id && Account.get_user(user.smurf_of_id)
 
     case UserLib.has_access(user, socket) do
       {true, _role} ->
         socket
-        |> assign(user: user, page_title: "Smurf link - #{user.name}")
+        |> assign(
+          user: user,
+          existing_smurf_of: existing_smurf_of,
+          page_title: "Smurf link - #{user.name}"
+        )
         |> assign_new(:form, fn ->
           to_form(%{
             "smurf_user_id" => nil
@@ -60,9 +67,7 @@ defmodule TeiserverWeb.Moderation.ActionLive.SmurfLink do
               |> noreply()
 
             _result ->
-              IO.puts("")
-              IO.inspect(result, label: "#{__MODULE__}:#{__ENV__.line}")
-              IO.puts("")
+              Logger.error("Error saving smurf link form: #{inspect(result)}")
 
               socket
               |> put_flash(:warning, "Internal error")

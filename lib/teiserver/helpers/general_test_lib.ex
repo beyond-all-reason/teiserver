@@ -132,7 +132,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
   def scope_fixture(%User{} = user, attrs \\ %{}) do
     %Scope{
       user: user,
-      ip: attrs[:ip] || "127.0.0.1"
+      ip: attrs[:ip] || {0, 0, 0, 0, 0, 0, 0, 1}
     }
   end
 end

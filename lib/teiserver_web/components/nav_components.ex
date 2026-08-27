@@ -402,18 +402,18 @@ defmodule TeiserverWeb.NavComponents do
   end
 
   @doc """
-  <.section_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
+  <.section_menu_button_patch bsname={bsname} icon={lib} active={true/false} url={url}>
     Text goes here
-  </.section_menu_button>
+  </.section_menu_button_patch>
 
-  <.section_menu_button
+  <.section_menu_button_patch
       bsname={@view_colour}
       icon={StylingHelper.icon(:list)}
       active={@active == "index"}
       url={~p"/account/relationship"}
     >
       List
-    </.section_menu_button>
+    </.section_menu_button_patch>
   """
   attr :icon, :string, default: nil
   attr :url, :string, required: true
@@ -431,6 +431,28 @@ defmodule TeiserverWeb.NavComponents do
       <Fontawesome.icon :if={@icon} icon={@icon} style={if @active, do: "solid", else: "regular"} />
       {render_slot(@inner_block)}
     </.link>
+    """
+  end
+
+  @doc """
+  <.tw_section_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
+    Text goes here
+  </.tw_section_menu_button>
+  """
+  attr :icon, :string, default: nil
+  attr :url, :string, required: true
+  attr :active, :boolean, default: false
+  slot :inner_block, required: true
+
+  def tw_section_menu_button(assigns) do
+    assigns =
+      assigns
+      |> assign(:active_class, if(assigns[:active], do: "tab-active"))
+
+    ~H"""
+    <a href={@url} class={["tab", @active_class]}>
+      <Fontawesome.icon :if={@icon} icon={@icon} style="solid" /> &nbsp; {render_slot(@inner_block)}
+    </a>
     """
   end
 

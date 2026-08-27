@@ -10,11 +10,11 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <TeiserverWeb.Components.Moderation.ActionComponents.section_menu
-          active="index"
+          active={if assigns[:show_search], do: "search", else: "index"}
           colour={bsname}
         />
 
-        <%= if @conn.params["search"] != nil do %>
+        <%= if @conn.params["search"] != nil or assigns[:show_search] do %>
           {render(TeiserverWeb.Moderation.ActionView, "search.html", assigns)}
         <% end %>
 

@@ -262,5 +262,9 @@ if enable_discord_bridge do
     bot_name: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_NAME")
 end
 
+# If we are running the server locally this will conflict, this allows us to test
+# if it is already defined, if not then it will set it to a new value as a default
+monitoring_port = Application.get_env(:teiserver, TeiserverWeb.Monitoring)[:port] || 4001
+
 config :teiserver, TeiserverWeb.Monitoring,
-  port: Teiserver.ConfigHelpers.get_env("TEI_METRICS_SERVER_PORT", 4001, :int)
+  port: Teiserver.ConfigHelpers.get_env("TEI_METRICS_SERVER_PORT", monitoring_port, :int)
