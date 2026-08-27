@@ -3,8 +3,10 @@ defmodule TeiserverWeb.Components.Moderation.ActionComponents do
   Components for Action pages
   """
 
+  alias Teiserver.Account.Scope
+
   use TeiserverWeb, :component
-  import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
+  import TeiserverWeb.NavComponents, only: [section_menu_button: 1, tw_section_menu_button: 1]
 
   @doc """
   <TeiserverWeb.Components.Moderation.ActionComponents.section_menu active={active} colour={} />
@@ -53,6 +55,64 @@ defmodule TeiserverWeb.Components.Moderation.ActionComponents do
         </.section_menu_button>
       <% _ -> %>
     <% end %>
+    """
+  end
+
+  @doc """
+  <TeiserverWeb.Components.Moderation.ActionComponents.section_menu
+    active="some-link"
+    scope={@scope}
+  />
+  """
+  attr :scope, Scope, required: true
+  attr :active, :string, required: true
+
+  def tw_section_menu(assigns) do
+    ~H"""
+    <div role="tablist" class="tabs tabs-box">
+      <.tw_section_menu_button
+        icon={StylingHelper.icon(:list)}
+        url={~p"/moderation/action"}
+        active={@active == "index"}
+      >
+        List
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        icon={StylingHelper.icon(:search)}
+        url={~p"/moderation/action/search"}
+        active={@active == "search"}
+      >
+        Search
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        :if={@active == "show"}
+        icon={StylingHelper.icon(:show)}
+        url="#"
+        active={true}
+      >
+        Show
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        :if={@active == "edit"}
+        icon={StylingHelper.icon(:edit)}
+        url="#"
+        active={true}
+      >
+        Edit
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        :if={@active == "smurf-link"}
+        active={true}
+        icon="fa-solid fa-code-compare"
+        url="#"
+      >
+        Smurf link
+      </.tw_section_menu_button>
+    </div>
     """
   end
 end

@@ -41,7 +41,7 @@ defmodule Teiserver.Logging.Helpers do
         action: action,
         user_id: scope.user && scope.user.id,
         details: details,
-        ip: scope.ip
+        ip: scope.ip && scope.ip |> Tuple.to_list() |> Enum.join(".")
       })
 
     the_log

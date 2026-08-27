@@ -3,8 +3,6 @@ defmodule TeiserverWeb.Router do
 
   use TeiserverWeb, :router
 
-  import TeiserverWeb.UserAuthentication
-
   pipeline :logging_live_auth do
     plug Bodyguard.Plug.Authorize,
       fallback: TeiserverWeb.Controllers.BodyguardFallback,
@@ -38,7 +36,6 @@ defmodule TeiserverWeb.Router do
     plug(Teiserver.Account.AuthPipeline)
     plug(Teiserver.Account.AuthPlug)
     plug(Teiserver.Plugs.CachePlug)
-    plug :fetch_current_scope_for_user
   end
 
   pipeline :tailwind do
@@ -493,8 +490,8 @@ defmodule TeiserverWeb.Router do
     put("/report/:id/close", ReportController, :close)
     put("/report/:id/open", ReportController, :open)
 
-    get("/action/search", ActionController, :index)
-    post("/action/search", ActionController, :index)
+    get("/action/search", ActionController, :search)
+    post("/action/search", ActionController, :search)
     get("/action/new_with_user", ActionController, :new_with_user)
     put("/action/halt/:id", ActionController, :halt)
     put("/action/re-post/:id", ActionController, :re_post)
@@ -510,12 +507,12 @@ defmodule TeiserverWeb.Router do
   end
 
   scope "/moderation", TeiserverWeb.Moderation, as: :moderation do
-    pipe_through([:browser, :app_layout, :protected, :tailwind])
+    pipe_through([:live_browser, :app_layout, :protected, :tailwind])
 
     live_session :actions,
       layout: {TeiserverWeb.Layouts, :moderation_tw},
       on_mount: [
-        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "users"}}},
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "moderation"}}},
         {UserAuthentication, :ensure_authenticated},
         {UserAuthentication, {:authorise, "Moderator"}}
       ] do

@@ -80,3 +80,5 @@ config :teiserver, Teiserver.Mailer,
   adapter: Swoosh.Adapters.Test,
   noreply_address: "noreply@testsite.co.uk",
   contact_address: "info@testsite.co.uk"
+
+config :teiserver, TeiserverWeb.Monitoring, port: 4401

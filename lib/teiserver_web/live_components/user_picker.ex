@@ -38,12 +38,11 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   def render(assigns) do
     ~H"""
     <div>
+      <CoreComponents.label :if={@label} for={@id}>{@label}</CoreComponents.label>
       <div>
-        <CoreComponents.label :if={@label} for={@id}>{@label}</CoreComponents.label>
-
-        <div class="w-full inline-flex border rounded-lg">
+        <div class="join">
           <div
-            class="w-15 text-center pt-3 bg-green-400 text-green-900 dark:bg-green-800 dark:text-green-50 cursor-pointer rounded-l-lg user-picker-search-button"
+            class="btn btn-success join-item user-picker-search-button"
             phx-click={
               JS.push("show-picker")
               |> JS.toggle(to: "##{@uniq_id}-picker-form")
@@ -51,15 +50,20 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
             }
             phx-target={@myself}
           >
-            <i class="fa-solid fa-lg fa-fw fa-magnifying-glass"></i>
+            <Fontawesome.icon icon="search" style="regular" /> Search
           </div>
+          <label class="input validator join-item">
+            <input
+              type="text"
+              class="input w-full min-w-lg"
+              placeholder=""
+              disabled
+              name="none"
+              value={@shown_value}
+            />
+          </label>
 
-          <.input_tw
-            name="none"
-            value={@shown_value}
-            placeholder="Click green button to search"
-          />
-          <.input_tw
+          <.input
             field={@field}
             value={@actual_value}
             type="hidden"
@@ -241,7 +245,7 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
     ~H"""
     <div class={["mt-2", not @show && "hidden"]} id={"#{@uniq_id}-picker-form"}>
       Search for user by name or ID, search will take place as soon as you stop typing
-      <.input
+      <.input_tw
         id={"#{@uniq_id}-search-input"}
         name="user-search-term"
         value={@search_term}

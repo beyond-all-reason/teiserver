@@ -65,6 +65,13 @@ defmodule TeiserverWeb.Moderation.ActionController do
     |> render("index.html")
   end
 
+  @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def search(conn, params) do
+    conn
+    |> assign(:show_search, true)
+    |> index(params)
+  end
+
   defp extract_search_params(params) do
     search_params = []
 

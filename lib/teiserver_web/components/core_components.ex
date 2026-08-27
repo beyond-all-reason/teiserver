@@ -511,7 +511,7 @@ defmodule TeiserverWeb.CoreComponents do
     |> assign(:errors, Enum.map(errors, &translate_error(&1)))
     |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
     |> assign_new(:value, fn -> field.value end)
-    |> input()
+    |> input_tw()
   end
 
   def input_tw(%{type: "hidden"} = assigns) do
