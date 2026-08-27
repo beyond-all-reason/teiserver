@@ -716,6 +716,108 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
   end
 
+  describe "state after reconnection" do
+    setup [:setup_queue, :setup_app]
+
+    defp reconnect_self_matchmaking(token) do
+      client = Tachyon.connect(token, swallow_first_event: false)
+
+      %{"commandId" => "user/self", "data" => %{"user" => user}} =
+        Tachyon.recv_message!(client)
+
+      user["matchmaking"]
+    end
+
+    test "no matchmaking", %{app: app} do
+      {:ok, %{client: client, token: token}} = setup_user(app)
+      Tachyon.abrupt_disconnect!(client)
+
+      assert %{"state" => "no_matchmaking"} = reconnect_self_matchmaking(token)
+    end
+
+    test "queuing", %{app: app, queue_id: queue_id, queue_version: version} do
+      {:ok, %{client: client, token: token}} = setup_user(app)
+
+      assert %{"status" => "success"} =
+               Tachyon.join_queues!(client, [%{id: queue_id, version: version}])
+
+      Tachyon.abrupt_disconnect!(client)
+
+      assert %{"state" => "queuing", "queues" => [%{"id" => ^queue_id, "version" => ^version}]} =
+               reconnect_self_matchmaking(token)
+    end
+
+    test "found", %{app: app, queue_id: queue_id, queue_pid: queue_pid, queue_version: version} do
+      [%{client: client, token: token} | _others] =
+        join_and_pair(app, %{id: queue_id, version: version}, queue_pid, 2)
+
+      Tachyon.abrupt_disconnect!(client)
+
+      assert %{
+               "state" => "found",
+               "queue" => %{
+                 "id" => ^queue_id,
+                 "version" => ^version,
+                 "hasAlreadyReadied" => false,
+                 "timeoutAt" => timeout_at
+               },
+               "otherQueues" => []
+             } = reconnect_self_matchmaking(token)
+
+      assert timeout_at > DateTime.utc_now() |> DateTime.to_unix(:microsecond)
+    end
+
+    test "found reports the queues left behind", %{
+      app: app,
+      queue_id: queue_id,
+      queue_pid: queue_pid,
+      queue_version: version
+    } do
+      {:ok, other} = setup_queue(1)
+      other_id = other[:queue_id]
+      other_version = other[:queue_version]
+
+      {:ok, %{client: client, token: token}} = setup_user(app)
+      {:ok, %{client: other_client}} = setup_user(app)
+
+      assert %{"status" => "success"} =
+               Tachyon.join_queues!(client, [
+                 %{id: queue_id, version: version},
+                 %{id: other_id, version: other_version}
+               ])
+
+      assert %{"status" => "success"} =
+               Tachyon.join_queues!(other_client, [%{id: queue_id, version: version}])
+
+      send(queue_pid, :tick)
+      assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client)
+
+      Tachyon.abrupt_disconnect!(client)
+
+      assert %{
+               "state" => "found",
+               "queue" => %{"id" => ^queue_id},
+               "otherQueues" => [%{"id" => ^other_id, "version" => ^other_version}]
+             } = reconnect_self_matchmaking(token)
+    end
+
+    test "found after readying up", %{
+      app: app,
+      queue_id: queue_id,
+      queue_pid: queue_pid,
+      queue_version: version
+    } do
+      [%{client: client, token: token} | _others] =
+        join_and_pair(app, %{id: queue_id, version: version}, queue_pid, 2)
+
+      assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client)
+      Tachyon.abrupt_disconnect!(client)
+
+      assert %{"state" => "found", "queue" => %{"hasAlreadyReadied" => true}} =
+               reconnect_self_matchmaking(token)
+    end
+  end
+
   describe "join with autohost" do
     setup [{Tachyon, :setup_client}, :setup_app, :setup_queue, {Tachyon, :setup_autohost}]
 

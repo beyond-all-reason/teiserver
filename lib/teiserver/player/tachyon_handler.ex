@@ -220,8 +220,8 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "user/updated", event, state}
   end
 
-  def handle_info({:user, {:role_updated, roles}}, state) do
-    event = build_user_self_event(%{state.user | roles: roles}, state)
+  def handle_info({:user, {:role_updated, roles, sess_state}}, state) do
+    event = build_user_self_event(%{state.user | roles: roles}, sess_state)
     {:event, "user/self", event, state}
   end
 
@@ -1058,12 +1058,11 @@ defmodule Teiserver.Player.TachyonHandler do
         outgoingFriendRequest: outgoing,
         incomingFriendRequest: incoming,
         ignoreIds: [],
-        # TODO: see https://github.com/beyond-all-reason/teiserver/issues/1450
-        matchmaking: %{state: :no_matchmaking},
+        matchmaking: matchmaking_state_to_tachyon(sess_state.matchmaking),
         # TODO. For now it's just there so clients don't break on missing
         # required property
         clanInvites: [],
-        currentLobby: sess_state[:current_lobby],
+        currentLobby: sess_state.current_lobby,
         roles: roles_to_tachyon(user.roles)
       }
     }
@@ -1087,7 +1086,16 @@ defmodule Teiserver.Player.TachyonHandler do
     case SessionSupervisor.start_session(user) do
       {:ok, session_pid} ->
         {:ok, _pid} = Registry.register_and_kill_existing(user.id)
-        {:ok, session_pid, %{party: nil, invited_to_parties: [], current_battle: nil}}
+
+        self_state = %{
+          party: nil,
+          invited_to_parties: [],
+          current_lobby: nil,
+          current_battle: nil,
+          matchmaking: :no_matchmaking
+        }
+
+        {:ok, session_pid, self_state}
 
       {:error, {:already_started, pid}} ->
         case Session.replace_connection(pid, self()) do
@@ -1227,6 +1235,33 @@ defmodule Teiserver.Player.TachyonHandler do
         end)
     }
   end
+
+  defp matchmaking_state_to_tachyon(:no_matchmaking), do: %{state: :no_matchmaking}
+
+  defp matchmaking_state_to_tachyon({:searching, %PT.MmSearchingState{} = searching}) do
+    %{
+      state: :queuing,
+      queues: Enum.map(searching.joined_queues, &queue_ref_to_tachyon/1)
+    }
+  end
+
+  defp matchmaking_state_to_tachyon({:pairing, %PT.MmPairingState{} = pairing}) do
+    queue =
+      pairing.paired_queue
+      |> queue_ref_to_tachyon()
+      |> Map.merge(%{
+        timeoutAt: DateTime.to_unix(pairing.timeout_at, :microsecond),
+        hasAlreadyReadied: pairing.readied?
+      })
+
+    %{
+      state: :found,
+      queue: queue,
+      otherQueues: Enum.map(pairing.frozen_queues, &queue_ref_to_tachyon/1)
+    }
+  end
+
+  defp queue_ref_to_tachyon({queue_id, version}), do: %{id: queue_id, version: version}
 
   def battle_state_to_tachyon(nil), do: nil
 

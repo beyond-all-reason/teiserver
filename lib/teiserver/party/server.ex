@@ -136,7 +136,7 @@ defmodule Teiserver.Party.Server do
   interactions between parties and matchmaking by removing any potential of a
   party member already being in matchmaking outside the party.
   """
-  @spec join_queues(PT.Data.id(), [{Matchmaking.queue_id(), version :: String.t()}]) ::
+  @spec join_queues(PT.Data.id(), [Matchmaking.queue_ref()]) ::
           :ok | {:error, reason :: term()}
   def join_queues(party_id, queues) do
     via_tuple(party_id)
