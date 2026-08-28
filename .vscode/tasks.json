@@ -46,6 +46,19 @@
                 "reveal": "always",
                 "panel": "dedicated"
             }
+        },
+        {
+            // Same checks as the "Lint and style checks" github action. MIX_ENV
+            // is set explicitly because the container pins it to dev, which
+            // takes precedence over the preferred_envs in mix.exs.
+            "label": "Run Linter",
+            "type": "shell",
+            "command": "MIX_ENV=test mix lint",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
         }
     ]
 }
