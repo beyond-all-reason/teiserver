@@ -305,6 +305,24 @@ defmodule Teiserver.Helpers.DateHelperTest do
     end
   end
 
+  describe "date_to_str :ymd_hms24" do
+    test "formats date and time in 24-hour notation" do
+      dt = ~U[2026-06-18 15:45:40Z]
+      assert DateHelper.date_to_str(dt, format: :ymd_hms24) == "2026-06-18 15:45:40"
+    end
+
+    test "midnight is 00, not 12" do
+      dt = ~U[2026-06-18 00:00:00Z]
+      assert DateHelper.date_to_str(dt, format: :ymd_hms24) == "2026-06-18 00:00:00"
+    end
+
+    test "does not use 12-hour AM/PM format" do
+      dt = ~U[2026-06-18 15:45:40Z]
+      result = DateHelper.date_to_str(dt, format: :ymd_hms24)
+      refute result == "2026-06-18 03:45:40"
+    end
+  end
+
   describe "human_input_to_datetime" do
     @now ~U[2026-05-19 09:00:00Z]
 
