@@ -221,7 +221,7 @@ defmodule Teiserver.Player.Session do
   def lobby_join_battle(user_id, battle_data, battle_start_data, password) do
     user_id
     |> via_tuple()
-    |> GenServer.cast({:battle, {:lobby_join, battle_data, battle_start_data, password}})
+    |> GenServer.cast({:battle, {:start, battle_data, battle_start_data, password}})
   end
 
   def notify_left_lobby(user_id, lobby_id, reason) do
@@ -1452,14 +1452,40 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  # this takes care of the logic when a player is asked to join a battle.
+  # for now, we treat the session's state as the authority, if the player isn't
+  # in the correct matchmaking state or in a lobby, the request is ignored.
+  # Maybe that shouldn't be so and we should treat whatever comes from battle
+  # as the source of truth?
   def handle_cast(
         {:battle, {:start, {battle_id, battle_pid}, battle_start_data, password}},
         %PT.Data{} = state
       ) do
     Logger.info("entering battle #{battle_id}")
 
-    case state.matchmaking do
-      {:pairing, %PT.MmPairingState{readied?: true, room: _room_pid}} ->
+    new_state =
+      case state do
+        %{matchmaking: {:pairing, %PT.MmPairingState{readied?: true, room: _room_pid}}} ->
+          monitors =
+            MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
+            |> MC.monitor(battle_pid, {:battle, battle_id})
+
+          {:joined, %{state | matchmaking: :no_matchmaking, monitors: monitors}}
+
+        %{lobby: %{id: _lobby_id}} ->
+          monitors = MC.monitor(state.monitors, battle_pid, {:battle, battle_id})
+          {:joined, %{state | monitors: monitors}}
+
+        _other ->
+          Logger.warning(
+            "User received a request to start a battle but is not in a state to do so #{inspect(state)}"
+          )
+
+          {:error, state}
+      end
+
+    case new_state do
+      {:joined, state} ->
         battle_state = %PT.BattleState{
           id: battle_id,
           username: state.user.name,
@@ -1471,60 +1497,15 @@ defmodule Teiserver.Player.Session do
           map: battle_start_data.map
         }
 
+        state = %{state | battle: battle_state}
         state = send_to_player(state, {:battle_start, battle_state})
-
-        monitors =
-          MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
-          |> MC.monitor(battle_pid, {:battle, battle_id})
-
         # TODO: this should ideally come from an engine event, but in first approximation it'll do
         broadcast_user_update!(state.user, :playing)
 
-        {:noreply,
-         %{state | matchmaking: :no_matchmaking, monitors: monitors, battle: battle_state}}
-
-      _other ->
-        Logger.warning(
-          "User received a request to start a battle but is not in a state to do so #{inspect(state)}"
-        )
-
-        {:noreply, state}
-    end
-  end
-
-  def handle_cast(
-        {:battle, {:lobby_join, {battle_id, battle_pid}, battle_start_data, password}},
-        state
-      ) do
-    Logger.info("joining lobby battle #{battle_id}")
-
-    case state.lobby do
-      nil ->
-        Logger.warning(
-          "User received a request to start a battle but is not in a state to do so #{inspect(state)}"
-        )
-
         {:noreply, state}
 
-      %{id: _lobby_id} ->
-        battle_state = %PT.BattleState{
-          id: battle_id,
-          username: state.user.name,
-          password: password,
-          ips: battle_start_data.ips,
-          port: battle_start_data.port,
-          engine: battle_start_data.engine,
-          game: battle_start_data.game,
-          map: battle_start_data.map
-        }
-
-        state = send_to_player(state, {:battle_start, battle_state})
-        monitors = MC.monitor(state.monitors, battle_pid, {:battle, battle_id})
-
-        # TODO: this should ideally come from an engine event, but in first approximation it'll do
-        broadcast_user_update!(state.user, :playing)
-
-        {:noreply, %{state | monitors: monitors, battle: battle_state}}
+      {:error, state} ->
+        {:noreply, state}
     end
   end
 
