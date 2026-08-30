@@ -100,6 +100,8 @@ defmodule Teiserver.Player do
   defdelegate lobby_join_battle(user_id, battle_data, battle_start_data, password),
     to: Player.Session
 
+  defdelegate notify_left_lobby(user_id, lobby_id, reason), to: Player.Session
+
   @doc """
   Let the player know they've been invited to a party
   """

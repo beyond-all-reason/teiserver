@@ -606,6 +606,12 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       %{"commandId" => "lobby/left", "data" => data} = Tachyon.recv_message!(ctx2[:client])
       assert data["reason"] == "kicked"
+
+      # check that user/self is also correct after reconnection
+      Tachyon.abrupt_disconnect!(ctx2[:client])
+      client2 = Tachyon.connect(ctx2[:token], swallow_first_event: false)
+      %{"commandId" => "user/self", "data" => data} = Tachyon.recv_message!(client2)
+      assert data["user"]["currentLobby"] == nil
     end
 
     test "invalid user id returns error" do

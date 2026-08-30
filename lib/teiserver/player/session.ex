@@ -222,6 +222,12 @@ defmodule Teiserver.Player.Session do
     |> GenServer.cast({:battle, {:lobby_join, battle_data, battle_start_data, password}})
   end
 
+  def notify_left_lobby(user_id, lobby_id, reason) do
+    user_id
+    |> via_tuple()
+    |> GenServer.cast({:lobby, {:left, lobby_id, reason}})
+  end
+
   @doc """
   notify the teiserver side that the player left a battle. This is coming
   from the engine
@@ -1658,6 +1664,16 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_cast({:lobby, {:left, lobby_id, _reason}}, %PT.Data{} = state)
+      when state.lobby.id != lobby_id,
+      do: {:noreply, state}
+
+  def handle_cast({:lobby, {:left, lobby_id, reason}}, %PT.Data{} = state) do
+    msg = {:lobby, lobby_id, {:left, reason}}
+    send_to_player!(msg, state)
+    {:noreply, %{state | lobby: nil}}
+  end
+
   @impl GenServer
   def handle_info({:DOWN, ref, :process, _pid, reason}, %PT.Data{} = state) do
     val = MC.get_val(state.monitors, ref)
@@ -1759,7 +1775,7 @@ defmodule Teiserver.Player.Session do
         case TachyonLobby.lookup_primary(lobby_id) do
           nil ->
             Logger.info("Lobby #{lobby_id} went down because #{inspect(reason)}")
-            send_to_player!({:lobby, lobby_id, {:left, "lobby crashed"}}, state)
+            send_to_player!({:lobby, lobby_id, {:left, {:error, "lobby crashed"}}}, state)
             {:noreply, %{state | lobby: nil}}
 
           pid ->
