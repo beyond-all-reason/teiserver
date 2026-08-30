@@ -27,8 +27,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   @type lost_reason :: :cancel | :timeout | {:server_error, term()}
   @type ready_data :: %{
           user_id: User.id(),
-          name: String.t(),
-          password: String.t()
+          name: String.t()
         }
 
   @spec start(QueueServer.id(), QueueServer.queue(), [team()], timeout()) ::
@@ -69,7 +68,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           # holds data from players that have readied up, in a format to be used to
           # create the start script. Maintain the same structure as `teams` but
           # the players for members are flatten
-          readied: [[%{user_id: User.id(), name: String.t(), password: String.t()}], ...]
+          readied: [[%{user_id: User.id(), name: String.t()}], ...]
         }
 
   def start_link(init_arg) do
@@ -170,8 +169,10 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           |> Map.put(:game, %{spring_name: game})
           |> Map.put(:map, %{spring_name: map.spring_name})
 
-        for team <- state.teams, member <- team, p_id <- member.player_ids do
-          Player.battle_start(p_id, battle_data, battle_start_data)
+        for ally_team <- start_script.ally_teams,
+            team <- ally_team.teams,
+            %AT.Player{} = player <- team.players do
+          Player.battle_start(player.user_id, battle_data, battle_start_data, player.password)
         end
 
         QueueServer.disband_pairing(state.queue_id, self())
@@ -283,6 +284,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     for {team, startbox} <- Enum.zip(state.readied, startboxes) do
       teams =
         for player <- team do
+          player = AT.Player.new(player.user_id, player.name)
           %{players: [player]}
         end
 

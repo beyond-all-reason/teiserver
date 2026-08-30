@@ -13,4 +13,14 @@ defmodule Teiserver.Autohost.Types.Player do
           name: String.t(),
           password: String.t()
         }
+
+  def new(user_id, name) do
+    password = :crypto.strong_rand_bytes(16) |> Base.encode16()
+
+    %__MODULE__{
+      user_id: user_id,
+      name: name,
+      password: password
+    }
+  end
 end

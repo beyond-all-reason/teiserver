@@ -200,10 +200,12 @@ defmodule Teiserver.Player.Session do
   @doc """
   Let the player know that they are now in a battle
   """
-  @spec battle_start(User.id(), {TachyonBattle.id(), pid()}, start_data()) ::
+  @spec battle_start(User.id(), {TachyonBattle.id(), pid()}, start_data(), password :: String.t()) ::
           :ok
-  def battle_start(user_id, battle_data, battle_start_data) do
-    user_id |> via_tuple() |> GenServer.cast({:battle, {:start, battle_data, battle_start_data}})
+  def battle_start(user_id, battle_data, battle_start_data, password) do
+    user_id
+    |> via_tuple()
+    |> GenServer.cast({:battle, {:start, battle_data, battle_start_data, password}})
   end
 
   @doc """
@@ -763,19 +765,12 @@ defmodule Teiserver.Player.Session do
   def handle_call({:matchmaking, :ready}, _from, %PT.Data{} = state) do
     case state.matchmaking do
       {:pairing, %PT.MmPairingState{room: room_pid} = pairing_state} ->
-        password = :crypto.strong_rand_bytes(16) |> Base.encode16()
-
         data = %{
           user_id: state.user.id,
-          name: state.user.name,
-          password: password
+          name: state.user.name
         }
 
-        new_state = %{
-          state
-          | matchmaking:
-              {:pairing, %{pairing_state | readied?: true} |> Map.put(:battle_password, password)}
-        }
+        new_state = %{state | matchmaking: {:pairing, %{pairing_state | readied?: true}}}
 
         {:reply, Matchmaking.ready(room_pid, data), new_state}
 
@@ -1458,17 +1453,17 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_cast(
-        {:battle, {:start, {battle_id, battle_pid}, battle_start_data}},
+        {:battle, {:start, {battle_id, battle_pid}, battle_start_data, password}},
         %PT.Data{} = state
       ) do
     Logger.info("entering battle #{battle_id}")
 
     case state.matchmaking do
-      {:pairing, %PT.MmPairingState{readied?: true, battle_password: pass, room: _room_pid}} ->
+      {:pairing, %PT.MmPairingState{readied?: true, room: _room_pid}} ->
         battle_state = %PT.BattleState{
           id: battle_id,
           username: state.user.name,
-          password: pass,
+          password: password,
           ips: battle_start_data.ips,
           port: battle_start_data.port,
           engine: battle_start_data.engine,
