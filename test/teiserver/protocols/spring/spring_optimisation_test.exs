@@ -29,7 +29,6 @@ defmodule Teiserver.SpringOptimisationTest do
     {:ok, socket: socket}
   end
 
-  # Logs a fresh user in announcing `lobby`, and returns their client.
   # The literal `0 *` fills LOGIN's cpu and local-ip fields.
   defp login(socket, lobby) do
     user = new_user()
