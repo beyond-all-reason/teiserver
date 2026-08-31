@@ -3,7 +3,7 @@ defmodule Teiserver.SpringOptimisationTest do
   The lobby client named in `LOGIN` selects how much of the event stream the
   connection receives, via `SpringIn`'s `@optimisation_level`.
   """
-  alias Teiserver.Client
+  alias Teiserver.{Account, Client}
   use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,
@@ -16,6 +16,12 @@ defmodule Teiserver.SpringOptimisationTest do
       start_spring_server: 1
     ]
 
+  # Chobby's `agent` field, "<macAddrHash> <sysInfoHash>"; stored for smurf
+  # detection.
+  @lobby_hash "1993717506 0d04a635e200f308"
+  # Chobby's compatibility flags; ignored by the server.
+  @compat_flags "b sp"
+
   setup :start_spring_server
 
   setup(context) do
@@ -24,13 +30,15 @@ defmodule Teiserver.SpringOptimisationTest do
   end
 
   # Logs a fresh user in announcing `lobby`, and returns their client.
-  defp login_announcing(socket, lobby) do
+  # The literal `0 *` fills LOGIN's cpu and local-ip fields.
+  defp login(socket, lobby) do
     user = new_user()
+    password_hash = Account.spring_md5_password("password")
     _welcome = _recv_raw(socket)
 
     _send_raw(
       socket,
-      "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * #{lobby}\t1993717506 0d04a635e200f308\tb sp\n"
+      "LOGIN #{user.name} #{password_hash} 0 * #{lobby}\t#{@lobby_hash}\t#{@compat_flags}\n"
     )
 
     _reply = _recv_until(socket)
@@ -40,7 +48,7 @@ defmodule Teiserver.SpringOptimisationTest do
   end
 
   test "a listed lobby client gets its mapped optimisation level", %{socket: socket} do
-    client = login_announcing(socket, "modlobby:0.1.0")
+    client = login(socket, "modlobby:0.1.0")
 
     assert GenServer.call(client.tcp_pid, {:get, :protocol_optimisation}) == :partial
 
@@ -51,7 +59,7 @@ defmodule Teiserver.SpringOptimisationTest do
   end
 
   test "an unlisted lobby client falls back to full optimisation", %{socket: socket} do
-    client = login_announcing(socket, "NotARealLobby:1")
+    client = login(socket, "NotARealLobby:1")
 
     assert GenServer.call(client.tcp_pid, {:get, :protocol_optimisation}) == :full
     assert client.lobby_client == "NotARealLobby"
