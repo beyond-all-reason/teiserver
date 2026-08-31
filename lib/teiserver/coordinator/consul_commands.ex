@@ -292,10 +292,18 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           1
 
         _other ->
-          rem
-          |> String.trim()
-          |> String.to_integer()
-          |> max(1)
+          parse_result =
+            rem
+            |> String.trim()
+            |> Integer.parse()
+
+          case parse_result do
+            :error ->
+              1
+
+            {i, _string} ->
+              max(i, 1)
+          end
       end
 
     ChatLib.sayex(
