@@ -159,217 +159,19 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   # DMs
   def handle_info({:direct_message, from_id, parts}, state) when is_list(parts) do
-    new_state =
+    if acceptable_source?(from_id) do
       parts
-      |> Enum.reduce(state, fn part, acc_state ->
-        {_reply, new_state} = handle_info({:direct_message, from_id, part}, acc_state)
-        new_state
+      |> Enum.each(fn part ->
+        handle_direct_message(from_id, part, state)
       end)
-
-    {:noreply, new_state}
-  end
-
-  def handle_info({:direct_message, from_id, "broken_connection " <> username}, state) do
-    if Auth.is_bot?(from_id) or Auth.admin?(from_id) or Auth.moderator?(from_id) do
-      user = Account.deprecated_get_user_by_name(username)
-
-      if user do
-        Telemetry.log_complex_server_event(user.id, "spads.broken_connection", %{from_id: from_id})
-
-        Client.disconnect(user.id, "reported broken connection")
-      end
     end
 
     {:noreply, state}
   end
 
-  # Examples of accepted format:
-  # match-event <playerName> <eventType> <gameTime>
-  # match-event <Beherith> <commands:FirstLineMove> <67>
-  def handle_info({:direct_message, from_id, "match-event " <> data}, state) do
-    regex_result = Regex.run(~r/<(.*?)> <(.*?)> <(.*?)>$/, String.trim(data))
-
-    with [_all, username, event_type_name, game_time] <- regex_result,
-         userid <- Account.get_userid_from_name(username) do
-      if userid && Auth.is_bot?(from_id) do
-        match_id = Battle.get_match_id_from_userid(userid)
-
-        if match_id do
-          game_time = int_parse(game_time)
-          handle_match_simple_event(username, userid, match_id, event_type_name, game_time)
-          check_for_griefing(username, event_type_name, game_time, match_id)
-        else
-          Logger.warning("match-event: Cannot get match_id of userid of #{username}")
-        end
-      else
-        Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
-      end
-    else
-      _other ->
-        Logger.error("complex_match_event error on '#{data}'")
-    end
-
-    {:noreply, state}
-  end
-
-  # Examples of accepted format:
-  # complex-match-event <playerName> <eventType> <gameTime> <base64data>
-  # complex-match-event <Beherith> <commands:FirstLineMove> <67> <eyJrZXkiOiJ2YWx1ZSJ9>
-  def handle_info({:direct_message, from_id, "complex-match-event " <> data}, state) do
-    regex_result = Regex.run(~r/<(.*?)> <(.*?)> <(.*?)> <(.*?)>$/, String.trim(data))
-
-    with [_all, username, event_type_name, game_time, base64data] <- regex_result,
-         {:ok, json_data} <- base64_and_json(base64data),
-         userid <- Account.get_userid_from_name(username) do
-      if userid && Auth.is_bot?(from_id) do
-        match_id = Battle.get_match_id_from_userid(userid)
-
-        if match_id do
-          game_time = int_parse(game_time)
-
-          handle_match_complex_event(
-            username,
-            userid,
-            match_id,
-            event_type_name,
-            game_time,
-            json_data
-          )
-        else
-          Logger.warning("match-event: Cannot get match_id of userid of #{username}")
-        end
-      else
-        Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
-      end
-    else
-      {:error, error_message} ->
-        Logger.error("complex_match_event error on '#{data}': #{error_message}")
-
-      _other ->
-        Logger.error("complex_match_event error on '#{data}'")
-    end
-
-    {:noreply, state}
-  end
-
-  # Examples of accepted format:
-  # match-chat <SomeUser> a: Message to allies
-  # match-chat <SomeUser> s: A message to the spectators
-  # match-chat <SomeUser> g: A message to the game
-  # match-chat <SomeUser> d123: A direct message of some sort, in theory shouldn't appear
-  def handle_info({:direct_message, from_id, "match-chat " <> data}, state) do
-    case Regex.run(~r/<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
-      [_all, username, to, msg] ->
-        host = Client.get_client_by_id(from_id)
-        user = CacheUser.deprecated_get_user_by_name(username)
-
-        case to do
-          "d" ->
-            # We don't persist this as it's already persisted elsewhere
-            # ChatLib.persist_message(user, "g: #{msg}", host.lobby_id, :say)
-            :ok
-
-          "dallies" ->
-            ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
-
-            PubSub.broadcast(
-              Teiserver.PubSub,
-              "teiserver_liveview_lobby_chat:#{host.lobby_id}",
-              {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
-            )
-
-          "dspectators" ->
-            ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
-
-            PubSub.broadcast(
-              Teiserver.PubSub,
-              "teiserver_liveview_lobby_chat:#{host.lobby_id}",
-              {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
-            )
-        end
-
-      _other ->
-        Logger.warning("match-chat nomatch from: #{from_id}: match-chat #{data}")
-    end
-
-    {:noreply, state}
-  end
-
-  def handle_info({:direct_message, from_id, "match-chat-name " <> data}, state) do
-    case Regex.run(~r/<(.*?)>:<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
-      [_all, username, _user_num, to, msg] ->
-        host = Client.get_client_by_id(from_id)
-        user = CacheUser.deprecated_get_user_by_name(username)
-
-        if host == nil do
-          Logger.error("No host found for from_id: #{from_id} for message #{to}:#{msg}")
-
-          # Optionally, handle the case here, such as by
-          # sending a message back to the user or taking
-          # other corrective actions. Just returning {:noreply, state} for now.
-          {:noreply, state}
-        else
-          case to do
-            "d" ->
-              # We don't persist this as it's already persisted elsewhere
-              # ChatLib.persist_message(user, "g: #{msg}", host.lobby_id, :say)
-              :ok
-
-            "dallies" ->
-              ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
-
-              PubSub.broadcast(
-                Teiserver.PubSub,
-                "teiserver_liveview_lobby_chat:#{host.lobby_id}",
-                {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
-              )
-
-            "dspectators" ->
-              ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
-
-              PubSub.broadcast(
-                Teiserver.PubSub,
-                "teiserver_liveview_lobby_chat:#{host.lobby_id}",
-                {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
-              )
-          end
-
-          {:noreply, state}
-        end
-
-      _other ->
-        Logger.warning("match-chat-name nomatch from: #{from_id}: match-chat [[#{data}]]")
-    end
-
-    {:noreply, state}
-  end
-
-  def handle_info({:direct_message, _from_id, "match-chat-noname " <> _data}, state) do
-    # Ignore this
-    {:noreply, state}
-  end
-
-  def handle_info({:direct_message, from_id, "user_info " <> message}, state) do
-    message = String.trim(message)
-
-    case Base.url_decode64(message) do
-      {:ok, compressed_contents} ->
-        case Spring.unzip(compressed_contents) do
-          {:ok, contents_string} ->
-            case Jason.decode(contents_string) do
-              {:ok, data} ->
-                handle_json_msg(data, from_id)
-
-              _error ->
-                Logger.warning("AHM DM no catch, no json-decode - '#{contents_string}'")
-            end
-
-          _error ->
-            Logger.warning("AHM DM no catch, no decompress - '#{compressed_contents}'")
-        end
-
-      _error ->
-        Logger.warning("AHM DM no catch, no base64 - '#{message}'")
+  def handle_info({:direct_message, from_id, message}, state) do
+    if acceptable_source?(from_id) do
+      handle_direct_message(from_id, message, state)
     end
 
     {:noreply, state}
@@ -582,5 +384,221 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       _error ->
         {:error, "base64 decode error"}
     end
+  end
+
+  # We don't want non-bot users messaging this bot, if they do we
+  # drop their message and kick the user
+  defp acceptable_source?(user_id) do
+    if Auth.is_bot?(user_id) do
+      true
+    else
+      Client.disconnect(user_id, "Abuse")
+      CacheUser.set_flood_level(user_id, 10)
+      false
+    end
+  end
+
+  # DMs
+  defp handle_direct_message(from_id, "broken_connection " <> username, _state) do
+    if Auth.is_bot?(from_id) or Auth.admin?(from_id) or Auth.moderator?(from_id) do
+      user = Account.deprecated_get_user_by_name(username)
+
+      if user do
+        Telemetry.log_complex_server_event(user.id, "spads.broken_connection", %{from_id: from_id})
+
+        Client.disconnect(user.id, "reported broken connection")
+      end
+    end
+  end
+
+  # Examples of accepted format:
+  # match-event <playerName> <eventType> <gameTime>
+  # match-event <Beherith> <commands:FirstLineMove> <67>
+  defp handle_direct_message(from_id, "match-event " <> data, _state) do
+    regex_result = Regex.run(~r/<(.*?)> <(.*?)> <(.*?)>$/, String.trim(data))
+
+    with [_all, username, event_type_name, game_time] <- regex_result,
+         userid <- Account.get_userid_from_name(username) do
+      if userid && Auth.is_bot?(from_id) do
+        match_id = Battle.get_match_id_from_userid(userid)
+
+        if match_id do
+          game_time = int_parse(game_time)
+          handle_match_simple_event(username, userid, match_id, event_type_name, game_time)
+          check_for_griefing(username, event_type_name, game_time, match_id)
+        else
+          Logger.warning("match-event: Cannot get match_id of userid of #{username}")
+        end
+      else
+        Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
+      end
+    else
+      _other ->
+        Logger.error("complex_match_event error on '#{data}'")
+    end
+  end
+
+  # Examples of accepted format:
+  # complex-match-event <playerName> <eventType> <gameTime> <base64data>
+  # complex-match-event <Beherith> <commands:FirstLineMove> <67> <eyJrZXkiOiJ2YWx1ZSJ9>
+  defp handle_direct_message(from_id, "complex-match-event " <> data, _state) do
+    regex_result = Regex.run(~r/<(.*?)> <(.*?)> <(.*?)> <(.*?)>$/, String.trim(data))
+
+    with [_all, username, event_type_name, game_time, base64data] <- regex_result,
+         {:ok, json_data} <- base64_and_json(base64data),
+         userid <- Account.get_userid_from_name(username) do
+      if userid && Auth.is_bot?(from_id) do
+        match_id = Battle.get_match_id_from_userid(userid)
+
+        if match_id do
+          game_time = int_parse(game_time)
+
+          handle_match_complex_event(
+            username,
+            userid,
+            match_id,
+            event_type_name,
+            game_time,
+            json_data
+          )
+        else
+          Logger.warning("match-event: Cannot get match_id of userid of #{username}")
+        end
+      else
+        Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
+      end
+    else
+      {:error, error_message} ->
+        Logger.error("complex_match_event error on '#{data}': #{error_message}")
+
+      _other ->
+        Logger.error("complex_match_event error on '#{data}'")
+    end
+  end
+
+  # Examples of accepted format:
+  # match-chat <SomeUser> a: Message to allies
+  # match-chat <SomeUser> s: A message to the spectators
+  # match-chat <SomeUser> g: A message to the game
+  # match-chat <SomeUser> d123: A direct message of some sort, in theory shouldn't appear
+  defp handle_direct_message(from_id, "match-chat " <> data, _state) do
+    case Regex.run(~r/<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
+      [_all, username, to, msg] ->
+        host = Client.get_client_by_id(from_id)
+        user = CacheUser.deprecated_get_user_by_name(username)
+
+        cond do
+          host == nil or user == nil ->
+            # Bad message, host or user is nil so we're not doing anything with that
+            :ok
+
+          to == "d" ->
+            # We don't persist this as it's already persisted elsewhere
+            # ChatLib.persist_message(user, "g: #{msg}", host.lobby_id, :say)
+            :ok
+
+          to == "dallies" ->
+            ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
+
+            PubSub.broadcast(
+              Teiserver.PubSub,
+              "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+              {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
+            )
+
+          to == "dspectators" ->
+            ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
+
+            PubSub.broadcast(
+              Teiserver.PubSub,
+              "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+              {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
+            )
+        end
+
+      _other ->
+        Logger.warning("match-chat nomatch from: #{from_id}: match-chat #{data}")
+    end
+  end
+
+  defp handle_direct_message(from_id, "match-chat-name " <> data, state) do
+    case Regex.run(~r/<(.*?)>:<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
+      [_all, username, _user_num, to, msg] ->
+        host = Client.get_client_by_id(from_id)
+        user = CacheUser.deprecated_get_user_by_name(username)
+
+        if host == nil do
+          Logger.error("No host found for from_id: #{from_id} for message #{to}:#{msg}")
+
+          # Optionally, handle the case here, such as by
+          # sending a message back to the user or taking
+          # other corrective actions. Just returning {:noreply, state} for now.
+          {:noreply, state}
+        else
+          case to do
+            "d" ->
+              # We don't persist this as it's already persisted elsewhere
+              # ChatLib.persist_message(user, "g: #{msg}", host.lobby_id, :say)
+              :ok
+
+            "dallies" ->
+              ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
+
+              PubSub.broadcast(
+                Teiserver.PubSub,
+                "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+                {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
+              )
+
+            "dspectators" ->
+              ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
+
+              PubSub.broadcast(
+                Teiserver.PubSub,
+                "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+                {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
+              )
+          end
+
+          {:noreply, state}
+        end
+
+      _other ->
+        Logger.warning("match-chat-name nomatch from: #{from_id}: match-chat [[#{data}]]")
+    end
+  end
+
+  # Ignore this
+  defp handle_direct_message(_from_id, "match-chat-noname " <> _data, state) do
+    {:noreply, state}
+  end
+
+  defp handle_direct_message(from_id, "user_info " <> message, _state) do
+    message = String.trim(message)
+
+    case Base.url_decode64(message) do
+      {:ok, compressed_contents} ->
+        case Spring.unzip(compressed_contents) do
+          {:ok, contents_string} ->
+            case Jason.decode(contents_string) do
+              {:ok, data} ->
+                handle_json_msg(data, from_id)
+
+              _error ->
+                Logger.warning("AHM DM no catch, no json-decode - '#{contents_string}'")
+            end
+
+          _error ->
+            Logger.warning("AHM DM no catch, no decompress - '#{compressed_contents}'")
+        end
+
+      _error ->
+        Logger.warning("AHM DM no catch, no base64 - '#{message}'")
+    end
+  end
+
+  defp handle_direct_message(_from_id, _message, _state) do
+    # No-op, we do nothing for this
+    :ok
   end
 end
