@@ -1723,6 +1723,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
     if primary?, do: send(pid, message)
   end
 
+  defp process_event_action(
+         {:kicked, user_id, reason},
+         primary?,
+         %LT.Data{} = fsm_data
+       ) do
+    if primary? do
+      Teiserver.Player.notify_left_lobby(user_id, fsm_data.id, reason)
+    end
+  end
+
   # create a default vote object
   defp new_vote(state, initiator_id, action) do
     vote_duration_s = 60

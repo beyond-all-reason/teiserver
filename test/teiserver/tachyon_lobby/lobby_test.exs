@@ -3,6 +3,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   alias Teiserver.AssetFixtures
   alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.KvStore
+  alias Teiserver.Player.SessionRegistry
   alias Teiserver.Tachyon, as: TachyonLib
   alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.TachyonLobby.Lobby, as: LobbyProcess
@@ -1727,10 +1728,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         |> Lobby.create()
 
       {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      SessionRegistry.register("user2", nil)
       assert_receive {:lobby, ^id, {:updated, _}}
 
       :ok = Lobby.kickban(id, @default_user_id, "user2")
-      assert_receive {:lobby, ^id, {:left, "kicked", nil}}
+      assert_receive {:"$gen_cast", {:lobby, {:left, ^id, :kicked}}}
 
       {:ok, details} = LobbyProcess.get_details(id)
       refute is_map_key(details.spectators, "user2")
@@ -1762,10 +1764,11 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         |> Lobby.create()
 
       {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      SessionRegistry.register("user2", nil)
 
       :ok = Lobby.kickban(id, @default_user_id, "user2")
 
-      assert_receive {:lobby, ^id, {:left, "kicked", nil}}
+      assert_receive {:"$gen_cast", {:lobby, {:left, ^id, :kicked}}}
       refute_receive {:lobby, ^id, {:updated, _}}, 30
     end
 
@@ -1776,12 +1779,13 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
         |> Lobby.create()
 
       {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("user2"), self())
+      SessionRegistry.register("user2", nil)
       assert_receive {:lobby, ^id, {:updated, _}}
 
       {:ok, _details} = Lobby.join_ally_team(id, "user2", 0)
 
       :ok = Lobby.kickban(id, @default_user_id, "user2")
-      assert_receive {:lobby, ^id, {:left, "kicked", nil}}
+      assert_receive {:"$gen_cast", {:lobby, {:left, ^id, :kicked}}}
 
       {:ok, details} = LobbyProcess.get_details(id)
       refute is_map_key(details.players, "user2")

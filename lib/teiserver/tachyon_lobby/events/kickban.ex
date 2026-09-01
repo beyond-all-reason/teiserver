@@ -57,9 +57,8 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.Kickban
 
     effects =
       if target_pid do
-        reason = if effective_ban_until != nil, do: "banned", else: "kicked"
-        message = {:lobby, agg.data.id, {:left, reason, effective_ban_until}}
-        effect = {:send_to_user, target_pid, message}
+        reason = if effective_ban_until != nil, do: {:banned, effective_ban_until}, else: :kicked
+        effect = {:kicked, ev.user_id, reason}
         [effect | agg.side_effects]
       else
         agg.side_effects

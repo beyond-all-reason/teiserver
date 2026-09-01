@@ -254,14 +254,16 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_info({:lobby, lobby_id, {:left, reason}}, state) do
-    {:event, "lobby/left", %{id: lobby_id, reason: reason}, state}
-  end
-
-  def handle_info({:lobby, lobby_id, {:left, reason, ban_until}}, state) do
     data =
-      case ban_until do
-        nil -> %{id: lobby_id, reason: reason}
-        dt -> %{id: lobby_id, reason: reason, bannedUntil: DateTime.to_unix(dt, :microsecond)}
+      case reason do
+        :kicked ->
+          %{id: lobby_id, reason: "kicked"}
+
+        {:error, msg} ->
+          %{id: lobby_id, reason: msg}
+
+        {:banned, dt} ->
+          %{id: lobby_id, reason: "banned", bannedUntil: DateTime.to_unix(dt, :microsecond)}
       end
 
     {:event, "lobby/left", data, state}
