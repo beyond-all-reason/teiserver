@@ -3,7 +3,8 @@ defmodule Teiserver.SpringOptimisationTest do
   The lobby client named in `LOGIN` selects how much of the event stream the
   connection receives, via `SpringIn`'s `@optimisation_level`.
   """
-  alias Teiserver.{Account, Client}
+  alias Teiserver.Account
+  alias Teiserver.Client
   use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,
