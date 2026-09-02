@@ -38,6 +38,9 @@ defmodule Teiserver.Player.Session do
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 
+  @typedoc """
+  the parts of the session state that go into a `user/self` event
+  """
   @type self_state :: %{
           party: PartyTypes.Overview.t() | nil,
           invited_to_parties: [PartyTypes.Overview.t()],
