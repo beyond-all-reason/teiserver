@@ -1355,7 +1355,7 @@ defmodule Teiserver.Moderation do
   and pass through that argument while using it to populate the AuditLog.
   """
   def log_anti_abuse_record_access({:ok, %AntiAbuseRecord{} = record}, %Scope{} = scope, action) do
-    LoggingHelper.add_audit_log(scope, "access_anti_abuse_record", %{
+    LoggingHelper.add_audit_log(scope, "Anti-abuse record access", %{
       id: record.id,
       action: action
     })
@@ -1364,7 +1364,7 @@ defmodule Teiserver.Moderation do
   end
 
   def log_anti_abuse_record_access(%AntiAbuseRecord{} = record, %Scope{} = scope, action) do
-    LoggingHelper.add_audit_log(scope, "access_anti_abuse_record", %{
+    LoggingHelper.add_audit_log(scope, "Anti-abuse record access", %{
       id: record.id,
       action: action
     })
@@ -1374,7 +1374,7 @@ defmodule Teiserver.Moderation do
 
   # If the changeset has an error in it we want to know they tried to use a changeset but it borked
   def log_anti_abuse_record_access({:error, %Ecto.Changeset{} = chg}, %Scope{} = scope, action) do
-    LoggingHelper.add_audit_log(scope, "access_anti_abuse_record", %{
+    LoggingHelper.add_audit_log(scope, "Anti-abuse record access", %{
       id: Map.get(chg.data, :id),
       action: action,
       changeset_action: chg.action
@@ -1384,14 +1384,14 @@ defmodule Teiserver.Moderation do
   end
 
   def log_anti_abuse_record_access(nil, %Scope{} = scope, action) do
-    LoggingHelper.add_audit_log(scope, "access_anti_abuse_record", %{id: nil, action: action})
+    LoggingHelper.add_audit_log(scope, "Anti-abuse record access", %{id: nil, action: action})
     nil
   end
 
   # Fallback, ideally we never see this but we'd rather log that something
   # anti_abuse_record was happening than not log it at all
   def log_anti_abuse_record_access(piped_value, %Scope{} = scope, action) do
-    LoggingHelper.add_audit_log(scope, "anti_abuse_record_log_fallback", %{action: action})
+    LoggingHelper.add_audit_log(scope, "Anti-abuse record fallback", %{action: action})
     piped_value
   end
 end

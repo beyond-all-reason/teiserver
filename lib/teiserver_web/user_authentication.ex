@@ -94,6 +94,19 @@ defmodule TeiserverWeb.UserAuthentication do
     end
   end
 
+  def on_mount({:authorise_any, permissions}, _params, _session, socket) do
+    if AuthLib.allow_any?(socket.assigns.current_user, permissions) do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> LiveView.put_flash(:error, "You do not have permission to view that page.")
+        |> LiveView.redirect(to: ~p"/")
+
+      {:halt, socket}
+    end
+  end
+
   defp mount_current_user(socket, %{"guardian_default_token" => token} = _session) do
     user =
       with {:ok, %{"sub" => user_id}} <- Guardian.decode_and_verify(token),
