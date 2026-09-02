@@ -165,15 +165,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_info({:battle_start, %PT.BattleState{} = battle_state}, state) do
-    data = %{
-      username: battle_state.username,
-      password: battle_state.password,
-      ip: battle_state.ip,
-      port: battle_state.port,
-      engine: %{version: battle_state.engine.version},
-      game: %{springName: battle_state.game.spring_name},
-      map: %{springName: battle_state.map.spring_name}
-    }
+    data = battle_state_to_tachyon(battle_state)
 
     {:request, "battle/start", data, [], state}
   end
@@ -1234,9 +1226,10 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def battle_state_to_tachyon(%PT.BattleState{} = battle) do
     %{
+      battleId: battle.id,
       username: battle.username,
       password: battle.password,
-      ip: battle.ip,
+      ips: battle.ips,
       port: battle.port,
       engine: %{version: battle.engine.version},
       game: %{springName: battle.game.spring_name},
