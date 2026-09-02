@@ -1,0 +1,7 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/battleId.json",
+    "title": "BattleId",
+    "type": "string",
+    "format": "uuid",
+    "examples": ["75bfc493-2b9d-495d-a453-06722fdca2ea"]
+}
