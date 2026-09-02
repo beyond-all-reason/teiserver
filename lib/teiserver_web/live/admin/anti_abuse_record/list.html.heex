@@ -1,0 +1,24 @@
+<h1 class="text-2xl font-bold">
+  Anti-abuse records
+</h1>
+
+<.table
+  id="anti-abuse-records-table"
+  rows={@records}
+  table_class="table-sm table-zebra mt-4"
+>
+  <:col :let={record} label="ID">{uuid_part(record.id)}</:col>
+  <:col :let={record} label="User ID">{record.user.id}</:col>
+  <:col :let={record} label="Created">{Calendar.strftime(record.inserted_at, "%Y-%m-%d")}</:col>
+  <:col :let={record} label="Clean ?">{record.clean && "Clean"}</:col>
+  <:col :let={record} label="Expires">{Calendar.strftime(record.expires_at, "%Y-%m-%d")}</:col>
+  <:col :let={record} label="Restored">
+    {record.restored_at && Calendar.strftime(record.restored_at, "%Y-%m-%d")}
+  </:col>
+  <:col :let={record} label="Restored by">{record.restored_by && record.restored_by.name}</:col>
+  <:action :let={record}>
+    <.link navigate={~p"/admin/anti-abuse-records/#{record.id}"} class="btn btn-warning btn-sm">
+      View record
+    </.link>
+  </:action>
+</.table>

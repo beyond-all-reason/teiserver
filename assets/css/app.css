@@ -101,7 +101,6 @@
   display: contents
 }
 
-/* This file is for your main application CSS */
 .menu-active {
   @apply bg-primary text-primary-content rounded-md;
 }
@@ -112,4 +111,21 @@
 
 .input[type="text"] {
   @apply text-gray-800 dark:text-gray-100;
+}
+
+.menu-link {
+  @apply col-span-1 my-2 mx-4 py-6 px-4
+    text-base-content text-center rounded-lg
+    hover:text-primary-content hover:bg-primary bg-base-300 transition duration-300 ease-in-out;
+}
+
+.admin-sensitive-topbar, .moderation-sensitive-topbar {
+  @apply bg-warning text-warning-content p-2;
+  
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  text-align: center;
 }

@@ -73,7 +73,7 @@ defmodule Teiserver.ModerationFixtures do
         hashes: attrs[:hashes] || %{},
         notes: attrs[:notes] || "",
         restored_at: attrs[:restored_at],
-        restored_by_id: attrs[:restored_by_id] || AccountFixtures.user_fixture().id
+        restored_by_id: attrs[:restored_by_id]
       })
       |> Moderation.create_anti_abuse_record(attrs[:scope])
 

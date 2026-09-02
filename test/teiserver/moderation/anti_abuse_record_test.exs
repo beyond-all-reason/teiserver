@@ -28,7 +28,7 @@ defmodule Teiserver.Moderation.AntiAbuseRecordTest do
       assert Moderation.get_anti_abuse_record(anti_abuse_record.id, scope) == anti_abuse_record
 
       log = get_most_recent_audit_log_for_user(user.id)
-      assert log.action == "access_anti_abuse_record"
+      assert log.action == "Anti-abuse record access"
       assert log.details["id"] == anti_abuse_record.id
       assert log.details["action"] == "get"
     end
@@ -52,7 +52,7 @@ defmodule Teiserver.Moderation.AntiAbuseRecordTest do
       assert anti_abuse_record.restored_at == nil
 
       log = get_most_recent_audit_log_for_user(user.id)
-      assert log.action == "access_anti_abuse_record"
+      assert log.action == "Anti-abuse record access"
       assert log.details["id"] == anti_abuse_record.id
       assert log.details["action"] == "create"
     end
@@ -65,7 +65,7 @@ defmodule Teiserver.Moderation.AntiAbuseRecordTest do
                Moderation.create_anti_abuse_record(%{notes: nil}, scope)
 
       log = get_most_recent_audit_log_for_user(user.id)
-      assert log.action == "access_anti_abuse_record"
+      assert log.action == "Anti-abuse record access"
       assert log.details == %{"action" => "create", "changeset_action" => "insert", "id" => nil}
     end
 
@@ -85,7 +85,7 @@ defmodule Teiserver.Moderation.AntiAbuseRecordTest do
       assert anti_abuse_record.notes == "some_notes"
 
       log = get_most_recent_audit_log_for_user(user.id)
-      assert log.action == "access_anti_abuse_record"
+      assert log.action == "Anti-abuse record access"
       assert log.details["id"] == anti_abuse_record.id
       assert log.details["action"] == "update"
     end
@@ -104,7 +104,7 @@ defmodule Teiserver.Moderation.AntiAbuseRecordTest do
                )
 
       log = get_most_recent_audit_log_for_user(user.id)
-      assert log.action == "access_anti_abuse_record"
+      assert log.action == "Anti-abuse record access"
 
       assert log.details == %{
                "action" => "update",
@@ -123,7 +123,7 @@ defmodule Teiserver.Moderation.AntiAbuseRecordTest do
                Moderation.delete_anti_abuse_record(anti_abuse_record, scope)
 
       log = get_most_recent_audit_log_for_user(user.id)
-      assert log.action == "access_anti_abuse_record"
+      assert log.action == "Anti-abuse record access"
 
       assert log.details == %{
                "action" => "delete",
@@ -133,7 +133,7 @@ defmodule Teiserver.Moderation.AntiAbuseRecordTest do
       assert Moderation.get_anti_abuse_record(anti_abuse_record.id, scope) == nil
 
       log = get_most_recent_audit_log_for_user(user.id)
-      assert log.action == "access_anti_abuse_record"
+      assert log.action == "Anti-abuse record access"
 
       assert log.details == %{
                "action" => "get",
