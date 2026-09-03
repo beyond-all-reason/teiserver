@@ -133,7 +133,7 @@ is_moderator = allow?(@conn, "Moderator") %>
           <.pagination
             page={@page}
             total_pages={@total_pages}
-            base_url="/teiserver/admin/user"
+            base_url={~p"/teiserver/admin/user"}
             limit={@limit}
             total_count={@total_count}
             current_count={@current_count}

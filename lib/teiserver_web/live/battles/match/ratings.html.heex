@@ -158,8 +158,8 @@
         total_pages={@total_pages}
         base_url={
           if @rating_type == "Large Team",
-            do: "/battle/ratings",
-            else: "/battle/ratings/#{@rating_type}"
+            do: ~p"/battle/ratings",
+            else: ~p"/battle/ratings/#{@rating_type}"
         }
         limit={@limit}
         total_count={@total_count}

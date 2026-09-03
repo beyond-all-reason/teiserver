@@ -74,7 +74,7 @@
           <.pagination
             page={@page}
             total_pages={@total_pages}
-            base_url="/teiserver/admin/matches"
+            base_url={~p"/teiserver/admin/matches"}
             limit={@limit}
             total_count={@total_count}
             current_count={@current_count}
