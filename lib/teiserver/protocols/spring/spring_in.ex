@@ -37,6 +37,7 @@ defmodule Teiserver.Protocols.SpringIn do
   @optimisation_level %{
     "LuaLobby Chobby" => :partial,
     "skylobby" => :partial,
+    "modlobby" => :partial,
     "SLTS Client d" => :none
   }
 

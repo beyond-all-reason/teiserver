@@ -16,7 +16,10 @@
                     "type": "array",
                     "items": { "$ref": "../definitions/partyState.json" }
                 },
-                "friendIds": { "type": "array", "items": { "type": "string" } },
+                "friendIds": {
+                    "type": "array",
+                    "items": { "$ref": "../definitions/userId.json" }
+                },
                 "outgoingFriendRequest": {
                     "type": "array",
                     "items": {
@@ -39,12 +42,18 @@
                         "required": ["from", "sentAt"]
                     }
                 },
-                "ignoreIds": { "type": "array", "items": { "type": "string" } },
+                "ignoreIds": {
+                    "type": "array",
+                    "items": { "$ref": "../definitions/userId.json" }
+                },
                 "currentBattle": {
                     "$ref": "../definitions/privateBattle.json"
                 },
                 "currentLobby": {
-                    "anyOf": [{ "type": "string" }, { "type": "null" }]
+                    "anyOf": [
+                        { "$ref": "../definitions/lobbyId.json" },
+                        { "type": "null" }
+                    ]
                 },
                 "clanInvites": {
                     "type": "array",

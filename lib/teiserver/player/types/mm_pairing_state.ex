@@ -7,9 +7,7 @@ defmodule Teiserver.Player.Types.MmPairingState do
   alias Teiserver.Matchmaking
 
   @enforce_keys [:paired_queue, :room, :frozen_queues, :readied?, :timeout_at]
-  defstruct [:paired_queue, :room, :frozen_queues, :readied?, :timeout_at, battle_password: ""]
-  # TODO: remove the battle password from there. It should only be a battle
-  # concern, and let the player know about it when joining.
+  defstruct [:paired_queue, :room, :frozen_queues, :readied?, :timeout_at]
 
   @type t :: %__MODULE__{
           paired_queue: Matchmaking.queue_ref(),
@@ -17,7 +15,6 @@ defmodule Teiserver.Player.Types.MmPairingState do
           # a list of the other queues to rejoin in case the pairing fails
           frozen_queues: [Matchmaking.queue_ref()],
           readied?: boolean(),
-          timeout_at: DateTime.t(),
-          battle_password: String.t()
+          timeout_at: DateTime.t()
         }
 end

@@ -113,7 +113,7 @@
           <.pagination
             page={@page}
             total_pages={@total_pages}
-            base_url="/telemetry/infolog"
+            base_url={~p"/telemetry/infolog"}
             limit={@limit}
             total_count={@total_count}
             current_count={@current_count}

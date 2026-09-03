@@ -871,7 +871,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       assert %{
                "commandId" => "battle/start",
                "data" => %{
-                 "ip" => _ip,
+                 "battleId" => _id,
+                 "ips" => [_ip],
                  "port" => _port,
                  "engine" => %{"version" => "105.1.1-2590-gb9462a0 bar"},
                  "game" => %{"springName" => "Beyond All Reason test-26929-d709d32"},
@@ -889,7 +890,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       assert %{
                "commandId" => "battle/start",
                "data" => %{
-                 "ip" => _ip,
+                 "battleId" => _id,
+                 "ips" => [_ip],
                  "port" => _port,
                  "engine" => %{"version" => "105.1.1-2590-gb9462a0 bar"},
                  "game" => %{"springName" => "Beyond All Reason test-26929-d709d32"},

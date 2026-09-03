@@ -13,7 +13,7 @@ defmodule TeiserverWeb.AdminDashLive.LoginThrottle do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> add_breadcrumb(name: "Admin", url: ~p"/teiserver/admin")
+      |> add_breadcrumb(name: "Admin", url: ~p"/admin")
       |> add_breadcrumb(name: "Dashboard", url: ~p"/admin/dashboard")
       |> add_breadcrumb(name: "Login throttle", url: ~p"/admin/dashboard/login_throttle")
       |> assign(:site_menu_active, "admin")

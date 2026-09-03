@@ -1,0 +1,27 @@
+<div>
+  <TeiserverWeb.Admin.AdminComponents.sensitive_warning
+    :if={assigns[:sensitive_data]}
+    scope={@scope}
+  />
+
+  <div class={[assigns[:sensitive_data] && "mt-10"]}>
+    <TeiserverWeb.NavComponents.top_navbar_tw
+      active={assigns[:site_menu_active]}
+      scope={@scope}
+    />
+  </div>
+
+  <.flash_group flash={@flash} />
+
+  <main>
+    <div class="px-3 my-0">
+      {@inner_content}
+    </div>
+  </main>
+
+  <footer class="footer mt-auto pt-2 pb-1 px-2">
+    <div style="text-align: right;">
+      &nbsp;
+    </div>
+  </footer>
+</div>

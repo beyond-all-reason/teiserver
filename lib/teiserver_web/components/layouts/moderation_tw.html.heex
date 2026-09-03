@@ -1,8 +1,15 @@
 <div>
-  <TeiserverWeb.NavComponents.top_navbar_tw
-    active={assigns[:site_menu_active]}
-    current_user={@current_user}
+  <TeiserverWeb.Moderation.ModerationComponents.sensitive_warning
+    :if={assigns[:sensitive_data]}
+    scope={@scope}
   />
+
+  <div class={[assigns[:sensitive_data] && "mt-10"]}>
+    <TeiserverWeb.NavComponents.top_navbar_tw
+      active={assigns[:site_menu_active]}
+      current_user={@current_user}
+    />
+  </div>
 
   <.flash_group flash={@flash} />
 

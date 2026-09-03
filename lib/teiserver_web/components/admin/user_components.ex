@@ -2,10 +2,11 @@ defmodule TeiserverWeb.Components.Admin.UserComponents do
   @moduledoc """
   Components for User pages
   """
+  alias Teiserver.Account.Scope
   alias Teiserver.Account.User
 
   use TeiserverWeb, :component
-  import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
+  import TeiserverWeb.NavComponents, only: [section_menu_button: 1, tw_section_menu_button: 1]
 
   @doc """
   <TeiserverWeb.Components.Admin.UserComponents.section_menu active={active} colour={} current_user={@current_user} />
@@ -158,6 +159,147 @@ defmodule TeiserverWeb.Components.Admin.UserComponents do
           </div>
         </form>
       </div>
+    </div>
+    """
+  end
+
+  @doc """
+  <TeiserverWeb.Components.Admin.UserComponents.tw_section_menu
+    active="some-link"
+    scope={@scope}
+  />
+  """
+  attr :scope, Scope, required: true
+  attr :active, :string, required: true
+  attr :search_value, :string
+  attr :search_autofocus, :boolean, default: false
+
+  def tw_section_menu(assigns) do
+    ~H"""
+    <div role="tablist" class="tabs tabs-box float-end">
+      <div class="tab">
+        <form action={~p"/teiserver/admin/user"} method="get" class="">
+          <div class="input-group">
+            <% input_opts = [
+              autofocus: @search_autofocus
+            ] %>
+            <input
+              type="text"
+              name="s"
+              id="quick_search"
+              value={assigns[:search_value]}
+              placeholder="Quick search"
+              class="input"
+              style="width: 150px; display: inline-block;"
+              {input_opts}
+            /> &nbsp;
+            <input
+              type="submit"
+              value="Search"
+              class="btn btn-primary float-end"
+              style="margin-top: 0px;"
+            />
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div role="tablist" class="tabs tabs-box">
+      <.tw_section_menu_button
+        active={@active == "client_admin"}
+        icon={Teiserver.Account.ClientLib.icon()}
+        url={~p"/teiserver/admin/client"}
+      >
+        Client admin
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        active={@active == "list"}
+        icon={Teiserver.Helper.StylingHelper.icon(:list)}
+        url={~p"/teiserver/admin/user"}
+      >
+        List
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        active={@active == "search"}
+        icon={Teiserver.Helper.StylingHelper.icon(:search)}
+        url={~p"/teiserver/admin/user?search=true"}
+      >
+        Search
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        :if={allow?(@scope, "admin")}
+        active={@active == "data_search"}
+        icon="fa-solid fa-magnifying-glass-chart"
+        url={~p"/teiserver/admin/users/data_search"}
+      >
+        Data search
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        :if={@active == "show"}
+        active={true}
+        icon={Teiserver.Helper.StylingHelper.icon(:detail)}
+        url="#"
+      >
+        Show
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        :if={@active == "edit"}
+        active={true}
+        icon={Teiserver.Helper.StylingHelper.icon(:edit)}
+        url="#"
+      >
+        Edit
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        :if={@active == "smurf"}
+        active={true}
+        icon="fa-solid fa-face-angry"
+        url="#"
+      >
+        Smurf search
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        :if={@active == "smurf_merge_form"}
+        active={true}
+        icon="fa-solid fa-merge"
+        url="#"
+      >
+        Smurf merge
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        :if={@active == "ratings"}
+        active={true}
+        icon={"fa-solid #{Teiserver.Account.RatingLib.icon()}"}
+        url="#"
+      >
+        Ratings
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        :if={@active == "ratings_form"}
+        active={true}
+        icon={"fa-solid #{Teiserver.Account.RatingLib.icon()}"}
+        url="#"
+      >
+        Ratings form
+      </.tw_section_menu_button>
+
+      <.tw_section_menu_button
+        :if={@active == "moderation"}
+        active={true}
+        icon={"fa-solid #{Teiserver.Moderation.icon()}"}
+        url="#"
+      >
+        Moderation
+      </.tw_section_menu_button>
     </div>
     """
   end

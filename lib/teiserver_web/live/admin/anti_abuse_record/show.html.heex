@@ -1,0 +1,69 @@
+<h1 class="text-2xl font-bold">
+  Anti-abuse record: {uuid_part(@record.id)}
+</h1>
+
+<div class="flex">
+  <div class="flex-1 list bg-base-100 rounded-box shadow-md mx-2">
+    <h3 class="font-bold">Details:</h3>
+    <ul class="list">
+      <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">Full ID: {@record.id}</li>
+
+      <li :if={@record.clean} class="list-row">
+        <div>
+          <Fontawesome.icon icon="circle-check" class="text-success" size="lg" />
+        </div>
+        <div>
+          <div>Clean</div>
+          <div class="text-xs opacity-60">User record is clean</div>
+        </div>
+      </li>
+
+      <li :if={@record.clean != true} class="list-row">
+        <div>
+          <Fontawesome.icon icon="circle-xmark" class="text-error" size="lg" />
+        </div>
+        <div>
+          <div>Not clean</div>
+          <div class="text-xs opacity-60">User record is not clean</div>
+        </div>
+      </li>
+
+      <li class="list-row">
+        <div>
+          <Fontawesome.icon icon="clock" size="lg" />
+        </div>
+        <div>
+          <div>Created - {Calendar.strftime(@record.inserted_at, "%Y-%m-%d %H:%M:%S")}</div>
+        </div>
+      </li>
+
+      <li class="list-row">
+        <div>
+          <Fontawesome.icon icon="clock" size="lg" />
+        </div>
+        <div>
+          <div>Expires - {Calendar.strftime(@record.expires_at, "%Y-%m-%d %H:%M:%S")}</div>
+        </div>
+      </li>
+
+      <li :if={@record.restored_by_id} class="list-row">
+        <div>
+          <Fontawesome.icon icon="rotate-left" size="lg" />
+        </div>
+        <div>
+          <div>
+            Restored by: {@record.restored_by.name} at {Calendar.strftime(
+              @record.expires_at,
+              "%Y-%m-%d %H:%M:%S"
+            )}
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="flex-1 bg-base-100 rounded-box shadow-md mx-2">
+    <h3 class="font-bold">Notes:</h3>
+    <textarea id="notes-text" rows="8" class="textarea w-full">{@record.notes}</textarea>
+  </div>
+</div>

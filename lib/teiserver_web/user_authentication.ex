@@ -11,7 +11,6 @@ defmodule TeiserverWeb.UserAuthentication do
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
-  alias Teiserver.Logging.LoggingPlug
 
   use TeiserverWeb, :verified_routes
 
@@ -95,6 +94,19 @@ defmodule TeiserverWeb.UserAuthentication do
     end
   end
 
+  def on_mount({:authorise_any, permissions}, _params, _session, socket) do
+    if AuthLib.allow_any?(socket.assigns.current_user, permissions) do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> LiveView.put_flash(:error, "You do not have permission to view that page.")
+        |> LiveView.redirect(to: ~p"/")
+
+      {:halt, socket}
+    end
+  end
+
   defp mount_current_user(socket, %{"guardian_default_token" => token} = _session) do
     user =
       with {:ok, %{"sub" => user_id}} <- Guardian.decode_and_verify(token),
@@ -106,6 +118,7 @@ defmodule TeiserverWeb.UserAuthentication do
       end
 
     Component.assign_new(socket, :current_user, fn -> user end)
+    |> fetch_current_scope_for_user()
   end
 
   defp mount_current_user(socket, _session) do
@@ -154,15 +167,17 @@ defmodule TeiserverWeb.UserAuthentication do
   @doc """
   Populates the scope for the user if one is assigned
   """
-  def fetch_current_scope_for_user(%{assigns: %{current_user: %User{} = user}} = conn, _opts) do
+  def fetch_current_scope_for_user(%{assigns: %{current_user: %User{} = user}} = socket) do
+    peer_data = LiveView.get_connect_info(socket, :peer_data)
+
     scope = %Scope{
       user: user,
-      ip: LoggingPlug.get_ip_from_conn(conn)
+      ip: peer_data.address
     }
 
-    assign(conn, :scope, scope)
+    Component.assign_new(socket, :scope, fn -> scope end)
   end
 
   # Fallback for no user assigned
-  def fetch_current_scope_for_user(conn, _opts), do: conn
+  def fetch_current_scope_for_user(socket), do: socket
 end

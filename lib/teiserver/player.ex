@@ -83,9 +83,9 @@ defmodule Teiserver.Player do
   @doc """
   It's go time! the player should join a game
   """
-  @spec battle_start(User.id(), {TachyonBattle.id(), pid()}, start_data()) ::
+  @spec battle_start(User.id(), {TachyonBattle.id(), pid()}, start_data(), password :: String.t()) ::
           :ok
-  defdelegate battle_start(user_id, battle_id, battle_start_data), to: Player.Session
+  defdelegate battle_start(user_id, battle_id, battle_start_data, password), to: Player.Session
 
   @doc """
   Let the player know that they can join a battle associated with a lobby
@@ -99,6 +99,8 @@ defmodule Teiserver.Player do
           :ok
   defdelegate lobby_join_battle(user_id, battle_data, battle_start_data, password),
     to: Player.Session
+
+  defdelegate notify_left_lobby(user_id, lobby_id, reason), to: Player.Session
 
   @doc """
   Let the player know they've been invited to a party

@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Moderation.ModerationComponents do
   @moduledoc false
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.Scope
   alias Teiserver.Account.User
 
   use TeiserverWeb, :component
@@ -59,6 +60,32 @@ defmodule TeiserverWeb.Moderation.ModerationComponents do
     ~H"""
     <div :if={Auth.vip?(@user)} class="alert alert-info">
       This user has VIP or Contributor credentials. Please check with senior moderators and/or community management if any additional communication needs to take place around this action.
+    </div>
+    """
+  end
+
+  @doc """
+  Places a very visible banner at the top of the page, the banner stickies to the top of
+  the window and will remain visible even when scrolling. It displays the warning message,
+  username, user_id and IP of connection.
+
+  <TeiserverWeb.Components.Admin.ModerationComponents.sensitive_warning scope={@scope} />
+  """
+  attr :scope, Scope, required: true
+
+  def sensitive_warning(assigns) do
+    ip =
+      assigns.scope.ip
+      |> Tuple.to_list()
+      |> Enum.join(".")
+
+    assigns =
+      assigns
+      |> assign(ip: ip)
+
+    ~H"""
+    <div class="moderation-sensitive-topbar">
+      This is especially sensitive information, do not stream it ({@scope.user.name}/{@scope.user.id} - {@ip})
     </div>
     """
   end

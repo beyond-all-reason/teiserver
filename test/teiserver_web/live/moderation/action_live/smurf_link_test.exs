@@ -51,7 +51,7 @@ defmodule TeiserverWeb.Live.Moderation.ActionLive.SmurfLinkTest do
         |> render()
 
       assert text_field_html ==
-               ~s(<input type="text" name="none" value="##{origin.id} - origin_user_testname" class="w-full input" placeholder="Click green button to search"/>)
+               ~s(<input type="text" class="input w-full min-w-xs" placeholder="" disabled="" name="none" value="##{origin.id} - origin_user_testname"/>)
 
       hidden_field_html =
         view

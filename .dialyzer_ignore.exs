@@ -18,7 +18,7 @@
   {"lib/teiserver/battle.ex", :no_return},
   {"lib/teiserver/battle.ex", :unused_fun},
   {"lib/teiserver/battle/libs/balance_lib.ex", :call},
-  {"lib/teiserver/battle/servers/match_monitor_server.ex", :call},
+  {"lib/teiserver/battle/servers/match_monitor_server.ex"},
   {"lib/teiserver/battle/tasks/battle_daily_cleanup_task.ex", :no_return},
   {"lib/teiserver/battle/tasks/battle_daily_cleanup_task.ex", :unused_fun},
   {"lib/teiserver/battle/tasks/breakdown_match_data_task.ex", :no_return},

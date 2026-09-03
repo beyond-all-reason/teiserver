@@ -9,7 +9,9 @@ defmodule TeiserverWeb.Endpoint do
     max_age: 1_814_400
   ]
 
-  socket("/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]])
+  socket("/live", Phoenix.LiveView.Socket,
+    websocket: [connect_info: [:peer_data, session: @session_options]]
+  )
 
   # log: :debug reduces verbosity to avoid logging sensitive connection params
   socket("/socket", TeiserverWeb.UserSocket,

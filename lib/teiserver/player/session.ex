@@ -211,10 +211,12 @@ defmodule Teiserver.Player.Session do
   @doc """
   Let the player know that they are now in a battle
   """
-  @spec battle_start(User.id(), {TachyonBattle.id(), pid()}, start_data()) ::
+  @spec battle_start(User.id(), {TachyonBattle.id(), pid()}, start_data(), password :: String.t()) ::
           :ok
-  def battle_start(user_id, battle_data, battle_start_data) do
-    user_id |> via_tuple() |> GenServer.cast({:battle, {:start, battle_data, battle_start_data}})
+  def battle_start(user_id, battle_data, battle_start_data, password) do
+    user_id
+    |> via_tuple()
+    |> GenServer.cast({:battle, {:start, battle_data, battle_start_data, password}})
   end
 
   @doc """
@@ -230,7 +232,13 @@ defmodule Teiserver.Player.Session do
   def lobby_join_battle(user_id, battle_data, battle_start_data, password) do
     user_id
     |> via_tuple()
-    |> GenServer.cast({:battle, {:lobby_join, battle_data, battle_start_data, password}})
+    |> GenServer.cast({:battle, {:start, battle_data, battle_start_data, password}})
+  end
+
+  def notify_left_lobby(user_id, lobby_id, reason) do
+    user_id
+    |> via_tuple()
+    |> GenServer.cast({:lobby, {:left, lobby_id, reason}})
   end
 
   @doc """
@@ -762,19 +770,12 @@ defmodule Teiserver.Player.Session do
   def handle_call({:matchmaking, :ready}, _from, %PT.Data{} = state) do
     case state.matchmaking do
       {:pairing, %PT.MmPairingState{room: room_pid} = pairing_state} ->
-        password = :crypto.strong_rand_bytes(16) |> Base.encode16()
-
         data = %{
           user_id: state.user.id,
-          name: state.user.name,
-          password: password
+          name: state.user.name
         }
 
-        new_state = %{
-          state
-          | matchmaking:
-              {:pairing, %{pairing_state | readied?: true} |> Map.put(:battle_password, password)}
-        }
+        new_state = %{state | matchmaking: {:pairing, %{pairing_state | readied?: true}}}
 
         {:reply, Matchmaking.ready(room_pid, data), new_state}
 
@@ -1457,79 +1458,60 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  # this takes care of the logic when a player is asked to join a battle.
+  # for now, we treat the session's state as the authority, if the player isn't
+  # in the correct matchmaking state or in a lobby, the request is ignored.
+  # Maybe that shouldn't be so and we should treat whatever comes from battle
+  # as the source of truth?
   def handle_cast(
-        {:battle, {:start, {battle_id, battle_pid}, battle_start_data}},
+        {:battle, {:start, {battle_id, battle_pid}, battle_start_data, password}},
         %PT.Data{} = state
       ) do
     Logger.info("entering battle #{battle_id}")
 
-    case state.matchmaking do
-      {:pairing, %PT.MmPairingState{readied?: true, battle_password: pass, room: _room_pid}} ->
-        battle_state = %PT.BattleState{
-          id: battle_id,
-          username: state.user.name,
-          password: pass,
-          ip: hd(battle_start_data.ips),
-          port: battle_start_data.port,
-          engine: battle_start_data.engine,
-          game: battle_start_data.game,
-          map: battle_start_data.map
-        }
+    new_state =
+      case state do
+        %{matchmaking: {:pairing, %PT.MmPairingState{readied?: true, room: _room_pid}}} ->
+          monitors =
+            MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
+            |> MC.monitor(battle_pid, {:battle, battle_id})
 
-        state = send_to_player(state, {:battle_start, battle_state})
+          {:joined, %{state | matchmaking: :no_matchmaking, monitors: monitors}}
 
-        monitors =
-          MC.demonitor_by_val(state.monitors, :mm_room, [:flush])
-          |> MC.monitor(battle_pid, {:battle, battle_id})
+        %{lobby: %{id: _lobby_id}} ->
+          monitors = MC.monitor(state.monitors, battle_pid, {:battle, battle_id})
+          {:joined, %{state | monitors: monitors}}
 
-        # TODO: this should ideally come from an engine event, but in first approximation it'll do
-        broadcast_user_update!(state.user, :playing)
+        _other ->
+          Logger.warning(
+            "User received a request to start a battle but is not in a state to do so #{inspect(state)}"
+          )
 
-        {:noreply,
-         %{state | matchmaking: :no_matchmaking, monitors: monitors, battle: battle_state}}
+          {:error, state}
+      end
 
-      _other ->
-        Logger.warning(
-          "User received a request to start a battle but is not in a state to do so #{inspect(state)}"
-        )
-
-        {:noreply, state}
-    end
-  end
-
-  def handle_cast(
-        {:battle, {:lobby_join, {battle_id, battle_pid}, battle_start_data, password}},
-        state
-      ) do
-    Logger.info("joining lobby battle #{battle_id}")
-
-    case state.lobby do
-      nil ->
-        Logger.warning(
-          "User received a request to start a battle but is not in a state to do so #{inspect(state)}"
-        )
-
-        {:noreply, state}
-
-      %{id: _lobby_id} ->
+    case new_state do
+      {:joined, state} ->
         battle_state = %PT.BattleState{
           id: battle_id,
           username: state.user.name,
           password: password,
-          ip: hd(battle_start_data.ips),
+          ips: battle_start_data.ips,
           port: battle_start_data.port,
           engine: battle_start_data.engine,
           game: battle_start_data.game,
           map: battle_start_data.map
         }
 
+        state = %{state | battle: battle_state}
         state = send_to_player(state, {:battle_start, battle_state})
-        monitors = MC.monitor(state.monitors, battle_pid, {:battle, battle_id})
-
         # TODO: this should ideally come from an engine event, but in first approximation it'll do
         broadcast_user_update!(state.user, :playing)
 
-        {:noreply, %{state | monitors: monitors, battle: battle_state}}
+        {:noreply, state}
+
+      {:error, state} ->
+        {:noreply, state}
     end
   end
 
@@ -1664,6 +1646,16 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_cast({:lobby, {:left, lobby_id, _reason}}, %PT.Data{} = state)
+      when state.lobby.id != lobby_id,
+      do: {:noreply, state}
+
+  def handle_cast({:lobby, {:left, lobby_id, reason}}, %PT.Data{} = state) do
+    msg = {:lobby, lobby_id, {:left, reason}}
+    send_to_player!(msg, state)
+    {:noreply, %{state | lobby: nil}}
+  end
+
   @impl GenServer
   def handle_info({:DOWN, ref, :process, _pid, reason}, %PT.Data{} = state) do
     val = MC.get_val(state.monitors, ref)
@@ -1765,7 +1757,7 @@ defmodule Teiserver.Player.Session do
         case TachyonLobby.lookup_primary(lobby_id) do
           nil ->
             Logger.info("Lobby #{lobby_id} went down because #{inspect(reason)}")
-            send_to_player!({:lobby, lobby_id, {:left, "lobby crashed"}}, state)
+            send_to_player!({:lobby, lobby_id, {:left, {:error, "lobby crashed"}}}, state)
             {:noreply, %{state | lobby: nil}}
 
           pid ->

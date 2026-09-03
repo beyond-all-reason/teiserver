@@ -10,6 +10,7 @@ defmodule Teiserver.Account.AuthLib do
   alias Teiserver.Account.Auth
   alias Teiserver.Account.Role
   alias Teiserver.Account.RoleLib
+  alias Teiserver.Account.Scope
   alias Teiserver.Account.TOTPLib
   alias Teiserver.Account.User
 
@@ -91,7 +92,7 @@ defmodule Teiserver.Account.AuthLib do
 
   # If you don't need permissions then lets not bother checking
   @spec allow?(
-          map() | Conn.t() | Socket.t() | Teiserver.Account.User.t(),
+          map() | Conn.t() | Socket.t() | Teiserver.Account.User.t() | Scope.t(),
           String.t() | [String.t()]
         ) :: boolean
   def allow?(nil, _any), do: false
@@ -116,6 +117,10 @@ defmodule Teiserver.Account.AuthLib do
     mfa_test(id, permissions_required) and
       permission_test(permissions_held, permissions_required)
   end
+
+  # Scope
+  def allow?(%Scope{user: user} = _scope, permissions_required),
+    do: allow?(user, permissions_required)
 
   # User and CacheUser
   def allow?(%{id: id, roles: roles}, permissions_required) do

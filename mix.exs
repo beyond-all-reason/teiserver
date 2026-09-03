@@ -74,7 +74,7 @@ defmodule Teiserver.MixProject do
       {:lazy_html, ">= 0.1.0", only: :test},
       # see https://hexdocs.pm/phoenix_html/changelog.html#v4-0-0-2023-12-19
       {:phoenix_html_helpers, "~> 1.0"},
-      {:floki, ">= 0.37.0", only: :test},
+      {:floki, ">= 0.37.0"},
       {:phoenix_live_dashboard, "~> 0.8"},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.26"},

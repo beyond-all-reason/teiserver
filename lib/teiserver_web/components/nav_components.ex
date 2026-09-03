@@ -123,7 +123,7 @@ defmodule TeiserverWeb.NavComponents do
             <.top_nav_item
               :if={allow_any?(@current_user, ~w(Contributor))}
               text="Admin"
-              route={~p"/teiserver/admin"}
+              route={~p"/admin"}
               active={@active == "admin"}
             />
           </ul>
@@ -153,7 +153,8 @@ defmodule TeiserverWeb.NavComponents do
   @doc """
   <TeiserverWeb.NavComponents.top_navbar_tw active={"string"} />
   """
-  attr :current_user, :map, required: true
+  attr :scope, :map, default: nil
+  attr :current_user, :map, default: nil
   attr :active, :string, required: true
 
   def top_navbar_tw(assigns) do
@@ -197,12 +198,15 @@ defmodule TeiserverWeb.NavComponents do
         <li class={[@active == "microblog" && "menu-active"]}>
           <.link href={~p"/microblog"}>Blog</.link>
         </li>
-        <%= if @current_user do %>
+        <%= if @current_user || @scope do %>
           <li class={[@active == "chat" && "menu-active"]}>
             <.link href={~p"/chat"}>Chat</.link>
           </li>
 
-          <li :if={allow?(@current_user, "Server")} class={[@active == "logging" && "menu-active"]}>
+          <li
+            :if={allow?(@current_user || @scope, "Server")}
+            class={[@active == "logging" && "menu-active"]}
+          >
             <.link href={~p"/logging"}>Logging</.link>
           </li>
 
@@ -219,28 +223,31 @@ defmodule TeiserverWeb.NavComponents do
           </li>
 
           <li
-            :if={allow_any?(@current_user, ["Contributor", "Overwatch"])}
+            :if={allow_any?(@current_user || @scope, ["Contributor", "Overwatch"])}
             class={[@active == "reports" && "menu-active"]}
           >
             <.link href={~p"/teiserver/reports"}>Reports</.link>
           </li>
 
           <li
-            :if={allow?(@current_user, "Moderator")}
+            :if={allow?(@current_user || @scope, "Moderator")}
             class={[@active == "users" && "menu-active"]}
           >
             <.link href={~p"/teiserver/admin/user"}>Users</.link>
           </li>
 
           <li
-            :if={allow?(@current_user, "Overwatch")}
+            :if={allow?(@current_user || @scope, "Overwatch")}
             class={[@active == "moderation" && "menu-active"]}
           >
             <.link href={~p"/moderation"}>Moderation</.link>
           </li>
 
-          <li :if={allow?(@current_user, "Contributor")} class={[@active == "admin" && "menu-active"]}>
-            <.link href={~p"/teiserver/admin"}>Admin</.link>
+          <li
+            :if={allow?(@current_user || @scope, "Contributor")}
+            class={[@active == "admin" && "menu-active"]}
+          >
+            <.link href={~p"/admin"}>Admin</.link>
           </li>
 
           <li>
@@ -353,6 +360,31 @@ defmodule TeiserverWeb.NavComponents do
   end
 
   @doc """
+  A square link used on menu pages, typically as part of a grid layout div.
+
+  <.menu_page_link
+    icon="icon"
+    url={~p""}
+  >
+    Text here
+  </.menu_page_link>
+  """
+  attr :url, :string, required: true
+  attr :icon, :string, required: true
+  attr :icon_class, :string, default: "solid"
+  attr :size, :atom, default: nil
+  slot :inner_block, required: true
+
+  def menu_page_link(assigns) do
+    ~H"""
+    <a href={@url} class="menu-link">
+      <Fontawesome.icon icon={@icon} size="4x" /><br />
+      <div class="mt-4 text-lg">{render_slot(@inner_block)}</div>
+    </a>
+    """
+  end
+
+  @doc """
   <.sub_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
     Text goes here
   </.sub_menu_button>
@@ -402,18 +434,18 @@ defmodule TeiserverWeb.NavComponents do
   end
 
   @doc """
-  <.section_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
+  <.section_menu_button_patch bsname={bsname} icon={lib} active={true/false} url={url}>
     Text goes here
-  </.section_menu_button>
+  </.section_menu_button_patch>
 
-  <.section_menu_button
+  <.section_menu_button_patch
       bsname={@view_colour}
       icon={StylingHelper.icon(:list)}
       active={@active == "index"}
       url={~p"/account/relationship"}
     >
       List
-    </.section_menu_button>
+    </.section_menu_button_patch>
   """
   attr :icon, :string, default: nil
   attr :url, :string, required: true
@@ -431,6 +463,28 @@ defmodule TeiserverWeb.NavComponents do
       <Fontawesome.icon :if={@icon} icon={@icon} style={if @active, do: "solid", else: "regular"} />
       {render_slot(@inner_block)}
     </.link>
+    """
+  end
+
+  @doc """
+  <.tw_section_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
+    Text goes here
+  </.tw_section_menu_button>
+  """
+  attr :icon, :string, default: nil
+  attr :url, :string, required: true
+  attr :active, :boolean, default: false
+  slot :inner_block, required: true
+
+  def tw_section_menu_button(assigns) do
+    assigns =
+      assigns
+      |> assign(:active_class, if(assigns[:active], do: "tab-active"))
+
+    ~H"""
+    <a href={@url} class={["tab", @active_class]}>
+      <Fontawesome.icon :if={@icon} icon={@icon} style="solid" /> &nbsp; {render_slot(@inner_block)}
+    </a>
     """
   end
 

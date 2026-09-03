@@ -13,7 +13,7 @@ defmodule TeiserverWeb.PaginationComponents do
       <.pagination
         page={@page}
         total_pages={@total_pages}
-        base_url="/admin/users"
+        base_url={~p"/admin/users"}
         class="mt-3"
       />
 
@@ -21,7 +21,7 @@ defmodule TeiserverWeb.PaginationComponents do
       <.pagination
         page={@page}
         total_pages={@total_pages}
-        base_url="/admin/users"
+        base_url={~p"/admin/users"}
         limit={@limit}
         total_count={@total_count}
         current_count={@current_count}
@@ -35,7 +35,7 @@ defmodule TeiserverWeb.PaginationComponents do
       <.pagination
         page={@page}
         total_pages={@total_pages}
-        base_url="/moderation/overwatch"
+        base_url={~p"/moderation/overwatch"}
         limit={@limit}
         total_count={@total_count}
         current_count={@current_count}
@@ -437,5 +437,73 @@ defmodule TeiserverWeb.PaginationComponents do
           Enum.to_list((current_page - half)..(current_page + half)) ++
           [:ellipsis, total_pages - 1]
     end
+  end
+
+  @doc """
+  Renders a pagination component with page numbers, navigation, and search parameter preservation. The parent is responsible for managing state and query parameters, the tw_pagination component purely renders the controls and sends events to the parent liveview.
+
+  ## Example
+
+      <.tw_pagination
+        page={@page}
+        page_count={@page_count}
+
+        # Optionally
+        size="md"
+      />
+
+  """
+  attr :page, :integer, required: true, doc: "The current page you are on, we start with page 0"
+
+  attr :page_count, :integer,
+    required: true,
+    doc: "The number of pages available to the entire dataset"
+
+  attr :size, :string,
+    values: ["xs", "sm", "md", "lg", "xl"],
+    default: "md",
+    doc: "The size class used for the pagination buttons"
+
+  def tw_pagination(%{page_count: page_count} = assigns) when page_count <= 1 do
+    ~H"""
+    """
+  end
+
+  def tw_pagination(assigns) do
+    ~H"""
+    <div class="join">
+      <button
+        class={["join-item btn btn-#{@size}", @page <= 0 && "btn-disabled"]}
+        phx-value-page="0"
+        phx-click="set-page"
+      >
+        <Fontawesome.icon icon="angles-left" style="regular" />
+      </button>
+      <button
+        class={["join-item btn btn-#{@size}", @page <= 0 && "btn-disabled"]}
+        phx-value-page={@page - 1}
+        phx-click="set-page"
+      >
+        <Fontawesome.icon icon="angle-left" style="regular" />
+      </button>
+      <button class={"join-item btn btn-#{@size}"}>
+        Page {@page + 1} of {@page_count}
+      </button>
+      <button
+        class={["join-item btn btn-#{@size}", @page >= @page_count - 1 && "btn-disabled"]}
+        phx-value-page={@page + 1}
+        phx-click="set-page"
+      >
+        <Fontawesome.icon icon="angle-right" style="regular" />
+      </button>
+      <button
+        class={["join-item btn btn-#{@size}", @page >= @page_count - 1 && "btn-disabled"]}
+        phx-value-page={@page_count - 1}
+        phx-click="set-page"
+      >
+        <Fontawesome.icon icon="angles-right" style="regular" />
+      </button>
+    </div>
+    """
   end
 end

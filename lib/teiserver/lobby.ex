@@ -748,6 +748,7 @@ defmodule Teiserver.Lobby do
     mod_command =
       Enum.member?(
         [
+          :setscripttag,
           :handicap,
           :updatebattleinfo,
           :addstartrect,
