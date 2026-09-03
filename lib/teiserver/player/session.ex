@@ -680,16 +680,18 @@ defmodule Teiserver.Player.Session do
 
     Logger.info("session reused")
 
-    self_state = build_self_state(state)
+    {current_party, invited_to} = get_party_states(state.party)
 
     party_state =
       %PT.PartyState{
-        version: if(self_state.party == nil, do: nil, else: self_state.party.version),
-        current_party: if(self_state.party == nil, do: nil, else: self_state.party.id),
-        invited_to: Enum.map(self_state.invited_to_parties, fn st -> {st.version, st.id} end)
+        version: if(current_party == nil, do: nil, else: current_party.version),
+        current_party: if(current_party == nil, do: nil, else: current_party.id),
+        invited_to: Enum.map(invited_to, fn st -> {st.version, st.id} end)
       }
 
     new_state = %{state | conn_pid: new_conn_pid, monitors: monitors, party: party_state}
+
+    self_state = build_self_state(state)
 
     {:reply, {:ok, original_conn_pid, self_state}, new_state}
   end
