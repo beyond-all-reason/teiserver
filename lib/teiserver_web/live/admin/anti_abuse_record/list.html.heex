@@ -2,10 +2,13 @@
   Anti-abuse records
 </h1>
 
+<TeiserverWeb.Admin.AntiAbuseRecordComponents.search_form params={@search} />
+
 <.table
   id="anti-abuse-records-table"
   rows={@records}
   table_class="table-sm table-zebra mt-4"
+  minimum_rows={min(@search["page_size"], @record_count)}
 >
   <:col :let={record} label="ID">{uuid_part(record.id)}</:col>
   <:col :let={record} label="User ID">{record.user.id}</:col>
@@ -22,3 +25,10 @@
     </.link>
   </:action>
 </.table>
+
+<div class="grid place-items-center mt-4">
+  <TeiserverWeb.PaginationComponents.tw_pagination
+    page={@page}
+    page_count={@page_count}
+  />
+</div>

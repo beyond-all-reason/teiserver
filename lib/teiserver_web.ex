@@ -110,6 +110,7 @@ defmodule TeiserverWeb do
   def live_view do
     quote do
       alias Phoenix.LiveView
+      alias Phoenix.LiveView.Socket
 
       use Phoenix.LiveView,
         layout: {TeiserverWeb.Layouts, :app}

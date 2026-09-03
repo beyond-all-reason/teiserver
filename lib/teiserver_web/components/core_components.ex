@@ -625,7 +625,7 @@ defmodule TeiserverWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="control-label">
+    <label for={@for} class="label control-label">
       {render_slot(@inner_block)}
     </label>
     """
@@ -688,6 +688,11 @@ defmodule TeiserverWeb.CoreComponents do
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
   attr :row_class, :any, default: nil, doc: "the function for setting the tr class"
 
+  attr :minimum_rows, :integer,
+    default: nil,
+    doc:
+      "the minimum number of rows to show, if there are fewer rows than this number then empty rows are inserted, will likely not work with streamed data"
+
   attr :table_class, :string, default: ""
 
   attr :row_item, :any,
@@ -701,10 +706,18 @@ defmodule TeiserverWeb.CoreComponents do
   slot :action, doc: "the slot for showing user actions in the last table column"
 
   def table(assigns) do
+    extra_row_count =
+      if assigns[:minimum_rows] do
+        max(assigns[:minimum_rows] - Enum.count(assigns[:rows]), 0)
+      else
+        0
+      end
+
     assigns =
       with %{rows: %Phoenix.LiveView.LiveStream{}} <- assigns do
         assign(assigns, row_id: assigns.row_id || fn {id, _item} -> id end)
       end
+      |> assign(extra_row_count: extra_row_count)
 
     ~H"""
     <div class="table-responsive">
@@ -735,6 +748,21 @@ defmodule TeiserverWeb.CoreComponents do
                   {render_slot(action, @row_item.(row))}
                 </span>
               </div>
+            </td>
+          </tr>
+          <tr
+            :for={_idx <- Range.new(1, max(@extra_row_count, 1))}
+            :if={@extra_row_count > 0}
+            class="extra-row"
+          >
+            <td
+              :for={{_col, _i} <- Enum.with_index(@col)}
+              class={["", @row_click && "cursor-pointer"]}
+            >
+              &nbsp;
+            </td>
+            <td class="">
+              &nbsp;
             </td>
           </tr>
         </tbody>
