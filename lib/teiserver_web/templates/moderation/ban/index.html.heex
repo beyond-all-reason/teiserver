@@ -65,7 +65,7 @@
           <.pagination
             page={@page}
             total_pages={@total_pages}
-            base_url="/moderation/ban"
+            base_url={~p"/moderation/ban"}
             limit={@limit}
             total_count={@total_count}
             current_count={@current_count}
