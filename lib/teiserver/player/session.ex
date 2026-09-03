@@ -1356,7 +1356,7 @@ defmodule Teiserver.Player.Session do
            room: room_pid,
            frozen_queues: other_queues,
            readied?: false,
-           timeout_at: DateTime.utc_now() |> DateTime.add(timeout_ms, :millisecond)
+           timeout_at: DateTime.utc_now() |> DateTime.shift(microsecond: {timeout_ms * 1000, 6})
          }}
 
       new_state =
